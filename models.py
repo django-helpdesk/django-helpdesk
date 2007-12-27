@@ -32,6 +32,16 @@ from django.contrib.auth.models import User
 from django.db.models import permalink
 
 class Queue(models.Model):
+    """
+    A queue is a collection of tickets into what would generally be business 
+    areas or departments.
+
+    For example, a company may have a queue for each Product they provide, or 
+    a queue for each of Accounts, Pre-Sales, and Support.
+
+    TODO: Add e-mail inboxes (either using piped e-mail or IMAP/POP3) so we 
+    can automatically get tickets via e-mail.
+    """
     title = models.CharField(maxlength=100)
     slug = models.SlugField()
     email_address = models.EmailField(blank=True, null=True)
@@ -55,6 +65,9 @@ class Ticket(models.Model):
     enter some basic info, save the ticket, give the customer the ID 
     and get off the phone, then add in further detail at a later time
     (once the customer is not on the line).
+
+    Note that assigned_to is optional - unassigned tickets are displayed on 
+    the dashboard to prompt users to take ownership of them.
     """
 
     OPEN_STATUS = 1
@@ -80,6 +93,9 @@ class Ticket(models.Model):
     resolution = models.TextField(blank=True, null=True)
 
     def _get_assigned_to(self):
+        """ Custom property to allow us to easily print 'Unassigned' if a 
+        ticket has no owner, or the users name if it's assigned. If the user 
+        has a full name configured, we use that, otherwise their username. """
         if not self.assigned_to:
             return 'Unassigned'
         else:
@@ -93,7 +109,6 @@ class Ticket(models.Model):
         list_display = ('title', 'status', 'assigned_to',)
         date_hierarchy = 'created'
         list_filter = ('assigned_to',)
-        search_fields = ('title',)
     
     class Meta:
         get_latest_by = "created"
@@ -114,6 +129,16 @@ class Ticket(models.Model):
 
 
 class FollowUp(models.Model):
+    """ A FollowUp is a comment and/or change to a ticket. We keep a simple 
+    title, the comment entered by the user, and the new status of a ticket 
+    to enable easy flagging of details on the view-ticket page.
+
+    The title is automatically generated at save-time, based on what action
+    the user took.
+
+    Tickets that aren't public are never shown to or e-mailed to the submitter, 
+    although all staff can see them.
+    """
     ticket = models.ForeignKey(Ticket)
     date = models.DateTimeField(auto_now_add=True)
     title = models.CharField(maxlength=200, blank=True, null=True)
@@ -133,7 +158,20 @@ class FollowUp(models.Model):
         return '%s' % self.title
 
 class TicketChange(models.Model):
+    """ For each FollowUp, any changes to the parent ticket (eg Title, Priority,
+    etc) are tracked here for display purposes.
+    """
     followup = models.ForeignKey(FollowUp, edit_inline=models.TABULAR)
     field = models.CharField(maxlength=100, core=True)
     old_value = models.TextField(blank=True, null=True, core=True)
     new_value = models.TextField(blank=True, null=True, core=True)
+
+    def __unicode__(self):
+        str = '%s ' % field
+        if not new_value:
+            str += 'removed'
+        elif not old_value:
+            str += 'set to %s' % new_value
+        else:
+            str += 'changed from "%s" to "%s"' % (old_value, new_value)
+        return str
