@@ -1,0 +1,27 @@
+<html>
+<head>
+<title>{% block helpdesk_title %}Helpdesk{% endblock %}</title>
+<script src='{{ MEDIA_URL }}/helpdesk/jquery.js' type='text/javascript' language='javascript'></script>
+<link rel='stylesheet' href='{{ MEDIA_URL }}/helpdesk/helpdesk.css' type='text/css' />
+{% block helpdesk_head %}{% endblock %}
+</head>
+<body>
+<div id='container'>
+    <div id='header'>
+        <h1>Helpdesk</h1>
+        <ul>
+            <li><a href='{% url helpdesk_home %}'>Dashboard</a></li>
+            <li><a href='{% url helpdesk_list %}'>Tickets</a></li>
+            <li><a href='{% url helpdesk_submit %}'>Submit Ticket</a></li>
+            <li>Search</li>
+        </ul>
+    </div>
+    <div id='body'>
+{% block helpdesk_body %}{% endblock %}
+    </div>
+    <div id='footer'>
+        <p>Powered by <a href='http://www.jutda.com.au/'>Jutda HelpDesk</a></p>
+    </div>
+</div>{% include "helpdesk/debug.html" %}
+</body>
+</html>

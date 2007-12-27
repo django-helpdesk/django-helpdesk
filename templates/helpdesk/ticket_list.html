@@ -1,0 +1,47 @@
+{% extends "helpdesk/base.html" %}
+{% block helpdesk_title %}Ticket Listing{% endblock %}
+{% block helpdesk_head %}<script type='text/javascript' language='javascript'>
+$(document).ready(function() {
+    $("tr.row_hover").mouseover(function() {$(this).addClass("hover");}).mouseout(function() {$(this).removeClass("hover");});
+});
+</script>{% endblock %}
+{% block helpdesk_body %}
+
+{% load in_list %}
+
+<form method='get' action='./'>
+<label for='id_sort'>Sorting</label> <select id='id_sort' name='sort'>
+    <option value='created'{% ifequal sort "created"%} selected='selected'{% endifequal %}>Created</option>
+    <option value='title'{% ifequal sort "title"%} selected='selected'{% endifequal %}>Title</option>
+    <option value='queue'{% ifequal sort "queue"%} selected='selected'{% endifequal %}>Queue</option>
+    <option value='status'{% ifequal sort "status"%} selected='selected'{% endifequal %}>Status</option>
+    <option value='assigned_to'{% ifequal sort "assigned_to"%} selected='selected'{% endifequal %}>Owner</option>
+</select>
+
+<label for='id_owners'>Owner(s)</label> <select id='id_owners' name='assigned_to' multiple='selected' size='5'>{% for u in user_choices %}<option value='{{ u.id }}'{% if u.id|in_list:owners %} selected='selected'{% endif %}>{{ u.username }}</option>{% endfor %}</select>
+
+<label for='id_queues'>Queue(s)</label> <select id='id_queues' name='queue' multiple='selected' size='5'>{% for q in queue_choices %}<option value='{{ q.id }}'{% if q.id|in_list:queues %} selected='selected'{% endif %}>{{ q.title }}</option>{% endfor %}</select>
+
+<label for='id_statuses'>Status(es)</label> {% for s in status_choices %}<input type='checkbox' name='status' value='{{ s.0 }}'{% if s.0|in_list:statuses %} checked='checked'{% endif %}> {{ s.1 }}{% endfor %}
+
+<input type='submit' value='Go!' />
+</form>
+
+<table width='100%'>
+<tr class='row_tablehead'><td colspan='6'>Tickets</td></tr>
+<tr class='row_columnheads'><th>#</th><th>Title</th><th>Queue</th><th>Status</th><th>Created</th><th>Owner</th></tr>
+{% if tickets %}{% for ticket in tickets %}
+<tr class='row_{% cycle odd,even %} row_hover'>
+<th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.id }}</a></th>
+<th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></th>
+<td>{{ ticket.queue }}</td>
+<td>{{ ticket.get_status_display }}</td>
+<td>{{ ticket.created }}</td>
+<td>{{ ticket.get_assigned_to }}</td>
+</tr>
+{% endfor %}{% else %}
+<tr class='row_odd'><td colspan='5'>No Tickets Match Your Selection</td></tr>
+{% endif %}
+</table>
+
+{% endblock %}

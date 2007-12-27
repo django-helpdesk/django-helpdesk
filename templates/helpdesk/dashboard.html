@@ -1,0 +1,49 @@
+{% extends "helpdesk/base.html" %}
+{% block helpdesk_title %}Helpdesk Dashboard{% endblock %}
+{% block helpdesk_head %}<script type='text/javascript' language='javascript'>
+$(document).ready(function() {
+    $("tr.row_hover").mouseover(function() {$(this).addClass("hover");}).mouseout(function() {$(this).removeClass("hover");});
+});
+</script>{% endblock %}
+{% block helpdesk_body %}
+<table width='30%'>
+<tr class='row_tablehead'><td colspan='4'>Helpdesk Summary</td></tr>
+<tr class='row_columnheads'><th>Queue</th><th>Open</th><th>Resolved</th></tr>
+{% for queue in dash_tickets %}
+<tr class='row_{% cycle odd,even %} row_hover '>
+<th><a href='{% url helpdesk_list %}?queue={{ queue.queue.id }}'>{{ queue.queue }}</a></th>
+<td>{% if queue.open %}<a href='{% url helpdesk_list %}?queue={{ queue.queue.id }}&status=1&status=2'>{% endif %}{{ queue.open }}{% if queue.open %}</a>{% endif %}</td>
+<td>{% if queue.resolved %}<a href='{% url helpdesk_list %}?queue={{ queue.queue.id }}&status=3'>{% endif %}{{ queue.resolved }}{% if queue.resolved %}</a>{% endif %}</td>
+</tr>
+{% endfor %}
+</table>
+
+<table width='100%'>
+<tr class='row_tablehead'><td colspan='5'>Your Tickets</td></tr>
+<tr class='row_columnheads'><th>#</th><th>Title</th><th>Queue</th><th>Status</th><th>Last Update</th></tr>
+{% for ticket in user_tickets %}
+<tr class='row_{% cycle odd,even %} row_hover'>
+<th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.id }}</a></th>
+<th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></th>
+<td>{{ ticket.queue }}</td>
+<td>{{ ticket.get_status_display }}</td>
+<td>{{ ticket.last_update|timesince }}</td>
+</tr>
+{% endfor %}
+</table>
+
+<table width='100%'>
+<tr class='row_tablehead'><td colspan='5'>Unassigned Tickets</td></tr>
+<tr class='row_columnheads'><th>#</th><th>Title</th><th>Queue</th><th>Created</th><th>&nbsp;</th></tr>
+{% for ticket in unassigned_tickets %}
+<tr class='row_{% cycle odd,even %} row_hover'>
+<th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.id }}</a></th>
+<th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></th>
+<td>{{ ticket.queue }}</td>
+<td>{{ ticket.created|timesince }} ago</td>
+<th><a href='{{ ticket.get_absolute_url }}?take'>Take</a></th>
+</tr>
+{% endfor %}
+</table>
+
+{% endblock %}

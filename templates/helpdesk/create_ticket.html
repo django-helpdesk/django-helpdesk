@@ -1,0 +1,42 @@
+{% extends "helpdesk/base.html" %}
+{% block helpdesk_title %}Helpdesk{% endblock %}
+
+{% block helpdesk_body %}
+<h2>Submit a Ticket</h2>
+
+<form method='post' action='./'>
+<fieldset>
+    <dl>
+        <dt><label for='id_queue'>{{ form.queue.label }}</label></dt>
+        <dd>{{ form.queue }}</dd>
+        {% if form.queue.errors %}
+        <dd class='error'>{{ form.queue.errors }}</dd>{% endif %}
+        
+        <dt><label for='id_title'>{{ form.title.label }}</label></dt>
+        <dd>{{ form.title }}</dd>
+        {% if form.title.errors %}
+        <dd class='error'>{{ form.title.errors }}</dd>{% endif %}
+    
+        <dt><label for='id_submitter_email'>{{ form.submitter_email.label }}</label></dt>
+        <dd>{{ form.submitter_email }}</dd>
+        {% if form.submitter_email.errors %}
+        <dd class='error'>{{ form.submitter_email.errors }}</dd>{% endif %}
+    
+        <dt><label for='id_body'>{{ form.body.label }}</label></dt>
+        <dd>{{ form.body }}</dd>
+        {% if form.body.errors %}
+        <dd class='error'>{{ form.body.errors }}</dd>{% endif %}
+        
+        <dt><label for='id_assigned_to'>{{ form.assigned_to.label }}</label></dt>
+        <dd>{{ form.assigned_to }}</dd>
+        {% if form.assigned_to.errors %}
+        <dd class='error'>{{ form.assigned_to.errors }}</dd>{% endif %}
+    </dl>
+    
+    <div class='buttons'>
+        <input type='submit' value='Submit' />
+    </div>
+</fieldset>
+
+</form>
+{% endblock %}
