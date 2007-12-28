@@ -29,6 +29,7 @@ $Id$
 
 from django import newforms as forms
 from helpdesk.models import Ticket, Queue, FollowUp
+from django.contrib.auth.models import User
 from datetime import datetime
 
 class TicketForm(forms.Form):
@@ -61,7 +62,11 @@ class TicketForm(forms.Form):
                     description = self.cleaned_data['body'],
                   )
         if self.cleaned_data['assigned_to']:
-            t.assigned_to = self.cleaned_data['assigned_to']
+            try:
+                u = User.objects.get(id=self.cleaned_data['assigned_to'])
+                t.assigned_to = u
+            except:
+                t.assigned_to = None
         t.save()
 
         f = FollowUp(   ticket=t,
@@ -72,7 +77,7 @@ class TicketForm(forms.Form):
                         user=user,
                      )
         if self.cleaned_data['assigned_to']:
-            f.title = 'Ticket Opened & Assigned to %s' % self.cleaned_data['assigned_to']
+            f.title = 'Ticket Opened & Assigned to %s' % t.get_assigned_to
 
         f.save()
 
