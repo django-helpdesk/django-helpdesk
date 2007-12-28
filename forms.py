@@ -47,7 +47,7 @@ class TicketForm(forms.Form):
     assigned_to = forms.ChoiceField(choices=(), required=False,
                            label=u'Case owner')
     
-    def save(self):
+    def save(self, user):
         """
         Writes and returns a Ticket() object
         
@@ -63,5 +63,17 @@ class TicketForm(forms.Form):
         if self.cleaned_data['assigned_to']:
             t.assigned_to = self.cleaned_data['assigned_to']
         t.save()
+
+        f = FollowUp(   ticket=t,
+                        title='Ticket Opened',
+                        date=datetime.now(),
+                        public=True,
+                        comment=self.cleaned_data['body'],
+                        user=user,
+                     )
+        if self.cleaned_data['assigned_to']:
+            f.title = 'Ticket Opened & Assigned to %s' % self.cleaned_data['assigned_to']
+
+        f.save()
 
         return t

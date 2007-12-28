@@ -171,7 +171,7 @@ def create_ticket(request):
         form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
         form.fields['assigned_to'].choices = [('', '--------')] + [[u.id, u.username] for u in User.objects.filter(is_active=True)]
         if form.is_valid():
-            ticket = form.save()
+            ticket = form.save(user=request.user)
             return HttpResponseRedirect(ticket.get_absolute_url())
     else:
         form = TicketForm()
