@@ -28,7 +28,7 @@ $Id$
 """
 
 from django import newforms as forms
-from helpdesk.models import Ticket, Queue
+from helpdesk.models import Ticket, Queue, FollowUp
 from datetime import datetime
 
 class TicketForm(forms.Form):
