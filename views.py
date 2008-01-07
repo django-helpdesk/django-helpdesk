@@ -132,7 +132,7 @@ def update_ticket(request, ticket_id):
     if f.new_status == Ticket.RESOLVED_STATUS:
         ticket.resolution = comment
     
-    if public and ticket.submitter_email:
+    if public and ticket.submitter_email and f.comment:
         context = {
             'ticket': ticket,
             'queue': ticket.queue,
