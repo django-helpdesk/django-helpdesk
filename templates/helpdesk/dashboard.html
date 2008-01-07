@@ -40,7 +40,7 @@ $(document).ready(function() {
 <th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.id }}</a></th>
 <th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></th>
 <td>{{ ticket.queue }}</td>
-<td>{{ ticket.created|timesince }} ago</td>
+<td><span title='{{ ticket.created|date:"r" }}'>{{ ticket.created|timesince }} ago</span></td>
 <th><a href='{{ ticket.get_absolute_url }}?take'>Take</a></th>
 </tr>
 {% endfor %}

@@ -1,0 +1,17 @@
+{% extends "helpdesk/emails/base.html" %}
+
+{% block header %}Thank You For Your Submission{% endblock %}
+
+{% block content %}
+<p style='font-family: "Trebuchet MS", Arial, sans-serif; font-size: 11pt;'>Hello,</p>
+
+
+<p style='font-family: "Trebuchet MS", Arial, sans-serif; font-size: 11pt;'>This is a courtesy e-mail to let you know that we have received your helpdesk query with a subject of <i>{{ ticket.title }}</i>. </p>
+
+<p style='font-family: "Trebuchet MS", Arial, sans-serif; font-size: 11pt;'>You do not have to do anything further at this stage. Your ticket has been assigned a number of <b>{{ ticket.ticket }}</b>.</p>
+
+<p style='font-family: "Trebuchet MS", Arial, sans-serif; font-size: 11pt;'>If you wish to send us further details, or if you have any queries about this ticket, please include the ticket id of <b>{{ ticket.ticket }}</b> in the subject. The easiest way to do this is just press 'reply' to this message.</p>
+
+<p style='font-family: "Trebuchet MS", Arial, sans-serif; font-size: 11pt;'>We will investigate your query and attempt to resolve it as soon as possible. You will receive further updates and a resolution via this e-mail address.</p>
+
+{% endblock %}

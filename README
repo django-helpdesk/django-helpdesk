@@ -1,0 +1,105 @@
+                                        .. 
+                                 .,::;::::::
+                           ..,::::::::,,,,:::      Jutda Helpdesk - A Django
+                      .,,::::::,,,,,,,,,,,,,::     powered ticket tracker for
+                  .,::::::,,,,,,,,,,,,,,,,,,:;r.        small enterprise
+                .::::,,,,,,,,,,,,,,,,,,,,,,:;;rr.
+              .:::,,,,,,,,,,,,,,,,,,,,,,,:;;;;;rr      (c) Copyright 2008
+            .:::,,,,,,,,,,,,,,,,,,,,,,,:;;;:::;;rr
+          .:::,,,,,,,,,,,,,,,,,,,,.  ,;;;::::::;;rr           Jutda
+        .:::,,,,,,,,,,,,,,,,,,.    .:;;:::::::::;;rr
+      .:::,,,,,,,,,,,,,,,.       .;r;::::::::::::;r;   All Rights Reserved
+    .:::,,,,,,,,,,,,,,,        .;r;;:::::::::::;;:.
+  .:::,,,,,,,,,,,,,,,.       .;r;;::::::::::::;:.
+ .;:,,,,,,,,,,,,,,,       .,;rr;::::::::::::;:.   This software is released 
+.,:,,,,,,,,,,,,,.    .,:;rrr;;::::::::::::;;.  under a limited-use license that
+  :,,,,,,,,,,,,,..:;rrrrr;;;::::::::::::;;.  allows you to freely download this
+   :,,,,,,,:::;;;rr;;;;;;:::::::::::::;;,  software from it's manufacturer and
+    ::::;;;;;;;;;;;:::::::::::::::::;;,  use it yourself, however you may not
+    .r;;;;:::::::::::::::::::::::;;;,  distribute it. For further details, see
+     .r;::::::::::::::::::::;;;;;:,  the enclosed LICENSE file.
+      .;;::::::::::::::;;;;;:,.
+       .;;:::::::;;;;;;:,.  Please direct people who wish to download this
+        .r;;;;;;;;:,.  software themselves to www.jutda.com.au.
+          ,,,..
+
+$Id$
+
+#########################
+0. Table of Contents
+#########################
+
+1. Licensing
+2. Dependencies (pre-flight checklist)
+3. Installation
+4. Initial Configuration
+
+#########################
+1. Licensing
+#########################
+
+See the file 'LICENSE' for licensing terms and conditions.
+
+#########################
+2. Dependencies (pre-flight checklist)
+#########################
+1. Python 2.3+ 
+
+2. Django (post-0.96, eg SVN checkout)
+
+3. Markdown
+
+4. An existing WORKING Django project with database etc
+
+
+#########################
+3. Installation
+#########################
+
+1. Place 'helpdesk' in your Python path
+
+2. In your projects' settings.py file, add these lines to the INSTALLED_APPS setting:
+   'helpdesk',
+   'django.contrib.admin',
+   'django.contrib.markup'
+
+3. In your projects' urls.py file, add this line:
+    (r'helpdesk/', include('helpdesk.urls')),
+
+    You can substitute 'helpdesk/' for something else, eg 'support/' or even ''.
+
+4. Ensure the admin line is un-hashed in urls.py:
+    # Uncomment this for admin:
+    (r'^admin/', include('django.contrib.admin.urls')),
+
+    If you use helpdesk at the top of your domain (at /), ensure the admin 
+    line comes BEFORE the helpdesk line.
+
+5. In your project directory (NOT the helpdesk directory) run 
+    ./manage.py syncdb
+   to create database tables
+
+#########################
+4. Initial Configuration
+#########################
+
+1. Visit http://yoursite/admin/ and add a Helpdesk Queue. If you wish, 
+   enter your POP3 or IMAP server details. 
+
+   IMPORTANT NOTE: Any tickets created via POP3 or IMAP mailboxes will DELETE
+   the original e-mail from the mail server.
+
+2. Visit http://yoursite/helpdesk/ (or other path as defined in your urls.py) 
+
+3. If you wish to automatically create tickets from the contents of an e-mail 
+   inbox, set up a cronjob to run scripts/get_email.py on a regular basis. 
+
+   Don't forget to set the relevant Django environment variables in your 
+   crnotab:
+
+   5 * * * * DJANGO_SETTINGS_MODULE='myproject.settings' python /path/to/helpdesk/scripts/get_email.py
+
+   IMPORTANT NOTE: Any tickets created via POP3 or IMAP mailboxes will DELETE
+   the original e-mail from the mail server.
+
+You're now up and running!

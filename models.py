@@ -46,12 +46,29 @@ class Queue(models.Model):
     slug = models.SlugField()
     email_address = models.EmailField(blank=True, null=True)
 
+    def _from_address(self):
+        return '%s <%s>' % (self.title, self.email_address)
+    from_address = property(_from_address)
+
+    email_box_type = models.CharField(maxlength=5, choices=(('pop3', 'POP 3'),('imap', 'IMAP')), blank=True, null=True, help_text='E-Mail Server Type - Both POP3 and IMAP are supported. Select your email server type here.')
+    email_box_host = models.CharField(maxlength=200, blank=True, null=True, help_text='Your e-mail server address - either the domain name or IP address. May be "localhost".')
+    email_box_port = models.IntegerField(blank=True, null=True, help_text='Port number to use for accessing e-mail. Default for POP3 is "110", and for IMAP is "143". This may differ on some servers.')
+    email_box_user = models.CharField(maxlength=200, blank=True, null=True, help_text='Username for accessing this mailbox.')
+    email_box_pass = models.CharField(maxlength=200, blank=True, null=True, help_text='Password for the above username')
+    email_box_imap_folder = models.CharField(maxlength=100, blank=True, null=True, help_text='If using IMAP, what folder do you wish to fetch messages from? This allows you to use one IMAP account for multiple queues, by filtering messages on your IMAP server into separate folders. Default: INBOX.')
+    email_box_interval = models.IntegerField(help_text='How often do you wish to check this mailbox? (in Minutes)', blank=True, null=True, default='5')
+    email_box_last_check = models.DateTimeField(blank=True, null=True, editable=False) # Updated by the auto-pop3-and-imap-checker
+
     def __unicode__(self):
         return u"%s" % self.title
 
     class Admin:
         pass
-
+        
+    def save(self):
+        if self.email_box_type == 'imap' and not self.email_box_imap_folder:
+            self.email_box_imap_folder = 'INBOX'
+        super(Queue, self).save()
 
 class Ticket(models.Model):
     """
@@ -104,6 +121,13 @@ class Ticket(models.Model):
             else:
                 return self.assigned_to
     get_assigned_to = property(_get_assigned_to)
+
+    def _get_ticket(self):
+        """ A user-friendly ticket ID, which is a combination of ticket ID 
+        and queue slug. This is generally used in e-mails. """
+
+        return "[%s-%s]" % (self.queue.slug, self.id)
+    ticket = property(_get_ticket)
 
     class Admin:
         list_display = ('title', 'status', 'assigned_to',)
@@ -175,3 +199,7 @@ class TicketChange(models.Model):
         else:
             str += 'changed from "%s" to "%s"' % (old_value, new_value)
         return str
+
+#class Attachment(models.Model):
+    #followup = models.ForeignKey(FollowUp, edit_inline=models.TABULAR)
+    #file = models.FileField()

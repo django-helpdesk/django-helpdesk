@@ -1,0 +1,16 @@
+{% extends "helpdesk/emails/base.html" %}
+
+{% block header %}Your Ticket Has Been Updated{% endblock %}
+
+{% block content %}
+<p style='font-family: "Trebuchet MS", Arial, sans-serif; font-size: 11pt;'>Hello,</p>
+
+<p style='font-family: "Trebuchet MS", Arial, sans-serif; font-size: 11pt;'>You recently logged a ticket with a subject of <i>{{ ticket.title }}</i> with us. This e-mail is to advise you of an update to that ticket.</p>
+
+<p style='font-family: "Trebuchet MS", Arial, sans-serif; font-size: 11pt;'>The following comment was added to ticket <b>{{ ticket.ticket }}</b>:</p>
+
+<blockquote style='font-family: "Trebuchet MS", Arial, sans-serif; font-size: 11pt; padding-left: 20px; border-left: solid #ccc 2px;'>{{ comment }}</blockquote>
+
+<p style='font-family: "Trebuchet MS", Arial, sans-serif; font-size: 11pt;'>To provide us with further information, please reply to this e-mail.</p>
+
+{% endblock %}

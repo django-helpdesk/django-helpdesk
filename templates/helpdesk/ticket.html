@@ -22,17 +22,31 @@
 
 <tr class='row_odd'>
     <th>Submitted On</th>
-    <td>{{ ticket.created }} ({{ ticket.created|timesince }} ago)</td>
+    <td>{{ ticket.created|date:"r" }} ({{ ticket.created|timesince }} ago)</td>
 </tr>
 
 <tr class='row_even'>
     <th>Assigned To</th>
-    <td>{{ ticket.get_assigned_to }}</td>
+    <td>{{ ticket.get_assigned_to }}{% ifequal ticket.get_assigned_to 'Unassigned' %} <strong><a href='?take'>Take</a></strong>{% endifequal %}</td>
 </tr>
 
-{% if ticket.submitter_email %}<tr class='row_odd'>
+<tr class='row_odd'>
     <th>Submitter E-Mail</th>
     <td>{{ ticket.submitter_email }}</td>
+</tr>
+
+<tr class='row_even'>
+    <th colspan='2'>Description</th>
+</tr>
+<tr class='row_odd'>
+    <td colspan='2'>{{ ticket.description }}</td>
+</tr>
+
+{% if ticket.resolution %}<tr class='row_even'>
+    <th colspan='2'>Resolution{% ifequal ticket.get_status_display "Resolved" %} [<a href='?close'>Accept &amp; Close</a>]{% endifequal %}</th>
+</tr>
+<tr class='row_odd'>
+    <td colspan='2'>{{ ticket.resolution }}</td>
 </tr>{% endif %}
 
 </table>
@@ -42,7 +56,7 @@
 {% load ticket_to_link %}
 {% for followup in ticket.followup_set.all %}
 <div class='followup'>
-<div class='title'>{{ followup.title }} <span class='byline'>by {{ followup.user }} <span title='at {{ followup.date|date:"r" }}'>{{ followup.date|timesince }} ago</span>{% if not followup.public %} <span class='private'>(Private)</span>{% endif %}</span></div>
+<div class='title'>{{ followup.title }} <span class='byline'>by {{ followup.user }} <span title='{{ followup.date|date:"r" }}'>{{ followup.date|timesince }} ago</span>{% if not followup.public %} <span class='private'>(Private)</span>{% endif %}</span></div>
 {{ followup.comment|markdown|num_to_link }}
 {% if followup.ticketchange_set.all %}<div class='changes'>
 {% for change in followup.ticketchange_set.all %}
@@ -63,18 +77,18 @@ Changed {{ change.field }} from {{ change.old_value }} to {{ change.new_value }}
 <input type='radio' name='new_status' value='4' id='st_closed'><label for='st_closed'>Closed</label>
 {% endifequal %}
 {% ifequal ticket.status 2 %}
-<input type='radio' name='new_status' value='2' id='st_reopened' checked='checked'><label for='st_reopened' class='active'>Reopened</label>
-<input type='radio' name='new_status' value='3' id='st_resolved'><label for='st_resolved'>Resolved</label>
+<input type='radio' name='new_status' value='2' id='st_reopened' checked='checked'><label for='st_reopened' class='active'>Reopened</label> &raquo; 
+<input type='radio' name='new_status' value='3' id='st_resolved'><label for='st_resolved'>Resolved</label> &raquo; 
 <input type='radio' name='new_status' value='4' id='st_closed'><label for='st_closed'>Closed</label>
 {% endifequal %}
 {% ifequal ticket.status 3 %}
-<input type='radio' name='new_status' value='2' id='st_reopened'><label for='st_reopened'>Reopened</label>
-<input type='radio' name='new_status' value='3' id='st_resolved' checked='checked'><label for='st_resolved' class='active'>Resolved</label>
+<input type='radio' name='new_status' value='2' id='st_reopened'><label for='st_reopened'>Reopened</label> &laquo; 
+<input type='radio' name='new_status' value='3' id='st_resolved' checked='checked'><label for='st_resolved' class='active'>Resolved</label> &raquo; 
 <input type='radio' name='new_status' value='4' id='st_closed'><label for='st_closed'>Closed</label>
 {% endifequal %}
 
 {% ifequal ticket.status 4 %}
-<input type='radio' name='new_status' value='2' id='st_reopened'><label for='st_reopened'>Reopened</label>
+<input type='radio' name='new_status' value='2' id='st_reopened'><label for='st_reopened'>Reopened</label> &laquo; 
 <input type='radio' name='new_status' value='4' id='st_closed' checked='checked'><label for='st_closed'>Closed</label>
 {% endifequal %}
 

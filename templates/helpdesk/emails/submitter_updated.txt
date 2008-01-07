@@ -1,0 +1,11 @@
+Hello,
+
+You recently logged a ticket with a subject of '{{ ticket.title }}' with us. This e-mail is to advise you of an update to that ticket.
+
+The following comment was added to ticket {{ ticket.ticket }}:
+
+{{ comment }}
+
+To provide us with further information, please reply to this e-mail.
+
+{% include "helpdesk/emails/text_footer.txt" %}

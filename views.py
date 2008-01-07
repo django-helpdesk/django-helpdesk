@@ -66,6 +66,14 @@ def view_ticket(request, ticket_id):
     if request.GET.has_key('take'):
         ticket.assigned_to = request.user
         ticket.save()
+    
+    if request.GET.has_key('close') and ticket.status == Ticket.RESOLVED_STATUS:
+        if not ticket.assigned_to: 
+            owner = 0
+        else:
+            owner = ticket.assigned_to.id
+        request.POST = {'new_status': Ticket.CLOSED_STATUS, 'public': 1, 'owner': owner, 'title': ticket.title, 'comment': "Accepted resolution and closed ticket"}
+        return update_ticket(request, ticket_id)
 
     return render_to_response('helpdesk/ticket.html',
         RequestContext(request, {
@@ -120,6 +128,24 @@ def update_ticket(request, ticket_id):
         c.save()
         ticket.title = title
 
+    if f.new_status == Ticket.RESOLVED_STATUS:
+        ticket.resolution = comment
+    
+    if public and ticket.submitter_email:
+        context = {
+            'ticket': ticket,
+            'queue': ticket.queue,
+            'resolution': ticket.resolution,
+            'comment': f.comment,
+        }
+        if f.new_status == Ticket.RESOLVED_STATUS:
+            template = 'helpdesk/emails/submitter_resolved'
+            subject = '%s Ticket Resolved'
+        else:
+            template = 'helpdesk/emails/submitter_updated'
+            subject = '%s Ticket Updated'
+        send_multipart_mail(template, context, subject, ticket.submitter_email, ticket.queue.from_address)
+
     ticket.save()
             
     return HttpResponseRedirect(ticket.get_absolute_url())
@@ -147,6 +173,19 @@ def ticket_list(request):
         statuses = [int(s) for s in statuses]
         tickets = tickets.filter(status__in=statuses)
         context = dict(context, statuses=statuses)
+
+    ### KEYWORD SEARCHING
+    q = request.GET.get('q', None)
+    
+    if q:
+        qset = (
+            Q(title__icontains=q) |
+            Q(description__icontains=q) |
+            Q(resolution__icontains=q) |
+            Q(submitter_email__icontains=q)
+        )
+        tickets = tickets.filter(qset)
+        context = dict(context, query=q)
    
     ### SORTING
     sort = request.GET.get('sort', None)
