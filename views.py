@@ -40,6 +40,7 @@ from django.db.models import Q
 # Helpdesk imports
 from helpdesk.forms import TicketForm
 from helpdesk.models import Ticket, Queue, FollowUp, TicketChange
+from helpdesk.lib import send_multipart_mail
 
 def dashboard(request):
     tickets = Ticket.objects.filter(assigned_to=request.user).exclude(status=Ticket.CLOSED_STATUS)
@@ -140,10 +141,10 @@ def update_ticket(request, ticket_id):
         }
         if f.new_status == Ticket.RESOLVED_STATUS:
             template = 'helpdesk/emails/submitter_resolved'
-            subject = '%s Ticket Resolved'
+            subject = '%s %s (Resolved)' % (ticket.ticket, ticket.title)
         else:
             template = 'helpdesk/emails/submitter_updated'
-            subject = '%s Ticket Updated'
+            subject = '%s %s (Updated)' % (ticket.ticket, ticket.title)
         send_multipart_mail(template, context, subject, ticket.submitter_email, ticket.queue.from_address)
 
     ticket.save()
