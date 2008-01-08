@@ -1,0 +1,143 @@
+body {
+    font: 10pt "Trebuchet MS", Arial, sans-serif;
+    background-color: #fff;
+    text-align: center;
+}
+
+table {
+    border-collapse: collapse;
+    margin-top: 8px;
+    padding: 80px;
+}
+
+#container {
+    width: 600px;
+    margin: 0 auto;
+    text-align: left;
+}
+
+#header h1 {
+    float: left;
+}
+
+#header ul {
+    float: right;
+}
+#header li {
+    display: inline;
+    float: left;
+    padding-left: 5px;
+}
+
+#header, #body, #footer {
+    clear: both;
+}
+
+label {
+    font-weight: bold;
+}
+
+.row_tablehead {
+    background-color: #6593C0;
+    font-weight: bold;
+    color: #fff;
+    border-bottom: solid white 1px;
+}
+
+.row_tablehead td {
+    padding-left: 12px;
+    line-height: 16pt;
+    font-size: 12pt;
+}
+
+.row_columnheads {
+    background-color: #94C0E8;
+    font-size: 10pt;
+    line-height: 12pt;
+}
+
+th {
+    font-weight: bold;
+    color: #3E5F84;
+    text-align: left;
+    padding-left: 12px;
+}
+
+.row_odd {
+    background-color: #fff;
+}
+
+.row_even {
+    background-color: #ecf6fc;
+}
+
+.row_odd, .row_even {
+    color: #6C79A0;
+    border-bottom: solid #d5e7fd 1px;
+}
+
+.row_odd th, .row_even th {
+    font-size: 10pt;
+}
+
+.row_odd td:first-child, .row_even td:first-child {
+    padding-left: 12px;
+}
+
+.cell_bold {
+    font-weight: bold;
+}
+
+td a, th a {
+    color: inherit;
+    text-decoration: none;
+}
+
+td {
+    font-size: 10pt;
+}
+
+.hover {
+    background-color: #bcd4ec;
+}
+
+div.followup {
+    width: 100%;
+    border-top: solid #666 1px;
+}
+
+div.followup .title {
+    font-weight: bold;
+    font-size: 10pt;
+}
+
+div.followup .title span {
+    color: #aaa;
+    font-weight: normal;
+}
+
+span.private {
+    color: #aaa;
+    font-style: italic;
+}
+
+a.ticket_link_status_Closed {
+    text-decoration: line-through;
+}
+
+a.ticket_link_status_Open {
+    color: #393;
+}
+
+a.ticket_link_status_Reopened {
+    color: #393;
+}
+
+a.ticket_link_status_Resolved {
+    color: #996;
+}
+
+a.ticket_link_status {
+    color: #369;
+    font: 12pt Garamond;
+}
