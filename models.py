@@ -99,15 +99,26 @@ class Ticket(models.Model):
         (CLOSED_STATUS, 'Closed'),
     )
 
+    PRIORITY_CHOICES = (
+        (1, '1 (Critical)'),
+        (2, '2 (High)'),
+        (3, '3 (Normal)'),
+        (4, '4 (Low)'),
+        (5, '5 (Very Low)'),
+    )
+
     title = models.CharField(maxlength=200)
     queue = models.ForeignKey(Queue)
-    created = models.DateTimeField(auto_now_add=True)
+    created = models.DateTimeField(blank=True)
+    modified = models.DateTimeField(blank=True)
     submitter_email = models.EmailField(blank=True, null=True, help_text='The submitter will receive an email for all public follow-ups left for this task.')
     assigned_to = models.ForeignKey(User, related_name='assigned_to', blank=True, null=True)
     status = models.IntegerField(choices=STATUS_CHOICES, default=OPEN_STATUS)
 
     description = models.TextField(blank=True, null=True)
     resolution = models.TextField(blank=True, null=True)
+
+    priority = models.IntegerField(choices=PRIORITY_CHOICES, default=3, blank=3)
 
     def _get_assigned_to(self):
         """ Custom property to allow us to easily print 'Unassigned' if a 
@@ -148,6 +159,11 @@ class Ticket(models.Model):
         if not self.id:
             # This is a new ticket as no ID yet exists.
             self.created = datetime.now()
+        
+        if not self.priority:
+            self.priority = 3
+        
+        self.modified = datetime.now()
 
         super(Ticket, self).save()
 
@@ -180,6 +196,13 @@ class FollowUp(models.Model):
 
     def __unicode__(self):
         return '%s' % self.title
+
+
+    def save(self):
+        t = self.ticket
+        t.modified = datetime.now()
+        t.save()
+        super(FollowUp, self).save()
 
 class TicketChange(models.Model):
     """ For each FollowUp, any changes to the parent ticket (eg Title, Priority,

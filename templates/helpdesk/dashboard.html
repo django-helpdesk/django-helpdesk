@@ -23,11 +23,11 @@ $(document).ready(function() {
 <tr class='row_columnheads'><th>#</th><th>Title</th><th>Queue</th><th>Status</th><th>Last Update</th></tr>
 {% for ticket in user_tickets %}
 <tr class='row_{% cycle odd,even %} row_hover'>
-<th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.id }}</a></th>
+<th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.ticket }}</a></th>
 <th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></th>
 <td>{{ ticket.queue }}</td>
 <td>{{ ticket.get_status_display }}</td>
-<td>{{ ticket.last_update|timesince }}</td>
+<td><span title='{{ ticket.modified|date:"r" }}'>{{ ticket.modified|timesince }}</span></td>
 </tr>
 {% endfor %}
 </table>
@@ -37,7 +37,7 @@ $(document).ready(function() {
 <tr class='row_columnheads'><th>#</th><th>Title</th><th>Queue</th><th>Created</th><th>&nbsp;</th></tr>
 {% for ticket in unassigned_tickets %}
 <tr class='row_{% cycle odd,even %} row_hover'>
-<th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.id }}</a></th>
+<th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.ticket }}</a></th>
 <th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></th>
 <td>{{ ticket.queue }}</td>
 <td><span title='{{ ticket.created|date:"r" }}'>{{ ticket.created|timesince }} ago</span></td>

@@ -93,6 +93,16 @@ def ticket_from_message(message, queue):
         except:
             ticket = None
 
+    priority = 3
+
+    smtp_priority = message.get('priority', '')
+    smtp_importance = message.get('importance', '')
+
+    high_priority_types = ('high', 'important', '1', 'urgent')
+
+    if smtp_priority in high_priority_types or smtp_importance in high_priority_types:
+        priority = 2
+
     if ticket == None:
         t = Ticket(
             title=subject,
@@ -100,6 +110,7 @@ def ticket_from_message(message, queue):
             submitter_email=sender_email,
             created=now,
             description=body,
+            priority=priority,
         )
         t.save()
         

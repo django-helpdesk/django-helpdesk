@@ -36,16 +36,21 @@
 </tr>
 
 <tr class='row_even'>
+    <th>Priority</th>
+    <td>{{ ticket.get_priority_display }}</td>
+</tr>
+
+<tr class='row_odd'>
     <th colspan='2'>Description</th>
 </tr>
-<tr class='row_odd'>
+<tr class='row_even'>
     <td colspan='2'>{{ ticket.description }}</td>
 </tr>
 
-{% if ticket.resolution %}<tr class='row_even'>
+{% if ticket.resolution %}<tr class='row_odd'>
     <th colspan='2'>Resolution{% ifequal ticket.get_status_display "Resolved" %} [<a href='?close'>Accept &amp; Close</a>]{% endifequal %}</th>
 </tr>
-<tr class='row_odd'>
+<tr class='row_even'>
     <td colspan='2'>{{ ticket.resolution }}</td>
 </tr>{% endif %}
 
@@ -101,6 +106,9 @@ Changed {{ change.field }} from {{ change.old_value }} to {{ change.new_value }}
 
 <label for='id_owner'>Owner</label>
 <select id='id_owner' name='owner'><option value='0'>Unassign</option>{% for u in active_users %}<option value='{{ u.id }}' {% ifequal u.id ticket.assigned_to.id %}selected{% endifequal %}>{{ u }}</option>{% endfor %}</select>
+
+<label for='id_priority'>Priority</label>
+<select id='id_priority' name='priority'>{% for p in priorities %}<option value='{{ p.0 }}'{% ifequal p.0 ticket.priority %} selected='selected'{% endifequal %}>{{ p.1 }}</option>{% endfor %}</select>
 
 </div>
 

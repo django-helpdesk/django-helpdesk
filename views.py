@@ -80,6 +80,7 @@ def view_ticket(request, ticket_id):
         RequestContext(request, {
             'ticket': ticket,
             'active_users': User.objects.filter(is_active=True),
+            'priorities': Ticket.PRIORITY_CHOICES,
         }))
 view_ticket = login_required(view_ticket)
 
@@ -91,6 +92,8 @@ def update_ticket(request, ticket_id):
     title = request.POST.get('title', '')
     public = request.POST.get('public', False)
     owner = int(request.POST.get('owner', None))
+    priority = int(request.POST.get('priority', ticket.priority))
+    
     if not owner and ticket.assigned_to:
         owner = ticket.assigned_to.id
 
@@ -128,6 +131,11 @@ def update_ticket(request, ticket_id):
         c = TicketChange(followup=f, field='Title', old_value=ticket.title, new_value=title)
         c.save()
         ticket.title = title
+
+    if priority != ticket.priority:
+        c = TicketChange(followup=f, field='Priority', old_value=ticket.priority, new_value=priority)
+        c.save()
+        ticket.priority = priority
 
     if f.new_status == Ticket.RESOLVED_STATUS:
         ticket.resolution = comment
