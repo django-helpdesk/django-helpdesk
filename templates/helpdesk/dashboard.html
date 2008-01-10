@@ -19,11 +19,12 @@ $(document).ready(function() {
 </table>
 
 <table width='100%'>
-<tr class='row_tablehead'><td colspan='5'>Your Tickets</td></tr>
-<tr class='row_columnheads'><th>#</th><th>Title</th><th>Queue</th><th>Status</th><th>Last Update</th></tr>
+<tr class='row_tablehead'><td colspan='6'>Your Tickets</td></tr>
+<tr class='row_columnheads'><th>#</th><th>Pr</th><th>Title</th><th>Queue</th><th>Status</th><th>Last Update</th></tr>
 {% for ticket in user_tickets %}
 <tr class='row_{% cycle odd,even %} row_hover'>
-<th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.ticket }}</a></th>
+<th class='priority{{ ticket.priority }}'><a href='{{ ticket.get_absolute_url }}'>{{ ticket.ticket }}</a></th>
+<td class='priority{{ ticket.priority }}'>{{ ticket.priority }}</td>
 <th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></th>
 <td>{{ ticket.queue }}</td>
 <td>{{ ticket.get_status_display }}</td>
@@ -33,11 +34,12 @@ $(document).ready(function() {
 </table>
 
 <table width='100%'>
-<tr class='row_tablehead'><td colspan='5'>Unassigned Tickets</td></tr>
-<tr class='row_columnheads'><th>#</th><th>Title</th><th>Queue</th><th>Created</th><th>&nbsp;</th></tr>
+<tr class='row_tablehead'><td colspan='6'>Unassigned Tickets</td></tr>
+<tr class='row_columnheads'><th>#</th><th>Pr</th><th>Title</th><th>Queue</th><th>Created</th><th>&nbsp;</th></tr>
 {% for ticket in unassigned_tickets %}
 <tr class='row_{% cycle odd,even %} row_hover'>
-<th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.ticket }}</a></th>
+<th class='priority{{ ticket.priority }}'><a href='{{ ticket.get_absolute_url }}'>{{ ticket.ticket }}</a></th>
+<td class='priority{{ ticket.priority }}'>{{ ticket.priority }}</td>
 <th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></th>
 <td>{{ ticket.queue }}</td>
 <td><span title='{{ ticket.created|date:"r" }}'>{{ ticket.created|timesince }} ago</span></td>

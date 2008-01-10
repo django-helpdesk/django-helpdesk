@@ -47,6 +47,11 @@ class TicketForm(forms.Form):
     
     assigned_to = forms.ChoiceField(choices=(), required=False,
                            label=u'Case owner')
+
+    priority = forms.ChoiceField(choices=Ticket.PRIORITY_CHOICES,
+                            required=False,
+                            initial='3',
+                            label=u'Priority')
     
     def save(self, user):
         """
@@ -60,6 +65,7 @@ class TicketForm(forms.Form):
                     status = Ticket.OPEN_STATUS,
                     queue = q,
                     description = self.cleaned_data['body'],
+                    priority = self.cleaned_data['priority'],
                   )
         if self.cleaned_data['assigned_to']:
             try:

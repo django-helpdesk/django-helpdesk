@@ -15,6 +15,7 @@ $(document).ready(function() {
     <option value='title'{% ifequal sort "title"%} selected='selected'{% endifequal %}>Title</option>
     <option value='queue'{% ifequal sort "queue"%} selected='selected'{% endifequal %}>Queue</option>
     <option value='status'{% ifequal sort "status"%} selected='selected'{% endifequal %}>Status</option>
+    <option value='priority'{% ifequal sort "priority"%} selected='selected'{% endifequal %}>Priority</option>
     <option value='assigned_to'{% ifequal sort "assigned_to"%} selected='selected'{% endifequal %}>Owner</option>
 </select>
 
@@ -30,11 +31,12 @@ $(document).ready(function() {
 </form>
 
 <table width='100%'>
-<tr class='row_tablehead'><td colspan='6'>Tickets</td></tr>
-<tr class='row_columnheads'><th>#</th><th>Title</th><th>Queue</th><th>Status</th><th>Created</th><th>Owner</th></tr>
+<tr class='row_tablehead'><td colspan='7'>Tickets</td></tr>
+<tr class='row_columnheads'><th>#</th><th>Pr</th><th>Title</th><th>Queue</th><th>Status</th><th>Created</th><th>Owner</th></tr>
 {% if tickets %}{% for ticket in tickets %}
 <tr class='row_{% cycle odd,even %} row_hover'>
-<th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.id }}</a></th>
+<th class='priority{{ ticket.priority }}'><a href='{{ ticket.get_absolute_url }}'>{{ ticket.ticket }}</a></th>
+<td class='priority{{ ticket.priority }}'>{{ ticket.priority }}</td>
 <th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></th>
 <td>{{ ticket.queue }}</td>
 <td>{{ ticket.get_status_display }}</td>

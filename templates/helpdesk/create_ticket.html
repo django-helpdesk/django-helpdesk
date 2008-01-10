@@ -31,6 +31,11 @@
         <dd>{{ form.assigned_to }}</dd>
         {% if form.assigned_to.errors %}
         <dd class='error'>{{ form.assigned_to.errors }}</dd>{% endif %}
+
+        <dt><label for='id_priority'>{{ form.priority.label }}</label></dt>
+        <dd>{{ form.priority }}</dd>
+        {% if form.priority.errors %}
+        <dd class='error'>{{ form.priority.errors }}</dd>{% endif %}
     </dl>
     
     <div class='buttons'>

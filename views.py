@@ -198,7 +198,7 @@ def ticket_list(request):
    
     ### SORTING
     sort = request.GET.get('sort', None)
-    if sort not in ('status', 'assigned_to', 'created', 'title', 'queue'):
+    if sort not in ('status', 'assigned_to', 'created', 'title', 'queue', 'priority'):
         sort = 'created'
     tickets = tickets.order_by(sort)
     context = dict(context, sort=sort)
