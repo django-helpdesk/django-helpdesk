@@ -34,12 +34,12 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.template import loader, Context, RequestContext
 from django.shortcuts import render_to_response, get_object_or_404
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, Http404, HttpResponse
 from django.db.models import Q
 
 # Helpdesk imports
 from helpdesk.forms import TicketForm
-from helpdesk.models import Ticket, Queue, FollowUp, TicketChange
+from helpdesk.models import Ticket, Queue, FollowUp, TicketChange, PreSetReply
 from helpdesk.lib import send_multipart_mail
 
 def dashboard(request):
@@ -81,6 +81,7 @@ def view_ticket(request, ticket_id):
             'ticket': ticket,
             'active_users': User.objects.filter(is_active=True),
             'priorities': Ticket.PRIORITY_CHOICES,
+            'preset_replies': PreSetReply.objects.filter(Q(queues=ticket.queue) | Q(queues__isnull=True)),
         }))
 view_ticket = login_required(view_ticket)
 
@@ -231,3 +232,17 @@ def create_ticket(request):
             'form': form,
         }))
 create_ticket = login_required(create_ticket)
+
+def raw_details(request, type):
+    if not type in ('preset',):
+        raise Http404
+    
+    if type == 'preset' and request.GET.get('id', False):
+        try:
+            preset = PreSetReply.objects.get(id=request.GET.get('id'))
+            return HttpResponse(preset.body)
+        except PreSetReply.DoesNotExist:
+            raise Http404
+    
+    raise Http404
+raw_details = login_required(raw_details)

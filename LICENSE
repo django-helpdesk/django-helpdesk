@@ -1,34 +1,51 @@
-                                        .. 
-                                 .,::;::::::
-                           ..,::::::::,,,,:::      Jutda Helpdesk - A Django
-                      .,,::::::,,,,,,,,,,,,,::     powered ticket tracker for
-                  .,::::::,,,,,,,,,,,,,,,,,,:;r.        small enterprise
-                .::::,,,,,,,,,,,,,,,,,,,,,,:;;rr.
-              .:::,,,,,,,,,,,,,,,,,,,,,,,:;;;;;rr      (c) Copyright 2008
-            .:::,,,,,,,,,,,,,,,,,,,,,,,:;;;:::;;rr
-          .:::,,,,,,,,,,,,,,,,,,,,.  ,;;;::::::;;rr           Jutda
-        .:::,,,,,,,,,,,,,,,,,,.    .:;;:::::::::;;rr
-      .:::,,,,,,,,,,,,,,,.       .;r;::::::::::::;r;   All Rights Reserved
-    .:::,,,,,,,,,,,,,,,        .;r;;:::::::::::;;:.
-  .:::,,,,,,,,,,,,,,,.       .;r;;::::::::::::;:.
- .;:,,,,,,,,,,,,,,,       .,;rr;::::::::::::;:.   This software is released 
-.,:,,,,,,,,,,,,,.    .,:;rrr;;::::::::::::;;.  under a limited-use license that
-  :,,,,,,,,,,,,,..:;rrrrr;;;::::::::::::;;.  allows you to freely download this
-   :,,,,,,,:::;;;rr;;;;;;:::::::::::::;;,  software from it's manufacturer and
-    ::::;;;;;;;;;;;:::::::::::::::::;;,  use it yourself, however you may not
-    .r;;;;:::::::::::::::::::::::;;;,  distribute it. For further details, see
-     .r;::::::::::::::::::::;;;;;:,  the enclosed LICENSE file.
-      .;;::::::::::::::;;;;;:,.
-       .;;:::::::;;;;;;:,.  Please direct people who wish to download this
-        .r;;;;;;;;:,.  software themselves to www.jutda.com.au.
-          ,,,..
+Jutda Helpdesk
+End User License Agreement (Last Updated January 12th 2007)
 
-$Id$
+SUMMARY
 
-LICENSING INFORMATION
+You should not have paid for this software.
 
-This software is not Free Software. You may freely download this software from it's manufacturer (Jutda, www.jutda.com.au) and use it for your own purposes. You may not distribute this software or give it to others.
+This software is not Free Software. You may freely download this software from it's manufacturer (Jutda, www.jutda.com.au) and use it within your organisation. You may not distribute this software or give it to others.
 
-You may download and install this software for other users, for example for a client or customer of yours or your companies.
+You may install this software for other users, for example for a client or customer, however you must download the software yourself prior to installation, leaving the client with a working installation of the software.
+
+LICENSE AGREEMENT
+
+This license agreement is between you and Jutda and governs your use of this software, including related components and documentation (herein referred to in whole as the "software").
+
+Jutda grants you a non-exclusive license to use the software subject to the provisions in all sections of this Agreement.
+
+By downloading, installing, or using the software, yo uagree to be bound by this agreement. If you do not agree to all of the terms of this agreement, do not download, install, or use the software.
+
+YOU MAY
+
+* Modify and customise the software to your personal liking, within the extent detailed in this agreement
+* Create and distribute documentation, templates, or modifications to the software
+* Create external software or internal modules that interact with the software
+* Install this software for a client or third party and charge that client or third party for your services
+
+YOU MAY NOT
+
+* Permit other individuals or organisations to use the software except when udner the use of this license agreement
+* Charge for the software, in currency or in kind (excluding charges for installation or modification)
+* Use the software in a way or within an organisation that condones or encourages terrorism, pirated software, or any other form of illegal activity
+* Modify or remove any copyright notices or labels, license details, or other such material from the software. This includes any links containing manufacturer or copyright information.
+* Distribute any of the files or any part of the files contained in the software (excluding documentation, templates or modifications which you have created in whole, which do not contain any part of the files contained in the software)
+
+DISCLAIMER OF WARRANTY
+
+The software is provided on an "AS IS" basis, without warranty of any kind, including without limitation the warranties of merchantability, fitness for a particular purpose, and non-infringement. The entire risk as to the quality and performance of the software is borne by you. Should the software prove defective, you and not Jutda assume the entire cost of any service and repair. In addition, any security mechanisms implemented by the software may have inherent limitations, and you must determine that the software sufficiently meets your requirements. This disclaimer of warranty constitutes an essential part of the agreement.
+
+TITLE
+
+Title, ownership rights, and intellectual property rights in the software shall remain with Jutda. The software is protected by copyright laws and treaties. Title and related rights in the content generated through the software is the property of the applicable content owner and may be protected by applicable law. This license gives Jutda no rights to such content.
+
+TERMINATION
+
+This agreement will terminate automatically upon failure to comply with the limitations described herein or on written notice from an authorized representative of Jutda. On termination, you must destroy all copies of the software within 48 hours. Termination of the license due to non compliance will not result in any refunds of license fees.
+
+MISCELLANEOUS
+
+Jutda reserves the right to change the terms of this agreement at any time. 
 
 

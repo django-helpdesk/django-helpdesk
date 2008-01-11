@@ -226,3 +226,14 @@ class TicketChange(models.Model):
 #class Attachment(models.Model):
     #followup = models.ForeignKey(FollowUp, edit_inline=models.TABULAR)
     #file = models.FileField()
+
+class PreSetReply(models.Model):
+    queues = models.ManyToManyField(Queue, blank=True, null=True)
+    name = models.CharField(max_length=100)
+    body = models.TextField(help_text='Context available: {{ ticket }} - ticket object (eg {{ ticket.title }}); {{ queue }} - The queue; and {{ user }} - the current user.')
+
+    class Admin:
+        pass
+
+    class Meta:
+        ordering = ['name',]
