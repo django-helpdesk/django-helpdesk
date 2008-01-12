@@ -140,6 +140,11 @@ class Ticket(models.Model):
         return "[%s-%s]" % (self.queue.slug, self.id)
     ticket = property(_get_ticket)
 
+    def _get_priority_img(self):
+        from django.conf import settings
+        return "%s/helpdesk/priorities/priority%s.png" % (settings.MEDIA_URL, self.priority)
+    get_priority_img = property(_get_priority_img)
+
     class Admin:
         list_display = ('title', 'status', 'assigned_to',)
         date_hierarchy = 'created'

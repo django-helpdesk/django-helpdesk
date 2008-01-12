@@ -166,3 +166,8 @@ a.ticket_link_status {
     color: #6C79A0;
     border-bottom: solid #d5e7fd 1px;
 }
+
+a img {
+    border: none;
+    padding: 2px;
+}

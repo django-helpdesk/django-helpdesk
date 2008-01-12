@@ -35,8 +35,8 @@ $(document).ready(function() {
 <tr class='row_columnheads'><th>#</th><th>Pr</th><th>Title</th><th>Queue</th><th>Status</th><th>Created</th><th>Owner</th></tr>
 {% if tickets %}{% for ticket in tickets %}
 <tr class='row_{% cycle odd,even %} row_hover'>
-<th class='priority{{ ticket.priority }}'><a href='{{ ticket.get_absolute_url }}'>{{ ticket.ticket }}</a></th>
-<td class='priority{{ ticket.priority }}'>{{ ticket.priority }}</td>
+<th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.ticket }}</a></th>
+<td><img src='{{ ticket.get_priority_img }}' alt='Priority {{ ticket.priority }}' title='Priority {{ ticket.priority }}' height='16' width='16' /></td>
 <th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></th>
 <td>{{ ticket.queue }}</td>
 <td>{{ ticket.get_status_display }}</td>

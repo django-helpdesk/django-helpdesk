@@ -25,7 +25,7 @@
 {% block helpdesk_body %}
 
 <table width='100%'>
-<tr class='row_tablehead'><td colspan='2'>{{ ticket.id }}. {{ ticket.title }} [{{ ticket.get_status_display }}]</td>
+<tr class='row_tablehead'><td>{{ ticket.id }}. {{ ticket.title }} [{{ ticket.get_status_display }}]</td><td align='right'><a href='#edit'><img src='{{ MEDIA_URL }}/helpdesk/buttons/edit.png' alt='Edit' title='Edit' width='60' height='15' /></a><a href='?delete'><img src='{{ MEDIA_URL }}/helpdesk/buttons/delete.png' alt='Delete' title='Delete' width='60' height='15' /></a></td></tr>
 <tr class='row_columnheads'><td colspan='2'>Queue: {{ ticket.queue }}</td></tr>
 
 <tr class='row_odd'>
@@ -35,7 +35,7 @@
 
 <tr class='row_even'>
     <th>Assigned To</th>
-    <td>{{ ticket.get_assigned_to }}{% ifequal ticket.get_assigned_to 'Unassigned' %} <strong><a href='?take'>Take</a></strong>{% endifequal %}</td>
+    <td>{{ ticket.get_assigned_to }}{% ifequal ticket.get_assigned_to 'Unassigned' %} <strong><a href='?take'><img src='{{ MEDIA_URL }}/helpdesk/buttons/take.png' width='60' height='15' alt='Take' title='Assign this ticket to yourself' /></a></strong>{% endifequal %}</td>
 </tr>
 
 <tr class='row_odd'>
@@ -56,7 +56,7 @@
 </tr>
 
 {% if ticket.resolution %}<tr class='row_odd'>
-    <th colspan='2'>Resolution{% ifequal ticket.get_status_display "Resolved" %} [<a href='?close'>Accept &amp; Close</a>]{% endifequal %}</th>
+    <th colspan='2'>Resolution{% ifequal ticket.get_status_display "Resolved" %} <a href='?close'><img src='{{ MEDIA_URL }}/helpdesk/buttons/accept.png' alt='Accept' title='Accept and Close' width='60' height='15' /></a>{% endifequal %}</th>
 </tr>
 <tr class='row_even'>
     <td colspan='2'>{{ ticket.resolution }}</td>

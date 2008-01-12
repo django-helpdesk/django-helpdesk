@@ -23,8 +23,8 @@ $(document).ready(function() {
 <tr class='row_columnheads'><th>#</th><th>Pr</th><th>Title</th><th>Queue</th><th>Status</th><th>Last Update</th></tr>
 {% for ticket in user_tickets %}
 <tr class='row_{% cycle odd,even %} row_hover'>
-<th class='priority{{ ticket.priority }}'><a href='{{ ticket.get_absolute_url }}'>{{ ticket.ticket }}</a></th>
-<td class='priority{{ ticket.priority }}'>{{ ticket.priority }}</td>
+<th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.ticket }}</a></th>
+<td><img src='{{ ticket.get_priority_img }}' alt='Priority {{ ticket.priority }}' title='Priority {{ ticket.priority }}' height='16' width='16' /></td>
 <th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></th>
 <td>{{ ticket.queue }}</td>
 <td>{{ ticket.get_status_display }}</td>
@@ -38,12 +38,12 @@ $(document).ready(function() {
 <tr class='row_columnheads'><th>#</th><th>Pr</th><th>Title</th><th>Queue</th><th>Created</th><th>&nbsp;</th></tr>
 {% for ticket in unassigned_tickets %}
 <tr class='row_{% cycle odd,even %} row_hover'>
-<th class='priority{{ ticket.priority }}'><a href='{{ ticket.get_absolute_url }}'>{{ ticket.ticket }}</a></th>
-<td class='priority{{ ticket.priority }}'>{{ ticket.priority }}</td>
+<th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.ticket }}</a></th>
+<td><img src='{{ ticket.get_priority_img }}' alt='Priority {{ ticket.priority }}' title='Priority {{ ticket.priority }}' height='16' width='16' /></td>
 <th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></th>
 <td>{{ ticket.queue }}</td>
 <td><span title='{{ ticket.created|date:"r" }}'>{{ ticket.created|timesince }} ago</span></td>
-<th><a href='{{ ticket.get_absolute_url }}?take'>Take</a></th>
+<th><a href='{{ ticket.get_absolute_url }}?take'><img src='{{ MEDIA_URL }}/helpdesk/buttons/take.png' width='60' height='15' alt='Take' title='Assign this ticket to yourself' /></a></th>
 </tr>
 {% endfor %}
 </table>
