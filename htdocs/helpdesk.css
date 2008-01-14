@@ -37,6 +37,16 @@ label {
     font-weight: bold;
 }
 
+span.form_optional {
+    color: #666;
+    font-size: 95%;
+}
+
+dd.form_help_text {
+    color: #666;
+    font-size: 95%;
+}
+
 .row_tablehead {
     background-color: #6593C0;
     font-weight: bold;
