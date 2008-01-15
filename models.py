@@ -26,10 +26,11 @@
 $Id$
 
 """
-from django.db import models
 from datetime import datetime
+
 from django.contrib.auth.models import User
-from django.db.models import permalink
+from django.db import models
+from django.conf import settings
 
 class Queue(models.Model):
     """
@@ -43,11 +44,14 @@ class Queue(models.Model):
     can automatically get tickets via e-mail.
     """
     title = models.CharField(maxlength=100)
-    slug = models.SlugField()
-    email_address = models.EmailField(blank=True, null=True)
+    slug = models.SlugField(help_text='This slug is used when building ticket ID\'s. Once set, try not to change it or e-mailing may get messy.')
+    email_address = models.EmailField(blank=True, null=True, help_text='All outgoing e-mails for this queue will use this e-mail address. If you use IMAP or POP3, this shoul be the e-mail address for that mailbox.')
 
     def _from_address(self):
-        return '%s <%s>' % (self.title, self.email_address)
+        if not self.email_address:
+            return 'NO QUEUE EMAIL ADDRESS DEFINED <%s>' % settings.DEFAULT_FROM_EMAIL
+        else:
+            return '%s <%s>' % (self.title, self.email_address)
     from_address = property(_from_address)
 
     email_box_type = models.CharField(maxlength=5, choices=(('pop3', 'POP 3'),('imap', 'IMAP')), blank=True, null=True, help_text='E-Mail Server Type - Both POP3 and IMAP are supported. Select your email server type here.')
@@ -63,12 +67,16 @@ class Queue(models.Model):
         return u"%s" % self.title
 
     class Admin:
-        pass
+        list_display = ('title', 'slug', 'email_address')
+
+    class Meta:
+        ordering = ('title',)
         
     def save(self):
         if self.email_box_type == 'imap' and not self.email_box_imap_folder:
             self.email_box_imap_folder = 'INBOX'
         super(Queue, self).save()
+
 
 class Ticket(models.Model):
     """
@@ -146,19 +154,19 @@ class Ticket(models.Model):
     get_priority_img = property(_get_priority_img)
 
     class Admin:
-        list_display = ('title', 'status', 'assigned_to',)
+        list_display = ('title', 'status', 'assigned_to', 'submitter_email',)
         date_hierarchy = 'created'
-        list_filter = ('assigned_to',)
+        list_filter = ('assigned_to', 'status', )
     
     class Meta:
         get_latest_by = "created"
 
     def __unicode__(self):
-        return '%s' % self.title
+        return u'%s' % self.title
 
     def get_absolute_url(self):
         return ('helpdesk.views.view_ticket', [str(self.id)])
-    get_absolute_url = permalink(get_absolute_url)
+    get_absolute_url = models.permalink(get_absolute_url)
 
     def save(self):
         if not self.id:
@@ -200,7 +208,7 @@ class FollowUp(models.Model):
         pass
 
     def __unicode__(self):
-        return '%s' % self.title
+        return u'%s' % self.title
 
 
     def save(self):
@@ -219,7 +227,7 @@ class TicketChange(models.Model):
     new_value = models.TextField(blank=True, null=True, core=True)
 
     def __unicode__(self):
-        str = '%s ' % field
+        str = u'%s ' % field
         if not new_value:
             str += 'removed'
         elif not old_value:
@@ -233,12 +241,24 @@ class TicketChange(models.Model):
     #file = models.FileField()
 
 class PreSetReply(models.Model):
-    queues = models.ManyToManyField(Queue, blank=True, null=True)
-    name = models.CharField(max_length=100)
+    """ We can allow the admin to define a number of pre-set replies, used to 
+    simplify the sending of updates and resolutions. These are basically Django
+    templates with a limited context - however if yo uwanted to get crafy it would
+    be easy to write a reply that displays ALL updates in hierarchical order etc 
+    with use of for loops over {{ ticket.followup_set.all }} and friends.
+    
+    When replying to a ticket, the user can select any reply set for the current
+    queue, and the body text is fetched via AJAX."""
+    
+    queues = models.ManyToManyField(Queue, blank=True, null=True, help_text='Leave blank to allow this reply to be used for all queues, or select those queues you wish to limit this reply to.')
+    name = models.CharField(max_length=100, help_text='Only used to assist users with selecting a reply - not shown to the user.')
     body = models.TextField(help_text='Context available: {{ ticket }} - ticket object (eg {{ ticket.title }}); {{ queue }} - The queue; and {{ user }} - the current user.')
 
     class Admin:
-        pass
+        list_display = ('name',)
 
     class Meta:
         ordering = ['name',]
+
+    def __unicode__(self):
+        return u'%s' % self.name

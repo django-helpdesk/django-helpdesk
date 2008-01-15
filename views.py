@@ -32,15 +32,16 @@ from datetime import datetime
 # Django imports
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
-from django.template import loader, Context, RequestContext
-from django.shortcuts import render_to_response, get_object_or_404
-from django.http import HttpResponseRedirect, Http404, HttpResponse
+from django.core.urlresolvers import reverse
 from django.db.models import Q
+from django.http import HttpResponseRedirect, Http404, HttpResponse
+from django.shortcuts import render_to_response, get_object_or_404
+from django.template import loader, Context, RequestContext
 
 # Helpdesk imports
 from helpdesk.forms import TicketForm
-from helpdesk.models import Ticket, Queue, FollowUp, TicketChange, PreSetReply
 from helpdesk.lib import send_multipart_mail
+from helpdesk.models import Ticket, Queue, FollowUp, TicketChange, PreSetReply
 
 def dashboard(request):
     tickets = Ticket.objects.filter(assigned_to=request.user).exclude(status=Ticket.CLOSED_STATUS)
@@ -67,6 +68,12 @@ def view_ticket(request, ticket_id):
     if request.GET.has_key('take'):
         ticket.assigned_to = request.user
         ticket.save()
+
+    if request.GET.has_key('delete'):
+        if request.method == 'GET':
+        else:
+            ticket.delete()
+            return HttpResponseRedirect(reverse('helpdesk_dashboard'))
     
     if request.GET.has_key('close') and ticket.status == Ticket.RESOLVED_STATUS:
         if not ticket.assigned_to: 
