@@ -1,15 +1,24 @@
 {% extends "helpdesk/base.html" %}
 {% block helpdesk_title %}Ticket Listing{% endblock %}
-{% block helpdesk_head %}<script type='text/javascript' language='javascript'>
-$(document).ready(function() {
-    $("tr.row_hover").mouseover(function() {$(this).addClass("hover");}).mouseout(function() {$(this).removeClass("hover");});
-});
-</script>{% endblock %}
+{% block helpdesk_head %}
+<script type='text/javascript' language='javascript' src='{{ MEDIA_URL }}/helpdesk/filter.js'></script>
+<script type='text/javascript' language='javascript' src='{{ MEDIA_URL }}/helpdesk/hover.js'></script>
+{% endblock %}
 {% block helpdesk_body %}
 
 {% load in_list %}
 
+<form><select name='select' id='filterBuilderSelect'>
+    <option value='Sort'>Sorting</option>
+    <option value='Owner'>Owner</option>
+    <option value='Queue'>Queue</option>
+    <option value='Status'>Status</option>
+    <option value='Keywords'>Keywords</option>
+</select>
+<input type='button' id='filterBuilderButton' value='+' /></form>
+
 <form method='get' action='./'>
+<div class='filterBox{% if sort %} filterBoxShow{% endif %}' id='filterBoxSort'>
 <label for='id_sort'>Sorting</label> <select id='id_sort' name='sort'>
     <option value='created'{% ifequal sort "created"%} selected='selected'{% endifequal %}>Created</option>
     <option value='title'{% ifequal sort "title"%} selected='selected'{% endifequal %}>Title</option>
@@ -18,14 +27,29 @@ $(document).ready(function() {
     <option value='priority'{% ifequal sort "priority"%} selected='selected'{% endifequal %}>Priority</option>
     <option value='assigned_to'{% ifequal sort "assigned_to"%} selected='selected'{% endifequal %}>Owner</option>
 </select>
+<input type='button' class='filterBuilderRemove' value='-' />
+</div>
 
+<div class='filterBox{% if owners %} filterBoxShow{% endif %}' id='filterBoxOwner'>
 <label for='id_owners'>Owner(s)</label> <select id='id_owners' name='assigned_to' multiple='selected' size='5'>{% for u in user_choices %}<option value='{{ u.id }}'{% if u.id|in_list:owners %} selected='selected'{% endif %}>{{ u.username }}</option>{% endfor %}</select>
+<input type='button' class='filterBuilderRemove' value='-' />
+</div>
 
+<div class='filterBox{% if queues %} filterBoxShow{% endif %}' id='filterBoxQueue'>
 <label for='id_queues'>Queue(s)</label> <select id='id_queues' name='queue' multiple='selected' size='5'>{% for q in queue_choices %}<option value='{{ q.id }}'{% if q.id|in_list:queues %} selected='selected'{% endif %}>{{ q.title }}</option>{% endfor %}</select>
+<input type='button' class='filterBuilderRemove' value='-' />
+</div>
 
+<div class='filterBox{% if statuses %} filterBoxShow{% endif %}' id='filterBoxStatus'>
 <label for='id_statuses'>Status(es)</label> {% for s in status_choices %}<input type='checkbox' name='status' value='{{ s.0 }}'{% if s.0|in_list:statuses %} checked='checked'{% endif %}> {{ s.1 }}{% endfor %}
+<input type='button' class='filterBuilderRemove' value='-' />
+</div>
 
+
+<div class='filterBox{% if query %} filterBoxShow{% endif %}' id='filterBoxKeywords'>
 <label for='id_query'>Keywords</label> <input type='text' name='q' value='{{ query }}' id='id_query' />
+<input type='button' class='filterBuilderRemove' value='-' />
+</div>
 
 <input type='submit' value='Go!' />
 </form>

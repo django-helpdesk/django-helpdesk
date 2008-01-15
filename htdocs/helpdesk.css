@@ -156,31 +156,6 @@ a.ticket_link_status {
     font: 12pt Garamond;
 }
 
-.priority1 {
-    background-color: #fcc;
-}
-
-.priority2 {
-    background-color: #FFE5CE;
-}
-
-.priority3 {
-    background-color: #CEE0FF;
-}
-
-.priority4 {
-    background-color: #CEF5FF;
-}
-
-.prority5 {
-    background-color: #CEE0FF;
-}
-
-.priority1, .priority2, .priority3, .priority4, .priority5 {
-    color: #6C79A0;
-    border-bottom: solid #d5e7fd 1px;
-}
-
 a img {
     border: none;
     padding: 2px;
@@ -188,4 +163,11 @@ a img {
 
 textarea#commentBox {
     width: 100%;
+}
+
+.filterBox {
+    display: none;
+}
+.filterBoxShow {
+    display: block;
 }

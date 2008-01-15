@@ -1,10 +1,8 @@
 {% extends "helpdesk/base.html" %}
 {% block helpdesk_title %}Helpdesk Dashboard{% endblock %}
-{% block helpdesk_head %}<script type='text/javascript' language='javascript'>
-$(document).ready(function() {
-    $("tr.row_hover").mouseover(function() {$(this).addClass("hover");}).mouseout(function() {$(this).removeClass("hover");});
-});
-</script>{% endblock %}
+{% block helpdesk_head %}
+<script type='text/javascript' language='javascript' src='{{ MEDIA_URL }}/helpdesk/hover.js'></script>
+{% endblock %}
 {% block helpdesk_body %}
 <table width='30%'>
 <tr class='row_tablehead'><td colspan='4'>Helpdesk Summary</td></tr>
