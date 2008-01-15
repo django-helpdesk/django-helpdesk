@@ -1,5 +1,5 @@
 Jutda Helpdesk
-End User License Agreement (Last Updated January 12th 2007)
+End User License Agreement (Last Updated January 15th 2007)
 
 SUMMARY
 
@@ -48,4 +48,6 @@ MISCELLANEOUS
 
 Jutda reserves the right to change the terms of this agreement at any time. 
 
+EXCEPTIONS
 
+This software is distributed with a copy jQuery, a javascript library written by John Resig.. jQuery is not distributed under the above license, but rather uses the MIT license. See LICENSE.JQUERY for further details.
