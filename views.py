@@ -63,18 +63,25 @@ def dashboard(request):
         }))
 dashboard = login_required(dashboard)
 
+def delete_ticket(request, ticket_id):
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+    
+    if request.method == 'GET':
+        return render_to_response('helpdesk/delete_ticket.html',
+            RequestContext(request, {
+                'ticket': ticket,
+            }))
+    else:
+        ticket.delete()
+        return HttpResponseRedirect(reverse('helpdesk_home'))
+delete_ticket = login_required(delete_ticket)
+
 def view_ticket(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
     if request.GET.has_key('take'):
         ticket.assigned_to = request.user
         ticket.save()
 
-    if request.GET.has_key('delete'):
-        if request.method == 'GET':
-        else:
-            ticket.delete()
-            return HttpResponseRedirect(reverse('helpdesk_dashboard'))
-    
     if request.GET.has_key('close') and ticket.status == Ticket.RESOLVED_STATUS:
         if not ticket.assigned_to: 
             owner = 0

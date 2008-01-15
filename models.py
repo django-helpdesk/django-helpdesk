@@ -236,9 +236,18 @@ class TicketChange(models.Model):
             str += 'changed from "%s" to "%s"' % (old_value, new_value)
         return str
 
-#class Attachment(models.Model):
-    #followup = models.ForeignKey(FollowUp, edit_inline=models.TABULAR)
-    #file = models.FileField()
+"""class Attachment(models.Model):
+    followup = models.ForeignKey(FollowUp, edit_inline=models.TABULAR)
+    file = models.FileField()
+    filename = models.CharField(maxlength=100)
+    mime_type = models.CharField(maxlength=30)
+    size = models.IntegerField(help_text='Size of this file in bytes')
+
+    def __unicode__(self):
+        return u'%s' % self.filename
+
+    class Meta:
+        ordering = ['filename',] """
 
 class PreSetReply(models.Model):
     """ We can allow the admin to define a number of pre-set replies, used to 

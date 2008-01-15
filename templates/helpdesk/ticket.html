@@ -25,7 +25,7 @@
 {% block helpdesk_body %}
 
 <table width='100%'>
-<tr class='row_tablehead'><td>{{ ticket.id }}. {{ ticket.title }} [{{ ticket.get_status_display }}]</td><td align='right'><a href='#edit'><img src='{{ MEDIA_URL }}/helpdesk/buttons/edit.png' alt='Edit' title='Edit' width='60' height='15' /></a><a href='?delete'><img src='{{ MEDIA_URL }}/helpdesk/buttons/delete.png' alt='Delete' title='Delete' width='60' height='15' /></a></td></tr>
+<tr class='row_tablehead'><td>{{ ticket.id }}. {{ ticket.title }} [{{ ticket.get_status_display }}]</td><td align='right'><a href='#edit'><img src='{{ MEDIA_URL }}/helpdesk/buttons/edit.png' alt='Edit' title='Edit' width='60' height='15' /></a><a href='{% url helpdesk_delete ticket.id %}'><img src='{{ MEDIA_URL }}/helpdesk/buttons/delete.png' alt='Delete' title='Delete' width='60' height='15' /></a></td></tr>
 <tr class='row_columnheads'><th colspan='2'>Queue: {{ ticket.queue }}</th></tr>
 
 <tr class='row_odd'>
