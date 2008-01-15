@@ -47,6 +47,10 @@ dd.form_help_text {
     font-size: 95%;
 }
 
+dt {
+    padding-top: 8px;
+}
+
 .row_tablehead {
     background-color: #6593C0;
     font-weight: bold;
@@ -180,4 +184,8 @@ a.ticket_link_status {
 a img {
     border: none;
     padding: 2px;
+}
+
+textarea#commentBox {
+    width: 100%;
 }

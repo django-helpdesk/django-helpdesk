@@ -99,6 +99,6 @@ class TicketForm(forms.Form):
 
         if t.submitter_email:
             from helpdesk.lib import send_multipart_mail
-            send_multipart_mail('helpdesk/emails/submitter_newticket', context, '%s %s' % (t.ticket, t.title), t.submitter_email,, q.from_address)
+            send_multipart_mail('helpdesk/emails/submitter_newticket', context, '%s %s' % (t.ticket, t.title), t.submitter_email, q.from_address)
 
         return t

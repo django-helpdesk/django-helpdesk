@@ -6,7 +6,8 @@
     $(document).ready(function() {
         nic = new nicEditor({buttonList: ['bold','italic','underline','strikeThrough','undo','redo','subscript','superscript','html']}).panelInstance('commentBox');
         $("#ShowFurtherEditOptions").click(function() {
-            $("#FurtherEditOptions").toggle();
+            $("#FurtherEditOptions").fadeIn();
+            $("#ShowFurtherOptPara").hide();
             return false;
         });
         $('#id_preset').change(function() {
@@ -19,14 +20,13 @@
         });
     });
 </script>
-<style type='text/css'>#commentBox { width: 100%; }</style>
 {% endblock %}
 
 {% block helpdesk_body %}
 
 <table width='100%'>
 <tr class='row_tablehead'><td>{{ ticket.id }}. {{ ticket.title }} [{{ ticket.get_status_display }}]</td><td align='right'><a href='#edit'><img src='{{ MEDIA_URL }}/helpdesk/buttons/edit.png' alt='Edit' title='Edit' width='60' height='15' /></a><a href='?delete'><img src='{{ MEDIA_URL }}/helpdesk/buttons/delete.png' alt='Delete' title='Delete' width='60' height='15' /></a></td></tr>
-<tr class='row_columnheads'><td colspan='2'>Queue: {{ ticket.queue }}</td></tr>
+<tr class='row_columnheads'><th colspan='2'>Queue: {{ ticket.queue }}</th></tr>
 
 <tr class='row_odd'>
     <th>Submitted On</th>
@@ -80,52 +80,69 @@ Changed {{ change.field }} from {{ change.old_value }} to {{ change.new_value }}
 {% endfor %}
 {% endif %}
 
-<form method='post' action='update/'>
 <h3>Respond to this ticket</h3>
 
-<label for='id_preset'>Use a Pre-set Reply</label> <select name='preset' id='id_preset'><option value=''>------</option>{% for preset in preset_replies %}<option value='{{ preset.id }}'>{{ preset.name }}</option>{% endfor %}</select>
+<form method='post' action='update/'>
 
-<textarea rows='8' cols='70' name='comment' id='commentBox'></textarea>
-<p>New Status
-{% ifequal ticket.status 1 %}
-<input type='radio' name='new_status' value='1' id='st_open' checked='checked'><label for='st_open' class='active'>Open</label> &raquo;
-<input type='radio' name='new_status' value='3' id='st_resolved'><label for='st_resolved'>Resolved</label> &raquo;
-<input type='radio' name='new_status' value='4' id='st_closed'><label for='st_closed'>Closed</label>
-{% endifequal %}
-{% ifequal ticket.status 2 %}
-<input type='radio' name='new_status' value='2' id='st_reopened' checked='checked'><label for='st_reopened' class='active'>Reopened</label> &raquo; 
-<input type='radio' name='new_status' value='3' id='st_resolved'><label for='st_resolved'>Resolved</label> &raquo; 
-<input type='radio' name='new_status' value='4' id='st_closed'><label for='st_closed'>Closed</label>
-{% endifequal %}
-{% ifequal ticket.status 3 %}
-<input type='radio' name='new_status' value='2' id='st_reopened'><label for='st_reopened'>Reopened</label> &laquo; 
-<input type='radio' name='new_status' value='3' id='st_resolved' checked='checked'><label for='st_resolved' class='active'>Resolved</label> &raquo; 
-<input type='radio' name='new_status' value='4' id='st_closed'><label for='st_closed'>Closed</label>
-{% endifequal %}
+<fieldset>
+    <dl>
+        <dt><label for='id_preset'>Use a Pre-set Reply</label> <span class='form_optional'>(Optional)</span></dt>
+        <dd><select name='preset' id='id_preset'><option value=''>------</option>{% for preset in preset_replies %}<option value='{{ preset.id }}'>{{ preset.name }}</option>{% endfor %}</select></dd>
+        <dd class='form_help_text'>Selecting a pre-set reply will over-write your comment below. You can then modify the pre-set reply to your liking before saving this update.</dd>
 
-{% ifequal ticket.status 4 %}
-<input type='radio' name='new_status' value='2' id='st_reopened'><label for='st_reopened'>Reopened</label> &laquo; 
-<input type='radio' name='new_status' value='4' id='st_closed' checked='checked'><label for='st_closed'>Closed</label>
-{% endifequal %}
+        <dt><label for='commentBox'>Comment / Resolution</label></dt>
+        <dd><textarea rows='8' cols='70' name='comment' id='commentBox'></textarea></dd>
+        <dd class='form_help_text'>You can use the ticket and queue template variables in your message.</dd>
 
-<p><a href='#' id='ShowFurtherEditOptions'>Change Other Details</a></p>
+        <dt><label>New Status</label></dt>
+        {% ifequal ticket.status 1 %}
+        <dd><input type='radio' name='new_status' value='1' id='st_open' checked='checked'><label for='st_open' class='active'>Open</label> &raquo;
+        <input type='radio' name='new_status' value='3' id='st_resolved'><label for='st_resolved'>Resolved</label> &raquo;
+        <input type='radio' name='new_status' value='4' id='st_closed'><label for='st_closed'>Closed</label></dd>
+        {% endifequal %}
+        {% ifequal ticket.status 2 %}
+        <dd><input type='radio' name='new_status' value='2' id='st_reopened' checked='checked'><label for='st_reopened' class='active'>Reopened</label> &raquo; 
+        <input type='radio' name='new_status' value='3' id='st_resolved'><label for='st_resolved'>Resolved</label> &raquo; 
+        <input type='radio' name='new_status' value='4' id='st_closed'><label for='st_closed'>Closed</label> </dd>
+        {% endifequal %}
+        {% ifequal ticket.status 3 %}
+        <dd><input type='radio' name='new_status' value='2' id='st_reopened'><label for='st_reopened'>Reopened</label> &laquo; 
+        <input type='radio' name='new_status' value='3' id='st_resolved' checked='checked'><label for='st_resolved' class='active'>Resolved</label> &raquo; 
+        <input type='radio' name='new_status' value='4' id='st_closed'><label for='st_closed'>Closed</label></dd>
+        {% endifequal %}
+        {% ifequal ticket.status 4 %}
+        <dd><input type='radio' name='new_status' value='2' id='st_reopened'><label for='st_reopened'>Reopened</label> &laquo; 
+        <input type='radio' name='new_status' value='4' id='st_closed' checked='checked'><label for='st_closed'>Closed</label></dd>
+        {% endifequal %}
+    
+        <dt><label for='id_public'>Is this update public?</label> <span class='form_optional'>(Optional)</span></dt>
+        <dd><input type='checkbox' name='public' value='1' checked='checked' /></dD>
+        <dd class='form_help_text'>If this is public, the submitter will be e-mailed your comment or resolution.</dd>
+    </dl>
+
+<p id='ShowFurtherOptPara'><a href='#' id='ShowFurtherEditOptions'>Change Further Details &raquo;</a></p>
 
 <div id='FurtherEditOptions' style='display: none;'>
 
-<label for='id_title'>Title</label>
-<input type='text' name='title' value='{{ ticket.title|escape }}' />
+    <dl>
 
-<label for='id_owner'>Owner</label>
-<select id='id_owner' name='owner'><option value='0'>Unassign</option>{% for u in active_users %}<option value='{{ u.id }}' {% ifequal u.id ticket.assigned_to.id %}selected{% endifequal %}>{{ u }}</option>{% endfor %}</select>
+        <dt><label for='id_title'>Title</label></dt>
+        <dd><input type='text' name='title' value='{{ ticket.title|escape }}' /></dd>
 
-<label for='id_priority'>Priority</label>
-<select id='id_priority' name='priority'>{% for p in priorities %}<option value='{{ p.0 }}'{% ifequal p.0 ticket.priority %} selected='selected'{% endifequal %}>{{ p.1 }}</option>{% endfor %}</select>
+        <dt><label for='id_owner'>Owner</label></dt>
+        <dd><select id='id_owner' name='owner'><option value='0'>Unassign</option>{% for u in active_users %}<option value='{{ u.id }}' {% ifequal u.id ticket.assigned_to.id %}selected{% endifequal %}>{{ u }}</option>{% endfor %}</select></dd>
+
+        <dt><label for='id_priority'>Priority</label></dt>
+        <dd><select id='id_priority' name='priority'>{% for p in priorities %}<option value='{{ p.0 }}'{% ifequal p.0 ticket.priority %} selected='selected'{% endifequal %}>{{ p.1 }}</option>{% endfor %}</select></dd>
+
+    </dl>
 
 </div>
 
-<label for='id_public'>Is this update public?</label> <input type='checkbox' name='public' value='1' checked='checked' />
+</fieldset>
 
-<input type='submit' value='Add' />
+
+<input type='submit' value='Update This Ticket' />
 
 </form>
 
