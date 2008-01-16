@@ -47,9 +47,7 @@ See the file 'LICENSE' for licensing terms and conditions.
 
 2. Django (post-0.96, eg SVN checkout)
 
-3. Markdown / pymarkdown
-
-4. An existing WORKING Django project with database etc. If you
+3. An existing WORKING Django project with database etc. If you
    cannot log into the Admin, you won't get this product working.
 
 
@@ -63,7 +61,6 @@ See the file 'LICENSE' for licensing terms and conditions.
    setting:
    'helpdesk',
    'django.contrib.admin',
-   'django.contrib.markup'
 
 3. In your projects' urls.py file, add this line:
     (r'helpdesk/', include('helpdesk.urls')),
