@@ -39,29 +39,50 @@ from django.shortcuts import render_to_response, get_object_or_404
 from django.template import loader, Context, RequestContext
 
 # Helpdesk imports
-from helpdesk.forms import TicketForm
+from helpdesk.forms import TicketForm, PublicTicketForm
 from helpdesk.lib import send_multipart_mail
 from helpdesk.models import Ticket, Queue, FollowUp, TicketChange, PreSetReply
 
 def dashboard(request):
-    tickets = Ticket.objects.filter(assigned_to=request.user).exclude(status=Ticket.CLOSED_STATUS)
-    unassigned_tickets = Ticket.objects.filter(assigned_to__isnull=True).exclude(status=Ticket.CLOSED_STATUS)
+    """
+    This isn't always truly a "dashboard" view. If the user is not logged in, we 
+    instead show the user a "public submission" form and a way to view existing
+    tickets.
+    """
+    if request.user.is_authenticated():
+        tickets = Ticket.objects.filter(assigned_to=request.user).exclude(status=Ticket.CLOSED_STATUS)
+        unassigned_tickets = Ticket.objects.filter(assigned_to__isnull=True).exclude(status=Ticket.CLOSED_STATUS)
     
-    dash_tickets = []
-    for q in Queue.objects.all():
-        dash_tickets.append({
-            'queue': q,
-            'open': q.ticket_set.filter(Q(status=Ticket.OPEN_STATUS) | Q(status=Ticket.REOPENED_STATUS)).count(),
-            'resolved': q.ticket_set.filter(status=Ticket.RESOLVED_STATUS).count(),
-        })
+        dash_tickets = []
+        for q in Queue.objects.all():
+            dash_tickets.append({
+                'queue': q,
+                'open': q.ticket_set.filter(Q(status=Ticket.OPEN_STATUS) | Q(status=Ticket.REOPENED_STATUS)).count(),
+                'resolved': q.ticket_set.filter(status=Ticket.RESOLVED_STATUS).count(),
+            })
 
-    return render_to_response('helpdesk/dashboard.html',
-        RequestContext(request, {
-            'user_tickets': tickets,
-            'unassigned_tickets': unassigned_tickets,
-            'dash_tickets': dash_tickets,
-        }))
-dashboard = login_required(dashboard)
+        return render_to_response('helpdesk/dashboard.html',
+            RequestContext(request, {
+                'user_tickets': tickets,
+                'unassigned_tickets': unassigned_tickets,
+                'dash_tickets': dash_tickets,
+            }))
+    else:
+        # Not a logged in user
+        if request.method == 'POST':
+            form = PublicTicketForm(request.POST)
+            form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
+            if form.is_valid():
+                ticket = form.save()
+                return HttpResponseRedirect('%s?ticket=%s&email=%s'% (reverse('helpdesk_public_view'), ticket.ticket_for_url, ticket.submitter_email))
+        else:
+            form = PublicTicketForm()
+            form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
+
+        return render_to_response('helpdesk/public_homepage.html',
+            RequestContext(request, {
+                'form': form,
+            }))
 
 def delete_ticket(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
@@ -260,3 +281,25 @@ def raw_details(request, type):
     
     raise Http404
 raw_details = login_required(raw_details)
+
+def public_view(request):
+    ticket = request.GET.get('ticket', '')
+    email = request.GET.get('email', '')
+    error_message = ''
+
+    if ticket and email:
+        queue, ticket_id = ticket.split('-')
+        try:
+            t = Ticket.objects.get(id=ticket_id, queue__slug__iexact=queue, submitter_email__iexact=email)
+            return render_to_response('helpdesk/public_view_ticket.html', 
+                RequestContext(request, {'ticket': t,}))
+        except:
+            t = False;
+            error_message = 'Invalid ticket ID or e-mail address. Please try again.'
+
+    return render_to_response('helpdesk/public_view_form.html', 
+        RequestContext(request, {
+            'ticket': ticket,
+            'email': email,
+            'error_message': error_message,
+        }))

@@ -8,4 +8,6 @@ The following resolution was added to ticket {{ ticket.ticket }}:
 
 Can you please confirm that this resolution addresses your needs so we may close this ticket? If you have any further queries, or if you do not believe this resolution is adequate, please reply to this e-mail and keep the subject intact.
 
+If you wish to view this ticket online, you can visit {{ ticket.get_ticket_url }}.
+
 {% include "helpdesk/emails/text_footer.txt" %}

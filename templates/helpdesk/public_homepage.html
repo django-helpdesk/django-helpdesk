@@ -1,0 +1,62 @@
+{% extends "helpdesk/public_base.html" %}
+{% block helpdesk_title %}Helpdesk{% endblock %}
+
+{% block helpdesk_body %}
+<h2>View a Ticket</h2>
+
+<form method='get' action='{% url helpdesk_public_view %}'>
+<fieldset>
+    <dl>
+        <dt><label for='id_ticket'>Ticket</label></dt>
+        <dd><input type='text' name='ticket' /></dd>
+
+        <dt><label for='id_email'>Your E-mail Address</label></dt>
+        <dd><input type='text' name='email' /></dd>
+    </dl>
+
+    <input type='submit' value='View Ticket' />
+</fieldset>
+</form>
+
+<h2 name='submit'>Submit a Ticket</h2>
+
+<p>All fields are required. Please provide as descriptive a title and description as possible.</p>
+
+<form method='post' action='./#submit'>
+<fieldset>
+    <dl>
+        <dt><label for='id_queue'>{{ form.queue.label }}</label></dt>
+        <dd>{{ form.queue }}</dd>
+        {% if form.queue.errors %}
+        <dd class='error'>{{ form.queue.errors }}</dd>{% endif %}
+        
+        <dt><label for='id_title'>{{ form.title.label }}</label></dt>
+        <dd>{{ form.title }}</dd>
+        {% if form.title.errors %}
+        <dd class='error'>{{ form.title.errors }}</dd>{% endif %}
+    
+        <dt><label for='id_submitter_email'>{{ form.submitter_email.label }}</label></dt>
+        <dd>{{ form.submitter_email }}</dd>
+        {% if form.submitter_email.errors %}
+        <dd class='error'>{{ form.submitter_email.errors }}</dd>{% endif %}
+        <dd class='form_help_text'>{{ form.submitter_email.help_text }}</dd>
+    
+        <dt><label for='id_body'>{{ form.body.label }}</label></dt>
+        <dd>{{ form.body }}</dd>
+        {% if form.body.errors %}
+        <dd class='error'>{{ form.body.errors }}</dd>{% endif %}
+        
+        <dt><label for='id_priority'>{{ form.priority.label }}</label></dt>
+        <dd>{{ form.priority }}</dd>
+        {% if form.priority.errors %}
+        <dd class='error'>{{ form.priority.errors }}</dd>{% endif %}
+        <dd class='form_help_text'>{{ form.priority.help_text }}</dd>
+    </dl>
+    
+    <div class='buttons'>
+        <input type='submit' value='Submit Ticket' />
+    </div>
+</fieldset>
+
+</form>
+{% endblock %}

@@ -145,13 +145,24 @@ class Ticket(models.Model):
         """ A user-friendly ticket ID, which is a combination of ticket ID 
         and queue slug. This is generally used in e-mails. """
 
-        return "[%s-%s]" % (self.queue.slug, self.id)
+        return "[%s]" % (self.ticket_for_url)
     ticket = property(_get_ticket)
+
+    def _get_ticket_for_url(self):
+        return "%s-%s" % (self.queue.slug, self.id)
+    ticket_for_url = property(_get_ticket_for_url)
 
     def _get_priority_img(self):
         from django.conf import settings
         return "%s/helpdesk/priorities/priority%s.png" % (settings.MEDIA_URL, self.priority)
     get_priority_img = property(_get_priority_img)
+
+    def _get_ticket_url(self):
+        from django.contrib.sites.models import Site
+        from django.core.urlresolvers import reverse
+        site = Site.objects.get_current()
+        return "http://%s%s?ticket=%s&email=%s" % (site.domain, reverse('helpdesk_public_view'), self.ticket_for_url, self.submitter_email)
+    ticket_url = property(_get_ticket_url)
 
     class Admin:
         list_display = ('title', 'status', 'assigned_to', 'submitter_email',)
@@ -180,6 +191,12 @@ class Ticket(models.Model):
 
         super(Ticket, self).save()
 
+class FollowUpManager(models.Manager):
+    def private_followups(self):
+        return self.filter(public=False)
+    
+    def public_followups(self):
+        return self.filter(public=True)
 
 class FollowUp(models.Model):
     """ A FollowUp is a comment and/or change to a ticket. We keep a simple 
@@ -197,9 +214,11 @@ class FollowUp(models.Model):
     title = models.CharField(maxlength=200, blank=True, null=True)
     comment = models.TextField(blank=True, null=True)
     public = models.BooleanField(blank=True, null=True)
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, blank=True, null=True)
     
     new_status = models.IntegerField(choices=Ticket.STATUS_CHOICES, blank=True, null=True)
+
+    objects = FollowUpManager()
 
     class Meta:
         ordering = ['date']

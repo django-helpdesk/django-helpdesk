@@ -47,6 +47,11 @@ dd.form_help_text {
     font-size: 95%;
 }
 
+ul.errorlist {
+    color: #a33;
+    font-size: 95%;
+}
+
 dt {
     padding-top: 8px;
 }

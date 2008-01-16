@@ -1,0 +1,23 @@
+{% extends "helpdesk/public_base.html" %}
+{% block helpdesk_title %}Helpdesk{% endblock %}
+
+{% block helpdesk_body %}
+<h2>View a Ticket</h2>
+
+<form method='get' action='{% url helpdesk_public_view %}'>
+
+{% if error_message %}<p><strong>Error:</strong> {{ error_message }}</p>{% endif %}
+
+<fieldset>
+    <dl>
+        <dt><label for='id_ticket'>Ticket</label></dt>
+        <dd><input type='text' name='ticket' value='{{ ticket }}' /></dd>
+
+        <dt><label for='id_email'>Your E-mail Address</label></dt>
+        <dd><input type='text' name='email' value='{{ email }}' /></dd>
+    </dl>
+
+    <input type='submit' value='View Ticket' />
+</fieldset>
+</form>
+{% endblock %}

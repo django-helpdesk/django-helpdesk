@@ -58,6 +58,10 @@ urlpatterns = patterns('helpdesk.views',
     url(r'^raw/(?P<type>\w+)/$',
         'raw_details',
         name='helpdesk_raw'),
+
+    url(r'^view/$',
+        'public_view',
+        name='helpdesk_public_view'),
 )
 
 urlpatterns += patterns('',

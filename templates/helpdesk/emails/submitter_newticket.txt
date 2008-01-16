@@ -6,6 +6,8 @@ You do not have to do anything further at this stage. Your ticket has been assig
 
 If you wish to send us further details, or if you have any queries about this ticket, please include the ticket id of {{ ticket.ticket }} in the subject. The easiest way to do this is just press 'reply' to this message.
 
+If you wish to view this ticket online, you can visit {{ ticket.get_ticket_url }}.
+
 We will investigate your query and attempt to resolve it as soon as possible. You will receive further updates and a resolution via this e-mail address.
 
 {% include "helpdesk/emails/text_footer.txt" %}
