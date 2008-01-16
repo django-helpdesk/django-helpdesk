@@ -46,6 +46,8 @@ class Queue(models.Model):
     title = models.CharField(maxlength=100)
     slug = models.SlugField(help_text='This slug is used when building ticket ID\'s. Once set, try not to change it or e-mailing may get messy.')
     email_address = models.EmailField(blank=True, null=True, help_text='All outgoing e-mails for this queue will use this e-mail address. If you use IMAP or POP3, this shoul be the e-mail address for that mailbox.')
+    escalate_hours = models.IntegerField(blank=True, null=True, help_text='For tickets which are not held, how often do you wish to increase their priority? Set to 0 for no escalation.')
+    last_escalation = models.DateTimeField(blank=True, null=True, editable=False)
 
     def _from_address(self):
         if not self.email_address:

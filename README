@@ -99,11 +99,21 @@ See the file 'LICENSE' for licensing terms and conditions.
    inbox, set up a cronjob to run scripts/get_email.py on a regular basis. 
 
    Don't forget to set the relevant Django environment variables in your 
-   crnotab:
+   crontab:
 
-   5 * * * * DJANGO_SETTINGS_MODULE='myproject.settings' python /path/to/helpdesk/scripts/get_email.py
+   */5 * * * * DJANGO_SETTINGS_MODULE='myproject.settings' python /path/to/helpdesk/scripts/get_email.py
+
+   This will run the e-mail import every 5 minutes
 
    IMPORTANT NOTE: Any tickets created via POP3 or IMAP mailboxes will DELETE
    the original e-mail from the mail server.
+
+4. If you wish to automatically escalate tickets based on their age, set up 
+   a cronjob to run scripts/escalate_tickets.py on a regular basis:
+   
+   0 * * * * DJANGO_SETTINGS_MODULE='myproject.settings' python /path/to/helpdesk/scripts/escalate_tickets.py
+   
+   This will run the escalation process hourly, using the 'Escalation Hours' 
+   setting for each queue to determine which tickets to escalate.
 
 You're now up and running!
