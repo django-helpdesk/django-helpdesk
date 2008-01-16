@@ -125,6 +125,8 @@ class Ticket(models.Model):
     assigned_to = models.ForeignKey(User, related_name='assigned_to', blank=True, null=True)
     status = models.IntegerField(choices=STATUS_CHOICES, default=OPEN_STATUS)
 
+    on_hold = models.BooleanField(blank=True, null=True)
+
     description = models.TextField(blank=True, null=True)
     resolution = models.TextField(blank=True, null=True)
 
@@ -158,6 +160,12 @@ class Ticket(models.Model):
         from django.conf import settings
         return "%s/helpdesk/priorities/priority%s.png" % (settings.MEDIA_URL, self.priority)
     get_priority_img = property(_get_priority_img)
+
+    def _get_status(self):
+        held_msg = ''
+        if self.on_hold: held_msg = ' (Held)'
+        return '%s%s' % (self.get_status_display, held_msg)
+    get_status = property(_get_status)
 
     def _get_ticket_url(self):
         from django.contrib.sites.models import Site

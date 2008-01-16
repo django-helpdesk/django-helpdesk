@@ -53,7 +53,14 @@ urlpatterns = patterns('helpdesk.views',
     url(r'^tickets/(?P<ticket_id>[0-9]+)/delete/$',
         'delete_ticket',
         name='helpdesk_delete'),
+    
+    url(r'^tickets/(?P<ticket_id>[0-9]+)/hold/$',
+        'hold_ticket',
+        name='helpdesk_hold'),
 
+    url(r'^tickets/(?P<ticket_id>[0-9]+)/unhold/$',
+        'unhold_ticket',
+        name='helpdesk_unhold'),
 
     url(r'^raw/(?P<type>\w+)/$',
         'raw_details',

@@ -44,7 +44,7 @@ def escalate_tickets():
         q.last_escalation = datetime.now()
         q.save()
 
-        for t in q.ticket_set.filter(Q(status=Ticket.OPEN_STATUS) | Q(status=Ticket.REOPENED_STATUS)).exclude(priority=1):
+        for t in q.ticket_set.filter(Q(status=Ticket.OPEN_STATUS) | Q(status=Ticket.REOPENED_STATUS)).exclude(priority=1).exclude(on_hold=True):
             t.priority -= 1
             t.save()
 

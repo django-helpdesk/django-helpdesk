@@ -303,3 +303,31 @@ def public_view(request):
             'email': email,
             'error_message': error_message,
         }))
+
+def hold_ticket(request, ticket_id, unhold=False):
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+
+    if unhold:
+        ticket.on_hold = False
+        title = 'Ticket placed on hold'
+    else:
+        ticket.on_hold = True
+        title = 'Ticket taken off hold'
+    
+    f = FollowUp(
+        ticket = ticket,
+        user = request.user,
+        title = title,
+        date = datetime.now(),
+    )
+    f.save()
+    
+    ticket.save()
+    
+    return HttpResponseRedirect(ticket.get_absolute_url())
+hold_ticket = login_required(hold_ticket)
+
+def unhold_ticket(request, ticket_id):
+    return hold_ticket(request, ticket_id, unhold=True)
+unhold_ticket = login_required(unhold_ticket)
+
