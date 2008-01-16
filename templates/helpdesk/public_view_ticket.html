@@ -12,7 +12,7 @@
 {% block helpdesk_body %}
 
 <table width='100%'>
-<tr class='row_tablehead'><td colspan='2'>{{ ticket.id }}. {{ ticket.title }} [{{ ticket.get_status_display }}]</td></tr>
+<tr class='row_tablehead'><td colspan='2'>{{ ticket.id }}. {{ ticket.title }} [{{ ticket.get_status }}]</td></tr>
 <tr class='row_columnheads'><th colspan='2'>Queue: {{ ticket.queue }}</th></tr>
 
 <tr class='row_odd'>
