@@ -164,7 +164,7 @@ class Ticket(models.Model):
     def _get_status(self):
         held_msg = ''
         if self.on_hold: held_msg = ' - On Hold'
-        return '%s%s' % (self.get_status_display, held_msg)
+        return '%s%s' % (self.get_status_display(), held_msg)
     get_status = property(_get_status)
 
     def _get_ticket_url(self):

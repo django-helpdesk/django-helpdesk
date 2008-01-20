@@ -69,13 +69,13 @@
 {% load ticket_to_link %}
 {% for followup in ticket.followup_set.all %}
 <div class='followup'>
-<div class='title'>{{ followup.title }} <span class='byline'>by {{ followup.user }} <span title='{{ followup.date|date:"r" }}'>{{ followup.date|timesince }} ago</span>{% if not followup.public %} <span class='private'>(Private)</span>{% endif %}</span></div>
-{{ followup.comment|num_to_link }}
-{% if followup.ticketchange_set.all %}<div class='changes'>
+<div class='title'>{{ followup.title }} <span class='byline'>{% if followup.user %}by {{ followup.user }}{% endif %} <span title='{{ followup.date|date:"r" }}'>{{ followup.date|timesince }} ago</span>{% if not followup.public %} <span class='private'>(Private)</span>{% endif %}</span></div>
+{% if followup.comment %}{{ followup.comment|num_to_link }}{% endif %}
+{% if followup.ticketchange_set.all %}<div class='changes'><ul>
 {% for change in followup.ticketchange_set.all %}
-Changed {{ change.field }} from {{ change.old_value }} to {{ change.new_value }}.<br />
+<li>Changed {{ change.field }} from {{ change.old_value }} to {{ change.new_value }}.</li>
 {% endfor %}
-</div>{% endif %}
+</div></ul>{% endif %}
 </div>
 {% endfor %}
 {% endif %}

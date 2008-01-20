@@ -63,7 +63,7 @@
 <td><img src='{{ ticket.get_priority_img }}' alt='Priority {{ ticket.priority }}' title='Priority {{ ticket.priority }}' height='16' width='16' /></td>
 <th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></th>
 <td>{{ ticket.queue }}</td>
-<td>{{ ticket.get_status_display }}</td>
+<td>{{ ticket.get_status }}</td>
 <td><span title='{{ ticket.created|date:"r" }}'>{{ ticket.created|timesince }} ago</span></td>
 <td>{{ ticket.get_assigned_to }}</td>
 </tr>

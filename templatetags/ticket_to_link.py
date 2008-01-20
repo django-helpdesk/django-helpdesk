@@ -42,6 +42,8 @@ class ReverseProxy:
             yield self.sequence[i]
 
 def num_to_link(text):
+    if text == '':
+        return text
     import re
     from django.core.urlresolvers import reverse
     

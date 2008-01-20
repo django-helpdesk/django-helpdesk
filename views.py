@@ -309,16 +309,17 @@ def hold_ticket(request, ticket_id, unhold=False):
 
     if unhold:
         ticket.on_hold = False
-        title = 'Ticket placed on hold'
+        title = 'Ticket taken off hold'
     else:
         ticket.on_hold = True
-        title = 'Ticket taken off hold'
+        title = 'Ticket placed on hold'
     
     f = FollowUp(
         ticket = ticket,
         user = request.user,
         title = title,
         date = datetime.now(),
+        public = True,
     )
     f.save()
     
