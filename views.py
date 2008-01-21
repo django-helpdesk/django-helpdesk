@@ -216,7 +216,7 @@ def update_ticket(request, ticket_id):
         send_multipart_mail(template_staff, context, subject, ticket.submitter_email, ticket.queue.from_address)
            
             
-        if q.updated_ticket_cc:
+        if ticket.queue.updated_ticket_cc:
             if reassigned:
                 template_cc = 'helpdesk/emails/cc_assigned'
                 subject = '%s %s (Assigned)' % (ticket.ticket, ticket.title)
@@ -230,7 +230,7 @@ def update_ticket(request, ticket_id):
                 template_cc = 'helpdesk/emails/cc_updated'
                 subject = '%s %s (Updated)' % (ticket.ticket, ticket.title)
             
-            send_multipart_mail(template_cc, context, q.updated_ticket_cc, t.submitter_email, q.from_address)
+            send_multipart_mail(template_cc, context, subject, ticket.queue.updated_ticket_cc, ticket.queue.from_address)
 
     ticket.save()
             
