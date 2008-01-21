@@ -137,11 +137,14 @@ def update_ticket(request, ticket_id):
     if public:
         f.public = True
 
+    reassigned = False
+
     if owner:
         if owner != 0 and (ticket.assigned_to and owner != ticket.assigned_to.id) or not ticket.assigned_to:
             new_user = User.objects.get(id=owner)
             f.title = 'Assigned to %s' % new_user.username
             ticket.assigned_to = new_user
+            reassigned = True
         else:
             f.title = 'Unassigned'
             ticket.assigned_to = None
@@ -186,10 +189,48 @@ def update_ticket(request, ticket_id):
         if f.new_status == Ticket.RESOLVED_STATUS:
             template = 'helpdesk/emails/submitter_resolved'
             subject = '%s %s (Resolved)' % (ticket.ticket, ticket.title)
+        elif f.new_status == Ticket.CLOSED_STATUS:
+            template = 'helpdesk/emails/submitter_closed'
+            subject = '%s %s (Closed)' % (ticket.ticket, ticket.title)
         else:
             template = 'helpdesk/emails/submitter_updated'
             subject = '%s %s (Updated)' % (ticket.ticket, ticket.title)
         send_multipart_mail(template, context, subject, ticket.submitter_email, ticket.queue.from_address)
+
+    if ticket.assigned_to and request.user != ticket.assigned_to:
+        # We only send e-mails to staff members if the ticket is updated by 
+        # another user.
+        if reassigned:
+            template_staff = 'helpdesk/emails/owner_assigned'
+            subject = '%s %s (Assigned)' % (ticket.ticket, ticket.title)
+        elif f.new_status == Ticket.RESOLVED_STATUS:
+            template_staff = 'helpdesk/emails/owner_resolved'
+            subject = '%s %s (Resolved)' % (ticket.ticket, ticket.title)
+        elif f.new_status == Ticket.CLOSED_STATUS:
+            template_staff = 'helpdesk/emails/owner_closed'
+            subject = '%s %s (Closed)' % (ticket.ticket, ticket.title)
+        else:
+            template_staff = 'helpdesk/emails/owner_updated'
+            subject = '%s %s (Updated)' % (ticket.ticket, ticket.title)
+        
+        send_multipart_mail(template_staff, context, subject, ticket.submitter_email, ticket.queue.from_address)
+           
+            
+        if q.updated_ticket_cc:
+            if reassigned:
+                template_cc = 'helpdesk/emails/cc_assigned'
+                subject = '%s %s (Assigned)' % (ticket.ticket, ticket.title)
+            elif f.new_status == Ticket.RESOLVED_STATUS:
+                template_cc = 'helpdesk/emails/cc_resolved'
+                subject = '%s %s (Resolved)' % (ticket.ticket, ticket.title)
+            elif f.new_status == Ticket.CLOSED_STATUS:
+                template_cc = 'helpdesk/emails/cc_closed'
+                subject = '%s %s (Closed)' % (ticket.ticket, ticket.title)
+            else:
+                template_cc = 'helpdesk/emails/cc_updated'
+                subject = '%s %s (Updated)' % (ticket.ticket, ticket.title)
+            
+            send_multipart_mail(template_cc, context, q.updated_ticket_cc, t.submitter_email, q.from_address)
 
     ticket.save()
             

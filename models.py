@@ -56,6 +56,9 @@ class Queue(models.Model):
             return '%s <%s>' % (self.title, self.email_address)
     from_address = property(_from_address)
 
+    new_ticket_cc = models.EmailField(blank=True, null=True, help_text='If an e-mail address is entered here, then it will receive notification of all new tickets created for this queue')
+    updated_ticket_cc = models.EmailField(blank=True, null=True, help_text='If an e-mail address is entered here, then it will receive notification of all activity (new tickets, closed tickets, updates, reassignments, etc) for this queue')
+
     email_box_type = models.CharField(maxlength=5, choices=(('pop3', 'POP 3'),('imap', 'IMAP')), blank=True, null=True, help_text='E-Mail Server Type - Both POP3 and IMAP are supported. Select your email server type here.')
     email_box_host = models.CharField(maxlength=200, blank=True, null=True, help_text='Your e-mail server address - either the domain name or IP address. May be "localhost".')
     email_box_port = models.IntegerField(blank=True, null=True, help_text='Port number to use for accessing e-mail. Default for POP3 is "110", and for IMAP is "143". This may differ on some servers.')
@@ -173,6 +176,13 @@ class Ticket(models.Model):
         site = Site.objects.get_current()
         return "http://%s%s?ticket=%s&email=%s" % (site.domain, reverse('helpdesk_public_view'), self.ticket_for_url, self.submitter_email)
     ticket_url = property(_get_ticket_url)
+
+    def _get_staff_url(self):
+        from django.contrib.sites.models import Site
+        from django.core.urlresolvers import reverse
+        site = Site.objects.get_current()
+        return "http://%s%s" % (site.domain, reverse('helpdesk_view', args=[self.id]))
+    staff_url = property(_get_staff_url)
 
     class Admin:
         list_display = ('title', 'status', 'assigned_to', 'submitter_email',)

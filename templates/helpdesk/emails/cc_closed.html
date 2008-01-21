@@ -1,0 +1,12 @@
+{% extends "helpdesk/emails/base.html" %}
+
+{% block header %}Ticket Closed{% endblock %}
+
+{% block content %}
+<p style='font-family: "Trebuchet MS", Arial, sans-serif; font-size: 11pt;'>Hello,</p>
+
+<p style='font-family: "Trebuchet MS", Arial, sans-serif; font-size: 11pt;'>Ticket <i>{{ ticket.title }}</i> ("{{ ticket.title }}") has been closed.</p>
+
+<p style='font-family: "Trebuchet MS", Arial, sans-serif; font-size: 11pt;'>If you wish to view this ticket online, you can visit <a href="{{ ticket.get_staff_url }}">{{ ticket.get_staff_url }}</a>.</p>
+
+{% endblock %}

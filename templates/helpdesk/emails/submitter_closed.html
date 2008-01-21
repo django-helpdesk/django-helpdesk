@@ -1,0 +1,14 @@
+{% extends "helpdesk/emails/base.html" %}
+
+{% block header %}Your Ticket Has Been Closed{% endblock %}
+
+{% block content %}
+<p style='font-family: "Trebuchet MS", Arial, sans-serif; font-size: 11pt;'>Hello,</p>
+
+<p style='font-family: "Trebuchet MS", Arial, sans-serif; font-size: 11pt;'>You recently logged a ticket with a subject of <i>{{ ticket.title }}</i> with us. This e-mail is to confirm that this ticket has been closed.</p>
+
+<p style='font-family: "Trebuchet MS", Arial, sans-serif; font-size: 11pt;'>If you believe that further work is required on this ticket, please let us know by replying to this e-mail and keeping the subject intact.</p>
+
+<p style='font-family: "Trebuchet MS", Arial, sans-serif; font-size: 11pt;'>If you wish to view this ticket online, you can visit <a href="{{ ticket.get_ticket_url }}">{{ ticket.get_ticket_url }}</a>.</p>
+
+{% endblock %}

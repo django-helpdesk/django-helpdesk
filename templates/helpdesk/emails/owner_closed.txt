@@ -1,0 +1,7 @@
+Hello,
+
+A ticket currently assigned to you with a subject of "{{ ticket.title }}" has been closed.
+
+If you wish to view this ticket online, you can visit {{ ticket.get_staff_url }}.
+
+{% include "helpdesk/emails/text_footer.txt" %}

@@ -1,0 +1,7 @@
+Hello,
+
+This is a courtesy e-mail to let you know that ticket {{ ticket.ticket }} ("{{ ticket.title }}") has been opened.
+
+You can view this online at {{ ticket.staff_url }}.
+
+{% include "helpdesk/emails/text_footer.txt" %}

@@ -1,0 +1,9 @@
+Hello,
+
+You recently logged a ticket with a subject of "{{ ticket.title }}" with us. This e-mail is to confirm that this ticket has been closed.
+
+If you believe that further work is required on this ticket, please let us know by replying to this e-mail and keeping the subject intact.
+
+If you wish to view this ticket online, you can visit {{ ticket.get_ticket_url }}.
+
+{% include "helpdesk/emails/text_footer.txt" %}

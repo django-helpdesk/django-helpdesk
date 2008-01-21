@@ -1,0 +1,13 @@
+Hello,
+
+Ticket {{ ticket.ticket }} ({{ ticket.title }}) has been resolved.
+
+The following resolution was added:
+
+{{ resolution }}
+
+This resolution has been e-mailed to the submitter, who will verify it before you can close this ticket.
+
+If you wish to view this ticket online, you can visit {{ ticket.get_staff_url }}.
+
+{% include "helpdesk/emails/text_footer.txt" %}
