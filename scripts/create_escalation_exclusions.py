@@ -28,80 +28,78 @@ $Id$
 """
 from datetime import datetime, timedelta, date
 from django.db.models import Q
-from helpdesk.models import Queue, Ticket, FollowUp, EscalationExclusion, TicketChange
-from helpdesk.lib import send_multipart_mail
+from helpdesk.models import EscalationExclusion, Queue
 import sys, getopt
 
-def escalate_tickets(queues, verbose):
-    """ Only include queues with escalation configured """
-    queryset = Queue.objects.filter(escalate_days__isnull=False).exclude(escalate_days=0)
-    if queues:
-        queryset = queryset.filter(slug__in=queues)
-    
-    for q in queryset:
-        last = date.today() - timedelta(days=q.escalate_days)
-        today = date.today()
-        workdate = last
+day_names = {
+    'monday': 0,
+    'tuesday': 1,
+    'wednesday': 2,
+    'thursday': 3,
+    'friday': 4,
+    'saturday': 5,
+    'sunday': 6,
+}
 
-        days = 0
+def create_exclusions(days, occurrences, verbose, queues):
+    days = days.split(',')
+    for day in days:
+        day_name = day
+        day = day_names[day]
+        workdate = date.today()
+        i = 0
+        while i < occurrences:
+            if day == workdate.weekday():
+                if EscalationExclusion.objects.filter(date=workdate).count() == 0:
+                    esc = EscalationExclusion(name='Auto Exclusion for %s' % day_name, date=workdate)
+                    esc.save()
+                
+                    if verbose:
+                        print "Created exclusion for %s %s" % (day_name, workdate)
+                
+                    for q in queues:
+                        esc.queues.add(q)
+                        if verbose:
+                            print "  - for queue %s" % q
 
-        while workdate < today:
-            if EscalationExclusion.objects.filter(date=workdate).count() == 0:
-                days += 1
-            workdate = workdate + timedelta(days=1)
+                i += 1
+            workdate += timedelta(days=1)
 
-
-        req_last_escl_date = date.today() - timedelta(days=days)
-
-        if verbose:
-            print "Processing: %s" % q
-        
-        for t in q.ticket_set.filter(Q(status=Ticket.OPEN_STATUS) | Q(status=Ticket.REOPENED_STATUS)).exclude(priority=1).filter(Q(on_hold__isnull=True) | Q(on_hold=False)).filter(Q(last_escalation__lte=req_last_escl_date) | Q(last_escalation__isnull=True)):
-            t.last_escalation = datetime.now()
-            t.priority -= 1
-            t.save()
-
-            if verbose:
-                print "  - Esclating %s from %s>%s" % (t.ticket, t.priority+1, t.priority)
-
-            f = FollowUp(
-                ticket = t,
-                title = 'Ticket Escalated',
-                date=datetime.now(),
-                public=True,
-                comment='Ticket escalated after %s days' % q.escalate_days,
-            )
-            f.save()
-
-            tc = TicketChange(
-                followup = f,
-                field = 'Priority',
-                old_value = t.priority + 1,
-                new_value = t.priority,
-            )
-            tc.save()
 
 def usage():
     print "Options:"
+    print " --days, -d: Days of week (monday, tuesday, etc)"
+    print " --occurrences, -o: Occurrences: How many weeks ahead to exclude this day"
     print " --queues, -q: Queues to include (default: all). Use queue slugs"
     print " --verbose, -v: Display a list of dates excluded"
 
 if __name__ == '__main__':
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'q:v', ['queues=', 'verbose'])
+        opts, args = getopt.getopt(sys.argv[1:], 'd:o:q:v', ['days=', 'occurrences=', 'verbose', 'queues='])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
-
+    
+    days = None
+    occurrences = None
     verbose = False
     queue_slugs = None
     queues = []
-    
+
     for o, a in opts:
         if o in ('-v', '--verbose'):
             verbose = True
+        if o in ('-d', '--days'):
+            days = a
         if o in ('-q', '--queues'):
             queue_slugs = a
+        if o in ('-o', '--occurrences'):
+            occurrences = int(a)
+
+    if not occurrences: occurrences = 1
+    if not (days and occurrences):
+        usage()
+        sys.exit(2)
     
     if queue_slugs is not None:
         queue_set = queue_slugs.split(',')
@@ -111,6 +109,6 @@ if __name__ == '__main__':
             except:
                 print "Queue %s does not exist." % queue
                 sys.exit(2)
-            queues.append(queue)
+            queues.append(q)
 
-    escalate_tickets(queues=queues, verbose=verbose)
+    create_exclusions(days=days, occurrences=occurrences, verbose=verbose, queues=queues)

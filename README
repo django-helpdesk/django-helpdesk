@@ -122,4 +122,12 @@ LICENSE.JQUERY and LICENSE.NICEDIT for their respective license terms.
    This will run the escalation process hourly, using the 'Escalation Hours' 
    setting for each queue to determine which tickets to escalate.
 
+5. If you wish to exclude some days (eg, weekends) from escalation calculations, enter 
+   the dates manually via the Admin, or setup a cronjob to run 
+   scripts/create_escalation_exclusions.py on a regular basis:
+
+   0 0 * * 0 DJANGO_SETTINGS_MODULE='myproject.settings' python /path/to/helpdesk/scripts/create_escalation_exclusions.py --days saturday,sunday --verbose
+
+   This will, on a weekly basis, create exclusions for the coming weekend.
+
 You're now up and running!

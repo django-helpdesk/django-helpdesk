@@ -46,8 +46,7 @@ class Queue(models.Model):
     title = models.CharField(maxlength=100)
     slug = models.SlugField(help_text='This slug is used when building ticket ID\'s. Once set, try not to change it or e-mailing may get messy.')
     email_address = models.EmailField(blank=True, null=True, help_text='All outgoing e-mails for this queue will use this e-mail address. If you use IMAP or POP3, this shoul be the e-mail address for that mailbox.')
-    escalate_hours = models.IntegerField(blank=True, null=True, help_text='For tickets which are not held, how often do you wish to increase their priority? Set to 0 for no escalation.')
-    last_escalation = models.DateTimeField(blank=True, null=True, editable=False)
+    escalate_days = models.IntegerField(blank=True, null=True, help_text='For tickets which are not held, how often do you wish to increase their priority? Set to 0 for no escalation.')
 
     def _from_address(self):
         if not self.email_address:
@@ -134,6 +133,8 @@ class Ticket(models.Model):
     resolution = models.TextField(blank=True, null=True)
 
     priority = models.IntegerField(choices=PRIORITY_CHOICES, default=3, blank=3)
+    
+    last_escalation = models.DateTimeField(blank=True, null=True, editable=False)
 
     def _get_assigned_to(self):
         """ Custom property to allow us to easily print 'Unassigned' if a 
@@ -307,6 +308,19 @@ class PreSetReply(models.Model):
 
     class Meta:
         ordering = ['name',]
+
+    def __unicode__(self):
+        return u'%s' % self.name
+
+class EscalationExclusion(models.Model):
+    queues = models.ManyToManyField(Queue, blank=True, null=True, help_text='Leave blank for this exclusion to b eaplied to all queues, or select those queues you wish to exclude with this entry.')
+
+    name = models.CharField(maxlength=100)
+    
+    date = models.DateField(help_text='Date on which escalation should not happen')
+
+    class Admin:
+        pass
 
     def __unicode__(self):
         return u'%s' % self.name
