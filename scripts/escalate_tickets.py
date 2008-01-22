@@ -60,6 +60,20 @@ def escalate_tickets(queues, verbose):
             t.last_escalation = datetime.now()
             t.priority -= 1
             t.save()
+        
+            context = {
+                'ticket': t,
+                'queue': queue,
+            }
+
+            if t.submitter_email:
+                send_multipart_mail('helpdesk/emails/submitter_escalated', context, '%s %s' % (t.ticket, t.title), t.submitter_email, t.queue.from_address)
+            
+            if t.queue.updated_ticket_cc:
+                send_multipart_mail('helpdesk/emails/cc_escalated', context, '%s %s' % (t.ticket, t.title), t.queue.updated_ticket_cc, t.queue.from_address)
+            
+            if t.assigned_to:
+                send_multipart_mail('helpdesk/emails/owner_escalated', context, '%s %s' % (t.ticket, t.title), t.assigned_to, t.queue.from_address)
 
             if verbose:
                 print "  - Esclating %s from %s>%s" % (t.ticket, t.priority+1, t.priority)
