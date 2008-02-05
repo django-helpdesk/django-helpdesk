@@ -102,12 +102,13 @@ class TicketForm(forms.Form):
         if t.submitter_email:
             send_multipart_mail('helpdesk/emails/submitter_newticket', context, '%s %s' % (t.ticket, t.title), t.submitter_email, q.from_address)
 
-        if t.assigned_to != user:
+        if t.assigned_to and t.assigned_to != user:
             send_multipart_mail('helpdesk/emails/owner_assigned', context, '%s %s (Opened)' % (t.ticket, t.title), t.assigned_to.email, q.from_address)
 
         if q.new_ticket_cc:
             send_multipart_mail('helpdesk/emails/cc_newticket', context, '%s %s (Opened)' % (t.ticket, t.title), q.updated_ticket_cc, q.from_address)
-        elif q.updated_ticket_cc and q.updated_ticket_cc != q.new_ticket_cc:
+        
+        if q.updated_ticket_cc and q.updated_ticket_cc != q.new_ticket_cc:
             send_multipart_mail('helpdesk/emails/cc_newticket', context, '%s %s (Opened)' % (t.ticket, t.title), q.updated_ticket_cc, q.from_address)
 
         return t
@@ -170,7 +171,8 @@ class PublicTicketForm(forms.Form):
 
         if q.new_ticket_cc:
             send_multipart_mail('helpdesk/emails/cc_newticket', context, '%s %s (Opened)' % (t.ticket, t.title), q.updated_ticket_cc, q.from_address)
-        elif q.updated_ticket_cc and q.updated_ticket_cc != q.new_ticket_cc:
+        
+        if q.updated_ticket_cc and q.updated_ticket_cc != q.new_ticket_cc:
             send_multipart_mail('helpdesk/emails/cc_newticket', context, '%s %s (Opened)' % (t.ticket, t.title), q.updated_ticket_cc, q.from_address)
 
         return t

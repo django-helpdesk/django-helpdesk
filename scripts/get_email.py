@@ -31,7 +31,7 @@ import imaplib
 from datetime import datetime, timedelta
 import email, mimetypes, re
 from email.Utils import parseaddr
-from helpdesk.models import Queue,Ticket
+from helpdesk.models import Queue,Ticket, FollowUp
 from helpdesk.lib import send_multipart_mail
 
 def process_email():
@@ -89,10 +89,10 @@ def ticket_from_message(message, queue):
     
     sender_email = parseaddr(message.get('from', 'Unknown Sender'))[1]
 
-    regex = re.compile("^\[\d+\]")
+    regex = re.compile("^\[[A-Za-z0-9]+-\d+\]")
     if regex.match(subject):
         # This is a reply or forward.
-        ticket = re.match(r"^\[(?P<id>\d+)\]", subject).group('id')
+        ticket = re.match(r"^\[(?P<queue>[A-Za-z0-9]+)-(?P<id>\d+)\]", subject).group('id')
     else:
         ticket = None
     counter = 0
@@ -147,10 +147,36 @@ def ticket_from_message(message, queue):
             'queue': queue,
         }
 
+        update = ""
+
         if sender_email:
             send_multipart_mail('helpdesk/emails/submitter_newticket', context, '%s %s' % (t.ticket, t.title), sender_email, queue.from_address)
-    
-    print " [%s-%s] %s" % (t.queue.slug, t.id, t.title)
+
+        if queue.new_ticket_cc:
+            send_multipart_mail('helpdesk/emails/cc_newticket', context, '%s %s (Opened)' % (t.ticket, t.title), queue.updated_ticket_cc, queue.from_address)
+        
+        if queue.updated_ticket_cc and queue.updated_ticket_cc != queue.new_ticket_cc:
+            send_multipart_mail('helpdesk/emails/cc_newticket', context, '%s %s (Opened)' % (t.ticket, t.title), queue.updated_ticket_cc, queue.from_address)
+
+    else:
+        f = FollowUp(
+            ticket = t,
+            title = 'E-Mail Received from %s' % sender_email,
+            date = datetime.now(),
+            public = True,
+            comment = body,
+        )
+        f.save()
+        update = " (Updated)"
+
+        if t.assigned_to:
+            send_multipart_mail('helpdesk/emails/owner_updated', context, '%s %s (Updated)' % (t.ticket, t.title), t.assigned_to.email, queue.from_address)
+
+        if queue.updated_ticket_cc:
+            send_multipart_mail('helpdesk/emails/cc_updatedt', context, '%s %s (Updated)' % (t.ticket, t.title), queue.updated_ticket_cc, queue.from_address)
+
+
+    print " [%s-%s] %s%s" % (t.queue.slug, t.id, t.title, update)
 
     #for file in files:
         #data = file['content']

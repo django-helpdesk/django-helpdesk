@@ -76,3 +76,11 @@ def send_multipart_mail(template_name, email_context, subject, recipients, sende
     
     return msg.send(fail_silently)
 
+def normalise_to_100(data):
+    max_value = max(data)
+    if max_value > 100:
+        new_data = []
+        for d in data:
+            new_data.append(int(d/float(max_value)*100))
+        data = new_data
+    return data
