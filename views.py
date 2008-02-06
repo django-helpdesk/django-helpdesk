@@ -156,7 +156,7 @@ def update_ticket(request, ticket_id):
     if f.new_status == Ticket.RESOLVED_STATUS:
         ticket.resolution = comment
     
-    if public and ticket.submitter_email and f.comment != '':
+    if ticket.submitter_email and ((f.comment != '' and public) or (f.new_status in (Ticket.RESOLVED_STATUS, Ticket.CLOSED_STATUS))):
         context = {
             'ticket': ticket,
             'queue': ticket.queue,
@@ -174,7 +174,7 @@ def update_ticket(request, ticket_id):
             subject = '%s %s (Updated)' % (ticket.ticket, ticket.title)
         send_multipart_mail(template, context, subject, ticket.submitter_email, ticket.queue.from_address)
 
-    if ticket.assigned_to and request.user != ticket.assigned_to:
+    if ticket.assigned_to and request.user != ticket.assigned_to and ticket.assigned_to.email:
         # We only send e-mails to staff members if the ticket is updated by 
         # another user.
         if reassigned:
@@ -190,7 +190,7 @@ def update_ticket(request, ticket_id):
             template_staff = 'helpdesk/emails/owner_updated'
             subject = '%s %s (Updated)' % (ticket.ticket, ticket.title)
         
-        send_multipart_mail(template_staff, context, subject, ticket.submitter_email, ticket.queue.from_address)
+        send_multipart_mail(template_staff, context, subject, ticket.assigned_to.email, ticket.queue.from_address)
            
             
         if ticket.queue.updated_ticket_cc:

@@ -57,6 +57,7 @@ def send_multipart_mail(template_name, email_context, subject, recipients, sende
     
     return msg.send(fail_silently)
 
+
 def normalise_to_100(data):
     """
     Used for normalising data prior to graphing with Google charting API

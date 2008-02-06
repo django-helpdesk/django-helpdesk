@@ -22,6 +22,7 @@ from django import newforms as forms
 
 from helpdesk.lib import send_multipart_mail
 from helpdesk.models import Ticket, Queue, FollowUp
+from helpdesk.forms import TicketForm
 
 STATUS_OK = 200
 
@@ -87,14 +88,14 @@ class API:
 
     def api_public_create_ticket(self):
 
-        form = APITicketForm(self.request.POST)
+        form = TicketForm(self.request.POST)
         form.fields['queue'].choices = [[q.id, q.title] for q in Queue.objects.all()]
         form.fields['assigned_to'].choices = [[u.id, u.username] for u in User.objects.filter(is_active=True)]
         if form.is_valid():
             ticket = form.save(user=self.request.user)
             return api_return(STATUS_OK, "%s" % ticket.id)
         else:
-            return api_return(STATUS_ERROR)
+            return api_return(STATUS_ERROR, text=form.errors.as_text())
 
     
     def api_public_list_queues(self):
@@ -183,7 +184,7 @@ class API:
             template_cc = 'helpdesk/emails/cc_updated'
             send_multipart_mail(template_cc, context, subject, q.updated_ticket_cc, ticket.queue.from_address)
         
-        if ticket.assigned_to and user != ticket.assigned_to:
+        if ticket.assigned_to and self.request.user != ticket.assigned_to:
             template_owner = 'helpdesk/emails/owner_updated'
             send_multipart_mail(template_owner, context, subject, t.assigned_to.email, ticket.queue.from_address)
 
@@ -214,7 +215,7 @@ class API:
         
         subject = '%s %s (Resolved)' % (ticket.ticket, ticket.title)
 
-        if public and ticket.submitter_email:
+        if ticket.submitter_email:
             template = 'helpdesk/emails/submitter_resolved'
             send_multipart_mail(template, context, subject, ticket.submitter_email, ticket.queue.from_address)
         
@@ -222,82 +223,13 @@ class API:
             template_cc = 'helpdesk/emails/cc_resolved'
             send_multipart_mail(template_cc, context, subject, q.updated_ticket_cc, ticket.queue.from_address)
         
-        if ticket.assigned_to and user != ticket.assigned_to:
+        if ticket.assigned_to and self.request.user != ticket.assigned_to:
             template_owner = 'helpdesk/emails/owner_resolved'
             send_multipart_mail(template_owner, context, subject, t.assigned_to.email, ticket.queue.from_address)
 
         ticket.resoltuion = f.comment
-        ticket.status = Ticket.STATUS_RESOLVED
+        ticket.status = Ticket.RESOLVED_STATUS
 
         ticket.save()
 
         return api_return(STATUS_OK)
-
-
-class APITicketForm(forms.Form):
-    """ We make bastardised use of the forms functionality within Django to 
-    validate incoming data for new tickets. """
-    queue = forms.ChoiceField(required=True, choices=())
-    title = forms.CharField(max_length=100, required=True)
-    submitter_email = forms.EmailField(required=False)
-    body = forms.CharField(widget=forms.Textarea(), required=True)
-    assigned_to = forms.ChoiceField(choices=(), required=False)
-    priority = forms.ChoiceField(choices=Ticket.PRIORITY_CHOICES,
-                            required=False,
-                            initial='3')
-    
-    def save(self, user):
-        """
-        Writes and returns a Ticket() object
-        
-        """
-        q = Queue.objects.get(id=int(self.cleaned_data['queue']))
-        
-        t = Ticket( title = self.cleaned_data['title'], 
-                    submitter_email = self.cleaned_data['submitter_email'],
-                    created = datetime.now(),
-                    status = Ticket.OPEN_STATUS,
-                    queue = q,
-                    description = self.cleaned_data['body'],
-                    priority = self.cleaned_data['priority'],
-                  )
-        
-        if self.cleaned_data['assigned_to']:
-            try:
-                u = User.objects.get(id=self.cleaned_data['assigned_to'])
-                t.assigned_to = u
-            except:
-                t.assigned_to = None
-        t.save()
-
-        f = FollowUp(   ticket = t,
-                        title = 'Ticket Opened',
-                        date = datetime.now(),
-                        public = True,
-                        comment = self.cleaned_data['body'],
-                        user = user,
-                     )
-        if self.cleaned_data['assigned_to']:
-            f.title = 'Ticket Opened & Assigned to %s' % t.get_assigned_to
-
-        f.save()
-        
-        context = {
-            'ticket': t,
-            'queue': q,
-        }
-
-
-        if t.submitter_email:
-            send_multipart_mail('helpdesk/emails/submitter_newticket', context, '%s %s' % (t.ticket, t.title), t.submitter_email, q.from_address)
-
-        if t.assigned_to and t.assigned_to != user:
-            send_multipart_mail('helpdesk/emails/owner_assigned', context, '%s %s (Opened)' % (t.ticket, t.title), t.assigned_to.email, q.from_address)
-
-        if q.new_ticket_cc:
-            send_multipart_mail('helpdesk/emails/cc_newticket', context, '%s %s (Opened)' % (t.ticket, t.title), q.updated_ticket_cc, q.from_address)
-        
-        if q.updated_ticket_cc and q.updated_ticket_cc != q.new_ticket_cc:
-            send_multipart_mail('helpdesk/emails/cc_newticket', context, '%s %s (Opened)' % (t.ticket, t.title), q.updated_ticket_cc, q.from_address)
-
-        return t
