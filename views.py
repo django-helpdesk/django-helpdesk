@@ -1,35 +1,13 @@
-"""                                     .. 
-                                 .,::;::::::
-                           ..,::::::::,,,,:::      Jutda Helpdesk - A Django
-                      .,,::::::,,,,,,,,,,,,,::     powered ticket tracker for
-                  .,::::::,,,,,,,,,,,,,,,,,,:;r.        small enterprise
-                .::::,,,,,,,,,,,,,,,,,,,,,,:;;rr.
-              .:::,,,,,,,,,,,,,,,,,,,,,,,:;;;;;rr      (c) Copyright 2008
-            .:::,,,,,,,,,,,,,,,,,,,,,,,:;;;:::;;rr
-          .:::,,,,,,,,,,,,,,,,,,,,.  ,;;;::::::;;rr           Jutda
-        .:::,,,,,,,,,,,,,,,,,,.    .:;;:::::::::;;rr
-      .:::,,,,,,,,,,,,,,,.       .;r;::::::::::::;r;   All Rights Reserved
-    .:::,,,,,,,,,,,,,,,        .;r;;:::::::::::;;:.
-  .:::,,,,,,,,,,,,,,,.       .;r;;::::::::::::;:.
- .;:,,,,,,,,,,,,,,,       .,;rr;::::::::::::;:.   This software is released 
-.,:,,,,,,,,,,,,,.    .,:;rrr;;::::::::::::;;.  under a limited-use license that
-  :,,,,,,,,,,,,,..:;rrrrr;;;::::::::::::;;.  allows you to freely download this
-   :,,,,,,,:::;;;rr;;;;;;:::::::::::::;;,  software from it's manufacturer and
-    ::::;;;;;;;;;;;:::::::::::::::::;;,  use it yourself, however you may not
-    .r;;;;:::::::::::::::::::::::;;;,  distribute it. For further details, see
-     .r;::::::::::::::::::::;;;;;:,  the enclosed LICENSE file.
-      .;;::::::::::::::;;;;;:,.
-       .;;:::::::;;;;;;:,.  Please direct people who wish to download this
-        .r;;;;;;;;:,.  software themselves to www.jutda.com.au.
-          ,,,..
-
-$Id$
-
 """
-# Python imports
+Jutda Helpdesk - A Django powered ticket tracker for small enterprise.
+
+(c) Copyright 2008 Jutda. All Rights Reserved. See LICENSE for details.
+
+views.py - The bulk of the application - provides most business logic and 
+           renders all user-facing views.
+"""
 from datetime import datetime
 
-# Django imports
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
@@ -38,16 +16,15 @@ from django.http import HttpResponseRedirect, Http404, HttpResponse
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import loader, Context, RequestContext
 
-# Helpdesk imports
 from helpdesk.forms import TicketForm, PublicTicketForm
 from helpdesk.lib import send_multipart_mail
 from helpdesk.models import Ticket, Queue, FollowUp, TicketChange, PreSetReply
 
 def dashboard(request):
     """
-    This isn't always truly a "dashboard" view. If the user is not logged in, we 
-    instead show the user a "public submission" form and a way to view existing
-    tickets.
+    This isn't always truly a "dashboard" view. If the user is not logged in,
+    we instead show the user a "public submission" form and a way to view
+    existing tickets.
     """
     if request.user.is_authenticated():
         tickets = Ticket.objects.filter(assigned_to=request.user).exclude(status=Ticket.CLOSED_STATUS)

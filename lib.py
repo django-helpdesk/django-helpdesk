@@ -1,29 +1,9 @@
 """                                     .. 
-                                 .,::;::::::
-                           ..,::::::::,,,,:::      Jutda Helpdesk - A Django
-                      .,,::::::,,,,,,,,,,,,,::     powered ticket tracker for
-                  .,::::::,,,,,,,,,,,,,,,,,,:;r.        small enterprise
-                .::::,,,,,,,,,,,,,,,,,,,,,,:;;rr.
-              .:::,,,,,,,,,,,,,,,,,,,,,,,:;;;;;rr      (c) Copyright 2008
-            .:::,,,,,,,,,,,,,,,,,,,,,,,:;;;:::;;rr
-          .:::,,,,,,,,,,,,,,,,,,,,.  ,;;;::::::;;rr           Jutda
-        .:::,,,,,,,,,,,,,,,,,,.    .:;;:::::::::;;rr
-      .:::,,,,,,,,,,,,,,,.       .;r;::::::::::::;r;   All Rights Reserved
-    .:::,,,,,,,,,,,,,,,        .;r;;:::::::::::;;:.
-  .:::,,,,,,,,,,,,,,,.       .;r;;::::::::::::;:.
- .;:,,,,,,,,,,,,,,,       .,;rr;::::::::::::;:.   This software is released 
-.,:,,,,,,,,,,,,,.    .,:;rrr;;::::::::::::;;.  under a limited-use license that
-  :,,,,,,,,,,,,,..:;rrrrr;;;::::::::::::;;.  allows you to freely download this
-   :,,,,,,,:::;;;rr;;;;;;:::::::::::::;;,  software from it's manufacturer and
-    ::::;;;;;;;;;;;:::::::::::::::::;;,  use it yourself, however you may not
-    .r;;;;:::::::::::::::::::::::;;;,  distribute it. For further details, see
-     .r;::::::::::::::::::::;;;;;:,  the enclosed LICENSE file.
-      .;;::::::::::::::;;;;;:,.
-       .;;:::::::;;;;;;:,.  Please direct people who wish to download this
-        .r;;;;;;;;:,.  software themselves to www.jutda.com.au.
-          ,,,..
+Jutda Helpdesk - A Django powered ticket tracker for small enterprise.
 
-$Id$
+(c) Copyright 2008 Jutda. All Rights Reserved. See LICENSE for details.
+
+lib.py - Common functions (eg multipart e-mail)
 """
 
 def send_multipart_mail(template_name, email_context, subject, recipients, sender=None, bcc=None, fail_silently=False, files=None):
@@ -47,6 +27,7 @@ def send_multipart_mail(template_name, email_context, subject, recipients, sende
     sender can be an e-mail, 'Name <email>' or None. If unspecified, the 
         DEFAULT_FROM_EMAIL will be used.
 
+    Originally posted on my blog at http://www.rossp.org/
     """
     from django.core.mail import EmailMultiAlternatives
     from django.template import loader, Context
@@ -77,6 +58,9 @@ def send_multipart_mail(template_name, email_context, subject, recipients, sende
     return msg.send(fail_silently)
 
 def normalise_to_100(data):
+    """
+    Used for normalising data prior to graphing with Google charting API
+    """
     max_value = max(data)
     if max_value > 100:
         new_data = []

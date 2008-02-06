@@ -1,31 +1,12 @@
-"""                                     .. 
-                                 .,::;::::::
-                           ..,::::::::,,,,:::      Jutda Helpdesk - A Django
-                      .,,::::::,,,,,,,,,,,,,::     powered ticket tracker for
-                  .,::::::,,,,,,,,,,,,,,,,,,:;r.        small enterprise
-                .::::,,,,,,,,,,,,,,,,,,,,,,:;;rr.
-              .:::,,,,,,,,,,,,,,,,,,,,,,,:;;;;;rr      (c) Copyright 2008
-            .:::,,,,,,,,,,,,,,,,,,,,,,,:;;;:::;;rr
-          .:::,,,,,,,,,,,,,,,,,,,,.  ,;;;::::::;;rr           Jutda
-        .:::,,,,,,,,,,,,,,,,,,.    .:;;:::::::::;;rr
-      .:::,,,,,,,,,,,,,,,.       .;r;::::::::::::;r;   All Rights Reserved
-    .:::,,,,,,,,,,,,,,,        .;r;;:::::::::::;;:.
-  .:::,,,,,,,,,,,,,,,.       .;r;;::::::::::::;:.
- .;:,,,,,,,,,,,,,,,       .,;rr;::::::::::::;:.   This software is released 
-.,:,,,,,,,,,,,,,.    .,:;rrr;;::::::::::::;;.  under a limited-use license that
-  :,,,,,,,,,,,,,..:;rrrrr;;;::::::::::::;;.  allows you to freely download this
-   :,,,,,,,:::;;;rr;;;;;;:::::::::::::;;,  software from it's manufacturer and
-    ::::;;;;;;;;;;;:::::::::::::::::;;,  use it yourself, however you may not
-    .r;;;;:::::::::::::::::::::::;;;,  distribute it. For further details, see
-     .r;::::::::::::::::::::;;;;;:,  the enclosed LICENSE file.
-      .;;::::::::::::::;;;;;:,.
-       .;;:::::::;;;;;;:,.  Please direct people who wish to download this
-        .r;;;;;;;;:,.  software themselves to www.jutda.com.au.
-          ,,,..
-
-$Id$
-
 """
+Jutda Helpdesk - A Django powered ticket tracker for small enterprise.
+
+(c) Copyright 2008 Jutda. All Rights Reserved. See LICENSE for details.
+
+models.py - Model (and hence database) definitions. This is the core of the
+            helpdesk structure.
+"""
+
 from datetime import datetime
 
 from django.contrib.auth.models import User
@@ -313,7 +294,7 @@ class PreSetReply(models.Model):
         return u'%s' % self.name
 
 class EscalationExclusion(models.Model):
-    queues = models.ManyToManyField(Queue, blank=True, null=True, help_text='Leave blank for this exclusion to b eaplied to all queues, or select those queues you wish to exclude with this entry.')
+    queues = models.ManyToManyField(Queue, blank=True, null=True, help_text='Leave blank for this exclusion to be applied to all queues, or select those queues you wish to exclude with this entry.')
 
     name = models.CharField(maxlength=100)
     

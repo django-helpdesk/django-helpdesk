@@ -1,37 +1,20 @@
-"""                                     .. 
-                                 .,::;::::::
-                           ..,::::::::,,,,:::      Jutda Helpdesk - A Django
-                      .,,::::::,,,,,,,,,,,,,::     powered ticket tracker for
-                  .,::::::,,,,,,,,,,,,,,,,,,:;r.        small enterprise
-                .::::,,,,,,,,,,,,,,,,,,,,,,:;;rr.
-              .:::,,,,,,,,,,,,,,,,,,,,,,,:;;;;;rr      (c) Copyright 2008
-            .:::,,,,,,,,,,,,,,,,,,,,,,,:;;;:::;;rr
-          .:::,,,,,,,,,,,,,,,,,,,,.  ,;;;::::::;;rr           Jutda
-        .:::,,,,,,,,,,,,,,,,,,.    .:;;:::::::::;;rr
-      .:::,,,,,,,,,,,,,,,.       .;r;::::::::::::;r;   All Rights Reserved
-    .:::,,,,,,,,,,,,,,,        .;r;;:::::::::::;;:.
-  .:::,,,,,,,,,,,,,,,.       .;r;;::::::::::::;:.
- .;:,,,,,,,,,,,,,,,       .,;rr;::::::::::::;:.   This software is released 
-.,:,,,,,,,,,,,,,.    .,:;rrr;;::::::::::::;;.  under a limited-use license that
-  :,,,,,,,,,,,,,..:;rrrrr;;;::::::::::::;;.  allows you to freely download this
-   :,,,,,,,:::;;;rr;;;;;;:::::::::::::;;,  software from it's manufacturer and
-    ::::;;;;;;;;;;;:::::::::::::::::;;,  use it yourself, however you may not
-    .r;;;;:::::::::::::::::::::::;;;,  distribute it. For further details, see
-     .r;::::::::::::::::::::;;;;;:,  the enclosed LICENSE file.
-      .;;::::::::::::::;;;;;:,.
-       .;;:::::::;;;;;;:,.  Please direct people who wish to download this
-        .r;;;;;;;;:,.  software themselves to www.jutda.com.au.
-          ,,,..
+#!/usr/bin/python
+"""
+Jutda Helpdesk - A Django powered ticket tracker for small enterprise.
 
-$Id$
+(c) Copyright 2008 Jutda. All Rights Reserved. See LICENSE for details.
 
+scripts/get_email.py - Designed to be run from cron, this script checks the
+                       POP and IMAP boxes defined for the queues within a 
+                       helpdesk, creating tickets from the new messages (or 
+                       adding to existing tickets if needed)
 """
 import poplib
 import imaplib
 from datetime import datetime, timedelta
 import email, mimetypes, re
 from email.Utils import parseaddr
-from helpdesk.models import Queue,Ticket, FollowUp
+from helpdesk.models import Queue, Ticket, FollowUp
 from helpdesk.lib import send_multipart_mail
 
 def process_email():

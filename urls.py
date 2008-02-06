@@ -1,30 +1,10 @@
-"""                                     .. 
-                                 .,::;::::::
-                           ..,::::::::,,,,:::      Jutda Helpdesk - A Django
-                      .,,::::::,,,,,,,,,,,,,::     powered ticket tracker for
-                  .,::::::,,,,,,,,,,,,,,,,,,:;r.        small enterprise
-                .::::,,,,,,,,,,,,,,,,,,,,,,:;;rr.
-              .:::,,,,,,,,,,,,,,,,,,,,,,,:;;;;;rr      (c) Copyright 2008
-            .:::,,,,,,,,,,,,,,,,,,,,,,,:;;;:::;;rr
-          .:::,,,,,,,,,,,,,,,,,,,,.  ,;;;::::::;;rr           Jutda
-        .:::,,,,,,,,,,,,,,,,,,.    .:;;:::::::::;;rr
-      .:::,,,,,,,,,,,,,,,.       .;r;::::::::::::;r;   All Rights Reserved
-    .:::,,,,,,,,,,,,,,,        .;r;;:::::::::::;;:.
-  .:::,,,,,,,,,,,,,,,.       .;r;;::::::::::::;:.
- .;:,,,,,,,,,,,,,,,       .,;rr;::::::::::::;:.   This software is released 
-.,:,,,,,,,,,,,,,.    .,:;rrr;;::::::::::::;;.  under a limited-use license that
-  :,,,,,,,,,,,,,..:;rrrrr;;;::::::::::::;;.  allows you to freely download this
-   :,,,,,,,:::;;;rr;;;;;;:::::::::::::;;,  software from it's manufacturer and
-    ::::;;;;;;;;;;;:::::::::::::::::;;,  use it yourself, however you may not
-    .r;;;;:::::::::::::::::::::::;;;,  distribute it. For further details, see
-     .r;::::::::::::::::::::;;;;;:,  the enclosed LICENSE file.
-      .;;::::::::::::::;;;;;:,.
-       .;;:::::::;;;;;;:,.  Please direct people who wish to download this
-        .r;;;;;;;;:,.  software themselves to www.jutda.com.au.
-          ,,,..
+"""
+Jutda Helpdesk - A Django powered ticket tracker for small enterprise.
 
-$Id$
+(c) Copyright 2008 Jutda. All Rights Reserved. See LICENSE for details.
 
+urls.py - Mapping of URL's to our various views. Note we always used NAMED 
+          views for simplicity in linking later on.
 """
 
 from django.conf.urls.defaults import *
@@ -72,7 +52,15 @@ urlpatterns = patterns('helpdesk.views',
 )
 
 urlpatterns += patterns('',
-    url(r'^login/$', 'django.contrib.auth.views.login', name='login'),
+    url(r'^api/(?P<method>[a-z_-]+)/$',
+        'helpdesk.api.api',
+        name='helpdesk_api'),
+    
+    url(r'^login/$',
+        'django.contrib.auth.views.login',
+        name='login'),
 
-    url(r'^logout/$', 'django.contrib.auth.views.logout', name='logout'),
+    url(r'^logout/$',
+        'django.contrib.auth.views.logout',
+        name='logout'),
 )
