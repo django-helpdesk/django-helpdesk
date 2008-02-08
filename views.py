@@ -357,3 +357,9 @@ def unhold_ticket(request, ticket_id):
     return hold_ticket(request, ticket_id, unhold=True)
 unhold_ticket = login_required(unhold_ticket)
 
+def rss_list(request):
+    return render_to_response('helpdesk/rss_list.html', 
+        RequestContext(request, {
+            'queues': Queue.objects.all(),
+        }))
+rss_list = login_required(rss_list)

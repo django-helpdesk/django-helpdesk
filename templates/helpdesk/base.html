@@ -21,7 +21,7 @@
 {% block helpdesk_body %}{% endblock %}
     </div>
     <div id='footer'>
-        <p>Powered by <a href='http://www.jutda.com.au/'>Jutda HelpDesk</a></p>
+        <p>Powered by <a href='http://www.jutda.com.au/'>Jutda HelpDesk</a>. <a href='{% url helpdesk_rss_index %}'><img src='{{ MEDIA_URL }}/helpdesk/rss_icon.png' width='14' height='14' alt='RSS Icon' title='RSS Feeds' border='0' />RSS Feeds</a></p>
     </div>
 </div>{% include "helpdesk/debug.html" %}
 </body>

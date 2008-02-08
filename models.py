@@ -232,6 +232,9 @@ class FollowUp(models.Model):
     def __unicode__(self):
         return u'%s' % self.title
 
+    def get_absolute_url(self):
+        return "%s#followup%s" % (self.ticket.get_absolute_url(), self.id)
+
 
     def save(self):
         t = self.ticket

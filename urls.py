@@ -9,6 +9,12 @@ urls.py - Mapping of URL's to our various views. Note we always used NAMED
 
 from django.conf.urls.defaults import *
 
+from django.contrib.auth.decorators import login_required
+
+from feeds import feed_setup
+
+from django.contrib.syndication.views import feed as django_feed
+
 urlpatterns = patterns('helpdesk.views',
     url(r'^$', 
         'dashboard',
@@ -49,8 +55,18 @@ urlpatterns = patterns('helpdesk.views',
     url(r'^view/$',
         'public_view',
         name='helpdesk_public_view'),
+    
+    url(r'^rss/$',
+        'rss_list',
+        name='helpdesk_rss_index'),
 )
 
+urlpatterns += patterns('',
+    url(r'^rss/(?P<url>.*)/$',
+        login_required(django_feed),
+        {'feed_dict': feed_setup},
+        name='helpdesk_rss'),
+)
 urlpatterns += patterns('',
     url(r'^api/(?P<method>[a-z_-]+)/$',
         'helpdesk.api.api',
