@@ -11,15 +11,10 @@
             return false;
         });
         
+        processAddFileClick();
         $("#ShowFileUpload").click(function() {
             $("#FileUpload").fadeIn();
             $("#ShowFileUploadPara").hide();
-            return false;
-        });
-
-        $(".AddAnotherFile").click(function() {
-            $(this).hide();
-            $("#FileUpload>dl").append("<dt><label>Attach another File</label></dt><dd><input type='file' name='attachment' id='file' /> (<a href='#' class='AddAnotherFile'>Add Another File</a>)</dd>");
             return false;
         });
 
@@ -32,6 +27,18 @@
             }
         });
     });
+
+    function processAddFileClick() {
+        /* Until jQuery includes some 'livequery' functionality in the core 
+           distribution, this will have to do. */
+        $(".AddAnotherFile>a").click(function() {
+            $(this).parent().hide();
+            $("#FileUpload>dl").append("<dt><label>Attach another File</label></dt><dd><input type='file' name='attachment' id='file' /> <span class='AddAnotherFile'>(<a href='#'>Add Another File</a>)</span></dd>");
+            processAddFileClick();
+            return false;
+        });
+
+    }
 </script>
 {% endblock %}
 
@@ -163,8 +170,7 @@
     <dl>
 
         <dt><label for='id_file'>Attach a File</label></dt>
-        <dd><input type='file' name='attachment' id='file' /> (<a href='#' class='AddAnotherFile'>Add Another File</a>)</dd>
-
+        <dd><input type='file' name='attachment' id='file' /> <span class='AddAnotherFile'>(<a href='#'>Add Another File</a>)</span></dd>
     </dl>
 
 </div>
