@@ -14,7 +14,7 @@ import imaplib
 from datetime import datetime, timedelta
 import email, mimetypes, re
 from email.Utils import parseaddr
-from helpdesk.models import Queue, Ticket, FollowUp
+from helpdesk.models import Queue, Ticket, FollowUp, Attachment
 from helpdesk.lib import send_multipart_mail
 
 def process_email():
@@ -71,6 +71,8 @@ def ticket_from_message(message, queue):
     sender = message.get('from', 'Unknown Sender')
     
     sender_email = parseaddr(message.get('from', 'Unknown Sender'))[1]
+    if sender_email.startswith('postmaster'):
+        sender_email = ''
 
     regex = re.compile("^\[[A-Za-z0-9]+-\d+\]")
     if regex.match(subject):
@@ -101,6 +103,7 @@ def ticket_from_message(message, queue):
     if ticket:
         try:
             t = Ticket.objects.get(id=ticket)
+            new = False
         except:
             ticket = None
 
@@ -124,50 +127,51 @@ def ticket_from_message(message, queue):
             priority=priority,
         )
         t.save()
+        new = True
+        update = ''
         
-        context = {
-            'ticket': t,
-            'queue': queue,
-        }
+    context = {
+        'ticket': t,
+        'queue': queue,
+    }
 
-        update = ""
+    if new:
 
         if sender_email:
-            send_multipart_mail('helpdesk/emails/submitter_newticket', context, '%s %s' % (t.ticket, t.title), sender_email, queue.from_address)
+            send_multipart_mail('helpdesk/emails/submitter_newticket', context, '%s %s' % (t.ticket, t.title), sender_email, queue.from_address, fail_silently=True)
 
         if queue.new_ticket_cc:
-            send_multipart_mail('helpdesk/emails/cc_newticket', context, '%s %s (Opened)' % (t.ticket, t.title), queue.updated_ticket_cc, queue.from_address)
+            send_multipart_mail('helpdesk/emails/cc_newticket', context, '%s %s (Opened)' % (t.ticket, t.title), queue.updated_ticket_cc, queue.from_address, fail_silently=True)
         
         if queue.updated_ticket_cc and queue.updated_ticket_cc != queue.new_ticket_cc:
-            send_multipart_mail('helpdesk/emails/cc_newticket', context, '%s %s (Opened)' % (t.ticket, t.title), queue.updated_ticket_cc, queue.from_address)
+            send_multipart_mail('helpdesk/emails/cc_newticket', context, '%s %s (Opened)' % (t.ticket, t.title), queue.updated_ticket_cc, queue.from_address, fail_silently=True)
 
     else:
-        f = FollowUp(
-            ticket = t,
-            title = 'E-Mail Received from %s' % sender_email,
-            date = datetime.now(),
-            public = True,
-            comment = body,
-        )
-        f.save()
         update = " (Updated)"
 
         if t.assigned_to:
-            send_multipart_mail('helpdesk/emails/owner_updated', context, '%s %s (Updated)' % (t.ticket, t.title), t.assigned_to.email, queue.from_address)
+            send_multipart_mail('helpdesk/emails/owner_updated', context, '%s %s (Updated)' % (t.ticket, t.title), t.assigned_to.email, queue.from_address, file_silently=True)
 
         if queue.updated_ticket_cc:
-            send_multipart_mail('helpdesk/emails/cc_updatedt', context, '%s %s (Updated)' % (t.ticket, t.title), queue.updated_ticket_cc, queue.from_address)
+            send_multipart_mail('helpdesk/emails/cc_updated', context, '%s %s (Updated)' % (t.ticket, t.title), queue.updated_ticket_cc, queue.from_address, fail_silently=True)
 
+    f = FollowUp(
+        ticket = t,
+        title = 'E-Mail Received from %s' % sender_email,
+        date = datetime.now(),
+        public = True,
+        comment = body,
+    )
+    f.save()
 
     print " [%s-%s] %s%s" % (t.queue.slug, t.id, t.title, update)
 
-    #for file in files:
-        #data = file['content']
-        #filename = file['filename'].replace(' ', '_')
-        #type = file['type']
-        #a = Attachment(followup=f, filename=filename, mimetype=type, size=len(data))
-        #a.save()
-        #print "    - %s" % file['filename']
+    for file in files:
+        filename = file['filename'].replace(' ', '_')
+        a = Attachment(followup=f, filename=filename, mime_type=file['type'], size=len(file['content']))
+        a.save_file_file(file['filename'], file['content'])
+        a.save()
+        print "    - %s" % file['filename']
     
 if __name__ == '__main__':
     process_email()

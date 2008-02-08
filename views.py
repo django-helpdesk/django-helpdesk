@@ -18,7 +18,7 @@ from django.template import loader, Context, RequestContext
 
 from helpdesk.forms import TicketForm, PublicTicketForm
 from helpdesk.lib import send_multipart_mail
-from helpdesk.models import Ticket, Queue, FollowUp, TicketChange, PreSetReply
+from helpdesk.models import Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment
 
 def dashboard(request):
     """
@@ -172,7 +172,7 @@ def update_ticket(request, ticket_id):
         else:
             template = 'helpdesk/emails/submitter_updated'
             subject = '%s %s (Updated)' % (ticket.ticket, ticket.title)
-        send_multipart_mail(template, context, subject, ticket.submitter_email, ticket.queue.from_address)
+        send_multipart_mail(template, context, subject, ticket.submitter_email, ticket.queue.from_address, fail_silently=True)
 
     if ticket.assigned_to and request.user != ticket.assigned_to and ticket.assigned_to.email:
         # We only send e-mails to staff members if the ticket is updated by 
@@ -190,7 +190,7 @@ def update_ticket(request, ticket_id):
             template_staff = 'helpdesk/emails/owner_updated'
             subject = '%s %s (Updated)' % (ticket.ticket, ticket.title)
         
-        send_multipart_mail(template_staff, context, subject, ticket.assigned_to.email, ticket.queue.from_address)
+        send_multipart_mail(template_staff, context, subject, ticket.assigned_to.email, ticket.queue.from_address, fail_silently=True)
            
             
         if ticket.queue.updated_ticket_cc:
@@ -207,7 +207,14 @@ def update_ticket(request, ticket_id):
                 template_cc = 'helpdesk/emails/cc_updated'
                 subject = '%s %s (Updated)' % (ticket.ticket, ticket.title)
             
-            send_multipart_mail(template_cc, context, subject, ticket.queue.updated_ticket_cc, ticket.queue.from_address)
+            send_multipart_mail(template_cc, context, subject, ticket.queue.updated_ticket_cc, ticket.queue.from_address, fail_silently=True)
+
+    if request.FILES:
+        for file in request.FILES.getlist('attachment'):
+            filename = file['filename'].replace(' ', '_')
+            a = Attachment(followup=f, filename=filename, mime_type=file['content-type'], size=len(file['content']))
+            a.save_file_file(file['filename'], file['content'])
+            a.save()
 
     ticket.save()
             

@@ -10,6 +10,19 @@
             $("#ShowFurtherOptPara").hide();
             return false;
         });
+        
+        $("#ShowFileUpload").click(function() {
+            $("#FileUpload").fadeIn();
+            $("#ShowFileUploadPara").hide();
+            return false;
+        });
+
+        $(".AddAnotherFile").click(function() {
+            $(this).hide();
+            $("#FileUpload>dl").append("<dt><label>Attach another File</label></dt><dd><input type='file' name='attachment' id='file' /> (<a href='#' class='AddAnotherFile'>Add Another File</a>)</dd>");
+            return false;
+        });
+
         $('#id_preset').change(function() {
             preset = $('#id_preset').val();
             if (preset != '') {
@@ -71,18 +84,22 @@
 <div class='followup'>
 <div class='title'>{{ followup.title }} <span class='byline'>{% if followup.user %}by {{ followup.user }}{% endif %} <span title='{{ followup.date|date:"r" }}'>{{ followup.date|timesince }} ago</span>{% if not followup.public %} <span class='private'>(Private)</span>{% endif %}</span></div>
 {% if followup.comment %}{{ followup.comment|num_to_link }}{% endif %}
-{% if followup.ticketchange_set.all %}<div class='changes'><ul>
 {% for change in followup.ticketchange_set.all %}
+{% if forloop.first %}<div class='changes'><ul>{% endif %}
 <li>Changed {{ change.field }} from {{ change.old_value }} to {{ change.new_value }}.</li>
+{% if forloop.last %}</div></ul>{% endif %}
 {% endfor %}
-</div></ul>{% endif %}
+{% for attachment in followup.attachment_set.all %}{% if forloop.first %}<div class='attachments'><ul>{% endif %}
+<li><a href='{{ attachment.get_file_url }}'>{{ attachment.filename }}</a> ({{ attachment.mime_type }}, {{ attachment.size|filesizeformat }})</li>
+{% if forloop.last %}</ul></div>{% endif %}
+{% endfor %}
 </div>
 {% endfor %}
 {% endif %}
 
 <h3>Respond to this ticket</h3>
 
-<form method='post' action='update/'>
+<form method='post' action='update/' enctype='multipart/form-data'>
 
 <fieldset>
     <dl>
@@ -139,8 +156,20 @@
 
 </div>
 
-</fieldset>
+<p id='ShowFileUploadPara'><a href='#' id='ShowFileUpload'>Attach File(s) &raquo;</a></p>
 
+<div id='FileUpload' style='display: none;'>
+
+    <dl>
+
+        <dt><label for='id_file'>Attach a File</label></dt>
+        <dd><input type='file' name='attachment' id='file' /> (<a href='#' class='AddAnotherFile'>Add Another File</a>)</dd>
+
+    </dl>
+
+</div>
+
+</fieldset>
 
 <input type='submit' value='Update This Ticket' />
 

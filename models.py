@@ -12,6 +12,7 @@ from datetime import datetime
 from django.contrib.auth.models import User
 from django.db import models
 from django.conf import settings
+from django.dispatch import dispatcher
 
 class Queue(models.Model):
     """
@@ -257,18 +258,50 @@ class TicketChange(models.Model):
             str += 'changed from "%s" to "%s"' % (old_value, new_value)
         return str
 
-"""class Attachment(models.Model):
+
+class DynamicFileField(models.FileField):
+    """
+    Allows model instance to specify upload_to dynamically.
+
+    Model class should have a method like:
+        
+        def get_upload_to(self, attname):
+            return 'path/to/%d' % self.parent.id
+
+    Based on: http://scottbarnham.com/blog/2007/07/31/uploading-images-to-a-dynamic-path-with-django/
+    """
+
+    def contribute_to_class(self, cls, name):
+        """Hook up events so we can access the instance."""
+        super(DynamicFileField, self).contribute_to_class(cls, name)
+        dispatcher.connect(self._post_init, models.signals.post_init, sender=cls)
+
+    def _post_init(self, instance=None):
+        """Get dynamic upload_to value from the model instance."""
+        if hasattr(instance, 'get_upload_to'):
+            self.upload_to = instance.get_upload_to(self.attname)
+
+    def db_type(self):
+        """Required by Django for ORM."""
+        return 'varchar(100)' 
+
+class Attachment(models.Model):
     followup = models.ForeignKey(FollowUp, edit_inline=models.TABULAR)
-    file = models.FileField()
+    file = DynamicFileField(upload_to='helpdesk/attachments', core=True)
     filename = models.CharField(maxlength=100)
     mime_type = models.CharField(maxlength=30)
     size = models.IntegerField(help_text='Size of this file in bytes')
+
+    def get_upload_to(self, field_attname):
+        """ Get upload_to path specific to this item """
+        return 'helpdesk/attachments/%s/%s' % (self.followup.ticket.ticket_for_url, self.followup.id)
 
     def __unicode__(self):
         return u'%s' % self.filename
 
     class Meta:
-        ordering = ['filename',] """
+        ordering = ['filename',]
+
 
 class PreSetReply(models.Model):
     """ We can allow the admin to define a number of pre-set replies, used to 
@@ -305,3 +338,4 @@ class EscalationExclusion(models.Model):
 
     def __unicode__(self):
         return u'%s' % self.name
+

@@ -10,6 +10,7 @@ Jutda Helpdesk - A Django powered ticket tracker for small enterprise.
 2. Dependencies (pre-flight checklist)
 3. Installation
 4. Initial Configuration
+5. API Usage
 
 #########################
 1. Licensing
@@ -69,6 +70,20 @@ LICENSE.JQUERY and LICENSE.NICEDIT for their respective license terms.
    This application assumes all helpdesk media will be accessible at
    http://MEDIA_PATH/helpdesk/
 
+7. Inside your MEDIA_ROOT folder, inside the 'helpdesk' folder, is a folder 
+   called 'attachments'. Ensure your web server software can write to this 
+   folder - something like this should do the trick:
+
+    chown www-data:www-data attachments/; chmod 700 attachments
+     (substitute www-data for the user / group that your web server runs
+      as, eg 'apache' or 'httpd')
+
+    If all else fails ensure all users can write to it:
+
+    chmod 777 attachments/
+
+    This is NOT recommended, especially if you're on a shared server.
+
 #########################
 4. Initial Configuration
 #########################
@@ -111,3 +126,13 @@ LICENSE.JQUERY and LICENSE.NICEDIT for their respective license terms.
    This will, on a weekly basis, create exclusions for the coming weekend.
 
 You're now up and running!
+
+#########################
+5. API Usage
+#########################
+
+Jutda Helpdesk includes an API accessible via HTTP POST requests, allowing
+you to create and alter tickets from 3rd party software and systems.
+
+For usage instructions and command syntax, see the file
+templates/helpdesk/api_help.html, or visit http://helpdesk/api/help/.
