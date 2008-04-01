@@ -94,11 +94,11 @@ class Ticket(models.Model):
     )
 
     PRIORITY_CHOICES = (
-        (1, '1 (Critical)'),
-        (2, '2 (High)'),
-        (3, '3 (Normal)'),
-        (4, '4 (Low)'),
-        (5, '5 (Very Low)'),
+        (1, '1. Critical'),
+        (2, '2. High'),
+        (3, '3. Normal'),
+        (4, '4. Low'),
+        (5, '5. Very Low'),
     )
 
     title = models.CharField(maxlength=200)
@@ -342,3 +342,24 @@ class EscalationExclusion(models.Model):
     def __unicode__(self):
         return u'%s' % self.name
 
+class EmailTemplate(models.Model):
+    """
+    Since these are more likely to be changed than other templates, we store
+    them in the database. 
+    """
+
+    template_name = models.CharField(maxlength=100, unique=True)
+   
+    subject = models.CharField(maxlength=100, help_text=u'This will be prefixed with "[ticket.ticket] ticket.title". We recommend something simple such as "(Updated") or "(Closed)" - the same context is available as in plain_text, below.')
+    heading = models.CharField(maxlength=100, help_text=u'In HTML e-mails, this will be the heading at the top of the email - the same context is available as in plain_text, below.')
+    plain_text = models.TextField(help_text=u'The context available to you includes {{ ticket }}, {{ queue }}, and depending on the time of the call: {{ resolution }} or {{ comment }}.')
+    html = models.TextField(help_text=u'The same context is available here as in plain_text, above.')
+
+    class Admin:
+        pass
+
+    def __unicode__(self):
+        return u'%s' % self.template_name
+
+    class Meta:
+        ordering = ['template_name',]

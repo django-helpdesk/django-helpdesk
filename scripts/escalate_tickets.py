@@ -10,7 +10,7 @@ scripts/escalate_tickets.py - Easy way to escalate tickets based on their age,
 from datetime import datetime, timedelta, date
 from django.db.models import Q
 from helpdesk.models import Queue, Ticket, FollowUp, EscalationExclusion, TicketChange
-from helpdesk.lib import send_multipart_mail
+from helpdesk.lib import send_templated_mail
 import sys, getopt
 
 def escalate_tickets(queues, verbose):
@@ -48,13 +48,13 @@ def escalate_tickets(queues, verbose):
             }
 
             if t.submitter_email:
-                send_multipart_mail('helpdesk/emails/submitter_escalated', context, '%s %s' % (t.ticket, t.title), t.submitter_email, t.queue.from_address)
+                send_templated_mail('escalated_submitter', context, recipients=t.submitter_email, sender=t.queue.from_address, fail_silently=True)
             
             if t.queue.updated_ticket_cc:
-                send_multipart_mail('helpdesk/emails/cc_escalated', context, '%s %s' % (t.ticket, t.title), t.queue.updated_ticket_cc, t.queue.from_address)
+                send_templated_mail('escalated_cc', context, recipients=t.queue.updated_ticket_cc, sender=t.queue.from_address, fail_silently=True)
             
             if t.assigned_to:
-                send_multipart_mail('helpdesk/emails/owner_escalated', context, '%s %s' % (t.ticket, t.title), t.assigned_to, t.queue.from_address)
+                send_templated_mail('escalated_owner', context, recipients=t.assigned_to.email, sender=t.queue.from_address, fail_silently=True)
 
             if verbose:
                 print "  - Esclating %s from %s>%s" % (t.ticket, t.priority+1, t.priority)

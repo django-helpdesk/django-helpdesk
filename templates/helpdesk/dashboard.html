@@ -9,9 +9,9 @@
 <tr class='row_columnheads'><th>Queue</th><th>Open</th><th>Resolved</th></tr>
 {% for queue in dash_tickets %}
 <tr class='row_{% cycle odd,even %} row_hover '>
-<th><a href='{% url helpdesk_list %}?queue={{ queue.queue.id }}'>{{ queue.queue }}</a></th>
-<td>{% if queue.open %}<a href='{% url helpdesk_list %}?queue={{ queue.queue.id }}&status=1&status=2'>{% endif %}{{ queue.open }}{% if queue.open %}</a>{% endif %}</td>
-<td>{% if queue.resolved %}<a href='{% url helpdesk_list %}?queue={{ queue.queue.id }}&status=3'>{% endif %}{{ queue.resolved }}{% if queue.resolved %}</a>{% endif %}</td>
+<th><a href='{% url helpdesk_list %}?queue={{ queue.queue }}'>{{ queue.name }}</a></th>
+<td>{% if queue.open %}<a href='{% url helpdesk_list %}?queue={{ queue.queue }}&status=1&status=2'>{% endif %}{{ queue.open }}{% if queue.open %}</a>{% endif %}</td>
+<td>{% if queue.resolved %}<a href='{% url helpdesk_list %}?queue={{ queue.queue }}&status=3'>{% endif %}{{ queue.resolved }}{% if queue.resolved %}</a>{% endif %}</td>
 </tr>
 {% endfor %}
 </table>

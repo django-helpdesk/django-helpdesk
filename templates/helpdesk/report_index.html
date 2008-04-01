@@ -1,0 +1,27 @@
+{% extends "helpdesk/base.html" %}
+
+{% block helpdesk_title %}Reports &amp; Statistics{% endblock %}
+
+{% block helpdesk_body %}
+<h2>Reports &amp; Statistics</h2>
+
+<ul>
+<li>User<ul>
+
+    <li><a href='userpriority/'>by Priority</a></li>
+    <li><a href='userqueue/'>by Queue</a></li>
+    <li><a href='userstatus/'>by Status</a></li>
+    <li><a href='usermonth/'>by Month</a></li>
+
+</ul></li>
+
+<li>Queue<ul>
+    
+    <li><a href='queuepriority/'>by Priority</a></li>
+    <li><a href='queuestatus/'>by Status</a></li>
+    <li><a href='queuemonth/'>by Month</a></li>
+
+</ul></li>
+</ul>
+
+{% endblock %}

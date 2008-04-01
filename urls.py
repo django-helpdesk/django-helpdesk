@@ -59,6 +59,14 @@ urlpatterns = patterns('helpdesk.views',
     url(r'^rss/$',
         'rss_list',
         name='helpdesk_rss_index'),
+
+    url(r'^reports/$',
+        'report_index',
+        name='helpdesk_report_index'),
+    
+    url(r'^reports/(?P<report>\w+)/$',
+        'run_report',
+        name='helpdesk_run_report'),
 )
 
 urlpatterns += patterns('',
@@ -67,6 +75,7 @@ urlpatterns += patterns('',
         {'feed_dict': feed_setup},
         name='helpdesk_rss'),
 )
+
 urlpatterns += patterns('',
     url(r'^api/(?P<method>[a-z_-]+)/$',
         'helpdesk.api.api',

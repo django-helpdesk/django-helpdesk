@@ -15,7 +15,7 @@ from datetime import datetime, timedelta
 import email, mimetypes, re
 from email.Utils import parseaddr
 from helpdesk.models import Queue, Ticket, FollowUp, Attachment
-from helpdesk.lib import send_multipart_mail
+from helpdesk.lib import send_templated_mail
 
 def process_email():
     for q in Queue.objects.filter(email_box_type__isnull=False):
@@ -138,22 +138,22 @@ def ticket_from_message(message, queue):
     if new:
 
         if sender_email:
-            send_multipart_mail('helpdesk/emails/submitter_newticket', context, '%s %s' % (t.ticket, t.title), sender_email, queue.from_address, fail_silently=True)
+            send_templated_mail('newticket_submitter', context, recipients=sender_email, sender=queue.from_address, fail_silently=True)
 
         if queue.new_ticket_cc:
-            send_multipart_mail('helpdesk/emails/cc_newticket', context, '%s %s (Opened)' % (t.ticket, t.title), queue.updated_ticket_cc, queue.from_address, fail_silently=True)
+            send_templated_mail('newticket_cc', context, recipients=queue.new_ticket_cc, sender=queue.from_address, fail_silently=True)
         
         if queue.updated_ticket_cc and queue.updated_ticket_cc != queue.new_ticket_cc:
-            send_multipart_mail('helpdesk/emails/cc_newticket', context, '%s %s (Opened)' % (t.ticket, t.title), queue.updated_ticket_cc, queue.from_address, fail_silently=True)
+            send_templated_mail('newticket_cc', context, recipients=queue.updated_ticket_cc, sender=queue.from_address, fail_silently=True)
 
     else:
         update = " (Updated)"
 
         if t.assigned_to:
-            send_multipart_mail('helpdesk/emails/owner_updated', context, '%s %s (Updated)' % (t.ticket, t.title), t.assigned_to.email, queue.from_address, file_silently=True)
+            send_templated_mail('updated_owner', context, recipients=t.assigned_to.email, sender=queue.from_address, fail_silently=True)
 
         if queue.updated_ticket_cc:
-            send_multipart_mail('helpdesk/emails/cc_updated', context, '%s %s (Updated)' % (t.ticket, t.title), queue.updated_ticket_cc, queue.from_address, fail_silently=True)
+            send_templated_mail('updated_cc', context, recipients=queue.updated_ticket_cc, sender=queue.from_address, fail_silently=True)
 
     f = FollowUp(
         ticket = t,

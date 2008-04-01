@@ -1,9 +1,0 @@
-Hello,
-
-This is a courtesy e-mail to let you know that a ticket has been assigned to you.
-
-{% if ticket.submitter_email %}The ticket was submitted by {{ ticket.submitter_email }}, and the subject{% else %}The ticket subject{% endif%} is {{ ticket.title }}.
-
-The ticket ID is {{ ticket.ticket }}, you can view it online at {{ ticket.staff_url }}. It's priority is {{ ticket.get_priority_display }}.
-
-{% include "helpdesk/emails/text_footer.txt" %}

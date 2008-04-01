@@ -1,0 +1,15 @@
+{% extends "helpdesk/base.html" %}
+
+{% block helpdesk_title %}Reports &amp; Statistics{% endblock %}
+
+{% block helpdesk_body %}
+<h2>Reports &amp; Statistics</h2>
+
+<table>
+<tr>{% for h in headings %}<th>{{ h }}</th>{% endfor %}</tr>
+{% for d in data %}<tr>{% for f in d %}<td>{{ f }}</td>{% endfor %}</tr>{% endfor %}
+</table>
+
+{% if chart %}<img src='{{ chart }}' />{% endif %}
+
+{% endblock %}

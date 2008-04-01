@@ -12,9 +12,10 @@
         <ul>
             <li><a href='{% url helpdesk_home %}'>Dashboard</a></li>
             <li><a href='{% url helpdesk_list %}'>Tickets</a></li>
-            <li><a href='{% url helpdesk_submit %}'>Submit Ticket</a></li>
+            <li><a href='{% url helpdesk_submit %}'>New Ticket</a></li>
+            <li><a href='{% url helpdesk_report_index %}'>Stats</a></li>
             <li><a href='{% url logout %}'>Logout</a></li>
-            {% if not query %}<li><form method='get' action='{% url helpdesk_list %}'><input type='text' name='q' size='10' /><input type='hidden' name='status' value='1' /><input type='hidden' name='status' value='2' /><input type='hidden' name='status' value='3' /><input type='submit' value='Search' /></form></li>{% endif %}
+            {% if not query %}<li><form id='searchform' method='get' action='{% url helpdesk_list %}'><input type='text' name='q' size='10' class='input' value='Search...' id='search_query' onFocus='s  = document.getElementById("search_query");if (s.value == "Search...") { s.value = ""; }' /><input type='hidden' name='status' value='1' /><input type='hidden' name='status' value='2' /><input type='hidden' name='status' value='3' /></form></li>{% endif %}
         </ul>
     </div>
     <div id='body'>

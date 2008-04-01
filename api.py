@@ -20,7 +20,7 @@ from django.shortcuts import render_to_response
 from django.template import loader, Context
 from django import newforms as forms
 
-from helpdesk.lib import send_multipart_mail
+from helpdesk.lib import send_templated_mail
 from helpdesk.models import Ticket, Queue, FollowUp
 from helpdesk.forms import TicketForm
 
@@ -174,19 +174,14 @@ class API:
             'comment': f.comment,
         }
 
-        subject = '%s %s (Updated)' % (ticket.ticket, ticket.title)
-
         if public and ticket.submitter_email:
-            template = 'helpdesk/emails/submitter_updated'
-            send_multipart_mail(template, context, subject, ticket.submitter_email, ticket.queue.from_address)
+            send_templated_mail('updated_submitter', context, recipients=ticket.submitter_email, sender=ticket.queue.from_address, fail_silently=True)
         
         if ticket.queue.updated_ticket_cc:
-            template_cc = 'helpdesk/emails/cc_updated'
-            send_multipart_mail(template_cc, context, subject, q.updated_ticket_cc, ticket.queue.from_address)
+            send_templated_mail('updated_cc', context, recipients=ticket.queue.updated_ticket_cc, sender=ticket.queue.from_address, fail_silently=True)
         
         if ticket.assigned_to and self.request.user != ticket.assigned_to:
-            template_owner = 'helpdesk/emails/owner_updated'
-            send_multipart_mail(template_owner, context, subject, t.assigned_to.email, ticket.queue.from_address)
+            send_templated_mail('updated_owner', context, recipients=ticket.assigned_to.email, sender=ticket.queue.from_address, fail_silently=True)
 
         ticket.save()
 
@@ -216,16 +211,13 @@ class API:
         subject = '%s %s (Resolved)' % (ticket.ticket, ticket.title)
 
         if ticket.submitter_email:
-            template = 'helpdesk/emails/submitter_resolved'
-            send_multipart_mail(template, context, subject, ticket.submitter_email, ticket.queue.from_address)
+            send_templated_mail('resolved_submitter', context, recipients=ticket.submitter_email, sender=ticket.queue.from_address, fail_silently=True)
         
         if ticket.queue.updated_ticket_cc:
-            template_cc = 'helpdesk/emails/cc_resolved'
-            send_multipart_mail(template_cc, context, subject, q.updated_ticket_cc, ticket.queue.from_address)
+            send_templated_mail('resolved_cc', context, recipients=ticket.queue.updated_ticket_cc, sender=ticket.queue.from_address, fail_silently=True)
         
         if ticket.assigned_to and self.request.user != ticket.assigned_to:
-            template_owner = 'helpdesk/emails/owner_resolved'
-            send_multipart_mail(template_owner, context, subject, t.assigned_to.email, ticket.queue.from_address)
+            send_templated_mail('resolved_resolved', context, recipients=ticket.assigned_to.email, sender=ticket.queue.from_address, fail_silently=True)
 
         ticket.resoltuion = f.comment
         ticket.status = Ticket.RESOLVED_STATUS

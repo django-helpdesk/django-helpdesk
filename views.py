@@ -17,7 +17,7 @@ from django.shortcuts import render_to_response, get_object_or_404
 from django.template import loader, Context, RequestContext
 
 from helpdesk.forms import TicketForm, PublicTicketForm
-from helpdesk.lib import send_multipart_mail
+from helpdesk.lib import send_templated_mail, line_chart, bar_chart
 from helpdesk.models import Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment
 
 def dashboard(request):
@@ -29,15 +29,22 @@ def dashboard(request):
     if request.user.is_authenticated():
         tickets = Ticket.objects.filter(assigned_to=request.user).exclude(status=Ticket.CLOSED_STATUS)
         unassigned_tickets = Ticket.objects.filter(assigned_to__isnull=True).exclude(status=Ticket.CLOSED_STATUS)
-    
-        dash_tickets = []
-        for q in Queue.objects.all():
-            dash_tickets.append({
-                'queue': q,
-                'open': q.ticket_set.filter(Q(status=Ticket.OPEN_STATUS) | Q(status=Ticket.REOPENED_STATUS)).count(),
-                'resolved': q.ticket_set.filter(status=Ticket.RESOLVED_STATUS).count(),
-            })
 
+        from django.db import connection
+        cursor = connection.cursor()
+        cursor.execute("""
+            SELECT      q.id as queue,
+                        q.title AS name,
+                        COUNT(CASE t.status WHEN '1' THEN t.id WHEN '2' THEN t.id END) AS open,
+                        COUNT(CASE t.status WHEN '3' THEN t.id END) AS resolved
+                FROM    helpdesk_ticket t,
+                        helpdesk_queue q
+                WHERE   q.id =  t.queue_id
+                GROUP BY queue, name
+                ORDER BY q.id;
+        """)
+        dash_tickets = cursor.dictfetchall()
+    
         return render_to_response('helpdesk/dashboard.html',
             RequestContext(request, {
                 'user_tickets': tickets,
@@ -164,50 +171,38 @@ def update_ticket(request, ticket_id):
             'comment': f.comment,
         }
         if f.new_status == Ticket.RESOLVED_STATUS:
-            template = 'helpdesk/emails/submitter_resolved'
-            subject = '%s %s (Resolved)' % (ticket.ticket, ticket.title)
+            template = 'resolved_submitter'
         elif f.new_status == Ticket.CLOSED_STATUS:
-            template = 'helpdesk/emails/submitter_closed'
-            subject = '%s %s (Closed)' % (ticket.ticket, ticket.title)
+            template = 'closed_submitter'
         else:
-            template = 'helpdesk/emails/submitter_updated'
-            subject = '%s %s (Updated)' % (ticket.ticket, ticket.title)
-        send_multipart_mail(template, context, subject, ticket.submitter_email, ticket.queue.from_address, fail_silently=True)
+            template = 'updated_submitter'
+        send_templated_mail(template, context, recipients=ticket.submitter_email, sender=ticket.queue.from_address, fail_silently=True)
 
     if ticket.assigned_to and request.user != ticket.assigned_to and ticket.assigned_to.email:
         # We only send e-mails to staff members if the ticket is updated by 
         # another user.
         if reassigned:
-            template_staff = 'helpdesk/emails/owner_assigned'
-            subject = '%s %s (Assigned)' % (ticket.ticket, ticket.title)
+            template_staff = 'assigned_owner'
         elif f.new_status == Ticket.RESOLVED_STATUS:
-            template_staff = 'helpdesk/emails/owner_resolved'
-            subject = '%s %s (Resolved)' % (ticket.ticket, ticket.title)
+            template_staff = 'resolved_owner'
         elif f.new_status == Ticket.CLOSED_STATUS:
-            template_staff = 'helpdesk/emails/owner_closed'
-            subject = '%s %s (Closed)' % (ticket.ticket, ticket.title)
+            template_staff = 'closed_owner'
         else:
-            template_staff = 'helpdesk/emails/owner_updated'
-            subject = '%s %s (Updated)' % (ticket.ticket, ticket.title)
+            template_staff = 'updated_owner'
         
-        send_multipart_mail(template_staff, context, subject, ticket.assigned_to.email, ticket.queue.from_address, fail_silently=True)
-           
+        send_templated_mail(template_staff, context, recipients=ticket.assigned_to.email, sender=ticket.queue.from_address, fail_silently=True)
             
-        if ticket.queue.updated_ticket_cc:
-            if reassigned:
-                template_cc = 'helpdesk/emails/cc_assigned'
-                subject = '%s %s (Assigned)' % (ticket.ticket, ticket.title)
-            elif f.new_status == Ticket.RESOLVED_STATUS:
-                template_cc = 'helpdesk/emails/cc_resolved'
-                subject = '%s %s (Resolved)' % (ticket.ticket, ticket.title)
-            elif f.new_status == Ticket.CLOSED_STATUS:
-                template_cc = 'helpdesk/emails/cc_closed'
-                subject = '%s %s (Closed)' % (ticket.ticket, ticket.title)
-            else:
-                template_cc = 'helpdesk/emails/cc_updated'
-                subject = '%s %s (Updated)' % (ticket.ticket, ticket.title)
-            
-            send_multipart_mail(template_cc, context, subject, ticket.queue.updated_ticket_cc, ticket.queue.from_address, fail_silently=True)
+    if ticket.queue.updated_ticket_cc:
+        if reassigned:
+            template_cc = 'assigned_cc'
+        elif f.new_status == Ticket.RESOLVED_STATUS:
+            template_cc = 'resolved_cc'
+        elif f.new_status == Ticket.CLOSED_STATUS:
+            template_cc = 'closed_cc'
+        else:
+            template_cc = 'updated_cc'
+        
+        send_templated_mail(template_cc, context, recipients=ticket.queue.updated_ticket_cc, sender=ticket.queue.from_address, fail_silently=True)
 
     if request.FILES:
         for file in request.FILES.getlist('attachment'):
@@ -363,3 +358,153 @@ def rss_list(request):
             'queues': Queue.objects.all(),
         }))
 rss_list = login_required(rss_list)
+
+def report_index(request):
+    return render_to_response('helpdesk/report_index.html',
+        RequestContext(request, {}))
+report_index = login_required(report_index)
+
+def run_report(request, report):
+    priority_sql = []
+    priority_columns = []
+    for p in Ticket.PRIORITY_CHOICES:
+        priority_sql.append("COUNT(CASE t.priority WHEN '%s' THEN t.id END) AS \"%s\"" % (p[0], p[1]))
+        priority_columns.append("%s" % p[1])
+    priority_sql = ", ".join(priority_sql)
+    
+    status_sql = []
+    status_columns = []
+    for s in Ticket.STATUS_CHOICES:
+        status_sql.append("COUNT(CASE t.status WHEN '%s' THEN t.id END) AS \"%s\"" % (s[0], s[1]))
+        status_columns.append("%s" % s[1])
+    status_sql = ", ".join(status_sql)
+    
+    queue_sql = []
+    queue_columns = []
+    for q in Queue.objects.all():
+        queue_sql.append("COUNT(CASE t.queue_id WHEN '%s' THEN t.id END) AS \"%s\"" % (q.id, q.title))
+        queue_columns.append(q.title)
+    queue_sql = ", ".join(queue_sql)
+
+    month_sql = []
+    months = (
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec',
+    )
+    month_columns = []
+    
+    first_ticket = Ticket.objects.all().order_by('created')[0]
+    first_month = first_ticket.created.month
+    first_year = first_ticket.created.year
+    
+    last_ticket = Ticket.objects.all().order_by('-created')[0]
+    last_month = last_ticket.created.month
+    last_year = last_ticket.created.year
+
+    periods = []
+    year, month = first_year, first_month
+    working = True
+
+    while working:
+        periods.append((year, month))
+        month += 1
+        if month > 12:
+            year += 1
+            month = 1
+        if month > last_month and year >= last_year:
+            working = False
+
+
+
+    for (year, month) in periods:
+        sqlmonth = '%s-%s' % (year, months[month-1])
+        desc = '%s %s' % (months[month-1], year)
+        month_sql.append("COUNT(CASE to_char(t.created, 'YYYY-Mon') WHEN '%s' THEN t.id END) AS \"%s\"" % (sqlmonth, desc))
+        month_columns.append(desc)
+    month_sql = ", ".join(month_sql)
+
+    queue_base_sql = """
+            SELECT      q.title as queue, %s
+                FROM    helpdesk_ticket t,
+                        helpdesk_queue q
+                WHERE   q.id =  t.queue_id
+                GROUP BY queue
+                ORDER BY queue;
+                """
+
+    user_base_sql = """
+            SELECT      u.username as username, %s
+                FROM    helpdesk_ticket t,
+                        auth_user u
+                WHERE   u.id =  t.assigned_to_id
+                GROUP BY u.username
+                ORDER BY u.username;
+                """
+
+    if report == 'userpriority':
+        sql = user_base_sql % priority_sql
+        columns = ['username'] + priority_columns
+    
+    elif report == 'userqueue':
+        sql = user_base_sql % queue_sql
+        columns = ['username'] + queue_columns
+    
+    elif report == 'userstatus':
+        sql = user_base_sql % status_sql
+        columns = ['username'] + status_columns
+    
+    elif report == 'usermonth':
+        sql = user_base_sql % month_sql
+        columns = ['username'] + month_columns
+    
+    elif report == 'queuepriority':
+        sql = queue_base_sql % priority_sql
+        columns = ['queue'] + priority_columns
+    
+    elif report == 'queuestatus':
+        sql = queue_base_sql % status_sql
+        columns = ['queue'] + status_columns
+    
+    elif report == 'queuemonth':
+        sql = queue_base_sql % month_sql
+        columns = ['queue'] + month_columns
+
+
+    from django.db import connection
+    cursor = connection.cursor()
+    cursor.execute(sql)
+    report_output = cursor.dictfetchall()
+
+    data = []
+
+    for record in report_output:
+        line = []
+        for c in columns:
+            line.append(record[c])
+        data.append(line)
+
+    if report in ('queuemonth', 'usermonth'):
+        chart_url = line_chart([columns] + data)
+    elif report in ('queuestatus', 'queuepriority', 'userstatus', 'userpriority'):
+        chart_url = bar_chart([columns] + data)
+    else:
+        chart_url = ''
+    
+    return render_to_response('helpdesk/report_output.html',
+        RequestContext(request, {
+            'headings': columns,
+            'data': data,
+            'sql': sql,
+            'chart': chart_url,
+        }))
+run_report = login_required(run_report)

@@ -77,19 +77,19 @@ class TicketForm(forms.Form):
             'queue': q,
         }
 
-        from helpdesk.lib import send_multipart_mail
+        from helpdesk.lib import send_templated_mail
 
         if t.submitter_email:
-            send_multipart_mail('helpdesk/emails/submitter_newticket', context, '%s %s' % (t.ticket, t.title), t.submitter_email, q.from_address)
+            send_templated_mail('newticket_submitter', context, recipients=t.submitter_email, sender=q.from_address, fail_silently=True)
 
         if t.assigned_to and t.assigned_to != user:
-            send_multipart_mail('helpdesk/emails/owner_assigned', context, '%s %s (Opened)' % (t.ticket, t.title), t.assigned_to.email, q.from_address)
+            send_templated_mail('assigned_owner', context, recipients=t.assigned_to.email, sender=q.from_address, fail_silently=True)
 
         if q.new_ticket_cc:
-            send_multipart_mail('helpdesk/emails/cc_newticket', context, '%s %s (Opened)' % (t.ticket, t.title), q.updated_ticket_cc, q.from_address)
+            send_templated_mail('newticket_cc', context, recipients=q.new_ticket_cc, sender=q.from_address, fail_silently=True)
         
         if q.updated_ticket_cc and q.updated_ticket_cc != q.new_ticket_cc:
-            send_multipart_mail('helpdesk/emails/cc_newticket', context, '%s %s (Opened)' % (t.ticket, t.title), q.updated_ticket_cc, q.from_address)
+            send_templated_mail('newticket_cc', context, recipients=q.updated_ticket_cc, sender=q.from_address, fail_silently=True)
 
         return t
 
@@ -146,13 +146,13 @@ class PublicTicketForm(forms.Form):
             'queue': q,
         }
 
-        from helpdesk.lib import send_multipart_mail
-        send_multipart_mail('helpdesk/emails/submitter_newticket', context, '%s %s' % (t.ticket, t.title), t.submitter_email, q.from_address)
+        from helpdesk.lib import send_templated_mail
+        send_templated_mail('newticket_submitter', context, recipients=t.submitter_email, sender=q.from_address, fail_silently=True)
 
         if q.new_ticket_cc:
-            send_multipart_mail('helpdesk/emails/cc_newticket', context, '%s %s (Opened)' % (t.ticket, t.title), q.updated_ticket_cc, q.from_address)
+            send_templated_mail('newticket_cc', context, recipients=q.new_ticket_cc, sender=q.from_address, fail_silently=True)
         
         if q.updated_ticket_cc and q.updated_ticket_cc != q.new_ticket_cc:
-            send_multipart_mail('helpdesk/emails/cc_newticket', context, '%s %s (Opened)' % (t.ticket, t.title), q.updated_ticket_cc, q.from_address)
+            send_templated_mail('newticket_cc', context, recipients=q.updated_ticket_cc, sender=q.from_address, fail_silently=True)
 
         return t
