@@ -80,6 +80,11 @@ urlpatterns += patterns('',
     url(r'^api/(?P<method>[a-z_-]+)/$',
         'helpdesk.api.api',
         name='helpdesk_api'),
+
+    url(r'^api/$',
+        'django.views.generic.simple.direct_to_template',
+        {'template': 'helpdesk/api_help.html',},
+        name='helpdesk_api_help'),
     
     url(r'^login/$',
         'django.contrib.auth.views.login',

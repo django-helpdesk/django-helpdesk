@@ -44,7 +44,7 @@
             </li>
         </ul>
 
-        <h2 name='introduction'>Introduction</h2>
+        <h2 id='introduction'>Introduction</h2>
 
         <p>Jutda Helpdesk provides a powerful <acronym title='Application Programming Interface'>API</acroynm> to allow you to interact with your helpdesk tickets by a means not otherwise provided by the helpdesk.</p>
 
@@ -52,7 +52,7 @@
 
         <p>Your use of this system is open-ended: most business cases should be addressible with a little bit of coding to allow you to interact nicely with your helpdesk.</p>
 
-        <h2 name='request'>Request Basics &amp; Authentication</h2>
+        <h2 id='request'>Request Basics &amp; Authentication</h2>
 
         <p>All requests to the API must be made using <acroynm title='HyperText Transfer Protocol'>HTTP</acronym> POST requests. Any request that is not made using POST will raise an error.</p>
 
@@ -93,11 +93,11 @@ curl_setopt($api, CURLOPT_POSTFIELDS, "user=susan&amp;password=fido&amp;ticket=3
 $result = curl_exec($api);
 curl_close($api);
 echo $result;
-?&lt;</pre>
+?&gt;</pre>
 
         <p>Note that cURL expects all data to be urlencoded, this is left as an exercise for the reader.</p>
 
-        <h2 name='#response'>Responses</h2>
+        <h2 id='response'>Responses</h2>
 
         <p>The API system makes proper use of the following HTTP response codes:</p>
 
@@ -128,7 +128,7 @@ echo $result;
             <dd>Any complex responses, such as a list of data.</dd>
         </dl>
 
-        <h2 name='methods'>Method Documentation</h2>
+        <h2 id='methods'>Method Documentation</h2>
 
         <p>The following public methods are available for use via the API. Each of them requires <a href='#request'>a valid request and authentication</a>, and each has it's own parameters as described below.</p>
 
@@ -143,7 +143,7 @@ echo $result;
             <li><a href='#method_find_user'>find_user</a></li>
         </ul>
 
-        <h3 name='method_create_ticket'>create_ticket</h3>
+        <h3 id='method_create_ticket'>create_ticket</h3>
 
         <p>This method creates a new helpdesk ticket.</p>
 
@@ -172,7 +172,7 @@ echo $result;
 
         <p>If you receive a 200 OK <a href='#response'>response</a>, then the content of the response will be the ticket ID.</p>
         
-        <h3 name='method_delete_ticket'>delete_ticket</h3>
+        <h3 id='method_delete_ticket'>delete_ticket</h3>
 
         <p>When given a ticket ID and confirmation, this method will delete a ticket entirely. This also deletes any followups, attachments, and other details.</p>
 
@@ -190,7 +190,7 @@ echo $result;
 
         <p>A standard <a href='#response'>200 OK response</a> is given on success, or an error message on failure.</p>
 
-        <h3 name='method_hold_ticket'>hold_ticket</h3>
+        <h3 id='method_hold_ticket'>hold_ticket</h3>
 
         <p>If a ticket needs to be placed on hold, preventing it from being escalated, use this method.</p>
 
@@ -205,7 +205,7 @@ echo $result;
         <p>A standard <a href='#response'>200 OK response</a> is given on success, or an error message on failure.</p>
 
         
-        <h3 name='method_unhold_ticket'>unhold_ticket</h3>
+        <h3 id='method_unhold_ticket'>unhold_ticket</h3>
 
         <p>If a ticket is currently on hold and you wish to remove that hold, use this method.</p>
 
@@ -220,7 +220,7 @@ echo $result;
         <p>A standard <a href='#response'>200 OK response</a> is given on success, or an error message on failure.</p>
         
         
-        <h3 name='method_add_followup'>add_followup</h3>
+        <h3 id='method_add_followup'>add_followup</h3>
 
         <p>This method adds a comment / followup to a ticket. The followup can be public, in which case it is e-mailed to the submitter, or private. The followup will also be sent to others involved in the ticket: The owner and the queue notification / CC address.</p>
 
@@ -242,7 +242,7 @@ echo $result;
         <p>A standard <a href='#response'>200 OK response</a> is given on success, or an error message on failure.</p>
         
         
-        <h3 name='method_resolve'>resolve</h3>
+        <h3 id='method_resolve'>resolve</h3>
         
         <p>This method adds a resolution to a ticket and marks it as resolved. The resolution will be e-mailed to everybody involved with the ticket, including the submitter.</p>
 
@@ -261,7 +261,7 @@ echo $result;
         <p>A standard <a href='#response'>200 OK response</a> is given on success, or an error message on failure.</p>
         
         
-        <h3 name='method_list_queues'>list_queues</h3>
+        <h3 id='method_list_queues'>list_queues</h3>
 
         <p>This method provides a JSON-parsable list of queues, letting you access the individual queue ID in order to create tickets.</p>
 
@@ -272,7 +272,7 @@ echo $result;
         <p>It provides a list of queues in JSON format. The fields provided are ID and Title.</p>
 
         
-        <h3 name='method_find_user'>find_user</h3>
+        <h3 id='method_find_user'>find_user</h3>
 
         <p>When given a username, this method provides the related numeric user ID - commonly used when creating or reassigning tickets.</p>
         
