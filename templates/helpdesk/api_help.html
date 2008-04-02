@@ -7,16 +7,33 @@
             font: 10pt "Trebuchet MS", Arial, sans-serif;
         }
 
-        h1 {
-            color: #00c;
-        }
-
         h1, h2, h3, h4 {
             font-family: Garamond, Times, serif;
         }
         
+        h1 {
+            color: #00c;
+            font-size: 18pt;
+            border-bottom: solid 1px #00c;
+        }
+
         h2 {
             color: #c00;
+            font-size: 17pt;
+            border-bottom: solid 1px #c00;
+        }
+
+        h3 {
+            font-size: 14pt;
+            border-bottom: solid 1px #ccc;
+        }
+
+        h4 {
+            font-size: 13pt;
+        }
+
+        dl {
+            padding-left: 2em;
         }
         </style>
         <title>Jutda Helpdesk API Documentation</title>
@@ -46,7 +63,7 @@
 
         <h2 id='introduction'>Introduction</h2>
 
-        <p>Jutda Helpdesk provides a powerful <acronym title='Application Programming Interface'>API</acroynm> to allow you to interact with your helpdesk tickets by a means not otherwise provided by the helpdesk.</p>
+        <p>Jutda Helpdesk provides a powerful <acronym title='Application Programming Interface'>API</acronym> to allow you to interact with your helpdesk tickets by a means not otherwise provided by the helpdesk.</p>
 
         <p>For example, you may use this API to implement a system to automatically open a ticket when an invoice is raised in your invoicing system, or to automatically close a ticket from an instant messenger application.</p>
 
