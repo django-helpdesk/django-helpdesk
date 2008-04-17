@@ -25,7 +25,7 @@ class Queue(models.Model):
     TODO: Add e-mail inboxes (either using piped e-mail or IMAP/POP3) so we 
     can automatically get tickets via e-mail.
     """
-    title = models.CharField(maxlength=100)
+    title = models.CharField(max_length=100)
     slug = models.SlugField(help_text='This slug is used when building ticket ID\'s. Once set, try not to change it or e-mailing may get messy.')
     email_address = models.EmailField(blank=True, null=True, help_text='All outgoing e-mails for this queue will use this e-mail address. If you use IMAP or POP3, this shoul be the e-mail address for that mailbox.')
     escalate_days = models.IntegerField(blank=True, null=True, help_text='For tickets which are not held, how often do you wish to increase their priority? Set to 0 for no escalation.')
@@ -40,12 +40,12 @@ class Queue(models.Model):
     new_ticket_cc = models.EmailField(blank=True, null=True, help_text='If an e-mail address is entered here, then it will receive notification of all new tickets created for this queue')
     updated_ticket_cc = models.EmailField(blank=True, null=True, help_text='If an e-mail address is entered here, then it will receive notification of all activity (new tickets, closed tickets, updates, reassignments, etc) for this queue')
 
-    email_box_type = models.CharField(maxlength=5, choices=(('pop3', 'POP 3'),('imap', 'IMAP')), blank=True, null=True, help_text='E-Mail Server Type - Both POP3 and IMAP are supported. Select your email server type here.')
-    email_box_host = models.CharField(maxlength=200, blank=True, null=True, help_text='Your e-mail server address - either the domain name or IP address. May be "localhost".')
+    email_box_type = models.CharField(max_length=5, choices=(('pop3', 'POP 3'),('imap', 'IMAP')), blank=True, null=True, help_text='E-Mail Server Type - Both POP3 and IMAP are supported. Select your email server type here.')
+    email_box_host = models.CharField(max_length=200, blank=True, null=True, help_text='Your e-mail server address - either the domain name or IP address. May be "localhost".')
     email_box_port = models.IntegerField(blank=True, null=True, help_text='Port number to use for accessing e-mail. Default for POP3 is "110", and for IMAP is "143". This may differ on some servers.')
-    email_box_user = models.CharField(maxlength=200, blank=True, null=True, help_text='Username for accessing this mailbox.')
-    email_box_pass = models.CharField(maxlength=200, blank=True, null=True, help_text='Password for the above username')
-    email_box_imap_folder = models.CharField(maxlength=100, blank=True, null=True, help_text='If using IMAP, what folder do you wish to fetch messages from? This allows you to use one IMAP account for multiple queues, by filtering messages on your IMAP server into separate folders. Default: INBOX.')
+    email_box_user = models.CharField(max_length=200, blank=True, null=True, help_text='Username for accessing this mailbox.')
+    email_box_pass = models.CharField(max_length=200, blank=True, null=True, help_text='Password for the above username')
+    email_box_imap_folder = models.CharField(max_length=100, blank=True, null=True, help_text='If using IMAP, what folder do you wish to fetch messages from? This allows you to use one IMAP account for multiple queues, by filtering messages on your IMAP server into separate folders. Default: INBOX.')
     email_box_interval = models.IntegerField(help_text='How often do you wish to check this mailbox? (in Minutes)', blank=True, null=True, default='5')
     email_box_last_check = models.DateTimeField(blank=True, null=True, editable=False) # Updated by the auto-pop3-and-imap-checker
 
@@ -101,7 +101,7 @@ class Ticket(models.Model):
         (5, '5. Very Low'),
     )
 
-    title = models.CharField(maxlength=200)
+    title = models.CharField(max_length=200)
     queue = models.ForeignKey(Queue)
     created = models.DateTimeField(blank=True)
     modified = models.DateTimeField(blank=True)
@@ -214,7 +214,7 @@ class FollowUp(models.Model):
     """
     ticket = models.ForeignKey(Ticket)
     date = models.DateTimeField(auto_now_add=True)
-    title = models.CharField(maxlength=200, blank=True, null=True)
+    title = models.CharField(max_length=200, blank=True, null=True)
     comment = models.TextField(blank=True, null=True)
     public = models.BooleanField(blank=True, null=True)
     user = models.ForeignKey(User, blank=True, null=True)
@@ -247,7 +247,7 @@ class TicketChange(models.Model):
     etc) are tracked here for display purposes.
     """
     followup = models.ForeignKey(FollowUp, edit_inline=models.TABULAR)
-    field = models.CharField(maxlength=100, core=True)
+    field = models.CharField(max_length=100, core=True)
     old_value = models.TextField(blank=True, null=True, core=True)
     new_value = models.TextField(blank=True, null=True, core=True)
 
@@ -291,8 +291,8 @@ class DynamicFileField(models.FileField):
 class Attachment(models.Model):
     followup = models.ForeignKey(FollowUp, edit_inline=models.TABULAR)
     file = DynamicFileField(upload_to='helpdesk/attachments', core=True)
-    filename = models.CharField(maxlength=100)
-    mime_type = models.CharField(maxlength=30)
+    filename = models.CharField(max_length=100)
+    mime_type = models.CharField(max_length=30)
     size = models.IntegerField(help_text='Size of this file in bytes')
 
     def get_upload_to(self, field_attname):
@@ -332,7 +332,7 @@ class PreSetReply(models.Model):
 class EscalationExclusion(models.Model):
     queues = models.ManyToManyField(Queue, blank=True, null=True, help_text='Leave blank for this exclusion to be applied to all queues, or select those queues you wish to exclude with this entry.')
 
-    name = models.CharField(maxlength=100)
+    name = models.CharField(max_length=100)
     
     date = models.DateField(help_text='Date on which escalation should not happen')
 
@@ -348,10 +348,10 @@ class EmailTemplate(models.Model):
     them in the database. 
     """
 
-    template_name = models.CharField(maxlength=100, unique=True)
+    template_name = models.CharField(max_length=100, unique=True)
    
-    subject = models.CharField(maxlength=100, help_text=u'This will be prefixed with "[ticket.ticket] ticket.title". We recommend something simple such as "(Updated") or "(Closed)" - the same context is available as in plain_text, below.')
-    heading = models.CharField(maxlength=100, help_text=u'In HTML e-mails, this will be the heading at the top of the email - the same context is available as in plain_text, below.')
+    subject = models.CharField(max_length=100, help_text=u'This will be prefixed with "[ticket.ticket] ticket.title". We recommend something simple such as "(Updated") or "(Closed)" - the same context is available as in plain_text, below.')
+    heading = models.CharField(max_length=100, help_text=u'In HTML e-mails, this will be the heading at the top of the email - the same context is available as in plain_text, below.')
     plain_text = models.TextField(help_text=u'The context available to you includes {{ ticket }}, {{ queue }}, and depending on the time of the call: {{ resolution }} or {{ comment }}.')
     html = models.TextField(help_text=u'The same context is available here as in plain_text, above.')
 

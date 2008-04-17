@@ -72,14 +72,14 @@
     <th colspan='2'>Description</th>
 </tr>
 <tr class='row_even'>
-    <td colspan='2'>{{ ticket.description }}</td>
+    <td colspan='2'>{{ ticket.description|safe }}</td>
 </tr>
 
 {% if ticket.resolution %}<tr class='row_odd'>
     <th colspan='2'>Resolution{% ifequal ticket.get_status_display "Resolved" %} <a href='?close'><img src='{{ MEDIA_URL }}/helpdesk/buttons/accept.png' alt='Accept' title='Accept and Close' width='60' height='15' /></a>{% endifequal %}</th>
 </tr>
 <tr class='row_even'>
-    <td colspan='2'>{{ ticket.resolution }}</td>
+    <td colspan='2'>{{ ticket.resolution|safe }}</td>
 </tr>{% endif %}
 
 </table>
@@ -90,7 +90,7 @@
 {% for followup in ticket.followup_set.all %}
 <div class='followup'>
 <div class='title'>{{ followup.title }} <span class='byline'>{% if followup.user %}by {{ followup.user }}{% endif %} <span title='{{ followup.date|date:"r" }}'>{{ followup.date|timesince }} ago</span>{% if not followup.public %} <span class='private'>(Private)</span>{% endif %}</span></div>
-{% if followup.comment %}{{ followup.comment|num_to_link }}{% endif %}
+{% if followup.comment %}{{ followup.comment|num_to_link|safe }}{% endif %}
 {% for change in followup.ticketchange_set.all %}
 {% if forloop.first %}<div class='changes'><ul>{% endif %}
 <li>Changed {{ change.field }} from {{ change.old_value }} to {{ change.new_value }}.</li>
