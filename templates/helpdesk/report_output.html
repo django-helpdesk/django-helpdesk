@@ -1,9 +1,9 @@
-{% extends "helpdesk/base.html" %}
+{% extends "helpdesk/base.html" %}{% load i18n %}
 
-{% block helpdesk_title %}Reports &amp; Statistics{% endblock %}
+{% block helpdesk_title %}{% trans "Reports &amp; Statistics" %}{% endblock %}
 
 {% block helpdesk_body %}
-<h2>Reports &amp; Statistics</h2>
+<h2>{% trans "Reports &amp; Statistics" %}</h2>
 
 <table>
 <tr>{% for h in headings %}<th>{{ h }}</th>{% endfor %}</tr>

@@ -1,5 +1,5 @@
-{% extends "helpdesk/base.html" %}
-{% block helpdesk_title %}Ticket Listing{% endblock %}
+{% extends "helpdesk/base.html" %}{% load i18n %}
+{% block helpdesk_title %}{% trans "Ticket Listing" %}{% endblock %}
 {% block helpdesk_head %}
 <script type='text/javascript' language='javascript' src='{{ MEDIA_URL }}/helpdesk/filter.js'></script>
 <script type='text/javascript' language='javascript' src='{{ MEDIA_URL }}/helpdesk/hover.js'></script>
@@ -9,58 +9,58 @@
 {% load in_list %}
 
 <form><select name='select' id='filterBuilderSelect'>
-    <option value='Sort'>Sorting</option>
-    <option value='Owner'>Owner</option>
-    <option value='Queue'>Queue</option>
-    <option value='Status'>Status</option>
-    <option value='Keywords'>Keywords</option>
+    <option value='Sort'>{% trans "Sorting" %}</option>
+    <option value='Owner'>{% trans "Owner" %}</option>
+    <option value='Queue'>{% trans "Queue" %}</option>
+    <option value='Status'>{% trans "Status" %}</option>
+    <option value='Keywords'>{% trans "Keywords" %}</option>
 </select>
 <input type='button' id='filterBuilderButton' value='+' /></form>
 
 <form method='get' action='./'>
 <div class='filterBox{% if sort %} filterBoxShow{% endif %}' id='filterBoxSort'>
 <label for='id_sort'>Sorting</label> <select id='id_sort' name='sort'>
-    <option value='created'{% ifequal sort "created"%} selected='selected'{% endifequal %}>Created</option>
-    <option value='title'{% ifequal sort "title"%} selected='selected'{% endifequal %}>Title</option>
-    <option value='queue'{% ifequal sort "queue"%} selected='selected'{% endifequal %}>Queue</option>
-    <option value='status'{% ifequal sort "status"%} selected='selected'{% endifequal %}>Status</option>
-    <option value='priority'{% ifequal sort "priority"%} selected='selected'{% endifequal %}>Priority</option>
-    <option value='assigned_to'{% ifequal sort "assigned_to"%} selected='selected'{% endifequal %}>Owner</option>
+    <option value='created'{% ifequal sort "created"%} selected='selected'{% endifequal %}>{% trans "Created" %}</option>
+    <option value='title'{% ifequal sort "title"%} selected='selected'{% endifequal %}>{% trans "Title" %}</option>
+    <option value='queue'{% ifequal sort "queue"%} selected='selected'{% endifequal %}>{% trans "Queue" %}</option>
+    <option value='status'{% ifequal sort "status"%} selected='selected'{% endifequal %}>{% trans "Status" %}</option>
+    <option value='priority'{% ifequal sort "priority"%} selected='selected'{% endifequal %}>{% trans "Priority" %}</option>
+    <option value='assigned_to'{% ifequal sort "assigned_to"%} selected='selected'{% endifequal %}>{% trans "Owner" %}</option>
 </select>
 <input type='button' class='filterBuilderRemove' value='-' />
 </div>
 
 <div class='filterBox{% if owners %} filterBoxShow{% endif %}' id='filterBoxOwner'>
-<label for='id_owners'>Owner(s)</label> <select id='id_owners' name='assigned_to' multiple='selected' size='5'>{% for u in user_choices %}<option value='{{ u.id }}'{% if u.id|in_list:owners %} selected='selected'{% endif %}>{{ u.username }}</option>{% endfor %}</select>
+<label for='id_owners'>{% trans "Owner(s)" %}</label> <select id='id_owners' name='assigned_to' multiple='selected' size='5'>{% for u in user_choices %}<option value='{{ u.id }}'{% if u.id|in_list:owners %} selected='selected'{% endif %}>{{ u.username }}</option>{% endfor %}</select>
 <input type='button' class='filterBuilderRemove' value='-' />
 </div>
 
 <div class='filterBox{% if queues %} filterBoxShow{% endif %}' id='filterBoxQueue'>
-<label for='id_queues'>Queue(s)</label> <select id='id_queues' name='queue' multiple='selected' size='5'>{% for q in queue_choices %}<option value='{{ q.id }}'{% if q.id|in_list:queues %} selected='selected'{% endif %}>{{ q.title }}</option>{% endfor %}</select>
+<label for='id_queues'>{% trans "Queue(s)" %}</label> <select id='id_queues' name='queue' multiple='selected' size='5'>{% for q in queue_choices %}<option value='{{ q.id }}'{% if q.id|in_list:queues %} selected='selected'{% endif %}>{{ q.title }}</option>{% endfor %}</select>
 <input type='button' class='filterBuilderRemove' value='-' />
 </div>
 
 <div class='filterBox{% if statuses %} filterBoxShow{% endif %}' id='filterBoxStatus'>
-<label for='id_statuses'>Status(es)</label> {% for s in status_choices %}<input type='checkbox' name='status' value='{{ s.0 }}'{% if s.0|in_list:statuses %} checked='checked'{% endif %}> {{ s.1 }}{% endfor %}
+<label for='id_statuses'>{% trans "Status(es)" %}</label> {% for s in status_choices %}<input type='checkbox' name='status' value='{{ s.0 }}'{% if s.0|in_list:statuses %} checked='checked'{% endif %}> {{ s.1 }}{% endfor %}
 <input type='button' class='filterBuilderRemove' value='-' />
 </div>
 
 
 <div class='filterBox{% if query %} filterBoxShow{% endif %}' id='filterBoxKeywords'>
-<label for='id_query'>Keywords</label> <input type='text' name='q' value='{{ query }}' id='id_query' />
+<label for='id_query'>{% trans "Keywords" %}</label> <input type='text' name='q' value='{{ query }}' id='id_query' />
 <input type='button' class='filterBuilderRemove' value='-' />
 </div>
 
-<input type='submit' value='Go!' />
+<input type='submit' value='{% trans "Apply Filter" %}' />
 </form>
 
 <table width='100%'>
-<tr class='row_tablehead'><td colspan='7'>Tickets</td></tr>
-<tr class='row_columnheads'><th>#</th><th>Pr</th><th>Title</th><th>Queue</th><th>Status</th><th>Created</th><th>Owner</th></tr>
+<tr class='row_tablehead'><td colspan='7'>{% trans "Tickets" %}</td></tr>
+<tr class='row_columnheads'><th>#</th><th>{% trans "Pr" %}</th><th>{% trans "Title" %}</th><th>{% trans "Queue" %}</th><th>{% trans "Status" %}</th><th>{% trans "Created" %}</th><th>{% trans "Owner" %}</th></tr>
 {% if tickets %}{% for ticket in tickets %}
 <tr class='row_{% cycle odd,even %} row_hover'>
 <th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.ticket }}</a></th>
-<td><img src='{{ ticket.get_priority_img }}' alt='Priority {{ ticket.priority }}' title='Priority {{ ticket.priority }}' height='16' width='16' /></td>
+<td><img src='{{ ticket.get_priority_img }}' alt='{% trans "Priority {{ ticket.priority }}" %}' title='{% trans "Priority {{ ticket.priority }}" %}' height='16' width='16' /></td>
 <th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></th>
 <td>{{ ticket.queue }}</td>
 <td>{{ ticket.get_status }}</td>
@@ -68,7 +68,7 @@
 <td>{{ ticket.get_assigned_to }}</td>
 </tr>
 {% endfor %}{% else %}
-<tr class='row_odd'><td colspan='5'>No Tickets Match Your Selection</td></tr>
+<tr class='row_odd'><td colspan='5'>{% trans "No Tickets Match Your Selection" %}</td></tr>
 {% endif %}
 </table>
 

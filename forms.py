@@ -11,30 +11,31 @@ from django import newforms as forms
 from helpdesk.models import Ticket, Queue, FollowUp
 from django.contrib.auth.models import User
 from datetime import datetime
+from django.utils.translation import ugettext as _
 
 class TicketForm(forms.Form):
-    queue = forms.ChoiceField(label=u'Queue', required=True, choices=())
+    queue = forms.ChoiceField(label=_('Queue'), required=True, choices=())
 
     title = forms.CharField(max_length=100, required=True,
                            widget=forms.TextInput(),
-                           label=u'Summary of the problem')
+                           label=_('Summary of the problem'))
     
     submitter_email = forms.EmailField(required=False,
-                            label=u'Submitter E-Mail Address',
-                            help_text=u'This e-mail address will receive copies of all public updates to this ticket.')
+                            label=_('Submitter E-Mail Address'),
+                            help_text=_('This e-mail address will receive copies of all public updates to this ticket.'))
     
     body = forms.CharField(widget=forms.Textarea(),
-                           label=u'Description of Issue', required=True)
+                           label=_('Description of Issue'), required=True)
     
     assigned_to = forms.ChoiceField(choices=(), required=False,
-                           label=u'Case owner',
-                           help_text=u'If you select an owner other than yourself, they\'ll be e-mailed details of this ticket immediately.')
+                           label=_('Case owner'),
+                           help_text=_('If you select an owner other than yourself, they\'ll be e-mailed details of this ticket immediately.'))
 
     priority = forms.ChoiceField(choices=Ticket.PRIORITY_CHOICES,
                             required=False,
                             initial='3',
-                            label=u'Priority',
-                            help_text=u'Please select a priority carefully. If unsure, leave it as \'3\'.')
+                            label=_('Priority'),
+                            help_text=_('Please select a priority carefully. If unsure, leave it as \'3\'.'))
     
     def save(self, user):
         """
@@ -61,14 +62,14 @@ class TicketForm(forms.Form):
         t.save()
 
         f = FollowUp(   ticket = t,
-                        title = 'Ticket Opened',
+                        title = _('Ticket Opened'),
                         date = datetime.now(),
                         public = True,
                         comment = self.cleaned_data['body'],
                         user = user,
                      )
         if self.cleaned_data['assigned_to']:
-            f.title = 'Ticket Opened & Assigned to %s' % t.get_assigned_to
+            f.title = _('Ticket Opened & Assigned to %(name)s') % {'name': t.get_assigned_to}
 
         f.save()
         
@@ -94,25 +95,25 @@ class TicketForm(forms.Form):
         return t
 
 class PublicTicketForm(forms.Form):
-    queue = forms.ChoiceField(label=u'Queue', required=True, choices=())
+    queue = forms.ChoiceField(label=_('Queue'), required=True, choices=())
 
     title = forms.CharField(max_length=100, required=True,
                             widget=forms.TextInput(),
-                            label=u'Summary of your query')
+                            label=_('Summary of your query'))
     
     submitter_email = forms.EmailField(required=True,
-                            label=u'Your E-Mail Address',
-                            help_text=u'We will e-mail you when your ticket is updated.')
+                            label=_('Your E-Mail Address'),
+                            help_text=_('We will e-mail you when your ticket is updated.'))
     
     body = forms.CharField(widget=forms.Textarea(),
-                            label=u'Description of your issue', required=True,
-                            help_text=u'Please be as descriptive as possible, including any details we may need to address your query.')
+                            label=_('Description of your issue'), required=True,
+                            help_text=_('Please be as descriptive as possible, including any details we may need to address your query.'))
     
     priority = forms.ChoiceField(choices=Ticket.PRIORITY_CHOICES,
                             required=True,
                             initial='3',
-                            label=u'Urgency',
-                            help_text=u'Please select a priority carefully.')
+                            label=_('Urgency'),
+                            help_text=_('Please select a priority carefully.'))
     
     def save(self):
         """
@@ -133,7 +134,7 @@ class PublicTicketForm(forms.Form):
         t.save()
 
         f = FollowUp(   ticket = t,
-                        title = 'Ticket Opened Via Web',
+                        title = _('Ticket Opened Via Web'),
                         date = datetime.now(),
                         public = True,
                         comment = self.cleaned_data['body'],

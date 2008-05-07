@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from django.contrib.syndication.feeds import Feed
 from django.core.urlresolvers import reverse
 from django.db.models import Q
+from django.utils.translation import ugettext as _
 
 from models import Ticket, FollowUp, Queue
 
@@ -22,21 +23,21 @@ class OpenTicketsByUser(Feed):
 
     def title(self, obj):
         if obj['queue']:
-            return "Helpdesk: Open Tickets in queue %s for %s" % (obj['queue'].title, obj['user'].username)
+            return _("Helpdesk: Open Tickets in queue %(queue)s for %(username)s") % {'queue': obj['queue'].title, 'username': obj['user'].username}
         else:
-            return "Helpdesk: Open Tickets for %s" % obj['user'].username
+            return _("Helpdesk: Open Tickets for %(username)s") % {'username': obj['user'].username}
 
     def description(self, obj):
         if obj['queue']:
-            return "Open and Reopened Tickets in queue %s for %s" % (obj['queue'].title, obj['user'].username)
+            return _("Open and Reopened Tickets in queue %(queue)s for %(username)s") % {'queue': obj['queue'].title, 'username': obj['user'].username}
         else:
-            return "Open and Reopened Tickets for %s" % obj['user'].username
+            return _("Open and Reopened Tickets for %(username)s") % {'username': obj['user'].username}
 
     def link(self, obj):
         if obj['queue']:
-            return '%s?assigned_to=%s&queue=%s' % (reverse('helpdesk_list'), obj['user'].id, obj['queue'].id)
+            return u'%s?assigned_to=%s&queue=%s' % (reverse('helpdesk_list'), obj['user'].id, obj['queue'].id)
         else:
-            return '%s?assigned_to=%s' % (reverse('helpdesk_list'), obj['user'].id)
+            return u'%s?assigned_to=%s' % (reverse('helpdesk_list'), obj['user'].id)
 
     def items(self, obj):
         if obj['queue']:
@@ -51,15 +52,15 @@ class OpenTicketsByUser(Feed):
         if item.assigned_to:
             return item.assigned_to.username
         else:
-            return "Unassigned"
+            return _('Unassigned')
 
 
 class UnassignedTickets(Feed):
     title_template = 'helpdesk/rss/ticket_title.html'
     description_template = 'helpdesk/rss/ticket_description.html'
     
-    title = "Helpdesk: Unassigned Tickets"
-    description = "Unassigned Open and Reopened tickets"
+    title = _('Helpdesk: Unassigned Tickets')
+    description = _('Unassigned Open and Reopened tickets')
     link = ''#%s?assigned_to=' % reverse('helpdesk_list')
 
     def items(self, obj):
@@ -73,15 +74,15 @@ class UnassignedTickets(Feed):
         if item.assigned_to:
             return item.assigned_to.username
         else:
-            return "Unassigned"
+            return _('Unassigned')
 
 
 class RecentFollowUps(Feed):
     title_template = 'helpdesk/rss/recent_activity_title.html'
     description_template = 'helpdesk/rss/recent_activity_description.html'
 
-    title = "Helpdesk: Recent Followups"
-    description = "Recent FollowUps, such as e-mail replies, comments, attachments and resolutions"
+    title = _('Helpdesk: Recent Followups')
+    description = _('Recent FollowUps, such as e-mail replies, comments, attachments and resolutions')
     link = '/tickets/' # reverse('helpdesk_list')
 
     def items(self):
@@ -98,10 +99,10 @@ class OpenTicketsByQueue(Feed):
         return Queue.objects.get(slug__exact=bits[0])
 
     def title(self, obj):
-        return "Helpdesk: Open Tickets in queue %s" % obj.title
+        return _('Helpdesk: Open Tickets in queue %(queue)s') % {'queue': obj.title}
 
     def description(self, obj):
-        return "Open and Reopened Tickets in queue %s" % obj.title
+        return _('Open and Reopened Tickets in queue %(queue)s') % {'queue': obj.title}
 
     def link(self, obj):
         return '%s?queue=%s' % (reverse('helpdesk_list'), obj.id)
@@ -116,7 +117,7 @@ class OpenTicketsByQueue(Feed):
         if item.assigned_to:
             return item.assigned_to.username
         else:
-            return "Unassigned"
+            return _('Unassigned')
 
 
 feed_setup = {

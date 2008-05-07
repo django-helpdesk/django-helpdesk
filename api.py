@@ -11,7 +11,7 @@ The API documentation can be accessed by visiting http://helpdesk/api/help/
 through templates/helpdesk/api_help.html.
 """
 from datetime import datetime
-import simplejson
+from django.utils import simplejson
 
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate

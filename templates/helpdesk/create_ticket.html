@@ -1,6 +1,6 @@
-{% extends "helpdesk/base.html" %}
+{% extends "helpdesk/base.html" %}{% load i18n %}
 
-{% block helpdesk_title %}Helpdesk{% endblock %}
+{% block helpdesk_title %}{% trans "Create Ticket" %}{% endblock %}
 
 {% block helpdesk_head %}
 <script src="http://media.jutda.com.au/helpdesk/nicEdit.js" type="text/javascript"></script>
@@ -12,9 +12,9 @@
 {% endblock %}
 
 {% block helpdesk_body %}
-<h2>Submit a Ticket</h2>
+{% blocktrans %}<h2>Submit a Ticket</h2>
 
-<p>Unless otherwise stated, all fields are required. Please provide as descriptive a title and description as possible.</p>
+<p>Unless otherwise stated, all fields are required. Please provide as descriptive a title and description as possible.</p>{% endblocktrans %}
 
 <form method='post' action='./'>
 <fieldset>
@@ -27,7 +27,7 @@
         <dd>{{ form.title }}</dd>
         {% if form.title.errors %}<dd class='error'>{{ form.title.errors }}</dd>{% endif %}
     
-        <dt><label for='id_submitter_email'>{{ form.submitter_email.label }}</label> <span class='form_optional'>(Optional)</span></dt>
+        <dt><label for='id_submitter_email'>{{ form.submitter_email.label }}</label> <span class='form_optional'>{% trans "(Optional)" %}</span></dt>
         <dd>{{ form.submitter_email }}</dd>
         {% if form.submitter_email.errors %}<dd class='error'>{{ form.submitter_email.errors }}</dd>{% endif %}
         <dd class='form_help_text'>{{ form.submitter_email.help_text }}</dd>
@@ -36,7 +36,7 @@
         <dd>{{ form.body }}</dd>
         {% if form.body.errors %}<dd class='error'>{{ form.body.errors }}</dd>{% endif %}
         
-        <dt><label for='id_assigned_to'>{{ form.assigned_to.label }}</label> <span class='form_optional'>(Optional)</span></dt>
+        <dt><label for='id_assigned_to'>{{ form.assigned_to.label }}</label> <span class='form_optional'>{% trans "(Optional)" %}</span></dt>
         <dd>{{ form.assigned_to }}</dd>
         {% if form.assigned_to.errors %}<dd class='error'>{{ form.assigned_to.errors }}</dd>{% endif %}
         <dd class='form_help_text'>{{ form.assigned_to.help_text }}</dd>
@@ -48,7 +48,7 @@
     </dl>
     
     <div class='buttons'>
-        <input type='submit' value='Submit Ticket' />
+        <input type='submit' value='{% trans "Submit Ticket" %}' />
     </div>
 </fieldset>
 

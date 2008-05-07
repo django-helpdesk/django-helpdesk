@@ -1,20 +1,20 @@
-{% extends "helpdesk/public_base.html" %}
-{% block helpdesk_title %}Helpdesk Login{% endblock %}
+{% extends "helpdesk/public_base.html" %}{% load i18n %}
+{% block helpdesk_title %}{% trans "Helpdesk Login" %}{% endblock %}
 
 {% block helpdesk_body %}
-<h2>Login</h2>
+<h2>{% trans "Login" %}</h2>
 
-<p>To log in and begin responding to cases, simply enter your username and password below.</p>
+<p>{% trans "To log in and begin responding to cases, simply enter your username and password below." %}</p>
 
 <form method='post' action='./'>
-    {% if form.has_errors %}<p>Your username and password didn't match. Please try again.</p>{% endif %}
+    {% if form.has_errors %}<p>{% trans "Your username and password didn't match. Please try again." %}</p>{% endif %}
     <dl>
-        <dt><label>Username</label></dt>
+        <dt><label>{% trans "Username" %}</label></dt>
         <dd>{{ form.username }}</dd>
-        <dt><label>Password</label></dt>
+        <dt><label>{% trans "Password" %}</label></dt>
         <dd>{{ form.password }}</dd>
     </dl>
-    <input type='submit' value='Login' />
+    <input type='submit' value='{% trans "Login" %}' />
     <input type="hidden" name="next" value="{% if next %}{{ next }}{% else %}../{% endif %}" />
 </form>
 {% endblock %}

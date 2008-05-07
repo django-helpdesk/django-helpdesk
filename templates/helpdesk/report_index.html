@@ -1,8 +1,8 @@
-{% extends "helpdesk/base.html" %}
+{% extends "helpdesk/base.html" %}{% load i18n %}
 
-{% block helpdesk_title %}Reports &amp; Statistics{% endblock %}
+{% block helpdesk_title %}{% trans "Reports &amp; Statistics" %}{% endblock %}
 
-{% block helpdesk_body %}
+{% block helpdesk_body %}{% blocktrans %}
 <h2>Reports &amp; Statistics</h2>
 
 <ul>
@@ -24,4 +24,4 @@
 </ul></li>
 </ul>
 
-{% endblock %}
+{% endblocktrans %}{% endblock %}

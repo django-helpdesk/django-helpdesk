@@ -24,53 +24,57 @@ def process_email():
 
         if (q.email_box_last_check + timedelta(minutes=q.email_box_interval)) > datetime.now():
             continue
-        print "Processing: %s" % q
-        if q.email_box_type == 'pop3':
-            server = poplib.POP3(q.email_box_host)
-            server.getwelcome()
-            server.user(q.email_box_user)
-            server.pass_(q.email_box_pass)
 
-            messagesInfo = server.list()[1]
-
-            for msg in messagesInfo:
-                msgNum = msg.split(" ")[0]
-                msgSize = msg.split(" ")[1]
-                
-                full_message = "\n".join(server.retr(msgNum)[1])
-                ticket_from_message(message=full_message, queue=q)
-                
-                server.dele(msgNum)
-            server.quit()
-
-        elif q.email_box_type == 'imap':
-            if not q.email_box_port: q.email_box_port = 143
-            
-            server = imaplib.IMAP4(q.email_box_host, q.email_box_port)
-            server.login(q.email_box_user, q.email_box_pass)
-            server.select(q.email_box_imap_folder)
-            status, data = server.search(None, 'ALL')
-            for num in data[0].split():
-                status, data = server.fetch(num, '(RFC822)')
-                ticket_from_message(message=data[0][1], queue=q)
-                server.store(num, '+FLAGS', '\\Deleted')
-            server.expunge()
-            server.close()
-            server.logout()
+        process_queue(q)
 
         q.email_box_last_check = datetime.now()
         q.save()
+
+def process_queue(q):
+    print "Processing: %s" % q
+    if q.email_box_type == 'pop3':
+        server = poplib.POP3(q.email_box_host)
+        server.getwelcome()
+        server.user(q.email_box_user)
+        server.pass_(q.email_box_pass)
+
+        messagesInfo = server.list()[1]
+
+        for msg in messagesInfo:
+            msgNum = msg.split(" ")[0]
+            msgSize = msg.split(" ")[1]
+            
+            full_message = "\n".join(server.retr(msgNum)[1])
+            ticket_from_message(message=full_message, queue=q)
+            
+            server.dele(msgNum)
+        server.quit()
+
+    elif q.email_box_type == 'imap':
+        if not q.email_box_port: q.email_box_port = 143
+        
+        server = imaplib.IMAP4(q.email_box_host, q.email_box_port)
+        server.login(q.email_box_user, q.email_box_pass)
+        server.select(q.email_box_imap_folder)
+        status, data = server.search(None, 'ALL')
+        for num in data[0].split():
+            status, data = server.fetch(num, '(RFC822)')
+            ticket_from_message(message=data[0][1], queue=q)
+            server.store(num, '+FLAGS', '\\Deleted')
+        server.expunge()
+        server.close()
+        server.logout()
 
 def ticket_from_message(message, queue):
     # 'message' must be an RFC822 formatted message.
     msg = message
     message = email.message_from_string(msg)
-    subject = message.get('subject', 'Created from e-mail')
+    subject = message.get('subject', _('Created from e-mail'))
     subject = subject.replace("Re: ", "").replace("Fw: ", "").strip()
     
-    sender = message.get('from', 'Unknown Sender')
+    sender = message.get('from', _('Unknown Sender'))
     
-    sender_email = parseaddr(message.get('from', 'Unknown Sender'))[1]
+    sender_email = parseaddr(sender)[1]
     if sender_email.startswith('postmaster'):
         sender_email = ''
 
@@ -147,7 +151,7 @@ def ticket_from_message(message, queue):
             send_templated_mail('newticket_cc', context, recipients=queue.updated_ticket_cc, sender=queue.from_address, fail_silently=True)
 
     else:
-        update = " (Updated)"
+        update = _(' (Updated)')
 
         if t.assigned_to:
             send_templated_mail('updated_owner', context, recipients=t.assigned_to.email, sender=queue.from_address, fail_silently=True)
@@ -157,7 +161,7 @@ def ticket_from_message(message, queue):
 
     f = FollowUp(
         ticket = t,
-        title = 'E-Mail Received from %s' % sender_email,
+        title = _('E-Mail Received from %s' % sender_email),
         date = datetime.now(),
         public = True,
         comment = body,

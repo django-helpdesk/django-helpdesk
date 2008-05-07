@@ -1,5 +1,4 @@
-{% extends "helpdesk/public_base.html" %}
-{% block helpdesk_title %}Helpdesk{% endblock %}
+{% extends "helpdesk/public_base.html" %}{% load i18n %}
 
 {% block helpdesk_head %}
 <script src="http://media.jutda.com.au/helpdesk/nicEdit.js" type="text/javascript"></script>
@@ -11,25 +10,25 @@
 {% endblock %}
 
 {% block helpdesk_body %}
-<h2>View a Ticket</h2>
+<h2>{% trans "View a Ticket" %}</h2>
 
 <form method='get' action='{% url helpdesk_public_view %}'>
 <fieldset>
     <dl>
-        <dt><label for='id_ticket'>Ticket</label></dt>
+        <dt><label for='id_ticket'>{% trans "Ticket" %}</label></dt>
         <dd><input type='text' name='ticket' /></dd>
 
-        <dt><label for='id_email'>Your E-mail Address</label></dt>
+        <dt><label for='id_email'>{% trans "Your E-mail Address" %}</label></dt>
         <dd><input type='text' name='email' /></dd>
     </dl>
 
-    <input type='submit' value='View Ticket' />
+    <input type='submit' value='{% trans "View Ticket" %}' />
 </fieldset>
 </form>
 
-<h2 name='submit'>Submit a Ticket</h2>
+<h2 name='submit'>{% trans "Submit a Ticket" %}</h2>
 
-<p>All fields are required. Please provide as descriptive a title and description as possible.</p>
+<p>{% trans "All fields are required. Please provide as descriptive a title and description as possible." %}</p>
 
 <form method='post' action='./#submit'>
 <fieldset>
@@ -63,7 +62,7 @@
     </dl>
     
     <div class='buttons'>
-        <input type='submit' value='Submit Ticket' />
+        <input type='submit' value='{% trans "Submit Ticket" %}' />
     </div>
 </fieldset>
 

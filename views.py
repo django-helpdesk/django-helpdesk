@@ -15,9 +15,10 @@ from django.db.models import Q
 from django.http import HttpResponseRedirect, Http404, HttpResponse
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import loader, Context, RequestContext
+from django.utils.translation import ugettext as _
 
 from helpdesk.forms import TicketForm, PublicTicketForm
-from helpdesk.lib import send_templated_mail, line_chart, bar_chart
+from helpdesk.lib import send_templated_mail, line_chart, bar_chart, query_to_dict
 from helpdesk.models import Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment
 
 def dashboard(request):
@@ -43,7 +44,7 @@ def dashboard(request):
                 GROUP BY queue, name
                 ORDER BY q.id;
         """)
-        dash_tickets = cursor.dictfetchall()
+        dash_tickets = query_to_dict(cursor.fetchall(), cursor.description)
     
         return render_to_response('helpdesk/dashboard.html',
             RequestContext(request, {
@@ -92,7 +93,7 @@ def view_ticket(request, ticket_id):
             owner = 0
         else:
             owner = ticket.assigned_to.id
-        request.POST = {'new_status': Ticket.CLOSED_STATUS, 'public': 1, 'owner': owner, 'title': ticket.title, 'comment': "Accepted resolution and closed ticket"}
+        request.POST = {'new_status': Ticket.CLOSED_STATUS, 'public': 1, 'owner': owner, 'title': ticket.title, 'comment': _('Accepted resolution and closed ticket')}
         return update_ticket(request, ticket_id)
 
     return render_to_response('helpdesk/ticket.html',
@@ -126,11 +127,11 @@ def update_ticket(request, ticket_id):
     if owner:
         if owner != 0 and (ticket.assigned_to and owner != ticket.assigned_to.id) or not ticket.assigned_to:
             new_user = User.objects.get(id=owner)
-            f.title = 'Assigned to %s' % new_user.username
+            f.title = _('Assigned to %(username)s') % {'username': new_user.username}
             ticket.assigned_to = new_user
             reassigned = True
         else:
-            f.title = 'Unassigned'
+            f.title = _('Unassigned')
             ticket.assigned_to = None
     
     if new_status != ticket.status:
@@ -144,19 +145,19 @@ def update_ticket(request, ticket_id):
 
     if not f.title:
         if f.comment:
-            f.title = 'Comment'
+            f.title = _('Comment')
         else:
-            f.title = 'Updated'
+            f.title = _('Updated')
 
     f.save()
     
     if title != ticket.title:
-        c = TicketChange(followup=f, field='Title', old_value=ticket.title, new_value=title)
+        c = TicketChange(followup=f, field=_('Title'), old_value=ticket.title, new_value=title)
         c.save()
         ticket.title = title
 
     if priority != ticket.priority:
-        c = TicketChange(followup=f, field='Priority', old_value=ticket.priority, new_value=priority)
+        c = TicketChange(followup=f, field=_('Priority'), old_value=ticket.priority, new_value=priority)
         c.save()
         ticket.priority = priority
 
@@ -315,7 +316,7 @@ def public_view(request):
                 RequestContext(request, {'ticket': t,}))
         except:
             t = False;
-            error_message = 'Invalid ticket ID or e-mail address. Please try again.'
+            error_message = _('Invalid ticket ID or e-mail address. Please try again.')
 
     return render_to_response('helpdesk/public_view_form.html', 
         RequestContext(request, {
@@ -329,10 +330,10 @@ def hold_ticket(request, ticket_id, unhold=False):
 
     if unhold:
         ticket.on_hold = False
-        title = 'Ticket taken off hold'
+        title = _('Ticket taken off hold')
     else:
         ticket.on_hold = True
-        title = 'Ticket placed on hold'
+        title = _('Ticket placed on hold')
     
     f = FollowUp(
         ticket = ticket,
@@ -368,15 +369,15 @@ def run_report(request, report):
     priority_sql = []
     priority_columns = []
     for p in Ticket.PRIORITY_CHOICES:
-        priority_sql.append("COUNT(CASE t.priority WHEN '%s' THEN t.id END) AS \"%s\"" % (p[0], p[1]))
-        priority_columns.append("%s" % p[1])
+        priority_sql.append("COUNT(CASE t.priority WHEN '%s' THEN t.id END) AS \"%s\"" % (p[0], p[1]._proxy____unicode_cast()))
+        priority_columns.append("%s" % p[1]._proxy____unicode_cast())
     priority_sql = ", ".join(priority_sql)
     
     status_sql = []
     status_columns = []
     for s in Ticket.STATUS_CHOICES:
-        status_sql.append("COUNT(CASE t.status WHEN '%s' THEN t.id END) AS \"%s\"" % (s[0], s[1]))
-        status_columns.append("%s" % s[1])
+        status_sql.append("COUNT(CASE t.status WHEN '%s' THEN t.id END) AS \"%s\"" % (s[0], s[1]._proxy____unicode_cast()))
+        status_columns.append("%s" % s[1]._proxy____unicode_cast())
     status_sql = ", ".join(status_sql)
     
     queue_sql = []
@@ -483,7 +484,7 @@ def run_report(request, report):
     from django.db import connection
     cursor = connection.cursor()
     cursor.execute(sql)
-    report_output = cursor.dictfetchall()
+    report_output = query_to_dict(cursor.fetchall(), cursor.description)
 
     data = []
 
