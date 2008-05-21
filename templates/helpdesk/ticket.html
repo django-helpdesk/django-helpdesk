@@ -93,7 +93,7 @@
 {% if followup.comment %}{{ followup.comment|num_to_link|safe }}{% endif %}
 {% for change in followup.ticketchange_set.all %}
 {% if forloop.first %}<div class='changes'><ul>{% endif %}
-<li>{% blocktrans %}Changed {{ change.field }} from {{ change.old_value }} to {{ change.new_value }}.{% endblocktrans %}</li>
+<li>{% blocktrans with change.field as field and change.old_value as old_value and change.new_value as new_value %}Changed {{ field }} from {{ old_value }} to {{ new_value }}.{% endblocktrans %}</li>
 {% if forloop.last %}</div></ul>{% endif %}
 {% endfor %}
 {% for attachment in followup.attachment_set.all %}{% if forloop.first %}<div class='attachments'><ul>{% endif %}
@@ -116,7 +116,7 @@
 
         <dt><label for='commentBox'>{% trans "Comment / Resolution" %}</label></dt>
         <dd><textarea rows='8' cols='70' name='comment' id='commentBox'></textarea></dd>
-        <dd class='form_help_text'>{% trans "You can use the ticket and queue template variables in your message." %}</dd>
+        <dd class='form_help_text'>{% trans "You can use the {{ ticket }} and {{ queue }} template variables in your message." %}</dd>
 
         <dt><label>{% trans "New Status" %}</label></dt>
         {% ifequal ticket.status 1 %}

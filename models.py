@@ -29,6 +29,8 @@ class Queue(models.Model):
     title = models.CharField(_('Title'), max_length=100)
     slug = models.SlugField(_('Slug'), help_text=_('This slug is used when building ticket ID\'s. Once set, try not to change it or e-mailing may get messy.'))
     email_address = models.EmailField(_('E-Mail Address'), blank=True, null=True, help_text=_('All outgoing e-mails for this queue will use this e-mail address. If you use IMAP or POP3, this should be the e-mail address for that mailbox.'))
+    allow_public_submission = models.BooleanField(_('Allow Public Submission?'), blank=True, null=True, help_text=_('Should this queue be listed on the public submission form?'))
+    allow_email_submission = models.BooleanField(_('Allow E-Mail Submission?'), blank=True, null=True, help_text=_('Do you want to poll the e-mail box below for new tickets?'))
     escalate_days = models.IntegerField(_('Escalation Days'), blank=True, null=True, help_text=_('For tickets which are not held, how often do you wish to increase their priority? Set to 0 for no escalation.'))
 
     def _from_address(self):
@@ -180,7 +182,7 @@ class Ticket(models.Model):
         return u'%s' % self.title
 
     def get_absolute_url(self):
-        return ('helpdesk.views.view_ticket', [str(self.id)])
+        return ('helpdesk_view', [str(self.id)])
     get_absolute_url = models.permalink(get_absolute_url)
 
     def save(self):
@@ -364,3 +366,65 @@ class EmailTemplate(models.Model):
 
     class Meta:
         ordering = ['template_name',]
+
+class KBCategory(models.Model):
+    """
+    Lets help users help themselves: the Knowledge Base is a categorised 
+    listing of questions & answers.
+    """
+    
+    title = models.CharField(_('Title'), max_length=100)
+    slug = models.SlugField(_('Slug'))
+    description = models.TextField(_('Description'))
+
+    def __unicode__(self):
+        return u'%s' % self.title
+
+    class Admin:
+        pass
+
+    class Meta:
+        ordering = ['title',]
+    
+    def get_absolute_url(self):
+        return ('helpdesk_kb_category', [str(self.slug)])
+    get_absolute_url = models.permalink(get_absolute_url)
+
+class KBItem(models.Model):
+    """
+    An item within the knowledgebase. Very straightforward question/answer 
+    style system.
+    """
+    category = models.ForeignKey(KBCategory)
+    title = models.CharField(_('Title'), max_length=100)
+    question = models.TextField(_('Question'))
+    answer = models.TextField(_('Answer'))
+    
+    votes = models.IntegerField(_('Votes'), help_text=_('Total number of votes cast for this item'))
+    recommendations = models.IntegerField(_('Positive Votes'), help_text=_('Number of votes for this item which were POSITIVE.'))
+
+    last_updated = models.DateTimeField(_('Last Updated'))
+
+    def save(self):
+        self.last_updated = datetime.now()
+        return super(KBItem, self).save()
+
+    def _score(self):
+        if self.votes > 0:
+            return int(self.recommendations / self.votes)
+        else:
+            return _('Unrated')
+    score = property(_score)
+    
+    def __unicode__(self):
+        return u'%s' % self.title
+
+    class Admin:
+        pass
+
+    class Meta:
+        ordering = ['title',]
+
+    def get_absolute_url(self):
+        return ('helpdesk_kb_item', [str(self.id)])
+    get_absolute_url = models.permalink(get_absolute_url)

@@ -18,7 +18,7 @@ from helpdesk.models import Queue, Ticket, FollowUp, Attachment
 from helpdesk.lib import send_templated_mail
 
 def process_email():
-    for q in Queue.objects.filter(email_box_type__isnull=False):
+    for q in Queue.objects.filter(email_box_type__isnull=False, allow_email_submission=True):
         if not q.email_box_last_check: q.email_box_last_check = datetime.now()-timedelta(minutes=30)
         if not q.email_box_interval: q.email_box_interval = 0
 

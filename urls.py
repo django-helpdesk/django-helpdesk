@@ -11,14 +11,14 @@ from django.conf.urls.defaults import *
 
 from django.contrib.auth.decorators import login_required
 
-from feeds import feed_setup
+from helpdesk.views.feeds import feed_setup
 
 from django.contrib.syndication.views import feed as django_feed
 
-urlpatterns = patterns('helpdesk.views',
-    url(r'^$', 
+urlpatterns = patterns('helpdesk.views.staff',
+    url(r'^dashboard/$', 
         'dashboard',
-        name='helpdesk_home'),
+        name='helpdesk_dashboard'),
     
     url(r'^tickets/$', 
         'ticket_list',
@@ -51,10 +51,6 @@ urlpatterns = patterns('helpdesk.views',
     url(r'^raw/(?P<type>\w+)/$',
         'raw_details',
         name='helpdesk_raw'),
-
-    url(r'^view/$',
-        'public_view',
-        name='helpdesk_public_view'),
     
     url(r'^rss/$',
         'rss_list',
@@ -69,16 +65,24 @@ urlpatterns = patterns('helpdesk.views',
         name='helpdesk_run_report'),
 )
 
+urlpatterns += patterns('helpdesk.views.public',
+    url(r'^$', 
+        'homepage',
+        name='helpdesk_home'),
+
+    url(r'^view/$',
+        'view_ticket',
+        name='helpdesk_public_view'),
+)
+
 urlpatterns += patterns('',
     url(r'^rss/(?P<url>.*)/$',
         login_required(django_feed),
         {'feed_dict': feed_setup},
         name='helpdesk_rss'),
-)
-
-urlpatterns += patterns('',
+    
     url(r'^api/(?P<method>[a-z_-]+)/$',
-        'helpdesk.api.api',
+        'helpdesk.views.api.api',
         name='helpdesk_api'),
 
     url(r'^api/$',
@@ -93,4 +97,18 @@ urlpatterns += patterns('',
     url(r'^logout/$',
         'django.contrib.auth.views.logout',
         name='logout'),
+)
+
+urlpatterns += patterns('helpdesk.views.kb',
+    url(r'^kb/$',
+        'index', name='helpdesk_kb_index'),
+    
+    url(r'^kb/(?P<slug>[A-Za-z_-]+)/$',
+        'category', name='helpdesk_kb_category'),
+    
+    url(r'^kb/(?P<item>[0-9]+)/$',
+        'item', name='helpdesk_kb_item'),
+    
+    url(r'^kb/(?P<item>[0-9]+)/vote/$',
+        'vote', name='helpdesk_kb_vote'),
 )

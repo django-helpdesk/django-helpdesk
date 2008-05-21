@@ -1,0 +1,18 @@
+{% extends "helpdesk/public_base.html" %}{% load i18n %}
+
+{% block helpdesk_body %}
+<h2>{% trans "Knowledgebase" %}</h2>
+
+<p>{% trans "We have listed a number of knowledgebase articles for your perusal in the following categories. Please check to see if any of these articles address your problem prior to opening a support ticket." %}</p>
+
+<table width='100%'>
+<tr class='row_tablehead'><td>{% trans "Knowledgebase Categories" %}</td></tr>
+<tr class='row_columnheads'><th>{% trans "Category" %}</th></tr>
+
+{% for category in categories %}
+<tr class='row_even row_hover'><th><a href='{{ category.get_absolute_url }}'>{{ category.title }}</a></th></tr>
+<tr class='row_odd'><td>{{ category.description }}</td></tr>
+{% endfor %}
+</table>
+
+{% endblock %}

@@ -4,7 +4,7 @@ from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.utils.translation import ugettext as _
 
-from models import Ticket, FollowUp, Queue
+from helpdesk.models import Ticket, FollowUp, Queue
 
 
 class OpenTicketsByUser(Feed):
