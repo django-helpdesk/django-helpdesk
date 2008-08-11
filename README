@@ -25,7 +25,7 @@ LICENSE.JQUERY and LICENSE.NICEDIT for their respective license terms.
 #########################
 1. Python 2.3+ 
 
-2. Django (post-0.96, eg SVN checkout)
+2. Django (1.0 alpha 1 or newer, or an SVN checkout after 7941).
 
 3. An existing WORKING Django project with database etc. If you
    cannot log into the Admin, you won't get this product working.
@@ -53,7 +53,9 @@ LICENSE.JQUERY and LICENSE.NICEDIT for their respective license terms.
 
 4. Ensure the admin line is un-hashed in urls.py:
     # Uncomment this for admin:
-    (r'^admin/', include('django.contrib.admin.urls')),
+    from django.contrib import admin
+    admin.autodiscover()
+    (r'^admin/(.*)', admin.site.root),
 
     If you use helpdesk at the top of your domain (at /), ensure the admin 
     line comes BEFORE the helpdesk line.

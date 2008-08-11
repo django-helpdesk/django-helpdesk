@@ -60,7 +60,7 @@
 {% if tickets %}{% for ticket in tickets %}
 <tr class='row_{% cycle odd,even %} row_hover'>
 <th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.ticket }}</a></th>
-<td><img src='{{ ticket.get_priority_img }}' alt='{% trans "Priority {{ ticket.priority }}" %}' title='{% trans "Priority {{ ticket.priority }}" %}' height='16' width='16' /></td>
+<td>{{ ticket.get_priority_span }}</td>
 <th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></th>
 <td>{{ ticket.queue }}</td>
 <td>{{ ticket.get_status }}</td>

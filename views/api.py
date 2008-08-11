@@ -18,7 +18,7 @@ from django.contrib.auth import authenticate
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from django.template import loader, Context
-from django import newforms as forms
+from django import forms
 
 from helpdesk.lib import send_templated_mail
 from helpdesk.models import Ticket, Queue, FollowUp

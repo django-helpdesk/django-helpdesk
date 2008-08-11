@@ -55,7 +55,7 @@
 
 <tr class='row_even'>
     <th>{% trans "Assigned To" %}</th>
-    <td>{{ ticket.get_assigned_to }}{% ifequal ticket.get_assigned_to _('Unassigned') %} <strong><a href='?take'><img src='{{ MEDIA_URL }}/helpdesk/buttons/take.png' width='60' height='15' alt='{% trans "Take" %}' title='{% trans "Assign this ticket to yourself" %}' /></a></strong>{% endifequal %}</td>
+    <td>{{ ticket.get_assigned_to }}{% ifequal ticket.get_assigned_to _('Unassigned') %} <strong><a href='?take'><span class='button button_take'>{% trans "Take" %}</span></a></strong>{% endifequal %}</td>
 </tr>
 
 <tr class='row_odd'>

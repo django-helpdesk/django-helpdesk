@@ -55,9 +55,6 @@ class Queue(models.Model):
     def __unicode__(self):
         return u"%s" % self.title
 
-    class Admin:
-        list_display = ('title', 'slug', 'email_address')
-
     class Meta:
         ordering = ('title',)
         
@@ -150,6 +147,11 @@ class Ticket(models.Model):
         return u"%s/helpdesk/priorities/priority%s.png" % (settings.MEDIA_URL, self.priority)
     get_priority_img = property(_get_priority_img)
 
+    def _get_priority_span(self):
+        from django.utils.safestring import mark_safe
+        return mark_safe(u"<span class='priority%s'>%s</span>" % (self.priority, self.priority))
+    get_priority_span = property(_get_priority_span)
+
     def _get_status(self):
         held_msg = ''
         if self.on_hold: held_msg = _(' - On Hold')
@@ -170,11 +172,6 @@ class Ticket(models.Model):
         return u"http://%s%s" % (site.domain, reverse('helpdesk_view', args=[self.id]))
     staff_url = property(_get_staff_url)
 
-    class Admin:
-        list_display = ('title', 'status', 'assigned_to', 'submitter_email',)
-        date_hierarchy = 'created'
-        list_filter = ('assigned_to', 'status', )
-    
     class Meta:
         get_latest_by = "created"
 
@@ -229,9 +226,6 @@ class FollowUp(models.Model):
     class Meta:
         ordering = ['date']
     
-    class Admin:
-        pass
-
     def __unicode__(self):
         return u'%s' % self.title
 
@@ -323,9 +317,6 @@ class PreSetReply(models.Model):
     name = models.CharField(_('Name'), max_length=100, help_text=_('Only used to assist users with selecting a reply - not shown to the user.'))
     body = models.TextField(_('Body'), help_text=_('Context available: {{ ticket }} - ticket object (eg {{ ticket.title }}); {{ queue }} - The queue; and {{ user }} - the current user.'))
 
-    class Admin:
-        list_display = ('name',)
-
     class Meta:
         ordering = ['name',]
 
@@ -338,9 +329,6 @@ class EscalationExclusion(models.Model):
     name = models.CharField(_('Name'), max_length=100)
     
     date = models.DateField(_('Date'), help_text=_('Date on which escalation should not happen'))
-
-    class Admin:
-        pass
 
     def __unicode__(self):
         return u'%s' % self.name
@@ -357,9 +345,6 @@ class EmailTemplate(models.Model):
     heading = models.CharField(_('Heading'), max_length=100, help_text=_('In HTML e-mails, this will be the heading at the top of the email - the same context is available as in plain_text, below.'))
     plain_text = models.TextField(_('Plain Text'), help_text=_('The context available to you includes {{ ticket }}, {{ queue }}, and depending on the time of the call: {{ resolution }} or {{ comment }}.'))
     html = models.TextField(_('HTML'), help_text=_('The same context is available here as in plain_text, above.'))
-
-    class Admin:
-        pass
 
     def __unicode__(self):
         return u'%s' % self.template_name
@@ -379,9 +364,6 @@ class KBCategory(models.Model):
 
     def __unicode__(self):
         return u'%s' % self.title
-
-    class Admin:
-        pass
 
     class Meta:
         ordering = ['title',]
@@ -418,9 +400,6 @@ class KBItem(models.Model):
     
     def __unicode__(self):
         return u'%s' % self.title
-
-    class Admin:
-        pass
 
     class Meta:
         ordering = ['title',]

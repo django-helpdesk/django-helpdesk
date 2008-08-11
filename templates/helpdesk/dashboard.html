@@ -4,7 +4,8 @@
 <script type='text/javascript' language='javascript' src='{{ MEDIA_URL }}/helpdesk/hover.js'></script>
 {% endblock %}
 {% block helpdesk_body %}
-<table width='30%'>
+
+<table width='30%' align='left'>
 <tr class='row_tablehead'><td colspan='4'>{% trans "Helpdesk Summary" %}</td></tr>
 <tr class='row_columnheads'><th>{% trans "Queue" %}</th><th>{% trans "Open" %}</th><th>{% trans "Resolved" %}</th></tr>
 {% for queue in dash_tickets %}
@@ -16,6 +17,9 @@
 {% endfor %}
 </table>
 
+<p style='padding-left: 5px;'>Welcome to your Helpdesk Dashboard! From here you can quickly see your own tickets, and those tickets that have no owner. Why not pick up an orphan ticket and sort it out for a customer?</p>
+
+<br style='clear: both;' />
 
 <table width='100%'>
 <tr class='row_tablehead'><td colspan='6'>{% trans "Your Tickets" %}</td></tr>
@@ -23,7 +27,7 @@
 {% for ticket in user_tickets %}
 <tr class='row_{% cycle odd,even %} row_hover'>
 <th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.ticket }}</a></th>
-<td><img src='{{ ticket.get_priority_img }}' alt='{% blocktrans with ticket.priority as priority %}Priority {{ priority }}{% endblocktrans %}' title='{% blocktrans with ticket.priority as priority %}Priority {{ priority }}{% endblocktrans %}' height='16' width='16' /></td>
+<td>{{ ticket.get_priority_span }}</td>
 <th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></th>
 <td>{{ ticket.queue }}</td>
 <td>{{ ticket.get_status }}</td>
@@ -38,11 +42,11 @@
 {% for ticket in unassigned_tickets %}
 <tr class='row_{% cycle odd,even %} row_hover'>
 <th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.ticket }}</a></th>
-<td><img src='{{ ticket.get_priority_img }}' alt='{% blocktrans with ticket.priority as priority %}Priority {{ priority }}{% endblocktrans %}' title='{% blocktrans with ticket.priority as priority %}Priority {{ priority }}{% endblocktrans %}' height='16' width='16' /></td>
+<td>{{ ticket.get_priority_span }}</td>
 <th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></th>
 <td>{{ ticket.queue }}</td>
 <td><span title='{{ ticket.created|date:"r" }}'>{{ ticket.created|timesince }} ago</span></td>
-<th><a href='{{ ticket.get_absolute_url }}?take'><img src='{{ MEDIA_URL }}/helpdesk/buttons/take.png' width='60' height='15' alt='{% trans "Take" %}' title='{% trans "Assign this ticket to yourself" %}' /></a></th>
+<th><a href='{{ ticket.get_absolute_url }}?take'><span class='button button_take'>{% trans "Take" %}</span></a></th>
 </tr>
 {% endfor %}
 </table>

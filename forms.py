@@ -7,7 +7,7 @@ forms.py - Definitions of newforms-based forms for creating and maintaining
            tickets.
 """
 
-from django import newforms as forms
+from django import forms
 from helpdesk.models import Ticket, Queue, FollowUp
 from django.contrib.auth.models import User
 from datetime import datetime
