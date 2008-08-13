@@ -17,6 +17,8 @@ from email.Utils import parseaddr
 from helpdesk.models import Queue, Ticket, FollowUp, Attachment
 from helpdesk.lib import send_templated_mail
 
+from django.core.files.base import ContentFile
+
 def process_email():
     for q in Queue.objects.filter(email_box_type__isnull=False, allow_email_submission=True):
         if not q.email_box_last_check: q.email_box_last_check = datetime.now()-timedelta(minutes=30)
@@ -173,7 +175,8 @@ def ticket_from_message(message, queue):
     for file in files:
         filename = file['filename'].replace(' ', '_')
         a = Attachment(followup=f, filename=filename, mime_type=file['type'], size=len(file['content']))
-        a.save_file_file(file['filename'], file['content'])
+        #a.save_file_file(file['filename'], file['content'])
+        a.file.save(file['filename'], ContentFile(file['content']))
         a.save()
         print "    - %s" % file['filename']
     

@@ -10,6 +10,7 @@ from datetime import datetime
 
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
+from django.core.files.base import ContentFile
 from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.http import HttpResponseRedirect, Http404, HttpResponse
@@ -194,7 +195,8 @@ def update_ticket(request, ticket_id):
         for file in request.FILES.getlist('attachment'):
             filename = file['filename'].replace(' ', '_')
             a = Attachment(followup=f, filename=filename, mime_type=file['content-type'], size=len(file['content']))
-            a.save_file_file(file['filename'], file['content'])
+            #a.save_file_file(file['filename'], file['content'])
+            a.file.save(file['filename'], ContentFile(file['content']))
             a.save()
 
     ticket.save()

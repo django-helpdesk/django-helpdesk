@@ -1,6 +1,7 @@
 from django.contrib import admin
 from helpdesk.models import Queue, Ticket, FollowUp, PreSetReply, KBCategory
 from helpdesk.models import EscalationExclusion, EmailTemplate, KBItem
+from helpdesk.models import TicketChange, Attachment
 
 class QueueAdmin(admin.ModelAdmin):
     list_display = ('title', 'slug', 'email_address')
@@ -10,17 +11,23 @@ class TicketAdmin(admin.ModelAdmin):
     date_hierarchy = 'created'
     list_filter = ('assigned_to', 'status', )
 
-class GenericAdmin(admin.ModelAdmin):
-    pass
+class TicketChangeInline(admin.StackedInline):
+    model = TicketChange
+
+class AttachmentInline(admin.StackedInline):
+    model = Attachment
+
+class FollowUpAdmin(admin.ModelAdmin):
+    inlines = [TicketChangeInline, AttachmentInline]
 
 class PreSetReplyAdmin(admin.ModelAdmin):
     list_display = ('name',)
 
 admin.site.register(Ticket, TicketAdmin)
 admin.site.register(Queue, QueueAdmin)
-admin.site.register(FollowUp, GenericAdmin)
-admin.site.register(PreSetReply, GenericAdmin)
-admin.site.register(EscalationExclusion, GenericAdmin)
-admin.site.register(EmailTemplate, GenericAdmin)
-admin.site.register(KBCategory, GenericAdmin)
-admin.site.register(KBItem, GenericAdmin)
+admin.site.register(FollowUp, FollowUpAdmin)
+admin.site.register(PreSetReply)
+admin.site.register(EscalationExclusion)
+admin.site.register(EmailTemplate)
+admin.site.register(KBCategory)
+admin.site.register(KBItem)

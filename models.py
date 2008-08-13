@@ -12,7 +12,6 @@ from datetime import datetime
 from django.contrib.auth.models import User
 from django.db import models
 from django.conf import settings
-from django.dispatch import dispatcher
 from django.utils.translation import ugettext_lazy as _
 
 class Queue(models.Model):
@@ -243,10 +242,10 @@ class TicketChange(models.Model):
     """ For each FollowUp, any changes to the parent ticket (eg Title, Priority,
     etc) are tracked here for display purposes.
     """
-    followup = models.ForeignKey(FollowUp, edit_inline=models.TABULAR)
-    field = models.CharField(_('Field'), max_length=100, core=True)
-    old_value = models.TextField(_('Old Value'), blank=True, null=True, core=True)
-    new_value = models.TextField(_('New Value'), blank=True, null=True, core=True)
+    followup = models.ForeignKey(FollowUp)
+    field = models.CharField(_('Field'), max_length=100)
+    old_value = models.TextField(_('Old Value'), blank=True, null=True)
+    new_value = models.TextField(_('New Value'), blank=True, null=True)
 
     def __unicode__(self):
         str = u'%s ' % field
@@ -274,9 +273,9 @@ class DynamicFileField(models.FileField):
     def contribute_to_class(self, cls, name):
         """Hook up events so we can access the instance."""
         super(DynamicFileField, self).contribute_to_class(cls, name)
-        dispatcher.connect(self._post_init, models.signals.post_init, sender=cls)
+        models.signals.post_init.connect(self._post_init, sender=cls)
 
-    def _post_init(self, instance=None):
+    def _post_init(self, instance=None, **kwargs):
         """Get dynamic upload_to value from the model instance."""
         if hasattr(instance, 'get_upload_to'):
             self.upload_to = instance.get_upload_to(self.attname)
@@ -286,8 +285,8 @@ class DynamicFileField(models.FileField):
         return 'varchar(100)' 
 
 class Attachment(models.Model):
-    followup = models.ForeignKey(FollowUp, edit_inline=models.TABULAR)
-    file = DynamicFileField(_('File'), upload_to='helpdesk/attachments', core=True)
+    followup = models.ForeignKey(FollowUp)
+    file = DynamicFileField(_('File'), upload_to='helpdesk/attachments')
     filename = models.CharField(_('Filename'), max_length=100)
     mime_type = models.CharField(_('MIME Type'), max_length=30)
     size = models.IntegerField(_('Size'), help_text=_('Size of this file in bytes'))
