@@ -254,7 +254,7 @@ class TicketChange(models.Model):
         elif not old_value:
             str += _('set to %s' % new_value)
         else:
-            str += _('changed from "%s" to "%s"' % (old_value, new_value))
+            str += _('changed from "%(old_value)s" to "%(new_value)s"' % {'old_value': old_value, 'new_value': new_value})
         return str
 
 
