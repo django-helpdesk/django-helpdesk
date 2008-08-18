@@ -9,17 +9,21 @@ scripts/get_email.py - Designed to be run from cron, this script checks the
                        helpdesk, creating tickets from the new messages (or 
                        adding to existing tickets if needed)
 """
-import poplib
+
+import email
 import imaplib
+import mimetypes
+import poplib
+import re
 from datetime import datetime, timedelta
-import email, mimetypes, re
 from email.Utils import parseaddr
-from helpdesk.models import Queue, Ticket, FollowUp, Attachment
-from helpdesk.lib import send_templated_mail
 
 from django.core.files.base import ContentFile
-
 from django.core.management.base import BaseCommand
+from django.utils.translation import ugettext as _
+
+from helpdesk.lib import send_templated_mail
+from helpdesk.models import Queue, Ticket, FollowUp, Attachment
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
