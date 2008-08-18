@@ -48,7 +48,7 @@ def view_ticket(request):
             t = Ticket.objects.get(id=ticket_id, queue__slug__iexact=queue, submitter_email__iexact=email)
             return render_to_response('helpdesk/public_view_ticket.html', 
                 RequestContext(request, {'ticket': t,}))
-        except:
+        except Ticket.DoesNotExist:
             t = False;
             error_message = _('Invalid ticket ID or e-mail address. Please try again.')
 

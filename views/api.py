@@ -107,7 +107,7 @@ class API:
         try:
             u = User.objects.get(username=username)
             return api_return(STATUS_OK, "%s" % u.id)
-        except:
+        except User.DoesNotExist:
             return api_return(STATUS_ERROR, "Invalid username provided")
 
 
@@ -117,7 +117,7 @@ class API:
 
         try:
             ticket = Ticket.objects.get(id=self.request.POST.get('ticket', False))
-        except:
+        except Ticket.DoesNotExist:
             return api_return(STATUS_ERROR, "Invalid ticket ID")
 
         ticket.delete()
@@ -127,7 +127,7 @@ class API:
     def api_public_hold_ticket(self):
         try:
             ticket = Ticket.objects.get(id=self.request.POST.get('ticket', False))
-        except:
+        except Ticket.DoesNotExist:
             return api_return(STATUS_ERROR, "Invalid ticket ID")
 
         ticket.on_hold = True
@@ -139,7 +139,7 @@ class API:
     def api_public_unhold_ticket(self):
         try:
             ticket = Ticket.objects.get(id=self.request.POST.get('ticket', False))
-        except:
+        except Ticket.DoesNotExist:
             return api_return(STATUS_ERROR, "Invalid ticket ID")
 
         ticket.on_hold = False
@@ -151,7 +151,7 @@ class API:
     def api_public_add_followup(self):
         try:
             ticket = Ticket.objects.get(id=self.request.POST.get('ticket', False))
-        except:
+        except Ticket.DoesNotExist:
             return api_return(STATUS_ERROR, "Invalid ticket ID")
 
         message = self.request.POST.get('message', None)
@@ -191,7 +191,7 @@ class API:
     def api_public_resolve(self):
         try:
             ticket = Ticket.objects.get(id=self.request.POST.get('ticket', False))
-        except:
+        except Ticket.DoesNotExist:
             return api_return(STATUS_ERROR, "Invalid ticket ID")
 
         resolution = self.request.POST.get('resolution', None)

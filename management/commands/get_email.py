@@ -19,6 +19,12 @@ from helpdesk.lib import send_templated_mail
 
 from django.core.files.base import ContentFile
 
+from django.core.management.base import BaseCommand
+
+class Command(BaseCommand):
+    def handle(self, *args, **options):
+        process_email()
+
 def process_email():
     for q in Queue.objects.filter(email_box_type__isnull=False, allow_email_submission=True):
         if not q.email_box_last_check: q.email_box_last_check = datetime.now()-timedelta(minutes=30)
@@ -89,7 +95,7 @@ def ticket_from_message(message, queue):
     counter = 0
     files = []
     for part in message.walk():
-        if part.get_main_type() == 'multipart':
+        if part.get_content_maintype() == 'multipart':
             continue
         
         name = part.get_param("name")
@@ -97,7 +103,7 @@ def ticket_from_message(message, queue):
         if part.get_content_maintype() == 'text' and name == None:
             body = part.get_payload()
         else:
-            if name == None:
+            if not name:
                 ext = mimetypes.guess_extension(part.get_content_type())
                 name = "part-%i%s" % (counter, ext)
             files.append({'filename': name, 'content': part.get_payload(decode=True), 'type': part.get_content_type()})
@@ -110,7 +116,7 @@ def ticket_from_message(message, queue):
         try:
             t = Ticket.objects.get(id=ticket)
             new = False
-        except:
+        except Ticket.DoesNotExist:
             ticket = None
 
     priority = 3

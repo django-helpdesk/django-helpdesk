@@ -13,6 +13,58 @@ from django.db.models import Q
 from helpdesk.models import EscalationExclusion, Queue
 import sys, getopt
 
+from django.core.management.base import BaseCommand, CommandError
+from optparse import make_option
+
+class Command(BaseCommand):
+    def __init__(self):
+        BaseCommand.__init__(self)
+
+        self.option_list += (
+            make_option(
+                '--days', '-d', 
+                help='Days of week (monday, tuesday, etc)'),
+            make_option(
+                '--occurrences', '-o', 
+                type='int',
+                default=1,
+                help='Occurrences: How many weeks ahead to exclude this day'),
+            make_option(
+                '--queues', '-q', 
+                help='Queues to include (default: all). Use queue slugs'),
+            make_option(
+                '--verbose', '-v',
+                action='store_true',
+                default=False,
+                help='Display a list of dates excluded'),
+            )
+
+    def handle(self, *args, **options):
+        days = options['days']
+        occurrences = options['occurrences']
+        verbose = False
+        queue_slugs = options['queues']
+        queues = []
+
+        if options['verbose']:
+            verbose = True
+
+        # this should already be handled by optparse
+        if not occurrences: occurrences = 1
+        if not (days and occurrences):
+            raise CommandError('One or more occurrences must be specified.')
+        
+        if queue_slugs is not None:
+            queue_set = queue_slugs.split(',')
+            for queue in queue_set:
+                try:
+                    q = Queue.objects.get(slug__exact=queue)
+                except Queue.DoesNotExist:
+                    raise CommandError("Queue %s does not exist." % queue)
+                queues.append(q)
+
+        create_exclusions(days=days, occurrences=occurrences, verbose=verbose, queues=queues)
+
 day_names = {
     'monday': 0,
     'tuesday': 1,
@@ -88,7 +140,7 @@ if __name__ == '__main__':
         for queue in queue_set:
             try:
                 q = Queue.objects.get(slug__exact=queue)
-            except:
+            except Queue.DoesNotExist:
                 print "Queue %s does not exist." % queue
                 sys.exit(2)
             queues.append(q)

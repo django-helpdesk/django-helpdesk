@@ -15,6 +15,45 @@ from django.utils.translation import ugettext as _
 
 from helpdesk.models import Queue, Ticket, FollowUp, EscalationExclusion, TicketChange
 from helpdesk.lib import send_templated_mail
+ 
+from django.core.management.base import BaseCommand
+from optparse import make_option
+
+class Command(BaseCommand):
+    def __init__(self):
+        BaseCommand.__init__(self)
+
+        self.option_list += (
+            make_option(
+                '--queues', '-q', 
+                help='Queues to include (default: all). Use queue slugs'),
+            make_option(
+                '--verbose', '-v',
+                action='store_true',
+                default=False,
+                help='Display a list of dates excluded'),
+            )
+    
+    def handle(self, *args, **options):
+        verbose = False
+        queue_slugs = None
+        queues = []
+        
+        if options['verbose']:
+            verbose = True
+        if options['queues']:
+            queue_slugs = options['queues']
+        
+        if queue_slugs is not None:
+            queue_set = queue_slugs.split(',')
+            for queue in queue_set:
+                try:
+                    q = Queue.objects.get(slug__exact=queue)
+                except Queue.DoesNotExist:
+                    raise CommandError("Queue %s does not exist." % queue)
+                queues.append(queue)
+
+        escalate_tickets(queues=queues, verbose=verbose)
 
 def escalate_tickets(queues, verbose):
     """ Only include queues with escalation configured """
@@ -47,7 +86,7 @@ def escalate_tickets(queues, verbose):
         
             context = {
                 'ticket': t,
-                'queue': queue,
+                'queue': q,
             }
 
             if t.submitter_email:
@@ -106,7 +145,7 @@ if __name__ == '__main__':
         for queue in queue_set:
             try:
                 q = Queue.objects.get(slug__exact=queue)
-            except:
+            except Queue.DoesNotExist:
                 print "Queue %s does not exist." % queue
                 sys.exit(2)
             queues.append(queue)

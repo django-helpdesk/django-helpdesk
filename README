@@ -11,6 +11,7 @@ Jutda Helpdesk - A Django powered ticket tracker for small enterprise.
 3. Installation
 4. Initial Configuration
 5. API Usage
+6. Thank You
 
 #########################
 1. Licensing
@@ -104,7 +105,7 @@ LICENSE.JQUERY and LICENSE.NICEDIT for their respective license terms.
    Don't forget to set the relevant Django environment variables in your 
    crontab:
 
-   */5 * * * * DJANGO_SETTINGS_MODULE='myproject.settings' python /path/to/helpdesk/scripts/get_email.py
+   */5 * * * * /path/to/helpdesksite/manage.py get_email
 
    This will run the e-mail import every 5 minutes
 
@@ -114,7 +115,7 @@ LICENSE.JQUERY and LICENSE.NICEDIT for their respective license terms.
 4. If you wish to automatically escalate tickets based on their age, set up 
    a cronjob to run scripts/escalate_tickets.py on a regular basis:
    
-   0 * * * * DJANGO_SETTINGS_MODULE='myproject.settings' python /path/to/helpdesk/scripts/escalate_tickets.py
+   0 * * * * /path/to/helpdesksite/manage.py escalate_tickets.py
    
    This will run the escalation process hourly, using the 'Escalation Hours' 
    setting for each queue to determine which tickets to escalate.
@@ -123,7 +124,7 @@ LICENSE.JQUERY and LICENSE.NICEDIT for their respective license terms.
    the dates manually via the Admin, or setup a cronjob to run 
    scripts/create_escalation_exclusions.py on a regular basis:
 
-   0 0 * * 0 DJANGO_SETTINGS_MODULE='myproject.settings' python /path/to/helpdesk/scripts/create_escalation_exclusions.py --days saturday,sunday --verbose
+   0 0 * * 0 /path/to/helpdesksite/manage.py create_escalation_exclusions.py --days saturday,sunday --verbose
 
    This will, on a weekly basis, create exclusions for the coming weekend.
 
@@ -138,3 +139,18 @@ you to create and alter tickets from 3rd party software and systems.
 
 For usage instructions and command syntax, see the file
 templates/helpdesk/api_help.html, or visit http://helpdesk/api/help/.
+
+#########################
+6. Thank You
+#########################
+
+While this started as a project to suit my own needs, since publishing the
+code a number of people have made some fantastic improvements and provided
+bug fixes and updates as the Django codebase has moved on and caused small
+portions of this application to break.
+
+To these people, my sincere thanks:
+
+David Clymer <http://djangopeople.net/vezult/>
+Chris Etcp
+Nikolay Panov

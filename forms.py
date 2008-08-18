@@ -57,7 +57,7 @@ class TicketForm(forms.Form):
             try:
                 u = User.objects.get(id=self.cleaned_data['assigned_to'])
                 t.assigned_to = u
-            except:
+            except User.DoesNotExist:
                 t.assigned_to = None
         t.save()
 

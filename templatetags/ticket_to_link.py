@@ -41,7 +41,7 @@ def num_to_link(text):
         url = reverse('helpdesk_view', args=[number])
         try:
             ticket = Ticket.objects.get(id=number)
-        except:
+        except Ticket.DoesNotExist:
             ticket = None
 
         if ticket:
