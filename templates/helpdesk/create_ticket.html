@@ -3,7 +3,7 @@
 {% block helpdesk_title %}{% trans "Create Ticket" %}{% endblock %}
 
 {% block helpdesk_head %}
-<script src="http://media.jutda.com.au/helpdesk/nicEdit.js" type="text/javascript"></script>
+<script src="{{ MEDIA_URL }}/helpdesk/nicEdit.js" type="text/javascript"></script>
 <script type="text/javascript">
     $(document).ready(function() {
         nic = new nicEditor({buttonList: ['bold','italic','underline','strikeThrough','undo','redo','subscript','superscript','html']}).panelInstance('id_body');
