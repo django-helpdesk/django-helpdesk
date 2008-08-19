@@ -1,15 +1,46 @@
-"""                                     .. 
+"""
 Jutda Helpdesk - A Django powered ticket tracker for small enterprise.
 
 (c) Copyright 2008 Jutda. All Rights Reserved. See LICENSE for details.
 
 lib.py - Common functions (eg multipart e-mail)
 """
+
+chart_colours = ('80C65A', '990066', 'FF9900', '3399CC', 'BBCCED', '3399CC', 'FFCC33')
+
+
 def send_templated_mail(template_name, email_context, recipients, sender=None, bcc=None, fail_silently=False, files=None):
-    from helpdesk.models import EmailTemplate
+    """
+    send_templated_mail() is a warpper around Django's e-mail routines that
+    allows us to easily send multipart (text/plain & text/html) e-mails using
+    templates that are stored in the database. This lets the admin provide
+    both a text and a HTML template for each message.
+
+    template_name is the slug of the template to use for this message (see
+        models.EmailTemplate)
+
+    email_context is a dictionary to be used when rendering the template
+
+    recipients can be either a string, eg 'a@b.com', or a list of strings.
+
+    sender should contain a string, eg 'My Site <me@z.com>'. If you leave it
+        blank, it'll use settings.DEFAULT_FROM_EMAIL as a fallback.
+
+    bcc is an optional list of addresses that will receive this message as a
+        blind carbon copy.
+
+    fail_silently is passed to Django's mail routine. Set to 'True' to ignore
+        any errors at send time.
+
+    files can be a list of file paths to be attached, or it can be left blank.
+        eg ('/tmp/file1.txt', '/tmp/image.png')
+
+    """
+    from django.conf import settings
     from django.core.mail import EmailMultiAlternatives
     from django.template import loader, Context
-    from django.conf import settings
+
+    from helpdesk.models import EmailTemplate
 
     t = EmailTemplate.objects.get(template_name__iexact=template_name)
 
@@ -17,15 +48,27 @@ def send_templated_mail(template_name, email_context, recipients, sender=None, b
         sender = settings.DEFAULT_FROM_EMAIL
 
     context = Context(email_context)
-    
-    text_part = loader.get_template_from_string("%s{%% include 'helpdesk/email_text_footer.txt' %%}" % t.plain_text).render(context)
-    html_part = loader.get_template_from_string("{%% extends 'helpdesk/email_html_base.html' %%}{%% block title %%}%s{%% endblock %%}{%% block content %%}%s{%% endblock %%}" % (t.heading, t.html)).render(context)
-    subject_part = loader.get_template_from_string("{{ ticket.ticket }} {{ ticket.title }} %s" % t.subject).render(context)
+
+    text_part = loader.get_template_from_string(
+        "%s{%% include 'helpdesk/email_text_footer.txt' %%}" % t.plain_text
+        ).render(context)
+
+    html_part = loader.get_template_from_string(
+        "{%% extends 'helpdesk/email_html_base.html' %%}{%% block title %%}%s{%% endblock %%}{%% block content %%}%s{%% endblock %%}" % (t.heading, t.html)
+        ).render(context)
+
+    subject_part = loader.get_template_from_string(
+        "{{ ticket.ticket }} {{ ticket.title }} %s" % t.subject
+        ).render(context)
 
     if type(recipients) != list:
         recipients = [recipients,]
 
-    msg = EmailMultiAlternatives(subject_part, text_part, sender, recipients, bcc=bcc)
+    msg = EmailMultiAlternatives(   subject_part,
+                                    text_part,
+                                    sender,
+                                    recipients,
+                                    bcc=bcc)
     msg.attach_alternative(html_part, "text/html")
 
     if files:
@@ -34,18 +77,18 @@ def send_templated_mail(template_name, email_context, recipients, sender=None, b
 
         for file in files:
             msg.attach_file(file)
-    
+
     return msg.send(fail_silently)
 
-    
 
 def send_multipart_mail(template_name, email_context, subject, recipients, sender=None, bcc=None, fail_silently=False, files=None):
     """
-    This function will send a multi-part e-mail with both HTML and 
-    Text parts.
+    This function will send a multi-part e-mail with both HTML and
+    Text parts. Note we don't use this any more; wsee send_templated_mail
+    instead.
 
-    template_name must NOT contain an extension. Both HTML (.html) and TEXT 
-        (.txt) versions must exist, eg 'emails/public_submit' will use both 
+    template_name must NOT contain an extension. Both HTML (.html) and TEXT
+        (.txt) versions must exist, eg 'emails/public_submit' will use both
         public_submit.html and public_submit.txt.
 
     email_context should be a plain python dictionary. It is applied against
@@ -57,7 +100,7 @@ def send_multipart_mail(template_name, email_context, subject, recipients, sende
     recipients can be either a string, eg 'a@b.com' or a list, eg:
         ['a@b.com', 'c@d.com']. Type conversion is done if needed.
 
-    sender can be an e-mail, 'Name <email>' or None. If unspecified, the 
+    sender can be an e-mail, 'Name <email>' or None. If unspecified, the
         DEFAULT_FROM_EMAIL will be used.
 
     Originally posted on my blog at http://www.rossp.org/
@@ -70,7 +113,7 @@ def send_multipart_mail(template_name, email_context, subject, recipients, sende
         sender = settings.DEFAULT_FROM_EMAIL
 
     context = Context(email_context)
-    
+
     text_part = loader.get_template('%s.txt' % template_name).render(context)
     html_part = loader.get_template('%s.html' % template_name).render(context)
     subject_part = loader.get_template_from_string(subject).render(context)
@@ -87,13 +130,16 @@ def send_multipart_mail(template_name, email_context, subject, recipients, sende
 
         for file in files:
             msg.attach_file(file)
-    
+
     return msg.send(fail_silently)
 
 
 def normalise_data(data, to=100):
     """
-    Used for normalising data prior to graphing with Google charting API
+    Used for normalising data prior to graphing with Google charting API. EG:
+
+        [1, 4, 10] becomes [10, 40, 100]
+        [36, 54, 240] becomes [15, 23, 100]
     """
     max_value = max(data)
     if max_value > to:
@@ -103,7 +149,6 @@ def normalise_data(data, to=100):
         data = new_data
     return data
 
-chart_colours = ('80C65A', '990066', 'FF9900', '3399CC', 'BBCCED', '3399CC', 'FFCC33')
 
 def line_chart(data):
     """
@@ -138,7 +183,7 @@ def line_chart(data):
     first = True
     for row in range(rows):
         # Set maximum data ranges to '0:x' where 'x' is the maximum number in use.
-        if not first: 
+        if not first:
             chart_url += ','
         chart_url += '0,%s' % max
         first = False
@@ -148,6 +193,7 @@ def line_chart(data):
     chart_url += '&chxl=0:|%s|1:|0|%s' % ('|'.join(column_headings), max) # Axis Label Text
 
     return chart_url
+
 
 def bar_chart(data):
     """
@@ -185,12 +231,16 @@ def bar_chart(data):
 
     return chart_url
 
+
 def query_to_dict(results, descriptions):
-    """ Replacement method for cursor.dictfetchall() as that method no longer
+    """
+    Replacement method for cursor.dictfetchall() as that method no longer
     exists in psycopg2, and I'm guessing in other backends too.
-    
-    Converts the results of a raw SQL query into a list of dictionaries, suitable 
-    for use in templates etc. """
+
+    Converts the results of a raw SQL query into a list of dictionaries, suitable
+    for use in templates etc.
+    """
+
     output = []
     for data in results:
         row = {}

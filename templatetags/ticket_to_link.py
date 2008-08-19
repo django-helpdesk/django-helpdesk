@@ -5,18 +5,24 @@ Jutda Helpdesk - A Django powered ticket tracker for small enterprise.
 
 templatetags/ticket_to_link.py - Used in ticket comments to allow wiki-style
                                  linking to other tickets. Including text such
-                                 as '#3180' in a comment automatically links 
+                                 as '#3180' in a comment automatically links
                                  that text to ticket number 3180, with styling
                                  to show the status of that ticket (eg a closed
                                  ticket would have a strikethrough).
 """
+
+import re
+
 from django import template
+from django.core.urlresolvers import reverse
+
 from helpdesk.models import Ticket
+
 
 class ReverseProxy:
     def __init__(self, sequence):
         self.sequence = sequence
-    
+
     def __iter__(self):
         length = len(self.sequence)
         i = length
@@ -24,16 +30,15 @@ class ReverseProxy:
             i = i - 1
             yield self.sequence[i]
 
+
 def num_to_link(text):
     if text == '':
         return text
-    import re
-    from django.core.urlresolvers import reverse
-    
+
     matches = []
     for match in re.finditer("#(\d+)", text):
         matches.append(match)
-    
+
     for match in ReverseProxy(matches):
         start = match.start()
         end = match.end()

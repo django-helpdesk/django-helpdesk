@@ -1,4 +1,4 @@
-"""                                     .. 
+"""                                     ..
 Jutda Helpdesk - A Django powered ticket tracker for small enterprise.
 
 (c) Copyright 2008 Jutda. All Rights Reserved. See LICENSE for details.
@@ -6,23 +6,24 @@ Jutda Helpdesk - A Django powered ticket tracker for small enterprise.
 api.py - Wrapper around API calls, and core functions to provide complete
          API to third party applications.
 
-The API documentation can be accessed by visiting http://helpdesk/api/help/ 
+The API documentation can be accessed by visiting http://helpdesk/api/help/
 (obviously, substitute helpdesk for your Jutda Helpdesk URI), or by reading
 through templates/helpdesk/api_help.html.
 """
-from datetime import datetime
-from django.utils import simplejson
 
-from django.contrib.auth.models import User
+from datetime import datetime
+
+from django import forms
 from django.contrib.auth import authenticate
+from django.contrib.auth.models import User
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from django.template import loader, Context
-from django import forms
+from django.utils import simplejson
 
+from helpdesk.forms import TicketForm
 from helpdesk.lib import send_templated_mail
 from helpdesk.models import Ticket, Queue, FollowUp
-from helpdesk.forms import TicketForm
 
 STATUS_OK = 200
 
@@ -31,27 +32,34 @@ STATUS_ERROR_NOT_FOUND = 404
 STATUS_ERROR_PERMISSIONS = 403
 STATUS_ERROR_BADMETHOD = 405
 
-def api(request, method):
-    if method == 'help':
-        """ Regardless of any other paramaters, we provide a help screen
-        to the user if they requested one. """
-        return render_to_response('helpdesk/api_help.html')
 
+def api(request, method):
     """
+    Regardless of any other paramaters, we provide a help screen
+    to the user if they requested one.
+
     If the user isn't looking for help, then we enforce a few conditions:
         * The request must be sent via HTTP POST
         * The request must contain a 'user' and 'password' which
           must be valid users
         * The method must match one of the public methods of the API class.
+
     """
-    
+
+    if method == 'help':
+        return render_to_response('helpdesk/api_help.html')
+
     if request.method != 'POST':
         return api_return(STATUS_ERROR_BADMETHOD)
-    
-    request.user = authenticate(username=request.POST.get('user', False), password=request.POST.get('password'))
+
+    # TODO: Move away from having the username & password in every request.
+    request.user = authenticate(
+        username=request.POST.get('user', False),
+        password=request.POST.get('password'))
+
     if request.user is None:
         return api_return(STATUS_ERROR_PERMISSIONS)
-    
+
     api = API(request)
     if hasattr(api, 'api_public_%s' % method):
         return getattr(api, 'api_public_%s' % method)()
@@ -63,7 +71,7 @@ def api_return(status, text='', json=False):
     content_type = 'text/plain'
     if status == STATUS_OK and json:
         content_type = 'text/json'
-    
+
     if text is None:
         if status == STATUS_ERROR:
             text = 'Error'
@@ -75,10 +83,12 @@ def api_return(status, text='', json=False):
             text = 'Invalid request method'
         elif status == STATUS_OK:
             text = 'OK'
+
     r = HttpResponse(status=status, content=text, content_type=content_type)
-    
+
     if status == STATUS_ERROR_BADMETHOD:
         r.Allow = 'POST'
+
     return r
 
 
@@ -86,27 +96,30 @@ class API:
     def __init__(self, request):
         self.request = request
 
-    def api_public_create_ticket(self):
 
+    def api_public_create_ticket(self):
         form = TicketForm(self.request.POST)
         form.fields['queue'].choices = [[q.id, q.title] for q in Queue.objects.all()]
         form.fields['assigned_to'].choices = [[u.id, u.username] for u in User.objects.filter(is_active=True)]
+
         if form.is_valid():
             ticket = form.save(user=self.request.user)
             return api_return(STATUS_OK, "%s" % ticket.id)
         else:
             return api_return(STATUS_ERROR, text=form.errors.as_text())
 
-    
+
     def api_public_list_queues(self):
         return api_return(STATUS_OK, simplejson.dumps([{"id": "%s" % q.id, "title": "%s" % q.title} for q in Queue.objects.all()]), json=True)
-    
-    
+
+
     def api_public_find_user(self):
         username = self.request.POST.get('username', False)
+
         try:
             u = User.objects.get(username=username)
             return api_return(STATUS_OK, "%s" % u.id)
+
         except User.DoesNotExist:
             return api_return(STATUS_ERROR, "Invalid username provided")
 
@@ -121,9 +134,10 @@ class API:
             return api_return(STATUS_ERROR, "Invalid ticket ID")
 
         ticket.delete()
+
         return api_return(STATUS_OK)
-        
-    
+
+
     def api_public_hold_ticket(self):
         try:
             ticket = Ticket.objects.get(id=self.request.POST.get('ticket', False))
@@ -135,7 +149,7 @@ class API:
 
         return api_return(STATUS_OK)
 
-        
+
     def api_public_unhold_ticket(self):
         try:
             ticket = Ticket.objects.get(id=self.request.POST.get('ticket', False))
@@ -162,12 +176,20 @@ class API:
 
         if not message:
             return api_return(STATUS_ERROR, "Blank message")
-        
-        f = FollowUp(ticket=ticket, date=datetime.now(), comment=message, user=self.request.user, title='Comment Added')
+
+        f = FollowUp(
+            ticket=ticket,
+            date=datetime.now(),
+            comment=message,
+            user=self.request.user,
+            title='Comment Added',
+            )
+
         if public:
             f.public = True
+
         f.save()
-        
+
         context = {
             'ticket': ticket,
             'queue': ticket.queue,
@@ -175,13 +197,31 @@ class API:
         }
 
         if public and ticket.submitter_email:
-            send_templated_mail('updated_submitter', context, recipients=ticket.submitter_email, sender=ticket.queue.from_address, fail_silently=True)
-        
+            send_templated_mail(
+                'updated_submitter',
+                context,
+                recipients=ticket.submitter_email,
+                sender=ticket.queue.from_address,
+                fail_silently=True,
+                )
+
         if ticket.queue.updated_ticket_cc:
-            send_templated_mail('updated_cc', context, recipients=ticket.queue.updated_ticket_cc, sender=ticket.queue.from_address, fail_silently=True)
-        
+            send_templated_mail(
+                'updated_cc',
+                context,
+                recipients=ticket.queue.updated_ticket_cc,
+                sender=ticket.queue.from_address,
+                fail_silently=True,
+                )
+
         if ticket.assigned_to and self.request.user != ticket.assigned_to:
-            send_templated_mail('updated_owner', context, recipients=ticket.assigned_to.email, sender=ticket.queue.from_address, fail_silently=True)
+            send_templated_mail(
+                'updated_owner',
+                context,
+                recipients=ticket.assigned_to.email,
+                sender=ticket.queue.from_address,
+                fail_silently=True,
+                )
 
         ticket.save()
 
@@ -198,26 +238,51 @@ class API:
 
         if not resolution:
             return api_return(STATUS_ERROR, "Blank resolution")
-        
-        f = FollowUp(ticket=ticket, date=datetime.now(), comment=resolution, user=self.request.user, title='Resolved', public=True)
+
+        f = FollowUp(
+            ticket=ticket,
+            date=datetime.now(),
+            comment=resolution,
+            user=self.request.user,
+            title='Resolved',
+            public=True,
+            )
         f.save()
-        
+
         context = {
             'ticket': ticket,
             'queue': ticket.queue,
             'resolution': f.comment,
         }
-        
+
         subject = '%s %s (Resolved)' % (ticket.ticket, ticket.title)
 
         if ticket.submitter_email:
-            send_templated_mail('resolved_submitter', context, recipients=ticket.submitter_email, sender=ticket.queue.from_address, fail_silently=True)
-        
+            send_templated_mail(
+                'resolved_submitter',
+                context,
+                recipients=ticket.submitter_email,
+                sender=ticket.queue.from_address,
+                fail_silently=True,
+                )
+
         if ticket.queue.updated_ticket_cc:
-            send_templated_mail('resolved_cc', context, recipients=ticket.queue.updated_ticket_cc, sender=ticket.queue.from_address, fail_silently=True)
-        
+            send_templated_mail(
+                'resolved_cc',
+                context,
+                recipients=ticket.queue.updated_ticket_cc,
+                sender=ticket.queue.from_address,
+                fail_silently=True,
+                )
+
         if ticket.assigned_to and self.request.user != ticket.assigned_to:
-            send_templated_mail('resolved_resolved', context, recipients=ticket.assigned_to.email, sender=ticket.queue.from_address, fail_silently=True)
+            send_templated_mail(
+                'resolved_resolved',
+                context,
+                recipients=ticket.assigned_to.email,
+                sender=ticket.queue.from_address,
+                fail_silently=True,
+                )
 
         ticket.resoltuion = f.comment
         ticket.status = Ticket.RESOLVED_STATUS
@@ -225,3 +290,4 @@ class API:
         ticket.save()
 
         return api_return(STATUS_OK)
+

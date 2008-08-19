@@ -8,13 +8,17 @@ scripts/create_escalation_exclusion.py - Easy way to routinely add particular
                                          days to the list of days on which no
                                          escalation should take place.
 """
+
 from datetime import datetime, timedelta, date
-from django.db.models import Q
-from helpdesk.models import EscalationExclusion, Queue
-import sys, getopt
+import getopt
+from optparse import make_option
+import sys
 
 from django.core.management.base import BaseCommand, CommandError
-from optparse import make_option
+from django.db.models import Q
+
+from helpdesk.models import EscalationExclusion, Queue
+
 
 class Command(BaseCommand):
     def __init__(self):
@@ -22,15 +26,15 @@ class Command(BaseCommand):
 
         self.option_list += (
             make_option(
-                '--days', '-d', 
+                '--days', '-d',
                 help='Days of week (monday, tuesday, etc)'),
             make_option(
-                '--occurrences', '-o', 
+                '--occurrences', '-o',
                 type='int',
                 default=1,
                 help='Occurrences: How many weeks ahead to exclude this day'),
             make_option(
-                '--queues', '-q', 
+                '--queues', '-q',
                 help='Queues to include (default: all). Use queue slugs'),
             make_option(
                 '--verbose', '-v',
@@ -53,7 +57,7 @@ class Command(BaseCommand):
         if not occurrences: occurrences = 1
         if not (days and occurrences):
             raise CommandError('One or more occurrences must be specified.')
-        
+
         if queue_slugs is not None:
             queue_set = queue_slugs.split(',')
             for queue in queue_set:
@@ -65,6 +69,7 @@ class Command(BaseCommand):
 
         create_exclusions(days=days, occurrences=occurrences, verbose=verbose, queues=queues)
 
+
 day_names = {
     'monday': 0,
     'tuesday': 1,
@@ -74,6 +79,7 @@ day_names = {
     'saturday': 5,
     'sunday': 6,
 }
+
 
 def create_exclusions(days, occurrences, verbose, queues):
     days = days.split(',')
@@ -87,10 +93,10 @@ def create_exclusions(days, occurrences, verbose, queues):
                 if EscalationExclusion.objects.filter(date=workdate).count() == 0:
                     esc = EscalationExclusion(name='Auto Exclusion for %s' % day_name, date=workdate)
                     esc.save()
-                
+
                     if verbose:
                         print "Created exclusion for %s %s" % (day_name, workdate)
-                
+
                     for q in queues:
                         esc.queues.add(q)
                         if verbose:
@@ -107,13 +113,15 @@ def usage():
     print " --queues, -q: Queues to include (default: all). Use queue slugs"
     print " --verbose, -v: Display a list of dates excluded"
 
+
 if __name__ == '__main__':
+    # This script can be run from the command-line or via Django's manage.py.
     try:
         opts, args = getopt.getopt(sys.argv[1:], 'd:o:q:v', ['days=', 'occurrences=', 'verbose', 'queues='])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
-    
+
     days = None
     occurrences = None
     verbose = False
@@ -134,7 +142,7 @@ if __name__ == '__main__':
     if not (days and occurrences):
         usage()
         sys.exit(2)
-    
+
     if queue_slugs is not None:
         queue_set = queue_slugs.split(',')
         for queue in queue_set:

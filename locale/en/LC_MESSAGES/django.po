@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-08-13 23:32+0000\n"
+"POT-Creation-Date: 2008-08-19 07:01+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: forms.py:17 forms.py:98 templates/helpdesk/dashboard.html:10
+#: forms.py:21 forms.py:147 templates/helpdesk/dashboard.html:10
 #: templates/helpdesk/dashboard.html:26 templates/helpdesk/dashboard.html:41
 #: templates/helpdesk/rss_list.html:23 templates/helpdesk/ticket_list.html:14
 #: templates/helpdesk/ticket_list.html:25
@@ -24,520 +24,564 @@ msgstr ""
 msgid "Queue"
 msgstr ""
 
-#: forms.py:21
+#: forms.py:30
 msgid "Summary of the problem"
 msgstr ""
 
-#: forms.py:24
+#: forms.py:35
 msgid "Submitter E-Mail Address"
 msgstr ""
 
-#: forms.py:25
+#: forms.py:36
 msgid ""
 "This e-mail address will receive copies of all public updates to this ticket."
 msgstr ""
 
-#: forms.py:28
+#: forms.py:42
 msgid "Description of Issue"
 msgstr ""
 
-#: forms.py:31
+#: forms.py:49
 msgid "Case owner"
 msgstr ""
 
-#: forms.py:32
+#: forms.py:50
 msgid ""
 "If you select an owner other than yourself, they'll be e-mailed details of "
 "this ticket immediately."
 msgstr ""
 
-#: forms.py:37 models.py:116 scripts/escalate_tickets.py:76
+#: forms.py:58 models.py:289 management/commands/escalate_tickets.py:152
 #: templates/helpdesk/public_view_ticket.html:29
 #: templates/helpdesk/ticket.html:67 templates/helpdesk/ticket.html.py:159
-#: templates/helpdesk/ticket_list.html:27 views/staff.py:146
+#: templates/helpdesk/ticket_list.html:27 views/staff.py:182
 msgid "Priority"
 msgstr ""
 
-#: forms.py:38
+#: forms.py:59
 msgid "Please select a priority carefully. If unsure, leave it as '3'."
 msgstr ""
 
-#: forms.py:65
+#: forms.py:88
 msgid "Ticket Opened"
 msgstr ""
 
-#: forms.py:72
+#: forms.py:95
 #, python-format
 msgid "Ticket Opened & Assigned to %(name)s"
 msgstr ""
 
-#: forms.py:102
+#: forms.py:156
 msgid "Summary of your query"
 msgstr ""
 
-#: forms.py:105
+#: forms.py:161
 msgid "Your E-Mail Address"
 msgstr ""
 
-#: forms.py:106
+#: forms.py:162
 msgid "We will e-mail you when your ticket is updated."
 msgstr ""
 
-#: forms.py:109
+#: forms.py:167
 msgid "Description of your issue"
 msgstr ""
 
-#: forms.py:110
+#: forms.py:169
 msgid ""
 "Please be as descriptive as possible, including any details we may need to "
 "address your query."
 msgstr ""
 
-#: forms.py:115
+#: forms.py:177
 msgid "Urgency"
 msgstr ""
 
-#: forms.py:116
+#: forms.py:178
 msgid "Please select a priority carefully."
 msgstr ""
 
-#: forms.py:137
+#: forms.py:202
 msgid "Ticket Opened Via Web"
 msgstr ""
 
-#: models.py:28 models.py:103 models.py:216 models.py:360 models.py:380
+#: models.py:29 models.py:227 models.py:434 models.py:728 models.py:759
 #: templates/helpdesk/dashboard.html:26 templates/helpdesk/dashboard.html:41
 #: templates/helpdesk/ticket.html:153 templates/helpdesk/ticket_list.html:24
-#: templates/helpdesk/ticket_list.html:59 views/staff.py:141
+#: templates/helpdesk/ticket_list.html:59 views/staff.py:172
 msgid "Title"
 msgstr ""
 
-#: models.py:29 models.py:361
+#: models.py:34 models.py:733
 msgid "Slug"
 msgstr ""
 
-#: models.py:29
+#: models.py:35
 msgid ""
 "This slug is used when building ticket ID's. Once set, try not to change it "
 "or e-mailing may get messy."
 msgstr ""
 
-#: models.py:30
+#: models.py:40
 msgid "E-Mail Address"
 msgstr ""
 
-#: models.py:30
+#: models.py:43
 msgid ""
 "All outgoing e-mails for this queue will use this e-mail address. If you use "
 "IMAP or POP3, this should be the e-mail address for that mailbox."
 msgstr ""
 
-#: models.py:31
+#: models.py:49
 msgid "Allow Public Submission?"
 msgstr ""
 
-#: models.py:31
+#: models.py:52
 msgid "Should this queue be listed on the public submission form?"
 msgstr ""
 
-#: models.py:32
+#: models.py:57
 msgid "Allow E-Mail Submission?"
 msgstr ""
 
-#: models.py:32
+#: models.py:60
 msgid "Do you want to poll the e-mail box below for new tickets?"
 msgstr ""
 
-#: models.py:33
+#: models.py:65
 msgid "Escalation Days"
 msgstr ""
 
-#: models.py:33
+#: models.py:68
 msgid ""
 "For tickets which are not held, how often do you wish to increase their "
 "priority? Set to 0 for no escalation."
 msgstr ""
 
-#: models.py:42
+#: models.py:73
 msgid "New Ticket CC Address"
 msgstr ""
 
-#: models.py:42
+#: models.py:76
 msgid ""
 "If an e-mail address is entered here, then it will receive notification of "
 "all new tickets created for this queue"
 msgstr ""
 
-#: models.py:43
+#: models.py:81
 msgid "Updated Ticket CC Address"
 msgstr ""
 
-#: models.py:43
+#: models.py:84
 msgid ""
 "If an e-mail address is entered here, then it will receive notification of "
 "all activity (new tickets, closed tickets, updates, reassignments, etc) for "
 "this queue"
 msgstr ""
 
-#: models.py:45
+#: models.py:90
 msgid "E-Mail Box Type"
 msgstr ""
 
-#: models.py:45
+#: models.py:92
 msgid "POP 3"
 msgstr ""
 
-#: models.py:45
+#: models.py:92
 msgid "IMAP"
 msgstr ""
 
-#: models.py:45
+#: models.py:95
 msgid ""
 "E-Mail server type for creating tickets automatically from a mailbox - both "
 "POP3 and IMAP are supported."
 msgstr ""
 
-#: models.py:46
+#: models.py:100
 msgid "E-Mail Hostname"
 msgstr ""
 
-#: models.py:46
+#: models.py:104
 msgid ""
 "Your e-mail server address - either the domain name or IP address. May be "
 "\"localhost\"."
 msgstr ""
 
-#: models.py:47
+#: models.py:109
 msgid "E-Mail Port"
 msgstr ""
 
-#: models.py:47
+#: models.py:112
 msgid ""
 "Port number to use for accessing e-mail. Default for POP3 is \"110\", and "
 "for IMAP is \"143\". This may differ on some servers. Leave it blank to use "
 "the defaults."
 msgstr ""
 
-#: models.py:48
+#: models.py:118
 msgid "E-Mail Username"
 msgstr ""
 
-#: models.py:48
+#: models.py:122
 msgid "Username for accessing this mailbox."
 msgstr ""
 
-#: models.py:49
+#: models.py:126
 msgid "E-Mail Password"
 msgstr ""
 
-#: models.py:49
+#: models.py:130
 msgid "Password for the above username"
 msgstr ""
 
-#: models.py:50
+#: models.py:134
 msgid "IMAP Folder"
 msgstr ""
 
-#: models.py:50
+#: models.py:138
 msgid ""
 "If using IMAP, what folder do you wish to fetch messages from? This allows "
 "you to use one IMAP account for multiple queues, by filtering messages on "
 "your IMAP server into separate folders. Default: INBOX."
 msgstr ""
 
-#: models.py:51
+#: models.py:145
 msgid "E-Mail Check Interval"
 msgstr ""
 
-#: models.py:51
+#: models.py:146
 msgid "How often do you wish to check this mailbox? (in Minutes)"
 msgstr ""
 
-#: models.py:89 templates/helpdesk/dashboard.html:10
+#: models.py:212 templates/helpdesk/dashboard.html:10
 #: templates/helpdesk/ticket.html:123
 msgid "Open"
 msgstr ""
 
-#: models.py:90 templates/helpdesk/ticket.html:128
+#: models.py:213 templates/helpdesk/ticket.html:128
 #: templates/helpdesk/ticket.html.py:133 templates/helpdesk/ticket.html:138
 msgid "Reopened"
 msgstr ""
 
-#: models.py:91 templates/helpdesk/dashboard.html:10
+#: models.py:214 templates/helpdesk/dashboard.html:10
 #: templates/helpdesk/ticket.html:124 templates/helpdesk/ticket.html.py:129
 #: templates/helpdesk/ticket.html:134
 msgid "Resolved"
 msgstr ""
 
-#: models.py:92 templates/helpdesk/ticket.html:125
+#: models.py:215 templates/helpdesk/ticket.html:125
 #: templates/helpdesk/ticket.html.py:130 templates/helpdesk/ticket.html:135
 #: templates/helpdesk/ticket.html.py:139
 msgid "Closed"
 msgstr ""
 
-#: models.py:96
+#: models.py:219
 msgid "1. Critical"
 msgstr ""
 
-#: models.py:97
+#: models.py:220
 msgid "2. High"
 msgstr ""
 
-#: models.py:98
+#: models.py:221
 msgid "3. Normal"
 msgstr ""
 
-#: models.py:99
+#: models.py:222
 msgid "4. Low"
 msgstr ""
 
-#: models.py:100
+#: models.py:223
 msgid "5. Very Low"
 msgstr ""
 
-#: models.py:105 templates/helpdesk/dashboard.html:41
+#: models.py:234 templates/helpdesk/dashboard.html:41
 #: templates/helpdesk/ticket_list.html:23
 #: templates/helpdesk/ticket_list.html:59
 msgid "Created"
 msgstr ""
 
-#: models.py:106
+#: models.py:236
+msgid "Date this ticket was first created"
+msgstr ""
+
+#: models.py:240
 msgid "Modified"
 msgstr ""
 
-#: models.py:107 templates/helpdesk/public_view_ticket.html:24
+#: models.py:242
+msgid "Date this ticket was most recently changed."
+msgstr ""
+
+#: models.py:246 templates/helpdesk/public_view_ticket.html:24
 #: templates/helpdesk/ticket.html:62
 msgid "Submitter E-Mail"
 msgstr ""
 
-#: models.py:107
+#: models.py:249
 msgid ""
 "The submitter will receive an email for all public follow-ups left for this "
 "task."
 msgstr ""
 
-#: models.py:109 templates/helpdesk/dashboard.html:26
+#: models.py:261 templates/helpdesk/dashboard.html:26
 #: templates/helpdesk/ticket_list.html:15
 #: templates/helpdesk/ticket_list.html:26
 #: templates/helpdesk/ticket_list.html:59
 msgid "Status"
 msgstr ""
 
-#: models.py:111
+#: models.py:267
 msgid "On Hold"
 msgstr ""
 
-#: models.py:113 models.py:362 templates/helpdesk/public_view_ticket.html:34
+#: models.py:270
+msgid "If a ticket is on hold, it will not automatically be escalated."
+msgstr ""
+
+#: models.py:275 models.py:737 templates/helpdesk/public_view_ticket.html:34
 #: templates/helpdesk/ticket.html:72
 msgid "Description"
 msgstr ""
 
-#: models.py:114 templates/helpdesk/public_view_ticket.html:41
+#: models.py:278
+msgid "The content of the customers query."
+msgstr ""
+
+#: models.py:282 templates/helpdesk/public_view_ticket.html:41
 #: templates/helpdesk/ticket.html:79
 msgid "Resolution"
 msgstr ""
 
-#: models.py:125 templates/helpdesk/ticket.html:58 views/feeds.py:55
-#: views/feeds.py:77 views/feeds.py:120 views/staff.py:120
+#: models.py:285
+msgid "The resolution provided to the customer by our staff."
+msgstr ""
+
+#: models.py:293
+msgid "1 = Highest Priority, 5 = Low Priority"
+msgstr ""
+
+#: models.py:300
+msgid ""
+"The date this ticket was last escalated - updated automatically by "
+"management/commands/escalate_tickets.py."
+msgstr ""
+
+#: models.py:309 templates/helpdesk/ticket.html:58 views/feeds.py:91
+#: views/feeds.py:117 views/feeds.py:171 views/staff.py:149
 msgid "Unassigned"
 msgstr ""
 
-#: models.py:156
+#: models.py:348
 msgid " - On Hold"
 msgstr ""
 
-#: models.py:215 models.py:330
+#: models.py:430 models.py:662
 msgid "Date"
 msgstr ""
 
-#: models.py:217 views/staff.py:134
+#: models.py:441 views/staff.py:163
 msgid "Comment"
 msgstr ""
 
-#: models.py:218
+#: models.py:447
 msgid "Public"
 msgstr ""
 
-#: models.py:221 templates/helpdesk/ticket.html:121
+#: models.py:450
+msgid ""
+"Public tickets are viewable by the submitter and all staff, but non-public "
+"tickets can only be seen by staff."
+msgstr ""
+
+#: models.py:461 templates/helpdesk/ticket.html:121
 msgid "New Status"
 msgstr ""
 
-#: models.py:246
+#: models.py:465
+msgid "If the status was changed, what was it changed to?"
+msgstr ""
+
+#: models.py:496
 msgid "Field"
 msgstr ""
 
-#: models.py:247
+#: models.py:501
 msgid "Old Value"
 msgstr ""
 
-#: models.py:248
+#: models.py:507
 msgid "New Value"
 msgstr ""
 
-#: models.py:253
+#: models.py:515
 msgid "removed"
 msgstr ""
 
-#: models.py:255
+#: models.py:517
 #, python-format
 msgid "set to %s"
 msgstr ""
 
-#: models.py:257
+#: models.py:519
 #, python-format
 msgid "changed from \"%(old_value)s\" to \"%(new_value)s\""
 msgstr ""
 
-#: models.py:289
+#: models.py:562
 msgid "File"
 msgstr ""
 
-#: models.py:290
+#: models.py:567
 msgid "Filename"
 msgstr ""
 
-#: models.py:291
+#: models.py:572
 msgid "MIME Type"
 msgstr ""
 
-#: models.py:292
+#: models.py:577
 msgid "Size"
 msgstr ""
 
-#: models.py:292
+#: models.py:578
 msgid "Size of this file in bytes"
 msgstr ""
 
-#: models.py:315
+#: models.py:611
 msgid ""
 "Leave blank to allow this reply to be used for all queues, or select those "
 "queues you wish to limit this reply to."
 msgstr ""
 
-#: models.py:316 models.py:328
+#: models.py:616 models.py:657
 msgid "Name"
 msgstr ""
 
-#: models.py:316
+#: models.py:618
 msgid ""
 "Only used to assist users with selecting a reply - not shown to the user."
 msgstr ""
 
-#: models.py:317
+#: models.py:623
 msgid "Body"
 msgstr ""
 
-#: models.py:317
+#: models.py:624
 msgid ""
 "Context available: {{ ticket }} - ticket object (eg {{ ticket.title }}); "
 "{{ queue }} - The queue; and {{ user }} - the current user."
 msgstr ""
 
-#: models.py:326
+#: models.py:651
 msgid ""
 "Leave blank for this exclusion to be applied to all queues, or select those "
 "queues you wish to exclude with this entry."
 msgstr ""
 
-#: models.py:330
+#: models.py:663
 msgid "Date on which escalation should not happen"
 msgstr ""
 
-#: models.py:341
+#: models.py:680
 msgid "Template Name"
 msgstr ""
 
-#: models.py:343
+#: models.py:686
 msgid "Subject"
 msgstr ""
 
-#: models.py:343
+#: models.py:688
 msgid ""
 "This will be prefixed with \"[ticket.ticket] ticket.title\". We recommend "
 "something simple such as \"(Updated\") or \"(Closed)\" - the same context is "
 "available as in plain_text, below."
 msgstr ""
 
-#: models.py:344
+#: models.py:694
 msgid "Heading"
 msgstr ""
 
-#: models.py:344
+#: models.py:696
 msgid ""
 "In HTML e-mails, this will be the heading at the top of the email - the same "
 "context is available as in plain_text, below."
 msgstr ""
 
-#: models.py:345
+#: models.py:702
 msgid "Plain Text"
 msgstr ""
 
-#: models.py:345
+#: models.py:703
 msgid ""
 "The context available to you includes {{ ticket }}, {{ queue }}, and "
 "depending on the time of the call: {{ resolution }} or {{ comment }}."
 msgstr ""
 
-#: models.py:346
+#: models.py:709
 msgid "HTML"
 msgstr ""
 
-#: models.py:346
+#: models.py:710
 msgid "The same context is available here as in plain_text, above."
 msgstr ""
 
-#: models.py:381
+#: models.py:764
 msgid "Question"
 msgstr ""
 
-#: models.py:382
+#: models.py:768
 msgid "Answer"
 msgstr ""
 
-#: models.py:384
+#: models.py:772
 msgid "Votes"
 msgstr ""
 
-#: models.py:384
+#: models.py:773
 msgid "Total number of votes cast for this item"
 msgstr ""
 
-#: models.py:385
+#: models.py:777
 msgid "Positive Votes"
 msgstr ""
 
-#: models.py:385
+#: models.py:778
 msgid "Number of votes for this item which were POSITIVE."
 msgstr ""
 
-#: models.py:387
+#: models.py:782
 msgid "Last Updated"
 msgstr ""
 
-#: models.py:397
+#: models.py:783
+msgid "The date on which this question was most recently changed."
+msgstr ""
+
+#: models.py:795
 msgid "Unrated"
 msgstr ""
 
-#: scripts/escalate_tickets.py:70
+#: management/commands/escalate_tickets.py:146
 #, python-format
 msgid "Ticket escalated after %s days"
 msgstr ""
 
-#: scripts/get_email.py:74
+#: management/commands/get_email.py:97
 msgid "Created from e-mail"
 msgstr ""
 
-#: scripts/get_email.py:77
+#: management/commands/get_email.py:100
 msgid "Unknown Sender"
 msgstr ""
 
-#: scripts/get_email.py:156
+#: management/commands/get_email.py:206
 msgid " (Updated)"
 msgstr ""
 
-#: scripts/get_email.py:166
+#: management/commands/get_email.py:228
 #, python-format
-msgid "E-Mail Received from %s"
+msgid "E-Mail Received from %(sender_email)s"
 msgstr ""
 
 #: templates/helpdesk/base.html:4
@@ -806,7 +850,7 @@ msgstr ""
 
 #: templates/helpdesk/public_view_ticket.html:16
 #, python-format
-msgid "Queue: %(ticket.queue)s"
+msgid "Queue: %(queue_name)s"
 msgstr ""
 
 #: templates/helpdesk/public_view_ticket.html:19
@@ -1087,75 +1131,75 @@ msgstr ""
 msgid "Password"
 msgstr ""
 
-#: views/feeds.py:26
+#: views/feeds.py:35
 #, python-format
 msgid "Helpdesk: Open Tickets in queue %(queue)s for %(username)s"
 msgstr ""
 
-#: views/feeds.py:28
+#: views/feeds.py:40
 #, python-format
 msgid "Helpdesk: Open Tickets for %(username)s"
 msgstr ""
 
-#: views/feeds.py:32
+#: views/feeds.py:46
 #, python-format
 msgid "Open and Reopened Tickets in queue %(queue)s for %(username)s"
 msgstr ""
 
-#: views/feeds.py:34
+#: views/feeds.py:51
 #, python-format
 msgid "Open and Reopened Tickets for %(username)s"
 msgstr ""
 
-#: views/feeds.py:62
+#: views/feeds.py:98
 msgid "Helpdesk: Unassigned Tickets"
 msgstr ""
 
-#: views/feeds.py:63
+#: views/feeds.py:99
 msgid "Unassigned Open and Reopened tickets"
 msgstr ""
 
-#: views/feeds.py:84
+#: views/feeds.py:124
 msgid "Helpdesk: Recent Followups"
 msgstr ""
 
-#: views/feeds.py:85
+#: views/feeds.py:125
 msgid ""
 "Recent FollowUps, such as e-mail replies, comments, attachments and "
 "resolutions"
 msgstr ""
 
-#: views/feeds.py:102
+#: views/feeds.py:142
 #, python-format
 msgid "Helpdesk: Open Tickets in queue %(queue)s"
 msgstr ""
 
-#: views/feeds.py:105
+#: views/feeds.py:147
 #, python-format
 msgid "Open and Reopened Tickets in queue %(queue)s"
 msgstr ""
 
-#: views/public.py:53
+#: views/public.py:58
 msgid "Invalid ticket ID or e-mail address. Please try again."
 msgstr ""
 
-#: views/staff.py:82
+#: views/staff.py:107
 msgid "Accepted resolution and closed ticket"
 msgstr ""
 
-#: views/staff.py:116
+#: views/staff.py:143
 #, python-format
 msgid "Assigned to %(username)s"
 msgstr ""
 
-#: views/staff.py:136
+#: views/staff.py:165
 msgid "Updated"
 msgstr ""
 
-#: views/staff.py:298
+#: views/staff.py:369
 msgid "Ticket taken off hold"
 msgstr ""
 
-#: views/staff.py:301
+#: views/staff.py:372
 msgid "Ticket placed on hold"
 msgstr ""

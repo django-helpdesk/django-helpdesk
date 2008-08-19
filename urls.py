@@ -3,43 +3,41 @@ Jutda Helpdesk - A Django powered ticket tracker for small enterprise.
 
 (c) Copyright 2008 Jutda. All Rights Reserved. See LICENSE for details.
 
-urls.py - Mapping of URL's to our various views. Note we always used NAMED 
+urls.py - Mapping of URL's to our various views. Note we always used NAMED
           views for simplicity in linking later on.
 """
 
 from django.conf.urls.defaults import *
-
 from django.contrib.auth.decorators import login_required
+from django.contrib.syndication.views import feed as django_feed
 
 from helpdesk.views.feeds import feed_setup
 
-from django.contrib.syndication.views import feed as django_feed
-
 urlpatterns = patterns('helpdesk.views.staff',
-    url(r'^dashboard/$', 
+    url(r'^dashboard/$',
         'dashboard',
         name='helpdesk_dashboard'),
-    
-    url(r'^tickets/$', 
+
+    url(r'^tickets/$',
         'ticket_list',
         name='helpdesk_list'),
-    
-    url(r'^tickets/submit/$', 
+
+    url(r'^tickets/submit/$',
         'create_ticket',
         name='helpdesk_submit'),
 
     url(r'^tickets/(?P<ticket_id>[0-9]+)/$',
         'view_ticket',
         name='helpdesk_view'),
-    
+
     url(r'^tickets/(?P<ticket_id>[0-9]+)/update/$',
         'update_ticket',
         name='helpdesk_update'),
-    
+
     url(r'^tickets/(?P<ticket_id>[0-9]+)/delete/$',
         'delete_ticket',
         name='helpdesk_delete'),
-    
+
     url(r'^tickets/(?P<ticket_id>[0-9]+)/hold/$',
         'hold_ticket',
         name='helpdesk_hold'),
@@ -51,7 +49,7 @@ urlpatterns = patterns('helpdesk.views.staff',
     url(r'^raw/(?P<type>\w+)/$',
         'raw_details',
         name='helpdesk_raw'),
-    
+
     url(r'^rss/$',
         'rss_list',
         name='helpdesk_rss_index'),
@@ -59,14 +57,14 @@ urlpatterns = patterns('helpdesk.views.staff',
     url(r'^reports/$',
         'report_index',
         name='helpdesk_report_index'),
-    
+
     url(r'^reports/(?P<report>\w+)/$',
         'run_report',
         name='helpdesk_run_report'),
 )
 
 urlpatterns += patterns('helpdesk.views.public',
-    url(r'^$', 
+    url(r'^$',
         'homepage',
         name='helpdesk_home'),
 
@@ -80,7 +78,7 @@ urlpatterns += patterns('',
         login_required(django_feed),
         {'feed_dict': feed_setup},
         name='helpdesk_rss'),
-    
+
     url(r'^api/(?P<method>[a-z_-]+)/$',
         'helpdesk.views.api.api',
         name='helpdesk_api'),
@@ -89,7 +87,7 @@ urlpatterns += patterns('',
         'django.views.generic.simple.direct_to_template',
         {'template': 'helpdesk/api_help.html',},
         name='helpdesk_api_help'),
-    
+
     url(r'^login/$',
         'django.contrib.auth.views.login',
         name='login'),
@@ -102,13 +100,13 @@ urlpatterns += patterns('',
 urlpatterns += patterns('helpdesk.views.kb',
     url(r'^kb/$',
         'index', name='helpdesk_kb_index'),
-    
+
     url(r'^kb/(?P<slug>[A-Za-z_-]+)/$',
         'category', name='helpdesk_kb_category'),
-    
+
     url(r'^kb/(?P<item>[0-9]+)/$',
         'item', name='helpdesk_kb_item'),
-    
+
     url(r'^kb/(?P<item>[0-9]+)/vote/$',
         'vote', name='helpdesk_kb_vote'),
 )
