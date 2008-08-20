@@ -32,13 +32,17 @@ def dashboard(request):
     with options for them to 'Take' ownership of said tickets.
     """
 
-    tickets = Ticket.objects
-        .filter(assigned_to=request.user)
-        .exclude(status=Ticket.CLOSED_STATUS)
+    tickets = Ticket.objects.filter(
+            assigned_to=request.user,
+        ).exclude(
+            status=Ticket.CLOSED_STATUS,
+        )
 
-    unassigned_tickets = Ticket.objects
-        .filter(assigned_to__isnull=True)
-        .exclude(status=Ticket.CLOSED_STATUS)
+    unassigned_tickets = Ticket.objects.filter(
+            assigned_to__isnull=True,
+        ).exclude(
+            status=Ticket.CLOSED_STATUS,
+        )
 
     # The following query builds a grid of queues & ticket statuses,
     # to be displayed to the user. EG:

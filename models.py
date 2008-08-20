@@ -114,6 +114,14 @@ class Queue(models.Model):
             'servers. Leave it blank to use the defaults.'),
         )
 
+    email_box_ssl = models.BooleanField(
+        _('Use SSL for E-Mail?'),
+        blank=True,
+        null=True,
+        help_text=_('Whether to use SSL for IMAP or POP3 - the default ports '
+            'when using SSL are 993 for IMAP and 995 for POP3.'),
+        )
+             
     email_box_user = models.CharField(
         _('E-Mail Username'),
         max_length=200,
@@ -179,9 +187,13 @@ class Queue(models.Model):
             self.email_box_imap_folder = 'INBOX'
 
         if not self.email_box_port:
-            if self.email_box_type == 'imap':
+            if self.email_box_type == 'imap' and self.email_box_ssl:
+                self.email_box_port = 993
+            elif self.email_box_type == 'imap' and not self.email_box_ssl:
                 self.email_box_port = 143
-            else:
+            elif self.email_box_type == 'pop3' and self.email_box_ssl:
+                self.email_box_port = 995
+            elif self.email_box_type == 'pop3' and not self.email_box_ssl:
                 self.email_box_port = 110
         super(Queue, self).save()
 

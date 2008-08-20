@@ -57,7 +57,14 @@ def process_email():
 def process_queue(q):
     print "Processing: %s" % q
     if q.email_box_type == 'pop3':
-        server = poplib.POP3(q.email_box_host)
+        
+        if q.email_box_ssl:
+            if not q.email_box_port: q.email_box_port = 995
+            server = poplib.POP3_SSL(q.email_box_host, q.email_box_port)
+        else:
+            if not q.email_box_port: q.email_box_port = 110
+            server = poplib.POP3(q.email_box_host, q.email_box_port)
+
         server.getwelcome()
         server.user(q.email_box_user)
         server.pass_(q.email_box_pass)
@@ -75,9 +82,13 @@ def process_queue(q):
         server.quit()
 
     elif q.email_box_type == 'imap':
-        if not q.email_box_port: q.email_box_port = 143
+        if q.email_box_ssl:
+            if not q.email_box_port: q.email_box_port = 993
+            server = imaplib.IMAP4_SSL(q.email_box_host, q.email_box_port)
+        else:
+            if not q.email_box_port: q.email_box_port = 143
+            server = imaplib.IMAP4(q.email_box_host, q.email_box_port)
 
-        server = imaplib.IMAP4(q.email_box_host, q.email_box_port)
         server.login(q.email_box_user, q.email_box_pass)
         server.select(q.email_box_imap_folder)
         status, data = server.search(None, 'ALL')
@@ -150,8 +161,7 @@ def ticket_from_message(message, queue):
 
     high_priority_types = ('high', 'important', '1', 'urgent')
 
-    if smtp_priority in high_priority_types
-    or smtp_importance in high_priority_types:
+    if smtp_priority in high_priority_types or smtp_importance in high_priority_types:
         priority = 2
 
     if ticket == None:
@@ -192,8 +202,7 @@ def ticket_from_message(message, queue):
                 fail_silently=True,
                 )
 
-        if queue.updated_ticket_cc
-        and queue.updated_ticket_cc != queue.new_ticket_cc:
+        if queue.updated_ticket_cc and queue.updated_ticket_cc != queue.new_ticket_cc:
             send_templated_mail(
                 'newticket_cc',
                 context,
