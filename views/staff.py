@@ -461,21 +461,27 @@ def run_report(request, report):
     working = True
 
     while working:
-        periods.append((year, month))
+        temp = (year, month)
         month += 1
         if month > 12:
             year += 1
             month = 1
         if month > last_month and year >= last_year:
             working = False
+        periods.append((temp, (year, month)))
 
-
-
-    for (year, month) in periods:
-        sqlmonth = '%s-%s' % (year, months[month-1])
-        desc = '%s %s' % (months[month-1], year)
-        month_sql.append("COUNT(CASE to_char(t.created, 'YYYY-Mon') WHEN '%s' THEN t.id END) AS \"%s\"" % (sqlmonth, desc))
+    for (low_bound, upper_bound) in periods:
+        low_sqlmonth = '%s-%02i-01' % (low_bound[0], low_bound[1])
+        upper_sqlmonth = '%s-%02i-01' % (upper_bound[0], upper_bound[1])
+        desc = '%s %s' % (months[low_bound[1]-1], low_bound[0])
+        month_sql.append("""
+          COUNT(
+             CASE 1 = 1 
+             WHEN (date(t.created) >= date('%s') 
+                  AND date(t.created) < date('%s')) THEN t.id END) AS "%s"
+             """ % (low_sqlmonth, upper_sqlmonth, desc))
         month_columns.append(desc)
+
     month_sql = ", ".join(month_sql)
 
     queue_base_sql = """
