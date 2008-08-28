@@ -28,6 +28,4 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 EXCEPTIONS
 
-This software is distributed with a copy of jQuery, a javascript library written by John Resig. jQuery is not distributed under the above license, but rather uses the MIT license. See LICENSE.JQUERY for further details.
-
-This software is also distributed with a copy of nicEdit, a javascript rich-text editor written by Brian Kirchoff. nicEdit is not distributed under the above license, but rather uses the MIT license. See LICENSE.NICEDIT for further details.
+This software is distributed with some third-party software which is not distributed under the above license. See LICENSE.3RDPARTY for further details.

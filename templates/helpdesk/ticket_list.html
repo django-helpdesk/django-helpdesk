@@ -3,11 +3,27 @@
 {% block helpdesk_head %}
 <script type='text/javascript' language='javascript' src='{{ MEDIA_URL }}/helpdesk/filter.js'></script>
 <script type='text/javascript' language='javascript' src='{{ MEDIA_URL }}/helpdesk/hover.js'></script>
+
+<script type='text/javascript' language='javascript'>
+$(document).ready(function() {
+    $("#tabset > ul").tabs();
+});
+</script>
 {% endblock %}
 {% block helpdesk_body %}
 
 {% load in_list %}
 
+<div id='tabset'>
+
+<ul>
+<li class='ui-tabs-nav-item'><a href='#tabfilter'><span>Query Options</span></a></li>
+{% if not from_saved_query %}<li class='ui-tabs-nav-item'><a href='#tabsave'><span>Save This Query</span></a></li>{% endif %}
+<li class='ui-tabs-nav-item'><a href='#tabload'><span>Load Saved Query</span></a></li>
+</ul>
+
+<div id='tabfilter'>
+<h3>{% trans "Change Query" %}</h3>
 <form><select name='select' id='filterBuilderSelect'>
     <option value='Sort'>{% trans "Sorting" %}</option>
     <option value='Owner'>{% trans "Owner" %}</option>
@@ -18,41 +34,81 @@
 <input type='button' id='filterBuilderButton' value='+' /></form>
 
 <form method='get' action='./'>
-<div class='filterBox{% if sort %} filterBoxShow{% endif %}' id='filterBoxSort'>
-<label for='id_sort'>Sorting</label> <select id='id_sort' name='sort'>
-    <option value='created'{% ifequal sort "created"%} selected='selected'{% endifequal %}>{% trans "Created" %}</option>
-    <option value='title'{% ifequal sort "title"%} selected='selected'{% endifequal %}>{% trans "Title" %}</option>
-    <option value='queue'{% ifequal sort "queue"%} selected='selected'{% endifequal %}>{% trans "Queue" %}</option>
-    <option value='status'{% ifequal sort "status"%} selected='selected'{% endifequal %}>{% trans "Status" %}</option>
-    <option value='priority'{% ifequal sort "priority"%} selected='selected'{% endifequal %}>{% trans "Priority" %}</option>
-    <option value='assigned_to'{% ifequal sort "assigned_to"%} selected='selected'{% endifequal %}>{% trans "Owner" %}</option>
+<div class='filterBox{% if query_params.sorting %} filterBoxShow{% endif %}' id='filterBoxSort'>
+<label for='id_sort'>Sorting</label><select id='id_sort' name='sort'>
+    <option value='created'{% ifequal query_params.sorting "created"%} selected='selected'{% endifequal %}>{% trans "Created" %}</option>
+    <option value='title'{% ifequal query_params.sorting "title"%} selected='selected'{% endifequal %}>{% trans "Title" %}</option>
+    <option value='queue'{% ifequal query_params.sorting "queue"%} selected='selected'{% endifequal %}>{% trans "Queue" %}</option>
+    <option value='status'{% ifequal query_params.sorting "status"%} selected='selected'{% endifequal %}>{% trans "Status" %}</option>
+    <option value='priority'{% ifequal query_params.sorting "priority"%} selected='selected'{% endifequal %}>{% trans "Priority" %}</option>
+    <option value='assigned_to'{% ifequal query_params.sorting "assigned_to"%} selected='selected'{% endifequal %}>{% trans "Owner" %}</option>
 </select>
+<p class='filterHelp'>Ordering applied to tickets</p>
 <input type='button' class='filterBuilderRemove' value='-' />
 </div>
 
-<div class='filterBox{% if owners %} filterBoxShow{% endif %}' id='filterBoxOwner'>
-<label for='id_owners'>{% trans "Owner(s)" %}</label> <select id='id_owners' name='assigned_to' multiple='selected' size='5'>{% for u in user_choices %}<option value='{{ u.id }}'{% if u.id|in_list:owners %} selected='selected'{% endif %}>{{ u.username }}</option>{% endfor %}</select>
+<div class='filterBox{% if query_params.filtering.assigned_to__id__in %} filterBoxShow{% endif %}' id='filterBoxOwner'>
+<label for='id_owners'>{% trans "Owner(s)" %}</label><select id='id_owners' name='assigned_to' multiple='selected' size='5'>{% for u in user_choices %}<option value='{{ u.id }}'{% if u.id|in_list:query_params.filtering.assigned_to__id__in %} selected='selected'{% endif %}>{{ u.username }}{% ifequal u user %} (ME){% endifequal %}</option>{% endfor %}</select>
+<p class='filterHelp'>Ctrl-Click to select multiple options</p>
 <input type='button' class='filterBuilderRemove' value='-' />
 </div>
 
-<div class='filterBox{% if queues %} filterBoxShow{% endif %}' id='filterBoxQueue'>
-<label for='id_queues'>{% trans "Queue(s)" %}</label> <select id='id_queues' name='queue' multiple='selected' size='5'>{% for q in queue_choices %}<option value='{{ q.id }}'{% if q.id|in_list:queues %} selected='selected'{% endif %}>{{ q.title }}</option>{% endfor %}</select>
+<div class='filterBox{% if query_params.filtering.queue__id__in %} filterBoxShow{% endif %}' id='filterBoxQueue'>
+<label for='id_queues'>{% trans "Queue(s)" %}</label><select id='id_queues' name='queue' multiple='selected' size='5'>{% for q in queue_choices %}<option value='{{ q.id }}'{% if q.id|in_list:query_params.filtering.queue__id__in %} selected='selected'{% endif %}>{{ q.title }}</option>{% endfor %}</select>
+<p class='filterHelp'>Ctrl-click to select multiple options</p>
 <input type='button' class='filterBuilderRemove' value='-' />
 </div>
 
-<div class='filterBox{% if statuses %} filterBoxShow{% endif %}' id='filterBoxStatus'>
-<label for='id_statuses'>{% trans "Status(es)" %}</label> {% for s in status_choices %}<input type='checkbox' name='status' value='{{ s.0 }}'{% if s.0|in_list:statuses %} checked='checked'{% endif %}> {{ s.1 }}{% endfor %}
+<div class='filterBox{% if query_params.filtering.status__in %} filterBoxShow{% endif %}' id='filterBoxStatus'>
+<label for='id_statuses'>{% trans "Status(es)" %}</label><select id='id_statuses' name='status' multiple='selected' size='5'>{% for s in status_choices %}<option value='{{ s.0 }}'{% if s.0|in_list:query_params.filtering.status__in %} selected='selected'{% endif %}>{{ s.1 }}</option>{% endfor %}</select>
+<p class='filterHelp'>Ctrl-click to select multiple options</p>
 <input type='button' class='filterBuilderRemove' value='-' />
 </div>
 
 
 <div class='filterBox{% if query %} filterBoxShow{% endif %}' id='filterBoxKeywords'>
-<label for='id_query'>{% trans "Keywords" %}</label> <input type='text' name='q' value='{{ query }}' id='id_query' />
+<label for='id_query'>{% trans "Keywords" %}</label><input type='text' name='q' value='{{ query }}' id='id_query' />
+<p class='filterHelp'>Keywords are case-insensitive, and will be looked for in the title, body and submitter fields.</p>
 <input type='button' class='filterBuilderRemove' value='-' />
 </div>
-
+<hr style='clear: both;' />
 <input type='submit' value='{% trans "Apply Filter" %}' />
 </form>
+</div>
+
+{% if not from_saved_query %}<div class='tab' id='tabsave'>
+<h3>{% trans "Save Query" %}</h3>
+<form method='post' action='{% url helpdesk_savequery %}'>
+<input type='hidden' name='query_encoded' value='{{ urlsafe_query }}' />
+<dl>
+    <dt><label for='id_title'>{% trans "Query Name" %}</label></dt>
+    <dd><input type='text' name='title' id='id_title' /></dd>
+    <dd class='form_help_text'>{% trans "This name appears in the drop-down list of saved queries. If you share your query, other users will see this name, so choose something clear and descriptive!" %}</dd>
+
+    <dt><label for='id_shared'>{% trans "Shared?" %}</label></dt>
+    <dd><input type='checkbox' name='shared' id='id_shared' /> {% trans "Yes, share this query with other users." %}</dd>
+    <dd class='form_help_text'>{% trans "If you share this query, it will be visible by <em>all</em> other logged-in users." %}</dd>
+
+</dl>
+    
+<div class='buttons'>
+    <input type='submit' value='{% trans "Save Query" %}'>
+</div>
+
+</form>
+</div>{% endif %}
+
+<div id='tabload'>
+<h3>{% trans "Use Saved Query" %}</h3>
+<form method='get' action='{% url helpdesk_list %}'>
+<p><label for='id_query_selector'>{% trans "Query" %}</label> <select name='saved_query' id='id_query_selector' />
+    {% for q in user_saved_queries %}
+    <option value='{{ q.id }}'>{{ q.title }}{% if q.shared %} (Shared{% ifnotequal user q.user %} by {{ q.user.username }}{% endifnotequal %}){% endif %}</option>
+    {% endfor %}
+</select></p>
+<input type='submit' value='{% trans "Run Query" %}'>
+</form>
+</div>
 
 <table width='100%'>
 <tr class='row_tablehead'><td colspan='7'>{% trans "Tickets" %}</td></tr>

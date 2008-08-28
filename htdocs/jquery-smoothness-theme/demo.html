@@ -1,0 +1,167 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+		<title>Themeroller Demo</title>
+		
+		<script src="http://ui.jquery.com/js/jquery.js"></script>
+		<script src="http://ui.jquery.com/js/ui.js"></script>
+		<link rel="stylesheet" href="http://ui.jquery.com/applications/themeroller/css/app_screen.css" type="text/css" media="screen">
+		<link rel="stylesheet" href="jquery-ui-themeroller.css" type="text/css" media="screen">
+		<script type="text/javascript">	
+		$(function(){
+			//accordion
+			$('#accordion').accordion({
+				header: ".ui-accordion-header",
+				clearStyle: true
+			});
+			
+			//tabs
+			$('#tabs ul').tabs();
+			
+			//datepicker
+			$('#ui-datepicker').datepicker({
+				changeFirstDay: false
+			});
+			
+			//slider
+			$('#slider').slider({range: true});
+			
+			
+			
+			
+			
+			//dialog (currently not js-driven in themeroller)
+			/*
+				var dOffset = $('#dialogContent').offset();
+				$('#dialogContent').dialog({
+					buttons: {
+							'Okay': function() {  },
+							'Cancel': function() {  }
+					}
+				});
+		
+			
+			window.scrollTo(0,0);
+			
+			*/
+			
+		});
+	</script>
+	</head>
+	<body>
+		
+		<div id="compGroupA" class="clearfix">
+		
+		<!-- ACCORDION -->
+	
+	
+		
+		<h2 class="demoHeaders">Accordion</h2>
+		
+		<div id="accordion">
+			<div class="ui-accordion-group">
+				<h3 class="ui-accordion-header"><a href="#">Test 1</a></h3>
+				<div class="ui-accordion-content">
+					<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+				</div>
+			</div>
+			<div class="ui-accordion-group">
+				<h3 class="ui-accordion-header"><a href="#">Test 2</a></h3>
+				<div class="ui-accordion-content">
+					<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>				</div>
+			</div>
+			<div class="ui-accordion-group">
+				<h3 class="ui-accordion-header"><a href="#">Test 3</a></h3>
+				<div class="ui-accordion-content">
+					<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+				</div>
+			</div>
+		</div>
+	
+	
+	
+	
+	
+	
+	
+	<!-- TABS -->
+	
+	
+		<h2 class="demoHeaders">Tabs</h2>
+	
+		<div id="tabs">
+            <ul>
+                <li class="ui-tabs-nav-item"><a href="#fragment-1">First Section</a></li>
+                <li class="ui-tabs-nav-item"><a href="#fragment-2">Second Section</a></li>
+                <li class="ui-tabs-nav-item"><a href="#fragment-3"><span>Third Section</span></a></li>
+            </ul>
+            <div id="fragment-1">
+                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+            </div>
+            <div id="fragment-2">
+                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+            </div>
+            <div id="fragment-3">
+                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+            </div>
+        </div>
+
+	
+	
+	</div><!-- /#compGroupA -->
+	
+	<div id="compGroupB" class="clearfix">
+	
+	<!-- SLIDER -->
+	
+	<h2 class="demoHeaders">Slider</h2>
+	
+	<div id="slider">
+		<div class='ui-slider-handle'></div>
+		<div class='ui-slider-handle' style="left: 100px;"></div>	
+	</div>
+	
+	
+	
+	<!-- Date Picker -->
+	<h2 class="demoHeaders">Date Picker</h2>
+	
+	<div id="ui-datepicker" class="clearfix"></div>
+	
+	
+	
+	<!-- Dialog NOTE: Dialog is not generated by UI in this demo so it can be visually styled in themeroller-->
+	<h2 class="demoHeaders">Dialog</h2>
+
+	<div class="ui-dialog ui-draggable" style="width: 30em; height: 20em; ">
+		<div style="position: relative;" class="ui-dialog-container">
+			<div class="ui-dialog-titlebar">
+				<span class="ui-dialog-title">This is my title</span>
+				<a href="#" class="ui-dialog-titlebar-close"><span>X</span></a>
+			</div>
+			<div class="ui-dialog-content" id="dialogContent" title="This is my title">
+				<p>I'm in a dialog!</p>
+			</div>
+		</div>
+		<div class="ui-resizable-n ui-resizable-handle"></div>
+		<div class="ui-resizable-s ui-resizable-handle"></div>
+		<div class="ui-resizable-e ui-resizable-handle"></div>
+		<div class="ui-resizable-w ui-resizable-handle"></div>
+		<div class="ui-resizable-ne ui-resizable-handle"></div>
+		<div class="ui-resizable-se ui-resizable-handle"></div>
+		<div class="ui-resizable-sw ui-resizable-handle"></div>
+		<div class="ui-resizable-nw ui-resizable-handle"></div>
+		<div class="ui-dialog-buttonpane">
+			<button>Okay</button>
+			<button>Cancel</button>
+		</div>
+	</div>
+
+	
+	</div><!-- /#compGroupB -->
+		
+	</body>
+</html>
+
+

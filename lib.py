@@ -251,3 +251,31 @@ def query_to_dict(results, descriptions):
 
         output.append(row)
     return output
+
+
+def apply_query(queryset, params):
+    """
+    Apply a dict-based set of filters & paramaters to a queryset.
+
+    queryset is a Django queryset, eg MyModel.objects.all() or 
+             MyModel.objects.filter(user=request.user)
+
+    params is a dictionary that contains the following:
+        filtering: A dict of Django ORM filters, eg:
+            {'user__id__in': [1, 3, 103], 'title__contains': 'foo'}
+        other_filter: Another filter of some type, most likely a 
+            set of Q() objects.
+        sorting: The name of the column to sort by
+    """
+    for key in params['filtering'].keys():
+        filter = {key: params['filtering'][key]}
+        queryset = queryset.filter(**filter)
+
+    if params.get('other_filter', None):
+        # eg a Q() set
+        queryset = queryset.filter(params['other_filter'])
+
+    if params.get('sorting', None):
+        queryset = queryset.order_by(params['sorting'])
+
+    return queryset

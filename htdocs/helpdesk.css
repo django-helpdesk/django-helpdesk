@@ -200,7 +200,24 @@ textarea#commentBox {
 
 .filterBox {
     display: none;
+    float: left;
+    border: solid #ccc 1px;
+    padding: 2px;
+    margin: 4px;
+    max-width: 24%;
 }
+
 .filterBoxShow {
     display: block;
+}
+
+.filterBox label {
+    clear: both;
+    display: block;
+}
+
+.filterBox .filterHelp {
+    color: #aaa;
+    font-size: 0.8em;
+    clear: both;
 }

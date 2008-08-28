@@ -20,9 +20,6 @@ class AttachmentInline(admin.StackedInline):
 class FollowUpAdmin(admin.ModelAdmin):
     inlines = [TicketChangeInline, AttachmentInline]
 
-class PreSetReplyAdmin(admin.ModelAdmin):
-    list_display = ('name',)
-
 admin.site.register(Ticket, TicketAdmin)
 admin.site.register(Queue, QueueAdmin)
 admin.site.register(FollowUp, FollowUpAdmin)

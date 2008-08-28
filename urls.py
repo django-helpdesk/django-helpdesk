@@ -61,6 +61,14 @@ urlpatterns = patterns('helpdesk.views.staff',
     url(r'^reports/(?P<report>\w+)/$',
         'run_report',
         name='helpdesk_run_report'),
+
+    url(r'^save_query/$',
+        'save_query',
+        name='helpdesk_savequery'),
+    
+    url(r'^delete_query/(?P<id>[0-9]+)/$',
+        'delete_saved_query',
+        name='helpdesk_delete_query'),
 )
 
 urlpatterns += patterns('helpdesk.views.public',

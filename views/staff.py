@@ -21,8 +21,8 @@ from django.template import loader, Context, RequestContext
 from django.utils.translation import ugettext as _
 
 from helpdesk.forms import TicketForm
-from helpdesk.lib import send_templated_mail, line_chart, bar_chart, query_to_dict
-from helpdesk.models import Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment
+from helpdesk.lib import send_templated_mail, line_chart, bar_chart, query_to_dict, apply_query
+from helpdesk.models import Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch
 
 
 def dashboard(request):
@@ -273,47 +273,71 @@ update_ticket = login_required(update_ticket)
 
 
 def ticket_list(request):
-    tickets = Ticket.objects.select_related()
     context = {}
+    
+    # Query_params will hold a dictionary of paramaters relating to 
+    # a query, to be saved if needed:
+    query_params = {
+        'filtering': {},
+        'sorting': None,
+        'keyword': None,
+        'other_filter': None,
+        }
 
-    ### FILTERING
-    queues = request.GET.getlist('queue')
-    if queues:
-        queues = [int(q) for q in queues]
-        tickets = tickets.filter(queue__id__in=queues)
-        context = dict(context, queues=queues)
+    if request.GET.get('saved_query', None):
+        from_saved_query = True
+        try:
+            saved_query = SavedSearch.objects.get(pk=request.GET.get('saved_query'))
+        except SavedSearch.DoesNotExist:
+            return HttpResponseRedirect(reverse('helpdesk_list'))
+        if not (saved_query.shared or saved_query.user == request.user):
+            return HttpResponseRedirect(reverse('helpdesk_list'))
 
-    owners = request.GET.getlist('assigned_to')
-    if owners:
-        owners = [int(u) for u in owners]
-        tickets = tickets.filter(assigned_to__id__in=owners)
-        context = dict(context, owners=owners)
+        import base64, cPickle
+        query_params = cPickle.loads(base64.urlsafe_b64decode(str(saved_query.query)))
+    else:
+        from_saved_query = False
+        queues = request.GET.getlist('queue')
+        if queues:
+            queues = [int(q) for q in queues]
+            query_params['filtering']['queue__id__in'] = queues
 
-    statuses = request.GET.getlist('status')
-    if statuses:
-        statuses = [int(s) for s in statuses]
-        tickets = tickets.filter(status__in=statuses)
-        context = dict(context, statuses=statuses)
+        owners = request.GET.getlist('assigned_to')
+        if owners:
+            owners = [int(u) for u in owners]
+            query_params['filtering']['assigned_to__id__in'] = owners
 
-    ### KEYWORD SEARCHING
-    q = request.GET.get('q', None)
+        statuses = request.GET.getlist('status')
+        if statuses:
+            statuses = [int(s) for s in statuses]
+            query_params['filtering']['status__in'] = statuses
 
-    if q:
-        qset = (
-            Q(title__icontains=q) |
-            Q(description__icontains=q) |
-            Q(resolution__icontains=q) |
-            Q(submitter_email__icontains=q)
-        )
-        tickets = tickets.filter(qset)
-        context = dict(context, query=q)
+        ### KEYWORD SEARCHING
+        q = request.GET.get('q', None)
 
-    ### SORTING
-    sort = request.GET.get('sort', None)
-    if sort not in ('status', 'assigned_to', 'created', 'title', 'queue', 'priority'):
-        sort = 'created'
-    tickets = tickets.order_by(sort)
-    context = dict(context, sort=sort)
+        if q:
+            qset = (
+                Q(title__icontains=q) |
+                Q(description__icontains=q) |
+                Q(resolution__icontains=q) |
+                Q(submitter_email__icontains=q)
+            )
+            context = dict(context, query=q)
+            
+            query_params['other_filter'] = qset
+
+        ### SORTING
+        sort = request.GET.get('sort', None)
+        if sort not in ('status', 'assigned_to', 'created', 'title', 'queue', 'priority'):
+            sort = 'created'
+        query_params['sorting'] = sort
+
+    tickets = apply_query(Ticket.objects.select_related(), query_params)
+
+    import cPickle, base64
+    urlsafe_query = base64.urlsafe_b64encode(cPickle.dumps(query_params))
+
+    user_saved_queries = SavedSearch.objects.filter(Q(user=request.user) | Q(shared__exact=True))
 
     return render_to_response('helpdesk/ticket_list.html',
         RequestContext(request, dict(
@@ -322,6 +346,10 @@ def ticket_list(request):
             user_choices=User.objects.filter(is_active=True),
             queue_choices=Queue.objects.all(),
             status_choices=Ticket.STATUS_CHOICES,
+            urlsafe_query=urlsafe_query,
+            user_saved_queries=user_saved_queries,
+            query_params=query_params,
+            from_saved_query=from_saved_query,
         )))
 ticket_list = login_required(ticket_list)
 
@@ -559,3 +587,31 @@ def run_report(request, report):
         }))
 run_report = login_required(run_report)
 
+
+def save_query(request):
+    title = request.POST.get('title', None)
+    shared = request.POST.get('shared', False)
+    query_encoded = request.POST.get('query_encoded', None)
+    
+    if not title or not query_encoded:
+        return HttpResponseRedirect(reverse('helpdesk_list'))
+    
+    query = SavedSearch(title=title, shared=shared, query=query_encoded, user=request.user)
+    query.save()
+    
+    return HttpResponseRedirect('%s?saved_query=%s' % (reverse('helpdesk_list'), query.id))
+save_query = login_required(save_query)
+
+
+def delete_saved_query(request, id):
+    query = get_object_or_404(SavedSearch, id=id, user=request.user)
+
+    if request.method == 'POST':
+        query.delete()
+        return HttpResponseRedirect(reverse('helpdesk_list'))
+    else:
+        return render_to_response('helpdesk/confirm_delete_saved_query.html',
+            RequestContext(request, {
+                'query': query,
+                }))
+delete_saved_query = login_required(delete_saved_query)
