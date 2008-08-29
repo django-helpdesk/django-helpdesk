@@ -21,7 +21,7 @@ from django.template import loader, Context, RequestContext
 from django.utils.translation import ugettext as _
 
 from helpdesk.forms import TicketForm
-from helpdesk.lib import send_templated_mail, line_chart, bar_chart, query_to_dict, apply_query
+from helpdesk.lib import send_templated_mail, line_chart, bar_chart, query_to_dict, apply_query, safe_template_context
 from helpdesk.models import Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch
 
 
@@ -132,6 +132,12 @@ def update_ticket(request, ticket_id):
     public = request.POST.get('public', False)
     owner = int(request.POST.get('owner', None))
     priority = int(request.POST.get('priority', ticket.priority))
+
+    # We need to allow the 'ticket' and 'queue' contexts to be applied to the
+    # comment.
+    from django.template import loader, Context
+    context = Context(safe_template_context(ticket))
+    comment = loader.get_template_from_string(comment).render(context)
 
     if not owner and ticket.assigned_to:
         owner = ticket.assigned_to.id
@@ -284,6 +290,8 @@ def ticket_list(request):
         'other_filter': None,
         }
 
+    from_saved_query = False
+
     if request.GET.get('saved_query', None):
         from_saved_query = True
         try:
@@ -295,8 +303,21 @@ def ticket_list(request):
 
         import base64, cPickle
         query_params = cPickle.loads(base64.urlsafe_b64decode(str(saved_query.query)))
+    elif not (  request.GET.has_key('queue')
+            or  request.GET.has_key('assigned_to')
+            or  request.GET.has_key('status')
+            or  request.GET.has_key('q')
+            or  request.GET.has_key('sort') ):
+
+        # Fall-back if no querying is being done, force the list to only 
+        # show open/reopened/resolved (not closed) cases sorted by creation
+        # date.
+
+        query_params = {
+            'filtering': {'status__in': [1, 2, 3]},
+            'sorting': 'created',
+        }
     else:
-        from_saved_query = False
         queues = request.GET.getlist('queue')
         if queues:
             queues = [int(q) for q in queues]

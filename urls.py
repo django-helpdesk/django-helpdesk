@@ -91,11 +91,6 @@ urlpatterns += patterns('',
         'helpdesk.views.api.api',
         name='helpdesk_api'),
 
-    url(r'^api/$',
-        'django.views.generic.simple.direct_to_template',
-        {'template': 'helpdesk/api_help.html',},
-        name='helpdesk_api_help'),
-
     url(r'^login/$',
         'django.contrib.auth.views.login',
         name='login'),
@@ -117,4 +112,16 @@ urlpatterns += patterns('helpdesk.views.kb',
 
     url(r'^kb/(?P<item>[0-9]+)/vote/$',
         'vote', name='helpdesk_kb_vote'),
+)
+
+urlpatterns += patterns('',
+    url(r'^api/$',
+        'django.views.generic.simple.direct_to_template',
+        {'template': 'helpdesk/help_api.html',},
+        name='helpdesk_api_help'),
+    
+    url(r'^help/context/$',
+        'django.views.generic.simple.direct_to_template',
+        {'template': 'helpdesk/help_context.html',},
+        name='helpdesk_help_context'),
 )

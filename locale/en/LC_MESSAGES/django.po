@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-08-28 02:50+0000\n"
+"POT-Creation-Date: 2008-08-29 05:10+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -54,7 +54,7 @@ msgstr ""
 #: forms.py:58 models.py:301 management/commands/escalate_tickets.py:152
 #: templates/helpdesk/public_view_ticket.html:29
 #: templates/helpdesk/ticket.html:67 templates/helpdesk/ticket.html.py:159
-#: templates/helpdesk/ticket_list.html:43 views/staff.py:186
+#: templates/helpdesk/ticket_list.html:43 views/staff.py:192
 msgid "Priority"
 msgstr ""
 
@@ -108,7 +108,7 @@ msgstr ""
 #: models.py:29 models.py:239 models.py:446 models.py:740 models.py:771
 #: templates/helpdesk/dashboard.html:26 templates/helpdesk/dashboard.html:41
 #: templates/helpdesk/ticket.html:153 templates/helpdesk/ticket_list.html:40
-#: templates/helpdesk/ticket_list.html:115 views/staff.py:176
+#: templates/helpdesk/ticket_list.html:115 views/staff.py:182
 msgid "Title"
 msgstr ""
 
@@ -378,7 +378,7 @@ msgid ""
 msgstr ""
 
 #: models.py:321 templates/helpdesk/ticket.html:58 views/feeds.py:91
-#: views/feeds.py:117 views/feeds.py:171 views/staff.py:153
+#: views/feeds.py:117 views/feeds.py:171 views/staff.py:159
 msgid "Unassigned"
 msgstr ""
 
@@ -390,7 +390,7 @@ msgstr ""
 msgid "Date"
 msgstr ""
 
-#: models.py:453 views/staff.py:167
+#: models.py:453 views/staff.py:173
 msgid "Comment"
 msgstr ""
 
@@ -1079,8 +1079,8 @@ msgstr ""
 
 #: templates/helpdesk/ticket.html:119
 msgid ""
-"You can use the {{ ticket }} and {{ queue }} template variables in your "
-"message."
+"You can insert ticket and queue details in your message. For more "
+"information, see the <a href='../../help/context/'>context help page</a>."
 msgstr ""
 
 #: templates/helpdesk/ticket.html:142
@@ -1289,19 +1289,19 @@ msgstr ""
 msgid "Accepted resolution and closed ticket"
 msgstr ""
 
-#: views/staff.py:147
+#: views/staff.py:153
 #, python-format
 msgid "Assigned to %(username)s"
 msgstr ""
 
-#: views/staff.py:169
+#: views/staff.py:175
 msgid "Updated"
 msgstr ""
 
-#: views/staff.py:401
+#: views/staff.py:422
 msgid "Ticket taken off hold"
 msgstr ""
 
-#: views/staff.py:404
+#: views/staff.py:425
 msgid "Ticket placed on hold"
 msgstr ""

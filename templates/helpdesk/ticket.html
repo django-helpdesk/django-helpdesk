@@ -116,7 +116,7 @@
 
         <dt><label for='commentBox'>{% trans "Comment / Resolution" %}</label></dt>
         <dd><textarea rows='8' cols='70' name='comment' id='commentBox'></textarea></dd>
-        <dd class='form_help_text'>{% trans "You can use the {{ ticket }} and {{ queue }} template variables in your message." %}</dd>
+        <dd class='form_help_text'>{% trans "You can insert ticket and queue details in your message. For more information, see the <a href='../../help/context/'>context help page</a>." %}</dd>
 
         <dt><label>{% trans "New Status" %}</label></dt>
         {% ifequal ticket.status 1 %}

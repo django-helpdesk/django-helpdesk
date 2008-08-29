@@ -8,7 +8,7 @@ api.py - Wrapper around API calls, and core functions to provide complete
 
 The API documentation can be accessed by visiting http://helpdesk/api/help/
 (obviously, substitute helpdesk for your Jutda Helpdesk URI), or by reading
-through templates/helpdesk/api_help.html.
+through templates/helpdesk/help_api.html.
 """
 
 from datetime import datetime
@@ -47,7 +47,7 @@ def api(request, method):
     """
 
     if method == 'help':
-        return render_to_response('helpdesk/api_help.html')
+        return render_to_response('helpdesk/help_api.html')
 
     if request.method != 'POST':
         return api_return(STATUS_ERROR_BADMETHOD)

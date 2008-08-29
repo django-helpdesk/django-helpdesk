@@ -279,3 +279,49 @@ def apply_query(queryset, params):
         queryset = queryset.order_by(params['sorting'])
 
     return queryset
+
+
+def safe_template_context(ticket):
+    """
+    Return a dictionary that can be used as a template context to render
+    comments and other details with ticket or queue paramaters. Note that
+    we don't just provide the Ticket & Queue objects to the template as 
+    they could reveal confidential information. Just imagine these two options:
+        * {{ ticket.queue.email_box_password }}
+        * {{ ticket.assigned_to.password }}
+
+    Ouch!
+
+    The downside to this is that if we make changes to the model, we will also
+    have to update this code. Perhaps we can find a better way in the future.
+    """
+
+    context = {
+        'queue': {},
+        'ticket': {},
+        }
+    queue = ticket.queue
+
+    for field in (  'title', 'slug', 'email_address', 'from_address'):
+        attr = getattr(queue, field, None)
+        if callable(attr):
+            context['queue'][field] = attr()
+        else:
+            context['queue'][field] = attr
+
+    for field in (  'title', 'created', 'modified', 'submitter_email', 
+                    'status', 'get_status_display', 'on_hold', 'description',
+                    'resolution', 'priority', 'get_priority_display',
+                    'last_escalation', 'ticket', 'ticket_for_url',
+                    'get_status', 'ticket_url', 'staff_url', '_get_assigned_to'
+                 ):
+        attr = getattr(ticket, field, None)
+        if callable(attr):
+            context['ticket'][field] = '%s' % attr()
+        else:
+            context['ticket'][field] = attr
+   
+    context['ticket']['queue'] = context['queue']
+    context['ticket']['assigned_to'] = context['ticket']['_get_assigned_to']
+
+    return context

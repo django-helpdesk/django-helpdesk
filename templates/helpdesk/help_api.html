@@ -1,46 +1,9 @@
-<html>
-    <head>
-        <style type='text/css'>
-        body {
-            background-color: #fff;
-            color: #333;
-            font: 10pt "Trebuchet MS", Arial, sans-serif;
-        }
+{% extends "helpdesk/help_base.html" %}
 
-        h1, h2, h3, h4 {
-            font-family: Garamond, Times, serif;
-        }
-        
-        h1 {
-            color: #00c;
-            font-size: 18pt;
-            border-bottom: solid 1px #00c;
-        }
+{% block title %}Jutda Helpdesk API Documentation{% endblock %}
+{% block heading %}Jutda Helpdesk API Documentation{% endblock %}
 
-        h2 {
-            color: #c00;
-            font-size: 17pt;
-            border-bottom: solid 1px #c00;
-        }
-
-        h3 {
-            font-size: 14pt;
-            border-bottom: solid 1px #ccc;
-        }
-
-        h4 {
-            font-size: 13pt;
-        }
-
-        dl {
-            padding-left: 2em;
-        }
-        </style>
-        <title>Jutda Helpdesk API Documentation</title>
-    </head>
-    <body>
-        <h1>Jutda Helpdesk API Documentation</h1>
-
+{% block content %}
         <h2>Contents</h2>
 
         <ul>
@@ -305,5 +268,4 @@ echo $result;
         <p>This method responds with <strong>plain-text</strong>.</p>
 
         <p>If you receive a 200 OK <a href='#response'>response</a>, then the content of the response will be the users ID.</p>
-    </body>
-</html>
+{% endblock %}
