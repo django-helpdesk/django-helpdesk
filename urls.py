@@ -69,6 +69,10 @@ urlpatterns = patterns('helpdesk.views.staff',
     url(r'^delete_query/(?P<id>[0-9]+)/$',
         'delete_saved_query',
         name='helpdesk_delete_query'),
+
+    url(r'^settings/$',
+        'user_settings',
+        name='helpdesk_user_settings'),
 )
 
 urlpatterns += patterns('helpdesk.views.public',
@@ -97,6 +101,7 @@ urlpatterns += patterns('',
 
     url(r'^logout/$',
         'django.contrib.auth.views.logout',
+        {'next_page': '../'},
         name='logout'),
 )
 

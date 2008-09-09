@@ -215,7 +215,7 @@ class API:
                 fail_silently=True,
                 )
 
-        if ticket.assigned_to and self.request.user != ticket.assigned_to:
+        if ticket.assigned_to and self.request.user != ticket.assigned_to and getattr(ticket.assigned_to.usersettings.settings, 'email_on_ticket_apichange', False):
             send_templated_mail(
                 'updated_owner',
                 context,
@@ -276,7 +276,7 @@ class API:
                 fail_silently=True,
                 )
 
-        if ticket.assigned_to and self.request.user != ticket.assigned_to:
+        if ticket.assigned_to and self.request.user != ticket.assigned_to and getattr(ticket.assigned_to.usersettings.settings, 'email_on_ticket_apichange', False):
             send_templated_mail(
                 'resolved_resolved',
                 context,

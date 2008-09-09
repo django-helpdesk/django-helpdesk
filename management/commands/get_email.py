@@ -245,15 +245,16 @@ def ticket_from_message(message, queue):
 
     for file in files:
         filename = file['filename'].replace(' ', '_')
-        a = Attachment(
-            followup=f,
-            filename=filename,
-            mime_type=file['type'],
-            size=len(file['content']),
-            )
-        a.file.save(file['filename'], ContentFile(file['content']))
-        a.save()
-        print "    - %s" % file['filename']
+        if file['content']:
+            a = Attachment(
+                followup=f,
+                filename=filename,
+                mime_type=file['type'],
+                size=len(file['content']),
+                )
+            a.file.save(file['filename'], ContentFile(file['content']))
+            a.save()
+            print "    - %s" % file['filename']
 
 
 if __name__ == '__main__':

@@ -31,10 +31,6 @@ LICENSE.JQUERY and LICENSE.NICEDIT for their respective license terms.
 3. An existing WORKING Django project with database etc. If you
    cannot log into the Admin, you won't get this product working.
 
-4. pygooglechart (needs minor mods to @staticmethod calls for python 2.3)
-   http://pygooglechart.slowchop.com/
-
-
 #########################
 3. Installation
 #########################

@@ -20,7 +20,7 @@ from django.shortcuts import render_to_response, get_object_or_404
 from django.template import loader, Context, RequestContext
 from django.utils.translation import ugettext as _
 
-from helpdesk.forms import TicketForm
+from helpdesk.forms import TicketForm, UserSettingsForm
 from helpdesk.lib import send_templated_mail, line_chart, bar_chart, query_to_dict, apply_query, safe_template_context
 from helpdesk.models import Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch
 
@@ -234,13 +234,14 @@ def update_ticket(request, ticket_id):
         else:
             template_staff = 'updated_owner'
 
-        send_templated_mail(
-            template_staff,
-            context,
-            recipients=ticket.assigned_to.email,
-            sender=ticket.queue.from_address,
-            fail_silently=True,
-            )
+        if (not reassigned or ( reassigned and getattr(ticket.assigned_to.usersettings.settings, 'email_on_ticket_assign', False))) or (not reassigned and getattr(ticket.assigned_to.usersettings.settings, 'email_on_ticket_change', False)):
+            send_templated_mail(
+                template_staff,
+                context,
+                recipients=ticket.assigned_to.email,
+                sender=ticket.queue.from_address,
+                fail_silently=True,
+                )
 
     if ticket.queue.updated_ticket_cc:
         if reassigned:
@@ -636,3 +637,19 @@ def delete_saved_query(request, id):
                 'query': query,
                 }))
 delete_saved_query = login_required(delete_saved_query)
+
+def user_settings(request):
+    s = request.user.usersettings
+    if request.POST:
+        form = UserSettingsForm(request.POST)
+        if form.is_valid():
+            s.settings = form.cleaned_data
+            s.save()
+    else:
+        form = UserSettingsForm(s.settings)
+
+    return render_to_response('helpdesk/user_settings.html',
+        RequestContext(request, {
+            'form': form,
+        }))
+user_settings = login_required(user_settings)

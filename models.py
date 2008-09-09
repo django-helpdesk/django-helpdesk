@@ -182,7 +182,7 @@ class Queue(models.Model):
             return u'%s <%s>' % (self.title, self.email_address)
     from_address = property(_from_address)
 
-    def save(self):
+    def save(self, force_insert=False, force_update=False):
         if self.email_box_type == 'imap' and not self.email_box_imap_folder:
             self.email_box_imap_folder = 'INBOX'
 
@@ -195,7 +195,7 @@ class Queue(models.Model):
                 self.email_box_port = 995
             elif self.email_box_type == 'pop3' and not self.email_box_ssl:
                 self.email_box_port = 110
-        super(Queue, self).save()
+        super(Queue, self).save(force_insert, force_update)
 
 
 class Ticket(models.Model):
@@ -402,7 +402,7 @@ class Ticket(models.Model):
         return ('helpdesk_view', [str(self.id)])
     get_absolute_url = models.permalink(get_absolute_url)
 
-    def save(self):
+    def save(self, force_insert=False, force_update=False):
         if not self.id:
             # This is a new ticket as no ID yet exists.
             self.created = datetime.now()
@@ -412,7 +412,7 @@ class Ticket(models.Model):
 
         self.modified = datetime.now()
 
-        super(Ticket, self).save()
+        super(Ticket, self).save(force_insert, force_update)
 
 
 class FollowUpManager(models.Manager):
@@ -488,12 +488,12 @@ class FollowUp(models.Model):
     def get_absolute_url(self):
         return u"%s#followup%s" % (self.ticket.get_absolute_url(), self.id)
 
-    def save(self):
+    def save(self, force_insert=False, force_update=False):
         t = self.ticket
         t.modified = datetime.now()
         self.date = datetime.now()
         t.save()
-        super(FollowUp, self).save()
+        super(FollowUp, self).save(force_insert, force_update)
 
 
 class TicketChange(models.Model):
@@ -796,9 +796,9 @@ class KBItem(models.Model):
             'changed.'),
         )
 
-    def save(self):
+    def save(self, force_insert=False, force_update=False):
         self.last_updated = datetime.now()
-        return super(KBItem, self).save()
+        return super(KBItem, self).save(force_insert, force_update)
 
     def _score(self):
         if self.votes > 0:
@@ -855,3 +855,73 @@ class SavedSearch(models.Model):
             return u'%s (*)' % self.title
         else:
             return u'%s' % self.title
+
+class UserSettings(models.Model):
+    """
+    A bunch of user-specific settings that we want to be able to define, such
+    as notification preferences and other things that should probably be 
+    configurable.
+
+    We should always refer to user.usersettings.settings['setting_name'].
+    """
+    
+    user = models.OneToOneField(User)
+
+    settings_pickled = models.TextField(
+        _('Settings Dictionary'),
+        help_text=_('This is a base64-encoded representation of a pickled Python dictionary. Do not change this field via the admin.'),
+        blank=True,
+        null=True,
+        )
+
+    def _set_settings(self, data):
+        # data should always be a Python dictionary.
+        import cPickle, base64
+        self.settings_pickled = base64.urlsafe_b64encode(cPickle.dumps(data))
+    
+    def _get_settings(self):
+        # return a python dictionary representing the pickled data.
+        import cPickle, base64
+        try:
+            return cPickle.loads(base64.urlsafe_b64decode(str(self.settings_pickled)))
+        except cPickle.UnpicklingError:
+            return {}
+
+    settings = property(_get_settings, _set_settings)
+
+    def __unicode__(self):
+        return u'Preferences for %s' % self.user
+    
+    class Meta:
+        verbose_name = 'User Settings'
+        verbose_name_plural = 'User Settings'
+
+
+def create_usersettings(sender, created_models=[], instance=None, created=False, **kwargs):
+    """
+    Helper function to create UserSettings instances as 
+    required, eg when we first create the UserSettings database
+    table via 'syncdb' or when we save a new user.
+
+    If we end up with users with no UserSettings, then we get horrible
+    'DoesNotExist: UserSettings matching query does not exist.' errors.
+    """
+    if sender == User and created:
+        # This is a new user, so lets create their settings entry.
+        s = UserSettings(user=instance)
+        s.save()
+    elif UserSettings in created_models:
+        # We just created the UserSettings model, lets create a UserSettings
+        # entry for each existing user. This will only happen once (at install
+        # time, or at upgrade) when the UserSettings model doesn't already 
+        # exist.
+        for u in User.objects.all():
+            try:
+                s = UserSettings.objects.get(user=u)
+            except UserSettings.DoesNotExist:
+                s = UserSettings(user=u)
+                s.save()
+
+models.signals.post_syncdb.connect(create_usersettings)
+models.signals.post_save.connect(create_usersettings, sender=User)
+

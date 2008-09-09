@@ -22,7 +22,10 @@ from helpdesk.models import Ticket, Queue
 
 def homepage(request):
     if request.user.is_authenticated():
-        return HttpResponseRedirect(reverse('helpdesk_dashboard'))
+        if getattr(request.user.usersettings.settings, 'login_view_ticketlist', False):
+            return HttpResponseRedirect(reverse('helpdesk_list'))
+        else:
+            return HttpResponseRedirect(reverse('helpdesk_dashboard'))
 
     if request.method == 'POST':
         form = PublicTicketForm(request.POST)
