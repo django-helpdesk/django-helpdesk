@@ -794,10 +794,12 @@ class KBItem(models.Model):
         _('Last Updated'),
         help_text=_('The date on which this question was most recently '
             'changed.'),
+        blank=True,
         )
 
     def save(self, force_insert=False, force_update=False):
-        self.last_updated = datetime.now()
+        if not self.last_updated:
+            self.last_updated = datetime.now()
         return super(KBItem, self).save(force_insert, force_update)
 
     def _score(self):
@@ -924,4 +926,3 @@ def create_usersettings(sender, created_models=[], instance=None, created=False,
 
 models.signals.post_syncdb.connect(create_usersettings)
 models.signals.post_save.connect(create_usersettings, sender=User)
-

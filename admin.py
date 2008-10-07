@@ -20,6 +20,10 @@ class AttachmentInline(admin.StackedInline):
 class FollowUpAdmin(admin.ModelAdmin):
     inlines = [TicketChangeInline, AttachmentInline]
 
+class KBItemAdmin(admin.ModelAdmin):
+    list_display = ('category', 'title', 'last_updated',)
+    list_display_links = ('title')
+
 admin.site.register(Ticket, TicketAdmin)
 admin.site.register(Queue, QueueAdmin)
 admin.site.register(FollowUp, FollowUpAdmin)
@@ -27,4 +31,4 @@ admin.site.register(PreSetReply)
 admin.site.register(EscalationExclusion)
 admin.site.register(EmailTemplate)
 admin.site.register(KBCategory)
-admin.site.register(KBItem)
+admin.site.register(KBItem, KBItemAdmin)

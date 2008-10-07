@@ -38,7 +38,14 @@ def homepage(request):
                 ticket.submitter_email)
                 )
     else:
-        form = PublicTicketForm()
+        try:
+            queue = Queue.objects.get(slug=request.GET.get('queue', None))
+        except Queue.DoesNotExist:
+            queue = None
+        initial_data = {}
+        if queue:
+            initial_data['queue'] = queue.id
+        form = PublicTicketForm(initial=initial_data)
         form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.filter(allow_public_submission=True)]
 
     return render_to_response('helpdesk/public_homepage.html',
