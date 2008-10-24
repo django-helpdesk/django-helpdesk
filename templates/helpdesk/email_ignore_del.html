@@ -1,0 +1,14 @@
+{% extends "helpdesk/base.html" %}{% load i18n %}
+
+{% block helpdesk_title %}{% trans "Delete Ignored E-Mail Address" %}{% endblock %}
+
+{% block helpdesk_body %}{% blocktrans with ignore.email_address as email_address %}
+<h2>Un-Ignore E-Mail Address</h2>
+
+<p>Are you sure you wish to stop removing this email address (<em>{{ email_address }}</em>) and allow their e-mails to automatically create tickets in your system? You can re-add this e-mail address at any time.<?p>
+{% endblocktrans %}
+
+{% blocktrans %}<p><a href='../../'>Keep Ignoring It</a></p>
+
+<form method='post' action='./'><input type='submit' value='Stop Ignoring It' /></form>
+{% endblocktrans %}{% endblock %}

@@ -926,3 +926,68 @@ def create_usersettings(sender, created_models=[], instance=None, created=False,
 
 models.signals.post_syncdb.connect(create_usersettings)
 models.signals.post_save.connect(create_usersettings, sender=User)
+
+class IgnoreEmail(models.Model):
+    """
+    This model lets us easily ignore e-mails from certain senders when 
+    processing IMAP and POP3 mailboxes, eg mails from postmaster or from 
+    known trouble-makers.
+    """
+    queues = models.ManyToManyField(
+        Queue,
+        blank=True,
+        null=True,
+        help_text=_('Leave blank for this e-mail to be ignored on all '
+            'queues, or select those queues you wish to ignore this e-mail '
+            'for.'),
+        )
+
+    name = models.CharField(
+        _('Name'),
+        max_length=100,
+        )
+    
+    date = models.DateField(
+        _('Date'),
+        help_text=_('Date on which this e-mail address was added'),
+        blank=True,
+        editable=False
+        )
+
+    email_address = models.CharField(
+        _('E-Mail Address'),
+        max_length=150,
+        help_text=_('Enter a full e-mail address, or portions with '
+            'wildcards, eg *@domain.com or postmaster@*.'),
+        )
+
+    def __unicode__(self):
+        return u'%s' % self.name
+    
+    def save(self):
+        if not self.date:
+            self.date = datetime.now()
+        return super(IgnoreEmail, self).save()
+
+    def test(self, email):
+        """
+        Possible situations:
+            1. Username & Domain both match
+            2. Username is wildcard, domain matches
+            3. Username matches, domain is wildcard
+            4. username & domain are both wildcards
+            5. Other (no match)
+
+            1-4 return True, 5 returns False.
+        """
+        
+        own_parts = self.email_address.split("@")
+        email_parts = email.split("@")
+
+        if self.email_address == email                              \
+        or own_parts[0] == "*" and own_parts[1] == email_parts[1]   \
+        or own_parts[1] == "*" and own_parts[0] == email_parts[0]   \
+        or own_parts[0] == "*" and own_parts[1] == "*":
+            return True
+        else:
+            return False

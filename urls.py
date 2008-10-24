@@ -73,6 +73,18 @@ urlpatterns = patterns('helpdesk.views.staff',
     url(r'^settings/$',
         'user_settings',
         name='helpdesk_user_settings'),
+
+    url(r'^ignore/$',
+        'email_ignore',
+        name='helpdesk_email_ignore'),
+
+    url(r'^ignore/add/$',
+        'email_ignore_add',
+        name='helpdesk_email_ignore_add'),
+
+    url(r'^ignore/delete/(?P<id>[0-9]+)/$',
+        'email_ignore_del',
+        name='helpdesk_email_ignore_del'),
 )
 
 urlpatterns += patterns('helpdesk.views.public',
@@ -129,4 +141,9 @@ urlpatterns += patterns('',
         'django.views.generic.simple.direct_to_template',
         {'template': 'helpdesk/help_context.html',},
         name='helpdesk_help_context'),
+    
+    url(r'^system_settings/$',
+        'django.views.generic.simple.direct_to_template',
+        {'template': 'helpdesk/system_settings.html',},
+        name='helpdesk_system_settings'),
 )

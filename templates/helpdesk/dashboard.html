@@ -5,7 +5,7 @@
 {% endblock %}
 {% block helpdesk_body %}
 
-<table width='30%' align='left'>
+<table width='40%' align='left'>
 <tr class='row_tablehead'><td colspan='4'>{% trans "Helpdesk Summary" %}</td></tr>
 <tr class='row_columnheads'><th>{% trans "Queue" %}</th><th>{% trans "Open" %}</th><th>{% trans "Resolved" %}</th></tr>
 {% for queue in dash_tickets %}
@@ -17,7 +17,7 @@
 {% endfor %}
 </table>
 
-<p style='padding-left: 5px;'>Welcome to your Helpdesk Dashboard! From here you can quickly see your own tickets, and those tickets that have no owner. Why not pick up an orphan ticket and sort it out for a customer?</p>
+<p style='margin-left: 42%;'>Welcome to your Helpdesk Dashboard! From here you can quickly see your own tickets, and those tickets that have no owner. Why not pick up an orphan ticket and sort it out for a customer?</p>
 
 <br style='clear: both;' />
 
@@ -34,6 +34,9 @@
 <td><span title='{{ ticket.modified|date:"r" }}'>{{ ticket.modified|timesince }}</span></td>
 </tr>
 {% endfor %}
+{% if not unassigned_tickets %}
+<tr class='row_odd'><td colspan='5'>{% trans "You have no tickets assigned to you." %}</td></tr>
+{% endif %}
 </table>
 
 <table width='100%'>
@@ -49,6 +52,9 @@
 <th><a href='{{ ticket.get_absolute_url }}?take'><span class='button button_take'>{% trans "Take" %}</span></a></th>
 </tr>
 {% endfor %}
+{% if not unassigned_tickets %}
+<tr class='row_odd'><td colspan='6'>{% trans "There are no unassigned tickets." %}</td></tr>
+{% endif %}
 </table>
 
 {% endblock %}

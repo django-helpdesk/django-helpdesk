@@ -20,10 +20,11 @@ from email.Utils import parseaddr
 
 from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand
+from django.db.models import Q
 from django.utils.translation import ugettext as _
 
 from helpdesk.lib import send_templated_mail
-from helpdesk.models import Queue, Ticket, FollowUp, Attachment
+from helpdesk.models import Queue, Ticket, FollowUp, Attachment, IgnoreEmail
 
 
 class Command(BaseCommand):
@@ -76,9 +77,11 @@ def process_queue(q):
             msgSize = msg.split(" ")[1]
 
             full_message = "\n".join(server.retr(msgNum)[1])
-            ticket_from_message(message=full_message, queue=q)
+            ticket = ticket_from_message(message=full_message, queue=q)
+            
+            if ticket:
+                server.dele(msgNum)
 
-            server.dele(msgNum)
         server.quit()
 
     elif q.email_box_type == 'imap':
@@ -94,8 +97,10 @@ def process_queue(q):
         status, data = server.search(None, 'ALL')
         for num in data[0].split():
             status, data = server.fetch(num, '(RFC822)')
-            ticket_from_message(message=data[0][1], queue=q)
-            server.store(num, '+FLAGS', '\\Deleted')
+            ticket = ticket_from_message(message=data[0][1], queue=q)
+            if ticket:
+                server.store(num, '+FLAGS', '\\Deleted')
+
         server.expunge()
         server.close()
         server.logout()
@@ -111,8 +116,10 @@ def ticket_from_message(message, queue):
     sender = message.get('from', _('Unknown Sender'))
 
     sender_email = parseaddr(sender)[1]
-    if sender_email.startswith('postmaster'):
-        sender_email = ''
+
+    for ignore in IgnoreEmail.objects.filter(Q(queues=queue) | Q(queues__isnull=True)):
+        if ignore.test(sender_email):
+            return False
 
     regex = re.compile("^\[[A-Za-z0-9]+-\d+\]")
     if regex.match(subject):
@@ -255,6 +262,8 @@ def ticket_from_message(message, queue):
             a.file.save(file['filename'], ContentFile(file['content']))
             a.save()
             print "    - %s" % file['filename']
+
+    return ticket
 
 
 if __name__ == '__main__':

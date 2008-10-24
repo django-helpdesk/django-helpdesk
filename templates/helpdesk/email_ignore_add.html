@@ -1,0 +1,27 @@
+{% extends "helpdesk/base.html" %}{% load i18n %}
+
+{% block helpdesk_title %}{% trans "Ignore E-Mail Address" %}{% endblock %}
+
+{% block helpdesk_body %}{% blocktrans %}
+<h2>Ignore E-Mail Address</h2>
+
+<p>To ignore an e-mail address and prevent any emails from that address creating tickets automatically, enter the e-mail address below.</p>
+
+<p>You can either enter a whole e-mail address such as <em>email@domain.com</em> or a portion of an e-mail address with a wildcard, such as <em>*@domain.com</em> or <em>user@*</em>.</p>{% endblocktrans %}
+
+<form method='post' action='./'>
+
+<fieldset>
+    <dl>{% for field in form %}
+        <dt><label for='id_{{ field.name }}'>{{ field.label }}</label></dt>
+        <dd>{{ field }}</dd>
+        {% if field.errors %}<dd class='error'>{{ field.errors }}</dd>{% endif %}
+        {% if field.help_text %}<dd class='form_help_text'>{{ field.help_text }}</dd>{% endif %}
+    {% endfor %}</dl>
+</fieldset>
+
+<input type='submit' value='{% trans "Ignore E-Mail Address" %}' />
+
+</form>
+
+{% endblock %}

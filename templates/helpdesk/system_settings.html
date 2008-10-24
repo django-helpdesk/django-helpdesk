@@ -1,0 +1,19 @@
+{% extends "helpdesk/base.html" %}{% load i18n %}
+
+{% block helpdesk_title %}{% trans "Change System Settings" %}{% endblock %}
+
+{% block helpdesk_body %}{% blocktrans %}
+<h2>System Settings</h2>
+
+<p>The following items can be maintained by you or other superusers:</p>{% endblocktrans %}
+
+<ul>
+    <li><a href='../ignore/'>{% trans "E-Mail Ignore list" %}</a></li>
+    <li><a href='/admin/helpdesk/queue/'>{% trans "Maintain Queues" %}</a></li>
+    <li><a href='/admin/helpdesk/presetreply/'>{% trans "Maintain Pre-Set Replies" %}</a></li>
+    <li><a href='/admin/helpdesk/kbcategory/'>{% trans "Maintain Knowledgebase Categories" %}</a></li>
+    <li><a href='/admin/helpdesk/kbitem/'>{% trans "Maintain Knowledgebase Items" %}</a></li>
+    <li><a href='/admin/helpdesk/emailtemplate/'>{% trans "Maintain E-Mail Templates" %}</a></li>
+    <li><a href='/admin/auth/user/'>{% trans "Maintain Users" %}</a></li>
+</ul>
+{% endblock %}

@@ -43,6 +43,7 @@ $(document).ready(function() {
     <option value='priority'{% ifequal query_params.sorting "priority"%} selected='selected'{% endifequal %}>{% trans "Priority" %}</option>
     <option value='assigned_to'{% ifequal query_params.sorting "assigned_to"%} selected='selected'{% endifequal %}>{% trans "Owner" %}</option>
 </select>
+<label for='id_sortreverse'>Reverse</label><input type='checkbox' name='sortreverse' id='id_sortreverse'{% if query_params.sortreverse %} checked='checked'{% endif %} />
 <p class='filterHelp'>Ordering applied to tickets</p>
 <input type='button' class='filterBuilderRemove' value='-' />
 </div>

@@ -165,8 +165,8 @@ def line_chart(data):
                 max = field
 
 
-    # Set width to '65px * number of months'.
-    chart_url = 'http://chart.apis.google.com/chart?cht=lc&chs=%sx90&chd=t:' % (len(column_headings)*65)
+    # Set width to '65px * number of months + 100 for headings.'.
+    chart_url = 'http://chart.apis.google.com/chart?cht=lc&chs=%sx150&chd=t:' % (len(column_headings)*65+100)
     first_row = True
     row_headings = []
     for row in data[1:]:
@@ -210,8 +210,8 @@ def bar_chart(data):
                 max = field
 
 
-    # Set width to '150px * number of months'.
-    chart_url = 'http://chart.apis.google.com/chart?cht=bvg&chs=%sx90&chd=t:' % (len(column_headings) * 150)
+    # Set width to '220px * number of months'.
+    chart_url = 'http://chart.apis.google.com/chart?cht=bvg&chs=%sx150&chd=t:' % (len(column_headings) * 220)
     first_row = True
     row_headings = []
     for row in data[1:]:
@@ -276,6 +276,8 @@ def apply_query(queryset, params):
         queryset = queryset.filter(params['other_filter'])
 
     if params.get('sorting', None):
+        if params.get('sortreverse', None):
+            params['sorting'] = "-%s" % params['sorting']
         queryset = queryset.order_by(params['sorting'])
 
     return queryset

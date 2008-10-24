@@ -14,7 +14,7 @@ from django.contrib.auth.models import User
 from django.utils.translation import ugettext as _
 
 from helpdesk.lib import send_templated_mail
-from helpdesk.models import Ticket, Queue, FollowUp
+from helpdesk.models import Ticket, Queue, FollowUp, IgnoreEmail
 
 class TicketForm(forms.Form):
     queue = forms.ChoiceField(
@@ -265,3 +265,7 @@ class UserSettingsForm(forms.Form):
         help_text=_('If a ticket is altered by the API, do you want to receive an e-mail?'),
         required=False,
         )
+
+class EmailIgnoreForm(forms.ModelForm):
+    class Meta:
+        model = IgnoreEmail

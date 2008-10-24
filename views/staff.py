@@ -10,7 +10,7 @@ views/staff.py - The bulk of the application - provides most business logic and
 from datetime import datetime
 
 from django.contrib.auth.models import User
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.files.base import ContentFile
 from django.core.urlresolvers import reverse
 from django.db import connection
@@ -20,9 +20,14 @@ from django.shortcuts import render_to_response, get_object_or_404
 from django.template import loader, Context, RequestContext
 from django.utils.translation import ugettext as _
 
-from helpdesk.forms import TicketForm, UserSettingsForm
+from helpdesk.forms import TicketForm, UserSettingsForm, EmailIgnoreForm
 from helpdesk.lib import send_templated_mail, line_chart, bar_chart, query_to_dict, apply_query, safe_template_context
-from helpdesk.models import Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch
+from helpdesk.models import Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch, IgnoreEmail
+
+
+staff_member_required = user_passes_test(lambda u: u.is_authenticated() and u.is_active and u.is_staff)
+superuser_required = user_passes_test(lambda u: u.is_authenticated() and u.is_active and u.is_superuser)
+
 
 
 def dashboard(request):
@@ -199,7 +204,7 @@ def update_ticket(request, ticket_id):
     if f.new_status == Ticket.RESOLVED_STATUS:
         ticket.resolution = comment
 
-    if ticket.submitter_email and ((f.comment != '' and public) or (f.new_status in (Ticket.RESOLVED_STATUS, Ticket.CLOSED_STATUS))):
+    if ticket.submitter_email and public and (f.comment or (f.new_status in (Ticket.RESOLVED_STATUS, Ticket.CLOSED_STATUS))):
         context = {
             'ticket': ticket,
             'queue': ticket.queue,
@@ -287,6 +292,7 @@ def ticket_list(request):
     query_params = {
         'filtering': {},
         'sorting': None,
+        'sortreverse': False,
         'keyword': None,
         'other_filter': None,
         }
@@ -308,7 +314,8 @@ def ticket_list(request):
             or  request.GET.has_key('assigned_to')
             or  request.GET.has_key('status')
             or  request.GET.has_key('q')
-            or  request.GET.has_key('sort') ):
+            or  request.GET.has_key('sort')
+            or  request.GET.has_key('sortreverse') ):
 
         # Fall-back if no querying is being done, force the list to only 
         # show open/reopened/resolved (not closed) cases sorted by creation
@@ -353,6 +360,9 @@ def ticket_list(request):
         if sort not in ('status', 'assigned_to', 'created', 'title', 'queue', 'priority'):
             sort = 'created'
         query_params['sorting'] = sort
+        
+        sortreverse = request.GET.get('sortreverse', None)
+        query_params['sortreverse'] = sortreverse
 
     tickets = apply_query(Ticket.objects.select_related(), query_params)
 
@@ -555,30 +565,37 @@ def run_report(request, report):
     if report == 'userpriority':
         sql = user_base_sql % priority_sql
         columns = ['username'] + priority_columns
+        title = 'User by Priority'
 
     elif report == 'userqueue':
         sql = user_base_sql % queue_sql
         columns = ['username'] + queue_columns
+        title = 'User by Queue'
 
     elif report == 'userstatus':
         sql = user_base_sql % status_sql
         columns = ['username'] + status_columns
+        title = 'User by Status'
 
     elif report == 'usermonth':
         sql = user_base_sql % month_sql
         columns = ['username'] + month_columns
+        title = 'User by Month'
 
     elif report == 'queuepriority':
         sql = queue_base_sql % priority_sql
         columns = ['queue'] + priority_columns
+        title = 'Queue by Priority'
 
     elif report == 'queuestatus':
         sql = queue_base_sql % status_sql
         columns = ['queue'] + status_columns
+        title = 'Queue by Status'
 
     elif report == 'queuemonth':
         sql = queue_base_sql % month_sql
         columns = ['queue'] + month_columns
+        title = 'Queue by Month'
 
 
     cursor = connection.cursor()
@@ -604,8 +621,8 @@ def run_report(request, report):
         RequestContext(request, {
             'headings': columns,
             'data': data,
-            'sql': sql,
             'chart': chart_url,
+            'title': title,
         }))
 run_report = login_required(run_report)
 
@@ -638,6 +655,7 @@ def delete_saved_query(request, id):
                 }))
 delete_saved_query = login_required(delete_saved_query)
 
+
 def user_settings(request):
     s = request.user.usersettings
     if request.POST:
@@ -653,3 +671,40 @@ def user_settings(request):
             'form': form,
         }))
 user_settings = login_required(user_settings)
+
+
+def email_ignore(request):
+    return render_to_response('helpdesk/email_ignore_list.html',
+        RequestContext(request, {
+            'ignore_list': IgnoreEmail.objects.all(),
+        }))
+email_ignore = superuser_required(email_ignore)
+
+
+def email_ignore_add(request):
+    if request.method == 'POST':
+        form = EmailIgnoreForm(request.POST)
+        if form.is_valid():
+            ignore = form.save()
+            return HttpResponseRedirect(reverse('helpdesk_email_ignore'))
+    else:
+        form = EmailIgnoreForm(request.GET)
+
+    return render_to_response('helpdesk/email_ignore_add.html',
+        RequestContext(request, {
+            'form': form,
+        }))
+email_ignore_add = superuser_required(email_ignore_add)
+
+
+def email_ignore_del(request, id):
+    ignore = get_object_or_404(IgnoreEmail, id=id)
+    if request.method == 'POST':
+        ignore.delete()
+        return HttpResponseRedirect(reverse('helpdesk_email_ignore'))
+    else:
+        return render_to_response('helpdesk/email_ignore_del.html',
+            RequestContext(request, {
+                'ignore': ignore,
+            }))
+email_ignore_del = superuser_required(email_ignore_del)
