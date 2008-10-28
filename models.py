@@ -592,6 +592,8 @@ class Attachment(models.Model):
 
     def get_upload_to(self, field_attname):
         """ Get upload_to path specific to this item """
+        if not self.id:
+            return u''
         return u'helpdesk/attachments/%s/%s' % (
             self.followup.ticket.ticket_for_url,
             self.followup.id

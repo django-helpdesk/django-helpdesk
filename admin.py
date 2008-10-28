@@ -22,7 +22,7 @@ class FollowUpAdmin(admin.ModelAdmin):
 
 class KBItemAdmin(admin.ModelAdmin):
     list_display = ('category', 'title', 'last_updated',)
-    list_display_links = ('title')
+    list_display_links = ('title',)
 
 admin.site.register(Ticket, TicketAdmin)
 admin.site.register(Queue, QueueAdmin)
