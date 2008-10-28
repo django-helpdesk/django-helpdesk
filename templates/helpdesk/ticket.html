@@ -1,7 +1,7 @@
 {% extends "helpdesk/base.html" %}{% load i18n %}
 {% block helpdesk_title %}{% trans "View Ticket Details" %}{% endblock %}
 {% block helpdesk_head %}
-<script src="{{ MEDIA_URL }}/helpdesk/nicEdit.js" type="text/javascript"></script>
+<script src="{{ MEDIA_URL }}helpdesk/nicEdit.js" type="text/javascript"></script>
 <script type="text/javascript">
     $(document).ready(function() {
         nic = new nicEditor({buttonList: ['bold','italic','underline','strikeThrough','undo','redo','subscript','superscript','html']}).panelInstance('commentBox');
@@ -45,7 +45,7 @@
 {% block helpdesk_body %}
 
 <table width='100%'>
-<tr class='row_tablehead'><td>{{ ticket.id }}. {{ ticket.title }} [{{ ticket.get_status }}]</td><td align='right'><a href='#edit'><img src='{{ MEDIA_URL }}/helpdesk/buttons/edit.png' alt='Edit' title='Edit' width='60' height='15' /></a><a href='{% url helpdesk_delete ticket.id %}'><img src='{{ MEDIA_URL }}/helpdesk/buttons/delete.png' alt='Delete' title='Delete' width='60' height='15' /></a>{% if ticket.on_hold %}<a href='unhold/'>{% trans "Unhold" %}</a>{% else %}<a href='hold/'>{% trans "Hold" %}</a>{% endif %}</td></tr>
+<tr class='row_tablehead'><td>{{ ticket.id }}. {{ ticket.title }} [{{ ticket.get_status }}]</td><td align='right'><a href='#edit'><img src='{{ MEDIA_URL }}helpdesk/buttons/edit.png' alt='Edit' title='Edit' width='60' height='15' /></a><a href='{% url helpdesk_delete ticket.id %}'><img src='{{ MEDIA_URL }}helpdesk/buttons/delete.png' alt='Delete' title='Delete' width='60' height='15' /></a>{% if ticket.on_hold %}<a href='unhold/'>{% trans "Unhold" %}</a>{% else %}<a href='hold/'>{% trans "Hold" %}</a>{% endif %}</td></tr>
 <tr class='row_columnheads'><th colspan='2'>{% blocktrans with ticket.queue as queue %}Queue: {{ queue }}{% endblocktrans %}</th></tr>
 
 <tr class='row_odd'>
@@ -76,7 +76,7 @@
 </tr>
 
 {% if ticket.resolution %}<tr class='row_odd'>
-    <th colspan='2'>{% trans "Resolution" %}{% ifequal ticket.get_status_display "Resolved" %} <a href='?close'><img src='{{ MEDIA_URL }}/helpdesk/buttons/accept.png' alt='{% trans "Accept" %}' title='{% trans "Accept and Close" %}' width='60' height='15' /></a>{% endifequal %}</th>
+    <th colspan='2'>{% trans "Resolution" %}{% ifequal ticket.get_status_display "Resolved" %} <a href='?close'><img src='{{ MEDIA_URL }}helpdesk/buttons/accept.png' alt='{% trans "Accept" %}' title='{% trans "Accept and Close" %}' width='60' height='15' /></a>{% endifequal %}</th>
 </tr>
 <tr class='row_even'>
     <td colspan='2'>{{ ticket.resolution|safe }}</td>

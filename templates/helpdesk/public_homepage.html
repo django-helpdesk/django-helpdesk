@@ -1,7 +1,7 @@
 {% extends "helpdesk/public_base.html" %}{% load i18n %}
 
 {% block helpdesk_head %}
-<script src="{{ MEDIA_URL }}/helpdesk/nicEdit.js" type="text/javascript"></script>
+<script src="{{ MEDIA_URL }}helpdesk/nicEdit.js" type="text/javascript"></script>
 <script type="text/javascript">
     $(document).ready(function() {
         nic = new nicEditor({buttonList: ['bold','italic','underline','strikeThrough','undo','redo','subscript','superscript','html']}).panelInstance('id_body');

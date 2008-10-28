@@ -341,7 +341,7 @@ class Ticket(models.Model):
     def _get_priority_img(self):
         """ Image-based representation of the priority """
         from django.conf import settings
-        return u"%s/helpdesk/priorities/priority%s.png" % (settings.MEDIA_URL, self.priority)
+        return u"%shelpdesk/priorities/priority%s.png" % (settings.MEDIA_URL, self.priority)
     get_priority_img = property(_get_priority_img)
 
     def _get_priority_span(self):
