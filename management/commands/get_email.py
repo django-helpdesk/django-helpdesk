@@ -263,7 +263,7 @@ def ticket_from_message(message, queue):
             a.save()
             print "    - %s" % file['filename']
 
-    return ticket
+    return t
 
 
 if __name__ == '__main__':

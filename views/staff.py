@@ -153,7 +153,7 @@ def update_ticket(request, ticket_id):
     reassigned = False
 
     if owner:
-        if owner != 0 and (ticket.assigned_to and owner != ticket.assigned_to.id) or not ticket.assigned_to:
+        if owner != 0 and ((ticket.assigned_to and owner != ticket.assigned_to.id) or not ticket.assigned_to):
             new_user = User.objects.get(id=owner)
             f.title = _('Assigned to %(username)s') % {
                 'username': new_user.username,
