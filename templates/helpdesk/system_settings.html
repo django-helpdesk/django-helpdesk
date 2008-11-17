@@ -9,11 +9,11 @@
 
 <ul>
     <li><a href='../ignore/'>{% trans "E-Mail Ignore list" %}</a></li>
-    <li><a href='/admin/helpdesk/queue/'>{% trans "Maintain Queues" %}</a></li>
-    <li><a href='/admin/helpdesk/presetreply/'>{% trans "Maintain Pre-Set Replies" %}</a></li>
-    <li><a href='/admin/helpdesk/kbcategory/'>{% trans "Maintain Knowledgebase Categories" %}</a></li>
-    <li><a href='/admin/helpdesk/kbitem/'>{% trans "Maintain Knowledgebase Items" %}</a></li>
-    <li><a href='/admin/helpdesk/emailtemplate/'>{% trans "Maintain E-Mail Templates" %}</a></li>
-    <li><a href='/admin/auth/user/'>{% trans "Maintain Users" %}</a></li>
+    <li><a href='{{ ADMIN_URL }}helpdesk/queue/'>{% trans "Maintain Queues" %}</a></li>
+    <li><a href='{{ ADMIN_URL }}helpdesk/presetreply/'>{% trans "Maintain Pre-Set Replies" %}</a></li>
+    <li><a href='{{ ADMIN_URL }}helpdesk/kbcategory/'>{% trans "Maintain Knowledgebase Categories" %}</a></li>
+    <li><a href='{{ ADMIN_URL }}helpdesk/kbitem/'>{% trans "Maintain Knowledgebase Items" %}</a></li>
+    <li><a href='{{ ADMIN_URL }}helpdesk/emailtemplate/'>{% trans "Maintain E-Mail Templates" %}</a></li>
+    <li><a href='{{ ADMIN_URL }}auth/user/'>{% trans "Maintain Users" %}</a></li>
 </ul>
 {% endblock %}

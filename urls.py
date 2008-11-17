@@ -7,6 +7,7 @@ urls.py - Mapping of URL's to our various views. Note we always used NAMED
           views for simplicity in linking later on.
 """
 
+from django.conf import settings
 from django.conf.urls.defaults import *
 from django.contrib.auth.decorators import login_required
 from django.contrib.syndication.views import feed as django_feed
@@ -144,6 +145,11 @@ urlpatterns += patterns('',
     
     url(r'^system_settings/$',
         'django.views.generic.simple.direct_to_template',
-        {'template': 'helpdesk/system_settings.html',},
+        {
+            'template': 'helpdesk/system_settings.html',
+            'extra_context': {
+                'ADMIN_URL': getattr(settings, 'ADMIN_URL', '/admin/'),
+            },
+        },
         name='helpdesk_system_settings'),
 )
