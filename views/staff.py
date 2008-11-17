@@ -160,7 +160,7 @@ def update_ticket(request, ticket_id):
                 }
             ticket.assigned_to = new_user
             reassigned = True
-        else:
+        elif owner == 0:
             f.title = _('Unassigned')
             ticket.assigned_to = None
 
