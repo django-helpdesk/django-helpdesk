@@ -106,14 +106,26 @@ def process_queue(q):
         server.logout()
 
 
+def decodeUnknown(charset, string):
+    if not charset:
+        try:
+            string = string.decode('utf-8')
+        except:
+            string = string.decode('iso8859-1')
+    string = unicode(string)
+    return string
+   
+
 def ticket_from_message(message, queue):
     # 'message' must be an RFC822 formatted message.
     msg = message
     message = email.message_from_string(msg)
     subject = message.get('subject', _('Created from e-mail'))
+    subject = decodeUnknown(message.get_charset(), subject)
     subject = subject.replace("Re: ", "").replace("Fw: ", "").strip()
 
     sender = message.get('from', _('Unknown Sender'))
+    sender = decodeUnknown(message.get_charset(), sender)
 
     sender_email = parseaddr(sender)[1]
 
@@ -138,7 +150,8 @@ def ticket_from_message(message, queue):
         name = part.get_param("name")
 
         if part.get_content_maintype() == 'text' and name == None:
-            body = part.get_payload()
+            body = part.get_payload(decode=True)
+            body = decodeUnknown(part.get_charset(), body)
         else:
             if not name:
                 ext = mimetypes.guess_extension(part.get_content_type())
