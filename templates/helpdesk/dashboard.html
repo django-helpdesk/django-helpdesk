@@ -34,7 +34,7 @@
 <td><span title='{{ ticket.modified|date:"r" }}'>{{ ticket.modified|timesince }}</span></td>
 </tr>
 {% endfor %}
-{% if not unassigned_tickets %}
+{% if not user_tickets %}
 <tr class='row_odd'><td colspan='5'>{% trans "You have no tickets assigned to you." %}</td></tr>
 {% endif %}
 </table>
