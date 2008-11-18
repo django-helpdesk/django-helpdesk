@@ -8,6 +8,14 @@ lib.py - Common functions (eg multipart e-mail)
 
 chart_colours = ('80C65A', '990066', 'FF9900', '3399CC', 'BBCCED', '3399CC', 'FFCC33')
 
+try:
+    from base64 import urlsafe_b64encode as b64encode
+except ImportError:
+    from base64 import encodestring as b64encode
+try:
+    from base64 import urlsafe_b64decode as b64decode
+except ImportError:
+    from base64 import decodestring as b64decode
 
 def send_templated_mail(template_name, email_context, recipients, sender=None, bcc=None, fail_silently=False, files=None):
     """
@@ -327,3 +335,4 @@ def safe_template_context(ticket):
     context['ticket']['assigned_to'] = context['ticket']['_get_assigned_to']
 
     return context
+

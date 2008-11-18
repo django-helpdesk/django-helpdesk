@@ -880,14 +880,16 @@ class UserSettings(models.Model):
 
     def _set_settings(self, data):
         # data should always be a Python dictionary.
-        import cPickle, base64
-        self.settings_pickled = base64.urlsafe_b64encode(cPickle.dumps(data))
+        import cPickle
+        from helpdesk.lib import b64encode
+        self.settings_pickled = b64encode(cPickle.dumps(data))
     
     def _get_settings(self):
         # return a python dictionary representing the pickled data.
-        import cPickle, base64
+        import cPickle
+        from helpdesk.lib import b64decode
         try:
-            return cPickle.loads(base64.urlsafe_b64decode(str(self.settings_pickled)))
+            return cPickle.loads(b64decode(str(self.settings_pickled)))
         except cPickle.UnpicklingError:
             return {}
 

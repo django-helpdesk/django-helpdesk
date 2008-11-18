@@ -308,8 +308,9 @@ def ticket_list(request):
         if not (saved_query.shared or saved_query.user == request.user):
             return HttpResponseRedirect(reverse('helpdesk_list'))
 
-        import base64, cPickle
-        query_params = cPickle.loads(base64.urlsafe_b64decode(str(saved_query.query)))
+        import cPickle
+        from helpdesk.lib import b64decode
+        query_params = cPickle.loads(b64decode(str(saved_query.query)))
     elif not (  request.GET.has_key('queue')
             or  request.GET.has_key('assigned_to')
             or  request.GET.has_key('status')
@@ -366,8 +367,9 @@ def ticket_list(request):
 
     tickets = apply_query(Ticket.objects.select_related(), query_params)
 
-    import cPickle, base64
-    urlsafe_query = base64.urlsafe_b64encode(cPickle.dumps(query_params))
+    import cPickle
+    from helpdesk.lib import b64encode
+    urlsafe_query = b64encode(cPickle.dumps(query_params))
 
     user_saved_queries = SavedSearch.objects.filter(Q(user=request.user) | Q(shared__exact=True))
 
