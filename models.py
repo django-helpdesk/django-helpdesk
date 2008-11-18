@@ -45,6 +45,14 @@ class Queue(models.Model):
             'address for that mailbox.'),
         )
 
+    locale = models.CharField(
+        _('Locale'),
+        max_length=10,
+        blank=True,
+        null=True,
+        help_text=_('Locale of this queue. All correspondence in this queue will be in this language.'),
+        )
+
     allow_public_submission = models.BooleanField(
         _('Allow Public Submission?'),
         blank=True,

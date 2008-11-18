@@ -1,0 +1,6 @@
+Beste GrüÃe,
+
+{{ queue.title }}{% if queue.email_address %}
+{{ queue.email_address }}{% endif %}
+    
+Diese E-Mail wurde, im Einklang mit unserer Privacy-Policy an Dich als Benutzer unseres Support-Dienstes gesendet. Bitte teil uns mit falls du denkst, daÃ du diese E-Mail nicht bekommen hättest sollen.

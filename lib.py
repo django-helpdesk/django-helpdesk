@@ -49,20 +49,39 @@ def send_templated_mail(template_name, email_context, recipients, sender=None, b
     from django.template import loader, Context
 
     from helpdesk.models import EmailTemplate
+    import os
 
-    t = EmailTemplate.objects.get(template_name__iexact=template_name)
+    context = Context(email_context)
+    locale = getattr(context['queue'], 'locale', 'en')
+
+    if locale != 'en':
+        template_localized = template_name + ':' + locale
+    else:
+        template_localized = None
+
+    got_template = True
+    if template_localized:
+        try:
+            t = EmailTemplate.objects.get(templaet_name__iexact=template_localized)
+        except EmailTemplate.DoesNotExist:
+            got_template = False
+    
+    if not got_template:
+        t = EmailTemplate.objects.get(template_name__iexact=template_name)
 
     if not sender:
         sender = settings.DEFAULT_FROM_EMAIL
 
-    context = Context(email_context)
+    footer_file = os.path.join('helpdesk', locale, 'email_text_footer.txt')
 
     text_part = loader.get_template_from_string(
-        "%s{%% include 'helpdesk/email_text_footer.txt' %%}" % t.plain_text
+        "%s{%% include '%s' %%}" % (t.plain_text, footer_file)
         ).render(context)
 
+    email_html_base_file = os.path.join('helpdesk', locale, 'email_html_base.html')
+
     html_part = loader.get_template_from_string(
-        "{%% extends 'helpdesk/email_html_base.html' %%}{%% block title %%}%s{%% endblock %%}{%% block content %%}%s{%% endblock %%}" % (t.heading, t.html)
+        "{%% extends '%s' %%}{%% block title %%}%s{%% endblock %%}{%% block content %%}%s{%% endblock %%}" % (email_html_base_file, t.heading, t.html)
         ).render(context)
 
     subject_part = loader.get_template_from_string(
