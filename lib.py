@@ -54,19 +54,19 @@ def send_templated_mail(template_name, email_context, recipients, sender=None, b
     context = Context(email_context)
     locale = getattr(context['queue'], 'locale', 'en')
 
-    if locale != 'en':
+    if locale:
         template_localized = template_name + ':' + locale
     else:
         template_localized = None
 
-    got_template = True
+    t = None
     if template_localized:
         try:
-            t = EmailTemplate.objects.get(templaet_name__iexact=template_localized)
+            t = EmailTemplate.objects.get(template_name__iexact=template_localized)
         except EmailTemplate.DoesNotExist:
-            got_template = False
+            pass
     
-    if not got_template:
+    if not t:
         t = EmailTemplate.objects.get(template_name__iexact=template_name)
 
     if not sender:
