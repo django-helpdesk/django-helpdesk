@@ -120,7 +120,7 @@ LICENSE.JQUERY and LICENSE.NICEDIT for their respective license terms.
    the dates manually via the Admin, or setup a cronjob to run 
    scripts/create_escalation_exclusions.py on a regular basis:
 
-   0 0 * * 0 /path/to/helpdesksite/manage.py create_escalation_exclusions.py --days saturday,sunday --verbose
+   0 0 * * 0 /path/to/helpdesksite/manage.py create_escalation_exclusions.py --days saturday,sunday --escalate-verbosely
 
    This will, on a weekly basis, create exclusions for the coming weekend.
 

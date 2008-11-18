@@ -37,7 +37,7 @@ class Command(BaseCommand):
                 '--queues', '-q',
                 help='Queues to include (default: all). Use queue slugs'),
             make_option(
-                '--verbose', '-v',
+                '--escalate-verbosely', '-x',
                 action='store_true',
                 default=False,
                 help='Display a list of dates excluded'),
@@ -50,7 +50,7 @@ class Command(BaseCommand):
         queue_slugs = options['queues']
         queues = []
 
-        if options['verbose']:
+        if options['escalate-verbosely']:
             verbose = True
 
         # this should already be handled by optparse
@@ -129,7 +129,7 @@ if __name__ == '__main__':
     queues = []
 
     for o, a in opts:
-        if o in ('-v', '--verbose'):
+        if o in ('-x', '--escalate-verbosely'):
             verbose = True
         if o in ('-d', '--days'):
             days = a
