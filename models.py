@@ -912,7 +912,7 @@ def create_usersettings(sender, created_models=[], instance=None, created=False,
     """
     if sender == User and created:
         # This is a new user, so lets create their settings entry.
-        s = UserSettings(user=instance)
+        s, created = UserSettings.objects.get_or_create(user=instance)
         s.save()
     elif UserSettings in created_models:
         # We just created the UserSettings model, lets create a UserSettings
