@@ -1,7 +1,7 @@
 from django.contrib import admin
 from helpdesk.models import Queue, Ticket, FollowUp, PreSetReply, KBCategory
 from helpdesk.models import EscalationExclusion, EmailTemplate, KBItem
-from helpdesk.models import TicketChange, Attachment
+from helpdesk.models import TicketChange, Attachment, IgnoreEmail
 
 class QueueAdmin(admin.ModelAdmin):
     list_display = ('title', 'slug', 'email_address')
@@ -32,3 +32,4 @@ admin.site.register(EscalationExclusion)
 admin.site.register(EmailTemplate)
 admin.site.register(KBCategory)
 admin.site.register(KBItem, KBItemAdmin)
+admin.site.register(IgnoreEmail)
