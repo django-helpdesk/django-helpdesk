@@ -16,6 +16,7 @@ import mimetypes
 import poplib
 import re
 from datetime import datetime, timedelta
+from email.header import decode_header
 from email.Utils import parseaddr
 
 from django.core.files.base import ContentFile
@@ -58,7 +59,7 @@ def process_email():
 def process_queue(q):
     print "Processing: %s" % q
     if q.email_box_type == 'pop3':
-        
+
         if q.email_box_ssl:
             if not q.email_box_port: q.email_box_port = 995
             server = poplib.POP3_SSL(q.email_box_host, int(q.email_box_port))
@@ -78,7 +79,7 @@ def process_queue(q):
 
             full_message = "\n".join(server.retr(msgNum)[1])
             ticket = ticket_from_message(message=full_message, queue=q)
-            
+
             if ticket:
                 server.dele(msgNum)
 
@@ -114,18 +115,21 @@ def decodeUnknown(charset, string):
             string = string.decode('iso8859-1')
     string = unicode(string)
     return string
-   
+
+def decode_mail_headers(string):
+    decoded = decode_header(string)
+    return u' '.join([unicode(msg, charset or 'utf-8') for msg, charset in decoded])
 
 def ticket_from_message(message, queue):
     # 'message' must be an RFC822 formatted message.
     msg = message
     message = email.message_from_string(msg)
     subject = message.get('subject', _('Created from e-mail'))
-    subject = decodeUnknown(message.get_charset(), subject)
+    subject = decode_mail_headers(decodeUnknown(message.get_charset(), subject))
     subject = subject.replace("Re: ", "").replace("Fw: ", "").replace("RE: ", "").replace("FW: ", "").strip()
 
     sender = message.get('from', _('Unknown Sender'))
-    sender = decodeUnknown(message.get_charset(), sender)
+    sender = decode_mail_headers(decodeUnknown(message.get_charset(), sender))
 
     sender_email = parseaddr(sender)[1]
 
