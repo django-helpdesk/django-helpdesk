@@ -61,10 +61,10 @@ def process_queue(q):
         
         if q.email_box_ssl:
             if not q.email_box_port: q.email_box_port = 995
-            server = poplib.POP3_SSL(q.email_box_host, q.email_box_port)
+            server = poplib.POP3_SSL(q.email_box_host, int(q.email_box_port))
         else:
             if not q.email_box_port: q.email_box_port = 110
-            server = poplib.POP3(q.email_box_host, q.email_box_port)
+            server = poplib.POP3(q.email_box_host, int(q.email_box_port))
 
         server.getwelcome()
         server.user(q.email_box_user)
@@ -87,10 +87,10 @@ def process_queue(q):
     elif q.email_box_type == 'imap':
         if q.email_box_ssl:
             if not q.email_box_port: q.email_box_port = 993
-            server = imaplib.IMAP4_SSL(q.email_box_host, q.email_box_port)
+            server = imaplib.IMAP4_SSL(q.email_box_host, int(q.email_box_port))
         else:
             if not q.email_box_port: q.email_box_port = 143
-            server = imaplib.IMAP4(q.email_box_host, q.email_box_port)
+            server = imaplib.IMAP4(q.email_box_host, int(q.email_box_port))
 
         server.login(q.email_box_user, q.email_box_pass)
         server.select(q.email_box_imap_folder)
