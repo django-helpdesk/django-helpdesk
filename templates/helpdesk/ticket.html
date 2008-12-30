@@ -97,7 +97,7 @@
 {% if forloop.last %}</div></ul>{% endif %}
 {% endfor %}
 {% for attachment in followup.attachment_set.all %}{% if forloop.first %}<div class='attachments'><ul>{% endif %}
-<li><a href='{{ attachment.get_file_url }}'>{{ attachment.filename }}</a> ({{ attachment.mime_type }}, {{ attachment.size|filesizeformat }})</li>
+<li><a href='{{ attachment.file.url }}'>{{ attachment.filename }}</a> ({{ attachment.mime_type }}, {{ attachment.size|filesizeformat }})</li>
 {% if forloop.last %}</ul></div>{% endif %}
 {% endfor %}
 </div>

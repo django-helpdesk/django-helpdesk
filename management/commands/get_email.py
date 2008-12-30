@@ -276,7 +276,7 @@ def ticket_from_message(message, queue):
                 mime_type=file['type'],
                 size=len(file['content']),
                 )
-            a.file.save(file['filename'], ContentFile(file['content']))
+            a.file.save(file['filename'], ContentFile(file['content']), save=False)
             a.save()
             print "    - %s" % file['filename']
 

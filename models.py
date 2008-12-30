@@ -543,31 +543,22 @@ class TicketChange(models.Model):
         return str
 
 
-class DynamicFileField(models.FileField):
+def attachment_path(instance, filename):
     """
-    Allows model instance to specify upload_to dynamically.
-
-    Model class should have a method like:
-
-        def get_upload_to(self, attname):
-            return 'path/to/%d' % self.parent.id
-
-    Based on: http://scottbarnham.com/blog/2007/07/31/uploading-images-to-a-dynamic-path-with-django/
+    Provide a file path that will help prevent files being overwritten, by
+    putting attachments in a folder off attachments for ticket/followup_id/.
     """
-
-    def contribute_to_class(self, cls, name):
-        """Hook up events so we can access the instance."""
-        super(DynamicFileField, self).contribute_to_class(cls, name)
-        models.signals.post_init.connect(self._post_init, sender=cls)
-
-    def _post_init(self, instance=None, **kwargs):
-        """Get dynamic upload_to value from the model instance."""
-        if hasattr(instance, 'get_upload_to'):
-            self.upload_to = instance.get_upload_to(self.attname)
-
-    def db_type(self):
-        """Required by Django for ORM."""
-        return 'varchar(100)'
+    import os
+    from django.conf import settings
+    os.umask(0)
+    path = 'helpdesk/attachments/%s/%s' % (instance.followup.ticket.ticket_for_url, instance.followup.id )
+    try:
+        os.makedirs(os.path.join(settings.MEDIA_ROOT, path), 0777)
+    except OSError,e:
+        if e[0] != 17:
+            # 17 = 'File exists'
+            raise e
+    return os.path.join(path, filename)
 
 
 class Attachment(models.Model):
@@ -578,9 +569,9 @@ class Attachment(models.Model):
 
     followup = models.ForeignKey(FollowUp)
 
-    file = DynamicFileField(
+    file = models.FileField(
         _('File'),
-        upload_to='helpdesk/attachments',
+        upload_to=attachment_path,
         )
 
     filename = models.CharField(

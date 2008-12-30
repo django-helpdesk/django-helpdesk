@@ -267,15 +267,16 @@ def update_ticket(request, ticket_id):
             )
 
     if request.FILES:
+        import mimetypes
         for file in request.FILES.getlist('attachment'):
-            filename = file['filename'].replace(' ', '_')
+            filename = file.name.replace(' ', '_')
             a = Attachment(
                 followup=f,
                 filename=filename,
-                mime_type=file['content-type'],
-                size=len(file['content']),
+                mime_type=mimetypes.guess_type(filename)[0] or 'application/octet-stream',
+                size=file.size,
                 )
-            a.file.save(file['filename'], ContentFile(file['content']))
+            a.file.save(file.name, file, save=False)
             a.save()
 
     ticket.save()
