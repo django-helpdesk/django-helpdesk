@@ -75,7 +75,7 @@ def dashboard(request):
             'unassigned_tickets': unassigned_tickets,
             'dash_tickets': dash_tickets,
         }))
-dashboard = login_required(dashboard)
+dashboard = staff_member_required(dashboard)
 
 
 def delete_ticket(request, ticket_id):
@@ -89,7 +89,7 @@ def delete_ticket(request, ticket_id):
     else:
         ticket.delete()
         return HttpResponseRedirect(reverse('helpdesk_home'))
-delete_ticket = login_required(delete_ticket)
+delete_ticket = staff_member_required(delete_ticket)
 
 
 def view_ticket(request, ticket_id):
@@ -121,11 +121,11 @@ def view_ticket(request, ticket_id):
     return render_to_response('helpdesk/ticket.html',
         RequestContext(request, {
             'ticket': ticket,
-            'active_users': User.objects.filter(is_active=True),
+            'active_users': User.objects.filter(is_active=True, is_staff=True),
             'priorities': Ticket.PRIORITY_CHOICES,
             'preset_replies': PreSetReply.objects.filter(Q(queues=ticket.queue) | Q(queues__isnull=True)),
         }))
-view_ticket = login_required(view_ticket)
+view_ticket = staff_member_required(view_ticket)
 
 
 def update_ticket(request, ticket_id):
@@ -282,7 +282,7 @@ def update_ticket(request, ticket_id):
     ticket.save()
 
     return HttpResponseRedirect(ticket.get_absolute_url())
-update_ticket = login_required(update_ticket)
+update_ticket = staff_member_required(update_ticket)
 
 
 def ticket_list(request):
@@ -386,7 +386,7 @@ def ticket_list(request):
             query_params=query_params,
             from_saved_query=from_saved_query,
         )))
-ticket_list = login_required(ticket_list)
+ticket_list = staff_member_required(ticket_list)
 
 
 def create_ticket(request):
@@ -406,7 +406,7 @@ def create_ticket(request):
         RequestContext(request, {
             'form': form,
         }))
-create_ticket = login_required(create_ticket)
+create_ticket = staff_member_required(create_ticket)
 
 
 def raw_details(request, type):
@@ -425,7 +425,7 @@ def raw_details(request, type):
             raise Http404
 
     raise Http404
-raw_details = login_required(raw_details)
+raw_details = staff_member_required(raw_details)
 
 
 def hold_ticket(request, ticket_id, unhold=False):
@@ -450,12 +450,12 @@ def hold_ticket(request, ticket_id, unhold=False):
     ticket.save()
 
     return HttpResponseRedirect(ticket.get_absolute_url())
-hold_ticket = login_required(hold_ticket)
+hold_ticket = staff_member_required(hold_ticket)
 
 
 def unhold_ticket(request, ticket_id):
     return hold_ticket(request, ticket_id, unhold=True)
-unhold_ticket = login_required(unhold_ticket)
+unhold_ticket = staff_member_required(unhold_ticket)
 
 
 def rss_list(request):
@@ -463,13 +463,13 @@ def rss_list(request):
         RequestContext(request, {
             'queues': Queue.objects.all(),
         }))
-rss_list = login_required(rss_list)
+rss_list = staff_member_required(rss_list)
 
 
 def report_index(request):
     return render_to_response('helpdesk/report_index.html',
         RequestContext(request, {}))
-report_index = login_required(report_index)
+report_index = staff_member_required(report_index)
 
 
 def run_report(request, report):
@@ -627,7 +627,7 @@ def run_report(request, report):
             'chart': chart_url,
             'title': title,
         }))
-run_report = login_required(run_report)
+run_report = staff_member_required(run_report)
 
 
 def save_query(request):
@@ -642,7 +642,7 @@ def save_query(request):
     query.save()
     
     return HttpResponseRedirect('%s?saved_query=%s' % (reverse('helpdesk_list'), query.id))
-save_query = login_required(save_query)
+save_query = staff_member_required(save_query)
 
 
 def delete_saved_query(request, id):
@@ -656,7 +656,7 @@ def delete_saved_query(request, id):
             RequestContext(request, {
                 'query': query,
                 }))
-delete_saved_query = login_required(delete_saved_query)
+delete_saved_query = staff_member_required(delete_saved_query)
 
 
 def user_settings(request):
@@ -673,7 +673,7 @@ def user_settings(request):
         RequestContext(request, {
             'form': form,
         }))
-user_settings = login_required(user_settings)
+user_settings = staff_member_required(user_settings)
 
 
 def email_ignore(request):
