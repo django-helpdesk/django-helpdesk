@@ -407,7 +407,7 @@ class Ticket(models.Model):
         return u'%s' % self.title
 
     def get_absolute_url(self):
-        return ('helpdesk_view', [str(self.id)])
+        return ('helpdesk_view', (self.id,))
     get_absolute_url = models.permalink(get_absolute_url)
 
     def save(self, force_insert=False, force_update=False):
@@ -757,7 +757,7 @@ class KBCategory(models.Model):
         ordering = ['title',]
 
     def get_absolute_url(self):
-        return ('helpdesk_kb_category', [str(self.slug)])
+        return ('helpdesk_kb_category', (), {'slug': self.slug})
     get_absolute_url = models.permalink(get_absolute_url)
 
 
@@ -817,7 +817,7 @@ class KBItem(models.Model):
         ordering = ['title',]
 
     def get_absolute_url(self):
-        return ('helpdesk_kb_item', [str(self.id)])
+        return ('helpdesk_kb_item', (self.id,))
     get_absolute_url = models.permalink(get_absolute_url)
 
 
