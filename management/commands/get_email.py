@@ -133,6 +133,8 @@ def ticket_from_message(message, queue):
 
     sender_email = parseaddr(sender)[1]
 
+    body_plain, body_html = '', ''
+
     for ignore in IgnoreEmail.objects.filter(Q(queues=queue) | Q(queues__isnull=True)):
         if ignore.test(sender_email):
             return False
@@ -154,8 +156,10 @@ def ticket_from_message(message, queue):
         name = part.get_param("name")
 
         if part.get_content_maintype() == 'text' and name == None:
-            body = part.get_payload(decode=True)
-            body = decodeUnknown(part.get_charset(), body)
+            if part.get_content_subtype() == 'plain':
+                body_plain = decodeUnknown(part.get_charset(), part.get_payload(decode=True))
+            else:
+                body_html = decodeUnknown(part.get_charset(), part.get_payload(decode=True))
         else:
             if not name:
                 ext = mimetypes.guess_extension(part.get_content_type())
@@ -168,6 +172,18 @@ def ticket_from_message(message, queue):
                 )
 
         counter += 1
+
+    if body_plain:
+        body = body_plain
+    else:
+        body = _('No plain-text email body available. Please see attachment email_html_body.html.')
+
+    if body_html:
+        files.append({
+            'filename': _("email_html_body.html"),
+            'content': body_html,
+            'type': 'text/html',
+        })
 
     now = datetime.now()
 
