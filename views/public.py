@@ -21,7 +21,7 @@ from helpdesk.models import Ticket, Queue
 
 
 def homepage(request):
-    if request.user.is_authenticated():
+    if request.user.is_staff:
         if getattr(request.user.usersettings.settings, 'login_view_ticketlist', False):
             return HttpResponseRedirect(reverse('helpdesk_list'))
         else:

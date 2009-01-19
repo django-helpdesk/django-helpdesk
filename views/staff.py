@@ -121,7 +121,7 @@ def view_ticket(request, ticket_id):
     return render_to_response('helpdesk/ticket.html',
         RequestContext(request, {
             'ticket': ticket,
-            'active_users': User.objects.filter(is_active=True, is_staff=True),
+            'active_users': User.objects.filter(is_active=True).filter(is_staff=True),
             'priorities': Ticket.PRIORITY_CHOICES,
             'preset_replies': PreSetReply.objects.filter(Q(queues=ticket.queue) | Q(queues__isnull=True)),
         }))
