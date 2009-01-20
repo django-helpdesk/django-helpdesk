@@ -9,6 +9,7 @@ views/staff.py - The bulk of the application - provides most business logic and
 
 from datetime import datetime
 
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.files.base import ContentFile
@@ -180,6 +181,26 @@ def update_ticket(request, ticket_id):
             f.title = _('Updated')
 
     f.save()
+    
+    files = []
+    if request.FILES:
+        import mimetypes, os
+        for file in request.FILES.getlist('attachment'):
+            filename = file.name.replace(' ', '_')
+            a = Attachment(
+                followup=f,
+                filename=filename,
+                mime_type=mimetypes.guess_type(filename)[0] or 'application/octet-stream',
+                size=file.size,
+                )
+            a.file.save(file.name, file, save=False)
+            a.save()
+            
+            if file.size < getattr(settings, 'MAX_EMAIL_ATTACHMENT_SIZE', 512000):
+                # Only files smaller than 512kb (or as defined in 
+                # settings.MAX_EMAIL_ATTACHMENT_SIZE) are sent via email.
+                files.append(a.file.path)
+
 
     if title != ticket.title:
         c = TicketChange(
@@ -225,6 +246,7 @@ def update_ticket(request, ticket_id):
             recipients=ticket.submitter_email,
             sender=ticket.queue.from_address,
             fail_silently=True,
+            files=files,
             )
 
     if ticket.assigned_to and request.user != ticket.assigned_to and ticket.assigned_to.email:
@@ -246,6 +268,7 @@ def update_ticket(request, ticket_id):
                 recipients=ticket.assigned_to.email,
                 sender=ticket.queue.from_address,
                 fail_silently=True,
+                files=files,
                 )
 
     if ticket.queue.updated_ticket_cc:
@@ -264,20 +287,8 @@ def update_ticket(request, ticket_id):
             recipients=ticket.queue.updated_ticket_cc,
             sender=ticket.queue.from_address,
             fail_silently=True,
+            files=files,
             )
-
-    if request.FILES:
-        import mimetypes
-        for file in request.FILES.getlist('attachment'):
-            filename = file.name.replace(' ', '_')
-            a = Attachment(
-                followup=f,
-                filename=filename,
-                mime_type=mimetypes.guess_type(filename)[0] or 'application/octet-stream',
-                size=file.size,
-                )
-            a.file.save(file.name, file, save=False)
-            a.save()
 
     ticket.save()
 
