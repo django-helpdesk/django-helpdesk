@@ -19,7 +19,7 @@ Jutda Helpdesk - A Django powered ticket tracker for small enterprise.
 
 See the file 'LICENSE' for licensing terms. Note that jQuery and nicEdit 
 are both distributed with this product, and have their own licenses. See 
-LICENSE.JQUERY and LICENSE.NICEDIT for their respective license terms.
+LICENSE.3RDPARTY for license terms for included packages.
 
 #########################
 2. Dependencies (pre-flight checklist)
