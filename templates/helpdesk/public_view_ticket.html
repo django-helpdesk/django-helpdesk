@@ -49,6 +49,10 @@
 {% for change in followup.ticketchange_set.all %}
 <li>{% blocktrans %}Changed {{ change.field }} from {{ change.old_value }} to {{ change.new_value }}.{% endblocktrans %}</li>
 {% endfor %}
+{% for attachment in followup.attachment_set.all %}{% if forloop.first %}<div class='attachments'><ul>{% endif %}
+<li><a href='{{ attachment.file.url }}'>{{ attachment.filename }}</a> ({{ attachment.mime_type }}, {{ attachment.size|filesizeformat }})</li>
+{% if forloop.last %}</ul></div>{% endif %}
+{% endfor %}
 </div></ul>{% endif %}
 </div>
 {% endfor %}
