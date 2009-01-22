@@ -28,7 +28,7 @@ def homepage(request):
             return HttpResponseRedirect(reverse('helpdesk_dashboard'))
 
     if request.method == 'POST':
-        form = PublicTicketForm(request.POST)
+        form = PublicTicketForm(request.POST, request.FILES)
         form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.filter(allow_public_submission=True)]
         if form.is_valid():
             ticket = form.save()

@@ -10,11 +10,12 @@ forms.py - Definitions of newforms-based forms for creating and maintaining
 from datetime import datetime
 
 from django import forms
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext as _
 
 from helpdesk.lib import send_templated_mail
-from helpdesk.models import Ticket, Queue, FollowUp, IgnoreEmail
+from helpdesk.models import Ticket, Queue, FollowUp, Attachment, IgnoreEmail
 
 class TicketForm(forms.Form):
     queue = forms.ChoiceField(
@@ -60,6 +61,12 @@ class TicketForm(forms.Form):
             'as \'3\'.'),
         )
 
+    attachment = forms.FileField(
+        required=False,
+        label=_('Attach File'),
+        help_text=_('You can attach a file such as a document or screenshot to this ticket.'),
+        )
+
     def save(self, user):
         """
         Writes and returns a Ticket() object
@@ -97,6 +104,25 @@ class TicketForm(forms.Form):
             }
 
         f.save()
+        
+        files = []
+        if self.cleaned_data['attachment']:
+            import mimetypes
+            file = self.cleaned_data['attachment']
+            filename = file.name.replace(' ', '_')
+            a = Attachment(
+                followup=f,
+                filename=filename,
+                mime_type=mimetypes.guess_type(filename)[0] or 'application/octet-stream',
+                size=file.size,
+                )
+            a.file.save(file.name, file, save=False)
+            a.save()
+            
+            if file.size < getattr(settings, 'MAX_EMAIL_ATTACHMENT_SIZE', 512000):
+                # Only files smaller than 512kb (or as defined in 
+                # settings.MAX_EMAIL_ATTACHMENT_SIZE) are sent via email.
+                files.append(a.file.path)
 
         context = {
             'ticket': t,
@@ -110,6 +136,7 @@ class TicketForm(forms.Form):
                 recipients=t.submitter_email,
                 sender=q.from_address,
                 fail_silently=True,
+                files=files,
                 )
 
         if t.assigned_to and t.assigned_to != user and getattr(t.assigned_to.usersettings.settings, 'email_on_ticket_assign', False):
@@ -119,6 +146,7 @@ class TicketForm(forms.Form):
                 recipients=t.assigned_to.email,
                 sender=q.from_address,
                 fail_silently=True,
+                files=files,
                 )
 
         if q.new_ticket_cc:
@@ -128,6 +156,7 @@ class TicketForm(forms.Form):
                 recipients=q.new_ticket_cc,
                 sender=q.from_address,
                 fail_silently=True,
+                files=files,
                 )
 
         if q.updated_ticket_cc and q.updated_ticket_cc != q.new_ticket_cc:
@@ -137,6 +166,7 @@ class TicketForm(forms.Form):
                 recipients=q.updated_ticket_cc,
                 sender=q.from_address,
                 fail_silently=True,
+                files=files,
                 )
 
         return t
@@ -178,6 +208,12 @@ class PublicTicketForm(forms.Form):
         help_text=_('Please select a priority carefully.'),
         )
 
+    attachment = forms.FileField(
+        required=False,
+        label=_('Attach File'),
+        help_text=_('You can attach a file such as a document or screenshot to this ticket.'),
+        )
+
     def save(self):
         """
         Writes and returns a Ticket() object
@@ -207,6 +243,25 @@ class PublicTicketForm(forms.Form):
 
         f.save()
 
+        files = []
+        if self.cleaned_data['attachment']:
+            import mimetypes
+            file = self.cleaned_data['attachment']
+            filename = file.name.replace(' ', '_')
+            a = Attachment(
+                followup=f,
+                filename=filename,
+                mime_type=mimetypes.guess_type(filename)[0] or 'application/octet-stream',
+                size=file.size,
+                )
+            a.file.save(file.name, file, save=False)
+            a.save()
+            
+            if file.size < getattr(settings, 'MAX_EMAIL_ATTACHMENT_SIZE', 512000):
+                # Only files smaller than 512kb (or as defined in 
+                # settings.MAX_EMAIL_ATTACHMENT_SIZE) are sent via email.
+                files.append(a.file.path)
+
         context = {
             'ticket': t,
             'queue': q,
@@ -218,6 +273,7 @@ class PublicTicketForm(forms.Form):
             recipients=t.submitter_email,
             sender=q.from_address,
             fail_silently=True,
+            files=files,
             )
 
         if q.new_ticket_cc:
@@ -227,6 +283,7 @@ class PublicTicketForm(forms.Form):
                 recipients=q.new_ticket_cc,
                 sender=q.from_address,
                 fail_silently=True,
+                files=files,
                 )
 
         if q.updated_ticket_cc and q.updated_ticket_cc != q.new_ticket_cc:
@@ -236,6 +293,7 @@ class PublicTicketForm(forms.Form):
                 recipients=q.updated_ticket_cc,
                 sender=q.from_address,
                 fail_silently=True,
+                files=files,
                 )
 
         return t

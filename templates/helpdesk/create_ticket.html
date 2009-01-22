@@ -7,35 +7,19 @@
 
 <p>Unless otherwise stated, all fields are required. Please provide as descriptive a title and description as possible.</p>{% endblocktrans %}
 
-<form method='post' action='./'>
+<form method='post' action='./' encrypt='multipart/form-data'>
 <fieldset>
     <dl>
-        <dt><label for='id_queue'>{{ form.queue.label }}</label></dt>
-        <dd>{{ form.queue }}</dd>
-        {% if form.queue.errors %}<dd class='error'>{{ form.queue.errors }}</dd>{% endif %}
-        
-        <dt><label for='id_title'>{{ form.title.label }}</label></dt>
-        <dd>{{ form.title }}</dd>
-        {% if form.title.errors %}<dd class='error'>{{ form.title.errors }}</dd>{% endif %}
-    
-        <dt><label for='id_submitter_email'>{{ form.submitter_email.label }}</label> <span class='form_optional'>{% trans "(Optional)" %}</span></dt>
-        <dd>{{ form.submitter_email }}</dd>
-        {% if form.submitter_email.errors %}<dd class='error'>{{ form.submitter_email.errors }}</dd>{% endif %}
-        <dd class='form_help_text'>{{ form.submitter_email.help_text }}</dd>
-    
-        <dt><label for='id_body'>{{ form.body.label }}</label></dt>
-        <dd>{{ form.body }}</dd>
-        {% if form.body.errors %}<dd class='error'>{{ form.body.errors }}</dd>{% endif %}
-        
-        <dt><label for='id_assigned_to'>{{ form.assigned_to.label }}</label> <span class='form_optional'>{% trans "(Optional)" %}</span></dt>
-        <dd>{{ form.assigned_to }}</dd>
-        {% if form.assigned_to.errors %}<dd class='error'>{{ form.assigned_to.errors }}</dd>{% endif %}
-        <dd class='form_help_text'>{{ form.assigned_to.help_text }}</dd>
-
-        <dt><label for='id_priority'>{{ form.priority.label }}</label></dt>
-        <dd>{{ form.priority }}</dd>
-        {% if form.priority.errors %}<dd class='error'>{{ form.priority.errors }}</dd>{% endif %}
-        <dd class='form_help_text'>{{ form.priority.help_text }}</dd>
+        {% for field in form %}
+            {% if field.is_hidden %}
+                {{ field }}
+            {% else %}
+                <dt><label for='id_{{ field.name }}'>{{ field.label }}</label>{% if not field.field.required %} <span class='form_optional'>{% trans "(Optional)" %}</span>{% endif %}</dt>
+                <dd>{{ field }}</dd>
+                {% if field.errors %}<dd class='error'>{{ field.errors }}</dd>{% endif %}
+                {% if field.help_text %}<dd class='form_help_text'>{{ field.help_text }}</dd>{% endif %}</label>
+            {% endif %}
+        {% endfor %}
     </dl>
     
     <div class='buttons'>
