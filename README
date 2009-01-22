@@ -31,6 +31,14 @@ LICENSE.3RDPARTY for license terms for included packages.
 3. An existing WORKING Django project with database etc. If you
    cannot log into the Admin, you won't get this product working.
 
+
+NOTE REGARDING SQLITE AND SEARCHING:
+If you use sqlite as your database, the search function will not work as
+effectively as it will with other databases due to its inability to do
+case-insensitive searches. It's recommended that you use PostgreSQL or MySQL
+if possible. For more information, see this note in the Django documentation:
+http://docs.djangoproject.com/en/dev/ref/databases/#sqlite-string-matching
+
 #########################
 3. Installation
 #########################
