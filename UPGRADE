@@ -9,4 +9,20 @@ all commands listed _after_ that checkout.
 #########################
 0. Table of Contents
 #########################
-No items yet.
+1. 2009-01-23 (Changes added after SVN r99)
+
+
+#########################
+1. 2009-01-23 (Changes added after SVN r99)
+#########################
+
+A new flag was added to the 'IgnoreEmail' model to allow emails from ignored
+addresses to be either kept in the mailbox (for manual checking) or deleted.
+
+A new column called 'keep_in_mailbox' (type boolean, not required) is to be 
+added to the 'helpdesk_ignoreemail' table. The 'UPDATE' command will set all 
+ignore list entries to 'Keep mail from ignored address', which is the previous
+behaviour.
+
+    ALTER TABLE helpdesk_ignoreemail ADD "keep_in_mailbox" boolean;
+    UPDATE helpdesk_ignoreemail SET keep_in_mailbox='t';

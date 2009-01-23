@@ -137,7 +137,11 @@ def ticket_from_message(message, queue):
 
     for ignore in IgnoreEmail.objects.filter(Q(queues=queue) | Q(queues__isnull=True)):
         if ignore.test(sender_email):
-            return False
+            if ignore.keep_in_mailbox:
+                # By returning 'False' the message will be kept in the mailbox,
+                # and the 'True' will cause the message to be deleted.
+                return False
+            return True
 
     regex = re.compile("^\[[A-Za-z0-9]+-\d+\]")
     if regex.match(subject):

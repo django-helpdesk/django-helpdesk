@@ -129,7 +129,7 @@ class Queue(models.Model):
         help_text=_('Whether to use SSL for IMAP or POP3 - the default ports '
             'when using SSL are 993 for IMAP and 995 for POP3.'),
         )
-             
+ 
     email_box_user = models.CharField(
         _('E-Mail Username'),
         max_length=200,
@@ -847,7 +847,7 @@ class SavedSearch(models.Model):
         null=True,
         help_text=_('Should other users see this query?'),
         )
-    
+
     query = models.TextField(
         _('Search Query'),
         help_text=_('Pickled query object. Be wary changing this.'),
@@ -867,7 +867,7 @@ class UserSettings(models.Model):
 
     We should always refer to user.usersettings.settings['setting_name'].
     """
-    
+
     user = models.OneToOneField(User)
 
     settings_pickled = models.TextField(
@@ -882,7 +882,7 @@ class UserSettings(models.Model):
         import cPickle
         from helpdesk.lib import b64encode
         self.settings_pickled = b64encode(cPickle.dumps(data))
-    
+
     def _get_settings(self):
         # return a python dictionary representing the pickled data.
         import cPickle
@@ -896,7 +896,7 @@ class UserSettings(models.Model):
 
     def __unicode__(self):
         return u'Preferences for %s' % self.user
-    
+
     class Meta:
         verbose_name = 'User Settings'
         verbose_name_plural = 'User Settings'
@@ -949,7 +949,7 @@ class IgnoreEmail(models.Model):
         _('Name'),
         max_length=100,
         )
-    
+
     date = models.DateField(
         _('Date'),
         help_text=_('Date on which this e-mail address was added'),
@@ -964,9 +964,18 @@ class IgnoreEmail(models.Model):
             'wildcards, eg *@domain.com or postmaster@*.'),
         )
 
+    keep_in_mailbox = models.BooleanField(
+        _('Save Emails in Mailbox?'),
+        blank=True,
+        null=True,
+        help_text=_('Do you want to save emails from this address in the '
+            'mailbox? If this is unticked, emails from this address will '
+            'be deleted.'),
+        )
+
     def __unicode__(self):
         return u'%s' % self.name
-    
+
     def save(self):
         if not self.date:
             self.date = datetime.now()
@@ -983,7 +992,7 @@ class IgnoreEmail(models.Model):
 
             1-4 return True, 5 returns False.
         """
-        
+
         own_parts = self.email_address.split("@")
         email_parts = email.split("@")
 
