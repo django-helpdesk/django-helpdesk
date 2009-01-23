@@ -71,6 +71,23 @@ def view_ticket(request):
             error_message = _('Invalid ticket ID or e-mail address. Please try again.')
 
         if t:
+            
+            if request.GET.has_key('close') and ticket.status == Ticket.RESOLVED_STATUS:
+                from helpdesk.views.staff import update_ticket
+                # Trick the update_ticket() view into thinking it's being called with
+                # a valid POST.
+                request.POST = {
+                    'new_status': Ticket.CLOSED_STATUS,
+                    'public': 1,
+                    'owner': ticket.assigned_to,
+                    'title': ticket.title,
+                    'comment': _('Submitter accepted resolution and closed ticket'),
+                    }
+                request.FILES = {}
+                request.GET = {}
+
+                return update_ticket(request, ticket_id)
+            
             return render_to_response('helpdesk/public_view_ticket.html',
                 RequestContext(request, {
                     'ticket': t,

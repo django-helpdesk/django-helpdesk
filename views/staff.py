@@ -148,7 +148,11 @@ def update_ticket(request, ticket_id):
     if not owner and ticket.assigned_to:
         owner = ticket.assigned_to.id
 
-    f = FollowUp(ticket=ticket, date=datetime.now(), comment=comment, user=request.user)
+    f = FollowUp(ticket=ticket, date=datetime.now(), comment=comment)
+    
+    if request.user.is_staff():
+        f.user = request.user
+    
     f.public = public
 
     reassigned = False
@@ -292,7 +296,10 @@ def update_ticket(request, ticket_id):
 
     ticket.save()
 
-    return HttpResponseRedirect(ticket.get_absolute_url())
+    if request.user.is_staff():
+        return HttpResponseRedirect(ticket.get_absolute_url())
+    else:
+        return HttpResponseRedirect(ticket.ticket_url)
 update_ticket = staff_member_required(update_ticket)
 
 
