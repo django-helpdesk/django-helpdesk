@@ -1,6 +1,6 @@
 Jutda Helpdesk - A Django powered ticket tracker for small enterprise.
 
-(c) Copyright 2008 Jutda. All Rights Reserved. See LICENSE for details.
+(c) Copyright 2009 Jutda. All Rights Reserved. See LICENSE for details.
 
 #########################
 0. Table of Contents
@@ -8,17 +8,18 @@ Jutda Helpdesk - A Django powered ticket tracker for small enterprise.
 
 1. Licensing
 2. Dependencies (pre-flight checklist)
-3. Installation
-4. Initial Configuration
-5. API Usage
-6. Thank You
+3. Upgrading from previous versions
+4. Installation
+5. Initial Configuration
+6. API Usage
+7. Thank You
 
 #########################
 1. Licensing
 #########################
 
-See the file 'LICENSE' for licensing terms. Note that jQuery and nicEdit 
-are both distributed with this product, and have their own licenses. See 
+See the file 'LICENSE' for licensing terms. Note that Jutda Helpdesk is 
+distributed with 3rd party products which have their own licenses. See 
 LICENSE.3RDPARTY for license terms for included packages.
 
 #########################
@@ -31,7 +32,6 @@ LICENSE.3RDPARTY for license terms for included packages.
 3. An existing WORKING Django project with database etc. If you
    cannot log into the Admin, you won't get this product working.
 
-
 NOTE REGARDING SQLITE AND SEARCHING:
 If you use sqlite as your database, the search function will not work as
 effectively as it will with other databases due to its inability to do
@@ -40,7 +40,32 @@ if possible. For more information, see this note in the Django documentation:
 http://docs.djangoproject.com/en/dev/ref/databases/#sqlite-string-matching
 
 #########################
-3. Installation
+3. Upgrading from previous versions
+#########################
+
+If you are upgrading from a previous version of Jutda Helpdesk, you should 
+read the UPGRADING file to learn what changes you will need to make to get 
+the current version of Jutda Helpdesk working.
+
+1. Find out your current version of Jutda Helpdesk. In the 'helpdesk' folder,
+   use the 'svn' command to find the current revision:
+
+    svn info .
+
+   Look for the 'Revision' line, eg:
+
+    Revision: 92
+
+2. Read through the UPGRADE file, looking for any changse made _after_ that 
+   revision. Apply the commands provided in order from oldest to most recent.
+
+3. Restart your web server software (eg Apache) or FastCGI instance, to ensure
+   the latest changes are in use.
+
+4. Continue to the 'Initial Configuration' area, if needed.
+
+#########################
+4. Installation
 #########################
 
 1. Place 'helpdesk' in your Python path. I use /var/django, others may use 
@@ -92,7 +117,7 @@ http://docs.djangoproject.com/en/dev/ref/databases/#sqlite-string-matching
     This is NOT recommended, especially if you're on a shared server.
 
 #########################
-4. Initial Configuration
+5. Initial Configuration
 #########################
 
 1. Visit http://yoursite/admin/ and add a Helpdesk Queue. If you wish, 
@@ -147,7 +172,7 @@ http://docs.djangoproject.com/en/dev/ref/databases/#sqlite-string-matching
 You're now up and running!
 
 #########################
-5. API Usage
+6. API Usage
 #########################
 
 Jutda Helpdesk includes an API accessible via HTTP POST requests, allowing
@@ -157,7 +182,7 @@ For usage instructions and command syntax, see the file
 templates/helpdesk/api_help.html, or visit http://helpdesk/api/help/.
 
 #########################
-6. Thank You
+7. Thank You
 #########################
 
 While this started as a project to suit my own needs, since publishing the

@@ -1,0 +1,12 @@
+Jutda Helpdesk - A Django powered ticket tracker for small enterprise.
+
+(c) Copyright 2009 Jutda. All Rights Reserved. See LICENSE for details.
+
+This file contains basic upgrade instructions, generally to do with database
+schema changes. To use it, determine what SVN checkout you're using, then run
+all commands listed _after_ that checkout.
+
+#########################
+0. Table of Contents
+#########################
+No items yet.
