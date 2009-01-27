@@ -150,7 +150,7 @@ def update_ticket(request, ticket_id):
 
     f = FollowUp(ticket=ticket, date=datetime.now(), comment=comment)
     
-    if request.user.is_staff():
+    if request.user.is_staff:
         f.user = request.user
     
     f.public = public
@@ -296,7 +296,7 @@ def update_ticket(request, ticket_id):
 
     ticket.save()
 
-    if request.user.is_staff():
+    if request.user.is_staff:
         return HttpResponseRedirect(ticket.get_absolute_url())
     else:
         return HttpResponseRedirect(ticket.ticket_url)
