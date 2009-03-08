@@ -28,7 +28,7 @@
                 {% block helpdesk_body %}{% endblock %}
             </div>
             <div id='footer'>
-                <p>{% trans "Powered by <a href='http://www.jutda.com.au/'>Jutda Helpdesk</a>." %} <a href='{% url helpdesk_rss_index %}'><img src='{{ MEDIA_URL }}helpdesk/rss_icon.png' width='14' height='14' alt='{% trans "RSS Icon" %}' title='{% trans "RSS Feeds" %}' border='0' />{% trans "RSS Feeds" %}</a> <a href='{% url helpdesk_api_help %}'>{% trans "API" %}</a> <a href='{% url helpdesk_user_settings %}'>{% trans "User Settings" %}</a> {% if user.is_superuser %}<a href='{% url helpdesk_system_settings %}'>{% trans "System Settings" %}</a>{% endif %}</p>
+                <p>{% trans "Powered by <a href='http://www.jutdahelpdesk.com/'>Jutda Helpdesk</a>." %} <a href='{% url helpdesk_rss_index %}'><img src='{{ MEDIA_URL }}helpdesk/rss_icon.png' width='14' height='14' alt='{% trans "RSS Icon" %}' title='{% trans "RSS Feeds" %}' border='0' />{% trans "RSS Feeds" %}</a> <a href='{% url helpdesk_api_help %}'>{% trans "API" %}</a> <a href='{% url helpdesk_user_settings %}'>{% trans "User Settings" %}</a> {% if user.is_superuser %}<a href='{% url helpdesk_system_settings %}'>{% trans "System Settings" %}</a>{% endif %}</p>
             </div>
         </div>
         {% include "helpdesk/debug.html" %}

@@ -23,6 +23,10 @@ urlpatterns = patterns('helpdesk.views.staff',
         'ticket_list',
         name='helpdesk_list'),
 
+    url(r'^tickets/update/$',
+        'mass_update',
+        name='helpdesk_mass_update'),
+
     url(r'^tickets/submit/$',
         'create_ticket',
         name='helpdesk_submit'),
