@@ -318,6 +318,40 @@ def ticket_list(request):
 
     from_saved_query = False
 
+    # If the user is coming from the header/navigation search box, lets' first
+    # look at their query to see if they have entered a valid ticket number. If
+    # they have, just redirect to that ticket number. Otherwise, we treat it as
+    # a keyword search.
+
+    if request.GET.get('search_type', None) == 'header':
+        query = request.GET.get('q')
+        filter = None
+        if query.find('-') > 0:
+            queue, id = query.split('-')
+            try:
+                id = int(id)
+            except ValueError:
+                id = None
+
+            if id:
+                filter = {'queue__slug': queue, 'id': id }
+        else:
+            try:
+                query = int(query)
+            except ValueError:
+                query = None
+
+            if query:
+                filter = {'id': int(query) }
+
+        if filter:
+            try:
+                ticket = Ticket.objects.get(**filter)
+                return HttpResponseRedirect(ticket.staff_url)
+            except Ticket.DoesNotExist:
+                # Go on to standard keyword searching
+                pass
+
     if request.GET.get('saved_query', None):
         from_saved_query = True
         try:
