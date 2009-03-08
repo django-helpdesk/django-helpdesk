@@ -386,6 +386,10 @@ def ticket_list(request):
 
     tickets = apply_query(Ticket.objects.select_related(), query_params)
 
+    search_message = ''
+    if context.has_key('query') and settings.DATABASE_ENGINE.startswith('sqlite'):
+        search_message = _('<p><strong>Note:</strong> Your keyword search is case sensitive because of your database. This means the search will <strong>not</strong> be accurate. By switching to a different database system you will gain better searching! For more information, read the <a href="http://docs.djangoproject.com/en/dev/ref/databases/#sqlite-string-matching">Django Documentation on string matching in SQLite</a>.')
+
     import cPickle
     from helpdesk.lib import b64encode
     urlsafe_query = b64encode(cPickle.dumps(query_params))
@@ -403,6 +407,7 @@ def ticket_list(request):
             user_saved_queries=user_saved_queries,
             query_params=query_params,
             from_saved_query=from_saved_query,
+            search_message=search_message,
         )))
 ticket_list = staff_member_required(ticket_list)
 

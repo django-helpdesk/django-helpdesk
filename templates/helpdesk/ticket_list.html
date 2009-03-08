@@ -111,6 +111,7 @@ $(document).ready(function() {
 </form>
 </div>
 
+{{ search_message|safe }}
 <table width='100%'>
 <tr class='row_tablehead'><td colspan='7'>{% trans "Tickets" %}</td></tr>
 <tr class='row_columnheads'><th>#</th><th>{% trans "Pr" %}</th><th>{% trans "Title" %}</th><th>{% trans "Queue" %}</th><th>{% trans "Status" %}</th><th>{% trans "Created" %}</th><th>{% trans "Owner" %}</th></tr>
