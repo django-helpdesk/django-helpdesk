@@ -149,10 +149,10 @@ def update_ticket(request, ticket_id):
         owner = ticket.assigned_to.id
 
     f = FollowUp(ticket=ticket, date=datetime.now(), comment=comment)
-    
+
     if request.user.is_staff:
         f.user = request.user
-    
+
     f.public = public
 
     reassigned = False
@@ -185,7 +185,7 @@ def update_ticket(request, ticket_id):
             f.title = _('Updated')
 
     f.save()
-    
+
     files = []
     if request.FILES:
         import mimetypes, os
@@ -199,9 +199,9 @@ def update_ticket(request, ticket_id):
                 )
             a.file.save(file.name, file, save=False)
             a.save()
-            
+
             if file.size < getattr(settings, 'MAX_EMAIL_ATTACHMENT_SIZE', 512000):
-                # Only files smaller than 512kb (or as defined in 
+                # Only files smaller than 512kb (or as defined in
                 # settings.MAX_EMAIL_ATTACHMENT_SIZE) are sent via email.
                 files.append(a.file.path)
 
@@ -303,10 +303,85 @@ def update_ticket(request, ticket_id):
 update_ticket = staff_member_required(update_ticket)
 
 
+def mass_update(request):
+    tickets = request.POST.getlist('ticket_id')
+    action = request.POST.get('action', None)
+    if not (tickets and action):
+        return HttpResponseRedirect(reverse('helpdesk_list'))
+
+    if action.startswith('assign_'):
+        parts = action.split('_')
+        user = User.objects.get(id=parts[1])
+        action = 'assign'
+    elif action == 'take':
+        user = request.user
+        action = 'assign'
+
+    for t in Ticket.objects.filter(id__in=tickets):
+        if action == 'assign' and t.assigned_to != user:
+            t.assigned_to = user
+            t.save()
+            f = FollowUp(ticket=t, date=datetime.now(), title=_('Assigned to %(username)s in bulk update' % {'username': user.username}), public=True, user=request.user)
+            f.save()
+        elif action == 'unassign' and t.assigned_to is not None:
+            t.assigned_to = None
+            t.save()
+            f = FollowUp(ticket=t, date=datetime.now(), title=_('Unassigned in bulk update'), public=True, user=request.user)
+            f.save()
+        elif action == 'close' and t.status != Ticket.CLOSED_STATUS:
+            t.status = Ticket.CLOSED_STATUS
+            t.save()
+            f = FollowUp(ticket=t, date=datetime.now(), title=_('Closed in bulk update'), public=False, user=request.user, new_status=Ticket.CLOSED_STATUS)
+            f.save()
+        elif action == 'close_public' and t.status != Ticket.CLOSED_STATUS:
+            t.status = Ticket.CLOSED_STATUS
+            t.save()
+            f = FollowUp(ticket=t, date=datetime.now(), title=_('Closed in bulk update'), public=True, user=request.user, new_status=Ticket.CLOSED_STATUS)
+            f.save()
+            # Send email to Submitter, Owner, Queue CC
+            context = {
+                'ticket': t,
+                'queue': t.queue,
+                'resolution': t.resolution,
+            }
+
+            if t.submitter_email:
+                send_templated_mail(
+                    'closed_submitter',
+                    context,
+                    recipients=t.submitter_email,
+                    sender=t.queue.from_address,
+                    fail_silently=True,
+                    )
+
+            if t.assigned_to and request.user != t.assigned_to and t.assigned_to.email:
+                send_templated_mail(
+                    'closed_owner',
+                    context,
+                    recipients=t.assigned_to.email,
+                    sender=t.queue.from_address,
+                    fail_silently=True,
+                    )
+
+            if t.queue.updated_ticket_cc:
+                send_templated_mail(
+                    'closed_cc',
+                    context,
+                    recipients=t.queue.updated_ticket_cc,
+                    sender=t.queue.from_address,
+                    fail_silently=True,
+                    )
+
+        elif action == 'delete':
+            t.delete()
+
+    return HttpResponseRedirect(reverse('helpdesk_list'))
+mass_update = staff_member_required(mass_update)
+
 def ticket_list(request):
     context = {}
-    
-    # Query_params will hold a dictionary of paramaters relating to 
+
+    # Query_params will hold a dictionary of paramaters relating to
     # a query, to be saved if needed:
     query_params = {
         'filtering': {},
@@ -371,7 +446,7 @@ def ticket_list(request):
             or  request.GET.has_key('sort')
             or  request.GET.has_key('sortreverse') ):
 
-        # Fall-back if no querying is being done, force the list to only 
+        # Fall-back if no querying is being done, force the list to only
         # show open/reopened/resolved (not closed) cases sorted by creation
         # date.
 
@@ -406,7 +481,7 @@ def ticket_list(request):
                 Q(submitter_email__icontains=q)
             )
             context = dict(context, query=q)
-            
+
             query_params['other_filter'] = qset
 
         ### SORTING
@@ -414,7 +489,7 @@ def ticket_list(request):
         if sort not in ('status', 'assigned_to', 'created', 'title', 'queue', 'priority'):
             sort = 'created'
         query_params['sorting'] = sort
-        
+
         sortreverse = request.GET.get('sortreverse', None)
         query_params['sortreverse'] = sortreverse
 
@@ -423,6 +498,7 @@ def ticket_list(request):
     search_message = ''
     if context.has_key('query') and settings.DATABASE_ENGINE.startswith('sqlite'):
         search_message = _('<p><strong>Note:</strong> Your keyword search is case sensitive because of your database. This means the search will <strong>not</strong> be accurate. By switching to a different database system you will gain better searching! For more information, read the <a href="http://docs.djangoproject.com/en/dev/ref/databases/#sqlite-string-matching">Django Documentation on string matching in SQLite</a>.')
+
 
     import cPickle
     from helpdesk.lib import b64encode
@@ -596,8 +672,8 @@ def run_report(request, report):
         desc = '%s %s' % (months[low_bound[1]-1], low_bound[0])
         month_sql.append("""
           COUNT(
-             CASE 1 = 1 
-             WHEN (date(t.created) >= date('%s') 
+             CASE 1 = 1
+             WHEN (date(t.created) >= date('%s')
                   AND date(t.created) < date('%s')) THEN t.id END) AS "%s"
              """ % (low_sqlmonth, upper_sqlmonth, desc))
         month_columns.append(desc)
@@ -691,13 +767,13 @@ def save_query(request):
     title = request.POST.get('title', None)
     shared = request.POST.get('shared', False)
     query_encoded = request.POST.get('query_encoded', None)
-    
+
     if not title or not query_encoded:
         return HttpResponseRedirect(reverse('helpdesk_list'))
-    
+
     query = SavedSearch(title=title, shared=shared, query=query_encoded, user=request.user)
     query.save()
-    
+
     return HttpResponseRedirect('%s?saved_query=%s' % (reverse('helpdesk_list'), query.id))
 save_query = staff_member_required(save_query)
 

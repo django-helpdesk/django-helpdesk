@@ -7,6 +7,21 @@
 <script type='text/javascript' language='javascript'>
 $(document).ready(function() {
     $("#tabset > ul").tabs();
+
+    $("#select_all").click(function() {
+        $(".ticket_multi_select").attr('checked', true);
+        return false;
+    });
+    $("#select_none").click(function() {
+        $(".ticket_multi_select").attr('checked', false);
+        return false;
+    });
+    $("#select_inverse").click(function() {
+        $(".ticket_multi_select").each(function() {
+            $(this).attr('checked', !$(this).attr('checked'));
+        });
+        return false;
+    });
 });
 </script>
 {% endblock %}
@@ -112,12 +127,14 @@ $(document).ready(function() {
 </div>
 
 {{ search_message|safe }}
+<form method='post' action='{% url helpdesk_mass_update %}'>
 <table width='100%'>
-<tr class='row_tablehead'><td colspan='7'>{% trans "Tickets" %}</td></tr>
-<tr class='row_columnheads'><th>#</th><th>{% trans "Pr" %}</th><th>{% trans "Title" %}</th><th>{% trans "Queue" %}</th><th>{% trans "Status" %}</th><th>{% trans "Created" %}</th><th>{% trans "Owner" %}</th></tr>
+<tr class='row_tablehead'><td colspan='8'>{% trans "Tickets" %}</td></tr>
+<tr class='row_columnheads'><th>#</th><th>&nbsp;</th><th>{% trans "Pr" %}</th><th>{% trans "Title" %}</th><th>{% trans "Queue" %}</th><th>{% trans "Status" %}</th><th>{% trans "Created" %}</th><th>{% trans "Owner" %}</th></tr>
 {% if tickets %}{% for ticket in tickets %}
 <tr class='row_{% cycle odd,even %} row_hover'>
 <th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.ticket }}</a></th>
+<td><input type='checkbox' name='ticket_id' value='{{ ticket.id }}' class='ticket_multi_select' /></td>
 <td>{{ ticket.get_priority_span }}</td>
 <th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></th>
 <td>{{ ticket.queue }}</td>
@@ -130,4 +147,8 @@ $(document).ready(function() {
 {% endif %}
 </table>
 
+<p><label>Select: </label> <a href='#select_all' id='select_all'>All</a> <a href='#select_none' id='select_none'>None</a> <a href='#select_inverse' id='select_inverse'>Inverse</a></p>
+
+<p><label for='id_mass_action'>With Selected Tickets:</label> <select name='action' id='id_mass_action'><option value='take'>Take (Assign to me)</option><option value='delete'>Delete</option><optgroup label='Close'><option value='close'>Close (Don't Send E-Mail)</option><option value='close_public'>Close (Send E-Mail)</option></optgroup><optgroup label='Assign To'><option value='unassign'>Nobody (Unassign)</option>{% for u in user_choices %}<option value='assign_{{ u.id }}'>{{ u.username }}</option>{% endfor %}</optgroup></select> <input type='submit' value='Go' /></p>
+</form>
 {% endblock %}
