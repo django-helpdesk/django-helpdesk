@@ -15,6 +15,7 @@ import re
 
 from django import template
 from django.core.urlresolvers import reverse
+from django.utils.safestring import mark_safe
 
 from helpdesk.models import Ticket
 
@@ -52,7 +53,7 @@ def num_to_link(text):
         if ticket:
             style = ticket.get_status_display()
             text = "%s<a href='%s' class='ticket_link_status ticket_link_status_%s'>#%s</a>%s" % (text[:match.start()], url, style, match.groups()[0], text[match.end():])
-    return text
+    return mark_safe(text)
 
 register = template.Library()
 register.filter(num_to_link)
