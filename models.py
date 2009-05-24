@@ -56,7 +56,7 @@ class Queue(models.Model):
     allow_public_submission = models.BooleanField(
         _('Allow Public Submission?'),
         blank=True,
-        null=True,
+        default=False,
         help_text=_('Should this queue be listed on the public submission '
             'form?'),
         )
@@ -64,7 +64,7 @@ class Queue(models.Model):
     allow_email_submission = models.BooleanField(
         _('Allow E-Mail Submission?'),
         blank=True,
-        null=True,
+        default=False,
         help_text=_('Do you want to poll the e-mail box below for new '
             'tickets?'),
         )
@@ -125,7 +125,7 @@ class Queue(models.Model):
     email_box_ssl = models.BooleanField(
         _('Use SSL for E-Mail?'),
         blank=True,
-        null=True,
+        default=False,
         help_text=_('Whether to use SSL for IMAP or POP3 - the default ports '
             'when using SSL are 993 for IMAP and 995 for POP3.'),
         )
@@ -286,7 +286,7 @@ class Ticket(models.Model):
     on_hold = models.BooleanField(
         _('On Hold'),
         blank=True,
-        null=True,
+        default=False,
         help_text=_('If a ticket is on hold, it will not automatically be '
             'escalated.'),
         )
@@ -466,7 +466,7 @@ class FollowUp(models.Model):
     public = models.BooleanField(
         _('Public'),
         blank=True,
-        null=True,
+        default=False,
         help_text=_('Public tickets are viewable by the submitter and all '
             'staff, but non-public tickets can only be seen by staff.'),
         )
@@ -839,9 +839,8 @@ class SavedSearch(models.Model):
 
     shared = models.BooleanField(
         _('Shared With Other Users?'),
-        default=False,
         blank=True,
-        null=True,
+        default=False,
         help_text=_('Should other users see this query?'),
         )
 
@@ -964,7 +963,7 @@ class IgnoreEmail(models.Model):
     keep_in_mailbox = models.BooleanField(
         _('Save Emails in Mailbox?'),
         blank=True,
-        null=True,
+        default=False,
         help_text=_('Do you want to save emails from this address in the '
             'mailbox? If this is unticked, emails from this address will '
             'be deleted.'),

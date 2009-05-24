@@ -221,3 +221,39 @@ textarea#commentBox {
     font-size: 0.8em;
     clear: both;
 }
+
+span.priority1, span.priority2, span.priority3, span.priority4, span.priority5 {
+    padding: 1px 12px;
+    font-weight: bold;
+    -moz-border-radius: 4px;
+    -webkit-border-radius: 4px;
+    margin: 2px;
+    display: block;
+    text-align: center;
+    width: 20px;
+}
+
+span.priority1 {
+    background-color: #c00;
+    color: #fff;
+}
+
+span.priority2 {
+    background-color: #e80;
+    color: #fff;
+}
+
+span.priority3 {
+    background-color: #fe8;
+    color: #000;
+}
+
+span.priority4 {
+    background-color: #59c;
+    color: #fff;
+}
+
+span.priority5 {
+    background-color: #8c5;
+    color: #fff;
+}
