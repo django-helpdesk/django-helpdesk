@@ -1,13 +1,15 @@
 {% extends "helpdesk/base.html" %}{% load i18n %}
 
-{% block helpdesk_title %}{% trans "Create Ticket" %}{% endblock %}
+{% block helpdesk_title %}{% trans "Edit Ticket" %}{% endblock %}
 
 {% block helpdesk_body %}
-{% blocktrans %}<h2>Submit a Ticket</h2>
+{% blocktrans %}<h2>Edit a Ticket</h2>
 
-<p>Unless otherwise stated, all fields are required. Please provide as descriptive a title and description as possible.</p>{% endblocktrans %}
+<p>Unless otherwise stated, all fields are required. Please provide as descriptive a title and description as possible.</p>
 
-<form method='post' action='./' enctype='multipart/form-data'>
+<p><strong>Note:</strong> Editing a ticket does <em>not</em> send an e-mail to the ticket owner or submitter. No new details should be entered, this form should only be used to fix incorrect details or clean up the submission.</p>{% endblocktrans %}
+
+<form method='post' action='./'>
 <fieldset>
     <dl>
         {% for field in form %}
@@ -23,7 +25,7 @@
     </dl>
     
     <div class='buttons'>
-        <input type='submit' value='{% trans "Submit Ticket" %}' />
+        <input type='submit' value='{% trans "Save Changes" %}' />
     </div>
 </fieldset>
 

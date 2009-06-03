@@ -17,6 +17,11 @@ from django.utils.translation import ugettext as _
 from helpdesk.lib import send_templated_mail
 from helpdesk.models import Ticket, Queue, FollowUp, Attachment, IgnoreEmail
 
+class EditTicketForm(forms.ModelForm):
+    class Meta:
+        model = Ticket
+        exclude = ('created', 'modified', 'status', 'on_hold', 'resolution', 'last_escalation', 'assigned_to')
+
 class TicketForm(forms.Form):
     queue = forms.ChoiceField(
         label=_('Queue'),

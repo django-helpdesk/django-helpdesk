@@ -21,7 +21,7 @@ from django.shortcuts import render_to_response, get_object_or_404
 from django.template import loader, Context, RequestContext
 from django.utils.translation import ugettext as _
 
-from helpdesk.forms import TicketForm, UserSettingsForm, EmailIgnoreForm
+from helpdesk.forms import TicketForm, UserSettingsForm, EmailIgnoreForm, EditTicketForm
 from helpdesk.lib import send_templated_mail, line_chart, bar_chart, query_to_dict, apply_query, safe_template_context
 from helpdesk.models import Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch, IgnoreEmail
 
@@ -521,6 +521,21 @@ def ticket_list(request):
         )))
 ticket_list = staff_member_required(ticket_list)
 
+
+def edit_ticket(request, ticket_id):
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+    if request.method == 'POST':
+        form = EditTicketForm(request.POST, instance=ticket)
+        if form.is_valid():
+            ticket = form.save()
+            return HttpResponseRedirect(ticket.get_absolute_url())
+    else:
+        form = EditTicketForm(instance=ticket)
+    
+    return render_to_response('helpdesk/edit_ticket.html',
+        RequestContext(request, {
+            'form': form,
+        }))
 
 def create_ticket(request):
     if request.method == 'POST':
