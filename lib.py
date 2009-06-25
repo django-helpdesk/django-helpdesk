@@ -65,7 +65,7 @@ def send_templated_mail(template_name, email_context, recipients, sender=None, b
             t = EmailTemplate.objects.get(template_name__iexact=template_localized)
         except EmailTemplate.DoesNotExist:
             pass
-    
+
     if not t:
         t = EmailTemplate.objects.get(template_name__iexact=template_name)
 
@@ -296,9 +296,48 @@ def safe_template_context(ticket):
             context['ticket'][field] = '%s' % attr()
         else:
             context['ticket'][field] = attr
-   
+
     context['ticket']['queue'] = context['queue']
     context['ticket']['assigned_to'] = context['ticket']['_get_assigned_to']
 
     return context
 
+
+def text_is_spam(text, request):
+    # Based on a blog post by 'sciyoshi':
+    # http://sciyoshi.com/blog/2008/aug/27/using-akismet-djangos-new-comments-framework/
+    # This will return 'True' is the given text is deemed to be spam, or 
+    # False if it is not spam. If it cannot be checked for some reason, we
+    # assume it isn't spam.
+    from django.contrib.sites.models import Site
+    from django.conf import settings
+    try:
+        from helpdesk.akismet import Akismet
+    except:
+        return False
+
+    ak = Akismet(
+        blog_url='http://%s/' % Site.objects.get(pk=settings.SITE_ID).domain,
+        agent='Jutda Helpdesk',
+    )
+
+    if hasattr(settings, 'TYPEPAD_ANTISPAM_API_KEY'):
+        ak.setAPIKey(key = settings.TYPEPAD_ANTISPAM_API_KEY)
+        ak.baseurl = 'api.antispam.typepad.com/1.1/'
+    elif hasattr(settings, 'AKISMET_API_KEY'):
+        ak.setAPIKey(key = settings.AKISMET_API_KEY)
+    else:
+        return False
+
+    if ak.verify_key():
+        ak_data = {
+            'user_ip': request.META.get('REMOTE_ADDR', '127.0.0.1'),
+            'user_agent': request.META.get('HTTP_USER_AGENT', ''),
+            'referrer': request.META.get('HTTP_REFERER', ''),
+            'comment_type': 'comment',
+            'comment_author': '',
+        }
+
+        return ak.comment_check(text, data=ak_data)
+
+    return False

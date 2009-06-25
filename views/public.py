@@ -16,7 +16,7 @@ from django.template import loader, Context, RequestContext
 from django.utils.translation import ugettext as _
 
 from helpdesk.forms import PublicTicketForm
-from helpdesk.lib import send_templated_mail
+from helpdesk.lib import send_templated_mail, text_is_spam
 from helpdesk.models import Ticket, Queue
 
 
@@ -31,12 +31,16 @@ def homepage(request):
         form = PublicTicketForm(request.POST, request.FILES)
         form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.filter(allow_public_submission=True)]
         if form.is_valid():
-            ticket = form.save()
-            return HttpResponseRedirect('%s?ticket=%s&email=%s'% (
-                reverse('helpdesk_public_view'),
-                ticket.ticket_for_url,
-                ticket.submitter_email)
-                )
+            if text_is_spam(form.cleaned_data['body'], request):
+                # This submission is spam. Let's not save it.
+                return render_to_response('helpdesk/public_spam.html', RequestContext(request, {}))
+            else:
+                ticket = form.save()
+                return HttpResponseRedirect('%s?ticket=%s&email=%s'% (
+                    reverse('helpdesk_public_view'),
+                    ticket.ticket_for_url,
+                    ticket.submitter_email)
+                    )
     else:
         try:
             queue = Queue.objects.get(slug=request.GET.get('queue', None))
