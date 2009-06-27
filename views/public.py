@@ -70,8 +70,8 @@ def view_ticket(request):
 
         try:
             t = Ticket.objects.get(id=ticket_id, queue__slug__iexact=queue, submitter_email__iexact=email)
-        except Ticket.DoesNotExist:
-            t = False;
+        except:
+            t = False
             error_message = _('Invalid ticket ID or e-mail address. Please try again.')
 
         if t:
