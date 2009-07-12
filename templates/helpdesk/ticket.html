@@ -20,7 +20,7 @@
             preset = $('#id_preset').val();
             if (preset != '') {
                 $.get("{% url helpdesk_raw "preset" %}?id=" + preset, function(data) {
-                    $("#commentBox").value(data)
+                    $("#commentBox").val(data)
                 });
             }
         });
