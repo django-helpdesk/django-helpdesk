@@ -285,7 +285,7 @@ def ticket_from_message(message, queue):
     )
     f.save()
 
-    print " [%s-%s] %s%s" % (t.queue.slug, t.id, t.title, update)
+    print (" [%s-%s] %s%s" % (t.queue.slug, t.id, t.title, update)).encode('ascii', 'replace')
 
     for file in files:
         filename = file['filename'].replace(' ', '_')
@@ -298,7 +298,7 @@ def ticket_from_message(message, queue):
                 )
             a.file.save(file['filename'], ContentFile(file['content']), save=False)
             a.save()
-            print "    - %s" % file['filename']
+            print ("    - %s" % file['filename']).encode('ascii', 'replace').encode('ascii', 'replace')
 
     return t
 
