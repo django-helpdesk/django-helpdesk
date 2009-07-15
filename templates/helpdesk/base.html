@@ -7,7 +7,7 @@
         <link rel='stylesheet' href='{{ MEDIA_URL }}helpdesk/helpdesk.css' type='text/css' />
         <link rel='stylesheet' href='{{ MEDIA_URL }}helpdesk/jquery-smoothness-theme/jquery-ui-themeroller.css' type='text/css' />
         <link rel='alternate' href='{% url helpdesk_rss "user" %}{{ user.username }}/' type='application/rss+xml' title='{% trans "My Open Tickets" %}' />
-        <link rel='alternate' href='{% url helpdesk_rss "recent" %}' type='application/rss+xml' title='{% trans "All Recent Activity" %}' />
+        <link rel='alternate' href='{% url helpdesk_rss "recent_activity" %}' type='application/rss+xml' title='{% trans "All Recent Activity" %}' />
         <link rel='alternate' href='{% url helpdesk_rss "unassigned" %}' type='application/rss+xml' title='{% trans "Unassigned Tickets" %}' />
         {% block helpdesk_head %}{% endblock %}
     </head>
