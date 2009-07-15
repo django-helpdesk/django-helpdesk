@@ -104,7 +104,7 @@ the current version of Jutda Helpdesk working.
     ln -s /path/to/helpdesk/htdocs /path/to/media/helpdesk
 
    This application assumes all helpdesk media will be accessible at
-   http://MEDIA_PATH/helpdesk/
+   http://MEDIA_URL/helpdesk/
 
 7. Inside your MEDIA_ROOT folder, inside the 'helpdesk' folder, is a folder 
    called 'attachments'. Ensure your web server software can write to this 
@@ -148,14 +148,14 @@ the current version of Jutda Helpdesk working.
 4. If you wish to automatically escalate tickets based on their age, set up 
    a cronjob to run scripts/escalate_tickets.py on a regular basis:
    
-   0 * * * * /path/to/helpdesksite/manage.py escalate_tickets.py
+   0 * * * * /path/to/helpdesksite/manage.py escalate_tickets
    
    This will run the escalation process hourly, using the 'Escalation Hours' 
    setting for each queue to determine which tickets to escalate.
 
 5. If you wish to exclude some days (eg, weekends) from escalation calculations, enter 
    the dates manually via the Admin, or setup a cronjob to run 
-   scripts/create_escalation_exclusions.py on a regular basis:
+   scripts/create_escalation_exclusions on a regular basis:
 
    0 0 * * 0 /path/to/helpdesksite/manage.py create_escalation_exclusions.py --days saturday,sunday --escalate-verbosely
 
