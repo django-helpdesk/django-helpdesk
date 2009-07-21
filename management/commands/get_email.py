@@ -292,17 +292,18 @@ def ticket_from_message(message, queue):
     print (" [%s-%s] %s%s" % (t.queue.slug, t.id, t.title, update)).encode('ascii', 'replace')
 
     for file in files:
-        filename = file['filename'].replace(' ', '_')
         if file['content']:
+            filename = file['filename'].encode('ascii', 'replace').replace(' ', '_')
+            filename = re.sub('[^a-zA-Z0-9._-]+', '', filename)
             a = Attachment(
                 followup=f,
                 filename=filename,
                 mime_type=file['type'],
                 size=len(file['content']),
                 )
-            a.file.save(file['filename'], ContentFile(file['content']), save=False)
+            a.file.save(filename, ContentFile(file['content']), save=False)
             a.save()
-            print ("    - %s" % file['filename']).encode('ascii', 'replace').encode('ascii', 'replace')
+            print "    - %s" % filename
 
     return t
 
