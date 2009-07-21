@@ -14,6 +14,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.files.base import ContentFile
 from django.core.urlresolvers import reverse
+from django.core.paginator import Paginator
 from django.db import connection
 from django.db.models import Q
 from django.http import HttpResponseRedirect, Http404, HttpResponse
@@ -493,7 +494,17 @@ def ticket_list(request):
         sortreverse = request.GET.get('sortreverse', None)
         query_params['sortreverse'] = sortreverse
 
-    tickets = apply_query(Ticket.objects.select_related(), query_params)
+    ticket_qs = apply_query(Ticket.objects.select_related(), query_params)
+    paginator = Paginator(ticket_qs, 20)
+    try:
+        page = int(request.GET.get('page', '1'))
+    except ValueError:
+         page = 1
+
+    try:
+        tickets = paginator.page(page)
+    except (EmptyPage, InvalidPage):
+        tickets = paginator.page(paginator.num_pages)
 
     search_message = ''
     if context.has_key('query') and settings.DATABASE_ENGINE.startswith('sqlite'):
@@ -506,9 +517,15 @@ def ticket_list(request):
 
     user_saved_queries = SavedSearch.objects.filter(Q(user=request.user) | Q(shared__exact=True))
 
+    query_string = []
+    for get_key, get_value in request.GET.iteritems():
+        if get_key != "page":
+            query_string.append("%s=%s" % (get_key, get_value))
+
     return render_to_response('helpdesk/ticket_list.html',
         RequestContext(request, dict(
             context,
+            query_string="&".join(query_string),
             tickets=tickets,
             user_choices=User.objects.filter(is_active=True),
             queue_choices=Queue.objects.all(),

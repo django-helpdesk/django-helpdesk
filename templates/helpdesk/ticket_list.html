@@ -131,7 +131,7 @@ $(document).ready(function() {
 <table width='100%'>
 <tr class='row_tablehead'><td colspan='8'>{% trans "Tickets" %}</td></tr>
 <tr class='row_columnheads'><th>#</th><th>&nbsp;</th><th>{% trans "Pr" %}</th><th>{% trans "Title" %}</th><th>{% trans "Queue" %}</th><th>{% trans "Status" %}</th><th>{% trans "Created" %}</th><th>{% trans "Owner" %}</th></tr>
-{% if tickets %}{% for ticket in tickets %}
+{% if tickets %}{% for ticket in tickets.object_list %}
 <tr class='row_{% cycle odd,even %} row_hover'>
 <th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.ticket }}</a></th>
 <td><input type='checkbox' name='ticket_id' value='{{ ticket.id }}' class='ticket_multi_select' /></td>
@@ -146,6 +146,21 @@ $(document).ready(function() {
 <tr class='row_odd'><td colspan='5'>{% trans "No Tickets Match Your Selection" %}</td></tr>
 {% endif %}
 </table>
+<div class="pagination">
+    <span class="step-links">
+        {% if tickets.has_previous %}
+            <a href="?{{ query_string }}{% if query_string %}&{% else %}?{% endif %}page={{ tickets.previous_page_number }}">{% trans "Previous" %}</a>
+        {% endif %}
+
+        <span class="current">
+            {% blocktrans with tickets.number as ticket_num and tickets.paginator.num_pages as num_pages %}Page {{ ticket_num }} of {{ num_pages }}.{% endblocktrans %}
+        </span>
+
+        {% if tickets.has_next %}
+            <a href="?{{ query_string }}{% if query_string %}&{% else %}?{% endif %}page={{ tickets.next_page_number }}">{% trans "Next" %}</a>
+        {% endif %}
+    </span>
+</div>
 
 <p><label>Select: </label> <a href='#select_all' id='select_all'>All</a> <a href='#select_none' id='select_none'>None</a> <a href='#select_inverse' id='select_inverse'>Inverse</a></p>
 
