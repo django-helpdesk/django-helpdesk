@@ -15,9 +15,11 @@ import imaplib
 import mimetypes
 import poplib
 import re
+
 from datetime import datetime, timedelta
 from email.header import decode_header
 from email.Utils import parseaddr
+from optparse import make_option
 
 from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand
@@ -29,11 +31,25 @@ from helpdesk.models import Queue, Ticket, FollowUp, Attachment, IgnoreEmail
 
 
 class Command(BaseCommand):
+    def __init__(self):
+        BaseCommand.__init__(self)
+
+        self.option_list += (
+            make_option(
+                '--quiet', '-q',
+                default=False,
+                action='store_true',
+                help='Hide details about each queue/message as they are processed'),
+            )
+
+    help = 'Process Jutda Helpdesk queues and process e-mails via POP3/IMAP as required, feeding them into the helpdesk.'
+
     def handle(self, *args, **options):
-        process_email()
+        quiet = options.get('quiet', False)
+        process_email(quiet=quiet)
 
 
-def process_email():
+def process_email(quiet=False):
     for q in Queue.objects.filter(
             email_box_type__isnull=False,
             allow_email_submission=True):
@@ -50,14 +66,15 @@ def process_email():
         if (q.email_box_last_check + queue_time_delta) > datetime.now():
             continue
 
-        process_queue(q)
+        process_queue(q, quiet=quiet)
 
         q.email_box_last_check = datetime.now()
         q.save()
 
 
-def process_queue(q):
-    print "Processing: %s" % q
+def process_queue(q, quiet=False):
+    if not quiet:
+        print "Processing: %s" % q
     if q.email_box_type == 'pop3':
 
         if q.email_box_ssl:
@@ -78,7 +95,7 @@ def process_queue(q):
             msgSize = msg.split(" ")[1]
 
             full_message = "\n".join(server.retr(msgNum)[1])
-            ticket = ticket_from_message(message=full_message, queue=q)
+            ticket = ticket_from_message(message=full_message, queue=q, quiet=quiet)
 
             if ticket:
                 server.dele(msgNum)
@@ -102,7 +119,7 @@ def process_queue(q):
                 break
             for num in msgnums:
                 status, data = server.fetch(num, '(RFC822)')
-                ticket = ticket_from_message(message=data[0][1], queue=q)
+                ticket = ticket_from_message(message=data[0][1], queue=q, quiet=quiet)
                 if ticket:
                     server.store(num, '+FLAGS', '\\Deleted')
         
@@ -124,7 +141,7 @@ def decode_mail_headers(string):
     decoded = decode_header(string)
     return u' '.join([unicode(msg, charset or 'utf-8') for msg, charset in decoded])
 
-def ticket_from_message(message, queue):
+def ticket_from_message(message, queue, quiet):
     # 'message' must be an RFC822 formatted message.
     msg = message
     message = email.message_from_string(msg)
@@ -289,7 +306,8 @@ def ticket_from_message(message, queue):
     )
     f.save()
 
-    print (" [%s-%s] %s%s" % (t.queue.slug, t.id, t.title, update)).encode('ascii', 'replace')
+    if not quiet:
+        print (" [%s-%s] %s%s" % (t.queue.slug, t.id, t.title, update)).encode('ascii', 'replace')
 
     for file in files:
         if file['content']:
@@ -303,7 +321,8 @@ def ticket_from_message(message, queue):
                 )
             a.file.save(filename, ContentFile(file['content']), save=False)
             a.save()
-            print "    - %s" % filename
+            if not quiet:
+                print "    - %s" % filename
 
     return t
 
