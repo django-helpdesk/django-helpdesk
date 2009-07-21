@@ -12,7 +12,7 @@
         <ul>
             <li><a href='{% url helpdesk_home %}'>{% trans "Submit A Ticket" %}</a></li>
             <li><a href='{% url helpdesk_kb_index %}'>{% trans "Knowledgebase" %}</a></li>
-            <li><a href='{% url login %}'>{% trans "Log In" %}</a></li>
+            <li><a href='{% url login %}?next={% url helpdesk_dashboard %}'>{% trans "Log In" %}</a></li>
         </ul>
     </div>
     <div id='body'>
