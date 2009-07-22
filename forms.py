@@ -329,6 +329,14 @@ class UserSettingsForm(forms.Form):
         required=False,
         )
 
+    tickets_per_page = forms.IntegerField(
+        label=_('Number of tickets to show per page'),
+        help_text=_('How many tickets do you want to see on the Ticket List page?'),
+        required=False,
+        min_value=1,
+        max_value=1000,
+        )
+
 class EmailIgnoreForm(forms.ModelForm):
     class Meta:
         model = IgnoreEmail

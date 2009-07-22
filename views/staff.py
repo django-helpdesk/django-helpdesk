@@ -17,7 +17,7 @@ from django.core.urlresolvers import reverse
 from django.core.paginator import Paginator
 from django.db import connection
 from django.db.models import Q
-from django.http import HttpResponseRedirect, Http404, HttpResponse
+from django.http import HttpResponseRedirect, Http404, HttpResponse, HttpResponseForbidden
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import loader, Context, RequestContext
 from django.utils.translation import ugettext as _
@@ -130,7 +130,10 @@ def view_ticket(request, ticket_id):
 view_ticket = staff_member_required(view_ticket)
 
 
-def update_ticket(request, ticket_id):
+def update_ticket(request, ticket_id, public=False):
+    if not (public or (request.user.is_authenticated() and request.user.is_active and request.user.is_staff)):
+        return HttpResponseForbidden(_('Sorry, you need to login to do that.'))
+
     ticket = get_object_or_404(Ticket, id=ticket_id)
 
     comment = request.POST.get('comment', '')
@@ -143,8 +146,8 @@ def update_ticket(request, ticket_id):
     # We need to allow the 'ticket' and 'queue' contexts to be applied to the
     # comment.
     from django.template import loader, Context
-    context = Context(safe_template_context(ticket))
-    comment = loader.get_template_from_string(comment).render(context)
+    context = safe_template_context(ticket)
+    comment = loader.get_template_from_string(comment).render(Context(context))
 
     if not owner and ticket.assigned_to:
         owner = ticket.assigned_to.id
@@ -231,12 +234,10 @@ def update_ticket(request, ticket_id):
         ticket.resolution = comment
 
     if ticket.submitter_email and public and (f.comment or (f.new_status in (Ticket.RESOLVED_STATUS, Ticket.CLOSED_STATUS))):
-        context = {
-            'ticket': ticket,
-            'queue': ticket.queue,
-            'resolution': ticket.resolution,
-            'comment': f.comment,
-        }
+        context.update(
+            resolution=ticket.resolution,
+            comment=f.comment,
+            )
 
         if f.new_status == Ticket.RESOLVED_STATUS:
             template = 'resolved_submitter'
@@ -256,7 +257,8 @@ def update_ticket(request, ticket_id):
 
     if ticket.assigned_to and request.user != ticket.assigned_to and ticket.assigned_to.email:
         # We only send e-mails to staff members if the ticket is updated by
-        # another user.
+        # another user. The actual template varies, depending on what has been
+        # changed.
         if reassigned:
             template_staff = 'assigned_owner'
         elif f.new_status == Ticket.RESOLVED_STATUS:
@@ -266,7 +268,7 @@ def update_ticket(request, ticket_id):
         else:
             template_staff = 'updated_owner'
 
-        if (not reassigned or ( reassigned and getattr(ticket.assigned_to.usersettings.settings, 'email_on_ticket_assign', False))) or (not reassigned and getattr(ticket.assigned_to.usersettings.settings, 'email_on_ticket_change', False)):
+        if (not reassigned or ( reassigned and ticket.assigned_to.usersettings.settings.get('email_on_ticket_assign', False))) or (not reassigned and ticket.assigned_to.usersettings.settings.get('email_on_ticket_change', False)):
             send_templated_mail(
                 template_staff,
                 context,
@@ -301,7 +303,6 @@ def update_ticket(request, ticket_id):
         return HttpResponseRedirect(ticket.get_absolute_url())
     else:
         return HttpResponseRedirect(ticket.ticket_url)
-update_ticket = staff_member_required(update_ticket)
 
 
 def mass_update(request):
@@ -495,7 +496,7 @@ def ticket_list(request):
         query_params['sortreverse'] = sortreverse
 
     ticket_qs = apply_query(Ticket.objects.select_related(), query_params)
-    paginator = Paginator(ticket_qs, 20)
+    paginator = Paginator(ticket_qs, request.user.usersettings.settings.get('tickets_per_page', 20))
     try:
         page = int(request.GET.get('page', '1'))
     except ValueError:

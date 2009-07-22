@@ -30,7 +30,7 @@
 </tr>
 
 {% if ticket.resolution %}<tr class='row_even'>
-    <th colspan='2'>{% trans "Resolution" %}{% ifequal ticket.get_status_display "Resolved" %} <a href='?close'><img src='{{ MEDIA_URL }}/helpdesk/buttons/accept.png' alt='{% trans "Accept" %}' title='{% trans "Accept and Close" %}' width='60' height='15' /></a>{% endifequal %}</th>
+    <th colspan='2'>{% trans "Resolution" %}{% ifequal ticket.get_status_display "Resolved" %} <a href='{{ request.get_full_path }}&close'><img src='{{ MEDIA_URL }}/helpdesk/buttons/accept.png' alt='{% trans "Accept" %}' title='{% trans "Accept and Close" %}' width='60' height='15' /></a>{% endifequal %}</th>
 </tr>
 <tr class='row_odd'>
     <td colspan='2'>{{ ticket.resolution }}</td>

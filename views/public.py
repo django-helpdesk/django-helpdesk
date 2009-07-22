@@ -59,22 +59,22 @@ def homepage(request):
 
 
 def view_ticket(request):
-    ticket = request.GET.get('ticket', '')
+    ticket_req = request.GET.get('ticket', '')
     email = request.GET.get('email', '')
     error_message = ''
 
-    if ticket and email:
-        parts = ticket.split('-')
+    if ticket_req and email:
+        parts = ticket_req.split('-')
         queue = '-'.join(parts[0:-1])
         ticket_id = parts[-1]
 
         try:
-            t = Ticket.objects.get(id=ticket_id, queue__slug__iexact=queue, submitter_email__iexact=email)
+            ticket = Ticket.objects.get(id=ticket_id, queue__slug__iexact=queue, submitter_email__iexact=email)
         except:
-            t = False
+            ticket = False
             error_message = _('Invalid ticket ID or e-mail address. Please try again.')
 
-        if t:
+        if ticket:
             
             if request.GET.has_key('close') and ticket.status == Ticket.RESOLVED_STATUS:
                 from helpdesk.views.staff import update_ticket
@@ -83,18 +83,17 @@ def view_ticket(request):
                 request.POST = {
                     'new_status': Ticket.CLOSED_STATUS,
                     'public': 1,
-                    'owner': ticket.assigned_to,
+                    'owner': ticket.assigned_to.id,
                     'title': ticket.title,
                     'comment': _('Submitter accepted resolution and closed ticket'),
                     }
-                request.FILES = {}
                 request.GET = {}
 
-                return update_ticket(request, ticket_id)
+                return update_ticket(request, ticket_id, public=True)
             
             return render_to_response('helpdesk/public_view_ticket.html',
                 RequestContext(request, {
-                    'ticket': t,
+                    'ticket': ticket,
                 }))
 
     return render_to_response('helpdesk/public_view_form.html',
