@@ -67,7 +67,10 @@ def send_templated_mail(template_name, email_context, recipients, sender=None, b
             pass
 
     if not t:
-        t = EmailTemplate.objects.get(template_name__iexact=template_name)
+        try:
+            t = EmailTemplate.objects.get(template_name__iexact=template_name)
+        except EmailTemplate.DoesNotExist:
+            return # just ignore if template doesn't exist
 
     if not sender:
         sender = settings.DEFAULT_FROM_EMAIL
