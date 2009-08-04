@@ -49,6 +49,10 @@ def homepage(request):
         initial_data = {}
         if queue:
             initial_data['queue'] = queue.id
+
+        if request.user.is_authenticated() and request.user.email:
+            initial_data['submitter_email'] = request.user.email
+
         form = PublicTicketForm(initial=initial_data)
         form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.filter(allow_public_submission=True)]
 
