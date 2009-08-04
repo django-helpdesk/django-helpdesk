@@ -37,7 +37,7 @@ def num_to_link(text):
         return text
 
     matches = []
-    for match in re.finditer("#(\d+)", text):
+    for match in re.finditer(" #(\d+)", text):
         matches.append(match)
 
     for match in ReverseProxy(matches):
