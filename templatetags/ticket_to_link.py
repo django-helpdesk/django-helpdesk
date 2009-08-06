@@ -37,7 +37,7 @@ def num_to_link(text):
         return text
 
     matches = []
-    for match in re.finditer(" #(\d+)", text):
+    for match in re.finditer(r"(?:[^&]|\b|^)#(\d+)\b", text):
         matches.append(match)
 
     for match in ReverseProxy(matches):
@@ -52,7 +52,7 @@ def num_to_link(text):
 
         if ticket:
             style = ticket.get_status_display()
-            text = "%s<a href='%s' class='ticket_link_status ticket_link_status_%s'>#%s</a>%s" % (text[:match.start()], url, style, match.groups()[0], text[match.end():])
+            text = "%s <a href='%s' class='ticket_link_status ticket_link_status_%s'>#%s</a>%s" % (text[:match.start()], url, style, match.groups()[0], text[match.end():])
     return mark_safe(text)
 
 register = template.Library()
