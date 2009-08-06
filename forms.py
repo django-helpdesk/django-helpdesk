@@ -337,6 +337,12 @@ class UserSettingsForm(forms.Form):
         max_value=1000,
         )
 
+    use_email_as_submitter = forms.BooleanField(
+        label=_('Use my e-mail address when submitting tickets?'),
+        help_text=_('When you submit a ticket, do you want to automatically use your e-mail address as the submitter address? You can type a different e-mail address when entering the ticket if needed, this option only changes the default.'),
+        required=False,
+        )
+
 class EmailIgnoreForm(forms.ModelForm):
     class Meta:
         model = IgnoreEmail
