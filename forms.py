@@ -133,6 +133,8 @@ class TicketForm(forms.Form):
             'ticket': t,
             'queue': q,
         }
+        
+        messages_sent_to = []
 
         if t.submitter_email:
             send_templated_mail(
@@ -143,8 +145,9 @@ class TicketForm(forms.Form):
                 fail_silently=True,
                 files=files,
                 )
+            messages_sent_to.append(t.submitter_email)
 
-        if t.assigned_to and t.assigned_to != user and getattr(t.assigned_to.usersettings.settings, 'email_on_ticket_assign', False):
+        if t.assigned_to and t.assigned_to != user and getattr(t.assigned_to.usersettings.settings, 'email_on_ticket_assign', False) and t.assigned_to.email and t.assigned_to.email not in messages_sent_to:
             send_templated_mail(
                 'assigned_owner',
                 context,
@@ -153,8 +156,9 @@ class TicketForm(forms.Form):
                 fail_silently=True,
                 files=files,
                 )
+            messages_sent_to.append(t.assigned_to.email)
 
-        if q.new_ticket_cc:
+        if q.new_ticket_cc and q.new_ticket_cc not in messages_sent_to:
             send_templated_mail(
                 'newticket_cc',
                 context,
@@ -163,8 +167,9 @@ class TicketForm(forms.Form):
                 fail_silently=True,
                 files=files,
                 )
+            messages_sent_to.append(q.new_ticket_cc)
 
-        if q.updated_ticket_cc and q.updated_ticket_cc != q.new_ticket_cc:
+        if q.updated_ticket_cc and q.updated_ticket_cc != q.new_ticket_cc and q.updated_ticket_cc not in messages_sent_to:
             send_templated_mail(
                 'newticket_cc',
                 context,
@@ -272,6 +277,8 @@ class PublicTicketForm(forms.Form):
             'queue': q,
         }
 
+        messages_sent_to = []
+
         send_templated_mail(
             'newticket_submitter',
             context,
@@ -280,8 +287,9 @@ class PublicTicketForm(forms.Form):
             fail_silently=True,
             files=files,
             )
+        messages_sent_to.append(t.submitter_email)
 
-        if q.new_ticket_cc:
+        if q.new_ticket_cc and q.new_ticket_cc not in messages_sent_to:
             send_templated_mail(
                 'newticket_cc',
                 context,
@@ -290,8 +298,9 @@ class PublicTicketForm(forms.Form):
                 fail_silently=True,
                 files=files,
                 )
+            messages_sent_to.append(q.new_ticket_cc)
 
-        if q.updated_ticket_cc and q.updated_ticket_cc != q.new_ticket_cc:
+        if q.updated_ticket_cc and q.updated_ticket_cc != q.new_ticket_cc and q.updated_ticket_cc not in messages_sent_to:
             send_templated_mail(
                 'newticket_cc',
                 context,

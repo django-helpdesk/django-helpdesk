@@ -196,6 +196,8 @@ class API:
             'queue': ticket.queue,
             'comment': f.comment,
         }
+        
+        messages_sent_to = []
 
         if public and ticket.submitter_email:
             send_templated_mail(
@@ -205,8 +207,9 @@ class API:
                 sender=ticket.queue.from_address,
                 fail_silently=True,
                 )
+            messages_sent_to.append(ticket.submitter_email)
 
-        if ticket.queue.updated_ticket_cc:
+        if ticket.queue.updated_ticket_cc and ticket.queue.updated_ticket_cc not in messages_sent_to:
             send_templated_mail(
                 'updated_cc',
                 context,
@@ -214,8 +217,9 @@ class API:
                 sender=ticket.queue.from_address,
                 fail_silently=True,
                 )
+            messages_sent_to.append(ticket.queue.updated_ticket_cc)
 
-        if ticket.assigned_to and self.request.user != ticket.assigned_to and getattr(ticket.assigned_to.usersettings.settings, 'email_on_ticket_apichange', False):
+        if ticket.assigned_to and self.request.user != ticket.assigned_to and getattr(ticket.assigned_to.usersettings.settings, 'email_on_ticket_apichange', False) and ticket.assigned_to.email and ticket.assigned_to.email not in messages_sent_to:
             send_templated_mail(
                 'updated_owner',
                 context,
@@ -257,6 +261,8 @@ class API:
         }
 
         subject = '%s %s (Resolved)' % (ticket.ticket, ticket.title)
+        
+        messages_sent_to = []
 
         if ticket.submitter_email:
             send_templated_mail(
@@ -266,8 +272,9 @@ class API:
                 sender=ticket.queue.from_address,
                 fail_silently=True,
                 )
+            messages_sent_to.append(ticket.submitter_email)
 
-        if ticket.queue.updated_ticket_cc:
+        if ticket.queue.updated_ticket_cc and ticket.queue.updated_ticket_cc not in messages_sent_to:
             send_templated_mail(
                 'resolved_cc',
                 context,
@@ -275,8 +282,9 @@ class API:
                 sender=ticket.queue.from_address,
                 fail_silently=True,
                 )
+            messages_sent_to.append(ticket.queue.updated_ticket_cc)
 
-        if ticket.assigned_to and self.request.user != ticket.assigned_to and getattr(ticket.assigned_to.usersettings.settings, 'email_on_ticket_apichange', False):
+        if ticket.assigned_to and self.request.user != ticket.assigned_to and getattr(ticket.assigned_to.usersettings.settings, 'email_on_ticket_apichange', False) and ticket.assigned_to.email and ticket.assigned_to.email not in messages_sent_to:
             send_templated_mail(
                 'resolved_resolved',
                 context,
