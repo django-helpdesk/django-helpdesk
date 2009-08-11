@@ -242,6 +242,10 @@ def ticket_from_message(message, queue, quiet):
         new = True
         update = ''
 
+    elif t.status == Ticket.CLOSED_STATUS:
+        t.status = Ticket.REOPENED_STATUS
+        t.save()
+
     context = {
         'ticket': t,
         'queue': queue,
@@ -277,7 +281,10 @@ def ticket_from_message(message, queue, quiet):
                 )
 
     else:
-        update = _(' (Updated)')
+        if t.status == Ticket.REOPENED_STATUS:
+            update = _(' (Reopened')
+        else:
+            update = _(' (Updated)')
 
         if t.assigned_to:
             send_templated_mail(
@@ -304,6 +311,11 @@ def ticket_from_message(message, queue, quiet):
         public = True,
         comment = body,
     )
+
+    if t.status == Ticket.REOPENED_STATUS:
+        f.new_status = Ticket.REOPENED_STATUS
+        f.title = _('Ticket Re-Opened by E-Mail Received from %(sender_email)s' % {'sender_email': sender_email})
+    
     f.save()
 
     if not quiet:
