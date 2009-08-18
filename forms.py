@@ -132,6 +132,7 @@ class TicketForm(forms.Form):
         context = {
             'ticket': t,
             'queue': q,
+            'comment': f.comment,
         }
         
         messages_sent_to = []

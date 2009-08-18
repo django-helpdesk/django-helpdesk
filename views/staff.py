@@ -14,7 +14,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.files.base import ContentFile
 from django.core.urlresolvers import reverse
-from django.core.paginator import Paginator
+from django.core import paginator
 from django.db import connection
 from django.db.models import Q
 from django.http import HttpResponseRedirect, Http404, HttpResponse, HttpResponseForbidden
@@ -235,11 +235,12 @@ def update_ticket(request, ticket_id, public=False):
 
     messages_sent_to = []
 
+    context.update(
+        resolution=ticket.resolution,
+        comment=f.comment,
+        )
+
     if ticket.submitter_email and public and (f.comment or (f.new_status in (Ticket.RESOLVED_STATUS, Ticket.CLOSED_STATUS))):
-        context.update(
-            resolution=ticket.resolution,
-            comment=f.comment,
-            )
 
         if f.new_status == Ticket.RESOLVED_STATUS:
             template = 'resolved_submitter'
@@ -504,16 +505,16 @@ def ticket_list(request):
         query_params['sortreverse'] = sortreverse
 
     ticket_qs = apply_query(Ticket.objects.select_related(), query_params)
-    paginator = Paginator(ticket_qs, request.user.usersettings.settings.get('tickets_per_page', 20))
+    ticket_paginator = paginator.Paginator(ticket_qs, request.user.usersettings.settings.get('tickets_per_page', 20))
     try:
         page = int(request.GET.get('page', '1'))
     except ValueError:
          page = 1
 
     try:
-        tickets = paginator.page(page)
-    except (EmptyPage, InvalidPage):
-        tickets = paginator.page(paginator.num_pages)
+        tickets = ticket_paginator.page(page)
+    except (paginator.EmptyPage, paginator.InvalidPage):
+        tickets = ticket_paginator.page(ticket_paginator.num_pages)
 
     search_message = ''
     if context.has_key('query') and settings.DATABASE_ENGINE.startswith('sqlite'):
