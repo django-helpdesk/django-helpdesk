@@ -184,7 +184,7 @@ def ticket_from_message(message, queue, quiet):
             if part.get_content_subtype() == 'plain':
                 body_plain = decodeUnknown(part.get_charset(), part.get_payload(decode=True))
             else:
-                body_html = decodeUnknown(part.get_charset(), part.get_payload(decode=True))
+                body_html = part.get_payload(decode=True)
         else:
             if not name:
                 ext = mimetypes.guess_extension(part.get_content_type())
