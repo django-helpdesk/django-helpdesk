@@ -505,7 +505,7 @@ def ticket_list(request):
         query_params['sortreverse'] = sortreverse
 
     ticket_qs = apply_query(Ticket.objects.select_related(), query_params)
-    ticket_paginator = paginator.Paginator(ticket_qs, request.user.usersettings.settings.get('tickets_per_page', 20))
+    ticket_paginator = paginator.Paginator(ticket_qs, request.user.usersettings.settings.get('tickets_per_page') or 20)
     try:
         page = int(request.GET.get('page', '1'))
     except ValueError:
