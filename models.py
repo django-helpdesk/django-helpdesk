@@ -331,7 +331,7 @@ class Ticket(models.Model):
             if self.assigned_to.get_full_name():
                 return self.assigned_to.get_full_name()
             else:
-                return self.assigned_to
+                return self.assigned_to.username
     get_assigned_to = property(_get_assigned_to)
 
     def _get_ticket(self):
