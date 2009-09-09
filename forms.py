@@ -16,6 +16,7 @@ from django.utils.translation import ugettext as _
 
 from helpdesk.lib import send_templated_mail
 from helpdesk.models import Ticket, Queue, FollowUp, Attachment, IgnoreEmail, TicketCC
+from helpdesk.settings import HAS_TAG_SUPPORT
 
 class EditTicketForm(forms.ModelForm):
     class Meta:
@@ -72,6 +73,17 @@ class TicketForm(forms.Form):
         help_text=_('You can attach a file such as a document or screenshot to this ticket.'),
         )
 
+    if HAS_TAG_SUPPORT:
+        tags = forms.CharField(
+            max_length=255,
+            required=False,
+            widget=forms.TextInput(),
+            label=_('Tags'),
+            help_text=_('Words, separated by spaces, or phrases separated by commas. '
+                    'These should communicate significant characteristics of this '
+                    'ticket'),
+            )
+
     def save(self, user):
         """
         Writes and returns a Ticket() object
@@ -87,6 +99,9 @@ class TicketForm(forms.Form):
                     description = self.cleaned_data['body'],
                     priority = self.cleaned_data['priority'],
                   )
+
+        if HAS_TAG_SUPPORT:
+            t.tags = self.cleaned_data['tags']
 
         if self.cleaned_data['assigned_to']:
             try:

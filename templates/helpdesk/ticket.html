@@ -71,17 +71,25 @@
     <td>{% for ticketcc in ticket.ticketcc_set.all %}{{ ticketcc.display }}{% if not forloop.last %}, {% endif %}{% endfor %} <strong><a href='{% url helpdesk_ticket_cc ticket.id %}'>{% trans "Manage" %}</a></strong></td>
 </tr>
 
+{% if tags_enabled %}
 <tr class='row_even'>
+    <th>{% trans "Tags" %}</th>
+    <td>{{ ticket.tags }}</td>
+</tr>
+{% endif %}
+
+<tr class='row_even'>
+<tr class='row_{% if tags_enabled %}odd{% else %}even{% endif %}'>
     <th colspan='2'>{% trans "Description" %}</th>
 </tr>
-<tr class='row_odd'>
+<tr class='row_{% if tags_enabled %}even{% else %}odd{% endif %}'>
     <td colspan='2'>{{ ticket.description|force_escape|linebreaksbr }}</td>
 </tr>
 
-{% if ticket.resolution %}<tr class='row_even'>
+{% if ticket.resolution %}<tr class='row_{% if tags_enabled %}odd{% else %}even{% endif %}'>
     <th colspan='2'>{% trans "Resolution" %}{% ifequal ticket.get_status_display "Resolved" %} <a href='?close'><img src='{{ MEDIA_URL }}helpdesk/buttons/accept.png' alt='{% trans "Accept" %}' title='{% trans "Accept and Close" %}' width='60' height='15' /></a>{% endifequal %}</th>
 </tr>
-<tr class='row_odd'>
+<tr class='row_{% if tags_enabled %}even{% else %}odd{% endif %}'>
     <td colspan='2'>{{ ticket.resolution|force_escape }}</td>
 </tr>{% endif %}
 
@@ -161,6 +169,10 @@
 
         <dt><label for='id_priority'>{% trans "Priority" %}</label></dt>
         <dd><select id='id_priority' name='priority'>{% for p in priorities %}<option value='{{ p.0 }}'{% ifequal p.0 ticket.priority %} selected='selected'{% endifequal %}>{{ p.1 }}</option>{% endfor %}</select></dd>
+       {% if tags_enabled %}
+        <dt><label for='id_tags'>{% trans "Tags" %}</label></dt>
+        <dd><input type='text' id='id_tags' name='tags' value='{{ ticket.tags }}'/></dd>
+       {% endif %}
 
     </dl>
 

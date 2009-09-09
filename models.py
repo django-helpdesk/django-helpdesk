@@ -13,7 +13,10 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
+from helpdesk.settings import HAS_TAG_SUPPORT
 
+if HAS_TAG_SUPPORT:
+    from tagging.fields import TagField
 
 class Queue(models.Model):
     """
@@ -399,6 +402,9 @@ class Ticket(models.Model):
             args=[self.id])
             )
     staff_url = property(_get_staff_url)
+
+    if HAS_TAG_SUPPORT:
+        tags = TagField(blank=True)
 
     class Meta:
         get_latest_by = "created"

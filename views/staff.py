@@ -25,7 +25,10 @@ from django.utils.translation import ugettext as _
 from helpdesk.forms import TicketForm, UserSettingsForm, EmailIgnoreForm, EditTicketForm, TicketCCForm
 from helpdesk.lib import send_templated_mail, line_chart, bar_chart, query_to_dict, apply_query, safe_template_context
 from helpdesk.models import Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch, IgnoreEmail, TicketCC
-
+from helpdesk.settings import HAS_TAG_SUPPORT
+  
+if HAS_TAG_SUPPORT:
+    from tagging.models import Tag, TaggedItem
 
 staff_member_required = user_passes_test(lambda u: u.is_authenticated() and u.is_active and u.is_staff)
 superuser_required = user_passes_test(lambda u: u.is_authenticated() and u.is_active and u.is_superuser)
@@ -126,6 +129,7 @@ def view_ticket(request, ticket_id):
             'active_users': User.objects.filter(is_active=True).filter(is_staff=True),
             'priorities': Ticket.PRIORITY_CHOICES,
             'preset_replies': PreSetReply.objects.filter(Q(queues=ticket.queue) | Q(queues__isnull=True)),
+            'tags_enabled': HAS_TAG_SUPPORT
         }))
 view_ticket = staff_member_required(view_ticket)
 
@@ -142,6 +146,7 @@ def update_ticket(request, ticket_id, public=False):
     public = request.POST.get('public', False)
     owner = int(request.POST.get('owner', None))
     priority = int(request.POST.get('priority', ticket.priority))
+    tags = request.POST.get('tags', '')
 
     # We need to allow the 'ticket' and 'queue' contexts to be applied to the
     # comment.
@@ -229,6 +234,17 @@ def update_ticket(request, ticket_id, public=False):
             )
         c.save()
         ticket.priority = priority
+
+    if HAS_TAG_SUPPORT:
+        if tags != ticket.tags:
+            c = TicketChange(
+                followup=f,
+                field=_('Tags'),
+                old_value=ticket.tags,
+                new_value=tags,
+                )
+            c.save()
+            ticket.tags = tags
 
     if f.new_status == Ticket.RESOLVED_STATUS:
         ticket.resolution = comment
@@ -477,7 +493,8 @@ def ticket_list(request):
             or  request.GET.has_key('status')
             or  request.GET.has_key('q')
             or  request.GET.has_key('sort')
-            or  request.GET.has_key('sortreverse') ):
+            or  request.GET.has_key('sortreverse') 
+            or  request.GET.has_key('tags') ):
 
         # Fall-back if no querying is being done, force the list to only
         # show open/reopened/resolved (not closed) cases sorted by creation
@@ -527,6 +544,14 @@ def ticket_list(request):
         query_params['sortreverse'] = sortreverse
 
     ticket_qs = apply_query(Ticket.objects.select_related(), query_params)
+
+    ## TAG MATCHING
+    if HAS_TAG_SUPPORT:
+        tags = request.GET.getlist('tags')
+        if tags:
+            ticket_qs = TaggedItem.objects.get_by_model(ticket_qs, tags)
+            query_params['tags'] = tags
+
     ticket_paginator = paginator.Paginator(ticket_qs, request.user.usersettings.settings.get('tickets_per_page') or 20)
     try:
         page = int(request.GET.get('page', '1'))
@@ -554,6 +579,11 @@ def ticket_list(request):
         if get_key != "page":
             query_string.append("%s=%s" % (get_key, get_value))
 
+    tag_choices = [] 
+    if HAS_TAG_SUPPORT:
+        # FIXME: restrict this to tags that are actually in use
+        tag_choices = Tag.objects.all()
+
     return render_to_response('helpdesk/ticket_list.html',
         RequestContext(request, dict(
             context,
@@ -562,11 +592,13 @@ def ticket_list(request):
             user_choices=User.objects.filter(is_active=True),
             queue_choices=Queue.objects.all(),
             status_choices=Ticket.STATUS_CHOICES,
+            tag_choices=tag_choices,
             urlsafe_query=urlsafe_query,
             user_saved_queries=user_saved_queries,
             query_params=query_params,
             from_saved_query=from_saved_query,
             search_message=search_message,
+            tags_enabled=HAS_TAG_SUPPORT
         )))
 ticket_list = staff_member_required(ticket_list)
 
@@ -584,6 +616,7 @@ def edit_ticket(request, ticket_id):
     return render_to_response('helpdesk/edit_ticket.html',
         RequestContext(request, {
             'form': form,
+            'tags_enabled': HAS_TAG_SUPPORT,
         }))
 edit_ticket = staff_member_required(edit_ticket)
 
@@ -607,6 +640,7 @@ def create_ticket(request):
     return render_to_response('helpdesk/create_ticket.html',
         RequestContext(request, {
             'form': form,
+            'tags_enabled': HAS_TAG_SUPPORT,
         }))
 create_ticket = staff_member_required(create_ticket)
 

@@ -4,3 +4,8 @@
 Add rudimentary CC: functionality on tickets, controlled by staff users. CC's 
 can be e-mail addresses or users, who will receive copies of all emails sent 
 to the Submitter. This is a work in progress.
+
+2009-09-09 r140 Issue #13 Add Tags to tickets
+Patch courtesy of david@zettazebra.com, adds the ability to add tags to 
+tickets if django-tagging is installed and in use. If django-tagging isn't 
+being used, no change is visible to the user.
