@@ -15,7 +15,7 @@ from django.contrib.auth.models import User
 from django.utils.translation import ugettext as _
 
 from helpdesk.lib import send_templated_mail
-from helpdesk.models import Ticket, Queue, FollowUp, Attachment, IgnoreEmail
+from helpdesk.models import Ticket, Queue, FollowUp, Attachment, IgnoreEmail, TicketCC
 
 class EditTicketForm(forms.ModelForm):
     class Meta:
@@ -356,3 +356,8 @@ class UserSettingsForm(forms.Form):
 class EmailIgnoreForm(forms.ModelForm):
     class Meta:
         model = IgnoreEmail
+
+class TicketCCForm(forms.ModelForm):
+    class Meta:
+        model = TicketCC
+        exclude = ('ticket',)

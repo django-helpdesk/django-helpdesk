@@ -129,7 +129,7 @@ class Queue(models.Model):
         help_text=_('Whether to use SSL for IMAP or POP3 - the default ports '
             'when using SSL are 993 for IMAP and 995 for POP3.'),
         )
- 
+
     email_box_user = models.CharField(
         _('E-Mail Username'),
         max_length=200,
@@ -999,3 +999,58 @@ class IgnoreEmail(models.Model):
             return True
         else:
             return False
+
+class TicketCC(models.Model):
+    """
+    Often, there are people who wish to follow a ticket who aren't the 
+    person who originally submitted it. This model provides a way for those
+    people to follow a ticket.
+
+    In this circumstance, a 'person' could be either an e-mail address or 
+    an existing system user.
+    """
+
+    ticket = models.ForeignKey(Ticket)
+
+    user = models.ForeignKey(
+        User,
+        blank=True,
+        null=True,
+        help_text=_('User who wishes to receive updates for this ticket.'),
+        )
+
+    email = models.EmailField(
+        _('E-Mail Address'),
+        blank=True,
+        null=True,
+        help_text=_('For non-user followers, enter their e-mail address'),
+        )
+
+    can_view = models.BooleanField(
+        _('Can View Ticket?'),
+        blank=True,
+        help_text=_('Can this CC login to view the ticket details?'),
+        )
+
+    can_update = models.BooleanField(
+        _('Can Update Ticket?'),
+        blank=True,
+        help_text=_('Can this CC login and update the ticket?'),
+        )
+
+    def _email_address(self):
+        if self.user and self.user.email is not None:
+            return self.user.email
+        else:
+            return self.email
+    email_address = property(_email_address)
+
+    def _display(self):
+        if self.user:
+            return self.user
+        else:
+            return self.email
+    display = property(_display)
+
+    def __unicode__(self):
+        return u'%s for %s' % (self.display, self.ticket.title)

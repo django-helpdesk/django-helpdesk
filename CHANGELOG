@@ -1,1 +1,6 @@
 2009-09-09 r138 Issue #104 Add a CHANGELOG file
+
+2009-09-09 r139 Issue #102 Add Ticket CC's
+Add rudimentary CC: functionality on tickets, controlled by staff users. CC's 
+can be e-mail addresses or users, who will receive copies of all emails sent 
+to the Submitter. This is a work in progress.

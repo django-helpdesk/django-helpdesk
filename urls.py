@@ -55,6 +55,18 @@ urlpatterns = patterns('helpdesk.views.staff',
         'unhold_ticket',
         name='helpdesk_unhold'),
 
+    url(r'^tickets/(?P<ticket_id>[0-9]+)/cc/$',
+        'ticket_cc',
+        name='helpdesk_ticket_cc'),
+
+    url(r'^tickets/(?P<ticket_id>[0-9]+)/cc/add/$',
+        'ticket_cc_add',
+        name='helpdesk_ticket_cc_add'),
+
+    url(r'^tickets/(?P<ticket_id>[0-9]+)/cc/delete/(?P<cc_id>[0-9]+)/$',
+        'ticket_cc_del',
+        name='helpdesk_ticket_cc_del'),
+
     url(r'^raw/(?P<type>\w+)/$',
         'raw_details',
         name='helpdesk_raw'),

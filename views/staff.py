@@ -22,9 +22,9 @@ from django.shortcuts import render_to_response, get_object_or_404
 from django.template import loader, Context, RequestContext
 from django.utils.translation import ugettext as _
 
-from helpdesk.forms import TicketForm, UserSettingsForm, EmailIgnoreForm, EditTicketForm
+from helpdesk.forms import TicketForm, UserSettingsForm, EmailIgnoreForm, EditTicketForm, TicketCCForm
 from helpdesk.lib import send_templated_mail, line_chart, bar_chart, query_to_dict, apply_query, safe_template_context
-from helpdesk.models import Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch, IgnoreEmail
+from helpdesk.models import Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch, IgnoreEmail, TicketCC
 
 
 staff_member_required = user_passes_test(lambda u: u.is_authenticated() and u.is_active and u.is_staff)
@@ -259,6 +259,17 @@ def update_ticket(request, ticket_id, public=False):
             )
         messages_sent_to.append(ticket.submitter_email)
 
+        for cc in ticket.ticketcc_set.all():
+            if cc.email_address not in messages_sent_to:
+                send_templated_mail(
+                    template,
+                    context,
+                    recipients=cc.email_address,
+                    sender=ticket.queue.from_address,
+                    fail_silently=True,
+                    )
+                messages_sent_to.append(cc.email_address)
+
     if ticket.assigned_to and request.user != ticket.assigned_to and ticket.assigned_to.email and ticket.assigned_to.email not in messages_sent_to:
         # We only send e-mails to staff members if the ticket is updated by
         # another user. The actual template varies, depending on what has been
@@ -363,6 +374,17 @@ def mass_update(request):
                     fail_silently=True,
                     )
                 messages_sent_to.append(t.submitter_email)
+
+            for cc in ticket.ticketcc_set.all():
+                if cc.email_address not in messages_sent_to:
+                    send_templated_mail(
+                        'closed_submitter',
+                        context,
+                        recipients=cc.email_address,
+                        sender=ticket.queue.from_address,
+                        fail_silently=True,
+                        )
+                    messages_sent_to.append(cc.email_address)
 
             if t.assigned_to and request.user != t.assigned_to and t.assigned_to.email and t.assigned_to.email not in messages_sent_to:
                 send_templated_mail(
@@ -563,6 +585,7 @@ def edit_ticket(request, ticket_id):
         RequestContext(request, {
             'form': form,
         }))
+edit_ticket = staff_member_required(edit_ticket)
 
 def create_ticket(request):
     if request.method == 'POST':
@@ -890,3 +913,42 @@ def email_ignore_del(request, id):
                 'ignore': ignore,
             }))
 email_ignore_del = superuser_required(email_ignore_del)
+
+def ticket_cc(request, ticket_id):
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+    copies_to = ticket.ticketcc_set.all()
+    return render_to_response('helpdesk/ticket_cc_list.html',
+        RequestContext(request, {
+            'copies_to': copies_to,
+            'ticket': ticket,
+        }))
+ticket_cc = staff_member_required(ticket_cc)
+
+def ticket_cc_add(request, ticket_id):
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+    if request.method == 'POST':
+        form = TicketCCForm(request.POST)
+        if form.is_valid():
+            ticketcc = form.save(commit=False)
+            ticketcc.ticket = ticket
+            ticketcc.save()
+            return HttpResponseRedirect(reverse('helpdesk_ticket_cc', kwargs={'ticket_id': ticket.id}))
+    else:
+        form = TicketCCForm()
+    return render_to_response('helpdesk/ticket_cc_add.html',
+        RequestContext(request, {
+            'ticket': ticket,
+            'form': form,
+        }))
+ticket_cc_add = staff_member_required(ticket_cc_add)
+
+def ticket_cc_del(request, ticket_id, cc_id):
+    cc = get_object_or_404(TicketCC, ticket__id=ticket_id, id=cc_id)
+    if request.POST:
+        cc.delete()
+        return HttpResponseRedirect(reverse('helpdesk_ticket_cc', kwargs={'ticket_id': cc.ticket.id}))
+    return render_to_response('helpdesk/ticket_cc_del.html',
+        RequestContext(request, {
+            'cc': cc,
+        }))
+ticket_cc_del = staff_member_required(ticket_cc_del)

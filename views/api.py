@@ -209,6 +209,18 @@ class API:
                 )
             messages_sent_to.append(ticket.submitter_email)
 
+        if public:
+            for cc in ticket.ticketcc_set.all():
+                if cc.email_address not in messages_sent_to:
+                    send_templated_mail(
+                        'updated_submitter',
+                        context,
+                        recipients=cc.email_address,
+                        sender=ticket.queue.from_address,
+                        fail_silently=True,
+                        )
+                    messages_sent_to.append(cc.email_address)
+
         if ticket.queue.updated_ticket_cc and ticket.queue.updated_ticket_cc not in messages_sent_to:
             send_templated_mail(
                 'updated_cc',
@@ -273,6 +285,17 @@ class API:
                 fail_silently=True,
                 )
             messages_sent_to.append(ticket.submitter_email)
+
+            for cc in ticket.ticketcc_set.all():
+                if cc.email_address not in messages_sent_to:
+                    send_templated_mail(
+                        'resolved_submitter',
+                        context,
+                        recipients=cc.email_address,
+                        sender=ticket.queue.from_address,
+                        fail_silently=True,
+                        )
+                    messages_sent_to.append(cc.email_address)
 
         if ticket.queue.updated_ticket_cc and ticket.queue.updated_ticket_cc not in messages_sent_to:
             send_templated_mail(
