@@ -12,7 +12,7 @@ from datetime import datetime
 from django.contrib.auth.models import User
 from django.db import models
 from django.conf import settings
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext_lazy as _, ugettext
 from helpdesk.settings import HAS_TAG_SUPPORT
 
 if HAS_TAG_SUPPORT:
@@ -536,16 +536,16 @@ class TicketChange(models.Model):
         )
 
     def __unicode__(self):
-        str = u'%s ' % field
-        if not new_value:
-            str += _('removed')
-        elif not old_value:
-            str += _('set to %s' % new_value)
+        str = u'%s ' % self.field
+        if not self.new_value:
+            str += ugettext('removed')
+        elif not self.old_value:
+            str += ugettext('set to %s') % self.new_value
         else:
-            str += _('changed from "%(old_value)s" to "%(new_value)s"' % {
-                'old_value': old_value,
-                'new_value': new_value
-                })
+            str += ugettext('changed from "%(old_value)s" to "%(new_value)s"') % {
+                'old_value': self.old_value,
+                'new_value': self.new_value
+                }
         return str
 
 

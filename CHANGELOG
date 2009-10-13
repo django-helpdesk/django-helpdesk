@@ -13,3 +13,6 @@ being used, no change is visible to the user.
 2009-10-13 r141 Issue #118 Incorrect locale handling on email templates
 Patch courtesy of hgeerts. Corrects the handling of locale on email 
 templaets, defaulting to English if no locale is provided.
+
+2009-10-13 r142 Issue #117 Incorrect I18N usage in a few spots
+Patch thanks to hgeerts.
