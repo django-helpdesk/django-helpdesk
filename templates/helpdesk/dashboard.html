@@ -10,7 +10,7 @@
 <tr class='row_columnheads'><th>{% trans "Queue" %}</th><th>{% trans "Open" %}</th><th>{% trans "Resolved" %}</th></tr>
 {% for queue in dash_tickets %}
 <tr class='row_{% cycle odd,even %} row_hover '>
-<th><a href='{% url helpdesk_list %}?queue={{ queue.queue }}'>{{ queue.name }}</a></th>
+<th><a href='{% url helpdesk_list %}?queue={{ queue.queue }}&status=1&status=2'>{{ queue.name }}</a></th>
 <td>{% if queue.open %}<a href='{% url helpdesk_list %}?queue={{ queue.queue }}&status=1&status=2'>{% endif %}{{ queue.open }}{% if queue.open %}</a>{% endif %}</td>
 <td>{% if queue.resolved %}<a href='{% url helpdesk_list %}?queue={{ queue.queue }}&status=3'>{% endif %}{{ queue.resolved }}{% if queue.resolved %}</a>{% endif %}</td>
 </tr>
