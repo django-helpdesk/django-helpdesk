@@ -20,3 +20,6 @@ Patch thanks to hgeerts.
 2009-10-13 r143 Issue #113 - Clicking Queue names on the Dashboard was showing
 all tickets; now only shows open tickets. Thanks to Andreas Kotowicz for the 
 sugestion.
+
+2009-12-16 r144 Issue #122 - Infinite loop when most recent ticket was 
+opened in December. Thanks to Chris Vigelius for the report.

@@ -765,7 +765,7 @@ def run_report(request, report):
         if month > 12:
             year += 1
             month = 1
-        if month > last_month and year >= last_year:
+        if (year > last_year) or (month > last_month and year >= last_year):
             working = False
         periods.append((temp, (year, month)))
 
