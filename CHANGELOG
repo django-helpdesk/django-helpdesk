@@ -23,3 +23,6 @@ sugestion.
 
 2009-12-16 r144 Issue #122 - Infinite loop when most recent ticket was 
 opened in December. Thanks to Chris Vigelius for the report.
+
+2009-12-16 r145 issue #123 - Google Chart doesn't show when there is a large
+volume of data in the system. This patch restricts the chart to 1000px wide.

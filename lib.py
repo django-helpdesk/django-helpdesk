@@ -145,7 +145,7 @@ def line_chart(data):
 
 
     # Set width to '65px * number of months + 100 for headings.'.
-    chart_url = 'http://chart.apis.google.com/chart?cht=lc&chs=%sx150&chd=t:' % (len(column_headings)*65+100)
+    chart_url = 'http://chart.apis.google.com/chart?cht=lc&chs=%sx150&chd=t:' % (min(len(column_headings)*65+100, 1000))
     first_row = True
     row_headings = []
     for row in data[1:]:
@@ -190,7 +190,7 @@ def bar_chart(data):
 
 
     # Set width to '220px * number of months'.
-    chart_url = 'http://chart.apis.google.com/chart?cht=bvg&chs=%sx150&chd=t:' % (len(column_headings) * 220)
+    chart_url = 'http://chart.apis.google.com/chart?cht=bvg&chs=%sx150&chd=t:' % (min(len(column_headings) * 220, 1000))
     first_row = True
     row_headings = []
     for row in data[1:]:
