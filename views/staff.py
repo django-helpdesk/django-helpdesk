@@ -703,8 +703,11 @@ rss_list = staff_member_required(rss_list)
 
 
 def report_index(request):
+    number_tickets = Ticket.objects.all().count()
     return render_to_response('helpdesk/report_index.html',
-        RequestContext(request, {}))
+        RequestContext(request, {
+            'number_tickets': number_tickets,
+        }))
 report_index = staff_member_required(report_index)
 
 

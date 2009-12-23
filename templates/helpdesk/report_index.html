@@ -2,8 +2,16 @@
 
 {% block helpdesk_title %}{% trans "Reports &amp; Statistics" %}{% endblock %}
 
-{% block helpdesk_body %}{% blocktrans %}
+{% block helpdesk_body %}
+{% ifequal num_tickets 0 %}{% blocktrans %}
 <h2>Reports &amp; Statistics</h2>
+
+<p>You haven't created any tickets yet, so you cannot run any reports.</p>
+{% endblocktrans %}
+{% else %}
+{% blocktrans %}
+<h2>Reports &amp; Statistics</h2>
+
 
 <ul>
 <li>User<ul>
@@ -24,4 +32,4 @@
 </ul></li>
 </ul>
 
-{% endblocktrans %}{% endblock %}
+{% endblocktrans %}{% endifequal %}{% endblock %}

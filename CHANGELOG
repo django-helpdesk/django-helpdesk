@@ -29,3 +29,7 @@ volume of data in the system. This patch restricts the chart to 1000px wide.
 
 2009-12-16 r146 Issue #121 Formatting fix for email subjects. Thanks, 
 Andreas Kotowicz.
+
+2009-12-16 r147 Issue #119 Update Russian translation, thanks to Alex Yakovlev
+
+2009-12-23 r148 Issue #125 Errors occurring when running reports with no data
