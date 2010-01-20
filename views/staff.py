@@ -849,7 +849,7 @@ def run_report(request, report):
     for record in report_output:
         line = []
         for c in columns:
-        c = c.encode('utf-8')
+            c = c.encode('utf-8')
             line.append(record[c])
         data.append(line)
 
