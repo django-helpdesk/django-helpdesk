@@ -33,3 +33,5 @@ Andreas Kotowicz.
 2009-12-16 r147 Issue #119 Update Russian translation, thanks to Alex Yakovlev
 
 2009-12-23 r148 Issue #125 Errors occurring when running reports with no data
+
+2010-01-20 r149 Issue #126 Reports didn't work with transalations.
