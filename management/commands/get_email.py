@@ -164,10 +164,10 @@ def ticket_from_message(message, queue, quiet):
                 return False
             return True
 
-    regex = re.compile("^\[[A-Za-z0-9]+-\d+\]")
-    if regex.match(subject):
+    matchobj = re.match(r"^\[(?P<queue>[-A-Za-z0-9]+)-(?P<id>\d+)\]", subject)
+    if matchobj:
         # This is a reply or forward.
-        ticket = re.match(r"^\[(?P<queue>[A-Za-z0-9]+)-(?P<id>\d+)\]", subject).group('id')
+        ticket = matchobj.group('id')
     else:
         ticket = None
 

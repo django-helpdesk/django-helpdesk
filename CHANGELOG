@@ -37,3 +37,5 @@ Andreas Kotowicz.
 2010-01-20 r149 Issue #126 Reports didn't work with transalations.
 
 2010-01-20 r150 Issue #127 Add german transalation, courtesy of openinformation.org
+
+2009-01-20 r151 Issue #128 If queue name has a dash in it, email imported failed. Thanks to enix.org for the patch.
