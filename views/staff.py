@@ -154,7 +154,7 @@ def update_ticket(request, ticket_id, public=False):
     context = safe_template_context(ticket)
     comment = loader.get_template_from_string(comment).render(Context(context))
 
-    if not owner and ticket.assigned_to:
+    if owner is None and ticket.assigned_to:
         owner = ticket.assigned_to.id
 
     f = FollowUp(ticket=ticket, date=datetime.now(), comment=comment)
@@ -166,7 +166,7 @@ def update_ticket(request, ticket_id, public=False):
 
     reassigned = False
 
-    if owner:
+    if owner is not None:
         if owner != 0 and ((ticket.assigned_to and owner != ticket.assigned_to.id) or not ticket.assigned_to):
             new_user = User.objects.get(id=owner)
             f.title = _('Assigned to %(username)s') % {

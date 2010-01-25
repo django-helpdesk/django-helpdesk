@@ -41,3 +41,6 @@ Andreas Kotowicz.
 2009-01-20 r151 Issue #128 If queue name has a dash in it, email imported failed. Thanks to enix.org for the patch.
 
 2010-01-21 r152 Fix indentation error caused by issue #126.
+
+2010-01-26 r153 Fix issue #129 - can not 'unassign' tickets. Thanks to 
+lukeman for the patch.
