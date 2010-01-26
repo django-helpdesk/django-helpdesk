@@ -44,3 +44,6 @@ Andreas Kotowicz.
 
 2010-01-26 r153 Fix issue #129 - can not 'unassign' tickets. Thanks to 
 lukeman for the patch.
+
+2010-01-26 r154 Fix bug in the code from Issue #102 where TicketCC's couldn't
+be deleted. Thanks again to lukeman.

@@ -982,7 +982,7 @@ ticket_cc_add = staff_member_required(ticket_cc_add)
 
 def ticket_cc_del(request, ticket_id, cc_id):
     cc = get_object_or_404(TicketCC, ticket__id=ticket_id, id=cc_id)
-    if request.POST:
+    if request.method == 'POST':
         cc.delete()
         return HttpResponseRedirect(reverse('helpdesk_ticket_cc', kwargs={'ticket_id': cc.ticket.id}))
     return render_to_response('helpdesk/ticket_cc_del.html',
