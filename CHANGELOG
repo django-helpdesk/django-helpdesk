@@ -47,3 +47,6 @@ lukeman for the patch.
 
 2010-01-26 r154 Fix bug in the code from Issue #102 where TicketCC's couldn't
 be deleted. Thanks again to lukeman.
+
+2010-01-31 r155 Fix bug caused by issue #129 - ticket followup titles being 
+set incorrectly. Thanks to Lukeman for the fix.
