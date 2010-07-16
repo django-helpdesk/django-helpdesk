@@ -50,3 +50,6 @@ be deleted. Thanks again to lukeman.
 
 2010-01-31 r155 Fix bug caused by issue #129 - ticket followup titles being 
 set incorrectly. Thanks to Lukeman for the fix.
+
+2010-07-16 r157 Fix issues #141, #142 - IMAP infinite loops and ticket 
+pagination issues. Thanks to Walter Doekes for the patches.

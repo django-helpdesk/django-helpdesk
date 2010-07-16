@@ -200,7 +200,7 @@ $(document).ready(function() {
 <div class="pagination">
     <span class="step-links">
         {% if tickets.has_previous %}
-            <a href="?{{ query_string }}{% if query_string %}&{% else %}?{% endif %}page={{ tickets.previous_page_number }}">{% trans "Previous" %}</a>
+            <a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ tickets.previous_page_number }}">{% trans "Previous" %}</a>
         {% endif %}
 
         <span class="current">
@@ -208,7 +208,7 @@ $(document).ready(function() {
         </span>
 
         {% if tickets.has_next %}
-            <a href="?{{ query_string }}{% if query_string %}&{% else %}?{% endif %}page={{ tickets.next_page_number }}">{% trans "Next" %}</a>
+            <a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ tickets.next_page_number }}">{% trans "Next" %}</a>
         {% endif %}
     </span>
 </div>
