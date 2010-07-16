@@ -112,11 +112,10 @@ def process_queue(q, quiet=False):
 
         server.login(q.email_box_user, q.email_box_pass)
         server.select(q.email_box_imap_folder)
-        while True:
-            status, data = server.search(None, 'NOT', 'DELETED')
+
+        status, data = server.search(None, 'NOT', 'DELETED')
+        if data:
             msgnums = data[0].split()
-            if not msgnums:
-                break
             for num in msgnums:
                 status, data = server.fetch(num, '(RFC822)')
                 ticket = ticket_from_message(message=data[0][1], queue=q, quiet=quiet)
