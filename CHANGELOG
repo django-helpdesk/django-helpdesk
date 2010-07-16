@@ -53,3 +53,6 @@ set incorrectly. Thanks to Lukeman for the fix.
 
 2010-07-16 r157 Fix issues #141, #142 - IMAP infinite loops and ticket 
 pagination issues. Thanks to Walter Doekes for the patches.
+
+2010-07-16 r158 New CSRF functionality for Django 1.1+. Thanks to 
+'litchfield4' for the patch.

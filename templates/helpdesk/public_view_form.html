@@ -18,7 +18,7 @@
 
     <input type='submit' value='{% trans "View Ticket" %}' />
 </fieldset>
-</form>
+{% csrf_token %}</form>
 
 
 {% endblock %}

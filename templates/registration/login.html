@@ -16,5 +16,5 @@
     </dl>
     <input type='submit' value='{% trans "Login" %}' />
     <input type="hidden" name="next" value="{% if next %}{{ next }}{% else %}../{% endif %}" />
-</form>
+{% csrf_token %}</form>
 {% endblock %}

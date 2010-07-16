@@ -59,7 +59,7 @@ $(document).ready(function() {
         {% endif %}
         </select>
         <input type='button' id='filterBuilderButton' value='+' />
-    </form>
+    {% csrf_token %}</form>
 
     <form method='get' action='./'>
     <div class='filterBox{% if query_params.sorting %} filterBoxShow{% endif %}' id='filterBoxSort'>
@@ -130,7 +130,7 @@ $(document).ready(function() {
     </div>
     <hr style='clear: both;' />
     <input type='submit' value='{% trans "Apply Filter" %}' />
-    </form>
+    {% csrf_token %}</form>
     </div>
     
     {% if not from_saved_query %}
@@ -153,7 +153,7 @@ $(document).ready(function() {
         <input type='submit' value='{% trans "Save Query" %}'>
     </div>
 
-    </form>
+    {% csrf_token %}</form>
     </div>{% endif %}
 
     <div id='tabload'>
@@ -165,7 +165,7 @@ $(document).ready(function() {
         {% endfor %}
     </select></p>
     <input type='submit' value='{% trans "Run Query" %}'>
-    </form>
+    {% csrf_token %}</form>
     </div>
     
 </div>
@@ -216,5 +216,5 @@ $(document).ready(function() {
 <p><label>Select: </label> <a href='#select_all' id='select_all'>All</a> <a href='#select_none' id='select_none'>None</a> <a href='#select_inverse' id='select_inverse'>Inverse</a></p>
 
 <p><label for='id_mass_action'>With Selected Tickets:</label> <select name='action' id='id_mass_action'><option value='take'>Take (Assign to me)</option><option value='delete'>Delete</option><optgroup label='Close'><option value='close'>Close (Don't Send E-Mail)</option><option value='close_public'>Close (Send E-Mail)</option></optgroup><optgroup label='Assign To'><option value='unassign'>Nobody (Unassign)</option>{% for u in user_choices %}<option value='assign_{{ u.id }}'>{{ u.username }}</option>{% endfor %}</optgroup></select> <input type='submit' value='Go' /></p>
-</form>
+{% csrf_token %}</form>
 {% endblock %}
