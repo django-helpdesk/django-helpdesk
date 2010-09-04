@@ -59,4 +59,6 @@ pagination issues. Thanks to Walter Doekes for the patches.
 
 2010-09-04 r159 Error when updating multiple tickets.  Issue #135.
 
-2010-09-04 r160 Fix translation blocks in deletion templates. Some translation strings will need to be updated.
+2010-09-04 r160 Fix translation blocks in deletion templates. Some translation strings will need to be updated. Thanks to william88 for the bug report.
+
+2010-09-04 r161 Fix jQuery filename in public templates. Thanks to bruno.braga for the fix.
