@@ -8,7 +8,7 @@
 <p>Are you sure you wish to delete this email address (<em>{{ email_address }}</em>) from the CC list for this ticket? They will stop receiving updates.</p>
 {% endblocktrans %}
 
-{% blocktrans %}<p><a href='../../'>Don't Delete</a></p>
+<p><a href='../../'>{% trans "Don't Delete" %}</a></p>
 
-<form method='post' action='./'><input type='submit' value='Yes, Delete' />{% csrf_token %}</form>
-{% endblocktrans %}{% endblock %}
+<form method='post' action='./'><input type='submit' value='{% trans "Yes, Delete" %}' />{% csrf_token %}</form>
+{% endblock %}

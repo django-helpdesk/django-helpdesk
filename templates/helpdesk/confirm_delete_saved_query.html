@@ -12,7 +12,7 @@
 <p>You have shared this query, so other users may be using it. If you delete it, they will have to manually create their own query.</p>
 {% endblocktrans %}{% endif %}
 
-{% blocktrans %}<p><a href='../'>No, Don't Delete It</a></p>
+<p><a href='../'>{% trans "No, Don't Delete It" %}</a></p>
 
-<form method='post' action='./'><input type='submit' value='Yes - Delete It' />{% csrf_token %}</form>
-{% endblocktrans %}{% endblock %}
+<form method='post' action='./'><input type='submit' value='{% trans "Yes - Delete It" %}' />{% csrf_token %}</form>
+{% endblock %}

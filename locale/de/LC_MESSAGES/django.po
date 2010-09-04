@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: jutda-helpdesk svn revision 148\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-01-20 07:46+0000\n"
+"POT-Creation-Date: 2010-09-04 06:55+0000\n"
 "PO-Revision-Date: 2010-01-18 22:28+0100\n"
 "Last-Translator: Gregor Geiermann <public@openinformation.org>\n"
 "Language-Team: German Language <DE@li.org>\n"
@@ -830,40 +830,40 @@ msgstr ""
 msgid "Ticket escalated after %s days"
 msgstr "Ticket nach %s Tagen eskaliert"
 
-#: management/commands/get_email.py:148
+#: management/commands/get_email.py:147
 msgid "Created from e-mail"
 msgstr "Aus E-mail erstellt"
 
-#: management/commands/get_email.py:152
+#: management/commands/get_email.py:151
 msgid "Unknown Sender"
 msgstr "Unbekannter Absender"
 
-#: management/commands/get_email.py:204
+#: management/commands/get_email.py:203
 msgid ""
 "No plain-text email body available. Please see attachment email_html_body."
 "html."
 msgstr ""
 "E-mail nicht als einfacher Text verfügbar. Siehe Anhang email_html_body.html."
 
-#: management/commands/get_email.py:208
+#: management/commands/get_email.py:207
 msgid "email_html_body.html"
 msgstr "email_html_body.html"
 
-#: management/commands/get_email.py:285
+#: management/commands/get_email.py:284
 #, fuzzy
 msgid " (Reopened"
 msgstr "Wieder geöffnet"
 
-#: management/commands/get_email.py:287
+#: management/commands/get_email.py:286
 msgid " (Updated)"
 msgstr "Aktualisiert"
 
-#: management/commands/get_email.py:309
+#: management/commands/get_email.py:308
 #, python-format
 msgid "E-Mail Received from %(sender_email)s"
 msgstr "E-mail empfangen von %(sender_email)s"
 
-#: management/commands/get_email.py:317
+#: management/commands/get_email.py:316
 #, python-format
 msgid "Ticket Re-Opened by E-Mail Received from %(sender_email)s"
 msgstr "Ticket wiede geöffnet durch empfangene E-mail von %(sender_email)s"
@@ -981,16 +981,13 @@ msgstr ""
 
 #: templates/helpdesk/confirm_delete_saved_query.html:15
 #: templates/helpdesk/delete_ticket.html:11
-msgid ""
-"<p><a href='../'>No, Don't Delete It</a></p>\n"
-"\n"
-"<form method='post' action='./'><input type='submit' value='Yes - Delete "
-"It' /></form>\n"
+msgid "No, Don't Delete It"
 msgstr ""
-"<p><a href='../'>Nein, nicht löschen</a></p>\n"
-"\n"
-"<form method='post' action='./'><input type='submit' value='ja, löschen'/></"
-"form>\n"
+
+#: templates/helpdesk/confirm_delete_saved_query.html:17
+#: templates/helpdesk/delete_ticket.html:13
+msgid "Yes - Delete It"
+msgstr ""
 
 #: templates/helpdesk/create_ticket.html:3
 msgid "Create Ticket"
@@ -1159,16 +1156,12 @@ msgstr ""
 "System zu erstellen? Sie können sie jederzeit wieder hinzufügen.</p>\n"
 
 #: templates/helpdesk/email_ignore_del.html:11
-msgid ""
-"<p><a href='../../'>Keep Ignoring It</a></p>\n"
-"\n"
-"<form method='post' action='./'><input type='submit' value='Stop Ignoring "
-"It' /></form>\n"
+msgid "Keep Ignoring It"
 msgstr ""
-"<p><a href='../../'>Weiter ignorieren</a></p>\n"
-"\n"
-"<form method='post' action='./'><input type='submit' value='Wieder "
-"berücksichtigen' /></form>\n"
+
+#: templates/helpdesk/email_ignore_del.html:13
+msgid "Stop Ignoring It"
+msgstr ""
 
 #: templates/helpdesk/email_ignore_list.html:3
 #: templates/helpdesk/email_ignore_list.html:12
@@ -1750,16 +1743,14 @@ msgstr ""
 "Aktualisierungsbenachrichtigungen mehr erhalten.</p>\n"
 
 #: templates/helpdesk/ticket_cc_del.html:11
-msgid ""
-"<p><a href='../../'>Don't Delete</a></p>\n"
-"\n"
-"<form method='post' action='./'><input type='submit' value='Yes, Delete' /></"
-"form>\n"
-msgstr ""
-"<p><a href='../../'>Nicht löschen</a></p>\n"
-"\n"
-"<form method='post' action='./'><input type='submit' value='Ja, löschen' /></"
-"form>\n"
+#, fuzzy
+msgid "Don't Delete"
+msgstr "Löschen"
+
+#: templates/helpdesk/ticket_cc_del.html:13
+#, fuzzy
+msgid "Yes, Delete"
+msgstr "Löschen"
 
 #: templates/helpdesk/ticket_cc_list.html:3
 msgid "Ticket CC Settings"
@@ -2091,3 +2082,36 @@ msgstr "Ticket wieder freigegeben"
 #: views/staff.py:675
 msgid "Ticket placed on hold"
 msgstr "Ticket zurückgehalten"
+
+#~ msgid ""
+#~ "<p><a href='../'>No, Don't Delete It</a></p>\n"
+#~ "\n"
+#~ "<form method='post' action='./'><input type='submit' value='Yes - Delete "
+#~ "It' /></form>\n"
+#~ msgstr ""
+#~ "<p><a href='../'>Nein, nicht löschen</a></p>\n"
+#~ "\n"
+#~ "<form method='post' action='./'><input type='submit' value='ja, löschen'/"
+#~ "></form>\n"
+
+#~ msgid ""
+#~ "<p><a href='../../'>Keep Ignoring It</a></p>\n"
+#~ "\n"
+#~ "<form method='post' action='./'><input type='submit' value='Stop Ignoring "
+#~ "It' /></form>\n"
+#~ msgstr ""
+#~ "<p><a href='../../'>Weiter ignorieren</a></p>\n"
+#~ "\n"
+#~ "<form method='post' action='./'><input type='submit' value='Wieder "
+#~ "berücksichtigen' /></form>\n"
+
+#~ msgid ""
+#~ "<p><a href='../../'>Don't Delete</a></p>\n"
+#~ "\n"
+#~ "<form method='post' action='./'><input type='submit' value='Yes, Delete' /"
+#~ "></form>\n"
+#~ msgstr ""
+#~ "<p><a href='../../'>Nicht löschen</a></p>\n"
+#~ "\n"
+#~ "<form method='post' action='./'><input type='submit' value='Ja, löschen' /"
+#~ "></form>\n"

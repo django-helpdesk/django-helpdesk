@@ -58,3 +58,5 @@ pagination issues. Thanks to Walter Doekes for the patches.
 'litchfield4' for the patch.
 
 2010-09-04 r159 Error when updating multiple tickets.  Issue #135.
+
+2010-09-04 r160 Fix translation blocks in deletion templates. Some translation strings will need to be updated.

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: jutda-helpdesk svn revision 143\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-01-20 07:46+0000\n"
+"POT-Creation-Date: 2010-09-04 06:55+0000\n"
 "PO-Revision-Date: 2009-10-15 00:01+0300\n"
 "Last-Translator: Alexander Yakovlev <ayakovlev@rambler.ru>\n"
 "Language-Team: Russian Language <RU@li.org>\n"
@@ -822,39 +822,39 @@ msgstr ""
 msgid "Ticket escalated after %s days"
 msgstr "Талон поднят после %s дней"
 
-#: management/commands/get_email.py:148
+#: management/commands/get_email.py:147
 msgid "Created from e-mail"
 msgstr "Созданый из электронной почты"
 
-#: management/commands/get_email.py:152
+#: management/commands/get_email.py:151
 msgid "Unknown Sender"
 msgstr "Неизвестный Отправитель"
 
-#: management/commands/get_email.py:204
+#: management/commands/get_email.py:203
 msgid ""
 "No plain-text email body available. Please see attachment email_html_body."
 "html."
 msgstr ""
 
-#: management/commands/get_email.py:208
+#: management/commands/get_email.py:207
 msgid "email_html_body.html"
 msgstr ""
 
-#: management/commands/get_email.py:285
+#: management/commands/get_email.py:284
 #, fuzzy
 msgid " (Reopened"
 msgstr "Переоткрытый"
 
-#: management/commands/get_email.py:287
+#: management/commands/get_email.py:286
 msgid " (Updated)"
 msgstr "(Обновлено)"
 
-#: management/commands/get_email.py:309
+#: management/commands/get_email.py:308
 #, python-format
 msgid "E-Mail Received from %(sender_email)s"
 msgstr "Электронное послание полученное от %(sender_email)s"
 
-#: management/commands/get_email.py:317
+#: management/commands/get_email.py:316
 #, fuzzy, python-format
 msgid "Ticket Re-Opened by E-Mail Received from %(sender_email)s"
 msgstr "Электронное послание полученное от %(sender_email)s"
@@ -972,16 +972,13 @@ msgstr ""
 
 #: templates/helpdesk/confirm_delete_saved_query.html:15
 #: templates/helpdesk/delete_ticket.html:11
-msgid ""
-"<p><a href='../'>No, Don't Delete It</a></p>\n"
-"\n"
-"<form method='post' action='./'><input type='submit' value='Yes - Delete "
-"It' /></form>\n"
+msgid "No, Don't Delete It"
 msgstr ""
-"<p><a href='../'>Нет, Не Удалять</a></p>\n"
-"\n"
-"<form method='post' action='./'><input type='submit' value='Да - Удалить' /"
-"></form>\n"
+
+#: templates/helpdesk/confirm_delete_saved_query.html:17
+#: templates/helpdesk/delete_ticket.html:13
+msgid "Yes - Delete It"
+msgstr ""
 
 #: templates/helpdesk/create_ticket.html:3
 msgid "Create Ticket"
@@ -1145,16 +1142,12 @@ msgstr ""
 "mail в список.<?p>\n"
 
 #: templates/helpdesk/email_ignore_del.html:11
-msgid ""
-"<p><a href='../../'>Keep Ignoring It</a></p>\n"
-"\n"
-"<form method='post' action='./'><input type='submit' value='Stop Ignoring "
-"It' /></form>\n"
+msgid "Keep Ignoring It"
 msgstr ""
-"<p><a href='../'>Продолжить игнорировать</a></p>\n"
-"\n"
-"<form method='post' action='./'><input type='submit' value='Перестать "
-"игнорировать' /></form>\n"
+
+#: templates/helpdesk/email_ignore_del.html:13
+msgid "Stop Ignoring It"
+msgstr ""
 
 #: templates/helpdesk/email_ignore_list.html:3
 #: templates/helpdesk/email_ignore_list.html:12
@@ -1723,16 +1716,13 @@ msgstr ""
 
 #: templates/helpdesk/ticket_cc_del.html:11
 #, fuzzy
-msgid ""
-"<p><a href='../../'>Don't Delete</a></p>\n"
-"\n"
-"<form method='post' action='./'><input type='submit' value='Yes, Delete' /></"
-"form>\n"
-msgstr ""
-"<p><a href='../'>Нет, Не Удалять</a></p>\n"
-"\n"
-"<form method='post' action='./'><input type='submit' value='Да - Удалить' /"
-"></form>\n"
+msgid "Don't Delete"
+msgstr "Удалить"
+
+#: templates/helpdesk/ticket_cc_del.html:13
+#, fuzzy
+msgid "Yes, Delete"
+msgstr "Удалить"
 
 #: templates/helpdesk/ticket_cc_list.html:3
 #, fuzzy
@@ -2055,6 +2045,40 @@ msgstr "Удержание талона снято"
 #: views/staff.py:675
 msgid "Ticket placed on hold"
 msgstr "Талон удерживается"
+
+#~ msgid ""
+#~ "<p><a href='../'>No, Don't Delete It</a></p>\n"
+#~ "\n"
+#~ "<form method='post' action='./'><input type='submit' value='Yes - Delete "
+#~ "It' /></form>\n"
+#~ msgstr ""
+#~ "<p><a href='../'>Нет, Не Удалять</a></p>\n"
+#~ "\n"
+#~ "<form method='post' action='./'><input type='submit' value='Да - "
+#~ "Удалить' /></form>\n"
+
+#~ msgid ""
+#~ "<p><a href='../../'>Keep Ignoring It</a></p>\n"
+#~ "\n"
+#~ "<form method='post' action='./'><input type='submit' value='Stop Ignoring "
+#~ "It' /></form>\n"
+#~ msgstr ""
+#~ "<p><a href='../'>Продолжить игнорировать</a></p>\n"
+#~ "\n"
+#~ "<form method='post' action='./'><input type='submit' value='Перестать "
+#~ "игнорировать' /></form>\n"
+
+#, fuzzy
+#~ msgid ""
+#~ "<p><a href='../../'>Don't Delete</a></p>\n"
+#~ "\n"
+#~ "<form method='post' action='./'><input type='submit' value='Yes, Delete' /"
+#~ "></form>\n"
+#~ msgstr ""
+#~ "<p><a href='../'>Нет, Не Удалять</a></p>\n"
+#~ "\n"
+#~ "<form method='post' action='./'><input type='submit' value='Да - "
+#~ "Удалить' /></form>\n"
 
 #~ msgid ""
 #~ "Changed %(change.field)s from %(change.old_value)s to %(change.new_value)"
