@@ -391,13 +391,13 @@ def mass_update(request):
                     )
                 messages_sent_to.append(t.submitter_email)
 
-            for cc in ticket.ticketcc_set.all():
+            for cc in t.ticketcc_set.all():
                 if cc.email_address not in messages_sent_to:
                     send_templated_mail(
                         'closed_submitter',
                         context,
                         recipients=cc.email_address,
-                        sender=ticket.queue.from_address,
+                        sender=t.queue.from_address,
                         fail_silently=True,
                         )
                     messages_sent_to.append(cc.email_address)
