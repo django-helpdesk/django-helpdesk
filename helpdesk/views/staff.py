@@ -1,5 +1,5 @@
 """
-Jutda Helpdesk - A Django powered ticket tracker for small enterprise.
+django-helpdesk - A Django powered ticket tracker for small enterprise.
 
 (c) Copyright 2008 Jutda. All Rights Reserved. See LICENSE for details.
 

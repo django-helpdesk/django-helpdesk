@@ -1,5 +1,5 @@
 """
-Jutda Helpdesk - A Django powered ticket tracker for small enterprise.
+django-helpdesk - A Django powered ticket tracker for small enterprise.
 
 (c) Copyright 2008 Jutda. All Rights Reserved. See LICENSE for details.
 
@@ -323,7 +323,7 @@ def text_is_spam(text, request):
 
     ak = Akismet(
         blog_url='http://%s/' % Site.objects.get(pk=settings.SITE_ID).domain,
-        agent='Jutda Helpdesk',
+        agent='django-helpdesk',
     )
 
     if hasattr(settings, 'TYPEPAD_ANTISPAM_API_KEY'):

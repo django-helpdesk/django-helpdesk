@@ -1,5 +1,5 @@
 """                                     ..
-Jutda Helpdesk - A Django powered ticket tracker for small enterprise.
+django-helpdesk - A Django powered ticket tracker for small enterprise.
 
 (c) Copyright 2008 Jutda. All Rights Reserved. See LICENSE for details.
 
@@ -7,7 +7,7 @@ api.py - Wrapper around API calls, and core functions to provide complete
          API to third party applications.
 
 The API documentation can be accessed by visiting http://helpdesk/api/help/
-(obviously, substitute helpdesk for your Jutda Helpdesk URI), or by reading
+(obviously, substitute helpdesk for your django-helpdesk URI), or by reading
 through templates/helpdesk/help_api.html.
 """
 

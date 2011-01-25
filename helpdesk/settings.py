@@ -1,6 +1,6 @@
 
 """
-Default settings for jutda-helpdesk.
+Default settings for django-helpdesk.
 
 """
 

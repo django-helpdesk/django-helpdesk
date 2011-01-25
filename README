@@ -1,4 +1,4 @@
-Jutda Helpdesk - A Django powered ticket tracker for small enterprise.
+django-helpdesk - A Django powered ticket tracker for small business.
 
 (c) Copyright 2009 Jutda. All Rights Reserved. See LICENSE for details.
 
@@ -19,16 +19,16 @@ Jutda Helpdesk - A Django powered ticket tracker for small enterprise.
 1. Licensing
 #########################
 
-See the file 'LICENSE' for licensing terms. Note that Jutda Helpdesk is 
+See the file 'LICENSE' for licensing terms. Note that django-helpdesk is 
 distributed with 3rd party products which have their own licenses. See 
 LICENSE.3RDPARTY for license terms for included packages.
 
 #########################
 2. Dependencies (pre-flight checklist)
 #########################
-1. Python 2.3+ 
+1. Python 2.4+ 
 
-2. Django (1.0 alpha 1 or newer, or an SVN checkout after 7941).
+2. Django (1.2 or newer)
 
 3. An existing WORKING Django project with database etc. If you
    cannot log into the Admin, you won't get this product working.
@@ -47,11 +47,11 @@ to alert you to this shortcoming. There is no way around it, sorry.
 3. Upgrading from previous versions
 #########################
 
-If you are upgrading from a previous version of Jutda Helpdesk, you should 
+If you are upgrading from a previous version of django-helpdesk, you should 
 read the UPGRADING file to learn what changes you will need to make to get 
-the current version of Jutda Helpdesk working.
+the current version of django-helpdesk working.
 
-1. Find out your current version of Jutda Helpdesk. In the 'helpdesk' folder,
+1. Find out your current version of django-helpdesk. In the 'helpdesk' folder,
    use the 'svn' command to find the current revision:
 
     svn info .
@@ -73,7 +73,7 @@ the current version of Jutda Helpdesk working.
 #########################
 
 1. Place 'helpdesk' in your Python path. I use /var/django, others may use 
-   /usr/lib/python2.3/site-packages/ or a similar path.
+   /usr/lib/python2.4/site-packages/ or a similar path.
 
 2. In your projects' settings.py file, add these lines to the INSTALLED_APPS
    setting:
@@ -193,7 +193,7 @@ You're now up and running!
 7. Spam filtering
 #########################
 
-Jutda Helpdesk includes a copy of `akismet.py' by Michael Foord, which lets
+django-helpdesk includes a copy of `akismet.py' by Michael Foord, which lets
 incoming ticket submissions be automatically checked against either the 
 Akismet or TypePad Anti-Spam services.
 
@@ -221,7 +221,7 @@ TYPEPAD_ANTISPAM_API_KEY = 'abc123'
 7. API Usage
 #########################
 
-Jutda Helpdesk includes an API accessible via HTTP POST requests, allowing
+django-helpdesk includes an API accessible via HTTP POST requests, allowing
 you to create and alter tickets from 3rd party software and systems.
 
 For usage instructions and command syntax, see the file
