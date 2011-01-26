@@ -77,7 +77,8 @@ the current version of django-helpdesk working.
 4. Installation
 #########################
 
-1. Place 'helpdesk' in your Python path. I use /var/django, others may use 
+1. Try using 'pip install django-helpdesk'. If that fails, download and 
+   place 'helpdesk' in your Python path. I use /var/django, others may use 
    /usr/lib/python2.4/site-packages/ or a similar path.
 
 2. In your projects' settings.py file, add these lines to the INSTALLED_APPS
