@@ -130,11 +130,10 @@ def process_queue(q, quiet=False):
 def decodeUnknown(charset, string):
     if not charset:
         try:
-            string = string.decode('utf-8')
+            return string.decode('utf-8')
         except:
-            string = string.decode('iso8859-1')
-    string = unicode(string)
-    return string
+            return string.decode('iso8859-1')
+    return unicode(string)
 
 def decode_mail_headers(string):
     decoded = decode_header(string)
@@ -181,7 +180,7 @@ def ticket_from_message(message, queue, quiet):
 
         if part.get_content_maintype() == 'text' and name == None:
             if part.get_content_subtype() == 'plain':
-                body_plain = decodeUnknown(part.get_charset(), part.get_payload(decode=True))
+                body_plain = decodeUnknown(part.get_content_charset(), part.get_payload(decode=True))
             else:
                 body_html = part.get_payload(decode=True)
         else:
