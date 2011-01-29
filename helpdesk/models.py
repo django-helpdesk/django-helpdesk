@@ -251,7 +251,10 @@ class Ticket(models.Model):
         max_length=200,
         )
 
-    queue = models.ForeignKey(Queue)
+    queue = models.ForeignKey(
+        Queue,
+        verbose_name=_('Queue'),
+        )
 
     created = models.DateTimeField(
         _('Created'),
@@ -278,6 +281,7 @@ class Ticket(models.Model):
         related_name='assigned_to',
         blank=True,
         null=True,
+        verbose_name=_('Assigned to'),
         )
 
     status = models.IntegerField(
@@ -450,7 +454,10 @@ class FollowUp(models.Model):
     although all staff can see them.
     """
 
-    ticket = models.ForeignKey(Ticket)
+    ticket = models.ForeignKey(
+        Ticket,
+        verbose_name=_('Ticket'),
+        )
 
     date = models.DateTimeField(
         _('Date'), 
@@ -482,6 +489,7 @@ class FollowUp(models.Model):
         User,
         blank=True,
         null=True,
+        verbose_name=_('User'),
         )
 
     new_status = models.IntegerField(
@@ -516,7 +524,10 @@ class TicketChange(models.Model):
     etc) are tracked here for display purposes.
     """
 
-    followup = models.ForeignKey(FollowUp)
+    followup = models.ForeignKey(
+        FollowUp,
+        verbose_name=_('Follow-up'),
+        )
 
     field = models.CharField(
         _('Field'),
@@ -570,7 +581,10 @@ class Attachment(models.Model):
     attachment, or it could be uploaded via the web interface.
     """
 
-    followup = models.ForeignKey(FollowUp)
+    followup = models.ForeignKey(
+        FollowUp,
+        verbose_name=_('Follow-up'),
+        )
 
     file = models.FileField(
         _('File'),
@@ -769,7 +783,10 @@ class KBItem(models.Model):
     An item within the knowledgebase. Very straightforward question/answer
     style system.
     """
-    category = models.ForeignKey(KBCategory)
+    category = models.ForeignKey(
+        KBCategory,
+        verbose_name=_('Category'),
+        )
 
     title = models.CharField(
         _('Title'),
@@ -835,7 +852,10 @@ class SavedSearch(models.Model):
         * All tickets containing the word 'billing'.
          etc...
     """
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(
+        User,
+        verbose_name=_('User'),
+        )
 
     title = models.CharField(
         _('Query Name'),
@@ -1016,13 +1036,17 @@ class TicketCC(models.Model):
     an existing system user.
     """
 
-    ticket = models.ForeignKey(Ticket)
+    ticket = models.ForeignKey(
+        Ticket,
+        verbose_name=_('Ticket'),
+        )
 
     user = models.ForeignKey(
         User,
         blank=True,
         null=True,
         help_text=_('User who wishes to receive updates for this ticket.'),
+        verbose_name=_('User'),
         )
 
     email = models.EmailField(
