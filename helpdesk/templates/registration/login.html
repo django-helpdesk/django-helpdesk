@@ -7,7 +7,7 @@
 <p>{% trans "To log in and begin responding to cases, simply enter your username and password below." %}</p>
 
 <form method='post' action='./'>
-    {% if form.has_errors %}<p>{% trans "Your username and password didn't match. Please try again." %}</p>{% endif %}
+    {% if form.errors %}<p>{% trans "Your username and password didn't match. Please try again." %}</p>{% endif %}
     <dl>
         <dt><label>{% trans "Username" %}</label></dt>
         <dd>{{ form.username }}</dd>
