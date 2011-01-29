@@ -92,7 +92,7 @@ def escalate_tickets(queues, verbose):
                 | Q(on_hold=False)
             ).filter(
                   Q(last_escalation__lte=req_last_escl_date)
-                | Q(last_escalation__isnull=True)
+                | Q(last_escalation__isnull=True, created__lte=req_last_escl_date)
             ):
 
             t.last_escalation = datetime.now()
