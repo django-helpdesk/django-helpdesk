@@ -18,7 +18,7 @@ import re
 
 from datetime import datetime, timedelta
 from email.header import decode_header
-from email.Utils import parseaddr
+from email.Utils import parseaddr, collapse_rfc2231_value
 from optparse import make_option
 
 from django.core.files.base import ContentFile
@@ -177,6 +177,8 @@ def ticket_from_message(message, queue, quiet):
             continue
 
         name = part.get_param("name")
+        if name:
+            name = collapse_rfc2231_value(name)
 
         if part.get_content_maintype() == 'text' and name == None:
             if part.get_content_subtype() == 'plain':
