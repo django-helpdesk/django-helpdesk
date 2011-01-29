@@ -151,6 +151,7 @@ td {
 div.followup {
     width: 100%;
     border-top: solid #666 1px;
+    padding:0 0 2px;
 }
 
 div.followup .title {
@@ -256,4 +257,8 @@ span.priority4 {
 span.priority5 {
     background-color: #8c5;
     color: #fff;
+}
+
+a.followup-edit {
+    float:right;
 }

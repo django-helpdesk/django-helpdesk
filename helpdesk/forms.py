@@ -23,6 +23,15 @@ class EditTicketForm(forms.ModelForm):
         model = Ticket
         exclude = ('created', 'modified', 'status', 'on_hold', 'resolution', 'last_escalation', 'assigned_to')
 
+class EditFollowUpForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        "Filter not openned tickets here."
+        super(EditFollowUpForm, self).__init__(*args, **kwargs)
+        self.fields["ticket"].queryset = Ticket.objects.filter(status__in=(Ticket.OPEN_STATUS, Ticket.REOPENED_STATUS))
+    class Meta:
+        model = FollowUp
+        exclude = ('date', 'user',)
+
 class TicketForm(forms.Form):
     queue = forms.ChoiceField(
         label=_('Queue'),

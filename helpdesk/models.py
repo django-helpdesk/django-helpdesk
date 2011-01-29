@@ -453,7 +453,8 @@ class FollowUp(models.Model):
     ticket = models.ForeignKey(Ticket)
 
     date = models.DateTimeField(
-        _('Date'),
+        _('Date'), 
+        default = datetime.now()
         )
 
     title = models.CharField(
@@ -505,7 +506,6 @@ class FollowUp(models.Model):
     def save(self, force_insert=False, force_update=False):
         t = self.ticket
         t.modified = datetime.now()
-        self.date = datetime.now()
         t.save()
         super(FollowUp, self).save(force_insert, force_update)
 

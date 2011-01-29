@@ -42,66 +42,18 @@
 
 {% block helpdesk_body %}
 
-<table width='100%'>
-<tr class='row_tablehead'><td>{{ ticket.id }}. {{ ticket.title }} [{{ ticket.get_status }}]</td><td align='right'><a href='{% url helpdesk_edit ticket.id %}'><img src='{{ MEDIA_URL }}helpdesk/buttons/edit.png' alt='Edit' title='Edit' width='60' height='15' /></a><a href='{% url helpdesk_delete ticket.id %}'><img src='{{ MEDIA_URL }}helpdesk/buttons/delete.png' alt='Delete' title='Delete' width='60' height='15' /></a>{% if ticket.on_hold %}<a href='unhold/'>{% trans "Unhold" %}</a>{% else %}<a href='hold/'>{% trans "Hold" %}</a>{% endif %}</td></tr>
-<tr class='row_columnheads'><th colspan='2'>{% blocktrans with ticket.queue as queue %}Queue: {{ queue }}{% endblocktrans %}</th></tr>
-
-<tr class='row_odd'>
-    <th>{% trans "Submitted On" %}</th>
-    <td>{{ ticket.created|date:"r" }} ({{ ticket.created|timesince }} ago)</td>
-</tr>
-
-<tr class='row_even'>
-    <th>{% trans "Assigned To" %}</th>
-    <td>{{ ticket.get_assigned_to }}{% ifequal ticket.get_assigned_to _('Unassigned') %} <strong><a href='?take'><span class='button button_take'>{% trans "Take" %}</span></a></strong>{% endifequal %}</td>
-</tr>
-
-<tr class='row_odd'>
-    <th>{% trans "Submitter E-Mail" %}</th>
-    <td>{{ ticket.submitter_email }}{% if user.is_superuser %} <strong><a href='{% url helpdesk_email_ignore_add %}?email={{ ticket.submitter_email }}'>{% trans "Ignore" %}</a></strong>{% endif %}</td>
-</tr>
-
-<tr class='row_even'>
-    <th>{% trans "Priority" %}</th>
-    <td>{{ ticket.get_priority_display }}</td>
-</tr>
-
-<tr class='row_odd'>
-    <th>{% trans "Copies To" %}</th>
-    <td>{% for ticketcc in ticket.ticketcc_set.all %}{{ ticketcc.display }}{% if not forloop.last %}, {% endif %}{% endfor %} <strong><a href='{% url helpdesk_ticket_cc ticket.id %}'>{% trans "Manage" %}</a></strong></td>
-</tr>
-
-{% if tags_enabled %}
-<tr class='row_even'>
-    <th>{% trans "Tags" %}</th>
-    <td>{{ ticket.tags }}</td>
-</tr>
-{% endif %}
-
-<tr class='row_even'>
-<tr class='row_{% if tags_enabled %}odd{% else %}even{% endif %}'>
-    <th colspan='2'>{% trans "Description" %}</th>
-</tr>
-<tr class='row_{% if tags_enabled %}even{% else %}odd{% endif %}'>
-    <td colspan='2'>{{ ticket.description|force_escape|linebreaksbr }}</td>
-</tr>
-
-{% if ticket.resolution %}<tr class='row_{% if tags_enabled %}odd{% else %}even{% endif %}'>
-    <th colspan='2'>{% trans "Resolution" %}{% ifequal ticket.get_status_display "Resolved" %} <a href='?close'><img src='{{ MEDIA_URL }}helpdesk/buttons/accept.png' alt='{% trans "Accept" %}' title='{% trans "Accept and Close" %}' width='60' height='15' /></a>{% endifequal %}</th>
-</tr>
-<tr class='row_{% if tags_enabled %}even{% else %}odd{% endif %}'>
-    <td colspan='2'>{{ ticket.resolution|force_escape }}</td>
-</tr>{% endif %}
-
-</table>
+{% include "helpdesk/ticket_desc_table.html" %}
 
 {% if ticket.followup_set.all %}
 <h3>{% trans "Follow-Ups" %}</h3>
 {% load ticket_to_link %}
 {% for followup in ticket.followup_set.all %}
 <div class='followup'>
-<div class='title'>{{ followup.title }} <span class='byline'>{% if followup.user %}by {{ followup.user }}{% endif %} <span title='{{ followup.date|date:"r" }}'>{{ followup.date|timesince }} ago</span>{% if not followup.public %} <span class='private'>({% trans "Private" %})</span>{% endif %}</span></div>
-{% if followup.comment %}{{ followup.comment|force_escape|num_to_link|linebreaksbr }}{% endif %}
+<div class='title'>
+    {{ followup.title }} <span class='byline'>{% if followup.user %}by {{ followup.user }}{% endif %} <span title='{{ followup.date|date:"r" }}'>{{ followup.date|timesince }} ago</span>{% if not followup.public %} <span class='private'>({% trans "Private" %})</span>{% endif %}</span>
+    <a href="{% url helpdesk_followup_edit ticket.id followup.id %}" class='followup-edit'><img width="60" height="15" title="Edit" alt="Edit" src="{{ MEDIA_URL }}helpdesk/buttons/edit.png"></a>
+</div>
+<span class='followup-desc'>{% if followup.comment %}{{ followup.comment|force_escape|num_to_link|linebreaksbr }}{% endif %}</span>
 {% for change in followup.ticketchange_set.all %}
 {% if forloop.first %}<div class='changes'><ul>{% endif %}
 <li>{% blocktrans with change.field as field and change.old_value as old_value and change.new_value as new_value %}Changed {{ field }} from {{ old_value }} to {{ new_value }}.{% endblocktrans %}</li>

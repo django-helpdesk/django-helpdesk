@@ -21,8 +21,9 @@ from django.http import HttpResponseRedirect, Http404, HttpResponse, HttpRespons
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import loader, Context, RequestContext
 from django.utils.translation import ugettext as _
+from django.utils.html import escape
 
-from helpdesk.forms import TicketForm, UserSettingsForm, EmailIgnoreForm, EditTicketForm, TicketCCForm
+from helpdesk.forms import TicketForm, UserSettingsForm, EmailIgnoreForm, EditTicketForm, TicketCCForm, EditFollowUpForm
 from helpdesk.lib import send_templated_mail, line_chart, bar_chart, query_to_dict, apply_query, safe_template_context
 from helpdesk.models import Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch, IgnoreEmail, TicketCC
 from helpdesk.settings import HAS_TAG_SUPPORT
@@ -96,7 +97,40 @@ def delete_ticket(request, ticket_id):
         return HttpResponseRedirect(reverse('helpdesk_home'))
 delete_ticket = staff_member_required(delete_ticket)
 
-
+def followup_edit(request, ticket_id, followup_id, ):
+    "Edit followup options with an ability to change the ticket."
+    followup = get_object_or_404(FollowUp, id=followup_id)
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+    if request.method == 'GET':
+        form = EditFollowUpForm(initial=
+                                     {'title': escape(followup.title),
+                                      'ticket': followup.ticket,
+                                      'comment': escape(followup.comment),
+                                      'public': followup.public,
+                                      'new_status': followup.new_status,
+                                      })
+        
+        return render_to_response('helpdesk/followup_edit.html',
+            RequestContext(request, {
+                'followup': followup,
+                'ticket': ticket,
+                'form': form,
+        }))
+    elif request.method == 'POST':
+        form = EditFollowUpForm(request.POST)
+        if form.is_valid():
+            title = form.cleaned_data['title']
+            _ticket = form.cleaned_data['ticket']
+            comment = form.cleaned_data['comment']
+            public = form.cleaned_data['public']
+            new_status = form.cleaned_data['new_status']
+            #will save previous date
+            old_date = followup.date
+            followup.delete()
+            new_followup = FollowUp(title=title, date=old_date, ticket=_ticket, comment=comment, public=public, new_status=new_status, )
+            new_followup.save()
+        return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket.id]))
+            
 def view_ticket(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
 
@@ -749,7 +783,7 @@ def run_report(request, report):
         'Dec',
     )
     month_columns = []
-
+    # Throw an error if there are no tickets
     first_ticket = Ticket.objects.all().order_by('created')[0]
     first_month = first_ticket.created.month
     first_year = first_ticket.created.year
