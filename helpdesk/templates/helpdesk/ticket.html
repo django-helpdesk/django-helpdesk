@@ -30,7 +30,7 @@
         /* Until jQuery includes some 'livequery' functionality in the core 
            distribution, this will have to do. */
         $(".AddAnotherFile>a").click(function() {
-            $(this).parent().hide();
+            $(this).parent().remove();
             $("#FileUpload>dl").append("<dt><label>{% trans "Attach another File" %}</label></dt><dd><input type='file' name='attachment' id='file' /> <span class='AddAnotherFile'>(<a href='#'>{% trans "Add Another File" %}</a>)</span></dd>");
             processAddFileClick();
             return false;
