@@ -53,7 +53,7 @@
     {{ followup.title }} <span class='byline'>{% if followup.user %}by {{ followup.user }}{% endif %} <span title='{{ followup.date|date:"r" }}'>{{ followup.date|timesince }} ago</span>{% if not followup.public %} <span class='private'>({% trans "Private" %})</span>{% endif %}</span>
     <a href="{% url helpdesk_followup_edit ticket.id followup.id %}" class='followup-edit'><img width="60" height="15" title="Edit" alt="Edit" src="{{ MEDIA_URL }}helpdesk/buttons/edit.png"></a>
 </div>
-<span class='followup-desc'>{% if followup.comment %}{{ followup.comment|force_escape|num_to_link|linebreaksbr }}{% endif %}</span>
+<span class='followup-desc'>{% if followup.comment %}{{ followup.comment|force_escape|urlizetrunc:50|num_to_link|linebreaksbr }}{% endif %}</span>
 {% for change in followup.ticketchange_set.all %}
 {% if forloop.first %}<div class='changes'><ul>{% endif %}
 <li>{% blocktrans with change.field as field and change.old_value as old_value and change.new_value as new_value %}Changed {{ field }} from {{ old_value }} to {{ new_value }}.{% endblocktrans %}</li>

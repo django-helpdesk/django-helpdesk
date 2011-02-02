@@ -40,14 +40,14 @@
     <th colspan='2'>{% trans "Description" %}</th>
 </tr>
 <tr class='row_{% if tags_enabled %}even{% else %}odd{% endif %}'>
-    <td colspan='2'>{{ ticket.description|force_escape|linebreaksbr }}</td>
+    <td colspan='2'>{{ ticket.description|force_escape|urlizetrunc:50|linebreaksbr }}</td>
 </tr>
 
 {% if ticket.resolution %}<tr class='row_{% if tags_enabled %}odd{% else %}even{% endif %}'>
     <th colspan='2'>{% trans "Resolution" %}{% ifequal ticket.get_status_display "Resolved" %} <a href='?close'><img src='{{ MEDIA_URL }}helpdesk/buttons/accept.png' alt='{% trans "Accept" %}' title='{% trans "Accept and Close" %}' width='60' height='15' /></a>{% endifequal %}</th>
 </tr>
 <tr class='row_{% if tags_enabled %}even{% else %}odd{% endif %}'>
-    <td colspan='2'>{{ ticket.resolution|force_escape }}</td>
+    <td colspan='2'>{{ ticket.resolution|force_escape|urlizetrunc:50|linebreaksbr }}</td>
 </tr>{% endif %}
 
 </table>

@@ -33,14 +33,14 @@
     <th colspan='2'>{% trans "Description" %}</th>
 </tr>
 <tr class='row_{% if tags_enabled %}odd{% else %}even{% endif %}'>
-    <td colspan='2'>{{ ticket.description|linebreaksbr }}</td>
+    <td colspan='2'>{{ ticket.description|force_escape|urlizetrunc:50|linebreaksbr }}</td>
 </tr>
 
 {% if ticket.resolution %}<tr class='row_{% if tags_enabled %}even{% else %}odd{% endif %}'>
     <th colspan='2'>{% trans "Resolution" %}{% ifequal ticket.get_status_display "Resolved" %} <a href='{{ request.get_full_path }}&close'><img src='{{ MEDIA_URL }}/helpdesk/buttons/accept.png' alt='{% trans "Accept" %}' title='{% trans "Accept and Close" %}' width='60' height='15' /></a>{% endifequal %}</th>
 </tr>
 <tr class='row_{% if tags_enabled %}even{% else %}odd{% endif %}'>
-    <td colspan='2'>{{ ticket.resolution }}</td>
+    <td colspan='2'>{{ ticket.resolution|urlizetrunc:50|linebreaksbr }}</td>
 </tr>{% endif %}
 
 </table>
@@ -51,7 +51,7 @@
 {% for followup in ticket.followup_set.public_followups %}
 <div class='followup'>
 <div class='title'>{{ followup.title }} <span class='byline'>{% if followup.user %}by {{ followup.user }}{% endif %} <span title='{{ followup.date|date:"r" }}'>{{ followup.date|timesince }} ago</span></span></div>
-{{ followup.comment|force_escape|num_to_link|linebreaksbr }}
+{{ followup.comment|force_escape|urlizetrunc:50|num_to_link|linebreaksbr }}
 {% if followup.ticketchange_set.all %}<div class='changes'><ul>
 {% for change in followup.ticketchange_set.all %}
 <li>{% blocktrans with change.field as field and change.old_value as old_value and change.new_value as new_value %}Changed {{ field }} from {{ old_value }} to {{ new_value }}.{% endblocktrans %}</li>
