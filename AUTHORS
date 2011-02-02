@@ -1,0 +1,13 @@
+django-helpdesk was originally written by Ross Poulton. Since publishing the
+code a number of people have made some fantastic improvements and provided
+bug fixes and updates as the Django codebase has moved on and caused small
+portions of this application to break.
+
+To these people, and any more, my sincere thanks:
+
+Andreas Kotowicz
+Chris Etcp
+David Clymer
+Loe Spee
+Maxim Litnitskiy
+Nikolay Panov
