@@ -1,10 +1,9 @@
 {% load i18n %}
-{% cycle 'row_odd' 'row_even' as rowcolors %}
 <table width='100%'>
-<tr class='row_tablehead'><td>{{ ticket.id }}. {{ ticket.title }} [{{ ticket.get_status }}]</td><td align='right'><a href='{% url helpdesk_edit ticket.id %}'><img src='{{ MEDIA_URL }}helpdesk/buttons/edit.png' alt='Edit' title='Edit' width='60' height='15' /></a><a href='{% url helpdesk_delete ticket.id %}'><img src='{{ MEDIA_URL }}helpdesk/buttons/delete.png' alt='Delete' title='Delete' width='60' height='15' /></a>{% if ticket.on_hold %}<a href='unhold/'>{% trans "Unhold" %}</a>{% else %}<a href='hold/'>{% trans "Hold" %}</a>{% endif %}</td></tr>
+    <tr class='row_tablehead'><td colspan='2'>{{ ticket.id }}. {{ ticket.title }} [{{ ticket.get_status }}] <span class='ticket_toolbar'><a href='{% url helpdesk_edit ticket.id %}'><img src='{{ MEDIA_URL }}helpdesk/buttons/edit.png' alt='Edit' title='Edit' width='60' height='15' /></a><a href='{% url helpdesk_delete ticket.id %}'><img src='{{ MEDIA_URL }}helpdesk/buttons/delete.png' alt='Delete' title='Delete' width='60' height='15' /></a>{% if ticket.on_hold %}<a href='unhold/'>{% trans "Unhold" %}</a>{% else %}<a href='hold/'>{% trans "Hold" %}</a>{% endif %}</span></td></tr>
 <tr class='row_columnheads'><th colspan='2'>{% blocktrans with ticket.queue as queue %}Queue: {{ queue }}{% endblocktrans %}</th></tr>
 
-<tr class='{% cycle rowcolors %}'>
+<tr class='{% cycle 'row_odd' 'row_even' as rowcolors %}'>
     <th>{% trans "Submitted On" %}</th>
     <td>{{ ticket.created|date:"r" }} ({{ ticket.created|timesince }} ago)</td>
 </tr>

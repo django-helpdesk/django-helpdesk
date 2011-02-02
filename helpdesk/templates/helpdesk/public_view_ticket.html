@@ -1,5 +1,4 @@
 {% extends "helpdesk/public_base.html" %}{% load i18n %}
-{% cycle 'row_odd' 'row_even' as rowcolors %}
 {% block helpdesk_title %}{% trans "View a Ticket" %}{% endblock %}
 
 {% block helpdesk_body %}
@@ -8,7 +7,7 @@
 <tr class='row_tablehead'><td colspan='2'>{{ ticket.id }}. {{ ticket.title }} [{{ ticket.get_status }}]</td></tr>
 <tr class='row_columnheads'><th colspan='2'>{% blocktrans with ticket.queue as queue_name %}Queue: {{ queue_name }}{% endblocktrans %}</th></tr>
 
-<tr class='{% cycle rowcolors %}'>
+<tr class='{% cycle 'row_odd' 'row_even' as rowcolors %}'>
     <th>{% trans "Submitted On" %}</th>
     <td>{{ ticket.created|date:"r" }} ({{ ticket.created|timesince }} ago)</td>
 </tr>

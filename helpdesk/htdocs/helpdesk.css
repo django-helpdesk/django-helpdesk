@@ -91,6 +91,11 @@ dt {
     border-bottom: solid white 1px;
 }
 
+.row_tablehead span.ticket_toolbar {
+    float: right;
+    text-align: right;
+}
+
 .row_tablehead td {
     padding-left: 12px;
     line-height: 16pt;
