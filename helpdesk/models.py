@@ -1085,3 +1085,102 @@ class TicketCC(models.Model):
 
     def __unicode__(self):
         return u'%s for %s' % (self.display, self.ticket.title)
+
+
+class CustomField(models.Model):
+    """
+    Definitions for custom fields that are glued onto each ticket.
+    """
+
+    name = models.SlugField(
+        _('Field Name'),
+        help_text=_('As used in the database and behind the scenes. Must be unique and consist of only lowercase letters with no punctuation.'),
+        unique=True,
+        )
+
+    label = models.CharField(
+        _('Label'),
+        max_length='30',
+        help_text=_('The display label for this field'),
+        )
+
+    help_text = models.TextField(
+        _('Help Text'),
+        help_text=_('Shown to the user when editing the ticket'),
+        )
+
+    DATA_TYPE_CHOICES = (
+            ('varchar', _('Character (single line)')),
+            ('text', _('Text (multi-line)')),
+            ('integer', _('Integer')),
+            ('decimal', _('Decimal')),
+            ('list', _('List')),
+            ('boolean', _('Boolean (checkbox yes/no)')),
+            ('date', _('Date')),
+            ('time', _('Time')),
+            ('datetime', _('Date & Time')),
+            ('email', _('E-Mail Address')),
+            ('url', _('URL')),
+            ('ipaddress', _('IP Address')),
+            ('slug', _('Slug')),
+            )
+
+    data_type = models.CharField(
+        _('Data Type'),
+        max_length=100,
+        help_text=_('Allows you to restrict the data entered into this field'),
+        choices=DATA_TYPE_CHOICES,
+        )
+
+    max_length = models.IntegerField(
+        _('Maximum Length (characters)'),
+        blank=True,
+        null=True,
+        )
+
+    decimal_places = models.IntegerField(
+        _('Decimal Places'),
+        help_text=_('Only used for decimal fields'),
+        blank=True,
+        null=True,
+        )
+
+    list_values = models.TextField(
+        _('List Values'),
+        help_text=_('For list fields only. Enter one option per line.'),
+        blank=True,
+        null=True,
+        )
+
+    required = models.BooleanField(
+        _('Required?'),
+        help_text=_('Does the user have to enter a value for this field?'),
+        )
+
+    staff_only = models.BooleanField(
+        _('Staff Only?'),
+        help_text=_('If this is ticked, then the public submission form will NOT show this field'),
+        )
+
+    def __unicode__(self):
+        return '%s' % (self.name)
+
+
+class TicketCustomFieldValue(models.Model):
+    ticket = models.ForeignKey(
+        Ticket,
+        verbose_name=_('Ticket'),
+        )
+
+    field = models.ForeignKey(
+        CustomField,
+        verbose_name=_('Field'),
+        )
+
+    value = models.TextField(blank=True, null=True)
+
+    def __unicode__(self):
+        return '%s / %s' % (self.ticket, self.field)
+
+    class Meta:
+        unique_together = ('ticket', 'field'),

@@ -15,7 +15,7 @@ from django.contrib.auth.models import User
 from django.utils.translation import ugettext as _
 
 from helpdesk.lib import send_templated_mail
-from helpdesk.models import Ticket, Queue, FollowUp, Attachment, IgnoreEmail, TicketCC
+from helpdesk.models import Ticket, Queue, FollowUp, Attachment, IgnoreEmail, TicketCC, CustomField, TicketCustomFieldValue
 from helpdesk.settings import HAS_TAG_SUPPORT
 
 class EditTicketForm(forms.ModelForm):
@@ -93,6 +93,56 @@ class TicketForm(forms.Form):
                     'ticket'),
             )
 
+    def __init__(self, *args, **kwargs):
+        """
+        Add any custom fields that are defined to the form
+        """
+        super(TicketForm, self).__init__(*args, **kwargs)
+        for field in CustomField.objects.all():
+            instanceargs = {
+                    'label': field.label,
+                    'help_text': field.help_text,
+                    'required': field.required,
+                    }
+            if field.data_type == 'varchar':
+                fieldclass = forms.CharField
+                instanceargs['max_length'] = field.max_length
+            elif field.data_type == 'text':
+                fieldclass = forms.CharField
+                instanceargs['widget'] = forms.Textarea
+                instanceargs['max_length'] = field.max_length
+            elif field.data_type == 'integer':
+                fieldclass = forms.IntegerField
+            elif field.data_type == 'decimal':
+                fieldclass = forms.DecimalField
+                instanceargs['decimal_places'] = field.decimal_places
+                instanceargs['max_digits'] = field.max_length
+            elif field.data_type == 'list':
+                fieldclass = forms.ChoiceField
+                choices = []
+                for line in field.list_values.split("\n"):
+                    choices.append((line, line))
+                instanceargs['choices'] = choices
+            elif field.data_type == 'boolean':
+                fieldclass = forms.BooleanField
+            elif field.data_type == 'date':
+                fieldclass = forms.DateField
+            elif field.data_type == 'time':
+                fieldclass = forms.TimeField
+            elif field.data_type == 'datetime':
+                fieldclass = forms.DateTimeField
+            elif field.data_type == 'email':
+                fieldclass = forms.EmailField
+            elif field.data_type == 'url':
+                fieldclass = forms.URLField
+            elif field.data_type == 'ipaddress':
+                fieldclass = forms.IPAddressField
+            elif field.data_type == 'slug':
+                fieldclass = forms.SlugField
+            
+            self.fields['custom_%s' % field.name] = fieldclass(**instanceargs)
+
+
     def save(self, user):
         """
         Writes and returns a Ticket() object
@@ -119,6 +169,15 @@ class TicketForm(forms.Form):
             except User.DoesNotExist:
                 t.assigned_to = None
         t.save()
+        
+        for field, value in self.cleaned_data.items():
+            if field.startswith('custom_'):
+                field_name = field.replace('custom_', '')
+                customfield = CustomField.objects.get(name=field_name)
+                cfv = TicketCustomFieldValue(ticket=t,
+                            field=customfield,
+                            value=value)
+                cfv.save()
 
         f = FollowUp(   ticket = t,
                         title = _('Ticket Opened'),
@@ -249,6 +308,54 @@ class PublicTicketForm(forms.Form):
         help_text=_('You can attach a file such as a document or screenshot to this ticket.'),
         )
 
+    def __init__(self, *args, **kwargs):
+        """
+        Add any custom fields that are defined to the form
+        """
+        super(PublicTicketForm, self).__init__(*args, **kwargs)
+        for field in CustomField.objects.filter(staff_only=False):
+            instanceargs = {
+                    'label': field.label,
+                    'help_text': field.help_text,
+                    'required': field.required,
+                    }
+            if field.data_type == 'varchar':
+                fieldclass = forms.CharField
+                instanceargs['max_length'] = field.max_length
+            elif field.data_type == 'text':
+                fieldclass = forms.TextField
+                instanceargs['max_length'] = field.max_length
+            elif field.data_type == 'integer':
+                fieldclass = forms.IntegerField
+            elif field.data_type == 'decimal':
+                fieldclass = forms.DecimalField
+                instanceargs['decimal_places'] = field.decimal_places
+                instanceargs['max_digits'] = field.max_length
+            elif field.data_type == 'list':
+                fieldclass = forms.ChoiceField
+                choices = ()
+                for line in field.choices:
+                    choices.append((line, line))
+                instanceargs['choices'] = choices
+            elif field.data_type == 'boolean':
+                fieldclass = forms.BooleanField
+            elif field.data_type == 'date':
+                fieldclass = forms.DateField
+            elif field.data_type == 'time':
+                fieldclass = forms.TimeField
+            elif field.data_type == 'datetime':
+                fieldclass = forms.DateTimeField
+            elif field.data_type == 'email':
+                fieldclass = forms.EmailField
+            elif field.data_type == 'url':
+                fieldclass = forms.URLField
+            elif field.data_type == 'ipaddress':
+                fieldclass = forms.IPAddressField
+            elif field.data_type == 'slug':
+                fieldclass = forms.SlugField
+            
+            self.fields['custom_%s' % field.name] = fieldclass(**instanceargs)
+
     def save(self):
         """
         Writes and returns a Ticket() object
@@ -267,6 +374,15 @@ class PublicTicketForm(forms.Form):
             )
 
         t.save()
+
+        for field, value in self.cleaned_data.items():
+            if field.startswith('custom_'):
+                field_name = field.replace('custom_', '')
+                customfield = CustomField.objects.get(name=field_name)
+                cfv = TicketCustomFieldValue(ticket=t,
+                            field=customfield,
+                            value=value)
+                cfv.save()
 
         f = FollowUp(
             ticket = t,

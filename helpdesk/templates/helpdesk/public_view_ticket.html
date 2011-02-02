@@ -1,4 +1,5 @@
 {% extends "helpdesk/public_base.html" %}{% load i18n %}
+{% cycle 'row_odd' 'row_even' as rowcolors %}
 {% block helpdesk_title %}{% trans "View a Ticket" %}{% endblock %}
 
 {% block helpdesk_body %}
@@ -7,39 +8,45 @@
 <tr class='row_tablehead'><td colspan='2'>{{ ticket.id }}. {{ ticket.title }} [{{ ticket.get_status }}]</td></tr>
 <tr class='row_columnheads'><th colspan='2'>{% blocktrans with ticket.queue as queue_name %}Queue: {{ queue_name }}{% endblocktrans %}</th></tr>
 
-<tr class='row_odd'>
+<tr class='{% cycle rowcolors %}'>
     <th>{% trans "Submitted On" %}</th>
     <td>{{ ticket.created|date:"r" }} ({{ ticket.created|timesince }} ago)</td>
 </tr>
 
-<tr class='row_even'>
+<tr class='{% cycle rowcolors %}'>
     <th>{% trans "Submitter E-Mail" %}</th>
     <td>{{ ticket.submitter_email }}</td>
 </tr>
 
-<tr class='row_odd'>
+<tr class='{% cycle rowcolors %}'>
     <th>{% trans "Priority" %}</th>
     <td>{{ ticket.get_priority_display }}</td>
 </tr>
 
+{% for customfield in ticket.ticketcustomfieldvalue_set.all %}
+<tr class='{% cycle rowcolors %}'>
+    <th>{{ customfield.field.label }}</th>
+    <td>{{ customfield.value }}</td>
+</tr>{% endfor %}
+
 {% if tags_enabled %}
-<tr class='row_even'>
+<tr class='{% cycle rowcolors %}'>
     <th>{% trans "Tags" %}</th>
     <td>{{ ticket.tags }}</td>
 </tr>
 {% endif %}
 
-<tr class='row_{% if tags_enabled %}odd{% else %}even{% endif %}'>
+<tr class='{% cycle rowcolors %}'>
     <th colspan='2'>{% trans "Description" %}</th>
 </tr>
-<tr class='row_{% if tags_enabled %}odd{% else %}even{% endif %}'>
+<tr class='{% cycle rowcolors %}'>
     <td colspan='2'>{{ ticket.description|force_escape|urlizetrunc:50|linebreaksbr }}</td>
 </tr>
 
-{% if ticket.resolution %}<tr class='row_{% if tags_enabled %}even{% else %}odd{% endif %}'>
+{% if ticket.resolution %}<tr class='{% cycle rowcolors %}'>
     <th colspan='2'>{% trans "Resolution" %}{% ifequal ticket.get_status_display "Resolved" %} <a href='{{ request.get_full_path }}&close'><img src='{{ MEDIA_URL }}/helpdesk/buttons/accept.png' alt='{% trans "Accept" %}' title='{% trans "Accept and Close" %}' width='60' height='15' /></a>{% endifequal %}</th>
 </tr>
-<tr class='row_{% if tags_enabled %}even{% else %}odd{% endif %}'>
+<tr class='{% cycle rowcolors %}'>
     <td colspan='2'>{{ ticket.resolution|urlizetrunc:50|linebreaksbr }}</td>
 </tr>{% endif %}
 
