@@ -134,11 +134,12 @@ urlpatterns += patterns('',
 
     url(r'^login/$',
         'django.contrib.auth.views.login',
+        {'template_name': 'helpdesk/registration/login.html'},
         name='login'),
 
     url(r'^logout/$',
         'django.contrib.auth.views.logout',
-        {'next_page': '../'},
+        {'template_name': 'helpdesk/registration/login.html', 'next_page': '../'},
         name='logout'),
 )
 
