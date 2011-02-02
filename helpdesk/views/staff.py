@@ -74,12 +74,14 @@ def dashboard(request):
             ORDER BY q.id;
     """)
     dash_tickets = query_to_dict(cursor.fetchall(), cursor.description)
+    user_saved_queries = SavedSearch.objects.filter(Q(user=request.user) | Q(shared__exact=True))
 
     return render_to_response('helpdesk/dashboard.html',
         RequestContext(request, {
             'user_tickets': tickets,
             'unassigned_tickets': unassigned_tickets,
             'dash_tickets': dash_tickets,
+            'user_saved_queries': user_saved_queries,
         }))
 dashboard = staff_member_required(dashboard)
 
@@ -133,6 +135,7 @@ def followup_edit(request, ticket_id, followup_id, ):
             
 def view_ticket(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
+    user_saved_queries = SavedSearch.objects.filter(Q(user=request.user) | Q(shared__exact=True))
 
     if request.GET.has_key('take'):
         # Allow the user to assign the ticket to themselves whilst viewing it.
@@ -153,6 +156,7 @@ def view_ticket(request, ticket_id):
             'owner': owner,
             'title': ticket.title,
             'comment': _('Accepted resolution and closed ticket'),
+            'user_saved_queries': user_saved_queries, 
             }
 
         return update_ticket(request, ticket_id)
@@ -163,7 +167,8 @@ def view_ticket(request, ticket_id):
             'active_users': User.objects.filter(is_active=True).filter(is_staff=True),
             'priorities': Ticket.PRIORITY_CHOICES,
             'preset_replies': PreSetReply.objects.filter(Q(queues=ticket.queue) | Q(queues__isnull=True)),
-            'tags_enabled': HAS_TAG_SUPPORT
+            'tags_enabled': HAS_TAG_SUPPORT,
+            'user_saved_queries': user_saved_queries, 
         }))
 view_ticket = staff_member_required(view_ticket)
 
