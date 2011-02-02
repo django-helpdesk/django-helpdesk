@@ -133,7 +133,7 @@ def decodeUnknown(charset, string):
             return string.decode('utf-8')
         except:
             return string.decode('iso8859-1')
-    return unicode(string)
+    return unicode(string, charset)
 
 def decode_mail_headers(string):
     decoded = decode_header(string)
