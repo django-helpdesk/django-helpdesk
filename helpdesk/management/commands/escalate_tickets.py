@@ -27,10 +27,10 @@ class Command(BaseCommand):
 
         self.option_list += (
             make_option(
-                '--queues', '-q',
+                '--queues',
                 help='Queues to include (default: all). Use queue slugs'),
             make_option(
-                '--verbose', '-v',
+                '--verboseescalation',
                 action='store_true',
                 default=False,
                 help='Display a list of dates excluded'),
@@ -41,7 +41,7 @@ class Command(BaseCommand):
         queue_slugs = None
         queues = []
 
-        if options['verbose']:
+        if options['verboseescalation']:
             verbose = True
         if options['queues']:
             queue_slugs = options['queues']
@@ -158,13 +158,13 @@ def escalate_tickets(queues, verbose):
 
 def usage():
     print "Options:"
-    print " --queues, -q: Queues to include (default: all). Use queue slugs"
-    print " --verbose, -v: Display a list of dates excluded"
+    print " --queues: Queues to include (default: all). Use queue slugs"
+    print " --verboseescalation: Display a list of dates excluded"
 
 
 if __name__ == '__main__':
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'q:v', ['queues=', 'verbose'])
+        opts, args = getopt.getopt(sys.argv[1:], ['queues=', 'verboseescalation'])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -174,9 +174,9 @@ if __name__ == '__main__':
     queues = []
 
     for o, a in opts:
-        if o in ('-v', '--verbose'):
+        if o == '--verboseescalation':
             verbose = True
-        if o in ('-q', '--queues'):
+        if o == '--queues':
             queue_slugs = a
 
     if queue_slugs is not None:
