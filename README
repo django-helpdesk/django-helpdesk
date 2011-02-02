@@ -175,9 +175,9 @@ the current version of django-helpdesk working.
 
 5. If you wish to exclude some days (eg, weekends) from escalation calculations, enter 
    the dates manually via the Admin, or setup a cronjob to run 
-   scripts/create_escalation_exclusions on a regular basis:
+   the create_escalation_exclusions management command on a regular basis:
 
-   0 0 * * 0 /path/to/helpdesksite/manage.py create_escalation_exclusions.py --days saturday,sunday --escalate-verbosely
+   0 0 * * 0 /path/to/helpdesksite/manage.py create_escalation_exclusions --days saturday,sunday --escalate-verbosely
 
    This will, on a weekly basis, create exclusions for the coming weekend.
 
