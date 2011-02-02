@@ -933,9 +933,10 @@ def create_usersettings(sender, created_models=[], instance=None, created=False,
     If we end up with users with no UserSettings, then we get horrible
     'DoesNotExist: UserSettings matching query does not exist.' errors.
     """
+    from helpdesk.settings import DEFAULT_USER_SETTINGS
     if sender == User and created:
         # This is a new user, so lets create their settings entry.
-        s, created = UserSettings.objects.get_or_create(user=instance)
+        s, created = UserSettings.objects.get_or_create(user=instance, defaults={'settings': DEFAULT_USER_SETTINGS})
         s.save()
     elif UserSettings in created_models:
         # We just created the UserSettings model, lets create a UserSettings
@@ -946,7 +947,7 @@ def create_usersettings(sender, created_models=[], instance=None, created=False,
             try:
                 s = UserSettings.objects.get(user=u)
             except UserSettings.DoesNotExist:
-                s = UserSettings(user=u)
+                s = UserSettings(user=u, settings=DEFAULT_USER_SETTINGS)
                 s.save()
 
 models.signals.post_syncdb.connect(create_usersettings)
