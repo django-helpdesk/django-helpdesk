@@ -323,7 +323,8 @@ class PublicTicketForm(forms.Form):
                 fieldclass = forms.CharField
                 instanceargs['max_length'] = field.max_length
             elif field.data_type == 'text':
-                fieldclass = forms.TextField
+                fieldclass = forms.CharField
+                instanceargs['widget'] = forms.Textarea
                 instanceargs['max_length'] = field.max_length
             elif field.data_type == 'integer':
                 fieldclass = forms.IntegerField
@@ -333,8 +334,8 @@ class PublicTicketForm(forms.Form):
                 instanceargs['max_digits'] = field.max_length
             elif field.data_type == 'list':
                 fieldclass = forms.ChoiceField
-                choices = ()
-                for line in field.choices:
+                choices = []
+                for line in field.list_values.split("\n"):
                     choices.append((line, line))
                 instanceargs['choices'] = choices
             elif field.data_type == 'boolean':
