@@ -1107,6 +1107,8 @@ class CustomField(models.Model):
     help_text = models.TextField(
         _('Help Text'),
         help_text=_('Shown to the user when editing the ticket'),
+        blank=True,
+        null=True
         )
 
     DATA_TYPE_CHOICES = (
