@@ -85,12 +85,14 @@
         {% ifequal ticket.status 1 %}
         <dd><input type='radio' name='new_status' value='1' id='st_open' checked='checked'><label for='st_open' class='active'>{% trans "Open" %}</label> &raquo;
         <input type='radio' name='new_status' value='3' id='st_resolved'><label for='st_resolved'>{% trans "Resolved" %}</label> &raquo;
-        <input type='radio' name='new_status' value='4' id='st_closed'><label for='st_closed'>{% trans "Closed" %}</label></dd>
+        <input type='radio' name='new_status' value='4' id='st_closed'><label for='st_closed'>{% trans "Closed" %}</label> &raquo;
+        <input type='radio' name='new_status' value='5' id='st_duplicate'><label for='st_duplicate'>{% trans "Duplicate" %}</label></dd>
         {% endifequal %}
         {% ifequal ticket.status 2 %}
         <dd><input type='radio' name='new_status' value='2' id='st_reopened' checked='checked'><label for='st_reopened' class='active'>{% trans "Reopened" %}</label> &raquo; 
         <input type='radio' name='new_status' value='3' id='st_resolved'><label for='st_resolved'>{% trans "Resolved" %}</label> &raquo; 
-        <input type='radio' name='new_status' value='4' id='st_closed'><label for='st_closed'>{% trans "Closed" %}</label> </dd>
+        <input type='radio' name='new_status' value='4' id='st_closed'><label for='st_closed'>{% trans "Closed" %}</label> &raquo; 
+        <input type='radio' name='new_status' value='5' id='st_duplicate'><label for='st_duplicate'>{% trans "Duplicate" %}</label></dd>
         {% endifequal %}
         {% ifequal ticket.status 3 %}
         <dd><input type='radio' name='new_status' value='2' id='st_reopened'><label for='st_reopened'>{% trans "Reopened" %}</label> &laquo; 
@@ -100,6 +102,10 @@
         {% ifequal ticket.status 4 %}
         <dd><input type='radio' name='new_status' value='2' id='st_reopened'><label for='st_reopened'>{% trans "Reopened" %}</label> &laquo; 
         <input type='radio' name='new_status' value='4' id='st_closed' checked='checked'><label for='st_closed'>{% trans "Closed" %}</label></dd>
+        {% endifequal %}
+        {% ifequal ticket.status 5 %}
+        <dd><input type='radio' name='new_status' value='2' id='st_reopened'><label for='st_reopened'>{% trans "Reopened" %}</label> &laquo; 
+        <input type='radio' name='new_status' value='5' id='st_duplicate' checked='checked'><label for='st_duplicate'>{% trans "Duplicate" %}</label></dd>
         {% endifequal %}
     
         <dt><label for='id_public'>{% trans "Is this update public?" %}</label> <span class='form_optional'>(Optional)</span></dt>
