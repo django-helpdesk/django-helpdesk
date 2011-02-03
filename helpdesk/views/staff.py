@@ -160,7 +160,7 @@ def view_ticket(request, ticket_id):
     return render_to_response('helpdesk/ticket.html',
         RequestContext(request, {
             'ticket': ticket,
-            'active_users': User.objects.filter(is_active=True).filter(is_staff=True),
+            'active_users': User.objects.filter(is_active=True).filter(is_staff=True).order_by('username'),
             'priorities': Ticket.PRIORITY_CHOICES,
             'preset_replies': PreSetReply.objects.filter(Q(queues=ticket.queue) | Q(queues__isnull=True)),
             'tags_enabled': HAS_TAG_SUPPORT,
@@ -658,7 +658,7 @@ def create_ticket(request):
     if request.method == 'POST':
         form = TicketForm(request.POST, request.FILES)
         form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
-        form.fields['assigned_to'].choices = [('', '--------')] + [[u.id, u.username] for u in User.objects.filter(is_active=True)]
+        form.fields['assigned_to'].choices = [('', '--------')] + [[u.id, u.username] for u in User.objects.filter(is_active=True).order_by('username')]
         if form.is_valid():
             ticket = form.save(user=request.user)
             return HttpResponseRedirect(ticket.get_absolute_url())
@@ -669,7 +669,7 @@ def create_ticket(request):
 
         form = TicketForm(initial=initial_data)
         form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
-        form.fields['assigned_to'].choices = [('', '--------')] + [[u.id, u.username] for u in User.objects.filter(is_active=True)]
+        form.fields['assigned_to'].choices = [('', '--------')] + [[u.id, u.username] for u in User.objects.filter(is_active=True).order_by('username')]
 
     return render_to_response('helpdesk/create_ticket.html',
         RequestContext(request, {
