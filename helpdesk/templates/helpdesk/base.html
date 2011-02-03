@@ -2,10 +2,10 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
         <title>{% block helpdesk_title %}Helpdesk{% endblock %} :: {% trans "Powered by django-helpdesk" %}</title>
-        <script src='{{ MEDIA_URL }}helpdesk/jquery-1.3.2.min.js' type='text/javascript' language='javascript'></script>
-        <script src='{{ MEDIA_URL }}helpdesk/jquery-ui-1.7.2.custom.min.js' type='text/javascript' language='javascript'></script>
+        <script src='{{ MEDIA_URL }}helpdesk/jquery-1.5.min.js' type='text/javascript' language='javascript'></script>
+        <script src='{{ MEDIA_URL }}helpdesk/jquery-ui-1.8.9.custom.min.js' type='text/javascript' language='javascript'></script>
         <link rel='stylesheet' href='{{ MEDIA_URL }}helpdesk/helpdesk.css' type='text/css' />
-        <link rel='stylesheet' href='{{ MEDIA_URL }}helpdesk/jquery-smoothness-theme/jquery-ui-1.7.2.custom.css' type='text/css' />
+        <link rel='stylesheet' href='{{ MEDIA_URL }}helpdesk/jquery-smoothness-theme/jquery-ui-1.8.9.custom.css' type='text/css' />
         <link rel='alternate' href='{% url helpdesk_rss "user" %}{{ user.username }}/' type='application/rss+xml' title='{% trans "My Open Tickets" %}' />
         <link rel='alternate' href='{% url helpdesk_rss "recent_activity" %}' type='application/rss+xml' title='{% trans "All Recent Activity" %}' />
         <link rel='alternate' href='{% url helpdesk_rss "unassigned" %}' type='application/rss+xml' title='{% trans "Unassigned Tickets" %}' />
