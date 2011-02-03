@@ -1,4 +1,7 @@
-{% load i18n %}<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+{% load i18n %}
+{% load saved_queries %}
+{% with request|saved_queries as user_saved_queries_ %}
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
         <title>{% block helpdesk_title %}Helpdesk{% endblock %} :: {% trans "Powered by django-helpdesk" %}</title>
@@ -36,26 +39,26 @@
                     <li><a href='{% url helpdesk_list %}'>{% trans "Tickets" %}</a></li>
                     <li><a href='{% url helpdesk_submit %}'>{% trans "New Ticket" %}</a></li>
                     <li><a href='{% url helpdesk_report_index %}'>{% trans "Stats" %}</a></li>
-                    {% if user_saved_queries %}
+                    {% if user_saved_queries_ %}
                         <li><a href="#queryloadheader" id="toggle_query">Load Saved Query</a></li>
-                    {% endif %}
+                    {% endif %}                    
                     <li><a href='{% url logout %}'>{% trans "Logout" %}</a></li>
                     {% if not query %}<li><form id='searchform' method='get' action='{% url helpdesk_list %}'><input type='text' name='q' size='10' class='input' value='{% trans "Search..." %}' id='search_query' onFocus='s=document.getElementById("search_query");if (s.value == "{% trans "Search..." %}") { s.value = ""; }' title='{% trans "Enter a keyword, or a ticket number to jump straight to that ticket." %}'/><input type='hidden' name='status' value='1' /><input type='hidden' name='status' value='2' /><input type='hidden' name='status' value='3' /><input type='hidden' name='search_type' value='header' />{% csrf_token %}</form></li>{% endif %}
                 </ul>
             </div>
 
-            {% if user_saved_queries %}            
-            <div id="queryloadheader" style="float:right; padding: 20px; background:#ECF1EF; ">
-                <form method='get' action='{% url helpdesk_list %}'>
-                <label for='id_query_selector'>{% trans "Query" %}</label> <select name='saved_query' id='id_query_selector' />
-                    {% for q in user_saved_queries %}
-                    <option value='{{ q.id }}'>{{ q.title }}{% if q.shared %} (Shared{% ifnotequal user q.user %} by {{ q.user.username }}{% endifnotequal %}){% endif %}</option>
-                    {% endfor %}
-                </select>
-                <input type='submit' value='{% trans "Run Query" %}'>
-                {% csrf_token %}</form>
-            </div>            
-            {% endif %}            
+            {% if user_saved_queries_ %}
+                <div id="queryloadheader" style="float:right; padding: 20px; background:#ECF1EF; ">
+                    <form method='get' action='{% url helpdesk_list %}'>
+                    <label for='id_query_selector'>{% trans "Query" %}</label> <select name='saved_query' id='id_query_selector' />
+                        {% for q in user_saved_queries_ %}
+                        <option value='{{ q.id }}'>{{ q.title }}{% if q.shared %} (Shared{% ifnotequal user q.user %} by {{ q.user.username }}{% endifnotequal %}){% endif %}</option>
+                        {% endfor %}
+                    </select>
+                    <input type='submit' value='{% trans "Run Query" %}'>
+                    {% csrf_token %}</form>
+                </div>            
+            {% endif %}
             
             <div id='body'>
                 {% block helpdesk_body %}{% endblock %}
@@ -67,3 +70,4 @@
         {% include "helpdesk/debug.html" %}
     </body>
 </html>
+{% endwith %}
