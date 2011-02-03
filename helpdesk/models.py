@@ -806,11 +806,13 @@ class KBItem(models.Model):
     votes = models.IntegerField(
         _('Votes'),
         help_text=_('Total number of votes cast for this item'),
+        default=0,
         )
 
     recommendations = models.IntegerField(
         _('Positive Votes'),
         help_text=_('Number of votes for this item which were POSITIVE.'),
+        default=0,
         )
 
     last_updated = models.DateTimeField(
