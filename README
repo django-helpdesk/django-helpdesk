@@ -7,6 +7,8 @@ company who originally created it. As of January 2011 the name has been
 changed to reflect what it really is: a Django-powered ticket tracker with
 contributors reaching far beyond Jutda.
 
+Complete documentation is available in the docs/ directory, or online at http://django-helpdesk.readthedocs.org/.
+
 #########################
 0. Table of Contents
 #########################
@@ -15,10 +17,6 @@ contributors reaching far beyond Jutda.
 2. Dependencies (pre-flight checklist)
 3. Upgrading from previous versions
 4. Installation
-5. Initial Configuration
-6. Spam filtering
-7. API Usage
-8. Custom fields
 
 #########################
 1. Licensing
@@ -77,174 +75,7 @@ the current version of django-helpdesk working.
 4. Installation
 #########################
 
-1. Try using 'pip install django-helpdesk'. If that fails, download and 
-   place 'helpdesk' in your Python path. I use /var/django, others may use 
-   /usr/lib/python2.4/site-packages/ or a similar path.
+``pip install django-helpdesk``
 
-2. In your projects' settings.py file, add these lines to the INSTALLED_APPS
-   setting:
-   'helpdesk',
-   'django.contrib.admin',
+For further installation information see docs/install.html and docs/configuration.html
 
-3. In your projects' urls.py file, add this line:
-    (r'helpdesk/', include('helpdesk.urls')),
-
-    You can substitute 'helpdesk/' for something else, eg 'support/' or even ''.
-
-4. Ensure the admin line is un-hashed in urls.py:
-    # Uncomment this for admin:
-    from django.contrib import admin
-    admin.autodiscover()
-    (r'^admin/(.*)', admin.site.root),
-
-    If you use helpdesk at the top of your domain (at /), ensure the admin 
-    line comes BEFORE the helpdesk line.
-
-5. In your project directory (NOT the helpdesk directory) run 
-    ./manage.py syncdb
-   to create database tables
-
-6. Inside your MEDIA_ROOT folder, create a new folder called 'helpdesk' and 
-   copy the contents of helpdesk/htdocs/ into it. Alternatively, create a
-   symlink:
-    ln -s /path/to/helpdesk/htdocs /path/to/media/helpdesk
-
-   This application assumes all helpdesk media will be accessible at
-   http://MEDIA_URL/helpdesk/
-
-7. Inside your MEDIA_ROOT folder, inside the 'helpdesk' folder, is a folder 
-   called 'attachments'. Ensure your web server software can write to this 
-   folder - something like this should do the trick:
-
-    chown www-data:www-data attachments/; chmod 700 attachments
-     (substitute www-data for the user / group that your web server runs
-      as, eg 'apache' or 'httpd')
-
-   If all else fails ensure all users can write to it:
-
-    chmod 777 attachments/
-
-   This is NOT recommended, especially if you're on a shared server.
-
-8. Ensure that your 'attachments' folder has directory listings turned off, 
-   to ensure users don't download files that they are not specifically linked 
-   to from their tickets.
-
-   If you are using Apache, put a .htaccess file in the 'attachments' folder 
-   with the following content:
-
-    Options -Indexes
-
-   You will also have to make sure that .htaccess files aren't being ignored.
-
-   Ideally, accessing http://MEDIA_URL/helpdesk/attachments/ will give you a 
-   403 access denied error.
-
-#########################
-5. Initial Configuration
-#########################
-
-1. Visit http://yoursite/admin/ and add a Helpdesk Queue. If you wish, 
-   enter your POP3 or IMAP server details. 
-
-   IMPORTANT NOTE: Any tickets created via POP3 or IMAP mailboxes will DELETE
-   the original e-mail from the mail server.
-
-2. Visit http://yoursite/helpdesk/ (or other path as defined in your urls.py) 
-
-3. If you wish to automatically create tickets from the contents of an e-mail 
-   inbox, set up a cronjob to run scripts/get_email.py on a regular basis. 
-
-   Don't forget to set the relevant Django environment variables in your 
-   crontab:
-
-   */5 * * * * /path/to/helpdesksite/manage.py get_email
-
-   This will run the e-mail import every 5 minutes
-
-   IMPORTANT NOTE: Any tickets created via POP3 or IMAP mailboxes will DELETE
-   the original e-mail from the mail server.
-
-4. If you wish to automatically escalate tickets based on their age, set up 
-   a cronjob to run scripts/escalate_tickets.py on a regular basis:
-   
-   0 * * * * /path/to/helpdesksite/manage.py escalate_tickets
-   
-   This will run the escalation process hourly, using the 'Escalation Hours' 
-   setting for each queue to determine which tickets to escalate.
-
-5. If you wish to exclude some days (eg, weekends) from escalation calculations, enter 
-   the dates manually via the Admin, or setup a cronjob to run 
-   the create_escalation_exclusions management command on a regular basis:
-
-   0 0 * * 0 /path/to/helpdesksite/manage.py create_escalation_exclusions --days saturday,sunday --escalate-verbosely
-
-   This will, on a weekly basis, create exclusions for the coming weekend.
-
-6. Log in to your Django admin screen, and go to the 'Sites' module. If the 
-   site 'example.com' is listed, click it and update the details so they are 
-   relevant for your website.
-
-7. If you do not send mail directly from your web server (eg, you need to 
-   use an SMTP server) then edit your settings.py file so it contains your 
-   mail server details:
-
-   EMAIL_HOST = 'XXXXX'
-   EMAIL_HOST_USER = 'YYYYYY@ZZZZ.PPP'
-   EMAIL_HOST_PASSWORD = '123456'
-
-You're now up and running!
-
-#########################
-7. Spam filtering
-#########################
-
-django-helpdesk includes a copy of `akismet.py' by Michael Foord, which lets
-incoming ticket submissions be automatically checked against either the 
-Akismet or TypePad Anti-Spam services.
-
-To enable this functionality, sign up for an API key with one of the following
-serviceS:
-
-Akismet: http://akismet.com/
-Save your API key in settings.py as AKISMET_API_KEY
-Note: Akismet is only free for personal use. Paid commercial accounts are 
-available.
-
-TypePad AntiSpam: http://antispam.typepad.com/
-Save your API key in settings.py as TYPEPAD_ANTISPAM_API_KEY
-This service is free to use, within their terms and conditions.
-
-If you have either of these settings enabled, the spam filtering will be 
-done automatically. If you have *both* settings configured, TypePad will 
-be used instead of Akismet.
-
-Example configuration in settings.py:
-
-TYPEPAD_ANTISPAM_API_KEY = 'abc123'
-
-#########################
-7. API Usage
-#########################
-
-django-helpdesk includes an API accessible via HTTP POST requests, allowing
-you to create and alter tickets from 3rd party software and systems.
-
-For usage instructions and command syntax, see the file
-templates/helpdesk/api_help.html, or visit http://helpdesk/api/help/.
-
-#########################
-8. Custom fields
-#########################
-
-As of February 2011, django-helpdesk supports custom fields on the Ticket 
-model. These fields are created by using the Django administration tool, and
-are shown on both the public and staff submission forms. 
-
-You can use most Django field types including text, integer, boolean, and list.
-
-The demo at http://demo.jutdahelpdesk.com contains an example of each type of 
-custom field, including a mix of mandatory and optional fields.
-
-Note that this feature is still in beta - it needs quite a bit of testing and 
-no doubt has bugs!

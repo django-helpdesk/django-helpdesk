@@ -1,0 +1,143 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>django-helpdesk spam filtering &mdash; django-helpdesk v0.1 documentation</title>
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="django-helpdesk v0.1 documentation" href="index.html" />
+    <link rel="next" title="django-helpdesk custom fields" href="custom_fields.html" />
+    <link rel="prev" title="django-helpdesk settings" href="settings.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="custom_fields.html" title="django-helpdesk custom fields"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="settings.html" title="django-helpdesk settings"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">django-helpdesk v0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="django-helpdesk-spam-filtering">
+<h1>django-helpdesk spam filtering<a class="headerlink" href="#django-helpdesk-spam-filtering" title="Permalink to this headline">¶</a></h1>
+<p>django-helpdesk includes a copy of <tt class="docutils literal"><span class="pre">akismet.py</span></tt> by Michael Foord, which lets incoming ticket submissions be automatically checked against either the Akismet or TypePad Anti-Spam services.</p>
+<p>To enable this functionality, sign up for an API key with one of the following services:</p>
+<div class="section" id="akismet">
+<h2>Akismet<a class="headerlink" href="#akismet" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Sign up at <a class="reference external" href="http://akismet.com/">http://akismet.com/</a></li>
+<li>Save your API key in <tt class="docutils literal"><span class="pre">settings.py</span></tt> as <tt class="docutils literal"><span class="pre">AKISMET_API_KEY</span></tt></li>
+</ul>
+<p><strong>Note</strong>: Akismet is only free for personal use. Paid commercial accounts are available.</p>
+</div>
+<div class="section" id="typepad-antispam">
+<h2>TypePad AntiSpam<a class="headerlink" href="#typepad-antispam" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Sign up at <a class="reference external" href="http://antispam.typepad.com/">http://antispam.typepad.com/</a></li>
+<li>Save your API key in <tt class="docutils literal"><span class="pre">settings.py</span></tt> as <tt class="docutils literal"><span class="pre">TYPEPAD_ANTISPAM_API_KEY</span></tt></li>
+</ul>
+<p>This service is free to use, within their terms and conditions.</p>
+<p>If you have either of these settings enabled, the spam filtering will be done automatically. If you have <em>both</em> settings configured, TypePad will be used instead of Akismet.</p>
+</div>
+<div class="section" id="example">
+<h2>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h2>
+<p>A sample configuration in <tt class="docutils literal"><span class="pre">settings.py</span></tt> may be:</p>
+<p>TYPEPAD_ANTISPAM_API_KEY = &#8216;abc123&#8217;</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">django-helpdesk spam filtering</a><ul>
+<li><a class="reference internal" href="#akismet">Akismet</a></li>
+<li><a class="reference internal" href="#typepad-antispam">TypePad AntiSpam</a></li>
+<li><a class="reference internal" href="#example">Example</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="settings.html"
+                        title="previous chapter">django-helpdesk settings</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="custom_fields.html"
+                        title="next chapter">django-helpdesk custom fields</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/spam.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="custom_fields.html" title="django-helpdesk custom fields"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="settings.html" title="django-helpdesk settings"
+             >previous</a> |</li>
+        <li><a href="index.html">django-helpdesk v0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Ross Poulton + Contributors.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>

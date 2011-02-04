@@ -7,3 +7,4 @@ recursive-include helpdesk/htdocs *
 recursive-include helpdesk/locale *.po *.mo
 recursive-include helpdesk/templates *
 recursive-include helpdesk/fixtures *.json
+recursive-include docs/html *
