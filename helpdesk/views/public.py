@@ -17,14 +17,17 @@ from django.utils.translation import ugettext as _
 
 from helpdesk.forms import PublicTicketForm
 from helpdesk.lib import send_templated_mail, text_is_spam
-from helpdesk.models import Ticket, Queue
+from helpdesk.models import Ticket, Queue, UserSettings
 
 
 def homepage(request):
     if request.user.is_staff:
-        if getattr(request.user.usersettings.settings, 'login_view_ticketlist', False):
-            return HttpResponseRedirect(reverse('helpdesk_list'))
-        else:
+        try:
+            if getattr(request.user.usersettings.settings, 'login_view_ticketlist', False):
+                return HttpResponseRedirect(reverse('helpdesk_list'))
+            else:
+                return HttpResponseRedirect(reverse('helpdesk_dashboard'))
+        except UserSettings.DoesNotExist:
             return HttpResponseRedirect(reverse('helpdesk_dashboard'))
 
     if request.method == 'POST':
