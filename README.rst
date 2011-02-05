@@ -1,7 +1,7 @@
 django-helpdesk - A Django powered ticket tracker for small enterprise.
 =======================================================================
 
-(c) Copyright 2009-11 Jutda. All Rights Reserved. See LICENSE for details.
+Copyright 2009-11 Jutda and Ross Poulton. All Rights Reserved. See LICENSE for details.
 
 django-helpdesk was formerly known as Jutda Helpdesk, named after the 
 company who originally created it. As of January 2011 the name has been 
@@ -10,23 +10,25 @@ contributors reaching far beyond Jutda.
 
 Complete documentation is available in the docs/ directory, or online at http://django-helpdesk.readthedocs.org/.
 
+You can see a demo installation at http://demo.jutdahelpdesk.com
+
 0. Table of Contents
 --------------------
 
-`1. Licensing`_
-`2. Dependencies (pre-flight checklist)`_
-`3. Upgrading from previous versions`_
-`4. Installation`_
+1. `Licensing`_
+2. `Dependencies (pre-flight checklist)`_
+3. `Upgrading from previous versions`_
+4. `Installation`_
 
-1. Licensing
-------------
+Licensing
+=========
 
 See the file 'LICENSE' for licensing terms. Note that django-helpdesk is 
 distributed with 3rd party products which have their own licenses. See 
 LICENSE.3RDPARTY for license terms for included packages.
 
-2. Dependencies (pre-flight checklist)
---------------------------------------
+Dependencies (pre-flight checklist)
+===================================
 
 1. Python 2.4+ 
 2. Django (1.2 or newer)
@@ -43,8 +45,8 @@ http://docs.djangoproject.com/en/dev/ref/databases/#sqlite-string-matching
 When you try to do a keyword search using sqlite, a message will be displayed
 to alert you to this shortcoming. There is no way around it, sorry.
 
-3. Upgrading from previous versions
------------------------------------
+Upgrading from previous versions
+================================
 
 If you are upgrading from a previous version of django-helpdesk, you should 
 read the UPGRADING file to learn what changes you will need to make to get 
@@ -67,8 +69,8 @@ the current version of django-helpdesk working.
 
 4. Continue to the 'Initial Configuration' area, if needed.
 
-4. Installation
----------------
+Installation
+============
 
 ``pip install django-helpdesk``
 
