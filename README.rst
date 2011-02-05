@@ -12,14 +12,6 @@ Complete documentation is available in the docs/ directory, or online at http://
 
 You can see a demo installation at http://demo.jutdahelpdesk.com
 
-0. Table of Contents
---------------------
-
-1. `Licensing`_
-2. `Dependencies (pre-flight checklist)`_
-3. `Upgrading from previous versions`_
-4. `Installation`_
-
 Licensing
 =========
 
