@@ -23,8 +23,8 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="django-helpdesk v0.1 documentation" href="index.html" />
-    <link rel="next" title="django-helpdesk Configuration" href="configuration.html" />
-    <link rel="prev" title="Welcome to django-helpdesk’s documentation!" href="index.html" /> 
+    <link rel="next" title="Configuration" href="configuration.html" />
+    <link rel="prev" title="License" href="license.html" /> 
   </head>
   <body>
     <div class="related">
@@ -34,10 +34,10 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="configuration.html" title="django-helpdesk Configuration"
+          <a href="configuration.html" title="Configuration"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="index.html" title="Welcome to django-helpdesk’s documentation!"
+          <a href="license.html" title="License"
              accesskey="P">previous</a> |</li>
         <li><a href="index.html">django-helpdesk v0.1 documentation</a> &raquo;</li> 
       </ul>
@@ -59,7 +59,7 @@
 </div>
 <div class="section" id="git-checkout-cutting-edge">
 <h3>GIT Checkout (Cutting Edge)<a class="headerlink" href="#git-checkout-cutting-edge" title="Permalink to this headline">¶</a></h3>
-<p><tt class="docutils literal"><span class="pre">git</span> <span class="pre">clone</span> <span class="pre">git://github.com/rossp/django-helpdesk.git</span></tt></p>
+<p>If you&#8217;re planning on editing the code or just want to get whatever is the latest and greatest, you can clone the official Git repository with <tt class="docutils literal"><span class="pre">git</span> <span class="pre">clone</span> <span class="pre">git://github.com/rossp/django-helpdesk.git</span></tt></p>
 <p>Copy the <tt class="docutils literal"><span class="pre">helpdesk</span></tt> folder into your <tt class="docutils literal"><span class="pre">PYTHONPATH</span></tt>.</p>
 </div>
 <div class="section" id="i-just-want-a-tar-gz">
@@ -94,28 +94,29 @@
 </div>
 </li>
 <li><p class="first">Inside your <tt class="docutils literal"><span class="pre">MEDIA_ROOT</span></tt> folder, create a new folder called <tt class="docutils literal"><span class="pre">helpdesk</span></tt> and copy the contents of <tt class="docutils literal"><span class="pre">helpdesk/htdocs</span></tt> into it. Alternatively, create a symlink:</p>
-<p><tt class="docutils literal"><span class="pre">ln</span> <span class="pre">-s</span> <span class="pre">/path/to/helpdesk/htdocs</span> <span class="pre">/path/to/media/helpdesk</span></tt></p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">ln</span> <span class="o">-</span><span class="n">s</span> <span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">helpdesk</span><span class="o">/</span><span class="n">htdocs</span> <span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">media</span><span class="o">/</span><span class="n">helpdesk</span>
+</pre></div>
+</div>
 </li>
 <li><p class="first">Inside your <tt class="docutils literal"><span class="pre">MEDIA_ROOT</span></tt> folder, inside the <tt class="docutils literal"><span class="pre">helpdesk</span></tt> folder, is a folder called <tt class="docutils literal"><span class="pre">attachments</span></tt>. Ensure your web server software can write to this folder - something like this should do the trick:</p>
-<div class="highlight-python"><pre>    chown www-data:www-data attachments/
-    chmod 700 attachments
-
-(substitute www-data for the user / group that your web server runs as, eg 'apache' or 'httpd')
-
-If all else fails ensure all users can write to it:
-
-``chmod 777 attachments/``
-
-This is NOT recommended, especially if you're on a shared server.</pre>
+<div class="highlight-python"><pre>chown www-data:www-data attachments/
+chmod 700 attachments</pre>
 </div>
+<p>(substitute www-data for the user / group that your web server runs as, eg &#8216;apache&#8217; or &#8216;httpd&#8217;)</p>
+<p>If all else fails ensure all users can write to it:</p>
+<div class="highlight-python"><pre>chmod 777 attachments/</pre>
+</div>
+<p>This is NOT recommended, especially if you&#8217;re on a shared server.</p>
 </li>
 <li><p class="first">Ensure that your <tt class="docutils literal"><span class="pre">attachments</span></tt> folder has directory listings turned off, to ensure users don&#8217;t download files that they are not specifically linked to from their tickets.</p>
 <p>If you are using Apache, put a <tt class="docutils literal"><span class="pre">.htaccess</span></tt> file in the <tt class="docutils literal"><span class="pre">attachments</span></tt> folder with the following content:</p>
-<p><tt class="docutils literal"><span class="pre">Options</span> <span class="pre">-Indexes</span></tt></p>
-<p>You will also have to make sure that <tt class="docutils literal"><span class="pre">.htaccess</span></tt> files aren&#8217;t being ignored.</p>
-<p>Ideally, accessing <a class="reference external" href="http://MEDIA_URL/helpdesk/attachments/">http://MEDIA_URL/helpdesk/attachments/</a> will give you a 403 access denied error.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">Options</span> <span class="o">-</span><span class="n">Indexes</span>
+</pre></div>
+</div>
 </li>
 </ol>
+<p>You will also have to make sure that <tt class="docutils literal"><span class="pre">.htaccess</span></tt> files aren&#8217;t being ignored.</p>
+<p>Ideally, accessing <a class="reference external" href="http://MEDIA_URL/helpdesk/attachments/">http://MEDIA_URL/helpdesk/attachments/</a> will give you a 403 access denied error.</p>
 </div>
 </div>
 
@@ -140,11 +141,11 @@ This is NOT recommended, especially if you're on a shared server.</pre>
 </ul>
 
   <h4>Previous topic</h4>
-  <p class="topless"><a href="index.html"
-                        title="previous chapter">Welcome to django-helpdesk&#8217;s documentation!</a></p>
+  <p class="topless"><a href="license.html"
+                        title="previous chapter">License</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="configuration.html"
-                        title="next chapter">django-helpdesk Configuration</a></p>
+                        title="next chapter">Configuration</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/install.txt"
@@ -174,10 +175,10 @@ This is NOT recommended, especially if you're on a shared server.</pre>
           <a href="genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="configuration.html" title="django-helpdesk Configuration"
+          <a href="configuration.html" title="Configuration"
              >next</a> |</li>
         <li class="right" >
-          <a href="index.html" title="Welcome to django-helpdesk’s documentation!"
+          <a href="license.html" title="License"
              >previous</a> |</li>
         <li><a href="index.html">django-helpdesk v0.1 documentation</a> &raquo;</li> 
       </ul>

@@ -1,5 +1,5 @@
-django-helpdesk Configuration
-=============================
+Configuration
+=============
 
 Before django-helpdesk will be much use, you need to do some basic configuration. Most of this is done via the Django admin screens.
 

@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>django-helpdesk spam filtering &mdash; django-helpdesk v0.1 documentation</title>
+    <title>Spam Filtering &mdash; django-helpdesk v0.1 documentation</title>
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
@@ -23,8 +23,8 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="django-helpdesk v0.1 documentation" href="index.html" />
-    <link rel="next" title="django-helpdesk custom fields" href="custom_fields.html" />
-    <link rel="prev" title="django-helpdesk settings" href="settings.html" /> 
+    <link rel="next" title="Custom Fields" href="custom_fields.html" />
+    <link rel="prev" title="Settings" href="settings.html" /> 
   </head>
   <body>
     <div class="related">
@@ -34,10 +34,10 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="custom_fields.html" title="django-helpdesk custom fields"
+          <a href="custom_fields.html" title="Custom Fields"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="settings.html" title="django-helpdesk settings"
+          <a href="settings.html" title="Settings"
              accesskey="P">previous</a> |</li>
         <li><a href="index.html">django-helpdesk v0.1 documentation</a> &raquo;</li> 
       </ul>
@@ -48,12 +48,12 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="django-helpdesk-spam-filtering">
-<h1>django-helpdesk spam filtering<a class="headerlink" href="#django-helpdesk-spam-filtering" title="Permalink to this headline">¶</a></h1>
-<p>django-helpdesk includes a copy of <tt class="docutils literal"><span class="pre">akismet.py</span></tt> by Michael Foord, which lets incoming ticket submissions be automatically checked against either the Akismet or TypePad Anti-Spam services.</p>
-<p>To enable this functionality, sign up for an API key with one of the following services:</p>
-<div class="section" id="akismet">
-<h2>Akismet<a class="headerlink" href="#akismet" title="Permalink to this headline">¶</a></h2>
+  <div class="section" id="spam-filtering">
+<h1>Spam Filtering<a class="headerlink" href="#spam-filtering" title="Permalink to this headline">¶</a></h1>
+<p>django-helpdesk includes a copy of <tt class="docutils literal"><span class="pre">akismet.py</span></tt> by <a class="reference external" href="http://www.voidspace.org.uk/">Michael Foord</a>, which lets incoming ticket submissions be automatically checked against either the <a class="reference external" href="http://akismet.com/">Akismet</a> or <a class="reference external" href="http://antispam.typepad.com/">TypePad Anti-Spam</a> services.</p>
+<p>To enable this functionality, sign up for an API key with one of these two services.</p>
+<div class="section" id="id1">
+<h2>Akismet<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Sign up at <a class="reference external" href="http://akismet.com/">http://akismet.com/</a></li>
 <li>Save your API key in <tt class="docutils literal"><span class="pre">settings.py</span></tt> as <tt class="docutils literal"><span class="pre">AKISMET_API_KEY</span></tt></li>
@@ -72,7 +72,9 @@
 <div class="section" id="example">
 <h2>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h2>
 <p>A sample configuration in <tt class="docutils literal"><span class="pre">settings.py</span></tt> may be:</p>
-<p>TYPEPAD_ANTISPAM_API_KEY = &#8216;abc123&#8217;</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">TYPEPAD_ANTISPAM_API_KEY</span> <span class="o">=</span> <span class="s">&#39;abc123&#39;</span>
+</pre></div>
+</div>
 </div>
 </div>
 
@@ -84,8 +86,8 @@
         <div class="sphinxsidebarwrapper">
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">django-helpdesk spam filtering</a><ul>
-<li><a class="reference internal" href="#akismet">Akismet</a></li>
+<li><a class="reference internal" href="#">Spam Filtering</a><ul>
+<li><a class="reference internal" href="#id1">Akismet</a></li>
 <li><a class="reference internal" href="#typepad-antispam">TypePad AntiSpam</a></li>
 <li><a class="reference internal" href="#example">Example</a></li>
 </ul>
@@ -94,10 +96,10 @@
 
   <h4>Previous topic</h4>
   <p class="topless"><a href="settings.html"
-                        title="previous chapter">django-helpdesk settings</a></p>
+                        title="previous chapter">Settings</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="custom_fields.html"
-                        title="next chapter">django-helpdesk custom fields</a></p>
+                        title="next chapter">Custom Fields</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/spam.txt"
@@ -127,10 +129,10 @@
           <a href="genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="custom_fields.html" title="django-helpdesk custom fields"
+          <a href="custom_fields.html" title="Custom Fields"
              >next</a> |</li>
         <li class="right" >
-          <a href="settings.html" title="django-helpdesk settings"
+          <a href="settings.html" title="Settings"
              >previous</a> |</li>
         <li><a href="index.html">django-helpdesk v0.1 documentation</a> &raquo;</li> 
       </ul>
