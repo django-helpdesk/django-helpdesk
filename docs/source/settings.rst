@@ -1,5 +1,5 @@
-django-helpdesk settings
-========================
+Settings
+========
 
 The following settings can be changed in your ``settings.py`` file to help change the way django-helpdesk operates.
 

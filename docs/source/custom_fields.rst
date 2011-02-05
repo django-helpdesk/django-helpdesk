@@ -1,5 +1,5 @@
-django-helpdesk custom fields
-=============================
+Custom Fields
+=============
 
 As of February 2011, django-helpdesk supports custom fields on the ``Ticket`` model. These fields are created by using the Django administration tool, and are shown on both the public and staff submission forms. 
 

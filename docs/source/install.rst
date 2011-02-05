@@ -15,7 +15,7 @@ Try using ``pip install django-helpdesk``. Go and have a beer to celebrate Pytho
 GIT Checkout (Cutting Edge)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-``git clone git://github.com/rossp/django-helpdesk.git``
+If you're planning on editing the code or just want to get whatever is the latest and greatest, you can clone the official Git repository with ``git clone git://github.com/rossp/django-helpdesk.git``
 
 Copy the ``helpdesk`` folder into your ``PYTHONPATH``.
 
@@ -49,30 +49,30 @@ Adding To Your Django Project
 
    ./manage.py syncdb
 
-4. Inside your ``MEDIA_ROOT`` folder, create a new folder called ``helpdesk`` and copy the contents of ``helpdesk/htdocs`` into it. Alternatively, create a symlink:
+4. Inside your ``MEDIA_ROOT`` folder, create a new folder called ``helpdesk`` and copy the contents of ``helpdesk/htdocs`` into it. Alternatively, create a symlink::
 
-   ``ln -s /path/to/helpdesk/htdocs /path/to/media/helpdesk``
+      ln -s /path/to/helpdesk/htdocs /path/to/media/helpdesk
 
 5. Inside your ``MEDIA_ROOT`` folder, inside the ``helpdesk`` folder, is a folder called ``attachments``. Ensure your web server software can write to this folder - something like this should do the trick::
 
-        chown www-data:www-data attachments/
-        chmod 700 attachments
+      chown www-data:www-data attachments/
+      chmod 700 attachments
 
-    (substitute www-data for the user / group that your web server runs as, eg 'apache' or 'httpd')
+   (substitute www-data for the user / group that your web server runs as, eg 'apache' or 'httpd')
 
-    If all else fails ensure all users can write to it:
+   If all else fails ensure all users can write to it::
 
-    ``chmod 777 attachments/``
+      chmod 777 attachments/
 
-    This is NOT recommended, especially if you're on a shared server.
+   This is NOT recommended, especially if you're on a shared server.
 
 6. Ensure that your ``attachments`` folder has directory listings turned off, to ensure users don't download files that they are not specifically linked to from their tickets.
 
-   If you are using Apache, put a ``.htaccess`` file in the ``attachments`` folder with the following content:
+   If you are using Apache, put a ``.htaccess`` file in the ``attachments`` folder with the following content::
 
-   ``Options -Indexes``
+      Options -Indexes
 
-   You will also have to make sure that ``.htaccess`` files aren't being ignored.
+You will also have to make sure that ``.htaccess`` files aren't being ignored.
 
-   Ideally, accessing http://MEDIA_URL/helpdesk/attachments/ will give you a 403 access denied error.
+Ideally, accessing http://MEDIA_URL/helpdesk/attachments/ will give you a 403 access denied error.
 
