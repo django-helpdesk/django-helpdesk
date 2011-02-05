@@ -10,14 +10,13 @@ contributors reaching far beyond Jutda.
 
 Complete documentation is available in the docs/ directory, or online at http://django-helpdesk.readthedocs.org/.
 
-#########################
 0. Table of Contents
-#########################
+--------------------
 
-1. Licensing
-2. Dependencies (pre-flight checklist)
-3. Upgrading from previous versions
-4. Installation
+`1. Licensing`_
+`2. Dependencies (pre-flight checklist)`_
+`3. Upgrading from previous versions`_
+`4. Installation`_
 
 1. Licensing
 ------------
