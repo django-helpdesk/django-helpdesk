@@ -499,6 +499,10 @@ class EmailIgnoreForm(forms.ModelForm):
         model = IgnoreEmail
 
 class TicketCCForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(TicketCCForm, self).__init__(*args, **kwargs)
+        self.fields['user'].queryset = User.objects.filter(is_active=True).order_by('username')
     class Meta:
         model = TicketCC
         exclude = ('ticket',)
+
