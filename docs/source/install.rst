@@ -1,0 +1,78 @@
+Installation
+============
+
+django-helpdesk installation isn't difficult, but it requires you have a bit of existing know-how about Django.
+
+
+Getting The Code
+----------------
+
+Installing using PIP
+~~~~~~~~~~~~~~~~~~~~
+
+Try using ``pip install django-helpdesk``. Go and have a beer to celebrate Python packaging.
+
+GIT Checkout (Cutting Edge)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If you're planning on editing the code or just want to get whatever is the latest and greatest, you can clone the official Git repository with ``git clone git://github.com/rossp/django-helpdesk.git``
+
+Copy the ``helpdesk`` folder into your ``PYTHONPATH``.
+
+I just want a .tar.gz!
+~~~~~~~~~~~~~~~~~~~~~~
+
+You can download the latest PyPi package from http://pypi.python.org/pypi/django-helpdesk/
+
+Download, extract, and drop ``helpdesk`` into your ``PYTHONPATH``
+
+Adding To Your Django Project
+-----------------------------
+
+1. Edit your ``settings.py`` file and add ``helpdesk`` to the ``INSTALLED_APPS`` setting. You also need ``django.contrib.admin`` in ``INSTALLED_APPS`` if you haven't already added it. eg::
+    
+    INSTALLED_APPS = (
+        'django.contrib.auth',
+        'django.contrib.contenttypes',
+        'django.contrib.sessions',
+        'django.contrib.sites',
+        'django.contrib.admin', # Required for helpdesk admin/maintenance
+        'django.contrib.markup', # Required for text display
+        'helpdesk', # This is new!
+    )
+
+2. Make sure django-helpdesk is accessible via ``urls.py``. Add the following line to ``urls.py``::
+
+     (r'helpdesk/', include('helpdesk.urls')),
+
+3. Create the required database tables. I'd suggest using *South*, however the following will work::
+
+   ./manage.py syncdb
+
+4. Inside your ``MEDIA_ROOT`` folder, create a new folder called ``helpdesk`` and copy the contents of ``helpdesk/htdocs`` into it. Alternatively, create a symlink::
+
+      ln -s /path/to/helpdesk/htdocs /path/to/media/helpdesk
+
+5. Inside your ``MEDIA_ROOT`` folder, inside the ``helpdesk`` folder, is a folder called ``attachments``. Ensure your web server software can write to this folder - something like this should do the trick::
+
+      chown www-data:www-data attachments/
+      chmod 700 attachments
+
+   (substitute www-data for the user / group that your web server runs as, eg 'apache' or 'httpd')
+
+   If all else fails ensure all users can write to it::
+
+      chmod 777 attachments/
+
+   This is NOT recommended, especially if you're on a shared server.
+
+6. Ensure that your ``attachments`` folder has directory listings turned off, to ensure users don't download files that they are not specifically linked to from their tickets.
+
+   If you are using Apache, put a ``.htaccess`` file in the ``attachments`` folder with the following content::
+
+      Options -Indexes
+
+You will also have to make sure that ``.htaccess`` files aren't being ignored.
+
+Ideally, accessing http://MEDIA_URL/helpdesk/attachments/ will give you a 403 access denied error.
+

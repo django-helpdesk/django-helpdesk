@@ -666,6 +666,8 @@ def create_ticket(request):
         initial_data = {}
         if request.user.usersettings.settings.get('use_email_as_submitter', False) and request.user.email:
             initial_data['submitter_email'] = request.user.email
+        if request.GET.has_key('queue'):
+            initial_data['queue'] = request.GET['queue']
 
         form = TicketForm(initial=initial_data)
         form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]

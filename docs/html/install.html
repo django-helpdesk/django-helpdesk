@@ -1,0 +1,191 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Installation &mdash; django-helpdesk v0.1 documentation</title>
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="django-helpdesk v0.1 documentation" href="index.html" />
+    <link rel="next" title="Configuration" href="configuration.html" />
+    <link rel="prev" title="License" href="license.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="configuration.html" title="Configuration"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="license.html" title="License"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">django-helpdesk v0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+<p>django-helpdesk installation isn&#8217;t difficult, but it requires you have a bit of existing know-how about Django.</p>
+<div class="section" id="getting-the-code">
+<h2>Getting The Code<a class="headerlink" href="#getting-the-code" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="installing-using-pip">
+<h3>Installing using PIP<a class="headerlink" href="#installing-using-pip" title="Permalink to this headline">¶</a></h3>
+<p>Try using <tt class="docutils literal"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">django-helpdesk</span></tt>. Go and have a beer to celebrate Python packaging.</p>
+</div>
+<div class="section" id="git-checkout-cutting-edge">
+<h3>GIT Checkout (Cutting Edge)<a class="headerlink" href="#git-checkout-cutting-edge" title="Permalink to this headline">¶</a></h3>
+<p>If you&#8217;re planning on editing the code or just want to get whatever is the latest and greatest, you can clone the official Git repository with <tt class="docutils literal"><span class="pre">git</span> <span class="pre">clone</span> <span class="pre">git://github.com/rossp/django-helpdesk.git</span></tt></p>
+<p>Copy the <tt class="docutils literal"><span class="pre">helpdesk</span></tt> folder into your <tt class="docutils literal"><span class="pre">PYTHONPATH</span></tt>.</p>
+</div>
+<div class="section" id="i-just-want-a-tar-gz">
+<h3>I just want a .tar.gz!<a class="headerlink" href="#i-just-want-a-tar-gz" title="Permalink to this headline">¶</a></h3>
+<p>You can download the latest PyPi package from <a class="reference external" href="http://pypi.python.org/pypi/django-helpdesk/">http://pypi.python.org/pypi/django-helpdesk/</a></p>
+<p>Download, extract, and drop <tt class="docutils literal"><span class="pre">helpdesk</span></tt> into your <tt class="docutils literal"><span class="pre">PYTHONPATH</span></tt></p>
+</div>
+</div>
+<div class="section" id="adding-to-your-django-project">
+<h2>Adding To Your Django Project<a class="headerlink" href="#adding-to-your-django-project" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic">
+<li><p class="first">Edit your <tt class="docutils literal"><span class="pre">settings.py</span></tt> file and add <tt class="docutils literal"><span class="pre">helpdesk</span></tt> to the <tt class="docutils literal"><span class="pre">INSTALLED_APPS</span></tt> setting. You also need <tt class="docutils literal"><span class="pre">django.contrib.admin</span></tt> in <tt class="docutils literal"><span class="pre">INSTALLED_APPS</span></tt> if you haven&#8217;t already added it. eg:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">INSTALLED_APPS</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s">&#39;django.contrib.auth&#39;</span><span class="p">,</span>
+    <span class="s">&#39;django.contrib.contenttypes&#39;</span><span class="p">,</span>
+    <span class="s">&#39;django.contrib.sessions&#39;</span><span class="p">,</span>
+    <span class="s">&#39;django.contrib.sites&#39;</span><span class="p">,</span>
+    <span class="s">&#39;django.contrib.admin&#39;</span><span class="p">,</span> <span class="c"># Required for helpdesk admin/maintenance</span>
+    <span class="s">&#39;django.contrib.markup&#39;</span><span class="p">,</span> <span class="c"># Required for text display</span>
+    <span class="s">&#39;helpdesk&#39;</span><span class="p">,</span> <span class="c"># This is new!</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Make sure django-helpdesk is accessible via <tt class="docutils literal"><span class="pre">urls.py</span></tt>. Add the following line to <tt class="docutils literal"><span class="pre">urls.py</span></tt>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">(</span><span class="s">r&#39;helpdesk/&#39;</span><span class="p">,</span> <span class="n">include</span><span class="p">(</span><span class="s">&#39;helpdesk.urls&#39;</span><span class="p">)),</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Create the required database tables. I&#8217;d suggest using <em>South</em>, however the following will work:</p>
+<div class="highlight-python"><pre>./manage.py syncdb</pre>
+</div>
+</li>
+<li><p class="first">Inside your <tt class="docutils literal"><span class="pre">MEDIA_ROOT</span></tt> folder, create a new folder called <tt class="docutils literal"><span class="pre">helpdesk</span></tt> and copy the contents of <tt class="docutils literal"><span class="pre">helpdesk/htdocs</span></tt> into it. Alternatively, create a symlink:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">ln</span> <span class="o">-</span><span class="n">s</span> <span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">helpdesk</span><span class="o">/</span><span class="n">htdocs</span> <span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">media</span><span class="o">/</span><span class="n">helpdesk</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Inside your <tt class="docutils literal"><span class="pre">MEDIA_ROOT</span></tt> folder, inside the <tt class="docutils literal"><span class="pre">helpdesk</span></tt> folder, is a folder called <tt class="docutils literal"><span class="pre">attachments</span></tt>. Ensure your web server software can write to this folder - something like this should do the trick:</p>
+<div class="highlight-python"><pre>chown www-data:www-data attachments/
+chmod 700 attachments</pre>
+</div>
+<p>(substitute www-data for the user / group that your web server runs as, eg &#8216;apache&#8217; or &#8216;httpd&#8217;)</p>
+<p>If all else fails ensure all users can write to it:</p>
+<div class="highlight-python"><pre>chmod 777 attachments/</pre>
+</div>
+<p>This is NOT recommended, especially if you&#8217;re on a shared server.</p>
+</li>
+<li><p class="first">Ensure that your <tt class="docutils literal"><span class="pre">attachments</span></tt> folder has directory listings turned off, to ensure users don&#8217;t download files that they are not specifically linked to from their tickets.</p>
+<p>If you are using Apache, put a <tt class="docutils literal"><span class="pre">.htaccess</span></tt> file in the <tt class="docutils literal"><span class="pre">attachments</span></tt> folder with the following content:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">Options</span> <span class="o">-</span><span class="n">Indexes</span>
+</pre></div>
+</div>
+</li>
+</ol>
+<p>You will also have to make sure that <tt class="docutils literal"><span class="pre">.htaccess</span></tt> files aren&#8217;t being ignored.</p>
+<p>Ideally, accessing <a class="reference external" href="http://MEDIA_URL/helpdesk/attachments/">http://MEDIA_URL/helpdesk/attachments/</a> will give you a 403 access denied error.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Installation</a><ul>
+<li><a class="reference internal" href="#getting-the-code">Getting The Code</a><ul>
+<li><a class="reference internal" href="#installing-using-pip">Installing using PIP</a></li>
+<li><a class="reference internal" href="#git-checkout-cutting-edge">GIT Checkout (Cutting Edge)</a></li>
+<li><a class="reference internal" href="#i-just-want-a-tar-gz">I just want a .tar.gz!</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#adding-to-your-django-project">Adding To Your Django Project</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="license.html"
+                        title="previous chapter">License</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="configuration.html"
+                        title="next chapter">Configuration</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/install.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="configuration.html" title="Configuration"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="license.html" title="License"
+             >previous</a> |</li>
+        <li><a href="index.html">django-helpdesk v0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Ross Poulton + Contributors.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>
