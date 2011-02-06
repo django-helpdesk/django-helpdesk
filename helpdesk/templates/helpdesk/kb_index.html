@@ -9,7 +9,7 @@
 <tr class='row_tablehead'><td>{% trans "Knowledgebase Categories" %}</td></tr>
 <tr class='row_columnheads'><th>{% trans "Category" %}</th></tr>
 
-{% for category in categories %}
+{% for category in kb_categories %}
 <tr class='row_even row_hover'><th><a href='{{ category.get_absolute_url }}'>{{ category.title }}</a></th></tr>
 <tr class='row_odd'><td>{{ category.description }}</td></tr>
 {% endfor %}

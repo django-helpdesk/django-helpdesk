@@ -23,7 +23,7 @@ def index(request):
     # TODO: It'd be great to have a list of most popular items here.
     return render_to_response('helpdesk/kb_index.html',
         RequestContext(request, {
-            'categories': category_list,
+            'kb_categories': category_list,
         }))
 
 
