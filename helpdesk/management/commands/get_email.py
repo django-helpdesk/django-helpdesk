@@ -282,7 +282,7 @@ def ticket_from_message(message, queue, quiet):
 
     else:
         if t.status == Ticket.REOPENED_STATUS:
-            update = _(' (Reopened')
+            update = _(' (Reopened)')
         else:
             update = _(' (Updated)')
 
