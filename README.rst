@@ -68,3 +68,13 @@ Installation
 
 For further installation information see docs/install.html and docs/configuration.html
 
+Internationalisation
+====================
+
+.. image:: http://www.transifex.net/projects/p/django-helpdesk/resource/core/chart/image_png
+
+If you want to help translate django-helpdesk into languages other than English, we encourage you to make use of our Transifex project.
+
+http://www.transifex.net/projects/p/django-helpdesk/resource/core/
+
+Feel free to request access to contribute your translations.
