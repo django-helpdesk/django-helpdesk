@@ -285,6 +285,9 @@ def update_ticket(request, ticket_id, public=False):
 
     messages_sent_to = []
 
+    # ticket might have changed above, so we re-instantiate context with the 
+    # (possibly) updated ticket.
+    context = safe_template_context(ticket)
     context.update(
         resolution=ticket.resolution,
         comment=f.comment,
