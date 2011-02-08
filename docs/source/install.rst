@@ -45,6 +45,12 @@ Adding To Your Django Project
 
      (r'helpdesk/', include('helpdesk.urls')),
 
+   Note that you can change 'helpdesk/' to anything you like, such as 'support/' or 'help/'. If you want django-helpdesk to be available at the root of your site (for example at http://support.mysite.tld/) then the line will be as follows::
+     
+     (r'', include('helpdesk.urls')),
+
+   This line will have to come *after* any other lines in your urls.py such as those used by the Django admin.
+
 3. Create the required database tables. I'd suggest using *South*, however the following will work::
 
    ./manage.py syncdb
