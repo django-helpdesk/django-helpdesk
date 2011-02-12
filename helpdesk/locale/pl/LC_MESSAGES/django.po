@@ -9,12 +9,13 @@ msgstr ""
 "Report-Msgid-Bugs-To: http://github.com/RossP/django-helpdesk/issues\n"
 "POT-Creation-Date: 2010-09-04 06:55+0000\n"
 "PO-Revision-Date: 2011-02-12 02:29+0000\n"
-"Last-Translator: rossp <ross@rossp.org>\n"
+"Last-Translator: mpasternak <michal.dtz@gmail.com>\n"
+"Language-Team: Polish <None>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: ru\n"
-"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)\n"
+"Language: pl\n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)\n"
 
 #: forms.py:28 forms.py:203 templates/helpdesk/dashboard.html:10
 #: templates/helpdesk/dashboard.html:26 templates/helpdesk/dashboard.html:44
@@ -22,231 +23,231 @@ msgstr ""
 #: templates/helpdesk/ticket_list.html:75
 #: templates/helpdesk/ticket_list.html:183
 msgid "Queue"
-msgstr "Очередь"
+msgstr "Kolejka"
 
 #: forms.py:37
 msgid "Summary of the problem"
-msgstr "Краткое описание проблемы"
+msgstr "Krótki opis problemu"
 
 #: forms.py:42
 msgid "Submitter E-Mail Address"
-msgstr "Адрес E-mail отправителя"
+msgstr "Adres e-mail zgłaszającego"
 
 #: forms.py:43
 msgid "This e-mail address will receive copies of all public updates to this ticket."
-msgstr "На этот e-mail адрес будут посылатся копии всех публичных обновлений этого талона"
+msgstr "Na ten adres e-mail wysyłane będą informacje o zmianach stanu tego zgłoszenia."
 
 #: forms.py:49
 msgid "Description of Issue"
-msgstr "Описание проблемы"
+msgstr "Opis zgłoszenia"
 
 #: forms.py:56
 msgid "Case owner"
-msgstr "Владелец"
+msgstr "Przypisane do"
 
 #: forms.py:57
 msgid "If you select an owner other than yourself, they'll be e-mailed details of this ticket immediately."
-msgstr "Если вы выберете отличного от себя владельца, ему будут высланы детали этого талона немедленно."
+msgstr "Jeżeli przypiszesz to zgłoszenie do kogoś innego, niż Ty, to osoba owa otrzyma e-mail ze szczegółami dotyczącymi tego zgłoszenia"
 
 #: forms.py:65 models.py:312 management/commands/escalate_tickets.py:152
 #: templates/helpdesk/public_view_ticket.html:21
 #: templates/helpdesk/ticket.html:65 templates/helpdesk/ticket.html.py:170
 #: templates/helpdesk/ticket_list.html:81 views/staff.py:231
 msgid "Priority"
-msgstr "Приоритет"
+msgstr "Priorytet"
 
 #: forms.py:66
 msgid "Please select a priority carefully. If unsure, leave it as '3'."
-msgstr "Пожалуйста выбирайте приобитет внимательно. Если не уверены оставьте 3, как есть."
+msgstr "Wybierz priorytet rozsądnie. Jeżeli nie wiesz, co wpisać, pozostaw '3'."
 
 #: forms.py:72 forms.py:239
 msgid "Attach File"
-msgstr ""
+msgstr "Dołącz plik"
 
 #: forms.py:73 forms.py:240
 msgid "You can attach a file such as a document or screenshot to this ticket."
-msgstr ""
+msgstr "Możesz dołączyć plik taki jak dokument lub zrzut ekranu do tego zgłoszenia."
 
 #: forms.py:81 templates/helpdesk/public_view_ticket.html:27
 #: templates/helpdesk/ticket.html:76 templates/helpdesk/ticket.html.py:173
 #: templates/helpdesk/ticket_list.html:58
 #: templates/helpdesk/ticket_list.html:183 views/staff.py:242
 msgid "Tags"
-msgstr ""
+msgstr "Tagi"
 
 #: forms.py:82
 msgid "Words, separated by spaces, or phrases separated by commas. These should communicate significant characteristics of this ticket"
-msgstr ""
+msgstr "Słowa oddzielone spacjami lub frazy oddzielone przecinkami. Powinny oddawać najważniejsze cechy tego zgłoszenia"
 
 #: forms.py:115
 msgid "Ticket Opened"
-msgstr "Талон открыт"
+msgstr "Zgłoszenie otwarto"
 
 #: forms.py:122
 #, python-format
 msgid "Ticket Opened & Assigned to %(name)s"
-msgstr "Талон открыт и присвоен %(name)s"
+msgstr "Zgłoszenie otwarto i przypisano do %(name)s"
 
 #: forms.py:212
 msgid "Summary of your query"
-msgstr "Краткое описание вашего запроса"
+msgstr "Krótki opis Twojego zapytania"
 
 #: forms.py:217
 msgid "Your E-Mail Address"
-msgstr "Ваш E-Mail Адрес"
+msgstr "Twój adres e-mail"
 
 #: forms.py:218
 msgid "We will e-mail you when your ticket is updated."
-msgstr "Мы известим вас по электронной почте, когда талон обновится."
+msgstr "Gdy Twoje zgłoszenie zostanie zaktualizowane, otrzymasz informację przez e-mail"
 
 #: forms.py:223
 msgid "Description of your issue"
-msgstr "Описание вашей проблемы."
+msgstr "Opis Twojego zgłoszenia"
 
 #: forms.py:225
 msgid "Please be as descriptive as possible, including any details we may need to address your query."
-msgstr "Пожалуйста, будьте максимально информативным, нам пригодятся любые подробности касающиеся вашего запроса."
+msgstr "Opisz zgłoszenie tak dokładnie, jak to możliwe, ze wszystkimi technicznym szczegółami których możemy potrzebować, aby odnieść się do Twojego zgłoszenia"
 
 #: forms.py:233
 msgid "Urgency"
-msgstr "Срочность"
+msgstr "Pilność"
 
 #: forms.py:234
 msgid "Please select a priority carefully."
-msgstr "Пожалуйста, выберите приоритеты тщательно."
+msgstr "Prosimy o rozsądny wybór"
 
 #: forms.py:264
 msgid "Ticket Opened Via Web"
-msgstr "Талон открыт через Web"
+msgstr "Zgłoszenie otwarto przez stronę WWW"
 
 #: forms.py:334
 msgid "Show Ticket List on Login?"
-msgstr "Показывать список талонов после входа?"
+msgstr "Pokazuj listę zgłoszeń po zalogowaniu się?"
 
 #: forms.py:335
 msgid "Display the ticket list upon login? Otherwise, the dashboard is shown."
-msgstr "Показывать список талонов после входа? Иначе будет показана панель."
+msgstr "Wyświetlaj listę zgłoszeń po zalogowaniu się? Jeżeli nie, wyświetlony zostanie panel sterowania."
 
 #: forms.py:340
 msgid "E-mail me on ticket change?"
-msgstr "Уведомлять меня по электронной почте о изменениях талона?"
+msgstr "Powiadomienie e-mail w razie zmiany zgłoszenia?"
 
 #: forms.py:341
 msgid "If you're the ticket owner and the ticket is changed via the web by somebody else, do you want to receive an e-mail?"
-msgstr "Если вы владелец талона и талон меняется через web кем-то еще, вы хотите получить уведомление по электронной почте?"
+msgstr "Jeżeli jesteś osobą do której przypisano to zgłoszenie, a zgłoszenie zostaje zaktualizowane przez przez kogoś innego przy pomocy strony WWW, to czy chcesz otrzymać e-mail w takiej sytuacji?"
 
 #: forms.py:346
 msgid "E-mail me when assigned a ticket?"
-msgstr "Уведовить меня по электронной почте о назначеных мне талонах?"
+msgstr "Powiadomienie e-mail w razie przypisania zgłoszenia?"
 
 #: forms.py:347
 msgid "If you are assigned a ticket via the web, do you want to receive an e-mail?"
-msgstr "Хотите ли получать уведомления по электронной почте если кто-то назначил вам талон через web?"
+msgstr "Jeżeli jesteś przypisywany do zgłoszenia za pomocą strony WWW, to czy chcesz otrzymywać e-mail w takiej sytuacji?"
 
 #: forms.py:352
 msgid "E-mail me when a ticket is changed via the API?"
-msgstr "Уведомить меня когда талон изменён через API?"
+msgstr "Powiadomienie e-mail w razie zmiany zgłoszenia przez API?"
 
 #: forms.py:353
 msgid "If a ticket is altered by the API, do you want to receive an e-mail?"
-msgstr "Хотите ли вы получать электронное уведомление если талон был изменён через API"
+msgstr "Jeżeli zgłoszenie jest zmieniane przez API, to czy chcesz otrzymywać e-mail w takiej sytuacji?"
 
 #: forms.py:358
 msgid "Number of tickets to show per page"
-msgstr ""
+msgstr "Ilość zgłoszeń wyświetlanych na stronie"
 
 #: forms.py:359
 msgid "How many tickets do you want to see on the Ticket List page?"
-msgstr ""
+msgstr "Ile zgłoszeń chcesz widzieć na stronie \"Lista zgłoszeń\"?"
 
 #: forms.py:366
 msgid "Use my e-mail address when submitting tickets?"
-msgstr ""
+msgstr "Użyj własnego adresu e-mail dla nowych zgłoszeń?"
 
 #: forms.py:367
 msgid "When you submit a ticket, do you want to automatically use your e-mail address as the submitter address? You can type a different e-mail address when entering the ticket if needed, this option only changes the default."
-msgstr ""
+msgstr "Czy system ma użyć Twojego adresu e-mail w momencie tworzenia nowego zgłoszenia? Możesz za każdym razem wpisać inny adres e-mail; ta opcja zmienia jedynie wartość domyślną."
 
 #: models.py:32 models.py:250 models.py:460 models.py:744 models.py:775
 #: templates/helpdesk/dashboard.html:26 templates/helpdesk/dashboard.html:44
 #: templates/helpdesk/ticket.html:164 templates/helpdesk/ticket_list.html:72
 #: templates/helpdesk/ticket_list.html:183 views/staff.py:221
 msgid "Title"
-msgstr "Заголовок"
+msgstr "Tytuł"
 
 #: models.py:37 models.py:749
 msgid "Slug"
-msgstr "Слаг"
+msgstr ""
 
 #: models.py:38
 msgid "This slug is used when building ticket ID's. Once set, try not to change it or e-mailing may get messy."
-msgstr "Эта строка используется для конструирования идентификатора талона. Однажды установив, старайтесь не менять его, или электронная почта может перепутаться."
+msgstr ""
 
 #: models.py:43 models.py:963 models.py:1029
 #: templates/helpdesk/email_ignore_list.html:13
 #: templates/helpdesk/ticket_cc_list.html:15
 msgid "E-Mail Address"
-msgstr "Адрес E-mail"
+msgstr "Adres e-mail"
 
 #: models.py:46
 msgid "All outgoing e-mails for this queue will use this e-mail address. If you use IMAP or POP3, this should be the e-mail address for that mailbox."
-msgstr "Все исходящие электронные письма этой очереди будут использовать этот электронный адрес. Если вы используете IMAP или POP3 это и есть этот электронный адрес."
+msgstr "Wszystkie wychodzące listy e-mail dla tej kolejki będą używać tego adresu e-mail. Jeżeli korzystasz z protokołu IMAP lub POP3, to ta wartość powinna być adresem e-mail wybranej skrzynki pocztowej."
 
 #: models.py:52
 msgid "Locale"
-msgstr ""
+msgstr "Język"
 
 #: models.py:56
 msgid "Locale of this queue. All correspondence in this queue will be in this language."
-msgstr ""
+msgstr "Język dla tej kolejki. Cała korespondencja będzie odbywać się w tym języku."
 
 #: models.py:60
 msgid "Allow Public Submission?"
-msgstr "Разрешить представления общественности?"
+msgstr "Zezwalaj na publiczne dodawanie zgłoszeń?"
 
 #: models.py:63
 msgid "Should this queue be listed on the public submission form?"
-msgstr "Должна ли эта очередь быть доступна в публичной форме заявки?"
+msgstr "Czy ta kolejka powinna wyświetlać się użytkownikom niezalogowanym?"
 
 #: models.py:68
 msgid "Allow E-Mail Submission?"
-msgstr "Разрешить размещение заявки через электронную почту?"
+msgstr "Zezwalaj na zgłoszenia przez e-mail?"
 
 #: models.py:71
 msgid "Do you want to poll the e-mail box below for new tickets?"
-msgstr "Хотите ли вы опрашивать ниже указанный электронный адрес на наличие новых талонов?"
+msgstr "Czy chcesz co jakiś czas sprawdzać poniższą skrzynkę pocztową na obecność nowych zgłoszeń?"
 
 #: models.py:76
 msgid "Escalation Days"
-msgstr "Дни поднятия"
+msgstr "Dni eskalacji"
 
 #: models.py:79
 msgid "For tickets which are not held, how often do you wish to increase their priority? Set to 0 for no escalation."
-msgstr "Как часто вы желаете увеличивать их приоритет для талонов которые не на удержании? 0 для отключения подъёма."
+msgstr "Dla zgłoszeń bez właściciela, jak często chcesz podnosić ich priorytet? Ustaw \"0\", aby wyłączyć. "
 
 #: models.py:84
 msgid "New Ticket CC Address"
-msgstr "CC Адрес Электронной Почты"
+msgstr "Adres w polu \"Kopia do\" dla nowych zgłoszeń"
 
 #: models.py:87
 msgid "If an e-mail address is entered here, then it will receive notification of all new tickets created for this queue"
-msgstr "На введённые здесь электронный адрес будут посылатся уведомления обо всех новый талонах и этой очереди"
+msgstr "Jeżeli wpiszesz tu adres e-mail, to będą na niego wysyłane powiadomienia o wszystkich nowych zgłoszeniach w tej kolejce."
 
 #: models.py:92
 msgid "Updated Ticket CC Address"
-msgstr "Обновлённый CC Адрес Талона"
+msgstr "Adres w polu \"Kopia do\" dla aktualizowanych zgłoszeń"
 
 #: models.py:95
 msgid "If an e-mail address is entered here, then it will receive notification of all activity (new tickets, closed tickets, updates, reassignments, etc) for this queue"
-msgstr "На введённый здесь электронный адрес будут посылатся уведомления о любой активности в талонах (создание, закрытие, обновлени, переназначание и т.д.) для этой очереди"
+msgstr "Jeżeli wpiszesz tu adres e-mail, to będą na niego wysyłane informacje o wszystkich działaniach (nowe zgłoszenia, zamknięte zgłoszenia, aktualizacje, zmiany przydziałów) dla tej kolejki"
 
 #: models.py:101
 msgid "E-Mail Box Type"
-msgstr "Тип электронного ящика."
+msgstr "Typ skrzynki pocztowej"
 
 #: models.py:103
 msgid "POP 3"
-msgstr "POP3"
+msgstr "POP 3"
 
 #: models.py:103
 msgid "IMAP"
@@ -254,397 +255,397 @@ msgstr "IMAP"
 
 #: models.py:106
 msgid "E-Mail server type for creating tickets automatically from a mailbox - both POP3 and IMAP are supported."
-msgstr "Тип ящика электронной почты, из которого будут создаватся автоматические талоны - оба POP3 и IMAP поддерживаются."
+msgstr "Nowe zgłoszenia przez e-mail - rodzaj skrzynki pocztowej. Obsługiwane protokoły to zarówno POP3 jak IMAP."
 
 #: models.py:111
 msgid "E-Mail Hostname"
-msgstr "Имя Сервера Электронной Почты"
+msgstr "Nazwa serwera e-mail"
 
 #: models.py:115
 msgid "Your e-mail server address - either the domain name or IP address. May be \"localhost\"."
-msgstr "Адрес вашего сервера электронной почты - может быть имя, или IP адрес. Или даже \"localhost\"."
+msgstr "Adres Twojego serwera e-mail: nazwa lub adres IP, a nawet \"localhost\""
 
 #: models.py:120
 msgid "E-Mail Port"
-msgstr "Порт Электронный Почты"
+msgstr "Port e-mail"
 
 #: models.py:123
 msgid "Port number to use for accessing e-mail. Default for POP3 is \"110\", and for IMAP is \"143\". This may differ on some servers. Leave it blank to use the defaults."
-msgstr "Номер порта для доступа к электронному ящику. По умолчанию \"110\" для POP3, и \"143\" для IMAP. Настройки могут отличатся на разных серверах. Оставьте пустым для использования значения по умолчанию."
+msgstr "Numer portu używanego do uzyskania dostępu do skrzynki e-mail. Dla POP3 to zazwyczaj \"110\", a dla IMAP to zazwyczaj \"143\". Ta wartość może być różna na różnych serwerach. Pozostaw pole puste, aby użyć wartości domyślnej."
 
 #: models.py:129
 msgid "Use SSL for E-Mail?"
-msgstr "Использовать SSL для электронной почты?"
+msgstr "Szyfrowanie e-mail za pomocą SSL?"
 
 #: models.py:132
 msgid "Whether to use SSL for IMAP or POP3 - the default ports when using SSL are 993 for IMAP and 995 for POP3."
-msgstr "Использовать SSL для IMAP или POP3 - порты по умолчанию для SSL 993 для IMAP и 995 для POP3."
+msgstr "Czy używać SSL do IMAP lub POP3? Domyślny numer portu gdy używasz SSL to \"993\" dla IMAP oraz \"995\" dla POP3."
 
 #: models.py:137
 msgid "E-Mail Username"
-msgstr "Имя Пользователя Электронной Почты"
+msgstr "Adres e-mail"
 
 #: models.py:141
 msgid "Username for accessing this mailbox."
-msgstr "Имя пользователя для доступа к этому электронному ящику."
+msgstr "Użytkownik z dostępem do tej skrzynki pocztowej"
 
 #: models.py:145
 msgid "E-Mail Password"
-msgstr "Пароль Электронной Почты"
+msgstr "Hasło e-mail"
 
 #: models.py:149
 msgid "Password for the above username"
-msgstr "Пароль для выше указанного имени пользователя"
+msgstr "Hasło dla powyższego użytkownika do powyższej skrzynki pocztowej"
 
 #: models.py:153
 msgid "IMAP Folder"
-msgstr "Папка IMAP"
+msgstr "Folder IMAP"
 
 #: models.py:157
 msgid "If using IMAP, what folder do you wish to fetch messages from? This allows you to use one IMAP account for multiple queues, by filtering messages on your IMAP server into separate folders. Default: INBOX."
-msgstr "Если используется IMAP, из какой папки вы желаете скачивать сообщения? Фильтрация сообщений на сервере позволяет вам использовать один IMAP аккаунт для множества очередей. По умолчанию: INBOX."
+msgstr "Jeżeli korzystasz z IMAP, to z jakiego folderu chcesz pobrać wiadomości? Dzięki temu ustawieniu możesz używać jednego konta IMAP dla wielu kolejek, korzystając z funkcji filtrowania serwera IMAP. Domyślnie: INBOX."
 
 #: models.py:164
 msgid "E-Mail Check Interval"
-msgstr "Интервал Проверки Электронной Почты"
+msgstr "Jak często sprawdzać e-mail?"
 
 #: models.py:165
 msgid "How often do you wish to check this mailbox? (in Minutes)"
-msgstr "Как часто вы хотите проверять этот ящик? (в минутах)"
+msgstr "Jak często sprawdzać skrzynkę e-mail? (w minutach)"
 
 #: models.py:235 templates/helpdesk/dashboard.html:10
 #: templates/helpdesk/ticket.html:134
 msgid "Open"
-msgstr "Открытый"
+msgstr "Otwarte"
 
 #: models.py:236 templates/helpdesk/ticket.html:139
 #: templates/helpdesk/ticket.html.py:144 templates/helpdesk/ticket.html:149
 msgid "Reopened"
-msgstr "Переоткрытый"
+msgstr "Ponownie otwarte"
 
 #: models.py:237 templates/helpdesk/dashboard.html:10
 #: templates/helpdesk/ticket.html:135 templates/helpdesk/ticket.html.py:140
 #: templates/helpdesk/ticket.html:145
 msgid "Resolved"
-msgstr "Решённый"
+msgstr "Rozwiązane"
 
 #: models.py:238 templates/helpdesk/ticket.html:136
 #: templates/helpdesk/ticket.html.py:141 templates/helpdesk/ticket.html:146
 #: templates/helpdesk/ticket.html.py:150
 msgid "Closed"
-msgstr "Закрытый"
+msgstr "Zamknięte"
 
 #: models.py:242
 msgid "1. Critical"
-msgstr "1. Критичный"
+msgstr "1. Krytyczn"
 
 #: models.py:243
 msgid "2. High"
-msgstr "2. Высокий"
+msgstr "2. Wysoki"
 
 #: models.py:244
 msgid "3. Normal"
-msgstr "3. Нормальный"
+msgstr "3. Normalny"
 
 #: models.py:245
 msgid "4. Low"
-msgstr "4. Низкий"
+msgstr "4. Nisk"
 
 #: models.py:246
 msgid "5. Very Low"
-msgstr "5. Очень низкий"
+msgstr "5. Bardzo nisk"
 
 #: models.py:257 templates/helpdesk/dashboard.html:44
 #: templates/helpdesk/ticket_list.html:69
 #: templates/helpdesk/ticket_list.html:183
 msgid "Created"
-msgstr "Созданный"
+msgstr "Utworzono"
 
 #: models.py:259
 msgid "Date this ticket was first created"
-msgstr "Дата создания этого талона"
+msgstr "Data utworzenia tego zgłoszenia"
 
 #: models.py:263
 msgid "Modified"
-msgstr "Изменённый"
+msgstr "Zmodyfikowano"
 
 #: models.py:265
 msgid "Date this ticket was most recently changed."
-msgstr "Дата когда талон был последний раз изменён."
+msgstr "Data ostatniej modyfikacji zgłoszenia"
 
 #: models.py:269 templates/helpdesk/public_view_ticket.html:16
 #: templates/helpdesk/ticket.html:60
 msgid "Submitter E-Mail"
-msgstr "Электронный Адрес Отправителя"
+msgstr "Adres e-mail zgłaszającego"
 
 #: models.py:272
 msgid "The submitter will receive an email for all public follow-ups left for this task."
-msgstr "Отправитель будет получать E-mail обо всех публичных дополнениях к этой задаче."
+msgstr "Zgłaszający otrzyma e-mail z powiadomieniem dla każdej nie-tajnej zmiany do tego zgłoszenia."
 
 #: models.py:284 templates/helpdesk/dashboard.html:26
 #: templates/helpdesk/ticket_list.html:55
 #: templates/helpdesk/ticket_list.html:78
 #: templates/helpdesk/ticket_list.html:183
 msgid "Status"
-msgstr "Статус"
+msgstr "Stan"
 
 #: models.py:290
 msgid "On Hold"
-msgstr "Удерживаемый"
+msgstr "Wstrzymaj"
 
 #: models.py:293
 msgid "If a ticket is on hold, it will not automatically be escalated."
-msgstr "Если талон на удержании он не будет автоматически поднят."
+msgstr "Jeżeli zgłoszenie ma status \"Wstrzymaj\", to nie będzie automatycznie eskalowane."
 
 #: models.py:298 models.py:753 templates/helpdesk/public_view_ticket.html:33
 #: templates/helpdesk/ticket.html:83
 msgid "Description"
-msgstr "Описание"
+msgstr "Opis"
 
 #: models.py:301
 msgid "The content of the customers query."
-msgstr "Содержимое запроса клиента."
+msgstr "Treść zgłoszenia od Klienta"
 
 #: models.py:305 templates/helpdesk/public_view_ticket.html:40
 #: templates/helpdesk/ticket.html:90
 msgid "Resolution"
-msgstr "Решение"
+msgstr "Rozwiązanie"
 
 #: models.py:308
 msgid "The resolution provided to the customer by our staff."
-msgstr "Решение предоставлено клиенту нашими сотрудниками."
+msgstr "Rozwiązanie dostarczone Klientowi"
 
 #: models.py:316
 msgid "1 = Highest Priority, 5 = Low Priority"
-msgstr "1 = Наивысший Приоритет, 5 = Низший Приоритет"
+msgstr "1 = najwyższy priorytet, 5 = najniższy"
 
 #: models.py:323
 msgid "The date this ticket was last escalated - updated automatically by management/commands/escalate_tickets.py."
-msgstr "Дата когда тикет последний раз в последний раз поднят, автоматически обновляется вызовом management/commands/escalate_tickets.py."
+msgstr "Data, gdy utworzono to zgłoszenie - aktualizowana automatycznie za pomocą management/commands/escalate_tickets.py.\n"
 
 #: models.py:332 templates/helpdesk/ticket.html:56 views/feeds.py:91
 #: views/feeds.py:117 views/feeds.py:171 views/staff.py:178
 msgid "Unassigned"
-msgstr "Не назначеный"
+msgstr "Nieprzydzielone"
 
 #: models.py:371
 msgid " - On Hold"
-msgstr " - На Удержании"
+msgstr "- Wstrzymaj"
 
 #: models.py:456 models.py:678 models.py:956
 msgid "Date"
-msgstr "Дата"
+msgstr "Data"
 
 #: models.py:467 views/staff.py:192
 msgid "Comment"
-msgstr "Комментарий"
+msgstr "Komentarz"
 
 #: models.py:473
 msgid "Public"
-msgstr "Публичный"
+msgstr "Publiczne"
 
 #: models.py:476
 msgid "Public tickets are viewable by the submitter and all staff, but non-public tickets can only be seen by staff."
-msgstr "Публичные талоны видны отправителям и коллективу, а не публичные только коллективу."
+msgstr "Publiczne zgłoszenia mogą być oglądane przez zgłaszającego oraz zespół, ale nie-publiczne zgłoszenia mogą być tylko oglądane przez zespół."
 
 #: models.py:487 templates/helpdesk/ticket.html:132
 msgid "New Status"
-msgstr "Новый Статус"
+msgstr ""
 
 #: models.py:491
 msgid "If the status was changed, what was it changed to?"
-msgstr "Если статус был изменён, на что он был изменён?"
+msgstr ""
 
 #: models.py:522
 msgid "Field"
-msgstr "Поле"
+msgstr ""
 
 #: models.py:527
 msgid "Old Value"
-msgstr "Старое Значение"
+msgstr ""
 
 #: models.py:533
 msgid "New Value"
-msgstr "Новое Значение"
+msgstr ""
 
 #: models.py:541
 msgid "removed"
-msgstr "удалённый"
+msgstr ""
 
 #: models.py:543
 #, python-format
 msgid "set to %s"
-msgstr "установлен в %s"
+msgstr ""
 
 #: models.py:545
 #, python-format
 msgid "changed from \"%(old_value)s\" to \"%(new_value)s\""
-msgstr "изменён с \"%(old_value)s\" на \"%(new_value)s\""
+msgstr ""
 
 #: models.py:576
 msgid "File"
-msgstr "Файл"
+msgstr ""
 
 #: models.py:581
 msgid "Filename"
-msgstr "Имя файла"
+msgstr ""
 
 #: models.py:586
 msgid "MIME Type"
-msgstr "MIME тип"
+msgstr ""
 
 #: models.py:591
 msgid "Size"
-msgstr "Размер"
+msgstr ""
 
 #: models.py:592
 msgid "Size of this file in bytes"
-msgstr "Размер этого файла в байтах"
+msgstr ""
 
 #: models.py:627
 msgid "Leave blank to allow this reply to be used for all queues, or select those queues you wish to limit this reply to."
-msgstr "Оставьте пустым что бы позволить всем очередям использовать этот ответ, или выберете каким очередям можно использовать этот ответ."
+msgstr ""
 
 #: models.py:632 models.py:673 models.py:951
 #: templates/helpdesk/email_ignore_list.html:13
 msgid "Name"
-msgstr "Имя"
+msgstr ""
 
 #: models.py:634
 msgid "Only used to assist users with selecting a reply - not shown to the user."
-msgstr "Используется пользователям только что бы помочь им выбрать ответ - пользователю не показывается."
+msgstr ""
 
 #: models.py:639
 msgid "Body"
-msgstr "Тело"
+msgstr ""
 
 #: models.py:640
 msgid "Context available: {{ ticket }} - ticket object (eg {{ ticket.title }}); {{ queue }} - The queue; and {{ user }} - the current user."
-msgstr "Доступный контекст: {{ ticket }} - талон (например {{ ticket.title }}); {{ queue }} - Очередь; и {{ user }} - текущий пользователь."
+msgstr ""
 
 #: models.py:667
 msgid "Leave blank for this exclusion to be applied to all queues, or select those queues you wish to exclude with this entry."
-msgstr "Оставьте пустым что бы это исключение применялось ко всем очередям, или выберите очереди для который применять исключение."
+msgstr ""
 
 #: models.py:679
 msgid "Date on which escalation should not happen"
-msgstr "Дата когда новые талоны не должны подниматся."
+msgstr ""
 
 #: models.py:696
 msgid "Template Name"
-msgstr "Имя Шаблона"
+msgstr ""
 
 #: models.py:702
 msgid "Subject"
-msgstr "Тема"
+msgstr ""
 
 #: models.py:704
 msgid "This will be prefixed with \"[ticket.ticket] ticket.title\". We recommend something simple such as \"(Updated\") or \"(Closed)\" - the same context is available as in plain_text, below."
-msgstr "Добавится приставка \"[ticket.ticket] ticket.title\". Мы рекомендуем что нибудь простое например \"(Updated\") или \"(Closed)\" - тот же контекст доступен ниже в plain_text."
+msgstr ""
 
 #: models.py:710
 msgid "Heading"
-msgstr "Заголовок"
+msgstr ""
 
 #: models.py:712
 msgid "In HTML e-mails, this will be the heading at the top of the email - the same context is available as in plain_text, below."
-msgstr "В HTML электронных письмах, это будет в заголовке - тот же контекст доступен в виде plain_text ниже."
+msgstr ""
 
 #: models.py:718
 msgid "Plain Text"
-msgstr "Чистый Текст"
+msgstr ""
 
 #: models.py:719
 msgid "The context available to you includes {{ ticket }}, {{ queue }}, and depending on the time of the call: {{ resolution }} or {{ comment }}."
-msgstr "Доступный контекст для включения {{ ticket }}, {{ queue }}, и в зависимости от времени вызова: {{ resolution }} или {{ comment }}."
+msgstr ""
 
 #: models.py:725
 msgid "HTML"
-msgstr "HTML"
+msgstr ""
 
 #: models.py:726
 msgid "The same context is available here as in plain_text, above."
-msgstr "Тот же самый контекст доступен здесь как в plain_text выше."
+msgstr ""
 
 #: models.py:780
 msgid "Question"
-msgstr "Вопрос"
+msgstr ""
 
 #: models.py:784
 msgid "Answer"
-msgstr "Ответ"
+msgstr ""
 
 #: models.py:788
 msgid "Votes"
-msgstr "Голоса"
+msgstr ""
 
 #: models.py:789
 msgid "Total number of votes cast for this item"
-msgstr "Общее количество отданых голосов"
+msgstr ""
 
 #: models.py:793
 msgid "Positive Votes"
-msgstr "Положительные Голоса"
+msgstr ""
 
 #: models.py:794
 msgid "Number of votes for this item which were POSITIVE."
-msgstr "Количество ПОЗИТИВНО голосовавших."
+msgstr ""
 
 #: models.py:798
 msgid "Last Updated"
-msgstr "Последний Раз Обновлялось"
+msgstr ""
 
 #: models.py:799
 msgid "The date on which this question was most recently changed."
-msgstr "Дата когда этот вопрос был последний раз изменён."
+msgstr ""
 
 #: models.py:813
 msgid "Unrated"
-msgstr "Не оценённый"
+msgstr ""
 
 #: models.py:841 templates/helpdesk/ticket_list.html:142
 msgid "Query Name"
-msgstr "Имя Запроса"
+msgstr ""
 
 #: models.py:843
 msgid "User-provided name for this query"
-msgstr "Имя запроса определённое пользователем"
+msgstr ""
 
 #: models.py:847
 msgid "Shared With Other Users?"
-msgstr "Доступный Остальным Пользователям?"
+msgstr ""
 
 #: models.py:850
 msgid "Should other users see this query?"
-msgstr "Виден ли этот запрос другим пользователям?"
+msgstr ""
 
 #: models.py:854
 msgid "Search Query"
-msgstr "Поисковый Запрос"
+msgstr ""
 
 #: models.py:855
 msgid "Pickled query object. Be wary changing this."
-msgstr "Pickle-ные объекты запросов. Не изменяйте их."
+msgstr ""
 
 #: models.py:876
 msgid "Settings Dictionary"
-msgstr "Словарь Настроек"
+msgstr ""
 
 #: models.py:877
 msgid "This is a base64-encoded representation of a pickled Python dictionary. Do not change this field via the admin."
-msgstr "Это base64-кодированое представление pickle-ного Python словаря. Не изменяйте его через админку."
+msgstr ""
 
 #: models.py:945
 msgid "Leave blank for this e-mail to be ignored on all queues, or select those queues you wish to ignore this e-mail for."
-msgstr "Оставьте пустым, чтобы этот E-mail был проигнорирован во всех очередях, или выберите те очереди, для которых он будет проигнорирован."
+msgstr ""
 
 #: models.py:957
 msgid "Date on which this e-mail address was added"
-msgstr "Дата добавления этого E-mail"
+msgstr ""
 
 #: models.py:965
 msgid "Enter a full e-mail address, or portions with wildcards, eg *@domain.com or postmaster@*."
-msgstr "Введите E-mail - полный адрес или шаблон с подстановочными знаками, например, *@domain.com или postmaster@*."
+msgstr ""
 
 #: models.py:970
 msgid "Save Emails in Mailbox?"
@@ -681,15 +682,15 @@ msgstr ""
 #: management/commands/escalate_tickets.py:146
 #, python-format
 msgid "Ticket escalated after %s days"
-msgstr "Талон поднят после %s дней"
+msgstr ""
 
 #: management/commands/get_email.py:147
 msgid "Created from e-mail"
-msgstr "Созданый из электронной почты"
+msgstr ""
 
 #: management/commands/get_email.py:151
 msgid "Unknown Sender"
-msgstr "Неизвестный Отправитель"
+msgstr ""
 
 #: management/commands/get_email.py:203
 msgid "No plain-text email body available. Please see attachment email_html_body.html."
@@ -705,12 +706,12 @@ msgstr ""
 
 #: management/commands/get_email.py:286
 msgid " (Updated)"
-msgstr "(Обновлено)"
+msgstr ""
 
 #: management/commands/get_email.py:308
 #, python-format
 msgid "E-Mail Received from %(sender_email)s"
-msgstr "Электронное послание полученное от %(sender_email)s"
+msgstr ""
 
 #: management/commands/get_email.py:316
 #, python-format
@@ -719,50 +720,50 @@ msgstr ""
 
 #: templates/helpdesk/base.html:4
 msgid "Powered by Jutda Helpdesk"
-msgstr "Работает на Judta Helpdesk"
+msgstr ""
 
 #: templates/helpdesk/base.html:9 templates/helpdesk/rss_list.html:9
 #: templates/helpdesk/rss_list.html:23 templates/helpdesk/rss_list.html:28
 msgid "My Open Tickets"
-msgstr "Мои Открытые Талоны"
+msgstr ""
 
 #: templates/helpdesk/base.html:10
 msgid "All Recent Activity"
-msgstr "Вся Последная Активность"
+msgstr ""
 
 #: templates/helpdesk/base.html:11 templates/helpdesk/dashboard.html:43
 #: templates/helpdesk/rss_list.html:15
 msgid "Unassigned Tickets"
-msgstr "Не Назначеные Талоны"
+msgstr ""
 
 #: templates/helpdesk/base.html:17 templates/helpdesk/public_base.html:3
 #: templates/helpdesk/public_base.html:11
 msgid "Helpdesk"
-msgstr "Справочная"
+msgstr ""
 
 #: templates/helpdesk/base.html:19
 msgid "Dashboard"
-msgstr "Панель"
+msgstr ""
 
 #: templates/helpdesk/base.html:20 templates/helpdesk/ticket_list.html:182
 msgid "Tickets"
-msgstr "талоны"
+msgstr ""
 
 #: templates/helpdesk/base.html:21
 msgid "New Ticket"
-msgstr "Новый Талон"
+msgstr ""
 
 #: templates/helpdesk/base.html:22
 msgid "Stats"
-msgstr "Статистика"
+msgstr ""
 
 #: templates/helpdesk/base.html:23
 msgid "Logout"
-msgstr "Выход"
+msgstr ""
 
 #: templates/helpdesk/base.html:24
 msgid "Search..."
-msgstr "Поиск..."
+msgstr ""
 
 #: templates/helpdesk/base.html:24
 msgid "Enter a keyword, or a ticket number to jump straight to that ticket."
@@ -776,28 +777,28 @@ msgstr ""
 #: templates/helpdesk/rss_list.html:12 templates/helpdesk/rss_list.html:15
 #: templates/helpdesk/rss_list.html:27 templates/helpdesk/rss_list.html:28
 msgid "RSS Icon"
-msgstr "Иконка RSS"
+msgstr ""
 
 #: templates/helpdesk/base.html:31 templates/helpdesk/rss_list.html:2
 #: templates/helpdesk/rss_list.html.py:4
 msgid "RSS Feeds"
-msgstr "RSS Ленты Новостей"
+msgstr ""
 
 #: templates/helpdesk/base.html:31
 msgid "API"
-msgstr "API"
+msgstr ""
 
 #: templates/helpdesk/base.html:31
 msgid "User Settings"
-msgstr "Настройки Пользователя"
+msgstr ""
 
 #: templates/helpdesk/base.html:31
 msgid "System Settings"
-msgstr "Системные настройки"
+msgstr ""
 
 #: templates/helpdesk/confirm_delete_saved_query.html:3
 msgid "Delete Saved Query"
-msgstr "Удалить Сохраннный Запрос"
+msgstr ""
 
 #: templates/helpdesk/confirm_delete_saved_query.html:5
 #, python-format
@@ -807,18 +808,12 @@ msgid ""
 "\n"
 "<p>Are you sure you want to delete this saved filter (<em>%(query_title)s</em>)? To re-create it, you will need to manually re-filter your ticket listing.</p>\n"
 msgstr ""
-"\n"
-"<h2>Удалить Запрос</h2>\n"
-"\n"
-"<p>Вы уверены что вы хотите удалить сохранённый фильтр (<em>%(query_title)s</em>)? Что бы пересоздать его, вам придётся в ручную перефильтровать ваши талоны из списка</p>\n"
 
 #: templates/helpdesk/confirm_delete_saved_query.html:11
 msgid ""
 "\n"
 "<p>You have shared this query, so other users may be using it. If you delete it, they will have to manually create their own query.</p>\n"
 msgstr ""
-"\n"
-"<p>Вы поделились запросом, теперь остальные пользователи могут его использовать. Если вы удалите его, им придётся сделать себе собственные запрос.</p>\n"
 
 #: templates/helpdesk/confirm_delete_saved_query.html:15
 #: templates/helpdesk/delete_ticket.html:11
@@ -832,7 +827,7 @@ msgstr ""
 
 #: templates/helpdesk/create_ticket.html:3
 msgid "Create Ticket"
-msgstr "Создать Талон"
+msgstr ""
 
 #: templates/helpdesk/create_ticket.html:6
 msgid ""
@@ -840,49 +835,46 @@ msgid ""
 "\n"
 "<p>Unless otherwise stated, all fields are required. Please provide as descriptive a title and description as possible.</p>"
 msgstr ""
-"<h2>Отправить талон</h2>\n"
-"\n"
-"<p>Все поля обязательны для заполнения пока не сказано обратное. Пожалуйста, напишите заголовок и описание как можно более точно отображающими суть проблемы.</p>"
 
 #: templates/helpdesk/create_ticket.html:17
 #: templates/helpdesk/edit_ticket.html:19
 #: templates/helpdesk/public_homepage.html:31
 msgid "(Optional)"
-msgstr "(Опциональный)"
+msgstr ""
 
 #: templates/helpdesk/create_ticket.html:26
 #: templates/helpdesk/public_homepage.html:40
 msgid "Submit Ticket"
-msgstr "Отправить Талон"
+msgstr ""
 
 #: templates/helpdesk/dashboard.html:2
 msgid "Helpdesk Dashboard"
-msgstr "Панель управления Справочной"
+msgstr ""
 
 #: templates/helpdesk/dashboard.html:9
 msgid "Helpdesk Summary"
-msgstr "Сводка по Справочной"
+msgstr ""
 
 #: templates/helpdesk/dashboard.html:25
 msgid "Your Tickets"
-msgstr "Ваши Талоны"
+msgstr ""
 
 #: templates/helpdesk/dashboard.html:26 templates/helpdesk/dashboard.html:44
 #: templates/helpdesk/ticket_list.html:183
 msgid "Pr"
-msgstr "Приоритет"
+msgstr ""
 
 #: templates/helpdesk/dashboard.html:26
 msgid "Last Update"
-msgstr "Последнее Обновление"
+msgstr ""
 
 #: templates/helpdesk/dashboard.html:38
 msgid "You have no tickets assigned to you."
-msgstr "Нет талонов, назначенных Вам."
+msgstr ""
 
 #: templates/helpdesk/dashboard.html:52 templates/helpdesk/ticket.html:56
 msgid "Take"
-msgstr "Взять"
+msgstr ""
 
 #: templates/helpdesk/dashboard.html:52
 #: templates/helpdesk/email_ignore_list.html:13
@@ -890,15 +882,15 @@ msgstr "Взять"
 #: templates/helpdesk/ticket_cc_list.html:15
 #: templates/helpdesk/ticket_cc_list.html:23
 msgid "Delete"
-msgstr "Удалить"
+msgstr ""
 
 #: templates/helpdesk/dashboard.html:56
 msgid "There are no unassigned tickets."
-msgstr "Нет неназначенных талонов."
+msgstr ""
 
 #: templates/helpdesk/delete_ticket.html:3
 msgid "Delete Ticket"
-msgstr "Удалить Талон"
+msgstr ""
 
 #: templates/helpdesk/delete_ticket.html:5
 #, python-format
@@ -908,10 +900,6 @@ msgid ""
 "\n"
 "<p>Are you sure you want to delete this ticket (<em>%(ticket_title)s</em>)? All traces of the ticket, including followups, attachments, and updates will be irreversably removed.</p>\n"
 msgstr ""
-"\n"
-"<h2>Удалить Талон</h2>\n"
-"\n"
-"<p>Вы уверены что хотите удалить этот талон (<em>%(ticket_title)s</em>)? Все следы талона, включая слежения, вложенные файлы и одновления будут безвозвратно удалены.</p>\n"
 
 #: templates/helpdesk/edit_ticket.html:3
 msgid "Edit Ticket"
@@ -933,7 +921,7 @@ msgstr ""
 #: templates/helpdesk/email_ignore_add.html:3
 #: templates/helpdesk/email_ignore_add.html:23
 msgid "Ignore E-Mail Address"
-msgstr "Игнорировать адрес E-mail"
+msgstr ""
 
 #: templates/helpdesk/email_ignore_add.html:5
 msgid ""
@@ -944,16 +932,10 @@ msgid ""
 "\n"
 "<p>You can either enter a whole e-mail address such as <em>email@domain.com</em> or a portion of an e-mail address with a wildcard, such as <em>*@domain.com</em> or <em>user@*</em>.</p>"
 msgstr ""
-"\n"
-"<h2>Игнорировать адрес E-mail</h2>\n"
-"\n"
-"<p>Чтобы игнорировать адрес E-mail, предотвратить автоматическое создание талонов письмами с него, укажите E-mail ниже.</p>\n"
-"\n"
-"<p>Вы можете указать как полный адрес E-mail, например, <em>email@domain.com</em>, так и часть адреса E-mail - с подстановочным знаком, например, <em>*@domain.com</em> или <em>user@*</em>.</p>"
 
 #: templates/helpdesk/email_ignore_del.html:3
 msgid "Delete Ignored E-Mail Address"
-msgstr "Удалить игнорируемый адрес E-mail"
+msgstr ""
 
 #: templates/helpdesk/email_ignore_del.html:5
 #, python-format
@@ -975,7 +957,7 @@ msgstr ""
 #: templates/helpdesk/email_ignore_list.html:3
 #: templates/helpdesk/email_ignore_list.html:12
 msgid "Ignored E-Mail Addresses"
-msgstr "Игнорируемые адреса E-mail"
+msgstr ""
 
 #: templates/helpdesk/email_ignore_list.html:5
 msgid ""
@@ -984,18 +966,14 @@ msgid ""
 "\n"
 "<p>The following e-mail addresses are currently being ignored by the incoming e-mail processor. You can <a href='add/'>add a new e-mail address to the list</a> or delete any of the items below as required.</p>"
 msgstr ""
-"\n"
-"<h2>Игнорируемые адреса E-mail</h2>\n"
-"\n"
-"<p>Следующие адреса E-mail в настоящее время игнорируются обработчиком входящей почты. Вы можете <a href='add/'>добавить в список новый адрес E-mail</a> или удалить любые перечисленные ниже на свое усмотрение.</p>"
 
 #: templates/helpdesk/email_ignore_list.html:13
 msgid "Date Added"
-msgstr "Дата добавления"
+msgstr ""
 
 #: templates/helpdesk/email_ignore_list.html:13
 msgid "Queues"
-msgstr "Очереди"
+msgstr ""
 
 #: templates/helpdesk/email_ignore_list.html:13
 msgid "Keep in mailbox?"
@@ -1017,118 +995,118 @@ msgstr ""
 #: templates/helpdesk/kb_category.html:11
 #, python-format
 msgid "Knowledgebase Category: %(kbcat)s"
-msgstr "Категория Базы Знаний: %(kbcat)s"
+msgstr ""
 
 #: templates/helpdesk/kb_category.html:6
 #, python-format
 msgid "You are viewing all items in the %(kbcat)s category."
-msgstr "Вы просматриваете всё содержимое в категории %(kbcat)s."
+msgstr ""
 
 #: templates/helpdesk/kb_category.html:12
 msgid "Article"
-msgstr "Статья"
+msgstr ""
 
 #: templates/helpdesk/kb_index.html:4 templates/helpdesk/public_base.html:14
 msgid "Knowledgebase"
-msgstr "База Знаний"
+msgstr ""
 
 #: templates/helpdesk/kb_index.html:6
 msgid "We have listed a number of knowledgebase articles for your perusal in the following categories. Please check to see if any of these articles address your problem prior to opening a support ticket."
-msgstr "Мы перечислили ряд статей в базе знаний для вашего ознакомления в следующих категориях. Пожалуйста, проверьте до открытия талона, чтобы в случае какого-либо из этих статей решить Вашу проблему до открытия"
+msgstr ""
 
 #: templates/helpdesk/kb_index.html:9
 msgid "Knowledgebase Categories"
-msgstr "Категории Базы Знаний"
+msgstr ""
 
 #: templates/helpdesk/kb_index.html:10
 msgid "Category"
-msgstr "Категория"
+msgstr ""
 
 #: templates/helpdesk/kb_item.html:4
 #, python-format
 msgid "Knowledgebase: %(item)s"
-msgstr "База Знаний: %(item)s"
+msgstr ""
 
 #: templates/helpdesk/kb_item.html:13
 #, python-format
 msgid "View <a href='%(category_url)s'>other <em>%(category_title)s</em> articles</a>, or continue <a href='../'>viewing other knowledgebase articles</a>."
-msgstr "Смотреть <a href='%(category_url)s'>другие <em>%(category_title)s</em> статьи</a>, или продолжить <a href='../'>просмотр остальных статьей Базы Знаний</a>."
+msgstr ""
 
 #: templates/helpdesk/kb_item.html:15
 msgid "Feedback"
-msgstr "Обратная Связь"
+msgstr ""
 
 #: templates/helpdesk/kb_item.html:17
 msgid "We give our users an opportunity to vote for items that they believe have helped them out, in order for us to better serve future customers. We would appreciate your feedback on this article. Did you find it useful?"
-msgstr "Мы предоставляем нашим пользователям возможность голосовать за статьи, которые по их мнению, способствовали им, с тем чтобы мы могли лучше обслуживать клиентов в будущем. Мы будем признательны за ваши отзывы на эту статью. Было ли это полезным?"
+msgstr ""
 
 #: templates/helpdesk/kb_item.html:20
 msgid "This article was useful to me"
-msgstr "Эта статья была полезна для меня"
+msgstr ""
 
 #: templates/helpdesk/kb_item.html:21
 msgid "This article was <strong>not</strong> useful to me"
-msgstr "Эта статья была <strong>бесполезна</strong> для меня"
+msgstr ""
 
 #: templates/helpdesk/kb_item.html:24
 msgid "The results of voting by other readers of this article are below:"
-msgstr "Результаты голосования других прочитавших эту статью указаны ниже:"
+msgstr ""
 
 #: templates/helpdesk/kb_item.html:27
 #, python-format
 msgid "Recommendations: %(recommendations)s"
-msgstr "Рекомендации: %(recommendations)s"
+msgstr ""
 
 #: templates/helpdesk/kb_item.html:28
 #, python-format
 msgid "Votes: %(votes)s"
-msgstr "Голоса: %(votes)s"
+msgstr ""
 
 #: templates/helpdesk/kb_item.html:29
 #, python-format
 msgid "Overall Rating: %(score)s"
-msgstr "Общий Рейтинг: %(score)s"
+msgstr ""
 
 #: templates/helpdesk/public_base.html:13
 msgid "Submit A Ticket"
-msgstr "Отправить Талон"
+msgstr ""
 
 #: templates/helpdesk/public_base.html:15
 msgid "Log In"
-msgstr "Войти"
+msgstr ""
 
 #: templates/helpdesk/public_base.html:22
 msgid "Powered by <a href='http://www.jutda.com.au/'>Jutda HelpDesk</a>."
-msgstr "Работает на <a href='http://www.jutda.com.au/'>Jutda Helpdesk</a>."
+msgstr ""
 
 #: templates/helpdesk/public_homepage.html:4
 #: templates/helpdesk/public_view_form.html:4
 #: templates/helpdesk/public_view_ticket.html:2
 msgid "View a Ticket"
-msgstr "Просмотреть Талон"
+msgstr ""
 
 #: templates/helpdesk/public_homepage.html:9
 #: templates/helpdesk/public_view_form.html:12
 msgid "Ticket"
-msgstr "Талон"
+msgstr ""
 
 #: templates/helpdesk/public_homepage.html:12
 #: templates/helpdesk/public_view_form.html:15
 msgid "Your E-mail Address"
-msgstr "Ваш Эдрес Электронной Почты"
+msgstr ""
 
 #: templates/helpdesk/public_homepage.html:16
 #: templates/helpdesk/public_view_form.html:19
 msgid "View Ticket"
-msgstr "Просмотреть Талон"
+msgstr ""
 
 #: templates/helpdesk/public_homepage.html:20
 msgid "Submit a Ticket"
-msgstr "Отправить Талон"
+msgstr ""
 
 #: templates/helpdesk/public_homepage.html:22
 msgid "All fields are required. Please provide as descriptive a title and description as possible."
-msgstr "Все поля являются обязательными для заполнения. Пожалуйста, представьте, заголовок и описание, настолько подробными насколько это возможно."
+msgstr ""
 
 #: templates/helpdesk/public_spam.html:4
 msgid "Unable To Open Ticket"
@@ -1145,44 +1123,44 @@ msgstr ""
 
 #: templates/helpdesk/public_view_form.html:8
 msgid "Error:"
-msgstr "Ошибка:"
+msgstr ""
 
 #: templates/helpdesk/public_view_ticket.html:8
 #, python-format
 msgid "Queue: %(queue_name)s"
-msgstr "Очередь: %(queue_name)s"
+msgstr ""
 
 #: templates/helpdesk/public_view_ticket.html:11
 #: templates/helpdesk/ticket.html:50
 msgid "Submitted On"
-msgstr "Отправлен В"
+msgstr ""
 
 #: templates/helpdesk/public_view_ticket.html:40
 #: templates/helpdesk/ticket.html:90
 msgid "Accept"
-msgstr "Принять"
+msgstr ""
 
 #: templates/helpdesk/public_view_ticket.html:40
 #: templates/helpdesk/ticket.html:90
 msgid "Accept and Close"
-msgstr "Принять и Закрыть"
+msgstr ""
 
 #: templates/helpdesk/public_view_ticket.html:49
 #: templates/helpdesk/ticket.html:99
 msgid "Follow-Ups"
-msgstr "Наблюдатели"
+msgstr ""
 
 #: templates/helpdesk/public_view_ticket.html:57
 #: templates/helpdesk/ticket.html:107
 #, python-format
 msgid "Changed %(field)s from %(old_value)s to %(new_value)s."
-msgstr "Изменено %(field)s с %(old_value)s на %(new_value)s."
+msgstr ""
 
 #: templates/helpdesk/report_index.html:3
 #: templates/helpdesk/report_output.html:3
 #: templates/helpdesk/report_output.html:6
 msgid "Reports &amp; Statistics"
-msgstr "Отчёты и Статистика"
+msgstr ""
 
 #: templates/helpdesk/report_index.html:6
 msgid ""
@@ -1221,43 +1199,43 @@ msgstr ""
 
 #: templates/helpdesk/rss_list.html:6
 msgid "The following RSS feeds are available for you to monitor using your preferred RSS software. With the exception of the 'Latest Activity' feed, all feeds provide information only on Open and Reopened cases. This ensures your RSS reader isn't full of information about closed or historical tasks."
-msgstr "Следующие RSS-каналы доступны для вас что бы следить за обновлениями, используя предпочтительное RSS программное обеспечение. За исключением канала \"Последная Активность\", все каналы представляют информацию только по открытомым и возобновленным делам. Это обеспечивает вашу RSS программу не заполнятся информацией о закрытых или устарешвих задачах."
+msgstr ""
 
 #: templates/helpdesk/rss_list.html:10
 msgid "A summary of your open tickets - useful for getting alerted to new tickets opened for you"
-msgstr "Кратко для ваших открытых талонах - полезно для получения уведомлений о новых талонах открытых вами"
+msgstr ""
 
 #: templates/helpdesk/rss_list.html:12
 msgid "Latest Activity"
-msgstr "Последная Активность"
+msgstr ""
 
 #: templates/helpdesk/rss_list.html:13
 msgid "A summary of all helpdesk activity - including comments, emails, attachments, and more"
-msgstr "Кратко обо всей активности - включая коментарии, электронные письма, вложеные файлы и так далее"
+msgstr ""
 
 #: templates/helpdesk/rss_list.html:16
 msgid "All unassigned tickets - useful for being alerted to new tickets opened by the public via the web or via e-mail"
-msgstr "Все не назначеные талоны - полезно что бы знать обо всех новых талонах открытых через браузер или электронную почту"
+msgstr ""
 
 #: templates/helpdesk/rss_list.html:19
 msgid "These RSS feeds allow you to view a summary of either your own tickets, or all tickets, for each of the queues in your helpdesk. For example, if you manage the staff who utilise a particular queue, this may be used to view new tickets coming into that queue."
-msgstr "Эти ленты RSS позволят Вам видеть сводку по Вашим собственным или всем талонам, для любой очереди в Справочной. Например, если Вы управляете персоналом, использующим определенную очередь, можно использовать ленту RSS для просмотра новых талонов этой очереди."
+msgstr ""
 
 #: templates/helpdesk/rss_list.html:22
 msgid "Per-Queue Feeds"
-msgstr "Ленты Новостей по Очередям"
+msgstr ""
 
 #: templates/helpdesk/rss_list.html:23
 msgid "All Open Tickets"
-msgstr "Все открытые талоны"
+msgstr ""
 
 #: templates/helpdesk/rss_list.html:27
 msgid "Open Tickets"
-msgstr "Открытые Талоны"
+msgstr ""
 
 #: templates/helpdesk/system_settings.html:3
 msgid "Change System Settings"
-msgstr "Изменить системные настройки"
+msgstr ""
 
 #: templates/helpdesk/system_settings.html:5
 msgid ""
@@ -1266,71 +1244,67 @@ msgid ""
 "\n"
 "<p>The following items can be maintained by you or other superusers:</p>"
 msgstr ""
-"\n"
-"h2>Системные настройки</h2>\n"
-"\n"
-"<p>Следующие задачи можете выполнить Вы и другие суперпользователи:</p>"
 
 #: templates/helpdesk/system_settings.html:11
 msgid "E-Mail Ignore list"
-msgstr "Список игнорируемых E-mail"
+msgstr ""
 
 #: templates/helpdesk/system_settings.html:12
 msgid "Maintain Queues"
-msgstr "Поддержка очередей"
+msgstr ""
 
 #: templates/helpdesk/system_settings.html:13
 msgid "Maintain Pre-Set Replies"
-msgstr "Поддержка предопределённых ответов"
+msgstr ""
 
 #: templates/helpdesk/system_settings.html:14
 msgid "Maintain Knowledgebase Categories"
-msgstr "Поддержка категорий Базы знаний"
+msgstr ""
 
 #: templates/helpdesk/system_settings.html:15
 msgid "Maintain Knowledgebase Items"
-msgstr "Поддержка статей Базы знаний"
+msgstr ""
 
 #: templates/helpdesk/system_settings.html:16
 msgid "Maintain E-Mail Templates"
-msgstr "Поддержка шаблонов E-mail"
+msgstr ""
 
 #: templates/helpdesk/system_settings.html:17
 msgid "Maintain Users"
-msgstr "Поддержка пользователей"
+msgstr ""
 
 #: templates/helpdesk/ticket.html:2
 msgid "View Ticket Details"
-msgstr "Просмотреть Талон"
+msgstr ""
 
 #: templates/helpdesk/ticket.html:34
 msgid "Attach another File"
-msgstr "Прикрепить Другой Файл"
+msgstr ""
 
 #: templates/helpdesk/ticket.html:34 templates/helpdesk/ticket.html.py:188
 msgid "Add Another File"
-msgstr "Добавить Другой Файл"
+msgstr ""
 
 #: templates/helpdesk/ticket.html:46
 msgid "Unhold"
-msgstr "Снять с удержания"
+msgstr ""
 
 #: templates/helpdesk/ticket.html:46
 msgid "Hold"
-msgstr "Удерживать"
+msgstr ""
 
 #: templates/helpdesk/ticket.html:47
 #, python-format
 msgid "Queue: %(queue)s"
-msgstr "Очередь: %(queue)s"
+msgstr ""
 
 #: templates/helpdesk/ticket.html:55
 msgid "Assigned To"
-msgstr "Назначен "
+msgstr ""
 
 #: templates/helpdesk/ticket.html:61
 msgid "Ignore"
-msgstr "Игнорировать"
+msgstr ""
 
 #: templates/helpdesk/ticket.html:70
 msgid "Copies To"
@@ -1342,61 +1316,61 @@ msgstr ""
 
 #: templates/helpdesk/ticket.html:103
 msgid "Private"
-msgstr "Приватный"
+msgstr ""
 
 #: templates/helpdesk/ticket.html:118
 msgid "Respond to this ticket"
-msgstr "Ответить на этот талон"
+msgstr ""
 
 #: templates/helpdesk/ticket.html:124
 msgid "Use a Pre-set Reply"
-msgstr "Использовать предопределённые ответы"
+msgstr ""
 
 #: templates/helpdesk/ticket.html:126
 msgid "Selecting a pre-set reply will over-write your comment below. You can then modify the pre-set reply to your liking before saving this update."
-msgstr "Выбор предопределенного ответа перезапишет Ваш комментарий. После чего (до сохранения этого обновления) можно исправить предопределенный ответ по своему усмотрению."
+msgstr ""
 
 #: templates/helpdesk/ticket.html:128
 msgid "Comment / Resolution"
-msgstr "Комментарий / Решение"
+msgstr ""
 
 #: templates/helpdesk/ticket.html:130
 msgid "You can insert ticket and queue details in your message. For more information, see the <a href='../../help/context/'>context help page</a>."
-msgstr "Вы можете вставить детали о талоне и очереди в ваше вообщение. Для дополнительной информации смотрите <a href='../../help/context/'>Страница помощи про Контекст</a>."
+msgstr ""
 
 #: templates/helpdesk/ticket.html:153
 msgid "Is this update public?"
-msgstr "Это публичный талон?"
+msgstr ""
 
 #: templates/helpdesk/ticket.html:155
 msgid "If this is public, the submitter will be e-mailed your comment or resolution."
-msgstr "Если это публичный, отправитель получит по электронной почте ваш комментарий или решение."
+msgstr ""
 
 #: templates/helpdesk/ticket.html:158
 msgid "Change Further Details &raquo;"
-msgstr "Изменить дополнительную информацию &raquo;"
+msgstr ""
 
 #: templates/helpdesk/ticket.html:167 templates/helpdesk/ticket_list.html:53
 #: templates/helpdesk/ticket_list.html:84
 #: templates/helpdesk/ticket_list.html:183
 msgid "Owner"
-msgstr "Владелец"
+msgstr ""
 
 #: templates/helpdesk/ticket.html:168
 msgid "Unassign"
-msgstr "Не назначен"
+msgstr ""
 
 #: templates/helpdesk/ticket.html:181
 msgid "Attach File(s) &raquo;"
-msgstr "Прикрепить Файл(ы) &raquo;"
+msgstr ""
 
 #: templates/helpdesk/ticket.html:187
 msgid "Attach a File"
-msgstr "Прикрепить файл"
+msgstr ""
 
 #: templates/helpdesk/ticket.html:195
 msgid "Update This Ticket"
-msgstr "Обновить Этот Талон"
+msgstr ""
 
 #: templates/helpdesk/ticket_cc_add.html:3
 msgid "Add Ticket CC"
@@ -1469,32 +1443,32 @@ msgstr ""
 
 #: templates/helpdesk/ticket_list.html:2
 msgid "Ticket Listing"
-msgstr "Список Талонов"
+msgstr ""
 
 #: templates/helpdesk/ticket_list.html:49
 msgid "Change Query"
-msgstr "Изменить Запрос"
+msgstr ""
 
 #: templates/helpdesk/ticket_list.html:52
 msgid "Sorting"
-msgstr "Сортировка"
+msgstr ""
 
 #: templates/helpdesk/ticket_list.html:56
 #: templates/helpdesk/ticket_list.html:127
 msgid "Keywords"
-msgstr "Ключевые Слова"
+msgstr ""
 
 #: templates/helpdesk/ticket_list.html:94
 msgid "Owner(s)"
-msgstr "Владелец(ы)"
+msgstr ""
 
 #: templates/helpdesk/ticket_list.html:107
 msgid "Queue(s)"
-msgstr "Очередь(и)"
+msgstr ""
 
 #: templates/helpdesk/ticket_list.html:113
 msgid "Status(es)"
-msgstr "Статус(ы)"
+msgstr ""
 
 #: templates/helpdesk/ticket_list.html:120
 msgid "Tag(s)"
@@ -1502,44 +1476,44 @@ msgstr ""
 
 #: templates/helpdesk/ticket_list.html:132
 msgid "Apply Filter"
-msgstr "Применить Фильтр"
+msgstr ""
 
 #: templates/helpdesk/ticket_list.html:138
 #: templates/helpdesk/ticket_list.html:153
 msgid "Save Query"
-msgstr "Сохранить Запрос"
+msgstr ""
 
 #: templates/helpdesk/ticket_list.html:144
 msgid "This name appears in the drop-down list of saved queries. If you share your query, other users will see this name, so choose something clear and descriptive!"
-msgstr "Это название появится в выпадающем списке сохраненных запросов. Если вы дадите доступ к своему запросу другим пользователям, они увидят это название, так что выберите что-нибудь четкое, информативное!"
+msgstr ""
 
 #: templates/helpdesk/ticket_list.html:146
 msgid "Shared?"
-msgstr "Общие?"
+msgstr ""
 
 #: templates/helpdesk/ticket_list.html:147
 msgid "Yes, share this query with other users."
-msgstr "Да, поделится этим запросом с другими пользователями."
+msgstr ""
 
 #: templates/helpdesk/ticket_list.html:148
 msgid "If you share this query, it will be visible by <em>all</em> other logged-in users."
-msgstr "Если вы поделитесь этим запросом, его смогут видеть <em>все</em> вошедьшие пользователи."
+msgstr ""
 
 #: templates/helpdesk/ticket_list.html:160
 msgid "Use Saved Query"
-msgstr "Использовать Сохранённый Запрос"
+msgstr ""
 
 #: templates/helpdesk/ticket_list.html:162
 msgid "Query"
-msgstr "Запрос"
+msgstr ""
 
 #: templates/helpdesk/ticket_list.html:167
 msgid "Run Query"
-msgstr "выполнить Запрос"
+msgstr ""
 
 #: templates/helpdesk/ticket_list.html:197
 msgid "No Tickets Match Your Selection"
-msgstr "Талонов Соответствующих Вашему Запросов не Найдено"
+msgstr ""
 
 #: templates/helpdesk/ticket_list.html:203
 msgid "Previous"
@@ -1556,7 +1530,7 @@ msgstr ""
 
 #: templates/helpdesk/user_settings.html:3
 msgid "Change User Settings"
-msgstr "Изменить Настройки Пользователя"
+msgstr ""
 
 #: templates/helpdesk/user_settings.html:5
 msgid ""
@@ -1565,18 +1539,14 @@ msgid ""
 "\n"
 "<p>Use the following options to change the way your helpdesk system works for you. These settings do not impact any other user.</p>"
 msgstr ""
-"\n"
-"<h2>Настройки Пользователя</h2>\n"
-"\n"
-"<p>Используйте следующие параметры для изменения работы системы для вас. Эти параметры не воздействие на каких-либо других пользователей.</p>"
 
 #: templates/helpdesk/user_settings.html:19
 msgid "Save Options"
-msgstr "Сохранить Опции"
+msgstr ""
 
 #: templates/registration/logged_out.html:2
 msgid "Logged Out"
-msgstr "Выход Произведён"
+msgstr ""
 
 #: templates/registration/logged_out.html:4
 msgid ""
@@ -1586,85 +1556,80 @@ msgid ""
 "<p>Thanks for being here. Hopefully you've helped resolve a few tickets and make the world a better place.</p>\n"
 "\n"
 msgstr ""
-"\n"
-"<h2>Выход произведён</h2>\n"
-"\n"
-"<p>Спасибо что были здесь. Надеемся, Вы помогли решить несколько билетов и сделать мир лучше.</p>\n"
-"\n"
 
 #: templates/registration/login.html:2
 msgid "Helpdesk Login"
-msgstr "Вход в Справочную"
+msgstr ""
 
 #: templates/registration/login.html:5 templates/registration/login.html:17
 msgid "Login"
-msgstr "Вход"
+msgstr ""
 
 #: templates/registration/login.html:7
 msgid "To log in and begin responding to cases, simply enter your username and password below."
-msgstr "Войдите что бы иметь возможность отвечать на вопросы, для этого просто введите имя пользователя и пароль ниже."
+msgstr ""
 
 #: templates/registration/login.html:10
 msgid "Your username and password didn't match. Please try again."
-msgstr "Введённые имя пользователя и пароль не подошли, Пожалуйста попробуйте ещё раз."
+msgstr ""
 
 #: templates/registration/login.html:12
 msgid "Username"
-msgstr "Имя Пользователя"
+msgstr ""
 
 #: templates/registration/login.html:14
 msgid "Password"
-msgstr "Пароль"
+msgstr ""
 
 #: views/feeds.py:35
 #, python-format
 msgid "Helpdesk: Open Tickets in queue %(queue)s for %(username)s"
-msgstr "Справочная: открытые талоны в очереди %(queue)s для %(username)s"
+msgstr ""
 
 #: views/feeds.py:40
 #, python-format
 msgid "Helpdesk: Open Tickets for %(username)s"
-msgstr "Справочная: открытые талоны для %(username)s"
+msgstr ""
 
 #: views/feeds.py:46
 #, python-format
 msgid "Open and Reopened Tickets in queue %(queue)s for %(username)s"
-msgstr "Открыть и Переоткрыть Талоны в Очереди %(queue)s для %(username)s"
+msgstr ""
 
 #: views/feeds.py:51
 #, python-format
 msgid "Open and Reopened Tickets for %(username)s"
-msgstr "Открыть и переоткрыть талоны для %(username)s"
+msgstr ""
 
 #: views/feeds.py:98
 msgid "Helpdesk: Unassigned Tickets"
-msgstr "Справочная: неназначенные талоны"
+msgstr ""
 
 #: views/feeds.py:99
 msgid "Unassigned Open and Reopened tickets"
-msgstr "Не назначеные Открытые и Переоткрытые талоны"
+msgstr ""
 
 #: views/feeds.py:124
 msgid "Helpdesk: Recent Followups"
-msgstr "Справочная: недавние дополнения"
+msgstr ""
 
 #: views/feeds.py:125
 msgid "Recent FollowUps, such as e-mail replies, comments, attachments and resolutions"
-msgstr "Недавние дополнения, такие как ответы на E-mail, комментарии, прикрепленные файлы и решения"
+msgstr ""
 
 #: views/feeds.py:142
 #, python-format
 msgid "Helpdesk: Open Tickets in queue %(queue)s"
-msgstr "Справочная: открытые талоны в очереди %(queue)s"
+msgstr ""
 
 #: views/feeds.py:147
 #, python-format
 msgid "Open and Reopened Tickets in queue %(queue)s"
-msgstr "Открыть и Переоткрыть Талоны в Очереди %(queue)s"
+msgstr ""
 
 #: views/public.py:80
 msgid "Invalid ticket ID or e-mail address. Please try again."
-msgstr "Неверный ID талона или адрес электронной почты, Пожалуйста попробуйте ещё."
+msgstr ""
 
 #: views/public.py:93
 msgid "Submitter accepted resolution and closed ticket"
@@ -1672,7 +1637,7 @@ msgstr ""
 
 #: views/staff.py:121
 msgid "Accepted resolution and closed ticket"
-msgstr "Принять решение и закрыть талон"
+msgstr ""
 
 #: views/staff.py:139
 msgid "Sorry, you need to login to do that."
@@ -1681,11 +1646,11 @@ msgstr ""
 #: views/staff.py:172
 #, python-format
 msgid "Assigned to %(username)s"
-msgstr "Назначено %(username)s"
+msgstr ""
 
 #: views/staff.py:194
 msgid "Updated"
-msgstr "Обновлено"
+msgstr ""
 
 #: views/staff.py:358
 #, python-format
@@ -1706,8 +1671,8 @@ msgstr ""
 
 #: views/staff.py:672
 msgid "Ticket taken off hold"
-msgstr "Удержание талона снято"
+msgstr ""
 
 #: views/staff.py:675
 msgid "Ticket placed on hold"
-msgstr "Талон удерживается"
+msgstr ""
