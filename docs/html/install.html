@@ -88,6 +88,11 @@
 <div class="highlight-python"><div class="highlight"><pre><span class="p">(</span><span class="s">r&#39;helpdesk/&#39;</span><span class="p">,</span> <span class="n">include</span><span class="p">(</span><span class="s">&#39;helpdesk.urls&#39;</span><span class="p">)),</span>
 </pre></div>
 </div>
+<p>Note that you can change &#8216;helpdesk/&#8217; to anything you like, such as &#8216;support/&#8217; or &#8216;help/&#8217;. If you want django-helpdesk to be available at the root of your site (for example at <a class="reference external" href="http://support.mysite.tld/">http://support.mysite.tld/</a>) then the line will be as follows:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">(</span><span class="s">r&#39;&#39;</span><span class="p">,</span> <span class="n">include</span><span class="p">(</span><span class="s">&#39;helpdesk.urls&#39;</span><span class="p">)),</span>
+</pre></div>
+</div>
+<p>This line will have to come <em>after</em> any other lines in your urls.py such as those used by the Django admin.</p>
 </li>
 <li><p class="first">Create the required database tables. I&#8217;d suggest using <em>South</em>, however the following will work:</p>
 <div class="highlight-python"><pre>./manage.py syncdb</pre>
@@ -113,10 +118,14 @@ chmod 700 attachments</pre>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">Options</span> <span class="o">-</span><span class="n">Indexes</span>
 </pre></div>
 </div>
-</li>
-</ol>
 <p>You will also have to make sure that <tt class="docutils literal"><span class="pre">.htaccess</span></tt> files aren&#8217;t being ignored.</p>
 <p>Ideally, accessing <a class="reference external" href="http://MEDIA_URL/helpdesk/attachments/">http://MEDIA_URL/helpdesk/attachments/</a> will give you a 403 access denied error.</p>
+</li>
+<li><p class="first">If it&#8217;s not already installed, install <tt class="docutils literal"><span class="pre">python-markdown</span></tt>:</p>
+<div class="highlight-python"><pre>pip install Markdown</pre>
+</div>
+</li>
+</ol>
 </div>
 </div>
 

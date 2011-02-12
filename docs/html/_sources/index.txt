@@ -56,6 +56,17 @@ Dependencies
 2. Django (1.2 or newer)
 3. An existing **working** Django project with database etc. If you cannot log into the Admin, you won't get this product working!
 
+Translation
+-----------
+
+.. image:: http://www.transifex.net/projects/p/django-helpdesk/resource/core/chart/image_png
+
+If you want to help translate django-helpdesk into languages other than English, we encourage you to make use of our Transifex project.
+
+http://www.transifex.net/projects/p/django-helpdesk/resource/core/
+
+Feel free to request access to contribute your translations.
+
 Contents:
 ---------
 

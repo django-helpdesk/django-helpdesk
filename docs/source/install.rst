@@ -78,7 +78,10 @@ Adding To Your Django Project
 
       Options -Indexes
 
-You will also have to make sure that ``.htaccess`` files aren't being ignored.
+   You will also have to make sure that ``.htaccess`` files aren't being ignored.
 
-Ideally, accessing http://MEDIA_URL/helpdesk/attachments/ will give you a 403 access denied error.
+   Ideally, accessing http://MEDIA_URL/helpdesk/attachments/ will give you a 403 access denied error.
 
+7. If it's not already installed, install ``python-markdown``::
+
+      pip install Markdown
