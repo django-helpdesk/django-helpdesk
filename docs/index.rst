@@ -47,7 +47,7 @@ If a user is a staff member, they get general helpdesk access, including:
 
 Licensing
 ---------
-django-helpdesk is released under the BSD license, however it packages 3rd party applications which may be using a different license. More details can be found in the :doc:`license documentation`.
+django-helpdesk is released under the BSD license, however it packages 3rd party applications which may be using a different license. More details can be found in the :doc:`license` documentation.
 
 Dependencies
 ------------
