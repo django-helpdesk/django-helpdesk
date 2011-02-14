@@ -8,8 +8,9 @@ msgstr ""
 "Project-Id-Version: django-helpdesk\n"
 "Report-Msgid-Bugs-To: http://github.com/RossP/django-helpdesk/issues\n"
 "POT-Creation-Date: 2010-09-04 06:55+0000\n"
-"PO-Revision-Date: 2011-02-12 02:29+0000\n"
-"Last-Translator: rossp <ross@rossp.org>\n"
+"PO-Revision-Date: 2011-02-14 03:08+0000\n"
+"Last-Translator: erik_river <erik.river@gmail.com>\n"
+"Language-Team: Spanish (Castilian) <None>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -190,7 +191,7 @@ msgstr "Dirección de E-mail"
 
 #: models.py:46
 msgid "All outgoing e-mails for this queue will use this e-mail address. If you use IMAP or POP3, this should be the e-mail address for that mailbox."
-msgstr ""
+msgstr "Todos los correos de salida de esta cola usarán esta dirección. Si usa IMAP o POP3, esta debe ser la dirección de correo para ese buzón"
 
 #: models.py:52
 msgid "Locale"
@@ -214,31 +215,31 @@ msgstr "¿Permitir envios por e-mail?"
 
 #: models.py:71
 msgid "Do you want to poll the e-mail box below for new tickets?"
-msgstr ""
+msgstr "¿Quiere sondear el buzón de correo de abajo para nuevos tickets?"
 
 #: models.py:76
 msgid "Escalation Days"
-msgstr ""
+msgstr "Dias de escalación"
 
 #: models.py:79
 msgid "For tickets which are not held, how often do you wish to increase their priority? Set to 0 for no escalation."
-msgstr ""
+msgstr "Para tickets que no están retenidos, ¿con que frecuencia desea incrementar su prioridad?"
 
 #: models.py:84
 msgid "New Ticket CC Address"
-msgstr ""
+msgstr "Ticket Nuevo, dirección CC"
 
 #: models.py:87
 msgid "If an e-mail address is entered here, then it will receive notification of all new tickets created for this queue"
-msgstr ""
+msgstr "Si introduce una dirección de correo, entonces recibirá una notificación de todos los tickets nuevos de esta cola "
 
 #: models.py:92
 msgid "Updated Ticket CC Address"
-msgstr ""
+msgstr "Actualización de Ticket, Dirección de CC"
 
 #: models.py:95
 msgid "If an e-mail address is entered here, then it will receive notification of all activity (new tickets, closed tickets, updates, reassignments, etc) for this queue"
-msgstr ""
+msgstr "Si introduce una dirección de correo, entonces recibirá notificaciones de todas las actividades (new tickets, tickets cerrados, actualizaciones, reasignaciones, etc.) para esta cola."
 
 #: models.py:101
 msgid "E-Mail Box Type"
@@ -254,7 +255,7 @@ msgstr "IMAP"
 
 #: models.py:106
 msgid "E-Mail server type for creating tickets automatically from a mailbox - both POP3 and IMAP are supported."
-msgstr ""
+msgstr "Dirección de correo para crear tickets automáticos a partir de un buzón de correo, tanto POP3 e IMAP son soportados."
 
 #: models.py:111
 msgid "E-Mail Hostname"
@@ -306,11 +307,11 @@ msgstr ""
 
 #: models.py:164
 msgid "E-Mail Check Interval"
-msgstr ""
+msgstr "Intervalo de revisión de correo"
 
 #: models.py:165
 msgid "How often do you wish to check this mailbox? (in Minutes)"
-msgstr ""
+msgstr "¿Con que frecuencia desea revisar el buzón de correo? (En Minutos)"
 
 #: models.py:235 templates/helpdesk/dashboard.html:10
 #: templates/helpdesk/ticket.html:134
@@ -403,20 +404,20 @@ msgstr "Descripcion"
 
 #: models.py:301
 msgid "The content of the customers query."
-msgstr ""
+msgstr "El contenido de la consulta de clientes"
 
 #: models.py:305 templates/helpdesk/public_view_ticket.html:40
 #: templates/helpdesk/ticket.html:90
 msgid "Resolution"
-msgstr ""
+msgstr "Resolución"
 
 #: models.py:308
 msgid "The resolution provided to the customer by our staff."
-msgstr ""
+msgstr "La resolución proporcionada al cliente por el personal"
 
 #: models.py:316
 msgid "1 = Highest Priority, 5 = Low Priority"
-msgstr ""
+msgstr "1 = Prioridad mas alta, 5 = Prioridad Baja"
 
 #: models.py:323
 msgid "The date this ticket was last escalated - updated automatically by management/commands/escalate_tickets.py."
@@ -433,11 +434,11 @@ msgstr ""
 
 #: models.py:456 models.py:678 models.py:956
 msgid "Date"
-msgstr ""
+msgstr "Fecha"
 
 #: models.py:467 views/staff.py:192
 msgid "Comment"
-msgstr ""
+msgstr "Comentario"
 
 #: models.py:473
 msgid "Public"
@@ -491,7 +492,7 @@ msgstr "Nombre de Archivo"
 
 #: models.py:586
 msgid "MIME Type"
-msgstr ""
+msgstr "Tipo MIME"
 
 #: models.py:591
 msgid "Size"
@@ -532,11 +533,11 @@ msgstr ""
 
 #: models.py:696
 msgid "Template Name"
-msgstr ""
+msgstr "Nombre de Plantillla"
 
 #: models.py:702
 msgid "Subject"
-msgstr ""
+msgstr "Asunto"
 
 #: models.py:704
 msgid "This will be prefixed with \"[ticket.ticket] ticket.title\". We recommend something simple such as \"(Updated\") or \"(Closed)\" - the same context is available as in plain_text, below."
@@ -552,7 +553,7 @@ msgstr ""
 
 #: models.py:718
 msgid "Plain Text"
-msgstr ""
+msgstr "Texto Plano"
 
 #: models.py:719
 msgid "The context available to you includes {{ ticket }}, {{ queue }}, and depending on the time of the call: {{ resolution }} or {{ comment }}."
@@ -560,7 +561,7 @@ msgstr ""
 
 #: models.py:725
 msgid "HTML"
-msgstr ""
+msgstr "HTML"
 
 #: models.py:726
 msgid "The same context is available here as in plain_text, above."
@@ -724,7 +725,7 @@ msgstr "Engrandecido por Jutda Helpdesk"
 #: templates/helpdesk/base.html:9 templates/helpdesk/rss_list.html:9
 #: templates/helpdesk/rss_list.html:23 templates/helpdesk/rss_list.html:28
 msgid "My Open Tickets"
-msgstr ""
+msgstr "Mis tickets abiertos"
 
 #: templates/helpdesk/base.html:10
 msgid "All Recent Activity"
@@ -738,7 +739,7 @@ msgstr "Tickets no asignados"
 #: templates/helpdesk/base.html:17 templates/helpdesk/public_base.html:3
 #: templates/helpdesk/public_base.html:11
 msgid "Helpdesk"
-msgstr ""
+msgstr "Mesa de Ayuda"
 
 #: templates/helpdesk/base.html:19
 msgid "Dashboard"
@@ -746,7 +747,7 @@ msgstr ""
 
 #: templates/helpdesk/base.html:20 templates/helpdesk/ticket_list.html:182
 msgid "Tickets"
-msgstr ""
+msgstr "Tickets"
 
 #: templates/helpdesk/base.html:21
 msgid "New Ticket"
@@ -968,7 +969,7 @@ msgstr ""
 
 #: templates/helpdesk/email_ignore_list.html:13
 msgid "Date Added"
-msgstr ""
+msgstr "Fecha agregada"
 
 #: templates/helpdesk/email_ignore_list.html:13
 msgid "Queues"
@@ -1015,11 +1016,11 @@ msgstr ""
 
 #: templates/helpdesk/kb_index.html:9
 msgid "Knowledgebase Categories"
-msgstr ""
+msgstr "Categorías de la Base de Conocimientos"
 
 #: templates/helpdesk/kb_index.html:10
 msgid "Category"
-msgstr ""
+msgstr "Categoría"
 
 #: templates/helpdesk/kb_item.html:4
 #, python-format
@@ -1072,7 +1073,7 @@ msgstr ""
 
 #: templates/helpdesk/public_base.html:15
 msgid "Log In"
-msgstr ""
+msgstr "Entrar"
 
 #: templates/helpdesk/public_base.html:22
 msgid "Powered by <a href='http://www.jutda.com.au/'>Jutda HelpDesk</a>."
@@ -1092,7 +1093,7 @@ msgstr "Ticket"
 #: templates/helpdesk/public_homepage.html:12
 #: templates/helpdesk/public_view_form.html:15
 msgid "Your E-mail Address"
-msgstr ""
+msgstr "Tu correo electrónico"
 
 #: templates/helpdesk/public_homepage.html:16
 #: templates/helpdesk/public_view_form.html:19
@@ -1137,12 +1138,12 @@ msgstr ""
 #: templates/helpdesk/public_view_ticket.html:40
 #: templates/helpdesk/ticket.html:90
 msgid "Accept"
-msgstr ""
+msgstr "Aceptar"
 
 #: templates/helpdesk/public_view_ticket.html:40
 #: templates/helpdesk/ticket.html:90
 msgid "Accept and Close"
-msgstr ""
+msgstr "Aceptar y Cerrar"
 
 #: templates/helpdesk/public_view_ticket.html:49
 #: templates/helpdesk/ticket.html:99
@@ -1159,7 +1160,7 @@ msgstr ""
 #: templates/helpdesk/report_output.html:3
 #: templates/helpdesk/report_output.html:6
 msgid "Reports &amp; Statistics"
-msgstr ""
+msgstr "Reportes &amp; Estadísticas"
 
 #: templates/helpdesk/report_index.html:6
 msgid ""
@@ -1410,7 +1411,7 @@ msgstr ""
 
 #: templates/helpdesk/ticket_cc_list.html:3
 msgid "Ticket CC Settings"
-msgstr "Ajustes de CC par Ticket"
+msgstr "Ajustes de CC para Ticket"
 
 #: templates/helpdesk/ticket_cc_list.html:5
 #, python-format
@@ -1619,7 +1620,7 @@ msgstr "Tickets no asignados abiertos y reabiertos"
 
 #: views/feeds.py:124
 msgid "Helpdesk: Recent Followups"
-msgstr "Helpdest: Actualizaciones recientes"
+msgstr "Helpdesk: Actualizaciones recientes"
 
 #: views/feeds.py:125
 msgid "Recent FollowUps, such as e-mail replies, comments, attachments and resolutions"
@@ -1628,7 +1629,7 @@ msgstr "Actualizaciones recientes, como respuestas por e-mail, comentarios, adju
 #: views/feeds.py:142
 #, python-format
 msgid "Helpdesk: Open Tickets in queue %(queue)s"
-msgstr "Helpdest: Abrir Tickets en cola %(queue)s"
+msgstr "Helpdesk: Abrir Tickets en cola %(queue)s"
 
 #: views/feeds.py:147
 #, python-format
