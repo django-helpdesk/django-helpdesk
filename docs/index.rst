@@ -81,4 +81,5 @@ Contents:
    spam
    custom_fields
    api
+   contributing
 
