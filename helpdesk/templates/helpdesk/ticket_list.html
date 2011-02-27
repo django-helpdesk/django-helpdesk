@@ -159,7 +159,7 @@ $(document).ready(function() {
     <div id='tabload'>
     <h3>{% trans "Use Saved Query" %}</h3>
     <form method='get' action='{% url helpdesk_list %}'>
-    <p><label for='id_query_selector'>{% trans "Query" %}</label> <select name='saved_query' id='id_query_selector' />
+    <p><label for='id_query_selector'>{% trans "Query" %}</label> <select name='saved_query' id='id_query_selector'>
         {% for q in user_saved_queries %}
         <option value='{{ q.id }}'>{{ q.title }}{% if q.shared %} (Shared{% ifnotequal user q.user %} by {{ q.user.username }}{% endifnotequal %}){% endif %}</option>
         {% endfor %}
