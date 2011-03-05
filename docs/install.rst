@@ -85,3 +85,9 @@ Adding To Your Django Project
 7. If it's not already installed, install ``python-markdown``::
 
       pip install Markdown
+
+8. If you already have a view handling your logins, then great! If not, add the following to ``settings.py`` to get your Django installation to use the login view included in ``django-helpdesk``::
+
+      LOGIN_URL = '/helpdesk/login/'
+
+   Alter the URL to suit your installation path.
