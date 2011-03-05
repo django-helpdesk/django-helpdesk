@@ -102,7 +102,10 @@ def send_templated_mail(template_name, email_context, recipients, sender=None, b
         "{{ ticket.ticket }} {{ ticket.title|safe }} %s" % t.subject
         ).render(context)
 
-    if type(recipients) != list:
+    if type(recipients) == str:
+        if recipients.find(','):
+            recipients = recipients.split(',')
+    elif type(recipients) != list:
         recipients = [recipients,]
 
     msg = EmailMultiAlternatives(   subject_part,

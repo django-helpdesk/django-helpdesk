@@ -80,21 +80,25 @@ class Queue(models.Model):
             'increase their priority? Set to 0 for no escalation.'),
         )
 
-    new_ticket_cc = models.EmailField(
+    new_ticket_cc = models.CharField(
         _('New Ticket CC Address'),
         blank=True,
         null=True,
+        max_length=200,
         help_text=_('If an e-mail address is entered here, then it will '
-            'receive notification of all new tickets created for this queue'),
+            'receive notification of all new tickets created for this queue. '
+            'Enter a comma between multiple e-mail addresses.'),
         )
 
-    updated_ticket_cc = models.EmailField(
+    updated_ticket_cc = models.CharField(
         _('Updated Ticket CC Address'),
         blank=True,
         null=True,
+        max_length=200,
         help_text=_('If an e-mail address is entered here, then it will '
             'receive notification of all activity (new tickets, closed '
-            'tickets, updates, reassignments, etc) for this queue'),
+            'tickets, updates, reassignments, etc) for this queue. Separate '
+            'multiple addresses with a comma.'),
         )
 
     email_box_type = models.CharField(
