@@ -7,7 +7,8 @@
             "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Hello,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">This is a courtesy e-mail to let you know that ticket <a href=\"{{ ticket.staff_url }}\"><b>{{ ticket.ticket }}</b></a> (<em>{{ ticket.title }}</em>) for {{ ticket.submitter_email }} has been {% if ticket.assigned_to %}assigned to {{ ticket.assigned_to }}{% else %}unassigned{% endif %}.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">\r\n<b>Ticket ID</b>: {{ ticket.ticket }}<br>\r\n<b>Queue</b>: {{ queue.title }}<br>\r\n<b>Title</b>: {{ ticket.title }}<br>\r\n<b>Opened</b>: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}<br>\r\n<b>Submitter</b>: {{ ticket.submitter_email|default:\"Unknown\" }}<br>\r\n<b>Priority</b>: {{ ticket.get_priority_display }}<br>\r\n<b>Status</b>: {{ ticket.get_status }}<br>\r\n<b>Assigned to</b>: {{ ticket.get_assigned_to }}<br>\r\n<b><a href='{{ ticket.staff_url }}'>View Online</a></b> to update this ticket (login required)</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Just for reference, the original ticket description was:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.description }}</blockquote>", 
             "plain_text": "Hello,\r\n\r\nThis is a courtesy e-mail to let you know that ticket {{ ticket.ticket }} (\"{{ ticket.title }}\") for {{ ticket.submitter_email }} has been {% if ticket.assigned_to %}assigned to {{ ticket.assigned_to }}{% else %}unassigned{% endif %}.\r\n\r\nTicket ID: {{ ticket.ticket }}\r\nQueue: {{ queue.title }}\r\nTitle: {{ ticket.title }}\r\nOpened: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}\r\nSubmitter: {{ ticket.submitter_email|default:\"Unknown\" }}\r\nPriority: {{ ticket.get_priority_display }}\r\nStatus: {{ ticket.get_status }}\r\nAssigned to: {{ ticket.get_assigned_to }}\r\nView Online: {{ ticket.staff_url }}\r\n\r\nThe original ticket description was:\r\n\r\n{{ ticket.description }}\r\n\r\n", 
             "heading": "Ticket Assigned", 
-            "subject": "(Assigned)"
+            "subject": "(Assigned)",
+            "locale": "en"
         }
     }, 
     {
@@ -18,7 +19,8 @@
             "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Hello,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">This is a courtesy e-mail to let you know that ticket <a href=\"{{ ticket.staff_url }}\"><b>{{ ticket.ticket }}</b></a> (<em>{{ ticket.title }}</em>) for {{ ticket.submitter_email }} has been assigned to <b>you</b>.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">\r\n<b>Ticket ID</b>: {{ ticket.ticket }}<br>\r\n<b>Queue</b>: {{ queue.title }}<br>\r\n<b>Title</b>: {{ ticket.title }}<br>\r\n<b>Opened</b>: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}<br>\r\n<b>Submitter</b>: {{ ticket.submitter_email|default:\"Unknown\" }}<br>\r\n<b>Priority</b>: {{ ticket.get_priority_display }}<br>\r\n<b>Status</b>: {{ ticket.get_status }}<br>\r\n<b>Assigned to</b>: YOU<br>\r\n<b><a href='{{ ticket.staff_url }}'>View Online</a></b> to update this ticket (login required)</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Just for reference, the original ticket description was:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.description }}</blockquote>", 
             "plain_text": "Hello,\r\n\r\nThis is a courtesy e-mail to let you know that ticket {{ ticket.ticket }} (\"{{ ticket.title }}\") for {{ ticket.submitter_email }} has been assigned to you.\r\n\r\nTicket ID: {{ ticket.ticket }}\r\nQueue: {{ queue.title }}\r\nTitle: {{ ticket.title }}\r\nOpened: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}\r\nSubmitter: {{ ticket.submitter_email|default:\"Unknown\" }}\r\nPriority: {{ ticket.get_priority_display }}\r\nStatus: {{ ticket.get_status }}\r\nAssigned to: YOU\r\nView Online: {{ ticket.staff_url }}\r\n\r\nThe original ticket description was:\r\n\r\n{{ ticket.description }}\r\n\r\n", 
             "heading": "Ticket Assigned To You", 
-            "subject": "(Assigned To You)"
+            "subject": "(Assigned To You)",
+            "locale": "en"
         }
     }, 
     {
@@ -29,7 +31,8 @@
             "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Hello,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Ticket <i>{{ ticket.title }}</i> ('{{ ticket.title }}'){% if ticket.assigned_to %}, assigned to {{ ticket.get_assigned_to }}{% endif %} has been closed.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">\r\n<b>Ticket ID</b>: {{ ticket.ticket }}<br>\r\n<b>Queue</b>: {{ queue.title }}<br>\r\n<b>Title</b>: {{ ticket.title }}<br>\r\n<b>Opened</b>: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}<br>\r\n<b>Submitter</b>: {{ ticket.submitter_email|default:\"Unknown\" }}<br>\r\n<b>Priority</b>: {{ ticket.get_priority_display }}<br>\r\n<b>Status</b>: {{ ticket.get_status }}<br>\r\n<b>Assigned to</b>: {{ ticket.get_assigned_to }}<br>\r\n<b><a href='{{ ticket.staff_url }}'>View Online</a></b> to update this ticket (login required)</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Just for reference, the original ticket description was:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.description }}</blockquote>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">The resolution provided was:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ resolution }}</blockquote>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">If you wish to view this ticket online, you can visit <a href='{{ ticket.staff_url }}'>{{ ticket.staff_url }}</a>.</p>", 
             "plain_text": "Hello,\r\n\r\nTicket {{ ticket.title }} (\"{{ ticket.title }}\"){% if ticket.assigned_to %}, assigned to {{ ticket.assigned_to }}{% endif %} has been closed.\r\n\r\nTicket ID: {{ ticket.ticket }}\r\nQueue: {{ queue.title }}\r\nTitle: {{ ticket.title }}\r\nOpened: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}\r\nSubmitter: {{ ticket.submitter_email|default:\"Unknown\" }}\r\nPriority: {{ ticket.get_priority_display }}\r\nStatus: {{ ticket.get_status }}\r\nAssigned to: {{ ticket.get_assigned_to }}\r\nView Online: {{ ticket.staff_url }} (login required)\r\n\r\nThe original description was:\r\n\r\n{{ ticket.description }}\r\n\r\nThe resolution provided was:\r\n\r\n{{ resolution }}\r\n\r\n", 
             "heading": "Ticket Closed", 
-            "subject": "(Closed)"
+            "subject": "(Closed)",
+            "locale": "en"
         }
     }, 
     {
@@ -40,7 +43,8 @@
             "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Hello,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">The following ticket, which is currently assigned to you, has been closed.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">\r\n<b>Ticket ID</b>: {{ ticket.ticket }}<br>\r\n<b>Queue</b>: {{ queue.title }}<br>\r\n<b>Title</b>: {{ ticket.title }}<br>\r\n<b>Opened</b>: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}<br>\r\n<b>Submitter</b>: {{ ticket.submitter_email|default:\"Unknown\" }}<br>\r\n<b>Priority</b>: {{ ticket.get_priority_display }}<br>\r\n<b>Status</b>: {{ ticket.get_status }}<br>\r\n<b>Assigned to</b>: {{ ticket.get_assigned_to }}<br>\r\n<b><a href='{{ ticket.staff_url }}'>View Online</a></b> to update this ticket (login required)</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Just for reference, the original ticket description was:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.description }}</blockquote>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">The resolution provided was:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.resolution }}</blockquote>", 
             "plain_text": "Hello,\r\n\r\nThe following ticket, which is currently assigned to you, has been closed.\r\n\r\nTicket ID: {{ ticket.ticket }}\r\nQueue: {{ queue.title }}\r\nTitle: {{ ticket.title }}\r\nOpened: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}\r\nSubmitter: {{ ticket.submitter_email|default:\"Unknown\" }}\r\nPriority: {{ ticket.get_priority_display }}\r\nStatus: {{ ticket.get_status }}\r\nAssigned to: {{ ticket.get_assigned_to }}\r\nView Online: {{ ticket.staff_url }} (login required)\r\n\r\nIf you wish to view this ticket online, you can visit {{ ticket.staff_url }}.\r\n\r\n", 
             "heading": "Ticket Closed", 
-            "subject": "(Closed)"
+            "subject": "(Closed)",
+            "locale": "en"
         }
     }, 
     {
@@ -51,7 +55,8 @@
             "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Hello,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">You recently logged a ticket with a subject of <i>{{ ticket.title }}</i> with us. This e-mail is to confirm that this ticket has been closed.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">The resolution that has been provided is:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.resolution }}</blockquote>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">If you wish to view this ticket online, you can visit <a href=\"{{ ticket.ticket_url }}\">{{ ticket.ticket_url }}</a>. If you believe that further work is required on this ticket, please let us know by replying to this e-mail and keeping the subject intact.</p>", 
             "plain_text": "Hello,\r\n\r\nYou recently logged a ticket with a subject of \"{{ ticket.title }}\" with us. This e-mail is to confirm that this ticket has been closed.\r\n\r\nIf you believe that further work is required on this ticket, please let us know by replying to this e-mail and keeping the subject intact.\r\n\r\nIf you wish to view this ticket online, you can visit {{ ticket.ticket_url }}.\r\n\r\nThe resolution provided was:\r\n\r\n{{ ticket.resolution }}\r\n\r\n", 
             "heading": "Ticket Closed", 
-            "subject": "(Closed)"
+            "subject": "(Closed)",
+            "locale": "en"
         }
     }, 
     {
@@ -62,7 +67,8 @@
             "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Hello,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">This is a courtesy e-mail to let you know that ticket <i>{{ ticket.ticket }}</i> ('{{ ticket.title }}') has been escalated automatically.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">\r\n<b>Ticket ID</b>: {{ ticket.ticket }}<br>\r\n<b>Queue</b>: {{ queue.title }}<br>\r\n<b>Title</b>: {{ ticket.title }}<br>\r\n<b>Opened</b>: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}<br>\r\n<b>Submitter</b>: {{ ticket.submitter_email|default:\"Unknown\" }}<br>\r\n<b>Priority</b>: {{ ticket.get_priority_display }}<br>\r\n<b>Status</b>: {{ ticket.get_status }}<br>\r\n<b>Assigned to</b>: {{ ticket.get_assigned_to }}<br>\r\n<b><a href='{{ ticket.staff_url }}'>View Online</a></b> to update this ticket (login required)</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Just for reference, the original ticket description was:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.description }}</blockquote>", 
             "plain_text": "Hello,\r\n\r\nThis is a courtesy e-mail to let you know that ticket {{ ticket.ticket }} (\"{{ ticket.title }}\") has been escalated automatically.\r\n\r\nTicket ID: {{ ticket.ticket }}\r\nQueue: {{ queue.title }}\r\nTitle: {{ ticket.title }}\r\nOpened: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}\r\nSubmitter: {{ ticket.submitter_email|default:\"Unknown\" }}\r\nPriority: {{ ticket.get_priority_display }}\r\nStatus: {{ ticket.get_status }}\r\nAssigned to: {{ ticket.get_assigned_to }}\r\nView Online: {{ ticket.staff_url }} (login required)\r\n\r\nThe original ticket description was:\r\n\r\n{{ ticket.description }}\r\n\r\n", 
             "heading": "Ticket Escalated", 
-            "subject": "(Escalated)"
+            "subject": "(Escalated)",
+            "locale": "en"
         }
     }, 
     {
@@ -73,7 +79,8 @@
             "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Hello,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">A ticket currently assigned to you has been automatically escalated as it has been open for longer than expected.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">\r\n<b>Ticket ID</b>: {{ ticket.ticket }}<br>\r\n<b>Queue</b>: {{ queue.title }}<br>\r\n<b>Title</b>: {{ ticket.title }}<br>\r\n<b>Opened</b>: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}<br>\r\n<b>Submitter</b>: {{ ticket.submitter_email|default:\"Unknown\" }}<br>\r\n<b>Priority</b>: {{ ticket.get_priority_display }}<br>\r\n<b>Status</b>: {{ ticket.get_status }}<br>\r\n<b>Assigned to</b>: {{ ticket.get_assigned_to }}<br>\r\n<b><a href='{{ ticket.staff_url }}'>View Online</a></b> to update this ticket (login required)</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Just for reference, the original ticket description was:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.description }}</blockquote>", 
             "plain_text": "Hello,\r\n\r\nA ticket currently assigned to you has been automatically escalated as it has been open for longer than expected.\r\n\r\nTicket ID: {{ ticket.ticket }}\r\nQueue: {{ queue.title }}\r\nTitle: {{ ticket.title }}\r\nOpened: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}\r\nSubmitter: {{ ticket.submitter_email|default:\"Unknown\" }}\r\nPriority: {{ ticket.get_priority_display }}\r\nStatus: {{ ticket.get_status }}\r\nAssigned to: {{ ticket.get_assigned_to }}\r\nView Online: {{ ticket.staff_url }} (login required)\r\n\r\nThe original ticket description was:\r\n\r\n{{ ticket.description }}\r\n\r\nPlease review this ticket and attempt to provide a resolution as soon as possible.\r\n\r\n", 
             "heading": "Ticket Assigned to You Has Been Escalated", 
-            "subject": "(Escalated)"
+            "subject": "(Escalated)",
+            "locale": "en"
         }
     }, 
     {
@@ -84,7 +91,8 @@
             "html": "<p style=\"font-family: sans-serif; font-size: 11pt;\">Hello,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 11pt;\">You recently logged a ticket with a subject of <i>{{ ticket.title }}</i> with us. This e-mail is to advise you of an automated escalation of that ticket as it has been open for longer than expected.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 11pt;\">We will review your ticket shortly and attempt to provide a resolution as soon as possible.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 11pt;\">If you wish to view this ticket online, you can visit <a href=\"{{ ticket.ticket_url }}\">{{ ticket.ticket_url }}</a>.</p>", 
             "plain_text": "Hello,\r\n\r\nYou recently logged a ticket with a subject of \"{{ ticket.title }}\" with us. This e-mail is to advise you of an automated escalation of that ticket as it has been open for longer than expected.\r\n\r\nWe will review your ticket shortly and attempt to provide a resolution as soon as possible.\r\n\r\nIf you wish to view this ticket online, you can visit {{ ticket.ticket_url }}.\r\n\r\n", 
             "heading": "Your Ticket Has Been Escalated", 
-            "subject": "(Escalated)"
+            "subject": "(Escalated)",
+            "locale": "en"
         }
     }, 
     {
@@ -95,7 +103,8 @@
             "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Hello,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">This is a courtesy e-mail to let you know that a new ticket has been opened.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">\r\n<b>Ticket ID</b>: {{ ticket.ticket }}<br>\r\n<b>Queue</b>: {{ queue.title }}<br>\r\n<b>Title</b>: {{ ticket.title }}<br>\r\n<b>Opened</b>: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}<br>\r\n<b>Submitter</b>: {{ ticket.submitter_email|default:\"Unknown\" }}<br>\r\n<b>Priority</b>: {{ ticket.get_priority_display }}<br>\r\n<b>Status</b>: {{ ticket.get_status }}<br>\r\n<b><a href='{{ ticket.staff_url }}'>View Online</a></b> to update this ticket (login required)</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Description:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.description }}</blockquote>", 
             "plain_text": "Hello,\r\n\r\nThis is a courtesy e-mail to let you know that a new ticket has been opened.\r\n\r\nTicket ID: {{ ticket.ticket }}\r\nQueue: {{ queue.title }}\r\nTitle: {{ ticket.title }}\r\nOpened: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}\r\nSubmitter: {{ ticket.submitter_email|default:\"Unknown\" }}\r\nPriority: {{ ticket.get_priority_display }}\r\nStatus: {{ ticket.get_status }}\r\nView Online: {{ ticket.staff_url }} (login required)\r\n\r\nDescription:\r\n{{ ticket.description }}\r\n\r\n", 
             "heading": "New Ticket Opened", 
-            "subject": "(Opened)"
+            "subject": "(Opened)",
+            "locale": "en"
         }
     }, 
     {
@@ -106,7 +115,8 @@
             "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Hello,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">This is a courtesy e-mail to let you know that we have received your helpdesk query with a subject of <i>{{ ticket.title }}</i>.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">You do not have to do anything further at this stage. Your ticket has been assigned a number of <b>{{ ticket.ticket }}</b> and will be responded to shortly.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">If you wish to send us further details, or if you have any queries about this ticket, please include the ticket id of <b>{{ ticket.ticket }}</b> in the subject. The easiest way to do this is just press \"reply\" to this message.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">If you wish to view this ticket online to provide further information, attach files or view recent updates, you can visit <a href=\"{{ ticket.ticket_url }}\">{{ ticket.ticket_url }}</a>.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">We will investigate your query and attempt to resolve it as soon as possible. You will receive further updates and a resolution via this e-mail address.</p>", 
             "plain_text": "Hello,\r\n\r\nThis is a courtesy e-mail to let you know that we have received your helpdesk query with a subject of \"{{ ticket.title }}\". \r\n\r\nYou do not have to do anything further at this stage. Your ticket has been assigned a number of {{ ticket.ticket }} and will be responded to shortly.\r\n\r\nIf you wish to send us further details, or if you have any queries about this ticket, please include the ticket id of '{{ ticket.ticket }}' in the subject. The easiest way to do this is just press \"reply\" to this message.\r\n\r\nIf you wish to view this ticket online to provide further information, attach files or view recent updates, you can visit {{ ticket.ticket_url }}.\r\n\r\nWe will investigate your query and attempt to resolve it as soon as possible. You will receive further updates and a resolution via this e-mail address.\r\n", 
             "heading": "Your Ticket Has Been Opened", 
-            "subject": "(Opened)"
+            "subject": "(Opened)",
+            "locale": "en"
         }
     }, 
     {
@@ -117,7 +127,8 @@
             "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Hello,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">The following ticket has been resolved.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">\r\n<b>Ticket ID</b>: {{ ticket.ticket }}<br>\r\n<b>Queue</b>: {{ queue.title }}<br>\r\n<b>Title</b>: {{ ticket.title }}<br>\r\n<b>Opened</b>: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}<br>\r\n<b>Submitter</b>: {{ ticket.submitter_email|default:\"Unknown\" }}<br>\r\n<b>Priority</b>: {{ ticket.get_priority_display }}<br>\r\n<b>Status</b>: {{ ticket.get_status }}<br>\r\n<b>Assigned to</b>: {{ ticket.get_assigned_to }}<br>\r\n<b><a href='{{ ticket.staff_url }}'>View Online</a></b> to update this ticket (login required)</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Just for reference, the original ticket description was:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.description }}</blockquote>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">The resolution that was added was:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.resolution }}</blockquote>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">This resolution has been e-mailed to the submitter, who will verify it before you can close this ticket.</p>", 
             "plain_text": "Hello,\r\n\r\nThe following ticket has been resolved:\r\n\r\nTicket ID: {{ ticket.ticket }}\r\nQueue: {{ queue.title }}\r\nTitle: {{ ticket.title }}\r\nOpened: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}\r\nSubmitter: {{ ticket.submitter_email|default:\"Unknown\" }}\r\nPriority: {{ ticket.get_priority_display }}\r\nStatus: {{ ticket.get_status }}\r\nAssigned to: {{ ticket.get_assigned_to }}\r\nView Online: {{ ticket.staff_url }} (login required)\r\n\r\nThe original ticket description was:\r\n\r\n{{ ticket.description }}\r\n\r\nThe resolution provided was:\r\n\r\n{{ ticket.resolution }}\r\n\r\nThis resolution has been e-mailed to the submitter, who will verify it before you can close this ticket.\r\n\r\n", 
             "heading": "Ticket Resolved", 
-            "subject": "(Resolved)"
+            "subject": "(Resolved)",
+            "locale": "en"
         }
     }, 
     {
@@ -128,7 +139,8 @@
             "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Hello,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">A ticket currently assigned to you has been resolved.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">\r\n<b>Ticket ID</b>: {{ ticket.ticket }}<br>\r\n<b>Queue</b>: {{ queue.title }}<br>\r\n<b>Title</b>: {{ ticket.title }}<br>\r\n<b>Opened</b>: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}<br>\r\n<b>Submitter</b>: {{ ticket.submitter_email|default:\"Unknown\" }}<br>\r\n<b>Priority</b>: {{ ticket.get_priority_display }}<br>\r\n<b>Status</b>: {{ ticket.get_status }}<br>\r\n<b>Assigned to</b>: {{ ticket.get_assigned_to }}<br>\r\n<b><a href='{{ ticket.staff_url }}'>View Online</a></b> to update this ticket (login required)</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Just for reference, the original ticket description was:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.description }}</blockquote>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">The resolution that was added was:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.resolution }}</blockquote>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">This resolution has been e-mailed to the submitter, who will verify it before you can close this ticket.</p>", 
             "plain_text": "Hello,\r\n\r\nA ticket currently assigned to you has been resolved.\r\n\r\nTicket ID: {{ ticket.ticket }}\r\nQueue: {{ queue.title }}\r\nTitle: {{ ticket.title }}\r\nOpened: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}\r\nSubmitter: {{ ticket.submitter_email|default:\"Unknown\" }}\r\nPriority: {{ ticket.get_priority_display }}\r\nStatus: {{ ticket.get_status }}\r\nAssigned to: {{ ticket.get_assigned_to }}\r\nView Online: {{ ticket.staff_url }} (login required)\r\n\r\nThe original ticket description was:\r\n\r\n{{ ticket.description }}\r\n\r\nThe resolution provided was:\r\n\r\n{{ ticket.resolution }}\r\n\r\nThis resolution has been e-mailed to the submitter, who will verify it before you can close this ticket.\r\n\r\n", 
             "heading": "Ticket Resolved", 
-            "subject": "(Resolved)"
+            "subject": "(Resolved)",
+            "locale": "en"
         }
     }, 
     {
@@ -139,7 +151,8 @@
             "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Hello,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">You recently logged a ticket with a subject of <i>{{ ticket.title }}</i> with us. This e-mail is to advise you of a resolution to that ticket.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">The following resolution was added to ticket <b>{{ ticket.ticket }}</b>:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ resolution }}</blockquote>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Can you please confirm that this resolution addresses your needs so we may close this ticket? If you have any further queries, or if you do not believe this resolution is adequate, please reply to this e-mail and keep the subject intact.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">If you wish to view this ticket online, you can visit <a href=\"{{ ticket.ticket_url }}\">{{ ticket.ticket_url }}</a>.</p>", 
             "plain_text": "Hello,\r\n\r\nYou recently logged a ticket with a subject of \"{{ ticket.title }}\" with us. This e-mail is to advise you of a resolution to that ticket.\r\n\r\nThe following resolution was added to ticket {{ ticket.ticket }}:\r\n\r\n{{ resolution }}\r\n\r\nCan you please confirm that this resolution addresses your needs so we may close this ticket? If you have any further queries, or if you do not believe this resolution is adequate, please reply to this e-mail and keep the subject intact.\r\n\r\nIf you wish to view this ticket online, you can visit {{ ticket.ticket_url }}\r\n\r\n", 
             "heading": "Your Ticket Has Been Resolved", 
-            "subject": "(Resolved)"
+            "subject": "(Resolved)",
+            "locale": "en"
         }
     }, 
     {
@@ -150,7 +163,8 @@
             "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Hello,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">This is a courtesy e-mail to let you know that ticket {{ ticket.ticket }} (\"{{ ticket.title }}\") for {{ ticket.submitter_email }} has been updated.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">\r\n<b>Ticket ID</b>: {{ ticket.ticket }}<br>\r\n<b>Queue</b>: {{ queue.title }}<br>\r\n<b>Title</b>: {{ ticket.title }}<br>\r\n<b>Opened</b>: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}<br>\r\n<b>Submitter</b>: {{ ticket.submitter_email|default:\"Unknown\" }}<br>\r\n<b>Priority</b>: {{ ticket.get_priority_display }}<br>\r\n<b>Status</b>: {{ ticket.get_status }}<br>\r\n<b>Assigned to</b>: {{ ticket.get_assigned_to }}<br>\r\n<b><a href='{{ ticket.staff_url }}'>View Online</a></b> to update this ticket (login required)</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Just for reference, the original ticket description was:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.description }}</blockquote>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">The following comment was added:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ comment }}</blockquote>\r\n\r\n<p style=\"font-family: Tahoma, Arial, sans-serif; font-size: 11pt;\">This information has {% if private %}not {% endif %} been e-mailed to the submitter.</p>", 
             "plain_text": "Hello,\r\n\r\nThis is a courtesy e-mail to let you know that ticket {{ ticket.ticket }} (\"{{ ticket.title }}\") for {{ ticket.submitter_email }} has been updated.\r\n\r\nTicket ID: {{ ticket.ticket }}\r\nQueue: {{ queue.title }}\r\nTitle: {{ ticket.title }}\r\nOpened: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}\r\nSubmitter: {{ ticket.submitter_email|default:\"Unknown\" }}\r\nPriority: {{ ticket.get_priority_display }}\r\nStatus: {{ ticket.get_status }}\r\nAssigned to: {{ ticket.get_assigned_to }}\r\nView Online: {{ ticket.staff_url }} (login required)\r\n\r\nOriginal description:\r\n\r\n{{ ticket.description }}\r\n\r\nThe following comment was added:\r\n\r\n{{ comment }}\r\n\r\nThis information has {% if private %}not {% endif %} been e-mailed to the submitter.\r\n\r\nIf you wish to view this ticket online, you can visit {{ ticket.staff_url }}.\r\n\r\n", 
             "heading": "Ticket Updated", 
-            "subject": "(Updated)"
+            "subject": "(Updated)",
+            "locale": "en"
         }
     }, 
     {
@@ -161,7 +175,8 @@
             "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Hello,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">This is a courtesy e-mail to let you know that ticket {{ ticket.ticket }} (\"{{ ticket.title }}\") for {{ ticket.submitter_email }}, which is assigned to you, has been updated.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">\r\n<b>Ticket ID</b>: {{ ticket.ticket }}<br>\r\n<b>Queue</b>: {{ queue.title }}<br>\r\n<b>Title</b>: {{ ticket.title }}<br>\r\n<b>Opened</b>: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}<br>\r\n<b>Submitter</b>: {{ ticket.submitter_email|default:\"Unknown\" }}<br>\r\n<b>Priority</b>: {{ ticket.get_priority_display }}<br>\r\n<b>Status</b>: {{ ticket.get_status }}<br>\r\n<b>Assigned to</b>: {{ ticket.get_assigned_to }}<br>\r\n<b><a href='{{ ticket.staff_url }}'>View Online</a></b> to update this ticket (login required)</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Just for reference, the original ticket description was:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.description }}</blockquote>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">The following comment was added:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ comment }}</blockquote>\r\n\r\n<p style=\"font-family: Tahoma, Arial, sans-serif; font-size: 11pt;\">This information has {% if private %}not {% endif %} been e-mailed to the submitter.</p>", 
             "plain_text": "Hello,\r\n\r\nThis is a courtesy e-mail to let you know that ticket {{ ticket.ticket }} (\"{{ ticket.title }}\") for {{ ticket.submitter_email }}, which is assigned to you, has been updated.\r\n\r\nTicket ID: {{ ticket.ticket }}\r\nQueue: {{ queue.title }}\r\nTitle: {{ ticket.title }}\r\nOpened: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}\r\nSubmitter: {{ ticket.submitter_email|default:\"Unknown\" }}\r\nPriority: {{ ticket.get_priority_display }}\r\nStatus: {{ ticket.get_status }}\r\nAssigned to: {{ ticket.get_assigned_to }}\r\nView Online: {{ ticket.staff_url }} (login required)\r\n\r\nOriginal description:\r\n\r\n{{ ticket.description }}\r\n\r\nThe following comment was added:\r\n\r\n{{ comment }}\r\n\r\nThis information has {% if private %}not {% endif %} been e-mailed to the submitter.\r\n\r\nIf you wish to view this ticket online, you can visit {{ ticket.staff_url }}\r\n\r\n", 
             "heading": "Ticket Updated", 
-            "subject": "(Updated)"
+            "subject": "(Updated)",
+            "locale": "en"
         }
     }, 
     {
@@ -172,7 +187,201 @@
             "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Hello,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">You recently logged a ticket with a subject of <i>{{ ticket.title }}</i> with us. This e-mail is to advise you of an update to that ticket.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">The following comment was added to ticket <b>{{ ticket.ticket }}</b>:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ comment }}</blockquote>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">If you need to provide us with further information, please reply to this e-mail and keep the subject intact. Alternatively, you can view and update this ticket online by visiting <a href=\"{{ ticket.ticket_url }}\">{{ ticket.ticket_url }}</a>.</p>", 
             "plain_text": "Hello,\r\n\r\nYou recently logged a ticket with a subject of \"{{ ticket.title }}\" with us. This e-mail is to advise you of an update to that ticket.\r\n\r\nThe following comment was added to ticket {{ ticket.ticket }}:\r\n\r\n{{ comment }}\r\n\r\nIf you need to provide us with further information, please reply to this e-mail and keep the subject intact. Alternatively, you can view and update this ticket online by visiting {{ ticket.ticket_url }}\r\n\r\n", 
             "heading": "Your Ticket Has Been Updated", 
-            "subject": "(Updated)"
+            "subject": "(Updated)",
+            "locale": "en"
+        }
+    },
+    {
+        "pk": 17, 
+        "model": "helpdesk.emailtemplate", 
+        "fields": {
+            "template_name": "assigned_cc", 
+            "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Здравствуйте,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Уведомляем Вас о том, что заявка <a href=\"{{ ticket.staff_url }}\"><b>{{ ticket.ticket }}</b></a> (<em>{{ ticket.title }}</em>) от {{ ticket.submitter_email }} была {% if ticket.assigned_to %}принята {{ ticket.assigned_to }}{% else %}отклонена{% endif %}.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">\r\n<b>ID заявки</b>: {{ ticket.ticket }}<br>\r\n<b>Очередь</b>: {{ queue.title }}<br>\r\n<b>Заголовок</b>: {{ ticket.title }}<br>\r\n<b>Создана</b>: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}<br>\r\n<b>Автор заявки</b>: {{ ticket.submitter_email|default:\"Unknown\" }}<br>\r\n<b>Приоритет</b>: {{ ticket.get_priority_display }}<br>\r\n<b>Статус</b>: {{ ticket.get_status }}<br>\r\n<b>Присвоена</b>: {{ ticket.get_assigned_to }}<br>\r\n<b><a href=\"{{ ticket.staff_url }}\">Перейти к заявке</a></b> оставить комментарий (требуется авторизация)</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Изначальное описание :</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.description }}</blockquote>", 
+            "plain_text": "Здравствуйте,\r\n\r\nУведомляем Вас о том, что заявка, {{ ticket.ticket }} (\"{{ ticket.title }}\") от {{ ticket.submitter_email }}, была {% if ticket.assigned_to %} принята {{ ticket.assigned_to }}{% else %} отклонена {% endif %}.\r\n\r\nID заявки: {{ ticket.ticket }}\r\nОчередь: {{ queue.title }}\r\nЗаголовок: {{ ticket.title }}\r\nСоздана: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}\r\nАвтор заявки: {{ ticket.submitter_email|default:\"Unknown\" }}\r\nПриоритет: {{ ticket.get_priority_display }}\r\nСтатус: {{ ticket.get_status }}\r\nПрисвоена: {{ ticket.get_assigned_to }}\r\nПерейти к заявке: {{ ticket.staff_url }}\r\n\r\nИзначальное описание:\r\n\r\n{{ ticket.description }}", 
+            "heading": "Заявка", 
+            "subject": " ",
+            "locale": "ru"
+        }
+    }, 
+    {
+        "pk": 18, 
+        "model": "helpdesk.emailtemplate", 
+        "fields": {
+            "template_name": "assigned_owner", 
+            "html": "<p style=\"font-family: sans-serif; font-size: 1em\";>Здравствуйте,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Уведомляем Вас о том, что заявка <a href=\"{{ ticket.staff_url }}\"><b>{{ ticket.ticket }}</b></a> (<em>{{ ticket.title }}</em>) от {{ ticket.submitter_email }} была присвоена  <b>Вам</b>.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">\r\n<b>ID заявки</b>: {{ ticket.ticket }}<br>\r\n<b>Очередь</b>: {{ queue.title }}<br>\r\n<b>Заголовок</b>: {{ ticket.title }}<br>\r\n<b>Создана</b>: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}<br>\r\n<b>Автор заявки</b>: {{ ticket.submitter_email|default:\"Unknown\" }}<br>\r\n<b>Приоритет</b>: {{ ticket.get_priority_display }}<br>\r\n<b>Статус</b>: {{ ticket.get_status }}<br>\r\n<b>Присвоена</b>: ВАМ<br>\r\n<b><a href=\"{{ ticket.staff_url }}\">Перейти к заявке</a></b> оставить комментарий (требуется авторизация)</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Изначальное описание заявки:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.description }}</blockquote>", 
+            "plain_text": "Здравствуйте,\r\n\r\nУведомляем Вас о том, что заявка {{ ticket.ticket }} (\"{{ ticket.title }}\") от {{ ticket.submitter_email }} была присвоенна Вам.\r\n\r\nID заявки: {{ ticket.ticket }}\r\nОчередь: {{ queue.title }}\r\nЗаголовок: {{ ticket.title }}\r\nСоздана: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}\r\nАвтор заявки: {{ ticket.submitter_email|default:\"Unknown\" }}\r\nПриоритет: {{ ticket.get_priority_display }}\r\nСтатус: {{ ticket.get_status }}\r\nПрисвоена: ВАМ\r\nПросмотреть онлайн: {{ ticket.staff_url }}\r\n\r\nИзначальное описание:\r\n\r\n{{ ticket.description }}", 
+            "heading": "Вам присвоенна заявка", 
+            "subject": " ",
+            "locale": "ru"
+        }
+    }, 
+    {
+        "pk": 19, 
+        "model": "helpdesk.emailtemplate", 
+        "fields": {
+            "template_name": "closed_cc", 
+            "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Здравствуйте,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Заявка <i>{{ ticket.title }}</i> (\"{{ ticket.title }}\"){% if ticket.assigned_to %}, присвоенная {{ ticket.get_assigned_to }}{% endif %} была закрыта.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">\r\n<b>ID заявки</b>: {{ ticket.ticket }}<br>\r\n<b>Очередь</b>: {{ queue.title }}<br>\r\n<b>Заголовок</b>: {{ ticket.title }}<br>\r\n<b>Создана</b>: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}<br>\r\n<b>Автор заявки</b>: {{ ticket.submitter_email|default:\"Unknown\" }}<br>\r\n<b>Приоритет</b>: {{ ticket.get_priority_display }}<br>\r\n<b>Статус</b>: {{ ticket.get_status }}<br>\r\n<b>Присвоена</b>: {{ ticket.get_assigned_to }}<br>\r\n<b><a href=\"{{ ticket.staff_url }}\">Перейти к заявке</a></b> to оставить комментарий (требуется авторизация)</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Изначальное описание:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;>{{ ticket.description }}</blockquote>\r\n\r\n<p style=font-family: sans-serif; font-size: 1em;\">Было принято следующее решение:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ resolution }}</blockquote>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Перейти к заявке <a href=\"{{ ticket.staff_url }}\">{{ ticket.staff_url }}</a>.</p>", 
+            "plain_text": "Здравствуйте,\r\n\r\nЗаявка {{ ticket.title }} (\"{{ ticket.title }}\"){% if ticket.assigned_to %}, присвоенная {{ ticket.assigned_to }}{% endif %} была закрыта.\r\n\r\nID заявки: {{ ticket.ticket }}\r\nОчередь: {{ queue.title }}\r\nЗаголовок: {{ ticket.title }}\r\nСоздана: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}\r\nАвтор заявки: {{ ticket.submitter_email|default:\"Unknown\" }}\r\nПриоритет: {{ ticket.get_priority_display }}\r\nСтатус: {{ ticket.get_status }}\r\nПрисвоена: {{ ticket.get_assigned_to }}\r\nПерейти к заявке: {{ ticket.staff_url }} (требуется авторизация)\r\n\r\nИзначальное описание:\r\n\r\n{{ ticket.description }}\r\n\r\nБыло предложено следующее решение:\r\n\r\n{{ resolution }}", 
+            "heading": "Заявка закрыта", 
+            "subject": " ",
+            "locale": "ru"
+        }
+    }, 
+    {
+        "pk": 20, 
+        "model": "helpdesk.emailtemplate", 
+        "fields": {
+            "template_name": "closed_owner", 
+            "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Здравствуйте,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Следующая заявка, которая на данный момент присвоена Вам, была закрыта.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">\r\n<b>ID заявки</b>: {{ ticket.ticket }}<br>\r\n<b>Очередь</b>: {{ queue.title }}<br>\r\n<b>Заголовок</b>: {{ ticket.title }}<br>\r\n<b>Создана</b>: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}<br>\r\n<b>Автор заявки</b>: {{ ticket.submitter_email|default:\"Unknown\" }}<br>\r\n<b>Приоритет</b>: {{ ticket.get_priority_display }}<br>\r\n<b>Статус</b>: {{ ticket.get_status }}<br>\r\n<b>Присвоена</b>: {{ ticket.get_assigned_to }}<br>\r\n<b><a href=\"{{ ticket.staff_url }}\">Перейти к заявке</a></b> Оставить комментарий (требуется авторизация)</p>\r\n\r\n<p style=\"font-family: sans-serif\"; font-size: 1em;>Изначальное описание:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.description }}</blockquote>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Было предложено следующее решение:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.resolution }}</blockquote>", 
+            "plain_text": "Hello,\r\n\r\nСледующая заявка, которая на данный момент присвоена Вам, была закрыта.\r\n\r\nID заявки: {{ ticket.ticket }}\r\nОчередь: {{ queue.title }}\r\nЗаголовок: {{ ticket.title }}\r\nСоздана: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}\r\nАвтор заявки: {{ ticket.submitter_email|default:\"Unknown\" }}\r\nПриоритет: {{ ticket.get_priority_display }}\r\nСтатус: {{ ticket.get_status }}\r\nПрисвоена: {{ ticket.get_assigned_to }}\r\nПерейти к заявке: {{ ticket.staff_url }} (требуется авторизаци)\r\n\r\nДля просмотра заявки перейдите по ссылке {{ ticket.staff_url }}.\r\n\r\n", 
+            "heading": "Заявка закрыта", 
+            "subject": " ",
+            "locale": "ru"
+        }
+    }, 
+    {
+        "pk": 21, 
+        "model": "helpdesk.emailtemplate", 
+        "fields": {
+            "template_name": "closed_submitter", 
+            "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Здравствуйте,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Вами была оставлена заявка<i>{{ ticket.title }}</i>  Уведомляем Вас о том, что ваша заявка была закрыта.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Было предложено следующее решение:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.resolution }}</blockquote>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Для просмотра заявки перейдите по ссылке <a href=\"{{ ticket.ticket_url }}\">{{ ticket.ticket_url }}</a>. Если вы считаете, что для решения проблемы требуется дальнейшая работа, пожалуйста, сообщите нам об этом, ответив на это письмо.</p>", 
+            "plain_text": "Здравствуйте,\r\n\r\nВами была оставлена заявка \"{{ ticket.title }}\"  Уведомляем Вас о том, что ваша заявка была закрыта\r\n\r\nЕсли вы считаете, что для решения проблемы требуется дальнейшая работа, пожалуйста, сообщите нам об этом, ответив на это письмо.\r\n\r\nДля просмотра заявки перейдите по ссылке {{ ticket.ticket_url }}.\r\n\r\nБыло предложено следующее решение:\r\n\r\n{{ ticket.resolution }}", 
+            "heading": "Заявка закрыта", 
+            "subject": " ",
+            "locale": "ru"
+        }
+    }, 
+    {
+        "pk": 22, 
+        "model": "helpdesk.emailtemplate", 
+        "fields": {
+            "template_name": "escalated_cc", 
+            "html": "<p style=\"font-family: sans-serif; font-size: 1em\";>Здравствуйте,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Уведомляем Вас о том, что приоритет заявки <i>{{ ticket.ticket }}</i> (\"{{ ticket.title }}\")был автоматически повышен.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">\r\n<b>ID заявки</b>: {{ ticket.ticket }}<br>\r\n<b>Очередь</b>: {{ queue.title }}<br>\r\n<b>Заголовок</b>: {{ ticket.title }}<br>\r\n<b>Создана</b>: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}<br>\r\n<b>Автор заявки</b>: {{ ticket.submitter_email|default:\"Unknown\" }}<br>\r\n<b>Приоритет</b>: {{ ticket.get_priority_display }}<br>\r\n<b>Статус</b>: {{ ticket.get_status }}<br>\r\n<b>Присвоена</b>: {{ ticket.get_assigned_to }}<br>\r\n<b><a href=\"{{ ticket.staff_url }}\">Перейти к заявке</a></b> оставить комментарий (требуется авторизация)</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Изначальное описание :</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.description }}</blockquote>", 
+            "plain_text": "Здравствуйте,\r\n\r\nУведомляем Вас о том, что приоритет заявки {{ ticket.ticket }} (\"{{ ticket.title }}\") был автоматически повышен.\r\n\r\nID заявки: {{ ticket.ticket }}\r\nОчередь: {{ queue.title }}\r\nЗаголовок: {{ ticket.title }}\r\nСоздана: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}\r\nАвтор заявки: {{ ticket.submitter_email|default:\"Unknown\" }}\r\nПриоритет: {{ ticket.get_priority_display }}\r\nСтатус: {{ ticket.get_status }}\r\nПрисвоена: {{ ticket.get_assigned_to }}\r\nПерейти к заявке: {{ ticket.staff_url }} (login required)\r\n\r\nИзначальное описание:\r\n\r\n{{ ticket.description }}", 
+            "heading": "Приоритет заявки повышен", 
+            "subject": " ",
+            "locale": "ru"
+        }
+    }, 
+    {
+        "pk": 23, 
+        "model": "helpdesk.emailtemplate", 
+        "fields": {
+            "template_name": "escalated_owner", 
+            "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Здравствуйте,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Приоритет заявки, которая на данный момент присвоена Вам, был автоматически повышен, так как она оставалась открытой дольше, чем ожидалось.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">\r\n<b>ID заявки</b>: {{ ticket.ticket }}<br>\r\n<b>Очередь</b>: {{ queue.title }}<br>\r\n<b>Заголовок</b>: {{ ticket.title }}<br>\r\n<b>Создана</b>: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}<br>\r\n<b>Автор заявки</b>: {{ ticket.submitter_email|default:\"Unknown\" }}<br>\r\nПриоритет</b>: {{ ticket.get_priority_display }}<br>\r\n<b>Статус</b>: {{ ticket.get_status }}<br>\r\n<b>Присвоена</b>: {{ ticket.get_assigned_to }}<br>\r\n<b><a href=\"{{ ticket.staff_url }}\">Перейти к заявке</a></b>оставить комментарий (требуется авторизация)</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Изначальное описание заявки:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.description }}</blockquote>", 
+            "plain_text": "Здравствуйте,\r\n\r\nПриоритет заявки, которая на данный момент присвоена Вам, был автоматически повышен, так как она оставалась открытой дольше, чем ожидалось.\r\n\r\nID заявки: {{ ticket.ticket }}\r\nОчередь: {{ queue.title }}\r\nЗаголовок: {{ ticket.title }}\r\nСоздана: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}\r\nАвтор заявки: {{ ticket.submitter_email|default:\"Unknown\" }}\r\nПриоритет: {{ ticket.get_priority_display }}\r\nСтатус: {{ ticket.get_status }}\r\nАдресованна: {{ ticket.get_assigned_to }}\r\nПерейти к заявке: {{ ticket.staff_url }} (необходима авторизация)\r\n\r\nИзначальное описание:\r\n\r\n{{ ticket.description }}\r\n\r\nПожалуйста, рассмотрите заявку и и попытайтесь найти решение проблемы как можно быстрее.", 
+            "heading": "Приоритет присвоенной Вам заявки был повышен", 
+            "subject": " ",
+            "locale": "ru"
+        }
+    }, 
+    {
+        "pk": 24, 
+        "model": "helpdesk.emailtemplate", 
+        "fields": {
+            "template_name": "escalated_submitter", 
+            "html": "<p style=\"font-family: sans-serif; font-size: 11pt;\">Здравствуйте,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 11pt;\">Вами была оставлена заявка <i>{{ ticket.title }}</i> Советуем Вам воспользоваться автоматизированным повышением приоритета этой заявки, так как она оставалась открытой дольше, чем ожидалось.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 11pt;\">Вскоре мы пересмотрим вашу заявку и попытаемся найти решение проблемы как можно быстрее.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 11pt;\">Перейти к заявке<a href=\"{{ ticket.ticket_url }}\">{{ ticket.ticket_url }}</a>.</p>", 
+            "plain_text": "Здравствуте,\r\n\r\nВами была оставлена заявка  \"{{ ticket.title }}\"  Советуем Вам воспользоваться автоматизированным повышением приоритета этой заявки, так как она оставалась открытой дольше, чем ожидалось.\r\n\r\nВскоре мы пересмотрим вашу заявку и попытаемся найти решение проблемы как можно быстрее.\r\n\r\nПерейти к заявке {{ ticket.ticket_url }}.", 
+            "heading": "Повышение приоритета Вашей заявки", 
+            "subject": " ",
+            "locale": "ru"
+        }
+    }, 
+    {
+        "pk": 25, 
+        "model": "helpdesk.emailtemplate", 
+        "fields": {
+            "template_name": "newticket_cc", 
+            "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Здравствуйте,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Уведомляем Вас о том, что была подана новая заявка</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">\r\n<b>ID заявки</b>: {{ ticket.ticket }}<br>\r\n<b>Очередь</b>: {{ queue.title }}<br>\r\n<b>Заголовок</b>: {{ ticket.title }}<br>\r\n<b>Создана</b>: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}<br>\r\n<b>Автор заявки</b>: {{ ticket.submitter_email|default:\"Unknown\" }}<br>\r\n<b>Приоритет</b>: {{ ticket.get_priority_display }}<br>\r\n<b>Статус</b>: {{ ticket.get_status }}<br>\r\n<b><a href=\"{{ ticket.staff_url }}\">Перейти к заявке</a></b> оставить комментарий (требуется авторизация)</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Описание:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.description }}</blockquote>", 
+            "plain_text": "Здравствуйте,\r\n\r\nУведомляем Вас о том, что была подана новая заявка.\r\n\r\nID заявки: {{ ticket.ticket }}\r\nОчередь: {{ queue.title }}\r\nЗаголовок: {{ ticket.title }}\r\nСоздана: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}\r\nАвтор заявки: {{ ticket.submitter_email|default:\"Unknown\" }}\r\nПриоритет: {{ ticket.get_priority_display }}\r\nСтатус: {{ ticket.get_status }}\r\nПерейти к заявке: {{ ticket.staff_url }} (login required)\r\n\r\nОписание:\r\n{{ ticket.description }}\r\n", 
+            "heading": "Подана новая заявка", 
+            "subject": " ",
+            "locale": "ru"
+        }
+    }, 
+    {
+        "pk": 26, 
+        "model": "helpdesk.emailtemplate", 
+        "fields": {
+            "template_name": "newticket_submitter", 
+            "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Здравствуйте,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Уведомляем Вас о том, что мы получили Ваш запрос на тему <i>{{ ticket.title }}</i>.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">На данном этапе Вам не нужно ничего делать. Вашей заявке был присвоен номер <b>{{ ticket.ticket }}</b> и вскоре Ваш запрос будет обработан.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Если Вы хотите сообщить нам какую-либо дополнительную информацию, или если у Вас есть вопросы относительно заявки, пoжалуйста напишите id заявки <b>{{ ticket.ticket }}</b> в теме письма. Легче всего это сделать, просто нажав \"ответить\".</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Вы хотите просмотреть заявку онлайн, сообщить дополнительную информацию, прикрепить файлы или просмотреть последние комментарии, Вы можете перейти по следующей ссылке. <a href=\"{{ ticket.ticket_url }}\">{{ ticket.ticket_url }}</a>.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Мы обработаем Ваш запрос и постараемся найти решение как можно быстрее. В дальнейшем, мы будем держать Вас в курсе дела, отправляя письма с этого электронного адреса.</p>", 
+            "plain_text": "Здравствуйте,\r\n\r\nУведомляем Вас о том, что мы получили Ваш запрос на тему \"{{ ticket.title }}\". \r\n\r\nНа данном этапе Вам не нужно ничего делать. Вашей заявке был присвоен номер {{ ticket.ticket }}и вскоре Ваш запрос будет обработан.\r\n\r\nЕсли Вы хотите сообщить нам какую-либо дополнительную информацию, или если у Вас есть вопросы относительно заявки, пожалуйста напишите id заявки \"{{ ticket.ticket }}\" в теме письма. Легче всего это сделать, просто нажав \"ответить\".\r\n\r\nЕсли Вы хотите просмотреть заявку онлайн, сообщить дополнительную информацию, прикрепить файлы или просмотреть последние комментарии, Вы можете перейти по следующей ссылке. {{ ticket.ticket_url }}.\r\n\r\nМы обработаем Ваш запрос и постараемся найти решение как можно быстрее. В дальнейшем, мы будем держать Вас в курсе дела, отправляя письма с этого электронного адреса.", 
+            "heading": "Ваша заявка была успешно создана", 
+            "subject": " ",
+            "locale": "ru"
+        }
+    }, 
+    {
+        "pk": 27, 
+        "model": "helpdesk.emailtemplate", 
+        "fields": {
+            "template_name": "resolved_cc", 
+            "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Здравствуйте,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Было найдено решение проблемы, указанной в следующей заявке.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">\r\n<b>ID заявки</b>: {{ ticket.ticket }}<br>\r\n<b>Очередь</b>: {{ queue.title }}<br>\r\n<b>Заголовок</b>: {{ ticket.title }}<br>\r\n<b>Создана</b>: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}<br>\r\n<b>Автор заявки</b>: {{ ticket.submitter_email|default:\"Unknown\" }}<br>\r\n<b>Приоритет</b>: {{ ticket.get_priority_display }}<br>\r\n<b>Статус</b>: {{ ticket.get_status }}<br>\r\n<b>Присвоена</b>: {{ ticket.get_assigned_to }}<br>\r\n<b><a href=\"{{ ticket.staff_url }}\">Перейти к заявке</a></b> оставить комментарий (требуется авторизация)</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Изначальное описание:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.description }}</blockquote>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Было предложено следующее решение:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.resolution }}</blockquote>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Это решение было отправлено автору заявки, который должен будет подтвердить его, прежде чем Вы сможете закрыть эту заявку.</p>", 
+            "plain_text": "Здравствуйте,\r\n\r\nБыло найдено решение проблемы, указанной в следующей заявке:\r\n\r\nID заявки: {{ ticket.ticket }}\r\nОчередь: {{ queue.title }}\r\nЗаголовок: {{ ticket.title }}\r\nСоздана: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}\r\nАвтор заявки: {{ ticket.submitter_email|default:\"Unknown\" }}\r\nПриоритет: {{ ticket.get_priority_display }}\r\nСтатус: {{ ticket.get_status }}\r\nПрисвоена: {{ ticket.get_assigned_to }}\r\nПерейти к заявке: {{ ticket.staff_url }} (требуется авторизация)\r\n\r\nИзначальное описание:\r\n\r\n{{ ticket.description }}\r\n\r\nБыло предложено следующее решение:\r\n\r\n{{ ticket.resolution }}\r\n\r\nЭто решение было отправлено автору заявки, который должен будет подтвердить его, прежде чем Вы сможете закрыть эту заявку.", 
+            "heading": "Решение найдено", 
+            "subject": " ",
+            "locale": "ru"
+        }
+    }, 
+    {
+        "pk": 28, 
+        "model": "helpdesk.emailtemplate", 
+        "fields": {
+            "template_name": "resolved_owner", 
+            "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Здравствуйте,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Было найдено решение проблемы, указанной в присвоенной Вам заявке.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">\r\n<b>ID заявки</b>: {{ ticket.ticket }}<br>\r\n<b>очередь</b>: {{ queue.title }}<br>\r\n<b>Заголовок</b>: {{ ticket.title }}<br>\r\n<b>Создана</b>: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}<br>\r\n<b>Автор заявки</b>: {{ ticket.submitter_email|default:\"Unknown\" }}<br>\r\n<b>Приоритет</b>: {{ ticket.get_priority_display }}<br>\r\n<b>Статус</b>: {{ ticket.get_status }}<br>\r\n<b>Присвоена</b>: {{ ticket.get_assigned_to }}<br>\r\n<b><a href=\"{{ ticket.staff_url }}\">Перейти к заявке</a></b> оставить комментарий (требуется авторизация)</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Изначальное описание:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.description }}</blockquote>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Было предложено следующее решение:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.resolution }}</blockquote>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Это решение было отправлено автору заявки, который должен будет подтвердить его, прежде чем Вы сможете закрыть эту заявку.</p>", 
+            "plain_text": "Здравствуйте,\r\n\r\nБыло найдено решение проблемы, указанной в присвоенной Вам заявке.\r\n\r\nID заявки: {{ ticket.ticket }}\r\nОчередь: {{ queue.title }}\r\nЗаголовок: {{ ticket.title }}\r\nСоздана: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}\r\nАвтор заявки: {{ ticket.submitter_email|default:\"Unknown\" }}\r\nПриоритет: {{ ticket.get_priority_display }}\r\nСтатус: {{ ticket.get_status }}\r\nПрисвоена: {{ ticket.get_assigned_to }}\r\nПерейти к заявке: {{ ticket.staff_url }} (требуется авторизация)\r\n\r\nИзначальное описание:\r\n\r\n{{ ticket.description }}\r\n\r\nБыло предложено следующее решение:\r\n\r\n{{ ticket.resolution }}\r\n\r\nЭто решение было отправлено автору заявки, который должен будет подтвердить его, прежде чем Вы сможете закрыть эту заявку.", 
+            "heading": "Решение найдено", 
+            "subject": " ",
+            "locale": "ru"
+        }
+    }, 
+    {
+        "pk": 29, 
+        "model": "helpdesk.emailtemplate", 
+        "fields": {
+            "template_name": "resolved_submitter", 
+            "html": "<p style=\"font-family: sans-serif\"; font-size: 1em;>Здравствуйте,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Вами была оставлена заявка <i>{{ ticket.title }}</i>  В этом письме содержится решение указанной Вами проблемы.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Следующий комментарий был добавлен к заявке <b>{{ ticket.ticket }}</b>:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ resolution }}</blockquote>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Не могли бы Вы сообщить, подходит ли Вам это решение, чтобы мы могли закрыть эту заявку? Если у Вас возникли какие-либо вопросы или сомнения в отношении адекватности этого решения, пожалуйста, ответьте на это письмо.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Для просмотра заявки перейдите по ссылке<a href=\"{{ ticket.ticket_url }}\">{{ ticket.ticket_url }}</a>.</p>", 
+            "plain_text": "Здравствуйте,\r\n\r\nВами была оставлена заявка \"{{ ticket.title }}\" В этом письме содержится решение указанной Вами проблемы. \r\n\r\nСледующее решение было предложено к заявке {{ ticket.ticket }}:\r\n\r\n{{ resolution }}\r\n\r\nНе могли бы Вы сообщить, подходит ли Вам это решение, чтобы мы могли закрыть эту заявку? Если у Вас возникли какие-либо вопросы или сомнения в отношении адекватности этого решения, пожалуйста, ответьте на это письмо.\r\n\r\nДля просмотра заявки перейдите по ссылке {{ ticket.ticket_url }}.", 
+            "heading": "Проблема, указанная в Вашей заявке была решена.", 
+            "subject": " ",
+            "locale": "ru"
+        }
+    }, 
+    {
+        "pk": 30, 
+        "model": "helpdesk.emailtemplate", 
+        "fields": {
+            "template_name": "updated_cc", 
+            "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Здравствуйте,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Уведомляем Вас о том, что заявка{{ ticket.ticket }} (\"{{ ticket.title }}\") от {{ ticket.submitter_email }} была обновлена.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">\r\n<b>ID заявки</b>: {{ ticket.ticket }}<br>\r\n<b>Очередь</b>: {{ queue.title }}<br>\r\n<b>Заголовок</b>: {{ ticket.title }}<br>\r\n<b>Создана</b>: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}<br>\r\n<b>Автор заявки</b>: {{ ticket.submitter_email|default:\"Unknown\" }}<br>\r\n<b>Приоритет</b>: {{ ticket.get_priority_display }}<br>\r\n<b>Статус</b>: {{ ticket.get_status }}<br>\r\n<b>Присвоена</b>: {{ ticket.get_assigned_to }}<br>\r\n<b><a href=\"{{ ticket.staff_url }}\">Перейти к заявке</a></b> Оставить комментарий (требуется авторизация)</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Изначальное описание :</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.description }}</blockquote>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Был добавлен следующий комментарий:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ comment }}</blockquote>\r\n\r\n<p style=\"font-family: Tahoma, Arial, sans-serif; font-size: 11pt;\">Эта информация {% if private %}не{% endif %} была отправленна на электронный ящик автора заявки.</p>", 
+            "plain_text": "Здравствуйте,\r\n\r\nУведомляем Вас о том, чтоо заявка {{ ticket.ticket }} (\"{{ ticket.title }}\") от {{ ticket.submitter_email }} была обновлена.\r\n\r\nID заявки: {{ ticket.ticket }}\r\nОчередь: {{ queue.title }}\r\nЗаголовок: {{ ticket.title }}\r\nСоздана: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}\r\nАвтор заявки: {{ ticket.submitter_email|default:\"Unknown\" }}\r\nПриоритет: {{ ticket.get_priority_display }}\r\nСтатус: {{ ticket.get_status }}\r\nПрисвоена: {{ ticket.get_assigned_to }}\r\nПросмотреть онлайн: {{ ticket.staff_url }} (login required)\r\n\r\nИзначальное описание:\r\n\r\n{{ ticket.description }}\r\n\r\nБыл добавлен следующий комментарий:\r\n\r\n{{ comment }}\r\n\r\nЭта информация {% if private %}не {% endif %} была отправлена адресатуbeen e-mailed to the submitter.\r\n\r\nЕсли Вы хотите просмотреть заявку онлайн, перейдите по следующей ссылке{{ ticket.staff_url }}.", 
+            "heading": "Заявка обновлена", 
+            "subject": " ",
+            "locale": "ru"
+        }
+    }, 
+    {
+        "pk": 31, 
+        "model": "helpdesk.emailtemplate", 
+        "fields": {
+            "template_name": "updated_owner", 
+            "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Здравствуйте,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Уведомляем Вас о том, что к заявке {{ ticket.ticket }} (\"{{ ticket.title }}\") от {{ ticket.submitter_email }}, которая была присвоенна Вам, был добавлен новый комментарий.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">\r\n<b>ID заявки</b>: {{ ticket.ticket }}<br>\r\n<b>Очередь</b>: {{ queue.title }}<br>\r\n<b>Заголовок</b>: {{ ticket.title }}<br>\r\n<b>Создана</b>: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}<br>\r\n<b>Автор заявки</b>: {{ ticket.submitter_email|default:\"Unknown\" }}<br>\r\n<b>Приоритет</b>: {{ ticket.get_priority_display }}<br>\r\n<b>Статус</b>: {{ ticket.get_status }}<br>\r\n<b>Присвоена</b>: {{ ticket.get_assigned_to }}<br>\r\n<b><a href=\"{{ ticket.staff_url }}\">Перейти к заявке</a></b> оставить комментарий (требуется авторизация)</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Изначальное описание :</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.description }}</blockquote>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Был добавлен следующий комментарий:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ comment }}</blockquote>\r\n\r\n<p style=\"font-family: Tahoma, Arial, sans-serif; font-size: 11pt;\">Эта информация{% if private %}не {% endif %}была отправлена на электронный ящик автора заявки.</p>", 
+            "plain_text": "Здравствуйте,\r\n\r\nУведомляем Вас о том, что к заявке {{ ticket.ticket }} (\"{{ ticket.title }}\") от {{ ticket.submitter_email }}, которая была присвоенна Вам, был добавлен новый комментарий.\r\n\r\nID заявки: {{ ticket.ticket }}\r\nОчередь: {{ queue.title }}\r\nЗаголовок: {{ ticket.title }}\r\nСоздана: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}\r\nАвтор заявки: {{ ticket.submitter_email|default:\"Unknown\" }}\r\nПриоритет: {{ ticket.get_priority_display }}\r\nСтатус: {{ ticket.get_status }}\r\nПрсвоена: {{ ticket.get_assigned_to }}\r\nПерейти к заявке: {{ ticket.staff_url }} (требуется авторизация)\r\n\r\nИзначальное описание:\r\n\r\n{{ ticket.description }}\r\n\r\nБыл добавлен следующий комментарий:\r\n\r\n{{ comment }}\r\n\r\nЭта информация {% if private %}не {% endif %} была отправленна на электронный ящик автора заявки.\r\n\r\nДля просмотра заявки онлайн перейдите по следующей ссылке {{ ticket.staff_url }}.", 
+            "heading": "Заявка обновлена", 
+            "subject": " ",
+            "locale": "ru"
+        }
+    }, 
+    {
+        "pk": 32, 
+        "model": "helpdesk.emailtemplate", 
+        "fields": {
+            "template_name": "updated_submitter", 
+            "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Здравствуйте,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Вами была оставлена заявка <i>{{ ticket.title }}</i> Советуем Вам прокомментировать эту заявку.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Следующий комментарий был добавлен к заявке<b>{{ ticket.ticket }}</b>:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ comment }}</blockquote>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Если Вы хотите сообщить нам дополнительную информацию, пожалуйста ответьте на это письмо. Или же Вы можете сделать это, оставив комментарий к своей заявке. Перейти к заявке<a href=\"{{ ticket.ticket_urL }}\">{{ ticket.ticket_url }}</a>.</p>", 
+            "plain_text": "Здравствуйте,\r\n\r\nВами была оставлена заявка \"{{ ticket.title }}\". Советуем Вам прокомментировать эту заявку.\r\n\r\nБыл добавлен следующий комментарий {{ ticket.ticket }}:\r\n\r\n{{ comment }}\r\n\r\nЕсли Вы хотите сообщить нам дополнительную информацию, пожалуйста ответьте на это письмо. Или же Вы можете сделать это, оставив комментарий к своей заявке. Перейти к заявке{{ ticket.ticket_url }}.", 
+            "heading": "К Вашей заявке добавлен новый комментарий", 
+            "subject": " ",
+            "locale": "ru"
         }
     }
+]
 ]

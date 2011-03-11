@@ -715,7 +715,6 @@ class EmailTemplate(models.Model):
     template_name = models.CharField(
         _('Template Name'),
         max_length=100,
-        unique=True,
         )
 
     subject = models.CharField(
@@ -746,12 +745,20 @@ class EmailTemplate(models.Model):
         help_text=_('The same context is available here as in plain_text, '
             'above.'),
         )
+    
+    locale = models.CharField(
+        _('Locale'),
+        max_length=10,
+        blank=True,
+        null=True,
+        help_text=_('Locale of this template.'),
+        )
 
     def __unicode__(self):
         return u'%s' % self.template_name
 
     class Meta:
-        ordering = ['template_name',]
+        ordering = ['template_name', 'locale']
 
 
 class KBCategory(models.Model):

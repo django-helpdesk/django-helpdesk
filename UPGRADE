@@ -10,6 +10,7 @@ all commands listed _after_ that checkout.
 0. Table of Contents
 #########################
 1. 2009-01-23 (Changes added after SVN r99)
+2. 2010-03-12 Addition of locale to emailtemplate
 
 
 #########################
@@ -26,3 +27,15 @@ behaviour.
 
     ALTER TABLE helpdesk_ignoreemail ADD "keep_in_mailbox" boolean;
     UPDATE helpdesk_ignoreemail SET keep_in_mailbox='t';
+
+#########################
+2. 2010-03-12 Addition of locale to emailtemplate
+#########################
+
+A new field was added to the EmailTemplate entity to allow us to have templates
+for multiple languages.
+
+To migrate your database, execute commands similar to the following:
+
+    ALTER TABLE helpdesk_emailtemplate ADD "locale" varchar(10);
+    UPDATE helpdesk_emailtemplate SET locale="en";

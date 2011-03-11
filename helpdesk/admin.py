@@ -5,7 +5,7 @@ from helpdesk.models import TicketChange, Attachment, IgnoreEmail
 from helpdesk.models import CustomField
 
 class QueueAdmin(admin.ModelAdmin):
-    list_display = ('title', 'slug', 'email_address')
+    list_display = ('title', 'slug', 'email_address', 'locale')
 
 class TicketAdmin(admin.ModelAdmin):
     list_display = ('title', 'status', 'assigned_to', 'submitter_email',)
@@ -28,12 +28,16 @@ class KBItemAdmin(admin.ModelAdmin):
 class CustomFieldAdmin(admin.ModelAdmin):
     list_display = ('name', 'label', 'data_type')
 
+class EmailTemplateAdmin(admin.ModelAdmin):
+    list_display = ('template_name', 'heading', 'locale')
+    list_filter = ('locale', )
+
 admin.site.register(Ticket, TicketAdmin)
 admin.site.register(Queue, QueueAdmin)
 admin.site.register(FollowUp, FollowUpAdmin)
 admin.site.register(PreSetReply)
 admin.site.register(EscalationExclusion)
-admin.site.register(EmailTemplate)
+admin.site.register(EmailTemplate, EmailTemplateAdmin)
 admin.site.register(KBCategory)
 admin.site.register(KBItem, KBItemAdmin)
 admin.site.register(IgnoreEmail)
