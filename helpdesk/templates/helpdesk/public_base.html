@@ -1,8 +1,8 @@
 {% load i18n %}<html>
 <head>
 <title>{% block helpdesk_title %}{% trans "Helpdesk" %}{% endblock %}</title>
-<script src='{{ MEDIA_URL }}helpdesk/jquery-1.5.min.js' type='text/javascript' language='javascript'></script>
-<link rel='stylesheet' href='{{ MEDIA_URL }}helpdesk/helpdesk.css' type='text/css' />
+<script src='{{ STATIC_URL }}helpdesk/jquery-1.5.min.js' type='text/javascript' language='javascript'></script>
+<link rel='stylesheet' href='{{ STATIC_URL }}helpdesk/helpdesk.css' type='text/css' />
 {% block helpdesk_head %}{% endblock %}
 </head>
 <body>

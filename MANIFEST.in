@@ -3,7 +3,7 @@ include UPGRADE
 include LICENSE*
 include CHANGELOG
 
-recursive-include helpdesk/htdocs *
+recursive-include helpdesk/static/helpdesk *
 recursive-include helpdesk/locale *.po *.mo
 recursive-include helpdesk/templates *
 recursive-include helpdesk/fixtures *.json
