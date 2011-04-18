@@ -8,13 +8,14 @@ msgstr ""
 "Project-Id-Version: django-helpdesk\n"
 "Report-Msgid-Bugs-To: http://github.com/RossP/django-helpdesk/issues\n"
 "POT-Creation-Date: 2011-02-07 10:33+0000\n"
-"PO-Revision-Date: 2011-02-22 00:01+0000\n"
-"Last-Translator: rossp <ross@rossp.org>\n"
+"PO-Revision-Date: 2011-04-01 16:07+0000\n"
+"Last-Translator: gorblnu4 <gorblnu4@gmail.com>\n"
+"Language-Team: Russian <None>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Language: ru\n"
-"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)\n"
 
 #: forms.py:37 forms.py:271 models.py:258 templates/helpdesk/dashboard.html:10
 #: templates/helpdesk/dashboard.html:26 templates/helpdesk/dashboard.html:44
@@ -72,11 +73,11 @@ msgstr ""
 
 #: forms.py:81 forms.py:307
 msgid "Attach File"
-msgstr ""
+msgstr "Прикрепить файл"
 
 #: forms.py:82 forms.py:308
 msgid "You can attach a file such as a document or screenshot to this ticket."
-msgstr ""
+msgstr "Вы можете прикрепить файл, например, документ или скриншот к талону."
 
 #: forms.py:90 templates/helpdesk/public_view_ticket.html:33
 #: templates/helpdesk/ticket.html:131
@@ -84,13 +85,13 @@ msgstr ""
 #: templates/helpdesk/ticket_list.html:58
 #: templates/helpdesk/ticket_list.html:183 views/staff.py:276
 msgid "Tags"
-msgstr ""
+msgstr "Тэги"
 
 #: forms.py:91
 msgid ""
 "Words, separated by spaces, or phrases separated by commas. These should "
 "communicate significant characteristics of this ticket"
-msgstr ""
+msgstr "Тэги"
 
 #: forms.py:183
 msgid "Ticket Opened"
@@ -559,7 +560,7 @@ msgstr ""
 
 #: models.py:494 models.py:861 models.py:1054
 msgid "User"
-msgstr ""
+msgstr "Пользователь"
 
 #: models.py:498 templates/helpdesk/ticket.html:84
 msgid "New Status"
@@ -895,19 +896,19 @@ msgstr ""
 
 #: models.py:1126
 msgid "Time"
-msgstr ""
+msgstr "Время"
 
 #: models.py:1127
 msgid "Date & Time"
-msgstr ""
+msgstr "Дата и время"
 
 #: models.py:1129
 msgid "URL"
-msgstr ""
+msgstr "Ссылка"
 
 #: models.py:1130
 msgid "IP Address"
-msgstr ""
+msgstr "IP адрес"
 
 #: models.py:1135
 msgid "Data Type"
@@ -975,7 +976,7 @@ msgstr ""
 
 #: management/commands/get_email.py:208
 msgid "email_html_body.html"
-msgstr ""
+msgstr "email_html_body.html"
 
 #: management/commands/get_email.py:285
 msgid " (Reopened)"
@@ -997,7 +998,7 @@ msgstr ""
 
 #: templates/helpdesk/base.html:7
 msgid "Powered by django-helpdesk"
-msgstr ""
+msgstr "Powered by django-helpdesk"
 
 #: templates/helpdesk/base.html:12 templates/helpdesk/rss_list.html:9
 #: templates/helpdesk/rss_list.html:23 templates/helpdesk/rss_list.html:28
@@ -1051,6 +1052,8 @@ msgid ""
 "Powered by <a href='https://github.com/rossp/django-helpdesk'>django-"
 "helpdesk</a>."
 msgstr ""
+"Powered by <a href='https://github.com/rossp/django-helpdesk'>django-"
+"helpdesk</a>."
 
 #: templates/helpdesk/base.html:73 templates/helpdesk/rss_list.html:9
 #: templates/helpdesk/rss_list.html:12 templates/helpdesk/rss_list.html:15
@@ -1103,12 +1106,12 @@ msgstr ""
 #: templates/helpdesk/confirm_delete_saved_query.html:15
 #: templates/helpdesk/delete_ticket.html:11
 msgid "No, Don't Delete It"
-msgstr ""
+msgstr "Нет,  не удалять"
 
 #: templates/helpdesk/confirm_delete_saved_query.html:17
 #: templates/helpdesk/delete_ticket.html:13
 msgid "Yes - Delete It"
-msgstr ""
+msgstr "Удалить"
 
 #: templates/helpdesk/create_ticket.html:3
 msgid "Create Ticket"
@@ -1216,7 +1219,7 @@ msgstr ""
 
 #: templates/helpdesk/edit_ticket.html:28
 msgid "Save Changes"
-msgstr ""
+msgstr "Сохранить изменения"
 
 #: templates/helpdesk/email_ignore_add.html:3
 #: templates/helpdesk/email_ignore_add.html:23
@@ -1291,7 +1294,7 @@ msgstr ""
 
 #: templates/helpdesk/email_ignore_list.html:21
 msgid "All"
-msgstr ""
+msgstr "Все"
 
 #: templates/helpdesk/email_ignore_list.html:22
 msgid "Keep"
@@ -1321,7 +1324,7 @@ msgstr ""
 
 #: templates/helpdesk/followup_edit.html:19
 msgid "Comment:"
-msgstr ""
+msgstr "Комментарий"
 
 #: templates/helpdesk/kb_category.html:4
 #: templates/helpdesk/kb_category.html:11
@@ -1427,6 +1430,8 @@ msgid ""
 "Powered by <a href='http://github.com/rossp/django-helpdesk'>django-"
 "helpdesk</a>."
 msgstr ""
+"Powered by <a href='http://github.com/rossp/django-helpdesk'>django-"
+"helpdesk</a>."
 
 #: templates/helpdesk/public_homepage.html:4
 #: templates/helpdesk/public_view_form.html:4
@@ -1752,11 +1757,11 @@ msgstr ""
 
 #: templates/helpdesk/ticket_cc_add.html:21
 msgid "Save Ticket CC"
-msgstr ""
+msgstr "Нет, не удалять"
 
 #: templates/helpdesk/ticket_cc_del.html:3
 msgid "Delete Ticket CC"
-msgstr ""
+msgstr "Да - удалить"
 
 #: templates/helpdesk/ticket_cc_del.html:5
 #, python-format
@@ -1769,11 +1774,11 @@ msgstr ""
 
 #: templates/helpdesk/ticket_cc_del.html:11
 msgid "Don't Delete"
-msgstr ""
+msgstr "Не удалять"
 
 #: templates/helpdesk/ticket_cc_del.html:13
 msgid "Yes, Delete"
-msgstr ""
+msgstr "Удалить"
 
 #: templates/helpdesk/ticket_cc_list.html:3
 msgid "Ticket CC Settings"
@@ -1867,7 +1872,7 @@ msgstr "Статус(ы)"
 
 #: templates/helpdesk/ticket_list.html:120
 msgid "Tag(s)"
-msgstr ""
+msgstr "Тэг(и)"
 
 #: templates/helpdesk/ticket_list.html:132
 msgid "Apply Filter"
@@ -1922,7 +1927,7 @@ msgstr "Талонов Соответствующих Вашему Запрос�
 
 #: templates/helpdesk/ticket_list.html:203
 msgid "Previous"
-msgstr ""
+msgstr "Предыдущий"
 
 #: templates/helpdesk/ticket_list.html:207
 #, python-format
