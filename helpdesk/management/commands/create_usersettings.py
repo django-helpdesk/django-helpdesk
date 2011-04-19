@@ -1,6 +1,12 @@
-# -*- coding: utf-8 -*-
+#!/usr/bin/python
+"""
+django-helpdesk - A Django powered ticket tracker for small enterprise.
 
-"Management command to add create UserSettings"
+See LICENSE for details.
+
+create_usersettings.py - Easy way to create helpdesk-specific settings for 
+users who don't yet have them.
+"""
 
 from django.utils.translation import ugettext as _
 from django.core.management.base import BaseCommand
@@ -13,7 +19,9 @@ class Command(BaseCommand):
     "create_usersettings command"
 
     help = _('Check for user without django-helpdesk UserSettings '
-             'and create if missing')
+             'and create settings if required. Uses '
+             'settings.DEFAULT_USER_SETTINGS which can be overridden to '
+             'suit your situation.')
 
     def handle(self, *args, **options):
         "handle command line"
@@ -23,5 +31,3 @@ class Command(BaseCommand):
             except UserSettings.DoesNotExist:
                 s = UserSettings(user=u, settings=DEFAULT_USER_SETTINGS)
                 s.save()
-
-# vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
