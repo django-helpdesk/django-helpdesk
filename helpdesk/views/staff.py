@@ -751,6 +751,8 @@ report_index = staff_member_required(report_index)
 
 
 def run_report(request, report):
+    if Ticket.objects.all().count() == 0:
+        return HttpResponseRedirect(reverse("helpdesk_report_index"))
     priority_sql = []
     priority_columns = []
     for p in Ticket.PRIORITY_CHOICES:
