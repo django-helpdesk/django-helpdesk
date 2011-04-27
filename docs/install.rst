@@ -38,6 +38,7 @@ Adding To Your Django Project
         'django.contrib.sites',
         'django.contrib.admin', # Required for helpdesk admin/maintenance
         'django.contrib.markup', # Required for text display
+        'south', # Highly recommended to make database migrations simpler.
         'helpdesk', # This is new!
     )
 
@@ -53,7 +54,15 @@ Adding To Your Django Project
 
 3. Create the required database tables. I'd suggest using *South*, however the following will work::
 
-   ./manage.py syncdb
+     ./manage.py syncdb
+
+   If you're wise enough to use South, the first migration will need to be a fake::
+
+     ./manage.py migrate helpdesk 0001 --fake
+
+   After the initial migration, all others are done in the usual way::
+
+     ./manage.py migrate helpdesk
 
 4. Inside your ``MEDIA_ROOT`` folder, create a new folder called ``helpdesk`` and copy the contents of ``helpdesk/htdocs`` into it. Alternatively, create a symlink::
 

@@ -54,7 +54,8 @@ Dependencies
 
 1. Python 2.4+
 2. Django (1.2 or newer)
-3. An existing **working** Django project with database etc. If you cannot log into the Admin, you won't get this product working!
+3. South for database migrations (highly recommended, but not required). Download from http://south.aeracode.org/
+4. An existing **working** Django project with database etc. If you cannot log into the Admin, you won't get this product working!
 
 Translation
 -----------

@@ -29,3 +29,14 @@ Wherever possible please break git commits up into small chunks that are specifi
 Commit messages should also explain *what*, precisely, has been changed.
 
 If you have any questions, please contact the project co-ordinator, Ross Poulton, at ross@rossp.org.
+
+Database schema changes
+-----------------------
+
+As well as making your normal code changes to ``models.py``, please generate a South migration file and commit it with your code. You will want to use a command similar to the following::
+
+    ./manage.py migrate helpdesk --auto [migration_name]
+
+Make sure that ``migration_name`` is a sensible single-string explanation of what this migration does, such as *add_priority_options* or *add_basket_table*
+
+This will add a file to the ``migrations/`` folder, which must be committed to git with your other code changes.

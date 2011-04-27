@@ -24,7 +24,8 @@ Dependencies (pre-flight checklist)
 
 1. Python 2.4+ 
 2. Django (1.2 or newer)
-3. An existing WORKING Django project with database etc. If you
+3. South for database migrations (highly recommended, but not required). Download from http://south.aeracode.org/
+4. An existing WORKING Django project with database etc. If you
    cannot log into the Admin, you won't get this product working.
 
 **NOTE REGARDING SQLITE AND SEARCHING:**
@@ -40,26 +41,27 @@ to alert you to this shortcoming. There is no way around it, sorry.
 Upgrading from previous versions
 ================================
 
-If you are upgrading from a previous version of django-helpdesk, you should 
-read the UPGRADING file to learn what changes you will need to make to get 
-the current version of django-helpdesk working.
+We highly recommend that you use South (available 
+from http://south.aeracode.org/) to assist with management of database schema
+changes. 
 
-1. Find out your current version of django-helpdesk. In the 'helpdesk' folder,
-   use the 'svn' command to find the current revision::
+If you are upgrading from a previous version that did NOT use South for 
+migrations (i.e. prior to April 2011) then you will need to 'fake' the first
+migration::
 
-      svn info .
+    python manage.py migrate helpdesk 0001 --fake
 
-   Look for the 'Revision' line, eg::
+If you are upgrading from a previous version of django-helpdesk that DID use
+South, simply download an up to date version of the code base (eg by using 
+`git pull`) then migrate the database::
 
-      Revision: 92
+    python manage.py migrate helpdesk --db-dry-run # DB untouched
+    python manage.py migrate helpdesk 
 
-2. Read through the UPGRADE file, looking for any changse made _after_ that 
-   revision. Apply the commands provided in order from oldest to most recent.
+Lastly, restart your web server software (eg Apache) or FastCGI instance, to 
+ensure the latest changes are in use.
 
-3. Restart your web server software (eg Apache) or FastCGI instance, to ensure
-   the latest changes are in use.
-
-4. Continue to the 'Initial Configuration' area, if needed.
+You can continue to the 'Initial Configuration' area, if needed.
 
 Installation
 ============
