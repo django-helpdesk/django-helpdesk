@@ -289,7 +289,7 @@ def safe_template_context(ticket):
         }
     queue = ticket.queue
 
-    for field in (  'title', 'slug', 'email_address', 'from_address'):
+    for field in (  'title', 'slug', 'email_address', 'from_address', 'locale'):
         attr = getattr(queue, field, None)
         if callable(attr):
             context['queue'][field] = attr()
