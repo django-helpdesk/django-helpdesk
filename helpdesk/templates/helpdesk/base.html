@@ -5,10 +5,10 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
         <title>{% block helpdesk_title %}Helpdesk{% endblock %} :: {% trans "Powered by django-helpdesk" %}</title>
-        <script src='{{ MEDIA_URL }}helpdesk/jquery-1.5.min.js' type='text/javascript' language='javascript'></script>
-        <script src='{{ MEDIA_URL }}helpdesk/jquery-ui-1.8.9.custom.min.js' type='text/javascript' language='javascript'></script>
-        <link rel='stylesheet' href='{{ MEDIA_URL }}helpdesk/helpdesk.css' type='text/css' />
-        <link rel='stylesheet' href='{{ MEDIA_URL }}helpdesk/jquery-smoothness-theme/jquery-ui-1.8.9.custom.css' type='text/css' />
+        <script src='{{ STATIC_URL }}helpdesk/jquery-1.5.min.js' type='text/javascript' language='javascript'></script>
+        <script src='{{ STATIC_URL }}helpdesk/jquery-ui-1.8.9.custom.min.js' type='text/javascript' language='javascript'></script>
+        <link rel='stylesheet' href='{{ STATIC_URL }}helpdesk/helpdesk.css' type='text/css' />
+        <link rel='stylesheet' href='{{ STATIC_URL }}helpdesk/jquery-smoothness-theme/jquery-ui-1.8.9.custom.css' type='text/css' />
         <link rel='alternate' href='{% url helpdesk_rss "user" %}{{ user.username }}/' type='application/rss+xml' title='{% trans "My Open Tickets" %}' />
         <link rel='alternate' href='{% url helpdesk_rss "recent_activity" %}' type='application/rss+xml' title='{% trans "All Recent Activity" %}' />
         <link rel='alternate' href='{% url helpdesk_rss "unassigned" %}' type='application/rss+xml' title='{% trans "Unassigned Tickets" %}' />
@@ -70,7 +70,7 @@
             </div>
             
             <div id='footer'>
-                <p>{% trans "Powered by <a href='https://github.com/rossp/django-helpdesk'>django-helpdesk</a>." %} {% if user.is_staff %}{% load svn_revision %}{% helpdesk_svn_revision %}{% endif %} <a href='{% url helpdesk_rss_index %}'><img src='{{ MEDIA_URL }}helpdesk/rss_icon.png' width='14' height='14' alt='{% trans "RSS Icon" %}' title='{% trans "RSS Feeds" %}' border='0' />{% trans "RSS Feeds" %}</a> <a href='{% url helpdesk_api_help %}'>{% trans "API" %}</a> <a href='{% url helpdesk_user_settings %}'>{% trans "User Settings" %}</a> {% if user.is_superuser %}<a href='{% url helpdesk_system_settings %}'>{% trans "System Settings" %}</a>{% endif %}</p>
+                <p>{% trans "Powered by <a href='https://github.com/rossp/django-helpdesk'>django-helpdesk</a>." %} {% if user.is_staff %}{% load svn_revision %}{% helpdesk_svn_revision %}{% endif %} <a href='{% url helpdesk_rss_index %}'><img src='{{ STATIC_URL }}helpdesk/rss_icon.png' width='14' height='14' alt='{% trans "RSS Icon" %}' title='{% trans "RSS Feeds" %}' border='0' />{% trans "RSS Feeds" %}</a> <a href='{% url helpdesk_api_help %}'>{% trans "API" %}</a> <a href='{% url helpdesk_user_settings %}'>{% trans "User Settings" %}</a> {% if user.is_superuser %}<a href='{% url helpdesk_system_settings %}'>{% trans "System Settings" %}</a>{% endif %}</p>
             </div>
         </div>
         {% include "helpdesk/debug.html" %}
