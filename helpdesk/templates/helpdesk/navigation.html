@@ -1,0 +1,29 @@
+{% load i18n %}
+            {% if user.is_staff %}
+                <ul id="dropdown">
+                    <li><a href='{% url helpdesk_dashboard %}'>{% trans "Dashboard" %}</a></li>
+                    <li><a href='{% url helpdesk_list %}'>{% trans "Tickets" %}</a></li>
+                    <li><a href='{% url helpdesk_submit %}'>{% trans "New Ticket" %}</a></li>
+                    <li><a href='{% url helpdesk_report_index %}'>{% trans "Stats" %}</a></li>
+                    {% if user_saved_queries_ %}
+                        <li class="headerlink"><a>Load Saved Query</a>
+                            <ul>
+                             {% for q in user_saved_queries_ %}
+                                <li><a href="{% url helpdesk_list %}?saved_query={{ q.id }}">{{ q.title }}
+                                {% if q.shared %}
+                                    (Shared{% ifnotequal user q.user %} by {{ q.user.username }}{% endifnotequal %})
+                                {% endif %}</a></li>
+                             {% endfor %}   
+                           </ul>
+                       </li>
+                    {% endif %}
+                    <li><a href='{% url logout %}'>{% trans "Logout" %}</a></li>
+                    {% if not query %}<li><form id='searchform' method='get' action='{% url helpdesk_list %}'><input type='text' name='q' size='10' class='input' value='{% trans "Search..." %}' id='search_query' onFocus='s=document.getElementById("search_query");if (s.value == "{% trans "Search..." %}") { s.value = ""; }' title='{% trans "Enter a keyword, or a ticket number to jump straight to that ticket." %}'/><input type='hidden' name='status' value='1' /><input type='hidden' name='status' value='2' /><input type='hidden' name='status' value='3' /><input type='hidden' name='search_type' value='header' />{% csrf_token %}</form></li>{% endif %}
+                </ul>
+        {% else %}
+        <ul>
+            <li><a href='{% url helpdesk_home %}'>{% trans "Submit A Ticket" %}</a></li>
+            <li><a href='{% url helpdesk_kb_index %}'>{% trans "Knowledgebase" %}</a></li>
+            <li><a href='{% url login %}?next={% url helpdesk_dashboard %}'>{% trans "Log In" %}</a></li>
+        </ul>
+        {% endif %}

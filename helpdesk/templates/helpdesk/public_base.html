@@ -9,11 +9,7 @@
 <div id='container'>
     <div id='header'>
         <h1>{% trans "Helpdesk" %}</h1>
-        <ul>
-            <li><a href='{% url helpdesk_home %}'>{% trans "Submit A Ticket" %}</a></li>
-            <li><a href='{% url helpdesk_kb_index %}'>{% trans "Knowledgebase" %}</a></li>
-            <li><a href='{% url login %}?next={% url helpdesk_dashboard %}'>{% trans "Log In" %}</a></li>
-        </ul>
+        {% include "helpdesk/navigation.html" %}
     </div>
     <div id='body'>
 {% block helpdesk_body %}{% endblock %}
