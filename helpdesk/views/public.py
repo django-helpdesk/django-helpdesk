@@ -91,10 +91,11 @@ def view_ticket(request):
                 request.POST = {
                     'new_status': Ticket.CLOSED_STATUS,
                     'public': 1,
-                    'owner': ticket.assigned_to.id,
                     'title': ticket.title,
                     'comment': _('Submitter accepted resolution and closed ticket'),
                     }
+                if ticket.assigned_to:
+                    request.POST['owner'] = ticket.assigned_to.id
                 request.GET = {}
 
                 return update_ticket(request, ticket_id, public=True)
