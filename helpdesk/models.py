@@ -1169,6 +1169,14 @@ class CustomField(models.Model):
         null=True,
         )
 
+    def _choices_as_array(self):
+        from StringIO import StringIO
+        valuebuffer = StringIO(self.list_values)
+        choices = [[item.strip(), item.strip()] for item in valuebuffer.readlines()]
+        valuebuffer.close()
+        return choices
+    choices_as_array = property(_choices_as_array)
+
     required = models.BooleanField(
         _('Required?'),
         help_text=_('Does the user have to enter a value for this field?'),
