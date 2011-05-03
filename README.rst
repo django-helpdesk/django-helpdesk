@@ -71,7 +71,10 @@ If you are running django 1.2.x then you will need to install django-staticfiles
 existing settings.py and urls.py files:
 
 settings.py:
-STATIC_URL = "/static/"
+MEDIA_ROOT = '/var/www/media/'
+MEDIA_URL = '/media/'
+STATIC_ROOT = '/var/www/static/'
+STATIC_URL = '/static/'
 
 INSTALLED_APPS = (
     'staticfiles',             
@@ -84,6 +87,12 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 urls.py:
 from staticfiles.urls import staticfiles_urlpatterns
 urlpatterns += staticfiles_urlpatterns()
+
+then do:
+$ cd /var/www
+$ mkdir static
+$ cd static
+$ ln -sf /path/to/helpdesk/static/helpdesk/ helpdesk
 
 
 Installation
