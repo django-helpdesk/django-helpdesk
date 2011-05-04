@@ -91,6 +91,10 @@ urlpatterns = patterns('helpdesk.views.staff',
         'save_query',
         name='helpdesk_savequery'),
     
+    url(r'^delete_query/$',
+        'delete_saved_query_no_id',
+        name='helpdesk_delete_query_no_id'),    
+    
     url(r'^delete_query/(?P<id>[0-9]+)/$',
         'delete_saved_query',
         name='helpdesk_delete_query'),
