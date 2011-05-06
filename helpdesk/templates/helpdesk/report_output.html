@@ -3,12 +3,12 @@
 {% block helpdesk_title %}{% trans "Reports &amp; Statistics" %}{% endblock %}
 
 {% block helpdesk_head %}
-        <!--[if IE]><script language="javascript" type="text/javascript" src="{{ MEDIA_URL }}helpdesk/jquery.jqplot/excanvas.min.js"></script><![endif]--> 
-        <script src='{{ MEDIA_URL }}helpdesk/jquery.jqplot/jquery.jqplot.min.js' type='text/javascript' language='javascript'></script>
-        <link rel='stylesheet' typ='text/css' href='{{ MEDIA_URL }}helpdesk/jquery.jqplot/jquery.jqplot.min.css' />
-        <script type="text/javascript" src="{{ MEDIA_URL }}helpdesk/jquery.jqplot/plugins/jqplot.categoryAxisRenderer.min.js"></script>
-        <script type="text/javascript" src="{{ MEDIA_URL }}helpdesk/jquery.jqplot/plugins/jqplot.barRenderer.min.js"></script>
-        <script type="text/javascript" src="{{ MEDIA_URL }}helpdesk/jquery.jqplot/plugins/jqplot.dateAxisRenderer.min.js"></script>
+        <!--[if IE]><script language="javascript" type="text/javascript" src="{{ STATIC_URL }}helpdesk/jquery.jqplot/excanvas.min.js"></script><![endif]--> 
+        <script src='{{ STATIC_URL }}helpdesk/jquery.jqplot/jquery.jqplot.min.js' type='text/javascript' language='javascript'></script>
+        <link rel='stylesheet' typ='text/css' href='{{ STATIC_URL }}helpdesk/jquery.jqplot/jquery.jqplot.min.css' />
+        <script type="text/javascript" src="{{ STATIC_URL }}helpdesk/jquery.jqplot/plugins/jqplot.categoryAxisRenderer.min.js"></script>
+        <script type="text/javascript" src="{{ STATIC_URL }}helpdesk/jquery.jqplot/plugins/jqplot.barRenderer.min.js"></script>
+        <script type="text/javascript" src="{{ STATIC_URL }}helpdesk/jquery.jqplot/plugins/jqplot.dateAxisRenderer.min.js"></script>
 
 {% endblock %}
 
