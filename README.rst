@@ -63,37 +63,41 @@ ensure the latest changes are in use.
 
 You can continue to the 'Initial Configuration' area, if needed.
 
-DJANGO 1.2.x and latest version of django-helpdesk
+Django 1.2.x and latest version of django-helpdesk
 ==================================================
 
-If you are running django 1.2.x then you will need to install django-staticfiles
+If you are running Django 1.2.x then you will need to install django-staticfiles
 (http://pypi.python.org/pypi/django-staticfiles/) and add the following to your 
-existing settings.py and urls.py files:
+existing `settings.py` and `urls.py` files.
 
-settings.py:
-MEDIA_ROOT = '/var/www/media/'
-MEDIA_URL = '/media/'
-STATIC_ROOT = '/var/www/static/'
-STATIC_URL = '/static/'
+settings.py::
 
-INSTALLED_APPS = (
-    'staticfiles',             
-)
+    MEDIA_ROOT = '/var/www/media/'
+    MEDIA_URL = '/media/'
+    STATIC_ROOT = '/var/www/static/'
+    STATIC_URL = '/static/'
 
-TEMPLATE_CONTEXT_PROCESSORS = (
-    'staticfiles.context_processors.static',
-)
+    INSTALLED_APPS = (
+        # Other installed applications here, including 'helpdesk'
+        'staticfiles',             
+    )
 
-urls.py:
-from staticfiles.urls import staticfiles_urlpatterns
-urlpatterns += staticfiles_urlpatterns()
+    TEMPLATE_CONTEXT_PROCESSORS = (
+        # Other context processors listed here
+        'staticfiles.context_processors.static',
+    )
 
-then do:
-$ cd /var/www
-$ mkdir static
-$ cd static
-$ ln -sf /path/to/helpdesk/static/helpdesk/ helpdesk
+urls.py::
 
+    from staticfiles.urls import staticfiles_urlpatterns
+    urlpatterns += staticfiles_urlpatterns()
+
+Once those changes are made, run the following commands to take a copy of the static files::
+
+    $ cd /var/www
+    $ mkdir static
+    $ cd static
+    $ ln -sf /path/to/helpdesk/static/helpdesk/ helpdesk
 
 Installation
 ============
