@@ -8,6 +8,7 @@ forms.py - Definitions of newforms-based forms for creating and maintaining
 """
 
 from datetime import datetime
+from StringIO import StringIO
 
 from django import forms
 from django.conf import settings
@@ -119,10 +120,7 @@ class TicketForm(forms.Form):
                 instanceargs['max_digits'] = field.max_length
             elif field.data_type == 'list':
                 fieldclass = forms.ChoiceField
-                choices = []
-                for line in field.list_values.split("\n"):
-                    choices.append((line, line))
-                instanceargs['choices'] = choices
+                instanceargs['choices'] = field.choices_as_array
             elif field.data_type == 'boolean':
                 fieldclass = forms.BooleanField
             elif field.data_type == 'date':

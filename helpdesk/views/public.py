@@ -83,6 +83,12 @@ def view_ticket(request):
             error_message = _('Invalid ticket ID or e-mail address. Please try again.')
 
         if ticket:
+
+            if request.user.is_staff:
+                redirect_url = reverse('helpdesk_view', args=[ticket_id])
+                if request.GET.has_key('close'):
+                    redirect_url += '?close'
+                return HttpResponseRedirect(redirect_url)
             
             if request.GET.has_key('close') and ticket.status == Ticket.RESOLVED_STATUS:
                 from helpdesk.views.staff import update_ticket
