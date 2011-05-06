@@ -130,6 +130,9 @@ $(document).ready(function() {
     </div>
     <hr style='clear: both;' />
     <input type='submit' value='{% trans "Apply Filter" %}' />
+    {% if from_saved_query and saved_query.user = user %}
+    <p>{% blocktrans with saved_query.title as query_name %}You are currently viewing saved query <em>{{ query_name }}</em>.{% endblocktrans %} <a href='{% url helpdesk_delete_query saved_query.id %}'>{% trans "Delete Saved Query" %}</a></p>
+    {% endif %}
     {% csrf_token %}</form>
     </div>
     
