@@ -68,23 +68,27 @@ Django 1.2.x and latest version of django-helpdesk
 
 If you are running Django 1.2.x then you will need to install django-staticfiles
 (http://pypi.python.org/pypi/django-staticfiles/) and add the following to your 
-existing `settings.py` and `urls.py` files:
+existing `settings.py` and `urls.py` files.
 
 settings.py::
+
     MEDIA_ROOT = '/var/www/media/'
     MEDIA_URL = '/media/'
     STATIC_ROOT = '/var/www/static/'
     STATIC_URL = '/static/'
 
     INSTALLED_APPS = (
+        # Other installed applications here, including 'helpdesk'
         'staticfiles',             
     )
 
     TEMPLATE_CONTEXT_PROCESSORS = (
+        # Other context processors listed here
         'staticfiles.context_processors.static',
     )
 
 urls.py::
+
     from staticfiles.urls import staticfiles_urlpatterns
     urlpatterns += staticfiles_urlpatterns()
 
