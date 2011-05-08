@@ -43,7 +43,6 @@ $(document).ready(function() {
     <li><a href='#tabsave'>Save This Query</a></li>
     {% endif %}
     <li><a href='#tabload'>Load Saved Query</a></li>
-    <li><a href='#tabdelete'>Delete Saved Query</a></li>
     </ul>
     
     <div id='tabfilter'>
@@ -169,20 +168,6 @@ $(document).ready(function() {
         {% endfor %}
     </select></p>
     <input type='submit' value='{% trans "Run Query" %}'>
-    {% csrf_token %}</form>
-    </div>
-    
-    <div id='tabdelete'>
-    <h3>{% trans "Delete Saved Query" %}</h3>
-    <form method='get' action='{% url helpdesk_delete_query_no_id %}'>
-    <p><label for='id_query_selector'>{% trans "Query" %}</label> <select name='delete_query' id='id_query_selector'>
-        {% for q in user_saved_queries %}
-            {% if q.user == user %}
-            <option value='{{ q.id }}'>{{ q.title }}</option>
-            {% endif %}
-        {% endfor %}
-    </select></p>
-    <input type='submit' value='{% trans "Delete Query" %}'>
     {% csrf_token %}</form>
     </div>
     

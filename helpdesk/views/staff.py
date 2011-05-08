@@ -932,13 +932,6 @@ def save_query(request):
 save_query = staff_member_required(save_query)
 
 
-def delete_saved_query_no_id(request):
-    id = request.GET.get('delete_query')
-    if not id:
-        return HttpResponseRedirect(reverse('helpdesk_list'))
-    return HttpResponseRedirect(reverse('helpdesk_delete_query', args=(id)))
-
-
 def delete_saved_query(request, id):
     query = get_object_or_404(SavedSearch, id=id, user=request.user)
 
