@@ -4,7 +4,7 @@ from distutils.util import convert_path
 from fnmatch import fnmatchcase
 from setuptools import setup, find_packages
 
-version = '0.1.3a1.dev6'
+version = '0.1.4b'
 
 # Provided as an attribute, so you can append to these instead
 # of replicating them:
