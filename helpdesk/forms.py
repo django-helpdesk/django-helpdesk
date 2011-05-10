@@ -16,7 +16,7 @@ from django.contrib.auth.models import User
 from django.utils.translation import ugettext as _
 
 from helpdesk.lib import send_templated_mail
-from helpdesk.models import Ticket, Queue, FollowUp, Attachment, IgnoreEmail, TicketCC, CustomField, TicketCustomFieldValue
+from helpdesk.models import Ticket, Queue, FollowUp, Attachment, IgnoreEmail, TicketCC, CustomField, TicketCustomFieldValue, TicketDependency
 from helpdesk.settings import HAS_TAG_SUPPORT
 
 class EditTicketForm(forms.ModelForm):
@@ -574,3 +574,7 @@ class TicketCCForm(forms.ModelForm):
         model = TicketCC
         exclude = ('ticket',)
 
+class TicketDependencyForm(forms.ModelForm):
+    class Meta:
+        model = TicketDependency
+        exclude = ('ticket',)

@@ -70,7 +70,15 @@ urlpatterns = patterns('helpdesk.views.staff',
     url(r'^tickets/(?P<ticket_id>[0-9]+)/cc/delete/(?P<cc_id>[0-9]+)/$',
         'ticket_cc_del',
         name='helpdesk_ticket_cc_del'),
+    
+    url(r'^tickets/(?P<ticket_id>[0-9]+)/dependency/add/$',
+        'ticket_dependency_add',
+        name='helpdesk_ticket_dependency_add'),
 
+    url(r'^tickets/(?P<ticket_id>[0-9]+)/dependency/delete/(?P<dependency_id>[0-9]+)/$',
+        'ticket_dependency_del',
+        name='helpdesk_ticket_dependency_del'),
+    
     url(r'^raw/(?P<type>\w+)/$',
         'raw_details',
         name='helpdesk_raw'),

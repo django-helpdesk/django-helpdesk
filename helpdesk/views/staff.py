@@ -23,9 +23,9 @@ from django.template import loader, Context, RequestContext
 from django.utils.translation import ugettext as _
 from django.utils.html import escape
 
-from helpdesk.forms import TicketForm, UserSettingsForm, EmailIgnoreForm, EditTicketForm, TicketCCForm, EditFollowUpForm
+from helpdesk.forms import TicketForm, UserSettingsForm, EmailIgnoreForm, EditTicketForm, TicketCCForm, EditFollowUpForm, TicketDependencyForm
 from helpdesk.lib import send_templated_mail, line_chart, bar_chart, query_to_dict, apply_query, safe_template_context
-from helpdesk.models import Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch, IgnoreEmail, TicketCC
+from helpdesk.models import Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch, IgnoreEmail, TicketCC, TicketDependency
 from helpdesk.settings import HAS_TAG_SUPPORT
   
 if HAS_TAG_SUPPORT:
@@ -1037,3 +1037,34 @@ def ticket_cc_del(request, ticket_id, cc_id):
             'cc': cc,
         }))
 ticket_cc_del = staff_member_required(ticket_cc_del)
+
+def ticket_dependency_add(request, ticket_id):
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+    if request.method == 'POST':
+        form = TicketDependencyForm(request.POST)
+        if form.is_valid():
+            ticketdependency = form.save(commit=False)
+            ticketdependency.ticket = ticket
+            if ticketdependency.ticket <> ticketdependency.depends_on:
+                ticketdependency.save()
+            return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket.id]))
+    else:
+        form = TicketDependencyForm()
+    return render_to_response('helpdesk/ticket_dependency_add.html',
+        RequestContext(request, {
+            'ticket': ticket,
+            'form': form,
+        }))
+ticket_dependency_add = staff_member_required(ticket_dependency_add)
+
+def ticket_dependency_del(request, ticket_id, dependency_id):
+    dependency = get_object_or_404(TicketDependency, ticket__id=ticket_id, id=dependency_id)
+    if request.method == 'POST':
+        dependency.delete()
+        return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket_id]))
+    return render_to_response('helpdesk/ticket_dependency_del.html',
+        RequestContext(request, {
+            'dependency': dependency,
+        }))
+ticket_dependency_del = staff_member_required(ticket_dependency_del)
+
