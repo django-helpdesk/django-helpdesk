@@ -8,9 +8,9 @@ msgstr ""
 "Project-Id-Version: django-helpdesk\n"
 "Report-Msgid-Bugs-To: http://github.com/RossP/django-helpdesk/issues\n"
 "POT-Creation-Date: 2011-02-07 10:33+0000\n"
-"PO-Revision-Date: 2011-05-02 23:22+0000\n"
-"Last-Translator: rossp <ross@rossp.org>\n"
-"Language-Team: Spanish (Mexican) <None>\n"
+"PO-Revision-Date: 2011-05-10 00:24+0000\n"
+"Last-Translator: albertogaona <gaona_consulting@yahoo.com>\n"
+"Language-Team: Spanish (Mexican) (http://www.transifex.net/projects/p/django-helpdesk/team/es_MX/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -1073,7 +1073,7 @@ msgid ""
 "Powered by <a href='https://github.com/rossp/django-helpdesk'>django-"
 "helpdesk</a>."
 msgstr ""
-"Powered by <a href='https://github.com/rossp/django-helpdesk'>django-"
+"Con tecnología de <a href='https://github.com/rossp/django-helpdesk'>django-"
 "helpdesk</a>."
 
 #: templates/helpdesk/base.html:73 templates/helpdesk/rss_list.html:9
@@ -1467,7 +1467,7 @@ msgid ""
 "Powered by <a href='http://github.com/rossp/django-helpdesk'>django-"
 "helpdesk</a>."
 msgstr ""
-"Powered by <a href='http://github.com/rossp/django-helpdesk'>django-"
+"Con tecnología de <a href='http://github.com/rossp/django-helpdesk'>django-"
 "helpdesk</a>."
 
 #: templates/helpdesk/public_homepage.html:4
@@ -1893,7 +1893,7 @@ msgstr "¿Actualizar?"
 #: templates/helpdesk/ticket_cc_list.html:29
 #, python-format
 msgid "Return to <em>%(ticket_title)s</em>"
-msgstr "Retornar a <em>%(ticket_title)s</em>"
+msgstr "Regresar a <em>%(ticket_title)s</em>"
 
 #: templates/helpdesk/ticket_desc_table.html:3
 msgid "Unhold"
@@ -2061,7 +2061,7 @@ msgstr ""
 
 #: templates/helpdesk/registration/login.html:2
 msgid "Helpdesk Login"
-msgstr "Helpdesk Login"
+msgstr "Ingresar a Helpdesk"
 
 #: templates/helpdesk/registration/login.html:5
 #: templates/helpdesk/registration/login.html:17
