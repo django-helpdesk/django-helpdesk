@@ -51,7 +51,7 @@
             </div>
             
             <div id='footer'>
-                <p>{% trans "Powered by <a href='https://github.com/rossp/django-helpdesk'>django-helpdesk</a>." %} {% if user.is_staff %}{% load svn_revision %}{% helpdesk_svn_revision %}{% endif %} <a href='{% url helpdesk_rss_index %}'><img src='{{ STATIC_URL }}helpdesk/rss_icon.png' width='14' height='14' alt='{% trans "RSS Icon" %}' title='{% trans "RSS Feeds" %}' border='0' />{% trans "RSS Feeds" %}</a> <a href='{% url helpdesk_api_help %}'>{% trans "API" %}</a> <a href='{% url helpdesk_user_settings %}'>{% trans "User Settings" %}</a> {% if user.is_superuser %}<a href='{% url helpdesk_system_settings %}'>{% trans "System Settings" %}</a>{% endif %}</p>
+                <p>{% trans "Powered by <a href='https://github.com/rossp/django-helpdesk'>django-helpdesk</a>." %} <a href='{% url helpdesk_rss_index %}'><img src='{{ STATIC_URL }}helpdesk/rss_icon.png' width='14' height='14' alt='{% trans "RSS Icon" %}' title='{% trans "RSS Feeds" %}' border='0' />{% trans "RSS Feeds" %}</a> <a href='{% url helpdesk_api_help %}'>{% trans "API" %}</a> <a href='{% url helpdesk_user_settings %}'>{% trans "User Settings" %}</a> {% if user.is_superuser %}<a href='{% url helpdesk_system_settings %}'>{% trans "System Settings" %}</a>{% endif %}</p>
             </div>
         </div>
         {% include "helpdesk/debug.html" %}
