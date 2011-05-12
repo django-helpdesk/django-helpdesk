@@ -558,6 +558,14 @@ def ticket_list(request):
             statuses = [int(s) for s in statuses]
             query_params['filtering']['status__in'] = statuses
 
+        date_from = request.GET.get('date_from')
+        if date_from:
+            query_params['filtering']['created__gte'] = date_from
+        
+        date_to = request.GET.get('date_to')
+        if date_to:
+            query_params['filtering']['created__lte'] = date_to
+
         ### KEYWORD SEARCHING
         q = request.GET.get('q', None)
 
@@ -582,6 +590,7 @@ def ticket_list(request):
         query_params['sortreverse'] = sortreverse
 
     ticket_qs = apply_query(Ticket.objects.select_related(), query_params)
+    print str(ticket_qs.query)
 
     ## TAG MATCHING
     if HAS_TAG_SUPPORT:

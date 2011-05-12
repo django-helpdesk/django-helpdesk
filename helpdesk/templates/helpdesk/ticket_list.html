@@ -42,7 +42,9 @@ $(document).ready(function() {
     {% if not from_saved_query %}
     <li><a href='#tabsave'>Save This Query</a></li>
     {% endif %}
+    {% if user_saved_queries %}
     <li><a href='#tabload'>Load Saved Query</a></li>
+    {% endif %}
     </ul>
     
     <div id='tabfilter'>
@@ -54,6 +56,7 @@ $(document).ready(function() {
         <option value='Queue'>{% trans "Queue" %}</option>
         <option value='Status'>{% trans "Status" %}</option>
         <option value='Keywords'>{% trans "Keywords" %}</option>
+        <option value='Dates'>{% trans "Date Range" %}</option>
         {% if tags_enabled %}
         <option value='Tags'>{% trans "Tags" %}</option>
         {% endif %}
@@ -114,6 +117,13 @@ $(document).ready(function() {
     <p class='filterHelp'>Ctrl-click to select multiple options</p>
     <input type='button' class='filterBuilderRemove' value='-' />
     </div>
+    
+    <div class='filterBox{% if query_params.filtering.created__gte or query_params.filtering.created__lte %} filterBoxShow{% endif %}' id='filterBoxDates'>
+        <label for='id_date_from'>{% trans "Date (From)" %}</label><input type='text' name='date_from' value='{{ query_params.filtering.created__gte }}' id='id_date_from' />
+        <label for='id_date_to'>{% trans "Date (To)" %}</label><input type='text' name='date_to' value='{{ query_params.filtering.created__lte }}' id='id_date_to' />
+    <p class='filterHelp'>Use YYYY-MM-DD date format, eg 2011-05-29</p>
+    <input type='button' class='filterBuilderRemove' value='-' />
+    </div>
 
 {% if tags_enabled %}
 <div class='filterBox{% if query_params.tags %} filterBoxShow{% endif %}' id='filterBoxTags'>
@@ -132,6 +142,9 @@ $(document).ready(function() {
     <input type='submit' value='{% trans "Apply Filter" %}' />
     {% if from_saved_query and saved_query.user = user %}
     <p>{% blocktrans with saved_query.title as query_name %}You are currently viewing saved query <em>{{ query_name }}</em>.{% endblocktrans %} <a href='{% url helpdesk_delete_query saved_query.id %}'>{% trans "Delete Saved Query" %}</a></p>
+    {% endif %}
+    {% if from_saved_query %}
+    <p>{% blocktrans with saved_query.id as query_id %}<a href='../reports/?saved_query={{ query_id }}'>Run a report</a> on this query to see stats and charts for the data listed below.{% endblocktrans %}</p>
     {% endif %}
     {% csrf_token %}</form>
     </div>
