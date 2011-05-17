@@ -2,22 +2,20 @@
 # Copyright (C) 2011 Ross Poulton
 # This file is distributed under the same license as the django-helpdesk package.
 # Ross Poulton <ross@rossp.org>, 2011.
-#
+# 
 msgid ""
 msgstr ""
 "Project-Id-Version: django-helpdesk\n"
-"Report-Msgid-Bugs-To: \n"
+"Report-Msgid-Bugs-To: http://github.com/RossP/django-helpdesk/issues\n"
 "POT-Creation-Date: 2011-05-11 15:05+1000\n"
-"PO-Revision-Date: 2011-04-01 16:07+0000\n"
+"PO-Revision-Date: 2011-05-12 00:22+0000\n"
 "Last-Translator: gorblnu4 <gorblnu4@gmail.com>\n"
-"Language-Team: Russian (http://www.transifex.net/projects/p/django-helpdesk/"
-"team/ru/)\n"
+"Language-Team: Russian (http://www.transifex.net/projects/p/django-helpdesk/team/ru/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Language: ru\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%"
-"10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)\n"
 
 #: forms.py:108 forms.py:339 models.py:262
 #: templates/helpdesk/dashboard.html:10 templates/helpdesk/dashboard.html:26
@@ -39,7 +37,8 @@ msgstr "Адрес E-mail отправителя"
 
 #: forms.py:123
 msgid ""
-"This e-mail address will receive copies of all public updates to this ticket."
+"This e-mail address will receive copies of all public updates to this "
+"ticket."
 msgstr ""
 "На этот e-mail адрес будут посылатся копии всех публичных обновлений этого "
 "талона"
@@ -57,8 +56,8 @@ msgid ""
 "If you select an owner other than yourself, they'll be e-mailed details of "
 "this ticket immediately."
 msgstr ""
-"Если вы выберете отличного от себя владельца, ему будут высланы детали этого "
-"талона немедленно."
+"Если вы выберете отличного от себя владельца, ему будут высланы детали этого"
+" талона немедленно."
 
 #: forms.py:145 models.py:322 management/commands/escalate_tickets.py:152
 #: templates/helpdesk/public_view_ticket.html:21
@@ -155,8 +154,8 @@ msgstr "Уведомлять меня по электронной почте о 
 
 #: forms.py:535
 msgid ""
-"If you're the ticket owner and the ticket is changed via the web by somebody "
-"else, do you want to receive an e-mail?"
+"If you're the ticket owner and the ticket is changed via the web by somebody"
+" else, do you want to receive an e-mail?"
 msgstr ""
 "Если вы владелец талона и талон меняется через web кем-то еще, вы хотите "
 "получить уведомление по электронной почте?"
@@ -169,8 +168,8 @@ msgstr "Уведовить меня по электронной почте о н
 msgid ""
 "If you are assigned a ticket via the web, do you want to receive an e-mail?"
 msgstr ""
-"Хотите ли получать уведомления по электронной почте если кто-то назначил вам "
-"талон через web?"
+"Хотите ли получать уведомления по электронной почте если кто-то назначил вам"
+" талон через web?"
 
 #: forms.py:546
 msgid "E-mail me when a ticket is changed via the API?"
@@ -229,8 +228,8 @@ msgstr "Адрес E-mail"
 
 #: models.py:46
 msgid ""
-"All outgoing e-mails for this queue will use this e-mail address. If you use "
-"IMAP or POP3, this should be the e-mail address for that mailbox."
+"All outgoing e-mails for this queue will use this e-mail address. If you use"
+" IMAP or POP3, this should be the e-mail address for that mailbox."
 msgstr ""
 "Все исходящие электронные письма этой очереди будут использовать этот "
 "электронный адрес. Если вы используете IMAP или POP3 это и есть этот "
@@ -281,29 +280,22 @@ msgid "New Ticket CC Address"
 msgstr "CC Адрес Электронной Почты"
 
 #: models.py:88
-#, fuzzy
 msgid ""
 "If an e-mail address is entered here, then it will receive notification of "
-"all new tickets created for this queue. Enter a comma between multiple e-"
-"mail addresses."
+"all new tickets created for this queue. Enter a comma between multiple "
+"e-mail addresses."
 msgstr ""
-"На введённые здесь электронный адрес будут посылатся уведомления обо всех "
-"новый талонах и этой очереди"
 
 #: models.py:94
 msgid "Updated Ticket CC Address"
 msgstr "Обновлённый CC Адрес Талона"
 
 #: models.py:98
-#, fuzzy
 msgid ""
 "If an e-mail address is entered here, then it will receive notification of "
 "all activity (new tickets, closed tickets, updates, reassignments, etc) for "
 "this queue. Separate multiple addresses with a comma."
 msgstr ""
-"На введённый здесь электронный адрес будут посылатся уведомления о любой "
-"активности в талонах (создание, закрытие, обновлени, переназначание и т.д.) "
-"для этой очереди"
 
 #: models.py:105
 msgid "E-Mail Box Type"
@@ -347,8 +339,8 @@ msgid ""
 "for IMAP is \"143\". This may differ on some servers. Leave it blank to use "
 "the defaults."
 msgstr ""
-"Номер порта для доступа к электронному ящику. По умолчанию \"110\" для POP3, "
-"и \"143\" для IMAP. Настройки могут отличатся на разных серверах. Оставьте "
+"Номер порта для доступа к электронному ящику. По умолчанию \"110\" для POP3,"
+" и \"143\" для IMAP. Настройки могут отличатся на разных серверах. Оставьте "
 "пустым для использования значения по умолчанию."
 
 #: models.py:133
@@ -360,8 +352,8 @@ msgid ""
 "Whether to use SSL for IMAP or POP3 - the default ports when using SSL are "
 "993 for IMAP and 995 for POP3."
 msgstr ""
-"Использовать SSL для IMAP или POP3 - порты по умолчанию для SSL 993 для IMAP "
-"и 995 для POP3."
+"Использовать SSL для IMAP или POP3 - порты по умолчанию для SSL 993 для IMAP"
+" и 995 для POP3."
 
 #: models.py:141
 msgid "E-Mail Username"
@@ -390,8 +382,8 @@ msgid ""
 "your IMAP server into separate folders. Default: INBOX."
 msgstr ""
 "Если используется IMAP, из какой папки вы желаете скачивать сообщения? "
-"Фильтрация сообщений на сервере позволяет вам использовать один IMAP аккаунт "
-"для множества очередей. По умолчанию: INBOX."
+"Фильтрация сообщений на сервере позволяет вам использовать один IMAP аккаунт"
+" для множества очередей. По умолчанию: INBOX."
 
 #: models.py:168
 msgid "E-Mail Check Interval"
@@ -653,11 +645,11 @@ msgstr "Тело"
 
 #: models.py:670
 msgid ""
-"Context available: {{ ticket }} - ticket object (eg {{ ticket.title }}); "
-"{{ queue }} - The queue; and {{ user }} - the current user."
+"Context available: {{ ticket }} - ticket object (eg {{ ticket.title }}); {{ "
+"queue }} - The queue; and {{ user }} - the current user."
 msgstr ""
-"Доступный контекст: {{ ticket }} - талон (например {{ ticket.title }}); "
-"{{ queue }} - Очередь; и {{ user }} - текущий пользователь."
+"Доступный контекст: {{ ticket }} - талон (например {{ ticket.title }}); {{ "
+"queue }} - Очередь; и {{ user }} - текущий пользователь."
 
 #: models.py:697
 msgid ""
@@ -682,8 +674,8 @@ msgstr "Тема"
 #: models.py:733
 msgid ""
 "This will be prefixed with \"[ticket.ticket] ticket.title\". We recommend "
-"something simple such as \"(Updated\") or \"(Closed)\" - the same context is "
-"available as in plain_text, below."
+"something simple such as \"(Updated\") or \"(Closed)\" - the same context is"
+" available as in plain_text, below."
 msgstr ""
 "Добавится приставка \"[ticket.ticket] ticket.title\". Мы рекомендуем что "
 "нибудь простое например \"(Updated\") или \"(Closed)\" - тот же контекст "
@@ -695,11 +687,11 @@ msgstr "Заголовок"
 
 #: models.py:741
 msgid ""
-"In HTML e-mails, this will be the heading at the top of the email - the same "
-"context is available as in plain_text, below."
+"In HTML e-mails, this will be the heading at the top of the email - the same"
+" context is available as in plain_text, below."
 msgstr ""
-"В HTML электронных письмах, это будет в заголовке - тот же контекст доступен "
-"в виде plain_text ниже."
+"В HTML электронных письмах, это будет в заголовке - тот же контекст доступен"
+" в виде plain_text ниже."
 
 #: models.py:747
 msgid "Plain Text"
@@ -861,8 +853,8 @@ msgstr ""
 
 #: models.py:1122
 msgid ""
-"As used in the database and behind the scenes. Must be unique and consist of "
-"only lowercase letters with no punctuation."
+"As used in the database and behind the scenes. Must be unique and consist of"
+" only lowercase letters with no punctuation."
 msgstr ""
 
 #: models.py:1127
@@ -967,9 +959,8 @@ msgid ""
 msgstr ""
 
 #: models.py:1238
-#, fuzzy
 msgid "Depends On Ticket"
-msgstr "Открытые Талоны"
+msgstr ""
 
 #: management/commands/create_usersettings.py:21
 msgid ""
@@ -993,8 +984,8 @@ msgstr "Неизвестный Отправитель"
 
 #: management/commands/get_email.py:204
 msgid ""
-"No plain-text email body available. Please see attachment email_html_body."
-"html."
+"No plain-text email body available. Please see attachment "
+"email_html_body.html."
 msgstr ""
 
 #: management/commands/get_email.py:208
@@ -1084,27 +1075,20 @@ msgid ""
 "\n"
 "<h2>Delete Query</h2>\n"
 "\n"
-"<p>Are you sure you want to delete this saved filter (<em>%(query_title)s</"
-"em>)? To re-create it, you will need to manually re-filter your ticket "
-"listing.</p>\n"
+"<p>Are you sure you want to delete this saved filter (<em>%(query_title)s</em>)? To re-create it, you will need to manually re-filter your ticket listing.</p>\n"
 msgstr ""
 "\n"
 "<h2>Удалить Запрос</h2>\n"
 "\n"
-"<p>Вы уверены что вы хотите удалить сохранённый фильтр (<em>%(query_title)s</"
-"em>)? Что бы пересоздать его, вам придётся в ручную перефильтровать ваши "
-"талоны из списка</p>\n"
+"<p>Вы уверены что вы хотите удалить сохранённый фильтр (<em>%(query_title)s</em>)? Что бы пересоздать его, вам придётся в ручную перефильтровать ваши талоны из списка</p>\n"
 
 #: templates/helpdesk/confirm_delete_saved_query.html:11
 msgid ""
 "\n"
-"<p>You have shared this query, so other users may be using it. If you delete "
-"it, they will have to manually create their own query.</p>\n"
+"<p>You have shared this query, so other users may be using it. If you delete it, they will have to manually create their own query.</p>\n"
 msgstr ""
 "\n"
-"<p>Вы поделились запросом, теперь остальные пользователи могут его "
-"использовать. Если вы удалите его, им придётся сделать себе собственные "
-"запрос.</p>\n"
+"<p>Вы поделились запросом, теперь остальные пользователи могут его использовать. Если вы удалите его, им придётся сделать себе собственные запрос.</p>\n"
 
 #: templates/helpdesk/confirm_delete_saved_query.html:15
 #: templates/helpdesk/delete_ticket.html:11
@@ -1124,14 +1108,11 @@ msgstr "Создать Талон"
 msgid ""
 "<h2>Submit a Ticket</h2>\n"
 "\n"
-"<p>Unless otherwise stated, all fields are required. Please provide as "
-"descriptive a title and description as possible.</p>"
+"<p>Unless otherwise stated, all fields are required. Please provide as descriptive a title and description as possible.</p>"
 msgstr ""
 "<h2>Отправить талон</h2>\n"
 "\n"
-"<p>Все поля обязательны для заполнения пока не сказано обратное. Пожалуйста, "
-"напишите заголовок и описание как можно более точно отображающими суть "
-"проблемы.</p>"
+"<p>Все поля обязательны для заполнения пока не сказано обратное. Пожалуйста, напишите заголовок и описание как можно более точно отображающими суть проблемы.</p>"
 
 #: templates/helpdesk/create_ticket.html:17
 #: templates/helpdesk/edit_ticket.html:19
@@ -1203,16 +1184,12 @@ msgid ""
 "\n"
 "<h2>Delete Ticket</h2>\n"
 "\n"
-"<p>Are you sure you want to delete this ticket (<em>%(ticket_title)s</em>)? "
-"All traces of the ticket, including followups, attachments, and updates will "
-"be irreversably removed.</p>\n"
+"<p>Are you sure you want to delete this ticket (<em>%(ticket_title)s</em>)? All traces of the ticket, including followups, attachments, and updates will be irreversably removed.</p>\n"
 msgstr ""
 "\n"
 "<h2>Удалить Талон</h2>\n"
 "\n"
-"<p>Вы уверены что хотите удалить этот талон (<em>%(ticket_title)s</em>)? Все "
-"следы талона, включая слежения, вложенные файлы и одновления будут "
-"безвозвратно удалены.</p>\n"
+"<p>Вы уверены что хотите удалить этот талон (<em>%(ticket_title)s</em>)? Все следы талона, включая слежения, вложенные файлы и одновления будут безвозвратно удалены.</p>\n"
 
 #: templates/helpdesk/edit_ticket.html:3
 msgid "Edit Ticket"
@@ -1222,13 +1199,9 @@ msgstr ""
 msgid ""
 "<h2>Edit a Ticket</h2>\n"
 "\n"
-"<p>Unless otherwise stated, all fields are required. Please provide as "
-"descriptive a title and description as possible.</p>\n"
+"<p>Unless otherwise stated, all fields are required. Please provide as descriptive a title and description as possible.</p>\n"
 "\n"
-"<p><strong>Note:</strong> Editing a ticket does <em>not</em> send an e-mail "
-"to the ticket owner or submitter. No new details should be entered, this "
-"form should only be used to fix incorrect details or clean up the submission."
-"</p>"
+"<p><strong>Note:</strong> Editing a ticket does <em>not</em> send an e-mail to the ticket owner or submitter. No new details should be entered, this form should only be used to fix incorrect details or clean up the submission.</p>"
 msgstr ""
 
 #: templates/helpdesk/edit_ticket.html:28
@@ -1245,22 +1218,16 @@ msgid ""
 "\n"
 "<h2>Ignore E-Mail Address</h2>\n"
 "\n"
-"<p>To ignore an e-mail address and prevent any emails from that address "
-"creating tickets automatically, enter the e-mail address below.</p>\n"
+"<p>To ignore an e-mail address and prevent any emails from that address creating tickets automatically, enter the e-mail address below.</p>\n"
 "\n"
-"<p>You can either enter a whole e-mail address such as <em>email@domain.com</"
-"em> or a portion of an e-mail address with a wildcard, such as <em>*@domain."
-"com</em> or <em>user@*</em>.</p>"
+"<p>You can either enter a whole e-mail address such as <em>email@domain.com</em> or a portion of an e-mail address with a wildcard, such as <em>*@domain.com</em> or <em>user@*</em>.</p>"
 msgstr ""
 "\n"
 "<h2>Игнорировать адрес E-mail</h2>\n"
 "\n"
-"<p>Чтобы игнорировать адрес E-mail, предотвратить автоматическое создание "
-"талонов письмами с него, укажите E-mail ниже.</p>\n"
+"<p>Чтобы игнорировать адрес E-mail, предотвратить автоматическое создание талонов письмами с него, укажите E-mail ниже.</p>\n"
 "\n"
-"<p>Вы можете указать как полный адрес E-mail, например, <em>email@domain."
-"com</em>, так и часть адреса E-mail - с подстановочным знаком, например, "
-"<em>*@domain.com</em> или <em>user@*</em>.</p>"
+"<p>Вы можете указать как полный адрес E-mail, например, <em>email@domain.com</em>, так и часть адреса E-mail - с подстановочным знаком, например, <em>*@domain.com</em> или <em>user@*</em>.</p>"
 
 #: templates/helpdesk/email_ignore_del.html:3
 msgid "Delete Ignored E-Mail Address"
@@ -1272,9 +1239,7 @@ msgid ""
 "\n"
 "<h2>Un-Ignore E-Mail Address</h2>\n"
 "\n"
-"<p>Are you sure you wish to stop removing this email address (<em>%"
-"(email_address)s</em>) and allow their e-mails to automatically create "
-"tickets in your system? You can re-add this e-mail address at any time.</p>\n"
+"<p>Are you sure you wish to stop removing this email address (<em>%(email_address)s</em>) and allow their e-mails to automatically create tickets in your system? You can re-add this e-mail address at any time.</p>\n"
 msgstr ""
 
 #: templates/helpdesk/email_ignore_del.html:11
@@ -1295,16 +1260,12 @@ msgid ""
 "\n"
 "<h2>Ignored E-Mail Addresses</h2>\n"
 "\n"
-"<p>The following e-mail addresses are currently being ignored by the "
-"incoming e-mail processor. You can <a href='add/'>add a new e-mail address "
-"to the list</a> or delete any of the items below as required.</p>"
+"<p>The following e-mail addresses are currently being ignored by the incoming e-mail processor. You can <a href='add/'>add a new e-mail address to the list</a> or delete any of the items below as required.</p>"
 msgstr ""
 "\n"
 "<h2>Игнорируемые адреса E-mail</h2>\n"
 "\n"
-"<p>Следующие адреса E-mail в настоящее время игнорируются обработчиком "
-"входящей почты. Вы можете <a href='add/'>добавить в список новый адрес E-"
-"mail</a> или удалить любые перечисленные ниже на свое усмотрение.</p>"
+"<p>Следующие адреса E-mail в настоящее время игнорируются обработчиком входящей почты. Вы можете <a href='add/'>добавить в список новый адрес E-mail</a> или удалить любые перечисленные ниже на свое усмотрение.</p>"
 
 #: templates/helpdesk/email_ignore_list.html:13
 msgid "Date Added"
@@ -1393,8 +1354,9 @@ msgstr "База Знаний: %(item)s"
 #: templates/helpdesk/kb_item.html:13
 #, python-format
 msgid ""
-"View <a href='%(category_url)s'>other <em>%(category_title)s</em> articles</"
-"a>, or continue <a href='../'>viewing other knowledgebase articles</a>."
+"View <a href='%(category_url)s'>other <em>%(category_title)s</em> "
+"articles</a>, or continue <a href='../'>viewing other knowledgebase "
+"articles</a>."
 msgstr ""
 "Смотреть <a href='%(category_url)s'>другие <em>%(category_title)s</em> "
 "статьи</a>, или продолжить <a href='../'>просмотр остальных статьей Базы "
@@ -1523,13 +1485,9 @@ msgstr ""
 msgid ""
 "<p>Sorry, but there has been an error trying to submit your ticket.</p>\n"
 "\n"
-"<p>Our system has marked your submission as <strong>spam</strong>, so we are "
-"unable to save it. If this is not spam, please press back and re-type your "
-"message. Be careful to avoid sounding 'spammy', and if you have heaps of "
-"links please try removing them if possible.</p>\n"
+"<p>Our system has marked your submission as <strong>spam</strong>, so we are unable to save it. If this is not spam, please press back and re-type your message. Be careful to avoid sounding 'spammy', and if you have heaps of links please try removing them if possible.</p>\n"
 "\n"
-"<p>We are sorry for any inconvenience, however this check is required to "
-"avoid our helpdesk resources being overloaded by spammers.</p>\n"
+"<p>We are sorry for any inconvenience, however this check is required to avoid our helpdesk resources being overloaded by spammers.</p>\n"
 msgstr ""
 
 #: templates/helpdesk/public_view_form.html:8
@@ -1584,20 +1542,17 @@ msgstr ""
 
 #: templates/helpdesk/report_index.html:15
 #: templates/helpdesk/report_index.html:24
-#, fuzzy
 msgid "by Priority"
-msgstr "Приоритет"
+msgstr ""
 
 #: templates/helpdesk/report_index.html:16
-#, fuzzy
 msgid "by Queue"
-msgstr "Очередь"
+msgstr ""
 
 #: templates/helpdesk/report_index.html:17
 #: templates/helpdesk/report_index.html:25
-#, fuzzy
 msgid "by Status"
-msgstr "Статус"
+msgstr ""
 
 #: templates/helpdesk/report_index.html:18
 #: templates/helpdesk/report_index.html:26
@@ -1618,8 +1573,8 @@ msgstr ""
 "Следующие RSS-каналы доступны для вас что бы следить за обновлениями, "
 "используя предпочтительное RSS программное обеспечение. За исключением "
 "канала \"Последная Активность\", все каналы представляют информацию только "
-"по открытомым и возобновленным делам. Это обеспечивает вашу RSS программу не "
-"заполнятся информацией о закрытых или устарешвих задачах."
+"по открытомым и возобновленным делам. Это обеспечивает вашу RSS программу не"
+" заполнятся информацией о закрытых или устарешвих задачах."
 
 #: templates/helpdesk/rss_list.html:10
 msgid ""
@@ -1765,8 +1720,8 @@ msgstr ""
 
 #: templates/helpdesk/ticket.html:85
 msgid ""
-"This ticket cannot be resolved or closed until the tickets it depends on are "
-"resolved."
+"This ticket cannot be resolved or closed until the tickets it depends on are"
+" resolved."
 msgstr ""
 
 #: templates/helpdesk/ticket.html:112
@@ -1775,10 +1730,11 @@ msgstr "Это публичный талон?"
 
 #: templates/helpdesk/ticket.html:114
 msgid ""
-"If this is public, the submitter will be e-mailed your comment or resolution."
+"If this is public, the submitter will be e-mailed your comment or "
+"resolution."
 msgstr ""
-"Если это публичный, отправитель получит по электронной почте ваш комментарий "
-"или решение."
+"Если это публичный, отправитель получит по электронной почте ваш комментарий"
+" или решение."
 
 #: templates/helpdesk/ticket.html:117
 msgid "Change Further Details &raquo;"
@@ -1815,8 +1771,7 @@ msgid ""
 "\n"
 "<h2>Add Ticket CC</h2>\n"
 "\n"
-"<p>To automatically send an email to a user or e-mail address when this "
-"ticket is updated, select the user or enter an e-mail address below.</p>"
+"<p>To automatically send an email to a user or e-mail address when this ticket is updated, select the user or enter an e-mail address below.</p>"
 msgstr ""
 
 #: templates/helpdesk/ticket_cc_add.html:21
@@ -1833,9 +1788,7 @@ msgid ""
 "\n"
 "<h2>Delete Ticket CC</h2>\n"
 "\n"
-"<p>Are you sure you wish to delete this email address (<em>%(email_address)"
-"s</em>) from the CC list for this ticket? They will stop receiving updates.</"
-"p>\n"
+"<p>Are you sure you wish to delete this email address (<em>%(email_address)s</em>) from the CC list for this ticket? They will stop receiving updates.</p>\n"
 msgstr ""
 
 #: templates/helpdesk/ticket_cc_del.html:11
@@ -1858,12 +1811,9 @@ msgid ""
 "\n"
 "<h2>Ticket CC Settings</h2>\n"
 "\n"
-"<p>The following people will receive an e-mail whenever <em><a href='../'>%"
-"(ticket_title)s</a></em> is updated. Some people can also view or edit the "
-"ticket via the public ticket views.</p>\n"
+"<p>The following people will receive an e-mail whenever <em><a href='../'>%(ticket_title)s</a></em> is updated. Some people can also view or edit the ticket via the public ticket views.</p>\n"
 "\n"
-"<p>You can <a href='add/'>add a new e-mail address to the list</a> or delete "
-"any of the items below as required.</p>"
+"<p>You can <a href='add/'>add a new e-mail address to the list</a> or delete any of the items below as required.</p>"
 msgstr ""
 
 #: templates/helpdesk/ticket_cc_list.html:14
@@ -1884,28 +1834,24 @@ msgid "Return to <em>%(ticket_title)s</em>"
 msgstr ""
 
 #: templates/helpdesk/ticket_dependency_add.html:3
-#, fuzzy
 msgid "Add Ticket Dependency"
-msgstr "Талон открыт"
+msgstr ""
 
 #: templates/helpdesk/ticket_dependency_add.html:5
 msgid ""
 "\n"
 "<h2>Add Ticket Dependency</h2>\n"
 "\n"
-"<p>Adding a dependency will stop you resolving this ticket until the "
-"dependent ticket has been resolved or closed.</p>"
+"<p>Adding a dependency will stop you resolving this ticket until the dependent ticket has been resolved or closed.</p>"
 msgstr ""
 
 #: templates/helpdesk/ticket_dependency_add.html:21
-#, fuzzy
 msgid "Save Ticket Dependency"
-msgstr "Нет, не удалять"
+msgstr ""
 
 #: templates/helpdesk/ticket_dependency_del.html:3
-#, fuzzy
 msgid "Delete Ticket Dependency"
-msgstr "Удалить Талон"
+msgstr ""
 
 #: templates/helpdesk/ticket_dependency_del.html:5
 msgid ""
@@ -2076,14 +2022,12 @@ msgid ""
 "\n"
 "<h2>User Settings</h2>\n"
 "\n"
-"<p>Use the following options to change the way your helpdesk system works "
-"for you. These settings do not impact any other user.</p>"
+"<p>Use the following options to change the way your helpdesk system works for you. These settings do not impact any other user.</p>"
 msgstr ""
 "\n"
 "<h2>Настройки Пользователя</h2>\n"
 "\n"
-"<p>Используйте следующие параметры для изменения работы системы для вас. Эти "
-"параметры не воздействие на каких-либо других пользователей.</p>"
+"<p>Используйте следующие параметры для изменения работы системы для вас. Эти параметры не воздействие на каких-либо других пользователей.</p>"
 
 #: templates/helpdesk/user_settings.html:19
 msgid "Save Options"
@@ -2098,15 +2042,13 @@ msgid ""
 "\n"
 "<h2>Logged Out</h2>\n"
 "\n"
-"<p>Thanks for being here. Hopefully you've helped resolve a few tickets and "
-"make the world a better place.</p>\n"
+"<p>Thanks for being here. Hopefully you've helped resolve a few tickets and make the world a better place.</p>\n"
 "\n"
 msgstr ""
 "\n"
 "<h2>Выход произведён</h2>\n"
 "\n"
-"<p>Спасибо что были здесь. Надеемся, Вы помогли решить несколько билетов и "
-"сделать мир лучше.</p>\n"
+"<p>Спасибо что были здесь. Надеемся, Вы помогли решить несколько билетов и сделать мир лучше.</p>\n"
 "\n"
 
 #: templates/helpdesk/registration/login.html:2
@@ -2234,9 +2176,9 @@ msgid ""
 "<p><strong>Note:</strong> Your keyword search is case sensitive because of "
 "your database. This means the search will <strong>not</strong> be accurate. "
 "By switching to a different database system you will gain better searching! "
-"For more information, read the <a href=\"http://docs.djangoproject.com/en/"
-"dev/ref/databases/#sqlite-string-matching\">Django Documentation on string "
-"matching in SQLite</a>."
+"For more information, read the <a "
+"href=\"http://docs.djangoproject.com/en/dev/ref/databases/#sqlite-string-"
+"matching\">Django Documentation on string matching in SQLite</a>."
 msgstr ""
 
 #: views/staff.py:713
@@ -2296,32 +2238,28 @@ msgid "Dec"
 msgstr ""
 
 #: views/staff.py:821
-#, fuzzy
 msgid "User by Priority"
-msgstr "Приоритет"
+msgstr ""
 
 #: views/staff.py:827
 msgid "User by Queue"
 msgstr ""
 
 #: views/staff.py:833
-#, fuzzy
 msgid "User by Status"
-msgstr "Новый Статус"
+msgstr ""
 
 #: views/staff.py:839
 msgid "User by Month"
 msgstr ""
 
 #: views/staff.py:845
-#, fuzzy
 msgid "Queue by Priority"
-msgstr "Приоритет"
+msgstr ""
 
 #: views/staff.py:851
-#, fuzzy
 msgid "Queue by Status"
-msgstr "Новый Статус"
+msgstr ""
 
 #: views/staff.py:857
 msgid "Queue by Month"
