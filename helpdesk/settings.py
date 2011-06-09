@@ -27,3 +27,6 @@ if type(DEFAULT_USER_SETTINGS) != type(dict()):
             'email_on_ticket_apichange': True,
             'tickets_per_page': 25
             }
+
+# show knowledgebase links?
+HELPDESK_KB_ENABLED = getattr(settings, 'HELPDESK_KB_ENABLED', True)
