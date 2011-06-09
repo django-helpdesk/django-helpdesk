@@ -12,7 +12,7 @@
         <link rel='alternate' href='{% url helpdesk_rss "user" %}{{ user.username }}/' type='application/rss+xml' title='{% trans "My Open Tickets" %}' />
         <link rel='alternate' href='{% url helpdesk_rss "recent_activity" %}' type='application/rss+xml' title='{% trans "All Recent Activity" %}' />
         <link rel='alternate' href='{% url helpdesk_rss "unassigned" %}' type='application/rss+xml' title='{% trans "Unassigned Tickets" %}' />
-        
+
         <script type="text/javascript">
         $(document).ready(function(){
             // replace display while hovering over menu item
@@ -21,22 +21,22 @@
 	            function() { $('ul', this).css('display', 'none'); });
         });
         </script>
-                
-        <style type="text/css"> 	
+
+        <style type="text/css">
         /* header */
         #dropdown li.headerlink { width: auto; float: left; text-align: center; }
-     
+
         /* query list */
-        #dropdown li.headerlink ul {    display: none; 
-                                        text-align: left; 
-                                        position: absolute; 
+        #dropdown li.headerlink ul {    display: none;
+                                        text-align: left;
+                                        position: absolute;
                                         padding: 5px;
                                         z-index: 2; }
         /* query entries */
         #dropdown li.headerlink:hover ul { display: block; width: auto; }
         #dropdown li.headerlink:hover ul li { padding: 5px; margin: 1px; float: none; display: block; }
-        </style>        
-        
+        </style>
+
         {% block helpdesk_head %}{% endblock %}
     </head>
     <body>
@@ -45,13 +45,13 @@
                 <h1>{% trans "Helpdesk" %}</h1>
                 {% include "helpdesk/navigation.html" %}
             </div>
-                  
+
             <div id='body'>
                 {% block helpdesk_body %}{% endblock %}
             </div>
-            
+
             <div id='footer'>
-                <p>{% trans "Powered by <a href='https://github.com/rossp/django-helpdesk'>django-helpdesk</a>." %} <a href='{% url helpdesk_rss_index %}'><img src='{{ STATIC_URL }}helpdesk/rss_icon.png' width='14' height='14' alt='{% trans "RSS Icon" %}' title='{% trans "RSS Feeds" %}' border='0' />{% trans "RSS Feeds" %}</a> <a href='{% url helpdesk_api_help %}'>{% trans "API" %}</a> <a href='{% url helpdesk_user_settings %}'>{% trans "User Settings" %}</a> {% if user.is_superuser %}<a href='{% url helpdesk_system_settings %}'>{% trans "System Settings" %}</a>{% endif %}</p>
+                <p>{% include "helpdesk/attribution.html" %}<a href='{% url helpdesk_rss_index %}'><img src='{{ STATIC_URL }}helpdesk/rss_icon.png' width='14' height='14' alt='{% trans "RSS Icon" %}' title='{% trans "RSS Feeds" %}' border='0' />{% trans "RSS Feeds" %}</a> <a href='{% url helpdesk_api_help %}'>{% trans "API" %}</a> <a href='{% url helpdesk_user_settings %}'>{% trans "User Settings" %}</a> {% if user.is_superuser %}<a href='{% url helpdesk_system_settings %}'>{% trans "System Settings" %}</a>{% endif %}</p>
             </div>
         </div>
         {% include "helpdesk/debug.html" %}
