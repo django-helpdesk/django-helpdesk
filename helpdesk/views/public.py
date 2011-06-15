@@ -15,6 +15,7 @@ from django.shortcuts import render_to_response, get_object_or_404
 from django.template import loader, Context, RequestContext
 from django.utils.translation import ugettext as _
 
+from helpdesk import settings as helpdesk_settings
 from helpdesk.forms import PublicTicketForm
 from helpdesk.lib import send_templated_mail, text_is_spam
 from helpdesk.models import Ticket, Queue, UserSettings
@@ -62,6 +63,7 @@ def homepage(request):
     return render_to_response('helpdesk/public_homepage.html',
         RequestContext(request, {
             'form': form,
+            'helpdesk_settings': helpdesk_settings,
         }))
 
 
@@ -89,7 +91,7 @@ def view_ticket(request):
                 if request.GET.has_key('close'):
                     redirect_url += '?close'
                 return HttpResponseRedirect(redirect_url)
-            
+
             if request.GET.has_key('close') and ticket.status == Ticket.RESOLVED_STATUS:
                 from helpdesk.views.staff import update_ticket
                 # Trick the update_ticket() view into thinking it's being called with
@@ -105,7 +107,7 @@ def view_ticket(request):
                 request.GET = {}
 
                 return update_ticket(request, ticket_id, public=True)
-            
+
             return render_to_response('helpdesk/public_view_ticket.html',
                 RequestContext(request, {
                     'ticket': ticket,
@@ -116,5 +118,6 @@ def view_ticket(request):
             'ticket': ticket,
             'email': email,
             'error_message': error_message,
+            'helpdesk_settings': helpdesk_settings,
         }))
 
