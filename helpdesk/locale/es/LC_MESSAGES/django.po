@@ -1,14 +1,16 @@
 # django-helpdesk English language translation
 # Copyright (C) 2011 Ross Poulton
 # This file is distributed under the same license as the django-helpdesk package.
-# Ross Poulton <ross@rossp.org>, 2011.
 # 
+# Alberto Gaona <gaona_consulting@yahoo.com>, 2011.
+# Erik Rivera <erik.river@gmail.com>, 2011.
+# Ross Poulton <ross@rossp.org>, 2011.
 msgid ""
 msgstr ""
 "Project-Id-Version: django-helpdesk\n"
 "Report-Msgid-Bugs-To: http://github.com/RossP/django-helpdesk/issues\n"
 "POT-Creation-Date: 2011-05-11 15:05+1000\n"
-"PO-Revision-Date: 2011-05-12 00:22+0000\n"
+"PO-Revision-Date: 2011-06-09 17:17+0000\n"
 "Last-Translator: albertogaona <gaona_consulting@yahoo.com>\n"
 "Language-Team: Spanish (Castilian) (http://www.transifex.net/projects/p/django-helpdesk/team/es/)\n"
 "MIME-Version: 1.0\n"
@@ -294,6 +296,9 @@ msgid ""
 "all new tickets created for this queue. Enter a comma between multiple "
 "e-mail addresses."
 msgstr ""
+"Si introduce una dirección de e-mail aquí, entonces esta recibirá "
+"notificaciones de nuevos tickets creados para esta cola. Introduzca una coma"
+" entre múltiples direcciones de e-mail"
 
 #: models.py:94
 msgid "Updated Ticket CC Address"
@@ -305,6 +310,10 @@ msgid ""
 "all activity (new tickets, closed tickets, updates, reassignments, etc) for "
 "this queue. Separate multiple addresses with a comma."
 msgstr ""
+"Si introduce una dirección de e-mail aquí, entonces esta recibirá "
+"notificaciones de toda la actividad (tickets nuevos, cerrados, actualizados,"
+" reasignados, etc.) para esta cola. Introduzca una coma entre múltiples "
+"direcciones de e-mail"
 
 #: models.py:105
 msgid "E-Mail Box Type"
@@ -725,7 +734,7 @@ msgstr "El mismo contexto está disponible aquí como texto plano, arriba."
 
 #: models.py:764
 msgid "Locale of this template."
-msgstr ""
+msgstr "Locale de esta plantilla"
 
 #: models.py:811 templates/helpdesk/kb_index.html:10
 msgid "Category"
@@ -979,7 +988,7 @@ msgstr ""
 
 #: models.py:1238
 msgid "Depends On Ticket"
-msgstr ""
+msgstr "Dependencias del ticket"
 
 #: management/commands/create_usersettings.py:21
 msgid ""
@@ -987,6 +996,9 @@ msgid ""
 "required. Uses settings.DEFAULT_USER_SETTINGS which can be overridden to "
 "suit your situation."
 msgstr ""
+"Busca al usuario sin UserSettings en django-helpdesk y crea los UserSettings"
+" en caso necesario. Utiliza settings.DEFAULT_USER_SETTINGS, que puede ser "
+"modificado de acuerdo a las circunstancias."
 
 #: management/commands/escalate_tickets.py:146
 #, python-format
@@ -1578,34 +1590,34 @@ msgstr "Reportes y Estadísticas"
 
 #: templates/helpdesk/report_index.html:9
 msgid "You haven't created any tickets yet, so you cannot run any reports."
-msgstr ""
+msgstr "No ha creado tickets, por lo que no puede generar reportes."
 
 #: templates/helpdesk/report_index.html:13
 msgid "Reports By User"
-msgstr ""
+msgstr "Reportes por Usuario"
 
 #: templates/helpdesk/report_index.html:15
 #: templates/helpdesk/report_index.html:24
 msgid "by Priority"
-msgstr ""
+msgstr "por Prioridad"
 
 #: templates/helpdesk/report_index.html:16
 msgid "by Queue"
-msgstr ""
+msgstr "por Cola"
 
 #: templates/helpdesk/report_index.html:17
 #: templates/helpdesk/report_index.html:25
 msgid "by Status"
-msgstr ""
+msgstr "por Estatus"
 
 #: templates/helpdesk/report_index.html:18
 #: templates/helpdesk/report_index.html:26
 msgid "by Month"
-msgstr ""
+msgstr "por Mes"
 
 #: templates/helpdesk/report_index.html:22
 msgid "Reports By Queue"
-msgstr ""
+msgstr "Reportes por Cola"
 
 #: templates/helpdesk/rss_list.html:6
 msgid ""
@@ -1767,6 +1779,8 @@ msgid ""
 "This ticket cannot be resolved or closed until the tickets it depends on are"
 " resolved."
 msgstr ""
+"Este ticket no puede marcarse como resuelto ni cerrarse hasta que el ticket "
+"del que depende sea resuelto."
 
 #: templates/helpdesk/ticket.html:112
 msgid "Is this update public?"
@@ -1892,7 +1906,7 @@ msgstr "Regresar a <em>%(ticket_title)s</em>"
 
 #: templates/helpdesk/ticket_dependency_add.html:3
 msgid "Add Ticket Dependency"
-msgstr ""
+msgstr "Añadir dependencia de tickets"
 
 #: templates/helpdesk/ticket_dependency_add.html:5
 msgid ""
@@ -1901,14 +1915,18 @@ msgid ""
 "\n"
 "<p>Adding a dependency will stop you resolving this ticket until the dependent ticket has been resolved or closed.</p>"
 msgstr ""
+"\n"
+"<h2>Añadir dependencia de tickets</h2>\n"
+"\n"
+"<p>Al añadir dependencia evitará que este ticket sea marcado como resuelto mientras el ticket del que depende no sea resuelto o cerrado.</p>"
 
 #: templates/helpdesk/ticket_dependency_add.html:21
 msgid "Save Ticket Dependency"
-msgstr ""
+msgstr "Guardar dependencia de tickets"
 
 #: templates/helpdesk/ticket_dependency_del.html:3
 msgid "Delete Ticket Dependency"
-msgstr ""
+msgstr "Eliminar dependencia de tickets"
 
 #: templates/helpdesk/ticket_dependency_del.html:5
 msgid ""
@@ -1917,6 +1935,10 @@ msgid ""
 "\n"
 "<p>Are you sure you wish to remove the dependency on this ticket?</p>\n"
 msgstr ""
+"\n"
+"<h2>Eliminar dependencia de tickets</h2>\n"
+"\n"
+"<p>¿Está seguro de que quiere remover la dependencia para este ticket?</p>\n"
 
 #: templates/helpdesk/ticket_desc_table.html:3
 msgid "Unhold"
@@ -1949,24 +1971,26 @@ msgstr "Gestionar"
 
 #: templates/helpdesk/ticket_desc_table.html:39
 msgid "Dependencies"
-msgstr ""
+msgstr "Dependencias"
 
 #: templates/helpdesk/ticket_desc_table.html:41
 msgid ""
 "This ticket cannot be resolved until the following ticket(s) are resolved"
 msgstr ""
+"Este ticket no puede ser marcado como resuelto hasta que el (los) "
+"siguiente(s) ticket(s) no sean resuelto(s)"
 
 #: templates/helpdesk/ticket_desc_table.html:42
 msgid "Remove Dependency"
-msgstr ""
+msgstr "Remover dependencia"
 
 #: templates/helpdesk/ticket_desc_table.html:45
 msgid "This ticket has no dependencies."
-msgstr ""
+msgstr "Este ticket no depende de otro"
 
 #: templates/helpdesk/ticket_desc_table.html:47
 msgid "Add Dependency"
-msgstr ""
+msgstr "Añadir dependencia"
 
 #: templates/helpdesk/ticket_list.html:2
 msgid "Ticket Listing"
@@ -2009,6 +2033,8 @@ msgstr "Aplicar filtro"
 #, python-format
 msgid "You are currently viewing saved query <em>%(query_name)s</em>."
 msgstr ""
+"Actualmente está visualizando la consulta pre-guardada "
+"<em>%(query_name)s</em>."
 
 #: templates/helpdesk/ticket_list.html:141
 #: templates/helpdesk/ticket_list.html:156
@@ -2252,76 +2278,78 @@ msgstr "Ticket puesto en espera"
 
 #: views/staff.py:784
 msgid "Jan"
-msgstr ""
+msgstr "Ene"
 
 #: views/staff.py:785
 msgid "Feb"
-msgstr ""
+msgstr "Feb"
 
 #: views/staff.py:786
 msgid "Mar"
-msgstr ""
+msgstr "Mar"
 
 #: views/staff.py:787
 msgid "Apr"
-msgstr ""
+msgstr "Abr"
 
 #: views/staff.py:788
 msgid "May"
-msgstr ""
+msgstr "May"
 
 #: views/staff.py:789
 msgid "Jun"
-msgstr ""
+msgstr "Jun"
 
 #: views/staff.py:790
 msgid "Jul"
-msgstr ""
+msgstr "Jul"
 
 #: views/staff.py:791
 msgid "Aug"
-msgstr ""
+msgstr "Ago"
 
 #: views/staff.py:792
 msgid "Sep"
-msgstr ""
+msgstr "Sep"
 
 #: views/staff.py:793
 msgid "Oct"
-msgstr ""
+msgstr "Oct"
 
 #: views/staff.py:794
 msgid "Nov"
-msgstr ""
+msgstr "Nov"
 
 #: views/staff.py:795
 msgid "Dec"
-msgstr ""
+msgstr "Dic"
 
 #: views/staff.py:821
 msgid "User by Priority"
-msgstr ""
+msgstr "Usuario por Prioridad"
 
 #: views/staff.py:827
 msgid "User by Queue"
-msgstr ""
+msgstr "Usuario por Cola"
 
 #: views/staff.py:833
 msgid "User by Status"
-msgstr ""
+msgstr "Usuario por Estatus"
 
 #: views/staff.py:839
 msgid "User by Month"
-msgstr ""
+msgstr "Usuario por Mes"
 
 #: views/staff.py:845
 msgid "Queue by Priority"
-msgstr ""
+msgstr "Cola por Prioridad"
 
 #: views/staff.py:851
 msgid "Queue by Status"
-msgstr ""
+msgstr "Cola por Estatus"
 
 #: views/staff.py:857
 msgid "Queue by Month"
-msgstr ""
+msgstr "Cola por Mes"
+
+

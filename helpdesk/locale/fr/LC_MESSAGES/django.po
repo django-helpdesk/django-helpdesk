@@ -1,8 +1,9 @@
 # django-helpdesk English language translation
 # Copyright (C) 2011 Ross Poulton
 # This file is distributed under the same license as the django-helpdesk package.
-# Ross Poulton <ross@rossp.org>, 2011.
 # 
+# kolin22 <kolin22@gmail.com>, 2011.
+# Ross Poulton <ross@rossp.org>, 2011.
 msgid ""
 msgstr ""
 "Project-Id-Version: django-helpdesk\n"
@@ -2336,3 +2337,5 @@ msgstr ""
 #: views/staff.py:857
 msgid "Queue by Month"
 msgstr ""
+
+
