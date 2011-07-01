@@ -38,6 +38,19 @@ http://docs.djangoproject.com/en/dev/ref/databases/#sqlite-string-matching
 When you try to do a keyword search using sqlite, a message will be displayed
 to alert you to this shortcoming. There is no way around it, sorry.
 
+**NOTE REGARDING MySQL:**
+If you use MySQL, with most default configurations you will receive an error 
+when creating the database tables as we populate a number of default templates 
+in languages other than English. 
+
+You must create the database the holds the django-helpdesk tables using the 
+UTF-8 collation; see the MySQL manual for more information: 
+http://dev.mysql.com/doc/refman/5.1/en/charset-database.html
+
+If you do NOT do this step, and you only want to use English-language templates,
+you can continue however you will receive a warning when running the 'migrate'
+commands.
+
 Upgrading from previous versions
 ================================
 
