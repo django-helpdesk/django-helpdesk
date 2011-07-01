@@ -12,7 +12,9 @@ from django.conf.urls.defaults import *
 from django.contrib.auth.decorators import login_required
 from django.contrib.syndication.views import feed as django_feed
 
+from helpdesk import settings as helpdesk_settings
 from helpdesk.views.feeds import feed_setup
+
 
 urlpatterns = patterns('helpdesk.views.staff',
     url(r'^dashboard/$',
@@ -34,7 +36,7 @@ urlpatterns = patterns('helpdesk.views.staff',
     url(r'^tickets/(?P<ticket_id>[0-9]+)/$',
         'view_ticket',
         name='helpdesk_view'),
-    
+
     url(r'^tickets/(?P<ticket_id>[0-9]+)/followup_edit/(?P<followup_id>[0-9]+)/$',
         'followup_edit',
         name='helpdesk_followup_edit'),
@@ -70,7 +72,7 @@ urlpatterns = patterns('helpdesk.views.staff',
     url(r'^tickets/(?P<ticket_id>[0-9]+)/cc/delete/(?P<cc_id>[0-9]+)/$',
         'ticket_cc_del',
         name='helpdesk_ticket_cc_del'),
-    
+
     url(r'^tickets/(?P<ticket_id>[0-9]+)/dependency/add/$',
         'ticket_dependency_add',
         name='helpdesk_ticket_dependency_add'),
@@ -78,7 +80,7 @@ urlpatterns = patterns('helpdesk.views.staff',
     url(r'^tickets/(?P<ticket_id>[0-9]+)/dependency/delete/(?P<dependency_id>[0-9]+)/$',
         'ticket_dependency_del',
         name='helpdesk_ticket_dependency_del'),
-    
+
     url(r'^raw/(?P<type>\w+)/$',
         'raw_details',
         name='helpdesk_raw'),
@@ -98,7 +100,7 @@ urlpatterns = patterns('helpdesk.views.staff',
     url(r'^save_query/$',
         'save_query',
         name='helpdesk_savequery'),
-    
+
     url(r'^delete_query/(?P<id>[0-9]+)/$',
         'delete_saved_query',
         name='helpdesk_delete_query'),
@@ -151,31 +153,32 @@ urlpatterns += patterns('',
         name='logout'),
 )
 
-urlpatterns += patterns('helpdesk.views.kb',
-    url(r'^kb/$',
-        'index', name='helpdesk_kb_index'),
+if helpdesk_settings.HELPDESK_KB_ENABLED:
+    urlpatterns += patterns('helpdesk.views.kb',
+        url(r'^kb/$',
+            'index', name='helpdesk_kb_index'),
 
-    url(r'^kb/(?P<slug>[A-Za-z_-]+)/$',
-        'category', name='helpdesk_kb_category'),
+        url(r'^kb/(?P<slug>[A-Za-z_-]+)/$',
+            'category', name='helpdesk_kb_category'),
 
-    url(r'^kb/(?P<item>[0-9]+)/$',
-        'item', name='helpdesk_kb_item'),
+        url(r'^kb/(?P<item>[0-9]+)/$',
+            'item', name='helpdesk_kb_item'),
 
-    url(r'^kb/(?P<item>[0-9]+)/vote/$',
-        'vote', name='helpdesk_kb_vote'),
-)
+        url(r'^kb/(?P<item>[0-9]+)/vote/$',
+            'vote', name='helpdesk_kb_vote'),
+    )
 
 urlpatterns += patterns('',
     url(r'^api/$',
         'django.views.generic.simple.direct_to_template',
         {'template': 'helpdesk/help_api.html',},
         name='helpdesk_api_help'),
-    
+
     url(r'^help/context/$',
         'django.views.generic.simple.direct_to_template',
         {'template': 'helpdesk/help_context.html',},
         name='helpdesk_help_context'),
-    
+
     url(r'^system_settings/$',
         'django.views.generic.simple.direct_to_template',
         {
