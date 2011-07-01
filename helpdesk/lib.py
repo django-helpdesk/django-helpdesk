@@ -17,6 +17,8 @@ try:
 except ImportError:
     from base64 import decodestring as b64decode
 
+from django.utils.encoding import smart_str
+
 def send_templated_mail(template_name, email_context, recipients, sender=None, bcc=None, fail_silently=False, files=None):
     """
     send_templated_mail() is a warpper around Django's e-mail routines that
@@ -251,6 +253,6 @@ def text_is_spam(text, request):
             'comment_author': '',
         }
 
-        return ak.comment_check(text, data=ak_data)
+        return ak.comment_check(smart_str(text), data=ak_data)
 
     return False
