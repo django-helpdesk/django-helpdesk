@@ -16,8 +16,9 @@ def saved_queries(request):
         user_saved_queries = SavedSearch.objects.filter(Q(user=request.user) | Q(shared__exact=True))
         return user_saved_queries
     except Exception, e:
-        print "'saved_queries' template tag (django-helpdesk) crashed with following error:"
-        print e
+        import sys
+        print >> sys.stderr,  "'saved_queries' template tag (django-helpdesk) crashed with following error:"
+        print >> sys.stderr,  e
         return ''
 
 register = Library()

@@ -8,6 +8,7 @@ views/staff.py - The bulk of the application - provides most business logic and
 """
 
 from datetime import datetime
+import sys
 
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -590,7 +591,7 @@ def ticket_list(request):
         query_params['sortreverse'] = sortreverse
 
     ticket_qs = apply_query(Ticket.objects.select_related(), query_params)
-    print str(ticket_qs.query)
+    print >> sys.stderr,  str(ticket_qs.query)
 
     ## TAG MATCHING
     if HAS_TAG_SUPPORT:
