@@ -137,8 +137,16 @@ def view_ticket(request, ticket_id):
 
     if request.GET.has_key('take'):
         # Allow the user to assign the ticket to themselves whilst viewing it.
-        ticket.assigned_to = request.user
-        ticket.save()
+        
+        # Trick the update_ticket() view into thinking it's being called with
+        # a valid POST.
+        request.POST = {
+            'owner': request.user.id,
+            'public': 1,
+            'title': ticket.title,
+            'comment': ''
+        }
+        return update_ticket(request, ticket_id)
 
     if request.GET.has_key('close') and ticket.status == Ticket.RESOLVED_STATUS:
         if not ticket.assigned_to:
