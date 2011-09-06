@@ -111,6 +111,7 @@ def view_ticket(request):
             return render_to_response('helpdesk/public_view_ticket.html',
                 RequestContext(request, {
                     'ticket': ticket,
+                    'helpdesk_settings': helpdesk_settings,
                 }))
 
     return render_to_response('helpdesk/public_view_form.html',
