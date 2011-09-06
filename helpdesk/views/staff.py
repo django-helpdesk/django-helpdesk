@@ -8,6 +8,7 @@ views/staff.py - The bulk of the application - provides most business logic and
 """
 
 from datetime import datetime
+import sys
 
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -136,8 +137,16 @@ def view_ticket(request, ticket_id):
 
     if request.GET.has_key('take'):
         # Allow the user to assign the ticket to themselves whilst viewing it.
-        ticket.assigned_to = request.user
-        ticket.save()
+        
+        # Trick the update_ticket() view into thinking it's being called with
+        # a valid POST.
+        request.POST = {
+            'owner': request.user.id,
+            'public': 1,
+            'title': ticket.title,
+            'comment': ''
+        }
+        return update_ticket(request, ticket_id)
 
     if request.GET.has_key('close') and ticket.status == Ticket.RESOLVED_STATUS:
         if not ticket.assigned_to:
@@ -590,7 +599,7 @@ def ticket_list(request):
         query_params['sortreverse'] = sortreverse
 
     ticket_qs = apply_query(Ticket.objects.select_related(), query_params)
-    print str(ticket_qs.query)
+    print >> sys.stderr,  str(ticket_qs.query)
 
     ## TAG MATCHING
     if HAS_TAG_SUPPORT:

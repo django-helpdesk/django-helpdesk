@@ -38,12 +38,12 @@ $(document).ready(function() {
 
 <div id="searchtabs">
     <ul>
-    <li><a href='#tabfilter'>Query Options</a></li>
+    <li><a href='#tabfilter'>{% trans "Query Options" %}</a></li>
     {% if not from_saved_query %}
-    <li><a href='#tabsave'>Save This Query</a></li>
+    <li><a href='#tabsave'>{% trans "Save This Query" %}</a></li>
     {% endif %}
     {% if user_saved_queries %}
-    <li><a href='#tabload'>Load Saved Query</a></li>
+    <li><a href='#tabload'>{% trans "Load Saved Query" %}</a></li>
     {% endif %}
     </ul>
     
@@ -66,7 +66,7 @@ $(document).ready(function() {
 
     <form method='get' action='./'>
     <div class='filterBox{% if query_params.sorting %} filterBoxShow{% endif %}' id='filterBoxSort'>
-    <label for='id_sort'>Sorting</label>
+    <label for='id_sort'>{% trans "Sorting" %}</label>
     <select id='id_sort' name='sort'>
         <option value='created'{% ifequal query_params.sorting "created"%} selected='selected'{% endifequal %}>
             {% trans "Created" %}
@@ -87,9 +87,9 @@ $(document).ready(function() {
             {% trans "Owner" %}
         </option>
     </select>
-    <label for='id_sortreverse'>Reverse</label>
+    <label for='id_sortreverse'>{% trans "Reverse" %}</label>
     <input type='checkbox' name='sortreverse' id='id_sortreverse'{% if query_params.sortreverse %} checked='checked'{% endif %} />
-    <p class='filterHelp'>Ordering applied to tickets</p>
+    <p class='filterHelp'>{% trans "Ordering applied to tickets" %}</p>
     <input type='button' class='filterBuilderRemove' value='-' />
     </div>
 
@@ -98,44 +98,44 @@ $(document).ready(function() {
     <select id='id_owners' name='assigned_to' multiple='selected' size='5'>
         {% for u in user_choices %}
         <option value='{{ u.id }}'{% if u.id|in_list:query_params.filtering.assigned_to__id__in %} selected='selected'{% endif %}>
-            {{ u.username }}{% ifequal u user %} (ME){% endifequal %}
+            {{ u.username }}{% ifequal u user %} {% trans "(ME)" %}{% endifequal %}
         </option>
         {% endfor %}
     </select>
-    <p class='filterHelp'>Ctrl-Click to select multiple options</p>
+    <p class='filterHelp'>{% trans "Ctrl-Click to select multiple options" %}</p>
     <input type='button' class='filterBuilderRemove' value='-' />
     </div>
 
     <div class='filterBox{% if query_params.filtering.queue__id__in %} filterBoxShow{% endif %}' id='filterBoxQueue'>
     <label for='id_queues'>{% trans "Queue(s)" %}</label><select id='id_queues' name='queue' multiple='selected' size='5'>{% for q in queue_choices %}<option value='{{ q.id }}'{% if q.id|in_list:query_params.filtering.queue__id__in %} selected='selected'{% endif %}>{{ q.title }}</option>{% endfor %}</select>
-    <p class='filterHelp'>Ctrl-click to select multiple options</p>
+    <p class='filterHelp'>{% trans "Ctrl-click to select multiple options" %}</p>
     <input type='button' class='filterBuilderRemove' value='-' />
     </div>
 
     <div class='filterBox{% if query_params.filtering.status__in %} filterBoxShow{% endif %}' id='filterBoxStatus'>
     <label for='id_statuses'>{% trans "Status(es)" %}</label><select id='id_statuses' name='status' multiple='selected' size='5'>{% for s in status_choices %}<option value='{{ s.0 }}'{% if s.0|in_list:query_params.filtering.status__in %} selected='selected'{% endif %}>{{ s.1 }}</option>{% endfor %}</select>
-    <p class='filterHelp'>Ctrl-click to select multiple options</p>
+    <p class='filterHelp'>{% trans "Ctrl-click to select multiple options" %}</p>
     <input type='button' class='filterBuilderRemove' value='-' />
     </div>
     
     <div class='filterBox{% if query_params.filtering.created__gte or query_params.filtering.created__lte %} filterBoxShow{% endif %}' id='filterBoxDates'>
         <label for='id_date_from'>{% trans "Date (From)" %}</label><input type='text' name='date_from' value='{{ query_params.filtering.created__gte }}' id='id_date_from' />
         <label for='id_date_to'>{% trans "Date (To)" %}</label><input type='text' name='date_to' value='{{ query_params.filtering.created__lte }}' id='id_date_to' />
-    <p class='filterHelp'>Use YYYY-MM-DD date format, eg 2011-05-29</p>
+    <p class='filterHelp'>{% trans "Use YYYY-MM-DD date format, eg 2011-05-29" %}</p>
     <input type='button' class='filterBuilderRemove' value='-' />
     </div>
 
 {% if tags_enabled %}
 <div class='filterBox{% if query_params.tags %} filterBoxShow{% endif %}' id='filterBoxTags'>
   <label for='id_tags'>{% trans "Tag(s)" %}</label><select id='id_tags' name='tags' multiple='selected' size='5'>{% for t in tag_choices %}<option value='{{t.name}}'{% if t.name|in_list:query_params.tags %} selected='selected'{% endif %}>{{ t.name }}</option>{% endfor %}</select>
-<p class='filterHelp'>Ctrl-click to select multiple options</p>
+<p class='filterHelp'>{% trans "Ctrl-click to select multiple options" %}</p>
 <input type='button' class='filterBuilderRemove' value='-' />
 </div>
 {% endif %}
 
     <div class='filterBox{% if query %} filterBoxShow{% endif %}' id='filterBoxKeywords'>
     <label for='id_query'>{% trans "Keywords" %}</label><input type='text' name='q' value='{{ query }}' id='id_query' />
-    <p class='filterHelp'>Keywords are case-insensitive, and will be looked for in the title, body and submitter fields.</p>
+    <p class='filterHelp'>{% trans "Keywords are case-insensitive, and will be looked for in the title, body and submitter fields." %}</p>
     <input type='button' class='filterBuilderRemove' value='-' />
     </div>
     <hr style='clear: both;' />
@@ -193,7 +193,7 @@ $(document).ready(function() {
 
 
 {{ search_message|safe }}
-<form method='post' action='{% url helpdesk_mass_update %}'>
+<form method='post' action='{% url helpdesk_mass_update %}' id="ticket_mass_update">
 <table width='100%'>
 <tr class='row_tablehead'><td colspan='9'>{% trans "Tickets" %}</td></tr>
 <tr class='row_columnheads'><th>#</th><th>&nbsp;</th><th>{% trans "Pr" %}</th><th>{% trans "Title" %}</th><th>{% trans "Queue" %}</th><th>{% trans "Status" %}</th><th>{% trans "Created" %}</th><th>{% trans "Owner" %}</th>{% if tags_enabled %}<th>{% trans "Tags" %}</th>{% endif %}</tr>
@@ -229,8 +229,8 @@ $(document).ready(function() {
     </span>
 </div>
 
-<p><label>Select: </label> <a href='#select_all' id='select_all'>All</a> <a href='#select_none' id='select_none'>None</a> <a href='#select_inverse' id='select_inverse'>Inverse</a></p>
+<p><label>{% trans "Select:" %} </label> <a href='#select_all' id='select_all'>{% trans "All" %}</a> <a href='#select_none' id='select_none'>{% trans "None" %}</a> <a href='#select_inverse' id='select_inverse'>{% trans "Inverse" %}</a></p>
 
-<p><label for='id_mass_action'>With Selected Tickets:</label> <select name='action' id='id_mass_action'><option value='take'>Take (Assign to me)</option><option value='delete'>Delete</option><optgroup label='Close'><option value='close'>Close (Don't Send E-Mail)</option><option value='close_public'>Close (Send E-Mail)</option></optgroup><optgroup label='Assign To'><option value='unassign'>Nobody (Unassign)</option>{% for u in user_choices %}<option value='assign_{{ u.id }}'>{{ u.username }}</option>{% endfor %}</optgroup></select> <input type='submit' value='Go' /></p>
+<p><label for='id_mass_action'>{% trans "With Selected Tickets:" %}</label> <select name='action' id='id_mass_action'><option value='take'>{% trans "Take (Assign to me)" %}</option><option value='delete'>{% trans "Delete" %}</option><optgroup label='{% trans "Close" %}'><option value='close'>{% trans "Close (Don't Send E-Mail)" %}</option><option value='close_public'>{% trans "Close (Send E-Mail)" %}</option></optgroup><optgroup label='{% trans "Assign To" %}'><option value='unassign'>{% trans "Nobody (Unassign)" %}</option>{% for u in user_choices %}<option value='assign_{{ u.id }}'>{{ u.username }}</option>{% endfor %}</optgroup></select> <input type='submit' value='Go' /></p>
 {% csrf_token %}</form>
 {% endblock %}

@@ -15,6 +15,7 @@ from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 from django.utils.translation import ugettext as _
 
+from helpdesk import settings as helpdesk_settings
 from helpdesk.models import KBCategory, KBItem
 
 
@@ -24,6 +25,7 @@ def index(request):
     return render_to_response('helpdesk/kb_index.html',
         RequestContext(request, {
             'kb_categories': category_list,
+            'helpdesk_settings': helpdesk_settings,
         }))
 
 
@@ -34,6 +36,7 @@ def category(request, slug):
         RequestContext(request, {
             'category': category,
             'items': items,
+            'helpdesk_settings': helpdesk_settings,
         }))
 
 
@@ -42,6 +45,7 @@ def item(request, item):
     return render_to_response('helpdesk/kb_item.html',
         RequestContext(request, {
             'item': item,
+            'helpdesk_settings': helpdesk_settings,
         }))
 
 
