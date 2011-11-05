@@ -157,15 +157,15 @@ if helpdesk_settings.HELPDESK_KB_ENABLED:
     urlpatterns += patterns('helpdesk.views.kb',
         url(r'^kb/$',
             'index', name='helpdesk_kb_index'),
-
-        url(r'^kb/(?P<slug>[A-Za-z_-]+)/$',
-            'category', name='helpdesk_kb_category'),
-
+        
         url(r'^kb/(?P<item>[0-9]+)/$',
             'item', name='helpdesk_kb_item'),
 
         url(r'^kb/(?P<item>[0-9]+)/vote/$',
             'vote', name='helpdesk_kb_vote'),
+
+        url(r'^kb/(?P<slug>[A-Za-z0-9_-]+)/$',
+            'category', name='helpdesk_kb_category'),
     )
 
 urlpatterns += patterns('',
