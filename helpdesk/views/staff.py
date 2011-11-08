@@ -833,7 +833,7 @@ def run_report(request, report):
             month = 1
         if (year > last_year) or (month > last_month and year >= last_year):
             working = False
-        periods.append("%s %s" % (months[month], year))
+        periods.append("%s %s" % (months[month - 1], year))
 
     if report == 'userpriority':
         title = _('User by Priority')
