@@ -1111,6 +1111,10 @@ class TicketCC(models.Model):
     def __unicode__(self):
         return u'%s for %s' % (self.display, self.ticket.title)
 
+class CustomFieldManager(models.Manager):
+    def get_query_set(self):
+        return super(CustomFieldManager, self).get_query_set().order_by('ordering')
+
 
 class CustomField(models.Model):
     """
@@ -1178,6 +1182,13 @@ class CustomField(models.Model):
         blank=True,
         null=True,
         )
+    
+    ordering = models.IntegerField(
+        _('Ordering'),
+        help_text=_('Lower numbers are displayed first; higher numbers are listed later'),
+        blank=True,
+        null=True,
+        )
 
     def _choices_as_array(self):
         from StringIO import StringIO
@@ -1196,6 +1207,8 @@ class CustomField(models.Model):
         _('Staff Only?'),
         help_text=_('If this is ticked, then the public submission form will NOT show this field'),
         )
+
+    objects = CustomFieldManager()
 
     def __unicode__(self):
         return '%s' % (self.name)
