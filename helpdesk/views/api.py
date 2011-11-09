@@ -22,7 +22,7 @@ from django.template import loader, Context
 from django.utils import simplejson
 
 from helpdesk.forms import TicketForm
-from helpdesk.lib import send_templated_mail
+from helpdesk.lib import send_templated_mail, safe_template_context
 from helpdesk.models import Ticket, Queue, FollowUp
 
 STATUS_OK = 200
@@ -191,11 +191,8 @@ class API:
 
         f.save()
 
-        context = {
-            'ticket': ticket,
-            'queue': ticket.queue,
-            'comment': f.comment,
-        }
+        context = safe_template_context(ticket)
+        context['comment'] = f.comment
         
         messages_sent_to = []
 
@@ -266,11 +263,8 @@ class API:
             )
         f.save()
 
-        context = {
-            'ticket': ticket,
-            'queue': ticket.queue,
-            'resolution': f.comment,
-        }
+        context = safe_template_context(ticket)
+        context['resolution'] = f.comment
 
         subject = '%s %s (Resolved)' % (ticket.ticket, ticket.title)
         

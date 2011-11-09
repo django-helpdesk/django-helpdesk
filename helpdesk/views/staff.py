@@ -419,11 +419,10 @@ def mass_update(request):
             f = FollowUp(ticket=t, date=datetime.now(), title=_('Closed in bulk update'), public=True, user=request.user, new_status=Ticket.CLOSED_STATUS)
             f.save()
             # Send email to Submitter, Owner, Queue CC
-            context = {
-                'ticket': t,
-                'queue': t.queue,
-                'resolution': t.resolution,
-            }
+            context = safe_template_context(t)
+            context.update(
+                resolution=t.resolution,
+                )
 
             messages_sent_to = []
 
