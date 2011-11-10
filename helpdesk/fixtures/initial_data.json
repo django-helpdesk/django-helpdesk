@@ -574,5 +574,197 @@
             "subject": "(Aktualisiert)",
             "locale": "de"
         }
+    },
+    {
+        "pk": 49,
+        "model": "helpdesk.emailtemplate",
+        "fields": {
+            "heading": "Ticket Assign\u00e9",
+            "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Bonjour,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Ce courriel indicatif permet de vous pr\u00e9venir que le ticket <a href=\"{{ ticket.staff_url }}\"><b>{{ ticket.ticket }}</b></a> (<em>{{ ticket.title }}</em>) par {{ ticket.submitter_email }}  {% if ticket.assigned_to %}a \u00e9t\u00e9 assign\u00e9 \u00e0 {{ ticket.assigned_to }}{% else %} n'est plus assign\u00e9 \u00e0 personne{% endif %}.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">\r\n<b>File d'attente</b>&nbsp;: {{ ticket.ticket }}<br>\r\n<b>Queue</b>&nbsp;: {{ queue.title }}<br>\r\n<b>Titre</b>&nbsp;: {{ ticket.title }}<br>\r\n<b>Ouvert le</b>&nbsp;: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}<br>\r\n<b>Soumis par</b>&nbsp;: {{ ticket.submitter_email|default:\"Unknown\" }}<br>\r\n<b>Priorit\u00e9</b>&nbsp;: {{ ticket.get_priority_display }}<br>\r\n<b>Statut</b>&nbsp;: {{ ticket.get_status }}<br>\r\n<b>Assign\u00e9 \u00e0</b>&nbsp;: {{ ticket.get_assigned_to }}<br>\r\n<b><a href='{{ ticket.staff_url }}'>Voir le ticket en ligne</a></b> pour le mettre \u00e0 jour (apr\u00e8s authentification)</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Pour m\u00e9moire, la description originelle \u00e9tait&nbsp;:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.description }}</blockquote>",
+            "locale": "fr",
+            "plain_text": "Bonjour,\r\n\r\nCe courriel indicatif permet de vous pr\u00e9venir que le ticket  {{ ticket.ticket }} (\"{{ ticket.title }}\") par {{ ticket.submitter_email }} {% if ticket.assigned_to %} a \u00e9t\u00e9 assign\u00e9 \u00e0 {{ ticket.assigned_to }}{% else %} n'est plus assign\u00e9 \u00e0 personne{% endif %}.\r\n\r\nIdentifiant\u00a0: {{ ticket.ticket }}\r\nFile d'attente\u00a0: {{ queue.title }}\r\nTitre\u00a0: {{ ticket.title }}\r\nOuvert le\u00a0: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}\r\nSoumis par\u00a0: {{ ticket.submitter_email|default:\"Unknown\" }}\r\nPriorit\u00e9\u00a0: {{ ticket.get_priority_display }}\r\nStatut\u00a0: {{ ticket.get_status }}\r\nAssign\u00e9 \u00e0\u00a0: {{ ticket.get_assigned_to }}\r\nAdresse\u00a0: {{ ticket.staff_url }}\r\n\r\nLa description originelle \u00e9tait\u00a0:\r\n\r\n{{ ticket.description }}\r\n\r\n",
+            "subject": "(Assign\u00e9)",
+            "template_name": "assigned_cc"
+        }
+    },
+    {
+        "pk": 50,
+        "model": "helpdesk.emailtemplate",
+        "fields": {
+            "heading": "Le ticket vous est assign\u00e9",
+            "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Bonjour,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Ce courriel indicatif permet de vous pr\u00e9venir que le ticket <a href=\"{{ ticket.staff_url }}\"><b>{{ ticket.ticket }}</b></a> (<em>{{ ticket.title }}</em>) pour {{ ticket.submitter_email }} <b>vous</b> a \u00e9t\u00e9 assign\u00e9.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">\r\n<b>File d'attente</b>&nbsp;: {{ ticket.ticket }}<br>\r\n<b>Queue</b>&nbsp;: {{ queue.title }}<br>\r\n<b>Titre</b>&nbsp;: {{ ticket.title }}<br>\r\n<b>Ouvert le</b>&nbsp;: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}<br>\r\n<b>Soumis par</b>&nbsp;: {{ ticket.submitter_email|default:\"Unknown\" }}<br>\r\n<b>Priorit\u00e9</b>&nbsp;: {{ ticket.get_priority_display }}<br>\r\n<b>Statut</b>&nbsp;: {{ ticket.get_status }}<br>\r\n<b>Assign\u00e9 \u00e0</b>&nbsp;: {{ ticket.get_assigned_to }}<br>\r\n<b><a href='{{ ticket.staff_url }}'>Voir le ticket en ligne</a></b> pour le mettre \u00e0 jour (apr\u00e8s authentification)</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Pour m\u00e9moire, la description originelle \u00e9tait&nbsp;:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.description }}</blockquote>",
+            "locale": "fr",
+            "plain_text": "Bonjour,\r\n\r\nCe courriel indicatif permet de vous pr\u00e9venir que le ticket {{ ticket.ticket }} (\"{{ ticket.title }}\") pour {{ ticket.submitter_email }} vous a \u00e9t\u00e9 assign\u00e9.\r\n\r\nIdentifiant : {{ ticket.ticket }}\r\nFile d'attente : {{ queue.title }}\r\nTitre : {{ ticket.title }}\r\nOuvert le : {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}\r\nSoumis par : {{ ticket.submitter_email|default:\"Unknown\" }}\r\nPriorit\u00e9 : {{ ticket.get_priority_display }}\r\nStatut : {{ ticket.get_status }}\r\nAssign\u00e9 \u00e0 : {{ ticket.get_assigned_to }}\r\nAdresse : {{ ticket.staff_url }}\r\n\r\nLa description originelle \u00e9tait :\r\n\r\n{{ ticket.description }}",
+            "subject": "(Pour vous)",
+            "template_name": "assigned_owner"
+        }
+    },
+    {
+        "pk": 51,
+        "model": "helpdesk.emailtemplate",
+        "fields": {
+            "heading": "Ticket Ferm\u00e9",
+            "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Bonjour,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Le ticket <i>{{ ticket.title }}</i> ('{{ ticket.title }}'){% if ticket.assigned_to %}, assign\u00e9 \u00e0 {{ ticket.get_assigned_to }}{% endif %} a \u00e9t\u00e9 ferm\u00e9.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">\r\n<b>File d'attente</b>&nbsp;: {{ ticket.ticket }}<br>\r\n<b>Queue</b>&nbsp;: {{ queue.title }}<br>\r\n<b>Titre</b>&nbsp;: {{ ticket.title }}<br>\r\n<b>Ouvert le</b>&nbsp;: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}<br>\r\n<b>Soumis par</b>&nbsp;: {{ ticket.submitter_email|default:\"Unknown\" }}<br>\r\n<b>Priorit\u00e9</b>&nbsp;: {{ ticket.get_priority_display }}<br>\r\n<b>Statut</b>&nbsp;: {{ ticket.get_status }}<br>\r\n<b>Assign\u00e9 \u00e0</b>&nbsp;: {{ ticket.get_assigned_to }}<br>\r\n<b><a href='{{ ticket.staff_url }}'>Voir le ticket en ligne</a></b> pour le mettre \u00e0 jour (apr\u00e8s authentification)</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Pour m\u00e9moire, la description originelle \u00e9tait&nbsp;:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.description }}</blockquote>\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">La motivation de r\u00e9solution est:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ resolution }}</blockquote>",
+            "locale": "fr",
+            "plain_text": "Bonjour,\r\n\r\nLe ticket {{ ticket.title }} (\"{{ ticket.title }}\"){% if ticket.assigned_to %}, assign\u00e9 \u00e0 {{ ticket.assigned_to }}{% endif %} a \u00e9t\u00e9 ferm\u00e9.\r\n\r\nIdentifiant : {{ ticket.ticket }}\r\nFile d'attente : {{ queue.title }}\r\nTitre : {{ ticket.title }}\r\nOuvert le : {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}\r\nSoumis par : {{ ticket.submitter_email|default:\"Unknown\" }}\r\nPriorit\u00e9 : {{ ticket.get_priority_display }}\r\nStatut : {{ ticket.get_status }}\r\nAssign\u00e9 \u00e0 : {{ ticket.get_assigned_to }}\r\nAdresse : {{ ticket.staff_url }}\r\n\r\nLa description originelle \u00e9tait :\r\n\r\n{{ ticket.description }}\r\n\r\nLa motivation de r\u00e9solution est:\r\n\r\n{{ resolution }}\r\n\r\n",
+            "subject": "(Ferm\u00e9)",
+            "template_name": "closed_cc"
+        }
+    },
+    {
+        "pk": 52,
+        "model": "helpdesk.emailtemplate",
+        "fields": {
+            "heading": "Ticket Ferm\u00e9",
+            "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Bonjour,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">\r\nLe ticket suivant qui vous est actuellement assign\u00e9 a \u00e9t\u00e9 ferm\u00e9.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">\r\n<b>File d'attente</b>&nbsp;: {{ ticket.ticket }}<br>\r\n<b>Queue</b>&nbsp;: {{ queue.title }}<br>\r\n<b>Titre</b>&nbsp;: {{ ticket.title }}<br>\r\n<b>Ouvert le</b>&nbsp;: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}<br>\r\n<b>Soumis par</b>&nbsp;: {{ ticket.submitter_email|default:\"Unknown\" }}<br>\r\n<b>Priorit\u00e9</b>&nbsp;: {{ ticket.get_priority_display }}<br>\r\n<b>Statut</b>&nbsp;: {{ ticket.get_status }}<br>\r\n<b>Assign\u00e9 \u00e0</b>&nbsp;: {{ ticket.get_assigned_to }}<br>\r\n<b><a href='{{ ticket.staff_url }}'>Voir le ticket en ligne</a></b> pour le mettre \u00e0 jour (apr\u00e8s authentification)</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Pour m\u00e9moire, la description originelle \u00e9tait&nbsp;:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.description }}</blockquote>\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">La motivation de r\u00e9solution est:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ resolution }}</blockquote>\r\n",
+            "locale": "fr",
+            "plain_text": "Bonjour,\r\n\r\nLe ticket suivant qui vous est actuellement assign\u00e9 a \u00e9t\u00e9 ferm\u00e9.\r\n\r\n\r\nIdentifiant : {{ ticket.ticket }}\r\nFile d'attente : {{ queue.title }}\r\nTitre : {{ ticket.title }}\r\nOuvert le : {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}\r\nSoumis par : {{ ticket.submitter_email|default:\"Unknown\" }}\r\nPriorit\u00e9 : {{ ticket.get_priority_display }}\r\nStatut : {{ ticket.get_status }}\r\nAssign\u00e9 \u00e0 : {{ ticket.get_assigned_to }}\r\nAdresse : {{ ticket.staff_url }} (authentification obligatoire)\r\n\r\nLa description originelle \u00e9tait :\r\n\r\n{{ ticket.description }}\r\n\r\nLa motivation de r\u00e9solution est:\r\n\r\n{{ resolution }}",
+            "subject": "(Ferm\u00e9 - \u00e0 vous)",
+            "template_name": "closed_owner"
+        }
+    },
+    {
+        "pk": 53,
+        "model": "helpdesk.emailtemplate",
+        "fields": {
+            "heading": "Ticket Ferm\u00e9",
+            "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Bonjour,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Vous avez r\u00e9cemment ouvert chez nous un ticket dont le sujet est <i>{{ ticket.title }}</i>. Ce courriel vous confirme que ce ticket a \u00e9t\u00e9 ferm\u00e9.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\"La r\u00e9solution a \u00e9t\u00e9 motiv\u00e9e ainsi&nbsp;:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.resolution }}</blockquote>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Vous pouvez visualiser ce ticket en ligne, en vous rendant \u00e0 l'adresse <a href=\"{{ ticket.ticket_url }}\">{{ ticket.ticket_url }}</a>.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Si vous pensez que nous devons encore travailler sur ce probl\u00e8me, faites le nous savoir en r\u00e9pondant \u00e0 ce courriel en conservant le sujet tel-quel..</p>",
+            "locale": "fr",
+            "plain_text": "Bonjour,\r\n\r\nVous avez r\u00e9cemment ouvert chez nous un ticket dont le sujet est \"{{ ticket.title }}\". Ce courriel vous confirme que ce ticket a \u00e9t\u00e9 ferm\u00e9.\r\n\r\nSi vous pensez que nous devons encore travailler sur ce probl\u00e8me, faites le nous savoir en r\u00e9pondant \u00e0 ce courriel en conservant le sujet tel-quel.\r\n\r\nVous pouvez visualiser ce ticket en ligne, en vous rendant \u00e0 l'adresse {{ ticket.ticket_url }}.\r\n\r\nLa r\u00e9solution a \u00e9t\u00e9 motiv\u00e9e ainsi\u00a0:\r\n\r\n{{ ticket.resolution }}\r\n\r\n",
+            "subject": "(Ferm\u00e9)",
+            "template_name": "closed_submitter"
+        }
+    },
+    {
+        "pk": 54,
+        "model": "helpdesk.emailtemplate",
+        "fields": {
+                "heading": "Priorit\u00e9 du ticket augment\u00e9e",
+                "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Bonjour,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Ce courriel indicatif permet de vous pr\u00e9venir que le ticket <i>{{ ticket.ticket }}</i> ('{{ ticket.title }}') a vu sa priorit\u00e9 augment\u00e9 de mani\u00e8re automatique.</p>\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">\r\n<b>File d'attente</b>&nbsp;: {{ ticket.ticket }}<br>\r\n<b>Queue</b>&nbsp;: {{ queue.title }}<br>\r\n<b>Titre</b>&nbsp;: {{ ticket.title }}<br>\r\n<b>Ouvert le</b>&nbsp;: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}<br>\r\n<b>Soumis par</b>&nbsp;: {{ ticket.submitter_email|default:\"Unknown\" }}<br>\r\n<b>Priorit\u00e9</b>&nbsp;: {{ ticket.get_priority_display }}<br>\r\n<b>Statut</b>&nbsp;: {{ ticket.get_status }}<br>\r\n<b>Assign\u00e9 \u00e0</b>&nbsp;: {{ ticket.get_assigned_to }}<br>\r\n<b><a href='{{ ticket.staff_url }}'>Voir le ticket en ligne</a></b> pour le mettre \u00e0 jour (apr\u00e8s authentification)</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Pour m\u00e9moire, la description originelle \u00e9tait&nbsp;:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.description }}</blockquote>",
+                "locale": "fr",
+                "plain_text": "Bonjour,\r\n\r\nCe courriel indicatif permet de vous pr\u00e9venir que le ticket {{ ticket.ticket }} (\"{{ ticket.title }}\") a vu sa priorit\u00e9 augment\u00e9 de mani\u00e8re automatique.\r\n\r\nIdentifiant : {{ ticket.ticket }}\r\nFile d'attente : {{ queue.title }}\r\nTitre : {{ ticket.title }}\r\nOuvert le : {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}\r\nSoumis par : {{ ticket.submitter_email|default:\"Unknown\" }}\r\nPriorit\u00e9 : {{ ticket.get_priority_display }}\r\nStatut : {{ ticket.get_status }}\r\nAssign\u00e9 \u00e0 : {{ ticket.get_assigned_to }}\r\nAdresse : {{ ticket.staff_url }}\r\n\r\nLa description originelle \u00e9tait :\r\n\r\n{{ ticket.description }}\r\n",
+                "subject": "(Priorit\u00e9 augment\u00e9e)",
+                "template_name": "escalated_cc"
+        }
+    },
+    {
+        "pk": 55,
+        "model": "helpdesk.emailtemplate",
+        "fields": {
+            "heading": "Votre ticket a vu sa priorit\u00e9 augment\u00e9e",
+            "html": "<p style=\"font-family: sans-serif; font-size: 11pt;\">Bonjour,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 11pt;\">Vous avez r\u00e9cemment ouvert chez nous un ticket dont le sujet est <i>{{ ticket.title }}</i> . Ce courriel vous informe que ce ticket  a vu sa priorit\u00e9 augment\u00e9 de mani\u00e8re automatique,  vu son d\u00e9lai de r\u00e9solution plus long que pr\u00e9vu.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 11pt;\">Nous allons reprendre rapidement ce ticket afin d'essayer de le r\u00e9soudre le plus vite possible.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 11pt;\">Vous pouvez visualiser ce ticket en ligne, en vous rendant \u00e0 l'adresse <a href=\"{{ ticket.ticket_url }}\">{{ ticket.ticket_url }}</a>.</p>",
+            "locale": "fr",
+            "plain_text": "Bonjour,\r\n\r\n\r\nVous avez r\u00e9cemment ouvert chez nous un ticket dont le sujet est \"{{ ticket.title }}\". Ce courriel vous informe que ce ticket  a vu sa priorit\u00e9 augment\u00e9 de mani\u00e8re automatique,  vu son d\u00e9lai de r\u00e9solution plus long que pr\u00e9vu.\r\n\r\nNous allons reprendre rapidement ce ticket afin d'essayer de le r\u00e9soudre le plus vite possible.\r\n\r\nVous pouvez visualiser ce ticket en ligne, en vous rendant \u00e0 l'adresse {{ ticket.ticket_url }}.\r\n\r\n",
+            "subject": "(Priorit\u00e9 augment\u00e9e)",
+            "template_name": "escalated_submitter"
+        }
+    },
+    {
+        "pk": 56,
+        "model": "helpdesk.emailtemplate",
+        "fields": {
+            "heading": "Priorit\u00e9 de votre ticket augment\u00e9e",
+            "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Bonjour,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Un ticket qui vous est assign\u00e9 a vu sa priorit\u00e9 augment\u00e9 vu son d\u00e9lai de r\u00e9solution plus long que pr\u00e9vu.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">\r\n<b>File d'attente</b>&nbsp;: {{ ticket.ticket }}<br>\r\n<b>Queue</b>&nbsp;: {{ queue.title }}<br>\r\n<b>Titre</b>&nbsp;: {{ ticket.title }}<br>\r\n<b>Ouvert le</b>&nbsp;: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}<br>\r\n<b>Soumis par</b>&nbsp;: {{ ticket.submitter_email|default:\"Unknown\" }}<br>\r\n<b>Priorit\u00e9</b>&nbsp;: {{ ticket.get_priority_display }}<br>\r\n<b>Statut</b>&nbsp;: {{ ticket.get_status }}<br>\r\n<b>Assign\u00e9 \u00e0</b>&nbsp;: {{ ticket.get_assigned_to }}<br>\r\n<b><a href='{{ ticket.staff_url }}'>Voir le ticket en ligne</a></b> pour le mettre \u00e0 jour (apr\u00e8s authentification)</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Pour m\u00e9moire, la description originelle \u00e9tait&nbsp;:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.description }}</blockquote>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Merci de reprendre ce ticket afin d'essayer de le r\u00e9soudre le plus vite possible..</p>",
+            "locale": "fr",
+            "plain_text": "Bonjour,\r\n\r\nUn ticket qui vous est assign\u00e9 a vu sa priorit\u00e9 augment\u00e9 vu son d\u00e9lai de r\u00e9solution plus long que pr\u00e9vu.\r\n\r\nIdentifiant : {{ ticket.ticket }}\r\nFile d'attente : {{ queue.title }}\r\nTitre : {{ ticket.title }}\r\nOuvert le : {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}\r\nSoumis par : {{ ticket.submitter_email|default:\"Unknown\" }}\r\nPriorit\u00e9 : {{ ticket.get_priority_display }}\r\nStatut : {{ ticket.get_status }}\r\nAssign\u00e9 \u00e0 : {{ ticket.get_assigned_to }}\r\nAdresse : {{ ticket.staff_url }}\r\n\r\nLa description originelle \u00e9tait :\r\n\r\n{{ ticket.description }}\r\n\r\nMerci de reprendre ce ticket afin d'essayer de le r\u00e9soudre le plus vite possible.\r\n",
+            "subject": "(Priorit\u00e9 augment\u00e9e - \u00e0 vous)",
+            "template_name": "escalated_owner"
+        }
+    },
+    {
+        "pk": 57,
+        "model": "helpdesk.emailtemplate",
+        "fields": {
+            "heading": "Nouveau ticket ouvert",
+            "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Bonjour,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Ce courriel indicatif permet de vous pr\u00e9venir qu'un nouveau ticket a \u00e9t\u00e9 ouvert.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">\r\n<b>File d'attente</b>&nbsp;: {{ ticket.ticket }}<br>\r\n<b>Queue</b>&nbsp;: {{ queue.title }}<br>\r\n<b>Titre</b>&nbsp;: {{ ticket.title }}<br>\r\n<b>Ouvert le</b>&nbsp;: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}<br>\r\n<b>Soumis par</b>&nbsp;: {{ ticket.submitter_email|default:\"Unknown\" }}<br>\r\n<b>Priorit\u00e9</b>&nbsp;: {{ ticket.get_priority_display }}<br>\r\n<b>Statut</b>&nbsp;: {{ ticket.get_status }}<br>\r\n<b>Assign\u00e9 \u00e0</b>&nbsp;: {{ ticket.get_assigned_to }}<br>\r\n<b><a href='{{ ticket.staff_url }}'>Voir le ticket en ligne</a></b> pour le mettre \u00e0 jour (apr\u00e8s authentification)</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Description&nbsp;:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.description }}</blockquote>",
+            "locale": "fr",
+            "plain_text": "Bonjour,\r\n\r\nCe courriel indicatif permet de vous pr\u00e9venir qu'un nouveau ticket a \u00e9t\u00e9 ouvert.\r\n\r\nIdentifiant : {{ ticket.ticket }}\r\nFile d'attente : {{ queue.title }}\r\nTitre : {{ ticket.title }}\r\nOuvert le : {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}\r\nSoumis par : {{ ticket.submitter_email|default:\"Unknown\" }}\r\nPriorit\u00e9 : {{ ticket.get_priority_display }}\r\nStatut : {{ ticket.get_status }}\r\nAssign\u00e9 \u00e0 : {{ ticket.get_assigned_to }}\r\nAdresse : {{ ticket.staff_url }}\r\n\r\nDescription\u00a0:\r\n{{ ticket.description }}\r\n\r\n",
+            "subject": "(Ouvert)",
+            "template_name": "newticket_cc"
+        }
+    },
+    {
+        "pk": 58,
+        "model": "helpdesk.emailtemplate",
+        "fields": {
+            "heading": "Votre ticket est d\u00e9sormais ouvert",
+            "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Bonjour,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Ce courriel permet de vous informer que nous avons re\u00e7u votre demande de support dont le sujet est <i>{{ ticket.title }}</i>.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\"Vous n'avez rien de plus \u00e0 faire pour le moment. Votre ticket porte l'identifiant <b>{{ ticket.ticket }}</b> et sera trait\u00e9 rapidement.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Si vous voulez nous donner plus de d\u00e9tails ou si vous avez une question concernant ce ticket, merci d'inclure la r\u00e9f\u00e9rence <b>{{ ticket.ticket }}</b> dans le sujet du message. Le plus simple \u00e9tant d'utiliser la fonction 'r\u00e9pondre' de votre logiciel de messagerie.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Vous pouvez visualiser ce ticket en ligne et y ajouter des informations ou des pi\u00e8ces jointes ainsi que voir les derni\u00e8res mies \u00e0 jour en vous rendant \u00e0 l'adresse <a href=\"{{ ticket.ticket_url }}\">{{ ticket.ticket_url }}</a>.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Nous allons traiter votre demande afin, si possible, de la r\u00e9soudre au plus vite. Vous recevrez des mise \u00e0 jour ou la r\u00e9ponse au ticket \u00e0 cette adresse mail.</p>",
+            "locale": "fr",
+            "plain_text": "Bonjour,\r\n\r\nCe courriel permet de vous informer que nous avons re\u00e7u votre demande de support dont le sujet est \"{{ ticket.title }}\".\r\n\r\nVous n'avez rien de plus \u00e0 faire pour le moment. Votre ticket porte l'identifiant  {{ ticket.ticket }} et sera trait\u00e9 rapidement.\r\n\r\nSi vous voulez nous donner plus de d\u00e9tails ou si vous avez une question concernant ce ticket, merci d'inclure la r\u00e9f\u00e9rence '{{ ticket.ticket }}'  dans le sujet du message. Le plus simple \u00e9tant d'utiliser la fonction 'r\u00e9pondre' de votre logiciel de messagerie.\r\n\r\nVous pouvez visualiser ce ticket en ligne et y ajouter des informations ou des pi\u00e8ces jointes ainsi que voir les derni\u00e8res mies \u00e0 jour en vous rendant \u00e0 l'adresse {{ ticket.ticket_url }}.\r\n\r\nNous allons traiter votre demande afin, si possible, de la r\u00e9soudre au plus vite. Vous recevrez des mise \u00e0 jour ou la r\u00e9ponse au ticket \u00e0 cette adresse mail.",
+            "subject": "(Ouvert)",
+            "template_name": "newticket_submitter"
+        }
+    },
+    {
+        "pk": 59,
+        "model": "helpdesk.emailtemplate",
+        "fields": {
+            "heading": "Ticket r\u00e9solu",
+            "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Bonjour,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Le ticket suivant a \u00e9t\u00e9 r\u00e9solu.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">\r\n<b>File d'attente</b>&nbsp;: {{ ticket.ticket }}<br>\r\n<b>Queue</b>&nbsp;: {{ queue.title }}<br>\r\n<b>Titre</b>&nbsp;: {{ ticket.title }}<br>\r\n<b>Ouvert le</b>&nbsp;: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}<br>\r\n<b>Soumis par</b>&nbsp;: {{ ticket.submitter_email|default:\"Unknown\" }}<br>\r\n<b>Priorit\u00e9</b>&nbsp;: {{ ticket.get_priority_display }}<br>\r\n<b>Statut</b>&nbsp;: {{ ticket.get_status }}<br>\r\n<b>Assign\u00e9 \u00e0</b>&nbsp;: {{ ticket.get_assigned_to }}<br>\r\n<b><a href='{{ ticket.staff_url }}'>Voir le ticket en ligne</a></b> pour le mettre \u00e0 jour (apr\u00e8s authentification)</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Pour m\u00e9moire, la description originelle \u00e9tait&nbsp;:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.description }}</blockquote>\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">La motivation de r\u00e9solution est:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ resolution }}</blockquote>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">\r\nCette information a \u00e9t\u00e9 envoy\u00e9 au cr\u00e9ateur de ce ticket, qui la confirmera avant que vous puissiez fermer ce ticket.</p>",
+            "locale": "fr",
+            "plain_text": "Bonjour,\r\n\r\nLe ticket suivant a \u00e9t\u00e9 r\u00e9solu.\r\n\r\nIdentifiant : {{ ticket.ticket }}\r\nFile d'attente : {{ queue.title }}\r\nTitre : {{ ticket.title }}\r\nOuvert le : {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}\r\nSoumis par : {{ ticket.submitter_email|default:\"Unknown\" }}\r\nPriorit\u00e9 : {{ ticket.get_priority_display }}\r\nStatut : {{ ticket.get_status }}\r\nAssign\u00e9 \u00e0 : {{ ticket.get_assigned_to }}\r\nAdresse : {{ ticket.staff_url }}\r\n\r\nLa description originelle \u00e9tait :\r\n\r\n{{ ticket.description }}\r\n\r\nLa motivation de r\u00e9solution est:\r\n\r\n{{ resolution }}\r\n\r\nCette information a \u00e9t\u00e9 envoy\u00e9 au cr\u00e9ateur de ce ticket, qui la confirmera avant que vous puissiez fermer ce ticket.\r\n\r\n",
+            "subject": "(R\u00e9solu)",
+            "template_name": "resolved_cc"
+        }
+    },
+    {
+        "pk": 60,
+        "model": "helpdesk.emailtemplate",
+        "fields": {
+            "heading": "Ticket r\u00e9solu",
+            "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Bonjour,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Un ticket qui vous est assign\u00e9 a \u00e9t\u00e9 r\u00e9solu.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">\r\n<b>File d'attente</b>&nbsp;: {{ ticket.ticket }}<br>\r\n<b>Queue</b>&nbsp;: {{ queue.title }}<br>\r\n<b>Titre</b>&nbsp;: {{ ticket.title }}<br>\r\n<b>Ouvert le</b>&nbsp;: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}<br>\r\n<b>Soumis par</b>&nbsp;: {{ ticket.submitter_email|default:\"Unknown\" }}<br>\r\n<b>Priorit\u00e9</b>&nbsp;: {{ ticket.get_priority_display }}<br>\r\n<b>Statut</b>&nbsp;: {{ ticket.get_status }}<br>\r\n<b>Assign\u00e9 \u00e0</b>&nbsp;: {{ ticket.get_assigned_to }}<br>\r\n<b><a href='{{ ticket.staff_url }}'>Voir le ticket en ligne</a></b> pour le mettre \u00e0 jour (apr\u00e8s authentification)</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Pour m\u00e9moire, la description originelle \u00e9tait&nbsp;:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.description }}</blockquote>\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">La motivation de r\u00e9solution est:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ resolution }}</blockquote>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">\r\nCette information a \u00e9t\u00e9 envoy\u00e9 au cr\u00e9ateur de ce ticket, qui la confirmera avant que vous puissiez fermer ce ticket.</p>",
+            "locale": "fr",
+            "plain_text": "Bonjour,\r\n\r\nUn ticket qui vous est assign\u00e9 a \u00e9t\u00e9 r\u00e9solu.\r\n\r\n\r\nIdentifiant : {{ ticket.ticket }}\r\nFile d'attente : {{ queue.title }}\r\nTitre : {{ ticket.title }}\r\nOuvert le : {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}\r\nSoumis par : {{ ticket.submitter_email|default:\"Unknown\" }}\r\nPriorit\u00e9 : {{ ticket.get_priority_display }}\r\nStatut : {{ ticket.get_status }}\r\nAssign\u00e9 \u00e0 : {{ ticket.get_assigned_to }}\r\nAdresse : {{ ticket.staff_url }}\r\n\r\nLa description originelle \u00e9tait :\r\n\r\n{{ ticket.description }}\r\n\r\nLa motivation de r\u00e9solution est:\r\n\r\n{{ resolution }}\r\n\r\nCette information a \u00e9t\u00e9 envoy\u00e9 au cr\u00e9ateur de ce ticket, qui la confirmera avant que vous puissiez fermer ce ticket.\r\n\r\n",
+            "subject": "(R\u00e9solu - \u00e0 vous)",
+            "template_name": "resolved_owner"
+        }
+    },
+    {
+        "pk": 61,
+        "model": "helpdesk.emailtemplate",
+        "fields": {
+            "heading": "Votre ticket a \u00e9t\u00e9 r\u00e9solu",
+            "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Bonjour,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Vous avez r\u00e9cemment ouvert chez nous un ticket dont le sujet est <i>{{ ticket.title }}</i>. Ce message vous informe d'une r\u00e9solution de la demande.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">La solution suivante a \u00e9t\u00e9 donn\u00e9e au ticket <b>{{ ticket.ticket }}</b>:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ resolution }}</blockquote>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Merci de confirmer que cette solution vous convient afin que nous puissions clore le ticket. Si vous avez d'autre demandes, o\u00f9 si vous pensez que cette solution n'est pas adapt\u00e9e, merci de r\u00e9pondre \u00e0 ce mail en conservant le sujet tel-quel.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Vous pouvez visualiser ce ticket en ligne, en vous rendant \u00e0 l'adresse <a href=\"{{ ticket.ticket_url }}\">{{ ticket.ticket_url }}</a>.</p>",
+            "locale": "fr",
+            "plain_text": "Bonjour,\r\n\r\nVous avez r\u00e9cemment ouvert chez nous un ticket dont le sujet est \"{{ ticket.title }}\" . Ce message vous informe d'une r\u00e9solution de la demande.\r\n\r\nLa solution suivante a \u00e9t\u00e9 donn\u00e9e au ticket {{ ticket.ticket }}:\r\n\r\n{{ resolution }}\r\n\r\nMerci de confirmer que cette solution vous convient afin que nous puissions clore le ticket. Si vous avez d'autre demandes, o\u00f9 si vous pensez que cette solution n'est pas adapt\u00e9e, merci de r\u00e9pondre \u00e0 ce mail en conservant le sujet tel-quel.\r\n\r\nVous pouvez visualiser ce ticket en ligne, en vous rendant \u00e0 l'adresse {{ ticket.ticket_url }}.\r\n\r\n",
+            "subject": "(R\u00e9solu)",
+            "template_name": "resolved_submitter"
+        }
+    },
+    {
+        "pk": 62,
+        "model": "helpdesk.emailtemplate",
+        "fields": {
+            "heading": "Ticket mis \u00e0 jour",
+            "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Bonjour,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Ce courriel indicatif permet de vous pr\u00e9venir que le ticket  {{ ticket.ticket }} (\"{{ ticket.title }}\") par {{ ticket.submitter_email }}  a \u00e9t\u00e9 mis \u00e0 jour.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">\r\n<b>File d'attente</b>&nbsp;: {{ ticket.ticket }}<br>\r\n<b>Queue</b>&nbsp;: {{ queue.title }}<br>\r\n<b>Titre</b>&nbsp;: {{ ticket.title }}<br>\r\n<b>Ouvert le</b>&nbsp;: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}<br>\r\n<b>Soumis par</b>&nbsp;: {{ ticket.submitter_email|default:\"Unknown\" }}<br>\r\n<b>Priorit\u00e9</b>&nbsp;: {{ ticket.get_priority_display }}<br>\r\n<b>Statut</b>&nbsp;: {{ ticket.get_status }}<br>\r\n<b>Assign\u00e9 \u00e0</b>&nbsp;: {{ ticket.get_assigned_to }}<br>\r\n<b><a href='{{ ticket.staff_url }}'>Voir le ticket en ligne</a></b> pour le mettre \u00e0 jour (apr\u00e8s authentification)</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Pour m\u00e9moire, la description originelle \u00e9tait&nbsp;:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.description }}</blockquote>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Le commentaire suivant a \u00e9t\u00e9 ajout\u00e9 :</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ comment }}</blockquote>\r\n\r\n<p style=\"font-family: Tahoma, Arial, sans-serif; font-size: 11pt;\">Cette information {% if private %} n' a pas {% else %} a {% endif %} \u00e9t\u00e9 envoy\u00e9 par mail \u00e0 l'\u00e9metteur.</p>",
+            "locale": "fr",
+            "plain_text": "Bonjour,\r\n\r\nCe courriel indicatif permet de vous pr\u00e9venir que le ticket  {{ ticket.ticket }} (\"{{ ticket.title }}\") par {{ ticket.submitter_email }} a \u00e9t\u00e9 mis \u00e0 jour.\r\n\r\nIdentifiant : {{ ticket.ticket }}\r\nFile d'attente : {{ queue.title }}\r\nTitre : {{ ticket.title }}\r\nOuvert le : {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}\r\nSoumis par : {{ ticket.submitter_email|default:\"Unknown\" }}\r\nPriorit\u00e9 : {{ ticket.get_priority_display }}\r\nStatut : {{ ticket.get_status }}\r\nAssign\u00e9 \u00e0 : {{ ticket.get_assigned_to }}\r\nAdresse : {{ ticket.staff_url }}\r\n\r\nDescription originelle :\r\n\r\n{{ ticket.description }}\r\n\r\nLe commentaire suivant a \u00e9t\u00e9 ajout\u00e9\u00a0:\r\n\r\n{{ comment }}\r\n\r\nCette information {% if private %} n' a pas {% else %} a {% endif %} \u00e9t\u00e9 envoy\u00e9 par mail \u00e0 l'\u00e9metteur.\r\n\r\n",
+            "subject": "(Mis \u00e0 jour)",
+            "template_name": "updated_cc"
+        }
+    },
+    {
+        "pk": 63,
+        "model": "helpdesk.emailtemplate",
+        "fields": {
+            "heading": "Ticket mis \u00e0 jour",
+            "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Bonjour,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Ce courriel indicatif permet de vous pr\u00e9venir que le ticket  {{ ticket.ticket }} (\"{{ ticket.title }}\") par {{ ticket.submitter_email }}, qui vous est assign\u00e9, a \u00e9t\u00e9 mis \u00e0 jour.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">\r\n<b>File d'attente</b>&nbsp;: {{ ticket.ticket }}<br>\r\n<b>Queue</b>&nbsp;: {{ queue.title }}<br>\r\n<b>Titre</b>&nbsp;: {{ ticket.title }}<br>\r\n<b>Ouvert le</b>&nbsp;: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}<br>\r\n<b>Soumis par</b>&nbsp;: {{ ticket.submitter_email|default:\"Unknown\" }}<br>\r\n<b>Priorit\u00e9</b>&nbsp;: {{ ticket.get_priority_display }}<br>\r\n<b>Statut</b>&nbsp;: {{ ticket.get_status }}<br>\r\n<b>Assign\u00e9 \u00e0</b>&nbsp;: {{ ticket.get_assigned_to }}<br>\r\n<b><a href='{{ ticket.staff_url }}'>Voir le ticket en ligne</a></b> pour le mettre \u00e0 jour (apr\u00e8s authentification)</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Pour m\u00e9moire, la description originelle \u00e9tait&nbsp;:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.description }}</blockquote>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Le commentaire suivant a \u00e9t\u00e9 ajout\u00e9 :</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ comment }}</blockquote>\r\n\r\n<p style=\"font-family: Tahoma, Arial, sans-serif; font-size: 11pt;\">Cette information {% if private %} n' a pas {% else %} a {% endif %} \u00e9t\u00e9 envoy\u00e9 par mail \u00e0 l'\u00e9metteur.</p>",
+            "locale": "fr",
+            "plain_text": "Hello,\r\n\r\nCe courriel indicatif permet de vous pr\u00e9venir que le ticket  {{ ticket.ticket }} (\"{{ ticket.title }}\") par {{ ticket.submitter_email }}, qui vous est assign\u00e9, a \u00e9t\u00e9 mis \u00e0 jour.\r\n\r\nIdentifiant : {{ ticket.ticket }}\r\nFile d'attente : {{ queue.title }}\r\nTitre : {{ ticket.title }}\r\nOuvert le : {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}\r\nSoumis par : {{ ticket.submitter_email|default:\"Unknown\" }}\r\nPriorit\u00e9 : {{ ticket.get_priority_display }}\r\nStatut : {{ ticket.get_status }}\r\nAssign\u00e9 \u00e0 : {{ ticket.get_assigned_to }}\r\nAdresse : {{ ticket.staff_url }}\r\n\r\nDescription originelle :\r\n\r\n{{ ticket.description }}\r\n\r\nLe commentaire suivant a \u00e9t\u00e9 ajout\u00e9 :\r\n\r\n{{ comment }}\r\n\r\nCette information {% if private %} n' a pas {% else %} a {% endif %} \u00e9t\u00e9 envoy\u00e9 par mail \u00e0 l'\u00e9metteur.\r\n\r\n",
+            "subject": "(Mis \u00e0 jour - \u00e0 vous)",
+            "template_name": "updated_owner"
+        }
+    },
+    {
+        "model": "helpdesk.emailtemplate",
+        "pk": 64,
+        "fields": {
+            "heading": "Votre ticket a \u00e9t\u00e9 mis \u00e0 jour",
+            "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Bonjour,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Vous avez r\u00e9cemment ouvert chez nous un ticket dont le sujet est <i>{{ ticket.title }}</i> . Ce message vous informe d'une mise \u00e0 jour du ticket.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Le commentaire suivant a \u00e9t\u00e9 ajout\u00e9 au ticket <b>{{ ticket.ticket }}</b>:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ comment }}</blockquote>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\"Si vous voulez nous fournir d'autres informations, merci de r\u00e9pondre \u00e0 ce mail en conservant le sujet tel-quel. Vous pouvez \u00e9galement voir et mettre \u00e0 jour ce ticket en ligne \u00e0 l'adresse <a href=\"{{ ticket.ticket_url }}\">{{ ticket.ticket_url }}</a>.</p>",
+            "locale": "fr",
+            "plain_text": "Bonjour,\r\n\r\nVous avez r\u00e9cemment ouvert chez nous un ticket dont le sujet est \"{{ ticket.title }}\". Ce message vous informe d'une mise \u00e0 jour du ticket.\r\n\r\nLe commentaire suivant a \u00e9t\u00e9 ajout\u00e9 au ticket {{ ticket.ticket }}\u00a0:\r\n\r\n{{ comment }}\r\n\r\nSi vous voulez nous fournir d'autres informations, merci de r\u00e9pondre \u00e0 ce mail en conservant le sujet tel-quel. Vous pouvez \u00e9galement voir et mettre \u00e0 jour ce ticket en ligne \u00e0 l'adresse {{ ticket.ticket_url }}",
+            "subject": "(Mis \u00e0 jour)",
+            "template_name": "updated_submitter"
+        }
     }
 ]
