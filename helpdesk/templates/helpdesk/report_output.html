@@ -15,6 +15,20 @@
 {% block helpdesk_body %}
 <h2>{% trans "Reports &amp; Statistics" %}</h2>
 
+{% if user_saved_queries_ %}
+    <p>{% trans "You can run this query on filtered data by using one of your saved queries." %}</p>
+    <form method='GET' action='./'>
+        <label for='saved_query'>{% trans "Select Query:" %}</label>
+        <select name='saved_query'>
+            <option value="">--------</option>{% for q in user_saved_queries_ %}
+            <option value="{{ q.id }}"{% ifequal saved_query q %} selected{% endifequal %}>{{ q.title }}</option>{% endfor %}
+        </select>
+        <input type='submit' value='{% trans "Filter Report" %}'>
+    </form>
+{% else %}
+    <p>{% trans "Want to filter this report to just show a subset of data? Go to the Ticket List, filter your query, and save your query." %}</p>
+{% endif %}
+
 <table>
 <tr class='row_tablehead'><td colspan='{{ headings|length }}'>{{ title }}</td></tr>
 <tr class='row_columnheads'>{% for h in headings %}<th>{% if forloop.first %}{{ h|title }}{% else %}{{ h }}{% endif %}</th>{% endfor %}</tr>

@@ -15,7 +15,7 @@
 {% block helpdesk_body %}{% endblock %}
     </div>
     <div id='footer'>
-        <p>{% trans "Powered by <a href='http://github.com/rossp/django-helpdesk'>django-helpdesk</a>." %}</p>
+        <p>{% include "helpdesk/attribution.html" %}</p>
     </div>
 </div>{% include "helpdesk/debug.html" %}
 </body>

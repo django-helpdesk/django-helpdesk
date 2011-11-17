@@ -3,33 +3,29 @@
 {% block helpdesk_title %}{% trans "Reports &amp; Statistics" %}{% endblock %}
 
 {% block helpdesk_body %}
-{% ifequal number_tickets 0 %}{% blocktrans %}
-<h2>Reports &amp; Statistics</h2>
+<h2>{% trans "Reports &amp; Statistics" %}</h2>
 
-<p>You haven't created any tickets yet, so you cannot run any reports.</p>
-{% endblocktrans %}
+{% ifequal number_tickets 0 %}
+<p>{% trans "You haven't created any tickets yet, so you cannot run any reports." %}</p>
 {% else %}
-{% blocktrans %}
-<h2>Reports &amp; Statistics</h2>
-
 
 <ul>
-<li>User<ul>
+    <li>{% trans "Reports By User" %}<ul>
 
-    <li><a href='userpriority/'>by Priority</a></li>
-    <li><a href='userqueue/'>by Queue</a></li>
-    <li><a href='userstatus/'>by Status</a></li>
-    <li><a href='usermonth/'>by Month</a></li>
+        <li><a href='userpriority/{% if saved_query %}?saved_query={{ saved_query }}{% endif %}'>{% trans "by Priority" %}</a></li>
+        <li><a href='userqueue/{% if saved_query %}?saved_query={{ saved_query }}{% endif %}'>{% trans "by Queue" %}</a></li>
+        <li><a href='userstatus/{% if saved_query %}?saved_query={{ saved_query }}{% endif %}'>{% trans "by Status" %}</a></li>
+        <li><a href='usermonth/{% if saved_query %}?saved_query={{ saved_query }}{% endif %}'>{% trans "by Month" %}</a></li>
 
 </ul></li>
 
-<li>Queue<ul>
+<li>{% trans "Reports By Queue" %}<ul>
     
-    <li><a href='queuepriority/'>by Priority</a></li>
-    <li><a href='queuestatus/'>by Status</a></li>
-    <li><a href='queuemonth/'>by Month</a></li>
+    <li><a href='queuepriority/{% if saved_query %}?saved_query={{ saved_query }}{% endif %}'>{% trans "by Priority" %}</a></li>
+    <li><a href='queuestatus/{% if saved_query %}?saved_query={{ saved_query }}{% endif %}'>{% trans "by Status" %}</a></li>
+    <li><a href='queuemonth/{% if saved_query %}?saved_query={{ saved_query }}{% endif %}'>{% trans "by Month" %}</a></li>
 
 </ul></li>
 </ul>
 
-{% endblocktrans %}{% endifequal %}{% endblock %}
+{% endifequal %}{% endblock %}

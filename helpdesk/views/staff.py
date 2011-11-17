@@ -8,6 +8,7 @@ views/staff.py - The bulk of the application - provides most business logic and
 """
 
 from datetime import datetime
+import sys
 
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -23,9 +24,9 @@ from django.template import loader, Context, RequestContext
 from django.utils.translation import ugettext as _
 from django.utils.html import escape
 
-from helpdesk.forms import TicketForm, UserSettingsForm, EmailIgnoreForm, EditTicketForm, TicketCCForm, EditFollowUpForm
-from helpdesk.lib import send_templated_mail, line_chart, bar_chart, query_to_dict, apply_query, safe_template_context
-from helpdesk.models import Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch, IgnoreEmail, TicketCC
+from helpdesk.forms import TicketForm, UserSettingsForm, EmailIgnoreForm, EditTicketForm, TicketCCForm, EditFollowUpForm, TicketDependencyForm
+from helpdesk.lib import send_templated_mail, query_to_dict, apply_query, safe_template_context
+from helpdesk.models import Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch, IgnoreEmail, TicketCC, TicketDependency
 from helpdesk.settings import HAS_TAG_SUPPORT
   
 if HAS_TAG_SUPPORT:
@@ -136,8 +137,16 @@ def view_ticket(request, ticket_id):
 
     if request.GET.has_key('take'):
         # Allow the user to assign the ticket to themselves whilst viewing it.
-        ticket.assigned_to = request.user
-        ticket.save()
+        
+        # Trick the update_ticket() view into thinking it's being called with
+        # a valid POST.
+        request.POST = {
+            'owner': request.user.id,
+            'public': 1,
+            'title': ticket.title,
+            'comment': ''
+        }
+        return update_ticket(request, ticket_id)
 
     if request.GET.has_key('close') and ticket.status == Ticket.RESOLVED_STATUS:
         if not ticket.assigned_to:
@@ -558,6 +567,14 @@ def ticket_list(request):
             statuses = [int(s) for s in statuses]
             query_params['filtering']['status__in'] = statuses
 
+        date_from = request.GET.get('date_from')
+        if date_from:
+            query_params['filtering']['created__gte'] = date_from
+        
+        date_to = request.GET.get('date_to')
+        if date_to:
+            query_params['filtering']['created__lte'] = date_to
+
         ### KEYWORD SEARCHING
         q = request.GET.get('q', None)
 
@@ -582,6 +599,7 @@ def ticket_list(request):
         query_params['sortreverse'] = sortreverse
 
     ticket_qs = apply_query(Ticket.objects.select_related(), query_params)
+    print >> sys.stderr,  str(ticket_qs.query)
 
     ## TAG MATCHING
     if HAS_TAG_SUPPORT:
@@ -745,54 +763,56 @@ rss_list = staff_member_required(rss_list)
 
 def report_index(request):
     number_tickets = Ticket.objects.all().count()
+    saved_query = request.GET.get('saved_query', None)
     return render_to_response('helpdesk/report_index.html',
         RequestContext(request, {
             'number_tickets': number_tickets,
+            'saved_query': saved_query,
         }))
 report_index = staff_member_required(report_index)
 
 
 def run_report(request, report):
-    if Ticket.objects.all().count() == 0:
+    if Ticket.objects.all().count() == 0 or report not in ('queuemonth', 'usermonth', 'queuestatus', 'queuepriority', 'userstatus', 'userpriority', 'userqueue'):
         return HttpResponseRedirect(reverse("helpdesk_report_index"))
-    priority_sql = []
-    priority_columns = []
-    for p in Ticket.PRIORITY_CHOICES:
-        priority_sql.append("COUNT(CASE t.priority WHEN '%s' THEN t.id END) AS \"%s\"" % (p[0], p[1]._proxy____unicode_cast()))
-        priority_columns.append("%s" % p[1]._proxy____unicode_cast())
-    priority_sql = ", ".join(priority_sql)
 
-    status_sql = []
-    status_columns = []
-    for s in Ticket.STATUS_CHOICES:
-        status_sql.append("COUNT(CASE t.status WHEN '%s' THEN t.id END) AS \"%s\"" % (s[0], s[1]._proxy____unicode_cast()))
-        status_columns.append("%s" % s[1]._proxy____unicode_cast())
-    status_sql = ", ".join(status_sql)
+    report_queryset = Ticket.objects.all().select_related()
+   
+    from_saved_query = False
+    saved_query = None
 
-    queue_sql = []
-    queue_columns = []
-    for q in Queue.objects.all():
-        queue_sql.append("COUNT(CASE t.queue_id WHEN '%s' THEN t.id END) AS \"%s\"" % (q.id, q.title))
-        queue_columns.append(q.title)
-    queue_sql = ", ".join(queue_sql)
+    if request.GET.get('saved_query', None):
+        from_saved_query = True
+        try:
+            saved_query = SavedSearch.objects.get(pk=request.GET.get('saved_query'))
+        except SavedSearch.DoesNotExist:
+            return HttpResponseRedirect(reverse('helpdesk_report_index'))
+        if not (saved_query.shared or saved_query.user == request.user):
+            return HttpResponseRedirect(reverse('helpdesk_report_index'))
 
-    month_sql = []
+        import cPickle
+        from helpdesk.lib import b64decode
+        query_params = cPickle.loads(b64decode(str(saved_query.query)))
+        report_queryset = apply_query(report_queryset, query_params)
+
+    from collections import defaultdict
+    summarytable = defaultdict(int)
+
     months = (
-        'Jan',
-        'Feb',
-        'Mar',
-        'Apr',
-        'May',
-        'Jun',
-        'Jul',
-        'Aug',
-        'Sep',
-        'Oct',
-        'Nov',
-        'Dec',
+        _('Jan'),
+        _('Feb'),
+        _('Mar'),
+        _('Apr'),
+        _('May'),
+        _('Jun'),
+        _('Jul'),
+        _('Aug'),
+        _('Sep'),
+        _('Oct'),
+        _('Nov'),
+        _('Dec'),
     )
-    month_columns = []
-    # Throw an error if there are no tickets
+    
     first_ticket = Ticket.objects.all().order_by('created')[0]
     first_month = first_ticket.created.month
     first_year = first_ticket.created.year
@@ -804,115 +824,114 @@ def run_report(request, report):
     periods = []
     year, month = first_year, first_month
     working = True
+    periods.append("%s %s" % (months[month], year))
 
     while working:
-        temp = (year, month)
         month += 1
         if month > 12:
             year += 1
             month = 1
         if (year > last_year) or (month > last_month and year >= last_year):
             working = False
-        periods.append((temp, (year, month)))
-
-    for (low_bound, upper_bound) in periods:
-        low_sqlmonth = '%s-%02i-01' % (low_bound[0], low_bound[1])
-        upper_sqlmonth = '%s-%02i-01' % (upper_bound[0], upper_bound[1])
-        desc = '%s %s' % (months[low_bound[1]-1], low_bound[0])
-        month_sql.append("""
-          COUNT(
-             CASE 1 = 1
-             WHEN (date(t.created) >= date('%s')
-                  AND date(t.created) < date('%s')) THEN t.id END) AS "%s"
-             """ % (low_sqlmonth, upper_sqlmonth, desc))
-        month_columns.append(desc)
-
-    month_sql = ", ".join(month_sql)
-
-    queue_base_sql = """
-            SELECT      q.title as queue, %s
-                FROM    helpdesk_ticket t,
-                        helpdesk_queue q
-                WHERE   q.id =  t.queue_id
-                GROUP BY queue
-                ORDER BY queue;
-                """
-
-    user_base_sql = """
-            SELECT      u.username as username, %s
-                FROM    helpdesk_ticket t,
-                        auth_user u
-                WHERE   u.id =  t.assigned_to_id
-                GROUP BY u.username
-                ORDER BY u.username;
-                """
+        periods.append("%s %s" % (months[month], year))
 
     if report == 'userpriority':
-        sql = user_base_sql % priority_sql
-        columns = ['username'] + priority_columns
-        title = 'User by Priority'
+        title = _('User by Priority')
+        col1heading = _('User')
+        possible_options = [t[1].__unicode__() for t in Ticket.PRIORITY_CHOICES]
+        charttype = 'bar'
 
     elif report == 'userqueue':
-        sql = user_base_sql % queue_sql
-        columns = ['username'] + queue_columns
-        title = 'User by Queue'
+        title = _('User by Queue')
+        col1heading = _('User')
+        possible_options = [q.title.encode('utf-8') for q in Queue.objects.all()]
+        charttype = 'bar'
 
     elif report == 'userstatus':
-        sql = user_base_sql % status_sql
-        columns = ['username'] + status_columns
-        title = 'User by Status'
+        title = _('User by Status')
+        col1heading = _('User')
+        possible_options = [s[1].__unicode__() for s in Ticket.STATUS_CHOICES]
+        charttype = 'bar'
 
     elif report == 'usermonth':
-        sql = user_base_sql % month_sql
-        columns = ['username'] + month_columns
-        title = 'User by Month'
+        title = _('User by Month')
+        col1heading = _('User')
+        possible_options = periods
+        charttype = 'date'
 
     elif report == 'queuepriority':
-        sql = queue_base_sql % priority_sql
-        columns = ['queue'] + priority_columns
-        title = 'Queue by Priority'
+        title = _('Queue by Priority')
+        col1heading = _('Queue')
+        possible_options = [t[1].__unicode__() for t in Ticket.PRIORITY_CHOICES]
+        charttype = 'bar'
 
     elif report == 'queuestatus':
-        sql = queue_base_sql % status_sql
-        columns = ['queue'] + status_columns
-        title = 'Queue by Status'
+        title = _('Queue by Status')
+        col1heading = _('Queue')
+        possible_options = [s[1].__unicode__() for s in Ticket.STATUS_CHOICES]
+        charttype = 'bar'
 
     elif report == 'queuemonth':
-        sql = queue_base_sql % month_sql
-        columns = ['queue'] + month_columns
-        title = 'Queue by Month'
-
-
-    cursor = connection.cursor()
-    cursor.execute(sql)
-    report_output = query_to_dict(cursor.fetchall(), cursor.description)
-
-    data = []
-
-    for record in report_output:
-        line = []
-        for c in columns:
-            c = c.encode('utf-8')
-            line.append(record[c])
-        data.append(line)
-
-    if report in ('queuemonth', 'usermonth'):
-        chart_url = line_chart([columns] + data)
+        title = _('Queue by Month')
+        col1heading = _('Queue')
+        possible_options = periods
         charttype = 'date'
-    elif report in ('queuestatus', 'queuepriority', 'userstatus', 'userpriority'):
-        chart_url = bar_chart([columns] + data)
-        charttype = 'bar'
-    else:
-        chart_url = ''
-        charttype = ''
+
+
+
+    for ticket in report_queryset:
+        if report == 'userpriority':
+            metric1 = u'%s' % ticket.get_assigned_to
+            metric2 = u'%s' % ticket.get_priority_display()
+
+        elif report == 'userqueue':
+            metric1 = u'%s' % ticket.get_assigned_to
+            metric2 = u'%s' % ticket.queue.title
+
+        elif report == 'userstatus':
+            metric1 = u'%s' % ticket.get_assigned_to
+            metric2 = u'%s' % ticket.get_status_display()
+
+        elif report == 'usermonth':
+            metric1 = u'%s' % ticket.get_assigned_to
+            metric2 = u'%s %s' % (months[ticket.created.month], ticket.created.year)
+
+        elif report == 'queuepriority':
+            metric1 = u'%s' % ticket.queue.title
+            metric2 = u'%s' % ticket.get_priority_display()
+
+        elif report == 'queuestatus':
+            metric1 = u'%s' % ticket.queue.title
+            metric2 = u'%s' % ticket.get_status_display()
+
+        elif report == 'queuemonth':
+            metric1 = u'%s' % ticket.queue.title
+            metric2 = u'%s %s' % (months[ticket.created.month], ticket.created.year)
+
+        summarytable[metric1, metric2] += 1
+    
+    table = []
+    
+    header1 = sorted(set(list( i.encode('utf-8') for i,_ in summarytable.keys() )))
+
+    column_headings = [col1heading] + possible_options
+
+    # Pivot the data so that 'header1' fields are always first column
+    # in the row, and 'possible_options' are always the 2nd - nth columns.
+    for item in header1:
+        data = []
+        for hdr in possible_options:
+            data.append(summarytable[item, hdr])
+        table.append([item] + data)
 
     return render_to_response('helpdesk/report_output.html',
         RequestContext(request, {
-            'headings': columns,
-            'data': data,
-            'chart': chart_url,
             'title': title,
             'charttype': charttype,
+            'data': table,
+            'headings': column_headings,
+            'from_saved_query': from_saved_query,
+            'saved_query': saved_query,
         }))
 run_report = staff_member_required(run_report)
 
@@ -1037,3 +1056,34 @@ def ticket_cc_del(request, ticket_id, cc_id):
             'cc': cc,
         }))
 ticket_cc_del = staff_member_required(ticket_cc_del)
+
+def ticket_dependency_add(request, ticket_id):
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+    if request.method == 'POST':
+        form = TicketDependencyForm(request.POST)
+        if form.is_valid():
+            ticketdependency = form.save(commit=False)
+            ticketdependency.ticket = ticket
+            if ticketdependency.ticket <> ticketdependency.depends_on:
+                ticketdependency.save()
+            return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket.id]))
+    else:
+        form = TicketDependencyForm()
+    return render_to_response('helpdesk/ticket_dependency_add.html',
+        RequestContext(request, {
+            'ticket': ticket,
+            'form': form,
+        }))
+ticket_dependency_add = staff_member_required(ticket_dependency_add)
+
+def ticket_dependency_del(request, ticket_id, dependency_id):
+    dependency = get_object_or_404(TicketDependency, ticket__id=ticket_id, id=dependency_id)
+    if request.method == 'POST':
+        dependency.delete()
+        return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket_id]))
+    return render_to_response('helpdesk/ticket_dependency_del.html',
+        RequestContext(request, {
+            'dependency': dependency,
+        }))
+ticket_dependency_del = staff_member_required(ticket_dependency_del)
+

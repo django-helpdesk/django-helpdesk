@@ -413,6 +413,16 @@ class Ticket(models.Model):
             )
     staff_url = property(_get_staff_url)
 
+    def _can_be_resolved(self):
+        """
+        Returns a boolean.
+        True = any dependencies are resolved
+        False = There are non-resolved dependencies
+        """
+        OPEN_STATUSES = (Ticket.OPEN_STATUS, Ticket.REOPENED_STATUS)
+        return TicketDependency.objects.filter(ticket=self).filter(depends_on__status__in=OPEN_STATUSES).count() == 0
+    can_be_resolved = property(_can_be_resolved)
+
     if HAS_TAG_SUPPORT:
         tags = TagField(blank=True)
 
@@ -1101,6 +1111,10 @@ class TicketCC(models.Model):
     def __unicode__(self):
         return u'%s for %s' % (self.display, self.ticket.title)
 
+class CustomFieldManager(models.Manager):
+    def get_query_set(self):
+        return super(CustomFieldManager, self).get_query_set().order_by('ordering')
+
 
 class CustomField(models.Model):
     """
@@ -1168,6 +1182,13 @@ class CustomField(models.Model):
         blank=True,
         null=True,
         )
+    
+    ordering = models.IntegerField(
+        _('Ordering'),
+        help_text=_('Lower numbers are displayed first; higher numbers are listed later'),
+        blank=True,
+        null=True,
+        )
 
     def _choices_as_array(self):
         from StringIO import StringIO
@@ -1186,6 +1207,8 @@ class CustomField(models.Model):
         _('Staff Only?'),
         help_text=_('If this is ticked, then the public submission form will NOT show this field'),
         )
+
+    objects = CustomFieldManager()
 
     def __unicode__(self):
         return '%s' % (self.name)
@@ -1209,3 +1232,28 @@ class TicketCustomFieldValue(models.Model):
 
     class Meta:
         unique_together = ('ticket', 'field'),
+
+
+class TicketDependency(models.Model):
+    """
+    The ticket identified by `ticket` cannot be resolved until the ticket in `depends_on` has been resolved.
+    To help enforce this, a helper function `can_be_resolved` on each Ticket instance checks that 
+    these have all been resolved.
+    """
+    ticket = models.ForeignKey(
+        Ticket,
+        verbose_name=_('Ticket'),
+        related_name='ticketdependency',
+        )
+
+    depends_on = models.ForeignKey(
+        Ticket,
+        verbose_name=_('Depends On Ticket'),
+        related_name='depends_on',
+        )
+
+    def __unicode__(self):
+        return '%s / %s' % (self.ticket, self.depends_on)
+
+    class Meta:
+        unique_together = ('ticket', 'depends_on')

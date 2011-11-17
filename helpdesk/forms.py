@@ -11,18 +11,89 @@ from datetime import datetime
 from StringIO import StringIO
 
 from django import forms
+from django.forms import extras
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext as _
 
 from helpdesk.lib import send_templated_mail
-from helpdesk.models import Ticket, Queue, FollowUp, Attachment, IgnoreEmail, TicketCC, CustomField, TicketCustomFieldValue
+from helpdesk.models import Ticket, Queue, FollowUp, Attachment, IgnoreEmail, TicketCC, CustomField, TicketCustomFieldValue, TicketDependency
 from helpdesk.settings import HAS_TAG_SUPPORT
 
 class EditTicketForm(forms.ModelForm):
     class Meta:
         model = Ticket
         exclude = ('created', 'modified', 'status', 'on_hold', 'resolution', 'last_escalation', 'assigned_to')
+    
+    def __init__(self, *args, **kwargs):
+        """
+        Add any custom fields that are defined to the form
+        """
+        super(EditTicketForm, self).__init__(*args, **kwargs)
+
+        for field in CustomField.objects.all():
+            try:
+                current_value = TicketCustomFieldValue.objects.get(ticket=self.instance, field=field)
+                initial_value = current_value.value
+            except TicketCustomFieldValue.DoesNotExist:
+                initial_value = None
+            instanceargs = {
+                    'label': field.label,
+                    'help_text': field.help_text,
+                    'required': field.required,
+                    'initial': initial_value,
+                    }
+            if field.data_type == 'varchar':
+                fieldclass = forms.CharField
+                instanceargs['max_length'] = field.max_length
+            elif field.data_type == 'text':
+                fieldclass = forms.CharField
+                instanceargs['widget'] = forms.Textarea
+                instanceargs['max_length'] = field.max_length
+            elif field.data_type == 'integer':
+                fieldclass = forms.IntegerField
+            elif field.data_type == 'decimal':
+                fieldclass = forms.DecimalField
+                instanceargs['decimal_places'] = field.decimal_places
+                instanceargs['max_digits'] = field.max_length
+            elif field.data_type == 'list':
+                fieldclass = forms.ChoiceField
+                instanceargs['choices'] = field.choices_as_array
+            elif field.data_type == 'boolean':
+                fieldclass = forms.BooleanField
+            elif field.data_type == 'date':
+                fieldclass = forms.DateField
+            elif field.data_type == 'time':
+                fieldclass = forms.TimeField
+            elif field.data_type == 'datetime':
+                fieldclass = forms.DateTimeField
+            elif field.data_type == 'email':
+                fieldclass = forms.EmailField
+            elif field.data_type == 'url':
+                fieldclass = forms.URLField
+            elif field.data_type == 'ipaddress':
+                fieldclass = forms.IPAddressField
+            elif field.data_type == 'slug':
+                fieldclass = forms.SlugField
+            
+            self.fields['custom_%s' % field.name] = fieldclass(**instanceargs)
+
+
+    def save(self, *args, **kwargs):
+        
+        for field, value in self.cleaned_data.items():
+            if field.startswith('custom_'):
+                field_name = field.replace('custom_', '')
+                customfield = CustomField.objects.get(name=field_name)
+                try:
+                    cfv = TicketCustomFieldValue.objects.get(ticket=self.instance, field=customfield)
+                except:
+                    cfv = TicketCustomFieldValue(ticket=self.instance, field=customfield)
+                cfv.value = value
+                cfv.save()
+        
+        return super(EditTicketForm, self).save(*args, **kwargs)
+
 
 class EditFollowUpForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -125,6 +196,7 @@ class TicketForm(forms.Form):
                 fieldclass = forms.BooleanField
             elif field.data_type == 'date':
                 fieldclass = forms.DateField
+                instanceargs['widget'] = extras.SelectDateWidget
             elif field.data_type == 'time':
                 fieldclass = forms.TimeField
             elif field.data_type == 'datetime':
@@ -504,3 +576,7 @@ class TicketCCForm(forms.ModelForm):
         model = TicketCC
         exclude = ('ticket',)
 
+class TicketDependencyForm(forms.ModelForm):
+    class Meta:
+        model = TicketDependency
+        exclude = ('ticket',)

@@ -1,6 +1,6 @@
-Beste GrüÃe,
+Beste Grüße,
 
 {{ queue.title }}{% if queue.email_address %}
 {{ queue.email_address }}{% endif %}
     
-Diese E-Mail wurde, im Einklang mit unserer Privacy-Policy an Dich als Benutzer unseres Support-Dienstes gesendet. Bitte teil uns mit falls du denkst, daÃ du diese E-Mail nicht bekommen hättest sollen.
+Diese E-Mail wurde, im Einklang mit unserer Privacy-Policy an Sie als Benutzer unseres Support-Dienstes gesendet. Bitte teilen Sie uns mit wenn Sie diese E-Mail nicht hätten bekommen sollen.

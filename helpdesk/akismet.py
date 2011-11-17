@@ -41,17 +41,17 @@ Usage example::
     # or you can call api.setAPIKey()
     #
     if api.key is None:
-        print "No 'apikey.txt' file."
+        print >> sys.stderr,  "No 'apikey.txt' file."
     elif not api.verify_key():
-        print "The API key is invalid."
+        print >> sys.stderr,  "The API key is invalid."
     else:
         # data should be a dictionary of values
         # They can all be filled in with defaults
         # from a CGI environment
         if api.comment_check(comment, data):
-            print 'This comment is spam.'
+            print >> sys.stderr,  'This comment is spam.'
         else:
-            print 'This comment is ham.'
+            print >> sys.stderr,  'This comment is ham.'
 """
 
 
