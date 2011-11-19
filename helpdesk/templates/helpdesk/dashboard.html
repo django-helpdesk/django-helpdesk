@@ -6,13 +6,14 @@
 {% block helpdesk_body %}
 
 <table width='40%' align='left'>
-<tr class='row_tablehead'><td colspan='4'>{% trans "Helpdesk Summary" %}</td></tr>
-<tr class='row_columnheads'><th>{% trans "Queue" %}</th><th>{% trans "Open" %}</th><th>{% trans "Resolved" %}</th></tr>
+<tr class='row_tablehead'><td colspan='5'>{% trans "Helpdesk Summary" %}</td></tr>
+<tr class='row_columnheads'><th>{% trans "Queue" %}</th><th>{% trans "Open" %}</th><th>{% trans "Resolved" %}</th><th>{% trans "Closed" %}</th></tr>
 {% for queue in dash_tickets %}
 <tr class='row_{% cycle odd,even %} row_hover '>
 <th><a href='{% url helpdesk_list %}?queue={{ queue.queue }}&status=1&status=2'>{{ queue.name }}</a></th>
-<td>{% if queue.open %}<a href='{% url helpdesk_list %}?queue={{ queue.queue }}&status=1&status=2'>{% endif %}{{ queue.open }}{% if queue.open %}</a>{% endif %}</td>
-<td>{% if queue.resolved %}<a href='{% url helpdesk_list %}?queue={{ queue.queue }}&status=3'>{% endif %}{{ queue.resolved }}{% if queue.resolved %}</a>{% endif %}</td>
+<td align="center">{% if queue.open %}<a href='{% url helpdesk_list %}?queue={{ queue.queue }}&status=1&status=2'>{% endif %}{{ queue.open }}{% if queue.open %}</a>{% endif %}</td>
+<td align="center">{% if queue.resolved %}<a href='{% url helpdesk_list %}?queue={{ queue.queue }}&status=3'>{% endif %}{{ queue.resolved }}{% if queue.resolved %}</a>{% endif %}</td>
+<td align="center">{% if queue.closed %}<a href='{% url helpdesk_list %}?queue={{ queue.queue }}&status=4'>{% endif %}{{ queue.closed }}{% if queue.closed %}</a>{% endif %}</td>
 </tr>
 {% endfor %}
 </table>
@@ -22,7 +23,7 @@
 <br style='clear: both;' />
 
 <table width='100%'>
-<tr class='row_tablehead'><td colspan='6'>{% trans "Your Tickets" %}</td></tr>
+<tr class='row_tablehead'><td colspan='6'>{% trans "Your Open Tickets" %}</td></tr>
 <tr class='row_columnheads'><th>#</th><th>{% trans "Pr" %}</th><th>{% trans "Title" %}</th><th>{% trans "Queue" %}</th><th>{% trans "Status" %}</th><th>{% trans "Last Update" %}</th></tr>
 {% for ticket in user_tickets %}
 <tr class='row_{% cycle odd,even %} row_hover'>
@@ -39,6 +40,8 @@
 {% endif %}
 </table>
 
+<br style='clear: both;' />
+
 <table width='100%'>
 <tr class='row_tablehead'><td colspan='6'>{% trans "Unassigned Tickets" %}</td></tr>
 <tr class='row_columnheads'><th>#</th><th>{% trans "Pr" %}</th><th>{% trans "Title" %}</th><th>{% trans "Queue" %}</th><th>{% trans "Created" %}</th><th>&nbsp;</th></tr>
@@ -49,12 +52,32 @@
 <th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></th>
 <td>{{ ticket.queue }}</td>
 <td><span title='{{ ticket.created|date:"r" }}'>{{ ticket.created|timesince }} ago</span></td>
-<th><a href='{{ ticket.get_absolute_url }}?take'><span class='button button_take'>{% trans "Take" %}</span></a> | <a href='{% url helpdesk_delete ticket.id %}'><span class='button button_delete'>{% trans "Delete" %}</span></a></th>
+<th><a href='{{ ticket.get_absolute_url }}?take'><span class='button button_take'>{% trans "Take" %}</span></a> {% if helpdesk_settings.HELPDESK_DASHBOARD_SHOW_DELETE_UNASSIGNED %}| <a href='{% url helpdesk_delete ticket.id %}'><span class='button button_delete'>{% trans "Delete" %}</span></a>{% endif %}</th>
 </tr>
 {% endfor %}
 {% if not unassigned_tickets %}
 <tr class='row_odd'><td colspan='6'>{% trans "There are no unassigned tickets." %}</td></tr>
 {% endif %}
 </table>
+
+
+{% if user_tickets_closed_resolved %}
+<br style='clear: both;' />
+
+<table width='100%'>
+<tr class='row_tablehead'><td colspan='6'>{% trans "Your closed & resolved Tickets" %}</td></tr>
+<tr class='row_columnheads'><th>#</th><th>{% trans "Pr" %}</th><th>{% trans "Title" %}</th><th>{% trans "Queue" %}</th><th>{% trans "Status" %}</th><th>{% trans "Last Update" %}</th></tr>
+{% for ticket in user_tickets_closed_resolved %}
+<tr class='row_{% cycle odd,even %} row_hover'>
+<th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.ticket }}</a></th>
+<td>{{ ticket.get_priority_span }}</td>
+<th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></th>
+<td>{{ ticket.queue }}</td>
+<td>{{ ticket.get_status }}</td>
+<td><span title='{{ ticket.modified|date:"r" }}'>{{ ticket.modified|timesince }}</span></td>
+</tr>
+{% endfor %}
+</table>
+{% endif %}
 
 {% endblock %}

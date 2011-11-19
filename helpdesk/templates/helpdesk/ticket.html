@@ -51,7 +51,11 @@
 <div class='followup'>
 <div class='title'>
     {{ followup.title }} <span class='byline'>{% if followup.user %}by {{ followup.user }}{% endif %} <span title='{{ followup.date|date:"r" }}'>{{ followup.date|timesince }} ago</span>{% if not followup.public %} <span class='private'>({% trans "Private" %})</span>{% endif %}</span>
+    {% if helpdesk_settings.HELPDESK_SHOW_EDIT_BUTTON_FOLLOW_UP %}
+    {% if followup.user and request.user == followup.user and not followup.ticketchange_set.all %}
     <a href="{% url helpdesk_followup_edit ticket.id followup.id %}" class='followup-edit'><img width="60" height="15" title="Edit" alt="Edit" src="{{ STATIC_URL }}helpdesk/buttons/edit.png"></a>
+    {% endif %}
+    {% endif %}
 </div>
 <span class='followup-desc'>{% if followup.comment %}{{ followup.comment|force_escape|urlizetrunc:50|num_to_link|linebreaksbr }}{% endif %}</span>
 {% for change in followup.ticketchange_set.all %}
@@ -60,7 +64,11 @@
 {% if forloop.last %}</div></ul>{% endif %}
 {% endfor %}
 {% for attachment in followup.attachment_set.all %}{% if forloop.first %}<div class='attachments'><ul>{% endif %}
-<li><a href='{{ attachment.file.url }}'>{{ attachment.filename }}</a> ({{ attachment.mime_type }}, {{ attachment.size|filesizeformat }})</li>
+<li><a href='{{ attachment.file.url }}'>{{ attachment.filename }}</a> ({{ attachment.mime_type }}, {{ attachment.size|filesizeformat }})
+{% if followup.user and request.user == followup.user %}
+<a href='{% url helpdesk_attachment_del ticket.id attachment.id %}'>delete</a>
+{% endif %}
+</li>
 {% if forloop.last %}</ul></div>{% endif %}
 {% endfor %}
 </div>
@@ -73,9 +81,11 @@
 
 <fieldset>
     <dl>
+        {% if preset_replies %}
         <dt><label for='id_preset'>{% trans "Use a Pre-set Reply" %}</label> <span class='form_optional'>(Optional)</span></dt>
         <dd><select name='preset' id='id_preset'><option value=''>------</option>{% for preset in preset_replies %}<option value='{{ preset.id }}'>{{ preset.name }}</option>{% endfor %}</select></dd>
         <dd class='form_help_text'>{% trans "Selecting a pre-set reply will over-write your comment below. You can then modify the pre-set reply to your liking before saving this update." %}</dd>
+        {% endif %}
 
         <dt><label for='commentBox'>{% trans "Comment / Resolution" %}</label></dt>
         <dd><textarea rows='8' cols='70' name='comment' id='commentBox'></textarea></dd>
@@ -109,9 +119,13 @@
         <input type='radio' name='new_status' value='5' id='st_duplicate' checked='checked'><label for='st_duplicate'>{% trans "Duplicate" %}</label></dd>
         {% endifequal %}
     
+        {% if helpdesk_settings.HELPDESK_UPDATE_PUBLIC_DEFAULT %}
+        <input type='hidden' name='public' value='1'>
+        {% else %}
         <dt><label for='id_public'>{% trans "Is this update public?" %}</label> <span class='form_optional'>(Optional)</span></dt>
-        <dd><input type='checkbox' name='public' value='1' checked='checked' /></dD>
+        <dd><input type='checkbox' name='public' value='1' checked='checked' /></dd>
         <dd class='form_help_text'>{% trans "If this is public, the submitter will be e-mailed your comment or resolution." %}</dd>
+        {% endif %}
     </dl>
 
 <p id='ShowFurtherOptPara'><a href='#' id='ShowFurtherEditOptions'>{% trans "Change Further Details &raquo;" %}</a></p>
