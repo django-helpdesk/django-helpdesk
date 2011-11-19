@@ -1,4 +1,7 @@
-{% load i18n %}<html>
+{% load i18n %}
+{% load load_helpdesk_settings %}
+{% with request|load_helpdesk_settings as helpdesk_settings %}
+<html>
 <head>
 <title>{% block helpdesk_title %}{% trans "Helpdesk" %}{% endblock %}</title>
 <script src='{{ STATIC_URL }}helpdesk/jquery-1.5.min.js' type='text/javascript' language='javascript'></script>
@@ -20,3 +23,4 @@
 </div>{% include "helpdesk/debug.html" %}
 </body>
 </html>
+{% endwith %}

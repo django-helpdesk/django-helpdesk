@@ -11,6 +11,7 @@ from datetime import datetime
 from StringIO import StringIO
 
 from django import forms
+from django.forms import extras
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext as _
@@ -195,6 +196,7 @@ class TicketForm(forms.Form):
                 fieldclass = forms.BooleanField
             elif field.data_type == 'date':
                 fieldclass = forms.DateField
+                instanceargs['widget'] = extras.SelectDateWidget
             elif field.data_type == 'time':
                 fieldclass = forms.TimeField
             elif field.data_type == 'datetime':

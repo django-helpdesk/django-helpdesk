@@ -1,2 +1,5 @@
 {% load i18n %}
 {% trans "Powered by <a href='https://github.com/rossp/django-helpdesk'>django-helpdesk</a>." %}
+{% if helpdesk_settings.HELPDESK_SUPPORT_PERSON %}
+<p>{% trans "For technical support please contact:" %} <a href='mailto:{{ helpdesk_settings.HELPDESK_SUPPORT_PERSON }}'>{{ helpdesk_settings.HELPDESK_SUPPORT_PERSON }}</a></p>
+{% endif %}

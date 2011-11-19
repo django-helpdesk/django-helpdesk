@@ -1,5 +1,7 @@
 {% load i18n %}
 {% load saved_queries %}
+{% load load_helpdesk_settings %}
+{% with request|load_helpdesk_settings as helpdesk_settings %}
 {% with request|saved_queries as user_saved_queries_ %}
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -51,10 +53,15 @@
             </div>
 
             <div id='footer'>
-                <p>{% include "helpdesk/attribution.html" %}<a href='{% url helpdesk_rss_index %}'><img src='{{ STATIC_URL }}helpdesk/rss_icon.png' width='14' height='14' alt='{% trans "RSS Icon" %}' title='{% trans "RSS Feeds" %}' border='0' />{% trans "RSS Feeds" %}</a> <a href='{% url helpdesk_api_help %}'>{% trans "API" %}</a> <a href='{% url helpdesk_user_settings %}'>{% trans "User Settings" %}</a> {% if user.is_superuser %}<a href='{% url helpdesk_system_settings %}'>{% trans "System Settings" %}</a>{% endif %}</p>
+                <p>{% include "helpdesk/attribution.html" %}
+                <a href='{% url helpdesk_rss_index %}'><img src='{{ STATIC_URL }}helpdesk/rss_icon.png' width='14' height='14' alt='{% trans "RSS Icon" %}' title='{% trans "RSS Feeds" %}' border='0' />{% trans "RSS Feeds" %}</a>
+                {% if helpdesk_settings.HELPDESK_FOOTER_SHOW_API_LINK %}<a href='{% url helpdesk_api_help %}'>{% trans "API" %}</a>{% endif %}
+                <a href='{% url helpdesk_user_settings %}'>{% trans "User Settings" %}</a>
+                {% if user.is_superuser %}<a href='{% url helpdesk_system_settings %}'>{% trans "System Settings" %}</a>{% endif %}</p>
             </div>
         </div>
         {% include "helpdesk/debug.html" %}
     </body>
 </html>
+{% endwith %}
 {% endwith %}
