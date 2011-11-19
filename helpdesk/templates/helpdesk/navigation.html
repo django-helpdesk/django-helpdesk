@@ -1,10 +1,12 @@
 {% load i18n %}
-{% if user.is_staff %}
+{% if helpdesk_settings.HELPDESK_NAVIGATION_ENABLED and user.is_authenticated or user.is_staff %}
 <ul id="dropdown">
     <li><a href='{% url helpdesk_dashboard %}'>{% trans "Dashboard" %}</a></li>
     <li><a href='{% url helpdesk_list %}'>{% trans "Tickets" %}</a></li>
     <li><a href='{% url helpdesk_submit %}'>{% trans "New Ticket" %}</a></li>
+    {% if helpdesk_settings.HELPDESK_NAVIGATION_STATS_ENABLED %}
     <li><a href='{% url helpdesk_report_index %}'>{% trans "Stats" %}</a></li>
+    {% endif %}
     {% if user_saved_queries_ %}
         <li class="headerlink"><a>Load Saved Query</a>
             <ul>
@@ -22,8 +24,12 @@
 </ul>
 {% else %}
 <ul>
+{% if helpdesk_settings.HELPDESK_SUBMIT_A_TICKET_PUBLIC %}
 <li><a href='{% url helpdesk_home %}'>{% trans "Submit A Ticket" %}</a></li>
+{% endif %}
 {% if helpdesk_settings.HELPDESK_KB_ENABLED %}<li><a href='{% url helpdesk_kb_index %}'>{% trans "Knowledgebase" %}</a></li>{% endif %}
-<li><a href='{% url login %}?next={% url helpdesk_dashboard %}'>{% trans "Log In" %}</a></li>
+{% if not helpdesk_settings.HELPDESK_REDIRECT_TO_LOGIN_BY_DEFAULT or user.is_authenticated %}
+<li>{% if user.is_authenticated %}<a href='{% url logout %}'>{% trans "Logout" %}</a>{% else %}<a href='{% url login %}?next={% url helpdesk_dashboard %}'>{% trans "Log In" %}</a>{% endif %}</li>
+{% endif %}
 </ul>
 {% endif %}
