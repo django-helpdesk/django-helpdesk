@@ -29,7 +29,7 @@
             $.translate(function(){ //when the Google Language API is loaded
                 $.translate().ui({
                       tags: ["select", "option"],
-                      //a function that filters the languages:
+                      // a function that filters the languages:
                       {% if helpdesk_settings.HELPDESK_TRANSLATE_TICKET_COMMENTS_LANG %}
                       filter: {{ helpdesk_settings.HELPDESK_TRANSLATE_TICKET_COMMENTS_LANG|safe }},
                       {% else %}
@@ -41,24 +41,23 @@
                              function(langCode, lang){
                                return $.translate.capitalize(lang);
                              },
-                      //whether to include the UNKNOWN:"" along with the languages:
+                      // whether to include the UNKNOWN:"" along with the languages:
                       includeUnknown: false,
                 })
 
-                .change(function(){
-                        $('#translate_block').translate( 'en', { //revert to english first
-                            not: 'select, pre'
-                        })
-
-                        .translate( 'en',  $(this).val(), {
-                            not: 'select, pre',
-                            async:  true,
-                            toggle: true,
-                            walk: false
-                        });
+                .click(function(){ // when selecting a language - 'change' is not enough, because your first language in the menu might be your target language
+                    $('#translate_block').translate( '', $(this).val(), { // translate from current language to the selected language
+                      not: '.option, select, pre, .translate_dropdown', // exclude these elements
+                      fromOriginal: true, // always translate from original version (even after the page has been translated)
+                      async:  true, // this prevents the browser from freezing on larger sites by executing each DOM filtering iteration with a delay
+                      toggle: true, // all translation will be cached (stored with $.data) and used if it's found, or translated to otherwise
+                      walk: true // finds elements having textnodes and translates only their content; on very large and complex pages this might take some time 
+                    })
                 })
-                 .val('English') //select English as default
-                 .appendTo('#translate_dropdown'); //insert the dropdown to the page
+                .appendTo('#translate_dropdown'); // insert the dropdown menu to the page
+
+                //insert Google's logo after the dropdown:
+                $.translate.getBranding().appendTo('#translate_dropdown');
 
             });
             {% endif %}
