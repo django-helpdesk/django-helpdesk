@@ -46,6 +46,12 @@ HELPDESK_NAVIGATION_STATS_ENABLED = getattr(settings, 'HELPDESK_NAVIGATION_STATS
 # in case they have technical problems.
 HELPDESK_SUPPORT_PERSON = getattr(settings, 'HELPDESK_SUPPORT_PERSON', False)
 
+# show dropdown list of languages that ticket comments can be translated into?
+HELPDESK_TRANSLATE_TICKET_COMMENTS = getattr(settings, 'HELPDESK_TRANSLATE_TICKET_COMMENTS', False)
+
+# list of languages to offer. if set to false, all default google translate languages will be shown.
+HELPDESK_TRANSLATE_TICKET_COMMENTS_LANG = getattr(settings, 'HELPDESK_TRANSLATE_TICKET_COMMENTS_LANG', ["en", "de", "fr", "ru"])
+
 
 ''' options for public pages '''
 # show 'view a ticket' section on public page?

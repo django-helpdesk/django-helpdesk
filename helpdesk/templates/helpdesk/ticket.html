@@ -41,6 +41,10 @@
 {% endblock %}
 
 {% block helpdesk_body %}
+{% if helpdesk_settings.HELPDESK_TRANSLATE_TICKET_COMMENTS %}
+<div id='translate_dropdown'>{% trans "Translate ticket comments into" %} </div>
+<div id='translate_block'>
+{% endif %}
 
 {% include "helpdesk/ticket_desc_table.html" %}
 
@@ -73,6 +77,9 @@
 {% endfor %}
 </div>
 {% endfor %}
+{% endif %}
+{% if helpdesk_settings.HELPDESK_TRANSLATE_TICKET_COMMENTS %}
+</div>
 {% endif %}
 
 <h3>{% trans "Respond to this ticket" %}</h3>

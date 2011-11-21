@@ -9,6 +9,7 @@
         <title>{% block helpdesk_title %}Helpdesk{% endblock %} :: {% trans "Powered by django-helpdesk" %}</title>
         <script src='{{ STATIC_URL }}helpdesk/jquery-1.5.min.js' type='text/javascript' language='javascript'></script>
         <script src='{{ STATIC_URL }}helpdesk/jquery-ui-1.8.9.custom.min.js' type='text/javascript' language='javascript'></script>
+        <script src='{{ STATIC_URL }}helpdesk/jquery.translate-1.4.7.NCT.core.NCT-adapter.ui.progress.native.parallel.min.js' type='text/javascript' language='javascript'></script>
         <link rel='stylesheet' href='{{ STATIC_URL }}helpdesk/helpdesk.css' type='text/css' />
         <link rel='stylesheet' href='{{ STATIC_URL }}helpdesk/jquery-smoothness-theme/jquery-ui-1.8.9.custom.css' type='text/css' />
         <link rel='alternate' href='{% url helpdesk_rss "user" %}{{ user.username }}/' type='application/rss+xml' title='{% trans "My Open Tickets" %}' />
@@ -16,11 +17,52 @@
         <link rel='alternate' href='{% url helpdesk_rss "unassigned" %}' type='application/rss+xml' title='{% trans "Unassigned Tickets" %}' />
 
         <script type="text/javascript">
+
         $(document).ready(function(){
             // replace display while hovering over menu item
             $('li.headerlink').hover(
 	            function() { $('ul', this).css('display', 'block'); },
 	            function() { $('ul', this).css('display', 'none'); });
+
+            {% if helpdesk_settings.HELPDESK_TRANSLATE_TICKET_COMMENTS %}
+            // add google translate functionality
+            $.translate(function(){ //when the Google Language API is loaded
+                $.translate().ui({
+                      tags: ["select", "option"],
+                      //a function that filters the languages:
+                      {% if helpdesk_settings.HELPDESK_TRANSLATE_TICKET_COMMENTS_LANG %}
+                      filter: {{ helpdesk_settings.HELPDESK_TRANSLATE_TICKET_COMMENTS_LANG|safe }},
+                      {% else %}
+                      // all languages
+                      filter: $.translate.isTranslatable, 
+                      {% endif %}
+                      //a function that returns the text to display based on the language code:
+                      label: $.translate.toNativeLanguage ||
+                             function(langCode, lang){
+                               return $.translate.capitalize(lang);
+                             },
+                      //whether to include the UNKNOWN:"" along with the languages:
+                      includeUnknown: false,
+                })
+
+                .change(function(){
+                        $('#translate_block').translate( 'en', { //revert to english first
+                            not: 'select, pre'
+                        })
+
+                        .translate( 'en',  $(this).val(), {
+                            not: 'select, pre',
+                            async:  true,
+                            toggle: true,
+                            walk: false
+                        });
+                })
+                 .val('English') //select English as default
+                 .appendTo('#translate_dropdown'); //insert the dropdown to the page
+
+            });
+            {% endif %}
+
         });
         </script>
 
