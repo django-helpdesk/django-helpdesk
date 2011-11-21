@@ -153,20 +153,32 @@ td {
     background-color: #bcd4ec;
 }
 
-div.followup {
+div.followup, div.followup_mod {
     width: 100%;
     border-top: solid #666 1px;
     padding:0 0 2px;
 }
 
-div.followup .title {
+div.followup_mod {
+    border: solid #666 1px;
+    padding: 5px;
+    margin: 0px 0px 10px;
+}
+
+div.followup .title, div.followup_mod .title {
     font-weight: bold;
     font-size: 10pt;
 }
 
-div.followup .title span {
+div.followup .title span, div.followup_mod .title span {
     color: #aaa;
     font-weight: normal;
+}
+
+div.followup_mod small {
+    float: right;
+    font-weight: bold;
+    font-style: italic;
 }
 
 span.private {

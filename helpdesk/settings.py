@@ -52,6 +52,10 @@ HELPDESK_TRANSLATE_TICKET_COMMENTS = getattr(settings, 'HELPDESK_TRANSLATE_TICKE
 # list of languages to offer. if set to false, all default google translate languages will be shown.
 HELPDESK_TRANSLATE_TICKET_COMMENTS_LANG = getattr(settings, 'HELPDESK_TRANSLATE_TICKET_COMMENTS_LANG', ["en", "de", "fr", "ru"])
 
+# allow user to override default layout for 'followups' - work in progress.
+HELPDESK_FOLLOWUP_MOD = getattr(settings, 'HELPDESK_FOLLOWUP_MOD', False)
+
+
 
 ''' options for public pages '''
 # show 'view a ticket' section on public page?

@@ -52,15 +52,28 @@
 <h3>{% trans "Follow-Ups" %}</h3>
 {% load ticket_to_link %}
 {% for followup in ticket.followup_set.all %}
-<div class='followup'>
-<div class='title'>
-    {{ followup.title }} <span class='byline'>{% if followup.user %}by {{ followup.user }}{% endif %} <span title='{{ followup.date|date:"r" }}'>{{ followup.date|timesince }} ago</span>{% if not followup.public %} <span class='private'>({% trans "Private" %})</span>{% endif %}</span>
-    {% if helpdesk_settings.HELPDESK_SHOW_EDIT_BUTTON_FOLLOW_UP %}
-    {% if followup.user and request.user == followup.user and not followup.ticketchange_set.all %}
-    <a href="{% url helpdesk_followup_edit ticket.id followup.id %}" class='followup-edit'><img width="60" height="15" title="Edit" alt="Edit" src="{{ STATIC_URL }}helpdesk/buttons/edit.png"></a>
-    {% endif %}
-    {% endif %}
-</div>
+{% if helpdesk_settings.HELPDESK_FOLLOWUP_MOD %}
+    <div class='followup_mod'>
+    <div class='title'>
+        <span class='byline'>{{ followup.user.get_full_name }}&nbsp;&nbsp;&nbsp;&nbsp;{{ followup.date }} ({{ followup.date|timesince }} ago)</span> <small>{{ followup.title }}</small>
+        {% if not followup.public %} <span class='private'>({% trans "Private" %})</span>{% endif %}
+        {% if helpdesk_settings.HELPDESK_SHOW_EDIT_BUTTON_FOLLOW_UP %}
+        {% if followup.user and request.user == followup.user and not followup.ticketchange_set.all %}
+        <a href="{% url helpdesk_followup_edit ticket.id followup.id %}" class='followup-edit'><img width="60" height="15" title="Edit" alt="Edit" src="{{ STATIC_URL }}helpdesk/buttons/edit.png"></a>
+        {% endif %}
+        {% endif %}
+    </div>
+{% else %}
+    <div class='followup'>
+    <div class='title'>
+        {{ followup.title }} <span class='byline'>{% if followup.user %}by {{ followup.user }}{% endif %} <span title='{{ followup.date|date:"r" }}'>{{ followup.date|timesince }} ago</span>{% if not followup.public %} <span class='private'>({% trans "Private" %})</span>{% endif %}</span>
+        {% if helpdesk_settings.HELPDESK_SHOW_EDIT_BUTTON_FOLLOW_UP %}
+        {% if followup.user and request.user == followup.user and not followup.ticketchange_set.all %}
+        <a href="{% url helpdesk_followup_edit ticket.id followup.id %}" class='followup-edit'><img width="60" height="15" title="Edit" alt="Edit" src="{{ STATIC_URL }}helpdesk/buttons/edit.png"></a>
+        {% endif %}
+        {% endif %}
+    </div>
+{% endif %}
 <span class='followup-desc'>{% if followup.comment %}{{ followup.comment|force_escape|urlizetrunc:50|num_to_link|linebreaksbr }}{% endif %}</span>
 {% for change in followup.ticketchange_set.all %}
 {% if forloop.first %}<div class='changes'><ul>{% endif %}
