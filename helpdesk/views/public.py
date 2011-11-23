@@ -111,10 +111,16 @@ def view_ticket(request):
 
                 return update_ticket(request, ticket_id, public=True)
 
+            # redirect user back to this ticket if possible.
+            redirect_url = ''
+            if helpdesk_settings.HELPDESK_NAVIGATION_ENABLED:
+                redirect_url = reverse('helpdesk_view', args=[ticket_id])
+
             return render_to_response('helpdesk/public_view_ticket.html',
                 RequestContext(request, {
                     'ticket': ticket,
                     'helpdesk_settings': helpdesk_settings,
+                    'next': redirect_url,
                 }))
 
     return render_to_response('helpdesk/public_view_form.html',
