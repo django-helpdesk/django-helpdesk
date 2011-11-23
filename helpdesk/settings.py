@@ -32,6 +32,9 @@ if type(DEFAULT_USER_SETTINGS) != type(dict()):
 # redirect to login page instead of the default homepage when users visits "/"?
 HELPDESK_REDIRECT_TO_LOGIN_BY_DEFAULT = getattr(settings, 'HELPDESK_REDIRECT_TO_LOGIN_BY_DEFAULT', False)
 
+# customize helpdesk name on a few pages, i.e., your organization.
+HELPDESK_PREPEND_ORG_NAME = getattr(settings, 'HELPDESK_PREPEND_ORG_NAME', False)
+
 # show knowledgebase links?
 HELPDESK_KB_ENABLED = getattr(settings, 'HELPDESK_KB_ENABLED', True)
 
