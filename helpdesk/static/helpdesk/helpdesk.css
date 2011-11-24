@@ -153,13 +153,14 @@ td {
     background-color: #bcd4ec;
 }
 
-div.followup, div.followup_mod {
+div.followup {
     width: 100%;
     border-top: solid #666 1px;
     padding:0 0 2px;
 }
 
 div.followup_mod {
+    width: auto;
     border: solid #666 1px;
     padding: 5px;
     margin: 0px 0px 10px;
