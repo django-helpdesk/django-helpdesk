@@ -34,7 +34,7 @@
 
 <tr class='{% cycle rowcolors %}'>
     <th>{% trans "Copies To" %}</th>
-    <td>{% for ticketcc in ticket.ticketcc_set.all %}{{ ticketcc.display }}{% if not forloop.last %}, {% endif %}{% endfor %} <strong><a href='{% url helpdesk_ticket_cc ticket.id %}'>{% trans "Manage" %}</a></strong></td>
+    <td>{% for ticketcc in ticket.ticketcc_set.all %}{{ ticketcc.display }}{% if not forloop.last %}, {% endif %}{% endfor %} <strong><a class='tooltip' href='{% url helpdesk_ticket_cc ticket.id %}'>{% trans "Manage" %}<span>{% trans "Click here to add / remove people who should receive an e-mail whenever this ticket is updated." %}</span></a></strong></td>
 </tr>
 
 {% if tags_enabled %}
@@ -53,7 +53,7 @@
         {% empty %}
         <p>{% trans "This ticket has no dependencies." %}</p>
         {% endfor %}
-        <p><a href='{% url helpdesk_ticket_dependency_add ticket.id %}'>{% trans "Add Dependency" %}</a></p>
+        <p><a class='tooltip' href='{% url helpdesk_ticket_dependency_add ticket.id %}'>{% trans "Add Dependency" %}<span>{% trans "Click on 'Add Dependency', if you want to make this ticket dependent on another ticket. A ticket may not be closed until all tickets it depends on are closed." %}</span></a></p>
     </td>
 </tr>
 

@@ -280,3 +280,34 @@ span.priority5 {
 a.followup-edit {
     float:right;
 }
+
+/* tooltips for link hover */
+a.tooltip, a.tooltip:link, a.tooltip:visited, a.tooltip:active  {
+  position: relative;
+  text-decoration: none;
+  font-style: italic;
+}
+
+a.tooltip:hover {
+  background: transparent;
+}
+
+a.tooltip span {
+  display: none;
+  text-decoration: none;
+}
+
+a.tooltip:hover span {
+  display: block;
+  position: absolute;
+  top: 25px;
+  left: 0;
+  width: 250px;
+  z-index: 10;
+  color: #000000;
+  border:1px solid #000000;
+  background: #FFFFCC;
+  font: 12px Verdana, sans-serif;
+  text-align: left;
+}
+
