@@ -132,5 +132,9 @@ def view_ticket(request):
         }))
 
 def change_language(request):
+    return_to = ''
+    if request.GET.has_key('return_to'):
+        return_to = request.GET['return_to']
+
     return render_to_response('helpdesk/public_change_language.html',
-        RequestContext(request, {}))
+        RequestContext(request, {'next': return_to}))

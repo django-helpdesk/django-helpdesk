@@ -6,7 +6,7 @@
 <h3>{% trans "Change the display language" %}</h3>
 <form action="/i18n/setlang/" method="post">
     {% csrf_token %}
-    <input name="next" type="hidden" value="/" />
+    <input name="next" type="hidden" value="{{ next|default:"/" }}" />
     <select name="language">
         {% get_language_info_list for LANGUAGES as languages %}
         {% for language in languages %}
