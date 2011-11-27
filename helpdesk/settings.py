@@ -100,3 +100,7 @@ HELPDESK_DASHBOARD_SHOW_DELETE_UNASSIGNED = getattr(settings, 'HELPDESK_DASHBOAR
 ''' options for footer '''
 # show 'API' link at bottom of page
 HELPDESK_FOOTER_SHOW_API_LINK = getattr(settings, 'HELPDESK_FOOTER_SHOW_API_LINK', True)
+
+# show / hide 'change language' link at bottom of page
+HELPDESK_FOOTER_SHOW_CHANGE_LANGUAGE_LINK = getattr(settings, 'HELPDESK_FOOTER_SHOW_CHANGE_LANGUAGE_LINK', False)
+

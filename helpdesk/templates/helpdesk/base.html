@@ -98,6 +98,9 @@
                 <a href='{% url helpdesk_rss_index %}'><img src='{{ STATIC_URL }}helpdesk/rss_icon.png' width='14' height='14' alt='{% trans "RSS Icon" %}' title='{% trans "RSS Feeds" %}' border='0' />{% trans "RSS Feeds" %}</a>
                 {% if helpdesk_settings.HELPDESK_FOOTER_SHOW_API_LINK %}<a href='{% url helpdesk_api_help %}'>{% trans "API" %}</a>{% endif %}
                 <a href='{% url helpdesk_user_settings %}'>{% trans "User Settings" %}</a>
+                {% if helpdesk_settings.HELPDESK_FOOTER_SHOW_CHANGE_LANGUAGE_LINK %}
+                <a href='{% url helpdesk_public_change_language %}'>{% trans "Change Language" %}</a>
+                {% endif %}
                 {% if user.is_superuser %}<a href='{% url helpdesk_system_settings %}'>{% trans "System Settings" %}</a>{% endif %}</p>
             </div>
         </div>

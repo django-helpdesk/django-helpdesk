@@ -131,3 +131,6 @@ def view_ticket(request):
             'helpdesk_settings': helpdesk_settings,
         }))
 
+def change_language(request):
+    return render_to_response('helpdesk/public_change_language.html',
+        RequestContext(request, {}))

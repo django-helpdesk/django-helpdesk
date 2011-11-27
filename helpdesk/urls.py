@@ -134,6 +134,10 @@ urlpatterns += patterns('helpdesk.views.public',
     url(r'^view/$',
         'view_ticket',
         name='helpdesk_public_view'),
+
+    url(r'^change_language/$',
+        'change_language',
+        name='helpdesk_public_change_language'),        
 )
 
 urlpatterns += patterns('',
