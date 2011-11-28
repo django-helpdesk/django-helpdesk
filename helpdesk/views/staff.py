@@ -419,11 +419,10 @@ def mass_update(request):
             f = FollowUp(ticket=t, date=datetime.now(), title=_('Closed in bulk update'), public=True, user=request.user, new_status=Ticket.CLOSED_STATUS)
             f.save()
             # Send email to Submitter, Owner, Queue CC
-            context = {
-                'ticket': t,
-                'queue': t.queue,
-                'resolution': t.resolution,
-            }
+            context = safe_template_context(t)
+            context.update(
+                resolution=t.resolution,
+                )
 
             messages_sent_to = []
 
@@ -833,7 +832,7 @@ def run_report(request, report):
             month = 1
         if (year > last_year) or (month > last_month and year >= last_year):
             working = False
-        periods.append("%s %s" % (months[month], year))
+        periods.append("%s %s" % (months[month - 1], year))
 
     if report == 'userpriority':
         title = _('User by Priority')

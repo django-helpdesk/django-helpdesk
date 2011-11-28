@@ -56,11 +56,7 @@ Adding To Your Django Project
 
      ./manage.py syncdb
 
-   If you're wise enough to use South, the first migration will need to be a fake::
-
-     ./manage.py migrate helpdesk 0001 --fake
-
-   After the initial migration, all others are done in the usual way::
+   Then migrate using South
 
      ./manage.py migrate helpdesk
 
