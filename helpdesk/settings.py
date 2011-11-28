@@ -28,6 +28,8 @@ if type(DEFAULT_USER_SETTINGS) != type(dict()):
             'tickets_per_page': 25
             }
 
+
+
 ''' generic options - visible on all pages '''
 # redirect to login page instead of the default homepage when users visits "/"?
 HELPDESK_REDIRECT_TO_LOGIN_BY_DEFAULT = getattr(settings, 'HELPDESK_REDIRECT_TO_LOGIN_BY_DEFAULT', False)
@@ -71,6 +73,7 @@ HELPDESK_VIEW_A_TICKET_PUBLIC = getattr(settings, 'HELPDESK_VIEW_A_TICKET_PUBLIC
 HELPDESK_SUBMIT_A_TICKET_PUBLIC = getattr(settings, 'HELPDESK_SUBMIT_A_TICKET_PUBLIC', True)
 
 
+
 ''' options for update_ticket views '''
 # allow non-staff users to interact with tickets? this will also change how 'staff_member_required' 
 # in staff.py will be defined.
@@ -92,9 +95,17 @@ HELPDESK_SHOW_HOLD_BUTTON_TICKET_TOP = getattr(settings, 'HELPDESK_SHOW_HOLD_BUT
 HELPDESK_UPDATE_PUBLIC_DEFAULT = getattr(settings, 'HELPDESK_UPDATE_PUBLIC_DEFAULT', True)
 
 
+
+''' options for staff.create_ticket view '''
+# hide the 'assigned to' / 'Case owner' field from the 'create_ticket' view?
+HELPDESK_CREATE_TICKET_HIDE_ASSIGNED_TO = getattr(settings, 'HELPDESK_CREATE_TICKET_HIDE_ASSIGNED_TO', False)
+
+
+
 ''' options for dashboard '''
 # show delete button next to unassigned tickets
 HELPDESK_DASHBOARD_SHOW_DELETE_UNASSIGNED = getattr(settings, 'HELPDESK_DASHBOARD_SHOW_DELETE_UNASSIGNED', True)
+
 
 
 ''' options for footer '''
