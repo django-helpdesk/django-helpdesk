@@ -114,19 +114,20 @@ class TicketForm(forms.Form):
     title = forms.CharField(
         max_length=100,
         required=True,
-        widget=forms.TextInput(),
+        widget=forms.TextInput(attrs={'size':'60'}),
         label=_('Summary of the problem'),
         )
 
     submitter_email = forms.EmailField(
         required=False,
         label=_('Submitter E-Mail Address'),
+        widget=forms.TextInput(attrs={'size':'60'}),
         help_text=_('This e-mail address will receive copies of all public '
             'updates to this ticket.'),
         )
 
     body = forms.CharField(
-        widget=forms.Textarea(),
+        widget=forms.Textarea(attrs={'cols': 47, 'rows': 15}),
         label=_('Description of Issue'),
         required=True,
         )
