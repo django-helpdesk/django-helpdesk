@@ -61,7 +61,6 @@ def send_templated_mail(template_name, email_context, recipients, sender=None, b
 
     t = None
     try:
-        import pdb;pdb.set_trace()
         t = EmailTemplate.objects.get(template_name__iexact=template_name, locale=locale)
     except EmailTemplate.DoesNotExist:
         pass
