@@ -244,11 +244,10 @@ def update_ticket(request, ticket_id, public=False):
                 }
             ticket.assigned_to = new_user
             reassigned = True
-        # This makes no sense to me. Why should we ever remove the 'assigned to' 
-        # value?
-        #elif owner == 0 and ticket.assigned_to is not None:
-        #    f.title = _('Unassigned')
-        #    ticket.assigned_to = None
+        # user changed owner to 'unassign'
+        elif owner == 0 and ticket.assigned_to is not None:
+            f.title = _('Unassigned')
+            ticket.assigned_to = None
 
     if new_status != ticket.status:
         ticket.status = new_status
