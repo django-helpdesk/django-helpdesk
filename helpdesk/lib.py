@@ -61,6 +61,7 @@ def send_templated_mail(template_name, email_context, recipients, sender=None, b
 
     t = None
     try:
+        import pdb;pdb.set_trace()
         t = EmailTemplate.objects.get(template_name__iexact=template_name, locale=locale)
     except EmailTemplate.DoesNotExist:
         pass
@@ -101,9 +102,8 @@ def send_templated_mail(template_name, email_context, recipients, sender=None, b
         "{{ ticket.ticket }} {{ ticket.title|safe }} %s" % t.subject
         ).render(context)
 
-    if type(recipients) == str:
-        if recipients.find(','):
-            recipients = recipients.split(',')
+    if isinstance(recipients,(str,unicode)):
+        recipients = recipients.split(',')
     elif type(recipients) != list:
         recipients = [recipients,]
 
