@@ -8,7 +8,7 @@
     <li><a href='{% url helpdesk_report_index %}'>{% trans "Stats" %}</a></li>
     {% endif %}
     {% if user_saved_queries_ %}
-        <li class="headerlink"><a>Load Saved Query</a>
+        <li class="headerlink"><a>{% trans "Load Saved Query" %}</a>
             <ul>
              {% for q in user_saved_queries_ %}
                 <li><a href="{% url helpdesk_list %}?saved_query={{ q.id }}">{{ q.title }}
