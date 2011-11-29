@@ -51,14 +51,14 @@ def dashboard(request):
     with options for them to 'Take' ownership of said tickets.
     """
 
-    # open & reopened tickets
+    # open & reopened tickets, assigned to current user
     tickets = Ticket.objects.filter(
             assigned_to=request.user,
         ).exclude(
             status__in = [Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
         )
 
-    # closed & resolved tickets
+    # closed & resolved tickets, assigned to current user
     tickets_closed_resolved =  Ticket.objects.filter(
             assigned_to=request.user, 
             status__in = [Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS])
@@ -68,6 +68,15 @@ def dashboard(request):
         ).exclude(
             status=Ticket.CLOSED_STATUS,
         )
+
+    # all tickets, reported by current user
+    all_tickets_reported_by_current_user = ''
+    email_current_user = request.user.email
+    if email_current_user:
+        all_tickets_reported_by_current_user = Ticket.objects.filter(
+            submitter_email=email_current_user,
+        ).order_by('status')
+
 
     # The following query builds a grid of queues & ticket statuses,
     # to be displayed to the user. EG:
@@ -95,6 +104,7 @@ def dashboard(request):
             'user_tickets': tickets,
             'user_tickets_closed_resolved': tickets_closed_resolved,
             'unassigned_tickets': unassigned_tickets,
+            'all_tickets_reported_by_current_user': all_tickets_reported_by_current_user,
             'dash_tickets': dash_tickets,
         }))
 dashboard = staff_member_required(dashboard)

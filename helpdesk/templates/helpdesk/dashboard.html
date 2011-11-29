@@ -18,12 +18,39 @@
 {% endfor %}
 </table>
 
+{% if helpdesk_settings.HELPDESK_CUSTOM_WELCOME %}
+<p style='margin-left: 42%;'>{% trans "Welcome to your Helpdesk Dashboard! From here you can quickly see tickets submitted by you, tickets you are working on, and those tickets that have no owner. Why not pick up an orphan ticket and sort it out for a customer?" %}</p>
+{% else %}
 <p style='margin-left: 42%;'>{% trans "Welcome to your Helpdesk Dashboard! From here you can quickly see your own tickets, and those tickets that have no owner. Why not pick up an orphan ticket and sort it out for a customer?" %}</p>
+{% endif %}
+
+
+
+{% if all_tickets_reported_by_current_user %}
+<br style='clear: both;' />
+
+<table width='100%'>
+<tr class='row_tablehead'><td colspan='6'>{% trans "All Tickets submitted by you" %}</td></tr>
+<tr class='row_columnheads'><th>#</th><th>{% trans "Pr" %}</th><th>{% trans "Title" %}</th><th>{% trans "Queue" %}</th><th>{% trans "Status" %}</th><th>{% trans "Last Update" %}</th></tr>
+{% for ticket in all_tickets_reported_by_current_user %}
+<tr class='row_{% cycle odd,even %} row_hover'>
+<th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.ticket }}</a></th>
+<td>{{ ticket.get_priority_span }}</td>
+<th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></th>
+<td>{{ ticket.queue }}</td>
+<td>{{ ticket.get_status }}</td>
+<td><span title='{{ ticket.modified|date:"r" }}'>{{ ticket.modified|timesince }}</span></td>
+</tr>
+{% endfor %}
+</table>
+{% endif %}
+
+
 
 <br style='clear: both;' />
 
 <table width='100%'>
-<tr class='row_tablehead'><td colspan='6'>{% trans "Your Open Tickets" %}</td></tr>
+<tr class='row_tablehead'><td colspan='6'>{% trans "Open Tickets assigned to you (you are working on this ticket)" %}</td></tr>
 <tr class='row_columnheads'><th>#</th><th>{% trans "Pr" %}</th><th>{% trans "Title" %}</th><th>{% trans "Queue" %}</th><th>{% trans "Status" %}</th><th>{% trans "Last Update" %}</th></tr>
 {% for ticket in user_tickets %}
 <tr class='row_{% cycle odd,even %} row_hover'>
@@ -43,7 +70,7 @@
 <br style='clear: both;' />
 
 <table width='100%'>
-<tr class='row_tablehead'><td colspan='6'>{% trans "Unassigned Tickets" %}</td></tr>
+<tr class='row_tablehead'><td colspan='6'>{% trans "Unassigned Tickets" %} {% trans "(pick up a ticket if you start to work on it)" %}</td></tr>
 <tr class='row_columnheads'><th>#</th><th>{% trans "Pr" %}</th><th>{% trans "Title" %}</th><th>{% trans "Queue" %}</th><th>{% trans "Created" %}</th><th>&nbsp;</th></tr>
 {% for ticket in unassigned_tickets %}
 <tr class='row_{% cycle odd,even %} row_hover'>
@@ -65,7 +92,7 @@
 <br style='clear: both;' />
 
 <table width='100%'>
-<tr class='row_tablehead'><td colspan='6'>{% trans "Your closed & resolved Tickets" %}</td></tr>
+<tr class='row_tablehead'><td colspan='6'>{% trans "Closed & resolved Tickets you used to work on" %}</td></tr>
 <tr class='row_columnheads'><th>#</th><th>{% trans "Pr" %}</th><th>{% trans "Title" %}</th><th>{% trans "Queue" %}</th><th>{% trans "Status" %}</th><th>{% trans "Last Update" %}</th></tr>
 {% for ticket in user_tickets_closed_resolved %}
 <tr class='row_{% cycle odd,even %} row_hover'>
