@@ -246,6 +246,39 @@ def ticket_from_message(message, queue, quiet):
         t.status = Ticket.REOPENED_STATUS
         t.save()
 
+    f = FollowUp(
+        ticket = t,
+        title = _('E-Mail Received from %(sender_email)s' % {'sender_email': sender_email}),
+        date = datetime.now(),
+        public = True,
+        comment = body,
+    )
+
+    if t.status == Ticket.REOPENED_STATUS:
+        f.new_status = Ticket.REOPENED_STATUS
+        f.title = _('Ticket Re-Opened by E-Mail Received from %(sender_email)s' % {'sender_email': sender_email})
+    
+    f.save()
+
+    if not quiet:
+        print (" [%s-%s] %s%s" % (t.queue.slug, t.id, t.title, update)).encode('ascii', 'replace')
+
+    for file in files:
+        if file['content']:
+            filename = file['filename'].encode('ascii', 'replace').replace(' ', '_')
+            filename = re.sub('[^a-zA-Z0-9._-]+', '', filename)
+            a = Attachment(
+                followup=f,
+                filename=filename,
+                mime_type=file['type'],
+                size=len(file['content']),
+                )
+            a.file.save(filename, ContentFile(file['content']), save=False)
+            a.save()
+            if not quiet:
+                print "    - %s" % filename
+
+
     context = {
         'ticket': t,
         'queue': queue,
@@ -281,6 +314,9 @@ def ticket_from_message(message, queue, quiet):
                 )
 
     else:
+
+        context.update(comment=f.comment)
+
         if t.status == Ticket.REOPENED_STATUS:
             update = _(' (Reopened)')
         else:
@@ -303,38 +339,6 @@ def ticket_from_message(message, queue, quiet):
                 sender=queue.from_address,
                 fail_silently=True,
                 )
-
-    f = FollowUp(
-        ticket = t,
-        title = _('E-Mail Received from %(sender_email)s' % {'sender_email': sender_email}),
-        date = datetime.now(),
-        public = True,
-        comment = body,
-    )
-
-    if t.status == Ticket.REOPENED_STATUS:
-        f.new_status = Ticket.REOPENED_STATUS
-        f.title = _('Ticket Re-Opened by E-Mail Received from %(sender_email)s' % {'sender_email': sender_email})
-    
-    f.save()
-
-    if not quiet:
-        print (" [%s-%s] %s%s" % (t.queue.slug, t.id, t.title, update)).encode('ascii', 'replace')
-
-    for file in files:
-        if file['content']:
-            filename = file['filename'].encode('ascii', 'replace').replace(' ', '_')
-            filename = re.sub('[^a-zA-Z0-9._-]+', '', filename)
-            a = Attachment(
-                followup=f,
-                filename=filename,
-                mime_type=file['type'],
-                size=len(file['content']),
-                )
-            a.file.save(filename, ContentFile(file['content']), save=False)
-            a.save()
-            if not quiet:
-                print "    - %s" % filename
 
     return t
 
