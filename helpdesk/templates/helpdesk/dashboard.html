@@ -5,7 +5,8 @@
 {% endblock %}
 {% block helpdesk_body %}
 
-<table width='40%' align='left'>
+<div style='float:left; width:auto; margin-right:10px;'>
+<table width='100%'>
 <tr class='row_tablehead'><td colspan='5'>{% trans "Helpdesk Summary" %}</td></tr>
 <tr class='row_columnheads'><th>{% trans "Queue" %}</th><th>{% trans "Open" %}</th><th>{% trans "Resolved" %}</th><th>{% trans "Closed" %}</th></tr>
 {% for queue in dash_tickets %}
@@ -17,13 +18,15 @@
 </tr>
 {% endfor %}
 </table>
+</div>
 
+<div>
 {% if helpdesk_settings.HELPDESK_CUSTOM_WELCOME %}
-<p style='margin-left: 42%;'>{% trans "Welcome to your Helpdesk Dashboard! From here you can quickly see tickets submitted by you, tickets you are working on, and those tickets that have no owner. Why not pick up an orphan ticket and sort it out for a customer?" %}</p>
+<p>{% trans "Welcome to your Helpdesk Dashboard! From here you can quickly see tickets submitted by you, tickets you are working on, and those tickets that have no owner. Why not pick up an orphan ticket and sort it out for a customer?" %}</p>
 {% else %}
-<p style='margin-left: 42%;'>{% trans "Welcome to your Helpdesk Dashboard! From here you can quickly see your own tickets, and those tickets that have no owner. Why not pick up an orphan ticket and sort it out for a customer?" %}</p>
+<p>{% trans "Welcome to your Helpdesk Dashboard! From here you can quickly see your own tickets, and those tickets that have no owner. Why not pick up an orphan ticket and sort it out for a customer?" %}</p>
 {% endif %}
-
+</div>
 
 
 {% if all_tickets_reported_by_current_user %}

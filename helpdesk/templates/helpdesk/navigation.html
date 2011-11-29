@@ -20,7 +20,7 @@
        </li>
     {% endif %}
     <li><a href='{% url logout %}'>{% trans "Logout" %}</a></li>
-    {% if not query %}<li><form id='searchform' method='get' action='{% url helpdesk_list %}'><input type='text' name='q' size='10' class='input' value='{% trans "Search..." %}' id='search_query' onFocus='s=document.getElementById("search_query");if (s.value == "{% trans "Search..." %}") { s.value = ""; }' title='{% trans "Enter a keyword, or a ticket number to jump straight to that ticket." %}'/><input type='hidden' name='status' value='1' /><input type='hidden' name='status' value='2' /><input type='hidden' name='status' value='3' /><input type='hidden' name='search_type' value='header' />{% csrf_token %}</form></li>{% endif %}
+    {% if not query %}<li><form id='searchform' method='get' action='{% url helpdesk_list %}'><input type='text' name='q' size='4' class='input' value='{% trans "Search..." %}' id='search_query' onFocus='s=document.getElementById("search_query");if (s.value == "{% trans "Search..." %}") { s.value = ""; }' title='{% trans "Enter a keyword, or a ticket number to jump straight to that ticket." %}'/><input type='hidden' name='status' value='1' /><input type='hidden' name='status' value='2' /><input type='hidden' name='status' value='3' /><input type='hidden' name='search_type' value='header' />{% csrf_token %}</form></li>{% endif %}
 </ul>
 {% else %}
 <ul>
