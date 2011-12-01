@@ -1175,6 +1175,11 @@ class CustomField(models.Model):
         blank=True,
         null=True,
         )
+        
+    empty_selection_list = models.BooleanField(
+        _('Add empty first choice to List?'),
+        help_text=_('Only for List: adds an empty first entry to the choices list, which enforces that the user makes an active choice.'),
+        )        
 
     list_values = models.TextField(
         _('List Values'),

@@ -58,7 +58,10 @@ class EditTicketForm(forms.ModelForm):
                 instanceargs['max_digits'] = field.max_length
             elif field.data_type == 'list':
                 fieldclass = forms.ChoiceField
-                instanceargs['choices'] = field.choices_as_array
+                if field.empty_selection_list:
+                    choices = field.choices_as_array
+                    choices.insert(0, ('','---------' ) )
+                instanceargs['choices'] = choices
             elif field.data_type == 'boolean':
                 fieldclass = forms.BooleanField
             elif field.data_type == 'date':
@@ -192,7 +195,10 @@ class TicketForm(forms.Form):
                 instanceargs['max_digits'] = field.max_length
             elif field.data_type == 'list':
                 fieldclass = forms.ChoiceField
-                instanceargs['choices'] = field.choices_as_array
+                if field.empty_selection_list:
+                    choices = field.choices_as_array
+                    choices.insert(0, ('','---------' ) )
+                instanceargs['choices'] = choices
             elif field.data_type == 'boolean':
                 fieldclass = forms.BooleanField
             elif field.data_type == 'date':
@@ -405,9 +411,9 @@ class PublicTicketForm(forms.Form):
                 instanceargs['max_digits'] = field.max_length
             elif field.data_type == 'list':
                 fieldclass = forms.ChoiceField
-                choices = []
-                for line in field.list_values.split("\n"):
-                    choices.append((line, line))
+                if field.empty_selection_list:
+                    choices = field.choices_as_array
+                    choices.insert(0, ('','---------' ) )
                 instanceargs['choices'] = choices
             elif field.data_type == 'boolean':
                 fieldclass = forms.BooleanField
