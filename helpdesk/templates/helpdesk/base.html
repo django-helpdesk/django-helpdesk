@@ -9,13 +9,16 @@
         <title>{% block helpdesk_title %}Helpdesk{% endblock %} :: {% trans "Powered by django-helpdesk" %}</title>
         <script src='{{ STATIC_URL }}helpdesk/jquery-1.5.min.js' type='text/javascript' language='javascript'></script>
         <script src='{{ STATIC_URL }}helpdesk/jquery-ui-1.8.9.custom.min.js' type='text/javascript' language='javascript'></script>
-        <script src='{{ STATIC_URL }}helpdesk/jquery.translate-1.4.7.NCT.core.NCT-adapter.ui.progress.native.parallel.min.js' type='text/javascript' language='javascript'></script>
+        {% comment %}
+        <script src='{{ STATIC_URL }}helpdesk/jquery.translate-debug-all.js' type='text/javascript' language='javascript'></script>
+        {% endcomment %}
         <link rel='stylesheet' href='{{ STATIC_URL }}helpdesk/helpdesk.css' type='text/css' />
         <link rel='stylesheet' href='{{ STATIC_URL }}helpdesk/jquery-smoothness-theme/jquery-ui-1.8.9.custom.css' type='text/css' />
         <link rel='alternate' href='{% url helpdesk_rss "user" %}{{ user.username }}/' type='application/rss+xml' title='{% trans "My Open Tickets" %}' />
         <link rel='alternate' href='{% url helpdesk_rss "recent_activity" %}' type='application/rss+xml' title='{% trans "All Recent Activity" %}' />
         <link rel='alternate' href='{% url helpdesk_rss "unassigned" %}' type='application/rss+xml' title='{% trans "Unassigned Tickets" %}' />
 
+        {% comment %}
         <script type="text/javascript">
 
         $(document).ready(function(){
@@ -25,8 +28,9 @@
 	            function() { $('ul', this).css('display', 'none'); });
 
             {% if helpdesk_settings.HELPDESK_TRANSLATE_TICKET_COMMENTS %}
-            // add google translate functionality
-            $.translate(function(){ //when the Google Language API is loaded
+            // add translate functionality - google translate V1 is deprecated
+            $.translate.load(bingID);
+            $.translate(function(){ //when the Language API is loaded
                 $.translate().ui({
                       tags: ["select", "option"],
                       // a function that filters the languages:
@@ -56,14 +60,20 @@
                 })
                 .appendTo('#translate_dropdown'); // insert the dropdown menu to the page
 
-                //insert Google's logo after the dropdown:
-                $.translate.getBranding().appendTo('#translate_dropdown');
-
             });
             {% endif %}
 
         });
         </script>
+        {% endcomment %}
+        
+        <style type="text/css">
+        /* hide google translate top bar */
+        .goog-te-banner-frame {display: none !important;}
+        .goog-te-balloon-frame {display: none !important;}
+        /* hide google translate tooltips (generated for every translated item) */
+        .goog-tooltip {display: none !important; } 
+        </style>
 
         <style type="text/css">
         /* header */

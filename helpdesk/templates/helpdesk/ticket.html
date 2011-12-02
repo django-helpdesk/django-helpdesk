@@ -42,8 +42,20 @@
 
 {% block helpdesk_body %}
 {% if helpdesk_settings.HELPDESK_TRANSLATE_TICKET_COMMENTS %}
+{% comment %}
 <div id='translate_dropdown'>{% trans "Translate ticket comments into" %} </div>
 <div id='translate_block'>
+{% endcomment %}
+<div id="google_translate_element"></div><script>
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({
+    pageLanguage: 'auto',
+    includedLanguages: 'en,fr,de,ru',
+    autoDisplay: false,
+    layout: google.translate.TranslateElement.InlineLayout.HORIZONTAL
+  }, 'google_translate_element');
+}
+</script><script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 {% endif %}
 
 {% include "helpdesk/ticket_desc_table.html" %}
