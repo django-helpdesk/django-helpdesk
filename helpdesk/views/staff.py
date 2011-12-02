@@ -85,18 +85,34 @@ def dashboard(request):
     # Queue 2     4    12
 
     cursor = connection.cursor()
-    cursor.execute("""
-        SELECT      q.id as queue,
-                    q.title AS name,
-                    COUNT(CASE t.status WHEN '1' THEN t.id WHEN '2' THEN t.id END) AS open,
-                    COUNT(CASE t.status WHEN '3' THEN t.id END) AS resolved,
-                    COUNT(CASE t.status WHEN '4' THEN t.id END) AS closed
-            FROM    helpdesk_ticket t,
-                    helpdesk_queue q
-            WHERE   q.id =  t.queue_id
-            GROUP BY queue, name
-            ORDER BY q.id;
-    """)
+    if helpdesk_settings.HELPDESK_DASHBOARD_HIDE_EMPTY_QUEUES:
+        cursor.execute("""
+            SELECT      q.id as queue,
+                        q.title AS name,
+                        COUNT(CASE t.status WHEN '1' THEN t.id WHEN '2' THEN t.id END) AS open,
+                        COUNT(CASE t.status WHEN '3' THEN t.id END) AS resolved,
+                        COUNT(CASE t.status WHEN '4' THEN t.id END) AS closed
+                FROM    helpdesk_ticket t,
+                        helpdesk_queue q
+                WHERE   q.id = t.queue_id
+                GROUP BY queue, name
+                ORDER BY q.id;
+        """)
+    else:
+        cursor.execute("""
+            SELECT      q.id as queue,
+                        q.title AS name,
+                        COUNT(CASE t.status WHEN '1' THEN t.id WHEN '2' THEN t.id END) AS open,
+                        COUNT(CASE t.status WHEN '3' THEN t.id END) AS resolved,
+                        COUNT(CASE t.status WHEN '4' THEN t.id END) AS closed
+                FROM    helpdesk_queue q
+                LEFT OUTER JOIN helpdesk_ticket t
+                ON      q.id = t.queue_id            
+                GROUP BY queue, name
+                ORDER BY q.id;
+        """)    
+    
+    
     dash_tickets = query_to_dict(cursor.fetchall(), cursor.description)
 
     return render_to_response('helpdesk/dashboard.html',
