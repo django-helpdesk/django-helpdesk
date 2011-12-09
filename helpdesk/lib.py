@@ -54,7 +54,13 @@ def send_templated_mail(template_name, email_context, recipients, sender=None, b
     import os
 
     context = Context(email_context)
-    locale = context['queue'].get('locale', 'en')
+
+    if hasattr(context['queue'], 'locale'):
+        locale = getattr(context['queue'], 'locale', '')
+    else:
+        locale = context['queue'].get('locale', 'en')
+    if not locale:
+        locale = 'en'
 
     t = None
     try:
@@ -96,7 +102,7 @@ def send_templated_mail(template_name, email_context, recipients, sender=None, b
         "{{ ticket.ticket }} {{ ticket.title|safe }} %s" % t.subject
         ).render(context)
 
-    if type(recipients) == str:
+    if type(recipients) == str or type(recipients) == unicode:
         if recipients.find(','):
             recipients = recipients.split(',')
     elif type(recipients) != list:

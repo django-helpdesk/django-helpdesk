@@ -1,6 +1,7 @@
 {% extends "helpdesk/public_base.html" %}{% load i18n %}
 
 {% block helpdesk_body %}
+{% if helpdesk_settings.HELPDESK_VIEW_A_TICKET_PUBLIC %}
 <h2>{% trans "View a Ticket" %}</h2>
 
 <form method='get' action='{% url helpdesk_public_view %}'>
@@ -16,7 +17,9 @@
     <input type='submit' value='{% trans "View Ticket" %}' />
 </fieldset>
 {% csrf_token %}</form>
+{% endif %}
 
+{% if helpdesk_settings.HELPDESK_SUBMIT_A_TICKET_PUBLIC %}
 <h2 name='submit'>{% trans "Submit a Ticket" %}</h2>
 
 <p>{% trans "All fields are required. Please provide as descriptive a title and description as possible." %}</p>
@@ -42,4 +45,10 @@
 </fieldset>
 
 {% csrf_token %}</form>
+{% endif %}
+
+{% if not helpdesk_settings.HELPDESK_VIEW_A_TICKET_PUBLIC and not helpdesk_settings.HELPDESK_SUBMIT_A_TICKET_PUBLIC %}
+        <h2>{% trans "Please use button at upper right to login first." %}</h2>
+{% endif %}
+
 {% endblock %}

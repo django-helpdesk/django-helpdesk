@@ -1,6 +1,9 @@
-{% load i18n %}<html>
+{% load i18n %}
+{% load load_helpdesk_settings %}
+{% with request|load_helpdesk_settings as helpdesk_settings %}
+<html>
 <head>
-<title>{% block helpdesk_title %}{% trans "Helpdesk" %}{% endblock %}</title>
+<title>{% block helpdesk_title %}{{ helpdesk_settings.HELPDESK_PREPEND_ORG_NAME|default:'' }} {% trans "Helpdesk" %}{% endblock %}</title>
 <script src='{{ STATIC_URL }}helpdesk/jquery-1.5.min.js' type='text/javascript' language='javascript'></script>
 <link rel='stylesheet' href='{{ STATIC_URL }}helpdesk/helpdesk.css' type='text/css' />
 {% block helpdesk_head %}{% endblock %}
@@ -8,7 +11,7 @@
 <body>
 <div id='container'>
     <div id='header'>
-        <h1>{% trans "Helpdesk" %}</h1>
+        <h1>{{ helpdesk_settings.HELPDESK_PREPEND_ORG_NAME|default:'' }} {% trans "Helpdesk" %}</h1>
         {% include "helpdesk/navigation.html" %}
     </div>
     <div id='body'>
@@ -20,3 +23,4 @@
 </div>{% include "helpdesk/debug.html" %}
 </body>
 </html>
+{% endwith %}
