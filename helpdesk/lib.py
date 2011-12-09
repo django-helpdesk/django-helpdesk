@@ -102,7 +102,7 @@ def send_templated_mail(template_name, email_context, recipients, sender=None, b
         "{{ ticket.ticket }} {{ ticket.title|safe }} %s" % t.subject
         ).render(context)
 
-    if type(recipients) == str:
+    if type(recipients) == str or type(recipients) == unicode:
         if recipients.find(','):
             recipients = recipients.split(',')
     elif type(recipients) != list:
