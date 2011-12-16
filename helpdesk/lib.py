@@ -54,7 +54,15 @@ def send_templated_mail(template_name, email_context, recipients, sender=None, b
     import os
 
     context = Context(email_context)
-    locale = context['queue'].get('locale', 'en')
+
+    # XXX: context['queue'] seems to able to be provided as either
+    #      a dict or a Queue object, handle both & fallback to 'en'
+    if isinstance(context['queue'], dict):
+        locale = context['queue'].get('locale', 'en')
+    elif hasattr(context['queue'], 'locale'):
+        locale = context['queue'].locale
+    else:
+        locale = 'en'
 
     t = None
     try:
