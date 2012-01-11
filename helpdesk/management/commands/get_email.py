@@ -26,7 +26,7 @@ from django.core.management.base import BaseCommand
 from django.db.models import Q
 from django.utils.translation import ugettext as _
 
-from helpdesk.lib import send_templated_mail
+from helpdesk.lib import send_templated_mail, safe_template_context
 from helpdesk.models import Queue, Ticket, FollowUp, Attachment, IgnoreEmail
 
 
@@ -246,10 +246,7 @@ def ticket_from_message(message, queue, quiet):
         t.status = Ticket.REOPENED_STATUS
         t.save()
 
-    context = {
-        'ticket': t,
-        'queue': queue,
-    }
+    context = safe_template_context(t)
 
     if new:
 

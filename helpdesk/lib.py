@@ -17,6 +17,9 @@ try:
 except ImportError:
     from base64 import decodestring as b64decode
 
+import logging
+logger = logging.getLogger('helpdesk')
+
 from django.utils.encoding import smart_str
 
 def send_templated_mail(template_name, email_context, recipients, sender=None, bcc=None, fail_silently=False, files=None):
@@ -66,6 +69,8 @@ def send_templated_mail(template_name, email_context, recipients, sender=None, b
         try:
             t = EmailTemplate.objects.get(template_name__iexact=template_name, locale__isnull=True)
         except EmailTemplate.DoesNotExist:
+            logger.warning('template "%s" does not exist, no mail sent' %
+			   template_name)
             return # just ignore if template doesn't exist
 
     if not sender:
@@ -96,9 +101,8 @@ def send_templated_mail(template_name, email_context, recipients, sender=None, b
         "{{ ticket.ticket }} {{ ticket.title|safe }} %s" % t.subject
         ).render(context)
 
-    if type(recipients) == str:
-        if recipients.find(','):
-            recipients = recipients.split(',')
+    if isinstance(recipients,(str,unicode)):
+        recipients = recipients.split(',')
     elif type(recipients) != list:
         recipients = [recipients,]
 

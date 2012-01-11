@@ -13,12 +13,12 @@ import getopt
 from optparse import make_option
 import sys
 
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 from django.db.models import Q
 from django.utils.translation import ugettext as _
 
 from helpdesk.models import Queue, Ticket, FollowUp, EscalationExclusion, TicketChange
-from helpdesk.lib import send_templated_mail
+from helpdesk.lib import send_templated_mail, safe_template_context
 
 
 class Command(BaseCommand):
@@ -99,10 +99,7 @@ def escalate_tickets(queues, verbose):
             t.priority -= 1
             t.save()
 
-            context = {
-                'ticket': t,
-                'queue': q,
-            }
+            context = safe_template_context(t)
 
             if t.submitter_email:
                 send_templated_mail(

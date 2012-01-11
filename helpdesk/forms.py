@@ -15,7 +15,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext as _
 
-from helpdesk.lib import send_templated_mail
+from helpdesk.lib import send_templated_mail, safe_template_context
 from helpdesk.models import Ticket, Queue, FollowUp, Attachment, IgnoreEmail, TicketCC, CustomField, TicketCustomFieldValue, TicketDependency
 from helpdesk.settings import HAS_TAG_SUPPORT
 
@@ -280,11 +280,8 @@ class TicketForm(forms.Form):
                 # settings.MAX_EMAIL_ATTACHMENT_SIZE) are sent via email.
                 files.append(a.file.path)
 
-        context = {
-            'ticket': t,
-            'queue': q,
-            'comment': f.comment,
-        }
+        context = safe_template_context(t)
+        context['comment'] = f.comment
         
         messages_sent_to = []
 
@@ -482,10 +479,7 @@ class PublicTicketForm(forms.Form):
                 # settings.MAX_EMAIL_ATTACHMENT_SIZE) are sent via email.
                 files.append(a.file.path)
 
-        context = {
-            'ticket': t,
-            'queue': q,
-        }
+        context = safe_template_context(t)
 
         messages_sent_to = []
 
