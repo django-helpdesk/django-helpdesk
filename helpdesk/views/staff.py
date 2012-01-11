@@ -23,18 +23,25 @@ from django.shortcuts import render_to_response, get_object_or_404
 from django.template import loader, Context, RequestContext
 from django.utils.translation import ugettext as _
 from django.utils.html import escape
+from django import forms
 
 from helpdesk.forms import TicketForm, UserSettingsForm, EmailIgnoreForm, EditTicketForm, TicketCCForm, EditFollowUpForm, TicketDependencyForm
 from helpdesk.lib import send_templated_mail, query_to_dict, apply_query, safe_template_context
 from helpdesk.models import Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch, IgnoreEmail, TicketCC, TicketDependency
 from helpdesk.settings import HAS_TAG_SUPPORT
+from helpdesk import settings as helpdesk_settings
   
 if HAS_TAG_SUPPORT:
     from tagging.models import Tag, TaggedItem
 
-staff_member_required = user_passes_test(lambda u: u.is_authenticated() and u.is_active and u.is_staff)
-superuser_required = user_passes_test(lambda u: u.is_authenticated() and u.is_active and u.is_superuser)
+if helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE:
+    # treat 'normal' users like 'staff'
+    staff_member_required = user_passes_test(lambda u: u.is_authenticated() and u.is_active)
+else:
+    staff_member_required = user_passes_test(lambda u: u.is_authenticated() and u.is_active and u.is_staff)
 
+
+superuser_required = user_passes_test(lambda u: u.is_authenticated() and u.is_active and u.is_superuser)
 
 
 def dashboard(request):
@@ -44,17 +51,32 @@ def dashboard(request):
     with options for them to 'Take' ownership of said tickets.
     """
 
+    # open & reopened tickets, assigned to current user
     tickets = Ticket.objects.filter(
             assigned_to=request.user,
         ).exclude(
-            status=Ticket.CLOSED_STATUS,
+            status__in = [Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
         )
+
+    # closed & resolved tickets, assigned to current user
+    tickets_closed_resolved =  Ticket.objects.filter(
+            assigned_to=request.user, 
+            status__in = [Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS])
 
     unassigned_tickets = Ticket.objects.filter(
             assigned_to__isnull=True,
         ).exclude(
             status=Ticket.CLOSED_STATUS,
         )
+
+    # all tickets, reported by current user
+    all_tickets_reported_by_current_user = ''
+    email_current_user = request.user.email
+    if email_current_user:
+        all_tickets_reported_by_current_user = Ticket.objects.filter(
+            submitter_email=email_current_user,
+        ).order_by('status')
+
 
     # The following query builds a grid of queues & ticket statuses,
     # to be displayed to the user. EG:
@@ -63,23 +85,42 @@ def dashboard(request):
     # Queue 2     4    12
 
     cursor = connection.cursor()
-    cursor.execute("""
-        SELECT      q.id as queue,
-                    q.title AS name,
-                    COUNT(CASE t.status WHEN '1' THEN t.id WHEN '2' THEN t.id END) AS open,
-                    COUNT(CASE t.status WHEN '3' THEN t.id END) AS resolved
-            FROM    helpdesk_ticket t,
-                    helpdesk_queue q
-            WHERE   q.id =  t.queue_id
-            GROUP BY queue, name
-            ORDER BY q.id;
-    """)
+    if helpdesk_settings.HELPDESK_DASHBOARD_HIDE_EMPTY_QUEUES:
+        cursor.execute("""
+            SELECT      q.id as queue,
+                        q.title AS name,
+                        COUNT(CASE t.status WHEN '1' THEN t.id WHEN '2' THEN t.id END) AS open,
+                        COUNT(CASE t.status WHEN '3' THEN t.id END) AS resolved,
+                        COUNT(CASE t.status WHEN '4' THEN t.id END) AS closed
+                FROM    helpdesk_ticket t,
+                        helpdesk_queue q
+                WHERE   q.id = t.queue_id
+                GROUP BY queue, name
+                ORDER BY q.id;
+        """)
+    else:
+        cursor.execute("""
+            SELECT      q.id as queue,
+                        q.title AS name,
+                        COUNT(CASE t.status WHEN '1' THEN t.id WHEN '2' THEN t.id END) AS open,
+                        COUNT(CASE t.status WHEN '3' THEN t.id END) AS resolved,
+                        COUNT(CASE t.status WHEN '4' THEN t.id END) AS closed
+                FROM    helpdesk_queue q
+                LEFT OUTER JOIN helpdesk_ticket t
+                ON      q.id = t.queue_id            
+                GROUP BY queue, name
+                ORDER BY q.id;
+        """)    
+    
+    
     dash_tickets = query_to_dict(cursor.fetchall(), cursor.description)
 
     return render_to_response('helpdesk/dashboard.html',
         RequestContext(request, {
             'user_tickets': tickets,
+            'user_tickets_closed_resolved': tickets_closed_resolved,
             'unassigned_tickets': unassigned_tickets,
+            'all_tickets_reported_by_current_user': all_tickets_reported_by_current_user,
             'dash_tickets': dash_tickets,
         }))
 dashboard = staff_member_required(dashboard)
@@ -127,9 +168,18 @@ def followup_edit(request, ticket_id, followup_id, ):
             new_status = form.cleaned_data['new_status']
             #will save previous date
             old_date = followup.date
-            followup.delete()
             new_followup = FollowUp(title=title, date=old_date, ticket=_ticket, comment=comment, public=public, new_status=new_status, )
+            # keep old user if one did exist before.
+            if followup.user:
+                new_followup.user = followup.user
             new_followup.save()
+            # get list of old attachments & link them to new_followup
+            attachments = Attachment.objects.filter(followup = followup)            
+            for attachment in attachments:
+                attachment.followup = new_followup
+                attachment.save()
+            # delete old followup
+            followup.delete()                
         return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket.id]))
             
 def view_ticket(request, ticket_id):
@@ -169,7 +219,7 @@ def view_ticket(request, ticket_id):
     return render_to_response('helpdesk/ticket.html',
         RequestContext(request, {
             'ticket': ticket,
-            'active_users': User.objects.filter(is_active=True).filter(is_staff=True).order_by('username'),
+            'active_users': User.objects.filter(is_active=True).order_by('username'),
             'priorities': Ticket.PRIORITY_CHOICES,
             'preset_replies': PreSetReply.objects.filter(Q(queues=ticket.queue) | Q(queues__isnull=True)),
             'tags_enabled': HAS_TAG_SUPPORT,
@@ -178,7 +228,7 @@ view_ticket = staff_member_required(view_ticket)
 
 
 def update_ticket(request, ticket_id, public=False):
-    if not (public or (request.user.is_authenticated() and request.user.is_active and request.user.is_staff)):
+    if not (public or (request.user.is_authenticated() and request.user.is_active and (request.user.is_staff or helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE))):
         return HttpResponseForbidden(_('Sorry, you need to login to do that.'))
 
     ticket = get_object_or_404(Ticket, id=ticket_id)
@@ -195,6 +245,10 @@ def update_ticket(request, ticket_id, public=False):
     # comment.
     from django.template import loader, Context
     context = safe_template_context(ticket)
+    # this line sometimes creates problems if code is sent as a comment.
+    # if comment contains some django code, like "why does {% if bla %} crash",
+    # then the following line will give us a crash, since django expects {% if %}
+    # to be closed with an {% endif %} tag.
     comment = loader.get_template_from_string(comment).render(Context(context))
 
     if owner is None and ticket.assigned_to:
@@ -202,7 +256,7 @@ def update_ticket(request, ticket_id, public=False):
 
     f = FollowUp(ticket=ticket, date=datetime.now(), comment=comment)
 
-    if request.user.is_staff:
+    if request.user.is_staff or helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE:
         f.user = request.user
 
     f.public = public
@@ -217,6 +271,7 @@ def update_ticket(request, ticket_id, public=False):
                 }
             ticket.assigned_to = new_user
             reassigned = True
+        # user changed owner to 'unassign'
         elif owner == 0 and ticket.assigned_to is not None:
             f.title = _('Unassigned')
             ticket.assigned_to = None
@@ -289,7 +344,7 @@ def update_ticket(request, ticket_id, public=False):
             c.save()
             ticket.tags = tags
 
-    if f.new_status == Ticket.RESOLVED_STATUS:
+    if new_status == Ticket.RESOLVED_STATUS:
         ticket.resolution = comment
 
     messages_sent_to = []
@@ -377,7 +432,7 @@ def update_ticket(request, ticket_id, public=False):
 
     ticket.save()
 
-    if request.user.is_staff:
+    if request.user.is_staff or helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE:
         return HttpResponseRedirect(ticket.get_absolute_url())
     else:
         return HttpResponseRedirect(ticket.ticket_url)
@@ -421,7 +476,8 @@ def mass_update(request):
             # Send email to Submitter, Owner, Queue CC
             context = safe_template_context(t)
             context.update(
-                resolution=t.resolution,
+                resolution = t.resolution,
+                queue = t.queue,
                 )
 
             messages_sent_to = []
@@ -694,6 +750,8 @@ def create_ticket(request):
         form = TicketForm(initial=initial_data)
         form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
         form.fields['assigned_to'].choices = [('', '--------')] + [[u.id, u.username] for u in User.objects.filter(is_active=True).order_by('username')]
+        if helpdesk_settings.HELPDESK_CREATE_TICKET_HIDE_ASSIGNED_TO:
+            form.fields['assigned_to'].widget = forms.HiddenInput()
 
     return render_to_response('helpdesk/create_ticket.html',
         RequestContext(request, {
@@ -823,7 +881,7 @@ def run_report(request, report):
     periods = []
     year, month = first_year, first_month
     working = True
-    periods.append("%s %s" % (months[month], year))
+    periods.append("%s %s" % (months[month - 1], year))
 
     while working:
         month += 1
@@ -893,7 +951,7 @@ def run_report(request, report):
 
         elif report == 'usermonth':
             metric1 = u'%s' % ticket.get_assigned_to
-            metric2 = u'%s %s' % (months[ticket.created.month], ticket.created.year)
+            metric2 = u'%s %s' % (months[ticket.created.month - 1], ticket.created.year)
 
         elif report == 'queuepriority':
             metric1 = u'%s' % ticket.queue.title
@@ -905,14 +963,14 @@ def run_report(request, report):
 
         elif report == 'queuemonth':
             metric1 = u'%s' % ticket.queue.title
-            metric2 = u'%s %s' % (months[ticket.created.month], ticket.created.year)
+            metric2 = u'%s %s' % (months[ticket.created.month - 1], ticket.created.year)
 
         summarytable[metric1, metric2] += 1
     
     table = []
     
     header1 = sorted(set(list( i.encode('utf-8') for i,_ in summarytable.keys() )))
-
+    
     column_headings = [col1heading] + possible_options
 
     # Pivot the data so that 'header1' fields are always first column
@@ -974,9 +1032,16 @@ def user_settings(request):
     else:
         form = UserSettingsForm(s.settings)
 
+    user = User.objects.get(id = request.user.id)
+    show_password_change_link = 0
+    # we don't want non-local users to see the 'change password' link.
+    if helpdesk_settings.HELPDESK_SHOW_CHANGE_PASSWORD and user.has_usable_password():
+        show_password_change_link = 1
+
     return render_to_response('helpdesk/user_settings.html',
         RequestContext(request, {
             'form': form,
+            'show_password_change_link': show_password_change_link,
         }))
 user_settings = staff_member_required(user_settings)
 
@@ -1085,4 +1150,11 @@ def ticket_dependency_del(request, ticket_id, dependency_id):
             'dependency': dependency,
         }))
 ticket_dependency_del = staff_member_required(ticket_dependency_del)
+
+def attachment_del(request, ticket_id, attachment_id):
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+    attachment = get_object_or_404(Attachment, id=attachment_id)
+    attachment.delete()
+    return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket_id]))
+attachment_del = staff_member_required(attachment_del)
 

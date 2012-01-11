@@ -22,7 +22,10 @@ from helpdesk.models import Ticket, Queue, UserSettings
 
 
 def homepage(request):
-    if request.user.is_staff:
+    if not request.user.is_authenticated() and helpdesk_settings.HELPDESK_REDIRECT_TO_LOGIN_BY_DEFAULT:
+        return HttpResponseRedirect(reverse('login'))
+
+    if (request.user.is_staff or (request.user.is_authenticated() and helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE)):
         try:
             if getattr(request.user.usersettings.settings, 'login_view_ticketlist', False):
                 return HttpResponseRedirect(reverse('helpdesk_list'))
@@ -108,10 +111,16 @@ def view_ticket(request):
 
                 return update_ticket(request, ticket_id, public=True)
 
+            # redirect user back to this ticket if possible.
+            redirect_url = ''
+            if helpdesk_settings.HELPDESK_NAVIGATION_ENABLED:
+                redirect_url = reverse('helpdesk_view', args=[ticket_id])
+
             return render_to_response('helpdesk/public_view_ticket.html',
                 RequestContext(request, {
                     'ticket': ticket,
                     'helpdesk_settings': helpdesk_settings,
+                    'next': redirect_url,
                 }))
 
     return render_to_response('helpdesk/public_view_form.html',
@@ -122,3 +131,10 @@ def view_ticket(request):
             'helpdesk_settings': helpdesk_settings,
         }))
 
+def change_language(request):
+    return_to = ''
+    if request.GET.has_key('return_to'):
+        return_to = request.GET['return_to']
+
+    return render_to_response('helpdesk/public_change_language.html',
+        RequestContext(request, {'next': return_to}))

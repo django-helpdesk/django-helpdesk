@@ -80,6 +80,10 @@ urlpatterns = patterns('helpdesk.views.staff',
     url(r'^tickets/(?P<ticket_id>[0-9]+)/dependency/delete/(?P<dependency_id>[0-9]+)/$',
         'ticket_dependency_del',
         name='helpdesk_ticket_dependency_del'),
+        
+    url(r'^tickets/(?P<ticket_id>[0-9]+)/attachment_delete/(?P<attachment_id>[0-9]+)/$',
+        'attachment_del',
+        name='helpdesk_attachment_del'),
 
     url(r'^raw/(?P<type>\w+)/$',
         'raw_details',
@@ -130,6 +134,10 @@ urlpatterns += patterns('helpdesk.views.public',
     url(r'^view/$',
         'view_ticket',
         name='helpdesk_public_view'),
+
+    url(r'^change_language/$',
+        'change_language',
+        name='helpdesk_public_change_language'),        
 )
 
 urlpatterns += patterns('',

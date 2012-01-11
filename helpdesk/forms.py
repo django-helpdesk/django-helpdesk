@@ -11,6 +11,7 @@ from datetime import datetime
 from StringIO import StringIO
 
 from django import forms
+from django.forms import extras
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext as _
@@ -57,7 +58,10 @@ class EditTicketForm(forms.ModelForm):
                 instanceargs['max_digits'] = field.max_length
             elif field.data_type == 'list':
                 fieldclass = forms.ChoiceField
-                instanceargs['choices'] = field.choices_as_array
+                if field.empty_selection_list:
+                    choices = field.choices_as_array
+                    choices.insert(0, ('','---------' ) )
+                instanceargs['choices'] = choices
             elif field.data_type == 'boolean':
                 fieldclass = forms.BooleanField
             elif field.data_type == 'date':
@@ -113,19 +117,20 @@ class TicketForm(forms.Form):
     title = forms.CharField(
         max_length=100,
         required=True,
-        widget=forms.TextInput(),
+        widget=forms.TextInput(attrs={'size':'60'}),
         label=_('Summary of the problem'),
         )
 
     submitter_email = forms.EmailField(
         required=False,
         label=_('Submitter E-Mail Address'),
+        widget=forms.TextInput(attrs={'size':'60'}),
         help_text=_('This e-mail address will receive copies of all public '
             'updates to this ticket.'),
         )
 
     body = forms.CharField(
-        widget=forms.Textarea(),
+        widget=forms.Textarea(attrs={'cols': 47, 'rows': 15}),
         label=_('Description of Issue'),
         required=True,
         )
@@ -190,11 +195,15 @@ class TicketForm(forms.Form):
                 instanceargs['max_digits'] = field.max_length
             elif field.data_type == 'list':
                 fieldclass = forms.ChoiceField
-                instanceargs['choices'] = field.choices_as_array
+                if field.empty_selection_list:
+                    choices = field.choices_as_array
+                    choices.insert(0, ('','---------' ) )
+                instanceargs['choices'] = choices
             elif field.data_type == 'boolean':
                 fieldclass = forms.BooleanField
             elif field.data_type == 'date':
                 fieldclass = forms.DateField
+                instanceargs['widget'] = extras.SelectDateWidget
             elif field.data_type == 'time':
                 fieldclass = forms.TimeField
             elif field.data_type == 'datetime':
@@ -399,9 +408,9 @@ class PublicTicketForm(forms.Form):
                 instanceargs['max_digits'] = field.max_length
             elif field.data_type == 'list':
                 fieldclass = forms.ChoiceField
-                choices = []
-                for line in field.list_values.split("\n"):
-                    choices.append((line, line))
+                if field.empty_selection_list:
+                    choices = field.choices_as_array
+                    choices.insert(0, ('','---------' ) )
                 instanceargs['choices'] = choices
             elif field.data_type == 'boolean':
                 fieldclass = forms.BooleanField
