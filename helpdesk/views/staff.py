@@ -182,6 +182,7 @@ def followup_edit(request, ticket_id, followup_id):
             # delete old followup
             followup.delete()
         return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket.id]))
+followup_edit = staff_member_required(followup_edit)
 
 
 def followup_delete(request, ticket_id, followup_id):
