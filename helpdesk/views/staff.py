@@ -241,6 +241,29 @@ def update_ticket(request, ticket_id, public=False):
     priority = int(request.POST.get('priority', ticket.priority))
     tags = request.POST.get('tags', '')
 
+    # Check whether anything about the ticket has changed. If nothing has 
+    # changed, we return to the ticket right away and skip everything below 
+    # this point.
+    # The code is using nested 'if' statements instead of concatenated 'and' 
+    # statements because it's easier to read, comment and debug.
+    NO_CHANGES = False
+    if comment == '':
+        if new_status == ticket.status:
+            if title == ticket.title:
+                #  (ticket remains unassigned            ) OR (ticket has the same owner                                     )
+                if (owner == 0 and not ticket.assigned_to) or (owner > 0 and User.objects.get(id=owner) == ticket.assigned_to):
+                    if priority == int(ticket.priority):
+                        if not request.FILES:
+                            # nothing has changed up to this point
+                            NO_CHANGES = True
+                            if HAS_TAG_SUPPORT:
+                                if tags != ticket.tags:
+                                    NO_CHANGES = False
+
+    if NO_CHANGES:
+        return return_to_ticket(request.user, helpdesk_settings, ticket)
+
+
     # We need to allow the 'ticket' and 'queue' contexts to be applied to the
     # comment.
     from django.template import loader, Context
@@ -432,7 +455,12 @@ def update_ticket(request, ticket_id, public=False):
 
     ticket.save()
 
-    if request.user.is_staff or helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE:
+    return return_to_ticket(request.user, helpdesk_settings, ticket)
+
+
+def return_to_ticket(user, helpdesk_settings, ticket):
+    ''' helper function for 'update_ticket' '''
+    if user.is_staff or helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE:
         return HttpResponseRedirect(ticket.get_absolute_url())
     else:
         return HttpResponseRedirect(ticket.ticket_url)
