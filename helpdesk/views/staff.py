@@ -216,10 +216,15 @@ def view_ticket(request, ticket_id):
 
         return update_ticket(request, ticket_id)
 
+    if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS:
+        users = User.objects.filter(is_active=True, is_staff=True).order_by('username')
+    else:
+        users = User.objects.filter(is_active=True).order_by('username')
+
     return render_to_response('helpdesk/ticket.html',
         RequestContext(request, {
             'ticket': ticket,
-            'active_users': User.objects.filter(is_active=True).order_by('username'),
+            'active_users': users,
             'priorities': Ticket.PRIORITY_CHOICES,
             'preset_replies': PreSetReply.objects.filter(Q(queues=ticket.queue) | Q(queues__isnull=True)),
             'tags_enabled': HAS_TAG_SUPPORT,
@@ -749,7 +754,11 @@ def create_ticket(request):
 
         form = TicketForm(initial=initial_data)
         form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
-        form.fields['assigned_to'].choices = [('', '--------')] + [[u.id, u.username] for u in User.objects.filter(is_active=True).order_by('username')]
+        if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS:
+            users = User.objects.filter(is_active=True, is_staff=True).order_by('username')
+        else:
+            users = User.objects.filter(is_active=True).order_by('username')
+        form.fields['assigned_to'].choices = [('', '--------')] + [[u.id, u.username] for u in users]
         if helpdesk_settings.HELPDESK_CREATE_TICKET_HIDE_ASSIGNED_TO:
             form.fields['assigned_to'].widget = forms.HiddenInput()
 

@@ -19,6 +19,7 @@ from django.utils.translation import ugettext as _
 from helpdesk.lib import send_templated_mail, safe_template_context
 from helpdesk.models import Ticket, Queue, FollowUp, Attachment, IgnoreEmail, TicketCC, CustomField, TicketCustomFieldValue, TicketDependency
 from helpdesk.settings import HAS_TAG_SUPPORT
+from helpdesk import settings as helpdesk_settings
 
 class EditTicketForm(forms.ModelForm):
     class Meta:
@@ -572,7 +573,11 @@ class EmailIgnoreForm(forms.ModelForm):
 class TicketCCForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(TicketCCForm, self).__init__(*args, **kwargs)
-        self.fields['user'].queryset = User.objects.filter(is_active=True).order_by('username')
+        if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_CC:
+            users = User.objects.filter(is_active=True, is_staff=True).order_by('username')
+        else:
+            users = User.objects.filter(is_active=True).order_by('username')
+        self.fields['user'].queryset = users 
     class Meta:
         model = TicketCC
         exclude = ('ticket',)

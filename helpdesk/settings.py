@@ -100,6 +100,12 @@ HELPDESK_SHOW_HOLD_BUTTON_TICKET_TOP = getattr(settings, 'HELPDESK_SHOW_HOLD_BUT
 # make all updates public by default? this will hide the 'is this update public' checkbox
 HELPDESK_UPDATE_PUBLIC_DEFAULT = getattr(settings, 'HELPDESK_UPDATE_PUBLIC_DEFAULT', True)
 
+# only show staff users in ticket owner drop-downs 
+HELPDESK_STAFF_ONLY_TICKET_OWNERS = getattr(settings, 'HELPDESK_STAFF_ONLY_TICKET_OWNERS', False)
+
+# only show staff users in ticket cc drop-down 
+HELPDESK_STAFF_ONLY_TICKET_CC = getattr(settings, 'HELPDESK_STAFF_ONLY_TICKET_CC', False)
+
 
 
 ''' options for staff.create_ticket view '''
