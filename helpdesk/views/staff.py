@@ -15,6 +15,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.files.base import ContentFile
 from django.core.urlresolvers import reverse
+from django.core.exceptions import ValidationError
 from django.core import paginator
 from django.db import connection
 from django.db.models import Q
@@ -609,18 +610,27 @@ def ticket_list(request):
     else:
         queues = request.GET.getlist('queue')
         if queues:
-            queues = [int(q) for q in queues]
-            query_params['filtering']['queue__id__in'] = queues
+            try:
+                queues = [int(q) for q in queues]
+                query_params['filtering']['queue__id__in'] = queues
+            except ValueError:
+                pass
 
         owners = request.GET.getlist('assigned_to')
         if owners:
-            owners = [int(u) for u in owners]
-            query_params['filtering']['assigned_to__id__in'] = owners
+            try:
+                owners = [int(u) for u in owners]
+                query_params['filtering']['assigned_to__id__in'] = owners
+            except ValueError:
+                pass
 
         statuses = request.GET.getlist('status')
         if statuses:
-            statuses = [int(s) for s in statuses]
-            query_params['filtering']['status__in'] = statuses
+            try:
+                statuses = [int(s) for s in statuses]
+                query_params['filtering']['status__in'] = statuses
+            except ValueError:
+                pass
 
         date_from = request.GET.get('date_from')
         if date_from:
@@ -653,8 +663,15 @@ def ticket_list(request):
         sortreverse = request.GET.get('sortreverse', None)
         query_params['sortreverse'] = sortreverse
 
-    ticket_qs = apply_query(Ticket.objects.select_related(), query_params)
-    print >> sys.stderr,  str(ticket_qs.query)
+    try:
+        ticket_qs = apply_query(Ticket.objects.select_related(), query_params)
+    except ValidationError:
+        # invalid parameters in query, return default query
+        query_params = {
+            'filtering': {'status__in': [1, 2, 3]},
+            'sorting': 'created',
+        }
+        ticket_qs = apply_query(Ticket.objects.select_related(), query_params)
 
     ## TAG MATCHING
     if HAS_TAG_SUPPORT:
