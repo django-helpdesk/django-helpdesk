@@ -81,7 +81,7 @@ def process_queue(q, quiet=False):
 
     if email_box_type == 'pop3':
 
-        if q.email_box_ssl:
+        if q.email_box_ssl or settings.QUEUE_EMAIL_BOX_SSL:
             if not q.email_box_port: q.email_box_port = 995
             server = poplib.POP3_SSL(q.email_box_host or settings.QUEUE_EMAIL_BOX_HOST, int(q.email_box_port))
         else:
@@ -108,7 +108,7 @@ def process_queue(q, quiet=False):
         server.quit()
 
     elif email_box_type == 'imap':
-        if q.email_box_ssl:
+        if q.email_box_ssl or settings.QUEUE_EMAIL_BOX_SSL:
             if not q.email_box_port: q.email_box_port = 993
             server = imaplib.IMAP4_SSL(q.email_box_host or settings.QUEUE_EMAIL_BOX_HOST, int(q.email_box_port))
         else:
