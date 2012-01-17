@@ -7,6 +7,9 @@
     {% if helpdesk_settings.HELPDESK_NAVIGATION_STATS_ENABLED %}
     <li><a href='{% url helpdesk_report_index %}'>{% trans "Stats" %}</a></li>
     {% endif %}
+    {% if helpdesk_settings.HELPDESK_KB_ENABLED_STAFF %}
+    <li><a href='{% url helpdesk_kb_index %}'>{% trans "Knowledgebase" %}</a></li>
+    {% endif %}
     {% if user_saved_queries_ %}
         <li class="headerlink"><a>{% trans "Load Saved Query" %}</a>
             <ul>
