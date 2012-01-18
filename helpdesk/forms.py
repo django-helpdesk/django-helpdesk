@@ -196,8 +196,8 @@ class TicketForm(forms.Form):
                 instanceargs['max_digits'] = field.max_length
             elif field.data_type == 'list':
                 fieldclass = forms.ChoiceField
+                choices = field.choices_as_array
                 if field.empty_selection_list:
-                    choices = field.choices_as_array
                     choices.insert(0, ('','---------' ) )
                 instanceargs['choices'] = choices
             elif field.data_type == 'boolean':
