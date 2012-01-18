@@ -176,7 +176,7 @@ def apply_query(queryset, params):
     sorting = params.get('sorting', None)
     if not sorting:
         sortreverse = params.get('sortreverse', None)
-        if not sortreverse:
+        if sortreverse:
             sorting = "-%s" % sorting
         queryset = queryset.order_by(sorting)
 
