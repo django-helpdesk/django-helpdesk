@@ -221,9 +221,14 @@ def view_ticket(request, ticket_id):
     else:
         users = User.objects.filter(is_active=True).order_by('username')
 
+
+    # TODO: shouldn't this template get a form to begin with?
+    form = TicketForm(initial={'due_date':ticket.due_date})
+
     return render_to_response('helpdesk/ticket.html',
         RequestContext(request, {
             'ticket': ticket,
+            'form': form,
             'active_users': users,
             'priorities': Ticket.PRIORITY_CHOICES,
             'preset_replies': PreSetReply.objects.filter(Q(queues=ticket.queue) | Q(queues__isnull=True)),
@@ -244,6 +249,10 @@ def update_ticket(request, ticket_id, public=False):
     public = request.POST.get('public', False)
     owner = int(request.POST.get('owner', None))
     priority = int(request.POST.get('priority', ticket.priority))
+    due_date = datetime(
+            int(request.POST.get('due_date_year')),
+            int(request.POST.get('due_date_month')),
+            int(request.POST.get('due_date_day')))
     tags = request.POST.get('tags', '')
 
     # We need to allow the 'ticket' and 'queue' contexts to be applied to the
@@ -337,6 +346,16 @@ def update_ticket(request, ticket_id, public=False):
             )
         c.save()
         ticket.priority = priority
+
+    if due_date != ticket.due_date:
+        c = TicketChange(
+            followup=f,
+            field=_('Due on'),
+            old_value=ticket.due_date,
+            new_value=due_date,
+            )
+        c.save()
+        ticket.due_date = due_date
 
     if HAS_TAG_SUPPORT:
         if tags != ticket.tags:

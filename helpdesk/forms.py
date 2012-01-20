@@ -159,10 +159,12 @@ class TicketForm(forms.Form):
         label=_('Due on'),
         )
 
-    def clean_due_date:
-        new_data = self.cleaned_data['due_date']
-        if new_data != self.instance.due_date:
+    def clean_due_date(self):
+        data = self.cleaned_data['due_date']
+        #import ipdb; ipdb.set_trace()
+        if not hasattr(self, 'instance') or self.instance.due_date != new_data:
             print "you changed!"
+        return data
 
     attachment = forms.FileField(
         required=False,
