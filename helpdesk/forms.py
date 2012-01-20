@@ -153,6 +153,17 @@ class TicketForm(forms.Form):
             'as \'3\'.'),
         )
 
+    due_date = forms.DateTimeField(
+        widget=extras.SelectDateWidget,
+        required=False,
+        label=_('Due on'),
+        )
+
+    def clean_due_date:
+        new_data = self.cleaned_data['due_date']
+        if new_data != self.instance.due_date:
+            print "you changed!"
+
     attachment = forms.FileField(
         required=False,
         label=_('Attach File'),
@@ -235,6 +246,7 @@ class TicketForm(forms.Form):
                     queue = q,
                     description = self.cleaned_data['body'],
                     priority = self.cleaned_data['priority'],
+                    due_date = self.cleaned_data['due_date'],
                   )
 
         if HAS_TAG_SUPPORT:
@@ -377,6 +389,12 @@ class PublicTicketForm(forms.Form):
         help_text=_('Please select a priority carefully.'),
         )
 
+    due_date = forms.DateTimeField(
+        widget=extras.SelectDateWidget,
+        required=False,
+        label=_('Due on'),
+        )
+
     attachment = forms.FileField(
         required=False,
         label=_('Attach File'),
@@ -447,6 +465,7 @@ class PublicTicketForm(forms.Form):
             queue = q,
             description = self.cleaned_data['body'],
             priority = self.cleaned_data['priority'],
+            due_date = self.cleaned_data['due_date'],
             )
 
         t.save()

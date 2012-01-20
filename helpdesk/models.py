@@ -326,6 +326,12 @@ class Ticket(models.Model):
         help_text=_('1 = Highest Priority, 5 = Low Priority'),
         )
 
+    due_date = models.DateTimeField(
+        _('Due on'),
+        blank=True,
+        null=True,
+        )
+
     last_escalation = models.DateTimeField(
         blank=True,
         null=True,
