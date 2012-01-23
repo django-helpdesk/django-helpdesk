@@ -1,0 +1,6 @@
+Cordiali saluti,
+
+{{ queue.title }}{% if queue.email_address %}
+{{ queue.email_address }}{% endif %}
+
+Questa email vi è stata inviata in quanto utenti del nostro servizio di supporto clienti, in conformità con la nostra policy sulla privacy. Vi preghiamo di informarci se pensate di aver ricevuto questa email per errore.
