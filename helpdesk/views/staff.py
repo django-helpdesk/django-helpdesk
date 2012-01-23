@@ -216,10 +216,20 @@ def view_ticket(request, ticket_id):
 
         return update_ticket(request, ticket_id)
 
+    if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS:
+        users = User.objects.filter(is_active=True, is_staff=True).order_by('username')
+    else:
+        users = User.objects.filter(is_active=True).order_by('username')
+
+
+    # TODO: shouldn't this template get a form to begin with?
+    form = TicketForm(initial={'due_date':ticket.due_date})
+
     return render_to_response('helpdesk/ticket.html',
         RequestContext(request, {
             'ticket': ticket,
-            'active_users': User.objects.filter(is_active=True).order_by('username'),
+            'form': form,
+            'active_users': users,
             'priorities': Ticket.PRIORITY_CHOICES,
             'preset_replies': PreSetReply.objects.filter(Q(queues=ticket.queue) | Q(queues__isnull=True)),
             'tags_enabled': HAS_TAG_SUPPORT,
@@ -239,6 +249,10 @@ def update_ticket(request, ticket_id, public=False):
     public = request.POST.get('public', False)
     owner = int(request.POST.get('owner', None))
     priority = int(request.POST.get('priority', ticket.priority))
+    due_date = datetime(
+            int(request.POST.get('due_date_year')),
+            int(request.POST.get('due_date_month')),
+            int(request.POST.get('due_date_day')))
     tags = request.POST.get('tags', '')
 
     # We need to allow the 'ticket' and 'queue' contexts to be applied to the
@@ -332,6 +346,16 @@ def update_ticket(request, ticket_id, public=False):
             )
         c.save()
         ticket.priority = priority
+
+    if due_date != ticket.due_date:
+        c = TicketChange(
+            followup=f,
+            field=_('Due on'),
+            old_value=ticket.due_date,
+            new_value=due_date,
+            )
+        c.save()
+        ticket.due_date = due_date
 
     if HAS_TAG_SUPPORT:
         if tags != ticket.tags:
@@ -749,7 +773,11 @@ def create_ticket(request):
 
         form = TicketForm(initial=initial_data)
         form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
-        form.fields['assigned_to'].choices = [('', '--------')] + [[u.id, u.username] for u in User.objects.filter(is_active=True).order_by('username')]
+        if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS:
+            users = User.objects.filter(is_active=True, is_staff=True).order_by('username')
+        else:
+            users = User.objects.filter(is_active=True).order_by('username')
+        form.fields['assigned_to'].choices = [('', '--------')] + [[u.id, u.username] for u in users]
         if helpdesk_settings.HELPDESK_CREATE_TICKET_HIDE_ASSIGNED_TO:
             form.fields['assigned_to'].widget = forms.HiddenInput()
 
