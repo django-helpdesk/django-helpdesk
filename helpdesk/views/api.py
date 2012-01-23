@@ -20,6 +20,7 @@ from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from django.template import loader, Context
 from django.utils import simplejson
+from django.views.decorators.csrf import csrf_exempt
 
 from helpdesk.forms import TicketForm
 from helpdesk.lib import send_templated_mail, safe_template_context
@@ -33,6 +34,7 @@ STATUS_ERROR_PERMISSIONS = 403
 STATUS_ERROR_BADMETHOD = 405
 
 
+@csrf_exempt
 def api(request, method):
     """
     Regardless of any other paramaters, we provide a help screen
