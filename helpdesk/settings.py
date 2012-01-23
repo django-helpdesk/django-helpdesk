@@ -137,3 +137,17 @@ QUEUE_EMAIL_BOX_SSL = getattr(settings, 'QUEUE_EMAIL_BOX_SSL', None)
 QUEUE_EMAIL_BOX_HOST = getattr(settings, 'QUEUE_EMAIL_BOX_HOST', None)
 QUEUE_EMAIL_BOX_USER = getattr(settings, 'QUEUE_EMAIL_BOX_USER', None)
 QUEUE_EMAIL_BOX_PASSWORD = getattr(settings, 'QUEUE_EMAIL_BOX_PASSWORD', None)
+
+''' calendar options '''
+# these settings determine whether a calendar will be integrated with the helpdesk
+
+# create or update an event in your calendar based on ticket.due_date
+HELPDESK_UPDATE_CALENDAR = getattr(settings, 'HELPDESK_UPDATE_CALENDAR', False)
+
+# specify the calendar to update - selects a python module to run the update code
+HELPDESK_CALENDAR = getattr(settings, 'HELPDESK_CALENDAR', None)
+
+
+
+
+

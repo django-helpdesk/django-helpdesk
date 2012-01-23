@@ -354,6 +354,8 @@ def update_ticket(request, ticket_id, public=False):
             old_value=ticket.due_date,
             new_value=due_date,
             )
+        # TODO: put calendar update hook here
+        print "You changed!"
         c.save()
         ticket.due_date = due_date
 
