@@ -344,7 +344,7 @@ def update_ticket(request, ticket_id, public=False):
             c.save()
             ticket.tags = tags
 
-    if new_status == Ticket.RESOLVED_STATUS:
+    if new_status in [ Ticket.RESOLVED_STATUS, Ticket.CLOSED_STATUS ]:
         ticket.resolution = comment
 
     messages_sent_to = []
