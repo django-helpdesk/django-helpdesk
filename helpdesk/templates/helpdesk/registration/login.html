@@ -1,20 +1,25 @@
 {% extends "helpdesk/public_base.html" %}{% load i18n %}
-{% block helpdesk_title %}{% trans "Helpdesk Login" %}{% endblock %}
+{% block helpdesk_title %}{{ helpdesk_settings.HELPDESK_PREPEND_ORG_NAME|default:'' }} {% trans "Helpdesk Login" %}{% endblock %}
 
 {% block helpdesk_body %}
-<h2>{% trans "Login" %}</h2>
 
-<p>{% trans "To log in and begin responding to cases, simply enter your username and password below." %}</p>
+{% if request.user.is_authenticated %}
+    <meta http-equiv="REFRESH" content="0;url={% url helpdesk_home %}">
+{% else %}
+    <h2>{% trans "Login" %}</h2>
 
-<form method='post' action='./'>
-    {% if form.errors %}<p>{% trans "Your username and password didn't match. Please try again." %}</p>{% endif %}
-    <dl>
-        <dt><label>{% trans "Username" %}</label></dt>
-        <dd>{{ form.username }}</dd>
-        <dt><label>{% trans "Password" %}</label></dt>
-        <dd>{{ form.password }}</dd>
-    </dl>
-    <input type='submit' value='{% trans "Login" %}' />
-    <input type="hidden" name="next" value="{% if next %}{{ next }}{% else %}../{% endif %}" />
-{% csrf_token %}</form>
+    <p>{% trans "To log in and begin responding to cases, simply enter your username and password below." %}</p>
+
+    <form method='post' action='./'>
+        {% if form.errors %}<p>{% trans "Your username and password didn't match. Please try again." %}</p>{% endif %}
+        <dl>
+            <dt><label>{% trans "Username" %}</label></dt>
+            <dd>{{ form.username }}</dd>
+            <dt><label>{% trans "Password" %}</label></dt>
+            <dd>{{ form.password }}</dd>
+        </dl>
+        <input type='submit' value='{% trans "Login" %}' />
+        <input type="hidden" name="next" value="{% if next %}{{ next }}{% else %}../{% endif %}" />
+    {% csrf_token %}</form>
+{% endif %}
 {% endblock %}

@@ -43,7 +43,7 @@ table {
     border: solid #444 1px;
     background-color: #fff;
     color: #ccc;
-    padding: 2px 3px;
+    padding: 0px 3px;
     margin: 0px 2px;
     font-size: 10pt;
     line-height: 12pt;
@@ -159,14 +159,27 @@ div.followup {
     padding:0 0 2px;
 }
 
-div.followup .title {
+div.followup_mod {
+    width: auto;
+    border: solid #666 1px;
+    padding: 5px;
+    margin: 0px 0px 10px;
+}
+
+div.followup .title, div.followup_mod .title {
     font-weight: bold;
     font-size: 10pt;
 }
 
-div.followup .title span {
+div.followup .title span, div.followup_mod .title span {
     color: #aaa;
     font-weight: normal;
+}
+
+div.followup_mod small {
+    float: right;
+    font-weight: bold;
+    font-style: italic;
 }
 
 span.private {
@@ -267,3 +280,34 @@ span.priority5 {
 a.followup-edit {
     float:right;
 }
+
+/* tooltips for link hover */
+a.tooltip, a.tooltip:link, a.tooltip:visited, a.tooltip:active  {
+  position: relative;
+  text-decoration: none;
+  font-style: italic;
+}
+
+a.tooltip:hover {
+  background: transparent;
+}
+
+a.tooltip span {
+  display: none;
+  text-decoration: none;
+}
+
+a.tooltip:hover span {
+  display: block;
+  position: absolute;
+  top: 25px;
+  left: 0;
+  width: 250px;
+  z-index: 10;
+  color: #000000;
+  border:1px solid #000000;
+  background: #FFFFCC;
+  font: 12px Verdana, sans-serif;
+  text-align: left;
+}
+

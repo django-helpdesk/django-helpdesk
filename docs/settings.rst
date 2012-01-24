@@ -1,6 +1,14 @@
 Settings
 ========
 
+First, django-helpdesk needs  ``django.core.context_processors.request`` activated, so in your ``settings.py`` add::
+
+    from django.conf import global_settings
+    TEMPLATE_CONTEXT_PROCESSORS = (
+                global_settings.TEMPLATE_CONTEXT_PROCESSORS +
+                ('django.core.context_processors.request',)
+         )
+
 The following settings can be changed in your ``settings.py`` file to help change the way django-helpdesk operates.
 
 HELPDESK_DEFAULT_SETTINGS

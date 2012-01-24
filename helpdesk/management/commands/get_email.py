@@ -25,8 +25,9 @@ from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand
 from django.db.models import Q
 from django.utils.translation import ugettext as _
+from django.conf import settings
 
-from helpdesk.lib import send_templated_mail
+from helpdesk.lib import send_templated_mail, safe_template_context
 from helpdesk.models import Queue, Ticket, FollowUp, Attachment, IgnoreEmail
 
 
@@ -75,18 +76,22 @@ def process_email(quiet=False):
 def process_queue(q, quiet=False):
     if not quiet:
         print "Processing: %s" % q
-    if q.email_box_type == 'pop3':
 
-        if q.email_box_ssl:
+    email_box_type = settings.QUEUE_EMAIL_BOX_TYPE if settings.QUEUE_EMAIL_BOX_TYPE else q.email_box_type
+
+    if email_box_type == 'pop3':
+
+        if q.email_box_ssl or settings.QUEUE_EMAIL_BOX_SSL:
             if not q.email_box_port: q.email_box_port = 995
-            server = poplib.POP3_SSL(q.email_box_host, int(q.email_box_port))
+            server = poplib.POP3_SSL(q.email_box_host or settings.QUEUE_EMAIL_BOX_HOST, int(q.email_box_port))
         else:
             if not q.email_box_port: q.email_box_port = 110
-            server = poplib.POP3(q.email_box_host, int(q.email_box_port))
+            server = poplib.POP3(q.email_box_host or settings.QUEUE_EMAIL_BOX_HOST, int(q.email_box_port))
 
         server.getwelcome()
-        server.user(q.email_box_user)
-        server.pass_(q.email_box_pass)
+        server.user(q.email_box_user or settings.QUEUE_EMAIL_BOX_USER)
+        server.pass_(q.email_box_pass or settings.QUEUE_EMAIL_BOX_PASSWORD)
+
 
         messagesInfo = server.list()[1]
 
@@ -102,15 +107,15 @@ def process_queue(q, quiet=False):
 
         server.quit()
 
-    elif q.email_box_type == 'imap':
-        if q.email_box_ssl:
+    elif email_box_type == 'imap':
+        if q.email_box_ssl or settings.QUEUE_EMAIL_BOX_SSL:
             if not q.email_box_port: q.email_box_port = 993
-            server = imaplib.IMAP4_SSL(q.email_box_host, int(q.email_box_port))
+            server = imaplib.IMAP4_SSL(q.email_box_host or settings.QUEUE_EMAIL_BOX_HOST, int(q.email_box_port))
         else:
             if not q.email_box_port: q.email_box_port = 143
-            server = imaplib.IMAP4(q.email_box_host, int(q.email_box_port))
+            server = imaplib.IMAP4(q.email_box_host or settings.QUEUE_EMAIL_BOX_HOST, int(q.email_box_port))
 
-        server.login(q.email_box_user, q.email_box_pass)
+        server.login(q.email_box_user or settings.QUEUE_EMAIL_BOX_USER, q.email_box_pass or settings.QUEUE_EMAIL_BOX_PASSWORD)
         server.select(q.email_box_imap_folder)
 
         status, data = server.search(None, 'NOT', 'DELETED')
@@ -246,43 +251,7 @@ def ticket_from_message(message, queue, quiet):
         t.status = Ticket.REOPENED_STATUS
         t.save()
 
-    f = FollowUp(
-        ticket = t,
-        title = _('E-Mail Received from %(sender_email)s' % {'sender_email': sender_email}),
-        date = datetime.now(),
-        public = True,
-        comment = body,
-    )
-
-    if t.status == Ticket.REOPENED_STATUS:
-        f.new_status = Ticket.REOPENED_STATUS
-        f.title = _('Ticket Re-Opened by E-Mail Received from %(sender_email)s' % {'sender_email': sender_email})
-    
-    f.save()
-
-    if not quiet:
-        print (" [%s-%s] %s%s" % (t.queue.slug, t.id, t.title, update)).encode('ascii', 'replace')
-
-    for file in files:
-        if file['content']:
-            filename = file['filename'].encode('ascii', 'replace').replace(' ', '_')
-            filename = re.sub('[^a-zA-Z0-9._-]+', '', filename)
-            a = Attachment(
-                followup=f,
-                filename=filename,
-                mime_type=file['type'],
-                size=len(file['content']),
-                )
-            a.file.save(filename, ContentFile(file['content']), save=False)
-            a.save()
-            if not quiet:
-                print "    - %s" % filename
-
-
-    context = {
-        'ticket': t,
-        'queue': queue,
-    }
+    context = safe_template_context(t)
 
     if new:
 
@@ -314,9 +283,6 @@ def ticket_from_message(message, queue, quiet):
                 )
 
     else:
-
-        context.update(comment=f.comment)
-
         if t.status == Ticket.REOPENED_STATUS:
             update = _(' (Reopened)')
         else:
@@ -339,6 +305,38 @@ def ticket_from_message(message, queue, quiet):
                 sender=queue.from_address,
                 fail_silently=True,
                 )
+
+    f = FollowUp(
+        ticket = t,
+        title = _('E-Mail Received from %(sender_email)s' % {'sender_email': sender_email}),
+        date = datetime.now(),
+        public = True,
+        comment = body,
+    )
+
+    if t.status == Ticket.REOPENED_STATUS:
+        f.new_status = Ticket.REOPENED_STATUS
+        f.title = _('Ticket Re-Opened by E-Mail Received from %(sender_email)s' % {'sender_email': sender_email})
+    
+    f.save()
+
+    if not quiet:
+        print (" [%s-%s] %s%s" % (t.queue.slug, t.id, t.title, update)).encode('ascii', 'replace')
+
+    for file in files:
+        if file['content']:
+            filename = file['filename'].encode('ascii', 'replace').replace(' ', '_')
+            filename = re.sub('[^a-zA-Z0-9._-]+', '', filename)
+            a = Attachment(
+                followup=f,
+                filename=filename,
+                mime_type=file['type'],
+                size=len(file['content']),
+                )
+            a.file.save(filename, ContentFile(file['content']), save=False)
+            a.save()
+            if not quiet:
+                print "    - %s" % filename
 
     return t
 

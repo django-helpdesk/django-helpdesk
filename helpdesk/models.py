@@ -197,7 +197,7 @@ class Queue(models.Model):
             return u'%s <%s>' % (self.title, self.email_address)
     from_address = property(_from_address)
 
-    def save(self, force_insert=False, force_update=False):
+    def save(self, *args, **kwargs):
         if self.email_box_type == 'imap' and not self.email_box_imap_folder:
             self.email_box_imap_folder = 'INBOX'
 
@@ -210,7 +210,7 @@ class Queue(models.Model):
                 self.email_box_port = 995
             elif self.email_box_type == 'pop3' and not self.email_box_ssl:
                 self.email_box_port = 110
-        super(Queue, self).save(force_insert, force_update)
+        super(Queue, self).save(*args, **kwargs)
 
 
 class Ticket(models.Model):
@@ -326,6 +326,12 @@ class Ticket(models.Model):
         help_text=_('1 = Highest Priority, 5 = Low Priority'),
         )
 
+    due_date = models.DateTimeField(
+        _('Due on'),
+        blank=True,
+        null=True,
+        )
+
     last_escalation = models.DateTimeField(
         blank=True,
         null=True,
@@ -436,7 +442,7 @@ class Ticket(models.Model):
         return ('helpdesk_view', (self.id,))
     get_absolute_url = models.permalink(get_absolute_url)
 
-    def save(self, force_insert=False, force_update=False):
+    def save(self, *args, **kwargs):
         if not self.id:
             # This is a new ticket as no ID yet exists.
             self.created = datetime.now()
@@ -446,7 +452,7 @@ class Ticket(models.Model):
 
         self.modified = datetime.now()
 
-        super(Ticket, self).save(force_insert, force_update)
+        super(Ticket, self).save(*args, **kwargs)
 
 
 class FollowUpManager(models.Manager):
@@ -527,11 +533,11 @@ class FollowUp(models.Model):
     def get_absolute_url(self):
         return u"%s#followup%s" % (self.ticket.get_absolute_url(), self.id)
 
-    def save(self, force_insert=False, force_update=False):
+    def save(self, *args, **kwargs):
         t = self.ticket
         t.modified = datetime.now()
         t.save()
-        super(FollowUp, self).save(force_insert, force_update)
+        super(FollowUp, self).save(*args, **kwargs)
 
 
 class TicketChange(models.Model):
@@ -843,10 +849,10 @@ class KBItem(models.Model):
         blank=True,
         )
 
-    def save(self, force_insert=False, force_update=False):
+    def save(self, *args, **kwargs):
         if not self.last_updated:
             self.last_updated = datetime.now()
-        return super(KBItem, self).save(force_insert, force_update)
+        return super(KBItem, self).save(*args, **kwargs)
 
     def _score(self):
         if self.votes > 0:
@@ -1024,10 +1030,10 @@ class IgnoreEmail(models.Model):
     def __unicode__(self):
         return u'%s' % self.name
 
-    def save(self):
+    def save(self, *args, **kwargs):
         if not self.date:
             self.date = datetime.now()
-        return super(IgnoreEmail, self).save()
+        return super(IgnoreEmail, self).save(*args, **kwargs)
 
     def test(self, email):
         """
@@ -1175,6 +1181,11 @@ class CustomField(models.Model):
         blank=True,
         null=True,
         )
+        
+    empty_selection_list = models.BooleanField(
+        _('Add empty first choice to List?'),
+        help_text=_('Only for List: adds an empty first entry to the choices list, which enforces that the user makes an active choice.'),
+        )        
 
     list_values = models.TextField(
         _('List Values'),
