@@ -354,9 +354,8 @@ def update_ticket(request, ticket_id, public=False):
             old_value=ticket.due_date,
             new_value=due_date,
             )
-        if helpdesk_settings.HELPDESK_UPDATE_CALENDAR:
-            from helpdesk import calendars
-            calendars.update_calendar(request, search_date=ticket.due_date)
+        # TODO: put calendar update hook here
+        print "You changed!"
         c.save()
         ticket.due_date = due_date
 
@@ -761,8 +760,7 @@ edit_ticket = staff_member_required(edit_ticket)
 
 def create_ticket(request):
     if request.method == 'POST':
-        # add request to process user related events
-        form = TicketForm(request.POST, request.FILES, request=request)
+        form = TicketForm(request.POST, request.FILES)
         form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
         form.fields['assigned_to'].choices = [('', '--------')] + [[u.id, u.username] for u in User.objects.filter(is_active=True).order_by('username')]
         if form.is_valid():
