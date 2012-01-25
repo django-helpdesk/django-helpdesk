@@ -107,6 +107,7 @@ function googleTranslateElementInit() {
 </div>
 {% endif %}
 
+<div id='add-followup'>
 <h3>{% trans "Respond to this ticket" %}</h3>
 
 <form method='post' action='update/' enctype='multipart/form-data'>
@@ -204,5 +205,6 @@ function googleTranslateElementInit() {
 
 {% csrf_token %}</form>
 
+</div>
 
 {% endblock %}
