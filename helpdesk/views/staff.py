@@ -250,10 +250,10 @@ def update_ticket(request, ticket_id, public=False):
     public = request.POST.get('public', False)
     owner = int(request.POST.get('owner', None))
     priority = int(request.POST.get('priority', ticket.priority))
-    due_date = datetime(
-            int(request.POST.get('due_date_year')),
-            int(request.POST.get('due_date_month')),
-            int(request.POST.get('due_date_day')))
+    due_year = int(request.POST.get('due_date_year'))
+    due_month = int(request.POST.get('due_date_month'))
+    due_day = int(request.POST.get('due_date_day'))
+    due_date = datetime(due_year, due_month, due_day) if due_year and due_month and due_day else ticket.due_date
     tags = request.POST.get('tags', '')
 
     # We need to allow the 'ticket' and 'queue' contexts to be applied to the
@@ -355,8 +355,6 @@ def update_ticket(request, ticket_id, public=False):
             old_value=ticket.due_date,
             new_value=due_date,
             )
-        # TODO: put calendar update hook here
-        print "You changed!"
         c.save()
         ticket.due_date = due_date
 
