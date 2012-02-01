@@ -3,6 +3,7 @@
 {% block helpdesk_head %}
 <script type="text/javascript">
     $(document).ready(function() {
+
         $("#ShowFurtherEditOptions").click(function() {
             $("#FurtherEditOptions").fadeIn();
             $("#ShowFurtherOptPara").hide();
@@ -178,12 +179,18 @@ function googleTranslateElementInit() {
         <dt><label for='id_due_date'>{% trans "Due on" %}</label></dt>
         <dd>{{ form.due_date }}</dd>
  
-       {% if tags_enabled %}
-        <dt><label for='id_tags'>{% trans "Tags" %}</label></dt>
-        <dd><input type='text' id='id_tags' name='tags' value='{{ ticket.tags }}'/></dd>
+       {% if tagging_enabled %}
+           <dt><label for='id_tags'>{% trans "Tags" %}</label></dt>
+           <dd><input type='text' id='id_tags' name='tags' value='{{ ticket.tags }}'/></dd>
+       {% endif %}
+
+       {% if taggit_enabled %}
+           <dt><label for='id_tags__tagautosuggest'>{% trans "Tags" %}</label></dt>
+           <dd>{{ form.tags }}</dd>
        {% endif %}
 
     </dl>
+
 
 </div>
 
