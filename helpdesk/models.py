@@ -13,16 +13,10 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _, ugettext
-from helpdesk.settings import HAS_TAGGING_SUPPORT, HAS_TAGGIT_SUPPORT
+from helpdesk.settings import HAS_TAG_SUPPORT
 
-
-if HAS_TAGGING_SUPPORT:
+if HAS_TAG_SUPPORT:
     from tagging.fields import TagField
-elif HAS_TAGGIT_SUPPORT:
-    try:
-        from taggit_autosuggest.managers import TaggableManager
-    except ImportError:
-        from taggit.managers import TaggableManager
 
 class Queue(models.Model):
     """
@@ -435,10 +429,8 @@ class Ticket(models.Model):
         return TicketDependency.objects.filter(ticket=self).filter(depends_on__status__in=OPEN_STATUSES).count() == 0
     can_be_resolved = property(_can_be_resolved)
 
-    if HAS_TAGGING_SUPPORT:
+    if HAS_TAG_SUPPORT:
         tags = TagField(blank=True)
-    elif HAS_TAGGIT_SUPPORT:
-        tags = TaggableManager()
 
     class Meta:
         get_latest_by = "created"

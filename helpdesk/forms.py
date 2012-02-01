@@ -18,7 +18,7 @@ from django.utils.translation import ugettext as _
 
 from helpdesk.lib import send_templated_mail, safe_template_context
 from helpdesk.models import Ticket, Queue, FollowUp, Attachment, IgnoreEmail, TicketCC, CustomField, TicketCustomFieldValue, TicketDependency
-from helpdesk.settings import HAS_TAGGING_SUPPORT, HAS_TAGGIT_SUPPORT
+from helpdesk.settings import HAS_TAG_SUPPORT
 from helpdesk import settings as helpdesk_settings
 
 class EditTicketForm(forms.ModelForm):
@@ -108,25 +108,7 @@ class EditFollowUpForm(forms.ModelForm):
         model = FollowUp
         exclude = ('date', 'user',)
 
-class TicketForm(forms.ModelForm):
-
-    def clean_queue(self):
-        data = self.cleaned_data['queue']
-        data = Queue.objects.get(pk=data)
-        return data
-
-    def clean_assigned_to(self):
-        data = self.cleaned_data['assigned_to']
-        data = User.objects.get(pk=data)
-        return data
-
-
-    class Meta:
-        model = Ticket 
-        fields = ('queue', 'title', 'submitter_email', 'description', 'assigned_to', 'priority', 'due_date')
-        if HAS_TAGGING_SUPPORT or HAS_TAGGIT_SUPPORT:
-            fields += ('tags',)
- 
+class TicketForm(forms.Form):
     queue = forms.ChoiceField(
         label=_('Queue'),
         required=True,
@@ -146,6 +128,12 @@ class TicketForm(forms.ModelForm):
         widget=forms.TextInput(attrs={'size':'60'}),
         help_text=_('This e-mail address will receive copies of all public '
             'updates to this ticket.'),
+        )
+
+    body = forms.CharField(
+        widget=forms.Textarea(attrs={'cols': 47, 'rows': 15}),
+        label=_('Description of Issue'),
+        required=True,
         )
 
     assigned_to = forms.ChoiceField(
@@ -177,7 +165,7 @@ class TicketForm(forms.ModelForm):
         help_text=_('You can attach a file such as a document or screenshot to this ticket.'),
         )
 
-    if HAS_TAGGING_SUPPORT:
+    if HAS_TAG_SUPPORT:
         tags = forms.CharField(
             max_length=255,
             required=False,
@@ -244,31 +232,28 @@ class TicketForm(forms.ModelForm):
         Writes and returns a Ticket() object
         """
 
-        q = self.cleaned_data['queue']
+        q = Queue.objects.get(id=int(self.cleaned_data['queue']))
 
         t = Ticket( title = self.cleaned_data['title'],
                     submitter_email = self.cleaned_data['submitter_email'],
                     created = datetime.now(),
                     status = Ticket.OPEN_STATUS,
                     queue = q,
-                    description = self.cleaned_data['description'],
+                    description = self.cleaned_data['body'],
                     priority = self.cleaned_data['priority'],
                     due_date = self.cleaned_data['due_date'],
                   )
 
-        if HAS_TAGGING_SUPPORT:
+        if HAS_TAG_SUPPORT:
             t.tags = self.cleaned_data['tags']
 
         if self.cleaned_data['assigned_to']:
             try:
-                u = self.cleaned_data['assigned_to']
+                u = User.objects.get(id=self.cleaned_data['assigned_to'])
                 t.assigned_to = u
             except User.DoesNotExist:
                 t.assigned_to = None
-
         t.save()
-        if HAS_TAGGIT_SUPPORT:
-            t.tags.set(*self.cleaned_data['tags'])
         
         for field, value in self.cleaned_data.items():
             if field.startswith('custom_'):
@@ -283,7 +268,7 @@ class TicketForm(forms.ModelForm):
                         title = _('Ticket Opened'),
                         date = datetime.now(),
                         public = True,
-                        comment = self.cleaned_data['description'],
+                        comment = self.cleaned_data['body'],
                         user = user,
                      )
         if self.cleaned_data['assigned_to']:

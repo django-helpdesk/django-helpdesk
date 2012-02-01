@@ -7,11 +7,6 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
         <title>{% block helpdesk_title %}Helpdesk{% endblock %} :: {% trans "Powered by django-helpdesk" %}</title>
-
-        {## django-taggit-autosuggest uses django.jQuery ##}
-        <script src='{{ STATIC_URL }}admin/js/jquery.min.js' type='text/javascript' language='javascript'></script>
-        <script src='{{ STATIC_URL }}admin/js/jquery.init.js' type='text/javascript' language='javascript'></script>
-
         <script src='{{ STATIC_URL }}helpdesk/jquery-1.5.min.js' type='text/javascript' language='javascript'></script>
         <script src='{{ STATIC_URL }}helpdesk/jquery-ui-1.8.9.custom.min.js' type='text/javascript' language='javascript'></script>
         {% comment %}
@@ -24,11 +19,10 @@
         <link rel='alternate' href='{% url helpdesk_rss "recent_activity" %}' type='application/rss+xml' title='{% trans "All Recent Activity" %}' />
         <link rel='alternate' href='{% url helpdesk_rss "unassigned" %}' type='application/rss+xml' title='{% trans "Unassigned Tickets" %}' />
 
-        {{ form.media }}
         {% comment %}
         <script type="text/javascript">
-        $(document).ready(function(){
 
+        $(document).ready(function(){
             // replace display while hovering over menu item
             $('li.headerlink').hover(
 	            function() { $('ul', this).css('display', 'block'); },

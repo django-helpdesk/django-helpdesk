@@ -29,10 +29,10 @@ from django import forms
 from helpdesk.forms import TicketForm, UserSettingsForm, EmailIgnoreForm, EditTicketForm, TicketCCForm, EditFollowUpForm, TicketDependencyForm
 from helpdesk.lib import send_templated_mail, query_to_dict, apply_query, safe_template_context
 from helpdesk.models import Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch, IgnoreEmail, TicketCC, TicketDependency
-from helpdesk.settings import HAS_TAGGING_SUPPORT, HAS_TAGGIT_SUPPORT
+from helpdesk.settings import HAS_TAG_SUPPORT
 from helpdesk import settings as helpdesk_settings
   
-if HAS_TAGGING_SUPPORT:
+if HAS_TAG_SUPPORT:
     from tagging.models import Tag, TaggedItem
 
 if helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE:
@@ -224,8 +224,7 @@ def view_ticket(request, ticket_id):
 
 
     # TODO: shouldn't this template get a form to begin with?
-    form = TicketForm(instance=ticket)
-
+    form = TicketForm(initial={'due_date':ticket.due_date})
 
     return render_to_response('helpdesk/ticket.html',
         RequestContext(request, {
@@ -234,8 +233,7 @@ def view_ticket(request, ticket_id):
             'active_users': users,
             'priorities': Ticket.PRIORITY_CHOICES,
             'preset_replies': PreSetReply.objects.filter(Q(queues=ticket.queue) | Q(queues__isnull=True)),
-            'tagging_enabled': HAS_TAGGING_SUPPORT,
-            'taggit_enabled': HAS_TAGGIT_SUPPORT,
+            'tags_enabled': HAS_TAG_SUPPORT,
         }))
 view_ticket = staff_member_required(view_ticket)
 
@@ -360,7 +358,7 @@ def update_ticket(request, ticket_id, public=False):
         c.save()
         ticket.due_date = due_date
 
-    if HAS_TAGGING_SUPPORT:
+    if HAS_TAG_SUPPORT:
         if tags != ticket.tags:
             c = TicketChange(
                 followup=f,
@@ -370,23 +368,6 @@ def update_ticket(request, ticket_id, public=False):
                 )
             c.save()
             ticket.tags = tags
-
-    if HAS_TAGGIT_SUPPORT:
-        old_tags = [tag.name for tag in ticket.tags.all()]
-        old_tags.sort()
-        new_tags = tags.replace(' ','').strip(',').split(',')
-        new_tags.sort()
-        if new_tags != old_tags:
-            c = TicketChange(
-                followup=f,
-                field=_('Tags'),
-                old_value=', '.join(old_tags),
-                new_value=', '.join(new_tags),
-                )
-            c.save()
-            ticket.tags.set(*new_tags)
-
-
 
     if new_status in [ Ticket.RESOLVED_STATUS, Ticket.CLOSED_STATUS ]:
         ticket.resolution = comment
@@ -475,7 +456,6 @@ def update_ticket(request, ticket_id, public=False):
             )
 
     ticket.save()
-    
 
     if request.user.is_staff or helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE:
         return HttpResponseRedirect(ticket.get_absolute_url())
@@ -718,7 +698,7 @@ def ticket_list(request):
         ticket_qs = apply_query(Ticket.objects.select_related(), query_params)
 
     ## TAG MATCHING
-    if HAS_TAGGING_SUPPORT:
+    if HAS_TAG_SUPPORT:
         tags = request.GET.getlist('tags')
         if tags:
             ticket_qs = TaggedItem.objects.get_by_model(ticket_qs, tags)
@@ -752,7 +732,7 @@ def ticket_list(request):
             query_string.append("%s=%s" % (get_key, get_value))
 
     tag_choices = [] 
-    if HAS_TAGGING_SUPPORT:
+    if HAS_TAG_SUPPORT:
         # FIXME: restrict this to tags that are actually in use
         tag_choices = Tag.objects.all()
 
@@ -771,8 +751,7 @@ def ticket_list(request):
             from_saved_query=from_saved_query,
             saved_query=saved_query,
             search_message=search_message,
-            tagging_enabled=HAS_TAGGING_SUPPORT,
-            taggit_enabled=HAS_TAGGIT_SUPPORT,
+            tags_enabled=HAS_TAG_SUPPORT
         )))
 ticket_list = staff_member_required(ticket_list)
 
@@ -786,13 +765,11 @@ def edit_ticket(request, ticket_id):
             return HttpResponseRedirect(ticket.get_absolute_url())
     else:
         form = EditTicketForm(instance=ticket)
-
     
     return render_to_response('helpdesk/edit_ticket.html',
         RequestContext(request, {
             'form': form,
-            'tagging_enabled': HAS_TAGGING_SUPPORT,
-            'taggit_enabled': HAS_TAGGIT_SUPPORT,
+            'tags_enabled': HAS_TAG_SUPPORT,
         }))
 edit_ticket = staff_member_required(edit_ticket)
 
@@ -824,8 +801,7 @@ def create_ticket(request):
     return render_to_response('helpdesk/create_ticket.html',
         RequestContext(request, {
             'form': form,
-            'tagging_enabled': HAS_TAGGING_SUPPORT,
-            'taggit_enabled': HAS_TAGGIT_SUPPORT,
+            'tags_enabled': HAS_TAG_SUPPORT,
         }))
 create_ticket = staff_member_required(create_ticket)
 
