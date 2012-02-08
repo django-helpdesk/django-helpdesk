@@ -8,14 +8,19 @@ class Migration(SchemaMigration):
 
     def forwards(self, orm):
         
-        # Adding field 'Ticket.due_date'
-        db.add_column('helpdesk_ticket', 'due_date', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True), keep_default=False)
+        # Adding field 'CustomField.empty_selection_list'
+        # retroactive migration - don't add if colum has already been added via syncdb
+        try:
+            db.add_column('helpdesk_customfield', 'empty_selection_list', self.gf('django.db.models.fields.BooleanField')(default=False), keep_default=False)
+        except:
+            pass
 
 
     def backwards(self, orm):
         
-        # Deleting field 'Ticket.due_date'
-        db.delete_column('helpdesk_ticket', 'due_date')
+        # Deleting field 'CustomField.empty_selection_list'
+        db.delete_column('helpdesk_customfield', 'empty_selection_list')
+
 
     models = {
         'auth.group': {
@@ -67,6 +72,7 @@ class Migration(SchemaMigration):
             'Meta': {'object_name': 'CustomField'},
             'data_type': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'decimal_places': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
+            'empty_selection_list': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'help_text': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'label': ('django.db.models.fields.CharField', [], {'max_length': "'30'"}),
@@ -97,7 +103,7 @@ class Migration(SchemaMigration):
         'helpdesk.followup': {
             'Meta': {'ordering': "['date']", 'object_name': 'FollowUp'},
             'comment': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
-            'date': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2012, 1, 20, 12, 19, 46, 778593)'}),
+            'date': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2012, 2, 7, 17, 8, 41, 299842)'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'new_status': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
             'public': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
