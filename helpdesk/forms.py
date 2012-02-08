@@ -159,13 +159,6 @@ class TicketForm(forms.Form):
         label=_('Due on'),
         )
 
-    def clean_due_date(self):
-        data = self.cleaned_data['due_date']
-        #TODO: add Google calendar update hook
-        #if not hasattr(self, 'instance') or self.instance.due_date != new_data:
-        #    print "you changed!"
-        return data
-
     attachment = forms.FileField(
         required=False,
         label=_('Attach File'),
