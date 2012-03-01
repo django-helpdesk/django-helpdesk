@@ -78,6 +78,9 @@ HELPDESK_VIEW_A_TICKET_PUBLIC = getattr(settings, 'HELPDESK_VIEW_A_TICKET_PUBLIC
 # show 'submit a ticket' section on public page?
 HELPDESK_SUBMIT_A_TICKET_PUBLIC = getattr(settings, 'HELPDESK_SUBMIT_A_TICKET_PUBLIC', True)
 
+# Should we should the KB categories on the homepage?
+HELPDESK_SHOW_KB_ON_HOMEPAGE = getattr(settings, 'HELPDESK_SHOW_KB_ON_HOMEPAGE', False)
+
 
 
 ''' options for update_ticket views '''

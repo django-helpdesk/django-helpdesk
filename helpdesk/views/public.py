@@ -18,7 +18,7 @@ from django.utils.translation import ugettext as _
 from helpdesk import settings as helpdesk_settings
 from helpdesk.forms import PublicTicketForm
 from helpdesk.lib import send_templated_mail, text_is_spam
-from helpdesk.models import Ticket, Queue, UserSettings
+from helpdesk.models import Ticket, Queue, UserSettings, KBCategory
 
 
 def homepage(request):
@@ -63,10 +63,13 @@ def homepage(request):
         form = PublicTicketForm(initial=initial_data)
         form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.filter(allow_public_submission=True)]
 
+    knowledgebase_categories = KBCategory.objects.all()
+
     return render_to_response('helpdesk/public_homepage.html',
         RequestContext(request, {
             'form': form,
             'helpdesk_settings': helpdesk_settings,
+            'kb_categories': knowledgebase_categories
         }))
 
 
