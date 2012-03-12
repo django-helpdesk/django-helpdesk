@@ -173,10 +173,12 @@ def apply_query(queryset, params):
         # eg a Q() set
         queryset = queryset.filter(params['other_filter'])
 
-    if params.get('sorting', None):
-        if params.get('sortreverse', None):
-            params['sorting'] = "-%s" % params['sorting']
-        queryset = queryset.order_by(params['sorting'])
+    sorting = params.get('sorting', None)
+    if not sorting:
+        sortreverse = params.get('sortreverse', None)
+        if sortreverse:
+            sorting = "-%s" % sorting
+        queryset = queryset.order_by(sorting)
 
     return queryset
 
