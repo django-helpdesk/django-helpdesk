@@ -246,20 +246,15 @@ def view_ticket(request, ticket_id):
 
         return update_ticket(request, ticket_id)
 
-<<<<<<< HEAD
-
-    ticketcc_string, SHOW_SUBSCRIBE = return_ticketccstring_and_show_subscribe(request.user, ticket)
-=======
     if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS:
         users = User.objects.filter(is_active=True, is_staff=True).order_by('username')
     else:
         users = User.objects.filter(is_active=True).order_by('username')
 
-
     # TODO: shouldn't this template get a form to begin with?
     form = TicketForm(initial={'due_date':ticket.due_date})
 
->>>>>>> upstream/master
+    ticketcc_string, SHOW_SUBSCRIBE = return_ticketccstring_and_show_subscribe(request.user, ticket)
     return render_to_response('helpdesk/ticket.html',
         RequestContext(request, {
             'ticket': ticket,
@@ -472,11 +467,7 @@ def update_ticket(request, ticket_id, public=False):
             c.save()
             ticket.tags = tags
 
-<<<<<<< HEAD
     if new_status in [Ticket.RESOLVED_STATUS, Ticket.CLOSED_STATUS]:
-=======
-    if new_status in [ Ticket.RESOLVED_STATUS, Ticket.CLOSED_STATUS ]:
->>>>>>> upstream/master
         ticket.resolution = comment
 
     messages_sent_to = []
