@@ -15,6 +15,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.files.base import ContentFile
 from django.core.urlresolvers import reverse
+from django.core.exceptions import ValidationError
 from django.core import paginator
 from django.db import connection
 from django.db.models import Q
@@ -85,18 +86,34 @@ def dashboard(request):
     # Queue 2     4    12
 
     cursor = connection.cursor()
-    cursor.execute("""
-        SELECT      q.id as queue,
-                    q.title AS name,
-                    COUNT(CASE t.status WHEN '1' THEN t.id WHEN '2' THEN t.id END) AS open,
-                    COUNT(CASE t.status WHEN '3' THEN t.id END) AS resolved,
-                    COUNT(CASE t.status WHEN '4' THEN t.id END) AS closed
-            FROM    helpdesk_ticket t,
-                    helpdesk_queue q
-            WHERE   q.id =  t.queue_id
-            GROUP BY queue, name
-            ORDER BY q.id;
-    """)
+    if helpdesk_settings.HELPDESK_DASHBOARD_HIDE_EMPTY_QUEUES:
+        cursor.execute("""
+            SELECT      q.id as queue,
+                        q.title AS name,
+                        COUNT(CASE t.status WHEN '1' THEN t.id WHEN '2' THEN t.id END) AS open,
+                        COUNT(CASE t.status WHEN '3' THEN t.id END) AS resolved,
+                        COUNT(CASE t.status WHEN '4' THEN t.id END) AS closed
+                FROM    helpdesk_ticket t,
+                        helpdesk_queue q
+                WHERE   q.id = t.queue_id
+                GROUP BY queue, name
+                ORDER BY q.id;
+        """)
+    else:
+        cursor.execute("""
+            SELECT      q.id as queue,
+                        q.title AS name,
+                        COUNT(CASE t.status WHEN '1' THEN t.id WHEN '2' THEN t.id END) AS open,
+                        COUNT(CASE t.status WHEN '3' THEN t.id END) AS resolved,
+                        COUNT(CASE t.status WHEN '4' THEN t.id END) AS closed
+                FROM    helpdesk_queue q
+                LEFT OUTER JOIN helpdesk_ticket t
+                ON      q.id = t.queue_id            
+                GROUP BY queue, name
+                ORDER BY q.id;
+        """)    
+    
+    
     dash_tickets = query_to_dict(cursor.fetchall(), cursor.description)
 
     return render_to_response('helpdesk/dashboard.html',
@@ -200,10 +217,20 @@ def view_ticket(request, ticket_id):
 
         return update_ticket(request, ticket_id)
 
+    if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS:
+        users = User.objects.filter(is_active=True, is_staff=True).order_by('username')
+    else:
+        users = User.objects.filter(is_active=True).order_by('username')
+
+
+    # TODO: shouldn't this template get a form to begin with?
+    form = TicketForm(initial={'due_date':ticket.due_date})
+
     return render_to_response('helpdesk/ticket.html',
         RequestContext(request, {
             'ticket': ticket,
-            'active_users': User.objects.filter(is_active=True).order_by('username'),
+            'form': form,
+            'active_users': users,
             'priorities': Ticket.PRIORITY_CHOICES,
             'preset_replies': PreSetReply.objects.filter(Q(queues=ticket.queue) | Q(queues__isnull=True)),
             'tags_enabled': HAS_TAG_SUPPORT,
@@ -223,6 +250,10 @@ def update_ticket(request, ticket_id, public=False):
     public = request.POST.get('public', False)
     owner = int(request.POST.get('owner', None))
     priority = int(request.POST.get('priority', ticket.priority))
+    due_date = datetime(
+            int(request.POST.get('due_date_year')),
+            int(request.POST.get('due_date_month')),
+            int(request.POST.get('due_date_day')))
     tags = request.POST.get('tags', '')
 
     # We need to allow the 'ticket' and 'queue' contexts to be applied to the
@@ -317,6 +348,16 @@ def update_ticket(request, ticket_id, public=False):
         c.save()
         ticket.priority = priority
 
+    if due_date != ticket.due_date:
+        c = TicketChange(
+            followup=f,
+            field=_('Due on'),
+            old_value=ticket.due_date,
+            new_value=due_date,
+            )
+        c.save()
+        ticket.due_date = due_date
+
     if HAS_TAG_SUPPORT:
         if tags != ticket.tags:
             c = TicketChange(
@@ -328,7 +369,7 @@ def update_ticket(request, ticket_id, public=False):
             c.save()
             ticket.tags = tags
 
-    if new_status == Ticket.RESOLVED_STATUS:
+    if new_status in [ Ticket.RESOLVED_STATUS, Ticket.CLOSED_STATUS ]:
         ticket.resolution = comment
 
     messages_sent_to = []
@@ -593,18 +634,27 @@ def ticket_list(request):
     else:
         queues = request.GET.getlist('queue')
         if queues:
-            queues = [int(q) for q in queues]
-            query_params['filtering']['queue__id__in'] = queues
+            try:
+                queues = [int(q) for q in queues]
+                query_params['filtering']['queue__id__in'] = queues
+            except ValueError:
+                pass
 
         owners = request.GET.getlist('assigned_to')
         if owners:
-            owners = [int(u) for u in owners]
-            query_params['filtering']['assigned_to__id__in'] = owners
+            try:
+                owners = [int(u) for u in owners]
+                query_params['filtering']['assigned_to__id__in'] = owners
+            except ValueError:
+                pass
 
         statuses = request.GET.getlist('status')
         if statuses:
-            statuses = [int(s) for s in statuses]
-            query_params['filtering']['status__in'] = statuses
+            try:
+                statuses = [int(s) for s in statuses]
+                query_params['filtering']['status__in'] = statuses
+            except ValueError:
+                pass
 
         date_from = request.GET.get('date_from')
         if date_from:
@@ -637,8 +687,15 @@ def ticket_list(request):
         sortreverse = request.GET.get('sortreverse', None)
         query_params['sortreverse'] = sortreverse
 
-    ticket_qs = apply_query(Ticket.objects.select_related(), query_params)
-    print >> sys.stderr,  str(ticket_qs.query)
+    try:
+        ticket_qs = apply_query(Ticket.objects.select_related(), query_params)
+    except ValidationError:
+        # invalid parameters in query, return default query
+        query_params = {
+            'filtering': {'status__in': [1, 2, 3]},
+            'sorting': 'created',
+        }
+        ticket_qs = apply_query(Ticket.objects.select_related(), query_params)
 
     ## TAG MATCHING
     if HAS_TAG_SUPPORT:
@@ -733,7 +790,11 @@ def create_ticket(request):
 
         form = TicketForm(initial=initial_data)
         form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
-        form.fields['assigned_to'].choices = [('', '--------')] + [[u.id, u.username] for u in User.objects.filter(is_active=True).order_by('username')]
+        if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS:
+            users = User.objects.filter(is_active=True, is_staff=True).order_by('username')
+        else:
+            users = User.objects.filter(is_active=True).order_by('username')
+        form.fields['assigned_to'].choices = [('', '--------')] + [[u.id, u.username] for u in users]
         if helpdesk_settings.HELPDESK_CREATE_TICKET_HIDE_ASSIGNED_TO:
             form.fields['assigned_to'].widget = forms.HiddenInput()
 
@@ -865,7 +926,7 @@ def run_report(request, report):
     periods = []
     year, month = first_year, first_month
     working = True
-    periods.append("%s %s" % (months[month], year))
+    periods.append("%s %s" % (months[month - 1], year))
 
     while working:
         month += 1
@@ -935,7 +996,7 @@ def run_report(request, report):
 
         elif report == 'usermonth':
             metric1 = u'%s' % ticket.get_assigned_to
-            metric2 = u'%s %s' % (months[ticket.created.month], ticket.created.year)
+            metric2 = u'%s %s' % (months[ticket.created.month - 1], ticket.created.year)
 
         elif report == 'queuepriority':
             metric1 = u'%s' % ticket.queue.title
@@ -947,14 +1008,14 @@ def run_report(request, report):
 
         elif report == 'queuemonth':
             metric1 = u'%s' % ticket.queue.title
-            metric2 = u'%s %s' % (months[ticket.created.month], ticket.created.year)
+            metric2 = u'%s %s' % (months[ticket.created.month - 1], ticket.created.year)
 
         summarytable[metric1, metric2] += 1
     
     table = []
     
     header1 = sorted(set(list( i.encode('utf-8') for i,_ in summarytable.keys() )))
-
+    
     column_headings = [col1heading] + possible_options
 
     # Pivot the data so that 'header1' fields are always first column

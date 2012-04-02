@@ -16,9 +16,10 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext as _
 
-from helpdesk.lib import send_templated_mail
+from helpdesk.lib import send_templated_mail, safe_template_context
 from helpdesk.models import Ticket, Queue, FollowUp, Attachment, IgnoreEmail, TicketCC, CustomField, TicketCustomFieldValue, TicketDependency
 from helpdesk.settings import HAS_TAG_SUPPORT
+from helpdesk import settings as helpdesk_settings
 
 class EditTicketForm(forms.ModelForm):
     class Meta:
@@ -58,8 +59,8 @@ class EditTicketForm(forms.ModelForm):
                 instanceargs['max_digits'] = field.max_length
             elif field.data_type == 'list':
                 fieldclass = forms.ChoiceField
+                choices = field.choices_as_array
                 if field.empty_selection_list:
-                    choices = field.choices_as_array
                     choices.insert(0, ('','---------' ) )
                 instanceargs['choices'] = choices
             elif field.data_type == 'boolean':
@@ -152,6 +153,19 @@ class TicketForm(forms.Form):
             'as \'3\'.'),
         )
 
+    due_date = forms.DateTimeField(
+        widget=extras.SelectDateWidget,
+        required=False,
+        label=_('Due on'),
+        )
+
+    def clean_due_date(self):
+        data = self.cleaned_data['due_date']
+        #TODO: add Google calendar update hook
+        #if not hasattr(self, 'instance') or self.instance.due_date != new_data:
+        #    print "you changed!"
+        return data
+
     attachment = forms.FileField(
         required=False,
         label=_('Attach File'),
@@ -195,8 +209,8 @@ class TicketForm(forms.Form):
                 instanceargs['max_digits'] = field.max_length
             elif field.data_type == 'list':
                 fieldclass = forms.ChoiceField
+                choices = field.choices_as_array
                 if field.empty_selection_list:
-                    choices = field.choices_as_array
                     choices.insert(0, ('','---------' ) )
                 instanceargs['choices'] = choices
             elif field.data_type == 'boolean':
@@ -234,6 +248,7 @@ class TicketForm(forms.Form):
                     queue = q,
                     description = self.cleaned_data['body'],
                     priority = self.cleaned_data['priority'],
+                    due_date = self.cleaned_data['due_date'],
                   )
 
         if HAS_TAG_SUPPORT:
@@ -289,11 +304,8 @@ class TicketForm(forms.Form):
                 # settings.MAX_EMAIL_ATTACHMENT_SIZE) are sent via email.
                 files.append(a.file.path)
 
-        context = {
-            'ticket': t,
-            'queue': q,
-            'comment': f.comment,
-        }
+        context = safe_template_context(t)
+        context['comment'] = f.comment
         
         messages_sent_to = []
 
@@ -379,6 +391,12 @@ class PublicTicketForm(forms.Form):
         help_text=_('Please select a priority carefully.'),
         )
 
+    due_date = forms.DateTimeField(
+        widget=extras.SelectDateWidget,
+        required=False,
+        label=_('Due on'),
+        )
+
     attachment = forms.FileField(
         required=False,
         label=_('Attach File'),
@@ -411,8 +429,8 @@ class PublicTicketForm(forms.Form):
                 instanceargs['max_digits'] = field.max_length
             elif field.data_type == 'list':
                 fieldclass = forms.ChoiceField
+                choices = field.choices_as_array
                 if field.empty_selection_list:
-                    choices = field.choices_as_array
                     choices.insert(0, ('','---------' ) )
                 instanceargs['choices'] = choices
             elif field.data_type == 'boolean':
@@ -449,6 +467,7 @@ class PublicTicketForm(forms.Form):
             queue = q,
             description = self.cleaned_data['body'],
             priority = self.cleaned_data['priority'],
+            due_date = self.cleaned_data['due_date'],
             )
 
         t.save()
@@ -491,10 +510,7 @@ class PublicTicketForm(forms.Form):
                 # settings.MAX_EMAIL_ATTACHMENT_SIZE) are sent via email.
                 files.append(a.file.path)
 
-        context = {
-            'ticket': t,
-            'queue': q,
-        }
+        context = safe_template_context(t)
 
         messages_sent_to = []
 
@@ -578,7 +594,11 @@ class EmailIgnoreForm(forms.ModelForm):
 class TicketCCForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(TicketCCForm, self).__init__(*args, **kwargs)
-        self.fields['user'].queryset = User.objects.filter(is_active=True).order_by('username')
+        if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_CC:
+            users = User.objects.filter(is_active=True, is_staff=True).order_by('username')
+        else:
+            users = User.objects.filter(is_active=True).order_by('username')
+        self.fields['user'].queryset = users 
     class Meta:
         model = TicketCC
         exclude = ('ticket',)

@@ -42,8 +42,20 @@
 
 {% block helpdesk_body %}
 {% if helpdesk_settings.HELPDESK_TRANSLATE_TICKET_COMMENTS %}
+{% comment %}
 <div id='translate_dropdown'>{% trans "Translate ticket comments into" %} </div>
 <div id='translate_block'>
+{% endcomment %}
+<div id="google_translate_element"></div><script>
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({
+    pageLanguage: 'auto',
+    includedLanguages: 'en,fr,de,ru',
+    autoDisplay: false,
+    layout: google.translate.TranslateElement.InlineLayout.HORIZONTAL
+  }, 'google_translate_element');
+}
+</script><script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 {% endif %}
 
 {% include "helpdesk/ticket_desc_table.html" %}
@@ -95,6 +107,7 @@
 </div>
 {% endif %}
 
+<div id='add-followup'>
 <h3>{% trans "Respond to this ticket" %}</h3>
 
 <form method='post' action='update/' enctype='multipart/form-data'>
@@ -162,6 +175,9 @@
 
         <dt><label for='id_priority'>{% trans "Priority" %}</label></dt>
         <dd><select id='id_priority' name='priority'>{% for p in priorities %}<option value='{{ p.0 }}'{% ifequal p.0 ticket.priority %} selected='selected'{% endifequal %}>{{ p.1 }}</option>{% endfor %}</select></dd>
+        <dt><label for='id_due_date'>{% trans "Due on" %}</label></dt>
+        <dd>{{ form.due_date }}</dd>
+ 
        {% if tags_enabled %}
         <dt><label for='id_tags'>{% trans "Tags" %}</label></dt>
         <dd><input type='text' id='id_tags' name='tags' value='{{ ticket.tags }}'/></dd>
@@ -189,5 +205,6 @@
 
 {% csrf_token %}</form>
 
+</div>
 
 {% endblock %}

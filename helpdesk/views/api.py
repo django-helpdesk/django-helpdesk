@@ -20,9 +20,10 @@ from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from django.template import loader, Context
 from django.utils import simplejson
+from django.views.decorators.csrf import csrf_exempt
 
 from helpdesk.forms import TicketForm
-from helpdesk.lib import send_templated_mail
+from helpdesk.lib import send_templated_mail, safe_template_context
 from helpdesk.models import Ticket, Queue, FollowUp
 
 STATUS_OK = 200
@@ -33,6 +34,7 @@ STATUS_ERROR_PERMISSIONS = 403
 STATUS_ERROR_BADMETHOD = 405
 
 
+@csrf_exempt
 def api(request, method):
     """
     Regardless of any other paramaters, we provide a help screen
@@ -191,11 +193,8 @@ class API:
 
         f.save()
 
-        context = {
-            'ticket': ticket,
-            'queue': ticket.queue,
-            'comment': f.comment,
-        }
+        context = safe_template_context(ticket)
+        context['comment'] = f.comment
         
         messages_sent_to = []
 
@@ -266,11 +265,8 @@ class API:
             )
         f.save()
 
-        context = {
-            'ticket': ticket,
-            'queue': ticket.queue,
-            'resolution': f.comment,
-        }
+        context = safe_template_context(ticket)
+        context['resolution'] = f.comment
 
         subject = '%s %s (Resolved)' % (ticket.ticket, ticket.title)
         

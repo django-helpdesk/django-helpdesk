@@ -40,6 +40,9 @@ HELPDESK_PREPEND_ORG_NAME = getattr(settings, 'HELPDESK_PREPEND_ORG_NAME', False
 # show knowledgebase links?
 HELPDESK_KB_ENABLED = getattr(settings, 'HELPDESK_KB_ENABLED', True)
 
+# show knowledgebase links on staff view?
+HELPDESK_KB_ENABLED_STAFF = getattr(settings, 'HELPDESK_KB_ENABLED_STAFF', False)
+
 # show extended navigation by default, to all users, irrespective of staff status?
 HELPDESK_NAVIGATION_ENABLED = getattr(settings, 'HELPDESK_NAVIGATION_ENABLED', False)
 
@@ -55,7 +58,7 @@ HELPDESK_SUPPORT_PERSON = getattr(settings, 'HELPDESK_SUPPORT_PERSON', False)
 HELPDESK_TRANSLATE_TICKET_COMMENTS = getattr(settings, 'HELPDESK_TRANSLATE_TICKET_COMMENTS', False)
 
 # list of languages to offer. if set to false, all default google translate languages will be shown.
-HELPDESK_TRANSLATE_TICKET_COMMENTS_LANG = getattr(settings, 'HELPDESK_TRANSLATE_TICKET_COMMENTS_LANG', ["en", "de", "fr", "ru"])
+HELPDESK_TRANSLATE_TICKET_COMMENTS_LANG = getattr(settings, 'HELPDESK_TRANSLATE_TICKET_COMMENTS_LANG', ["en", "de", "fr", "it", "ru"])
 
 # show link to 'change password' on 'User Settings' page?
 HELPDESK_SHOW_CHANGE_PASSWORD = getattr(settings, 'HELPDESK_SHOW_CHANGE_PASSWORD', False)
@@ -74,6 +77,9 @@ HELPDESK_VIEW_A_TICKET_PUBLIC = getattr(settings, 'HELPDESK_VIEW_A_TICKET_PUBLIC
 
 # show 'submit a ticket' section on public page?
 HELPDESK_SUBMIT_A_TICKET_PUBLIC = getattr(settings, 'HELPDESK_SUBMIT_A_TICKET_PUBLIC', True)
+
+# Should we should the KB categories on the homepage?
+HELPDESK_SHOW_KB_ON_HOMEPAGE = getattr(settings, 'HELPDESK_SHOW_KB_ON_HOMEPAGE', False)
 
 
 
@@ -97,6 +103,12 @@ HELPDESK_SHOW_HOLD_BUTTON_TICKET_TOP = getattr(settings, 'HELPDESK_SHOW_HOLD_BUT
 # make all updates public by default? this will hide the 'is this update public' checkbox
 HELPDESK_UPDATE_PUBLIC_DEFAULT = getattr(settings, 'HELPDESK_UPDATE_PUBLIC_DEFAULT', True)
 
+# only show staff users in ticket owner drop-downs 
+HELPDESK_STAFF_ONLY_TICKET_OWNERS = getattr(settings, 'HELPDESK_STAFF_ONLY_TICKET_OWNERS', False)
+
+# only show staff users in ticket cc drop-down 
+HELPDESK_STAFF_ONLY_TICKET_CC = getattr(settings, 'HELPDESK_STAFF_ONLY_TICKET_CC', False)
+
 
 
 ''' options for staff.create_ticket view '''
@@ -109,6 +121,9 @@ HELPDESK_CREATE_TICKET_HIDE_ASSIGNED_TO = getattr(settings, 'HELPDESK_CREATE_TIC
 # show delete button next to unassigned tickets
 HELPDESK_DASHBOARD_SHOW_DELETE_UNASSIGNED = getattr(settings, 'HELPDESK_DASHBOARD_SHOW_DELETE_UNASSIGNED', True)
 
+# hide empty queues in dashboard overview?
+HELPDESK_DASHBOARD_HIDE_EMPTY_QUEUES = getattr(settings, 'HELPDESK_DASHBOARD_HIDE_EMPTY_QUEUES', True)
+
 
 
 ''' options for footer '''
@@ -118,3 +133,10 @@ HELPDESK_FOOTER_SHOW_API_LINK = getattr(settings, 'HELPDESK_FOOTER_SHOW_API_LINK
 # show / hide 'change language' link at bottom of page
 HELPDESK_FOOTER_SHOW_CHANGE_LANGUAGE_LINK = getattr(settings, 'HELPDESK_FOOTER_SHOW_CHANGE_LANGUAGE_LINK', False)
 
+''' email options '''
+# default Queue email submission settings
+QUEUE_EMAIL_BOX_TYPE = getattr(settings, 'QUEUE_EMAIL_BOX_TYPE', None)
+QUEUE_EMAIL_BOX_SSL = getattr(settings, 'QUEUE_EMAIL_BOX_SSL', None)
+QUEUE_EMAIL_BOX_HOST = getattr(settings, 'QUEUE_EMAIL_BOX_HOST', None)
+QUEUE_EMAIL_BOX_USER = getattr(settings, 'QUEUE_EMAIL_BOX_USER', None)
+QUEUE_EMAIL_BOX_PASSWORD = getattr(settings, 'QUEUE_EMAIL_BOX_PASSWORD', None)
