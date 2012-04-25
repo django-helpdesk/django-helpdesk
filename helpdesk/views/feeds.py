@@ -8,10 +8,11 @@ views/feeds.py - A handful of staff-only RSS feeds to provide ticket details
 """
 
 from django.contrib.auth.models import User
-from django.contrib.syndication.feeds import Feed
+from django.contrib.syndication.views import Feed
 from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.utils.translation import ugettext as _
+from django.shortcuts import get_object_or_404
 
 from helpdesk.models import Ticket, FollowUp, Queue
 
@@ -20,13 +21,12 @@ class OpenTicketsByUser(Feed):
     title_template = 'helpdesk/rss/ticket_title.html'
     description_template = 'helpdesk/rss/ticket_description.html'
 
-    def get_object(self, bits):
-        if len(bits) < 1:
-            raise ObjectDoesNotExist
-        user = User.objects.get(username__exact=bits[0])
-        if len(bits) == 2:
-            queue = Queue.objects.get(slug__exact=bits[1])
-        else: queue = False
+    def get_object(self, request, user_name, queue_slug=None):
+        user = get_object_or_404(User, username=user_name)
+        if queue_slug:
+            queue = get_object_or_404(Queue, slug=queue_slug)
+        else:
+            queue = None
 
         return {'user': user, 'queue': queue}
 
@@ -133,10 +133,8 @@ class OpenTicketsByQueue(Feed):
     title_template = 'helpdesk/rss/ticket_title.html'
     description_template = 'helpdesk/rss/ticket_description.html'
 
-    def get_object(self, bits):
-        if len(bits) != 1:
-            raise ObjectDoesNotExist
-        return Queue.objects.get(slug__exact=bits[0])
+    def get_object(self, request, queue_slug):
+        return get_object_or_404(Queue, slug=queue_slug)
 
     def title(self, obj):
         return _('Helpdesk: Open Tickets in queue %(queue)s') % {
@@ -169,12 +167,4 @@ class OpenTicketsByQueue(Feed):
             return item.assigned_to.username
         else:
             return _('Unassigned')
-
-
-feed_setup = {
-    'user': OpenTicketsByUser,
-    'queue': OpenTicketsByQueue,
-    'recent_activity': RecentFollowUps,
-    'unassigned': UnassignedTickets,
-}
 
