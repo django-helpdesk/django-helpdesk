@@ -10,7 +10,7 @@ contributors reaching far beyond Jutda.
 
 Complete documentation is available in the docs/ directory, or online at http://django-helpdesk.readthedocs.org/.
 
-You can see a demo installation at http://demo.jutdahelpdesk.com
+You can see a demo installation at http://django-helpdesk-demo.herokuapp.com/
 
 Licensing
 =========
@@ -23,7 +23,7 @@ Dependencies (pre-flight checklist)
 ===================================
 
 1. Python 2.4+ 
-2. Django (1.2 or newer)
+2. Django (1.3 or newer)
 3. South for database migrations (highly recommended, but not required). Download from http://south.aeracode.org/
 4. An existing WORKING Django project with database etc. If you
    cannot log into the Admin, you won't get this product working.
