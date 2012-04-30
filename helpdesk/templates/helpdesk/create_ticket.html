@@ -17,7 +17,7 @@
                 <dt><label for='id_{{ field.name }}'>{% trans field.label %}</label>{% if not field.field.required %} <span class='form_optional'>{% trans "(Optional)" %}</span>{% endif %}</dt>
                 <dd>{{ field }}</dd>
                 {% if field.errors %}<dd class='error'>{{ field.errors }}</dd>{% endif %}
-                {% if field.help_text %}<dd class='form_help_text'>{% trans field.help_text %}</dd>{% endif %}</label>
+                {% if field.help_text %}<dd class='form_help_text'>{% trans field.help_text %}</dd>{% endif %}
             {% endif %}
         {% endfor %}
     </dl>
