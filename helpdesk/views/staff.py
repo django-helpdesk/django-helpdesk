@@ -564,7 +564,7 @@ mass_update = staff_member_required(mass_update)
 def ticket_list(request):
     context = {}
 
-    # Query_params will hold a dictionary of paramaters relating to
+    # Query_params will hold a dictionary of parameters relating to
     # a query, to be saved if needed:
     query_params = {
         'filtering': {},
@@ -734,10 +734,8 @@ def ticket_list(request):
 
     user_saved_queries = SavedSearch.objects.filter(Q(user=request.user) | Q(shared__exact=True))
 
-    query_string = []
-    for get_key, get_value in request.GET.iteritems():
-        if get_key != "page":
-            query_string.append("%s=%s" % (get_key, get_value))
+    querydict = request.GET.copy()
+    querydict.pop('page', 1)
 
     tag_choices = [] 
     if HAS_TAG_SUPPORT:
@@ -747,7 +745,7 @@ def ticket_list(request):
     return render_to_response('helpdesk/ticket_list.html',
         RequestContext(request, dict(
             context,
-            query_string="&".join(query_string),
+            query_string=querydict.urlencode(),
             tickets=tickets,
             user_choices=User.objects.filter(is_active=True),
             queue_choices=Queue.objects.all(),
