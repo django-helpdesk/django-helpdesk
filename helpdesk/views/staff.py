@@ -257,7 +257,11 @@ def update_ticket(request, ticket_id, public=False):
     if not (due_date_year and due_date_month and due_date_day):
         due_date = ticket.due_date
     else:
-        due_date = datetime(due_date_year, due_date_month, due_date_day)
+        if ticket.due_date:
+            due_date = ticket.due_date
+        else:
+            due_date = datetime.now()
+        due_date = due_date.replace(due_date_year, due_date_month, due_date_day)
     tags = request.POST.get('tags', '')
 
     # We need to allow the 'ticket' and 'queue' contexts to be applied to the

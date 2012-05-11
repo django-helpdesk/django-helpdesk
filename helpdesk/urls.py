@@ -10,11 +10,9 @@ urls.py - Mapping of URL's to our various views. Note we always used NAMED
 from django.conf import settings
 from django.conf.urls.defaults import *
 from django.contrib.auth.decorators import login_required
-from django.contrib.syndication.views import feed as django_feed
 
 from helpdesk import settings as helpdesk_settings
 from helpdesk.views import feeds
-
 
 urlpatterns = patterns('helpdesk.views.staff',
     url(r'^dashboard/$',
