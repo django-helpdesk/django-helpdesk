@@ -153,7 +153,7 @@ def query_to_dict(results, descriptions):
 
 def apply_query(queryset, params):
     """
-    Apply a dict-based set of filters & paramaters to a queryset.
+    Apply a dict-based set of filters & parameters to a queryset.
 
     queryset is a Django queryset, eg MyModel.objects.all() or
              MyModel.objects.filter(user=request.user)
@@ -174,7 +174,7 @@ def apply_query(queryset, params):
         queryset = queryset.filter(params['other_filter'])
 
     sorting = params.get('sorting', None)
-    if not sorting:
+    if sorting:
         sortreverse = params.get('sortreverse', None)
         if sortreverse:
             sorting = "-%s" % sorting
@@ -186,7 +186,7 @@ def apply_query(queryset, params):
 def safe_template_context(ticket):
     """
     Return a dictionary that can be used as a template context to render
-    comments and other details with ticket or queue paramaters. Note that
+    comments and other details with ticket or queue parameters. Note that
     we don't just provide the Ticket & Queue objects to the template as
     they could reveal confidential information. Just imagine these two options:
         * {{ ticket.queue.email_box_password }}
