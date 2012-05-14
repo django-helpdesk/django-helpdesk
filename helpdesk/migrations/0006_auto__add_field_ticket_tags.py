@@ -101,7 +101,7 @@ class Migration(SchemaMigration):
         'helpdesk.followup': {
             'Meta': {'ordering': "['date']", 'object_name': 'FollowUp'},
             'comment': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
-            'date': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2012, 5, 14, 0, 0)'}),
+            'date': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2012, 5, 11, 0, 0)'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'new_status': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
             'public': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),

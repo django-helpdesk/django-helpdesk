@@ -182,7 +182,6 @@ class Migration(SchemaMigration):
             'modified': ('django.db.models.fields.DateTimeField', [], {'blank': 'True'}),
             'on_hold': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'priority': ('django.db.models.fields.IntegerField', [], {'default': '3', 'blank': '3'}),
-            'due_date': ('django.db.models.fields.DateTimeField', [], {'blank': 'True', 'null': 'True'}),
             'queue': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['helpdesk.Queue']"}),
             'resolution': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'status': ('django.db.models.fields.IntegerField', [], {'default': '1'}),
