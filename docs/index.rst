@@ -6,7 +6,7 @@ django-helpdesk is a Django application to manage helpdesk tickets for your inte
 How Does It Look?
 -----------------
 
-You can see a demo installation at http://demo.jutdahelpdesk.com
+You can see a demo installation at http://django-helpdesk-demo.herokuapp.com/
 
 Quick Start
 -----------

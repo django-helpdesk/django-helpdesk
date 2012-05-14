@@ -10,11 +10,9 @@ urls.py - Mapping of URL's to our various views. Note we always used NAMED
 from django.conf import settings
 from django.conf.urls.defaults import *
 from django.contrib.auth.decorators import login_required
-from django.contrib.syndication.views import feed as django_feed
 
 from helpdesk import settings as helpdesk_settings
-from helpdesk.views.feeds import feed_setup
-
+from helpdesk.views import feeds
 
 urlpatterns = patterns('helpdesk.views.staff',
     url(r'^dashboard/$',
@@ -141,11 +139,30 @@ urlpatterns += patterns('helpdesk.views.public',
 )
 
 urlpatterns += patterns('',
-    url(r'^rss/(?P<url>.*)/$',
-        login_required(django_feed),
-        {'feed_dict': feed_setup},
-        name='helpdesk_rss'),
+    url(r'^rss/user/(?P<user_name>[A-Za-z0-9_-]+)/$',
+        login_required(feeds.OpenTicketsByUser()),
+        name='helpdesk_rss_user'),
+    
+    url(r'^rss/user/(?P<user_name>[A-Za-z0-9_-]+)/(?P<queue_slug>[A-Za-z0-9_-]+)/$',
+        login_required(feeds.OpenTicketsByUser()),
+        name='helpdesk_rss_user_queue'),
+    
+    url(r'^rss/queue/(?P<queue_slug>[A-Za-z0-9_-]+)/$',
+        login_required(feeds.OpenTicketsByQueue()),
+        name='helpdesk_rss_queue'),
+    
+    url(r'^rss/unassigned/$',
+        login_required(feeds.UnassignedTickets()),
+        name='helpdesk_rss_unassigned'),
+    
+    url(r'^rss/recent_activity/$',
+        login_required(feeds.RecentFollowUps()),
+        name='helpdesk_rss_activity'),
+    
+)
 
+
+urlpatterns += patterns('',
     url(r'^api/(?P<method>[a-z_-]+)/$',
         'helpdesk.views.api.api',
         name='helpdesk_api'),

@@ -250,10 +250,18 @@ def update_ticket(request, ticket_id, public=False):
     public = request.POST.get('public', False)
     owner = int(request.POST.get('owner', None))
     priority = int(request.POST.get('priority', ticket.priority))
-    due_date = datetime(
-            int(request.POST.get('due_date_year')),
-            int(request.POST.get('due_date_month')),
-            int(request.POST.get('due_date_day')))
+    due_date_year = int(request.POST.get('due_date_year', 0))
+    due_date_month = int(request.POST.get('due_date_month', 0))
+    due_date_day = int(request.POST.get('due_date_day', 0))
+
+    if not (due_date_year and due_date_month and due_date_day):
+        due_date = ticket.due_date
+    else:
+        if ticket.due_date:
+            due_date = ticket.due_date
+        else:
+            due_date = datetime.now()
+        due_date = due_date.replace(due_date_year, due_date_month, due_date_day)
     tags = request.POST.get('tags', '')
 
     # We need to allow the 'ticket' and 'queue' contexts to be applied to the
