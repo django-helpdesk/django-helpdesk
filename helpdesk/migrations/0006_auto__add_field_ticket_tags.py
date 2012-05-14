@@ -3,19 +3,22 @@ import datetime
 from south.db import db
 from south.v2 import SchemaMigration
 from django.db import models
+from helpdesk.settings import HAS_TAG_SUPPORT
 
 
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Adding field 'Ticket.tags'
-        db.add_column('helpdesk_ticket', 'tags',
-                      self.gf('tagging.fields.TagField')(default=''),
-                      keep_default=False)
+        # Adding field 'Ticket.tags' if HAS_TAG_SUPPORT is True
+        if HAS_TAG_SUPPORT:
+            db.add_column('helpdesk_ticket', 'tags',
+                          self.gf('tagging.fields.TagField')(default=''),
+                          keep_default=False)
 
     def backwards(self, orm):
         # Deleting field 'Ticket.tags'
-        db.delete_column('helpdesk_ticket', 'tags')
+        if HAS_TAG_SUPPORT:
+            db.delete_column('helpdesk_ticket', 'tags')
 
     models = {
         'auth.group': {
@@ -185,7 +188,6 @@ class Migration(SchemaMigration):
             'resolution': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'status': ('django.db.models.fields.IntegerField', [], {'default': '1'}),
             'submitter_email': ('django.db.models.fields.EmailField', [], {'max_length': '75', 'null': 'True', 'blank': 'True'}),
-            'tags': ('tagging.fields.TagField', [], {}),
             'title': ('django.db.models.fields.CharField', [], {'max_length': '200'})
         },
         'helpdesk.ticketcc': {
@@ -225,5 +227,8 @@ class Migration(SchemaMigration):
             'user': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['auth.User']", 'unique': 'True'})
         }
     }
+    if HAS_TAG_SUPPORT:
+        models['helpdesk.ticket'].update({'tags': ('tagging.fields.TagField', [],
+                                                      {}),})
 
     complete_apps = ['helpdesk']
