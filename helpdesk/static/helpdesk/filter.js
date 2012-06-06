@@ -5,7 +5,7 @@ $(document).ready(function() {
         return false;
     });
     $(".filterBuilderRemove").click(function() {
-        var boxName = "#" + $(this).parent().attr('id');
+        var boxName = "#" + $(this).parents(".filterBox").attr('id');
         $(boxName).slideUp();
         $(boxName).children("input:text").each(function() {
             $(this).val("");
