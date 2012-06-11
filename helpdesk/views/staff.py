@@ -724,7 +724,7 @@ def ticket_list(request):
         tickets = ticket_paginator.page(ticket_paginator.num_pages)
 
     search_message = ''
-    if context.has_key('query') and settings.DATABASE_ENGINE.startswith('sqlite'):
+    if context.has_key('query') and settings.DATABASES['default']['ENGINE'].endswith('sqlite'):
         search_message = _('<p><strong>Note:</strong> Your keyword search is case sensitive because of your database. This means the search will <strong>not</strong> be accurate. By switching to a different database system you will gain better searching! For more information, read the <a href="http://docs.djangoproject.com/en/dev/ref/databases/#sqlite-string-matching">Django Documentation on string matching in SQLite</a>.')
 
 
