@@ -29,7 +29,7 @@ Download, extract, and drop ``helpdesk`` into your ``PYTHONPATH``
 Adding To Your Django Project
 -----------------------------
 
-1. Edit your ``settings.py`` file and add ``helpdesk`` to the ``INSTALLED_APPS`` setting. You also need ``django.contrib.admin`` in ``INSTALLED_APPS`` if you haven't already added it. eg::
+1. Edit your ``settings.py`` file and add ``helpdesk`` to the ``INSTALLED_APPS`` setting. You also need ``django.contrib.admin`` and ``django.contrib.markup`` in ``INSTALLED_APPS`` if you haven't already added it. eg::
     
     INSTALLED_APPS = (
         'django.contrib.auth',
@@ -37,7 +37,7 @@ Adding To Your Django Project
         'django.contrib.sessions',
         'django.contrib.sites',
         'django.contrib.admin', # Required for helpdesk admin/maintenance
-        'django.contrib.markup', # Required for text display
+        'django.contrib.markup', # Required for helpdesk text display
         'south', # Highly recommended to make database migrations simpler.
         'helpdesk', # This is new!
     )

@@ -27,6 +27,7 @@ Dependencies (pre-flight checklist)
 3. South for database migrations (highly recommended, but not required). Download from http://south.aeracode.org/
 4. An existing WORKING Django project with database etc. If you
    cannot log into the Admin, you won't get this product working.
+5. You must have ``django.contrib.markup`` in your ``settings.INSTALLED_APPS`` setting.
 
 **NOTE REGARDING SQLITE AND SEARCHING:**
 If you use sqlite as your database, the search function will not work as
