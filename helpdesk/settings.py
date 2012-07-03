@@ -69,6 +69,9 @@ HELPDESK_FOLLOWUP_MOD = getattr(settings, 'HELPDESK_FOLLOWUP_MOD', False)
 # show custom welcome message in dashboard?
 HELPDESK_CUSTOM_WELCOME = getattr(settings, 'HELPDESK_CUSTOM_WELCOME', False)
 
+# auto-subscribe user to ticket if (s)he responds to a ticket?
+HELPDESK_AUTO_SUBSCRIBE_ON_TICKET_RESPONSE = getattr(settings, 'HELPDESK_AUTO_SUBSCRIBE_ON_TICKET_RESPONSE', False)
+
 
 
 ''' options for public pages '''
@@ -89,7 +92,10 @@ HELPDESK_SHOW_KB_ON_HOMEPAGE = getattr(settings, 'HELPDESK_SHOW_KB_ON_HOMEPAGE',
 HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = getattr(settings, 'HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE', False)
 
 # show edit buttons in ticket follow ups.
-HELPDESK_SHOW_EDIT_BUTTON_FOLLOW_UP = getattr(settings, 'HELPDESK_HIDE_EDIT_BUTTON_FOLLOW_UP', True)
+HELPDESK_SHOW_EDIT_BUTTON_FOLLOW_UP = getattr(settings, 'HELPDESK_SHOW_EDIT_BUTTON_FOLLOW_UP', True)
+
+# show delete buttons in ticket follow ups if user is 'superuser'
+HELPDESK_SHOW_DELETE_BUTTON_SUPERUSER_FOLLOW_UP = getattr(settings, 'HELPDESK_SHOW_DELETE_BUTTON_SUPERUSER_FOLLOW_UP', False)
 
 # show ticket edit button on top of ticket description.
 HELPDESK_SHOW_EDIT_BUTTON_TICKET_TOP = getattr(settings, 'HELPDESK_SHOW_EDIT_BUTTON_TICKET_TOP', True)
@@ -124,6 +130,8 @@ HELPDESK_DASHBOARD_SHOW_DELETE_UNASSIGNED = getattr(settings, 'HELPDESK_DASHBOAR
 # hide empty queues in dashboard overview?
 HELPDESK_DASHBOARD_HIDE_EMPTY_QUEUES = getattr(settings, 'HELPDESK_DASHBOARD_HIDE_EMPTY_QUEUES', True)
 
+# show basic ticket stats on dashboard?
+HELPDESK_DASHBOARD_BASIC_TICKET_STATS = getattr(settings, 'HELPDESK_DASHBOARD_BASIC_TICKET_STATS', False)
 
 
 ''' options for footer '''
