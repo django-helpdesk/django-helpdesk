@@ -32,7 +32,7 @@ from helpdesk.lib import send_templated_mail, query_to_dict, apply_query, safe_t
 from helpdesk.models import Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch, IgnoreEmail, TicketCC, TicketDependency
 from helpdesk.settings import HAS_TAG_SUPPORT
 from helpdesk import settings as helpdesk_settings
-  
+
 if HAS_TAG_SUPPORT:
     from tagging.models import Tag, TaggedItem
 
@@ -1344,7 +1344,11 @@ def calc_average_nbr_days_until_ticket_resolved(Tickets):
         days_per_ticket += days_this_ticket
         days_each_ticket.append(days_this_ticket)
 
-    mean_per_ticket = days_per_ticket / nbr_closed_tickets
+    if nbr_closed_tickets > 0:
+        mean_per_ticket = days_per_ticket / nbr_closed_tickets
+    else:
+        mean_per_ticket = 0
+
     return mean_per_ticket
 
 def calc_basic_ticket_stats(Ticket):
@@ -1361,16 +1365,16 @@ def calc_basic_ticket_stats(Ticket):
     date_30_str = date_30.strftime('%Y-%m-%d')
     date_60_str = date_60.strftime('%Y-%m-%d')
 
-    # < 30 
-    ota_le_30 = all_open_tickets.filter(created__gt = date_30)
+    # > 0 & <= 30 
+    ota_le_30 = all_open_tickets.filter(created__gte = date_30_str)
     N_ota_le_30 = len(ota_le_30)
 
-    # > 30 & < 60 
-    ota_le_60_ge_30 = all_open_tickets.filter(created__gte = date_60, created__lte = date_30)
+    # >= 30 & <= 60 
+    ota_le_60_ge_30 = all_open_tickets.filter(created__gte = date_60_str, created__lte = date_30_str)
     N_ota_le_60_ge_30 = len(ota_le_60_ge_30)
 
-    # > 60
-    ota_ge_60 = all_open_tickets.filter(created__lt = date_60)
+    # >= 60
+    ota_ge_60 = all_open_tickets.filter(created__lte = date_60_str)
     N_ota_ge_60 = len(ota_ge_60)
 
     # (O)pen (T)icket (S)tats
