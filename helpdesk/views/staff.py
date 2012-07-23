@@ -585,8 +585,8 @@ def ticket_list(request):
         query = request.GET.get('q')
         filter = None
         if query.find('-') > 0:
-            queue, id = query.split('-')
             try:
+                queue, id = query.split('-')
                 id = int(id)
             except ValueError:
                 id = None
