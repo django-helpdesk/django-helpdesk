@@ -1356,10 +1356,6 @@ def calc_average_nbr_days_until_ticket_resolved(Tickets):
     return mean_per_ticket
 
 def calc_basic_ticket_stats(Ticket):
-    # all closed tickets - independent of user
-    all_closed_tickets = Ticket.objects.filter(status = Ticket.CLOSED_STATUS)
-    average_nbr_days_until_ticket_closed = calc_average_nbr_days_until_ticket_resolved(all_closed_tickets)
-
     # all not closed tickets (open, reopened, resolved,) - independent of user
     all_open_tickets = Ticket.objects.exclude(status = Ticket.CLOSED_STATUS)
     today = datetime.today()
@@ -1387,9 +1383,17 @@ def calc_basic_ticket_stats(Ticket):
     ots.append(['< 30 days', N_ota_le_30, get_color_for_nbr_days(N_ota_le_30), sort_string(date_30_str, ''), ])
     ots.append(['30 - 60 days', N_ota_le_60_ge_30, get_color_for_nbr_days(N_ota_le_60_ge_30), sort_string(date_60_str, date_30_str), ])
     ots.append(['> 60 days', N_ota_ge_60, get_color_for_nbr_days(N_ota_ge_60), sort_string('', date_60_str), ])
-    
+
+    # all closed tickets - independent of user.
+    all_closed_tickets = Ticket.objects.filter(status = Ticket.CLOSED_STATUS)
+    average_nbr_days_until_ticket_closed = calc_average_nbr_days_until_ticket_resolved(all_closed_tickets)
+    # all closed tickets that were opened in the last 60 days.
+    all_closed_last_60_days = all_closed_tickets.filter(created__gte = date_60_str)
+    average_nbr_days_until_ticket_closed_last_60_days = calc_average_nbr_days_until_ticket_resolved(all_closed_last_60_days)
+
     # put together basic stats
     basic_ticket_stats = {  'average_nbr_days_until_ticket_closed': average_nbr_days_until_ticket_closed, 
+                            'average_nbr_days_until_ticket_closed_last_60_days': average_nbr_days_until_ticket_closed_last_60_days,
                             'open_ticket_stats': ots, }
 
     return basic_ticket_stats
