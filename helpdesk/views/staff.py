@@ -267,6 +267,19 @@ def update_ticket(request, ticket_id, public=False):
         due_date = due_date.replace(due_date_year, due_date_month, due_date_day)
     tags = request.POST.get('tags', '')
 
+    no_changes = all([
+        not request.FILES,
+        not comment,
+        new_status == ticket.status,
+        title == ticket.title,
+        priority == int(ticket.priority),
+        due_date == ticket.due_date,
+        (not owner and not ticket.assigned_to) or (owner and User.objects.get(id=owner) == ticket.assigned_to),
+        (HAS_TAG_SUPPORT and tags == ticket.tags) or not HAS_TAG_SUPPORT,
+    ])
+    if no_changes:
+        return return_to_ticket(request.user, helpdesk_settings, ticket)
+
     # We need to allow the 'ticket' and 'queue' contexts to be applied to the
     # comment.
     from django.template import loader, Context
@@ -469,7 +482,12 @@ def update_ticket(request, ticket_id, public=False):
 
     ticket.save()
 
-    if request.user.is_staff or helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE:
+    return return_to_ticket(request.user, helpdesk_settings, ticket)
+
+def return_to_ticket(user, helpdesk_settings, ticket):
+    ''' Helpder function for update_ticket '''
+
+    if user.is_staff or helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE:
         return HttpResponseRedirect(ticket.get_absolute_url())
     else:
         return HttpResponseRedirect(ticket.ticket_url)
