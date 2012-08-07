@@ -248,7 +248,7 @@ def update_ticket(request, ticket_id, public=False):
     new_status = int(request.POST.get('new_status', ticket.status))
     title = request.POST.get('title', '')
     public = request.POST.get('public', False)
-    owner = int(request.POST.get('owner', None))
+    owner = int(request.POST.get('owner', -1))
     priority = int(request.POST.get('priority', ticket.priority))
     due_date_year = int(request.POST.get('due_date_year', 0))
     due_date_month = int(request.POST.get('due_date_month', 0))
@@ -274,7 +274,7 @@ def update_ticket(request, ticket_id, public=False):
     # to be closed with an {% endif %} tag.
     comment = loader.get_template_from_string(comment).render(Context(context))
 
-    if owner is None and ticket.assigned_to:
+    if owner is -1 and ticket.assigned_to:
         owner = ticket.assigned_to.id
 
     f = FollowUp(ticket=ticket, date=datetime.now(), comment=comment)
@@ -286,7 +286,7 @@ def update_ticket(request, ticket_id, public=False):
 
     reassigned = False
 
-    if owner is not None:
+    if owner is not -1:
         if owner != 0 and ((ticket.assigned_to and owner != ticket.assigned_to.id) or not ticket.assigned_to):
             new_user = User.objects.get(id=owner)
             f.title = _('Assigned to %(username)s') % {
@@ -378,7 +378,8 @@ def update_ticket(request, ticket_id, public=False):
             ticket.tags = tags
 
     if new_status in [ Ticket.RESOLVED_STATUS, Ticket.CLOSED_STATUS ]:
-        ticket.resolution = comment
+        if new_status == Ticket.RESOLVED_STATUS or ticket.resolution is None:
+            ticket.resolution = comment
 
     messages_sent_to = []
 
