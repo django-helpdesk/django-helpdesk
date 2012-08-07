@@ -139,11 +139,11 @@ urlpatterns += patterns('helpdesk.views.public',
 )
 
 urlpatterns += patterns('',
-    url(r'^rss/user/(?P<user_name>[A-Za-z0-9_-]+)/$',
+    url(r'^rss/user/(?P<user_name>[\.A-Za-z0-9_-]+)/$',
         login_required(feeds.OpenTicketsByUser()),
         name='helpdesk_rss_user'),
     
-    url(r'^rss/user/(?P<user_name>[A-Za-z0-9_-]+)/(?P<queue_slug>[A-Za-z0-9_-]+)/$',
+    url(r'^rss/user/(?P<user_name>[\.A-Za-z0-9_-]+)/(?P<queue_slug>[A-Za-z0-9_-]+)/$',
         login_required(feeds.OpenTicketsByUser()),
         name='helpdesk_rss_user_queue'),
     
