@@ -39,7 +39,10 @@ if helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE:
     # treat 'normal' users like 'staff'
     staff_member_required = user_passes_test(lambda u: u.is_authenticated() and u.is_active)
 else:
-    staff_member_required = user_passes_test(lambda u: u.is_authenticated() and u.is_active and u.is_staff)
+    try:
+        from django.contrib.admin.views.decorators import staff_member_required
+    except:
+        staff_member_required = user_passes_test(lambda u: u.is_authenticated() and u.is_active and u.is_staff)
 
 
 superuser_required = user_passes_test(lambda u: u.is_authenticated() and u.is_active and u.is_superuser)
@@ -585,8 +588,8 @@ def ticket_list(request):
         query = request.GET.get('q')
         filter = None
         if query.find('-') > 0:
-            queue, id = query.split('-')
             try:
+                queue, id = query.split('-')
                 id = int(id)
             except ValueError:
                 id = None
@@ -747,7 +750,7 @@ def ticket_list(request):
             context,
             query_string=querydict.urlencode(),
             tickets=tickets,
-            user_choices=User.objects.filter(is_active=True),
+            user_choices=User.objects.filter(is_active=True,is_staff=True),
             queue_choices=Queue.objects.all(),
             status_choices=Ticket.STATUS_CHOICES,
             tag_choices=tag_choices,
@@ -783,7 +786,7 @@ def create_ticket(request):
     if request.method == 'POST':
         form = TicketForm(request.POST, request.FILES)
         form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
-        form.fields['assigned_to'].choices = [('', '--------')] + [[u.id, u.username] for u in User.objects.filter(is_active=True).order_by('username')]
+        form.fields['assigned_to'].choices = [('', '--------')] + [[u.id, u.username] for u in User.objects.filter(is_active=True,is_staff=True).order_by('username')]
         if form.is_valid():
             ticket = form.save(user=request.user)
             return HttpResponseRedirect(ticket.get_absolute_url())
