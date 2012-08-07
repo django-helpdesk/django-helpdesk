@@ -1,25 +1,24 @@
 # django-helpdesk English language translation
 # Copyright (C) 2011 Ross Poulton
 # This file is distributed under the same license as the django-helpdesk package.
-#
+# 
 # Translators:
 # mpasternak <michal.dtz@gmail.com>, 2011.
 # Ross Poulton <ross@rossp.org>, 2011.
+# Tomasz Sanecki <tomasz@sanecki.net>, 2012.
 msgid ""
 msgstr ""
 "Project-Id-Version: django-helpdesk\n"
-"Report-Msgid-Bugs-To: \n"
+"Report-Msgid-Bugs-To: http://github.com/RossP/django-helpdesk/issues\n"
 "POT-Creation-Date: 2012-04-25 18:25+1000\n"
-"PO-Revision-Date: 2011-11-05 00:46+0000\n"
-"Last-Translator: rossp <ross@rossp.org>\n"
-"Language-Team: Polish (http://www.transifex.net/projects/p/django-helpdesk/"
-"team/pl/)\n"
-"Language: pl\n"
+"PO-Revision-Date: 2012-07-02 14:06+0000\n"
+"Last-Translator: Tomasz Sanecki <tomasz@sanecki.net>\n"
+"Language-Team: Polish (http://www.transifex.com/projects/p/django-helpdesk/language/pl/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 "
-"|| n%100>=20) ? 1 : 2)\n"
+"Language: pl\n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)\n"
 
 #: forms.py:113 forms.py:360 models.py:262
 #: templates/helpdesk/dashboard.html:11 templates/helpdesk/dashboard.html:37
@@ -42,10 +41,9 @@ msgstr "Adres e-mail zgłaszającego"
 
 #: forms.py:129
 msgid ""
-"This e-mail address will receive copies of all public updates to this ticket."
-msgstr ""
-"Na ten adres e-mail wysyłane będą informacje o zmianach stanu tego "
-"zgłoszenia."
+"This e-mail address will receive copies of all public updates to this "
+"ticket."
+msgstr "Na ten adres e-mail wysyłane będą informacje o zmianach stanu tego zgłoszenia."
 
 #: forms.py:135
 msgid "Description of Issue"
@@ -59,9 +57,7 @@ msgstr "Przypisane do"
 msgid ""
 "If you select an owner other than yourself, they'll be e-mailed details of "
 "this ticket immediately."
-msgstr ""
-"Jeżeli przypiszesz to zgłoszenie do kogoś innego, niż Ty, to osoba owa "
-"otrzyma e-mail ze szczegółami dotyczącymi tego zgłoszenia"
+msgstr "Jeżeli przypiszesz to zgłoszenie do kogoś innego, niż Ty, to osoba owa otrzyma e-mail ze szczegółami dotyczącymi tego zgłoszenia"
 
 #: forms.py:151 models.py:322 management/commands/escalate_tickets.py:149
 #: templates/helpdesk/public_view_ticket.html:21
@@ -73,13 +69,12 @@ msgstr "Priorytet"
 
 #: forms.py:152
 msgid "Please select a priority carefully. If unsure, leave it as '3'."
-msgstr ""
-"Wybierz priorytet rozsądnie. Jeżeli nie wiesz, co wpisać, pozostaw '3'."
+msgstr "Wybierz priorytet rozsądnie. Jeżeli nie wiesz, co wpisać, pozostaw '3'."
 
 #: forms.py:159 forms.py:397 models.py:330 templates/helpdesk/ticket.html:178
 #: views/staff.py:361
 msgid "Due on"
-msgstr ""
+msgstr "Ukończyć do"
 
 #: forms.py:171 forms.py:402
 msgid "Attach File"
@@ -87,8 +82,7 @@ msgstr "Dołącz plik"
 
 #: forms.py:172 forms.py:403
 msgid "You can attach a file such as a document or screenshot to this ticket."
-msgstr ""
-"Możesz dołączyć plik taki jak dokument lub zrzut ekranu do tego zgłoszenia."
+msgstr "Możesz dołączyć plik taki jak dokument lub zrzut ekranu do tego zgłoszenia."
 
 #: forms.py:180 templates/helpdesk/public_view_ticket.html:33
 #: templates/helpdesk/ticket.html:182
@@ -102,9 +96,7 @@ msgstr "Tagi"
 msgid ""
 "Words, separated by spaces, or phrases separated by commas. These should "
 "communicate significant characteristics of this ticket"
-msgstr ""
-"Słowa oddzielone spacjami lub frazy oddzielone przecinkami. Powinny oddawać "
-"najważniejsze cechy tego zgłoszenia"
+msgstr "Słowa oddzielone spacjami lub frazy oddzielone przecinkami. Powinny oddawać najważniejsze cechy tego zgłoszenia"
 
 #: forms.py:275
 msgid "Ticket Opened"
@@ -125,9 +117,7 @@ msgstr "Twój adres e-mail"
 
 #: forms.py:375
 msgid "We will e-mail you when your ticket is updated."
-msgstr ""
-"Gdy Twoje zgłoszenie zostanie zaktualizowane, otrzymasz informację przez e-"
-"mail"
+msgstr "Gdy Twoje zgłoszenie zostanie zaktualizowane, otrzymasz informację przez e-mail"
 
 #: forms.py:380
 msgid "Description of your issue"
@@ -137,9 +127,7 @@ msgstr "Opis Twojego zgłoszenia"
 msgid ""
 "Please be as descriptive as possible, including any details we may need to "
 "address your query."
-msgstr ""
-"Opisz zgłoszenie tak dokładnie, jak to możliwe, ze wszystkimi technicznym "
-"szczegółami których możemy potrzebować, aby odnieść się do Twojego zgłoszenia"
+msgstr "Opisz zgłoszenie tak dokładnie, jak to możliwe, ze wszystkimi technicznym szczegółami których możemy potrzebować, aby odnieść się do Twojego zgłoszenia"
 
 #: forms.py:390
 msgid "Urgency"
@@ -159,9 +147,7 @@ msgstr "Pokazuj listę zgłoszeń po zalogowaniu się?"
 
 #: forms.py:554
 msgid "Display the ticket list upon login? Otherwise, the dashboard is shown."
-msgstr ""
-"Wyświetlaj listę zgłoszeń po zalogowaniu się? Jeżeli nie, wyświetlony "
-"zostanie panel sterowania."
+msgstr "Wyświetlaj listę zgłoszeń po zalogowaniu się? Jeżeli nie, wyświetlony zostanie panel sterowania."
 
 #: forms.py:559
 msgid "E-mail me on ticket change?"
@@ -169,12 +155,9 @@ msgstr "Powiadomienie e-mail w razie zmiany zgłoszenia?"
 
 #: forms.py:560
 msgid ""
-"If you're the ticket owner and the ticket is changed via the web by somebody "
-"else, do you want to receive an e-mail?"
-msgstr ""
-"Jeżeli jesteś osobą do której przypisano to zgłoszenie, a zgłoszenie zostaje "
-"zaktualizowane przez przez kogoś innego przy pomocy strony WWW, to czy "
-"chcesz otrzymać e-mail w takiej sytuacji?"
+"If you're the ticket owner and the ticket is changed via the web by somebody"
+" else, do you want to receive an e-mail?"
+msgstr "Jeżeli jesteś osobą do której przypisano to zgłoszenie, a zgłoszenie zostaje zaktualizowane przez przez kogoś innego przy pomocy strony WWW, to czy chcesz otrzymać e-mail w takiej sytuacji?"
 
 #: forms.py:565
 msgid "E-mail me when assigned a ticket?"
@@ -183,9 +166,7 @@ msgstr "Powiadomienie e-mail w razie przypisania zgłoszenia?"
 #: forms.py:566
 msgid ""
 "If you are assigned a ticket via the web, do you want to receive an e-mail?"
-msgstr ""
-"Jeżeli jesteś przypisywany do zgłoszenia za pomocą strony WWW, to czy chcesz "
-"otrzymywać e-mail w takiej sytuacji?"
+msgstr "Jeżeli jesteś przypisywany do zgłoszenia za pomocą strony WWW, to czy chcesz otrzymywać e-mail w takiej sytuacji?"
 
 #: forms.py:571
 msgid "E-mail me when a ticket is changed via the API?"
@@ -193,9 +174,7 @@ msgstr "Powiadomienie e-mail w razie zmiany zgłoszenia przez API?"
 
 #: forms.py:572
 msgid "If a ticket is altered by the API, do you want to receive an e-mail?"
-msgstr ""
-"Jeżeli zgłoszenie jest zmieniane przez API, to czy chcesz otrzymywać e-mail "
-"w takiej sytuacji?"
+msgstr "Jeżeli zgłoszenie jest zmieniane przez API, to czy chcesz otrzymywać e-mail w takiej sytuacji?"
 
 #: forms.py:577
 msgid "Number of tickets to show per page"
@@ -214,10 +193,7 @@ msgid ""
 "When you submit a ticket, do you want to automatically use your e-mail "
 "address as the submitter address? You can type a different e-mail address "
 "when entering the ticket if needed, this option only changes the default."
-msgstr ""
-"Czy system ma użyć Twojego adresu e-mail w momencie tworzenia nowego "
-"zgłoszenia? Możesz za każdym razem wpisać inny adres e-mail; ta opcja "
-"zmienia jedynie wartość domyślną."
+msgstr "Czy system ma użyć Twojego adresu e-mail w momencie tworzenia nowego zgłoszenia? Możesz za każdym razem wpisać inny adres e-mail; ta opcja zmienia jedynie wartość domyślną."
 
 #: models.py:32 models.py:256 models.py:490 models.py:787 models.py:821
 #: templates/helpdesk/dashboard.html:37 templates/helpdesk/dashboard.html:57
@@ -235,10 +211,7 @@ msgstr "Slug"
 msgid ""
 "This slug is used when building ticket ID's. Once set, try not to change it "
 "or e-mailing may get messy."
-msgstr ""
-"Slug to krótka etykieta, używana podczas tworzenia identyfikatora "
-"zgłoszenia. Postaraj się jej nie zmieniać, gdyż mogą wystąpić problemy z "
-"wysyłanymi e-mailami."
+msgstr "Slug to krótka etykieta, używana podczas tworzenia identyfikatora zgłoszenia. Postaraj się jej nie zmieniać, gdyż mogą wystąpić problemy z wysyłanymi e-mailami."
 
 #: models.py:43 models.py:1015 models.py:1085 models.py:1159
 #: templates/helpdesk/email_ignore_list.html:13
@@ -248,12 +221,9 @@ msgstr "Adres e-mail"
 
 #: models.py:46
 msgid ""
-"All outgoing e-mails for this queue will use this e-mail address. If you use "
-"IMAP or POP3, this should be the e-mail address for that mailbox."
-msgstr ""
-"Wszystkie wychodzące listy e-mail dla tej kolejki będą używać tego adresu e-"
-"mail. Jeżeli korzystasz z protokołu IMAP lub POP3, to ta wartość powinna być "
-"adresem e-mail wybranej skrzynki pocztowej."
+"All outgoing e-mails for this queue will use this e-mail address. If you use"
+" IMAP or POP3, this should be the e-mail address for that mailbox."
+msgstr "Wszystkie wychodzące listy e-mail dla tej kolejki będą używać tego adresu e-mail. Jeżeli korzystasz z protokołu IMAP lub POP3, to ta wartość powinna być adresem e-mail wybranej skrzynki pocztowej."
 
 #: models.py:52 models.py:766
 msgid "Locale"
@@ -263,8 +233,7 @@ msgstr "Język"
 msgid ""
 "Locale of this queue. All correspondence in this queue will be in this "
 "language."
-msgstr ""
-"Język dla tej kolejki. Cała korespondencja będzie odbywać się w tym języku."
+msgstr "Język dla tej kolejki. Cała korespondencja będzie odbywać się w tym języku."
 
 #: models.py:60
 msgid "Allow Public Submission?"
@@ -280,9 +249,7 @@ msgstr "Zezwalaj na zgłoszenia przez e-mail?"
 
 #: models.py:71
 msgid "Do you want to poll the e-mail box below for new tickets?"
-msgstr ""
-"Czy chcesz co jakiś czas sprawdzać poniższą skrzynkę pocztową na obecność "
-"nowych zgłoszeń?"
+msgstr "Czy chcesz co jakiś czas sprawdzać poniższą skrzynkę pocztową na obecność nowych zgłoszeń?"
 
 #: models.py:76
 msgid "Escalation Days"
@@ -292,9 +259,7 @@ msgstr "Dni eskalacji"
 msgid ""
 "For tickets which are not held, how often do you wish to increase their "
 "priority? Set to 0 for no escalation."
-msgstr ""
-"Dla zgłoszeń bez właściciela, jak często chcesz podnosić ich priorytet? "
-"Ustaw \"0\", aby wyłączyć. "
+msgstr "Dla zgłoszeń bez właściciela, jak często chcesz podnosić ich priorytet? Ustaw \"0\", aby wyłączyć. "
 
 #: models.py:84
 msgid "New Ticket CC Address"
@@ -303,9 +268,9 @@ msgstr "Adres w polu \"Kopia do\" dla nowych zgłoszeń"
 #: models.py:88
 msgid ""
 "If an e-mail address is entered here, then it will receive notification of "
-"all new tickets created for this queue. Enter a comma between multiple e-"
-"mail addresses."
-msgstr ""
+"all new tickets created for this queue. Enter a comma between multiple "
+"e-mail addresses."
+msgstr "Jeżeli wprowadzisz tutaj adres e-mail, będą na niego wysyłane powiadomienia o nowych zgłoszeniach do tej kolejki. Kilka adresów e-mail należy oddzielić przecinkami."
 
 #: models.py:94
 msgid "Updated Ticket CC Address"
@@ -316,7 +281,7 @@ msgid ""
 "If an e-mail address is entered here, then it will receive notification of "
 "all activity (new tickets, closed tickets, updates, reassignments, etc) for "
 "this queue. Separate multiple addresses with a comma."
-msgstr ""
+msgstr "Jeżeli wprowadzisz tutaj adres e-mail, będą na niego wysyłane powiadomienia o wszystkich zdarzeniach (nowe zgłoszenia, zamknięte zgłoszenia, aktualizacje, przypisania itp.) dla tej kolejnki. Oddziel kilka adresów przecinkami."
 
 #: models.py:105
 msgid "E-Mail Box Type"
@@ -334,9 +299,7 @@ msgstr "IMAP"
 msgid ""
 "E-Mail server type for creating tickets automatically from a mailbox - both "
 "POP3 and IMAP are supported."
-msgstr ""
-"Nowe zgłoszenia przez e-mail - rodzaj skrzynki pocztowej. Obsługiwane "
-"protokoły to zarówno POP3 jak IMAP."
+msgstr "Nowe zgłoszenia przez e-mail - rodzaj skrzynki pocztowej. Obsługiwane protokoły to zarówno POP3 jak IMAP."
 
 #: models.py:115
 msgid "E-Mail Hostname"
@@ -346,8 +309,7 @@ msgstr "Nazwa serwera e-mail"
 msgid ""
 "Your e-mail server address - either the domain name or IP address. May be "
 "\"localhost\"."
-msgstr ""
-"Adres Twojego serwera e-mail: nazwa lub adres IP, a nawet \"localhost\""
+msgstr "Adres Twojego serwera e-mail: nazwa lub adres IP, a nawet \"localhost\""
 
 #: models.py:124
 msgid "E-Mail Port"
@@ -358,10 +320,7 @@ msgid ""
 "Port number to use for accessing e-mail. Default for POP3 is \"110\", and "
 "for IMAP is \"143\". This may differ on some servers. Leave it blank to use "
 "the defaults."
-msgstr ""
-"Numer portu używanego do uzyskania dostępu do skrzynki e-mail. Dla POP3 to "
-"zazwyczaj \"110\", a dla IMAP to zazwyczaj \"143\". Ta wartość może być "
-"różna na różnych serwerach. Pozostaw pole puste, aby użyć wartości domyślnej."
+msgstr "Numer portu używanego do uzyskania dostępu do skrzynki e-mail. Dla POP3 to zazwyczaj \"110\", a dla IMAP to zazwyczaj \"143\". Ta wartość może być różna na różnych serwerach. Pozostaw pole puste, aby użyć wartości domyślnej."
 
 #: models.py:133
 msgid "Use SSL for E-Mail?"
@@ -371,9 +330,7 @@ msgstr "Szyfrowanie e-mail za pomocą SSL?"
 msgid ""
 "Whether to use SSL for IMAP or POP3 - the default ports when using SSL are "
 "993 for IMAP and 995 for POP3."
-msgstr ""
-"Czy używać SSL do IMAP lub POP3? Domyślny numer portu gdy używasz SSL to "
-"\"993\" dla IMAP oraz \"995\" dla POP3."
+msgstr "Czy używać SSL do IMAP lub POP3? Domyślny numer portu gdy używasz SSL to \"993\" dla IMAP oraz \"995\" dla POP3."
 
 #: models.py:141
 msgid "E-Mail Username"
@@ -400,10 +357,7 @@ msgid ""
 "If using IMAP, what folder do you wish to fetch messages from? This allows "
 "you to use one IMAP account for multiple queues, by filtering messages on "
 "your IMAP server into separate folders. Default: INBOX."
-msgstr ""
-"Jeżeli korzystasz z IMAP, to z jakiego folderu chcesz pobrać wiadomości? "
-"Dzięki temu ustawieniu możesz używać jednego konta IMAP dla wielu kolejek, "
-"korzystając z funkcji filtrowania serwera IMAP. Domyślnie: INBOX."
+msgstr "Jeżeli korzystasz z IMAP, to z jakiego folderu chcesz pobrać wiadomości? Dzięki temu ustawieniu możesz używać jednego konta IMAP dla wielu kolejek, korzystając z funkcji filtrowania serwera IMAP. Domyślnie: INBOX."
 
 #: models.py:168
 msgid "E-Mail Check Interval"
@@ -488,9 +442,7 @@ msgstr "Adres e-mail zgłaszającego"
 msgid ""
 "The submitter will receive an email for all public follow-ups left for this "
 "task."
-msgstr ""
-"Zgłaszający otrzyma e-mail z powiadomieniem dla każdej nie-tajnej zmiany do "
-"tego zgłoszenia."
+msgstr "Zgłaszający otrzyma e-mail z powiadomieniem dla każdej nie-tajnej zmiany do tego zgłoszenia."
 
 #: models.py:290
 msgid "Assigned to"
@@ -510,9 +462,7 @@ msgstr "Wstrzymaj"
 
 #: models.py:303
 msgid "If a ticket is on hold, it will not automatically be escalated."
-msgstr ""
-"Jeżeli zgłoszenie ma status \"Wstrzymaj\", to nie będzie automatycznie "
-"eskalowane."
+msgstr "Jeżeli zgłoszenie ma status \"Wstrzymaj\", to nie będzie automatycznie eskalowane."
 
 #: models.py:308 models.py:796 templates/helpdesk/public_view_ticket.html:39
 #: templates/helpdesk/ticket_desc_table.html:67
@@ -540,9 +490,7 @@ msgstr "1 = najwyższy priorytet, 5 = najniższy"
 msgid ""
 "The date this ticket was last escalated - updated automatically by "
 "management/commands/escalate_tickets.py."
-msgstr ""
-"Data, gdy utworzono to zgłoszenie - aktualizowana automatycznie za pomocą "
-"management/commands/escalate_tickets.py."
+msgstr "Data, gdy utworzono to zgłoszenie - aktualizowana automatycznie za pomocą management/commands/escalate_tickets.py."
 
 #: models.py:348 templates/helpdesk/ticket_desc_table.html:22
 #: views/feeds.py:91 views/feeds.py:117 views/feeds.py:169 views/staff.py:298
@@ -575,9 +523,7 @@ msgstr "Publiczne"
 msgid ""
 "Public tickets are viewable by the submitter and all staff, but non-public "
 "tickets can only be seen by staff."
-msgstr ""
-"Publiczne zgłoszenia mogą być oglądane przez zgłaszającego oraz zespół, ale "
-"nie-publiczne zgłoszenia mogą być tylko oglądane przez zespół."
+msgstr "Publiczne zgłoszenia mogą być oglądane przez zgłaszającego oraz zespół, ale nie-publiczne zgłoszenia mogą być tylko oglądane przez zespół."
 
 #: models.py:514 models.py:888 models.py:1081 views/staff.py:949
 #: views/staff.py:955 views/staff.py:961 views/staff.py:967
@@ -646,9 +592,7 @@ msgstr "Rozmiar tego pliku w bajtach"
 msgid ""
 "Leave blank to allow this reply to be used for all queues, or select those "
 "queues you wish to limit this reply to."
-msgstr ""
-"Pozostaw puste aby pozwolić, by ta odpowiedź była używana dla wszystkich "
-"kolejek, lub wybierz te kolejki, do których chcesz jej użycie ograniczyć."
+msgstr "Pozostaw puste aby pozwolić, by ta odpowiedź była używana dla wszystkich kolejek, lub wybierz te kolejki, do których chcesz jej użycie ograniczyć."
 
 #: models.py:668 models.py:709 models.py:1003
 #: templates/helpdesk/email_ignore_list.html:13
@@ -658,9 +602,7 @@ msgstr "Nazwa"
 #: models.py:670
 msgid ""
 "Only used to assist users with selecting a reply - not shown to the user."
-msgstr ""
-"Wartość używana jest tylko podczas wyboru odpowiedzi - nie jest widoczna dla "
-"użytkownika końcowego."
+msgstr "Wartość używana jest tylko podczas wyboru odpowiedzi - nie jest widoczna dla użytkownika końcowego."
 
 #: models.py:675
 msgid "Body"
@@ -668,19 +610,15 @@ msgstr "Treść"
 
 #: models.py:676
 msgid ""
-"Context available: {{ ticket }} - ticket object (eg {{ ticket.title }}); "
-"{{ queue }} - The queue; and {{ user }} - the current user."
-msgstr ""
-"Dopuszczalne tagi: {{ ticket }} - obiekt zgłoszenia (np. {{ ticket."
-"title }}); {{ queue }} - kolejka; {{ user }} - zalogowany użytkownik."
+"Context available: {{ ticket }} - ticket object (eg {{ ticket.title }}); {{ "
+"queue }} - The queue; and {{ user }} - the current user."
+msgstr "Dopuszczalne tagi: {{ ticket }} - obiekt zgłoszenia (np. {{ ticket.title }}); {{ queue }} - kolejka; {{ user }} - zalogowany użytkownik."
 
 #: models.py:703
 msgid ""
 "Leave blank for this exclusion to be applied to all queues, or select those "
 "queues you wish to exclude with this entry."
-msgstr ""
-"Pozostaw puste, aby to wykluczenie dotyczyło wszystkich kolejek, lub wybierz "
-"te kolejki, które chcesz wykluczyć. XXXCHECKTHISXXX"
+msgstr "Pozostaw puste, aby to wykluczenie dotyczyło wszystkich kolejek, lub wybierz te kolejki, które chcesz wykluczyć. XXXCHECKTHISXXX"
 
 #: models.py:715
 msgid "Date on which escalation should not happen"
@@ -697,13 +635,9 @@ msgstr "Temat"
 #: models.py:739
 msgid ""
 "This will be prefixed with \"[ticket.ticket] ticket.title\". We recommend "
-"something simple such as \"(Updated\") or \"(Closed)\" - the same context is "
-"available as in plain_text, below."
-msgstr ""
-"Wartość w tym polu będzie poprzedzona \"[ticket.ticket] ticket.title\" - ID "
-"oraz tytułem zgłoszenia. Proponujemy coś prostego, jak np "
-"\"(Zaktualizowano)\" lub \"(Zamknięto)\". Możesz zastosować podobne tagi, "
-"jak w wersji tekstowej - patrz niżej."
+"something simple such as \"(Updated\") or \"(Closed)\" - the same context is"
+" available as in plain_text, below."
+msgstr "Wartość w tym polu będzie poprzedzona \"[ticket.ticket] ticket.title\" - ID oraz tytułem zgłoszenia. Proponujemy coś prostego, jak np \"(Zaktualizowano)\" lub \"(Zamknięto)\". Możesz zastosować podobne tagi, jak w wersji tekstowej - patrz niżej."
 
 #: models.py:745
 msgid "Heading"
@@ -711,11 +645,9 @@ msgstr "Nagłówek"
 
 #: models.py:747
 msgid ""
-"In HTML e-mails, this will be the heading at the top of the email - the same "
-"context is available as in plain_text, below."
-msgstr ""
-"W e-mailach HTML, nagłówek będzie widoczny na początku e-maila. Możesz "
-"zastosować podobne tagi, jak w wersji tekstowej - patrz niżej."
+"In HTML e-mails, this will be the heading at the top of the email - the same"
+" context is available as in plain_text, below."
+msgstr "W e-mailach HTML, nagłówek będzie widoczny na początku e-maila. Możesz zastosować podobne tagi, jak w wersji tekstowej - patrz niżej."
 
 #: models.py:753
 msgid "Plain Text"
@@ -725,10 +657,7 @@ msgstr "Wersja tekstowa"
 msgid ""
 "The context available to you includes {{ ticket }}, {{ queue }}, and "
 "depending on the time of the call: {{ resolution }} or {{ comment }}."
-msgstr ""
-"Dopuszczalne tagi: {{ ticket }} - zgłoszenie, {{ queue }} - kolejka; w "
-"zależności od chwili wywołania mogą być dostępne: {{ comment }} - komentarz "
-"lub {{ resolution }} - rozwiązanie."
+msgstr "Dopuszczalne tagi: {{ ticket }} - zgłoszenie, {{ queue }} - kolejka; w zależności od chwili wywołania mogą być dostępne: {{ comment }} - komentarz lub {{ resolution }} - rozwiązanie."
 
 #: models.py:760
 msgid "HTML"
@@ -740,7 +669,7 @@ msgstr "Możesz zastosować podobne tagi, jak w wersji tekstowej - patrz wyżej.
 
 #: models.py:770
 msgid "Locale of this template."
-msgstr ""
+msgstr "Język tego szablonu"
 
 #: models.py:817 templates/helpdesk/kb_index.html:10
 #: templates/helpdesk/public_homepage.html:10
@@ -815,17 +744,13 @@ msgstr "Ustawienia - słownik"
 msgid ""
 "This is a base64-encoded representation of a pickled Python dictionary. Do "
 "not change this field via the admin."
-msgstr ""
-"To jest słownik języka Python, przepuszczony przez Pickle oraz kodowanie "
-"base64. Nie zmieniaj tego pola za pomocą panelu administracyjnego."
+msgstr "To jest słownik języka Python, przepuszczony przez Pickle oraz kodowanie base64. Nie zmieniaj tego pola za pomocą panelu administracyjnego."
 
 #: models.py:997
 msgid ""
 "Leave blank for this e-mail to be ignored on all queues, or select those "
 "queues you wish to ignore this e-mail for."
-msgstr ""
-"Pozostaw puste, aby zignorować ten e-mail dla wszystkich kolejek lub wybierz "
-"kolejki, dla których chcesz zignorować ten e-mail."
+msgstr "Pozostaw puste, aby zignorować ten e-mail dla wszystkich kolejek lub wybierz kolejki, dla których chcesz zignorować ten e-mail."
 
 #: models.py:1009
 msgid "Date on which this e-mail address was added"
@@ -835,9 +760,7 @@ msgstr "Data dodania tego adresu e-mail"
 msgid ""
 "Enter a full e-mail address, or portions with wildcards, eg *@domain.com or "
 "postmaster@*."
-msgstr ""
-"Wpisz adres e-mail. Możesz użyć gwiazdki, np \"*@domain.com\" lub "
-"\"postmaster@*\""
+msgstr "Wpisz adres e-mail. Możesz użyć gwiazdki, np \"*@domain.com\" lub \"postmaster@*\""
 
 #: models.py:1022
 msgid "Save Emails in Mailbox?"
@@ -847,21 +770,15 @@ msgstr "Zapisywać e-maile?"
 msgid ""
 "Do you want to save emails from this address in the mailbox? If this is "
 "unticked, emails from this address will be deleted."
-msgstr ""
-"Czy chcesz zapisywać listy e-mail z tego adresu w skrzynce? Jeżeli "
-"odznaczysz to pole, e-maile z tego adresu będą usuwane."
+msgstr "Czy chcesz zapisywać listy e-mail z tego adresu w skrzynce? Jeżeli odznaczysz to pole, e-maile z tego adresu będą usuwane."
 
 #: models.py:1080
 msgid "User who wishes to receive updates for this ticket."
-msgstr ""
-"Użytkownicy, którzy chcą otrzymywać e-maile aktualizacyjne dla tego "
-"zgłoszenia."
+msgstr "Użytkownicy, którzy chcą otrzymywać e-maile aktualizacyjne dla tego zgłoszenia."
 
 #: models.py:1088
 msgid "For non-user followers, enter their e-mail address"
-msgstr ""
-"Wpisz adresy e-mail osób nie posiadających konta w serwisie, które chcą "
-"obserwować to zgłoszenie"
+msgstr "Wpisz adresy e-mail osób nie posiadających konta w serwisie, które chcą obserwować to zgłoszenie"
 
 #: models.py:1092
 msgid "Can View Ticket?"
@@ -885,11 +802,9 @@ msgstr "Nazwa pola"
 
 #: models.py:1132
 msgid ""
-"As used in the database and behind the scenes. Must be unique and consist of "
-"only lowercase letters with no punctuation."
-msgstr ""
-"Taka sama, jak w bazie danych. Musi być unikalna i składać się tylko z "
-"małych liter bez znaków przestankowych."
+"As used in the database and behind the scenes. Must be unique and consist of"
+" only lowercase letters with no punctuation."
+msgstr "Taka sama, jak w bazie danych. Musi być unikalna i składać się tylko z małych liter bez znaków przestankowych."
 
 #: models.py:1137
 msgid "Label"
@@ -969,13 +884,13 @@ msgstr "Tylko dla pola \"liczba naturalna\""
 
 #: models.py:1186
 msgid "Add empty first choice to List?"
-msgstr ""
+msgstr "Dodać pustą pozycję do listy?"
 
 #: models.py:1187
 msgid ""
-"Only for List: adds an empty first entry to the choices list, which enforces "
-"that the user makes an active choice."
-msgstr ""
+"Only for List: adds an empty first entry to the choices list, which enforces"
+" that the user makes an active choice."
+msgstr "Tylko dla list: dodaje pustą pozycję na początku listy, wymuszając na użytkowniku dokonanie wyboru."
 
 #: models.py:1191
 msgid "List Values"
@@ -987,11 +902,11 @@ msgstr "Tylko dla pola typu \"lista\". Wpisz każdą wartość w nowej linii."
 
 #: models.py:1198
 msgid "Ordering"
-msgstr ""
+msgstr "Kolejność"
 
 #: models.py:1199
 msgid "Lower numbers are displayed first; higher numbers are listed later"
-msgstr ""
+msgstr "Niższe wartości są wyświetlone wcześniej; wyższe później"
 
 #: models.py:1213
 msgid "Required?"
@@ -1008,13 +923,11 @@ msgstr "Tylko dla pracowników?"
 #: models.py:1219
 msgid ""
 "If this is ticked, then the public submission form will NOT show this field"
-msgstr ""
-"Jeżeli zaznaczysz to pole, to formularz zgłoszenia dla niezalogowanych "
-"użytkowników NIE będzie wyświetlał tego pola"
+msgstr "Jeżeli zaznaczysz to pole, to formularz zgłoszenia dla niezalogowanych użytkowników NIE będzie wyświetlał tego pola"
 
 #: models.py:1262
 msgid "Depends On Ticket"
-msgstr ""
+msgstr "Zależnie od zgłoszenia"
 
 #: management/commands/create_usersettings.py:21
 msgid ""
@@ -1038,11 +951,9 @@ msgstr "Nadawca nieznany"
 
 #: management/commands/get_email.py:209
 msgid ""
-"No plain-text email body available. Please see attachment email_html_body."
-"html."
-msgstr ""
-"Brak treści listu w wersji tekstowej. Proszę obejrzeć załącznik "
-"email_html_body.html"
+"No plain-text email body available. Please see attachment "
+"email_html_body.html."
+msgstr "Brak treści listu w wersji tekstowej. Proszę obejrzeć załącznik email_html_body.html"
 
 #: management/commands/get_email.py:213
 msgid "email_html_body.html"
@@ -1056,9 +967,7 @@ msgstr "E-mail otrzymany z adresu %(sender_email)s"
 #: management/commands/get_email.py:264
 #, python-format
 msgid "Ticket Re-Opened by E-Mail Received from %(sender_email)s"
-msgstr ""
-"Zgłoszenie ponownie otwarte z powodu wiadomości e-mail otrzymanej z adresu "
-"%(sender_email)s"
+msgstr "Zgłoszenie ponownie otwarte z powodu wiadomości e-mail otrzymanej z adresu %(sender_email)s"
 
 #: management/commands/get_email.py:322
 msgid " (Reopened)"
@@ -1072,17 +981,15 @@ msgstr "(Zaktualizowano)"
 msgid ""
 "Powered by <a href='https://github.com/rossp/django-helpdesk'>django-"
 "helpdesk</a>."
-msgstr ""
-"Sercem systemu jest <a href='https://github.com/rossp/django-"
-"helpdesk'>django-helpdesk</a>."
+msgstr "Pracuje pod kontrolą <a href='https://github.com/rossp/django-helpdesk'>django-helpdesk</a>."
 
 #: templates/helpdesk/attribution.html:4
 msgid "For technical support please contact:"
-msgstr ""
+msgstr "Aby uzyskać pomoc techniczną, skontaktuj się z:"
 
 #: templates/helpdesk/base.html:9
 msgid "Powered by django-helpdesk"
-msgstr "Sercem systemu jest django-helpdesk"
+msgstr "Pracuje pod kontrolą django-helpdesk"
 
 #: templates/helpdesk/base.html:19 templates/helpdesk/rss_list.html:9
 #: templates/helpdesk/rss_list.html:23 templates/helpdesk/rss_list.html:28
@@ -1091,12 +998,12 @@ msgstr "Moje otwarte zgłoszenia"
 
 #: templates/helpdesk/base.html:20
 msgid "All Recent Activity"
-msgstr "Cała ostatnia aktywność "
+msgstr "Cała bieżąca aktywność"
 
 #: templates/helpdesk/base.html:21 templates/helpdesk/dashboard.html:76
 #: templates/helpdesk/rss_list.html:15
 msgid "Unassigned Tickets"
-msgstr "Zgłoszenia nieprzydzielone"
+msgstr "Nieprzypisane zgłoszenia"
 
 #: templates/helpdesk/base.html:101 templates/helpdesk/public_base.html:6
 #: templates/helpdesk/public_base.html:14
@@ -1123,18 +1030,17 @@ msgid "User Settings"
 msgstr "Ustawienia użytkownika"
 
 #: templates/helpdesk/base.html:115
-#, fuzzy
 msgid "Change Language"
-msgstr "Zmień zapytanie"
+msgstr "Zmień język"
 
 #: templates/helpdesk/base.html:117
 msgid "System Settings"
-msgstr "Ustawienia system"
+msgstr "Ustawienia systemu"
 
 #: templates/helpdesk/confirm_delete_saved_query.html:3
 #: templates/helpdesk/ticket_list.html:144
 msgid "Delete Saved Query"
-msgstr "Usuń zapisaną kwerendę"
+msgstr "Usuń zapisane zapytanie"
 
 #: templates/helpdesk/confirm_delete_saved_query.html:5
 #, python-format
@@ -1142,37 +1048,24 @@ msgid ""
 "\n"
 "<h2>Delete Query</h2>\n"
 "\n"
-"<p>Are you sure you want to delete this saved filter (<em>%(query_title)s</"
-"em>)? To re-create it, you will need to manually re-filter your ticket "
-"listing.</p>\n"
-msgstr ""
-"\n"
-"<h2>Usuń kwerendę</h2>\n"
-"\n"
-"<p>Czy jesteś pewny, że chcesz usunąć tą zapisaną kwerendę (<em>"
-"%(query_title)s</em>)? Aby utworzyć ją ponownie, będziesz musiał ręcznie "
-"przefiltrować listę zgłoszeń.</p>\n"
+"<p>Are you sure you want to delete this saved filter (<em>%(query_title)s</em>)? To re-create it, you will need to manually re-filter your ticket listing.</p>\n"
+msgstr "\n<h2>Usuń zapytanie</h2>\n\n<p>Czy rzeczywiście chcesz usunąć zapisany filtr (<em>%(query_title)s</em>)? Aby go ponownie utworzyć, musisz ponownie ręcznie przefiltrować listę zgłoszeń.</p>\n"
 
 #: templates/helpdesk/confirm_delete_saved_query.html:11
 msgid ""
 "\n"
-"<p>You have shared this query, so other users may be using it. If you delete "
-"it, they will have to manually create their own query.</p>\n"
-msgstr ""
-"\n"
-"<p>Ta kwerenda była widoczna dla innych użytkowników, więc ktoś jeszcze "
-"prócz ciebie mógł jej używać. Jeżeli usuniesz ją, inni użytkownicy będą "
-"musieli stworzyć ją ponownie ręcznie.</p>\n"
+"<p>You have shared this query, so other users may be using it. If you delete it, they will have to manually create their own query.</p>\n"
+msgstr "\n<p>Udostępniłeś to zapytanie więc inni użytkownicy mogą go używać. Jeśli je usuniesz, będą musieli sami odtworzyć to zapytanie.</p>\n"
 
 #: templates/helpdesk/confirm_delete_saved_query.html:15
 #: templates/helpdesk/delete_ticket.html:11
 msgid "No, Don't Delete It"
-msgstr "Nie, nie usuwaj"
+msgstr "Nie, nie usuwaj tego"
 
 #: templates/helpdesk/confirm_delete_saved_query.html:17
 #: templates/helpdesk/delete_ticket.html:13
 msgid "Yes - Delete It"
-msgstr "Tak, usuń"
+msgstr "Tak, usuń to"
 
 #: templates/helpdesk/create_ticket.html:3
 msgid "Create Ticket"
@@ -1182,65 +1075,51 @@ msgstr "Utwórz zgłoszenie"
 msgid ""
 "<h2>Submit a Ticket</h2>\n"
 "\n"
-"<p>Unless otherwise stated, all fields are required. Please provide as "
-"descriptive a title and description as possible.</p>"
-msgstr ""
-"<h2>Utwórz zgłoszenie</h2>\n"
-"\n"
-"<p>Wszystkie pola są obowiązkowe, chyba, że oznaczono inaczej. Proszę, podaj "
-"tak dużo informacji, jak jest to możliwe.</p>"
+"<p>Unless otherwise stated, all fields are required. Please provide as descriptive a title and description as possible.</p>"
+msgstr "<h2>Utwórz zgłoszenie</h2>\n\n<p>Jeżeli nie zaznaczono inaczej, wszystkie pola są wymagane. Postaraj się aby tytuł i opis dostarczały jak najwięcej informacji.</p>"
 
 #: templates/helpdesk/create_ticket.html:17
 #: templates/helpdesk/edit_ticket.html:19
 #: templates/helpdesk/public_homepage.html:50
 msgid "(Optional)"
-msgstr "(Opcjonalne)"
+msgstr "(Opcjonalnie)"
 
 #: templates/helpdesk/create_ticket.html:26
 #: templates/helpdesk/public_homepage.html:59
 msgid "Submit Ticket"
-msgstr "Wyślij zgłoszenie"
+msgstr "Utwórz zgłoszenie"
 
 #: templates/helpdesk/dashboard.html:2
 msgid "Helpdesk Dashboard"
-msgstr "Panel sterowania"
+msgstr "Kokpit Helpdesk"
 
 #: templates/helpdesk/dashboard.html:10
 msgid "Helpdesk Summary"
-msgstr "Statystyka"
+msgstr "Podsumowanie Helpdesk"
 
 #: templates/helpdesk/dashboard.html:25
-#, fuzzy
 msgid ""
 "Welcome to your Helpdesk Dashboard! From here you can quickly see tickets "
-"submitted by you, tickets you are working on, and those tickets that have no "
-"owner."
-msgstr ""
-"Witaj w panelu kontronlym Helpdesk! Z tego miejsca możesz szybko zobaczyć "
-"swoje własne zgłoszenia oraz zgłoszenia nieprzydzielone do nikogo. Czy masz "
-"coś przeciwko temu, żeby wybrać zgłoszenie i rozwiązać je, pomagając w ten "
-"sposób Twojemu klientowi?"
+"submitted by you, tickets you are working on, and those tickets that have no"
+" owner."
+msgstr "Witaj w kokpicie Helpdesk! Z tego miejsca możesz szybko przejrzeć zgłoszenia utworzone przez ciebie, zgłoszenia nad którymi pracujesz i zgłoszenia, które nie mają właściciela."
 
 #: templates/helpdesk/dashboard.html:27
 msgid ""
 "Welcome to your Helpdesk Dashboard! From here you can quickly see your own "
 "tickets, and those tickets that have no owner. Why not pick up an orphan "
 "ticket and sort it out for a customer?"
-msgstr ""
-"Witaj w panelu kontronlym Helpdesk! Z tego miejsca możesz szybko zobaczyć "
-"swoje własne zgłoszenia oraz zgłoszenia nieprzydzielone do nikogo. Czy masz "
-"coś przeciwko temu, żeby wybrać zgłoszenie i rozwiązać je, pomagając w ten "
-"sposób Twojemu klientowi?"
+msgstr "Witaj w kokpicie Helpdesk! Z tego miejsca możesz szybko przejrzeć zgłoszenia utworzone przez ciebie, zgłoszenia nad którymi pracujesz i zgłoszenia, które nie mają właściciela. Może mógłbyś zająć się jakimś zgłoszeniem i pomóc klientowi?"
 
 #: templates/helpdesk/dashboard.html:36
 msgid "All Tickets submitted by you"
-msgstr ""
+msgstr "Wszystkie zgłoszenia utworzone przez ciebie"
 
 #: templates/helpdesk/dashboard.html:37 templates/helpdesk/dashboard.html:57
 #: templates/helpdesk/dashboard.html:77 templates/helpdesk/dashboard.html:99
 #: templates/helpdesk/ticket_list.html:199
 msgid "Pr"
-msgstr "Pr "
+msgstr ""
 
 #: templates/helpdesk/dashboard.html:37 templates/helpdesk/dashboard.html:57
 #: templates/helpdesk/dashboard.html:99
@@ -1249,20 +1128,20 @@ msgstr "Ostatnia aktualizacja"
 
 #: templates/helpdesk/dashboard.html:56
 msgid "Open Tickets assigned to you (you are working on this ticket)"
-msgstr ""
+msgstr "Otwarte zgłoszenia przypisane do ciebie (pracujesz nad tymi zgłoszeniami)"
 
 #: templates/helpdesk/dashboard.html:69
 msgid "You have no tickets assigned to you."
-msgstr "Nie masz przypisanych żadnych zgłoszeń"
+msgstr "Brak zgłoszeń przypisanych do ciebie."
 
 #: templates/helpdesk/dashboard.html:76
 msgid "(pick up a ticket if you start to work on it)"
-msgstr ""
+msgstr "(wybierz zgłoszenie gdy zaczniesz się nim zajmować)"
 
 #: templates/helpdesk/dashboard.html:85
 #: templates/helpdesk/ticket_desc_table.html:22
 msgid "Take"
-msgstr "Zajmę się tym zgłoszeniem"
+msgstr "Weź"
 
 #: templates/helpdesk/dashboard.html:85
 #: templates/helpdesk/email_ignore_list.html:13
@@ -1279,7 +1158,7 @@ msgstr "Nie ma nieprzypisanych zgłoszeń."
 
 #: templates/helpdesk/dashboard.html:98
 msgid "Closed & resolved Tickets you used to work on"
-msgstr ""
+msgstr "Zamknięte i rozwiązane zgłoszenia nad którymi pracowałeś"
 
 #: templates/helpdesk/delete_ticket.html:3
 msgid "Delete Ticket"
@@ -1291,43 +1170,21 @@ msgid ""
 "\n"
 "<h2>Delete Ticket</h2>\n"
 "\n"
-"<p>Are you sure you want to delete this ticket (<em>%(ticket_title)s</em>)? "
-"All traces of the ticket, including followups, attachments, and updates will "
-"be irreversably removed.</p>\n"
-msgstr ""
-"\n"
-"<h2>Usuń zgłoszenie</h2>\n"
-"\n"
-"<p>Czy jesteś pewien, że chcesz usunąć to zgłoszenie (<em>%(ticket_title)s</"
-"em>)? Wszystkie informacje o nim, z odpowiedziami, załącznikami i "
-"aktualizacjami włącznie, zostaną nieodwracalnie usunięte.</p>\n"
+"<p>Are you sure you want to delete this ticket (<em>%(ticket_title)s</em>)? All traces of the ticket, including followups, attachments, and updates will be irreversably removed.</p>\n"
+msgstr "\n<h2>Usuń zgłoszenie</h2>\n\n<p>Czy rzeczywiście chcesz usunąć zgłoszenie (<em>%(ticket_title)s</em>)? Wszelkie ślady po tym zgłoszeniu, wliczając kontynuacje, załączniki i aktualizacje, będą bezpowrotnie usunięte</p>\n"
 
 #: templates/helpdesk/edit_ticket.html:3
 msgid "Edit Ticket"
-msgstr "Edycja zgłoszenia"
+msgstr "Edytuj zgłoszenie"
 
 #: templates/helpdesk/edit_ticket.html:6
 msgid ""
 "<h2>Edit a Ticket</h2>\n"
 "\n"
-"<p>Unless otherwise stated, all fields are required. Please provide as "
-"descriptive a title and description as possible.</p>\n"
+"<p>Unless otherwise stated, all fields are required. Please provide as descriptive a title and description as possible.</p>\n"
 "\n"
-"<p><strong>Note:</strong> Editing a ticket does <em>not</em> send an e-mail "
-"to the ticket owner or submitter. No new details should be entered, this "
-"form should only be used to fix incorrect details or clean up the submission."
-"</p>"
-msgstr ""
-"<h2>Edycja zgłoszenia</h2>\n"
-"\n"
-"<p>Wszystkie pola są wymagane, chyba, że zaznaczono inaczej. Proszę "
-"starannie i szczegółowo opisać tytuł i opis zgłoszenia.</p>\n"
-"\n"
-"<p><strong>Uwaga:</strong> Edycja zgłoszenia <em>nie</em> powoduje "
-"automatycznego wysłania e-mail do właściciela zgłoszenia lub do "
-"zgłaszającego. Nie powinieneś w ten sposób dodawać nowych szczegółów do "
-"zgłoszenia; ten formularz powinien być raczej używany do korekty literówek "
-"lub innych zmian edytorskich.</p>"
+"<p><strong>Note:</strong> Editing a ticket does <em>not</em> send an e-mail to the ticket owner or submitter. No new details should be entered, this form should only be used to fix incorrect details or clean up the submission.</p>"
+msgstr "<h2>Edytuj zgłoszenie</h2>\n\n<p>Jeżeli nie zaznaczono inaczej, wszystkie pola są wymagane. Postaraj się aby tytuł i opis zawierały możliwie jak najwięcej informacji.</p>\n\n<p><strong>Uwaga:</strong> Edycja zgłoszenia <em>nie powoduje</em> wysłania e-maila do właściciela lub zgłaszającego. Nie podawaj żadnych nowych szczegółów - formularz ten służy jedynie do poprawki detali i oczyszczania zgłoszenia.</p>"
 
 #: templates/helpdesk/edit_ticket.html:28
 msgid "Save Changes"
@@ -1336,33 +1193,21 @@ msgstr "Zapisz zmiany"
 #: templates/helpdesk/email_ignore_add.html:3
 #: templates/helpdesk/email_ignore_add.html:23
 msgid "Ignore E-Mail Address"
-msgstr "Zignoruj adres e-mail"
+msgstr "Ignoruj adres e-mail"
 
 #: templates/helpdesk/email_ignore_add.html:5
 msgid ""
 "\n"
 "<h2>Ignore E-Mail Address</h2>\n"
 "\n"
-"<p>To ignore an e-mail address and prevent any emails from that address "
-"creating tickets automatically, enter the e-mail address below.</p>\n"
+"<p>To ignore an e-mail address and prevent any emails from that address creating tickets automatically, enter the e-mail address below.</p>\n"
 "\n"
-"<p>You can either enter a whole e-mail address such as <em>email@domain.com</"
-"em> or a portion of an e-mail address with a wildcard, such as <em>*@domain."
-"com</em> or <em>user@*</em>.</p>"
+"<p>You can either enter a whole e-mail address such as <em>email@domain.com</em> or a portion of an e-mail address with a wildcard, such as <em>*@domain.com</em> or <em>user@*</em>.</p>"
 msgstr ""
-"\n"
-"<h2>Zignoruj adres e-mailh2>\n"
-"\n"
-"<p>Aby zignorować adres e-mail i wyłączyć funkcję tworzenia nowych zgłoszeń "
-"za pomocą listów e-mail nadanym z tego adresu, wpisz adres e-mail poniżej.</"
-"p>\n"
-"\n"
-"<p>Możesz wpisać cały adres e-mail, taki jak <em>email@domain.com</em> lub "
-"jego część z gwiazdką, np. <em>*@domain.com</em> lub <em>user@*</em>.</p>"
 
 #: templates/helpdesk/email_ignore_del.html:3
 msgid "Delete Ignored E-Mail Address"
-msgstr "Usuń ignorowany adres e-mail."
+msgstr "Usuń ignorowany adres e-mail"
 
 #: templates/helpdesk/email_ignore_del.html:5
 #, python-format
@@ -1370,21 +1215,12 @@ msgid ""
 "\n"
 "<h2>Un-Ignore E-Mail Address</h2>\n"
 "\n"
-"<p>Are you sure you wish to stop removing this email address (<em>"
-"%(email_address)s</em>) and allow their e-mails to automatically create "
-"tickets in your system? You can re-add this e-mail address at any time.</p>\n"
+"<p>Are you sure you wish to stop removing this email address (<em>%(email_address)s</em>) and allow their e-mails to automatically create tickets in your system? You can re-add this e-mail address at any time.</p>\n"
 msgstr ""
-"\n"
-"<h2>Usuń ignorowany adres e-mailh2>\n"
-"\n"
-"<p>Czy jesteś pewny/a, że chcesz przestać ignorować adres e-mail (<em>"
-"%(email_address)s</em>) i zezwolić listom e-mail nadanym z tego adresu na "
-"automatyczne tworzenie zgłoszeń w Twoim systemie? Możesz później dodać ten "
-"adres ponownie w dowolnej chwili.</p>\n"
 
 #: templates/helpdesk/email_ignore_del.html:11
 msgid "Keep Ignoring It"
-msgstr "Ignoruj dalej"
+msgstr "Nadal ignoruj"
 
 #: templates/helpdesk/email_ignore_del.html:13
 msgid "Stop Ignoring It"
@@ -1400,20 +1236,12 @@ msgid ""
 "\n"
 "<h2>Ignored E-Mail Addresses</h2>\n"
 "\n"
-"<p>The following e-mail addresses are currently being ignored by the "
-"incoming e-mail processor. You can <a href='add/'>add a new e-mail address "
-"to the list</a> or delete any of the items below as required.</p>"
+"<p>The following e-mail addresses are currently being ignored by the incoming e-mail processor. You can <a href='add/'>add a new e-mail address to the list</a> or delete any of the items below as required.</p>"
 msgstr ""
-"\n"
-"<h2>Ignorowane adresy e-mail</h2>\n"
-"\n"
-"<p>Następujące adresy e-mail są obecnie ignorowane. Możesz <a "
-"href='add/'>dodać nowy adres</a> do listy lub usunąć dowolny z poniższych "
-"adresów.</p>"
 
 #: templates/helpdesk/email_ignore_list.html:13
 msgid "Date Added"
-msgstr "Data dodania"
+msgstr "Data dodana"
 
 #: templates/helpdesk/email_ignore_list.html:13
 msgid "Queues"
@@ -1421,7 +1249,7 @@ msgstr "Kolejki"
 
 #: templates/helpdesk/email_ignore_list.html:13
 msgid "Keep in mailbox?"
-msgstr "Zachować w skrzynce pocztowej?"
+msgstr "Zatrzymać w skrzynce?"
 
 #: templates/helpdesk/email_ignore_list.html:21
 #: templates/helpdesk/ticket_list.html:232
@@ -1437,20 +1265,18 @@ msgid ""
 "<strong>Note:</strong> If the 'Keep' option is not selected, emails sent "
 "from that address will be deleted permanently."
 msgstr ""
-"<strong>Uwaga:</strong> Jeżeli nie zaznaczono opcji \"Zatrzymaj\", listy e-"
-"mail wysyłane z tego adresu będą trwale usuwane."
 
 #: templates/helpdesk/followup_edit.html:2
 msgid "Edit followup"
-msgstr "Edytuj odpowiedź"
+msgstr ""
 
 #: templates/helpdesk/followup_edit.html:9
 msgid "Edit FollowUp"
-msgstr "Edytuj odpowiedź"
+msgstr ""
 
 #: templates/helpdesk/followup_edit.html:14
 msgid "Reassign ticket:"
-msgstr "Przydziel ponownie"
+msgstr "Ponownie przydziel zgłoszenie:"
 
 #: templates/helpdesk/followup_edit.html:16
 msgid "Title:"
@@ -1464,12 +1290,12 @@ msgstr "Komentarz:"
 #: templates/helpdesk/kb_category.html:11
 #, python-format
 msgid "Knowledgebase Category: %(kbcat)s"
-msgstr "Kategoria Bazy Wiedzy: %(kbcat)s"
+msgstr "Kategoria Bazy Wiedzy:  %(kbcat)s"
 
 #: templates/helpdesk/kb_category.html:6
 #, python-format
 msgid "You are viewing all items in the %(kbcat)s category."
-msgstr "Przeglądasz wszystkie wpisy z kategorii %(kbcat)s."
+msgstr "Przeglądasz wszystkie pozycje w kategorii %(kbcat)s."
 
 #: templates/helpdesk/kb_category.html:12
 msgid "Article"
@@ -1486,8 +1312,6 @@ msgid ""
 "following categories. Please check to see if any of these articles address "
 "your problem prior to opening a support ticket."
 msgstr ""
-"Sugerujemy skorzystanie z Bazy Wiedzy przed utworzeniem zgłoszenia. Być może "
-"któryś z poniższych artykułów zawiera rozwiązanie Twojego problemu."
 
 #: templates/helpdesk/kb_index.html:9
 #: templates/helpdesk/public_homepage.html:9
@@ -1497,20 +1321,19 @@ msgstr "Kategorie Bazy Wiedzy"
 #: templates/helpdesk/kb_item.html:4
 #, python-format
 msgid "Knowledgebase: %(item)s"
-msgstr "Baza Wiedzy: %(item)s"
+msgstr "Baza wiedzy: %(item)s"
 
 #: templates/helpdesk/kb_item.html:13
 #, python-format
 msgid ""
-"View <a href='%(category_url)s'>other <em>%(category_title)s</em> articles</"
-"a>, or continue <a href='../'>viewing other knowledgebase articles</a>."
+"View <a href='%(category_url)s'>other <em>%(category_title)s</em> "
+"articles</a>, or continue <a href='../'>viewing other knowledgebase "
+"articles</a>."
 msgstr ""
-"Wyświetl <a href='%(category_url)s'>inne artykuły w kategorii <em>"
-"%(category_title)s</em></a>, lub <a href='../'>przejdź dalej</a>."
 
 #: templates/helpdesk/kb_item.html:15
 msgid "Feedback"
-msgstr "Komentarz zwrotny"
+msgstr "Wsparcie"
 
 #: templates/helpdesk/kb_item.html:17
 msgid ""
@@ -1518,9 +1341,6 @@ msgid ""
 "helped them out, in order for us to better serve future customers. We would "
 "appreciate your feedback on this article. Did you find it useful?"
 msgstr ""
-"Umożliwiamy użytkownikom głosowanie na artykuły, które ich zdaniem są "
-"najbardziej pomocne, aby w przyszłości inni użytkownicy mogli z nich "
-"skorzystać. Czy Tobie pomógł ten artykuł?"
 
 #: templates/helpdesk/kb_item.html:20
 msgid "This article was useful to me"
@@ -1532,12 +1352,12 @@ msgstr "Ten artykuł <strong>nie był</strong> dla mnie pomocny"
 
 #: templates/helpdesk/kb_item.html:24
 msgid "The results of voting by other readers of this article are below:"
-msgstr "Wyniki głosowania innych użytkowników są wyświetlone poniżej:"
+msgstr "Wyniki głosowania innych czytelników tego artykułu znajdują się poniżej:"
 
 #: templates/helpdesk/kb_item.html:27
 #, python-format
 msgid "Recommendations: %(recommendations)s"
-msgstr "Rekomendacje: %(recommendations)s"
+msgstr ""
 
 #: templates/helpdesk/kb_item.html:28
 #, python-format
@@ -1547,7 +1367,7 @@ msgstr "Głosy: %(votes)s"
 #: templates/helpdesk/kb_item.html:29
 #, python-format
 msgid "Overall Rating: %(score)s"
-msgstr "Ocena sumaryczna: %(score)s"
+msgstr "Wynik ogólny: %(score)s"
 
 #: templates/helpdesk/navigation.html:4
 msgid "Dashboard"
@@ -1568,27 +1388,24 @@ msgstr "Statystyki"
 
 #: templates/helpdesk/navigation.html:14
 #: templates/helpdesk/ticket_list.html:46
-#, fuzzy
 msgid "Load Saved Query"
-msgstr "Użyj zapisanego zapytania."
+msgstr "Wczytaj zapisane zapytanie"
 
 #: templates/helpdesk/navigation.html:25 templates/helpdesk/navigation.html:35
 msgid "Logout"
-msgstr "Wyloguj"
+msgstr "Wyloguj się"
 
 #: templates/helpdesk/navigation.html:26
 msgid "Search..."
-msgstr "Wyszukiwanie..."
+msgstr "Szukaj..."
 
 #: templates/helpdesk/navigation.html:26
 msgid "Enter a keyword, or a ticket number to jump straight to that ticket."
-msgstr ""
-"Wpisz słowo kluczowe lub numer zgłoszenia aby przejść do zgłoszenia "
-"bezpośrednio"
+msgstr "Wpisz słowo kluczowe lub numer zgłoszenia aby przejść bezpośrednio do zgłoszenia."
 
 #: templates/helpdesk/navigation.html:31
 msgid "Submit A Ticket"
-msgstr "Wyślij zgłoszenie"
+msgstr "Utwórz zgłoszenie"
 
 #: templates/helpdesk/navigation.html:35
 msgid "Log In"
@@ -1603,12 +1420,11 @@ msgstr "Wyświetl zgłoszenie"
 
 #: templates/helpdesk/public_change_language.html:5
 msgid "Change the display language"
-msgstr ""
+msgstr "Zmień wyświetlany język"
 
 #: templates/helpdesk/public_homepage.html:6
-#, fuzzy
 msgid "Knowledgebase Articles"
-msgstr "Kategorie Bazy Wiedzy"
+msgstr "Artykuły Bazy Wiedzy"
 
 #: templates/helpdesk/public_homepage.html:29
 #: templates/helpdesk/public_view_form.html:15
@@ -1618,52 +1434,34 @@ msgstr "Twój adres e-mail"
 #: templates/helpdesk/public_homepage.html:33
 #: templates/helpdesk/public_view_form.html:19
 msgid "View Ticket"
-msgstr "Podgląd zgłoszenia"
+msgstr "Wyświetl zgłoszenie"
 
 #: templates/helpdesk/public_homepage.html:39
 msgid "Submit a Ticket"
-msgstr "Dodaj zgłoszenie"
+msgstr "Utwórz zgłoszenie"
 
 #: templates/helpdesk/public_homepage.html:41
 msgid ""
 "All fields are required. Please provide as descriptive a title and "
 "description as possible."
 msgstr ""
-"Wszystkie pola są wymagane. Zastanów się nad adekwatnym tytułem i opisem."
 
 #: templates/helpdesk/public_homepage.html:67
 msgid "Please use button at upper right to login first."
-msgstr ""
+msgstr "Najpierw użyj przycisku w górnym prawym rogu aby się zalogować."
 
 #: templates/helpdesk/public_spam.html:4
 msgid "Unable To Open Ticket"
-msgstr "Nie można dodać zgłoszenia"
+msgstr "Nie można utworzyć zgłoszenia"
 
 #: templates/helpdesk/public_spam.html:6
 msgid ""
 "<p>Sorry, but there has been an error trying to submit your ticket.</p>\n"
 "\n"
-"<p>Our system has marked your submission as <strong>spam</strong>, so we are "
-"unable to save it. If this is not spam, please press back and re-type your "
-"message. Be careful to avoid sounding 'spammy', and if you have heaps of "
-"links please try removing them if possible.</p>\n"
+"<p>Our system has marked your submission as <strong>spam</strong>, so we are unable to save it. If this is not spam, please press back and re-type your message. Be careful to avoid sounding 'spammy', and if you have heaps of links please try removing them if possible.</p>\n"
 "\n"
-"<p>We are sorry for any inconvenience, however this check is required to "
-"avoid our helpdesk resources being overloaded by spammers.</p>\n"
+"<p>We are sorry for any inconvenience, however this check is required to avoid our helpdesk resources being overloaded by spammers.</p>\n"
 msgstr ""
-"<p>Przykro mi, ale wystąpił błąd podczas próby dodania Twojego zgłoszenia do "
-"systemu.</p>\n"
-"\n"
-"<p>Nasz system rozpoznał Twoje zgłoszenie jako <strong>spam</strong>, więc "
-"nie można go dodać. Jeżeli to nie jest spam, proszę przejdź do poprzedniej "
-"strony i spróbuj uzupełnić opis ponownie. Postaraj się unikać słów, które "
-"często występują w wiadomościach typu spam i jeżeli Twoja wiadomość zawiera "
-"mnóstwo adresów URL, postaraj się umieścić je gdzieś indziej i usunąć z "
-"treści zgłoszenia.</p>\n"
-"\n"
-"<p>Przykro nam za jakiekolwiek niedogodności, jakie to może sprawić, "
-"aczkolwiek ta weryfikacja jest konieczna, aby zapewnić nieprzerwane "
-"działanie naszego systemu i uniknąć zapełnienia go przez spammerów.</p>\n"
 
 #: templates/helpdesk/public_view_form.html:8
 msgid "Error:"
@@ -1677,7 +1475,7 @@ msgstr "Kolejka: %(queue_name)s"
 #: templates/helpdesk/public_view_ticket.html:11
 #: templates/helpdesk/ticket_desc_table.html:16
 msgid "Submitted On"
-msgstr "Zgłoszono"
+msgstr "Utworzono dnia"
 
 #: templates/helpdesk/public_view_ticket.html:46
 #: templates/helpdesk/ticket_desc_table.html:74
@@ -1692,65 +1490,64 @@ msgstr "Zaakceptuj i zamknij"
 #: templates/helpdesk/public_view_ticket.html:55
 #: templates/helpdesk/ticket.html:64
 msgid "Follow-Ups"
-msgstr "Odpowiedzi"
+msgstr ""
 
 #: templates/helpdesk/public_view_ticket.html:63
 #: templates/helpdesk/ticket.html:92
 #, python-format
 msgid "Changed %(field)s from %(old_value)s to %(new_value)s."
-msgstr "Zmieniono %(field)s z %(old_value)s na %(new_value)s."
+msgstr ""
 
 #: templates/helpdesk/report_index.html:3
 #: templates/helpdesk/report_index.html:6
 #: templates/helpdesk/report_output.html:3
 #: templates/helpdesk/report_output.html:16
 msgid "Reports &amp; Statistics"
-msgstr "Raporty &amp; statystyki"
+msgstr "Raporty i statystyki"
 
 #: templates/helpdesk/report_index.html:9
 msgid "You haven't created any tickets yet, so you cannot run any reports."
-msgstr ""
+msgstr "Nie utworzyłeś jeszcze żadnych zgłoszeń więc nie możesz generować żadnych raportów."
 
 #: templates/helpdesk/report_index.html:13
 msgid "Reports By User"
-msgstr ""
+msgstr "Raporty wg. użytkownika"
 
 #: templates/helpdesk/report_index.html:15
 #: templates/helpdesk/report_index.html:24
 msgid "by Priority"
-msgstr ""
+msgstr "wg. priorytetu"
 
 #: templates/helpdesk/report_index.html:16
 msgid "by Queue"
-msgstr ""
+msgstr "wg. kolejki"
 
 #: templates/helpdesk/report_index.html:17
 #: templates/helpdesk/report_index.html:25
 msgid "by Status"
-msgstr ""
+msgstr "wg. statusu"
 
 #: templates/helpdesk/report_index.html:18
 #: templates/helpdesk/report_index.html:26
 msgid "by Month"
-msgstr ""
+msgstr "wg.miesiąca"
 
 #: templates/helpdesk/report_index.html:22
 msgid "Reports By Queue"
-msgstr ""
+msgstr "Raporty wg. kolejki"
 
 #: templates/helpdesk/report_output.html:19
 msgid ""
 "You can run this query on filtered data by using one of your saved queries."
-msgstr ""
+msgstr "Możesz uruchomić to zapytanie na przefiltrowanych danych używając zapisanego zapytania."
 
 #: templates/helpdesk/report_output.html:21
-#, fuzzy
 msgid "Select Query:"
-msgstr "Kwerenda wyszukująca"
+msgstr "Wybierz zapytanie:"
 
 #: templates/helpdesk/report_output.html:26
 msgid "Filter Report"
-msgstr ""
+msgstr "Filtruj raport"
 
 #: templates/helpdesk/report_output.html:29
 msgid ""
@@ -1765,38 +1562,28 @@ msgid ""
 "all feeds provide information only on Open and Reopened cases. This ensures "
 "your RSS reader isn't full of information about closed or historical tasks."
 msgstr ""
-"Następujące kanały RSS są dostępne. Możesz odczytywać je w swoim czytniku "
-"RSS. Za wyjątkiem \"Ostatniej aktywności\", kanały dostarczają informacje "
-"dotyczące jedynie otwartych i ponownie otwartych zgłoszeń. Dzięki temu Twój "
-"czytnik RSS nie będzie zawierał informacji o zamkniętych i historycznych "
-"zgłoszeniach."
 
 #: templates/helpdesk/rss_list.html:10
 msgid ""
 "A summary of your open tickets - useful for getting alerted to new tickets "
 "opened for you"
 msgstr ""
-"Podsumowanie Twoich otwartych zgłoszeń - użyteczne, aby dostać informacje o "
-"nowych zgłoszeniach otwartych dla Ciebie."
 
 #: templates/helpdesk/rss_list.html:12
 msgid "Latest Activity"
-msgstr "Ostatnia aktywność"
+msgstr "Bieżąca aktywność"
 
 #: templates/helpdesk/rss_list.html:13
 msgid ""
 "A summary of all helpdesk activity - including comments, emails, "
 "attachments, and more"
 msgstr ""
-"Podsumowanie aktywności helpdesku - komentarze, e-maile, załączniki i inne."
 
 #: templates/helpdesk/rss_list.html:16
 msgid ""
 "All unassigned tickets - useful for being alerted to new tickets opened by "
 "the public via the web or via e-mail"
 msgstr ""
-"Wszystkie nieprzydzielone zgłoszenia - użyteczne, aby dostać informacje o "
-"nowych zgłoszeniach, otwartych przez stronę WWW lub e-mail przez użytkowników"
 
 #: templates/helpdesk/rss_list.html:19
 msgid ""
@@ -1805,14 +1592,10 @@ msgid ""
 "manage the staff who utilise a particular queue, this may be used to view "
 "new tickets coming into that queue."
 msgstr ""
-"Te kanały RSS pozwalają przeglądać podsumowania Twoich własnych zgłoszeń lub "
-"wszystkich zgłoszeń dla każdej kolejki w Twoim helpdesku. Przykładowo, "
-"jeżeli odpowiadasz za pracę zespołu, który korzysta z konkretnej kolejki, ta "
-"funkcja może być użyta aby monitorować nowe zgłoszenia w tej kolejce."
 
 #: templates/helpdesk/rss_list.html:22
 msgid "Per-Queue Feeds"
-msgstr "Kanały dla kolejek"
+msgstr ""
 
 #: templates/helpdesk/rss_list.html:23
 msgid "All Open Tickets"
@@ -1824,7 +1607,7 @@ msgstr "Otwarte zgłoszenia"
 
 #: templates/helpdesk/system_settings.html:3
 msgid "Change System Settings"
-msgstr "Zmień ustawienia system"
+msgstr "Zmień ustawienia systemu"
 
 #: templates/helpdesk/system_settings.html:5
 msgid ""
@@ -1832,16 +1615,11 @@ msgid ""
 "<h2>System Settings</h2>\n"
 "\n"
 "<p>The following items can be maintained by you or other superusers:</p>"
-msgstr ""
-"\n"
-"<h2>Ustawienia systemu</h2>\n"
-"\n"
-"<p>Następujące ustawienia mogą być zmieniane przez Ciebie lub innych "
-"administratorów:</p>"
+msgstr "\n<h2>Ustawienia systemu</h2>\n\n<p>Poniższe pozycje mogą być zarządzane przez ciebie oraz innych uprawnionych użytkowników:</p>"
 
 #: templates/helpdesk/system_settings.html:11
 msgid "E-Mail Ignore list"
-msgstr "Lista ignorowanych e-mail"
+msgstr "Lista ignorowanych e-maili"
 
 #: templates/helpdesk/system_settings.html:12
 msgid "Maintain Queues"
@@ -1857,11 +1635,11 @@ msgstr "Zarządzaj kategoriami Bazy Wiedzy"
 
 #: templates/helpdesk/system_settings.html:15
 msgid "Maintain Knowledgebase Items"
-msgstr "Zarządzaj artykułami Bazy Wiedzy"
+msgstr "Zarządzaj elementami Bazy Wiedzy"
 
 #: templates/helpdesk/system_settings.html:16
 msgid "Maintain E-Mail Templates"
-msgstr "Zarządzaj szablonami e-mail"
+msgstr "Zarządzaj szablonami e-maili"
 
 #: templates/helpdesk/system_settings.html:17
 msgid "Maintain Users"
@@ -1869,7 +1647,7 @@ msgstr "Zarządzaj użytkownikami"
 
 #: templates/helpdesk/ticket.html:2
 msgid "View Ticket Details"
-msgstr "Pokaż szczegóły zgłoszenia"
+msgstr "Wyświetl szczegóły zgłoszenia"
 
 #: templates/helpdesk/ticket.html:34
 msgid "Attach another File"
@@ -1881,7 +1659,7 @@ msgstr "Dodaj kolejny plik"
 
 #: templates/helpdesk/ticket.html:71 templates/helpdesk/ticket.html.py:81
 msgid "Private"
-msgstr "Prywatne"
+msgstr ""
 
 #: templates/helpdesk/ticket.html:111
 msgid "Respond to this ticket"
@@ -1896,9 +1674,6 @@ msgid ""
 "Selecting a pre-set reply will over-write your comment below. You can then "
 "modify the pre-set reply to your liking before saving this update."
 msgstr ""
-"Wybranie przygotowanej wcześniej odpowiedzi nadpisze Twój komentarz w "
-"poniższym polu. Możesz później zmodyfikować przygotowaną wcześniej odpowiedź "
-"wedle Twojego zapotrzebowania przed zapisaniem tej aktualizacji."
 
 #: templates/helpdesk/ticket.html:123
 msgid "Comment / Resolution"
@@ -1909,30 +1684,26 @@ msgid ""
 "You can insert ticket and queue details in your message. For more "
 "information, see the <a href='../../help/context/'>context help page</a>."
 msgstr ""
-"Możesz dodać szczegóły zgłoszenia oraz kolejki do Twojej wiadomości. Aby "
-"dowiedzieć się więcej, odwiedź <a href='../../help/context/'>stronę pomocy</"
-"a>."
 
 #: templates/helpdesk/ticket.html:128
 msgid ""
-"This ticket cannot be resolved or closed until the tickets it depends on are "
-"resolved."
-msgstr ""
+"This ticket cannot be resolved or closed until the tickets it depends on are"
+" resolved."
+msgstr "To zgłoszenie nie może być rozwiązane ani zamknięte dopóki zgłoszenia od których ono zależy nie są rozwiązane."
 
 #: templates/helpdesk/ticket.html:158
 msgid "Is this update public?"
-msgstr "Czy ta zmiana ma być upubliczniona?"
+msgstr "Czy ta aktualizacja jest publiczna?"
 
 #: templates/helpdesk/ticket.html:160
 msgid ""
-"If this is public, the submitter will be e-mailed your comment or resolution."
-msgstr ""
-"Jeżeli ta zmiana ma być upubliczniona, zgłaszający otrzyma wiadomość e-mail "
-"z Twoim komentarzem lub rozwiązaniem."
+"If this is public, the submitter will be e-mailed your comment or "
+"resolution."
+msgstr "Jeżeli aktualizacja jest publiczna, autor zgłoszenia otrzyma powiadomienie e-mailem."
 
 #: templates/helpdesk/ticket.html:164
 msgid "Change Further Details &raquo;"
-msgstr "Zmień pozostałe szczegóły &raquo;"
+msgstr ""
 
 #: templates/helpdesk/ticket.html:173 templates/helpdesk/ticket_list.html:55
 #: templates/helpdesk/ticket_list.html:87
@@ -1942,15 +1713,15 @@ msgstr "Właściciel"
 
 #: templates/helpdesk/ticket.html:174
 msgid "Unassign"
-msgstr "Nie przydzielaj"
+msgstr "Filtruj raport"
 
 #: templates/helpdesk/ticket.html:190
 msgid "Attach File(s) &raquo;"
-msgstr "Dołącz plik(i) &raquo;"
+msgstr "Załącz plik(i) &raquo;"
 
 #: templates/helpdesk/ticket.html:196
 msgid "Attach a File"
-msgstr "Dołącz plik"
+msgstr "Załącz plik"
 
 #: templates/helpdesk/ticket.html:204
 msgid "Update This Ticket"
@@ -1958,30 +1729,23 @@ msgstr "Zaktualizuj to zgłoszenie"
 
 #: templates/helpdesk/ticket_cc_add.html:3
 msgid "Add Ticket CC"
-msgstr "Dodaj CC zgłoszenia"
+msgstr ""
 
 #: templates/helpdesk/ticket_cc_add.html:5
 msgid ""
 "\n"
 "<h2>Add Ticket CC</h2>\n"
 "\n"
-"<p>To automatically send an email to a user or e-mail address when this "
-"ticket is updated, select the user or enter an e-mail address below.</p>"
+"<p>To automatically send an email to a user or e-mail address when this ticket is updated, select the user or enter an e-mail address below.</p>"
 msgstr ""
-"\n"
-"<h2>Dodaj CC zgłoszenia</h2>\n"
-"\n"
-"<p>Aby automatycznie wysłać wiadomość e-mail do użytkownika lub adresu e-"
-"mail gdy to zgłoszenie jest aktualizowane, wybierz użytkownika lub wpisz "
-"adres e-mail do poniższego pola.</p>"
 
 #: templates/helpdesk/ticket_cc_add.html:21
 msgid "Save Ticket CC"
-msgstr "Zapisz CC zgłoszenia"
+msgstr ""
 
 #: templates/helpdesk/ticket_cc_del.html:3
 msgid "Delete Ticket CC"
-msgstr "Usuń CC zgłoszenia"
+msgstr ""
 
 #: templates/helpdesk/ticket_cc_del.html:5
 #, python-format
@@ -1989,16 +1753,8 @@ msgid ""
 "\n"
 "<h2>Delete Ticket CC</h2>\n"
 "\n"
-"<p>Are you sure you wish to delete this email address (<em>"
-"%(email_address)s</em>) from the CC list for this ticket? They will stop "
-"receiving updates.</p>\n"
+"<p>Are you sure you wish to delete this email address (<em>%(email_address)s</em>) from the CC list for this ticket? They will stop receiving updates.</p>\n"
 msgstr ""
-"\n"
-"<h2>Usuń CC zgłoszenia</h2>\n"
-"\n"
-"<p>Czy jesteś pewny/a, że chcesz usunąć ten adres (<em>%(email_address)s</"
-"em>) z CC dla tego zgłoszenia? Aktualizacje zgłoszenia nie będą wysyłane na "
-"ten adres.</p>\n"
 
 #: templates/helpdesk/ticket_cc_del.html:11
 #: templates/helpdesk/ticket_dependency_del.html:11
@@ -2012,7 +1768,7 @@ msgstr "Tak, usuń"
 
 #: templates/helpdesk/ticket_cc_list.html:3
 msgid "Ticket CC Settings"
-msgstr "Ustawienia CC zgłoszenia"
+msgstr ""
 
 #: templates/helpdesk/ticket_cc_list.html:5
 #, python-format
@@ -2020,60 +1776,47 @@ msgid ""
 "\n"
 "<h2>Ticket CC Settings</h2>\n"
 "\n"
-"<p>The following people will receive an e-mail whenever <em><a href='../'>"
-"%(ticket_title)s</a></em> is updated. Some people can also view or edit the "
-"ticket via the public ticket views.</p>\n"
+"<p>The following people will receive an e-mail whenever <em><a href='../'>%(ticket_title)s</a></em> is updated. Some people can also view or edit the ticket via the public ticket views.</p>\n"
 "\n"
-"<p>You can <a href='add/'>add a new e-mail address to the list</a> or delete "
-"any of the items below as required.</p>"
+"<p>You can <a href='add/'>add a new e-mail address to the list</a> or delete any of the items below as required.</p>"
 msgstr ""
-"\n"
-"<h2>Ustawienia CC zgłoszenia</h2>\n"
-"\n"
-"<p>Następujące osoby otrzymają e-mail gdy zgłoszenie <em><a href='../'>"
-"%(ticket_title)s</a></em> zostanie zaktualizowane. Niektóre z tych osób mogą "
-"również oglądać lub edytować to zgłoszenie.</p>\n"
-"\n"
-"<p>Możesz <a href='add/'>dodać nowy adres e-mail do tej listy</a> lub usunąć "
-"dowolny z poniższych elementów.</p>"
 
 #: templates/helpdesk/ticket_cc_list.html:14
 msgid "Ticket CC List"
-msgstr "Lista CC zgłoszenia"
+msgstr ""
 
 #: templates/helpdesk/ticket_cc_list.html:15
 msgid "View?"
-msgstr "Podgląd?"
+msgstr ""
 
 #: templates/helpdesk/ticket_cc_list.html:15
 msgid "Update?"
-msgstr "Aktualizacja?"
+msgstr "Zaktualizować?"
 
 #: templates/helpdesk/ticket_cc_list.html:29
 #, python-format
 msgid "Return to <em>%(ticket_title)s</em>"
-msgstr "Powróć do <em>%(ticket_title)s</em>"
+msgstr ""
 
 #: templates/helpdesk/ticket_dependency_add.html:3
 msgid "Add Ticket Dependency"
-msgstr ""
+msgstr "Dodaj zależność zgłoszenia"
 
 #: templates/helpdesk/ticket_dependency_add.html:5
 msgid ""
 "\n"
 "<h2>Add Ticket Dependency</h2>\n"
 "\n"
-"<p>Adding a dependency will stop you resolving this ticket until the "
-"dependent ticket has been resolved or closed.</p>"
-msgstr ""
+"<p>Adding a dependency will stop you resolving this ticket until the dependent ticket has been resolved or closed.</p>"
+msgstr "\n<h2>Dodaj zależność zgłoszenia</h2>\n\n<p>Dodanie zależności zgłoszenia uniemożliwi rozwiązanie tego zgłoszenia, dopóki zależne zgłoszenia nie są rozwiązane.</p>"
 
 #: templates/helpdesk/ticket_dependency_add.html:21
 msgid "Save Ticket Dependency"
-msgstr ""
+msgstr "Zapisz zależność zgłoszenia"
 
 #: templates/helpdesk/ticket_dependency_del.html:3
 msgid "Delete Ticket Dependency"
-msgstr ""
+msgstr "Usuń zależność zgłoszenia"
 
 #: templates/helpdesk/ticket_dependency_del.html:5
 msgid ""
@@ -2081,11 +1824,11 @@ msgid ""
 "<h2>Delete Ticket Dependency</h2>\n"
 "\n"
 "<p>Are you sure you wish to remove the dependency on this ticket?</p>\n"
-msgstr ""
+msgstr "\n<h2>Usuń zależność zgłoszenia</h2>\n\n<p>Jesteś pewien, że chcesz usunąć tą zależność zgłoszenia?</p>\n"
 
 #: templates/helpdesk/ticket_desc_table.html:11
 msgid "Unhold"
-msgstr "Nie wstrzymuj"
+msgstr "Wznów"
 
 #: templates/helpdesk/ticket_desc_table.html:11
 msgid "Hold"
@@ -2098,11 +1841,11 @@ msgstr "Kolejka: %(queue)s"
 
 #: templates/helpdesk/ticket_desc_table.html:21
 msgid "Assigned To"
-msgstr "Przypisany do"
+msgstr "Przypisane do"
 
 #: templates/helpdesk/ticket_desc_table.html:27
 msgid "Ignore"
-msgstr "Zignoruj"
+msgstr "Ignoruj"
 
 #: templates/helpdesk/ticket_desc_table.html:36
 msgid "Copies To"
@@ -2114,13 +1857,13 @@ msgstr "Zarządzaj"
 
 #: templates/helpdesk/ticket_desc_table.html:37
 msgid ""
-"Click here to add / remove people who should receive an e-mail whenever this "
-"ticket is updated."
+"Click here to add / remove people who should receive an e-mail whenever this"
+" ticket is updated."
 msgstr ""
 
 #: templates/helpdesk/ticket_desc_table.html:48
 msgid "Dependencies"
-msgstr ""
+msgstr "Zależności"
 
 #: templates/helpdesk/ticket_desc_table.html:50
 msgid ""
@@ -2129,7 +1872,7 @@ msgstr ""
 
 #: templates/helpdesk/ticket_desc_table.html:51
 msgid "Remove Dependency"
-msgstr ""
+msgstr "Usuń zależność"
 
 #: templates/helpdesk/ticket_desc_table.html:54
 msgid "This ticket has no dependencies."
@@ -2148,36 +1891,33 @@ msgstr ""
 
 #: templates/helpdesk/ticket_list.html:2
 msgid "Ticket Listing"
-msgstr "Lista zgłoszeń"
+msgstr ""
 
 #: templates/helpdesk/ticket_list.html:41
-#, fuzzy
 msgid "Query Options"
-msgstr "Zapisz opcje"
+msgstr ""
 
 #: templates/helpdesk/ticket_list.html:43
-#, fuzzy
 msgid "Save This Query"
-msgstr "Zapisz zapytanie"
+msgstr ""
 
 #: templates/helpdesk/ticket_list.html:51
 msgid "Change Query"
-msgstr "Zmień zapytanie"
+msgstr ""
 
 #: templates/helpdesk/ticket_list.html:54
 #: templates/helpdesk/ticket_list.html:69
 msgid "Sorting"
-msgstr "Sortowanie"
+msgstr ""
 
 #: templates/helpdesk/ticket_list.html:58
 #: templates/helpdesk/ticket_list.html:137
 msgid "Keywords"
-msgstr "Słowa kluczowe"
+msgstr ""
 
 #: templates/helpdesk/ticket_list.html:59
-#, fuzzy
 msgid "Date Range"
-msgstr "Zapisz zmiany"
+msgstr ""
 
 #: templates/helpdesk/ticket_list.html:90
 msgid "Reverse"
@@ -2189,7 +1929,7 @@ msgstr ""
 
 #: templates/helpdesk/ticket_list.html:97
 msgid "Owner(s)"
-msgstr "Właściciel(e)"
+msgstr ""
 
 #: templates/helpdesk/ticket_list.html:101
 msgid "(ME)"
@@ -2201,7 +1941,7 @@ msgstr ""
 
 #: templates/helpdesk/ticket_list.html:110
 msgid "Queue(s)"
-msgstr "Kolejka(i)"
+msgstr ""
 
 #: templates/helpdesk/ticket_list.html:111
 #: templates/helpdesk/ticket_list.html:117
@@ -2211,16 +1951,15 @@ msgstr ""
 
 #: templates/helpdesk/ticket_list.html:116
 msgid "Status(es)"
-msgstr "Status(y)"
+msgstr ""
 
 #: templates/helpdesk/ticket_list.html:122
 msgid "Date (From)"
 msgstr ""
 
 #: templates/helpdesk/ticket_list.html:123
-#, fuzzy
 msgid "Date (To)"
-msgstr "Data"
+msgstr ""
 
 #: templates/helpdesk/ticket_list.html:124
 msgid "Use YYYY-MM-DD date format, eg 2011-05-29"
@@ -2228,12 +1967,12 @@ msgstr ""
 
 #: templates/helpdesk/ticket_list.html:130
 msgid "Tag(s)"
-msgstr "Tag(i)"
+msgstr ""
 
 #: templates/helpdesk/ticket_list.html:138
 msgid ""
-"Keywords are case-insensitive, and will be looked for in the title, body and "
-"submitter fields."
+"Keywords are case-insensitive, and will be looked for in the title, body and"
+" submitter fields."
 msgstr ""
 
 #: templates/helpdesk/ticket_list.html:142
@@ -2263,30 +2002,24 @@ msgid ""
 "query, other users will see this name, so choose something clear and "
 "descriptive!"
 msgstr ""
-"Ta nazwa pojawi się w rozwijanej liście zapisanych zapytań. Jeżeli "
-"udostępniasz swoje zapytanie, inni użytkownicy również zobaczą tą nazwę, "
-"więc sugeruję, abyś wpisał/a tutaj określenie nie budzące wątpliwości i "
-"opisowe."
 
 #: templates/helpdesk/ticket_list.html:162
 msgid "Shared?"
-msgstr "Udostępnij?"
+msgstr "Udostępnione?"
 
 #: templates/helpdesk/ticket_list.html:163
 msgid "Yes, share this query with other users."
-msgstr "Tak, udostępnij to zapytanie dla innych użytkowników"
+msgstr "Tak, udostępnij to zapytanie innym użytkownikom."
 
 #: templates/helpdesk/ticket_list.html:164
 msgid ""
 "If you share this query, it will be visible by <em>all</em> other logged-in "
 "users."
-msgstr ""
-"Jeżeli udostępnisz to zapytanie, będzie ono widoczne dla  <em>wszystkich</"
-"em> zalogowanych użytkowników. "
+msgstr "Jeżeli udostępnisz to zapytanie, będzie widoczne dla <em>wszystkich</em> zalogowanych użytkowników."
 
 #: templates/helpdesk/ticket_list.html:176
 msgid "Use Saved Query"
-msgstr "Użyj zapisanego zapytania."
+msgstr "Użyj zapisanego zapytania"
 
 #: templates/helpdesk/ticket_list.html:178
 msgid "Query"
@@ -2298,7 +2031,7 @@ msgstr "Uruchom zapytanie"
 
 #: templates/helpdesk/ticket_list.html:213
 msgid "No Tickets Match Your Selection"
-msgstr "Żadne zgłoszenia nie pasują do wybranych przez Ciebie kryteriów"
+msgstr "Żadne zgłoszenie nie pasuje do twojego wyboru"
 
 #: templates/helpdesk/ticket_list.html:219
 msgid "Previous"
@@ -2307,7 +2040,7 @@ msgstr "Poprzednia"
 #: templates/helpdesk/ticket_list.html:223
 #, python-format
 msgid "Page %(ticket_num)s of %(num_pages)s."
-msgstr "Strona %(ticket_num)s z %(num_pages)s."
+msgstr ""
 
 #: templates/helpdesk/ticket_list.html:227
 msgid "Next"
@@ -2315,68 +2048,55 @@ msgstr "Następna"
 
 #: templates/helpdesk/ticket_list.html:232
 msgid "Select:"
-msgstr ""
+msgstr "Wybierz"
 
 #: templates/helpdesk/ticket_list.html:232
 msgid "None"
-msgstr ""
+msgstr "Nic"
 
 #: templates/helpdesk/ticket_list.html:232
 msgid "Inverse"
-msgstr ""
+msgstr "Odwrotnie"
 
 #: templates/helpdesk/ticket_list.html:234
-#, fuzzy
 msgid "With Selected Tickets:"
-msgstr "Usuń zgłoszenie"
+msgstr "Zaznaczone zgłoszenia"
 
 #: templates/helpdesk/ticket_list.html:234
-#, fuzzy
 msgid "Take (Assign to me)"
-msgstr "Zgłoszenie otwarto i przypisano do %(name)s"
+msgstr "Weź (Przypisz do mnie)"
 
 #: templates/helpdesk/ticket_list.html:234
-#, fuzzy
 msgid "Close"
-msgstr "Zamknięte"
+msgstr "Zamknij"
 
 #: templates/helpdesk/ticket_list.html:234
 msgid "Close (Don't Send E-Mail)"
-msgstr ""
+msgstr "Zamknij (nie wysyłaj e-maila)"
 
 #: templates/helpdesk/ticket_list.html:234
 msgid "Close (Send E-Mail)"
-msgstr ""
+msgstr "Zamknij (wyślij e-mail)"
 
 #: templates/helpdesk/ticket_list.html:234
-#, fuzzy
 msgid "Assign To"
-msgstr "Przypisany do"
+msgstr "Przypisz do"
 
 #: templates/helpdesk/ticket_list.html:234
-#, fuzzy
 msgid "Nobody (Unassign)"
-msgstr "Nie przydzielaj"
+msgstr "Nikogo (nie przypisuj)"
 
 #: templates/helpdesk/user_settings.html:3
 msgid "Change User Settings"
 msgstr "Zmień ustawienia użytkownika"
 
 #: templates/helpdesk/user_settings.html:14
-#, fuzzy
 msgid ""
 "\n"
 "<h2>User Settings</h2>\n"
 "\n"
-"<p>Use the following options to change the way your helpdesk system works "
-"for you. These settings do not impact any other user.</p>\n"
+"<p>Use the following options to change the way your helpdesk system works for you. These settings do not impact any other user.</p>\n"
 msgstr ""
-"\n"
-"<h2>Ustawienia użytkownika</h2>\n"
-"\n"
-"<p>Użyj poniższych opcji, aby zmienić sposób, w jaki funkcjonuje Twój system "
-"helpdesk. Te ustawienia nie zmieniają funkcjonalności dla żadnego innego "
-"użytkownika, prócz Ciebie.</p>"
 
 #: templates/helpdesk/user_settings.html:29
 msgid "Save Options"
@@ -2391,35 +2111,28 @@ msgid ""
 "\n"
 "<h2>Logged Out</h2>\n"
 "\n"
-"<p>Thanks for being here. Hopefully you've helped resolve a few tickets and "
-"make the world a better place.</p>\n"
+"<p>Thanks for being here. Hopefully you've helped resolve a few tickets and make the world a better place.</p>\n"
 "\n"
 msgstr ""
-"\n"
-"<h2>Wylogowano</h2>\n"
-"\n"
-"<p>Dzięki za czas spędzony w systemie. Mam nadzieję, że pomogłeś rozwiązać "
-"kilka problemów i uczyniłeś świat lepszym miejscem...</p>\n"
-"\n"
 
 #: templates/helpdesk/registration/login.html:2
 msgid "Helpdesk Login"
-msgstr "Logowanie do Helpdesk"
+msgstr "Logowanie Helpdesk"
 
 #: templates/helpdesk/registration/login.html:9
 #: templates/helpdesk/registration/login.html:21
 msgid "Login"
-msgstr "Login"
+msgstr "Logowanie"
 
 #: templates/helpdesk/registration/login.html:11
 msgid ""
 "To log in and begin responding to cases, simply enter your username and "
 "password below."
-msgstr "Aby zalogować się, wpisz swoją nazwę użytkownika i hasło."
+msgstr ""
 
 #: templates/helpdesk/registration/login.html:14
 msgid "Your username and password didn't match. Please try again."
-msgstr "Twoja nazwa użytkownika i hasło nie zgadzają się. Spróbuj jeszcze raz."
+msgstr "Nie odnaleziono takiego użytkownika i hasła. Spróbuj jeszcze raz."
 
 #: templates/helpdesk/registration/login.html:16
 msgid "Username"
@@ -2432,8 +2145,7 @@ msgstr "Hasło"
 #: views/feeds.py:35
 #, python-format
 msgid "Helpdesk: Open Tickets in queue %(queue)s for %(username)s"
-msgstr ""
-"Helpdesk: otwarte zgłoszenia w kolejce %(queue)s dla użytkownika %(username)s"
+msgstr "Helpdesk: otwarte zgłoszenia w kolejce %(queue)s dla użytkownika %(username)s"
 
 #: views/feeds.py:40
 #, python-format
@@ -2443,9 +2155,7 @@ msgstr "Helpdesk: otwarte zgłoszenia dla użytkownika %(username)s"
 #: views/feeds.py:46
 #, python-format
 msgid "Open and Reopened Tickets in queue %(queue)s for %(username)s"
-msgstr ""
-"Otwarte i ponownie otwarte zgłoszenia w kolejce %(queue)s dla użytkownika "
-"%(username)s"
+msgstr "Otwarte i ponownie otwarte zgłoszenia w kolejce %(queue)s dla użytkownika %(username)s"
 
 #: views/feeds.py:51
 #, python-format
@@ -2468,8 +2178,7 @@ msgstr "Helpdesk: ostatnie odpowiedzi"
 msgid ""
 "Recent FollowUps, such as e-mail replies, comments, attachments and "
 "resolutions"
-msgstr ""
-"Ostatnie odpowiedzi, takie jak e-maile, komentarze, załączniki i rozwiązania"
+msgstr "Ostatnie odpowiedzi, takie jak e-maile, komentarze, załączniki i rozwiązania"
 
 #: views/feeds.py:140
 #, python-format
@@ -2483,8 +2192,7 @@ msgstr "Otwarte i ponownie otwarte zgłoszenia w kolejce %(queue)s"
 
 #: views/public.py:91
 msgid "Invalid ticket ID or e-mail address. Please try again."
-msgstr ""
-"Nieprawidłowe ID zgłoszenia lub nieprawidłowy adres e-mail. Spróbuj ponownie."
+msgstr "Nieprawidłowe ID zgłoszenia lub nieprawidłowy adres e-mail. Spróbuj ponownie."
 
 #: views/public.py:109
 msgid "Submitter accepted resolution and closed ticket"
@@ -2525,16 +2233,10 @@ msgid ""
 "<p><strong>Note:</strong> Your keyword search is case sensitive because of "
 "your database. This means the search will <strong>not</strong> be accurate. "
 "By switching to a different database system you will gain better searching! "
-"For more information, read the <a href=\"http://docs.djangoproject.com/en/"
-"dev/ref/databases/#sqlite-string-matching\">Django Documentation on string "
-"matching in SQLite</a>."
-msgstr ""
-"<p><strong>Uwaga:</strong> to wyszukiwanie słów kluczowych rozróżnia wielkie "
-"i małe litery z powodu używanej bazy danych. Oznacza to, że wyszukiwanie "
-"może <strong>nie</strong> być dokładne. Używając innej bazy danych możesz "
-"poprawić wyszukiwanie. Aby dowiedzieć się więcej, przeczytaj <a href="
-"\"http://docs.djangoproject.com/en/dev/ref/databases/#sqlite-string-matching"
-"\">Django Documentation on string matching in SQLite</a>."
+"For more information, read the <a "
+"href=\"http://docs.djangoproject.com/en/dev/ref/databases/#sqlite-string-"
+"matching\">Django Documentation on string matching in SQLite</a>."
+msgstr "<p><strong>Uwaga:</strong> to wyszukiwanie słów kluczowych rozróżnia wielkie i małe litery z powodu używanej bazy danych. Oznacza to, że wyszukiwanie może <strong>nie</strong> być dokładne. Używając innej bazy danych możesz poprawić wyszukiwanie. Aby dowiedzieć się więcej, przeczytaj <a href=\"http://docs.djangoproject.com/en/dev/ref/databases/#sqlite-string-matching\">Django Documentation on string matching in SQLite</a>."
 
 #: views/staff.py:840
 msgid "Ticket taken off hold"
@@ -2546,86 +2248,76 @@ msgstr "Zgłoszenia wstrzymane"
 
 #: views/staff.py:911
 msgid "Jan"
-msgstr ""
+msgstr "Sty"
 
 #: views/staff.py:912
 msgid "Feb"
-msgstr ""
+msgstr "Lut"
 
 #: views/staff.py:913
 msgid "Mar"
-msgstr ""
+msgstr "Mar"
 
 #: views/staff.py:914
 msgid "Apr"
-msgstr ""
+msgstr "Kwie"
 
 #: views/staff.py:915
 msgid "May"
-msgstr ""
+msgstr "Maj"
 
 #: views/staff.py:916
 msgid "Jun"
-msgstr ""
+msgstr "Cze"
 
 #: views/staff.py:917
 msgid "Jul"
-msgstr ""
+msgstr "Lip"
 
 #: views/staff.py:918
 msgid "Aug"
-msgstr ""
+msgstr "Sie"
 
 #: views/staff.py:919
 msgid "Sep"
-msgstr ""
+msgstr "Wrze"
 
 #: views/staff.py:920
 msgid "Oct"
-msgstr ""
+msgstr "Paź"
 
 #: views/staff.py:921
 msgid "Nov"
-msgstr ""
+msgstr "Lis"
 
 #: views/staff.py:922
 msgid "Dec"
-msgstr ""
+msgstr "Gru"
 
 #: views/staff.py:948
 msgid "User by Priority"
-msgstr ""
+msgstr "Użytkownik wg. priorytetu"
 
 #: views/staff.py:954
 msgid "User by Queue"
-msgstr ""
+msgstr "Użytkownik wg. kolejki"
 
 #: views/staff.py:960
 msgid "User by Status"
-msgstr ""
+msgstr "Użytkownik wg. statusu"
 
 #: views/staff.py:966
 msgid "User by Month"
-msgstr ""
+msgstr "Użytkownik wg. miesiąca"
 
 #: views/staff.py:972
 msgid "Queue by Priority"
-msgstr ""
+msgstr "Kolejka wg. priorytetu"
 
 #: views/staff.py:978
 msgid "Queue by Status"
-msgstr ""
+msgstr "Kolejka wg. statusu"
 
 #: views/staff.py:984
 msgid "Queue by Month"
-msgstr ""
-
-#~ msgid "Your Tickets"
-#~ msgstr "Twoje zgłoszenia"
-
-#~ msgid ""
-#~ "Powered by <a href='http://github.com/rossp/django-helpdesk'>django-"
-#~ "helpdesk</a>."
-#~ msgstr ""
-#~ "Sercem systemu jest oprogramowanie <a href='http://github.com/rossp/"
-#~ "django-helpdesk'>django-helpdesk</a>."
+msgstr "Kolejka wg. miesiąca"
