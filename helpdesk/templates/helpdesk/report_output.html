@@ -33,7 +33,7 @@
 <tr class='row_tablehead'><td colspan='{{ headings|length }}'>{{ title }}</td></tr>
 <tr class='row_columnheads'>{% for h in headings %}<th>{% if forloop.first %}{{ h|title }}{% else %}{{ h }}{% endif %}</th>{% endfor %}</tr>
 {% for d in data %}
-<tr class='row_{% cycle odd,even %}'>{% for f in d %}<td>{{ f }}</td>{% endfor %}</tr>{% endfor %}
+<tr class='row_{% cycle odd,even %}'>{% for f in d %}<td class='report'>{{ f }}</td>{% endfor %}</tr>{% endfor %}
 </table>
 
 <div class='jqPlot' id='placeholder' style='width: 600px; height: 400px;'></div>

@@ -154,6 +154,11 @@ td {
     font-size: 10pt;
 }
 
+td.report {
+    font-size: 10pt;
+    text-align: center;
+}
+
 .hover {
     background-color: #bcd4ec;
 }
