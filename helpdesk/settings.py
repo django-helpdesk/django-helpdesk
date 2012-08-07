@@ -89,7 +89,7 @@ HELPDESK_SHOW_KB_ON_HOMEPAGE = getattr(settings, 'HELPDESK_SHOW_KB_ON_HOMEPAGE',
 HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = getattr(settings, 'HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE', False)
 
 # show edit buttons in ticket follow ups.
-HELPDESK_SHOW_EDIT_BUTTON_FOLLOW_UP = getattr(settings, 'HELPDESK_HIDE_EDIT_BUTTON_FOLLOW_UP', True)
+HELPDESK_SHOW_EDIT_BUTTON_FOLLOW_UP = getattr(settings, 'HELPDESK_SHOW_EDIT_BUTTON_FOLLOW_UP', True)
 
 # show ticket edit button on top of ticket description.
 HELPDESK_SHOW_EDIT_BUTTON_TICKET_TOP = getattr(settings, 'HELPDESK_SHOW_EDIT_BUTTON_TICKET_TOP', True)
