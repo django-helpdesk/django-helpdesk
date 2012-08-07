@@ -74,6 +74,9 @@ function googleTranslateElementInit() {
         <a href="{% url helpdesk_followup_edit ticket.id followup.id %}" class='followup-edit'><img width="60" height="15" title="Edit" alt="Edit" src="{{ STATIC_URL }}helpdesk/buttons/edit.png"></a>
         {% endif %}
         {% endif %}
+        {% if user.is_superuser and helpdesk_settings.HELPDESK_SHOW_DELETE_BUTTON_SUPERUSER_FOLLOW_UP %}
+        <a href="{% url helpdesk_followup_delete ticket.id followup.id %}" class='followup-edit'><img width="60" height="15" title="Delete" alt="Delete" src="{{ STATIC_URL }}helpdesk/buttons/delete.png"></a>
+        {% endif %}
     </div>
 {% else %}
     <div class='followup'>
@@ -83,6 +86,9 @@ function googleTranslateElementInit() {
         {% if followup.user and request.user == followup.user and not followup.ticketchange_set.all %}
         <a href="{% url helpdesk_followup_edit ticket.id followup.id %}" class='followup-edit'><img width="60" height="15" title="Edit" alt="Edit" src="{{ STATIC_URL }}helpdesk/buttons/edit.png"></a>
         {% endif %}
+        {% endif %}
+        {% if user.is_superuser and helpdesk_settings.HELPDESK_SHOW_DELETE_BUTTON_SUPERUSER_FOLLOW_UP %}
+        <a href="{% url helpdesk_followup_delete ticket.id followup.id %}" class='followup-edit'><img width="60" height="15" title="Delete" alt="Delete" src="{{ STATIC_URL }}helpdesk/buttons/delete.png"></a>
         {% endif %}
     </div>
 {% endif %}
