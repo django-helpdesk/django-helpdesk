@@ -188,7 +188,7 @@ def followup_edit(request, ticket_id, followup_id):
             # delete old followup
             followup.delete()
         return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket.id]))
-
+followup_edit = staff_member_required(followup_edit)
 
 def followup_delete(request, ticket_id, followup_id):
     ''' followup delete for superuser'''
@@ -200,6 +200,7 @@ def followup_delete(request, ticket_id, followup_id):
     followup = get_object_or_404(FollowUp, id=followup_id)
     followup.delete()
     return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket.id]))
+followup_delete = staff_member_required(followup_delete)
 
 
 def view_ticket(request, ticket_id):
