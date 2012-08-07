@@ -155,12 +155,15 @@ def followup_edit(request, ticket_id, followup_id):
                                       'public': followup.public,
                                       'new_status': followup.new_status,
                                       })
-    
+
+        ticketcc_string, SHOW_SUBSCRIBE = return_ticketccstring_and_show_subscribe(request.user, ticket)
+
         return render_to_response('helpdesk/followup_edit.html',
             RequestContext(request, {
                 'followup': followup,
                 'ticket': ticket,
                 'form': form,
+                'ticketcc_string': ticketcc_string,
         }))
     elif request.method == 'POST':
         form = EditFollowUpForm(request.POST)
@@ -215,6 +218,13 @@ def view_ticket(request, ticket_id):
         }
         return update_ticket(request, ticket_id)
 
+    if request.GET.has_key('subscribe'):
+        # Allow the user to subscribe him/herself to the ticket whilst viewing it.
+        ticketcc_string, SHOW_SUBSCRIBE = return_ticketccstring_and_show_subscribe(request.user, ticket)
+        if SHOW_SUBSCRIBE:
+            subscribe_staff_member_to_ticket(ticket, request.user)
+            return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket.id]))
+
     if request.GET.has_key('close') and ticket.status == Ticket.RESOLVED_STATUS:
         if not ticket.assigned_to:
             owner = 0
@@ -242,6 +252,8 @@ def view_ticket(request, ticket_id):
     # TODO: shouldn't this template get a form to begin with?
     form = TicketForm(initial={'due_date':ticket.due_date})
 
+    ticketcc_string, SHOW_SUBSCRIBE = return_ticketccstring_and_show_subscribe(request.user, ticket)
+
     return render_to_response('helpdesk/ticket.html',
         RequestContext(request, {
             'ticket': ticket,
@@ -250,8 +262,53 @@ def view_ticket(request, ticket_id):
             'priorities': Ticket.PRIORITY_CHOICES,
             'preset_replies': PreSetReply.objects.filter(Q(queues=ticket.queue) | Q(queues__isnull=True)),
             'tags_enabled': HAS_TAG_SUPPORT,
+            'ticketcc_string': ticketcc_string,
+            'SHOW_SUBSCRIBE': SHOW_SUBSCRIBE,
         }))
 view_ticket = staff_member_required(view_ticket)
+
+def return_ticketccstring_and_show_subscribe(user, ticket):
+    ''' used in view_ticket() and followup_edit()'''
+    # create the ticketcc_string and check whether current user is already 
+    # subscribed
+    username = user.username.upper()
+    useremail = user.email.upper()
+    strings_to_check = list()
+    strings_to_check.append(username)
+    strings_to_check.append(useremail)
+
+    ticketcc_string = ''
+    all_ticketcc = ticket.ticketcc_set.all()
+    counter_all_ticketcc = len(all_ticketcc) - 1
+    SHOW_SUBSCRIBE = True
+    for i, ticketcc in enumerate(all_ticketcc):
+        ticketcc_this_entry = str(ticketcc.display)
+        ticketcc_string = ticketcc_string + ticketcc_this_entry
+        if i < counter_all_ticketcc:
+            ticketcc_string = ticketcc_string + ', '
+        if strings_to_check.__contains__(ticketcc_this_entry.upper()):
+            SHOW_SUBSCRIBE = False
+
+    # check whether current user is a submitter or assigned to ticket
+    assignedto_username = str(ticket.assigned_to).upper()
+    submitter_email = ticket.submitter_email.upper()
+    strings_to_check = list()
+    strings_to_check.append(assignedto_username)
+    strings_to_check.append(submitter_email)
+    if strings_to_check.__contains__(username) or strings_to_check.__contains__(useremail):
+        SHOW_SUBSCRIBE = False
+
+    return ticketcc_string, SHOW_SUBSCRIBE
+
+
+def subscribe_staff_member_to_ticket(ticket, user):
+    ''' used in view_ticket() and update_ticket() '''
+    ticketcc = TicketCC()
+    ticketcc.ticket = ticket
+    ticketcc.user = user
+    ticketcc.can_view = True
+    ticketcc.can_update = True
+    ticketcc.save()
 
 
 def update_ticket(request, ticket_id, public=False):
@@ -495,7 +552,14 @@ def update_ticket(request, ticket_id, public=False):
 
     ticket.save()
 
+    # auto subscribe user if enabled
+    if helpdesk_settings.HELPDESK_AUTO_SUBSCRIBE_ON_TICKET_RESPONSE:
+        ticketcc_string, SHOW_SUBSCRIBE = return_ticketccstring_and_show_subscribe(request.user, ticket)
+        if SHOW_SUBSCRIBE:
+            subscribe_staff_member_to_ticket(ticket, request.user)
+
     return return_to_ticket(request.user, helpdesk_settings, ticket)
+
 
 def return_to_ticket(user, helpdesk_settings, ticket):
     ''' Helpder function for update_ticket '''
