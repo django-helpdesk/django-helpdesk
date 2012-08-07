@@ -28,6 +28,27 @@
 {% endif %}
 </div>
 
+{% if helpdesk_settings.HELPDESK_DASHBOARD_BASIC_TICKET_STATS %}
+<br style='clear: both;' />
+
+<table width='100%'>
+
+<tr class='row_tablehead' style="color: #fbff00;"><td colspan='2'><i>{% trans "Current Ticket Stats" %}</i></td></tr>
+<tr><td colspan='2'>- {% trans "Current average number of days until ticket is closed: " %}<strong style="color: red;">{{ basic_ticket_stats.average_nbr_days_until_ticket_closed }}</strong>. 
+{% trans "Click" %} <strong><a href="{% url helpdesk_report_index %}daysuntilticketclosedbymonth">here</a></strong> {% trans "for detailed average by month." %} </td></tr>
+<tr><td colspan='2'>- {% trans "Distribution of open tickets, grouped by time period:" %}</td></tr>
+<tr class='row_columnheads'><th>{% trans "Days since opened" %}</th><th>{% trans "Number of open tickets" %}</th></tr>
+
+{% for entry in basic_ticket_stats.open_ticket_stats %}
+<tr class='row_{% cycle odd,even %} row_hover'>
+<th style="padding-left: 20px;">{{ entry.0 }}</th>
+<td style="padding-left: 20px;"><span style="color: {{ entry.2 }};">{% if entry.1 > 0 %}<a href="{% url helpdesk_list %}?{{ entry.3 }}">{{ entry.1 }}</a>{% else %}{{ entry.1 }}{% endif %}</span></td>
+</tr>
+{% endfor %}
+
+</table>
+{% endif %}
+
 
 {% if all_tickets_reported_by_current_user %}
 <br style='clear: both;' />

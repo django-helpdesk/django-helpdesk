@@ -129,6 +129,10 @@ HELPDESK_DASHBOARD_SHOW_DELETE_UNASSIGNED = getattr(settings, 'HELPDESK_DASHBOAR
 # hide empty queues in dashboard overview?
 HELPDESK_DASHBOARD_HIDE_EMPTY_QUEUES = getattr(settings, 'HELPDESK_DASHBOARD_HIDE_EMPTY_QUEUES', True)
 
+# show basic ticket stats on dashboard?
+HELPDESK_DASHBOARD_BASIC_TICKET_STATS = getattr(settings, 'HELPDESK_DASHBOARD_BASIC_TICKET_STATS', False)
+
+
 
 
 ''' options for footer '''

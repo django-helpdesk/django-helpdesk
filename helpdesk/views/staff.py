@@ -7,7 +7,7 @@ views/staff.py - The bulk of the application - provides most business logic and
                  renders all staff-facing views.
 """
 
-from datetime import datetime
+from datetime import datetime, timedelta
 import sys
 
 from django.conf import settings
@@ -81,6 +81,10 @@ def dashboard(request):
             submitter_email=email_current_user,
         ).order_by('status')
 
+    # calculate basic ticket stats if requested
+    basic_ticket_stats = False
+    if helpdesk_settings.HELPDESK_DASHBOARD_BASIC_TICKET_STATS:
+        basic_ticket_stats = calc_basic_ticket_stats(Ticket)
 
     # The following query builds a grid of queues & ticket statuses,
     # to be displayed to the user. EG:
@@ -126,6 +130,7 @@ def dashboard(request):
             'unassigned_tickets': unassigned_tickets,
             'all_tickets_reported_by_current_user': all_tickets_reported_by_current_user,
             'dash_tickets': dash_tickets,
+            'basic_ticket_stats': basic_ticket_stats,
         }))
 dashboard = staff_member_required(dashboard)
 
@@ -981,7 +986,7 @@ report_index = staff_member_required(report_index)
 
 
 def run_report(request, report):
-    if Ticket.objects.all().count() == 0 or report not in ('queuemonth', 'usermonth', 'queuestatus', 'queuepriority', 'userstatus', 'userpriority', 'userqueue'):
+    if Ticket.objects.all().count() == 0 or report not in ('queuemonth', 'usermonth', 'queuestatus', 'queuepriority', 'userstatus', 'userpriority', 'userqueue', 'daysuntilticketclosedbymonth'):
         return HttpResponseRedirect(reverse("helpdesk_report_index"))
 
     report_queryset = Ticket.objects.all().select_related()
@@ -1005,6 +1010,9 @@ def run_report(request, report):
 
     from collections import defaultdict
     summarytable = defaultdict(int)
+    # a second table for more complex queries
+    summarytable2 = defaultdict(int)
+
 
     months = (
         _('Jan'),
@@ -1085,8 +1093,13 @@ def run_report(request, report):
         possible_options = periods
         charttype = 'date'
 
+    elif report == 'daysuntilticketclosedbymonth':
+        title = _('Days until ticket closed by Month')
+        col1heading = _('Queue')
+        possible_options = periods
+        charttype = 'date'
 
-
+    metric3 = False
     for ticket in report_queryset:
         if report == 'userpriority':
             metric1 = u'%s' % ticket.get_assigned_to
@@ -1116,10 +1129,25 @@ def run_report(request, report):
             metric1 = u'%s' % ticket.queue.title
             metric2 = u'%s %s' % (months[ticket.created.month - 1], ticket.created.year)
 
+        elif report == 'daysuntilticketclosedbymonth':
+            metric1 = u'%s' % ticket.queue.title
+            metric2 = u'%s %s' % (months[ticket.created.month - 1], ticket.created.year)
+            metric3 = ticket.modified - ticket.created
+            metric3 = metric3.days
+
+
         summarytable[metric1, metric2] += 1
+        if metric3:
+            if report == 'daysuntilticketclosedbymonth':
+                summarytable2[metric1, metric2] += metric3
+
     
     table = []
     
+    if report == 'daysuntilticketclosedbymonth':
+        for key in summarytable2.keys():
+            summarytable[key] = summarytable2[key] / summarytable[key]
+
     header1 = sorted(set(list( i.encode('utf-8') for i,_ in summarytable.keys() )))
     
     column_headings = [col1heading] + possible_options
@@ -1308,4 +1336,79 @@ def attachment_del(request, ticket_id, attachment_id):
     attachment.delete()
     return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket_id]))
 attachment_del = staff_member_required(attachment_del)
+
+def calc_average_nbr_days_until_ticket_resolved(Tickets):
+    nbr_closed_tickets = len(Tickets)
+    days_per_ticket = 0
+    days_each_ticket = list()
+
+    for ticket in Tickets:
+        time_ticket_open = ticket.modified - ticket.created
+        days_this_ticket = time_ticket_open.days
+        days_per_ticket += days_this_ticket
+        days_each_ticket.append(days_this_ticket)
+
+    mean_per_ticket = days_per_ticket / nbr_closed_tickets
+    return mean_per_ticket
+
+def calc_basic_ticket_stats(Ticket):
+    # all closed tickets - independent of user
+    all_closed_tickets = Ticket.objects.filter(status = Ticket.CLOSED_STATUS)
+    average_nbr_days_until_ticket_closed = calc_average_nbr_days_until_ticket_resolved(all_closed_tickets)
+
+    # all not closed tickets (open, reopened, resolved,) - independent of user
+    all_open_tickets = Ticket.objects.exclude(status = Ticket.CLOSED_STATUS)
+    today = datetime.today()
+
+    date_30 = date_rel_to_today(today, 30)
+    date_60 = date_rel_to_today(today, 60)
+    date_30_str = date_30.strftime('%Y-%m-%d')
+    date_60_str = date_60.strftime('%Y-%m-%d')
+
+    # < 30 
+    ota_le_30 = all_open_tickets.filter(created__gt = date_30)
+    N_ota_le_30 = len(ota_le_30)
+
+    # > 30 & < 60 
+    ota_le_60_ge_30 = all_open_tickets.filter(created__gte = date_60, created__lte = date_30)
+    N_ota_le_60_ge_30 = len(ota_le_60_ge_30)
+
+    # > 60
+    ota_ge_60 = all_open_tickets.filter(created__lt = date_60)
+    N_ota_ge_60 = len(ota_ge_60)
+
+    # (O)pen (T)icket (S)tats
+    ots = list()
+    # label, number entries, color, sort_string
+    ots.append(['< 30 days', N_ota_le_30, get_color_for_nbr_days(N_ota_le_30), sort_string(date_30_str, ''), ])
+    ots.append(['30 - 60 days', N_ota_le_60_ge_30, get_color_for_nbr_days(N_ota_le_60_ge_30), sort_string(date_60_str, date_30_str), ])
+    ots.append(['> 60 days', N_ota_ge_60, get_color_for_nbr_days(N_ota_ge_60), sort_string('', date_60_str), ])
+    
+    # put together basic stats
+    basic_ticket_stats = {  'average_nbr_days_until_ticket_closed': average_nbr_days_until_ticket_closed, 
+                            'open_ticket_stats': ots, }
+
+    return basic_ticket_stats
+
+def get_color_for_nbr_days(nbr_days):
+    ''' '''
+    if nbr_days < 5:
+        color_string = 'green'
+    elif nbr_days >= 5 and nbr_days < 10:
+        color_string = 'orange'
+    else: # more than 10 days
+        color_string = 'red'
+
+    return color_string
+
+def days_since_created(today, ticket):
+    return (today - ticket.created).days
+
+def date_rel_to_today(today, offset):
+    return today - timedelta(days = offset)
+
+def sort_string(begin, end):
+    return 'sort=created&date_from=%s&date_to=%s&status=%s&status=%s&status=%s' %(begin, end, Ticket.OPEN_STATUS, Ticket.REOPENED_STATUS, Ticket.RESOLVED_STATUS)
+
+
 
