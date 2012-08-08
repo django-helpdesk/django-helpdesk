@@ -350,7 +350,7 @@ def update_ticket(request, ticket_id, public=False):
         title == ticket.title,
         priority == int(ticket.priority),
         due_date == ticket.due_date,
-        (not owner and not ticket.assigned_to) or (owner and User.objects.get(id=owner) == ticket.assigned_to),
+        (owner == -1) or (not owner and not ticket.assigned_to) or (owner and User.objects.get(id=owner) == ticket.assigned_to),
         (HAS_TAG_SUPPORT and tags == ticket.tags) or not HAS_TAG_SUPPORT,
     ])
     if no_changes:
