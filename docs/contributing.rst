@@ -13,11 +13,15 @@ If you or your organisation does not accept these license terms then we cannot a
 Translations
 ------------
 
+.. image:: http://www.transifex.net/projects/p/django-helpdesk/resource/core/chart/image_png
+
 Although django-helpdesk has originally been written for the English language, there are already multiple translations to Spanish, Polish, and German and more translations are welcomed.
 
 Translations are handled using the excellent Transifex service which is much easier for most users than manually editing .po files. It also allows collaborative translation. If you want to help translate django-helpdesk into languages other than English, we encourage you to make use of our Transifex project:
 
 http://www.transifex.net/projects/p/django-helpdesk/resource/core/
+
+Once you have translated content via Transifex, please raise an issue on the project Github page to let us know it's ready to import.
 
 Code changes
 ------------
@@ -29,6 +33,15 @@ Wherever possible please break git commits up into small chunks that are specifi
 Commit messages should also explain *what*, precisely, has been changed.
 
 If you have any questions, please contact the project co-ordinator, Ross Poulton, at ross@rossp.org.
+
+Tests
+-----
+
+Currently, test coverage is very low. We're working on increasing this, and to make life easier we are using `Travis CI`_ for continuous integration. This means that the test suite is run every time a code change is made, so we can try and make sure we avoid basic bugs and other regressions.
+
+Please include tests in the ``tests/`` folder when committing code changes.
+
+.. _Travis CI: http://travis-ci.org/
 
 Database schema changes
 -----------------------

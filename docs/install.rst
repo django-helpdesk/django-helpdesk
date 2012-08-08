@@ -60,9 +60,9 @@ Adding To Your Django Project
 
      ./manage.py migrate helpdesk
 
-4. [If you're not using django.contrib.staticfiles] Inside your ``STATIC_ROOT`` folder, create a new folder called ``helpdesk`` and copy the contents of ``helpdesk/static`` into it. Alternatively, create a symlink::
+4. Include your static files in your public web path::
 
-      ln -s /path/to/helpdesk/static/helpdesk /path/to/static/helpdesk
+      python manage.py collectstatic
 
 5. Inside your ``MEDIA_ROOT`` folder, inside the ``helpdesk`` folder, is a folder called ``attachments``. Ensure your web server software can write to this folder - something like this should do the trick::
 
