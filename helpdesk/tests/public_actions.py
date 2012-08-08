@@ -21,29 +21,33 @@ class PublicActionsTestCase(TestCase):
         self.client = Client()
 
     def test_public_view_ticket(self):
-        response = self.client.get('%s?id=%s&email=%s' % (reverse('helpdesk_public_view'), self.ticket.id, 'test.submitter@example.com'))
+        response = self.client.get('%s?ticket=%s&email=%s' % (reverse('helpdesk_public_view'), self.ticket.ticket_for_url, 'test.submitter@example.com'))
         self.assertEqual(response.status_code, 200)
+        self.assertTemplateNotUsed(response, 'helpdesk/public_view_form.html')
 
     def test_public_close(self):
         old_status = self.ticket.status
         old_resolution = self.ticket.resolution
         resolution_text = 'Resolved by test script'
-        
-        self.ticket.status = Ticket.RESOLVED_STATUS
-        self.ticket.resolution = resolution_text
-        self.ticket.save()
 
-        current_followups = self.ticket.followup_set.all().count()
+        ticket = Ticket.objects.get(id=self.ticket.id)
         
-        response = self.client.get('%s?id=%s&email=%s&close=yes' % (reverse('helpdesk_public_view'), self.ticket.id, 'test.submitter@example.com'))
+        ticket.status = Ticket.RESOLVED_STATUS
+        ticket.resolution = resolution_text
+        ticket.save()
+
+        current_followups = ticket.followup_set.all().count()
+        
+        response = self.client.get('%s?ticket=%s&email=%s&close' % (reverse('helpdesk_public_view'), ticket.ticket_for_url, 'test.submitter@example.com'))
+        
         ticket = Ticket.objects.get(id=self.ticket.id)
 
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 302)
+        self.assertTemplateNotUsed(response, 'helpdesk/public_view_form.html')
         self.assertEqual(ticket.status, Ticket.CLOSED_STATUS)
         self.assertEqual(ticket.resolution, resolution_text)
-        self.assertEqual(current_followups+1, self.ticket.followup_set.all().count())
+        self.assertEqual(current_followups+1, ticket.followup_set.all().count())
         
-        
-        self.ticket.resolution = old_resolution
-        self.ticket.status = old_status
-        self.ticket.save()
+        ticket.resolution = old_resolution
+        ticket.status = old_status
+        ticket.save()
