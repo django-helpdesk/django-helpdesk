@@ -626,7 +626,7 @@ class Attachment(models.Model):
 
     mime_type = models.CharField(
         _('MIME Type'),
-        max_length=30,
+        max_length=255,
         )
 
     size = models.IntegerField(
