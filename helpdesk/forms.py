@@ -320,7 +320,7 @@ class TicketForm(forms.Form):
                 )
             messages_sent_to.append(t.submitter_email)
 
-        if t.assigned_to and t.assigned_to != user and getattr(t.assigned_to.usersettings.settings, 'email_on_ticket_assign', False) and t.assigned_to.email and t.assigned_to.email not in messages_sent_to:
+        if t.assigned_to and t.assigned_to != user and t.assigned_to.usersettings.settings.get('email_on_ticket_assign', False) and t.assigned_to.email and t.assigned_to.email not in messages_sent_to:
             send_templated_mail(
                 'assigned_owner',
                 context,
