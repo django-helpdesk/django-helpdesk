@@ -25,7 +25,7 @@ from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand
 from django.db.models import Q
 from django.utils.translation import ugettext as _
-from django.conf import settings
+from helpdesk import settings
 
 from helpdesk.lib import send_templated_mail, safe_template_context
 from helpdesk.models import Queue, Ticket, FollowUp, Attachment, IgnoreEmail
@@ -266,7 +266,7 @@ def ticket_from_message(message, queue, quiet):
     f.save()
 
     if not quiet:
-        print (" [%s-%s] %s%s" % (t.queue.slug, t.id, t.title, update)).encode('ascii', 'replace')
+        print (" [%s-%s] %s" % (t.queue.slug, t.id, t.title,)).encode('ascii', 'replace')
 
     for file in files:
         if file['content']:

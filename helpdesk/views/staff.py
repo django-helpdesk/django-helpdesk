@@ -885,10 +885,15 @@ def edit_ticket(request, ticket_id):
 edit_ticket = staff_member_required(edit_ticket)
 
 def create_ticket(request):
+    if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS:
+        assignable_users = User.objects.filter(is_active=True, is_staff=True).order_by('username')
+    else:
+        assignable_users = User.objects.filter(is_active=True).order_by('username')
+        
     if request.method == 'POST':
         form = TicketForm(request.POST, request.FILES)
         form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
-        form.fields['assigned_to'].choices = [('', '--------')] + [[u.id, u.username] for u in User.objects.filter(is_active=True,is_staff=True).order_by('username')]
+        form.fields['assigned_to'].choices = [('', '--------')] + [[u.id, u.username] for u in assignable_users]
         if form.is_valid():
             ticket = form.save(user=request.user)
             return HttpResponseRedirect(ticket.get_absolute_url())
@@ -901,11 +906,7 @@ def create_ticket(request):
 
         form = TicketForm(initial=initial_data)
         form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
-        if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS:
-            users = User.objects.filter(is_active=True, is_staff=True).order_by('username')
-        else:
-            users = User.objects.filter(is_active=True).order_by('username')
-        form.fields['assigned_to'].choices = [('', '--------')] + [[u.id, u.username] for u in users]
+        form.fields['assigned_to'].choices = [('', '--------')] + [[u.id, u.username] for u in assignable_users]
         if helpdesk_settings.HELPDESK_CREATE_TICKET_HIDE_ASSIGNED_TO:
             form.fields['assigned_to'].widget = forms.HiddenInput()
 
