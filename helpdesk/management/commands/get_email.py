@@ -135,9 +135,9 @@ def process_queue(q, quiet=False):
 def decodeUnknown(charset, string):
     if not charset:
         try:
-            return string.decode('utf-8')
+            return string.decode('utf-8','ignore')
         except:
-            return string.decode('iso8859-1')
+            return string.decode('iso8859-1','ignore')
     return unicode(string, charset)
 
 def decode_mail_headers(string):
