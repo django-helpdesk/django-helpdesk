@@ -412,14 +412,14 @@ def update_ticket(request, ticket_id, public=False):
     if request.FILES:
         import mimetypes, os
         for file in request.FILES.getlist('attachment'):
-            filename = file.name.replace(' ', '_')
+            filename = file.name.encode('ascii', 'ignore')
             a = Attachment(
                 followup=f,
                 filename=filename,
                 mime_type=mimetypes.guess_type(filename)[0] or 'application/octet-stream',
                 size=file.size,
                 )
-            a.file.save(file.name, file, save=False)
+            a.file.save(filename, file, save=False)
             a.save()
 
             if file.size < getattr(settings, 'MAX_EMAIL_ATTACHMENT_SIZE', 512000):
