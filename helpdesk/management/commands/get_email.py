@@ -150,7 +150,7 @@ def ticket_from_message(message, queue, quiet):
     message = email.message_from_string(msg)
     subject = message.get('subject', _('Created from e-mail'))
     subject = decode_mail_headers(decodeUnknown(message.get_charset(), subject))
-    subject = subject.replace("Re: ", "").replace("Fw: ", "").replace("RE: ", "").replace("FW: ", "").strip()
+    subject = subject.replace("Re: ", "").replace("Fw: ", "").replace("RE: ", "").replace("FW: ", "").replace("Automatic reply: ", "").strip()
 
     sender = message.get('from', _('Unknown Sender'))
     sender = decode_mail_headers(decodeUnknown(message.get_charset(), sender))
