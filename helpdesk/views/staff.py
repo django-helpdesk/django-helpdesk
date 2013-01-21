@@ -483,7 +483,8 @@ def update_ticket(request, ticket_id, public=False):
         comment=f.comment,
         )
 
-    if ticket.submitter_email and public and (f.comment or (f.new_status in (Ticket.RESOLVED_STATUS, Ticket.CLOSED_STATUS))):
+    if public and (f.comment or (f.new_status in (Ticket.RESOLVED_STATUS, Ticket.CLOSED_STATUS))):
+        
 
         if f.new_status == Ticket.RESOLVED_STATUS:
             template = 'resolved_submitter'
@@ -492,15 +493,16 @@ def update_ticket(request, ticket_id, public=False):
         else:
             template = 'updated_submitter'
 
-        send_templated_mail(
-            template,
-            context,
-            recipients=ticket.submitter_email,
-            sender=ticket.queue.from_address,
-            fail_silently=True,
-            files=files,
-            )
-        messages_sent_to.append(ticket.submitter_email)
+        if ticket.submitter_email:
+            send_templated_mail(
+                template,
+                context,
+                recipients=ticket.submitter_email,
+                sender=ticket.queue.from_address,
+                fail_silently=True,
+                files=files,
+                )
+            messages_sent_to.append(ticket.submitter_email)
 
         for cc in ticket.ticketcc_set.all():
             if cc.email_address not in messages_sent_to:
