@@ -7,7 +7,6 @@ forms.py - Definitions of newforms-based forms for creating and maintaining
            tickets.
 """
 
-from datetime import datetime
 from StringIO import StringIO
 
 from django import forms
@@ -15,6 +14,7 @@ from django.forms import extras
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext as _
+from django.utils import timezone
 
 from helpdesk.lib import send_templated_mail, safe_template_context
 from helpdesk.models import Ticket, Queue, FollowUp, Attachment, IgnoreEmail, TicketCC, CustomField, TicketCustomFieldValue, TicketDependency
@@ -243,7 +243,7 @@ class TicketForm(forms.Form):
 
         t = Ticket( title = self.cleaned_data['title'],
                     submitter_email = self.cleaned_data['submitter_email'],
-                    created = datetime.now(),
+                    created = timezone.now(),
                     status = Ticket.OPEN_STATUS,
                     queue = q,
                     description = self.cleaned_data['body'],
@@ -273,7 +273,7 @@ class TicketForm(forms.Form):
 
         f = FollowUp(   ticket = t,
                         title = _('Ticket Opened'),
-                        date = datetime.now(),
+                        date = timezone.now(),
                         public = True,
                         comment = self.cleaned_data['body'],
                         user = user,
@@ -462,7 +462,7 @@ class PublicTicketForm(forms.Form):
         t = Ticket(
             title = self.cleaned_data['title'],
             submitter_email = self.cleaned_data['submitter_email'],
-            created = datetime.now(),
+            created = timezone.now(),
             status = Ticket.OPEN_STATUS,
             queue = q,
             description = self.cleaned_data['body'],
@@ -484,7 +484,7 @@ class PublicTicketForm(forms.Form):
         f = FollowUp(
             ticket = t,
             title = _('Ticket Opened Via Web'),
-            date = datetime.now(),
+            date = timezone.now(),
             public = True,
             comment = self.cleaned_data['body'],
             )

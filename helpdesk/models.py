@@ -7,12 +7,11 @@ models.py - Model (and hence database) definitions. This is the core of the
             helpdesk structure.
 """
 
-from datetime import datetime
-
 from django.contrib.auth.models import User
 from django.db import models
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _, ugettext
+from django.utils import timezone
 from helpdesk.settings import HAS_TAG_SUPPORT
 
 if HAS_TAG_SUPPORT:
@@ -451,12 +450,12 @@ class Ticket(models.Model):
     def save(self, *args, **kwargs):
         if not self.id:
             # This is a new ticket as no ID yet exists.
-            self.created = datetime.now()
+            self.created = timezone.now()
 
         if not self.priority:
             self.priority = 3
 
-        self.modified = datetime.now()
+        self.modified = timezone.now()
 
         super(Ticket, self).save(*args, **kwargs)
 
@@ -489,7 +488,7 @@ class FollowUp(models.Model):
 
     date = models.DateTimeField(
         _('Date'), 
-        default = datetime.now()
+        default = timezone.now()
         )
 
     title = models.CharField(
@@ -541,7 +540,7 @@ class FollowUp(models.Model):
 
     def save(self, *args, **kwargs):
         t = self.ticket
-        t.modified = datetime.now()
+        t.modified = timezone.now()
         t.save()
         super(FollowUp, self).save(*args, **kwargs)
 
@@ -857,7 +856,7 @@ class KBItem(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.last_updated:
-            self.last_updated = datetime.now()
+            self.last_updated = timezone.now()
         return super(KBItem, self).save(*args, **kwargs)
 
     def _score(self):
@@ -1038,7 +1037,7 @@ class IgnoreEmail(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.date:
-            self.date = datetime.now()
+            self.date = timezone.now()
         return super(IgnoreEmail, self).save(*args, **kwargs)
 
     def test(self, email):
