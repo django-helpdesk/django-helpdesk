@@ -17,8 +17,13 @@ from django.contrib.auth.models import User
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from django.template import loader, Context
-from django.utils import simplejson, timezone
+from django.utils import simplejson
 from django.views.decorators.csrf import csrf_exempt
+
+try:
+    from django.utils import timezone
+except ImportError:
+    from datetime import datetime as timezone
 
 from helpdesk.forms import TicketForm
 from helpdesk.lib import send_templated_mail, safe_template_context
