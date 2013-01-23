@@ -14,7 +14,7 @@ from django.utils.translation import ugettext_lazy as _, ugettext
 
 try:
     from django.utils import timezone
-except importError:
+except ImportError:
     from datetime import datetime as timezone
 
 from helpdesk.settings import HAS_TAG_SUPPORT

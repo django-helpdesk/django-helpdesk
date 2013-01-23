@@ -28,7 +28,7 @@ from django import forms
 
 try:
     from django.utils import timezone
-except importError:
+except ImportError:
     from datetime import datetime as timezone
 
 from helpdesk.forms import TicketForm, UserSettingsForm, EmailIgnoreForm, EditTicketForm, TicketCCForm, EditFollowUpForm, TicketDependencyForm

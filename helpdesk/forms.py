@@ -16,7 +16,7 @@ from django.contrib.auth.models import User
 from django.utils.translation import ugettext as _
 try:
     from django.utils import timezone
-except importError:
+except ImportError:
     from datetime import datetime as timezone
 
 from helpdesk.lib import send_templated_mail, safe_template_context
