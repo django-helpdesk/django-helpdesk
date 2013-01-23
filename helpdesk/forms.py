@@ -14,7 +14,10 @@ from django.forms import extras
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext as _
-from django.utils import timezone
+try:
+    from django.utils import timezone
+except importError:
+    from datetime import datetime as timezone
 
 from helpdesk.lib import send_templated_mail, safe_template_context
 from helpdesk.models import Ticket, Queue, FollowUp, Attachment, IgnoreEmail, TicketCC, CustomField, TicketCustomFieldValue, TicketDependency

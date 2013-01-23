@@ -11,7 +11,12 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _, ugettext
-from django.utils import timezone
+
+try:
+    from django.utils import timezone
+except importError:
+    from datetime import datetime as timezone
+
 from helpdesk.settings import HAS_TAG_SUPPORT
 
 if HAS_TAG_SUPPORT:

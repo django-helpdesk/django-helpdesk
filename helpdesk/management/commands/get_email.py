@@ -16,7 +16,7 @@ import mimetypes
 import poplib
 import re
 
-from datetime import datetime, timedelta
+from datetime import timedelta
 from email.header import decode_header
 from email.Utils import parseaddr, collapse_rfc2231_value
 from optparse import make_option
@@ -26,6 +26,11 @@ from django.core.management.base import BaseCommand
 from django.db.models import Q
 from django.utils.translation import ugettext as _
 from helpdesk import settings
+
+try:
+    from django.utils import timezone
+except ImportError:
+    from datetime import datetime as timezone
 
 from helpdesk.lib import send_templated_mail, safe_template_context
 from helpdesk.models import Queue, Ticket, FollowUp, Attachment, IgnoreEmail
@@ -56,7 +61,7 @@ def process_email(quiet=False):
             allow_email_submission=True):
 
         if not q.email_box_last_check:
-            q.email_box_last_check = datetime.now()-timedelta(minutes=30)
+            q.email_box_last_check = timezone.now()-timedelta(minutes=30)
 
         if not q.email_box_interval:
             q.email_box_interval = 0
@@ -64,12 +69,12 @@ def process_email(quiet=False):
 
         queue_time_delta = timedelta(minutes=q.email_box_interval)
 
-        if (q.email_box_last_check + queue_time_delta) > datetime.now():
+        if (q.email_box_last_check + queue_time_delta) > timezone.now():
             continue
 
         process_queue(q, quiet=quiet)
 
-        q.email_box_last_check = datetime.now()
+        q.email_box_last_check = timezone.now()
         q.save()
 
 
@@ -215,7 +220,7 @@ def ticket_from_message(message, queue, quiet):
             'type': 'text/html',
         })
 
-    now = datetime.now()
+    now = timezone.now()
 
     if ticket:
         try:
@@ -254,7 +259,7 @@ def ticket_from_message(message, queue, quiet):
     f = FollowUp(
         ticket = t,
         title = _('E-Mail Received from %(sender_email)s' % {'sender_email': sender_email}),
-        date = datetime.now(),
+        date = timezone.now(),
         public = True,
         comment = body,
     )
