@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # django-helpdesk shell script to upload to pypi.
 
 WORKDIR=/tmp/django-helpdesk-build.$$
