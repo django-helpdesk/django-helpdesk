@@ -444,9 +444,10 @@ class Ticket(models.Model):
 
     class Meta:
         get_latest_by = "created"
+        ordering = ('id',)
 
     def __unicode__(self):
-        return u'%s' % self.title
+        return u'%s %s' % (self.id, self.title)
 
     def get_absolute_url(self):
         return ('helpdesk_view', (self.id,))
