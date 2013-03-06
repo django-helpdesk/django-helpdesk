@@ -389,7 +389,9 @@ class Ticket(models.Model):
         """
         held_msg = ''
         if self.on_hold: held_msg = _(' - On Hold')
-        return u'%s%s' % (self.get_status_display(), held_msg)
+        dep_msg = ''
+        if self.can_be_resolved == False: dep_msg = _(' - Open dependencies')
+        return u'%s%s%s' % (self.get_status_display(), held_msg, dep_msg)
     get_status = property(_get_status)
 
     def _get_ticket_url(self):
