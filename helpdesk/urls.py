@@ -8,7 +8,11 @@ urls.py - Mapping of URL's to our various views. Note we always used NAMED
 """
 
 from django.conf import settings
-from django.conf.urls import *
+import django
+if django.get_version().startswith("1.3"):
+	from django.conf.urls.defaults import *
+else:
+	from django.conf.urls import *
 from django.contrib.auth.decorators import login_required
 
 from helpdesk import settings as helpdesk_settings
