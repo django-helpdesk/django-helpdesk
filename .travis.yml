@@ -5,6 +5,7 @@ python:
 env:
     - DJANGO=1.4.3
     - DJANGO=1.3.5
+    - DJANGO=1.5.0
 install:
     - pip install argparse --use-mirrors
     - pip install -q Django==$DJANGO --use-mirrors

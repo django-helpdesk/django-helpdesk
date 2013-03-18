@@ -1,10 +1,10 @@
-{% extends "helpdesk/base.html" %}{% load i18n %}
+{% extends "helpdesk/base.html" %}{% load i18n %}{% load url from future %}
 
 {% block helpdesk_title %}{% trans "Change User Settings" %}{% endblock %}
 
 {% block helpdesk_body %}
 {% if show_password_change_link %}
-{% url auth_password_change as password_change_url %} 
+{% url 'auth_password_change' as password_change_url %} 
 <h2>Change Password</h2>
 <p>
 Change your password <a href="{{ password_change_url }}" title="change your password">here</a>.
