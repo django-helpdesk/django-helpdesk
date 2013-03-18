@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n %}{% load url from future %}
 <table width='100%'>
     <tr class='row_tablehead'><td colspan='2'>{{ ticket.id }}. {{ ticket.title }} [{{ ticket.get_status }}] <span class='ticket_toolbar'>
     {% if helpdesk_settings.HELPDESK_SHOW_EDIT_BUTTON_TICKET_TOP %}
