@@ -8,11 +8,28 @@ urls.py - Mapping of URL's to our various views. Note we always used NAMED
 """
 
 from django.conf import settings
-from django.conf.urls.defaults import *
+import django
+if django.get_version().startswith("1.3"):
+	from django.conf.urls.defaults import *
+else:
+	from django.conf.urls import *
 from django.contrib.auth.decorators import login_required
 
 from helpdesk import settings as helpdesk_settings
 from helpdesk.views import feeds
+
+from django.views.generic import TemplateView
+class DirectTemplateView(TemplateView):
+    extra_context = None
+    def get_context_data(self, **kwargs):
+        context = super(self.__class__, self).get_context_data(**kwargs)
+        if self.extra_context is not None:
+            for key, value in self.extra_context.items():
+                if callable(value):
+                    context[key] = value()
+                else:
+                    context[key] = value
+        return context
 
 urlpatterns = patterns('helpdesk.views.staff',
     url(r'^dashboard/$',
@@ -198,23 +215,13 @@ if helpdesk_settings.HELPDESK_KB_ENABLED:
     )
 
 urlpatterns += patterns('',
-    url(r'^api/$',
-        'django.views.generic.simple.direct_to_template',
-        {'template': 'helpdesk/help_api.html',},
+    url(r'^api/$',TemplateView.as_view(template_name='helpdesk/help_api.html'),
         name='helpdesk_api_help'),
 
-    url(r'^help/context/$',
-        'django.views.generic.simple.direct_to_template',
-        {'template': 'helpdesk/help_context.html',},
+    url(r'^help/context/$',TemplateView.as_view(template_name='helpdesk/help_context.html'),
         name='helpdesk_help_context'),
 
-    url(r'^system_settings/$',
-        'django.views.generic.simple.direct_to_template',
-        {
-            'template': 'helpdesk/system_settings.html',
-            'extra_context': {
-                'ADMIN_URL': getattr(settings, 'ADMIN_URL', '/admin/'),
-            },
-        },
-        name='helpdesk_system_settings'),
+		url(r'^system_settings/$',DirectTemplateView.as_view(template_name='helpdesk/system_settings.html',
+				extra_context={'ADMIN_URL': getattr(settings, 'ADMIN_URL', '/admin/')}),
+				name='helpdesk_system_settings'),
 )

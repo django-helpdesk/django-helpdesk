@@ -1,4 +1,5 @@
 {% load i18n %}
+{% load url from future %}
 {% load saved_queries %}
 {% load load_helpdesk_settings %}
 {% with request|load_helpdesk_settings as helpdesk_settings %}
@@ -15,9 +16,9 @@
         <link rel='stylesheet' href='{{ STATIC_URL }}helpdesk/helpdesk.css' type='text/css'  media="screen" />
         <link rel='stylesheet' href='{{ STATIC_URL }}helpdesk/helpdesk-print.css' type='text/css' media="print" />
         <link rel='stylesheet' href='{{ STATIC_URL }}helpdesk/jquery-smoothness-theme/jquery-ui-1.8.9.custom.css' type='text/css' />
-        <link rel='alternate' href='{% url helpdesk_rss_user user.username %}' type='application/rss+xml' title='{% trans "My Open Tickets" %}' />
-        <link rel='alternate' href='{% url helpdesk_rss_activity %}' type='application/rss+xml' title='{% trans "All Recent Activity" %}' />
-        <link rel='alternate' href='{% url helpdesk_rss_unassigned %}' type='application/rss+xml' title='{% trans "Unassigned Tickets" %}' />
+        <link rel='alternate' href='{% url 'helpdesk_rss_user' user.username %}' type='application/rss+xml' title='{% trans "My Open Tickets" %}' />
+        <link rel='alternate' href='{% url 'helpdesk_rss_activity' %}' type='application/rss+xml' title='{% trans "All Recent Activity" %}' />
+        <link rel='alternate' href='{% url 'helpdesk_rss_unassigned' %}' type='application/rss+xml' title='{% trans "Unassigned Tickets" %}' />
 
         {% comment %}
         <script type="text/javascript">
@@ -106,13 +107,13 @@
 
             <div id='footer'>
                 <p>{% include "helpdesk/attribution.html" %}
-                <a href='{% url helpdesk_rss_index %}'><img src='{{ STATIC_URL }}helpdesk/rss_icon.png' width='14' height='14' alt='{% trans "RSS Icon" %}' title='{% trans "RSS Feeds" %}' border='0' />{% trans "RSS Feeds" %}</a>
-                {% if helpdesk_settings.HELPDESK_FOOTER_SHOW_API_LINK %}<a href='{% url helpdesk_api_help %}'>{% trans "API" %}</a>{% endif %}
-                <a href='{% url helpdesk_user_settings %}'>{% trans "User Settings" %}</a>
+                <a href='{% url 'helpdesk_rss_index' %}'><img src='{{ STATIC_URL }}helpdesk/rss_icon.png' width='14' height='14' alt='{% trans "RSS Icon" %}' title='{% trans "RSS Feeds" %}' border='0' />{% trans "RSS Feeds" %}</a>
+                {% if helpdesk_settings.HELPDESK_FOOTER_SHOW_API_LINK %}<a href='{% url 'helpdesk_api_help' %}'>{% trans "API" %}</a>{% endif %}
+                <a href='{% url 'helpdesk_user_settings' %}'>{% trans "User Settings" %}</a>
                 {% if helpdesk_settings.HELPDESK_FOOTER_SHOW_CHANGE_LANGUAGE_LINK %}
-                <a href='{% url helpdesk_public_change_language %}?return_to={{ request.path }}'>{% trans "Change Language" %}</a>
+                <a href='{% url 'helpdesk_public_change_language' %}?return_to={{ request.path }}'>{% trans "Change Language" %}</a>
                 {% endif %}
-                {% if user.is_superuser %}<a href='{% url helpdesk_system_settings %}'>{% trans "System Settings" %}</a>{% endif %}</p>
+                {% if user.is_superuser %}<a href='{% url 'helpdesk_system_settings' %}'>{% trans "System Settings" %}</a>{% endif %}</p>
             </div>
         </div>
         {% include "helpdesk/debug.html" %}
