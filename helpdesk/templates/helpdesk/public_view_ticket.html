@@ -4,7 +4,7 @@
 {% block helpdesk_body %}
 
 <table width='100%'>
-<tr class='row_tablehead'><td colspan='2'>{{ ticket.id }}. {{ ticket.title }} [{{ ticket.get_status }}]</td></tr>
+<tr class='row_tablehead'><td colspan='2'>{{ ticket.ticket }} . {{ ticket.title }} [{{ ticket.get_status }}]</td></tr>
 <tr class='row_columnheads'><th colspan='2'>{% blocktrans with ticket.queue as queue_name %}Queue: {{ queue_name }}{% endblocktrans %}</th></tr>
 
 <tr class='{% cycle 'row_odd' 'row_even' as rowcolors %}'>
