@@ -492,15 +492,17 @@ def update_ticket(request, ticket_id, public=False):
         
 
         if f.new_status == Ticket.RESOLVED_STATUS:
-            template = 'resolved_submitter'
+            template = 'resolved_'
         elif f.new_status == Ticket.CLOSED_STATUS:
-            template = 'closed_submitter'
+            template = 'closed_'
         else:
-            template = 'updated_submitter'
+            template = 'updated_'
+
+        template_suffix = 'submitter'
 
         if ticket.submitter_email:
             send_templated_mail(
-                template,
+                template + template_suffix,
                 context,
                 recipients=ticket.submitter_email,
                 sender=ticket.queue.from_address,
@@ -509,10 +511,12 @@ def update_ticket(request, ticket_id, public=False):
                 )
             messages_sent_to.append(ticket.submitter_email)
 
+        template_suffix = 'cc'
+
         for cc in ticket.ticketcc_set.all():
             if cc.email_address not in messages_sent_to:
                 send_templated_mail(
-                    template,
+                    template + template_suffix,
                     context,
                     recipients=cc.email_address,
                     sender=ticket.queue.from_address,
