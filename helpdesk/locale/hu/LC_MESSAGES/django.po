@@ -7,14 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: django-helpdesk\n"
 "Report-Msgid-Bugs-To: http://github.com/RossP/django-helpdesk/issues\n"
-"POT-Creation-Date: 2012-04-25 18:25+1000\n"
-"PO-Revision-Date: 2011-02-06 23:10+0000\n"
+"POT-Creation-Date: 2012-08-07 20:40+1000\n"
+"PO-Revision-Date: 2013-04-29 09:18+0000\n"
+"Last-Translator: Ross Poulton <ross@rossp.org>\n"
 "Language-Team: Hungarian (http://www.transifex.com/projects/p/django-helpdesk/language/hu/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Language: hu\n"
-"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: forms.py:113 forms.py:360 models.py:262
 #: templates/helpdesk/dashboard.html:11 templates/helpdesk/dashboard.html:37
@@ -22,8 +23,8 @@ msgstr ""
 #: templates/helpdesk/dashboard.html:99 templates/helpdesk/rss_list.html:23
 #: templates/helpdesk/ticket_list.html:56
 #: templates/helpdesk/ticket_list.html:78
-#: templates/helpdesk/ticket_list.html:199 views/staff.py:973
-#: views/staff.py:979 views/staff.py:985
+#: templates/helpdesk/ticket_list.html:199 views/staff.py:976
+#: views/staff.py:982 views/staff.py:988
 msgid "Queue"
 msgstr ""
 
@@ -59,7 +60,7 @@ msgstr ""
 #: templates/helpdesk/public_view_ticket.html:21
 #: templates/helpdesk/ticket.html:176
 #: templates/helpdesk/ticket_desc_table.html:31
-#: templates/helpdesk/ticket_list.html:84 views/staff.py:351
+#: templates/helpdesk/ticket_list.html:84 views/staff.py:355
 msgid "Priority"
 msgstr ""
 
@@ -68,7 +69,7 @@ msgid "Please select a priority carefully. If unsure, leave it as '3'."
 msgstr ""
 
 #: forms.py:159 forms.py:397 models.py:330 templates/helpdesk/ticket.html:178
-#: views/staff.py:361
+#: views/staff.py:365
 msgid "Due on"
 msgstr ""
 
@@ -84,7 +85,7 @@ msgstr ""
 #: templates/helpdesk/ticket.html:182
 #: templates/helpdesk/ticket_desc_table.html:42
 #: templates/helpdesk/ticket_list.html:61
-#: templates/helpdesk/ticket_list.html:199 views/staff.py:372
+#: templates/helpdesk/ticket_list.html:199 views/staff.py:376
 msgid "Tags"
 msgstr ""
 
@@ -195,7 +196,7 @@ msgstr ""
 #: templates/helpdesk/dashboard.html:37 templates/helpdesk/dashboard.html:57
 #: templates/helpdesk/dashboard.html:77 templates/helpdesk/dashboard.html:99
 #: templates/helpdesk/ticket.html:170 templates/helpdesk/ticket_list.html:75
-#: templates/helpdesk/ticket_list.html:199 views/staff.py:341
+#: templates/helpdesk/ticket_list.html:199 views/staff.py:345
 msgid "Title"
 msgstr ""
 
@@ -489,7 +490,7 @@ msgid ""
 msgstr ""
 
 #: models.py:348 templates/helpdesk/ticket_desc_table.html:22
-#: views/feeds.py:91 views/feeds.py:117 views/feeds.py:169 views/staff.py:298
+#: views/feeds.py:91 views/feeds.py:117 views/feeds.py:169 views/staff.py:302
 msgid "Unassigned"
 msgstr ""
 
@@ -507,7 +508,7 @@ msgstr ""
 msgid "Date"
 msgstr ""
 
-#: models.py:497 views/staff.py:312
+#: models.py:497 views/staff.py:316
 msgid "Comment"
 msgstr ""
 
@@ -521,8 +522,8 @@ msgid ""
 "tickets can only be seen by staff."
 msgstr ""
 
-#: models.py:514 models.py:888 models.py:1081 views/staff.py:949
-#: views/staff.py:955 views/staff.py:961 views/staff.py:967
+#: models.py:514 models.py:888 models.py:1081 views/staff.py:952
+#: views/staff.py:958 views/staff.py:964 views/staff.py:970
 msgid "User"
 msgstr ""
 
@@ -1278,7 +1279,7 @@ msgstr ""
 msgid "Title:"
 msgstr ""
 
-#: templates/helpdesk/followup_edit.html:19
+#: templates/helpdesk/followup_edit.html:18
 msgid "Comment:"
 msgstr ""
 
@@ -2194,37 +2195,37 @@ msgstr ""
 msgid "Submitter accepted resolution and closed ticket"
 msgstr ""
 
-#: views/staff.py:215
+#: views/staff.py:218
 msgid "Accepted resolution and closed ticket"
 msgstr ""
 
-#: views/staff.py:243
+#: views/staff.py:246
 msgid "Sorry, you need to login to do that."
 msgstr ""
 
-#: views/staff.py:291
+#: views/staff.py:295
 #, python-format
 msgid "Assigned to %(username)s"
 msgstr ""
 
-#: views/staff.py:314
+#: views/staff.py:318
 msgid "Updated"
 msgstr ""
 
-#: views/staff.py:491
+#: views/staff.py:496
 #, python-format
 msgid "Assigned to %(username)s in bulk update"
 msgstr ""
 
-#: views/staff.py:496
+#: views/staff.py:501
 msgid "Unassigned in bulk update"
 msgstr ""
 
-#: views/staff.py:501 views/staff.py:506
+#: views/staff.py:506 views/staff.py:511
 msgid "Closed in bulk update"
 msgstr ""
 
-#: views/staff.py:727
+#: views/staff.py:732
 msgid ""
 "<p><strong>Note:</strong> Your keyword search is case sensitive because of "
 "your database. This means the search will <strong>not</strong> be accurate. "
@@ -2234,86 +2235,86 @@ msgid ""
 "matching\">Django Documentation on string matching in SQLite</a>."
 msgstr ""
 
-#: views/staff.py:840
+#: views/staff.py:843
 msgid "Ticket taken off hold"
 msgstr ""
 
-#: views/staff.py:843
+#: views/staff.py:846
 msgid "Ticket placed on hold"
 msgstr ""
 
-#: views/staff.py:911
+#: views/staff.py:914
 msgid "Jan"
 msgstr ""
 
-#: views/staff.py:912
+#: views/staff.py:915
 msgid "Feb"
 msgstr ""
 
-#: views/staff.py:913
+#: views/staff.py:916
 msgid "Mar"
 msgstr ""
 
-#: views/staff.py:914
+#: views/staff.py:917
 msgid "Apr"
 msgstr ""
 
-#: views/staff.py:915
+#: views/staff.py:918
 msgid "May"
 msgstr ""
 
-#: views/staff.py:916
+#: views/staff.py:919
 msgid "Jun"
 msgstr ""
 
-#: views/staff.py:917
+#: views/staff.py:920
 msgid "Jul"
 msgstr ""
 
-#: views/staff.py:918
+#: views/staff.py:921
 msgid "Aug"
 msgstr ""
 
-#: views/staff.py:919
+#: views/staff.py:922
 msgid "Sep"
 msgstr ""
 
-#: views/staff.py:920
+#: views/staff.py:923
 msgid "Oct"
 msgstr ""
 
-#: views/staff.py:921
+#: views/staff.py:924
 msgid "Nov"
 msgstr ""
 
-#: views/staff.py:922
+#: views/staff.py:925
 msgid "Dec"
 msgstr ""
 
-#: views/staff.py:948
+#: views/staff.py:951
 msgid "User by Priority"
 msgstr ""
 
-#: views/staff.py:954
+#: views/staff.py:957
 msgid "User by Queue"
 msgstr ""
 
-#: views/staff.py:960
+#: views/staff.py:963
 msgid "User by Status"
 msgstr ""
 
-#: views/staff.py:966
+#: views/staff.py:969
 msgid "User by Month"
 msgstr ""
 
-#: views/staff.py:972
+#: views/staff.py:975
 msgid "Queue by Priority"
 msgstr ""
 
-#: views/staff.py:978
+#: views/staff.py:981
 msgid "Queue by Status"
 msgstr ""
 
-#: views/staff.py:984
+#: views/staff.py:987
 msgid "Queue by Month"
 msgstr ""

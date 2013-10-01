@@ -3,23 +3,24 @@
 # This file is distributed under the same license as the django-helpdesk package.
 # 
 # Translators:
-# Jannis Leidel <jannis@leidel.info>, 2011.
-# Marc-Stefan Cassola <maccesch@web.de>, 2011.
-# Ross Poulton <ross@rossp.org>, 2011.
-#   <zerok@zerokspot.com>, 2012.
+# Fabian Affolter <fab@fedoraproject.org>, 2013
+# Jannis Leidel <jannis@leidel.info>, 2011
+# Marc-Stefan Cassola <maccesch@web.de>, 2011
+# Ross Poulton <ross@rossp.org>, 2011
+# Horst Gutmann <zerok@zerokspot.com>, 2012
 msgid ""
 msgstr ""
 "Project-Id-Version: django-helpdesk\n"
 "Report-Msgid-Bugs-To: http://github.com/RossP/django-helpdesk/issues\n"
-"POT-Creation-Date: 2012-04-25 18:25+1000\n"
-"PO-Revision-Date: 2012-07-22 20:48+0000\n"
-"Last-Translator: Horst Gutmann <zerok@zerokspot.com>\n"
+"POT-Creation-Date: 2012-08-07 20:40+1000\n"
+"PO-Revision-Date: 2013-04-29 09:18+0000\n"
+"Last-Translator: Ross Poulton <ross@rossp.org>\n"
 "Language-Team: German (http://www.transifex.com/projects/p/django-helpdesk/language/de/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Language: de\n"
-"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: forms.py:113 forms.py:360 models.py:262
 #: templates/helpdesk/dashboard.html:11 templates/helpdesk/dashboard.html:37
@@ -27,8 +28,8 @@ msgstr ""
 #: templates/helpdesk/dashboard.html:99 templates/helpdesk/rss_list.html:23
 #: templates/helpdesk/ticket_list.html:56
 #: templates/helpdesk/ticket_list.html:78
-#: templates/helpdesk/ticket_list.html:199 views/staff.py:973
-#: views/staff.py:979 views/staff.py:985
+#: templates/helpdesk/ticket_list.html:199 views/staff.py:976
+#: views/staff.py:982 views/staff.py:988
 msgid "Queue"
 msgstr "Ticketsammlung"
 
@@ -64,7 +65,7 @@ msgstr "Wenn Sie andere Verantwortliche als sich selbst auswählen, werden diese
 #: templates/helpdesk/public_view_ticket.html:21
 #: templates/helpdesk/ticket.html:176
 #: templates/helpdesk/ticket_desc_table.html:31
-#: templates/helpdesk/ticket_list.html:84 views/staff.py:351
+#: templates/helpdesk/ticket_list.html:84 views/staff.py:355
 msgid "Priority"
 msgstr "Priorität"
 
@@ -73,7 +74,7 @@ msgid "Please select a priority carefully. If unsure, leave it as '3'."
 msgstr "Wählen Sie die Priorität mit Bedacht. Im Zweifel lassen Sie sie bei '3'."
 
 #: forms.py:159 forms.py:397 models.py:330 templates/helpdesk/ticket.html:178
-#: views/staff.py:361
+#: views/staff.py:365
 msgid "Due on"
 msgstr "Fällig am"
 
@@ -89,7 +90,7 @@ msgstr "Sie können eine Datei (z.B. ein Dokument oder ein Bildschirmphoto) an d
 #: templates/helpdesk/ticket.html:182
 #: templates/helpdesk/ticket_desc_table.html:42
 #: templates/helpdesk/ticket_list.html:61
-#: templates/helpdesk/ticket_list.html:199 views/staff.py:372
+#: templates/helpdesk/ticket_list.html:199 views/staff.py:376
 msgid "Tags"
 msgstr "Tags"
 
@@ -200,7 +201,7 @@ msgstr "Soll Ihre E-Mail-Adresse automatisch als Absender verwendet werden, wenn
 #: templates/helpdesk/dashboard.html:37 templates/helpdesk/dashboard.html:57
 #: templates/helpdesk/dashboard.html:77 templates/helpdesk/dashboard.html:99
 #: templates/helpdesk/ticket.html:170 templates/helpdesk/ticket_list.html:75
-#: templates/helpdesk/ticket_list.html:199 views/staff.py:341
+#: templates/helpdesk/ticket_list.html:199 views/staff.py:345
 msgid "Title"
 msgstr "Titel"
 
@@ -494,7 +495,7 @@ msgid ""
 msgstr "Das Datum, an dem dieses Ticket zuletzt eskaliert wurde - wird von management/commands/escalate_tickets.py automatisch aktualisiert."
 
 #: models.py:348 templates/helpdesk/ticket_desc_table.html:22
-#: views/feeds.py:91 views/feeds.py:117 views/feeds.py:169 views/staff.py:298
+#: views/feeds.py:91 views/feeds.py:117 views/feeds.py:169 views/staff.py:302
 msgid "Unassigned"
 msgstr "Nicht zugeordnet"
 
@@ -512,7 +513,7 @@ msgstr "Ticket"
 msgid "Date"
 msgstr "Datum"
 
-#: models.py:497 views/staff.py:312
+#: models.py:497 views/staff.py:316
 msgid "Comment"
 msgstr "Kommentar"
 
@@ -526,8 +527,8 @@ msgid ""
 "tickets can only be seen by staff."
 msgstr "Öffentliche Tickets sind vom Ersteller und allen Mitarbeitern einsehbar, nicht-öffentliche Tickets nur von den Mitarbeitern."
 
-#: models.py:514 models.py:888 models.py:1081 views/staff.py:949
-#: views/staff.py:955 views/staff.py:961 views/staff.py:967
+#: models.py:514 models.py:888 models.py:1081 views/staff.py:952
+#: views/staff.py:958 views/staff.py:964 views/staff.py:970
 msgid "User"
 msgstr "Benutzer"
 
@@ -999,7 +1000,7 @@ msgstr "Meine offenen Tickets"
 
 #: templates/helpdesk/base.html:20
 msgid "All Recent Activity"
-msgstr ""
+msgstr "Letzte Aktivitäten"
 
 #: templates/helpdesk/base.html:21 templates/helpdesk/dashboard.html:76
 #: templates/helpdesk/rss_list.html:15
@@ -1041,7 +1042,7 @@ msgstr "Systemeinstellungen"
 #: templates/helpdesk/confirm_delete_saved_query.html:3
 #: templates/helpdesk/ticket_list.html:144
 msgid "Delete Saved Query"
-msgstr ""
+msgstr "Gespeicherte Abfrage löschen"
 
 #: templates/helpdesk/confirm_delete_saved_query.html:5
 #, python-format
@@ -1283,7 +1284,7 @@ msgstr ""
 msgid "Title:"
 msgstr ""
 
-#: templates/helpdesk/followup_edit.html:19
+#: templates/helpdesk/followup_edit.html:18
 msgid "Comment:"
 msgstr "Kommentar:"
 
@@ -1742,11 +1743,11 @@ msgstr ""
 
 #: templates/helpdesk/ticket_cc_add.html:21
 msgid "Save Ticket CC"
-msgstr ""
+msgstr "Ticket CC speichern"
 
 #: templates/helpdesk/ticket_cc_del.html:3
 msgid "Delete Ticket CC"
-msgstr ""
+msgstr "Ticket CC löschen"
 
 #: templates/helpdesk/ticket_cc_del.html:5
 #, python-format
@@ -1760,12 +1761,12 @@ msgstr ""
 #: templates/helpdesk/ticket_cc_del.html:11
 #: templates/helpdesk/ticket_dependency_del.html:11
 msgid "Don't Delete"
-msgstr ""
+msgstr "Nicht löschen"
 
 #: templates/helpdesk/ticket_cc_del.html:13
 #: templates/helpdesk/ticket_dependency_del.html:13
 msgid "Yes, Delete"
-msgstr ""
+msgstr "Ja, löschen"
 
 #: templates/helpdesk/ticket_cc_list.html:3
 msgid "Ticket CC Settings"
@@ -1788,11 +1789,11 @@ msgstr ""
 
 #: templates/helpdesk/ticket_cc_list.html:15
 msgid "View?"
-msgstr ""
+msgstr "Ansehen?"
 
 #: templates/helpdesk/ticket_cc_list.html:15
 msgid "Update?"
-msgstr ""
+msgstr "Aktualisieren?"
 
 #: templates/helpdesk/ticket_cc_list.html:29
 #, python-format
@@ -2199,37 +2200,37 @@ msgstr "Ungültige Ticket-ID oder E-Mail-Adresse. Bitte versuchen Sie es erneut.
 msgid "Submitter accepted resolution and closed ticket"
 msgstr "Ersteller akzeptiert die Lösung und hat das Ticket geschlossen."
 
-#: views/staff.py:215
+#: views/staff.py:218
 msgid "Accepted resolution and closed ticket"
 msgstr "Lösung akzeptiert und Ticket geschlossen"
 
-#: views/staff.py:243
+#: views/staff.py:246
 msgid "Sorry, you need to login to do that."
 msgstr "Dafür müssen Sie sich leider anmelden."
 
-#: views/staff.py:291
+#: views/staff.py:295
 #, python-format
 msgid "Assigned to %(username)s"
 msgstr "%(username)s zugeordnet"
 
-#: views/staff.py:314
+#: views/staff.py:318
 msgid "Updated"
 msgstr "Aktualisiert"
 
-#: views/staff.py:491
+#: views/staff.py:496
 #, python-format
 msgid "Assigned to %(username)s in bulk update"
 msgstr "%(username)s zugeordnet in Massenaktualisierung"
 
-#: views/staff.py:496
+#: views/staff.py:501
 msgid "Unassigned in bulk update"
 msgstr "Zuordnung in Massenaktualisierung aufgehoben"
 
-#: views/staff.py:501 views/staff.py:506
+#: views/staff.py:506 views/staff.py:511
 msgid "Closed in bulk update"
 msgstr "In Massenaktualisierung geschlossen"
 
-#: views/staff.py:727
+#: views/staff.py:732
 msgid ""
 "<p><strong>Note:</strong> Your keyword search is case sensitive because of "
 "your database. This means the search will <strong>not</strong> be accurate. "
@@ -2239,86 +2240,86 @@ msgid ""
 "matching\">Django Documentation on string matching in SQLite</a>."
 msgstr "<p><strong>Achtung:</strong> Ihre Schlagwortsuche achtet wegen Ihrer Datenbank auf Groß- und Kleinschreibung. Das bedeutet, dass die Suche <strong>nicht</strong> genau ist. Durch den Wechsel auf eine andere Datenbank werden Sie eine bessere Suche erhalten. Weitere Informationen finden Sie in der <a href=\"http://docs.djangoproject.com/en/dev/ref/databases/#sqlite-string-matching\">Django Dokumentation zur Stringerkennung in SQLite</a>."
 
-#: views/staff.py:840
+#: views/staff.py:843
 msgid "Ticket taken off hold"
 msgstr "Ticket wieder freigegeben"
 
-#: views/staff.py:843
+#: views/staff.py:846
 msgid "Ticket placed on hold"
 msgstr "Ticket zurückgehalten"
 
-#: views/staff.py:911
+#: views/staff.py:914
 msgid "Jan"
 msgstr "Jan"
 
-#: views/staff.py:912
+#: views/staff.py:915
 msgid "Feb"
 msgstr "Feb"
 
-#: views/staff.py:913
+#: views/staff.py:916
 msgid "Mar"
 msgstr "Mär"
 
-#: views/staff.py:914
+#: views/staff.py:917
 msgid "Apr"
 msgstr "Apr"
 
-#: views/staff.py:915
+#: views/staff.py:918
 msgid "May"
 msgstr "Mai"
 
-#: views/staff.py:916
+#: views/staff.py:919
 msgid "Jun"
 msgstr "Jun"
 
-#: views/staff.py:917
+#: views/staff.py:920
 msgid "Jul"
 msgstr "Jul"
 
-#: views/staff.py:918
+#: views/staff.py:921
 msgid "Aug"
 msgstr "Aug"
 
-#: views/staff.py:919
+#: views/staff.py:922
 msgid "Sep"
 msgstr "Sep"
 
-#: views/staff.py:920
+#: views/staff.py:923
 msgid "Oct"
 msgstr "Okt"
 
-#: views/staff.py:921
+#: views/staff.py:924
 msgid "Nov"
 msgstr "Nov"
 
-#: views/staff.py:922
+#: views/staff.py:925
 msgid "Dec"
 msgstr "Dez"
 
-#: views/staff.py:948
+#: views/staff.py:951
 msgid "User by Priority"
 msgstr "Benutzer je Priorität"
 
-#: views/staff.py:954
+#: views/staff.py:957
 msgid "User by Queue"
 msgstr "Benutzer je Sammlung"
 
-#: views/staff.py:960
+#: views/staff.py:963
 msgid "User by Status"
 msgstr "Benutzer je Status"
 
-#: views/staff.py:966
+#: views/staff.py:969
 msgid "User by Month"
 msgstr "Benutzer je Monat"
 
-#: views/staff.py:972
+#: views/staff.py:975
 msgid "Queue by Priority"
 msgstr "Sammlung je Priorität"
 
-#: views/staff.py:978
+#: views/staff.py:981
 msgid "Queue by Status"
 msgstr "Sammlung je Status"
 
-#: views/staff.py:984
+#: views/staff.py:987
 msgid "Queue by Month"
 msgstr "Sammlung je Monat"
