@@ -1,6 +1,9 @@
 django-helpdesk - A Django powered ticket tracker for small enterprise.
 =======================================================================
 
+.. image:: https://travis-ci.org/rossp/django-helpdesk.png?branch=master
+
+
 Copyright 2009-11 Jutda and Ross Poulton. All Rights Reserved. See LICENSE for details.
 
 django-helpdesk was formerly known as Jutda Helpdesk, named after the 
