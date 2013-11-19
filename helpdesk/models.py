@@ -604,8 +604,9 @@ def attachment_path(instance, filename):
     os.umask(0)
     path = 'helpdesk/attachments/%s/%s' % (instance.followup.ticket.ticket_for_url, instance.followup.id )
     att_path = os.path.join(settings.MEDIA_ROOT, path)
-    if not os.path.exists(att_path):
-        os.makedirs(att_path, 0777)
+    if settings.DEFAULT_FILE_STORAGE == "django.core.files.storage.FileSystemStorage":
+        if not os.path.exists(att_path):
+            os.makedirs(att_path, 0777)
     return os.path.join(path, filename)
 
 

@@ -11,6 +11,7 @@ from StringIO import StringIO
 
 from django import forms
 from django.forms import extras
+from django.core.files.storage import default_storage
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext as _
@@ -305,7 +306,10 @@ class TicketForm(forms.Form):
             if file.size < getattr(settings, 'MAX_EMAIL_ATTACHMENT_SIZE', 512000):
                 # Only files smaller than 512kb (or as defined in 
                 # settings.MAX_EMAIL_ATTACHMENT_SIZE) are sent via email.
-                files.append(a.file.path)
+                try:
+                    files.append(a.file.path)
+                except NotImplementedError:
+                    pass
 
         context = safe_template_context(t)
         context['comment'] = f.comment
