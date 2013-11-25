@@ -3,11 +3,14 @@
 {% block helpdesk_body %}
 <h2>{% blocktrans with item.title as item %}Knowledgebase: {{ item }}{% endblocktrans %}</h2>
 
-<table width='100%'>
+<table class="table table-hover table-bordered">
+<thead>
 <tr class='row_tablehead'><td>{{ item.title }}</td></tr>
-
+</thead>
+<tbody>
 <tr class='row_even row_hover'><th>{{ item.question }}</th></tr>
 <tr class='row_odd'><td>{{ item.answer|markdown }}</td></tr>
+</tbody>
 </table>
 
 <p>{% blocktrans with item.category.title as category_title and item.category.get_absolute_url as category_url %}View <a href='{{ category_url }}'>other <em>{{ category_title }}</em> articles</a>, or continue <a href='../'>viewing other knowledgebase articles</a>.{% endblocktrans %}</p>

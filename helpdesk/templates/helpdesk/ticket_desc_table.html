@@ -1,17 +1,19 @@
 {% load i18n %}{% load url from future %}
-<table width='100%'>
-    <tr class='row_tablehead'><td colspan='2'>{{ ticket.id }}. {{ ticket.title }} [{{ ticket.get_status }}] <span class='ticket_toolbar'>
+<table class="table table-hover table-bordered">
+<thead>
+    <tr class='row_tablehead'><td colspan='2'><h3>{{ ticket.id }}. {{ ticket.title }} [{{ ticket.get_status }}]</h3> <span class='ticket_toolbar'>
     {% if helpdesk_settings.HELPDESK_SHOW_EDIT_BUTTON_TICKET_TOP %}
-        <a href='{% url 'helpdesk_edit' ticket.id %}' class="ticket-edit"><img src='{{ STATIC_URL }}helpdesk/buttons/edit.png' alt='Edit' title='Edit' width='60' height='15' /></a>
+        <a href='{% url 'helpdesk_edit' ticket.id %}' class="ticket-edit"><span class="glyphicon glyphicon-pencil"></span> Edit</a>
     {% endif %}
     {% if helpdesk_settings.HELPDESK_SHOW_DELETE_BUTTON_TICKET_TOP %}
-    <a href='{% url 'helpdesk_delete' ticket.id %}' class="ticket-delete"><img src='{{ STATIC_URL }}helpdesk/buttons/delete.png' alt='Delete' title='Delete' width='60' height='15' /></a>
+    | <a href='{% url 'helpdesk_delete' ticket.id %}' class="ticket-delete"><span class="glyphicon glyphicon-remove"></span> Delete</a>
     {% endif %}
     {% if helpdesk_settings.HELPDESK_SHOW_HOLD_BUTTON_TICKET_TOP %}
-    {% if ticket.on_hold %}<a href='unhold/' class="ticket-hold">{% trans "Unhold" %}</a>{% else %}<a href='hold/' class="ticket-hold">{% trans "Hold" %}</a>{% endif %}
+    {% if ticket.on_hold %} | <a href='unhold/' class="ticket-hold">{% trans "Unhold" %}</a>{% else %} | <a href='hold/' class="ticket-hold">{% trans "Hold" %}</a>{% endif %}
     {% endif %}</span></td></tr>
 <tr class='row_columnheads'><th colspan='2'>{% blocktrans with ticket.queue as queue %}Queue: {{ queue }}{% endblocktrans %}</th></tr>
-
+</thead>
+<tbody>
 <tr class='{% cycle 'row_odd' 'row_even' as rowcolors %}'>
     <th>{% trans "Submitted On" %}</th>
     <td>{{ ticket.created|date:"r" }} ({{ ticket.created|timesince }} ago)</td>
@@ -76,5 +78,5 @@
 <tr class='{% cycle rowcolors %}'>
     <td colspan='2'>{{ ticket.resolution|force_escape|urlizetrunc:50|linebreaksbr }}</td>
 </tr>{% endif %}
-
+</tbody>
 </table>

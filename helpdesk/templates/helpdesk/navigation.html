@@ -1,17 +1,19 @@
 {% load i18n %}{% load url from future %}
 {% if helpdesk_settings.HELPDESK_NAVIGATION_ENABLED and user.is_authenticated or user.is_staff %}
-<ul id="dropdown">
-    <li><a href='{% url 'helpdesk_dashboard' %}'>{% trans "Dashboard" %}</a></li>
-    <li><a href='{% url 'helpdesk_list' %}'>{% trans "Tickets" %}</a></li>
-    <li><a href='{% url 'helpdesk_submit' %}'>{% trans "New Ticket" %}</a></li>
+<nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+{% if helpdesk_settings.HELPDESK_ORG_LOGO %}<img class="navbar-brand" src="{{ helpdesk_settings.HELPDESK_ORG_LOGO }}" />{% endif %}
+<ul id="dropdown" class="nav navbar-nav">
+    <li><a href='{% url 'helpdesk_dashboard' %}'><span class="glyphicon glyphicon-dashboard"></span> {% trans "Dashboard" %}</a></li>
+    <li><a href='{% url 'helpdesk_list' %}'><span class="glyphicon glyphicon-tags"></span> {% trans "Tickets" %}</a></li>
+    <li><a href='{% url 'helpdesk_submit' %}'><span class="glyphicon glyphicon-plus"></span> {% trans "New Ticket" %}</a></li>
     {% if helpdesk_settings.HELPDESK_NAVIGATION_STATS_ENABLED %}
-    <li><a href='{% url 'helpdesk_report_index' %}'>{% trans "Stats" %}</a></li>
+    <li><a href='{% url 'helpdesk_report_index' %}'><span class="glyphicon glyphicon-stats"></span> {% trans "Stats" %}</a></li>
     {% endif %}
     {% if helpdesk_settings.HELPDESK_KB_ENABLED_STAFF %}
-    <li><a href='{% url 'helpdesk_kb_index' %}'>{% trans "Knowledgebase" %}</a></li>
+    <li><a href='{% url 'helpdesk_kb_index' %}'><span class="glyphicon glyphicon-tree-deciduous"></span> {% trans "Knowledgebase" %}</a></li>
     {% endif %}
     {% if user_saved_queries_ %}
-        <li class="headerlink"><a>{% trans "Load Saved Query" %}</a>
+        <li class="headerlink"><a><span class="glyphicon glyphicon-filter"></span> {% trans "Load Saved Query" %}</a>
             <ul>
              {% for q in user_saved_queries_ %}
                 <li><a href="{% url 'helpdesk_list' %}?saved_query={{ q.id }}">{{ q.title }}
@@ -22,11 +24,24 @@
            </ul>
        </li>
     {% endif %}
-    <li><a href='{% url 'logout' %}'>{% trans "Logout" %}</a></li>
-    {% if not query %}<li><form id='searchform' method='get' action='{% url 'helpdesk_list' %}'><input type='text' name='q' size='4' class='input' value='{% trans "Search..." %}' id='search_query' onFocus='s=document.getElementById("search_query");if (s.value == "{% trans "Search..." %}") { s.value = ""; }' title='{% trans "Enter a keyword, or a ticket number to jump straight to that ticket." %}'/><input type='hidden' name='status' value='1' /><input type='hidden' name='status' value='2' /><input type='hidden' name='status' value='3' /><input type='hidden' name='search_type' value='header' />{% csrf_token %}</form></li>{% endif %}
+    <li><a href='{% url 'logout' %}'><span class="glyphicon glyphicon-logout"></span> {% trans "Logout" %}</a></li>
+    {% if not query %}<li>
+    <form class="navbar-form navbar-left" id='searchform' method='get' action="{% url 'helpdesk_list' %}">
+    <div class="form-group">
+        <input type='text' name='q' size='6' class='input form-control' placeholder='{% trans "Search..." %}' id='search_query' title='{% trans "Enter a keyword, or a ticket number to jump straight to that ticket." %}'/>
+        <input type='hidden' name='status' value='1' /><input type='hidden' name='status' value='2' /><input type='hidden' name='status' value='3' />
+        <input type='hidden' name='search_type' value='header' />
+        {% csrf_token %}
+    </div>
+    <button type="submit" class="btn btn-default">Submit</button>
+    </form>
+</li>{% endif %}
 </ul>
+</nav>
 {% else %}
-<ul>
+<nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+{% if helpdesk_settings.HELPDESK_ORG_LOGO %}<img class="navbar-brand" src="{{ helpdesk_settings.HELPDESK_ORG_LOGO }}" />{% endif %}
+<ul id="dropdown" class="nav navbar-nav">
 {% if helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE %}
 <li><a href='{% url 'helpdesk_dashboard' %}'>{% trans "Dashboard" %}</a></li>
 <li><a href='{% url 'helpdesk_submit' %}'>{% trans "Submit A Ticket" %}</a></li>
@@ -40,4 +55,5 @@
 <li>{% if user.is_authenticated %}<a href='{% url 'logout' %}'>{% trans "Logout" %}</a>{% else %}<a href='{% url 'login' %}?next={% if next %}{{ next|escape }}{% else %}{% url 'helpdesk_home' %}{% endif %}'>{% trans "Log In" %}</a>{% endif %}</li>
 {% endif %}
 </ul>
+</nav>
 {% endif %}

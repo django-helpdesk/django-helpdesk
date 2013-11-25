@@ -26,7 +26,7 @@ Change your password <a href="{{ password_change_url }}" title="change your pass
         {% if field.help_text %}<dd class='form_help_text'>{{ field.help_text }}</dd>{% endif %}
     {% endfor %}</dl>
 </fieldset>
-<input type='submit' value='{% trans "Save Options" %}' />
+<input class="btn btn-primary" type='submit' value='{% trans "Save Options" %}' />
 {% csrf_token %}</form>
 
 {% endblock %}

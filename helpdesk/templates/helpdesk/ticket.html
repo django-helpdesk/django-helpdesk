@@ -1,4 +1,4 @@
-{% extends "helpdesk/base.html" %}{% load i18n %}{% load url from future %}
+{% extends "helpdesk/base.html" %}{% load i18n bootstrap %}{% load url from future %}
 {% block helpdesk_title %}{% trans "View Ticket Details" %}{% endblock %}
 {% block helpdesk_head %}
 <script type="text/javascript">
@@ -40,6 +40,8 @@
 </script>
 {% endblock %}
 
+{% block h1_title %}{{ ticket.ticket_for_url }}{% endblock %}
+
 {% block helpdesk_body %}
 {% if helpdesk_settings.HELPDESK_TRANSLATE_TICKET_COMMENTS %}
 {% comment %}
@@ -67,7 +69,7 @@ function googleTranslateElementInit() {
 {% if helpdesk_settings.HELPDESK_FOLLOWUP_MOD %}
     <div class='followup_mod'>
     <div class='title'>
-        <span class='byline'>{{ followup.user.get_full_name }}&nbsp;&nbsp;&nbsp;&nbsp;{{ followup.date }} ({{ followup.date|timesince }} ago)</span> <small>{{ followup.title }}</small>
+        <span class='byline text-info'>{{ followup.user.get_full_name }}&nbsp;&nbsp;&nbsp;&nbsp;{{ followup.date }} ({{ followup.date|timesince }} ago)</span> <small>{{ followup.title }}</small>
         {% if not followup.public %} <span class='private'>({% trans "Private" %})</span>{% endif %}
         {% if helpdesk_settings.HELPDESK_SHOW_EDIT_BUTTON_FOLLOW_UP %}
         {% if followup.user and request.user == followup.user and not followup.ticketchange_set.all %}
@@ -79,9 +81,9 @@ function googleTranslateElementInit() {
         {% endif %}
     </div>
 {% else %}
-    <div class='followup'>
+    <div class='followup well'>
     <div class='title'>
-        {{ followup.title }} <span class='byline'>{% if followup.user %}by {{ followup.user }}{% endif %} <span title='{{ followup.date|date:"r" }}'>{{ followup.date|timesince }} ago</span>{% if not followup.public %} <span class='private'>({% trans "Private" %})</span>{% endif %}</span>
+        {{ followup.title }} <span class='byline text-info'>{% if followup.user %}by {{ followup.user }}{% endif %} <span title='{{ followup.date|date:"r" }}'>{{ followup.date|timesince }} ago</span>{% if not followup.public %} <span class='private'>({% trans "Private" %})</span>{% endif %}</span>
         {% if helpdesk_settings.HELPDESK_SHOW_EDIT_BUTTON_FOLLOW_UP %}
         {% if followup.user and request.user == followup.user and not followup.ticketchange_set.all %}
         <a href="{% url 'helpdesk_followup_edit' ticket.id followup.id %}" class='followup-edit'><img width="60" height="15" title="Edit" alt="Edit" src="{{ STATIC_URL }}helpdesk/buttons/edit.png"></a>
@@ -113,7 +115,7 @@ function googleTranslateElementInit() {
 </div>
 {% endif %}
 
-<div id='add-followup'>
+<div id='add-followup' class="well">
 <h3>{% trans "Respond to this ticket" %}</h3>
 
 <form method='post' action='update/' enctype='multipart/form-data'>
@@ -207,7 +209,7 @@ function googleTranslateElementInit() {
 
 </fieldset>
 
-<input type='submit' value='{% trans "Update This Ticket" %}' />
+<input class="btn btn-primary" type='submit' value='{% trans "Update This Ticket" %}' />
 
 {% csrf_token %}</form>
 

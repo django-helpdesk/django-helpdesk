@@ -10,5 +10,5 @@
 
 <p><a href='../'>{% trans "No, Don't Delete It" %}</a></p>
 
-<form method='post' action='./'><input type='submit' value='{% trans "Yes - Delete It" %}' />{% csrf_token %}</form>
+<form method='post' action='./'><input class="btn btn-primary" type='submit' value='{% trans "Yes - Delete It" %}' />{% csrf_token %}</form>
 {% endblock %}
