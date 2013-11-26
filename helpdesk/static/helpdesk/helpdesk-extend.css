@@ -38,7 +38,8 @@ Bootstrap overrides
 #helpdesk-nav-collapse #searchform {
     padding-top: 0;
 }
-
+#ticket-description {background-color: #FCF8E3;}
+.followup.well {background-color: #f4f5ff;}
 /*
 Add your custom styles here
 */
