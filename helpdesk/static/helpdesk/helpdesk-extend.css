@@ -35,7 +35,9 @@ Bootstrap overrides
 .errorlist {padding: 0;}
 .has-error .input-group input, .has-error .input-group select,  .has-error .input-group textarea {border-color: #b94a48}
 
-
+#helpdesk-nav-collapse #searchform {
+    padding-top: 0;
+}
 
 /*
 Add your custom styles here
@@ -46,6 +48,4 @@ Add your custom styles here
     padding: 10px 0;
 }
 #helpdesk-body {padding-top: 100px;}
-#header .navbar-nav {
-    padding-top: 25px;
-}
+img.brand {padding-right: 30px;}
