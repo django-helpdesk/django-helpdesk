@@ -34,7 +34,10 @@
                         </ul>
                     </li>
                 {% endif %}
-                <li><a href='{% url 'logout' %}'><span class="glyphicon glyphicon-log-out"></span><span class="nav-text">{% trans "Logout" %}</span></a></li>
+                {% if helpdesk_settings.HELPDESK_NAVIGATION_CUSTOM_EXTEND and user.is_superuser %}
+                    {% include helpdesk_settings.HELPDESK_NAVIGATION_CUSTOM_EXTEND %}
+                {% endif %}
+                <li><a href='{% url 'logout' %}'><span class="glyphicon glyphicon-log-out"></span><span class="nav-text">{% trans "Logout" %} ({{ user.username }})</span></a></li>
             </ul>
 
             {% if not query %}
