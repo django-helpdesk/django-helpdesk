@@ -7,7 +7,11 @@ models.py - Model (and hence database) definitions. This is the core of the
             helpdesk structure.
 """
 
-from django.contrib.auth.models import User
+try:
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+except ImportError:
+    from django.contrib.auth.models import User
 from django.db import models
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _, ugettext
