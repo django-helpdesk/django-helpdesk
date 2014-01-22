@@ -3,11 +3,13 @@
 
 {% block helpdesk_body %}
 
-<table width='100%'>
+<table class="table table-hover table-bordered">
+<thead>
 <tr class='row_tablehead'><td colspan='2'>{{ ticket.ticket }} . {{ ticket.title }} [{{ ticket.get_status }}]</td></tr>
 <tr class='row_columnheads'><th colspan='2'>{% blocktrans with ticket.queue as queue_name %}Queue: {{ queue_name }}{% endblocktrans %}</th></tr>
-
-<tr class='{% cycle 'row_odd' 'row_even' as rowcolors %}'>
+</thead>
+<tbody>
+<tr class="{% cycle 'row_odd' 'row_even' as rowcolors %}">
     <th>{% trans "Submitted On" %}</th>
     <td>{{ ticket.created|date:"r" }} ({{ ticket.created|timesince }} ago)</td>
 </tr>
@@ -48,15 +50,15 @@
 <tr class='{% cycle rowcolors %}'>
     <td colspan='2'>{{ ticket.resolution|urlizetrunc:50|linebreaksbr }}</td>
 </tr>{% endif %}
-
+</tbody>
 </table>
 
 {% if ticket.followup_set.public_followups %}
 <h3>{% trans "Follow-Ups" %}</h3>
 {% load ticket_to_link %}
 {% for followup in ticket.followup_set.public_followups %}
-<div class='followup'>
-<div class='title'>{{ followup.title }} <span class='byline'>{% if followup.user %}by {{ followup.user }}{% endif %} <span title='{{ followup.date|date:"r" }}'>{{ followup.date|timesince }} ago</span></span></div>
+<div class='followup well'>
+<div class='title'>{{ followup.title }} <span class='byline text-info'>{% if followup.user %}by {{ followup.user }}{% endif %} <span title='{{ followup.date|date:"r" }}'>{{ followup.date|timesince }} ago</span></span></div>
 {{ followup.comment|force_escape|urlizetrunc:50|num_to_link|linebreaksbr }}
 {% if followup.ticketchange_set.all %}<div class='changes'><ul>
 {% for change in followup.ticketchange_set.all %}

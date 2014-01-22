@@ -37,6 +37,8 @@ HELPDESK_REDIRECT_TO_LOGIN_BY_DEFAULT = getattr(settings, 'HELPDESK_REDIRECT_TO_
 # customize helpdesk name on a few pages, i.e., your organization.
 HELPDESK_PREPEND_ORG_NAME = getattr(settings, 'HELPDESK_PREPEND_ORG_NAME', False)
 
+HELPDESK_ORG_LOGO = getattr(settings, 'HELPDESK_ORG_LOGO', False)
+
 # show knowledgebase links?
 HELPDESK_KB_ENABLED = getattr(settings, 'HELPDESK_KB_ENABLED', True)
 
@@ -45,6 +47,9 @@ HELPDESK_KB_ENABLED_STAFF = getattr(settings, 'HELPDESK_KB_ENABLED_STAFF', False
 
 # show extended navigation by default, to all users, irrespective of staff status?
 HELPDESK_NAVIGATION_ENABLED = getattr(settings, 'HELPDESK_NAVIGATION_ENABLED', False)
+
+# allow local customisation, add the contents of a template file to the nav bar.
+HELPDESK_NAVIGATION_CUSTOM_EXTEND = getattr(settings, 'HELPDESK_NAVIGATION_CUSTOM_EXTEND', False)
 
 # show 'stats' link in navigation bar?
 HELPDESK_NAVIGATION_STATS_ENABLED = getattr(settings, 'HELPDESK_NAVIGATION_STATS_ENABLED', True)

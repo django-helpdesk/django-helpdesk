@@ -8,14 +8,18 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
         <title>{% block helpdesk_title %}Helpdesk{% endblock %} :: {% trans "Powered by django-helpdesk" %}</title>
-        <script src='{{ STATIC_URL }}helpdesk/jquery-1.5.min.js' type='text/javascript' language='javascript'></script>
+
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
         <script src='{{ STATIC_URL }}helpdesk/jquery-ui-1.8.9.custom.min.js' type='text/javascript' language='javascript'></script>
         {% comment %}
         <script src='{{ STATIC_URL }}helpdesk/jquery.translate-debug-all.js' type='text/javascript' language='javascript'></script>
         {% endcomment %}
-        <link rel='stylesheet' href='{{ STATIC_URL }}helpdesk/helpdesk.css' type='text/css'  media="screen" />
-        <link rel='stylesheet' href='{{ STATIC_URL }}helpdesk/helpdesk-print.css' type='text/css' media="print" />
-        <link rel='stylesheet' href='{{ STATIC_URL }}helpdesk/jquery-smoothness-theme/jquery-ui-1.8.9.custom.css' type='text/css' />
+        <link rel='stylesheet' href='{{ STATIC_URL }}helpdesk/helpdesk-extend.css' type='text/css'  media="screen" >
+
+        <!--link rel='stylesheet' href='{{ STATIC_URL }}helpdesk/helpdesk-print.css' type='text/css' media="print" /-->
+        <!--link rel='stylesheet' href='{{ STATIC_URL }}helpdesk/jquery-smoothness-theme/jquery-ui-1.8.9.custom.css' type='text/css' /-->
+        <script src="http://netdna.bootstrapcdn.com/bootstrap/3.0.2/js/bootstrap.min.js"></script>
+        <link href="http://netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css" rel="stylesheet">
         <link rel='alternate' href='{% url 'helpdesk_rss_user' user.username %}' type='application/rss+xml' title='{% trans "My Open Tickets" %}' />
         <link rel='alternate' href='{% url 'helpdesk_rss_activity' %}' type='application/rss+xml' title='{% trans "All Recent Activity" %}' />
         <link rel='alternate' href='{% url 'helpdesk_rss_unassigned' %}' type='application/rss+xml' title='{% trans "Unassigned Tickets" %}' />
@@ -94,26 +98,27 @@
 
         {% block helpdesk_head %}{% endblock %}
     </head>
-    <body>
-        <div id='container'>
-            <div id='header'>
-                <h1>{% trans "Helpdesk" %}</h1>
+    <body id="helpdesk-body">
+        <div id='container' class="container">
+            <div id='header' class="row">
+                {% if helpdesk_settings.HELPDESK_ORG_LOGO %}<img class="brand pull-right" src="{{ helpdesk_settings.HELPDESK_ORG_LOGO }}" />{% endif %}
+                <h1>{% block h1_title %}{{ helpdesk_settings.HELPDESK_PREPEND_ORG_NAME|default:'' }} {% trans "Helpdesk" %}{% endblock %}</h1>
                 {% include "helpdesk/navigation.html" %}
             </div>
 
-            <div id='body'>
+            <div id='body' class="row">
                 {% block helpdesk_body %}{% endblock %}
             </div>
 
-            <div id='footer'>
-                <p>{% include "helpdesk/attribution.html" %}
-                <a href='{% url 'helpdesk_rss_index' %}'><img src='{{ STATIC_URL }}helpdesk/rss_icon.png' width='14' height='14' alt='{% trans "RSS Icon" %}' title='{% trans "RSS Feeds" %}' border='0' />{% trans "RSS Feeds" %}</a>
-                {% if helpdesk_settings.HELPDESK_FOOTER_SHOW_API_LINK %}<a href='{% url 'helpdesk_api_help' %}'>{% trans "API" %}</a>{% endif %}
-                <a href='{% url 'helpdesk_user_settings' %}'>{% trans "User Settings" %}</a>
+            <div id='footer' class="row">
+                <div class="col-md-2">{% include "helpdesk/attribution.html" %}</div>
+                <div class="col-md-2"><a href='{% url 'helpdesk_rss_index' %}'><img src='{{ STATIC_URL }}helpdesk/rss_icon.png' width='14' height='14' alt='{% trans "RSS Icon" %}' title='{% trans "RSS Feeds" %}' border='0' />{% trans "RSS Feeds" %}</a></div>
+                {% if helpdesk_settings.HELPDESK_FOOTER_SHOW_API_LINK %}<div class="col-md-2"><a href='{% url 'helpdesk_api_help' %}'>{% trans "API" %}</a></div>{% endif %}
+                <div class="col-md-2"><a href='{% url 'helpdesk_user_settings' %}'>{% trans "User Settings" %}</a></div>
                 {% if helpdesk_settings.HELPDESK_FOOTER_SHOW_CHANGE_LANGUAGE_LINK %}
-                <a href='{% url 'helpdesk_public_change_language' %}?return_to={{ request.path }}'>{% trans "Change Language" %}</a>
+                <div class="col-md-2"><a href='{% url 'helpdesk_public_change_language' %}?return_to={{ request.path }}'>{% trans "Change Language" %}</a></div>
                 {% endif %}
-                {% if user.is_superuser %}<a href='{% url 'helpdesk_system_settings' %}'>{% trans "System Settings" %}</a>{% endif %}</p>
+                {% if user.is_superuser %}<div class="col-md-2"><a href='{% url 'helpdesk_system_settings' %}'>{% trans "System Settings" %}</a></div>{% endif %}
             </div>
         </div>
         {% include "helpdesk/debug.html" %}
