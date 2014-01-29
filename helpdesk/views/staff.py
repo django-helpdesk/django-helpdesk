@@ -34,12 +34,8 @@ except ImportError:
 from helpdesk.forms import TicketForm, UserSettingsForm, EmailIgnoreForm, EditTicketForm, TicketCCForm, EditFollowUpForm, TicketDependencyForm
 from helpdesk.lib import send_templated_mail, query_to_dict, apply_query, safe_template_context
 from helpdesk.models import Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch, IgnoreEmail, TicketCC, TicketDependency
-from helpdesk.settings import HAS_TAG_SUPPORT
 from helpdesk import settings as helpdesk_settings
   
-if HAS_TAG_SUPPORT:
-    from tagging.models import Tag, TaggedItem
-
 if helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE:
     # treat 'normal' users like 'staff'
     staff_member_required = user_passes_test(lambda u: u.is_authenticated() and u.is_active)
@@ -272,7 +268,6 @@ def view_ticket(request, ticket_id):
             'active_users': users,
             'priorities': Ticket.PRIORITY_CHOICES,
             'preset_replies': PreSetReply.objects.filter(Q(queues=ticket.queue) | Q(queues__isnull=True)),
-            'tags_enabled': HAS_TAG_SUPPORT,
             'ticketcc_string': ticketcc_string,
             'SHOW_SUBSCRIBE': SHOW_SUBSCRIBE,
         }))
@@ -346,7 +341,6 @@ def update_ticket(request, ticket_id, public=False):
         else:
             due_date = timezone.now()
         due_date = due_date.replace(due_date_year, due_date_month, due_date_day)
-    tags = request.POST.get('tags', '')
 
     no_changes = all([
         not request.FILES,
@@ -356,7 +350,6 @@ def update_ticket(request, ticket_id, public=False):
         priority == int(ticket.priority),
         due_date == ticket.due_date,
         (owner == -1) or (not owner and not ticket.assigned_to) or (owner and User.objects.get(id=owner) == ticket.assigned_to),
-        (HAS_TAG_SUPPORT and tags == ticket.tags) or not HAS_TAG_SUPPORT,
     ])
     if no_changes:
         return return_to_ticket(request.user, helpdesk_settings, ticket)
@@ -462,17 +455,6 @@ def update_ticket(request, ticket_id, public=False):
             )
         c.save()
         ticket.due_date = due_date
-
-    if HAS_TAG_SUPPORT:
-        if tags != ticket.tags:
-            c = TicketChange(
-                followup=f,
-                field=_('Tags'),
-                old_value=ticket.tags,
-                new_value=tags,
-                )
-            c.save()
-            ticket.tags = tags
 
     if new_status in [ Ticket.RESOLVED_STATUS, Ticket.CLOSED_STATUS ]:
         if new_status == Ticket.RESOLVED_STATUS or ticket.resolution is None:
@@ -745,7 +727,7 @@ def ticket_list(request):
             or  request.GET.has_key('q')
             or  request.GET.has_key('sort')
             or  request.GET.has_key('sortreverse') 
-            or  request.GET.has_key('tags') ):
+                ):
 
         # Fall-back if no querying is being done, force the list to only
         # show open/reopened/resolved (not closed) cases sorted by creation
@@ -821,13 +803,6 @@ def ticket_list(request):
         }
         ticket_qs = apply_query(Ticket.objects.select_related(), query_params)
 
-    ## TAG MATCHING
-    if HAS_TAG_SUPPORT:
-        tags = request.GET.getlist('tags')
-        if tags:
-            ticket_qs = TaggedItem.objects.get_by_model(ticket_qs, tags)
-            query_params['tags'] = tags
-
     ticket_paginator = paginator.Paginator(ticket_qs, request.user.usersettings.settings.get('tickets_per_page') or 20)
     try:
         page = int(request.GET.get('page', '1'))
@@ -853,10 +828,6 @@ def ticket_list(request):
     querydict = request.GET.copy()
     querydict.pop('page', 1)
 
-    tag_choices = [] 
-    if HAS_TAG_SUPPORT:
-        # FIXME: restrict this to tags that are actually in use
-        tag_choices = Tag.objects.all()
 
     return render_to_response('helpdesk/ticket_list.html',
         RequestContext(request, dict(
@@ -866,14 +837,12 @@ def ticket_list(request):
             user_choices=User.objects.filter(is_active=True,is_staff=True),
             queue_choices=Queue.objects.all(),
             status_choices=Ticket.STATUS_CHOICES,
-            tag_choices=tag_choices,
             urlsafe_query=urlsafe_query,
             user_saved_queries=user_saved_queries,
             query_params=query_params,
             from_saved_query=from_saved_query,
             saved_query=saved_query,
             search_message=search_message,
-            tags_enabled=HAS_TAG_SUPPORT
         )))
 ticket_list = staff_member_required(ticket_list)
 
@@ -891,7 +860,6 @@ def edit_ticket(request, ticket_id):
     return render_to_response('helpdesk/edit_ticket.html',
         RequestContext(request, {
             'form': form,
-            'tags_enabled': HAS_TAG_SUPPORT,
         }))
 edit_ticket = staff_member_required(edit_ticket)
 
@@ -924,7 +892,6 @@ def create_ticket(request):
     return render_to_response('helpdesk/create_ticket.html',
         RequestContext(request, {
             'form': form,
-            'tags_enabled': HAS_TAG_SUPPORT,
         }))
 create_ticket = staff_member_required(create_ticket)
 

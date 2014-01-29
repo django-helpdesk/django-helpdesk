@@ -21,11 +21,6 @@ try:
 except ImportError:
     from datetime import datetime as timezone
 
-from helpdesk.settings import HAS_TAG_SUPPORT
-
-if HAS_TAG_SUPPORT:
-    from tagging.fields import TagField
-
 class Queue(models.Model):
     """
     A queue is a collection of tickets into what would generally be business
@@ -444,9 +439,6 @@ class Ticket(models.Model):
         OPEN_STATUSES = (Ticket.OPEN_STATUS, Ticket.REOPENED_STATUS)
         return TicketDependency.objects.filter(ticket=self).filter(depends_on__status__in=OPEN_STATUSES).count() == 0
     can_be_resolved = property(_can_be_resolved)
-
-    if HAS_TAG_SUPPORT:
-        tags = TagField(blank=True)
 
     class Meta:
         get_latest_by = "created"

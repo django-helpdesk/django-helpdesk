@@ -22,7 +22,6 @@ except ImportError:
 
 from helpdesk.lib import send_templated_mail, safe_template_context
 from helpdesk.models import Ticket, Queue, FollowUp, Attachment, IgnoreEmail, TicketCC, CustomField, TicketCustomFieldValue, TicketDependency
-from helpdesk.settings import HAS_TAG_SUPPORT
 from helpdesk import settings as helpdesk_settings
 
 class EditTicketForm(forms.ModelForm):
@@ -176,17 +175,6 @@ class TicketForm(forms.Form):
         help_text=_('You can attach a file such as a document or screenshot to this ticket.'),
         )
 
-    if HAS_TAG_SUPPORT:
-        tags = forms.CharField(
-            max_length=255,
-            required=False,
-            widget=forms.TextInput(),
-            label=_('Tags'),
-            help_text=_('Words, separated by spaces, or phrases separated by commas. '
-                    'These should communicate significant characteristics of this '
-                    'ticket'),
-            )
-
     def __init__(self, *args, **kwargs):
         """
         Add any custom fields that are defined to the form
@@ -254,9 +242,6 @@ class TicketForm(forms.Form):
                     priority = self.cleaned_data['priority'],
                     due_date = self.cleaned_data['due_date'],
                   )
-
-        if HAS_TAG_SUPPORT:
-            t.tags = self.cleaned_data['tags']
 
         if self.cleaned_data['assigned_to']:
             try:

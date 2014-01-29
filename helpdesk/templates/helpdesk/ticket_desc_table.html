@@ -58,13 +58,6 @@
     <td>{{ ticketcc_string }} <strong><a class='tooltip' href='{% url 'helpdesk_ticket_cc' ticket.id %}'>{% trans "Manage" %}<span>{% trans "Click here to add / remove people who should receive an e-mail whenever this ticket is updated." %}</span></a></strong>{% if SHOW_SUBSCRIBE %}, <strong><a class='tooltip' href='?subscribe'>{% trans "Subscribe" %}<span>{% trans "Click here to subscribe yourself to this ticket, if you want to receive an e-mail whenever this ticket is updated." %}</span></a></strong>{% endif %}</td>
 </tr>
 
-{% if tags_enabled %}
-<tr class='{% cycle rowcolors %}'>
-    <th>{% trans "Tags" %}</th>
-    <td>{{ ticket.tags }}</td>
-</tr>
-{% endif %}
-
 <tr class='{% cycle rowcolors %}'>
     <th>{% trans "Dependencies" %}</th>
     <td>{% for dep in ticket.ticketdependency.all %}

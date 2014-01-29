@@ -186,11 +186,6 @@ function googleTranslateElementInit() {
         <dt><label for='id_due_date'>{% trans "Due on" %}</label></dt>
         <dd>{{ form.due_date }}</dd>
  
-       {% if tags_enabled %}
-        <dt><label for='id_tags'>{% trans "Tags" %}</label></dt>
-        <dd><input type='text' id='id_tags' name='tags' value='{{ ticket.tags }}'/></dd>
-       {% endif %}
-
     </dl>
 
 </div>

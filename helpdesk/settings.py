@@ -6,12 +6,6 @@ Default settings for django-helpdesk.
 
 from django.conf import settings
 
-# check for django-tagging support
-HAS_TAG_SUPPORT = 'tagging' in settings.INSTALLED_APPS
-try:
-        import tagging
-except ImportError:
-        HAS_TAG_SUPPORT = False
 
 try:
     DEFAULT_USER_SETTINGS = settings.HELPDESK_DEFAULT_SETTINGS
@@ -154,3 +148,5 @@ QUEUE_EMAIL_BOX_SSL = getattr(settings, 'QUEUE_EMAIL_BOX_SSL', None)
 QUEUE_EMAIL_BOX_HOST = getattr(settings, 'QUEUE_EMAIL_BOX_HOST', None)
 QUEUE_EMAIL_BOX_USER = getattr(settings, 'QUEUE_EMAIL_BOX_USER', None)
 QUEUE_EMAIL_BOX_PASSWORD = getattr(settings, 'QUEUE_EMAIL_BOX_PASSWORD', None)
+
+HAS_TAG_SUPPORT = False

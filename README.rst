@@ -26,11 +26,11 @@ Dependencies (pre-flight checklist)
 -----------------------------------
 
 1. Python 2.5+ 
-2. Django (1.3 or newer)
+2. Django (1.4 or newer)
 3. South for database migrations (highly recommended, but not required). Download from http://south.aeracode.org/
 4. An existing WORKING Django project with database etc. If you
    cannot log into the Admin, you won't get this product working.
-5. You must have ``django.contrib.markup`` in your ``settings.INSTALLED_APPS`` setting.
+5. `pip install django-bootstrap-form` and add `bootstrapform` to `settings.INSTALLED_APPS`
 
 **NOTE REGARDING SQLITE AND SEARCHING:**
 If you use sqlite as your database, the search function will not work as
@@ -54,13 +54,6 @@ http://dev.mysql.com/doc/refman/5.1/en/charset-database.html
 If you do NOT do this step, and you only want to use English-language templates,
 you can continue however you will receive a warning when running the 'migrate'
 commands.
-
-Tagging
--------
-
-If you use Django-tagging and want to tag your Helpdesk tickets, ensure that 
-django-tagging is installed and you have done a ``syncdb`` **before** you 
-add ``helpdesk`` to your ``INSTALLED_APPS``.
 
 Fresh Django Installations
 --------------------------

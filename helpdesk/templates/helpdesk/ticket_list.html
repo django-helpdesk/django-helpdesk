@@ -69,9 +69,6 @@ $(document).ready(function() {
         <option value='Status'>{% trans "Status" %}</option>
         <option value='Keywords'>{% trans "Keywords" %}</option>
         <option value='Dates'>{% trans "Date Range" %}</option>
-        {% if tags_enabled %}
-        <option value='Tags'>{% trans "Tags" %}</option>
-        {% endif %}
         </select>
         <input type='button' id='filterBuilderButton' value='+' />
     {% csrf_token %}</form>
@@ -136,14 +133,6 @@ $(document).ready(function() {
     <p class='filterHelp'>{% trans "Use YYYY-MM-DD date format, eg 2011-05-29" %}</p>
     <input type='button' class='filterBuilderRemove' value='-' />
     </div>
-
-{% if tags_enabled %}
-<div class='thumbnail filterBox{% if query_params.tags %} filterBoxShow{% endif %}' id='filterBoxTags'>
-  <label for='id_tags'>{% trans "Tag(s)" %}</label><select id='id_tags' name='tags' multiple='selected' size='5'>{% for t in tag_choices %}<option value='{{t.name}}'{% if t.name|in_list:query_params.tags %} selected='selected'{% endif %}>{{ t.name }}</option>{% endfor %}</select>
-<p class='filterHelp'>{% trans "Ctrl-click to select multiple options" %}</p>
-<input type='button' class='filterBuilderRemove' value='-' />
-</div>
-{% endif %}
 
     <div class='thumbnail filterBox{% if query %} filterBoxShow{% endif %}' id='filterBoxKeywords'>
     <label for='id_query'>{% trans "Keywords" %}</label><input type='text' name='q' value='{{ query }}' id='id_query' />
@@ -232,7 +221,7 @@ $(document).ready(function() {
 <table class="table table-hover table-bordered">
 <thead>
 <tr class='row_tablehead'><td colspan='9'>{% trans "Tickets" %}</td></tr>
-<tr class='row_columnheads'><th>#</th><th>&nbsp;</th><th>{% trans "Pr" %}</th><th>{% trans "Title" %}</th><th>{% trans "Queue" %}</th><th>{% trans "Status" %}</th><th>{% trans "Created" %}</th><th>{% trans "Owner" %}</th>{% if tags_enabled %}<th>{% trans "Tags" %}</th>{% endif %}</tr>
+<tr class='row_columnheads'><th>#</th><th>&nbsp;</th><th>{% trans "Pr" %}</th><th>{% trans "Title" %}</th><th>{% trans "Queue" %}</th><th>{% trans "Status" %}</th><th>{% trans "Created" %}</th><th>{% trans "Owner" %}</th></tr>
 </thead>
 <tbody>
 {% if tickets %}{% for ticket in tickets.object_list %}
@@ -245,7 +234,6 @@ $(document).ready(function() {
 <td>{{ ticket.get_status }}</td>
 <td><span title='{{ ticket.created|date:"r" }}'>{{ ticket.created|timesince }} ago</span></td>
 <td>{{ ticket.get_assigned_to }}</td>
-{% if tags_enabled %}<td>{{ ticket.tags }}</td>{% endif %}
 </tr>
 {% endfor %}{% else %}
 <tr class='row_odd'><td colspan='5'>{% trans "No Tickets Match Your Selection" %}</td></tr>
