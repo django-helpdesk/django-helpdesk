@@ -48,11 +48,6 @@ HELPDESK_NAVIGATION_CUSTOM_EXTEND = getattr(settings, 'HELPDESK_NAVIGATION_CUSTO
 # show 'stats' link in navigation bar?
 HELPDESK_NAVIGATION_STATS_ENABLED = getattr(settings, 'HELPDESK_NAVIGATION_STATS_ENABLED', True)
 
-# set this to an email address inside your organization and a footer below
-# the 'Powered by django-helpdesk' will be shown, telling the user whom to contact
-# in case they have technical problems.
-HELPDESK_SUPPORT_PERSON = getattr(settings, 'HELPDESK_SUPPORT_PERSON', False)
-
 # show dropdown list of languages that ticket comments can be translated into?
 HELPDESK_TRANSLATE_TICKET_COMMENTS = getattr(settings, 'HELPDESK_TRANSLATE_TICKET_COMMENTS', False)
 
