@@ -2,7 +2,7 @@
 
 {% block helpdesk_body %}
 
-{% if helpdesk_settings.HELPDESK_SHOW_KB_ON_HOMEPAGE %}
+{% if kb_categories %}
 <h2>{% trans "Knowledgebase Articles" %}</h2>
 
 <table class="table table-hover table-bordered">
@@ -17,7 +17,6 @@
 {% endfor %}
 </tbody>
 </table>
-
 {% endif %}
 
 {% if helpdesk_settings.HELPDESK_SUBMIT_A_TICKET_PUBLIC %}
