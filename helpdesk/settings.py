@@ -31,17 +31,8 @@ HELPDESK_REDIRECT_TO_LOGIN_BY_DEFAULT = getattr(settings, 'HELPDESK_REDIRECT_TO_
 # show knowledgebase links?
 HELPDESK_KB_ENABLED = getattr(settings, 'HELPDESK_KB_ENABLED', True)
 
-# show knowledgebase links on staff view?
-HELPDESK_KB_ENABLED_STAFF = getattr(settings, 'HELPDESK_KB_ENABLED_STAFF', False)
-
 # show extended navigation by default, to all users, irrespective of staff status?
 HELPDESK_NAVIGATION_ENABLED = getattr(settings, 'HELPDESK_NAVIGATION_ENABLED', False)
-
-# allow local customisation, add the contents of a template file to the nav bar.
-HELPDESK_NAVIGATION_CUSTOM_EXTEND = getattr(settings, 'HELPDESK_NAVIGATION_CUSTOM_EXTEND', False)
-
-# show 'stats' link in navigation bar?
-HELPDESK_NAVIGATION_STATS_ENABLED = getattr(settings, 'HELPDESK_NAVIGATION_STATS_ENABLED', True)
 
 # show dropdown list of languages that ticket comments can be translated into?
 HELPDESK_TRANSLATE_TICKET_COMMENTS = getattr(settings, 'HELPDESK_TRANSLATE_TICKET_COMMENTS', False)
