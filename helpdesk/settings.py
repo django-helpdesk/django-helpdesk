@@ -122,9 +122,6 @@ HELPDESK_CREATE_TICKET_HIDE_ASSIGNED_TO = getattr(settings, 'HELPDESK_CREATE_TIC
 
 
 ''' options for dashboard '''
-# show delete button next to unassigned tickets
-HELPDESK_DASHBOARD_SHOW_DELETE_UNASSIGNED = getattr(settings, 'HELPDESK_DASHBOARD_SHOW_DELETE_UNASSIGNED', True)
-
 # hide empty queues in dashboard overview?
 HELPDESK_DASHBOARD_HIDE_EMPTY_QUEUES = getattr(settings, 'HELPDESK_DASHBOARD_HIDE_EMPTY_QUEUES', True)
 
