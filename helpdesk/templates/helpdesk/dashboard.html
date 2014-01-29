@@ -6,11 +6,7 @@
 {% block helpdesk_body %}
 
 <div class="alert alert-warning">
-{% if helpdesk_settings.HELPDESK_CUSTOM_WELCOME %}
 <p>{% trans "Welcome to your Helpdesk Dashboard! From here you can quickly see tickets submitted by you, tickets you are working on, and those tickets that have no owner." %}</p>
-{% else %}
-<p>{% trans "Welcome to your Helpdesk Dashboard! From here you can quickly see your own tickets, and those tickets that have no owner." %}</p>
-{% endif %}
 </div>
 
 <table class="table table-hover table-bordered">

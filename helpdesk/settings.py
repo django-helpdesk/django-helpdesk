@@ -65,9 +65,6 @@ HELPDESK_SHOW_CHANGE_PASSWORD = getattr(settings, 'HELPDESK_SHOW_CHANGE_PASSWORD
 # allow user to override default layout for 'followups' - work in progress.
 HELPDESK_FOLLOWUP_MOD = getattr(settings, 'HELPDESK_FOLLOWUP_MOD', False)
 
-# show custom welcome message in dashboard?
-HELPDESK_CUSTOM_WELCOME = getattr(settings, 'HELPDESK_CUSTOM_WELCOME', False)
-
 # auto-subscribe user to ticket if (s)he responds to a ticket?
 HELPDESK_AUTO_SUBSCRIBE_ON_TICKET_RESPONSE = getattr(settings, 'HELPDESK_AUTO_SUBSCRIBE_ON_TICKET_RESPONSE', False)
 
