@@ -82,10 +82,7 @@ def dashboard(request):
             submitter_email=email_current_user,
         ).order_by('status')
 
-    # calculate basic ticket stats if requested
-    basic_ticket_stats = False
-    if helpdesk_settings.HELPDESK_DASHBOARD_BASIC_TICKET_STATS:
-        basic_ticket_stats = calc_basic_ticket_stats(Ticket)
+    basic_ticket_stats = calc_basic_ticket_stats(Ticket)
 
     # The following query builds a grid of queues & ticket statuses,
     # to be displayed to the user. EG:

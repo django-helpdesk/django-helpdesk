@@ -121,13 +121,6 @@ HELPDESK_CREATE_TICKET_HIDE_ASSIGNED_TO = getattr(settings, 'HELPDESK_CREATE_TIC
 
 
 
-''' options for dashboard '''
-# show basic ticket stats on dashboard?
-HELPDESK_DASHBOARD_BASIC_TICKET_STATS = getattr(settings, 'HELPDESK_DASHBOARD_BASIC_TICKET_STATS', False)
-
-
-
-
 ''' options for footer '''
 # show 'API' link at bottom of page
 HELPDESK_FOOTER_SHOW_API_LINK = getattr(settings, 'HELPDESK_FOOTER_SHOW_API_LINK', True)
