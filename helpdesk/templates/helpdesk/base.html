@@ -3,7 +3,7 @@
 {% load saved_queries %}
 {% load load_helpdesk_settings %}
 {% with request|load_helpdesk_settings as helpdesk_settings %}
-{% with request|saved_queries as user_saved_queries_ %}
+{% with user|saved_queries as user_saved_queries_ %}
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
