@@ -92,15 +92,6 @@ HELPDESK_SHOW_EDIT_BUTTON_FOLLOW_UP = getattr(settings, 'HELPDESK_SHOW_EDIT_BUTT
 # show delete buttons in ticket follow ups if user is 'superuser'
 HELPDESK_SHOW_DELETE_BUTTON_SUPERUSER_FOLLOW_UP = getattr(settings, 'HELPDESK_SHOW_DELETE_BUTTON_SUPERUSER_FOLLOW_UP', False)
 
-# show ticket edit button on top of ticket description.
-HELPDESK_SHOW_EDIT_BUTTON_TICKET_TOP = getattr(settings, 'HELPDESK_SHOW_EDIT_BUTTON_TICKET_TOP', True)
-
-# show ticket delete button on top of ticket description.
-HELPDESK_SHOW_DELETE_BUTTON_TICKET_TOP = getattr(settings, 'HELPDESK_SHOW_DELETE_BUTTON_TICKET_TOP', True)
-
-# show hold / unhold button on top of ticket description.
-HELPDESK_SHOW_HOLD_BUTTON_TICKET_TOP = getattr(settings, 'HELPDESK_SHOW_HOLD_BUTTON_TICKET_TOP', True)
-
 # make all updates public by default? this will hide the 'is this update public' checkbox
 HELPDESK_UPDATE_PUBLIC_DEFAULT = getattr(settings, 'HELPDESK_UPDATE_PUBLIC_DEFAULT', False)
 

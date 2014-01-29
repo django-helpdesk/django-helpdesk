@@ -2,15 +2,10 @@
 <table class="table table-hover table-bordered">
 <thead>
     <tr class='row_tablehead'><td colspan='2'><h3>{{ ticket.id }}. {{ ticket.title }} [{{ ticket.get_status }}]</h3> <span class='ticket_toolbar'>
-    {% if helpdesk_settings.HELPDESK_SHOW_EDIT_BUTTON_TICKET_TOP %}
         <a href='{% url 'helpdesk_edit' ticket.id %}' class="ticket-edit"><span class="glyphicon glyphicon-pencil"></span> Edit</a>
-    {% endif %}
-    {% if helpdesk_settings.HELPDESK_SHOW_DELETE_BUTTON_TICKET_TOP %}
     | <a href='{% url 'helpdesk_delete' ticket.id %}' class="ticket-delete"><span class="glyphicon glyphicon-remove"></span> Delete</a>
-    {% endif %}
-    {% if helpdesk_settings.HELPDESK_SHOW_HOLD_BUTTON_TICKET_TOP %}
     {% if ticket.on_hold %} | <a href='unhold/' class="ticket-hold">{% trans "Unhold" %}</a>{% else %} | <a href='hold/' class="ticket-hold">{% trans "Hold" %}</a>{% endif %}
-    {% endif %}</span></td></tr>
+    </span></td></tr>
 <tr class='row_columnheads'><th colspan='2'>{% blocktrans with ticket.queue as queue %}Queue: {{ queue }}{% endblocktrans %}</th></tr>
 </thead>
 <tbody>
