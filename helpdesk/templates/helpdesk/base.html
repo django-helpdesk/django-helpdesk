@@ -101,8 +101,7 @@
     <body id="helpdesk-body">
         <div id='container' class="container">
             <div id='header' class="row">
-                {% if helpdesk_settings.HELPDESK_ORG_LOGO %}<img class="brand pull-right" src="{{ helpdesk_settings.HELPDESK_ORG_LOGO }}" />{% endif %}
-                <h1>{% block h1_title %}{{ helpdesk_settings.HELPDESK_PREPEND_ORG_NAME|default:'' }} {% trans "Helpdesk" %}{% endblock %}</h1>
+                <h1>{% block h1_title %}{% trans "Helpdesk" %}{% endblock %}</h1>
                 {% include "helpdesk/navigation.html" %}
             </div>
 

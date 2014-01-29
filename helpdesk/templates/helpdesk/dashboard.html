@@ -1,5 +1,5 @@
 {% extends "helpdesk/base.html" %}{% load i18n %}{% load url from future %}
-{% block helpdesk_title %}{{ helpdesk_settings.HELPDESK_PREPEND_ORG_NAME|default:'' }} {% trans "Helpdesk Dashboard" %}{% endblock %}
+{% block helpdesk_title %}{% trans "Helpdesk Dashboard" %}{% endblock %}
 {% block helpdesk_head %}
 <script type='text/javascript' language='javascript' src='{{ STATIC_URL }}helpdesk/hover.js'></script>
 {% endblock %}
