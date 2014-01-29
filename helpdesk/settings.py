@@ -121,13 +121,6 @@ HELPDESK_CREATE_TICKET_HIDE_ASSIGNED_TO = getattr(settings, 'HELPDESK_CREATE_TIC
 
 
 
-''' options for footer '''
-# show 'API' link at bottom of page
-HELPDESK_FOOTER_SHOW_API_LINK = getattr(settings, 'HELPDESK_FOOTER_SHOW_API_LINK', True)
-
-# show / hide 'change language' link at bottom of page
-HELPDESK_FOOTER_SHOW_CHANGE_LANGUAGE_LINK = getattr(settings, 'HELPDESK_FOOTER_SHOW_CHANGE_LANGUAGE_LINK', False)
-
 ''' email options '''
 # default Queue email submission settings
 QUEUE_EMAIL_BOX_TYPE = getattr(settings, 'QUEUE_EMAIL_BOX_TYPE', None)

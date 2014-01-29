@@ -113,11 +113,8 @@
             <div id='footer' class="row">
                 <div class="col-md-2">{% include "helpdesk/attribution.html" %}</div>
                 <div class="col-md-2"><a href='{% url 'helpdesk_rss_index' %}'><img src='{{ STATIC_URL }}helpdesk/rss_icon.png' width='14' height='14' alt='{% trans "RSS Icon" %}' title='{% trans "RSS Feeds" %}' border='0' />{% trans "RSS Feeds" %}</a></div>
-                {% if helpdesk_settings.HELPDESK_FOOTER_SHOW_API_LINK %}<div class="col-md-2"><a href='{% url 'helpdesk_api_help' %}'>{% trans "API" %}</a></div>{% endif %}
+                <div class="col-md-2"><a href='{% url 'helpdesk_api_help' %}'>{% trans "API" %}</a></div>
                 <div class="col-md-2"><a href='{% url 'helpdesk_user_settings' %}'>{% trans "User Settings" %}</a></div>
-                {% if helpdesk_settings.HELPDESK_FOOTER_SHOW_CHANGE_LANGUAGE_LINK %}
-                <div class="col-md-2"><a href='{% url 'helpdesk_public_change_language' %}?return_to={{ request.path }}'>{% trans "Change Language" %}</a></div>
-                {% endif %}
                 {% if user.is_superuser %}<div class="col-md-2"><a href='{% url 'helpdesk_system_settings' %}'>{% trans "System Settings" %}</a></div>{% endif %}
             </div>
         </div>
