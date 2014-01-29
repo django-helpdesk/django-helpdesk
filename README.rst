@@ -25,12 +25,13 @@ LICENSE.3RDPARTY for license terms for included packages.
 Dependencies (pre-flight checklist)
 -----------------------------------
 
-1. Python 2.5+ 
+1. Python 2.6+ 
 2. Django (1.4 or newer)
 3. South for database migrations (highly recommended, but not required). Download from http://south.aeracode.org/
 4. An existing WORKING Django project with database etc. If you
    cannot log into the Admin, you won't get this product working.
 5. `pip install django-bootstrap-form` and add `bootstrapform` to `settings.INSTALLED_APPS`
+6. `pip install email-reply-parser` to get smart email reply handling
 
 **NOTE REGARDING SQLITE AND SEARCHING:**
 If you use sqlite as your database, the search function will not work as
