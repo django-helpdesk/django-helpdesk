@@ -1,4 +1,3 @@
-
 """
 Default settings for django-helpdesk.
 
@@ -23,6 +22,7 @@ if type(DEFAULT_USER_SETTINGS) != type(dict()):
             }
 
 
+HAS_TAG_SUPPORT = False
 
 ''' generic options - visible on all pages '''
 # redirect to login page instead of the default homepage when users visits "/"?
