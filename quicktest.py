@@ -22,6 +22,7 @@ class QuickDjangoTest(object):
         'django.contrib.admin',
         'django.contrib.staticfiles',
         'django.contrib.messages',
+        'bootstrapform',
     )
 
     def __init__(self, *args, **kwargs):

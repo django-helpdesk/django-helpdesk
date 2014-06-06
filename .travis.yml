@@ -3,10 +3,11 @@ python:
     - "2.6"
     - "2.7"
 env:
-    - DJANGO=1.4.3
-    - DJANGO=1.3.5
-    - DJANGO=1.5.0
+    - DJANGO=1.4.13
+    - DJANGO=1.5.8
+    - DJANGO=1.6.5
 install:
-    - pip install argparse --use-mirrors
-    - pip install -q Django==$DJANGO --use-mirrors
+    - pip install argparse
+    - pip install -q Django==$DJANGO
+    - pip install -q -r requirements.txt
 script: python quicktest.py helpdesk
