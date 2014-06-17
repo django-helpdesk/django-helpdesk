@@ -113,7 +113,7 @@ def send_templated_mail(template_name, email_context, recipients, sender=None, b
     elif type(recipients) != list:
         recipients = [recipients,]
 
-    msg = EmailMultiAlternatives(   subject_part,
+    msg = EmailMultiAlternatives(   subject_part.replace('\n', ''),
                                     text_part,
                                     sender,
                                     recipients,
