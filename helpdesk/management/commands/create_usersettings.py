@@ -10,7 +10,11 @@ users who don't yet have them.
 
 from django.utils.translation import ugettext as _
 from django.core.management.base import BaseCommand
-from django.contrib.auth.models import User
+try:
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+except ImportError:
+    from django.contrib.auth.models import User
 
 from helpdesk.models import UserSettings
 from helpdesk.settings import DEFAULT_USER_SETTINGS

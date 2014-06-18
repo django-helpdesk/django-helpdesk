@@ -13,8 +13,12 @@ from django import forms
 from django.forms import extras
 from django.core.files.storage import default_storage
 from django.conf import settings
-from django.contrib.auth.models import User
 from django.utils.translation import ugettext as _
+try:
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+except ImportError:
+    from django.contrib.auth.models import User
 try:
     from django.utils import timezone
 except ImportError:
