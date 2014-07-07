@@ -4,7 +4,7 @@ from distutils.util import convert_path
 from fnmatch import fnmatchcase
 from setuptools import setup, find_packages
 
-version = '0.1.11'
+version = '0.1.12'
 
 # Provided as an attribute, so you can append to these instead
 # of replicating them:
@@ -133,6 +133,6 @@ setup(
     package_data=find_package_data("helpdesk", only_in_packages=False),
     include_package_data=True,
     zip_safe=False,
-    install_requires=['setuptools', 'pytz'],
+    install_requires=['setuptools', 'pytz', 'django-markdown-deux', 'django-bootstrap-form', 'email-reply-parser', 'django'],
 )
 

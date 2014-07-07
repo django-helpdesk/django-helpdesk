@@ -31,7 +31,8 @@ Dependencies (pre-flight checklist)
 4. An existing WORKING Django project with database etc. If you
    cannot log into the Admin, you won't get this product working.
 5. `pip install django-bootstrap-form` and add `bootstrapform` to `settings.INSTALLED_APPS`
-6. `pip install email-reply-parser` to get smart email reply handling
+6. `pip install django-markdown-deux` and add `markdown_deux` to `settings.INSTALLED_APPS`
+7. `pip install email-reply-parser` to get smart email reply handling
 
 **NOTE REGARDING SQLITE AND SEARCHING:**
 If you use sqlite as your database, the search function will not work as

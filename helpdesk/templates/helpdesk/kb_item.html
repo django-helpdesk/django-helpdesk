@@ -1,4 +1,4 @@
-{% extends "helpdesk/public_base.html" %}{% load i18n %}{% load markup %}
+{% extends "helpdesk/public_base.html" %}{% load i18n %}{% load markdown_deux_tags %}
 
 {% block helpdesk_body %}
 <h2>{% blocktrans with item.title as item %}Knowledgebase: {{ item }}{% endblocktrans %}</h2>

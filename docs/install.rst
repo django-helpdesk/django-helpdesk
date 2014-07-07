@@ -39,6 +39,7 @@ Adding To Your Django Project
         'django.contrib.admin', # Required for helpdesk admin/maintenance
         'django.contrib.markup', # Required for helpdesk text display
         'south', # Highly recommended to make database migrations simpler.
+        'markdown_deux', # Required for Knowledgebase item formatting
         'helpdesk', # This is new!
     )
 
@@ -87,9 +88,9 @@ Adding To Your Django Project
 
    Ideally, accessing http://MEDIA_URL/helpdesk/attachments/ will give you a 403 access denied error.
 
-7. If it's not already installed, install ``python-markdown``::
+7. If it's not already installed, install ``django-markdown-deux`` and ensure it's in your ``INSTALLED_APPS``::
 
-      pip install Markdown
+      pip install django-markdown-deux
 
 8. If you already have a view handling your logins, then great! If not, add the following to ``settings.py`` to get your Django installation to use the login view included in ``django-helpdesk``::
 
