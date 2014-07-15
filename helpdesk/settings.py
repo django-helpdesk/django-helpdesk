@@ -80,6 +80,9 @@ HELPDESK_STAFF_ONLY_TICKET_OWNERS = getattr(settings, 'HELPDESK_STAFF_ONLY_TICKE
 HELPDESK_STAFF_ONLY_TICKET_CC = getattr(settings, 'HELPDESK_STAFF_ONLY_TICKET_CC', False)
 
 
+# allow the subject to have a configurable template.
+HELPDESK_EMAIL_SUBJECT_TEMPLATE = getattr(settings, 'HELPDESK_EMAIL_SUBJECT_TEMPLATE', "{{ ticket.ticket }} {{ ticket.title|safe }} %(subject)s")
+
 
 ''' options for staff.create_ticket view '''
 # hide the 'assigned to' / 'Case owner' field from the 'create_ticket' view?
