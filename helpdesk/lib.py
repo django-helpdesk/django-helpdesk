@@ -104,8 +104,9 @@ def send_templated_mail(template_name, email_context, recipients, sender=None, b
         ).render(context)
 
     subject_part = loader.get_template_from_string(
-        settings.HELPDESK_EMAIL_SUBJECT_TEMPLATE % t.subject
-        ).render(context)
+        settings.HELPDESK_EMAIL_SUBJECT_TEMPLATE % {
+            "subject": t.subject,
+        }).render(context)
 
     if isinstance(recipients,(str,unicode)):
         if recipients.find(','):
