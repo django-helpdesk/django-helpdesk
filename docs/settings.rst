@@ -86,6 +86,10 @@ These changes are visible throughout django-helpdesk
   
   **Default:** ``HELPDESK_AUTO_SUBSCRIBE_ON_TICKET_RESPONSE = False``
 
+- **HELPDESK_EMAIL_SUBJECT_TEMPLATE ** Subject template for templated emails. ``%(subject)s`` represents the subject wording from the email template (e.g. "(Closed)").
+
+  **Default:** ``HELPDESK_EMAIL_SUBJECT_TEMPLATE = "{{ ticket.ticket }} {{ ticket.title|safe }} %(subject)s"``
+
 
 Options shown on public pages
 -----------------------------

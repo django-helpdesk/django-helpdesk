@@ -237,9 +237,9 @@ def view_ticket(request, ticket_id):
         return update_ticket(request, ticket_id)
 
     if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS:
-        users = User.objects.filter(is_active=True, is_staff=True).order_by('username')
+        users = User.objects.filter(is_active=True, is_staff=True).order_by(User.USERNAME_FIELD)
     else:
-        users = User.objects.filter(is_active=True).order_by('username')
+        users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
 
 
     # TODO: shouldn't this template get a form to begin with?
