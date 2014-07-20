@@ -2,7 +2,7 @@
 Default settings for django-helpdesk.
 
 """
-
+import warnings
 from django.conf import settings
 
 
@@ -60,9 +60,16 @@ HELPDESK_SUBMIT_A_TICKET_PUBLIC = getattr(settings, 'HELPDESK_SUBMIT_A_TICKET_PU
 
 
 ''' options for update_ticket views '''
-# allow non-staff users to interact with tickets? this will also change how 'staff_member_required' 
+# allow non-staff users to interact with tickets? this will also change how 'staff_member_required'
 # in staff.py will be defined.
 HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = getattr(settings, 'HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE', False)
+
+# apply a custom authorisation logic when defining 'staff_member_required' in staff.py.
+HELPDESK_CUSTOM_STAFF_FILTER_CALLBACK = getattr(settings, 'HELPDESK_CUSTOM_STAFF_FILTER_CALLBACK', None)
+if HELPDESK_CUSTOM_STAFF_FILTER_CALLBACK and HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE:
+    warnings.warn(
+        "The HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE and HELPDESK_CUSTOM_STAFF_FILTER_CALLBACK settings cannot be both defined. "
+        "Only HELPDESK_CUSTOM_STAFF_FILTER_CALLBACK will be considered in determining staff access.", RuntimeWarning)
 
 # show edit buttons in ticket follow ups.
 HELPDESK_SHOW_EDIT_BUTTON_FOLLOW_UP = getattr(settings, 'HELPDESK_SHOW_EDIT_BUTTON_FOLLOW_UP', True)
@@ -73,10 +80,10 @@ HELPDESK_SHOW_DELETE_BUTTON_SUPERUSER_FOLLOW_UP = getattr(settings, 'HELPDESK_SH
 # make all updates public by default? this will hide the 'is this update public' checkbox
 HELPDESK_UPDATE_PUBLIC_DEFAULT = getattr(settings, 'HELPDESK_UPDATE_PUBLIC_DEFAULT', False)
 
-# only show staff users in ticket owner drop-downs 
+# only show staff users in ticket owner drop-downs
 HELPDESK_STAFF_ONLY_TICKET_OWNERS = getattr(settings, 'HELPDESK_STAFF_ONLY_TICKET_OWNERS', False)
 
-# only show staff users in ticket cc drop-down 
+# only show staff users in ticket cc drop-down
 HELPDESK_STAFF_ONLY_TICKET_CC = getattr(settings, 'HELPDESK_STAFF_ONLY_TICKET_CC', False)
 
 
