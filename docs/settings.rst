@@ -165,22 +165,20 @@ Discontinued Settings
 
 The following settings were defined in previous versions and are no longer supported.
 
-- **HELPDESK_SUPPORT_PERSON** Please customise your local `helpdesk/attribution.html` template if needed
-
-- **HELPDESK_SHOW_EDIT_BUTTON_TICKET_TOP** Button is always shown
-
-- **HELPDESK_SHOW_DELETE_BUTTON_TICKET_TOP** Button is always shown
-
-- **HELPDESK_SHOW_HOLD_BUTTON_TICKET_TOP** Button is always shown
-
 - **HELPDESK_CUSTOM_WELCOME** 
-
-- **HELPDESK_SHOW_KB_ON_HOMEPAGE** KB categories are always shown on the homepage
-
-- **HELPDESK_PREPEND_ORG_NAME** Please customise your local `helpdesk/base.html` template if needed
 
 - **HELDPESK_KB_ENABLED_STAFF** Now always True
 
 - **HELPDESK_NAVIGATION_STATS_ENABLED** Now always True
 
+- **HELPDESK_PREPEND_ORG_NAME** Please customise your local `helpdesk/base.html` template if needed
 
+- **HELPDESK_SHOW_DELETE_BUTTON_TICKET_TOP** Button is always shown
+
+- **HELPDESK_SHOW_EDIT_BUTTON_TICKET_TOP** Button is always shown
+
+- **HELPDESK_SHOW_HOLD_BUTTON_TICKET_TOP** Button is always shown
+
+- **HELPDESK_SHOW_KB_ON_HOMEPAGE** KB categories are always shown on the homepage
+
+- **HELPDESK_SUPPORT_PERSON** Please customise your local `helpdesk/attribution.html` template if needed
