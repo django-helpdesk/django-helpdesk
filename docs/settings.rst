@@ -60,11 +60,11 @@ These changes are visible throughout django-helpdesk
   
   **Default:** ``HELPDESK_FOLLOWUP_MOD = False``
 
-- **HELPDESK_AUTO_SUBSCRIBE_ON_TICKET_RESPONSE ** Auto-subscribe user to ticket as a 'CC' if (s)he responds to a ticket?
+- **HELPDESK_AUTO_SUBSCRIBE_ON_TICKET_RESPONSE** Auto-subscribe user to ticket as a 'CC' if (s)he responds to a ticket?
   
   **Default:** ``HELPDESK_AUTO_SUBSCRIBE_ON_TICKET_RESPONSE = False``
 
-- **HELPDESK_EMAIL_SUBJECT_TEMPLATE ** Subject template for templated emails. ``%(subject)s`` represents the subject wording from the email template (e.g. "(Closed)").
+- **HELPDESK_EMAIL_SUBJECT_TEMPLATE** Subject template for templated emails. ``%(subject)s`` represents the subject wording from the email template (e.g. "(Closed)").
 
   **Default:** ``HELPDESK_EMAIL_SUBJECT_TEMPLATE = "{{ ticket.ticket }} {{ ticket.title|safe }} %(subject)s"``
 
