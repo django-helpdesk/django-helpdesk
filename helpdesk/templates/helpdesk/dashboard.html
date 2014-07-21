@@ -1,22 +1,20 @@
 {% extends "helpdesk/base.html" %}{% load i18n %}{% load url from future %}
 {% block helpdesk_title %}{% trans "Helpdesk Dashboard" %}{% endblock %}
-{% block helpdesk_head %}
-<script type='text/javascript' language='javascript' src='{{ STATIC_URL }}helpdesk/hover.js'></script>
-{% endblock %}
+
 {% block helpdesk_body %}
 
 <div class="alert alert-warning">
 <p>{% trans "Welcome to your Helpdesk Dashboard! From here you can quickly see tickets submitted by you, tickets you are working on, and those tickets that have no owner." %}</p>
 </div>
 
-<table class="table table-hover table-bordered">
+<table class="table table-hover table-bordered table-striped">
 <caption>{% trans "Helpdesk Summary" %}</caption>
 <thead>
 <tr class='row_columnheads'><th>{% trans "Queue" %}</th><th>{% trans "Open" %}</th><th>{% trans "Resolved" %}</th><th>{% trans "Closed" %}</th></tr>
 </thead>
 <tbody>
 {% for queue in dash_tickets %}
-<tr class='row_{% cycle odd,even %} row_hover '>
+<tr>
 <th><a href='{% url 'helpdesk_list' %}?queue={{ queue.queue }}&status=1&status=2'>{{ queue.name }}</a></th>
 <td align="center">{% if queue.open %}<a href='{% url 'helpdesk_list' %}?queue={{ queue.queue }}&status=1&status=2'>{% endif %}{{ queue.open }}{% if queue.open %}</a>{% endif %}</td>
 <td align="center">{% if queue.resolved %}<a href='{% url 'helpdesk_list' %}?queue={{ queue.queue }}&status=3'>{% endif %}{{ queue.resolved }}{% if queue.resolved %}</a>{% endif %}</td>
@@ -31,7 +29,7 @@
 
 <br style='clear: both;' />
 
-<table class="table table-hover table-bordered ticket-stats">
+<table class="table table-hover table-bordered table-striped ticket-stats">
 <caption>{% trans "Current Ticket Stats" %}</caption>
 <thead>
 <tr><td colspan='2'>- {% trans "Average number of days until ticket is closed (all tickets): " %}<strong style="color: red;">{{ basic_ticket_stats.average_nbr_days_until_ticket_closed }}</strong>.</td></tr>
@@ -42,7 +40,7 @@
 </thead>
 <tbody>
 {% for entry in basic_ticket_stats.open_ticket_stats %}
-<tr class='row_{% cycle odd,even %} row_hover'>
+<tr>
 <th style="padding-left: 20px;">{{ entry.0 }}</th>
 <td style="padding-left: 20px;"><span style="color: {{ entry.2 }};">{% if entry.1 > 0 %}<a href="{% url 'helpdesk_list' %}?{{ entry.3 }}">{{ entry.1 }}</a>{% else %}{{ entry.1 }}{% endif %}</span></td>
 </tr>
@@ -52,14 +50,14 @@
 
 
 {% if all_tickets_reported_by_current_user %}
-<table class="table table-hover table-bordered">
+<table class="table table-hover table-bordered table-striped">
 <caption>{% trans "All Tickets submitted by you" %}</caption>
 <thead>
 <tr class='row_columnheads'><th>#</th><th>{% trans "Pr" %}</th><th>{% trans "Title" %}</th><th>{% trans "Queue" %}</th><th>{% trans "Status" %}</th><th>{% trans "Last Update" %}</th></tr>
 </thead>
 <tbody>
 {% for ticket in all_tickets_reported_by_current_user %}
-<tr class='row_{% cycle odd,even %} row_hover'>
+<tr>
 <th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.ticket }}</a></th>
 <td>{{ ticket.get_priority_span }}</td>
 <th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></th>
@@ -72,14 +70,14 @@
 </table>
 {% endif %}
 
-<table class="table table-hover table-bordered">
+<table class="table table-hover table-bordered table-striped">
 <caption>{% trans "Open Tickets assigned to you (you are working on this ticket)" %}</caption>
 <thead>
 <tr class='row_columnheads'><th>#</th><th>{% trans "Pr" %}</th><th>{% trans "Title" %}</th><th>{% trans "Queue" %}</th><th>{% trans "Status" %}</th><th>{% trans "Last Update" %}</th></tr>
 </thead>
 <tbody>
 {% for ticket in user_tickets %}
-<tr class='row_{% cycle odd,even %} row_hover'>
+<tr>
 <th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.ticket }}</a></th>
 <td>{{ ticket.get_priority_span }}</td>
 <th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></th>
@@ -89,19 +87,19 @@
 </tr>
 {% endfor %}
 {% if not user_tickets %}
-<tr class='row_odd'><td colspan='6'>{% trans "You have no tickets assigned to you." %}</td></tr>
+<tr><td colspan='6'>{% trans "You have no tickets assigned to you." %}</td></tr>
 {% endif %}
 </tbody>
 </table>
 
-<table class="table table-hover table-bordered">
+<table class="table table-hover table-bordered table-striped">
 <caption>{% trans "Unassigned Tickets" %} {% trans "(pick up a ticket if you start to work on it)" %}</caption>
 <thead>
 <tr class='row_columnheads'><th>#</th><th>{% trans "Pr" %}</th><th>{% trans "Title" %}</th><th>{% trans "Queue" %}</th><th>{% trans "Created" %}</th><th>&nbsp;</th></tr>
 </thead>
 <tbody>
 {% for ticket in unassigned_tickets %}
-<tr class='row_{% cycle odd,even %} row_hover'>
+<tr>
 <th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.ticket }}</a></th>
 <td>{{ ticket.get_priority_span }}</td>
 <th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></th>
@@ -111,21 +109,21 @@
 </tr>
 {% endfor %}
 {% if not unassigned_tickets %}
-<tr class='row_odd'><td colspan='6'>{% trans "There are no unassigned tickets." %}</td></tr>
+<tr><td colspan='6'>{% trans "There are no unassigned tickets." %}</td></tr>
 {% endif %}
 </tbody>
 </table>
 
 
 {% if user_tickets_closed_resolved %}
-<table class="table table-hover table-bordered">
+<table class="table table-hover table-bordered table-striped">
 <caption>{% trans "Closed & resolved Tickets you used to work on" %}</caption>
 <thead>
 <tr class='row_columnheads'><th>#</th><th>{% trans "Pr" %}</th><th>{% trans "Title" %}</th><th>{% trans "Queue" %}</th><th>{% trans "Status" %}</th><th>{% trans "Last Update" %}</th></tr>
 </thead>
 <tbody>
 {% for ticket in user_tickets_closed_resolved %}
-<tr class='row_{% cycle odd,even %} row_hover'>
+<tr>
 <th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.ticket }}</a></th>
 <td>{{ ticket.get_priority_span }}</td>
 <th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></th>
