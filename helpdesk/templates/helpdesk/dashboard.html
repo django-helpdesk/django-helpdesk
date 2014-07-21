@@ -85,10 +85,9 @@
 <td>{{ ticket.get_status }}</td>
 <td><span title='{{ ticket.modified|date:"r" }}'>{{ ticket.modified|timesince }}</span></td>
 </tr>
-{% endfor %}
-{% if not user_tickets %}
+{% empty %}
 <tr><td colspan='6'>{% trans "You have no tickets assigned to you." %}</td></tr>
-{% endif %}
+{% endfor %}
 </tbody>
 </table>
 
@@ -107,10 +106,9 @@
 <td><span title='{{ ticket.created|date:"r" }}'>{{ ticket.created|timesince }} ago</span></td>
 <th><a href='{{ ticket.get_absolute_url }}?take'><span class='button button_take'>{% trans "Take" %}</span></a> | <a href='{% url 'helpdesk_delete' ticket.id %}'><span class='button button_delete'>{% trans "Delete" %}</span></a></th>
 </tr>
-{% endfor %}
-{% if not unassigned_tickets %}
+{% empty %}
 <tr><td colspan='6'>{% trans "There are no unassigned tickets." %}</td></tr>
-{% endif %}
+{% endfor %}
 </tbody>
 </table>
 
