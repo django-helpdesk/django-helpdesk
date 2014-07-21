@@ -1,4 +1,4 @@
-{% extends "helpdesk/base.html" %}{% load i18n bootstrap %}{% load url from future %}
+{% extends "helpdesk/base.html" %}{% load i18n bootstrap humanize %}{% load url from future %}
 {% block helpdesk_title %}{% trans "View Ticket Details" %}{% endblock %}
 {% block helpdesk_head %}
 <script type="text/javascript">
@@ -8,7 +8,7 @@
             $("#ShowFurtherOptPara").hide();
             return false;
         });
-        
+
         processAddFileClick();
         $("#ShowFileUpload").click(function() {
             $("#FileUpload").fadeIn();
@@ -27,7 +27,7 @@
     });
 
     function processAddFileClick() {
-        /* Until jQuery includes some 'livequery' functionality in the core 
+        /* Until jQuery includes some 'livequery' functionality in the core
            distribution, this will have to do. */
         $(".AddAnotherFile>a").click(function() {
             $(this).parent().remove();
@@ -69,7 +69,7 @@ function googleTranslateElementInit() {
 {% if helpdesk_settings.HELPDESK_FOLLOWUP_MOD %}
     <div class='followup_mod'>
     <div class='title'>
-        <span class='byline text-info'>{{ followup.user.get_full_name }}&nbsp;&nbsp;&nbsp;&nbsp;{{ followup.date }} ({{ followup.date|timesince }} ago)</span> <small>{{ followup.title }}</small>
+        <span class='byline text-info'>{{ followup.user.get_full_name }}&nbsp;&nbsp;&nbsp;&nbsp;{{ followup.date }} ({{ followup.date|naturaltime }})</span> <small>{{ followup.title }}</small>
         {% if not followup.public %} <span class='private'>({% trans "Private" %})</span>{% endif %}
         {% if helpdesk_settings.HELPDESK_SHOW_EDIT_BUTTON_FOLLOW_UP %}
         {% if followup.user and request.user == followup.user and not followup.ticketchange_set.all %}
@@ -83,7 +83,7 @@ function googleTranslateElementInit() {
 {% else %}
     <div class='followup well'>
     <div class='title'>
-        {{ followup.title }} <span class='byline text-info'>{% if followup.user %}by {{ followup.user }}{% endif %} <span title='{{ followup.date|date:"r" }}'>{{ followup.date|timesince }} ago</span>{% if not followup.public %} <span class='private'>({% trans "Private" %})</span>{% endif %}</span>
+        {{ followup.title }} <span class='byline text-info'>{% if followup.user %}by {{ followup.user }}{% endif %} <span title='{{ followup.date|date:"r" }}'>{{ followup.date|naturaltime }}</span>{% if not followup.public %} <span class='private'>({% trans "Private" %})</span>{% endif %}</span>
         {% if helpdesk_settings.HELPDESK_SHOW_EDIT_BUTTON_FOLLOW_UP %}
         {% if followup.user and request.user == followup.user and not followup.ticketchange_set.all %}
         <a href="{% url 'helpdesk_followup_edit' ticket.id followup.id %}" class='followup-edit'><img width="60" height="15" title="Edit" alt="Edit" src="{{ STATIC_URL }}helpdesk/buttons/edit.png"></a>
@@ -141,25 +141,25 @@ function googleTranslateElementInit() {
         <input type='radio' name='new_status' value='5' id='st_duplicate'><label for='st_duplicate'>{% trans "Duplicate" %}</label></dd>
         {% endifequal %}
         {% ifequal ticket.status 2 %}
-        <dd><input type='radio' name='new_status' value='2' id='st_reopened' checked='checked'><label for='st_reopened' class='active'>{% trans "Reopened" %}</label> &raquo; 
-        <input type='radio' name='new_status' value='3' id='st_resolved'{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}><label for='st_resolved'>{% trans "Resolved" %}</label> &raquo; 
-        <input type='radio' name='new_status' value='4' id='st_closed'{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}><label for='st_closed'>{% trans "Closed" %}</label> &raquo; 
+        <dd><input type='radio' name='new_status' value='2' id='st_reopened' checked='checked'><label for='st_reopened' class='active'>{% trans "Reopened" %}</label> &raquo;
+        <input type='radio' name='new_status' value='3' id='st_resolved'{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}><label for='st_resolved'>{% trans "Resolved" %}</label> &raquo;
+        <input type='radio' name='new_status' value='4' id='st_closed'{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}><label for='st_closed'>{% trans "Closed" %}</label> &raquo;
         <input type='radio' name='new_status' value='5' id='st_duplicate'><label for='st_duplicate'>{% trans "Duplicate" %}</label></dd>
         {% endifequal %}
         {% ifequal ticket.status 3 %}
-        <dd><input type='radio' name='new_status' value='2' id='st_reopened'><label for='st_reopened'>{% trans "Reopened" %}</label> &laquo; 
-        <input type='radio' name='new_status' value='3' id='st_resolved' checked='checked'><label for='st_resolved' class='active'>{% trans "Resolved" %}</label> &raquo; 
+        <dd><input type='radio' name='new_status' value='2' id='st_reopened'><label for='st_reopened'>{% trans "Reopened" %}</label> &laquo;
+        <input type='radio' name='new_status' value='3' id='st_resolved' checked='checked'><label for='st_resolved' class='active'>{% trans "Resolved" %}</label> &raquo;
         <input type='radio' name='new_status' value='4' id='st_closed'><label for='st_closed'>{% trans "Closed" %}</label></dd>
         {% endifequal %}
         {% ifequal ticket.status 4 %}
-        <dd><input type='radio' name='new_status' value='2' id='st_reopened'><label for='st_reopened'>{% trans "Reopened" %}</label> &laquo; 
+        <dd><input type='radio' name='new_status' value='2' id='st_reopened'><label for='st_reopened'>{% trans "Reopened" %}</label> &laquo;
         <input type='radio' name='new_status' value='4' id='st_closed' checked='checked'><label for='st_closed'>{% trans "Closed" %}</label></dd>
         {% endifequal %}
         {% ifequal ticket.status 5 %}
-        <dd><input type='radio' name='new_status' value='2' id='st_reopened'><label for='st_reopened'>{% trans "Reopened" %}</label> &laquo; 
+        <dd><input type='radio' name='new_status' value='2' id='st_reopened'><label for='st_reopened'>{% trans "Reopened" %}</label> &laquo;
         <input type='radio' name='new_status' value='5' id='st_duplicate' checked='checked'><label for='st_duplicate'>{% trans "Duplicate" %}</label></dd>
         {% endifequal %}
-    
+
         {% if helpdesk_settings.HELPDESK_UPDATE_PUBLIC_DEFAULT %}
         <input type='hidden' name='public' value='1'>
         {% else %}
@@ -185,7 +185,7 @@ function googleTranslateElementInit() {
         <dd><select id='id_priority' name='priority'>{% for p in priorities %}<option value='{{ p.0 }}'{% ifequal p.0 ticket.priority %} selected='selected'{% endifequal %}>{{ p.1 }}</option>{% endfor %}</select></dd>
         <dt><label for='id_due_date'>{% trans "Due on" %}</label></dt>
         <dd>{{ form.due_date }}</dd>
- 
+
     </dl>
 
 </div>

@@ -1,4 +1,4 @@
-{% extends "helpdesk/public_base.html" %}{% load i18n %}
+{% extends "helpdesk/public_base.html" %}{% load i18n humanize %}
 
 {% block helpdesk_body %}
 <h2>{% blocktrans with category.title as kbcat %}Knowledgebase Category: {{ kbcat }}{% endblocktrans %}</h2>
@@ -14,7 +14,7 @@
 </thead>
 <tbody>
 {% for item in items %}
-<tr class='row_even row_hover'><th><a href='{{ item.get_absolute_url }}'>{{ item.title }}</a></th><td>Rating: {{ item.score }}</td><td>Last Update: {{ item.last_updated|timesince }} ago</td></tr>
+<tr class='row_even row_hover'><th><a href='{{ item.get_absolute_url }}'>{{ item.title }}</a></th><td>Rating: {{ item.score }}</td><td>Last Update: {{ item.last_updated|naturaltime }}</td></tr>
 <tr class='row_odd'><td colspan='3'>{{ item.question }}</td></tr>
 {% endfor %}
 </tbody>

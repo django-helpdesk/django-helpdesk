@@ -30,17 +30,18 @@ Adding To Your Django Project
 -----------------------------
 
 1. Edit your ``settings.py`` file and add ``helpdesk`` to the ``INSTALLED_APPS`` setting. You also need ``django.contrib.admin`` and ``django.contrib.markup`` in ``INSTALLED_APPS`` if you haven't already added it. eg::
-    
+
     INSTALLED_APPS = (
         'django.contrib.auth',
         'django.contrib.contenttypes',
         'django.contrib.sessions',
         'django.contrib.sites',
-        'django.contrib.admin', # Required for helpdesk admin/maintenance
-        'django.contrib.markup', # Required for helpdesk text display
-        'south', # Highly recommended to make database migrations simpler.
-        'markdown_deux', # Required for Knowledgebase item formatting
-        'helpdesk', # This is new!
+        'django.contrib.admin',  # Required for helpdesk admin/maintenance
+        'django.contrib.markup',  # Required for helpdesk text display
+        'django.contrib.humanize',  # Required for elapsed time formatting
+        'south',  # Highly recommended to make database migrations simpler.
+        'markdown_deux',  # Required for Knowledgebase item formatting
+        'helpdesk',  # This is new!
     )
 
 2. Make sure django-helpdesk is accessible via ``urls.py``. Add the following line to ``urls.py``::
@@ -48,7 +49,7 @@ Adding To Your Django Project
      (r'helpdesk/', include('helpdesk.urls')),
 
    Note that you can change 'helpdesk/' to anything you like, such as 'support/' or 'help/'. If you want django-helpdesk to be available at the root of your site (for example at http://support.mysite.tld/) then the line will be as follows::
-     
+
      (r'', include('helpdesk.urls')),
 
    This line will have to come *after* any other lines in your urls.py such as those used by the Django admin.

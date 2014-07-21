@@ -1,4 +1,4 @@
-{% extends "helpdesk/public_base.html" %}{% load i18n %}
+{% extends "helpdesk/public_base.html" %}{% load i18n humanize %}
 {% block helpdesk_title %}{% trans "View a Ticket" %}{% endblock %}
 
 {% block helpdesk_body %}
@@ -11,7 +11,7 @@
 <tbody>
 <tr class="{% cycle 'row_odd' 'row_even' as rowcolors %}">
     <th>{% trans "Submitted On" %}</th>
-    <td>{{ ticket.created|date:"r" }} ({{ ticket.created|timesince }} ago)</td>
+    <td>{{ ticket.created|date:"r" }} ({{ ticket.created|naturaltime }})</td>
 </tr>
 
 <tr class='{% cycle rowcolors %}'>
@@ -58,7 +58,7 @@
 {% load ticket_to_link %}
 {% for followup in ticket.followup_set.public_followups %}
 <div class='followup well'>
-<div class='title'>{{ followup.title }} <span class='byline text-info'>{% if followup.user %}by {{ followup.user }}{% endif %} <span title='{{ followup.date|date:"r" }}'>{{ followup.date|timesince }} ago</span></span></div>
+<div class='title'>{{ followup.title }} <span class='byline text-info'>{% if followup.user %}by {{ followup.user }}{% endif %} <span title='{{ followup.date|date:"r" }}'>{{ followup.date|naturaltime }}</span></span></div>
 {{ followup.comment|force_escape|urlizetrunc:50|num_to_link|linebreaksbr }}
 {% if followup.ticketchange_set.all %}<div class='changes'><ul>
 {% for change in followup.ticketchange_set.all %}

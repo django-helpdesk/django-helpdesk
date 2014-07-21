@@ -1,4 +1,4 @@
-{% load i18n %}{% load url from future %}
+{% load i18n humanize %}{% load url from future %}
 <table class="table table-hover table-bordered">
 <thead>
     <tr class='row_tablehead'><td colspan='2'><h3>{{ ticket.id }}. {{ ticket.title }} [{{ ticket.get_status }}]</h3> <span class='ticket_toolbar'>
@@ -30,7 +30,7 @@
 </tr>{% endif %}
 <tr class='{% cycle rowcolors %}'>
     <th>{% trans "Submitted On" %}</th>
-    <td>{{ ticket.created|date:"r" }} ({{ ticket.created|timesince }} ago)</td>
+    <td>{{ ticket.created|date:"r" }} ({{ ticket.created|naturaltime }})</td>
 </tr>
 
 <tr class='{% cycle rowcolors %}'>
