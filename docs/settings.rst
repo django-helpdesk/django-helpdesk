@@ -36,31 +36,13 @@ These changes are visible throughout django-helpdesk
 
   **Default:** ``HELPDESK_REDIRECT_TO_LOGIN_BY_DEFAULT = False``
 
-- **HELPDESK_PREPEND_ORG_NAME** Customize helpdesk name on a few pages, i.e., your organization.
-
-  **Default:** ``HELPDESK_PREPEND_ORG_NAME = False``
-
 - **HELPDESK_KB_ENABLED** show knowledgebase links?
 
   **Default:** ``HELPDESK_KB_ENABLED = True``
 
-- **HELDPESK_KB_ENABLED_STAFF** Show knowledgebase links for staff users?
-
-  **Default:** ``HELPDESK_KB_ENABLED_STAFF = False``
-
 - **HELPDESK_NAVIGATION_ENABLED** Show extended navigation by default, to all users, irrespective of staff status?
 
   **Default:** ``HELPDESK_NAVIGATION_ENABLED = False``
-
-- **HELPDESK_NAVIGATION_STATS_ENABLED** Show 'stats' link in navigation bar for staff users?
-
-  **Default:** ``HELPDESK_NAVIGATION_STATS_ENABLED = True``
-
-- **HELPDESK_SUPPORT_PERSON** Set this to an email address inside your organization and a footer below
-  the 'Powered by django-helpdesk' will be shown, telling the user whom to contact
-  in case they have technical problems.
-
-  **Default:** ``HELPDESK_SUPPORT_PERSON = ""``
 
 - **HELPDESK_TRANSLATE_TICKET_COMMENTS** Show dropdown list of languages that ticket comments can be translated into via Google Translate?
 
@@ -78,15 +60,11 @@ These changes are visible throughout django-helpdesk
   
   **Default:** ``HELPDESK_FOLLOWUP_MOD = False``
 
-- **HELPDESK_CUSTOM_WELCOME** Show custom welcome message in dashboard?
-  
-  **Default:** ``HELPDESK_CUSTOM_WELCOME = False``
-
-- **HELPDESK_AUTO_SUBSCRIBE_ON_TICKET_RESPONSE ** Auto-subscribe user to ticket as a 'CC' if (s)he responds to a ticket?
+- **HELPDESK_AUTO_SUBSCRIBE_ON_TICKET_RESPONSE** Auto-subscribe user to ticket as a 'CC' if (s)he responds to a ticket?
   
   **Default:** ``HELPDESK_AUTO_SUBSCRIBE_ON_TICKET_RESPONSE = False``
 
-- **HELPDESK_EMAIL_SUBJECT_TEMPLATE ** Subject template for templated emails. ``%(subject)s`` represents the subject wording from the email template (e.g. "(Closed)").
+- **HELPDESK_EMAIL_SUBJECT_TEMPLATE** Subject template for templated emails. ``%(subject)s`` represents the subject wording from the email template (e.g. "(Closed)").
 
   **Default:** ``HELPDESK_EMAIL_SUBJECT_TEMPLATE = "{{ ticket.ticket }} {{ ticket.title|safe }} %(subject)s"``
 
@@ -103,10 +81,6 @@ These options only change display of items on public-facing pages, not staff pag
 - **HELPDESK_SUBMIT_A_TICKET_PUBLIC** Show 'submit a ticket' section & form on public page?
   
   **Default:** ``HELPDESK_SUBMIT_A_TICKET_PUBLIC = True``
-
-- **HELPDESK_SHOW_KB_ON_HOMEPAGE** Should we should the KB categories on the homepage?
-  
-  **Default:** ``HELPDESK_SHOW_KB_ON_HOMEPAGE = False``
 
 
 Options that change ticket updates
@@ -125,21 +99,9 @@ Options that change ticket updates
 
   **Default:** ``HELPDESK_SHOW_DELETE_BUTTON_SUPERUSER_FOLLOW_UP = False``
 
-- **HELPDESK_SHOW_EDIT_BUTTON_TICKET_TOP** Show ticket edit button on top of ticket description?
-
-  **Default:** ``HELPDESK_SHOW_EDIT_BUTTON_TICKET_TOP = True``
-
-- **HELPDESK_SHOW_DELETE_BUTTON_TICKET_TOP** Show ticket delete button on top of ticket description?
-
-  **Default:** ``HELPDESK_SHOW_DELETE_BUTTON_TICKET_TOP = True``
-
-- **HELPDESK_SHOW_HOLD_BUTTON_TICKET_TOP** Show hold / unhold button on top of ticket description?
-
-  **Default:** ``HELPDESK_SHOW_HOLD_BUTTON_TICKET_TOP = True``
-
 - **HELPDESK_UPDATE_PUBLIC_DEFAULT** Make all updates public by default? This will hide the 'is this update public' checkbox.
 
-  **Default:** ``HELPDESK_UPDATE_PUBLIC_DEFAULT = True``
+  **Default:** ``HELPDESK_UPDATE_PUBLIC_DEFAULT = False``
 
 - **HELPDESK_STAFF_ONLY_TICKET_OWNERS** Only show staff users in ticket owner drop-downs?
 
@@ -197,3 +159,26 @@ The following settings default to ``None`` but can be set as defaults, rather th
 - ``QUEUE_EMAIL_BOX_HOST````
 - ``QUEUE_EMAIL_BOX_USER``
 - ``QUEUE_EMAIL_BOX_PASSWORD``
+
+Discontinued Settings
+---------------------
+
+The following settings were defined in previous versions and are no longer supported.
+
+- **HELPDESK_CUSTOM_WELCOME** 
+
+- **HELDPESK_KB_ENABLED_STAFF** Now always True
+
+- **HELPDESK_NAVIGATION_STATS_ENABLED** Now always True
+
+- **HELPDESK_PREPEND_ORG_NAME** Please customise your local `helpdesk/base.html` template if needed
+
+- **HELPDESK_SHOW_DELETE_BUTTON_TICKET_TOP** Button is always shown
+
+- **HELPDESK_SHOW_EDIT_BUTTON_TICKET_TOP** Button is always shown
+
+- **HELPDESK_SHOW_HOLD_BUTTON_TICKET_TOP** Button is always shown
+
+- **HELPDESK_SHOW_KB_ON_HOMEPAGE** KB categories are always shown on the homepage
+
+- **HELPDESK_SUPPORT_PERSON** Please customise your local `helpdesk/attribution.html` template if needed
