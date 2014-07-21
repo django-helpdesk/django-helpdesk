@@ -7,7 +7,7 @@
 
 <script type='text/javascript' language='javascript'>
 $(document).ready(function() {
-    
+
     // Enable Tabs
     $("#searchtabs").tabs({
         collapsible:true
@@ -126,7 +126,7 @@ $(document).ready(function() {
     <p class='filterHelp'>{% trans "Ctrl-click to select multiple options" %}</p>
     <input type='button' class='filterBuilderRemove' value='-' />
     </div>
-    
+
     <div class='thumbnail filterBox{% if query_params.filtering.created__gte or query_params.filtering.created__lte %} filterBoxShow{% endif %}' id='filterBoxDates'>
         <label for='id_date_from'>{% trans "Date (From)" %}</label><input type='text' name='date_from' value='{{ query_params.filtering.created__gte }}' id='id_date_from' />
         <label for='id_date_to'>{% trans "Date (To)" %}</label><input type='text' name='date_to' value='{{ query_params.filtering.created__lte }}' id='id_date_to' />
@@ -152,7 +152,7 @@ $(document).ready(function() {
     </div>
     </div>
 
-    
+
     {% if not from_saved_query %}
     <div class='panel panel-default' id='tabsave'>
     <div class="panel-heading">
@@ -219,8 +219,8 @@ $(document).ready(function() {
 {{ search_message|safe }}
 <form method='post' action='{% url 'helpdesk_mass_update' %}' id="ticket_mass_update">
 <table class="table table-hover table-bordered">
+<caption>{% trans "Tickets" %}</caption>
 <thead>
-<tr class='row_tablehead'><td colspan='9'>{% trans "Tickets" %}</td></tr>
 <tr class='row_columnheads'><th>#</th><th>&nbsp;</th><th>{% trans "Pr" %}</th><th>{% trans "Title" %}</th><th>{% trans "Queue" %}</th><th>{% trans "Status" %}</th><th>{% trans "Created" %}</th><th>{% trans "Owner" %}</th></tr>
 </thead>
 <tbody>

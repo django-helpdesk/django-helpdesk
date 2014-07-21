@@ -8,8 +8,8 @@
 <p>{{ category.description }}</p>
 
 <table class="table table-hover table-bordered">
+<caption>{% blocktrans with category.title as kbcat %}Knowledgebase Category: {{ kbcat }}{% endblocktrans %}</caption>
 <thead>
-<tr class='row_tablehead'><td colspan='3'>{% blocktrans with category.title as kbcat %}Knowledgebase Category: {{ kbcat }}{% endblocktrans %}</td></tr>
 <tr class='row_columnheads'><th colspan='3'>{% trans "Article" %}</th></tr>
 </thead>
 <tbody>
