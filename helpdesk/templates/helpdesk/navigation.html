@@ -17,7 +17,9 @@
                 <li><a href='{% url 'helpdesk_list' %}'><span class="glyphicon glyphicon-tags"></span> <span class="nav-text">{% trans "Tickets" %}</span></a></li>
                 <li><a href='{% url 'helpdesk_submit' %}'><span class="glyphicon glyphicon-plus"></span> <span class="nav-text">{% trans "New Ticket" %}</span></a></li>
                 <li><a href='{% url 'helpdesk_report_index' %}'><span class="glyphicon glyphicon-stats"></span><span class="nav-text"> {% trans "Stats" %}</span></a></li>
+                {% if helpdesk_settings.HELPDESK_KB_ENABLED %}
                 <li><a href='{% url 'helpdesk_kb_index' %}'><span class="glyphicon glyphicon-tree-deciduous"></span><span class="nav-text">{% trans "Knowledgebase" %}</span></a></li>
+                {% endif %}
                 {% if user_saved_queries_ %}
                     <li class="headerlink dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#"><span class="glyphicon glyphicon-filter"></span><span class="nav-text"> {% trans "Saved Query" %} <b class="caret"></b></span></a>
                         <ul class="dropdown-menu">
