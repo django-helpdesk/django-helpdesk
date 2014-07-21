@@ -18,10 +18,15 @@ table {
 
 #header h1 {
     float: left;
+    margin-top: 20px;
+    padding-top: 20px;
+    line-height: 24px;
 }
 
 #header ul {
     float: right;
+    margin-top: 40px;
+    line-height: 24px;
 }
 #header li {
     display: inline;
@@ -147,6 +152,11 @@ td a, th a {
 
 td {
     font-size: 10pt;
+}
+
+td.report {
+    font-size: 10pt;
+    text-align: center;
 }
 
 .hover {

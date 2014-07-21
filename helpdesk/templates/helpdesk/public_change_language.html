@@ -12,7 +12,7 @@
         <option value="{{ language.code }}"{% if LANGUAGE_CODE = language.code %} selected{% endif %}>{{ language.name_local }} ({{ language.code }})</option>
         {% endfor %}
     </select>
-    <input type="submit" value="Go" />
+    <input class="btn btn-primary" type="submit" value="Go" />
 </form>
 
 {% endblock %}

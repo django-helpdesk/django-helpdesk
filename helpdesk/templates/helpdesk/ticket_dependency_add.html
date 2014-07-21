@@ -1,4 +1,4 @@
-{% extends "helpdesk/base.html" %}{% load i18n %}
+{% extends "helpdesk/base.html" %}{% load i18n %}{% load url from future %}
 
 {% block helpdesk_title %}{% trans "Add Ticket Dependency" %}{% endblock %}
 
@@ -18,7 +18,7 @@
     {% endfor %}</dl>
 </fieldset>
 
-<input type='submit' value='{% trans "Save Ticket Dependency" %}' />
+<input class="btn btn-primary" type='submit' value='{% trans "Save Ticket Dependency" %}' />
 
 {% csrf_token %}</form>
 

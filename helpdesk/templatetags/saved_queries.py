@@ -11,9 +11,9 @@ from django.db.models import Q
 from helpdesk.models import SavedSearch
 
 
-def saved_queries(request):
+def saved_queries(user):
     try:
-        user_saved_queries = SavedSearch.objects.filter(Q(user=request.user) | Q(shared__exact=True))
+        user_saved_queries = SavedSearch.objects.filter(Q(user=user) | Q(shared__exact=True))
         return user_saved_queries
     except Exception, e:
         import sys

@@ -1,4 +1,4 @@
-{% extends "helpdesk/base.html" %}{% load i18n %}
+{% extends "helpdesk/base.html" %}{% load i18n %}{% load url from future %}
 
 {% block helpdesk_title %}{% trans "Delete Ticket CC" %}{% endblock %}
 
@@ -10,5 +10,5 @@
 
 <p><a href='../../'>{% trans "Don't Delete" %}</a></p>
 
-<form method='post' action='./'><input type='submit' value='{% trans "Yes, Delete" %}' />{% csrf_token %}</form>
+<form method='post' action='./'><input class="btn btn-primary" type='submit' value='{% trans "Yes, Delete" %}' />{% csrf_token %}</form>
 {% endblock %}

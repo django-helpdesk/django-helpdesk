@@ -9,7 +9,7 @@ scripts/create_escalation_exclusion.py - Easy way to routinely add particular
                                          escalation should take place.
 """
 
-from datetime import datetime, timedelta, date
+from datetime import timedelta, date
 import getopt
 from optparse import make_option
 import sys

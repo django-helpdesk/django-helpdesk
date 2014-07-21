@@ -1,6 +1,7 @@
-{% extends "helpdesk/base.html" %}{% load i18n %}
-{% block helpdesk_title %}{% trans "Ticket Listing" %}{% endblock %}
+{% extends "helpdesk/base.html" %}{% load i18n %}{% load url from future %}
+{% block helpdesk_title %}{% trans "Tickets" %}{% endblock %}
 {% block helpdesk_head %}
+
 <script type='text/javascript' language='javascript' src='{{ STATIC_URL }}helpdesk/filter.js'></script>
 <script type='text/javascript' language='javascript' src='{{ STATIC_URL }}helpdesk/hover.js'></script>
 
@@ -32,12 +33,14 @@ $(document).ready(function() {
 });
 </script>
 {% endblock %}
+{% block h1_title %}Tickets
+    {% if from_saved_query %} [{{ saved_query.title }}]{% endif %}{% endblock %}
 {% block helpdesk_body %}
 
 {% load in_list %}
 
-<div id="searchtabs">
-    <ul>
+<div id="searchtabs" class="row">
+    {% comment %}<ul>
     <li><a href='#tabfilter'>{% trans "Query Options" %}</a></li>
     {% if not from_saved_query %}
     <li><a href='#tabsave'>{% trans "Save This Query" %}</a></li>
@@ -45,10 +48,19 @@ $(document).ready(function() {
     {% if user_saved_queries %}
     <li><a href='#tabload'>{% trans "Load Saved Query" %}</a></li>
     {% endif %}
-    </ul>
-    
-    <div id='tabfilter'>
-    <h3>{% trans "Change Query" %}</h3>
+    </ul>{% endcomment %}
+
+<div class="panel-group filter-options" id="accordion">
+    <div id='tabfilter' class="panel panel-default">
+    <div class="panel-heading">
+    <h3 class="panel-title">
+        <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
+        {% trans "Change Query" %}
+        </a>
+    </h3>
+    </div>
+    <div id="collapseOne" class="panel-collapse collapse in">
+      <div class="panel-body">
     <form>
         <select name='select' id='filterBuilderSelect'>
         <option value='Sort'>{% trans "Sorting" %}</option>
@@ -57,15 +69,12 @@ $(document).ready(function() {
         <option value='Status'>{% trans "Status" %}</option>
         <option value='Keywords'>{% trans "Keywords" %}</option>
         <option value='Dates'>{% trans "Date Range" %}</option>
-        {% if tags_enabled %}
-        <option value='Tags'>{% trans "Tags" %}</option>
-        {% endif %}
         </select>
         <input type='button' id='filterBuilderButton' value='+' />
     {% csrf_token %}</form>
 
     <form method='get' action='./'>
-    <div class='filterBox{% if query_params.sorting %} filterBoxShow{% endif %}' id='filterBoxSort'>
+    <div class='thumbnail filterBox{% if query_params.sorting %} filterBoxShow{% endif %}' id='filterBoxSort'>
     <label for='id_sort'>{% trans "Sorting" %}</label>
     <select id='id_sort' name='sort'>
         <option value='created'{% ifequal query_params.sorting "created"%} selected='selected'{% endifequal %}>
@@ -93,7 +102,7 @@ $(document).ready(function() {
     <input type='button' class='filterBuilderRemove' value='-' />
     </div>
 
-    <div class='filterBox{% if query_params.filtering.assigned_to__id__in %} filterBoxShow{% endif %}' id='filterBoxOwner'>
+    <div class='thumbnail filterBox{% if query_params.filtering.assigned_to__id__in %} filterBoxShow{% endif %}' id='filterBoxOwner'>
     <label for='id_owners'>{% trans "Owner(s)" %}</label>
     <select id='id_owners' name='assigned_to' multiple='selected' size='5'>
         {% for u in user_choices %}
@@ -106,53 +115,55 @@ $(document).ready(function() {
     <input type='button' class='filterBuilderRemove' value='-' />
     </div>
 
-    <div class='filterBox{% if query_params.filtering.queue__id__in %} filterBoxShow{% endif %}' id='filterBoxQueue'>
+    <div class='thumbnail filterBox{% if query_params.filtering.queue__id__in %} filterBoxShow{% endif %}' id='filterBoxQueue'>
     <label for='id_queues'>{% trans "Queue(s)" %}</label><select id='id_queues' name='queue' multiple='selected' size='5'>{% for q in queue_choices %}<option value='{{ q.id }}'{% if q.id|in_list:query_params.filtering.queue__id__in %} selected='selected'{% endif %}>{{ q.title }}</option>{% endfor %}</select>
     <p class='filterHelp'>{% trans "Ctrl-click to select multiple options" %}</p>
     <input type='button' class='filterBuilderRemove' value='-' />
     </div>
 
-    <div class='filterBox{% if query_params.filtering.status__in %} filterBoxShow{% endif %}' id='filterBoxStatus'>
+    <div class='thumbnail filterBox{% if query_params.filtering.status__in %} filterBoxShow{% endif %}' id='filterBoxStatus'>
     <label for='id_statuses'>{% trans "Status(es)" %}</label><select id='id_statuses' name='status' multiple='selected' size='5'>{% for s in status_choices %}<option value='{{ s.0 }}'{% if s.0|in_list:query_params.filtering.status__in %} selected='selected'{% endif %}>{{ s.1 }}</option>{% endfor %}</select>
     <p class='filterHelp'>{% trans "Ctrl-click to select multiple options" %}</p>
     <input type='button' class='filterBuilderRemove' value='-' />
     </div>
     
-    <div class='filterBox{% if query_params.filtering.created__gte or query_params.filtering.created__lte %} filterBoxShow{% endif %}' id='filterBoxDates'>
+    <div class='thumbnail filterBox{% if query_params.filtering.created__gte or query_params.filtering.created__lte %} filterBoxShow{% endif %}' id='filterBoxDates'>
         <label for='id_date_from'>{% trans "Date (From)" %}</label><input type='text' name='date_from' value='{{ query_params.filtering.created__gte }}' id='id_date_from' />
         <label for='id_date_to'>{% trans "Date (To)" %}</label><input type='text' name='date_to' value='{{ query_params.filtering.created__lte }}' id='id_date_to' />
     <p class='filterHelp'>{% trans "Use YYYY-MM-DD date format, eg 2011-05-29" %}</p>
     <input type='button' class='filterBuilderRemove' value='-' />
     </div>
 
-{% if tags_enabled %}
-<div class='filterBox{% if query_params.tags %} filterBoxShow{% endif %}' id='filterBoxTags'>
-  <label for='id_tags'>{% trans "Tag(s)" %}</label><select id='id_tags' name='tags' multiple='selected' size='5'>{% for t in tag_choices %}<option value='{{t.name}}'{% if t.name|in_list:query_params.tags %} selected='selected'{% endif %}>{{ t.name }}</option>{% endfor %}</select>
-<p class='filterHelp'>{% trans "Ctrl-click to select multiple options" %}</p>
-<input type='button' class='filterBuilderRemove' value='-' />
-</div>
-{% endif %}
-
-    <div class='filterBox{% if query %} filterBoxShow{% endif %}' id='filterBoxKeywords'>
+    <div class='thumbnail filterBox{% if query %} filterBoxShow{% endif %}' id='filterBoxKeywords'>
     <label for='id_query'>{% trans "Keywords" %}</label><input type='text' name='q' value='{{ query }}' id='id_query' />
     <p class='filterHelp'>{% trans "Keywords are case-insensitive, and will be looked for in the title, body and submitter fields." %}</p>
     <input type='button' class='filterBuilderRemove' value='-' />
     </div>
     <hr style='clear: both;' />
-    <input type='submit' value='{% trans "Apply Filter" %}' />
-    {% if from_saved_query and saved_query.user = user %}
-    <p>{% blocktrans with saved_query.title as query_name %}You are currently viewing saved query <em>{{ query_name }}</em>.{% endblocktrans %} <a href='{% url helpdesk_delete_query saved_query.id %}'>{% trans "Delete Saved Query" %}</a></p>
+    <input class="btn btn-primary" type='submit' value='{% trans "Apply Filter" %}' />
+    {% if from_saved_query and saved_query.user == user %}
+    <p>{% blocktrans with saved_query.title as query_name %}You are currently viewing saved query <strong>"{{ query_name }}"</strong>.{% endblocktrans %} <a href='{% url 'helpdesk_delete_query' saved_query.id %}'>{% trans "Delete Saved Query" %}</a></p>
     {% endif %}
     {% if from_saved_query %}
     <p>{% blocktrans with saved_query.id as query_id %}<a href='../reports/?saved_query={{ query_id }}'>Run a report</a> on this query to see stats and charts for the data listed below.{% endblocktrans %}</p>
     {% endif %}
     {% csrf_token %}</form>
     </div>
+    </div>
+    </div>
+
     
     {% if not from_saved_query %}
-    <div class='tab' id='tabsave'>
-    <h3>{% trans "Save Query" %}</h3>
-    <form method='post' action='{% url helpdesk_savequery %}'>
+    <div class='panel panel-default' id='tabsave'>
+    <div class="panel-heading">
+    <h3 class="panel-title">
+        <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwo">
+        {% trans "Save Query" %}</a>
+    </h3>
+    </div>
+    <div id="collapseTwo" class="panel-collapse collapse">
+      <div class="panel-body">
+    <form method='post' action='{% url 'helpdesk_savequery' %}'>
     <input type='hidden' name='query_encoded' value='{{ urlsafe_query }}' />
     <dl>
         <dt><label for='id_title'>{% trans "Query Name" %}</label></dt>
@@ -166,37 +177,53 @@ $(document).ready(function() {
     </dl>
 
     <div class='buttons'>
-        <input type='submit' value='{% trans "Save Query" %}'>
+        <input class="btn btn-primary" type='submit' value='{% trans "Save Query" %}'>
     </div>
 
     {% csrf_token %}</form>
-    </div>{% endif %}
+    </div>
+    </div>
+    </div>
+    {% endif %}
 
-    <div id='tabload'>
-    <h3>{% trans "Use Saved Query" %}</h3>
-    <form method='get' action='{% url helpdesk_list %}'>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title">
+          <a data-toggle="collapse" data-parent="#accordion" href="#collapseThree">
+          {% trans "Use Saved Query" %}
+          </a>
+      </h3>
+    </div>
+    <div id="collapseThree" class="panel-collapse collapse">
+      <div class="panel-body">
+    <form method='get' action='{% url 'helpdesk_list' %}'>
     <p><label for='id_query_selector'>{% trans "Query" %}</label> <select name='saved_query' id='id_query_selector'>
         {% for q in user_saved_queries %}
         <option value='{{ q.id }}'>{{ q.title }}{% if q.shared %} (Shared{% ifnotequal user q.user %} by {{ q.user.username }}{% endifnotequal %}){% endif %}</option>
         {% endfor %}
     </select></p>
-    <input type='submit' value='{% trans "Run Query" %}'>
+    <input class="btn btn-primary" type='submit' value='{% trans "Run Query" %}'>
     {% csrf_token %}</form>
     </div>
-    
+    </div>
+    </div>
+</div>
+
 </div>
 
 
 
-
-
-
+<div class="row">
 
 {{ search_message|safe }}
-<form method='post' action='{% url helpdesk_mass_update %}' id="ticket_mass_update">
-<table width='100%'>
+<form method='post' action='{% url 'helpdesk_mass_update' %}' id="ticket_mass_update">
+<table class="table table-hover table-bordered">
+<thead>
 <tr class='row_tablehead'><td colspan='9'>{% trans "Tickets" %}</td></tr>
-<tr class='row_columnheads'><th>#</th><th>&nbsp;</th><th>{% trans "Pr" %}</th><th>{% trans "Title" %}</th><th>{% trans "Queue" %}</th><th>{% trans "Status" %}</th><th>{% trans "Created" %}</th><th>{% trans "Owner" %}</th>{% if tags_enabled %}<th>{% trans "Tags" %}</th>{% endif %}</tr>
+<tr class='row_columnheads'><th>#</th><th>&nbsp;</th><th>{% trans "Pr" %}</th><th>{% trans "Title" %}</th><th>{% trans "Queue" %}</th><th>{% trans "Status" %}</th><th>{% trans "Created" %}</th><th>{% trans "Owner" %}</th></tr>
+</thead>
+<tbody>
 {% if tickets %}{% for ticket in tickets.object_list %}
 <tr class='row_{% cycle odd,even %} row_hover'>
 <th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.ticket }}</a></th>
@@ -207,11 +234,11 @@ $(document).ready(function() {
 <td>{{ ticket.get_status }}</td>
 <td><span title='{{ ticket.created|date:"r" }}'>{{ ticket.created|timesince }} ago</span></td>
 <td>{{ ticket.get_assigned_to }}</td>
-{% if tags_enabled %}<td>{{ ticket.tags }}</td>{% endif %}
 </tr>
 {% endfor %}{% else %}
 <tr class='row_odd'><td colspan='5'>{% trans "No Tickets Match Your Selection" %}</td></tr>
 {% endif %}
+</tbody>
 </table>
 <div class="pagination">
     <span class="step-links">
@@ -234,3 +261,4 @@ $(document).ready(function() {
 <p><label for='id_mass_action'>{% trans "With Selected Tickets:" %}</label> <select name='action' id='id_mass_action'><option value='take'>{% trans "Take (Assign to me)" %}</option><option value='delete'>{% trans "Delete" %}</option><optgroup label='{% trans "Close" %}'><option value='close'>{% trans "Close (Don't Send E-Mail)" %}</option><option value='close_public'>{% trans "Close (Send E-Mail)" %}</option></optgroup><optgroup label='{% trans "Assign To" %}'><option value='unassign'>{% trans "Nobody (Unassign)" %}</option>{% for u in user_choices %}<option value='assign_{{ u.id }}'>{{ u.username }}</option>{% endfor %}</optgroup></select> <input type='submit' value='Go' /></p>
 {% csrf_token %}</form>
 {% endblock %}
+</div>

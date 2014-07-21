@@ -54,6 +54,7 @@ def send_templated_mail(template_name, email_context, recipients, sender=None, b
     from django.template import loader, Context
 
     from helpdesk.models import EmailTemplate
+    from helpdesk.settings import HELPDESK_EMAIL_SUBJECT_TEMPLATE
     import os
 
     context = Context(email_context)
@@ -104,8 +105,9 @@ def send_templated_mail(template_name, email_context, recipients, sender=None, b
         ).render(context)
 
     subject_part = loader.get_template_from_string(
-        "{{ ticket.ticket }} {{ ticket.title|safe }} %s" % t.subject
-        ).render(context)
+        HELPDESK_EMAIL_SUBJECT_TEMPLATE % {
+            "subject": t.subject,
+        }).render(context)
 
     if isinstance(recipients,(str,unicode)):
         if recipients.find(','):
@@ -113,7 +115,7 @@ def send_templated_mail(template_name, email_context, recipients, sender=None, b
     elif type(recipients) != list:
         recipients = [recipients,]
 
-    msg = EmailMultiAlternatives(   subject_part,
+    msg = EmailMultiAlternatives(   subject_part.replace('\n', ''),
                                     text_part,
                                     sender,
                                     recipients,
@@ -153,7 +155,7 @@ def query_to_dict(results, descriptions):
 
 def apply_query(queryset, params):
     """
-    Apply a dict-based set of filters & paramaters to a queryset.
+    Apply a dict-based set of filters & parameters to a queryset.
 
     queryset is a Django queryset, eg MyModel.objects.all() or
              MyModel.objects.filter(user=request.user)
@@ -174,7 +176,7 @@ def apply_query(queryset, params):
         queryset = queryset.filter(params['other_filter'])
 
     sorting = params.get('sorting', None)
-    if not sorting:
+    if sorting:
         sortreverse = params.get('sortreverse', None)
         if sortreverse:
             sorting = "-%s" % sorting
@@ -186,7 +188,7 @@ def apply_query(queryset, params):
 def safe_template_context(ticket):
     """
     Return a dictionary that can be used as a template context to render
-    comments and other details with ticket or queue paramaters. Note that
+    comments and other details with ticket or queue parameters. Note that
     we don't just provide the Ticket & Queue objects to the template as
     they could reveal confidential information. Just imagine these two options:
         * {{ ticket.queue.email_box_password }}
@@ -241,9 +243,13 @@ def text_is_spam(text, request):
         from helpdesk.akismet import Akismet
     except:
         return False
+    try:
+        site = Site.objects.get_current()
+    except:
+        site = Site(domain='configure-django-sites.com')
 
     ak = Akismet(
-        blog_url='http://%s/' % Site.objects.get(pk=settings.SITE_ID).domain,
+        blog_url='http://%s/' % site.domain,
         agent='django-helpdesk',
     )
 

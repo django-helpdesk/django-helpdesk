@@ -1,4 +1,4 @@
-{% extends "helpdesk/base.html" %}{% load i18n %}
+{% extends "helpdesk/base.html" %}{% load i18n bootstrap %}{% load url from future %}
 {% block helpdesk_title %}{% trans "View Ticket Details" %}{% endblock %}
 {% block helpdesk_head %}
 <script type="text/javascript">
@@ -19,7 +19,7 @@
         $('#id_preset').change(function() {
             preset = $('#id_preset').val();
             if (preset != '') {
-                $.get("{% url helpdesk_raw "preset" %}?id=" + preset, function(data) {
+                $.get("{% url 'helpdesk_raw' "preset" %}?id=" + preset, function(data) {
                     $("#commentBox").val(data)
                 });
             }
@@ -31,7 +31,7 @@
            distribution, this will have to do. */
         $(".AddAnotherFile>a").click(function() {
             $(this).parent().remove();
-            $("#FileUpload>dl").append("<dt><label>{% trans "Attach another File" %}</label></dt><dd><input type='file' name='attachment' id='file' /> <span class='AddAnotherFile'>(<a href='#'>{% trans "Add Another File" %}</a>)</span></dd>");
+            $("#FileUpload>dl").append("<dt><label>{% trans "Attach another File" %}</label></dt><dd><input type='file' name='attachment' id='file' multiple/> <span class='AddAnotherFile'>(<a href='#'>{% trans "Add Another File" %}</a>)</span></dd>");
             processAddFileClick();
             return false;
         });
@@ -39,6 +39,8 @@
     }
 </script>
 {% endblock %}
+
+{% block h1_title %}{{ ticket.ticket_for_url }}{% endblock %}
 
 {% block helpdesk_body %}
 {% if helpdesk_settings.HELPDESK_TRANSLATE_TICKET_COMMENTS %}
@@ -67,22 +69,28 @@ function googleTranslateElementInit() {
 {% if helpdesk_settings.HELPDESK_FOLLOWUP_MOD %}
     <div class='followup_mod'>
     <div class='title'>
-        <span class='byline'>{{ followup.user.get_full_name }}&nbsp;&nbsp;&nbsp;&nbsp;{{ followup.date }} ({{ followup.date|timesince }} ago)</span> <small>{{ followup.title }}</small>
+        <span class='byline text-info'>{{ followup.user.get_full_name }}&nbsp;&nbsp;&nbsp;&nbsp;{{ followup.date }} ({{ followup.date|timesince }} ago)</span> <small>{{ followup.title }}</small>
         {% if not followup.public %} <span class='private'>({% trans "Private" %})</span>{% endif %}
         {% if helpdesk_settings.HELPDESK_SHOW_EDIT_BUTTON_FOLLOW_UP %}
         {% if followup.user and request.user == followup.user and not followup.ticketchange_set.all %}
-        <a href="{% url helpdesk_followup_edit ticket.id followup.id %}" class='followup-edit'><img width="60" height="15" title="Edit" alt="Edit" src="{{ STATIC_URL }}helpdesk/buttons/edit.png"></a>
+        <a href="{% url 'helpdesk_followup_edit' ticket.id followup.id %}" class='followup-edit'><img width="60" height="15" title="Edit" alt="Edit" src="{{ STATIC_URL }}helpdesk/buttons/edit.png"></a>
         {% endif %}
+        {% endif %}
+        {% if user.is_superuser and helpdesk_settings.HELPDESK_SHOW_DELETE_BUTTON_SUPERUSER_FOLLOW_UP %}
+        <a href="{% url 'helpdesk_followup_delete' ticket.id followup.id %}" class='followup-edit'><img width="60" height="15" title="Delete" alt="Delete" src="{{ STATIC_URL }}helpdesk/buttons/delete.png"></a>
         {% endif %}
     </div>
 {% else %}
-    <div class='followup'>
+    <div class='followup well'>
     <div class='title'>
-        {{ followup.title }} <span class='byline'>{% if followup.user %}by {{ followup.user }}{% endif %} <span title='{{ followup.date|date:"r" }}'>{{ followup.date|timesince }} ago</span>{% if not followup.public %} <span class='private'>({% trans "Private" %})</span>{% endif %}</span>
+        {{ followup.title }} <span class='byline text-info'>{% if followup.user %}by {{ followup.user }}{% endif %} <span title='{{ followup.date|date:"r" }}'>{{ followup.date|timesince }} ago</span>{% if not followup.public %} <span class='private'>({% trans "Private" %})</span>{% endif %}</span>
         {% if helpdesk_settings.HELPDESK_SHOW_EDIT_BUTTON_FOLLOW_UP %}
         {% if followup.user and request.user == followup.user and not followup.ticketchange_set.all %}
-        <a href="{% url helpdesk_followup_edit ticket.id followup.id %}" class='followup-edit'><img width="60" height="15" title="Edit" alt="Edit" src="{{ STATIC_URL }}helpdesk/buttons/edit.png"></a>
+        <a href="{% url 'helpdesk_followup_edit' ticket.id followup.id %}" class='followup-edit'><img width="60" height="15" title="Edit" alt="Edit" src="{{ STATIC_URL }}helpdesk/buttons/edit.png"></a>
         {% endif %}
+        {% endif %}
+        {% if user.is_superuser and helpdesk_settings.HELPDESK_SHOW_DELETE_BUTTON_SUPERUSER_FOLLOW_UP %}
+        <a href="{% url 'helpdesk_followup_delete' ticket.id followup.id %}" class='followup-edit'><img width="60" height="15" title="Delete" alt="Delete" src="{{ STATIC_URL }}helpdesk/buttons/delete.png"></a>
         {% endif %}
     </div>
 {% endif %}
@@ -90,12 +98,12 @@ function googleTranslateElementInit() {
 {% for change in followup.ticketchange_set.all %}
 {% if forloop.first %}<div class='changes'><ul>{% endif %}
 <li>{% blocktrans with change.field as field and change.old_value as old_value and change.new_value as new_value %}Changed {{ field }} from {{ old_value }} to {{ new_value }}.{% endblocktrans %}</li>
-{% if forloop.last %}</div></ul>{% endif %}
+{% if forloop.last %}</ul></div>{% endif %}
 {% endfor %}
 {% for attachment in followup.attachment_set.all %}{% if forloop.first %}<div class='attachments'><ul>{% endif %}
 <li><a href='{{ attachment.file.url }}'>{{ attachment.filename }}</a> ({{ attachment.mime_type }}, {{ attachment.size|filesizeformat }})
 {% if followup.user and request.user == followup.user %}
-<a href='{% url helpdesk_attachment_del ticket.id attachment.id %}'>delete</a>
+<a href='{% url 'helpdesk_attachment_del' ticket.id attachment.id %}'>delete</a>
 {% endif %}
 </li>
 {% if forloop.last %}</ul></div>{% endif %}
@@ -107,7 +115,7 @@ function googleTranslateElementInit() {
 </div>
 {% endif %}
 
-<div id='add-followup'>
+<div id='add-followup' class="well">
 <h3>{% trans "Respond to this ticket" %}</h3>
 
 <form method='post' action='update/' enctype='multipart/form-data'>
@@ -178,11 +186,6 @@ function googleTranslateElementInit() {
         <dt><label for='id_due_date'>{% trans "Due on" %}</label></dt>
         <dd>{{ form.due_date }}</dd>
  
-       {% if tags_enabled %}
-        <dt><label for='id_tags'>{% trans "Tags" %}</label></dt>
-        <dd><input type='text' id='id_tags' name='tags' value='{{ ticket.tags }}'/></dd>
-       {% endif %}
-
     </dl>
 
 </div>
@@ -194,14 +197,14 @@ function googleTranslateElementInit() {
     <dl>
 
         <dt><label for='id_file'>{% trans "Attach a File" %}</label></dt>
-        <dd><input type='file' name='attachment' id='file' /> <span class='AddAnotherFile'>(<a href='#'>{% trans "Add Another File" %}</a>)</span></dd>
+        <dd><input type='file' name='attachment' id='file' multiple/> <span class='AddAnotherFile'>(<a href='#'>{% trans "Add Another File" %}</a>)</span></dd>
     </dl>
 
 </div>
 
 </fieldset>
 
-<input type='submit' value='{% trans "Update This Ticket" %}' />
+<input class="btn btn-primary" type='submit' value='{% trans "Update This Ticket" %}' />
 
 {% csrf_token %}</form>
 

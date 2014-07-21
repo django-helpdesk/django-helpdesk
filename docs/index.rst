@@ -3,10 +3,27 @@ Welcome to django-helpdesk's documentation!
 
 django-helpdesk is a Django application to manage helpdesk tickets for your internal helpdesk. It was formerly known as Jutda Helpdesk.
 
+Contents
+--------
+
+.. toctree::
+   :maxdepth: 2
+   :glob:
+
+   license
+   install
+   configuration
+   settings
+   spam
+   custom_fields
+   api
+   contributing
+
+
 How Does It Look?
 -----------------
 
-You can see a demo installation at http://demo.jutdahelpdesk.com
+You can see a demo installation at http://django-helpdesk-demo.herokuapp.com/
 
 Quick Start
 -----------
@@ -18,7 +35,7 @@ Key Features
 
 django-helpdesk has been designed for small businesses who need to recieve, manage and respond to requests for help from customers. In this context *'customers'* may be external users, or other people within your company.
 
-* Tickets can be opened vi a email
+* Tickets can be opened via email
 * Multiple queues / categories of tickets
 * Integrated FAQ / knowledgebase
 
@@ -52,35 +69,8 @@ django-helpdesk is released under the BSD license, however it packages 3rd party
 Dependencies
 ------------
 
-1. Python 2.4+
-2. Django (1.2 or newer)
+1. Python 2.5+
+2. Django (1.3 or newer)
 3. South for database migrations (highly recommended, but not required). Download from http://south.aeracode.org/
-4. An existing **working** Django project with database etc. If you cannot log into the Admin, you won't get this product working!
-
-Translation
------------
-
-.. image:: http://www.transifex.net/projects/p/django-helpdesk/resource/core/chart/image_png
-
-If you want to help translate django-helpdesk into languages other than English, we encourage you to make use of our Transifex project.
-
-http://www.transifex.net/projects/p/django-helpdesk/resource/core/
-
-Feel free to request access to contribute your translations.
-
-Contents:
----------
-
-.. toctree::
-   :maxdepth: 2
-   :glob:
-
-   license
-   install
-   configuration
-   settings
-   spam
-   custom_fields
-   api
-   contributing
+4. An existing **working** Django project with database etc. If you cannot log into the Admin, you won't get this product working! This means you **must** run `syncdb` **before** you add ``helpdesk`` to your ``INSTALLED_APPS``.
 

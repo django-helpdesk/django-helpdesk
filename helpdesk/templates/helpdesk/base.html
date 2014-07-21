@@ -1,73 +1,26 @@
 {% load i18n %}
+{% load url from future %}
 {% load saved_queries %}
 {% load load_helpdesk_settings %}
 {% with request|load_helpdesk_settings as helpdesk_settings %}
-{% with request|saved_queries as user_saved_queries_ %}
+{% with user|saved_queries as user_saved_queries_ %}
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
         <title>{% block helpdesk_title %}Helpdesk{% endblock %} :: {% trans "Powered by django-helpdesk" %}</title>
-        <script src='{{ STATIC_URL }}helpdesk/jquery-1.5.min.js' type='text/javascript' language='javascript'></script>
+
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
         <script src='{{ STATIC_URL }}helpdesk/jquery-ui-1.8.9.custom.min.js' type='text/javascript' language='javascript'></script>
-        {% comment %}
-        <script src='{{ STATIC_URL }}helpdesk/jquery.translate-debug-all.js' type='text/javascript' language='javascript'></script>
-        {% endcomment %}
-        <link rel='stylesheet' href='{{ STATIC_URL }}helpdesk/helpdesk.css' type='text/css'  media="screen" />
-        <link rel='stylesheet' href='{{ STATIC_URL }}helpdesk/helpdesk-print.css' type='text/css' media="print" />
-        <link rel='stylesheet' href='{{ STATIC_URL }}helpdesk/jquery-smoothness-theme/jquery-ui-1.8.9.custom.css' type='text/css' />
-        <link rel='alternate' href='{% url helpdesk_rss "user" %}{{ user.username }}/' type='application/rss+xml' title='{% trans "My Open Tickets" %}' />
-        <link rel='alternate' href='{% url helpdesk_rss "recent_activity" %}' type='application/rss+xml' title='{% trans "All Recent Activity" %}' />
-        <link rel='alternate' href='{% url helpdesk_rss "unassigned" %}' type='application/rss+xml' title='{% trans "Unassigned Tickets" %}' />
+        <link rel='stylesheet' href='{{ STATIC_URL }}helpdesk/helpdesk-extend.css' type='text/css'  media="screen" >
 
-        {% comment %}
-        <script type="text/javascript">
+        <!--link rel='stylesheet' href='{{ STATIC_URL }}helpdesk/helpdesk-print.css' type='text/css' media="print" /-->
+        <!--link rel='stylesheet' href='{{ STATIC_URL }}helpdesk/jquery-smoothness-theme/jquery-ui-1.8.9.custom.css' type='text/css' /-->
+        <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.2/js/bootstrap.min.js"></script>
+        <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css" rel="stylesheet">
+        <link rel='alternate' href='{% url 'helpdesk_rss_user' user.username %}' type='application/rss+xml' title='{% trans "My Open Tickets" %}' />
+        <link rel='alternate' href='{% url 'helpdesk_rss_activity' %}' type='application/rss+xml' title='{% trans "All Recent Activity" %}' />
+        <link rel='alternate' href='{% url 'helpdesk_rss_unassigned' %}' type='application/rss+xml' title='{% trans "Unassigned Tickets" %}' />
 
-        $(document).ready(function(){
-            // replace display while hovering over menu item
-            $('li.headerlink').hover(
-	            function() { $('ul', this).css('display', 'block'); },
-	            function() { $('ul', this).css('display', 'none'); });
-
-            {% if helpdesk_settings.HELPDESK_TRANSLATE_TICKET_COMMENTS %}
-            // add translate functionality - google translate V1 is deprecated
-            $.translate.load(bingID);
-            $.translate(function(){ //when the Language API is loaded
-                $.translate().ui({
-                      tags: ["select", "option"],
-                      // a function that filters the languages:
-                      {% if helpdesk_settings.HELPDESK_TRANSLATE_TICKET_COMMENTS_LANG %}
-                      filter: {{ helpdesk_settings.HELPDESK_TRANSLATE_TICKET_COMMENTS_LANG|safe }},
-                      {% else %}
-                      // all languages
-                      filter: $.translate.isTranslatable, 
-                      {% endif %}
-                      //a function that returns the text to display based on the language code:
-                      label: $.translate.toNativeLanguage ||
-                             function(langCode, lang){
-                               return $.translate.capitalize(lang);
-                             },
-                      // whether to include the UNKNOWN:"" along with the languages:
-                      includeUnknown: false,
-                })
-
-                .click(function(){ // when selecting a language - 'change' is not enough, because your first language in the menu might be your target language
-                    $('#translate_block').translate( '', $(this).val(), { // translate from current language to the selected language
-                      not: '.option, select, pre, .translate_dropdown', // exclude these elements
-                      fromOriginal: true, // always translate from original version (even after the page has been translated)
-                      async:  true, // this prevents the browser from freezing on larger sites by executing each DOM filtering iteration with a delay
-                      toggle: true, // all translation will be cached (stored with $.data) and used if it's found, or translated to otherwise
-                      walk: true // finds elements having textnodes and translates only their content; on very large and complex pages this might take some time 
-                    })
-                })
-                .appendTo('#translate_dropdown'); // insert the dropdown menu to the page
-
-            });
-            {% endif %}
-
-        });
-        </script>
-        {% endcomment %}
-        
         <style type="text/css">
         /* hide google translate top bar */
         .goog-te-banner-frame {display: none !important;}
@@ -93,26 +46,23 @@
 
         {% block helpdesk_head %}{% endblock %}
     </head>
-    <body>
-        <div id='container'>
-            <div id='header'>
-                <h1>{% trans "Helpdesk" %}</h1>
+    <body id="helpdesk-body">
+        <div id='container' class="container">
+            <div id='header' class="row">
+                <h1>{% block h1_title %}{% trans "Helpdesk" %}{% endblock %}</h1>
                 {% include "helpdesk/navigation.html" %}
             </div>
 
-            <div id='body'>
+            <div id='body' class="row">
                 {% block helpdesk_body %}{% endblock %}
             </div>
 
-            <div id='footer'>
-                <p>{% include "helpdesk/attribution.html" %}
-                <a href='{% url helpdesk_rss_index %}'><img src='{{ STATIC_URL }}helpdesk/rss_icon.png' width='14' height='14' alt='{% trans "RSS Icon" %}' title='{% trans "RSS Feeds" %}' border='0' />{% trans "RSS Feeds" %}</a>
-                {% if helpdesk_settings.HELPDESK_FOOTER_SHOW_API_LINK %}<a href='{% url helpdesk_api_help %}'>{% trans "API" %}</a>{% endif %}
-                <a href='{% url helpdesk_user_settings %}'>{% trans "User Settings" %}</a>
-                {% if helpdesk_settings.HELPDESK_FOOTER_SHOW_CHANGE_LANGUAGE_LINK %}
-                <a href='{% url helpdesk_public_change_language %}?return_to={{ request.path }}'>{% trans "Change Language" %}</a>
-                {% endif %}
-                {% if user.is_superuser %}<a href='{% url helpdesk_system_settings %}'>{% trans "System Settings" %}</a>{% endif %}</p>
+            <div id='footer' class="row">
+                <div class="col-md-2">{% include "helpdesk/attribution.html" %}</div>
+                <div class="col-md-2"><a href='{% url 'helpdesk_rss_index' %}'><img src='{{ STATIC_URL }}helpdesk/rss_icon.png' width='14' height='14' alt='{% trans "RSS Icon" %}' title='{% trans "RSS Feeds" %}' border='0' />{% trans "RSS Feeds" %}</a></div>
+                <div class="col-md-2"><a href='{% url 'helpdesk_api_help' %}'>{% trans "API" %}</a></div>
+                <div class="col-md-2"><a href='{% url 'helpdesk_user_settings' %}'>{% trans "User Settings" %}</a></div>
+                {% if user.is_superuser %}<div class="col-md-2"><a href='{% url 'helpdesk_system_settings' %}'>{% trans "System Settings" %}</a></div>{% endif %}
             </div>
         </div>
         {% include "helpdesk/debug.html" %}

@@ -10,5 +10,5 @@
 
 <p><a href='../../'>{% trans "Keep Ignoring It" %}</a></p>
 
-<form method='post' action='./'><input type='submit' value='{% trans "Stop Ignoring It" %}' />{% csrf_token %}</form>
+<form method='post' action='./'><input class="btn btn-primary" type='submit' value='{% trans "Stop Ignoring It" %}' />{% csrf_token %}</form>
 {% endblock %}

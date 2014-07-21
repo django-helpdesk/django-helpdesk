@@ -8,7 +8,7 @@ scripts/escalate_tickets.py - Easy way to escalate tickets based on their age,
                               designed to be run from Cron or similar.
 """
 
-from datetime import datetime, timedelta, date
+from datetime import timedelta, date
 import getopt
 from optparse import make_option
 import sys
@@ -16,6 +16,11 @@ import sys
 from django.core.management.base import BaseCommand, CommandError
 from django.db.models import Q
 from django.utils.translation import ugettext as _
+
+try:
+    from django.utils import timezone
+except ImportError:
+    from datetime import datetime as timezone
 
 from helpdesk.models import Queue, Ticket, FollowUp, EscalationExclusion, TicketChange
 from helpdesk.lib import send_templated_mail, safe_template_context
@@ -95,7 +100,7 @@ def escalate_tickets(queues, verbose):
                 | Q(last_escalation__isnull=True, created__lte=req_last_escl_date)
             ):
 
-            t.last_escalation = datetime.now()
+            t.last_escalation = timezone.now()
             t.priority -= 1
             t.save()
 
@@ -138,7 +143,7 @@ def escalate_tickets(queues, verbose):
             f = FollowUp(
                 ticket = t,
                 title = 'Ticket Escalated',
-                date=datetime.now(),
+                date=timezone.now(),
                 public=True,
                 comment=_('Ticket escalated after %s days' % q.escalate_days),
             )

@@ -23,17 +23,21 @@
             <option value="">--------</option>{% for q in user_saved_queries_ %}
             <option value="{{ q.id }}"{% ifequal saved_query q %} selected{% endifequal %}>{{ q.title }}</option>{% endfor %}
         </select>
-        <input type='submit' value='{% trans "Filter Report" %}'>
+        <input class="btn btn-primary" type='submit' value='{% trans "Filter Report" %}'>
     </form>
 {% else %}
     <p>{% trans "Want to filter this report to just show a subset of data? Go to the Ticket List, filter your query, and save your query." %}</p>
 {% endif %}
 
-<table>
+<table class="table table-hover table-bordered">
+<thead>
 <tr class='row_tablehead'><td colspan='{{ headings|length }}'>{{ title }}</td></tr>
 <tr class='row_columnheads'>{% for h in headings %}<th>{% if forloop.first %}{{ h|title }}{% else %}{{ h }}{% endif %}</th>{% endfor %}</tr>
+</thead>
+<tbody>
 {% for d in data %}
-<tr class='row_{% cycle odd,even %}'>{% for f in d %}<td>{{ f }}</td>{% endfor %}</tr>{% endfor %}
+<tr class='row_{% cycle odd,even %}'>{% for f in d %}<td class='report'>{{ f }}</td>{% endfor %}</tr>{% endfor %}
+</tbody>
 </table>
 
 <div class='jqPlot' id='placeholder' style='width: 600px; height: 400px;'></div>

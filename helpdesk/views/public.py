@@ -7,8 +7,6 @@ views/public.py - All public facing views, eg non-staff (no authentication
                   required) views.
 """
 
-from datetime import datetime
-
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, Http404, HttpResponse
 from django.shortcuts import render_to_response, get_object_or_404

@@ -1,9 +1,12 @@
-{% extends "helpdesk/base.html" %}{% load i18n %}
+{% extends "helpdesk/base.html" %}{% load i18n bootstrap %}
 
 {% block helpdesk_title %}{% trans "Edit Ticket" %}{% endblock %}
 
 {% block helpdesk_body %}
-{% blocktrans %}<h2>Edit a Ticket</h2>
+<div class="col-xs-6">
+<div class="panel panel-default">
+
+<div class="panel-body">{% blocktrans %}<h2>Edit a Ticket</h2>
 
 <p>Unless otherwise stated, all fields are required. Please provide as descriptive a title and description as possible.</p>
 
@@ -11,7 +14,8 @@
 
 <form method='post' action='./'>
 <fieldset>
-    <dl>
+    {{ form|bootstrap }}
+    {% comment %}
         {% for field in form %}
             {% if field.is_hidden %}
                 {{ field }}
@@ -23,11 +27,14 @@
             {% endif %}
         {% endfor %}
     </dl>
-    
-    <div class='buttons'>
-        <input type='submit' value='{% trans "Save Changes" %}' />
+    {% endcomment %}
+    <div class='buttons form-group'>
+        <input type='submit' class="btn btn-primary" value='{% trans "Save Changes" %}' />
     </div>
 </fieldset>
 
 {% csrf_token %}</form>
+    </div>
+  </div>
+</div>
 {% endblock %}

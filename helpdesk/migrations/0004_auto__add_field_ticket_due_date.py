@@ -67,7 +67,6 @@ class Migration(SchemaMigration):
             'Meta': {'object_name': 'CustomField'},
             'data_type': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'decimal_places': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
-            'empty_selection_list': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'help_text': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'label': ('django.db.models.fields.CharField', [], {'max_length': "'30'"}),
