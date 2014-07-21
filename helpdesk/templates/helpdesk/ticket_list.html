@@ -223,7 +223,7 @@ $(document).ready(function() {
 <tr class='row_columnheads'><th>#</th><th>&nbsp;</th><th>{% trans "Pr" %}</th><th>{% trans "Title" %}</th><th>{% trans "Queue" %}</th><th>{% trans "Status" %}</th><th>{% trans "Created" %}</th><th>{% trans "Owner" %}</th></tr>
 </thead>
 <tbody>
-{% if tickets %}{% for ticket in tickets.object_list %}
+{% for ticket in tickets.object_list %}
 <tr>
 <th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.ticket }}</a></th>
 <td><input type='checkbox' name='ticket_id' value='{{ ticket.id }}' class='ticket_multi_select' /></td>
@@ -234,9 +234,9 @@ $(document).ready(function() {
 <td><span title='{{ ticket.created|date:"r" }}'>{{ ticket.created|timesince }} ago</span></td>
 <td>{{ ticket.get_assigned_to }}</td>
 </tr>
-{% endfor %}{% else %}
+{% empty %}
 <tr><td colspan='5'>{% trans "No Tickets Match Your Selection" %}</td></tr>
-{% endif %}
+{% endfor %}
 </tbody>
 </table>
 <div class="pagination">
