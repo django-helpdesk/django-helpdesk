@@ -1,4 +1,4 @@
-{% extends "helpdesk/base.html" %}{% load i18n %}{% load url from future %}
+{% extends "helpdesk/base.html" %}{% load i18n humanize %}{% load url from future %}
 {% block helpdesk_title %}{% trans "Tickets" %}{% endblock %}
 {% block helpdesk_head %}
 
@@ -231,7 +231,7 @@ $(document).ready(function() {
 <th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></th>
 <td>{{ ticket.queue }}</td>
 <td>{{ ticket.get_status }}</td>
-<td><span title='{{ ticket.created|date:"r" }}'>{{ ticket.created|timesince }} ago</span></td>
+<td><span title='{{ ticket.created|date:"r" }}'>{{ ticket.created|naturaltime }}</span></td>
 <td>{{ ticket.get_assigned_to }}</td>
 </tr>
 {% empty %}
