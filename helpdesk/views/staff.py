@@ -62,18 +62,18 @@ def dashboard(request):
     """
 
     # open & reopened tickets, assigned to current user
-    tickets = Ticket.objects.filter(
+    tickets = Ticket.objects.select_related('queue').filter(
             assigned_to=request.user,
         ).exclude(
             status__in = [Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
         )
 
     # closed & resolved tickets, assigned to current user
-    tickets_closed_resolved =  Ticket.objects.filter(
+    tickets_closed_resolved =  Ticket.objects.select_related('queue').filter(
             assigned_to=request.user,
             status__in = [Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS])
 
-    unassigned_tickets = Ticket.objects.filter(
+    unassigned_tickets = Ticket.objects.select_related('queue').filter(
             assigned_to__isnull=True,
         ).exclude(
             status=Ticket.CLOSED_STATUS,
@@ -83,7 +83,7 @@ def dashboard(request):
     all_tickets_reported_by_current_user = ''
     email_current_user = request.user.email
     if email_current_user:
-        all_tickets_reported_by_current_user = Ticket.objects.filter(
+        all_tickets_reported_by_current_user = Ticket.objects.select_related('queue').filter(
             submitter_email=email_current_user,
         ).order_by('status')
 
