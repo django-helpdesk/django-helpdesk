@@ -26,6 +26,7 @@ from django.db.models import Q
 from django.http import HttpResponseRedirect, Http404, HttpResponse, HttpResponseForbidden
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import loader, Context, RequestContext
+from django.utils.dates import MONTHS_3
 from django.utils.translation import ugettext as _
 from django.utils.html import escape
 from django import forms
@@ -980,21 +981,7 @@ def run_report(request, report):
     # a second table for more complex queries
     summarytable2 = defaultdict(int)
 
-
-    months = (
-        _('Jan'),
-        _('Feb'),
-        _('Mar'),
-        _('Apr'),
-        _('May'),
-        _('Jun'),
-        _('Jul'),
-        _('Aug'),
-        _('Sep'),
-        _('Oct'),
-        _('Nov'),
-        _('Dec'),
-    )
+    month_name = lambda m: MONTHS_3[m].title()
 
     first_ticket = Ticket.objects.all().order_by('created')[0]
     first_month = first_ticket.created.month
@@ -1007,7 +994,7 @@ def run_report(request, report):
     periods = []
     year, month = first_year, first_month
     working = True
-    periods.append("%s %s" % (months[month - 1], year))
+    periods.append("%s %s" % (month_name(month), year))
 
     while working:
         month += 1
@@ -1016,7 +1003,7 @@ def run_report(request, report):
             month = 1
         if (year > last_year) or (month > last_month and year >= last_year):
             working = False
-        periods.append("%s %s" % (months[month - 1], year))
+        periods.append("%s %s" % (month_name(month), year))
 
     if report == 'userpriority':
         title = _('User by Priority')
@@ -1082,7 +1069,7 @@ def run_report(request, report):
 
         elif report == 'usermonth':
             metric1 = u'%s' % ticket.get_assigned_to
-            metric2 = u'%s %s' % (months[ticket.created.month - 1], ticket.created.year)
+            metric2 = u'%s %s' % (month_name(ticket.created.month), ticket.created.year)
 
         elif report == 'queuepriority':
             metric1 = u'%s' % ticket.queue.title
@@ -1094,11 +1081,11 @@ def run_report(request, report):
 
         elif report == 'queuemonth':
             metric1 = u'%s' % ticket.queue.title
-            metric2 = u'%s %s' % (months[ticket.created.month - 1], ticket.created.year)
+            metric2 = u'%s %s' % (month_name(ticket.created.month), ticket.created.year)
 
         elif report == 'daysuntilticketclosedbymonth':
             metric1 = u'%s' % ticket.queue.title
-            metric2 = u'%s %s' % (months[ticket.created.month - 1], ticket.created.year)
+            metric2 = u'%s %s' % (month_name(ticket.created.month), ticket.created.year)
             metric3 = ticket.modified - ticket.created
             metric3 = metric3.days
 

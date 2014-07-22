@@ -54,6 +54,7 @@ def send_templated_mail(template_name, email_context, recipients, sender=None, b
     from django.template import loader, Context
 
     from helpdesk.models import EmailTemplate
+    from helpdesk.settings import HELPDESK_EMAIL_SUBJECT_TEMPLATE
     import os
 
     context = Context(email_context)
@@ -104,7 +105,7 @@ def send_templated_mail(template_name, email_context, recipients, sender=None, b
         ).render(context)
 
     subject_part = loader.get_template_from_string(
-        settings.HELPDESK_EMAIL_SUBJECT_TEMPLATE % {
+        HELPDESK_EMAIL_SUBJECT_TEMPLATE % {
             "subject": t.subject,
         }).render(context)
 
