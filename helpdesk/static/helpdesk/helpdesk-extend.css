@@ -33,9 +33,9 @@ Bootstrap overrides
 table.table caption {height: 2em; line-height: 2em; font-weight: bold;}
 table.ticket-stats caption {color: #fbff00; font-style: italic;}
 
-.errorlist {list-style: none; }
+.errorlist {list-style: none;}
 .errorlist {padding: 0;}
-.has-error .input-group input, .has-error .input-group select,  .has-error .input-group textarea {border-color: #b94a48}
+.has-error .input-group input, .has-error .input-group select, .has-error .input-group textarea {border-color: #b94a48}
 
 #helpdesk-nav-collapse #searchform {
     padding-top: 0;

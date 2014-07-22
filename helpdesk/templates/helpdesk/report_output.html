@@ -32,7 +32,7 @@
 <table class="table table-hover table-bordered">
 <caption>{{ title }}</caption>
 <thead>
-<tr class='row_columnheads'>{% for h in headings %}<th>{% if forloop.first %}{{ h|title }}{% else %}{{ h }}{% endif %}</th>{% endfor %}</tr>
+<tr>{% for h in headings %}<th>{% if forloop.first %}{{ h|title }}{% else %}{{ h }}{% endif %}</th>{% endfor %}</tr>
 </thead>
 <tbody>
 {% for d in data %}

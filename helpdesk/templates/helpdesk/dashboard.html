@@ -10,7 +10,7 @@
 <table class="table table-hover table-bordered table-striped">
 <caption>{% trans "Helpdesk Summary" %}</caption>
 <thead>
-<tr class='row_columnheads'><th>{% trans "Queue" %}</th><th>{% trans "Open" %}</th><th>{% trans "Resolved" %}</th><th>{% trans "Closed" %}</th></tr>
+<tr><th>{% trans "Queue" %}</th><th>{% trans "Open" %}</th><th>{% trans "Resolved" %}</th><th>{% trans "Closed" %}</th></tr>
 </thead>
 <tbody>
 {% for queue in dash_tickets %}
@@ -36,7 +36,7 @@
 <tr><td colspan='2'>- {% trans "Average number of days until ticket is closed (tickets opened in last 60 days): " %}<strong style="color: red;">{{ basic_ticket_stats.average_nbr_days_until_ticket_closed_last_60_days }}</strong>.
 {% trans "Click" %} <strong><a href="{% url 'helpdesk_report_index' %}daysuntilticketclosedbymonth">here</a></strong> {% trans "for detailed average by month." %} </td></tr>
 <tr><td colspan='2'>- {% trans "Distribution of open tickets, grouped by time period:" %}</td></tr>
-<tr class='row_columnheads'><th>{% trans "Days since opened" %}</th><th>{% trans "Number of open tickets" %}</th></tr>
+<tr><th>{% trans "Days since opened" %}</th><th>{% trans "Number of open tickets" %}</th></tr>
 </thead>
 <tbody>
 {% for entry in basic_ticket_stats.open_ticket_stats %}
@@ -53,7 +53,7 @@
 <table class="table table-hover table-bordered table-striped">
 <caption>{% trans "All Tickets submitted by you" %}</caption>
 <thead>
-<tr class='row_columnheads'><th>#</th><th>{% trans "Pr" %}</th><th>{% trans "Title" %}</th><th>{% trans "Queue" %}</th><th>{% trans "Status" %}</th><th>{% trans "Last Update" %}</th></tr>
+<tr><th>#</th><th>{% trans "Pr" %}</th><th>{% trans "Title" %}</th><th>{% trans "Queue" %}</th><th>{% trans "Status" %}</th><th>{% trans "Last Update" %}</th></tr>
 </thead>
 <tbody>
 {% for ticket in all_tickets_reported_by_current_user %}
@@ -73,7 +73,7 @@
 <table class="table table-hover table-bordered table-striped">
 <caption>{% trans "Open Tickets assigned to you (you are working on this ticket)" %}</caption>
 <thead>
-<tr class='row_columnheads'><th>#</th><th>{% trans "Pr" %}</th><th>{% trans "Title" %}</th><th>{% trans "Queue" %}</th><th>{% trans "Status" %}</th><th>{% trans "Last Update" %}</th></tr>
+<tr><th>#</th><th>{% trans "Pr" %}</th><th>{% trans "Title" %}</th><th>{% trans "Queue" %}</th><th>{% trans "Status" %}</th><th>{% trans "Last Update" %}</th></tr>
 </thead>
 <tbody>
 {% for ticket in user_tickets %}
@@ -94,7 +94,7 @@
 <table class="table table-hover table-bordered table-striped">
 <caption>{% trans "Unassigned Tickets" %} {% trans "(pick up a ticket if you start to work on it)" %}</caption>
 <thead>
-<tr class='row_columnheads'><th>#</th><th>{% trans "Pr" %}</th><th>{% trans "Title" %}</th><th>{% trans "Queue" %}</th><th>{% trans "Created" %}</th><th>&nbsp;</th></tr>
+<tr><th>#</th><th>{% trans "Pr" %}</th><th>{% trans "Title" %}</th><th>{% trans "Queue" %}</th><th>{% trans "Created" %}</th><th>&nbsp;</th></tr>
 </thead>
 <tbody>
 {% for ticket in unassigned_tickets %}
@@ -117,7 +117,7 @@
 <table class="table table-hover table-bordered table-striped">
 <caption>{% trans "Closed & resolved Tickets you used to work on" %}</caption>
 <thead>
-<tr class='row_columnheads'><th>#</th><th>{% trans "Pr" %}</th><th>{% trans "Title" %}</th><th>{% trans "Queue" %}</th><th>{% trans "Status" %}</th><th>{% trans "Last Update" %}</th></tr>
+<tr><th>#</th><th>{% trans "Pr" %}</th><th>{% trans "Title" %}</th><th>{% trans "Queue" %}</th><th>{% trans "Status" %}</th><th>{% trans "Last Update" %}</th></tr>
 </thead>
 <tbody>
 {% for ticket in user_tickets_closed_resolved %}

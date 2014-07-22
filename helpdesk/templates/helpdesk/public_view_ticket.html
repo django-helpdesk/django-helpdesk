@@ -6,7 +6,7 @@
 <table class="table table-hover table-bordered table-striped">
 <caption>{{ ticket.ticket }} . {{ ticket.title }} [{{ ticket.get_status }}]</caption>
 <thead>
-<tr class='row_columnheads'><th colspan='2'>{% blocktrans with ticket.queue as queue_name %}Queue: {{ queue_name }}{% endblocktrans %}</th></tr>
+<tr><th colspan='2'>{% blocktrans with ticket.queue as queue_name %}Queue: {{ queue_name }}{% endblocktrans %}</th></tr>
 </thead>
 <tbody>
 <tr>

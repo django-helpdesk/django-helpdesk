@@ -6,7 +6,7 @@
     | <a href='{% url 'helpdesk_delete' ticket.id %}' class="ticket-delete"><span class="glyphicon glyphicon-remove"></span> Delete</a>
     {% if ticket.on_hold %} | <a href='unhold/' class="ticket-hold">{% trans "Unhold" %}</a>{% else %} | <a href='hold/' class="ticket-hold">{% trans "Hold" %}</a>{% endif %}
     </span></td></tr>
-<tr class='row_columnheads'><th colspan='2'>{% blocktrans with ticket.queue as queue %}Queue: {{ queue }}{% endblocktrans %}</th></tr>
+<tr><th colspan='2'>{% blocktrans with ticket.queue as queue %}Queue: {{ queue }}{% endblocktrans %}</th></tr>
 </thead>
 <tbody>
 {% for customfield in ticket.ticketcustomfieldvalue_set.all %}
