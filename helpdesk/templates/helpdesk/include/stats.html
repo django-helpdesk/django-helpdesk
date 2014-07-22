@@ -1,0 +1,19 @@
+{% load i18n %}
+<table class="table table-hover table-bordered table-striped ticket-stats">
+<caption>{% trans "Current Ticket Stats" %}</caption>
+<thead>
+<tr><td colspan='2'>- {% trans "Average number of days until ticket is closed (all tickets): " %}<strong style="color: red;">{{ basic_ticket_stats.average_nbr_days_until_ticket_closed }}</strong>.</td></tr>
+<tr><td colspan='2'>- {% trans "Average number of days until ticket is closed (tickets opened in last 60 days): " %}<strong style="color: red;">{{ basic_ticket_stats.average_nbr_days_until_ticket_closed_last_60_days }}</strong>.
+{% trans "Click" %} <strong><a href="{% url 'helpdesk_report_index' %}daysuntilticketclosedbymonth">here</a></strong> {% trans "for detailed average by month." %} </td></tr>
+<tr><td colspan='2'>- {% trans "Distribution of open tickets, grouped by time period:" %}</td></tr>
+<tr><th>{% trans "Days since opened" %}</th><th>{% trans "Number of open tickets" %}</th></tr>
+</thead>
+<tbody>
+{% for entry in basic_ticket_stats.open_ticket_stats %}
+<tr>
+<th>{{ entry.0 }}</th>
+<td><span style="color: {{ entry.2 }};">{% if entry.1 > 0 %}<a href="{% url 'helpdesk_list' %}?{{ entry.3 }}">{{ entry.1 }}</a>{% else %}{{ entry.1 }}{% endif %}</span></td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
