@@ -11,7 +11,7 @@ class QuickDjangoTest(object):
 
         >>> QuickDjangoTest('app1', 'app2')
 
-    Based on a script published by Lukasz Dziedzia at: 
+    Based on a script published by Lukasz Dziedzia at:
     http://stackoverflow.com/questions/3841725/how-to-launch-tests-for-django-reusable-app
     """
     DIRNAME = os.path.dirname(__file__)
@@ -22,6 +22,7 @@ class QuickDjangoTest(object):
         'django.contrib.admin',
         'django.contrib.staticfiles',
         'django.contrib.messages',
+        'django.contrib.humanize',
         'bootstrapform',
     )
 

@@ -1,4 +1,4 @@
-{% extends "helpdesk/base.html" %}{% load i18n %}{% load url from future %}
+{% extends "helpdesk/base.html" %}{% load i18n humanize %}{% load url from future %}
 {% block helpdesk_title %}{% trans "Tickets" %}{% endblock %}
 {% block helpdesk_head %}
 
@@ -7,7 +7,7 @@
 
 <script type='text/javascript' language='javascript'>
 $(document).ready(function() {
-    
+
     // Enable Tabs
     $("#searchtabs").tabs({
         collapsible:true
@@ -126,7 +126,7 @@ $(document).ready(function() {
     <p class='filterHelp'>{% trans "Ctrl-click to select multiple options" %}</p>
     <input type='button' class='filterBuilderRemove' value='-' />
     </div>
-    
+
     <div class='thumbnail filterBox{% if query_params.filtering.created__gte or query_params.filtering.created__lte %} filterBoxShow{% endif %}' id='filterBoxDates'>
         <label for='id_date_from'>{% trans "Date (From)" %}</label><input type='text' name='date_from' value='{{ query_params.filtering.created__gte }}' id='id_date_from' />
         <label for='id_date_to'>{% trans "Date (To)" %}</label><input type='text' name='date_to' value='{{ query_params.filtering.created__lte }}' id='id_date_to' />
@@ -152,7 +152,7 @@ $(document).ready(function() {
     </div>
     </div>
 
-    
+
     {% if not from_saved_query %}
     <div class='panel panel-default' id='tabsave'>
     <div class="panel-heading">
@@ -232,7 +232,7 @@ $(document).ready(function() {
 <th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></th>
 <td>{{ ticket.queue }}</td>
 <td>{{ ticket.get_status }}</td>
-<td><span title='{{ ticket.created|date:"r" }}'>{{ ticket.created|timesince }} ago</span></td>
+<td><span title='{{ ticket.created|date:"r" }}'>{{ ticket.created|naturaltime }}</span></td>
 <td>{{ ticket.get_assigned_to }}</td>
 </tr>
 {% endfor %}{% else %}
