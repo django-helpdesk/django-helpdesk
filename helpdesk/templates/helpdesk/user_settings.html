@@ -1,32 +1,20 @@
-{% extends "helpdesk/base.html" %}{% load i18n %}{% load url from future %}
+{% extends "helpdesk/base.html" %}{% load i18n bootstrap %}{% load url from future %}
 
 {% block helpdesk_title %}{% trans "Change User Settings" %}{% endblock %}
 
 {% block helpdesk_body %}
-{% if show_password_change_link %}
-{% url 'auth_password_change' as password_change_url %} 
-<h2>Change Password</h2>
-<p>
-Change your password <a href="{{ password_change_url }}" title="change your password">here</a>.
-</p>
-{% endif %}
-
 {% blocktrans %}
 <h2>User Settings</h2>
 
 <p>Use the following options to change the way your helpdesk system works for you. These settings do not impact any other user.</p>
 {% endblocktrans %}
 
-<form method='post' action='./'>
-<fieldset>
-    <dl>{% for field in form %}
-        <dt><label for='id_{{ field.name }}'>{{ field.label }}</label></dt>
-        <dd>{{ field }}</dd>
-        {% if field.errors %}<dd class='error'>{{ field.errors }}</dd>{% endif %}
-        {% if field.help_text %}<dd class='form_help_text'>{{ field.help_text }}</dd>{% endif %}
-    {% endfor %}</dl>
-</fieldset>
-<input class="btn btn-primary" type='submit' value='{% trans "Save Options" %}' />
-{% csrf_token %}</form>
+<form role="form" method='post' action='./'>
+    {% csrf_token %}
+    {{ form|bootstrap }}
+    <div class="form-group">
+        <input class="btn btn-primary" type='submit' value='{% trans "Save Options" %}' />
+    </div>
+</form>
 
 {% endblock %}

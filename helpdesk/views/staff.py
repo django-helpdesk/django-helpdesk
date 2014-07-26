@@ -62,18 +62,18 @@ def dashboard(request):
     """
 
     # open & reopened tickets, assigned to current user
-    tickets = Ticket.objects.filter(
+    tickets = Ticket.objects.select_related('queue').filter(
             assigned_to=request.user,
         ).exclude(
             status__in = [Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
         )
 
     # closed & resolved tickets, assigned to current user
-    tickets_closed_resolved =  Ticket.objects.filter(
+    tickets_closed_resolved =  Ticket.objects.select_related('queue').filter(
             assigned_to=request.user,
             status__in = [Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS])
 
-    unassigned_tickets = Ticket.objects.filter(
+    unassigned_tickets = Ticket.objects.select_related('queue').filter(
             assigned_to__isnull=True,
         ).exclude(
             status=Ticket.CLOSED_STATUS,
@@ -83,7 +83,7 @@ def dashboard(request):
     all_tickets_reported_by_current_user = ''
     email_current_user = request.user.email
     if email_current_user:
-        all_tickets_reported_by_current_user = Ticket.objects.filter(
+        all_tickets_reported_by_current_user = Ticket.objects.select_related('queue').filter(
             submitter_email=email_current_user,
         ).order_by('status')
 
@@ -1163,16 +1163,9 @@ def user_settings(request):
     else:
         form = UserSettingsForm(s.settings)
 
-    user = User.objects.get(id = request.user.id)
-    show_password_change_link = 0
-    # we don't want non-local users to see the 'change password' link.
-    if helpdesk_settings.HELPDESK_SHOW_CHANGE_PASSWORD and user.has_usable_password():
-        show_password_change_link = 1
-
     return render_to_response('helpdesk/user_settings.html',
         RequestContext(request, {
             'form': form,
-            'show_password_change_link': show_password_change_link,
         }))
 user_settings = staff_member_required(user_settings)
 
