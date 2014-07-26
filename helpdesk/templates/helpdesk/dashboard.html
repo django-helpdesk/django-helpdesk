@@ -1,4 +1,4 @@
-{% extends "helpdesk/base.html" %}{% load i18n %}{% load url from future %}
+{% extends "helpdesk/base.html" %}{% load i18n humanize %}{% load url from future %}
 {% block helpdesk_title %}{% trans "Helpdesk Dashboard" %}{% endblock %}
 {% block helpdesk_head %}
 <script type='text/javascript' language='javascript' src='{{ STATIC_URL }}helpdesk/hover.js'></script>
@@ -34,8 +34,8 @@
 <table class="table table-hover table-bordered">
 <thead>
 <tr class='row_tablehead' style="color: #fbff00;"><td colspan='2'><i>{% trans "Current Ticket Stats" %}</i></td></tr>
-<tr><td colspan='2'>- {% trans "Average number of days until ticket is closed (all tickets): " %}<strong style="color: red;">{{ basic_ticket_stats.average_nbr_days_until_ticket_closed }}</strong>.</td></tr> 
-<tr><td colspan='2'>- {% trans "Average number of days until ticket is closed (tickets opened in last 60 days): " %}<strong style="color: red;">{{ basic_ticket_stats.average_nbr_days_until_ticket_closed_last_60_days }}</strong>. 
+<tr><td colspan='2'>- {% trans "Average number of days until ticket is closed (all tickets): " %}<strong style="color: red;">{{ basic_ticket_stats.average_nbr_days_until_ticket_closed }}</strong>.</td></tr>
+<tr><td colspan='2'>- {% trans "Average number of days until ticket is closed (tickets opened in last 60 days): " %}<strong style="color: red;">{{ basic_ticket_stats.average_nbr_days_until_ticket_closed_last_60_days }}</strong>.
 {% trans "Click" %} <strong><a href="{% url 'helpdesk_report_index' %}daysuntilticketclosedbymonth">here</a></strong> {% trans "for detailed average by month." %} </td></tr>
 <tr><td colspan='2'>- {% trans "Distribution of open tickets, grouped by time period:" %}</td></tr>
 <tr class='row_columnheads'><th>{% trans "Days since opened" %}</th><th>{% trans "Number of open tickets" %}</th></tr>
@@ -65,7 +65,7 @@
 <th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></th>
 <td>{{ ticket.queue }}</td>
 <td>{{ ticket.get_status }}</td>
-<td><span title='{{ ticket.modified|date:"r" }}'>{{ ticket.modified|timesince }}</span></td>
+<td><span title='{{ ticket.modified|date:"r" }}'>{{ ticket.modified|naturaltime }}</span></td>
 </tr>
 {% endfor %}
 </tbody>
@@ -85,7 +85,7 @@
 <th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></th>
 <td>{{ ticket.queue }}</td>
 <td>{{ ticket.get_status }}</td>
-<td><span title='{{ ticket.modified|date:"r" }}'>{{ ticket.modified|timesince }}</span></td>
+<td><span title='{{ ticket.modified|date:"r" }}'>{{ ticket.modified|naturaltime }}</span></td>
 </tr>
 {% endfor %}
 {% if not user_tickets %}
@@ -106,7 +106,7 @@
 <td>{{ ticket.get_priority_span }}</td>
 <th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></th>
 <td>{{ ticket.queue }}</td>
-<td><span title='{{ ticket.created|date:"r" }}'>{{ ticket.created|timesince }} ago</span></td>
+<td><span title='{{ ticket.created|date:"r" }}'>{{ ticket.created|naturaltime }}</span></td>
 <th><a href='{{ ticket.get_absolute_url }}?take'><span class='button button_take'>{% trans "Take" %}</span></a> | <a href='{% url 'helpdesk_delete' ticket.id %}'><span class='button button_delete'>{% trans "Delete" %}</span></a></th>
 </tr>
 {% endfor %}
@@ -131,7 +131,7 @@
 <th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></th>
 <td>{{ ticket.queue }}</td>
 <td>{{ ticket.get_status }}</td>
-<td><span title='{{ ticket.modified|date:"r" }}'>{{ ticket.modified|timesince }}</span></td>
+<td><span title='{{ ticket.modified|date:"r" }}'>{{ ticket.modified|naturaltime }}</span></td>
 </tr>
 {% endfor %}
 </tbody>

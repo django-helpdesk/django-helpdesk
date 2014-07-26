@@ -21,22 +21,30 @@
                 <li><a href='{% url 'helpdesk_kb_index' %}'><span class="glyphicon glyphicon-tree-deciduous"></span><span class="nav-text">{% trans "Knowledgebase" %}</span></a></li>
                 {% endif %}
                 {% if user_saved_queries_ %}
-                    <li class="headerlink dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#"><span class="glyphicon glyphicon-filter"></span><span class="nav-text"> {% trans "Saved Query" %} <b class="caret"></b></span></a>
-                        <ul class="dropdown-menu">
-                            {% for q in user_saved_queries_ %}
-                                <li><a href="{% url 'helpdesk_list' %}?saved_query={{ q.id }}">{{ q.title }}
-                                    {% if q.shared %}
-                                        (Shared{% ifnotequal user q.user %} by {{ q.user.username }}{% endifnotequal %})
-                                    {% endif %}</a></li>
-                            {% endfor %}
-                        </ul>
-                    </li>
+                <li class="headerlink dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#"><span class="glyphicon glyphicon-filter"></span><span class="nav-text"> {% trans "Saved Query" %} <b class="caret"></b></span></a>
+                    <ul class="dropdown-menu">
+                        {% for q in user_saved_queries_ %}
+                            <li><a href="{% url 'helpdesk_list' %}?saved_query={{ q.id }}">{{ q.title }}
+                                {% if q.shared %}
+                                    (Shared{% ifnotequal user q.user %} by {{ q.user.username }}{% endifnotequal %})
+                                {% endif %}</a></li>
+                        {% endfor %}
+                    </ul>
+                </li>
                 {% endif %}
-                <li><a href='{% url 'logout' %}'><span class="glyphicon glyphicon-log-out"></span><span class="nav-text">{% trans "Logout" %} ({{ user.username }})</span></a></li>
+                <li class="headerlink dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#"><span class="glyphicon glyphicon-user"></span><span class="nav-text"> {{ user.get_full_name|default:user.username }} <b class="caret"></b></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href='{% url 'helpdesk_user_settings' %}'>{% trans "User Settings" %}</a></li>
+{% if helpdesk_settings.HELPDESK_SHOW_CHANGE_PASSWORD and user.has_usable_password %}
+                        <li><a href='{% url 'auth_password_change' %}'>{% trans "Change password" %}</a></li>
+{% endif %}
+                        <li class="divider"></li>
+                        <li><a href='{% url 'logout' %}'>{#<span class="glyphicon glyphicon-log-out"></span> #}{% trans "Logout" %}</a></li>
+                    </ul>
+                </li>
             </ul>
 
             {% if not query %}
-
                     <form class="navbar-form navbar-left" id='searchform' method='get' action="{% url 'helpdesk_list' %}">
                         <div class="input-group">
                             <input type='text' name='q' size='15' class='input form-control' placeholder='{% trans "Search..." %}' id='search_query' title='{% trans "Enter a keyword, or a ticket number to jump straight to that ticket." %}'/>
@@ -48,7 +56,6 @@
                             </span>
                         </div>
                     </form>
-
             {% endif %}
         {% else %}
             {# Public menu #}
