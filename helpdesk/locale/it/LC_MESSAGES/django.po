@@ -3,14 +3,15 @@
 # This file is distributed under the same license as the django-helpdesk package.
 # 
 # Translators:
-# brente <sbrentegani@gmail.com>, 2011, 2012
+# Stefano Brentegani <sbrentegani@gmail.com>, 2013
+# Stefano Brentegani <sbrentegani@gmail.com>, 2011, 2012
 msgid ""
 msgstr ""
 "Project-Id-Version: django-helpdesk\n"
 "Report-Msgid-Bugs-To: http://github.com/RossP/django-helpdesk/issues\n"
 "POT-Creation-Date: 2012-08-07 20:40+1000\n"
-"PO-Revision-Date: 2013-04-29 09:18+0000\n"
-"Last-Translator: Ross Poulton <ross@rossp.org>\n"
+"PO-Revision-Date: 2013-11-20 11:07+0000\n"
+"Last-Translator: Stefano Brentegani <sbrentegani@gmail.com>\n"
 "Language-Team: Italian (http://www.transifex.com/projects/p/django-helpdesk/language/it/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -76,11 +77,11 @@ msgstr "Scadenza"
 
 #: forms.py:171 forms.py:402
 msgid "Attach File"
-msgstr "Allega File"
+msgstr "Allega un file"
 
 #: forms.py:172 forms.py:403
 msgid "You can attach a file such as a document or screenshot to this ticket."
-msgstr "Puoi allegare al ticket un file, come un documento o una schermata."
+msgstr "Puoi allegare al ticket un file, per esempio un documento o una schermata."
 
 #: forms.py:180 templates/helpdesk/public_view_ticket.html:33
 #: templates/helpdesk/ticket.html:182
@@ -145,7 +146,7 @@ msgstr "Mostrare l'elenco dei ticket dopo il login?"
 
 #: forms.py:554
 msgid "Display the ticket list upon login? Otherwise, the dashboard is shown."
-msgstr "Mostrare l'elenco dei ticket dopo il login? In caso contrario sarà visibile la dashboard."
+msgstr "Mostrare l'elenco dei ticket dopo il login? In caso contrario sarà aperta la dashboard."
 
 #: forms.py:559
 msgid "E-mail me on ticket change?"
@@ -159,7 +160,7 @@ msgstr "Se il ticket è assegnato a te, vuoi ricevere un'e-mail quando altri lo 
 
 #: forms.py:565
 msgid "E-mail me when assigned a ticket?"
-msgstr "Inviare un'e-mail quando viene assegnato un ticket?"
+msgstr "Inviare un'e-mail quando ti viene assegnato un ticket?"
 
 #: forms.py:566
 msgid ""
@@ -191,7 +192,7 @@ msgid ""
 "When you submit a ticket, do you want to automatically use your e-mail "
 "address as the submitter address? You can type a different e-mail address "
 "when entering the ticket if needed, this option only changes the default."
-msgstr "Quando crei un nuovo ticket, vuoi impostare automaticamente il tuo indirizzo e-mail come autore? Se necessario, puoi modificare l'indirizzo e-mail nel momento in cui crei il ticket: questa opzione definisce solo il default."
+msgstr "Quando crei un nuovo ticket, vuoi impostare automaticamente il tuo indirizzo e-mail come autore? Se necessario, puoi modificare l'indirizzo e-mail nel momento in cui crei il ticket: questa opzione definisce solo il valore predefinito."
 
 #: models.py:32 models.py:256 models.py:490 models.py:787 models.py:821
 #: templates/helpdesk/dashboard.html:37 templates/helpdesk/dashboard.html:57
@@ -209,7 +210,7 @@ msgstr "Slug"
 msgid ""
 "This slug is used when building ticket ID's. Once set, try not to change it "
 "or e-mailing may get messy."
-msgstr "Questo slug viene utilizzato per costruire gli ID dei ticket. Una volta impostato, cerca di non cambiarlo, o potrebbero verificarsi problemi con le e-mail."
+msgstr "Lo slug viene utilizzato per costruire gli ID dei ticket. Una volta impostato, cerca di non cambiarlo, o potrebbero verificarsi problemi con le e-mail."
 
 #: models.py:43 models.py:1015 models.py:1085 models.py:1159
 #: templates/helpdesk/email_ignore_list.html:13
@@ -221,7 +222,7 @@ msgstr "Indirizzo e-mail"
 msgid ""
 "All outgoing e-mails for this queue will use this e-mail address. If you use"
 " IMAP or POP3, this should be the e-mail address for that mailbox."
-msgstr "Tutti i messaggi inviati per questa coda useranno questo indirizzo e-mail. Se usi IMAP o POP3, questo dovrebbe essere l'indirizzo della casella postale."
+msgstr "Tutti i messaggi inviati relativi a questa coda useranno questo indirizzo e-mail. Se usi IMAP o POP3, questo dovrebbe essere l'indirizzo della casella postale."
 
 #: models.py:52 models.py:766
 msgid "Locale"
@@ -283,7 +284,7 @@ msgstr "Se definito, a questo indirizzo e-mail saranno inviate le notifiche di t
 
 #: models.py:105
 msgid "E-Mail Box Type"
-msgstr "Tipo casella e-mail"
+msgstr "Tipo di casella e-mail"
 
 #: models.py:107
 msgid "POP 3"
@@ -328,7 +329,7 @@ msgstr "Usare SSL per l'e-mail?"
 msgid ""
 "Whether to use SSL for IMAP or POP3 - the default ports when using SSL are "
 "993 for IMAP and 995 for POP3."
-msgstr "Richiede di usare SSL per IMAP o POP3: quando si usa SSL, le porte di default sono 993 per IMAP e 995 per POP3."
+msgstr "Attiva l'uso di SSL per IMAP o POP3: quando si usa SSL, le porte di default sono 993 per IMAP e 995 per POP3."
 
 #: models.py:141
 msgid "E-Mail Username"
@@ -590,7 +591,7 @@ msgstr "Dimensione del file in byte"
 msgid ""
 "Leave blank to allow this reply to be used for all queues, or select those "
 "queues you wish to limit this reply to."
-msgstr "Se vuoto, questa risposta potrà essere utilizzata per qualsiasi coda, altrimenti seleziona le code a cui limitarne l'uso."
+msgstr "Lascia vuoto se questa risposta potrà essere utilizzata per qualsiasi coda, altrimenti seleziona le code a cui limitarne l'uso."
 
 #: models.py:668 models.py:709 models.py:1003
 #: templates/helpdesk/email_ignore_list.html:13
@@ -610,13 +611,13 @@ msgstr "Corpo"
 msgid ""
 "Context available: {{ ticket }} - ticket object (eg {{ ticket.title }}); {{ "
 "queue }} - The queue; and {{ user }} - the current user."
-msgstr "Contesto disponibile: {{ ticket }} - oggetto ticket (e.g. {{ ticket.title }}); {{ queue }} - La coda; e {{ user }} - l'utente attuale."
+msgstr "Contesto disponibile: {{ ticket }} - oggetto ticket (e.g. {{ ticket.title }}); {{ queue }} - la coda; e {{ user }} - l'utente attuale."
 
 #: models.py:703
 msgid ""
 "Leave blank for this exclusion to be applied to all queues, or select those "
 "queues you wish to exclude with this entry."
-msgstr "Se vuoto, questa esclusione sarà applicata a tutte le code, altrimenti seleziona le code interessate da questa esclusione."
+msgstr "Lascia vuoto per applicare questa esclusione a tutte le code, altrimenti seleziona le code interessate da questa esclusione."
 
 #: models.py:715
 msgid "Date on which escalation should not happen"
@@ -758,7 +759,7 @@ msgstr "Data in cui è stato aggiunto questo indirizzo e-mail"
 msgid ""
 "Enter a full e-mail address, or portions with wildcards, eg *@domain.com or "
 "postmaster@*."
-msgstr "Puoi specificare un indirizzo e-mail completo, o parti utilizzando caratteri speciali, per esempio *@domain.com o postmaster@*."
+msgstr "Puoi specificare un indirizzo e-mail completo, o parziale utilizzando caratteri speciali, per esempio *@domain.com o postmaster@*."
 
 #: models.py:1022
 msgid "Save Emails in Mailbox?"
@@ -896,7 +897,7 @@ msgstr "Valori dell'elenco"
 
 #: models.py:1192
 msgid "For list fields only. Enter one option per line."
-msgstr "Solo per campi Elenco"
+msgstr "Solo per campi Elenco. Una opzione per riga."
 
 #: models.py:1198
 msgid "Ordering"
@@ -1080,7 +1081,7 @@ msgstr "<h2>Crea un Ticket</h2>\n\n<p>Se non specificato altrimenti, tutti i cam
 #: templates/helpdesk/edit_ticket.html:19
 #: templates/helpdesk/public_homepage.html:50
 msgid "(Optional)"
-msgstr "(Opzionale)"
+msgstr "(Facoltativo)"
 
 #: templates/helpdesk/create_ticket.html:26
 #: templates/helpdesk/public_homepage.html:59
@@ -2143,7 +2144,7 @@ msgstr "Password"
 #: views/feeds.py:35
 #, python-format
 msgid "Helpdesk: Open Tickets in queue %(queue)s for %(username)s"
-msgstr "Helpdesk: Ticket aperti per la coda %(queue)s per %(username)s"
+msgstr "Helpdesk: Ticket aperti nella coda %(queue)s per %(username)s"
 
 #: views/feeds.py:40
 #, python-format
@@ -2153,7 +2154,7 @@ msgstr "Helpdesk: Ticket aperti per %(username)s"
 #: views/feeds.py:46
 #, python-format
 msgid "Open and Reopened Tickets in queue %(queue)s for %(username)s"
-msgstr "Ticket aperti e riaperti per la coda %(queue)s per %(username)s"
+msgstr "Ticket aperti e riaperti nella coda %(queue)s per %(username)s"
 
 #: views/feeds.py:51
 #, python-format
@@ -2234,7 +2235,7 @@ msgid ""
 "For more information, read the <a "
 "href=\"http://docs.djangoproject.com/en/dev/ref/databases/#sqlite-string-"
 "matching\">Django Documentation on string matching in SQLite</a>."
-msgstr "<p><strong>Attenzione</strong>: La tua ricerca per parole chiave distingue lettere maiuscole e minuscole per via del database. Questo significa che la ricerca <strong>non</strong> sarà accurata. Il passaggio a un sistema di database differente migliorerà la qualità delle ricerche! Per maggiori informazioni leggi la <a href=\"http://docs.djangoproject.com/en/dev/ref/databases/#sqlite-string-matching\">documentazione di Django sulla ricerca testuale con SQLite</a> (in lingua inglese)."
+msgstr "<p><strong>Attenzione</strong>: La tua ricerca per parole chiave distingue lettere maiuscole e minuscole per via del tipo di database utilizzato. Questo significa che la ricerca <strong>non</strong> sarà accurata. Il passaggio a un sistema di database differente migliorerebbe la qualità delle ricerche! Per maggiori informazioni leggi la <a href=\"http://docs.djangoproject.com/en/dev/ref/databases/#sqlite-string-matching\">documentazione di Django sulla ricerca testuale con SQLite</a> (in lingua inglese)."
 
 #: views/staff.py:843
 msgid "Ticket taken off hold"
