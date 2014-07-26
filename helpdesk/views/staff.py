@@ -1163,16 +1163,9 @@ def user_settings(request):
     else:
         form = UserSettingsForm(s.settings)
 
-    user = User.objects.get(id = request.user.id)
-    show_password_change_link = 0
-    # we don't want non-local users to see the 'change password' link.
-    if helpdesk_settings.HELPDESK_SHOW_CHANGE_PASSWORD and user.has_usable_password():
-        show_password_change_link = 1
-
     return render_to_response('helpdesk/user_settings.html',
         RequestContext(request, {
             'form': form,
-            'show_password_change_link': show_password_change_link,
         }))
 user_settings = staff_member_required(user_settings)
 
