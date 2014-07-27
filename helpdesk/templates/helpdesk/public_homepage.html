@@ -5,15 +5,15 @@
 {% if kb_categories %}
 <h2>{% trans "Knowledgebase Articles" %}</h2>
 
-<table class="table table-hover table-bordered">
+<table class="table table-hover table-bordered table-striped">
+<caption>{% trans "Knowledgebase Categories" %}</caption>
 <thead>
-<tr class='row_tablehead'><td>{% trans "Knowledgebase Categories" %}</td></tr>
-<tr class='row_columnheads'><th>{% trans "Category" %}</th></tr>
+<tr><th>{% trans "Category" %}</th></tr>
 </thead>
 <tbody>
 {% for category in kb_categories %}
-<tr class='row_even row_hover'><th><a href='{{ category.get_absolute_url }}'>{{ category.title }}</a></th></tr>
-<tr class='row_odd'><td>{{ category.description }}</td></tr>
+<tr><th><a href='{{ category.get_absolute_url }}'>{{ category.title }}</a></th></tr>
+<tr><td>{{ category.description }}</td></tr>
 {% endfor %}
 </tbody>
 </table>
@@ -49,7 +49,7 @@
 
         {% endfor %}
         {% endcomment %}
-    
+
     <div class='buttons form-group'>
         <input type='submit' class="btn btn-primary" value='{% trans "Submit Ticket" %}' />
     </div>

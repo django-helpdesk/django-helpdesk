@@ -1,59 +1,59 @@
 {% load i18n humanize %}{% load url from future %}
-<table class="table table-hover table-bordered">
+<table class="table table-hover table-bordered table-striped">
 <thead>
     <tr class='row_tablehead'><td colspan='2'><h3>{{ ticket.id }}. {{ ticket.title }} [{{ ticket.get_status }}]</h3> <span class='ticket_toolbar'>
         <a href='{% url 'helpdesk_edit' ticket.id %}' class="ticket-edit"><span class="glyphicon glyphicon-pencil"></span> Edit</a>
     | <a href='{% url 'helpdesk_delete' ticket.id %}' class="ticket-delete"><span class="glyphicon glyphicon-remove"></span> Delete</a>
     {% if ticket.on_hold %} | <a href='unhold/' class="ticket-hold">{% trans "Unhold" %}</a>{% else %} | <a href='hold/' class="ticket-hold">{% trans "Hold" %}</a>{% endif %}
     </span></td></tr>
-<tr class='row_columnheads'><th colspan='2'>{% blocktrans with ticket.queue as queue %}Queue: {{ queue }}{% endblocktrans %}</th></tr>
+<tr><th colspan='2'>{% blocktrans with ticket.queue as queue %}Queue: {{ queue }}{% endblocktrans %}</th></tr>
 </thead>
 <tbody>
 {% for customfield in ticket.ticketcustomfieldvalue_set.all %}
-<tr class='{% cycle 'row_odd' 'row_even' as rowcolors %}'>
+<tr>
     <th>{{ customfield.field.label }}</th>
     <td>{% ifequal customfield.field.data_type "url" %}<a href='{{ customfield.value }}'>{{ customfield.value }}</a>{% else %}{{ customfield.value }}{% endifequal %}</td>
 </tr>{% endfor %}
 
-<tr class='{% cycle rowcolors %}'>
+<tr>
     <th colspan='2'>{% trans "Description" %}</th>
 </tr>
-<tr class='{% cycle rowcolors %}'>
+<tr>
     <td id="ticket-description" colspan='2'>{{ ticket.description|force_escape|urlizetrunc:50|linebreaksbr }}</td>
 </tr>
 
-{% if ticket.resolution %}<tr class='{% cycle rowcolors %}'>
+{% if ticket.resolution %}<tr>
     <th colspan='2'>{% trans "Resolution" %}{% ifequal ticket.get_status_display "Resolved" %} <a href='?close'><img src='{{ STATIC_URL }}helpdesk/buttons/accept.png' alt='{% trans "Accept" %}' title='{% trans "Accept and Close" %}' width='60' height='15' /></a>{% endifequal %}</th>
 </tr>
-<tr class='{% cycle rowcolors %}'>
+<tr>
     <td colspan='2'>{{ ticket.resolution|force_escape|urlizetrunc:50|linebreaksbr }}</td>
 </tr>{% endif %}
-<tr class='{% cycle rowcolors %}'>
+<tr>
     <th>{% trans "Submitted On" %}</th>
     <td>{{ ticket.created|date:"r" }} ({{ ticket.created|naturaltime }})</td>
 </tr>
 
-<tr class='{% cycle rowcolors %}'>
+<tr>
     <th>{% trans "Assigned To" %}</th>
     <td>{{ ticket.get_assigned_to }}{% ifequal ticket.get_assigned_to _('Unassigned') %} <strong><a href='?take'><span class='button button_take'>{% trans "Take" %}</span></a></strong>{% endifequal %}</td>
 </tr>
 
-<tr class='{% cycle rowcolors %}'>
+<tr>
     <th>{% trans "Submitter E-Mail" %}</th>
     <td>{{ ticket.submitter_email }}{% if user.is_superuser %} <strong><a href='{% url 'helpdesk_email_ignore_add' %}?email={{ ticket.submitter_email }}'>{% trans "Ignore" %}</a></strong>{% endif %}</td>
 </tr>
 
-<tr class='{% cycle rowcolors %}'>
+<tr>
     <th>{% trans "Priority" %}</th>
     <td>{{ ticket.get_priority_display }}</td>
 </tr>
 
-<tr class='{% cycle rowcolors %}'>
+<tr>
     <th>{% trans "Copies To" %}</th>
     <td>{{ ticketcc_string }} <strong><a class='tooltip' href='{% url 'helpdesk_ticket_cc' ticket.id %}'>{% trans "Manage" %}<span>{% trans "Click here to add / remove people who should receive an e-mail whenever this ticket is updated." %}</span></a></strong>{% if SHOW_SUBSCRIBE %}, <strong><a class='tooltip' href='?subscribe'>{% trans "Subscribe" %}<span>{% trans "Click here to subscribe yourself to this ticket, if you want to receive an e-mail whenever this ticket is updated." %}</span></a></strong>{% endif %}</td>
 </tr>
 
-<tr class='{% cycle rowcolors %}'>
+<tr>
     <th>{% trans "Dependencies" %}</th>
     <td>{% for dep in ticket.ticketdependency.all %}
         {% if forloop.first %}<p>{% trans "This ticket cannot be resolved until the following ticket(s) are resolved" %}</p><ul>{% endif %}
