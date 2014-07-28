@@ -64,6 +64,8 @@ class QuickDjangoTest(object):
         """
         Fire up the Django test suite developed for version 1.2
         """
+        from django.core.urlresolvers import reverse_lazy
+
         settings.configure(
             DEBUG=True,
             DATABASES={
@@ -79,7 +81,7 @@ class QuickDjangoTest(object):
             INSTALLED_APPS=self.INSTALLED_APPS + self.apps,
             ROOT_URLCONF=self.apps[0] + '.urls',
             STATIC_URL='/static/',
-            LOGIN_URL='login',
+            LOGIN_URL=reverse_lazy('login'),
         )
         from django.test.simple import DjangoTestSuiteRunner
         failures = DjangoTestSuiteRunner().run_tests(self.apps, verbosity=1)
