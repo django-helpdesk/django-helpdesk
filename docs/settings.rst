@@ -61,7 +61,7 @@ These changes are visible throughout django-helpdesk
   **Default:** ``HELPDESK_FOLLOWUP_MOD = False``
 
 - **HELPDESK_AUTO_SUBSCRIBE_ON_TICKET_RESPONSE** Auto-subscribe user to ticket as a 'CC' if (s)he responds to a ticket?
-  
+
   **Default:** ``HELPDESK_AUTO_SUBSCRIBE_ON_TICKET_RESPONSE = False``
 
 - **HELPDESK_EMAIL_SUBJECT_TEMPLATE** Subject template for templated emails. ``%(subject)s`` represents the subject wording from the email template (e.g. "(Closed)").
@@ -94,7 +94,9 @@ Options that change ticket updates
 - **HELPDESK_CUSTOM_STAFF_FILTER_CALLBACK** Apply a custom authorisation logic when defining 'staff_member_required' in staff.py.
   If set, `HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE` will be ignored when determining staff access.
   The value should be a function accepting the active user as a parameter and returning True if the user is considered helpdesk
-  staff.
+  staff, e.g.
+
+    lambda u: u.is_authenticated() and u.is_active and u.groups.filter(name='helpdesk_staff').exists()))
 
   **Default:** ``HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = None``
 
@@ -172,7 +174,7 @@ Discontinued Settings
 
 The following settings were defined in previous versions and are no longer supported.
 
-- **HELPDESK_CUSTOM_WELCOME** 
+- **HELPDESK_CUSTOM_WELCOME**
 
 - **HELDPESK_KB_ENABLED_STAFF** Now always True
 

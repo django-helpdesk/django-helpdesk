@@ -42,6 +42,7 @@ from helpdesk.models import Ticket, Queue, FollowUp, TicketChange, PreSetReply, 
 from helpdesk import settings as helpdesk_settings
 
 if helpdesk_settings.HELPDESK_CUSTOM_STAFF_FILTER_CALLBACK:
+    # apply a custom user validation condition
     staff_member_required = user_passes_test(helpdesk_settings.HELPDESK_CUSTOM_STAFF_FILTER_CALLBACK)
 elif helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE:
     # treat 'normal' users like 'staff'

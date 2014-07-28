@@ -65,8 +65,8 @@ class QuickDjangoTest(object):
         Fire up the Django test suite developed for version 1.2
         """
         settings.configure(
-            DEBUG = True,
-            DATABASES = {
+            DEBUG=True,
+            DATABASES={
                 'default': {
                     'ENGINE': 'django.db.backends.sqlite3',
                     'NAME': os.path.join(self.DIRNAME, 'database.db'),
@@ -76,8 +76,10 @@ class QuickDjangoTest(object):
                     'PORT': '',
                 }
             },
-            INSTALLED_APPS = self.INSTALLED_APPS + self.apps,
-            ROOT_URLCONF = self.apps[0] + '.urls',
+            INSTALLED_APPS=self.INSTALLED_APPS + self.apps,
+            ROOT_URLCONF=self.apps[0] + '.urls',
+            STATIC_URL='/static/',
+            LOGIN_URL='login',
         )
         from django.test.simple import DjangoTestSuiteRunner
         failures = DjangoTestSuiteRunner().run_tests(self.apps, verbosity=1)

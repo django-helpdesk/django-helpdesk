@@ -1,22 +1,20 @@
 # -*- coding: utf-8 -*-
+import sys
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 
-from helpdesk.tests.helpers import get_staff_user, reload_urlconf
+from helpdesk import settings
+from helpdesk.tests.helpers import get_staff_user, reload_urlconf, User
 
 
-class TestKBDisabled(TestCase):
+class KBDisabledTestCase(TestCase):
     def setUp(self):
-        from helpdesk import settings
-
         self.HELPDESK_KB_ENABLED = settings.HELPDESK_KB_ENABLED
         if self.HELPDESK_KB_ENABLED:
             settings.HELPDESK_KB_ENABLED = False
             reload_urlconf()
 
     def tearDown(self):
-        from helpdesk import settings
-
         if self.HELPDESK_KB_ENABLED:
             settings.HELPDESK_KB_ENABLED = True
             reload_urlconf()
@@ -36,3 +34,91 @@ class TestKBDisabled(TestCase):
                 raise
         else:
             self.assertEqual(response.status_code, 200)
+
+
+class StaffUserTestCaseMixin(object):
+    HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = False
+    HELPDESK_CUSTOM_STAFF_FILTER_CALLBACK = None
+    expected_login_template = 'admin/login.html'
+
+    def setUp(self):
+        self.old_settings = settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE, settings.HELPDESK_CUSTOM_STAFF_FILTER_CALLBACK
+        settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = self.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE
+        settings.HELPDESK_CUSTOM_STAFF_FILTER_CALLBACK = self.HELPDESK_CUSTOM_STAFF_FILTER_CALLBACK
+        self.reload_views()
+
+    def tearDown(self):
+        settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE, settings.HELPDESK_CUSTOM_STAFF_FILTER_CALLBACK = self.old_settings
+        self.reload_views()
+
+    def reload_views(self):
+        try:
+            reload(sys.modules['helpdesk.views.staff'])
+            reload_urlconf()
+        except KeyError:
+            pass
+
+    def test_anonymous_user(self):
+        """Access to the dashboard always requires a login"""
+        response = self.client.get(reverse('helpdesk_dashboard'), follow=True)
+        self.assertTemplateUsed(response, self.expected_login_template)
+
+
+class NonStaffUsersAllowedTestCase(StaffUserTestCaseMixin, TestCase):
+    HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = True
+    HELPDESK_CUSTOM_STAFF_FILTER_CALLBACK = None
+    expected_login_template = 'helpdesk/registration/login.html'
+
+    def test_non_staff_allowed(self):
+        """If HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE is True,
+        authenticated, non-staff users should be able to access
+        the dashboard.
+        """
+        user = User.objects.create_user(username='henry.wensleydale', password='gouda', email='wensleydale@example.com')
+
+        self.client.login(username=user.username, password='gouda')
+        response = self.client.get(reverse('helpdesk_dashboard'), follow=True)
+        self.assertTemplateUsed(response, 'helpdesk/dashboard.html')
+
+
+class StaffUsersOnlyTestCase(StaffUserTestCaseMixin, TestCase):
+    # Use default values
+    HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = False
+    HELPDESK_CUSTOM_STAFF_FILTER_CALLBACK = None
+
+    def test_staff_only(self):
+        """If HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE is False,
+        only staff users should be able to access the dashboard.
+        """
+        user = get_staff_user()
+
+        self.client.login(username=user.username, password='password')
+        response = self.client.get(reverse('helpdesk_dashboard'), follow=True)
+        self.assertTemplateUsed(response, 'helpdesk/dashboard.html')
+
+
+class CustomStaffUserTestCase(StaffUserTestCaseMixin, TestCase):
+    HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = False
+    expected_login_template = 'helpdesk/registration/login.html'
+
+    @staticmethod
+    def HELPDESK_CUSTOM_STAFF_FILTER_CALLBACK(user):
+        """Arbitrary user validation function"""
+        return user.is_authenticated() and user.is_active and user.username.lower().endswith('wensleydale')
+
+    def test_custom_staff_pass(self):
+        """If HELPDESK_CUSTOM_STAFF_FILTER_CALLBACK is not None,
+        a custom access rule is applied.
+        """
+        user = User.objects.create_user(username='henry.wensleydale', password='gouda', email='wensleydale@example.com')
+
+        self.client.login(username=user.username, password='gouda')
+        response = self.client.get(reverse('helpdesk_dashboard'), follow=True)
+        self.assertTemplateUsed(response, 'helpdesk/dashboard.html')
+
+    def test_custom_staff_fail(self):
+        user = User.objects.create_user(username='terry.milton', password='frog', email='milton@example.com')
+
+        self.client.login(username=user.username, password='frog')
+        response = self.client.get(reverse('helpdesk_dashboard'), follow=True)
+        self.assertTemplateUsed(response, self.expected_login_template)
