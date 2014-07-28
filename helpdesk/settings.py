@@ -60,11 +60,11 @@ HELPDESK_SUBMIT_A_TICKET_PUBLIC = getattr(settings, 'HELPDESK_SUBMIT_A_TICKET_PU
 
 
 ''' options for update_ticket views '''
-# allow non-staff users to interact with tickets? this will also change how 'staff_member_required'
+# allow non-staff users to interact with tickets? this will also change how 'helpdesk_staff_member_required'
 # in staff.py will be defined.
 HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = getattr(settings, 'HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE', False)
 
-# apply a custom authorisation logic when defining 'staff_member_required' in staff.py.
+# apply a custom authorisation logic when defining 'helpdesk_staff_member_required' in staff.py.
 HELPDESK_CUSTOM_STAFF_FILTER_CALLBACK = getattr(settings, 'HELPDESK_CUSTOM_STAFF_FILTER_CALLBACK', None)
 if HELPDESK_CUSTOM_STAFF_FILTER_CALLBACK and HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE:
     warnings.warn(

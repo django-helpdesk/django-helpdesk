@@ -53,6 +53,7 @@ class StaffUserTestCaseMixin(object):
 
     def reload_views(self):
         try:
+            reload(sys.modules['helpdesk.decorators'])
             reload(sys.modules['helpdesk.views.staff'])
             reload_urlconf()
         except KeyError:
