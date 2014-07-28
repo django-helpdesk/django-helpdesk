@@ -3,7 +3,7 @@
 {% block helpdesk_title %}{% trans "Reports &amp; Statistics" %}{% endblock %}
 
 {% block helpdesk_head %}
-        <!--[if IE]><script language="javascript" type="text/javascript" src="{{ STATIC_URL }}helpdesk/jquery.jqplot/excanvas.min.js"></script><![endif]--> 
+        <!--[if IE]><script language="javascript" type="text/javascript" src="{{ STATIC_URL }}helpdesk/jquery.jqplot/excanvas.min.js"></script><![endif]-->
         <script src='{{ STATIC_URL }}helpdesk/jquery.jqplot/jquery.jqplot.min.js' type='text/javascript' language='javascript'></script>
         <link rel='stylesheet' typ='text/css' href='{{ STATIC_URL }}helpdesk/jquery.jqplot/jquery.jqplot.min.css' />
         <script type="text/javascript" src="{{ STATIC_URL }}helpdesk/jquery.jqplot/plugins/jqplot.categoryAxisRenderer.min.js"></script>
@@ -30,9 +30,9 @@
 {% endif %}
 
 <table class="table table-hover table-bordered">
+<caption>{{ title }}</caption>
 <thead>
-<tr class='row_tablehead'><td colspan='{{ headings|length }}'>{{ title }}</td></tr>
-<tr class='row_columnheads'>{% for h in headings %}<th>{% if forloop.first %}{{ h|title }}{% else %}{{ h }}{% endif %}</th>{% endfor %}</tr>
+<tr>{% for h in headings %}<th>{% if forloop.first %}{{ h|title }}{% else %}{{ h }}{% endif %}</th>{% endfor %}</tr>
 </thead>
 <tbody>
 {% for d in data %}
@@ -68,7 +68,7 @@
             }
         }
     });
-    
+
 </script>
 {% endifequal %}
 {% ifequal charttype "bar" %}
@@ -99,7 +99,7 @@
             }
         }
     });
-    
+
 </script>
 {% endifequal %}
 

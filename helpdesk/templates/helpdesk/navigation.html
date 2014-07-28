@@ -16,12 +16,12 @@
                 <li><a href='{% url 'helpdesk_dashboard' %}'><span class="glyphicon glyphicon-dashboard"></span> <span class="nav-text">{% trans "Dashboard" %}</span></a></li>
                 <li><a href='{% url 'helpdesk_list' %}'><span class="glyphicon glyphicon-tags"></span> <span class="nav-text">{% trans "Tickets" %}</span></a></li>
                 <li><a href='{% url 'helpdesk_submit' %}'><span class="glyphicon glyphicon-plus"></span> <span class="nav-text">{% trans "New Ticket" %}</span></a></li>
-                <li><a href='{% url 'helpdesk_report_index' %}'><span class="glyphicon glyphicon-stats"></span><span class="nav-text"> {% trans "Stats" %}</span></a></li>
+                <li><a href='{% url 'helpdesk_report_index' %}'><span class="glyphicon glyphicon-stats"></span> <span class="nav-text"> {% trans "Stats" %}</span></a></li>
                 {% if helpdesk_settings.HELPDESK_KB_ENABLED %}
-                <li><a href='{% url 'helpdesk_kb_index' %}'><span class="glyphicon glyphicon-tree-deciduous"></span><span class="nav-text">{% trans "Knowledgebase" %}</span></a></li>
+                <li><a href='{% url 'helpdesk_kb_index' %}'><span class="glyphicon glyphicon-tree-deciduous"></span> <span class="nav-text">{% trans "Knowledgebase" %}</span></a></li>
                 {% endif %}
                 {% if user_saved_queries_ %}
-                <li class="headerlink dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#"><span class="glyphicon glyphicon-filter"></span><span class="nav-text"> {% trans "Saved Query" %} <b class="caret"></b></span></a>
+                <li class="headerlink dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#"><span class="glyphicon glyphicon-filter"></span> <span class="nav-text">{% trans "Saved Query" %} <b class="caret"></b></span></a>
                     <ul class="dropdown-menu">
                         {% for q in user_saved_queries_ %}
                             <li><a href="{% url 'helpdesk_list' %}?saved_query={{ q.id }}">{{ q.title }}
@@ -32,7 +32,7 @@
                     </ul>
                 </li>
                 {% endif %}
-                <li class="headerlink dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#"><span class="glyphicon glyphicon-user"></span><span class="nav-text"> {{ user.get_full_name|default:user.username }} <b class="caret"></b></span></a>
+                <li class="headerlink dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#"><span class="glyphicon glyphicon-user"></span> <span class="nav-text">{{ user.get_full_name|default:user.username }} <b class="caret"></b></span></a>
                     <ul class="dropdown-menu">
                         <li><a href='{% url 'helpdesk_user_settings' %}'>{% trans "User Settings" %}</a></li>
 {% if helpdesk_settings.HELPDESK_SHOW_CHANGE_PASSWORD and user.has_usable_password %}

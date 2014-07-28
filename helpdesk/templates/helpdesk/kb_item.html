@@ -3,13 +3,11 @@
 {% block helpdesk_body %}
 <h2>{% blocktrans with item.title as item %}Knowledgebase: {{ item }}{% endblocktrans %}</h2>
 
-<table class="table table-hover table-bordered">
-<thead>
-<tr class='row_tablehead'><td>{{ item.title }}</td></tr>
-</thead>
+<table class="table table-hover table-bordered table-striped">
+<caption>{{ item.title }}</caption>
 <tbody>
-<tr class='row_even row_hover'><th>{{ item.question }}</th></tr>
-<tr class='row_odd'><td>{{ item.answer|markdown }}</td></tr>
+<tr><th>{{ item.question }}</th></tr>
+<tr><td>{{ item.answer|markdown }}</td></tr>
 </tbody>
 </table>
 
