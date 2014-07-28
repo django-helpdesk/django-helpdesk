@@ -3,51 +3,51 @@
 
 {% block helpdesk_body %}
 
-<table class="table table-hover table-bordered">
+<table class="table table-hover table-bordered table-striped">
+<caption>{{ ticket.ticket }} . {{ ticket.title }} [{{ ticket.get_status }}]</caption>
 <thead>
-<tr class='row_tablehead'><td colspan='2'>{{ ticket.ticket }} . {{ ticket.title }} [{{ ticket.get_status }}]</td></tr>
-<tr class='row_columnheads'><th colspan='2'>{% blocktrans with ticket.queue as queue_name %}Queue: {{ queue_name }}{% endblocktrans %}</th></tr>
+<tr><th colspan='2'>{% blocktrans with ticket.queue as queue_name %}Queue: {{ queue_name }}{% endblocktrans %}</th></tr>
 </thead>
 <tbody>
-<tr class="{% cycle 'row_odd' 'row_even' as rowcolors %}">
+<tr>
     <th>{% trans "Submitted On" %}</th>
     <td>{{ ticket.created|date:"r" }} ({{ ticket.created|naturaltime }})</td>
 </tr>
 
-<tr class='{% cycle rowcolors %}'>
+<tr>
     <th>{% trans "Submitter E-Mail" %}</th>
     <td>{{ ticket.submitter_email }}</td>
 </tr>
 
-<tr class='{% cycle rowcolors %}'>
+<tr>
     <th>{% trans "Priority" %}</th>
     <td>{{ ticket.get_priority_display }}</td>
 </tr>
 
 {% for customfield in ticket.ticketcustomfieldvalue_set.all %}
-<tr class='{% cycle rowcolors %}'>
+<tr>
     <th>{{ customfield.field.label }}</th>
     <td>{{ customfield.value }}</td>
 </tr>{% endfor %}
 
 {% if tags_enabled %}
-<tr class='{% cycle rowcolors %}'>
+<tr>
     <th>{% trans "Tags" %}</th>
     <td>{{ ticket.tags }}</td>
 </tr>
 {% endif %}
 
-<tr class='{% cycle rowcolors %}'>
+<tr>
     <th colspan='2'>{% trans "Description" %}</th>
 </tr>
-<tr class='{% cycle rowcolors %}'>
+<tr>
     <td colspan='2'>{{ ticket.description|force_escape|urlizetrunc:50|linebreaksbr }}</td>
 </tr>
 
-{% if ticket.resolution %}<tr class='{% cycle rowcolors %}'>
+{% if ticket.resolution %}<tr>
     <th colspan='2'>{% trans "Resolution" %}{% ifequal ticket.get_status_display "Resolved" %} <a href='{{ ticket.ticket_url }}&close'><img src='{{ STATIC_URL }}/helpdesk/buttons/accept.png' alt='{% trans "Accept" %}' title='{% trans "Accept and Close" %}' width='60' height='15' /></a>{% endifequal %}</th>
 </tr>
-<tr class='{% cycle rowcolors %}'>
+<tr>
     <td colspan='2'>{{ ticket.resolution|urlizetrunc:50|linebreaksbr }}</td>
 </tr>{% endif %}
 </tbody>

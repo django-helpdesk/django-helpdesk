@@ -3,7 +3,6 @@
 {% block helpdesk_head %}
 
 <script type='text/javascript' language='javascript' src='{{ STATIC_URL }}helpdesk/filter.js'></script>
-<script type='text/javascript' language='javascript' src='{{ STATIC_URL }}helpdesk/hover.js'></script>
 
 <script type='text/javascript' language='javascript'>
 $(document).ready(function() {
@@ -218,14 +217,14 @@ $(document).ready(function() {
 
 {{ search_message|safe }}
 <form method='post' action='{% url 'helpdesk_mass_update' %}' id="ticket_mass_update">
-<table class="table table-hover table-bordered">
+<table class="table table-hover table-bordered table-striped">
+<caption>{% trans "Tickets" %}</caption>
 <thead>
-<tr class='row_tablehead'><td colspan='9'>{% trans "Tickets" %}</td></tr>
-<tr class='row_columnheads'><th>#</th><th>&nbsp;</th><th>{% trans "Pr" %}</th><th>{% trans "Title" %}</th><th>{% trans "Queue" %}</th><th>{% trans "Status" %}</th><th>{% trans "Created" %}</th><th>{% trans "Owner" %}</th></tr>
+<tr><th>#</th><th>&nbsp;</th><th>{% trans "Pr" %}</th><th>{% trans "Title" %}</th><th>{% trans "Queue" %}</th><th>{% trans "Status" %}</th><th>{% trans "Created" %}</th><th>{% trans "Owner" %}</th></tr>
 </thead>
 <tbody>
-{% if tickets %}{% for ticket in tickets.object_list %}
-<tr class='row_{% cycle odd,even %} row_hover'>
+{% for ticket in tickets.object_list %}
+<tr>
 <th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.ticket }}</a></th>
 <td><input type='checkbox' name='ticket_id' value='{{ ticket.id }}' class='ticket_multi_select' /></td>
 <td>{{ ticket.get_priority_span }}</td>
@@ -235,9 +234,9 @@ $(document).ready(function() {
 <td><span title='{{ ticket.created|date:"r" }}'>{{ ticket.created|naturaltime }}</span></td>
 <td>{{ ticket.get_assigned_to }}</td>
 </tr>
-{% endfor %}{% else %}
-<tr class='row_odd'><td colspan='5'>{% trans "No Tickets Match Your Selection" %}</td></tr>
-{% endif %}
+{% empty %}
+<tr><td colspan='5'>{% trans "No Tickets Match Your Selection" %}</td></tr>
+{% endfor %}
 </tbody>
 </table>
 <div class="pagination">
