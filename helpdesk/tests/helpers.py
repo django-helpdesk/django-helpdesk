@@ -31,3 +31,21 @@ def reload_urlconf(urlconf=None):
 
         reload(sys.modules[urlconf])
         clear_url_caches()
+
+
+def update_user_settings(user, **kwargs):
+    usersettings = user.usersettings
+    settings = usersettings.settings
+    settings.update(kwargs)
+    usersettings.settings = settings
+    usersettings.save()
+
+
+def delete_user_settings(user, *args):
+    usersettings = user.usersettings
+    settings = usersettings.settings
+    for setting in args:
+        if setting in settings:
+            del settings[setting]
+    usersettings.settings = settings
+    usersettings.save()

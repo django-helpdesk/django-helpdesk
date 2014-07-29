@@ -14,6 +14,7 @@ from django.template import loader, Context, RequestContext
 from django.utils.translation import ugettext as _
 
 from helpdesk import settings as helpdesk_settings
+from helpdesk.decorators import is_helpdesk_staff
 from helpdesk.forms import PublicTicketForm
 from helpdesk.lib import send_templated_mail, text_is_spam
 from helpdesk.models import Ticket, Queue, UserSettings, KBCategory
@@ -23,14 +24,13 @@ def homepage(request):
     if not request.user.is_authenticated() and helpdesk_settings.HELPDESK_REDIRECT_TO_LOGIN_BY_DEFAULT:
         return HttpResponseRedirect(reverse('login'))
 
-    if (request.user.is_staff or (request.user.is_authenticated() and helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE)):
+    if is_helpdesk_staff(request.user):
         try:
-            if getattr(request.user.usersettings.settings, 'login_view_ticketlist', False):
+            if request.user.usersettings.settings.get('login_view_ticketlist', False):
                 return HttpResponseRedirect(reverse('helpdesk_list'))
-            else:
-                return HttpResponseRedirect(reverse('helpdesk_dashboard'))
         except UserSettings.DoesNotExist:
-            return HttpResponseRedirect(reverse('helpdesk_dashboard'))
+            pass
+        return HttpResponseRedirect(reverse('helpdesk_dashboard'))
 
     if request.method == 'POST':
         form = PublicTicketForm(request.POST, request.FILES)
