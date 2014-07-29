@@ -73,7 +73,11 @@ class NonStaffUsersAllowedTestCase(StaffUserTestCaseMixin, TestCase):
         authenticated, non-staff users should be able to access
         the dashboard.
         """
+        from helpdesk.decorators import is_helpdesk_staff
+
         user = User.objects.create_user(username='henry.wensleydale', password='gouda', email='wensleydale@example.com')
+
+        self.assertTrue(is_helpdesk_staff(user))
 
         self.client.login(username=user.username, password='gouda')
         response = self.client.get(reverse('helpdesk_dashboard'), follow=True)
@@ -85,11 +89,23 @@ class StaffUsersOnlyTestCase(StaffUserTestCaseMixin, TestCase):
     HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = False
     HELPDESK_CUSTOM_STAFF_FILTER_CALLBACK = None
 
+    def test_non_staff(self):
+        """Non-staff users are correctly identified"""
+        from helpdesk.decorators import is_helpdesk_staff
+
+        user = User.objects.create_user(username='henry.wensleydale', password='gouda', email='wensleydale@example.com')
+
+        self.assertFalse(is_helpdesk_staff(user))
+
     def test_staff_only(self):
         """If HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE is False,
         only staff users should be able to access the dashboard.
         """
+        from helpdesk.decorators import is_helpdesk_staff
+
         user = get_staff_user()
+
+        self.assertTrue(is_helpdesk_staff(user))
 
         self.client.login(username=user.username, password='password')
         response = self.client.get(reverse('helpdesk_dashboard'), follow=True)
@@ -108,14 +124,22 @@ class CustomStaffUserTestCase(StaffUserTestCaseMixin, TestCase):
         """If HELPDESK_CUSTOM_STAFF_FILTER_CALLBACK is not None,
         a custom access rule is applied.
         """
+        from helpdesk.decorators import is_helpdesk_staff
+
         user = User.objects.create_user(username='henry.wensleydale', password='gouda', email='wensleydale@example.com')
+
+        self.assertTrue(is_helpdesk_staff(user))
 
         self.client.login(username=user.username, password='gouda')
         response = self.client.get(reverse('helpdesk_dashboard'), follow=True)
         self.assertTemplateUsed(response, 'helpdesk/dashboard.html')
 
     def test_custom_staff_fail(self):
+        from helpdesk.decorators import is_helpdesk_staff
+
         user = User.objects.create_user(username='terry.milton', password='frog', email='milton@example.com')
+
+        self.assertFalse(is_helpdesk_staff(user))
 
         self.client.login(username=user.username, password='frog')
         response = self.client.get(reverse('helpdesk_dashboard'), follow=True)
