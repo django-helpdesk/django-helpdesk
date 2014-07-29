@@ -39,7 +39,6 @@ class KBDisabledTestCase(TestCase):
 class StaffUserTestCaseMixin(object):
     HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = False
     HELPDESK_CUSTOM_STAFF_FILTER_CALLBACK = None
-    expected_login_template = 'admin/login.html'
 
     def setUp(self):
         self.old_settings = settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE, settings.HELPDESK_CUSTOM_STAFF_FILTER_CALLBACK
@@ -62,13 +61,12 @@ class StaffUserTestCaseMixin(object):
     def test_anonymous_user(self):
         """Access to the dashboard always requires a login"""
         response = self.client.get(reverse('helpdesk_dashboard'), follow=True)
-        self.assertTemplateUsed(response, self.expected_login_template)
+        self.assertTemplateUsed(response, 'helpdesk/registration/login.html')
 
 
 class NonStaffUsersAllowedTestCase(StaffUserTestCaseMixin, TestCase):
     HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = True
     HELPDESK_CUSTOM_STAFF_FILTER_CALLBACK = None
-    expected_login_template = 'helpdesk/registration/login.html'
 
     def test_non_staff_allowed(self):
         """If HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE is True,
@@ -100,7 +98,6 @@ class StaffUsersOnlyTestCase(StaffUserTestCaseMixin, TestCase):
 
 class CustomStaffUserTestCase(StaffUserTestCaseMixin, TestCase):
     HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = False
-    expected_login_template = 'helpdesk/registration/login.html'
 
     @staticmethod
     def HELPDESK_CUSTOM_STAFF_FILTER_CALLBACK(user):
@@ -122,4 +119,4 @@ class CustomStaffUserTestCase(StaffUserTestCaseMixin, TestCase):
 
         self.client.login(username=user.username, password='frog')
         response = self.client.get(reverse('helpdesk_dashboard'), follow=True)
-        self.assertTemplateUsed(response, self.expected_login_template)
+        self.assertTemplateUsed(response, 'helpdesk/registration/login.html')
