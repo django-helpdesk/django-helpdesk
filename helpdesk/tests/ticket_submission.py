@@ -1,8 +1,11 @@
-from helpdesk.models import Queue, CustomField, Ticket
 from django.test import TestCase
 from django.core import mail
 from django.test.client import Client
 from django.core.urlresolvers import reverse
+
+from helpdesk.models import Queue, CustomField, Ticket
+from helpdesk.tests.helpers import create_ticket, get_staff_user, User
+
 
 class TicketBasicsTestCase(TestCase):
     def setUp(self):
@@ -22,7 +25,7 @@ class TicketBasicsTestCase(TestCase):
         ticket = Ticket.objects.create(**ticket_data)
         self.assertEqual(ticket.ticket_for_url, "q1-%s" % ticket.id)
         self.assertEqual(email_count, len(mail.outbox))
-        
+
 
     def test_create_ticket_public(self):
         email_count = len(mail.outbox)
@@ -46,7 +49,7 @@ class TicketBasicsTestCase(TestCase):
         self.assertEqual(last_redirect_url.split('?')[0], 'http://testserver%s' % reverse('helpdesk_public_view'))
         # Ensure submitter, new-queue + update-queue were all emailed.
         self.assertEqual(email_count+3, len(mail.outbox))
-    
+
     def test_create_ticket_private(self):
         email_count = len(mail.outbox)
         post_data = {
@@ -85,3 +88,24 @@ class TicketBasicsTestCase(TestCase):
         self.assertEqual(last_redirect_url.split('?')[0], 'http://testserver%s' % reverse('helpdesk_public_view'))
         # Ensure only two e-mails were sent - submitter & updated.
         self.assertEqual(email_count+2, len(mail.outbox))
+
+
+class TicketUpdateTestCase(TestCase):
+    def setUp(self):
+        from helpdesk.tests.helpers import create_ticket
+
+        self.ticket = create_ticket()
+        self.update_url = reverse('helpdesk_update', kwargs={'ticket_id': self.ticket.pk})
+
+    def test_not_allowed(self):
+        data = {
+            'title': self.ticket.title,
+            'queue': self.ticket.queue.pk,
+        }
+        response = self.client.post(self.update_url, data=data)
+        self.assertRedirects(response, '%s?next=%s' % (reverse('login'), self.update_url))
+
+        user = User.objects.create_user(username='henry.wensleydale', password='gouda', email='wensleydale@example.com')
+        self.client.login(username=user.username, password='gouda')
+        response = self.client.post(self.update_url, data=data)
+        self.assertRedirects(response, '%s?next=%s' % (reverse('login'), self.update_url))
