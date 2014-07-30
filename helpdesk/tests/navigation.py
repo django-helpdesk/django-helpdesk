@@ -4,7 +4,8 @@ from django.core.urlresolvers import reverse
 from django.test import TestCase
 
 from helpdesk import settings
-from helpdesk.tests.helpers import get_staff_user, reload_urlconf, User, update_user_settings, delete_user_settings
+from helpdesk.tests.helpers import (get_staff_user, reload_urlconf, User, update_user_settings, delete_user_settings,
+                                    create_ticket)
 
 
 class KBDisabledTestCase(TestCase):
@@ -146,7 +147,7 @@ class CustomStaffUserTestCase(StaffUserTestCaseMixin, TestCase):
         self.assertTemplateUsed(response, 'helpdesk/registration/login.html')
 
 
-class HomePageAnonymousUserTest(TestCase):
+class HomePageAnonymousUserTestCase(TestCase):
     def setUp(self):
         self.redirect_to_login = settings.HELPDESK_REDIRECT_TO_LOGIN_BY_DEFAULT
 
@@ -165,7 +166,7 @@ class HomePageAnonymousUserTest(TestCase):
         self.assertRedirects(response, reverse('login'))
 
 
-class HomePageTest(TestCase):
+class HomePageTestCase(TestCase):
     def setUp(self):
         self.previous = settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE, settings.HELPDESK_CUSTOM_STAFF_FILTER_CALLBACK
         settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = False
@@ -211,3 +212,21 @@ class HomePageTest(TestCase):
         update_user_settings(user, login_view_ticketlist=True)
 
         self.assertUserRedirectedToView(user, 'helpdesk_list')
+
+
+class ReturnToTicketTestCase(TestCase):
+    def test_staff_user(self):
+        from helpdesk.views.staff import return_to_ticket
+
+        user = get_staff_user()
+        ticket = create_ticket()
+        response = return_to_ticket(user, settings, ticket)
+        self.assertEqual(response['location'], ticket.get_absolute_url())
+
+    def test_non_staff_user(self):
+        from helpdesk.views.staff import return_to_ticket
+
+        user = User.objects.create_user(username='henry.wensleydale', password='gouda', email='wensleydale@example.com')
+        ticket = create_ticket()
+        response = return_to_ticket(user, settings, ticket)
+        self.assertEqual(response['location'], ticket.ticket_url)

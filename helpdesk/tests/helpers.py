@@ -7,6 +7,8 @@ except ImportError:
 else:
     User = get_user_model()
 
+from helpdesk.models import Ticket, Queue
+
 
 def get_staff_user(username='helpdesk.staff', password='password'):
     try:
@@ -49,3 +51,18 @@ def delete_user_settings(user, *args):
             del settings[setting]
     usersettings.settings = settings
     usersettings.save()
+
+
+def create_ticket(**kwargs):
+    q = kwargs.get('queue', None)
+    if q is None:
+        try:
+            q = Queue.objects.all()[0]
+        except IndexError:
+            q = Queue.objects.create(title='Test Q', slug='test', )
+    data = {
+        'title': "I wish to register a complaint",
+        'queue': q,
+    }
+    data.update(kwargs)
+    return Ticket.objects.create(**data)
