@@ -4,6 +4,7 @@ Default settings for django-helpdesk.
 """
 import warnings
 from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
 
 
 try:
@@ -66,6 +67,8 @@ HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = getattr(settings, 'HELPDESK_ALLOW_NON_S
 
 # apply a custom authorisation logic when defining 'helpdesk_staff_member_required' in staff.py.
 HELPDESK_CUSTOM_STAFF_FILTER_CALLBACK = getattr(settings, 'HELPDESK_CUSTOM_STAFF_FILTER_CALLBACK', None)
+if not (HELPDESK_CUSTOM_STAFF_FILTER_CALLBACK is None or callable(HELPDESK_CUSTOM_STAFF_FILTER_CALLBACK)):
+    raise ImproperlyConfigured("HELPDESK_CUSTOM_STAFF_FILTER_CALLBACK must be a callable or None")
 if HELPDESK_CUSTOM_STAFF_FILTER_CALLBACK and HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE:
     warnings.warn(
         "The HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE and HELPDESK_CUSTOM_STAFF_FILTER_CALLBACK settings cannot be both defined. "
