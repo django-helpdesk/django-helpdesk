@@ -1,9 +1,9 @@
 # django-helpdesk English language translation
 # Copyright (C) 2011 Ross Poulton
 # This file is distributed under the same license as the django-helpdesk package.
-# 
+#
 # Translators:
-# Alex Nordlund <deep.alexander@gmail.com>, 2012
+# Alexander Nordlund <deep.alexander@gmail.com>, 2012
 # osterberg <mikael@osterberg.me>, 2012
 msgid ""
 msgstr ""

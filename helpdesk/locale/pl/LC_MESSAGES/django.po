@@ -1,9 +1,9 @@
 # django-helpdesk English language translation
 # Copyright (C) 2011 Ross Poulton
 # This file is distributed under the same license as the django-helpdesk package.
-# 
+#
 # Translators:
-# mpasternak <michal.dtz@gmail.com>, 2011
+# Michał Pasternak <michal.dtz@gmail.com>, 2011
 # Ross Poulton <ross@rossp.org>, 2011
 # Tomasz Sanecki <tomasz@sanecki.net>, 2012
 msgid ""
@@ -1052,10 +1052,8 @@ msgid ""
 msgstr "\n<h2>Usuń zapytanie</h2>\n\n<p>Czy rzeczywiście chcesz usunąć zapisany filtr (<em>%(query_title)s</em>)? Aby go ponownie utworzyć, musisz ponownie ręcznie przefiltrować listę zgłoszeń.</p>\n"
 
 #: templates/helpdesk/confirm_delete_saved_query.html:11
-msgid ""
-"\n"
-"<p>You have shared this query, so other users may be using it. If you delete it, they will have to manually create their own query.</p>\n"
-msgstr "\n<p>Udostępniłeś to zapytanie więc inni użytkownicy mogą go używać. Jeśli je usuniesz, będą musieli sami odtworzyć to zapytanie.</p>\n"
+msgid "You have shared this query, so other users may be using it. If you delete it, they will have to manually create their own query."
+msgstr "Udostępniłeś to zapytanie więc inni użytkownicy mogą go używać. Jeśli je usuniesz, będą musieli sami odtworzyć to zapytanie."
 
 #: templates/helpdesk/confirm_delete_saved_query.html:15
 #: templates/helpdesk/delete_ticket.html:11
@@ -1071,12 +1069,18 @@ msgstr "Tak, usuń to"
 msgid "Create Ticket"
 msgstr "Utwórz zgłoszenie"
 
-#: templates/helpdesk/create_ticket.html:6
-msgid ""
-"<h2>Submit a Ticket</h2>\n"
-"\n"
-"<p>Unless otherwise stated, all fields are required. Please provide as descriptive a title and description as possible.</p>"
-msgstr "<h2>Utwórz zgłoszenie</h2>\n\n<p>Jeżeli nie zaznaczono inaczej, wszystkie pola są wymagane. Postaraj się aby tytuł i opis dostarczały jak najwięcej informacji.</p>"
+#: templates/helpdesk/create_ticket.html:10
+#: templates/helpdesk/public_homepage.html:39
+msgid "Submit a Ticket"
+msgstr "Utwórz zgłoszenie"
+
+#: templates/helpdesk/create_ticket.html:11
+msgid "Unless otherwise stated, all fields are required."
+msgstr "Jeżeli nie zaznaczono inaczej, wszystkie pola są wymagane."
+
+#: templates/helpdesk/create_ticket.html:11
+msgid "Please provide as descriptive a title and description as possible."
+msgstr "Postaraj się aby tytuł i opis dostarczały jak najwięcej informacji."
 
 #: templates/helpdesk/create_ticket.html:17
 #: templates/helpdesk/edit_ticket.html:19
@@ -1164,27 +1168,26 @@ msgstr "Zamknięte i rozwiązane zgłoszenia nad którymi pracowałeś"
 msgid "Delete Ticket"
 msgstr "Usuń zgłoszenie"
 
-#: templates/helpdesk/delete_ticket.html:5
+#: templates/helpdesk/delete_ticket.html:8
 #, python-format
-msgid ""
-"\n"
-"<h2>Delete Ticket</h2>\n"
-"\n"
-"<p>Are you sure you want to delete this ticket (<em>%(ticket_title)s</em>)? All traces of the ticket, including followups, attachments, and updates will be irreversably removed.</p>\n"
-msgstr "\n<h2>Usuń zgłoszenie</h2>\n\n<p>Czy rzeczywiście chcesz usunąć zgłoszenie (<em>%(ticket_title)s</em>)? Wszelkie ślady po tym zgłoszeniu, wliczając kontynuacje, załączniki i aktualizacje, będą bezpowrotnie usunięte</p>\n"
+msgid "Are you sure you want to delete this ticket (<em>%(ticket_title)s</em>)? All traces of the ticket, including followups, attachments, and updates will be irreversibly removed."
+msgstr "Czy rzeczywiście chcesz usunąć zgłoszenie (<em>%(ticket_title)s</em>)? Wszelkie ślady po tym zgłoszeniu, wliczając kontynuacje, załączniki i aktualizacje, będą bezpowrotnie usunięte"
 
 #: templates/helpdesk/edit_ticket.html:3
 msgid "Edit Ticket"
 msgstr "Edytuj zgłoszenie"
 
 #: templates/helpdesk/edit_ticket.html:6
-msgid ""
-"<h2>Edit a Ticket</h2>\n"
-"\n"
-"<p>Unless otherwise stated, all fields are required. Please provide as descriptive a title and description as possible.</p>\n"
-"\n"
-"<p><strong>Note:</strong> Editing a ticket does <em>not</em> send an e-mail to the ticket owner or submitter. No new details should be entered, this form should only be used to fix incorrect details or clean up the submission.</p>"
-msgstr "<h2>Edytuj zgłoszenie</h2>\n\n<p>Jeżeli nie zaznaczono inaczej, wszystkie pola są wymagane. Postaraj się aby tytuł i opis zawierały możliwie jak najwięcej informacji.</p>\n\n<p><strong>Uwaga:</strong> Edycja zgłoszenia <em>nie powoduje</em> wysłania e-maila do właściciela lub zgłaszającego. Nie podawaj żadnych nowych szczegółów - formularz ten służy jedynie do poprawki detali i oczyszczania zgłoszenia.</p>"
+msgid "Edit a Ticket"
+msgstr "Edytuj zgłoszenie"
+
+#: templates/helpdesk/edit_ticket.html:6
+msgid "Note"
+msgstr "Uwaga"
+
+#: templates/helpdesk/edit_ticket.html:6
+msgid "Editing a ticket does <em>not</em> send an e-mail to the ticket owner or submitter. No new details should be entered, this form should only be used to fix incorrect details or clean up the submission."
+msgstr "Edycja zgłoszenia <em>nie powoduje</em> wysłania e-maila do właściciela lub zgłaszającego. Nie podawaj żadnych nowych szczegółów - formularz ten służy jedynie do poprawki detali i oczyszczania zgłoszenia."
 
 #: templates/helpdesk/edit_ticket.html:28
 msgid "Save Changes"
@@ -1436,14 +1439,8 @@ msgstr "Twój adres e-mail"
 msgid "View Ticket"
 msgstr "Wyświetl zgłoszenie"
 
-#: templates/helpdesk/public_homepage.html:39
-msgid "Submit a Ticket"
-msgstr "Utwórz zgłoszenie"
-
 #: templates/helpdesk/public_homepage.html:41
-msgid ""
-"All fields are required. Please provide as descriptive a title and "
-"description as possible."
+msgid "All fields are required."
 msgstr ""
 
 #: templates/helpdesk/public_homepage.html:67
@@ -1609,13 +1606,8 @@ msgstr "Otwarte zgłoszenia"
 msgid "Change System Settings"
 msgstr "Zmień ustawienia systemu"
 
-#: templates/helpdesk/system_settings.html:5
-msgid ""
-"\n"
-"<h2>System Settings</h2>\n"
-"\n"
-"<p>The following items can be maintained by you or other superusers:</p>"
-msgstr "\n<h2>Ustawienia systemu</h2>\n\n<p>Poniższe pozycje mogą być zarządzane przez ciebie oraz innych uprawnionych użytkowników:</p>"
+msgid "The following items can be maintained by you or other superusers:"
+msgstr "Poniższe pozycje mogą być zarządzane przez ciebie oraz innych uprawnionych użytkowników:"
 
 #: templates/helpdesk/system_settings.html:11
 msgid "E-Mail Ignore list"

@@ -1,10 +1,10 @@
 # django-helpdesk English language translation
 # Copyright (C) 2011 Ross Poulton
 # This file is distributed under the same license as the django-helpdesk package.
-# 
+#
 # Translators:
 # Alberto Gaona <gaona_consulting@yahoo.com>, 2011
-# anto987 <anto987@gmail.com>, 2012
+# Antonio Storni <anto987@gmail.com>, 2012
 # Erik Rivera <erik.river@gmail.com>, 2011
 # Ross Poulton <ross@rossp.org>, 2011
 msgid ""
@@ -1072,12 +1072,18 @@ msgstr "Si - Eliminar"
 msgid "Create Ticket"
 msgstr "Crear Ticket"
 
-#: templates/helpdesk/create_ticket.html:6
-msgid ""
-"<h2>Submit a Ticket</h2>\n"
-"\n"
-"<p>Unless otherwise stated, all fields are required. Please provide as descriptive a title and description as possible.</p>"
-msgstr "<h2>Enviar nuevo ticket</h2>⏎ ⏎ <p>Salvo los indicados, todos los campos son obligatorios. Por favor ingrese la información y el título de la forma más descriptiva posible</p>"
+#: templates/helpdesk/create_ticket.html:10
+#: templates/helpdesk/public_homepage.html:39
+msgid "Submit a Ticket"
+msgstr "Enviar un Ticket"
+
+#: templates/helpdesk/create_ticket.html:11
+msgid "Unless otherwise stated, all fields are required."
+msgstr "Salvo los indicados, todos los campos son obligatorios."
+
+#: templates/helpdesk/create_ticket.html:11
+msgid "Please provide as descriptive a title and description as possible."
+msgstr "Por favor ingrese la información y el título de la forma más descriptiva posible."
 
 #: templates/helpdesk/create_ticket.html:17
 #: templates/helpdesk/edit_ticket.html:19
@@ -1179,13 +1185,16 @@ msgid "Edit Ticket"
 msgstr "Editar Ticket"
 
 #: templates/helpdesk/edit_ticket.html:6
-msgid ""
-"<h2>Edit a Ticket</h2>\n"
-"\n"
-"<p>Unless otherwise stated, all fields are required. Please provide as descriptive a title and description as possible.</p>\n"
-"\n"
-"<p><strong>Note:</strong> Editing a ticket does <em>not</em> send an e-mail to the ticket owner or submitter. No new details should be entered, this form should only be used to fix incorrect details or clean up the submission.</p>"
-msgstr "<h2>Editar ticket</h2>⏎ ⏎ <p>Unless otherwise stated, all fields are required. Please provide as descriptive a title and description as possible.</p>⏎ ⏎ <p><strong>Note:</strong> Editing a ticket does <em>not</em> send an e-mail to the ticket owner or submitter. No new details should be entered, this form should only be used to fix incorrect details or clean up the submission.</p>"
+msgid "Edit a Ticket"
+msgstr "Editar ticket"
+
+#: templates/helpdesk/edit_ticket.html:6
+msgid "Note"
+msgstr ""
+
+#: templates/helpdesk/edit_ticket.html:6
+msgid "Editing a ticket does <em>not</em> send an e-mail to the ticket owner or submitter. No new details should be entered, this form should only be used to fix incorrect details or clean up the submission."
+msgstr ""
 
 #: templates/helpdesk/edit_ticket.html:28
 msgid "Save Changes"
@@ -1437,15 +1446,9 @@ msgstr "Su Direcciójn de E-Mail"
 msgid "View Ticket"
 msgstr "Ver Ticket"
 
-#: templates/helpdesk/public_homepage.html:39
-msgid "Submit a Ticket"
-msgstr "Enviar Ticket"
-
 #: templates/helpdesk/public_homepage.html:41
-msgid ""
-"All fields are required. Please provide as descriptive a title and "
-"description as possible."
-msgstr "Todos los campos son requeridos. Por favor ingrese un título y descripción."
+msgid "All fields are required."
+msgstr "Todos los campos son requeridos."
 
 #: templates/helpdesk/public_homepage.html:67
 msgid "Please use button at upper right to login first."

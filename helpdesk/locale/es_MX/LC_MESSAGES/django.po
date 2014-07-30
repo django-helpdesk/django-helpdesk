@@ -1,11 +1,11 @@
 # django-helpdesk English language translation
 # Copyright (C) 2011 Ross Poulton
 # This file is distributed under the same license as the django-helpdesk package.
-# 
+#
 # Translators:
 # Alberto Gaona <gaona_consulting@yahoo.com>, 2011
-# apizano <apizano@gdl.cinvestav.mx>, 2013
-# apizano <apizano@gdl.cinvestav.mx>, 2012
+# Apizano <apizano@gdl.cinvestav.mx>, 2013
+# Apizano <apizano@gdl.cinvestav.mx>, 2012
 # Erik Rivera <erik.river@gmail.com>, 2011,2013
 # Ross Poulton <ross@rossp.org>, 2011
 msgid ""
@@ -1054,10 +1054,8 @@ msgid ""
 msgstr "\n<h2>Eliminar Consulta</h2>\n\n<p>¿Esta seguro de eliminar el filtro guardado (<em>%(query_title)s</em>)? Para recrearlo, necesita volver a filtrar manualmente su lista de tickets.</p>\n"
 
 #: templates/helpdesk/confirm_delete_saved_query.html:11
-msgid ""
-"\n"
-"<p>You have shared this query, so other users may be using it. If you delete it, they will have to manually create their own query.</p>\n"
-msgstr "\n<p>Has compartido esta consulta, entonces otros usuarios podrían estar usandola, si tu la eliminas ellos tienen que crear manualmente su propia consulta</p>\n"
+msgid "You have shared this query, so other users may be using it. If you delete it, they will have to manually create their own query."
+msgstr "Has compartido esta consulta, entonces otros usuarios podrían estar usandola, si tu la eliminas ellos tienen que crear manualmente su propia consulta"
 
 #: templates/helpdesk/confirm_delete_saved_query.html:15
 #: templates/helpdesk/delete_ticket.html:11
@@ -1073,12 +1071,18 @@ msgstr "Sí, borrarlo"
 msgid "Create Ticket"
 msgstr "Crear Ticket"
 
-#: templates/helpdesk/create_ticket.html:6
-msgid ""
-"<h2>Submit a Ticket</h2>\n"
-"\n"
-"<p>Unless otherwise stated, all fields are required. Please provide as descriptive a title and description as possible.</p>"
-msgstr "<h2>Enviar un Ticket</h2>\n\n<p></p>"
+#: templates/helpdesk/create_ticket.html:10
+#: templates/helpdesk/public_homepage.html:39
+msgid "Submit a Ticket"
+msgstr "Enviar un Ticket"
+
+#: templates/helpdesk/create_ticket.html:11
+msgid "Unless otherwise stated, all fields are required."
+msgstr "A menos que se indique lo contrario, todos los campos son obligatorios."
+
+#: templates/helpdesk/create_ticket.html:11
+msgid "Please provide as descriptive a title and description as possible."
+msgstr "Por favor use un título y descripción lo más claro posible."
 
 #: templates/helpdesk/create_ticket.html:17
 #: templates/helpdesk/edit_ticket.html:19
@@ -1166,27 +1170,26 @@ msgstr "Tickets cerrados y resueltos en los que usted trabajó"
 msgid "Delete Ticket"
 msgstr "Borrar Ticket"
 
-#: templates/helpdesk/delete_ticket.html:5
+#: templates/helpdesk/delete_ticket.html:8
 #, python-format
-msgid ""
-"\n"
-"<h2>Delete Ticket</h2>\n"
-"\n"
-"<p>Are you sure you want to delete this ticket (<em>%(ticket_title)s</em>)? All traces of the ticket, including followups, attachments, and updates will be irreversably removed.</p>\n"
-msgstr "\n<h2> Eliminar ticket </h2><p> ¿Está seguro que desea eliminar esta entrada <em>( %(ticket_title)s )?</em> Todos los rastros del ticket, incluyendo comentarios, archivos adjuntos y actualizaciones serán eliminados de forma irreversible. </p>\n"
+msgid "Are you sure you want to delete this ticket (<em>%(ticket_title)s</em>)? All traces of the ticket, including followups, attachments, and updates will be irreversibly removed."
+msgstr "¿Está seguro que desea eliminar esta entrada (<em>%(ticket_title)s</em>)? Todos los rastros del ticket, incluyendo comentarios, archivos adjuntos y actualizaciones serán eliminados de forma irreversible."
 
 #: templates/helpdesk/edit_ticket.html:3
 msgid "Edit Ticket"
 msgstr "Editar Ticket"
 
 #: templates/helpdesk/edit_ticket.html:6
-msgid ""
-"<h2>Edit a Ticket</h2>\n"
-"\n"
-"<p>Unless otherwise stated, all fields are required. Please provide as descriptive a title and description as possible.</p>\n"
-"\n"
-"<p><strong>Note:</strong> Editing a ticket does <em>not</em> send an e-mail to the ticket owner or submitter. No new details should be entered, this form should only be used to fix incorrect details or clean up the submission.</p>"
-msgstr "<h2> Editar un Ticket</h2>\n\n<p> A menos que se indique lo contrario, todos los campos son obligatorios. Por favor use un título y descripción lo más claro  posible. </p>\n<p> <strong>Nota:</strong> La edición de un ticket <em>no</em> envía un correo electrónico al propietario del ticket o remitente. Este formato no es para añadir nuevos datos, sólo se debe utilizar para arreglar datos incorrectos o limpiar el ticket. </p>"
+msgid "Edit a Ticket"
+msgstr "Editar un Ticket"
+
+#: templates/helpdesk/edit_ticket.html:6
+msgid "Note"
+msgstr "Nota"
+
+#: templates/helpdesk/edit_ticket.html:6
+msgid "Editing a ticket does <em>not</em> send an e-mail to the ticket owner or submitter. No new details should be entered, this form should only be used to fix incorrect details or clean up the submission."
+msgstr "La edición de un ticket <em>no</em> envía un correo electrónico al propietario del ticket o remitente. Este formato no es para añadir nuevos datos, sólo se debe utilizar para arreglar datos incorrectos o limpiar el ticket."
 
 #: templates/helpdesk/edit_ticket.html:28
 msgid "Save Changes"
@@ -1198,27 +1201,23 @@ msgid "Ignore E-Mail Address"
 msgstr "Ignorar Dirección de E-mail"
 
 #: templates/helpdesk/email_ignore_add.html:5
-msgid ""
-"\n"
-"<h2>Ignore E-Mail Address</h2>\n"
-"\n"
-"<p>To ignore an e-mail address and prevent any emails from that address creating tickets automatically, enter the e-mail address below.</p>\n"
-"\n"
-"<p>You can either enter a whole e-mail address such as <em>email@domain.com</em> or a portion of an e-mail address with a wildcard, such as <em>*@domain.com</em> or <em>user@*</em>.</p>"
-msgstr "\n<h2>Ignorar dirección de E-Mail</h2>\n\n<p>Para ignorar una dirección e-mail y evitar que se creen tickets automáticos desde la misma, introduzca la dirección de e-mail abajo.</p>\n\n<p>Puede especificar tanto una dirección de correo completo, por ejemplo <em>email@dominio.com</em> o solo una parte de la dirección con un wildcard, como por ejemplo <em>*@dominio.com</em> o <em>usuario@*</em>.</p>"
+msgid "To ignore an e-mail address and prevent any emails from that address creating tickets automatically, enter the e-mail address below."
+msgstr "Para ignorar una dirección e-mail y evitar que se creen tickets automáticos desde la misma, introduzca la dirección de e-mail abajo."
+
+msgid "You can either enter a whole e-mail address such as <em>email@domain.com</em> or a portion of an e-mail address with a wildcard, such as <em>*@domain.com</em> or <em>user@*</em>."
+msgstr "Puede especificar tanto una dirección de correo completo, por ejemplo <em>email@dominio.com</em> o solo una parte de la dirección con un wildcard, como por ejemplo <em>*@dominio.com</em> o <em>usuario@*</em>."
 
 #: templates/helpdesk/email_ignore_del.html:3
 msgid "Delete Ignored E-Mail Address"
 msgstr "Borrar dirección de E-Mail Ignorada"
 
 #: templates/helpdesk/email_ignore_del.html:5
+msgid "Un-Ignore E-Mail Address"
+msgstr "Readmitir dirección E-Mail"
+
 #, python-format
-msgid ""
-"\n"
-"<h2>Un-Ignore E-Mail Address</h2>\n"
-"\n"
-"<p>Are you sure you wish to stop removing this email address (<em>%(email_address)s</em>) and allow their e-mails to automatically create tickets in your system? You can re-add this e-mail address at any time.</p>\n"
-msgstr "\n<h2>Readmitir dirección E-Mail</h2>\n\n<p>¿Está seguro de que quiere dejar de bloquear esta dirección de correo (<em>%(email_address)s</em>)  y permitir que los correos de esta dirección creen tickets en el sistema? Puede añadir esta dirección e-mail en cualquier momento. </p>\n"
+msgid "Are you sure you wish to stop removing this email address (<em>%(email_address)s</em>) and allow their e-mails to automatically create tickets in your system? You can re-add this e-mail address at any time."
+msgstr "¿Está seguro de que quiere dejar de bloquear esta dirección de correo (<em>%(email_address)s</em>) y permitir que los correos de esta dirección creen tickets en el sistema? Puede añadir esta dirección e-mail en cualquier momento."
 
 #: templates/helpdesk/email_ignore_del.html:11
 msgid "Keep Ignoring It"
@@ -1438,15 +1437,9 @@ msgstr "Su dirección de correo electrénico"
 msgid "View Ticket"
 msgstr "Ver Ticket"
 
-#: templates/helpdesk/public_homepage.html:39
-msgid "Submit a Ticket"
-msgstr "Enviar un Ticket"
-
 #: templates/helpdesk/public_homepage.html:41
-msgid ""
-"All fields are required. Please provide as descriptive a title and "
-"description as possible."
-msgstr "Todos los campos son requeridos. Por favor incluya un título y una descripción tan explícitas como sea posible."
+msgid "All fields are required."
+msgstr "Todos los campos son requeridos."
 
 #: templates/helpdesk/public_homepage.html:67
 msgid "Please use button at upper right to login first."
@@ -1457,13 +1450,14 @@ msgid "Unable To Open Ticket"
 msgstr "No es posible abrir el Ticket"
 
 #: templates/helpdesk/public_spam.html:6
-msgid ""
-"<p>Sorry, but there has been an error trying to submit your ticket.</p>\n"
-"\n"
-"<p>Our system has marked your submission as <strong>spam</strong>, so we are unable to save it. If this is not spam, please press back and re-type your message. Be careful to avoid sounding 'spammy', and if you have heaps of links please try removing them if possible.</p>\n"
-"\n"
-"<p>We are sorry for any inconvenience, however this check is required to avoid our helpdesk resources being overloaded by spammers.</p>\n"
-msgstr "<p>Lo sentimos, pero se generó un error al tratar de ingresar su ticket.</p>\n\n<p>Nuestro sistema ha catalogado su envío como  <strong>spam</strong>, por lo que no podemos guardarlo. Si no es spam, por favor presione atrás y reingrese su mensaje. Intente no ingresar palabras que puedan sonar a spam, y si tiene ligas en su mensaje trate de eliminarlas si es posible.</p>\n\n<p>Sentimos el inconveniente, pero necesitamos verificar el correo contra spam para evitar que nuestros recursos de helpdesk sean bloqueados por spammers.</p>\n"
+msgid "Sorry, but there has been an error trying to submit your ticket."
+msgstr "Lo sentimos, pero se generó un error al tratar de ingresar su ticket."
+
+msgid "Our system has marked your submission as <strong>spam</strong>, so we are unable to save it. If this is not spam, please press back and re-type your message. Be careful to avoid sounding 'spammy', and if you have heaps of links please try removing them if possible."
+msgstr "Nuestro sistema ha catalogado su envío como <strong>spam</strong>, por lo que no podemos guardarlo. Si no es spam, por favor presione atrás y reingrese su mensaje. Intente no ingresar palabras que puedan sonar a spam, y si tiene ligas en su mensaje trate de eliminarlas si es posible."
+
+msgid "We are sorry for any inconvenience, however this check is required to avoid our helpdesk resources being overloaded by spammers."
+msgstr "Sentimos el inconveniente, pero necesitamos verificar el correo contra spam para evitar que nuestros recursos de helpdesk sean bloqueados por spammers."
 
 #: templates/helpdesk/public_view_form.html:8
 msgid "Error:"
