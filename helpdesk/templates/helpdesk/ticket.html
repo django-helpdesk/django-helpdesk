@@ -123,7 +123,7 @@ function googleTranslateElementInit() {
 <fieldset>
     <dl>
         {% if preset_replies %}
-        <dt><label for='id_preset'>{% trans "Use a Pre-set Reply" %}</label> <span class='form_optional'>(Optional)</span></dt>
+        <dt><label for='id_preset'>{% trans "Use a Pre-set Reply" %}</label> <span class='form_optional'>{% trans "(Optional)" %}</span></dt>
         <dd><select name='preset' id='id_preset'><option value=''>------</option>{% for preset in preset_replies %}<option value='{{ preset.id }}'>{{ preset.name }}</option>{% endfor %}</select></dd>
         <dd class='form_help_text'>{% trans "Selecting a pre-set reply will over-write your comment below. You can then modify the pre-set reply to your liking before saving this update." %}</dd>
         {% endif %}
@@ -163,7 +163,7 @@ function googleTranslateElementInit() {
         {% if helpdesk_settings.HELPDESK_UPDATE_PUBLIC_DEFAULT %}
         <input type='hidden' name='public' value='1'>
         {% else %}
-        <dt><label for='id_public'>{% trans "Is this update public?" %}</label> <span class='form_optional'>(Optional)</span></dt>
+        <dt><label for='id_public'>{% trans "Is this update public?" %}</label> <span class='form_optional'>{% trans "(Optional)" %}</span></dt>
         <dd><input type='checkbox' name='public' value='1' checked='checked' /></dd>
         <dd class='form_help_text'>{% trans "If this is public, the submitter will be e-mailed your comment or resolution." %}</dd>
         {% endif %}
