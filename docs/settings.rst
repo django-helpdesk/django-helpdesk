@@ -86,12 +86,11 @@ These options only change display of items on public-facing pages, not staff pag
 Options that change ticket updates
 ----------------------------------
 
-- **HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE** Allow non-staff users to interact with tickets? This will also change how 'staff_member_required'
-  in staff.py will be defined.
+- **HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE** Allow non-staff users to interact with tickets?
 
   **Default:** ``HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = False``
 
-- **HELPDESK_CUSTOM_STAFF_FILTER_CALLBACK** Apply a custom authorisation logic when defining 'staff_member_required' in staff.py.
+- **HELPDESK_CUSTOM_STAFF_FILTER_CALLBACK** Apply a custom authorisation logic for identifying helpdesk staff members.
   If set, `HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE` will be ignored when determining staff access.
   The value should be a function accepting the active user as a parameter and returning True if the user is considered helpdesk
   staff, e.g.

@@ -32,7 +32,7 @@ try:
 except ImportError:
     from datetime import datetime as timezone
 
-from helpdesk.decorators import helpdesk_staff_member_required, helpdesk_superuser_required
+from helpdesk.decorators import helpdesk_staff_member_required, helpdesk_superuser_required, is_helpdesk_staff
 from helpdesk.forms import TicketForm, UserSettingsForm, EmailIgnoreForm, EditTicketForm, TicketCCForm, EditFollowUpForm, TicketDependencyForm
 from helpdesk.lib import send_templated_mail, query_to_dict, apply_query, safe_template_context
 from helpdesk.models import Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch, IgnoreEmail, TicketCC, TicketDependency
@@ -292,8 +292,7 @@ def subscribe_staff_member_to_ticket(ticket, user):
 
 
 def update_ticket(request, ticket_id, public=False):
-    if not (public or (request.user.is_authenticated() and request.user.is_active and (
-            request.user.is_staff or helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE))):
+    if not (public or is_helpdesk_staff(request.user)):
         return HttpResponseRedirect('%s?next=%s' % (reverse('login'), request.path))
 
     ticket = get_object_or_404(Ticket, id=ticket_id)
@@ -344,7 +343,7 @@ def update_ticket(request, ticket_id, public=False):
 
     f = FollowUp(ticket=ticket, date=timezone.now(), comment=comment)
 
-    if request.user.is_staff or helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE:
+    if is_helpdesk_staff(request.user):
         f.user = request.user
 
     f.public = public
@@ -535,9 +534,9 @@ def update_ticket(request, ticket_id, public=False):
 
 
 def return_to_ticket(user, helpdesk_settings, ticket):
-    ''' Helpder function for update_ticket '''
+    """ Helper function for update_ticket """
 
-    if user.is_staff or helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE:
+    if is_helpdesk_staff(user):
         return HttpResponseRedirect(ticket.get_absolute_url())
     else:
         return HttpResponseRedirect(ticket.ticket_url)
