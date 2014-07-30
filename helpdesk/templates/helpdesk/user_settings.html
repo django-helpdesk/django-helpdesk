@@ -3,11 +3,9 @@
 {% block helpdesk_title %}{% trans "Change User Settings" %}{% endblock %}
 
 {% block helpdesk_body %}
-{% blocktrans %}
-<h2>User Settings</h2>
+<h2>{% trans "User Settings" %}</h2>
 
-<p>Use the following options to change the way your helpdesk system works for you. These settings do not impact any other user.</p>
-{% endblocktrans %}
+<p>{% blocktrans %}Use the following options to change the way your helpdesk system works for you. These settings do not impact any other user.{% endblocktrans %}</p>
 
 <form role="form" method='post' action='./'>
     {% csrf_token %}

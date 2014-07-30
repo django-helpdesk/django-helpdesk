@@ -2,10 +2,10 @@
 
 {% block helpdesk_title %}{% trans "Change System Settings" %}{% endblock %}
 
-{% block helpdesk_body %}{% blocktrans %}
-<h2>System Settings</h2>
+{% block helpdesk_body %}
+<h2>{% trans "System Settings" %}</h2>
 
-<p>The following items can be maintained by you or other superusers:</p>{% endblocktrans %}
+<p>{% blocktrans %}The following items can be maintained by you or other superusers:{% endblocktrans %}</p>
 
 <ul>
     <li><a href='{% url 'helpdesk_email_ignore' %}'>{% trans "E-Mail Ignore list" %}</a></li>
