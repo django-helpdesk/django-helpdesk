@@ -3,7 +3,7 @@
 # This file is distributed under the same license as the django-helpdesk package.
 # 
 # Translators:
-# Fenkiou <papin.alexandre@me.com>, 2013
+# Alexandre Papin <papin.alexandre@me.com>, 2013
 # Alex Garel <alex.garel@gmail.com>, 2012
 # yaap <gracieux.guillaume@gmail.com>, 2012
 # kolin22 <kolin22@gmail.com>, 2011
@@ -13,8 +13,8 @@ msgstr ""
 "Project-Id-Version: django-helpdesk\n"
 "Report-Msgid-Bugs-To: http://github.com/RossP/django-helpdesk/issues\n"
 "POT-Creation-Date: 2012-08-07 20:40+1000\n"
-"PO-Revision-Date: 2013-09-26 14:44+0000\n"
-"Last-Translator: Fenkiou <papin.alexandre@me.com>\n"
+"PO-Revision-Date: 2013-11-20 11:07+0000\n"
+"Last-Translator: Alexandre Papin <papin.alexandre@me.com>\n"
 "Language-Team: French (http://www.transifex.com/projects/p/django-helpdesk/language/fr/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"

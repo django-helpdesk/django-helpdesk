@@ -4,8 +4,8 @@
 # 
 # Translators:
 # Alberto Gaona <gaona_consulting@yahoo.com>, 2011
-# apizano <apizano@gdl.cinvestav.mx>, 2013
-# apizano <apizano@gdl.cinvestav.mx>, 2012
+# Apizano <apizano@gdl.cinvestav.mx>, 2013
+# Apizano <apizano@gdl.cinvestav.mx>, 2012
 # Erik Rivera <erik.river@gmail.com>, 2011,2013
 # Ross Poulton <ross@rossp.org>, 2011
 msgid ""
