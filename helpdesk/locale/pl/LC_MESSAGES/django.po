@@ -3,7 +3,7 @@
 # This file is distributed under the same license as the django-helpdesk package.
 # 
 # Translators:
-# mpasternak <michal.dtz@gmail.com>, 2011
+# Michał Pasternak <michal.dtz@gmail.com>, 2011
 # Ross Poulton <ross@rossp.org>, 2011
 # Tomasz Sanecki <tomasz@sanecki.net>, 2012
 msgid ""
