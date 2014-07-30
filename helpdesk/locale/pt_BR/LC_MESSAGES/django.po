@@ -3,19 +3,19 @@
 # This file is distributed under the same license as the django-helpdesk package.
 # 
 # Translators:
-# alemp <alemp@alemp.com.br>, 2013
-# macaba <lixo@macaba.com.br>, 2013
+# Alessandro Pinto <alemp@alemp.com.br>, 2013
+# Daniel de Abreu Mendes <lixo@macaba.com.br>, 2013
 # Gabriel Galiaso <gabrielgaliaso@gmail.com>, 2012-2013
 # Gabriel Galiaso <gabrielgaliaso@gmail.com>, 2011
-# rafaelcapucho <rafael.capucho@gmail.com>, 2013
+# Rafael Capucho <rafael.capucho@gmail.com>, 2013
 # Ross Poulton <ross@rossp.org>, 2011
 msgid ""
 msgstr ""
 "Project-Id-Version: django-helpdesk\n"
 "Report-Msgid-Bugs-To: http://github.com/RossP/django-helpdesk/issues\n"
 "POT-Creation-Date: 2012-08-07 20:40+1000\n"
-"PO-Revision-Date: 2013-08-22 02:49+0000\n"
-"Last-Translator: alemp <alemp@alemp.com.br>\n"
+"PO-Revision-Date: 2013-11-20 11:07+0000\n"
+"Last-Translator: Alessandro Pinto <alemp@alemp.com.br>\n"
 "Language-Team: Portuguese (Brazil) (http://www.transifex.com/projects/p/django-helpdesk/language/pt_BR/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"

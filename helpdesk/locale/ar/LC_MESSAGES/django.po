@@ -3,19 +3,20 @@
 # This file is distributed under the same license as the django-helpdesk package.
 # 
 # Translators:
+# Beshoy Atef <beshosmile@hotmail.com>, 2013
 msgid ""
 msgstr ""
 "Project-Id-Version: django-helpdesk\n"
-"Report-Msgid-Bugs-To: http://github.com/RossP/django-helpdesk/issues\n"
+"Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2012-08-07 20:40+1000\n"
-"PO-Revision-Date: 2013-04-29 09:18+0000\n"
-"Last-Translator: Ross Poulton <ross@rossp.org>\n"
-"Language-Team: Persian (Iran) (http://www.transifex.com/projects/p/django-helpdesk/language/fa_IR/)\n"
+"PO-Revision-Date: 2013-11-20 11:07+0000\n"
+"Last-Translator: Beshoy Atef <beshosmile@hotmail.com>\n"
+"Language-Team: Arabic (http://www.transifex.com/projects/p/django-helpdesk/language/ar/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: fa_IR\n"
-"Plural-Forms: nplurals=1; plural=0;\n"
+"Language: ar\n"
+"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
 
 #: forms.py:113 forms.py:360 models.py:262
 #: templates/helpdesk/dashboard.html:11 templates/helpdesk/dashboard.html:37
@@ -30,11 +31,11 @@ msgstr ""
 
 #: forms.py:122
 msgid "Summary of the problem"
-msgstr ""
+msgstr "ملخص لبعض المشاكل"
 
 #: forms.py:127
 msgid "Submitter E-Mail Address"
-msgstr ""
+msgstr "مرسل العنوان البريدى للشكوة "
 
 #: forms.py:129
 msgid ""
@@ -44,17 +45,17 @@ msgstr ""
 
 #: forms.py:135
 msgid "Description of Issue"
-msgstr ""
+msgstr "وصف المشكلة"
 
 #: forms.py:142
 msgid "Case owner"
-msgstr ""
+msgstr "مالك الحالة"
 
 #: forms.py:143
 msgid ""
 "If you select an owner other than yourself, they'll be e-mailed details of "
 "this ticket immediately."
-msgstr ""
+msgstr "اذا قمت باختيار مالك اخر غيرك , سوف يتم ارسال رسالة الدعم الخاصة بة عبر البريد الالكترونى خلال لحظات"
 
 #: forms.py:151 models.py:322 management/commands/escalate_tickets.py:149
 #: templates/helpdesk/public_view_ticket.html:21
@@ -62,11 +63,11 @@ msgstr ""
 #: templates/helpdesk/ticket_desc_table.html:31
 #: templates/helpdesk/ticket_list.html:84 views/staff.py:355
 msgid "Priority"
-msgstr ""
+msgstr "الاولوية"
 
 #: forms.py:152
 msgid "Please select a priority carefully. If unsure, leave it as '3'."
-msgstr ""
+msgstr "رجاء اختيار الاولوية بحرص , فى حالة عدم التأكد , اتركها 3"
 
 #: forms.py:159 forms.py:397 models.py:330 templates/helpdesk/ticket.html:178
 #: views/staff.py:365
@@ -75,11 +76,11 @@ msgstr ""
 
 #: forms.py:171 forms.py:402
 msgid "Attach File"
-msgstr ""
+msgstr "اضافة ملف"
 
 #: forms.py:172 forms.py:403
 msgid "You can attach a file such as a document or screenshot to this ticket."
-msgstr ""
+msgstr "يمكنك اضافة ملف كملف نصى او صورة الى تذكرة الدعم"
 
 #: forms.py:180 templates/helpdesk/public_view_ticket.html:33
 #: templates/helpdesk/ticket.html:182
@@ -87,60 +88,60 @@ msgstr ""
 #: templates/helpdesk/ticket_list.html:61
 #: templates/helpdesk/ticket_list.html:199 views/staff.py:376
 msgid "Tags"
-msgstr ""
+msgstr "الكلمات الدلالية"
 
 #: forms.py:181
 msgid ""
 "Words, separated by spaces, or phrases separated by commas. These should "
 "communicate significant characteristics of this ticket"
-msgstr ""
+msgstr "الكلمات، مفصولة بمسافات، أو عبارات مفصولة بفواصل. وينبغي لهذه التواصل خصائص هامة لتذكرة الدعم هذة"
 
 #: forms.py:275
 msgid "Ticket Opened"
-msgstr ""
+msgstr "تذاكر الدعم المفتوحة"
 
 #: forms.py:282
 #, python-format
 msgid "Ticket Opened & Assigned to %(name)s"
-msgstr ""
+msgstr "التذكرة مفتوحة و منسوبة الى  %(name)s"
 
 #: forms.py:369
 msgid "Summary of your query"
-msgstr ""
+msgstr "ملخص الاستعلام الخاص بك"
 
 #: forms.py:374
 msgid "Your E-Mail Address"
-msgstr ""
+msgstr "بريدك الالكترونى"
 
 #: forms.py:375
 msgid "We will e-mail you when your ticket is updated."
-msgstr ""
+msgstr "سنقوم بمراسلتك عند تعديل تذكرة الدعم الخاصة بك"
 
 #: forms.py:380
 msgid "Description of your issue"
-msgstr ""
+msgstr "وصف المشكلة الخاصة بك"
 
 #: forms.py:382
 msgid ""
 "Please be as descriptive as possible, including any details we may need to "
 "address your query."
-msgstr ""
+msgstr "رجاء جعل الوصف تفصيليا متضمن اى تفاصيل ربما نحتاجها لمعالجة الاستعلام الخاص بك"
 
 #: forms.py:390
 msgid "Urgency"
-msgstr ""
+msgstr "الاهمية"
 
 #: forms.py:391
 msgid "Please select a priority carefully."
-msgstr ""
+msgstr "رجاء اختيار الاولوية بحرص"
 
 #: forms.py:486
 msgid "Ticket Opened Via Web"
-msgstr ""
+msgstr "تم فتح تذكرة الدعم عن طريق الويب"
 
 #: forms.py:553
 msgid "Show Ticket List on Login?"
-msgstr ""
+msgstr "مشاهدة قائمة تذاكر الدعم عند الدخول؟"
 
 #: forms.py:554
 msgid "Display the ticket list upon login? Otherwise, the dashboard is shown."
@@ -148,22 +149,22 @@ msgstr ""
 
 #: forms.py:559
 msgid "E-mail me on ticket change?"
-msgstr ""
+msgstr "راسلنى عند تغيير تذكرة الدعم ؟"
 
 #: forms.py:560
 msgid ""
 "If you're the ticket owner and the ticket is changed via the web by somebody"
 " else, do you want to receive an e-mail?"
-msgstr ""
+msgstr "اذا كنت انت صاحب تذكرة الدعم و قام شخص اخر بتغيير التذكرة عن طريق الويب هل تريد ان تتلقى بريد الكترونى ؟"
 
 #: forms.py:565
 msgid "E-mail me when assigned a ticket?"
-msgstr ""
+msgstr "ارسال بريد الكترونى عند تعيين تذكرة للدعم ؟"
 
 #: forms.py:566
 msgid ""
 "If you are assigned a ticket via the web, do you want to receive an e-mail?"
-msgstr ""
+msgstr "اذا قمت بتعيين تذكرة عن طريق الويب هل تريد استقبال بريد الكترونى ؟"
 
 #: forms.py:571
 msgid "E-mail me when a ticket is changed via the API?"
@@ -175,15 +176,15 @@ msgstr ""
 
 #: forms.py:577
 msgid "Number of tickets to show per page"
-msgstr ""
+msgstr "عدد التذاكر لللعرض فى صفحة واحدة"
 
 #: forms.py:578
 msgid "How many tickets do you want to see on the Ticket List page?"
-msgstr ""
+msgstr "كم عدد تذاكر الدعم الذى تريد رؤيتها فىقائمة التذاكر هذة ؟"
 
 #: forms.py:585
 msgid "Use my e-mail address when submitting tickets?"
-msgstr ""
+msgstr "استتخدام البريد الاكترونى عند ارسال التذاكر ؟"
 
 #: forms.py:586
 msgid ""
@@ -198,7 +199,7 @@ msgstr ""
 #: templates/helpdesk/ticket.html:170 templates/helpdesk/ticket_list.html:75
 #: templates/helpdesk/ticket_list.html:199 views/staff.py:345
 msgid "Title"
-msgstr ""
+msgstr "عنوان"
 
 #: models.py:37 models.py:792 models.py:1162
 msgid "Slug"
@@ -214,7 +215,7 @@ msgstr ""
 #: templates/helpdesk/email_ignore_list.html:13
 #: templates/helpdesk/ticket_cc_list.html:15
 msgid "E-Mail Address"
-msgstr ""
+msgstr "عنولن البريد الالكترونى"
 
 #: models.py:46
 msgid ""
@@ -224,7 +225,7 @@ msgstr ""
 
 #: models.py:52 models.py:766
 msgid "Locale"
-msgstr ""
+msgstr "موضع"
 
 #: models.py:56
 msgid ""
@@ -234,15 +235,15 @@ msgstr ""
 
 #: models.py:60
 msgid "Allow Public Submission?"
-msgstr ""
+msgstr "السماح بالارسال العام"
 
 #: models.py:63
 msgid "Should this queue be listed on the public submission form?"
-msgstr ""
+msgstr "هل ينبغي إدراج قائمة الانتظار هذه على استمارة التقديم العام؟"
 
 #: models.py:68
 msgid "Allow E-Mail Submission?"
-msgstr ""
+msgstr "السماح بارسال بريد الكترونى ؟"
 
 #: models.py:71
 msgid "Do you want to poll the e-mail box below for new tickets?"
@@ -250,7 +251,7 @@ msgstr ""
 
 #: models.py:76
 msgid "Escalation Days"
-msgstr ""
+msgstr "أيام التصعيد"
 
 #: models.py:79
 msgid ""
@@ -282,7 +283,7 @@ msgstr ""
 
 #: models.py:105
 msgid "E-Mail Box Type"
-msgstr ""
+msgstr "كتابة صندزق البريد الالكترونى "
 
 #: models.py:107
 msgid "POP 3"
