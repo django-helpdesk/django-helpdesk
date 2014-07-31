@@ -958,5 +958,197 @@
             "heading": "Il Tuo Ticket \u00e8 Stato Aggiornato", 
             "subject": "(Aggiornato)"
         }
+    },
+    {
+        "pk": 81,
+        "model": "helpdesk.emailtemplate",
+        "fields": {
+            "locale": "cs",
+            "template_name": "assigned_cc",
+            "plain_text": "Dobr\u00fd den,\r\n\r\nTento e-mail v\u00e1m byl odesl\u00e1n na z\u00e1klad\u011b po\u017eadavku {{ ticket.ticket }} (\"{{ ticket.title }}\") z {{ ticket.submitter_email }}{% if ticket.assigned_to %} a je p\u0159i\u0159azen {{ ticket.assigned_to }}.\r\n\r\nPo\u017eadavek ID: {{ ticket.ticket }}\r\nFronta: {{ queue.title }}\r\nP\u0159edm\u011bt: {{ ticket.title }}\r\nOtev\u0159eno: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}\r\nZadavatel: {{ ticket.submitter_email|default:\"nezn\u00e1m\u00ed\" }}\r\nPriorita: {{ ticket.get_priority_display }}\r\nStav: {{ ticket.get_status }}\r\nP\u0159i\u0159azeno: {{ ticket.get_assigned_to }}\r\nOdkaz na web: {{ ticket.staff_url }}\r\n\r\nP\u016fvodn\u00ed popis po\u017eadavku:\r\n\r\n{{ ticket.description }}\r\n\r\n",
+            "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Dobr\u00fd den,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Tento e-mail v\u00e1m byl odesl\u00e1n na z\u00e1klad\u011b po\u017eadavku <a href=\"{{ ticket.staff_url }}\"><b>{{ ticket.ticket }}</b></a> (<em>{{ ticket.title }}</em>) z {{ ticket.submitter_email }} {% if ticket.assigned_to %} a je p\u0159i\u0159azen {{ ticket.assigned_to }}.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">\r\n<b>Po\u017eadavek ID</b>: {{ ticket.ticket }}<br>\r\n<b>Fronta</b>: {{ queue.title }}<br>\r\n<b>P\u0159edm\u011bt</b>: {{ ticket.title }}<br>\r\n<b>Otev\u0159eno</b>: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}<br>\r\n<b>Zadavatel</b>: {{ ticket.submitter_email|default:\"nezn\u00e1m\u00ed\" }}<br>\r\n<b>Priorita</b>: {{ ticket.get_priority_display }}<br>\r\n<b>Stav</b>: {{ ticket.get_status }}<br>\r\n<b>P\u0159i\u0159azeno</b>: {{ ticket.get_assigned_to }}<br>\r\n<b><a href='{{ ticket.staff_url }}'>Odkaz na web</a></b> pro \u00fapravu po\u017eadavku (p\u0159ihl\u00e1\u0161en\u00ed vy\u017eadov\u00e1no)</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">P\u016fvodn\u00ed popis po\u017eadavku:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.description|linebreaksbr }}</blockquote>",
+            "heading": "Po\u017eadavek p\u0159i\u0159azen",
+            "subject": "(P\u0159i\u0159azen)"
+        }
+    },
+    {
+        "pk": 82,
+        "model": "helpdesk.emailtemplate",
+        "fields": {
+            "locale": "cs",
+            "template_name": "assigned_owner",
+            "plain_text": "Dobr\u00fd den,\r\n\r\nByl v\u00e1m p\u0159i\u0159azen po\u017eadavek {{ ticket.ticket }} (\"{{ ticket.title }}\") z e-mailu{{ ticket.submitter_email }}.\r\n\r\nPo\u017eadavek ID: {{ ticket.ticket }}\r\nFronta: {{ queue.title }}\r\nP\u0159edm\u011bt: {{ ticket.title }}\r\nOtev\u0159eno: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}\r\nZadavatel: {{ ticket.submitter_email|default:\"nezn\u00e1m\u00ed\" }}\r\nPriorita: {{ ticket.get_priority_display }}\r\nStav: {{ ticket.get_status }}\r\nP\u0159i\u0159azeno: v\u00e1m\r\nOdkaz na web: {{ ticket.staff_url }}\r\n\r\nP\u016fvodn\u00ed popis po\u017eadavku:\r\n\r\n{{ ticket.description }}",
+            "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Dobr\u00fd den,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Byl v\u00e1m p\u0159i\u0159azen po\u017eadavek <a href=\"{{ ticket.staff_url }}\"><b>{{ ticket.ticket }}</b></a> (<em>{{ ticket.title }}</em>) z e-mailu {{ ticket.submitter_email }}.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">\r\n<b>Po\u017eadavek ID</b>: {{ ticket.ticket }}<br>\r\n<b>Fronta</b>: {{ queue.title }}<br>\r\n<b>P\u0159edm\u011bt</b>: {{ ticket.title }}<br>\r\n<b>Otev\u0159eno</b>: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}<br>\r\n<b>Zadavatel</b>: {{ ticket.submitter_email|default:\"nezn\u00e1m\u00ed\" }}<br>\r\n<b>Priorita</b>: {{ ticket.get_priority_display }}<br>\r\n<b>Stav</b>: {{ ticket.get_status }}<br>\r\n<b>P\u0159i\u0159azeno</b>: v\u00e1m<br>\r\n<b><a href='{{ ticket.staff_url }}'>Odkaz na web</a></b> pro \u00fapravu po\u017eadavku (p\u0159ihl\u00e1\u0161en\u00ed vy\u017eadov\u00e1no)</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">P\u016fvodn\u00ed popis po\u017eadavku:</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Just for reference, the original ticket description was:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.description|linebreaksbr }}</blockquote>",
+            "heading": "Po\u017eadavek je p\u0159i\u0159azen v\u00e1m",
+            "subject": "(P\u0159i\u0159azen v\u00e1m)"
+        }
+    },
+    {
+        "pk": 83,
+        "model": "helpdesk.emailtemplate",
+        "fields": {
+            "locale": "cs",
+            "template_name": "closed_cc",
+            "plain_text": "Dobr\u00fd den,\r\n\r\nPo\u017eadavek {{ ticket.title }} (\"{{ ticket.title }}\"){% if ticket.assigned_to %}, p\u0159i\u0159azen {{ ticket.assigned_to }}{% endif %} byl uzav\u0159en.\r\n\r\nPo\u017eadavek ID: {{ ticket.ticket }}\r\nFronta: {{ queue.title }}\r\nP\u0159edm\u011bt: {{ ticket.title }}\r\nOtev\u0159eno: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}\r\nZadavatel: {{ ticket.submitter_email|default:\"nezn\u00e1m\u00ed\" }}\r\nPriorita: {{ ticket.get_priority_display }}\r\nStav: {{ ticket.get_status }}\r\nP\u0159i\u0159azeno: v\u00e1m\r\nOdkaz na web: {{ ticket.staff_url }}\r\n\r\nP\u016fvodn\u00ed popis po\u017eadavku:\r\n\r\n{{ ticket.description }}\r\n\r\nRozhodnut\u00ed:\r\n\r\n{{ resolution }}",
+            "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Dobr\u00fd den,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Po\u017eadavek <i>{{ ticket.title }}</i> ('{{ ticket.title }}'){% if ticket.assigned_to %}, p\u0159i\u0159azen\u00fd {{ ticket.get_assigned_to }}{% endif %} byl uzav\u0159en.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">\r\n<b>Po\u017eadavek ID</b>: {{ ticket.ticket }}<br>\r\n<b>Fronta</b>: {{ queue.title }}<br>\r\n<b>P\u0159edm\u011bt</b>: {{ ticket.title }}<br>\r\n<b>Otev\u0159eno</b>: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}<br>\r\n<b>Zadavatel</b>: {{ ticket.submitter_email|default:\"nezn\u00e1m\u00ed\" }}<br>\r\n<b>Priorita</b>: {{ ticket.get_priority_display }}<br>\r\n<b>Stav</b>: {{ ticket.get_status }}<br>\r\n<b>P\u0159i\u0159azeno</b>: {{ ticket.get_assigned_to }}<br>\r\n<b><a href='{{ ticket.staff_url }}'>Odkaz na web</a></b> pro \u00fapravu po\u017eadavku (p\u0159ihl\u00e1\u0161en\u00ed vy\u017eadov\u00e1no)</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">P\u016fvodn\u00ed popis po\u017eadavku:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.description|linebreaksbr }}</blockquote>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Rozhodnut\u00ed:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ resolution }}</blockquote>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Chcete-li zobrazit tento po\u017eadavek on-line, m\u016f\u017eete nav\u0161t\u00edvit <a href='{{ ticket.staff_url }}'>{{ ticket.staff_url }}</a>.</p>",
+            "heading": "Po\u017eadavek uzav\u0159en",
+            "subject": "(Uzav\u0159en)"
+        }
+    },
+    {
+        "pk": 84,
+        "model": "helpdesk.emailtemplate",
+        "fields": {
+            "locale": "cs",
+            "template_name": "closed_owner",
+            "plain_text": "Dobr\u00fd den,\r\n\r\nn\u00e1sleduj\u00edc\u00ed po\u017eadavek, kter\u00fd je p\u0159i\u0159azen v\u00e1m, byl uzav\u0159en.\r\n\r\nPo\u017eadavek ID: {{ ticket.ticket }}\r\nFronta: {{ queue.title }}\r\nP\u0159edm\u011bt: {{ ticket.title }}\r\nOtev\u0159eno: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}\r\nZadavatel: {{ ticket.submitter_email|default:\"nezn\u00e1m\u00ed\" }}\r\nPriorita: {{ ticket.get_priority_display }}\r\nStav: {{ ticket.get_status }}\r\nP\u0159i\u0159azeno: {{ ticket.get_assigned_to }}\r\nOdkaz na web: {{ ticket.staff_url }}\r\n\r\nPokud chcete vid\u011bt po\u017eadavek on-line, nav\u0161tivte {{ ticket.staff_url }}.\r\n\r\n",
+            "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Dobr\u00fd den,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">n\u00e1sleduj\u00edc\u00ed po\u017eadavek, kter\u00fd je p\u0159i\u0159azen v\u00e1m, byl uzav\u0159en.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">\r\n<b>Po\u017eadavek ID</b>: {{ ticket.ticket }}<br>\r\n<b>Fronta</b>: {{ queue.title }}<br>\r\n<b>P\u0159edm\u011bt</b>: {{ ticket.title }}<br>\r\n<b>Otev\u0159eno</b>: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}<br>\r\n<b>Zadavatel</b>: {{ ticket.submitter_email|default:\"nezn\u00e1m\u00ed\" }}<br>\r\n<b>Priorita</b>: {{ ticket.get_priority_display }}<br>\r\n<b>Stav</b>: {{ ticket.get_status }}<br>\r\n<b>P\u0159i\u0159azeno</b>: v\u00e1m<br>\r\n<b><a href='{{ ticket.staff_url }}'>Odkaz na web</a></b> pro \u00fapravu po\u017eadavku (p\u0159ihl\u00e1\u0161en\u00ed vy\u017eadov\u00e1no)</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">P\u016fvodn\u00ed popis po\u017eadavku:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.description|linebreaksbr }}</blockquote>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Rozhodnut\u00ed</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.resolution }}</blockquote>",
+            "heading": "Po\u017eadavek uzav\u0159en",
+            "subject": "(Uzav\u0159en)"
+        }
+    },
+    {
+        "pk": 85,
+        "model": "helpdesk.emailtemplate",
+        "fields": {
+            "locale": "cs",
+            "template_name": "closed_submitter",
+            "plain_text": "Dobr\u00fd den,\r\n\r\nned\u00e1vno jste vytvo\u0159il/a po\u017eadavek s p\u0159edm\u011btem \"{{ ticket.title }}\". Tento e-mail potvrzuje, \u017ee po\u017eadavek byl uzav\u0159en.\r\n\r\nPokud si mysl\u00edte, \u017ee je zapot\u0159eb\u00ed \u0159e\u0161it tento po\u017eadavek, prosim odpov\u011bzte na tento e-mail a zachovejte p\u0159edm\u011bt a historii.\r\n\r\nPokud chcete po\u017eadavek zobrazit on-line, nav\u0161tivte {{ ticket.ticket_url }}.\r\n\r\nRozhodnut\u00ed:\r\n\r\n{{ ticket.resolution }}\r\n\r\n",
+            "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Dobr\u00fd den,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">ned\u00e1vno jste vytvo\u0159il/a po\u017eadavek s p\u0159edm\u011btem <i>{{ ticket.title }}</i>. Tento e-mail potvrzuje, \u017ee po\u017eadavek byl uzav\u0159en.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Rozhodnut\u00ed:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.resolution }}</blockquote>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Pokud chcete po\u017eadavek zobrazit on-line, nav\u0161tivte <a href=\"{{ ticket.ticket_url }}\">{{ ticket.ticket_url }}</a>. Pokud si mysl\u00edte, \u017ee je zapot\u0159eb\u00ed \u0159e\u0161it tento po\u017eadavek, prosim odpov\u011bzte na tento e-mail a zachovejte p\u0159edm\u011bt a historii.</p>",
+            "heading": "Po\u017eadavek uzav\u0159en",
+            "subject": "(Uzav\u0159en)"
+        }
+    },
+    {
+        "pk": 86,
+        "model": "helpdesk.emailtemplate",
+        "fields": {
+            "locale": "cs",
+            "template_name": "escalated_cc",
+            "plain_text": "Dobr\u00fd den,\r\n\r\nv\u00e1mi poslan\u00fd po\u017eadavek  {{ ticket.ticket }} (\"{{ ticket.title }}\")  automaticky eskaloval.\r\n\r\nPo\u017eadavek ID: {{ ticket.ticket }}\r\nFronta: {{ queue.title }}\r\nP\u0159edm\u011bt: {{ ticket.title }}\r\nOtev\u0159eno: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}\r\nZadavatel: {{ ticket.submitter_email|default:\"nezn\u00e1m\u00ed\" }}\r\nPriorita: {{ ticket.get_priority_display }}\r\nStav: {{ ticket.get_status }}\r\nP\u0159i\u0159azeno: v\u00e1m\r\nOdkaz na web: {{ ticket.staff_url }}\r\n\r\nP\u016fvodn\u00ed popis po\u017eadavku:\r\n\r\n{{ ticket.description }}\r\n\r\n",
+            "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Dobr\u00fd den,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">v\u00e1mi poslan\u00fd po\u017eadavek  <i>{{ ticket.ticket }}</i> (\"{{ ticket.title }}\")  automaticky eskaloval.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">\r\n<b>Po\u017eadavek ID</b>: {{ ticket.ticket }}<br>\r\n<b>Fronta</b>: {{ queue.title }}<br>\r\n<b>P\u0159edm\u011bt</b>: {{ ticket.title }}<br>\r\n<b>Otev\u0159eno</b>: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}<br>\r\n<b>Zadavatel</b>: {{ ticket.submitter_email|default:\"nezn\u00e1m\u00ed\" }}<br>\r\n<b>Priorita</b>: {{ ticket.get_priority_display }}<br>\r\n<b>Stav</b>: {{ ticket.get_status }}<br>\r\n<b>P\u0159i\u0159azeno</b>: v\u00e1m<br>\r\n<b><a href='{{ ticket.staff_url }}'>Odkaz na web</a></b> pro \u00fapravu po\u017eadavku (p\u0159ihl\u00e1\u0161en\u00ed vy\u017eadov\u00e1no)</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">P\u016fvodn\u00ed popis po\u017eadavku:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.description|linebreaksbr }}</blockquote>",
+            "heading": "Po\u017eadavek eskaloval",
+            "subject": "(Eskaloval)"
+        }
+    },
+    {
+        "pk": 87,
+        "model": "helpdesk.emailtemplate",
+        "fields": {
+            "locale": "cs",
+            "template_name": "escalated_submitter",
+            "plain_text": "Dobr\u00fd den,\r\n\r\nNed\u00e1vno jste vytvo\u0159il/a po\u017eadavek \"{{ ticket.title }}\". Tento e-mail v\u00e1m pos\u00edl\u00e1me pro automatizovanou eskalaci tohto po\u017eadavku. Byl p\u0159\u00edli\u0161 dlouho otev\u0159en\u00fd.\r\n\r\nJe\u0161t\u011b to prov\u011b\u0159\u00edme a pokus\u00edme se poskytnout \u0159e\u0161en\u00ed co nejd\u0159\u00edve.\r\n\r\nChcete-li zobrazit tento po\u017eadavek, m\u016f\u017eete nav\u0161t\u00edv\u00edt {{ ticket.ticket_url }}.\r\n",
+            "html": "<p style=\"font-family: sans-serif; font-size: 11pt;\">Dobr\u00fd den,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 11pt;\">Ned\u00e1vno jste vytvo\u0159il/a po\u017eadavek \"{{ ticket.title }}\". Tento e-mail v\u00e1m pos\u00edl\u00e1me pro automatizovanou eskalaci tohto po\u017eadavku. Byl p\u0159\u00edli\u0161 dlouho otev\u0159en\u00fd.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 11pt;\">Je\u0161t\u011b to prov\u011b\u0159\u00edme a pokus\u00edme se poskytnout \u0159e\u0161en\u00ed co nejd\u0159\u00edve.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 11pt;\">Chcete-li zobrazit tento po\u017eadavek, m\u016f\u017eete nav\u0161t\u00edv\u00edt <a href=\"{{ ticket.ticket_url }}\">{{ ticket.ticket_url }}</a>.</p>",
+            "heading": "V\u00e1\u0161 po\u017eadavek eskaloval",
+            "subject": "(Eskaloval)"
+        }
+    },
+    {
+        "pk": 88,
+        "model": "helpdesk.emailtemplate",
+        "fields": {
+            "locale": "cs",
+            "template_name": "escalated_owner",
+            "plain_text": "Dobr\u00fd den,\r\n\r\nPo\u017eadavek p\u0159i\u0159azen\u00fd v\u00e1m automaticky eskaloval.\r\n\r\nPo\u017eadavek ID: {{ ticket.ticket }}\r\nFronta: {{ queue.title }}\r\nP\u0159edm\u011bt: {{ ticket.title }}\r\nOtev\u0159eno: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}\r\nZadavatel: {{ ticket.submitter_email|default:\"nezn\u00e1m\u00ed\" }}\r\nPriorita: {{ ticket.get_priority_display }}\r\nStav: {{ ticket.get_status }}\r\nP\u0159i\u0159azeno: {{ ticket.get_assigned_to }}\r\nOdkaz na web: {{ ticket.staff_url }}\r\n\r\nP\u016fvodn\u00ed zdn\u011bn\u00ed po\u017eadavku:\r\n\r\n{{ ticket.description }}\r\n\r\nP\u0159e\u010dt\u011bte si pros\u00edm po\u017eadavek pozorn\u011b a pokuste se co nejd\u0159\u00edve poskytnout \u0159e\u0161en\u00ed.\r\n\r\n",
+            "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Dobr\u00fd den,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Po\u017eadavek p\u0159i\u0159azen\u00fd v\u00e1m automaticky eskaloval.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">\r\n<b>Po\u017eadavek ID</b>: {{ ticket.ticket }}<br>\r\n<b>Fronta</b>: {{ queue.title }}<br>\r\n<b>P\u0159edm\u011bt</b>: {{ ticket.title }}<br>\r\n<b>Otev\u0159eno</b>: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}<br>\r\n<b>Zadavatel</b>: {{ ticket.submitter_email|default:\"nezn\u00e1m\u00ed\" }}<br>\r\n<b>Priorita</b>: {{ ticket.get_priority_display }}<br>\r\n<b>Stav</b>: {{ ticket.get_status }}<br>\r\n<b>P\u0159i\u0159azeno</b>: v\u00e1m<br>\r\n<b><a href='{{ ticket.staff_url }}'>Odkaz na web</a></b> pro \u00fapravu po\u017eadavku (p\u0159ihl\u00e1\u0161en\u00ed vy\u017eadov\u00e1no)</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">P\u016fvodn\u00ed zdn\u011bn\u00ed po\u017eadavku:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.description|linebreaksbr }}</blockquote>",
+            "heading": "Po\u017eadavek p\u0159i\u0159azen\u00fd v\u00e1m, eskaloval",
+            "subject": "(Escalated)"
+        }
+    },
+    {
+        "pk": 89,
+        "model": "helpdesk.emailtemplate",
+        "fields": {
+            "locale": "cs",
+            "template_name": "newticket_cc",
+            "plain_text": "Dobr\u00fd den,\r\n\r\nv\u00e1\u0161 po\u017eadavek byl ulo\u017een a ozna\u010den za otev\u0159en\u00fd.\r\n\r\nPo\u017eadavek ID: {{ ticket.ticket }}\r\nFronta: {{ queue.title }}\r\nP\u0159edm\u011bt: {{ ticket.title }}\r\nOtev\u0159eno: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}\r\nZadavatel: {{ ticket.submitter_email|default:\"nezn\u00e1m\u00ed\" }}\r\nPriorita: {{ ticket.get_priority_display }}\r\nStav: {{ ticket.get_status }}\r\nP\u0159i\u0159azeno: {{ ticket.get_assigned_to }}\r\nOdkaz na web: {{ ticket.staff_url }}\r\n\r\nPopis:\r\n{{ ticket.description }}\r\n\r\n",
+            "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Dobr\u00fd den,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">v\u00e1\u0161 po\u017eadavek byl ulo\u017een a ozna\u010den za otev\u0159en\u00fd.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">\r\n<b>Po\u017eadavek ID</b>: {{ ticket.ticket }}<br>\r\n<b>Fronta</b>: {{ queue.title }}<br>\r\n<b>P\u0159edm\u011bt</b>: {{ ticket.title }}<br>\r\n<b>Otev\u0159eno</b>: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}<br>\r\n<b>Zadavatel</b>: {{ ticket.submitter_email|default:\"nezn\u00e1m\u00ed\" }}<br>\r\n<b>Priorita</b>: {{ ticket.get_priority_display }}<br>\r\n<b>Stav</b>: {{ ticket.get_status }}<br>\r\n<b>P\u0159i\u0159azeno</b>: v\u00e1m<br>\r\n<b><a href='{{ ticket.staff_url }}'>Odkaz na web</a></b> pro \u00fapravu po\u017eadavku (p\u0159ihl\u00e1\u0161en\u00ed vy\u017eadov\u00e1no)</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Popis:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.description|linebreaksbr }}</blockquote>",
+            "heading": "Nov\u00fd otev\u0159en\u00fd po\u017eadavek",
+            "subject": "(Otev\u0159en\u00fd)"
+        }
+    },
+    {
+        "pk": 90,
+        "model": "helpdesk.emailtemplate",
+        "fields": {
+            "locale": "cs",
+            "template_name": "newticket_submitter",
+            "plain_text": "Dobr\u00fd den,\r\n\r\nobdr\u017eeli jsme v\u00e1\u0161 dotaz \"{{ ticket.title }}\" na na\u0161i podporu.\r\n\r\nV tento okam\u017eik nemus\u00edte d\u011blat nic dal\u0161\u00edho. Va\u0161emu po\u017eadavku bylo p\u0159i\u0159azeno \u010d\u00edslo {{ ticket.ticket }} .\r\n\r\nChcete-li n\u00e1m poslat dal\u0161\u00ed informace, nebo pokud m\u00e1te jak\u00e9koliv dotazy t\u00fdkaj\u00edc\u00ed se k tomuto po\u017eadavku, uve\u010fte \u010d\u00edslo '{{ticket.ticket}}' v p\u0159edm\u011btu e-mailu. Nejjednodu\u0161\u0161\u00ed zp\u016fsob jak to ud\u011blat, je stisknout na tla\u010d\u00edtko \"odpov\u011b\u010f\" na tuto zpr\u00e1vu.\r\n\r\nPo\u017eadavek m\u016f\u017eete zobrazit na webu a tam p\u0159ipojit soubory nebo prohl\u00ed\u017eet aktualizace {{ticket.ticket_url}}.\r\n\r\nPo\u017eadavek se pokus\u00edme vy\u0159e\u0161it co nejd\u0159\u00edve. Dal\u0161\u00ed informace o aktualizac\u00edch po\u017eadavku budete dost\u00e1vat prost\u0159ednictv\u00edm t\u00e9to e-mailov\u00e9 adresy.\r\n",
+            "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Dobr\u00fd den,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">obdr\u017eeli jsme v\u00e1\u0161 dotaz <i>\"{{ ticket.title }}\"</i> na na\u0161i podporu..</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">V tento okam\u017eik nemus\u00edte d\u011blat nic dal\u0161\u00edho. Va\u0161emu po\u017eadavku bylo p\u0159i\u0159azeno \u010d\u00edslo <b>{{ ticket.ticket }}</b> .</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Chcete-li n\u00e1m poslat dal\u0161\u00ed informace, nebo pokud m\u00e1te jak\u00e9koliv dotazy t\u00fdkaj\u00edc\u00ed se k tomuto po\u017eadavku, uve\u010fte \u010d\u00edslo <b>'{{ticket.ticket}}'</b> v p\u0159edm\u011btu e-mailu. Nejjednodu\u0161\u0161\u00ed zp\u016fsob jak to ud\u011blat, je stisknout na tla\u010d\u00edtko \"odpov\u011b\u010f\" na tuto zpr\u00e1vu.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Po\u017eadavek m\u016f\u017eete zobrazit na webu a tam p\u0159ipojit soubory nebo prohl\u00ed\u017eet aktualizace <a href=\"{{ ticket.ticket_url }}\">{{ ticket.ticket_url }}</a>.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Po\u017eadavek se pokus\u00edme vy\u0159e\u0161it co nejd\u0159\u00edve. Dal\u0161\u00ed informace o aktualizac\u00edch po\u017eadavku budete dost\u00e1vat prost\u0159ednictv\u00edm t\u00e9to e-mailov\u00e9 adresy.</p>",
+            "heading": "V\u00e1\u0161 po\u017eadavej byl zaznamen\u00e1n",
+            "subject": "(Otev\u0159en\u00fd)"
+        }
+    },
+    {
+        "pk": 91,
+        "model": "helpdesk.emailtemplate",
+        "fields": {
+            "locale": "cs",
+            "template_name": "resolved_cc",
+            "plain_text": "Dobr\u00fd den,\r\n\r\nn\u00e1sleduj\u00edc\u00ed po\u017eadavek byl vy\u0159e\u0161en.\r\n\r\nPo\u017eadavek ID: {{ ticket.ticket }}\r\nFronta: {{ queue.title }}\r\nP\u0159edm\u011bt: {{ ticket.title }}\r\nOtev\u0159eno: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}\r\nZadavatel: {{ ticket.submitter_email|default:\"nezn\u00e1m\u00ed\" }}\r\nPriorita: {{ ticket.get_priority_display }}\r\nStav: {{ ticket.get_status }}\r\nP\u0159i\u0159azeno: {{ ticket.get_assigned_to }}\r\nOdkaz na web: {{ ticket.staff_url }}\r\n\r\nZn\u011bn\u00ed po\u017eadavku:\r\n\r\n{{ ticket.description }}\r\n\r\n\u0158e\u0161en\u00ed:\r\n\r\n{{ ticket.resolution }}\r\n\r\nToto \u0159e\u0161en\u00ed bylo odesl\u00e1no zadavateli, ten to ov\u011b\u0159\u00ed ne\u017e po\u017eadavek uzav\u0159ete.\r\n",
+            "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Dobr\u00fd den,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">n\u00e1sleduj\u00edc\u00ed po\u017eadavek byl vy\u0159e\u0161en.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">\r\n<b>Po\u017eadavek ID</b>: {{ ticket.ticket }}<br>\r\n<b>Fronta</b>: {{ queue.title }}<br>\r\n<b>P\u0159edm\u011bt</b>: {{ ticket.title }}<br>\r\n<b>Otev\u0159eno</b>: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}<br>\r\n<b>Zadavatel</b>: {{ ticket.submitter_email|default:\"nezn\u00e1m\u00ed\" }}<br>\r\n<b>Priorita</b>: {{ ticket.get_priority_display }}<br>\r\n<b>Stav</b>: {{ ticket.get_status }}<br>\r\n<b>P\u0159i\u0159azeno</b>: v\u00e1m<br>\r\n<b><a href='{{ ticket.staff_url }}'>Odkaz na web</a></b> pro \u00fapravu po\u017eadavku (p\u0159ihl\u00e1\u0161en\u00ed vy\u017eadov\u00e1no)</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Zn\u011bn\u00ed po\u017eadavku:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.description|linebreaksbr }}</blockquote>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">\u0158e\u0161en\u00ed:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.resolution }}</blockquote>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Toto \u0159e\u0161en\u00ed bylo odesl\u00e1no zadavateli, ten to ov\u011b\u0159\u00ed ne\u017e po\u017eadavek uzav\u0159ete.</p>",
+            "heading": "Po\u0159adavek vy\u0159e\u0161en",
+            "subject": "(Vy\u0159e\u0161eno)"
+        }
+    },
+    {
+        "pk": 92,
+        "model": "helpdesk.emailtemplate",
+        "fields": {
+            "locale": "cs",
+            "template_name": "resolved_owner",
+            "plain_text": "Dobr\u00fd den,\r\n\r\npo\u017eadavek, kter\u00fd je p\u0159i\u0159azen v\u00e1m je byl ji\u017e vy\u0159e\u0161en.\r\n\r\nPo\u017eadavek ID: {{ ticket.ticket }}\r\nFronta: {{ queue.title }}\r\nP\u0159edm\u011bt: {{ ticket.title }}\r\nOtev\u0159eno: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}\r\nZadavatel: {{ ticket.submitter_email|default:\"nezn\u00e1m\u00ed\" }}\r\nPriorita: {{ ticket.get_priority_display }}\r\nStav: {{ ticket.get_status }}\r\nP\u0159i\u0159azeno: {{ ticket.get_assigned_to }}\r\nOdkaz na web: {{ ticket.staff_url }}\r\n\r\nZn\u011bn\u00ed po\u017eadavku:\r\n\r\n{{ ticket.description }}\r\n\r\n\u0158e\u0161en\u00ed:\r\n\r\n{{ ticket.resolution }}\r\n\r\nToto \u0159e\u0161en\u00ed bylo odesl\u00e1no zadavateli, ten to ov\u011b\u0159\u00ed ne\u017e po\u017eadavek uzav\u0159ete.\r\n\r\n",
+            "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Dobr\u00fd den,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">po\u017eadavek, kter\u00fd je p\u0159i\u0159azen v\u00e1m je byl ji\u017e vy\u0159e\u0161en.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">\r\n<b>Po\u017eadavek ID</b>: {{ ticket.ticket }}<br>\r\n<b>Fronta</b>: {{ queue.title }}<br>\r\n<b>P\u0159edm\u011bt</b>: {{ ticket.title }}<br>\r\n<b>Otev\u0159eno</b>: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}<br>\r\n<b>Zadavatel</b>: {{ ticket.submitter_email|default:\"nezn\u00e1m\u00ed\" }}<br>\r\n<b>Priorita</b>: {{ ticket.get_priority_display }}<br>\r\n<b>Stav</b>: {{ ticket.get_status }}<br>\r\n<b>P\u0159i\u0159azeno</b>: v\u00e1m<br>\r\n<b><a href='{{ ticket.staff_url }}'>Odkaz na web</a></b> pro \u00fapravu po\u017eadavku (p\u0159ihl\u00e1\u0161en\u00ed vy\u017eadov\u00e1no)</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Zn\u011bn\u00ed po\u017eadavku:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.description|linebreaksbr }}</blockquote>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">\u0158e\u0161en\u00ed:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.resolution }}</blockquote>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Toto \u0159e\u0161en\u00ed bylo odesl\u00e1no zadavateli, ten to ov\u011b\u0159\u00ed ne\u017e po\u017eadavek uzav\u0159ete.</p>",
+            "heading": "Po\u017eadavek vy\u0159e\u0161en",
+            "subject": "(Vy\u0159e\u0161en)"
+        }
+    },
+    {
+        "pk": 93,
+        "model": "helpdesk.emailtemplate",
+        "fields": {
+            "locale": "cs",
+            "template_name": "resolved_submitter",
+            "plain_text": "Dobr\u00fd den,\r\n\r\nned\u00e1vno jste zdal/a po\u017eadavek \"{{ ticket.title }}\". Tento e-mail je rozhodnut\u00ed k tomuto po\u017eadavku.\r\n\r\nN\u00e1sleduj\u00edc\u00ed \u0159e\u0161en\u00ed bylo p\u0159id\u00e1no k po\u017eadavku {{ ticket.ticket }}:\r\n\r\n{{ resolution }}\r\n\r\nPros\u00edm potvr\u010fte n\u00e1m, \u017ee v\u00e1m toto navrhovan\u00e9 \u0159e\u0161en\u00ed vyhovuje. Pak po\u017eadavek uzav\u0159eme. M\u00e1te-li jak\u00e9koli dal\u0161\u00ed dotazy, nebo pokud navrhovan\u00e9 \u0159e\u0161en\u00ed nen\u00ed dostate\u010dn\u00e9, odpov\u011bzte pros\u00edm na tento e-mail a nechte nezm\u011bn\u011bn\u00fd p\u0159edm\u011bt.\r\n\r\nPokud chcete vid\u011bt po\u017eadavek on-line, nav\u0161tivte {{ ticket.staff_url }}.\r\n\r\n\r\n",
+            "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Dobr\u00fd den,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">ned\u00e1vno jste zdal/a po\u017eadavek <i>\"{{ ticket.title }}\"</i>. Tento e-mail je rozhodnut\u00ed k tomuto po\u017eadavku.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">N\u00e1sleduj\u00edc\u00ed \u0159e\u0161en\u00ed bylo p\u0159id\u00e1no k po\u017eadavku <b>{{ ticket.ticket }}</b>:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ resolution }}</blockquote>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Pros\u00edm potvr\u010fte n\u00e1m, \u017ee v\u00e1m toto navrhovan\u00e9 \u0159e\u0161en\u00ed vyhovuje. Pak po\u017eadavek uzav\u0159eme. M\u00e1te-li jak\u00e9koli dal\u0161\u00ed dotazy, nebo pokud navrhovan\u00e9 \u0159e\u0161en\u00ed nen\u00ed dostate\u010dn\u00e9, odpov\u011bzte pros\u00edm na tento e-mail a nechte nezm\u011bn\u011bn\u00fd p\u0159edm\u011bt.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Pokud chcete vid\u011bt po\u017eadavek on-line, nav\u0161tivte <a href=\"{{ ticket.ticket_url }}\">{{ ticket.ticket_url }}</a>.</p>",
+            "heading": "V\u00e1\u0161 po\u017eadavek byl vy\u0159e\u0161en",
+            "subject": "(Vy\u0159e\u0161en)"
+        }
+    },
+    {
+        "pk": 94,
+        "model": "helpdesk.emailtemplate",
+        "fields": {
+            "locale": "cs",
+            "template_name": "updated_cc",
+            "plain_text": "Dobr\u00fd den,\r\n\r\npo\u017eadavek {{ ticket.ticket }} (\"{{ ticket.title }}\") pro {{ ticket.submitter_email }} byl aktualizov\u00e1n.\r\n\r\nPo\u017eadavek ID: {{ ticket.ticket }}\r\nFronta: {{ queue.title }}\r\nP\u0159edm\u011bt: {{ ticket.title }}\r\nOtev\u0159eno: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}\r\nZadavatel: {{ ticket.submitter_email|default:\"nezn\u00e1m\u00ed\" }}\r\nPriorita: {{ ticket.get_priority_display }}\r\nStav: {{ ticket.get_status }}\r\nP\u0159i\u0159azeno: {{ ticket.get_assigned_to }}\r\nOdkaz na web: {{ ticket.staff_url }}\r\n\r\nP\u016fvodn\u00ed zn\u011bn\u00ed po\u017eadavku:\r\n\r\n{{ ticket.description }}\r\n\r\nByl p\u0159id\u00e1n n\u00e1sleduj\u00edc\u00ed p\u0159\u00edsp\u011bvek:\r\n\r\n{{ comment }}\r\n\r\nTato informace {% if private %}ne {% endif %}byla odesl\u00e1na zadavateli.\r\n\r\nPokud chcete vid\u011bt po\u017eadavek on-line, nav\u0161tivte {{ ticket.staff_url }}.\r\n\r\n",
+            "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Dobr\u00fd den,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">po\u017eadavek {{ ticket.ticket }} (\"{{ ticket.title }}\") pro {{ ticket.submitter_email }} byl aktualizov\u00e1n.</p>\r\n\r\nPo\u017eadavek ID: {{ ticket.ticket }}\r\nFronta: {{ queue.title }}\r\nP\u0159edm\u011bt: {{ ticket.title }}\r\nOtev\u0159eno: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}\r\nZadavatel: {{ ticket.submitter_email|default:\"nezn\u00e1m\u00ed\" }}\r\nPriorita: {{ ticket.get_priority_display }}\r\nStav: {{ ticket.get_status }}\r\nP\u0159i\u0159azeno: {{ ticket.get_assigned_to }}\r\nOdkaz na web: {{ ticket.staff_url }}\r\n\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">P\u016fvodn\u00ed zdn\u011bn\u00ed po\u017eadavku :</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.description|linebreaksbr }}</blockquote>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Byl p\u0159id\u00e1n n\u00e1sleduj\u00edc\u00ed p\u0159\u00edsp\u011bvek:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ comment }}</blockquote>\r\n\r\n<p style=\"font-family: Tahoma, Arial, sans-serif; font-size: 11pt;\">Tato informace {% if private %}ne {% endif %}byla odesl\u00e1na zadavateli.</p>",
+            "heading": "Po\u017eadavek byl aktualizov\u00e1n",
+            "subject": "(Aktualizace)"
+        }
+    },
+    {
+        "pk": 95,
+        "model": "helpdesk.emailtemplate",
+        "fields": {
+            "locale": "cs",
+            "template_name": "updated_owner",
+            "plain_text": "Dobr\u00fd den,\r\n\r\npo\u017eadavek  {{ ticket.ticket }} (\"{{ ticket.title }}\") pro {{ ticket.submitter_email }}, kter\u00fd je p\u0159i\u0159azen\u00fd v\u00e1m, byl aktualizov\u00e1n.\r\n\r\nPo\u017eadavek ID: {{ ticket.ticket }}\r\nFronta: {{ queue.title }}\r\nP\u0159edm\u011bt: {{ ticket.title }}\r\nOtev\u0159eno: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}\r\nZadavatel: {{ ticket.submitter_email|default:\"nezn\u00e1m\u00ed\" }}\r\nPriorita: {{ ticket.get_priority_display }}\r\nStav: {{ ticket.get_status }}\r\nP\u0159i\u0159azeno: {{ ticket.get_assigned_to }}\r\nOdkaz na web: {{ ticket.staff_url }}\r\n\r\nP\u016fvodn\u00ed zn\u011bn\u00ed po\u017eadavku:\r\n\r\n{{ ticket.description }}\r\n\r\nByl p\u0159id\u00e1n n\u00e1sleduj\u00edc\u00ed p\u0159\u00edsp\u011bvek:\r\n\r\n{{ comment }}\r\n\r\nTato informace {% if private %}ne {% endif %}byla odesl\u00e1na zadavateli.\r\n\r\nPokud chcete vid\u011bt po\u017eadavek on-line, nav\u0161tivte {{ ticket.staff_url }}.\r\n\r\n\r\n\r\n",
+            "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Dobr\u00fd den,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">po\u017eadavek  {{ ticket.ticket }} (\"{{ ticket.title }}\") pro {{ ticket.submitter_email }}, kter\u00fd je p\u0159i\u0159azen\u00fd v\u00e1m, byl aktualizov\u00e1n.</p>\r\n\r\nPo\u017eadavek ID: {{ ticket.ticket }}\r\nFronta: {{ queue.title }}\r\nP\u0159edm\u011bt: {{ ticket.title }}\r\nOtev\u0159eno: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}\r\nZadavatel: {{ ticket.submitter_email|default:\"nezn\u00e1m\u00ed\" }}\r\nPriorita: {{ ticket.get_priority_display }}\r\nStav: {{ ticket.get_status }}\r\nP\u0159i\u0159azeno: {{ ticket.get_assigned_to }}\r\nOdkaz na web: {{ ticket.staff_url }}\r\n\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">P\u016fvodn\u00ed zdn\u011bn\u00ed po\u017eadavku :</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.description|linebreaksbr }}</blockquote>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Byl p\u0159id\u00e1n n\u00e1sleduj\u00edc\u00ed p\u0159\u00edsp\u011bvek:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ comment }}</blockquote>\r\n\r\n<p style=\"font-family: Tahoma, Arial, sans-serif; font-size: 11pt;\">Tato informace {% if private %}ne {% endif %}byla odesl\u00e1na zadavateli.</p>",
+            "heading": "Po\u017eadavek byl aktualizov\u00e1n",
+            "subject": "(Aktualizace)"
+        }
+    },
+    {
+        "pk": 96,
+        "model": "helpdesk.emailtemplate",
+        "fields": {
+            "locale": "cs",
+            "template_name": "updated_submitter",
+            "plain_text": "Dobr\u00fd den,\r\n\r\nned\u00e1vno jste p\u0159idal/a po\u017eadavek \"{{ ticket.title }}\". T\u00edmto e-maile v\u00e1s upozor\u0148ujeme na aktalizaci tohoto po\u017eadavku.\r\n\r\nN\u00e1sleduj\u00edc\u00ed p\u0159\u00edsp\u011bvek byl p\u0159id\u00e1n k po\u017eadavku {{ ticket.ticket }}:\r\n\r\n{{ comment }}\r\n\r\nPot\u0159ebujete-li n\u00e1m poskytnout dal\u0161\u00ed informace, pros\u00edm, odpov\u011bzte na tento e-mail a zanechte p\u0159edm\u011bt neporu\u0161en\u00fd. P\u0159\u00edpadn\u011b, m\u016f\u017eete zobrazit a aktualizovat tento po\u017eadavek on-line na adrese {{ ticket.ticket_url }}\r\n",
+            "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Dobr\u00fd den,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">ned\u00e1vno jste p\u0159idal/a po\u017eadavek <i>\"{{ ticket.title }}\"</i>. T\u00edmto e-maile v\u00e1s upozor\u0148ujeme na aktalizaci tohoto po\u017eadavku.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">N\u00e1sleduj\u00edc\u00ed p\u0159\u00edsp\u011bvek byl p\u0159id\u00e1n k po\u017eadavku <b>{{ ticket.ticket }}</b>:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ comment }}</blockquote>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Pot\u0159ebujete-li n\u00e1m poskytnout dal\u0161\u00ed informace, pros\u00edm, odpov\u011bzte na tento e-mail a zanechte p\u0159edm\u011bt neporu\u0161en\u00fd. P\u0159\u00edpadn\u011b, m\u016f\u017eete zobrazit a aktualizovat tento po\u017eadavek on-line na adrese <a href=\"{{ ticket.ticket_url }}\">{{ ticket.ticket_url }}</a>.</p>",
+            "heading": "V\u00e1\u0161 po\u017eadavek byl aktualizov\u00e1n",
+            "subject": "(Aktualizace)"
+        }
     }
  ]

@@ -1,0 +1,6 @@
+Dobrý den,
+
+{{ queue.title }}{% if queue.email_address %}
+{{ queue.email_address }}{% endif %}
+    
+Tento e-mail vám byl odeslán jako uživateli našich služeb, v souladu s našimi zásadami ochrany osobních údajů. Prosím, sdělte nám, pokud si myslíte, že jste obdrželi tento email omylem.
