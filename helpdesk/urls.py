@@ -99,7 +99,7 @@ urlpatterns = patterns('helpdesk.views.staff',
     url(r'^tickets/(?P<ticket_id>[0-9]+)/dependency/delete/(?P<dependency_id>[0-9]+)/$',
         'ticket_dependency_del',
         name='helpdesk_ticket_dependency_del'),
-        
+
     url(r'^tickets/(?P<ticket_id>[0-9]+)/attachment_delete/(?P<attachment_id>[0-9]+)/$',
         'attachment_del',
         name='helpdesk_attachment_del'),
@@ -156,15 +156,15 @@ urlpatterns += patterns('helpdesk.views.public',
 
     url(r'^change_language/$',
         'change_language',
-        name='helpdesk_public_change_language'),        
+        name='helpdesk_public_change_language'),
 )
 
 urlpatterns += patterns('',
-    url(r'^rss/user/(?P<user_name>[\.\@A-Za-z0-9_-]+)/$',
+    url(r'^rss/user/(?P<user_name>[^/]+)/$',
         login_required(feeds.OpenTicketsByUser()),
         name='helpdesk_rss_user'),
-    
-    url(r'^rss/user/(?P<user_name>[\.\@A-Za-z0-9_-]+)/(?P<queue_slug>[A-Za-z0-9_-]+)/$',
+
+    url(r'^rss/user/(?P<user_name>[^/]+)/(?P<queue_slug>[A-Za-z0-9_-]+)/$',
         login_required(feeds.OpenTicketsByUser()),
         name='helpdesk_rss_user_queue'),
     
@@ -203,7 +203,7 @@ if helpdesk_settings.HELPDESK_KB_ENABLED:
     urlpatterns += patterns('helpdesk.views.kb',
         url(r'^kb/$',
             'index', name='helpdesk_kb_index'),
-        
+
         url(r'^kb/(?P<item>[0-9]+)/$',
             'item', name='helpdesk_kb_item'),
 
@@ -215,13 +215,12 @@ if helpdesk_settings.HELPDESK_KB_ENABLED:
     )
 
 urlpatterns += patterns('',
-    url(r'^api/$',TemplateView.as_view(template_name='helpdesk/help_api.html'),
+    url(r'^api/$', TemplateView.as_view(template_name='helpdesk/help_api.html'),
         name='helpdesk_api_help'),
 
-    url(r'^help/context/$',TemplateView.as_view(template_name='helpdesk/help_context.html'),
+    url(r'^help/context/$', TemplateView.as_view(template_name='helpdesk/help_context.html'),
         name='helpdesk_help_context'),
 
-		url(r'^system_settings/$',DirectTemplateView.as_view(template_name='helpdesk/system_settings.html',
-				extra_context={'ADMIN_URL': getattr(settings, 'ADMIN_URL', '/admin/')}),
-				name='helpdesk_system_settings'),
+    url(r'^system_settings/$', DirectTemplateView.as_view(template_name='helpdesk/system_settings.html'),
+        name='helpdesk_system_settings'),
 )

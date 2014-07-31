@@ -19,9 +19,9 @@
 <p>{% trans "These RSS feeds allow you to view a summary of either your own tickets, or all tickets, for each of the queues in your helpdesk. For example, if you manage the staff who utilise a particular queue, this may be used to view new tickets coming into that queue." %}</p>
 
 <table class="table table-hover table-bordered">
+<caption>{% trans "Per-Queue Feeds" %}</caption>
 <thead>
-<tr class='row_tablehead'><td colspan='4'>{% trans "Per-Queue Feeds" %}</td></tr>
-<tr class='row_columnheads'><th>{% trans "Queue" %}</th><th align='center'>{% trans "All Open Tickets" %}</th><th align='center'>{% trans "My Open Tickets" %}</th></tr>
+<tr><th>{% trans "Queue" %}</th><th align='center'>{% trans "All Open Tickets" %}</th><th align='center'>{% trans "My Open Tickets" %}</th></tr>
 </thead>
 <tbody>
 {% for queue in queues %}

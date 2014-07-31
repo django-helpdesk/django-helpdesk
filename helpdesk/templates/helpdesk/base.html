@@ -26,7 +26,7 @@
         .goog-te-banner-frame {display: none !important;}
         .goog-te-balloon-frame {display: none !important;}
         /* hide google translate tooltips (generated for every translated item) */
-        .goog-tooltip {display: none !important; } 
+        .goog-tooltip {display: none !important; }
         </style>
 
         <style type="text/css">
@@ -61,7 +61,6 @@
                 <div class="col-md-2">{% include "helpdesk/attribution.html" %}</div>
                 <div class="col-md-2"><a href='{% url 'helpdesk_rss_index' %}'><img src='{{ STATIC_URL }}helpdesk/rss_icon.png' width='14' height='14' alt='{% trans "RSS Icon" %}' title='{% trans "RSS Feeds" %}' border='0' />{% trans "RSS Feeds" %}</a></div>
                 <div class="col-md-2"><a href='{% url 'helpdesk_api_help' %}'>{% trans "API" %}</a></div>
-                <div class="col-md-2"><a href='{% url 'helpdesk_user_settings' %}'>{% trans "User Settings" %}</a></div>
                 {% if user.is_superuser %}<div class="col-md-2"><a href='{% url 'helpdesk_system_settings' %}'>{% trans "System Settings" %}</a></div>{% endif %}
             </div>
         </div>

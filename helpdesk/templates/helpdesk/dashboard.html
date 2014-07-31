@@ -1,141 +1,30 @@
-{% extends "helpdesk/base.html" %}{% load i18n %}{% load url from future %}
+{% extends "helpdesk/base.html" %}{% load i18n %}
 {% block helpdesk_title %}{% trans "Helpdesk Dashboard" %}{% endblock %}
-{% block helpdesk_head %}
-<script type='text/javascript' language='javascript' src='{{ STATIC_URL }}helpdesk/hover.js'></script>
-{% endblock %}
+
 {% block helpdesk_body %}
 
 <div class="alert alert-warning">
 <p>{% trans "Welcome to your Helpdesk Dashboard! From here you can quickly see tickets submitted by you, tickets you are working on, and those tickets that have no owner." %}</p>
 </div>
 
-<table class="table table-hover table-bordered">
-<thead>
-<tr class='row_tablehead'><td colspan='5'>{% trans "Helpdesk Summary" %}</td></tr>
-<tr class='row_columnheads'><th>{% trans "Queue" %}</th><th>{% trans "Open" %}</th><th>{% trans "Resolved" %}</th><th>{% trans "Closed" %}</th></tr>
-</thead>
-<tbody>
-{% for queue in dash_tickets %}
-<tr class='row_{% cycle odd,even %} row_hover '>
-<th><a href='{% url 'helpdesk_list' %}?queue={{ queue.queue }}&status=1&status=2'>{{ queue.name }}</a></th>
-<td align="center">{% if queue.open %}<a href='{% url 'helpdesk_list' %}?queue={{ queue.queue }}&status=1&status=2'>{% endif %}{{ queue.open }}{% if queue.open %}</a>{% endif %}</td>
-<td align="center">{% if queue.resolved %}<a href='{% url 'helpdesk_list' %}?queue={{ queue.queue }}&status=3'>{% endif %}{{ queue.resolved }}{% if queue.resolved %}</a>{% endif %}</td>
-<td align="center">{% if queue.closed %}<a href='{% url 'helpdesk_list' %}?queue={{ queue.queue }}&status=4'>{% endif %}{{ queue.closed }}{% if queue.closed %}</a>{% endif %}</td>
-</tr>
-{% endfor %}
-</tbody>
-</table>
+{% include 'helpdesk/include/summary.html' %}
 
-
-
-
-<br style='clear: both;' />
-
-<table class="table table-hover table-bordered">
-<thead>
-<tr class='row_tablehead' style="color: #fbff00;"><td colspan='2'><i>{% trans "Current Ticket Stats" %}</i></td></tr>
-<tr><td colspan='2'>- {% trans "Average number of days until ticket is closed (all tickets): " %}<strong style="color: red;">{{ basic_ticket_stats.average_nbr_days_until_ticket_closed }}</strong>.</td></tr> 
-<tr><td colspan='2'>- {% trans "Average number of days until ticket is closed (tickets opened in last 60 days): " %}<strong style="color: red;">{{ basic_ticket_stats.average_nbr_days_until_ticket_closed_last_60_days }}</strong>. 
-{% trans "Click" %} <strong><a href="{% url 'helpdesk_report_index' %}daysuntilticketclosedbymonth">here</a></strong> {% trans "for detailed average by month." %} </td></tr>
-<tr><td colspan='2'>- {% trans "Distribution of open tickets, grouped by time period:" %}</td></tr>
-<tr class='row_columnheads'><th>{% trans "Days since opened" %}</th><th>{% trans "Number of open tickets" %}</th></tr>
-</thead>
-<tbody>
-{% for entry in basic_ticket_stats.open_ticket_stats %}
-<tr class='row_{% cycle odd,even %} row_hover'>
-<th style="padding-left: 20px;">{{ entry.0 }}</th>
-<td style="padding-left: 20px;"><span style="color: {{ entry.2 }};">{% if entry.1 > 0 %}<a href="{% url 'helpdesk_list' %}?{{ entry.3 }}">{{ entry.1 }}</a>{% else %}{{ entry.1 }}{% endif %}</span></td>
-</tr>
-{% endfor %}
-</tbody>
-</table>
-
+{% include 'helpdesk/include/stats.html' %}
 
 {% if all_tickets_reported_by_current_user %}
-<table class="table table-hover table-bordered">
-<thead>
-<tr class='row_tablehead'><td colspan='6'>{% trans "All Tickets submitted by you" %}</td></tr>
-<tr class='row_columnheads'><th>#</th><th>{% trans "Pr" %}</th><th>{% trans "Title" %}</th><th>{% trans "Queue" %}</th><th>{% trans "Status" %}</th><th>{% trans "Last Update" %}</th></tr>
-</thead>
-<tbody>
-{% for ticket in all_tickets_reported_by_current_user %}
-<tr class='row_{% cycle odd,even %} row_hover'>
-<th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.ticket }}</a></th>
-<td>{{ ticket.get_priority_span }}</td>
-<th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></th>
-<td>{{ ticket.queue }}</td>
-<td>{{ ticket.get_status }}</td>
-<td><span title='{{ ticket.modified|date:"r" }}'>{{ ticket.modified|timesince }}</span></td>
-</tr>
-{% endfor %}
-</tbody>
-</table>
+{% trans "All Tickets submitted by you" as ticket_list_caption %}
+{% include 'helpdesk/include/tickets.html' with ticket_list=all_tickets_reported_by_current_user ticket_list_empty_message="" %}
 {% endif %}
 
-<table class="table table-hover table-bordered">
-<thead>
-<tr class='row_tablehead'><td colspan='6'>{% trans "Open Tickets assigned to you (you are working on this ticket)" %}</td></tr>
-<tr class='row_columnheads'><th>#</th><th>{% trans "Pr" %}</th><th>{% trans "Title" %}</th><th>{% trans "Queue" %}</th><th>{% trans "Status" %}</th><th>{% trans "Last Update" %}</th></tr>
-</thead>
-<tbody>
-{% for ticket in user_tickets %}
-<tr class='row_{% cycle odd,even %} row_hover'>
-<th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.ticket }}</a></th>
-<td>{{ ticket.get_priority_span }}</td>
-<th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></th>
-<td>{{ ticket.queue }}</td>
-<td>{{ ticket.get_status }}</td>
-<td><span title='{{ ticket.modified|date:"r" }}'>{{ ticket.modified|timesince }}</span></td>
-</tr>
-{% endfor %}
-{% if not user_tickets %}
-<tr class='row_odd'><td colspan='6'>{% trans "You have no tickets assigned to you." %}</td></tr>
-{% endif %}
-</tbody>
-</table>
+{% trans "Open Tickets assigned to you (you are working on this ticket)" as ticket_list_caption %}
+{% trans "You have no tickets assigned to you." as no_assigned_tickets %}
+{% include 'helpdesk/include/tickets.html' with ticket_list=user_tickets ticket_list_empty_message=no_assigned_tickets %}
 
-<table class="table table-hover table-bordered">
-<thead>
-<tr class='row_tablehead'><td colspan='6'>{% trans "Unassigned Tickets" %} {% trans "(pick up a ticket if you start to work on it)" %}</td></tr>
-<tr class='row_columnheads'><th>#</th><th>{% trans "Pr" %}</th><th>{% trans "Title" %}</th><th>{% trans "Queue" %}</th><th>{% trans "Created" %}</th><th>&nbsp;</th></tr>
-</thead>
-<tbody>
-{% for ticket in unassigned_tickets %}
-<tr class='row_{% cycle odd,even %} row_hover'>
-<th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.ticket }}</a></th>
-<td>{{ ticket.get_priority_span }}</td>
-<th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></th>
-<td>{{ ticket.queue }}</td>
-<td><span title='{{ ticket.created|date:"r" }}'>{{ ticket.created|timesince }} ago</span></td>
-<th><a href='{{ ticket.get_absolute_url }}?take'><span class='button button_take'>{% trans "Take" %}</span></a> | <a href='{% url 'helpdesk_delete' ticket.id %}'><span class='button button_delete'>{% trans "Delete" %}</span></a></th>
-</tr>
-{% endfor %}
-{% if not unassigned_tickets %}
-<tr class='row_odd'><td colspan='6'>{% trans "There are no unassigned tickets." %}</td></tr>
-{% endif %}
-</tbody>
-</table>
-
+{% include 'helpdesk/include/unassigned.html' %}
 
 {% if user_tickets_closed_resolved %}
-<table class="table table-hover table-bordered">
-<thead>
-<tr class='row_tablehead'><td colspan='6'>{% trans "Closed & resolved Tickets you used to work on" %}</td></tr>
-<tr class='row_columnheads'><th>#</th><th>{% trans "Pr" %}</th><th>{% trans "Title" %}</th><th>{% trans "Queue" %}</th><th>{% trans "Status" %}</th><th>{% trans "Last Update" %}</th></tr>
-</thead>
-<tbody>
-{% for ticket in user_tickets_closed_resolved %}
-<tr class='row_{% cycle odd,even %} row_hover'>
-<th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.ticket }}</a></th>
-<td>{{ ticket.get_priority_span }}</td>
-<th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></th>
-<td>{{ ticket.queue }}</td>
-<td>{{ ticket.get_status }}</td>
-<td><span title='{{ ticket.modified|date:"r" }}'>{{ ticket.modified|timesince }}</span></td>
-</tr>
-{% endfor %}
-</tbody>
-</table>
+{% trans "Closed & resolved Tickets you used to work on" as ticket_list_caption %}
+{% include 'helpdesk/include/tickets.html' with ticket_list=user_tickets_closed_resolved ticket_list_empty_message="" %}
 {% endif %}
 
 {% endblock %}

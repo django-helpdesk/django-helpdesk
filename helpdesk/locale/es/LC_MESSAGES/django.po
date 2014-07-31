@@ -4,7 +4,7 @@
 # 
 # Translators:
 # Alberto Gaona <gaona_consulting@yahoo.com>, 2011
-# anto987 <anto987@gmail.com>, 2012
+# Antonio Storni <anto987@gmail.com>, 2012
 # Erik Rivera <erik.river@gmail.com>, 2011
 # Ross Poulton <ross@rossp.org>, 2011
 msgid ""

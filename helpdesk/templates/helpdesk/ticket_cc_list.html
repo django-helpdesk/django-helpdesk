@@ -10,9 +10,9 @@
 <p>You can <a href='add/'>add a new e-mail address to the list</a> or delete any of the items below as required.</p>{% endblocktrans %}
 
 <table class="table table-hover table-bordered">
+<caption>{% trans "Ticket CC List" %}</caption>
 <thead>
-<tr class='row_tablehead'><td colspan='4'>{% trans "Ticket CC List" %}</td></tr>
-<tr class='row_columnheads'><th>{% trans "E-Mail Address" %}</th><th>{% trans "View?" %}</th><th>{% trans "Update?" %}</th><th>{% trans "Delete" %}</th></tr>
+<tr><th>{% trans "E-Mail Address" %}</th><th>{% trans "View?" %}</th><th>{% trans "Update?" %}</th><th>{% trans "Delete" %}</th></tr>
 </thead>
 <tbody>
 {% for person in copies_to %}

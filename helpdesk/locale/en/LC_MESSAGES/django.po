@@ -1,19 +1,22 @@
 # django-helpdesk English language translation
 # Copyright (C) 2011 Ross Poulton
 # This file is distributed under the same license as the django-helpdesk package.
-# Ross Poulton <ross@rossp.org>, 2011.
 #
-#, fuzzy
+# Translators:
+# Ross Poulton <ross@rossp.org>, 2011
 msgid ""
 msgstr ""
-"Project-Id-Version: 0.1\n"
-"Report-Msgid-Bugs-To: \n"
+"Project-Id-Version: django-helpdesk\n"
+"Report-Msgid-Bugs-To: http://github.com/RossP/django-helpdesk/issues\n"
 "POT-Creation-Date: 2012-08-07 20:40+1000\n"
-"PO-Revision-Date: 2011-07-02 07:12+10Last-Translator: Ross Poulton "
-"<ross@rossp.org>\n"
+"PO-Revision-Date: 2013-11-20 11:07+0000\n"
+"Last-Translator: Ross Poulton <ross@rossp.org>\n"
+"Language-Team: English (http://www.transifex.com/projects/p/django-helpdesk/language/en/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Language: en\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: forms.py:113 forms.py:360 models.py:262
 #: templates/helpdesk/dashboard.html:11 templates/helpdesk/dashboard.html:37

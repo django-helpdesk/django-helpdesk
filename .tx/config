@@ -1,5 +1,5 @@
 [main]
-host = http://www.transifex.net
+host = https://www.transifex.com
 
 [django-helpdesk.core]
 file_filter = helpdesk/locale/<lang>/LC_MESSAGES/django.po

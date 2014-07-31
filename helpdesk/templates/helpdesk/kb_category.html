@@ -1,4 +1,4 @@
-{% extends "helpdesk/public_base.html" %}{% load i18n %}
+{% extends "helpdesk/public_base.html" %}{% load i18n humanize %}
 
 {% block helpdesk_body %}
 <h2>{% blocktrans with category.title as kbcat %}Knowledgebase Category: {{ kbcat }}{% endblocktrans %}</h2>
@@ -7,15 +7,15 @@
 
 <p>{{ category.description }}</p>
 
-<table class="table table-hover table-bordered">
+<table class="table table-hover table-bordered table-striped">
+<caption>{% blocktrans with category.title as kbcat %}Knowledgebase Category: {{ kbcat }}{% endblocktrans %}</caption>
 <thead>
-<tr class='row_tablehead'><td colspan='3'>{% blocktrans with category.title as kbcat %}Knowledgebase Category: {{ kbcat }}{% endblocktrans %}</td></tr>
-<tr class='row_columnheads'><th colspan='3'>{% trans "Article" %}</th></tr>
+<tr><th colspan='3'>{% trans "Article" %}</th></tr>
 </thead>
 <tbody>
 {% for item in items %}
-<tr class='row_even row_hover'><th><a href='{{ item.get_absolute_url }}'>{{ item.title }}</a></th><td>Rating: {{ item.score }}</td><td>Last Update: {{ item.last_updated|timesince }} ago</td></tr>
-<tr class='row_odd'><td colspan='3'>{{ item.question }}</td></tr>
+<tr><th><a href='{{ item.get_absolute_url }}'>{{ item.title }}</a></th><td>Rating: {{ item.score }}</td><td>Last Update: {{ item.last_updated|naturaltime }}</td></tr>
+<tr><td colspan='3'>{{ item.question }}</td></tr>
 {% endfor %}
 </tbody>
 </table>
