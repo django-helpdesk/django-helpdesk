@@ -90,7 +90,7 @@ def view_ticket(request):
 
         if ticket:
 
-            if request.user.is_staff:
+            if is_helpdesk_staff(request.user):
                 redirect_url = reverse('helpdesk_view', args=[ticket_id])
                 if request.GET.has_key('close'):
                     redirect_url += '?close'
