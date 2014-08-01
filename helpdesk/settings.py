@@ -61,18 +61,11 @@ HELPDESK_SUBMIT_A_TICKET_PUBLIC = getattr(settings, 'HELPDESK_SUBMIT_A_TICKET_PU
 
 
 ''' options for update_ticket views '''
-# allow non-staff users to interact with tickets? this will also change how 'helpdesk_staff_member_required'
-# in staff.py will be defined.
+# allow non-staff users to interact with tickets?
+# can be True/False or a callable accepting the active user and returning True if they must be considered helpdesk staff
 HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = getattr(settings, 'HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE', False)
-
-# apply a custom authorisation logic when defining 'helpdesk_staff_member_required' in staff.py.
-HELPDESK_CUSTOM_STAFF_FILTER_CALLBACK = getattr(settings, 'HELPDESK_CUSTOM_STAFF_FILTER_CALLBACK', None)
-if not (HELPDESK_CUSTOM_STAFF_FILTER_CALLBACK is None or callable(HELPDESK_CUSTOM_STAFF_FILTER_CALLBACK)):
-    raise ImproperlyConfigured("HELPDESK_CUSTOM_STAFF_FILTER_CALLBACK must be a callable or None")
-if HELPDESK_CUSTOM_STAFF_FILTER_CALLBACK and HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE:
-    warnings.warn(
-        "The HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE and HELPDESK_CUSTOM_STAFF_FILTER_CALLBACK settings cannot be both defined. "
-        "Only HELPDESK_CUSTOM_STAFF_FILTER_CALLBACK will be considered in determining staff access.", RuntimeWarning)
+if not (HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE in (True, False) or callable(HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE)):
+    warnings.warn("HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE should be set to either True/False or a callable.", RuntimeWarning)
 
 # show edit buttons in ticket follow ups.
 HELPDESK_SHOW_EDIT_BUTTON_FOLLOW_UP = getattr(settings, 'HELPDESK_SHOW_EDIT_BUTTON_FOLLOW_UP', True)

@@ -39,16 +39,14 @@ class KBDisabledTestCase(TestCase):
 
 class StaffUserTestCaseMixin(object):
     HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = False
-    HELPDESK_CUSTOM_STAFF_FILTER_CALLBACK = None
 
     def setUp(self):
-        self.old_settings = settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE, settings.HELPDESK_CUSTOM_STAFF_FILTER_CALLBACK
+        self.original_setting = settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE
         settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = self.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE
-        settings.HELPDESK_CUSTOM_STAFF_FILTER_CALLBACK = self.HELPDESK_CUSTOM_STAFF_FILTER_CALLBACK
         self.reload_views()
 
     def tearDown(self):
-        settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE, settings.HELPDESK_CUSTOM_STAFF_FILTER_CALLBACK = self.old_settings
+        settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = self.original_setting
         self.reload_views()
 
     def reload_views(self):
@@ -67,7 +65,6 @@ class StaffUserTestCaseMixin(object):
 
 class NonStaffUsersAllowedTestCase(StaffUserTestCaseMixin, TestCase):
     HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = True
-    HELPDESK_CUSTOM_STAFF_FILTER_CALLBACK = None
 
     def test_non_staff_allowed(self):
         """If HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE is True,
@@ -88,7 +85,6 @@ class NonStaffUsersAllowedTestCase(StaffUserTestCaseMixin, TestCase):
 class StaffUsersOnlyTestCase(StaffUserTestCaseMixin, TestCase):
     # Use default values
     HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = False
-    HELPDESK_CUSTOM_STAFF_FILTER_CALLBACK = None
 
     def test_non_staff(self):
         """Non-staff users are correctly identified"""
@@ -114,15 +110,15 @@ class StaffUsersOnlyTestCase(StaffUserTestCaseMixin, TestCase):
 
 
 class CustomStaffUserTestCase(StaffUserTestCaseMixin, TestCase):
-    HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = False
-
     @staticmethod
-    def HELPDESK_CUSTOM_STAFF_FILTER_CALLBACK(user):
+    def custom_staff_filter(user):
         """Arbitrary user validation function"""
         return user.is_authenticated() and user.is_active and user.username.lower().endswith('wensleydale')
 
+    HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = custom_staff_filter
+
     def test_custom_staff_pass(self):
-        """If HELPDESK_CUSTOM_STAFF_FILTER_CALLBACK is not None,
+        """If HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE is callable,
         a custom access rule is applied.
         """
         from helpdesk.decorators import is_helpdesk_staff
@@ -168,16 +164,15 @@ class HomePageAnonymousUserTestCase(TestCase):
 
 class HomePageTestCase(TestCase):
     def setUp(self):
-        self.previous = settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE, settings.HELPDESK_CUSTOM_STAFF_FILTER_CALLBACK
+        self.original_setting = settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE
         settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = False
-        settings.HELPDESK_CUSTOM_STAFF_FILTER_CALLBACK = None
         try:
             reload(sys.modules['helpdesk.views.public'])
         except KeyError:
             pass
 
     def tearDown(self):
-        settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE, settings.HELPDESK_CUSTOM_STAFF_FILTER_CALLBACK = self.previous
+        settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = self.original_setting
         reload(sys.modules['helpdesk.views.public'])
 
     def assertUserRedirectedToView(self, user, view_name):

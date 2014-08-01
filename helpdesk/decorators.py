@@ -2,9 +2,9 @@
 from django.contrib.auth.decorators import user_passes_test
 from helpdesk import settings
 
-if settings.HELPDESK_CUSTOM_STAFF_FILTER_CALLBACK:
+if callable(settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE):
     # apply a custom user validation condition
-    is_helpdesk_staff = settings.HELPDESK_CUSTOM_STAFF_FILTER_CALLBACK
+    is_helpdesk_staff = settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE
 elif settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE:
     # treat 'normal' users like 'staff'
     is_helpdesk_staff = lambda u: u.is_authenticated() and u.is_active
