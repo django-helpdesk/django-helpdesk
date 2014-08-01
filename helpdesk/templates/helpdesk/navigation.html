@@ -62,10 +62,10 @@
             <ul id="dropdown" class="nav navbar-nav">
                 {% if helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE %}
                     <li><a href='{% url 'helpdesk_dashboard' %}'>{% trans "Dashboard" %}</a></li>
-                    <li><a href='{% url 'helpdesk_submit' %}'>{% trans "Submit A Ticket" %}</a></li>
+                    <li><a href='{% url 'helpdesk_submit' %}'>{% trans "Submit a Ticket" %}</a></li>
                 {% else %}
                     {% if helpdesk_settings.HELPDESK_SUBMIT_A_TICKET_PUBLIC %}
-                        <li><a href='{% url 'helpdesk_home' %}'>{% trans "Submit A Ticket" %}</a></li>
+                        <li><a href='{% url 'helpdesk_home' %}'>{% trans "Submit a Ticket" %}</a></li>
                     {% endif %}
                 {% endif %}
                 {% if helpdesk_settings.HELPDESK_KB_ENABLED %}<li><a href='{% url 'helpdesk_kb_index' %}'>{% trans "Knowledgebase" %}</a></li>{% endif %}

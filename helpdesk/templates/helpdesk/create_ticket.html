@@ -6,9 +6,9 @@
 <div class="col-xs-6">
 <div class="panel panel-default">
 
-<div class="panel-body">{% blocktrans %}<h2>Submit a Ticket</h2>
-
-<p>Unless otherwise stated, all fields are required. Please provide as descriptive a title and description as possible.</p>{% endblocktrans %}
+<div class="panel-body">
+<h2>{% trans "Submit a Ticket" %}</h2>
+<p>{% trans "Unless otherwise stated, all fields are required." %} {% trans "Please provide as descriptive a title and description as possible." %}</p>
 
 <form method='post' action='./' enctype='multipart/form-data'>
 <fieldset>
@@ -24,7 +24,7 @@
             {% endif %}
         {% endfor %}
         {% endcomment %}
-    
+
     <div class='buttons form-group'>
         <input type='submit' class="btn btn-primary" value='{% trans "Submit Ticket" %}' />
     </div>

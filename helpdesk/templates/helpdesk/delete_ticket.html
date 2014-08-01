@@ -2,11 +2,10 @@
 
 {% block helpdesk_title %}{% trans "Delete Ticket" %}{% endblock %}
 
-{% block helpdesk_body %}{% blocktrans with ticket.title as ticket_title %}
-<h2>Delete Ticket</h2>
+{% block helpdesk_body %}
+<h2>{% trans "Delete Ticket" %}</h2>
 
-<p>Are you sure you want to delete this ticket (<em>{{ ticket_title }}</em>)? All traces of the ticket, including followups, attachments, and updates will be irreversably removed.</p>
-{% endblocktrans %}
+<p>{% blocktrans with ticket.title as ticket_title %}Are you sure you want to delete this ticket (<em>{{ ticket_title }}</em>)? All traces of the ticket, including followups, attachments, and updates will be irreversibly removed.{% endblocktrans %}</p>
 
 <p><a href='../'>{% trans "No, Don't Delete It" %}</a></p>
 

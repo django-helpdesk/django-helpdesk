@@ -6,11 +6,11 @@
 <div class="col-xs-6">
 <div class="panel panel-default">
 
-<div class="panel-body">{% blocktrans %}<h2>Edit a Ticket</h2>
+<div class="panel-body"><h2>{% trans "Edit a Ticket" %}</h2>
 
-<p>Unless otherwise stated, all fields are required. Please provide as descriptive a title and description as possible.</p>
+<p>{% trans "Unless otherwise stated, all fields are required." %} {% trans "Please provide as descriptive a title and description as possible." %}</p>
 
-<p><strong>Note:</strong> Editing a ticket does <em>not</em> send an e-mail to the ticket owner or submitter. No new details should be entered, this form should only be used to fix incorrect details or clean up the submission.</p>{% endblocktrans %}
+<p><strong>{% trans "Note" %}:</strong> {% blocktrans %}Editing a ticket does <em>not</em> send an e-mail to the ticket owner or submitter. No new details should be entered, this form should only be used to fix incorrect details or clean up the submission.{% endblocktrans %}</p>
 
 <form method='post' action='./'>
 <fieldset>
