@@ -42,6 +42,7 @@ Adding To Your Django Project
         'south',  # Highly recommended to make database migrations simpler.
         'markdown_deux',  # Required for Knowledgebase item formatting
         'helpdesk',  # This is new!
+        'bootstrapform', 
     )
 
 2. Make sure django-helpdesk is accessible via ``urls.py``. Add the following line to ``urls.py``::
