@@ -410,7 +410,7 @@ def update_ticket(request, ticket_id, public=False):
             if file.size < getattr(settings, 'MAX_EMAIL_ATTACHMENT_SIZE', 512000):
                 # Only files smaller than 512kb (or as defined in
                 # settings.MAX_EMAIL_ATTACHMENT_SIZE) are sent via email.
-                files.append(a.file.path)
+                files.append([a.filename, a.file])
 
 
     if title != ticket.title:

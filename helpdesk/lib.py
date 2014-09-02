@@ -45,8 +45,8 @@ def send_templated_mail(template_name, email_context, recipients, sender=None, b
     fail_silently is passed to Django's mail routine. Set to 'True' to ignore
         any errors at send time.
 
-    files can be a list of file paths to be attached, or it can be left blank.
-        eg ('/tmp/file1.txt', '/tmp/image.png')
+    files can be a list of tuple. Each tuple should be a filename to attach, 
+        along with the File objects to be read. files can be blank.
 
     """
     from django.conf import settings
@@ -123,11 +123,11 @@ def send_templated_mail(template_name, email_context, recipients, sender=None, b
     msg.attach_alternative(html_part, "text/html")
 
     if files:
-        if type(files) != list:
-            files = [files,]
-
-        for file in files:
-            msg.attach_file(file)
+        for attachment in files:
+            file_to_attach = attachment[1]
+            file_to_attach.open()
+            msg.attach(filename=attachment[0], content=file_to_attach.read())
+            file_to_attach.close()
 
     return msg.send(fail_silently)
 

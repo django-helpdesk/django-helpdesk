@@ -268,7 +268,7 @@ class TicketForm(CustomFieldMixin, forms.Form):
                 # Only files smaller than 512kb (or as defined in 
                 # settings.MAX_EMAIL_ATTACHMENT_SIZE) are sent via email.
                 try:
-                    files.append(a.file.path)
+                    files.append([a.filename, a.file])
                 except NotImplementedError:
                     pass
 
@@ -441,7 +441,7 @@ class PublicTicketForm(CustomFieldMixin, forms.Form):
             if file.size < getattr(settings, 'MAX_EMAIL_ATTACHMENT_SIZE', 512000):
                 # Only files smaller than 512kb (or as defined in 
                 # settings.MAX_EMAIL_ATTACHMENT_SIZE) are sent via email.
-                files.append(a.file.path)
+                files.append([a.filename, a.file])
 
         context = safe_template_context(t)
 
