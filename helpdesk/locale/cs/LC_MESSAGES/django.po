@@ -99,7 +99,7 @@ msgstr "Email použijeme pro zpětnou komunikaci."
 
 #: forms.py:348
 msgid "Description of your issue"
-msgstr "Popis vašeho požadavku"
+msgstr "Popiště nám váš požadavek"
 
 #: forms.py:350
 msgid ""
