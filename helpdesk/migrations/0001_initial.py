@@ -1,490 +1,346 @@
-# encoding: utf-8
-import datetime
-from south.db import db
-from south.v2 import SchemaMigration
-from django.db import models
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 
-class Migration(SchemaMigration):
-
-    def forwards(self, orm):
-        
-        # Adding model 'Queue'
-        db.create_table('helpdesk_queue', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('title', self.gf('django.db.models.fields.CharField')(max_length=100)),
-            ('slug', self.gf('django.db.models.fields.SlugField')(max_length=50, db_index=True)),
-            ('email_address', self.gf('django.db.models.fields.EmailField')(max_length=75, null=True, blank=True)),
-            ('locale', self.gf('django.db.models.fields.CharField')(max_length=10, null=True, blank=True)),
-            ('allow_public_submission', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('allow_email_submission', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('escalate_days', self.gf('django.db.models.fields.IntegerField')(null=True, blank=True)),
-            ('new_ticket_cc', self.gf('django.db.models.fields.CharField')(max_length=200, null=True, blank=True)),
-            ('updated_ticket_cc', self.gf('django.db.models.fields.CharField')(max_length=200, null=True, blank=True)),
-            ('email_box_type', self.gf('django.db.models.fields.CharField')(max_length=5, null=True, blank=True)),
-            ('email_box_host', self.gf('django.db.models.fields.CharField')(max_length=200, null=True, blank=True)),
-            ('email_box_port', self.gf('django.db.models.fields.IntegerField')(null=True, blank=True)),
-            ('email_box_ssl', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('email_box_user', self.gf('django.db.models.fields.CharField')(max_length=200, null=True, blank=True)),
-            ('email_box_pass', self.gf('django.db.models.fields.CharField')(max_length=200, null=True, blank=True)),
-            ('email_box_imap_folder', self.gf('django.db.models.fields.CharField')(max_length=100, null=True, blank=True)),
-            ('email_box_interval', self.gf('django.db.models.fields.IntegerField')(default='5', null=True, blank=True)),
-            ('email_box_last_check', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True)),
-        ))
-        db.send_create_signal('helpdesk', ['Queue'])
-
-        # Adding model 'Ticket'
-        db.create_table('helpdesk_ticket', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('title', self.gf('django.db.models.fields.CharField')(max_length=200)),
-            ('queue', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['helpdesk.Queue'])),
-            ('created', self.gf('django.db.models.fields.DateTimeField')(blank=True)),
-            ('modified', self.gf('django.db.models.fields.DateTimeField')(blank=True)),
-            ('submitter_email', self.gf('django.db.models.fields.EmailField')(max_length=75, null=True, blank=True)),
-            ('assigned_to', self.gf('django.db.models.fields.related.ForeignKey')(related_name='assigned_to', blank=True, null=True, to=orm['auth.User'])),
-            ('status', self.gf('django.db.models.fields.IntegerField')(default=1)),
-            ('on_hold', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('description', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
-            ('resolution', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
-            ('priority', self.gf('django.db.models.fields.IntegerField')(default=3, blank=3)),
-            ('last_escalation', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True)),
-        ))
-        db.send_create_signal('helpdesk', ['Ticket'])
-
-        # Adding model 'FollowUp'
-        db.create_table('helpdesk_followup', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('ticket', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['helpdesk.Ticket'])),
-            ('date', self.gf('django.db.models.fields.DateTimeField')(default=datetime.datetime(2011, 4, 27, 15, 17, 4, 272904))),
-            ('title', self.gf('django.db.models.fields.CharField')(max_length=200, null=True, blank=True)),
-            ('comment', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
-            ('public', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'], null=True, blank=True)),
-            ('new_status', self.gf('django.db.models.fields.IntegerField')(null=True, blank=True)),
-        ))
-        db.send_create_signal('helpdesk', ['FollowUp'])
-
-        # Adding model 'TicketChange'
-        db.create_table('helpdesk_ticketchange', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('followup', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['helpdesk.FollowUp'])),
-            ('field', self.gf('django.db.models.fields.CharField')(max_length=100)),
-            ('old_value', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
-            ('new_value', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
-        ))
-        db.send_create_signal('helpdesk', ['TicketChange'])
-
-        # Adding model 'Attachment'
-        db.create_table('helpdesk_attachment', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('followup', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['helpdesk.FollowUp'])),
-            ('file', self.gf('django.db.models.fields.files.FileField')(max_length=100)),
-            ('filename', self.gf('django.db.models.fields.CharField')(max_length=100)),
-            ('mime_type', self.gf('django.db.models.fields.CharField')(max_length=30)),
-            ('size', self.gf('django.db.models.fields.IntegerField')()),
-        ))
-        db.send_create_signal('helpdesk', ['Attachment'])
-
-        # Adding model 'PreSetReply'
-        db.create_table('helpdesk_presetreply', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('name', self.gf('django.db.models.fields.CharField')(max_length=100)),
-            ('body', self.gf('django.db.models.fields.TextField')()),
-        ))
-        db.send_create_signal('helpdesk', ['PreSetReply'])
-
-        # Adding M2M table for field queues on 'PreSetReply'
-        db.create_table('helpdesk_presetreply_queues', (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('presetreply', models.ForeignKey(orm['helpdesk.presetreply'], null=False)),
-            ('queue', models.ForeignKey(orm['helpdesk.queue'], null=False))
-        ))
-        db.create_unique('helpdesk_presetreply_queues', ['presetreply_id', 'queue_id'])
-
-        # Adding model 'EscalationExclusion'
-        db.create_table('helpdesk_escalationexclusion', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('name', self.gf('django.db.models.fields.CharField')(max_length=100)),
-            ('date', self.gf('django.db.models.fields.DateField')()),
-        ))
-        db.send_create_signal('helpdesk', ['EscalationExclusion'])
-
-        # Adding M2M table for field queues on 'EscalationExclusion'
-        db.create_table('helpdesk_escalationexclusion_queues', (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('escalationexclusion', models.ForeignKey(orm['helpdesk.escalationexclusion'], null=False)),
-            ('queue', models.ForeignKey(orm['helpdesk.queue'], null=False))
-        ))
-        db.create_unique('helpdesk_escalationexclusion_queues', ['escalationexclusion_id', 'queue_id'])
-
-        # Adding model 'EmailTemplate'
-        db.create_table('helpdesk_emailtemplate', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('template_name', self.gf('django.db.models.fields.CharField')(max_length=100)),
-            ('subject', self.gf('django.db.models.fields.CharField')(max_length=100)),
-            ('heading', self.gf('django.db.models.fields.CharField')(max_length=100)),
-            ('plain_text', self.gf('django.db.models.fields.TextField')()),
-            ('html', self.gf('django.db.models.fields.TextField')()),
-            ('locale', self.gf('django.db.models.fields.CharField')(max_length=10, null=True, blank=True)),
-        ))
-        db.send_create_signal('helpdesk', ['EmailTemplate'])
-
-        # Adding model 'KBCategory'
-        db.create_table('helpdesk_kbcategory', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('title', self.gf('django.db.models.fields.CharField')(max_length=100)),
-            ('slug', self.gf('django.db.models.fields.SlugField')(max_length=50, db_index=True)),
-            ('description', self.gf('django.db.models.fields.TextField')()),
-        ))
-        db.send_create_signal('helpdesk', ['KBCategory'])
-
-        # Adding model 'KBItem'
-        db.create_table('helpdesk_kbitem', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('category', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['helpdesk.KBCategory'])),
-            ('title', self.gf('django.db.models.fields.CharField')(max_length=100)),
-            ('question', self.gf('django.db.models.fields.TextField')()),
-            ('answer', self.gf('django.db.models.fields.TextField')()),
-            ('votes', self.gf('django.db.models.fields.IntegerField')(default=0)),
-            ('recommendations', self.gf('django.db.models.fields.IntegerField')(default=0)),
-            ('last_updated', self.gf('django.db.models.fields.DateTimeField')(blank=True)),
-        ))
-        db.send_create_signal('helpdesk', ['KBItem'])
-
-        # Adding model 'SavedSearch'
-        db.create_table('helpdesk_savedsearch', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'])),
-            ('title', self.gf('django.db.models.fields.CharField')(max_length=100)),
-            ('shared', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('query', self.gf('django.db.models.fields.TextField')()),
-        ))
-        db.send_create_signal('helpdesk', ['SavedSearch'])
-
-        # Adding model 'UserSettings'
-        db.create_table('helpdesk_usersettings', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('user', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['auth.User'], unique=True)),
-            ('settings_pickled', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
-        ))
-        db.send_create_signal('helpdesk', ['UserSettings'])
-
-        # Adding model 'IgnoreEmail'
-        db.create_table('helpdesk_ignoreemail', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('name', self.gf('django.db.models.fields.CharField')(max_length=100)),
-            ('date', self.gf('django.db.models.fields.DateField')(blank=True)),
-            ('email_address', self.gf('django.db.models.fields.CharField')(max_length=150)),
-            ('keep_in_mailbox', self.gf('django.db.models.fields.BooleanField')(default=False)),
-        ))
-        db.send_create_signal('helpdesk', ['IgnoreEmail'])
-
-        # Adding M2M table for field queues on 'IgnoreEmail'
-        db.create_table('helpdesk_ignoreemail_queues', (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('ignoreemail', models.ForeignKey(orm['helpdesk.ignoreemail'], null=False)),
-            ('queue', models.ForeignKey(orm['helpdesk.queue'], null=False))
-        ))
-        db.create_unique('helpdesk_ignoreemail_queues', ['ignoreemail_id', 'queue_id'])
-
-        # Adding model 'TicketCC'
-        db.create_table('helpdesk_ticketcc', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('ticket', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['helpdesk.Ticket'])),
-            ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'], null=True, blank=True)),
-            ('email', self.gf('django.db.models.fields.EmailField')(max_length=75, null=True, blank=True)),
-            ('can_view', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('can_update', self.gf('django.db.models.fields.BooleanField')(default=False)),
-        ))
-        db.send_create_signal('helpdesk', ['TicketCC'])
-
-        # Adding model 'CustomField'
-        db.create_table('helpdesk_customfield', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('name', self.gf('django.db.models.fields.SlugField')(max_length=50, unique=True, db_index=True)),
-            ('label', self.gf('django.db.models.fields.CharField')(max_length='30')),
-            ('help_text', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
-            ('data_type', self.gf('django.db.models.fields.CharField')(max_length=100)),
-            ('max_length', self.gf('django.db.models.fields.IntegerField')(null=True, blank=True)),
-            ('decimal_places', self.gf('django.db.models.fields.IntegerField')(null=True, blank=True)),
-            ('list_values', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
-            ('required', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('staff_only', self.gf('django.db.models.fields.BooleanField')(default=False)),
-        ))
-        db.send_create_signal('helpdesk', ['CustomField'])
-
-        # Adding model 'TicketCustomFieldValue'
-        db.create_table('helpdesk_ticketcustomfieldvalue', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('ticket', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['helpdesk.Ticket'])),
-            ('field', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['helpdesk.CustomField'])),
-            ('value', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
-        ))
-        db.send_create_signal('helpdesk', ['TicketCustomFieldValue'])
-
-        # Adding unique constraint on 'TicketCustomFieldValue', fields ['ticket', 'field']
-        db.create_unique('helpdesk_ticketcustomfieldvalue', ['ticket_id', 'field_id'])
+from django.db import models, migrations
+import django.utils.timezone
+from django.conf import settings
+import helpdesk.models
 
 
-    def backwards(self, orm):
-        
-        # Removing unique constraint on 'TicketCustomFieldValue', fields ['ticket', 'field']
-        db.delete_unique('helpdesk_ticketcustomfieldvalue', ['ticket_id', 'field_id'])
+class Migration(migrations.Migration):
 
-        # Deleting model 'Queue'
-        db.delete_table('helpdesk_queue')
+    dependencies = [
+        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
+    ]
 
-        # Deleting model 'Ticket'
-        db.delete_table('helpdesk_ticket')
-
-        # Deleting model 'FollowUp'
-        db.delete_table('helpdesk_followup')
-
-        # Deleting model 'TicketChange'
-        db.delete_table('helpdesk_ticketchange')
-
-        # Deleting model 'Attachment'
-        db.delete_table('helpdesk_attachment')
-
-        # Deleting model 'PreSetReply'
-        db.delete_table('helpdesk_presetreply')
-
-        # Removing M2M table for field queues on 'PreSetReply'
-        db.delete_table('helpdesk_presetreply_queues')
-
-        # Deleting model 'EscalationExclusion'
-        db.delete_table('helpdesk_escalationexclusion')
-
-        # Removing M2M table for field queues on 'EscalationExclusion'
-        db.delete_table('helpdesk_escalationexclusion_queues')
-
-        # Deleting model 'EmailTemplate'
-        db.delete_table('helpdesk_emailtemplate')
-
-        # Deleting model 'KBCategory'
-        db.delete_table('helpdesk_kbcategory')
-
-        # Deleting model 'KBItem'
-        db.delete_table('helpdesk_kbitem')
-
-        # Deleting model 'SavedSearch'
-        db.delete_table('helpdesk_savedsearch')
-
-        # Deleting model 'UserSettings'
-        db.delete_table('helpdesk_usersettings')
-
-        # Deleting model 'IgnoreEmail'
-        db.delete_table('helpdesk_ignoreemail')
-
-        # Removing M2M table for field queues on 'IgnoreEmail'
-        db.delete_table('helpdesk_ignoreemail_queues')
-
-        # Deleting model 'TicketCC'
-        db.delete_table('helpdesk_ticketcc')
-
-        # Deleting model 'CustomField'
-        db.delete_table('helpdesk_customfield')
-
-        # Deleting model 'TicketCustomFieldValue'
-        db.delete_table('helpdesk_ticketcustomfieldvalue')
-
-
-    models = {
-        'auth.group': {
-            'Meta': {'object_name': 'Group'},
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '80', 'unique': 'True'}),
-            'permissions': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['auth.Permission']", 'symmetrical': 'False', 'blank': 'True'})
-        },
-        'auth.permission': {
-            'Meta': {'ordering': "('content_type__app_label', 'content_type__model', 'codename')", 'unique_together': "(('content_type', 'codename'),)", 'object_name': 'Permission'},
-            'codename': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'content_type': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['contenttypes.ContentType']"}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '50'})
-        },
-        'auth.user': {
-            'Meta': {'object_name': 'User'},
-            'date_joined': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
-            'email': ('django.db.models.fields.EmailField', [], {'max_length': '75', 'blank': 'True'}),
-            'first_name': ('django.db.models.fields.CharField', [], {'max_length': '30', 'blank': 'True'}),
-            'groups': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['auth.Group']", 'symmetrical': 'False', 'blank': 'True'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'is_active': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
-            'is_staff': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'is_superuser': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'last_login': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
-            'last_name': ('django.db.models.fields.CharField', [], {'max_length': '30', 'blank': 'True'}),
-            'password': ('django.db.models.fields.CharField', [], {'max_length': '128'}),
-            'user_permissions': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['auth.Permission']", 'symmetrical': 'False', 'blank': 'True'}),
-            'username': ('django.db.models.fields.CharField', [], {'max_length': '30', 'unique': 'True'})
-        },
-        'contenttypes.contenttype': {
-            'Meta': {'ordering': "('name',)", 'unique_together': "(('app_label', 'model'),)", 'object_name': 'ContentType', 'db_table': "'django_content_type'"},
-            'app_label': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'model': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
-        },
-        'helpdesk.attachment': {
-            'Meta': {'ordering': "['filename']", 'object_name': 'Attachment'},
-            'file': ('django.db.models.fields.files.FileField', [], {'max_length': '100'}),
-            'filename': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'followup': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['helpdesk.FollowUp']"}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'mime_type': ('django.db.models.fields.CharField', [], {'max_length': '30'}),
-            'size': ('django.db.models.fields.IntegerField', [], {})
-        },
-        'helpdesk.customfield': {
-            'Meta': {'object_name': 'CustomField'},
-            'data_type': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'decimal_places': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
-            'help_text': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'label': ('django.db.models.fields.CharField', [], {'max_length': "'30'"}),
-            'list_values': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
-            'max_length': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
-            'name': ('django.db.models.fields.SlugField', [], {'max_length': '50', 'unique': 'True', 'db_index': 'True'}),
-            'required': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'staff_only': ('django.db.models.fields.BooleanField', [], {'default': 'False'})
-        },
-        'helpdesk.emailtemplate': {
-            'Meta': {'ordering': "['template_name', 'locale']", 'object_name': 'EmailTemplate'},
-            'heading': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'html': ('django.db.models.fields.TextField', [], {}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'locale': ('django.db.models.fields.CharField', [], {'max_length': '10', 'null': 'True', 'blank': 'True'}),
-            'plain_text': ('django.db.models.fields.TextField', [], {}),
-            'subject': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'template_name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
-        },
-        'helpdesk.escalationexclusion': {
-            'Meta': {'object_name': 'EscalationExclusion'},
-            'date': ('django.db.models.fields.DateField', [], {}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'queues': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['helpdesk.Queue']", 'symmetrical': 'False', 'null': 'True', 'blank': 'True'})
-        },
-        'helpdesk.followup': {
-            'Meta': {'ordering': "['date']", 'object_name': 'FollowUp'},
-            'comment': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
-            'date': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2011, 4, 27, 15, 17, 4, 272904)'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'new_status': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
-            'public': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'ticket': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['helpdesk.Ticket']"}),
-            'title': ('django.db.models.fields.CharField', [], {'max_length': '200', 'null': 'True', 'blank': 'True'}),
-            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']", 'null': 'True', 'blank': 'True'})
-        },
-        'helpdesk.ignoreemail': {
-            'Meta': {'object_name': 'IgnoreEmail'},
-            'date': ('django.db.models.fields.DateField', [], {'blank': 'True'}),
-            'email_address': ('django.db.models.fields.CharField', [], {'max_length': '150'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'keep_in_mailbox': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'queues': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['helpdesk.Queue']", 'symmetrical': 'False', 'null': 'True', 'blank': 'True'})
-        },
-        'helpdesk.kbcategory': {
-            'Meta': {'ordering': "['title']", 'object_name': 'KBCategory'},
-            'description': ('django.db.models.fields.TextField', [], {}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'slug': ('django.db.models.fields.SlugField', [], {'max_length': '50', 'db_index': 'True'}),
-            'title': ('django.db.models.fields.CharField', [], {'max_length': '100'})
-        },
-        'helpdesk.kbitem': {
-            'Meta': {'ordering': "['title']", 'object_name': 'KBItem'},
-            'answer': ('django.db.models.fields.TextField', [], {}),
-            'category': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['helpdesk.KBCategory']"}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'last_updated': ('django.db.models.fields.DateTimeField', [], {'blank': 'True'}),
-            'question': ('django.db.models.fields.TextField', [], {}),
-            'recommendations': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
-            'title': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'votes': ('django.db.models.fields.IntegerField', [], {'default': '0'})
-        },
-        'helpdesk.presetreply': {
-            'Meta': {'ordering': "['name']", 'object_name': 'PreSetReply'},
-            'body': ('django.db.models.fields.TextField', [], {}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'queues': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['helpdesk.Queue']", 'symmetrical': 'False', 'null': 'True', 'blank': 'True'})
-        },
-        'helpdesk.queue': {
-            'Meta': {'ordering': "('title',)", 'object_name': 'Queue'},
-            'allow_email_submission': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'allow_public_submission': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'email_address': ('django.db.models.fields.EmailField', [], {'max_length': '75', 'null': 'True', 'blank': 'True'}),
-            'email_box_host': ('django.db.models.fields.CharField', [], {'max_length': '200', 'null': 'True', 'blank': 'True'}),
-            'email_box_imap_folder': ('django.db.models.fields.CharField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
-            'email_box_interval': ('django.db.models.fields.IntegerField', [], {'default': "'5'", 'null': 'True', 'blank': 'True'}),
-            'email_box_last_check': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
-            'email_box_pass': ('django.db.models.fields.CharField', [], {'max_length': '200', 'null': 'True', 'blank': 'True'}),
-            'email_box_port': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
-            'email_box_ssl': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'email_box_type': ('django.db.models.fields.CharField', [], {'max_length': '5', 'null': 'True', 'blank': 'True'}),
-            'email_box_user': ('django.db.models.fields.CharField', [], {'max_length': '200', 'null': 'True', 'blank': 'True'}),
-            'escalate_days': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'locale': ('django.db.models.fields.CharField', [], {'max_length': '10', 'null': 'True', 'blank': 'True'}),
-            'new_ticket_cc': ('django.db.models.fields.CharField', [], {'max_length': '200', 'null': 'True', 'blank': 'True'}),
-            'slug': ('django.db.models.fields.SlugField', [], {'max_length': '50', 'db_index': 'True'}),
-            'title': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'updated_ticket_cc': ('django.db.models.fields.CharField', [], {'max_length': '200', 'null': 'True', 'blank': 'True'})
-        },
-        'helpdesk.savedsearch': {
-            'Meta': {'object_name': 'SavedSearch'},
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'query': ('django.db.models.fields.TextField', [], {}),
-            'shared': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'title': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']"})
-        },
-        'helpdesk.ticket': {
-            'Meta': {'object_name': 'Ticket'},
-            'assigned_to': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'assigned_to'", 'blank': 'True', 'null': 'True', 'to': "orm['auth.User']"}),
-            'created': ('django.db.models.fields.DateTimeField', [], {'blank': 'True'}),
-            'description': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'last_escalation': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
-            'modified': ('django.db.models.fields.DateTimeField', [], {'blank': 'True'}),
-            'on_hold': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'priority': ('django.db.models.fields.IntegerField', [], {'default': '3', 'blank': '3'}),
-            'queue': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['helpdesk.Queue']"}),
-            'resolution': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
-            'status': ('django.db.models.fields.IntegerField', [], {'default': '1'}),
-            'submitter_email': ('django.db.models.fields.EmailField', [], {'max_length': '75', 'null': 'True', 'blank': 'True'}),
-            'title': ('django.db.models.fields.CharField', [], {'max_length': '200'})
-        },
-        'helpdesk.ticketcc': {
-            'Meta': {'object_name': 'TicketCC'},
-            'can_update': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'can_view': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'email': ('django.db.models.fields.EmailField', [], {'max_length': '75', 'null': 'True', 'blank': 'True'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'ticket': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['helpdesk.Ticket']"}),
-            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']", 'null': 'True', 'blank': 'True'})
-        },
-        'helpdesk.ticketchange': {
-            'Meta': {'object_name': 'TicketChange'},
-            'field': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'followup': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['helpdesk.FollowUp']"}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'new_value': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
-            'old_value': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'})
-        },
-        'helpdesk.ticketcustomfieldvalue': {
-            'Meta': {'unique_together': "(('ticket', 'field'),)", 'object_name': 'TicketCustomFieldValue'},
-            'field': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['helpdesk.CustomField']"}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'ticket': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['helpdesk.Ticket']"}),
-            'value': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'})
-        },
-        'helpdesk.usersettings': {
-            'Meta': {'object_name': 'UserSettings'},
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'settings_pickled': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
-            'user': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['auth.User']", 'unique': 'True'})
-        }
-    }
-
-    complete_apps = ['helpdesk']
+    operations = [
+        migrations.CreateModel(
+            name='Attachment',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('file', models.FileField(upload_to=helpdesk.models.attachment_path, max_length=1000, verbose_name='File')),
+                ('filename', models.CharField(max_length=1000, verbose_name='Filename')),
+                ('mime_type', models.CharField(max_length=255, verbose_name='MIME Type')),
+                ('size', models.IntegerField(help_text='Size of this file in bytes', verbose_name='Size')),
+            ],
+            options={
+                'ordering': ['filename'],
+                'verbose_name': 'Attachment',
+                'verbose_name_plural': 'Attachments',
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='CustomField',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('name', models.SlugField(help_text='As used in the database and behind the scenes. Must be unique and consist of only lowercase letters with no punctuation.', unique=True, verbose_name='Field Name')),
+                ('label', models.CharField(help_text='The display label for this field', max_length=b'30', verbose_name='Label')),
+                ('help_text', models.TextField(help_text='Shown to the user when editing the ticket', null=True, verbose_name='Help Text', blank=True)),
+                ('data_type', models.CharField(help_text='Allows you to restrict the data entered into this field', max_length=100, verbose_name='Data Type', choices=[(b'varchar', 'Character (single line)'), (b'text', 'Text (multi-line)'), (b'integer', 'Integer'), (b'decimal', 'Decimal'), (b'list', 'List'), (b'boolean', 'Boolean (checkbox yes/no)'), (b'date', 'Date'), (b'time', 'Time'), (b'datetime', 'Date & Time'), (b'email', 'E-Mail Address'), (b'url', 'URL'), (b'ipaddress', 'IP Address'), (b'slug', 'Slug')])),
+                ('max_length', models.IntegerField(null=True, verbose_name='Maximum Length (characters)', blank=True)),
+                ('decimal_places', models.IntegerField(help_text='Only used for decimal fields', null=True, verbose_name='Decimal Places', blank=True)),
+                ('empty_selection_list', models.BooleanField(default=False, help_text='Only for List: adds an empty first entry to the choices list, which enforces that the user makes an active choice.', verbose_name='Add empty first choice to List?')),
+                ('list_values', models.TextField(help_text='For list fields only. Enter one option per line.', null=True, verbose_name='List Values', blank=True)),
+                ('ordering', models.IntegerField(help_text='Lower numbers are displayed first; higher numbers are listed later', null=True, verbose_name='Ordering', blank=True)),
+                ('required', models.BooleanField(default=False, help_text='Does the user have to enter a value for this field?', verbose_name='Required?')),
+                ('staff_only', models.BooleanField(default=False, help_text='If this is ticked, then the public submission form will NOT show this field', verbose_name='Staff Only?')),
+            ],
+            options={
+                'verbose_name': 'Custom field',
+                'verbose_name_plural': 'Custom fields',
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='EmailTemplate',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('template_name', models.CharField(max_length=100, verbose_name='Template Name')),
+                ('subject', models.CharField(help_text='This will be prefixed with "[ticket.ticket] ticket.title". We recommend something simple such as "(Updated") or "(Closed)" - the same context is available as in plain_text, below.', max_length=100, verbose_name='Subject')),
+                ('heading', models.CharField(help_text='In HTML e-mails, this will be the heading at the top of the email - the same context is available as in plain_text, below.', max_length=100, verbose_name='Heading')),
+                ('plain_text', models.TextField(help_text='The context available to you includes {{ ticket }}, {{ queue }}, and depending on the time of the call: {{ resolution }} or {{ comment }}.', verbose_name='Plain Text')),
+                ('html', models.TextField(help_text='The same context is available here as in plain_text, above.', verbose_name='HTML')),
+                ('locale', models.CharField(help_text='Locale of this template.', max_length=10, null=True, verbose_name='Locale', blank=True)),
+            ],
+            options={
+                'ordering': ['template_name', 'locale'],
+                'verbose_name': 'e-mail template',
+                'verbose_name_plural': 'e-mail templates',
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='EscalationExclusion',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('name', models.CharField(max_length=100, verbose_name='Name')),
+                ('date', models.DateField(help_text='Date on which escalation should not happen', verbose_name='Date')),
+            ],
+            options={
+                'verbose_name': 'Escalation exclusion',
+                'verbose_name_plural': 'Escalation exclusions',
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='FollowUp',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('date', models.DateTimeField(default=django.utils.timezone.now, verbose_name='Date')),
+                ('title', models.CharField(max_length=200, null=True, verbose_name='Title', blank=True)),
+                ('comment', models.TextField(null=True, verbose_name='Comment', blank=True)),
+                ('public', models.BooleanField(default=False, help_text='Public tickets are viewable by the submitter and all staff, but non-public tickets can only be seen by staff.', verbose_name='Public')),
+                ('new_status', models.IntegerField(blank=True, help_text='If the status was changed, what was it changed to?', null=True, verbose_name='New Status', choices=[(1, 'Open'), (2, 'Reopened'), (3, 'Resolved'), (4, 'Closed'), (5, 'Duplicate')])),
+            ],
+            options={
+                'ordering': ['date'],
+                'verbose_name': 'Follow-up',
+                'verbose_name_plural': 'Follow-ups',
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='IgnoreEmail',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('name', models.CharField(max_length=100, verbose_name='Name')),
+                ('date', models.DateField(help_text='Date on which this e-mail address was added', verbose_name='Date', editable=False, blank=True)),
+                ('email_address', models.CharField(help_text='Enter a full e-mail address, or portions with wildcards, eg *@domain.com or postmaster@*.', max_length=150, verbose_name='E-Mail Address')),
+                ('keep_in_mailbox', models.BooleanField(default=False, help_text='Do you want to save emails from this address in the mailbox? If this is unticked, emails from this address will be deleted.', verbose_name='Save Emails in Mailbox?')),
+            ],
+            options={
+                'verbose_name': 'Ignored e-mail address',
+                'verbose_name_plural': 'Ignored e-mail addresses',
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='KBCategory',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('title', models.CharField(max_length=100, verbose_name='Title')),
+                ('slug', models.SlugField(verbose_name='Slug')),
+                ('description', models.TextField(verbose_name='Description')),
+            ],
+            options={
+                'ordering': ['title'],
+                'verbose_name': 'Knowledge base category',
+                'verbose_name_plural': 'Knowledge base categories',
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='KBItem',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('title', models.CharField(max_length=100, verbose_name='Title')),
+                ('question', models.TextField(verbose_name='Question')),
+                ('answer', models.TextField(verbose_name='Answer')),
+                ('votes', models.IntegerField(default=0, help_text='Total number of votes cast for this item', verbose_name='Votes')),
+                ('recommendations', models.IntegerField(default=0, help_text='Number of votes for this item which were POSITIVE.', verbose_name='Positive Votes')),
+                ('last_updated', models.DateTimeField(help_text='The date on which this question was most recently changed.', verbose_name='Last Updated', blank=True)),
+                ('category', models.ForeignKey(verbose_name='Category', to='helpdesk.KBCategory')),
+            ],
+            options={
+                'ordering': ['title'],
+                'verbose_name': 'Knowledge base item',
+                'verbose_name_plural': 'Knowledge base items',
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='PreSetReply',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('name', models.CharField(help_text='Only used to assist users with selecting a reply - not shown to the user.', max_length=100, verbose_name='Name')),
+                ('body', models.TextField(help_text='Context available: {{ ticket }} - ticket object (eg {{ ticket.title }}); {{ queue }} - The queue; and {{ user }} - the current user.', verbose_name='Body')),
+            ],
+            options={
+                'ordering': ['name'],
+                'verbose_name': 'Pre-set reply',
+                'verbose_name_plural': 'Pre-set replies',
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='Queue',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('title', models.CharField(max_length=100, verbose_name='Title')),
+                ('slug', models.SlugField(help_text="This slug is used when building ticket ID's. Once set, try not to change it or e-mailing may get messy.", verbose_name='Slug')),
+                ('email_address', models.EmailField(help_text='All outgoing e-mails for this queue will use this e-mail address. If you use IMAP or POP3, this should be the e-mail address for that mailbox.', max_length=75, null=True, verbose_name='E-Mail Address', blank=True)),
+                ('locale', models.CharField(help_text='Locale of this queue. All correspondence in this queue will be in this language.', max_length=10, null=True, verbose_name='Locale', blank=True)),
+                ('allow_public_submission', models.BooleanField(default=False, help_text='Should this queue be listed on the public submission form?', verbose_name='Allow Public Submission?')),
+                ('allow_email_submission', models.BooleanField(default=False, help_text='Do you want to poll the e-mail box below for new tickets?', verbose_name='Allow E-Mail Submission?')),
+                ('escalate_days', models.IntegerField(help_text='For tickets which are not held, how often do you wish to increase their priority? Set to 0 for no escalation.', null=True, verbose_name='Escalation Days', blank=True)),
+                ('new_ticket_cc', models.CharField(help_text='If an e-mail address is entered here, then it will receive notification of all new tickets created for this queue. Enter a comma between multiple e-mail addresses.', max_length=200, null=True, verbose_name='New Ticket CC Address', blank=True)),
+                ('updated_ticket_cc', models.CharField(help_text='If an e-mail address is entered here, then it will receive notification of all activity (new tickets, closed tickets, updates, reassignments, etc) for this queue. Separate multiple addresses with a comma.', max_length=200, null=True, verbose_name='Updated Ticket CC Address', blank=True)),
+                ('email_box_type', models.CharField(choices=[(b'pop3', 'POP 3'), (b'imap', 'IMAP')], max_length=5, blank=True, help_text='E-Mail server type for creating tickets automatically from a mailbox - both POP3 and IMAP are supported.', null=True, verbose_name='E-Mail Box Type')),
+                ('email_box_host', models.CharField(help_text='Your e-mail server address - either the domain name or IP address. May be "localhost".', max_length=200, null=True, verbose_name='E-Mail Hostname', blank=True)),
+                ('email_box_port', models.IntegerField(help_text='Port number to use for accessing e-mail. Default for POP3 is "110", and for IMAP is "143". This may differ on some servers. Leave it blank to use the defaults.', null=True, verbose_name='E-Mail Port', blank=True)),
+                ('email_box_ssl', models.BooleanField(default=False, help_text='Whether to use SSL for IMAP or POP3 - the default ports when using SSL are 993 for IMAP and 995 for POP3.', verbose_name='Use SSL for E-Mail?')),
+                ('email_box_user', models.CharField(help_text='Username for accessing this mailbox.', max_length=200, null=True, verbose_name='E-Mail Username', blank=True)),
+                ('email_box_pass', models.CharField(help_text='Password for the above username', max_length=200, null=True, verbose_name='E-Mail Password', blank=True)),
+                ('email_box_imap_folder', models.CharField(help_text='If using IMAP, what folder do you wish to fetch messages from? This allows you to use one IMAP account for multiple queues, by filtering messages on your IMAP server into separate folders. Default: INBOX.', max_length=100, null=True, verbose_name='IMAP Folder', blank=True)),
+                ('email_box_interval', models.IntegerField(default=b'5', help_text='How often do you wish to check this mailbox? (in Minutes)', null=True, verbose_name='E-Mail Check Interval', blank=True)),
+                ('email_box_last_check', models.DateTimeField(null=True, editable=False, blank=True)),
+            ],
+            options={
+                'ordering': ('title',),
+                'verbose_name': 'Queue',
+                'verbose_name_plural': 'Queues',
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='SavedSearch',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('title', models.CharField(help_text='User-provided name for this query', max_length=100, verbose_name='Query Name')),
+                ('shared', models.BooleanField(default=False, help_text='Should other users see this query?', verbose_name='Shared With Other Users?')),
+                ('query', models.TextField(help_text='Pickled query object. Be wary changing this.', verbose_name='Search Query')),
+                ('user', models.ForeignKey(verbose_name='User', to=settings.AUTH_USER_MODEL)),
+            ],
+            options={
+                'verbose_name': 'Saved search',
+                'verbose_name_plural': 'Saved searches',
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='Ticket',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('title', models.CharField(max_length=200, verbose_name='Title')),
+                ('created', models.DateTimeField(help_text='Date this ticket was first created', verbose_name='Created', blank=True)),
+                ('modified', models.DateTimeField(help_text='Date this ticket was most recently changed.', verbose_name='Modified', blank=True)),
+                ('submitter_email', models.EmailField(help_text='The submitter will receive an email for all public follow-ups left for this task.', max_length=75, null=True, verbose_name='Submitter E-Mail', blank=True)),
+                ('status', models.IntegerField(default=1, verbose_name='Status', choices=[(1, 'Open'), (2, 'Reopened'), (3, 'Resolved'), (4, 'Closed'), (5, 'Duplicate')])),
+                ('on_hold', models.BooleanField(default=False, help_text='If a ticket is on hold, it will not automatically be escalated.', verbose_name='On Hold')),
+                ('description', models.TextField(help_text='The content of the customers query.', null=True, verbose_name='Description', blank=True)),
+                ('resolution', models.TextField(help_text='The resolution provided to the customer by our staff.', null=True, verbose_name='Resolution', blank=True)),
+                ('priority', models.IntegerField(default=3, help_text='1 = Highest Priority, 5 = Low Priority', blank=3, verbose_name='Priority', choices=[(1, '1. Critical'), (2, '2. High'), (3, '3. Normal'), (4, '4. Low'), (5, '5. Very Low')])),
+                ('due_date', models.DateTimeField(null=True, verbose_name='Due on', blank=True)),
+                ('last_escalation', models.DateTimeField(help_text='The date this ticket was last escalated - updated automatically by management/commands/escalate_tickets.py.', null=True, editable=False, blank=True)),
+                ('assigned_to', models.ForeignKey(related_name=b'assigned_to', verbose_name='Assigned to', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('queue', models.ForeignKey(verbose_name='Queue', to='helpdesk.Queue')),
+            ],
+            options={
+                'ordering': ('id',),
+                'get_latest_by': 'created',
+                'verbose_name': 'Ticket',
+                'verbose_name_plural': 'Tickets',
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='TicketCC',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('email', models.EmailField(help_text='For non-user followers, enter their e-mail address', max_length=75, null=True, verbose_name='E-Mail Address', blank=True)),
+                ('can_view', models.BooleanField(default=False, help_text='Can this CC login to view the ticket details?', verbose_name='Can View Ticket?')),
+                ('can_update', models.BooleanField(default=False, help_text='Can this CC login and update the ticket?', verbose_name='Can Update Ticket?')),
+                ('ticket', models.ForeignKey(verbose_name='Ticket', to='helpdesk.Ticket')),
+                ('user', models.ForeignKey(blank=True, to=settings.AUTH_USER_MODEL, help_text='User who wishes to receive updates for this ticket.', null=True, verbose_name='User')),
+            ],
+            options={
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='TicketChange',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('field', models.CharField(max_length=100, verbose_name='Field')),
+                ('old_value', models.TextField(null=True, verbose_name='Old Value', blank=True)),
+                ('new_value', models.TextField(null=True, verbose_name='New Value', blank=True)),
+                ('followup', models.ForeignKey(verbose_name='Follow-up', to='helpdesk.FollowUp')),
+            ],
+            options={
+                'verbose_name': 'Ticket change',
+                'verbose_name_plural': 'Ticket changes',
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='TicketCustomFieldValue',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('value', models.TextField(null=True, blank=True)),
+                ('field', models.ForeignKey(verbose_name='Field', to='helpdesk.CustomField')),
+                ('ticket', models.ForeignKey(verbose_name='Ticket', to='helpdesk.Ticket')),
+            ],
+            options={
+                'verbose_name': 'Ticket custom field value',
+                'verbose_name_plural': 'Ticket custom field values',
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='TicketDependency',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('depends_on', models.ForeignKey(related_name=b'depends_on', verbose_name='Depends On Ticket', to='helpdesk.Ticket')),
+                ('ticket', models.ForeignKey(related_name=b'ticketdependency', verbose_name='Ticket', to='helpdesk.Ticket')),
+            ],
+            options={
+                'verbose_name': 'Ticket dependency',
+                'verbose_name_plural': 'Ticket dependencies',
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='UserSettings',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('settings_pickled', models.TextField(help_text='This is a base64-encoded representation of a pickled Python dictionary. Do not change this field via the admin.', null=True, verbose_name='Settings Dictionary', blank=True)),
+                ('user', models.OneToOneField(to=settings.AUTH_USER_MODEL)),
+            ],
+            options={
+                'verbose_name': 'User Setting',
+                'verbose_name_plural': 'User Settings',
+            },
+            bases=(models.Model,),
+        ),
+        migrations.AlterUniqueTogether(
+            name='ticketdependency',
+            unique_together=set([('ticket', 'depends_on')]),
+        ),
+        migrations.AddField(
+            model_name='presetreply',
+            name='queues',
+            field=models.ManyToManyField(help_text='Leave blank to allow this reply to be used for all queues, or select those queues you wish to limit this reply to.', to='helpdesk.Queue', null=True, blank=True),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='ignoreemail',
+            name='queues',
+            field=models.ManyToManyField(help_text='Leave blank for this e-mail to be ignored on all queues, or select those queues you wish to ignore this e-mail for.', to='helpdesk.Queue', null=True, blank=True),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='followup',
+            name='ticket',
+            field=models.ForeignKey(verbose_name='Ticket', to='helpdesk.Ticket'),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='followup',
+            name='user',
+            field=models.ForeignKey(verbose_name='User', blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='escalationexclusion',
+            name='queues',
+            field=models.ManyToManyField(help_text='Leave blank for this exclusion to be applied to all queues, or select those queues you wish to exclude with this entry.', to='helpdesk.Queue', null=True, blank=True),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='attachment',
+            name='followup',
+            field=models.ForeignKey(verbose_name='Follow-up', to='helpdesk.FollowUp'),
+            preserve_default=True,
+        ),
+    ]

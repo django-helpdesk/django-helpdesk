@@ -7,12 +7,8 @@ models.py - Model (and hence database) definitions. This is the core of the
             helpdesk structure.
 """
 
-try:
-    from django.contrib.auth import get_user_model
-    User = get_user_model()
-except ImportError:
-    from django.contrib.auth.models import User
 from django.db import models
+from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _, ugettext
 
@@ -288,7 +284,7 @@ class Ticket(models.Model):
         )
 
     assigned_to = models.ForeignKey(
-        User,
+        settings.AUTH_USER_MODEL,
         related_name='assigned_to',
         blank=True,
         null=True,
@@ -496,7 +492,7 @@ class FollowUp(models.Model):
 
     date = models.DateTimeField(
         _('Date'),
-        default = timezone.now()
+        default = timezone.now
         )
 
     title = models.CharField(
@@ -521,7 +517,7 @@ class FollowUp(models.Model):
         )
 
     user = models.ForeignKey(
-        User,
+        settings.AUTH_USER_MODEL,
         blank=True,
         null=True,
         verbose_name=_('User'),
@@ -919,7 +915,7 @@ class SavedSearch(models.Model):
          etc...
     """
     user = models.ForeignKey(
-        User,
+        settings.AUTH_USER_MODEL,
         verbose_name=_('User'),
         )
 
@@ -961,7 +957,7 @@ class UserSettings(models.Model):
     We should always refer to user.usersettings.settings['setting_name'].
     """
 
-    user = models.OneToOneField(User)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL)
 
     settings_pickled = models.TextField(
         _('Settings Dictionary'),
@@ -1005,11 +1001,12 @@ def create_usersettings(sender, created_models=[], instance=None, created=False,
     'DoesNotExist: UserSettings matching query does not exist.' errors.
     """
     from helpdesk.settings import DEFAULT_USER_SETTINGS
-    if sender == User and created:
+    if sender == settings.AUTH_USER_MODEL and created:
         # This is a new user, so lets create their settings entry.
         s, created = UserSettings.objects.get_or_create(user=instance, defaults={'settings': DEFAULT_USER_SETTINGS})
         s.save()
     elif UserSettings in created_models:
+        User = get_user_model()
         # We just created the UserSettings model, lets create a UserSettings
         # entry for each existing user. This will only happen once (at install
         # time, or at upgrade) when the UserSettings model doesn't already
@@ -1022,7 +1019,11 @@ def create_usersettings(sender, created_models=[], instance=None, created=False,
                 s.save()
 
 models.signals.post_syncdb.connect(create_usersettings)
-models.signals.post_save.connect(create_usersettings, sender=User)
+try:
+    models.signals.post_save.connect(create_usersettings, sender=settings.AUTH_USER_MODEL)
+except:
+    signal_user = get_user_model()
+    models.signals.post_save.connect(create_usersettings, sender=signal_user)
 
 class IgnoreEmail(models.Model):
     """
@@ -1119,7 +1120,7 @@ class TicketCC(models.Model):
         )
 
     user = models.ForeignKey(
-        User,
+        settings.AUTH_USER_MODEL,
         blank=True,
         null=True,
         help_text=_('User who wishes to receive updates for this ticket.'),
@@ -1136,12 +1137,14 @@ class TicketCC(models.Model):
     can_view = models.BooleanField(
         _('Can View Ticket?'),
         blank=True,
+        default=False,
         help_text=_('Can this CC login to view the ticket details?'),
         )
 
     can_update = models.BooleanField(
         _('Can Update Ticket?'),
         blank=True,
+        default=False,
         help_text=_('Can this CC login and update the ticket?'),
         )
 
@@ -1163,8 +1166,8 @@ class TicketCC(models.Model):
         return u'%s for %s' % (self.display, self.ticket.title)
 
 class CustomFieldManager(models.Manager):
-    def get_query_set(self):
-        return super(CustomFieldManager, self).get_query_set().order_by('ordering')
+    def get_queryset(self):
+        return super(CustomFieldManager, self).get_queryset().order_by('ordering')
 
 
 class CustomField(models.Model):
@@ -1258,11 +1261,13 @@ class CustomField(models.Model):
     required = models.BooleanField(
         _('Required?'),
         help_text=_('Does the user have to enter a value for this field?'),
+        default=False,
         )
 
     staff_only = models.BooleanField(
         _('Staff Only?'),
         help_text=_('If this is ticked, then the public submission form will NOT show this field'),
+        default=False,
         )
 
     objects = CustomFieldManager()
