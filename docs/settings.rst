@@ -120,34 +120,6 @@ Staff Ticket Creation Settings
   **Default:** ``HELPDESK_CREATE_TICKET_HIDE_ASSIGNED_TO = False``
 
 
-Dashboard Settings
-------------------
-
-These will change the way the *dashboard* is displayed to staff users when they login.
-
-- **HELPDESK_DASHBOARD_SHOW_DELETE_UNASSIGNED** Show delete button next to unassigned tickets?
-
-  **Default:** ``HELPDESK_DASHBOARD_SHOW_DELETE_UNASSIGNED = True``
-
-- **HELPDESK_DASHBOARD_HIDE_EMPTY_QUEUES** Hide empty queues in dashboard overview?
-
-  **Default:** ``HELPDESK_DASHBOARD_HIDE_EMPTY_QUEUES = True``
-
-- **HELPDESK_DASHBOARD_BASIC_TICKET_STATS** Show basic ticket stats on dashboard? This may have performance implications for busy helpdesks.
-
-  **Default:** ``HELPDESK_DASHBOARD_BASIC_TICKET_STATS = False``
-
-
-Footer Display Settings
------------------------
-
-- **HELPDESK_FOOTER_SHOW_API_LINK** Show link to API documentation at bottom of page?
-
-  **Default:** ``HELPDESK_FOOTER_SHOW_API_LINK = True``
-
-- **HELPDESK_FOOTER_SHOW_CHANGE_LANGUAGE_LINK** Show the 'change language' link at bottom of page? Useful if you have a multilingual helpdesk.
-
-  **Default:** ``HELPDESK_FOOTER_SHOW_CHANGE_LANGUAGE_LINK = False``
 
 Default E-Mail Settings
 -----------------------
@@ -182,3 +154,14 @@ The following settings were defined in previous versions and are no longer suppo
 - **HELPDESK_SHOW_KB_ON_HOMEPAGE** KB categories are always shown on the homepage
 
 - **HELPDESK_SUPPORT_PERSON** Please customise your local `helpdesk/attribution.html` template if needed
+
+- **HELPDESK_DASHBOARD_SHOW_DELETE_UNASSIGNED** Button is always shown
+
+- **HELPDESK_DASHBOARD_HIDE_EMPTY_QUEUES** Empty queues are always hidden
+
+- **HELPDESK_DASHBOARD_BASIC_TICKET_STATS** Stats are always shown
+
+- **HELPDESK_FOOTER_SHOW_API_LINK** Link to API documentation is always shown. Edit your local `helpdesk/base.html` template if needed.
+
+- **HELPDESK_FOOTER_SHOW_CHANGE_LANGUAGE_LINK** Is never shown. Use your own template if required.
+
