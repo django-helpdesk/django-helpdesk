@@ -523,6 +523,7 @@ class UserSettingsForm(forms.Form):
 class EmailIgnoreForm(forms.ModelForm):
     class Meta:
         model = IgnoreEmail
+        exclude = []
 
 class TicketCCForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
