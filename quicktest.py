@@ -84,7 +84,7 @@ class QuickDjangoTest(object):
             setup()
         except ImportError:
             pass  # Django < 1.7
-    from django.test.simple import DjangoTestSuiteRunner
+        from django.test.simple import DjangoTestSuiteRunner
         failures = DjangoTestSuiteRunner().run_tests(self.apps, verbosity=1)
         if failures:
             sys.exit(failures)
