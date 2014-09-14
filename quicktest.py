@@ -93,6 +93,11 @@ if __name__ == '__main__':
         $ python quicktest.py app1 app2
 
     """
+    try:
+        from django import setup
+        setup()
+    except ImportError:
+        pass  # Django < 1.7
     parser = argparse.ArgumentParser(
         usage="[args]",
         description="Run Django tests on the provided applications."
