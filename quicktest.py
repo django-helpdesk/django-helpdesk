@@ -79,7 +79,12 @@ class QuickDjangoTest(object):
             INSTALLED_APPS = self.INSTALLED_APPS + self.apps,
             ROOT_URLCONF = self.apps[0] + '.urls',
         )
-        from django.test.simple import DjangoTestSuiteRunner
+        try:
+            from django import setup
+            setup()
+        except ImportError:
+            pass  # Django < 1.7
+    from django.test.simple import DjangoTestSuiteRunner
         failures = DjangoTestSuiteRunner().run_tests(self.apps, verbosity=1)
         if failures:
             sys.exit(failures)
@@ -93,11 +98,6 @@ if __name__ == '__main__':
         $ python quicktest.py app1 app2
 
     """
-    try:
-        from django import setup
-        setup()
-    except ImportError:
-        pass  # Django < 1.7
     parser = argparse.ArgumentParser(
         usage="[args]",
         description="Run Django tests on the provided applications."
