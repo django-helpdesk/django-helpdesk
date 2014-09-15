@@ -1108,7 +1108,10 @@ msgid ""
 "Welcome to your Helpdesk Dashboard! From here you can quickly see tickets "
 "submitted by you, tickets you are working on, and those tickets that have no"
 " owner."
-msgstr "<a revoir>"
+msgstr ""
+"Bienvenue dans votre tableau de bord! D'ici vous pouvez rapidement voir "
+"les tickets que vous avez soumis, ceux sur lesquels vous travaillez "
+"et ceux sur qui n'ont pas de propriétaire."
 
 #: templates/helpdesk/dashboard.html:27
 msgid ""
