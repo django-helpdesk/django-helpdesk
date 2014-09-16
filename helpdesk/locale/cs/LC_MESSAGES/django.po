@@ -11,12 +11,12 @@ msgstr ""
 "POT-Creation-Date: 2014-07-26 14:14+0200\n"
 "PO-Revision-Date: 2014-08-01 09:58+0000\n"
 "Last-Translator: Ross Poulton <ross@rossp.org>\n"
-"Language-Team: Chinese (China) (http://www.transifex.com/projects/p/django-helpdesk/language/zh_CN/)\n"
+"Language-Team: Czech (http://www.transifex.com/projects/p/django-helpdesk/language/cs/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: zh_CN\n"
-"Plural-Forms: nplurals=1; plural=0;\n"
+"Language: cs\n"
+"Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
 
 #: forms.py:128 forms.py:328 models.py:190 models.py:267
 #: templates/helpdesk/dashboard.html:15 templates/helpdesk/dashboard.html:58
