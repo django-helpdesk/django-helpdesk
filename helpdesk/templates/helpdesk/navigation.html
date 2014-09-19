@@ -1,4 +1,4 @@
-{% load i18n %}{% load url from future %}
+{% load i18n helpdesk_staff %}{% load url from future %}
 
 <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
     <div class="navbar-header">
@@ -11,7 +11,7 @@
     </div>
 
     <div class="collapse navbar-collapse" id="helpdesk-nav-collapse">
-        {% if helpdesk_settings.HELPDESK_NAVIGATION_ENABLED and user.is_authenticated or user.is_staff %}
+        {% if helpdesk_settings.HELPDESK_NAVIGATION_ENABLED and user.is_authenticated or user|is_helpdesk_staff %}
             <ul class="nav navbar-nav">
                 <li><a href='{% url 'helpdesk_dashboard' %}'><span class="glyphicon glyphicon-dashboard"></span> <span class="nav-text">{% trans "Dashboard" %}</span></a></li>
                 <li><a href='{% url 'helpdesk_list' %}'><span class="glyphicon glyphicon-tags"></span> <span class="nav-text">{% trans "Tickets" %}</span></a></li>

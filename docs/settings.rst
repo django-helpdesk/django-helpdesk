@@ -57,11 +57,11 @@ These changes are visible throughout django-helpdesk
   **Default:** ``HELPDESK_SHOW_CHANGE_PASSWORD = False``
 
 - **HELPDESK_FOLLOWUP_MOD** Allow user to override default layout for 'followups' (work in progress)
-  
+
   **Default:** ``HELPDESK_FOLLOWUP_MOD = False``
 
 - **HELPDESK_AUTO_SUBSCRIBE_ON_TICKET_RESPONSE** Auto-subscribe user to ticket as a 'CC' if (s)he responds to a ticket?
-  
+
   **Default:** ``HELPDESK_AUTO_SUBSCRIBE_ON_TICKET_RESPONSE = False``
 
 - **HELPDESK_EMAIL_SUBJECT_TEMPLATE** Subject template for templated emails. ``%(subject)s`` represents the subject wording from the email template (e.g. "(Closed)").
@@ -75,24 +75,28 @@ Options shown on public pages
 These options only change display of items on public-facing pages, not staff pages.
 
 - **HELPDESK_VIEW_A_TICKET_PUBLIC** Show 'View a Ticket' section on public page?
-  
+
   **Default:** ``HELPDESK_VIEW_A_TICKET_PUBLIC = True``
 
 - **HELPDESK_SUBMIT_A_TICKET_PUBLIC** Show 'submit a ticket' section & form on public page?
-  
+
   **Default:** ``HELPDESK_SUBMIT_A_TICKET_PUBLIC = True``
 
 
 Options that change ticket updates
 ----------------------------------
 
-- **HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE** Allow non-staff users to interact with tickets? This will also change how 'staff_member_required' 
-  in staff.py will be defined.
-  
+- **HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE** Allow non-staff users to interact with tickets?
+  Set to True to allow any authenticated user to manage tickets.
+  You can also apply a custom authorisation logic for identifying helpdesk staff members, by setting this to a callable.
+  In that case, the value should be a function accepting the active user as a parameter and returning True if the user is considered helpdesk staff, e.g.
+
+    lambda u: u.is_authenticated() and u.is_active and u.groups.filter(name='helpdesk_staff').exists()))
+
   **Default:** ``HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = False``
 
 - **HELPDESK_SHOW_EDIT_BUTTON_FOLLOW_UP** Show edit buttons in ticket follow ups?
-  
+
   **Default:** ``HELPDESK_SHOW_EDIT_BUTTON_FOLLOW_UP = True``
 
 - **HELPDESK_SHOW_DELETE_BUTTON_SUPERUSER_FOLLOW_UP** Show delete buttons in ticket follow ups if user is 'superuser'?
@@ -137,7 +141,7 @@ Discontinued Settings
 
 The following settings were defined in previous versions and are no longer supported.
 
-- **HELPDESK_CUSTOM_WELCOME** 
+- **HELPDESK_CUSTOM_WELCOME**
 
 - **HELDPESK_KB_ENABLED_STAFF** Now always True
 
