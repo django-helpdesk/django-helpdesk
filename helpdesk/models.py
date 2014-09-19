@@ -378,7 +378,7 @@ class Ticket(models.Model):
         """
         if self.priority == 4:
             return "warning"
-        elif priority == 5:
+        elif self.priority == 5:
             return "danger"
         else:
             return ""
