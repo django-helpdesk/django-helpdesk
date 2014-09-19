@@ -6,9 +6,9 @@
 </thead>
 <tbody>
 {% for ticket in unassigned_tickets %}
-<tr>
+<tr class="{{ ticket.get_priority_css_class }}">
 <th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.ticket }}</a></th>
-<td>{{ ticket.get_priority_span }}</td>
+<td>{{ ticket.priority }}</td>
 <th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></th>
 <td>{{ ticket.queue }}</td>
 <td><span title='{{ ticket.created|date:"r" }}'>{{ ticket.created|naturaltime }}</span></td>
