@@ -62,7 +62,7 @@
         {% empty %}
         <p>{% trans "This ticket has no dependencies." %}</p>
         {% endfor %}
-        <p><a data-toogle='tooltip' href='{% url 'helpdesk_ticket_dependency_add' ticket.id %}' title="{% trans "Click on 'Add Dependency', if you want to make this ticket dependent on another ticket. A ticket may not be closed until all tickets it depends on are closed." %}">{% trans "Add Dependency" %}</a></p>
+        <p><a data-toggle='tooltip' href='{% url 'helpdesk_ticket_dependency_add' ticket.id %}' title="{% trans "Click on 'Add Dependency', if you want to make this ticket dependent on another ticket. A ticket may not be closed until all tickets it depends on are closed." %}">{% trans "Add Dependency" %}</a></p>
     </td>
 </tr>
 
