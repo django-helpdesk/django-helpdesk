@@ -1,6 +1,13 @@
 {% extends "helpdesk/base.html" %}{% load i18n %}
 {% block helpdesk_title %}{% trans "Edit followup" %}{% endblock %}
-{% block helpdesk_head %}{% endblock helpdesk_head %}
+
+{% block helpdesk_head %}
+<script type="text/javascript">
+    $(document).ready(function() {
+        $("[data-toggle=tooltip]").tooltip();
+    });
+</script>
+{% endblock helpdesk_head %}
 
 {% block helpdesk_body %}
 
