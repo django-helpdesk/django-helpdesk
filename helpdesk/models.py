@@ -376,9 +376,9 @@ class Ticket(models.Model):
         """
         Return the boostrap class corresponding to the priority.
         """
-        if self.priority == 4:
+        if self.priority == 2:
             return "warning"
-        elif self.priority == 5:
+        elif self.priority == 1:
             return "danger"
         else:
             return ""
