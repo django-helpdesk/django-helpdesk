@@ -372,13 +372,17 @@ class Ticket(models.Model):
         return u"%shelpdesk/priorities/priority%s.png" % (settings.MEDIA_URL, self.priority)
     get_priority_img = property(_get_priority_img)
 
-    def _get_priority_span(self):
+    def _get_priority_css_class(self):
         """
-        A HTML <span> providing a CSS_styled representation of the priority.
+        Return the boostrap class corresponding to the priority.
         """
-        from django.utils.safestring import mark_safe
-        return mark_safe(u"<span class='priority%s'>%s</span>" % (self.priority, self.priority))
-    get_priority_span = property(_get_priority_span)
+        if self.priority == 2:
+            return "warning"
+        elif self.priority == 1:
+            return "danger"
+        else:
+            return ""
+    get_priority_css_class = property(_get_priority_css_class)
 
     def _get_status(self):
         """

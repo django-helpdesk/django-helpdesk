@@ -45,10 +45,7 @@ if helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE:
     # treat 'normal' users like 'staff'
     staff_member_required = user_passes_test(lambda u: u.is_authenticated() and u.is_active)
 else:
-    try:
-        from django.contrib.admin.views.decorators import staff_member_required
-    except:
-        staff_member_required = user_passes_test(lambda u: u.is_authenticated() and u.is_active and u.is_staff)
+    staff_member_required = user_passes_test(lambda u: u.is_authenticated() and u.is_active and u.is_staff)
 
 
 superuser_required = user_passes_test(lambda u: u.is_authenticated() and u.is_active and u.is_superuser)
