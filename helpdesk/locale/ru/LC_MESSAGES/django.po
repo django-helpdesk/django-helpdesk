@@ -70,7 +70,7 @@ msgstr "Приоритет"
 
 #: forms.py:152
 msgid "Please select a priority carefully. If unsure, leave it as '3'."
-msgstr "Пожалуйста выбирайте приоритет внимательно. Если не уверены оставьте 3, как есть."
+msgstr "Пожалуйста, выбирайте приоритет внимательно. Если не уверены оставьте 3, как есть."
 
 #: forms.py:159 forms.py:397 models.py:330 templates/helpdesk/ticket.html:178
 #: views/staff.py:365
@@ -128,7 +128,7 @@ msgstr "Описание вашей проблемы."
 msgid ""
 "Please be as descriptive as possible, including any details we may need to "
 "address your query."
-msgstr "Пожалуйста, будьте максимально информативным, нам пригодятся любые подробности касающиеся вашего запроса."
+msgstr "Пожалуйста, будьте максимально информативны, нам пригодятся любые подробности, касающиеся вашего запроса."
 
 #: forms.py:390
 msgid "Urgency"
@@ -183,7 +183,7 @@ msgstr "Количество тикетов на страницу"
 
 #: forms.py:578
 msgid "How many tickets do you want to see on the Ticket List page?"
-msgstr "Как много тикетов вы хотите видеть на странице?"
+msgstr "Сколько тикетов вы хотите видеть на странице?"
 
 #: forms.py:585
 msgid "Use my e-mail address when submitting tickets?"
@@ -347,7 +347,7 @@ msgstr "Пароль электронной почты"
 
 #: models.py:153
 msgid "Password for the above username"
-msgstr "Пароль для выше указанного имени пользователя"
+msgstr "Пароль для указанного имени пользователя"
 
 #: models.py:157
 msgid "IMAP Folder"
@@ -358,7 +358,8 @@ msgid ""
 "If using IMAP, what folder do you wish to fetch messages from? This allows "
 "you to use one IMAP account for multiple queues, by filtering messages on "
 "your IMAP server into separate folders. Default: INBOX."
-msgstr "Если используется IMAP, из какой папки вы желаете скачивать сообщения? Фильтрация сообщений на сервере позволяет вам использовать один IMAP аккаунт для множества очередей. По умолчанию: INBOX."
+msgstr "Если используется IMAP, из какой папки вы желаете скачивать сообщения?"
+"Фильтрация сообщений на сервере позволяет вам использовать один IMAP аккаунт для множества очередей. По умолчанию: INBOX."
 
 #: models.py:168
 msgid "E-Mail Check Interval"
@@ -371,13 +372,13 @@ msgstr "Как часто вы хотите проверять этот ящик
 #: models.py:240 templates/helpdesk/dashboard.html:11
 #: templates/helpdesk/ticket.html:130
 msgid "Open"
-msgstr "Открытый"
+msgstr "Открыт"
 
 #: models.py:241 templates/helpdesk/ticket.html:136
 #: templates/helpdesk/ticket.html.py:142 templates/helpdesk/ticket.html:147
 #: templates/helpdesk/ticket.html.py:151
 msgid "Reopened"
-msgstr "Переоткрытый"
+msgstr "Открыт заново"
 
 #: models.py:242 templates/helpdesk/dashboard.html:11
 #: templates/helpdesk/ticket.html:131 templates/helpdesk/ticket.html.py:137
@@ -389,7 +390,7 @@ msgstr "Решённый"
 #: templates/helpdesk/ticket.html:132 templates/helpdesk/ticket.html.py:138
 #: templates/helpdesk/ticket.html:144 templates/helpdesk/ticket.html.py:148
 msgid "Closed"
-msgstr "Закрытый"
+msgstr "Закрыт"
 
 #: models.py:244 templates/helpdesk/ticket.html:133
 #: templates/helpdesk/ticket.html.py:139 templates/helpdesk/ticket.html:152
@@ -424,7 +425,7 @@ msgstr "Создан"
 
 #: models.py:268
 msgid "Date this ticket was first created"
-msgstr "Дата создания этого талона"
+msgstr "Дата создания этого тикета"
 
 #: models.py:272
 msgid "Modified"
@@ -506,7 +507,7 @@ msgstr " - На Удержании"
 #: templates/helpdesk/public_homepage.html:26
 #: templates/helpdesk/public_view_form.html:12
 msgid "Ticket"
-msgstr "Талон"
+msgstr "Тикет"
 
 #: models.py:485 models.py:714 models.py:1008 models.py:1156
 msgid "Date"
@@ -524,7 +525,7 @@ msgstr "Публичный"
 msgid ""
 "Public tickets are viewable by the submitter and all staff, but non-public "
 "tickets can only be seen by staff."
-msgstr "Публичные талоны видны отправителям и коллективу, а не публичные только коллективу."
+msgstr "Публичные тикеты видны отправителям и коллективу, а не публичные только коллективу."
 
 #: models.py:514 models.py:888 models.py:1081 views/staff.py:952
 #: views/staff.py:958 views/staff.py:964 views/staff.py:970
@@ -928,7 +929,7 @@ msgstr "Если это отметить, то общедоступная фор
 
 #: models.py:1262
 msgid "Depends On Ticket"
-msgstr "Зависит от талона"
+msgstr "Зависит от тикета"
 
 #: management/commands/create_usersettings.py:21
 msgid ""
@@ -963,7 +964,7 @@ msgstr "email_html_body.html"
 #: management/commands/get_email.py:256
 #, python-format
 msgid "E-Mail Received from %(sender_email)s"
-msgstr "Электронное сообщение полученное от %(sender_email)s"
+msgstr "Электронное сообщение, полученное от %(sender_email)s"
 
 #: management/commands/get_email.py:264
 #, python-format
@@ -1059,7 +1060,7 @@ msgstr "Вы поделились запросом, теперь остальн�
 #: templates/helpdesk/confirm_delete_saved_query.html:15
 #: templates/helpdesk/delete_ticket.html:11
 msgid "No, Don't Delete It"
-msgstr "Нет,  не удалять"
+msgstr "НСе удалять"
 
 #: templates/helpdesk/confirm_delete_saved_query.html:17
 #: templates/helpdesk/delete_ticket.html:13
@@ -1133,11 +1134,11 @@ msgstr "Последнее обновление"
 
 #: templates/helpdesk/dashboard.html:56
 msgid "Open Tickets assigned to you (you are working on this ticket)"
-msgstr "Открыть тикеты, присвоенные Вам (вы работаете с этим тикетом)"
+msgstr "Открыть тикеты, присвоенные Вам (вы работаете с этими тикетом)"
 
 #: templates/helpdesk/dashboard.html:69
 msgid "You have no tickets assigned to you."
-msgstr "Нет тикеты, назначенных вам."
+msgstr "Нет тикетов, назначенных вам."
 
 #: templates/helpdesk/dashboard.html:76
 msgid "(pick up a ticket if you start to work on it)"
@@ -1340,7 +1341,7 @@ msgid ""
 "We give our users an opportunity to vote for items that they believe have "
 "helped them out, in order for us to better serve future customers. We would "
 "appreciate your feedback on this article. Did you find it useful?"
-msgstr "Мы предоставляем нашим пользователям возможность голосовать за статьи, которые по их мнению, способствовали им, с тем чтобы мы могли лучше обслуживать клиентов в будущем. Мы будем признательны за ваши отзывы на эту статью. Было ли это полезным?"
+msgstr "Мы предоставляем нашим пользователям возможность голосовать за статьи, которые по их мнению, помогли им, чтобы мы могли лучше обслуживать клиентов в будущем. Мы будем признательны за ваши отзывы на эту статью. Было ли это полезным?"
 
 #: templates/helpdesk/kb_item.html:20
 msgid "This article was useful to me"
@@ -1434,7 +1435,7 @@ msgstr "Ваш адрес электронной почты"
 #: templates/helpdesk/public_homepage.html:33
 #: templates/helpdesk/public_view_form.html:19
 msgid "View Ticket"
-msgstr "Просмотреть талон"
+msgstr "Просмотреть тикет"
 
 #: templates/helpdesk/public_homepage.html:41
 msgid "All fields are required."
@@ -1485,7 +1486,7 @@ msgstr "Принять и закрыть"
 #: templates/helpdesk/public_view_ticket.html:55
 #: templates/helpdesk/ticket.html:64
 msgid "Follow-Ups"
-msgstr "Наблюдения"
+msgstr "Действия"
 
 #: templates/helpdesk/public_view_ticket.html:63
 #: templates/helpdesk/ticket.html:92
@@ -1562,7 +1563,7 @@ msgstr "Следующие RSS-каналы доступны для вас чт�
 msgid ""
 "A summary of your open tickets - useful for getting alerted to new tickets "
 "opened for you"
-msgstr "Кратко о ваших открытых тикетах - полезно для получения уведомлений о новых тикетах открытых вами"
+msgstr "Сводка ваших открытых тикетов - полезно для получения уведомлений о новых тикетах открытых вами"
 
 #: templates/helpdesk/rss_list.html:12
 msgid "Latest Activity"
@@ -1572,13 +1573,13 @@ msgstr "Последняя активность"
 msgid ""
 "A summary of all helpdesk activity - including comments, emails, "
 "attachments, and more"
-msgstr "Кратко обо всей активности - включая комментарии, электронные письма, вложенные файлы и так далее"
+msgstr "Сводка активности - включая комментарии, электронные письма, вложенные файлы и так далее"
 
 #: templates/helpdesk/rss_list.html:16
 msgid ""
 "All unassigned tickets - useful for being alerted to new tickets opened by "
 "the public via the web or via e-mail"
-msgstr "Все неназначенные тикеты - полезно что бы знать обо всех новых тикетах открытых через браузер или электронную почту"
+msgstr "Все неназначенные тикеты - полезно чтобы знать обо всех новых тикетах открытых через браузер или электронную почту"
 
 #: templates/helpdesk/rss_list.html:19
 msgid ""
@@ -2082,7 +2083,7 @@ msgstr "Изменить Настройки Пользователя"
 
 #: templates/helpdesk/user_settings.html:14
 msgid "Use the following options to change the way your helpdesk system works for you. These settings do not impact any other user."
-msgstr "Используйте следующие параметры для изменения, как системы helpdesk бкдет работать для вас. Эти параметры не воздействия любого другого пользователя,."
+msgstr "Используйте следующие параметры для изменения, как система helpdesk будет работать для вас. Эти параметры не действуют на любого другого пользователя,."
 
 #: templates/helpdesk/user_settings.html:29
 msgid "Save Options"
@@ -2090,7 +2091,7 @@ msgstr "Сохранить Опции"
 
 #: templates/helpdesk/registration/logged_out.html:2
 msgid "Logged Out"
-msgstr "Вы больше не авторизированы"
+msgstr "Вы вышли"
 
 #: templates/helpdesk/registration/logged_out.html:4
 msgid ""
@@ -2158,7 +2159,7 @@ msgstr "Неназначенные открытые и переоткрытые 
 
 #: views/feeds.py:124
 msgid "Helpdesk: Recent Followups"
-msgstr "Helpdesk: недавние дополнения"
+msgstr "Helpdesk: недавняя активность"
 
 #: views/feeds.py:125
 msgid ""
