@@ -7,7 +7,11 @@ views/feeds.py - A handful of staff-only RSS feeds to provide ticket details
                  to feed readers or similar software.
 """
 
-from django.contrib.auth.models import User
+try:
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+except ImportError:
+    from django.contrib.auth.models import User
 from django.contrib.syndication.views import Feed
 from django.core.urlresolvers import reverse
 from django.db.models import Q

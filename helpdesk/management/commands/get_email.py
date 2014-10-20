@@ -21,6 +21,8 @@ from email.header import decode_header
 from email.Utils import parseaddr, collapse_rfc2231_value
 from optparse import make_option
 
+from email_reply_parser import EmailReplyParser
+
 from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand
 from django.db.models import Q
@@ -192,7 +194,7 @@ def ticket_from_message(message, queue, quiet):
 
         if part.get_content_maintype() == 'text' and name == None:
             if part.get_content_subtype() == 'plain':
-                body_plain = decodeUnknown(part.get_content_charset(), part.get_payload(decode=True))
+                body_plain = EmailReplyParser.parse_reply(decodeUnknown(part.get_content_charset(), part.get_payload(decode=True)))
             else:
                 body_html = part.get_payload(decode=True)
         else:

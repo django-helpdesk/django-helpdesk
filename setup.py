@@ -4,7 +4,7 @@ from distutils.util import convert_path
 from fnmatch import fnmatchcase
 from setuptools import setup, find_packages
 
-version = '0.1.11'
+version = '0.1.12'
 
 # Provided as an attribute, so you can append to these instead
 # of replicating them:
@@ -96,6 +96,14 @@ def find_package_data(
     return out
 
 
+def get_requirements():
+    with open(os.path.join(os.path.dirname(__file__), "requirements.txt")) as f:
+        requirements_list = [req.strip() for req in f.readlines()]
+
+    requirements_list.append("setuptools")
+    requirements_list.append("pytz")
+    return requirements_list
+
 
 LONG_DESCRIPTION = """
 ===============
@@ -133,6 +141,6 @@ setup(
     package_data=find_package_data("helpdesk", only_in_packages=False),
     include_package_data=True,
     zip_safe=False,
-    install_requires=['setuptools', 'pytz'],
+    install_requires=get_requirements(),
 )
 

@@ -45,8 +45,8 @@ def send_templated_mail(template_name, email_context, recipients, sender=None, b
     fail_silently is passed to Django's mail routine. Set to 'True' to ignore
         any errors at send time.
 
-    files can be a list of file paths to be attached, or it can be left blank.
-        eg ('/tmp/file1.txt', '/tmp/image.png')
+    files can be a list of tuple. Each tuple should be a filename to attach, 
+        along with the File objects to be read. files can be blank.
 
     """
     from django.conf import settings
@@ -54,6 +54,7 @@ def send_templated_mail(template_name, email_context, recipients, sender=None, b
     from django.template import loader, Context
 
     from helpdesk.models import EmailTemplate
+    from helpdesk.settings import HELPDESK_EMAIL_SUBJECT_TEMPLATE
     import os
 
     context = Context(email_context)
@@ -104,8 +105,9 @@ def send_templated_mail(template_name, email_context, recipients, sender=None, b
         ).render(context)
 
     subject_part = loader.get_template_from_string(
-        "{{ ticket.ticket }} {{ ticket.title|safe }} %s" % t.subject
-        ).render(context)
+        HELPDESK_EMAIL_SUBJECT_TEMPLATE % {
+            "subject": t.subject,
+        }).render(context)
 
     if isinstance(recipients,(str,unicode)):
         if recipients.find(','):
@@ -113,7 +115,7 @@ def send_templated_mail(template_name, email_context, recipients, sender=None, b
     elif type(recipients) != list:
         recipients = [recipients,]
 
-    msg = EmailMultiAlternatives(   subject_part,
+    msg = EmailMultiAlternatives(   subject_part.replace('\n', ''),
                                     text_part,
                                     sender,
                                     recipients,
@@ -121,11 +123,11 @@ def send_templated_mail(template_name, email_context, recipients, sender=None, b
     msg.attach_alternative(html_part, "text/html")
 
     if files:
-        if type(files) != list:
-            files = [files,]
-
-        for file in files:
-            msg.attach_file(file)
+        for attachment in files:
+            file_to_attach = attachment[1]
+            file_to_attach.open()
+            msg.attach(filename=attachment[0], content=file_to_attach.read())
+            file_to_attach.close()
 
     return msg.send(fail_silently)
 
