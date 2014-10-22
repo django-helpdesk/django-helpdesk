@@ -15,7 +15,7 @@ from django.contrib.auth import get_user_model
 def user_admin_url(action):
     user = get_user_model()
     return 'admin:%s_%s_%s' % (
-        user._meta.app_label, user._meta.model_name,
+        user._meta.app_label, user._meta.module_name.lower(),
         action)
 
 register = template.Library()
