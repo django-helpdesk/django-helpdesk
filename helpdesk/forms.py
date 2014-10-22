@@ -529,9 +529,9 @@ class TicketCCForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(TicketCCForm, self).__init__(*args, **kwargs)
         if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_CC:
-            users = User.objects.filter(is_active=True, is_staff=True).order_by('username')
+            users = User.objects.filter(is_active=True, is_staff=True).order_by(User.USERNAME_FIELD)
         else:
-            users = User.objects.filter(is_active=True).order_by('username')
+            users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
         self.fields['user'].queryset = users 
     class Meta:
         model = TicketCC
