@@ -19,4 +19,4 @@ def user_admin_url(action):
         action)
 
 register = template.Library()
-register.filter(user_admin_urlname)
+register.filter(user_admin_url)
