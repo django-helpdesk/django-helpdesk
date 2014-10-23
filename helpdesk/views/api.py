@@ -11,7 +11,6 @@ The API documentation can be accessed by visiting http://helpdesk/api/help/
 through templates/helpdesk/help_api.html.
 """
 
-import json
 from django import forms
 from django.contrib.auth import authenticate
 try:
@@ -121,7 +120,7 @@ class API:
 
 
     def api_public_list_queues(self):
-        return api_return(STATUS_OK, json.dumps([{"id": "%s" % q.id, "title": "%s" % q.title} for q in Queue.objects.all()]), json=True)
+        return api_return(STATUS_OK, simplejson.dumps([{"id": "%s" % q.id, "title": "%s" % q.title} for q in Queue.objects.all()]), json=True)
 
 
     def api_public_find_user(self):
@@ -326,4 +325,3 @@ class API:
         ticket.save()
 
         return api_return(STATUS_OK)
-
