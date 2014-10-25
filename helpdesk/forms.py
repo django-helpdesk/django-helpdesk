@@ -102,7 +102,7 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
         
         for field, value in self.cleaned_data.items():
             if field.startswith('custom_'):
-                field_name = field.replace('custom_', '')
+                field_name = field.replace('custom_', '', 1)
                 customfield = CustomField.objects.get(name=field_name)
                 try:
                     cfv = TicketCustomFieldValue.objects.get(ticket=self.instance, field=customfield)
@@ -229,7 +229,7 @@ class TicketForm(CustomFieldMixin, forms.Form):
         
         for field, value in self.cleaned_data.items():
             if field.startswith('custom_'):
-                field_name = field.replace('custom_', '')
+                field_name = field.replace('custom_', '', 1)
                 customfield = CustomField.objects.get(name=field_name)
                 cfv = TicketCustomFieldValue(ticket=t,
                             field=customfield,
@@ -407,7 +407,7 @@ class PublicTicketForm(CustomFieldMixin, forms.Form):
 
         for field, value in self.cleaned_data.items():
             if field.startswith('custom_'):
-                field_name = field.replace('custom_', '')
+                field_name = field.replace('custom_', '', 1)
                 customfield = CustomField.objects.get(name=field_name)
                 cfv = TicketCustomFieldValue(ticket=t,
                             field=customfield,
