@@ -26,13 +26,13 @@
                         {% for q in user_saved_queries_ %}
                             <li><a href="{% url 'helpdesk_list' %}?saved_query={{ q.id }}">{{ q.title }}
                                 {% if q.shared %}
-                                    (Shared{% ifnotequal user q.user %} by {{ q.user.username }}{% endifnotequal %})
+                                    (Shared{% ifnotequal user q.user %} by {{ q.user.get_username }}{% endifnotequal %})
                                 {% endif %}</a></li>
                         {% endfor %}
                     </ul>
                 </li>
                 {% endif %}
-                <li class="headerlink dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#"><span class="glyphicon glyphicon-user"></span> <span class="nav-text">{{ user.get_full_name|default:user.username }} <b class="caret"></b></span></a>
+                <li class="headerlink dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#"><span class="glyphicon glyphicon-user"></span> <span class="nav-text">{{ user.get_full_name|default:user.get_username }} <b class="caret"></b></span></a>
                     <ul class="dropdown-menu">
                         <li><a href='{% url 'helpdesk_user_settings' %}'>{% trans "User Settings" %}</a></li>
 {% if helpdesk_settings.HELPDESK_SHOW_CHANGE_PASSWORD and user.has_usable_password %}

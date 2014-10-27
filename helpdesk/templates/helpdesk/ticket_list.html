@@ -106,7 +106,7 @@ $(document).ready(function() {
     <select id='id_owners' name='assigned_to' multiple='selected' size='5'>
         {% for u in user_choices %}
         <option value='{{ u.id }}'{% if u.id|in_list:query_params.filtering.assigned_to__id__in %} selected='selected'{% endif %}>
-            {{ u.username }}{% ifequal u user %} {% trans "(ME)" %}{% endifequal %}
+            {{ u.get_username }}{% ifequal u user %} {% trans "(ME)" %}{% endifequal %}
         </option>
         {% endfor %}
     </select>
@@ -199,7 +199,7 @@ $(document).ready(function() {
     <form method='get' action='{% url 'helpdesk_list' %}'>
     <p><label for='id_query_selector'>{% trans "Query" %}</label> <select name='saved_query' id='id_query_selector'>
         {% for q in user_saved_queries %}
-        <option value='{{ q.id }}'>{{ q.title }}{% if q.shared %} (Shared{% ifnotequal user q.user %} by {{ q.user.username }}{% endifnotequal %}){% endif %}</option>
+        <option value='{{ q.id }}'>{{ q.title }}{% if q.shared %} (Shared{% ifnotequal user q.user %} by {{ q.user.get_username }}{% endifnotequal %}){% endif %}</option>
         {% endfor %}
     </select></p>
     <input class="btn btn-primary" type='submit' value='{% trans "Run Query" %}'>
@@ -257,7 +257,7 @@ $(document).ready(function() {
 
 <p><label>{% trans "Select:" %} </label> <a href='#select_all' id='select_all'>{% trans "All" %}</a> <a href='#select_none' id='select_none'>{% trans "None" %}</a> <a href='#select_inverse' id='select_inverse'>{% trans "Inverse" %}</a></p>
 
-<p><label for='id_mass_action'>{% trans "With Selected Tickets:" %}</label> <select name='action' id='id_mass_action'><option value='take'>{% trans "Take (Assign to me)" %}</option><option value='delete'>{% trans "Delete" %}</option><optgroup label='{% trans "Close" %}'><option value='close'>{% trans "Close (Don't Send E-Mail)" %}</option><option value='close_public'>{% trans "Close (Send E-Mail)" %}</option></optgroup><optgroup label='{% trans "Assign To" %}'><option value='unassign'>{% trans "Nobody (Unassign)" %}</option>{% for u in user_choices %}<option value='assign_{{ u.id }}'>{{ u.username }}</option>{% endfor %}</optgroup></select> <input type='submit' value='Go' /></p>
+<p><label for='id_mass_action'>{% trans "With Selected Tickets:" %}</label> <select name='action' id='id_mass_action'><option value='take'>{% trans "Take (Assign to me)" %}</option><option value='delete'>{% trans "Delete" %}</option><optgroup label='{% trans "Close" %}'><option value='close'>{% trans "Close (Don't Send E-Mail)" %}</option><option value='close_public'>{% trans "Close (Send E-Mail)" %}</option></optgroup><optgroup label='{% trans "Assign To" %}'><option value='unassign'>{% trans "Nobody (Unassign)" %}</option>{% for u in user_choices %}<option value='assign_{{ u.id }}'>{{ u.get_username }}</option>{% endfor %}</optgroup></select> <input type='submit' value='Go' /></p>
 {% csrf_token %}</form>
 {% endblock %}
 </div>

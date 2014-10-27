@@ -261,7 +261,7 @@ def return_ticketccstring_and_show_subscribe(user, ticket):
     ''' used in view_ticket() and followup_edit()'''
     # create the ticketcc_string and check whether current user is already
     # subscribed
-    username = user.username.upper()
+    username = user.get_username().upper()
     useremail = user.email.upper()
     strings_to_check = list()
     strings_to_check.append(username)
@@ -364,7 +364,7 @@ def update_ticket(request, ticket_id, public=False):
         if owner != 0 and ((ticket.assigned_to and owner != ticket.assigned_to.id) or not ticket.assigned_to):
             new_user = User.objects.get(id=owner)
             f.title = _('Assigned to %(username)s') % {
-                'username': new_user.username,
+                'username': new_user.get_username(),
                 }
             ticket.assigned_to = new_user
             reassigned = True
@@ -571,7 +571,7 @@ def mass_update(request):
         if action == 'assign' and t.assigned_to != user:
             t.assigned_to = user
             t.save()
-            f = FollowUp(ticket=t, date=timezone.now(), title=_('Assigned to %(username)s in bulk update' % {'username': user.username}), public=True, user=request.user)
+            f = FollowUp(ticket=t, date=timezone.now(), title=_('Assigned to %(username)s in bulk update' % {'username': user.get_username()}), public=True, user=request.user)
             f.save()
         elif action == 'unassign' and t.assigned_to is not None:
             t.assigned_to = None
@@ -849,14 +849,14 @@ edit_ticket = staff_member_required(edit_ticket)
 
 def create_ticket(request):
     if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS:
-        assignable_users = User.objects.filter(is_active=True, is_staff=True).order_by('username')
+        assignable_users = User.objects.filter(is_active=True, is_staff=True).order_by(User.USERNAME_FIELD)
     else:
-        assignable_users = User.objects.filter(is_active=True).order_by('username')
+        assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
 
     if request.method == 'POST':
         form = TicketForm(request.POST, request.FILES)
         form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
-        form.fields['assigned_to'].choices = [('', '--------')] + [[u.id, u.username] for u in assignable_users]
+        form.fields['assigned_to'].choices = [('', '--------')] + [[u.id, u.get_username()] for u in assignable_users]
         if form.is_valid():
             ticket = form.save(user=request.user)
             return HttpResponseRedirect(ticket.get_absolute_url())
@@ -869,7 +869,7 @@ def create_ticket(request):
 
         form = TicketForm(initial=initial_data)
         form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
-        form.fields['assigned_to'].choices = [('', '--------')] + [[u.id, u.username] for u in assignable_users]
+        form.fields['assigned_to'].choices = [('', '--------')] + [[u.id, u.get_username()] for u in assignable_users]
         if helpdesk_settings.HELPDESK_CREATE_TICKET_HIDE_ASSIGNED_TO:
             form.fields['assigned_to'].widget = forms.HiddenInput()
 
