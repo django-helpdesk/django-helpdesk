@@ -1037,7 +1037,7 @@ class IgnoreEmail(models.Model):
     """
     queues = models.ManyToManyField(
         Queue,
-        blank=True,
+        blank=False,
         null=True,
         help_text=_('Leave blank for this e-mail to be ignored on all '
             'queues, or select those queues you wish to ignore this e-mail '
