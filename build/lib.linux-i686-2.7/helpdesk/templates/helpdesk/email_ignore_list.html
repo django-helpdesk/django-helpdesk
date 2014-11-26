@@ -1,0 +1,31 @@
+{% extends "helpdesk/base.html" %}{% load i18n %}{% load url from future %}
+
+{% block helpdesk_title %}{% trans "Ignored E-Mail Addresses" %}{% endblock %}
+
+{% block helpdesk_body %}{% blocktrans %}
+<h2>Ignored E-Mail Addresses</h2>
+
+<p>The following e-mail addresses are currently being ignored by the incoming e-mail processor. You can <a href='add/'>add a new e-mail address to the list</a> or delete any of the items below as required.</p>{% endblocktrans %}
+
+<table class="table table-hover table-bordered">
+<caption>{% trans "Ignored E-Mail Addresses" %}</caption>
+<thead>
+<tr><th>{% trans "Name" %}</th><th>{% trans "E-Mail Address" %}</th><th>{% trans "Date Added" %}</th><th>{% trans "Queues" %}</th><th>{% trans "Keep in mailbox?" %}</th><th>{% trans "Delete" %}</th></tr>
+</thead>
+<tbody>
+{% for ignore in ignore_list %}
+<tr class='row_{% cycle odd,even %}'>
+    <td>{{ ignore.name }}</td>
+    <td>{{ ignore.email_address }}</td>
+    <td>{{ ignore.date }}</td>
+    <td>{% for queue in ignore.queues.all %}{{ queue.slug }}{% if not forloop.last %}, {% endif %}{% empty %}{% trans "All" %}{% endfor %}</td>
+    <td>{% if ignore.keep_in_mailbox %}{% trans "Keep" %}{% endif %}</td>
+    <td><a href='{% url 'helpdesk_email_ignore_del' ignore.id %}'>{% trans "Delete" %}</a></td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+
+<p>{% trans "<strong>Note:</strong> If the 'Keep' option is not selected, emails sent from that address will be deleted permanently." %}</p>
+
+{% endblock %}

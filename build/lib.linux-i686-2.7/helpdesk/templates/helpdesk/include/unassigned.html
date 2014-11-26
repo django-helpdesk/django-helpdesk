@@ -1,0 +1,21 @@
+{% load i18n humanize %}{% load url from future %}
+<table class="table table-hover table-bordered table-striped">
+<caption>{% trans "Unassigned Tickets" %} {% trans "(pick up a ticket if you start to work on it)" %}</caption>
+<thead>
+<tr><th>#</th><th>{% trans "Pr" %}</th><th>{% trans "Title" %}</th><th>{% trans "Queue" %}</th><th>{% trans "Created" %}</th><th>&nbsp;</th></tr>
+</thead>
+<tbody>
+{% for ticket in unassigned_tickets %}
+<tr class="{{ ticket.get_priority_css_class }}">
+<th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.ticket }}</a></th>
+<td>{{ ticket.priority }}</td>
+<th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></th>
+<td>{{ ticket.queue }}</td>
+<td><span title='{{ ticket.created|date:"r" }}'>{{ ticket.created|naturaltime }}</span></td>
+<th><a href='{{ ticket.get_absolute_url }}?take'><span class='button button_take'>{% trans "Take" %}</span></a> | <a href='{% url 'helpdesk_delete' ticket.id %}'><span class='button button_delete'>{% trans "Delete" %}</span></a></th>
+</tr>
+{% empty %}
+<tr><td colspan='6'>{% trans "There are no unassigned tickets." %}</td></tr>
+{% endfor %}
+</tbody>
+</table>

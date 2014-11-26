@@ -1,0 +1,23 @@
+{% extends "helpdesk/public_base.html" %}{% load i18n humanize %}
+
+{% block helpdesk_body %}
+<h2>{% blocktrans with category.title as kbcat %}Knowledgebase Category: {{ kbcat }}{% endblocktrans %}</h2>
+
+<p>{% blocktrans with category.title as kbcat %}You are viewing all items in the {{ kbcat }} category.{% endblocktrans %}</p>
+
+<p>{{ category.description }}</p>
+
+<table class="table table-hover table-bordered table-striped">
+<caption>{% blocktrans with category.title as kbcat %}Knowledgebase Category: {{ kbcat }}{% endblocktrans %}</caption>
+<thead>
+<tr><th colspan='3'>{% trans "Article" %}</th></tr>
+</thead>
+<tbody>
+{% for item in items %}
+<tr><th><a href='{{ item.get_absolute_url }}'>{{ item.title }}</a></th><td>Rating: {{ item.score }}</td><td>Last Update: {{ item.last_updated|naturaltime }}</td></tr>
+<tr><td colspan='3'>{{ item.question }}</td></tr>
+{% endfor %}
+</tbody>
+</table>
+
+{% endblock %}

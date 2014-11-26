@@ -1,0 +1,18 @@
+{% extends "helpdesk/public_base.html" %}{% load i18n %}
+{% block helpdesk_title %}{% trans "View a Ticket" %}{% endblock %}
+
+{% block helpdesk_body %}
+<h3>{% trans "Change the display language" %}</h3>
+<form action="/i18n/setlang/" method="post">
+    {% csrf_token %}
+    <input name="next" type="hidden" value="{{ next|default:"/" }}" />
+    <select name="language">
+        {% get_language_info_list for LANGUAGES as languages %}
+        {% for language in languages %}
+        <option value="{{ language.code }}"{% if LANGUAGE_CODE == language.code %} selected{% endif %}>{{ language.name_local }} ({{ language.code }})</option>
+        {% endfor %}
+    </select>
+    <input class="btn btn-primary" type="submit" value="Go" />
+</form>
+
+{% endblock %}

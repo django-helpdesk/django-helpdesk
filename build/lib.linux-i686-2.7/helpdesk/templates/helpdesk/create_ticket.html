@@ -1,0 +1,37 @@
+{% extends "helpdesk/base.html" %}{% load i18n bootstrap %}
+
+{% block helpdesk_title %}{% trans "Create Ticket" %}{% endblock %}
+
+{% block helpdesk_body %}
+<div class="col-xs-6">
+<div class="panel panel-default">
+
+<div class="panel-body">
+<h2>{% trans "Submit a Ticket" %}</h2>
+<p>{% trans "Unless otherwise stated, all fields are required." %} {% trans "Please provide as descriptive a title and description as possible." %}</p>
+
+<form method='post' action='./' enctype='multipart/form-data'>
+<fieldset>
+    {{ form|bootstrap }}
+        {% comment %}{% for field in form %}
+            {% if field.is_hidden %}
+                {{ field }}
+            {% else %}
+                <dt><label for='id_{{ field.name }}'>{% trans field.label %}</label>{% if not field.field.required %} <span class='form_optional'>{% trans "(Optional)" %}</span>{% endif %}</dt>
+                <dd>{{ field }}</dd>
+                {% if field.errors %}<dd class='error'>{{ field.errors }}</dd>{% endif %}
+                {% if field.help_text %}<dd class='form_help_text'>{% trans field.help_text %}</dd>{% endif %}
+            {% endif %}
+        {% endfor %}
+        {% endcomment %}
+
+    <div class='buttons form-group'>
+        <input type='submit' class="btn btn-primary" value='{% trans "Submit Ticket" %}' />
+    </div>
+</fieldset>
+
+{% csrf_token %}</form>
+</div>
+</div>
+</div>
+{% endblock %}

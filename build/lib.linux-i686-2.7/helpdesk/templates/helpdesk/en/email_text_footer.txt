@@ -1,0 +1,6 @@
+Regards,
+
+{{ queue.title }}{% if queue.email_address %}
+{{ queue.email_address }}{% endif %}
+    
+This e-mail was sent to you as a user of our support service, in accordance with our privacy policy. Please advise us if you believe you have received this e-mail in error.

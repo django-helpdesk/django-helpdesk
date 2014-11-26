@@ -1,0 +1,33 @@
+{% extends "helpdesk/public_base.html" %}{% load i18n %}{% load markdown_deux_tags %}
+
+{% block helpdesk_body %}
+<h2>{% blocktrans with item.title as item %}Knowledgebase: {{ item }}{% endblocktrans %}</h2>
+
+<table class="table table-hover table-bordered table-striped">
+<caption>{{ item.title }}</caption>
+<tbody>
+<tr><th>{{ item.question }}</th></tr>
+<tr><td>{{ item.answer|markdown }}</td></tr>
+</tbody>
+</table>
+
+<p>{% blocktrans with item.category.title as category_title and item.category.get_absolute_url as category_url %}View <a href='{{ category_url }}'>other <em>{{ category_title }}</em> articles</a>, or continue <a href='../'>viewing other knowledgebase articles</a>.{% endblocktrans %}</p>
+
+<h2>{% trans "Feedback" %}</h2>
+
+<p>{% trans "We give our users an opportunity to vote for items that they believe have helped them out, in order for us to better serve future customers. We would appreciate your feedback on this article. Did you find it useful?" %}</p>
+
+<ul>
+<li><a href='vote/?vote=up'>{% trans "This article was useful to me" %}</a></li>
+<li><a href='vote/?vote=down'>{% trans "This article was <strong>not</strong> useful to me" %}</a></li>
+</ul>
+
+<p>{% trans "The results of voting by other readers of this article are below:" %}</p>
+
+<ul>
+<li>{% blocktrans with item.recommendations as recommendations %}Recommendations: {{ recommendations }}{% endblocktrans %}</li>
+<li>{% blocktrans with item.votes as votes %}Votes: {{ votes }}{% endblocktrans %}</li>
+<li>{% blocktrans with item.score as score %}Overall Rating: {{ score }}{% endblocktrans %}</li>
+</ul>
+
+{% endblock %}

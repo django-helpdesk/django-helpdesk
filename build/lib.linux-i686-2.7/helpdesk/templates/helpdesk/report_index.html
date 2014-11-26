@@ -1,0 +1,32 @@
+{% extends "helpdesk/base.html" %}{% load i18n %}
+
+{% block helpdesk_title %}{% trans "Reports &amp; Statistics" %}{% endblock %}
+
+{% block helpdesk_body %}
+<h2>{% trans "Reports &amp; Statistics" %}</h2>
+
+{% ifequal number_tickets 0 %}
+<p>{% trans "You haven't created any tickets yet, so you cannot run any reports." %}</p>
+{% else %}
+
+<ul>
+    <li>{% trans "Reports By User" %}<ul>
+
+        <li><a href='userpriority/{% if saved_query %}?saved_query={{ saved_query }}{% endif %}'>{% trans "by Priority" %}</a></li>
+        <li><a href='userqueue/{% if saved_query %}?saved_query={{ saved_query }}{% endif %}'>{% trans "by Queue" %}</a></li>
+        <li><a href='userstatus/{% if saved_query %}?saved_query={{ saved_query }}{% endif %}'>{% trans "by Status" %}</a></li>
+        <li><a href='usermonth/{% if saved_query %}?saved_query={{ saved_query }}{% endif %}'>{% trans "by Month" %}</a></li>
+
+</ul></li>
+
+<li>{% trans "Reports By Queue" %}<ul>
+    
+    <li><a href='queuepriority/{% if saved_query %}?saved_query={{ saved_query }}{% endif %}'>{% trans "by Priority" %}</a></li>
+    <li><a href='queuestatus/{% if saved_query %}?saved_query={{ saved_query }}{% endif %}'>{% trans "by Status" %}</a></li>
+    <li><a href='queuemonth/{% if saved_query %}?saved_query={{ saved_query }}{% endif %}'>{% trans "by Month" %}</a></li>
+    <li><a href='daysuntilticketclosedbymonth/{% if saved_query %}?saved_query={{ saved_query }}{% endif %}'>{% trans "Days until ticket closed by Month" %}</a></li>
+
+</ul></li>
+</ul>
+
+{% endifequal %}{% endblock %}

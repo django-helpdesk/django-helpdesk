@@ -1,0 +1,108 @@
+{% extends "helpdesk/base.html" %}{% load i18n %}
+
+{% block helpdesk_title %}{% trans "Reports &amp; Statistics" %}{% endblock %}
+
+{% block helpdesk_head %}
+        <!--[if IE]><script language="javascript" type="text/javascript" src="{{ STATIC_URL }}helpdesk/jquery.jqplot/excanvas.min.js"></script><![endif]-->
+        <script src='{{ STATIC_URL }}helpdesk/jquery.jqplot/jquery.jqplot.min.js' type='text/javascript' language='javascript'></script>
+        <link rel='stylesheet' typ='text/css' href='{{ STATIC_URL }}helpdesk/jquery.jqplot/jquery.jqplot.min.css' />
+        <script type="text/javascript" src="{{ STATIC_URL }}helpdesk/jquery.jqplot/plugins/jqplot.categoryAxisRenderer.min.js"></script>
+        <script type="text/javascript" src="{{ STATIC_URL }}helpdesk/jquery.jqplot/plugins/jqplot.barRenderer.min.js"></script>
+        <script type="text/javascript" src="{{ STATIC_URL }}helpdesk/jquery.jqplot/plugins/jqplot.dateAxisRenderer.min.js"></script>
+
+{% endblock %}
+
+{% block helpdesk_body %}
+<h2>{% trans "Reports &amp; Statistics" %}</h2>
+
+{% if user_saved_queries_ %}
+    <p>{% trans "You can run this query on filtered data by using one of your saved queries." %}</p>
+    <form method='GET' action='./'>
+        <label for='saved_query'>{% trans "Select Query:" %}</label>
+        <select name='saved_query'>
+            <option value="">--------</option>{% for q in user_saved_queries_ %}
+            <option value="{{ q.id }}"{% ifequal saved_query q %} selected{% endifequal %}>{{ q.title }}</option>{% endfor %}
+        </select>
+        <input class="btn btn-primary" type='submit' value='{% trans "Filter Report" %}'>
+    </form>
+{% else %}
+    <p>{% trans "Want to filter this report to just show a subset of data? Go to the Ticket List, filter your query, and save your query." %}</p>
+{% endif %}
+
+<table class="table table-hover table-bordered">
+<caption>{{ title }}</caption>
+<thead>
+<tr>{% for h in headings %}<th>{% if forloop.first %}{{ h|title }}{% else %}{{ h }}{% endif %}</th>{% endfor %}</tr>
+</thead>
+<tbody>
+{% for d in data %}
+<tr class='row_{% cycle odd,even %}'>{% for f in d %}<td class='report'>{{ f }}</td>{% endfor %}</tr>{% endfor %}
+</tbody>
+</table>
+
+<div class='jqPlot' id='placeholder' style='width: 600px; height: 400px;'></div>
+{% ifequal charttype "date" %}
+<script type='text/javascript'>
+    $.jqplot.config.enablePlugins = true;
+    var dataset = [];
+
+    {% for d in data %}
+    dataset[{{ forloop.counter0 }}] = [{% for f in d %}{% if not forloop.first %}['{% for h in headings %}{% ifequal forloop.counter0 forloop.parentloop.counter0 %}{{ h }}{% endifequal %}{% endfor %}', {{ f }}]{% if not forloop.last %}, {% endif %}{% endif %}{% endfor %}];{% endfor %}
+
+    plot = $.jqplot('placeholder', dataset, {
+        legend: {show: true, location: 'nw', xoffset: 55},
+        title: "{{ title }}",
+        series: [{% for d in data %}
+            {
+                label:'{{ d.0 }}',
+                lineWidth: 4,
+                markerOptions: { style: 'square'}
+            }{% if not forloop.last %},{% endif %}{% endfor %}
+            ],
+        axes: {
+            xaxis: {
+                renderer: $.jqplot.DateAxisRenderer
+            },
+            yaxis: {
+                min: 0
+            }
+        }
+    });
+
+</script>
+{% endifequal %}
+{% ifequal charttype "bar" %}
+<script type='text/javascript'>
+    $.jqplot.config.enablePlugins = true;
+    var dataset = [];
+
+    {% for d in data %}
+    dataset[{{ forloop.counter0 }}] = [{% for f in d %}{% if not forloop.first %}{{ f }}{% if not forloop.last %}, {% endif %}{% endif %}{% endfor %}];{% endfor %}
+
+    plot = $.jqplot('placeholder', dataset, {
+        legend: {show: true, location: 'nw', xoffset: 55},
+        title: "{{ title }}",
+        seriesDefaults: {
+            renderer: $.jqplot.BarRenderer,
+            rendererOptions: {barPadding: 8, barMargin: 20}
+            },
+        series: [{% for d in data %}
+            {label:'{{ d.0 }}'}{% if not forloop.last %},{% endif %}{% endfor %}
+            ],
+        axes: {
+            xaxis: {
+                renderer: $.jqplot.CategoryAxisRenderer,
+                ticks: [{% for h in headings %}{% if not forloop.first %}'{{ h }}'{% if not forloop.last %}, {% endif %}{% endif %}{% endfor %}]
+            },
+            yaxis: {
+                min: 0
+            }
+        }
+    });
+
+</script>
+{% endifequal %}
+
+
+
+{% endblock %}

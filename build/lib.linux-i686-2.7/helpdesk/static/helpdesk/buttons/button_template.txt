@@ -1,0 +1,5 @@
+* Use this template to create new buttons
+* Typeface: Delicious, Roman, 12pt, Sharp Anti-Aliasing
+   http://www.josbuivenga.demon.nl/delicious.html
+* Icons: Diagona (10px versions)
+   http://www.pinvoke.com/ - I purchased these before they were creative-commons, I believe this gives me rights to use them without attribution.

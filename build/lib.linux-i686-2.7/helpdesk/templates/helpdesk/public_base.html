@@ -1,0 +1,30 @@
+{% load i18n %}{% load url from future %}
+{% load load_helpdesk_settings %}
+{% with request|load_helpdesk_settings as helpdesk_settings %}
+<html>
+<head>
+<title>{% block helpdesk_title %}{% trans "Helpdesk" %}{% endblock %}</title>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script src="//netdna.bootstrapcdn.com/bootstrap/3.0.2/js/bootstrap.min.js"></script>
+<link href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css" rel="stylesheet">
+<link rel='stylesheet' href='{{ STATIC_URL }}helpdesk/helpdesk-extend.css' type='text/css' />
+{% block helpdesk_head %}{% endblock %}
+</head>
+<body id="helpdesk-body">
+<div id='container' class="container">
+    <div id='header' class="row">
+        <!-- Put your logo here if necessary: -->
+        <!-- <img class="brand pull-right" src="/media/logo.png"> -->
+        <h1>{% trans "Helpdesk" %}</h1>
+        {% include "helpdesk/navigation.html" %}
+    </div>
+    <div id='body' class="row">
+{% block helpdesk_body %}{% endblock %}
+    </div>
+    <div id='footer' class="row">
+        <p>{% include "helpdesk/attribution.html" %}</p>
+    </div>
+</div>{% include "helpdesk/debug.html" %}
+</body>
+</html>
+{% endwith %}
