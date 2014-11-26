@@ -9,14 +9,14 @@
     <head>
         <title>{% block helpdesk_title %}Helpdesk{% endblock %} :: {% trans "Powered by django-helpdesk" %}</title>
 
-        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+        <script src='{{ STATIC_URL }}helpdesk/jquery.min.js' type='text/javascript' language='javascript'></script>
         <script src='{{ STATIC_URL }}helpdesk/jquery-ui-1.8.9.custom.min.js' type='text/javascript' language='javascript'></script>
         <link rel='stylesheet' href='{{ STATIC_URL }}helpdesk/helpdesk-extend.css' type='text/css'  media="screen" >
 
         <!--link rel='stylesheet' href='{{ STATIC_URL }}helpdesk/helpdesk-print.css' type='text/css' media="print" /-->
         <!--link rel='stylesheet' href='{{ STATIC_URL }}helpdesk/jquery-smoothness-theme/jquery-ui-1.8.9.custom.css' type='text/css' /-->
-        <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.2/js/bootstrap.min.js"></script>
-        <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css" rel="stylesheet">
+        <script src='{{ STATIC_URL }}helpdesk/bootstrap.min.js'type='text/javascript' language='javascript'></script>
+        <link href='{{ STATIC_URL }}helpdesk/bootstrap.min.css' rel='stylesheet' type='text/css'>
         <link rel='alternate' href='{% url 'helpdesk_rss_user' user.get_username %}' type='application/rss+xml' title='{% trans "My Open Tickets" %}' />
         <link rel='alternate' href='{% url 'helpdesk_rss_activity' %}' type='application/rss+xml' title='{% trans "All Recent Activity" %}' />
         <link rel='alternate' href='{% url 'helpdesk_rss_unassigned' %}' type='application/rss+xml' title='{% trans "Unassigned Tickets" %}' />
