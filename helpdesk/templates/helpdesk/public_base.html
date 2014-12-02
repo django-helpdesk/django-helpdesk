@@ -16,12 +16,12 @@
         <!-- Put your logo here if necessary: -->
         <!-- <img class="brand pull-right" src="/media/logo.png"> -->
         {% block logo %}
-        <div><a class="col-md-6 pull-left" href="/">
+        <div><a class="brand pull-left" href="/">
             <img class="account_zina" src='{{ STATIC_URL }}helpdesk/ZINA_LOGO_WF.svg'>
             </a>
         </div>
         {% endblock %}
-        <h1>{% trans "Help Desk" %}</h1>
+        <h1 class="pull-right">{% trans "Help Desk" %}</h1>
         {% include "helpdesk/navigation.html" %}
     </div>
     <div id='body' class="row">
