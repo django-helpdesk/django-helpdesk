@@ -32,8 +32,13 @@ $(document).ready(function() {
 });
 </script>
 {% endblock %}
-{% block h1_title %}Tickets
-    {% if from_saved_query %} [{{ saved_query.title }}]{% endif %}{% endblock %}
+{% block h1_title %}<div><a class="col-md-6" href="/">
+    <img class="account_zina" src='{{ STATIC_URL }}helpdesk/ZINA_LOGO_WF.svg'>
+</a>
+</div>Tickets
+{% if from_saved_query %} [{{ saved_query.title }}]{% endif %}
+{% endblock %}
+
 {% block helpdesk_body %}
 
 {% load in_list %}

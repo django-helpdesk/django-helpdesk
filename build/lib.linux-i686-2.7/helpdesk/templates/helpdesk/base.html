@@ -7,6 +7,9 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"> <!-- IE compatibility -->
+        <meta name="ROBOTS" content="NOINDEX,NOFOLLOW" />
+
         <title>{% block helpdesk_title %}Helpdesk{% endblock %} :: {% trans "Powered by django-helpdesk" %}</title>
 
         <link rel='stylesheet' href='{{ STATIC_URL }}helpdesk/helpdesk-extend.css'   media="screen" >
@@ -51,7 +54,14 @@
     <body id="helpdesk-body">
         <div id='container' class="container">
             <div id='header' class="row">
-                <h1>{% block h1_title %}{% trans "Helpdesk" %}{% endblock %}</h1>
+                <h1>{% block h1_title %}
+                    <div><a class="col-md-6" href="/">
+                        <img class="account_zina" src='{{ STATIC_URL }}helpdesk/ZINA_LOGO_WF.svg'>
+                    </a>
+                    </div>
+                    {% trans "Help Desk" %}{% endblock %}
+                </h1>
+
                 {% include "helpdesk/navigation.html" %}
             </div>
 
