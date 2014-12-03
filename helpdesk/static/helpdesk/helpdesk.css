@@ -1,6 +1,6 @@
 body {
-    font: 10pt "Trebuchet MS", Arial, sans-serif;
-    background-color: #fff;
+    font-family: "nokia_pure_textregular", Arial, sans-serif;
+    background-color: #ffffff;
     text-align: center;
 }
 
@@ -8,6 +8,7 @@ table {
     border-collapse: collapse;
     margin-top: 8px;
     padding: 80px;
+    font-family:"nokia_pure_textlight";
 }
 
 #container {
@@ -21,72 +22,85 @@ table {
     margin-top: 20px;
     padding-top: 20px;
     line-height: 24px;
+    font-family:"nokia_pure_textlight";
 }
 
 #header ul {
     float: right;
     margin-top: 40px;
     line-height: 24px;
+    font-family:"nokia_pure_textlight";
 }
 #header li {
     display: inline;
     float: left;
+    font-family:"nokia_pure_textlight";
 }
 
 #header li a {
     padding: 2px 3px;
     margin: 2px;
     border: solid #444 1px;
-    color: #000;
-    background-color: #eee;
+    color: #000000;
+    background-color: #ffffff;
     text-decoration: none;
     font-size: 10pt;
     line-height: 12pt;
+    font-family:"nokia_pure_textlight";
 }
 
 #searchform .input {
     border: solid #444 1px;
-    background-color: #fff;
+    background-color: #ffffff;
     color: #ccc;
-    padding: 0px 3px;
-    margin: 0px 2px;
+    padding: 0 3px;
+    margin: 0 2px;
     font-size: 10pt;
     line-height: 12pt;
+    font-family:"nokia_pure_textlight";
 }
 
 #searchform .input:focus {
     color: #000;
+    font-family:"nokia_pure_textlight";
 }
 
 #header li a:hover {
     background-color: #ccc;
+    font-family:"nokia_pure_textlight";
 }
 
 #header, #body, #footer {
     clear: both;
+    font-family:"nokia_pure_textlight";
 }
 
 label {
     font-weight: bold;
+    font-family:"nokia_pure_textlight";
 }
 
 span.form_optional {
     color: #666;
     font-size: 95%;
+    font-family:"nokia_pure_textlight";
 }
 
 dd.form_help_text {
     color: #666;
     font-size: 95%;
+    font-family:"nokia_pure_textlight";
 }
 
 ul.errorlist {
     color: #a33;
     font-size: 95%;
+    font-family:"nokia_pure_textlight";
 }
 
 dt {
     padding-top: 8px;
+    font-family:"nokia_pure_textlight";
 }
 
 .row_tablehead {
@@ -94,23 +108,27 @@ dt {
     font-weight: bold;
     color: #fff;
     border-bottom: solid white 1px;
+    font-family:"nokia_pure_textlight";
 }
 
 .row_tablehead span.ticket_toolbar {
     float: right;
     text-align: right;
+    font-family:"nokia_pure_textlight";
 }
 
 .row_tablehead td {
     padding-left: 12px;
     line-height: 16pt;
     font-size: 12pt;
+    font-family:"nokia_pure_textlight";
 }
 
 .row_columnheads {
     background-color: #94C0E8;
     font-size: 10pt;
     line-height: 12pt;
+    font-family:"nokia_pure_textlight";
 }
 
 th {
@@ -118,45 +136,55 @@ th {
     color: #3E5F84;
     text-align: left;
     padding-left: 12px;
+    font-family:"nokia_pure_textlight";
 }
 
 .row_odd {
     background-color: #fff;
+    font-family:"nokia_pure_textlight";
 }
 
 .row_even {
     background-color: #ecf6fc;
+    font-family:"nokia_pure_textlight";
 }
 
 .row_odd, .row_even {
     color: #6C79A0;
     border-bottom: solid #d5e7fd 1px;
+    font-family:"nokia_pure_textlight";
 }
 
 .row_odd th, .row_even th {
     font-size: 10pt;
+    font-family:"nokia_pure_textlight";
 }
 
 .row_odd td:first-child, .row_even td:first-child {
     padding-left: 12px;
+    font-family:"nokia_pure_textlight";
 }
 
 .cell_bold {
     font-weight: bold;
+    font-family:"nokia_pure_textlight";
 }
 
 td a, th a {
     color: inherit;
     text-decoration: none;
+    font-family:"nokia_pure_textlight";
 }
 
 td {
     font-size: 10pt;
+    font-family:"nokia_pure_textlight";
 }
 
 td.report {
     font-size: 10pt;
     text-align: center;
+    font-family:"nokia_pure_textlight";
 }
 
 .hover {
@@ -320,4 +348,3 @@ a.tooltip:hover span {
   font: 12px Verdana, sans-serif;
   text-align: left;
 }
-
