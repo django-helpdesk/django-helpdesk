@@ -246,13 +246,13 @@ def ticket_from_message(message, queue, quiet):
     lower_title = title.lower()
     if sender_email.lower() == 'zina.lat@nsn.com':
         if 'celery' in lower_title and 'django' in lower_title:
-            # Erro no celery
+            # Error in celery
             priority = 1
         if not 'celery' in lower_title and 'django' not in lower_title:
-            # Erro 500
+            # Error 500
             priority = 2
         if not 'celery' in lower_title and 'django' in lower_title:
-            # Erro 500
+            # Error 500
             priority = 2
 
     if ticket == None:
