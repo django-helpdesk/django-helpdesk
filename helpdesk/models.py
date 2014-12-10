@@ -178,6 +178,29 @@ class Queue(models.Model):
         # This is updated by management/commands/get_mail.py.
         )
 
+    socks_proxy_type = models.CharField(
+        _('Socks Proxy Type'),
+        max_length=8,
+        choices=(('socks4', _('SOCKS4')), ('socks5', _('SOCKS5'))),
+        blank=True,
+        null=True,
+        help_text=_('SOCKS4 or SOCKS5 allows you to proxy your connections through a SOCKS server.'),
+    )
+
+    socks_proxy_host = models.GenericIPAddressField(
+        _('Socks Proxy Host'),
+        blank=True,
+        null=True,
+        help_text=_('Socks proxy IP address.'),
+    )
+
+    socks_proxy_port = models.IntegerField(
+        _('Socks Proxy Port'),
+        blank=True,
+        null=True,
+        help_text=_('Socks proxy port number.'),
+    )
+
     def __unicode__(self):
         return u"%s" % self.title
 

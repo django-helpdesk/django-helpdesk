@@ -185,6 +185,10 @@ class Migration(migrations.Migration):
                 ('email_box_imap_folder', models.CharField(help_text='If using IMAP, what folder do you wish to fetch messages from? This allows you to use one IMAP account for multiple queues, by filtering messages on your IMAP server into separate folders. Default: INBOX.', max_length=100, null=True, verbose_name='IMAP Folder', blank=True)),
                 ('email_box_interval', models.IntegerField(default=b'5', help_text='How often do you wish to check this mailbox? (in Minutes)', null=True, verbose_name='E-Mail Check Interval', blank=True)),
                 ('email_box_last_check', models.DateTimeField(null=True, editable=False, blank=True)),
+                ('socks_proxy_type', models.CharField(choices=[(b'socks4', 'SOCKS4'), (b'socks5', 'SOCKS5')], max_length=8, blank=True, help_text='SOCKS4 or SOCKS5 allows you to proxy your connections through a SOCKS server', null=True, verbose_name='Socks Proxy Type')),
+                ('socks_proxy_host', models.GenericIPAddressField(blank=True, help_text='Socks proxy IP address.', null=True, verbose_name='Socks Proxy Host')),
+                ('socks_proxy_port', models.IntegerField(blank=True, help_text='Socks proxy port number.', null=True, verbose_name='Socks Proxy Port')),
+
             ],
             options={
                 'ordering': ('title',),
