@@ -191,14 +191,14 @@ class Queue(models.Model):
         _('Socks Proxy Host'),
         blank=True,
         null=True,
-        help_text=_('Socks proxy IP address.'),
+        help_text=_('Socks proxy IP address. Default: 127.0.0.1'),
     )
 
     socks_proxy_port = models.IntegerField(
         _('Socks Proxy Port'),
         blank=True,
         null=True,
-        help_text=_('Socks proxy port number.'),
+        help_text=_('Socks proxy port number. Default: 9150 (default TOR port)'),
     )
 
     def __unicode__(self):
@@ -224,6 +224,12 @@ class Queue(models.Model):
     def save(self, *args, **kwargs):
         if self.email_box_type == 'imap' and not self.email_box_imap_folder:
             self.email_box_imap_folder = 'INBOX'
+
+        if self.socks_proxy_type:
+            if not self.socks_proxy_host:
+                self.socks_proxy_host = '127.0.0.1'
+            if not self.socks_proxy_port:
+                self.socks_proxy_port = 9150
 
         if not self.email_box_port:
             if self.email_box_type == 'imap' and self.email_box_ssl:
