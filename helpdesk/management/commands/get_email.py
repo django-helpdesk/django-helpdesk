@@ -15,7 +15,6 @@ import imaplib
 import mimetypes
 import poplib
 import re
-import socks
 import socket
 
 from datetime import timedelta
@@ -87,6 +86,11 @@ def process_queue(q, quiet=False):
         print "Processing: %s" % q
 
     if q.socks_proxy_type and q.socks_proxy_host and q.socks_proxy_port:
+        try:
+            import socks
+        except ImportError:
+            raise ImportError("Queue has been configured with proxy settings, but no socks library was installed. Try to install PySocks via pypi.")
+
         proxy_type = {
             'socks4': socks.SOCKS4,
             'socks5': socks.SOCKS5,
