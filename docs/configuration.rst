@@ -39,4 +39,6 @@ Before django-helpdesk will be much use, you need to do some basic configuration
        EMAIL_HOST_USER = 'YYYYYY@ZZZZ.PPP'
        EMAIL_HOST_PASSWORD = '123456'
 
+8. If you wish to use SOCKS4/5 proxy with Helpdesk Queue email operations, install PySocks manually.
+
 You're now up and running! Happy ticketing.

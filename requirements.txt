@@ -3,4 +3,3 @@ django-bootstrap-form>=3.1,<4
 email-reply-parser
 django-markdown-deux
 simplejson
-PySocks
