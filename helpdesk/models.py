@@ -230,6 +230,9 @@ class Queue(models.Model):
                 self.socks_proxy_host = '127.0.0.1'
             if not self.socks_proxy_port:
                 self.socks_proxy_port = 9150
+        else:
+            self.socks_proxy_host = None
+            self.socks_proxy_port = None
 
         if not self.email_box_port:
             if self.email_box_type == 'imap' and self.email_box_ssl:
