@@ -79,6 +79,11 @@ class QuickDjangoTest(object):
             INSTALLED_APPS = self.INSTALLED_APPS + self.apps,
             ROOT_URLCONF = self.apps[0] + '.urls',
         )
+        try:
+            from django import setup
+            setup()
+        except ImportError:
+            pass  # Django < 1.7
         from django.test.simple import DjangoTestSuiteRunner
         failures = DjangoTestSuiteRunner().run_tests(self.apps, verbosity=1)
         if failures:
