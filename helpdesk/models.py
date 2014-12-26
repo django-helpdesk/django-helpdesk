@@ -178,6 +178,29 @@ class Queue(models.Model):
         # This is updated by management/commands/get_mail.py.
         )
 
+    socks_proxy_type = models.CharField(
+        _('Socks Proxy Type'),
+        max_length=8,
+        choices=(('socks4', _('SOCKS4')), ('socks5', _('SOCKS5'))),
+        blank=True,
+        null=True,
+        help_text=_('SOCKS4 or SOCKS5 allows you to proxy your connections through a SOCKS server.'),
+    )
+
+    socks_proxy_host = models.GenericIPAddressField(
+        _('Socks Proxy Host'),
+        blank=True,
+        null=True,
+        help_text=_('Socks proxy IP address. Default: 127.0.0.1'),
+    )
+
+    socks_proxy_port = models.IntegerField(
+        _('Socks Proxy Port'),
+        blank=True,
+        null=True,
+        help_text=_('Socks proxy port number. Default: 9150 (default TOR port)'),
+    )
+
     def __unicode__(self):
         return u"%s" % self.title
 
@@ -201,6 +224,15 @@ class Queue(models.Model):
     def save(self, *args, **kwargs):
         if self.email_box_type == 'imap' and not self.email_box_imap_folder:
             self.email_box_imap_folder = 'INBOX'
+
+        if self.socks_proxy_type:
+            if not self.socks_proxy_host:
+                self.socks_proxy_host = '127.0.0.1'
+            if not self.socks_proxy_port:
+                self.socks_proxy_port = 9150
+        else:
+            self.socks_proxy_host = None
+            self.socks_proxy_port = None
 
         if not self.email_box_port:
             if self.email_box_type == 'imap' and self.email_box_ssl:
