@@ -258,6 +258,20 @@ def ticket_from_message(message, queue, quiet):
     if smtp_priority in high_priority_types or smtp_importance in high_priority_types:
         priority = 2
 
+    ### modified for tasks and zina
+    title = remove_accentuation(subject[:10000])
+    lower_title = title.lower()
+    if sender_email.lower() == 'zina.lat@nsn.com':
+        if 'celery' in lower_title and 'django' in lower_title:
+            # Error in celery
+            priority = 1
+        if not 'celery' in lower_title and 'django' not in lower_title:
+            # Error 500
+            priority = 2
+        if not 'celery' in lower_title and 'django' in lower_title:
+            # Error 500
+            priority = 2
+
     if ticket == None:
         t = Ticket(
             title=subject,

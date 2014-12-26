@@ -1054,7 +1054,7 @@ def create_usersettings(sender, created_models=[], instance=None, created=False,
                 s = UserSettings(user=u, settings=DEFAULT_USER_SETTINGS)
                 s.save()
 
-models.signals.post_syncdb.connect(create_usersettings)
+models.signals.post_migrate.connect(create_usersettings)
 try:
     models.signals.post_save.connect(create_usersettings, sender=settings.AUTH_USER_MODEL)
 except:

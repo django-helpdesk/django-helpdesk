@@ -1,0 +1,139 @@
+{% extends "helpdesk/help_base.html" %}
+
+{% block title %}django-helpdesk Context Listing{% endblock %}
+{% block heading %}django-helpdesk Context Listing{% endblock %}
+
+{% block content %}
+        <h2>Contents</h2>
+
+        <ul>
+            <li><a href='#introduction'>Introduction</a></li>
+            <li><a href='#usage'>Inserting Fields</a></li>
+            <li><a href='#queue'>Queue Fields</a>
+                <ul>
+                    <li><a href='#queue_title'>queue.title</a></li>
+                    <li><a href='#queue_slug'>queue.slug</a></li>
+                    <li><a href='#queue_email_address'>queue.email_address</a></li>
+                    <li><a href='#queue_from_address'>queue.from_address</a></li>
+                </ul>
+            </li>
+            <li><a href='#ticket'>Ticket Fields</a>
+                <ul>
+                    <li><a href='#ticket_title'>ticket.title</a></li>
+                    <li><a href='#ticket_created'>ticket.created</a></li>
+                    <li><a href='#ticket_modified'>ticket.modified</a></li>
+                    <li><a href='#ticket_submitter_email'>ticket.submitter_email</a></li>
+                    <li><a href='#ticket_status'>ticket.status</a></li>
+                    <li><a href='#ticket_get_status_display'>ticket.get_status_display</a></li>
+                    <li><a href='#ticket_on_hold'>ticket.on_hold</a></li>
+                    <li><a href='#ticket_description'>ticket.description</a></li>
+                    <li><a href='#ticket_resolution'>ticket.resolution</a></li>
+                    <li><a href='#ticket_priority'>ticket.priority</a></li>
+                    <li><a href='#ticket_get_priority_display'>ticket.get_priority_display</a></li>
+                    <li><a href='#ticket_last_escalation'>ticket.last_escalation</a></li>
+                    <li><a href='#ticket_ticket'>ticket.ticket</a></li>
+                    <li><a href='#ticket_ticket_for_url'>ticket.ticket_for_url</a></li>
+                    <li><a href='#ticket_get_status'>ticket.get_status</a></li>
+                    <li><a href='#ticket_ticket_url'>ticket.ticket_url</a></li>
+                    <li><a href='#ticket_staff_url'>ticket.staff_url</a></li>
+                    <li><a href='#ticket_assigned_to'>ticket.assigned_to</a></li>
+                    <li><a href='#ticket_queue'>ticket.queue</a></li>
+                </ul>
+            </li>
+        </ul>
+
+        <h2 id='introduction'>Introduction</h2>
+
+        <p>django-helpdesk provides a powerful way for you to embed fields from the current ticket into your comments and ticket resolutions using a template language.</p>
+
+        <p>For example, you may want to place the last escalation date into a ticket comment, or reproduce the original description sent to you by the submitter.</p>
+
+        <p><strong>Tech Note:</strong> This system uses the <a href='http://docs.djangoproject.com/en/dev/topics/templates/#variables'>Django templating system</a> with a sandboxed template context.</p>
+
+        <h2 id='usage'>Inserting Fields</h2>
+
+        <p>In your comment, enter the field name surrounded by double curly braces. For example, to get the ticket title, use:</p>
+
+        <pre>&#123;&#123; ticket.title &#125;&#125;</pre>
+
+        <h2 id='queue'>Queue Fields</h2>
+
+        <p>The following fields are available in the template context to display the details of the queue to which this ticket belongs:</p>
+
+        <dl>
+            <dt id='queue_title'>queue.title</dt>
+            <dd>The display title of the queue</dd>
+            
+            <dt id='queue_slug'>queue.slug</dt>
+            <dd>The 'slug' of the queue, a single-word lowercase identifier used in URL's and e-mail subjects.</dd>
+            
+            <dt id='queue_email_address'>queue.email_address</dt>
+            <dd>The e-mail address to which users can send an e-mail to open a new ticket automatically.</dd>
+            
+            <dt id='queue_from_address'>queue.from_address</dt>
+            <dd>The e-mail address from which the queue will send e-mails to submitters.</dd>
+        </dl>
+
+        <h2 id='ticket'>Ticket Fields</h2>
+
+        <dl>
+
+            <dt id='ticket_title'>ticket.title</dt>
+            <dd>Title of the ticket, as provided by the submitter. A single line of text.</dd>
+
+            <dt id='ticket_created'>ticket.created</dt>
+            <dd>The time/date this ticket was first opened</dd>
+
+            <dt id='ticket_modified'>ticket.modified</dt>
+            <dd>The time/date this ticket was most recently changed</dd>
+
+            <dt id='ticket_submitter_email'>ticket.submitter_email</dt>
+            <dd>E-Mail address of the ticket submitter</dd>
+
+            <dt id='ticket_status'>ticket.status</dt>
+            <dd>Status of this ticket (Integer)</dd>
+
+            <dt id='ticket_get_status_display'>ticket.get_status_display</dt>
+            <dd>Status of this ticket (Text-based)</dd>
+
+            <dt id='ticket_get_status'>ticket.get_status</dt>
+            <dd>Status of this ticket (Text-based, includes 'On Hold' if required)</dd>
+
+            <dt id='ticket_on_hold'>ticket.on_hold</dt>
+            <dd>Indicates whether this ticket is on hold (True/False)</dd>
+
+            <dt id='ticket_description'>ticket.description</dt>
+            <dd>The description of the ticket, eg the body of the e-mail sent or the problem entered by the submitter</dd>
+
+            <dt id='ticket_resolution'>ticket.resolution</dt>
+            <dd>The resolution of the ticket provided by staff. This may be blank.</dd>
+
+            <dt id='ticket_priority'>ticket.priority</dt>
+            <dd>The priority of this ticket (1-5, Integer only)</dd>
+
+            <dt id='ticket_get_priority_display'>ticket.get_priority_display</dt>
+            <dd>The priority of this ticket (Text-based)</dd>
+
+            <dt id='ticket_last_escalation'>ticket.last_escalation</dt>
+            <dd>The time/date this ticket was last escalated</dd>
+
+            <dt id='ticket_ticket'>ticket.ticket</dt>
+            <dd>The ticket ID in form '[queue_slug-id]', used in e-mail subjects.</dd>
+
+            <dt id='ticket_ticket_for_url'>ticket.ticket_for_url</dt>
+            <dd>The ticket ID in form 'queue_slug-id', used in URLs</dd>
+
+            <dt id='ticket_ticket_url'>ticket.ticket_url</dt>
+            <dd>Public URL for this ticket</dd>
+
+            <dt id='ticket_staff_url'>ticket.staff_url</dt>
+            <dd>Staff-only URL for this ticket</dd>
+
+            <dt id='ticket_assigned_to'>ticket.assigned_to</dt>
+            <dd>Name of the staff member assigned to this ticket, or 'Unassigned' if it is unassigned.</dd>
+
+            <dt id='ticket_queue'>ticket.queue</dt>
+            <dd>Another dictionary of queue information, identical to <a href='#queue'>queue</a> above. For example, use ticket.queue.title.</dd>
+        </dl>
+
+{% endblock %}

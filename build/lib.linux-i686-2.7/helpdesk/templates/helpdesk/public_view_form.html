@@ -1,0 +1,24 @@
+{% extends "helpdesk/public_base.html" %}{% load i18n %}{% load url from future %}
+
+{% block helpdesk_body %}
+<h2>{% trans "View a Ticket" %}</h2>
+
+<form method='get' action='{% url 'helpdesk_public_view' %}'>
+
+{% if error_message %}<p><strong>{% trans "Error:" %}</strong> {{ error_message }}</p>{% endif %}
+
+<fieldset>
+    <dl>
+        <dt><label for='id_ticket'>{% trans "Ticket" %}</label></dt>
+        <dd><input type='text' name='ticket' /></dd>
+
+        <dt><label for='id_email'>{% trans "Your E-mail Address" %}</label></dt>
+        <dd><input type='text' name='email' /></dd>
+    </dl>
+
+    <input class="btn btn-primary" type='submit' value='{% trans "View Ticket" %}' />
+</fieldset>
+{% csrf_token %}</form>
+
+
+{% endblock %}

@@ -1,0 +1,8 @@
+{% extends "helpdesk/public_base.html" %}{% load i18n %}
+
+{% block helpdesk_body %}
+<h2>{% trans "Unable To Open Ticket" %}</h2>
+<p>{% trans "Sorry, but there has been an error trying to submit your ticket." %}</p>
+<p>{% blocktrans %}Our system has marked your submission as <strong>spam</strong>, so we are unable to save it. If this is not spam, please press back and re-type your message. Be careful to avoid sounding 'spammy', and if you have heaps of links please try removing them if possible.{% endblocktrans %}</p>
+<p>{% blocktrans %}We are sorry for any inconvenience, however this check is required to avoid our helpdesk resources being overloaded by spammers.{% endblocktrans %}</p>
+{% endblock helpdesk_body %}
