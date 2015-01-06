@@ -15,6 +15,8 @@ import imaplib
 import mimetypes
 import poplib
 import re
+import unicodedata
+import string
 
 from datetime import timedelta
 from email.header import decode_header
@@ -242,6 +244,12 @@ def ticket_from_message(message, queue, quiet):
         priority = 2
 
     ### modified for tasks and zina
+
+    def remove_accentuation(string):
+        if isinstance(string, unicode):
+            return unicodedata.normalize("NFKD", string).encode('ascii', 'ignore')
+        return unicodedata.normalize("NFKD", string.decode('utf-8')).encode('ascii', 'ignore')
+
     title = remove_accentuation(subject[:10000])
     lower_title = title.lower()
     if sender_email.lower() == 'zina.lat@nsn.com':
