@@ -1,7 +1,10 @@
 import os
 import sys
 import argparse
+
+import django
 from django.conf import settings
+
 
 class QuickDjangoTest(object):
     """
@@ -79,6 +82,8 @@ class QuickDjangoTest(object):
             INSTALLED_APPS = self.INSTALLED_APPS + self.apps,
             ROOT_URLCONF = self.apps[0] + '.urls',
         )
+        django.setup()
+
         from django.test.simple import DjangoTestSuiteRunner
         failures = DjangoTestSuiteRunner().run_tests(self.apps, verbosity=1)
         if failures:
