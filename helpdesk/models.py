@@ -1027,7 +1027,7 @@ class UserSettings(models.Model):
         verbose_name_plural = _('User Settings')
 
 
-def create_usersettings(sender, created_models=[], instance=None, created=False, **kwargs):
+def create_usersettings(sender, instance, created, **kwargs):
     """
     Helper function to create UserSettings instances as
     required, eg when we first create the UserSettings database
@@ -1037,29 +1037,15 @@ def create_usersettings(sender, created_models=[], instance=None, created=False,
     'DoesNotExist: UserSettings matching query does not exist.' errors.
     """
     from helpdesk.settings import DEFAULT_USER_SETTINGS
-    if sender == settings.AUTH_USER_MODEL and created:
-        # This is a new user, so lets create their settings entry.
-        s, created = UserSettings.objects.get_or_create(user=instance, defaults={'settings': DEFAULT_USER_SETTINGS})
-        s.save()
-    elif UserSettings in created_models:
-        User = get_user_model()
-        # We just created the UserSettings model, lets create a UserSettings
-        # entry for each existing user. This will only happen once (at install
-        # time, or at upgrade) when the UserSettings model doesn't already
-        # exist.
-        for u in User.objects.all():
-            try:
-                s = UserSettings.objects.get(user=u)
-            except UserSettings.DoesNotExist:
-                s = UserSettings(user=u, settings=DEFAULT_USER_SETTINGS)
-                s.save()
+    if created:
+        UserSettings.objects.create(user=instance, settings=DEFAULT_USER_SETTINGS)
 
-models.signals.post_syncdb.connect(create_usersettings)
 try:
     models.signals.post_save.connect(create_usersettings, sender=settings.AUTH_USER_MODEL)
 except:
     signal_user = get_user_model()
     models.signals.post_save.connect(create_usersettings, sender=signal_user)
+
 
 class IgnoreEmail(models.Model):
     """
