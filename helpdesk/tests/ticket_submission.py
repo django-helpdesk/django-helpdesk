@@ -5,6 +5,8 @@ from django.test.client import Client
 from django.core.urlresolvers import reverse
 
 class TicketBasicsTestCase(TestCase):
+    fixtures = ['emailtemplate.json']
+
     def setUp(self):
         self.queue_public = Queue.objects.create(title='Queue 1', slug='q1', allow_public_submission=True, new_ticket_cc='new.public@example.com', updated_ticket_cc='update.public@example.com')
         self.queue_private = Queue.objects.create(title='Queue 2', slug='q2', allow_public_submission=False, new_ticket_cc='new.private@example.com', updated_ticket_cc='update.private@example.com')
