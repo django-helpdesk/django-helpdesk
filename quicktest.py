@@ -28,6 +28,7 @@ class QuickDjangoTest(object):
         'django.contrib.humanize',
         'bootstrapform',
     )
+    MIDDLEWARE_CLASSES = []
 
     def __init__(self, *args, **kwargs):
         self.apps = args
@@ -43,8 +44,7 @@ class QuickDjangoTest(object):
         """
         Figure out which version of Django's test suite we have to play with.
         """
-        from django import VERSION
-        if VERSION[0] == 1 and VERSION[1] >= 2:
+        if django.VERSION > (1, 2):
             return 'new'
         else:
             return 'old'
@@ -67,6 +67,7 @@ class QuickDjangoTest(object):
         """
         Fire up the Django test suite developed for version 1.2
         """
+
         settings.configure(
             DEBUG = True,
             DATABASES = {
@@ -80,9 +81,12 @@ class QuickDjangoTest(object):
                 }
             },
             INSTALLED_APPS = self.INSTALLED_APPS + self.apps,
+            MIDDLEWARE_CLASSES = self.MIDDLEWARE_CLASSES,
             ROOT_URLCONF = self.apps[0] + '.urls',
         )
-        django.setup()
+
+        if django.VERSION > (1, 7):
+            django.setup()
 
         from django.test.simple import DjangoTestSuiteRunner
         failures = DjangoTestSuiteRunner().run_tests(self.apps, verbosity=1)
