@@ -8,7 +8,7 @@ from django.db import models, migrations
 from django.core import serializers
 
 fixture_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../fixtures'))
-fixture_filename = 'initial_data.json'
+fixture_filename = 'emailtemplate.json'
 
 def deserialize_fixture():
     fixture_file = os.path.join(fixture_dir, fixture_filename)

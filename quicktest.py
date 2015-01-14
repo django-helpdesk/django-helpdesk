@@ -28,7 +28,13 @@ class QuickDjangoTest(object):
         'django.contrib.humanize',
         'bootstrapform',
     )
-    MIDDLEWARE_CLASSES = []
+    MIDDLEWARE_CLASSES = [
+        'django.middleware.common.CommonMiddleware',
+        'django.middleware.csrf.CsrfViewMiddleware',
+        'django.contrib.sessions.middleware.SessionMiddleware',
+        'django.contrib.auth.middleware.AuthenticationMiddleware',
+        'django.contrib.messages.middleware.MessageMiddleware',
+    ]
 
     def __init__(self, *args, **kwargs):
         self.apps = args
@@ -44,7 +50,7 @@ class QuickDjangoTest(object):
         """
         Figure out which version of Django's test suite we have to play with.
         """
-        if django.VERSION > (1, 2):
+        if django.VERSION >= (1, 2):
             return 'new'
         else:
             return 'old'
@@ -85,7 +91,7 @@ class QuickDjangoTest(object):
             ROOT_URLCONF = self.apps[0] + '.urls',
         )
 
-        if django.VERSION > (1, 7):
+        if django.VERSION >= (1, 7):
             django.setup()
 
         from django.test.simple import DjangoTestSuiteRunner
