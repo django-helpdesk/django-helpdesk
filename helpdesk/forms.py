@@ -369,6 +369,7 @@ class PublicTicketForm(CustomFieldMixin, forms.Form):
         required=False,
         label=_('Attach File'),
         help_text=_('You can attach a file such as a document or screenshot to this ticket.'),
+        max_length=1000,
         )
 
     def __init__(self, *args, **kwargs):
