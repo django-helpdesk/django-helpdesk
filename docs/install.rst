@@ -39,7 +39,7 @@ Adding To Your Django Project
         'django.contrib.admin',  # Required for helpdesk admin/maintenance
         'django.contrib.markup',  # Required for helpdesk text display
         'django.contrib.humanize',  # Required for elapsed time formatting
-        'south',  # Highly recommended to make database migrations simpler.
+        'south',  # Highly recommended to make database migrations simpler in Django < 1.7
         'markdown_deux',  # Required for Knowledgebase item formatting
         'helpdesk',  # This is new!
     )
@@ -58,7 +58,7 @@ Adding To Your Django Project
 
      ./manage.py syncdb
 
-   Then migrate using South
+   Then migrate using South / Django 1.7+ migrations::
 
      ./manage.py migrate helpdesk
 
@@ -98,3 +98,7 @@ Adding To Your Django Project
       LOGIN_URL = '/helpdesk/login/'
 
    Alter the URL to suit your installation path.
+
+9. Load initial e-mail templates, otherwise you will not be able to setnd e-mail::
+
+   python manage.py loaddata emailtemplate.json
