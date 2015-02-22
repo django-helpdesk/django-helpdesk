@@ -1201,6 +1201,13 @@ class CustomField(models.Model):
     """
     Definitions for custom fields that are glued onto each ticket.
     """
+    queues = models.ManyToManyField(
+        Queue,
+        blank=True,
+        null=True,
+        help_text=_('Leave blank to allow this reply to be used for all '
+            'queues, or select those queues you wish to limit this field to.'),
+        )
 
     name = models.SlugField(
         _('Field Name'),

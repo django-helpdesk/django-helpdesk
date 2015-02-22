@@ -24,8 +24,9 @@ class FollowUpAdmin(admin.ModelAdmin):
 class KBItemAdmin(admin.ModelAdmin):
     list_display = ('category', 'title', 'last_updated',)
     list_display_links = ('title',)
-   
+
 class CustomFieldAdmin(admin.ModelAdmin):
+    list_filter = ('queues', )
     list_display = ('name', 'label', 'data_type')
 
 class EmailTemplateAdmin(admin.ModelAdmin):
