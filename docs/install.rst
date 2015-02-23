@@ -40,7 +40,8 @@ Adding To Your Django Project
         'django.contrib.humanize',  # Required for elapsed time formatting
         'south',  # Highly recommended to make database migrations simpler in Django < 1.7
         'markdown_deux',  # Required for Knowledgebase item formatting
-        'helpdesk',  # This is new!
+        'bootstrapform', # Required for nicer formatting of forms with the default templates
+        'helpdesk',  # This is us!
     )
 
 2. Make sure django-helpdesk is accessible via ``urls.py``. Add the following line to ``urls.py``::
