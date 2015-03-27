@@ -9,13 +9,13 @@ from django.template import Library
 from helpdesk import settings as helpdesk_settings_config
 
 def load_helpdesk_settings(request):
-    try:
+#    try:
         return helpdesk_settings_config
-    except Exception, e:
-        import sys
-        print >> sys.stderr,  "'load_helpdesk_settings' template tag (django-helpdesk) crashed with following error:"
-        print >> sys.stderr,  e
-        return ''
+#    except Exception, e:
+#        import sys
+#        print >> sys.stderr,  "'load_helpdesk_settings' template tag (django-helpdesk) crashed with following error:"
+#        print >> sys.stderr,  e
+#        return ''
 
 register = Library()
 register.filter('load_helpdesk_settings', load_helpdesk_settings)

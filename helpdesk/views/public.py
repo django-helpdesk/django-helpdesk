@@ -92,11 +92,11 @@ def view_ticket(request):
 
             if request.user.is_staff:
                 redirect_url = reverse('helpdesk_view', args=[ticket_id])
-                if request.GET.has_key('close'):
+                if 'close' in request.GET:
                     redirect_url += '?close'
                 return HttpResponseRedirect(redirect_url)
 
-            if request.GET.has_key('close') and ticket.status == Ticket.RESOLVED_STATUS:
+            if 'close' in request.GET and ticket.status == Ticket.RESOLVED_STATUS:
                 from helpdesk.views.staff import update_ticket
                 # Trick the update_ticket() view into thinking it's being called with
                 # a valid POST.
@@ -134,7 +134,7 @@ def view_ticket(request):
 
 def change_language(request):
     return_to = ''
-    if request.GET.has_key('return_to'):
+    if 'return_to' in request.GET:
         return_to = request.GET['return_to']
 
     return render_to_response('helpdesk/public_change_language.html',
