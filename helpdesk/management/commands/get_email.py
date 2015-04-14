@@ -15,6 +15,7 @@ import imaplib
 import mimetypes
 import poplib
 import re
+import socket
 
 from datetime import timedelta
 from email.header import decode_header
@@ -83,6 +84,22 @@ def process_email(quiet=False):
 def process_queue(q, quiet=False):
     if not quiet:
         print "Processing: %s" % q
+
+    if q.socks_proxy_type and q.socks_proxy_host and q.socks_proxy_port:
+        try:
+            import socks
+        except ImportError:
+            raise ImportError("Queue has been configured with proxy settings, but no socks library was installed. Try to install PySocks via pypi.")
+
+        proxy_type = {
+            'socks4': socks.SOCKS4,
+            'socks5': socks.SOCKS5,
+        }.get(q.socks_proxy_type)
+
+        socks.set_default_proxy(proxy_type=proxy_type, addr=q.socks_proxy_host, port=q.socks_proxy_port)
+        socket.socket = socks.socksocket
+    else:
+        socket.socket = socket._socketobject
 
     email_box_type = settings.QUEUE_EMAIL_BOX_TYPE if settings.QUEUE_EMAIL_BOX_TYPE else q.email_box_type
 

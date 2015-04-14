@@ -11,6 +11,7 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _, ugettext
+from django import VERSION
 
 try:
     from django.utils import timezone
@@ -178,6 +179,29 @@ class Queue(models.Model):
         # This is updated by management/commands/get_mail.py.
         )
 
+    socks_proxy_type = models.CharField(
+        _('Socks Proxy Type'),
+        max_length=8,
+        choices=(('socks4', _('SOCKS4')), ('socks5', _('SOCKS5'))),
+        blank=True,
+        null=True,
+        help_text=_('SOCKS4 or SOCKS5 allows you to proxy your connections through a SOCKS server.'),
+    )
+
+    socks_proxy_host = models.GenericIPAddressField(
+        _('Socks Proxy Host'),
+        blank=True,
+        null=True,
+        help_text=_('Socks proxy IP address. Default: 127.0.0.1'),
+    )
+
+    socks_proxy_port = models.IntegerField(
+        _('Socks Proxy Port'),
+        blank=True,
+        null=True,
+        help_text=_('Socks proxy port number. Default: 9150 (default TOR port)'),
+    )
+
     def __unicode__(self):
         return u"%s" % self.title
 
@@ -201,6 +225,15 @@ class Queue(models.Model):
     def save(self, *args, **kwargs):
         if self.email_box_type == 'imap' and not self.email_box_imap_folder:
             self.email_box_imap_folder = 'INBOX'
+
+        if self.socks_proxy_type:
+            if not self.socks_proxy_host:
+                self.socks_proxy_host = '127.0.0.1'
+            if not self.socks_proxy_port:
+                self.socks_proxy_port = 9150
+        else:
+            self.socks_proxy_host = None
+            self.socks_proxy_port = None
 
         if not self.email_box_port:
             if self.email_box_type == 'imap' and self.email_box_ssl:
@@ -351,7 +384,7 @@ class Ticket(models.Model):
             if self.assigned_to.get_full_name():
                 return self.assigned_to.get_full_name()
             else:
-                return self.assigned_to.username
+                return self.assigned_to.get_username()
     get_assigned_to = property(_get_assigned_to)
 
     def _get_ticket(self):
@@ -995,7 +1028,7 @@ class UserSettings(models.Model):
         verbose_name_plural = _('User Settings')
 
 
-def create_usersettings(sender, created_models=[], instance=None, created=False, **kwargs):
+def create_usersettings(sender, instance, created, **kwargs):
     """
     Helper function to create UserSettings instances as
     required, eg when we first create the UserSettings database
@@ -1005,29 +1038,19 @@ def create_usersettings(sender, created_models=[], instance=None, created=False,
     'DoesNotExist: UserSettings matching query does not exist.' errors.
     """
     from helpdesk.settings import DEFAULT_USER_SETTINGS
-    if sender == settings.AUTH_USER_MODEL and created:
-        # This is a new user, so lets create their settings entry.
-        s, created = UserSettings.objects.get_or_create(user=instance, defaults={'settings': DEFAULT_USER_SETTINGS})
-        s.save()
-    elif UserSettings in created_models:
-        User = get_user_model()
-        # We just created the UserSettings model, lets create a UserSettings
-        # entry for each existing user. This will only happen once (at install
-        # time, or at upgrade) when the UserSettings model doesn't already
-        # exist.
-        for u in User.objects.all():
-            try:
-                s = UserSettings.objects.get(user=u)
-            except UserSettings.DoesNotExist:
-                s = UserSettings(user=u, settings=DEFAULT_USER_SETTINGS)
-                s.save()
+    if created:
+        UserSettings.objects.create(user=instance, settings=DEFAULT_USER_SETTINGS)
 
-models.signals.post_syncdb.connect(create_usersettings)
 try:
+    # Connecting via settings.AUTH_USER_MODEL (string) fails in Django < 1.7. We need the actual model there.
+    # https://docs.djangoproject.com/en/1.7/topics/auth/customizing/#referencing-the-user-model
+    if VERSION < (1, 7):
+        raise ValueError
     models.signals.post_save.connect(create_usersettings, sender=settings.AUTH_USER_MODEL)
 except:
     signal_user = get_user_model()
     models.signals.post_save.connect(create_usersettings, sender=signal_user)
+
 
 class IgnoreEmail(models.Model):
     """

@@ -110,7 +110,7 @@ class API:
     def api_public_create_ticket(self):
         form = TicketForm(self.request.POST)
         form.fields['queue'].choices = [[q.id, q.title] for q in Queue.objects.all()]
-        form.fields['assigned_to'].choices = [[u.id, u.username] for u in User.objects.filter(is_active=True)]
+        form.fields['assigned_to'].choices = [[u.id, u.get_username()] for u in User.objects.filter(is_active=True)]
 
         if form.is_valid():
             ticket = form.save(user=self.request.user)

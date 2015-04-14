@@ -29,7 +29,7 @@ Download, extract, and drop ``helpdesk`` into your ``PYTHONPATH``
 Adding To Your Django Project
 -----------------------------
 
-1. Edit your ``settings.py`` file and add ``helpdesk`` to the ``INSTALLED_APPS`` setting. You also need ``django.contrib.admin`` and ``django.contrib.markup`` in ``INSTALLED_APPS`` if you haven't already added it. eg::
+1. Edit your ``settings.py`` file and add ``helpdesk`` to the ``INSTALLED_APPS`` setting. You also need ``django.contrib.admin`` in ``INSTALLED_APPS`` if you haven't already added it. eg::
 
     INSTALLED_APPS = (
         'django.contrib.auth',
@@ -37,11 +37,11 @@ Adding To Your Django Project
         'django.contrib.sessions',
         'django.contrib.sites',
         'django.contrib.admin',  # Required for helpdesk admin/maintenance
-        'django.contrib.markup',  # Required for helpdesk text display
         'django.contrib.humanize',  # Required for elapsed time formatting
-        'south',  # Highly recommended to make database migrations simpler.
+        'south',  # Highly recommended to make database migrations simpler in Django < 1.7
         'markdown_deux',  # Required for Knowledgebase item formatting
-        'helpdesk',  # This is new!
+        'bootstrapform', # Required for nicer formatting of forms with the default templates
+        'helpdesk',  # This is us!
     )
 
 2. Make sure django-helpdesk is accessible via ``urls.py``. Add the following line to ``urls.py``::
@@ -58,7 +58,7 @@ Adding To Your Django Project
 
      ./manage.py syncdb
 
-   Then migrate using South
+   Then migrate using South / Django 1.7+ migrations::
 
      ./manage.py migrate helpdesk
 
@@ -98,3 +98,7 @@ Adding To Your Django Project
       LOGIN_URL = '/helpdesk/login/'
 
    Alter the URL to suit your installation path.
+
+9. Load initial e-mail templates, otherwise you will not be able to setnd e-mail::
+
+   python manage.py loaddata emailtemplate.json

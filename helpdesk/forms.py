@@ -102,7 +102,7 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
         
         for field, value in self.cleaned_data.items():
             if field.startswith('custom_'):
-                field_name = field.replace('custom_', '')
+                field_name = field.replace('custom_', '', 1)
                 customfield = CustomField.objects.get(name=field_name)
                 try:
                     cfv = TicketCustomFieldValue.objects.get(ticket=self.instance, field=customfield)
@@ -229,7 +229,7 @@ class TicketForm(CustomFieldMixin, forms.Form):
         
         for field, value in self.cleaned_data.items():
             if field.startswith('custom_'):
-                field_name = field.replace('custom_', '')
+                field_name = field.replace('custom_', '', 1)
                 customfield = CustomField.objects.get(name=field_name)
                 cfv = TicketCustomFieldValue(ticket=t,
                             field=customfield,
@@ -369,6 +369,7 @@ class PublicTicketForm(CustomFieldMixin, forms.Form):
         required=False,
         label=_('Attach File'),
         help_text=_('You can attach a file such as a document or screenshot to this ticket.'),
+        max_length=1000,
         )
 
     def __init__(self, *args, **kwargs):
@@ -407,7 +408,7 @@ class PublicTicketForm(CustomFieldMixin, forms.Form):
 
         for field, value in self.cleaned_data.items():
             if field.startswith('custom_'):
-                field_name = field.replace('custom_', '')
+                field_name = field.replace('custom_', '', 1)
                 customfield = CustomField.objects.get(name=field_name)
                 cfv = TicketCustomFieldValue(ticket=t,
                             field=customfield,
@@ -529,9 +530,9 @@ class TicketCCForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(TicketCCForm, self).__init__(*args, **kwargs)
         if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_CC:
-            users = User.objects.filter(is_active=True, is_staff=True).order_by('username')
+            users = User.objects.filter(is_active=True, is_staff=True).order_by(User.USERNAME_FIELD)
         else:
-            users = User.objects.filter(is_active=True).order_by('username')
+            users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
         self.fields['user'].queryset = users 
     class Meta:
         model = TicketCC

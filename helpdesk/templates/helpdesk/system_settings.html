@@ -1,4 +1,4 @@
-{% extends "helpdesk/base.html" %}{% load i18n %}{% load url from future %}
+{% extends "helpdesk/base.html" %}{% load i18n %}{% load url from future %}{% load user_admin_url %}
 
 {% block helpdesk_title %}{% trans "Change System Settings" %}{% endblock %}
 
@@ -14,6 +14,6 @@
     <li><a href='{% url 'admin:helpdesk_kbcategory_changelist' %}'>{% trans "Maintain Knowledgebase Categories" %}</a></li>
     <li><a href='{% url 'admin:helpdesk_kbitem_changelist' %}'>{% trans "Maintain Knowledgebase Items" %}</a></li>
     <li><a href='{% url 'admin:helpdesk_emailtemplate_changelist' %}'>{% trans "Maintain E-Mail Templates" %}</a></li>
-    <li><a href='{% url 'admin:auth_user_changelist' %}'>{% trans "Maintain Users" %}</a></li>
+    <li><a href='{% url 'changelist'|user_admin_url %}'>{% trans "Maintain Users" %}</a></li>
 </ul>
 {% endblock %}
