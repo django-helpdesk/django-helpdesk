@@ -325,4 +325,3 @@ class API:
         ticket.save()
 
         return api_return(STATUS_OK)
-
