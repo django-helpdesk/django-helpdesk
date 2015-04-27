@@ -646,7 +646,7 @@ def attachment_path(instance, filename):
     att_path = os.path.join(settings.MEDIA_ROOT, path)
     if settings.DEFAULT_FILE_STORAGE == "django.core.files.storage.FileSystemStorage":
         if not os.path.exists(att_path):
-            os.makedirs(att_path, 0777)
+            os.makedirs(att_path, 0o777)
     return os.path.join(path, filename)
 
 
@@ -1003,17 +1003,23 @@ class UserSettings(models.Model):
 
     def _set_settings(self, data):
         # data should always be a Python dictionary.
-        import cPickle
+        try:
+            import pickle
+        except ImportError:
+            import cPickle as pickle
         from helpdesk.lib import b64encode
-        self.settings_pickled = b64encode(cPickle.dumps(data))
+        self.settings_pickled = b64encode(pickle.dumps(data))
 
     def _get_settings(self):
         # return a python dictionary representing the pickled data.
-        import cPickle
+        try:
+            import pickle
+        except ImportError:
+            import cPickle as pickle
         from helpdesk.lib import b64decode
         try:
-            return cPickle.loads(b64decode(str(self.settings_pickled)))
-        except cPickle.UnpicklingError:
+            return pickle.loads(b64decode(str(self.settings_pickled)))
+        except pickle.UnpicklingError:
             return {}
 
     settings = property(_get_settings, _set_settings)

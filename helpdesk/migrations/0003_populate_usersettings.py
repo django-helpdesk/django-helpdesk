@@ -9,9 +9,12 @@ from helpdesk.settings import DEFAULT_USER_SETTINGS
 
 def picke_settings(data):
     """Pickling as defined at migration's creation time"""
-    import cPickle
+    try:
+        import pickle
+    except ImportError:
+        import cPickle as pickle
     from helpdesk.lib import b64encode
-    return b64encode(cPickle.dumps(data))
+    return b64encode(pickle.dumps(data))
 
 
 # https://docs.djangoproject.com/en/1.7/topics/migrations/#data-migrations
