@@ -20,6 +20,7 @@ from helpdesk.models import Ticket, Queue, UserSettings, KBCategory
 
 
 def homepage(request):
+    ticket = {}
     if not request.user.is_authenticated() and helpdesk_settings.HELPDESK_REDIRECT_TO_LOGIN_BY_DEFAULT:
         return HttpResponseRedirect(reverse('login'))
 
@@ -57,17 +58,25 @@ def homepage(request):
 
         if request.user.is_authenticated() and request.user.email:
             initial_data['submitter_email'] = request.user.email
+            # Display users tickets if configured
+            if helpdesk_settings.HELPDESK_USERS_TICKETS_PUBLIC :
+                try:
+                    print("display tickets")
+                    ticket = Ticket.objects.all().filter(submitter_email = request.user.email)
+                except Ticket.DoesNotExist:
+                    print("don't tickets")
+                    ticket = None
 
         form = PublicTicketForm(initial=initial_data)
         form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.filter(allow_public_submission=True)]
 
     knowledgebase_categories = KBCategory.objects.all()
-
     return render_to_response('helpdesk/public_homepage.html',
         RequestContext(request, {
             'form': form,
             'helpdesk_settings': helpdesk_settings,
-            'kb_categories': knowledgebase_categories
+            'kb_categories': knowledgebase_categories,
+            'tickets': ticket,
         }))
 
 

@@ -21,6 +21,40 @@
 </table>
 {% endif %}
 
+{% if helpdesk_settings.HELPDESK_USERS_TICKETS_PUBLIC %}
+{% if user.is_authenticated %}
+<div class="col-xs-12">
+<div class="panel panel-default">
+
+<div class="panel-body">
+    <h2 name='submit'>{% trans "My tickets" %}</h2>
+<p>{% trans "You can view your previous tickets here." %}</p>
+<div><table class="table table-bordered">
+<tbody><tr>
+                      <th>{% trans "Title" %}</th>
+                      <th>{% trans "Status" %}</th>
+                      <th>{% trans "Action" %}</th>
+                    </tr>
+
+{% for ticket in tickets %}
+       <tr>
+            <td>{{ ticket.title }}</td>
+            <td>{{ ticket.status }}</td>
+            <td><a href={% url 'helpdesk_public_view' %}?ticket={{ ticket.queue.title}}-{{ticket.id }}&email={{ request.user.email }}>{% trans "Show ticket" %}</td>
+        </tr>
+{% empty %}
+<tr><td>{% trans "You don't have any tickets" %}</td><td></td><td></td></tr>
+{% endfor %}
+    </tbody>
+    </table>
+</div>
+</div>
+</div>
+</div>
+{% endif %}
+{% endif %}
+
+
 {% if helpdesk_settings.HELPDESK_SUBMIT_A_TICKET_PUBLIC %}
 <div class="col-xs-6">
 <div class="panel panel-default">

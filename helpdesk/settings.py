@@ -57,6 +57,9 @@ HELPDESK_VIEW_A_TICKET_PUBLIC = getattr(settings, 'HELPDESK_VIEW_A_TICKET_PUBLIC
 # show 'submit a ticket' section on public page?
 HELPDESK_SUBMIT_A_TICKET_PUBLIC = getattr(settings, 'HELPDESK_SUBMIT_A_TICKET_PUBLIC', True)
 
+# show 'users tickets (by mail)' if logged on public page?
+HELPDESK_USERS_TICKETS_PUBLIC = getattr(settings, 'HELPDESK_USERS_TICKETS_PUBLIC', True)
+
 
 
 ''' options for update_ticket views '''
