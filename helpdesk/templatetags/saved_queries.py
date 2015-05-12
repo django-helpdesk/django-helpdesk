@@ -12,14 +12,14 @@ from helpdesk.models import SavedSearch
 
 
 def saved_queries(user):
-#    try:
+    try:
         user_saved_queries = SavedSearch.objects.filter(Q(user=user) | Q(shared__exact=True))
         return user_saved_queries
-#    except Exception, e:
-#        import sys
-#        print >> sys.stderr,  "'saved_queries' template tag (django-helpdesk) crashed with following error:"
-#        print >> sys.stderr,  e
-#        return ''
+    except Exception as e:
+        import sys
+        print >> sys.stderr,  "'saved_queries' template tag (django-helpdesk) crashed with following error:"
+        print >> sys.stderr,  e
+        return ''
 
 register = Library()
 register.filter('saved_queries', saved_queries)
