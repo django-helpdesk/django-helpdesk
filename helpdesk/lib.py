@@ -103,13 +103,15 @@ def send_templated_mail(template_name, email_context, recipients, sender=None, b
         html_txt = html_txt.replace('\r\n', '<br>')
         context['comment'] = mark_safe(html_txt)
 
+    from django.template import engines
+
     # get_template_from_string was removed in Django 1.8 http://django.readthedocs.org/en/1.8.x/ref/templates/upgrading.html
-    html_part = Engine().from_string(
+    html_part = engines['django'].from_string(
         "{%% extends '%s' %%}{%% block title %%}%s{%% endblock %%}{%% block content %%}%s{%% endblock %%}" % (email_html_base_file, t.heading, t.html)
         ).render(context)
 
     # get_template_from_string was removed in Django 1.8 http://django.readthedocs.org/en/1.8.x/ref/templates/upgrading.html
-    subject_part = Engine().from_string(
+    subject_part = engines['django'].from_string(
         HELPDESK_EMAIL_SUBJECT_TEMPLATE % {
             "subject": t.subject,
         }).render(context)
