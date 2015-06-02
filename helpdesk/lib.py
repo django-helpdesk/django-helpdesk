@@ -84,8 +84,11 @@ def send_templated_mail(template_name, email_context, recipients, sender=None, b
         sender = settings.DEFAULT_FROM_EMAIL
 
     footer_file = os.path.join('helpdesk', locale, 'email_text_footer.txt')
-
-    text_part = loader.get_template_from_string(
+    
+    # get_template_from_string was removed in Django 1.8 http://django.readthedocs.org/en/1.8.x/ref/templates/upgrading.html
+    from django.template import Engine
+    
+    text_part = Engine().from_string(
         "%s{%% include '%s' %%}" % (t.plain_text, footer_file)
         ).render(context)
 
@@ -100,11 +103,13 @@ def send_templated_mail(template_name, email_context, recipients, sender=None, b
         html_txt = html_txt.replace('\r\n', '<br>')
         context['comment'] = mark_safe(html_txt)
 
-    html_part = loader.get_template_from_string(
+    # get_template_from_string was removed in Django 1.8 http://django.readthedocs.org/en/1.8.x/ref/templates/upgrading.html
+    html_part = Engine().from_string(
         "{%% extends '%s' %%}{%% block title %%}%s{%% endblock %%}{%% block content %%}%s{%% endblock %%}" % (email_html_base_file, t.heading, t.html)
         ).render(context)
 
-    subject_part = loader.get_template_from_string(
+    # get_template_from_string was removed in Django 1.8 http://django.readthedocs.org/en/1.8.x/ref/templates/upgrading.html
+    subject_part = Engine().from_string(
         HELPDESK_EMAIL_SUBJECT_TEMPLATE % {
             "subject": t.subject,
         }).render(context)
