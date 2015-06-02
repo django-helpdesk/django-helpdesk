@@ -6,7 +6,8 @@ django-helpdesk - A Django powered ticket tracker for small enterprise.
 views/staff.py - The bulk of the application - provides most business logic and
                  renders all staff-facing views.
 """
-
+from __future__ import unicode_literals
+from django.utils.encoding import python_2_unicode_compatible
 from datetime import datetime, timedelta
 import sys
 
@@ -196,7 +197,7 @@ followup_delete = staff_member_required(followup_delete)
 def view_ticket(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
 
-    if request.GET.has_key('take'):
+    if 'take' in request.GET:
         # Allow the user to assign the ticket to themselves whilst viewing it.
 
         # Trick the update_ticket() view into thinking it's being called with
@@ -209,14 +210,14 @@ def view_ticket(request, ticket_id):
         }
         return update_ticket(request, ticket_id)
 
-    if request.GET.has_key('subscribe'):
+    if 'subscribe' in request.GET:
         # Allow the user to subscribe him/herself to the ticket whilst viewing it.
         ticketcc_string, SHOW_SUBSCRIBE = return_ticketccstring_and_show_subscribe(request.user, ticket)
         if SHOW_SUBSCRIBE:
             subscribe_staff_member_to_ticket(ticket, request.user)
             return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket.id]))
 
-    if request.GET.has_key('close') and ticket.status == Ticket.RESOLVED_STATUS:
+    if 'close' in request.GET and ticket.status == Ticket.RESOLVED_STATUS:
         if not ticket.assigned_to:
             owner = 0
         else:
@@ -702,15 +703,18 @@ def ticket_list(request):
         if not (saved_query.shared or saved_query.user == request.user):
             return HttpResponseRedirect(reverse('helpdesk_list'))
 
-        import cPickle
+        try:
+            import pickle
+        except ImportError:
+            import cPickle as pickle
         from helpdesk.lib import b64decode
-        query_params = cPickle.loads(b64decode(str(saved_query.query)))
-    elif not (  request.GET.has_key('queue')
-            or  request.GET.has_key('assigned_to')
-            or  request.GET.has_key('status')
-            or  request.GET.has_key('q')
-            or  request.GET.has_key('sort')
-            or  request.GET.has_key('sortreverse')
+        query_params = pickle.loads(b64decode(str(saved_query.query)))
+    elif not (  'queue' in request.GET
+            or  'assigned_to' in request.GET
+            or  'status' in request.GET
+            or  'q' in request.GET
+            or  'sort' in request.GET
+            or  'sortreverse' in request.GET
                 ):
 
         # Fall-back if no querying is being done, force the list to only
@@ -799,13 +803,16 @@ def ticket_list(request):
         tickets = ticket_paginator.page(ticket_paginator.num_pages)
 
     search_message = ''
-    if context.has_key('query') and settings.DATABASES['default']['ENGINE'].endswith('sqlite'):
+    if 'query' in context and settings.DATABASES['default']['ENGINE'].endswith('sqlite'):
         search_message = _('<p><strong>Note:</strong> Your keyword search is case sensitive because of your database. This means the search will <strong>not</strong> be accurate. By switching to a different database system you will gain better searching! For more information, read the <a href="http://docs.djangoproject.com/en/dev/ref/databases/#sqlite-string-matching">Django Documentation on string matching in SQLite</a>.')
 
 
-    import cPickle
+    try:
+        import pickle
+    except ImportError:
+        import cPickle as pickle
     from helpdesk.lib import b64encode
-    urlsafe_query = b64encode(cPickle.dumps(query_params))
+    urlsafe_query = b64encode(pickle.dumps(query_params))
 
     user_saved_queries = SavedSearch.objects.filter(Q(user=request.user) | Q(shared__exact=True))
 
@@ -864,7 +871,7 @@ def create_ticket(request):
         initial_data = {}
         if request.user.usersettings.settings.get('use_email_as_submitter', False) and request.user.email:
             initial_data['submitter_email'] = request.user.email
-        if request.GET.has_key('queue'):
+        if 'queue' in request.GET:
             initial_data['queue'] = request.GET['queue']
 
         form = TicketForm(initial=initial_data)
@@ -966,9 +973,12 @@ def run_report(request, report):
         if not (saved_query.shared or saved_query.user == request.user):
             return HttpResponseRedirect(reverse('helpdesk_report_index'))
 
-        import cPickle
+        try:
+            import pickle
+        except ImportError:
+            import cPickle as pickle
         from helpdesk.lib import b64decode
-        query_params = cPickle.loads(b64decode(str(saved_query.query)))
+        query_params = pickle.loads(b64decode(str(saved_query.query)))
         report_queryset = apply_query(report_queryset, query_params)
 
     from collections import defaultdict
@@ -1003,7 +1013,7 @@ def run_report(request, report):
     if report == 'userpriority':
         title = _('User by Priority')
         col1heading = _('User')
-        possible_options = [t[1].__unicode__() for t in Ticket.PRIORITY_CHOICES]
+        possible_options = [t[1].__str__() for t in Ticket.PRIORITY_CHOICES]
         charttype = 'bar'
 
     elif report == 'userqueue':
@@ -1015,7 +1025,7 @@ def run_report(request, report):
     elif report == 'userstatus':
         title = _('User by Status')
         col1heading = _('User')
-        possible_options = [s[1].__unicode__() for s in Ticket.STATUS_CHOICES]
+        possible_options = [s[1].__str__() for s in Ticket.STATUS_CHOICES]
         charttype = 'bar'
 
     elif report == 'usermonth':
@@ -1027,13 +1037,13 @@ def run_report(request, report):
     elif report == 'queuepriority':
         title = _('Queue by Priority')
         col1heading = _('Queue')
-        possible_options = [t[1].__unicode__() for t in Ticket.PRIORITY_CHOICES]
+        possible_options = [t[1].__str__() for t in Ticket.PRIORITY_CHOICES]
         charttype = 'bar'
 
     elif report == 'queuestatus':
         title = _('Queue by Status')
         col1heading = _('Queue')
-        possible_options = [s[1].__unicode__() for s in Ticket.STATUS_CHOICES]
+        possible_options = [s[1].__str__() for s in Ticket.STATUS_CHOICES]
         charttype = 'bar'
 
     elif report == 'queuemonth':
@@ -1249,7 +1259,7 @@ def ticket_dependency_add(request, ticket_id):
         if form.is_valid():
             ticketdependency = form.save(commit=False)
             ticketdependency.ticket = ticket
-            if ticketdependency.ticket <> ticketdependency.depends_on:
+            if ticketdependency.ticket != ticketdependency.depends_on:
                 ticketdependency.save()
             return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket.id]))
     else:

@@ -6,8 +6,10 @@ django-helpdesk - A Django powered ticket tracker for small enterprise.
 forms.py - Definitions of newforms-based forms for creating and maintaining
            tickets.
 """
-
-from StringIO import StringIO
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 
 from django import forms
 from django.forms import extras
@@ -369,6 +371,7 @@ class PublicTicketForm(CustomFieldMixin, forms.Form):
         required=False,
         label=_('Attach File'),
         help_text=_('You can attach a file such as a document or screenshot to this ticket.'),
+        max_length=1000,
         )
 
     def __init__(self, *args, **kwargs):

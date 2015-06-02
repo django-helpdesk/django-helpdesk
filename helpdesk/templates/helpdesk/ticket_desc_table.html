@@ -1,10 +1,10 @@
-{% load i18n humanize %}{% load url from future %}
+{% load i18n humanize %}
 <table class="table table-hover table-bordered table-striped">
 <thead>
     <tr class='row_tablehead'><td colspan='2'><h3>{{ ticket.id }}. {{ ticket.title }} [{{ ticket.get_status }}]</h3> <span class='ticket_toolbar'>
         <a href='{% url 'helpdesk_edit' ticket.id %}' class="ticket-edit"><span class="glyphicon glyphicon-pencil"></span> Edit</a>
     | <a href='{% url 'helpdesk_delete' ticket.id %}' class="ticket-delete"><span class="glyphicon glyphicon-remove"></span> Delete</a>
-    {% if ticket.on_hold %} | <a href='unhold/' class="ticket-hold">{% trans "Unhold" %}</a>{% else %} | <a href='hold/' class="ticket-hold">{% trans "Hold" %}</a>{% endif %}
+    {% if ticket.on_hold %} | <a href='{% url 'helpdesk_unhold' ticket.id %}' class="ticket-hold">{% trans "Unhold" %}</a>{% else %} | <a href='{% url 'helpdesk_hold' ticket.id %}' class="ticket-hold">{% trans "Hold" %}</a>{% endif %}
     </span></td></tr>
 <tr><th colspan='2'>{% blocktrans with ticket.queue as queue %}Queue: {{ queue }}{% endblocktrans %}</th></tr>
 </thead>
