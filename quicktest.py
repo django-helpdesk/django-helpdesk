@@ -90,6 +90,7 @@ class QuickDjangoTest(object):
             INSTALLED_APPS = self.INSTALLED_APPS + self.apps,
             MIDDLEWARE_CLASSES = self.MIDDLEWARE_CLASSES,
             ROOT_URLCONF = self.apps[0] + '.urls',
+            STATIC_URL = '/static/'
         )
 
         if django.VERSION >= (1, 7):
