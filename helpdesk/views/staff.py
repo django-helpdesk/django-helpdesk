@@ -1013,7 +1013,7 @@ def run_report(request, report):
     if report == 'userpriority':
         title = _('User by Priority')
         col1heading = _('User')
-        possible_options = [t[1].__str__() for t in Ticket.PRIORITY_CHOICES]
+        possible_options = [t[1].title() for t in Ticket.PRIORITY_CHOICES]
         charttype = 'bar'
 
     elif report == 'userqueue':
@@ -1025,7 +1025,7 @@ def run_report(request, report):
     elif report == 'userstatus':
         title = _('User by Status')
         col1heading = _('User')
-        possible_options = [s[1].__str__() for s in Ticket.STATUS_CHOICES]
+        possible_options = [s[1].title() for s in Ticket.STATUS_CHOICES]
         charttype = 'bar'
 
     elif report == 'usermonth':
@@ -1037,13 +1037,13 @@ def run_report(request, report):
     elif report == 'queuepriority':
         title = _('Queue by Priority')
         col1heading = _('Queue')
-        possible_options = [t[1].__str__() for t in Ticket.PRIORITY_CHOICES]
+        possible_options = [t[1].title() for t in Ticket.PRIORITY_CHOICES]
         charttype = 'bar'
 
     elif report == 'queuestatus':
         title = _('Queue by Status')
         col1heading = _('Queue')
-        possible_options = [s[1].__str__() for s in Ticket.STATUS_CHOICES]
+        possible_options = [s[1].title() for s in Ticket.STATUS_CHOICES]
         charttype = 'bar'
 
     elif report == 'queuemonth':
