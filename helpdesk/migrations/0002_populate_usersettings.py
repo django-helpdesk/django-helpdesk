@@ -43,7 +43,7 @@ noop = lambda *args, **kwargs: None
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('helpdesk', '0002_socks_proxy'),
+        ('helpdesk', '0001_initial'),
     ]
 
     operations = [
