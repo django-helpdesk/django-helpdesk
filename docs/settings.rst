@@ -120,6 +120,14 @@ Staff Ticket Creation Settings
   **Default:** ``HELPDESK_CREATE_TICKET_HIDE_ASSIGNED_TO = False``
 
 
+Staff Ticket View Settings
+------------------------------
+
+- **HELPDESK_ENABLE_PER_QUEUE_MEMBERSHIP** Only show queues to which staff users have specifically been granted access to in the dashboard, ticket query, and ticket report views? Note that this does not prevent them from creating new tickets in any queue, or from editing existing tickets in other queues if they know the ticket ID or otherwise access the ticket URL directly. It is meant to keep work loads segregated for staff convenience, not to prevent malicious behavior. It also does not limit superuser accounts regardless of whatever gueue memberships they have or have not been granted.
+
+  **Default:** ``HELPDESK_ENABLE_PER_QUEUE_MEMBERSHIP = False``
+
+
 
 Default E-Mail Settings
 -----------------------

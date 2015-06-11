@@ -76,6 +76,11 @@ def dashboard(request):
         ).exclude(
             status=Ticket.CLOSED_STATUS,
         )
+    limit_queues_by_user = helpdesk_settings.HELPDESK_ENABLE_PER_QUEUE_STAFF_MEMBERSHIP and not request.user.is_superuser
+    if limit_queues_by_user:
+        unassigned_tickets = unassigned_tickets.filter(
+            queue__in=request.user.queuemembership.queues.all(),
+        )
 
     # all tickets, reported by current user
     all_tickets_reported_by_current_user = ''
@@ -85,7 +90,12 @@ def dashboard(request):
             submitter_email=email_current_user,
         ).order_by('status')
 
-    basic_ticket_stats = calc_basic_ticket_stats(Ticket)
+    Tickets = Ticket.objects
+    if limit_queues_by_user:
+        Tickets = Tickets.filter(
+            queue__in=request.user.queuemembership.queues.all(),
+        )
+    basic_ticket_stats = calc_basic_ticket_stats(Tickets)
 
     # The following query builds a grid of queues & ticket statuses,
     # to be displayed to the user. EG:
@@ -93,6 +103,17 @@ def dashboard(request):
     # Queue 1    10     4
     # Queue 2     4    12
 
+    from_clause = """FROM    helpdesk_ticket t,
+                    helpdesk_queue q"""
+    where_clause = """WHERE   q.id = t.queue_id"""
+    if limit_queues_by_user:
+        from_clause = """%s,
+                    helpdesk_queuemembership qm,
+                    helpdesk_queuemembership_queues qm_queues""" % from_clause
+        where_clause = """%s AND
+                    qm.user_id = %d AND
+                    qm.id = qm_queues.queuemembership_id AND
+                    q.id = qm_queues.queue_id""" % (where_clause, request.user.id)
     cursor = connection.cursor()
     cursor.execute("""
         SELECT      q.id as queue,
@@ -100,12 +121,11 @@ def dashboard(request):
                     COUNT(CASE t.status WHEN '1' THEN t.id WHEN '2' THEN t.id END) AS open,
                     COUNT(CASE t.status WHEN '3' THEN t.id END) AS resolved,
                     COUNT(CASE t.status WHEN '4' THEN t.id END) AS closed
-            FROM    helpdesk_ticket t,
-                    helpdesk_queue q
-            WHERE   q.id = t.queue_id
+            %s
+            %s
             GROUP BY queue, name
             ORDER BY q.id;
-    """)
+    """ % (from_clause, where_clause))
 
     dash_tickets = query_to_dict(cursor.fetchall(), cursor.description)
 
@@ -781,15 +801,24 @@ def ticket_list(request):
         sortreverse = request.GET.get('sortreverse', None)
         query_params['sortreverse'] = sortreverse
 
+    tickets = Ticket.objects.select_related()
+    queue_choices = Queue.objects.all()
+    if helpdesk_settings.HELPDESK_ENABLE_PER_QUEUE_STAFF_MEMBERSHIP and not request.user.is_superuser:
+        user_queues = request.user.queuemembership.queues.all()
+        tickets = tickets.filter(
+            queue__in=user_queues,
+        )
+        queue_choices = user_queues
+
     try:
-        ticket_qs = apply_query(Ticket.objects.select_related(), query_params)
+        ticket_qs = apply_query(tickets, query_params)
     except ValidationError:
         # invalid parameters in query, return default query
         query_params = {
             'filtering': {'status__in': [1, 2, 3]},
             'sorting': 'created',
         }
-        ticket_qs = apply_query(Ticket.objects.select_related(), query_params)
+        ticket_qs = apply_query(tickets, query_params)
 
     ticket_paginator = paginator.Paginator(ticket_qs, request.user.usersettings.settings.get('tickets_per_page') or 20)
     try:
@@ -826,7 +855,7 @@ def ticket_list(request):
             query_string=querydict.urlencode(),
             tickets=tickets,
             user_choices=User.objects.filter(is_active=True,is_staff=True),
-            queue_choices=Queue.objects.all(),
+            queue_choices=queue_choices,
             status_choices=Ticket.STATUS_CHOICES,
             urlsafe_query=urlsafe_query,
             user_saved_queries=user_saved_queries,
@@ -960,6 +989,11 @@ def run_report(request, report):
         return HttpResponseRedirect(reverse("helpdesk_report_index"))
 
     report_queryset = Ticket.objects.all().select_related()
+    limit_queues_by_user = helpdesk_settings.HELPDESK_ENABLE_PER_QUEUE_STAFF_MEMBERSHIP and not request.user.is_superuser
+    if limit_queues_by_user:
+        report_queryset = report_queryset.filter(
+            queue__in=request.user.queuemembership.queues.all(),
+        )
 
     from_saved_query = False
     saved_query = None
@@ -1019,7 +1053,12 @@ def run_report(request, report):
     elif report == 'userqueue':
         title = _('User by Queue')
         col1heading = _('User')
-        possible_options = [q.title.encode('utf-8') for q in Queue.objects.all()]
+        queue_options = Queue.objects.all()
+        if limit_queues_by_user:
+            queue_options  = queue_options.filter(
+                pk__in=request.user.queuemembership.queues.all(),
+            )
+        possible_options = [q.title.encode('utf-8') for q in queue_options]
         charttype = 'bar'
 
     elif report == 'userstatus':
@@ -1307,9 +1346,9 @@ def calc_average_nbr_days_until_ticket_resolved(Tickets):
 
     return mean_per_ticket
 
-def calc_basic_ticket_stats(Ticket):
+def calc_basic_ticket_stats(Tickets):
     # all not closed tickets (open, reopened, resolved,) - independent of user
-    all_open_tickets = Ticket.objects.exclude(status = Ticket.CLOSED_STATUS)
+    all_open_tickets = Tickets.exclude(status = Ticket.CLOSED_STATUS)
     today = datetime.today()
 
     date_30 = date_rel_to_today(today, 30)
@@ -1337,7 +1376,7 @@ def calc_basic_ticket_stats(Ticket):
     ots.append(['> 60 days', N_ota_ge_60, get_color_for_nbr_days(N_ota_ge_60), sort_string('', date_60_str), ])
 
     # all closed tickets - independent of user.
-    all_closed_tickets = Ticket.objects.filter(status = Ticket.CLOSED_STATUS)
+    all_closed_tickets = Tickets.filter(status = Ticket.CLOSED_STATUS)
     average_nbr_days_until_ticket_closed = calc_average_nbr_days_until_ticket_resolved(all_closed_tickets)
     # all closed tickets that were opened in the last 60 days.
     all_closed_last_60_days = all_closed_tickets.filter(created__gte = date_60_str)

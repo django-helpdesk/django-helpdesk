@@ -61,6 +61,7 @@ If a user is a staff member, they get general helpdesk access, including:
 6. Assign tickets to themselves or other staff members
 7. Resolve tickets
 
+Optionally, their access to view tickets, both on the dashboard and through searches and reports, may be restricted by a list of queues to which they have been granted membership. Create and update permissions for individual tickets are not limited by this optional restriction.
 
 Licensing
 ---------
