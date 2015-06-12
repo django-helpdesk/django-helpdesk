@@ -86,9 +86,9 @@ def send_templated_mail(template_name, email_context, recipients, sender=None, b
     footer_file = os.path.join('helpdesk', locale, 'email_text_footer.txt')
     
     # get_template_from_string was removed in Django 1.8 http://django.readthedocs.org/en/1.8.x/ref/templates/upgrading.html
-    from django.template import Engine
+    from django.template import engines
     
-    text_part = Engine().from_string(
+    text_part = engines['django'].from_string(
         "%s{%% include '%s' %%}" % (t.plain_text, footer_file)
         ).render(context)
 
