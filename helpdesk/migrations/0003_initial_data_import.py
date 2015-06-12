@@ -36,7 +36,7 @@ def unload_fixture(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('helpdesk', '0003_populate_usersettings'),
+        ('helpdesk', '0002_populate_usersettings'),
     ]
 
     operations = [

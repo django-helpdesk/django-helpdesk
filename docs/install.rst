@@ -46,11 +46,11 @@ Adding To Your Django Project
 
 2. Make sure django-helpdesk is accessible via ``urls.py``. Add the following line to ``urls.py``::
 
-     (r'helpdesk/', include('helpdesk.urls')),
+     url(r'helpdesk/', include('helpdesk.urls')),
 
    Note that you can change 'helpdesk/' to anything you like, such as 'support/' or 'help/'. If you want django-helpdesk to be available at the root of your site (for example at http://support.mysite.tld/) then the line will be as follows::
 
-     (r'', include('helpdesk.urls')),
+     url(r'', include('helpdesk.urls')),
 
    This line will have to come *after* any other lines in your urls.py such as those used by the Django admin.
 
