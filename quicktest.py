@@ -93,6 +93,9 @@ class QuickDjangoTest(object):
             STATIC_URL = '/static/'
         )
 
+        # compatibility with django 1.8 downwards
+        # see: http://stackoverflow.com/questions/3841725/how-to-launch-tests-for-django-reusable-app
+        
         try:
             # Django <= 1.8
             from django.test.simple import DjangoTestSuiteRunner
@@ -108,11 +111,6 @@ class QuickDjangoTest(object):
         failures = test_runner.run_tests(self.apps)
         if failures:
             sys.exit(failures)
-
-        # from django.test.simple import DjangoTestSuiteRunner
-        # failures = DjangoTestSuiteRunner().run_tests(self.apps, verbosity=1)
-        # if failures:
-        #     sys.exit(failures)
 
 if __name__ == '__main__':
     """
