@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('helpdesk', '0004_initial_data_import'),
+        ('helpdesk', '0003_initial_data_import'),
     ]
 
     operations = [

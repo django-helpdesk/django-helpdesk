@@ -123,7 +123,7 @@ Staff Ticket Creation Settings
 Staff Ticket View Settings
 ------------------------------
 
-- **HELPDESK_ENABLE_PER_QUEUE_MEMBERSHIP** Only show queues to which staff users have specifically been granted access to in the dashboard, ticket query, and ticket report views? Note that this does not prevent them from creating new tickets in any queue, or from editing existing tickets in other queues if they know the ticket ID or otherwise access the ticket URL directly. It is meant to keep work loads segregated for staff convenience, not to prevent malicious behavior. It also does not limit superuser accounts regardless of whatever gueue memberships they have or have not been granted.
+- **HELPDESK_ENABLE_PER_QUEUE_MEMBERSHIP** If ``True``, logged in staff users only see queues and tickets to which they have specifically been granted access -  this holds for the dashboard, ticket query, and ticket report views. User assignment can be modified in the ``User`` section of the standard ``django.contrib.admin`` app. *Note*: This setting does not prevent staff users from creating tickets for all queues or editing tickets in any queue, should they know the ticket ID or editing URL. It is meant to keep work loads segregated for staff convenience, not to prevent malicious behavior. Also, superuser accounts have full access to all queues, regardless of whatever queue memberships they have been granted.
 
   **Default:** ``HELPDESK_ENABLE_PER_QUEUE_MEMBERSHIP = False``
 
