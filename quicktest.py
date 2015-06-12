@@ -93,13 +93,26 @@ class QuickDjangoTest(object):
             STATIC_URL = '/static/'
         )
 
+        try:
+            # Django <= 1.8
+            from django.test.simple import DjangoTestSuiteRunner
+            test_runner = DjangoTestSuiteRunner(verbosity=1)
+        except ImportError:
+            # Django >= 1.8
+            from django.test.runner import DiscoverRunner
+            test_runner = DiscoverRunner(verbosity=1)
+
         if django.VERSION >= (1, 7):
             django.setup()
 
-        from django.test.simple import DjangoTestSuiteRunner
-        failures = DjangoTestSuiteRunner().run_tests(self.apps, verbosity=1)
+        failures = test_runner.run_tests(self.apps)
         if failures:
             sys.exit(failures)
+
+        # from django.test.simple import DjangoTestSuiteRunner
+        # failures = DjangoTestSuiteRunner().run_tests(self.apps, verbosity=1)
+        # if failures:
+        #     sys.exit(failures)
 
 if __name__ == '__main__':
     """
