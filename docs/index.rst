@@ -33,7 +33,7 @@ django-helpdesk is just a Django application with models, views, templates, and 
 Key Features
 ------------
 
-django-helpdesk has been designed for small businesses who need to recieve, manage and respond to requests for help from customers. In this context *'customers'* may be external users, or other people within your company.
+django-helpdesk has been designed for small businesses who need to receive, manage and respond to requests for help from customers. In this context *'customers'* may be external users, or other people within your company.
 
 * Tickets can be opened via email
 * Multiple queues / categories of tickets
