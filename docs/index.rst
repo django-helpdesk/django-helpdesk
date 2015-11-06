@@ -33,7 +33,7 @@ django-helpdesk is just a Django application with models, views, templates, and 
 Key Features
 ------------
 
-django-helpdesk has been designed for small businesses who need to recieve, manage and respond to requests for help from customers. In this context *'customers'* may be external users, or other people within your company.
+django-helpdesk has been designed for small businesses who need to receive, manage and respond to requests for help from customers. In this context *'customers'* may be external users, or other people within your company.
 
 * Tickets can be opened via email
 * Multiple queues / categories of tickets
@@ -61,6 +61,7 @@ If a user is a staff member, they get general helpdesk access, including:
 6. Assign tickets to themselves or other staff members
 7. Resolve tickets
 
+Optionally, their access to view tickets, both on the dashboard and through searches and reports, may be restricted by a list of queues to which they have been granted membership. Create and update permissions for individual tickets are not limited by this optional restriction.
 
 Licensing
 ---------
