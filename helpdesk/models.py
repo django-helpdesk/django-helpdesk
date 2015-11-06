@@ -1359,3 +1359,25 @@ class TicketDependency(models.Model):
         unique_together = ('ticket', 'depends_on')
         verbose_name = _('Ticket dependency')
         verbose_name_plural = _('Ticket dependencies')
+
+
+class QueueMembership(models.Model):
+    """
+    Used to restrict staff members to certain queues only
+    """
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_('User'),
+        )
+
+    queues = models.ManyToManyField(
+        Queue,
+        verbose_name=_('Authorized Queues'),
+        )
+
+    def __unicode__(self):
+        return '%s authorized for queues %s' % (self.user, ", ".join(self.queues.values_list('title', flat=True)))
+
+    class Meta:
+        verbose_name = _('Queue Membership')
+        verbose_name_plural = _('Queue Memberships')

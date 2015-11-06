@@ -40,6 +40,7 @@ class Command(BaseCommand):
                 '--escalate-verbosely', '-x',
                 action='store_true',
                 default=False,
+                dest='escalate-verbosely',
                 help='Display a list of dates excluded'),
             )
 
