@@ -1,6 +1,9 @@
-from os.path import dirname, basename, isfile
-import glob
+# import all test_*.py files in directory.
+# neccessary for automatic discovery in django <= 1.5
+# http://stackoverflow.com/a/15780326/1382740
 
-# import all test_*.py files in directory
-modules = glob.glob(dirname(__file__)+"/test_*.py")
-__all__ = [basename(f)[:-3] for f in modules if isfile(f)]
+import unittest
+
+
+def suite():
+    return unittest.TestLoader().discover("helpdesk.tests", pattern="test_*.py")
