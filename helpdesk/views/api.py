@@ -202,7 +202,7 @@ class API:
 
         context = safe_template_context(ticket)
         context['comment'] = f.comment
-        
+
         messages_sent_to = []
 
         if public and ticket.submitter_email:
@@ -237,14 +237,20 @@ class API:
                 )
             messages_sent_to.append(ticket.queue.updated_ticket_cc)
 
-        if ticket.assigned_to and self.request.user != ticket.assigned_to and getattr(ticket.assigned_to.usersettings.settings, 'email_on_ticket_apichange', False) and ticket.assigned_to.email and ticket.assigned_to.email not in messages_sent_to:
+        if (
+            ticket.assigned_to and
+            self.request.user != ticket.assigned_to and
+            ticket.assigned_to.usersettings.settings.get('email_on_ticket_apichange', False) and
+            ticket.assigned_to.email and
+            ticket.assigned_to.email not in messages_sent_to
+        ):
             send_templated_mail(
                 'updated_owner',
                 context,
                 recipients=ticket.assigned_to.email,
                 sender=ticket.queue.from_address,
                 fail_silently=True,
-                )
+            )
 
         ticket.save()
 
@@ -276,7 +282,7 @@ class API:
         context['resolution'] = f.comment
 
         subject = '%s %s (Resolved)' % (ticket.ticket, ticket.title)
-        
+
         messages_sent_to = []
 
         if ticket.submitter_email:

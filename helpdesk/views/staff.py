@@ -512,6 +512,7 @@ def update_ticket(request, ticket_id, public=False):
                     recipients=cc.email_address,
                     sender=ticket.queue.from_address,
                     fail_silently=True,
+                    files=files,
                     )
                 messages_sent_to.append(cc.email_address)
 
