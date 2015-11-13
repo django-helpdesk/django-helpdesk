@@ -1,4 +1,5 @@
 {% extends "helpdesk/public_base.html" %}{% load i18n humanize %}
+{% load static from staticfiles %}
 {% block helpdesk_title %}{% trans "View a Ticket" %}{% endblock %}
 
 {% block helpdesk_body %}
@@ -45,7 +46,7 @@
 </tr>
 
 {% if ticket.resolution %}<tr>
-    <th colspan='2'>{% trans "Resolution" %}{% ifequal ticket.get_status_display "Resolved" %} <a href='{{ ticket.ticket_url }}&close'><img src='{{ STATIC_URL }}/helpdesk/buttons/accept.png' alt='{% trans "Accept" %}' title='{% trans "Accept and Close" %}' width='60' height='15' /></a>{% endifequal %}</th>
+    <th colspan='2'>{% trans "Resolution" %}{% ifequal ticket.get_status_display "Resolved" %} <a href='{{ ticket.ticket_url }}&close'><img src='{% static "helpdesk/buttons/accept.png" %}' alt='{% trans "Accept" %}' title='{% trans "Accept and Close" %}' width='60' height='15' /></a>{% endifequal %}</th>
 </tr>
 <tr>
     <td colspan='2'>{{ ticket.resolution|urlizetrunc:50|linebreaksbr }}</td>
