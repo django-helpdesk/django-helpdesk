@@ -370,8 +370,13 @@ def update_ticket(request, ticket_id, public=False):
     
 
     # get_template_from_string was removed in Django 1.8 http://django.readthedocs.org/en/1.8.x/ref/templates/upgrading.html
-    from django.template import engines
-    comment = engines['django'].from_string(comment).render(Context(context))
+    try:
+        from django.template import engines
+        template_func = engines['django'].from_string
+    except ImportError:  # occurs in django < 1.8
+        template_func = loader.get_template_from_string
+
+    comment = template_func(comment).render(Context(context))
 
     if owner is -1 and ticket.assigned_to:
         owner = ticket.assigned_to.id
