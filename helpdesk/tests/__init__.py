@@ -1,4 +1,6 @@
-from helpdesk.tests.test_ticket_submission import *
-from helpdesk.tests.test_public_actions import *
-from helpdesk.tests.test_navigation import *
-from helpdesk.tests.test_per_queue_staff_membership import *
+from os.path import dirname, basename, isfile
+import glob
+
+# import all test_*.py files in directory
+modules = glob.glob(dirname(__file__)+"/test_*.py")
+__all__ = [basename(f)[:-3] for f in modules if isfile(f)]
