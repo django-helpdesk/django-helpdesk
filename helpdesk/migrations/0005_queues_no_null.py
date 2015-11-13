@@ -7,7 +7,7 @@ from django.db import models, migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('helpdesk', '0004_initial_data_import'),
+        ('helpdesk', '0004_add_per_queue_staff_membership'),
     ]
 
     operations = [
