@@ -1,4 +1,9 @@
-from helpdesk.tests.ticket_submission import *
-from helpdesk.tests.public_actions import *
-from helpdesk.tests.navigation import *
-from helpdesk.tests.per_queue_staff_membership import *
+# import all test_*.py files in directory.
+# neccessary for automatic discovery in django <= 1.5
+# http://stackoverflow.com/a/15780326/1382740
+
+import unittest
+
+
+def suite():
+    return unittest.TestLoader().discover("helpdesk.tests", pattern="test_*.py")

@@ -367,7 +367,16 @@ def update_ticket(request, ticket_id, public=False):
     # if comment contains some django code, like "why does {% if bla %} crash",
     # then the following line will give us a crash, since django expects {% if %}
     # to be closed with an {% endif %} tag.
-    comment = loader.get_template_from_string(comment).render(Context(context))
+    
+
+    # get_template_from_string was removed in Django 1.8 http://django.readthedocs.org/en/1.8.x/ref/templates/upgrading.html
+    try:
+        from django.template import engines
+        template_func = engines['django'].from_string
+    except ImportError:  # occurs in django < 1.8
+        template_func = loader.get_template_from_string
+
+    comment = template_func(comment).render(Context(context))
 
     if owner is -1 and ticket.assigned_to:
         owner = ticket.assigned_to.id
