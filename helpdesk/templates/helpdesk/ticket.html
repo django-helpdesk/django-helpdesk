@@ -1,4 +1,6 @@
-{% extends "helpdesk/base.html" %}{% load i18n bootstrap humanize %}
+{% extends "helpdesk/base.html" %}
+{% load i18n bootstrap humanize %}
+{% load static from staticfiles %}
 {% block helpdesk_title %}{% trans "View Ticket Details" %}{% endblock %}
 {% block helpdesk_head %}
 <script type="text/javascript">
@@ -75,11 +77,11 @@ function googleTranslateElementInit() {
         {% if not followup.public %} <span class='private'>({% trans "Private" %})</span>{% endif %}
         {% if helpdesk_settings.HELPDESK_SHOW_EDIT_BUTTON_FOLLOW_UP %}
         {% if followup.user and request.user == followup.user and not followup.ticketchange_set.all %}
-        <a href="{% url 'helpdesk_followup_edit' ticket.id followup.id %}" class='followup-edit'><img width="60" height="15" title="Edit" alt="Edit" src="{{ STATIC_URL }}helpdesk/buttons/edit.png"></a>
+        <a href="{% url 'helpdesk_followup_edit' ticket.id followup.id %}" class='followup-edit'><img width="60" height="15" title="Edit" alt="Edit" src="{% static "helpdesk/buttons/edit.png" %}"></a>
         {% endif %}
         {% endif %}
         {% if user.is_superuser and helpdesk_settings.HELPDESK_SHOW_DELETE_BUTTON_SUPERUSER_FOLLOW_UP %}
-        <a href="{% url 'helpdesk_followup_delete' ticket.id followup.id %}" class='followup-edit'><img width="60" height="15" title="Delete" alt="Delete" src="{{ STATIC_URL }}helpdesk/buttons/delete.png"></a>
+        <a href="{% url 'helpdesk_followup_delete' ticket.id followup.id %}" class='followup-edit'><img width="60" height="15" title="Delete" alt="Delete" src="{% static "helpdesk/buttons/delete.png" %}"></a>
         {% endif %}
     </div>
 {% else %}
@@ -88,11 +90,11 @@ function googleTranslateElementInit() {
         {{ followup.title }} <span class='byline text-info'>{% if followup.user %}by {{ followup.user }}{% endif %} <span title='{{ followup.date|date:"r" }}'>{{ followup.date|naturaltime }}</span>{% if not followup.public %} <span class='private'>({% trans "Private" %})</span>{% endif %}</span>
         {% if helpdesk_settings.HELPDESK_SHOW_EDIT_BUTTON_FOLLOW_UP %}
         {% if followup.user and request.user == followup.user and not followup.ticketchange_set.all %}
-        <a href="{% url 'helpdesk_followup_edit' ticket.id followup.id %}" class='followup-edit'><img width="60" height="15" title="Edit" alt="Edit" src="{{ STATIC_URL }}helpdesk/buttons/edit.png"></a>
+        <a href="{% url 'helpdesk_followup_edit' ticket.id followup.id %}" class='followup-edit'><img width="60" height="15" title="Edit" alt="Edit" src="{% static "helpdesk/buttons/edit.png" %}"></a>
         {% endif %}
         {% endif %}
         {% if user.is_superuser and helpdesk_settings.HELPDESK_SHOW_DELETE_BUTTON_SUPERUSER_FOLLOW_UP %}
-        <a href="{% url 'helpdesk_followup_delete' ticket.id followup.id %}" class='followup-edit'><img width="60" height="15" title="Delete" alt="Delete" src="{{ STATIC_URL }}helpdesk/buttons/delete.png"></a>
+        <a href="{% url 'helpdesk_followup_delete' ticket.id followup.id %}" class='followup-edit'><img width="60" height="15" title="Delete" alt="Delete" src="{% static "helpdesk/buttons/delete.png" %}"></a>
         {% endif %}
     </div>
 {% endif %}

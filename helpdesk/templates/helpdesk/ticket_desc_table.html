@@ -1,4 +1,5 @@
 {% load i18n humanize %}
+{% load static from staticfiles %}
 <table class="table table-hover table-bordered table-striped">
 <thead>
     <tr class='row_tablehead'><td colspan='2'><h3>{{ ticket.id }}. {{ ticket.title }} [{{ ticket.get_status }}]</h3> <span class='ticket_toolbar'>
@@ -23,7 +24,7 @@
 </tr>
 
 {% if ticket.resolution %}<tr>
-    <th colspan='2'>{% trans "Resolution" %}{% ifequal ticket.get_status_display "Resolved" %} <a href='?close'><img src='{{ STATIC_URL }}helpdesk/buttons/accept.png' alt='{% trans "Accept" %}' title='{% trans "Accept and Close" %}' width='60' height='15' /></a>{% endifequal %}</th>
+    <th colspan='2'>{% trans "Resolution" %}{% ifequal ticket.get_status_display "Resolved" %} <a href='?close'><img src='{% static "helpdesk/buttons/accept.png" %}' alt='{% trans "Accept" %}' title='{% trans "Accept and Close" %}' width='60' height='15' /></a>{% endifequal %}</th>
 </tr>
 <tr>
     <td colspan='2'>{{ ticket.resolution|force_escape|urlizetrunc:50|linebreaksbr }}</td>
