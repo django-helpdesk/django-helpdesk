@@ -19,13 +19,14 @@ class QuickDjangoTest(object):
     """
     DIRNAME = os.path.dirname(__file__)
     INSTALLED_APPS = (
+        'django.contrib.admin',
         'django.contrib.auth',
         'django.contrib.contenttypes',
-        'django.contrib.sessions',
-        'django.contrib.admin',
-        'django.contrib.staticfiles',
-        'django.contrib.messages',
         'django.contrib.humanize',
+        'django.contrib.messages',
+        'django.contrib.sessions',
+        'django.contrib.sites',
+        'django.contrib.staticfiles',
         'bootstrapform',
     )
     MIDDLEWARE_CLASSES = [
