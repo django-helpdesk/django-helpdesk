@@ -4,6 +4,12 @@ from django.core import mail
 from django.test.client import Client
 from django.core.urlresolvers import reverse
 
+try:  # python 3
+    from urllib.parse import urlparse
+except ImportError:  # python 2
+    from urlparse import urlparse
+
+
 class TicketBasicsTestCase(TestCase):
     fixtures = ['emailtemplate.json']
 
@@ -44,11 +50,16 @@ class TicketBasicsTestCase(TestCase):
         last_redirect = response.redirect_chain[-1]
         last_redirect_url = last_redirect[0]
         last_redirect_status = last_redirect[1]
+
         # Ensure we landed on the "View" page.
-        self.assertEqual(last_redirect_url.split('?')[0], 'http://testserver%s' % reverse('helpdesk_public_view'))
+        # Django 1.9 compatible way of testing this
+        # https://docs.djangoproject.com/en/1.9/releases/1.9/#http-redirects-no-longer-forced-to-absolute-uris
+        urlparts = urlparse(last_redirect_url)
+        self.assertEqual(urlparts.path, reverse('helpdesk_public_view'))
+
         # Ensure submitter, new-queue + update-queue were all emailed.
         self.assertEqual(email_count+3, len(mail.outbox))
-    
+
     def test_create_ticket_private(self):
         email_count = len(mail.outbox)
         post_data = {
@@ -83,7 +94,12 @@ class TicketBasicsTestCase(TestCase):
         last_redirect = response.redirect_chain[-1]
         last_redirect_url = last_redirect[0]
         last_redirect_status = last_redirect[1]
+        
         # Ensure we landed on the "View" page.
-        self.assertEqual(last_redirect_url.split('?')[0], 'http://testserver%s' % reverse('helpdesk_public_view'))
+        # Django 1.9 compatible way of testing this
+        # https://docs.djangoproject.com/en/1.9/releases/1.9/#http-redirects-no-longer-forced-to-absolute-uris
+        urlparts = urlparse(last_redirect_url)
+        self.assertEqual(urlparts.path, reverse('helpdesk_public_view'))
+
         # Ensure only two e-mails were sent - submitter & updated.
         self.assertEqual(email_count+2, len(mail.outbox))
