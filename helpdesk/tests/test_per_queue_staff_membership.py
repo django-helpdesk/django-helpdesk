@@ -17,6 +17,7 @@ class PerQueueStaffMembershipTestCase(TestCase):
         and    user_2 with access to queue_2 containing 2 tickets
         and superuser who should be able to access both queues
         """
+        self.HELPDESK_ENABLE_PER_QUEUE_STAFF_MEMBERSHIP = settings.HELPDESK_ENABLE_PER_QUEUE_STAFF_MEMBERSHIP
         settings.HELPDESK_ENABLE_PER_QUEUE_STAFF_MEMBERSHIP = True
         self.client = Client()
         User = get_user_model()
@@ -58,6 +59,12 @@ class PerQueueStaffMembershipTestCase(TestCase):
                     queue=queue,
                     assigned_to=user,
                 )
+
+    def tearDown(self):
+        """
+        Reset HELPDESK_ENABLE_PER_QUEUE_STAFF_MEMBERSHIP to original value
+        """
+        settings.HELPDESK_ENABLE_PER_QUEUE_STAFF_MEMBERSHIP = self.HELPDESK_ENABLE_PER_QUEUE_STAFF_MEMBERSHIP
 
     def test_dashboard_ticket_counts(self):
         """
@@ -213,9 +220,3 @@ class PerQueueStaffMembershipTestCase(TestCase):
             3,
             'Queue choices were improperly limited by queue membership for a superuser'
         )
-
-    def tearDown(self):
-        """
-        Don't interfere with subsequent tests that do not expect this setting
-        """
-        settings.HELPDESK_ENABLE_PER_QUEUE_STAFF_MEMBERSHIP = False
