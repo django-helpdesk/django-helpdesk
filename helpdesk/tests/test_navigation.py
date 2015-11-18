@@ -29,7 +29,7 @@ class TestKBDisabled(TestCase):
         self.assertRaises(NoReverseMatch, reverse, 'helpdesk_kb_index')
         try:
             response = self.client.get(reverse('helpdesk_dashboard'))
-        except NoReverseMatch, e:
+        except NoReverseMatch as e:
             if 'helpdesk_kb_index' in e.message:
                 self.fail("Please verify any unchecked references to helpdesk_kb_index (start with navigation.html)")
             else:
