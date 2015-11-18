@@ -39,7 +39,7 @@ except ImportError:
 
 from helpdesk.forms import TicketForm, UserSettingsForm, EmailIgnoreForm, EditTicketForm, TicketCCForm, EditFollowUpForm, TicketDependencyForm
 from helpdesk.lib import send_templated_mail, query_to_dict, apply_query, safe_template_context
-from helpdesk.models import Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch, IgnoreEmail, TicketCC, TicketDependency
+from helpdesk.models import Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch, IgnoreEmail, TicketCC, TicketDependency, QueueMembership
 from helpdesk import settings as helpdesk_settings
 
 if helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE:
@@ -78,9 +78,12 @@ def dashboard(request):
         )
     limit_queues_by_user = helpdesk_settings.HELPDESK_ENABLE_PER_QUEUE_STAFF_MEMBERSHIP and not request.user.is_superuser
     if limit_queues_by_user:
-        unassigned_tickets = unassigned_tickets.filter(
-            queue__in=request.user.queuemembership.queues.all(),
-        )
+        try:
+            unassigned_tickets = unassigned_tickets.filter(
+                queue__in=request.user.queuemembership.queues.all(),
+            )
+        except QueueMembership.DoesNotExist:
+           unassigned_tickets = unassigned_tickets.none()
 
     # all tickets, reported by current user
     all_tickets_reported_by_current_user = ''
@@ -92,9 +95,12 @@ def dashboard(request):
 
     Tickets = Ticket.objects
     if limit_queues_by_user:
-        Tickets = Tickets.filter(
-            queue__in=request.user.queuemembership.queues.all(),
-        )
+        try:
+            Tickets = Tickets.filter(
+                queue__in=request.user.queuemembership.queues.all(),
+            )
+        except QueueMembership.DoesNotExist:
+           Tickets = Tickets.none()
     basic_ticket_stats = calc_basic_ticket_stats(Tickets)
 
     # The following query builds a grid of queues & ticket statuses,
@@ -367,7 +373,7 @@ def update_ticket(request, ticket_id, public=False):
     # if comment contains some django code, like "why does {% if bla %} crash",
     # then the following line will give us a crash, since django expects {% if %}
     # to be closed with an {% endif %} tag.
-    
+
 
     # get_template_from_string was removed in Django 1.8 http://django.readthedocs.org/en/1.8.x/ref/templates/upgrading.html
     try:
@@ -1001,9 +1007,12 @@ def run_report(request, report):
     report_queryset = Ticket.objects.all().select_related()
     limit_queues_by_user = helpdesk_settings.HELPDESK_ENABLE_PER_QUEUE_STAFF_MEMBERSHIP and not request.user.is_superuser
     if limit_queues_by_user:
-        report_queryset = report_queryset.filter(
-            queue__in=request.user.queuemembership.queues.all(),
-        )
+        try:
+            report_queryset = report_queryset.filter(
+                queue__in=request.user.queuemembership.queues.all(),
+            )
+        except QueueMembership.DoesNotExist:
+            report_queryset = report_queryset.none()
 
     from_saved_query = False
     saved_query = None
@@ -1065,9 +1074,12 @@ def run_report(request, report):
         col1heading = _('User')
         queue_options = Queue.objects.all()
         if limit_queues_by_user:
-            queue_options  = queue_options.filter(
-                pk__in=request.user.queuemembership.queues.all(),
-            )
+            try:
+                queue_options = queue_options.filter(
+                    pk__in=request.user.queuemembership.queues.all(),
+                )
+            except QueueMembership.DoesNotExist:
+                queue_options = queue_options.none()
         possible_options = [q.title.encode('utf-8') for q in queue_options]
         charttype = 'bar'
 
