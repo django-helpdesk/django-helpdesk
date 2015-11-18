@@ -21,7 +21,6 @@ import logging
 logger = logging.getLogger('helpdesk')
 
 from django.utils.encoding import smart_str
-from builtins import str as text
 
 def send_templated_mail(template_name, email_context, recipients, sender=None, bcc=None, fail_silently=False, files=None):
     """
@@ -119,7 +118,7 @@ def send_templated_mail(template_name, email_context, recipients, sender=None, b
             "subject": t.subject,
         }).render(context)
 
-    if isinstance(recipients, text):
+    if isinstance(recipients, str):
         if recipients.find(','):
             recipients = recipients.split(',')
     elif type(recipients) != list:
