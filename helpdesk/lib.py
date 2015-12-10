@@ -49,6 +49,7 @@ def send_templated_mail(template_name, email_context, recipients, sender=None, b
         along with the File objects to be read. files can be blank.
 
     """
+    from django import VERSION
     from django.conf import settings
     from django.core.mail import EmailMultiAlternatives
     from django.template import loader, Context
@@ -57,7 +58,11 @@ def send_templated_mail(template_name, email_context, recipients, sender=None, b
     from helpdesk.settings import HELPDESK_EMAIL_SUBJECT_TEMPLATE
     import os
 
-    context = Context(email_context)
+    # RemovedInDjango110Warning: render() must be called with a dict, not a Context.
+    if VERSION >= (1, 8):
+        context = email_context
+    else:
+        context = Context(email_context)
 
     if hasattr(context['queue'], 'locale'):
         locale = getattr(context['queue'], 'locale', '')
