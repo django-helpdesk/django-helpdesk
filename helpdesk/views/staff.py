@@ -11,6 +11,7 @@ from django.utils.encoding import python_2_unicode_compatible
 from datetime import datetime, timedelta
 import sys
 
+from django import VERSION
 from django.conf import settings
 try:
     from django.contrib.auth import get_user_model
@@ -374,7 +375,6 @@ def update_ticket(request, ticket_id, public=False):
     # then the following line will give us a crash, since django expects {% if %}
     # to be closed with an {% endif %} tag.
 
-
     # get_template_from_string was removed in Django 1.8 http://django.readthedocs.org/en/1.8.x/ref/templates/upgrading.html
     try:
         from django.template import engines
@@ -382,7 +382,11 @@ def update_ticket(request, ticket_id, public=False):
     except ImportError:  # occurs in django < 1.8
         template_func = loader.get_template_from_string
 
-    comment = template_func(comment).render(Context(context))
+    # RemovedInDjango110Warning: render() must be called with a dict, not a Context.
+    if VERSION < (1, 8):
+        context = Context(context)
+
+    comment = template_func(comment).render(context)
 
     if owner is -1 and ticket.assigned_to:
         owner = ticket.assigned_to.id
