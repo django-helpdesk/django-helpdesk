@@ -6,12 +6,15 @@ django-helpdesk - A Django powered ticket tracker for small enterprise.
 models.py - Model (and hence database) definitions. This is the core of the
             helpdesk structure.
 """
-
+from django.contrib.auth.models import Permission
+from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _, ugettext
 from django import VERSION
+
+from helpdesk import settings as helpdesk_settings
 
 try:
     from django.utils import timezone
@@ -35,6 +38,7 @@ class Queue(models.Model):
 
     slug = models.SlugField(
         _('Slug'),
+        max_length=50,
         help_text=_('This slug is used when building ticket ID\'s. Once set, '
             'try not to change it or e-mailing may get messy.'),
         )
@@ -164,6 +168,15 @@ class Queue(models.Model):
             'folders. Default: INBOX.'),
         )
 
+    permission_name = models.CharField(
+        _('Django auth permission name'),
+        max_length=50,
+        blank=True,
+        null=True,
+        help_text=_('Name used in the django.contrib.auth permission system'),
+        )
+
+
     email_box_interval = models.IntegerField(
         _('E-Mail Check Interval'),
         help_text=_('How often do you wish to check this mailbox? (in Minutes)'),
@@ -244,6 +257,17 @@ class Queue(models.Model):
                 self.email_box_port = 995
             elif self.email_box_type == 'pop3' and not self.email_box_ssl:
                 self.email_box_port = 110
+
+        if not self.id and helpdesk_settings.HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION:
+            # Prepare the permission associated to this Queue
+            basename = "queue_access_%s" % self.slug
+            self.permission_name = "helpdesk.%s" % basename
+            Permission.objects.create(
+                name=_("Permission for queue: ") + self.title,
+                content_type=ContentType.objects.get(model="queue"),
+                codename=basename,
+            )
+
         super(Queue, self).save(*args, **kwargs)
 
 
@@ -1359,25 +1383,3 @@ class TicketDependency(models.Model):
         unique_together = ('ticket', 'depends_on')
         verbose_name = _('Ticket dependency')
         verbose_name_plural = _('Ticket dependencies')
-
-
-class QueueMembership(models.Model):
-    """
-    Used to restrict staff members to certain queues only
-    """
-    user = models.OneToOneField(
-        settings.AUTH_USER_MODEL,
-        verbose_name=_('User'),
-        )
-
-    queues = models.ManyToManyField(
-        Queue,
-        verbose_name=_('Authorized Queues'),
-        )
-
-    def __unicode__(self):
-        return '%s authorized for queues %s' % (self.user, ", ".join(self.queues.values_list('title', flat=True)))
-
-    class Meta:
-        verbose_name = _('Queue Membership')
-        verbose_name_plural = _('Queue Memberships')
