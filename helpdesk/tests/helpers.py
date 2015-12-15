@@ -22,6 +22,9 @@ def get_staff_user(username='helpdesk.staff', password='password'):
 
 
 def reload_urlconf(urlconf=None):
+
+    from imp import reload  # python 3 needs this import.
+
     if urlconf is None:
         from django.conf import settings
 

@@ -118,7 +118,7 @@ def send_templated_mail(template_name, email_context, recipients, sender=None, b
             "subject": t.subject,
         }).render(context)
 
-    if isinstance(recipients,(str,unicode)):
+    if isinstance(recipients, str):
         if recipients.find(','):
             recipients = recipients.split(',')
     elif type(recipients) != list:

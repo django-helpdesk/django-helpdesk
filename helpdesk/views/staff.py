@@ -1080,7 +1080,7 @@ def run_report(request, report):
                 )
             except QueueMembership.DoesNotExist:
                 queue_options = queue_options.none()
-        possible_options = [q.title.encode('utf-8') for q in queue_options]
+        possible_options = [q.title for q in queue_options]
         charttype = 'bar'
 
     elif report == 'userstatus':
@@ -1155,12 +1155,10 @@ def run_report(request, report):
             metric3 = ticket.modified - ticket.created
             metric3 = metric3.days
 
-
         summarytable[metric1, metric2] += 1
         if metric3:
             if report == 'daysuntilticketclosedbymonth':
                 summarytable2[metric1, metric2] += metric3
-
 
     table = []
 
@@ -1168,7 +1166,7 @@ def run_report(request, report):
         for key in summarytable2.keys():
             summarytable[key] = summarytable2[key] / summarytable[key]
 
-    header1 = sorted(set(list( i.encode('utf-8') for i,_ in summarytable.keys() )))
+    header1 = sorted(set(list(i for i, _ in summarytable.keys())))
 
     column_headings = [col1heading] + possible_options
 

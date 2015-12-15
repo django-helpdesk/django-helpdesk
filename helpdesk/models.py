@@ -7,17 +7,21 @@ models.py - Model (and hence database) definitions. This is the core of the
             helpdesk structure.
 """
 
+from __future__ import unicode_literals
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _, ugettext
 from django import VERSION
+from django.utils.encoding import python_2_unicode_compatible
 
 try:
     from django.utils import timezone
 except ImportError:
     from datetime import datetime as timezone
 
+
+@python_2_unicode_compatible
 class Queue(models.Model):
     """
     A queue is a collection of tickets into what would generally be business
@@ -202,8 +206,8 @@ class Queue(models.Model):
         help_text=_('Socks proxy port number. Default: 9150 (default TOR port)'),
     )
 
-    def __unicode__(self):
-        return u"%s" % self.title
+    def __str__(self):
+        return "%s" % self.title
 
     class Meta:
         ordering = ('title',)
@@ -481,8 +485,8 @@ class Ticket(models.Model):
         verbose_name = _('Ticket')
         verbose_name_plural = _('Tickets')
 
-    def __unicode__(self):
-        return u'%s %s' % (self.id, self.title)
+    def __str__(self):
+        return '%s %s' % (self.id, self.title)
 
     def get_absolute_url(self):
         return ('helpdesk_view', (self.id,))
@@ -509,6 +513,7 @@ class FollowUpManager(models.Manager):
         return self.filter(public=True)
 
 
+@python_2_unicode_compatible
 class FollowUp(models.Model):
     """
     A FollowUp is a comment and/or change to a ticket. We keep a simple
@@ -575,8 +580,8 @@ class FollowUp(models.Model):
         verbose_name = _('Follow-up')
         verbose_name_plural = _('Follow-ups')
 
-    def __unicode__(self):
-        return u'%s' % self.title
+    def __str__(self):
+        return '%s' % self.title
 
     def get_absolute_url(self):
         return u"%s#followup%s" % (self.ticket.get_absolute_url(), self.id)
@@ -588,6 +593,7 @@ class FollowUp(models.Model):
         super(FollowUp, self).save(*args, **kwargs)
 
 
+@python_2_unicode_compatible
 class TicketChange(models.Model):
     """
     For each FollowUp, any changes to the parent ticket (eg Title, Priority,
@@ -616,18 +622,18 @@ class TicketChange(models.Model):
         null=True,
         )
 
-    def __unicode__(self):
-        str = u'%s ' % self.field
+    def __str__(self):
+        out = '%s ' % self.field
         if not self.new_value:
-            str += ugettext('removed')
+            out += ugettext('removed')
         elif not self.old_value:
-            str += ugettext('set to %s') % self.new_value
+            out += ugettext('set to %s') % self.new_value
         else:
-            str += ugettext('changed from "%(old_value)s" to "%(new_value)s"') % {
+            out += ugettext('changed from "%(old_value)s" to "%(new_value)s"') % {
                 'old_value': self.old_value,
                 'new_value': self.new_value
                 }
-        return str
+        return out
 
     class Meta:
         verbose_name = _('Ticket change')
@@ -650,6 +656,7 @@ def attachment_path(instance, filename):
     return os.path.join(path, filename)
 
 
+@python_2_unicode_compatible
 class Attachment(models.Model):
     """
     Represents a file attached to a follow-up. This could come from an e-mail
@@ -691,8 +698,8 @@ class Attachment(models.Model):
             self.followup.id
             )
 
-    def __unicode__(self):
-        return u'%s' % self.filename
+    def __str__(self):
+        return '%s' % self.filename
 
     class Meta:
         ordering = ['filename',]
@@ -700,6 +707,7 @@ class Attachment(models.Model):
         verbose_name_plural = _('Attachments')
 
 
+@python_2_unicode_compatible
 class PreSetReply(models.Model):
     """
     We can allow the admin to define a number of pre-set replies, used to
@@ -738,10 +746,11 @@ class PreSetReply(models.Model):
         verbose_name = _('Pre-set reply')
         verbose_name_plural = _('Pre-set replies')
 
-    def __unicode__(self):
-        return u'%s' % self.name
+    def __str__(self):
+        return '%s' % self.name
 
 
+@python_2_unicode_compatible
 class EscalationExclusion(models.Model):
     """
     An 'EscalationExclusion' lets us define a date on which escalation should
@@ -771,14 +780,15 @@ class EscalationExclusion(models.Model):
         help_text=_('Date on which escalation should not happen'),
         )
 
-    def __unicode__(self):
-        return u'%s' % self.name
+    def __str__(self):
+        return '%s' % self.name
 
     class Meta:
         verbose_name = _('Escalation exclusion')
         verbose_name_plural = _('Escalation exclusions')
 
 
+@python_2_unicode_compatible
 class EmailTemplate(models.Model):
     """
     Since these are more likely to be changed than other templates, we store
@@ -830,8 +840,8 @@ class EmailTemplate(models.Model):
         help_text=_('Locale of this template.'),
         )
 
-    def __unicode__(self):
-        return u'%s' % self.template_name
+    def __str__(self):
+        return '%s' % self.template_name
 
     class Meta:
         ordering = ['template_name', 'locale']
@@ -839,6 +849,7 @@ class EmailTemplate(models.Model):
         verbose_name_plural = _('e-mail templates')
 
 
+@python_2_unicode_compatible
 class KBCategory(models.Model):
     """
     Lets help users help themselves: the Knowledge Base is a categorised
@@ -858,8 +869,8 @@ class KBCategory(models.Model):
         _('Description'),
         )
 
-    def __unicode__(self):
-        return u'%s' % self.title
+    def __str__(self):
+        return '%s' % self.title
 
     class Meta:
         ordering = ['title',]
@@ -871,6 +882,7 @@ class KBCategory(models.Model):
     get_absolute_url = models.permalink(get_absolute_url)
 
 
+@python_2_unicode_compatible
 class KBItem(models.Model):
     """
     An item within the knowledgebase. Very straightforward question/answer
@@ -925,8 +937,8 @@ class KBItem(models.Model):
             return _('Unrated')
     score = property(_score)
 
-    def __unicode__(self):
-        return u'%s' % self.title
+    def __str__(self):
+        return '%s' % self.title
 
     class Meta:
         ordering = ['title',]
@@ -938,6 +950,7 @@ class KBItem(models.Model):
     get_absolute_url = models.permalink(get_absolute_url)
 
 
+@python_2_unicode_compatible
 class SavedSearch(models.Model):
     """
     Allow a user to save a ticket search, eg their filtering and sorting
@@ -972,17 +985,18 @@ class SavedSearch(models.Model):
         help_text=_('Pickled query object. Be wary changing this.'),
         )
 
-    def __unicode__(self):
+    def __str__(self):
         if self.shared:
-            return u'%s (*)' % self.title
+            return '%s (*)' % self.title
         else:
-            return u'%s' % self.title
+            return '%s' % self.title
 
     class Meta:
         verbose_name = _('Saved search')
         verbose_name_plural = _('Saved searches')
 
 
+@python_2_unicode_compatible
 class UserSettings(models.Model):
     """
     A bunch of user-specific settings that we want to be able to define, such
@@ -1024,8 +1038,8 @@ class UserSettings(models.Model):
 
     settings = property(_get_settings, _set_settings)
 
-    def __unicode__(self):
-        return u'Preferences for %s' % self.user
+    def __str__(self):
+        return 'Preferences for %s' % self.user
 
     class Meta:
         verbose_name = _('User Setting')
@@ -1056,6 +1070,7 @@ except:
     models.signals.post_save.connect(create_usersettings, sender=signal_user)
 
 
+@python_2_unicode_compatible
 class IgnoreEmail(models.Model):
     """
     This model lets us easily ignore e-mails from certain senders when
@@ -1098,8 +1113,8 @@ class IgnoreEmail(models.Model):
             'be deleted.'),
         )
 
-    def __unicode__(self):
-        return u'%s' % self.name
+    def __str__(self):
+        return '%s' % self.name
 
     def save(self, *args, **kwargs):
         if not self.date:
@@ -1134,6 +1149,7 @@ class IgnoreEmail(models.Model):
         verbose_name_plural = _('Ignored e-mail addresses')
 
 
+@python_2_unicode_compatible
 class TicketCC(models.Model):
     """
     Often, there are people who wish to follow a ticket who aren't the
@@ -1192,14 +1208,15 @@ class TicketCC(models.Model):
             return self.email
     display = property(_display)
 
-    def __unicode__(self):
-        return u'%s for %s' % (self.display, self.ticket.title)
+    def __str__(self):
+        return '%s for %s' % (self.display, self.ticket.title)
 
 class CustomFieldManager(models.Manager):
     def get_queryset(self):
         return super(CustomFieldManager, self).get_queryset().order_by('ordering')
 
 
+@python_2_unicode_compatible
 class CustomField(models.Model):
     """
     Definitions for custom fields that are glued onto each ticket.
@@ -1302,7 +1319,7 @@ class CustomField(models.Model):
 
     objects = CustomFieldManager()
 
-    def __unicode__(self):
+    def __str__(self):
         return '%s' % (self.name)
 
     class Meta:
@@ -1310,6 +1327,7 @@ class CustomField(models.Model):
         verbose_name_plural = _('Custom fields')
 
 
+@python_2_unicode_compatible
 class TicketCustomFieldValue(models.Model):
     ticket = models.ForeignKey(
         Ticket,
@@ -1323,7 +1341,7 @@ class TicketCustomFieldValue(models.Model):
 
     value = models.TextField(blank=True, null=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return '%s / %s' % (self.ticket, self.field)
 
     class Meta:
@@ -1334,6 +1352,7 @@ class TicketCustomFieldValue(models.Model):
         verbose_name_plural = _('Ticket custom field values')
 
 
+@python_2_unicode_compatible
 class TicketDependency(models.Model):
     """
     The ticket identified by `ticket` cannot be resolved until the ticket in `depends_on` has been resolved.
@@ -1352,7 +1371,7 @@ class TicketDependency(models.Model):
         related_name='depends_on',
         )
 
-    def __unicode__(self):
+    def __str__(self):
         return '%s / %s' % (self.ticket, self.depends_on)
 
     class Meta:
@@ -1361,6 +1380,7 @@ class TicketDependency(models.Model):
         verbose_name_plural = _('Ticket dependencies')
 
 
+@python_2_unicode_compatible
 class QueueMembership(models.Model):
     """
     Used to restrict staff members to certain queues only
@@ -1375,7 +1395,7 @@ class QueueMembership(models.Model):
         verbose_name=_('Authorized Queues'),
         )
 
-    def __unicode__(self):
+    def __str__(self):
         return '%s authorized for queues %s' % (self.user, ", ".join(self.queues.values_list('title', flat=True)))
 
     class Meta:
