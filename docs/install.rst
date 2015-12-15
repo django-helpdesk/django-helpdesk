@@ -38,7 +38,6 @@ Adding To Your Django Project
         'django.contrib.sites',
         'django.contrib.admin',  # Required for helpdesk admin/maintenance
         'django.contrib.humanize',  # Required for elapsed time formatting
-        'south',  # Highly recommended to make database migrations simpler in Django < 1.7
         'markdown_deux',  # Required for Knowledgebase item formatting
         'bootstrapform', # Required for nicer formatting of forms with the default templates
         'helpdesk',  # This is us!
@@ -54,11 +53,9 @@ Adding To Your Django Project
 
    This line will have to come *after* any other lines in your urls.py such as those used by the Django admin.
 
-3. Create the required database tables. I'd suggest using *South*, however the following will work::
+3. Create the required database tables.
 
-     ./manage.py syncdb
-
-   Then migrate using South / Django 1.7+ migrations::
+   Migrate using Django migrations::
 
      ./manage.py migrate helpdesk
 

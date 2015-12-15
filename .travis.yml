@@ -1,10 +1,13 @@
 language: python
 python:
     - "2.7"
+    - "3.3"
+    - "3.4"
+    - "3.5"
 env:
-    - DJANGO=1.5.10
-    - DJANGO=1.6.7
-    - DJANGO=1.7
+    - DJANGO=1.7.11
+    - DJANGO=1.8.7
+    - DJANGO=1.9
 install:
     - pip install argparse
     - pip install -q Django==$DJANGO

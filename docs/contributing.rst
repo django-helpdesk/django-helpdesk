@@ -46,7 +46,7 @@ Please include tests in the ``tests/`` folder when committing code changes.
 Database schema changes
 -----------------------
 
-As well as making your normal code changes to ``models.py``, please generate a South migration file and commit it with your code. You will want to use a command similar to the following::
+As well as making your normal code changes to ``models.py``, please generate a Django migration file and commit it with your code. You will want to use a command similar to the following::
 
     ./manage.py migrate helpdesk --auto [migration_name]
 
