@@ -25,7 +25,7 @@ LICENSE.3RDPARTY for license terms for included packages.
 Dependencies (pre-flight checklist)
 -----------------------------------
 
-1. Python 2.7 or 3.3+ (3.3 support is new, please let us know how it goes)
+1. Python 2.7 or 3.4+ (3.4+ support is new, please let us know how it goes)
 2. Django (1.7 or newer, preferably 1.9)
 3. An existing WORKING Django project with database etc. If you
    cannot log into the Admin, you won't get this product working.
