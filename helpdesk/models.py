@@ -39,6 +39,7 @@ class Queue(models.Model):
 
     slug = models.SlugField(
         _('Slug'),
+        max_length=50,
         help_text=_('This slug is used when building ticket ID\'s. Once set, '
             'try not to change it or e-mailing may get messy.'),
         )
@@ -167,6 +168,15 @@ class Queue(models.Model):
             'queues, by filtering messages on your IMAP server into separate '
             'folders. Default: INBOX.'),
         )
+
+    permission_name = models.CharField(
+        _('Django auth permission name'),
+        max_length=50,
+        blank=True,
+        null=True,
+        help_text=_('Name used in the django.contrib.auth permission system'),
+        )
+
 
     email_box_interval = models.IntegerField(
         _('E-Mail Check Interval'),
