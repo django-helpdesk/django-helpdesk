@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.utils.translation import ugettext_lazy as _
 from helpdesk.models import Queue, Ticket, FollowUp, PreSetReply, KBCategory
 from helpdesk.models import EscalationExclusion, EmailTemplate, KBItem
 from helpdesk.models import TicketChange, Attachment, IgnoreEmail
@@ -8,9 +9,19 @@ class QueueAdmin(admin.ModelAdmin):
     list_display = ('title', 'slug', 'email_address', 'locale')
 
 class TicketAdmin(admin.ModelAdmin):
-    list_display = ('title', 'status', 'assigned_to', 'submitter_email',)
+    list_display = ('title', 'status', 'assigned_to', 'queue', 'hidden_submitter_email',)
     date_hierarchy = 'created'
-    list_filter = ('assigned_to', 'status', )
+    list_filter = ('queue', 'assigned_to', 'status')
+
+    def hidden_submitter_email(self, ticket):
+        if ticket.submitter_email:
+            username, domain = ticket.submitter_email.split("@")
+            username = username[:2] + "*" * (len(username) - 2)
+            domain = domain[:1] + "*" * (len(domain) - 2) + domain[-1:]
+            return "%s@%s" % (username, domain)
+        else:
+            return ticket.submitter_email
+    hidden_submitter_email.short_description = _('Submitter E-Mail')
 
 class TicketChangeInline(admin.StackedInline):
     model = TicketChange
