@@ -1,9 +1,10 @@
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Permission
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 from django.test.client import Client
 
-from helpdesk.models import Queue, Ticket, QueueMembership
+from helpdesk.models import Queue, Ticket
 from helpdesk import settings
 
 
@@ -17,8 +18,8 @@ class PerQueueStaffMembershipTestCase(TestCase):
         and    user_2 with access to queue_2 containing 2 tickets
         and superuser who should be able to access both queues
         """
-        self.HELPDESK_ENABLE_PER_QUEUE_STAFF_MEMBERSHIP = settings.HELPDESK_ENABLE_PER_QUEUE_STAFF_MEMBERSHIP
-        settings.HELPDESK_ENABLE_PER_QUEUE_STAFF_MEMBERSHIP = True
+        self.HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION = settings.HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION
+        settings.HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION = True
         self.client = Client()
         User = get_user_model()
 
@@ -43,11 +44,9 @@ class PerQueueStaffMembershipTestCase(TestCase):
             user.set_password(identifier)
             user.save()
 
-            queue_membership = self.__dict__['queue_membership_%d' % identifier] = QueueMembership.objects.create(
-                user=user,
-            )
-            queue_membership.queues = (queue,)
-            queue_membership.save()
+            # The prefix 'helpdesk.' must be trimmed
+            p = Permission.objects.get(codename=queue.permission_name[9:])
+            user.user_permissions.add(p)
 
             for ticket_number in range(1, identifier + 1):
                 Ticket.objects.create(
@@ -64,7 +63,7 @@ class PerQueueStaffMembershipTestCase(TestCase):
         """
         Reset HELPDESK_ENABLE_PER_QUEUE_STAFF_MEMBERSHIP to original value
         """
-        settings.HELPDESK_ENABLE_PER_QUEUE_STAFF_MEMBERSHIP = self.HELPDESK_ENABLE_PER_QUEUE_STAFF_MEMBERSHIP
+        settings.HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION = self.HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION
 
     def test_dashboard_ticket_counts(self):
         """

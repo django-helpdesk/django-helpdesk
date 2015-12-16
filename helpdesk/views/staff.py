@@ -40,7 +40,7 @@ except ImportError:
 
 from helpdesk.forms import TicketForm, UserSettingsForm, EmailIgnoreForm, EditTicketForm, TicketCCForm, EditFollowUpForm, TicketDependencyForm
 from helpdesk.lib import send_templated_mail, query_to_dict, apply_query, safe_template_context
-from helpdesk.models import Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch, IgnoreEmail, TicketCC, TicketDependency, QueueMembership
+from helpdesk.models import Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch, IgnoreEmail, TicketCC, TicketDependency
 from helpdesk import settings as helpdesk_settings
 
 if helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE:
@@ -51,6 +51,34 @@ else:
 
 
 superuser_required = user_passes_test(lambda u: u.is_authenticated() and u.is_active and u.is_superuser)
+
+
+def _get_user_queues(user):
+    """Return the list of Queues the user can access.
+
+    :param user: The User (the class should have the has_perm method)
+    :return: A Python list of Queues
+    """
+    all_queues = Queue.objects.all()
+    limit_queues_by_user = helpdesk_settings.HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION and not user.is_superuser
+    if limit_queues_by_user:
+        id_list = [q.pk for q in all_queues if user.has_perm(q.permission_name)]
+        return all_queues.filter(pk__in=id_list)
+    else:
+        return all_queues
+
+
+def _has_access_to_queue(user, queue):
+    """Check if a certain user can access a certain queue.
+
+    :param user: The User (the class should have the has_perm method)
+    :param queue: The django-helpdesk Queue instance
+    :return: True if the user has permission (either by default or explicitly), false otherwise
+    """
+    if user.is_superuser or not helpdesk_settings.HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION:
+        return True
+    else:
+        return user.has_perm(queue.permission_name)
 
 
 def dashboard(request):
@@ -72,19 +100,14 @@ def dashboard(request):
             assigned_to=request.user,
             status__in = [Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS])
 
+    user_queues = _get_user_queues(request.user)
+
     unassigned_tickets = Ticket.objects.select_related('queue').filter(
             assigned_to__isnull=True,
+            queue__in=user_queues
         ).exclude(
             status=Ticket.CLOSED_STATUS,
         )
-    limit_queues_by_user = helpdesk_settings.HELPDESK_ENABLE_PER_QUEUE_STAFF_MEMBERSHIP and not request.user.is_superuser
-    if limit_queues_by_user:
-        try:
-            unassigned_tickets = unassigned_tickets.filter(
-                queue__in=request.user.queuemembership.queues.all(),
-            )
-        except QueueMembership.DoesNotExist:
-           unassigned_tickets = unassigned_tickets.none()
 
     # all tickets, reported by current user
     all_tickets_reported_by_current_user = ''
@@ -94,14 +117,9 @@ def dashboard(request):
             submitter_email=email_current_user,
         ).order_by('status')
 
-    Tickets = Ticket.objects
-    if limit_queues_by_user:
-        try:
-            Tickets = Tickets.filter(
-                queue__in=request.user.queuemembership.queues.all(),
+    Tickets = Ticket.objects.filter(
+                queue__in=user_queues,
             )
-        except QueueMembership.DoesNotExist:
-           Tickets = Tickets.none()
     basic_ticket_stats = calc_basic_ticket_stats(Tickets)
 
     # The following query builds a grid of queues & ticket statuses,
@@ -110,17 +128,13 @@ def dashboard(request):
     # Queue 1    10     4
     # Queue 2     4    12
 
+    queues = _get_user_queues(request.user).values_list('id', flat=True)
+
     from_clause = """FROM    helpdesk_ticket t,
                     helpdesk_queue q"""
-    where_clause = """WHERE   q.id = t.queue_id"""
-    if limit_queues_by_user:
-        from_clause = """%s,
-                    helpdesk_queuemembership qm,
-                    helpdesk_queuemembership_queues qm_queues""" % from_clause
-        where_clause = """%s AND
-                    qm.user_id = %d AND
-                    qm.id = qm_queues.queuemembership_id AND
-                    q.id = qm_queues.queue_id""" % (where_clause, request.user.id)
+    where_clause = """WHERE   q.id = t.queue_id AND
+                    q.id IN (%s)""" % (",".join(("%d" % pk for pk in queues)))
+
     cursor = connection.cursor()
     cursor.execute("""
         SELECT      q.id as queue,
@@ -687,6 +701,10 @@ mass_update = staff_member_required(mass_update)
 def ticket_list(request):
     context = {}
 
+    user_queues = _get_user_queues(request.user)
+    # Prefilter the allowed tickets
+    base_tickets = Ticket.objects.filter(queue__in=user_queues)
+
     # Query_params will hold a dictionary of parameters relating to
     # a query, to be saved if needed:
     query_params = {
@@ -727,7 +745,7 @@ def ticket_list(request):
 
         if filter:
             try:
-                ticket = Ticket.objects.get(**filter)
+                ticket = base_tickets.get(**filter)
                 return HttpResponseRedirect(ticket.staff_url)
             except Ticket.DoesNotExist:
                 # Go on to standard keyword searching
@@ -821,14 +839,7 @@ def ticket_list(request):
         sortreverse = request.GET.get('sortreverse', None)
         query_params['sortreverse'] = sortreverse
 
-    tickets = Ticket.objects.select_related()
-    queue_choices = Queue.objects.all()
-    if helpdesk_settings.HELPDESK_ENABLE_PER_QUEUE_STAFF_MEMBERSHIP and not request.user.is_superuser:
-        user_queues = request.user.queuemembership.queues.all()
-        tickets = tickets.filter(
-            queue__in=user_queues,
-        )
-        queue_choices = user_queues
+    tickets = base_tickets.select_related()
 
     try:
         ticket_qs = apply_query(tickets, query_params)
@@ -875,7 +886,7 @@ def ticket_list(request):
             query_string=querydict.urlencode(),
             tickets=tickets,
             user_choices=User.objects.filter(is_active=True,is_staff=True),
-            queue_choices=queue_choices,
+            queue_choices=user_queues,
             status_choices=Ticket.STATUS_CHOICES,
             urlsafe_query=urlsafe_query,
             user_saved_queries=user_saved_queries,
@@ -889,6 +900,9 @@ ticket_list = staff_member_required(ticket_list)
 
 def edit_ticket(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
+    if not _has_access_to_queue(request.user, ticket.queue):
+        return HttpResponseRedirect(reverse('helpdesk_dashboard'))
+
     if request.method == 'POST':
         form = EditTicketForm(request.POST, instance=ticket)
         if form.is_valid():
@@ -915,7 +929,10 @@ def create_ticket(request):
         form.fields['assigned_to'].choices = [('', '--------')] + [[u.id, u.get_username()] for u in assignable_users]
         if form.is_valid():
             ticket = form.save(user=request.user)
-            return HttpResponseRedirect(ticket.get_absolute_url())
+            if _has_access_to_queue(request.user, ticket.queue):
+                return HttpResponseRedirect(ticket.get_absolute_url())
+            else:
+                return HttpResponseRedirect(reverse('helpdesk_dashboard'))
     else:
         initial_data = {}
         if request.user.usersettings.settings.get('use_email_as_submitter', False) and request.user.email:
@@ -1008,15 +1025,9 @@ def run_report(request, report):
     if Ticket.objects.all().count() == 0 or report not in ('queuemonth', 'usermonth', 'queuestatus', 'queuepriority', 'userstatus', 'userpriority', 'userqueue', 'daysuntilticketclosedbymonth'):
         return HttpResponseRedirect(reverse("helpdesk_report_index"))
 
-    report_queryset = Ticket.objects.all().select_related()
-    limit_queues_by_user = helpdesk_settings.HELPDESK_ENABLE_PER_QUEUE_STAFF_MEMBERSHIP and not request.user.is_superuser
-    if limit_queues_by_user:
-        try:
-            report_queryset = report_queryset.filter(
-                queue__in=request.user.queuemembership.queues.all(),
-            )
-        except QueueMembership.DoesNotExist:
-            report_queryset = report_queryset.none()
+    report_queryset = Ticket.objects.all().select_related().filter(
+        queue__in=_get_user_queues(request.user)
+    )
 
     from_saved_query = False
     saved_query = None
@@ -1076,14 +1087,7 @@ def run_report(request, report):
     elif report == 'userqueue':
         title = _('User by Queue')
         col1heading = _('User')
-        queue_options = Queue.objects.all()
-        if limit_queues_by_user:
-            try:
-                queue_options = queue_options.filter(
-                    pk__in=request.user.queuemembership.queues.all(),
-                )
-            except QueueMembership.DoesNotExist:
-                queue_options = queue_options.none()
+        queue_options = _get_user_queues(request.user)
         possible_options = [q.title for q in queue_options]
         charttype = 'bar'
 

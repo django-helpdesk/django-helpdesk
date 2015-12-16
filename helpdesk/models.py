@@ -8,12 +8,16 @@ models.py - Model (and hence database) definitions. This is the core of the
 """
 
 from __future__ import unicode_literals
+from django.contrib.auth.models import Permission
+from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _, ugettext
 from django import VERSION
 from django.utils.encoding import python_2_unicode_compatible
+
+from helpdesk import settings as helpdesk_settings
 
 try:
     from django.utils import timezone
@@ -258,6 +262,17 @@ class Queue(models.Model):
                 self.email_box_port = 995
             elif self.email_box_type == 'pop3' and not self.email_box_ssl:
                 self.email_box_port = 110
+
+        if not self.id and helpdesk_settings.HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION:
+            # Prepare the permission associated to this Queue
+            basename = "queue_access_%s" % self.slug
+            self.permission_name = "helpdesk.%s" % basename
+            Permission.objects.create(
+                name=_("Permission for queue: ") + self.title,
+                content_type=ContentType.objects.get(model="queue"),
+                codename=basename,
+            )
+
         super(Queue, self).save(*args, **kwargs)
 
 
