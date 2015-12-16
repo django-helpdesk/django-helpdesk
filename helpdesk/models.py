@@ -10,6 +10,7 @@ models.py - Model (and hence database) definitions. This is the core of the
 from __future__ import unicode_literals
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.conf import settings
@@ -285,6 +286,18 @@ class Queue(models.Model):
                 )
 
         super(Queue, self).save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        permission_name = self.permission_name
+        super(Queue, self).delete(*args, **kwargs)
+
+        # once the Queue is safely deleted, remove the permission (if exists)
+        if permission_name:
+            try:
+                p = Permission.objects.get(codename=permission_name[9:])
+                p.delete()
+            except ObjectDoesNotExist:
+                pass
 
 
 class Ticket(models.Model):
