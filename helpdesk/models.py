@@ -240,6 +240,15 @@ class Queue(models.Model):
             return u'%s <%s>' % (self.title, self.email_address)
     from_address = property(_from_address)
 
+    def prepare_permission_name(self):
+        """Prepare internally the codename for the permission and store it in permission_name.
+        :return: The codename that can be used to create a new Permission object.
+        """
+        # Prepare the permission associated to this Queue
+        basename = "queue_access_%s" % self.slug
+        self.permission_name = "helpdesk.%s" % basename
+        return basename
+
     def save(self, *args, **kwargs):
         if self.email_box_type == 'imap' and not self.email_box_imap_folder:
             self.email_box_imap_folder = 'INBOX'
@@ -263,15 +272,17 @@ class Queue(models.Model):
             elif self.email_box_type == 'pop3' and not self.email_box_ssl:
                 self.email_box_port = 110
 
-        if not self.id and helpdesk_settings.HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION:
-            # Prepare the permission associated to this Queue
-            basename = "queue_access_%s" % self.slug
-            self.permission_name = "helpdesk.%s" % basename
-            Permission.objects.create(
-                name=_("Permission for queue: ") + self.title,
-                content_type=ContentType.objects.get(model="queue"),
-                codename=basename,
-            )
+        if not self.id:
+            # Always prepare the permission codename
+            basename = self.prepare_permission_name()
+
+            # Create the permission only if the flag is active
+            if helpdesk_settings.HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION:
+                Permission.objects.create(
+                    name=_("Permission for queue: ") + self.title,
+                    content_type=ContentType.objects.get(model="queue"),
+                    codename=basename,
+                )
 
         super(Queue, self).save(*args, **kwargs)
 

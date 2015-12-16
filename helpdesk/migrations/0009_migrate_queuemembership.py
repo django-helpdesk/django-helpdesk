@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 from django.db import migrations
 from django.conf import settings
+from django.db.utils import IntegrityError
 from django.utils.translation import ugettext_lazy as _
 
 
@@ -24,14 +25,20 @@ def create_and_assign_permissions(apps, schema_editor):
     Queue = apps.get_model('helpdesk', 'Queue')
 
     for q in Queue.objects.all():
-        # Prepare the permission associated to this Queue
-        basename = "queue_access_%s" % q.slug
-        q.permission_name = "helpdesk.%s" % basename
-        Permission.objects.create(
-            name=_("Permission for queue: ") + q.title,
-            content_type=ContentType.objects.get(model="queue"),
-            codename=basename,
-        )
+        if not q.permission_name:
+            basename = q.prepare_permission_name
+        else:
+            basename = q.permission_name[9:]
+
+        try:
+            Permission.objects.create(
+                name=_("Permission for queue: ") + q.title,
+                content_type=ContentType.objects.get(model="queue"),
+                codename=basename,
+            )
+        except IntegrityError:
+            # Seems that it already existed, safely ignore it
+            pass
         q.save()
 
     # Second step: map the permissions according to QueueMembership
