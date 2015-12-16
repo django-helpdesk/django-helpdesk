@@ -21,11 +21,11 @@ except ImportError:
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.files.base import ContentFile
 from django.core.urlresolvers import reverse
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, PermissionDenied
 from django.core import paginator
 from django.db import connection
 from django.db.models import Q
-from django.http import HttpResponseRedirect, Http404, HttpResponse, HttpResponseForbidden
+from django.http import HttpResponseRedirect, Http404, HttpResponse
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import loader, Context, RequestContext
 from django.utils.dates import MONTHS_3
@@ -164,6 +164,8 @@ dashboard = staff_member_required(dashboard)
 
 def delete_ticket(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
+    if not _has_access_to_queue(request.user, ticket.queue):
+        raise PermissionDenied()
 
     if request.method == 'GET':
         return render_to_response('helpdesk/delete_ticket.html',
@@ -179,6 +181,8 @@ def followup_edit(request, ticket_id, followup_id):
     "Edit followup options with an ability to change the ticket."
     followup = get_object_or_404(FollowUp, id=followup_id)
     ticket = get_object_or_404(Ticket, id=ticket_id)
+    if not _has_access_to_queue(request.user, ticket.queue):
+        raise PermissionDenied()
     if request.method == 'GET':
         form = EditFollowUpForm(initial=
                                      {'title': escape(followup.title),
@@ -237,6 +241,8 @@ followup_delete = staff_member_required(followup_delete)
 
 def view_ticket(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
+    if not _has_access_to_queue(request.user, ticket.queue):
+        raise PermissionDenied()
 
     if 'take' in request.GET:
         # Allow the user to assign the ticket to themselves whilst viewing it.
@@ -623,6 +629,9 @@ def mass_update(request):
         action = 'assign'
 
     for t in Ticket.objects.filter(id__in=tickets):
+        if not _has_access_to_queue(request.user, t.queue):
+            continue
+
         if action == 'assign' and t.assigned_to != user:
             t.assigned_to = user
             t.save()
@@ -901,7 +910,7 @@ ticket_list = staff_member_required(ticket_list)
 def edit_ticket(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
     if not _has_access_to_queue(request.user, ticket.queue):
-        return HttpResponseRedirect(reverse('helpdesk_dashboard'))
+        raise PermissionDenied()
 
     if request.method == 'POST':
         form = EditTicketForm(request.POST, instance=ticket)
@@ -974,6 +983,8 @@ raw_details = staff_member_required(raw_details)
 
 def hold_ticket(request, ticket_id, unhold=False):
     ticket = get_object_or_404(Ticket, id=ticket_id)
+    if not _has_access_to_queue(request.user, ticket.queue):
+        raise PermissionDenied()
 
     if unhold:
         ticket.on_hold = False
@@ -1282,6 +1293,9 @@ email_ignore_del = superuser_required(email_ignore_del)
 
 def ticket_cc(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
+    if not _has_access_to_queue(request.user, ticket.queue):
+        raise PermissionDenied()
+
     copies_to = ticket.ticketcc_set.all()
     return render_to_response('helpdesk/ticket_cc_list.html',
         RequestContext(request, {
@@ -1292,6 +1306,9 @@ ticket_cc = staff_member_required(ticket_cc)
 
 def ticket_cc_add(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
+    if not _has_access_to_queue(request.user, ticket.queue):
+        raise PermissionDenied()
+
     if request.method == 'POST':
         form = TicketCCForm(request.POST)
         if form.is_valid():
@@ -1310,6 +1327,7 @@ ticket_cc_add = staff_member_required(ticket_cc_add)
 
 def ticket_cc_del(request, ticket_id, cc_id):
     cc = get_object_or_404(TicketCC, ticket__id=ticket_id, id=cc_id)
+
     if request.method == 'POST':
         cc.delete()
         return HttpResponseRedirect(reverse('helpdesk_ticket_cc', kwargs={'ticket_id': cc.ticket.id}))
@@ -1321,6 +1339,8 @@ ticket_cc_del = staff_member_required(ticket_cc_del)
 
 def ticket_dependency_add(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
+    if not _has_access_to_queue(request.user, ticket.queue):
+        raise PermissionDenied()
     if request.method == 'POST':
         form = TicketDependencyForm(request.POST)
         if form.is_valid():
@@ -1351,6 +1371,8 @@ ticket_dependency_del = staff_member_required(ticket_dependency_del)
 
 def attachment_del(request, ticket_id, attachment_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
+    if not _has_access_to_queue(request.user, ticket.queue):
+        raise PermissionDenied()
     attachment = get_object_or_404(Attachment, id=attachment_id)
     attachment.delete()
     return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket_id]))
