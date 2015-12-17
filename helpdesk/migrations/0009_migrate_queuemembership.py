@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import migrations
 from django.conf import settings
 from django.db.utils import IntegrityError
@@ -53,6 +55,25 @@ def create_and_assign_permissions(apps, schema_editor):
         qm.delete()
 
 
+def revert_queue_membership(apps, schema_editor):
+    Permission = apps.get_model('auth', 'Permission')
+    Queue = apps.get_model('helpdesk', 'Queue')
+    QueueMembership = apps.get_model('helpdesk', 'QueueMembership')
+    for p in Permission.objects.all():
+        if p.codename.startswith("queue_access_"):
+            slug = p.codename[13:]
+            try:
+                q = Queue.objects.get(slug=slug)
+            except ObjectDoesNotExist:
+                continue
+
+            for user in p.user_set.all():
+                qm, _ = QueueMembership.objects.get_or_create(user=user)
+                qm.queues.add(q)
+
+            p.delete()
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -60,5 +81,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(create_and_assign_permissions)
+        migrations.RunPython(create_and_assign_permissions,
+                             revert_queue_membership)
     ]
