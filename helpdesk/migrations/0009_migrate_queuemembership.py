@@ -7,7 +7,6 @@ from django.utils.translation import ugettext_lazy as _
 
 
 def create_and_assign_permissions(apps, schema_editor):
-
     # If neither Permission nor Membership mechanism are enabled, ignore the migration
     if not ((hasattr(settings, 'HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION') and
             settings.HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION) or
@@ -26,8 +25,10 @@ def create_and_assign_permissions(apps, schema_editor):
 
     for q in Queue.objects.all():
         if not q.permission_name:
-            basename = q.prepare_permission_name
+            basename = "queue_access_%s" % q.slug
+            q.permission_name = "helpdesk.%s" % basename
         else:
+            # Strip the `helpdesk.` prefix
             basename = q.permission_name[9:]
 
         try:
