@@ -8,12 +8,17 @@ models.py - Model (and hence database) definitions. This is the core of the
 """
 
 from __future__ import unicode_literals
+from django.contrib.auth.models import Permission
+from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _, ugettext
 from django import VERSION
 from django.utils.encoding import python_2_unicode_compatible
+
+from helpdesk import settings as helpdesk_settings
 
 try:
     from django.utils import timezone
@@ -39,6 +44,7 @@ class Queue(models.Model):
 
     slug = models.SlugField(
         _('Slug'),
+        max_length=50,
         help_text=_('This slug is used when building ticket ID\'s. Once set, '
             'try not to change it or e-mailing may get messy.'),
         )
@@ -168,6 +174,15 @@ class Queue(models.Model):
             'folders. Default: INBOX.'),
         )
 
+    permission_name = models.CharField(
+        _('Django auth permission name'),
+        max_length=50,
+        blank=True,
+        null=True,
+        help_text=_('Name used in the django.contrib.auth permission system'),
+        )
+
+
     email_box_interval = models.IntegerField(
         _('E-Mail Check Interval'),
         help_text=_('How often do you wish to check this mailbox? (in Minutes)'),
@@ -226,6 +241,15 @@ class Queue(models.Model):
             return u'%s <%s>' % (self.title, self.email_address)
     from_address = property(_from_address)
 
+    def prepare_permission_name(self):
+        """Prepare internally the codename for the permission and store it in permission_name.
+        :return: The codename that can be used to create a new Permission object.
+        """
+        # Prepare the permission associated to this Queue
+        basename = "queue_access_%s" % self.slug
+        self.permission_name = "helpdesk.%s" % basename
+        return basename
+
     def save(self, *args, **kwargs):
         if self.email_box_type == 'imap' and not self.email_box_imap_folder:
             self.email_box_imap_folder = 'INBOX'
@@ -248,7 +272,32 @@ class Queue(models.Model):
                 self.email_box_port = 995
             elif self.email_box_type == 'pop3' and not self.email_box_ssl:
                 self.email_box_port = 110
+
+        if not self.id:
+            # Always prepare the permission codename
+            basename = self.prepare_permission_name()
+
+            # Create the permission only if the flag is active
+            if helpdesk_settings.HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION:
+                Permission.objects.create(
+                    name=_("Permission for queue: ") + self.title,
+                    content_type=ContentType.objects.get(model="queue"),
+                    codename=basename,
+                )
+
         super(Queue, self).save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        permission_name = self.permission_name
+        super(Queue, self).delete(*args, **kwargs)
+
+        # once the Queue is safely deleted, remove the permission (if exists)
+        if permission_name:
+            try:
+                p = Permission.objects.get(codename=permission_name[9:])
+                p.delete()
+            except ObjectDoesNotExist:
+                pass
 
 
 class Ticket(models.Model):
@@ -1378,26 +1427,3 @@ class TicketDependency(models.Model):
         unique_together = ('ticket', 'depends_on')
         verbose_name = _('Ticket dependency')
         verbose_name_plural = _('Ticket dependencies')
-
-
-@python_2_unicode_compatible
-class QueueMembership(models.Model):
-    """
-    Used to restrict staff members to certain queues only
-    """
-    user = models.OneToOneField(
-        settings.AUTH_USER_MODEL,
-        verbose_name=_('User'),
-        )
-
-    queues = models.ManyToManyField(
-        Queue,
-        verbose_name=_('Authorized Queues'),
-        )
-
-    def __str__(self):
-        return '%s authorized for queues %s' % (self.user, ", ".join(self.queues.values_list('title', flat=True)))
-
-    class Meta:
-        verbose_name = _('Queue Membership')
-        verbose_name_plural = _('Queue Memberships')
