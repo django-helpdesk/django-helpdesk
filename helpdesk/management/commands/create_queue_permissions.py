@@ -3,11 +3,14 @@
 scripts/create_queue_permissions.py -
     Create automatically permissions for all Queues.
 
-    This is typically used when some queues are created before using the flag
-    HELPDESK_ENABLE_PER_QUEUE_PERMISSION, and then Permissions must be added.
+    This is rarely needed. However, one use case is the scenario where the
+    slugs of the Queues have been changed, and thus the Permission should be
+    recreated according to the new slugs.
+
+    No cleanup of permissions is performed.
 
     It should be safe to call this script multiple times or with partial
-    permissions.
+    existing permissions.
 """
 
 from optparse import make_option

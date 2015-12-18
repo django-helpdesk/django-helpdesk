@@ -274,16 +274,15 @@ class Queue(models.Model):
                 self.email_box_port = 110
 
         if not self.id:
-            # Always prepare the permission codename
+            # Prepare the permission codename and the permission
+            # (even if they are not needed with the current configuration)
             basename = self.prepare_permission_name()
 
-            # Create the permission only if the flag is active
-            if helpdesk_settings.HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION:
-                Permission.objects.create(
-                    name=_("Permission for queue: ") + self.title,
-                    content_type=ContentType.objects.get(model="queue"),
-                    codename=basename,
-                )
+            Permission.objects.create(
+                name=_("Permission for queue: ") + self.title,
+                content_type=ContentType.objects.get(model="queue"),
+                codename=basename,
+            )
 
         super(Queue, self).save(*args, **kwargs)
 
