@@ -3,22 +3,14 @@ from __future__ import unicode_literals
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import migrations
-from django.conf import settings
 from django.db.utils import IntegrityError
 from django.utils.translation import ugettext_lazy as _
 
 
 def create_and_assign_permissions(apps, schema_editor):
-    # If neither Permission nor Membership mechanism are enabled, ignore the migration
-    if not ((hasattr(settings, 'HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION') and
-            settings.HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION) or
-            (hasattr(settings, 'HELPDESK_ENABLE_PER_QUEUE_STAFF_MEMBERSHIP') and
-            settings.HELPDESK_ENABLE_PER_QUEUE_STAFF_MEMBERSHIP)):
-        return
-
     Permission = apps.get_model('auth', 'Permission')
     ContentType = apps.get_model('contenttypes', 'ContentType')
-    # Otherwise, two steps:
+    # Two steps:
     #   1. Create the permission for existing Queues
     #   2. Assign the permission to user according to QueueMembership objects
 
