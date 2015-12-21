@@ -45,6 +45,7 @@ class Queue(models.Model):
     slug = models.SlugField(
         _('Slug'),
         max_length=50,
+        unique=True,
         help_text=_('This slug is used when building ticket ID\'s. Once set, '
             'try not to change it or e-mailing may get messy.'),
         )
@@ -179,6 +180,7 @@ class Queue(models.Model):
         max_length=50,
         blank=True,
         null=True,
+        editable=False,
         help_text=_('Name used in the django.contrib.auth permission system'),
         )
 
