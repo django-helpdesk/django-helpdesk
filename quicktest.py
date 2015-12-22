@@ -90,7 +90,7 @@ class QuickDjangoTest(object):
             },
             INSTALLED_APPS = self.INSTALLED_APPS + self.apps,
             MIDDLEWARE_CLASSES = self.MIDDLEWARE_CLASSES,
-            ROOT_URLCONF = 'tests.urls',
+            ROOT_URLCONF = 'helpdesk.tests.urls',
             STATIC_URL = '/static/'
         )
 
