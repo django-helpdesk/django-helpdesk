@@ -33,6 +33,8 @@ from helpdesk.forms import TicketForm
 from helpdesk.lib import send_templated_mail, safe_template_context
 from helpdesk.models import Ticket, Queue, FollowUp
 
+import warnings
+
 STATUS_OK = 200
 
 STATUS_ERROR = 400
@@ -53,7 +55,13 @@ def api(request, method):
           must be valid users
         * The method must match one of the public methods of the API class.
 
+
+    THIS IS DEPRECATED AS OF DECEMBER 2015 AND WILL BE REMOVED IN JANUARY 2016.
+    SEE https://github.com/rossp/django-helpdesk/issues/198 FOR DETAILS
+
     """
+
+    warnings.warn("django-helpdesk API will be removed in January 2016. See https://github.com/rossp/django-helpdesk/issues/198 for details.", category=DeprecationWarning)
 
     if method == 'help':
         return render_to_response('helpdesk/help_api.html')
