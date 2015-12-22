@@ -50,14 +50,14 @@
             <li>A set of <em>data</em> to be saved into the database. This data will vary from request to request, and is outlined in <a href='#methods'>Methods</a> below.</li>
         </ol>
 
-        <p>To build your request, send a HTTP POST request to <em>{% url 'helpdesk_api' "method" %}</em>, where <em>method</em> is the name of a <a href='#methods'>valid method</a> from the list below.</p>
+        <p>To build your request, send a HTTP POST request to <em>{% url 'helpdesk:api' "method" %}</em>, where <em>method</em> is the name of a <a href='#methods'>valid method</a> from the list below.</p>
 
         <p>Your POST must include both <em>user</em> and <em>password</em> parameters.</p>
 
         <p>A sample request for the method <em>hold_ticket</em> may look like this:</p>
 
         <ul>
-            <li>A HTTP POST to <em>{% url 'helpdesk_api' "hold_ticket" %}</em></li>
+            <li>A HTTP POST to <em>{% url 'helpdesk:api' "hold_ticket" %}</em></li>
             <li>A set of POST data containing:<ul>
                 <li>username=susan</li>
                 <li>password=fido</li>
@@ -67,13 +67,13 @@
 
         <p>To complete this from a command-line using the <a href='http://curl.haxx.se/'>cURL</a> application, you may use a command such as this:</p>
 
-        <pre>/usr/bin/curl {% url 'helpdesk_api' "hold_ticket" %} --data "user=susan&amp;password=fido&amp;ticket=31794"</pre>
+        <pre>/usr/bin/curl {% url 'helpdesk:api' "hold_ticket" %} --data "user=susan&amp;password=fido&amp;ticket=31794"</pre>
 
         <p>In <a href='http://www.php.net/'>PHP</a>, providing you have access to the <a href='http://www.php.net/curl'>cURL libraries</a>, you may use code such as this:</p>
 
         <pre>&lt;?php
 $api = curl_init();
-curl_setopt($api, CURLOPT_URL, "{% url 'helpdesk_api' "hold_ticket" %}");
+curl_setopt($api, CURLOPT_URL, "{% url 'helpdesk:api' "hold_ticket" %}");
 curl_setopt($api, CURLOPT_POST, 1);
 curl_setopt($api, CURLOPT_POSTFIELDS, "user=susan&amp;password=fido&amp;ticket=31794");
 $result = curl_exec($api);

@@ -21,16 +21,16 @@ from helpdesk.models import Ticket, Queue, UserSettings, KBCategory
 
 def homepage(request):
     if not request.user.is_authenticated() and helpdesk_settings.HELPDESK_REDIRECT_TO_LOGIN_BY_DEFAULT:
-        return HttpResponseRedirect(reverse('login'))
+        return HttpResponseRedirect(reverse('helpdesk:login'))
 
     if (request.user.is_staff or (request.user.is_authenticated() and helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE)):
         try:
             if getattr(request.user.usersettings.settings, 'login_view_ticketlist', False):
-                return HttpResponseRedirect(reverse('helpdesk_list'))
+                return HttpResponseRedirect(reverse('helpdesk:list'))
             else:
-                return HttpResponseRedirect(reverse('helpdesk_dashboard'))
+                return HttpResponseRedirect(reverse('helpdesk:dashboard'))
         except UserSettings.DoesNotExist:
-            return HttpResponseRedirect(reverse('helpdesk_dashboard'))
+            return HttpResponseRedirect(reverse('helpdesk:dashboard'))
 
     if request.method == 'POST':
         form = PublicTicketForm(request.POST, request.FILES)
@@ -42,7 +42,7 @@ def homepage(request):
             else:
                 ticket = form.save()
                 return HttpResponseRedirect('%s?ticket=%s&email=%s'% (
-                    reverse('helpdesk_public_view'),
+                    reverse('helpdesk:public_view'),
                     ticket.ticket_for_url,
                     ticket.submitter_email)
                     )
@@ -91,7 +91,7 @@ def view_ticket(request):
         if ticket:
 
             if request.user.is_staff:
-                redirect_url = reverse('helpdesk_view', args=[ticket_id])
+                redirect_url = reverse('helpdesk:view', args=[ticket_id])
                 if 'close' in request.GET:
                     redirect_url += '?close'
                 return HttpResponseRedirect(redirect_url)
@@ -115,7 +115,7 @@ def view_ticket(request):
             # redirect user back to this ticket if possible.
             redirect_url = ''
             if helpdesk_settings.HELPDESK_NAVIGATION_ENABLED:
-                redirect_url = reverse('helpdesk_view', args=[ticket_id])
+                redirect_url = reverse('helpdesk:view', args=[ticket_id])
 
             return render_to_response('helpdesk/public_view_ticket.html',
                 RequestContext(request, {

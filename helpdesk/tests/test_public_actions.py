@@ -21,7 +21,7 @@ class PublicActionsTestCase(TestCase):
         self.client = Client()
 
     def test_public_view_ticket(self):
-        response = self.client.get('%s?ticket=%s&email=%s' % (reverse('helpdesk_public_view'), self.ticket.ticket_for_url, 'test.submitter@example.com'))
+        response = self.client.get('%s?ticket=%s&email=%s' % (reverse('helpdesk:public_view'), self.ticket.ticket_for_url, 'test.submitter@example.com'))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateNotUsed(response, 'helpdesk/public_view_form.html')
 
@@ -38,7 +38,7 @@ class PublicActionsTestCase(TestCase):
 
         current_followups = ticket.followup_set.all().count()
         
-        response = self.client.get('%s?ticket=%s&email=%s&close' % (reverse('helpdesk_public_view'), ticket.ticket_for_url, 'test.submitter@example.com'))
+        response = self.client.get('%s?ticket=%s&email=%s&close' % (reverse('helpdesk:public_view'), ticket.ticket_for_url, 'test.submitter@example.com'))
         
         ticket = Ticket.objects.get(id=self.ticket.id)
 

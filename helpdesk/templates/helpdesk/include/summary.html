@@ -6,7 +6,7 @@
 </thead>
 <tbody>
 {% for queue in dash_tickets %}
-<tr>{% url 'helpdesk_list' as hdlist %}
+<tr>{% url 'helpdesk:list' as hdlist %}
 <th><a href='{{ hdlist }}?queue={{ queue.queue }}&status=1&status=2'>{{ queue.name }}</a></th>
 <td align="center">{% if queue.open %}<a href='{{ hdlist }}?queue={{ queue.queue }}&status=1&status=2'>{% endif %}{{ queue.open }}{% if queue.open %}</a>{% endif %}</td>
 <td align="center">{% if queue.resolved %}<a href='{{ hdlist }}?queue={{ queue.queue }}&status=3'>{% endif %}{{ queue.resolved }}{% if queue.resolved %}</a>{% endif %}</td>

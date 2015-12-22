@@ -495,7 +495,7 @@ class Ticket(models.Model):
             site = Site(domain='configure-django-sites.com')
         return u"http://%s%s?ticket=%s&email=%s" % (
             site.domain,
-            reverse('helpdesk_public_view'),
+            reverse('helpdesk:public_view'),
             self.ticket_for_url,
             self.submitter_email
             )
@@ -514,7 +514,7 @@ class Ticket(models.Model):
             site = Site(domain='configure-django-sites.com')
         return u"http://%s%s" % (
             site.domain,
-            reverse('helpdesk_view',
+            reverse('helpdesk:view',
             args=[self.id])
             )
     staff_url = property(_get_staff_url)
