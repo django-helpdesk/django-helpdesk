@@ -2,7 +2,9 @@
 <table class="table table-hover table-bordered table-striped">{% if ticket_list_caption %}
 <caption>{{ ticket_list_caption }}</caption>{% endif %}
 <thead>
-<tr><th>#</th><th>{% trans "Pr" %}</th><th>{% trans "Title" %}</th><th>{% trans "Queue" %}</th><th>{% trans "Status" %}</th><th>{% trans "Last Update" %}</th></tr>
+<tr><th>#</th><th>{% trans "Pr" %}</th><th>{% trans "Title" %}</th><th>{% trans "Queue" %}</th>
+    <th>{% trans "Type" %}</th><th>{% trans "Status" %}</th><th>{% trans "Last Update" %}</th>
+</tr>
 </thead>
 <tbody>
 {% for ticket in ticket_list %}
@@ -11,6 +13,7 @@
 <td>{{ ticket.priority }}</td>
 <th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></th>
 <td>{{ ticket.queue }}</td>
+<td>{{ ticket.get_ticket_type_display }}</td>
 <td>{{ ticket.get_status }}</td>
 <td><span title='{{ ticket.modified|date:"r" }}'>{{ ticket.modified|naturaltime }}</span></td>
 </tr>

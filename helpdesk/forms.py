@@ -76,7 +76,7 @@ class CustomFieldMixin(object):
 class EditTicketForm(CustomFieldMixin, forms.ModelForm):
     class Meta:
         model = Ticket
-        exclude = ('created', 'modified', 'status', 'on_hold', 'resolution', 'last_escalation', 'assigned_to')
+        exclude = ('created', 'modified', 'status', 'ticket_type', 'on_hold', 'resolution', 'last_escalation', 'assigned_to')
     
     def __init__(self, *args, **kwargs):
         """
@@ -215,6 +215,7 @@ class TicketForm(CustomFieldMixin, forms.Form):
                     submitter_email = self.cleaned_data['submitter_email'],
                     created = timezone.now(),
                     status = Ticket.OPEN_STATUS,
+                    ticket_type = Ticket.ISSUE_TICKETTYPE,
                     queue = q,
                     description = self.cleaned_data['body'],
                     priority = self.cleaned_data['priority'],
@@ -400,6 +401,7 @@ class PublicTicketForm(CustomFieldMixin, forms.Form):
             submitter_email = self.cleaned_data['submitter_email'],
             created = timezone.now(),
             status = Ticket.OPEN_STATUS,
+            ticket_type = Ticket.ISSUE_TICKETTYPE,
             queue = q,
             description = self.cleaned_data['body'],
             priority = self.cleaned_data['priority'],

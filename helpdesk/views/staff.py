@@ -298,6 +298,7 @@ def view_ticket(request, ticket_id):
             'ticket': ticket,
             'form': form,
             'active_users': users,
+            'ticket_types': Ticket.TICKETTYPE_CHOICES,
             'priorities': Ticket.PRIORITY_CHOICES,
             'preset_replies': PreSetReply.objects.filter(Q(queues=ticket.queue) | Q(queues__isnull=True)),
             'ticketcc_string': ticketcc_string,
@@ -778,6 +779,7 @@ def ticket_list(request):
         query_params = pickle.loads(b64decode(str(saved_query.query)))
     elif not (  'queue' in request.GET
             or  'assigned_to' in request.GET
+            or  'ticket_type' in request.GET
             or  'status' in request.GET
             or  'q' in request.GET
             or  'sort' in request.GET
@@ -806,6 +808,14 @@ def ticket_list(request):
             try:
                 owners = [int(u) for u in owners]
                 query_params['filtering']['assigned_to__id__in'] = owners
+            except ValueError:
+                pass
+
+        types = request.GET.getlist('ticket_type')
+        if types:
+            try:
+                types = [int(t) for t in types]
+                query_params['filtering']['ticket_type__in'] = types
             except ValueError:
                 pass
 
@@ -841,7 +851,7 @@ def ticket_list(request):
 
         ### SORTING
         sort = request.GET.get('sort', None)
-        if sort not in ('status', 'assigned_to', 'created', 'title', 'queue', 'priority'):
+        if sort not in ('ticket_type', 'status', 'assigned_to', 'created', 'title', 'queue', 'priority'):
             sort = 'created'
         query_params['sorting'] = sort
 
@@ -896,6 +906,7 @@ def ticket_list(request):
             tickets=tickets,
             user_choices=User.objects.filter(is_active=True,is_staff=True),
             queue_choices=user_queues,
+            ticket_type_choices=Ticket.TICKETTYPE_CHOICES,
             status_choices=Ticket.STATUS_CHOICES,
             urlsafe_query=urlsafe_query,
             user_saved_queries=user_saved_queries,
