@@ -6,13 +6,15 @@ from helpdesk.models import TicketChange, Attachment, IgnoreEmail
 from helpdesk.models import CustomField
 
 class QueueAdmin(admin.ModelAdmin):
-    list_display = ('title', 'slug', 'email_address', 'locale')
+    list_display = ('title', 'slug', 'email_address', 'allow_public_submission')
+    list_editable = ('allow_public_submission', )
     prepopulated_fields = {"slug": ("title",)}
 
 class TicketAdmin(admin.ModelAdmin):
-    list_display = ('title', 'status', 'assigned_to', 'queue', 'hidden_submitter_email',)
+    list_display = ('title', 'ticket_type', 'status', 'assigned_to', 'queue', 'hidden_submitter_email',)
+    list_editable = ('ticket_type', 'status')
     date_hierarchy = 'created'
-    list_filter = ('queue', 'assigned_to', 'status')
+    list_filter = ('queue', 'assigned_to', 'ticket_type', 'status')
 
     def hidden_submitter_email(self, ticket):
         if ticket.submitter_email:

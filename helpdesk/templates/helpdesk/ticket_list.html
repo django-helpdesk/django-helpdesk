@@ -67,6 +67,7 @@ $(document).ready(function() {
         <option value='Sort'>{% trans "Sorting" %}</option>
         <option value='Owner'>{% trans "Owner" %}</option>
         <option value='Queue'>{% trans "Queue" %}</option>
+        <option value='Type'>{% trans "Type" %}</option>
         <option value='Status'>{% trans "Status" %}</option>
         <option value='Keywords'>{% trans "Keywords" %}</option>
         <option value='Dates'>{% trans "Date Range" %}</option>
@@ -86,6 +87,9 @@ $(document).ready(function() {
         </option>
         <option value='queue'{% ifequal query_params.sorting "queue"%} selected='selected'{% endifequal %}>
             {% trans "Queue" %}
+        </option>
+        <option value='ticket_type'{% ifequal query_params.sorting "ticket_type"%} selected='selected'{% endifequal %}>
+            {% trans "Type" %}
         </option>
         <option value='status'{% ifequal query_params.sorting "status"%} selected='selected'{% endifequal %}>
             {% trans "Status" %}
@@ -118,6 +122,12 @@ $(document).ready(function() {
 
     <div class='thumbnail filterBox{% if query_params.filtering.queue__id__in %} filterBoxShow{% endif %}' id='filterBoxQueue'>
     <label for='id_queues'>{% trans "Queue(s)" %}</label><select id='id_queues' name='queue' multiple='selected' size='5'>{% for q in queue_choices %}<option value='{{ q.id }}'{% if q.id|in_list:query_params.filtering.queue__id__in %} selected='selected'{% endif %}>{{ q.title }}</option>{% endfor %}</select>
+    <p class='filterHelp'>{% trans "Ctrl-click to select multiple options" %}</p>
+    <input type='button' class='filterBuilderRemove' value='-' />
+    </div>
+
+    <div class='thumbnail filterBox{% if query_params.filtering.ticket_type__in %} filterBoxShow{% endif %}' id='filterBoxType'>
+    <label for='id_ticket_types'>{% trans "Type(s)" %}</label><select id='id_ticket_types' name='ticket_type' multiple='selected' size='5'>{% for t in ticket_type_choices %}<option value='{{ t.0 }}'{% if t.0|in_list:query_params.filtering.ticket_type__in %} selected='selected'{% endif %}>{{ t.1 }}</option>{% endfor %}</select>
     <p class='filterHelp'>{% trans "Ctrl-click to select multiple options" %}</p>
     <input type='button' class='filterBuilderRemove' value='-' />
     </div>
@@ -222,7 +232,8 @@ $(document).ready(function() {
 <table class="table table-hover table-bordered table-striped">
 <caption>{% trans "Tickets" %}</caption>
 <thead>
-<tr><th>#</th><th>&nbsp;</th><th>{% trans "Pr" %}</th><th>{% trans "Title" %}</th><th>{% trans "Queue" %}</th><th>{% trans "Status" %}</th><th>{% trans "Created" %}</th><th>{% trans "Owner" %}</th></tr>
+<tr><th>#</th><th>&nbsp;</th><th>{% trans "Pr" %}</th><th>{% trans "Title" %}</th><th>{% trans "Queue" %}</th>
+    <th>{% trans "Type" %}</th><th>{% trans "Status" %}</th><th>{% trans "Created" %}</th><th>{% trans "Owner" %}</th></tr>
 </thead>
 <tbody>
 {% for ticket in tickets.object_list %}
@@ -232,6 +243,7 @@ $(document).ready(function() {
 <td>{{ ticket.priority }}</td>
 <th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></th>
 <td>{{ ticket.queue }}</td>
+<td>{{ ticket.get_ticket_type_display }}</td>
 <td>{{ ticket.get_status }}</td>
 <td><span title='{{ ticket.created|date:"r" }}'>{{ ticket.created|naturaltime }}</span></td>
 <td>{{ ticket.get_assigned_to }}</td>

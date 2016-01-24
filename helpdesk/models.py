@@ -318,11 +318,26 @@ class Ticket(models.Model):
     the dashboard to prompt users to take ownership of them.
     """
 
+    ISSUE_TICKETTYPE = 1
+    ENHANCEMENT_TICKETTYPE = 2
+    NEW_FEATURE_TICKETTYPE = 3
+    TASK_TICKETTYPE = 4
+    TRAINING_TICKETTYPE = 5
+
+    TICKETTYPE_CHOICES = (
+        (ISSUE_TICKETTYPE, _('Issue / Bug')),
+        (ENHANCEMENT_TICKETTYPE, _('Enhancement')),
+        (NEW_FEATURE_TICKETTYPE, _('New Feature')),
+        (TASK_TICKETTYPE, _('Task / To Do')),
+        (TRAINING_TICKETTYPE, _('Training')),
+    )
+
     OPEN_STATUS = 1
     REOPENED_STATUS = 2
     RESOLVED_STATUS = 3
     CLOSED_STATUS = 4
     DUPLICATE_STATUS = 5
+    WONT_FIX_STATUS = 6
 
     STATUS_CHOICES = (
         (OPEN_STATUS, _('Open')),
@@ -330,6 +345,7 @@ class Ticket(models.Model):
         (RESOLVED_STATUS, _('Resolved')),
         (CLOSED_STATUS, _('Closed')),
         (DUPLICATE_STATUS, _('Duplicate')),
+        (WONT_FIX_STATUS, _('Won\'t Fix')),
     )
 
     PRIORITY_CHOICES = (
@@ -348,6 +364,12 @@ class Ticket(models.Model):
     queue = models.ForeignKey(
         Queue,
         verbose_name=_('Queue'),
+        )
+
+    ticket_type = models.IntegerField(
+        _('Status'),
+        choices=TICKETTYPE_CHOICES,
+        default=ISSUE_TICKETTYPE,
         )
 
     created = models.DateTimeField(

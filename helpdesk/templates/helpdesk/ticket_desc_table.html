@@ -45,6 +45,11 @@
 </tr>
 
 <tr>
+    <th>{% trans "Type" %}</th>
+    <td>{{ ticket.get_ticket_type_display }}</td>
+</tr>
+
+<tr>
     <th>{% trans "Priority" %}</th>
     <td>{{ ticket.get_priority_display }}</td>
 </tr>
