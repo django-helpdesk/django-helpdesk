@@ -49,6 +49,7 @@ def send_templated_mail(template_name, email_context, recipients, sender=None, b
         along with the File objects to be read. files can be blank.
 
     """
+    from django import VERSION
     from django.conf import settings
     from django.core.mail import EmailMultiAlternatives
     from django.template import loader, Context
@@ -57,7 +58,11 @@ def send_templated_mail(template_name, email_context, recipients, sender=None, b
     from helpdesk.settings import HELPDESK_EMAIL_SUBJECT_TEMPLATE
     import os
 
-    context = Context(email_context)
+    # RemovedInDjango110Warning: render() must be called with a dict, not a Context.
+    if VERSION >= (1, 8):
+        context = email_context
+    else:
+        context = Context(email_context)
 
     if hasattr(context['queue'], 'locale'):
         locale = getattr(context['queue'], 'locale', '')
@@ -84,8 +89,15 @@ def send_templated_mail(template_name, email_context, recipients, sender=None, b
         sender = settings.DEFAULT_FROM_EMAIL
 
     footer_file = os.path.join('helpdesk', locale, 'email_text_footer.txt')
+    
+    # get_template_from_string was removed in Django 1.8 http://django.readthedocs.org/en/1.8.x/ref/templates/upgrading.html
+    try:
+        from django.template import engines
+        template_func = engines['django'].from_string
+    except ImportError:  # occurs in django < 1.8
+        template_func = loader.get_template_from_string
 
-    text_part = loader.get_template_from_string(
+    text_part = template_func(
         "%s{%% include '%s' %%}" % (t.plain_text, footer_file)
         ).render(context)
 
@@ -95,27 +107,29 @@ def send_templated_mail(template_name, email_context, recipients, sender=None, b
     ''' keep new lines in html emails '''
     from django.utils.safestring import mark_safe
 
-    if context.has_key('comment'):
+    if 'comment' in context:
         html_txt = context['comment']
         html_txt = html_txt.replace('\r\n', '<br>')
         context['comment'] = mark_safe(html_txt)
 
-    html_part = loader.get_template_from_string(
+    # get_template_from_string was removed in Django 1.8 http://django.readthedocs.org/en/1.8.x/ref/templates/upgrading.html
+    html_part = template_func(
         "{%% extends '%s' %%}{%% block title %%}%s{%% endblock %%}{%% block content %%}%s{%% endblock %%}" % (email_html_base_file, t.heading, t.html)
         ).render(context)
 
-    subject_part = loader.get_template_from_string(
+    # get_template_from_string was removed in Django 1.8 http://django.readthedocs.org/en/1.8.x/ref/templates/upgrading.html
+    subject_part = template_func(
         HELPDESK_EMAIL_SUBJECT_TEMPLATE % {
             "subject": t.subject,
         }).render(context)
 
-    if isinstance(recipients,(str,unicode)):
+    if isinstance(recipients, str):
         if recipients.find(','):
             recipients = recipients.split(',')
     elif type(recipients) != list:
         recipients = [recipients,]
 
-    msg = EmailMultiAlternatives(   subject_part.replace('\n', ''),
+    msg = EmailMultiAlternatives(   subject_part.replace('\n', '').replace('\r', ''),
                                     text_part,
                                     sender,
                                     recipients,

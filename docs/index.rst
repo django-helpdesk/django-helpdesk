@@ -33,7 +33,7 @@ django-helpdesk is just a Django application with models, views, templates, and 
 Key Features
 ------------
 
-django-helpdesk has been designed for small businesses who need to recieve, manage and respond to requests for help from customers. In this context *'customers'* may be external users, or other people within your company.
+django-helpdesk has been designed for small businesses who need to receive, manage and respond to requests for help from customers. In this context *'customers'* may be external users, or other people within your company.
 
 * Tickets can be opened via email
 * Multiple queues / categories of tickets
@@ -61,6 +61,7 @@ If a user is a staff member, they get general helpdesk access, including:
 6. Assign tickets to themselves or other staff members
 7. Resolve tickets
 
+Optionally, their access to view tickets, both on the dashboard and through searches and reports, may be restricted by a list of queues to which they have been granted membership. Create and update permissions for individual tickets are not limited by this optional restriction.
 
 Licensing
 ---------
@@ -69,8 +70,7 @@ django-helpdesk is released under the BSD license, however it packages 3rd party
 Dependencies
 ------------
 
-1. Python 2.5+
-2. Django (1.3 or newer)
-3. South for database migrations (highly recommended, but not required). Download from http://south.aeracode.org/
-4. An existing **working** Django project with database etc. If you cannot log into the Admin, you won't get this product working! This means you **must** run `syncdb` **before** you add ``helpdesk`` to your ``INSTALLED_APPS``.
+1. Python 2.7+ (or 3.3+)
+2. Django (1.7 or newer)
+3. An existing **working** Django project with database etc. If you cannot log into the Admin, you won't get this product working! This means you **must** run `syncdb` **before** you add ``helpdesk`` to your ``INSTALLED_APPS``.
 

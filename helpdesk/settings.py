@@ -60,7 +60,7 @@ HELPDESK_SUBMIT_A_TICKET_PUBLIC = getattr(settings, 'HELPDESK_SUBMIT_A_TICKET_PU
 
 
 ''' options for update_ticket views '''
-# allow non-staff users to interact with tickets? this will also change how 'staff_member_required' 
+# allow non-staff users to interact with tickets? this will also change how 'staff_member_required'
 # in staff.py will be defined.
 HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = getattr(settings, 'HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE', False)
 
@@ -73,10 +73,10 @@ HELPDESK_SHOW_DELETE_BUTTON_SUPERUSER_FOLLOW_UP = getattr(settings, 'HELPDESK_SH
 # make all updates public by default? this will hide the 'is this update public' checkbox
 HELPDESK_UPDATE_PUBLIC_DEFAULT = getattr(settings, 'HELPDESK_UPDATE_PUBLIC_DEFAULT', False)
 
-# only show staff users in ticket owner drop-downs 
+# only show staff users in ticket owner drop-downs
 HELPDESK_STAFF_ONLY_TICKET_OWNERS = getattr(settings, 'HELPDESK_STAFF_ONLY_TICKET_OWNERS', False)
 
-# only show staff users in ticket cc drop-down 
+# only show staff users in ticket cc drop-down
 HELPDESK_STAFF_ONLY_TICKET_CC = getattr(settings, 'HELPDESK_STAFF_ONLY_TICKET_CC', False)
 
 
@@ -97,3 +97,7 @@ QUEUE_EMAIL_BOX_SSL = getattr(settings, 'QUEUE_EMAIL_BOX_SSL', None)
 QUEUE_EMAIL_BOX_HOST = getattr(settings, 'QUEUE_EMAIL_BOX_HOST', None)
 QUEUE_EMAIL_BOX_USER = getattr(settings, 'QUEUE_EMAIL_BOX_USER', None)
 QUEUE_EMAIL_BOX_PASSWORD = getattr(settings, 'QUEUE_EMAIL_BOX_PASSWORD', None)
+
+
+# only allow users to access queues that they are members of?
+HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION = getattr(settings, 'HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION', False)

@@ -1,4 +1,4 @@
-{% extends "helpdesk/help_base.html" %}{% load url from future %}
+{% extends "helpdesk/help_base.html" %}
 
 {% block title %}django-helpdesk API Documentation{% endblock %}
 {% block heading %}django-helpdesk API Documentation{% endblock %}
@@ -23,6 +23,12 @@
                 </ul>
             </li>
         </ul>
+        <h2 id='warning'>Deprecation Warning</h2>
+
+        <P>This API has been deprecated and will be removed in January 2016. Please <a href='https://github.com/rossp/django-helpdesk/issues/198'>See the GitHub Issue Tracker</a> for more details.</p>
+        <P>Do <strong>not</strong> build new integrations using this API.</p>
+
+        <p>We recommend using django-rest-framework or similar for all integrations.</p>
 
         <h2 id='introduction'>Introduction</h2>
 

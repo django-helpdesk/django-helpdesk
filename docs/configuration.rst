@@ -23,7 +23,7 @@ Before django-helpdesk will be much use, you need to do some basic configuration
    
        0 * * * * /path/to/helpdesksite/manage.py escalate_tickets
    
-   This will run the escalation process hourly, using the 'Escalation Hours' setting for each queue to determine which tickets to escalate.
+   This will run the escalation process hourly, using the 'Escalation Days' setting for each queue to determine which tickets to escalate.
 
 5. If you wish to exclude some days (eg, weekends) from escalation calculations, enter the dates manually via the Admin, or setup a cronjob to run a management command on a regular basis::
 
@@ -38,5 +38,7 @@ Before django-helpdesk will be much use, you need to do some basic configuration
        EMAIL_HOST = 'XXXXX'
        EMAIL_HOST_USER = 'YYYYYY@ZZZZ.PPP'
        EMAIL_HOST_PASSWORD = '123456'
+
+8. If you wish to use SOCKS4/5 proxy with Helpdesk Queue email operations, install PySocks manually.
 
 You're now up and running! Happy ticketing.

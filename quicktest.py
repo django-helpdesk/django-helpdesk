@@ -1,7 +1,10 @@
 import os
 import sys
 import argparse
+
+import django
 from django.conf import settings
+
 
 class QuickDjangoTest(object):
     """
@@ -16,15 +19,24 @@ class QuickDjangoTest(object):
     """
     DIRNAME = os.path.dirname(__file__)
     INSTALLED_APPS = (
+        'django.contrib.admin',
         'django.contrib.auth',
         'django.contrib.contenttypes',
-        'django.contrib.sessions',
-        'django.contrib.admin',
-        'django.contrib.staticfiles',
-        'django.contrib.messages',
         'django.contrib.humanize',
+        'django.contrib.messages',
+        'django.contrib.sessions',
+        'django.contrib.sites',
+        'django.contrib.staticfiles',
         'bootstrapform',
     )
+    MIDDLEWARE_CLASSES = [
+        'django.contrib.sessions.middleware.SessionMiddleware',
+        'django.middleware.common.CommonMiddleware',
+        'django.middleware.csrf.CsrfViewMiddleware',
+        'django.contrib.auth.middleware.AuthenticationMiddleware',
+        'django.contrib.messages.middleware.MessageMiddleware',
+        'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    ]
 
     def __init__(self, *args, **kwargs):
         self.apps = args
@@ -40,8 +52,7 @@ class QuickDjangoTest(object):
         """
         Figure out which version of Django's test suite we have to play with.
         """
-        from django import VERSION
-        if VERSION[0] == 1 and VERSION[1] >= 2:
+        if django.VERSION >= (1, 2):
             return 'new'
         else:
             return 'old'
@@ -64,6 +75,7 @@ class QuickDjangoTest(object):
         """
         Fire up the Django test suite developed for version 1.2
         """
+
         settings.configure(
             DEBUG = True,
             DATABASES = {
@@ -77,10 +89,27 @@ class QuickDjangoTest(object):
                 }
             },
             INSTALLED_APPS = self.INSTALLED_APPS + self.apps,
+            MIDDLEWARE_CLASSES = self.MIDDLEWARE_CLASSES,
             ROOT_URLCONF = self.apps[0] + '.urls',
+            STATIC_URL = '/static/'
         )
-        from django.test.simple import DjangoTestSuiteRunner
-        failures = DjangoTestSuiteRunner().run_tests(self.apps, verbosity=1)
+
+        # compatibility with django 1.8 downwards
+        # see: http://stackoverflow.com/questions/3841725/how-to-launch-tests-for-django-reusable-app
+        
+        try:
+            # Django >= 1.6
+            from django.test.runner import DiscoverRunner
+            test_runner = DiscoverRunner(verbosity=1)
+        except ImportError:
+            # Django <= 1.5
+            from django.test.simple import DjangoTestSuiteRunner
+            test_runner = DjangoTestSuiteRunner(verbosity=1)
+
+        if django.VERSION >= (1, 7):
+            django.setup()
+
+        failures = test_runner.run_tests(self.apps)
         if failures:
             sys.exit(failures)
 

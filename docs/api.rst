@@ -1,6 +1,8 @@
 Ticket API
 ==========
 
-django-helpdesk includes an API accessible via HTTP POST requests, allowing you to create and alter tickets from 3rd party software and systems.
+*Warning*: The django-helpdesk API is deprecated, and no longer maintained. See https://github.com/rossp/django-helpdesk/issues/198 for more details.
 
-For usage instructions and command syntax, see the file ``templates/helpdesk/api_help.html``, or visit http://helpdesk/api/help/.
+The API will be removed in January 2016 - you should instead build an integration with eg django-rest-framework.
+
+For details on the current API including usage instructions and command syntax, see the file ``templates/helpdesk/api_help.html``, or visit http://helpdesk/api/help/.

@@ -2,6 +2,7 @@ include README
 include UPGRADE
 include LICENSE*
 include CHANGELOG
+include requirements.txt
 
 recursive-include helpdesk/static/helpdesk *
 recursive-include helpdesk/locale *.po *.mo

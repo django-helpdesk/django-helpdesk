@@ -1,5 +1,6 @@
-{% load i18n %}{% load url from future %}
+{% load i18n %}
 {% load load_helpdesk_settings %}
+{% load static from staticfiles %}
 {% with request|load_helpdesk_settings as helpdesk_settings %}
 <html>
 <head>
@@ -7,7 +8,7 @@
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.2/js/bootstrap.min.js"></script>
 <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css" rel="stylesheet">
-<link rel='stylesheet' href='{{ STATIC_URL }}helpdesk/helpdesk-extend.css' type='text/css' />
+<link rel='stylesheet' href='{% static "helpdesk/helpdesk-extend.css" %}' type='text/css' />
 {% block helpdesk_head %}{% endblock %}
 </head>
 <body id="helpdesk-body">

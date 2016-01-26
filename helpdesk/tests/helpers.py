@@ -22,12 +22,22 @@ def get_staff_user(username='helpdesk.staff', password='password'):
 
 
 def reload_urlconf(urlconf=None):
+
+    from imp import reload  # python 3 needs this import.
+
     if urlconf is None:
         from django.conf import settings
 
         urlconf = settings.ROOT_URLCONF
-    if urlconf in sys.modules:
-        from django.core.urlresolvers import clear_url_caches
 
+    if HELPDESK_URLCONF in sys.modules:
+        reload(sys.modules[HELPDESK_URLCONF])
+
+    if urlconf in sys.modules:
         reload(sys.modules[urlconf])
-        clear_url_caches()
+
+    from django.core.urlresolvers import clear_url_caches
+    clear_url_caches()
+
+
+HELPDESK_URLCONF = 'helpdesk.urls'

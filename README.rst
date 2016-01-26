@@ -1,10 +1,10 @@
-django-helpdesk - A Django powered ticket tracker for small enterprise.
+django-helpdesk - A Django powered ticket tracker for small businesses.
 =======================================================================
 
 .. image:: https://travis-ci.org/rossp/django-helpdesk.png?branch=master
     :target: https://travis-ci.org/rossp/django-helpdesk
 
-Copyright 2009-11 Jutda and Ross Poulton. All Rights Reserved. See LICENSE for details.
+Copyright 2009- Ross Poulton and contributors. All Rights Reserved. See LICENSE for details.
 
 django-helpdesk was formerly known as Jutda Helpdesk, named after the 
 company who originally created it. As of January 2011 the name has been 
@@ -25,14 +25,13 @@ LICENSE.3RDPARTY for license terms for included packages.
 Dependencies (pre-flight checklist)
 -----------------------------------
 
-1. Python 2.6+ 
-2. Django (1.4 or newer)
-3. South for database migrations (highly recommended, but not required). Download from http://south.aeracode.org/
-4. An existing WORKING Django project with database etc. If you
+1. Python 2.7 or 3.4+ (3.4+ support is new, please let us know how it goes)
+2. Django (1.7 or newer, preferably 1.9 - Django 1.7 is not supported if you are using Python 3.5)
+3. An existing WORKING Django project with database etc. If you
    cannot log into the Admin, you won't get this product working.
-5. `pip install django-bootstrap-form` and add `bootstrapform` to `settings.INSTALLED_APPS`
-6. `pip install django-markdown-deux` and add `markdown_deux` to `settings.INSTALLED_APPS`
-7. `pip install email-reply-parser` to get smart email reply handling
+4. `pip install django-bootstrap-form` and add `bootstrapform` to `settings.INSTALLED_APPS`
+5. `pip install django-markdown-deux` and add `markdown_deux` to `settings.INSTALLED_APPS`
+6. `pip install email-reply-parser` to get smart email reply handling
 
 **NOTE REGARDING SQLITE AND SEARCHING:**
 If you use sqlite as your database, the search function will not work as
@@ -60,25 +59,15 @@ commands.
 Fresh Django Installations
 --------------------------
 
-If you're on a brand new Django installation, make sure you do a ``syncdb``
+If you're on a brand new Django installation, make sure you do a ``migrate``
 **before** adding ``helpdesk`` to your ``INSTALLED_APPS``. This will avoid 
 errors with trying to create User settings.
 
 Upgrading from previous versions
 --------------------------------
 
-We highly recommend that you use South (available 
-from http://south.aeracode.org/) to assist with management of database schema
-changes. 
-
-If you are upgrading from a previous version that did NOT use South for 
-migrations (i.e. prior to April 2011) then you will need to 'fake' the first
-migration::
-
-    python manage.py migrate helpdesk 0001 --fake
-
-If you are upgrading from a previous version of django-helpdesk that DID use
-South, simply download an up to date version of the code base (eg by using 
+If you are upgrading from a previous version of django-helpdesk that used
+migrations, get an up to date version of the code base (eg by using 
 `git pull` or `pip install --upgrade django-helpdesk`) then migrate the database::
 
     python manage.py migrate helpdesk --db-dry-run # DB untouched
@@ -86,6 +75,9 @@ South, simply download an up to date version of the code base (eg by using
 
 Lastly, restart your web server software (eg Apache) or FastCGI instance, to 
 ensure the latest changes are in use.
+
+If you are using django-helpdesk pre-migrations (ie pre-2011) then you're
+on your own, sorry.
 
 You can continue to the 'Initial Configuration' area, if needed.
 

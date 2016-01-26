@@ -6,8 +6,10 @@ django-helpdesk - A Django powered ticket tracker for small enterprise.
 forms.py - Definitions of newforms-based forms for creating and maintaining
            tickets.
 """
-
-from StringIO import StringIO
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 
 from django import forms
 from django.forms import extras
@@ -102,7 +104,7 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
         
         for field, value in self.cleaned_data.items():
             if field.startswith('custom_'):
-                field_name = field.replace('custom_', '')
+                field_name = field.replace('custom_', '', 1)
                 customfield = CustomField.objects.get(name=field_name)
                 try:
                     cfv = TicketCustomFieldValue.objects.get(ticket=self.instance, field=customfield)
@@ -229,7 +231,7 @@ class TicketForm(CustomFieldMixin, forms.Form):
         
         for field, value in self.cleaned_data.items():
             if field.startswith('custom_'):
-                field_name = field.replace('custom_', '')
+                field_name = field.replace('custom_', '', 1)
                 customfield = CustomField.objects.get(name=field_name)
                 cfv = TicketCustomFieldValue(ticket=t,
                             field=customfield,
@@ -369,6 +371,7 @@ class PublicTicketForm(CustomFieldMixin, forms.Form):
         required=False,
         label=_('Attach File'),
         help_text=_('You can attach a file such as a document or screenshot to this ticket.'),
+        max_length=1000,
         )
 
     def __init__(self, *args, **kwargs):
@@ -407,7 +410,7 @@ class PublicTicketForm(CustomFieldMixin, forms.Form):
 
         for field, value in self.cleaned_data.items():
             if field.startswith('custom_'):
-                field_name = field.replace('custom_', '')
+                field_name = field.replace('custom_', '', 1)
                 customfield = CustomField.objects.get(name=field_name)
                 cfv = TicketCustomFieldValue(ticket=t,
                             field=customfield,
