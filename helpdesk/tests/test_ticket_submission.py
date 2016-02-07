@@ -50,7 +50,7 @@ class TicketBasicsTestCase(TestCase):
 
         message_id = uuid.uuid4().hex
 
-        self.ticket_data['rfc_2822_message-id'] = message_id
+        self.ticket_data['rfc_2822_submitter_email_id'] = message_id
 
         email_count = len(mail.outbox)
         ticket_data = dict(queue=self.queue_public, **self.ticket_data)

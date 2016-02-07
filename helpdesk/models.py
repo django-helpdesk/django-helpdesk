@@ -447,8 +447,8 @@ class Ticket(models.Model):
                 self.rfc_2822_items[field] = value
 
         # Submitter Message-Id is an exception here, since it's a <Ticket> attribute
-        if 'rfc_2822_message_id' in kwargs:
-            kwargs['submitter_message_id'] = value
+        if 'rfc_2822_submitter_email_id' in kwargs:
+            kwargs['submitter_email_id'] = kwargs['rfc_2822_submitter_email_id']
 
         for field in self.rfc_2822_items.iterkeys():
             kwargs.pop(field)
