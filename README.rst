@@ -29,6 +29,7 @@ Dependencies (pre-flight checklist)
 2. Django (1.7 or newer, preferably 1.9 - Django 1.7 is not supported if you are using Python 3.5)
 3. An existing WORKING Django project with database etc. If you
    cannot log into the Admin, you won't get this product working.
+3.1 Also, make sure  that both "django.contrib.humanize" and "django.contrib.sites" are installed.
 4. `pip install django-bootstrap-form` and add `bootstrapform` to `settings.INSTALLED_APPS`
 5. `pip install django-markdown-deux` and add `markdown_deux` to `settings.INSTALLED_APPS`
 6. `pip install email-reply-parser` to get smart email reply handling
