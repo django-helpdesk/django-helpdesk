@@ -1,6 +1,10 @@
-from helpdesk.models import Queue, CustomField, Ticket
+
+import uuid
+
+from helpdesk.models import Queue, CustomField, Ticket, TicketCC
 from django.test import TestCase
 from django.core import mail
+from django.core.exceptions import ObjectDoesNotExist
 from django.test.client import Client
 from django.core.urlresolvers import reverse
 
@@ -30,6 +34,72 @@ class TicketBasicsTestCase(TestCase):
         ticket = Ticket.objects.create(**ticket_data)
         self.assertEqual(ticket.ticket_for_url, "q1-%s" % ticket.id)
         self.assertEqual(email_count, len(mail.outbox))
+
+    def test_create_ticket_from_email_with_carbon_copy(self):
+
+        """ 
+        Ensure that an instance of <TicketCC> is created for every valid element of the
+        "rfc_2822_cc" field when creating a <Ticket> instance.
+        """
+
+        message_id = uuid.uuid4().hex
+
+        email_data = {
+            'Message-ID': message_id,
+            'cc': ['bravo@example.net', 'charlie@foobar.com'],
+        }
+
+        # Regular ticket from email creation process
+        self.ticket_data = {
+                'title': 'Test Ticket',
+                'description': 'Some Test Ticket',
+                'rfc_2822_cc': email_data.get('cc', [])
+        }
+
+        email_count = len(mail.outbox)
+        ticket_data = dict(queue=self.queue_public, **self.ticket_data)
+        ticket = Ticket.objects.create(**ticket_data)
+        self.assertEqual(ticket.ticket_for_url, "q1-%s" % ticket.id)
+        self.assertEqual(email_count, len(mail.outbox))
+
+        # Ensure that <TicketCC> is created
+        for cc_email in email_data.get('cc', []):
+
+            ticket_cc = TicketCC.objects.get(ticket=ticket, email=cc_email)
+            self.assertTrue(ticket_cc.ticket, ticket)
+            self.assertTrue(ticket_cc.email, cc_email)
+
+    def test_create_ticket_from_email_with_invalid_carbon_copy(self):
+
+        """ 
+        Ensure that no <TicketCC> instance is created if an invalid element of the
+        "rfc_2822_cc" field is provided when creating a <Ticket> instance.
+        """
+
+        message_id = uuid.uuid4().hex
+
+        email_data = {
+            'Message-ID': message_id,
+            'cc': ['null@example', 'invalid@foobar'],
+        }
+
+        # Regular ticket from email creation process
+        self.ticket_data = {
+                'title': 'Test Ticket',
+                'description': 'Some Test Ticket',
+                'rfc_2822_cc': email_data.get('cc', [])
+        }
+
+        email_count = len(mail.outbox)
+        ticket_data = dict(queue=self.queue_public, **self.ticket_data)
+        ticket = Ticket.objects.create(**ticket_data)
+        self.assertEqual(ticket.ticket_for_url, "q1-%s" % ticket.id)
+        self.assertEqual(email_count, len(mail.outbox))
+
+        # Ensure that <TicketCC> is created
+        for cc_email in email_data.get('cc', []):
+
+            self.assertEquals(0, TicketCC.objects.filter(ticket=ticket, email=cc_email).count())
 
     def test_create_ticket_public(self):
         email_count = len(mail.outbox)
