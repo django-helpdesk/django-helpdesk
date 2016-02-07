@@ -24,13 +24,12 @@ class TicketBasicsTestCase(TestCase):
 
         self.client = Client()
 
-    def test_create_ticket_direct(self):
+    def test_create_ticket_from_email(self):
         email_count = len(mail.outbox)
         ticket_data = dict(queue=self.queue_public, **self.ticket_data)
         ticket = Ticket.objects.create(**ticket_data)
         self.assertEqual(ticket.ticket_for_url, "q1-%s" % ticket.id)
         self.assertEqual(email_count, len(mail.outbox))
-        
 
     def test_create_ticket_public(self):
         email_count = len(mail.outbox)
