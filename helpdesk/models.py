@@ -576,9 +576,10 @@ class Ticket(models.Model):
                 except user_model.DoesNotExist: 
                     pass
 
+                # Local import to deal with non-defined / circular reference problem
                 from .views import staff
 
-                ticket_cc = staff.subscribe_staff_member_to_ticket(ticket=self, user=user, email=cced_email)
+                ticket_cc = staff.subscribe_to_ticket_updates(ticket=self, user=user, email=cced_email)
                    
 
     def save(self, *args, **kwargs):
