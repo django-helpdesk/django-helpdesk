@@ -28,12 +28,37 @@ class TicketBasicsTestCase(TestCase):
 
         self.client = Client()
 
-    def test_create_ticket_from_email(self):
+    def test_create_ticket_from_email_without_message_id(self):
+
+        """
+        Ensure that a <Ticket> instance is created whenever an email is sent to a public queue.
+        """
+
         email_count = len(mail.outbox)
         ticket_data = dict(queue=self.queue_public, **self.ticket_data)
         ticket = Ticket.objects.create(**ticket_data)
         self.assertEqual(ticket.ticket_for_url, "q1-%s" % ticket.id)
         self.assertEqual(email_count, len(mail.outbox))
+
+    def test_create_ticket_from_email_with_message_id(self):
+
+        """
+        Ensure that a <Ticket> instance is created whenever an email is sent to a public queue.
+        Also, make sure that the RFC 2822 field "message-id" is stored on the <Ticket.submitter_email_id>
+        field.
+        """
+
+        message_id = uuid.uuid4().hex
+
+        self.ticket_data['rfc_2822_message-id'] = message_id
+
+        email_count = len(mail.outbox)
+        ticket_data = dict(queue=self.queue_public, **self.ticket_data)
+        ticket = Ticket.objects.create(**ticket_data)
+        self.assertEqual(ticket.ticket_for_url, "q1-%s" % ticket.id)
+        self.assertEqual(email_count, len(mail.outbox))
+        self.assertEqual(ticket.submitter_email_id, message_id)
+
 
     def test_create_ticket_from_email_with_carbon_copy(self):
 
