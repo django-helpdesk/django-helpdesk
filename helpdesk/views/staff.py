@@ -22,6 +22,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.files.base import ContentFile
 from django.core.urlresolvers import reverse
 from django.core.exceptions import ValidationError, PermissionDenied
+from django.core.validators import EmailValidator
 from django.core import paginator
 from django.db import connection
 from django.db.models import Q
@@ -338,16 +339,29 @@ def return_ticketccstring_and_show_subscribe(user, ticket):
 
     return ticketcc_string, SHOW_SUBSCRIBE
 
+def subscribe_to_ticket_updates(ticket, user=None, email=''):
 
-def subscribe_staff_member_to_ticket(ticket, user):
-    ''' used in view_ticket() and update_ticket() '''
+    try:
+        EmailValidator()(email)
+    except ValidationError:
+        email = ''
+
     ticketcc = TicketCC()
     ticketcc.ticket = ticket
     ticketcc.user = user
+    ticketcc.email = email
     ticketcc.can_view = True
     ticketcc.can_update = True
     ticketcc.save()
 
+    return ticketcc
+
+def subscribe_staff_member_to_ticket(ticket, user, email=''):
+
+    ''' used in view_ticket() and update_ticket() '''
+
+    return subscribe_to_ticket_updates(ticket=ticket, user=user)
+    
 
 def update_ticket(request, ticket_id, public=False):
     if not (public or (request.user.is_authenticated() and request.user.is_active and (request.user.is_staff or helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE))):
