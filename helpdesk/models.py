@@ -428,6 +428,24 @@ class Ticket(models.Model):
             'automatically by management/commands/escalate_tickets.py.'),
         )
 
+    def __init__(self, *args, **kwargs):
+
+        # Separate RFC 2822 (email) exclusive fields for later processing
+        self.rfc_2822_items = {}
+
+        for field, value in kwargs.iteritems():
+            if field.startswith('rfc_2822'):
+                self.rfc_2822_items[field] = value
+
+        # Submitter Message-Id is an exception here, since it's a <Ticket> attribute
+        if 'rfc_2822_message_id' in kwargs:
+            kwargs['submitter_message_id'] = value
+
+        for field in self.rfc_2822_items.iterkeys():
+            kwargs.pop(field)
+
+        super(Ticket, self).__init__(*args, **kwargs)
+
     def _get_assigned_to(self):
         """ Custom property to allow us to easily print 'Unassigned' if a
         ticket has no owner, or the users name if it's assigned. If the user
@@ -542,6 +560,27 @@ class Ticket(models.Model):
         return ('helpdesk_view', (self.id,))
     get_absolute_url = models.permalink(get_absolute_url)
 
+    def process_rfc_2822_data(self):
+
+        if len(self.rfc_2822_items) > 0:
+            cc_list = self.rfc_2822_items.get('rfc_2822_cc', [])
+
+            for cced_email in cc_list:
+
+                user = None
+
+                user_model = get_user_model()
+
+                try:
+                    user = user_model.objects.get(email=cced_email)
+                except user_model.DoesNotExist: 
+                    pass
+
+                from .views import staff
+
+                ticket_cc = staff.subscribe_staff_member_to_ticket(ticket=self, user=user, email=cced_email)
+                   
+
     def save(self, *args, **kwargs):
         if not self.id:
             # This is a new ticket as no ID yet exists.
@@ -553,6 +592,9 @@ class Ticket(models.Model):
         self.modified = timezone.now()
 
         super(Ticket, self).save(*args, **kwargs)
+
+        # Process RFC 2822 fields, if any
+        self.process_rfc_2822_data()
 
 
 class FollowUpManager(models.Manager):
