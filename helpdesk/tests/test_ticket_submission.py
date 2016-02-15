@@ -1,4 +1,5 @@
 
+import email
 import uuid
 
 from helpdesk.models import Queue, CustomField, Ticket, TicketCC
@@ -7,6 +8,8 @@ from django.core import mail
 from django.core.exceptions import ObjectDoesNotExist
 from django.test.client import Client
 from django.core.urlresolvers import reverse
+
+from helpdesk.management.commands.get_email import ticket_from_message
 
 try:  # python 3
     from urllib.parse import urlparse
@@ -28,7 +31,7 @@ class TicketBasicsTestCase(TestCase):
 
         self.client = Client()
 
-    def test_create_ticket_from_email_without_message_id(self):
+    def test_create_ticket_instance_from_payload(self):
 
         """
         Ensure that a <Ticket> instance is created whenever an email is sent to a public queue.
@@ -48,16 +51,27 @@ class TicketBasicsTestCase(TestCase):
         field.
         """
 
-        message_id = uuid.uuid4().hex
+        msg = email.message.Message()
 
-        self.ticket_data['rfc_2822_submitter_email_id'] = message_id
+        message_id = uuid.uuid4().hex
+        submitter_email = 'foo@bar.py'
+     
+        msg.__setitem__('Message-ID', message_id)
+        msg.__setitem__('subject', self.ticket_data['title'])
+        msg.__setitem__('From', submitter_email) 
+        msg.__setitem__('To', self.queue_public.email_address)
+        msg.__setitem__('Content-Type', 'text/plain;')
+        msg.set_payload(self.ticket_data['description'])
 
         email_count = len(mail.outbox)
-        ticket_data = dict(queue=self.queue_public, **self.ticket_data)
-        ticket = Ticket.objects.create(**ticket_data)
+
+        ticket_from_message(str(msg), self.queue_public, quiet=True)
+        ticket = Ticket.objects.get(title=self.ticket_data['title'], submitter_email_id=message_id)
+
         self.assertEqual(ticket.ticket_for_url, "q1-%s" % ticket.id)
-        self.assertEqual(email_count, len(mail.outbox))
-        self.assertEqual(ticket.submitter_email_id, message_id)
+
+        # As we have created an Ticket from an email, we notify the sender (+1) and the new and update queues (+2)
+        self.assertEqual(email_count + 1 + 2, len(mail.outbox))
 
 
     def test_create_ticket_from_email_with_carbon_copy(self):
