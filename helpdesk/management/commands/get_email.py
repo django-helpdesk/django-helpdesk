@@ -170,8 +170,10 @@ def decode_mail_headers(string):
 
 def ticket_from_message(message, queue, quiet):
     # 'message' must be an RFC822 formatted message.
+
     msg = message
     message = email.message_from_string(msg)
+    
     subject = message.get('subject', _('Created from e-mail'))
     subject = decode_mail_headers(decodeUnknown(message.get_charset(), subject))
     subject = subject.replace("Re: ", "").replace("Fw: ", "").replace("RE: ", "").replace("FW: ", "").replace("Automatic reply: ", "").strip()
@@ -258,11 +260,12 @@ def ticket_from_message(message, queue, quiet):
     if smtp_priority in high_priority_types or smtp_importance in high_priority_types:
         priority = 2
 
-    if ticket == None:
+    if ticket is None:
         t = Ticket(
             title=subject,
             queue=queue,
             submitter_email=sender_email,
+            submitter_email_id=message.get('message-id'),
             created=now,
             description=body,
             priority=priority,
