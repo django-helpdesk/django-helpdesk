@@ -370,15 +370,6 @@ class Ticket(models.Model):
             'follow-ups left for this task.'),
         )
 
-    submitter_email_id = models.CharField(
-        _('Submitter E-Mail ID'),
-        max_length=256,
-        blank=True,
-        null=True,
-        help_text=_("The Message ID of the submitter's email."),
-        editable=False,
-        )
-
     assigned_to = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         related_name='assigned_to',
@@ -673,6 +664,15 @@ class FollowUp(models.Model):
         blank=True,
         null=True,
         help_text=_('If the status was changed, what was it changed to?'),
+        )
+
+    message_id = models.CharField(
+        _('E-Mail ID'),
+        max_length=256,
+        blank=True,
+        null=True,
+        help_text=_("The Message ID of the submitter's email."),
+        editable=False,
         )
 
     objects = FollowUpManager()
