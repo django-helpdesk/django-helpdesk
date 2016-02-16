@@ -246,7 +246,7 @@ def create_object_from_email_message(message, ticket_id, payload, files, quiet):
     f.save()
 
     if not quiet:
-        print (" [%s-%s] %s" % (t.queue.slug, t.id, t.title,)).encode('ascii', 'replace')
+        print (" [%s-%s] %s" % (ticket.queue.slug, ticket.id, ticket.title,)).encode('ascii', 'replace')
 
     for file in files:
         if file['content']:
@@ -304,16 +304,16 @@ def create_object_from_email_message(message, ticket_id, payload, files, quiet):
     else:
         context.update(comment=f.comment)
 
-        if t.status == Ticket.REOPENED_STATUS:
+        if ticket.status == Ticket.REOPENED_STATUS:
             update = _(' (Reopened)')
         else:
             update = _(' (Updated)')
 
-        if t.assigned_to:
+        if ticket.assigned_to:
             send_templated_mail(
                 'updated_owner',
                 context,
-                recipients=t.assigned_to.email,
+                recipients=ticket.assigned_to.email,
                 sender=queue.from_address,
                 fail_silently=True,
                 )
