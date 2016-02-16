@@ -2,14 +2,14 @@
 import email
 import uuid
 
-from helpdesk.models import Queue, CustomField, Ticket, TicketCC
+from helpdesk.models import Queue, CustomField, FollowUp, Ticket, TicketCC
 from django.test import TestCase
 from django.core import mail
 from django.core.exceptions import ObjectDoesNotExist
 from django.test.client import Client
 from django.core.urlresolvers import reverse
 
-from helpdesk.management.commands.get_email import ticket_from_message
+from helpdesk.management.commands.get_email import object_from_message
 
 try:  # python 3
     from urllib.parse import urlparse
@@ -57,7 +57,7 @@ class TicketBasicsTestCase(TestCase):
         submitter_email = 'foo@bar.py'
      
         msg.__setitem__('Message-ID', message_id)
-        msg.__setitem__('subject', self.ticket_data['title'])
+        msg.__setitem__('Subject', self.ticket_data['title'])
         msg.__setitem__('From', submitter_email) 
         msg.__setitem__('To', self.queue_public.email_address)
         msg.__setitem__('Content-Type', 'text/plain;')
@@ -65,12 +65,15 @@ class TicketBasicsTestCase(TestCase):
 
         email_count = len(mail.outbox)
 
-        ticket_from_message(str(msg), self.queue_public, quiet=True)
-        ticket = Ticket.objects.get(title=self.ticket_data['title'], submitter_email_id=message_id)
+        object_from_message(str(msg), self.queue_public, quiet=True)
+
+        followup = FollowUp.objects.get(message_id=message_id)
+        ticket = Ticket.objects.get(id=followup.ticket.id)
 
         self.assertEqual(ticket.ticket_for_url, "q1-%s" % ticket.id)
 
-        # As we have created an Ticket from an email, we notify the sender (+1) and the new and update queues (+2)
+        # As we have created an Ticket from an email, we notify the sender (+1) 
+        # and the new and update queues (+2)
         self.assertEqual(email_count + 1 + 2, len(mail.outbox))
 
 
@@ -81,29 +84,35 @@ class TicketBasicsTestCase(TestCase):
         "rfc_2822_cc" field when creating a <Ticket> instance.
         """
 
+        msg = email.message.Message()
+
         message_id = uuid.uuid4().hex
+        submitter_email = 'foo@bar.py'
+        cc_list = ['bravo@example.net', 'charlie@foobar.com']
 
-        email_data = {
-            'Message-ID': message_id,
-            'cc': ['bravo@example.net', 'charlie@foobar.com'],
-        }
-
-        # Regular ticket from email creation process
-        self.ticket_data = {
-                'title': 'Test Ticket',
-                'description': 'Some Test Ticket',
-                'rfc_2822_cc': email_data.get('cc', [])
-        }
+        msg.__setitem__('Message-ID', message_id)
+        msg.__setitem__('Subject', self.ticket_data['title'])
+        msg.__setitem__('From', submitter_email)
+        msg.__setitem__('To', self.queue_public.email_address)
+        msg.__setitem__('Cc', ','.join(cc_list))
+        msg.__setitem__('Content-Type', 'text/plain;')
+        msg.set_payload(self.ticket_data['description'])
 
         email_count = len(mail.outbox)
-        ticket_data = dict(queue=self.queue_public, **self.ticket_data)
-        ticket = Ticket.objects.create(**ticket_data)
+        
+        object_from_message(str(msg), self.queue_public, quiet=True)
+
+        followup = FollowUp.objects.get(message_id=message_id)
+        ticket = Ticket.objects.get(id=followup.ticket.id)
         self.assertEqual(ticket.ticket_for_url, "q1-%s" % ticket.id)
-        self.assertEqual(email_count, len(mail.outbox))
+
+        # As we have created an Ticket from an email, we notify the sender (+1)
+        # and the new and update queues (+2)
+        self.assertEqual(email_count + 1 + 2, len(mail.outbox))
+
 
         # Ensure that <TicketCC> is created
-        for cc_email in email_data.get('cc', []):
-
+        for cc_email in cc_list:
             ticket_cc = TicketCC.objects.get(ticket=ticket, email=cc_email)
             self.assertTrue(ticket_cc.ticket, ticket)
             self.assertTrue(ticket_cc.email, cc_email)
@@ -115,29 +124,28 @@ class TicketBasicsTestCase(TestCase):
         "rfc_2822_cc" field is provided when creating a <Ticket> instance.
         """
 
+        msg = email.message.Message()
+
         message_id = uuid.uuid4().hex
+        submitter_email = 'foo@bar.py'
+        cc_list = ['null@example', 'invalid@foobar']
 
-        email_data = {
-            'Message-ID': message_id,
-            'cc': ['null@example', 'invalid@foobar'],
-        }
-
-        # Regular ticket from email creation process
-        self.ticket_data = {
-                'title': 'Test Ticket',
-                'description': 'Some Test Ticket',
-                'rfc_2822_cc': email_data.get('cc', [])
-        }
+        msg.__setitem__('Message-ID', message_id)
+        msg.__setitem__('Subject', self.ticket_data['title'])
+        msg.__setitem__('From', submitter_email)
+        msg.__setitem__('To', self.queue_public.email_address)
+        msg.__setitem__('Cc', ','.join(cc_list))
+        msg.__setitem__('Content-Type', 'text/plain;')
+        msg.set_payload(self.ticket_data['description'])
 
         email_count = len(mail.outbox)
-        ticket_data = dict(queue=self.queue_public, **self.ticket_data)
-        ticket = Ticket.objects.create(**ticket_data)
-        self.assertEqual(ticket.ticket_for_url, "q1-%s" % ticket.id)
-        self.assertEqual(email_count, len(mail.outbox))
 
-        # Ensure that <TicketCC> is created
-        for cc_email in email_data.get('cc', []):
+        object_from_message(str(msg), self.queue_public, quiet=True)
 
+        ticket = Ticket.objects.get(title=self.ticket_data['title'])
+        
+        # Ensure that <TicketCC> is created but the email field is not set
+        for cc_email in cc_list:
             self.assertEquals(0, TicketCC.objects.filter(ticket=ticket, email=cc_email).count())
 
     def test_create_ticket_public(self):

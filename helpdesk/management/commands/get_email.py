@@ -168,9 +168,25 @@ def decode_mail_headers(string):
     decoded = decode_header(string)
     return u' '.join([unicode(msg, charset or 'utf-8') for msg, charset in decoded])
 
+def create_ticket_cc(ticket, cc_list):
+
+    # Local import to deal with non-defined / circular reference problem
+    from helpdesk.views.staff import User, subscribe_to_ticket_updates
+
+    for cced_email in cc_list:
+
+        user = None
+
+        try:
+            user = User.objects.get(email=cced_email)
+        except User.DoesNotExist: 
+            pass
+
+        ticket_cc = subscribe_to_ticket_updates(ticket=ticket, user=user, email=cced_email)
+
 def create_object_from_email_message(message, ticket_id, payload, files, quiet):
 
-    ticket, new = None, False
+    ticket, followup, new = None, None, False
     now = timezone.now()
 
     queue = payload['queue']
@@ -178,24 +194,28 @@ def create_object_from_email_message(message, ticket_id, payload, files, quiet):
 
     message_id = message.get('Message-Id')
     in_reply_to = message.get('In-Reply-To')
+    cc_list = message.get('Cc')
 
-    query_set = Ticket.objects.filter(Q(id=ticket_id)|Q(submitter_email_id=message_id))
-    if query_set.count() == 0:
-        ticket = None
-        new = True
+    if in_reply_to is not None:
+        followup = FollowUp.objects.get(message_id=in_reply_to)
+        ticket = followup.ticket
+
     else:
-        t = query_set.first()
+        try:
+            t = Ticket.objects.get(id=ticket_id)
+            new = False
+        except Ticket.DoesNotExist:
+            ticket = None
 
     # New issue, create a new <Ticket> instance
     if ticket is None:
         t = Ticket.objects.create(
-            title=payload['subject'],
-            queue=queue,
-            submitter_email=sender_email,
-            submitter_email_id=message_id,
-            created=now,
-            description=payload['body'],
-            priority=payload['priority'],
+            title = payload['subject'],
+            queue = queue,
+            submitter_email = sender_email,
+            created = now,
+            description = payload['body'],
+            priority = payload['priority'],
         )
         t.save()
 
@@ -213,6 +233,7 @@ def create_object_from_email_message(message, ticket_id, payload, files, quiet):
         date = now,
         public = True,
         comment = payload['body'],
+        message_id = message_id,
     )
 
     if t.status == Ticket.REOPENED_STATUS:
@@ -241,6 +262,9 @@ def create_object_from_email_message(message, ticket_id, payload, files, quiet):
 
 
     context = safe_template_context(t)
+
+    if cc_list is not None:
+        create_ticket_cc(t, cc_list.split(','))
 
     if new:
 
@@ -301,6 +325,7 @@ def create_object_from_email_message(message, ticket_id, payload, files, quiet):
                 )
 
     return t
+
 
 def object_from_message(message, queue, quiet):
     # 'message' must be an RFC822 formatted message.

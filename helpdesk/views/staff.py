@@ -346,6 +346,7 @@ def subscribe_to_ticket_updates(ticket, user=None, email=''):
     except ValidationError:
         email = ''
 
+
     ticketcc = TicketCC()
     ticketcc.ticket = ticket
     ticketcc.user = user
