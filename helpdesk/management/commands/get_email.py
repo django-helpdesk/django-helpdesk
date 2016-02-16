@@ -186,7 +186,7 @@ def create_ticket_cc(ticket, cc_list):
 
 def create_object_from_email_message(message, ticket_id, payload, files, quiet):
 
-    ticket, followup, new = None, None, False
+    ticket, previous_followup, new = None, None, False
     now = timezone.now()
 
     queue = payload['queue']
@@ -197,19 +197,22 @@ def create_object_from_email_message(message, ticket_id, payload, files, quiet):
     cc_list = message.get('Cc')
 
     if in_reply_to is not None:
-        followup = FollowUp.objects.get(message_id=in_reply_to)
-        ticket = followup.ticket
-
-    else:
         try:
-            t = Ticket.objects.get(id=ticket_id)
+            previous_followup = FollowUp.objects.get(message_id=in_reply_to)
+            ticket = previous_followup.ticket
+        except FollowUp.DoesNotExist:
+            pass #play along. The header may be wrong
+
+    if previous_followup is None and ticket_id is not None:
+        try:
+            ticket = Ticket.objects.get(id=ticket_id)
             new = False
         except Ticket.DoesNotExist:
             ticket = None
 
     # New issue, create a new <Ticket> instance
     if ticket is None:
-        t = Ticket.objects.create(
+        ticket = Ticket.objects.create(
             title = payload['subject'],
             queue = queue,
             submitter_email = sender_email,
@@ -217,18 +220,18 @@ def create_object_from_email_message(message, ticket_id, payload, files, quiet):
             description = payload['body'],
             priority = payload['priority'],
         )
-        t.save()
+        ticket.save()
 
         new = True
         update = ''
 
     # Old issue being re-openned
-    elif t.status == Ticket.CLOSED_STATUS:
-        t.status = Ticket.REOPENED_STATUS
-        t.save()
+    elif ticket.status == Ticket.CLOSED_STATUS:
+        ticket.status = Ticket.REOPENED_STATUS
+        ticket.save()
 
     f = FollowUp(
-        ticket = t,
+        ticket = ticket,
         title = _('E-Mail Received from %(sender_email)s' % {'sender_email': sender_email}),
         date = now,
         public = True,
@@ -236,7 +239,7 @@ def create_object_from_email_message(message, ticket_id, payload, files, quiet):
         message_id = message_id,
     )
 
-    if t.status == Ticket.REOPENED_STATUS:
+    if ticket.status == Ticket.REOPENED_STATUS:
         f.new_status = Ticket.REOPENED_STATUS
         f.title = _('Ticket Re-Opened by E-Mail Received from %(sender_email)s' % {'sender_email': sender_email})
     
@@ -261,10 +264,10 @@ def create_object_from_email_message(message, ticket_id, payload, files, quiet):
                 print "    - %s" % filename
 
 
-    context = safe_template_context(t)
+    context = safe_template_context(ticket)
 
     if cc_list is not None:
-        create_ticket_cc(t, cc_list.split(','))
+        create_ticket_cc(ticket, cc_list.split(','))
 
     if new:
 
@@ -324,7 +327,7 @@ def create_object_from_email_message(message, ticket_id, payload, files, quiet):
                 fail_silently=True,
                 )
 
-    return t
+    return ticket
 
 
 def object_from_message(message, queue, quiet):
