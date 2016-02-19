@@ -22,7 +22,6 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.files.base import ContentFile
 from django.core.urlresolvers import reverse
 from django.core.exceptions import ValidationError, PermissionDenied
-from django.core.validators import EmailValidator
 from django.core import paginator
 from django.db import connection
 from django.db.models import Q
@@ -341,13 +340,7 @@ def return_ticketccstring_and_show_subscribe(user, ticket):
 
 def subscribe_to_ticket_updates(ticket, user=None, email=None, can_view=True, can_update=False):
 
-    try:
-        EmailValidator()(email)
-    except ValidationError:
-        email = None
-
     data = {
-        'ticket': ticket,
         'user': user,
         'email': email,
         'can_view': can_view,
@@ -356,7 +349,16 @@ def subscribe_to_ticket_updates(ticket, user=None, email=None, can_view=True, ca
 
     ticket_cc_form = TicketCCForm(data)
     if ticket_cc_form.is_valid():
-        return ticket_cc_form.save()
+
+        queryset = TicketCC.objects.filter(ticket=ticket, user=user, email=email)
+
+        if queryset.count() > 0:
+            return queryset.first()
+
+        ticketcc = ticket_cc_form.save(commit=False)
+        ticketcc.ticket = ticket
+        ticketcc.save()
+        return ticketcc.save()
     else:
         raise ValidationError(
                 _('Could not create subscribe contact to ticket updated. Errors: {}'.format(ticket_cc_form.errors))
