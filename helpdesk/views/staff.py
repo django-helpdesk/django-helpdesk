@@ -348,7 +348,7 @@ def subscribe_to_ticket_updates(ticket, user=None, email=None, can_view=True, ca
     }
 
     ticket_cc_form = TicketCCForm(data)
-    if ticket_cc_form.is_valid():
+    if ticket is not None and ticket_cc_form.is_valid():
 
         queryset = TicketCC.objects.filter(ticket=ticket, user=user, email=email)
 

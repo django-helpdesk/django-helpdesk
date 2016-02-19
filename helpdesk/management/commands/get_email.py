@@ -198,8 +198,10 @@ def create_object_from_email_message(message, ticket_id, payload, files, quiet):
 
     if in_reply_to is not None:
         try:
-            previous_followup = FollowUp.objects.get(message_id=in_reply_to)
-            ticket = previous_followup.ticket
+            queryset = FollowUp.objects.filter(message_id=in_reply_to).order_by('-date')
+            if queryset.count() > 0:
+                previous_followup = queryset.first()
+                ticket = previous_followup.ticket
         except FollowUp.DoesNotExist:
             pass #play along. The header may be wrong
 
