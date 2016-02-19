@@ -6,10 +6,11 @@ from helpdesk.models import Queue, CustomField, FollowUp, Ticket, TicketCC
 from django.test import TestCase
 from django.core import mail
 from django.core.exceptions import ObjectDoesNotExist
+from django.forms import ValidationError
 from django.test.client import Client
 from django.core.urlresolvers import reverse
 
-from helpdesk.management.commands.get_email import object_from_message
+from helpdesk.management.commands.get_email import object_from_message, create_ticket_cc
 
 try:  # python 3
     from urllib.parse import urlparse
@@ -169,13 +170,213 @@ class TicketBasicsTestCase(TestCase):
 
         email_count = len(mail.outbox)
 
+        self.assertRaises(ValidationError, object_from_message, str(msg), self.queue_public, quiet=True)
+
+    def test_create_followup_from_email_with_valid_message_id_with_when_no_initial_cc_list(self):
+
+        """
+        Ensure that if a message is received with an valid In-Reply-To ID, 
+        the expected <TicketCC> instances are created even if the there were
+        no <TicketCC>s so far.
+        """
+
+        ### Ticket and TicketCCs creation ###
+        msg = email.message.Message()
+
+        message_id = uuid.uuid4().hex
+        submitter_email = 'foo@bar.py'
+
+        msg.__setitem__('Message-ID', message_id)
+        msg.__setitem__('Subject', self.ticket_data['title'])
+        msg.__setitem__('From', submitter_email)
+        msg.__setitem__('To', self.queue_public.email_address)
+        msg.__setitem__('Content-Type', 'text/plain;')
+        msg.set_payload(self.ticket_data['description'])
+
+        email_count = len(mail.outbox)
+        
         object_from_message(str(msg), self.queue_public, quiet=True)
 
-        ticket = Ticket.objects.get(title=self.ticket_data['title'])
+        followup = FollowUp.objects.get(message_id=message_id)
+        ticket = Ticket.objects.get(id=followup.ticket.id)
+        ### end of the Ticket and TicketCCs creation ###
+
+        # Reply message
+        reply = email.message.Message()
+
+        reply_message_id = uuid.uuid4().hex
+        submitter_email = 'foo@bar.py'
+        cc_list = ['bravo@example.net', 'charlie@foobar.com']
+
+        reply.__setitem__('Message-ID', reply_message_id)
+        reply.__setitem__('In-Reply-To', message_id)
+        reply.__setitem__('Subject', self.ticket_data['title'])
+        reply.__setitem__('From', submitter_email)
+        reply.__setitem__('To', self.queue_public.email_address)
+        reply.__setitem__('Cc', ','.join(cc_list))
+        reply.__setitem__('Content-Type', 'text/plain;')
+        reply.set_payload(self.ticket_data['description'])
+
+        email_count = len(mail.outbox)
         
-        # Ensure that <TicketCC> is created but the email field is not set
+        object_from_message(str(reply), self.queue_public, quiet=True)
+
+        followup = FollowUp.objects.get(message_id=message_id)
+        ticket = Ticket.objects.get(id=followup.ticket.id)
+        self.assertEqual(ticket.ticket_for_url, "q1-%s" % ticket.id)
+
+        # Ensure that <TicketCC> is created
         for cc_email in cc_list:
-            self.assertEquals(0, TicketCC.objects.filter(ticket=ticket, email=cc_email).count())
+            # Even after 2 messages with the same cc_list, <get> MUST return only 
+            # one object 
+            ticket_cc = TicketCC.objects.get(ticket=ticket, email=cc_email)
+            self.assertTrue(ticket_cc.ticket, ticket)
+            self.assertTrue(ticket_cc.email, cc_email)
+
+
+    def test_create_followup_from_email_with_valid_message_id_with_original_cc_list_included(self):
+
+        """
+        Ensure that if a message is received with an valid In-Reply-To ID, 
+        the expected <TicketCC> instances are created but if there's any 
+        overlap with the previous Cc list, no duplicates are created.
+        """
+
+        ### Ticket and TicketCCs creation ###
+        msg = email.message.Message()
+
+        message_id = uuid.uuid4().hex
+        submitter_email = 'foo@bar.py'
+        cc_list = ['bravo@example.net', 'charlie@foobar.com']
+
+        msg.__setitem__('Message-ID', message_id)
+        msg.__setitem__('Subject', self.ticket_data['title'])
+        msg.__setitem__('From', submitter_email)
+        msg.__setitem__('To', self.queue_public.email_address)
+        msg.__setitem__('Cc', ','.join(cc_list))
+        msg.__setitem__('Content-Type', 'text/plain;')
+        msg.set_payload(self.ticket_data['description'])
+
+        email_count = len(mail.outbox)
+        
+        object_from_message(str(msg), self.queue_public, quiet=True)
+
+        followup = FollowUp.objects.get(message_id=message_id)
+        ticket = Ticket.objects.get(id=followup.ticket.id)
+
+        # Ensure that <TicketCC> is created
+        for cc_email in cc_list:
+            ticket_cc = TicketCC.objects.get(ticket=ticket, email=cc_email)
+            self.assertTrue(ticket_cc.ticket, ticket)
+            self.assertTrue(ticket_cc.email, cc_email)
+            self.assertTrue(ticket_cc.can_view, True)
+        ### end of the Ticket and TicketCCs creation ###
+
+        # Reply message
+        reply = email.message.Message()
+
+        reply_message_id = uuid.uuid4().hex
+        submitter_email = 'foo@bar.py'
+        cc_list = ['bravo@example.net', 'charlie@foobar.com']
+
+        reply.__setitem__('Message-ID', reply_message_id)
+        reply.__setitem__('In-Reply-To', message_id)
+        reply.__setitem__('Subject', self.ticket_data['title'])
+        reply.__setitem__('From', submitter_email)
+        reply.__setitem__('To', self.queue_public.email_address)
+        reply.__setitem__('Cc', ','.join(cc_list))
+        reply.__setitem__('Content-Type', 'text/plain;')
+        reply.set_payload(self.ticket_data['description'])
+
+        email_count = len(mail.outbox)
+        
+        object_from_message(str(reply), self.queue_public, quiet=True)
+
+        followup = FollowUp.objects.get(message_id=message_id)
+        ticket = Ticket.objects.get(id=followup.ticket.id)
+        self.assertEqual(ticket.ticket_for_url, "q1-%s" % ticket.id)
+
+        # Ensure that <TicketCC> is created
+        for cc_email in cc_list:
+            # Even after 2 messages with the same cc_list, <get> MUST return only 
+            # one object 
+            ticket_cc = TicketCC.objects.get(ticket=ticket, email=cc_email)
+            self.assertTrue(ticket_cc.ticket, ticket)
+            self.assertTrue(ticket_cc.email, cc_email)
+
+    def test_create_followup_from_email_with_invalid_message_id(self):
+
+        """
+        Ensure that if a message is received with an invalid In-Reply-To ID and we
+        can infer the original Ticket ID by the message's subject, the expected 
+        <TicketCC> instances are created
+        """
+        
+        ### Ticket and TicketCCs creation ###
+        msg = email.message.Message()
+
+        message_id = uuid.uuid4().hex
+        submitter_email = 'foo@bar.py'
+        cc_list = ['bravo@example.net', 'charlie@foobar.com']
+
+        msg.__setitem__('Message-ID', message_id)
+        msg.__setitem__('Subject', self.ticket_data['title'])
+        msg.__setitem__('From', submitter_email)
+        msg.__setitem__('To', self.queue_public.email_address)
+        msg.__setitem__('Cc', ','.join(cc_list))
+        msg.__setitem__('Content-Type', 'text/plain;')
+        msg.set_payload(self.ticket_data['description'])
+
+        email_count = len(mail.outbox)
+        
+        object_from_message(str(msg), self.queue_public, quiet=True)
+
+        followup = FollowUp.objects.get(message_id=message_id)
+        ticket = Ticket.objects.get(id=followup.ticket.id)
+
+        # Ensure that <TicketCC> is created
+        for cc_email in cc_list:
+            ticket_cc = TicketCC.objects.get(ticket=ticket, email=cc_email)
+            self.assertTrue(ticket_cc.ticket, ticket)
+            self.assertTrue(ticket_cc.email, cc_email)
+            self.assertTrue(ticket_cc.can_view, True)
+        ### end of the Ticket and TicketCCs creation ###
+
+        # Reply message
+        reply = email.message.Message()
+
+        reply_message_id = uuid.uuid4().hex
+        submitter_email = 'foo@bar.py'
+        cc_list = ['bravo@example.net', 'charlie@foobar.com']
+
+        invalid_message_id = 'INVALID'
+        reply_subject = 'Re: ' + self.ticket_data['title']
+
+        reply.__setitem__('Message-ID', reply_message_id)
+        reply.__setitem__('In-Reply-To', invalid_message_id)
+        reply.__setitem__('Subject', reply_subject)
+        reply.__setitem__('From', submitter_email)
+        reply.__setitem__('To', self.queue_public.email_address)
+        reply.__setitem__('Cc', ','.join(cc_list))
+        reply.__setitem__('Content-Type', 'text/plain;')
+        reply.set_payload(self.ticket_data['description'])
+
+        email_count = len(mail.outbox)
+        
+        object_from_message(str(reply), self.queue_public, quiet=True)
+
+        followup = FollowUp.objects.get(message_id=message_id)
+        ticket = Ticket.objects.get(id=followup.ticket.id)
+        self.assertEqual(ticket.ticket_for_url, "q1-%s" % ticket.id)
+
+        # Ensure that <TicketCC> is created
+        for cc_email in cc_list:
+            # Even after 2 messages with the same cc_list, <get> MUST return only 
+            # one object 
+            ticket_cc = TicketCC.objects.get(ticket=ticket, email=cc_email)
+            self.assertTrue(ticket_cc.ticket, ticket)
+            self.assertTrue(ticket_cc.email, cc_email)
+
 
     def test_create_ticket_public(self):
         email_count = len(mail.outbox)
