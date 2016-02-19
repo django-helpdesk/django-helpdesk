@@ -339,29 +339,35 @@ def return_ticketccstring_and_show_subscribe(user, ticket):
 
     return ticketcc_string, SHOW_SUBSCRIBE
 
-def subscribe_to_ticket_updates(ticket, user=None, email=''):
+def subscribe_to_ticket_updates(ticket, user=None, email=None, can_view=True, can_update=False):
 
     try:
         EmailValidator()(email)
     except ValidationError:
-        email = ''
+        email = None
 
+    data = {
+        'ticket': ticket,
+        'user': user,
+        'email': email,
+        'can_view': can_view,
+        'can_update': can_update
+    }
 
-    ticketcc = TicketCC()
-    ticketcc.ticket = ticket
-    ticketcc.user = user
-    ticketcc.email = email
-    ticketcc.can_view = True
-    ticketcc.can_update = True
-    ticketcc.save()
+    ticket_cc_form = TicketCCForm(data)
+    if ticket_cc_form.is_valid():
+        return ticket_cc_form.save()
+    else:
+        raise ValidationError(
+                _('Could not create subscribe contact to ticket updated. Errors: {}'.format(ticket_cc_form.errors))
+                )
 
-    return ticketcc
 
 def subscribe_staff_member_to_ticket(ticket, user, email=''):
 
     ''' used in view_ticket() and update_ticket() '''
 
-    return subscribe_to_ticket_updates(ticket=ticket, user=user)
+    return subscribe_to_ticket_updates(ticket=ticket, user=user, email=email, can_view=can_view, can_update=can_update)
     
 
 def update_ticket(request, ticket_id, public=False):
