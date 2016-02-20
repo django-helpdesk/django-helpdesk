@@ -22,7 +22,7 @@ logger = logging.getLogger('helpdesk')
 
 from django.utils.encoding import smart_str
 
-def send_templated_mail(template_name, email_context, recipients, sender=None, bcc=None, fail_silently=False, files=None):
+def send_templated_mail(template_name, email_context, recipients, sender=None, bcc=None, fail_silently=False, files=None, extra_headers={}):
     """
     send_templated_mail() is a warpper around Django's e-mail routines that
     allows us to easily send multipart (text/plain & text/html) e-mails using
@@ -82,7 +82,7 @@ def send_templated_mail(template_name, email_context, recipients, sender=None, b
             t = EmailTemplate.objects.get(template_name__iexact=template_name, locale__isnull=True)
         except EmailTemplate.DoesNotExist:
             logger.warning('template "%s" does not exist, no mail sent' %
-			   template_name)
+               template_name)
             return # just ignore if template doesn't exist
 
     if not sender:
@@ -133,7 +133,9 @@ def send_templated_mail(template_name, email_context, recipients, sender=None, b
                                     text_part,
                                     sender,
                                     recipients,
-                                    bcc=bcc)
+                                    bcc=bcc,
+                                    headers=extra_headers,
+                                    )
     msg.attach_alternative(html_part, "text/html")
 
     if files:

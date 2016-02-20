@@ -36,7 +36,7 @@ except ImportError:
     from datetime import datetime as timezone
 
 from helpdesk.lib import send_templated_mail, safe_template_context
-from helpdesk.models import Queue, Ticket, FollowUp, Attachment, IgnoreEmail
+from helpdesk.models import Queue, Ticket, TicketCC, FollowUp, Attachment, IgnoreEmail
 
 
 class Command(BaseCommand):
@@ -124,7 +124,7 @@ def process_queue(q, quiet=False):
             msgSize = msg.split(" ")[1]
 
             full_message = "\n".join(server.retr(msgNum)[1])
-            ticket = ticket_from_message(message=full_message, queue=q, quiet=quiet)
+            ticket = object_from_message(message=full_message, queue=q, quiet=quiet)
 
             if ticket:
                 server.dele(msgNum)
@@ -147,7 +147,7 @@ def process_queue(q, quiet=False):
             msgnums = data[0].split()
             for num in msgnums:
                 status, data = server.fetch(num, '(RFC822)')
-                ticket = ticket_from_message(message=data[0][1], queue=q, quiet=quiet)
+                ticket = object_from_message(message=data[0][1], queue=q, quiet=quiet)
                 if ticket:
                     server.store(num, '+FLAGS', '\\Deleted')
         
@@ -168,10 +168,207 @@ def decode_mail_headers(string):
     decoded = decode_header(string)
     return u' '.join([unicode(msg, charset or 'utf-8') for msg, charset in decoded])
 
-def ticket_from_message(message, queue, quiet):
+def create_ticket_cc(ticket, cc_list):
+
+    # Local import to deal with non-defined / circular reference problem
+    from helpdesk.views.staff import User, subscribe_to_ticket_updates
+
+    new_ticket_ccs = []
+    for cced_email in cc_list:
+
+        user = None
+
+        try:
+            user = User.objects.get(email=cced_email)
+        except User.DoesNotExist: 
+            pass
+
+        ticket_cc = subscribe_to_ticket_updates(ticket=ticket, user=user, email=cced_email)
+        new_ticket_ccs.append(ticket_cc)
+
+    return new_ticket_ccs
+
+def create_object_from_email_message(message, ticket_id, payload, files, quiet):
+
+    ticket, previous_followup, new = None, None, False
+    now = timezone.now()
+
+    queue = payload['queue']
+    sender_email = payload['sender_email']
+
+    message_id = message.get('Message-Id')
+    in_reply_to = message.get('In-Reply-To')
+    cc_list = message.get('Cc')
+
+    if in_reply_to is not None:
+        try:
+            queryset = FollowUp.objects.filter(message_id=in_reply_to).order_by('-date')
+            if queryset.count() > 0:
+                previous_followup = queryset.first()
+                ticket = previous_followup.ticket
+        except FollowUp.DoesNotExist:
+            pass #play along. The header may be wrong
+
+    if previous_followup is None and ticket_id is not None:
+        try:
+            ticket = Ticket.objects.get(id=ticket_id)
+            new = False
+        except Ticket.DoesNotExist:
+            ticket = None
+
+    # New issue, create a new <Ticket> instance
+    if ticket is None:
+        ticket = Ticket.objects.create(
+            title = payload['subject'],
+            queue = queue,
+            submitter_email = sender_email,
+            created = now,
+            description = payload['body'],
+            priority = payload['priority'],
+        )
+        ticket.save()
+
+        new = True
+        update = ''
+
+    # Old issue being re-openned
+    elif ticket.status == Ticket.CLOSED_STATUS:
+        ticket.status = Ticket.REOPENED_STATUS
+        ticket.save()
+
+    f = FollowUp(
+        ticket = ticket,
+        title = _('E-Mail Received from %(sender_email)s' % {'sender_email': sender_email}),
+        date = now,
+        public = True,
+        comment = payload['body'],
+        message_id = message_id,
+    )
+
+    if ticket.status == Ticket.REOPENED_STATUS:
+        f.new_status = Ticket.REOPENED_STATUS
+        f.title = _('Ticket Re-Opened by E-Mail Received from %(sender_email)s' % {'sender_email': sender_email})
+    
+    f.save()
+
+    if not quiet:
+        print (" [%s-%s] %s" % (ticket.queue.slug, ticket.id, ticket.title,)).encode('ascii', 'replace')
+
+    for file in files:
+        if file['content']:
+            filename = file['filename'].encode('ascii', 'replace').replace(' ', '_')
+            filename = re.sub('[^a-zA-Z0-9._-]+', '', filename)
+            a = Attachment(
+                followup=f,
+                filename=filename,
+                mime_type=file['type'],
+                size=len(file['content']),
+                )
+            a.file.save(filename, ContentFile(file['content']), save=False)
+            a.save()
+            if not quiet:
+                print "    - %s" % filename
+
+
+    context = safe_template_context(ticket)
+
+    new_ticket_ccs = []
+    if cc_list is not None:
+        new_ticket_ccs = create_ticket_cc(ticket, cc_list.split(','))
+
+    notification_template = None
+
+    if new:
+
+        notification_template = 'newticket_cc'
+
+        if sender_email:
+            send_templated_mail(
+                'newticket_submitter',
+                context,
+                recipients=sender_email,
+                sender=queue.from_address,
+                fail_silently=True,
+                extra_headers={'In-Reply-To': message_id},
+                )
+
+        if queue.new_ticket_cc:
+
+            send_templated_mail(
+                'newticket_cc',
+                context,
+                recipients=queue.new_ticket_cc,
+                sender=queue.from_address,
+                fail_silently=True,
+                extra_headers={'In-Reply-To': message_id},
+                )
+
+        if queue.updated_ticket_cc and queue.updated_ticket_cc != queue.new_ticket_cc:
+            send_templated_mail(
+                'newticket_cc',
+                context,
+                recipients=queue.updated_ticket_cc,
+                sender=queue.from_address,
+                fail_silently=True,
+                extra_headers={'In-Reply-To': message_id},
+                )
+
+    else:
+
+        notification_template = 'updated_cc'
+
+        context.update(comment=f.comment)
+
+        if ticket.status == Ticket.REOPENED_STATUS:
+            update = _(' (Reopened)')
+        else:
+            update = _(' (Updated)')
+
+        if ticket.assigned_to:
+            send_templated_mail(
+                'updated_owner',
+                context,
+                recipients=ticket.assigned_to.email,
+                sender=queue.from_address,
+                fail_silently=True,
+                )
+
+        if queue.updated_ticket_cc:
+            send_templated_mail(
+                'updated_cc',
+                context,
+                recipients=queue.updated_ticket_cc,
+                sender=queue.from_address,
+                fail_silently=True,
+                )
+
+    notifications_to_be_sent = []
+    ticket_cc_list = TicketCC.objects.filter(ticket=ticket).all().values_list('email', flat=True)
+
+    for email in ticket_cc_list :
+        notifications_to_be_sent.append(email)
+
+    if len(notifications_to_be_sent):
+
+        send_templated_mail(
+            notification_template,
+            context,
+            recipients=notifications_to_be_sent,
+            sender=queue.from_address,
+            fail_silently=True,
+            extra_headers={'In-Reply-To': message_id},
+            )
+
+    return ticket
+
+
+def object_from_message(message, queue, quiet):
     # 'message' must be an RFC822 formatted message.
+
     msg = message
+
     message = email.message_from_string(msg)
+    
     subject = message.get('subject', _('Created from e-mail'))
     subject = decode_mail_headers(decodeUnknown(message.get_charset(), subject))
     subject = subject.replace("Re: ", "").replace("Fw: ", "").replace("RE: ", "").replace("FW: ", "").replace("Automatic reply: ", "").strip()
@@ -194,9 +391,9 @@ def ticket_from_message(message, queue, quiet):
     matchobj = re.match(r".*\["+queue.slug+"-(?P<id>\d+)\]", subject)
     if matchobj:
         # This is a reply or forward.
-        ticket = matchobj.group('id')
+        ticket_id = matchobj.group('id')
     else:
-        ticket = None
+        ticket_id = None
 
     counter = 0
     files = []
@@ -239,14 +436,7 @@ def ticket_from_message(message, queue, quiet):
             'type': 'text/html',
         })
 
-    now = timezone.now()
-
-    if ticket:
-        try:
-            t = Ticket.objects.get(id=ticket)
-            new = False
-        except Ticket.DoesNotExist:
-            ticket = None
+    
 
     priority = 3
 
@@ -258,115 +448,17 @@ def ticket_from_message(message, queue, quiet):
     if smtp_priority in high_priority_types or smtp_importance in high_priority_types:
         priority = 2
 
-    if ticket == None:
-        t = Ticket(
-            title=subject,
-            queue=queue,
-            submitter_email=sender_email,
-            created=now,
-            description=body,
-            priority=priority,
-        )
-        t.save()
-        new = True
-        update = ''
-
-    elif t.status == Ticket.CLOSED_STATUS:
-        t.status = Ticket.REOPENED_STATUS
-        t.save()
-
-    f = FollowUp(
-        ticket = t,
-        title = _('E-Mail Received from %(sender_email)s' % {'sender_email': sender_email}),
-        date = timezone.now(),
-        public = True,
-        comment = body,
-    )
-
-    if t.status == Ticket.REOPENED_STATUS:
-        f.new_status = Ticket.REOPENED_STATUS
-        f.title = _('Ticket Re-Opened by E-Mail Received from %(sender_email)s' % {'sender_email': sender_email})
-    
-    f.save()
-
-    if not quiet:
-        print (" [%s-%s] %s" % (t.queue.slug, t.id, t.title,)).encode('ascii', 'replace')
-
-    for file in files:
-        if file['content']:
-            filename = file['filename'].encode('ascii', 'replace').replace(' ', '_')
-            filename = re.sub('[^a-zA-Z0-9._-]+', '', filename)
-            a = Attachment(
-                followup=f,
-                filename=filename,
-                mime_type=file['type'],
-                size=len(file['content']),
-                )
-            a.file.save(filename, ContentFile(file['content']), save=False)
-            a.save()
-            if not quiet:
-                print "    - %s" % filename
+    payload = {
+        'body': body,
+        'subject': subject,
+        'queue': queue,
+        'sender_email': sender_email,
+        'priority': priority,
+        'files': files,
+    }
 
 
-    context = safe_template_context(t)
-
-    if new:
-
-        if sender_email:
-            send_templated_mail(
-                'newticket_submitter',
-                context,
-                recipients=sender_email,
-                sender=queue.from_address,
-                fail_silently=True,
-                )
-
-        if queue.new_ticket_cc:
-            send_templated_mail(
-                'newticket_cc',
-                context,
-                recipients=queue.new_ticket_cc,
-                sender=queue.from_address,
-                fail_silently=True,
-                )
-
-        if queue.updated_ticket_cc and queue.updated_ticket_cc != queue.new_ticket_cc:
-            send_templated_mail(
-                'newticket_cc',
-                context,
-                recipients=queue.updated_ticket_cc,
-                sender=queue.from_address,
-                fail_silently=True,
-                )
-
-    else:
-        context.update(comment=f.comment)
-
-        if t.status == Ticket.REOPENED_STATUS:
-            update = _(' (Reopened)')
-        else:
-            update = _(' (Updated)')
-
-        if t.assigned_to:
-            send_templated_mail(
-                'updated_owner',
-                context,
-                recipients=t.assigned_to.email,
-                sender=queue.from_address,
-                fail_silently=True,
-                )
-
-        if queue.updated_ticket_cc:
-            send_templated_mail(
-                'updated_cc',
-                context,
-                recipients=queue.updated_ticket_cc,
-                sender=queue.from_address,
-                fail_silently=True,
-                )
-
-    return t
-
+    return create_object_from_email_message(message, ticket_id, payload, files, quiet=quiet)
 
 if __name__ == '__main__':
     process_email()

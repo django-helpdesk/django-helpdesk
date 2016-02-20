@@ -540,7 +540,7 @@ class Ticket(models.Model):
 
     def get_absolute_url(self):
         return ('helpdesk_view', (self.id,))
-    get_absolute_url = models.permalink(get_absolute_url)
+    get_absolute_url = models.permalink(get_absolute_url)                 
 
     def save(self, *args, **kwargs):
         if not self.id:
@@ -621,6 +621,15 @@ class FollowUp(models.Model):
         blank=True,
         null=True,
         help_text=_('If the status was changed, what was it changed to?'),
+        )
+
+    message_id = models.CharField(
+        _('E-Mail ID'),
+        max_length=256,
+        blank=True,
+        null=True,
+        help_text=_("The Message ID of the submitter's email."),
+        editable=False,
         )
 
     objects = FollowUpManager()
