@@ -173,6 +173,7 @@ def create_ticket_cc(ticket, cc_list):
     # Local import to deal with non-defined / circular reference problem
     from helpdesk.views.staff import User, subscribe_to_ticket_updates
 
+    new_ticket_ccs = []
     for cced_email in cc_list:
 
         user = None
@@ -183,7 +184,9 @@ def create_ticket_cc(ticket, cc_list):
             pass
 
         ticket_cc = subscribe_to_ticket_updates(ticket=ticket, user=user, email=cced_email)
+        new_ticket_ccs.append(ticket_cc)
 
+    return new_ticket_ccs
 
 def create_object_from_email_message(message, ticket_id, payload, files, quiet):
 
@@ -269,22 +272,15 @@ def create_object_from_email_message(message, ticket_id, payload, files, quiet):
 
     context = safe_template_context(ticket)
 
+    new_ticket_ccs = []
     if cc_list is not None:
-        create_ticket_cc(ticket, cc_list.split(','))
+        new_ticket_ccs = create_ticket_cc(ticket, cc_list.split(','))
 
-    ticket_cc_list = TicketCC.objects.filter(ticket=ticket).all().values_list('email', flat=True)
-
-    if ticket_cc_list.count() > 0 :
-        send_templated_mail(
-            'newticket_cc',
-            context,
-            recipients=ticket_cc_list,
-            sender=queue.from_address,
-            fail_silently=True,
-            extra_headers={'In-Reply-To': message_id},
-            )
+    notification_template = None
 
     if new:
+
+        notification_template = 'newticket_cc'
 
         if sender_email:
             send_templated_mail(
@@ -297,6 +293,7 @@ def create_object_from_email_message(message, ticket_id, payload, files, quiet):
                 )
 
         if queue.new_ticket_cc:
+
             send_templated_mail(
                 'newticket_cc',
                 context,
@@ -317,6 +314,9 @@ def create_object_from_email_message(message, ticket_id, payload, files, quiet):
                 )
 
     else:
+
+        notification_template = 'updated_cc'
+
         context.update(comment=f.comment)
 
         if ticket.status == Ticket.REOPENED_STATUS:
@@ -341,6 +341,23 @@ def create_object_from_email_message(message, ticket_id, payload, files, quiet):
                 sender=queue.from_address,
                 fail_silently=True,
                 )
+
+    notifications_to_be_sent = []
+    ticket_cc_list = TicketCC.objects.filter(ticket=ticket).all().values_list('email', flat=True)
+
+    for email in ticket_cc_list :
+        notifications_to_be_sent.append(email)
+
+    if len(notifications_to_be_sent):
+
+        send_templated_mail(
+            notification_template,
+            context,
+            recipients=notifications_to_be_sent,
+            sender=queue.from_address,
+            fail_silently=True,
+            extra_headers={'In-Reply-To': message_id},
+            )
 
     return ticket
 
