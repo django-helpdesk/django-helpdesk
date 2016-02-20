@@ -338,16 +338,39 @@ def return_ticketccstring_and_show_subscribe(user, ticket):
 
     return ticketcc_string, SHOW_SUBSCRIBE
 
+def subscribe_to_ticket_updates(ticket, user=None, email=None, can_view=True, can_update=False):
 
-def subscribe_staff_member_to_ticket(ticket, user):
+    data = {
+        'user': user,
+        'email': email,
+        'can_view': can_view,
+        'can_update': can_update
+    }
+
+    ticket_cc_form = TicketCCForm(data)
+    if ticket is not None and ticket_cc_form.is_valid():
+
+        queryset = TicketCC.objects.filter(ticket=ticket, user=user, email=email)
+
+        if queryset.count() > 0:
+            return queryset.first()
+
+        ticketcc = ticket_cc_form.save(commit=False)
+        ticketcc.ticket = ticket
+        ticketcc.save()
+        return ticketcc
+    else:
+        raise ValidationError(
+                _('Could not create subscribe contact to ticket updated. Errors: {}'.format(ticket_cc_form.errors))
+                )
+
+
+def subscribe_staff_member_to_ticket(ticket, user, email=''):
+
     ''' used in view_ticket() and update_ticket() '''
-    ticketcc = TicketCC()
-    ticketcc.ticket = ticket
-    ticketcc.user = user
-    ticketcc.can_view = True
-    ticketcc.can_update = True
-    ticketcc.save()
 
+    return subscribe_to_ticket_updates(ticket=ticket, user=user, email=email, can_view=can_view, can_update=can_update)
+    
 
 def update_ticket(request, ticket_id, public=False):
     if not (public or (request.user.is_authenticated() and request.user.is_active and (request.user.is_staff or helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE))):
