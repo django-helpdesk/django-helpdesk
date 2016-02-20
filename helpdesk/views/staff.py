@@ -358,7 +358,7 @@ def subscribe_to_ticket_updates(ticket, user=None, email=None, can_view=True, ca
         ticketcc = ticket_cc_form.save(commit=False)
         ticketcc.ticket = ticket
         ticketcc.save()
-        return ticketcc.save()
+        return ticketcc
     else:
         raise ValidationError(
                 _('Could not create subscribe contact to ticket updated. Errors: {}'.format(ticket_cc_form.errors))
