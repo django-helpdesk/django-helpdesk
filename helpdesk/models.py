@@ -428,24 +428,6 @@ class Ticket(models.Model):
             'automatically by management/commands/escalate_tickets.py.'),
         )
 
-    def __init__(self, *args, **kwargs):
-
-        # Separate RFC 2822 (email) exclusive fields for later processing
-        self.rfc_2822_items = {}
-
-        for field, value in kwargs.iteritems():
-            if field.startswith('rfc_2822'):
-                self.rfc_2822_items[field] = value
-
-        # Submitter Message-Id is an exception here, since it's a <Ticket> attribute
-        if 'rfc_2822_submitter_email_id' in kwargs:
-            kwargs['submitter_email_id'] = kwargs['rfc_2822_submitter_email_id']
-
-        for field in self.rfc_2822_items.iterkeys():
-            kwargs.pop(field)
-
-        super(Ticket, self).__init__(*args, **kwargs)
-
     def _get_assigned_to(self):
         """ Custom property to allow us to easily print 'Unassigned' if a
         ticket has no owner, or the users name if it's assigned. If the user
