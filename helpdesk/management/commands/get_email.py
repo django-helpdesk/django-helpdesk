@@ -367,7 +367,6 @@ def object_from_message(message, queue, quiet):
 
     msg = message
 
-    #import ipdb;ipdb.set_trace()
     message = email.message_from_string(msg)
     
     subject = message.get('subject', _('Created from e-mail'))
