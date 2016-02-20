@@ -65,6 +65,9 @@ class TicketBasicsTestCase(TestCase):
         msg.set_payload(self.ticket_data['description'])
 
         email_count = len(mail.outbox)
+        #print email_count
+        #for m in mail.outbox:
+        #    print m.to, m.subject
 
         object_from_message(str(msg), self.queue_public, quiet=True)
 
@@ -106,7 +109,6 @@ class TicketBasicsTestCase(TestCase):
         # and the new and update queues (+2)
         self.assertEqual(email_count + 1 + 2, len(mail.outbox))
 
-
     def test_create_ticket_from_email_with_carbon_copy(self):
 
         """ 
@@ -136,10 +138,10 @@ class TicketBasicsTestCase(TestCase):
         ticket = Ticket.objects.get(id=followup.ticket.id)
         self.assertEqual(ticket.ticket_for_url, "q1-%s" % ticket.id)
 
-        # As we have created an Ticket from an email, we notify the sender (+1)
-        # and the new and update queues (+2)
-        self.assertEqual(email_count + 1 + 2, len(mail.outbox))
-
+        # As we have created an Ticket from an email, we notify the sender (+1),
+        # the new and update queues (+2) and contacts on the cc_list (+1 as it's 
+        # treated as a list)
+        self.assertEqual(email_count + 1 + 2 + 1, len(mail.outbox))
 
         # Ensure that <TicketCC> is created
         for cc_email in cc_list:
@@ -217,8 +219,6 @@ class TicketBasicsTestCase(TestCase):
         reply.__setitem__('Content-Type', 'text/plain;')
         reply.set_payload(self.ticket_data['description'])
 
-        email_count = len(mail.outbox)
-        
         object_from_message(str(reply), self.queue_public, quiet=True)
 
         followup = FollowUp.objects.get(message_id=message_id)
@@ -232,6 +232,16 @@ class TicketBasicsTestCase(TestCase):
             ticket_cc = TicketCC.objects.get(ticket=ticket, email=cc_email)
             self.assertTrue(ticket_cc.ticket, ticket)
             self.assertTrue(ticket_cc.email, cc_email)
+
+        # As we have created an Ticket from an email, we notify the sender (+1)
+        # and the new and update queues (+2)
+        expected_email_count = 1 + 2
+
+        # As an update was made, we increase the expected_email_count with:
+        # cc_list: +1
+        # public_update_queue: +1
+        expected_email_count += 1 + 1   
+        self.assertEqual(expected_email_count, len(mail.outbox))
 
 
     def test_create_followup_from_email_with_valid_message_id_with_original_cc_list_included(self):
@@ -270,6 +280,11 @@ class TicketBasicsTestCase(TestCase):
             self.assertTrue(ticket_cc.ticket, ticket)
             self.assertTrue(ticket_cc.email, cc_email)
             self.assertTrue(ticket_cc.can_view, True)
+
+        # As we have created an Ticket from an email, we notify the sender (+1),
+        # the new and update queues (+2) and contacts on the cc_list (+1 as it's 
+        # treated as a list)
+        self.assertEqual(email_count + 1 + 2 + 1, len(mail.outbox))
         ### end of the Ticket and TicketCCs creation ###
 
         # Reply message
@@ -287,9 +302,7 @@ class TicketBasicsTestCase(TestCase):
         reply.__setitem__('Cc', ','.join(cc_list))
         reply.__setitem__('Content-Type', 'text/plain;')
         reply.set_payload(self.ticket_data['description'])
-
-        email_count = len(mail.outbox)
-        
+       
         object_from_message(str(reply), self.queue_public, quiet=True)
 
         followup = FollowUp.objects.get(message_id=message_id)
@@ -298,11 +311,22 @@ class TicketBasicsTestCase(TestCase):
 
         # Ensure that <TicketCC> is created
         for cc_email in cc_list:
-            # Even after 2 messages with the same cc_list, <get> MUST return only 
-            # one object 
+            # Even after 2 messages with the same cc_list, 
+            # <get> MUST return only one object 
             ticket_cc = TicketCC.objects.get(ticket=ticket, email=cc_email)
             self.assertTrue(ticket_cc.ticket, ticket)
             self.assertTrue(ticket_cc.email, cc_email)
+
+        # As we have created an Ticket from an email, we notify the sender (+1),
+        # the new and update queues (+2) and contacts on the cc_list (+1 as it's 
+        # treated as a list)
+        expected_email_count = 1 + 2 + 1
+
+        # As an update was made, we increase the expected_email_count with:
+        # cc_list: +1
+        # public_update_queue: +1
+        expected_email_count += 1 + 1   
+        self.assertEqual(expected_email_count, len(mail.outbox))
 
     def test_create_followup_from_email_with_invalid_message_id(self):
 
@@ -340,6 +364,11 @@ class TicketBasicsTestCase(TestCase):
             self.assertTrue(ticket_cc.ticket, ticket)
             self.assertTrue(ticket_cc.email, cc_email)
             self.assertTrue(ticket_cc.can_view, True)
+
+        # As we have created an Ticket from an email, we notify the sender (+1),
+        # the new and update queues (+2) and contacts on the cc_list (+1 as it's 
+        # treated as a list)
+        self.assertEqual(email_count + 1 + 2 + 1, len(mail.outbox))
         ### end of the Ticket and TicketCCs creation ###
 
         # Reply message
@@ -376,6 +405,11 @@ class TicketBasicsTestCase(TestCase):
             ticket_cc = TicketCC.objects.get(ticket=ticket, email=cc_email)
             self.assertTrue(ticket_cc.ticket, ticket)
             self.assertTrue(ticket_cc.email, cc_email)
+
+        # As we have created an Ticket from an email, we notify the sender (+1),
+        # the new and update queues (+2) and contacts on the cc_list (+1 as it's 
+        # treated as a list)
+        self.assertEqual(email_count + 1 + 2 + 1, len(mail.outbox))
 
 
     def test_create_ticket_public(self):
