@@ -36,7 +36,7 @@ except ImportError:
     from datetime import datetime as timezone
 
 from helpdesk.lib import send_templated_mail, safe_template_context
-from helpdesk.models import Queue, Ticket, FollowUp, Attachment, IgnoreEmail
+from helpdesk.models import Queue, Ticket, TicketCC, FollowUp, Attachment, IgnoreEmail
 
 
 class Command(BaseCommand):
@@ -184,6 +184,7 @@ def create_ticket_cc(ticket, cc_list):
 
         ticket_cc = subscribe_to_ticket_updates(ticket=ticket, user=user, email=cced_email)
 
+
 def create_object_from_email_message(message, ticket_id, payload, files, quiet):
 
     ticket, previous_followup, new = None, None, False
@@ -270,6 +271,18 @@ def create_object_from_email_message(message, ticket_id, payload, files, quiet):
 
     if cc_list is not None:
         create_ticket_cc(ticket, cc_list.split(','))
+
+    ticket_cc_list = TicketCC.objects.filter(ticket=ticket).all().values_list('email', flat=True)
+
+    if ticket_cc_list.count() > 0 :
+        send_templated_mail(
+            'newticket_cc',
+            context,
+            recipients=ticket_cc_list,
+            sender=queue.from_address,
+            fail_silently=True,
+            extra_headers={'In-Reply-To': message_id},
+            )
 
     if new:
 
