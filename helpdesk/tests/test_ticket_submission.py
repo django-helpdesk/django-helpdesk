@@ -10,7 +10,7 @@ from django.forms import ValidationError
 from django.test.client import Client
 from django.core.urlresolvers import reverse
 
-from helpdesk.management.commands.get_email import object_from_message, create_ticket_cc
+from helpdesk.management.commands.get_email import parse_mail_message, create_ticket_cc
 
 try:  # python 3
     from urllib.parse import urlparse
@@ -69,7 +69,7 @@ class TicketBasicsTestCase(TestCase):
         #for m in mail.outbox:
         #    print m.to, m.subject
 
-        object_from_message(str(msg), self.queue_public, quiet=True)
+        parse_mail_message(str(msg), self.queue_public, quiet=True)
 
         followup = FollowUp.objects.get(message_id=message_id)
         ticket = Ticket.objects.get(id=followup.ticket.id)
@@ -99,7 +99,7 @@ class TicketBasicsTestCase(TestCase):
 
         email_count = len(mail.outbox)
 
-        object_from_message(str(msg), self.queue_public, quiet=True)
+        parse_mail_message(str(msg), self.queue_public, quiet=True)
 
         ticket = Ticket.objects.get(title=self.ticket_data['title'], queue=self.queue_public, submitter_email=submitter_email)
 
@@ -132,7 +132,7 @@ class TicketBasicsTestCase(TestCase):
 
         email_count = len(mail.outbox)
         
-        object_from_message(str(msg), self.queue_public, quiet=True)
+        parse_mail_message(str(msg), self.queue_public, quiet=True)
 
         followup = FollowUp.objects.get(message_id=message_id)
         ticket = Ticket.objects.get(id=followup.ticket.id)
@@ -172,7 +172,7 @@ class TicketBasicsTestCase(TestCase):
 
         email_count = len(mail.outbox)
 
-        self.assertRaises(ValidationError, object_from_message, str(msg), self.queue_public, quiet=True)
+        self.assertRaises(ValidationError, parse_mail_message, str(msg), self.queue_public, quiet=True)
 
     def test_create_followup_from_email_with_valid_message_id_with_when_no_initial_cc_list(self):
 
@@ -197,7 +197,7 @@ class TicketBasicsTestCase(TestCase):
 
         email_count = len(mail.outbox)
         
-        object_from_message(str(msg), self.queue_public, quiet=True)
+        parse_mail_message(str(msg), self.queue_public, quiet=True)
 
         followup = FollowUp.objects.get(message_id=message_id)
         ticket = Ticket.objects.get(id=followup.ticket.id)
@@ -219,7 +219,7 @@ class TicketBasicsTestCase(TestCase):
         reply.__setitem__('Content-Type', 'text/plain;')
         reply.set_payload(self.ticket_data['description'])
 
-        object_from_message(str(reply), self.queue_public, quiet=True)
+        parse_mail_message(str(reply), self.queue_public, quiet=True)
 
         followup = FollowUp.objects.get(message_id=message_id)
         ticket = Ticket.objects.get(id=followup.ticket.id)
@@ -269,7 +269,7 @@ class TicketBasicsTestCase(TestCase):
 
         email_count = len(mail.outbox)
         
-        object_from_message(str(msg), self.queue_public, quiet=True)
+        parse_mail_message(str(msg), self.queue_public, quiet=True)
 
         followup = FollowUp.objects.get(message_id=message_id)
         ticket = Ticket.objects.get(id=followup.ticket.id)
@@ -303,7 +303,7 @@ class TicketBasicsTestCase(TestCase):
         reply.__setitem__('Content-Type', 'text/plain;')
         reply.set_payload(self.ticket_data['description'])
        
-        object_from_message(str(reply), self.queue_public, quiet=True)
+        parse_mail_message(str(reply), self.queue_public, quiet=True)
 
         followup = FollowUp.objects.get(message_id=message_id)
         ticket = Ticket.objects.get(id=followup.ticket.id)
@@ -353,7 +353,7 @@ class TicketBasicsTestCase(TestCase):
 
         email_count = len(mail.outbox)
         
-        object_from_message(str(msg), self.queue_public, quiet=True)
+        parse_mail_message(str(msg), self.queue_public, quiet=True)
 
         followup = FollowUp.objects.get(message_id=message_id)
         ticket = Ticket.objects.get(id=followup.ticket.id)
@@ -392,7 +392,7 @@ class TicketBasicsTestCase(TestCase):
 
         email_count = len(mail.outbox)
         
-        object_from_message(str(reply), self.queue_public, quiet=True)
+        parse_mail_message(str(reply), self.queue_public, quiet=True)
 
         followup = FollowUp.objects.get(message_id=message_id)
         ticket = Ticket.objects.get(id=followup.ticket.id)
