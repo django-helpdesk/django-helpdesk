@@ -13,8 +13,8 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AddField(
-            model_name='ticket',
-            name='submitter_email_id',
-            field=models.CharField(blank=True, editable=False, help_text="The Message ID of the submitter's email.", max_length=256, null=True, verbose_name='Submitter E-Mail ID'),
+            model_name='followup',
+            name='message_id',
+            field=models.CharField(blank=True, editable=False, help_text="The Message ID of the submitter's email.", max_length=256, null=True, verbose_name='E-Mail ID'),
         ),
     ]
