@@ -223,6 +223,14 @@ class Queue(models.Model):
         help_text=_('Socks proxy port number. Default: 9150 (default TOR port)'),
     )
 
+    default_owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        related_name='default_owner',
+        blank=True,
+        null=True,
+        verbose_name=_('Default owner'),
+    )
+
     def __str__(self):
         return "%s" % self.title
 

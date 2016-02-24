@@ -406,6 +406,9 @@ class PublicTicketForm(CustomFieldMixin, forms.Form):
             due_date = self.cleaned_data['due_date'],
             )
 
+        if q.default_owner and not t.assigned_to:
+            t.assigned_to = q.default_owner
+
         t.save()
 
         for field, value in self.cleaned_data.items():
@@ -459,6 +462,17 @@ class PublicTicketForm(CustomFieldMixin, forms.Form):
             files=files,
             )
         messages_sent_to.append(t.submitter_email)
+
+        if t.assigned_to and t.assigned_to.usersettings.settings.get('email_on_ticket_assign', False) and t.assigned_to.email and t.assigned_to.email not in messages_sent_to:
+            send_templated_mail(
+                'assigned_owner',
+                context,
+                recipients=t.assigned_to.email,
+                sender=q.from_address,
+                fail_silently=True,
+                files=files,
+                )
+            messages_sent_to.append(t.assigned_to.email)
 
         if q.new_ticket_cc and q.new_ticket_cc not in messages_sent_to:
             send_templated_mail(
