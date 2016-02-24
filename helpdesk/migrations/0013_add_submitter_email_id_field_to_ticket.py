@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('helpdesk', '0011_admin_related_improvements'),
+        ('helpdesk', '0012_queue_default_owner'),
     ]
 
     operations = [
