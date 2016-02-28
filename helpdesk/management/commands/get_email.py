@@ -124,9 +124,9 @@ def process_queue(q, quiet=False):
             msgSize = msg.split(" ")[1]
 
             full_message = "\n".join(server.retr(msgNum)[1])
-            obj = parse_mail_message(message=full_message, queue=q, quiet=quiet)
+            ticket = object_from_message(message=full_message, queue=q, quiet=quiet)
 
-            if obj:
+            if ticket:
                 server.dele(msgNum)
 
         server.quit()
@@ -147,8 +147,8 @@ def process_queue(q, quiet=False):
             msgnums = data[0].split()
             for num in msgnums:
                 status, data = server.fetch(num, '(RFC822)')
-                obj = parse_mail_message(message=data[0][1], queue=q, quiet=quiet)
-                if obj:
+                ticket = object_from_message(message=data[0][1], queue=q, quiet=quiet)
+                if ticket:
                     server.store(num, '+FLAGS', '\\Deleted')
         
         server.expunge()
@@ -362,7 +362,7 @@ def create_object_from_email_message(message, ticket_id, payload, files, quiet):
     return ticket
 
 
-def parse_mail_message(message, queue, quiet):
+def object_from_message(message, queue, quiet):
     # 'message' must be an RFC822 formatted message.
 
     msg = message
@@ -462,4 +462,3 @@ def parse_mail_message(message, queue, quiet):
 
 if __name__ == '__main__':
     process_email()
-
