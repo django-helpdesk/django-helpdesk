@@ -7,6 +7,7 @@ django-helpdesk - A Django powered ticket tracker for small enterprise.
 scripts/escalate_tickets.py - Easy way to escalate tickets based on their age,
                               designed to be run from Cron or similar.
 """
+from __future__ import print_function
 
 from datetime import timedelta, date
 import getopt
@@ -85,7 +86,7 @@ def escalate_tickets(queues, verbose):
         req_last_escl_date = date.today() - timedelta(days=days)
 
         if verbose:
-            print "Processing: %s" % q
+            print("Processing: %s" % q)
 
         for t in q.ticket_set.filter(
                   Q(status=Ticket.OPEN_STATUS)
@@ -134,11 +135,12 @@ def escalate_tickets(queues, verbose):
                     )
 
             if verbose:
-                print "  - Esclating %s from %s>%s" % (
+                print("  - Esclating %s from %s>%s" % (
                     t.ticket,
                     t.priority+1,
                     t.priority
                     )
+                )
 
             f = FollowUp(
                 ticket = t,
@@ -159,9 +161,9 @@ def escalate_tickets(queues, verbose):
 
 
 def usage():
-    print "Options:"
-    print " --queues: Queues to include (default: all). Use queue slugs"
-    print " --verboseescalation: Display a list of dates excluded"
+    print("Options:")
+    print(" --queues: Queues to include (default: all). Use queue slugs")
+    print(" --verboseescalation: Display a list of dates excluded")
 
 
 if __name__ == '__main__':
@@ -187,7 +189,7 @@ if __name__ == '__main__':
             try:
                 q = Queue.objects.get(slug__exact=queue)
             except Queue.DoesNotExist:
-                print "Queue %s does not exist." % queue
+                print("Queue %s does not exist." % queue)
                 sys.exit(2)
             queues.append(queue)
 
