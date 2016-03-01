@@ -132,8 +132,11 @@ def dashboard(request):
 
     from_clause = """FROM    helpdesk_ticket t,
                     helpdesk_queue q"""
-    where_clause = """WHERE   q.id = t.queue_id AND
-                    q.id IN (%s)""" % (",".join(("%d" % pk for pk in queues)))
+    if queues:
+        where_clause = """WHERE   q.id = t.queue_id AND
+                        q.id IN (%s)""" % (",".join(("%d" % pk for pk in queues)))
+    else:
+        where_clause = """WHERE   q.id = t.queue_id"""
 
     cursor = connection.cursor()
     cursor.execute("""
