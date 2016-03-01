@@ -348,7 +348,7 @@ def create_object_from_email_message(message, ticket_id, payload, files, quiet):
     for email in ticket_cc_list :
         notifications_to_be_sent.append(email)
 
-    if len(notifications_to_be_sent):
+    if queue.enable_notifications_on_email_events and len(notifications_to_be_sent):
 
         send_templated_mail(
             notification_template,

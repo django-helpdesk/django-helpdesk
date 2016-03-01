@@ -112,6 +112,15 @@ class Queue(models.Model):
             'multiple addresses with a comma.'),
         )
 
+    enable_notifications_on_email_events = models.BooleanField(
+        _('Notify contacts when email updates arrive'),
+        blank=True,
+        default=False,
+        help_text=_('When an email arrives to either create a ticket or to '
+            'interact with an existing discussion. Should email notifications be sent ? '
+            'Note: the new_ticket_cc and updated_ticket_cc work independently of this feature'),
+        )
+
     email_box_type = models.CharField(
         _('E-Mail Box Type'),
         max_length=5,
