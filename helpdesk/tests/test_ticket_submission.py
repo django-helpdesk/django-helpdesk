@@ -507,8 +507,8 @@ class EmailInteractionsTestCase(TestCase):
     def test_create_ticket_from_email_to_a_notification_enabled_queue(self):
 
         """
-            Ensure that when an email is sent to a Queue with notifications_enabled turned ON, all contacts 
-        on the TicketCC list are notified.
+            Ensure that when an email is sent to a Queue with notifications_enabled turned ON, 
+        and a <Ticket> is created, all contacts n the TicketCC list are notified.
         """
         
         msg = email.message.Message()
@@ -585,3 +585,211 @@ class EmailInteractionsTestCase(TestCase):
             self.assertTrue(ticket_cc.ticket, ticket)
             self.assertTrue(ticket_cc.email, cc_email)
 
+    def test_create_followup_from_email_to_a_notification_enabled_queue(self):
+
+        """
+            Ensure that when an email is sent to a Queue with notifications_enabled turned ON, 
+        and a <FollowUp> is created, all contacts n the TicketCC list are notified.
+        """
+
+        ### Ticket and TicketCCs creation ###
+        msg = email.message.Message()
+
+        message_id = uuid.uuid4().hex
+        submitter_email = 'foo@bar.py'
+        cc_list = ['bravo@example.net', 'charlie@foobar.com']
+
+        msg.__setitem__('Message-ID', message_id)
+        msg.__setitem__('Subject', self.ticket_data['title'])
+        msg.__setitem__('From', submitter_email)
+        msg.__setitem__('To', self.queue_public.email_address)
+        msg.__setitem__('Cc', ','.join(cc_list))
+        msg.__setitem__('Content-Type', 'text/plain;')
+        msg.set_payload(self.ticket_data['description'])
+
+        email_count = len(mail.outbox)
+        
+        object_from_message(str(msg), self.queue_public, quiet=True)
+
+        followup = FollowUp.objects.get(message_id=message_id)
+        ticket = Ticket.objects.get(id=followup.ticket.id)
+        self.assertEqual(ticket.ticket_for_url, "mq1-%s" % ticket.id)
+
+        # As we have created an Ticket from an email, we notify the sender (+1),
+        # the new and update queues (+2) and contacts on the cc_list (+1 as it's 
+        # treated as a list)
+        expected_email_count = email_count + 1 + 2 + 1
+        self.assertEqual(expected_email_count, len(mail.outbox))
+
+        # Ensure that <TicketCC> is created
+        for cc_email in cc_list:
+            ticket_cc = TicketCC.objects.get(ticket=ticket, email=cc_email)
+            self.assertTrue(ticket_cc.ticket, ticket)
+            self.assertTrue(ticket_cc.email, cc_email)
+        ### end of the Ticket and TicketCCs creation ###
+
+        # Reply message
+        reply = email.message.Message()
+
+        reply_message_id = uuid.uuid4().hex
+        submitter_email = 'bravo@example.net'
+
+        reply.__setitem__('Message-ID', reply_message_id)
+        reply.__setitem__('In-Reply-To', message_id)
+        reply.__setitem__('Subject', self.ticket_data['title'])
+        reply.__setitem__('From', submitter_email)
+        reply.__setitem__('To', self.queue_public.email_address)
+        reply.__setitem__('Content-Type', 'text/plain;')
+        reply.set_payload(self.ticket_data['description'])
+
+        object_from_message(str(reply), self.queue_public, quiet=True)
+
+        followup = FollowUp.objects.get(message_id=message_id)
+        ticket = Ticket.objects.get(id=followup.ticket.id)
+        self.assertEqual(ticket.ticket_for_url, "mq1-%s" % ticket.id)
+
+        # As an update was made, we increase the expected_email_count with:
+        # the ticket submitter: +1
+        # public_update_queue: +1
+        expected_email_count += 1 + 1   
+        self.assertEqual(expected_email_count, len(mail.outbox))
+
+    def test_create_followup_from_email_to_a_notification_diabled_queue(self):
+
+        """
+            Ensure that when an email is sent to a Queue with notifications_enabled turned ON, 
+        and a <FollowUp> is created, all contacts n the TicketCC list are notified.
+        """
+
+        ### Ticket and TicketCCs creation ###
+        msg = email.message.Message()
+
+        message_id = uuid.uuid4().hex
+        submitter_email = 'foo@bar.py'
+        cc_list = ['bravo@example.net', 'charlie@foobar.com']
+
+        msg.__setitem__('Message-ID', message_id)
+        msg.__setitem__('Subject', self.ticket_data['title'])
+        msg.__setitem__('From', submitter_email)
+        msg.__setitem__('To', self.queue_public_with_notifications_disabled.email_address)
+        msg.__setitem__('Cc', ','.join(cc_list))
+        msg.__setitem__('Content-Type', 'text/plain;')
+        msg.set_payload(self.ticket_data['description'])
+
+        email_count = len(mail.outbox)
+        
+        object_from_message(str(msg), self.queue_public, quiet=True)
+
+        followup = FollowUp.objects.get(message_id=message_id)
+        ticket = Ticket.objects.get(id=followup.ticket.id)
+        self.assertEqual(ticket.ticket_for_url, "mq1-%s" % ticket.id)
+
+        # As we have created an Ticket from an email, we notify the sender (+1),
+        # the new and update queues (+2) and contacts on the cc_list (+1 as it's 
+        # treated as a list)
+        expected_email_count = email_count + 1 + 2 + 1
+        self.assertEqual(expected_email_count, len(mail.outbox))
+        
+
+        # Ensure that <TicketCC> is created
+        for cc_email in cc_list:
+            ticket_cc = TicketCC.objects.get(ticket=ticket, email=cc_email)
+            self.assertTrue(ticket_cc.ticket, ticket)
+            self.assertTrue(ticket_cc.email, cc_email)
+        ### end of the Ticket and TicketCCs creation ###
+
+        # Reply message
+        reply = email.message.Message()
+
+        reply_message_id = uuid.uuid4().hex
+        submitter_email = 'bravo@example.net'
+
+        reply.__setitem__('Message-ID', reply_message_id)
+        reply.__setitem__('In-Reply-To', message_id)
+        reply.__setitem__('Subject', self.ticket_data['title'])
+        reply.__setitem__('From', submitter_email)
+        reply.__setitem__('To', self.queue_public_with_notifications_disabled.email_address)
+        reply.__setitem__('Content-Type', 'text/plain;')
+        reply.set_payload(self.ticket_data['description'])
+
+        object_from_message(str(reply), self.queue_public_with_notifications_disabled, quiet=True)
+
+        followup = FollowUp.objects.get(message_id=message_id)
+        ticket = Ticket.objects.get(id=followup.ticket.id)
+        self.assertEqual(ticket.ticket_for_url, "mq1-%s" % ticket.id)
+
+        # As an update was made, we increase the expected_email_count with:
+        # public_update_queue: +1
+        expected_email_count += 1
+        self.assertEqual(expected_email_count, len(mail.outbox))
+
+
+
+    def test_create_followup_from_email_with_valid_message_id_with_original_cc_list_included(self):
+
+        """
+        Ensure that if a message is received with an valid In-Reply-To ID, 
+        the expected <TicketCC> instances are created even if the there were
+        no <TicketCC>s so far.
+        """
+
+        ### Ticket and TicketCCs creation ###
+        msg = email.message.Message()
+
+        message_id = uuid.uuid4().hex
+        submitter_email = 'foo@bar.py'
+
+        msg.__setitem__('Message-ID', message_id)
+        msg.__setitem__('Subject', self.ticket_data['title'])
+        msg.__setitem__('From', submitter_email)
+        msg.__setitem__('To', self.queue_public.email_address)
+        msg.__setitem__('Content-Type', 'text/plain;')
+        msg.set_payload(self.ticket_data['description'])
+
+        email_count = len(mail.outbox)
+        
+        object_from_message(str(msg), self.queue_public, quiet=True)
+
+        followup = FollowUp.objects.get(message_id=message_id)
+        ticket = Ticket.objects.get(id=followup.ticket.id)
+        ### end of the Ticket and TicketCCs creation ###
+
+        # Reply message
+        reply = email.message.Message()
+
+        reply_message_id = uuid.uuid4().hex
+        submitter_email = 'bravo@example.net'
+        cc_list = ['foo@bar.py', 'charlie@foobar.com']
+
+        reply.__setitem__('Message-ID', reply_message_id)
+        reply.__setitem__('In-Reply-To', message_id)
+        reply.__setitem__('Subject', self.ticket_data['title'])
+        reply.__setitem__('From', submitter_email)
+        reply.__setitem__('To', self.queue_public.email_address)
+        reply.__setitem__('Cc', ','.join(cc_list))
+        reply.__setitem__('Content-Type', 'text/plain;')
+        reply.set_payload(self.ticket_data['description'])
+
+        object_from_message(str(reply), self.queue_public, quiet=True)
+
+        followup = FollowUp.objects.get(message_id=message_id)
+        ticket = Ticket.objects.get(id=followup.ticket.id)
+        self.assertEqual(ticket.ticket_for_url, "mq1-%s" % ticket.id)
+
+        # Ensure that <TicketCC> is created
+        for cc_email in cc_list:
+            # Even after 2 messages with the same cc_list, <get> MUST return only 
+            # one object 
+            ticket_cc = TicketCC.objects.get(ticket=ticket, email=cc_email)
+            self.assertTrue(ticket_cc.ticket, ticket)
+            self.assertTrue(ticket_cc.email, cc_email)
+
+        # As we have created an Ticket from an email, we notify the sender (+1)
+        # and the new and update queues (+2)
+        expected_email_count = 1 + 2
+
+        # As an update was made, we increase the expected_email_count with:
+        # cc_list: +1
+        # public_update_queue: +1
+        expected_email_count += 1 + 1   
+        self.assertEqual(expected_email_count, len(mail.outbox))
