@@ -25,7 +25,7 @@ def homepage(request):
 
     if (request.user.is_staff or (request.user.is_authenticated() and helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE)):
         try:
-            if getattr(request.user.usersettings.settings, 'login_view_ticketlist', False):
+            if request.user.usersettings.settings.get('login_view_ticketlist', False):
                 return HttpResponseRedirect(reverse('helpdesk_list'))
             else:
                 return HttpResponseRedirect(reverse('helpdesk_dashboard'))
