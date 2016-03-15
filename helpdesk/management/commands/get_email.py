@@ -25,6 +25,7 @@ from optparse import make_option
 
 from email_reply_parser import EmailReplyParser
 
+from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand
 from django.db.models import Q
@@ -184,8 +185,11 @@ def create_ticket_cc(ticket, cc_list):
         except User.DoesNotExist: 
             pass
 
-        ticket_cc = subscribe_to_ticket_updates(ticket=ticket, user=user, email=cced_email)
-        new_ticket_ccs.append(ticket_cc)
+        try:
+            ticket_cc = subscribe_to_ticket_updates(ticket=ticket, user=user, email=cced_email)
+            new_ticket_ccs.append(ticket_cc)
+        except ValidationError, err:
+            pass
 
     return new_ticket_ccs
 
@@ -346,7 +350,7 @@ def create_object_from_email_message(message, ticket_id, payload, files, quiet):
     notifications_to_be_sent = []
     ticket_cc_list = TicketCC.objects.filter(ticket=ticket).all().values_list('email', flat=True)
 
-    for email in ticket_cc_list :
+    for email in ticket_cc_list : 
         notifications_to_be_sent.append(email)
 
     if queue.enable_notifications_on_email_events and len(notifications_to_be_sent):
@@ -436,8 +440,6 @@ def object_from_message(message, queue, quiet):
             'content': body_html,
             'type': 'text/html',
         })
-
-    
 
     priority = 3
 
