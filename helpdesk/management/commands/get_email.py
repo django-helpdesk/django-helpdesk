@@ -24,6 +24,7 @@ from optparse import make_option
 
 from email_reply_parser import EmailReplyParser
 
+from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand
 from django.db.models import Q
@@ -183,8 +184,11 @@ def create_ticket_cc(ticket, cc_list):
         except User.DoesNotExist: 
             pass
 
-        ticket_cc = subscribe_to_ticket_updates(ticket=ticket, user=user, email=cced_email)
-        new_ticket_ccs.append(ticket_cc)
+        try:
+            ticket_cc = subscribe_to_ticket_updates(ticket=ticket, user=user, email=cced_email)
+            new_ticket_ccs.append(ticket_cc)
+        except ValidationError, err:
+            pass
 
     return new_ticket_ccs
 
