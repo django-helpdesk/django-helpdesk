@@ -340,29 +340,22 @@ def return_ticketccstring_and_show_subscribe(user, ticket):
 
 def subscribe_to_ticket_updates(ticket, user=None, email=None, can_view=True, can_update=False):
 
-    data = {
-        'user': user,
-        'email': email,
-        'can_view': can_view,
-        'can_update': can_update
-    }
-
-    ticket_cc_form = TicketCCForm(data)
-    if ticket is not None and ticket_cc_form.is_valid():
+    if ticket is not None:
 
         queryset = TicketCC.objects.filter(ticket=ticket, user=user, email=email)
 
+        # Dont'create duplicate entries for subscribers
         if queryset.count() > 0:
             return queryset.first()
 
-        ticketcc = ticket_cc_form.save(commit=False)
-        ticketcc.ticket = ticket
-        ticketcc.save()
-        return ticketcc
-    else:
-        raise ValidationError(
-                _('Could not create subscribe contact to ticket updated. Errors: {}'.format(ticket_cc_form.errors))
+        if user is None and len(email) < 5:
+            raise ValidationError(
+                _('When you add somebody on Cc, you must provided either an User or a valid email. Email: %s' %email)
                 )
+
+        ticketcc = TicketCC.objects.create(ticket=ticket, user=user, email=email,can_view=can_view, can_update=can_update)
+        
+        return ticketcc
 
 
 def subscribe_staff_member_to_ticket(ticket, user, email=''):

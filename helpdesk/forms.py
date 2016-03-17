@@ -554,16 +554,6 @@ class TicketCCForm(forms.ModelForm):
         model = TicketCC
         exclude = ('ticket',)
 
-    def clean(self):
-
-        cleaned_data = super(TicketCCForm, self).clean()
-
-        user = cleaned_data.get('user', None)
-        email = cleaned_data.get('email', '')
-
-        if user is None and len(email) == 0:
-            raise forms.ValidationError(_('When you add somebody on Cc, you must provided either an User or a valid email. Email: %s' %email))
-
 class TicketDependencyForm(forms.ModelForm):
     class Meta:
         model = TicketDependency

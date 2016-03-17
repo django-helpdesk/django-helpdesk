@@ -174,6 +174,9 @@ class EmailInteractionsTestCase(TestCase):
         # and the new and update queues (+2)
         self.assertEqual(email_count + 1 + 2, len(mail.outbox))
 
+        # Ensure that the submitter is notified
+        self.assertIn(submitter_email,mail.outbox[0].to)
+
     def test_create_ticket_from_email_without_message_id(self):
 
         """
@@ -202,6 +205,9 @@ class EmailInteractionsTestCase(TestCase):
         # As we have created an Ticket from an email, we notify the sender (+1) 
         # and the new and update queues (+2)
         self.assertEqual(email_count + 1 + 2, len(mail.outbox))
+
+        # Ensure that the submitter is notified
+        self.assertIn(submitter_email,mail.outbox[0].to)
 
     def test_create_ticket_from_email_with_carbon_copy(self):
 
@@ -232,13 +238,21 @@ class EmailInteractionsTestCase(TestCase):
         ticket = Ticket.objects.get(id=followup.ticket.id)
         self.assertEqual(ticket.ticket_for_url, "mq1-%s" % ticket.id)
 
-        # As we have created an Ticket from an email, we notify the sender (+1),
-        # the new and update queues (+2) and contacts on the cc_list (+1 as it's 
-        # treated as a list)
-        self.assertEqual(email_count + 1 + 2 + 1, len(mail.outbox))
+        # As we have created an Ticket from an email, we notify the sender
+        # and contacts on the cc_list (+1 as it's treated as a list),
+        # the new and update queues (+2) 
+        self.assertEqual(email_count + 1 + 2, len(mail.outbox))
 
-        # Ensure that <TicketCC> is created
+        # Ensure that the submitter is notified
+        self.assertIn(submitter_email,mail.outbox[0].to)
+
+        
         for cc_email in cc_list:
+
+            # Ensure that contacts on cc_list will be notified on the same email (index 0)
+            self.assertIn(cc_email, mail.outbox[0].to)
+
+            # Ensure that <TicketCC> exists
             ticket_cc = TicketCC.objects.get(ticket=ticket, email=cc_email)
             self.assertTrue(ticket_cc.ticket, ticket)
             self.assertTrue(ticket_cc.email, cc_email)
@@ -266,9 +280,31 @@ class EmailInteractionsTestCase(TestCase):
 
         email_count = len(mail.outbox)
 
-        self.assertRaises(ValidationError, object_from_message, str(msg), self.queue_public, quiet=True)
+        object_from_message(str(msg), self.queue_public, quiet=True)
 
-    def test_create_followup_from_email_with_valid_message_id_with_when_no_initial_cc_list(self):
+        followup = FollowUp.objects.get(message_id=message_id)
+        ticket = Ticket.objects.get(id=followup.ticket.id)
+        self.assertEqual(ticket.ticket_for_url, "mq1-%s" % ticket.id)
+
+        # As we have created an Ticket from an email, we notify the sender
+        # and contacts on the cc_list (+1 as it's treated as a list),
+        # the new and update queues (+2) 
+        self.assertEqual(email_count + 1 + 2, len(mail.outbox))
+
+        # Ensure that the submitter is notified
+        self.assertIn(submitter_email, mail.outbox[0].to)
+        
+        for cc_email in cc_list:
+
+            # Ensure that contacts on cc_list will be notified on the same email (index 0)
+            self.assertIn(cc_email, mail.outbox[0].to)
+
+            # Ensure that <TicketCC> exists. Even if it's an invalid email.
+            ticket_cc = TicketCC.objects.get(ticket=ticket, email=cc_email)
+            self.assertTrue(ticket_cc.ticket, ticket)
+            self.assertTrue(ticket_cc.email, cc_email)
+
+    def test_create_followup_from_email_with_valid_message_id_with_no_initial_cc_list(self):
 
         """
         Ensure that if a message is received with an valid In-Reply-To ID, 
@@ -295,6 +331,18 @@ class EmailInteractionsTestCase(TestCase):
 
         followup = FollowUp.objects.get(message_id=message_id)
         ticket = Ticket.objects.get(id=followup.ticket.id)
+
+        # As we have created an Ticket from an email, we notify the sender
+        # and contacts on the cc_list (+1 as it's treated as a list),
+        # the new and update queues (+2) 
+
+        # Ensure that the submitter is notified
+        self.assertIn(submitter_email,mail.outbox[0].to)
+
+        # As we have created an Ticket from an email, we notify the sender (+1)
+        # and the new and update queues (+2)
+        expected_email_count = 1 + 2
+        self.assertEqual(expected_email_count, len(mail.outbox))
         ### end of the Ticket and TicketCCs creation ###
 
         # Reply message
@@ -327,15 +375,22 @@ class EmailInteractionsTestCase(TestCase):
             self.assertTrue(ticket_cc.ticket, ticket)
             self.assertTrue(ticket_cc.email, cc_email)
 
-        # As we have created an Ticket from an email, we notify the sender (+1)
-        # and the new and update queues (+2)
-        expected_email_count = 1 + 2
-
         # As an update was made, we increase the expected_email_count with:
         # cc_list: +1
         # public_update_queue: +1
-        expected_email_count += 1 + 1   
+        expected_email_count += 1 + 1
         self.assertEqual(expected_email_count, len(mail.outbox))
+
+        # As we have created a FollowUp from an email, we notify the sender
+        # and contacts on the cc_list (+1 as it's treated as a list),
+        # the new and update queues (+2) 
+
+        # Ensure that the submitter is notified
+        self.assertIn(submitter_email, mail.outbox[expected_email_count - 1].to)
+
+        # Ensure that contacts on cc_list will be notified on the same email (index 0)
+        for cc_email in cc_list:
+            self.assertIn(cc_email, mail.outbox[expected_email_count - 1].to)
 
     def test_create_followup_from_email_with_valid_message_id_with_original_cc_list_included(self):
 
@@ -374,10 +429,17 @@ class EmailInteractionsTestCase(TestCase):
             self.assertTrue(ticket_cc.email, cc_email)
             self.assertTrue(ticket_cc.can_view, True)
 
-        # As we have created an Ticket from an email, we notify the sender (+1),
-        # the new and update queues (+2) and contacts on the cc_list (+1 as it's 
-        # treated as a list)
-        self.assertEqual(email_count + 1 + 2 + 1, len(mail.outbox))
+        # As we have created a Ticket from an email, we notify the sender
+        # and contacts on the cc_list (+1 as it's treated as a list),
+        # the new and update queues (+2) 
+
+        # Ensure that the submitter is notified
+        self.assertIn(submitter_email,mail.outbox[0].to)
+
+        # As we have created an Ticket from an email, we notify the sender (+1)
+        # and the new and update queues (+2)
+        expected_email_count = 1 + 2
+        self.assertEqual(expected_email_count, len(mail.outbox))
         ### end of the Ticket and TicketCCs creation ###
 
         # Reply message
@@ -402,24 +464,27 @@ class EmailInteractionsTestCase(TestCase):
         ticket = Ticket.objects.get(id=followup.ticket.id)
         self.assertEqual(ticket.ticket_for_url, "mq1-%s" % ticket.id)
 
-        # Ensure that <TicketCC> is created
+        # As an update was made, we increase the expected_email_count with:
+        # public_update_queue: +1
+        expected_email_count += 1
+        self.assertEqual(expected_email_count, len(mail.outbox))
+
+        # As we have created a FollowUp from an email, we notify the sender
+        # and contacts on the cc_list (+1 as it's treated as a list),
+        # the new and update queues (+2) 
+
+        # Ensure that the submitter is notified
+        self.assertIn(submitter_email, mail.outbox[expected_email_count - 1].to)
+
+        # Ensure that contacts on cc_list will be notified on the same email (index 0)
         for cc_email in cc_list:
+            self.assertIn(cc_email, mail.outbox[expected_email_count - 1].to)
+
             # Even after 2 messages with the same cc_list, 
             # <get> MUST return only one object 
             ticket_cc = TicketCC.objects.get(ticket=ticket, email=cc_email)
             self.assertTrue(ticket_cc.ticket, ticket)
             self.assertTrue(ticket_cc.email, cc_email)
-
-        # As we have created an Ticket from an email, we notify the sender (+1),
-        # the new and update queues (+2) and contacts on the cc_list (+1 as it's 
-        # treated as a list)
-        expected_email_count = 1 + 2 + 1
-
-        # As an update was made, we increase the expected_email_count with:
-        # cc_list: +1
-        # public_update_queue: +1
-        expected_email_count += 1 + 1   
-        self.assertEqual(expected_email_count, len(mail.outbox))
 
     def test_create_followup_from_email_with_invalid_message_id(self):
 
@@ -458,10 +523,25 @@ class EmailInteractionsTestCase(TestCase):
             self.assertTrue(ticket_cc.email, cc_email)
             self.assertTrue(ticket_cc.can_view, True)
 
-        # As we have created an Ticket from an email, we notify the sender (+1),
-        # the new and update queues (+2) and contacts on the cc_list (+1 as it's 
-        # treated as a list)
-        self.assertEqual(email_count + 1 + 2 + 1, len(mail.outbox))
+        # As we have created an Ticket from an email, we notify the sender
+        # and contacts on the cc_list (+1 as it's treated as a list),
+        # the new and update queues (+2) 
+        expected_email_count = 1 + 2
+        self.assertEqual(expected_email_count, len(mail.outbox))
+
+        # Ensure that the submitter is notified
+        self.assertIn(submitter_email,mail.outbox[0].to)
+
+        # Ensure that <TicketCC> is created
+        for cc_email in cc_list:
+
+            # Ensure that contacts on cc_list will be notified on the same email (index 0)
+            self.assertIn(cc_email, mail.outbox[0].to)
+
+            ticket_cc = TicketCC.objects.get(ticket=ticket, email=cc_email)
+            self.assertTrue(ticket_cc.ticket, ticket)
+            self.assertTrue(ticket_cc.email, cc_email)
+
         ### end of the Ticket and TicketCCs creation ###
 
         # Reply message
@@ -491,6 +571,7 @@ class EmailInteractionsTestCase(TestCase):
         ticket = Ticket.objects.get(id=followup.ticket.id)
         self.assertEqual(ticket.ticket_for_url, "mq1-%s" % ticket.id)
 
+
         # Ensure that <TicketCC> is created
         for cc_email in cc_list:
             # Even after 2 messages with the same cc_list, <get> MUST return only 
@@ -502,7 +583,7 @@ class EmailInteractionsTestCase(TestCase):
         # As we have created an Ticket from an email, we notify the sender (+1),
         # the new and update queues (+2) and contacts on the cc_list (+1 as it's 
         # treated as a list)
-        self.assertEqual(email_count + 1 + 2 + 1, len(mail.outbox))
+        self.assertEqual(email_count + 1 + 2, len(mail.outbox))
 
     def test_create_ticket_from_email_to_a_notification_enabled_queue(self):
 
@@ -526,23 +607,31 @@ class EmailInteractionsTestCase(TestCase):
         msg.set_payload(self.ticket_data['description'])
 
         email_count = len(mail.outbox)
-        
         object_from_message(str(msg), self.queue_public, quiet=True)
+        
 
         followup = FollowUp.objects.get(message_id=message_id)
         ticket = Ticket.objects.get(id=followup.ticket.id)
         self.assertEqual(ticket.ticket_for_url, "mq1-%s" % ticket.id)
 
-        # As we have created an Ticket from an email, we notify the sender (+1),
-        # the new and update queues (+2) and contacts on the cc_list (+1 as it's 
-        # treated as a list)
-        self.assertEqual(email_count + 1 + 2 + 1, len(mail.outbox))
+        # As we have created a Ticket from an email, we notify the sender
+        # and contacts on the cc_list (+1 as it's treated as a list),
+        # the new and update queues (+2) 
+        self.assertEqual(email_count + 1 + 2, len(mail.outbox))
 
-        # Ensure that <TicketCC> is created
+        # Ensure that the submitter is notified
+        self.assertIn(submitter_email, mail.outbox[0].to)
+
+        # Ensure that <TicketCC> exist
         for cc_email in cc_list:
+
+            # Ensure that contacts on cc_list will be notified on the same email (index 0)
+            self.assertIn(cc_email, mail.outbox[0].to)
+
             ticket_cc = TicketCC.objects.get(ticket=ticket, email=cc_email)
             self.assertTrue(ticket_cc.ticket, ticket)
             self.assertTrue(ticket_cc.email, cc_email)
+
 
     def test_create_ticket_from_email_to_a_notification_disabled_queue(self):
 
@@ -581,6 +670,10 @@ class EmailInteractionsTestCase(TestCase):
         # Ensure that <TicketCC> is created even if the Queue notifications are disabled 
         # so when staff members interact with the <Ticket>, they get notified
         for cc_email in cc_list:
+
+            # Ensure that contacts on the cc_list are not notified
+            self.assertNotIn(cc_email, mail.outbox[0].to)
+
             ticket_cc = TicketCC.objects.get(ticket=ticket, email=cc_email)
             self.assertTrue(ticket_cc.ticket, ticket)
             self.assertTrue(ticket_cc.email, cc_email)
@@ -615,14 +708,18 @@ class EmailInteractionsTestCase(TestCase):
         ticket = Ticket.objects.get(id=followup.ticket.id)
         self.assertEqual(ticket.ticket_for_url, "mq1-%s" % ticket.id)
 
-        # As we have created an Ticket from an email, we notify the sender (+1),
-        # the new and update queues (+2) and contacts on the cc_list (+1 as it's 
-        # treated as a list)
-        expected_email_count = email_count + 1 + 2 + 1
+        # As we have created an Ticket from an email, we notify the sender
+        # and contacts on the cc_list (+1 as it's treated as a list),
+        # the new and update queues (+2) 
+        expected_email_count = email_count + 1 + 2
         self.assertEqual(expected_email_count, len(mail.outbox))
 
         # Ensure that <TicketCC> is created
         for cc_email in cc_list:
+
+            # Ensure that contacts on cc_list will be notified on the same email (index 0)
+            self.assertIn(cc_email, mail.outbox[0].to)
+
             ticket_cc = TicketCC.objects.get(ticket=ticket, email=cc_email)
             self.assertTrue(ticket_cc.ticket, ticket)
             self.assertTrue(ticket_cc.email, cc_email)
@@ -649,10 +746,20 @@ class EmailInteractionsTestCase(TestCase):
         self.assertEqual(ticket.ticket_for_url, "mq1-%s" % ticket.id)
 
         # As an update was made, we increase the expected_email_count with:
-        # the ticket submitter: +1
+        # a new email to all TicketCC subscribers : +1
         # public_update_queue: +1
-        expected_email_count += 1 + 1   
+        expected_email_count += 1 + 1
         self.assertEqual(expected_email_count, len(mail.outbox))
+
+        # Ensure that <TicketCC> exist
+        for cc_email in cc_list:
+
+            # Ensure that contacts on cc_list will be notified on the same email (index 0)
+            self.assertIn(cc_email, mail.outbox[expected_email_count - 1].to)
+
+            ticket_cc = TicketCC.objects.get(ticket=ticket, email=cc_email)
+            self.assertTrue(ticket_cc.ticket, ticket)
+            self.assertTrue(ticket_cc.email, cc_email)
 
     def test_create_followup_from_email_to_a_notification_diabled_queue(self):
 
@@ -684,15 +791,19 @@ class EmailInteractionsTestCase(TestCase):
         ticket = Ticket.objects.get(id=followup.ticket.id)
         self.assertEqual(ticket.ticket_for_url, "mq1-%s" % ticket.id)
 
-        # As we have created an Ticket from an email, we notify the sender (+1),
-        # the new and update queues (+2) and contacts on the cc_list (+1 as it's 
-        # treated as a list)
-        expected_email_count = email_count + 1 + 2 + 1
+        # As we have created an Ticket from an email, we notify the sender
+        # and contacts on the cc_list (+1 as it's treated as a list),
+        # the new and update queues (+2) 
+        expected_email_count = email_count + 1 + 2
         self.assertEqual(expected_email_count, len(mail.outbox))
         
 
         # Ensure that <TicketCC> is created
         for cc_email in cc_list:
+
+            # Ensure that contacts on cc_list will be notified on the same email (index 0)
+            self.assertIn(cc_email, mail.outbox[0].to)
+
             ticket_cc = TicketCC.objects.get(ticket=ticket, email=cc_email)
             self.assertTrue(ticket_cc.ticket, ticket)
             self.assertTrue(ticket_cc.email, cc_email)
@@ -722,7 +833,6 @@ class EmailInteractionsTestCase(TestCase):
         # public_update_queue: +1
         expected_email_count += 1
         self.assertEqual(expected_email_count, len(mail.outbox))
-
 
 
     def test_create_followup_from_email_with_valid_message_id_with_original_cc_list_included(self):
