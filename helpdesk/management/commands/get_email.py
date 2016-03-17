@@ -179,6 +179,7 @@ def create_ticket_cc(ticket, cc_list):
     for cced_email in cc_list:
 
         user = None
+        cced_email = cced_email.strip()
 
         try:
             user = User.objects.get(email=cced_email)
