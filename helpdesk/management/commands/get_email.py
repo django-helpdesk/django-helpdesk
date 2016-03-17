@@ -282,6 +282,14 @@ def create_object_from_email_message(message, ticket_id, payload, files, quiet):
         new_ticket_ccs = create_ticket_cc(ticket, cc_list.split(','))
 
     notification_template = None
+    notifications_to_be_sent = [sender_email,]
+    
+    if queue.enable_notifications_on_email_events and len(notifications_to_be_sent):
+
+        ticket_cc_list = TicketCC.objects.filter(ticket=ticket).all().values_list('email', flat=True)
+
+        for email in ticket_cc_list : 
+            notifications_to_be_sent.append(email)
 
     if new:
 
@@ -291,7 +299,7 @@ def create_object_from_email_message(message, ticket_id, payload, files, quiet):
             send_templated_mail(
                 'newticket_submitter',
                 context,
-                recipients=sender_email,
+                recipients=notifications_to_be_sent,
                 sender=queue.from_address,
                 fail_silently=True,
                 extra_headers={'In-Reply-To': message_id},
@@ -345,24 +353,18 @@ def create_object_from_email_message(message, ticket_id, payload, files, quiet):
                 recipients=queue.updated_ticket_cc,
                 sender=queue.from_address,
                 fail_silently=True,
-                )
+                )    
 
-    notifications_to_be_sent = []
-    ticket_cc_list = TicketCC.objects.filter(ticket=ticket).all().values_list('email', flat=True)
+        if queue.enable_notifications_on_email_events:
 
-    for email in ticket_cc_list : 
-        notifications_to_be_sent.append(email)
-
-    if queue.enable_notifications_on_email_events and len(notifications_to_be_sent):
-
-        send_templated_mail(
-            notification_template,
-            context,
-            recipients=notifications_to_be_sent,
-            sender=queue.from_address,
-            fail_silently=True,
-            extra_headers={'In-Reply-To': message_id},
-            )
+            if queue.updated_ticket_cc:
+                send_templated_mail(
+                    'updated_cc',
+                    context,
+                    recipients=notifications_to_be_sent,
+                    sender=queue.from_address,
+                    fail_silently=True,
+                    )  
 
     return ticket
 
