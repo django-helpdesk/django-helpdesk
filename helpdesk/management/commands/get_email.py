@@ -12,6 +12,7 @@ scripts/get_email.py - Designed to be run from cron, this script checks the
 from __future__ import print_function
 
 import email
+from email.utils import getaddresses
 import imaplib
 import mimetypes
 import poplib
@@ -172,11 +173,17 @@ def decode_mail_headers(string):
 
 def create_ticket_cc(ticket, cc_list):
 
+    if not cc_list:
+        return []
+
     # Local import to deal with non-defined / circular reference problem
     from helpdesk.views.staff import User, subscribe_to_ticket_updates
 
     new_ticket_ccs = []
-    for cced_email in cc_list:
+    for cced_name, cced_email in cc_list:
+
+        if cced_email == ticket.queue.email_address:
+            continue
 
         user = None
         cced_email = cced_email.strip()
@@ -202,9 +209,11 @@ def create_object_from_email_message(message, ticket_id, payload, files, quiet):
     queue = payload['queue']
     sender_email = payload['sender_email']
 
+    to_list = getaddresses(message.get_all('To', []))
+    cc_list = getaddresses(message.get_all('Cc', []))
+
     message_id = message.get('Message-Id')
     in_reply_to = message.get('In-Reply-To')
-    cc_list = message.get('Cc')
 
     if in_reply_to is not None:
         try:
@@ -279,8 +288,8 @@ def create_object_from_email_message(message, ticket_id, payload, files, quiet):
     context = safe_template_context(ticket)
 
     new_ticket_ccs = []
-    if cc_list is not None:
-        new_ticket_ccs = create_ticket_cc(ticket, cc_list.split(','))
+    new_ticket_ccs.append(create_ticket_cc(ticket, to_list))
+    new_ticket_ccs.append(create_ticket_cc(ticket, cc_list))
 
     notification_template = None
     notifications_to_be_sent = [sender_email,]
