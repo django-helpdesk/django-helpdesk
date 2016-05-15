@@ -96,6 +96,6 @@ Adding To Your Django Project
 
    Alter the URL to suit your installation path.
 
-9. Load initial e-mail templates, otherwise you will not be able to setnd e-mail::
+9. Load initial e-mail templates, otherwise you will not be able to send e-mail::
 
    python manage.py loaddata emailtemplate.json
