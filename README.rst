@@ -93,7 +93,7 @@ Contributing
 
 If you want to help translate django-helpdesk into languages other than English, we encourage you to make use of our Transifex project.
 
-http://www.transifex.net/projects/p/django-helpdesk/resource/core/
+https://www.transifex.com/rossp/django-helpdesk/
 
 Feel free to request access to contribute your translations.
 
