@@ -37,7 +37,7 @@
 </thead>
 <tbody>
 {% for d in data %}
-<tr class='row_{% cycle odd,even %}'>{% for f in d %}<td class='report'>{{ f }}</td>{% endfor %}</tr>{% endfor %}
+<tr class='row_{% cycle 'odd' 'even' %}'>{% for f in d %}<td class='report'>{{ f }}</td>{% endfor %}</tr>{% endfor %}
 </tbody>
 </table>
 
