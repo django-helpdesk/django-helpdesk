@@ -20,7 +20,7 @@ import socket
 
 from datetime import timedelta
 from email.header import decode_header
-from email.Utils import parseaddr, collapse_rfc2231_value
+from email.utils import parseaddr, collapse_rfc2231_value
 from optparse import make_option
 
 from email_reply_parser import EmailReplyParser
