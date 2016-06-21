@@ -153,8 +153,8 @@ def dashboard(request):
 
     dash_tickets = query_to_dict(cursor.fetchall(), cursor.description)
 
-    return render(request, template_name='helpdesk/dashboard.html',
-        context = {
+    return render(request, 'helpdesk/dashboard.html',
+        {
             'user_tickets': tickets,
             'user_tickets_closed_resolved': tickets_closed_resolved,
             'unassigned_tickets': unassigned_tickets,
@@ -892,8 +892,8 @@ def ticket_list(request):
     querydict.pop('page', 1)
 
 
-    return render(request, template_name='helpdesk/ticket_list.html',
-        context = dict(
+    return render(request, 'helpdesk/ticket_list.html',
+        dict(
             context,
             query_string=querydict.urlencode(),
             tickets=tickets,
@@ -1198,8 +1198,8 @@ def run_report(request, report):
             data.append(summarytable[item, hdr])
         table.append([item] + data)
 
-    return render(request, template_name='helpdesk/report_output.html',
-        context = {
+    return render(request, 'helpdesk/report_output.html',
+        {
             'title': title,
             'charttype': charttype,
             'data': table,

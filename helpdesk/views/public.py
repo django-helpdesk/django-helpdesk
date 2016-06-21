@@ -63,8 +63,8 @@ def homepage(request):
 
     knowledgebase_categories = KBCategory.objects.all()
 
-    return render(request, template_name='helpdesk/public_homepage.html',
-        context = {
+    return render(request, 'helpdesk/public_homepage.html',
+        {
             'form': form,
             'helpdesk_settings': helpdesk_settings,
             'kb_categories': knowledgebase_categories
@@ -117,8 +117,8 @@ def view_ticket(request):
             if helpdesk_settings.HELPDESK_NAVIGATION_ENABLED:
                 redirect_url = reverse('helpdesk_view', args=[ticket_id])
 
-            return render(request, template_name='helpdesk/public_view_ticket.html',
-                context = {
+            return render(request, 'helpdesk/public_view_ticket.html',
+                {
                     'ticket': ticket,
                     'helpdesk_settings': helpdesk_settings,
                     'next': redirect_url,
