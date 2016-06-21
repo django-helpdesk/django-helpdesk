@@ -19,7 +19,7 @@ try:
 except ImportError:
     from django.contrib.auth.models import User
 from django.http import HttpResponse
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 from django.template import loader, Context
 import simplejson
 from django.views.decorators.csrf import csrf_exempt
@@ -64,7 +64,7 @@ def api(request, method):
     warnings.warn("django-helpdesk API will be removed in January 2016. See https://github.com/rossp/django-helpdesk/issues/198 for details.", category=DeprecationWarning)
 
     if method == 'help':
-        return render_to_response('helpdesk/help_api.html')
+        return render(request, template_name='helpdesk/help_api.html')
 
     if request.method != 'POST':
         return api_return(STATUS_ERROR_BADMETHOD)
