@@ -32,6 +32,7 @@ Dependencies (pre-flight checklist)
 4. `pip install django-bootstrap-form` and add `bootstrapform` to `settings.INSTALLED_APPS`
 5. `pip install django-markdown-deux` and add `markdown_deux` to `settings.INSTALLED_APPS`
 6. `pip install email-reply-parser` to get smart email reply handling
+7. Add 'django.contrib.sites' to settings.INSTALLED_APPS, ensure there is at least 1 site created.
 
 **NOTE REGARDING SQLITE AND SEARCHING:**
 If you use sqlite as your database, the search function will not work as
