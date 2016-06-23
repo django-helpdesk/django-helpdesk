@@ -35,7 +35,7 @@ Adding To Your Django Project
         'django.contrib.auth',
         'django.contrib.contenttypes',
         'django.contrib.sessions',
-        'django.contrib.sites',
+        'django.contrib.sites',  # Required for determing domain url for use in emails
         'django.contrib.admin',  # Required for helpdesk admin/maintenance
         'django.contrib.humanize',  # Required for elapsed time formatting
         'markdown_deux',  # Required for Knowledgebase item formatting
