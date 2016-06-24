@@ -83,7 +83,7 @@ def view_ticket(request):
         ticket_id = parts[-1]
 
         try:
-            ticket = Ticket.objects.get(id=ticket_id, queue__slug__iexact=queue, submitter_email__iexact=email)
+            ticket = Ticket.objects.get(id=ticket_id, submitter_email__iexact=email)
         except:
             ticket = False
             error_message = _('Invalid ticket ID or e-mail address. Please try again.')
