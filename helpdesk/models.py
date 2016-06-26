@@ -562,6 +562,14 @@ class Ticket(models.Model):
 
         super(Ticket, self).save(*args, **kwargs)
 
+    @classmethod
+    def queue_and_id_from_query(klass, query):
+        # Apply the opposite logic here compared to self._get_ticket_for_url
+        # Ensure that queues with '-' in them will work
+        parts = query.split('-')
+        queue = '-'.join(parts[0:-1])
+        return queue, parts[-1]
+
 
 class FollowUpManager(models.Manager):
     def private_followups(self):

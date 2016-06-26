@@ -739,7 +739,7 @@ def ticket_list(request):
         filter = None
         if query.find('-') > 0:
             try:
-                queue, id = query.split('-')
+                queue, id = Ticket.queue_and_id_from_query(query)
                 id = int(id)
             except ValueError:
                 id = None

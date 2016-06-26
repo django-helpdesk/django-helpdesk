@@ -78,10 +78,7 @@ def view_ticket(request):
     error_message = ''
 
     if ticket_req and email:
-        parts = ticket_req.split('-')
-        queue = '-'.join(parts[0:-1])
-        ticket_id = parts[-1]
-
+        queue, ticket_id = Ticket.queue_and_id_from_query(ticket_req)
         try:
             ticket = Ticket.objects.get(id=ticket_id, submitter_email__iexact=email)
         except:
