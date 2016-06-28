@@ -883,7 +883,7 @@ def ticket_list(request):
 
     import json
     from helpdesk.lib import b64encode
-    urlsafe_query = b64encode(json.dumps(query_params))
+    urlsafe_query = b64encode(json.dumps(query_params).encode('UTF-8'))
 
     user_saved_queries = SavedSearch.objects.filter(Q(user=request.user) | Q(shared__exact=True))
 
