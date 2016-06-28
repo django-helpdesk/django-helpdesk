@@ -773,12 +773,14 @@ def ticket_list(request):
         if not (saved_query.shared or saved_query.user == request.user):
             return HttpResponseRedirect(reverse('helpdesk_list'))
 
-        try:
-            import pickle
-        except ImportError:
-            import cPickle as pickle
+        import json
         from helpdesk.lib import b64decode
-        query_params = pickle.loads(b64decode(str(saved_query.query)))
+        try:
+            query_params = json.loads(b64decode(str(saved_query.query)))
+        except ValueError:
+            # Query deserialization failed. (E.g. was a pickled query)
+            return HttpResponseRedirect(reverse('helpdesk_list'))
+
     elif not (  'queue' in request.GET
             or  'assigned_to' in request.GET
             or  'status' in request.GET
@@ -879,12 +881,9 @@ def ticket_list(request):
         search_message = _('<p><strong>Note:</strong> Your keyword search is case sensitive because of your database. This means the search will <strong>not</strong> be accurate. By switching to a different database system you will gain better searching! For more information, read the <a href="http://docs.djangoproject.com/en/dev/ref/databases/#sqlite-string-matching">Django Documentation on string matching in SQLite</a>.')
 
 
-    try:
-        import pickle
-    except ImportError:
-        import cPickle as pickle
+    import json
     from helpdesk.lib import b64encode
-    urlsafe_query = b64encode(pickle.dumps(query_params))
+    urlsafe_query = b64encode(json.dumps(query_params).encode('UTF-8'))
 
     user_saved_queries = SavedSearch.objects.filter(Q(user=request.user) | Q(shared__exact=True))
 
@@ -1053,12 +1052,13 @@ def run_report(request, report):
         if not (saved_query.shared or saved_query.user == request.user):
             return HttpResponseRedirect(reverse('helpdesk_report_index'))
 
-        try:
-            import pickle
-        except ImportError:
-            import cPickle as pickle
+        import json
         from helpdesk.lib import b64decode
-        query_params = pickle.loads(b64decode(str(saved_query.query)))
+        try:
+            query_params = json.loads(b64decode(str(saved_query.query)))
+        except:
+            return HttpResponseRedirect(reverse('helpdesk_report_index'))
+
         report_queryset = apply_query(report_queryset, query_params)
 
     from collections import defaultdict
