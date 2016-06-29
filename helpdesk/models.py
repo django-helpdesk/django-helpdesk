@@ -26,6 +26,11 @@ except ImportError:
     from datetime import datetime as timezone
 
 
+class QueueManager(models.Manager):
+    def enabled_queues(self):
+        return self.filter(enabled=True)
+
+
 @python_2_unicode_compatible
 class Queue(models.Model):
     """
@@ -230,6 +235,17 @@ class Queue(models.Model):
         null=True,
         verbose_name=_('Default owner'),
     )
+
+    enabled = models.BooleanField(
+        blank=False,
+        null=False,
+        default=True,
+        verbose_name=_('Enable queue'),
+        help_text=_('No tickets can be created on disabled queues, but ' + \
+                    'tickets can be looked up & edited')
+    )
+
+    objects = QueueManager()
 
     def __str__(self):
         return "%s" % self.title
