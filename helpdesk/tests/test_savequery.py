@@ -21,6 +21,6 @@ class TestSavingSharedQuery(TestCase):
                                     'shared':'on',
                                     'query_encoded':'KGRwMApWZmlsdGVyaW5nCnAxCihkcDIKVnN0YXR1c19faW4KcDMKKGxwNApJMQphSTIKYUkzCmFzc1Zzb3J0aW5nCnA1ClZjcmVhdGVkCnA2CnMu'})
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, '/helpdesk/tickets/?saved_query=1')
+        self.assertTrue('/helpdesk/tickets/?saved_query=1' in response.url)
 
 
