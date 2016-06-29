@@ -4,7 +4,7 @@ from django.test import TestCase
 from helpdesk.models import Ticket, Queue
 from helpdesk.tests.helpers import get_staff_user, reload_urlconf
 
-class TestKBDisabled(TestCase):
+class TestSavingSharedQuery(TestCase):
     def setUp(self):
         q = Queue(title='Q1', slug='q1')
         q.save()
@@ -12,7 +12,6 @@ class TestKBDisabled(TestCase):
 
     def test_cansavequery(self):
         """Can a query be saved"""
-        # get the ticket from models
         url = reverse('helpdesk_savequery')
         self.client.login(username=get_staff_user().get_username(),
                           password='password')
