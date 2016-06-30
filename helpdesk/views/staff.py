@@ -867,7 +867,7 @@ def ticket_list(request):
     try:
         page = int(request.GET.get('page', '1'))
     except ValueError:
-         page = 1
+        page = 1
 
     try:
         tickets = ticket_paginator.page(page)
