@@ -1213,6 +1213,8 @@ run_report = staff_member_required(run_report)
 def save_query(request):
     title = request.POST.get('title', None)
     shared = request.POST.get('shared', False)
+    if shared == 'on': # django only translates '1', 'true', 't' into True
+        shared = True
     query_encoded = request.POST.get('query_encoded', None)
 
     if not title or not query_encoded:
