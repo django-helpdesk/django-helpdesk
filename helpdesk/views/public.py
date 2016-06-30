@@ -34,7 +34,9 @@ def homepage(request):
 
     if request.method == 'POST':
         form = PublicTicketForm(request.POST, request.FILES)
-        form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.filter(allow_public_submission=True)]
+        form.fields['queue'].choices = [('', '--------')] + \
+            [[q.id, q.title] for q in
+             Queue.objects.enabled_queues().filter(allow_public_submission=True)]
         if form.is_valid():
             if text_is_spam(form.cleaned_data['body'], request):
                 # This submission is spam. Let's not save it.
@@ -59,7 +61,9 @@ def homepage(request):
             initial_data['submitter_email'] = request.user.email
 
         form = PublicTicketForm(initial=initial_data)
-        form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.filter(allow_public_submission=True)]
+        form.fields['queue'].choices = [('', '--------')] + \
+            [[q.id, q.title] for q in
+             Queue.objects.enabled_queues().filter(allow_public_submission=True)]
 
     knowledgebase_categories = KBCategory.objects.all()
 

@@ -6,7 +6,7 @@ from helpdesk.models import TicketChange, Attachment, IgnoreEmail
 from helpdesk.models import CustomField
 
 class QueueAdmin(admin.ModelAdmin):
-    list_display = ('title', 'slug', 'email_address', 'locale')
+    list_display = ('title', 'slug', 'email_address', 'locale', 'enabled')
     prepopulated_fields = {"slug": ("title",)}
 
 class TicketAdmin(admin.ModelAdmin):

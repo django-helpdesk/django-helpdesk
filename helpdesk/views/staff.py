@@ -59,7 +59,7 @@ def _get_user_queues(user):
     :param user: The User (the class should have the has_perm method)
     :return: A Python list of Queues
     """
-    all_queues = Queue.objects.all()
+    all_queues = Queue.objects.enabled_queues()
     limit_queues_by_user = helpdesk_settings.HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION and not user.is_superuser
     if limit_queues_by_user:
         id_list = [q.pk for q in all_queues if user.has_perm(q.permission_name)]
@@ -952,7 +952,8 @@ def create_ticket(request):
             initial_data['queue'] = request.GET['queue']
 
         form = TicketForm(initial=initial_data)
-        form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
+        form.fields['queue'].choices = [('', '--------')] + \
+            [[q.id, q.title] for q in Queue.objects.enabled_queues()]
         form.fields['assigned_to'].choices = [('', '--------')] + [[u.id, u.get_username()] for u in assignable_users]
         if helpdesk_settings.HELPDESK_CREATE_TICKET_HIDE_ASSIGNED_TO:
             form.fields['assigned_to'].widget = forms.HiddenInput()
@@ -1213,6 +1214,8 @@ run_report = staff_member_required(run_report)
 def save_query(request):
     title = request.POST.get('title', None)
     shared = request.POST.get('shared', False)
+    if shared == 'on': # django only translates '1', 'true', 't' into True
+        shared = True
     query_encoded = request.POST.get('query_encoded', None)
 
     if not title or not query_encoded:
