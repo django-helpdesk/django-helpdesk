@@ -724,7 +724,7 @@ def ticket_list(request):
         'sorting': None,
         'sortreverse': False,
         'keyword': None,
-        'other_filter': None,
+        'search_string': None,
         }
 
     from_saved_query = False
@@ -834,15 +834,8 @@ def ticket_list(request):
         q = request.GET.get('q', None)
 
         if q:
-            qset = (
-                Q(title__icontains=q) |
-                Q(description__icontains=q) |
-                Q(resolution__icontains=q) |
-                Q(submitter_email__icontains=q)
-            )
             context = dict(context, query=q)
-
-            query_params['other_filter'] = qset
+            query_params['search_string'] = q
 
         ### SORTING
         sort = request.GET.get('sort', None)
