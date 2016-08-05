@@ -34,6 +34,9 @@ HELPDESK_KB_ENABLED = getattr(settings, 'HELPDESK_KB_ENABLED', True)
 # show extended navigation by default, to all users, irrespective of staff status?
 HELPDESK_NAVIGATION_ENABLED = getattr(settings, 'HELPDESK_NAVIGATION_ENABLED', False)
 
+# use public CDNs to serve jquery and other javascript by default? otherwise, use built-in static copy
+HELPDESK_USE_CDN = getattr(settings, 'HELPDESK_USE_CDN', False)
+
 # show dropdown list of languages that ticket comments can be translated into?
 HELPDESK_TRANSLATE_TICKET_COMMENTS = getattr(settings, 'HELPDESK_TRANSLATE_TICKET_COMMENTS', False)
 

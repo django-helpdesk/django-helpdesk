@@ -16,10 +16,13 @@
 
         <!--link rel='stylesheet' href='{% static "helpdesk/helpdesk-print.css" %}' type='text/css' media="print" /-->
         <!--link rel='stylesheet' href='{% static "helpdesk/jquery-smoothness-theme/jquery-ui-1.8.9.custom.css" %}' type='text/css' /-->
-        <!--<script src="//netdna.bootstrapcdn.com/bootstrap/3.0.2/js/bootstrap.min.js"></script>-->
-        <!--<link href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css" rel="stylesheet">-->
+        {% if helpdesk_settings.HELPDESK_USE_CDN %}
+        <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.2/js/bootstrap.min.js"></script>
+        <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css" rel="stylesheet">
+        {% else %}
         <script src="{% static 'helpdesk/bootstrap/bootstrap-3.3.7.min.js' %}" type='text/javascript'></script>
         <link href="{% static 'helpdesk/bootstrap/bootstrap-3.3.7.min.css' %}" rel="stylesheet">
+        {% endif %}
         <link rel='alternate' href='{% url 'helpdesk_rss_user' user.get_username %}' type='application/rss+xml' title='{% trans "My Open Tickets" %}' />
         <link rel='alternate' href='{% url 'helpdesk_rss_activity' %}' type='application/rss+xml' title='{% trans "All Recent Activity" %}' />
         <link rel='alternate' href='{% url 'helpdesk_rss_unassigned' %}' type='application/rss+xml' title='{% trans "Unassigned Tickets" %}' />
