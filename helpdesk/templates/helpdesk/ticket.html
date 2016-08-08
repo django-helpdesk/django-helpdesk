@@ -3,44 +3,44 @@
 {% load static from staticfiles %}
 {% block helpdesk_title %}{% trans "View Ticket Details" %}{% endblock %}
 {% block helpdesk_head %}
-<script type="text/javascript">
-    $(document).ready(function() {
-        $("#ShowFurtherEditOptions").click(function() {
-            $("#FurtherEditOptions").fadeIn();
-            $("#ShowFurtherOptPara").hide();
-            return false;
-        });
-
-        processAddFileClick();
-        $("#ShowFileUpload").click(function() {
-            $("#FileUpload").fadeIn();
-            $("#ShowFileUploadPara").hide();
-            return false;
-        });
-
-        $('#id_preset').change(function() {
-            preset = $('#id_preset').val();
-            if (preset != '') {
-                $.get("{% url 'helpdesk_raw' "preset" %}?id=" + preset, function(data) {
-                    $("#commentBox").val(data)
-                });
-            }
-        });
-
-        $("[data-toggle=tooltip]").tooltip();
+<script type='text/javascript' language='javascript'>
+$(document).ready(function() {
+    $("#ShowFurtherEditOptions").click(function() {
+        $("#FurtherEditOptions").fadeIn();
+        $("#ShowFurtherOptPara").hide();
+        return false;
     });
 
-    function processAddFileClick() {
-        /* Until jQuery includes some 'livequery' functionality in the core
-           distribution, this will have to do. */
-        $(".AddAnotherFile>a").click(function() {
-            $(this).parent().remove();
-            $("#FileUpload>dl").append("<dt><label>{% trans "Attach another File" %}</label></dt><dd><input type='file' name='attachment' id='file' multiple/> <span class='AddAnotherFile'>(<a href='#'>{% trans "Add Another File" %}</a>)</span></dd>");
-            processAddFileClick();
-            return false;
-        });
+    processAddFileClick();
+    $("#ShowFileUpload").click(function() {
+        $("#FileUpload").fadeIn();
+        $("#ShowFileUploadPara").hide();
+        return false;
+    });
 
-    }
+    $('#id_preset').change(function() {
+        preset = $('#id_preset').val();
+        if (preset != '') {
+            $.get("{% url 'helpdesk_raw' "preset" %}?id=" + preset, function(data) {
+                $("#commentBox").val(data)
+            });
+        }
+    });
+
+    $("[data-toggle=tooltip]").tooltip();
+});
+
+function processAddFileClick() {
+    /* Until jQuery includes some 'livequery' functionality in the core
+        distribution, this will have to do. */
+    $(".AddAnotherFile>a").click(function() {
+        $(this).parent().remove();
+        $("#FileUpload>dl").append("<dt><label>{% trans "Attach another File" %}</label></dt><dd><input type='file' name='attachment' id='file' multiple/> <span class='AddAnotherFile'>(<a href='#'>{% trans "Add Another File" %}</a>)</span></dd>");
+        processAddFileClick();
+        return false;
+    });
+
+}
 </script>
 {% endblock %}
 
@@ -52,16 +52,8 @@
 <div id='translate_dropdown'>{% trans "Translate ticket comments into" %} </div>
 <div id='translate_block'>
 {% endcomment %}
-<div id="google_translate_element"></div><script>
-function googleTranslateElementInit() {
-  new google.translate.TranslateElement({
-    pageLanguage: 'auto',
-    includedLanguages: 'en,fr,de,ru',
-    autoDisplay: false,
-    layout: google.translate.TranslateElement.InlineLayout.HORIZONTAL
-  }, 'google_translate_element');
-}
-</script><script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+<div id="google_translate_element"></div>
+<script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 {% endif %}
 
 {% include "helpdesk/ticket_desc_table.html" %}
@@ -173,7 +165,7 @@ function googleTranslateElementInit() {
         {% endif %}
     </dl>
 
-<p id='ShowFurtherOptPara'><a href='#' id='ShowFurtherEditOptions'>{% trans "Change Further Details &raquo;" %}</a></p>
+<p id='ShowFurtherOptPara'><button id='ShowFurtherEditOptions'>{% trans "Change Further Details &raquo;" %}</button></p>
 
 <div id='FurtherEditOptions' style='display: none;'>
 
@@ -194,7 +186,7 @@ function googleTranslateElementInit() {
 
 </div>
 
-<p id='ShowFileUploadPara'><a href='#' id='ShowFileUpload'>{% trans "Attach File(s) &raquo;" %}</a></p>
+<p id='ShowFileUploadPara'><button id='ShowFileUpload'>{% trans "Attach File(s) &raquo;" %}</button></p>
 
 <div id='FileUpload' style='display: none;'>
 
