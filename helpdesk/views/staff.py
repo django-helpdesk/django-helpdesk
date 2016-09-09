@@ -1017,10 +1017,50 @@ rss_list = staff_member_required(rss_list)
 def report_index(request):
     number_tickets = Ticket.objects.all().count()
     saved_query = request.GET.get('saved_query', None)
+
+    user_queues = _get_user_queues(request.user)
+    Tickets = Ticket.objects.filter(
+                queue__in=user_queues,
+            )
+    basic_ticket_stats = calc_basic_ticket_stats(Tickets)
+
+    # The following query builds a grid of queues & ticket statuses,
+    # to be displayed to the user. EG:
+    #          Open  Resolved
+    # Queue 1    10     4
+    # Queue 2     4    12
+
+    queues = _get_user_queues(request.user).values_list('id', flat=True)
+
+    from_clause = """FROM    helpdesk_ticket t,
+                    helpdesk_queue q"""
+    if queues:
+        where_clause = """WHERE   q.id = t.queue_id AND
+                        q.id IN (%s)""" % (",".join(("%d" % pk for pk in queues)))
+    else:
+        where_clause = """WHERE   q.id = t.queue_id"""
+
+    cursor = connection.cursor()
+    cursor.execute("""
+        SELECT      q.id as queue,
+                    q.title AS name,
+                    COUNT(CASE t.status WHEN '1' THEN t.id WHEN '2' THEN t.id END) AS open,
+                    COUNT(CASE t.status WHEN '3' THEN t.id END) AS resolved,
+                    COUNT(CASE t.status WHEN '4' THEN t.id END) AS closed
+            %s
+            %s
+            GROUP BY queue, name
+            ORDER BY q.id;
+    """ % (from_clause, where_clause))
+
+    dash_tickets = query_to_dict(cursor.fetchall(), cursor.description)
+
     return render(request, template_name='helpdesk/report_index.html',
         context = {
             'number_tickets': number_tickets,
             'saved_query': saved_query,
+            'basic_ticket_stats': basic_ticket_stats,
+            'dash_tickets': dash_tickets,
         })
 report_index = staff_member_required(report_index)
 
@@ -1072,7 +1112,8 @@ def run_report(request, report):
     periods = []
     year, month = first_year, first_month
     working = True
-    periods.append("%s %s" % (month_name(month), year))
+    #periods.append("%s %s" % (month_name(month), year))
+    periods.append("%s-%s" % (year,month))
 
     while working:
         month += 1
@@ -1081,7 +1122,7 @@ def run_report(request, report):
             month = 1
         if (year > last_year) or (month > last_month and year >= last_year):
             working = False
-        periods.append("%s %s" % (month_name(month), year))
+        periods.append("%s-%s" % (year,month))
 
     if report == 'userpriority':
         title = _('User by Priority')
@@ -1148,7 +1189,7 @@ def run_report(request, report):
 
         elif report == 'usermonth':
             metric1 = u'%s' % ticket.get_assigned_to
-            metric2 = u'%s %s' % (month_name(ticket.created.month), ticket.created.year)
+            metric2 = u'%s-%s' % (ticket.created.year, ticket.created.month)
 
         elif report == 'queuepriority':
             metric1 = u'%s' % ticket.queue.title
@@ -1160,11 +1201,11 @@ def run_report(request, report):
 
         elif report == 'queuemonth':
             metric1 = u'%s' % ticket.queue.title
-            metric2 = u'%s %s' % (month_name(ticket.created.month), ticket.created.year)
+            metric2 = u'%s-%s' % (ticket.created.year, ticket.created.month)
 
         elif report == 'daysuntilticketclosedbymonth':
             metric1 = u'%s' % ticket.queue.title
-            metric2 = u'%s %s' % (month_name(ticket.created.month), ticket.created.year)
+            metric2 = u'%s-%s' % (ticket.created.year, ticket.created.month)
             metric3 = ticket.modified - ticket.created
             metric3 = metric3.days
 
@@ -1191,12 +1232,29 @@ def run_report(request, report):
             data.append(summarytable[item, hdr])
         table.append([item] + data)
 
+    # Zip data and headers together in one list for Morris.js charts
+    # will get a list like [(Header1, Data1), (Header2, Data2)...]
+    seriesnum = 0
+    morrisjs_data = []
+    for label in column_headings[1:]:
+        seriesnum += 1
+        datadict = { "x": label }
+        for n in range(0,len(table)):
+            datadict[n] = table[n][seriesnum]
+        morrisjs_data.append(datadict)
+
+    series_names = []
+    for series in table:
+        series_names.append(series[0])
+
     return render(request, 'helpdesk/report_output.html',
         {
             'title': title,
             'charttype': charttype,
             'data': table,
             'headings': column_headings,
+            'series_names': series_names,
+            'morrisjs_data': morrisjs_data,
             'from_saved_query': from_saved_query,
             'saved_query': saved_query,
         })
