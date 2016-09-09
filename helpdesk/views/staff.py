@@ -122,44 +122,12 @@ def dashboard(request):
             )
     basic_ticket_stats = calc_basic_ticket_stats(Tickets)
 
-    # The following query builds a grid of queues & ticket statuses,
-    # to be displayed to the user. EG:
-    #          Open  Resolved
-    # Queue 1    10     4
-    # Queue 2     4    12
-
-    queues = _get_user_queues(request.user).values_list('id', flat=True)
-
-    from_clause = """FROM    helpdesk_ticket t,
-                    helpdesk_queue q"""
-    if queues:
-        where_clause = """WHERE   q.id = t.queue_id AND
-                        q.id IN (%s)""" % (",".join(("%d" % pk for pk in queues)))
-    else:
-        where_clause = """WHERE   q.id = t.queue_id"""
-
-    cursor = connection.cursor()
-    cursor.execute("""
-        SELECT      q.id as queue,
-                    q.title AS name,
-                    COUNT(CASE t.status WHEN '1' THEN t.id WHEN '2' THEN t.id END) AS open,
-                    COUNT(CASE t.status WHEN '3' THEN t.id END) AS resolved,
-                    COUNT(CASE t.status WHEN '4' THEN t.id END) AS closed
-            %s
-            %s
-            GROUP BY queue, name
-            ORDER BY q.id;
-    """ % (from_clause, where_clause))
-
-    dash_tickets = query_to_dict(cursor.fetchall(), cursor.description)
-
     return render(request, 'helpdesk/dashboard.html',
         {
             'user_tickets': tickets,
             'user_tickets_closed_resolved': tickets_closed_resolved,
             'unassigned_tickets': unassigned_tickets,
             'all_tickets_reported_by_current_user': all_tickets_reported_by_current_user,
-            'dash_tickets': dash_tickets,
             'basic_ticket_stats': basic_ticket_stats,
         })
 dashboard = staff_member_required(dashboard)

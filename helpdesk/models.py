@@ -461,12 +461,6 @@ class Ticket(models.Model):
         return u"%s-%s" % (self.queue.slug, self.id)
     ticket_for_url = property(_get_ticket_for_url)
 
-    def _get_priority_img(self):
-        """ Image-based representation of the priority """
-        from django.conf import settings
-        return u"%shelpdesk/priorities/priority%s.png" % (settings.MEDIA_URL, self.priority)
-    get_priority_img = property(_get_priority_img)
-
     def _get_priority_css_class(self):
         """
         Return the boostrap class corresponding to the priority.
@@ -475,6 +469,8 @@ class Ticket(models.Model):
             return "warning"
         elif self.priority == 1:
             return "danger"
+        elif self.priority == 5:
+            return "success"
         else:
             return ""
     get_priority_css_class = property(_get_priority_css_class)

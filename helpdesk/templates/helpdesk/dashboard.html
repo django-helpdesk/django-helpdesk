@@ -7,8 +7,6 @@
 <p>{% trans "Welcome to your Helpdesk Dashboard! From here you can quickly see tickets submitted by you, tickets you are working on, and those tickets that have no owner." %}</p>
 </div>
 
-{% include 'helpdesk/include/summary.html' %}
-
 {% include 'helpdesk/include/stats.html' %}
 
 {% if all_tickets_reported_by_current_user %}
