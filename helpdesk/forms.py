@@ -77,7 +77,7 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
     class Meta:
         model = Ticket
         exclude = ('created', 'modified', 'status', 'on_hold', 'resolution', 'last_escalation', 'assigned_to')
-    
+
     def __init__(self, *args, **kwargs):
         """
         Add any custom fields that are defined to the form
@@ -101,7 +101,7 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
 
 
     def save(self, *args, **kwargs):
-        
+
         for field, value in self.cleaned_data.items():
             if field.startswith('custom_'):
                 field_name = field.replace('custom_', '', 1)
@@ -112,7 +112,7 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
                     cfv = TicketCustomFieldValue(ticket=self.instance, field=customfield)
                 cfv.value = value
                 cfv.save()
-        
+
         return super(EditTicketForm, self).save(*args, **kwargs)
 
 
@@ -228,7 +228,7 @@ class TicketForm(CustomFieldMixin, forms.Form):
             except User.DoesNotExist:
                 t.assigned_to = None
         t.save()
-        
+
         for field, value in self.cleaned_data.items():
             if field.startswith('custom_'):
                 field_name = field.replace('custom_', '', 1)
@@ -251,7 +251,7 @@ class TicketForm(CustomFieldMixin, forms.Form):
             }
 
         f.save()
-        
+
         files = []
         if self.cleaned_data['attachment']:
             import mimetypes
@@ -265,9 +265,9 @@ class TicketForm(CustomFieldMixin, forms.Form):
                 )
             a.file.save(file.name, file, save=False)
             a.save()
-            
+
             if file.size < getattr(settings, 'MAX_EMAIL_ATTACHMENT_SIZE', 512000):
-                # Only files smaller than 512kb (or as defined in 
+                # Only files smaller than 512kb (or as defined in
                 # settings.MAX_EMAIL_ATTACHMENT_SIZE) are sent via email.
                 try:
                     files.append([a.filename, a.file])
@@ -276,7 +276,7 @@ class TicketForm(CustomFieldMixin, forms.Form):
 
         context = safe_template_context(t)
         context['comment'] = f.comment
-        
+
         messages_sent_to = []
 
         if t.submitter_email:
@@ -443,9 +443,9 @@ class PublicTicketForm(CustomFieldMixin, forms.Form):
                 )
             a.file.save(file.name, file, save=False)
             a.save()
-            
+
             if file.size < getattr(settings, 'MAX_EMAIL_ATTACHMENT_SIZE', 512000):
-                # Only files smaller than 512kb (or as defined in 
+                # Only files smaller than 512kb (or as defined in
                 # settings.MAX_EMAIL_ATTACHMENT_SIZE) are sent via email.
                 files.append([a.filename, a.file])
 
@@ -523,12 +523,11 @@ class UserSettingsForm(forms.Form):
         required=False,
         )
 
-    tickets_per_page = forms.IntegerField(
+    tickets_per_page = forms.ChoiceField(
         label=_('Number of tickets to show per page'),
         help_text=_('How many tickets do you want to see on the Ticket List page?'),
         required=False,
-        min_value=1,
-        max_value=1000,
+        choices=((10,'10'),(25,'25'),(50,'50'),(100,'100')),
         )
 
     use_email_as_submitter = forms.BooleanField(
@@ -543,16 +542,38 @@ class EmailIgnoreForm(forms.ModelForm):
         exclude = []
 
 class TicketCCForm(forms.ModelForm):
+    ''' Adds either an email address or helpdesk user as a CC on a Ticket. Used for processing POST requests. '''
     def __init__(self, *args, **kwargs):
         super(TicketCCForm, self).__init__(*args, **kwargs)
         if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_CC:
             users = User.objects.filter(is_active=True, is_staff=True).order_by(User.USERNAME_FIELD)
         else:
             users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
-        self.fields['user'].queryset = users 
+        self.fields['user'].queryset = users
     class Meta:
         model = TicketCC
         exclude = ('ticket',)
+
+class TicketCCUserForm(forms.ModelForm):
+    ''' Adds a helpdesk user as a CC on a Ticket '''
+    def __init__(self, *args, **kwargs):
+        super(TicketCCUserForm, self).__init__(*args, **kwargs)
+        if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_CC:
+            users = User.objects.filter(is_active=True, is_staff=True).order_by(User.USERNAME_FIELD)
+        else:
+            users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
+        self.fields['user'].queryset = users
+    class Meta:
+        model = TicketCC
+        exclude = ('ticket','email',)
+
+class TicketCCEmailForm(forms.ModelForm):
+    ''' Adds an email address as a CC on a Ticket '''
+    def __init__(self, *args, **kwargs):
+        super(TicketCCEmailForm, self).__init__(*args, **kwargs)
+    class Meta:
+        model = TicketCC
+        exclude = ('ticket','user',)
 
 class TicketDependencyForm(forms.ModelForm):
     class Meta:

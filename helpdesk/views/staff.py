@@ -38,7 +38,7 @@ try:
 except ImportError:
     from datetime import datetime as timezone
 
-from helpdesk.forms import TicketForm, UserSettingsForm, EmailIgnoreForm, EditTicketForm, TicketCCForm, EditFollowUpForm, TicketDependencyForm
+from helpdesk.forms import TicketForm, UserSettingsForm, EmailIgnoreForm, EditTicketForm, TicketCCForm, TicketCCEmailForm, TicketCCUserForm, EditFollowUpForm, TicketDependencyForm
 from helpdesk.lib import send_templated_mail, query_to_dict, apply_query, safe_template_context
 from helpdesk.models import Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch, IgnoreEmail, TicketCC, TicketDependency
 from helpdesk import settings as helpdesk_settings
@@ -424,12 +424,16 @@ def update_ticket(request, ticket_id, public=False):
     files = []
     if request.FILES:
         import mimetypes, os
+        print(request.FILES)
+        print(request.FILES.getlist('attachment'))
         for file in request.FILES.getlist('attachment'):
             filename = file.name.encode('ascii', 'ignore')
+            filename = filename.decode("utf-8")
+            print(filename)
             a = Attachment(
                 followup=f,
                 filename=filename,
-                mime_type=mimetypes.guess_type(filename)[0] or 'application/octet-stream',
+                mime_type=file.content_type or 'application/octet-stream',
                 size=file.size,
                 )
             a.file.save(filename, file, save=False)
@@ -826,17 +830,6 @@ def ticket_list(request):
         }
         ticket_qs = apply_query(tickets, query_params)
 
-    ticket_paginator = paginator.Paginator(ticket_qs, request.user.usersettings.settings.get('tickets_per_page') or 20)
-    try:
-        page = int(request.GET.get('page', '1'))
-    except ValueError:
-         page = 1
-
-    try:
-        tickets = ticket_paginator.page(page)
-    except (paginator.EmptyPage, paginator.InvalidPage):
-        tickets = ticket_paginator.page(ticket_paginator.num_pages)
-
     search_message = ''
     if 'query' in context and settings.DATABASES['default']['ENGINE'].endswith('sqlite'):
         search_message = _('<p><strong>Note:</strong> Your keyword search is case sensitive because of your database. This means the search will <strong>not</strong> be accurate. By switching to a different database system you will gain better searching! For more information, read the <a href="http://docs.djangoproject.com/en/dev/ref/databases/#sqlite-string-matching">Django Documentation on string matching in SQLite</a>.')
@@ -848,15 +841,12 @@ def ticket_list(request):
 
     user_saved_queries = SavedSearch.objects.filter(Q(user=request.user) | Q(shared__exact=True))
 
-    querydict = request.GET.copy()
-    querydict.pop('page', 1)
-
 
     return render(request, 'helpdesk/ticket_list.html',
         dict(
             context,
-            query_string=querydict.urlencode(),
-            tickets=tickets,
+            tickets=ticket_qs,
+            default_tickets_per_page=request.user.usersettings.settings.get('tickets_per_page') or 25,
             user_choices=User.objects.filter(is_active=True,is_staff=True),
             queue_choices=user_queues,
             status_choices=Ticket.STATUS_CHOICES,
@@ -1339,11 +1329,13 @@ def ticket_cc_add(request, ticket_id):
             ticketcc.save()
             return HttpResponseRedirect(reverse('helpdesk_ticket_cc', kwargs={'ticket_id': ticket.id}))
     else:
-        form = TicketCCForm()
+        form_email = TicketCCEmailForm()
+        form_user = TicketCCUserForm()
     return render(request, template_name='helpdesk/ticket_cc_add.html',
         context = {
             'ticket': ticket,
-            'form': form,
+            'form_email': form_email,
+            'form_user': form_user,
         })
 ticket_cc_add = staff_member_required(ticket_cc_add)
 
@@ -1395,9 +1387,16 @@ def attachment_del(request, ticket_id, attachment_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
     if not _has_access_to_queue(request.user, ticket.queue):
         raise PermissionDenied()
+
     attachment = get_object_or_404(Attachment, id=attachment_id)
-    attachment.delete()
-    return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket_id]))
+    if request.method == 'POST':
+        attachment.delete()
+        return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket_id]))
+    return render(request, template_name='helpdesk/ticket_attachment_del.html',
+        context = {
+            'attachment': attachment,
+            'filename': attachment.filename,
+        })
 attachment_del = staff_member_required(attachment_del)
 
 def calc_average_nbr_days_until_ticket_resolved(Tickets):
@@ -1443,9 +1442,9 @@ def calc_basic_ticket_stats(Tickets):
     # (O)pen (T)icket (S)tats
     ots = list()
     # label, number entries, color, sort_string
-    ots.append(['< 30 days', N_ota_le_30, get_color_for_nbr_days(N_ota_le_30), sort_string(date_30_str, ''), ])
-    ots.append(['30 - 60 days', N_ota_le_60_ge_30, get_color_for_nbr_days(N_ota_le_60_ge_30), sort_string(date_60_str, date_30_str), ])
-    ots.append(['> 60 days', N_ota_ge_60, get_color_for_nbr_days(N_ota_ge_60), sort_string('', date_60_str), ])
+    ots.append(['Tickets < 30 days', N_ota_le_30, 'success', sort_string(date_30_str, ''), ])
+    ots.append(['Tickets 30 - 60 days', N_ota_le_60_ge_30, 'success' if N_ota_le_60_ge_30 == 0 else 'warning', sort_string(date_60_str, date_30_str), ])
+    ots.append(['Tickets > 60 days', N_ota_ge_60, 'success' if N_ota_ge_60 == 0 else 'danger', sort_string('', date_60_str), ])
 
     # all closed tickets - independent of user.
     all_closed_tickets = Tickets.filter(status = Ticket.CLOSED_STATUS)
@@ -1460,17 +1459,6 @@ def calc_basic_ticket_stats(Tickets):
                             'open_ticket_stats': ots, }
 
     return basic_ticket_stats
-
-def get_color_for_nbr_days(nbr_days):
-    ''' '''
-    if nbr_days < 5:
-        color_string = 'green'
-    elif nbr_days >= 5 and nbr_days < 10:
-        color_string = 'orange'
-    else: # more than 10 days
-        color_string = 'red'
-
-    return color_string
 
 def days_since_created(today, ticket):
     return (today - ticket.created).days

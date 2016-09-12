@@ -11,7 +11,6 @@ $(document).ready(function() {
         return false;
     });
 
-    processAddFileClick();
     $("#ShowFileUpload").click(function() {
         $("#FileUpload").fadeIn();
         $("#ShowFileUploadPara").hide();
@@ -28,19 +27,37 @@ $(document).ready(function() {
     });
 
     $("[data-toggle=tooltip]").tooltip();
-});
 
-function processAddFileClick() {
-    /* Until jQuery includes some 'livequery' functionality in the core
-        distribution, this will have to do. */
-    $(".AddAnotherFile>a").click(function() {
-        $(this).parent().remove();
-        $("#FileUpload>dl").append("<dt><label>{% trans "Attach another File" %}</label></dt><dd><input type='file' name='attachment' id='file' multiple/> <span class='AddAnotherFile'>(<a href='#'>{% trans "Add Another File" %}</a>)</span></dd>");
-        processAddFileClick();
-        return false;
+    // for CSS customized file select/browse button
+    $(':file').on('fileselect', function(event, numFiles, label, browseButtonNum) {
+        $("#selectedfilename"+browseButtonNum).html(label);
     });
 
-}
+    var x = 0;
+    var wrapper         = $(".input_fields_wrap"); //Fields wrapper
+    var add_button      = $(".add_field_button"); //Add button ID
+
+    $(add_button).click(function(e){ //on add input button click
+        x++;
+        e.preventDefault();
+        $(wrapper).append("<div><label class='btn btn-primary btn-sm btn-file'>Browse... <input type='file' name='attachment' id='file" + x + "' multiple style='display: none;'/></label><span>&nbsp;</span><span id='selectedfilename" + x + "'>{% trans 'No files selected.' %}</span></div>"); //add input box
+
+        $(document).on('change', '#file'+x, function() {
+            var input = $(this),
+                numFiles = input.get(0).files ? input.get(0).files.length : 1,
+                label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
+            input.trigger('fileselect', [numFiles, label, x]);
+        });
+    });
+
+});
+
+$(document).on('change', '#file0', function() {
+    var input = $(this),
+        numFiles = input.get(0).files ? input.get(0).files.length : 1,
+        label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
+    input.trigger('fileselect', [numFiles, label, 0]);
+});
 </script>
 {% endblock %}
 
@@ -99,7 +116,7 @@ function processAddFileClick() {
 {% for attachment in followup.attachment_set.all %}{% if forloop.first %}<div class='attachments'><ul>{% endif %}
 <li><a href='{{ attachment.file.url }}'>{{ attachment.filename }}</a> ({{ attachment.mime_type }}, {{ attachment.size|filesizeformat }})
 {% if followup.user and request.user == followup.user %}
-<a href='{% url 'helpdesk_attachment_del' ticket.id attachment.id %}'>delete</a>
+<a href='{% url 'helpdesk_attachment_del' ticket.id attachment.id %}'><button class="btn btn-danger btn-xs">{% trans 'Delete' %}</button></a>
 {% endif %}
 </li>
 {% if forloop.last %}</ul></div>{% endif %}
@@ -165,7 +182,7 @@ function processAddFileClick() {
         {% endif %}
     </dl>
 
-<p id='ShowFurtherOptPara'><button id='ShowFurtherEditOptions'>{% trans "Change Further Details &raquo;" %}</button></p>
+<p id='ShowFurtherOptPara'><button class="btn btn-warning btn-sm" id='ShowFurtherEditOptions'>{% trans "Change Further Details &raquo;" %}</button></p>
 
 <div id='FurtherEditOptions' style='display: none;'>
 
@@ -186,21 +203,29 @@ function processAddFileClick() {
 
 </div>
 
-<p id='ShowFileUploadPara'><button id='ShowFileUpload'>{% trans "Attach File(s) &raquo;" %}</button></p>
+<p id='ShowFileUploadPara'><button class="btn btn-warning btn-sm" id='ShowFileUpload'>{% trans "Attach File(s) &raquo;" %}</button></p>
 
 <div id='FileUpload' style='display: none;'>
 
     <dl>
-
         <dt><label for='id_file'>{% trans "Attach a File" %}</label></dt>
-        <dd><input type='file' name='attachment' id='file' multiple/> <span class='AddAnotherFile'>(<a href='#'>{% trans "Add Another File" %}</a>)</span></dd>
+        <dd>
+            <div class="input_fields_wrap">
+                <div>
+                    <button class="add_field_button btn btn-success btn-xs">{% trans "Add Another File" %}</button>
+                    <div><label class='btn btn-primary btn-sm btn-file'>
+                        Browse... <input type="file" name='attachment' id='file0' style='display: none;'/>
+                    </label><span>&nbsp;</span><span id='selectedfilename0'>{% trans 'No files selected.' %}</span></div>
+                </div>
+            </div>
+        </dd>
     </dl>
 
 </div>
 
 </fieldset>
 
-<input class="btn btn-primary" type='submit' value='{% trans "Update This Ticket" %}' />
+<button class="btn btn-primary btn-lg" type='submit'>{% trans "Update This Ticket" %}</button>
 
 {% csrf_token %}</form>
 
