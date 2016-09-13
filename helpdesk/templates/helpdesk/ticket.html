@@ -28,7 +28,8 @@ $(document).ready(function() {
 
     $("[data-toggle=tooltip]").tooltip();
 
-    // for CSS customized file select/browse button
+    // lists for file input change events, then updates the associated text label
+    // with the file name selected
     $('.add_file_fields_wrap').on('fileselect', ':file', function(event, numFiles, label, browseButtonNum) {
         $("#selectedfilename"+browseButtonNum).html(label);
     });
@@ -41,28 +42,19 @@ $(document).ready(function() {
         x++;
         e.preventDefault();
         $(wrapper).append("<div><label class='btn btn-primary btn-sm btn-file'>Browse... <input type='file' name='attachment' id='file" + x + "' multiple style='display: none;'/></label><span>&nbsp;</span><span id='selectedfilename" + x + "'>{% trans 'No files selected.' %}</span></div>"); //add input box
-
-        $(document).on('change', '#file'+x, function() {
-            var input = $(this),
-                numFiles = input.get(0).files ? input.get(0).files.length : 1,
-                label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
-            input.trigger('fileselect', [numFiles, label, x]);
-        });
     });
 
 });
 
-/*$('.add_file_fields_wrap').on('change', ':file', function() {
+// this function listens for changes on any file input, and
+// emits the appropriate event to update the input's text.
+// Needed to have properly styled file input buttons! (this really shouldn't be this hard...)
+$(document).on('change', ':file', function() {
     var input = $(this),
+        inputWidgetNum = $(this).attr('id').split("file")[1],
         numFiles = input.get(0).files ? input.get(0).files.length : 1,
         label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
-    input.trigger('fileselect', [numFiles, label, 0]);
-});*/
-$(document).on('change', '#file0', function() {
-    var input = $(this),
-        numFiles = input.get(0).files ? input.get(0).files.length : 1,
-        label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
-    input.trigger('fileselect', [numFiles, label, 0]);
+    input.trigger('fileselect', [numFiles, label, inputWidgetNum]);
 });
 </script>
 {% endblock %}
@@ -193,7 +185,7 @@ $(document).on('change', '#file0', function() {
         <dt>
             <label for='id_public'>{% trans "Is this update public?" %}</label> <span class='form_optional'>{% trans "(Optional)" %}</span>
         </dt>
-        <dd><input type='checkbox' name='public' value='1' checked='checked' /></dd>
+        <dd><input type='checkbox' name='public' value='1' checked='checked' />&nbsp; Yes, make this update public.</dd>
         <dd class='form_help_text'>{% trans "If this is public, the submitter will be e-mailed your comment or resolution." %}</dd>
         {% endif %}
     </dl>
