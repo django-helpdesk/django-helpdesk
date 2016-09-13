@@ -154,35 +154,45 @@ $(document).on('change', '#file0', function() {
         <dt><label>{% trans "New Status" %}</label></dt>
         {% if not ticket.can_be_resolved %}<dd>{% trans "This ticket cannot be resolved or closed until the tickets it depends on are resolved." %}</dd>{% endif %}
         {% ifequal ticket.status 1 %}
-        <dd><input type='radio' name='new_status' value='1' id='st_open' checked='checked'><label for='st_open' class='active'>{% trans "Open" %}</label> &raquo;
-        <input type='radio' name='new_status' value='3' id='st_resolved'{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}><label for='st_resolved'>{% trans "Resolved" %}</label> &raquo;
-        <input type='radio' name='new_status' value='4' id='st_closed'{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}><label for='st_closed'>{% trans "Closed" %}</label> &raquo;
-        <input type='radio' name='new_status' value='5' id='st_duplicate'><label for='st_duplicate'>{% trans "Duplicate" %}</label></dd>
+        <dd><div class="form-group">
+            <label for='st_open' class='active radio-inline'><input type='radio' name='new_status' value='1' id='st_open' checked='checked'>{% trans "Open" %} &raquo;</label>
+            <label for='st_resolved' class="radio-inline"><input type='radio' name='new_status' value='3' id='st_resolved'{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}>{% trans "Resolved" %} &raquo;</label>
+            <label for='st_closed' class="radio-inline"><input type='radio' name='new_status' value='4' id='st_closed'{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}>{% trans "Closed" %} &raquo;</label>
+            <label class="radio-inline" for='st_duplicate'><input type='radio' name='new_status' value='5' id='st_duplicate'>{% trans "Duplicate" %}</label>
+        </div></dd>
         {% endifequal %}
         {% ifequal ticket.status 2 %}
-        <dd><input type='radio' name='new_status' value='2' id='st_reopened' checked='checked'><label for='st_reopened' class='active'>{% trans "Reopened" %}</label> &raquo;
-        <input type='radio' name='new_status' value='3' id='st_resolved'{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}><label for='st_resolved'>{% trans "Resolved" %}</label> &raquo;
-        <input type='radio' name='new_status' value='4' id='st_closed'{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}><label for='st_closed'>{% trans "Closed" %}</label> &raquo;
-        <input type='radio' name='new_status' value='5' id='st_duplicate'><label for='st_duplicate'>{% trans "Duplicate" %}</label></dd>
+        <dd><div class="form-group">
+            <label for='st_reopened' class='active radio-inline'><input type='radio' name='new_status' value='2' id='st_reopened' checked='checked'>{% trans "Reopened" %} &raquo;</label>
+            <label class="radio-inline" for='st_resolved'><input type='radio' name='new_status' value='3' id='st_resolved'{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}>{% trans "Resolved" %} &raquo;</label>
+            <label class="radio-inline" for='st_closed'><input type='radio' name='new_status' value='4' id='st_closed'{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}>{% trans "Closed" %} &raquo;</label>
+            <label class="radio-inline" for='st_duplicate'><input type='radio' name='new_status' value='5' id='st_duplicate'>{% trans "Duplicate" %}</label>
+        </div></dd>
         {% endifequal %}
         {% ifequal ticket.status 3 %}
-        <dd><input type='radio' name='new_status' value='2' id='st_reopened'><label for='st_reopened'>{% trans "Reopened" %}</label> &laquo;
-        <input type='radio' name='new_status' value='3' id='st_resolved' checked='checked'><label for='st_resolved' class='active'>{% trans "Resolved" %}</label> &raquo;
-        <input type='radio' name='new_status' value='4' id='st_closed'><label for='st_closed'>{% trans "Closed" %}</label></dd>
+        <dd><div class="form-group">
+            <label for='st_reopened' class="radio-inline"><input type='radio' name='new_status' value='2' id='st_reopened'>{% trans "Reopened" %} &laquo;</label>
+            <label for='st_resolved' class='active radio-inline'><input type='radio' name='new_status' value='3' id='st_resolved' checked='checked'>{% trans "Resolved" %} &raquo;</label>
+            <label class="radio-inline" for='st_closed'><input type='radio' name='new_status' value='4' id='st_closed'>{% trans "Closed" %}</label>
+        </div></dd>
         {% endifequal %}
         {% ifequal ticket.status 4 %}
-        <dd><input type='radio' name='new_status' value='2' id='st_reopened'><label for='st_reopened'>{% trans "Reopened" %}</label> &laquo;
-        <input type='radio' name='new_status' value='4' id='st_closed' checked='checked'><label for='st_closed'>{% trans "Closed" %}</label></dd>
+        <dd><div class="form-group"><label for='st_reopened' class="radio-inline"><input type='radio' name='new_status' value='2' id='st_reopened'>{% trans "Reopened" %} &laquo;</label>
+        <label class="radio-inline" for='st_closed'><input type='radio' name='new_status' value='4' id='st_closed' checked='checked'>{% trans "Closed" %}</label></div></dd>
         {% endifequal %}
         {% ifequal ticket.status 5 %}
-        <dd><input type='radio' name='new_status' value='2' id='st_reopened'><label for='st_reopened'>{% trans "Reopened" %}</label> &laquo;
-        <input type='radio' name='new_status' value='5' id='st_duplicate' checked='checked'><label for='st_duplicate'>{% trans "Duplicate" %}</label></dd>
+        <dd><div class="form-group">
+            <label class="radio-inline" for='st_reopened'><input type='radio' name='new_status' value='2' id='st_reopened'>{% trans "Reopened" %} &laquo;</label>
+            <label class="radio-inline" for='st_duplicate'><input type='radio' name='new_status' value='5' id='st_duplicate' checked='checked'>{% trans "Duplicate" %}</label>
+        </div></dd>
         {% endifequal %}
 
         {% if helpdesk_settings.HELPDESK_UPDATE_PUBLIC_DEFAULT %}
         <input type='hidden' name='public' value='1'>
         {% else %}
-        <dt><label for='id_public'>{% trans "Is this update public?" %}</label> <span class='form_optional'>{% trans "(Optional)" %}</span></dt>
+        <dt>
+            <label for='id_public'>{% trans "Is this update public?" %}</label> <span class='form_optional'>{% trans "(Optional)" %}</span>
+        </dt>
         <dd><input type='checkbox' name='public' value='1' checked='checked' /></dd>
         <dd class='form_help_text'>{% trans "If this is public, the submitter will be e-mailed your comment or resolution." %}</dd>
         {% endif %}
