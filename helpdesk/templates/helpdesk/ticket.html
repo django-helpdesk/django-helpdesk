@@ -29,13 +29,13 @@ $(document).ready(function() {
     $("[data-toggle=tooltip]").tooltip();
 
     // for CSS customized file select/browse button
-    $(':file').on('fileselect', function(event, numFiles, label, browseButtonNum) {
+    $('.add_file_fields_wrap').on('fileselect', ':file', function(event, numFiles, label, browseButtonNum) {
         $("#selectedfilename"+browseButtonNum).html(label);
     });
 
     var x = 0;
-    var wrapper         = $(".input_fields_wrap"); //Fields wrapper
-    var add_button      = $(".add_field_button"); //Add button ID
+    var wrapper         = $(".add_file_fields_wrap"); //Fields wrapper
+    var add_button      = $(".add_file_field_button"); //Add button ID
 
     $(add_button).click(function(e){ //on add input button click
         x++;
@@ -52,6 +52,12 @@ $(document).ready(function() {
 
 });
 
+/*$('.add_file_fields_wrap').on('change', ':file', function() {
+    var input = $(this),
+        numFiles = input.get(0).files ? input.get(0).files.length : 1,
+        label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
+    input.trigger('fileselect', [numFiles, label, 0]);
+});*/
 $(document).on('change', '#file0', function() {
     var input = $(this),
         numFiles = input.get(0).files ? input.get(0).files.length : 1,
@@ -210,13 +216,11 @@ $(document).on('change', '#file0', function() {
     <dl>
         <dt><label for='id_file'>{% trans "Attach a File" %}</label></dt>
         <dd>
-            <div class="input_fields_wrap">
-                <div>
-                    <button class="add_field_button btn btn-success btn-xs">{% trans "Add Another File" %}</button>
-                    <div><label class='btn btn-primary btn-sm btn-file'>
+            <div class="add_file_fields_wrap">
+                <button class="add_file_field_button btn btn-success btn-xs">{% trans "Add Another File" %}</button>
+                <div><label class='btn btn-primary btn-sm btn-file'>
                         Browse... <input type="file" name='attachment' id='file0' style='display: none;'/>
-                    </label><span>&nbsp;</span><span id='selectedfilename0'>{% trans 'No files selected.' %}</span></div>
-                </div>
+                </label><span>&nbsp;</span><span id='selectedfilename0'>{% trans 'No files selected.' %}</span></div>
             </div>
         </dd>
     </dl>

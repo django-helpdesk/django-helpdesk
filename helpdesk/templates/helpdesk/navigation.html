@@ -69,6 +69,7 @@
                     <ul class="dropdown-menu dropdown-user">
                         <li><a href="{% url 'helpdesk_user_settings' %}"><i class="fa fa-gear fa-fw"></i> {% trans "User Settings" %}</a>
                         </li>
+                        <li><a href='{% url 'helpdesk_rss_index' %}'><i class="fa fa-rss-square fa-fw"></i> {% trans "RSS Feeds" %}</a></li>
                         {% if helpdesk_settings.HELPDESK_SHOW_CHANGE_PASSWORD and user.has_usable_password %}
                         <li><a href="{% url 'auth_password_change' %}"><i class="fa fa-user-secret fa-fw"></i> {% trans "Change password" %}</a></li>
                         {% endif %}
