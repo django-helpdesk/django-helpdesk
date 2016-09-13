@@ -1013,8 +1013,8 @@ def report_index(request):
 
     dash_tickets = query_to_dict(cursor.fetchall(), cursor.description)
 
-    return render(request, template_name='helpdesk/report_index.html',
-        context = {
+    return render(request, 'helpdesk/report_index.html',
+        {
             'number_tickets': number_tickets,
             'saved_query': saved_query,
             'basic_ticket_stats': basic_ticket_stats,
