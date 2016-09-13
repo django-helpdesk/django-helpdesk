@@ -131,7 +131,7 @@ class PerQueueStaffMembershipTestCase(TestCase):
 
         # Superuser
         self.client.login(username='superuser', password='superuser')
-        response = self.client.get(reverse('helpdesk_dashboard'))
+        response = self.client.get(reverse('helpdesk_report_index'))
         self.assertEqual(
             len(response.context['dash_tickets']),
             2,
