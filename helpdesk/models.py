@@ -115,11 +115,12 @@ class Queue(models.Model):
     email_box_type = models.CharField(
         _('E-Mail Box Type'),
         max_length=5,
-        choices=(('pop3', _('POP 3')), ('imap', _('IMAP'))),
+        choices=(('pop3', _('POP 3')), ('imap', _('IMAP')), ('local',_('Local Directory'))),
         blank=True,
         null=True,
         help_text=_('E-Mail server type for creating tickets automatically '
-            'from a mailbox - both POP3 and IMAP are supported.'),
+            'from a mailbox - both POP3 and IMAP are supported, as well as '
+            'reading from a local directory.'),
         )
 
     email_box_host = models.CharField(
@@ -175,6 +176,15 @@ class Queue(models.Model):
             'folders. Default: INBOX.'),
         )
 
+    email_box_local_dir = models.CharField(
+        _('E-Mail Local Directory'),
+        max_length=200,
+        blank=True,
+        null=True,
+        help_text=_('If using a local directory, what directory path do you '
+            'wish to poll for new email? Example: /var/lib/mail/helpdesk/'),
+        )
+
     permission_name = models.CharField(
         _('Django auth permission name'),
         max_length=50,
@@ -222,6 +232,27 @@ class Queue(models.Model):
         null=True,
         help_text=_('Socks proxy port number. Default: 9150 (default TOR port)'),
     )
+
+    logging_type = models.CharField(
+        _('Logging Type'),
+        max_length=5,
+        choices=(('none', _('None')), ('debug', _('Debug')), ('info',_('Information')), ('warn', _('Warning')), ('error', _('Error')), ('crit', _('Critical'))),
+        blank=True,
+        null=True,
+        help_text=_('Set the default logging level. All messages at that '
+            'level or above will be logged to the directory set below. '
+            'If no level is set, logging will be disabled.'),
+        )
+
+    logging_dir = models.CharField(
+        _('Logging Directory'),
+        max_length=200,
+        blank=True,
+        null=True,
+        help_text=_('If logging is enabled, what directory should we use to '
+            'store log files for this queue? '
+            'If no directory is set, default to /var/log/helpdesk/'),
+        )
 
     default_owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
