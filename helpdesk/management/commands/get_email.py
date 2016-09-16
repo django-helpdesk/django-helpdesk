@@ -284,7 +284,7 @@ def ticket_from_message(message, queue, logger):
         ticket = matchobj.group('id')
         logger.info("Matched tracking ID %s-%s" % (queue.slug, ticket))
     else:
-        logger.info("No tracking ID matched, assuming new ticket")
+        logger.info("No tracking ID matched.")
         ticket = None
 
     counter = 0
@@ -301,8 +301,10 @@ def ticket_from_message(message, queue, logger):
         if part.get_content_maintype() == 'text' and name == None:
             if part.get_content_subtype() == 'plain':
                 body_plain = EmailReplyParser.parse_reply(decodeUnknown(part.get_content_charset(), part.get_payload(decode=True)))
+                logger.debug("Discovered plain text MIME part")
             else:
                 body_html = part.get_payload(decode=True)
+                logger.debug("Discovered HTML MIME part")
         else:
             if not name:
                 ext = mimetypes.guess_extension(part.get_content_type())
@@ -313,6 +315,7 @@ def ticket_from_message(message, queue, logger):
                 'content': part.get_payload(decode=True),
                 'type': part.get_content_type()},
                 )
+            logger.debug("Found MIME attachment %s" % name)
 
         counter += 1
 
@@ -334,8 +337,9 @@ def ticket_from_message(message, queue, logger):
         try:
             t = Ticket.objects.get(id=ticket)
             new = False
+            logger.info("Found existing ticket with Tracking ID %s-%s" % (t.queue.slug, t.id))
         except Ticket.DoesNotExist:
-            logger.info("Tracking ID not associated with existing ticket. Creating new ticket.")
+            logger.info("Tracking ID %s-%s not associated with existing ticket. Creating new ticket." % (queue.slug, ticket))
             ticket = None
 
     priority = 3
@@ -360,6 +364,7 @@ def ticket_from_message(message, queue, logger):
         t.save()
         new = True
         update = ''
+        logger.debug("Created new ticket %s-%s" % (t.queue.slug, t.id))
 
     elif t.status == Ticket.CLOSED_STATUS:
         t.status = Ticket.REOPENED_STATUS
@@ -378,11 +383,12 @@ def ticket_from_message(message, queue, logger):
         f.title = _('Ticket Re-Opened by E-Mail Received from %(sender_email)s' % {'sender_email': sender_email})
 
     f.save()
+    logger.debug("Created new FollowUp for Ticket")
 
     if six.PY2:
-        logger.info((" [%s-%s] %s" % (t.queue.slug, t.id, t.title,)).encode('ascii', 'replace'))
+        logger.info(("[%s-%s] %s" % (t.queue.slug, t.id, t.title,)).encode('ascii', 'replace'))
     elif six.PY3:
-        logger.info(" [%s-%s] %s" % (t.queue.slug, t.id, t.title,))
+        logger.info("[%s-%s] %s" % (t.queue.slug, t.id, t.title,))
 
     for file in files:
         if file['content']:
