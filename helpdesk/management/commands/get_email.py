@@ -10,10 +10,8 @@ scripts/get_email.py - Designed to be run from cron, this script checks the
                        helpdesk, creating tickets from the new messages (or
                        adding to existing tickets if needed)
 """
-from __future__ import print_function
 
 import email
-import codecs
 import imaplib
 import mimetypes
 import poplib
@@ -244,10 +242,10 @@ def decodeUnknown(charset, string):
         if type(string) is not str:
             if not charset:
                 try:
-                    return codecs.decode(bytes(string),'utf-8','ignore')
+                    return str(string,encoding='utf-8',errors='replace')
                 except:
-                    return codecs.decode(bytes(string),'iso8859-1','ignore')
-            return str(string, charset)
+                    return str(string,encoding='iso8859-1',errors='replace')
+            return str(string,encoding=charset)
         return string
 
 def decode_mail_headers(string):
@@ -255,7 +253,7 @@ def decode_mail_headers(string):
     if six.PY2:
         return u' '.join([unicode(msg, charset or 'utf-8') for msg, charset in decoded])
     elif six.PY3:
-        return u' '.join([str(msg) for msg, charset in decoded])
+        return u' '.join([str(msg,encoding=charset,errors='replace') if charset else str(msg) for msg, charset in decoded])
 
 def ticket_from_message(message, queue, logger):
     # 'message' must be an RFC822 formatted message.
