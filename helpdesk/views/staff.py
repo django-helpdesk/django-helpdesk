@@ -391,6 +391,7 @@ def update_ticket(request, ticket_id, public=False):
 
     reassigned = False
 
+    old_owner = ticket.assigned_to
     if owner is not -1:
         if owner != 0 and ((ticket.assigned_to and owner != ticket.assigned_to.id) or not ticket.assigned_to):
             new_user = User.objects.get(id=owner)
@@ -404,10 +405,13 @@ def update_ticket(request, ticket_id, public=False):
             f.title = _('Unassigned')
             ticket.assigned_to = None
 
+    old_status_str = ticket.get_status_display()
+    old_status = ticket.status
     if new_status != ticket.status:
         ticket.status = new_status
         ticket.save()
         f.new_status = new_status
+        ticket_status_changed = True
         if f.title:
             f.title += ' and %s' % ticket.get_status_display()
         else:
@@ -454,6 +458,24 @@ def update_ticket(request, ticket_id, public=False):
             )
         c.save()
         ticket.title = title
+
+    if new_status != old_status:
+        c = TicketChange(
+            followup=f,
+            field=_('Status'),
+            old_value=old_status_str,
+            new_value=ticket.get_status_display(),
+            )
+        c.save()
+
+    if ticket.assigned_to != old_owner:
+        c = TicketChange(
+            followup=f,
+            field=_('Owner'),
+            old_value=old_owner,
+            new_value=ticket.assigned_to,
+            )
+        c.save()
 
     if priority != ticket.priority:
         c = TicketChange(
