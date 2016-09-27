@@ -253,9 +253,13 @@ $(document).ready(function() {
                                 </table>
                             {% csrf_token %}</form>
 
-                                <p><label>{% trans "Select:" %} </label> <a href='#select_all' id='select_all'><button class="btn btn-primary btn-sm">{% trans "All" %}</button></a> <a href='#select_none' id='select_none'><button class="btn btn-primary btn-sm">{% trans "None" %}</button></a> <a href='#select_inverse' id='select_inverse'><button class="btn btn-primary btn-sm">{% trans "Invert" %}</button></a></p>
+                                <p><label>{% trans "Select:" %} </label>
+                                    <a href='#select_all' id='select_all'><button class="btn btn-primary btn-sm"><i class="fa fa-check-circle"></i>&nbsp;{% trans "All" %}</button></a>
+                                    <a href='#select_none' id='select_none'><button class="btn btn-primary btn-sm"><i class="fa fa-times-circle"></i>&nbsp;{% trans "None" %}</button></a>
+                                    <a href='#select_inverse' id='select_inverse'><button class="btn btn-primary btn-sm"><i class="fa fa-arrows-alt"></i>&nbsp;{% trans "Invert" %}</button></a>
+                                </p>
 
-                                <p><label for='id_mass_action'>{% trans "With Selected Tickets:" %}</label> <select name='action' id='id_mass_action'><option value='take'>{% trans "Take (Assign to me)" %}</option><option value='delete'>{% trans "Delete" %}</option><optgroup label='{% trans "Close" %}'><option value='close'>{% trans "Close (Don't Send E-Mail)" %}</option><option value='close_public'>{% trans "Close (Send E-Mail)" %}</option></optgroup><optgroup label='{% trans "Assign To" %}'><option value='unassign'>{% trans "Nobody (Unassign)" %}</option>{% for u in user_choices %}<option value='assign_{{ u.id }}'>{{ u.get_username }}</option>{% endfor %}</optgroup></select> <button class="btn btn-primary btn-sm">{% trans "Go" %}</button></p>
+                                <p><label for='id_mass_action'>{% trans "With Selected Tickets:" %}</label> <select name='action' id='id_mass_action'><option value='take'>{% trans "Take (Assign to me)" %}</option><option value='delete'>{% trans "Delete" %}</option><optgroup label='{% trans "Close" %}'><option value='close'>{% trans "Close (Don't Send E-Mail)" %}</option><option value='close_public'>{% trans "Close (Send E-Mail)" %}</option></optgroup><optgroup label='{% trans "Assign To" %}'><option value='unassign'>{% trans "Nobody (Unassign)" %}</option>{% for u in user_choices %}<option value='assign_{{ u.id }}'>{{ u.get_username }}</option>{% endfor %}</optgroup></select> <button class="btn btn-primary btn-sm"><i class="fa fa-arrow-circle-right"></i>&nbsp;{% trans "Go" %}</button></p>
                         </div>
                         <!-- /.panel-body -->
                     </div>

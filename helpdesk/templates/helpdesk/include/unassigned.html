@@ -28,7 +28,10 @@
                                             <td><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></td>
                                             <td>{{ ticket.queue }}</td>
                                             <td><span title='{{ ticket.created|date:"r" }}'>{{ ticket.created|naturaltime }}</span></td>
-                                            <td><a href='{{ ticket.get_absolute_url }}?take'><button class='btn btn-primary btn-xs'>{% trans "Take" %}</button></a> | <a href='{% url 'helpdesk_delete' ticket.id %}'><button class='btn btn-danger btn-xs'>{% trans "Delete" %}</button></a></td>
+                                            <td>
+                                                <a href='{{ ticket.get_absolute_url }}?take'><button class='btn btn-primary btn-xs'><i class="fa fa-hand-paper-o"></i>&nbsp;{% trans "Take" %}</button></a> |
+                                                <a href='{% url 'helpdesk_delete' ticket.id %}'><button class='btn btn-danger btn-xs'><i class="fa fa-trash"></i>&nbsp;{% trans "Delete" %}</button></a>
+                                            </td>
                                         </tr>
                                         {% empty %}
                                         <tr><td colspan='6'>{% trans "There are no unassigned tickets." %}</td></tr>

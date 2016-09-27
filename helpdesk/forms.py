@@ -127,6 +127,7 @@ class EditFollowUpForm(forms.ModelForm):
 
 class TicketForm(CustomFieldMixin, forms.Form):
     queue = forms.ChoiceField(
+        widget=forms.Select(attrs={'class':'form-control'}),
         label=_('Queue'),
         required=True,
         choices=()
@@ -135,25 +136,26 @@ class TicketForm(CustomFieldMixin, forms.Form):
     title = forms.CharField(
         max_length=100,
         required=True,
-        widget=forms.TextInput(attrs={'size':'60'}),
+        widget=forms.TextInput(attrs={'class':'form-control'}),
         label=_('Summary of the problem'),
         )
 
     submitter_email = forms.EmailField(
         required=False,
         label=_('Submitter E-Mail Address'),
-        widget=forms.TextInput(attrs={'size':'60'}),
+        widget=forms.TextInput(attrs={'class':'form-control'}),
         help_text=_('This e-mail address will receive copies of all public '
             'updates to this ticket.'),
         )
 
     body = forms.CharField(
-        widget=forms.Textarea(attrs={'cols': 47, 'rows': 15}),
+        widget=forms.Textarea(attrs={'class':'form-control', 'rows': 15}),
         label=_('Description of Issue'),
         required=True,
         )
 
     assigned_to = forms.ChoiceField(
+        widget=forms.Select(attrs={'class':'form-control'}),
         choices=(),
         required=False,
         label=_('Case owner'),
@@ -162,6 +164,7 @@ class TicketForm(CustomFieldMixin, forms.Form):
         )
 
     priority = forms.ChoiceField(
+        widget=forms.Select(attrs={'class':'form-control'}),
         choices=Ticket.PRIORITY_CHOICES,
         required=False,
         initial='3',
@@ -171,7 +174,7 @@ class TicketForm(CustomFieldMixin, forms.Form):
         )
 
     due_date = forms.DateTimeField(
-        widget=extras.SelectDateWidget,
+        widget=forms.TextInput(attrs={'class':'form-control'}),
         required=False,
         label=_('Due on'),
         )

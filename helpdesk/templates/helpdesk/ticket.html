@@ -84,11 +84,11 @@ $(document).on('change', ':file', function() {
         {% if not followup.public %} <span class='private'>({% trans "Private" %})</span>{% endif %}
         {% if helpdesk_settings.HELPDESK_SHOW_EDIT_BUTTON_FOLLOW_UP %}
         {% if followup.user and request.user == followup.user and not followup.ticketchange_set.all %}
-        <a href="{% url 'helpdesk_followup_edit' ticket.id followup.id %}" class='followup-edit'><button type="button" class="btn btn-warning btn-xs">{% trans "Edit" %}</button></a>
+        <a href="{% url 'helpdesk_followup_edit' ticket.id followup.id %}" class='followup-edit'><button type="button" class="btn btn-warning btn-xs"><i class="fa fa-edit"></i>&nbsp;{% trans "Edit" %}</button></a>
         {% endif %}
         {% endif %}
         {% if user.is_superuser and helpdesk_settings.HELPDESK_SHOW_DELETE_BUTTON_SUPERUSER_FOLLOW_UP %}
-        <a href="{% url 'helpdesk_followup_delete' ticket.id followup.id %}" class='followup-edit'><button type="button" class="btn btn-warning btn-xs">{% trans "Delete" %}</button></a>
+        <a href="{% url 'helpdesk_followup_delete' ticket.id followup.id %}" class='followup-edit'><button type="button" class="btn btn-warning btn-xs"><i class="fa fa-trash"></i>&nbsp;{% trans "Delete" %}</button></a>
         {% endif %}
     </div>
 {% else %}
@@ -97,11 +97,11 @@ $(document).on('change', ':file', function() {
         {{ followup.title }} <span class='byline text-info'>{% if followup.user %}by {{ followup.user }}{% endif %} <span title='{{ followup.date|date:"r" }}'>{{ followup.date|naturaltime }}</span>{% if not followup.public %} <span class='private'>({% trans "Private" %})</span>{% endif %}</span>
         {% if helpdesk_settings.HELPDESK_SHOW_EDIT_BUTTON_FOLLOW_UP %}
         {% if followup.user and request.user == followup.user and not followup.ticketchange_set.all %}
-        <a href="{% url 'helpdesk_followup_edit' ticket.id followup.id %}" class='followup-edit'><button type="button" class="btn btn-warning btn-xs">{% trans "Edit" %}</button></a>
+        <a href="{% url 'helpdesk_followup_edit' ticket.id followup.id %}" class='followup-edit'><button type="button" class="btn btn-warning btn-xs"><i class="fa fa-edit"></i>&nbsp;{% trans "Edit" %}</button></a>
         {% endif %}
         {% endif %}
         {% if user.is_superuser and helpdesk_settings.HELPDESK_SHOW_DELETE_BUTTON_SUPERUSER_FOLLOW_UP %}
-        <a href="{% url 'helpdesk_followup_delete' ticket.id followup.id %}" class='followup-edit'><button type="button" class="btn btn-warning btn-xs">{% trans "Delete" %}</button></a>
+        <a href="{% url 'helpdesk_followup_delete' ticket.id followup.id %}" class='followup-edit'><button type="button" class="btn btn-warning btn-xs"><i class="fa fa-trash"></i>&nbsp;{% trans "Delete" %}</button></a>
         {% endif %}
     </div>
 {% endif %}
