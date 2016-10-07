@@ -1411,9 +1411,7 @@ class TicketCustomFieldValue(models.Model):
         return '%s / %s' % (self.ticket, self.field)
 
     class Meta:
-        unique_together = ('ticket', 'field'),
-
-    class Meta:
+        unique_together = (('ticket', 'field'),)
         verbose_name = _('Ticket custom field value')
         verbose_name_plural = _('Ticket custom field values')
 
@@ -1441,6 +1439,6 @@ class TicketDependency(models.Model):
         return '%s / %s' % (self.ticket, self.depends_on)
 
     class Meta:
-        unique_together = ('ticket', 'depends_on')
+        unique_together = (('ticket', 'depends_on'),)
         verbose_name = _('Ticket dependency')
         verbose_name_plural = _('Ticket dependencies')
