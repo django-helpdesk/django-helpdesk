@@ -57,11 +57,11 @@ def api(request, method):
 
 
     THIS IS DEPRECATED AS OF DECEMBER 2015 AND WILL BE REMOVED IN JANUARY 2016.
-    SEE https://github.com/rossp/django-helpdesk/issues/198 FOR DETAILS
+    SEE https://github.com/django-helpdesk/django-helpdesk/issues/198 FOR DETAILS
 
     """
 
-    warnings.warn("django-helpdesk API will be removed in January 2016. See https://github.com/rossp/django-helpdesk/issues/198 for details.", category=DeprecationWarning)
+    warnings.warn("django-helpdesk API will be removed in January 2016. See https://github.com/django-helpdesk/django-helpdesk/issues/198 for details.", category=DeprecationWarning)
 
     if method == 'help':
         return render(request, template_name='helpdesk/help_api.html')

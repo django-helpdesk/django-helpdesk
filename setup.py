@@ -140,7 +140,7 @@ setup(
     keywords=['django', 'helpdesk', 'tickets', 'incidents', 'cases'],
     author='Ross Poulton',
     author_email='ross@rossp.org',
-    url='http://github.com/rossp/django-helpdesk',
+    url='http://github.com/django-helpdesk/django-helpdesk',
     license='BSD',
     packages=find_packages(),
     package_data=find_package_data("helpdesk", only_in_packages=False),

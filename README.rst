@@ -1,8 +1,8 @@
 django-helpdesk - A Django powered ticket tracker for small businesses.
 =======================================================================
 
-.. image:: https://travis-ci.org/rossp/django-helpdesk.png?branch=master
-    :target: https://travis-ci.org/rossp/django-helpdesk
+.. image:: https://travis-ci.org/django-helpdesk/django-helpdesk.png?branch=master
+    :target: https://travis-ci.org/django-helpdesk/django-helpdesk
 
 Copyright 2009- Ross Poulton and contributors. All Rights Reserved. See LICENSE for details.
 
@@ -94,11 +94,11 @@ Contributing
 
 If you want to help translate django-helpdesk into languages other than English, we encourage you to make use of our Transifex project.
 
-https://www.transifex.com/rossp/django-helpdesk/
+https://www.transifex.com/django-helpdesk/django-helpdesk/
 
 Feel free to request access to contribute your translations.
 
 Pull requests for all other changes are welcome. We're currently trying to add test cases wherever possible, so please continue to include tests with pull requests.
 
-.. image:: https://secure.travis-ci.org/rossp/django-helpdesk.png?branch=master
-    :target: https://travis-ci.org/rossp/django-helpdesk
+.. image:: https://secure.travis-ci.org/django-helpdesk/django-helpdesk.png?branch=master
+    :target: https://travis-ci.org/django-helpdesk/django-helpdesk
