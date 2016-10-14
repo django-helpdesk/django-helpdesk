@@ -68,6 +68,10 @@ These changes are visible throughout django-helpdesk
 
   **Default:** ``HELPDESK_EMAIL_SUBJECT_TEMPLATE = "{{ ticket.ticket }} {{ ticket.title|safe }} %(subject)s"``
 
+- **HELPDESK_EMAIL_FALLBACK_LOCALE** Fallback locale for templated emails when queue locale not found
+
+  **Default:** ``HELPDESK_EMAIL_FALLBACK_LOCALE= "en"``
+
 
 Options shown on public pages
 -----------------------------
