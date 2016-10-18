@@ -15,7 +15,7 @@ from django import forms
 from django.forms import extras
 from django.core.files.storage import default_storage
 from django.conf import settings
-from django.utils.translation import ugettext as _
+from django.utils.translation import ugettext_lazy as _
 try:
     from django.contrib.auth import get_user_model
     User = get_user_model()
