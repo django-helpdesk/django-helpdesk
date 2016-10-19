@@ -779,7 +779,7 @@ def ticket_list(request):
             query_params = json.loads(b64decode(str(saved_query.query)))
         except ValueError:
             # Query deserialization failed. (E.g. was a pickled query)
-            return HttpResponseRedirect(reverse('helpdesk_list'))
+            return HttpResponseRedirect(reverse('helpdesk:list'))
 
     elif not (  'queue' in request.GET
             or  'assigned_to' in request.GET
@@ -1050,7 +1050,7 @@ def run_report(request, report):
         try:
             query_params = json.loads(b64decode(str(saved_query.query)))
         except:
-            return HttpResponseRedirect(reverse('helpdesk_report_index'))
+            return HttpResponseRedirect(reverse('helpdesk:report_index'))
 
         report_queryset = apply_query(report_queryset, query_params)
 
