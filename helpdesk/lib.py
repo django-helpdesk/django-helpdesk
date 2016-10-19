@@ -21,6 +21,7 @@ import logging
 logger = logging.getLogger('helpdesk')
 
 from django.utils.encoding import smart_str
+from django.db.models import Q
 
 def send_templated_mail(template_name, email_context, recipients, sender=None, bcc=None, fail_silently=False, files=None):
     """
@@ -45,7 +46,7 @@ def send_templated_mail(template_name, email_context, recipients, sender=None, b
     fail_silently is passed to Django's mail routine. Set to 'True' to ignore
         any errors at send time.
 
-    files can be a list of tuple. Each tuple should be a filename to attach, 
+    files can be a list of tuple. Each tuple should be a filename to attach,
         along with the File objects to be read. files can be blank.
 
     """
@@ -55,7 +56,8 @@ def send_templated_mail(template_name, email_context, recipients, sender=None, b
     from django.template import loader, Context
 
     from helpdesk.models import EmailTemplate
-    from helpdesk.settings import HELPDESK_EMAIL_SUBJECT_TEMPLATE
+    from helpdesk.settings import HELPDESK_EMAIL_SUBJECT_TEMPLATE, \
+        HELPDESK_EMAIL_FALLBACK_LOCALE
     import os
 
     # RemovedInDjango110Warning: render() must be called with a dict, not a Context.
@@ -67,9 +69,9 @@ def send_templated_mail(template_name, email_context, recipients, sender=None, b
     if hasattr(context['queue'], 'locale'):
         locale = getattr(context['queue'], 'locale', '')
     else:
-        locale = context['queue'].get('locale', 'en')
+        locale = context['queue'].get('locale', HELPDESK_EMAIL_FALLBACK_LOCALE)
     if not locale:
-        locale = 'en'
+        locale = HELPDESK_EMAIL_FALLBACK_LOCALE
 
     t = None
     try:
@@ -89,7 +91,7 @@ def send_templated_mail(template_name, email_context, recipients, sender=None, b
         sender = settings.DEFAULT_FROM_EMAIL
 
     footer_file = os.path.join('helpdesk', locale, 'email_text_footer.txt')
-    
+
     # get_template_from_string was removed in Django 1.8 http://django.readthedocs.org/en/1.8.x/ref/templates/upgrading.html
     try:
         from django.template import engines
@@ -177,17 +179,25 @@ def apply_query(queryset, params):
     params is a dictionary that contains the following:
         filtering: A dict of Django ORM filters, eg:
             {'user__id__in': [1, 3, 103], 'title__contains': 'foo'}
-        other_filter: Another filter of some type, most likely a
-            set of Q() objects.
+
+        search_string: A freetext search string
+
         sorting: The name of the column to sort by
     """
     for key in params['filtering'].keys():
         filter = {key: params['filtering'][key]}
         queryset = queryset.filter(**filter)
 
-    if params.get('other_filter', None):
-        # eg a Q() set
-        queryset = queryset.filter(params['other_filter'])
+    search = params.get('search_string', None)
+    if search:
+        qset = (
+            Q(title__icontains=search) |
+            Q(description__icontains=search) |
+            Q(resolution__icontains=search) |
+            Q(submitter_email__icontains=search)
+        )
+
+        queryset = queryset.filter(qset)
 
     sorting = params.get('sorting', None)
     if sorting:

@@ -32,7 +32,7 @@ Wherever possible please break git commits up into small chunks that are specifi
 
 Commit messages should also explain *what*, precisely, has been changed.
 
-If you have any questions, please contact the project co-ordinator, Ross Poulton, at ross@rossp.org.
+If you have any questions, please start a discussion on the GitHub issue tracker at https://github.com/django-helpdesk/django-helpdesk/issues
 
 Tests
 -----

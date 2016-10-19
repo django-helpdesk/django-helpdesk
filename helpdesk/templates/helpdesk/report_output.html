@@ -5,12 +5,11 @@
 
 {% block helpdesk_head %}
     <!--[if IE]><script language="javascript" type="text/javascript" src="{% static "helpdesk/jquery.jqplot/excanvas.min.js" %}"></script><![endif]-->
-    <script src='{% static "helpdesk/jquery.jqplot/jquery.jqplot.min.js" %}' type='text/javascript' language='javascript'></script>
-    <link rel='stylesheet' typ='text/css' href='{% static "helpdesk/jquery.jqplot/jquery.jqplot.min.css" %}' />
-    <script type="text/javascript" src="{% static "helpdesk/jquery.jqplot/plugins/jqplot.categoryAxisRenderer.min.js" %}"></script>
-    <script type="text/javascript" src="{% static "helpdesk/jquery.jqplot/plugins/jqplot.barRenderer.min.js" %}"></script>
-    <script type="text/javascript" src="{% static "helpdesk/jquery.jqplot/plugins/jqplot.dateAxisRenderer.min.js" %}"></script>
-
+    <script src='{% static "helpdesk/jquery.jqplot/jquery.jqplot-1.0.9.min.js" %}' type='text/javascript' language='javascript'></script>
+    <link rel='stylesheet' typ='text/css' href='{% static "helpdesk/jquery.jqplot/jquery.jqplot-1.0.9.min.css" %}' />
+    <script type="text/javascript" src="{% static "helpdesk/jquery.jqplot/plugins/jqplot.categoryAxisRenderer.js" %}"></script>
+    <script type="text/javascript" src="{% static "helpdesk/jquery.jqplot/plugins/jqplot.barRenderer.js" %}"></script>
+    <script type="text/javascript" src="{% static "helpdesk/jquery.jqplot/plugins/jqplot.dateAxisRenderer.js" %}"></script>
 {% endblock %}
 
 {% block helpdesk_body %}
@@ -37,7 +36,7 @@
 </thead>
 <tbody>
 {% for d in data %}
-<tr class='row_{% cycle odd,even %}'>{% for f in d %}<td class='report'>{{ f }}</td>{% endfor %}</tr>{% endfor %}
+<tr class='row_{% cycle 'odd' 'even' %}'>{% for f in d %}<td class='report'>{{ f }}</td>{% endfor %}</tr>{% endfor %}
 </tbody>
 </table>
 

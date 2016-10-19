@@ -1,8 +1,8 @@
 django-helpdesk - A Django powered ticket tracker for small businesses.
 =======================================================================
 
-.. image:: https://travis-ci.org/rossp/django-helpdesk.png?branch=master
-    :target: https://travis-ci.org/rossp/django-helpdesk
+.. image:: https://travis-ci.org/django-helpdesk/django-helpdesk.png?branch=master
+    :target: https://travis-ci.org/django-helpdesk/django-helpdesk
 
 Copyright 2009- Ross Poulton and contributors. All Rights Reserved. See LICENSE for details.
 
@@ -32,6 +32,7 @@ Dependencies (pre-flight checklist)
 4. `pip install django-bootstrap-form` and add `bootstrapform` to `settings.INSTALLED_APPS`
 5. `pip install django-markdown-deux` and add `markdown_deux` to `settings.INSTALLED_APPS`
 6. `pip install email-reply-parser` to get smart email reply handling
+7. Add 'django.contrib.sites' to settings.INSTALLED_APPS, ensure there is at least 1 site created.
 
 **NOTE REGARDING SQLITE AND SEARCHING:**
 If you use sqlite as your database, the search function will not work as
@@ -93,11 +94,11 @@ Contributing
 
 If you want to help translate django-helpdesk into languages other than English, we encourage you to make use of our Transifex project.
 
-http://www.transifex.net/projects/p/django-helpdesk/resource/core/
+https://www.transifex.com/django-helpdesk/django-helpdesk/
 
 Feel free to request access to contribute your translations.
 
 Pull requests for all other changes are welcome. We're currently trying to add test cases wherever possible, so please continue to include tests with pull requests.
 
-.. image:: https://secure.travis-ci.org/rossp/django-helpdesk.png?branch=master
-    :target: https://travis-ci.org/rossp/django-helpdesk
+.. image:: https://secure.travis-ci.org/django-helpdesk/django-helpdesk.png?branch=master
+    :target: https://travis-ci.org/django-helpdesk/django-helpdesk

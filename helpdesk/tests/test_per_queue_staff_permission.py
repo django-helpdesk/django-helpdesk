@@ -41,7 +41,7 @@ class PerQueueStaffMembershipTestCase(TestCase):
                 username='User_%d' % identifier,
                 is_staff=True,
             )
-            user.set_password(identifier)
+            user.set_password(str(identifier))
             user.save()
 
             # The prefix 'helpdesk.' must be trimmed
@@ -74,7 +74,7 @@ class PerQueueStaffMembershipTestCase(TestCase):
 
         # Regular users
         for identifier in self.IDENTIFIERS:
-            self.client.login(username='User_%d' % identifier, password=identifier)
+            self.client.login(username='User_%d' % identifier, password=str(identifier))
             response = self.client.get(reverse('helpdesk:dashboard'))
             self.assertEqual(
                 len(response.context['unassigned_tickets']),
@@ -131,7 +131,7 @@ class PerQueueStaffMembershipTestCase(TestCase):
         """
         # Regular users
         for identifier in self.IDENTIFIERS:
-            self.client.login(username='User_%d' % identifier, password=identifier)
+            self.client.login(username='User_%d' % identifier, password=str(identifier))
             response = self.client.get(reverse('helpdesk:list'))
             self.assertEqual(
                 len(response.context['tickets']),
@@ -166,7 +166,7 @@ class PerQueueStaffMembershipTestCase(TestCase):
         """
         # Regular users
         for identifier in self.IDENTIFIERS:
-            self.client.login(username='User_%d' % identifier, password=identifier)
+            self.client.login(username='User_%d' % identifier, password=str(identifier))
             response = self.client.get(
                 reverse('helpdesk:run_report', kwargs={'report': 'userqueue'})
             )

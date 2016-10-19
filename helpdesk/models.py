@@ -223,6 +223,14 @@ class Queue(models.Model):
         help_text=_('Socks proxy port number. Default: 9150 (default TOR port)'),
     )
 
+    default_owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        related_name='default_owner',
+        blank=True,
+        null=True,
+        verbose_name=_('Default owner'),
+    )
+
     def __str__(self):
         return "%s" % self.title
 
@@ -553,6 +561,14 @@ class Ticket(models.Model):
         self.modified = timezone.now()
 
         super(Ticket, self).save(*args, **kwargs)
+
+    @classmethod
+    def queue_and_id_from_query(klass, query):
+        # Apply the opposite logic here compared to self._get_ticket_for_url
+        # Ensure that queues with '-' in them will work
+        parts = query.split('-')
+        queue = '-'.join(parts[0:-1])
+        return queue, parts[-1]
 
 
 class FollowUpManager(models.Manager):
@@ -1395,9 +1411,7 @@ class TicketCustomFieldValue(models.Model):
         return '%s / %s' % (self.ticket, self.field)
 
     class Meta:
-        unique_together = ('ticket', 'field'),
-
-    class Meta:
+        unique_together = (('ticket', 'field'),)
         verbose_name = _('Ticket custom field value')
         verbose_name_plural = _('Ticket custom field values')
 
@@ -1425,6 +1439,6 @@ class TicketDependency(models.Model):
         return '%s / %s' % (self.ticket, self.depends_on)
 
     class Meta:
-        unique_together = ('ticket', 'depends_on')
+        unique_together = (('ticket', 'depends_on'),)
         verbose_name = _('Ticket dependency')
         verbose_name_plural = _('Ticket dependencies')

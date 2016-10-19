@@ -4,14 +4,15 @@
 # 
 # Translators:
 # Translators:
+# Alan Pevec <apevec@gmail.com>, 2016
 msgid ""
 msgstr ""
 "Project-Id-Version: django-helpdesk\n"
 "Report-Msgid-Bugs-To: http://github.com/RossP/django-helpdesk/issues\n"
 "POT-Creation-Date: 2014-07-26 14:14+0200\n"
-"PO-Revision-Date: 2014-08-01 09:58+0000\n"
-"Last-Translator: Ross Poulton <ross@rossp.org>\n"
-"Language-Team: Croatian (http://www.transifex.com/projects/p/django-helpdesk/language/hr/)\n"
+"PO-Revision-Date: 2016-10-09 16:56+0000\n"
+"Last-Translator: Alan Pevec <apevec@gmail.com>\n"
+"Language-Team: Croatian (http://www.transifex.com/rossp/django-helpdesk/language/hr/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -27,29 +28,29 @@ msgstr ""
 #: templates/helpdesk/ticket_list.html:225 views/staff.py:1032
 #: views/staff.py:1038 views/staff.py:1044 views/staff.py:1050
 msgid "Queue"
-msgstr ""
+msgstr "red"
 
 #: forms.py:137
 msgid "Summary of the problem"
-msgstr ""
+msgstr "sažetak problema"
 
 #: forms.py:142
 msgid "Submitter E-Mail Address"
-msgstr ""
+msgstr "adresa podnositelja"
 
 #: forms.py:144
 msgid ""
 "This e-mail address will receive copies of all public updates to this "
 "ticket."
-msgstr ""
+msgstr "Ova adresa će primiti kopije svih javnih ažuriranja ovog problema."
 
 #: forms.py:150
 msgid "Description of Issue"
-msgstr ""
+msgstr "opis problema"
 
 #: forms.py:157
 msgid "Case owner"
-msgstr ""
+msgstr "vlasnik slučaja"
 
 #: forms.py:158
 msgid ""
@@ -63,59 +64,59 @@ msgstr ""
 #: templates/helpdesk/ticket_desc_table.html:47
 #: templates/helpdesk/ticket_list.html:94 views/staff.py:429
 msgid "Priority"
-msgstr ""
+msgstr "prioritet"
 
 #: forms.py:167
 msgid "Please select a priority carefully. If unsure, leave it as '3'."
-msgstr ""
+msgstr "Pažljivo odredite prioritet. Ako niste sigurni, ostavite '3'."
 
 #: forms.py:174 forms.py:365 models.py:335 templates/helpdesk/ticket.html:186
 #: views/staff.py:439
 msgid "Due on"
-msgstr ""
+msgstr "Rok izvršenja"
 
 #: forms.py:186 forms.py:370
 msgid "Attach File"
-msgstr ""
+msgstr "priloži datoteku"
 
 #: forms.py:187 forms.py:371
 msgid "You can attach a file such as a document or screenshot to this ticket."
-msgstr ""
+msgstr "Možete priložiti datoteku npr. dokument ili sliku ekrana."
 
 #: forms.py:240
 msgid "Ticket Opened"
-msgstr ""
+msgstr "otvoreni slučaj"
 
 #: forms.py:247
 #, python-format
 msgid "Ticket Opened & Assigned to %(name)s"
-msgstr ""
+msgstr "Slučaj otvoren i dodijeljen %(name)s"
 
 #: forms.py:337
 msgid "Summary of your query"
-msgstr ""
+msgstr "Sažetak Vašeg upita"
 
 #: forms.py:342
 msgid "Your E-Mail Address"
-msgstr ""
+msgstr "adresa Vaše elektroničke pošte"
 
 #: forms.py:343
 msgid "We will e-mail you when your ticket is updated."
-msgstr ""
+msgstr "Poslat ćemo Vam poruku kad Vaš slučaj bude ažuriran."
 
 #: forms.py:348
 msgid "Description of your issue"
-msgstr ""
+msgstr "opis Vašeg prolema"
 
 #: forms.py:350
 msgid ""
 "Please be as descriptive as possible, including any details we may need to "
 "address your query."
-msgstr ""
+msgstr "Budite što je moguće jasniji i uključite sve detalje koji nam trebaju za rješavanje Vašeg upita."
 
 #: forms.py:358
 msgid "Urgency"
-msgstr ""
+msgstr "hitnost"
 
 #: forms.py:359
 msgid "Please select a priority carefully."
@@ -123,11 +124,11 @@ msgstr ""
 
 #: forms.py:419
 msgid "Ticket Opened Via Web"
-msgstr ""
+msgstr "Slučaj otvoren na webu"
 
 #: forms.py:486
 msgid "Show Ticket List on Login?"
-msgstr ""
+msgstr "Prikaži listu slučajeva prilikom prijave?"
 
 #: forms.py:487
 msgid "Display the ticket list upon login? Otherwise, the dashboard is shown."
@@ -185,7 +186,7 @@ msgstr ""
 #: templates/helpdesk/ticket.html:178 templates/helpdesk/ticket_list.html:85
 #: templates/helpdesk/ticket_list.html:225 views/staff.py:419
 msgid "Title"
-msgstr ""
+msgstr "naslov"
 
 #: models.py:40 models.py:822 models.py:1206
 msgid "Slug"
@@ -201,7 +202,7 @@ msgstr ""
 #: templates/helpdesk/email_ignore_list.html:13
 #: templates/helpdesk/ticket_cc_list.html:15
 msgid "E-Mail Address"
-msgstr ""
+msgstr "adresa elektroničke pošte"
 
 #: models.py:49
 msgid ""
@@ -229,7 +230,7 @@ msgstr ""
 
 #: models.py:71
 msgid "Allow E-Mail Submission?"
-msgstr ""
+msgstr "Dozvoli prijave elektroničkom poštom?"
 
 #: models.py:74
 msgid "Do you want to poll the e-mail box below for new tickets?"
@@ -273,11 +274,11 @@ msgstr ""
 
 #: models.py:110
 msgid "POP 3"
-msgstr ""
+msgstr "POP 3"
 
 #: models.py:110
 msgid "IMAP"
-msgstr ""
+msgstr "IMAP"
 
 #: models.py:113
 msgid ""
@@ -353,30 +354,30 @@ msgstr ""
 
 #: models.py:191 templates/helpdesk/email_ignore_list.html:13
 msgid "Queues"
-msgstr ""
+msgstr "redovi"
 
 #: models.py:245 templates/helpdesk/dashboard.html:15
 #: templates/helpdesk/ticket.html:138
 msgid "Open"
-msgstr ""
+msgstr "otvoreno"
 
 #: models.py:246 templates/helpdesk/ticket.html:144
 #: templates/helpdesk/ticket.html.py:150 templates/helpdesk/ticket.html:155
 #: templates/helpdesk/ticket.html.py:159
 msgid "Reopened"
-msgstr ""
+msgstr "ponovno otvoreno"
 
 #: models.py:247 templates/helpdesk/dashboard.html:15
 #: templates/helpdesk/ticket.html:139 templates/helpdesk/ticket.html.py:145
 #: templates/helpdesk/ticket.html:151
 msgid "Resolved"
-msgstr ""
+msgstr "riješeno"
 
 #: models.py:248 templates/helpdesk/dashboard.html:15
 #: templates/helpdesk/ticket.html:140 templates/helpdesk/ticket.html.py:146
 #: templates/helpdesk/ticket.html:152 templates/helpdesk/ticket.html.py:156
 msgid "Closed"
-msgstr ""
+msgstr "zatvoreno"
 
 #: models.py:249 templates/helpdesk/ticket.html:141
 #: templates/helpdesk/ticket.html.py:147 templates/helpdesk/ticket.html:160
@@ -695,7 +696,7 @@ msgstr ""
 
 #: models.py:788
 msgid "HTML"
-msgstr ""
+msgstr "HTML"
 
 #: models.py:789
 msgid "The same context is available here as in plain_text, above."
@@ -724,15 +725,15 @@ msgstr ""
 #: models.py:849 templates/helpdesk/kb_index.html:11
 #: templates/helpdesk/public_homepage.html:11
 msgid "Category"
-msgstr ""
+msgstr "kategorija"
 
 #: models.py:858
 msgid "Question"
-msgstr ""
+msgstr "pitanje"
 
 #: models.py:862
 msgid "Answer"
-msgstr ""
+msgstr "odgovor"
 
 #: models.py:866
 msgid "Votes"
@@ -752,7 +753,7 @@ msgstr ""
 
 #: models.py:878
 msgid "Last Updated"
-msgstr ""
+msgstr "zadnje ažuriranje"
 
 #: models.py:879
 msgid "The date on which this question was most recently changed."
@@ -1087,7 +1088,7 @@ msgstr ""
 #: templates/helpdesk/attribution.html:2
 msgid ""
 "<a href='https://github.com/rossp/django-helpdesk'>django-helpdesk</a>."
-msgstr ""
+msgstr "<a href='https://github.com/rossp/django-helpdesk'>django-helpdesk</a>."
 
 #: templates/helpdesk/base.html:10
 msgid "Powered by django-helpdesk"
@@ -1110,7 +1111,7 @@ msgstr ""
 #: templates/helpdesk/base.html:52 templates/helpdesk/public_base.html:6
 #: templates/helpdesk/public_base.html:18
 msgid "Helpdesk"
-msgstr ""
+msgstr "Helpdesk"
 
 #: templates/helpdesk/base.html:62 templates/helpdesk/rss_list.html:9
 #: templates/helpdesk/rss_list.html:12 templates/helpdesk/rss_list.html:15
@@ -2053,7 +2054,7 @@ msgstr ""
 #: templates/helpdesk/ticket_list.html:71
 #: templates/helpdesk/ticket_list.html:139
 msgid "Keywords"
-msgstr ""
+msgstr "ključne riječi"
 
 #: templates/helpdesk/ticket_list.html:72
 msgid "Date Range"

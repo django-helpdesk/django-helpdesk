@@ -14,7 +14,7 @@
 </thead>
 <tbody>
 {% for ignore in ignore_list %}
-<tr class='row_{% cycle odd,even %}'>
+<tr class='row_{% cycle 'odd' 'even' %}'>
     <td>{{ ignore.name }}</td>
     <td>{{ ignore.email_address }}</td>
     <td>{{ ignore.date }}</td>

@@ -1,10 +1,12 @@
+from __future__ import print_function
+
 import os
 import sys
 from distutils.util import convert_path
 from fnmatch import fnmatchcase
 from setuptools import setup, find_packages
 
-version = '0.1.17'
+version = '0.1.18'
 
 # Provided as an attribute, so you can append to these instead
 # of replicating them:
@@ -63,9 +65,11 @@ def find_package_data(
                         or fn.lower() == pattern.lower()):
                         bad_name = True
                         if show_ignored:
-                            print >> sys.stderr, (
-                                "Directory %s ignored by pattern %s"
-                                % (fn, pattern))
+                            print(
+                                "Directory %s ignored by pattern %s" % (fn, pattern), 
+                                file=sys.stderr
+                            )
+
                         break
                 if bad_name:
                     continue
@@ -86,9 +90,10 @@ def find_package_data(
                         or fn.lower() == pattern.lower()):
                         bad_name = True
                         if show_ignored:
-                            print >> sys.stderr, (
-                                "File %s ignored by pattern %s"
-                                % (fn, pattern))
+                            print(
+                                "File %s ignored by pattern %s" % (fn, pattern), 
+                                file=sys.stderr
+                                )
                         break
                 if bad_name:
                     continue
@@ -135,7 +140,7 @@ setup(
     keywords=['django', 'helpdesk', 'tickets', 'incidents', 'cases'],
     author='Ross Poulton',
     author_email='ross@rossp.org',
-    url='http://github.com/rossp/django-helpdesk',
+    url='http://github.com/django-helpdesk/django-helpdesk',
     license='BSD',
     packages=find_packages(),
     package_data=find_package_data("helpdesk", only_in_packages=False),

@@ -19,7 +19,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                {% for query in sql_queries %}<tr class="{% cycle odd,even %}">
+                {% for query in sql_queries %}<tr class="{% cycle 'odd' 'even' %}">
                     <td>{{ forloop.counter }}</td>
                     <td>{{ query.sql|escape }}</td>
                     <td>{{ query.time }}</td>

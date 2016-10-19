@@ -133,7 +133,7 @@ class Akismet(object):
     def _safeRequest(self, url, data, headers):
         try:
             resp = _fetch_url(url, data, headers)
-        except Exception, e:
+        except Exception as e:
             raise AkismetError(str(e))
         return resp
 

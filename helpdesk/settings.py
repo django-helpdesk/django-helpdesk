@@ -34,6 +34,9 @@ HELPDESK_KB_ENABLED = getattr(settings, 'HELPDESK_KB_ENABLED', True)
 # show extended navigation by default, to all users, irrespective of staff status?
 HELPDESK_NAVIGATION_ENABLED = getattr(settings, 'HELPDESK_NAVIGATION_ENABLED', False)
 
+# use public CDNs to serve jquery and other javascript by default? otherwise, use built-in static copy
+HELPDESK_USE_CDN = getattr(settings, 'HELPDESK_USE_CDN', False)
+
 # show dropdown list of languages that ticket comments can be translated into?
 HELPDESK_TRANSLATE_TICKET_COMMENTS = getattr(settings, 'HELPDESK_TRANSLATE_TICKET_COMMENTS', False)
 
@@ -82,6 +85,9 @@ HELPDESK_STAFF_ONLY_TICKET_CC = getattr(settings, 'HELPDESK_STAFF_ONLY_TICKET_CC
 
 # allow the subject to have a configurable template.
 HELPDESK_EMAIL_SUBJECT_TEMPLATE = getattr(settings, 'HELPDESK_EMAIL_SUBJECT_TEMPLATE', "{{ ticket.ticket }} {{ ticket.title|safe }} %(subject)s")
+
+# default fallback locale when queue locale not found
+HELPDESK_EMAIL_FALLBACK_LOCALE = getattr(settings, 'HELPDESK_EMAIL_FALLBACK_LOCALE', 'en')
 
 
 ''' options for staff.create_ticket view '''
