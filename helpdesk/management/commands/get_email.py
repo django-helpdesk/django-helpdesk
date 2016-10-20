@@ -18,7 +18,7 @@ import poplib
 import re
 import socket
 from os import listdir, unlink
-from os.path import isfile, join
+from os.path import isfile, isdir, join
 
 from datetime import timedelta
 from email.header import decode_header
@@ -97,7 +97,7 @@ def process_email(quiet=False):
             logger.setLevel(logging.DEBUG)
         if quiet:
             logger.propagate = False # do not propagate to root logger that would log to console
-        logdir = q.logging_dir or '/var/log/helpdesk/'
+        logdir = q.logging_dir if isdir(q.logging_dir) else '/var/log/helpdesk/'
         handler = logging.FileHandler(logdir + q.slug + '_get_email.log')
         logger.addHandler(handler)
 
@@ -212,7 +212,7 @@ def process_queue(q, logger):
         server.logout()
 
     elif email_box_type == 'local':
-        mail_dir = q.email_box_local_dir or '/var/lib/mail/helpdesk/'
+        mail_dir = q.email_box_local_dir if isdir(q.email_box_local_dir) else '/var/lib/mail/helpdesk/'
         mail = [join(mail_dir, f) for f in listdir(mail_dir) if isfile(join(mail_dir, f))]
         logger.info("Found %s messages in local mailbox directory" % str(len(mail)))
         for m in mail:

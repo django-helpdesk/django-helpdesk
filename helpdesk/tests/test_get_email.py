@@ -29,8 +29,10 @@ class GetEmailTestCase(TestCase):
     # tests correct syntax for command line option
     def test_get_email_quiet_option(self):
         with mock.patch('helpdesk.management.commands.get_email.process_email') as mocked_processemail:
-            management.call_command('get_email', '-q')
+            management.call_command('get_email', '--quiet')
             mocked_processemail.assert_called_with(quiet=True)
+            management.call_command('get_email')
+            mocked_processemail.assert_called_with(quiet=False)
 
     # tests reading emails from a queue and creating tickets
     def test_read_email(self):
