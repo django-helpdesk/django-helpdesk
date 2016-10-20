@@ -55,9 +55,10 @@ class Command(BaseCommand):
         if VERSION < (1, 8):
             self.option_list += (
             make_option(
-                '--quiet', '-q',
+                '--quiet',
                 default=False,
                 action='store_true',
+                dest='quiet',
                 help='Hide details about each queue/message as they are processed'),
             )
 

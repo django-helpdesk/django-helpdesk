@@ -4,6 +4,7 @@ from django.test import TestCase
 from django.core import mail
 from django.core.management import call_command
 from django.test.client import Client
+from django.utils import six
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404
 
@@ -38,13 +39,13 @@ class GetEmailTestCase(TestCase):
         test_email = "To: update.public@example.com\nFrom: comment@example.com\nSubject: Some Comment\n\nThis is the helpdesk comment via email."
         with mock.patch('helpdesk.management.commands.get_email.listdir') as mocked_listdir, \
                 mock.patch('helpdesk.management.commands.get_email.isfile') as mocked_isfile, \
-                mock.patch('builtins.open', mock.mock_open(read_data=test_email)):
+                mock.patch('builtins.open' if six.PY3 else '__builtin__.open', mock.mock_open(read_data=test_email)):
             mocked_isfile.return_value = True
             mocked_listdir.return_value = ['filename1', 'filename2']
 
             call_command('get_email')
 
-            mocked_listdir.assert_called_with('/var/lib/mail/helpdesk')
+            mocked_listdir.assert_called_with('/var/lib/mail/helpdesk/')
             mocked_isfile.assert_any_call('/var/lib/mail/helpdesk/filename1')
             mocked_isfile.assert_any_call('/var/lib/mail/helpdesk/filename2')
 
