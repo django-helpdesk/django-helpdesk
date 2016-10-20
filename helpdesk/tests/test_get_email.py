@@ -2,7 +2,7 @@ from helpdesk.models import Queue, Ticket
 from helpdesk.management.commands.get_email import process_email
 from django.test import TestCase
 from django.core import mail
-from django.core import management
+from django.core.management import call_command
 from django.test.client import Client
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404
@@ -23,30 +23,28 @@ class GetEmailTestCase(TestCase):
     fixtures = ['emailtemplate.json']
 
     def setUp(self):
-        self.queue_public = Queue.objects.create(title='Queue 1', slug='QQ', allow_public_submission=True, new_ticket_cc='new.public@example.com', updated_ticket_cc='update.public@example.com',
-        email_box_type='local', email_box_local_dir='/var/lib/mail/helpdesk')
+        self.queue_public = Queue.objects.create(title='Queue 1', slug='QQ', allow_public_submission=True, allow_email_submission=True, new_ticket_cc='new.public@example.com', updated_ticket_cc='update.public@example.com', email_box_type='local', email_box_local_dir='/var/lib/mail/helpdesk/')
 
     # tests correct syntax for command line option
     def test_get_email_quiet_option(self):
         with mock.patch('helpdesk.management.commands.get_email.process_email') as mocked_processemail:
-            management.call_command('get_email', '--quiet')
+            call_command('get_email', '--quiet')
             mocked_processemail.assert_called_with(quiet=True)
-            management.call_command('get_email')
+            call_command('get_email')
             mocked_processemail.assert_called_with(quiet=False)
 
     # tests reading emails from a queue and creating tickets
     def test_read_email(self):
         test_email = "To: update.public@example.com\nFrom: comment@example.com\nSubject: Some Comment\n\nThis is the helpdesk comment via email."
-        with mock.patch('helpdesk.management.commands.get_email.isdir') as mocked_isdir, \
-                mock.patch('helpdesk.management.commands.get_email.listdir') as mocked_listdir, \
+        with mock.patch('helpdesk.management.commands.get_email.listdir') as mocked_listdir, \
                 mock.patch('helpdesk.management.commands.get_email.isfile') as mocked_isfile, \
                 mock.patch('builtins.open', mock.mock_open(read_data=test_email)):
-            mocked_isdir.return_value = True
             mocked_isfile.return_value = True
             mocked_listdir.return_value = ['filename1', 'filename2']
 
-            management.call_command('get_email')
+            call_command('get_email')
 
+            mocked_listdir.assert_called_with('/var/lib/mail/helpdesk')
             mocked_isfile.assert_any_call('/var/lib/mail/helpdesk/filename1')
             mocked_isfile.assert_any_call('/var/lib/mail/helpdesk/filename2')
 
