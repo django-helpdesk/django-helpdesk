@@ -26,7 +26,7 @@ Dependencies (pre-flight checklist)
 -----------------------------------
 
 1. Python 2.7 or 3.4+ (3.4+ support is new, please let us know how it goes)
-2. Django (1.7 or newer, preferably 1.9 - Django 1.7 is not supported if you are using Python 3.5)
+2. Django (1.7, 1.8, 1.9 and 1.10, preferably 1.9 - Django 1.7 is not supported if you are using Python 3.5)
 3. An existing WORKING Django project with database etc. If you
    cannot log into the Admin, you won't get this product working.
 4. `pip install django-bootstrap-form` and add `bootstrapform` to `settings.INSTALLED_APPS`
