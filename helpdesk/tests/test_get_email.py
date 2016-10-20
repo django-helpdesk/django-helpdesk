@@ -28,16 +28,16 @@ class GetEmailTestCase(TestCase):
 
     # tests correct syntax for command line option
     def test_get_email_quiet_option(self):
-        with mock.patch('helpdesk.management.commands.process_email') as mocked_processemail:
+        with mock.patch('helpdesk.management.commands.get_email.process_email') as mocked_processemail:
             management.call_command('get_email', '-q')
             mocked_processemail.assert_called_with(quiet=True)
 
     # tests reading emails from a queue and creating tickets
     def test_read_email(self):
         test_email = "To: update.public@example.com\nFrom: comment@example.com\nSubject: Some Comment\n\nThis is the helpdesk comment via email."
-        with mock.patch('helpdesk.management.commands.isdir') as mocked_isdir, \
-                mock.patch('helpdesk.management.commands.listdir') as mocked_listdir, \
-                mock.patch('helpdesk.management.commands.isfile') as mocked_isfile, \
+        with mock.patch('helpdesk.management.commands.get_email.isdir') as mocked_isdir, \
+                mock.patch('helpdesk.management.commands.get_email.listdir') as mocked_listdir, \
+                mock.patch('helpdesk.management.commands.get_email.isfile') as mocked_isfile, \
                 mock.patch('builtins.open', mock.mock_open(read_data=test_email)):
             mocked_isdir.return_value = True
             mocked_isfile.return_value = True
