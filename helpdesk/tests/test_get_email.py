@@ -36,7 +36,7 @@ class GetEmailTestCase(TestCase):
 
     # tests reading emails from a queue and creating tickets
     def test_read_email(self):
-        test_email = six.b("To: update.public@example.com\nFrom: comment@example.com\nSubject: Some Comment\n\nThis is the helpdesk comment via email.")
+        test_email = "To: update.public@example.com\nFrom: comment@example.com\nSubject: Some Comment\n\nThis is the helpdesk comment via email."
         with mock.patch('helpdesk.management.commands.get_email.listdir') as mocked_listdir, \
                 mock.patch('helpdesk.management.commands.get_email.isfile') as mocked_isfile, \
                 mock.patch('builtins.open' if six.PY3 else '__builtin__.open', mock.mock_open(read_data=test_email)):
