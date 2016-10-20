@@ -17,7 +17,6 @@ import mimetypes
 import poplib
 import re
 import socket
-import six
 from os import listdir, unlink
 from os.path import isfile, join
 
@@ -33,6 +32,7 @@ from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand
 from django.db.models import Q
 from django.utils.translation import ugettext as _
+from django.utils import six
 from helpdesk import settings
 
 try:
