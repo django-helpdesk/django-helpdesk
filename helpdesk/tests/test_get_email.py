@@ -24,7 +24,7 @@ class GetEmailTestCase(TestCase):
     #fixtures = ['emailtemplate.json'] # may don't need this, not testing templates here
 
     def setUp(self):
-        self.queue_public = Queue.objects.create(title='Queue 1', slug='QQ', allow_public_submission=True, allow_email_submission=True, new_ticket_cc='new.public@example.com', updated_ticket_cc='update.public@example.com', email_box_type='local', email_box_local_dir='/var/lib/mail/helpdesk/')
+        self.queue_public = Queue.objects.create(title='Queue 1', slug='QQ', allow_public_submission=True, allow_email_submission=True, email_box_type='local', email_box_local_dir='/var/lib/mail/helpdesk/')
 
     # tests correct syntax for command line option
     def test_get_email_quiet_option(self):
