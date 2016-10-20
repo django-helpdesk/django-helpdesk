@@ -38,6 +38,27 @@ class QuickDjangoTest(object):
         'django.middleware.clickjacking.XFrameOptionsMiddleware',
     ]
 
+    TEMPLATES = [
+        {
+            'BACKEND': 'django.template.backends.django.DjangoTemplates',
+            'APP_DIRS': True,
+            'OPTIONS': {
+                'context_processors': (
+                    # Defaults:
+                    "django.contrib.auth.context_processors.auth",
+                    "django.template.context_processors.debug",
+                    "django.template.context_processors.i18n",
+                    "django.template.context_processors.media",
+                    "django.template.context_processors.static",
+                    "django.template.context_processors.tz",
+                    "django.contrib.messages.context_processors.messages",
+                    # Our extra:
+                    "django.template.context_processors.request",
+                ),
+            },
+        },
+    ]
+
     def __init__(self, *args, **kwargs):
         self.apps = args
         # Get the version of the test suite
@@ -91,7 +112,8 @@ class QuickDjangoTest(object):
             INSTALLED_APPS = self.INSTALLED_APPS + self.apps,
             MIDDLEWARE_CLASSES = self.MIDDLEWARE_CLASSES,
             ROOT_URLCONF = self.apps[0] + '.urls',
-            STATIC_URL = '/static/'
+            STATIC_URL = '/static/',
+            TEMPLATES = self.TEMPLATES,
         )
 
         # compatibility with django 1.8 downwards
