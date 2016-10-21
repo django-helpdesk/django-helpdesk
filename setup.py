@@ -6,7 +6,7 @@ from distutils.util import convert_path
 from fnmatch import fnmatchcase
 from setuptools import setup, find_packages
 
-version = '0.1.18'
+version = '0.2.0'
 
 # Provided as an attribute, so you can append to these instead
 # of replicating them:
@@ -66,7 +66,7 @@ def find_package_data(
                         bad_name = True
                         if show_ignored:
                             print(
-                                "Directory %s ignored by pattern %s" % (fn, pattern), 
+                                "Directory %s ignored by pattern %s" % (fn, pattern),
                                 file=sys.stderr
                             )
 
@@ -91,7 +91,7 @@ def find_package_data(
                         bad_name = True
                         if show_ignored:
                             print(
-                                "File %s ignored by pattern %s" % (fn, pattern), 
+                                "File %s ignored by pattern %s" % (fn, pattern),
                                 file=sys.stderr
                                 )
                         break
@@ -116,7 +116,7 @@ django-helpdesk
 ===============
 
 This is a Django-powered helpdesk ticket tracker, designed to
-plug into an existing Django website and provide you with 
+plug into an existing Django website and provide you with
 internal (or, perhaps, external) helpdesk management.
 """
 

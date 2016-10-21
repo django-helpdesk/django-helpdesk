@@ -9,8 +9,8 @@ django-helpdesk - A Django powered ticket tracker for small businesses.
 
 Copyright 2009- Ross Poulton and contributors. All Rights Reserved. See LICENSE for details.
 
-django-helpdesk was formerly known as Jutda Helpdesk, named after the 
-company who originally created it. As of January 2011 the name has been 
+django-helpdesk was formerly known as Jutda Helpdesk, named after the
+company which originally created it. As of January 2011 the name has been
 changed to reflect what it really is: a Django-powered ticket tracker with
 contributors reaching far beyond Jutda.
 
@@ -21,15 +21,15 @@ You can see a demo installation at http://django-helpdesk-demo.herokuapp.com/
 Licensing
 ---------
 
-See the file 'LICENSE' for licensing terms. Note that django-helpdesk is 
-distributed with 3rd party products which have their own licenses. See 
+See the file 'LICENSE' for licensing terms. Note that django-helpdesk is
+distributed with 3rd party products which have their own licenses. See
 LICENSE.3RDPARTY for license terms for included packages.
 
 Dependencies (pre-flight checklist)
 -----------------------------------
 
 1. Python 2.7 or 3.4+ (3.4+ support is new, please let us know how it goes)
-2. Django (1.7, 1.8, 1.9 and 1.10, preferably 1.9 - Django 1.7 is not supported if you are using Python 3.5)
+2. Django (1.8+, preferably 1.10)
 3. An existing WORKING Django project with database etc. If you
    cannot log into the Admin, you won't get this product working.
 4. `pip install django-bootstrap-form` and add `bootstrapform` to `settings.INSTALLED_APPS`
@@ -48,12 +48,12 @@ When you try to do a keyword search using sqlite, a message will be displayed
 to alert you to this shortcoming. There is no way around it, sorry.
 
 **NOTE REGARDING MySQL:**
-If you use MySQL, with most default configurations you will receive an error 
-when creating the database tables as we populate a number of default templates 
-in languages other than English. 
+If you use MySQL, with most default configurations you will receive an error
+when creating the database tables as we populate a number of default templates
+in languages other than English.
 
-You must create the database the holds the django-helpdesk tables using the 
-UTF-8 collation; see the MySQL manual for more information: 
+You must create the database the holds the django-helpdesk tables using the
+UTF-8 collation; see the MySQL manual for more information:
 http://dev.mysql.com/doc/refman/5.1/en/charset-database.html
 
 If you do NOT do this step, and you only want to use English-language templates,
@@ -64,20 +64,20 @@ Fresh Django Installations
 --------------------------
 
 If you're on a brand new Django installation, make sure you do a ``migrate``
-**before** adding ``helpdesk`` to your ``INSTALLED_APPS``. This will avoid 
+**before** adding ``helpdesk`` to your ``INSTALLED_APPS``. This will avoid
 errors with trying to create User settings.
 
 Upgrading from previous versions
 --------------------------------
 
 If you are upgrading from a previous version of django-helpdesk that used
-migrations, get an up to date version of the code base (eg by using 
+migrations, get an up to date version of the code base (eg by using
 `git pull` or `pip install --upgrade django-helpdesk`) then migrate the database::
 
     python manage.py migrate helpdesk --db-dry-run # DB untouched
-    python manage.py migrate helpdesk 
+    python manage.py migrate helpdesk
 
-Lastly, restart your web server software (eg Apache) or FastCGI instance, to 
+Lastly, restart your web server software (eg Apache) or FastCGI instance, to
 ensure the latest changes are in use.
 
 If you are using django-helpdesk pre-migrations (ie pre-2011) then you're
