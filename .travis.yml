@@ -6,15 +6,9 @@ python:
     - "3.5"
 
 env:
-    - DJANGO=1.7.11
-    - DJANGO=1.8.7
-    - DJANGO=1.9
-    - DJANGO=1.10
-
-matrix:
-    exclude:
-    - python: "3.5"  # django 1.7 does not support python 3.5
-      env: DJANGO=1.7.11
+    - DJANGO=1.8.15
+    - DJANGO=1.9.10
+    - DJANGO=1.10.2
 
 install:
     - pip install argparse
