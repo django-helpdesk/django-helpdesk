@@ -7,11 +7,7 @@ views/feeds.py - A handful of staff-only RSS feeds to provide ticket details
                  to feed readers or similar software.
 """
 
-try:
-    from django.contrib.auth import get_user_model
-    User = get_user_model()
-except ImportError:
-    from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.contrib.syndication.views import Feed
 from django.core.urlresolvers import reverse
 from django.db.models import Q
@@ -19,6 +15,8 @@ from django.utils.translation import ugettext as _
 from django.shortcuts import get_object_or_404
 
 from helpdesk.models import Ticket, FollowUp, Queue
+
+User = get_user_model()
 
 
 class OpenTicketsByUser(Feed):
@@ -101,7 +99,7 @@ class UnassignedTickets(Feed):
 
     title = _('Helpdesk: Unassigned Tickets')
     description = _('Unassigned Open and Reopened tickets')
-    link = ''#%s?assigned_to=' % reverse('helpdesk_list')
+    link = ''  # '%s?assigned_to=' % reverse('helpdesk_list')
 
     def items(self, obj):
         return Ticket.objects.filter(
@@ -112,7 +110,6 @@ class UnassignedTickets(Feed):
 
     def item_pubdate(self, item):
         return item.created
-
 
     def item_author_name(self, item):
         if item.assigned_to:
@@ -127,7 +124,7 @@ class RecentFollowUps(Feed):
 
     title = _('Helpdesk: Recent Followups')
     description = _('Recent FollowUps, such as e-mail replies, comments, attachments and resolutions')
-    link = '/tickets/' # reverse('helpdesk_list')
+    link = '/tickets/'  # reverse('helpdesk_list')
 
     def items(self):
         return FollowUp.objects.order_by('-date')[:20]

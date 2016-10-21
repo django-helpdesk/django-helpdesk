@@ -20,18 +20,6 @@ from django.utils.safestring import mark_safe
 from helpdesk.models import Ticket
 
 
-class ReverseProxy:
-    def __init__(self, sequence):
-        self.sequence = sequence
-
-    def __iter__(self):
-        length = len(self.sequence)
-        i = length
-        while i > 0:
-            i = i - 1
-            yield self.sequence[i]
-
-
 def num_to_link(text):
     if text == '':
         return text
@@ -40,9 +28,7 @@ def num_to_link(text):
     for match in re.finditer(r"(?:[^&]|\b|^)#(\d+)\b", text):
         matches.append(match)
 
-    for match in ReverseProxy(matches):
-        start = match.start()
-        end = match.end()
+    for match in reversed(matches):
         number = match.groups()[0]
         url = reverse('helpdesk_view', args=[number])
         try:
@@ -52,7 +38,8 @@ def num_to_link(text):
 
         if ticket:
             style = ticket.get_status_display()
-            text = "%s <a href='%s' class='ticket_link_status ticket_link_status_%s'>#%s</a>%s" % (text[:match.start()], url, style, match.groups()[0], text[match.end():])
+            text = "%s <a href='%s' class='ticket_link_status ticket_link_status_%s'>#%s</a>%s" % (
+                text[:match.start()], url, style, match.groups()[0], text[match.end():])
     return mark_safe(text)
 
 register = template.Library()

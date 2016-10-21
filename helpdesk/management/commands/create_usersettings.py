@@ -10,17 +10,16 @@ users who don't yet have them.
 
 from django.utils.translation import ugettext as _
 from django.core.management.base import BaseCommand
-try:
-    from django.contrib.auth import get_user_model
-    User = get_user_model()
-except ImportError:
-    from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 
 from helpdesk.models import UserSettings
 from helpdesk.settings import DEFAULT_USER_SETTINGS
 
+User = get_user_model()
+
+
 class Command(BaseCommand):
-    "create_usersettings command"
+    """create_usersettings command"""
 
     help = _('Check for user without django-helpdesk UserSettings '
              'and create settings if required. Uses '
@@ -28,10 +27,7 @@ class Command(BaseCommand):
              'suit your situation.')
 
     def handle(self, *args, **options):
-        "handle command line"
+        """handle command line"""
         for u in User.objects.all():
-            try:
-                s = UserSettings.objects.get(user=u)
-            except UserSettings.DoesNotExist:
-                s = UserSettings(user=u, settings=DEFAULT_USER_SETTINGS)
-                s.save()
+            UserSettings.objects.get_or_create(user=u,
+                                               defaults={'settings': DEFAULT_USER_SETTINGS})
