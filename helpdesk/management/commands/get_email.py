@@ -40,6 +40,14 @@ from helpdesk.lib import send_templated_mail, safe_template_context
 from helpdesk.models import Queue, Ticket, FollowUp, Attachment, IgnoreEmail
 
 
+STRIPPED_SUBJECT_STRINGS = [
+    "Re: ",
+    "Fw: ",
+    "RE: ",
+    "FW: ",
+    "Automatic reply: ",
+]
+
 class Command(BaseCommand):
     def __init__(self):
         BaseCommand.__init__(self)
@@ -52,7 +60,8 @@ class Command(BaseCommand):
                 help='Hide details about each queue/message as they are processed'),
             )
 
-    help = 'Process Jutda Helpdesk queues and process e-mails via POP3/IMAP as required, feeding them into the helpdesk.'
+    help = 'Process Jutda Helpdesk queues and process e-mails via ' \
+           'POP3/IMAP as required, feeding them into the helpdesk.'
 
     def handle(self, *args, **options):
         quiet = options.get('quiet', False)
@@ -69,7 +78,6 @@ def process_email(quiet=False):
 
         if not q.email_box_interval:
             q.email_box_interval = 0
-
 
         queue_time_delta = timedelta(minutes=q.email_box_interval)
 
@@ -90,39 +98,47 @@ def process_queue(q, quiet=False):
         try:
             import socks
         except ImportError:
-            raise ImportError("Queue has been configured with proxy settings, but no socks library was installed. Try to install PySocks via pypi.")
+            raise ImportError("Queue has been configured with proxy settings, "
+                              "but no socks library was installed. "
+                              "Try to install PySocks via pypi.")
 
         proxy_type = {
             'socks4': socks.SOCKS4,
             'socks5': socks.SOCKS5,
         }.get(q.socks_proxy_type)
 
-        socks.set_default_proxy(proxy_type=proxy_type, addr=q.socks_proxy_host, port=q.socks_proxy_port)
+        socks.set_default_proxy(proxy_type=proxy_type,
+                                addr=q.socks_proxy_host,
+                                port=q.socks_proxy_port)
         socket.socket = socks.socksocket
     else:
         socket.socket = socket._socketobject
 
-    email_box_type = settings.QUEUE_EMAIL_BOX_TYPE if settings.QUEUE_EMAIL_BOX_TYPE else q.email_box_type
+    email_box_type = settings.QUEUE_EMAIL_BOX_TYPE or q.email_box_type
 
     if email_box_type == 'pop3':
-
         if q.email_box_ssl or settings.QUEUE_EMAIL_BOX_SSL:
-            if not q.email_box_port: q.email_box_port = 995
-            server = poplib.POP3_SSL(q.email_box_host or settings.QUEUE_EMAIL_BOX_HOST, int(q.email_box_port))
+            if not q.email_box_port:
+                q.email_box_port = 995
+            server = poplib.POP3_SSL(q.email_box_host or
+                                     settings.QUEUE_EMAIL_BOX_HOST,
+                                     int(q.email_box_port))
         else:
-            if not q.email_box_port: q.email_box_port = 110
-            server = poplib.POP3(q.email_box_host or settings.QUEUE_EMAIL_BOX_HOST, int(q.email_box_port))
+            if not q.email_box_port:
+                q.email_box_port = 110
+            server = poplib.POP3(q.email_box_host or
+                                 settings.QUEUE_EMAIL_BOX_HOST,
+                                 int(q.email_box_port))
 
         server.getwelcome()
         server.user(q.email_box_user or settings.QUEUE_EMAIL_BOX_USER)
         server.pass_(q.email_box_pass or settings.QUEUE_EMAIL_BOX_PASSWORD)
 
-
         messagesInfo = server.list()[1]
 
         for msg in messagesInfo:
             msgNum = msg.split(" ")[0]
-            msgSize = msg.split(" ")[1]
+            # msgSize = msg.split(" ")[1]
 
             full_message = "\n".join(server.retr(msgNum)[1])
             ticket = ticket_from_message(message=full_message, queue=q, quiet=quiet)
@@ -134,13 +150,22 @@ def process_queue(q, quiet=False):
 
     elif email_box_type == 'imap':
         if q.email_box_ssl or settings.QUEUE_EMAIL_BOX_SSL:
-            if not q.email_box_port: q.email_box_port = 993
-            server = imaplib.IMAP4_SSL(q.email_box_host or settings.QUEUE_EMAIL_BOX_HOST, int(q.email_box_port))
+            if not q.email_box_port:
+                q.email_box_port = 993
+            server = imaplib.IMAP4_SSL(q.email_box_host or
+                                       settings.QUEUE_EMAIL_BOX_HOST,
+                                       int(q.email_box_port))
         else:
-            if not q.email_box_port: q.email_box_port = 143
-            server = imaplib.IMAP4(q.email_box_host or settings.QUEUE_EMAIL_BOX_HOST, int(q.email_box_port))
+            if not q.email_box_port:
+                q.email_box_port = 143
+            server = imaplib.IMAP4(q.email_box_host or
+                                   settings.QUEUE_EMAIL_BOX_HOST,
+                                   int(q.email_box_port))
 
-        server.login(q.email_box_user or settings.QUEUE_EMAIL_BOX_USER, q.email_box_pass or settings.QUEUE_EMAIL_BOX_PASSWORD)
+        server.login(q.email_box_user or
+                     settings.QUEUE_EMAIL_BOX_USER,
+                     q.email_box_pass or
+                     settings.QUEUE_EMAIL_BOX_PASSWORD)
         server.select(q.email_box_imap_folder)
 
         status, data = server.search(None, 'NOT', 'DELETED')
@@ -160,14 +185,16 @@ def process_queue(q, quiet=False):
 def decodeUnknown(charset, string):
     if not charset:
         try:
-            return string.decode('utf-8','ignore')
+            return string.decode('utf-8', 'ignore')
         except:
-            return string.decode('iso8859-1','ignore')
+            return string.decode('iso8859-1', 'ignore')
     return unicode(string, charset)
+
 
 def decode_mail_headers(string):
     decoded = decode_header(string)
     return u' '.join([unicode(msg, charset or 'utf-8') for msg, charset in decoded])
+
 
 def ticket_from_message(message, queue, quiet):
     # 'message' must be an RFC822 formatted message.
@@ -175,7 +202,9 @@ def ticket_from_message(message, queue, quiet):
     message = email.message_from_string(msg)
     subject = message.get('subject', _('Created from e-mail'))
     subject = decode_mail_headers(decodeUnknown(message.get_charset(), subject))
-    subject = subject.replace("Re: ", "").replace("Fw: ", "").replace("RE: ", "").replace("FW: ", "").replace("Automatic reply: ", "").strip()
+    for affix in STRIPPED_SUBJECT_STRINGS:
+        subject = subject.replace(affix, "")
+    subject = subject.strip()
 
     sender = message.get('from', _('Unknown Sender'))
     sender = decode_mail_headers(decodeUnknown(message.get_charset(), sender))
@@ -210,9 +239,10 @@ def ticket_from_message(message, queue, quiet):
         if name:
             name = collapse_rfc2231_value(name)
 
-        if part.get_content_maintype() == 'text' and name == None:
+        if part.get_content_maintype() == 'text' and name is None:
             if part.get_content_subtype() == 'plain':
-                body_plain = EmailReplyParser.parse_reply(decodeUnknown(part.get_content_charset(), part.get_payload(decode=True)))
+                body_plain = EmailReplyParser.parse_reply(
+                    decodeUnknown(part.get_content_charset(), part.get_payload(decode=True)))
             else:
                 body_html = part.get_payload(decode=True)
         else:
@@ -259,7 +289,7 @@ def ticket_from_message(message, queue, quiet):
     if smtp_priority in high_priority_types or smtp_importance in high_priority_types:
         priority = 2
 
-    if ticket == None:
+    if ticket is None:
         t = Ticket(
             title=subject,
             queue=queue,
@@ -270,18 +300,18 @@ def ticket_from_message(message, queue, quiet):
         )
         t.save()
         new = True
-        update = ''
+        # update = ''
 
     elif t.status == Ticket.CLOSED_STATUS:
         t.status = Ticket.REOPENED_STATUS
         t.save()
 
     f = FollowUp(
-        ticket = t,
-        title = _('E-Mail Received from %(sender_email)s' % {'sender_email': sender_email}),
-        date = timezone.now(),
-        public = True,
-        comment = body,
+        ticket=t,
+        title=_('E-Mail Received from %(sender_email)s' % {'sender_email': sender_email}),
+        date=timezone.now(),
+        public=True,
+        comment=body,
     )
 
     if t.status == Ticket.REOPENED_STATUS:
@@ -307,7 +337,6 @@ def ticket_from_message(message, queue, quiet):
             a.save()
             if not quiet:
                 print("    - %s" % filename)
-
 
     context = safe_template_context(t)
 
@@ -343,10 +372,10 @@ def ticket_from_message(message, queue, quiet):
     else:
         context.update(comment=f.comment)
 
-        if t.status == Ticket.REOPENED_STATUS:
-            update = _(' (Reopened)')
-        else:
-            update = _(' (Updated)')
+        # if t.status == Ticket.REOPENED_STATUS:
+        #     update = _(' (Reopened)')
+        # else:
+        #     update = _(' (Updated)')
 
         if t.assigned_to:
             send_templated_mail(

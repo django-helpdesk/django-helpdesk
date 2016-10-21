@@ -7,21 +7,18 @@ urls.py - Mapping of URL's to our various views. Note we always used NAMED
           views for simplicity in linking later on.
 """
 
-from django.conf import settings
-import django
-if django.get_version().startswith("1.3"):
-    from django.conf.urls.defaults import *
-else:
-    from django.conf.urls import *
+from django.conf.urls import url
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import views as auth_views
+from django.views.generic import TemplateView
 
 from helpdesk import settings as helpdesk_settings
 from helpdesk.views import feeds, staff, public, api, kb
-from django.contrib.auth import views as auth_views
 
-from django.views.generic import TemplateView
+
 class DirectTemplateView(TemplateView):
     extra_context = None
+
     def get_context_data(self, **kwargs):
         context = super(self.__class__, self).get_context_data(**kwargs)
         if self.extra_context is not None:

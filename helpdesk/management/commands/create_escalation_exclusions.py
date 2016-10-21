@@ -16,7 +16,6 @@ from optparse import make_option
 import sys
 
 from django.core.management.base import BaseCommand, CommandError
-from django.db.models import Q
 
 from helpdesk.models import EscalationExclusion, Queue
 
@@ -47,7 +46,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         days = options['days']
-        occurrences = options['occurrences']
+        # optparse should already handle the `or 1`
+        occurrences = options['occurrences'] or 1
         verbose = False
         queue_slugs = options['queues']
         queues = []
@@ -55,8 +55,6 @@ class Command(BaseCommand):
         if options['escalate-verbosely']:
             verbose = True
 
-        # this should already be handled by optparse
-        if not occurrences: occurrences = 1
         if not (days and occurrences):
             raise CommandError('One or more occurrences must be specified.')
 
@@ -116,7 +114,6 @@ def usage():
     print(" --verbose, -v: Display a list of dates excluded")
 
 
-
 if __name__ == '__main__':
     # This script can be run from the command-line or via Django's manage.py.
     try:
@@ -126,7 +123,7 @@ if __name__ == '__main__':
         sys.exit(2)
 
     days = None
-    occurrences = None
+    occurrences = 1
     verbose = False
     queue_slugs = None
     queues = []
@@ -139,9 +136,8 @@ if __name__ == '__main__':
         if o in ('-q', '--queues'):
             queue_slugs = a
         if o in ('-o', '--occurrences'):
-            occurrences = int(a)
+            occurrences = int(a) or 1
 
-    if not occurrences: occurrences = 1
     if not (days and occurrences):
         usage()
         sys.exit(2)

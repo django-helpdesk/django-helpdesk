@@ -6,6 +6,8 @@ django-helpdesk - A Django powered ticket tracker for small enterprise.
 forms.py - Definitions of newforms-based forms for creating and maintaining
            tickets.
 """
+from django.core.exceptions import ObjectDoesNotExist
+
 try:
     from StringIO import StringIO
 except ImportError:
@@ -13,22 +15,21 @@ except ImportError:
 
 from django import forms
 from django.forms import extras
-from django.core.files.storage import default_storage
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
-try:
-    from django.contrib.auth import get_user_model
-    User = get_user_model()
-except ImportError:
-    from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 try:
     from django.utils import timezone
 except ImportError:
     from datetime import datetime as timezone
 
 from helpdesk.lib import send_templated_mail, safe_template_context
-from helpdesk.models import Ticket, Queue, FollowUp, Attachment, IgnoreEmail, TicketCC, CustomField, TicketCustomFieldValue, TicketDependency
+from helpdesk.models import (Ticket, Queue, FollowUp, Attachment, IgnoreEmail, TicketCC,
+                             CustomField, TicketCustomFieldValue, TicketDependency)
 from helpdesk import settings as helpdesk_settings
+
+User = get_user_model()
+
 
 class CustomFieldMixin(object):
     """
@@ -52,7 +53,7 @@ class CustomFieldMixin(object):
             fieldclass = forms.ChoiceField
             choices = field.choices_as_array
             if field.empty_selection_list:
-                choices.insert(0, ('','---------' ) )
+                choices.insert(0, ('', '---------'))
             instanceargs['choices'] = choices
         elif field.data_type == 'boolean':
             fieldclass = forms.BooleanField
@@ -72,6 +73,7 @@ class CustomFieldMixin(object):
             fieldclass = forms.SlugField
 
         self.fields['custom_%s' % field.name] = fieldclass(**instanceargs)
+
 
 class EditTicketForm(CustomFieldMixin, forms.ModelForm):
     class Meta:
@@ -99,7 +101,6 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
 
             self.customfield_to_field(field, instanceargs)
 
-
     def save(self, *args, **kwargs):
 
         for field, value in self.cleaned_data.items():
@@ -108,7 +109,7 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
                 customfield = CustomField.objects.get(name=field_name)
                 try:
                     cfv = TicketCustomFieldValue.objects.get(ticket=self.instance, field=customfield)
-                except:
+                except ObjectDoesNotExist:
                     cfv = TicketCustomFieldValue(ticket=self.instance, field=customfield)
                 cfv.value = value
                 cfv.save()
@@ -117,13 +118,15 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
 
 
 class EditFollowUpForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        "Filter not openned tickets here."
-        super(EditFollowUpForm, self).__init__(*args, **kwargs)
-        self.fields["ticket"].queryset = Ticket.objects.filter(status__in=(Ticket.OPEN_STATUS, Ticket.REOPENED_STATUS))
     class Meta:
         model = FollowUp
         exclude = ('date', 'user',)
+
+    def __init__(self, *args, **kwargs):
+        """Filter not openned tickets here."""
+        super(EditFollowUpForm, self).__init__(*args, **kwargs)
+        self.fields["ticket"].queryset = Ticket.objects.filter(status__in=(Ticket.OPEN_STATUS, Ticket.REOPENED_STATUS))
+
 
 class TicketForm(CustomFieldMixin, forms.Form):
     queue = forms.ChoiceField(
@@ -158,7 +161,7 @@ class TicketForm(CustomFieldMixin, forms.Form):
         required=False,
         label=_('Case owner'),
         help_text=_('If you select an owner other than yourself, they\'ll be '
-            'e-mailed details of this ticket immediately.'),
+                    'e-mailed details of this ticket immediately.'),
         )
 
     priority = forms.ChoiceField(
@@ -166,8 +169,7 @@ class TicketForm(CustomFieldMixin, forms.Form):
         required=False,
         initial='3',
         label=_('Priority'),
-        help_text=_('Please select a priority carefully. If unsure, leave it '
-            'as \'3\'.'),
+        help_text=_('Please select a priority carefully. If unsure, leave it as \'3\'.'),
         )
 
     due_date = forms.DateTimeField(
@@ -178,9 +180,9 @@ class TicketForm(CustomFieldMixin, forms.Form):
 
     def clean_due_date(self):
         data = self.cleaned_data['due_date']
-        #TODO: add Google calendar update hook
-        #if not hasattr(self, 'instance') or self.instance.due_date != new_data:
-        #    print "you changed!"
+        # TODO: add Google calendar update hook
+        # if not hasattr(self, 'instance') or self.instance.due_date != new_data:
+        #     print "you changed!"
         return data
 
     attachment = forms.FileField(
@@ -203,7 +205,6 @@ class TicketForm(CustomFieldMixin, forms.Form):
 
             self.customfield_to_field(field, instanceargs)
 
-
     def save(self, user):
         """
         Writes and returns a Ticket() object
@@ -211,15 +212,15 @@ class TicketForm(CustomFieldMixin, forms.Form):
 
         q = Queue.objects.get(id=int(self.cleaned_data['queue']))
 
-        t = Ticket( title = self.cleaned_data['title'],
-                    submitter_email = self.cleaned_data['submitter_email'],
-                    created = timezone.now(),
-                    status = Ticket.OPEN_STATUS,
-                    queue = q,
-                    description = self.cleaned_data['body'],
-                    priority = self.cleaned_data['priority'],
-                    due_date = self.cleaned_data['due_date'],
-                  )
+        t = Ticket(title=self.cleaned_data['title'],
+                   submitter_email=self.cleaned_data['submitter_email'],
+                   created=timezone.now(),
+                   status=Ticket.OPEN_STATUS,
+                   queue=q,
+                   description=self.cleaned_data['body'],
+                   priority=self.cleaned_data['priority'],
+                   due_date=self.cleaned_data['due_date'],
+                   )
 
         if self.cleaned_data['assigned_to']:
             try:
@@ -234,16 +235,16 @@ class TicketForm(CustomFieldMixin, forms.Form):
                 field_name = field.replace('custom_', '', 1)
                 customfield = CustomField.objects.get(name=field_name)
                 cfv = TicketCustomFieldValue(ticket=t,
-                            field=customfield,
-                            value=value)
+                                             field=customfield,
+                                             value=value)
                 cfv.save()
 
-        f = FollowUp(   ticket = t,
-                        title = _('Ticket Opened'),
-                        date = timezone.now(),
-                        public = True,
-                        comment = self.cleaned_data['body'],
-                        user = user,
+        f = FollowUp(ticket=t,
+                     title=_('Ticket Opened'),
+                     date=timezone.now(),
+                     public=True,
+                     comment=self.cleaned_data['body'],
+                     user=user,
                      )
         if self.cleaned_data['assigned_to']:
             f.title = _('Ticket Opened & Assigned to %(name)s') % {
@@ -290,7 +291,11 @@ class TicketForm(CustomFieldMixin, forms.Form):
                 )
             messages_sent_to.append(t.submitter_email)
 
-        if t.assigned_to and t.assigned_to != user and t.assigned_to.usersettings.settings.get('email_on_ticket_assign', False) and t.assigned_to.email and t.assigned_to.email not in messages_sent_to:
+        if t.assigned_to and \
+                t.assigned_to != user and \
+                t.assigned_to.usersettings.settings.get('email_on_ticket_assign', False) and \
+                t.assigned_to.email and \
+                t.assigned_to.email not in messages_sent_to:
             send_templated_mail(
                 'assigned_owner',
                 context,
@@ -312,7 +317,9 @@ class TicketForm(CustomFieldMixin, forms.Form):
                 )
             messages_sent_to.append(q.new_ticket_cc)
 
-        if q.updated_ticket_cc and q.updated_ticket_cc != q.new_ticket_cc and q.updated_ticket_cc not in messages_sent_to:
+        if q.updated_ticket_cc and \
+                q.updated_ticket_cc != q.new_ticket_cc and \
+                q.updated_ticket_cc not in messages_sent_to:
             send_templated_mail(
                 'newticket_cc',
                 context,
@@ -350,7 +357,7 @@ class PublicTicketForm(CustomFieldMixin, forms.Form):
         label=_('Description of your issue'),
         required=True,
         help_text=_('Please be as descriptive as possible, including any '
-            'details we may need to address your query.'),
+                    'details we may need to address your query.'),
         )
 
     priority = forms.ChoiceField(
@@ -396,14 +403,14 @@ class PublicTicketForm(CustomFieldMixin, forms.Form):
         q = Queue.objects.get(id=int(self.cleaned_data['queue']))
 
         t = Ticket(
-            title = self.cleaned_data['title'],
-            submitter_email = self.cleaned_data['submitter_email'],
-            created = timezone.now(),
-            status = Ticket.OPEN_STATUS,
-            queue = q,
-            description = self.cleaned_data['body'],
-            priority = self.cleaned_data['priority'],
-            due_date = self.cleaned_data['due_date'],
+            title=self.cleaned_data['title'],
+            submitter_email=self.cleaned_data['submitter_email'],
+            created=timezone.now(),
+            status=Ticket.OPEN_STATUS,
+            queue=q,
+            description=self.cleaned_data['body'],
+            priority=self.cleaned_data['priority'],
+            due_date=self.cleaned_data['due_date'],
             )
 
         if q.default_owner and not t.assigned_to:
@@ -416,16 +423,16 @@ class PublicTicketForm(CustomFieldMixin, forms.Form):
                 field_name = field.replace('custom_', '', 1)
                 customfield = CustomField.objects.get(name=field_name)
                 cfv = TicketCustomFieldValue(ticket=t,
-                            field=customfield,
-                            value=value)
+                                             field=customfield,
+                                             value=value)
                 cfv.save()
 
         f = FollowUp(
-            ticket = t,
-            title = _('Ticket Opened Via Web'),
-            date = timezone.now(),
-            public = True,
-            comment = self.cleaned_data['body'],
+            ticket=t,
+            title=_('Ticket Opened Via Web'),
+            date=timezone.now(),
+            public=True,
+            comment=self.cleaned_data['body'],
             )
 
         f.save()
@@ -463,7 +470,10 @@ class PublicTicketForm(CustomFieldMixin, forms.Form):
             )
         messages_sent_to.append(t.submitter_email)
 
-        if t.assigned_to and t.assigned_to.usersettings.settings.get('email_on_ticket_assign', False) and t.assigned_to.email and t.assigned_to.email not in messages_sent_to:
+        if t.assigned_to and \
+                t.assigned_to.usersettings.settings.get('email_on_ticket_assign', False) and \
+                t.assigned_to.email and \
+                t.assigned_to.email not in messages_sent_to:
             send_templated_mail(
                 'assigned_owner',
                 context,
@@ -485,7 +495,9 @@ class PublicTicketForm(CustomFieldMixin, forms.Form):
                 )
             messages_sent_to.append(q.new_ticket_cc)
 
-        if q.updated_ticket_cc and q.updated_ticket_cc != q.new_ticket_cc and q.updated_ticket_cc not in messages_sent_to:
+        if q.updated_ticket_cc and \
+                q.updated_ticket_cc != q.new_ticket_cc and \
+                q.updated_ticket_cc not in messages_sent_to:
             send_templated_mail(
                 'newticket_cc',
                 context,
@@ -537,12 +549,18 @@ class UserSettingsForm(forms.Form):
         required=False,
         )
 
+
 class EmailIgnoreForm(forms.ModelForm):
     class Meta:
         model = IgnoreEmail
         exclude = []
 
+
 class TicketCCForm(forms.ModelForm):
+    class Meta:
+        model = TicketCC
+        exclude = ('ticket',)
+
     def __init__(self, *args, **kwargs):
         super(TicketCCForm, self).__init__(*args, **kwargs)
         if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_CC:
@@ -550,9 +568,7 @@ class TicketCCForm(forms.ModelForm):
         else:
             users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
         self.fields['user'].queryset = users
-    class Meta:
-        model = TicketCC
-        exclude = ('ticket',)
+
 
 class TicketDependencyForm(forms.ModelForm):
     class Meta:
