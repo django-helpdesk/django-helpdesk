@@ -457,7 +457,7 @@ def update_ticket(request, ticket_id, public=False):
     if request.FILES:
         import mimetypes, os
         for file in request.FILES.getlist('attachment'):
-            filename = file.name.encode('ascii', 'ignore')
+            filename = file.name
             a = Attachment(
                 followup=f,
                 filename=filename,
@@ -473,7 +473,7 @@ def update_ticket(request, ticket_id, public=False):
                 files.append([a.filename, a.file])
 
 
-    if title != ticket.title:
+    if title != ticket.title and title != "":
         c = TicketChange(
             followup=f,
             field=_('Title'),
