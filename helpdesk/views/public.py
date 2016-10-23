@@ -47,7 +47,7 @@ def homepage(request):
                     reverse('helpdesk_public_view'),
                     ticket.ticket_for_url,
                     ticket.submitter_email)
-                    )
+                )
     else:
         try:
             queue = Queue.objects.get(slug=request.GET.get('queue', None))
@@ -67,9 +67,9 @@ def homepage(request):
     knowledgebase_categories = KBCategory.objects.all()
 
     return render(request, 'helpdesk/public_homepage.html', {
-            'form': form,
-            'helpdesk_settings': helpdesk_settings,
-            'kb_categories': knowledgebase_categories
+        'form': form,
+        'helpdesk_settings': helpdesk_settings,
+        'kb_categories': knowledgebase_categories
     })
 
 
@@ -106,7 +106,7 @@ def view_ticket(request):
                     'public': 1,
                     'title': ticket.title,
                     'comment': _('Submitter accepted resolution and closed ticket'),
-                    }
+                }
                 if ticket.assigned_to:
                     request.POST['owner'] = ticket.assigned_to.id
                 request.GET = {}
