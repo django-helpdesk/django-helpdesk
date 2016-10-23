@@ -35,6 +35,7 @@ class CustomFieldMixin(object):
     """
     Mixin that provides a method to turn CustomFields into an actual field
     """
+
     def customfield_to_field(self, field, instanceargs):
         if field.data_type == 'varchar':
             fieldclass = forms.CharField
@@ -76,6 +77,7 @@ class CustomFieldMixin(object):
 
 
 class EditTicketForm(CustomFieldMixin, forms.ModelForm):
+
     class Meta:
         model = Ticket
         exclude = ('created', 'modified', 'status', 'on_hold', 'resolution', 'last_escalation', 'assigned_to')
@@ -93,11 +95,11 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
             except TicketCustomFieldValue.DoesNotExist:
                 initial_value = None
             instanceargs = {
-                    'label': field.label,
-                    'help_text': field.help_text,
-                    'required': field.required,
-                    'initial': initial_value,
-                    }
+                'label': field.label,
+                'help_text': field.help_text,
+                'required': field.required,
+                'initial': initial_value,
+            }
 
             self.customfield_to_field(field, instanceargs)
 
@@ -118,6 +120,7 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
 
 
 class EditFollowUpForm(forms.ModelForm):
+
     class Meta:
         model = FollowUp
         exclude = ('date', 'user',)
@@ -133,28 +136,28 @@ class TicketForm(CustomFieldMixin, forms.Form):
         label=_('Queue'),
         required=True,
         choices=()
-        )
+    )
 
     title = forms.CharField(
         max_length=100,
         required=True,
-        widget=forms.TextInput(attrs={'size':'60'}),
+        widget=forms.TextInput(attrs={'size': '60'}),
         label=_('Summary of the problem'),
-        )
+    )
 
     submitter_email = forms.EmailField(
         required=False,
         label=_('Submitter E-Mail Address'),
-        widget=forms.TextInput(attrs={'size':'60'}),
+        widget=forms.TextInput(attrs={'size': '60'}),
         help_text=_('This e-mail address will receive copies of all public '
-            'updates to this ticket.'),
-        )
+                    'updates to this ticket.'),
+    )
 
     body = forms.CharField(
         widget=forms.Textarea(attrs={'cols': 47, 'rows': 15}),
         label=_('Description of Issue'),
         required=True,
-        )
+    )
 
     assigned_to = forms.ChoiceField(
         choices=(),
@@ -162,7 +165,7 @@ class TicketForm(CustomFieldMixin, forms.Form):
         label=_('Case owner'),
         help_text=_('If you select an owner other than yourself, they\'ll be '
                     'e-mailed details of this ticket immediately.'),
-        )
+    )
 
     priority = forms.ChoiceField(
         choices=Ticket.PRIORITY_CHOICES,
@@ -170,13 +173,13 @@ class TicketForm(CustomFieldMixin, forms.Form):
         initial='3',
         label=_('Priority'),
         help_text=_('Please select a priority carefully. If unsure, leave it as \'3\'.'),
-        )
+    )
 
     due_date = forms.DateTimeField(
         widget=extras.SelectDateWidget,
         required=False,
         label=_('Due on'),
-        )
+    )
 
     def clean_due_date(self):
         data = self.cleaned_data['due_date']
@@ -189,7 +192,7 @@ class TicketForm(CustomFieldMixin, forms.Form):
         required=False,
         label=_('Attach File'),
         help_text=_('You can attach a file such as a document or screenshot to this ticket.'),
-        )
+    )
 
     def __init__(self, *args, **kwargs):
         """
@@ -198,10 +201,10 @@ class TicketForm(CustomFieldMixin, forms.Form):
         super(TicketForm, self).__init__(*args, **kwargs)
         for field in CustomField.objects.all():
             instanceargs = {
-                    'label': field.label,
-                    'help_text': field.help_text,
-                    'required': field.required,
-                    }
+                'label': field.label,
+                'help_text': field.help_text,
+                'required': field.required,
+            }
 
             self.customfield_to_field(field, instanceargs)
 
@@ -263,7 +266,7 @@ class TicketForm(CustomFieldMixin, forms.Form):
                 filename=filename,
                 mime_type=mimetypes.guess_type(filename)[0] or 'application/octet-stream',
                 size=file.size,
-                )
+            )
             a.file.save(file.name, file, save=False)
             a.save()
 
@@ -288,7 +291,7 @@ class TicketForm(CustomFieldMixin, forms.Form):
                 sender=q.from_address,
                 fail_silently=True,
                 files=files,
-                )
+            )
             messages_sent_to.append(t.submitter_email)
 
         if t.assigned_to and \
@@ -303,7 +306,7 @@ class TicketForm(CustomFieldMixin, forms.Form):
                 sender=q.from_address,
                 fail_silently=True,
                 files=files,
-                )
+            )
             messages_sent_to.append(t.assigned_to.email)
 
         if q.new_ticket_cc and q.new_ticket_cc not in messages_sent_to:
@@ -314,7 +317,7 @@ class TicketForm(CustomFieldMixin, forms.Form):
                 sender=q.from_address,
                 fail_silently=True,
                 files=files,
-                )
+            )
             messages_sent_to.append(q.new_ticket_cc)
 
         if q.updated_ticket_cc and \
@@ -327,7 +330,7 @@ class TicketForm(CustomFieldMixin, forms.Form):
                 sender=q.from_address,
                 fail_silently=True,
                 files=files,
-                )
+            )
 
         return t
 
@@ -337,20 +340,20 @@ class PublicTicketForm(CustomFieldMixin, forms.Form):
         label=_('Queue'),
         required=True,
         choices=()
-        )
+    )
 
     title = forms.CharField(
         max_length=100,
         required=True,
         widget=forms.TextInput(),
         label=_('Summary of your query'),
-        )
+    )
 
     submitter_email = forms.EmailField(
         required=True,
         label=_('Your E-Mail Address'),
         help_text=_('We will e-mail you when your ticket is updated.'),
-        )
+    )
 
     body = forms.CharField(
         widget=forms.Textarea(),
@@ -358,7 +361,7 @@ class PublicTicketForm(CustomFieldMixin, forms.Form):
         required=True,
         help_text=_('Please be as descriptive as possible, including any '
                     'details we may need to address your query.'),
-        )
+    )
 
     priority = forms.ChoiceField(
         choices=Ticket.PRIORITY_CHOICES,
@@ -366,20 +369,20 @@ class PublicTicketForm(CustomFieldMixin, forms.Form):
         initial='3',
         label=_('Urgency'),
         help_text=_('Please select a priority carefully.'),
-        )
+    )
 
     due_date = forms.DateTimeField(
         widget=extras.SelectDateWidget,
         required=False,
         label=_('Due on'),
-        )
+    )
 
     attachment = forms.FileField(
         required=False,
         label=_('Attach File'),
         help_text=_('You can attach a file such as a document or screenshot to this ticket.'),
         max_length=1000,
-        )
+    )
 
     def __init__(self, *args, **kwargs):
         """
@@ -388,10 +391,10 @@ class PublicTicketForm(CustomFieldMixin, forms.Form):
         super(PublicTicketForm, self).__init__(*args, **kwargs)
         for field in CustomField.objects.filter(staff_only=False):
             instanceargs = {
-                    'label': field.label,
-                    'help_text': field.help_text,
-                    'required': field.required,
-                    }
+                'label': field.label,
+                'help_text': field.help_text,
+                'required': field.required,
+            }
 
             self.customfield_to_field(field, instanceargs)
 
@@ -411,7 +414,7 @@ class PublicTicketForm(CustomFieldMixin, forms.Form):
             description=self.cleaned_data['body'],
             priority=self.cleaned_data['priority'],
             due_date=self.cleaned_data['due_date'],
-            )
+        )
 
         if q.default_owner and not t.assigned_to:
             t.assigned_to = q.default_owner
@@ -433,7 +436,7 @@ class PublicTicketForm(CustomFieldMixin, forms.Form):
             date=timezone.now(),
             public=True,
             comment=self.cleaned_data['body'],
-            )
+        )
 
         f.save()
 
@@ -447,7 +450,7 @@ class PublicTicketForm(CustomFieldMixin, forms.Form):
                 filename=filename,
                 mime_type=mimetypes.guess_type(filename)[0] or 'application/octet-stream',
                 size=file.size,
-                )
+            )
             a.file.save(file.name, file, save=False)
             a.save()
 
@@ -467,7 +470,7 @@ class PublicTicketForm(CustomFieldMixin, forms.Form):
             sender=q.from_address,
             fail_silently=True,
             files=files,
-            )
+        )
         messages_sent_to.append(t.submitter_email)
 
         if t.assigned_to and \
@@ -481,7 +484,7 @@ class PublicTicketForm(CustomFieldMixin, forms.Form):
                 sender=q.from_address,
                 fail_silently=True,
                 files=files,
-                )
+            )
             messages_sent_to.append(t.assigned_to.email)
 
         if q.new_ticket_cc and q.new_ticket_cc not in messages_sent_to:
@@ -492,7 +495,7 @@ class PublicTicketForm(CustomFieldMixin, forms.Form):
                 sender=q.from_address,
                 fail_silently=True,
                 files=files,
-                )
+            )
             messages_sent_to.append(q.new_ticket_cc)
 
         if q.updated_ticket_cc and \
@@ -505,7 +508,7 @@ class PublicTicketForm(CustomFieldMixin, forms.Form):
                 sender=q.from_address,
                 fail_silently=True,
                 files=files,
-                )
+            )
 
         return t
 
@@ -515,25 +518,25 @@ class UserSettingsForm(forms.Form):
         label=_('Show Ticket List on Login?'),
         help_text=_('Display the ticket list upon login? Otherwise, the dashboard is shown.'),
         required=False,
-        )
+    )
 
     email_on_ticket_change = forms.BooleanField(
         label=_('E-mail me on ticket change?'),
         help_text=_('If you\'re the ticket owner and the ticket is changed via the web by somebody else, do you want to receive an e-mail?'),
         required=False,
-        )
+    )
 
     email_on_ticket_assign = forms.BooleanField(
         label=_('E-mail me when assigned a ticket?'),
         help_text=_('If you are assigned a ticket via the web, do you want to receive an e-mail?'),
         required=False,
-        )
+    )
 
     email_on_ticket_apichange = forms.BooleanField(
         label=_('E-mail me when a ticket is changed via the API?'),
         help_text=_('If a ticket is altered by the API, do you want to receive an e-mail?'),
         required=False,
-        )
+    )
 
     tickets_per_page = forms.IntegerField(
         label=_('Number of tickets to show per page'),
@@ -541,22 +544,24 @@ class UserSettingsForm(forms.Form):
         required=False,
         min_value=1,
         max_value=1000,
-        )
+    )
 
     use_email_as_submitter = forms.BooleanField(
         label=_('Use my e-mail address when submitting tickets?'),
         help_text=_('When you submit a ticket, do you want to automatically use your e-mail address as the submitter address? You can type a different e-mail address when entering the ticket if needed, this option only changes the default.'),
         required=False,
-        )
+    )
 
 
 class EmailIgnoreForm(forms.ModelForm):
+
     class Meta:
         model = IgnoreEmail
         exclude = []
 
 
 class TicketCCForm(forms.ModelForm):
+
     class Meta:
         model = TicketCC
         exclude = ('ticket',)
@@ -571,6 +576,7 @@ class TicketCCForm(forms.ModelForm):
 
 
 class TicketDependencyForm(forms.ModelForm):
+
     class Meta:
         model = TicketDependency
         exclude = ('ticket',)

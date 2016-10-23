@@ -1,7 +1,7 @@
 """
 django-helpdesk - A Django powered ticket tracker for small enterprise.
 
-templatetags/saved_queries.py - This template tag returns previously saved 
+templatetags/saved_queries.py - This template tag returns previously saved
                                 queries. Therefore you don't need to modify
                                 any views.
 """
@@ -17,8 +17,8 @@ def saved_queries(user):
         return user_saved_queries
     except Exception as e:
         import sys
-        print >> sys.stderr,  "'saved_queries' template tag (django-helpdesk) crashed with following error:"
-        print >> sys.stderr,  e
+        print >> sys.stderr, "'saved_queries' template tag (django-helpdesk) crashed with following error:"
+        print >> sys.stderr, e
         return ''
 
 register = Library()
