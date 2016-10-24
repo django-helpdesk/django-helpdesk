@@ -71,7 +71,7 @@ def api(request, method):
     request.user = authenticate(
         username=request.POST.get('user', False),
         password=request.POST.get('password'),
-        )
+    )
 
     if request.user is None:
         return api_return(STATUS_ERROR_PERMISSIONS)
@@ -109,6 +109,7 @@ def api_return(status, text='', json=False):
 
 
 class API:
+
     def __init__(self, request):
         self.request = request
 
@@ -195,7 +196,7 @@ class API:
             comment=message,
             user=self.request.user,
             title='Comment Added',
-            )
+        )
 
         if public:
             f.public = True
@@ -214,7 +215,7 @@ class API:
                 recipients=ticket.submitter_email,
                 sender=ticket.queue.from_address,
                 fail_silently=True,
-                )
+            )
             messages_sent_to.append(ticket.submitter_email)
 
         if public:
@@ -226,7 +227,7 @@ class API:
                         recipients=cc.email_address,
                         sender=ticket.queue.from_address,
                         fail_silently=True,
-                        )
+                    )
                     messages_sent_to.append(cc.email_address)
 
         if ticket.queue.updated_ticket_cc and ticket.queue.updated_ticket_cc not in messages_sent_to:
@@ -236,7 +237,7 @@ class API:
                 recipients=ticket.queue.updated_ticket_cc,
                 sender=ticket.queue.from_address,
                 fail_silently=True,
-                )
+            )
             messages_sent_to.append(ticket.queue.updated_ticket_cc)
 
         if (
@@ -276,7 +277,7 @@ class API:
             user=self.request.user,
             title='Resolved',
             public=True,
-            )
+        )
         f.save()
 
         context = safe_template_context(ticket)
@@ -293,7 +294,7 @@ class API:
                 recipients=ticket.submitter_email,
                 sender=ticket.queue.from_address,
                 fail_silently=True,
-                )
+            )
             messages_sent_to.append(ticket.submitter_email)
 
             for cc in ticket.ticketcc_set.all():
@@ -304,7 +305,7 @@ class API:
                         recipients=cc.email_address,
                         sender=ticket.queue.from_address,
                         fail_silently=True,
-                        )
+                    )
                     messages_sent_to.append(cc.email_address)
 
         if ticket.queue.updated_ticket_cc and ticket.queue.updated_ticket_cc not in messages_sent_to:
@@ -314,7 +315,7 @@ class API:
                 recipients=ticket.queue.updated_ticket_cc,
                 sender=ticket.queue.from_address,
                 fail_silently=True,
-                )
+            )
             messages_sent_to.append(ticket.queue.updated_ticket_cc)
 
         if ticket.assigned_to and \
@@ -329,7 +330,7 @@ class API:
                 recipients=ticket.assigned_to.email,
                 sender=ticket.queue.from_address,
                 fail_silently=True,
-                )
+            )
 
         ticket.resoltuion = f.comment
         ticket.status = Ticket.RESOLVED_STATUS
