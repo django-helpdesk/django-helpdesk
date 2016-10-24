@@ -3,6 +3,7 @@ from django.core.urlresolvers import reverse
 from django.test import TestCase
 from helpdesk.models import Ticket, Queue
 
+
 class TestKBDisabled(TestCase):
     def setUp(self):
         q = Queue(title='Q1', slug='q1')
@@ -14,22 +15,19 @@ class TestKBDisabled(TestCase):
 
     def test_ticket_by_id(self):
         """Can a ticket be looked up by its ID"""
-        from django.core.urlresolvers import NoReverseMatch
-
         # get the ticket from models
         t = Ticket.objects.get(id=self.ticket.id)
         self.assertEqual(t.title, self.ticket.title)
 
     def test_ticket_by_link(self):
         """Can a ticket be looked up by its link from (eg) an email"""
-        # Work out the link which would have been inserted into the email
-        link = self.ticket.ticket_url
-        # however instead of using that link, we will exercise 'reverse'
-        # to lookup/build the URL from the ticket info we have
-        #  http://example.com/helpdesk/view/?ticket=q1-1&email=None
+        # Instead of using the ticket_for_url link,
+        # we will exercise 'reverse' to lookup/build the URL
+        # from the ticket info we have
+        # http://example.com/helpdesk/view/?ticket=q1-1&email=None
         response = self.client.get(reverse('helpdesk:public_view'),
                                    {'ticket': self.ticket.ticket_for_url,
-                                    'email':self.ticket.submitter_email})
+                                    'email': self.ticket.submitter_email})
         self.assertEqual(response.status_code, 200)
 
     def test_ticket_with_changed_queue(self):
@@ -40,7 +38,7 @@ class TestKBDisabled(TestCase):
         # grab the URL / params which would have been emailed out to submitter.
         url = reverse('helpdesk:public_view')
         params = {'ticket': self.ticket.ticket_for_url,
-                  'email':self.ticket.submitter_email}
+                  'email': self.ticket.submitter_email}
         # Pickup the ticket created in setup() and change its queue
         self.ticket.queue = q2
         self.ticket.save()

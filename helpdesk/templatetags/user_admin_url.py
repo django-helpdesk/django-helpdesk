@@ -12,6 +12,7 @@ templatetags/admin_url.py - Very simple template tag allow linking to the
 from django import template
 from django.contrib.auth import get_user_model
 
+
 def user_admin_url(action):
     user = get_user_model()
     try:

@@ -4,6 +4,9 @@ django-helpdesk - A Django powered ticket tracker for small businesses.
 .. image:: https://travis-ci.org/django-helpdesk/django-helpdesk.png?branch=master
     :target: https://travis-ci.org/django-helpdesk/django-helpdesk
 
+.. image:: https://codecov.io/gh/django-helpdesk/django-helpdesk/branch/master/graph/badge.svg
+  :target: https://codecov.io/gh/django-helpdesk/django-helpdesk
+
 Copyright 2009- Ross Poulton and contributors. All Rights Reserved. See LICENSE for details.
 
 django-helpdesk was formerly known as Jutda Helpdesk, named after the 
@@ -26,7 +29,7 @@ Dependencies (pre-flight checklist)
 -----------------------------------
 
 1. Python 2.7 or 3.4+ (3.4+ support is new, please let us know how it goes)
-2. Django (1.7 or newer, preferably 1.9 - Django 1.7 is not supported if you are using Python 3.5)
+2. Django (1.7, 1.8, 1.9 and 1.10, preferably 1.9 - Django 1.7 is not supported if you are using Python 3.5)
 3. An existing WORKING Django project with database etc. If you
    cannot log into the Admin, you won't get this product working.
 4. `pip install django-bootstrap-form` and add `bootstrapform` to `settings.INSTALLED_APPS`
@@ -99,6 +102,3 @@ https://www.transifex.com/django-helpdesk/django-helpdesk/
 Feel free to request access to contribute your translations.
 
 Pull requests for all other changes are welcome. We're currently trying to add test cases wherever possible, so please continue to include tests with pull requests.
-
-.. image:: https://secure.travis-ci.org/django-helpdesk/django-helpdesk.png?branch=master
-    :target: https://travis-ci.org/django-helpdesk/django-helpdesk
