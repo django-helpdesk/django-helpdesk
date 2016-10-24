@@ -20,8 +20,12 @@ install:
     - pip install argparse
     - pip install coverage
     - pip install codecov
+    - pip install pep8
     - pip install -q Django==$DJANGO
     - pip install -q -r requirements.txt
+
+before_script:
+    - "pep8 --exclude=migrations,south_migrations --ignore=E501 helpdesk"
 
 script: 
     - coverage run --source='.' quicktest.py helpdesk
