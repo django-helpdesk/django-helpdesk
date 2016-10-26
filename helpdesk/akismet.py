@@ -24,14 +24,14 @@ You should pass in the keyword argument 'agent' to the name of your program,
 when you create an Akismet instance. This sets the ``user-agent`` to a useful
 value.
 
-The default is : ::
+The default is::
 
     Python Interface by Fuzzyman | akismet.py/0.2.0
 
 Whatever you pass in, will replace the *Python Interface by Fuzzyman* part.
 **0.2.0** will change with the version of this interface.
 
-Usage example:
+Usage example::
 
     from akismet import Akismet
 
