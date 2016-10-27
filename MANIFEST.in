@@ -1,5 +1,5 @@
 include README.rst
-include UPGRADE
+include AUTHORS
 include LICENSE*
 include requirements.txt
 
