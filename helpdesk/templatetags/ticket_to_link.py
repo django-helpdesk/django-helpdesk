@@ -30,7 +30,7 @@ def num_to_link(text):
 
     for match in reversed(matches):
         number = match.groups()[0]
-        url = reverse('helpdesk_view', args=[number])
+        url = reverse('helpdesk:view', args=[number])
         try:
             ticket = Ticket.objects.get(id=number)
         except Ticket.DoesNotExist:

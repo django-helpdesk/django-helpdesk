@@ -13,7 +13,7 @@ class TestSavingSharedQuery(TestCase):
 
     def test_cansavequery(self):
         """Can a query be saved"""
-        url = reverse('helpdesk_savequery')
+        url = reverse('helpdesk:savequery')
         self.client.login(username=get_staff_user().get_username(),
                           password='password')
         response = self.client.post(

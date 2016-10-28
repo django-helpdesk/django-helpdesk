@@ -20,12 +20,12 @@
     <td>{{ person.display }}</td>
     <td>{{ person.can_view }}</td>
     <td>{{ person.can_update }}</td>
-    <td><a href='{% url 'helpdesk_ticket_cc_del' ticket.id person.id %}'>{% trans "Delete" %}</a></td>
+    <td><a href='{% url 'helpdesk:ticket_cc_del' ticket.id person.id %}'>{% trans "Delete" %}</a></td>
 </tr>
 {% endfor %}
 </tbody>
 </table>
 
-<p><a href='{% url 'helpdesk_view' ticket.id %}'>{% blocktrans with ticket.title as ticket_title %}Return to <em>{{ ticket_title }}</em>{% endblocktrans %}</a></p>
+<p><a href='{% url 'helpdesk:view' ticket.id %}'>{% blocktrans with ticket.title as ticket_title %}Return to <em>{{ ticket_title }}</em>{% endblocktrans %}</a></p>
 
 {% endblock %}

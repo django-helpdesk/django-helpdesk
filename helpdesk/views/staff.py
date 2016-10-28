@@ -183,7 +183,7 @@ def delete_ticket(request, ticket_id):
         })
     else:
         ticket.delete()
-        return HttpResponseRedirect(reverse('helpdesk_home'))
+        return HttpResponseRedirect(reverse('helpdesk:home'))
 delete_ticket = staff_member_required(delete_ticket)
 
 
@@ -233,7 +233,7 @@ def followup_edit(request, ticket_id, followup_id):
                 attachment.save()
             # delete old followup
             followup.delete()
-        return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket.id]))
+        return HttpResponseRedirect(reverse('helpdesk:view', args=[ticket.id]))
 followup_edit = staff_member_required(followup_edit)
 
 
@@ -242,11 +242,11 @@ def followup_delete(request, ticket_id, followup_id):
 
     ticket = get_object_or_404(Ticket, id=ticket_id)
     if not request.user.is_superuser:
-        return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket.id]))
+        return HttpResponseRedirect(reverse('helpdesk:view', args=[ticket.id]))
 
     followup = get_object_or_404(FollowUp, id=followup_id)
     followup.delete()
-    return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket.id]))
+    return HttpResponseRedirect(reverse('helpdesk:view', args=[ticket.id]))
 followup_delete = staff_member_required(followup_delete)
 
 
@@ -274,7 +274,7 @@ def view_ticket(request, ticket_id):
             return_ticketccstring_and_show_subscribe(request.user, ticket)
         if show_subscribe:
             subscribe_staff_member_to_ticket(ticket, request.user)
-            return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket.id]))
+            return HttpResponseRedirect(reverse('helpdesk:view', args=[ticket.id]))
 
     if 'close' in request.GET and ticket.status == Ticket.RESOLVED_STATUS:
         if not ticket.assigned_to:
@@ -370,7 +370,7 @@ def update_ticket(request, ticket_id, public=False):
                 request.user.is_staff or
                 helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE))):
         return HttpResponseRedirect('%s?next=%s' %
-                                    (reverse('login'), request.path))
+                                    (reverse('helpdesk:login'), request.path))
 
     ticket = get_object_or_404(Ticket, id=ticket_id)
 
@@ -647,7 +647,7 @@ def mass_update(request):
     tickets = request.POST.getlist('ticket_id')
     action = request.POST.get('action', None)
     if not (tickets and action):
-        return HttpResponseRedirect(reverse('helpdesk_list'))
+        return HttpResponseRedirect(reverse('helpdesk:list'))
 
     if action.startswith('assign_'):
         parts = action.split('_')
@@ -755,7 +755,7 @@ def mass_update(request):
         elif action == 'delete':
             t.delete()
 
-    return HttpResponseRedirect(reverse('helpdesk_list'))
+    return HttpResponseRedirect(reverse('helpdesk:list'))
 mass_update = staff_member_required(mass_update)
 
 
@@ -818,9 +818,9 @@ def ticket_list(request):
         try:
             saved_query = SavedSearch.objects.get(pk=request.GET.get('saved_query'))
         except SavedSearch.DoesNotExist:
-            return HttpResponseRedirect(reverse('helpdesk_list'))
+            return HttpResponseRedirect(reverse('helpdesk:list'))
         if not (saved_query.shared or saved_query.user == request.user):
-            return HttpResponseRedirect(reverse('helpdesk_list'))
+            return HttpResponseRedirect(reverse('helpdesk:list'))
 
         import json
         from helpdesk.lib import b64decode
@@ -828,7 +828,7 @@ def ticket_list(request):
             query_params = json.loads(b64decode(str(saved_query.query)))
         except ValueError:
             # Query deserialization failed. (E.g. was a pickled query)
-            return HttpResponseRedirect(reverse('helpdesk_list'))
+            return HttpResponseRedirect(reverse('helpdesk:list'))
 
     elif not ('queue' in request.GET or
               'assigned_to' in request.GET or
@@ -989,7 +989,7 @@ def create_ticket(request):
             if _has_access_to_queue(request.user, ticket.queue):
                 return HttpResponseRedirect(ticket.get_absolute_url())
             else:
-                return HttpResponseRedirect(reverse('helpdesk_dashboard'))
+                return HttpResponseRedirect(reverse('helpdesk:dashboard'))
     else:
         initial_data = {}
         if request.user.usersettings.settings.get('use_email_as_submitter', False) and request.user.email:
@@ -1093,16 +1093,16 @@ def run_report(request, report):
         try:
             saved_query = SavedSearch.objects.get(pk=request.GET.get('saved_query'))
         except SavedSearch.DoesNotExist:
-            return HttpResponseRedirect(reverse('helpdesk_report_index'))
+            return HttpResponseRedirect(reverse('helpdesk:report_index'))
         if not (saved_query.shared or saved_query.user == request.user):
-            return HttpResponseRedirect(reverse('helpdesk_report_index'))
+            return HttpResponseRedirect(reverse('helpdesk:report_index'))
 
         import json
         from helpdesk.lib import b64decode
         try:
             query_params = json.loads(b64decode(str(saved_query.query)))
         except:
-            return HttpResponseRedirect(reverse('helpdesk_report_index'))
+            return HttpResponseRedirect(reverse('helpdesk:report_index'))
 
         report_queryset = apply_query(report_queryset, query_params)
 
@@ -1263,12 +1263,12 @@ def save_query(request):
     query_encoded = request.POST.get('query_encoded', None)
 
     if not title or not query_encoded:
-        return HttpResponseRedirect(reverse('helpdesk_list'))
+        return HttpResponseRedirect(reverse('helpdesk:list'))
 
     query = SavedSearch(title=title, shared=shared, query=query_encoded, user=request.user)
     query.save()
 
-    return HttpResponseRedirect('%s?saved_query=%s' % (reverse('helpdesk_list'), query.id))
+    return HttpResponseRedirect('%s?saved_query=%s' % (reverse('helpdesk:list'), query.id))
 save_query = staff_member_required(save_query)
 
 
@@ -1277,7 +1277,7 @@ def delete_saved_query(request, id):
 
     if request.method == 'POST':
         query.delete()
-        return HttpResponseRedirect(reverse('helpdesk_list'))
+        return HttpResponseRedirect(reverse('helpdesk:list'))
     else:
         return render(request, 'helpdesk/confirm_delete_saved_query.html', {'query': query})
 delete_saved_query = staff_member_required(delete_saved_query)
@@ -1309,7 +1309,7 @@ def email_ignore_add(request):
         form = EmailIgnoreForm(request.POST)
         if form.is_valid():
             form.save()
-            return HttpResponseRedirect(reverse('helpdesk_email_ignore'))
+            return HttpResponseRedirect(reverse('helpdesk:email_ignore'))
     else:
         form = EmailIgnoreForm(request.GET)
 
@@ -1321,7 +1321,7 @@ def email_ignore_del(request, id):
     ignore = get_object_or_404(IgnoreEmail, id=id)
     if request.method == 'POST':
         ignore.delete()
-        return HttpResponseRedirect(reverse('helpdesk_email_ignore'))
+        return HttpResponseRedirect(reverse('helpdesk:email_ignore'))
     else:
         return render(request, 'helpdesk/email_ignore_del.html', {'ignore': ignore})
 email_ignore_del = superuser_required(email_ignore_del)
@@ -1351,7 +1351,7 @@ def ticket_cc_add(request, ticket_id):
             ticketcc = form.save(commit=False)
             ticketcc.ticket = ticket
             ticketcc.save()
-            return HttpResponseRedirect(reverse('helpdesk_ticket_cc',
+            return HttpResponseRedirect(reverse('helpdesk:ticket_cc',
                                                 kwargs={'ticket_id': ticket.id}))
     else:
         form = TicketCCForm()
@@ -1367,7 +1367,7 @@ def ticket_cc_del(request, ticket_id, cc_id):
 
     if request.method == 'POST':
         cc.delete()
-        return HttpResponseRedirect(reverse('helpdesk_ticket_cc',
+        return HttpResponseRedirect(reverse('helpdesk:ticket_cc',
                                             kwargs={'ticket_id': cc.ticket.id}))
     return render(request, 'helpdesk/ticket_cc_del.html', {'cc': cc})
 ticket_cc_del = staff_member_required(ticket_cc_del)
@@ -1384,7 +1384,7 @@ def ticket_dependency_add(request, ticket_id):
             ticketdependency.ticket = ticket
             if ticketdependency.ticket != ticketdependency.depends_on:
                 ticketdependency.save()
-            return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket.id]))
+            return HttpResponseRedirect(reverse('helpdesk:view', args=[ticket.id]))
     else:
         form = TicketDependencyForm()
     return render(request, 'helpdesk/ticket_dependency_add.html', {
@@ -1398,7 +1398,7 @@ def ticket_dependency_del(request, ticket_id, dependency_id):
     dependency = get_object_or_404(TicketDependency, ticket__id=ticket_id, id=dependency_id)
     if request.method == 'POST':
         dependency.delete()
-        return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket_id]))
+        return HttpResponseRedirect(reverse('helpdesk:view', args=[ticket_id]))
     return render(request, 'helpdesk/ticket_dependency_del.html', {'dependency': dependency})
 ticket_dependency_del = staff_member_required(ticket_dependency_del)
 
@@ -1409,7 +1409,7 @@ def attachment_del(request, ticket_id, attachment_id):
         raise PermissionDenied()
     attachment = get_object_or_404(Attachment, id=attachment_id)
     attachment.delete()
-    return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket_id]))
+    return HttpResponseRedirect(reverse('helpdesk:view', args=[ticket_id]))
 attachment_del = staff_member_required(attachment_del)
 
 

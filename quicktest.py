@@ -82,11 +82,11 @@ class QuickDjangoTest(object):
         """
         Fire up the Django test suite from before version 1.2
         """
-        settings.configure(DEBUG = True,
-           DATABASE_ENGINE = 'sqlite3',
-           DATABASE_NAME = os.path.join(self.DIRNAME, 'database.db'),
-           INSTALLED_APPS = self.INSTALLED_APPS + self.apps
-        )
+        settings.configure(DEBUG=True,
+                           DATABASE_ENGINE='sqlite3',
+                           DATABASE_NAME=os.path.join(self.DIRNAME, 'database.db'),
+                           INSTALLED_APPS=self.INSTALLED_APPS + self.apps
+                           )
         from django.test.simple import run_tests
         failures = run_tests(self.apps, verbosity=1)
         if failures:
@@ -98,8 +98,8 @@ class QuickDjangoTest(object):
         """
 
         settings.configure(
-            DEBUG = True,
-            DATABASES = {
+            DEBUG=True,
+            DATABASES={
                 'default': {
                     'ENGINE': 'django.db.backends.sqlite3',
                     'NAME': os.path.join(self.DIRNAME, 'database.db'),
@@ -109,16 +109,16 @@ class QuickDjangoTest(object):
                     'PORT': '',
                 }
             },
-            INSTALLED_APPS = self.INSTALLED_APPS + self.apps,
-            MIDDLEWARE_CLASSES = self.MIDDLEWARE_CLASSES,
-            ROOT_URLCONF = self.apps[0] + '.urls',
-            STATIC_URL = '/static/',
-            TEMPLATES = self.TEMPLATES,
+            INSTALLED_APPS=self.INSTALLED_APPS + self.apps,
+            MIDDLEWARE_CLASSES=self.MIDDLEWARE_CLASSES,
+            ROOT_URLCONF='helpdesk.tests.urls',
+            STATIC_URL='/static/',
+            TEMPLATES=self.TEMPLATES
         )
 
         # compatibility with django 1.8 downwards
         # see: http://stackoverflow.com/questions/3841725/how-to-launch-tests-for-django-reusable-app
-        
+
         try:
             # Django >= 1.6
             from django.test.runner import DiscoverRunner
@@ -151,4 +151,3 @@ if __name__ == '__main__':
     parser.add_argument('apps', nargs='+', type=str)
     args = parser.parse_args()
     QuickDjangoTest(*args.apps)
-

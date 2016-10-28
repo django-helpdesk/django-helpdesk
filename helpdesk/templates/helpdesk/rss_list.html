@@ -7,13 +7,13 @@
 <p>{% trans "The following RSS feeds are available for you to monitor using your preferred RSS software. With the exception of the 'Latest Activity' feed, all feeds provide information only on Open and Reopened cases. This ensures your RSS reader isn't full of information about closed or historical tasks." %}</p>
 
 <dl>
-    <dt><a href='{% url 'helpdesk_rss_user' user.get_username %}'><img src='{% static "helpdesk/rss_icon.png" %}' width='14' height='14' alt='{% trans "RSS Icon" %}' title='{% trans "My Open Tickets" %}' border='0' />{% trans "My Open Tickets" %}</a></dt>
+    <dt><a href='{% url 'helpdesk:rss_user' user.get_username %}'><img src='{% static "helpdesk/rss_icon.png" %}' width='14' height='14' alt='{% trans "RSS Icon" %}' title='{% trans "My Open Tickets" %}' border='0' />{% trans "My Open Tickets" %}</a></dt>
     <dd>{% trans "A summary of your open tickets - useful for getting alerted to new tickets opened for you" %}</dd>
 
-    <dt><a href='{% url 'helpdesk_rss_activity' %}'><img src='{% static "helpdesk/rss_icon.png" %}' width='14' height='14' alt='{% trans "RSS Icon" %}' title='{% trans "Latest Activity" %}' border='0' />{% trans "Latest Activity" %}</a></dt>
+    <dt><a href='{% url 'helpdesk:rss_activity' %}'><img src='{% static "helpdesk/rss_icon.png" %}' width='14' height='14' alt='{% trans "RSS Icon" %}' title='{% trans "Latest Activity" %}' border='0' />{% trans "Latest Activity" %}</a></dt>
     <dd>{% trans "A summary of all helpdesk activity - including comments, emails, attachments, and more" %}</dd>
 
-    <dt><a href='{% url 'helpdesk_rss_unassigned' %}'><img src='{% static "helpdesk/rss_icon.png" %}' width='14' height='14' alt='{% trans "RSS Icon" %}' title='{% trans "Unassigned Tickets" %}' border='0' />{% trans "Unassigned Tickets" %}</a></dt>
+    <dt><a href='{% url 'helpdesk:rss_unassigned' %}'><img src='{% static "helpdesk/rss_icon.png" %}' width='14' height='14' alt='{% trans "RSS Icon" %}' title='{% trans "Unassigned Tickets" %}' border='0' />{% trans "Unassigned Tickets" %}</a></dt>
     <dd>{% trans "All unassigned tickets - useful for being alerted to new tickets opened by the public via the web or via e-mail" %}</dd>
 </dl>
 
@@ -28,8 +28,8 @@
 {% for queue in queues %}
 <tr>
     <td>{{ queue.title }}</td>
-    <td align='center'><a href='{% url 'helpdesk_rss_queue' queue.slug %}'><img src='{% static "helpdesk/rss_icon.png" %}' width='14' height='14' alt='{% trans "RSS Icon" %}' title='{% trans "Open Tickets" %}' border='0' /></a></td>
-    <td align='center'><a href='{% url 'helpdesk_rss_user_queue' user.get_username queue.slug %}'><img src='{% static "helpdesk/rss_icon.png" %}' width='14' height='14' alt='{% trans "RSS Icon" %}' title='{% trans "My Open Tickets" %}' border='0' /></a></td>
+    <td align='center'><a href='{% url 'helpdesk:rss_queue' queue.slug %}'><img src='{% static "helpdesk/rss_icon.png" %}' width='14' height='14' alt='{% trans "RSS Icon" %}' title='{% trans "Open Tickets" %}' border='0' /></a></td>
+    <td align='center'><a href='{% url 'helpdesk:rss_user_queue' user.get_username queue.slug %}'><img src='{% static "helpdesk/rss_icon.png" %}' width='14' height='14' alt='{% trans "RSS Icon" %}' title='{% trans "My Open Tickets" %}' border='0' /></a></td>
 {% endfor %}
 </tbody>
 </table>

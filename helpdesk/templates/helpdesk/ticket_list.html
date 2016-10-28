@@ -141,7 +141,7 @@ $(document).ready(function() {
     <hr style='clear: both;' />
     <input class="btn btn-primary" type='submit' value='{% trans "Apply Filter" %}' />
     {% if from_saved_query and saved_query.user == user %}
-    <p>{% blocktrans with saved_query.title as query_name %}You are currently viewing saved query <strong>"{{ query_name }}"</strong>.{% endblocktrans %} <a href='{% url 'helpdesk_delete_query' saved_query.id %}'>{% trans "Delete Saved Query" %}</a></p>
+    <p>{% blocktrans with saved_query.title as query_name %}You are currently viewing saved query <strong>"{{ query_name }}"</strong>.{% endblocktrans %} <a href='{% url 'helpdesk:delete_query' saved_query.id %}'>{% trans "Delete Saved Query" %}</a></p>
     {% endif %}
     {% if from_saved_query %}
     <p>{% blocktrans with saved_query.id as query_id %}<a href='../reports/?saved_query={{ query_id }}'>Run a report</a> on this query to see stats and charts for the data listed below.{% endblocktrans %}</p>
@@ -162,7 +162,7 @@ $(document).ready(function() {
     </div>
     <div id="collapseTwo" class="panel-collapse collapse">
       <div class="panel-body">
-    <form method='post' action='{% url 'helpdesk_savequery' %}'>
+    <form method='post' action='{% url 'helpdesk:savequery' %}'>
     <input type='hidden' name='query_encoded' value='{{ urlsafe_query }}' />
     <dl>
         <dt><label for='id_title'>{% trans "Query Name" %}</label></dt>
@@ -196,7 +196,7 @@ $(document).ready(function() {
     </div>
     <div id="collapseThree" class="panel-collapse collapse">
       <div class="panel-body">
-    <form method='get' action='{% url 'helpdesk_list' %}'>
+    <form method='get' action='{% url 'helpdesk:list' %}'>
     <p><label for='id_query_selector'>{% trans "Query" %}</label> <select name='saved_query' id='id_query_selector'>
         {% for q in user_saved_queries %}
         <option value='{{ q.id }}'>{{ q.title }}{% if q.shared %} (Shared{% ifnotequal user q.user %} by {{ q.user.get_username }}{% endifnotequal %}){% endif %}</option>
@@ -216,7 +216,7 @@ $(document).ready(function() {
 <div class="row">
 
 {{ search_message|safe }}
-<form method='post' action='{% url 'helpdesk_mass_update' %}' id="ticket_mass_update">
+<form method='post' action='{% url 'helpdesk:mass_update' %}' id="ticket_mass_update">
 <table class="table table-hover table-bordered table-striped">
 <caption>{% trans "Tickets" %}</caption>
 <thead>

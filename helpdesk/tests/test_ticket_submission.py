@@ -44,7 +44,7 @@ class TicketBasicsTestCase(TestCase):
     def test_create_ticket_public(self):
         email_count = len(mail.outbox)
 
-        response = self.client.get(reverse('helpdesk_home'))
+        response = self.client.get(reverse('helpdesk:home'))
         self.assertEqual(response.status_code, 200)
 
         post_data = {
@@ -55,7 +55,7 @@ class TicketBasicsTestCase(TestCase):
             'priority': 3,
         }
 
-        response = self.client.post(reverse('helpdesk_home'), post_data, follow=True)
+        response = self.client.post(reverse('helpdesk:home'), post_data, follow=True)
         last_redirect = response.redirect_chain[-1]
         last_redirect_url = last_redirect[0]
         # last_redirect_status = last_redirect[1]
@@ -64,7 +64,7 @@ class TicketBasicsTestCase(TestCase):
         # Django 1.9 compatible way of testing this
         # https://docs.djangoproject.com/en/1.9/releases/1.9/#http-redirects-no-longer-forced-to-absolute-uris
         urlparts = urlparse(last_redirect_url)
-        self.assertEqual(urlparts.path, reverse('helpdesk_public_view'))
+        self.assertEqual(urlparts.path, reverse('helpdesk:public_view'))
 
         # Ensure submitter, new-queue + update-queue were all emailed.
         self.assertEqual(email_count + 3, len(mail.outbox))
@@ -79,7 +79,7 @@ class TicketBasicsTestCase(TestCase):
             'priority': 3,
         }
 
-        response = self.client.post(reverse('helpdesk_home'), post_data)
+        response = self.client.post(reverse('helpdesk:home'), post_data)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(email_count, len(mail.outbox))
         self.assertContains(response, 'Select a valid choice.')
@@ -108,7 +108,7 @@ class TicketBasicsTestCase(TestCase):
             'custom_textfield': 'This is my custom text.',
         }
 
-        response = self.client.post(reverse('helpdesk_home'), post_data, follow=True)
+        response = self.client.post(reverse('helpdesk:home'), post_data, follow=True)
 
         custom_field_1.delete()
         last_redirect = response.redirect_chain[-1]
@@ -119,7 +119,7 @@ class TicketBasicsTestCase(TestCase):
         # Django 1.9 compatible way of testing this
         # https://docs.djangoproject.com/en/1.9/releases/1.9/#http-redirects-no-longer-forced-to-absolute-uris
         urlparts = urlparse(last_redirect_url)
-        self.assertEqual(urlparts.path, reverse('helpdesk_public_view'))
+        self.assertEqual(urlparts.path, reverse('helpdesk:public_view'))
 
         # Ensure only two e-mails were sent - submitter & updated.
         self.assertEqual(email_count + 2, len(mail.outbox))

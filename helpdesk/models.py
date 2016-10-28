@@ -499,7 +499,7 @@ class Ticket(models.Model):
             site = Site(domain='configure-django-sites.com')
         return u"http://%s%s?ticket=%s&email=%s" % (
             site.domain,
-            reverse('helpdesk_public_view'),
+            reverse('helpdesk:public_view'),
             self.ticket_for_url,
             self.submitter_email
         )
@@ -518,7 +518,7 @@ class Ticket(models.Model):
             site = Site(domain='configure-django-sites.com')
         return u"http://%s%s" % (
             site.domain,
-            reverse('helpdesk_view',
+            reverse('helpdesk:view',
                     args=[self.id])
         )
     staff_url = property(_get_staff_url)
@@ -544,7 +544,7 @@ class Ticket(models.Model):
         return '%s %s' % (self.id, self.title)
 
     def get_absolute_url(self):
-        return 'helpdesk_view', (self.id,)
+        return 'helpdesk:view', (self.id,)
     get_absolute_url = models.permalink(get_absolute_url)
 
     def save(self, *args, **kwargs):
@@ -939,7 +939,7 @@ class KBCategory(models.Model):
         verbose_name_plural = _('Knowledge base categories')
 
     def get_absolute_url(self):
-        return 'helpdesk_kb_category', (), {'slug': self.slug}
+        return 'kb_category', (), {'slug': self.slug}
     get_absolute_url = models.permalink(get_absolute_url)
 
 
@@ -1006,7 +1006,7 @@ class KBItem(models.Model):
         verbose_name_plural = _('Knowledge base items')
 
     def get_absolute_url(self):
-        return 'helpdesk_kb_item', (self.id,)
+        return 'helpdesk:kb_item', (self.id,)
     get_absolute_url = models.permalink(get_absolute_url)
 
 

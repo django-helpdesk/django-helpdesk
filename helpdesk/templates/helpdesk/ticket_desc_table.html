@@ -3,9 +3,9 @@
 <table class="table table-hover table-bordered table-striped">
 <thead>
     <tr class='row_tablehead'><td colspan='2'><h3>{{ ticket.id }}. {{ ticket.title }} [{{ ticket.get_status }}]</h3> <span class='ticket_toolbar'>
-        <a href='{% url 'helpdesk_edit' ticket.id %}' class="ticket-edit"><span class="glyphicon glyphicon-pencil"></span> Edit</a>
-    | <a href='{% url 'helpdesk_delete' ticket.id %}' class="ticket-delete"><span class="glyphicon glyphicon-remove"></span> Delete</a>
-    {% if ticket.on_hold %} | <a href='{% url 'helpdesk_unhold' ticket.id %}' class="ticket-hold">{% trans "Unhold" %}</a>{% else %} | <a href='{% url 'helpdesk_hold' ticket.id %}' class="ticket-hold">{% trans "Hold" %}</a>{% endif %}
+        <a href='{% url 'helpdesk:edit' ticket.id %}' class="ticket-edit"><span class="glyphicon glyphicon-pencil"></span> Edit</a>
+    | <a href='{% url 'helpdesk:delete' ticket.id %}' class="ticket-delete"><span class="glyphicon glyphicon-remove"></span> Delete</a>
+    {% if ticket.on_hold %} | <a href='{% url 'helpdesk:unhold' ticket.id %}' class="ticket-hold">{% trans "Unhold" %}</a>{% else %} | <a href='{% url 'helpdesk:hold' ticket.id %}' class="ticket-hold">{% trans "Hold" %}</a>{% endif %}
     </span></td></tr>
 <tr><th colspan='2'>{% blocktrans with ticket.queue as queue %}Queue: {{ queue }}{% endblocktrans %}</th></tr>
 </thead>
@@ -41,7 +41,7 @@
 
 <tr>
     <th>{% trans "Submitter E-Mail" %}</th>
-    <td>{{ ticket.submitter_email }}{% if user.is_superuser %} <strong><a href='{% url 'helpdesk_email_ignore_add' %}?email={{ ticket.submitter_email }}'>{% trans "Ignore" %}</a></strong>{% endif %}</td>
+    <td>{{ ticket.submitter_email }}{% if user.is_superuser %} <strong><a href='{% url 'helpdesk:email_ignore_add' %}?email={{ ticket.submitter_email }}'>{% trans "Ignore" %}</a></strong>{% endif %}</td>
 </tr>
 
 <tr>
@@ -51,19 +51,19 @@
 
 <tr>
     <th>{% trans "Copies To" %}</th>
-    <td>{{ ticketcc_string }} <a data-toggle='tooltip' href='{% url 'helpdesk_ticket_cc' ticket.id %}' title='{% trans "Click here to add / remove people who should receive an e-mail whenever this ticket is updated." %}'><strong>{% trans "Manage" %}</strong></a>{% if SHOW_SUBSCRIBE %}, <strong><a data-toggle='tooltip' href='?subscribe' title='{% trans "Click here to subscribe yourself to this ticket, if you want to receive an e-mail whenever this ticket is updated." %}'>{% trans "Subscribe" %}</a></strong>{% endif %}</td>
+    <td>{{ ticketcc_string }} <a data-toggle='tooltip' href='{% url 'helpdesk:ticket_cc' ticket.id %}' title='{% trans "Click here to add / remove people who should receive an e-mail whenever this ticket is updated." %}'><strong>{% trans "Manage" %}</strong></a>{% if SHOW_SUBSCRIBE %}, <strong><a data-toggle='tooltip' href='?subscribe' title='{% trans "Click here to subscribe yourself to this ticket, if you want to receive an e-mail whenever this ticket is updated." %}'>{% trans "Subscribe" %}</a></strong>{% endif %}</td>
 </tr>
 
 <tr>
     <th>{% trans "Dependencies" %}</th>
     <td>{% for dep in ticket.ticketdependency.all %}
         {% if forloop.first %}<p>{% trans "This ticket cannot be resolved until the following ticket(s) are resolved" %}</p><ul>{% endif %}
-            <li><a href='{{ dep.depends_on.get_absolute_url }}'>{{ dep.depends_on.ticket }} {{ dep.depends_on.title }}</a> ({{ dep.depends_on.get_status_display }}) <a href='{% url 'helpdesk_ticket_dependency_del' ticket.id dep.id %}'>{% trans "Remove Dependency" %}</a></li>
+            <li><a href='{{ dep.depends_on.get_absolute_url }}'>{{ dep.depends_on.ticket }} {{ dep.depends_on.title }}</a> ({{ dep.depends_on.get_status_display }}) <a href='{% url 'helpdesk:ticket_dependency_del' ticket.id dep.id %}'>{% trans "Remove Dependency" %}</a></li>
         {% if forloop.last %}</ul>{% endif %}
         {% empty %}
         <p>{% trans "This ticket has no dependencies." %}</p>
         {% endfor %}
-        <p><a data-toggle='tooltip' href='{% url 'helpdesk_ticket_dependency_add' ticket.id %}' title="{% trans "Click on 'Add Dependency', if you want to make this ticket dependent on another ticket. A ticket may not be closed until all tickets it depends on are closed." %}">{% trans "Add Dependency" %}</a></p>
+        <p><a data-toggle='tooltip' href='{% url 'helpdesk:ticket_dependency_add' ticket.id %}' title="{% trans "Click on 'Add Dependency', if you want to make this ticket dependent on another ticket. A ticket may not be closed until all tickets it depends on are closed." %}">{% trans "Add Dependency" %}</a></p>
     </td>
 </tr>
 

@@ -57,13 +57,13 @@ class OpenTicketsByUser(Feed):
     def link(self, obj):
         if obj['queue']:
             return u'%s?assigned_to=%s&queue=%s' % (
-                reverse('helpdesk_list'),
+                reverse('helpdesk:list'),
                 obj['user'].id,
                 obj['queue'].id,
             )
         else:
             return u'%s?assigned_to=%s' % (
-                reverse('helpdesk_list'),
+                reverse('helpdesk:list'),
                 obj['user'].id,
             )
 
@@ -99,7 +99,7 @@ class UnassignedTickets(Feed):
 
     title = _('Helpdesk: Unassigned Tickets')
     description = _('Unassigned Open and Reopened tickets')
-    link = ''  # '%s?assigned_to=' % reverse('helpdesk_list')
+    link = ''  # '%s?assigned_to=' % reverse('helpdesk:list')
 
     def items(self, obj):
         return Ticket.objects.filter(
@@ -124,7 +124,7 @@ class RecentFollowUps(Feed):
 
     title = _('Helpdesk: Recent Followups')
     description = _('Recent FollowUps, such as e-mail replies, comments, attachments and resolutions')
-    link = '/tickets/'  # reverse('helpdesk_list')
+    link = '/tickets/'  # reverse('helpdesk:list')
 
     def items(self):
         return FollowUp.objects.order_by('-date')[:20]
@@ -149,7 +149,7 @@ class OpenTicketsByQueue(Feed):
 
     def link(self, obj):
         return '%s?queue=%s' % (
-            reverse('helpdesk_list'),
+            reverse('helpdesk:list'),
             obj.id,
         )
 

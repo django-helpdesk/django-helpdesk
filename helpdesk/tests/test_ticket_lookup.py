@@ -25,7 +25,7 @@ class TestKBDisabled(TestCase):
         # we will exercise 'reverse' to lookup/build the URL
         # from the ticket info we have
         # http://example.com/helpdesk/view/?ticket=q1-1&email=None
-        response = self.client.get(reverse('helpdesk_public_view'),
+        response = self.client.get(reverse('helpdesk:public_view'),
                                    {'ticket': self.ticket.ticket_for_url,
                                     'email': self.ticket.submitter_email})
         self.assertEqual(response.status_code, 200)
@@ -36,7 +36,7 @@ class TestKBDisabled(TestCase):
         q2 = Queue(title='Q2', slug='q2')
         q2.save()
         # grab the URL / params which would have been emailed out to submitter.
-        url = reverse('helpdesk_public_view')
+        url = reverse('helpdesk:public_view')
         params = {'ticket': self.ticket.ticket_for_url,
                   'email': self.ticket.submitter_email}
         # Pickup the ticket created in setup() and change its queue
