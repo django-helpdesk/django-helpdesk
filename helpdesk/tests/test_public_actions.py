@@ -11,6 +11,7 @@ class PublicActionsTestCase(TestCase):
     - Add a followup
     - Close resolved case
     """
+
     def setUp(self):
         """
         Create a queue & ticket we can use for later tests.
@@ -41,26 +42,26 @@ class PublicActionsTestCase(TestCase):
         resolution_text = 'Resolved by test script'
 
         ticket = Ticket.objects.get(id=self.ticket.id)
-        
+
         ticket.status = Ticket.RESOLVED_STATUS
         ticket.resolution = resolution_text
         ticket.save()
 
         current_followups = ticket.followup_set.all().count()
-        
+
         response = self.client.get('%s?ticket=%s&email=%s&close' % (
             reverse('helpdesk_public_view'),
             ticket.ticket_for_url,
             'test.submitter@example.com'))
-        
+
         ticket = Ticket.objects.get(id=self.ticket.id)
 
         self.assertEqual(response.status_code, 302)
         self.assertTemplateNotUsed(response, 'helpdesk/public_view_form.html')
         self.assertEqual(ticket.status, Ticket.CLOSED_STATUS)
         self.assertEqual(ticket.resolution, resolution_text)
-        self.assertEqual(current_followups+1, ticket.followup_set.all().count())
-        
+        self.assertEqual(current_followups + 1, ticket.followup_set.all().count())
+
         ticket.resolution = old_resolution
         ticket.status = old_status
         ticket.save()

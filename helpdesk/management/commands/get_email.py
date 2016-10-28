@@ -48,7 +48,9 @@ STRIPPED_SUBJECT_STRINGS = [
     "Automatic reply: ",
 ]
 
+
 class Command(BaseCommand):
+
     def __init__(self):
         BaseCommand.__init__(self)
 
@@ -58,7 +60,7 @@ class Command(BaseCommand):
                 default=False,
                 action='store_true',
                 help='Hide details about each queue/message as they are processed'),
-            )
+        )
 
     help = 'Process Jutda Helpdesk queues and process e-mails via ' \
            'POP3/IMAP as required, feeding them into the helpdesk.'
@@ -74,7 +76,7 @@ def process_email(quiet=False):
             allow_email_submission=True):
 
         if not q.email_box_last_check:
-            q.email_box_last_check = timezone.now()-timedelta(minutes=30)
+            q.email_box_last_check = timezone.now() - timedelta(minutes=30)
 
         if not q.email_box_interval:
             q.email_box_interval = 0
@@ -176,7 +178,7 @@ def process_queue(q, quiet=False):
                 ticket = ticket_from_message(message=data[0][1], queue=q, quiet=quiet)
                 if ticket:
                     server.store(num, '+FLAGS', '\\Deleted')
-        
+
         server.expunge()
         server.close()
         server.logout()
@@ -221,7 +223,7 @@ def ticket_from_message(message, queue, quiet):
                 return False
             return True
 
-    matchobj = re.match(r".*\["+queue.slug+"-(?P<id>\d+)\]", subject)
+    matchobj = re.match(r".*\[" + queue.slug + "-(?P<id>\d+)\]", subject)
     if matchobj:
         # This is a reply or forward.
         ticket = matchobj.group('id')
@@ -254,7 +256,7 @@ def ticket_from_message(message, queue, quiet):
                 'filename': name,
                 'content': part.get_payload(decode=True),
                 'type': part.get_content_type()},
-                )
+            )
 
         counter += 1
 
@@ -317,7 +319,7 @@ def ticket_from_message(message, queue, quiet):
     if t.status == Ticket.REOPENED_STATUS:
         f.new_status = Ticket.REOPENED_STATUS
         f.title = _('Ticket Re-Opened by E-Mail Received from %(sender_email)s' % {'sender_email': sender_email})
-    
+
     f.save()
 
     if not quiet:
@@ -332,7 +334,7 @@ def ticket_from_message(message, queue, quiet):
                 filename=filename,
                 mime_type=file['type'],
                 size=len(file['content']),
-                )
+            )
             a.file.save(filename, ContentFile(file['content']), save=False)
             a.save()
             if not quiet:
@@ -349,7 +351,7 @@ def ticket_from_message(message, queue, quiet):
                 recipients=sender_email,
                 sender=queue.from_address,
                 fail_silently=True,
-                )
+            )
 
         if queue.new_ticket_cc:
             send_templated_mail(
@@ -358,7 +360,7 @@ def ticket_from_message(message, queue, quiet):
                 recipients=queue.new_ticket_cc,
                 sender=queue.from_address,
                 fail_silently=True,
-                )
+            )
 
         if queue.updated_ticket_cc and queue.updated_ticket_cc != queue.new_ticket_cc:
             send_templated_mail(
@@ -367,7 +369,7 @@ def ticket_from_message(message, queue, quiet):
                 recipients=queue.updated_ticket_cc,
                 sender=queue.from_address,
                 fail_silently=True,
-                )
+            )
 
     else:
         context.update(comment=f.comment)
@@ -384,7 +386,7 @@ def ticket_from_message(message, queue, quiet):
                 recipients=t.assigned_to.email,
                 sender=queue.from_address,
                 fail_silently=True,
-                )
+            )
 
         if queue.updated_ticket_cc:
             send_templated_mail(
@@ -393,11 +395,10 @@ def ticket_from_message(message, queue, quiet):
                 recipients=queue.updated_ticket_cc,
                 sender=queue.from_address,
                 fail_silently=True,
-                )
+            )
 
     return t
 
 
 if __name__ == '__main__':
     process_email()
-

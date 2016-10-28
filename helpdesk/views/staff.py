@@ -98,24 +98,24 @@ def dashboard(request):
 
     # open & reopened tickets, assigned to current user
     tickets = Ticket.objects.select_related('queue').filter(
-            assigned_to=request.user,
-        ).exclude(
-            status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
-        )
+        assigned_to=request.user,
+    ).exclude(
+        status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
+    )
 
     # closed & resolved tickets, assigned to current user
     tickets_closed_resolved = Ticket.objects.select_related('queue').filter(
-            assigned_to=request.user,
-            status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS])
+        assigned_to=request.user,
+        status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS])
 
     user_queues = _get_user_queues(request.user)
 
     unassigned_tickets = Ticket.objects.select_related('queue').filter(
-            assigned_to__isnull=True,
-            queue__in=user_queues
-        ).exclude(
-            status=Ticket.CLOSED_STATUS,
-        )
+        assigned_to__isnull=True,
+        queue__in=user_queues
+    ).exclude(
+        status=Ticket.CLOSED_STATUS,
+    )
 
     # all tickets, reported by current user
     all_tickets_reported_by_current_user = ''
@@ -126,8 +126,8 @@ def dashboard(request):
         ).order_by('status')
 
     tickets_in_queues = Ticket.objects.filter(
-                queue__in=user_queues,
-            )
+        queue__in=user_queues,
+    )
     basic_ticket_stats = calc_basic_ticket_stats(tickets_in_queues)
 
     # The following query builds a grid of queues & ticket statuses,
@@ -227,7 +227,7 @@ def followup_edit(request, ticket_id, followup_id):
                 new_followup.user = followup.user
             new_followup.save()
             # get list of old attachments & link them to new_followup
-            attachments = Attachment.objects.filter(followup = followup)
+            attachments = Attachment.objects.filter(followup=followup)
             for attachment in attachments:
                 attachment.followup = new_followup
                 attachment.save()
@@ -290,7 +290,7 @@ def view_ticket(request, ticket_id):
             'owner': owner,
             'title': ticket.title,
             'comment': _('Accepted resolution and closed ticket'),
-            }
+        }
 
         return update_ticket(request, ticket_id)
 
@@ -298,7 +298,6 @@ def view_ticket(request, ticket_id):
         users = User.objects.filter(is_active=True, is_staff=True).order_by(User.USERNAME_FIELD)
     else:
         users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
-
 
     # TODO: shouldn't this template get a form to begin with?
     form = TicketForm(initial={'due_date': ticket.due_date})
@@ -447,7 +446,7 @@ def update_ticket(request, ticket_id, public=False):
             new_user = User.objects.get(id=owner)
             f.title = _('Assigned to %(username)s') % {
                 'username': new_user.get_username(),
-                }
+            }
             ticket.assigned_to = new_user
             reassigned = True
         # user changed owner to 'unassign'
@@ -482,7 +481,7 @@ def update_ticket(request, ticket_id, public=False):
                 filename=filename,
                 mime_type=mimetypes.guess_type(filename)[0] or 'application/octet-stream',
                 size=file.size,
-                )
+            )
             a.file.save(filename, file, save=False)
             a.save()
 
@@ -497,7 +496,7 @@ def update_ticket(request, ticket_id, public=False):
             field=_('Title'),
             old_value=ticket.title,
             new_value=title,
-            )
+        )
         c.save()
         ticket.title = title
 
@@ -507,7 +506,7 @@ def update_ticket(request, ticket_id, public=False):
             field=_('Priority'),
             old_value=ticket.priority,
             new_value=priority,
-            )
+        )
         c.save()
         ticket.priority = priority
 
@@ -517,11 +516,11 @@ def update_ticket(request, ticket_id, public=False):
             field=_('Due on'),
             old_value=ticket.due_date,
             new_value=due_date,
-            )
+        )
         c.save()
         ticket.due_date = due_date
 
-    if new_status in [ Ticket.RESOLVED_STATUS, Ticket.CLOSED_STATUS ]:
+    if new_status in (Ticket.RESOLVED_STATUS, Ticket.CLOSED_STATUS):
         if new_status == Ticket.RESOLVED_STATUS or ticket.resolution is None:
             ticket.resolution = comment
 
@@ -533,11 +532,11 @@ def update_ticket(request, ticket_id, public=False):
     context.update(
         resolution=ticket.resolution,
         comment=f.comment,
-        )
+    )
 
     if public and (f.comment or (
-                f.new_status in (Ticket.RESOLVED_STATUS,
-                                 Ticket.CLOSED_STATUS))):
+        f.new_status in (Ticket.RESOLVED_STATUS,
+                         Ticket.CLOSED_STATUS))):
         if f.new_status == Ticket.RESOLVED_STATUS:
             template = 'resolved_'
         elif f.new_status == Ticket.CLOSED_STATUS:
@@ -555,7 +554,7 @@ def update_ticket(request, ticket_id, public=False):
                 sender=ticket.queue.from_address,
                 fail_silently=True,
                 files=files,
-                )
+            )
             messages_sent_to.append(ticket.submitter_email)
 
         template_suffix = 'cc'
@@ -569,7 +568,7 @@ def update_ticket(request, ticket_id, public=False):
                     sender=ticket.queue.from_address,
                     fail_silently=True,
                     files=files,
-                    )
+                )
                 messages_sent_to.append(cc.email_address)
 
     if ticket.assigned_to and \
@@ -602,7 +601,7 @@ def update_ticket(request, ticket_id, public=False):
                 sender=ticket.queue.from_address,
                 fail_silently=True,
                 files=files,
-                )
+            )
             messages_sent_to.append(ticket.assigned_to.email)
 
     if ticket.queue.updated_ticket_cc and ticket.queue.updated_ticket_cc not in messages_sent_to:
@@ -622,7 +621,7 @@ def update_ticket(request, ticket_id, public=False):
             sender=ticket.queue.from_address,
             fail_silently=True,
             files=files,
-            )
+        )
 
     ticket.save()
 
@@ -716,7 +715,7 @@ def mass_update(request):
                     recipients=t.submitter_email,
                     sender=t.queue.from_address,
                     fail_silently=True,
-                    )
+                )
                 messages_sent_to.append(t.submitter_email)
 
             for cc in t.ticketcc_set.all():
@@ -727,7 +726,7 @@ def mass_update(request):
                         recipients=cc.email_address,
                         sender=t.queue.from_address,
                         fail_silently=True,
-                        )
+                    )
                     messages_sent_to.append(cc.email_address)
 
             if t.assigned_to and \
@@ -740,7 +739,7 @@ def mass_update(request):
                     recipients=t.assigned_to.email,
                     sender=t.queue.from_address,
                     fail_silently=True,
-                    )
+                )
                 messages_sent_to.append(t.assigned_to.email)
 
             if t.queue.updated_ticket_cc and \
@@ -751,7 +750,7 @@ def mass_update(request):
                     recipients=t.queue.updated_ticket_cc,
                     sender=t.queue.from_address,
                     fail_silently=True,
-                    )
+                )
 
         elif action == 'delete':
             t.delete()
@@ -775,7 +774,7 @@ def ticket_list(request):
         'sortreverse': False,
         'keyword': None,
         'search_string': None,
-        }
+    }
 
     from_saved_query = False
 
@@ -831,13 +830,12 @@ def ticket_list(request):
             # Query deserialization failed. (E.g. was a pickled query)
             return HttpResponseRedirect(reverse('helpdesk_list'))
 
-    elif not ('queue' in request.GET
-              or 'assigned_to' in request.GET
-              or 'status' in request.GET
-              or 'q' in request.GET
-              or 'sort' in request.GET
-              or 'sortreverse' in request.GET
-              ):
+    elif not ('queue' in request.GET or
+              'assigned_to' in request.GET or
+              'status' in request.GET or
+              'q' in request.GET or
+              'sort' in request.GET or
+              'sortreverse' in request.GET):
 
         # Fall-back if no querying is being done, force the list to only
         # show open/reopened/resolved (not closed) cases sorted by creation
@@ -1113,7 +1111,8 @@ def run_report(request, report):
     # a second table for more complex queries
     summarytable2 = defaultdict(int)
 
-    month_name = lambda m: MONTHS_3[m].title()
+    def month_name(m):
+        MONTHS_3[m].title()
 
     first_ticket = Ticket.objects.all().order_by('created')[0]
     first_month = first_ticket.created.month
@@ -1259,7 +1258,7 @@ run_report = staff_member_required(run_report)
 def save_query(request):
     title = request.POST.get('title', None)
     shared = request.POST.get('shared', False)
-    if shared == 'on': # django only translates '1', 'true', 't' into True
+    if shared == 'on':  # django only translates '1', 'true', 't' into True
         shared = True
     query_encoded = request.POST.get('query_encoded', None)
 
@@ -1501,7 +1500,7 @@ def days_since_created(today, ticket):
 
 
 def date_rel_to_today(today, offset):
-    return today - timedelta(days = offset)
+    return today - timedelta(days=offset)
 
 
 def sort_string(begin, end):

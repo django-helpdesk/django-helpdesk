@@ -21,6 +21,7 @@ from helpdesk.models import EscalationExclusion, Queue
 
 
 class Command(BaseCommand):
+
     def __init__(self):
         BaseCommand.__init__(self)
 
@@ -42,7 +43,7 @@ class Command(BaseCommand):
                 default=False,
                 dest='escalate-verbosely',
                 help='Display a list of dates excluded'),
-            )
+        )
 
     def handle(self, *args, **options):
         days = options['days']

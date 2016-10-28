@@ -4,7 +4,7 @@ django-helpdesk - A Django powered ticket tracker for small enterprise.
 
 See LICENSE for details.
 
-create_usersettings.py - Easy way to create helpdesk-specific settings for 
+create_usersettings.py - Easy way to create helpdesk-specific settings for
 users who don't yet have them.
 """
 

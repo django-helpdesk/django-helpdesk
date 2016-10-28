@@ -109,7 +109,7 @@ def send_templated_mail(template_name,
 
     text_part = template_func(
         "%s{%% include '%s' %%}" % (t.plain_text, footer_file)
-        ).render(context)
+    ).render(context)
 
     email_html_base_file = os.path.join('helpdesk', locale, 'email_html_base.html')
 
@@ -233,8 +233,8 @@ def safe_template_context(ticket):
 
     context = {
         'queue': {},
-        'ticket': {},
-        }
+        'ticket': {}
+    }
     queue = ticket.queue
 
     for field in ('title', 'slug', 'email_address', 'from_address', 'locale'):
