@@ -66,7 +66,7 @@ def find_package_data(
                         bad_name = True
                         if show_ignored:
                             print(
-                                "Directory %s ignored by pattern %s" % (fn, pattern), 
+                                "Directory %s ignored by pattern %s" % (fn, pattern),
                                 file=sys.stderr
                             )
 
@@ -91,7 +91,7 @@ def find_package_data(
                         bad_name = True
                         if show_ignored:
                             print(
-                                "File %s ignored by pattern %s" % (fn, pattern), 
+                                "File %s ignored by pattern %s" % (fn, pattern),
                                 file=sys.stderr
                                 )
                         break
@@ -116,7 +116,7 @@ django-helpdesk
 ===============
 
 This is a Django-powered helpdesk ticket tracker, designed to
-plug into an existing Django website and provide you with 
+plug into an existing Django website and provide you with
 internal (or, perhaps, external) helpdesk management.
 """
 
@@ -137,10 +137,13 @@ setup(
         "Topic :: Office/Business",
         "Topic :: Software Development :: Bug Tracking",
     ],
-    keywords=['django', 'helpdesk', 'tickets', 'incidents', 'cases'],
+    keywords=['django', 'helpdesk', 'django-helpdesk', 'tickets', 'incidents',
+              'cases', 'bugs', 'track', 'support'],
     author='Ross Poulton',
     author_email='ross@rossp.org',
-    url='http://github.com/django-helpdesk/django-helpdesk',
+    maintainer='Jonathan Barratt',
+    maintainer_email='jonathan@the-im.com',
+    url='https://github.com/django-helpdesk/django-helpdesk',
     license='BSD',
     packages=find_packages(),
     package_data=find_package_data("helpdesk", only_in_packages=False),

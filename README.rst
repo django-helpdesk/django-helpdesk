@@ -10,7 +10,7 @@ django-helpdesk - A Django powered ticket tracker for small businesses.
 Copyright 2009- Ross Poulton and contributors. All Rights Reserved. See LICENSE for details.
 
 django-helpdesk was formerly known as Jutda Helpdesk, named after the 
-company who originally created it. As of January 2011 the name has been 
+company which originally created it. As of January 2011 the name has been
 changed to reflect what it really is: a Django-powered ticket tracker with
 contributors reaching far beyond Jutda.
 
