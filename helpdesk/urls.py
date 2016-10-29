@@ -13,7 +13,7 @@ from django.contrib.auth import views as auth_views
 from django.views.generic import TemplateView
 
 from helpdesk import settings as helpdesk_settings
-from helpdesk.views import feeds, staff, public, api, kb
+from helpdesk.views import feeds, staff, public, kb
 
 
 class DirectTemplateView(TemplateView):
@@ -183,10 +183,6 @@ urlpatterns += [
 
 
 urlpatterns += [
-    url(r'^api/(?P<method>[a-z_-]+)/$',
-        api.api,
-        name='api'),
-
     url(r'^login/$',
         auth_views.login,
         {'template_name': 'helpdesk/registration/login.html'},
@@ -218,10 +214,6 @@ if helpdesk_settings.HELPDESK_KB_ENABLED:
     ]
 
 urlpatterns += [
-    url(r'^api/$',
-        TemplateView.as_view(template_name='helpdesk/help_api.html'),
-        name='api_help'),
-
     url(r'^help/context/$',
         TemplateView.as_view(template_name='helpdesk/help_context.html'),
         name='help_context'),

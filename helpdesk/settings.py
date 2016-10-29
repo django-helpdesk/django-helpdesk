@@ -17,7 +17,6 @@ if not isinstance(DEFAULT_USER_SETTINGS, dict):
         'email_on_ticket_assign': True,
         'email_on_ticket_change': True,
         'login_view_ticketlist': True,
-        'email_on_ticket_apichange': True,
         'tickets_per_page': 25
     }
 

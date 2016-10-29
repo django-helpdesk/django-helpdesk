@@ -42,7 +42,6 @@ If you want to override the default settings for your users, create ``HELPDESK_D
             'email_on_ticket_assign': True,
             'email_on_ticket_change': True,
             'login_view_ticketlist': True,
-            'email_on_ticket_apichange': True,
             'tickets_per_page': 25
             }
 
