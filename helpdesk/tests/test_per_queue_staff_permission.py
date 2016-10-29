@@ -89,7 +89,7 @@ class PerQueueStaffMembershipTestCase(TestCase):
 
         # Superuser
         self.client.login(username='superuser', password='superuser')
-        response = self.client.get(reverse('helpdesk_dashboard'))
+        response = self.client.get(reverse('helpdesk:dashboard'))
         self.assertEqual(
             len(response.context['unassigned_tickets']),
             3,
@@ -112,7 +112,7 @@ class PerQueueStaffMembershipTestCase(TestCase):
         # Regular users
         for identifier in self.IDENTIFIERS:
             self.client.login(username='User_%d' % identifier, password=str(identifier))
-            response = self.client.get(reverse('helpdesk_report_index'))
+            response = self.client.get(reverse('helpdesk:report_index'))
             self.assertEqual(
                 len(response.context['dash_tickets']),
                 1,

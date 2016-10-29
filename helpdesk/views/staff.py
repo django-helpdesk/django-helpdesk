@@ -947,7 +947,7 @@ def ticket_list(request):
 
     return render(request, 'helpdesk/ticket_list.html', dict(
         context,
-        tickets=tickets_qs,
+        tickets=ticket_qs,
         default_tickets_per_page=request.user.usersettings.settings.get('tickets_per_page') or 25,
         user_choices=User.objects.filter(is_active=True, is_staff=True),
         queue_choices=user_queues,
