@@ -133,7 +133,7 @@ class EditFollowUpForm(forms.ModelForm):
 
 class TicketForm(CustomFieldMixin, forms.Form):
     queue = forms.ChoiceField(
-        widget=forms.Select(attrs={'class':'form-control'}),
+        widget=forms.Select(attrs={'class': 'form-control'}),
         label=_('Queue'),
         required=True,
         choices=()
@@ -142,26 +142,26 @@ class TicketForm(CustomFieldMixin, forms.Form):
     title = forms.CharField(
         max_length=100,
         required=True,
-        widget=forms.TextInput(attrs={'class':'form-control'}),
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
         label=_('Summary of the problem'),
     )
 
     submitter_email = forms.EmailField(
         required=False,
         label=_('Submitter E-Mail Address'),
-        widget=forms.TextInput(attrs={'class':'form-control'}),
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
         help_text=_('This e-mail address will receive copies of all public '
                     'updates to this ticket.'),
     )
 
     body = forms.CharField(
-        widget=forms.Textarea(attrs={'class':'form-control', 'rows': 15}),
+        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 15}),
         label=_('Description of Issue'),
         required=True,
     )
 
     assigned_to = forms.ChoiceField(
-        widget=forms.Select(attrs={'class':'form-control'}),
+        widget=forms.Select(attrs={'class': 'form-control'}),
         choices=(),
         required=False,
         label=_('Case owner'),
@@ -170,7 +170,7 @@ class TicketForm(CustomFieldMixin, forms.Form):
     )
 
     priority = forms.ChoiceField(
-        widget=forms.Select(attrs={'class':'form-control'}),
+        widget=forms.Select(attrs={'class': 'form-control'}),
         choices=Ticket.PRIORITY_CHOICES,
         required=False,
         initial='3',
@@ -179,7 +179,7 @@ class TicketForm(CustomFieldMixin, forms.Form):
     )
 
     due_date = forms.DateTimeField(
-        widget=forms.TextInput(attrs={'class':'form-control'}),
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
         required=False,
         label=_('Due on'),
     )
@@ -539,8 +539,8 @@ class UserSettingsForm(forms.Form):
         label=_('Number of tickets to show per page'),
         help_text=_('How many tickets do you want to see on the Ticket List page?'),
         required=False,
-        choices=((10,'10'),(25,'25'),(50,'50'),(100,'100')),
-        )
+        choices=((10,'10'), (25,'25'), (50,'50'), (100,'100')),
+    )
 
     use_email_as_submitter = forms.BooleanField(
         label=_('Use my e-mail address when submitting tickets?'),
@@ -573,6 +573,7 @@ class TicketCCForm(forms.ModelForm):
 
 class TicketCCUserForm(forms.ModelForm):
     ''' Adds a helpdesk user as a CC on a Ticket '''
+
     def __init__(self, *args, **kwargs):
         super(TicketCCUserForm, self).__init__(*args, **kwargs)
         if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_CC:
@@ -582,17 +583,19 @@ class TicketCCUserForm(forms.ModelForm):
         self.fields['user'].queryset = users
     class Meta:
         model = TicketCC
-        exclude = ('ticket','email',)
+        exclude = ('ticket', 'email',)
 
 class TicketCCEmailForm(forms.ModelForm):
     ''' Adds an email address as a CC on a Ticket '''
+
     def __init__(self, *args, **kwargs):
         super(TicketCCEmailForm, self).__init__(*args, **kwargs)
     class Meta:
         model = TicketCC
-        exclude = ('ticket','user',)
+        exclude = ('ticket', 'user',)
 
 class TicketDependencyForm(forms.ModelForm):
+    ''' Adds a different ticket as a dependency for this Ticket '''
 
     class Meta:
         model = TicketDependency

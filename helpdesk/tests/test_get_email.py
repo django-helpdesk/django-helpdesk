@@ -21,7 +21,7 @@ except ImportError:
     import mock
 
 class GetEmailTestCase(TestCase):
-    #fixtures = ['emailtemplate.json'] # may don't need this, not testing templates here
+    ''' Test reading emails from a local directory '''
 
     def setUp(self):
         self.queue_public = Queue.objects.create(title='Queue 1', slug='QQ', allow_public_submission=True, allow_email_submission=True, email_box_type='local', email_box_local_dir='/var/lib/mail/helpdesk/')
@@ -56,6 +56,3 @@ class GetEmailTestCase(TestCase):
             ticket2 = get_object_or_404(Ticket, pk=2)
             self.assertEqual(ticket2.ticket_for_url, "QQ-%s" % ticket2.id)
             self.assertEqual(ticket2.description, "This is the helpdesk comment via email.")
-
-
-

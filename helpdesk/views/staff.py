@@ -511,7 +511,7 @@ def update_ticket(request, ticket_id, public=False):
             field=_('Status'),
             old_value=old_status_str,
             new_value=ticket.get_status_display(),
-            )
+        )
         c.save()
 
     if ticket.assigned_to != old_owner:
@@ -520,7 +520,7 @@ def update_ticket(request, ticket_id, public=False):
             field=_('Owner'),
             old_value=old_owner,
             new_value=ticket.assigned_to,
-            )
+        )
         c.save()
 
     if priority != ticket.priority:
@@ -1077,9 +1077,7 @@ def report_index(request):
     saved_query = request.GET.get('saved_query', None)
 
     user_queues = _get_user_queues(request.user)
-    Tickets = Ticket.objects.filter(
-                queue__in=user_queues,
-            )
+    Tickets = Ticket.objects.filter(queue__in=user_queues)
     basic_ticket_stats = calc_basic_ticket_stats(Tickets)
 
     # The following query builds a grid of queues & ticket statuses,
@@ -1172,8 +1170,7 @@ def run_report(request, report):
     periods = []
     year, month = first_year, first_month
     working = True
-    #periods.append("%s %s" % (month_name(month), year))
-    periods.append("%s-%s" % (year,month))
+    periods.append("%s-%s" % (year, month))
 
     while working:
         month += 1
@@ -1182,7 +1179,7 @@ def run_report(request, report):
             month = 1
         if (year > last_year) or (month > last_month and year >= last_year):
             working = False
-        periods.append("%s-%s" % (year,month))
+        periods.append("%s-%s" % (year, month))
 
     if report == 'userpriority':
         title = _('User by Priority')
@@ -1298,8 +1295,8 @@ def run_report(request, report):
     morrisjs_data = []
     for label in column_headings[1:]:
         seriesnum += 1
-        datadict = { "x": label }
-        for n in range(0,len(table)):
+        datadict = {"x": label}
+        for n in range(0, len(table)):
             datadict[n] = table[n][seriesnum]
         morrisjs_data.append(datadict)
 

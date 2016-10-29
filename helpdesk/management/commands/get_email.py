@@ -61,17 +61,6 @@ class Command(BaseCommand):
     def __init__(self):
         BaseCommand.__init__(self)
 
-        # Django 1.7 uses different way to specify options than 1.8+
-        if VERSION < (1, 8):
-            self.option_list += (
-            make_option(
-                '--quiet',
-                default=False,
-                action='store_true',
-                dest='quiet',
-                help='Hide details about each queue/message as they are processed'),
-        )
-
     help = 'Process django-helpdesk queues and process e-mails via POP3/IMAP or ' \
            'from a local mailbox directory as required, feeding them into the helpdesk.'
 
@@ -137,8 +126,9 @@ def process_queue(q, logger):
         try:
             import socks
         except ImportError:
-            no_socks_msg = "Queue has been configured with proxy settings, but no socks " \
-                           "library was installed. Try to install PySocks via PyPI."
+            no_socks_msg = "Queue has been configured with proxy settings, " \
+                           "but no socks library was installed. Try to " \
+                           "install PySocks via PyPI."
             logger.error(no_socks_msg)
             raise ImportError(no_socks_msg)
 

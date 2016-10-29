@@ -111,7 +111,7 @@ class Queue(models.Model):
     email_box_type = models.CharField(
         _('E-Mail Box Type'),
         max_length=5,
-        choices=(('pop3', _('POP 3')), ('imap', _('IMAP')), ('local',_('Local Directory'))),
+        choices=(('pop3', _('POP 3')), ('imap', _('IMAP')), ('local', _('Local Directory'))),
         blank=True,
         null=True,
         help_text=_('E-Mail server type for creating tickets automatically '
@@ -178,8 +178,9 @@ class Queue(models.Model):
         blank=True,
         null=True,
         help_text=_('If using a local directory, what directory path do you '
-            'wish to poll for new email? Example: /var/lib/mail/helpdesk/'),
-        )
+                    'wish to poll for new email? '
+                    'Example: /var/lib/mail/helpdesk/'),
+    )
 
     permission_name = models.CharField(
         _('Django auth permission name'),
@@ -230,14 +231,21 @@ class Queue(models.Model):
 
     logging_type = models.CharField(
         _('Logging Type'),
-        max_length=5,
-        choices=(('none', _('None')), ('debug', _('Debug')), ('info',_('Information')), ('warn', _('Warning')), ('error', _('Error')), ('crit', _('Critical'))),
+        max_length = 5,
+        choices = (
+            ('none', _('None')),
+            ('debug', _('Debug')),
+            ('info', _('Information')),
+            ('warn', _('Warning')),
+            ('error', _('Error')),
+            ('crit', _('Critical'))
+        ),
         blank=True,
         null=True,
         help_text=_('Set the default logging level. All messages at that '
-            'level or above will be logged to the directory set below. '
-            'If no level is set, logging will be disabled.'),
-        )
+                    'level or above will be logged to the directory set '
+                    'below. If no level is set, logging will be disabled.'),
+    )
 
     logging_dir = models.CharField(
         _('Logging Directory'),
@@ -245,9 +253,9 @@ class Queue(models.Model):
         blank=True,
         null=True,
         help_text=_('If logging is enabled, what directory should we use to '
-            'store log files for this queue? '
-            'If no directory is set, default to /var/log/helpdesk/'),
-        )
+                    'store log files for this queue? '
+                    'If no directory is set, default to /var/log/helpdesk/'),
+    )
 
     default_owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
