@@ -20,6 +20,7 @@ except ImportError:
     # Python < 3.3
     import mock
 
+
 class GetEmailTestCase(TestCase):
     ''' Test reading emails from a local directory '''
 

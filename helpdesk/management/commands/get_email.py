@@ -85,7 +85,7 @@ def process_email(quiet=False):
 
         logger = logging.getLogger('django.helpdesk.queue.' + q.slug)
         if not q.logging_type or q.logging_type == 'none':
-            logging.disable(logging.CRITICAL) #disable all messages
+            logging.disable(logging.CRITICAL)  # disable all messages
         elif q.logging_type == 'info':
             logger.setLevel(logging.INFO)
         elif q.logging_type == 'warn':
@@ -97,7 +97,7 @@ def process_email(quiet=False):
         elif q.logging_type == 'debug':
             logger.setLevel(logging.DEBUG)
         if quiet:
-            logger.propagate = False # do not propagate to root logger that would log to console
+            logger.propagate = False  # do not propagate to root logger that would log to console
         logdir = q.logging_dir or '/var/log/helpdesk/'
         handler = logging.FileHandler(logdir + q.slug + '_get_email.log')
         logger.addHandler(handler)
@@ -239,7 +239,7 @@ def process_queue(q, logger):
             if ticket:
                 logger.info("Successfully processed message %s, ticket/comment created." % str(m))
                 try:
-                    #unlink(m) #delete message file if ticket was successful
+                    # unlink(m) #delete message file if ticket was successful
                     logger.info("Successfully deleted message %s." % str(m))
                 except:
                     logger.error("Unable to delete message %s." % str(m))
@@ -271,7 +271,7 @@ def decode_mail_headers(string):
     if six.PY2:
         return u' '.join([unicode(msg, charset or 'utf-8') for msg, charset in decoded])
     elif six.PY3:
-        return u' '.join([str(msg,encoding=charset,errors='replace') if charset else str(msg) for msg, charset in decoded])
+        return u' '.join([str(msg, encoding=charset, errors='replace') if charset else str(msg) for msg, charset in decoded])
 
 
 def ticket_from_message(message, queue, logger):
