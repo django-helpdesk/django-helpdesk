@@ -574,6 +574,7 @@ class TicketCCForm(forms.ModelForm):
             users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
         self.fields['user'].queryset = users
 
+
 class TicketCCUserForm(forms.ModelForm):
     ''' Adds a helpdesk user as a CC on a Ticket '''
 
@@ -589,6 +590,7 @@ class TicketCCUserForm(forms.ModelForm):
         model = TicketCC
         exclude = ('ticket', 'email',)
 
+
 class TicketCCEmailForm(forms.ModelForm):
     ''' Adds an email address as a CC on a Ticket '''
 
@@ -598,6 +600,7 @@ class TicketCCEmailForm(forms.ModelForm):
     class Meta:
         model = TicketCC
         exclude = ('ticket', 'user',)
+
 
 class TicketDependencyForm(forms.ModelForm):
     ''' Adds a different ticket as a dependency for this Ticket '''
