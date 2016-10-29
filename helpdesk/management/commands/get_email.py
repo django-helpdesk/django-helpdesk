@@ -47,7 +47,17 @@ import logging
 from time import ctime
 
 
+STRIPPED_SUBJECT_STRINGS = [
+    "Re: ",
+    "Fw: ",
+    "RE: ",
+    "FW: ",
+    "Automatic reply: ",
+]
+
+
 class Command(BaseCommand):
+
     def __init__(self):
         BaseCommand.__init__(self)
 
@@ -60,9 +70,10 @@ class Command(BaseCommand):
                 action='store_true',
                 dest='quiet',
                 help='Hide details about each queue/message as they are processed'),
-            )
+        )
 
-    help = 'Process django-helpdesk queues and process e-mails via POP3/IMAP or from a local mailbox directory as required, feeding them into the helpdesk.'
+    help = 'Process django-helpdesk queues and process e-mails via POP3/IMAP or ' \
+           'from a local mailbox directory as required, feeding them into the helpdesk.'
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -103,11 +114,10 @@ def process_email(quiet=False):
         logger.addHandler(handler)
 
         if not q.email_box_last_check:
-            q.email_box_last_check = timezone.now()-timedelta(minutes=30)
+            q.email_box_last_check = timezone.now() - timedelta(minutes=30)
 
         if not q.email_box_interval:
             q.email_box_interval = 0
-
 
         queue_time_delta = timedelta(minutes=q.email_box_interval)
 
@@ -127,15 +137,19 @@ def process_queue(q, logger):
         try:
             import socks
         except ImportError:
-            logger.error("Queue has been configured with proxy settings, but no socks library was installed. Try to install PySocks via pypi.")
-            raise ImportError("Queue has been configured with proxy settings, but no socks library was installed. Try to install PySocks via pypi.")
+            no_socks_msg = "Queue has been configured with proxy settings, but no socks " \
+                           "library was installed. Try to install PySocks via PyPI."
+            logger.error(no_socks_msg)
+            raise ImportError(no_socks_msg)
 
         proxy_type = {
             'socks4': socks.SOCKS4,
             'socks5': socks.SOCKS5,
         }.get(q.socks_proxy_type)
 
-        socks.set_default_proxy(proxy_type=proxy_type, addr=q.socks_proxy_host, port=q.socks_proxy_port)
+        socks.set_default_proxy(proxy_type=proxy_type,
+                                addr=q.socks_proxy_host,
+                                port=q.socks_proxy_port)
         socket.socket = socks.socksocket
     else:
         if six.PY2:
@@ -144,16 +158,21 @@ def process_queue(q, logger):
             import _socket
             socket.socket = _socket.socket
 
-    email_box_type = settings.QUEUE_EMAIL_BOX_TYPE if settings.QUEUE_EMAIL_BOX_TYPE else q.email_box_type
+    email_box_type = settings.QUEUE_EMAIL_BOX_TYPE or q.email_box_type
 
     if email_box_type == 'pop3':
-
         if q.email_box_ssl or settings.QUEUE_EMAIL_BOX_SSL:
-            if not q.email_box_port: q.email_box_port = 995
-            server = poplib.POP3_SSL(q.email_box_host or settings.QUEUE_EMAIL_BOX_HOST, int(q.email_box_port))
+            if not q.email_box_port:
+                q.email_box_port = 995
+            server = poplib.POP3_SSL(q.email_box_host or
+                                     settings.QUEUE_EMAIL_BOX_HOST,
+                                     int(q.email_box_port))
         else:
-            if not q.email_box_port: q.email_box_port = 110
-            server = poplib.POP3(q.email_box_host or settings.QUEUE_EMAIL_BOX_HOST, int(q.email_box_port))
+            if not q.email_box_port:
+                q.email_box_port = 110
+            server = poplib.POP3(q.email_box_host or
+                                 settings.QUEUE_EMAIL_BOX_HOST,
+                                 int(q.email_box_port))
 
         logger.info("Attempting POP3 server login")
 
@@ -161,13 +180,11 @@ def process_queue(q, logger):
         server.user(q.email_box_user or settings.QUEUE_EMAIL_BOX_USER)
         server.pass_(q.email_box_pass or settings.QUEUE_EMAIL_BOX_PASSWORD)
 
-
         messagesInfo = server.list()[1]
         logger.info("Received %s messages from POP3 server" % str(len(messagesInfo)))
 
         for msg in messagesInfo:
             msgNum = msg.split(" ")[0]
-            msgSize = msg.split(" ")[1]
             logger.info("Processing message %s" % str(msgNum))
 
             full_message = "\n".join(server.retr(msgNum)[1])
@@ -183,15 +200,24 @@ def process_queue(q, logger):
 
     elif email_box_type == 'imap':
         if q.email_box_ssl or settings.QUEUE_EMAIL_BOX_SSL:
-            if not q.email_box_port: q.email_box_port = 993
-            server = imaplib.IMAP4_SSL(q.email_box_host or settings.QUEUE_EMAIL_BOX_HOST, int(q.email_box_port))
+            if not q.email_box_port:
+                q.email_box_port = 993
+            server = imaplib.IMAP4_SSL(q.email_box_host or
+                                       settings.QUEUE_EMAIL_BOX_HOST,
+                                       int(q.email_box_port))
         else:
-            if not q.email_box_port: q.email_box_port = 143
-            server = imaplib.IMAP4(q.email_box_host or settings.QUEUE_EMAIL_BOX_HOST, int(q.email_box_port))
+            if not q.email_box_port:
+                q.email_box_port = 143
+            server = imaplib.IMAP4(q.email_box_host or
+                                   settings.QUEUE_EMAIL_BOX_HOST,
+                                   int(q.email_box_port))
 
         logger.info("Attempting IMAP server login")
 
-        server.login(q.email_box_user or settings.QUEUE_EMAIL_BOX_USER, q.email_box_pass or settings.QUEUE_EMAIL_BOX_PASSWORD)
+        server.login(q.email_box_user or
+                     settings.QUEUE_EMAIL_BOX_USER,
+                     q.email_box_pass or
+                     settings.QUEUE_EMAIL_BOX_PASSWORD)
         server.select(q.email_box_imap_folder)
 
         status, data = server.search(None, 'NOT', 'DELETED')
@@ -235,19 +261,20 @@ def decodeUnknown(charset, string):
     if six.PY2:
         if not charset:
             try:
-                return string.decode('utf-8','ignore')
+                return string.decode('utf-8', 'ignore')
             except:
-                return string.decode('iso8859-1','ignore')
+                return string.decode('iso8859-1', 'ignore')
         return unicode(string, charset)
     elif six.PY3:
         if type(string) is not str:
             if not charset:
                 try:
-                    return str(string,encoding='utf-8',errors='replace')
+                    return str(string, encoding='utf-8', errors='replace')
                 except:
-                    return str(string,encoding='iso8859-1',errors='replace')
-            return str(string,encoding=charset)
+                    return str(string, encoding='iso8859-1', errors='replace')
+            return str(string, encoding=charset)
         return string
+
 
 def decode_mail_headers(string):
     decoded = decode_header(string)
@@ -256,13 +283,16 @@ def decode_mail_headers(string):
     elif six.PY3:
         return u' '.join([str(msg,encoding=charset,errors='replace') if charset else str(msg) for msg, charset in decoded])
 
+
 def ticket_from_message(message, queue, logger):
     # 'message' must be an RFC822 formatted message.
     msg = message
     message = email.message_from_string(msg)
     subject = message.get('subject', _('Created from e-mail'))
     subject = decode_mail_headers(decodeUnknown(message.get_charset(), subject))
-    subject = subject.replace("Re: ", "").replace("Fw: ", "").replace("RE: ", "").replace("FW: ", "").replace("Automatic reply: ", "").strip()
+    for affix in STRIPPED_SUBJECT_STRINGS:
+        subject = subject.replace(affix, "")
+    subject = subject.strip()
 
     sender = message.get('from', _('Unknown Sender'))
     sender = decode_mail_headers(decodeUnknown(message.get_charset(), sender))
@@ -279,7 +309,7 @@ def ticket_from_message(message, queue, logger):
                 return False
             return True
 
-    matchobj = re.match(r".*\["+queue.slug+"-(?P<id>\d+)\]", subject)
+    matchobj = re.match(r".*\[" + queue.slug + "-(?P<id>\d+)\]", subject)
     if matchobj:
         # This is a reply or forward.
         ticket = matchobj.group('id')
@@ -299,9 +329,10 @@ def ticket_from_message(message, queue, logger):
         if name:
             name = collapse_rfc2231_value(name)
 
-        if part.get_content_maintype() == 'text' and name == None:
+        if part.get_content_maintype() == 'text' and name is None:
             if part.get_content_subtype() == 'plain':
-                body_plain = EmailReplyParser.parse_reply(decodeUnknown(part.get_content_charset(), part.get_payload(decode=True)))
+                body_plain = EmailReplyParser.parse_reply(
+                    decodeUnknown(part.get_content_charset(), part.get_payload(decode=True)))
                 logger.debug("Discovered plain text MIME part")
             else:
                 body_html = part.get_payload(decode=True)
@@ -315,7 +346,7 @@ def ticket_from_message(message, queue, logger):
                 'filename': name,
                 'content': part.get_payload(decode=True),
                 'type': part.get_content_type()},
-                )
+            )
             logger.debug("Found MIME attachment %s" % name)
 
         counter += 1
@@ -353,7 +384,7 @@ def ticket_from_message(message, queue, logger):
     if smtp_priority in high_priority_types or smtp_importance in high_priority_types:
         priority = 2
 
-    if ticket == None:
+    if ticket is None:
         t = Ticket(
             title=subject,
             queue=queue,
@@ -364,7 +395,6 @@ def ticket_from_message(message, queue, logger):
         )
         t.save()
         new = True
-        update = ''
         logger.debug("Created new ticket %s-%s" % (t.queue.slug, t.id))
 
     elif t.status == Ticket.CLOSED_STATUS:
@@ -372,11 +402,11 @@ def ticket_from_message(message, queue, logger):
         t.save()
 
     f = FollowUp(
-        ticket = t,
-        title = _('E-Mail Received from %(sender_email)s' % {'sender_email': sender_email}),
-        date = timezone.now(),
-        public = True,
-        comment = body,
+        ticket=t,
+        title=_('E-Mail Received from %(sender_email)s' % {'sender_email': sender_email}),
+        date=timezone.now(),
+        public=True,
+        comment=body,
     )
 
     if t.status == Ticket.REOPENED_STATUS:
@@ -404,11 +434,10 @@ def ticket_from_message(message, queue, logger):
                 filename=filename,
                 mime_type=file['type'],
                 size=len(file['content']),
-                )
+            )
             a.file.save(filename, ContentFile(file['content']), save=False)
             a.save()
             logger.info("Attachment '%s' successfully added to ticket." % filename)
-
 
     context = safe_template_context(t)
 
@@ -421,7 +450,7 @@ def ticket_from_message(message, queue, logger):
                 recipients=sender_email,
                 sender=queue.from_address,
                 fail_silently=True,
-                )
+            )
 
         if queue.new_ticket_cc:
             send_templated_mail(
@@ -430,7 +459,7 @@ def ticket_from_message(message, queue, logger):
                 recipients=queue.new_ticket_cc,
                 sender=queue.from_address,
                 fail_silently=True,
-                )
+            )
 
         if queue.updated_ticket_cc and queue.updated_ticket_cc != queue.new_ticket_cc:
             send_templated_mail(
@@ -439,15 +468,15 @@ def ticket_from_message(message, queue, logger):
                 recipients=queue.updated_ticket_cc,
                 sender=queue.from_address,
                 fail_silently=True,
-                )
+            )
 
     else:
         context.update(comment=f.comment)
 
-        if t.status == Ticket.REOPENED_STATUS:
-            update = _(' (Reopened)')
-        else:
-            update = _(' (Updated)')
+        # if t.status == Ticket.REOPENED_STATUS:
+        #     update = _(' (Reopened)')
+        # else:
+        #     update = _(' (Updated)')
 
         if t.assigned_to:
             send_templated_mail(
@@ -456,7 +485,7 @@ def ticket_from_message(message, queue, logger):
                 recipients=t.assigned_to.email,
                 sender=queue.from_address,
                 fail_silently=True,
-                )
+            )
 
         if queue.updated_ticket_cc:
             send_templated_mail(
@@ -465,11 +494,10 @@ def ticket_from_message(message, queue, logger):
                 recipients=queue.updated_ticket_cc,
                 sender=queue.from_address,
                 fail_silently=True,
-                )
+            )
 
     return t
 
 
 if __name__ == '__main__':
     process_email()
-

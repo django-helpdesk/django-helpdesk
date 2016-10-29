@@ -1,11 +1,8 @@
 # -*- coding: utf-8 -*-
 import sys
-try:
-    from django.contrib.auth import get_user_model
-except ImportError:
-    from django.contrib.auth.models import User
-else:
-    User = get_user_model()
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 
 def get_staff_user(username='helpdesk.staff', password='password'):

@@ -25,7 +25,7 @@ def load_fixture(apps, schema_editor):
 
 
 def unload_fixture(apps, schema_editor):
-    "Delete all EmailTemplate objects"
+    """Delete all EmailTemplate objects"""
 
     objects = deserialize_fixture()
 

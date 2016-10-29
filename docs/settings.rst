@@ -1,13 +1,32 @@
 Settings
 ========
 
-First, django-helpdesk needs  ``django.core.context_processors.request`` activated, so in your ``settings.py`` add::
+First, django-helpdesk needs  ``django.core.context_processors.request`` activated, so you must add it to the ``settings.py``. For Django 1.7, add::
 
     from django.conf import global_settings
     TEMPLATE_CONTEXT_PROCESSORS = (
                 global_settings.TEMPLATE_CONTEXT_PROCESSORS +
                 ('django.core.context_processors.request',)
          )
+
+For Django 1.8 and onwards, the settings are located in the ``TEMPLATES``, and the ``request`` module has moved. Add the following instead::
+
+    TEMPLATES = [
+        {
+            'BACKEND': 'django.template.backends.django.DjangoTemplates',
+            ...
+            'OPTIONS': {
+                ...
+                'context_processors': (
+                    # Default ones first
+                    ...
+                    # The one django-helpdesk requires:
+                    "django.template.context_processors.request",
+                ),
+            },
+        },
+    ]
+
 
 The following settings can be changed in your ``settings.py`` file to help change the way django-helpdesk operates. There are quite a few settings available to toggle functionality within django-helpdesk.
 
@@ -67,6 +86,10 @@ These changes are visible throughout django-helpdesk
 - **HELPDESK_EMAIL_SUBJECT_TEMPLATE** Subject template for templated emails. ``%(subject)s`` represents the subject wording from the email template (e.g. "(Closed)").
 
   **Default:** ``HELPDESK_EMAIL_SUBJECT_TEMPLATE = "{{ ticket.ticket }} {{ ticket.title|safe }} %(subject)s"``
+
+- **HELPDESK_EMAIL_FALLBACK_LOCALE** Fallback locale for templated emails when queue locale not found
+
+  **Default:** ``HELPDESK_EMAIL_FALLBACK_LOCALE= "en"``
 
 
 Options shown on public pages

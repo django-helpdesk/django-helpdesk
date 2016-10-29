@@ -6,7 +6,7 @@ django-helpdesk - A Django powered ticket tracker for small enterprise.
 lib.py - Common functions (eg multipart e-mail)
 """
 
-chart_colours = ('80C65A', '990066', 'FF9900', '3399CC', 'BBCCED', '3399CC', 'FFCC33')
+import logging
 
 try:
     from base64 import urlsafe_b64encode as b64encode
@@ -17,13 +17,20 @@ try:
 except ImportError:
     from base64 import decodestring as b64decode
 
-import logging
-logger = logging.getLogger('helpdesk')
-
 from django.utils.encoding import smart_str
 from django.db.models import Q
+from django.utils.safestring import mark_safe
 
-def send_templated_mail(template_name, email_context, recipients, sender=None, bcc=None, fail_silently=False, files=None):
+logger = logging.getLogger('helpdesk')
+
+
+def send_templated_mail(template_name,
+                        email_context,
+                        recipients,
+                        sender=None,
+                        bcc=None,
+                        fail_silently=False,
+                        files=None):
     """
     send_templated_mail() is a warpper around Django's e-mail routines that
     allows us to easily send multipart (text/plain & text/html) e-mails using
@@ -46,7 +53,7 @@ def send_templated_mail(template_name, email_context, recipients, sender=None, b
     fail_silently is passed to Django's mail routine. Set to 'True' to ignore
         any errors at send time.
 
-    files can be a list of tuple. Each tuple should be a filename to attach, 
+    files can be a list of tuple. Each tuple should be a filename to attach,
         along with the File objects to be read. files can be blank.
 
     """
@@ -56,7 +63,8 @@ def send_templated_mail(template_name, email_context, recipients, sender=None, b
     from django.template import loader, Context
 
     from helpdesk.models import EmailTemplate
-    from helpdesk.settings import HELPDESK_EMAIL_SUBJECT_TEMPLATE
+    from helpdesk.settings import HELPDESK_EMAIL_SUBJECT_TEMPLATE, \
+        HELPDESK_EMAIL_FALLBACK_LOCALE
     import os
 
     # RemovedInDjango110Warning: render() must be called with a dict, not a Context.
@@ -68,9 +76,9 @@ def send_templated_mail(template_name, email_context, recipients, sender=None, b
     if hasattr(context['queue'], 'locale'):
         locale = getattr(context['queue'], 'locale', '')
     else:
-        locale = context['queue'].get('locale', 'en')
+        locale = context['queue'].get('locale', HELPDESK_EMAIL_FALLBACK_LOCALE)
     if not locale:
-        locale = 'en'
+        locale = HELPDESK_EMAIL_FALLBACK_LOCALE
 
     t = None
     try:
@@ -82,16 +90,17 @@ def send_templated_mail(template_name, email_context, recipients, sender=None, b
         try:
             t = EmailTemplate.objects.get(template_name__iexact=template_name, locale__isnull=True)
         except EmailTemplate.DoesNotExist:
-            logger.warning('template "%s" does not exist, no mail sent' %
-			   template_name)
-            return # just ignore if template doesn't exist
+            logger.warning('template "%s" does not exist, no mail sent',
+                           template_name)
+            return  # just ignore if template doesn't exist
 
     if not sender:
         sender = settings.DEFAULT_FROM_EMAIL
 
     footer_file = os.path.join('helpdesk', locale, 'email_text_footer.txt')
-    
-    # get_template_from_string was removed in Django 1.8 http://django.readthedocs.org/en/1.8.x/ref/templates/upgrading.html
+
+    # get_template_from_string was removed in Django 1.8
+    # http://django.readthedocs.org/en/1.8.x/ref/templates/upgrading.html
     try:
         from django.template import engines
         template_func = engines['django'].from_string
@@ -100,25 +109,26 @@ def send_templated_mail(template_name, email_context, recipients, sender=None, b
 
     text_part = template_func(
         "%s{%% include '%s' %%}" % (t.plain_text, footer_file)
-        ).render(context)
+    ).render(context)
 
     email_html_base_file = os.path.join('helpdesk', locale, 'email_html_base.html')
 
-
-    ''' keep new lines in html emails '''
-    from django.utils.safestring import mark_safe
-
+    # keep new lines in html emails
     if 'comment' in context:
         html_txt = context['comment']
         html_txt = html_txt.replace('\r\n', '<br>')
         context['comment'] = mark_safe(html_txt)
 
-    # get_template_from_string was removed in Django 1.8 http://django.readthedocs.org/en/1.8.x/ref/templates/upgrading.html
+    # get_template_from_string was removed in Django 1.8
+    # http://django.readthedocs.org/en/1.8.x/ref/templates/upgrading.html
     html_part = template_func(
-        "{%% extends '%s' %%}{%% block title %%}%s{%% endblock %%}{%% block content %%}%s{%% endblock %%}" % (email_html_base_file, t.heading, t.html)
-        ).render(context)
+        "{%% extends '%s' %%}{%% block title %%}"
+        "%s"
+        "{%% endblock %%}{%% block content %%}%s{%% endblock %%}" %
+        (email_html_base_file, t.heading, t.html)).render(context)
 
-    # get_template_from_string was removed in Django 1.8 http://django.readthedocs.org/en/1.8.x/ref/templates/upgrading.html
+    # get_template_from_string was removed in Django 1.8
+    # http://django.readthedocs.org/en/1.8.x/ref/templates/upgrading.html
     subject_part = template_func(
         HELPDESK_EMAIL_SUBJECT_TEMPLATE % {
             "subject": t.subject,
@@ -128,13 +138,11 @@ def send_templated_mail(template_name, email_context, recipients, sender=None, b
         if recipients.find(','):
             recipients = recipients.split(',')
     elif type(recipients) != list:
-        recipients = [recipients,]
+        recipients = [recipients, ]
 
-    msg = EmailMultiAlternatives(   subject_part.replace('\n', '').replace('\r', ''),
-                                    text_part,
-                                    sender,
-                                    recipients,
-                                    bcc=bcc)
+    msg = EmailMultiAlternatives(
+        subject_part.replace('\n', '').replace('\r', ''),
+        text_part, sender, recipients, bcc=bcc)
     msg.attach_alternative(html_part, "text/html")
 
     if files:
@@ -178,7 +186,7 @@ def apply_query(queryset, params):
     params is a dictionary that contains the following:
         filtering: A dict of Django ORM filters, eg:
             {'user__id__in': [1, 3, 103], 'title__contains': 'foo'}
-       
+
         search_string: A freetext search string
 
         sorting: The name of the column to sort by
@@ -225,23 +233,23 @@ def safe_template_context(ticket):
 
     context = {
         'queue': {},
-        'ticket': {},
-        }
+        'ticket': {}
+    }
     queue = ticket.queue
 
-    for field in (  'title', 'slug', 'email_address', 'from_address', 'locale'):
+    for field in ('title', 'slug', 'email_address', 'from_address', 'locale'):
         attr = getattr(queue, field, None)
         if callable(attr):
             context['queue'][field] = attr()
         else:
             context['queue'][field] = attr
 
-    for field in (  'title', 'created', 'modified', 'submitter_email',
-                    'status', 'get_status_display', 'on_hold', 'description',
-                    'resolution', 'priority', 'get_priority_display',
-                    'last_escalation', 'ticket', 'ticket_for_url',
-                    'get_status', 'ticket_url', 'staff_url', '_get_assigned_to'
-                 ):
+    for field in ('title', 'created', 'modified', 'submitter_email',
+                  'status', 'get_status_display', 'on_hold', 'description',
+                  'resolution', 'priority', 'get_priority_display',
+                  'last_escalation', 'ticket', 'ticket_for_url',
+                  'get_status', 'ticket_url', 'staff_url', '_get_assigned_to'
+                  ):
         attr = getattr(ticket, field, None)
         if callable(attr):
             context['ticket'][field] = '%s' % attr()
@@ -277,10 +285,10 @@ def text_is_spam(text, request):
     )
 
     if hasattr(settings, 'TYPEPAD_ANTISPAM_API_KEY'):
-        ak.setAPIKey(key = settings.TYPEPAD_ANTISPAM_API_KEY)
+        ak.setAPIKey(key=settings.TYPEPAD_ANTISPAM_API_KEY)
         ak.baseurl = 'api.antispam.typepad.com/1.1/'
     elif hasattr(settings, 'AKISMET_API_KEY'):
-        ak.setAPIKey(key = settings.AKISMET_API_KEY)
+        ak.setAPIKey(key=settings.AKISMET_API_KEY)
     else:
         return False
 

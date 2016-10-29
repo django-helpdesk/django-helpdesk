@@ -11,16 +11,10 @@ The API documentation can be accessed by visiting http://helpdesk/api/help/
 through templates/helpdesk/help_api.html.
 """
 
-from django import forms
 from django.contrib.auth import authenticate
-try:
-    from django.contrib.auth import get_user_model
-    User = get_user_model()
-except ImportError:
-    from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.http import HttpResponse
 from django.shortcuts import render
-from django.template import loader, Context
 import simplejson
 from django.views.decorators.csrf import csrf_exempt
 
@@ -34,6 +28,8 @@ from helpdesk.lib import send_templated_mail, safe_template_context
 from helpdesk.models import Ticket, Queue, FollowUp
 
 import warnings
+
+User = get_user_model()
 
 STATUS_OK = 200
 
@@ -57,11 +53,13 @@ def api(request, method):
 
 
     THIS IS DEPRECATED AS OF DECEMBER 2015 AND WILL BE REMOVED IN JANUARY 2016.
-    SEE https://github.com/rossp/django-helpdesk/issues/198 FOR DETAILS
+    SEE https://github.com/django-helpdesk/django-helpdesk/issues/198 FOR DETAILS
 
     """
 
-    warnings.warn("django-helpdesk API will be removed in January 2016. See https://github.com/rossp/django-helpdesk/issues/198 for details.", category=DeprecationWarning)
+    warnings.warn("django-helpdesk API will be removed in January 2016. "
+                  "See https://github.com/django-helpdesk/django-helpdesk/issues/198 for details.",
+                  category=DeprecationWarning)
 
     if method == 'help':
         return render(request, template_name='helpdesk/help_api.html')
@@ -73,7 +71,7 @@ def api(request, method):
     request.user = authenticate(
         username=request.POST.get('user', False),
         password=request.POST.get('password'),
-        )
+    )
 
     if request.user is None:
         return api_return(STATUS_ERROR_PERMISSIONS)
@@ -111,9 +109,9 @@ def api_return(status, text='', json=False):
 
 
 class API:
+
     def __init__(self, request):
         self.request = request
-
 
     def api_public_create_ticket(self):
         form = TicketForm(self.request.POST)
@@ -126,10 +124,11 @@ class API:
         else:
             return api_return(STATUS_ERROR, text=form.errors.as_text())
 
-
     def api_public_list_queues(self):
-        return api_return(STATUS_OK, simplejson.dumps([{"id": "%s" % q.id, "title": "%s" % q.title} for q in Queue.objects.all()]), json=True)
-
+        return api_return(STATUS_OK, simplejson.dumps([
+            {"id": "%s" % q.id, "title": "%s" % q.title}
+            for q in Queue.objects.all()
+        ]), json=True)
 
     def api_public_find_user(self):
         username = self.request.POST.get('username', False)
@@ -140,7 +139,6 @@ class API:
 
         except User.DoesNotExist:
             return api_return(STATUS_ERROR, "Invalid username provided")
-
 
     def api_public_delete_ticket(self):
         if not self.request.POST.get('confirm', False):
@@ -155,7 +153,6 @@ class API:
 
         return api_return(STATUS_OK)
 
-
     def api_public_hold_ticket(self):
         try:
             ticket = Ticket.objects.get(id=self.request.POST.get('ticket', False))
@@ -167,7 +164,6 @@ class API:
 
         return api_return(STATUS_OK)
 
-
     def api_public_unhold_ticket(self):
         try:
             ticket = Ticket.objects.get(id=self.request.POST.get('ticket', False))
@@ -178,7 +174,6 @@ class API:
         ticket.save()
 
         return api_return(STATUS_OK)
-
 
     def api_public_add_followup(self):
         try:
@@ -201,7 +196,7 @@ class API:
             comment=message,
             user=self.request.user,
             title='Comment Added',
-            )
+        )
 
         if public:
             f.public = True
@@ -220,7 +215,7 @@ class API:
                 recipients=ticket.submitter_email,
                 sender=ticket.queue.from_address,
                 fail_silently=True,
-                )
+            )
             messages_sent_to.append(ticket.submitter_email)
 
         if public:
@@ -232,7 +227,7 @@ class API:
                         recipients=cc.email_address,
                         sender=ticket.queue.from_address,
                         fail_silently=True,
-                        )
+                    )
                     messages_sent_to.append(cc.email_address)
 
         if ticket.queue.updated_ticket_cc and ticket.queue.updated_ticket_cc not in messages_sent_to:
@@ -242,7 +237,7 @@ class API:
                 recipients=ticket.queue.updated_ticket_cc,
                 sender=ticket.queue.from_address,
                 fail_silently=True,
-                )
+            )
             messages_sent_to.append(ticket.queue.updated_ticket_cc)
 
         if (
@@ -264,7 +259,6 @@ class API:
 
         return api_return(STATUS_OK)
 
-
     def api_public_resolve(self):
         try:
             ticket = Ticket.objects.get(id=self.request.POST.get('ticket', False))
@@ -283,13 +277,13 @@ class API:
             user=self.request.user,
             title='Resolved',
             public=True,
-            )
+        )
         f.save()
 
         context = safe_template_context(ticket)
         context['resolution'] = f.comment
 
-        subject = '%s %s (Resolved)' % (ticket.ticket, ticket.title)
+        # subject = '%s %s (Resolved)' % (ticket.ticket, ticket.title)
 
         messages_sent_to = []
 
@@ -300,7 +294,7 @@ class API:
                 recipients=ticket.submitter_email,
                 sender=ticket.queue.from_address,
                 fail_silently=True,
-                )
+            )
             messages_sent_to.append(ticket.submitter_email)
 
             for cc in ticket.ticketcc_set.all():
@@ -311,7 +305,7 @@ class API:
                         recipients=cc.email_address,
                         sender=ticket.queue.from_address,
                         fail_silently=True,
-                        )
+                    )
                     messages_sent_to.append(cc.email_address)
 
         if ticket.queue.updated_ticket_cc and ticket.queue.updated_ticket_cc not in messages_sent_to:
@@ -321,17 +315,22 @@ class API:
                 recipients=ticket.queue.updated_ticket_cc,
                 sender=ticket.queue.from_address,
                 fail_silently=True,
-                )
+            )
             messages_sent_to.append(ticket.queue.updated_ticket_cc)
 
-        if ticket.assigned_to and self.request.user != ticket.assigned_to and getattr(ticket.assigned_to.usersettings.settings, 'email_on_ticket_apichange', False) and ticket.assigned_to.email and ticket.assigned_to.email not in messages_sent_to:
+        if ticket.assigned_to and \
+                self.request.user != ticket.assigned_to and \
+                getattr(ticket.assigned_to.usersettings.settings,
+                        'email_on_ticket_apichange', False) and \
+                ticket.assigned_to.email and \
+                ticket.assigned_to.email not in messages_sent_to:
             send_templated_mail(
                 'resolved_resolved',
                 context,
                 recipients=ticket.assigned_to.email,
                 sender=ticket.queue.from_address,
                 fail_silently=True,
-                )
+            )
 
         ticket.resoltuion = f.comment
         ticket.status = Ticket.RESOLVED_STATUS
