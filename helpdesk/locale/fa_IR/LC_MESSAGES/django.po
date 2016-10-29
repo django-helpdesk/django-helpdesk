@@ -4,14 +4,15 @@
 # 
 # Translators:
 # Translators:
+# Morteza Nekoei <cisco.ir@gmail.com>, 2016
 msgid ""
 msgstr ""
 "Project-Id-Version: django-helpdesk\n"
 "Report-Msgid-Bugs-To: http://github.com/RossP/django-helpdesk/issues\n"
 "POT-Creation-Date: 2014-07-26 14:14+0200\n"
-"PO-Revision-Date: 2014-08-01 09:58+0000\n"
-"Last-Translator: Ross Poulton <ross@rossp.org>\n"
-"Language-Team: Persian (Iran) (http://www.transifex.com/projects/p/django-helpdesk/language/fa_IR/)\n"
+"PO-Revision-Date: 2016-10-10 22:42+0000\n"
+"Last-Translator: Morteza Nekoei <cisco.ir@gmail.com>\n"
+"Language-Team: Persian (Iran) (http://www.transifex.com/rossp/django-helpdesk/language/fa_IR/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -27,35 +28,35 @@ msgstr ""
 #: templates/helpdesk/ticket_list.html:225 views/staff.py:1032
 #: views/staff.py:1038 views/staff.py:1044 views/staff.py:1050
 msgid "Queue"
-msgstr ""
+msgstr "صف"
 
 #: forms.py:137
 msgid "Summary of the problem"
-msgstr ""
+msgstr "خلاصه مشکل"
 
 #: forms.py:142
 msgid "Submitter E-Mail Address"
-msgstr ""
+msgstr "آدرس ایمیل ثبت کننده"
 
 #: forms.py:144
 msgid ""
 "This e-mail address will receive copies of all public updates to this "
 "ticket."
-msgstr ""
+msgstr "این آدرس ایمیل یک نسخه کپی از کلیه‌ی به‌روزرسانی‌های عمومی این تیکت را دریافت خواهد کرد."
 
 #: forms.py:150
 msgid "Description of Issue"
-msgstr ""
+msgstr "توضیح این مسئله"
 
 #: forms.py:157
 msgid "Case owner"
-msgstr ""
+msgstr "مالک"
 
 #: forms.py:158
 msgid ""
 "If you select an owner other than yourself, they'll be e-mailed details of "
 "this ticket immediately."
-msgstr ""
+msgstr "اگر یک مالک غیر از خودتان را انتخاب نمایید، جزئیات این تیکت به صورت بلادرنگ برای آن‌ها ارسال خواهد شد"
 
 #: forms.py:166 models.py:327 management/commands/escalate_tickets.py:154
 #: templates/helpdesk/public_view_ticket.html:23
@@ -63,28 +64,28 @@ msgstr ""
 #: templates/helpdesk/ticket_desc_table.html:47
 #: templates/helpdesk/ticket_list.html:94 views/staff.py:429
 msgid "Priority"
-msgstr ""
+msgstr "اولویت"
 
 #: forms.py:167
 msgid "Please select a priority carefully. If unsure, leave it as '3'."
-msgstr ""
+msgstr "لطفا با دقت یک اولویت را انتخاب نمایید. در صورت عدم اطمینان، آن‌ را رها نمایید. (اولویت پیش‌فرض: ۳)"
 
 #: forms.py:174 forms.py:365 models.py:335 templates/helpdesk/ticket.html:186
 #: views/staff.py:439
 msgid "Due on"
-msgstr ""
+msgstr "در مدت زمان"
 
 #: forms.py:186 forms.py:370
 msgid "Attach File"
-msgstr ""
+msgstr "ضمیمه کردن فایل"
 
 #: forms.py:187 forms.py:371
 msgid "You can attach a file such as a document or screenshot to this ticket."
-msgstr ""
+msgstr "شما می‌توانید یک فایل مانند مستند یا عکس به این تیکت ضمیمه نمایید."
 
 #: forms.py:240
 msgid "Ticket Opened"
-msgstr ""
+msgstr "تیکت باز است"
 
 #: forms.py:247
 #, python-format
@@ -93,68 +94,68 @@ msgstr ""
 
 #: forms.py:337
 msgid "Summary of your query"
-msgstr ""
+msgstr "خلاصه پرس و جوی شما"
 
 #: forms.py:342
 msgid "Your E-Mail Address"
-msgstr ""
+msgstr "آدرس ایمیل شما"
 
 #: forms.py:343
 msgid "We will e-mail you when your ticket is updated."
-msgstr ""
+msgstr "زمانی‌ که تیکت به‌روزرسانی شود، برای شما ایمیلی ارسال خواهد شد."
 
 #: forms.py:348
 msgid "Description of your issue"
-msgstr ""
+msgstr "توضیح مشکل شما"
 
 #: forms.py:350
 msgid ""
 "Please be as descriptive as possible, including any details we may need to "
 "address your query."
-msgstr ""
+msgstr "لطفا تا جای امکان توضیحات لازم را وارد نمایید، توضیحاتی شامل هر نوع جزئیاتی که ما برای یافتن پرس و جوی شما لازم داریم."
 
 #: forms.py:358
 msgid "Urgency"
-msgstr ""
+msgstr "اورژانسی"
 
 #: forms.py:359
 msgid "Please select a priority carefully."
-msgstr ""
+msgstr "لطفا با دقت یک اولویت را انتخاب نمایید."
 
 #: forms.py:419
 msgid "Ticket Opened Via Web"
-msgstr ""
+msgstr "تیکت از طریق وب باز شده است."
 
 #: forms.py:486
 msgid "Show Ticket List on Login?"
-msgstr ""
+msgstr "لیست تیکت‌ها در زمان ورود نمایش داده شود؟"
 
 #: forms.py:487
 msgid "Display the ticket list upon login? Otherwise, the dashboard is shown."
-msgstr ""
+msgstr "لیست تیکت‌ها در زمان ورود نمایش داده شود؟ در غیر اینصورت در داشبورد نمایش داده خواهند شد."
 
 #: forms.py:492
 msgid "E-mail me on ticket change?"
-msgstr ""
+msgstr "تغییرات تیکت به من ایمیل شود؟"
 
 #: forms.py:493
 msgid ""
 "If you're the ticket owner and the ticket is changed via the web by somebody"
 " else, do you want to receive an e-mail?"
-msgstr ""
+msgstr "اگر شما مالک تیکت هستید و تیکت از طریق وب توسط افراد دیگر تغییر یافت، آیا مایل هستید یک ایمیل اطلاع‌ رسانی دریافت نمایید؟"
 
 #: forms.py:498
 msgid "E-mail me when assigned a ticket?"
-msgstr ""
+msgstr "زمانی‌که یک تیکت تخصیص یافت به من ایمیل ارسال شود؟"
 
 #: forms.py:499
 msgid ""
 "If you are assigned a ticket via the web, do you want to receive an e-mail?"
-msgstr ""
+msgstr "اگر شما یک تیکت را از طریق وب تخصیص دادید، آیا مایل هستید یک ایمیل اطلاع‌رسانی دریافت نمایید؟"
 
 #: forms.py:504
 msgid "E-mail me when a ticket is changed via the API?"
-msgstr ""
+msgstr "زمانی‌که یک تیکت از طریق API تغییر یافت، برای من ایمیل ارسال شود؟"
 
 #: forms.py:505
 msgid "If a ticket is altered by the API, do you want to receive an e-mail?"
@@ -162,22 +163,22 @@ msgstr ""
 
 #: forms.py:510
 msgid "Number of tickets to show per page"
-msgstr ""
+msgstr "تعداد تیکت‌های قابل نمایش در هر صفحه"
 
 #: forms.py:511
 msgid "How many tickets do you want to see on the Ticket List page?"
-msgstr ""
+msgstr "مایل هستید چه تعداد تیکت در صفحه‌ی لیست تیکت برای شما نمایش داده شود؟"
 
 #: forms.py:518
 msgid "Use my e-mail address when submitting tickets?"
-msgstr ""
+msgstr "ایمیل آدرس من در زمان ثبت تیکت‌ها استفاده شود."
 
 #: forms.py:519
 msgid ""
 "When you submit a ticket, do you want to automatically use your e-mail "
 "address as the submitter address? You can type a different e-mail address "
 "when entering the ticket if needed, this option only changes the default."
-msgstr ""
+msgstr "زمانی که یک تیکت ثبت نمودید، آیا مایل هستید به صورت خودکار آدرس ایمیل خود را به عنوان آدرس ایمیل ثبت کننده استفاده نمایید؟ شما میتوانید در صورت تمایل یک آدرس ایمیل دیگر زمان ثبت تیکت استفاده نمایید."
 
 #: models.py:35 models.py:261 models.py:503 models.py:817 models.py:853
 #: templates/helpdesk/dashboard.html:58 templates/helpdesk/dashboard.html:78
@@ -185,7 +186,7 @@ msgstr ""
 #: templates/helpdesk/ticket.html:178 templates/helpdesk/ticket_list.html:85
 #: templates/helpdesk/ticket_list.html:225 views/staff.py:419
 msgid "Title"
-msgstr ""
+msgstr "عنوان"
 
 #: models.py:40 models.py:822 models.py:1206
 msgid "Slug"
@@ -201,39 +202,39 @@ msgstr ""
 #: templates/helpdesk/email_ignore_list.html:13
 #: templates/helpdesk/ticket_cc_list.html:15
 msgid "E-Mail Address"
-msgstr ""
+msgstr "آدرس ایمیل"
 
 #: models.py:49
 msgid ""
 "All outgoing e-mails for this queue will use this e-mail address. If you use"
 " IMAP or POP3, this should be the e-mail address for that mailbox."
-msgstr ""
+msgstr "کلیه‌ی ایمیل‌های ارسالی برای این صف، از این ایمیل استفاده خواهند کرد. اگر می‌خواهید از IMAP یا POP3 استفاده کنید، آدرس ایمیل شما باید مرتبط با آن ایمیل سرور باشد."
 
 #: models.py:55 models.py:794
 msgid "Locale"
-msgstr ""
+msgstr "موقعیت/محل"
 
 #: models.py:59
 msgid ""
 "Locale of this queue. All correspondence in this queue will be in this "
 "language."
-msgstr ""
+msgstr "موقعیت این صف. کلیه‌ی پاسخ‌ها و تعاملات در این صف، با این زبان استفاده خواهد شد."
 
 #: models.py:63
 msgid "Allow Public Submission?"
-msgstr ""
+msgstr "اجازه دادن ثبت‌های عمومی؟"
 
 #: models.py:66
 msgid "Should this queue be listed on the public submission form?"
-msgstr ""
+msgstr "آیا این صف در فرم ثبت‌های عمومی لیست شود؟"
 
 #: models.py:71
 msgid "Allow E-Mail Submission?"
-msgstr ""
+msgstr "اجازه‌ دادن ثبت ایمیل‌؟"
 
 #: models.py:74
 msgid "Do you want to poll the e-mail box below for new tickets?"
-msgstr ""
+msgstr "آیا می‌خواهید ایمیل زیر را برای تیکت‌های جدید انتخاب نمایید؟"
 
 #: models.py:79
 msgid "Escalation Days"
@@ -243,22 +244,22 @@ msgstr ""
 msgid ""
 "For tickets which are not held, how often do you wish to increase their "
 "priority? Set to 0 for no escalation."
-msgstr ""
+msgstr "برای تیکت‌هایی که نگهداری نشده‌اند، آیا می‌خواهید اولویتی برای آن‌ها در نظر بگیرید؟ عدد ۰ را برای عدم استفاده از اولویت بکار برید."
 
 #: models.py:87
 msgid "New Ticket CC Address"
-msgstr ""
+msgstr "یک آدرس کپی (CC) برای تیکت جدید"
 
 #: models.py:91
 msgid ""
 "If an e-mail address is entered here, then it will receive notification of "
 "all new tickets created for this queue. Enter a comma between multiple "
 "e-mail addresses."
-msgstr ""
+msgstr "اگر یک آدرس ایمیل در این قسمت وارد شود، این آدرس کلیه‌ی تیکت‌های ایجاد شده برای این صف را دریافت خواهد نمود. جهت استفاده از بیش از یک آدرس ایمیل از کاما استفاده نمایید."
 
 #: models.py:97
 msgid "Updated Ticket CC Address"
-msgstr ""
+msgstr "آدرس تیکت (CC) به‌روزرسانی شده"
 
 #: models.py:101
 msgid ""

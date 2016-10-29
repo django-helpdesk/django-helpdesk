@@ -8,12 +8,8 @@ views/kb.py - Public-facing knowledgebase views. The knowledgebase is a
               resolutions to common problems.
 """
 
-from datetime import datetime
-
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
-from django.template import RequestContext
-from django.utils.translation import ugettext as _
 
 from helpdesk import settings as helpdesk_settings
 from helpdesk.models import KBCategory, KBItem
@@ -22,31 +18,28 @@ from helpdesk.models import KBCategory, KBItem
 def index(request):
     category_list = KBCategory.objects.all()
     # TODO: It'd be great to have a list of most popular items here.
-    return render(request, template_name='helpdesk/kb_index.html',
-        context = {
-            'kb_categories': category_list,
-            'helpdesk_settings': helpdesk_settings,
-        })
+    return render(request, 'helpdesk/kb_index.html', {
+        'kb_categories': category_list,
+        'helpdesk_settings': helpdesk_settings,
+    })
 
 
 def category(request, slug):
     category = get_object_or_404(KBCategory, slug__iexact=slug)
     items = category.kbitem_set.all()
-    return render(request, template_name='helpdesk/kb_category.html',
-        context = {
-            'category': category,
-            'items': items,
-            'helpdesk_settings': helpdesk_settings,
-        })
+    return render(request, 'helpdesk/kb_category.html', {
+        'category': category,
+        'items': items,
+        'helpdesk_settings': helpdesk_settings,
+    })
 
 
 def item(request, item):
     item = get_object_or_404(KBItem, pk=item)
-    return render(request, template_name='helpdesk/kb_item.html',
-        context = {
-            'item': item,
-            'helpdesk_settings': helpdesk_settings,
-        })
+    return render(request, 'helpdesk/kb_item.html', {
+        'item': item,
+        'helpdesk_settings': helpdesk_settings,
+    })
 
 
 def vote(request, item):
@@ -59,4 +52,3 @@ def vote(request, item):
         item.save()
 
     return HttpResponseRedirect(item.get_absolute_url())
-

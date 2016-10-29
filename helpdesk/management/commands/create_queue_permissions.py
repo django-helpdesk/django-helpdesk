@@ -25,6 +25,7 @@ from helpdesk.models import Queue
 
 
 class Command(BaseCommand):
+
     def __init__(self):
         BaseCommand.__init__(self)
 
@@ -32,7 +33,7 @@ class Command(BaseCommand):
             make_option(
                 '--queues', '-q',
                 help='Queues to include (default: all). Use queue slugs'),
-            )
+        )
 
     def handle(self, *args, **options):
         queue_slugs = options['queues']
@@ -71,4 +72,3 @@ class Command(BaseCommand):
                 )
             except IntegrityError:
                 self.stdout.write("  .. permission already existed, skipping")
-

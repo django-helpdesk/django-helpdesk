@@ -15,7 +15,7 @@ Try using ``pip install django-helpdesk``. Go and have a beer to celebrate Pytho
 GIT Checkout (Cutting Edge)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If you're planning on editing the code or just want to get whatever is the latest and greatest, you can clone the official Git repository with ``git clone git://github.com/rossp/django-helpdesk.git``
+If you're planning on editing the code or just want to get whatever is the latest and greatest, you can clone the official Git repository with ``git clone git://github.com/django-helpdesk/django-helpdesk.git``
 
 Copy the ``helpdesk`` folder into your ``PYTHONPATH``.
 
@@ -49,9 +49,12 @@ Adding To Your Django Project
 
    Note that you can change 'helpdesk/' to anything you like, such as 'support/' or 'help/'. If you want django-helpdesk to be available at the root of your site (for example at http://support.mysite.tld/) then the line will be as follows::
 
-     url(r'', include('helpdesk.urls')),
+     url(r'', include('helpdesk.urls', namespace='helpdesk')),
 
    This line will have to come *after* any other lines in your urls.py such as those used by the Django admin.
+
+   Note that the `helpdesk` namespace is no longer required for Django 1.9 and you can use a different namespace.
+   However, it is recommended to use the default namespace name for clarity.
 
 3. Create the required database tables.
 

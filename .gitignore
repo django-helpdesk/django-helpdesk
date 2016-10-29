@@ -3,5 +3,6 @@
 django_helpdesk.egg-info
 docs/html/*
 docs/doctrees/*
+.coverage
 .project
 .pydevproject

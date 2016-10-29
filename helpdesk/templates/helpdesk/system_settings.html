@@ -8,7 +8,7 @@
 <p>{% blocktrans %}The following items can be maintained by you or other superusers:{% endblocktrans %}</p>
 
 <ul>
-    <li><a href='{% url 'helpdesk_email_ignore' %}'>{% trans "E-Mail Ignore list" %}</a></li>
+    <li><a href='{% url 'helpdesk:email_ignore' %}'>{% trans "E-Mail Ignore list" %}</a></li>
     <li><a href='{% url 'admin:helpdesk_queue_changelist' %}'>{% trans "Maintain Queues" %}</a></li>
     <li><a href='{% url 'admin:helpdesk_presetreply_changelist' %}'>{% trans "Maintain Pre-Set Replies" %}</a></li>
     <li><a href='{% url 'admin:helpdesk_kbcategory_changelist' %}'>{% trans "Maintain Knowledgebase Categories" %}</a></li>

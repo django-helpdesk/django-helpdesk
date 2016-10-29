@@ -26,11 +26,11 @@ class TestKBDisabled(TestCase):
         from django.core.urlresolvers import NoReverseMatch
 
         self.client.login(username=get_staff_user().get_username(), password='password')
-        self.assertRaises(NoReverseMatch, reverse, 'helpdesk_kb_index')
+        self.assertRaises(NoReverseMatch, reverse, 'helpdesk:kb_index')
         try:
-            response = self.client.get(reverse('helpdesk_dashboard'))
+            response = self.client.get(reverse('helpdesk:dashboard'))
         except NoReverseMatch as e:
-            if 'helpdesk_kb_index' in e.message:
+            if 'helpdesk:kb_index' in e.message:
                 self.fail("Please verify any unchecked references to helpdesk_kb_index (start with navigation.html)")
             else:
                 raise

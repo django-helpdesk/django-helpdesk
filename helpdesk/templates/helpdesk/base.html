@@ -74,9 +74,9 @@
     <script src="{% static 'helpdesk/dist/js/sb-admin-2.js' %}"></script>
 
     <!-- RSS -->
-    <link rel='alternate' href='{% url 'helpdesk_rss_user' user.get_username %}' type='application/rss+xml' title='{% trans "My Open Tickets" %}' />
-    <link rel='alternate' href='{% url 'helpdesk_rss_activity' %}' type='application/rss+xml' title='{% trans "All Recent Activity" %}' />
-    <link rel='alternate' href='{% url 'helpdesk_rss_unassigned' %}' type='application/rss+xml' title='{% trans "Unassigned Tickets" %}' />
+    <link rel='alternate' href='{% url 'helpdesk:rss_user' user.get_username %}' type='application/rss+xml' title='{% trans "My Open Tickets" %}' />
+    <link rel='alternate' href='{% url 'helpdesk:rss_activity' %}' type='application/rss+xml' title='{% trans "All Recent Activity" %}' />
+    <link rel='alternate' href='{% url 'helpdesk:rss_unassigned' %}' type='application/rss+xml' title='{% trans "Unassigned Tickets" %}' />
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -126,7 +126,6 @@
 
         <div id='footer' class="row">
             <div class="col-md-2">{% include "helpdesk/attribution.html" %}</div>
-            <div class="col-md-2"><s><a href='{% url 'helpdesk_api_help' %}'>{% trans "API" %}</a></s></div>
         </div>
     </div>
     {% include "helpdesk/debug.html" %}

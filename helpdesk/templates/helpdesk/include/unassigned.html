@@ -30,7 +30,7 @@
                                             <td><span title='{{ ticket.created|date:"r" }}'>{{ ticket.created|naturaltime }}</span></td>
                                             <td>
                                                 <a href='{{ ticket.get_absolute_url }}?take'><button class='btn btn-primary btn-xs'><i class="fa fa-hand-paper-o"></i>&nbsp;{% trans "Take" %}</button></a> |
-                                                <a href='{% url 'helpdesk_delete' ticket.id %}'><button class='btn btn-danger btn-xs'><i class="fa fa-trash"></i>&nbsp;{% trans "Delete" %}</button></a>
+                                                <a href='{% url 'helpdesk:delete' ticket.id %}'><button class='btn btn-danger btn-xs'><i class="fa fa-trash"></i>&nbsp;{% trans "Delete" %}</button></a>
                                             </td>
                                         </tr>
                                         {% empty %}

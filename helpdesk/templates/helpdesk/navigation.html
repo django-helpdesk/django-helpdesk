@@ -9,7 +9,7 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="{% url 'helpdesk_home' %}">Helpdesk</a>
+                <a class="navbar-brand" href="{% url 'helpdesk:home' %}">Helpdesk</a>
             </div>
             <!-- /.navbar-header -->
 
@@ -17,27 +17,28 @@
             {% if helpdesk_settings.HELPDESK_NAVIGATION_ENABLED and user.is_authenticated or user.is_staff %}
             <ul class="nav navbar-top-links navbar-right">
                 <li>
-                    <a href='{% url 'helpdesk_dashboard' %}'><i class="fa fa-dashboard fa-fw"></i> <span class="nav-text">{% trans "Dashboard" %}</span></a>
+                    <a href='{% url 'helpdesk:dashboard' %}'><i class="fa fa-dashboard fa-fw"></i> <span class="nav-text">{% trans "Dashboard" %}</span></a>
                 </li>
                 <li>
-                    <a href='{% url 'helpdesk_list' %}'><i class="fa fa-tasks fa-fw"></i> <span class="nav-text">{% trans "Tickets" %}</span></a>
+                    <a href='{% url 'helpdesk:list' %}'><i class="fa fa-tasks fa-fw"></i> <span class="nav-text">{% trans "Tickets" %}</span></a>
                 </li>
                 <li>
-                    <a href='{% url 'helpdesk_submit' %}'><i class="fa fa-plus-circle fa-fw"></i> <span class="nav-text">{% trans "New Ticket" %}</span></a>
+                    <a href='{% url 'helpdesk:submit' %}'><i class="fa fa-plus-circle fa-fw"></i> <span class="nav-text">{% trans "New Ticket" %}</span></a>
                 </li>
                 <li>
-                    <a href='{% url 'helpdesk_report_index' %}'><i class="fa fa-bar-chart-o fa-fw"></i> <span class="nav-text"> {% trans "Stats" %}</span></a>
+                    <a href='{% url 'helpdesk:report_index' %}'><i class="fa fa-bar-chart-o fa-fw"></i> <span class="nav-text"> {% trans "Stats" %}</span></a>
                 </li>
                 {% if helpdesk_settings.HELPDESK_KB_ENABLED %}
                 <li>
-                    <a href='{% url 'helpdesk_kb_index' %}'><i class="fa fa-database fa-fw"></i> <span class="nav-text">{% trans "Knowledgebase" %}</span></a>
+                    <a href='{% url 'helpdesk:kb_index' %}'><i class="fa fa-database fa-fw"></i> <span class="nav-text">{% trans "Knowledgebase" %}</span></a>
                 </li>
+
                 {% endif %}
                 {% if user_saved_queries_ %}
                 <li class="headerlink dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#"><i class="fa fa-filter fa-fw"></i> <span class="nav-text">{% trans "Saved Query" %} <b class="caret"></b></span></a>
                     <ul class="dropdown-menu">
                         {% for q in user_saved_queries_ %}
-                            <li><a href="{% url 'helpdesk_list' %}?saved_query={{ q.id }}">{{ q.title }}
+                            <li><a href="{% url 'helpdesk:list' %}?saved_query={{ q.id }}">{{ q.title }}
                                 {% if q.shared %}
                                     (Shared{% ifnotequal user q.user %} by {{ q.user.get_username }}{% endifnotequal %})
                                 {% endif %}</a></li>
@@ -47,7 +48,7 @@
                 {% endif %}
                 {% if not query %}
                 <li>
-                    <form class="navbar-form navbar-top" id='searchform' method='get' action="{% url 'helpdesk_list' %}">
+                    <form class="navbar-form navbar-top" id='searchform' method='get' action="{% url 'helpdesk:list' %}">
                         <div class="input-group custom-search-form">
                             <input type='text' name='q' size='15' class='input form-control' placeholder='{% trans "Search..." %}' id='search_query' title='{% trans "Enter a keyword, or a ticket number to jump straight to that ticket." %}'/>
                             <input type='hidden' name='status' value='1' /><input type='hidden' name='status' value='2' /><input type='hidden' name='status' value='3' /><input type='hidden' name='search_type' value='header' />
@@ -67,15 +68,15 @@
                         <i class="fa fa-user fa-fw"></i> {{ user.get_full_name|default:user.get_username }} <i class="fa fa-caret-down"></i>
                     </a>
                     <ul class="dropdown-menu dropdown-user">
-                        <li><a href="{% url 'helpdesk_user_settings' %}"><i class="fa fa-gear fa-fw"></i> {% trans "User Settings" %}</a>
+                        <li><a href="{% url 'helpdesk:user_settings' %}"><i class="fa fa-gear fa-fw"></i> {% trans "User Settings" %}</a>
                         </li>
-                        <li><a href='{% url 'helpdesk_rss_index' %}'><i class="fa fa-rss-square fa-fw"></i> {% trans "RSS Feeds" %}</a></li>
+                        <li><a href='{% url 'helpdesk:rss_index' %}'><i class="fa fa-rss-square fa-fw"></i> {% trans "RSS Feeds" %}</a></li>
                         {% if helpdesk_settings.HELPDESK_SHOW_CHANGE_PASSWORD and user.has_usable_password %}
                         <li><a href="{% url 'auth_password_change' %}"><i class="fa fa-user-secret fa-fw"></i> {% trans "Change password" %}</a></li>
                         {% endif %}
                         <li class="divider"></li>
                         {% if user.is_superuser %}
-                        <li><a href='{% url 'helpdesk_system_settings' %}'><i class="fa fa-gears fa-fw"></i> {% trans "System Settings" %}</a></li>
+                        <li><a href='{% url 'helpdesk:system_settings' %}'><i class="fa fa-gears fa-fw"></i> {% trans "System Settings" %}</a></li>
                         <li class="divider"></li>
                         {% endif %}
                         <li><a href="{% url 'logout' %}"><i class="fa fa-sign-out fa-fw"></i> {% trans "Logout" %}</a>
@@ -90,16 +91,16 @@
                 {# Public menu #}
                 <ul id="dropdown" class="nav navbar-nav">
                     {% if helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE %}
-                        <li><a href='{% url 'helpdesk_dashboard' %}'>{% trans "Dashboard" %}</a></li>
-                        <li><a href='{% url 'helpdesk_submit' %}'>{% trans "Submit a Ticket" %}</a></li>
+                        <li><a href='{% url 'helpdesk:dashboard' %}'>{% trans "Dashboard" %}</a></li>
+                        <li><a href='{% url 'helpdesk:submit' %}'>{% trans "Submit a Ticket" %}</a></li>
                     {% else %}
                         {% if helpdesk_settings.HELPDESK_SUBMIT_A_TICKET_PUBLIC %}
-                            <li><a href='{% url 'helpdesk_submit' %}'>{% trans "Submit a Ticket" %}</a></li>
+                            <li><a href='{% url 'helpdesk:submit' %}'>{% trans "Submit a Ticket" %}</a></li>
                         {% endif %}
                     {% endif %}
-                    {% if helpdesk_settings.HELPDESK_KB_ENABLED %}<li><a href='{% url 'helpdesk_kb_index' %}'>{% trans "Knowledgebase" %}</a></li>{% endif %}
+                    {% if helpdesk_settings.HELPDESK_KB_ENABLED %}<li><a href='{% url 'helpdesk:kb_index' %}'>{% trans "Knowledgebase" %}</a></li>{% endif %}
                     {% if not request.path == '/helpdesk/login/' or user.is_authenticated %}
-                        <li>{% if user.is_authenticated %}<a href='{% url 'logout' %}'>{% trans "Logout" %}</a>{% else %}<a href='{% url 'login' %}?next={% if next %}{{ next|escape }}{% else %}{% url 'helpdesk_home' %}{% endif %}'>{% trans "Log In" %}</a>{% endif %}</li>
+                        <li>{% if user.is_authenticated %}<a href='{% url 'logout' %}'>{% trans "Logout" %}</a>{% else %}<a href='{% url 'login' %}?next={% if next %}{{ next|escape }}{% else %}{% url 'helpdesk:home' %}{% endif %}'>{% trans "Log In" %}</a>{% endif %}</li>
                     {% endif %}
                 </ul>
             {% endif %}

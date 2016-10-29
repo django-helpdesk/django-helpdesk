@@ -22,7 +22,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        {% if entry.1 > 0 %}<a href="{% url 'helpdesk_list' %}?{{ entry.3 }}">{% else %}<a href="#">{% endif %}
+                                        {% if entry.1 > 0 %}<a href="{% url 'helpdesk:list' %}?{{ entry.3 }}">{% else %}<a href="#">{% endif %}
                                             <div class="panel-footer">
                                                 <span class="pull-left">{% if entry.1 > 0 %}{% trans "View Tickets" %}{% else %}{% trans "No tickets in this range" %}{% endif %}</span>
                                                 {% if entry.1 > 0 %}<span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>{% endif %}

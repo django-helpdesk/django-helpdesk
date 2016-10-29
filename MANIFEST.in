@@ -1,7 +1,6 @@
-include README
-include UPGRADE
+include README.rst
+include AUTHORS
 include LICENSE*
-include CHANGELOG
 include requirements.txt
 
 recursive-include helpdesk/static/helpdesk *

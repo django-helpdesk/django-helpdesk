@@ -9,8 +9,6 @@
 
 <p>You can add a new recipient to the list or delete any of the items below as required.</p>{% endblocktrans %}
 
-
-
             <div class="row">
                 <div class="col-lg-12">
                     <div class="panel panel-primary">
@@ -36,7 +34,7 @@
                                             <td>{{ person.display }}</td>
                                             <td>{{ person.can_view }}</td>
                                             <td>{{ person.can_update }}</td>
-                                            <td><a href='{% url 'helpdesk_ticket_cc_del' ticket.id person.id %}'><button class="btn btn-danger btn-xs">{% trans "Delete" %}</button></a></td>
+                                            <td><a href='{% url 'helpdesk:ticket_cc_del' ticket.id person.id %}'><button class="btn btn-danger btn-xs">{% trans "Delete" %}</button></a></td>
                                         </tr>
                                         {% endfor %}
                                     </tbody>
@@ -52,6 +50,6 @@
             </div>
             <!-- /.row -->
 
-<p><a href='{% url 'helpdesk_view' ticket.id %}'><button class="btn btn-primary btn-lg">{% blocktrans with ticket.title as ticket_title %}Return to <em>{{ ticket_title }}</em>{% endblocktrans %}</button></a></p>
+<p><a href='{% url 'helpdesk:view' ticket.id %}'><button class="btn btn-primary btn-lg">{% blocktrans with ticket.title as ticket_title %}Return to <em>{{ ticket_title }}</em>{% endblocktrans %}</button></a></p>
 
 {% endblock %}

@@ -4,7 +4,7 @@
 {% block helpdesk_body %}
 
 {% if request.user.is_authenticated %}
-    <meta http-equiv="REFRESH" content="0;url={% url 'helpdesk_home' %}">
+    <meta http-equiv="REFRESH" content="0;url={% url 'helpdesk:home' %}">
 {% else %}
 
     <div class="col-md-4 col-md-offset-4">

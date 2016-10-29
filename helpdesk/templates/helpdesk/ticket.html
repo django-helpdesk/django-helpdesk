@@ -20,7 +20,7 @@ $(document).ready(function() {
     $('#id_preset').change(function() {
         preset = $('#id_preset').val();
         if (preset != '') {
-            $.get("{% url 'helpdesk_raw' "preset" %}?id=" + preset, function(data) {
+            $.get("{% url 'helpdesk:raw' "preset" %}?id=" + preset, function(data) {
                 $("#commentBox").val(data)
             });
         }
@@ -100,7 +100,7 @@ $(document).on('change', ':file', function() {
                         {% for attachment in followup.attachment_set.all %}{% if forloop.first %}<hr><div class='attachments'><ul>{% endif %}
                             <li><a href='{{ attachment.file.url }}'>{{ attachment.filename }}</a> ({{ attachment.mime_type }}, {{ attachment.size|filesizeformat }})
                             {% if followup.user and request.user == followup.user %}
-                            <a href='{% url 'helpdesk_attachment_del' ticket.id attachment.id %}'><button class="btn btn-danger btn-xs"><i class="fa fa-trash"></i>&nbsp;{% trans 'Delete' %}</button></a>
+                            <a href='{% url 'helpdesk:attachment_del' ticket.id attachment.id %}'><button class="btn btn-danger btn-xs"><i class="fa fa-trash"></i>&nbsp;{% trans 'Delete' %}</button></a>
                             {% endif %}
                             </li>
                             {% if forloop.last %}</ul></div>{% endif %}
@@ -109,11 +109,11 @@ $(document).on('change', ':file', function() {
                         <div class="btn-group">
                             {% if helpdesk_settings.HELPDESK_SHOW_EDIT_BUTTON_FOLLOW_UP %}
                                 {% if followup.user and request.user == followup.user and not followup.ticketchange_set.all %}
-                                <a href="{% url 'helpdesk_followup_edit' ticket.id followup.id %}" class='followup-edit'><button type="button" class="btn btn-warning btn-xs"><i class="fa fa-edit"></i>&nbsp;{% trans "Edit" %}</button></a>
+                                <a href="{% url 'helpdesk:followup_edit' ticket.id followup.id %}" class='followup-edit'><button type="button" class="btn btn-warning btn-xs"><i class="fa fa-edit"></i>&nbsp;{% trans "Edit" %}</button></a>
                                 {% endif %}
                             {% endif %}
                             {% if user.is_superuser and helpdesk_settings.HELPDESK_SHOW_DELETE_BUTTON_SUPERUSER_FOLLOW_UP %}
-                                <a href="{% url 'helpdesk_followup_delete' ticket.id followup.id %}" class='followup-edit'><button type="button" class="btn btn-warning btn-xs"><i class="fa fa-trash"></i>&nbsp;{% trans "Delete" %}</button></a>
+                                <a href="{% url 'helpdesk:followup_delete' ticket.id followup.id %}" class='followup-edit'><button type="button" class="btn btn-warning btn-xs"><i class="fa fa-trash"></i>&nbsp;{% trans "Delete" %}</button></a>
                             {% endif %}
                         </div>
                     </div>

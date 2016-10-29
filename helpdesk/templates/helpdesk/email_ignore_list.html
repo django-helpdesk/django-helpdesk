@@ -37,7 +37,7 @@
                                             <td>{{ ignore.date }}</td>
                                             <td>{% for queue in ignore.queues.all %}{{ queue.slug }}{% if not forloop.last %}, {% endif %}{% empty %}{% trans "All" %}{% endfor %}</td>
                                             <td>{% if ignore.keep_in_mailbox %}{% trans "Keep" %}{% endif %}</td>
-                                            <td><a href='{% url 'helpdesk_email_ignore_del' ignore.id %}'><button class="btn btn-danger btn-xs">{% trans "Delete" %}</button></a></td>
+                                            <td><a href='{% url 'helpdesk:email_ignore_del' ignore.id %}'><button class="btn btn-danger btn-xs">{% trans "Delete" %}</button></a></td>
                                         </tr>
                                         {% endfor %}
                                     </tbody>
@@ -52,7 +52,6 @@
                 <!-- /.col-lg-12 -->
             </div>
             <!-- /.row -->
-
 
 <p>{% trans "<strong>Note:</strong> If the 'Keep' option is not selected, emails sent from that address will be deleted permanently." %}</p>
 
