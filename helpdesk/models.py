@@ -231,8 +231,8 @@ class Queue(models.Model):
 
     logging_type = models.CharField(
         _('Logging Type'),
-        max_length = 5,
-        choices = (
+        max_length=5,
+        choices=(
             ('none', _('None')),
             ('debug', _('Debug')),
             ('info', _('Information')),

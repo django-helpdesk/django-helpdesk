@@ -539,12 +539,15 @@ class UserSettingsForm(forms.Form):
         label=_('Number of tickets to show per page'),
         help_text=_('How many tickets do you want to see on the Ticket List page?'),
         required=False,
-        choices=((10,'10'), (25,'25'), (50,'50'), (100,'100')),
+        choices=((10, '10'), (25, '25'), (50, '50'), (100, '100')),
     )
 
     use_email_as_submitter = forms.BooleanField(
         label=_('Use my e-mail address when submitting tickets?'),
-        help_text=_('When you submit a ticket, do you want to automatically use your e-mail address as the submitter address? You can type a different e-mail address when entering the ticket if needed, this option only changes the default.'),
+        help_text=_('When you submit a ticket, do you want to automatically '
+                    'use your e-mail address as the submitter address? You '
+                    'can type a different e-mail address when entering the '
+                    'ticket if needed, this option only changes the default.'),
         required=False,
     )
 
@@ -581,6 +584,7 @@ class TicketCCUserForm(forms.ModelForm):
         else:
             users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
         self.fields['user'].queryset = users
+
     class Meta:
         model = TicketCC
         exclude = ('ticket', 'email',)
@@ -590,6 +594,7 @@ class TicketCCEmailForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(TicketCCEmailForm, self).__init__(*args, **kwargs)
+
     class Meta:
         model = TicketCC
         exclude = ('ticket', 'user',)
