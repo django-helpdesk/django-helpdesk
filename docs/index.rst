@@ -16,7 +16,6 @@ Contents
    settings
    spam
    custom_fields
-   api
    contributing
 
 
@@ -49,7 +48,7 @@ Customers (who are not 'staff' users in Django) can:
 3. Review open and closed requests they submitted
 
 Staff Capabilities
-~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~
 
 If a user is a staff member, they get general helpdesk access, including:
 

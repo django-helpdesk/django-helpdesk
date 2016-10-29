@@ -532,12 +532,6 @@ class UserSettingsForm(forms.Form):
         required=False,
     )
 
-    email_on_ticket_apichange = forms.BooleanField(
-        label=_('E-mail me when a ticket is changed via the API?'),
-        help_text=_('If a ticket is altered by the API, do you want to receive an e-mail?'),
-        required=False,
-    )
-
     tickets_per_page = forms.IntegerField(
         label=_('Number of tickets to show per page'),
         help_text=_('How many tickets do you want to see on the Ticket List page?'),
