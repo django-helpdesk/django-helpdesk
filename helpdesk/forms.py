@@ -30,6 +30,18 @@ from helpdesk import settings as helpdesk_settings
 
 User = get_user_model()
 
+CUSTOMFIELD_TO_FIELD_DICT = {
+    # Store the immediate equivalences here
+    'boolean': forms.BooleanField,
+    'date': forms.DateField,
+    'time': forms.TimeField,
+    'datetime': forms.DateTimeField,
+    'email': forms.EmailField,
+    'url': forms.URLField,
+    'ipaddress': forms.GenericIPAddressField,
+    'slug': forms.SlugField,
+}
+
 
 class CustomFieldMixin(object):
     """
@@ -37,6 +49,7 @@ class CustomFieldMixin(object):
     """
 
     def customfield_to_field(self, field, instanceargs):
+        # if-elif branches start with special cases
         if field.data_type == 'varchar':
             fieldclass = forms.CharField
             instanceargs['max_length'] = field.max_length
@@ -56,24 +69,13 @@ class CustomFieldMixin(object):
             if field.empty_selection_list:
                 choices.insert(0, ('', '---------'))
             instanceargs['choices'] = choices
-        elif field.data_type == 'boolean':
-            fieldclass = forms.BooleanField
-        elif field.data_type == 'date':
-            fieldclass = forms.DateField
-        elif field.data_type == 'time':
-            fieldclass = forms.TimeField
-        elif field.data_type == 'datetime':
-            fieldclass = forms.DateTimeField
-        elif field.data_type == 'email':
-            fieldclass = forms.EmailField
-        elif field.data_type == 'url':
-            fieldclass = forms.URLField
-        elif field.data_type == 'ipaddress':
-            fieldclass = forms.GenericIPAddressField
-        elif field.data_type == 'slug':
-            fieldclass = forms.SlugField
         else:
-            raise NameError("Unrecognized data_type %s" % field.data_type)
+            # Try to use the immediate equivalences dictionary
+            try:
+                fieldclass = CUSTOMFIELD_TO_FIELD_DICT[field.data_type]
+            except KeyError:
+                # The data_type was not found anywhere
+                raise NameError("Unrecognized data_type %s" % field.data_type)
 
         self.fields['custom_%s' % field.name] = fieldclass(**instanceargs)
 
