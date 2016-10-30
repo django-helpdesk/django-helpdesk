@@ -69,9 +69,11 @@ class CustomFieldMixin(object):
         elif field.data_type == 'url':
             fieldclass = forms.URLField
         elif field.data_type == 'ipaddress':
-            fieldclass = forms.IPAddressField
+            fieldclass = forms.GenericIPAddressField
         elif field.data_type == 'slug':
             fieldclass = forms.SlugField
+        else:
+            raise NameError("Unrecognized data_type %s" % field.data_type)
 
         self.fields['custom_%s' % field.name] = fieldclass(**instanceargs)
 
