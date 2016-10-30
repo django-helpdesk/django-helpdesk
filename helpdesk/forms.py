@@ -133,7 +133,11 @@ class EditFollowUpForm(forms.ModelForm):
         self.fields["ticket"].queryset = Ticket.objects.filter(status__in=(Ticket.OPEN_STATUS, Ticket.REOPENED_STATUS))
 
 
-class TicketForm(CustomFieldMixin, forms.Form):
+class AbstractTicketForm(CustomFieldMixin, forms.Form):
+    """
+    Contain all the common code and fields between "TicketForm" and
+    "PublicTicketForm". This Form is not intended to be used directly.
+    """
     queue = forms.ChoiceField(
         label=_('Queue'),
         required=True,
@@ -147,34 +151,19 @@ class TicketForm(CustomFieldMixin, forms.Form):
         label=_('Summary of the problem'),
     )
 
-    submitter_email = forms.EmailField(
-        required=False,
-        label=_('Submitter E-Mail Address'),
-        widget=forms.TextInput(attrs={'size': '60'}),
-        help_text=_('This e-mail address will receive copies of all public '
-                    'updates to this ticket.'),
-    )
-
     body = forms.CharField(
         widget=forms.Textarea(attrs={'cols': 47, 'rows': 15}),
-        label=_('Description of Issue'),
+        label=_('Description of your issue'),
         required=True,
-    )
-
-    assigned_to = forms.ChoiceField(
-        choices=(),
-        required=False,
-        label=_('Case owner'),
-        help_text=_('If you select an owner other than yourself, they\'ll be '
-                    'e-mailed details of this ticket immediately.'),
+        help_text=_('Please be as descriptive as possible and include all details'),
     )
 
     priority = forms.ChoiceField(
         choices=Ticket.PRIORITY_CHOICES,
-        required=False,
+        required=True,
         initial='3',
         label=_('Priority'),
-        help_text=_('Please select a priority carefully. If unsure, leave it as \'3\'.'),
+        help_text=_("Please select a priority carefully. If unsure, leave it as '3'."),
     )
 
     due_date = forms.DateTimeField(
@@ -183,25 +172,19 @@ class TicketForm(CustomFieldMixin, forms.Form):
         label=_('Due on'),
     )
 
-    def clean_due_date(self):
-        data = self.cleaned_data['due_date']
-        # TODO: add Google calendar update hook
-        # if not hasattr(self, 'instance') or self.instance.due_date != new_data:
-        #     print "you changed!"
-        return data
-
     attachment = forms.FileField(
         required=False,
         label=_('Attach File'),
         help_text=_('You can attach a file such as a document or screenshot to this ticket.'),
     )
 
-    def __init__(self, *args, **kwargs):
-        """
-        Add any custom fields that are defined to the form
-        """
-        super(TicketForm, self).__init__(*args, **kwargs)
-        for field in CustomField.objects.all():
+    def _add_form_custom_fields(self, staff_only_filter=None):
+        if staff_only_filter is None:
+            queryset = CustomField.objects.all()
+        else:
+            queryset = CustomField.objects.filter(staff_only=staff_only_filter)
+
+        for field in queryset:
             instanceargs = {
                 'label': field.label,
                 'help_text': field.help_text,
@@ -210,11 +193,7 @@ class TicketForm(CustomFieldMixin, forms.Form):
 
             self.customfield_to_field(field, instanceargs)
 
-    def save(self, user):
-        """
-        Writes and returns a Ticket() object
-        """
-
+    def _create_ticket(self):
         q = Queue.objects.get(id=int(self.cleaned_data['queue']))
 
         t = Ticket(title=self.cleaned_data['title'],
@@ -227,6 +206,143 @@ class TicketForm(CustomFieldMixin, forms.Form):
                    due_date=self.cleaned_data['due_date'],
                    )
 
+        return t, q
+
+    def _create_custom_fields(self, ticket):
+        for field, value in self.cleaned_data.items():
+            if field.startswith('custom_'):
+                field_name = field.replace('custom_', '', 1)
+                custom_field = CustomField.objects.get(name=field_name)
+                cfv = TicketCustomFieldValue(ticket=ticket,
+                                             field=custom_field,
+                                             value=value)
+                cfv.save()
+
+    def _create_follow_up(self, ticket, title, user=None):
+        f = FollowUp(ticket=ticket,
+                     title=title,
+                     date=timezone.now(),
+                     public=True,
+                     comment=self.cleaned_data['body'],
+                     )
+        if user:
+            f.user = user
+        return f
+
+    def _attach_files_to_follow_up(self, followup):
+        attachments = []
+        if self.cleaned_data['attachment']:
+            import mimetypes
+            attachment = self.cleaned_data['attachment']
+            filename = attachment.name.replace(' ', '_')
+            a = Attachment(
+                followup=followup,
+                filename=filename,
+                mime_type=mimetypes.guess_type(filename)[0] or 'application/octet-stream',
+                size=attachment.size,
+            )
+            a.file.save(attachment.name, attachment, save=False)
+            a.save()
+
+            if attachment.size < getattr(settings, 'MAX_EMAIL_ATTACHMENT_SIZE', 512000):
+                # Only files smaller than 512kb (or as defined in
+                # settings.MAX_EMAIL_ATTACHMENT_SIZE) are sent via email.
+                try:
+                    attachments.append([a.filename, a.file])
+                except NotImplementedError:
+                    pass
+        return attachments
+
+    @staticmethod
+    def _send_messages(ticket, queue, followup, files, user=None):
+        context = safe_template_context(ticket)
+        context['comment'] = followup.comment
+
+        messages_sent_to = []
+
+        if ticket.submitter_email:
+            send_templated_mail(
+                'newticket_submitter',
+                context,
+                recipients=ticket.submitter_email,
+                sender=queue.from_address,
+                fail_silently=True,
+                files=files,
+            )
+            messages_sent_to.append(ticket.submitter_email)
+
+        if ticket.assigned_to and \
+                ticket.assigned_to != user and \
+                ticket.assigned_to.usersettings.settings.get('email_on_ticket_assign', False) and \
+                ticket.assigned_to.email and \
+                ticket.assigned_to.email not in messages_sent_to:
+            send_templated_mail(
+                'assigned_owner',
+                context,
+                recipients=ticket.assigned_to.email,
+                sender=queue.from_address,
+                fail_silently=True,
+                files=files,
+            )
+            messages_sent_to.append(ticket.assigned_to.email)
+
+        if queue.new_ticket_cc and queue.new_ticket_cc not in messages_sent_to:
+            send_templated_mail(
+                'newticket_cc',
+                context,
+                recipients=queue.new_ticket_cc,
+                sender=queue.from_address,
+                fail_silently=True,
+                files=files,
+            )
+            messages_sent_to.append(queue.new_ticket_cc)
+
+        if queue.updated_ticket_cc and \
+                queue.updated_ticket_cc != q.new_ticket_cc and \
+                queue.updated_ticket_cc not in messages_sent_to:
+            send_templated_mail(
+                'newticket_cc',
+                context,
+                recipients=queue.updated_ticket_cc,
+                sender=queue.from_address,
+                fail_silently=True,
+                files=files,
+            )
+
+
+class TicketForm(AbstractTicketForm):
+    """
+    Ticket Form creation for registered users.
+    """
+    submitter_email = forms.EmailField(
+        required=False,
+        label=_('Submitter E-Mail Address'),
+        widget=forms.TextInput(attrs={'size': '60'}),
+        help_text=_('This e-mail address will receive copies of all public '
+                    'updates to this ticket.'),
+    )
+
+    assigned_to = forms.ChoiceField(
+        choices=(),
+        required=False,
+        label=_('Case owner'),
+        help_text=_('If you select an owner other than yourself, they\'ll be '
+                    'e-mailed details of this ticket immediately.'),
+    )
+
+    def __init__(self, *args, **kwargs):
+        """
+        Add any custom fields that are defined to the form.
+        """
+        super(TicketForm, self).__init__(*args, **kwargs)
+        self._add_form_custom_fields()
+
+    def save(self, user=None):
+        """
+        Writes and returns a Ticket() object
+        """
+
+        t, q = self._create_ticket()
         if self.cleaned_data['assigned_to']:
             try:
                 u = User.objects.get(id=self.cleaned_data['assigned_to'])
@@ -235,283 +351,55 @@ class TicketForm(CustomFieldMixin, forms.Form):
                 t.assigned_to = None
         t.save()
 
-        for field, value in self.cleaned_data.items():
-            if field.startswith('custom_'):
-                field_name = field.replace('custom_', '', 1)
-                customfield = CustomField.objects.get(name=field_name)
-                cfv = TicketCustomFieldValue(ticket=t,
-                                             field=customfield,
-                                             value=value)
-                cfv.save()
+        self._create_custom_fields(t)
 
-        f = FollowUp(ticket=t,
-                     title=_('Ticket Opened'),
-                     date=timezone.now(),
-                     public=True,
-                     comment=self.cleaned_data['body'],
-                     user=user,
-                     )
         if self.cleaned_data['assigned_to']:
-            f.title = _('Ticket Opened & Assigned to %(name)s') % {
-                'name': t.get_assigned_to
+            title = _('Ticket Opened & Assigned to %(name)s') % {
+                'name': t.get_assigned_to or _("<invalid user>")
             }
-
+        else:
+            title = _('Ticket Opened')
+        f = self._create_follow_up(t, title=title, user=user)
         f.save()
 
-        files = []
-        if self.cleaned_data['attachment']:
-            import mimetypes
-            file = self.cleaned_data['attachment']
-            filename = file.name.replace(' ', '_')
-            a = Attachment(
-                followup=f,
-                filename=filename,
-                mime_type=mimetypes.guess_type(filename)[0] or 'application/octet-stream',
-                size=file.size,
-            )
-            a.file.save(file.name, file, save=False)
-            a.save()
-
-            if file.size < getattr(settings, 'MAX_EMAIL_ATTACHMENT_SIZE', 512000):
-                # Only files smaller than 512kb (or as defined in
-                # settings.MAX_EMAIL_ATTACHMENT_SIZE) are sent via email.
-                try:
-                    files.append([a.filename, a.file])
-                except NotImplementedError:
-                    pass
-
-        context = safe_template_context(t)
-        context['comment'] = f.comment
-
-        messages_sent_to = []
-
-        if t.submitter_email:
-            send_templated_mail(
-                'newticket_submitter',
-                context,
-                recipients=t.submitter_email,
-                sender=q.from_address,
-                fail_silently=True,
-                files=files,
-            )
-            messages_sent_to.append(t.submitter_email)
-
-        if t.assigned_to and \
-                t.assigned_to != user and \
-                t.assigned_to.usersettings.settings.get('email_on_ticket_assign', False) and \
-                t.assigned_to.email and \
-                t.assigned_to.email not in messages_sent_to:
-            send_templated_mail(
-                'assigned_owner',
-                context,
-                recipients=t.assigned_to.email,
-                sender=q.from_address,
-                fail_silently=True,
-                files=files,
-            )
-            messages_sent_to.append(t.assigned_to.email)
-
-        if q.new_ticket_cc and q.new_ticket_cc not in messages_sent_to:
-            send_templated_mail(
-                'newticket_cc',
-                context,
-                recipients=q.new_ticket_cc,
-                sender=q.from_address,
-                fail_silently=True,
-                files=files,
-            )
-            messages_sent_to.append(q.new_ticket_cc)
-
-        if q.updated_ticket_cc and \
-                q.updated_ticket_cc != q.new_ticket_cc and \
-                q.updated_ticket_cc not in messages_sent_to:
-            send_templated_mail(
-                'newticket_cc',
-                context,
-                recipients=q.updated_ticket_cc,
-                sender=q.from_address,
-                fail_silently=True,
-                files=files,
-            )
-
+        files = self._attach_files_to_follow_up(f)
+        self._send_messages(ticket=t, queue=q, followup=f, files=files, user=user)
         return t
 
 
-class PublicTicketForm(CustomFieldMixin, forms.Form):
-    queue = forms.ChoiceField(
-        label=_('Queue'),
-        required=True,
-        choices=()
-    )
-
-    title = forms.CharField(
-        max_length=100,
-        required=True,
-        widget=forms.TextInput(),
-        label=_('Summary of your query'),
-    )
-
+class PublicTicketForm(AbstractTicketForm):
+    """
+    Ticket Form creation for all users (public-facing).
+    """
     submitter_email = forms.EmailField(
         required=True,
         label=_('Your E-Mail Address'),
         help_text=_('We will e-mail you when your ticket is updated.'),
     )
 
-    body = forms.CharField(
-        widget=forms.Textarea(),
-        label=_('Description of your issue'),
-        required=True,
-        help_text=_('Please be as descriptive as possible, including any '
-                    'details we may need to address your query.'),
-    )
-
-    priority = forms.ChoiceField(
-        choices=Ticket.PRIORITY_CHOICES,
-        required=True,
-        initial='3',
-        label=_('Urgency'),
-        help_text=_('Please select a priority carefully.'),
-    )
-
-    due_date = forms.DateTimeField(
-        widget=extras.SelectDateWidget,
-        required=False,
-        label=_('Due on'),
-    )
-
-    attachment = forms.FileField(
-        required=False,
-        label=_('Attach File'),
-        help_text=_('You can attach a file such as a document or screenshot to this ticket.'),
-        max_length=1000,
-    )
-
     def __init__(self, *args, **kwargs):
         """
-        Add any custom fields that are defined to the form
+        Add any (non-staff) custom fields that are defined to the form
         """
         super(PublicTicketForm, self).__init__(*args, **kwargs)
-        for field in CustomField.objects.filter(staff_only=False):
-            instanceargs = {
-                'label': field.label,
-                'help_text': field.help_text,
-                'required': field.required,
-            }
-
-            self.customfield_to_field(field, instanceargs)
+        self._add_form_custom_fields(False)
 
     def save(self):
         """
         Writes and returns a Ticket() object
         """
-
-        q = Queue.objects.get(id=int(self.cleaned_data['queue']))
-
-        t = Ticket(
-            title=self.cleaned_data['title'],
-            submitter_email=self.cleaned_data['submitter_email'],
-            created=timezone.now(),
-            status=Ticket.OPEN_STATUS,
-            queue=q,
-            description=self.cleaned_data['body'],
-            priority=self.cleaned_data['priority'],
-            due_date=self.cleaned_data['due_date'],
-        )
-
+        t, q = self._create_ticket()
         if q.default_owner and not t.assigned_to:
             t.assigned_to = q.default_owner
-
         t.save()
 
-        for field, value in self.cleaned_data.items():
-            if field.startswith('custom_'):
-                field_name = field.replace('custom_', '', 1)
-                customfield = CustomField.objects.get(name=field_name)
-                cfv = TicketCustomFieldValue(ticket=t,
-                                             field=customfield,
-                                             value=value)
-                cfv.save()
+        self._create_custom_fields(t)
 
-        f = FollowUp(
-            ticket=t,
-            title=_('Ticket Opened Via Web'),
-            date=timezone.now(),
-            public=True,
-            comment=self.cleaned_data['body'],
-        )
-
+        f = self._create_follow_up(t, title=_('Ticket Opened Via Web'))
         f.save()
 
-        files = []
-        if self.cleaned_data['attachment']:
-            import mimetypes
-            file = self.cleaned_data['attachment']
-            filename = file.name.replace(' ', '_')
-            a = Attachment(
-                followup=f,
-                filename=filename,
-                mime_type=mimetypes.guess_type(filename)[0] or 'application/octet-stream',
-                size=file.size,
-            )
-            a.file.save(file.name, file, save=False)
-            a.save()
-
-            if file.size < getattr(settings, 'MAX_EMAIL_ATTACHMENT_SIZE', 512000):
-                # Only files smaller than 512kb (or as defined in
-                # settings.MAX_EMAIL_ATTACHMENT_SIZE) are sent via email.
-                files.append([a.filename, a.file])
-
-        context = safe_template_context(t)
-
-        messages_sent_to = []
-
-        send_templated_mail(
-            'newticket_submitter',
-            context,
-            recipients=t.submitter_email,
-            sender=q.from_address,
-            fail_silently=True,
-            files=files,
-        )
-        messages_sent_to.append(t.submitter_email)
-
-        if t.assigned_to and \
-                t.assigned_to.usersettings.settings.get('email_on_ticket_assign', False) and \
-                t.assigned_to.email and \
-                t.assigned_to.email not in messages_sent_to:
-            send_templated_mail(
-                'assigned_owner',
-                context,
-                recipients=t.assigned_to.email,
-                sender=q.from_address,
-                fail_silently=True,
-                files=files,
-            )
-            messages_sent_to.append(t.assigned_to.email)
-
-        if q.new_ticket_cc and q.new_ticket_cc not in messages_sent_to:
-            send_templated_mail(
-                'newticket_cc',
-                context,
-                recipients=q.new_ticket_cc,
-                sender=q.from_address,
-                fail_silently=True,
-                files=files,
-            )
-            messages_sent_to.append(q.new_ticket_cc)
-
-        if q.updated_ticket_cc and \
-                q.updated_ticket_cc != q.new_ticket_cc and \
-                q.updated_ticket_cc not in messages_sent_to:
-            send_templated_mail(
-                'newticket_cc',
-                context,
-                recipients=q.updated_ticket_cc,
-                sender=q.from_address,
-                fail_silently=True,
-                files=files,
-            )
-
+        files = self._attach_files_to_follow_up(f)
+        self._send_messages(ticket=t, queue=q, followup=f, files=files)
         return t
 
 
