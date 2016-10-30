@@ -298,7 +298,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
             messages_sent_to.append(queue.new_ticket_cc)
 
         if queue.updated_ticket_cc and \
-                queue.updated_ticket_cc != q.new_ticket_cc and \
+                queue.updated_ticket_cc != queue.new_ticket_cc and \
                 queue.updated_ticket_cc not in messages_sent_to:
             send_templated_mail(
                 'newticket_cc',
