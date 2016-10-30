@@ -194,19 +194,19 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
             self.customfield_to_field(field, instanceargs)
 
     def _create_ticket(self):
-        q = Queue.objects.get(id=int(self.cleaned_data['queue']))
+        queue = Queue.objects.get(id=int(self.cleaned_data['queue']))
 
-        t = Ticket(title=self.cleaned_data['title'],
-                   submitter_email=self.cleaned_data['submitter_email'],
-                   created=timezone.now(),
-                   status=Ticket.OPEN_STATUS,
-                   queue=q,
-                   description=self.cleaned_data['body'],
-                   priority=self.cleaned_data['priority'],
-                   due_date=self.cleaned_data['due_date'],
-                   )
+        ticket = Ticket(title=self.cleaned_data['title'],
+                        submitter_email=self.cleaned_data['submitter_email'],
+                        created=timezone.now(),
+                        status=Ticket.OPEN_STATUS,
+                        queue=queue,
+                        description=self.cleaned_data['body'],
+                        priority=self.cleaned_data['priority'],
+                        due_date=self.cleaned_data['due_date'],
+                        )
 
-        return t, q
+        return ticket, queue
 
     def _create_custom_fields(self, ticket):
         for field, value in self.cleaned_data.items():
@@ -219,15 +219,15 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
                 cfv.save()
 
     def _create_follow_up(self, ticket, title, user=None):
-        f = FollowUp(ticket=ticket,
-                     title=title,
-                     date=timezone.now(),
-                     public=True,
-                     comment=self.cleaned_data['body'],
-                     )
+        followup = FollowUp(ticket=ticket,
+                            title=title,
+                            date=timezone.now(),
+                            public=True,
+                            comment=self.cleaned_data['body'],
+                            )
         if user:
-            f.user = user
-        return f
+            followup.user = user
+        return followup
 
     def _attach_files_to_follow_up(self, followup):
         attachments = []
@@ -235,20 +235,20 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
             import mimetypes
             attachment = self.cleaned_data['attachment']
             filename = attachment.name.replace(' ', '_')
-            a = Attachment(
+            att = Attachment(
                 followup=followup,
                 filename=filename,
                 mime_type=mimetypes.guess_type(filename)[0] or 'application/octet-stream',
                 size=attachment.size,
             )
-            a.file.save(attachment.name, attachment, save=False)
-            a.save()
+            att.file.save(attachment.name, attachment, save=False)
+            att.save()
 
             if attachment.size < getattr(settings, 'MAX_EMAIL_ATTACHMENT_SIZE', 512000):
                 # Only files smaller than 512kb (or as defined in
                 # settings.MAX_EMAIL_ATTACHMENT_SIZE) are sent via email.
                 try:
-                    attachments.append([a.filename, a.file])
+                    attachments.append([att.filename, att.file])
                 except NotImplementedError:
                     pass
         return attachments
@@ -342,29 +342,33 @@ class TicketForm(AbstractTicketForm):
         Writes and returns a Ticket() object
         """
 
-        t, q = self._create_ticket()
+        ticket, queue = self._create_ticket()
         if self.cleaned_data['assigned_to']:
             try:
                 u = User.objects.get(id=self.cleaned_data['assigned_to'])
-                t.assigned_to = u
+                ticket.assigned_to = u
             except User.DoesNotExist:
-                t.assigned_to = None
-        t.save()
+                ticket.assigned_to = None
+        ticket.save()
 
-        self._create_custom_fields(t)
+        self._create_custom_fields(ticket)
 
         if self.cleaned_data['assigned_to']:
             title = _('Ticket Opened & Assigned to %(name)s') % {
-                'name': t.get_assigned_to or _("<invalid user>")
+                'name': ticket.get_assigned_to or _("<invalid user>")
             }
         else:
             title = _('Ticket Opened')
-        f = self._create_follow_up(t, title=title, user=user)
-        f.save()
+        followup = self._create_follow_up(ticket, title=title, user=user)
+        followup.save()
 
-        files = self._attach_files_to_follow_up(f)
-        self._send_messages(ticket=t, queue=q, followup=f, files=files, user=user)
-        return t
+        files = self._attach_files_to_follow_up(followup)
+        self._send_messages(ticket=ticket,
+                            queue=queue,
+                            followup=followup,
+                            files=files,
+                            user=user)
+        return ticket
 
 
 class PublicTicketForm(AbstractTicketForm):
@@ -388,19 +392,22 @@ class PublicTicketForm(AbstractTicketForm):
         """
         Writes and returns a Ticket() object
         """
-        t, q = self._create_ticket()
-        if q.default_owner and not t.assigned_to:
-            t.assigned_to = q.default_owner
-        t.save()
+        ticket, queue = self._create_ticket()
+        if queue.default_owner and not ticket.assigned_to:
+            ticket.assigned_to = queue.default_owner
+        ticket.save()
 
-        self._create_custom_fields(t)
+        self._create_custom_fields(ticket)
 
-        f = self._create_follow_up(t, title=_('Ticket Opened Via Web'))
-        f.save()
+        followup = self._create_follow_up(ticket, title=_('Ticket Opened Via Web'))
+        followup.save()
 
-        files = self._attach_files_to_follow_up(f)
-        self._send_messages(ticket=t, queue=q, followup=f, files=files)
-        return t
+        files = self._attach_files_to_follow_up(followup)
+        self._send_messages(ticket=ticket,
+                            queue=queue,
+                            followup=followup,
+                            files=files)
+        return ticket
 
 
 class UserSettingsForm(forms.Form):
