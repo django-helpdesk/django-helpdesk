@@ -3,19 +3,25 @@
 {% block helpdesk_body %}
 <h2>{% trans "Knowledgebase" %}</h2>
 
-<p>{% trans "We have listed a number of knowledgebase articles for your perusal in the following categories. Please check to see if any of these articles address your problem prior to opening a support ticket." %}</p>
+<p>{% trans "We have listed a number of Knowledgebase articles for your perusal in the following categories. Please check to see if any of these articles address your problem prior to opening a support ticket." %}</p>
 
-<table class="table table-hover table-bordered table-striped">
-<caption>{% trans "Knowledgebase Categories" %}</caption>
-<thead>
-<tr><th>{% trans "Category" %}</th></tr>
-</thead>
-<tbody>
 {% for category in kb_categories %}
-<tr><th><a href='{{ category.get_absolute_url }}'>{{ category.title }}</a></th></tr>
-<tr><td>{{ category.description }}</td></tr>
+{% cycle 'one' 'two' 'three' as catnumperrow silent %}
+{% if catnumperrow == 'one' %}<div class="row">{% endif %}
+    <div class="col-lg-4">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <h3>{{ category.title }}</h3>
+            </div>
+            <div class="panel-body">
+                <p>{{ category.description }}</p>
+            </div>
+            <div class="panel-footer">
+                <a href='{{ category.get_absolute_url }}'>{% trans 'View articles' %}<i class="fa fa-arrow-right"></i></a>
+            </div>
+        </div>
+    </div>
+{% if catnumperrow == 'three' %}</div>{% endif %}
 {% endfor %}
-</tbody>
-</table>
 
 {% endblock %}

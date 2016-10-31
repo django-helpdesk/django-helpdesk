@@ -32,7 +32,7 @@ except ImportError:
 
 from helpdesk.forms import (
     TicketForm, UserSettingsForm, EmailIgnoreForm, EditTicketForm, TicketCCForm,
-    EditFollowUpForm, TicketDependencyForm
+    TicketCCEmailForm, TicketCCUserForm, EditFollowUpForm, TicketDependencyForm
 )
 from helpdesk.lib import (
     send_templated_mail, query_to_dict, apply_query, safe_template_context,
@@ -166,7 +166,6 @@ def dashboard(request):
         'user_tickets_closed_resolved': tickets_closed_resolved,
         'unassigned_tickets': unassigned_tickets,
         'all_tickets_reported_by_current_user': all_tickets_reported_by_current_user,
-        'dash_tickets': dash_tickets,
         'basic_ticket_stats': basic_ticket_stats,
     })
 dashboard = staff_member_required(dashboard)
@@ -441,6 +440,7 @@ def update_ticket(request, ticket_id, public=False):
 
     reassigned = False
 
+    old_owner = ticket.assigned_to
     if owner is not -1:
         if owner != 0 and ((ticket.assigned_to and owner != ticket.assigned_to.id) or not ticket.assigned_to):
             new_user = User.objects.get(id=owner)
@@ -454,10 +454,13 @@ def update_ticket(request, ticket_id, public=False):
             f.title = _('Unassigned')
             ticket.assigned_to = None
 
+    old_status_str = ticket.get_status_display()
+    old_status = ticket.status
     if new_status != ticket.status:
         ticket.status = new_status
         ticket.save()
         f.new_status = new_status
+        ticket_status_changed = True
         if f.title:
             f.title += ' and %s' % ticket.get_status_display()
         else:
@@ -476,10 +479,12 @@ def update_ticket(request, ticket_id, public=False):
         import mimetypes
         for file in request.FILES.getlist('attachment'):
             filename = file.name.encode('ascii', 'ignore')
+            filename = filename.decode("utf-8")
+            print(filename)
             a = Attachment(
                 followup=f,
                 filename=filename,
-                mime_type=mimetypes.guess_type(filename)[0] or 'application/octet-stream',
+                mime_type=file.content_type or 'application/octet-stream',
                 size=file.size,
             )
             a.file.save(filename, file, save=False)
@@ -499,6 +504,24 @@ def update_ticket(request, ticket_id, public=False):
         )
         c.save()
         ticket.title = title
+
+    if new_status != old_status:
+        c = TicketChange(
+            followup=f,
+            field=_('Status'),
+            old_value=old_status_str,
+            new_value=ticket.get_status_display(),
+        )
+        c.save()
+
+    if ticket.assigned_to != old_owner:
+        c = TicketChange(
+            followup=f,
+            field=_('Owner'),
+            old_value=old_owner,
+            new_value=ticket.assigned_to,
+        )
+        c.save()
 
     if priority != ticket.priority:
         c = TicketChange(
@@ -906,19 +929,6 @@ def ticket_list(request):
         }
         ticket_qs = apply_query(tickets, query_params)
 
-    ticket_paginator = paginator.Paginator(
-        ticket_qs,
-        request.user.usersettings.settings.get('tickets_per_page') or 20)
-    try:
-        page = int(request.GET.get('page', '1'))
-    except ValueError:
-        page = 1
-
-    try:
-        tickets = ticket_paginator.page(page)
-    except (paginator.EmptyPage, paginator.InvalidPage):
-        tickets = ticket_paginator.page(ticket_paginator.num_pages)
-
     search_message = ''
     if 'query' in context and settings.DATABASES['default']['ENGINE'].endswith('sqlite'):
         search_message = _(
@@ -935,13 +945,10 @@ def ticket_list(request):
 
     user_saved_queries = SavedSearch.objects.filter(Q(user=request.user) | Q(shared__exact=True))
 
-    querydict = request.GET.copy()
-    querydict.pop('page', 1)
-
     return render(request, 'helpdesk/ticket_list.html', dict(
         context,
-        query_string=querydict.urlencode(),
-        tickets=tickets,
+        tickets=ticket_qs,
+        default_tickets_per_page=request.user.usersettings.settings.get('tickets_per_page') or 25,
         user_choices=User.objects.filter(is_active=True, is_staff=True),
         queue_choices=user_queues,
         status_choices=Ticket.STATUS_CHOICES,
@@ -1068,9 +1075,47 @@ rss_list = staff_member_required(rss_list)
 def report_index(request):
     number_tickets = Ticket.objects.all().count()
     saved_query = request.GET.get('saved_query', None)
+
+    user_queues = _get_user_queues(request.user)
+    Tickets = Ticket.objects.filter(queue__in=user_queues)
+    basic_ticket_stats = calc_basic_ticket_stats(Tickets)
+
+    # The following query builds a grid of queues & ticket statuses,
+    # to be displayed to the user. EG:
+    #          Open  Resolved
+    # Queue 1    10     4
+    # Queue 2     4    12
+
+    queues = _get_user_queues(request.user).values_list('id', flat=True)
+
+    from_clause = """FROM    helpdesk_ticket t,
+                    helpdesk_queue q"""
+    if queues:
+        where_clause = """WHERE   q.id = t.queue_id AND
+                        q.id IN (%s)""" % (",".join(("%d" % pk for pk in queues)))
+    else:
+        where_clause = """WHERE   q.id = t.queue_id"""
+
+    cursor = connection.cursor()
+    cursor.execute("""
+        SELECT      q.id as queue,
+                    q.title AS name,
+                    COUNT(CASE t.status WHEN '1' THEN t.id WHEN '2' THEN t.id END) AS open,
+                    COUNT(CASE t.status WHEN '3' THEN t.id END) AS resolved,
+                    COUNT(CASE t.status WHEN '4' THEN t.id END) AS closed
+            %s
+            %s
+            GROUP BY queue, name
+            ORDER BY q.id;
+    """ % (from_clause, where_clause))
+
+    dash_tickets = query_to_dict(cursor.fetchall(), cursor.description)
+
     return render(request, 'helpdesk/report_index.html', {
         'number_tickets': number_tickets,
         'saved_query': saved_query,
+        'basic_ticket_stats': basic_ticket_stats,
+        'dash_tickets': dash_tickets,
     })
 report_index = staff_member_required(report_index)
 
@@ -1125,7 +1170,7 @@ def run_report(request, report):
     periods = []
     year, month = first_year, first_month
     working = True
-    periods.append("%s %s" % (month_name(month), year))
+    periods.append("%s-%s" % (year, month))
 
     while working:
         month += 1
@@ -1134,7 +1179,7 @@ def run_report(request, report):
             month = 1
         if (year > last_year) or (month > last_month and year >= last_year):
             working = False
-        periods.append("%s %s" % (month_name(month), year))
+        periods.append("%s-%s" % (year, month))
 
     if report == 'userpriority':
         title = _('User by Priority')
@@ -1201,7 +1246,7 @@ def run_report(request, report):
 
         elif report == 'usermonth':
             metric1 = u'%s' % ticket.get_assigned_to
-            metric2 = u'%s %s' % (month_name(ticket.created.month), ticket.created.year)
+            metric2 = u'%s-%s' % (ticket.created.year, ticket.created.month)
 
         elif report == 'queuepriority':
             metric1 = u'%s' % ticket.queue.title
@@ -1213,11 +1258,11 @@ def run_report(request, report):
 
         elif report == 'queuemonth':
             metric1 = u'%s' % ticket.queue.title
-            metric2 = u'%s %s' % (month_name(ticket.created.month), ticket.created.year)
+            metric2 = u'%s-%s' % (ticket.created.year, ticket.created.month)
 
         elif report == 'daysuntilticketclosedbymonth':
             metric1 = u'%s' % ticket.queue.title
-            metric2 = u'%s %s' % (month_name(ticket.created.month), ticket.created.year)
+            metric2 = u'%s-%s' % (ticket.created.year, ticket.created.month)
             metric3 = ticket.modified - ticket.created
             metric3 = metric3.days
 
@@ -1244,11 +1289,28 @@ def run_report(request, report):
             data.append(summarytable[item, hdr])
         table.append([item] + data)
 
+    # Zip data and headers together in one list for Morris.js charts
+    # will get a list like [(Header1, Data1), (Header2, Data2)...]
+    seriesnum = 0
+    morrisjs_data = []
+    for label in column_headings[1:]:
+        seriesnum += 1
+        datadict = {"x": label}
+        for n in range(0, len(table)):
+            datadict[n] = table[n][seriesnum]
+        morrisjs_data.append(datadict)
+
+    series_names = []
+    for series in table:
+        series_names.append(series[0])
+
     return render(request, 'helpdesk/report_output.html', {
         'title': title,
         'charttype': charttype,
         'data': table,
         'headings': column_headings,
+        'series_names': series_names,
+        'morrisjs_data': morrisjs_data,
         'from_saved_query': from_saved_query,
         'saved_query': saved_query,
     })
@@ -1354,10 +1416,12 @@ def ticket_cc_add(request, ticket_id):
             return HttpResponseRedirect(reverse('helpdesk:ticket_cc',
                                                 kwargs={'ticket_id': ticket.id}))
     else:
-        form = TicketCCForm()
+        form_email = TicketCCEmailForm()
+        form_user = TicketCCUserForm()
     return render(request, 'helpdesk/ticket_cc_add.html', {
         'ticket': ticket,
-        'form': form,
+        'form_email': form_email,
+        'form_user': form_user,
     })
 ticket_cc_add = staff_member_required(ticket_cc_add)
 
@@ -1407,9 +1471,15 @@ def attachment_del(request, ticket_id, attachment_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
     if not _has_access_to_queue(request.user, ticket.queue):
         raise PermissionDenied()
+
     attachment = get_object_or_404(Attachment, id=attachment_id)
-    attachment.delete()
-    return HttpResponseRedirect(reverse('helpdesk:view', args=[ticket_id]))
+    if request.method == 'POST':
+        attachment.delete()
+        return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket_id]))
+    return render(request, 'helpdesk/ticket_attachment_del.html', {
+        'attachment': attachment,
+        'filename': attachment.filename,
+    })
 attachment_del = staff_member_required(attachment_del)
 
 
@@ -1457,11 +1527,13 @@ def calc_basic_ticket_stats(Tickets):
     # (O)pen (T)icket (S)tats
     ots = list()
     # label, number entries, color, sort_string
-    ots.append(['< 30 days', N_ota_le_30, get_color_for_nbr_days(N_ota_le_30),
+    ots.append(['Tickets < 30 days', N_ota_le_30, 'success',
                 sort_string(date_30_str, ''), ])
-    ots.append(['30 - 60 days', N_ota_le_60_ge_30, get_color_for_nbr_days(N_ota_le_60_ge_30),
+    ots.append(['Tickets 30 - 60 days', N_ota_le_60_ge_30,
+                'success' if N_ota_le_60_ge_30 == 0 else 'warning',
                 sort_string(date_60_str, date_30_str), ])
-    ots.append(['> 60 days', N_ota_ge_60, get_color_for_nbr_days(N_ota_ge_60),
+    ots.append(['Tickets > 60 days', N_ota_ge_60,
+                'success' if N_ota_ge_60 == 0 else 'danger',
                 sort_string('', date_60_str), ])
 
     # all closed tickets - independent of user.

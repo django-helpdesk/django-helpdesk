@@ -1,23 +1,36 @@
 {% extends "helpdesk/public_base.html" %}{% load i18n humanize %}
 
 {% block helpdesk_body %}
-<h2>{% blocktrans with category.title as kbcat %}Knowledgebase Category: {{ kbcat }}{% endblocktrans %}</h2>
+<h2>{% trans 'Knowledgebase Category' %}:{% blocktrans with category.title as kbcat %}{{ kbcat }}{% endblocktrans %}</h2>
 
-<p>{% blocktrans with category.title as kbcat %}You are viewing all items in the {{ kbcat }} category.{% endblocktrans %}</p>
+<div class="col-lg-12">
+    <div class="well well-sm">
+        <h4>{% blocktrans with category.title as kbcat %}You are viewing all items in the {{ kbcat }} category.{% endblocktrans %}</h4>
+        <p>{{ category.description }}</p>
+    </div>
+</div>
 
-<p>{{ category.description }}</p>
-
-<table class="table table-hover table-bordered table-striped">
-<caption>{% blocktrans with category.title as kbcat %}Knowledgebase Category: {{ kbcat }}{% endblocktrans %}</caption>
-<thead>
-<tr><th colspan='3'>{% trans "Article" %}</th></tr>
-</thead>
-<tbody>
 {% for item in items %}
-<tr><th><a href='{{ item.get_absolute_url }}'>{{ item.title }}</a></th><td>Rating: {{ item.score }}</td><td>Last Update: {{ item.last_updated|naturaltime }}</td></tr>
-<tr><td colspan='3'>{{ item.question }}</td></tr>
+{% cycle 'one' 'two' 'three' as itemnumperrow silent %}
+{% ifequal itemnumperrow 'one' %}<div class="row">{% endifequal %}
+    <div class="col-lg-3">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <h4>{{ item.title }}</h4>
+            </div>
+            <div class="panel-body">
+                <p>{{ item.question }}</p>
+            </div>
+            <div class="panel-footer">
+                <p>{% blocktrans %}View <a href='{{ item.get_absolute_url }}'>Answer <i class="fa fa-arrow-right"></i></a>{% endblocktrans %}</p>
+                <div class="well well-sm">
+                    <p>{% trans 'Rating' %}: {{ item.score }}</p>
+                    <p>{% trans 'Last Update' %}: {{ item.last_updated|naturaltime }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+{% ifequal itemnumperrow 'three' %}</div>{% endifequal %}
 {% endfor %}
-</tbody>
-</table>
 
 {% endblock %}

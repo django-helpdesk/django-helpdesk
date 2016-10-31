@@ -46,7 +46,7 @@
 </tr>
 
 {% if ticket.resolution %}<tr>
-    <th colspan='2'>{% trans "Resolution" %}{% ifequal ticket.get_status_display "Resolved" %} <a href='{{ ticket.ticket_url }}&close'><img src='{% static "helpdesk/buttons/accept.png" %}' alt='{% trans "Accept" %}' title='{% trans "Accept and Close" %}' width='60' height='15' /></a>{% endifequal %}</th>
+    <th colspan='2'>{% trans "Resolution" %}{% if ticket.get_status_display == "Resolved" %} <a href='{{ ticket.ticket_url }}&close'><button type="button" class="btn btn-primary btn-xs">{% trans "Accept and Close" %}</button></a>{% endif %}</th>
 </tr>
 <tr>
     <td colspan='2'>{{ ticket.resolution|urlizetrunc:50|linebreaksbr }}</td>

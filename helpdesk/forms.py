@@ -141,6 +141,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
     "PublicTicketForm". This Form is not intended to be used directly.
     """
     queue = forms.ChoiceField(
+        widget=forms.Select(attrs={'class': 'form-control'}),
         label=_('Queue'),
         required=True,
         choices=()
@@ -149,18 +150,19 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
     title = forms.CharField(
         max_length=100,
         required=True,
-        widget=forms.TextInput(attrs={'size': '60'}),
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
         label=_('Summary of the problem'),
     )
 
     body = forms.CharField(
-        widget=forms.Textarea(attrs={'cols': 47, 'rows': 15}),
+        widget=forms.Textarea(attrs={'class': 'form-control'}),
         label=_('Description of your issue'),
         required=True,
         help_text=_('Please be as descriptive as possible and include all details'),
     )
 
     priority = forms.ChoiceField(
+        widget=forms.Select(attrs={'class': 'form-control'}),
         choices=Ticket.PRIORITY_CHOICES,
         required=True,
         initial='3',
@@ -169,7 +171,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
     )
 
     due_date = forms.DateTimeField(
-        widget=extras.SelectDateWidget,
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
         required=False,
         label=_('Due on'),
     )
@@ -319,12 +321,13 @@ class TicketForm(AbstractTicketForm):
     submitter_email = forms.EmailField(
         required=False,
         label=_('Submitter E-Mail Address'),
-        widget=forms.TextInput(attrs={'size': '60'}),
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
         help_text=_('This e-mail address will receive copies of all public '
                     'updates to this ticket.'),
     )
 
     assigned_to = forms.ChoiceField(
+        widget=forms.Select(attrs={'class': 'form-control'}),
         choices=(),
         required=False,
         label=_('Case owner'),
@@ -378,6 +381,7 @@ class PublicTicketForm(AbstractTicketForm):
     Ticket Form creation for all users (public-facing).
     """
     submitter_email = forms.EmailField(
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
         required=True,
         label=_('Your E-Mail Address'),
         help_text=_('We will e-mail you when your ticket is updated.'),
@@ -431,17 +435,19 @@ class UserSettingsForm(forms.Form):
         required=False,
     )
 
-    tickets_per_page = forms.IntegerField(
+    tickets_per_page = forms.ChoiceField(
         label=_('Number of tickets to show per page'),
         help_text=_('How many tickets do you want to see on the Ticket List page?'),
         required=False,
-        min_value=1,
-        max_value=1000,
+        choices=((10, '10'), (25, '25'), (50, '50'), (100, '100')),
     )
 
     use_email_as_submitter = forms.BooleanField(
         label=_('Use my e-mail address when submitting tickets?'),
-        help_text=_('When you submit a ticket, do you want to automatically use your e-mail address as the submitter address? You can type a different e-mail address when entering the ticket if needed, this option only changes the default.'),
+        help_text=_('When you submit a ticket, do you want to automatically '
+                    'use your e-mail address as the submitter address? You '
+                    'can type a different e-mail address when entering the '
+                    'ticket if needed, this option only changes the default.'),
         required=False,
     )
 
@@ -454,6 +460,7 @@ class EmailIgnoreForm(forms.ModelForm):
 
 
 class TicketCCForm(forms.ModelForm):
+    ''' Adds either an email address or helpdesk user as a CC on a Ticket. Used for processing POST requests. '''
 
     class Meta:
         model = TicketCC
@@ -468,7 +475,35 @@ class TicketCCForm(forms.ModelForm):
         self.fields['user'].queryset = users
 
 
+class TicketCCUserForm(forms.ModelForm):
+    ''' Adds a helpdesk user as a CC on a Ticket '''
+
+    def __init__(self, *args, **kwargs):
+        super(TicketCCUserForm, self).__init__(*args, **kwargs)
+        if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_CC:
+            users = User.objects.filter(is_active=True, is_staff=True).order_by(User.USERNAME_FIELD)
+        else:
+            users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
+        self.fields['user'].queryset = users
+
+    class Meta:
+        model = TicketCC
+        exclude = ('ticket', 'email',)
+
+
+class TicketCCEmailForm(forms.ModelForm):
+    ''' Adds an email address as a CC on a Ticket '''
+
+    def __init__(self, *args, **kwargs):
+        super(TicketCCEmailForm, self).__init__(*args, **kwargs)
+
+    class Meta:
+        model = TicketCC
+        exclude = ('ticket', 'user',)
+
+
 class TicketDependencyForm(forms.ModelForm):
+    ''' Adds a different ticket as a dependency for this Ticket '''
 
     class Meta:
         model = TicketDependency

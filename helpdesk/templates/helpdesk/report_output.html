@@ -4,17 +4,38 @@
 {% block helpdesk_title %}{% trans "Reports &amp; Statistics" %}{% endblock %}
 
 {% block helpdesk_head %}
-    <!--[if IE]><script language="javascript" type="text/javascript" src="{% static "helpdesk/jquery.jqplot/excanvas.min.js" %}"></script><![endif]-->
-    <script src='{% static "helpdesk/jquery.jqplot/jquery.jqplot-1.0.9.min.js" %}' type='text/javascript' language='javascript'></script>
-    <link rel='stylesheet' typ='text/css' href='{% static "helpdesk/jquery.jqplot/jquery.jqplot-1.0.9.min.css" %}' />
-    <script type="text/javascript" src="{% static "helpdesk/jquery.jqplot/plugins/jqplot.categoryAxisRenderer.js" %}"></script>
-    <script type="text/javascript" src="{% static "helpdesk/jquery.jqplot/plugins/jqplot.barRenderer.js" %}"></script>
-    <script type="text/javascript" src="{% static "helpdesk/jquery.jqplot/plugins/jqplot.dateAxisRenderer.js" %}"></script>
+
+    <!-- Flot Charts JavaScript -->
+    <script src="/static/helpdesk/vendor/flot/excanvas.min.js"></script>
+    <script src="/static/helpdesk/vendor/flot/jquery.flot.js"></script>
+    <script src="/static/helpdesk/vendor/flot/jquery.flot.categories.js"></script>
+    <script src="/static/helpdesk/vendor/flot/jquery.flot.pie.js"></script>
+    <script src="/static/helpdesk/vendor/flot/jquery.flot.resize.js"></script>
+    <script src="/static/helpdesk/vendor/flot/jquery.flot.time.js"></script>
+    <script src="/static/helpdesk/vendor/flot-tooltip/jquery.flot.tooltip.min.js"></script>
+
+    <!-- Morris Charts JavaScript -->
+    {% if helpdesk_settings.HELPDESK_USE_CDN %}
+    <script src="//cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.min.js"></script>
+    {% else %}
+    <script src="{% static 'helpdesk/vendor/raphael/raphael.min.js' %}"></script>
+    <script src="{% static 'helpdesk/vendor/morrisjs/morris.min.js' %}"></script>
+    {% endif %}
+
 {% endblock %}
 
 {% block helpdesk_body %}
 <h2>{% trans "Reports &amp; Statistics" %}</h2>
 
+<div class="row">
+                <div class="col-lg-12">
+                    <div class="panel panel-primary">
+                        <div class="panel-heading">
+                            {% trans 'Saved Queries' %}
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div class="panel-body">
 {% if user_saved_queries_ %}
     <p>{% trans "You can run this query on filtered data by using one of your saved queries." %}</p>
     <form method='GET' action='./'>
@@ -28,22 +49,59 @@
 {% else %}
     <p>{% trans "Want to filter this report to just show a subset of data? Go to the Ticket List, filter your query, and save your query." %}</p>
 {% endif %}
+                        </div>
+                        <!-- /.panel-body -->
+                    </div>
+                    <!-- /.panel -->
+                </div>
+            </div>
 
-<table class="table table-hover table-bordered">
-<caption>{{ title }}</caption>
-<thead>
-<tr>{% for h in headings %}<th>{% if forloop.first %}{{ h|title }}{% else %}{{ h }}{% endif %}</th>{% endfor %}</tr>
-</thead>
-<tbody>
-{% for d in data %}
-<tr class='row_{% cycle 'odd' 'even' %}'>{% for f in d %}<td class='report'>{{ f }}</td>{% endfor %}</tr>{% endfor %}
-</tbody>
-</table>
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="panel panel-primary">
+                        <div class="panel-heading">
+                            {{ title }}
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div class="panel-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-bordered table-hover">
+                                    <thead>
+                                        <tr>{% for h in headings %}
+                                            <th>{% if forloop.first %}{{ h|title }}{% else %}{{ h }}{% endif %}</th>{% endfor %}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for d in data %}<tr class='row_{% cycle 'odd' 'even' %}'>
+                                            {% for f in d %}<td class='report'>{{ f }}</td>{% endfor %}
+                                        </tr>{% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <!-- /.table-responsive -->
+                            <div class="flot-chart">
+                                <div class="flot-chart-content" id="chart-content"></div>
+                            </div>
+                        </div>
+                        <!-- /.panel-body -->
+                    </div>
+                    <!-- /.panel -->
+                </div>
+            </div>
 
-<div class='jqPlot' id='placeholder' style='width: 600px; height: 400px;'></div>
-{% ifequal charttype "date" %}
+{% if charttype == "date" %}
 <script type='text/javascript'>
-    $.jqplot.config.enablePlugins = true;
+
+Morris.Line({
+  element: 'chart-content',
+  data: {% autoescape on %}{{ morrisjs_data|safe }}{% endautoescape %},
+  xkey: 'x',
+  ykeys: [{% for d in data %}{{ forloop.counter0 }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+  labels: [{% for n in series_names %}"{{ n }}"{% if not forloop.last %}, {% endif %}{% endfor %}],
+  xLabels: "month"
+});
+
+    /*$.jqplot.config.enablePlugins = true;
     var dataset = [];
 
     {% for d in data %}
@@ -67,41 +125,23 @@
                 min: 0
             }
         }
-    });
+    });*/
 
 </script>
-{% endifequal %}
-{% ifequal charttype "bar" %}
+{% endif %}
+{% if charttype == "bar" %}
 <script type='text/javascript'>
-    $.jqplot.config.enablePlugins = true;
-    var dataset = [];
 
-    {% for d in data %}
-    dataset[{{ forloop.counter0 }}] = [{% for f in d %}{% if not forloop.first %}{{ f }}{% if not forloop.last %}, {% endif %}{% endif %}{% endfor %}];{% endfor %}
-
-    plot = $.jqplot('placeholder', dataset, {
-        legend: {show: true, location: 'nw', xoffset: 55},
-        title: "{{ title }}",
-        seriesDefaults: {
-            renderer: $.jqplot.BarRenderer,
-            rendererOptions: {barPadding: 8, barMargin: 20}
-            },
-        series: [{% for d in data %}
-            {label:'{{ d.0 }}'}{% if not forloop.last %},{% endif %}{% endfor %}
-            ],
-        axes: {
-            xaxis: {
-                renderer: $.jqplot.CategoryAxisRenderer,
-                ticks: [{% for h in headings %}{% if not forloop.first %}'{{ h }}'{% if not forloop.last %}, {% endif %}{% endif %}{% endfor %}]
-            },
-            yaxis: {
-                min: 0
-            }
-        }
-    });
+Morris.Bar({
+  element: 'chart-content',
+  data: {% autoescape on %}{{ morrisjs_data|safe }}{% endautoescape %},
+  xkey: 'x',
+  ykeys: [{% for d in data %}{{ forloop.counter0 }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+  labels: [{% for n in series_names %}"{{ n }}"{% if not forloop.last %}, {% endif %}{% endfor %}]
+});
 
 </script>
-{% endifequal %}
+{% endif %}
 
 
 

@@ -2,24 +2,62 @@
 
 {% block helpdesk_title %}{% trans "Add Ticket CC" %}{% endblock %}
 
-{% block helpdesk_body %}{% blocktrans %}
-<h2>Add Ticket CC</h2>
+{% block helpdesk_body %}
+<h2>{% trans 'Add Ticket CC' %}</h2>
 
-<p>To automatically send an email to a user or e-mail address when this ticket is updated, select the user or enter an e-mail address below.</p>{% endblocktrans %}
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="panel panel-primary">
+                        <div class="panel-heading">
+                            {% trans 'To automatically send an email to a user or e-mail address when this ticket is updated, select the user or enter an e-mail address below.' %}
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div class="panel-body">
+                            <!-- Nav tabs -->
+                            <ul class="nav nav-tabs">
+                                <li class="active"><a href="#EmailCC" data-toggle="tab">{% trans 'Email' %}</a>
+                                </li>
+                                <li><a href="#UserCC" data-toggle="tab">{% trans 'User' %}</a>
+                                </li>
+                            </ul>
 
-<form method='post' action='./'>
-
-<fieldset>
-    <dl>{% for field in form %}
-        <dt><label for='id_{{ field.name }}'>{{ field.label }}</label></dt>
-        <dd>{{ field }}</dd>
-        {% if field.errors %}<dd class='error'>{{ field.errors }}</dd>{% endif %}
-        {% if field.help_text %}<dd class='form_help_text'>{{ field.help_text }}</dd>{% endif %}
-    {% endfor %}</dl>
-</fieldset>
-
-<input class="btn btn-primary" type='submit' value='{% trans "Save Ticket CC" %}' />
-
-{% csrf_token %}</form>
+                            <!-- Tab panes -->
+                            <div class="tab-content">
+                                <div class="tab-pane fade in active" id="EmailCC">
+                                    <h4>{% trans 'Add Email' %}</h4>
+                                    <form method='post' action='./'>
+                                        <fieldset>
+                                            <dl>{% for field in form_email %}
+                                                <dt><label for='id_{{ field.name }}'>{{ field.label }}</label></dt>
+                                                <dd>{{ field }}</dd>
+                                                {% if field.errors %}<dd class='error'>{{ field.errors }}</dd>{% endif %}
+                                                {% if field.help_text %}<dd class='form_help_text'>{{ field.help_text }}</dd>{% endif %}
+                                            {% endfor %}</dl>
+                                        </fieldset>
+                                        <button class="btn btn-primary" type='submit'>{% trans "Save Ticket CC" %}</button>
+                                    {% csrf_token %}</form>
+                                </div>
+                                <div class="tab-pane fade" id="UserCC">
+                                    <h4>{% trans 'Add User' %}</h4>
+                                    <form method='post' action='./'>
+                                        <fieldset>
+                                            <dl>{% for field in form_user %}
+                                                <dt><label for='id_{{ field.name }}'>{{ field.label }}</label></dt>
+                                                <dd>{{ field }}</dd>
+                                                {% if field.errors %}<dd class='error'>{{ field.errors }}</dd>{% endif %}
+                                                {% if field.help_text %}<dd class='form_help_text'>{{ field.help_text }}</dd>{% endif %}
+                                            {% endfor %}</dl>
+                                        </fieldset>
+                                        <button class="btn btn-primary" type='submit'>{% trans "Save Ticket CC" %}</button>
+                                    {% csrf_token %}</form>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- /.panel-body -->
+                    </div>
+                    <!-- /.panel -->
+                </div>
+            </div>
+            <!-- /.row -->
 
 {% endblock %}

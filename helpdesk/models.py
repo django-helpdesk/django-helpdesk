@@ -178,7 +178,8 @@ class Queue(models.Model):
         blank=True,
         null=True,
         help_text=_('If using a local directory, what directory path do you '
-                    'wish to poll for new email? Example: /var/lib/mail/helpdesk/'),
+                    'wish to poll for new email? '
+                    'Example: /var/lib/mail/helpdesk/'),
     )
 
     permission_name = models.CharField(
@@ -231,12 +232,19 @@ class Queue(models.Model):
     logging_type = models.CharField(
         _('Logging Type'),
         max_length=5,
-        choices=(('none', _('None')), ('debug', _('Debug')), ('info', _('Information')), ('warn', _('Warning')), ('error', _('Error')), ('crit', _('Critical'))),
+        choices=(
+            ('none', _('None')),
+            ('debug', _('Debug')),
+            ('info', _('Information')),
+            ('warn', _('Warning')),
+            ('error', _('Error')),
+            ('crit', _('Critical'))
+        ),
         blank=True,
         null=True,
         help_text=_('Set the default logging level. All messages at that '
-                    'level or above will be logged to the directory set below. '
-                    'If no level is set, logging will be disabled.'),
+                    'level or above will be logged to the directory set '
+                    'below. If no level is set, logging will be disabled.'),
     )
 
     logging_dir = models.CharField(
@@ -486,12 +494,6 @@ class Ticket(models.Model):
         return u"%s-%s" % (self.queue.slug, self.id)
     ticket_for_url = property(_get_ticket_for_url)
 
-    def _get_priority_img(self):
-        """ Image-based representation of the priority """
-        from django.conf import settings
-        return u"%shelpdesk/priorities/priority%s.png" % (settings.MEDIA_URL, self.priority)
-    get_priority_img = property(_get_priority_img)
-
     def _get_priority_css_class(self):
         """
         Return the boostrap class corresponding to the priority.
@@ -500,6 +502,8 @@ class Ticket(models.Model):
             return "warning"
         elif self.priority == 1:
             return "danger"
+        elif self.priority == 5:
+            return "success"
         else:
             return ""
     get_priority_css_class = property(_get_priority_css_class)
@@ -970,7 +974,7 @@ class KBCategory(models.Model):
         verbose_name_plural = _('Knowledge base categories')
 
     def get_absolute_url(self):
-        return 'kb_category', (), {'slug': self.slug}
+        return 'helpdesk:kb_category', (), {'slug': self.slug}
     get_absolute_url = models.permalink(get_absolute_url)
 
 

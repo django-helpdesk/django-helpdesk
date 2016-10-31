@@ -126,8 +126,9 @@ def process_queue(q, logger):
         try:
             import socks
         except ImportError:
-            no_socks_msg = "Queue has been configured with proxy settings, but no socks " \
-                           "library was installed. Try to install PySocks via PyPI."
+            no_socks_msg = "Queue has been configured with proxy settings, " \
+                           "but no socks library was installed. Try to " \
+                           "install PySocks via PyPI."
             logger.error(no_socks_msg)
             raise ImportError(no_socks_msg)
 

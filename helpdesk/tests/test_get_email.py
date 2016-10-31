@@ -22,7 +22,7 @@ except ImportError:
 
 
 class GetEmailTestCase(TestCase):
-    # fixtures = ['emailtemplate.json'] # may not need this, not testing templates here
+    ''' Test reading emails from a local directory '''
 
     def setUp(self):
         self.queue_public = Queue.objects.create(title='Queue 1', slug='QQ', allow_public_submission=True, allow_email_submission=True, email_box_type='local', email_box_local_dir='/var/lib/mail/helpdesk/')

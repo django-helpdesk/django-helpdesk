@@ -7,7 +7,11 @@
 
 <p>{% blocktrans with ignore.email_address as email_address %}Are you sure you wish to stop removing this email address (<em>{{ email_address }}</em>) and allow their e-mails to automatically create tickets in your system? You can re-add this e-mail address at any time.{% endblocktrans %}</p>
 
-<p><a href='../../'>{% trans "Keep Ignoring It" %}</a></p>
+<p><a href='../../'><button class="btn btn-primary btn-lg">{% trans "Keep Ignoring It" %}</button></a></p>
 
-<form method='post' action='./'><input class="btn btn-primary" type='submit' value='{% trans "Stop Ignoring It" %}' />{% csrf_token %}</form>
+<form method='post' action='./'>
+    <button class="btn btn-danger" type='submit'>{% trans "Stop Ignoring It" %}</button>
+{% csrf_token %}</form>
+
+
 {% endblock %}

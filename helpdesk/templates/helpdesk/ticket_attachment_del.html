@@ -1,0 +1,16 @@
+{% extends "helpdesk/base.html" %}{% load i18n %}
+
+{% block helpdesk_title %}{% trans "Delete Ticket Attachment" %}{% endblock %}
+
+{% block helpdesk_body %}{% blocktrans %}
+<h2>Delete Ticket Attachment</h2>
+
+<p>Are you sure you wish to delete the attachment <i>{{ filename }}</i> from this ticket? The attachment data will be permanently deleted from the database, but the attachment itself will still exist on the server.</p>
+{% endblocktrans %}
+
+<p><a href='../../'><button class="btn btn-primary btn-lg">{% trans "Don't Delete" %}</button></a></p>
+
+<form method='post' action='./'>
+    <button class="btn btn-danger" type='submit'>{% trans "Yes, I Understand - Delete" %}&nbsp;{{ filename }}</button>
+{% csrf_token %}</form>
+{% endblock %}

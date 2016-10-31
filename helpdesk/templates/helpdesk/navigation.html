@@ -1,27 +1,41 @@
 {% load i18n %}
 
-<nav class="navbar navbar-default navbar-fixed-top" role="navigation">
-    <div class="navbar-header">
-        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#helpdesk-nav-collapse">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-        </button>
-    </div>
+<!-- Navigation -->
+        <nav class="navbar navbar-default navbar-fixed-top" role="navigation" style="margin-bottom: 0">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#helpdesk-nav-collapse">
+                    <span class="sr-only">{% trans 'Toggle navigation' %}</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="{% url 'helpdesk:home' %}">{% trans 'Helpdesk' %}</a>
+            </div>
+            <!-- /.navbar-header -->
 
-    <div class="collapse navbar-collapse" id="helpdesk-nav-collapse">
-        {% if helpdesk_settings.HELPDESK_NAVIGATION_ENABLED and user.is_authenticated or user.is_staff %}
-            <ul class="nav navbar-nav">
-                <li><a href='{% url 'helpdesk:dashboard' %}'><span class="glyphicon glyphicon-dashboard"></span> <span class="nav-text">{% trans "Dashboard" %}</span></a></li>
-                <li><a href='{% url 'helpdesk:list' %}'><span class="glyphicon glyphicon-tags"></span> <span class="nav-text">{% trans "Tickets" %}</span></a></li>
-                <li><a href='{% url 'helpdesk:submit' %}'><span class="glyphicon glyphicon-plus"></span> <span class="nav-text">{% trans "New Ticket" %}</span></a></li>
-                <li><a href='{% url 'helpdesk:report_index' %}'><span class="glyphicon glyphicon-stats"></span> <span class="nav-text"> {% trans "Stats" %}</span></a></li>
+            <div class="collapse navbar-collapse" id="helpdesk-nav-collapse">
+            {% if helpdesk_settings.HELPDESK_NAVIGATION_ENABLED and user.is_authenticated or user.is_staff %}
+            <ul class="nav navbar-top-links navbar-right">
+                <li>
+                    <a href='{% url 'helpdesk:dashboard' %}'><i class="fa fa-dashboard fa-fw"></i> <span class="nav-text">{% trans "Dashboard" %}</span></a>
+                </li>
+                <li>
+                    <a href='{% url 'helpdesk:list' %}'><i class="fa fa-tasks fa-fw"></i> <span class="nav-text">{% trans "Tickets" %}</span></a>
+                </li>
+                <li>
+                    <a href='{% url 'helpdesk:submit' %}'><i class="fa fa-plus-circle fa-fw"></i> <span class="nav-text">{% trans "New Ticket" %}</span></a>
+                </li>
+                <li>
+                    <a href='{% url 'helpdesk:report_index' %}'><i class="fa fa-bar-chart-o fa-fw"></i> <span class="nav-text"> {% trans "Stats" %}</span></a>
+                </li>
                 {% if helpdesk_settings.HELPDESK_KB_ENABLED %}
-                <li><a href='{% url 'helpdesk:kb_index' %}'><span class="glyphicon glyphicon-tree-deciduous"></span> <span class="nav-text">{% trans "Knowledgebase" %}</span></a></li>
+                <li>
+                    <a href='{% url 'helpdesk:kb_index' %}'><i class="fa fa-database fa-fw"></i> <span class="nav-text">{% trans "Knowledgebase" %}</span></a>
+                </li>
+
                 {% endif %}
                 {% if user_saved_queries_ %}
-                <li class="headerlink dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#"><span class="glyphicon glyphicon-filter"></span> <span class="nav-text">{% trans "Saved Query" %} <b class="caret"></b></span></a>
+                <li class="headerlink dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#"><i class="fa fa-filter fa-fw"></i> <span class="nav-text">{% trans "Saved Query" %} <b class="caret"></b></span></a>
                     <ul class="dropdown-menu">
                         {% for q in user_saved_queries_ %}
                             <li><a href="{% url 'helpdesk:list' %}?saved_query={{ q.id }}">{{ q.title }}
@@ -32,47 +46,64 @@
                     </ul>
                 </li>
                 {% endif %}
-                <li class="headerlink dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#"><span class="glyphicon glyphicon-user"></span> <span class="nav-text">{{ user.get_full_name|default:user.get_username }} <b class="caret"></b></span></a>
-                    <ul class="dropdown-menu">
-                        <li><a href='{% url 'helpdesk:user_settings' %}'>{% trans "User Settings" %}</a></li>
-{% if helpdesk_settings.HELPDESK_SHOW_CHANGE_PASSWORD and user.has_usable_password %}
-                        <li><a href='{% url 'auth_password_change' %}'>{% trans "Change password" %}</a></li>
-{% endif %}
-                        <li class="divider"></li>
-                        <li><a href='{% url 'helpdesk:logout' %}'>{#<span class="glyphicon glyphicon-log-out"></span> #}{% trans "Logout" %}</a></li>
-                    </ul>
-                </li>
-            </ul>
-
-            {% if not query %}
-                    <form class="navbar-form navbar-left" id='searchform' method='get' action="{% url 'helpdesk:list' %}">
-                        <div class="input-group">
+                {% if not query %}
+                <li>
+                    <form class="navbar-form navbar-top" id='searchform' method='get' action="{% url 'helpdesk:list' %}">
+                        <div class="input-group custom-search-form">
                             <input type='text' name='q' size='15' class='input form-control' placeholder='{% trans "Search..." %}' id='search_query' title='{% trans "Enter a keyword, or a ticket number to jump straight to that ticket." %}'/>
-                            <input type='hidden' name='status' value='1' /><input type='hidden' name='status' value='2' /><input type='hidden' name='status' value='3' />
-                            <input type='hidden' name='search_type' value='header' />
-                            {% csrf_token %}
+                            <input type='hidden' name='status' value='1' /><input type='hidden' name='status' value='2' /><input type='hidden' name='status' value='3' /><input type='hidden' name='search_type' value='header' />
                             <span class="input-group-btn">
-                            <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search"></span> Go</button>
+                                <button class="btn btn-default" type="submit">
+                                    <i class="fa fa-search"></i> {% trans 'Go' %}
+                                </button>
                             </span>
                         </div>
+                    {% csrf_token %}
                     </form>
-            {% endif %}
-        {% else %}
-            {# Public menu #}
-            <ul id="dropdown" class="nav navbar-nav">
-                {% if helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE %}
-                    <li><a href='{% url 'helpdesk:dashboard' %}'>{% trans "Dashboard" %}</a></li>
-                    <li><a href='{% url 'helpdesk:submit' %}'>{% trans "Submit a Ticket" %}</a></li>
-                {% else %}
-                    {% if helpdesk_settings.HELPDESK_SUBMIT_A_TICKET_PUBLIC %}
-                        <li><a href='{% url 'helpdesk:home' %}'>{% trans "Submit a Ticket" %}</a></li>
-                    {% endif %}
+                    <!-- /input-group -->
+                </li>
                 {% endif %}
-                {% if helpdesk_settings.HELPDESK_KB_ENABLED %}<li><a href='{% url 'helpdesk:kb_index' %}'>{% trans "Knowledgebase" %}</a></li>{% endif %}
-                {% if not request.path == '/helpdesk/login/' or user.is_authenticated %}
-                    <li>{% if user.is_authenticated %}<a href='{% url 'helpdesk:logout' %}'>{% trans "Logout" %}</a>{% else %}<a href='{% url 'helpdesk:login' %}?next={% if next %}{{ next|escape }}{% else %}{% url 'helpdesk:home' %}{% endif %}'>{% trans "Log In" %}</a>{% endif %}</li>
-                {% endif %}
+                <li class="dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                        <i class="fa fa-user fa-fw"></i> {{ user.get_full_name|default:user.get_username }} <i class="fa fa-caret-down"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-user">
+                        <li><a href="{% url 'helpdesk:user_settings' %}"><i class="fa fa-gear fa-fw"></i> {% trans "User Settings" %}</a>
+                        </li>
+                        <li><a href='{% url 'helpdesk:rss_index' %}'><i class="fa fa-rss-square fa-fw"></i> {% trans "RSS Feeds" %}</a></li>
+                        {% if helpdesk_settings.HELPDESK_SHOW_CHANGE_PASSWORD and user.has_usable_password %}
+                        <li><a href="{% url 'auth_password_change' %}"><i class="fa fa-user-secret fa-fw"></i> {% trans "Change password" %}</a></li>
+                        {% endif %}
+                        <li class="divider"></li>
+                        {% if user.is_superuser %}
+                        <li><a href='{% url 'helpdesk:system_settings' %}'><i class="fa fa-gears fa-fw"></i> {% trans "System Settings" %}</a></li>
+                        <li class="divider"></li>
+                        {% endif %}
+                        <li><a href="{% url 'helpdesk:logout' %}"><i class="fa fa-sign-out fa-fw"></i> {% trans "Logout" %}</a>
+                        </li>
+                    </ul>
+                    <!-- /.dropdown-user -->
+                </li>
+                <!-- /.dropdown -->
             </ul>
-        {% endif %}
-    </div>
-</nav>
+            <!-- /.navbar-top-links -->
+            {% else %}
+                {# Public menu #}
+                <ul id="dropdown" class="nav navbar-nav">
+                    {% if helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE %}
+                        <li><a href='{% url 'helpdesk:dashboard' %}'>{% trans "Dashboard" %}</a></li>
+                        <li><a href='{% url 'helpdesk:submit' %}'>{% trans "Submit a Ticket" %}</a></li>
+                    {% else %}
+                        {% if helpdesk_settings.HELPDESK_SUBMIT_A_TICKET_PUBLIC %}
+                            <li><a href='{% url 'helpdesk:submit' %}'>{% trans "Submit a Ticket" %}</a></li>
+                        {% endif %}
+                    {% endif %}
+                    {% if helpdesk_settings.HELPDESK_KB_ENABLED %}<li><a href='{% url 'helpdesk:kb_index' %}'>{% trans "Knowledgebase" %}</a></li>{% endif %}
+                    {% if not request.path == '/helpdesk/login/' or user.is_authenticated %}
+                        <li>{% if user.is_authenticated %}<a href='{% url 'logout' %}'>{% trans "Logout" %}</a>{% else %}<a href='{% url 'helpdesk:login' %}?next={% if next %}{{ next|escape }}{% else %}{% url 'helpdesk:home' %}{% endif %}'>{% trans "Log In" %}</a>{% endif %}</li>
+                    {% endif %}
+                </ul>
+            {% endif %}
+            </div>
+        </nav>
+
