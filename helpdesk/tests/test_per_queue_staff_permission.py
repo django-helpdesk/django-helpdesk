@@ -133,11 +133,6 @@ class PerQueueStaffMembershipTestCase(TestCase):
         self.client.login(username='superuser', password='superuser')
         response = self.client.get(reverse('helpdesk:report_index'))
         self.assertEqual(
-            len(response.context['unassigned_tickets']),
-            3,
-            'Unassigned tickets were limited by queue membership for a superuser'
-        )
-        self.assertEqual(
             len(response.context['dash_tickets']),
             2,
             'The queues in dash_tickets were limited by queue membership for a superuser'
