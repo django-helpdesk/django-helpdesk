@@ -5,7 +5,7 @@
 {% block helpdesk_body %}
 <h2>{% trans "Reports &amp; Statistics" %}</h2>
 
-{% ifequal number_tickets 0 %}
+{% if number_tickets == 0 %}
 <p>{% trans "You haven't created any tickets yet, so you cannot run any reports." %}</p>
 {% else %}
 
@@ -44,7 +44,7 @@
                                     </thead>
                                     <tbody>
                                         {% for queue in dash_tickets %}
-                                        <tr>{% url 'helpdesk_list' as hdlist %}
+                                        <tr>{% url 'helpdesk:list' as hdlist %}
                                             <td><a href='{{ hdlist }}?queue={{ queue.queue }}&status=1&status=2'>{{ queue.name }}</a></td>
                                             <td>{% if queue.open %}<a href='{{ hdlist }}?queue={{ queue.queue }}&status=1&status=2'>{% endif %}{{ queue.open }}{% if queue.open %}</a>{% endif %}</td>
                                             <td>{% if queue.resolved %}<a href='{{ hdlist }}?queue={{ queue.queue }}&status=3'>{% endif %}{{ queue.resolved }}{% if queue.resolved %}</a>{% endif %}</td>
@@ -97,4 +97,4 @@
                 </div>
             </div>
 
-{% endifequal %}{% endblock %}
+{% endif %}{% endblock %}

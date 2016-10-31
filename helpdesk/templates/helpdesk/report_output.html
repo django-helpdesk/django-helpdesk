@@ -32,7 +32,7 @@
                 <div class="col-lg-12">
                     <div class="panel panel-primary">
                         <div class="panel-heading">
-                            Saved Queries
+                            {% trans 'Saved Queries' %}
                         </div>
                         <!-- /.panel-heading -->
                         <div class="panel-body">
@@ -89,7 +89,7 @@
                 </div>
             </div>
 
-{% ifequal charttype "date" %}
+{% if charttype == "date" %}
 <script type='text/javascript'>
 
 Morris.Line({
@@ -128,8 +128,8 @@ Morris.Line({
     });*/
 
 </script>
-{% endifequal %}
-{% ifequal charttype "bar" %}
+{% endif %}
+{% if charttype == "bar" %}
 <script type='text/javascript'>
 
 Morris.Bar({
@@ -141,7 +141,7 @@ Morris.Bar({
 });
 
 </script>
-{% endifequal %}
+{% endif %}
 
 
 

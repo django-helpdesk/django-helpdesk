@@ -4,12 +4,12 @@
         <nav class="navbar navbar-default navbar-fixed-top" role="navigation" style="margin-bottom: 0">
             <div class="navbar-header">
                 <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#helpdesk-nav-collapse">
-                    <span class="sr-only">Toggle navigation</span>
+                    <span class="sr-only">{% trans 'Toggle navigation' %}</span>
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="{% url 'helpdesk:home' %}">Helpdesk</a>
+                <a class="navbar-brand" href="{% url 'helpdesk:home' %}">{% trans 'Helpdesk' %}</a>
             </div>
             <!-- /.navbar-header -->
 
@@ -54,7 +54,7 @@
                             <input type='hidden' name='status' value='1' /><input type='hidden' name='status' value='2' /><input type='hidden' name='status' value='3' /><input type='hidden' name='search_type' value='header' />
                             <span class="input-group-btn">
                                 <button class="btn btn-default" type="submit">
-                                    <i class="fa fa-search"></i> Go
+                                    <i class="fa fa-search"></i> {% trans 'Go' %}
                                 </button>
                             </span>
                         </div>

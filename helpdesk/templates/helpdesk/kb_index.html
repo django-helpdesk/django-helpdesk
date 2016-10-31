@@ -3,11 +3,11 @@
 {% block helpdesk_body %}
 <h2>{% trans "Knowledgebase" %}</h2>
 
-<p>{% trans "We have listed a number of knowledgebase articles for your perusal in the following categories. Please check to see if any of these articles address your problem prior to opening a support ticket." %}</p>
+<p>{% trans "We have listed a number of Knowledgebase articles for your perusal in the following categories. Please check to see if any of these articles address your problem prior to opening a support ticket." %}</p>
 
 {% for category in kb_categories %}
 {% cycle 'one' 'two' 'three' as catnumperrow silent %}
-{% ifequal catnumperrow 'one' %}<div class="row">{% endifequal %}
+{% if catnumperrow == 'one' %}<div class="row">{% endif %}
     <div class="col-lg-4">
         <div class="panel panel-primary">
             <div class="panel-heading">
@@ -17,11 +17,11 @@
                 <p>{{ category.description }}</p>
             </div>
             <div class="panel-footer">
-                View <a href='{{ category.get_absolute_url }}'>{{ category.title }} articles <i class="fa fa-arrow-right"></i></a>
+                <a href='{{ category.get_absolute_url }}'>{% trans 'View articles' %}<i class="fa fa-arrow-right"></i></a>
             </div>
         </div>
     </div>
-{% ifequal catnumperrow 'three' %}</div>{% endifequal %}
+{% if catnumperrow == 'three' %}</div>{% endif %}
 {% endfor %}
 
 {% endblock %}

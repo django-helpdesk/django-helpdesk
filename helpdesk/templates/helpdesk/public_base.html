@@ -13,7 +13,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>{% block helpdesk_title %}Helpdesk{% endblock %}</title>
+    <title>{% block helpdesk_title %}{% trans 'Helpdesk' %}{% endblock %}</title>
 
     <!-- Bootstrap Core CSS -->
     {% if helpdesk_settings.HELPDESK_USE_CDN %}
@@ -67,7 +67,7 @@
     {% else %}
     <script src="{% static 'helpdesk/vendor/jquery/jquery.min.js' %}"></script>
     {% endif %}
-    <script src='{% static "helpdesk/jquery-ui-1.12.0.min.js" %}' type='text/javascript' language='javascript'></script>
+    <script src='{% static "helpdesk/jquery-ui-1.12.0.min.js" %}'></script>
 
     <!-- Bootstrap Core JavaScript -->
     {% if helpdesk_settings.HELPDESK_USE_CDN %}

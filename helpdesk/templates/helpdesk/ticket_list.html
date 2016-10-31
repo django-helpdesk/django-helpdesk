@@ -4,8 +4,8 @@
 {% block helpdesk_title %}{% trans "Tickets" %}{% endblock %}
 {% block helpdesk_head %}
 
-<script type='text/javascript' language='javascript' src='{% static "helpdesk/filter.js" %}'></script>
-<script type='text/javascript' language='javascript'>
+<script src='{% static "helpdesk/filter.js" %}'></script>
+<script>
 $(document).ready(function() {
 
     $('#ticketTable').DataTable({
