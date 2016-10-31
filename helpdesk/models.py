@@ -974,7 +974,7 @@ class KBCategory(models.Model):
         verbose_name_plural = _('Knowledge base categories')
 
     def get_absolute_url(self):
-        return 'kb_category', (), {'slug': self.slug}
+        return 'helpdesk:kb_category', (), {'slug': self.slug}
     get_absolute_url = models.permalink(get_absolute_url)
 
 
