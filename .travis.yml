@@ -11,12 +11,9 @@ env:
     - DJANGO=1.10.2
 
 install:
-    - pip install argparse
-    - pip install coverage
-    - pip install codecov
-    - pip install pep8
     - pip install -q Django==$DJANGO
     - pip install -q -r requirements.txt
+    - pip install -q -r requirements-testing.txt
 
 before_script:
     - "pep8 --exclude=migrations --ignore=E501 helpdesk"
