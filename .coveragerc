@@ -4,7 +4,6 @@
 branch = True
 include = helpdesk/*
 omit =
-    *helpdesk/south_migrations/*
     *helpdesk/migrations/*
 
 [report]

@@ -19,7 +19,7 @@ install:
     - pip install -q -r requirements.txt
 
 before_script:
-    - "pep8 --exclude=migrations,south_migrations --ignore=E501 helpdesk"
+    - "pep8 --exclude=migrations --ignore=E501 helpdesk"
 
 script: 
     - coverage run --source='.' quicktest.py helpdesk
