@@ -234,17 +234,17 @@ def process_queue(q, logger):
         logger.info("Found %s messages in local mailbox directory" % str(len(mail)))
         for m in mail:
             logger.info("Processing message %s" % str(m))
-            f = open(m, 'r')
-            ticket = ticket_from_message(message=f.read(), queue=q, logger=logger)
-            if ticket:
-                logger.info("Successfully processed message %s, ticket/comment created." % str(m))
-                try:
-                    # unlink(m) #delete message file if ticket was successful
-                    logger.info("Successfully deleted message %s." % str(m))
-                except:
-                    logger.error("Unable to delete message %s." % str(m))
-            else:
-                logger.warn("Message %s was not successfully processed, and will be left in local directory" % str(m))
+            with open(m, 'r') as f:
+                ticket = ticket_from_message(message=f.read(), queue=q, logger=logger)
+                if ticket:
+                    logger.info("Successfully processed message %s, ticket/comment created." % str(m))
+                    try:
+                        # unlink(m) #delete message file if ticket was successful
+                        logger.info("Successfully deleted message %s." % str(m))
+                    except:
+                        logger.error("Unable to delete message %s." % str(m))
+                else:
+                    logger.warn("Message %s was not successfully processed, and will be left in local directory" % str(m))
 
 
 def decodeUnknown(charset, string):
