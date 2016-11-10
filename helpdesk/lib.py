@@ -7,6 +7,8 @@ lib.py - Common functions (eg multipart e-mail)
 """
 
 import logging
+import mimetypes
+import os
 
 try:
     from base64 import urlsafe_b64encode as b64encode
@@ -17,22 +19,25 @@ try:
 except ImportError:
     from base64 import decodestring as b64decode
 
-from django.utils.encoding import smart_str
+from django.conf import settings
 from django.db.models import Q
+from django.utils.encoding import smart_text
 from django.utils.safestring import mark_safe
+
+from helpdesk.models import Attachment, EmailTemplate
 
 logger = logging.getLogger('helpdesk')
 
 
 def send_templated_mail(template_name,
-                        email_context,
+                        context,
                         recipients,
                         sender=None,
                         bcc=None,
                         fail_silently=False,
                         files=None):
     """
-    send_templated_mail() is a warpper around Django's e-mail routines that
+    send_templated_mail() is a wrapper around Django's e-mail routines that
     allows us to easily send multipart (text/plain & text/html) e-mails using
     templates that are stored in the database. This lets the admin provide
     both a text and a HTML template for each message.
@@ -40,7 +45,7 @@ def send_templated_mail(template_name,
     template_name is the slug of the template to use for this message (see
         models.EmailTemplate)
 
-    email_context is a dictionary to be used when rendering the template
+    context is a dictionary to be used when rendering the template
 
     recipients can be either a string, eg 'a@b.com', or a list of strings.
 
@@ -53,68 +58,52 @@ def send_templated_mail(template_name,
     fail_silently is passed to Django's mail routine. Set to 'True' to ignore
         any errors at send time.
 
-    files can be a list of tuple. Each tuple should be a filename to attach,
+    files can be a list of tuples. Each tuple should be a filename to attach,
         along with the File objects to be read. files can be blank.
 
     """
-    from django.conf import settings
     from django.core.mail import EmailMultiAlternatives
+    from django.template import engines
+    from_string = engines['django'].from_string
 
     from helpdesk.models import EmailTemplate
     from helpdesk.settings import HELPDESK_EMAIL_SUBJECT_TEMPLATE, \
         HELPDESK_EMAIL_FALLBACK_LOCALE
-    import os
 
-    context = email_context
+    locale = context['queue'].get('locale') or HELPDESK_EMAIL_FALLBACK_LOCALE
 
-    if hasattr(context['queue'], 'locale'):
-        locale = getattr(context['queue'], 'locale', '')
-    else:
-        locale = context['queue'].get('locale', HELPDESK_EMAIL_FALLBACK_LOCALE)
-    if not locale:
-        locale = HELPDESK_EMAIL_FALLBACK_LOCALE
-
-    t = None
     try:
         t = EmailTemplate.objects.get(template_name__iexact=template_name, locale=locale)
     except EmailTemplate.DoesNotExist:
-        pass
-
-    if not t:
         try:
             t = EmailTemplate.objects.get(template_name__iexact=template_name, locale__isnull=True)
         except EmailTemplate.DoesNotExist:
-            logger.warning('template "%s" does not exist, no mail sent',
-                           template_name)
+            logger.warning('template "%s" does not exist, no mail sent', template_name)
             return  # just ignore if template doesn't exist
 
-    if not sender:
-        sender = settings.DEFAULT_FROM_EMAIL
+    subject_part = from_string(
+        HELPDESK_EMAIL_SUBJECT_TEMPLATE % {"subject": t.subject}
+    ).render(context).replace('\n', '').replace('\r', '')
 
     footer_file = os.path.join('helpdesk', locale, 'email_text_footer.txt')
 
-    from django.template import engines
-    template_func = engines['django'].from_string
-
-    text_part = template_func(
+    text_part = from_string(
         "%s{%% include '%s' %%}" % (t.plain_text, footer_file)
     ).render(context)
 
     email_html_base_file = os.path.join('helpdesk', locale, 'email_html_base.html')
-
     # keep new lines in html emails
     if 'comment' in context:
-        html_txt = context['comment']
-        html_txt = html_txt.replace('\r\n', '<br>')
-        context['comment'] = mark_safe(html_txt)
+        context['comment'] = mark_safe(context['comment'].replace('\r\n', '<br>'))
 
-    html_part = template_func(
+    html_part = from_string(
         "{%% extends '%s' %%}{%% block title %%}"
         "%s"
         "{%% endblock %%}{%% block content %%}%s{%% endblock %%}" %
-        (email_html_base_file, t.heading, t.html)).render(context)
+        (email_html_base_file, t.heading, t.html)
+    ).render(context)
 
-    subject_part = template_func(
+    subject_part = from_string(
         HELPDESK_EMAIL_SUBJECT_TEMPLATE % {
             "subject": t.subject,
         }).render(context)
@@ -123,19 +112,16 @@ def send_templated_mail(template_name,
         if recipients.find(','):
             recipients = recipients.split(',')
     elif type(recipients) != list:
-        recipients = [recipients, ]
+        recipients = [recipients]
 
-    msg = EmailMultiAlternatives(
-        subject_part.replace('\n', '').replace('\r', ''),
-        text_part, sender, recipients, bcc=bcc)
+    msg = EmailMultiAlternatives(subject_part, text_part,
+                                 sender or settings.DEFAULT_FROM_EMAIL,
+                                 recipients, bcc=bcc)
     msg.attach_alternative(html_part, "text/html")
 
     if files:
-        for attachment in files:
-            file_to_attach = attachment[1]
-            file_to_attach.open()
-            msg.attach(filename=attachment[0], content=file_to_attach.read())
-            file_to_attach.close()
+        for filename, filefield in files:
+            msg.attach(filename, open(filefield.path).read())
 
     return msg.send(fail_silently)
 
@@ -254,7 +240,6 @@ def text_is_spam(text, request):
     # False if it is not spam. If it cannot be checked for some reason, we
     # assume it isn't spam.
     from django.contrib.sites.models import Site
-    from django.conf import settings
     try:
         from helpdesk.akismet import Akismet
     except:
@@ -286,6 +271,32 @@ def text_is_spam(text, request):
             'comment_author': '',
         }
 
-        return ak.comment_check(smart_str(text), data=ak_data)
+        return ak.comment_check(smart_text(text), data=ak_data)
 
     return False
+
+
+def process_attachments(followup, attached_files):
+    max_email_attachment_size = getattr(settings, 'MAX_EMAIL_ATTACHMENT_SIZE', 512000)
+    attachments = []
+
+    for attached in attached_files:
+        if attached.size:
+            filename = smart_text(attached.name)
+            att = Attachment(
+                followup=followup,
+                file=attached,
+                filename=filename,
+                mime_type=attached.content_type or
+                mimetypes.guess_type(filename, strict=False)[0] or
+                'application/octet-stream',
+                size=attached.size,
+            )
+            att.save()
+
+            if attached.size < max_email_attachment_size:
+                # Only files smaller than 512kb (or as defined in
+                # settings.MAX_EMAIL_ATTACHMENT_SIZE) are sent via email.
+                attachments.append([filename, att.file])
+
+    return attachments

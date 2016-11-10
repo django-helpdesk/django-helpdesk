@@ -31,6 +31,7 @@ from helpdesk.forms import (
 )
 from helpdesk.lib import (
     send_templated_mail, query_to_dict, apply_query, safe_template_context,
+    process_attachments,
 )
 from helpdesk.models import (
     Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch,
@@ -458,26 +459,7 @@ def update_ticket(request, ticket_id, public=False):
 
     f.save()
 
-    files = []
-    if request.FILES:
-        import mimetypes
-        for file in request.FILES.getlist('attachment'):
-            filename = file.name.encode('ascii', 'ignore')
-            filename = filename.decode("utf-8")
-            print(filename)
-            a = Attachment(
-                followup=f,
-                filename=filename,
-                mime_type=file.content_type or 'application/octet-stream',
-                size=file.size,
-            )
-            a.file.save(filename, file, save=False)
-            a.save()
-
-            if file.size < getattr(settings, 'MAX_EMAIL_ATTACHMENT_SIZE', 512000):
-                # Only files smaller than 512kb (or as defined in
-                # settings.MAX_EMAIL_ATTACHMENT_SIZE) are sent via email.
-                files.append([a.filename, a.file])
+    files = process_attachments(f, request.FILES.getlist('attachment'))
 
     if title != ticket.title:
         c = TicketChange(

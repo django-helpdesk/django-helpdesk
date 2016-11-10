@@ -741,7 +741,6 @@ def attachment_path(instance, filename):
     putting attachments in a folder off attachments for ticket/followup_id/.
     """
     import os
-    from django.conf import settings
     os.umask(0)
     path = 'helpdesk/attachments/%s/%s' % (instance.followup.ticket.ticket_for_url, instance.followup.id)
     att_path = os.path.join(settings.MEDIA_ROOT, path)
@@ -783,15 +782,6 @@ class Attachment(models.Model):
         _('Size'),
         help_text=_('Size of this file in bytes'),
     )
-
-    def get_upload_to(self, field_attname):
-        """ Get upload_to path specific to this item """
-        if not self.id:
-            return u''
-        return u'helpdesk/attachments/%s/%s' % (
-            self.followup.ticket.ticket_for_url,
-            self.followup.id
-        )
 
     def __str__(self):
         return '%s' % self.filename
