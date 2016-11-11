@@ -1124,7 +1124,7 @@ def run_report(request, report):
     if Ticket.objects.all().count() == 0 or report not in (
             'queuemonth', 'usermonth', 'queuestatus', 'queuepriority', 'userstatus',
             'userpriority', 'userqueue', 'daysuntilticketclosedbymonth'):
-        return HttpResponseRedirect(reverse("helpdesk_report_index"))
+        return HttpResponseRedirect(reverse("helpdesk:report_index"))
 
     report_queryset = Ticket.objects.all().select_related().filter(
         queue__in=_get_user_queues(request.user)
@@ -1475,7 +1475,7 @@ def attachment_del(request, ticket_id, attachment_id):
     attachment = get_object_or_404(Attachment, id=attachment_id)
     if request.method == 'POST':
         attachment.delete()
-        return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket_id]))
+        return HttpResponseRedirect(reverse('helpdesk:view', args=[ticket_id]))
     return render(request, 'helpdesk/ticket_attachment_del.html', {
         'attachment': attachment,
         'filename': attachment.filename,
