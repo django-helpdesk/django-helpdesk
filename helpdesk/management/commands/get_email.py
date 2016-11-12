@@ -239,7 +239,7 @@ def process_queue(q, logger):
                 if ticket:
                     logger.info("Successfully processed message %s, ticket/comment created." % str(m))
                     try:
-                        # unlink(m) #delete message file if ticket was successful
+                        unlink(m)  # delete message file if ticket was successful
                         logger.info("Successfully deleted message %s." % str(m))
                     except:
                         logger.error("Unable to delete message %s." % str(m))
