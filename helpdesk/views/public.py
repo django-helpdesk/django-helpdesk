@@ -10,6 +10,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
+from django.utils.http import urlquote
 from django.utils.translation import ugettext as _
 
 from helpdesk import settings as helpdesk_settings
@@ -46,7 +47,7 @@ def homepage(request):
                 return HttpResponseRedirect('%s?ticket=%s&email=%s' % (
                     reverse('helpdesk:public_view'),
                     ticket.ticket_for_url,
-                    ticket.submitter_email)
+                    urlquote(ticket.submitter_email))
                 )
     else:
         try:
