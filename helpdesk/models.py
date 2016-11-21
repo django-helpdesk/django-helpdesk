@@ -13,13 +13,9 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.conf import settings
+from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _, ugettext
 from django.utils.encoding import python_2_unicode_compatible
-
-try:
-    from django.utils import timezone
-except ImportError:
-    from datetime import datetime as timezone
 
 
 @python_2_unicode_compatible

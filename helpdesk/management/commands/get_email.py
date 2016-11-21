@@ -27,19 +27,13 @@ from optparse import make_option
 
 from email_reply_parser import EmailReplyParser
 
-from django import VERSION
 from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand
 from django.db.models import Q
 from django.utils.translation import ugettext as _
-from django.utils import six
+from django.utils import six, timezone
+
 from helpdesk import settings
-
-try:
-    from django.utils import timezone
-except ImportError:
-    from datetime import datetime as timezone
-
 from helpdesk.lib import send_templated_mail, safe_template_context
 from helpdesk.models import Queue, Ticket, FollowUp, Attachment, IgnoreEmail
 

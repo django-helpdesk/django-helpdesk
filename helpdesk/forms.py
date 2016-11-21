@@ -6,19 +6,16 @@ django-helpdesk - A Django powered ticket tracker for small enterprise.
 forms.py - Definitions of newforms-based forms for creating and maintaining
            tickets.
 """
+
+
 from django.core.exceptions import ObjectDoesNotExist
-
 from django.utils.six import StringIO
-
 from django import forms
 from django.forms import extras
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth import get_user_model
-try:
-    from django.utils import timezone
-except ImportError:
-    from datetime import datetime as timezone
+from django.utils import timezone
 
 from helpdesk.lib import send_templated_mail, safe_template_context
 from helpdesk.models import (Ticket, Queue, FollowUp, Attachment, IgnoreEmail, TicketCC,

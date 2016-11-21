@@ -9,7 +9,6 @@ views/staff.py - The bulk of the application - provides most business logic and
 from __future__ import unicode_literals
 from datetime import datetime, timedelta
 
-from django import VERSION
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import user_passes_test
@@ -24,11 +23,7 @@ from django.utils.dates import MONTHS_3
 from django.utils.translation import ugettext as _
 from django.utils.html import escape
 from django import forms
-
-try:
-    from django.utils import timezone
-except ImportError:
-    from datetime import datetime as timezone
+from django.utils import timezone
 
 from helpdesk.forms import (
     TicketForm, UserSettingsForm, EmailIgnoreForm, EditTicketForm, TicketCCForm,
@@ -407,25 +402,14 @@ def update_ticket(request, ticket_id, public=False):
 
     # We need to allow the 'ticket' and 'queue' contexts to be applied to the
     # comment.
-    from django.template import loader, Context
     context = safe_template_context(ticket)
+
     # this line sometimes creates problems if code is sent as a comment.
     # if comment contains some django code, like "why does {% if bla %} crash",
     # then the following line will give us a crash, since django expects {% if %}
     # to be closed with an {% endif %} tag.
-
-    # get_template_from_string was removed in Django 1.8
-    # http://django.readthedocs.org/en/1.8.x/ref/templates/upgrading.html
-    try:
-        from django.template import engines
-        template_func = engines['django'].from_string
-    except ImportError:  # occurs in django < 1.8
-        template_func = loader.get_template_from_string
-
-    # RemovedInDjango110Warning: render() must be called with a dict, not a Context.
-    if VERSION < (1, 8):
-        context = Context(context)
-
+    from django.template import engines
+    template_func = engines['django'].from_string
     comment = template_func(comment).render(context)
 
     if owner is -1 and ticket.assigned_to:
