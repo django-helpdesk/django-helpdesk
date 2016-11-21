@@ -61,41 +61,9 @@ class QuickDjangoTest(object):
 
     def __init__(self, *args, **kwargs):
         self.apps = args
-        # Get the version of the test suite
-        self.version = self.get_test_version()
-        # Call the appropriate one
-        if self.version == 'new':
-            self._new_tests()
-        else:
-            self._old_tests()
+        self._tests()
 
-    def get_test_version(self):
-        """
-        Figure out which version of Django's test suite we have to play with.
-        """
-        if django.VERSION >= (1, 2):
-            return 'new'
-        else:
-            return 'old'
-
-    def _old_tests(self):
-        """
-        Fire up the Django test suite from before version 1.2
-        """
-        settings.configure(DEBUG=True,
-                           DATABASE_ENGINE='sqlite3',
-                           DATABASE_NAME=os.path.join(self.DIRNAME, 'database.db'),
-                           INSTALLED_APPS=self.INSTALLED_APPS + self.apps
-                           )
-        from django.test.simple import run_tests
-        failures = run_tests(self.apps, verbosity=1)
-        if failures:
-            sys.exit(failures)
-
-    def _new_tests(self):
-        """
-        Fire up the Django test suite developed for version 1.2
-        """
+    def _tests(self):
 
         settings.configure(
             DEBUG=True,
@@ -116,20 +84,9 @@ class QuickDjangoTest(object):
             TEMPLATES=self.TEMPLATES
         )
 
-        # compatibility with django 1.8 downwards
-        # see: http://stackoverflow.com/questions/3841725/how-to-launch-tests-for-django-reusable-app
-
-        try:
-            # Django >= 1.6
-            from django.test.runner import DiscoverRunner
-            test_runner = DiscoverRunner(verbosity=1)
-        except ImportError:
-            # Django <= 1.5
-            from django.test.simple import DjangoTestSuiteRunner
-            test_runner = DjangoTestSuiteRunner(verbosity=1)
-
-        if django.VERSION >= (1, 7):
-            django.setup()
+        from django.test.runner import DiscoverRunner
+        test_runner = DiscoverRunner(verbosity=1)
+        django.setup()
 
         failures = test_runner.run_tests(self.apps)
         if failures:
