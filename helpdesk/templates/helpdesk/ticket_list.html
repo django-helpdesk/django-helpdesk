@@ -344,7 +344,7 @@ $(document).ready(function() {
                                             <th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></th>
                                             <td>{{ ticket.queue }}</td>
                                             <td>{{ ticket.get_status }}</td>
-                                            <td><span title='{{ ticket.created|date:"r" }}'>{{ ticket.created|naturaltime }}</span></td>
+                                            <td data-order='{{ ticket.created|date:"U" }}'><span title='{{ ticket.created|date:"r" }}'>{{ ticket.created|naturaltime }}</span></td>
                                             <td>{{ ticket.get_assigned_to }}</td>
                                         </tr>
                                         {% empty %}
