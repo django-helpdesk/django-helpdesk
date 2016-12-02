@@ -6,9 +6,9 @@ python:
     - "3.5"
 
 env:
-    - DJANGO=1.8.15
-    - DJANGO=1.9.10
-    - DJANGO=1.10.2
+    - DJANGO=1.8.17
+    - DJANGO=1.9.12
+    - DJANGO=1.10.4
 
 install:
     - pip install -q Django==$DJANGO

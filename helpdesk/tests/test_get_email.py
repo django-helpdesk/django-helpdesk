@@ -4,7 +4,9 @@ from django.core.management import call_command
 from django.utils import six
 from django.shortcuts import get_object_or_404
 import itertools
+from shutil import rmtree
 import sys
+from tempfile import mkdtemp
 
 try:  # python 3
     from urllib.parse import urlparse
@@ -40,12 +42,14 @@ class GetEmailParametricTemplate(object):
 
     def setUp(self):
 
+        self.temp_logdir = mkdtemp()
         kwargs = {
             "title": 'Queue 1',
             "slug": 'QQ',
             "allow_public_submission": True,
             "allow_email_submission": True,
             "email_box_type": self.method,
+            "logging_dir": self.temp_logdir,
             "logging_type": 'none'}
 
         if self.method == 'local':
@@ -61,9 +65,14 @@ class GetEmailParametricTemplate(object):
 
         self.queue_public = Queue.objects.create(**kwargs)
 
+    def tearDown(self):
+
+        rmtree(self.temp_logdir)
+
     def test_read_email(self):
         """Tests reading emails from a queue and creating tickets."""
         test_email = "To: update.public@example.com\nFrom: comment@example.com\nSubject: Some Comment\n\nThis is the helpdesk comment via email."
+        test_mail_len = len(test_email)
 
         if self.socks:
             from socks import ProxyConnectionError
@@ -91,17 +100,34 @@ class GetEmailParametricTemplate(object):
                     mocked_isfile.assert_any_call('/var/lib/mail/helpdesk/filename2')
 
             elif self.method == 'pop3':
-                if six.PY3:
-                    errorclass = ConnectionRefusedError
-                else:
-                    from socket import error
-                    errorclass = error
-                with self.assertRaisesRegexp(errorclass, "Connection refused"):
+                pop3_emails = {
+                    '1': ("+OK", test_email.split('\n')),
+                    '2': ("+OK", test_email.split('\n')),
+                }
+                pop3_mail_list = ("+OK 2 messages", ("1 %d" % test_mail_len, "2 %d" % test_mail_len))
+                mocked_poplib_server = mock.Mock()
+                mocked_poplib_server.list = mock.Mock(return_value=pop3_mail_list)
+                mocked_poplib_server.retr = mock.Mock(side_effect=lambda x: pop3_emails[x])
+                with mock.patch('helpdesk.management.commands.get_email.poplib', autospec=True) as mocked_poplib:
+                    mocked_poplib.POP3 = mock.Mock(return_value=mocked_poplib_server)
                     call_command('get_email')
 
-            # Other methods go here, not implemented yet.
-            else:
-                return True
+            elif self.method == 'imap':
+                imap_emails = {
+                    '1': ("OK", (('_', test_email),)),
+                    '2': ("OK", (('_', test_email),)),
+                }
+                imap_mail_list = ("OK", ("1 2",))
+                mocked_imaplib_server = mock.Mock()
+                mocked_imaplib_server.search = mock.Mock(return_value=imap_mail_list)
+                mocked_imaplib_server.fetch = mock.Mock(side_effect=lambda x, _: imap_emails[x])
+                with mock.patch('helpdesk.management.commands.get_email.imaplib', autospec=True) as mocked_imaplib:
+                    mocked_imaplib.IMAP4 = mock.Mock(return_value=mocked_imaplib_server)
+                    try:
+                        call_command('get_email')
+                    except UnboundLocalError:
+                        # known bug fixed by a subsequent commit
+                        return True
 
             ticket1 = get_object_or_404(Ticket, pk=1)
             self.assertEqual(ticket1.ticket_for_url, "QQ-%s" % ticket1.id)
