@@ -20,9 +20,11 @@ except ImportError:
     # Python < 3.3
     import mock
 
-unrouted_socks_server = "127.0.0.1"
-unrouted_email_server = "127.0.0.1"
-unrouted_port = "12345"
+# class A addresses can't have first octet of 0
+unrouted_socks_server = "0.0.0.1"
+unrouted_email_server = "0.0.0.1"
+# the last user port, reserved by IANA
+unused_port = "49151"
 
 
 class GetEmailCommonTests(TestCase):
@@ -56,12 +58,12 @@ class GetEmailParametricTemplate(object):
             kwargs["email_box_local_dir"] = '/var/lib/mail/helpdesk/'
         else:
             kwargs["email_box_host"] = unrouted_email_server
-            kwargs["email_box_port"] = unrouted_port
+            kwargs["email_box_port"] = unused_port
 
         if self.socks:
             kwargs["socks_proxy_type"] = self.socks
             kwargs["socks_proxy_host"] = unrouted_socks_server
-            kwargs["socks_proxy_port"] = unrouted_port
+            kwargs["socks_proxy_port"] = unused_port
 
         self.queue_public = Queue.objects.create(**kwargs)
 
@@ -70,20 +72,17 @@ class GetEmailParametricTemplate(object):
         rmtree(self.temp_logdir)
 
     def test_read_email(self):
-        """Tests reading emails from a queue and creating tickets."""
+        """Tests reading emails from a queue and creating tickets.
+           For each email source supported, we mock the backend to provide
+           authenticly formatted responses containing our test data."""
         test_email = "To: update.public@example.com\nFrom: comment@example.com\nSubject: Some Comment\n\nThis is the helpdesk comment via email."
         test_mail_len = len(test_email)
 
         if self.socks:
             from socks import ProxyConnectionError
-            with self.assertRaisesRegexp(ProxyConnectionError, '%s:%s' % (unrouted_socks_server, unrouted_port)):
+            with self.assertRaisesRegexp(ProxyConnectionError, '%s:%s' % (unrouted_socks_server, unused_port)):
                 call_command('get_email')
 
-            # with mock.patch('socket.socket') as mocked_socket,\
-            #         mock.patch('socks.socket') as mocked_sockssocket:
-            #     call_command('get_email')
-            #     print(mocked_socket)
-            #     print(mocked_sockssocket)
         else:
             # Test local email reading
             if self.method == 'local':
@@ -100,6 +99,7 @@ class GetEmailParametricTemplate(object):
                     mocked_isfile.assert_any_call('/var/lib/mail/helpdesk/filename2')
 
             elif self.method == 'pop3':
+                # mock poplib.POP3's list and retr methods to provide responses as per RFC 1939
                 pop3_emails = {
                     '1': ("+OK", test_email.split('\n')),
                     '2': ("+OK", test_email.split('\n')),
@@ -113,13 +113,16 @@ class GetEmailParametricTemplate(object):
                     call_command('get_email')
 
             elif self.method == 'imap':
+                # mock imaplib.IMAP4's search and fetch methods with responses from RFC 3501
                 imap_emails = {
-                    '1': ("OK", (('_', test_email),)),
-                    '2': ("OK", (('_', test_email),)),
+                    "1": ("OK", (("1", test_email),)),
+                    "2": ("OK", (("2", test_email),)),
                 }
                 imap_mail_list = ("OK", ("1 2",))
                 mocked_imaplib_server = mock.Mock()
                 mocked_imaplib_server.search = mock.Mock(return_value=imap_mail_list)
+
+                # we ignore the second arg as the data item/mime-part is constant (RFC822)
                 mocked_imaplib_server.fetch = mock.Mock(side_effect=lambda x, _: imap_emails[x])
                 with mock.patch('helpdesk.management.commands.get_email.imaplib', autospec=True) as mocked_imaplib:
                     mocked_imaplib.IMAP4 = mock.Mock(return_value=mocked_imaplib_server)
