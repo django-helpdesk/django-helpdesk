@@ -268,7 +268,13 @@ def ticket_from_message(message, queue, logger):
     if six.PY2:
         message = email.message_from_string(msg)
     elif six.PY3:
-        message = email.message_from_bytes(msg)
+        print(type(msg))
+        print(msg)
+        print(isinstance(msg, bytes))
+        if isinstance(msg, bytes):
+            message = email.message_from_bytes(msg)
+        else:
+            message = email.message_from_string(msg)
     subject = message.get('subject', _('Created from e-mail'))
     subject = decode_mail_headers(decodeUnknown(message.get_charset(), subject))
     for affix in STRIPPED_SUBJECT_STRINGS:
