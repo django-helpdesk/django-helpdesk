@@ -274,9 +274,6 @@ def ticket_from_message(message, queue, logger):
     if six.PY2:
         message = email.message_from_string(msg)
     elif six.PY3:
-        print(type(msg))
-        print(msg)
-        print(isinstance(msg, bytes))
         if isinstance(msg, bytes):
             message = email.message_from_bytes(msg)
         else:
