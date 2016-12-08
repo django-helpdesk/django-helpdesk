@@ -214,9 +214,9 @@ def process_queue(q, logger):
                 ticket = ticket_from_message(message=data[0][1], queue=q, logger=logger)
                 if ticket:
                     server.store(num, '+FLAGS', '\\Deleted')
-                    logger.info("Successfully processed message %s, deleted from IMAP server" % str(msgNum))
+                    logger.info("Successfully processed message %s, deleted from IMAP server" % str(num))
                 else:
-                    logger.warn("Message %s was not successfully processed, and will be left on IMAP server" % str(msgNum))
+                    logger.warn("Message %s was not successfully processed, and will be left on IMAP server" % str(num))
 
         server.expunge()
         server.close()
@@ -271,7 +271,10 @@ def decode_mail_headers(string):
 def ticket_from_message(message, queue, logger):
     # 'message' must be an RFC822 formatted message.
     msg = message
-    message = email.message_from_string(msg)
+    if six.PY2:
+        message = email.message_from_string(msg)
+    elif six.PY3:
+        message = email.message_from_bytes(msg)
     subject = message.get('subject', _('Created from e-mail'))
     subject = decode_mail_headers(decodeUnknown(message.get_charset(), subject))
     for affix in STRIPPED_SUBJECT_STRINGS:
