@@ -126,11 +126,7 @@ class GetEmailParametricTemplate(object):
                 mocked_imaplib_server.fetch = mock.Mock(side_effect=lambda x, _: imap_emails[x])
                 with mock.patch('helpdesk.management.commands.get_email.imaplib', autospec=True) as mocked_imaplib:
                     mocked_imaplib.IMAP4 = mock.Mock(return_value=mocked_imaplib_server)
-                    try:
-                        call_command('get_email')
-                    except UnboundLocalError:
-                        # known bug fixed by a subsequent commit
-                        return True
+                    call_command('get_email')
 
             ticket1 = get_object_or_404(Ticket, pk=1)
             self.assertEqual(ticket1.ticket_for_url, "QQ-%s" % ticket1.id)
@@ -139,6 +135,7 @@ class GetEmailParametricTemplate(object):
             ticket2 = get_object_or_404(Ticket, pk=2)
             self.assertEqual(ticket2.ticket_for_url, "QQ-%s" % ticket2.id)
             self.assertEqual(ticket2.description, "This is the helpdesk comment via email.")
+
 
 # build matrix of test cases
 case_methods = [c[0] for c in Queue._meta.get_field('email_box_type').choices]

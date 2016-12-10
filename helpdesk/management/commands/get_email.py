@@ -11,34 +11,31 @@ scripts/get_email.py - Designed to be run from cron, this script checks the
                        adding to existing tickets if needed)
 """
 
+from datetime import timedelta
 import email
 import imaplib
 import mimetypes
+from os import listdir, unlink
+from os.path import isfile, join
 import poplib
 import re
 import socket
-from os import listdir, unlink
-from os.path import isfile, join
-
-from datetime import timedelta
-from email.header import decode_header
-from email.utils import parseaddr, collapse_rfc2231_value
-from optparse import make_option
+from time import ctime
 
 from email_reply_parser import EmailReplyParser
 
 from django.core.files.base import ContentFile
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management.base import BaseCommand
 from django.db.models import Q
 from django.utils.translation import ugettext as _
-from django.utils import six, timezone
+from django.utils import encoding, six, timezone
 
 from helpdesk import settings
-from helpdesk.lib import send_templated_mail, safe_template_context
-from helpdesk.models import Queue, Ticket, FollowUp, Attachment, IgnoreEmail
+from helpdesk.lib import send_templated_mail, safe_template_context, process_attachments
+from helpdesk.models import Queue, Ticket, FollowUp, IgnoreEmail
 
 import logging
-from time import ctime
 
 
 STRIPPED_SUBJECT_STRINGS = [
@@ -93,24 +90,18 @@ def process_email(quiet=False):
         if quiet:
             logger.propagate = False  # do not propagate to root logger that would log to console
         logdir = q.logging_dir or '/var/log/helpdesk/'
-        handler = logging.FileHandler(logdir + q.slug + '_get_email.log')
+        handler = logging.FileHandler(join(logdir, q.slug + '_get_email.log'))
         logger.addHandler(handler)
 
         if not q.email_box_last_check:
             q.email_box_last_check = timezone.now() - timedelta(minutes=30)
 
-        if not q.email_box_interval:
-            q.email_box_interval = 0
+        queue_time_delta = timedelta(minutes=q.email_box_interval or 0)
 
-        queue_time_delta = timedelta(minutes=q.email_box_interval)
-
-        if (q.email_box_last_check + queue_time_delta) > timezone.now():
-            continue
-
-        process_queue(q, logger=logger)
-
-        q.email_box_last_check = timezone.now()
-        q.save()
+        if (q.email_box_last_check + queue_time_delta) < timezone.now():
+            process_queue(q, logger=logger)
+            q.email_box_last_check = timezone.now()
+            q.save()
 
 
 def process_queue(q, logger):
@@ -165,20 +156,20 @@ def process_queue(q, logger):
         server.pass_(q.email_box_pass or settings.QUEUE_EMAIL_BOX_PASSWORD)
 
         messagesInfo = server.list()[1]
-        logger.info("Received %s messages from POP3 server" % str(len(messagesInfo)))
+        logger.info("Received %d messages from POP3 server" % len(messagesInfo))
 
         for msg in messagesInfo:
             msgNum = msg.split(" ")[0]
-            logger.info("Processing message %s" % str(msgNum))
+            logger.info("Processing message %s" % msgNum)
 
             full_message = "\n".join(server.retr(msgNum)[1])
             ticket = ticket_from_message(message=full_message, queue=q, logger=logger)
 
             if ticket:
                 server.dele(msgNum)
-                logger.info("Successfully processed message %s, deleted from POP3 server" % str(msgNum))
+                logger.info("Successfully processed message %s, deleted from POP3 server" % msgNum)
             else:
-                logger.warn("Message %s was not successfully processed, and will be left on POP3 server" % str(msgNum))
+                logger.warn("Message %s was not successfully processed, and will be left on POP3 server" % msgNum)
 
         server.quit()
 
@@ -207,16 +198,16 @@ def process_queue(q, logger):
         status, data = server.search(None, 'NOT', 'DELETED')
         if data:
             msgnums = data[0].split()
-            logger.info("Received %s messages from IMAP server" % str(len(msgnums)))
+            logger.info("Received %d messages from IMAP server" % len(msgnums))
             for num in msgnums:
-                logger.info("Processing message %s" % str(num))
+                logger.info("Processing message %s" % num)
                 status, data = server.fetch(num, '(RFC822)')
-                ticket = ticket_from_message(message=data[0][1], queue=q, logger=logger)
+                ticket = ticket_from_message(message=encoding.smart_text(data[0][1]), queue=q, logger=logger)
                 if ticket:
                     server.store(num, '+FLAGS', '\\Deleted')
-                    logger.info("Successfully processed message %s, deleted from IMAP server" % str(msgNum))
+                    logger.info("Successfully processed message %s, deleted from IMAP server" % num)
                 else:
-                    logger.warn("Message %s was not successfully processed, and will be left on IMAP server" % str(msgNum))
+                    logger.warn("Message %s was not successfully processed, and will be left on IMAP server" % num)
 
         server.expunge()
         server.close()
@@ -225,20 +216,23 @@ def process_queue(q, logger):
     elif email_box_type == 'local':
         mail_dir = q.email_box_local_dir or '/var/lib/mail/helpdesk/'
         mail = [join(mail_dir, f) for f in listdir(mail_dir) if isfile(join(mail_dir, f))]
-        logger.info("Found %s messages in local mailbox directory" % str(len(mail)))
-        for m in mail:
-            logger.info("Processing message %s" % str(m))
+        logger.info("Found %d messages in local mailbox directory" % len(mail))
+
+        logger.info("Found %d messages in local mailbox directory" % len(mail))
+        for i, m in enumerate(mail, 1):
+            logger.info("Processing message %d" % i)
             with open(m, 'r') as f:
                 ticket = ticket_from_message(message=f.read(), queue=q, logger=logger)
-                if ticket:
-                    logger.info("Successfully processed message %s, ticket/comment created." % str(m))
-                    try:
-                        unlink(m)  # delete message file if ticket was successful
-                        logger.info("Successfully deleted message %s." % str(m))
-                    except:
-                        logger.error("Unable to delete message %s." % str(m))
+            if ticket:
+                logger.info("Successfully processed message %d, ticket/comment created." % i)
+                try:
+                    unlink(m)  # delete message file if ticket was successful
+                except:
+                    logger.error("Unable to delete message %d." % i)
                 else:
-                    logger.warn("Message %s was not successfully processed, and will be left in local directory" % str(m))
+                    logger.info("Successfully deleted message %d." % i)
+            else:
+                logger.warn("Message %d was not successfully processed, and will be left in local directory" % i)
 
 
 def decodeUnknown(charset, string):
@@ -256,12 +250,12 @@ def decodeUnknown(charset, string):
                     return str(string, encoding='utf-8', errors='replace')
                 except:
                     return str(string, encoding='iso8859-1', errors='replace')
-            return str(string, encoding=charset)
+            return str(string, encoding=charset, errors='replace')
         return string
 
 
 def decode_mail_headers(string):
-    decoded = decode_header(string)
+    decoded = email.header.decode_header(string)
     if six.PY2:
         return u' '.join([unicode(msg, charset or 'utf-8') for msg, charset in decoded])
     elif six.PY3:
@@ -270,8 +264,7 @@ def decode_mail_headers(string):
 
 def ticket_from_message(message, queue, logger):
     # 'message' must be an RFC822 formatted message.
-    msg = message
-    message = email.message_from_string(msg)
+    message = email.message_from_string(message)
     subject = message.get('subject', _('Created from e-mail'))
     subject = decode_mail_headers(decodeUnknown(message.get_charset(), subject))
     for affix in STRIPPED_SUBJECT_STRINGS:
@@ -280,10 +273,7 @@ def ticket_from_message(message, queue, logger):
 
     sender = message.get('from', _('Unknown Sender'))
     sender = decode_mail_headers(decodeUnknown(message.get_charset(), sender))
-
-    sender_email = parseaddr(sender)[1]
-
-    body_plain, body_html = '', ''
+    sender_email = email.utils.parseaddr(sender)[1]
 
     for ignore in IgnoreEmail.objects.filter(Q(queues=queue) | Q(queues__isnull=True)):
         if ignore.test(sender_email):
@@ -302,6 +292,7 @@ def ticket_from_message(message, queue, logger):
         logger.info("No tracking ID matched.")
         ticket = None
 
+    body = None
     counter = 0
     files = []
 
@@ -311,79 +302,60 @@ def ticket_from_message(message, queue, logger):
 
         name = part.get_param("name")
         if name:
-            name = collapse_rfc2231_value(name)
+            name = email.utils.collapse_rfc2231_value(name)
 
         if part.get_content_maintype() == 'text' and name is None:
             if part.get_content_subtype() == 'plain':
-                body_plain = EmailReplyParser.parse_reply(
-                    decodeUnknown(part.get_content_charset(), part.get_payload(decode=True)))
+                body = EmailReplyParser.parse_reply(
+                    decodeUnknown(part.get_content_charset(), part.get_payload(decode=True))
+                )
                 logger.debug("Discovered plain text MIME part")
             else:
-                body_html = part.get_payload(decode=True)
+                files.append(
+                    SimpleUploadedFile(_("email_html_body.html"), encoding.smart_bytes(part.get_payload()), 'text/html')
+                )
                 logger.debug("Discovered HTML MIME part")
         else:
             if not name:
                 ext = mimetypes.guess_extension(part.get_content_type())
                 name = "part-%i%s" % (counter, ext)
-
-            files.append({
-                'filename': name,
-                'content': part.get_payload(decode=True),
-                'type': part.get_content_type()},
-            )
+            files.append(SimpleUploadedFile(name, encoding.smart_bytes(part.get_payload()), part.get_content_type()))
             logger.debug("Found MIME attachment %s" % name)
 
         counter += 1
 
-    if body_plain:
-        body = body_plain
-    else:
+    if not body:
         body = _('No plain-text email body available. Please see attachment "email_html_body.html".')
-
-    if body_html:
-        files.append({
-            'filename': _("email_html_body.html"),
-            'content': body_html,
-            'type': 'text/html',
-        })
-
-    now = timezone.now()
 
     if ticket:
         try:
             t = Ticket.objects.get(id=ticket)
-            new = False
-            logger.info("Found existing ticket with Tracking ID %s-%s" % (t.queue.slug, t.id))
         except Ticket.DoesNotExist:
             logger.info("Tracking ID %s-%s not associated with existing ticket. Creating new ticket." % (queue.slug, ticket))
             ticket = None
-
-    priority = 3
+        else:
+            logger.info("Found existing ticket with Tracking ID %s-%s" % (t.queue.slug, t.id))
+            if t.status == Ticket.CLOSED_STATUS:
+                t.status = Ticket.REOPENED_STATUS
+                t.save()
+            new = False
 
     smtp_priority = message.get('priority', '')
     smtp_importance = message.get('importance', '')
-
-    high_priority_types = ('high', 'important', '1', 'urgent')
-
-    if smtp_priority in high_priority_types or smtp_importance in high_priority_types:
-        priority = 2
+    high_priority_types = {'high', 'important', '1', 'urgent'}
+    priority = 2 if high_priority_types & {smtp_priority, smtp_importance} else 3
 
     if ticket is None:
-        t = Ticket(
+        new = True
+        t = Ticket.objects.create(
             title=subject,
             queue=queue,
             submitter_email=sender_email,
-            created=now,
+            created=timezone.now(),
             description=body,
             priority=priority,
         )
-        t.save()
-        new = True
         logger.debug("Created new ticket %s-%s" % (t.queue.slug, t.id))
-
-    elif t.status == Ticket.CLOSED_STATUS:
-        t.status = Ticket.REOPENED_STATUS
-        t.save()
 
     f = FollowUp(
         ticket=t,
@@ -405,28 +377,13 @@ def ticket_from_message(message, queue, logger):
     elif six.PY3:
         logger.info("[%s-%s] %s" % (t.queue.slug, t.id, t.title,))
 
-    for file in files:
-        if file['content']:
-            if six.PY2:
-                filename = file['filename'].encode('ascii', 'replace').replace(' ', '_')
-            elif six.PY3:
-                filename = file['filename'].replace(' ', '_')
-            filename = re.sub('[^a-zA-Z0-9._-]+', '', filename)
-            logger.info("Found attachment '%s'" % filename)
-            a = Attachment(
-                followup=f,
-                filename=filename,
-                mime_type=file['type'],
-                size=len(file['content']),
-            )
-            a.file.save(filename, ContentFile(file['content']), save=False)
-            a.save()
-            logger.info("Attachment '%s' successfully added to ticket." % filename)
+    attached = process_attachments(f, files)
+    for att_file in attached:
+        logger.info("Attachment '%s' successfully added to ticket from email." % att_file[0])
 
     context = safe_template_context(t)
 
     if new:
-
         if sender_email:
             send_templated_mail(
                 'newticket_submitter',
@@ -435,7 +392,6 @@ def ticket_from_message(message, queue, logger):
                 sender=queue.from_address,
                 fail_silently=True,
             )
-
         if queue.new_ticket_cc:
             send_templated_mail(
                 'newticket_cc',
@@ -444,7 +400,6 @@ def ticket_from_message(message, queue, logger):
                 sender=queue.from_address,
                 fail_silently=True,
             )
-
         if queue.updated_ticket_cc and queue.updated_ticket_cc != queue.new_ticket_cc:
             send_templated_mail(
                 'newticket_cc',
@@ -453,15 +408,8 @@ def ticket_from_message(message, queue, logger):
                 sender=queue.from_address,
                 fail_silently=True,
             )
-
     else:
         context.update(comment=f.comment)
-
-        # if t.status == Ticket.REOPENED_STATUS:
-        #     update = _(' (Reopened)')
-        # else:
-        #     update = _(' (Updated)')
-
         if t.assigned_to:
             send_templated_mail(
                 'updated_owner',
@@ -470,7 +418,6 @@ def ticket_from_message(message, queue, logger):
                 sender=queue.from_address,
                 fail_silently=True,
             )
-
         if queue.updated_ticket_cc:
             send_templated_mail(
                 'updated_cc',
