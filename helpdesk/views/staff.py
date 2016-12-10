@@ -461,7 +461,7 @@ def update_ticket(request, ticket_id, public=False):
 
     files = process_attachments(f, request.FILES.getlist('attachment'))
 
-    if title != ticket.title:
+    if title and title != ticket.title:
         c = TicketChange(
             followup=f,
             field=_('Title'),
