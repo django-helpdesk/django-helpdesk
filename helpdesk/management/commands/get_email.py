@@ -205,9 +205,9 @@ def process_queue(q, logger):
                 ticket = ticket_from_message(message=encoding.smart_text(data[0][1]), queue=q, logger=logger)
                 if ticket:
                     server.store(num, '+FLAGS', '\\Deleted')
-                    logger.info("Successfully processed message %s, deleted from IMAP server" % str(num))
+                    logger.info("Successfully processed message %s, deleted from IMAP server" % num)
                 else:
-                    logger.warn("Message %s was not successfully processed, and will be left on IMAP server" % str(num))
+                    logger.warn("Message %s was not successfully processed, and will be left on IMAP server" % num)
 
         server.expunge()
         server.close()
