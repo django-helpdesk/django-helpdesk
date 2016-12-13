@@ -64,6 +64,8 @@ def send_templated_mail(template_name,
     """
     from django.core.mail import EmailMultiAlternatives
     from django.template import engines
+    from email.mime.base import MIMEBase
+    from email import encoders
     from_string = engines['django'].from_string
 
     from helpdesk.models import EmailTemplate
