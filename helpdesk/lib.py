@@ -118,11 +118,14 @@ def send_templated_mail(template_name,
                                  sender or settings.DEFAULT_FROM_EMAIL,
                                  recipients, bcc=bcc)
     msg.attach_alternative(html_part, "text/html")
-
+    
     if files:
         for file_name, file_field in files:
-            with open(file_field.path, 'rb') as attached_file:
-                msg.attach(file_name, attached_file.read(), getattr(attached_file, 'content_type', None))
+            part_attachment = MIMEBase('application', "octet-stream")
+            part_attachment.set_payload(open(file_field.path, 'rb').read())
+            encoders.encode_base64(part_attachment)
+            part_attachment.add_header('Content-Disposition', 'attachment; filename="{}"'.format(file_name))
+            msg.attach(part_attachment)
 
     return msg.send(fail_silently)
 
