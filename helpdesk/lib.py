@@ -21,7 +21,6 @@ except ImportError:
 
 from django.conf import settings
 from django.db.models import Q
-from django.utils import six
 from django.utils.encoding import smart_text
 from django.utils.safestring import mark_safe
 
@@ -121,12 +120,9 @@ def send_templated_mail(template_name,
     msg.attach_alternative(html_part, "text/html")
 
     if files:
-        for filename, filefield in files:
-            if six.PY3:
-                msg.attach_file(filefield.path)
-            else:
-                with open(filefield.path) as attachedfile:
-                    msg.attach(filename, attachedfile.read())
+        for file_name, file_field in files:
+            with open(file_field.path, 'rb') as attached_file:
+                msg.attach(file_name, attached_file.read(), getattr(attached_file, 'content_type', None))
 
     return msg.send(fail_silently)
 
