@@ -319,8 +319,7 @@ def ticket_from_message(message, queue, logger):
             if not name:
                 ext = mimetypes.guess_extension(part.get_content_type())
                 name = "part-%i%s" % (counter, ext)
-            print(name, part.get_content_type())
-            files.append(SimpleUploadedFile(name, part.get_payload(decode=True), part.get_content_type()))
+            files.append(SimpleUploadedFile(name, part.get_payload(decode=True), mimetypes.guess_type(name)[0]))
             logger.debug("Found MIME attachment %s" % name)
 
         counter += 1
