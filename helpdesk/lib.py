@@ -118,7 +118,7 @@ def send_templated_mail(template_name,
                                  sender or settings.DEFAULT_FROM_EMAIL,
                                  recipients, bcc=bcc)
     msg.attach_alternative(html_part, "text/html")
-    
+
     if files:
         for file_name, file_field in files:
             part_attachment = MIMEBase('application', "octet-stream")
