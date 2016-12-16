@@ -119,7 +119,7 @@ def send_templated_mail(template_name,
                                  sender or settings.DEFAULT_FROM_EMAIL,
                                  recipients, bcc=bcc)
     msg.attach_alternative(html_part, "text/html")
-    
+
     if files:
         for filename, filefield in files:
             if six.PY3:
