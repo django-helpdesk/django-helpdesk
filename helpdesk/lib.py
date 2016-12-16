@@ -21,6 +21,7 @@ except ImportError:
 
 from django.conf import settings
 from django.db.models import Q
+from django.utils import six
 from django.utils.encoding import smart_text
 from django.utils.safestring import mark_safe
 
@@ -64,8 +65,6 @@ def send_templated_mail(template_name,
     """
     from django.core.mail import EmailMultiAlternatives
     from django.template import engines
-    from email.mime.base import MIMEBase
-    from email import encoders
     from_string = engines['django'].from_string
 
     from helpdesk.models import EmailTemplate
@@ -121,13 +120,12 @@ def send_templated_mail(template_name,
                                  recipients, bcc=bcc)
     msg.attach_alternative(html_part, "text/html")
 
-    if files:
-        for file_name, file_field in files:
-            part_attachment = MIMEBase('application', "octet-stream")
-            part_attachment.set_payload(open(file_field.path, 'rb').read())
-            encoders.encode_base64(part_attachment)
-            part_attachment.add_header('Content-Disposition', 'attachment; filename="{}"'.format(file_name))
-            msg.attach(part_attachment)
+    for filename, filefield in files:
+        if six.PY3:
+            msg.attach_file(filefield.path)
+        else:
+            with open(filefield.path, 'rb') as attachedfile:
+                msg.attach(filename, attachedfile.read())
 
     return msg.send(fail_silently)
 
