@@ -9,6 +9,9 @@
 $(document).ready(function() {
 
     $('#ticketTable').DataTable({
+            "oLanguage": {
+                "sEmptyTable": "{% trans 'No Tickets Match Your Selection' %}"
+            },
             responsive: true
     });
 
@@ -234,8 +237,6 @@ $(document).ready(function() {
                                             <td data-order='{{ ticket.created|date:"U" }}'><span title='{{ ticket.created|date:"r" }}'>{{ ticket.created|naturaltime }}</span></td>
                                             <td>{{ ticket.get_assigned_to }}</td>
                                         </tr>
-                                        {% empty %}
-                                        <tr><td colspan='7'>{% trans "No Tickets Match Your Selection" %}</td></tr>
                                         {% endfor %}
                                     </tbody>
                                 </table>
