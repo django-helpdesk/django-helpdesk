@@ -82,8 +82,9 @@ def send_templated_mail(template_name,
             return  # just ignore if template doesn't exist
 
     subject_part = from_string(
-        HELPDESK_EMAIL_SUBJECT_TEMPLATE % {"subject": t.subject}
-    ).render(context).replace('\n', '').replace('\r', '')
+        HELPDESK_EMAIL_SUBJECT_TEMPLATE % {
+            "subject": t.subject
+        }).render(context).replace('\n', '').replace('\r', '')
 
     footer_file = os.path.join('helpdesk', locale, 'email_text_footer.txt')
 
