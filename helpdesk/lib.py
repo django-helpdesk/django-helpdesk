@@ -103,11 +103,6 @@ def send_templated_mail(template_name,
         (email_html_base_file, t.heading, t.html)
     ).render(context)
 
-    subject_part = from_string(
-        HELPDESK_EMAIL_SUBJECT_TEMPLATE % {
-            "subject": t.subject,
-        }).render(context)
-
     if isinstance(recipients, str):
         if recipients.find(','):
             recipients = recipients.split(',')
