@@ -6,6 +6,7 @@ django-helpdesk - A Django powered ticket tracker for small enterprise.
 views/public.py - All public facing views, eg non-staff (no authentication
                   required) views.
 """
+from django import forms
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
@@ -38,6 +39,9 @@ def homepage(request):
         form = PublicTicketForm(request.POST, request.FILES)
         form.fields['queue'].choices = [
             (q.id, q.title) for q in Queue.objects.filter(allow_public_submission=True)]
+        form.fields['submitter_email'].widget = forms.HiddenInput()
+        form.fields['priority'].widget = forms.HiddenInput()
+        form.fields['due_date'].widget = forms.HiddenInput()
         if form.is_valid():
             if text_is_spam(form.cleaned_data['body'], request):
                 # This submission is spam. Let's not save it.
@@ -64,6 +68,9 @@ def homepage(request):
         form = PublicTicketForm(initial=initial_data)
         form.fields['queue'].choices = [
             (q.id, q.title) for q in Queue.objects.filter(allow_public_submission=True)]
+        form.fields['submitter_email'].widget = forms.HiddenInput()
+        form.fields['priority'].widget = forms.HiddenInput()
+        form.fields['due_date'].widget = forms.HiddenInput()
 
     knowledgebase_categories = KBCategory.objects.all()
 
