@@ -77,6 +77,10 @@ def homepage(request):
 def view_ticket(request):
     ticket_req = request.GET.get('ticket', '')
     email = request.GET.get('email', '')
+    # If there is no email address in the query string, get it from
+    # the currently logged-in user
+    if email == '':
+        email = request.user.email
 
     if ticket_req and email:
         queue, ticket_id = Ticket.queue_and_id_from_query(ticket_req)
