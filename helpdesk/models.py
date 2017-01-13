@@ -517,23 +517,30 @@ class Ticket(models.Model):
         return u'%s%s%s' % (self.get_status_display(), held_msg, dep_msg)
     get_status = property(_get_status)
 
+    def _absolute_uri(self, relative):
+        """
+        Returns an absolute URL for the given relative URL. This
+        guesses the protocol and uses the configured domain-name
+        from the Site or else just a hard-coded domain.
+        """
+        from django.contrib.sites.models import Site
+        try:
+            site = Site.objects.get_current()
+        except:
+            site = Site(domain='configure-django-sites.com')
+        return u"http://%s%s" % (site.domain, relative)
+
     def _get_ticket_url(self):
         """
         Returns a publicly-viewable URL for this ticket, used when giving
         a URL to the submitter of a ticket.
         """
-        from django.contrib.sites.models import Site
         from django.core.urlresolvers import reverse
-        try:
-            site = Site.objects.get_current()
-        except:
-            site = Site(domain='configure-django-sites.com')
-        return u"http://%s%s?ticket=%s&email=%s" % (
-            site.domain,
+        return self._absolute_uri(u"%s?ticket=%s&email=%s" % (
             reverse('helpdesk:public_view'),
             self.ticket_for_url,
             self.submitter_email
-        )
+        ))
     ticket_url = property(_get_ticket_url)
 
     def _get_staff_url(self):
@@ -541,17 +548,8 @@ class Ticket(models.Model):
         Returns a staff-only URL for this ticket, used when giving a URL to
         a staff member (in emails etc)
         """
-        from django.contrib.sites.models import Site
         from django.core.urlresolvers import reverse
-        try:
-            site = Site.objects.get_current()
-        except:
-            site = Site(domain='configure-django-sites.com')
-        return u"http://%s%s" % (
-            site.domain,
-            reverse('helpdesk:view',
-                    args=[self.id])
-        )
+        return self._absolute_uri(reverse('helpdesk:view', args=[self.id]))
     staff_url = property(_get_staff_url)
 
     def _can_be_resolved(self):
