@@ -126,12 +126,8 @@ def process_queue(q, logger):
                                 addr=q.socks_proxy_host,
                                 port=q.socks_proxy_port)
         socket.socket = socks.socksocket
-    else:
-        if six.PY2:
-            socket.socket = socket._socketobject
-        elif six.PY3:
-            import _socket
-            socket.socket = _socket.socket
+    elif six.PY2:
+        socket.socket = socket._socketobject
 
     email_box_type = settings.QUEUE_EMAIL_BOX_TYPE or q.email_box_type
 
