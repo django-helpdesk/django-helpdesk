@@ -198,7 +198,7 @@ def process_queue(q, logger):
             for num in msgnums:
                 logger.info("Processing message %s" % num)
                 status, data = server.fetch(num, '(RFC822)')
-                ticket = ticket_from_message(message=encoding.smart_text(data[0][1]), queue=q, logger=logger)
+                ticket = ticket_from_message(message=encoding.smart_text(data[0][1], errors='replace'), queue=q, logger=logger)
                 if ticket:
                     server.store(num, '+FLAGS', '\\Deleted')
                     logger.info("Successfully processed message %s, deleted from IMAP server" % num)
