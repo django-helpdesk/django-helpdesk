@@ -75,7 +75,7 @@
 <form method='get' action="{% url 'helpdesk:public_view' %}">
 <fieldset>
     <div class="form-group {% if field.errors %}has-error{% endif %}">
-        <label for='id_ticket'>{% trans "Ticket" %}</label>
+        <label for='id_ticket'>{% trans "Ticket Number" %}</label>
         <div class="input-group"><input type='text' name='ticket' /></div>
     </div>
     <div class='buttons form-group'>
