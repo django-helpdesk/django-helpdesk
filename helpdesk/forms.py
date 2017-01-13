@@ -253,7 +253,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
 
         if ticket.assigned_to and \
                 ticket.assigned_to != user and \
-                ticket.assigned_to.usersettings.settings.get('email_on_ticket_assign', False) and \
+                ticket.assigned_to.usersettings_helpdesk.settings.get('email_on_ticket_assign', False) and \
                 ticket.assigned_to.email and \
                 ticket.assigned_to.email not in messages_sent_to:
             send_templated_mail(

@@ -1084,10 +1084,12 @@ class UserSettings(models.Model):
     as notification preferences and other things that should probably be
     configurable.
 
-    We should always refer to user.usersettings.settings['setting_name'].
+    We should always refer to user.usersettings_helpdesk.settings['setting_name'].
     """
 
-    user = models.OneToOneField(settings.AUTH_USER_MODEL)
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        related_name="usersettings_helpdesk")
 
     settings_pickled = models.TextField(
         _('Settings Dictionary'),

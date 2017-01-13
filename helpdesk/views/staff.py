@@ -337,10 +337,11 @@ def return_ticketccstring_and_show_subscribe(user, ticket):
 
     # check whether current user is a submitter or assigned to ticket
     assignedto_username = str(ticket.assigned_to).upper()
-    submitter_email = ticket.submitter_email.upper()
     strings_to_check = list()
+    if ticket.submitter_email is not None:
+        submitter_email = ticket.submitter_email.upper()
+        strings_to_check.append(submitter_email)
     strings_to_check.append(assignedto_username)
-    strings_to_check.append(submitter_email)
     if strings_to_check.__contains__(username) or strings_to_check.__contains__(useremail):
         show_subscribe = False
 
@@ -578,10 +579,10 @@ def update_ticket(request, ticket_id, public=False):
 
         if (not reassigned or
                 (reassigned and
-                    ticket.assigned_to.usersettings.settings.get(
+                    ticket.assigned_to.usersettings_helpdesk.settings.get(
                         'email_on_ticket_assign', False))) or \
             (not reassigned and
-                ticket.assigned_to.usersettings.settings.get(
+                ticket.assigned_to.usersettings_helpdesk.settings.get(
                     'email_on_ticket_change', False)):
             send_templated_mail(
                 template_staff,
@@ -914,7 +915,7 @@ def ticket_list(request):
     return render(request, 'helpdesk/ticket_list.html', dict(
         context,
         tickets=ticket_qs,
-        default_tickets_per_page=request.user.usersettings.settings.get('tickets_per_page') or 25,
+        default_tickets_per_page=request.user.usersettings_helpdesk.settings.get('tickets_per_page') or 25,
         user_choices=User.objects.filter(is_active=True, is_staff=True),
         queue_choices=user_queues,
         status_choices=Ticket.STATUS_CHOICES,
@@ -965,7 +966,7 @@ def create_ticket(request):
                 return HttpResponseRedirect(reverse('helpdesk:dashboard'))
     else:
         initial_data = {}
-        if request.user.usersettings.settings.get('use_email_as_submitter', False) and request.user.email:
+        if request.user.usersettings_helpdesk.settings.get('use_email_as_submitter', False) and request.user.email:
             initial_data['submitter_email'] = request.user.email
         if 'queue' in request.GET:
             initial_data['queue'] = request.GET['queue']
@@ -1312,7 +1313,7 @@ delete_saved_query = staff_member_required(delete_saved_query)
 
 
 def user_settings(request):
-    s = request.user.usersettings
+    s = request.user.usersettings_helpdesk
     if request.POST:
         form = UserSettingsForm(request.POST)
         if form.is_valid():
