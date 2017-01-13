@@ -43,7 +43,7 @@ def homepage(request):
                 # This submission is spam. Let's not save it.
                 return render(request, template_name='helpdesk/public_spam.html')
             else:
-                ticket = form.save()
+                ticket = form.save(request=request)
                 return HttpResponseRedirect('%s?ticket=%s&email=%s' % (
                     reverse('helpdesk:public_view'),
                     ticket.ticket_for_url,

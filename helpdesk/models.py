@@ -465,6 +465,13 @@ class Ticket(models.Model):
                     'automatically by management/commands/escalate_tickets.py.'),
     )
 
+    def __init__(self, *args, **kwargs):
+        # Stash request (if provided) then call super-class __init__
+        if 'request' in kwargs:
+            self.request = kwargs['request']
+            del kwargs['request']
+        super(Ticket, self).__init__(*args, **kwargs)
+
     def _get_assigned_to(self):
         """ Custom property to allow us to easily print 'Unassigned' if a
         ticket has no owner, or the users name if it's assigned. If the user
@@ -519,16 +526,21 @@ class Ticket(models.Model):
 
     def _absolute_uri(self, relative):
         """
-        Returns an absolute URL for the given relative URL. This
-        guesses the protocol and uses the configured domain-name
-        from the Site or else just a hard-coded domain.
+        Returns an absolute URL for the given relative URL.  This will
+        use self.request, if available (using the same protocol and
+        domain as from the original request), otherwise will make a
+        best guess from the Site or else just a hard-coded domain.
         """
         from django.contrib.sites.models import Site
-        try:
-            site = Site.objects.get_current()
-        except:
-            site = Site(domain='configure-django-sites.com')
-        return u"http://%s%s" % (site.domain, relative)
+        # If we have a request object, use it to construct the absolute URL
+        if self.request:
+            return self.request.build_absolute_uri(relative)
+        else:
+            try:
+                site = Site.objects.get_current()
+            except:
+                site = Site(domain='configure-django-sites.com')
+            return u"http://%s%s" % (site.domain, relative)
 
     def _get_ticket_url(self):
         """
