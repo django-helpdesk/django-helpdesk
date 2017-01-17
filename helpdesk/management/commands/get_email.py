@@ -126,12 +126,8 @@ def process_queue(q, logger):
                                 addr=q.socks_proxy_host,
                                 port=q.socks_proxy_port)
         socket.socket = socks.socksocket
-    else:
-        if six.PY2:
-            socket.socket = socket._socketobject
-        elif six.PY3:
-            import _socket
-            socket.socket = _socket.socket
+    elif six.PY2:
+        socket.socket = socket._socketobject
 
     email_box_type = settings.QUEUE_EMAIL_BOX_TYPE or q.email_box_type
 
@@ -202,7 +198,7 @@ def process_queue(q, logger):
             for num in msgnums:
                 logger.info("Processing message %s" % num)
                 status, data = server.fetch(num, '(RFC822)')
-                ticket = ticket_from_message(message=encoding.smart_text(data[0][1]), queue=q, logger=logger)
+                ticket = ticket_from_message(message=encoding.smart_text(data[0][1], errors='replace'), queue=q, logger=logger)
                 if ticket:
                     server.store(num, '+FLAGS', '\\Deleted')
                     logger.info("Successfully processed message %s, deleted from IMAP server" % num)
