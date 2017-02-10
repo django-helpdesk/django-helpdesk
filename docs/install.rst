@@ -35,13 +35,19 @@ Adding To Your Django Project
         'django.contrib.auth',
         'django.contrib.contenttypes',
         'django.contrib.sessions',
-        'django.contrib.sites',  # Required for determing domain url for use in emails
+        'django.contrib.sites',  # Required for determining domain url for use in emails
         'django.contrib.admin',  # Required for helpdesk admin/maintenance
         'django.contrib.humanize',  # Required for elapsed time formatting
         'markdown_deux',  # Required for Knowledgebase item formatting
         'bootstrapform', # Required for nicer formatting of forms with the default templates
         'helpdesk',  # This is us!
     )
+
+   Your ``settings.py`` file should also define a ``SITE_ID`` that allows multiple projects to share
+   a single database, and is required by ``django.contrib.sites`` in Django 1.9+.
+   If you aren't running multiple sites, you can simply add a default ``SITE_ID`` to ``settings.py``::
+
+     SITE_ID = 1
 
 2. Make sure django-helpdesk is accessible via ``urls.py``. Add the following line to ``urls.py``::
 
