@@ -70,6 +70,6 @@ Dependencies
 ------------
 
 1. Python 2.7+ (or 3.3+)
-2. Django (1.7 or newer)
+2. Django (1.8 or newer)
 3. An existing **working** Django project with database etc. If you cannot log into the Admin, you won't get this product working! This means you **must** run `syncdb` **before** you add ``helpdesk`` to your ``INSTALLED_APPS``.
 
