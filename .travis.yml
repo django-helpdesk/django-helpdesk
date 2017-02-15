@@ -4,6 +4,7 @@ python:
     - "2.7"
     - 3.4.4
     - "3.5"
+    - "3.6"
 
 env:
     - DJANGO=1.8.17
@@ -18,7 +19,7 @@ install:
 before_script:
     - "pep8 --exclude=migrations --ignore=E501 helpdesk"
 
-script: 
+script:
     - coverage run --source='.' quicktest.py helpdesk
 
 after_success:

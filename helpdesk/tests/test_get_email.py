@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 from helpdesk.models import Queue, Ticket
 from django.test import TestCase
 from django.core.management import call_command
@@ -40,7 +42,7 @@ class GetEmailCommonTests(TestCase):
 
 
 class GetEmailParametricTemplate(object):
-    """TestCase that checks email functionality accross methods and socks configs."""
+    """TestCase that checks email functionality across methods and socks configs."""
 
     def setUp(self):
 
@@ -52,7 +54,8 @@ class GetEmailParametricTemplate(object):
             "allow_email_submission": True,
             "email_box_type": self.method,
             "logging_dir": self.temp_logdir,
-            "logging_type": 'none'}
+            "logging_type": 'none'
+        }
 
         if self.method == 'local':
             kwargs["email_box_local_dir"] = '/var/lib/mail/helpdesk/'
@@ -74,9 +77,12 @@ class GetEmailParametricTemplate(object):
     def test_read_email(self):
         """Tests reading emails from a queue and creating tickets.
            For each email source supported, we mock the backend to provide
-           authenticly formatted responses containing our test data."""
+           authentically formatted responses containing our test data."""
         test_email = "To: update.public@example.com\nFrom: comment@example.com\nSubject: Some Comment\n\nThis is the helpdesk comment via email."
         test_mail_len = len(test_email)
+
+        test_unicode_email = "To: update.public@example.com\nFrom: comment@example.com\nSubject: Some Unicode Comment\n\nThis is the helpdesk comment via email with unicode chars \u2013 inserted for testing purposes."
+        test_unicode_email_len = len(test_unicode_email)
 
         if self.socks:
             from socks import ProxyConnectionError
@@ -98,13 +104,25 @@ class GetEmailParametricTemplate(object):
                     mocked_isfile.assert_any_call('/var/lib/mail/helpdesk/filename1')
                     mocked_isfile.assert_any_call('/var/lib/mail/helpdesk/filename2')
 
+                with mock.patch('helpdesk.management.commands.get_email.listdir') as mocked_listdir, \
+                        mock.patch('helpdesk.management.commands.get_email.isfile') as mocked_isfile, \
+                        mock.patch('builtins.open' if six.PY3 else '__builtin__.open', mock.mock_open(read_data=test_unicode_email)):
+                    mocked_isfile.return_value = True
+                    mocked_listdir.return_value = ['filename3']
+
+                    call_command('get_email')
+
+                    mocked_listdir.assert_called_with('/var/lib/mail/helpdesk/')
+                    mocked_isfile.assert_any_call('/var/lib/mail/helpdesk/filename3')
+
             elif self.method == 'pop3':
                 # mock poplib.POP3's list and retr methods to provide responses as per RFC 1939
                 pop3_emails = {
                     '1': ("+OK", test_email.split('\n')),
                     '2': ("+OK", test_email.split('\n')),
+                    '3': ("+OK", test_unicode_email.split('\n')),
                 }
-                pop3_mail_list = ("+OK 2 messages", ("1 %d" % test_mail_len, "2 %d" % test_mail_len))
+                pop3_mail_list = ("+OK 3 messages", ("1 %d" % test_mail_len, "2 %d" % test_mail_len, "3 %d" % test_unicode_email_len))
                 mocked_poplib_server = mock.Mock()
                 mocked_poplib_server.list = mock.Mock(return_value=pop3_mail_list)
                 mocked_poplib_server.retr = mock.Mock(side_effect=lambda x: pop3_emails[x])
@@ -117,8 +135,9 @@ class GetEmailParametricTemplate(object):
                 imap_emails = {
                     "1": ("OK", (("1", test_email),)),
                     "2": ("OK", (("2", test_email),)),
+                    "3": ("OK", (("3", test_unicode_email),)),
                 }
-                imap_mail_list = ("OK", ("1 2",))
+                imap_mail_list = ("OK", ("1 2 3",))
                 mocked_imaplib_server = mock.Mock()
                 mocked_imaplib_server.search = mock.Mock(return_value=imap_mail_list)
 
@@ -135,6 +154,10 @@ class GetEmailParametricTemplate(object):
             ticket2 = get_object_or_404(Ticket, pk=2)
             self.assertEqual(ticket2.ticket_for_url, "QQ-%s" % ticket2.id)
             self.assertEqual(ticket2.description, "This is the helpdesk comment via email.")
+
+            ticket3 = get_object_or_404(Ticket, pk=3)
+            self.assertEqual(ticket3.ticket_for_url, "QQ-%s" % ticket3.id)
+            self.assertEqual(ticket3.description, "This is the helpdesk comment via email with unicode chars \u2013 inserted for testing purposes.")
 
 
 # build matrix of test cases
