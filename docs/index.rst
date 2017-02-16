@@ -69,7 +69,7 @@ django-helpdesk is released under the BSD license, however it packages 3rd party
 Dependencies
 ------------
 
-1. Python 2.7+ (or 3.3+)
-2. Django (1.7 or newer)
+1. Python 2.7+ (or 3.4+)
+2. Django (1.8 or newer)
 3. An existing **working** Django project with database etc. If you cannot log into the Admin, you won't get this product working! This means you **must** run `syncdb` **before** you add ``helpdesk`` to your ``INSTALLED_APPS``.
 
