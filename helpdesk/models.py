@@ -180,7 +180,7 @@ class Queue(models.Model):
 
     permission_name = models.CharField(
         _('Django auth permission name'),
-        max_length=50,
+        max_length=72,  # based on prepare_permission_name() pre-pending chars to slug
         blank=True,
         null=True,
         editable=False,
