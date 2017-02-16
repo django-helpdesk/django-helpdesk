@@ -6,4 +6,4 @@ docs/doctrees/*
 .coverage
 .project
 .pydevproject
-.desktop
+.directory
