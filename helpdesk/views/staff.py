@@ -815,7 +815,7 @@ def ticket_list(request):
         import json
         from helpdesk.lib import b64decode
         try:
-            query_params = json.loads(b64decode(str(saved_query.query)))
+            query_params = json.loads(b64decode(str(saved_query.query)).decode())
         except ValueError:
             # Query deserialization failed. (E.g. was a pickled query)
             return HttpResponseRedirect(reverse('helpdesk:list'))
@@ -1112,7 +1112,7 @@ def run_report(request, report):
         import json
         from helpdesk.lib import b64decode
         try:
-            query_params = json.loads(b64decode(str(saved_query.query)))
+            query_params = json.loads(b64decode(str(saved_query.query)).decode())
         except:
             return HttpResponseRedirect(reverse('helpdesk:report_index'))
 
