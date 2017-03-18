@@ -22,7 +22,9 @@
                 <p>{{ item.question }}</p>
             </div>
             <div class="panel-footer">
-                <p>{% blocktrans %}View <a href='{{ item.get_absolute_url }}'>Answer <i class="fa fa-arrow-right"></i></a>{% endblocktrans %}</p>
+                <p>
+                    {% blocktrans with item.get_absolute_url as url %}View <a href='{{ url }}'>Answer <i class="fa fa-arrow-right"></i></a>{% endblocktrans %}
+                </p>
                 <div class="well well-sm">
                     <p>{% trans 'Rating' %}: {{ item.score }}</p>
                     <p>{% trans 'Last Update' %}: {{ item.last_updated|naturaltime }}</p>
