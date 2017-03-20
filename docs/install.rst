@@ -29,6 +29,10 @@ Download, extract, and drop ``helpdesk`` into your ``PYTHONPATH``
 Adding To Your Django Project
 -----------------------------
 
+If you're on a brand new Django installation, make sure you do a ``migrate``
+**before** adding ``helpdesk`` to your ``INSTALLED_APPS``. This will avoid
+errors with trying to create User settings.
+
 1. Edit your ``settings.py`` file and add ``helpdesk`` to the ``INSTALLED_APPS`` setting. You also need ``django.contrib.admin`` in ``INSTALLED_APPS`` if you haven't already added it. eg::
 
     INSTALLED_APPS = (
@@ -115,3 +119,46 @@ Adding To Your Django Project
 
    Also, be aware that if a disk error occurs and the local file is not deleted, the mail may be processed multiple times and generate duplicate tickets until the file is removed. It is recommended to monitor log files for ERRORS when a file is unable to be deleted.
 
+Upgrading from previous versions
+--------------------------------
+
+If you are upgrading from a previous version of django-helpdesk that used
+migrations, get an up to date version of the code base (eg by using
+`git pull` or `pip install --upgrade django-helpdesk`) then migrate the database::
+
+    python manage.py migrate helpdesk --db-dry-run # DB untouched
+    python manage.py migrate helpdesk
+
+Lastly, restart your web server software (eg Apache) or FastCGI instance, to
+ensure the latest changes are in use.
+
+Unfortunately we are unable to assist if you are upgrading from a
+version of django-helpdesk prior to migrations (ie pre-2011).
+
+You can continue to the 'Initial Configuration' area, if needed.
+
+Notes on database backends
+--------------------------
+
+**NOTE REGARDING SQLITE AND SEARCHING:**
+If you use sqlite as your database, the search function will not work as
+effectively as it will with other databases due to its inability to do
+case-insensitive searches. It's recommended that you use PostgreSQL or MySQL
+if possible. For more information, see this note in the Django documentation:
+http://docs.djangoproject.com/en/dev/ref/databases/#sqlite-string-matching
+
+When you try to do a keyword search using sqlite, a message will be displayed
+to alert you to this shortcoming. There is no way around it, sorry.
+
+**NOTE REGARDING MySQL:**
+If you use MySQL, with most default configurations you will receive an error
+when creating the database tables as we populate a number of default templates
+in languages other than English.
+
+You must create the database the holds the django-helpdesk tables using the
+UTF-8 collation; see the MySQL manual for more information:
+http://dev.mysql.com/doc/refman/5.1/en/charset-database.html
+
+If you do NOT do this step, and you only want to use English-language templates,
+you can continue however you will receive a warning when running the 'migrate'
+commands.

@@ -2,16 +2,23 @@ Contributing
 ============
 
 django-helpdesk is an open-source project and as such contributions from the
-community are welcomed and encouraged.
+community are welcomed and encouraged!
+
+Please read these guidelines to get up to speed quickly. If you have any
+questions, please file an issue ticket on GitHub. Our main project
+repository is available at:
+
+https://github.com/django-helpdesk/django-helpdesk
 
 Licensing
 ---------
 
 All contributions to django-helpdesk must be under the BSD license documented in
-the LICENSE file in the top-level directory of this project. By submitting a
-contribution to this project (in any way: via e-mail, via GitHub forks,
-attachments, etc), you acknowledge that your contribution is open-source and
-licensed under the BSD license.
+the LICENSE file in the top-level directory of this project.
+
+By submitting a contribution to this project (in any way: via e-mail,
+via GitHub forks, attachments, etc), you acknowledge that your contribution is
+open-source and licensed under the BSD license.
 
 If you or your organisation does not accept these license terms then we cannot
 accept your contribution. Please reconsider!
@@ -20,8 +27,8 @@ Translations
 ------------
 
 Although django-helpdesk has originally been written for the English language,
-there are already multiple translations to Spanish, Polish, and German and more
-translations are welcomed.
+there are already multiple translations to Spanish, Polish, German and Russian.
+More translations are welcomed!
 
 Translations are handled using the excellent Transifex service which is much
 easier for most users than manually editing .po files. It also allows

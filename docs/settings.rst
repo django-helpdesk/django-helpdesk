@@ -1,15 +1,7 @@
 Settings
 ========
 
-First, django-helpdesk needs  ``django.core.context_processors.request`` activated, so you must add it to the ``settings.py``. For Django 1.7, add::
-
-    from django.conf import global_settings
-    TEMPLATE_CONTEXT_PROCESSORS = (
-                global_settings.TEMPLATE_CONTEXT_PROCESSORS +
-                ('django.core.context_processors.request',)
-         )
-
-For Django 1.8 and onwards, the settings are located in the ``TEMPLATES``, and the ``request`` module has moved. Add the following instead::
+First, django-helpdesk needs  ``django.core.context_processors.request`` activated, so you must add it to the ``settings.py``. Add the following::
 
     TEMPLATES = [
         {
@@ -75,11 +67,11 @@ These changes are visible throughout django-helpdesk
   **Default:** ``HELPDESK_SHOW_CHANGE_PASSWORD = False``
 
 - **HELPDESK_FOLLOWUP_MOD** Allow user to override default layout for 'followups' (work in progress)
-  
+
   **Default:** ``HELPDESK_FOLLOWUP_MOD = False``
 
 - **HELPDESK_AUTO_SUBSCRIBE_ON_TICKET_RESPONSE** Auto-subscribe user to ticket as a 'CC' if (s)he responds to a ticket?
-  
+
   **Default:** ``HELPDESK_AUTO_SUBSCRIBE_ON_TICKET_RESPONSE = False``
 
 - **HELPDESK_EMAIL_SUBJECT_TEMPLATE** Subject template for templated emails. ``%(subject)s`` represents the subject wording from the email template (e.g. "(Closed)").
@@ -97,24 +89,24 @@ Options shown on public pages
 These options only change display of items on public-facing pages, not staff pages.
 
 - **HELPDESK_VIEW_A_TICKET_PUBLIC** Show 'View a Ticket' section on public page?
-  
+
   **Default:** ``HELPDESK_VIEW_A_TICKET_PUBLIC = True``
 
 - **HELPDESK_SUBMIT_A_TICKET_PUBLIC** Show 'submit a ticket' section & form on public page?
-  
+
   **Default:** ``HELPDESK_SUBMIT_A_TICKET_PUBLIC = True``
 
 
 Options that change ticket updates
 ----------------------------------
 
-- **HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE** Allow non-staff users to interact with tickets? This will also change how 'staff_member_required' 
+- **HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE** Allow non-staff users to interact with tickets? This will also change how 'staff_member_required'
   in staff.py will be defined.
-  
+
   **Default:** ``HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = False``
 
 - **HELPDESK_SHOW_EDIT_BUTTON_FOLLOW_UP** Show edit buttons in ticket follow ups?
-  
+
   **Default:** ``HELPDESK_SHOW_EDIT_BUTTON_FOLLOW_UP = True``
 
 - **HELPDESK_SHOW_DELETE_BUTTON_SUPERUSER_FOLLOW_UP** Show delete buttons in ticket follow ups if user is 'superuser'?
@@ -167,7 +159,7 @@ Discontinued Settings
 
 The following settings were defined in previous versions and are no longer supported.
 
-- **HELPDESK_CUSTOM_WELCOME** 
+- **HELPDESK_CUSTOM_WELCOME**
 
 - **HELDPESK_KB_ENABLED_STAFF** Now always True
 
