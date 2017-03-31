@@ -1,9 +1,23 @@
 *.pyc
 /dist/
 django_helpdesk.egg-info
+demo/*.egg-info
+demo/demodesk/*.sqlite3
 docs/html/*
 docs/doctrees/*
 .coverage
 .project
 .pydevproject
 .directory
+
+# ignore demo attachments that user might have added
+demo/demodesk/media/helpdesk/attachments/*
+!demo/demodesk/media/helpdesk/attachments/DH-3
+demo/demodesk/media/helpdesk/attachments/DH-3/*
+!demo/demodesk/media/helpdesk/attachments/DH-3/3
+!demo/demodesk/media/helpdesk/attachments/DH-3/4
+demo/demodesk/media/helpdesk/attachments/DH-3/3/*
+demo/demodesk/media/helpdesk/attachments/DH-3/4/*
+!demo/demodesk/media/helpdesk/attachments/DH-3/3/someinfo.txt
+!demo/demodesk/media/helpdesk/attachments/DH-3/4/helpdesk.png
+
