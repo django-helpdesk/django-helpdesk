@@ -146,7 +146,6 @@ class GetEmailParametricTemplate(object):
             self.assertEqual(ticket2.title, test_email_subject)
             self.assertEqual(ticket2.description, test_email_body)
 
-
     def test_read_html_multipart_email(self):
         """Tests reading multipart MIME (HTML body and plain text alternative)
            emails from a queue and creating tickets.
