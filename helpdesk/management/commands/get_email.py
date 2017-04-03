@@ -254,7 +254,7 @@ def decodeUnknown(charset, string):
 
 
 def decode_mail_headers(string):
-    decoded = email.header.decode_header(string)
+    decoded = email.header.decode_header(string) if six.PY3 else email.header.decode_header(string.encode('utf-8'))
     if six.PY2:
         return u' '.join([unicode(msg, charset or 'utf-8') for msg, charset in decoded])
     elif six.PY3:
@@ -263,7 +263,7 @@ def decode_mail_headers(string):
 
 def ticket_from_message(message, queue, logger):
     # 'message' must be an RFC822 formatted message.
-    message = email.message_from_string(message)
+    message = email.message_from_string(message) if six.PY3 else email.message_from_string(message.encode('utf-8'))
     subject = message.get('subject', _('Created from e-mail'))
     subject = decode_mail_headers(decodeUnknown(message.get_charset(), subject))
     for affix in STRIPPED_SUBJECT_STRINGS:
@@ -309,7 +309,7 @@ def ticket_from_message(message, queue, logger):
                     decodeUnknown(part.get_content_charset(), part.get_payload(decode=True))
                 )
                 # workaround to get unicode text out rather than escaped text
-                body = body.encode('ascii').decode('unicode_escape')
+                body = body.encode('ascii').decode('unicode_escape') if six.PY3 else body.encode('utf-8')
                 logger.debug("Discovered plain text MIME part")
             else:
                 files.append(
