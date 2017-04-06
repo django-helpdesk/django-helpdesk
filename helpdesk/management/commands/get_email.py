@@ -10,6 +10,7 @@ scripts/get_email.py - Designed to be run from cron, this script checks the
                        helpdesk, creating tickets from the new messages (or
                        adding to existing tickets if needed)
 """
+from __future__ import unicode_literals
 
 from datetime import timedelta
 import email
@@ -158,7 +159,7 @@ def process_queue(q, logger):
             msgNum = msg.split(" ")[0]
             logger.info("Processing message %s" % msgNum)
 
-            full_message = "\n".join(server.retr(msgNum)[1])
+            full_message = encoding.force_text("\n".join(server.retr(msgNum)[1]), errors='replace')
             ticket = ticket_from_message(message=full_message, queue=q, logger=logger)
 
             if ticket:
@@ -198,7 +199,8 @@ def process_queue(q, logger):
             for num in msgnums:
                 logger.info("Processing message %s" % num)
                 status, data = server.fetch(num, '(RFC822)')
-                ticket = ticket_from_message(message=encoding.smart_text(data[0][1], errors='replace'), queue=q, logger=logger)
+                full_message = encoding.force_text(data[0][1], errors='replace')
+                ticket = ticket_from_message(message=full_message, queue=q, logger=logger)
                 if ticket:
                     server.store(num, '+FLAGS', '\\Deleted')
                     logger.info("Successfully processed message %s, deleted from IMAP server" % num)
@@ -218,7 +220,8 @@ def process_queue(q, logger):
         for i, m in enumerate(mail, 1):
             logger.info("Processing message %d" % i)
             with open(m, 'r') as f:
-                ticket = ticket_from_message(message=f.read(), queue=q, logger=logger)
+                full_message = encoding.force_text(f.read(), errors='replace')
+                ticket = ticket_from_message(message=full_message, queue=q, logger=logger)
             if ticket:
                 logger.info("Successfully processed message %d, ticket/comment created." % i)
                 try:
@@ -235,9 +238,9 @@ def decodeUnknown(charset, string):
     if six.PY2:
         if not charset:
             try:
-                return string.decode('utf-8', 'ignore')
+                return string.decode('utf-8', 'replace')
             except:
-                return string.decode('iso8859-1', 'ignore')
+                return string.decode('iso8859-1', 'replace')
         return unicode(string, charset)
     elif six.PY3:
         if type(string) is not str:
@@ -251,7 +254,7 @@ def decodeUnknown(charset, string):
 
 
 def decode_mail_headers(string):
-    decoded = email.header.decode_header(string)
+    decoded = email.header.decode_header(string) if six.PY3 else email.header.decode_header(string.encode('utf-8'))
     if six.PY2:
         return u' '.join([unicode(msg, charset or 'utf-8') for msg, charset in decoded])
     elif six.PY3:
@@ -260,7 +263,7 @@ def decode_mail_headers(string):
 
 def ticket_from_message(message, queue, logger):
     # 'message' must be an RFC822 formatted message.
-    message = email.message_from_string(message.encode('utf-8') if six.PY2 else message)
+    message = email.message_from_string(message) if six.PY3 else email.message_from_string(message.encode('utf-8'))
     subject = message.get('subject', _('Created from e-mail'))
     subject = decode_mail_headers(decodeUnknown(message.get_charset(), subject))
     for affix in STRIPPED_SUBJECT_STRINGS:
@@ -305,6 +308,8 @@ def ticket_from_message(message, queue, logger):
                 body = EmailReplyParser.parse_reply(
                     decodeUnknown(part.get_content_charset(), part.get_payload(decode=True))
                 )
+                # workaround to get unicode text out rather than escaped text
+                body = body.encode('ascii').decode('unicode_escape') if six.PY3 else body.encode('utf-8')
                 logger.debug("Discovered plain text MIME part")
             else:
                 files.append(
