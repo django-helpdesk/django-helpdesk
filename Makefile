@@ -17,12 +17,12 @@ help:
 	@egrep -o "^#: (.+)" [Mm]akefile  | sed 's/#: /* /'
 
 
-#: develop - Install minimal development utilities for Python3
+#: develop - Install minimal development utilities for Python3.
 .PHONY: develop
 develop:
 	$(PIP) install -e .
 
-#: develop - Install minimal development utilities for Python2
+#: develop2 - Install minimal development utilities for Python2.
 .PHONY: develop2
 develop2:
 	pip2 install -e .
@@ -62,7 +62,7 @@ test:
 	$(TOX)
 
 
-#: documentation - Build documentation (Sphinx, README, ...)
+#: documentation - Build documentation (Sphinx, README, ...).
 .PHONY: documentation
 documentation: sphinx readme
 
@@ -93,7 +93,7 @@ demo:
 	demodesk loaddata emailtemplate.json
 	demodesk loaddata demo.json
 
-#: demo - Setup demo project using Python2.
+#: demo2 - Setup demo project using Python2.
 .PHONY: demo2
 demo2:
 	pip2 install -e .
@@ -108,12 +108,12 @@ demo2:
 	demodesk loaddata demo.json
 
 
-#: runserver - Run demo server using Python3
+#: rundemo - Run demo server using Python3.
 .PHONY: rundemo
 rundemo: demo
 	demodesk runserver 8080
 
-#: runserver - Run demo server using Python2
+#: rundemo2 - Run demo server using Python2.
 .PHONY: rundemo2
 rundemo2: demo2
 	demodesk runserver 8080
