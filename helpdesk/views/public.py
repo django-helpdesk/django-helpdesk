@@ -75,9 +75,8 @@ def homepage(request):
 
 
 def view_ticket(request):
-    # TODO: Use a form here, not enough validation on these parameters.
-    ticket_req = request.GET.get('ticket', '')
-    email = request.GET.get('email', '')
+    ticket_req = request.GET.get('ticket', None)
+    email = request.GET.get('email', None)
 
     if ticket_req and email:
         queue, ticket_id = Ticket.queue_and_id_from_query(ticket_req)
@@ -118,6 +117,8 @@ def view_ticket(request):
                 'helpdesk_settings': helpdesk_settings,
                 'next': redirect_url,
             })
+    elif ticket_req is None and email is None:
+        error_message = None
     else:
         error_message = _('Missing ticket ID or e-mail address. Please try again.')
 
