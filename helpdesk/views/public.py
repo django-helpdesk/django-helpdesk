@@ -75,8 +75,8 @@ def homepage(request):
 
 
 def view_ticket(request):
-    ticket_req = request.GET.get('ticket', '')
-    email = request.GET.get('email', '')
+    ticket_req = request.GET.get('ticket', None)
+    email = request.GET.get('email', None)
 
     if ticket_req and email:
         queue, ticket_id = Ticket.queue_and_id_from_query(ticket_req)
@@ -84,13 +84,6 @@ def view_ticket(request):
             ticket = Ticket.objects.get(id=ticket_id, submitter_email__iexact=email)
         except ObjectDoesNotExist:
             error_message = _('Invalid ticket ID or e-mail address. Please try again.')
-
-            return render(request, 'helpdesk/public_view_form.html', {
-                'ticket': False,
-                'email': email,
-                'error_message': error_message,
-                'helpdesk_settings': helpdesk_settings,
-            })
         else:
             if request.user.is_staff:
                 redirect_url = reverse('helpdesk:view', args=[ticket_id])
@@ -124,6 +117,17 @@ def view_ticket(request):
                 'helpdesk_settings': helpdesk_settings,
                 'next': redirect_url,
             })
+    elif ticket_req is None and email is None:
+        error_message = None
+    else:
+        error_message = _('Missing ticket ID or e-mail address. Please try again.')
+
+    return render(request, 'helpdesk/public_view_form.html', {
+        'ticket': False,
+        'email': email,
+        'error_message': error_message,
+        'helpdesk_settings': helpdesk_settings,
+    })
 
 
 def change_language(request):
