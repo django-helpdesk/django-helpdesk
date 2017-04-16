@@ -3,6 +3,13 @@ Installation
 
 django-helpdesk installation isn't difficult, but it requires you have a bit of existing know-how about Django.
 
+Server templates
+----------------
+Server templates allows to create a temporary server to test djando helpdesk. You can also deploy production servers and fork configurations for customization.
+
+- Ubuntu 14.04: https://manageacloud.com/cookbook/django_helpdesk
+- CentOS 7: https://manageacloud.com/cookbook/django_helpdesk_centos_7
+- Amazon Linux: https://manageacloud.com/cookbook/django_helpdesk_amazon_2014032
 
 Getting The Code
 ----------------
