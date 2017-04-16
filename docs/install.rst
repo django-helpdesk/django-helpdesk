@@ -159,6 +159,14 @@ You must create the database the holds the django-helpdesk tables using the
 UTF-8 collation; see the MySQL manual for more information:
 http://dev.mysql.com/doc/refman/5.1/en/charset-database.html
 
+You may be able to convert an existing MySQL database to use UTF-8 collation
+by using the following SQL commands::
+
+    ALTER DATABASE mydatabase CHARACTER SET utf8 COLLATE utf8_general_ci;
+    ALTER TABLE helpdesk_emailtemplate CONVERT TO CHARACTER SET utf8 COLLATE utf8_general_ci;
+
+Both ``utf8_general_ci`` or ``utf16_general_ci`` have been reported to work.
+
 If you do NOT do this step, and you only want to use English-language templates,
-you can continue however you will receive a warning when running the 'migrate'
-commands.
+you may be able to continue however you will receive a warning when running the
+'migrate' commands.
