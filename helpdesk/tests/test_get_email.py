@@ -148,7 +148,6 @@ class GetEmailParametricTemplate(object):
             self.assertEqual(ticket2.title, test_email_subject)
             self.assertEqual(ticket2.description, test_email_body)
 
-
     def test_read_email_with_template_tag(self):
         """Tests reading plain text emails from a queue and creating tickets,
            except this time the email body contains a Django template tag.
@@ -221,7 +220,6 @@ class GetEmailParametricTemplate(object):
             self.assertEqual(ticket2.ticket_for_url, "QQ-%s" % ticket2.id)
             self.assertEqual(ticket2.title, test_email_subject)
             self.assertEqual(ticket2.description, test_email_body)
-
 
     def test_read_email_cc(self):
         """Tests reading plain text emails from a queue and creating tickets,
@@ -307,7 +305,6 @@ class GetEmailParametricTemplate(object):
             self.assertEqual(ticket2.ticket_for_url, "QQ-%s" % ticket2.id)
             self.assertEqual(ticket2.title, test_email_subject)
             self.assertEqual(ticket2.description, test_email_body)
-
 
     def test_read_html_multipart_email(self):
         """Tests reading multipart MIME (HTML body and plain text alternative)
