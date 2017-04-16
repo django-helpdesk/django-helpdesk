@@ -406,12 +406,14 @@ def update_ticket(request, ticket_id, public=False):
     # comment.
     context = safe_template_context(ticket)
 
-    # this line sometimes creates problems if code is sent as a comment.
-    # if comment contains some django code, like "why does {% if bla %} crash",
-    # then the following line will give us a crash, since django expects {% if %}
-    # to be closed with an {% endif %} tag.
     from django.template import engines
     template_func = engines['django'].from_string
+    # this prevents system from trying to render any template tags
+    # broken into two stages to prevent changes from first replace being themselves
+    # changed by the second replace due to conflicting syntax
+    comment = comment.replace('{%','X-HELPDESK-COMMENT-VERBATIM').replace('%}','X-HELPDESK-COMMENT-ENDVERBATIM')
+    comment = comment.replace('X-HELPDESK-COMMENT-VERBATIM','{% verbatim %}{%').replace('X-HELPDESK-COMMENT-ENDVERBATIM','%}{% endverbatim %}')
+    # render the neutralized template
     comment = template_func(comment).render(context)
 
     if owner is -1 and ticket.assigned_to:
