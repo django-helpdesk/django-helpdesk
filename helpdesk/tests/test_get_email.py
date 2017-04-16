@@ -83,10 +83,86 @@ class GetEmailParametricTemplate(object):
 
         # example email text from Django docs: https://docs.djangoproject.com/en/1.10/ref/unicode/
         test_email_from = "Arnbjörg Ráðormsdóttir <arnbjorg@example.com>"
-        test_email_cc = "other@example.com"
         test_email_subject = "My visit to Sør-Trøndelag"
         test_email_body = "Unicode helpdesk comment with an s-hat (ŝ) via email."
-        test_email = "To: helpdesk@example.com\nCc: " + test_email_cc + "\nFrom: " + test_email_from + "\nSubject: " + test_email_subject + "\n\n" + test_email_body
+        test_email = "To: helpdesk@example.com\nFrom: " + test_email_from + "\nSubject: " + test_email_subject + "\n\n" + test_email_body
+        test_mail_len = len(test_email)
+
+        if self.socks:
+            from socks import ProxyConnectionError
+            with self.assertRaisesRegexp(ProxyConnectionError, '%s:%s' % (unrouted_socks_server, unused_port)):
+                call_command('get_email')
+
+        else:
+            # Test local email reading
+            if self.method == 'local':
+                with mock.patch('helpdesk.management.commands.get_email.listdir') as mocked_listdir, \
+                        mock.patch('helpdesk.management.commands.get_email.isfile') as mocked_isfile, \
+                        mock.patch('builtins.open' if six.PY3 else '__builtin__.open', mock.mock_open(read_data=test_email)):
+                    mocked_isfile.return_value = True
+                    mocked_listdir.return_value = ['filename1', 'filename2']
+
+                    call_command('get_email')
+
+                    mocked_listdir.assert_called_with('/var/lib/mail/helpdesk/')
+                    mocked_isfile.assert_any_call('/var/lib/mail/helpdesk/filename1')
+                    mocked_isfile.assert_any_call('/var/lib/mail/helpdesk/filename2')
+
+            elif self.method == 'pop3':
+                # mock poplib.POP3's list and retr methods to provide responses as per RFC 1939
+                pop3_emails = {
+                    '1': ("+OK", test_email.split('\n')),
+                    '2': ("+OK", test_email.split('\n')),
+                }
+                pop3_mail_list = ("+OK 2 messages", ("1 %d" % test_mail_len, "2 %d" % test_mail_len))
+                mocked_poplib_server = mock.Mock()
+                mocked_poplib_server.list = mock.Mock(return_value=pop3_mail_list)
+                mocked_poplib_server.retr = mock.Mock(side_effect=lambda x: pop3_emails[x])
+                with mock.patch('helpdesk.management.commands.get_email.poplib', autospec=True) as mocked_poplib:
+                    mocked_poplib.POP3 = mock.Mock(return_value=mocked_poplib_server)
+                    call_command('get_email')
+
+            elif self.method == 'imap':
+                # mock imaplib.IMAP4's search and fetch methods with responses from RFC 3501
+                imap_emails = {
+                    "1": ("OK", (("1", test_email),)),
+                    "2": ("OK", (("2", test_email),)),
+                }
+                imap_mail_list = ("OK", ("1 2",))
+                mocked_imaplib_server = mock.Mock()
+                mocked_imaplib_server.search = mock.Mock(return_value=imap_mail_list)
+
+                # we ignore the second arg as the data item/mime-part is constant (RFC822)
+                mocked_imaplib_server.fetch = mock.Mock(side_effect=lambda x, _: imap_emails[x])
+                with mock.patch('helpdesk.management.commands.get_email.imaplib', autospec=True) as mocked_imaplib:
+                    mocked_imaplib.IMAP4 = mock.Mock(return_value=mocked_imaplib_server)
+                    call_command('get_email')
+
+            ticket1 = get_object_or_404(Ticket, pk=1)
+            self.assertEqual(ticket1.ticket_for_url, "QQ-%s" % ticket1.id)
+            self.assertEqual(ticket1.title, test_email_subject)
+            self.assertEqual(ticket1.description, test_email_body)
+
+            ticket2 = get_object_or_404(Ticket, pk=2)
+            self.assertEqual(ticket2.ticket_for_url, "QQ-%s" % ticket2.id)
+            self.assertEqual(ticket2.title, test_email_subject)
+            self.assertEqual(ticket2.description, test_email_body)
+
+    def test_read_email_cc(self):
+        """Tests reading plain text emails from a queue and creating tickets,
+           particularly to test appropriate handling of CC'd emails.
+           For each email source supported, we mock the backend to provide
+           authentically formatted responses containing our test data."""
+
+        # example email text from Django docs: https://docs.djangoproject.com/en/1.10/ref/unicode/
+        test_email_from = "Arnbjörg Ráðormsdóttir <arnbjorg@example.com>"
+        test_email_cc_one = "other@example.com"
+        test_email_cc_two = "someone@example.com"
+        test_email_cc_three = "Alice Ráðormsdóttir <alice@example.com>"
+        test_email_cc_four = "nobody@example.com"
+        test_email_subject = "My visit to Sør-Trøndelag"
+        test_email_body = "Unicode helpdesk comment with an s-hat (ŝ) via email."
+        test_email = "To: helpdesk@example.com\nCc: " + test_email_cc_one + ", " + test_email_cc_two + ", " + test_email_cc_three + "\nCC: " + test_email_cc_four + "\nFrom: " + test_email_from + "\nSubject: " + test_email_subject + "\n\n" + test_email_body
         test_mail_len = len(test_email)
 
         if self.socks:
@@ -144,7 +220,13 @@ class GetEmailParametricTemplate(object):
             self.assertEqual(ticket1.title, test_email_subject)
             self.assertEqual(ticket1.description, test_email_body)
             cc1 = get_object_or_404(TicketCC, pk=1)
-            self.assertEqual(cc1.email, test_email_cc)
+            self.assertEqual(cc1.email, test_email_cc_one)
+            cc2 = get_object_or_404(TicketCC, pk=2)
+            self.assertEqual(cc2.email, test_email_cc_two)
+            cc3 = get_object_or_404(TicketCC, pk=3)
+            self.assertEqual(cc3.email, test_email_cc_three)
+            cc4 = get_object_or_404(TicketCC, pk=4)
+            self.assertEqual(cc4.email, test_email_cc_four)
 
             ticket2 = get_object_or_404(Ticket, pk=2)
             self.assertEqual(ticket2.ticket_for_url, "QQ-%s" % ticket2.id)
