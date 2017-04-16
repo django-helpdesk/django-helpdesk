@@ -2,7 +2,7 @@
 
 from __future__ import unicode_literals
 
-from helpdesk.models import Queue, Ticket, FollowUp, Attachment
+from helpdesk.models import Queue, Ticket, TicketCC, FollowUp, Attachment
 from django.test import TestCase
 from django.core.management import call_command
 from django.utils import six
@@ -83,9 +83,10 @@ class GetEmailParametricTemplate(object):
 
         # example email text from Django docs: https://docs.djangoproject.com/en/1.10/ref/unicode/
         test_email_from = "Arnbjörg Ráðormsdóttir <arnbjorg@example.com>"
+        test_email_cc = "other@example.com"
         test_email_subject = "My visit to Sør-Trøndelag"
         test_email_body = "Unicode helpdesk comment with an s-hat (ŝ) via email."
-        test_email = "To: helpdesk@example.com\nFrom: " + test_email_from + "\nSubject: " + test_email_subject + "\n\n" + test_email_body
+        test_email = "To: helpdesk@example.com\nCc: " + test_email_cc + "\nFrom: " + test_email_from + "\nSubject: " + test_email_subject + "\n\n" + test_email_body
         test_mail_len = len(test_email)
 
         if self.socks:
@@ -142,6 +143,8 @@ class GetEmailParametricTemplate(object):
             self.assertEqual(ticket1.ticket_for_url, "QQ-%s" % ticket1.id)
             self.assertEqual(ticket1.title, test_email_subject)
             self.assertEqual(ticket1.description, test_email_body)
+            cc1 = get_object_or_404(TicketCC, pk=1)
+            self.assertEqual(cc1.email, test_email_cc)
 
             ticket2 = get_object_or_404(Ticket, pk=2)
             self.assertEqual(ticket2.ticket_for_url, "QQ-%s" % ticket2.id)
@@ -160,6 +163,9 @@ class GetEmailParametricTemplate(object):
 
         me = "my@example.com"
         you = "your@example.com"
+        cc_one = "other@example.com"
+        cc_two = "nobody@example.com"
+        cc = cc_one + ", " + cc_two
         subject = "Link"
 
         # Create message container - the correct MIME type is multipart/alternative.
@@ -167,6 +173,7 @@ class GetEmailParametricTemplate(object):
         msg['Subject'] = subject
         msg['From'] = me
         msg['To'] = you
+        msg['Cc'] = cc
 
         # Create the body of the message (a plain-text and an HTML version).
         text = "Hi!\nHow are you?\nHere is the link you wanted:\nhttps://www.python.org"
@@ -255,6 +262,10 @@ class GetEmailParametricTemplate(object):
             attach1 = get_object_or_404(Attachment, pk=1)
             self.assertEqual(attach1.followup.id, 1)
             self.assertEqual(attach1.filename, 'email_html_body.html')
+            cc1 = get_object_or_404(TicketCC, pk=1)
+            self.assertEqual(cc1.email, cc_one)
+            cc2 = get_object_or_404(TicketCC, pk=2)
+            self.assertEqual(cc2.email, cc_two)
 
             ticket2 = get_object_or_404(Ticket, pk=2)
             self.assertEqual(ticket2.ticket_for_url, "QQ-%s" % ticket2.id)

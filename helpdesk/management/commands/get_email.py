@@ -34,7 +34,7 @@ from django.utils import encoding, six, timezone
 
 from helpdesk import settings
 from helpdesk.lib import send_templated_mail, safe_template_context, process_attachments
-from helpdesk.models import Queue, Ticket, FollowUp, IgnoreEmail
+from helpdesk.models import Queue, Ticket, TicketCC, FollowUp, IgnoreEmail
 
 import logging
 
@@ -264,7 +264,7 @@ def decode_mail_headers(string):
 def ticket_from_message(message, queue, logger):
     # 'message' must be an RFC822 formatted message.
     message = email.message_from_string(message) if six.PY3 else email.message_from_string(message.encode('utf-8'))
-    subject = message.get('subject', _('Created from e-mail'))
+    subject = message.get('subject', _('Comment from e-mail'))
     subject = decode_mail_headers(decodeUnknown(message.get_charset(), subject))
     for affix in STRIPPED_SUBJECT_STRINGS:
         subject = subject.replace(affix, "")
@@ -273,6 +273,14 @@ def ticket_from_message(message, queue, logger):
     sender = message.get('from', _('Unknown Sender'))
     sender = decode_mail_headers(decodeUnknown(message.get_charset(), sender))
     sender_email = email.utils.parseaddr(sender)[1]
+
+    cc = message.get_all('cc', None)
+    if cc:
+        # get_all checks if multiple CC headers, but individual emails may be comma separated too
+        tempcc = []
+        for hdr in cc:
+            tempcc.extend(hdr.split(','))
+        cc = [decode_mail_headers(decodeUnknown(message.get_charset(), x.strip())) for x in tempcc]
 
     for ignore in IgnoreEmail.objects.filter(Q(queues=queue) | Q(queues__isnull=True)):
         if ignore.test(sender_email):
@@ -357,6 +365,16 @@ def ticket_from_message(message, queue, logger):
             priority=priority,
         )
         logger.debug("Created new ticket %s-%s" % (t.queue.slug, t.id))
+
+    if cc:
+        for new_cc in cc:
+            tcc = TicketCC(
+                ticket=t,
+                email=new_cc,
+                can_view=True,
+                can_update=False
+            )
+            tcc.save()
 
     f = FollowUp(
         ticket=t,
