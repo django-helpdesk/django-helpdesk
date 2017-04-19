@@ -306,6 +306,9 @@ class GetEmailParametricTemplate(object):
             # should not be saved again, so the 4th email should be
             # test_email_cc_four
             self.assertEqual(cc4.email, test_email_cc_four)
+            # ensure these 4 CCs are the only ones created
+            # (otherwise, there were duplicates)
+            self.assertEqual(len(TicketCC.objects.filter(ticket=1)), 4)
 
             ticket2 = get_object_or_404(Ticket, pk=2)
             self.assertEqual(ticket2.ticket_for_url, "QQ-%s" % ticket2.id)
@@ -430,6 +433,7 @@ class GetEmailParametricTemplate(object):
             self.assertEqual(cc1.email, cc_one)
             cc2 = get_object_or_404(TicketCC, pk=2)
             self.assertEqual(cc2.email, cc_two)
+            self.assertEqual(len(TicketCC.objects.filter(ticket=1)), 2)
 
             ticket2 = get_object_or_404(Ticket, pk=2)
             self.assertEqual(ticket2.ticket_for_url, "QQ-%s" % ticket2.id)
