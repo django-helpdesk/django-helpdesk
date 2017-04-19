@@ -229,13 +229,16 @@ class GetEmailParametricTemplate(object):
 
         # example email text from Django docs: https://docs.djangoproject.com/en/1.10/ref/unicode/
         test_email_from = "Arnbjörg Ráðormsdóttir <arnbjorg@example.com>"
-        test_email_cc_one = "other@example.com"
-        test_email_cc_two = "someone@example.com"
-        test_email_cc_three = "Alice Ráðormsdóttir <alice@example.com>"
-        test_email_cc_four = "nobody@example.com"
+        # NOTE: CC emails are in alphabetical order and must be tested as such!
+        # implementation uses sets, so only way to ensure tickets created
+        # in right order is to change set to list and sort it
+        test_email_cc_one = "Alice Ráðormsdóttir <alice@example.com>"
+        test_email_cc_two = "nobody@example.com"
+        test_email_cc_three = "other@example.com"
+        test_email_cc_four = "someone@example.com"
         test_email_subject = "My visit to Sør-Trøndelag"
         test_email_body = "Unicode helpdesk comment with an s-hat (ŝ) via email."
-        test_email = "To: helpdesk@example.com\nCc: " + test_email_cc_one + ", " + test_email_cc_two + ", " + test_email_cc_three + "\nCC: " + test_email_cc_four + "\nFrom: " + test_email_from + "\nSubject: " + test_email_subject + "\n\n" + test_email_body
+        test_email = "To: helpdesk@example.com\nCc: " + test_email_cc_one + ", " + test_email_cc_one + ", " + test_email_cc_two + ", " + test_email_cc_three + "\nCC: " + test_email_cc_one + ", " + test_email_cc_three + ", " + test_email_cc_four + "\nFrom: " + test_email_from + "\nSubject: " + test_email_subject + "\n\n" + test_email_body
         test_mail_len = len(test_email)
 
         if self.socks:
@@ -299,6 +302,9 @@ class GetEmailParametricTemplate(object):
             cc3 = get_object_or_404(TicketCC, pk=3)
             self.assertEqual(cc3.email, test_email_cc_three)
             cc4 = get_object_or_404(TicketCC, pk=4)
+            # the second CC has an extra test_email_cc_one and three that
+            # should not be saved again, so the 4th email should be
+            # test_email_cc_four
             self.assertEqual(cc4.email, test_email_cc_four)
 
             ticket2 = get_object_or_404(Ticket, pk=2)
@@ -318,8 +324,11 @@ class GetEmailParametricTemplate(object):
 
         me = "my@example.com"
         you = "your@example.com"
-        cc_one = "other@example.com"
-        cc_two = "nobody@example.com"
+        # NOTE: CC'd emails need to be alphabetical and tested as such!
+        # implementation uses sets, so only way to ensure tickets created
+        # in right order is to change set to list and sort it
+        cc_one = "nobody@example.com"
+        cc_two = "other@example.com"
         cc = cc_one + ", " + cc_two
         subject = "Link"
 

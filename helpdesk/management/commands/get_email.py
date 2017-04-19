@@ -282,7 +282,8 @@ def ticket_from_message(message, queue, logger):
         tempcc = []
         for hdr in cc:
             tempcc.extend(hdr.split(','))
-        cc = [x.strip() for x in tempcc]
+        # use a set to ensure no duplicates
+        cc = set([x.strip() for x in tempcc])
 
     for ignore in IgnoreEmail.objects.filter(Q(queues=queue) | Q(queues__isnull=True)):
         if ignore.test(sender_email):
@@ -369,10 +370,17 @@ def ticket_from_message(message, queue, logger):
         logger.debug("Created new ticket %s-%s" % (t.queue.slug, t.id))
 
     if cc:
-        for new_cc in cc:
-            tcc = TicketCC(
+        # get list of currently CC'd emails
+        current_cc = TicketCC.objects.filter(ticket=ticket)
+        current_cc = set([x.email for x in current_cc])
+        # add any email in cc that's not already in current_cc (set difference)
+        new_cc = cc.difference(current_cc)
+        # add emails alphabetically, makes testing easy
+        new_cc = sorted(list(new_cc))
+        for ccemail in new_cc:
+            tcc = TicketCC.objects.create(
                 ticket=t,
-                email=new_cc,
+                email=ccemail,
                 can_view=True,
                 can_update=False
             )
