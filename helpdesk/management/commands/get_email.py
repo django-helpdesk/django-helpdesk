@@ -372,7 +372,16 @@ def ticket_from_message(message, queue, logger):
     if cc:
         # get list of currently CC'd emails
         current_cc = TicketCC.objects.filter(ticket=ticket)
-        current_cc = set([x.email for x in current_cc])
+        current_cc_emails = [x.email for x in current_cc]
+        # get emails of any Users CC'd to email
+        current_cc_users = [x.user.email for x in current_cc]
+        # ensure submitter, assigned user, queue email not added
+        other_emails = [queue.email_address]
+        if t.submitter_email:
+            other_emails.append(t.submitter_email)
+        if t.assigned_to:
+            other_emails.append(t.assigned_to.email)
+        current_cc = set(current_cc_emails + current_cc_users + other_emails)
         # add any email in cc that's not already in current_cc (set difference)
         new_cc = cc.difference(current_cc)
         # add emails alphabetically, makes testing easy
