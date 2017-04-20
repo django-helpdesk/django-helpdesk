@@ -34,7 +34,8 @@ from django.utils import encoding, six, timezone
 
 from helpdesk import settings
 from helpdesk.lib import send_templated_mail, safe_template_context, process_attachments
-from helpdesk.models import Queue, Ticket, FollowUp, IgnoreEmail
+from helpdesk.models import Queue, Ticket, TicketCC, FollowUp, IgnoreEmail
+from django.contrib.auth.models import User
 
 import logging
 
@@ -264,7 +265,7 @@ def decode_mail_headers(string):
 def ticket_from_message(message, queue, logger):
     # 'message' must be an RFC822 formatted message.
     message = email.message_from_string(message) if six.PY3 else email.message_from_string(message.encode('utf-8'))
-    subject = message.get('subject', _('Created from e-mail'))
+    subject = message.get('subject', _('Comment from e-mail'))
     subject = decode_mail_headers(decodeUnknown(message.get_charset(), subject))
     for affix in STRIPPED_SUBJECT_STRINGS:
         subject = subject.replace(affix, "")
@@ -273,6 +274,17 @@ def ticket_from_message(message, queue, logger):
     sender = message.get('from', _('Unknown Sender'))
     sender = decode_mail_headers(decodeUnknown(message.get_charset(), sender))
     sender_email = email.utils.parseaddr(sender)[1]
+
+    cc = message.get_all('cc', None)
+    if cc:
+        # first, fixup the encoding if necessary
+        cc = [decode_mail_headers(decodeUnknown(message.get_charset(), x)) for x in cc]
+        # get_all checks if multiple CC headers, but individual emails may be comma separated too
+        tempcc = []
+        for hdr in cc:
+            tempcc.extend(hdr.split(','))
+        # use a set to ensure no duplicates
+        cc = set([x.strip() for x in tempcc])
 
     for ignore in IgnoreEmail.objects.filter(Q(queues=queue) | Q(queues__isnull=True)):
         if ignore.test(sender_email):
@@ -357,6 +369,44 @@ def ticket_from_message(message, queue, logger):
             priority=priority,
         )
         logger.debug("Created new ticket %s-%s" % (t.queue.slug, t.id))
+
+    if cc:
+        # get list of currently CC'd emails
+        current_cc = TicketCC.objects.filter(ticket=ticket)
+        current_cc_emails = [x.email for x in current_cc]
+        # get emails of any Users CC'd to email
+        current_cc_users = [x.user.email for x in current_cc]
+        # ensure submitter, assigned user, queue email not added
+        other_emails = [queue.email_address]
+        if t.submitter_email:
+            other_emails.append(t.submitter_email)
+        if t.assigned_to:
+            other_emails.append(t.assigned_to.email)
+        current_cc = set(current_cc_emails + current_cc_users + other_emails)
+        # first, add any User not previously CC'd (as identified by User's email)
+        all_users = User.objects.all()
+        all_user_emails = set([x.email for x in all_users])
+        users_not_currently_ccd = all_user_emails.difference(set(current_cc))
+        users_to_cc = cc.intersection(users_not_currently_ccd)
+        for user in users_to_cc:
+            tcc = TicketCC.objects.create(
+                ticket=t,
+                user=User.objects.get(email=user),
+                can_view=True,
+                can_update=False
+            )
+            tcc.save()
+        # then add remaining emails alphabetically, makes testing easy
+        new_cc = cc.difference(current_cc).difference(all_user_emails)
+        new_cc = sorted(list(new_cc))
+        for ccemail in new_cc:
+            tcc = TicketCC.objects.create(
+                ticket=t,
+                email=ccemail,
+                can_view=True,
+                can_update=False
+            )
+            tcc.save()
 
     f = FollowUp(
         ticket=t,
