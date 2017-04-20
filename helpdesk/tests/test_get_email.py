@@ -457,8 +457,8 @@ class GetEmailCCHandling(TestCase):
         test_mail_len = len(test_email)
 
         with mock.patch('helpdesk.management.commands.get_email.listdir') as mocked_listdir, \
-            mock.patch('helpdesk.management.commands.get_email.isfile') as mocked_isfile, \
-            mock.patch('builtins.open' if six.PY3 else '__builtin__.open', mock.mock_open(read_data=test_email)):
+                mock.patch('helpdesk.management.commands.get_email.isfile') as mocked_isfile, \
+                mock.patch('builtins.open' if six.PY3 else '__builtin__.open', mock.mock_open(read_data=test_email)):
 
             mocked_isfile.return_value = True
             mocked_listdir.return_value = ['filename1']
@@ -507,7 +507,5 @@ for method, socks in case_matrix:
     test_name = str(
         "TestGetEmail%s%s" % (method.capitalize(), socks_str))
 
-    cl = type(test_name,
-              (GetEmailParametricTemplate,TestCase,),
-              {"method": method, "socks": socks})
+    cl = type(test_name, (GetEmailParametricTemplate,TestCase,), {"method": method, "socks": socks})
     setattr(thismodule, test_name, cl)
