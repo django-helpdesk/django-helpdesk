@@ -355,6 +355,7 @@ class GetEmailParametricTemplate(object):
             self.assertEqual(attach2.followup.id, 2)
             self.assertEqual(attach2.filename, 'email_html_body.html')
 
+
 class GetEmailCCHandling(TestCase):
     """TestCase that checks CC handling in email. Needs its own test harness."""
 
@@ -422,7 +423,6 @@ class GetEmailCCHandling(TestCase):
         }
         self.original_cc = TicketCC.objects.create(**cc_kwargs)
 
-
     def tearDown(self):
 
         rmtree(self.temp_logdir)
@@ -457,15 +457,16 @@ class GetEmailCCHandling(TestCase):
         test_mail_len = len(test_email)
 
         with mock.patch('helpdesk.management.commands.get_email.listdir') as mocked_listdir, \
-             mock.patch('helpdesk.management.commands.get_email.isfile') as mocked_isfile, \
-             mock.patch('builtins.open' if six.PY3 else '__builtin__.open', mock.mock_open(read_data=test_email)):
-             mocked_isfile.return_value = True
-             mocked_listdir.return_value = ['filename1']
+            mock.patch('helpdesk.management.commands.get_email.isfile') as mocked_isfile, \
+            mock.patch('builtins.open' if six.PY3 else '__builtin__.open', mock.mock_open(read_data=test_email)):
 
-             call_command('get_email')
+            mocked_isfile.return_value = True
+            mocked_listdir.return_value = ['filename1']
 
-             mocked_listdir.assert_called_with('/var/lib/mail/helpdesk/')
-             mocked_isfile.assert_any_call('/var/lib/mail/helpdesk/filename1')
+            call_command('get_email')
+
+            mocked_listdir.assert_called_with('/var/lib/mail/helpdesk/')
+            mocked_isfile.assert_any_call('/var/lib/mail/helpdesk/filename1')
 
         # ensure these 4 CCs (test_email_cc one thru four) are the only ones
         # created and added to the existing staff_user that was CC'd,
@@ -508,6 +509,5 @@ for method, socks in case_matrix:
 
     cl = type(test_name,
               (GetEmailParametricTemplate,TestCase,),
-              { "method": method, "socks": socks}
-             )
+              {"method": method, "socks": socks})
     setattr(thismodule, test_name, cl)

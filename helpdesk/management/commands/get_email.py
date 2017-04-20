@@ -387,7 +387,7 @@ def ticket_from_message(message, queue, logger):
         all_users = User.objects.all()
         all_user_emails = set([x.email for x in all_users])
         users_not_currently_ccd = all_user_emails.difference(set(current_cc))
-        users_to_cc = cc.intersection( users_not_currently_ccd )
+        users_to_cc = cc.intersection(users_not_currently_ccd)
         for user in users_to_cc:
             tcc = TicketCC.objects.create(
                 ticket=t,
