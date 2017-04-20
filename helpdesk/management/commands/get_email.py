@@ -35,6 +35,7 @@ from django.utils import encoding, six, timezone
 from helpdesk import settings
 from helpdesk.lib import send_templated_mail, safe_template_context, process_attachments
 from helpdesk.models import Queue, Ticket, TicketCC, FollowUp, IgnoreEmail
+from django.contrib.auth.models import User
 
 import logging
 
@@ -382,9 +383,21 @@ def ticket_from_message(message, queue, logger):
         if t.assigned_to:
             other_emails.append(t.assigned_to.email)
         current_cc = set(current_cc_emails + current_cc_users + other_emails)
-        # add any email in cc that's not already in current_cc (set difference)
-        new_cc = cc.difference(current_cc)
-        # add emails alphabetically, makes testing easy
+        # first, add any User not previously CC'd (as identified by User's email)
+        all_users = User.objects.all()
+        all_user_emails = set([x.email for x in all_users])
+        users_not_currently_ccd = all_user_emails.difference(set(current_cc))
+        users_to_cc = cc.intersection( users_not_currently_ccd )
+        for user in users_to_cc:
+            tcc = TicketCC.objects.create(
+                ticket=t,
+                user=User.objects.get(email=user),
+                can_view=True,
+                can_update=False
+            )
+            tcc.save()
+        # then add remaining emails alphabetically, makes testing easy
+        new_cc = cc.difference(current_cc).difference(all_user_emails)
         new_cc = sorted(list(new_cc))
         for ccemail in new_cc:
             tcc = TicketCC.objects.create(

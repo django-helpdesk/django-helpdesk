@@ -367,6 +367,7 @@ class GetEmailCCHandling(TestCase):
             "slug": 'CC',
             "allow_public_submission": True,
             "allow_email_submission": True,
+            "email_address": 'queue@example.com',
             "email_box_type": 'local',
             "email_box_local_dir": '/var/lib/mail/helpdesk/',
             "logging_dir": self.temp_logdir,
@@ -393,6 +394,16 @@ class GetEmailCCHandling(TestCase):
             'is_active': True
         }
         self.assigned_user = User.objects.create(**user2_kwargs)
+
+        user3_kwargs = {
+            'username': 'observer',
+            'email': 'observer@example.com',
+            'password': make_password('Test1234'),
+            'is_staff': True,
+            'is_superuser': False,
+            'is_active': True
+        }
+        self.observer_user = User.objects.create(**user3_kwargs)
 
         ticket_kwargs = {
             'title': 'Original Ticket',
@@ -426,9 +437,12 @@ class GetEmailCCHandling(TestCase):
         self.assertEqual(ticket1.title, "Original Ticket")
         # only the staff_user is CC'd for now
         self.assertEqual(len(TicketCC.objects.filter(ticket=1)), 1)
+        ccstaff = get_object_or_404(TicketCC, pk=1)
+        self.assertEqual(ccstaff.user, User.objects.get(username='staff'))
+        self.assertEqual(ticket1.assigned_to, User.objects.get(username='assigned'))
 
         # example email text from Django docs: https://docs.djangoproject.com/en/1.10/ref/unicode/
-        test_email_from = "Arnbjörg Ráðormsdóttir <arnbjorg@example.com>"
+        test_email_from = "submitter@example.com"
         # NOTE: CC emails are in alphabetical order and must be tested as such!
         # implementation uses sets, so only way to ensure tickets created
         # in right order is to change set to list and sort it
@@ -436,10 +450,10 @@ class GetEmailCCHandling(TestCase):
         test_email_cc_two = "nobody@example.com"
         test_email_cc_three = "other@example.com"
         test_email_cc_four = "someone@example.com"
-        ticket_user_emails = "assigned@example.com, staff@example.com, submitter@example.com"
+        ticket_user_emails = "assigned@example.com, staff@example.com, submitter@example.com, observer@example.com, queue@example.com"
         test_email_subject = "[CC-1] My visit to Sør-Trøndelag"
         test_email_body = "Unicode helpdesk comment with an s-hat (ŝ) via email."
-        test_email = "To: helpdesk@example.com\nCc: " + test_email_cc_one + ", " + test_email_cc_one + ", " + test_email_cc_two + ", " + test_email_cc_three + "\nCC: " + test_email_cc_one + ", " + test_email_cc_three + ", " + test_email_cc_four + ", " + ticket_user_emails + "\nFrom: " + test_email_from + "\nSubject: " + test_email_subject + "\n\n" + test_email_body
+        test_email = "To: queue@example.com\nCc: " + test_email_cc_one + ", " + test_email_cc_one + ", " + test_email_cc_two + ", " + test_email_cc_three + "\nCC: " + test_email_cc_one + ", " + test_email_cc_three + ", " + test_email_cc_four + ", " + ticket_user_emails + "\nFrom: " + test_email_from + "\nSubject: " + test_email_subject + "\n\n" + test_email_body
         test_mail_len = len(test_email)
 
         with mock.patch('helpdesk.management.commands.get_email.listdir') as mocked_listdir, \
@@ -453,22 +467,25 @@ class GetEmailCCHandling(TestCase):
              mocked_listdir.assert_called_with('/var/lib/mail/helpdesk/')
              mocked_isfile.assert_any_call('/var/lib/mail/helpdesk/filename1')
 
-        # next we make sure no duplicates were added, and the
-        # staff users nor submitter were not re-added as email TicketCCs
-        cc1 = get_object_or_404(TicketCC, pk=2)
-        self.assertEqual(cc1.email, test_email_cc_one)
-        cc2 = get_object_or_404(TicketCC, pk=3)
-        self.assertEqual(cc2.email, test_email_cc_two)
-        cc3 = get_object_or_404(TicketCC, pk=4)
-        self.assertEqual(cc3.email, test_email_cc_three)
-        cc4 = get_object_or_404(TicketCC, pk=5)
-        self.assertEqual(cc4.email, test_email_cc_four)
         # ensure these 4 CCs (test_email_cc one thru four) are the only ones
         # created and added to the existing staff_user that was CC'd,
+        # and the observer user that gets CC'd to new email.,
         # and that submitter and assignee are not added as CC either
         # (in other words, even though everyone was CC'd to this email,
-        #  we should come out with only 5 CCs after filtering)
-        self.assertEqual(len(TicketCC.objects.filter(ticket=1)), 5)
+        #  we should come out with only 6 CCs after filtering)
+        self.assertEqual(len(TicketCC.objects.filter(ticket=1)), 6)
+        # next we make sure no duplicates were added, and the
+        # staff users nor submitter were not re-added as email TicketCCs
+        cc0 = get_object_or_404(TicketCC, pk=2)
+        self.assertEqual(cc0.user, User.objects.get(username='observer'))
+        cc1 = get_object_or_404(TicketCC, pk=3)
+        self.assertEqual(cc1.email, test_email_cc_one)
+        cc2 = get_object_or_404(TicketCC, pk=4)
+        self.assertEqual(cc2.email, test_email_cc_two)
+        cc3 = get_object_or_404(TicketCC, pk=5)
+        self.assertEqual(cc3.email, test_email_cc_three)
+        cc4 = get_object_or_404(TicketCC, pk=6)
+        self.assertEqual(cc4.email, test_email_cc_four)
 
 
 # build matrix of test cases
