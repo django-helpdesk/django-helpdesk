@@ -507,5 +507,5 @@ for method, socks in case_matrix:
     test_name = str(
         "TestGetEmail%s%s" % (method.capitalize(), socks_str))
 
-    cl = type(test_name, (GetEmailParametricTemplate,TestCase,), {"method": method, "socks": socks})
+    cl = type(test_name, (GetEmailParametricTemplate, TestCase), {"method": method, "socks": socks})
     setattr(thismodule, test_name, cl)
