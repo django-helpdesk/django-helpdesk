@@ -5,7 +5,7 @@ templatetags/saved_queries.py - This template tag returns previously saved
                                 queries. Therefore you don't need to modify
                                 any views.
 """
-
+from __future__ import print_function
 from django.template import Library
 from django.db.models import Q
 from helpdesk.models import SavedSearch
@@ -17,8 +17,9 @@ def saved_queries(user):
         return user_saved_queries
     except Exception as e:
         import sys
-        print >> sys.stderr, "'saved_queries' template tag (django-helpdesk) crashed with following error:"
-        print >> sys.stderr, e
+        print("'saved_queries' template tag (django-helpdesk) crashed with following error:",
+              file=sys.stderr)
+        print(e, file=sys.stderr)
         return ''
 
 register = Library()
