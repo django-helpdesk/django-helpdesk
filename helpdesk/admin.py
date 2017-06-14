@@ -40,7 +40,12 @@ class AttachmentInline(admin.StackedInline):
 @admin.register(FollowUp)
 class FollowUpAdmin(admin.ModelAdmin):
     inlines = [TicketChangeInline, AttachmentInline]
+    list_display = ('ticket_get_ticket_for_url', 'title', 'date', 'ticket', 'user', 'new_status')
+    list_filter = ('user', 'date', 'new_status')
 
+    def ticket_get_ticket_for_url(self, obj):
+        return obj.ticket.ticket_for_url
+    ticket_get_ticket_for_url.short_description = _('Slug')
 
 @admin.register(KBItem)
 class KBItemAdmin(admin.ModelAdmin):
