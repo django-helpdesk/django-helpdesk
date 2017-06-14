@@ -47,6 +47,7 @@ class FollowUpAdmin(admin.ModelAdmin):
         return obj.ticket.ticket_for_url
     ticket_get_ticket_for_url.short_description = _('Slug')
 
+
 @admin.register(KBItem)
 class KBItemAdmin(admin.ModelAdmin):
     list_display = ('category', 'title', 'last_updated',)
