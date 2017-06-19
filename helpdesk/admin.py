@@ -64,8 +64,12 @@ class EmailTemplateAdmin(admin.ModelAdmin):
     list_display = ('template_name', 'heading', 'locale')
     list_filter = ('locale', )
 
+@admin.register(IgnoreEmail)
+class IgnoreEmailAdmin(admin.ModelAdmin):
+    list_display = ('name', 'queue_list', 'email_address', 'keep_in_mailbox')
+
 
 admin.site.register(PreSetReply)
 admin.site.register(EscalationExclusion)
 admin.site.register(KBCategory)
-admin.site.register(IgnoreEmail)
+#admin.site.register(IgnoreEmail)
