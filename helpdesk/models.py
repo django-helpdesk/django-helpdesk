@@ -1199,6 +1199,16 @@ class IgnoreEmail(models.Model):
             self.date = timezone.now()
         return super(IgnoreEmail, self).save(*args, **kwargs)
 
+    def queue_list(self):
+        """Return a list of the queues this IgnoreEmail applies to.
+        If this IgnoreEmail applies to ALL queues, return '*'.
+        """
+        queues = self.queues.all().order_by('title')
+        if len(queues) == 0:
+            return '*'
+        else:
+            return ', '.join([str(q) for q in queues])
+
     def test(self, email):
         """
         Possible situations:
