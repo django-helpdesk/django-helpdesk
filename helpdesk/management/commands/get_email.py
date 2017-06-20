@@ -21,6 +21,8 @@ from os.path import isfile, join
 import poplib
 import re
 import socket
+import base64
+import binascii
 from time import ctime
 
 from email_reply_parser import EmailReplyParser
@@ -332,8 +334,16 @@ def ticket_from_message(message, queue, logger):
             if not name:
                 ext = mimetypes.guess_extension(part.get_content_type())
                 name = "part-%i%s" % (counter, ext)
-            files.append(SimpleUploadedFile(name, encoding.smart_bytes(part.get_payload()), part.get_content_type()))
-            logger.debug("Found MIME attachment %s" % name)
+            payload = part.get_payload()
+            payloadToWrite = payload
+            try:
+                logger.debug("Try to base64 decode the attachment payload")
+                payloadToWrite = base64.decodestring(payload)
+            except binascii.Error:
+                logger.debug("Payload was not base64 encoded, using raw bytes")
+                payloadToWrite = payload
+            files.append(SimpleUploadedFile(name, encoding.smart_bytes(payloadToWrite), part.get_content_type()))
+            logger.info("Found MIME attachment %s" % name)
 
         counter += 1
 
