@@ -136,6 +136,7 @@ setup(
         "Framework :: Django :: 1.8",
         "Framework :: Django :: 1.9",
         "Framework :: Django :: 1.10",
+        "Framework :: Django :: 1.11",
         "Environment :: Web Environment",
         "Operating System :: OS Independent",
         "Intended Audience :: Customer Service",
