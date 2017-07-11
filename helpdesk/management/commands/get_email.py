@@ -323,7 +323,10 @@ def ticket_from_message(message, queue, logger):
                     decodeUnknown(part.get_content_charset(), part.get_payload(decode=True))
                 )
                 # workaround to get unicode text out rather than escaped text
-                body = body.encode('ascii').decode('unicode_escape') if six.PY3 else body.encode('utf-8')
+                try:
+                    body = body.encode('ascii').decode('unicode_escape')
+                except UnicodeEncodeError:
+                    body.encode('utf-8')
                 logger.debug("Discovered plain text MIME part")
             else:
                 files.append(
@@ -369,6 +372,8 @@ def ticket_from_message(message, queue, logger):
     priority = 2 if high_priority_types & {smtp_priority, smtp_importance} else 3
 
     if ticket is None:
+        if settings.QUEUE_EMAIL_BOX_UPDATE_ONLY:
+            return None
         new = True
         t = Ticket.objects.create(
             title=subject,
