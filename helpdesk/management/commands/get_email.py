@@ -372,6 +372,8 @@ def ticket_from_message(message, queue, logger):
     priority = 2 if high_priority_types & {smtp_priority, smtp_importance} else 3
 
     if ticket is None:
+        if settings.QUEUE_EMAIL_BOX_UPDATE_ONLY:
+            return None
         new = True
         t = Ticket.objects.create(
             title=subject,
