@@ -81,6 +81,10 @@ These changes are visible throughout django-helpdesk
 - **HELPDESK_EMAIL_FALLBACK_LOCALE** Fallback locale for templated emails when queue locale not found
 
   **Default:** ``HELPDESK_EMAIL_FALLBACK_LOCALE= "en"``
+  
+- **QUEUE_EMAIL_BOX_UPDATE_ONLY** Only process mail with a valid tracking ID; all other mail will be ignored instead of creating a new ticket.
+
+  **Default:** ``False``
 
 
 Options shown on public pages
