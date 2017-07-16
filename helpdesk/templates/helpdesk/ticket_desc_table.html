@@ -29,7 +29,7 @@
                                             <th colspan='2'>{% trans "Description" %}</th>
                                         </tr>
                                         <tr>
-                                            <td id="ticket-description" colspan='2'>{{ ticket.description|force_escape|urlizetrunc:50|linebreaksbr }}</td>
+                                            <td id="ticket-description" colspan='2'>{{ ticket.description|force_escape|urlizetrunc:50|num_to_link|linebreaksbr }}</td>
                                         </tr>
 
                                         {% if ticket.resolution %}<tr>
