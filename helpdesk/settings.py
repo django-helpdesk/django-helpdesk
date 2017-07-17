@@ -51,7 +51,7 @@ HELPDESK_TRANSLATE_TICKET_COMMENTS = getattr(settings,
 # all default google translate languages will be shown.
 HELPDESK_TRANSLATE_TICKET_COMMENTS_LANG = getattr(settings,
                                                   'HELPDESK_TRANSLATE_TICKET_COMMENTS_LANG',
-                                                  ["en", "de", "fr", "it", "ru"])
+                                                  ["en", "de", "es", "fr", "it", "ru"])
 
 # show link to 'change password' on 'User Settings' page?
 HELPDESK_SHOW_CHANGE_PASSWORD = getattr(settings, 'HELPDESK_SHOW_CHANGE_PASSWORD', False)
