@@ -51,7 +51,7 @@ HELPDESK_TRANSLATE_TICKET_COMMENTS = getattr(settings,
 # all default google translate languages will be shown.
 HELPDESK_TRANSLATE_TICKET_COMMENTS_LANG = getattr(settings,
                                                   'HELPDESK_TRANSLATE_TICKET_COMMENTS_LANG',
-                                                  ["en", "de", "fr", "it", "ru"])
+                                                  ["en", "de", "es", "fr", "it", "ru"])
 
 # show link to 'change password' on 'User Settings' page?
 HELPDESK_SHOW_CHANGE_PASSWORD = getattr(settings, 'HELPDESK_SHOW_CHANGE_PASSWORD', False)
@@ -133,6 +133,8 @@ QUEUE_EMAIL_BOX_SSL = getattr(settings, 'QUEUE_EMAIL_BOX_SSL', None)
 QUEUE_EMAIL_BOX_HOST = getattr(settings, 'QUEUE_EMAIL_BOX_HOST', None)
 QUEUE_EMAIL_BOX_USER = getattr(settings, 'QUEUE_EMAIL_BOX_USER', None)
 QUEUE_EMAIL_BOX_PASSWORD = getattr(settings, 'QUEUE_EMAIL_BOX_PASSWORD', None)
+
+# only process emails with a valid tracking ID? (throws away all other mail)
 QUEUE_EMAIL_BOX_UPDATE_ONLY = getattr(settings, 'QUEUE_EMAIL_BOX_UPDATE_ONLY', False)
 
 # only allow users to access queues that they are members of?

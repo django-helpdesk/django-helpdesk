@@ -117,7 +117,15 @@ def send_templated_mail(template_name,
 
     if files:
         for filename, filefield in files:
-            msg.attach(filename, open(filefield.path).read())
+            mime = mimetypes.guess_type(filename)
+            if mime[0] is not None and mime[0] == "text/plain":
+                with open(filefield.path, 'r') as file:
+                    content = file.read()
+                    msg.attach(filename, content)
+            else:
+                with open(filefield.path, 'rb') as file:
+                    content = file.read()
+                    msg.attach(filename, content)
 
     return msg.send(fail_silently)
 
