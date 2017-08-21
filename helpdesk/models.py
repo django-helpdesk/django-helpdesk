@@ -339,6 +339,7 @@ class Queue(models.Model):
                 pass
 
 
+@python_2_unicode_compatible
 class Ticket(models.Model):
     """
     To allow a ticket to be entered as quickly as possible, only the
