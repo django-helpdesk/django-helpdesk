@@ -388,9 +388,10 @@ def ticket_from_message(message, queue, logger):
     if cc:
         # get list of currently CC'd emails
         current_cc = TicketCC.objects.filter(ticket=ticket)
-        current_cc_emails = [x.email for x in current_cc]
-        # get emails of any Users CC'd to email
-        current_cc_users = [x.user.email for x in current_cc]
+        current_cc_emails = [x.email for x in current_cc if x.email]
+        # get emails of any Users CC'd to email, if defined
+        # (some Users may not have an associated email, e.g, when using LDAP)
+        current_cc_users = [x.user.email for x in current_cc if x.user and x.user.email]
         # ensure submitter, assigned user, queue email not added
         other_emails = [queue.email_address]
         if t.submitter_email:
