@@ -191,6 +191,38 @@ def apply_query(queryset, params):
     return queryset
 
 
+def ticket_template_context(ticket):
+    context = {}
+
+    for field in ('title', 'created', 'modified', 'submitter_email',
+                  'status', 'get_status_display', 'on_hold', 'description',
+                  'resolution', 'priority', 'get_priority_display',
+                  'last_escalation', 'ticket', 'ticket_for_url',
+                  'get_status', 'ticket_url', 'staff_url', '_get_assigned_to'
+                  ):
+        attr = getattr(ticket, field, None)
+        if callable(attr):
+            context[field] = '%s' % attr()
+        else:
+            context[field] = attr
+    context['assigned_to'] = context['_get_assigned_to']
+
+    return context
+
+
+def queue_template_context(queue):
+    context = {}
+
+    for field in ('title', 'slug', 'email_address', 'from_address', 'locale'):
+        attr = getattr(queue, field, None)
+        if callable(attr):
+            context[field] = attr()
+        else:
+            context[field] = attr
+
+    return context
+
+
 def safe_template_context(ticket):
     """
     Return a dictionary that can be used as a template context to render
@@ -207,32 +239,10 @@ def safe_template_context(ticket):
     """
 
     context = {
-        'queue': {},
-        'ticket': {}
+        'queue': queue_template_context(ticket.queue),
+        'ticket': ticket_template_context(ticket),
     }
-    queue = ticket.queue
-
-    for field in ('title', 'slug', 'email_address', 'from_address', 'locale'):
-        attr = getattr(queue, field, None)
-        if callable(attr):
-            context['queue'][field] = attr()
-        else:
-            context['queue'][field] = attr
-
-    for field in ('title', 'created', 'modified', 'submitter_email',
-                  'status', 'get_status_display', 'on_hold', 'description',
-                  'resolution', 'priority', 'get_priority_display',
-                  'last_escalation', 'ticket', 'ticket_for_url',
-                  'get_status', 'ticket_url', 'staff_url', '_get_assigned_to'
-                  ):
-        attr = getattr(ticket, field, None)
-        if callable(attr):
-            context['ticket'][field] = '%s' % attr()
-        else:
-            context['ticket'][field] = attr
-
     context['ticket']['queue'] = context['queue']
-    context['ticket']['assigned_to'] = context['ticket']['_get_assigned_to']
 
     return context
 

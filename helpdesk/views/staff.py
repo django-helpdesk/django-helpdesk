@@ -31,7 +31,7 @@ from helpdesk.forms import (
 )
 from helpdesk.lib import (
     send_templated_mail, query_to_dict, apply_query, safe_template_context,
-    process_attachments,
+    process_attachments, queue_template_context,
 )
 from helpdesk.models import (
     Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch,
@@ -696,7 +696,7 @@ def mass_update(request):
             # Send email to Submitter, Owner, Queue CC
             context = safe_template_context(t)
             context.update(resolution=t.resolution,
-                           queue=t.queue)
+                           queue=queue_template_context(t.queue))
 
             messages_sent_to = []
 
