@@ -73,7 +73,7 @@ Then navigate to the site in a browser as above.
 
 *NOTE ON DJANGO VERISON*
 
-The demo project was also created with Django 1.10
+The demo project was also created with Django 1.11
 in mind. If you are using a different version of Django,
 slight tweaks might be necessary to make the demo work.
 
