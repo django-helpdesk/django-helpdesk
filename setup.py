@@ -6,7 +6,7 @@ from distutils.util import convert_path
 from fnmatch import fnmatchcase
 from setuptools import setup, find_packages
 
-version = '0.2.0.1'
+version = '0.2.0'
 
 # Provided as an attribute, so you can append to these instead
 # of replicating them:
@@ -133,9 +133,6 @@ setup(
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Framework :: Django",
-        "Framework :: Django :: 1.8",
-        "Framework :: Django :: 1.9",
-        "Framework :: Django :: 1.10",
         "Framework :: Django :: 1.11",
         "Environment :: Web Environment",
         "Operating System :: OS Independent",
@@ -150,8 +147,8 @@ setup(
               'cases', 'bugs', 'track', 'support'],
     author='Ross Poulton',
     author_email='ross@rossp.org',
-    maintainer='Jonathan Barratt',
-    maintainer_email='jonathan@the-im.com',
+    maintainer='Garret Wassermann',
+    maintainer_email='gwasser@gmail.com',
     url='https://github.com/django-helpdesk/django-helpdesk',
     license='BSD',
     packages=find_packages(),

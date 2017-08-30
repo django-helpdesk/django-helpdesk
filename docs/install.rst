@@ -63,7 +63,7 @@ errors with trying to create User settings.
 
    This line will have to come *after* any other lines in your urls.py such as those used by the Django admin.
 
-   Note that the `helpdesk` namespace is no longer required for Django 1.9 and you can use a different namespace.
+   Note that the `helpdesk` namespace is no longer required for Django 1.9+ and you can use a different namespace.
    However, it is recommended to use the default namespace name for clarity.
 
 3. Create the required database tables.
