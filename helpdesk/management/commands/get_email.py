@@ -447,7 +447,7 @@ def ticket_from_message(message, queue, logger):
 
     attached = process_attachments(f, files)
     for att_file in attached:
-        logger.info("Attachment '%s' successfully added to ticket from email." % att_file[0])
+        logger.info("Attachment '%s' (with size %s) successfully added to ticket from email." % (att_file[0], att_file[1].size))
 
     context = safe_template_context(t)
 
