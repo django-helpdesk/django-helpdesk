@@ -9,6 +9,7 @@ lib.py - Common functions (eg multipart e-mail)
 import logging
 import mimetypes
 import os
+from smtplib import SMTPException
 
 try:
     # Python 2 support
@@ -135,7 +136,15 @@ def send_templated_mail(template_name,
                         content = attachedfile.read()
                         msg.attach(filename, content)
 
-    return msg.send(fail_silently)
+    logger.debug('Sending email to: {!r}'.format(recipients))
+
+    try:
+        return msg.send()
+    except SMTPException:
+        logger.exception('SMTPException raised while sending email to {}'.format(recipients))
+        if not fail_silently:
+            raise e
+        return 0
 
 
 def query_to_dict(results, descriptions):
