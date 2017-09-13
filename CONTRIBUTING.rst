@@ -27,6 +27,7 @@ Ways to Contribute
 ------------------
 
 We're happy to include any type of contribution! This can be:
+
 * back-end python/django code development
 * front-end web development (HTML/Javascript, especially jQuery)
 * language translations
@@ -46,10 +47,12 @@ pull request back into the appropriate branch of the
 django-helpdesk repository.
 
 In general, we use the following git branching scheme:
+
 * `master` always refers to development for the next major release
-* major releases are found in their own branches
-** `0.2.x` is the branch for the 0.2 release and any bugfix releases
-** `0.1` is the branch for the legacy code; it is no longer supported
+* major releases are found in their own branches:
+
+  * `0.2.x` is the branch for the 0.2 release and any bugfix releases
+  * `0.1` is the branch for the legacy code; it is no longer supported
 
 If you are submitting a patch for a 0.2 release, apply your pull request
 to the `0.2.x` branch. If you are helping develop the next release,

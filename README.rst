@@ -52,7 +52,7 @@ The demo project uses `sqlite` as its database. Sqlite does not allow
 case-insensitive searches and so the search function may not work as
 effectively as it would on other database such as PostgreSQL or MySQL
 that does support case-insensitive searches.
-For more information, see [this note in the Django documentation](http://docs.djangoproject.com/en/dev/ref/databases/#sqlite-string-matching).
+For more information, see this note_ in the Django documentation.
 
 When you try to do a keyword search using `sqlite`, a message will be displayed
 to alert you to this shortcoming. There is no way around it, sorry.
@@ -61,6 +61,7 @@ Installation
 ------------
 
 `django-helpdesk` requires:
+
 * Django 1.11.x *only*
 * either Python 2.7 or 3.4+
 
@@ -108,9 +109,12 @@ Contributing
 ------------
 
 We're happy to include any type of contribution! This can be:
+
 * back-end python/django code development
 * front-end web development (HTML/Javascript, especially jQuery)
 * language translations
 * writing improved documentation and demos
 
 For more information on contributing, please see the `CONTRIBUTING.rst` file.
+
+.. _note: http://docs.djangoproject.com/en/dev/ref/databases/#sqlite-string-matching
