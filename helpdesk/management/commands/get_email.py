@@ -195,7 +195,10 @@ def process_queue(q, logger):
                      settings.QUEUE_EMAIL_BOX_PASSWORD)
         server.select(q.email_box_imap_folder)
 
-        status, data = server.search(None, 'NOT', 'DELETED')
+        try:
+            status, data = server.search(None, 'NOT', 'DELETED')
+        except imaplib.IMAP4.error:
+            logger.error("IMAP retrieve failed. Is the folder '%s' spelled correctly, and does it exist on the server?" % q.email_box_imap_folder)
         if data:
             msgnums = data[0].split()
             logger.info("Received %d messages from IMAP server" % len(msgnums))
