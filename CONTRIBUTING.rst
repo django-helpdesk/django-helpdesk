@@ -40,7 +40,8 @@ the GitHub issue tracker at
 
 https://github.com/django-helpdesk/django-helpdesk/issues
 
-### Back-end Python/Django
+Back-end Python/Django
+``````````````````````
 
 Please fork the project on GitHub, make your changes, and submit a
 pull request back into the appropriate branch of the
@@ -72,7 +73,8 @@ If your changes affect the Django models for django-helpdesk, be aware
 that your commits should include database schema python scripts; see the
 Database Schema Changes section below for more details.
 
-#### Tests
+Tests
+.....
 
 Currently, test coverage is very low. We're working on increasing this, and to
 make life easier we are using Travis CI (http://travis-ci.org/) for continuous
@@ -100,7 +102,8 @@ start a discussion on the GitHub issue tracker at
 
 https://github.com/django-helpdesk/django-helpdesk/issues
 
-#### Database schema changes
+Database schema changes
+.......................
 
 As well as making your normal code changes to ``models.py``, please generate a
 Django migration file and commit it with your code. You will want to use a
@@ -114,7 +117,8 @@ what this migration does, such as *add_priority_options* or *add_basket_table*.
 This will add a file to the ``migrations/`` folder, which must be committed to
 git with your other code changes.
 
-### Translations
+Translations
+````````````
 
 Although django-helpdesk has originally been written for the English language,
 there are already multiple translations to Spanish, Polish, German and Russian.
