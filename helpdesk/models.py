@@ -259,6 +259,7 @@ class Queue(models.Model):
         blank=True,
         null=True,
         verbose_name=_('Default owner'),
+        on_delete=models.SET_NULL,
     )
 
     def __str__(self):
