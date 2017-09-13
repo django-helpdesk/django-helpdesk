@@ -36,55 +36,60 @@ Demo Quickstart
 
 django-helpdesk includes a basic demo Django project so that you may easily
 get started with testing or developing django-helpdesk. The demo project
-resides in the demo/ top-level folder.
+resides in the `demo/` top-level folder.
 
 It's likely that you can start up a demo project server by running
-only the command:
+only the command::
 
     sudo make rundemo
 
-then pointing your web browser at localhost:8080.
+then pointing your web browser at `localhost:8080`.
 
-For more information and options, please read the demo/README.rst file.
+For more information and options, please read the `demo/README.rst` file.
 
 **NOTE REGARDING SQLITE AND SEARCHING:**
-The demo project uses sqlite as its database. Sqlite does not allow
+The demo project uses `sqlite` as its database. Sqlite does not allow
 case-insensitive searches and so the search function may not work as
 effectively as it would on other database such as PostgreSQL or MySQL
 that does support case-insensitive searches.
-For more information, see this note in the Django documentation:
-http://docs.djangoproject.com/en/dev/ref/databases/#sqlite-string-matching
+For more information, see [this note in the Django documentation](http://docs.djangoproject.com/en/dev/ref/databases/#sqlite-string-matching).
 
-When you try to do a keyword search using sqlite, a message will be displayed
+When you try to do a keyword search using `sqlite`, a message will be displayed
 to alert you to this shortcoming. There is no way around it, sorry.
 
 Installation
 ------------
 
-django-helpdesk requires either Python 2.7 or 3.4+, as well as Django 1.11+.
+`django-helpdesk` requires:
+* Django 1.11.x *only*
+* either Python 2.7 or 3.4+
 
 **NOTE REGARDING PYTHON VERSION:**
-The recommended combination is Python 3.4+ with Django 1.11+.
-Support for Python 2 will end in the next versions of both django-helpdesk
-and Django itself (2.0), so users and developers are encouraged to begin
-transitioning to Python 3 if have not already.
+The recommended combination is Python 3.4+ with Django 1.11.
+Support for Python 2 will end in the next versions of both `django-helpdesk`
+and Django itself (Django 2.0), so users and developers are encouraged to begin
+transitioning to Python 3 if have not already. New projects should definitely
+use Python 3!
 
-You can quickly install the latest stable version of django-helpdesk app via pip:
+You can quickly install the latest stable version of `django-helpdesk`
+app via `pip`::
 
     pip install django-helpdesk
 
-You may also check out the master branch on GitHub, and install manually:
+You may also check out the `master` branch on GitHub, and install manually::
 
     python setup.py install
 
-Either way, you will need to add django-helpdesk to an existing Django project.
+Either way, you will need to add `django-helpdesk` to an existing
+Django project.
 
-For further installation information see docs/install.html and docs/configuration.html
+For further installation information see `docs/install.html`
+and `docs/configuration.html`
 
 Upgrading from previous versions
 --------------------------------
 
-If you are upgrading from a previous version of django-helpdesk that used
+If you are upgrading from a previous version of `django-helpdesk` that used
 migrations, get an up to date version of the code base (eg by using
 `git pull` or `pip install --upgrade django-helpdesk`) then migrate the database::
 
@@ -95,15 +100,17 @@ Lastly, restart your web server software (eg Apache) or FastCGI instance, to
 ensure the latest changes are in use.
 
 Unfortunately we are unable to assist if you are upgrading from a
-version of django-helpdesk prior to migrations (ie pre-2011).
+version of `django-helpdesk` prior to migrations (ie pre-2011).
 
 You can continue to the 'Initial Configuration' area, if needed.
 
 Contributing
 ------------
 
-We're happy to include any type of contribution! This can be back-end
-python/django code development, front-end web development
-(HTML/Javascript, especially jQuery), or even language translations.
+We're happy to include any type of contribution! This can be:
+* back-end python/django code development
+* front-end web development (HTML/Javascript, especially jQuery)
+* language translations
+* writing improved documentation and demos
 
-For more information on contributing, please see the CONTRIBUTING.rst file.
+For more information on contributing, please see the `CONTRIBUTING.rst` file.
