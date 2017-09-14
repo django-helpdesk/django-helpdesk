@@ -1,7 +1,27 @@
 Installation
 ============
 
-django-helpdesk installation isn't difficult, but it requires you have a bit of existing know-how about Django.
+``django-helpdesk`` installation isn't difficult, but it requires you have a bit of existing know-how about Django.
+
+
+Prerequisites
+-------------
+
+Before getting started, ensure your system meets the following dependencies:
+
+* Python 3.4+, or Python 2.7
+* Django 1.11.x (Django 2.0 support is coming in a future release; older
+  releases such as 1.8-1.10 *may* work, but are not guaranteed. Django's
+  deprecation policy suggests that any project that worked with 1.8 should
+  be able to upgrade to 1.11 without any problems)
+  
+Ensure any extra Django modules you wish to use are compatible before continuing.
+
+**NOTE**: Python 2.7 support is deprecated in both ``django-helpdesk`` and Django.
+Future releases of ``django-helpdesk`` may remove support for Python 2.7,
+and Django will no longer support Python 2.7 as of the Django 2.0 release.
+It is highly recommended to start new projects using Python 3.4+, or migrate
+existing projects to Python 3.4+.
 
 
 Getting The Code
@@ -12,10 +32,10 @@ Installing using PIP
 
 Try using ``pip install django-helpdesk``. Go and have a beer to celebrate Python packaging.
 
-GIT Checkout (Cutting Edge)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Checkout ``master`` from git (Cutting Edge)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If you're planning on editing the code or just want to get whatever is the latest and greatest, you can clone the official Git repository with ``git clone git://github.com/django-helpdesk/django-helpdesk.git``
+If you're planning on editing the code or just want to get whatever is the latest and greatest, you can clone the official Git repository with ``git clone git://github.com/django-helpdesk/django-helpdesk.git``. We use the ``master`` branch as our development branch for the next major release of ``django-helpdesk``.
 
 Copy the ``helpdesk`` folder into your ``PYTHONPATH``.
 
@@ -124,7 +144,7 @@ Upgrading from previous versions
 
 If you are upgrading from a previous version of django-helpdesk that used
 migrations, get an up to date version of the code base (eg by using
-`git pull` or `pip install --upgrade django-helpdesk`) then migrate the database::
+``git pull`` or ``pip install --upgrade django-helpdesk``) then migrate the database::
 
     python manage.py migrate helpdesk --db-dry-run # DB untouched
     python manage.py migrate helpdesk
