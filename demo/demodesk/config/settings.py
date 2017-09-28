@@ -207,3 +207,8 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # - This is only necessary to make the demo project work, not needed for
 # your own projects unless you make your own fixtures
 FIXTURE_DIRS = [os.path.join(BASE_DIR, 'fixtures')]
+
+try:
+    from .local_settings import *
+except ImportError:
+    pass
