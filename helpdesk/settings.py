@@ -32,6 +32,11 @@ HELPDESK_REDIRECT_TO_LOGIN_BY_DEFAULT = getattr(settings,
                                                 'HELPDESK_REDIRECT_TO_LOGIN_BY_DEFAULT',
                                                 False)
 
+# raises a 404 to anon users. It's like it was invisible
+HELPDESK_ANON_ACCESS_RAISES_404 = getattr(settings,
+                                          'HELPDESK_ANON_ACCESS_RAISES_404',
+                                          False)
+
 # show knowledgebase links?
 HELPDESK_KB_ENABLED = getattr(settings, 'HELPDESK_KB_ENABLED', True)
 
