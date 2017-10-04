@@ -9,18 +9,24 @@ lib.py - Common functions (eg multipart e-mail)
 import logging
 import mimetypes
 import os
+from smtplib import SMTPException
 
 try:
+    # Python 2 support
     from base64 import urlsafe_b64encode as b64encode
 except ImportError:
-    from base64 import encodestring as b64encode
+    # Python 3 support
+    from base64 import encodebytes as b64encode
 try:
+    # Python 2 support
     from base64 import urlsafe_b64decode as b64decode
 except ImportError:
-    from base64 import decodestring as b64decode
+    # Python 3 support
+    from base64 import decodebytes as b64decode
 
 from django.conf import settings
 from django.db.models import Q
+from django.utils import six
 from django.utils.encoding import smart_text
 from django.utils.safestring import mark_safe
 
@@ -119,15 +125,26 @@ def send_templated_mail(template_name,
         for filename, filefield in files:
             mime = mimetypes.guess_type(filename)
             if mime[0] is not None and mime[0] == "text/plain":
-                with open(filefield.path, 'r') as file:
-                    content = file.read()
+                with open(filefield.path, 'r') as attachedfile:
+                    content = attachedfile.read()
                     msg.attach(filename, content)
             else:
-                with open(filefield.path, 'rb') as file:
-                    content = file.read()
-                    msg.attach(filename, content)
+                if six.PY3:
+                    msg.attach_file(filefield.path)
+                else:
+                    with open(filefield.path, 'rb') as attachedfile:
+                        content = attachedfile.read()
+                        msg.attach(filename, content)
 
-    return msg.send(fail_silently)
+    logger.debug('Sending email to: {!r}'.format(recipients))
+
+    try:
+        return msg.send()
+    except SMTPException:
+        logger.exception('SMTPException raised while sending email to {}'.format(recipients))
+        if not fail_silently:
+            raise e
+        return 0
 
 
 def query_to_dict(results, descriptions):

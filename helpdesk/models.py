@@ -259,6 +259,7 @@ class Queue(models.Model):
         blank=True,
         null=True,
         verbose_name=_('Default owner'),
+        on_delete=models.SET_NULL,
     )
 
     def __str__(self):
@@ -339,6 +340,7 @@ class Queue(models.Model):
                 pass
 
 
+@python_2_unicode_compatible
 class Ticket(models.Model):
     """
     To allow a ticket to be entered as quickly as possible, only the

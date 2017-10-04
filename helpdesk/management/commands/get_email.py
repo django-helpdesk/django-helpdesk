@@ -195,7 +195,10 @@ def process_queue(q, logger):
                      settings.QUEUE_EMAIL_BOX_PASSWORD)
         server.select(q.email_box_imap_folder)
 
-        status, data = server.search(None, 'NOT', 'DELETED')
+        try:
+            status, data = server.search(None, 'NOT', 'DELETED')
+        except imaplib.IMAP4.error:
+            logger.error("IMAP retrieve failed. Is the folder '%s' spelled correctly, and does it exist on the server?" % q.email_box_imap_folder)
         if data:
             msgnums = data[0].split()
             logger.info("Received %d messages from IMAP server" % len(msgnums))
@@ -338,15 +341,17 @@ def ticket_from_message(message, queue, logger):
                 ext = mimetypes.guess_extension(part.get_content_type())
                 name = "part-%i%s" % (counter, ext)
             payload = part.get_payload()
+            if isinstance(payload, list):
+                payload = payload.pop().as_string()
             payloadToWrite = payload
             try:
                 logger.debug("Try to base64 decode the attachment payload")
                 payloadToWrite = base64.decodestring(payload)
-            except binascii.Error:
+            except (binascii.Error, TypeError):
                 logger.debug("Payload was not base64 encoded, using raw bytes")
                 payloadToWrite = payload
-            files.append(SimpleUploadedFile(name, encoding.smart_bytes(payloadToWrite), part.get_content_type()))
-            logger.info("Found MIME attachment %s" % name)
+            files.append(SimpleUploadedFile(name, part.get_payload(decode=True), mimetypes.guess_type(name)[0]))
+            logger.debug("Found MIME attachment %s" % name)
 
         counter += 1
 
@@ -388,9 +393,10 @@ def ticket_from_message(message, queue, logger):
     if cc:
         # get list of currently CC'd emails
         current_cc = TicketCC.objects.filter(ticket=ticket)
-        current_cc_emails = [x.email for x in current_cc]
-        # get emails of any Users CC'd to email
-        current_cc_users = [x.user.email for x in current_cc]
+        current_cc_emails = [x.email for x in current_cc if x.email]
+        # get emails of any Users CC'd to email, if defined
+        # (some Users may not have an associated email, e.g, when using LDAP)
+        current_cc_users = [x.user.email for x in current_cc if x.user and x.user.email]
         # ensure submitter, assigned user, queue email not added
         other_emails = [queue.email_address]
         if t.submitter_email:
@@ -445,7 +451,7 @@ def ticket_from_message(message, queue, logger):
 
     attached = process_attachments(f, files)
     for att_file in attached:
-        logger.info("Attachment '%s' successfully added to ticket from email." % att_file[0])
+        logger.info("Attachment '%s' (with size %s) successfully added to ticket from email." % (att_file[0], att_file[1].size))
 
     context = safe_template_context(t)
 

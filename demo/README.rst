@@ -73,9 +73,11 @@ Then navigate to the site in a browser as above.
 
 *NOTE ON DJANGO VERISON*
 
-The demo project was also created with Django 1.10
-in mind. If you are using a different version of Django,
+The demo project was also created with Django 1.11
+in mind. If you are using an older version of Django,
 slight tweaks might be necessary to make the demo work.
+Please remember that we do not currently support any
+version of Django other than 1.11.
 
 *NOTE ON ATTACHMENTS*
 

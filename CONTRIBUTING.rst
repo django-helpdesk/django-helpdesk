@@ -13,43 +13,54 @@ https://github.com/django-helpdesk/django-helpdesk
 Licensing
 ---------
 
-All contributions to django-helpdesk must be under the BSD license documented in
-the LICENSE file in the top-level directory of this project.
+All contributions to django-helpdesk *must* be under the BSD license documented
+in the LICENSE file in the top-level directory of this project.
 
 By submitting a contribution to this project (in any way: via e-mail,
-via GitHub forks, attachments, etc), you acknowledge that your contribution is
-open-source and licensed under the BSD license.
+via GitHub pull requests, ticket attachments, etc), you acknowledge that your
+contribution is open-source and licensed under the BSD license.
 
 If you or your organisation does not accept these license terms then we cannot
 accept your contribution. Please reconsider!
 
-Translations
-------------
+Ways to Contribute
+------------------
 
-Although django-helpdesk has originally been written for the English language,
-there are already multiple translations to Spanish, Polish, German and Russian.
-More translations are welcomed!
+We're happy to include any type of contribution! This can be:
 
-Translations are handled using the excellent Transifex service which is much
-easier for most users than manually editing .po files. It also allows
-collaborative translation. If you want to help translate django-helpdesk into
-languages other than English, we encourage you to make use of our Transifex
-project:
+* back-end python/django code development
+* front-end web development (HTML/Javascript, especially jQuery)
+* language translations
+* writing improved documentation and demos
 
-http://www.transifex.net/projects/p/django-helpdesk/resource/core/
+More details on each of theses tasks is below.
 
-Once you have translated content via Transifex, please raise an issue on the
-project Github page to let us know it's ready to import.
+If you have any questions on contributing, please start a discussion on
+the GitHub issue tracker at
 
-Code changes
-------------
+https://github.com/django-helpdesk/django-helpdesk/issues
 
-Please fork the project on GitHub, make your changes, and log a pull request to
-get the changes pulled back into the
-master branch of the django-helpdesk repository.
+Back-end Python/Django
+``````````````````````
+
+Please fork the project on GitHub, make your changes, and submit a
+pull request back into the appropriate branch of the
+django-helpdesk repository.
+
+In general, we use the following git branching scheme:
+
+* `master` always refers to development for the next major release
+* major releases are found in their own branches:
+
+  * `0.2.x` is the branch for the 0.2 release and any bugfix releases
+  * `0.1` is the branch for the legacy code; it is no longer supported
+
+If you are submitting a patch for a 0.2 release, apply your pull request
+to the `0.2.x` branch. If you are helping develop the next release,
+apply your patches to the `master` branch.
 
 Wherever possible please break git commits up into small chunks that are
-specific to a single bit of functionality. For example, a commit should not
+specific to a single bit of functionality. For example, a commit should *not*
 contain both new functionality *and* a bugfix; the new function and the bugfix
 should be separate commits wherever possible.
 
@@ -58,16 +69,15 @@ Commit messages should also explain *what*, precisely, has been changed.
 All commits should include appropriate new or updated tests; see the Tests
 section below for more details.
 
-If you have any questions, please start a discussion on the GitHub issue tracker
-at
-
-https://github.com/django-helpdesk/django-helpdesk/issues
+If your changes affect the Django models for django-helpdesk, be aware
+that your commits should include database schema python scripts; see the
+Database Schema Changes section below for more details.
 
 Tests
------
+.....
 
 Currently, test coverage is very low. We're working on increasing this, and to
-make life easier we are using `Travis CI` (http://travis-ci.org/) for continuous
+make life easier we are using Travis CI (http://travis-ci.org/) for continuous
 integration. This means that the test suite is run every time a code change is
 made, so we can try and make sure we avoid basic bugs and other regressions.
 
@@ -77,7 +87,7 @@ functionality you just added). Bugfixes should also include new unit tests to
 ensure the bug has been fixed.
 
 More significant code refactoring must also include proper integration or
-validation tests, to be committed BEFORE the refactoring patches. This is to
+validation tests, to be committed *BEFORE* the refactoring patches. This is to
 ensure that the refactored code produces the same results as the previous code
 base.
 
@@ -93,7 +103,7 @@ start a discussion on the GitHub issue tracker at
 https://github.com/django-helpdesk/django-helpdesk/issues
 
 Database schema changes
------------------------
+.......................
 
 As well as making your normal code changes to ``models.py``, please generate a
 Django migration file and commit it with your code. You will want to use a
@@ -106,3 +116,21 @@ what this migration does, such as *add_priority_options* or *add_basket_table*.
 
 This will add a file to the ``migrations/`` folder, which must be committed to
 git with your other code changes.
+
+Translations
+````````````
+
+Although django-helpdesk has originally been written for the English language,
+there are already multiple translations to Spanish, Polish, German and Russian.
+More translations are welcomed!
+
+Translations are handled using the excellent Transifex service which is much
+easier for most users than manually editing .po files. It also allows
+collaborative translation. If you want to help translate django-helpdesk into
+languages other than English, we encourage you to make use of our Transifex
+project:
+
+http://www.transifex.net/projects/p/django-helpdesk/resource/core/
+
+Once you have translated content via Transifex, please raise an issue on the
+project Github page to let us know it's ready to import.

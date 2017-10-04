@@ -24,6 +24,8 @@ from django.utils.html import escape
 from django import forms
 from django.utils import timezone
 
+from django.utils import six
+
 from helpdesk.forms import (
     TicketForm, UserSettingsForm, EmailIgnoreForm, EditTicketForm, TicketCCForm,
     TicketCCEmailForm, TicketCCUserForm, EditFollowUpForm, TicketDependencyForm
@@ -815,7 +817,10 @@ def ticket_list(request):
         import json
         from helpdesk.lib import b64decode
         try:
-            query_params = json.loads(b64decode(str(saved_query.query)))
+            if six.PY3:
+                query_params = json.loads(b64decode(str(saved_query.query)).decode())
+            else:
+                query_params = json.loads(b64decode(str(saved_query.query)))
         except ValueError:
             # Query deserialization failed. (E.g. was a pickled query)
             return HttpResponseRedirect(reverse('helpdesk:list'))
@@ -1112,7 +1117,10 @@ def run_report(request, report):
         import json
         from helpdesk.lib import b64decode
         try:
-            query_params = json.loads(b64decode(str(saved_query.query)))
+            if six.PY3:
+                query_params = json.loads(b64decode(str(saved_query.query)).decode())
+            else:
+                query_params = json.loads(b64decode(str(saved_query.query)))
         except:
             return HttpResponseRedirect(reverse('helpdesk:report_index'))
 

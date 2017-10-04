@@ -1,6 +1,7 @@
-Django>=1.8
-django-bootstrap-form>=3.1,<4
+Django>=1.11,<2
+django-bootstrap-form>=3.3,<4
 email-reply-parser
 django-markdown-deux
 simplejson
+pytz
 six
