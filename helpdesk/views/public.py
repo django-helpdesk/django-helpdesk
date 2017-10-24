@@ -14,15 +14,14 @@ from django.utils.http import urlquote
 from django.utils.translation import ugettext as _
 
 from helpdesk import settings as helpdesk_settings
+from helpdesk.decorators import protect_view
 from helpdesk.forms import PublicTicketForm
 from helpdesk.lib import text_is_spam
 from helpdesk.models import Ticket, Queue, UserSettings, KBCategory
 
 
+@protect_view
 def homepage(request):
-    if not request.user.is_authenticated() and helpdesk_settings.HELPDESK_REDIRECT_TO_LOGIN_BY_DEFAULT:
-        return HttpResponseRedirect(reverse('helpdesk:login'))
-
     if request.user.is_staff or \
             (request.user.is_authenticated() and
              helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE):
@@ -74,6 +73,7 @@ def homepage(request):
     })
 
 
+@protect_view
 def view_ticket(request):
     ticket_req = request.GET.get('ticket', None)
     email = request.GET.get('email', None)

@@ -14,7 +14,6 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import user_passes_test
 from django.core.urlresolvers import reverse
 from django.core.exceptions import ValidationError, PermissionDenied
-from django.core import paginator
 from django.db import connection
 from django.db.models import Q
 from django.http import HttpResponseRedirect, Http404, HttpResponse
@@ -93,7 +92,6 @@ def dashboard(request):
     showing ticket counts by queue/status, and a list of unassigned tickets
     with options for them to 'Take' ownership of said tickets.
     """
-
     # open & reopened tickets, assigned to current user
     tickets = Ticket.objects.select_related('queue').filter(
         assigned_to=request.user,
