@@ -47,17 +47,33 @@ Please fork the project on GitHub, make your changes, and submit a
 pull request back into the appropriate branch of the
 django-helpdesk repository.
 
-In general, we use the following git branching scheme:
+Short story:
 
-* `master` always refers to development for the next major release
+* pull requests for `master` are for bugfixes to current release
+* pull requests for `develop` are for major features in future release
+
+Longer story:
+
+In general, our git branching scheme looks like the following.
+
+* `master` always points to the latest major release, plus bugfixes
+* `develop` always points to development for the next major release
 * major releases are found in their own branches:
 
   * `0.2.x` is the branch for the 0.2 release and any bugfix releases
   * `0.1` is the branch for the legacy code; it is no longer supported
 
 If you are submitting a patch for a 0.2 release, apply your pull request
-to the `0.2.x` branch. If you are helping develop the next release,
-apply your patches to the `master` branch.
+to the `master` branch. Once patches are tested and gathered into a new
+bugfix release, it will be merged into the `0.2.x` branch by a
+maintainer.
+
+If you are helping develop the next release, apply your pull requests
+to the `develop` branch instead.
+
+We reserve the right to decline a pull request if it is not for
+the appropriate branch. For example, major new features shouldn't
+be applied to the `master` branch, and will be rejected.
 
 Wherever possible please break git commits up into small chunks that are
 specific to a single bit of functionality. For example, a commit should *not*
@@ -69,7 +85,7 @@ Commit messages should also explain *what*, precisely, has been changed.
 All commits should include appropriate new or updated tests; see the Tests
 section below for more details.
 
-If your changes affect the Django models for django-helpdesk, be aware
+If your changes affect the Django models for `django-helpdesk`, be aware
 that your commits should include database schema python scripts; see the
 Database Schema Changes section below for more details.
 
@@ -120,9 +136,9 @@ git with your other code changes.
 Translations
 ````````````
 
-Although django-helpdesk has originally been written for the English language,
-there are already multiple translations to Spanish, Polish, German and Russian.
-More translations are welcomed!
+Although `django-helpdesk` has originally been written for the English language,
+there are already multiple community translations, including Spanish, Polish,
+German, and Russian. More translations are welcomed!
 
 Translations are handled using the excellent Transifex service which is much
 easier for most users than manually editing .po files. It also allows
