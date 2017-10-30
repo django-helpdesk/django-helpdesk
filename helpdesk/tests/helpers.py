@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
-from helpdesk.models import Ticket, Queue
+from helpdesk.models import Ticket, Queue, UserSettings
 
 
 def get_staff_user(username='helpdesk.staff', password='password'):
@@ -22,7 +22,7 @@ def get_staff_user(username='helpdesk.staff', password='password'):
 
 def reload_urlconf(urlconf=None):
 
-    from imp import reload  # python 3 needs this import.
+    from importlib import reload  # python 3 needs this import.
 
     if urlconf is None:
         from django.conf import settings
@@ -40,7 +40,7 @@ def reload_urlconf(urlconf=None):
 
 
 def update_user_settings(user, **kwargs):
-    usersettings = user.usersettings
+    usersettings = user.usersettings_helpdesk
     settings = usersettings.settings
     settings.update(kwargs)
     usersettings.settings = settings
@@ -48,7 +48,7 @@ def update_user_settings(user, **kwargs):
 
 
 def delete_user_settings(user, *args):
-    usersettings = user.usersettings
+    usersettings = user.usersettings_helpdesk
     settings = usersettings.settings
     for setting in args:
         if setting in settings:

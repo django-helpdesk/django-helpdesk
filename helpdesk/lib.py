@@ -11,18 +11,14 @@ import mimetypes
 import os
 from smtplib import SMTPException
 
-try:
-    # Python 2 support
-    from base64 import urlsafe_b64encode as b64encode
-except ImportError:
-    # Python 3 support
+import six
+
+if six.PY3:
     from base64 import encodebytes as b64encode
-try:
-    # Python 2 support
-    from base64 import urlsafe_b64decode as b64decode
-except ImportError:
-    # Python 3 support
     from base64 import decodebytes as b64decode
+else:
+    from base64 import urlsafe_b64encode as b64encode
+    from base64 import urlsafe_b64decode as b64decode
 
 from django.conf import settings
 from django.db.models import Q

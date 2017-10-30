@@ -27,6 +27,7 @@ class QuickDjangoTest(object):
         'django.contrib.sessions',
         'django.contrib.sites',
         'django.contrib.staticfiles',
+        'markdown_deux',
         'bootstrapform',
     )
     MIDDLEWARE_CLASSES = [
@@ -58,6 +59,8 @@ class QuickDjangoTest(object):
             },
         },
     ]
+                
+    SITE_ID = 1
 
     def __init__(self, *args, **kwargs):
         self.apps = args

@@ -1,23 +1,24 @@
 # -*- coding: utf-8 -*-
 import sys
+from importlib import reload
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 
-from helpdesk import settings
+from helpdesk import settings as helpdesk_settings
 from helpdesk.tests.helpers import (get_staff_user, reload_urlconf, User, update_user_settings, delete_user_settings,
                                     create_ticket)
 
 
 class KBDisabledTestCase(TestCase):
     def setUp(self):
-        self.HELPDESK_KB_ENABLED = settings.HELPDESK_KB_ENABLED
+        self.HELPDESK_KB_ENABLED = helpdesk_settings.HELPDESK_KB_ENABLED
         if self.HELPDESK_KB_ENABLED:
-            settings.HELPDESK_KB_ENABLED = False
+            helpdesk_settings.HELPDESK_KB_ENABLED = False
             reload_urlconf()
 
     def tearDown(self):
         if self.HELPDESK_KB_ENABLED:
-            settings.HELPDESK_KB_ENABLED = True
+            helpdesk_settings.HELPDESK_KB_ENABLED = True
             reload_urlconf()
 
     def test_navigation(self):
@@ -41,12 +42,12 @@ class StaffUserTestCaseMixin(object):
     HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = False
 
     def setUp(self):
-        self.original_setting = settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE
-        settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = self.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE
+        self.original_setting = helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE
+        helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = self.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE
         self.reload_views()
 
     def tearDown(self):
-        settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = self.original_setting
+        helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = self.original_setting
         self.reload_views()
 
     def reload_views(self):
@@ -59,7 +60,7 @@ class StaffUserTestCaseMixin(object):
 
     def test_anonymous_user(self):
         """Access to the dashboard always requires a login"""
-        response = self.client.get(reverse('helpdesk_dashboard'), follow=True)
+        response = self.client.get(reverse('helpdesk:dashboard'), follow=True)
         self.assertTemplateUsed(response, 'helpdesk/registration/login.html')
 
 
@@ -78,7 +79,7 @@ class NonStaffUsersAllowedTestCase(StaffUserTestCaseMixin, TestCase):
         self.assertTrue(is_helpdesk_staff(user))
 
         self.client.login(username=user.username, password='gouda')
-        response = self.client.get(reverse('helpdesk_dashboard'), follow=True)
+        response = self.client.get(reverse('helpdesk:dashboard'), follow=True)
         self.assertTemplateUsed(response, 'helpdesk/dashboard.html')
 
 
@@ -105,7 +106,7 @@ class StaffUsersOnlyTestCase(StaffUserTestCaseMixin, TestCase):
         self.assertTrue(is_helpdesk_staff(user))
 
         self.client.login(username=user.username, password='password')
-        response = self.client.get(reverse('helpdesk_dashboard'), follow=True)
+        response = self.client.get(reverse('helpdesk:dashboard'), follow=True)
         self.assertTemplateUsed(response, 'helpdesk/dashboard.html')
 
 
@@ -128,7 +129,7 @@ class CustomStaffUserTestCase(StaffUserTestCaseMixin, TestCase):
         self.assertTrue(is_helpdesk_staff(user))
 
         self.client.login(username=user.username, password='gouda')
-        response = self.client.get(reverse('helpdesk_dashboard'), follow=True)
+        response = self.client.get(reverse('helpdesk:dashboard'), follow=True)
         self.assertTemplateUsed(response, 'helpdesk/dashboard.html')
 
     def test_custom_staff_fail(self):
@@ -139,45 +140,45 @@ class CustomStaffUserTestCase(StaffUserTestCaseMixin, TestCase):
         self.assertFalse(is_helpdesk_staff(user))
 
         self.client.login(username=user.username, password='frog')
-        response = self.client.get(reverse('helpdesk_dashboard'), follow=True)
+        response = self.client.get(reverse('helpdesk:dashboard'), follow=True)
         self.assertTemplateUsed(response, 'helpdesk/registration/login.html')
 
 
 class HomePageAnonymousUserTestCase(TestCase):
     def setUp(self):
-        self.redirect_to_login = settings.HELPDESK_REDIRECT_TO_LOGIN_BY_DEFAULT
+        self.redirect_to_login = helpdesk_settings.HELPDESK_REDIRECT_TO_LOGIN_BY_DEFAULT
 
     def tearDown(self):
-        settings.HELPDESK_REDIRECT_TO_LOGIN_BY_DEFAULT = self.redirect_to_login
+        helpdesk_settings.HELPDESK_REDIRECT_TO_LOGIN_BY_DEFAULT = self.redirect_to_login
 
     def test_homepage(self):
-        settings.HELPDESK_REDIRECT_TO_LOGIN_BY_DEFAULT = True
-        response = self.client.get(reverse('helpdesk_home'))
+        helpdesk_settings.HELPDESK_REDIRECT_TO_LOGIN_BY_DEFAULT = True
+        response = self.client.get(reverse('helpdesk:home'))
         self.assertTemplateUsed('helpdesk/public_homepage.html')
 
     def test_redirect_to_login(self):
         """Unauthenticated users are redirected to the login page if HELPDESK_REDIRECT_TO_LOGIN_BY_DEFAULT is True"""
-        settings.HELPDESK_REDIRECT_TO_LOGIN_BY_DEFAULT = True
-        response = self.client.get(reverse('helpdesk_home'))
-        self.assertRedirects(response, reverse('login'))
+        helpdesk_settings.HELPDESK_REDIRECT_TO_LOGIN_BY_DEFAULT = True
+        response = self.client.get(reverse('helpdesk:home'))
+        self.assertRedirects(response, reverse('helpdesk:login'))
 
 
 class HomePageTestCase(TestCase):
     def setUp(self):
-        self.original_setting = settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE
-        settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = False
+        self.original_setting = helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE
+        helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = False
         try:
             reload(sys.modules['helpdesk.views.public'])
         except KeyError:
             pass
 
     def tearDown(self):
-        settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = self.original_setting
+        helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = self.original_setting
         reload(sys.modules['helpdesk.views.public'])
 
     def assertUserRedirectedToView(self, user, view_name):
         self.client.login(username=user.username, password='password')
-        response = self.client.get(reverse('helpdesk_home'))
+        response = self.client.get(reverse('helpdesk:home'))
         self.assertRedirects(response, reverse(view_name))
         self.client.logout()
 
@@ -187,11 +188,11 @@ class HomePageTestCase(TestCase):
 
         # login_view_ticketlist is False...
         update_user_settings(user, login_view_ticketlist=False)
-        self.assertUserRedirectedToView(user, 'helpdesk_dashboard')
+        self.assertUserRedirectedToView(user, 'helpdesk:dashboard')
 
         # ... or missing
         delete_user_settings(user, 'login_view_ticketlist')
-        self.assertUserRedirectedToView(user, 'helpdesk_dashboard')
+        self.assertUserRedirectedToView(user, 'helpdesk:dashboard')
 
     def test_no_user_settings_redirect_to_dashboard(self):
         """Authenticated users are redirected to the dashboard if user settings are missing"""
@@ -199,14 +200,14 @@ class HomePageTestCase(TestCase):
         user = get_staff_user()
 
         UserSettings.objects.filter(user=user).delete()
-        self.assertUserRedirectedToView(user, 'helpdesk_dashboard')
+        self.assertUserRedirectedToView(user, 'helpdesk:dashboard')
 
     def test_redirect_to_ticket_list(self):
         """Authenticated users are redirected to the ticket list based on their user settings"""
         user = get_staff_user()
         update_user_settings(user, login_view_ticketlist=True)
 
-        self.assertUserRedirectedToView(user, 'helpdesk_list')
+        self.assertUserRedirectedToView(user, 'helpdesk:list')
 
 
 class ReturnToTicketTestCase(TestCase):
@@ -215,7 +216,7 @@ class ReturnToTicketTestCase(TestCase):
 
         user = get_staff_user()
         ticket = create_ticket()
-        response = return_to_ticket(user, settings, ticket)
+        response = return_to_ticket(user, helpdesk_settings, ticket)
         self.assertEqual(response['location'], ticket.get_absolute_url())
 
     def test_non_staff_user(self):
@@ -223,5 +224,5 @@ class ReturnToTicketTestCase(TestCase):
 
         user = User.objects.create_user(username='henry.wensleydale', password='gouda', email='wensleydale@example.com')
         ticket = create_ticket()
-        response = return_to_ticket(user, settings, ticket)
+        response = return_to_ticket(user, helpdesk_settings, ticket)
         self.assertEqual(response['location'], ticket.ticket_url)

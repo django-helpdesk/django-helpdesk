@@ -17,6 +17,7 @@ from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _, ugettext
 from django.utils.encoding import python_2_unicode_compatible
 
+import six
 
 @python_2_unicode_compatible
 class Queue(models.Model):
@@ -1118,7 +1119,10 @@ class UserSettings(models.Model):
             import cPickle as pickle
         from helpdesk.lib import b64decode
         try:
-            return pickle.loads(b64decode(str(self.settings_pickled)))
+            if six.PY3:
+                return pickle.loads(b64decode(bytes(self.settings_pickled, 'utf8')))
+            else:
+                return pickle.loads(b64decode(str(self.settings_pickled)))
         except pickle.UnpicklingError:
             return {}
 
