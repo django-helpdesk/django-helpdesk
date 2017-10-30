@@ -26,6 +26,10 @@ from django.utils import timezone
 
 from django.utils import six
 
+from helpdesk.decorators import (
+    helpdesk_staff_member_required, helpdesk_superuser_required,
+    is_helpdesk_staff
+)
 from helpdesk.forms import (
     TicketForm, UserSettingsForm, EmailIgnoreForm, EditTicketForm, TicketCCForm,
     TicketCCEmailForm, TicketCCUserForm, EditFollowUpForm, TicketDependencyForm
@@ -178,17 +182,11 @@ def delete_ticket(request, ticket_id):
         })
     else:
         ticket.delete()
-<<<<<<< HEAD
         return HttpResponseRedirect(reverse('helpdesk:home'))
 delete_ticket = staff_member_required(delete_ticket)
 
 
-=======
-        return HttpResponseRedirect(reverse('helpdesk_home'))
-
-
 @helpdesk_staff_member_required
->>>>>>> brente/custom-staff-filter
 def followup_edit(request, ticket_id, followup_id):
     """Edit followup options with an ability to change the ticket."""
     followup = get_object_or_404(FollowUp, id=followup_id)
@@ -639,11 +637,7 @@ def update_ticket(request, ticket_id, public=False):
 
 
 def return_to_ticket(user, helpdesk_settings, ticket):
-<<<<<<< HEAD
     """Helper function for update_ticket"""
-=======
-    """ Helper function for update_ticket """
->>>>>>> brente/custom-staff-filter
 
     if is_helpdesk_staff(user):
         return HttpResponseRedirect(ticket.get_absolute_url())

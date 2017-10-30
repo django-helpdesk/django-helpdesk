@@ -18,5 +18,5 @@ register = Library()
 def helpdesk_staff(user):
     try:
         return is_helpdesk_staff(user)
-    except Exception, e:
+    except Exception as e:
         logger.exception("'helpdesk_staff' template tag (django-helpdesk) crashed")
