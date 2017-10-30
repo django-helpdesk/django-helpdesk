@@ -14,7 +14,7 @@ from django.utils.http import urlquote
 from django.utils.translation import ugettext as _
 
 from helpdesk import settings as helpdesk_settings
-from helpdesk.decorators import protect_view
+from helpdesk.decorators import protect_view, is_helpdesk_staff
 from helpdesk.forms import PublicTicketForm
 from helpdesk.lib import text_is_spam
 from helpdesk.models import Ticket, Queue, UserSettings, KBCategory
@@ -22,7 +22,10 @@ from helpdesk.models import Ticket, Queue, UserSettings, KBCategory
 
 @protect_view
 def homepage(request):
-    if request.user.is_staff or \
+    if not request.user.is_authenticated() and helpdesk_settings.HELPDESK_REDIRECT_TO_LOGIN_BY_DEFAULT:
+        return HttpResponseRedirect(reverse('login'))
+
+    if is_helpdesk_staff(request.user) or \
             (request.user.is_authenticated() and
              helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE):
         try:
@@ -85,7 +88,7 @@ def view_ticket(request):
         except ObjectDoesNotExist:
             error_message = _('Invalid ticket ID or e-mail address. Please try again.')
         else:
-            if request.user.is_staff:
+            if is_helpdesk_staff(request.user):
                 redirect_url = reverse('helpdesk:view', args=[ticket_id])
                 if 'close' in request.GET:
                     redirect_url += '?close'

@@ -2,8 +2,9 @@
 Default settings for django-helpdesk.
 
 """
-
+import warnings
 from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
 
 
 try:
@@ -85,12 +86,12 @@ HELPDESK_SUBMIT_A_TICKET_PUBLIC = getattr(settings, 'HELPDESK_SUBMIT_A_TICKET_PU
 # options for update_ticket views #
 ###################################
 
+''' options for update_ticket views '''
 # allow non-staff users to interact with tickets?
-# this will also change how 'staff_member_required'
-# in staff.py will be defined.
-HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = getattr(settings,
-                                                 'HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE',
-                                                 False)
+# can be True/False or a callable accepting the active user and returning True if they must be considered helpdesk staff
+HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = getattr(settings, 'HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE', False)
+if not (HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE in (True, False) or callable(HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE)):
+    warnings.warn("HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE should be set to either True/False or a callable.", RuntimeWarning)
 
 # show edit buttons in ticket follow ups.
 HELPDESK_SHOW_EDIT_BUTTON_FOLLOW_UP = getattr(settings,

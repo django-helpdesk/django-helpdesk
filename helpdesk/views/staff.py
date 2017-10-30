@@ -42,7 +42,6 @@ from helpdesk import settings as helpdesk_settings
 
 User = get_user_model()
 
-
 if helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE:
     # treat 'normal' users like 'staff'
     staff_member_required = user_passes_test(
@@ -86,6 +85,7 @@ def _has_access_to_queue(user, queue):
         return user.has_perm(queue.permission_name)
 
 
+@helpdesk_staff_member_required
 def dashboard(request):
     """
     A quick summary overview for users: A list of their own tickets, a table
@@ -166,7 +166,7 @@ def dashboard(request):
     })
 dashboard = staff_member_required(dashboard)
 
-
+@helpdesk_staff_member_required
 def delete_ticket(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
     if not _has_access_to_queue(request.user, ticket.queue):
@@ -178,10 +178,17 @@ def delete_ticket(request, ticket_id):
         })
     else:
         ticket.delete()
+<<<<<<< HEAD
         return HttpResponseRedirect(reverse('helpdesk:home'))
 delete_ticket = staff_member_required(delete_ticket)
 
 
+=======
+        return HttpResponseRedirect(reverse('helpdesk_home'))
+
+
+@helpdesk_staff_member_required
+>>>>>>> brente/custom-staff-filter
 def followup_edit(request, ticket_id, followup_id):
     """Edit followup options with an ability to change the ticket."""
     followup = get_object_or_404(FollowUp, id=followup_id)
@@ -232,6 +239,7 @@ def followup_edit(request, ticket_id, followup_id):
 followup_edit = staff_member_required(followup_edit)
 
 
+@helpdesk_staff_member_required
 def followup_delete(request, ticket_id, followup_id):
     """followup delete for superuser"""
 
@@ -245,6 +253,7 @@ def followup_delete(request, ticket_id, followup_id):
 followup_delete = staff_member_required(followup_delete)
 
 
+@helpdesk_staff_member_required
 def view_ticket(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
     if not _has_access_to_queue(request.user, ticket.queue):
@@ -363,7 +372,7 @@ def update_ticket(request, ticket_id, public=False):
     if not (public or (
             request.user.is_authenticated() and
             request.user.is_active and (
-                request.user.is_staff or
+                is_helpdesk_staff(request.user) or
                 helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE))):
         return HttpResponseRedirect('%s?next=%s' %
                                     (reverse('helpdesk:login'), request.path))
@@ -421,7 +430,7 @@ def update_ticket(request, ticket_id, public=False):
 
     f = FollowUp(ticket=ticket, date=timezone.now(), comment=comment)
 
-    if request.user.is_staff or helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE:
+    if is_helpdesk_staff(request.user):
         f.user = request.user
 
     f.public = public
@@ -461,8 +470,10 @@ def update_ticket(request, ticket_id, public=False):
             f.title = _('Updated')
 
     f.save()
-
-    files = process_attachments(f, request.FILES.getlist('attachment'))
+    
+    files = []
+    if request.FILES:
+        files = process_attachments(f, request.FILES.getlist('attachment'))
 
     if title and title != ticket.title:
         c = TicketChange(
@@ -586,6 +597,7 @@ def update_ticket(request, ticket_id, public=False):
             (not reassigned and
                 ticket.assigned_to.usersettings_helpdesk.settings.get(
                     'email_on_ticket_change', False)):
+
             send_templated_mail(
                 template_staff,
                 context,
@@ -627,14 +639,19 @@ def update_ticket(request, ticket_id, public=False):
 
 
 def return_to_ticket(user, helpdesk_settings, ticket):
+<<<<<<< HEAD
     """Helper function for update_ticket"""
+=======
+    """ Helper function for update_ticket """
+>>>>>>> brente/custom-staff-filter
 
-    if user.is_staff or helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE:
+    if is_helpdesk_staff(user):
         return HttpResponseRedirect(ticket.get_absolute_url())
     else:
         return HttpResponseRedirect(ticket.ticket_url)
 
 
+@helpdesk_staff_member_required
 def mass_update(request):
     tickets = request.POST.getlist('ticket_id')
     action = request.POST.get('action', None)
@@ -751,6 +768,7 @@ def mass_update(request):
 mass_update = staff_member_required(mass_update)
 
 
+@helpdesk_staff_member_required
 def ticket_list(request):
     context = {}
 
@@ -934,6 +952,7 @@ def ticket_list(request):
 ticket_list = staff_member_required(ticket_list)
 
 
+@helpdesk_staff_member_required
 def edit_ticket(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
     if not _has_access_to_queue(request.user, ticket.queue):
@@ -951,6 +970,7 @@ def edit_ticket(request, ticket_id):
 edit_ticket = staff_member_required(edit_ticket)
 
 
+@helpdesk_staff_member_required
 def create_ticket(request):
     if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS:
         assignable_users = User.objects.filter(is_active=True, is_staff=True).order_by(User.USERNAME_FIELD)
@@ -988,6 +1008,7 @@ def create_ticket(request):
 create_ticket = staff_member_required(create_ticket)
 
 
+@helpdesk_staff_member_required
 def raw_details(request, type):
     # TODO: This currently only supports spewing out 'PreSetReply' objects,
     # in the future it needs to be expanded to include other items. All it
@@ -1004,9 +1025,9 @@ def raw_details(request, type):
             raise Http404
 
     raise Http404
-raw_details = staff_member_required(raw_details)
 
 
+@helpdesk_staff_member_required
 def hold_ticket(request, ticket_id, unhold=False):
     ticket = get_object_or_404(Ticket, id=ticket_id)
     if not _has_access_to_queue(request.user, ticket.queue):
@@ -1031,19 +1052,20 @@ def hold_ticket(request, ticket_id, unhold=False):
     ticket.save()
 
     return HttpResponseRedirect(ticket.get_absolute_url())
-hold_ticket = staff_member_required(hold_ticket)
 
 
+@helpdesk_staff_member_required
 def unhold_ticket(request, ticket_id):
     return hold_ticket(request, ticket_id, unhold=True)
-unhold_ticket = staff_member_required(unhold_ticket)
 
 
+@helpdesk_staff_member_required
 def rss_list(request):
     return render(request, 'helpdesk/rss_list.html', {'queues': Queue.objects.all()})
 rss_list = staff_member_required(rss_list)
 
 
+@helpdesk_staff_member_required
 def report_index(request):
     number_tickets = Ticket.objects.all().count()
     saved_query = request.GET.get('saved_query', None)
@@ -1092,6 +1114,7 @@ def report_index(request):
 report_index = staff_member_required(report_index)
 
 
+@helpdesk_staff_member_required
 def run_report(request, report):
     if Ticket.objects.all().count() == 0 or report not in (
             'queuemonth', 'usermonth', 'queuestatus', 'queuepriority', 'userstatus',
@@ -1292,6 +1315,7 @@ def run_report(request, report):
 run_report = staff_member_required(run_report)
 
 
+@helpdesk_staff_member_required
 def save_query(request):
     title = request.POST.get('title', None)
     shared = request.POST.get('shared', False)
@@ -1309,6 +1333,7 @@ def save_query(request):
 save_query = staff_member_required(save_query)
 
 
+@helpdesk_staff_member_required
 def delete_saved_query(request, id):
     query = get_object_or_404(SavedSearch, id=id, user=request.user)
 
@@ -1320,6 +1345,7 @@ def delete_saved_query(request, id):
 delete_saved_query = staff_member_required(delete_saved_query)
 
 
+@helpdesk_staff_member_required
 def user_settings(request):
     s = request.user.usersettings_helpdesk
     if request.POST:
@@ -1334,6 +1360,7 @@ def user_settings(request):
 user_settings = staff_member_required(user_settings)
 
 
+@helpdesk_superuser_required
 def email_ignore(request):
     return render(request, 'helpdesk/email_ignore_list.html', {
         'ignore_list': IgnoreEmail.objects.all(),
@@ -1341,6 +1368,7 @@ def email_ignore(request):
 email_ignore = superuser_required(email_ignore)
 
 
+@helpdesk_superuser_required
 def email_ignore_add(request):
     if request.method == 'POST':
         form = EmailIgnoreForm(request.POST)
@@ -1354,6 +1382,7 @@ def email_ignore_add(request):
 email_ignore_add = superuser_required(email_ignore_add)
 
 
+@helpdesk_superuser_required
 def email_ignore_del(request, id):
     ignore = get_object_or_404(IgnoreEmail, id=id)
     if request.method == 'POST':
@@ -1364,6 +1393,7 @@ def email_ignore_del(request, id):
 email_ignore_del = superuser_required(email_ignore_del)
 
 
+@helpdesk_staff_member_required
 def ticket_cc(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
     if not _has_access_to_queue(request.user, ticket.queue):
@@ -1377,6 +1407,7 @@ def ticket_cc(request, ticket_id):
 ticket_cc = staff_member_required(ticket_cc)
 
 
+@helpdesk_staff_member_required
 def ticket_cc_add(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
     if not _has_access_to_queue(request.user, ticket.queue):
@@ -1401,6 +1432,7 @@ def ticket_cc_add(request, ticket_id):
 ticket_cc_add = staff_member_required(ticket_cc_add)
 
 
+@helpdesk_staff_member_required
 def ticket_cc_del(request, ticket_id, cc_id):
     cc = get_object_or_404(TicketCC, ticket__id=ticket_id, id=cc_id)
 
@@ -1412,6 +1444,7 @@ def ticket_cc_del(request, ticket_id, cc_id):
 ticket_cc_del = staff_member_required(ticket_cc_del)
 
 
+@helpdesk_staff_member_required
 def ticket_dependency_add(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
     if not _has_access_to_queue(request.user, ticket.queue):
@@ -1433,6 +1466,7 @@ def ticket_dependency_add(request, ticket_id):
 ticket_dependency_add = staff_member_required(ticket_dependency_add)
 
 
+@helpdesk_staff_member_required
 def ticket_dependency_del(request, ticket_id, dependency_id):
     dependency = get_object_or_404(TicketDependency, ticket__id=ticket_id, id=dependency_id)
     if request.method == 'POST':
@@ -1442,6 +1476,7 @@ def ticket_dependency_del(request, ticket_id, dependency_id):
 ticket_dependency_del = staff_member_required(ticket_dependency_del)
 
 
+@helpdesk_staff_member_required
 def attachment_del(request, ticket_id, attachment_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
     if not _has_access_to_queue(request.user, ticket.queue):

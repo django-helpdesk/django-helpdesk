@@ -4,6 +4,8 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
+from helpdesk.models import Ticket, Queue
+
 
 def get_staff_user(username='helpdesk.staff', password='password'):
     try:
@@ -35,6 +37,39 @@ def reload_urlconf(urlconf=None):
 
     from django.core.urlresolvers import clear_url_caches
     clear_url_caches()
+
+
+def update_user_settings(user, **kwargs):
+    usersettings = user.usersettings
+    settings = usersettings.settings
+    settings.update(kwargs)
+    usersettings.settings = settings
+    usersettings.save()
+
+
+def delete_user_settings(user, *args):
+    usersettings = user.usersettings
+    settings = usersettings.settings
+    for setting in args:
+        if setting in settings:
+            del settings[setting]
+    usersettings.settings = settings
+    usersettings.save()
+
+
+def create_ticket(**kwargs):
+    q = kwargs.get('queue', None)
+    if q is None:
+        try:
+            q = Queue.objects.all()[0]
+        except IndexError:
+            q = Queue.objects.create(title='Test Q', slug='test', )
+    data = {
+        'title': "I wish to register a complaint",
+        'queue': q,
+    }
+    data.update(kwargs)
+    return Ticket.objects.create(**data)
 
 
 HELPDESK_URLCONF = 'helpdesk.urls'

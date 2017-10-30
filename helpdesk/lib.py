@@ -312,6 +312,7 @@ def process_attachments(followup, attached_files):
     attachments = []
 
     for attached in attached_files:
+
         if attached.size:
             filename = smart_text(attached.name)
             att = Attachment(

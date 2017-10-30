@@ -108,8 +108,12 @@ These options only change display of items on public-facing pages, not staff pag
 Options that change ticket updates
 ----------------------------------
 
-- **HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE** Allow non-staff users to interact with tickets? This will also change how 'staff_member_required'
-  in staff.py will be defined.
+- **HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE** Allow non-staff users to interact with tickets?
+  Set to True to allow any authenticated user to manage tickets.
+  You can also apply a custom authorisation logic for identifying helpdesk staff members, by setting this to a callable.
+  In that case, the value should be a function accepting the active user as a parameter and returning True if the user is considered helpdesk staff, e.g.
+
+    lambda u: u.is_authenticated() and u.is_active and u.groups.filter(name='helpdesk_staff').exists()))
 
   **Default:** ``HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = False``
 

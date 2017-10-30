@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n helpdesk_staff %}
 
 <!-- Navigation -->
         <nav class="navbar navbar-default navbar-fixed-top" role="navigation" style="margin-bottom: 0">
@@ -14,7 +14,7 @@
             <!-- /.navbar-header -->
 
             <div class="collapse navbar-collapse" id="helpdesk-nav-collapse">
-            {% if helpdesk_settings.HELPDESK_NAVIGATION_ENABLED and user.is_authenticated or user.is_staff %}
+            {% if helpdesk_settings.HELPDESK_NAVIGATION_ENABLED and user.is_authenticated or user|is_helpdesk_staff %}
             <ul class="nav navbar-top-links navbar-right">
                 <li>
                     <a href='{% url 'helpdesk:dashboard' %}'><i class="fa fa-dashboard fa-fw"></i> <span class="nav-text">{% trans "Dashboard" %}</span></a>
@@ -28,6 +28,7 @@
                 <li>
                     <a href='{% url 'helpdesk:report_index' %}'><i class="fa fa-bar-chart-o fa-fw"></i> <span class="nav-text"> {% trans "Stats" %}</span></a>
                 </li>
+
                 {% if helpdesk_settings.HELPDESK_KB_ENABLED %}
                 <li>
                     <a href='{% url 'helpdesk:kb_index' %}'><i class="fa fa-database fa-fw"></i> <span class="nav-text">{% trans "Knowledgebase" %}</span></a>
