@@ -158,7 +158,17 @@ def process_queue(q, logger):
         messagesInfo = server.list()[1]
         logger.info("Received %d messages from POP3 server" % len(messagesInfo))
 
-        for msg in messagesInfo:
+        for msgRaw in messagesInfo:
+            if six.PY3:
+                # in py3, msgRaw is a bytes object, decode to str
+                try:
+                    msg = msgRaw.decode("utf-8")
+                except:
+                    # if couldn't decode easily, just leave it raw
+                    msg = msgRaw
+            else:
+                # in py2, already a str
+                msg = msgRaw
             msgNum = msg.split(" ")[0]
             logger.info("Processing message %s" % msgNum)
 
