@@ -25,6 +25,8 @@ import base64
 import binascii
 from time import ctime
 
+from bs4 import BeautifulSoup
+
 from email_reply_parser import EmailReplyParser
 
 from django.core.files.base import ContentFile
@@ -366,7 +368,12 @@ def ticket_from_message(message, queue, logger):
         counter += 1
 
     if not body:
-        body = _('No plain-text email body available. Please see attachment "email_html_body.html".')
+        mail = BeautifulSoup(part.get_payload(), "lxml")
+        if ">" in mail.text:
+            message_body = mail.text.split(">")[1]
+            body = message_body.encode('ascii', errors='ignore')
+        else:
+            body = mail.text
 
     if ticket:
         try:
