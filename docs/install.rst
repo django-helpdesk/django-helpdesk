@@ -119,7 +119,7 @@ errors with trying to create User settings.
 
    Ideally, accessing http://MEDIA_URL/helpdesk/attachments/ will give you a 403 access denied error.
 
-7. If it's not already installed, install ``django-markdown-deux`` and ensure it's in your ``INSTALLED_APPS``::
+7. If it's not already installed, install ``markdown_deux`` and ensure it's in your ``INSTALLED_APPS``::
 
       pip install django-markdown-deux
 
