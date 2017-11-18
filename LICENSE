@@ -11,7 +11,7 @@ are permitted provided that the following conditions are met:
        notice, this list of conditions and the following disclaimer in the
        documentation and/or other materials provided with the distribution.
 
-    3. Neither the name of Ross Poulton, Jutda, nor the names of any 
+    3. Neither the name of Ross Poulton, Jutda, nor the names of any
        of its contributors may be used to endorse or promote products
        derived from this software without specific prior written permission.
 
@@ -26,6 +26,3 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-EXCEPTIONS
-
-This software is distributed with some third-party software which is not distributed under the above license. See LICENSE.3RDPARTY for further details.

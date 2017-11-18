@@ -14,7 +14,6 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import user_passes_test
 from django.core.urlresolvers import reverse
 from django.core.exceptions import ValidationError, PermissionDenied
-from django.core import paginator
 from django.db import connection
 from django.db.models import Q
 from django.http import HttpResponseRedirect, Http404, HttpResponse
@@ -25,13 +24,15 @@ from django.utils.html import escape
 from django import forms
 from django.utils import timezone
 
+from django.utils import six
+
 from helpdesk.forms import (
     TicketForm, UserSettingsForm, EmailIgnoreForm, EditTicketForm, TicketCCForm,
     TicketCCEmailForm, TicketCCUserForm, EditFollowUpForm, TicketDependencyForm
 )
 from helpdesk.lib import (
     send_templated_mail, query_to_dict, apply_query, safe_template_context,
-    process_attachments,
+    process_attachments, queue_template_context,
 )
 from helpdesk.models import (
     Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch,
@@ -91,7 +92,6 @@ def dashboard(request):
     showing ticket counts by queue/status, and a list of unassigned tickets
     with options for them to 'Take' ownership of said tickets.
     """
-
     # open & reopened tickets, assigned to current user
     tickets = Ticket.objects.select_related('queue').filter(
         assigned_to=request.user,
@@ -406,12 +406,14 @@ def update_ticket(request, ticket_id, public=False):
     # comment.
     context = safe_template_context(ticket)
 
-    # this line sometimes creates problems if code is sent as a comment.
-    # if comment contains some django code, like "why does {% if bla %} crash",
-    # then the following line will give us a crash, since django expects {% if %}
-    # to be closed with an {% endif %} tag.
     from django.template import engines
     template_func = engines['django'].from_string
+    # this prevents system from trying to render any template tags
+    # broken into two stages to prevent changes from first replace being themselves
+    # changed by the second replace due to conflicting syntax
+    comment = comment.replace('{%', 'X-HELPDESK-COMMENT-VERBATIM').replace('%}', 'X-HELPDESK-COMMENT-ENDVERBATIM')
+    comment = comment.replace('X-HELPDESK-COMMENT-VERBATIM', '{% verbatim %}{%').replace('X-HELPDESK-COMMENT-ENDVERBATIM', '%}{% endverbatim %}')
+    # render the neutralized template
     comment = template_func(comment).render(context)
 
     if owner is -1 and ticket.assigned_to:
@@ -694,7 +696,7 @@ def mass_update(request):
             # Send email to Submitter, Owner, Queue CC
             context = safe_template_context(t)
             context.update(resolution=t.resolution,
-                           queue=t.queue)
+                           queue=queue_template_context(t.queue))
 
             messages_sent_to = []
 
@@ -815,7 +817,10 @@ def ticket_list(request):
         import json
         from helpdesk.lib import b64decode
         try:
-            query_params = json.loads(b64decode(str(saved_query.query)))
+            if six.PY3:
+                query_params = json.loads(b64decode(str(saved_query.query)).decode())
+            else:
+                query_params = json.loads(b64decode(str(saved_query.query)))
         except ValueError:
             # Query deserialization failed. (E.g. was a pickled query)
             return HttpResponseRedirect(reverse('helpdesk:list'))
@@ -1112,7 +1117,10 @@ def run_report(request, report):
         import json
         from helpdesk.lib import b64decode
         try:
-            query_params = json.loads(b64decode(str(saved_query.query)))
+            if six.PY3:
+                query_params = json.loads(b64decode(str(saved_query.query)).decode())
+            else:
+                query_params = json.loads(b64decode(str(saved_query.query)))
         except:
             return HttpResponseRedirect(reverse('helpdesk:report_index'))
 

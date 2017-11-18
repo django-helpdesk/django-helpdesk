@@ -10,6 +10,7 @@ scripts/get_email.py - Designed to be run from cron, this script checks the
                        helpdesk, creating tickets from the new messages (or
                        adding to existing tickets if needed)
 """
+from __future__ import unicode_literals
 
 from datetime import timedelta
 import email
@@ -20,7 +21,11 @@ from os.path import isfile, join
 import poplib
 import re
 import socket
+import base64
+import binascii
 from time import ctime
+
+from bs4 import BeautifulSoup
 
 from email_reply_parser import EmailReplyParser
 
@@ -33,7 +38,8 @@ from django.utils import encoding, six, timezone
 
 from helpdesk import settings
 from helpdesk.lib import send_templated_mail, safe_template_context, process_attachments
-from helpdesk.models import Queue, Ticket, FollowUp, IgnoreEmail
+from helpdesk.models import Queue, Ticket, TicketCC, FollowUp, IgnoreEmail
+from django.contrib.auth.models import User
 
 import logging
 
@@ -154,11 +160,21 @@ def process_queue(q, logger):
         messagesInfo = server.list()[1]
         logger.info("Received %d messages from POP3 server" % len(messagesInfo))
 
-        for msg in messagesInfo:
+        for msgRaw in messagesInfo:
+            if six.PY3:
+                # in py3, msgRaw is a bytes object, decode to str
+                try:
+                    msg = msgRaw.decode("utf-8")
+                except:
+                    # if couldn't decode easily, just leave it raw
+                    msg = msgRaw
+            else:
+                # in py2, already a str
+                msg = msgRaw
             msgNum = msg.split(" ")[0]
             logger.info("Processing message %s" % msgNum)
 
-            full_message = "\n".join(server.retr(msgNum)[1])
+            full_message = encoding.force_text("\n".join(server.retr(msgNum)[1]), errors='replace')
             ticket = ticket_from_message(message=full_message, queue=q, logger=logger)
 
             if ticket:
@@ -191,14 +207,18 @@ def process_queue(q, logger):
                      settings.QUEUE_EMAIL_BOX_PASSWORD)
         server.select(q.email_box_imap_folder)
 
-        status, data = server.search(None, 'NOT', 'DELETED')
+        try:
+            status, data = server.search(None, 'NOT', 'DELETED')
+        except imaplib.IMAP4.error:
+            logger.error("IMAP retrieve failed. Is the folder '%s' spelled correctly, and does it exist on the server?" % q.email_box_imap_folder)
         if data:
             msgnums = data[0].split()
             logger.info("Received %d messages from IMAP server" % len(msgnums))
             for num in msgnums:
                 logger.info("Processing message %s" % num)
                 status, data = server.fetch(num, '(RFC822)')
-                ticket = ticket_from_message(message=encoding.smart_text(data[0][1], errors='replace'), queue=q, logger=logger)
+                full_message = encoding.force_text(data[0][1], errors='replace')
+                ticket = ticket_from_message(message=full_message, queue=q, logger=logger)
                 if ticket:
                     server.store(num, '+FLAGS', '\\Deleted')
                     logger.info("Successfully processed message %s, deleted from IMAP server" % num)
@@ -218,7 +238,8 @@ def process_queue(q, logger):
         for i, m in enumerate(mail, 1):
             logger.info("Processing message %d" % i)
             with open(m, 'r') as f:
-                ticket = ticket_from_message(message=f.read(), queue=q, logger=logger)
+                full_message = encoding.force_text(f.read(), errors='replace')
+                ticket = ticket_from_message(message=full_message, queue=q, logger=logger)
             if ticket:
                 logger.info("Successfully processed message %d, ticket/comment created." % i)
                 try:
@@ -235,9 +256,9 @@ def decodeUnknown(charset, string):
     if six.PY2:
         if not charset:
             try:
-                return string.decode('utf-8', 'ignore')
+                return string.decode('utf-8', 'replace')
             except:
-                return string.decode('iso8859-1', 'ignore')
+                return string.decode('iso8859-1', 'replace')
         return unicode(string, charset)
     elif six.PY3:
         if type(string) is not str:
@@ -251,7 +272,7 @@ def decodeUnknown(charset, string):
 
 
 def decode_mail_headers(string):
-    decoded = email.header.decode_header(string)
+    decoded = email.header.decode_header(string) if six.PY3 else email.header.decode_header(string.encode('utf-8'))
     if six.PY2:
         return u' '.join([unicode(msg, charset or 'utf-8') for msg, charset in decoded])
     elif six.PY3:
@@ -260,8 +281,8 @@ def decode_mail_headers(string):
 
 def ticket_from_message(message, queue, logger):
     # 'message' must be an RFC822 formatted message.
-    message = email.message_from_string(message)
-    subject = message.get('subject', _('Created from e-mail'))
+    message = email.message_from_string(message) if six.PY3 else email.message_from_string(message.encode('utf-8'))
+    subject = message.get('subject', _('Comment from e-mail'))
     subject = decode_mail_headers(decodeUnknown(message.get_charset(), subject))
     for affix in STRIPPED_SUBJECT_STRINGS:
         subject = subject.replace(affix, "")
@@ -270,6 +291,17 @@ def ticket_from_message(message, queue, logger):
     sender = message.get('from', _('Unknown Sender'))
     sender = decode_mail_headers(decodeUnknown(message.get_charset(), sender))
     sender_email = email.utils.parseaddr(sender)[1]
+
+    cc = message.get_all('cc', None)
+    if cc:
+        # first, fixup the encoding if necessary
+        cc = [decode_mail_headers(decodeUnknown(message.get_charset(), x)) for x in cc]
+        # get_all checks if multiple CC headers, but individual emails may be comma separated too
+        tempcc = []
+        for hdr in cc:
+            tempcc.extend(hdr.split(','))
+        # use a set to ensure no duplicates
+        cc = set([x.strip() for x in tempcc])
 
     for ignore in IgnoreEmail.objects.filter(Q(queues=queue) | Q(queues__isnull=True)):
         if ignore.test(sender_email):
@@ -305,6 +337,11 @@ def ticket_from_message(message, queue, logger):
                 body = EmailReplyParser.parse_reply(
                     decodeUnknown(part.get_content_charset(), part.get_payload(decode=True))
                 )
+                # workaround to get unicode text out rather than escaped text
+                try:
+                    body = body.encode('ascii').decode('unicode_escape')
+                except UnicodeEncodeError:
+                    body.encode('utf-8')
                 logger.debug("Discovered plain text MIME part")
             else:
                 files.append(
@@ -315,13 +352,28 @@ def ticket_from_message(message, queue, logger):
             if not name:
                 ext = mimetypes.guess_extension(part.get_content_type())
                 name = "part-%i%s" % (counter, ext)
-            files.append(SimpleUploadedFile(name, encoding.smart_bytes(part.get_payload()), part.get_content_type()))
+            payload = part.get_payload()
+            if isinstance(payload, list):
+                payload = payload.pop().as_string()
+            payloadToWrite = payload
+            try:
+                logger.debug("Try to base64 decode the attachment payload")
+                payloadToWrite = base64.decodestring(payload)
+            except (binascii.Error, TypeError):
+                logger.debug("Payload was not base64 encoded, using raw bytes")
+                payloadToWrite = payload
+            files.append(SimpleUploadedFile(name, part.get_payload(decode=True), mimetypes.guess_type(name)[0]))
             logger.debug("Found MIME attachment %s" % name)
 
         counter += 1
 
     if not body:
-        body = _('No plain-text email body available. Please see attachment "email_html_body.html".')
+        mail = BeautifulSoup(part.get_payload(), "lxml")
+        if ">" in mail.text:
+            message_body = mail.text.split(">")[1]
+            body = message_body.encode('ascii', errors='ignore')
+        else:
+            body = mail.text
 
     if ticket:
         try:
@@ -342,6 +394,8 @@ def ticket_from_message(message, queue, logger):
     priority = 2 if high_priority_types & {smtp_priority, smtp_importance} else 3
 
     if ticket is None:
+        if settings.QUEUE_EMAIL_BOX_UPDATE_ONLY:
+            return None
         new = True
         t = Ticket.objects.create(
             title=subject,
@@ -352,6 +406,45 @@ def ticket_from_message(message, queue, logger):
             priority=priority,
         )
         logger.debug("Created new ticket %s-%s" % (t.queue.slug, t.id))
+
+    if cc:
+        # get list of currently CC'd emails
+        current_cc = TicketCC.objects.filter(ticket=ticket)
+        current_cc_emails = [x.email for x in current_cc if x.email]
+        # get emails of any Users CC'd to email, if defined
+        # (some Users may not have an associated email, e.g, when using LDAP)
+        current_cc_users = [x.user.email for x in current_cc if x.user and x.user.email]
+        # ensure submitter, assigned user, queue email not added
+        other_emails = [queue.email_address]
+        if t.submitter_email:
+            other_emails.append(t.submitter_email)
+        if t.assigned_to:
+            other_emails.append(t.assigned_to.email)
+        current_cc = set(current_cc_emails + current_cc_users + other_emails)
+        # first, add any User not previously CC'd (as identified by User's email)
+        all_users = User.objects.all()
+        all_user_emails = set([x.email for x in all_users])
+        users_not_currently_ccd = all_user_emails.difference(set(current_cc))
+        users_to_cc = cc.intersection(users_not_currently_ccd)
+        for user in users_to_cc:
+            tcc = TicketCC.objects.create(
+                ticket=t,
+                user=User.objects.get(email=user),
+                can_view=True,
+                can_update=False
+            )
+            tcc.save()
+        # then add remaining emails alphabetically, makes testing easy
+        new_cc = cc.difference(current_cc).difference(all_user_emails)
+        new_cc = sorted(list(new_cc))
+        for ccemail in new_cc:
+            tcc = TicketCC.objects.create(
+                ticket=t,
+                email=ccemail,
+                can_view=True,
+                can_update=False
+            )
+            tcc.save()
 
     f = FollowUp(
         ticket=t,
@@ -375,7 +468,7 @@ def ticket_from_message(message, queue, logger):
 
     attached = process_attachments(f, files)
     for att_file in attached:
-        logger.info("Attachment '%s' successfully added to ticket from email." % att_file[0])
+        logger.info("Attachment '%s' (with size %s) successfully added to ticket from email." % (att_file[0], att_file[1].size))
 
     context = safe_template_context(t)
 

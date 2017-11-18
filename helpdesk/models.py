@@ -259,6 +259,7 @@ class Queue(models.Model):
         blank=True,
         null=True,
         verbose_name=_('Default owner'),
+        on_delete=models.SET_NULL,
     )
 
     def __str__(self):
@@ -339,6 +340,7 @@ class Queue(models.Model):
                 pass
 
 
+@python_2_unicode_compatible
 class Ticket(models.Model):
     """
     To allow a ticket to be entered as quickly as possible, only the
@@ -1198,6 +1200,16 @@ class IgnoreEmail(models.Model):
         if not self.date:
             self.date = timezone.now()
         return super(IgnoreEmail, self).save(*args, **kwargs)
+
+    def queue_list(self):
+        """Return a list of the queues this IgnoreEmail applies to.
+        If this IgnoreEmail applies to ALL queues, return '*'.
+        """
+        queues = self.queues.all().order_by('title')
+        if len(queues) == 0:
+            return '*'
+        else:
+            return ', '.join([str(q) for q in queues])
 
     def test(self, email):
         """

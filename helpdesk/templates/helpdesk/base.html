@@ -35,10 +35,8 @@
     {% endif %}
 
     <!-- DataTables CSS -->
-    <link href="{% static 'helpdesk/vendor/datatables-plugins/dataTables.bootstrap.css' %}" rel="stylesheet">
-
-    <!-- DataTables Responsive CSS -->
-    <link href="{% static 'helpdesk/vendor/datatables-responsive/dataTables.responsive.css' %}" rel="stylesheet">
+    <link href="{% static 'helpdesk/vendor/datatables/css/dataTables.bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'helpdesk/vendor/datatables/extensions/Responsive/css/responsive.bootstrap.min.css' %}" rel="stylesheet">
 
     <!-- Custom CSS -->
     <link href="{% static 'helpdesk/dist/css/sb-admin-2.css' %}" rel="stylesheet">
@@ -66,9 +64,9 @@
     {% endif %}
 
     <!-- DataTables JavaScript -->
-    <script src="{% static 'helpdesk/vendor/datatables/js/jquery.dataTables.js' %}"></script>
-    <script src="{% static 'helpdesk/vendor/datatables-plugins/dataTables.bootstrap.min.js' %}"></script>
-    <script src="{% static 'helpdesk/vendor/datatables-responsive/dataTables.responsive.js' %}"></script>
+    <script src="{% static 'helpdesk/vendor/datatables/js/jquery.dataTables.min.js' %}"></script>
+    <script src="{% static 'helpdesk/vendor/datatables/js/dataTables.bootstrap.min.js' %}"></script>
+    <script src="{% static 'helpdesk/vendor/datatables/extensions/Responsive/js/dataTables.responsive.min.js' %}"></script>
 
     <!-- Custom Theme JavaScript -->
     <script src="{% static 'helpdesk/dist/js/sb-admin-2.js' %}"></script>

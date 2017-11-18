@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<link rel="shortcut icon" type="image/ico" href="http://www.datatables.net/favicon.ico">
+	<meta name="viewport" content="initial-scale=1.0, maximum-scale=2.0">
+	<title>Buttons example - Format output data - orthogonal data</title>
+	<link rel="stylesheet" type="text/css" href="../../../../media/css/jquery.dataTables.css">
+	<link rel="stylesheet" type="text/css" href="../../css/buttons.dataTables.css">
+	<link rel="stylesheet" type="text/css" href="../../../../examples/resources/syntax/shCore.css">
+	<link rel="stylesheet" type="text/css" href="../../../../examples/resources/demo.css">
+	<style type="text/css" class="init">
+	
+	</style>
+	<script type="text/javascript" language="javascript" src="//code.jquery.com/jquery-1.12.4.js">
+	</script>
+	<script type="text/javascript" language="javascript" src="../../../../media/js/jquery.dataTables.js">
+	</script>
+	<script type="text/javascript" language="javascript" src="../../js/dataTables.buttons.js">
+	</script>
+	<script type="text/javascript" language="javascript" src="//cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js">
+	</script>
+	<script type="text/javascript" language="javascript" src="//cdn.rawgit.com/bpampuch/pdfmake/0.1.27/build/pdfmake.min.js">
+	</script>
+	<script type="text/javascript" language="javascript" src="//cdn.rawgit.com/bpampuch/pdfmake/0.1.27/build/vfs_fonts.js">
+	</script>
+	<script type="text/javascript" language="javascript" src="../../js/buttons.html5.js">
+	</script>
+	<script type="text/javascript" language="javascript" src="../../../../examples/resources/syntax/shCore.js">
+	</script>
+	<script type="text/javascript" language="javascript" src="../../../../examples/resources/demo.js">
+	</script>
+	<script type="text/javascript" language="javascript" class="init">
+	
+
+
+$(document).ready(function() {
+	$('#example').DataTable( {
+        ajax: '../../../../examples/ajax/data/objects.txt',
+        columns: [
+            { data: 'name' },
+            { data: 'position' },
+            { data: 'office' },
+            { data: 'extn' },
+            { data: 'start_date' },
+            { data: 'salary', render: function (data, type, row) {
+            	return type === 'export' ?
+            		data.replace( /[$,]/g, '' ) :
+            		data;
+            } }
+        ],
+		dom: 'Bfrtip',
+		buttons: [
+			{
+				extend: 'copyHtml5', 
+				exportOptions: { orthogonal: 'export' }
+			},
+			{
+				extend: 'excelHtml5', 
+				exportOptions: { orthogonal: 'export' }
+			},
+			{
+				extend: 'pdfHtml5', 
+				exportOptions: { orthogonal: 'export' }
+			}
+		]
+	} );
+} );
+
+
+
+	</script>
+</head>
+<body class="dt-example">
+	<div class="container">
+		<section>
+			<h1>Buttons example <span>Format output data - orthogonal data</span></h1>
+			<div class="info">
+				<p>Buttons has two different methods that can be used to format the data exported differently from the data that is shown in the table: orthogonal options as shown
+				in this example and <a href="outputFormat-function.html">formatting functions</a>. They both achieve basically the same thing in different ways: namely
+				modification of the output data.</p>
+				<p>The orthogonal options are based upon <a href="//datatables.net/manual/orthogonal-data">DataTables' support for orthogonal data</a> - specifically being able to
+				use <a href="//datatables.net/reference/option/columns.render"><code class="option" title="DataTables initialisation option">columns.render</code></a> as an object
+				for function to give DataTables different data for the different actions it needs to take.</p>
+				<p>By default Buttons will ask for the same data that is shown in the table (<code class="string" title="String">display</code>) but the <code>orthogonal</code>
+				option of the <code>exportOptions</code> parameter can be used to specify a different data point. In this example the orthogonal data for the exported buttons is
+				set to be <code>export</code> and the <a href="//datatables.net/reference/option/columns.render"><code class="option" title=
+				"DataTables initialisation option">columns.render</code></a> function will return a deformatted string (stripping the <code>$</code> and <code>,</code> characters
+				from the final column to make it a numeric value).</p>
+			</div>
+			<div class="demo-html"></div>
+			<table id="example" class="display" cellspacing="0" width="100%">
+				<thead>
+					<tr>
+						<th>Name</th>
+						<th>Position</th>
+						<th>Office</th>
+						<th>Extn.</th>
+						<th>Start date</th>
+						<th>Salary</th>
+					</tr>
+				</thead>
+				<tfoot>
+					<tr>
+						<th>Name</th>
+						<th>Position</th>
+						<th>Office</th>
+						<th>Extn.</th>
+						<th>Start date</th>
+						<th>Salary</th>
+					</tr>
+				</tfoot>
+			</table>
+			<ul class="tabs">
+				<li class="active">Javascript</li>
+				<li>HTML</li>
+				<li>CSS</li>
+				<li>Ajax</li>
+				<li>Server-side script</li>
+			</ul>
+			<div class="tabs">
+				<div class="js">
+					<p>The Javascript shown below is used to initialise the table shown in this example:</p><code class="multiline language-js">$(document).ready(function() {
+	$('#example').DataTable( {
+        ajax: '../../../../examples/ajax/data/objects.txt',
+        columns: [
+            { data: 'name' },
+            { data: 'position' },
+            { data: 'office' },
+            { data: 'extn' },
+            { data: 'start_date' },
+            { data: 'salary', render: function (data, type, row) {
+            	return type === 'export' ?
+            		data.replace( /[$,]/g, '' ) :
+            		data;
+            } }
+        ],
+		dom: 'Bfrtip',
+		buttons: [
+			{
+				extend: 'copyHtml5', 
+				exportOptions: { orthogonal: 'export' }
+			},
+			{
+				extend: 'excelHtml5', 
+				exportOptions: { orthogonal: 'export' }
+			},
+			{
+				extend: 'pdfHtml5', 
+				exportOptions: { orthogonal: 'export' }
+			}
+		]
+	} );
+} );</code>
+					<p>In addition to the above code, the following Javascript library files are loaded for use in this example:</p>
+					<ul>
+						<li>
+							<a href="//code.jquery.com/jquery-1.12.4.js">//code.jquery.com/jquery-1.12.4.js</a>
+						</li>
+						<li>
+							<a href="../../../../media/js/jquery.dataTables.js">../../../../media/js/jquery.dataTables.js</a>
+						</li>
+						<li>
+							<a href="../../js/dataTables.buttons.js">../../js/dataTables.buttons.js</a>
+						</li>
+						<li>
+							<a href="//cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js">//cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js</a>
+						</li>
+						<li>
+							<a href="//cdn.rawgit.com/bpampuch/pdfmake/0.1.27/build/pdfmake.min.js">//cdn.rawgit.com/bpampuch/pdfmake/0.1.27/build/pdfmake.min.js</a>
+						</li>
+						<li>
+							<a href="//cdn.rawgit.com/bpampuch/pdfmake/0.1.27/build/vfs_fonts.js">//cdn.rawgit.com/bpampuch/pdfmake/0.1.27/build/vfs_fonts.js</a>
+						</li>
+						<li>
+							<a href="../../js/buttons.html5.js">../../js/buttons.html5.js</a>
+						</li>
+					</ul>
+				</div>
+				<div class="table">
+					<p>The HTML shown below is the raw HTML table element, before it has been enhanced by DataTables:</p>
+				</div>
+				<div class="css">
+					<div>
+						<p>This example uses a little bit of additional CSS beyond what is loaded from the library files (below), in order to correctly display the table. The
+						additional CSS used is shown below:</p><code class="multiline language-css"></code>
+					</div>
+					<p>The following CSS library files are loaded for use in this example to provide the styling of the table:</p>
+					<ul>
+						<li>
+							<a href="../../../../media/css/jquery.dataTables.css">../../../../media/css/jquery.dataTables.css</a>
+						</li>
+						<li>
+							<a href="../../css/buttons.dataTables.css">../../css/buttons.dataTables.css</a>
+						</li>
+					</ul>
+				</div>
+				<div class="ajax">
+					<p>This table loads data by Ajax. The latest data that has been loaded is shown below. This data will update automatically as any additional data is
+					loaded.</p>
+				</div>
+				<div class="php">
+					<p>The script used to perform the server-side processing for this table is shown below. Please note that this is just an example script using PHP. Server-side
+					processing scripts can be written in any language, using <a href="//datatables.net/manual/server-side">the protocol described in the DataTables
+					documentation</a>.</p>
+				</div>
+			</div>
+		</section>
+	</div>
+	<section>
+		<div class="footer">
+			<div class="gradient"></div>
+			<div class="liner">
+				<h2>Other examples</h2>
+				<div class="toc">
+					<div class="toc-group">
+						<h3><a href="../initialisation/index.html">Basic initialisation</a></h3>
+						<ul class="toc">
+							<li>
+								<a href="../initialisation/simple.html">Basic initialisation</a>
+							</li>
+							<li>
+								<a href="../initialisation/export.html">File export</a>
+							</li>
+							<li>
+								<a href="../initialisation/custom.html">Custom button</a>
+							</li>
+							<li>
+								<a href="../initialisation/className.html">Class names</a>
+							</li>
+							<li>
+								<a href="../initialisation/keys.html">Keyboard activation</a>
+							</li>
+							<li>
+								<a href="../initialisation/collections.html">Collections</a>
+							</li>
+							<li>
+								<a href="../initialisation/collections-sub.html">Multi-level collections</a>
+							</li>
+							<li>
+								<a href="../initialisation/collections-autoClose.html">Auto close collection</a>
+							</li>
+							<li>
+								<a href="../initialisation/plugins.html">Plug-ins</a>
+							</li>
+							<li>
+								<a href="../initialisation/new.html">`new` initialisation</a>
+							</li>
+							<li>
+								<a href="../initialisation/multiple.html">Multiple button groups</a>
+							</li>
+							<li>
+								<a href="../initialisation/pageLength.html">Page length</a>
+							</li>
+						</ul>
+					</div>
+					<div class="toc-group">
+						<h3><a href="./index.html">HTML 5 data export</a></h3>
+						<ul class="toc active">
+							<li>
+								<a href="./simple.html">HTML5 export buttons</a>
+							</li>
+							<li>
+								<a href="./tsv.html">Tab separated values</a>
+							</li>
+							<li>
+								<a href="./filename.html">File name</a>
+							</li>
+							<li>
+								<a href="./copyi18n.html">Copy button internationalisation</a>
+							</li>
+							<li>
+								<a href="./columns.html">Column selectors</a>
+							</li>
+							<li class="active">
+								<a href="./outputFormat-orthogonal.html">Format output data - orthogonal data</a>
+							</li>
+							<li>
+								<a href="./outputFormat-function.html">Format output data - export options</a>
+							</li>
+							<li>
+								<a href="./excelTextBold.html">Excel - Bold text</a>
+							</li>
+							<li>
+								<a href="./excelCellShading.html">Excel - Cell background</a>
+							</li>
+							<li>
+								<a href="./excelBorder.html">Excel - Customise borders</a>
+							</li>
+							<li>
+								<a href="./pdfMessage.html">PDF - message</a>
+							</li>
+							<li>
+								<a href="./pdfPage.html">PDF - page size and orientation</a>
+							</li>
+							<li>
+								<a href="./pdfImage.html">PDF - image</a>
+							</li>
+							<li>
+								<a href="./pdfOpen.html">PDF - open in new window</a>
+							</li>
+							<li>
+								<a href="./customFile.html">Custom file (JSON)</a>
+							</li>
+						</ul>
+					</div>
+					<div class="toc-group">
+						<h3><a href="../flash/index.html">Flash data export</a></h3>
+						<ul class="toc">
+							<li>
+								<a href="../flash/simple.html">Flash export buttons</a>
+							</li>
+							<li>
+								<a href="../flash/tsv.html">Tab separated values</a>
+							</li>
+							<li>
+								<a href="../flash/filename.html">File name</a>
+							</li>
+							<li>
+								<a href="../flash/copyi18n.html">Copy button internationalisation</a>
+							</li>
+							<li>
+								<a href="../flash/pdfMessage.html">PDF message</a>
+							</li>
+							<li>
+								<a href="../flash/pdfPage.html">Page size and orientation</a>
+							</li>
+							<li>
+								<a href="../flash/hidden.html">Hidden initialisation</a>
+							</li>
+							<li>
+								<a href="../flash/swfPath.html">SWF file location</a>
+							</li>
+						</ul>
+					</div>
+					<div class="toc-group">
+						<h3><a href="../column_visibility/index.html">Column visibility</a></h3>
+						<ul class="toc">
+							<li>
+								<a href="../column_visibility/simple.html">Basic column visibility</a>
+							</li>
+							<li>
+								<a href="../column_visibility/layout.html">Multi-column layout</a>
+							</li>
+							<li>
+								<a href="../column_visibility/text.html">Internationalisation</a>
+							</li>
+							<li>
+								<a href="../column_visibility/columnText.html">Customisation of column button text</a>
+							</li>
+							<li>
+								<a href="../column_visibility/restore.html">Restore column visibility</a>
+							</li>
+							<li>
+								<a href="../column_visibility/columns.html">Select columns</a>
+							</li>
+							<li>
+								<a href="../column_visibility/columnsToggle.html">Visibility toggle buttons</a>
+							</li>
+							<li>
+								<a href="../column_visibility/columnGroups.html">Column groups</a>
+							</li>
+							<li>
+								<a href="../column_visibility/stateSave.html">State saving</a>
+							</li>
+						</ul>
+					</div>
+					<div class="toc-group">
+						<h3><a href="../print/index.html">Print</a></h3>
+						<ul class="toc">
+							<li>
+								<a href="../print/simple.html">Print button</a>
+							</li>
+							<li>
+								<a href="../print/message.html">Custom message</a>
+							</li>
+							<li>
+								<a href="../print/columns.html">Export options - column selector</a>
+							</li>
+							<li>
+								<a href="../print/select.html">Export options - row selector</a>
+							</li>
+							<li>
+								<a href="../print/autoPrint.html">Disable auto print</a>
+							</li>
+							<li>
+								<a href="../print/customisation.html">Customisation of the print view window</a>
+							</li>
+						</ul>
+					</div>
+					<div class="toc-group">
+						<h3><a href="../api/index.html">API</a></h3>
+						<ul class="toc">
+							<li>
+								<a href="../api/enable.html">Enable / disable</a>
+							</li>
+							<li>
+								<a href="../api/text.html">Dynamic text</a>
+							</li>
+							<li>
+								<a href="../api/addRemove.html">Adding and removing buttons dynamically</a>
+							</li>
+							<li>
+								<a href="../api/group.html">Group selection</a>
+							</li>
+						</ul>
+					</div>
+					<div class="toc-group">
+						<h3><a href="../styling/index.html">Styling</a></h3>
+						<ul class="toc">
+							<li>
+								<a href="../styling/bootstrap.html">Bootstrap 3</a>
+							</li>
+							<li>
+								<a href="../styling/bootstrap4.html">Bootstrap 4</a>
+							</li>
+							<li>
+								<a href="../styling/foundation.html">Foundation styling</a>
+							</li>
+							<li>
+								<a href="../styling/jqueryui.html">jQuery UI styling</a>
+							</li>
+							<li>
+								<a href="../styling/semanticui.html">Semantic UI styling</a>
+							</li>
+							<li>
+								<a href="../styling/icons.html">Icons</a>
+							</li>
+						</ul>
+					</div>
+				</div>
+				<div class="epilogue">
+					<p>Please refer to the <a href="http://www.datatables.net">DataTables documentation</a> for full information about its API properties and methods.<br>
+					Additionally, there are a wide range of <a href="http://www.datatables.net/extensions">extensions</a> and <a href=
+					"http://www.datatables.net/plug-ins">plug-ins</a> which extend the capabilities of DataTables.</p>
+					<p class="copyright">DataTables designed and created by <a href="http://www.sprymedia.co.uk">SpryMedia Ltd</a> © 2007-2017<br>
+					DataTables is licensed under the <a href="http://www.datatables.net/mit">MIT license</a>.</p>
+				</div>
+			</div>
+		</div>
+	</section>
+</body>
+</html>
