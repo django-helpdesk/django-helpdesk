@@ -356,10 +356,15 @@ def ticket_from_message(message, queue, logger):
             if isinstance(payload, list):
                 payload = payload.pop().as_string()
             payloadToWrite = payload
+            # check version of python to ensure use of only the correct error type
+            if six.PY2:
+                non_b64_err = binascii.Error
+            else:
+                non_b64_err = TypeError
             try:
                 logger.debug("Try to base64 decode the attachment payload")
                 payloadToWrite = base64.decodestring(payload)
-            except (binascii.Error, TypeError):
+            except non_b64_err:
                 logger.debug("Payload was not base64 encoded, using raw bytes")
                 payloadToWrite = payload
             files.append(SimpleUploadedFile(name, part.get_payload(decode=True), mimetypes.guess_type(name)[0]))
