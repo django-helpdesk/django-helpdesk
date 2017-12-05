@@ -354,7 +354,7 @@ class GetEmailParametricTemplate(object):
             attach2 = get_object_or_404(Attachment, pk=2)
             self.assertEqual(attach2.followup.id, 2)
             self.assertEqual(attach2.filename, 'email_html_body.html')
-            
+
     def test_read_pgp_signed_email(self):
         """Tests reading a PGP signed email to ensure we handle base64
            and PGP signatures appropriately."""
@@ -412,11 +412,7 @@ X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
          O0jO9CqsRmbEDc4vZAtOTXm1O69jCz66oll6H4T5Nka9HUpyHFZzv7Z0j0F/5djfzjCQ
          HCFZhzobEgZAmBC9o2Y5aDvKCnWJGR5kVTtBQaFCuxr57o4zq0D359V3gMMPRGMdujDP
          hXAQ==
-X-Gm-Message-State: AJaThX56HHm8QgZdgM6bRqozlRrXQZnpTcIF/KsEEwRqMaNQ55G23WbC
-	MSCB6WamzjTSlTyoOJn2j7/mIupvLC62mYlSjA==
 X-Google-Smtp-Source: ABhQp+SbAIRuabSw2EkD+7YFXtLiCFINtymAshxVYuNZhApd39ymv2m9UnIM3rZNIHonQBywtZ3VjalQxeN8lVuWD6OquEskEc8=
-X-Received: by 10.107.47.85 with SMTP id j82mr2485471ioo.48.1510176621730;
-        Wed, 08 Nov 2017 13:30:21 -0800 (PST)
 ARC-Seal: i=1; a=rsa-sha256; t=1510176621; cv=none;
         d=google.com; s=arc-20160816;
         b=mOqnqVV4oq14hoOdEA+yVvQYQd/sv/Qr//xmW6r94dKaUczdbFG+Uy8x7EbuF/ILJt
@@ -602,7 +598,7 @@ a9eiiQ+3V1v+7wWHXCzq
 -----END PGP SIGNATURE-----
 """)
             # should this be 'application/pgp-signature'?
-            #self.assertEqual(attach1.mime_type, 'text/plain')
+            # self.assertEqual(attach1.mime_type, 'text/plain')
 
 
 class GetEmailCCHandling(TestCase):
