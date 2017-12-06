@@ -1,5 +1,5 @@
 pysocks
-pep8
+pycodestyle
 codecov
 coverage
 argparse

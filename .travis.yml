@@ -15,7 +15,7 @@ install:
     - pip install -q -r requirements-testing.txt
 
 before_script:
-    - "pep8 --exclude=migrations --ignore=E501 helpdesk"
+    - "pycodestyle --exclude=migrations --ignore=E501 helpdesk"
 
 script:
     - coverage run --source='.' quicktest.py helpdesk
