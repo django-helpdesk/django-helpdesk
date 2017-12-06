@@ -205,9 +205,9 @@ def process_queue(q, logger):
 
         try:
             server.login(q.email_box_user or
-                        settings.QUEUE_EMAIL_BOX_USER,
-                        q.email_box_pass or
-                        settings.QUEUE_EMAIL_BOX_PASSWORD)
+                         settings.QUEUE_EMAIL_BOX_USER,
+                         q.email_box_pass or
+                         settings.QUEUE_EMAIL_BOX_PASSWORD)
             server.select(q.email_box_imap_folder)
         except imaplib.IMAP.abort:
             logger.error("IMAP login failed. Check that the server is accessible and that the username and password are correct.")
