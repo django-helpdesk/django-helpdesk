@@ -525,10 +525,11 @@ class Ticket(models.Model):
         a URL to the submitter of a ticket.
         """
         from django.contrib.sites.models import Site
+        from django.core.exceptions import ImproperlyConfigured
         from django.core.urlresolvers import reverse
         try:
             site = Site.objects.get_current()
-        except:
+        except ImproperlyConfigured:
             site = Site(domain='configure-django-sites.com')
         return u"http://%s%s?ticket=%s&email=%s" % (
             site.domain,
@@ -544,10 +545,11 @@ class Ticket(models.Model):
         a staff member (in emails etc)
         """
         from django.contrib.sites.models import Site
+        from django.core.exceptions import ImproperlyConfigured
         from django.core.urlresolvers import reverse
         try:
             site = Site.objects.get_current()
-        except:
+        except ImproperlyConfigured:
             site = Site(domain='configure-django-sites.com')
         return u"http://%s%s" % (
             site.domain,
@@ -1144,6 +1146,7 @@ def create_usersettings(sender, instance, created, **kwargs):
     from helpdesk.settings import DEFAULT_USER_SETTINGS
     if created:
         UserSettings.objects.create(user=instance, settings=DEFAULT_USER_SETTINGS)
+
 
 models.signals.post_save.connect(create_usersettings, sender=settings.AUTH_USER_MODEL)
 

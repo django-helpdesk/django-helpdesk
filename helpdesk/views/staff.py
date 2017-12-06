@@ -164,6 +164,8 @@ def dashboard(request):
         'all_tickets_reported_by_current_user': all_tickets_reported_by_current_user,
         'basic_ticket_stats': basic_ticket_stats,
     })
+
+
 dashboard = staff_member_required(dashboard)
 
 
@@ -179,6 +181,8 @@ def delete_ticket(request, ticket_id):
     else:
         ticket.delete()
         return HttpResponseRedirect(reverse('helpdesk:home'))
+
+
 delete_ticket = staff_member_required(delete_ticket)
 
 
@@ -229,6 +233,8 @@ def followup_edit(request, ticket_id, followup_id):
             # delete old followup
             followup.delete()
         return HttpResponseRedirect(reverse('helpdesk:view', args=[ticket.id]))
+
+
 followup_edit = staff_member_required(followup_edit)
 
 
@@ -242,6 +248,8 @@ def followup_delete(request, ticket_id, followup_id):
     followup = get_object_or_404(FollowUp, id=followup_id)
     followup.delete()
     return HttpResponseRedirect(reverse('helpdesk:view', args=[ticket.id]))
+
+
 followup_delete = staff_member_required(followup_delete)
 
 
@@ -310,6 +318,8 @@ def view_ticket(request, ticket_id):
         'ticketcc_string': ticketcc_string,
         'SHOW_SUBSCRIBE': show_subscribe,
     })
+
+
 view_ticket = staff_member_required(view_ticket)
 
 
@@ -748,6 +758,8 @@ def mass_update(request):
             t.delete()
 
     return HttpResponseRedirect(reverse('helpdesk:list'))
+
+
 mass_update = staff_member_required(mass_update)
 
 
@@ -931,6 +943,8 @@ def ticket_list(request):
         saved_query=saved_query,
         search_message=search_message,
     ))
+
+
 ticket_list = staff_member_required(ticket_list)
 
 
@@ -948,6 +962,8 @@ def edit_ticket(request, ticket_id):
         form = EditTicketForm(instance=ticket)
 
     return render(request, 'helpdesk/edit_ticket.html', {'form': form})
+
+
 edit_ticket = staff_member_required(edit_ticket)
 
 
@@ -985,6 +1001,8 @@ def create_ticket(request):
             form.fields['assigned_to'].widget = forms.HiddenInput()
 
     return render(request, 'helpdesk/create_ticket.html', {'form': form})
+
+
 create_ticket = staff_member_required(create_ticket)
 
 
@@ -1004,6 +1022,8 @@ def raw_details(request, type):
             raise Http404
 
     raise Http404
+
+
 raw_details = staff_member_required(raw_details)
 
 
@@ -1031,16 +1051,22 @@ def hold_ticket(request, ticket_id, unhold=False):
     ticket.save()
 
     return HttpResponseRedirect(ticket.get_absolute_url())
+
+
 hold_ticket = staff_member_required(hold_ticket)
 
 
 def unhold_ticket(request, ticket_id):
     return hold_ticket(request, ticket_id, unhold=True)
+
+
 unhold_ticket = staff_member_required(unhold_ticket)
 
 
 def rss_list(request):
     return render(request, 'helpdesk/rss_list.html', {'queues': Queue.objects.all()})
+
+
 rss_list = staff_member_required(rss_list)
 
 
@@ -1089,6 +1115,8 @@ def report_index(request):
         'basic_ticket_stats': basic_ticket_stats,
         'dash_tickets': dash_tickets,
     })
+
+
 report_index = staff_member_required(report_index)
 
 
@@ -1121,7 +1149,7 @@ def run_report(request, report):
                 query_params = json.loads(b64decode(str(saved_query.query)).decode())
             else:
                 query_params = json.loads(b64decode(str(saved_query.query)))
-        except:
+        except json.JSONDecodeError:
             return HttpResponseRedirect(reverse('helpdesk:report_index'))
 
         report_queryset = apply_query(report_queryset, query_params)
@@ -1289,6 +1317,8 @@ def run_report(request, report):
         'from_saved_query': from_saved_query,
         'saved_query': saved_query,
     })
+
+
 run_report = staff_member_required(run_report)
 
 
@@ -1306,6 +1336,8 @@ def save_query(request):
     query.save()
 
     return HttpResponseRedirect('%s?saved_query=%s' % (reverse('helpdesk:list'), query.id))
+
+
 save_query = staff_member_required(save_query)
 
 
@@ -1317,6 +1349,8 @@ def delete_saved_query(request, id):
         return HttpResponseRedirect(reverse('helpdesk:list'))
     else:
         return render(request, 'helpdesk/confirm_delete_saved_query.html', {'query': query})
+
+
 delete_saved_query = staff_member_required(delete_saved_query)
 
 
@@ -1331,6 +1365,8 @@ def user_settings(request):
         form = UserSettingsForm(s.settings)
 
     return render(request, 'helpdesk/user_settings.html', {'form': form})
+
+
 user_settings = staff_member_required(user_settings)
 
 
@@ -1338,6 +1374,8 @@ def email_ignore(request):
     return render(request, 'helpdesk/email_ignore_list.html', {
         'ignore_list': IgnoreEmail.objects.all(),
     })
+
+
 email_ignore = superuser_required(email_ignore)
 
 
@@ -1351,6 +1389,8 @@ def email_ignore_add(request):
         form = EmailIgnoreForm(request.GET)
 
     return render(request, 'helpdesk/email_ignore_add.html', {'form': form})
+
+
 email_ignore_add = superuser_required(email_ignore_add)
 
 
@@ -1361,6 +1401,8 @@ def email_ignore_del(request, id):
         return HttpResponseRedirect(reverse('helpdesk:email_ignore'))
     else:
         return render(request, 'helpdesk/email_ignore_del.html', {'ignore': ignore})
+
+
 email_ignore_del = superuser_required(email_ignore_del)
 
 
@@ -1374,6 +1416,8 @@ def ticket_cc(request, ticket_id):
         'copies_to': copies_to,
         'ticket': ticket,
     })
+
+
 ticket_cc = staff_member_required(ticket_cc)
 
 
@@ -1398,6 +1442,8 @@ def ticket_cc_add(request, ticket_id):
         'form_email': form_email,
         'form_user': form_user,
     })
+
+
 ticket_cc_add = staff_member_required(ticket_cc_add)
 
 
@@ -1409,6 +1455,8 @@ def ticket_cc_del(request, ticket_id, cc_id):
         return HttpResponseRedirect(reverse('helpdesk:ticket_cc',
                                             kwargs={'ticket_id': cc.ticket.id}))
     return render(request, 'helpdesk/ticket_cc_del.html', {'cc': cc})
+
+
 ticket_cc_del = staff_member_required(ticket_cc_del)
 
 
@@ -1430,6 +1478,8 @@ def ticket_dependency_add(request, ticket_id):
         'ticket': ticket,
         'form': form,
     })
+
+
 ticket_dependency_add = staff_member_required(ticket_dependency_add)
 
 
@@ -1439,6 +1489,8 @@ def ticket_dependency_del(request, ticket_id, dependency_id):
         dependency.delete()
         return HttpResponseRedirect(reverse('helpdesk:view', args=[ticket_id]))
     return render(request, 'helpdesk/ticket_dependency_del.html', {'dependency': dependency})
+
+
 ticket_dependency_del = staff_member_required(ticket_dependency_del)
 
 
@@ -1455,6 +1507,8 @@ def attachment_del(request, ticket_id, attachment_id):
         'attachment': attachment,
         'filename': attachment.filename,
     })
+
+
 attachment_del = staff_member_required(attachment_del)
 
 

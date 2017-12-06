@@ -4,11 +4,11 @@ Default settings for django-helpdesk.
 """
 
 from django.conf import settings
-
+from django.core.exceptions import ImproperlyConfigured
 
 try:
     DEFAULT_USER_SETTINGS = settings.HELPDESK_DEFAULT_SETTINGS
-except:
+except ImproperlyConfigured:
     DEFAULT_USER_SETTINGS = None
 
 if not isinstance(DEFAULT_USER_SETTINGS, dict):

@@ -19,5 +19,6 @@ def load_helpdesk_settings(request):
         print(e, file=sys.stderr)
         return ''
 
+
 register = Library()
 register.filter('load_helpdesk_settings', load_helpdesk_settings)

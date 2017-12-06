@@ -165,7 +165,7 @@ def process_queue(q, logger):
                 # in py3, msgRaw is a bytes object, decode to str
                 try:
                     msg = msgRaw.decode("utf-8")
-                except:
+                except UnicodeError:
                     # if couldn't decode easily, just leave it raw
                     msg = msgRaw
             else:
@@ -244,7 +244,7 @@ def process_queue(q, logger):
                 logger.info("Successfully processed message %d, ticket/comment created." % i)
                 try:
                     unlink(m)  # delete message file if ticket was successful
-                except:
+                except OSError:
                     logger.error("Unable to delete message %d." % i)
                 else:
                     logger.info("Successfully deleted message %d." % i)
@@ -257,7 +257,7 @@ def decodeUnknown(charset, string):
         if not charset:
             try:
                 return string.decode('utf-8', 'replace')
-            except:
+            except UnicodeError:
                 return string.decode('iso8859-1', 'replace')
         return unicode(string, charset)
     elif six.PY3:
@@ -265,7 +265,7 @@ def decodeUnknown(charset, string):
             if not charset:
                 try:
                     return str(string, encoding='utf-8', errors='replace')
-                except:
+                except UnicodeError:
                     return str(string, encoding='iso8859-1', errors='replace')
             return str(string, encoding=charset, errors='replace')
         return string
