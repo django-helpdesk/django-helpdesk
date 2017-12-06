@@ -13,6 +13,8 @@ scripts/get_email.py - Designed to be run from cron, this script checks the
 from __future__ import unicode_literals
 
 from datetime import timedelta
+import base64
+import binascii
 import email
 import imaplib
 import mimetypes
@@ -21,8 +23,8 @@ from os.path import isfile, join
 import poplib
 import re
 import socket
-import base64
-import binascii
+import ssl
+import sys
 from time import ctime
 
 from bs4 import BeautifulSoup
@@ -201,11 +203,20 @@ def process_queue(q, logger):
 
         logger.info("Attempting IMAP server login")
 
-        server.login(q.email_box_user or
-                     settings.QUEUE_EMAIL_BOX_USER,
-                     q.email_box_pass or
-                     settings.QUEUE_EMAIL_BOX_PASSWORD)
-        server.select(q.email_box_imap_folder)
+        try:
+            server.login(q.email_box_user or
+                        settings.QUEUE_EMAIL_BOX_USER,
+                        q.email_box_pass or
+                        settings.QUEUE_EMAIL_BOX_PASSWORD)
+            server.select(q.email_box_imap_folder)
+        except imaplib.IMAP.abort:
+            logger.error("IMAP login failed. Check that the server is accessible and that the username and password are correct.")
+            server.logout()
+            sys.exit()
+        except ssl.SSLError:
+            logger.error("IMAP login failed due to SSL error. This is often due to a timeout. Please check your connection and try again.")
+            server.logout()
+            sys.exit()
 
         try:
             status, data = server.search(None, 'NOT', 'DELETED')
