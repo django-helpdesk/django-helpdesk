@@ -9,7 +9,7 @@ from django.core.exceptions import ImproperlyConfigured
 
 try:
     DEFAULT_USER_SETTINGS = settings.HELPDESK_DEFAULT_SETTINGS
-except:
+except AttributeError:
     DEFAULT_USER_SETTINGS = None
 
 if not isinstance(DEFAULT_USER_SETTINGS, dict):

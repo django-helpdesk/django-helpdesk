@@ -24,5 +24,6 @@ def user_admin_url(action):
         user._meta.app_label, model_name,
         action)
 
+
 register = template.Library()
 register.filter(user_admin_url)

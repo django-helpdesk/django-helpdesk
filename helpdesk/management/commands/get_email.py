@@ -13,6 +13,8 @@ scripts/get_email.py - Designed to be run from cron, this script checks the
 from __future__ import unicode_literals
 
 from datetime import timedelta
+import base64
+import binascii
 import email
 import imaplib
 import mimetypes
@@ -21,9 +23,11 @@ from os.path import isfile, join
 import poplib
 import re
 import socket
-import base64
-import binascii
+import ssl
+import sys
 from time import ctime
+
+from bs4 import BeautifulSoup
 
 from email_reply_parser import EmailReplyParser
 
@@ -158,7 +162,17 @@ def process_queue(q, logger):
         messagesInfo = server.list()[1]
         logger.info("Received %d messages from POP3 server" % len(messagesInfo))
 
-        for msg in messagesInfo:
+        for msgRaw in messagesInfo:
+            if six.PY3 and type(msgRaw) is bytes:
+                # in py3, msgRaw may be a bytes object, decode to str
+                try:
+                    msg = msgRaw.decode("utf-8")
+                except UnicodeError:
+                    # if couldn't decode easily, just leave it raw
+                    msg = msgRaw
+            else:
+                # already a str
+                msg = msgRaw
             msgNum = msg.split(" ")[0]
             logger.info("Processing message %s" % msgNum)
 
@@ -189,11 +203,20 @@ def process_queue(q, logger):
 
         logger.info("Attempting IMAP server login")
 
-        server.login(q.email_box_user or
-                     settings.QUEUE_EMAIL_BOX_USER,
-                     q.email_box_pass or
-                     settings.QUEUE_EMAIL_BOX_PASSWORD)
-        server.select(q.email_box_imap_folder)
+        try:
+            server.login(q.email_box_user or
+                         settings.QUEUE_EMAIL_BOX_USER,
+                         q.email_box_pass or
+                         settings.QUEUE_EMAIL_BOX_PASSWORD)
+            server.select(q.email_box_imap_folder)
+        except imaplib.IMAP.abort:
+            logger.error("IMAP login failed. Check that the server is accessible and that the username and password are correct.")
+            server.logout()
+            sys.exit()
+        except ssl.SSLError:
+            logger.error("IMAP login failed due to SSL error. This is often due to a timeout. Please check your connection and try again.")
+            server.logout()
+            sys.exit()
 
         try:
             status, data = server.search(None, 'NOT', 'DELETED')
@@ -232,7 +255,7 @@ def process_queue(q, logger):
                 logger.info("Successfully processed message %d, ticket/comment created." % i)
                 try:
                     unlink(m)  # delete message file if ticket was successful
-                except:
+                except OSError:
                     logger.error("Unable to delete message %d." % i)
                 else:
                     logger.info("Successfully deleted message %d." % i)
@@ -245,7 +268,7 @@ def decodeUnknown(charset, string):
         if not charset:
             try:
                 return string.decode('utf-8', 'replace')
-            except:
+            except UnicodeError:
                 return string.decode('iso8859-1', 'replace')
         return unicode(string, charset)
     elif six.PY3:
@@ -253,7 +276,7 @@ def decodeUnknown(charset, string):
             if not charset:
                 try:
                     return str(string, encoding='utf-8', errors='replace')
-                except:
+                except UnicodeError:
                     return str(string, encoding='iso8859-1', errors='replace')
             return str(string, encoding=charset, errors='replace')
         return string
@@ -344,10 +367,15 @@ def ticket_from_message(message, queue, logger):
             if isinstance(payload, list):
                 payload = payload.pop().as_string()
             payloadToWrite = payload
+            # check version of python to ensure use of only the correct error type
+            if six.PY2:
+                non_b64_err = binascii.Error
+            else:
+                non_b64_err = TypeError
             try:
                 logger.debug("Try to base64 decode the attachment payload")
                 payloadToWrite = base64.decodestring(payload)
-            except (binascii.Error, TypeError):
+            except non_b64_err:
                 logger.debug("Payload was not base64 encoded, using raw bytes")
                 payloadToWrite = payload
             files.append(SimpleUploadedFile(name, part.get_payload(decode=True), mimetypes.guess_type(name)[0]))
@@ -356,7 +384,12 @@ def ticket_from_message(message, queue, logger):
         counter += 1
 
     if not body:
-        body = _('No plain-text email body available. Please see attachment "email_html_body.html".')
+        mail = BeautifulSoup(part.get_payload(), "lxml")
+        if ">" in mail.text:
+            message_body = mail.text.split(">")[1]
+            body = message_body.encode('ascii', errors='ignore')
+        else:
+            body = mail.text
 
     if ticket:
         try:

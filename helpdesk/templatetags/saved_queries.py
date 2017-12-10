@@ -22,5 +22,6 @@ def saved_queries(user):
         print(e, file=sys.stderr)
         return ''
 
+
 register = Library()
 register.filter('saved_queries', saved_queries)

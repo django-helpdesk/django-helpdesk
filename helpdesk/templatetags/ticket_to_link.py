@@ -42,5 +42,6 @@ def num_to_link(text):
                 text[:match.start() + 1], url, style, match.groups()[0], text[match.end():])
     return mark_safe(text)
 
+
 register = template.Library()
 register.filter(num_to_link)

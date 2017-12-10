@@ -29,6 +29,7 @@ class DirectTemplateView(TemplateView):
                     context[key] = value
         return context
 
+
 app_name = 'helpdesk'
 
 urlpatterns = [
