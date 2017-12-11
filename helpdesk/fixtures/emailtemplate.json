@@ -1158,7 +1158,7 @@
         "pk": 97, 
         "model": "helpdesk.emailtemplate", 
         "fields": {
-            "template_name": "已分配_CC", 
+            "template_name": "assigned_cc", 
             "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">您好,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">温馨提示, {{ ticket.submitter_email }}的工单 <a href=\"{{ ticket.staff_url }}\"><b>{{ ticket.ticket }}</b></a> (<em>{{ ticket.title }}</em>)  {% if ticket.assigned_to %}已经分配给 {{ ticket.assigned_to }}{% else %}还未分配{% endif %}.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">\r\n<b>工单 ID</b>: {{ ticket.ticket }}<br>\r\n<b>待办</b>: {{ queue.title }}<br>\r\n<b>标题</b>: {{ ticket.title }}<br>\r\n<b>已打开</b>: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}<br>\r\n<b>提交人</b>: {{ ticket.submitter_email|default:\"Unknown\" }}<br>\r\n<b>优先级</b>: {{ ticket.get_priority_display }}<br>\r\n<b>状态</b>: {{ ticket.get_status }}<br>\r\n<b>已分配给</b>: {{ ticket.get_assigned_to }}<br>\r\n<b><a href='{{ ticket.staff_url }}'>在线查看</a></b> 更新此工单 (需要登录)</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">原工单描述参考：:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.description|linebreaksbr }}</blockquote>", 
             "plain_text": "您好,\r\n\r\n温馨提示, {{ ticket.submitter_email }}提交的工单 {{ ticket.ticket }} (\"{{ ticket.title }}\") 已经 {% if ticket.assigned_to %}分配给 {{ ticket.assigned_to }}{% else %}未分配{% endif %}.\r\n\r\n工单 ID: {{ ticket.ticket }}\r\n待办: {{ queue.title }}\r\n标题: {{ ticket.title }}\r\n已打开: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}\r\n提交人: {{ ticket.submitter_email|default:\"Unknown\" }}\r\n优先级:{{ ticket.get_priority_display }}\r\n状态: {{ ticket.get_status }}\r\n已分配给: {{ ticket.get_assigned_to }}\r\n在线查看: {{ ticket.staff_url }}\r\n\r\n原始描述为:\r\n\r\n{{ ticket.description }}\r\n\r\n", 
             "heading": "工单已分配", 
@@ -1278,7 +1278,7 @@
         "pk": 107, 
         "model": "helpdesk.emailtemplate", 
         "fields": {
-            "template_name": "解决_cc", 
+            "template_name": "resolved_cc", 
             "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">您好,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">以下工单 已经 解决.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">\r\n<b>工单 ID</b>: {{ ticket.ticket }}<br>\r\n<b>待办</b>: {{ queue.title }}<br>\r\n<b>标题</b>: {{ ticket.title }}<br>\r\n<b>已打开</b>: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}<br>\r\n<b>提交人</b>: {{ ticket.submitter_email|default:\"Unknown\" }}<br>\r\n<b>优先级</b>: {{ ticket.get_priority_display }}<br>\r\n<b>状态</b>: {{ ticket.get_status }}<br>\r\n<b>已分配给</b>: {{ ticket.get_assigned_to }}<br>\r\n<b><a href='{{ ticket.staff_url }}'>在线查看</a></b> 更新此工单 (需要登录)</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">原工单描述参考：:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.description|linebreaksbr }}</blockquote>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">增加的解决方案为:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.resolution }}</blockquote>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">此方案已经 邮件发送给提交者, 在您关闭之前需要他先确认.</p>", 
             "plain_text": "您好,\r\n\r\n以下工单 已经 解决:\r\n\r\n工单 ID: {{ ticket.ticket }}\r\n待办: {{ queue.title }}\r\n标题: {{ ticket.title }}\r\n已打开: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}\r\n提交人: {{ ticket.submitter_email|default:\"Unknown\" }}\r\n优先级:{{ ticket.get_priority_display }}\r\n状态: {{ ticket.get_status }}\r\n已分配给: {{ ticket.get_assigned_to }}\r\n在线查看: {{ ticket.staff_url }} (需要登录)\r\n\r\n原始描述为:\r\n\r\n{{ ticket.description }}\r\n\r\n提供的解决方案为:\r\n\r\n{{ ticket.resolution }}\r\n\r\n此方案已经 邮件发送给提交者, 在您关闭之前需要他先确认.\r\n\r\n", 
             "heading": "工单 解决", 
@@ -1290,7 +1290,7 @@
         "pk": 108, 
         "model": "helpdesk.emailtemplate", 
         "fields": {
-            "template_name": "解决_owner", 
+            "template_name": "resolved_owner", 
             "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">您好,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">A 当前分配给您的工单已经 解决.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">\r\n<b>工单 ID</b>: {{ ticket.ticket }}<br>\r\n<b>待办</b>: {{ queue.title }}<br>\r\n<b>标题</b>: {{ ticket.title }}<br>\r\n<b>已打开</b>: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}<br>\r\n<b>提交人</b>: {{ ticket.submitter_email|default:\"Unknown\" }}<br>\r\n<b>优先级</b>: {{ ticket.get_priority_display }}<br>\r\n<b>状态</b>: {{ ticket.get_status }}<br>\r\n<b>已分配给</b>: {{ ticket.get_assigned_to }}<br>\r\n<b><a href='{{ ticket.staff_url }}'>在线查看</a></b> 更新此工单 (需要登录)</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">原工单描述参考：:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.description|linebreaksbr }}</blockquote>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">增加的解决方案为:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.resolution }}</blockquote>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">此方案已经 邮件发送给提交者, 在您关闭之前需要他先确认.</p>", 
             "plain_text": "您好,\r\n\r\nA 当前分配给您的工单已经 解决.\r\n\r\n工单 ID: {{ ticket.ticket }}\r\n待办: {{ queue.title }}\r\n标题: {{ ticket.title }}\r\n已打开: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}\r\n提交人: {{ ticket.submitter_email|default:\"Unknown\" }}\r\n优先级:{{ ticket.get_priority_display }}\r\n状态: {{ ticket.get_status }}\r\n已分配给: {{ ticket.get_assigned_to }}\r\n在线查看: {{ ticket.staff_url }} (需要登录)\r\n\r\n原始描述为:\r\n\r\n{{ ticket.description }}\r\n\r\n提供的方案为:\r\n\r\n{{ ticket.resolution }}\r\n\r\n此方案已经 邮件发送给提交者, 在您关闭之前需要他先确认.\r\n\r\n", 
             "heading": "工单 解决", 
@@ -1302,7 +1302,7 @@
         "pk": 109, 
         "model": "helpdesk.emailtemplate", 
         "fields": {
-            "template_name": "解决_submitter", 
+            "template_name": "resolved_submitter", 
             "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">您好,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">您最近记录了主题为<i>{{ ticket.title }}</i>的工单. 此邮件是要告知您解决方案.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">工单添加了以下解决方案 <b>{{ ticket.ticket }}</b>:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ resolution }}</blockquote>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">请您确认下此解决方案是否解决了您的问题， 这样我们可以关闭此工单? 如果有更多问题或者认为方案不够充分，, 请继续使用邮件的主题回复此邮件.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">如果您想在线查看， 可以访问 <a href=\"{{ ticket.ticket_url }}\">{{ ticket.ticket_url }}</a>.</p>", 
             "plain_text": "您好,\r\n\r\n您最近记录了主题为\"{{ ticket.title }}\"的工单. 此邮件是要告知您解决方案.\r\n\r\n工单添加了以下解决方案 {{ ticket.ticket }}:\r\n\r\n{{ resolution }}\r\n\r\n请您确认下此解决方案是否解决了您的问题， 这样我们可以关闭此工单? 如果有更多问题或者认为方案不够充分，, 请继续使用邮件的主题回复此邮件.\r\n\r\n如果您想在线查看， 可以访问 {{ ticket.ticket_url }}\r\n\r\n", 
             "heading": "您的 工单 已经 解决", 
