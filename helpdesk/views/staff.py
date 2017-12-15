@@ -86,6 +86,15 @@ def _has_access_to_queue(user, queue):
         return user.has_perm(queue.permission_name)
 
 
+def _is_my_ticket(user, ticket):
+    """Check to see if the user has permission to access
+    a ticket. If not then deny access."""
+    if user.is_superuser or user.is_staff or user.id == ticket.customer_id:
+        return True
+    else:
+        return False
+
+
 def dashboard(request):
     """
     A quick summary overview for users: A list of their own tickets, a table
@@ -173,6 +182,8 @@ def delete_ticket(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
     if not _has_access_to_queue(request.user, ticket.queue):
         raise PermissionDenied()
+    if not _is_my_ticket(request.user, ticket):
+        raise PermissionDenied()
 
     if request.method == 'GET':
         return render(request, 'helpdesk/delete_ticket.html', {
@@ -192,6 +203,9 @@ def followup_edit(request, ticket_id, followup_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
     if not _has_access_to_queue(request.user, ticket.queue):
         raise PermissionDenied()
+    if not _is_my_ticket(request.user, ticket):
+        raise PermissionDenied()
+
     if request.method == 'GET':
         form = EditFollowUpForm(initial={
             'title': escape(followup.title),
@@ -256,6 +270,8 @@ followup_delete = staff_member_required(followup_delete)
 def view_ticket(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
     if not _has_access_to_queue(request.user, ticket.queue):
+        raise PermissionDenied()
+    if not _is_my_ticket(request.user, ticket):
         raise PermissionDenied()
 
     if 'take' in request.GET:
@@ -952,6 +968,8 @@ def edit_ticket(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
     if not _has_access_to_queue(request.user, ticket.queue):
         raise PermissionDenied()
+    if not _is_my_ticket(request.user, ticket):
+        raise PermissionDenied()
 
     if request.method == 'POST':
         form = EditTicketForm(request.POST, instance=ticket)
@@ -1030,6 +1048,8 @@ raw_details = staff_member_required(raw_details)
 def hold_ticket(request, ticket_id, unhold=False):
     ticket = get_object_or_404(Ticket, id=ticket_id)
     if not _has_access_to_queue(request.user, ticket.queue):
+        raise PermissionDenied()
+    if not _is_my_ticket(request.user, ticket):
         raise PermissionDenied()
 
     if unhold:
@@ -1410,6 +1430,8 @@ def ticket_cc(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
     if not _has_access_to_queue(request.user, ticket.queue):
         raise PermissionDenied()
+    if not _is_my_ticket(request.user, ticket):
+        raise PermissionDenied()
 
     copies_to = ticket.ticketcc_set.all()
     return render(request, 'helpdesk/ticket_cc_list.html', {
@@ -1424,6 +1446,8 @@ ticket_cc = staff_member_required(ticket_cc)
 def ticket_cc_add(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
     if not _has_access_to_queue(request.user, ticket.queue):
+        raise PermissionDenied()
+    if not _is_my_ticket(request.user, ticket):
         raise PermissionDenied()
 
     if request.method == 'POST':
@@ -1464,6 +1488,8 @@ def ticket_dependency_add(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
     if not _has_access_to_queue(request.user, ticket.queue):
         raise PermissionDenied()
+    if not _is_my_ticket(request.user, ticket):
+        raise PermissionDenied()
     if request.method == 'POST':
         form = TicketDependencyForm(request.POST)
         if form.is_valid():
@@ -1497,6 +1523,8 @@ ticket_dependency_del = staff_member_required(ticket_dependency_del)
 def attachment_del(request, ticket_id, attachment_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
     if not _has_access_to_queue(request.user, ticket.queue):
+        raise PermissionDenied()
+    if not _is_my_ticket(request.user, ticket):
         raise PermissionDenied()
 
     attachment = get_object_or_404(Attachment, id=attachment_id)
