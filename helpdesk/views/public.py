@@ -43,11 +43,15 @@ def homepage(request):
                 return render(request, template_name='helpdesk/public_spam.html')
             else:
                 ticket = form.save()
-                return HttpResponseRedirect('%s?ticket=%s&email=%s' % (
-                    reverse('helpdesk:public_view'),
-                    ticket.ticket_for_url,
-                    urlquote(ticket.submitter_email))
-                )
+                try:
+                    return HttpResponseRedirect('%s?ticket=%s&email=%s' % (
+                        reverse('helpdesk:public_view'),
+                        ticket.ticket_for_url,
+                        urlquote(ticket.submitter_email))
+                    )
+                except ValueError:
+                    # if someone enters a non-int string for the ticket
+                    return HttpResponseRedirect(reverse('helpdesk:home'))
     else:
         try:
             queue = Queue.objects.get(slug=request.GET.get('queue', None))
