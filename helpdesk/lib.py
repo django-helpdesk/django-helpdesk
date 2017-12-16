@@ -140,7 +140,7 @@ def send_templated_mail(template_name,
 
     try:
         return msg.send()
-    except SMTPException:
+    except SMTPException as e:
         logger.exception('SMTPException raised while sending email to {}'.format(recipients))
         if not fail_silently:
             raise e
