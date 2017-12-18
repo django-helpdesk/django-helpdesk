@@ -42,6 +42,7 @@ distclean: clean
 	rm -rf *.egg
 	rm -rf *.egg-info
 	rm -rf demo/*.egg-info
+	rm -rf helpdesk/attachments/
 	# remove the django-created database
 	rm -f demo/demodesk/*.sqlite3
 
