@@ -11,6 +11,7 @@ docs/doctrees/*
 .directory
 
 # ignore demo attachments that user might have added
+helpdesk/attachments/
 demo/demodesk/media/helpdesk/attachments/*
 !demo/demodesk/media/helpdesk/attachments/DH-3
 demo/demodesk/media/helpdesk/attachments/DH-3/*

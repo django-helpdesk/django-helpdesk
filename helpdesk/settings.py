@@ -115,6 +115,10 @@ HELPDESK_STAFF_ONLY_TICKET_CC = getattr(settings, 'HELPDESK_STAFF_ONLY_TICKET_CC
 HELPDESK_EMAIL_SUBJECT_TEMPLATE = getattr(
     settings, 'HELPDESK_EMAIL_SUBJECT_TEMPLATE',
     "{{ ticket.ticket }} {{ ticket.title|safe }} %(subject)s")
+# since django-helpdesk may not work correctly without the ticket ID
+# in the subject, let's do a check for it quick:
+if HELPDESK_EMAIL_SUBJECT_TEMPLATE.find("ticket.ticket") < 0:
+    raise ImproperlyConfigured
 
 # default fallback locale when queue locale not found
 HELPDESK_EMAIL_FALLBACK_LOCALE = getattr(settings, 'HELPDESK_EMAIL_FALLBACK_LOCALE', 'en')
