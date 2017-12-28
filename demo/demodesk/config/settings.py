@@ -194,6 +194,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATIC_URL = '/static/'
+# static root needs to be defined in order to use collectstatic
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 # MEDIA_ROOT is where media uploads are stored.
 # We set this to a directory to host file attachments created

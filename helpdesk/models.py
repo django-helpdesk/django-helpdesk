@@ -256,11 +256,11 @@ class Queue(models.Model):
 
     default_owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
         related_name='default_owner',
         blank=True,
         null=True,
         verbose_name=_('Default owner'),
-        on_delete=models.SET_NULL,
     )
 
     def __str__(self):
@@ -388,6 +388,7 @@ class Ticket(models.Model):
 
     queue = models.ForeignKey(
         Queue,
+        on_delete=models.CASCADE,
         verbose_name=_('Queue'),
     )
 
@@ -413,6 +414,7 @@ class Ticket(models.Model):
 
     assigned_to = models.ForeignKey(
         settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
         related_name='assigned_to',
         blank=True,
         null=True,
@@ -629,6 +631,7 @@ class FollowUp(models.Model):
 
     ticket = models.ForeignKey(
         Ticket,
+        on_delete=models.CASCADE,
         verbose_name=_('Ticket'),
     )
 
@@ -660,6 +663,7 @@ class FollowUp(models.Model):
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
         blank=True,
         null=True,
         verbose_name=_('User'),
@@ -702,6 +706,7 @@ class TicketChange(models.Model):
 
     followup = models.ForeignKey(
         FollowUp,
+        on_delete=models.CASCADE,
         verbose_name=_('Follow-up'),
     )
 
@@ -764,6 +769,7 @@ class Attachment(models.Model):
 
     followup = models.ForeignKey(
         FollowUp,
+        on_delete=models.CASCADE,
         verbose_name=_('Follow-up'),
     )
 
@@ -977,6 +983,7 @@ class KBItem(models.Model):
     """
     category = models.ForeignKey(
         KBCategory,
+        on_delete=models.CASCADE,
         verbose_name=_('Category'),
     )
 
@@ -1050,6 +1057,7 @@ class SavedSearch(models.Model):
     """
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
         verbose_name=_('User'),
     )
 
@@ -1094,6 +1102,7 @@ class UserSettings(models.Model):
 
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
         related_name="usersettings_helpdesk")
 
     settings_pickled = models.TextField(
@@ -1255,11 +1264,13 @@ class TicketCC(models.Model):
 
     ticket = models.ForeignKey(
         Ticket,
+        on_delete=models.CASCADE,
         verbose_name=_('Ticket'),
     )
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
         blank=True,
         null=True,
         help_text=_('User who wishes to receive updates for this ticket.'),
@@ -1429,11 +1440,13 @@ class CustomField(models.Model):
 class TicketCustomFieldValue(models.Model):
     ticket = models.ForeignKey(
         Ticket,
+        on_delete=models.CASCADE,
         verbose_name=_('Ticket'),
     )
 
     field = models.ForeignKey(
         CustomField,
+        on_delete=models.CASCADE,
         verbose_name=_('Field'),
     )
 
@@ -1462,12 +1475,14 @@ class TicketDependency(models.Model):
 
     ticket = models.ForeignKey(
         Ticket,
+        on_delete=models.CASCADE,
         verbose_name=_('Ticket'),
         related_name='ticketdependency',
     )
 
     depends_on = models.ForeignKey(
         Ticket,
+        on_delete=models.CASCADE,
         verbose_name=_('Depends On Ticket'),
         related_name='depends_on',
     )
