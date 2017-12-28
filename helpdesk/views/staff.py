@@ -46,14 +46,14 @@ User = get_user_model()
 if helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE:
     # treat 'normal' users like 'staff'
     staff_member_required = user_passes_test(
-        lambda u: u.is_authenticated() and u.is_active)
+        lambda u: u.is_authenticated and u.is_active)
 else:
     staff_member_required = user_passes_test(
-        lambda u: u.is_authenticated() and u.is_active and u.is_staff)
+        lambda u: u.is_authenticated and u.is_active and u.is_staff)
 
 
 superuser_required = user_passes_test(
-    lambda u: u.is_authenticated() and u.is_active and u.is_superuser)
+    lambda u: u.is_authenticated and u.is_active and u.is_superuser)
 
 
 def _get_user_queues(user):
@@ -387,7 +387,7 @@ def subscribe_staff_member_to_ticket(ticket, user):
 
 def update_ticket(request, ticket_id, public=False):
     if not (public or (
-            request.user.is_authenticated() and
+            request.user.is_authenticated and
             request.user.is_active and (
                 request.user.is_staff or
                 helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE))):
@@ -644,7 +644,7 @@ def update_ticket(request, ticket_id, public=False):
     ticket.save()
 
     # auto subscribe user if enabled
-    if helpdesk_settings.HELPDESK_AUTO_SUBSCRIBE_ON_TICKET_RESPONSE and request.user.is_authenticated():
+    if helpdesk_settings.HELPDESK_AUTO_SUBSCRIBE_ON_TICKET_RESPONSE and request.user.is_authenticated:
         ticketcc_string, SHOW_SUBSCRIBE = return_ticketccstring_and_show_subscribe(request.user, ticket)
         if SHOW_SUBSCRIBE:
             subscribe_staff_member_to_ticket(ticket, request.user)

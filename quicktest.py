@@ -29,7 +29,8 @@ class QuickDjangoTest(object):
         'django.contrib.staticfiles',
         'bootstrapform',
     )
-    MIDDLEWARE_CLASSES = [
+    MIDDLEWARE = [
+        'django.middleware.security.SecurityMiddleware',
         'django.contrib.sessions.middleware.SessionMiddleware',
         'django.middleware.common.CommonMiddleware',
         'django.middleware.csrf.CsrfViewMiddleware',
@@ -78,7 +79,7 @@ class QuickDjangoTest(object):
                 }
             },
             INSTALLED_APPS=self.INSTALLED_APPS + self.apps,
-            MIDDLEWARE_CLASSES=self.MIDDLEWARE_CLASSES,
+            MIDDLEWARE=self.MIDDLEWARE,
             ROOT_URLCONF='helpdesk.tests.urls',
             STATIC_URL='/static/',
             TEMPLATES=self.TEMPLATES

@@ -92,7 +92,7 @@ class GetEmailParametricTemplate(object):
 
         if self.socks:
             from socks import ProxyConnectionError
-            with self.assertRaisesRegexp(ProxyConnectionError, '%s:%s' % (unrouted_socks_server, unused_port)):
+            with self.assertRaisesRegex(ProxyConnectionError, '%s:%s' % (unrouted_socks_server, unused_port)):
                 call_command('get_email')
 
         else:
@@ -165,7 +165,7 @@ class GetEmailParametricTemplate(object):
 
         if self.socks:
             from socks import ProxyConnectionError
-            with self.assertRaisesRegexp(ProxyConnectionError, '%s:%s' % (unrouted_socks_server, unused_port)):
+            with self.assertRaisesRegex(ProxyConnectionError, '%s:%s' % (unrouted_socks_server, unused_port)):
                 call_command('get_email')
 
         else:
@@ -278,7 +278,7 @@ class GetEmailParametricTemplate(object):
 
         if self.socks:
             from socks import ProxyConnectionError
-            with self.assertRaisesRegexp(ProxyConnectionError, '%s:%s' % (unrouted_socks_server, unused_port)):
+            with self.assertRaisesRegex(ProxyConnectionError, '%s:%s' % (unrouted_socks_server, unused_port)):
                 call_command('get_email')
 
         else:
@@ -525,7 +525,7 @@ a9eiiQ+3V1v+7wWHXCzq
 
         if self.socks:
             from socks import ProxyConnectionError
-            with self.assertRaisesRegexp(ProxyConnectionError, '%s:%s' % (unrouted_socks_server, unused_port)):
+            with self.assertRaisesRegex(ProxyConnectionError, '%s:%s' % (unrouted_socks_server, unused_port)):
                 call_command('get_email')
 
         else:
