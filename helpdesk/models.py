@@ -529,7 +529,7 @@ class Ticket(models.Model):
         """
         from django.contrib.sites.models import Site
         from django.core.exceptions import ImproperlyConfigured
-        from django.core.urlresolvers import reverse
+        from django.urls import reverse
         try:
             site = Site.objects.get_current()
         except ImproperlyConfigured:
@@ -549,7 +549,7 @@ class Ticket(models.Model):
         """
         from django.contrib.sites.models import Site
         from django.core.exceptions import ImproperlyConfigured
-        from django.core.urlresolvers import reverse
+        from django.urls import reverse
         try:
             site = Site.objects.get_current()
         except ImproperlyConfigured:
@@ -582,8 +582,8 @@ class Ticket(models.Model):
         return '%s %s' % (self.id, self.title)
 
     def get_absolute_url(self):
-        return 'helpdesk:view', (self.id,)
-    get_absolute_url = models.permalink(get_absolute_url)
+        from django.urls import reverse
+        return reverse('helpdesk:view', args=(self.id,))
 
     def save(self, *args, **kwargs):
         if not self.id:
@@ -971,8 +971,8 @@ class KBCategory(models.Model):
         verbose_name_plural = _('Knowledge base categories')
 
     def get_absolute_url(self):
-        return 'helpdesk:kb_category', (), {'slug': self.slug}
-    get_absolute_url = models.permalink(get_absolute_url)
+        from django.urls import reverse
+        return reverse('helpdesk:kb_category', kwargs={'slug': self.slug})
 
 
 @python_2_unicode_compatible
@@ -1039,8 +1039,8 @@ class KBItem(models.Model):
         verbose_name_plural = _('Knowledge base items')
 
     def get_absolute_url(self):
-        return 'helpdesk:kb_item', (self.id,)
-    get_absolute_url = models.permalink(get_absolute_url)
+        from django.urls import reverse
+        return reverse('helpdesk:kb_item', args=(self.id,))
 
 
 @python_2_unicode_compatible
