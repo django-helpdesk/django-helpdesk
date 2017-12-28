@@ -6,7 +6,7 @@ import shutil
 from tempfile import gettempdir
 
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.test import override_settings, TestCase
 from django.utils.encoding import smart_text
 
