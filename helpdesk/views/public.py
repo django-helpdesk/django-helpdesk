@@ -7,11 +7,12 @@ views/public.py - All public facing views, eg non-staff (no authentication
                   required) views.
 """
 from django.core.exceptions import ObjectDoesNotExist
-from django.urls import reverse
-from django.http import HttpResponseRedirect
+from django.core.urlresolvers import reverse
+from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render
 from django.utils.http import urlquote
 from django.utils.translation import ugettext as _
+from django.conf import settings
 
 from helpdesk import settings as helpdesk_settings
 from helpdesk.decorators import protect_view
@@ -58,6 +59,19 @@ def homepage(request):
         except Queue.DoesNotExist:
             queue = None
         initial_data = {}
+
+        # add pre-defined data for public ticket
+        if hasattr(settings, 'HELPDESK_PUBLIC_TICKET_QUEUE'):
+            # get the requested queue; return an error if queue not found
+            try:
+                queue = Queue.objects.get(slug=settings.HELPDESK_PUBLIC_TICKET_QUEUE)
+            except Queue.DoesNotExist:
+                return HttpResponse(status=500)
+        if hasattr(settings, 'HELPDESK_PUBLIC_TICKET_PRIORITY'):
+            initial_data['priority'] = settings.HELPDESK_PUBLIC_TICKET_PRIORITY
+        if hasattr(settings, 'HELPDESK_PUBLIC_TICKET_DUE_DATE'):
+            initial_data['due_date'] = settings.HELPDESK_PUBLIC_TICKET_DUE_DATE
+
         if queue:
             initial_data['queue'] = queue.id
 

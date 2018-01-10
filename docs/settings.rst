@@ -105,6 +105,22 @@ These options only change display of items on public-facing pages, not staff pag
   **Default:** ``HELPDESK_SUBMIT_A_TICKET_PUBLIC = True``
 
 
+Options for public ticket submission form
+-----------------------------------------
+
+- **HELPDESK_PUBLIC_TICKET_QUEUE** Sets the queue for tickets submitted through the public form. If defined, the matching form field will be hidden. This cannot be `None` but must be set to a valid queue slug.
+
+  **Default:** Not defined
+
+- **HELPDESK_PUBLIC_TICKET_PRIORITY** Sets the priority for tickets submitted through the public form. If defined, the matching form field will be hidden. Must be set to a valid integer priority.
+
+  **Default:** Not defined
+
+- **HELPDESK_PUBLIC_TICKET_DUE_DATE** Sets the due date for tickets submitted through the public form. If defined, the matching form field will be hidden. Set to `None` if you want to hide the form field but do not want to define a value.
+
+  **Default:** Not defined
+
+
 Options that change ticket updates
 ----------------------------------
 
