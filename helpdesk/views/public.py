@@ -24,7 +24,7 @@ from helpdesk.models import Ticket, Queue, UserSettings, KBCategory
 @protect_view
 def homepage(request):
     if request.user.is_staff or \
-            (request.user.is_authenticated() and
+            (request.user.is_authenticated and
              helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE):
         try:
             if request.user.usersettings_helpdesk.settings.get('login_view_ticketlist', False):
@@ -75,7 +75,7 @@ def homepage(request):
         if queue:
             initial_data['queue'] = queue.id
 
-        if request.user.is_authenticated() and request.user.email:
+        if request.user.is_authenticated and request.user.email:
             initial_data['submitter_email'] = request.user.email
 
         form = PublicTicketForm(initial=initial_data)

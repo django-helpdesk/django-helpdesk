@@ -140,7 +140,7 @@ class Migration(migrations.Migration):
                 ('votes', models.IntegerField(verbose_name='Votes', default=0, help_text='Total number of votes cast for this item')),
                 ('recommendations', models.IntegerField(verbose_name='Positive Votes', default=0, help_text='Number of votes for this item which were POSITIVE.')),
                 ('last_updated', models.DateTimeField(verbose_name='Last Updated', blank=True, help_text='The date on which this question was most recently changed.')),
-                ('category', models.ForeignKey(verbose_name='Category', to='helpdesk.KBCategory')),
+                ('category', models.ForeignKey(verbose_name='Category', to='helpdesk.KBCategory', on_delete=models.CASCADE)),
             ],
             options={
                 'verbose_name_plural': 'Knowledge base items',
@@ -203,7 +203,7 @@ class Migration(migrations.Migration):
                 ('title', models.CharField(verbose_name='Query Name', help_text='User-provided name for this query', max_length=100)),
                 ('shared', models.BooleanField(verbose_name='Shared With Other Users?', default=False, help_text='Should other users see this query?')),
                 ('query', models.TextField(verbose_name='Search Query', help_text='Pickled query object. Be wary changing this.')),
-                ('user', models.ForeignKey(verbose_name='User', to=settings.AUTH_USER_MODEL)),
+                ('user', models.ForeignKey(verbose_name='User', to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)),
             ],
             options={
                 'verbose_name_plural': 'Saved searches',
@@ -226,8 +226,8 @@ class Migration(migrations.Migration):
                 ('priority', models.IntegerField(verbose_name='Priority', help_text='1 = Highest Priority, 5 = Low Priority', blank=3, default=3, choices=[(1, '1. Critical'), (2, '2. High'), (3, '3. Normal'), (4, '4. Low'), (5, '5. Very Low')])),
                 ('due_date', models.DateTimeField(null=True, verbose_name='Due on', blank=True)),
                 ('last_escalation', models.DateTimeField(editable=False, null=True, blank=True, help_text='The date this ticket was last escalated - updated automatically by management/commands/escalate_tickets.py.')),
-                ('assigned_to', models.ForeignKey(null=True, verbose_name='Assigned to', blank=True, related_name='assigned_to', to=settings.AUTH_USER_MODEL)),
-                ('queue', models.ForeignKey(verbose_name='Queue', to='helpdesk.Queue')),
+                ('assigned_to', models.ForeignKey(null=True, verbose_name='Assigned to', blank=True, related_name='assigned_to', to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)),
+                ('queue', models.ForeignKey(verbose_name='Queue', to='helpdesk.Queue', on_delete=models.CASCADE)),
             ],
             options={
                 'verbose_name_plural': 'Tickets',
@@ -244,8 +244,8 @@ class Migration(migrations.Migration):
                 ('email', models.EmailField(null=True, verbose_name='E-Mail Address', help_text='For non-user followers, enter their e-mail address', blank=True, max_length=75)),
                 ('can_view', models.BooleanField(verbose_name='Can View Ticket?', default=False, help_text='Can this CC login to view the ticket details?')),
                 ('can_update', models.BooleanField(verbose_name='Can Update Ticket?', default=False, help_text='Can this CC login and update the ticket?')),
-                ('ticket', models.ForeignKey(verbose_name='Ticket', to='helpdesk.Ticket')),
-                ('user', models.ForeignKey(null=True, verbose_name='User', blank=True, to=settings.AUTH_USER_MODEL, help_text='User who wishes to receive updates for this ticket.')),
+                ('ticket', models.ForeignKey(verbose_name='Ticket', to='helpdesk.Ticket', on_delete=models.CASCADE)),
+                ('user', models.ForeignKey(null=True, verbose_name='User', blank=True, to=settings.AUTH_USER_MODEL, help_text='User who wishes to receive updates for this ticket.', on_delete=models.CASCADE)),
             ],
             options={
             },
@@ -258,7 +258,7 @@ class Migration(migrations.Migration):
                 ('field', models.CharField(verbose_name='Field', max_length=100)),
                 ('old_value', models.TextField(null=True, verbose_name='Old Value', blank=True)),
                 ('new_value', models.TextField(null=True, verbose_name='New Value', blank=True)),
-                ('followup', models.ForeignKey(verbose_name='Follow-up', to='helpdesk.FollowUp')),
+                ('followup', models.ForeignKey(verbose_name='Follow-up', to='helpdesk.FollowUp', on_delete=models.CASCADE)),
             ],
             options={
                 'verbose_name_plural': 'Ticket changes',
@@ -271,8 +271,8 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, verbose_name='ID', primary_key=True, serialize=False)),
                 ('value', models.TextField(null=True, blank=True)),
-                ('field', models.ForeignKey(verbose_name='Field', to='helpdesk.CustomField')),
-                ('ticket', models.ForeignKey(verbose_name='Ticket', to='helpdesk.Ticket')),
+                ('field', models.ForeignKey(verbose_name='Field', to='helpdesk.CustomField', on_delete=models.CASCADE)),
+                ('ticket', models.ForeignKey(verbose_name='Ticket', to='helpdesk.Ticket', on_delete=models.CASCADE)),
             ],
             options={
                 'verbose_name_plural': 'Ticket custom field values',
@@ -284,8 +284,8 @@ class Migration(migrations.Migration):
             name='TicketDependency',
             fields=[
                 ('id', models.AutoField(auto_created=True, verbose_name='ID', primary_key=True, serialize=False)),
-                ('depends_on', models.ForeignKey(related_name='depends_on', verbose_name='Depends On Ticket', to='helpdesk.Ticket')),
-                ('ticket', models.ForeignKey(related_name='ticketdependency', verbose_name='Ticket', to='helpdesk.Ticket')),
+                ('depends_on', models.ForeignKey(related_name='depends_on', verbose_name='Depends On Ticket', to='helpdesk.Ticket', on_delete=models.CASCADE)),
+                ('ticket', models.ForeignKey(related_name='ticketdependency', verbose_name='Ticket', to='helpdesk.Ticket', on_delete=models.CASCADE)),
             ],
             options={
                 'verbose_name_plural': 'Ticket dependencies',
@@ -298,7 +298,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, verbose_name='ID', primary_key=True, serialize=False)),
                 ('settings_pickled', models.TextField(null=True, verbose_name='Settings Dictionary', blank=True, help_text='This is a base64-encoded representation of a pickled Python dictionary. Do not change this field via the admin.')),
-                ('user', models.OneToOneField(to=settings.AUTH_USER_MODEL)),
+                ('user', models.OneToOneField(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)),
             ],
             options={
                 'verbose_name_plural': 'User Settings',
@@ -325,13 +325,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='followup',
             name='ticket',
-            field=models.ForeignKey(verbose_name='Ticket', to='helpdesk.Ticket'),
+            field=models.ForeignKey(verbose_name='Ticket', to='helpdesk.Ticket', on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='followup',
             name='user',
-            field=models.ForeignKey(null=True, verbose_name='User', blank=True, to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(null=True, verbose_name='User', blank=True, to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
@@ -343,7 +343,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='attachment',
             name='followup',
-            field=models.ForeignKey(verbose_name='Follow-up', to='helpdesk.FollowUp'),
+            field=models.ForeignKey(verbose_name='Follow-up', to='helpdesk.FollowUp', on_delete=models.CASCADE),
             preserve_default=True,
         ),
     ]

@@ -11,7 +11,7 @@ forms.py - Definitions of newforms-based forms for creating and maintaining
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.six import StringIO
 from django import forms
-from django.forms import extras
+from django.forms import widgets
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth import get_user_model

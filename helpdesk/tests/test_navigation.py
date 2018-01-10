@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.test import TestCase
 
 from helpdesk.tests.helpers import get_staff_user, reload_urlconf
@@ -23,7 +23,7 @@ class TestKBDisabled(TestCase):
 
     def test_navigation(self):
         """Test proper rendering of navigation.html by accessing the dashboard"""
-        from django.core.urlresolvers import NoReverseMatch
+        from django.urls import NoReverseMatch
 
         self.client.login(username=get_staff_user().get_username(), password='password')
         self.assertRaises(NoReverseMatch, reverse, 'helpdesk:kb_index')
