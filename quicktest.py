@@ -28,7 +28,7 @@ class QuickDjangoTest(object):
         'django.contrib.sites',
         'django.contrib.staticfiles',
         'markdown_deux',
-        'bootstrapform',
+        'bootstrapform'
     )
     MIDDLEWARE = [
         'django.middleware.security.SecurityMiddleware',

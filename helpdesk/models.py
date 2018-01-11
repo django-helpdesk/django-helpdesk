@@ -1131,7 +1131,10 @@ class UserSettings(models.Model):
         from helpdesk.lib import b64decode
         try:
             if six.PY3:
-                return pickle.loads(b64decode(bytes(self.settings_pickled, 'utf8')))
+                if type(self.settings_pickled) is bytes:
+                    return pickle.loads(b64decode(str(self.settings_pickled, 'utf8')))
+                else:
+                    return pickle.loads(b64decode(bytes(self.settings_pickled, 'utf8')))
             else:
                 return pickle.loads(b64decode(str(self.settings_pickled)))
         except pickle.UnpicklingError:

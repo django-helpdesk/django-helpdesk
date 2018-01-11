@@ -5,8 +5,7 @@ from django.urls import reverse
 from django.test import TestCase
 
 from helpdesk import settings as helpdesk_settings
-from helpdesk.tests.helpers import (get_staff_user, reload_urlconf, User, update_user_settings, delete_user_settings,
-                                    create_ticket)
+from helpdesk.tests.helpers import (get_staff_user, reload_urlconf, User, update_user_settings, delete_user_settings, create_ticket)
 
 
 class KBDisabledTestCase(TestCase):
