@@ -84,6 +84,8 @@ def view_ticket(request):
             ticket = Ticket.objects.get(id=ticket_id, submitter_email__iexact=email)
         except ObjectDoesNotExist:
             error_message = _('Invalid ticket ID or e-mail address. Please try again.')
+        except ValueError:
+            error_message = _('Invalid ticket ID or e-mail address. Please try again.')
         else:
             if request.user.is_staff:
                 redirect_url = reverse('helpdesk:view', args=[ticket_id])
