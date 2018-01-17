@@ -40,6 +40,12 @@ class AttachmentInline(admin.StackedInline):
 @admin.register(FollowUp)
 class FollowUpAdmin(admin.ModelAdmin):
     inlines = [TicketChangeInline, AttachmentInline]
+    list_display = ('ticket_get_ticket_for_url', 'title', 'date', 'ticket', 'user', 'new_status')
+    list_filter = ('user', 'date', 'new_status')
+
+    def ticket_get_ticket_for_url(self, obj):
+        return obj.ticket.ticket_for_url
+    ticket_get_ticket_for_url.short_description = _('Slug')
 
 
 @admin.register(KBItem)
@@ -59,7 +65,11 @@ class EmailTemplateAdmin(admin.ModelAdmin):
     list_filter = ('locale', )
 
 
+@admin.register(IgnoreEmail)
+class IgnoreEmailAdmin(admin.ModelAdmin):
+    list_display = ('name', 'queue_list', 'email_address', 'keep_in_mailbox')
+
+
 admin.site.register(PreSetReply)
 admin.site.register(EscalationExclusion)
 admin.site.register(KBCategory)
-admin.site.register(IgnoreEmail)

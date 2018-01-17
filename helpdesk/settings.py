@@ -4,11 +4,11 @@ Default settings for django-helpdesk.
 """
 
 from django.conf import settings
-
+from django.core.exceptions import ImproperlyConfigured
 
 try:
     DEFAULT_USER_SETTINGS = settings.HELPDESK_DEFAULT_SETTINGS
-except:
+except AttributeError:
     DEFAULT_USER_SETTINGS = None
 
 if not isinstance(DEFAULT_USER_SETTINGS, dict):
@@ -32,6 +32,11 @@ HELPDESK_REDIRECT_TO_LOGIN_BY_DEFAULT = getattr(settings,
                                                 'HELPDESK_REDIRECT_TO_LOGIN_BY_DEFAULT',
                                                 False)
 
+# raises a 404 to anon users. It's like it was invisible
+HELPDESK_ANON_ACCESS_RAISES_404 = getattr(settings,
+                                          'HELPDESK_ANON_ACCESS_RAISES_404',
+                                          False)
+
 # show knowledgebase links?
 HELPDESK_KB_ENABLED = getattr(settings, 'HELPDESK_KB_ENABLED', True)
 
@@ -51,7 +56,7 @@ HELPDESK_TRANSLATE_TICKET_COMMENTS = getattr(settings,
 # all default google translate languages will be shown.
 HELPDESK_TRANSLATE_TICKET_COMMENTS_LANG = getattr(settings,
                                                   'HELPDESK_TRANSLATE_TICKET_COMMENTS_LANG',
-                                                  ["en", "de", "fr", "it", "ru"])
+                                                  ["en", "de", "es", "fr", "it", "ru"])
 
 # show link to 'change password' on 'User Settings' page?
 HELPDESK_SHOW_CHANGE_PASSWORD = getattr(settings, 'HELPDESK_SHOW_CHANGE_PASSWORD', False)
@@ -109,6 +114,10 @@ HELPDESK_STAFF_ONLY_TICKET_CC = getattr(settings, 'HELPDESK_STAFF_ONLY_TICKET_CC
 HELPDESK_EMAIL_SUBJECT_TEMPLATE = getattr(
     settings, 'HELPDESK_EMAIL_SUBJECT_TEMPLATE',
     "{{ ticket.ticket }} {{ ticket.title|safe }} %(subject)s")
+# since django-helpdesk may not work correctly without the ticket ID
+# in the subject, let's do a check for it quick:
+if HELPDESK_EMAIL_SUBJECT_TEMPLATE.find("ticket.ticket") < 0:
+    raise ImproperlyConfigured
 
 # default fallback locale when queue locale not found
 HELPDESK_EMAIL_FALLBACK_LOCALE = getattr(settings, 'HELPDESK_EMAIL_FALLBACK_LOCALE', 'en')
@@ -133,6 +142,9 @@ QUEUE_EMAIL_BOX_SSL = getattr(settings, 'QUEUE_EMAIL_BOX_SSL', None)
 QUEUE_EMAIL_BOX_HOST = getattr(settings, 'QUEUE_EMAIL_BOX_HOST', None)
 QUEUE_EMAIL_BOX_USER = getattr(settings, 'QUEUE_EMAIL_BOX_USER', None)
 QUEUE_EMAIL_BOX_PASSWORD = getattr(settings, 'QUEUE_EMAIL_BOX_PASSWORD', None)
+
+# only process emails with a valid tracking ID? (throws away all other mail)
+QUEUE_EMAIL_BOX_UPDATE_ONLY = getattr(settings, 'QUEUE_EMAIL_BOX_UPDATE_ONLY', False)
 
 # only allow users to access queues that they are members of?
 HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION = getattr(

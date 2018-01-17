@@ -2,13 +2,12 @@ language: python
 
 python:
     - "2.7"
-    - 3.4.4
+    - "3.4"
     - "3.5"
+    - "3.6"
 
 env:
-    - DJANGO=1.8.17
-    - DJANGO=1.9.12
-    - DJANGO=1.10.4
+    - DJANGO=1.11.8
 
 install:
     - pip install -q Django==$DJANGO
@@ -16,9 +15,9 @@ install:
     - pip install -q -r requirements-testing.txt
 
 before_script:
-    - "pep8 --exclude=migrations --ignore=E501 helpdesk"
+    - "pycodestyle --exclude=migrations --ignore=E501 helpdesk"
 
-script: 
+script:
     - coverage run --source='.' quicktest.py helpdesk
 
 after_success:

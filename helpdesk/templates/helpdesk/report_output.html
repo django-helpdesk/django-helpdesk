@@ -101,32 +101,6 @@ Morris.Line({
   xLabels: "month"
 });
 
-    /*$.jqplot.config.enablePlugins = true;
-    var dataset = [];
-
-    {% for d in data %}
-    dataset[{{ forloop.counter0 }}] = [{% for f in d %}{% if not forloop.first %}['{% for h in headings %}{% ifequal forloop.counter0 forloop.parentloop.counter0 %}{{ h }}{% endifequal %}{% endfor %}', {{ f }}]{% if not forloop.last %}, {% endif %}{% endif %}{% endfor %}];{% endfor %}
-
-    plot = $.jqplot('placeholder', dataset, {
-        legend: {show: true, location: 'nw', xoffset: 55},
-        title: "{{ title }}",
-        series: [{% for d in data %}
-            {
-                label:'{{ d.0 }}',
-                lineWidth: 4,
-                markerOptions: { style: 'square'}
-            }{% if not forloop.last %},{% endif %}{% endfor %}
-            ],
-        axes: {
-            xaxis: {
-                renderer: $.jqplot.DateAxisRenderer
-            },
-            yaxis: {
-                min: 0
-            }
-        }
-    });*/
-
 </script>
 {% endif %}
 {% if charttype == "bar" %}

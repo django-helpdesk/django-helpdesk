@@ -1,7 +1,27 @@
 Installation
 ============
 
-django-helpdesk installation isn't difficult, but it requires you have a bit of existing know-how about Django.
+``django-helpdesk`` installation isn't difficult, but it requires you have a bit of existing know-how about Django.
+
+
+Prerequisites
+-------------
+
+Before getting started, ensure your system meets the following dependencies:
+
+* Python 3.4+, or Python 2.7
+* Django 1.11.x (Django 2.0 support is coming in a future release; older
+  releases such as 1.8-1.10 *may* work, but are not guaranteed. Django's
+  deprecation policy suggests that any project that worked with 1.8 should
+  be able to upgrade to 1.11 without any problems)
+  
+Ensure any extra Django modules you wish to use are compatible before continuing.
+
+**NOTE**: Python 2.7 support is deprecated in both ``django-helpdesk`` and Django.
+Future releases of ``django-helpdesk`` may remove support for Python 2.7,
+and Django will no longer support Python 2.7 as of the Django 2.0 release.
+It is highly recommended to start new projects using Python 3.4+, or migrate
+existing projects to Python 3.4+.
 
 
 Getting The Code
@@ -12,10 +32,10 @@ Installing using PIP
 
 Try using ``pip install django-helpdesk``. Go and have a beer to celebrate Python packaging.
 
-GIT Checkout (Cutting Edge)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Checkout ``master`` from git (Cutting Edge)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If you're planning on editing the code or just want to get whatever is the latest and greatest, you can clone the official Git repository with ``git clone git://github.com/django-helpdesk/django-helpdesk.git``
+If you're planning on editing the code or just want to get whatever is the latest and greatest, you can clone the official Git repository with ``git clone git://github.com/django-helpdesk/django-helpdesk.git``. We use the ``master`` branch as our development branch for the next major release of ``django-helpdesk``.
 
 Copy the ``helpdesk`` folder into your ``PYTHONPATH``.
 
@@ -29,19 +49,29 @@ Download, extract, and drop ``helpdesk`` into your ``PYTHONPATH``
 Adding To Your Django Project
 -----------------------------
 
+If you're on a brand new Django installation, make sure you do a ``migrate``
+**before** adding ``helpdesk`` to your ``INSTALLED_APPS``. This will avoid
+errors with trying to create User settings.
+
 1. Edit your ``settings.py`` file and add ``helpdesk`` to the ``INSTALLED_APPS`` setting. You also need ``django.contrib.admin`` in ``INSTALLED_APPS`` if you haven't already added it. eg::
 
     INSTALLED_APPS = (
         'django.contrib.auth',
         'django.contrib.contenttypes',
         'django.contrib.sessions',
-        'django.contrib.sites',  # Required for determing domain url for use in emails
+        'django.contrib.sites',  # Required for determining domain url for use in emails
         'django.contrib.admin',  # Required for helpdesk admin/maintenance
         'django.contrib.humanize',  # Required for elapsed time formatting
         'markdown_deux',  # Required for Knowledgebase item formatting
         'bootstrapform', # Required for nicer formatting of forms with the default templates
         'helpdesk',  # This is us!
     )
+
+   Your ``settings.py`` file should also define a ``SITE_ID`` that allows multiple projects to share
+   a single database, and is required by ``django.contrib.sites`` in Django 1.9+.
+   If you aren't running multiple sites, you can simply add a default ``SITE_ID`` to ``settings.py``::
+
+     SITE_ID = 1
 
 2. Make sure django-helpdesk is accessible via ``urls.py``. Add the following line to ``urls.py``::
 
@@ -53,7 +83,7 @@ Adding To Your Django Project
 
    This line will have to come *after* any other lines in your urls.py such as those used by the Django admin.
 
-   Note that the `helpdesk` namespace is no longer required for Django 1.9 and you can use a different namespace.
+   Note that the `helpdesk` namespace is no longer required for Django 1.9+ and you can use a different namespace.
    However, it is recommended to use the default namespace name for clarity.
 
 3. Create the required database tables.
@@ -89,7 +119,7 @@ Adding To Your Django Project
 
    Ideally, accessing http://MEDIA_URL/helpdesk/attachments/ will give you a 403 access denied error.
 
-7. If it's not already installed, install ``django-markdown-deux`` and ensure it's in your ``INSTALLED_APPS``::
+7. If it's not already installed, install ``markdown_deux`` and ensure it's in your ``INSTALLED_APPS``::
 
       pip install django-markdown-deux
 
@@ -109,3 +139,54 @@ Adding To Your Django Project
 
    Also, be aware that if a disk error occurs and the local file is not deleted, the mail may be processed multiple times and generate duplicate tickets until the file is removed. It is recommended to monitor log files for ERRORS when a file is unable to be deleted.
 
+Upgrading from previous versions
+--------------------------------
+
+If you are upgrading from a previous version of django-helpdesk that used
+migrations, get an up to date version of the code base (eg by using
+``git pull`` or ``pip install --upgrade django-helpdesk``) then migrate the database::
+
+    python manage.py migrate helpdesk --db-dry-run # DB untouched
+    python manage.py migrate helpdesk
+
+Lastly, restart your web server software (eg Apache) or FastCGI instance, to
+ensure the latest changes are in use.
+
+Unfortunately we are unable to assist if you are upgrading from a
+version of django-helpdesk prior to migrations (ie pre-2011).
+
+You can continue to the 'Initial Configuration' area, if needed.
+
+Notes on database backends
+--------------------------
+
+**NOTE REGARDING SQLITE AND SEARCHING:**
+If you use sqlite as your database, the search function will not work as
+effectively as it will with other databases due to its inability to do
+case-insensitive searches. It's recommended that you use PostgreSQL or MySQL
+if possible. For more information, see this note in the Django documentation:
+http://docs.djangoproject.com/en/dev/ref/databases/#sqlite-string-matching
+
+When you try to do a keyword search using sqlite, a message will be displayed
+to alert you to this shortcoming. There is no way around it, sorry.
+
+**NOTE REGARDING MySQL:**
+If you use MySQL, with most default configurations you will receive an error
+when creating the database tables as we populate a number of default templates
+in languages other than English.
+
+You must create the database the holds the django-helpdesk tables using the
+UTF-8 collation; see the MySQL manual for more information:
+http://dev.mysql.com/doc/refman/5.1/en/charset-database.html
+
+You may be able to convert an existing MySQL database to use UTF-8 collation
+by using the following SQL commands::
+
+    ALTER DATABASE mydatabase CHARACTER SET utf8 COLLATE utf8_general_ci;
+    ALTER TABLE helpdesk_emailtemplate CONVERT TO CHARACTER SET utf8 COLLATE utf8_general_ci;
+
+Both ``utf8_general_ci`` or ``utf16_general_ci`` have been reported to work.
+
+If you do NOT do this step, and you only want to use English-language templates,
+you may be able to continue however you will receive a warning when running the
+'migrate' commands.

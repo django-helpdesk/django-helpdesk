@@ -271,7 +271,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            width: 0,
 	            x: 0,
 	            y: 0,
-	            class: ""
+	            "class": ""
 	        },
 	        availableAnimAttrs = R._availableAnimAttrs = {
 	            blur: nu,
@@ -444,7 +444,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    \*/
 	    R.fn = paperproto = Paper.prototype = R.prototype;
 	    R._id = 0;
-	    R._oid = 0;
 	    /*\
 	     * Raphael.is
 	     [ method ]
@@ -5499,15 +5498,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	// See the License for the specific language governing permissions and
 	// limitations under the License.
 	// ┌────────────────────────────────────────────────────────────┐ \\
-	// │ Eve 0.4.2 - JavaScript Events Library                      │ \\
+	// │ Eve 0.5.0 - JavaScript Events Library                      │ \\
 	// ├────────────────────────────────────────────────────────────┤ \\
 	// │ Author Dmitry Baranovskiy (http://dmitry.baranovskiy.com/) │ \\
 	// └────────────────────────────────────────────────────────────┘ \\
 
 	(function (glob) {
-	    var version = "0.4.2",
+	    var version = "0.5.0",
 	        has = "hasOwnProperty",
 	        separator = /[\.\/]/,
+	        comaseparator = /\s*,\s*/,
 	        wildcard = "*",
 	        fun = function () {},
 	        numsort = function (a, b) {
@@ -5516,6 +5516,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	        current_event,
 	        stop,
 	        events = {n: {}},
+	        firstDefined = function () {
+	            for (var i = 0, ii = this.length; i < ii; i++) {
+	                if (typeof this[i] != "undefined") {
+	                    return this[i];
+	                }
+	            }
+	        },
+	        lastDefined = function () {
+	            var i = this.length;
+	            while (--i) {
+	                if (typeof this[i] != "undefined") {
+	                    return this[i];
+	                }
+	            }
+	        },
+	        objtos = Object.prototype.toString,
+	        Str = String,
+	        isArray = Array.isArray || function (ar) {
+	            return ar instanceof Array || objtos.call(ar) == "[object Array]";
+	        };
 	    /*\
 	     * eve
 	     [ method ]
@@ -5528,10 +5548,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	     - scope (object) context for the event handlers
 	     - varargs (...) the rest of arguments will be sent to event handlers
 
-	     = (object) array of returned values from the listeners
+	     = (object) array of returned values from the listeners. Array has two methods `.firstDefined()` and `.lastDefined()` to get first or last not `undefined` value.
 	    \*/
 	        eve = function (name, scope) {
-				name = String(name);
 	            var e = events,
 	                oldstop = stop,
 	                args = Array.prototype.slice.call(arguments, 2),
@@ -5544,6 +5563,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	                out = [],
 	                ce = current_event,
 	                errors = [];
+	            out.firstDefined = firstDefined;
+	            out.lastDefined = lastDefined;
 	            current_event = name;
 	            stop = 0;
 	            for (var i = 0, ii = listeners.length; i < ii; i++) if ("zIndex" in listeners[i]) {
@@ -5589,10 +5610,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	            stop = oldstop;
 	            current_event = ce;
-	            return out.length ? out : null;
+	            return out;
 	        };
-			// Undocumented. Debug only.
-			eve._events = events;
+	        // Undocumented. Debug only.
+	        eve._events = events;
 	    /*\
 	     * eve.listeners
 	     [ method ]
@@ -5606,7 +5627,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	     = (array) array of event handlers
 	    \*/
 	    eve.listeners = function (name) {
-	        var names = name.split(separator),
+	        var names = isArray(name) ? name : name.split(separator),
 	            e = events,
 	            item,
 	            items,
@@ -5636,7 +5657,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	        return out;
 	    };
-	    
+	    /*\
+	     * eve.separator
+	     [ method ]
+
+	     * If for some reasons you don’t like default separators (`.` or `/`) you can specify yours
+	     * here. Be aware that if you pass a string longer than one character it will be treated as
+	     * a list of characters.
+
+	     - separator (string) new separator. Empty string resets to default: `.` or `/`.
+	    \*/
+	    eve.separator = function (sep) {
+	        if (sep) {
+	            sep = Str(sep).replace(/(?=[\.\^\]\[\-])/g, "\\");
+	            sep = "[" + sep + "]";
+	            separator = new RegExp(sep);
+	        } else {
+	            separator = /[\.\/]/;
+	        }
+	    };
 	    /*\
 	     * eve.on
 	     [ method ]
@@ -5646,9 +5685,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	     | eve("mouse.under.floor"); // triggers f
 	     * Use @eve to trigger the listener.
 	     **
-	     > Arguments
-	     **
 	     - name (string) name of the event, dot (`.`) or slash (`/`) separated, with optional wildcards
+	     - f (function) event handler function
+	     **
+	     - name (array) if you don’t want to use separators, you can use array of strings
 	     - f (function) event handler function
 	     **
 	     = (function) returned function accepts a single numeric parameter that represents z-index of the handler. It is an optional feature and only used when you need to ensure that some subset of handlers will be invoked in a given order, despite of the order of assignment. 
@@ -5656,27 +5696,33 @@ return /******/ (function(modules) { // webpackBootstrap
 	     | eve.on("mouse", eatIt)(2);
 	     | eve.on("mouse", scream);
 	     | eve.on("mouse", catchIt)(1);
-	     * This will ensure that `catchIt()` function will be called before `eatIt()`.
-		 *
+	     * This will ensure that `catchIt` function will be called before `eatIt`.
+	     *
 	     * If you want to put your handler before non-indexed handlers, specify a negative value.
 	     * Note: I assume most of the time you don’t need to worry about z-index, but it’s nice to have this feature “just in case”.
 	    \*/
 	    eve.on = function (name, f) {
-			name = String(name);
-			if (typeof f != "function") {
-				return function () {};
-			}
-	        var names = name.split(separator),
-	            e = events;
+	        if (typeof f != "function") {
+	            return function () {};
+	        }
+	        var names = isArray(name) ? (isArray(name[0]) ? name : [name]) : Str(name).split(comaseparator);
 	        for (var i = 0, ii = names.length; i < ii; i++) {
-	            e = e.n;
-	            e = e.hasOwnProperty(names[i]) && e[names[i]] || (e[names[i]] = {n: {}});
+	            (function (name) {
+	                var names = isArray(name) ? name : Str(name).split(separator),
+	                    e = events,
+	                    exist;
+	                for (var i = 0, ii = names.length; i < ii; i++) {
+	                    e = e.n;
+	                    e = e.hasOwnProperty(names[i]) && e[names[i]] || (e[names[i]] = {n: {}});
+	                }
+	                e.f = e.f || [];
+	                for (i = 0, ii = e.f.length; i < ii; i++) if (e.f[i] == f) {
+	                    exist = true;
+	                    break;
+	                }
+	                !exist && e.f.push(f);
+	            }(names[i]));
 	        }
-	        e.f = e.f || [];
-	        for (i = 0, ii = e.f.length; i < ii; i++) if (e.f[i] == f) {
-	            return fun;
-	        }
-	        e.f.push(f);
 	        return function (zIndex) {
 	            if (+zIndex == +zIndex) {
 	                f.zIndex = +zIndex;
@@ -5688,23 +5734,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	     [ method ]
 	     **
 	     * Returns function that will fire given event with optional arguments.
-		 * Arguments that will be passed to the result function will be also
-		 * concated to the list of final arguments.
-	 	 | el.onclick = eve.f("click", 1, 2);
-	 	 | eve.on("click", function (a, b, c) {
-	 	 |     console.log(a, b, c); // 1, 2, [event object]
-	 	 | });
+	     * Arguments that will be passed to the result function will be also
+	     * concated to the list of final arguments.
+	     | el.onclick = eve.f("click", 1, 2);
+	     | eve.on("click", function (a, b, c) {
+	     |     console.log(a, b, c); // 1, 2, [event object]
+	     | });
 	     > Arguments
-		 - event (string) event name
-		 - varargs (…) and any other arguments
-		 = (function) possible event handler function
+	     - event (string) event name
+	     - varargs (…) and any other arguments
+	     = (function) possible event handler function
 	    \*/
-		eve.f = function (event) {
-			var attrs = [].slice.call(arguments, 1);
-			return function () {
-				eve.apply(null, [event, null].concat(attrs).concat([].slice.call(arguments, 0)));
-			};
-		};
+	    eve.f = function (event) {
+	        var attrs = [].slice.call(arguments, 1);
+	        return function () {
+	            eve.apply(null, [event, null].concat(attrs).concat([].slice.call(arguments, 0)));
+	        };
+	    };
 	    /*\
 	     * eve.stop
 	     [ method ]
@@ -5729,10 +5775,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	     = (boolean) `true`, if current event’s name contains `subname`
 	    \*/
 	    eve.nt = function (subname) {
+	        var cur = isArray(current_event) ? current_event.join(".") : current_event;
 	        if (subname) {
-	            return new RegExp("(?:\\.|\\/|^)" + subname + "(?:\\.|\\/|$)").test(current_event);
+	            return new RegExp("(?:\\.|\\/|^)" + subname + "(?:\\.|\\/|$)").test(cur);
 	        }
-	        return current_event;
+	        return cur;
 	    };
 	    /*\
 	     * eve.nts
@@ -5744,14 +5791,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	     = (array) names of the event
 	    \*/
 	    eve.nts = function () {
-	        return current_event.split(separator);
+	        return isArray(current_event) ? current_event : current_event.split(separator);
 	    };
 	    /*\
 	     * eve.off
 	     [ method ]
 	     **
 	     * Removes given function from the list of event listeners assigned to given name.
-		 * If no arguments specified all the events will be cleared.
+	     * If no arguments specified all the events will be cleared.
 	     **
 	     > Arguments
 	     **
@@ -5765,12 +5812,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	     * See @eve.off
 	    \*/
 	    eve.off = eve.unbind = function (name, f) {
-			if (!name) {
-			    eve._events = events = {n: {}};
-				return;
-			}
-	        var names = name.split(separator),
-	            e,
+	        if (!name) {
+	            eve._events = events = {n: {}};
+	            return;
+	        }
+	        var names = isArray(name) ? (isArray(name[0]) ? name : [name]) : Str(name).split(comaseparator);
+	        if (names.length > 1) {
+	            for (var i = 0, ii = names.length; i < ii; i++) {
+	                eve.off(names[i], f);
+	            }
+	            return;
+	        }
+	        names = isArray(name) ? name : Str(name).split(separator);
+	        var e,
 	            key,
 	            splice,
 	            i, ii, j, jj,
@@ -5839,7 +5893,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    \*/
 	    eve.once = function (name, f) {
 	        var f2 = function () {
-	            eve.unbind(name, f2);
+	            eve.off(name, f2);
 	            return f.apply(this, arguments);
 	        };
 	        return eve.on(name, f2);
@@ -6522,8 +6576,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	         * Unique id of the element. Especially useful when you want to listen to events of the element,
 	         * because all events are fired in format `<module>.<action>.<id>`. Also useful for @Paper.getById method.
 	        \*/
-	        this.id = R._oid++;
+	        this.id = guid();
 	        node.raphaelid = this.id;
+
+	        /**
+	        * Method that returns a 5 letter/digit id, enough for 36^5 = 60466176 elements
+	        * @returns {string} id
+	        */
+	        function guid() {
+	            return ("0000" + (Math.random()*Math.pow(36,5) << 0).toString(36)).slice(-5);
+	        }
+
 	        this.matrix = R.matrix();
 	        this.realPath = null;
 	        /*\
@@ -6729,9 +6792,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var sw = this.attrs[has]("stroke-width") ? this.attrs["stroke-width"] : 1;
 	            this.attr({"stroke-width": sw});
 	        }
-
-	        //Reduce transform string
-	        _.transform = this.matrix.toTransformString();
 
 	        return this;
 	    };
