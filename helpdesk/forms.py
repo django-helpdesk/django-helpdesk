@@ -136,7 +136,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
     """
     queue = forms.ChoiceField(
         widget=forms.Select(attrs={'class': 'form-control'}),
-        label=_('Queue'),
+        label=_('Category'),
         required=True,
         choices=()
     )
@@ -191,7 +191,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
 
             self.customfield_to_field(field, instanceargs)
 
-    def _create_ticket(self):
+    def _create_ticket(self, request=None):
         queue = Queue.objects.get(id=int(self.cleaned_data['queue']))
 
         ticket = Ticket(title=self.cleaned_data['title'],
@@ -202,6 +202,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
                         description=self.cleaned_data['body'],
                         priority=self.cleaned_data['priority'],
                         due_date=self.cleaned_data['due_date'],
+                        request=request
                         )
 
         return ticket, queue
@@ -311,6 +312,12 @@ class TicketForm(AbstractTicketForm):
                     'e-mailed details of this ticket immediately.'),
     )
 
+    viewable_globally = forms.BooleanField(
+        required=True,
+        label=_('Viewable globally'),
+        help_text=_('Should the ticket be viewable by any user?'),
+    )
+
     def __init__(self, *args, **kwargs):
         """
         Add any custom fields that are defined to the form.
@@ -318,18 +325,21 @@ class TicketForm(AbstractTicketForm):
         super(TicketForm, self).__init__(*args, **kwargs)
         self._add_form_custom_fields()
 
-    def save(self, user=None):
+    def save(self, user=None, request=None):
         """
         Writes and returns a Ticket() object
         """
 
-        ticket, queue = self._create_ticket()
+        ticket, queue = self._create_ticket(request=request)
         if self.cleaned_data['assigned_to']:
             try:
                 u = User.objects.get(id=self.cleaned_data['assigned_to'])
                 ticket.assigned_to = u
             except User.DoesNotExist:
                 ticket.assigned_to = None
+
+        if self.cleaned_data['viewable_globally']:
+            ticket.viewable_globally = self.cleaned_data['viewable_globally']
         ticket.save()
 
         self._create_custom_fields(ticket)
@@ -378,11 +388,11 @@ class PublicTicketForm(AbstractTicketForm):
 
         self._add_form_custom_fields(False)
 
-    def save(self):
+    def save(self, request=None):
         """
         Writes and returns a Ticket() object
         """
-        ticket, queue = self._create_ticket()
+        ticket, queue = self._create_ticket(request=request)
         if queue.default_owner and not ticket.assigned_to:
             ticket.assigned_to = queue.default_owner
         ticket.save()

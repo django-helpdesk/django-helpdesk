@@ -6,6 +6,8 @@ django-helpdesk - A Django powered ticket tracker for small enterprise.
 views/public.py - All public facing views, eg non-staff (no authentication
                   required) views.
 """
+from django import forms
+from django.db.models import Q
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponse
@@ -36,23 +38,22 @@ def homepage(request):
 
     if request.method == 'POST':
         form = PublicTicketForm(request.POST, request.FILES)
-        form.fields['queue'].choices = [('', '--------')] + [
+        form.fields['queue'].choices = [
             (q.id, q.title) for q in Queue.objects.filter(allow_public_submission=True)]
+        form.fields['submitter_email'].widget = forms.HiddenInput()
+        form.fields['priority'].widget = forms.HiddenInput()
+        form.fields['due_date'].widget = forms.HiddenInput()
         if form.is_valid():
             if text_is_spam(form.cleaned_data['body'], request):
                 # This submission is spam. Let's not save it.
                 return render(request, template_name='helpdesk/public_spam.html')
             else:
-                ticket = form.save()
-                try:
-                    return HttpResponseRedirect('%s?ticket=%s&email=%s' % (
-                        reverse('helpdesk:public_view'),
-                        ticket.ticket_for_url,
-                        urlquote(ticket.submitter_email))
-                    )
-                except ValueError:
-                    # if someone enters a non-int string for the ticket
-                    return HttpResponseRedirect(reverse('helpdesk:home'))
+                ticket = form.save(request=request)
+                return HttpResponseRedirect('%s?ticket=%s&email=%s' % (
+                    reverse('helpdesk:public_view'),
+                    ticket.ticket_for_url,
+                    urlquote(ticket.submitter_email))
+                )
     else:
         try:
             queue = Queue.objects.get(slug=request.GET.get('queue', None))
@@ -79,8 +80,11 @@ def homepage(request):
             initial_data['submitter_email'] = request.user.email
 
         form = PublicTicketForm(initial=initial_data)
-        form.fields['queue'].choices = [('', '--------')] + [
+        form.fields['queue'].choices = [
             (q.id, q.title) for q in Queue.objects.filter(allow_public_submission=True)]
+        form.fields['submitter_email'].widget = forms.HiddenInput()
+        form.fields['priority'].widget = forms.HiddenInput()
+        form.fields['due_date'].widget = forms.HiddenInput()
 
     knowledgebase_categories = KBCategory.objects.all()
 
@@ -95,11 +99,15 @@ def homepage(request):
 def view_ticket(request):
     ticket_req = request.GET.get('ticket', None)
     email = request.GET.get('email', None)
+    # If there is no email address in the query string, get it from
+    # the currently logged-in user
+    if not email:
+        email = request.user.email
 
     if ticket_req and email:
         queue, ticket_id = Ticket.queue_and_id_from_query(ticket_req)
         try:
-            ticket = Ticket.objects.get(id=ticket_id, submitter_email__iexact=email)
+            ticket = Ticket.objects.get(Q(id=ticket_id) & (Q(submitter_email__iexact=email) | Q(viewable_globally=True)))
         except ObjectDoesNotExist:
             error_message = _('Invalid ticket ID or e-mail address. Please try again.')
         except ValueError:
