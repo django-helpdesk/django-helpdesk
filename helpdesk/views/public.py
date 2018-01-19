@@ -100,7 +100,7 @@ def view_ticket(request):
     email = request.GET.get('email', None)
     # If there is no email address in the query string, get it from
     # the currently logged-in user
-    if email == '':
+    if not email:
         email = request.user.email
 
     if ticket_req and email:
