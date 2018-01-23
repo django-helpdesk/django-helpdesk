@@ -12,9 +12,8 @@ from datetime import datetime, timedelta
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import user_passes_test
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.core.exceptions import ValidationError, PermissionDenied
-from django.core import paginator
 from django.db import connection
 from django.db.models import Q
 from django.http import HttpResponseRedirect, Http404, HttpResponse
@@ -25,13 +24,15 @@ from django.utils.html import escape
 from django import forms
 from django.utils import timezone
 
+from django.utils import six
+
 from helpdesk.forms import (
     TicketForm, UserSettingsForm, EmailIgnoreForm, EditTicketForm, TicketCCForm,
     TicketCCEmailForm, TicketCCUserForm, EditFollowUpForm, TicketDependencyForm
 )
 from helpdesk.lib import (
     send_templated_mail, query_to_dict, apply_query, safe_template_context,
-    process_attachments,
+    process_attachments, queue_template_context,
 )
 from helpdesk.models import (
     Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch,
@@ -45,14 +46,14 @@ User = get_user_model()
 if helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE:
     # treat 'normal' users like 'staff'
     staff_member_required = user_passes_test(
-        lambda u: u.is_authenticated() and u.is_active)
+        lambda u: u.is_authenticated and u.is_active)
 else:
     staff_member_required = user_passes_test(
-        lambda u: u.is_authenticated() and u.is_active and u.is_staff)
+        lambda u: u.is_authenticated and u.is_active and u.is_staff)
 
 
 superuser_required = user_passes_test(
-    lambda u: u.is_authenticated() and u.is_active and u.is_superuser)
+    lambda u: u.is_authenticated and u.is_active and u.is_superuser)
 
 
 def _get_user_queues(user):
@@ -85,13 +86,21 @@ def _has_access_to_queue(user, queue):
         return user.has_perm(queue.permission_name)
 
 
+def _is_my_ticket(user, ticket):
+    """Check to see if the user has permission to access
+    a ticket. If not then deny access."""
+    if user.is_superuser or user.is_staff or user.id == ticket.customer_id:
+        return True
+    else:
+        return False
+
+
 def dashboard(request):
     """
     A quick summary overview for users: A list of their own tickets, a table
     showing ticket counts by queue/status, and a list of unassigned tickets
     with options for them to 'Take' ownership of said tickets.
     """
-
     # open & reopened tickets, assigned to current user
     tickets = Ticket.objects.select_related('queue').filter(
         assigned_to=request.user,
@@ -164,12 +173,16 @@ def dashboard(request):
         'all_tickets_reported_by_current_user': all_tickets_reported_by_current_user,
         'basic_ticket_stats': basic_ticket_stats,
     })
+
+
 dashboard = staff_member_required(dashboard)
 
 
 def delete_ticket(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
     if not _has_access_to_queue(request.user, ticket.queue):
+        raise PermissionDenied()
+    if not _is_my_ticket(request.user, ticket):
         raise PermissionDenied()
 
     if request.method == 'GET':
@@ -179,6 +192,8 @@ def delete_ticket(request, ticket_id):
     else:
         ticket.delete()
         return HttpResponseRedirect(reverse('helpdesk:home'))
+
+
 delete_ticket = staff_member_required(delete_ticket)
 
 
@@ -188,6 +203,9 @@ def followup_edit(request, ticket_id, followup_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
     if not _has_access_to_queue(request.user, ticket.queue):
         raise PermissionDenied()
+    if not _is_my_ticket(request.user, ticket):
+        raise PermissionDenied()
+
     if request.method == 'GET':
         form = EditFollowUpForm(initial={
             'title': escape(followup.title),
@@ -229,6 +247,8 @@ def followup_edit(request, ticket_id, followup_id):
             # delete old followup
             followup.delete()
         return HttpResponseRedirect(reverse('helpdesk:view', args=[ticket.id]))
+
+
 followup_edit = staff_member_required(followup_edit)
 
 
@@ -242,12 +262,16 @@ def followup_delete(request, ticket_id, followup_id):
     followup = get_object_or_404(FollowUp, id=followup_id)
     followup.delete()
     return HttpResponseRedirect(reverse('helpdesk:view', args=[ticket.id]))
+
+
 followup_delete = staff_member_required(followup_delete)
 
 
 def view_ticket(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
     if not _has_access_to_queue(request.user, ticket.queue):
+        raise PermissionDenied()
+    if not _is_my_ticket(request.user, ticket):
         raise PermissionDenied()
 
     if 'take' in request.GET:
@@ -310,6 +334,8 @@ def view_ticket(request, ticket_id):
         'ticketcc_string': ticketcc_string,
         'SHOW_SUBSCRIBE': show_subscribe,
     })
+
+
 view_ticket = staff_member_required(view_ticket)
 
 
@@ -361,7 +387,7 @@ def subscribe_staff_member_to_ticket(ticket, user):
 
 def update_ticket(request, ticket_id, public=False):
     if not (public or (
-            request.user.is_authenticated() and
+            request.user.is_authenticated and
             request.user.is_active and (
                 request.user.is_staff or
                 helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE))):
@@ -406,12 +432,14 @@ def update_ticket(request, ticket_id, public=False):
     # comment.
     context = safe_template_context(ticket)
 
-    # this line sometimes creates problems if code is sent as a comment.
-    # if comment contains some django code, like "why does {% if bla %} crash",
-    # then the following line will give us a crash, since django expects {% if %}
-    # to be closed with an {% endif %} tag.
     from django.template import engines
     template_func = engines['django'].from_string
+    # this prevents system from trying to render any template tags
+    # broken into two stages to prevent changes from first replace being themselves
+    # changed by the second replace due to conflicting syntax
+    comment = comment.replace('{%', 'X-HELPDESK-COMMENT-VERBATIM').replace('%}', 'X-HELPDESK-COMMENT-ENDVERBATIM')
+    comment = comment.replace('X-HELPDESK-COMMENT-VERBATIM', '{% verbatim %}{%').replace('X-HELPDESK-COMMENT-ENDVERBATIM', '%}{% endverbatim %}')
+    # render the neutralized template
     comment = template_func(comment).render(context)
 
     if owner is -1 and ticket.assigned_to:
@@ -616,7 +644,7 @@ def update_ticket(request, ticket_id, public=False):
     ticket.save()
 
     # auto subscribe user if enabled
-    if helpdesk_settings.HELPDESK_AUTO_SUBSCRIBE_ON_TICKET_RESPONSE and request.user.is_authenticated():
+    if helpdesk_settings.HELPDESK_AUTO_SUBSCRIBE_ON_TICKET_RESPONSE and request.user.is_authenticated:
         ticketcc_string, SHOW_SUBSCRIBE = return_ticketccstring_and_show_subscribe(request.user, ticket)
         if SHOW_SUBSCRIBE:
             subscribe_staff_member_to_ticket(ticket, request.user)
@@ -694,7 +722,7 @@ def mass_update(request):
             # Send email to Submitter, Owner, Queue CC
             context = safe_template_context(t)
             context.update(resolution=t.resolution,
-                           queue=t.queue)
+                           queue=queue_template_context(t.queue))
 
             messages_sent_to = []
 
@@ -746,6 +774,8 @@ def mass_update(request):
             t.delete()
 
     return HttpResponseRedirect(reverse('helpdesk:list'))
+
+
 mass_update = staff_member_required(mass_update)
 
 
@@ -815,7 +845,10 @@ def ticket_list(request):
         import json
         from helpdesk.lib import b64decode
         try:
-            query_params = json.loads(b64decode(str(saved_query.query)))
+            if six.PY3:
+                query_params = json.loads(b64decode(str(saved_query.query)).decode())
+            else:
+                query_params = json.loads(b64decode(str(saved_query.query)))
         except ValueError:
             # Query deserialization failed. (E.g. was a pickled query)
             return HttpResponseRedirect(reverse('helpdesk:list'))
@@ -926,12 +959,16 @@ def ticket_list(request):
         saved_query=saved_query,
         search_message=search_message,
     ))
+
+
 ticket_list = staff_member_required(ticket_list)
 
 
 def edit_ticket(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
     if not _has_access_to_queue(request.user, ticket.queue):
+        raise PermissionDenied()
+    if not _is_my_ticket(request.user, ticket):
         raise PermissionDenied()
 
     if request.method == 'POST':
@@ -943,6 +980,8 @@ def edit_ticket(request, ticket_id):
         form = EditTicketForm(instance=ticket)
 
     return render(request, 'helpdesk/edit_ticket.html', {'form': form})
+
+
 edit_ticket = staff_member_required(edit_ticket)
 
 
@@ -980,6 +1019,8 @@ def create_ticket(request):
             form.fields['assigned_to'].widget = forms.HiddenInput()
 
     return render(request, 'helpdesk/create_ticket.html', {'form': form})
+
+
 create_ticket = staff_member_required(create_ticket)
 
 
@@ -999,12 +1040,16 @@ def raw_details(request, type):
             raise Http404
 
     raise Http404
+
+
 raw_details = staff_member_required(raw_details)
 
 
 def hold_ticket(request, ticket_id, unhold=False):
     ticket = get_object_or_404(Ticket, id=ticket_id)
     if not _has_access_to_queue(request.user, ticket.queue):
+        raise PermissionDenied()
+    if not _is_my_ticket(request.user, ticket):
         raise PermissionDenied()
 
     if unhold:
@@ -1026,16 +1071,22 @@ def hold_ticket(request, ticket_id, unhold=False):
     ticket.save()
 
     return HttpResponseRedirect(ticket.get_absolute_url())
+
+
 hold_ticket = staff_member_required(hold_ticket)
 
 
 def unhold_ticket(request, ticket_id):
     return hold_ticket(request, ticket_id, unhold=True)
+
+
 unhold_ticket = staff_member_required(unhold_ticket)
 
 
 def rss_list(request):
     return render(request, 'helpdesk/rss_list.html', {'queues': Queue.objects.all()})
+
+
 rss_list = staff_member_required(rss_list)
 
 
@@ -1084,6 +1135,8 @@ def report_index(request):
         'basic_ticket_stats': basic_ticket_stats,
         'dash_tickets': dash_tickets,
     })
+
+
 report_index = staff_member_required(report_index)
 
 
@@ -1112,8 +1165,11 @@ def run_report(request, report):
         import json
         from helpdesk.lib import b64decode
         try:
-            query_params = json.loads(b64decode(str(saved_query.query)))
-        except:
+            if six.PY3:
+                query_params = json.loads(b64decode(str(saved_query.query)).decode())
+            else:
+                query_params = json.loads(b64decode(str(saved_query.query)))
+        except json.JSONDecodeError:
             return HttpResponseRedirect(reverse('helpdesk:report_index'))
 
         report_queryset = apply_query(report_queryset, query_params)
@@ -1281,6 +1337,8 @@ def run_report(request, report):
         'from_saved_query': from_saved_query,
         'saved_query': saved_query,
     })
+
+
 run_report = staff_member_required(run_report)
 
 
@@ -1298,6 +1356,8 @@ def save_query(request):
     query.save()
 
     return HttpResponseRedirect('%s?saved_query=%s' % (reverse('helpdesk:list'), query.id))
+
+
 save_query = staff_member_required(save_query)
 
 
@@ -1309,6 +1369,8 @@ def delete_saved_query(request, id):
         return HttpResponseRedirect(reverse('helpdesk:list'))
     else:
         return render(request, 'helpdesk/confirm_delete_saved_query.html', {'query': query})
+
+
 delete_saved_query = staff_member_required(delete_saved_query)
 
 
@@ -1323,6 +1385,8 @@ def user_settings(request):
         form = UserSettingsForm(s.settings)
 
     return render(request, 'helpdesk/user_settings.html', {'form': form})
+
+
 user_settings = staff_member_required(user_settings)
 
 
@@ -1330,6 +1394,8 @@ def email_ignore(request):
     return render(request, 'helpdesk/email_ignore_list.html', {
         'ignore_list': IgnoreEmail.objects.all(),
     })
+
+
 email_ignore = superuser_required(email_ignore)
 
 
@@ -1343,6 +1409,8 @@ def email_ignore_add(request):
         form = EmailIgnoreForm(request.GET)
 
     return render(request, 'helpdesk/email_ignore_add.html', {'form': form})
+
+
 email_ignore_add = superuser_required(email_ignore_add)
 
 
@@ -1353,6 +1421,8 @@ def email_ignore_del(request, id):
         return HttpResponseRedirect(reverse('helpdesk:email_ignore'))
     else:
         return render(request, 'helpdesk/email_ignore_del.html', {'ignore': ignore})
+
+
 email_ignore_del = superuser_required(email_ignore_del)
 
 
@@ -1360,18 +1430,24 @@ def ticket_cc(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
     if not _has_access_to_queue(request.user, ticket.queue):
         raise PermissionDenied()
+    if not _is_my_ticket(request.user, ticket):
+        raise PermissionDenied()
 
     copies_to = ticket.ticketcc_set.all()
     return render(request, 'helpdesk/ticket_cc_list.html', {
         'copies_to': copies_to,
         'ticket': ticket,
     })
+
+
 ticket_cc = staff_member_required(ticket_cc)
 
 
 def ticket_cc_add(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
     if not _has_access_to_queue(request.user, ticket.queue):
+        raise PermissionDenied()
+    if not _is_my_ticket(request.user, ticket):
         raise PermissionDenied()
 
     if request.method == 'POST':
@@ -1390,6 +1466,8 @@ def ticket_cc_add(request, ticket_id):
         'form_email': form_email,
         'form_user': form_user,
     })
+
+
 ticket_cc_add = staff_member_required(ticket_cc_add)
 
 
@@ -1401,12 +1479,16 @@ def ticket_cc_del(request, ticket_id, cc_id):
         return HttpResponseRedirect(reverse('helpdesk:ticket_cc',
                                             kwargs={'ticket_id': cc.ticket.id}))
     return render(request, 'helpdesk/ticket_cc_del.html', {'cc': cc})
+
+
 ticket_cc_del = staff_member_required(ticket_cc_del)
 
 
 def ticket_dependency_add(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
     if not _has_access_to_queue(request.user, ticket.queue):
+        raise PermissionDenied()
+    if not _is_my_ticket(request.user, ticket):
         raise PermissionDenied()
     if request.method == 'POST':
         form = TicketDependencyForm(request.POST)
@@ -1422,6 +1504,8 @@ def ticket_dependency_add(request, ticket_id):
         'ticket': ticket,
         'form': form,
     })
+
+
 ticket_dependency_add = staff_member_required(ticket_dependency_add)
 
 
@@ -1431,12 +1515,16 @@ def ticket_dependency_del(request, ticket_id, dependency_id):
         dependency.delete()
         return HttpResponseRedirect(reverse('helpdesk:view', args=[ticket_id]))
     return render(request, 'helpdesk/ticket_dependency_del.html', {'dependency': dependency})
+
+
 ticket_dependency_del = staff_member_required(ticket_dependency_del)
 
 
 def attachment_del(request, ticket_id, attachment_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
     if not _has_access_to_queue(request.user, ticket.queue):
+        raise PermissionDenied()
+    if not _is_my_ticket(request.user, ticket):
         raise PermissionDenied()
 
     attachment = get_object_or_404(Attachment, id=attachment_id)
@@ -1447,6 +1535,8 @@ def attachment_del(request, ticket_id, attachment_id):
         'attachment': attachment,
         'filename': attachment.filename,
     })
+
+
 attachment_del = staff_member_required(attachment_del)
 
 

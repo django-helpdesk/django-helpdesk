@@ -14,7 +14,7 @@
             // %y -> Y value,
             // %x.2 -> precision of X value,
             // %p -> percent
-	    // %n -> value (not percent) of pie chart
+            // %n -> value (not percent) of pie chart
             xDateFormat: null,
             yDateFormat: null,
             monthNames: null,
@@ -249,18 +249,19 @@
             var totalTipHeight = $tip.outerHeight() + that.tooltipOptions.shifts.y;
             if ((pos.x - $(window).scrollLeft()) > ($(window)[that.wfunc]() - totalTipWidth)) {
                 pos.x -= totalTipWidth;
+                pos.x = Math.max(pos.x, 0);
             }
             if ((pos.y - $(window).scrollTop()) > ($(window)[that.hfunc]() - totalTipHeight)) {
                 pos.y -= totalTipHeight;
             }
 
-	    /* 
+	    /*
 	       The section applies the new positioning ONLY if pos.x and pos.y
 	       are numbers. If they are undefined or not a number, use the last
-	       known numerical position. This hack fixes a bug that kept pie 
+	       known numerical position. This hack fixes a bug that kept pie
 	       charts from keeping their tooltip positioning.
 	     */
-	    
+
             if (isNaN(pos.x)) {
 		that.tipPosition.x = that.tipPosition.xPrev;
 	    }
@@ -275,7 +276,7 @@
 		that.tipPosition.y = pos.y;
 		that.tipPosition.yPrev = pos.y;
 	    }
-	    
+
         };
 
         // Quick little function for showing the tooltip.
@@ -288,7 +289,7 @@
                 return;
 
             $tip.html(tipText);
-            plot.setTooltipPosition({ x: position.pageX, y: position.pageY });
+            plot.setTooltipPosition({ x: that.tipPosition.x, y: that.tipPosition.y });
             $tip.css({
                 left: that.tipPosition.x + that.tooltipOptions.shifts.x,
                 top: that.tipPosition.y + that.tooltipOptions.shifts.y
@@ -322,7 +323,7 @@
             if( $tip.length === 0 ){
                 $tip = $('<div />').addClass(this.tooltipOptions.cssClass);
                 $tip.appendTo('body').hide().css({position: 'absolute'});
-    
+
                 if(this.tooltipOptions.defaultTheme) {
                     $tip.css({
                         'background': '#fff',
@@ -359,7 +360,7 @@
         var yPatternWithoutPrecision = "%y";
         var customTextPattern = "%ct";
 	var nPiePattern = "%n";
-	
+
         var x, y, customText, p, n;
 
         // for threshold plugin we need to read data from different place
@@ -374,7 +375,7 @@
 		x = item.datapoint[0];
 		y = item.datapoint[1];
 	    }
-	    
+
         else if (typeof item.series.lines !== "undefined" && item.series.lines.steps) {
             x = item.series.datapoints.points[item.dataIndex * 2];
             y = item.series.datapoints.points[item.dataIndex * 2 + 1];
@@ -401,33 +402,34 @@
             return '';
         }
 
-	/* replacement of %ct and other multi-character templates must
-	   precede the replacement of single-character templates 
-	   to avoid conflict between '%c' and '%ct'  and similar substrings
-	*/
-	if (customText)
+        /* replacement of %ct and other multi-character templates must
+           precede the replacement of single-character templates
+           to avoid conflict between '%c' and '%ct'  and similar substrings
+        */
+        if (customText) {
             content = content.replace(customTextPattern, customText);
+        }
 
         // percent match for pie charts and stacked percent
         if (typeof (item.series.percent) !== 'undefined') {
             p = item.series.percent;
         } else if (typeof (item.series.percents) !== 'undefined') {
             p = item.series.percents[item.dataIndex];
-        }        
+        }
         if (typeof p === 'number') {
             content = this.adjustValPrecision(percentPattern, content, p);
         }
 
-	// replace %n with number of items represented by slice in pie charts
-	if (item.series.hasOwnProperty('pie')) {
-	    if (typeof (item.series.data[0][1] !== 'undefined')) {
-		n = item.series.data[0][1];
-	    }
-	}
-	if (typeof n === 'number') {
+        // replace %n with number of items represented by slice in pie charts
+        if (item.series.hasOwnProperty('pie')) {
+            if (typeof item.series.data[0][1] !== 'undefined') {
+                n = item.series.data[0][1];
+            }
+        }
+        if (typeof n === 'number') {
             content = content.replace(nPiePattern, n);
-	}
-	
+        }
+
         // series match
         if (typeof(item.series.label) !== 'undefined') {
             content = content.replace(seriesPattern, item.series.label);
@@ -435,7 +437,7 @@
             //remove %s if label is undefined
             content = content.replace(seriesPattern, "");
         }
-        
+
         // color match
         if (typeof(item.series.color) !== 'undefined') {
             content = content.replace(colorPattern, item.series.color);

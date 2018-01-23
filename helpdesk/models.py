@@ -180,7 +180,7 @@ class Queue(models.Model):
 
     permission_name = models.CharField(
         _('Django auth permission name'),
-        max_length=50,
+        max_length=72,  # based on prepare_permission_name() pre-pending chars to slug
         blank=True,
         null=True,
         editable=False,
@@ -255,6 +255,7 @@ class Queue(models.Model):
 
     default_owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
         related_name='default_owner',
         blank=True,
         null=True,
@@ -339,6 +340,7 @@ class Queue(models.Model):
                 pass
 
 
+@python_2_unicode_compatible
 class Ticket(models.Model):
     """
     To allow a ticket to be entered as quickly as possible, only the
@@ -385,6 +387,7 @@ class Ticket(models.Model):
 
     queue = models.ForeignKey(
         Queue,
+        on_delete=models.CASCADE,
         verbose_name=_('Queue'),
     )
 
@@ -410,6 +413,7 @@ class Ticket(models.Model):
 
     assigned_to = models.ForeignKey(
         settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
         related_name='assigned_to',
         blank=True,
         null=True,
@@ -585,8 +589,8 @@ class Ticket(models.Model):
         return '%s %s' % (self.id, self.title)
 
     def get_absolute_url(self):
-        return 'helpdesk:view', (self.id,)
-    get_absolute_url = models.permalink(get_absolute_url)
+        from django.urls import reverse
+        return reverse('helpdesk:view', args=(self.id,))
 
     def save(self, *args, **kwargs):
         if not self.id:
@@ -634,6 +638,7 @@ class FollowUp(models.Model):
 
     ticket = models.ForeignKey(
         Ticket,
+        on_delete=models.CASCADE,
         verbose_name=_('Ticket'),
     )
 
@@ -665,6 +670,7 @@ class FollowUp(models.Model):
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
         blank=True,
         null=True,
         verbose_name=_('User'),
@@ -707,6 +713,7 @@ class TicketChange(models.Model):
 
     followup = models.ForeignKey(
         FollowUp,
+        on_delete=models.CASCADE,
         verbose_name=_('Follow-up'),
     )
 
@@ -769,6 +776,7 @@ class Attachment(models.Model):
 
     followup = models.ForeignKey(
         FollowUp,
+        on_delete=models.CASCADE,
         verbose_name=_('Follow-up'),
     )
 
@@ -970,8 +978,8 @@ class KBCategory(models.Model):
         verbose_name_plural = _('Knowledge base categories')
 
     def get_absolute_url(self):
-        return 'helpdesk:kb_category', (), {'slug': self.slug}
-    get_absolute_url = models.permalink(get_absolute_url)
+        from django.urls import reverse
+        return reverse('helpdesk:kb_category', kwargs={'slug': self.slug})
 
 
 @python_2_unicode_compatible
@@ -982,6 +990,7 @@ class KBItem(models.Model):
     """
     category = models.ForeignKey(
         KBCategory,
+        on_delete=models.CASCADE,
         verbose_name=_('Category'),
     )
 
@@ -1037,8 +1046,8 @@ class KBItem(models.Model):
         verbose_name_plural = _('Knowledge base items')
 
     def get_absolute_url(self):
-        return 'helpdesk:kb_item', (self.id,)
-    get_absolute_url = models.permalink(get_absolute_url)
+        from django.urls import reverse
+        return reverse('helpdesk:kb_item', args=(self.id,))
 
 
 @python_2_unicode_compatible
@@ -1055,6 +1064,7 @@ class SavedSearch(models.Model):
     """
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
         verbose_name=_('User'),
     )
 
@@ -1099,6 +1109,7 @@ class UserSettings(models.Model):
 
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
         related_name="usersettings_helpdesk")
 
     settings_pickled = models.TextField(
@@ -1152,6 +1163,7 @@ def create_usersettings(sender, instance, created, **kwargs):
     from helpdesk.settings import DEFAULT_USER_SETTINGS
     if created:
         UserSettings.objects.create(user=instance, settings=DEFAULT_USER_SETTINGS)
+
 
 models.signals.post_save.connect(create_usersettings, sender=settings.AUTH_USER_MODEL)
 
@@ -1209,6 +1221,16 @@ class IgnoreEmail(models.Model):
             self.date = timezone.now()
         return super(IgnoreEmail, self).save(*args, **kwargs)
 
+    def queue_list(self):
+        """Return a list of the queues this IgnoreEmail applies to.
+        If this IgnoreEmail applies to ALL queues, return '*'.
+        """
+        queues = self.queues.all().order_by('title')
+        if len(queues) == 0:
+            return '*'
+        else:
+            return ', '.join([str(q) for q in queues])
+
     def test(self, email):
         """
         Possible situations:
@@ -1246,11 +1268,13 @@ class TicketCC(models.Model):
 
     ticket = models.ForeignKey(
         Ticket,
+        on_delete=models.CASCADE,
         verbose_name=_('Ticket'),
     )
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
         blank=True,
         null=True,
         help_text=_('User who wishes to receive updates for this ticket.'),
@@ -1420,11 +1444,13 @@ class CustomField(models.Model):
 class TicketCustomFieldValue(models.Model):
     ticket = models.ForeignKey(
         Ticket,
+        on_delete=models.CASCADE,
         verbose_name=_('Ticket'),
     )
 
     field = models.ForeignKey(
         CustomField,
+        on_delete=models.CASCADE,
         verbose_name=_('Field'),
     )
 
@@ -1453,12 +1479,14 @@ class TicketDependency(models.Model):
 
     ticket = models.ForeignKey(
         Ticket,
+        on_delete=models.CASCADE,
         verbose_name=_('Ticket'),
         related_name='ticketdependency',
     )
 
     depends_on = models.ForeignKey(
         Ticket,
+        on_delete=models.CASCADE,
         verbose_name=_('Depends On Ticket'),
         related_name='depends_on',
     )

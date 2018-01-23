@@ -39,6 +39,6 @@ Before django-helpdesk will be much use, you need to do some basic configuration
        EMAIL_HOST_USER = 'YYYYYY@ZZZZ.PPP'
        EMAIL_HOST_PASSWORD = '123456'
 
-8. If you wish to use SOCKS4/5 proxy with Helpdesk Queue email operations, install PySocks manually.
+8. If you wish to use SOCKS4/5 proxy with Helpdesk Queue email operations, install PySocks manually. Please note that mixing both SOCKS and non-SOCKS email sources for different queues is only supported under Python 2; on Python 3, SOCKS proxy support is all-or-nothing: either all queue email sources must use SOCKS or none may use it. If you need this functionality on Python 3 please `let us know <https://github.com/django-helpdesk/django-helpdesk/issues/new>`_.
 
 You're now up and running! Happy ticketing.

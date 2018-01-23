@@ -50,7 +50,10 @@ Bootstrap overrides
 #searchtabs {margin-bottom: 20px;}
 
 .row_tablehead, table.table caption {background-color: #dbd5d9;}
-table.table caption {height: 2em; line-height: 2em; font-weight: bold;}
+table.table caption {
+    padding-left: 2em; 
+    line-height: 2em; font-weight: bold;
+}
 table.ticket-stats caption {color: #fbff00; font-style: italic;}
 table.ticket-stats tbody th, table.ticket-stats tbody tr {padding-left: 20px}
 

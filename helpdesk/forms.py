@@ -11,7 +11,7 @@ forms.py - Definitions of newforms-based forms for creating and maintaining
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.six import StringIO
 from django import forms
-from django.forms import extras
+from django.forms import widgets
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth import get_user_model
@@ -369,6 +369,14 @@ class PublicTicketForm(AbstractTicketForm):
         Add any (non-staff) custom fields that are defined to the form
         """
         super(PublicTicketForm, self).__init__(*args, **kwargs)
+
+        if hasattr(settings, 'HELPDESK_PUBLIC_TICKET_QUEUE'):
+            self.fields['queue'].widget = forms.HiddenInput()
+        if hasattr(settings, 'HELPDESK_PUBLIC_TICKET_PRIORITY'):
+            self.fields['priority'].widget = forms.HiddenInput()
+        if hasattr(settings, 'HELPDESK_PUBLIC_TICKET_DUE_DATE'):
+            self.fields['due_date'].widget = forms.HiddenInput()
+
         self._add_form_custom_fields(False)
 
     def save(self, request=None):

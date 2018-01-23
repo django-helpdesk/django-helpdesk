@@ -2,7 +2,7 @@ from helpdesk.models import Queue, CustomField, Ticket
 from django.test import TestCase
 from django.core import mail
 from django.test.client import Client
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 try:  # python 3
     from urllib.parse import urlparse
