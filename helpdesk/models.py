@@ -469,6 +469,11 @@ class Ticket(models.Model):
                     'automatically by management/commands/escalate_tickets.py.'),
     )
 
+    viewable_globally = models.BooleanField(
+        default=False,
+        help_text=_('Should the ticket be viewable by all users?'),
+    )
+
     def __init__(self, *args, **kwargs):
         # Stash request (if provided) then call super-class __init__
         if 'request' in kwargs:

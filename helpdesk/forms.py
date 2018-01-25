@@ -312,6 +312,12 @@ class TicketForm(AbstractTicketForm):
                     'e-mailed details of this ticket immediately.'),
     )
 
+    viewable_globally = forms.BooleanField(
+        required=False,
+        label=_('Viewable globally'),
+        help_text=_('Should the ticket be viewable by any user?'),
+    )
+
     def __init__(self, *args, **kwargs):
         """
         Add any custom fields that are defined to the form.
@@ -331,6 +337,9 @@ class TicketForm(AbstractTicketForm):
                 ticket.assigned_to = u
             except User.DoesNotExist:
                 ticket.assigned_to = None
+
+        if self.cleaned_data['viewable_globally']:
+            ticket.viewable_globally = self.cleaned_data['viewable_globally']
         ticket.save()
 
         self._create_custom_fields(ticket)
