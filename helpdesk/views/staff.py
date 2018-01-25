@@ -89,7 +89,9 @@ def _has_access_to_queue(user, queue):
 def _is_my_ticket(user, ticket):
     """Check to see if the user has permission to access
     a ticket. If not then deny access."""
-    if user.is_superuser or user.is_staff or user.id == ticket.customer_id:
+    if user.is_superuser or user.is_staff or user.email == ticket.submitter_email:
+        return True
+    elif ticket.viewable_globally:
         return True
     else:
         return False
@@ -135,6 +137,9 @@ def dashboard(request):
     )
     basic_ticket_stats = calc_basic_ticket_stats(tickets_in_queues)
 
+    # global tickets created by admins and viewable by all
+    global_tickets = Ticket.objects.filter(viewable_globally=True)
+
     # The following query builds a grid of queues & ticket statuses,
     # to be displayed to the user. EG:
     #          Open  Resolved
@@ -171,6 +176,7 @@ def dashboard(request):
         'user_tickets_closed_resolved': tickets_closed_resolved,
         'unassigned_tickets': unassigned_tickets,
         'all_tickets_reported_by_current_user': all_tickets_reported_by_current_user,
+        'global_tickets': global_tickets,
         'basic_ticket_stats': basic_ticket_stats,
     })
 
@@ -1017,6 +1023,16 @@ def create_ticket(request):
             (u.id, u.get_username()) for u in assignable_users]
         if helpdesk_settings.HELPDESK_CREATE_TICKET_HIDE_ASSIGNED_TO:
             form.fields['assigned_to'].widget = forms.HiddenInput()
+
+        # For non-staff users, the create ticket form should not
+        # contain priority, due on, submitter email, case owner,
+        # and global view
+        if not request.user.is_staff:
+            form.fields['priority'].widget = forms.HiddenInput()
+            form.fields['submitter_email'].widget = forms.HiddenInput()
+            form.fields['due_date'].widget = forms.HiddenInput()
+            form.fields['assigned_to'].widget = forms.HiddenInput()
+            form.fields['viewable_globally'].widget = forms.HiddenInput()
 
     return render(request, 'helpdesk/create_ticket.html', {'form': form})
 
