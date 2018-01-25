@@ -91,6 +91,8 @@ def _is_my_ticket(user, ticket):
     a ticket. If not then deny access."""
     if user.is_superuser or user.is_staff or user.email == ticket.submitter_email:
         return True
+    elif ticket.viewable_globally:
+        return True
     else:
         return False
 
@@ -135,6 +137,9 @@ def dashboard(request):
     )
     basic_ticket_stats = calc_basic_ticket_stats(tickets_in_queues)
 
+    # global tickets created by admins and viewable by all
+    global_tickets = Ticket.objects.filter(viewable_globally=True)
+
     # The following query builds a grid of queues & ticket statuses,
     # to be displayed to the user. EG:
     #          Open  Resolved
@@ -171,6 +176,7 @@ def dashboard(request):
         'user_tickets_closed_resolved': tickets_closed_resolved,
         'unassigned_tickets': unassigned_tickets,
         'all_tickets_reported_by_current_user': all_tickets_reported_by_current_user,
+        'global_tickets': global_tickets,
         'basic_ticket_stats': basic_ticket_stats,
     })
 
