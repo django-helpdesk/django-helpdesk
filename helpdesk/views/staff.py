@@ -1018,6 +1018,16 @@ def create_ticket(request):
         if helpdesk_settings.HELPDESK_CREATE_TICKET_HIDE_ASSIGNED_TO:
             form.fields['assigned_to'].widget = forms.HiddenInput()
 
+        # For non-staff users, the create ticket form should not
+        # contain priority, due on, submitter email, case owner,
+        # and global view
+        if not request.user.is_staff:
+            form.fields['priority'].widget = forms.HiddenInput()
+            form.fields['submitter_email'].widget = forms.HiddenInput()
+            form.fields['due_date'].widget = forms.HiddenInput()
+            form.fields['assigned_to'].widget = forms.HiddenInput()
+            form.fields['viewable_globally'].widget = forms.HiddenInput()
+
     return render(request, 'helpdesk/create_ticket.html', {'form': form})
 
 
