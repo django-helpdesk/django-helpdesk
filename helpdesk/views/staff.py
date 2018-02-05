@@ -330,6 +330,8 @@ def view_ticket(request, ticket_id):
     ticketcc_string, show_subscribe = \
         return_ticketccstring_and_show_subscribe(request.user, ticket)
 
+    is_staff = request.user.is_staff
+
     return render(request, 'helpdesk/ticket.html', {
         'ticket': ticket,
         'form': form,
@@ -339,6 +341,7 @@ def view_ticket(request, ticket_id):
             Q(queues=ticket.queue) | Q(queues__isnull=True)),
         'ticketcc_string': ticketcc_string,
         'SHOW_SUBSCRIBE': show_subscribe,
+        'is_staff': is_staff,
     })
 
 
