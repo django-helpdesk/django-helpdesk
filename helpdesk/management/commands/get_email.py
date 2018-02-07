@@ -462,7 +462,7 @@ def ticket_from_message(message, queue, logger):
         for ccemail in new_cc:
             tcc = TicketCC.objects.create(
                 ticket=t,
-                email=ccemail,
+                email=ccemail.replace('\n', ' ').replace('\r', ' '),
                 can_view=True,
                 can_update=False
             )
