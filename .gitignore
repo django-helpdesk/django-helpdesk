@@ -1,4 +1,5 @@
 *.pyc
+.eggs/
 /dist/
 django_helpdesk.egg-info
 demo/*.egg-info
