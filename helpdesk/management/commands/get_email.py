@@ -179,8 +179,10 @@ def process_queue(q, logger):
             if six.PY2:
                 full_message = encoding.force_text("\n".join(server.retr(msgNum)[1]), errors='replace')
             else:
-                popmsg = server.retr(msgNum)[1]
-                full_message = encoding.force_text(b"\n".join(popmsg.encode()), errors='replace')
+                popmsg = []
+                for line in server.retr(msgNum)[1]:
+                    popmsg.append(line.encode())
+                full_message = encoding.force_text(b"\n".join(popmsg), errors='replace')
             ticket = ticket_from_message(message=full_message, queue=q, logger=logger)
 
             if ticket:
