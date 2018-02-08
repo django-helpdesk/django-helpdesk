@@ -196,26 +196,6 @@ $(document).on('change', ':file', function() {
         {% endif %}
     </dl>
 
-{% if is_staff %}
-<p id='ShowFurtherOptPara'><button class="btn btn-warning btn-sm" id='ShowFurtherEditOptions'>{% trans "Change Further Details &raquo;" %}</button></p>
-{% endif %}
-
-<div id='FurtherEditOptions' style='display: none;'>
-
-    <dl>
-
-        <dt><label for='id_title'>{% trans "Title" %}</label></dt>
-        <dd><input type='text' name='title' value='{{ ticket.title|escape }}' /></dd>
-
-        <dt><label for='id_priority'>{% trans "Priority" %}</label></dt>
-        <dd><select id='id_priority' name='priority'>{% for p in priorities %}<option value='{{ p.0 }}'{% ifequal p.0 ticket.priority %} selected='selected'{% endifequal %}>{{ p.1 }}</option>{% endfor %}</select></dd>
-        <dt><label for='id_due_date'>{% trans "Due on" %}</label></dt>
-        <dd>{{ form.due_date }}</dd>
-
-    </dl>
-
-</div>
-
 <p id='ShowFileUploadPara'><button class="btn btn-warning btn-sm" id='ShowFileUpload'>{% trans "Attach File(s) &raquo;" %}</button></p>
 
 <div id='FileUpload' style='display: none;'>
