@@ -46,13 +46,6 @@
                                         </tr>
 
                                         <tr>
-                                            <th>{% trans "Assigned To" %}</th>
-                                            {% if is_staff %}
-                                            <td>{{ ticket.get_assigned_to }}{% ifequal ticket.get_assigned_to _('Unassigned') %} <strong><a href='?take'><button type="button" class="btn btn-primary btn-xs"><i class="fa fa-hand-paper-o"></i>&nbsp;{% trans "Take" %}</button></a></strong>{% endifequal %}</td>
-                                            {% endif %}
-                                        </tr>
-
-                                        <tr>
                                             <th>{% trans "Submitter E-Mail" %}</th>
                                             <td>{{ ticket.submitter_email }}{% if user.is_superuser %} <strong><a href='{% url 'helpdesk:email_ignore_add' %}?email={{ ticket.submitter_email }}'><button type="button" class="btn btn-warning btn-xs"><i class="fa fa-eye-slash"></i>&nbsp;{% trans "Ignore" %}</button></a></strong>{% endif %}</td>
                                         </tr>
