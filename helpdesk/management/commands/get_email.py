@@ -395,8 +395,9 @@ def ticket_from_message(message, queue, logger):
     if not body:
         mail = BeautifulSoup(part.get_payload(), "lxml")
         if ">" in mail.text:
-            message_body = mail.text.split(">")[1]
-            body = message_body.encode('ascii', errors='ignore')
+            body = mail.find('body')
+            body = body.text
+            body = body.encode('ascii', errors='ignore')
         else:
             body = mail.text
 
