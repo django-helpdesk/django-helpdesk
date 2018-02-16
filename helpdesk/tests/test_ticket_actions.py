@@ -18,7 +18,7 @@ from helpdesk.views.staff import _is_my_ticket
 class TicketActionsTestCase(TestCase):
     fixtures = ['emailtemplate.json']
 
-    def setUp(self):      
+    def setUp(self):
         self.queue_public = Queue.objects.create(
             title='Queue 1',
             slug='q1',
@@ -127,7 +127,7 @@ class TicketActionsTestCase(TestCase):
         }
         response = self.client.post(reverse('helpdesk:update', kwargs={'ticket_id': ticket_id}), post_data, follow=True)
         self.assertContains(response, 'Changed Status from Open to Closed')
-        
+
     def test_is_my_ticket(self):
         """Tests whether non-staff but assigned user still counts as owner"""
 
@@ -150,7 +150,7 @@ class TicketActionsTestCase(TestCase):
 
         # create ticket
         ticket = Ticket.objects.create(**initial_data)
-        
+
         self.assertEqual(_is_my_ticket(self.user, ticket), True)
         self.assertEqual(_is_my_ticket(self.user2, ticket), False)
 
