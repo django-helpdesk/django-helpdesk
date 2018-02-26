@@ -28,13 +28,7 @@ def homepage(request):
     if request.user.is_staff or \
             (request.user.is_authenticated and
              helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE):
-        try:
-            if request.user.usersettings_helpdesk.settings.get('login_view_ticketlist', False):
-                return HttpResponseRedirect(reverse('helpdesk:list'))
-            else:
-                return HttpResponseRedirect(reverse('helpdesk:dashboard'))
-        except UserSettings.DoesNotExist:
-            return HttpResponseRedirect(reverse('helpdesk:dashboard'))
+        return HttpResponseRedirect(reverse('helpdesk:dashboard'))
 
     if request.method == 'POST':
         form = PublicTicketForm(request.POST, request.FILES)
