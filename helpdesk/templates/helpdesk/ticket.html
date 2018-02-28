@@ -105,6 +105,9 @@ $(document).on('change', ':file', function() {
                             </li>
                             {% if forloop.last %}</ul></div>{% endif %}
                         {% endfor %}
+<!--- ugly long test to suppress the following if it will be empty, to save vertical space -->
+{% with possible=helpdesk_settings.HELPDESK_SHOW_EDIT_BUTTON_FOLLOW_UP %}
+    {% if  possible and followup.user and request.user == followup.user and not followup.ticketchange_set.all or  possible and user.is_superuser and helpdesk_settings.HELPDESK_SHOW_DELETE_BUTTON_SUPERUSER_FOLLOW_UP %}
                         <hr>
                         <div class="btn-group">
                             {% if helpdesk_settings.HELPDESK_SHOW_EDIT_BUTTON_FOLLOW_UP %}
@@ -116,6 +119,7 @@ $(document).on('change', ':file', function() {
                                 <a href="{% url 'helpdesk:followup_delete' ticket.id followup.id %}" class='followup-edit'><button type="button" class="btn btn-warning btn-xs"><i class="fa fa-trash"></i>&nbsp;{% trans "Delete" %}</button></a>
                             {% endif %}
                         </div>
+{% endif %}{% endwith %}
                     </div>
                 </div>
             </li>
