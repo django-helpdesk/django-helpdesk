@@ -181,8 +181,8 @@ def process_queue(q, logger):
             else:
                 raw_content = server.retr(msgNum)[1]
                 if type(raw_content[0]) is bytes:
-                    full_message =  "\n".join([elm.decode('utf-8') for elm in raw_content])
-                else :
+                    full_message = "\n".join([elm.decode('utf-8') for elm in raw_content])
+                else:
                     full_message = encoding.force_text("\n".join(raw_content), errors='replace')
             ticket = ticket_from_message(message=full_message, queue=q, logger=logger)
 
