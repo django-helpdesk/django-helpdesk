@@ -105,6 +105,22 @@ These options only change display of items on public-facing pages, not staff pag
   **Default:** ``HELPDESK_SUBMIT_A_TICKET_PUBLIC = True``
 
 
+Options for public ticket submission form
+-----------------------------------------
+
+- **HELPDESK_PUBLIC_TICKET_QUEUE** Sets the queue for tickets submitted through the public form. If defined, the matching form field will be hidden. This cannot be `None` but must be set to a valid queue slug.
+
+  **Default:** Not defined
+
+- **HELPDESK_PUBLIC_TICKET_PRIORITY** Sets the priority for tickets submitted through the public form. If defined, the matching form field will be hidden. Must be set to a valid integer priority.
+
+  **Default:** Not defined
+
+- **HELPDESK_PUBLIC_TICKET_DUE_DATE** Sets the due date for tickets submitted through the public form. If defined, the matching form field will be hidden. Set to `None` if you want to hide the form field but do not want to define a value.
+
+  **Default:** Not defined
+
+
 Options that change ticket updates
 ----------------------------------
 
@@ -149,9 +165,9 @@ Staff Ticket Creation Settings
 Staff Ticket View Settings
 ------------------------------
 
-- **HELPDESK_ENABLE_PER_QUEUE_PERMISSION** If ``True``, logged in staff users only see queues and tickets to which they have specifically been granted access -  this holds for the dashboard, ticket query, and ticket report views. User assignment is done through the standard ``django.admin.admin`` permissions. *Note*: Staff with access to admin interface will be able to see the full list of tickets, but won't have access to details and could not modify them. This setting does not prevent staff users from creating tickets for all queues. Also, superuser accounts have full access to all queues, regardless of whatever queue memberships they have been granted.
+- **HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION** If ``True``, logged in staff users only see queues and tickets to which they have specifically been granted access -  this holds for the dashboard, ticket query, and ticket report views. User assignment is done through the standard ``django.admin.admin`` permissions. *Note*: Staff with access to admin interface will be able to see the full list of tickets, but won't have access to details and could not modify them. This setting does not prevent staff users from creating tickets for all queues. Also, superuser accounts have full access to all queues, regardless of whatever queue memberships they have been granted.
 
-  **Default:** ``HELPDESK_ENABLE_PER_QUEUE_PERMISSION = False``
+  **Default:** ``HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION = False``
 
 
 

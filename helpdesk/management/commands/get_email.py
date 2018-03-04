@@ -176,7 +176,14 @@ def process_queue(q, logger):
             msgNum = msg.split(" ")[0]
             logger.info("Processing message %s" % msgNum)
 
-            full_message = encoding.force_text("\n".join(server.retr(msgNum)[1]), errors='replace')
+            if six.PY2:
+                full_message = encoding.force_text("\n".join(server.retr(msgNum)[1]), errors='replace')
+            else:
+                raw_content = server.retr(msgNum)[1]
+                if type(raw_content[0]) is bytes:
+                    full_message = "\n".join([elm.decode('utf-8') for elm in raw_content])
+                else:
+                    full_message = encoding.force_text("\n".join(raw_content), errors='replace')
             ticket = ticket_from_message(message=full_message, queue=q, logger=logger)
 
             if ticket:
@@ -229,7 +236,10 @@ def process_queue(q, logger):
                 logger.info("Processing message %s" % num)
                 status, data = server.fetch(num, '(RFC822)')
                 full_message = encoding.force_text(data[0][1], errors='replace')
-                ticket = ticket_from_message(message=full_message, queue=q, logger=logger)
+                try:
+                    ticket = ticket_from_message(message=full_message, queue=q, logger=logger)
+                except TypeError:
+                    ticket = None  # hotfix. Need to work out WHY.
                 if ticket:
                     server.store(num, '+FLAGS', '\\Deleted')
                     logger.info("Successfully processed message %s, deleted from IMAP server" % num)
@@ -389,8 +399,9 @@ def ticket_from_message(message, queue, logger):
     if not body:
         mail = BeautifulSoup(part.get_payload(), "lxml")
         if ">" in mail.text:
-            message_body = mail.text.split(">")[1]
-            body = message_body.encode('ascii', errors='ignore')
+            body = mail.find('body')
+            body = body.text
+            body = body.encode('ascii', errors='ignore')
         else:
             body = mail.text
 
@@ -459,7 +470,7 @@ def ticket_from_message(message, queue, logger):
         for ccemail in new_cc:
             tcc = TicketCC.objects.create(
                 ticket=t,
-                email=ccemail,
+                email=ccemail.replace('\n', ' ').replace('\r', ' '),
                 can_view=True,
                 can_update=False
             )
