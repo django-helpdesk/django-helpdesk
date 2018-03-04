@@ -12,12 +12,12 @@ if callable(helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE):
     is_helpdesk_staff = helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE
 elif helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE:
     # treat 'normal' users like 'staff'
-    is_helpdesk_staff = lambda u: u.is_authenticated() and u.is_active
+    is_helpdesk_staff = lambda u: u.is_authenticated and u.is_active
 else:
-    is_helpdesk_staff = lambda u: u.is_authenticated() and u.is_active and u.is_staff
+    is_helpdesk_staff = lambda u: u.is_authenticated and u.is_active and u.is_staff
 
 helpdesk_staff_member_required = user_passes_test(is_helpdesk_staff)
-helpdesk_superuser_required = user_passes_test(lambda u: u.is_authenticated() and u.is_active and u.is_superuser)
+helpdesk_superuser_required = user_passes_test(lambda u: u.is_authenticated and u.is_active and u.is_superuser)
 
 def protect_view(view_func):
     """

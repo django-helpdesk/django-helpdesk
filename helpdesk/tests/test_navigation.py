@@ -113,7 +113,7 @@ class CustomStaffUserTestCase(StaffUserTestCaseMixin, TestCase):
     @staticmethod
     def custom_staff_filter(user):
         """Arbitrary user validation function"""
-        return user.is_authenticated() and user.is_active and user.username.lower().endswith('wensleydale')
+        return user.is_authenticated and user.is_active and user.username.lower().endswith('wensleydale')
 
     HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = custom_staff_filter
 
