@@ -151,21 +151,6 @@ def dashboard(request):
     else:
         where_clause = """WHERE   q.id = t.queue_id"""
 
-    cursor = connection.cursor()
-    cursor.execute("""
-        SELECT      q.id as queue,
-                    q.title AS name,
-                    COUNT(CASE t.status WHEN '1' THEN t.id WHEN '2' THEN t.id END) AS open,
-                    COUNT(CASE t.status WHEN '3' THEN t.id END) AS resolved,
-                    COUNT(CASE t.status WHEN '4' THEN t.id END) AS closed
-            %s
-            %s
-            GROUP BY queue, name
-            ORDER BY q.id;
-    """ % (from_clause, where_clause))
-
-    dash_tickets = query_to_dict(cursor.fetchall(), cursor.description)
-
     return render(request, 'helpdesk/dashboard.html', {
         'user_tickets': tickets,
         'user_tickets_closed_resolved': tickets_closed_resolved,
@@ -1103,31 +1088,18 @@ def report_index(request):
     #          Open  Resolved
     # Queue 1    10     4
     # Queue 2     4    12
+    Queues = user_queues if user_queues else Queue.objects.all()
 
-    queues = _get_user_queues(request.user).values_list('id', flat=True)
-
-    from_clause = """FROM    helpdesk_ticket t,
-                    helpdesk_queue q"""
-    if queues:
-        where_clause = """WHERE   q.id = t.queue_id AND
-                        q.id IN (%s)""" % (",".join(("%d" % pk for pk in queues)))
-    else:
-        where_clause = """WHERE   q.id = t.queue_id"""
-
-    cursor = connection.cursor()
-    cursor.execute("""
-        SELECT      q.id as queue,
-                    q.title AS name,
-                    COUNT(CASE t.status WHEN '1' THEN t.id WHEN '2' THEN t.id END) AS open,
-                    COUNT(CASE t.status WHEN '3' THEN t.id END) AS resolved,
-                    COUNT(CASE t.status WHEN '4' THEN t.id END) AS closed
-            %s
-            %s
-            GROUP BY queue, name
-            ORDER BY q.id;
-    """ % (from_clause, where_clause))
-
-    dash_tickets = query_to_dict(cursor.fetchall(), cursor.description)
+    dash_tickets = []
+    for queue in Queues:
+        dash_ticket = {
+            'queue': queue.id,
+            'name': queue.title,
+            'open': queue.ticket_set.filter(status__in=[1, 2]).count(),
+            'resolved': queue.ticket_set.filter(status=3).count(),
+            'closed': queue.ticket_set.filter(status=4).count(),
+        }
+        dash_tickets.append(dash_ticket)
 
     return render(request, 'helpdesk/report_index.html', {
         'number_tickets': number_tickets,
