@@ -61,7 +61,7 @@ class TicketActionsTestCase(TestCase):
         # Django 1.9 compatible way of testing this
         # https://docs.djangoproject.com/en/1.9/releases/1.9/#http-redirects-no-longer-forced-to-absolute-uris
         urlparts = urlparse(first_redirect_url)
-        self.assertEqual(urlparts.path, reverse('helpdesk:home'))
+        self.assertEqual(urlparts.path, reverse('helpdesk:dashboard'))
 
         # test ticket deleted
         with self.assertRaises(Ticket.DoesNotExist):
