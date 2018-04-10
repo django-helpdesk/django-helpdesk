@@ -499,7 +499,6 @@ msgid " - Open dependencies"
 msgstr ""
 
 #: models.py:448 models.py:494 models.py:1117 models.py:1280 models.py:1309
-#: templates/helpdesk/public_homepage.html:78
 #: templates/helpdesk/public_view_form.html:12
 msgid "Ticket"
 msgstr "Ticket"
@@ -727,7 +726,6 @@ msgid "Knowledge base categories"
 msgstr ""
 
 #: models.py:849 templates/helpdesk/kb_index.html:11
-#: templates/helpdesk/public_homepage.html:11
 msgid "Category"
 msgstr "Kategorie"
 
@@ -1175,7 +1173,6 @@ msgstr ""
 
 #: templates/helpdesk/create_ticket.html:10
 #: templates/helpdesk/navigation.html:65 templates/helpdesk/navigation.html:68
-#: templates/helpdesk/public_homepage.html:27
 msgid "Submit a Ticket"
 msgstr ""
 
@@ -1186,12 +1183,10 @@ msgstr ""
 
 #: templates/helpdesk/create_ticket.html:11
 #: templates/helpdesk/edit_ticket.html:11
-#: templates/helpdesk/public_homepage.html:28
 msgid "Please provide as descriptive a title and description as possible."
 msgstr ""
 
 #: templates/helpdesk/create_ticket.html:30
-#: templates/helpdesk/public_homepage.html:55
 msgid "Submit Ticket"
 msgstr ""
 
@@ -1456,7 +1451,6 @@ msgid ""
 msgstr ""
 
 #: templates/helpdesk/kb_index.html:10
-#: templates/helpdesk/public_homepage.html:10
 msgid "Knowledgebase Categories"
 msgstr "Wissendatenbank-Kategorien"
 
@@ -1548,7 +1542,6 @@ msgid "Log In"
 msgstr "Anmelden"
 
 #: templates/helpdesk/public_change_language.html:2
-#: templates/helpdesk/public_homepage.html:73
 #: templates/helpdesk/public_view_form.html:4
 #: templates/helpdesk/public_view_ticket.html:2
 msgid "View a Ticket"
@@ -1558,24 +1551,19 @@ msgstr ""
 msgid "Change the display language"
 msgstr "Anzeigesprache ändern"
 
-#: templates/helpdesk/public_homepage.html:6
 msgid "Knowledgebase Articles"
 msgstr "Wissensdatenbank-Artikel"
 
-#: templates/helpdesk/public_homepage.html:28
 msgid "All fields are required."
 msgstr ""
 
-#: templates/helpdesk/public_homepage.html:66
 msgid "Please use button at upper right to login first."
 msgstr ""
 
-#: templates/helpdesk/public_homepage.html:82
 #: templates/helpdesk/public_view_form.html:15
 msgid "Your E-mail Address"
 msgstr "Ihre E-Mail-Adresse"
 
-#: templates/helpdesk/public_homepage.html:86
 #: templates/helpdesk/public_view_form.html:19
 msgid "View Ticket"
 msgstr "Ticket betrachten"

@@ -501,7 +501,6 @@ msgid " - On Hold"
 msgstr " - Sospeso"
 
 #: models.py:481 models.py:1073 models.py:1231 models.py:1256
-#: templates/helpdesk/public_homepage.html:26
 #: templates/helpdesk/public_view_form.html:12
 msgid "Ticket"
 msgstr "Ticket"
@@ -671,7 +670,6 @@ msgid "Locale of this template."
 msgstr "Impostazioni internazionali per questo modello."
 
 #: models.py:817 templates/helpdesk/kb_index.html:10
-#: templates/helpdesk/public_homepage.html:10
 msgid "Category"
 msgstr "Categoria"
 
@@ -1069,7 +1067,6 @@ msgid "Create Ticket"
 msgstr "Crea ticket"
 
 #: templates/helpdesk/create_ticket.html:10
-#: templates/helpdesk/public_homepage.html:39
 msgid "Submit a Ticket"
 msgstr "Crea un Ticket"
 
@@ -1083,12 +1080,10 @@ msgstr "Cerca di fornire un titolo e una descrizione il più significativi possi
 
 #: templates/helpdesk/create_ticket.html:17
 #: templates/helpdesk/edit_ticket.html:19
-#: templates/helpdesk/public_homepage.html:50
 msgid "(Optional)"
 msgstr "(Facoltativo)"
 
 #: templates/helpdesk/create_ticket.html:26
-#: templates/helpdesk/public_homepage.html:59
 msgid "Submit Ticket"
 msgstr "Invia ticket"
 
@@ -1313,7 +1308,6 @@ msgid ""
 msgstr "Abbiamo selezionato per queste categorie alcuni articoli della knowledge base che potrebbero esserti utili. Puoi verificare che il tuo problema non sia già stato risolto prima di aprire una richiesta di assistenza."
 
 #: templates/helpdesk/kb_index.html:9
-#: templates/helpdesk/public_homepage.html:9
 msgid "Knowledgebase Categories"
 msgstr "Categorie knowledge base"
 
@@ -1411,7 +1405,6 @@ msgid "Log In"
 msgstr "Accedi"
 
 #: templates/helpdesk/public_change_language.html:2
-#: templates/helpdesk/public_homepage.html:21
 #: templates/helpdesk/public_view_form.html:4
 #: templates/helpdesk/public_view_ticket.html:2
 msgid "View a Ticket"
@@ -1421,25 +1414,20 @@ msgstr "Vedi un ticket"
 msgid "Change the display language"
 msgstr "Modifica lingua"
 
-#: templates/helpdesk/public_homepage.html:6
 msgid "Knowledgebase Articles"
 msgstr "Articoli knowledge base"
 
-#: templates/helpdesk/public_homepage.html:29
 #: templates/helpdesk/public_view_form.html:15
 msgid "Your E-mail Address"
 msgstr "Il tuo indirizzo e-mail"
 
-#: templates/helpdesk/public_homepage.html:33
 #: templates/helpdesk/public_view_form.html:19
 msgid "View Ticket"
 msgstr "Vedi ticket"
 
-#: templates/helpdesk/public_homepage.html:41
 msgid "All fields are required."
 msgstr "Tutti i campi sono obbligatori."
 
-#: templates/helpdesk/public_homepage.html:67
 msgid "Please use button at upper right to login first."
 msgstr "Usa il pulsante in alto a destra per accedere."
 

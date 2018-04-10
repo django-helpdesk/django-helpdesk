@@ -500,7 +500,6 @@ msgid " - On Hold"
 msgstr ""
 
 #: models.py:481 models.py:1073 models.py:1231 models.py:1256
-#: templates/helpdesk/public_homepage.html:26
 #: templates/helpdesk/public_view_form.html:12
 msgid "Ticket"
 msgstr ""
@@ -670,7 +669,6 @@ msgid "Locale of this template."
 msgstr ""
 
 #: models.py:817 templates/helpdesk/kb_index.html:10
-#: templates/helpdesk/public_homepage.html:10
 msgid "Category"
 msgstr ""
 
@@ -1078,12 +1076,10 @@ msgstr ""
 
 #: templates/helpdesk/create_ticket.html:17
 #: templates/helpdesk/edit_ticket.html:19
-#: templates/helpdesk/public_homepage.html:50
 msgid "(Optional)"
 msgstr ""
 
 #: templates/helpdesk/create_ticket.html:26
-#: templates/helpdesk/public_homepage.html:59
 msgid "Submit Ticket"
 msgstr ""
 
@@ -1312,7 +1308,6 @@ msgid ""
 msgstr ""
 
 #: templates/helpdesk/kb_index.html:9
-#: templates/helpdesk/public_homepage.html:9
 msgid "Knowledgebase Categories"
 msgstr ""
 
@@ -1410,7 +1405,6 @@ msgid "Log In"
 msgstr ""
 
 #: templates/helpdesk/public_change_language.html:2
-#: templates/helpdesk/public_homepage.html:21
 #: templates/helpdesk/public_view_form.html:4
 #: templates/helpdesk/public_view_ticket.html:2
 msgid "View a Ticket"
@@ -1420,31 +1414,25 @@ msgstr ""
 msgid "Change the display language"
 msgstr ""
 
-#: templates/helpdesk/public_homepage.html:6
 msgid "Knowledgebase Articles"
 msgstr ""
 
-#: templates/helpdesk/public_homepage.html:29
 #: templates/helpdesk/public_view_form.html:15
 msgid "Your E-mail Address"
 msgstr ""
 
-#: templates/helpdesk/public_homepage.html:33
 #: templates/helpdesk/public_view_form.html:19
 msgid "View Ticket"
 msgstr ""
 
-#: templates/helpdesk/public_homepage.html:39
 msgid "Submit a Ticket"
 msgstr ""
 
-#: templates/helpdesk/public_homepage.html:41
 msgid ""
 "All fields are required. Please provide as descriptive a title and "
 "description as possible."
 msgstr ""
 
-#: templates/helpdesk/public_homepage.html:67
 msgid "Please use button at upper right to login first."
 msgstr ""
 

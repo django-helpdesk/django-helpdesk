@@ -500,7 +500,6 @@ msgid " - Open dependencies"
 msgstr "Dependencias abiertas"
 
 #: models.py:448 models.py:494 models.py:1117 models.py:1280 models.py:1309
-#: templates/helpdesk/public_homepage.html:78
 #: templates/helpdesk/public_view_form.html:12
 msgid "Ticket"
 msgstr "Ticket"
@@ -728,7 +727,6 @@ msgid "Knowledge base categories"
 msgstr "Categorías de la base de conocimiento"
 
 #: models.py:849 templates/helpdesk/kb_index.html:11
-#: templates/helpdesk/public_homepage.html:11
 msgid "Category"
 msgstr "Categoría"
 
@@ -1176,7 +1174,6 @@ msgstr "Crear Ticket"
 
 #: templates/helpdesk/create_ticket.html:10
 #: templates/helpdesk/navigation.html:65 templates/helpdesk/navigation.html:68
-#: templates/helpdesk/public_homepage.html:27
 msgid "Submit a Ticket"
 msgstr "Enviar un Ticket"
 
@@ -1187,12 +1184,10 @@ msgstr "Se requieren todos los campos, a menos que se indique lo contrario."
 
 #: templates/helpdesk/create_ticket.html:11
 #: templates/helpdesk/edit_ticket.html:11
-#: templates/helpdesk/public_homepage.html:28
 msgid "Please provide as descriptive a title and description as possible."
 msgstr "Por favor incluya un título y una descripción tan explícitas como sea posible."
 
 #: templates/helpdesk/create_ticket.html:30
-#: templates/helpdesk/public_homepage.html:55
 msgid "Submit Ticket"
 msgstr "Enviar Ticket"
 
@@ -1457,7 +1452,6 @@ msgid ""
 msgstr "Hemos listado una serie de artículos de la base de conocimiento para usted en las siguientes categorías. Por favor, revise para ver si alguno de estos artículos se refieren a su problema antes de abrir un Ticket de soporte."
 
 #: templates/helpdesk/kb_index.html:10
-#: templates/helpdesk/public_homepage.html:10
 msgid "Knowledgebase Categories"
 msgstr "Categorías de la base de conocimientos"
 
@@ -1549,7 +1543,6 @@ msgid "Log In"
 msgstr "Entrar"
 
 #: templates/helpdesk/public_change_language.html:2
-#: templates/helpdesk/public_homepage.html:73
 #: templates/helpdesk/public_view_form.html:4
 #: templates/helpdesk/public_view_ticket.html:2
 msgid "View a Ticket"
@@ -1559,24 +1552,19 @@ msgstr "Ver un Ticket"
 msgid "Change the display language"
 msgstr "Cambiar el lenguaje mostrado"
 
-#: templates/helpdesk/public_homepage.html:6
 msgid "Knowledgebase Articles"
 msgstr "Artículos de la Base de Conocimientos"
 
-#: templates/helpdesk/public_homepage.html:28
 msgid "All fields are required."
 msgstr "Se requieren todos los campos."
 
-#: templates/helpdesk/public_homepage.html:66
 msgid "Please use button at upper right to login first."
 msgstr "Por favor use el botón de la sección superior derecha para logearse primero."
 
-#: templates/helpdesk/public_homepage.html:82
 #: templates/helpdesk/public_view_form.html:15
 msgid "Your E-mail Address"
 msgstr "Su dirección de correo electrénico"
 
-#: templates/helpdesk/public_homepage.html:86
 #: templates/helpdesk/public_view_form.html:19
 msgid "View Ticket"
 msgstr "Ver Ticket"

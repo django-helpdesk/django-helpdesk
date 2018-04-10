@@ -495,7 +495,6 @@ msgid " - Open dependencies"
 msgstr "打开依赖"
 
 #: models.py:448 models.py:494 models.py:1117 models.py:1280 models.py:1309
-#: templates/helpdesk/public_homepage.html:78
 #: templates/helpdesk/public_view_form.html:12
 msgid "Ticket"
 msgstr "工单"
@@ -723,7 +722,6 @@ msgid "Knowledge base categories"
 msgstr "知识库分类"
 
 #: models.py:849 templates/helpdesk/kb_index.html:11
-#: templates/helpdesk/public_homepage.html:11
 msgid "Category"
 msgstr "分类"
 
@@ -1171,7 +1169,6 @@ msgstr "创建工单"
 
 #: templates/helpdesk/create_ticket.html:10
 #: templates/helpdesk/navigation.html:65 templates/helpdesk/navigation.html:68
-#: templates/helpdesk/public_homepage.html:27
 msgid "Submit a Ticket"
 msgstr "提交工单"
 
@@ -1182,12 +1179,10 @@ msgstr "除非其他说明， 所有字段都必须"
 
 #: templates/helpdesk/create_ticket.html:11
 #: templates/helpdesk/edit_ticket.html:11
-#: templates/helpdesk/public_homepage.html:28
 msgid "Please provide as descriptive a title and description as possible."
 msgstr "请提供描述性的标题和描述"
 
 #: templates/helpdesk/create_ticket.html:30
-#: templates/helpdesk/public_homepage.html:55
 msgid "Submit Ticket"
 msgstr "提交工单"
 
@@ -1452,7 +1447,6 @@ msgid ""
 msgstr "我们列出了以下类别的知识库文章供您查阅。在开支持工单的时候，请检查是否有文章解决了该文题"
 
 #: templates/helpdesk/kb_index.html:10
-#: templates/helpdesk/public_homepage.html:10
 msgid "Knowledgebase Categories"
 msgstr "知识库分类"
 
@@ -1544,7 +1538,6 @@ msgid "Log In"
 msgstr "登入"
 
 #: templates/helpdesk/public_change_language.html:2
-#: templates/helpdesk/public_homepage.html:73
 #: templates/helpdesk/public_view_form.html:4
 #: templates/helpdesk/public_view_ticket.html:2
 msgid "View a Ticket"
@@ -1554,24 +1547,19 @@ msgstr "查看工单"
 msgid "Change the display language"
 msgstr "修改显示语言"
 
-#: templates/helpdesk/public_homepage.html:6
 msgid "Knowledgebase Articles"
 msgstr "知识库文章"
 
-#: templates/helpdesk/public_homepage.html:28
 msgid "All fields are required."
 msgstr "所有字段必须"
 
-#: templates/helpdesk/public_homepage.html:66
 msgid "Please use button at upper right to login first."
 msgstr "请用右上角按钮先登录"
 
-#: templates/helpdesk/public_homepage.html:82
 #: templates/helpdesk/public_view_form.html:15
 msgid "Your E-mail Address"
 msgstr "您的邮箱地址"
 
-#: templates/helpdesk/public_homepage.html:86
 #: templates/helpdesk/public_view_form.html:19
 msgid "View Ticket"
 msgstr "查看工单"

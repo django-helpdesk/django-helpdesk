@@ -33,7 +33,7 @@ class DirectTemplateView(TemplateView):
 app_name = 'helpdesk'
 
 urlpatterns = [
-    url(r'^dashboard/$',
+    url(r'^$',
         staff.dashboard,
         name='dashboard'),
 
@@ -147,10 +147,6 @@ urlpatterns = [
 ]
 
 urlpatterns += [
-    url(r'^$',
-        login_required(public.homepage),
-        name='home'),
-
     url(r'^view/$',
         login_required(public.view_ticket),
         name='public_view'),
