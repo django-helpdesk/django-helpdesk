@@ -25,6 +25,7 @@ except ImportError:
     from base64 import decodebytes as b64decode
 
 from django.conf import settings
+from django.core.files.storage import default_storage
 from django.db.models import Q
 from django.utils import six
 from django.utils.encoding import smart_text
@@ -124,15 +125,20 @@ def send_templated_mail(template_name,
     if files:
         for filename, filefield in files:
             mime = mimetypes.guess_type(filename)
+
+            # s3 storage does not support file paths,
+            # so we must use the file name instead.
+            filepath = filefield.name
+
             if mime[0] is not None and mime[0] == "text/plain":
-                with open(filefield.path, 'r') as attachedfile:
+                with default_storage.open(filepath, 'r') as attachedfile:
                     content = attachedfile.read()
                     msg.attach(filename, content)
             else:
                 if six.PY3:
-                    msg.attach_file(filefield.path)
+                    msg.attach_file(filepath)
                 else:
-                    with open(filefield.path, 'rb') as attachedfile:
+                    with default_storage.open(filepath, 'rb') as attachedfile:
                         content = attachedfile.read()
                         msg.attach(filename, content)
 
