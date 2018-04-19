@@ -557,11 +557,8 @@ class Ticket(models.Model):
         a URL to the submitter of a ticket.
         """
         from django.core.urlresolvers import reverse
-        return self._absolute_uri(u"%s?ticket=%s&email=%s" % (
-            reverse('helpdesk:public_view'),
-            self.ticket_for_url,
-            self.submitter_email
-        ))
+        return self._absolute_uri(
+            reverse('helpdesk:view', kwargs={'ticket_id': self.id}))
     ticket_url = property(_get_ticket_url)
 
     def _get_staff_url(self):
