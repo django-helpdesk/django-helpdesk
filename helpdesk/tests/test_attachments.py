@@ -60,7 +60,7 @@ class AttachmentIntegrationTests(TestCase):
         })
 
         # Ensure ticket form submits with attachment successfully
-        response = self.client.post(reverse('helpdesk:home'), post_data, follow=True)
+        response = self.client.post(reverse('helpdesk:dashboard'), post_data, follow=True)
         self.assertContains(response, test_file.name)
 
         # Ensure attachment is available with correct content
@@ -78,7 +78,7 @@ class AttachmentIntegrationTests(TestCase):
         })
 
         # Ensure ticket form submits with attachment successfully
-        response = self.client.post(reverse('helpdesk:home'), post_data, follow=True)
+        response = self.client.post(reverse('helpdesk:dashboard'), post_data, follow=True)
         self.assertContains(response, test_file.name)
 
         # Ensure attachment is available with correct content

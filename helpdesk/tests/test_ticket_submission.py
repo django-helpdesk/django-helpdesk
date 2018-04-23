@@ -44,7 +44,7 @@ class TicketBasicsTestCase(TestCase):
     def test_create_ticket_public(self):
         email_count = len(mail.outbox)
 
-        response = self.client.get(reverse('helpdesk:home'))
+        response = self.client.get(reverse('helpdesk:dashboard'))
         self.assertEqual(response.status_code, 200)
 
         post_data = {
@@ -55,7 +55,7 @@ class TicketBasicsTestCase(TestCase):
             'priority': 3,
         }
 
-        response = self.client.post(reverse('helpdesk:home'), post_data, follow=True)
+        response = self.client.post(reverse('helpdesk:dashboard'), post_data, follow=True)
         last_redirect = response.redirect_chain[-1]
         last_redirect_url = last_redirect[0]
         # last_redirect_status = last_redirect[1]
@@ -79,7 +79,7 @@ class TicketBasicsTestCase(TestCase):
             'priority': 3,
         }
 
-        response = self.client.post(reverse('helpdesk:home'), post_data)
+        response = self.client.post(reverse('helpdesk:dashboard'), post_data)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(email_count, len(mail.outbox))
         self.assertContains(response, 'Select a valid choice.')
@@ -108,7 +108,7 @@ class TicketBasicsTestCase(TestCase):
             'custom_textfield': 'This is my custom text.',
         }
 
-        response = self.client.post(reverse('helpdesk:home'), post_data, follow=True)
+        response = self.client.post(reverse('helpdesk:dashboard'), post_data, follow=True)
 
         custom_field_1.delete()
         last_redirect = response.redirect_chain[-1]

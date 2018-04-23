@@ -197,7 +197,7 @@ def delete_ticket(request, ticket_id):
         })
     else:
         ticket.delete()
-        return HttpResponseRedirect(reverse('helpdesk:home'))
+        return HttpResponseRedirect(reverse('helpdesk:dashboard'))
 
 
 delete_ticket = staff_member_required(delete_ticket)

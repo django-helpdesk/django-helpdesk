@@ -684,7 +684,6 @@ msgid " - Open dependencies"
 msgstr " - Открыты зависимости"
 
 #: models.py:571 models.py:627 models.py:1239 models.py:1413 models.py:1446
-#: templates/helpdesk/public_homepage.html:79
 #: templates/helpdesk/public_view_form.html:12
 msgid "Ticket"
 msgstr "Тикет"
@@ -1328,7 +1327,6 @@ msgstr "Создать тикет"
 
 #: templates/helpdesk/create_ticket.html:27
 #: templates/helpdesk/navigation.html:95 templates/helpdesk/navigation.html:98
-#: templates/helpdesk/public_homepage.html:28
 msgid "Submit a Ticket"
 msgstr "Создать тикет"
 
@@ -1339,7 +1337,6 @@ msgstr ""
 
 #: templates/helpdesk/create_ticket.html:31
 #: templates/helpdesk/edit_ticket.html:11
-#: templates/helpdesk/public_homepage.html:29
 msgid "Please provide as descriptive a title and description as possible."
 msgstr ""
 
@@ -1349,7 +1346,6 @@ msgid "(Optional)"
 msgstr "(Опционально)"
 
 #: templates/helpdesk/create_ticket.html:50
-#: templates/helpdesk/public_homepage.html:56
 msgid "Submit Ticket"
 msgstr "Отправить тикет"
 
@@ -1748,7 +1744,6 @@ msgid "Log In"
 msgstr "Войти"
 
 #: templates/helpdesk/public_change_language.html:2
-#: templates/helpdesk/public_homepage.html:74
 #: templates/helpdesk/public_view_form.html:4
 #: templates/helpdesk/public_view_ticket.html:3
 msgid "View a Ticket"
@@ -1758,29 +1753,23 @@ msgstr "Просмотреть тикет"
 msgid "Change the display language"
 msgstr "Изменение языка отображения"
 
-#: templates/helpdesk/public_homepage.html:7
 msgid "Knowledgebase Articles"
 msgstr "Категории Статей"
 
-#: templates/helpdesk/public_homepage.html:10
 msgid "Knowledgebase Categories"
 msgstr "Категории Базы Знаний"
 
-#: templates/helpdesk/public_homepage.html:29
 msgid "All fields are required."
 msgstr ""
 
-#: templates/helpdesk/public_homepage.html:67
 msgid "Please use button at upper right to login first."
 msgstr ""
 "Пожалуйста, используйте кнопку в правом верхнем углу для входа сначала."
 
-#: templates/helpdesk/public_homepage.html:83
 #: templates/helpdesk/public_view_form.html:15
 msgid "Your E-mail Address"
 msgstr "Ваш адрес электронной почты"
 
-#: templates/helpdesk/public_homepage.html:87
 #: templates/helpdesk/public_view_form.html:19
 msgid "View Ticket"
 msgstr "Просмотреть тикет"

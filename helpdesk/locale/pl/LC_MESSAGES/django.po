@@ -502,7 +502,6 @@ msgid " - On Hold"
 msgstr "- Wstrzymaj"
 
 #: models.py:481 models.py:1073 models.py:1231 models.py:1256
-#: templates/helpdesk/public_homepage.html:26
 #: templates/helpdesk/public_view_form.html:12
 msgid "Ticket"
 msgstr "Zgłoszenie"
@@ -672,7 +671,6 @@ msgid "Locale of this template."
 msgstr "Język tego szablonu"
 
 #: models.py:817 templates/helpdesk/kb_index.html:10
-#: templates/helpdesk/public_homepage.html:10
 msgid "Category"
 msgstr "Kategoria"
 
@@ -1070,7 +1068,6 @@ msgid "Create Ticket"
 msgstr "Utwórz zgłoszenie"
 
 #: templates/helpdesk/create_ticket.html:10
-#: templates/helpdesk/public_homepage.html:39
 msgid "Submit a Ticket"
 msgstr "Utwórz zgłoszenie"
 
@@ -1084,12 +1081,10 @@ msgstr "Postaraj się aby tytuł i opis dostarczały jak najwięcej informacji."
 
 #: templates/helpdesk/create_ticket.html:17
 #: templates/helpdesk/edit_ticket.html:19
-#: templates/helpdesk/public_homepage.html:50
 msgid "(Optional)"
 msgstr "(Opcjonalnie)"
 
 #: templates/helpdesk/create_ticket.html:26
-#: templates/helpdesk/public_homepage.html:59
 msgid "Submit Ticket"
 msgstr "Utwórz zgłoszenie"
 
@@ -1317,7 +1312,6 @@ msgid ""
 msgstr ""
 
 #: templates/helpdesk/kb_index.html:9
-#: templates/helpdesk/public_homepage.html:9
 msgid "Knowledgebase Categories"
 msgstr "Kategorie Bazy Wiedzy"
 
@@ -1415,7 +1409,6 @@ msgid "Log In"
 msgstr "Zaloguj się"
 
 #: templates/helpdesk/public_change_language.html:2
-#: templates/helpdesk/public_homepage.html:21
 #: templates/helpdesk/public_view_form.html:4
 #: templates/helpdesk/public_view_ticket.html:2
 msgid "View a Ticket"
@@ -1425,25 +1418,20 @@ msgstr "Wyświetl zgłoszenie"
 msgid "Change the display language"
 msgstr "Zmień wyświetlany język"
 
-#: templates/helpdesk/public_homepage.html:6
 msgid "Knowledgebase Articles"
 msgstr "Artykuły Bazy Wiedzy"
 
-#: templates/helpdesk/public_homepage.html:29
 #: templates/helpdesk/public_view_form.html:15
 msgid "Your E-mail Address"
 msgstr "Twój adres e-mail"
 
-#: templates/helpdesk/public_homepage.html:33
 #: templates/helpdesk/public_view_form.html:19
 msgid "View Ticket"
 msgstr "Wyświetl zgłoszenie"
 
-#: templates/helpdesk/public_homepage.html:41
 msgid "All fields are required."
 msgstr ""
 
-#: templates/helpdesk/public_homepage.html:67
 msgid "Please use button at upper right to login first."
 msgstr "Najpierw użyj przycisku w górnym prawym rogu aby się zalogować."
 
