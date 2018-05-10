@@ -332,7 +332,7 @@ def ticket_from_message(message, queue, logger):
                 return False
             return True
 
-    matchobj = re.match(r".*\[" + queue.slug + "-(?P<id>\d+)\]", subject)
+    matchobj = re.match(r".*\[" + queue.slug + r"-(?P<id>\d+)\]", subject)
     if matchobj:
         # This is a reply or forward.
         ticket = matchobj.group('id')
