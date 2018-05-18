@@ -561,9 +561,8 @@ def update_ticket(request, ticket_id, public=False):
         comment=f.comment,
     )
 
-    if public and (f.comment or (
-        f.new_status in (Ticket.RESOLVED_STATUS,
-                         Ticket.CLOSED_STATUS))):
+    if f.comment or (
+       f.new_status in (Ticket.RESOLVED_STATUS, Ticket.CLOSED_STATUS)):
         if f.new_status == Ticket.RESOLVED_STATUS:
             template = 'resolved_'
         elif f.new_status == Ticket.CLOSED_STATUS:
