@@ -1,4 +1,8 @@
+0.2.6+nimbis.14 (2018-05-18):
+
+    * Emails are now always sent to ticket subscribers when a ticket is
+      updated.
+
 0.2.6+nimbis.13 (2018-04-27):
 
     * Correct ticket URLs in outgoing email messages
-
