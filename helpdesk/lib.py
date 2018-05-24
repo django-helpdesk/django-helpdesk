@@ -31,7 +31,7 @@ from django.utils import six
 from django.utils.encoding import smart_text
 from django.utils.safestring import mark_safe
 
-from helpdesk.models import Attachment, EmailTemplate
+from helpdesk.models import Attachment
 
 logger = logging.getLogger('helpdesk')
 
