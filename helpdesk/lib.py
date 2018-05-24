@@ -30,6 +30,11 @@ from django.db.models import Q
 from django.utils import six
 from django.utils.encoding import smart_text
 from django.utils.safestring import mark_safe
+from django.core.mail import EmailMultiAlternatives
+from django.template import engines
+
+from helpdesk.settings import HELPDESK_EMAIL_SUBJECT_TEMPLATE, \
+    HELPDESK_EMAIL_FALLBACK_LOCALE
 
 logger = logging.getLogger('helpdesk')
 
@@ -67,13 +72,9 @@ def send_templated_mail(template_name,
         along with the File objects to be read. files can be blank.
 
     """
-    from django.core.mail import EmailMultiAlternatives
-    from django.template import engines
-    from_string = engines['django'].from_string
-
     from helpdesk.models import EmailTemplate
-    from helpdesk.settings import HELPDESK_EMAIL_SUBJECT_TEMPLATE, \
-        HELPDESK_EMAIL_FALLBACK_LOCALE
+
+    from_string = engines['django'].from_string
 
     locale = context['queue'].get('locale') or HELPDESK_EMAIL_FALLBACK_LOCALE
 
@@ -274,8 +275,6 @@ def text_is_spam(text, request):
     # This will return 'True' is the given text is deemed to be spam, or
     # False if it is not spam. If it cannot be checked for some reason, we
     # assume it isn't spam.
-    from django.contrib.sites.models import Site
-    from django.core.exceptions import ImproperlyConfigured
     try:
         from helpdesk.akismet import Akismet
     except ImportError:
