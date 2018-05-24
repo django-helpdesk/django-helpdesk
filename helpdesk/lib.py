@@ -79,12 +79,18 @@ def send_templated_mail(template_name,
     locale = context['queue'].get('locale') or HELPDESK_EMAIL_FALLBACK_LOCALE
 
     try:
-        t = EmailTemplate.objects.get(template_name__iexact=template_name, locale=locale)
+        t = EmailTemplate.objects.get(
+            template_name__iexact=template_name,
+            locale=locale)
     except EmailTemplate.DoesNotExist:
         try:
-            t = EmailTemplate.objects.get(template_name__iexact=template_name, locale__isnull=True)
+            t = EmailTemplate.objects.get(
+                template_name__iexact=template_name,
+                locale__isnull=True)
         except EmailTemplate.DoesNotExist:
-            logger.warning('template "%s" does not exist, no mail sent', template_name)
+            logger.warning(
+                'template "%s" does not exist, no mail sent',
+                template_name)
             return  # just ignore if template doesn't exist
 
     subject_part = from_string(
@@ -98,10 +104,14 @@ def send_templated_mail(template_name,
         "%s{%% include '%s' %%}" % (t.plain_text, footer_file)
     ).render(context)
 
-    email_html_base_file = os.path.join('helpdesk', locale, 'email_html_base.html')
+    email_html_base_file = os.path.join(
+        'helpdesk',
+        locale,
+        'email_html_base.html')
     # keep new lines in html emails
     if 'comment' in context:
-        context['comment'] = mark_safe(context['comment'].replace('\r\n', '<br>'))
+        context['comment'] = mark_safe(
+            context['comment'].replace('\r\n', '<br>'))
 
     html_part = from_string(
         "{%% extends '%s' %%}{%% block title %%}"
@@ -146,7 +156,9 @@ def send_templated_mail(template_name,
     try:
         return msg.send()
     except SMTPException as e:
-        logger.exception('SMTPException raised while sending email to {}'.format(recipients))
+        logger.exception(
+            'SMTPException raised while sending email to {}'.format(
+                recipients))
         if not fail_silently:
             raise e
         return 0
@@ -157,8 +169,8 @@ def query_to_dict(results, descriptions):
     Replacement method for cursor.dictfetchall() as that method no longer
     exists in psycopg2, and I'm guessing in other backends too.
 
-    Converts the results of a raw SQL query into a list of dictionaries, suitable
-    for use in templates etc.
+    Converts the results of a raw SQL query into a list of dictionaries,
+    suitable for use in templates etc.
     """
 
     output = []
@@ -272,7 +284,10 @@ def safe_template_context(ticket):
 def process_attachments(followup, attached_files):
     from helpdesk.models import Attachment
 
-    max_email_attachment_size = getattr(settings, 'MAX_EMAIL_ATTACHMENT_SIZE', 512000)
+    max_email_attachment_size = getattr(
+        settings,
+        'MAX_EMAIL_ATTACHMENT_SIZE',
+        512000)
     attachments = []
 
     for attached in attached_files:
