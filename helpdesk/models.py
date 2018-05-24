@@ -577,19 +577,13 @@ class Ticket(models.Model):
     def _absolute_uri(self, relative):
         """
         Returns an absolute URL for the given relative URL.  This will
-        use self.request, if available (using the same protocol and
-        domain as from the original request), otherwise will make a
-        best guess from the Site or else just a hard-coded domain.
+        make a best guess from the Site or else just a hard-coded domain.
         """
-        # If we have a request object, use it to construct the absolute URL
-        if self.request:
-            return self.request.build_absolute_uri(relative)
-        else:
-            try:
-                site = Site.objects.get_current()
-            except:
-                site = Site(domain='configure-django-sites.com')
-            return u"http://%s%s" % (site.domain, relative)
+        try:
+            site = Site.objects.get_current()
+        except:
+            site = Site(domain='configure-django-sites.com')
+        return u"http://%s%s" % (site.domain, relative)
 
     def _get_ticket_url(self):
         """
