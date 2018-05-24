@@ -31,8 +31,6 @@ from django.utils import six
 from django.utils.encoding import smart_text
 from django.utils.safestring import mark_safe
 
-from helpdesk.models import Attachment
-
 logger = logging.getLogger('helpdesk')
 
 
@@ -315,6 +313,8 @@ def text_is_spam(text, request):
 
 
 def process_attachments(followup, attached_files):
+    from helpdesk.models import Attachment
+
     max_email_attachment_size = getattr(settings, 'MAX_EMAIL_ATTACHMENT_SIZE', 512000)
     attachments = []
 
