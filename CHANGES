@@ -1,3 +1,10 @@
+0.2.6+nimbis.15 (2018-05-24):
+
+    * Correct ticket URLs in outgoing email messages whenever an existing
+      ticket is updated. There was still behavior in v0.2.6+nimbis.13 that
+      would cause these links to be broken in every case except for the case
+      of a new ticket.
+
 0.2.6+nimbis.14 (2018-05-18):
 
     * Emails are now always sent to ticket subscribers when a ticket is
