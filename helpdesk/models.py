@@ -8,14 +8,27 @@ models.py - Model (and hence database) definitions. This is the core of the
 """
 
 from __future__ import unicode_literals
+
+try:
+    import pickle
+except ImportError:
+    import cPickle as pickle
+import os
+
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.sites.models import Site
 from django.core.exceptions import ObjectDoesNotExist
-from django.db import models
-from django.conf import settings
+from django.core.urlresolvers import reverse
 from django.utils import timezone
+from django.utils.six import StringIO
 from django.utils.translation import ugettext_lazy as _, ugettext
 from django.utils.encoding import python_2_unicode_compatible
+from django.db import models
+from django.conf import settings
+
+from helpdesk.lib import b64encode, b64decode
+from helpdesk.settings import DEFAULT_USER_SETTINGS
 
 
 @python_2_unicode_compatible
@@ -540,7 +553,6 @@ class Ticket(models.Model):
         domain as from the original request), otherwise will make a
         best guess from the Site or else just a hard-coded domain.
         """
-        from django.contrib.sites.models import Site
         # If we have a request object, use it to construct the absolute URL
         if self.request:
             return self.request.build_absolute_uri(relative)
@@ -556,7 +568,6 @@ class Ticket(models.Model):
         Returns a publicly-viewable URL for this ticket, used when giving
         a URL to the submitter of a ticket.
         """
-        from django.core.urlresolvers import reverse
         return self._absolute_uri(
             reverse('helpdesk:view', kwargs={'ticket_id': self.id}))
     ticket_url = property(_get_ticket_url)
@@ -566,7 +577,6 @@ class Ticket(models.Model):
         Returns a staff-only URL for this ticket, used when giving a URL to
         a staff member (in emails etc)
         """
-        from django.core.urlresolvers import reverse
         return self._absolute_uri(reverse('helpdesk:view', args=[self.id]))
     staff_url = property(_get_staff_url)
 
@@ -591,7 +601,6 @@ class Ticket(models.Model):
         return '%s %s' % (self.id, self.title)
 
     def get_absolute_url(self):
-        from django.urls import reverse
         return reverse('helpdesk:view', args=(self.id,))
 
     def save(self, *args, **kwargs):
@@ -759,7 +768,6 @@ def attachment_path(instance, filename):
     Provide a file path that will help prevent files being overwritten, by
     putting attachments in a folder off attachments for ticket/followup_id/.
     """
-    import os
     os.umask(0)
     path = 'helpdesk/attachments/%s/%s' % (instance.followup.ticket.ticket_for_url, instance.followup.id)
     att_path = os.path.join(settings.MEDIA_ROOT, path)
@@ -980,7 +988,6 @@ class KBCategory(models.Model):
         verbose_name_plural = _('Knowledge base categories')
 
     def get_absolute_url(self):
-        from django.urls import reverse
         return reverse('helpdesk:kb_category', kwargs={'slug': self.slug})
 
 
@@ -1048,7 +1055,6 @@ class KBItem(models.Model):
         verbose_name_plural = _('Knowledge base items')
 
     def get_absolute_url(self):
-        from django.urls import reverse
         return reverse('helpdesk:kb_item', args=(self.id,))
 
 
@@ -1124,20 +1130,10 @@ class UserSettings(models.Model):
 
     def _set_settings(self, data):
         # data should always be a Python dictionary.
-        try:
-            import pickle
-        except ImportError:
-            import cPickle as pickle
-        from helpdesk.lib import b64encode
         self.settings_pickled = b64encode(pickle.dumps(data))
 
     def _get_settings(self):
         # return a python dictionary representing the pickled data.
-        try:
-            import pickle
-        except ImportError:
-            import cPickle as pickle
-        from helpdesk.lib import b64decode
         try:
             return pickle.loads(b64decode(str(self.settings_pickled)))
         except pickle.UnpicklingError:
@@ -1162,7 +1158,6 @@ def create_usersettings(sender, instance, created, **kwargs):
     If we end up with users with no UserSettings, then we get horrible
     'DoesNotExist: UserSettings matching query does not exist.' errors.
     """
-    from helpdesk.settings import DEFAULT_USER_SETTINGS
     if created:
         UserSettings.objects.create(user=instance, settings=DEFAULT_USER_SETTINGS)
 
@@ -1412,7 +1407,6 @@ class CustomField(models.Model):
     )
 
     def _choices_as_array(self):
-        from django.utils.six import StringIO
         valuebuffer = StringIO(self.list_values)
         choices = [[item.strip(), item.strip()] for item in valuebuffer.readlines()]
         valuebuffer.close()
