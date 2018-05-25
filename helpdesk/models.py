@@ -18,7 +18,7 @@ import os
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, ImproperlyConfigured
 from django.core.urlresolvers import reverse
 from django.utils import timezone
 from django.utils.six import StringIO
@@ -582,7 +582,9 @@ class Ticket(models.Model):
         try:
             site = Site.objects.get_current()
         except:
-            site = Site(domain='configure-django-sites.com')
+            raise ImproperlyConfigured(
+                "The Django sites framework must be configured in order for "
+                "django-helpdesk to build absolute URLs.")
         return u"http://%s%s" % (site.domain, relative)
 
     def _get_ticket_url(self):
