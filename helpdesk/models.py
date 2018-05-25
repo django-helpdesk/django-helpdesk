@@ -8,14 +8,27 @@ models.py - Model (and hence database) definitions. This is the core of the
 """
 
 from __future__ import unicode_literals
+
+try:
+    import pickle
+except ImportError:
+    import cPickle as pickle
+import os
+
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import ObjectDoesNotExist
-from django.db import models
-from django.conf import settings
+from django.contrib.sites.models import Site
+from django.core.exceptions import ObjectDoesNotExist, ImproperlyConfigured
+from django.core.urlresolvers import reverse
 from django.utils import timezone
+from django.utils.six import StringIO
 from django.utils.translation import ugettext_lazy as _, ugettext
 from django.utils.encoding import python_2_unicode_compatible
+from django.db import models
+from django.conf import settings
+
+from helpdesk.lib import b64encode, b64decode
+from helpdesk.settings import DEFAULT_USER_SETTINGS
 
 
 @python_2_unicode_compatible
@@ -47,8 +60,8 @@ class Queue(models.Model):
         blank=True,
         null=True,
         help_text=_('All outgoing e-mails for this queue will use this e-mail '
-                    'address. If you use IMAP or POP3, this should be the e-mail '
-                    'address for that mailbox.'),
+                    'address. If you use IMAP or POP3, this should be the '
+                    'e-mail address for that mailbox.'),
     )
 
     locale = models.CharField(
@@ -64,23 +77,25 @@ class Queue(models.Model):
         _('Allow Public Submission?'),
         blank=True,
         default=False,
-        help_text=_('Should this queue be listed on the public submission form?'),
+        help_text=_(
+            'Should this queue be listed on the public submission form?'),
     )
 
     allow_email_submission = models.BooleanField(
         _('Allow E-Mail Submission?'),
         blank=True,
         default=False,
-        help_text=_('Do you want to poll the e-mail box below for new '
-                    'tickets?'),
+        help_text=_(
+            'Do you want to poll the e-mail box below for new tickets?'),
     )
 
     escalate_days = models.IntegerField(
         _('Escalation Days'),
         blank=True,
         null=True,
-        help_text=_('For tickets which are not held, how often do you wish to '
-                    'increase their priority? Set to 0 for no escalation.'),
+        help_text=_(
+            'For tickets which are not held, how often do you wish to '
+            'increase their priority? Set to 0 for no escalation.'),
     )
 
     new_ticket_cc = models.CharField(
@@ -88,9 +103,10 @@ class Queue(models.Model):
         blank=True,
         null=True,
         max_length=200,
-        help_text=_('If an e-mail address is entered here, then it will '
-                    'receive notification of all new tickets created for this queue. '
-                    'Enter a comma between multiple e-mail addresses.'),
+        help_text=_(
+            'If an e-mail address is entered here, then it will '
+            'receive notification of all new tickets created for this queue. '
+            'Enter a comma between multiple e-mail addresses.'),
     )
 
     updated_ticket_cc = models.CharField(
@@ -98,21 +114,26 @@ class Queue(models.Model):
         blank=True,
         null=True,
         max_length=200,
-        help_text=_('If an e-mail address is entered here, then it will '
-                    'receive notification of all activity (new tickets, closed '
-                    'tickets, updates, reassignments, etc) for this queue. Separate '
-                    'multiple addresses with a comma.'),
+        help_text=_(
+            'If an e-mail address is entered here, then it will '
+            'receive notification of all activity (new tickets, closed '
+            'tickets, updates, reassignments, etc) for this queue. Separate '
+            'multiple addresses with a comma.'),
     )
 
     email_box_type = models.CharField(
         _('E-Mail Box Type'),
         max_length=5,
-        choices=(('pop3', _('POP 3')), ('imap', _('IMAP')), ('local', _('Local Directory'))),
+        choices=(
+            ('pop3', _('POP 3')),
+            ('imap', _('IMAP')),
+            ('local', _('Local Directory'))),
         blank=True,
         null=True,
-        help_text=_('E-Mail server type for creating tickets automatically '
-                    'from a mailbox - both POP3 and IMAP are supported, as well as '
-                    'reading from a local directory.'),
+        help_text=_(
+            'E-Mail server type for creating tickets automatically '
+            'from a mailbox - both POP3 and IMAP are supported, as well as '
+            'reading from a local directory.'),
     )
 
     email_box_host = models.CharField(
@@ -120,25 +141,28 @@ class Queue(models.Model):
         max_length=200,
         blank=True,
         null=True,
-        help_text=_('Your e-mail server address - either the domain name or '
-                    'IP address. May be "localhost".'),
+        help_text=_(
+            'Your e-mail server address - either the domain name or '
+            'IP address. May be "localhost".'),
     )
 
     email_box_port = models.IntegerField(
         _('E-Mail Port'),
         blank=True,
         null=True,
-        help_text=_('Port number to use for accessing e-mail. Default for '
-                    'POP3 is "110", and for IMAP is "143". This may differ on some '
-                    'servers. Leave it blank to use the defaults.'),
+        help_text=_(
+            'Port number to use for accessing e-mail. Default for '
+            'POP3 is "110", and for IMAP is "143". This may differ on some '
+            'servers. Leave it blank to use the defaults.'),
     )
 
     email_box_ssl = models.BooleanField(
         _('Use SSL for E-Mail?'),
         blank=True,
         default=False,
-        help_text=_('Whether to use SSL for IMAP or POP3 - the default ports '
-                    'when using SSL are 993 for IMAP and 995 for POP3.'),
+        help_text=_(
+            'Whether to use SSL for IMAP or POP3 - the default ports '
+            'when using SSL are 993 for IMAP and 995 for POP3.'),
     )
 
     email_box_user = models.CharField(
@@ -162,10 +186,11 @@ class Queue(models.Model):
         max_length=100,
         blank=True,
         null=True,
-        help_text=_('If using IMAP, what folder do you wish to fetch messages '
-                    'from? This allows you to use one IMAP account for multiple '
-                    'queues, by filtering messages on your IMAP server into separate '
-                    'folders. Default: INBOX.'),
+        help_text=_(
+            'If using IMAP, what folder do you wish to fetch messages '
+            'from? This allows you to use one IMAP account for multiple '
+            'queues, by filtering messages on your IMAP server into separate '
+            'folders. Default: INBOX.'),
     )
 
     email_box_local_dir = models.CharField(
@@ -173,14 +198,17 @@ class Queue(models.Model):
         max_length=200,
         blank=True,
         null=True,
-        help_text=_('If using a local directory, what directory path do you '
-                    'wish to poll for new email? '
-                    'Example: /var/lib/mail/helpdesk/'),
+        help_text=_(
+            'If using a local directory, what directory path do you '
+            'wish to poll for new email? '
+            'Example: /var/lib/mail/helpdesk/'),
     )
 
     permission_name = models.CharField(
         _('Django auth permission name'),
-        max_length=72,  # based on prepare_permission_name() pre-pending chars to slug
+        # max_length based on prepare_permission_name() pre-pending chars
+        # to slug
+        max_length=72,
         blank=True,
         null=True,
         editable=False,
@@ -189,7 +217,8 @@ class Queue(models.Model):
 
     email_box_interval = models.IntegerField(
         _('E-Mail Check Interval'),
-        help_text=_('How often do you wish to check this mailbox? (in Minutes)'),
+        help_text=_(
+            'How often do you wish to check this mailbox? (in Minutes)'),
         blank=True,
         null=True,
         default='5',
@@ -208,7 +237,9 @@ class Queue(models.Model):
         choices=(('socks4', _('SOCKS4')), ('socks5', _('SOCKS5'))),
         blank=True,
         null=True,
-        help_text=_('SOCKS4 or SOCKS5 allows you to proxy your connections through a SOCKS server.'),
+        help_text=_(
+            'SOCKS4 or SOCKS5 allows you to proxy your connections '
+            'through a SOCKS server.'),
     )
 
     socks_proxy_host = models.GenericIPAddressField(
@@ -222,7 +253,8 @@ class Queue(models.Model):
         _('Socks Proxy Port'),
         blank=True,
         null=True,
-        help_text=_('Socks proxy port number. Default: 9150 (default TOR port)'),
+        help_text=_(
+            'Socks proxy port number. Default: 9150 (default TOR port)'),
     )
 
     logging_type = models.CharField(
@@ -238,9 +270,10 @@ class Queue(models.Model):
         ),
         blank=True,
         null=True,
-        help_text=_('Set the default logging level. All messages at that '
-                    'level or above will be logged to the directory set '
-                    'below. If no level is set, logging will be disabled.'),
+        help_text=_(
+            'Set the default logging level. All messages at that '
+            'level or above will be logged to the directory set '
+            'below. If no level is set, logging will be disabled.'),
     )
 
     logging_dir = models.CharField(
@@ -248,9 +281,10 @@ class Queue(models.Model):
         max_length=200,
         blank=True,
         null=True,
-        help_text=_('If logging is enabled, what directory should we use to '
-                    'store log files for this queue? '
-                    'If no directory is set, default to /var/log/helpdesk/'),
+        help_text=_(
+            'If logging is enabled, what directory should we use to '
+            'store log files for this queue? '
+            'If no directory is set, default to /var/log/helpdesk/'),
     )
 
     default_owner = models.ForeignKey(
@@ -277,14 +311,19 @@ class Queue(models.Model):
         in the sender name field, so hopefully the admin can see and fix it.
         """
         if not self.email_address:
-            return u'NO QUEUE EMAIL ADDRESS DEFINED <%s>' % settings.DEFAULT_FROM_EMAIL
+            return u'NO QUEUE EMAIL ADDRESS DEFINED {}'.format(
+                settings.DEFAULT_FROM_EMAIL)
         else:
             return u'%s <%s>' % (self.title, self.email_address)
     from_address = property(_from_address)
 
     def prepare_permission_name(self):
-        """Prepare internally the codename for the permission and store it in permission_name.
-        :return: The codename that can be used to create a new Permission object.
+        """
+        Prepare internally the codename for the permission and store it
+        in permission_name.
+
+        :return: The codename that can be used to create a new Permission
+        object.
         """
         # Prepare the permission associated to this Queue
         basename = "queue_access_%s" % self.slug
@@ -430,7 +469,8 @@ class Ticket(models.Model):
         _('On Hold'),
         blank=True,
         default=False,
-        help_text=_('If a ticket is on hold, it will not automatically be escalated.'),
+        help_text=_(
+            'If a ticket is on hold, it will not automatically be escalated.'),
     )
 
     description = models.TextField(
@@ -465,8 +505,9 @@ class Ticket(models.Model):
         blank=True,
         null=True,
         editable=False,
-        help_text=_('The date this ticket was last escalated - updated '
-                    'automatically by management/commands/escalate_tickets.py.'),
+        help_text=_(
+            'The date this ticket was last escalated - updated '
+            'automatically by management/commands/escalate_tickets.py.'),
     )
 
     viewable_globally = models.BooleanField(
@@ -536,27 +577,21 @@ class Ticket(models.Model):
     def _absolute_uri(self, relative):
         """
         Returns an absolute URL for the given relative URL.  This will
-        use self.request, if available (using the same protocol and
-        domain as from the original request), otherwise will make a
-        best guess from the Site or else just a hard-coded domain.
+        make a best guess from the Site or else just a hard-coded domain.
         """
-        from django.contrib.sites.models import Site
-        # If we have a request object, use it to construct the absolute URL
-        if self.request:
-            return self.request.build_absolute_uri(relative)
-        else:
-            try:
-                site = Site.objects.get_current()
-            except:
-                site = Site(domain='configure-django-sites.com')
-            return u"http://%s%s" % (site.domain, relative)
+        try:
+            site = Site.objects.get_current()
+        except:
+            raise ImproperlyConfigured(
+                "The Django sites framework must be configured in order for "
+                "django-helpdesk to build absolute URLs.")
+        return u"http://%s%s" % (site.domain, relative)
 
     def _get_ticket_url(self):
         """
         Returns a publicly-viewable URL for this ticket, used when giving
         a URL to the submitter of a ticket.
         """
-        from django.core.urlresolvers import reverse
         return self._absolute_uri(
             reverse('helpdesk:view', kwargs={'ticket_id': self.id}))
     ticket_url = property(_get_ticket_url)
@@ -566,7 +601,6 @@ class Ticket(models.Model):
         Returns a staff-only URL for this ticket, used when giving a URL to
         a staff member (in emails etc)
         """
-        from django.core.urlresolvers import reverse
         return self._absolute_uri(reverse('helpdesk:view', args=[self.id]))
     staff_url = property(_get_staff_url)
 
@@ -591,7 +625,6 @@ class Ticket(models.Model):
         return '%s %s' % (self.id, self.title)
 
     def get_absolute_url(self):
-        from django.urls import reverse
         return reverse('helpdesk:view', args=(self.id,))
 
     def save(self, *args, **kwargs):
@@ -666,8 +699,9 @@ class FollowUp(models.Model):
         _('Public'),
         blank=True,
         default=False,
-        help_text=_('Public tickets are viewable by the submitter and all '
-                    'staff, but non-public tickets can only be seen by staff.'),
+        help_text=_(
+            'Public tickets are viewable by the submitter and all '
+            'staff, but non-public tickets can only be seen by staff.'),
     )
 
     user = models.ForeignKey(
@@ -743,10 +777,9 @@ class TicketChange(models.Model):
         elif not self.old_value:
             out += ugettext('set to %s') % self.new_value
         else:
-            out += ugettext('changed from "%(old_value)s" to "%(new_value)s"') % {
-                'old_value': self.old_value,
-                'new_value': self.new_value
-            }
+            out += ugettext('changed from "{0}" to "{1}"').format(
+                self.old_value,
+                self.new_value)
         return out
 
     class Meta:
@@ -759,11 +792,13 @@ def attachment_path(instance, filename):
     Provide a file path that will help prevent files being overwritten, by
     putting attachments in a folder off attachments for ticket/followup_id/.
     """
-    import os
     os.umask(0)
-    path = 'helpdesk/attachments/%s/%s' % (instance.followup.ticket.ticket_for_url, instance.followup.id)
+    path = 'helpdesk/attachments/{0}/{1}'.format(
+        instance.followup.ticket.ticket_for_url,
+        instance.followup.id)
     att_path = os.path.join(settings.MEDIA_ROOT, path)
-    if settings.DEFAULT_FILE_STORAGE == "django.core.files.storage.FileSystemStorage":
+    if (settings.DEFAULT_FILE_STORAGE ==
+            "django.core.files.storage.FileSystemStorage"):
         if not os.path.exists(att_path):
             os.makedirs(att_path, 0o777)
     return os.path.join(path, filename)
@@ -816,13 +851,14 @@ class Attachment(models.Model):
 class PreSetReply(models.Model):
     """
     We can allow the admin to define a number of pre-set replies, used to
-    simplify the sending of updates and resolutions. These are basically Django
-    templates with a limited context - however if you wanted to get crafy it would
-    be easy to write a reply that displays ALL updates in hierarchical order etc
-    with use of for loops over {{ ticket.followup_set.all }} and friends.
+    simplify the sending of updates and resolutions. These are basically
+    Django templates with a limited context - however if you wanted to get
+    crafy it would be easy to write a reply that displays ALL updates in
+    hierarchical order etc with use of for loops over
+    {{ ticket.followup_set.all }} and friends.
 
-    When replying to a ticket, the user can select any reply set for the current
-    queue, and the body text is fetched via AJAX.
+    When replying to a ticket, the user can select any reply set for the
+    current queue, and the body text is fetched via AJAX.
     """
     class Meta:
         ordering = ('name',)
@@ -832,8 +868,9 @@ class PreSetReply(models.Model):
     queues = models.ManyToManyField(
         Queue,
         blank=True,
-        help_text=_('Leave blank to allow this reply to be used for all '
-                    'queues, or select those queues you wish to limit this reply to.'),
+        help_text=_(
+            'Leave blank to allow this reply to be used for all '
+            'queues, or select those queues you wish to limit this reply to.'),
     )
 
     name = models.CharField(
@@ -845,9 +882,10 @@ class PreSetReply(models.Model):
 
     body = models.TextField(
         _('Body'),
-        help_text=_('Context available: {{ ticket }} - ticket object (eg '
-                    '{{ ticket.title }}); {{ queue }} - The queue; and {{ user }} '
-                    '- the current user.'),
+        help_text=_(
+            'Context available: {{ ticket }} - ticket object (eg '
+            '{{ ticket.title }}); {{ queue }} - The queue; and {{ user }} '
+            '- the current user.'),
     )
 
     def __str__(self):
@@ -869,8 +907,9 @@ class EscalationExclusion(models.Model):
     queues = models.ManyToManyField(
         Queue,
         blank=True,
-        help_text=_('Leave blank for this exclusion to be applied to all queues, '
-                    'or select those queues you wish to exclude with this entry.'),
+        help_text=_(
+            'Leave blank for this exclusion to be applied to all queues, '
+            'or select those queues you wish to exclude with this entry.'),
     )
 
     name = models.CharField(
@@ -909,17 +948,19 @@ class EmailTemplate(models.Model):
     subject = models.CharField(
         _('Subject'),
         max_length=100,
-        help_text=_('This will be prefixed with "[ticket.ticket] ticket.title"'
-                    '. We recommend something simple such as "(Updated") or "(Closed)"'
-                    ' - the same context is available as in plain_text, below.'),
+        help_text=_(
+            'This will be prefixed with "[ticket.ticket] ticket.title"'
+            '. We recommend something simple such as "(Updated") or "(Closed)"'
+            ' - the same context is available as in plain_text, below.'),
     )
 
     heading = models.CharField(
         _('Heading'),
         max_length=100,
-        help_text=_('In HTML e-mails, this will be the heading at the top of '
-                    'the email - the same context is available as in plain_text, '
-                    'below.'),
+        help_text=_(
+            'In HTML e-mails, this will be the heading at the top of '
+            'the email - the same context is available as in plain_text, '
+            'below.'),
     )
 
     plain_text = models.TextField(
@@ -931,7 +972,8 @@ class EmailTemplate(models.Model):
 
     html = models.TextField(
         _('HTML'),
-        help_text=_('The same context is available here as in plain_text, above.'),
+        help_text=_(
+            'The same context is available here as in plain_text, above.'),
     )
 
     locale = models.CharField(
@@ -980,7 +1022,6 @@ class KBCategory(models.Model):
         verbose_name_plural = _('Knowledge base categories')
 
     def get_absolute_url(self):
-        from django.urls import reverse
         return reverse('helpdesk:kb_category', kwargs={'slug': self.slug})
 
 
@@ -1023,7 +1064,8 @@ class KBItem(models.Model):
 
     last_updated = models.DateTimeField(
         _('Last Updated'),
-        help_text=_('The date on which this question was most recently changed.'),
+        help_text=_(
+            'The date on which this question was most recently changed.'),
         blank=True,
     )
 
@@ -1048,7 +1090,6 @@ class KBItem(models.Model):
         verbose_name_plural = _('Knowledge base items')
 
     def get_absolute_url(self):
-        from django.urls import reverse
         return reverse('helpdesk:kb_item', args=(self.id,))
 
 
@@ -1106,7 +1147,8 @@ class UserSettings(models.Model):
     as notification preferences and other things that should probably be
     configurable.
 
-    We should always refer to user.usersettings_helpdesk.settings['setting_name'].
+    We should always refer to
+    user.usersettings_helpdesk.settings['setting_name'].
     """
 
     user = models.OneToOneField(
@@ -1116,28 +1158,19 @@ class UserSettings(models.Model):
 
     settings_pickled = models.TextField(
         _('Settings Dictionary'),
-        help_text=_('This is a base64-encoded representation of a pickled Python dictionary. '
-                    'Do not change this field via the admin.'),
+        help_text=_(
+            'This is a base64-encoded representation of a pickled Python '
+            'dictionary. Do not change this field via the admin.'),
         blank=True,
         null=True,
     )
 
     def _set_settings(self, data):
         # data should always be a Python dictionary.
-        try:
-            import pickle
-        except ImportError:
-            import cPickle as pickle
-        from helpdesk.lib import b64encode
         self.settings_pickled = b64encode(pickle.dumps(data))
 
     def _get_settings(self):
         # return a python dictionary representing the pickled data.
-        try:
-            import pickle
-        except ImportError:
-            import cPickle as pickle
-        from helpdesk.lib import b64decode
         try:
             return pickle.loads(b64decode(str(self.settings_pickled)))
         except pickle.UnpicklingError:
@@ -1162,12 +1195,15 @@ def create_usersettings(sender, instance, created, **kwargs):
     If we end up with users with no UserSettings, then we get horrible
     'DoesNotExist: UserSettings matching query does not exist.' errors.
     """
-    from helpdesk.settings import DEFAULT_USER_SETTINGS
     if created:
-        UserSettings.objects.create(user=instance, settings=DEFAULT_USER_SETTINGS)
+        UserSettings.objects.create(
+            user=instance,
+            settings=DEFAULT_USER_SETTINGS)
 
 
-models.signals.post_save.connect(create_usersettings, sender=settings.AUTH_USER_MODEL)
+models.signals.post_save.connect(
+    create_usersettings,
+    sender=settings.AUTH_USER_MODEL)
 
 
 @python_2_unicode_compatible
@@ -1184,8 +1220,9 @@ class IgnoreEmail(models.Model):
     queues = models.ManyToManyField(
         Queue,
         blank=True,
-        help_text=_('Leave blank for this e-mail to be ignored on all queues, '
-                    'or select those queues you wish to ignore this e-mail for.'),
+        help_text=_(
+            'Leave blank for this e-mail to be ignored on all queues, '
+            'or select those queues you wish to ignore this e-mail for.'),
     )
 
     name = models.CharField(
@@ -1211,8 +1248,9 @@ class IgnoreEmail(models.Model):
         _('Save Emails in Mailbox?'),
         blank=True,
         default=False,
-        help_text=_('Do you want to save emails from this address in the mailbox? '
-                    'If this is unticked, emails from this address will be deleted.'),
+        help_text=_(
+            'Do you want to save emails from this address in the mailbox? '
+            'If this is unticked, emails from this address will be deleted.'),
     )
 
     def __str__(self):
@@ -1325,7 +1363,8 @@ class TicketCC(models.Model):
 class CustomFieldManager(models.Manager):
 
     def get_queryset(self):
-        return super(CustomFieldManager, self).get_queryset().order_by('ordering')
+        return super(CustomFieldManager, self).get_queryset().order_by(
+            'ordering')
 
 
 @python_2_unicode_compatible
@@ -1336,8 +1375,10 @@ class CustomField(models.Model):
 
     name = models.SlugField(
         _('Field Name'),
-        help_text=_('As used in the database and behind the scenes. '
-                    'Must be unique and consist of only lowercase letters with no punctuation.'),
+        help_text=_(
+            'As used in the database and behind the scenes. '
+            'Must be unique and consist of only lowercase letters with no '
+            'punctuation.'),
         unique=True,
     )
 
@@ -1393,8 +1434,9 @@ class CustomField(models.Model):
     empty_selection_list = models.BooleanField(
         _('Add empty first choice to List?'),
         default=False,
-        help_text=_('Only for List: adds an empty first entry to the choices list, '
-                    'which enforces that the user makes an active choice.'),
+        help_text=_(
+            'Only for List: adds an empty first entry to the choices list, '
+            'which enforces that the user makes an active choice.'),
     )
 
     list_values = models.TextField(
@@ -1406,15 +1448,17 @@ class CustomField(models.Model):
 
     ordering = models.IntegerField(
         _('Ordering'),
-        help_text=_('Lower numbers are displayed first; higher numbers are listed later'),
+        help_text=_(
+            'Lower numbers are displayed first; higher numbers are listed '
+            'later'),
         blank=True,
         null=True,
     )
 
     def _choices_as_array(self):
-        from django.utils.six import StringIO
         valuebuffer = StringIO(self.list_values)
-        choices = [[item.strip(), item.strip()] for item in valuebuffer.readlines()]
+        choices = [
+            [item.strip(), item.strip()] for item in valuebuffer.readlines()]
         valuebuffer.close()
         return choices
     choices_as_array = property(_choices_as_array)
@@ -1470,9 +1514,10 @@ class TicketCustomFieldValue(models.Model):
 @python_2_unicode_compatible
 class TicketDependency(models.Model):
     """
-    The ticket identified by `ticket` cannot be resolved until the ticket in `depends_on` has been resolved.
-    To help enforce this, a helper function `can_be_resolved` on each Ticket instance checks that
-    these have all been resolved.
+    The ticket identified by `ticket` cannot be resolved until the ticket in
+    `depends_on` has been resolved. To help enforce this, a helper function
+    `can_be_resolved` on each Ticket instance checks that these have all been
+    resolved.
     """
     class Meta:
         unique_together = (('ticket', 'depends_on'),)

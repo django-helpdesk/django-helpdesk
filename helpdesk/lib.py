@@ -30,8 +30,11 @@ from django.db.models import Q
 from django.utils import six
 from django.utils.encoding import smart_text
 from django.utils.safestring import mark_safe
+from django.core.mail import EmailMultiAlternatives
+from django.template import engines
 
-from helpdesk.models import Attachment, EmailTemplate
+from helpdesk.settings import HELPDESK_EMAIL_SUBJECT_TEMPLATE, \
+    HELPDESK_EMAIL_FALLBACK_LOCALE
 
 logger = logging.getLogger('helpdesk')
 
@@ -69,23 +72,25 @@ def send_templated_mail(template_name,
         along with the File objects to be read. files can be blank.
 
     """
-    from django.core.mail import EmailMultiAlternatives
-    from django.template import engines
-    from_string = engines['django'].from_string
-
     from helpdesk.models import EmailTemplate
-    from helpdesk.settings import HELPDESK_EMAIL_SUBJECT_TEMPLATE, \
-        HELPDESK_EMAIL_FALLBACK_LOCALE
+
+    from_string = engines['django'].from_string
 
     locale = context['queue'].get('locale') or HELPDESK_EMAIL_FALLBACK_LOCALE
 
     try:
-        t = EmailTemplate.objects.get(template_name__iexact=template_name, locale=locale)
+        t = EmailTemplate.objects.get(
+            template_name__iexact=template_name,
+            locale=locale)
     except EmailTemplate.DoesNotExist:
         try:
-            t = EmailTemplate.objects.get(template_name__iexact=template_name, locale__isnull=True)
+            t = EmailTemplate.objects.get(
+                template_name__iexact=template_name,
+                locale__isnull=True)
         except EmailTemplate.DoesNotExist:
-            logger.warning('template "%s" does not exist, no mail sent', template_name)
+            logger.warning(
+                'template "%s" does not exist, no mail sent',
+                template_name)
             return  # just ignore if template doesn't exist
 
     subject_part = from_string(
@@ -99,10 +104,14 @@ def send_templated_mail(template_name,
         "%s{%% include '%s' %%}" % (t.plain_text, footer_file)
     ).render(context)
 
-    email_html_base_file = os.path.join('helpdesk', locale, 'email_html_base.html')
+    email_html_base_file = os.path.join(
+        'helpdesk',
+        locale,
+        'email_html_base.html')
     # keep new lines in html emails
     if 'comment' in context:
-        context['comment'] = mark_safe(context['comment'].replace('\r\n', '<br>'))
+        context['comment'] = mark_safe(
+            context['comment'].replace('\r\n', '<br>'))
 
     html_part = from_string(
         "{%% extends '%s' %%}{%% block title %%}"
@@ -147,7 +156,9 @@ def send_templated_mail(template_name,
     try:
         return msg.send()
     except SMTPException as e:
-        logger.exception('SMTPException raised while sending email to {}'.format(recipients))
+        logger.exception(
+            'SMTPException raised while sending email to {}'.format(
+                recipients))
         if not fail_silently:
             raise e
         return 0
@@ -158,8 +169,8 @@ def query_to_dict(results, descriptions):
     Replacement method for cursor.dictfetchall() as that method no longer
     exists in psycopg2, and I'm guessing in other backends too.
 
-    Converts the results of a raw SQL query into a list of dictionaries, suitable
-    for use in templates etc.
+    Converts the results of a raw SQL query into a list of dictionaries,
+    suitable for use in templates etc.
     """
 
     output = []
@@ -270,52 +281,13 @@ def safe_template_context(ticket):
     return context
 
 
-def text_is_spam(text, request):
-    # Based on a blog post by 'sciyoshi':
-    # http://sciyoshi.com/blog/2008/aug/27/using-akismet-djangos-new-comments-framework/
-    # This will return 'True' is the given text is deemed to be spam, or
-    # False if it is not spam. If it cannot be checked for some reason, we
-    # assume it isn't spam.
-    from django.contrib.sites.models import Site
-    from django.core.exceptions import ImproperlyConfigured
-    try:
-        from helpdesk.akismet import Akismet
-    except ImportError:
-        return False
-    try:
-        site = Site.objects.get_current()
-    except ImproperlyConfigured:
-        site = Site(domain='configure-django-sites.com')
-
-    ak = Akismet(
-        blog_url='http://%s/' % site.domain,
-        agent='django-helpdesk',
-    )
-
-    if hasattr(settings, 'TYPEPAD_ANTISPAM_API_KEY'):
-        ak.setAPIKey(key=settings.TYPEPAD_ANTISPAM_API_KEY)
-        ak.baseurl = 'api.antispam.typepad.com/1.1/'
-    elif hasattr(settings, 'AKISMET_API_KEY'):
-        ak.setAPIKey(key=settings.AKISMET_API_KEY)
-    else:
-        return False
-
-    if ak.verify_key():
-        ak_data = {
-            'user_ip': request.META.get('REMOTE_ADDR', '127.0.0.1'),
-            'user_agent': request.META.get('HTTP_USER_AGENT', ''),
-            'referrer': request.META.get('HTTP_REFERER', ''),
-            'comment_type': 'comment',
-            'comment_author': '',
-        }
-
-        return ak.comment_check(smart_text(text), data=ak_data)
-
-    return False
-
-
 def process_attachments(followup, attached_files):
-    max_email_attachment_size = getattr(settings, 'MAX_EMAIL_ATTACHMENT_SIZE', 512000)
+    from helpdesk.models import Attachment
+
+    max_email_attachment_size = getattr(
+        settings,
+        'MAX_EMAIL_ATTACHMENT_SIZE',
+        512000)
     attachments = []
 
     for attached in attached_files:
