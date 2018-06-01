@@ -30,4 +30,9 @@
 {% include 'helpdesk/include/tickets.html' with ticket_list=user_tickets_closed_resolved ticket_list_empty_message="" %}
 {% endif %}
 
+{% if tickets_closed %}
+{% trans "Closed Tickets" as ticket_list_caption %}
+{% include 'helpdesk/include/tickets.html' with ticket_list=tickets_closed ticket_list_empty_message="" %}
+{% endif %}
+
 {% endblock %}
