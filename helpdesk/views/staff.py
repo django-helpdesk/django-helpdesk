@@ -115,6 +115,10 @@ def dashboard(request):
         assigned_to=request.user,
         status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS])
 
+    # closed tickets
+    tickets_closed = Ticket.objects.select_related('queue').filter(
+        status__in=[Ticket.CLOSED_STATUS])
+
     user_queues = _get_user_queues(request.user)
 
     unassigned_tickets = Ticket.objects.select_related('queue').filter(
@@ -174,6 +178,7 @@ def dashboard(request):
     return render(request, 'helpdesk/dashboard.html', {
         'user_tickets': tickets,
         'user_tickets_closed_resolved': tickets_closed_resolved,
+        'tickets_closed': tickets_closed,
         'unassigned_tickets': unassigned_tickets,
         'all_tickets_reported_by_current_user': all_tickets_reported_by_current_user,
         'global_tickets': global_tickets,
