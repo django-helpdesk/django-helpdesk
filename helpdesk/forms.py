@@ -247,9 +247,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
                 context,
                 recipients=ticket.submitter_email,
                 sender=queue.from_address,
-                fail_silently=True,
-                files=files,
-            )
+                fail_silently=True)
             messages_sent_to.append(ticket.submitter_email)
 
         if ticket.assigned_to and \
@@ -262,9 +260,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
                 context,
                 recipients=ticket.assigned_to.email,
                 sender=queue.from_address,
-                fail_silently=True,
-                files=files,
-            )
+                fail_silently=True)
             messages_sent_to.append(ticket.assigned_to.email)
 
         if queue.new_ticket_cc and queue.new_ticket_cc not in messages_sent_to:
@@ -273,9 +269,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
                 context,
                 recipients=queue.new_ticket_cc,
                 sender=queue.from_address,
-                fail_silently=True,
-                files=files,
-            )
+                fail_silently=True)
             messages_sent_to.append(queue.new_ticket_cc)
 
         if queue.updated_ticket_cc and \
@@ -286,9 +280,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
                 context,
                 recipients=queue.updated_ticket_cc,
                 sender=queue.from_address,
-                fail_silently=True,
-                files=files,
-            )
+                fail_silently=True)
 
 
 class TicketForm(AbstractTicketForm):
