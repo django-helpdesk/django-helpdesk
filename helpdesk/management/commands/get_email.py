@@ -36,12 +36,13 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management.base import BaseCommand
 from django.db.models import Q
 from django.utils.translation import ugettext as _
-from django.utils import encoding, six, timezone
+from django.utils import encoding, six
 
 from helpdesk import settings
 from helpdesk.lib import send_templated_mail, safe_template_context, process_attachments
 from helpdesk.models import Queue, Ticket, TicketCC, FollowUp, IgnoreEmail
 from django.contrib.auth.models import User
+from ico_portal.utils.datetime import datetime
 
 import logging
 
@@ -102,13 +103,13 @@ def process_email(quiet=False):
         logger.addHandler(handler)
 
         if not q.email_box_last_check:
-            q.email_box_last_check = timezone.now() - timedelta(minutes=30)
+            q.email_box_last_check = datetime.utcnow() - timedelta(minutes=30)
 
         queue_time_delta = timedelta(minutes=q.email_box_interval or 0)
 
-        if (q.email_box_last_check + queue_time_delta) < timezone.now():
+        if (q.email_box_last_check + queue_time_delta) < datetime.utcnow():
             process_queue(q, logger=logger)
-            q.email_box_last_check = timezone.now()
+            q.email_box_last_check = datetime.utcnow()
             q.save()
 
 
@@ -431,7 +432,7 @@ def ticket_from_message(message, queue, logger):
             title=subject,
             queue=queue,
             submitter_email=sender_email,
-            created=timezone.now(),
+            created=datetime.utcnow(),
             description=body,
             priority=priority,
         )
@@ -479,7 +480,7 @@ def ticket_from_message(message, queue, logger):
     f = FollowUp(
         ticket=t,
         title=_('E-Mail Received from %(sender_email)s' % {'sender_email': sender_email}),
-        date=timezone.now(),
+        date=datetime.utcnow(),
         public=True,
         comment=body,
     )

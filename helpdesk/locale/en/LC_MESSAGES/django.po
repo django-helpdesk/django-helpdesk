@@ -403,6 +403,9 @@ msgstr ""
 msgid "5. Very Low"
 msgstr ""
 
+msgid "Reporer"
+msgstr ""
+
 #: models.py:271 templates/helpdesk/dashboard.html:100
 #: templates/helpdesk/ticket_list.html:82
 #: templates/helpdesk/ticket_list.html:225

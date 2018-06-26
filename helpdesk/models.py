@@ -13,10 +13,15 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.conf import settings
-from django.utils import timezone
 from django.utils import six
 from django.utils.translation import ugettext_lazy as _, ugettext
 from django.utils.encoding import python_2_unicode_compatible
+from django.urls import reverse
+
+from ico_portal.utils.datetime import datetime
+
+
+HOST = settings.HOST
 
 
 @python_2_unicode_compatible
@@ -392,6 +397,15 @@ class Ticket(models.Model):
         verbose_name=_('Queue'),
     )
 
+    reporter = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.DO_NOTHING,
+        related_name='reporter',
+        blank=True,
+        null=True,
+        verbose_name=_('Reporter')
+    )
+
     created = models.DateTimeField(
         _('Created'),
         blank=True,
@@ -470,6 +484,11 @@ class Ticket(models.Model):
                     'automatically by management/commands/escalate_tickets.py.'),
     )
 
+    def _public_follow_ups(self):
+        return self.followup_set.filter(public=True)
+    public_follow_ups = property(_public_follow_ups)
+
+
     def _get_assigned_to(self):
         """ Custom property to allow us to easily print 'Unassigned' if a
         ticket has no owner, or the users name if it's assigned. If the user
@@ -482,6 +501,32 @@ class Ticket(models.Model):
             else:
                 return self.assigned_to.get_username()
     get_assigned_to = property(_get_assigned_to)
+
+    def _get_reporter(self):
+        if not self.reporter:
+            return ''
+        else:
+            if self.reporter.get_full_name():
+                return self.reporter.get_full_name()
+            else:
+                return self.reporter.get_username()
+    get_reporter = property(_get_reporter)
+
+    def _get_reporter_url(self):
+        if self.reporter:
+            return "%s%s" % (
+                HOST,
+                reverse('admin:user_office_investor_change', args=(self.reporter.id,))
+            )
+    reporter_url = property(_get_reporter_url)
+
+    def _get_reporter_kyc_url(self):
+        if self.reporter and self.reporter.kyc:
+            return "%s%s" % (
+                HOST,
+                reverse('admin:user_office_kyc_change', args=(self.reporter.kyc.id,))
+            )
+    reporter_kyc_url = property(_get_reporter_kyc_url)
 
     def _get_ticket(self):
         """ A user-friendly ticket ID, which is a combination of ticket ID
@@ -527,15 +572,9 @@ class Ticket(models.Model):
         Returns a publicly-viewable URL for this ticket, used when giving
         a URL to the submitter of a ticket.
         """
-        from django.contrib.sites.models import Site
-        from django.core.exceptions import ImproperlyConfigured
-        from django.urls import reverse
-        try:
-            site = Site.objects.get_current()
-        except ImproperlyConfigured:
-            site = Site(domain='configure-django-sites.com')
-        return u"http://%s%s?ticket=%s&email=%s" % (
-            site.domain,
+
+        return "%s%s?ticket=%s&email=%s" % (
+            HOST,
             reverse('helpdesk:public_view'),
             self.ticket_for_url,
             self.submitter_email
@@ -547,17 +586,9 @@ class Ticket(models.Model):
         Returns a staff-only URL for this ticket, used when giving a URL to
         a staff member (in emails etc)
         """
-        from django.contrib.sites.models import Site
-        from django.core.exceptions import ImproperlyConfigured
-        from django.urls import reverse
-        try:
-            site = Site.objects.get_current()
-        except ImproperlyConfigured:
-            site = Site(domain='configure-django-sites.com')
-        return u"http://%s%s" % (
-            site.domain,
-            reverse('helpdesk:view',
-                    args=[self.id])
+        return "%s%s" % (
+            HOST,
+            reverse('helpdesk:view',args=[self.id])
         )
     staff_url = property(_get_staff_url)
 
@@ -582,18 +613,20 @@ class Ticket(models.Model):
         return '%s %s' % (self.id, self.title)
 
     def get_absolute_url(self):
-        from django.urls import reverse
-        return reverse('helpdesk:view', args=(self.id,))
+        return "%s%s" % (
+            HOST,
+            reverse('helpdesk:view', args=(self.id,))
+        )
 
     def save(self, *args, **kwargs):
         if not self.id:
             # This is a new ticket as no ID yet exists.
-            self.created = timezone.now()
+            self.created = datetime.utcnow()
 
         if not self.priority:
             self.priority = 3
 
-        self.modified = timezone.now()
+        self.modified = datetime.utcnow()
 
         super(Ticket, self).save(*args, **kwargs)
 
@@ -637,7 +670,7 @@ class FollowUp(models.Model):
 
     date = models.DateTimeField(
         _('Date'),
-        default=timezone.now
+        default=datetime.utcnow
     )
 
     title = models.CharField(
@@ -692,7 +725,7 @@ class FollowUp(models.Model):
 
     def save(self, *args, **kwargs):
         t = self.ticket
-        t.modified = timezone.now()
+        t.modified = datetime.utcnow()
         t.save()
         super(FollowUp, self).save(*args, **kwargs)
 
@@ -971,8 +1004,10 @@ class KBCategory(models.Model):
         verbose_name_plural = _('Knowledge base categories')
 
     def get_absolute_url(self):
-        from django.urls import reverse
-        return reverse('helpdesk:kb_category', kwargs={'slug': self.slug})
+        return "%s%s" % (
+            HOST,
+            reverse('helpdesk:kb_category', kwargs={'slug': self.slug})
+        )
 
 
 @python_2_unicode_compatible
@@ -1020,7 +1055,7 @@ class KBItem(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.last_updated:
-            self.last_updated = timezone.now()
+            self.last_updated = datetime.utcnow()
         return super(KBItem, self).save(*args, **kwargs)
 
     def _score(self):
@@ -1039,8 +1074,10 @@ class KBItem(models.Model):
         verbose_name_plural = _('Knowledge base items')
 
     def get_absolute_url(self):
-        from django.urls import reverse
-        return reverse('helpdesk:kb_item', args=(self.id,))
+        return "%s%s" % (
+            HOST,
+            reverse('helpdesk:kb_item', args=(self.id,))
+        )
 
 
 @python_2_unicode_compatible
@@ -1217,7 +1254,7 @@ class IgnoreEmail(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.date:
-            self.date = timezone.now()
+            self.date = datetime.utcnow()
         return super(IgnoreEmail, self).save(*args, **kwargs)
 
     def queue_list(self):

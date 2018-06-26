@@ -38,6 +38,8 @@
                     <li><a href='#ticket_staff_url'>ticket.staff_url</a></li>
                     <li><a href='#ticket_assigned_to'>ticket.assigned_to</a></li>
                     <li><a href='#ticket_queue'>ticket.queue</a></li>
+                    <li><a href='#reporter_url'>ticket.reporter_url</a></li>
+                    <li><a href='#reporter_kyc_url'>ticket.reporter_kyc_url</a></li>
                 </ul>
             </li>
         </ul>
@@ -63,13 +65,13 @@
         <dl>
             <dt id='queue_title'>queue.title</dt>
             <dd>The display title of the queue</dd>
-            
+
             <dt id='queue_slug'>queue.slug</dt>
             <dd>The 'slug' of the queue, a single-word lowercase identifier used in URL's and e-mail subjects.</dd>
-            
+
             <dt id='queue_email_address'>queue.email_address</dt>
             <dd>The e-mail address to which users can send an e-mail to open a new ticket automatically.</dd>
-            
+
             <dt id='queue_from_address'>queue.from_address</dt>
             <dd>The e-mail address from which the queue will send e-mails to submitters.</dd>
         </dl>
@@ -134,6 +136,10 @@
 
             <dt id='ticket_queue'>ticket.queue</dt>
             <dd>Another dictionary of queue information, identical to <a href='#queue'>queue</a> above. For example, use ticket.queue.title.</dd>
+            <dt id='reporter_url'>ticket.reporter_url</dt>
+            <dd>Link to reporter in admin</dd>
+            <dt id='reporter_kyc_url'>ticket.reporter_kyc_url</dt>
+            <dd>Link to reporet`s kyc in admin</dd>
         </dl>
 
 {% endblock %}

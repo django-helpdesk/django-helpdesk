@@ -2,9 +2,9 @@
 from __future__ import unicode_literals
 
 from django.db import models, migrations
-import django.utils.timezone
 from django.conf import settings
 import helpdesk.models
+from datetime import datetime
 
 
 class Migration(migrations.Migration):
@@ -87,7 +87,7 @@ class Migration(migrations.Migration):
             name='FollowUp',
             fields=[
                 ('id', models.AutoField(auto_created=True, verbose_name='ID', primary_key=True, serialize=False)),
-                ('date', models.DateTimeField(verbose_name='Date', default=django.utils.timezone.now)),
+                ('date', models.DateTimeField(verbose_name='Date', default=datetime.utcnow)),
                 ('title', models.CharField(null=True, verbose_name='Title', blank=True, max_length=200)),
                 ('comment', models.TextField(null=True, verbose_name='Comment', blank=True)),
                 ('public', models.BooleanField(verbose_name='Public', default=False, help_text='Public tickets are viewable by the submitter and all staff, but non-public tickets can only be seen by staff.')),

@@ -215,7 +215,8 @@ def ticket_template_context(ticket):
                   'status', 'get_status_display', 'on_hold', 'description',
                   'resolution', 'priority', 'get_priority_display',
                   'last_escalation', 'ticket', 'ticket_for_url',
-                  'get_status', 'ticket_url', 'staff_url', '_get_assigned_to'
+                  'get_status', 'ticket_url', 'staff_url', '_get_assigned_to',
+                  'reporter_url', 'reporter_kyc_url'
                   ):
         attr = getattr(ticket, field, None)
         if callable(attr):
@@ -262,51 +263,6 @@ def safe_template_context(ticket):
     context['ticket']['queue'] = context['queue']
 
     return context
-
-
-def text_is_spam(text, request):
-    # Based on a blog post by 'sciyoshi':
-    # http://sciyoshi.com/blog/2008/aug/27/using-akismet-djangos-new-comments-framework/
-    # This will return 'True' is the given text is deemed to be spam, or
-    # False if it is not spam. If it cannot be checked for some reason, we
-    # assume it isn't spam.
-    from django.contrib.sites.models import Site
-    from django.core.exceptions import ImproperlyConfigured
-    try:
-        from helpdesk.akismet import Akismet
-    except ImportError:
-        return False
-    try:
-        site = Site.objects.get_current()
-    except ImproperlyConfigured:
-        site = Site(domain='configure-django-sites.com')
-
-    ak = Akismet(
-        blog_url='http://%s/' % site.domain,
-        agent='django-helpdesk',
-    )
-
-    if hasattr(settings, 'TYPEPAD_ANTISPAM_API_KEY'):
-        ak.setAPIKey(key=settings.TYPEPAD_ANTISPAM_API_KEY)
-        ak.baseurl = 'api.antispam.typepad.com/1.1/'
-    elif hasattr(settings, 'AKISMET_API_KEY'):
-        ak.setAPIKey(key=settings.AKISMET_API_KEY)
-    else:
-        return False
-
-    if ak.verify_key():
-        ak_data = {
-            'user_ip': request.META.get('REMOTE_ADDR', '127.0.0.1'),
-            'user_agent': request.META.get('HTTP_USER_AGENT', ''),
-            'referrer': request.META.get('HTTP_REFERER', ''),
-            'comment_type': 'comment',
-            'comment_author': '',
-        }
-
-        return ak.comment_check(smart_text(text), data=ak_data)
-
-    return False
-
 
 def process_attachments(followup, attached_files):
     max_email_attachment_size = getattr(settings, 'MAX_EMAIL_ATTACHMENT_SIZE', 512000)

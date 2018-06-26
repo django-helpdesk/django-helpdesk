@@ -22,7 +22,6 @@ from django.conf import settings
 from helpdesk import settings as helpdesk_settings
 from helpdesk.decorators import protect_view
 from helpdesk.forms import PublicTicketForm
-from helpdesk.lib import text_is_spam
 from helpdesk.models import Ticket, Queue, UserSettings, KBCategory
 
 
@@ -44,20 +43,16 @@ def homepage(request):
         form.fields['queue'].choices = [('', '--------')] + [
             (q.id, q.title) for q in Queue.objects.filter(allow_public_submission=True)]
         if form.is_valid():
-            if text_is_spam(form.cleaned_data['body'], request):
-                # This submission is spam. Let's not save it.
-                return render(request, template_name='helpdesk/public_spam.html')
-            else:
-                ticket = form.save()
-                try:
-                    return HttpResponseRedirect('%s?ticket=%s&email=%s' % (
-                        reverse('helpdesk:public_view'),
-                        ticket.ticket_for_url,
-                        urlquote(ticket.submitter_email))
-                    )
-                except ValueError:
-                    # if someone enters a non-int string for the ticket
-                    return HttpResponseRedirect(reverse('helpdesk:home'))
+            ticket = form.save()
+            try:
+                return HttpResponseRedirect('%s?ticket=%s&email=%s' % (
+                    reverse('helpdesk:public_view'),
+                    ticket.ticket_for_url,
+                    urlquote(ticket.submitter_email))
+                )
+            except ValueError:
+                # if someone enters a non-int string for the ticket
+                return HttpResponseRedirect(reverse('helpdesk:home'))
     else:
         try:
             queue = Queue.objects.get(slug=request.GET.get('queue', None))

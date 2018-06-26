@@ -15,12 +15,12 @@ from django.forms import widgets
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth import get_user_model
-from django.utils import timezone
 
 from helpdesk.lib import send_templated_mail, safe_template_context, process_attachments
 from helpdesk.models import (Ticket, Queue, FollowUp, Attachment, IgnoreEmail, TicketCC,
                              CustomField, TicketCustomFieldValue, TicketDependency)
 from helpdesk import settings as helpdesk_settings
+from ico_portal.utils.datetime import datetime
 
 User = get_user_model()
 
@@ -196,12 +196,12 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
 
         ticket = Ticket(title=self.cleaned_data['title'],
                         submitter_email=self.cleaned_data['submitter_email'],
-                        created=timezone.now(),
+                        created=datetime.utcnow(),
                         status=Ticket.OPEN_STATUS,
                         queue=queue,
                         description=self.cleaned_data['body'],
                         priority=self.cleaned_data['priority'],
-                        due_date=self.cleaned_data['due_date'],
+                        due_date=self.cleaned_data['due_date']
                         )
 
         return ticket, queue
@@ -219,7 +219,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
     def _create_follow_up(self, ticket, title, user=None):
         followup = FollowUp(ticket=ticket,
                             title=title,
-                            date=timezone.now(),
+                            date=datetime.utcnow(),
                             public=True,
                             comment=self.cleaned_data['body'],
                             )
@@ -315,6 +315,8 @@ class TicketForm(AbstractTicketForm):
         """
         Add any custom fields that are defined to the form.
         """
+        self.user = kwargs.pop('user', None)
+
         super(TicketForm, self).__init__(*args, **kwargs)
         self._add_form_custom_fields()
 
@@ -324,6 +326,10 @@ class TicketForm(AbstractTicketForm):
         """
 
         ticket, queue = self._create_ticket()
+
+        if self.user:
+            ticket.reporter = self.user
+
         if self.cleaned_data['assigned_to']:
             try:
                 u = User.objects.get(id=self.cleaned_data['assigned_to'])

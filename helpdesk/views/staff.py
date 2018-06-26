@@ -22,7 +22,6 @@ from django.utils.dates import MONTHS_3
 from django.utils.translation import ugettext as _
 from django.utils.html import escape
 from django import forms
-from django.utils import timezone
 
 from django.utils import six
 
@@ -39,6 +38,7 @@ from helpdesk.models import (
     IgnoreEmail, TicketCC, TicketDependency,
 )
 from helpdesk import settings as helpdesk_settings
+from ico_portal.utils.datetime import datetime
 
 User = get_user_model()
 
@@ -266,7 +266,7 @@ def view_ticket(request, ticket_id):
         # a valid POST.
         request.POST = {
             'owner': request.user.id,
-            'public': 1,
+            'public': 0,
             'title': ticket.title,
             'comment': ''
         }
@@ -397,7 +397,7 @@ def update_ticket(request, ticket_id, public=False):
         if ticket.due_date:
             due_date = ticket.due_date
         else:
-            due_date = timezone.now()
+            due_date = datetime.utcnow()
         due_date = due_date.replace(due_date_year, due_date_month, due_date_day)
 
     no_changes = all([
@@ -425,12 +425,13 @@ def update_ticket(request, ticket_id, public=False):
     comment = comment.replace('{%', 'X-HELPDESK-COMMENT-VERBATIM').replace('%}', 'X-HELPDESK-COMMENT-ENDVERBATIM')
     comment = comment.replace('X-HELPDESK-COMMENT-VERBATIM', '{% verbatim %}{%').replace('X-HELPDESK-COMMENT-ENDVERBATIM', '%}{% endverbatim %}')
     # render the neutralized template
+
     comment = template_func(comment).render(context)
 
     if owner is -1 and ticket.assigned_to:
         owner = ticket.assigned_to.id
 
-    f = FollowUp(ticket=ticket, date=timezone.now(), comment=comment)
+    f = FollowUp(ticket=ticket, date=datetime.utcnow(), comment=comment)
 
     if request.user.is_staff or helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE:
         f.user = request.user
@@ -668,7 +669,7 @@ def mass_update(request):
             t.assigned_to = user
             t.save()
             f = FollowUp(ticket=t,
-                         date=timezone.now(),
+                         date=datetime.utcnow(),
                          title=_('Assigned to %(username)s in bulk update' % {
                              'username': user.get_username()
                          }),
@@ -679,7 +680,7 @@ def mass_update(request):
             t.assigned_to = None
             t.save()
             f = FollowUp(ticket=t,
-                         date=timezone.now(),
+                         date=datetime.utcnow(),
                          title=_('Unassigned in bulk update'),
                          public=True,
                          user=request.user)
@@ -688,7 +689,7 @@ def mass_update(request):
             t.status = Ticket.CLOSED_STATUS
             t.save()
             f = FollowUp(ticket=t,
-                         date=timezone.now(),
+                         date=datetime.utcnow(),
                          title=_('Closed in bulk update'),
                          public=False,
                          user=request.user,
@@ -698,7 +699,7 @@ def mass_update(request):
             t.status = Ticket.CLOSED_STATUS
             t.save()
             f = FollowUp(ticket=t,
-                         date=timezone.now(),
+                         date=datetime.utcnow(),
                          title=_('Closed in bulk update'),
                          public=True,
                          user=request.user,
@@ -977,7 +978,7 @@ def create_ticket(request):
         assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
 
     if request.method == 'POST':
-        form = TicketForm(request.POST, request.FILES)
+        form = TicketForm(request.POST, request.FILES, user=request.user)
         form.fields['queue'].choices = [('', '--------')] + [
             (q.id, q.title) for q in Queue.objects.all()]
         form.fields['assigned_to'].choices = [('', '--------')] + [
@@ -1048,8 +1049,8 @@ def hold_ticket(request, ticket_id, unhold=False):
         ticket=ticket,
         user=request.user,
         title=title,
-        date=timezone.now(),
-        public=True,
+        date=datetime.utcnow(),
+        public=False,
     )
     f.save()
 

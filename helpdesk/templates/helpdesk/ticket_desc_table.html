@@ -44,6 +44,11 @@
                                         </tr>
 
                                         <tr>
+                                            <th>{% trans "Reporter" %}</th>
+                                            <td>{% if ticket.get_reporter %}<a href='{{ ticket.reporter_url }}'>{{ ticket.get_reporter }}</a>{% endif %}</td>
+                                        </tr>
+
+                                        <tr>
                                             <th>{% trans "Assigned To" %}</th>
                                             <td>{{ ticket.get_assigned_to }}{% ifequal ticket.get_assigned_to _('Unassigned') %} <strong><a href='?take'><button type="button" class="btn btn-primary btn-xs"><i class="fa fa-hand-paper-o"></i>&nbsp;{% trans "Take" %}</button></a></strong>{% endifequal %}</td>
                                         </tr>
@@ -85,4 +90,3 @@
                     <!-- /.panel -->
                 </div>
             </div>
-
