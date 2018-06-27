@@ -17,6 +17,7 @@ from django.utils import timezone
 from django.utils import six
 from django.utils.translation import ugettext_lazy as _, ugettext
 from django.utils.encoding import python_2_unicode_compatible
+import re
 
 
 @python_2_unicode_compatible
@@ -278,7 +279,13 @@ class Queue(models.Model):
         in the sender name field, so hopefully the admin can see and fix it.
         """
         if not self.email_address:
-            return u'NO QUEUE EMAIL ADDRESS DEFINED <%s>' % settings.DEFAULT_FROM_EMAIL
+            # must check if given in format "Foo <foo@example.com>"
+            default_email = re.match(".*<(?P<email>.*@*.)>", settings.DEFAULT_FROM_EMAIL)
+            if default_email is not None:
+                # already in the right format, so just include it here
+                return u'NO QUEUE EMAIL ADDRESS DEFINED %s' % settings.DEFAULT_FROM_EMAIL
+            else:
+                return u'NO QUEUE EMAIL ADDRESS DEFINED <%s>' % settings.DEFAULT_FROM_EMAIL
         else:
             return u'%s <%s>' % (self.title, self.email_address)
     from_address = property(_from_address)
