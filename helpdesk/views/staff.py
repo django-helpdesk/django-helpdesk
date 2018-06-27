@@ -9,6 +9,7 @@ views/staff.py - The bulk of the application - provides most business logic and
 from __future__ import unicode_literals
 from datetime import datetime, timedelta
 
+import django.VERSION as DJANGO_VERSION
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import user_passes_test
@@ -831,7 +832,11 @@ def ticket_list(request):
         from helpdesk.lib import b64decode
         try:
             if six.PY3:
-                query_params = json.loads(b64decode(str(saved_query.query)).decode())
+                if DJANGO_VERSION[0] > 1:
+                    # if Django >= 2.0
+                    query_params = json.loads(b64decode(str(saved_query.query).lstrip("b\\'")).decode())
+                else:
+                    query_params = json.loads(b64decode(str(saved_query.query)).decode())
             else:
                 query_params = json.loads(b64decode(str(saved_query.query)))
         except ValueError:
@@ -1138,7 +1143,11 @@ def run_report(request, report):
         from helpdesk.lib import b64decode
         try:
             if six.PY3:
-                query_params = json.loads(b64decode(str(saved_query.query)).decode())
+                if DJANGO_VERSION[0] > 1:
+                    # if Django >= 2.0
+                    query_params = json.loads(b64decode(str(saved_query.query).lstrip("b\\'")).decode())
+                else:
+                    query_params = json.loads(b64decode(str(saved_query.query)).decode())
             else:
                 query_params = json.loads(b64decode(str(saved_query.query)))
         except json.JSONDecodeError:
