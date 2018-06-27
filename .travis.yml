@@ -7,7 +7,7 @@ python:
     - "3.6"
 
 env:
-    - DJANGO=1.11.9
+    - DJANGO=1.11.13
 
 install:
     - pip install -q Django==$DJANGO
