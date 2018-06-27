@@ -9,7 +9,7 @@ views/staff.py - The bulk of the application - provides most business logic and
 from __future__ import unicode_literals
 from datetime import datetime, timedelta
 
-import django.VERSION as DJANGO_VERSION
+from django import VERSION as DJANGO_VERSION
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import user_passes_test
