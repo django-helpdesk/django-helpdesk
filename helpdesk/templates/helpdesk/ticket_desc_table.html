@@ -38,6 +38,11 @@
                                         <tr>
                                             <td colspan='2'>{{ ticket.resolution|force_escape|urlizetrunc:50|linebreaksbr }}</td>
                                         </tr>{% endif %}
+                                        
+                                        <tr>
+                                            <th>{% trans "Due Date" %}</th>
+                                            <td>{{ ticket.due_date|date:"r" }} ({{ ticket.due_date|naturaltime }})</td>
+                                        </tr>
                                         <tr>
                                             <th>{% trans "Submitted On" %}</th>
                                             <td>{{ ticket.created|date:"r" }} ({{ ticket.created|naturaltime }})</td>

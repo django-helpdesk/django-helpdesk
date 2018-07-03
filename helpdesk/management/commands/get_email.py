@@ -216,7 +216,7 @@ def process_queue(q, logger):
                          q.email_box_pass or
                          settings.QUEUE_EMAIL_BOX_PASSWORD)
             server.select(q.email_box_imap_folder)
-        except imaplib.IMAP.abort:
+        except imaplib.IMAP4.abort:
             logger.error("IMAP login failed. Check that the server is accessible and that the username and password are correct.")
             server.logout()
             sys.exit()
@@ -332,7 +332,7 @@ def ticket_from_message(message, queue, logger):
                 return False
             return True
 
-    matchobj = re.match(r".*\[" + queue.slug + "-(?P<id>\d+)\]", subject)
+    matchobj = re.match(r".*\[" + queue.slug + r"-(?P<id>\d+)\]", subject)
     if matchobj:
         # This is a reply or forward.
         ticket = matchobj.group('id')

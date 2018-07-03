@@ -12,6 +12,9 @@
 # Released subject to the BSD License
 # See http://www.voidspace.org.uk/python/license.shtml
 
+# Updated by django-helpdesk developers, 2018
+# to be compatible with python 3
+
 
 """
 A python interface to the `Akismet <http://akismet.com>`_ API.
@@ -56,7 +59,10 @@ Usage example::
 
 
 import os
-from urllib import urlencode
+try:
+    from urllib import urlencode  # python2
+except ImportError:
+    from urllib.parse import urlencode  # python3
 
 import socket
 if hasattr(socket, 'setdefaulttimeout'):

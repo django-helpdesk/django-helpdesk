@@ -11,12 +11,11 @@
 <p>{% blocktrans %}You have shared this query, so other users may be using it. If you delete it, they will have to manually create their own query.{% endblocktrans %}</p>
 {% endif %}
 
+<p><a href='{% url 'helpdesk:list' %}?saved_query={{ query.id }}'><button class="btn btn-primary btn-lg">{% trans "No, Don't Delete It" %}</button></a></p>
 
-<p><a href='../'><button class="btn btn-primary btn-lg">{% trans "No, Don't Delete It" %}</button></a></p>
-
-<form method='post' action='./'>
+<form method='post' action='./'>{% csrf_token %}
     <button class="btn btn-danger" type='submit'>{% trans "Yes I Understand - Delete It Anyway" %}</button>
-{% csrf_token %}</form>
+</form>
 
 
 {% endblock %}

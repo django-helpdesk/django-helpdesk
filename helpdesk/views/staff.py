@@ -7,8 +7,10 @@ views/staff.py - The bulk of the application - provides most business logic and
                  renders all staff-facing views.
 """
 from __future__ import unicode_literals
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
+import re
 
+from django import VERSION as DJANGO_VERSION
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import user_passes_test
@@ -154,21 +156,6 @@ def dashboard(request):
                         q.id IN (%s)""" % (",".join(("%d" % pk for pk in queues)))
     else:
         where_clause = """WHERE   q.id = t.queue_id"""
-
-    cursor = connection.cursor()
-    cursor.execute("""
-        SELECT      q.id as queue,
-                    q.title AS name,
-                    COUNT(CASE t.status WHEN '1' THEN t.id WHEN '2' THEN t.id END) AS open,
-                    COUNT(CASE t.status WHEN '3' THEN t.id END) AS resolved,
-                    COUNT(CASE t.status WHEN '4' THEN t.id END) AS closed
-            %s
-            %s
-            GROUP BY queue, name
-            ORDER BY q.id;
-    """ % (from_clause, where_clause))
-
-    dash_tickets = query_to_dict(cursor.fetchall(), cursor.description)
 
     return render(request, 'helpdesk/dashboard.html', {
         'user_tickets': tickets,
@@ -404,6 +391,10 @@ def update_ticket(request, ticket_id, public=False):
 
     ticket = get_object_or_404(Ticket, id=ticket_id)
 
+    date_re = re.compile(
+        r'(?P<month>\d{1,2})/(?P<day>\d{1,2})/(?P<year>\d{4})$'
+    )
+
     comment = request.POST.get('comment', '')
     new_status = int(request.POST.get('new_status', ticket.status))
     title = request.POST.get('title', '')
@@ -413,15 +404,29 @@ def update_ticket(request, ticket_id, public=False):
     due_date_year = int(request.POST.get('due_date_year', 0))
     due_date_month = int(request.POST.get('due_date_month', 0))
     due_date_day = int(request.POST.get('due_date_day', 0))
+    # NOTE: jQuery's default for dates is mm/dd/yy
+    # very US-centric but for now that's the only format supported
+    # until we clean up code to internationalize a little more
+    due_date = request.POST.get('due_date', None)
 
-    if not (due_date_year and due_date_month and due_date_day):
-        due_date = ticket.due_date
+    if due_date is not None:
+        # based on Django code to parse dates:
+        # https://docs.djangoproject.com/en/2.0/_modules/django/utils/dateparse/
+        match = date_re.match(due_date)
+        if match:
+            kw = {k: int(v) for k, v in match.groupdict().items()}
+            due_date = date(**kw)
     else:
-        if ticket.due_date:
+        # old way, probably deprecated?
+        if not (due_date_year and due_date_month and due_date_day):
             due_date = ticket.due_date
         else:
-            due_date = timezone.now()
-        due_date = due_date.replace(due_date_year, due_date_month, due_date_day)
+            # NOTE: must be an easier way to create a new date than doing it this way?
+            if ticket.due_date:
+                due_date = ticket.due_date
+            else:
+                due_date = timezone.now()
+            due_date = due_date.replace(due_date_year, due_date_month, due_date_day)
 
     no_changes = all([
         not request.FILES,
@@ -859,7 +864,11 @@ def ticket_list(request):
         from helpdesk.lib import b64decode
         try:
             if six.PY3:
-                query_params = json.loads(b64decode(str(saved_query.query)).decode())
+                if DJANGO_VERSION[0] > 1:
+                    # if Django >= 2.0
+                    query_params = json.loads(b64decode(str(saved_query.query).lstrip("b\\'")).decode())
+                else:
+                    query_params = json.loads(b64decode(str(saved_query.query)).decode())
             else:
                 query_params = json.loads(b64decode(str(saved_query.query)))
         except ValueError:
@@ -1123,31 +1132,18 @@ def report_index(request):
     #          Open  Resolved
     # Queue 1    10     4
     # Queue 2     4    12
+    Queues = user_queues if user_queues else Queue.objects.all()
 
-    queues = _get_user_queues(request.user).values_list('id', flat=True)
-
-    from_clause = """FROM    helpdesk_ticket t,
-                    helpdesk_queue q"""
-    if queues:
-        where_clause = """WHERE   q.id = t.queue_id AND
-                        q.id IN (%s)""" % (",".join(("%d" % pk for pk in queues)))
-    else:
-        where_clause = """WHERE   q.id = t.queue_id"""
-
-    cursor = connection.cursor()
-    cursor.execute("""
-        SELECT      q.id as queue,
-                    q.title AS name,
-                    COUNT(CASE t.status WHEN '1' THEN t.id WHEN '2' THEN t.id END) AS open,
-                    COUNT(CASE t.status WHEN '3' THEN t.id END) AS resolved,
-                    COUNT(CASE t.status WHEN '4' THEN t.id END) AS closed
-            %s
-            %s
-            GROUP BY queue, name
-            ORDER BY q.id;
-    """ % (from_clause, where_clause))
-
-    dash_tickets = query_to_dict(cursor.fetchall(), cursor.description)
+    dash_tickets = []
+    for queue in Queues:
+        dash_ticket = {
+            'queue': queue.id,
+            'name': queue.title,
+            'open': queue.ticket_set.filter(status__in=[1, 2]).count(),
+            'resolved': queue.ticket_set.filter(status=3).count(),
+            'closed': queue.ticket_set.filter(status=4).count(),
+        }
+        dash_tickets.append(dash_ticket)
 
     return render(request, 'helpdesk/report_index.html', {
         'number_tickets': number_tickets,
@@ -1187,7 +1183,11 @@ def run_report(request, report):
         from helpdesk.lib import b64decode
         try:
             if six.PY3:
-                query_params = json.loads(b64decode(str(saved_query.query)).decode())
+                if DJANGO_VERSION[0] > 1:
+                    # if Django >= 2.0
+                    query_params = json.loads(b64decode(str(saved_query.query).lstrip("b\\'")).decode())
+                else:
+                    query_params = json.loads(b64decode(str(saved_query.query)).decode())
             else:
                 query_params = json.loads(b64decode(str(saved_query.query)))
         except json.JSONDecodeError:
