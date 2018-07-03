@@ -63,7 +63,7 @@ Installation
 `django-helpdesk` requires:
 
 * Django 2.x
-* either 3.5+
+* Python 3.5+
 
 You can quickly install the latest stable version of `django-helpdesk`
 app via `pip`::
