@@ -382,7 +382,7 @@ def update_ticket(request, ticket_id, public=False):
                                     (reverse('helpdesk:login'), request.path))
 
     ticket = get_object_or_404(Ticket, id=ticket_id)
-    
+
     date_re = re.compile(
         r'(?P<month>\d{1,2})/(?P<day>\d{1,2})/(?P<year>\d{4})$'
     )
@@ -396,13 +396,13 @@ def update_ticket(request, ticket_id, public=False):
     due_date_year = int(request.POST.get('due_date_year', 0))
     due_date_month = int(request.POST.get('due_date_month', 0))
     due_date_day = int(request.POST.get('due_date_day', 0))
-    #NOTE: jQuery's default for dates is mm/dd/yy
+    # NOTE: jQuery's default for dates is mm/dd/yy
     # very US-centric but for now that's the only format supported
     # until we clean up code to internationalize a little more
     due_date = request.POST.get('due_date', None)
 
     if due_date is not None:
-        # based on Django code to parse dates: 
+        # based on Django code to parse dates:
         # https://docs.djangoproject.com/en/2.0/_modules/django/utils/dateparse/
         match = date_re.match(due_date)
         if match:
