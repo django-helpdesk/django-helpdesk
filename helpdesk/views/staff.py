@@ -7,7 +7,8 @@ views/staff.py - The bulk of the application - provides most business logic and
                  renders all staff-facing views.
 """
 from __future__ import unicode_literals
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
+import re
 
 from django import VERSION as DJANGO_VERSION
 from django.conf import settings
@@ -381,6 +382,10 @@ def update_ticket(request, ticket_id, public=False):
                                     (reverse('helpdesk:login'), request.path))
 
     ticket = get_object_or_404(Ticket, id=ticket_id)
+    
+    date_re = re.compile(
+        r'(?P<month>\d{1,2})/(?P<day>\d{1,2})/(?P<year>\d{4})$'
+    )
 
     comment = request.POST.get('comment', '')
     new_status = int(request.POST.get('new_status', ticket.status))
@@ -391,15 +396,29 @@ def update_ticket(request, ticket_id, public=False):
     due_date_year = int(request.POST.get('due_date_year', 0))
     due_date_month = int(request.POST.get('due_date_month', 0))
     due_date_day = int(request.POST.get('due_date_day', 0))
+    #NOTE: jQuery's default for dates is mm/dd/yy
+    # very US-centric but for now that's the only format supported
+    # until we clean up code to internationalize a little more
+    due_date = request.POST.get('due_date', None)
 
-    if not (due_date_year and due_date_month and due_date_day):
-        due_date = ticket.due_date
+    if due_date is not None:
+        # based on Django code to parse dates: 
+        # https://docs.djangoproject.com/en/2.0/_modules/django/utils/dateparse/
+        match = date_re.match(due_date)
+        if match:
+            kw = {k: int(v) for k, v in match.groupdict().items()}
+            due_date = date(**kw)
     else:
-        if ticket.due_date:
+        # old way, probably deprecated?
+        if not (due_date_year and due_date_month and due_date_day):
             due_date = ticket.due_date
         else:
-            due_date = timezone.now()
-        due_date = due_date.replace(due_date_year, due_date_month, due_date_day)
+            # NOTE: must be an easier way to create a new date than doing it this way?
+            if ticket.due_date:
+                due_date = ticket.due_date
+            else:
+                due_date = timezone.now()
+            due_date = due_date.replace(due_date_year, due_date_month, due_date_day)
 
     no_changes = all([
         not request.FILES,
