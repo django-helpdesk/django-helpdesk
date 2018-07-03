@@ -34,8 +34,8 @@ included packages.
 Demo Quickstart
 ---------------
 
-django-helpdesk includes a basic demo Django project so that you may easily
-get started with testing or developing django-helpdesk. The demo project
+`django-helpdesk` includes a basic demo Django project so that you may easily
+get started with testing or developing `django-helpdesk`. The demo project
 resides in the `demo/` top-level folder.
 
 It's likely that you can start up a demo project server by running
@@ -62,20 +62,8 @@ Installation
 
 `django-helpdesk` requires:
 
-* Django 1.11.x
-* either Python 2.7 or 3.4+
-
-**NOTE REGARDING PYTHON VERSION:**
-The recommended combination is Python 3.4+ with Django 1.11.
-Support for Python 2 will end in the next versions of both `django-helpdesk`
-and Django itself (Django 2.0), so users and developers are encouraged to begin
-transitioning to Python 3 if have not already. New projects should definitely
-use Python 3!
-
-**NOTE REGARDING DJANGO VERSION:**
-The recommended release is Django 1.11. However, there initial support of
-Django 2.0 as of version 0.2.7 if you'd like to try it out.
-Please report any bugs you find!
+* Django 2.x
+* either 3.5+
 
 You can quickly install the latest stable version of `django-helpdesk`
 app via `pip`::
