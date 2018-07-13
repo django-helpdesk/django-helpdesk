@@ -399,7 +399,7 @@ def update_ticket(request, ticket_id, public=False):
     # NOTE: jQuery's default for dates is mm/dd/yy
     # very US-centric but for now that's the only format supported
     # until we clean up code to internationalize a little more
-    due_date = request.POST.get('due_date', None)
+    due_date = request.POST.get('due_date', None) or None
 
     if due_date is not None:
         # based on Django code to parse dates:
