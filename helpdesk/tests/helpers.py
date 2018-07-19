@@ -2,9 +2,9 @@
 import sys
 from django.contrib.auth import get_user_model
 
-User = get_user_model()
-
 from helpdesk.models import Ticket, Queue, UserSettings
+
+User = get_user_model()
 
 
 def get_staff_user(username='helpdesk.staff', password='password'):

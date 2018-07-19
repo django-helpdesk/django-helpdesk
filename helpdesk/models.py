@@ -21,6 +21,7 @@ import re
 
 import six
 
+
 @python_2_unicode_compatible
 class Queue(models.Model):
     """

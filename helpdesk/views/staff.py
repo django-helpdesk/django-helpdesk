@@ -500,7 +500,7 @@ def update_ticket(request, ticket_id, public=False):
             f.title = _('Updated')
 
     f.save()
-    
+
     files = []
     if request.FILES:
         files = process_attachments(f, request.FILES.getlist('attachment'))

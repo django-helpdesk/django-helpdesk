@@ -11,6 +11,14 @@ import mimetypes
 import os
 from smtplib import SMTPException
 
+from django.conf import settings
+from django.db.models import Q
+from django.utils import six
+from django.utils.encoding import smart_text
+from django.utils.safestring import mark_safe
+
+from helpdesk.models import Attachment, EmailTemplate
+
 import six
 
 if six.PY3:
@@ -19,14 +27,6 @@ if six.PY3:
 else:
     from base64 import urlsafe_b64encode as b64encode
     from base64 import urlsafe_b64decode as b64decode
-
-from django.conf import settings
-from django.db.models import Q
-from django.utils import six
-from django.utils.encoding import smart_text
-from django.utils.safestring import mark_safe
-
-from helpdesk.models import Attachment, EmailTemplate
 
 logger = logging.getLogger('helpdesk')
 
