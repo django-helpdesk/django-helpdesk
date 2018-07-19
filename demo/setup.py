@@ -19,9 +19,9 @@ AUTHOR = 'django-helpdesk team'
 URL = 'https://github.com/django-helpdesk/django-helpdesk'
 CLASSIFIERS = ['Development Status :: 4 - Beta',
                'License :: OSI Approved :: BSD License',
-               'Programming Language :: Python :: 3.4',
                'Programming Language :: Python :: 3.5',
                'Programming Language :: Python :: 3.6',
+               'Programming Language :: Python :: 3.7',
                'Framework :: Django :: 2.0']
 KEYWORDS = []
 PACKAGES = ['demodesk']

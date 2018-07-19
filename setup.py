@@ -110,28 +110,25 @@ def get_requirements():
     return requirements_list
 
 
-LONG_DESCRIPTION = """
-===============
-django-helpdesk
-===============
+def get_long_description():
+    with open(os.path.join(os.path.dirname(__file__), "README.rst")) as f:
+        long_desc = f.read()
+        
+    return long_desc
 
-This is a Django-powered helpdesk ticket tracker, designed to
-plug into an existing Django website and provide you with
-internal (or, perhaps, external) helpdesk management.
-"""
 
 setup(
     name='django-helpdesk',
     version=version,
     description="Django-powered ticket tracker for your helpdesk",
-    long_description=LONG_DESCRIPTION,
+    long_description=get_long_description(),
     classifiers=[
         "Development Status :: 4 - Beta",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.4",
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
         "Framework :: Django",
         "Framework :: Django :: 2.0",
         "Environment :: Web Environment",
