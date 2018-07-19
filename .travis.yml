@@ -1,4 +1,5 @@
 language: python
+dist: xenial # Python 3.7 requires xenial because of dependencies
 
 python:
     - "3.5"
