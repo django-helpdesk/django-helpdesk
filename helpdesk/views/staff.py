@@ -26,6 +26,8 @@ from django.utils import timezone
 
 from django.utils import six
 
+from allauth.account.models import EmailAddress
+
 from helpdesk.forms import (
     TicketForm, UserSettingsForm, EmailIgnoreForm, EditTicketForm, TicketCCForm,
     TicketCCEmailForm, TicketCCUserForm, EditFollowUpForm, TicketDependencyForm
@@ -130,11 +132,14 @@ def dashboard(request):
 
     # all tickets, reported by current user
     all_tickets_reported_by_current_user = ''
-    email_current_user = request.user.email
-    if email_current_user:
+
+    # Get all email addresses associated with the current user as a list
+    # of strings.
+    email_addresses = EmailAddress.objects.filter(
+        user=request.user).values_list('email')
+    if email_addresses:
         all_tickets_reported_by_current_user = Ticket.objects.select_related('queue').filter(
-            submitter_email=email_current_user,
-        ).order_by('status')
+            submitter_email__in=email_addresses).order_by('status')
 
     tickets_in_queues = Ticket.objects.filter(
         queue__in=user_queues,

@@ -1,3 +1,9 @@
+0.2.6+nimbis.17 (2018-7-17):
+
+	* "Owned by me" tickets will now filter based on all django-allauth
+	  EmailAddress objects associated with the user the filed the ticket,
+	  instead of just email address associated with the ticket.
+
 0.2.6+nimbis.16 (2018-6-4):
 
     * Show closed tickets in helpdesk dashboard.

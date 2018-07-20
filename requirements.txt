@@ -1,4 +1,5 @@
 Django
+django-allauth
 django-bootstrap-form>=3.3,<4
 email-reply-parser
 django-markdown-deux
