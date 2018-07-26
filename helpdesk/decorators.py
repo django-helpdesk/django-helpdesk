@@ -16,7 +16,7 @@ def protect_view(view_func):
     def _wrapped_view(request, *args, **kwargs):
         if not request.user.is_authenticated and helpdesk_settings.HELPDESK_REDIRECT_TO_LOGIN_BY_DEFAULT:
             return HttpResponseRedirect(reverse('helpdesk:login'))
-        elif not request.user.is_authenticated and helpdesk_settings.HELPDESK_ANON_ACCESS_RAISES_404:
+        elif not (request.user.is_authenticated and request.user.is_staff) and helpdesk_settings.HELPDESK_ANON_ACCESS_RAISES_404:
             raise Http404
         return view_func(request, *args, **kwargs)
 
