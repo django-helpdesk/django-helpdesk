@@ -1541,7 +1541,7 @@ def send_ticket_upd_email(sender, instance, created, **kwargs):
     reporter = instance.ticket.reporter
 
     if created and instance.public and reporter and reporter != instance.user:
-        url = f'{settings.HOST}support/ticket/{instance.ticket.id}/'
+        url = f'{settings.HOST}/user_office/support/ticket/{instance.ticket.id}/'
 
         ctx = {
             'email': reporter.email,
