@@ -19,7 +19,7 @@ from django.utils.encoding import python_2_unicode_compatible
 from django.urls import reverse
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.core.mail import send_mail
+from user_office.tasks import send_mail
 from django.utils.html import strip_tags
 from django.template import loader
 
@@ -1548,7 +1548,5 @@ def send_ticket_upd_email(sender, instance, created, **kwargs):
             'ticket_url': url,
             'ticket_name': instance.ticket.title
         }
-        html_content = loader.render_to_string('mail/new_reply.html', ctx)
-        text_content = strip_tags(html_content)
-        send_mail('New reply in your ticket', text_content,
-                  settings.DEFAULT_FROM_EMAIL, [reporter.email], fail_silently=True, html_message=html_content)
+
+        send_mail.delay('New reply in your ticket', reporter.email, 'mail/new_reply.html', ctx)
