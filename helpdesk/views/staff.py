@@ -14,6 +14,7 @@ from django import VERSION as DJANGO_VERSION
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import user_passes_test
+from django.contrib.contenttypes.models import ContentType
 from django.urls import reverse
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.db import connection
@@ -319,8 +320,18 @@ def view_ticket(request, ticket_id):
     ticketcc_string, show_subscribe = \
         return_ticketccstring_and_show_subscribe(request.user, ticket)
 
+    submitter_userprofile = ticket.get_submitter_userprofile()
+    if submitter_userprofile is not None:
+        content_type = ContentType.objects.get_for_model(submitter_userprofile)
+        submitter_userprofile_url = reverse(
+            'admin:{app}_{model}_change'.format(app=content_type.app_label, model=content_type.model),
+            kwargs={'object_id': submitter_userprofile.id}
+        )
+    else:
+        submitter_userprofile_url = None
     return render(request, 'helpdesk/ticket.html', {
         'ticket': ticket,
+        'submitter_userprofile_url': submitter_userprofile_url,
         'form': form,
         'active_users': users,
         'priorities': Ticket.PRIORITY_CHOICES,

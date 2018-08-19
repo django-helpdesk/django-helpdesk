@@ -9,6 +9,7 @@ models.py - Model (and hence database) definitions. This is the core of the
 
 from __future__ import unicode_literals
 from django.contrib.auth.models import Permission
+from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
@@ -580,6 +581,13 @@ class Ticket(models.Model):
         return TicketDependency.objects.filter(ticket=self).filter(
             depends_on__status__in=OPEN_STATUSES).count() == 0
     can_be_resolved = property(_can_be_resolved)
+
+    def get_submitter_userprofile(self):
+        User = get_user_model()
+        try:
+            return User.objects.get(email=self.submitter_email)
+        except User.DoesNotExist:
+            return None
 
     class Meta:
         get_latest_by = "created"
