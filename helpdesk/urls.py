@@ -12,6 +12,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import views as auth_views
 from django.views.generic import TemplateView
 
+from helpdesk.decorators import helpdesk_staff_member_required
 from helpdesk import settings as helpdesk_settings
 from helpdesk.views import feeds, staff, public, kb
 
@@ -162,23 +163,23 @@ urlpatterns += [
 
 urlpatterns += [
     url(r'^rss/user/(?P<user_name>[^/]+)/$',
-        login_required(feeds.OpenTicketsByUser()),
+        helpdesk_staff_member_required(feeds.OpenTicketsByUser()),
         name='rss_user'),
 
     url(r'^rss/user/(?P<user_name>[^/]+)/(?P<queue_slug>[A-Za-z0-9_-]+)/$',
-        login_required(feeds.OpenTicketsByUser()),
+        helpdesk_staff_member_required(feeds.OpenTicketsByUser()),
         name='rss_user_queue'),
 
     url(r'^rss/queue/(?P<queue_slug>[A-Za-z0-9_-]+)/$',
-        login_required(feeds.OpenTicketsByQueue()),
+        helpdesk_staff_member_required(feeds.OpenTicketsByQueue()),
         name='rss_queue'),
 
     url(r'^rss/unassigned/$',
-        login_required(feeds.UnassignedTickets()),
+        helpdesk_staff_member_required(feeds.UnassignedTickets()),
         name='rss_unassigned'),
 
     url(r'^rss/recent_activity/$',
-        login_required(feeds.RecentFollowUps()),
+        helpdesk_staff_member_required(feeds.RecentFollowUps()),
         name='rss_activity'),
 ]
 
