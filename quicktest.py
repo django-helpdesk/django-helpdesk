@@ -60,8 +60,7 @@ class QuickDjangoTest(object):
             },
         },
     ]
-                
-    SITE_ID = 1
+
 
     def __init__(self, *args, **kwargs):
         self.apps = args
@@ -85,7 +84,9 @@ class QuickDjangoTest(object):
             MIDDLEWARE=self.MIDDLEWARE,
             ROOT_URLCONF='helpdesk.tests.urls',
             STATIC_URL='/static/',
-            TEMPLATES=self.TEMPLATES
+            LOGIN_URL='/helpdesk/login/',
+            TEMPLATES=self.TEMPLATES,
+            SITE_ID=1
         )
 
         from django.test.runner import DiscoverRunner
