@@ -38,7 +38,7 @@
                                         <tr>
                                             <td colspan='2'>{{ ticket.resolution|force_escape|urlizetrunc:50|linebreaksbr }}</td>
                                         </tr>{% endif %}
-                                        
+
                                         <tr>
                                             <th>{% trans "Due Date" %}</th>
                                             <td>{{ ticket.due_date|date:"r" }} ({{ ticket.due_date|naturaltime }})</td>
@@ -55,7 +55,9 @@
 
                                         <tr>
                                             <th>{% trans "Submitter E-Mail" %}</th>
-                                            <td>{{ ticket.submitter_email }}{% if user.is_superuser %} <strong><a href='{% url 'helpdesk:email_ignore_add' %}?email={{ ticket.submitter_email }}'><button type="button" class="btn btn-warning btn-xs"><i class="fa fa-eye-slash"></i>&nbsp;{% trans "Ignore" %}</button></a></strong>{% endif %}</td>
+                                            <td>{{ ticket.submitter_email }}
+                                            {% if user.is_superuser %} {% if submitter_userprofile_url %}<strong><a href='{{submitter_userprofile_url}}'><button type="button" class="btn btn-primary btn-xs"><i class="fa fa-address-book"></i>&nbsp;{% trans "Profile" %}</button></a></strong>{% endif %}
+                                            <strong><a href='{% url 'helpdesk:email_ignore_add' %}?email={{ ticket.submitter_email }}'><button type="button" class="btn btn-warning btn-xs"><i class="fa fa-eye-slash"></i>&nbsp;{% trans "Ignore" %}</button></a></strong>{% endif %}</td>
                                         </tr>
 
                                         <tr>
