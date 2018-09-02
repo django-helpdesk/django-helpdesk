@@ -6,7 +6,7 @@ from distutils.util import convert_path
 from fnmatch import fnmatchcase
 from setuptools import setup, find_packages
 
-version = '0.2.9'
+version = '0.2.10'
 
 # Provided as an attribute, so you can append to these instead
 # of replicating them:
@@ -137,6 +137,7 @@ setup(
         "Framework :: Django",
         "Framework :: Django :: 1.11",
         "Framework :: Django :: 2.0",
+        "Framework :: Django :: 2.1",
         "Environment :: Web Environment",
         "Operating System :: OS Independent",
         "Intended Audience :: Customer Service",
