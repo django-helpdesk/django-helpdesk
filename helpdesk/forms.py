@@ -171,6 +171,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
     )
 
     attachment = forms.FileField(
+        widget=forms.FileInput(attrs={'class': 'form-control-file'}),
         required=False,
         label=_('Attach File'),
         help_text=_('You can attach a file such as a document or screenshot to this ticket.'),
@@ -297,7 +298,7 @@ class TicketForm(AbstractTicketForm):
     submitter_email = forms.EmailField(
         required=False,
         label=_('Submitter E-Mail Address'),
-        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        widget=forms.TextInput(attrs={'class': 'form-control', 'type': 'email'}),
         help_text=_('This e-mail address will receive copies of all public '
                     'updates to this ticket.'),
     )
@@ -357,7 +358,7 @@ class PublicTicketForm(AbstractTicketForm):
     Ticket Form creation for all users (public-facing).
     """
     submitter_email = forms.EmailField(
-        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        widget=forms.TextInput(attrs={'class': 'form-control', 'type': 'email'}),
         required=True,
         label=_('Your E-Mail Address'),
         help_text=_('We will e-mail you when your ticket is updated.'),

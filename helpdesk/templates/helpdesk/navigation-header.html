@@ -1,0 +1,125 @@
+{% load i18n helpdesk_staff %}
+
+    <nav class="navbar navbar-expand navbar-dark bg-dark static-top">
+
+      <a class="navbar-brand" href="{% url 'helpdesk:home' %}">{% trans 'Helpdesk' %}</a>
+
+      <button class="btn btn-link btn-sm text-white order-1 order-sm-0" id="sidebarToggle" href="#">
+        <i class="fas fa-bars"></i>
+      </button>
+
+      <!-- Navbar Search -->
+      <form class="d-none d-md-inline-block form-inline ml-auto mr-0 mr-md-3 my-2 my-md-0" id='searchform' method='get' action="{% url 'helpdesk:list' %}">
+        <div class="input-group">
+          <input type="text" class="form-control" name='q' size='15' placeholder='{% trans "Search..." %}' id='search_query' title='{% trans "Enter a keyword, or a ticket number to jump straight to that ticket." %}' aria-label="Search" aria-describedby="basic-addon2">
+          <input type='hidden' name='status' value='1' /><input type='hidden' name='status' value='2' /><input type='hidden' name='status' value='3' /><input type='hidden' name='search_type' value='header' />
+          <div class="input-group-append">
+            <button class="btn btn-primary" type="submit">
+              <i class="fas fa-search"></i> {% trans 'Go' %}
+            </button>
+          </div>
+        </div>
+        {% csrf_token %}
+      </form>
+      <!-- Navbar -->
+      <ul class="navbar-nav ml-auto ml-md-0">
+      {% if helpdesk_settings.HELPDESK_NAVIGATION_ENABLED and user.is_authenticated or user|is_helpdesk_staff %}
+        {% if user_saved_queries_ %}
+        <li class="nav-item dropdown no-arrow mx-1">
+          <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class="fas fa-search fa-fw"></i>
+            <span class="badge badge-danger">5+</span>
+          </a>
+          <div class="dropdown-menu dropdown-menu-right" aria-labelledby="alertsDropdown">
+            {% for q in user_saved_queries_ %}
+                <a class="dropdown-item" href="{% url 'helpdesk:list' %}?saved_query={{ q.id }}">{{ q.title }}
+                    {% if q.shared %}
+                    (Shared{% ifnotequal user q.user %} by {{ q.user.get_username }}{% endifnotequal %})
+                    {% endif %}
+                </a>
+            {% endfor %}
+          </div>
+        </li>
+        {% endif %}
+        <li class="nav-item dropdown no-arrow mx-1">
+          <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class="fas fa-bell fa-fw"></i>
+            <span class="badge badge-danger">9+</span>
+          </a>
+          <div class="dropdown-menu dropdown-menu-right" aria-labelledby="alertsDropdown">
+            <a class="dropdown-item" href="#">Action</a>
+            <a class="dropdown-item" href="#">Another action</a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="#">Something else here</a>
+          </div>
+        </li>
+        <li class="nav-item dropdown no-arrow mx-1">
+          <a class="nav-link dropdown-toggle" href="#" id="messagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class="fas fa-envelope fa-fw"></i>
+          </a>
+          <div class="dropdown-menu dropdown-menu-right" aria-labelledby="messagesDropdown">
+            <a class="dropdown-item" href="#">Action 2</a>
+            <a class="dropdown-item" href="#">Another action 2</a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="#">Something else here 2</a>
+          </div>
+        </li>
+        <li class="nav-item dropdown no-arrow">
+          <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class="fas fa-user-circle fa-fw"></i> {{ user.get_full_name|default:user.get_username }}
+          </a>
+          <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">
+            <a class="dropdown-item" href="{% url 'helpdesk:user_settings' %}"><i class="fas fa-fw fa-user-cog"></i> {% trans "User Settings" %}</a>
+            <a class="dropdown-item" href='{% url 'helpdesk:rss_index' %}'><i class="fas fa-fw fa-rss-square"></i> {% trans "RSS Feeds" %}</a>
+            {% if helpdesk_settings.HELPDESK_SHOW_CHANGE_PASSWORD and user.has_usable_password %}
+            <a class="dropdown-item" href="{% url 'auth_password_change' %}"><i class="fas fa-fw fa-user-secret"></i> {% trans "Change password" %}</a>
+            {% endif %}
+            <div class="dropdown-divider"></div>
+            {% if user.is_superuser %}
+            <a class="dropdown-item" href='{% url 'helpdesk:system_settings' %}'><i class="fas fa-fw fa-cogs"></i> {% trans "System Settings" %}</a>
+            <div class="dropdown-divider"></div>
+            {% endif %}
+            <a class="dropdown-item" href="{% url 'helpdesk:logout' %}"><i class="fas fa-fw fa-sign-out-alt"></i> {% trans "Logout" %}</a>
+          </div>
+        </li>
+      {% else %}
+        {% if helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE %}
+            <li class="nav-item dropdown no-arrow">
+                <a class="nav-link dropdown-toggle" href="{% url 'helpdesk:dashboard' %}" id="userDropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                    <i class="fas fa-user-circle fa-fw"></i> {% trans "Dashboard" %}
+                </a>
+            </li>
+            <li class="nav-item dropdown no-arrow">
+                <a class="nav-link dropdown-toggle" href="{% url 'helpdesk:submit' %}" id="userDropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                    <i class="fas fa-user-circle fa-fw"></i> {% trans "Submit a Ticket" %}
+                </a>
+            </li>
+        {% else %}
+          {% if helpdesk_settings.HELPDESK_SUBMIT_A_TICKET_PUBLIC %}
+            <li class="nav-item dropdown no-arrow">
+                <a class="nav-link dropdown-toggle" href="{% url 'helpdesk:submit' %}" id="userDropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                    <i class="fas fa-user-circle fa-fw"></i> {% trans "Submit a Ticket" %}
+                </a>
+            </li>
+          {% endif %}
+        {% endif %}
+        {% if helpdesk_settings.HELPDESK_KB_ENABLED %}
+            <li class="nav-item dropdown no-arrow">
+                <a class="nav-link dropdown-toggle" href="{% url 'helpdesk:kb_index' %}" id="userDropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                    <i class="fas fa-fw fa-database"></i> {% trans "Knowledgebase" %}
+                </a>
+            </li>
+        {% endif %}
+        {% if not request.path == '/helpdesk/login/' or user.is_authenticated %}
+            <li class="nav-item dropdown no-arrow">
+              {% if user.is_authenticated %}
+                <a class="nav-link dropdown-toggle" href="{% url 'helpdesk:logout' %}" id="userDropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fas fa-fw fa-sign-out-alt"></i> {% trans "Logout" %}</a>
+              {% else %}
+                <a class="nav-link dropdown-toggle" href="{% url 'helpdesk:login' %}?next={% if next %}{{ next|escape }}{% else %}{% url 'helpdesk:home' %}{% endif %}" id="userDropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fas fa-fw fa-sign-in-alt"></i> {% trans "Log In" %}</a>
+              {% endif %}
+            </li>
+        {% endif %}
+      {% endif %}
+      </ul>
+
+    </nav>
