@@ -1,10 +1,10 @@
 django-helpdesk - A Django powered ticket tracker for small businesses.
 =======================================================================
 
-.. image:: https://travis-ci.org/django-helpdesk/django-helpdesk.png?branch=master
+.. image:: https://travis-ci.org/django-helpdesk/django-helpdesk.png?branch=develop
     :target: https://travis-ci.org/django-helpdesk/django-helpdesk
 
-.. image:: https://codecov.io/gh/django-helpdesk/django-helpdesk/branch/master/graph/badge.svg
+.. image:: https://codecov.io/gh/django-helpdesk/django-helpdesk/branch/develop/graph/badge.svg
   :target: https://codecov.io/gh/django-helpdesk/django-helpdesk
 
 Copyright 2009-2018 Ross Poulton and django-helpdesk contributors. All Rights Reserved.
@@ -62,7 +62,7 @@ Installation
 
 `django-helpdesk` requires:
 
-* Django 2.x
+* Django 2.x+
 * Python 3.5+
 
 You can quickly install the latest stable version of `django-helpdesk`
