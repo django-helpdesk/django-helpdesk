@@ -2,6 +2,16 @@
 
 {% block helpdesk_title %}{% trans "Edit Ticket" %}{% endblock %}
 
+{% block helpdesk_breadcrumb %}
+<li class="breadcrumb-item">
+    <a href="{% url 'helpdesk:list' %}">{% trans "Tickets" %}</a>
+</li>
+<li class="breadcrumb-item">
+    <a href="{% url 'helpdesk:list' %}{{ ticket.id }}/">{{ ticket.queue.slug }}-{{ ticket.id }}</a>
+</li>
+<li class="breadcrumb-item active">{% trans "Edit Ticket" %}</li>
+{% endblock %}
+
 {% block helpdesk_body %}
 <div class="col-xs-6">
 <div class="panel panel-default">

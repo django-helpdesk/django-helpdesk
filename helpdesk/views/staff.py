@@ -1013,7 +1013,7 @@ def edit_ticket(request, ticket_id):
     else:
         form = EditTicketForm(instance=ticket)
 
-    return render(request, 'helpdesk/edit_ticket.html', {'form': form})
+    return render(request, 'helpdesk/edit_ticket.html', {'form': form, 'ticket': ticket})
 
 
 edit_ticket = staff_member_required(edit_ticket)
