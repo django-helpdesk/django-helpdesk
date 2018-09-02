@@ -77,3 +77,12 @@ def create_ticket(**kwargs):
 
 
 HELPDESK_URLCONF = 'helpdesk.urls'
+
+
+def print_response(response, stdout=False):
+    content = response.content.decode()
+    if stdout:
+        print(content)
+    else:
+        with open("response.html", "w") as f:  # pragma: no cover
+            f.write(content)  # pragma: no cover
