@@ -131,6 +131,7 @@ setup(
         "Programming Language :: Python :: 3.7",
         "Framework :: Django",
         "Framework :: Django :: 2.0",
+        "Framework :: Django :: 2.1",
         "Environment :: Web Environment",
         "Operating System :: OS Independent",
         "Intended Audience :: Customer Service",
