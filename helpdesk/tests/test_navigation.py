@@ -5,7 +5,8 @@ from django.urls import reverse
 from django.test import TestCase
 
 from helpdesk import settings as helpdesk_settings
-from helpdesk.tests.helpers import (get_staff_user, reload_urlconf, User, update_user_settings, delete_user_settings, create_ticket)
+from helpdesk.models import Queue
+from helpdesk.tests.helpers import (get_staff_user, reload_urlconf, User, update_user_settings, delete_user_settings, create_ticket, print_response)
 
 
 class KBDisabledTestCase(TestCase):
@@ -86,27 +87,68 @@ class StaffUsersOnlyTestCase(StaffUserTestCaseMixin, TestCase):
     # Use default values
     HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = False
 
-    def test_non_staff(self):
-        """Non-staff users are correctly identified"""
+    def setUp(self):
+        super().setUp()
+        self.non_staff_user = User.objects.create_user(username='henry.wensleydale', password='gouda', email='wensleydale@example.com')
+
+    def test_staff_user_detection(self):
+        """Staff and non-staff users are correctly identified"""
         from helpdesk.decorators import is_helpdesk_staff
 
-        user = User.objects.create_user(username='henry.wensleydale', password='gouda', email='wensleydale@example.com')
+        self.assertFalse(is_helpdesk_staff(self.non_staff_user))
+        self.assertTrue(is_helpdesk_staff(get_staff_user()))
 
-        self.assertFalse(is_helpdesk_staff(user))
-
-    def test_staff_only(self):
-        """If HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE is False,
-        only staff users should be able to access the dashboard.
+    def test_staff_can_access_dashboard(self):
+        """When HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE is False,
+        staff users should be able to access the dashboard.
         """
         from helpdesk.decorators import is_helpdesk_staff
 
         user = get_staff_user()
-
-        self.assertTrue(is_helpdesk_staff(user))
-
         self.client.login(username=user.username, password='password')
         response = self.client.get(reverse('helpdesk:dashboard'), follow=True)
         self.assertTemplateUsed(response, 'helpdesk/dashboard.html')
+
+    def test_non_staff_cannot_access_dashboard(self):
+        """When HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE is False,
+        non-staff users should not be able to access the dashboard.
+        """
+        from helpdesk.decorators import is_helpdesk_staff
+
+        user = self.non_staff_user
+        self.client.login(username=user.username, password=user.password)
+        response = self.client.get(reverse('helpdesk:dashboard'), follow=True)
+        self.assertTemplateUsed(response, 'helpdesk/registration/login.html')
+
+    def test_staff_rss(self):
+        """If HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE is False,
+        staff users should be able to access rss feeds.
+        """
+        user = get_staff_user()
+        self.client.login(username=user.username, password='password')
+        response = self.client.get(reverse('helpdesk:rss_unassigned'), follow=True)
+        self.assertContains(response, 'Unassigned Open and Reopened tickets')
+
+    def test_non_staff_cannot_rss(self):
+        """If HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE is False,
+        non-staff users should not be able to access rss feeds.
+        """
+        user = self.non_staff_user
+        self.client.login(username=user.username, password='password')
+        queue = Queue.objects.create(
+            title="Foo",
+            slug="test_queue",
+        )
+        rss_urls = [
+            reverse('helpdesk:rss_user', args=[user.username]),
+            reverse('helpdesk:rss_user_queue', args=[user.username, 'test_queue']),
+            reverse('helpdesk:rss_queue', args=['test_queue']),
+            reverse('helpdesk:rss_unassigned'),
+            reverse('helpdesk:rss_activity'),
+        ]
+        for rss_url in rss_urls:
+            response = self.client.get(rss_url, follow=True)
+            self.assertTemplateUsed(response, 'helpdesk/registration/login.html')
 
 
 class CustomStaffUserTestCase(StaffUserTestCaseMixin, TestCase):
