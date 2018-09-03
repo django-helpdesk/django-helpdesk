@@ -1,5 +1,14 @@
 {% extends "helpdesk/public_base.html" %}{% load i18n %}
 
+{% block helpdesk_title %}{% trans "Knowledgebase" %}{% endblock %}
+
+{% block helpdesk_breadcrumb %}
+<li class="breadcrumb-item">
+    <a href="{% url 'helpdesk:kb_index' %}">{% trans "Knowledgebase" %}</a>
+</li>
+<li class="breadcrumb-item active">Overview</li>
+{% endblock %}
+
 {% block helpdesk_body %}
 <h2>{% trans "Knowledgebase" %}</h2>
 

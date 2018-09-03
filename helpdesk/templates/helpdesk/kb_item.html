@@ -1,5 +1,15 @@
 {% extends "helpdesk/public_base.html" %}{% load i18n %}{% load markdown_deux_tags %}
 
+{% block helpdesk_breadcrumb %}
+<li class="breadcrumb-item">
+    <a href="{% url 'helpdesk:kb_index' %}">{% trans "Knowledgebase" %}</a>
+</li>
+<li class="breadcrumb-item">
+    <a href="{{ category.get_absolute_url }}">{% blocktrans with category.title as kbcat %}{{ kbcat }}{% endblocktrans %}</a>
+</li>
+<li class="breadcrumb-item active">Overview</li>
+{% endblock %}
+
 {% block helpdesk_body %}
 <h2>{% trans 'Knowledgebase' %}:{% blocktrans with item.title as item %}{{ item }}{% endblocktrans %}</h2>
 

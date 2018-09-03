@@ -1,9 +1,10 @@
 {% extends "helpdesk/base.html" %}
 {% load i18n humanize %}
 {% load static from staticfiles %}
-{% block helpdesk_title %}{% trans "Tickets" %}{% endblock %}
-{% block helpdesk_head %}
 
+{% block helpdesk_title %}{% trans "Tickets" %}{% endblock %}
+
+{% block helpdesk_head %}
 <script src='{% static "helpdesk/filter.js" %}'></script>
 <script>
 $(document).ready(function() {
@@ -33,10 +34,19 @@ $(document).ready(function() {
 });
 </script>
 {% endblock %}
-{% block h1_title %}Tickets
-    {% if from_saved_query %} [{{ saved_query.title }}]{% endif %}{% endblock %}
-{% block helpdesk_body %}
 
+{% block h1_title %}Tickets
+    {% if from_saved_query %} [{{ saved_query.title }}]{% endif %}
+{% endblock %}
+
+{% block helpdesk_breadcrumb %}
+<li class="breadcrumb-item">
+    <a href="{% url 'helpdesk:list' %}">{% trans "Tickets" %}</a>
+</li>
+<li class="breadcrumb-item active">Overview</li>
+{% endblock %}
+
+{% block helpdesk_body %}
 {% load in_list %}
 
             <div class="row">

@@ -25,6 +25,13 @@
 
 {% endblock %}
 
+{% block helpdesk_breadcrumb %}
+<li class="breadcrumb-item">
+    <a href="{% url 'helpdesk:report_index' %}">{% trans "Reports &amp; Statistics" %}</a>
+</li>
+<li class="breadcrumb-item active">{{ title }}</li>
+{% endblock %}
+
 {% block helpdesk_body %}
 <h2>{% trans "Reports &amp; Statistics" %}</h2>
 
