@@ -6,7 +6,7 @@ from distutils.util import convert_path
 from fnmatch import fnmatchcase
 from setuptools import setup, find_packages
 
-version = '0.2.6+nimbis.17'
+version = '0.2.6+nimbis.18'
 
 # Provided as an attribute, so you can append to these instead
 # of replicating them:
@@ -159,4 +159,3 @@ setup(
     zip_safe=False,
     install_requires=get_requirements(),
 )
-

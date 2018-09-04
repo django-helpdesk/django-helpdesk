@@ -1,3 +1,7 @@
+0.2.6+nimbis.18 (2018-08-29):
+
+	* Remove attachments from all sent emails.
+
 0.2.6+nimbis.17 (2018-7-17):
 
 	* "Owned by me" tickets will now filter based on all django-allauth
