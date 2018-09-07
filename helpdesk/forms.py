@@ -301,21 +301,27 @@ class TicketForm(AbstractTicketForm):
         help_text=_('This e-mail address will receive copies of all public '
                     'updates to this ticket.'),
     )
-
     assigned_to = forms.ChoiceField(
-        widget=forms.Select(attrs={'class': 'form-control'}),
-        choices=(),
+        widget=forms.Select(attrs={'class': 'form-control'}) if not helpdesk_settings.HELPDESK_CREATE_TICKET_HIDE_ASSIGNED_TO else forms.HiddenInput(),
         required=False,
         label=_('Case owner'),
         help_text=_('If you select an owner other than yourself, they\'ll be '
                     'e-mailed details of this ticket immediately.'),
+
+        choices=()
     )
 
     def __init__(self, *args, **kwargs):
         """
         Add any custom fields that are defined to the form.
         """
-        super(TicketForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
+        self.fields['queue'].choices = [('', '--------')] + [(q.id, q.title) for q in Queue.objects.all()]
+        if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS:
+            assignable_users = User.objects.filter(is_active=True, is_staff=True).order_by(User.USERNAME_FIELD)
+        else:
+            assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
+        self.fields['assigned_to'].choices = [('', '--------')] + [(u.id, u.get_username()) for u in assignable_users]
         self._add_form_custom_fields()
 
     def save(self, user=None):
@@ -375,8 +381,8 @@ class PublicTicketForm(AbstractTicketForm):
             self.fields['priority'].widget = forms.HiddenInput()
         if hasattr(settings, 'HELPDESK_PUBLIC_TICKET_DUE_DATE'):
             self.fields['due_date'].widget = forms.HiddenInput()
-
-        self._add_form_custom_fields(False)
+        self.fields['queue'].choices = [('', '--------')] + [
+            (q.id, q.title) for q in Queue.objects.filter(allow_public_submission=True)]
 
     def save(self):
         """

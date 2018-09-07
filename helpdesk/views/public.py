@@ -18,55 +18,58 @@ from django.shortcuts import render
 from django.utils.http import urlquote
 from django.utils.translation import ugettext as _
 from django.conf import settings
+from django.views.generic.edit import FormView
 
 from helpdesk import settings as helpdesk_settings
 from helpdesk.decorators import protect_view, is_helpdesk_staff
+import helpdesk.views.staff as staff
 from helpdesk.forms import PublicTicketForm
 from helpdesk.lib import text_is_spam
 from helpdesk.models import Ticket, Queue, UserSettings, KBCategory
 
 
-@protect_view
-def homepage(request):
-    if not request.user.is_authenticated and helpdesk_settings.HELPDESK_REDIRECT_TO_LOGIN_BY_DEFAULT:
-        return HttpResponseRedirect(reverse('login'))
-
-    if is_helpdesk_staff(request.user) or \
-            (request.user.is_authenticated and
-             helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE):
-        try:
-            if request.user.usersettings_helpdesk.settings.get('login_view_ticketlist', False):
-                return HttpResponseRedirect(reverse('helpdesk:list'))
-            else:
-                return HttpResponseRedirect(reverse('helpdesk:dashboard'))
-        except UserSettings.DoesNotExist:
-            return HttpResponseRedirect(reverse('helpdesk:dashboard'))
-
-    if request.method == 'POST':
-        form = PublicTicketForm(request.POST, request.FILES)
-        form.fields['queue'].choices = [('', '--------')] + [
-            (q.id, q.title) for q in Queue.objects.filter(allow_public_submission=True)]
-        if form.is_valid():
-            if text_is_spam(form.cleaned_data['body'], request):
-                # This submission is spam. Let's not save it.
-                return render(request, template_name='helpdesk/public_spam.html')
-            else:
-                ticket = form.save()
-                try:
-                    return HttpResponseRedirect('%s?ticket=%s&email=%s' % (
-                        reverse('helpdesk:public_view'),
-                        ticket.ticket_for_url,
-                        urlquote(ticket.submitter_email))
-                    )
-                except ValueError:
-                    # if someone enters a non-int string for the ticket
-                    return HttpResponseRedirect(reverse('helpdesk:home'))
+def create_ticket(request, *args, **kwargs):
+    if is_helpdesk_staff(request.user):
+        return staff.CreateTicketView.as_view()(request, *args, **kwargs)
     else:
+        return CreateTicketView.as_view()(request, *args, **kwargs)
+
+
+class CreateTicketView(FormView):
+    template_name = 'helpdesk/public_create_ticket.html'
+    form_class = PublicTicketForm
+
+    def dispatch(self, *args, **kwargs):
+        request = self.request
+        if not request.user.is_authenticated and helpdesk_settings.HELPDESK_REDIRECT_TO_LOGIN_BY_DEFAULT:
+            return HttpResponseRedirect(reverse('login'))
+
+        if is_helpdesk_staff(request.user) or \
+                (request.user.is_authenticated and
+                 helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE):
+            try:
+                if request.user.usersettings_helpdesk.settings.get('login_view_ticketlist', False):
+                    return HttpResponseRedirect(reverse('helpdesk:list'))
+                else:
+                    return HttpResponseRedirect(reverse('helpdesk:dashboard'))
+            except UserSettings.DoesNotExist:
+                return HttpResponseRedirect(reverse('helpdesk:dashboard'))
+        return super().dispatch(*args, **kwargs)
+
+    def get_context(self):
+        knowledgebase_categories = KBCategory.objects.all()
+        return {
+            'helpdesk_settings': helpdesk_settings,
+            'kb_categories': knowledgebase_categories
+        }
+
+    def get_initial(self):
+        request = self.request
+        initial_data = {}
         try:
             queue = Queue.objects.get(slug=request.GET.get('queue', None))
         except Queue.DoesNotExist:
             queue = None
-        initial_data = {}
 
         # add pre-defined data for public ticket
         if hasattr(settings, 'HELPDESK_PUBLIC_TICKET_QUEUE'):
@@ -85,18 +88,31 @@ def homepage(request):
 
         if request.user.is_authenticated and request.user.email:
             initial_data['submitter_email'] = request.user.email
+        return initial_data
 
-        form = PublicTicketForm(initial=initial_data)
-        form.fields['queue'].choices = [('', '--------')] + [
-            (q.id, q.title) for q in Queue.objects.filter(allow_public_submission=True)]
+    def form_valid(self, form):
+        request = self.request
+        if text_is_spam(form.cleaned_data['body'], request):
+            # This submission is spam. Let's not save it.
+            return render(request, template_name='helpdesk/public_spam.html')
+        else:
+            ticket = form.save()
+            try:
+                return HttpResponseRedirect('%s?ticket=%s&email=%s' % (
+                    reverse('helpdesk:public_view'),
+                    ticket.ticket_for_url,
+                    urlquote(ticket.submitter_email))
+                )
+            except ValueError:
+                # if someone enters a non-int string for the ticket
+                return HttpResponseRedirect(reverse('helpdesk:home'))
 
-    knowledgebase_categories = KBCategory.objects.all()
+    def get_success_url(self):
+        request = self.request
 
-    return render(request, 'helpdesk/public_homepage.html', {
-        'form': form,
-        'helpdesk_settings': helpdesk_settings,
-        'kb_categories': knowledgebase_categories
-    })
+
+class Homepage(CreateTicketView):
+    template_name = 'helpdesk/public_homepage.html'
 
 
 @protect_view
