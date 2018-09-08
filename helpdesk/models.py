@@ -21,6 +21,7 @@ from django.utils.encoding import python_2_unicode_compatible
 import re
 
 import six
+import uuid
 
 
 @python_2_unicode_compatible
@@ -351,6 +352,10 @@ class Queue(models.Model):
                 pass
 
 
+def mk_secret():
+    return str(uuid.uuid4())
+
+
 @python_2_unicode_compatible
 class Ticket(models.Model):
     """
@@ -480,6 +485,12 @@ class Ticket(models.Model):
                     'automatically by management/commands/escalate_tickets.py.'),
     )
 
+    secret_key = models.CharField(
+        _("Secret key needed for viewing/editing ticket by non-logged in users"),
+        max_length=36,
+        default=mk_secret,
+    )
+
     def _get_assigned_to(self):
         """ Custom property to allow us to easily print 'Unassigned' if a
         ticket has no owner, or the users name if it's assigned. If the user
@@ -544,11 +555,12 @@ class Ticket(models.Model):
             site = Site.objects.get_current()
         except ImproperlyConfigured:
             site = Site(domain='configure-django-sites.com')
-        return u"http://%s%s?ticket=%s&email=%s" % (
+        return u"http://%s%s?ticket=%s&email=%s&key=%s" % (
             site.domain,
             reverse('helpdesk:public_view'),
             self.ticket_for_url,
-            self.submitter_email
+            self.submitter_email,
+            self.secret_key
         )
     ticket_url = property(_get_ticket_url)
 
