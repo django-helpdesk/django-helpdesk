@@ -26,6 +26,7 @@ from django.utils.translation import ugettext as _
 from django.utils.html import escape
 from django import forms
 from django.utils import timezone
+from django.views.generic.edit import FormView
 
 from django.utils import six
 
@@ -46,6 +47,7 @@ from helpdesk.models import (
     IgnoreEmail, TicketCC, TicketDependency,
 )
 from helpdesk import settings as helpdesk_settings
+from helpdesk.views.permissions import MustBeStaffMixin
 
 User = get_user_model()
 
@@ -1019,44 +1021,29 @@ def edit_ticket(request, ticket_id):
 edit_ticket = staff_member_required(edit_ticket)
 
 
-@helpdesk_staff_member_required
-def create_ticket(request):
-    if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS:
-        assignable_users = User.objects.filter(is_active=True, is_staff=True).order_by(User.USERNAME_FIELD)
-    else:
-        assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
+class CreateTicketView(MustBeStaffMixin, FormView):
+    template_name = 'helpdesk/create_ticket.html'
+    form_class = TicketForm
 
-    if request.method == 'POST':
-        form = TicketForm(request.POST, request.FILES)
-        form.fields['queue'].choices = [('', '--------')] + [
-            (q.id, q.title) for q in Queue.objects.all()]
-        form.fields['assigned_to'].choices = [('', '--------')] + [
-            (u.id, u.get_username()) for u in assignable_users]
-        if form.is_valid():
-            ticket = form.save(user=request.user)
-            if _has_access_to_queue(request.user, ticket.queue):
-                return HttpResponseRedirect(ticket.get_absolute_url())
-            else:
-                return HttpResponseRedirect(reverse('helpdesk:dashboard'))
-    else:
+    def get_initial(self):
         initial_data = {}
+        request = self.request
         if request.user.usersettings_helpdesk.settings.get('use_email_as_submitter', False) and request.user.email:
             initial_data['submitter_email'] = request.user.email
         if 'queue' in request.GET:
             initial_data['queue'] = request.GET['queue']
+        return initial_data
 
-        form = TicketForm(initial=initial_data)
-        form.fields['queue'].choices = [('', '--------')] + [
-            (q.id, q.title) for q in Queue.objects.all()]
-        form.fields['assigned_to'].choices = [('', '--------')] + [
-            (u.id, u.get_username()) for u in assignable_users]
-        if helpdesk_settings.HELPDESK_CREATE_TICKET_HIDE_ASSIGNED_TO:
-            form.fields['assigned_to'].widget = forms.HiddenInput()
+    def form_valid(self, form):
+        self.ticket = form.save()
+        return super().form_valid(form)
 
-    return render(request, 'helpdesk/create_ticket.html', {'form': form})
-
-
-create_ticket = staff_member_required(create_ticket)
+    def get_success_url(self):
+        request = self.request
+        if _has_access_to_queue(request.user, self.ticket.queue):
+            return self.ticket.get_absolute_url()
+        else:
+            return reverse('helpdesk:dashboard')
 
 
 @helpdesk_staff_member_required

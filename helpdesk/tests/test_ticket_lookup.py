@@ -2,9 +2,13 @@
 from django.urls import reverse
 from django.test import TestCase
 from helpdesk.models import Ticket, Queue
+from django.test.utils import override_settings
 
 
-class TestKBDisabled(TestCase):
+@override_settings(
+    HELPDESK_VIEW_A_TICKET_PUBLIC=True
+)
+class TestTicketLookupPublicEnabled(TestCase):
     def setUp(self):
         q = Queue(title='Q1', slug='q1')
         q.save()
