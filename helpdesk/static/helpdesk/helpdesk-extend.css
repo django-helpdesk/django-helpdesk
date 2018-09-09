@@ -1,6 +1,7 @@
 /*
 Bootstrap overrides
 */
+@import 'helpdesk-customize.css';
 
 .btn-file {
     position: relative;
