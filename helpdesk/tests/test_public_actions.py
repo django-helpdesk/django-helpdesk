@@ -29,12 +29,21 @@ class PublicActionsTestCase(TestCase):
         self.client = Client()
 
     def test_public_view_ticket(self):
+        # Without key, we get 403
         response = self.client.get('%s?ticket=%s&email=%s' % (
             reverse('helpdesk:public_view'),
             self.ticket.ticket_for_url,
             'test.submitter@example.com'))
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 403)
         self.assertTemplateNotUsed(response, 'helpdesk/public_view_form.html')
+        # With a key it works
+        response = self.client.get('%s?ticket=%s&email=%s&key=%s' % (
+            reverse('helpdesk:public_view'),
+            self.ticket.ticket_for_url,
+            'test.submitter@example.com',
+            self.ticket.secret_key))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'helpdesk/public_view_ticket.html')
 
     def test_public_close(self):
         old_status = self.ticket.status
@@ -49,10 +58,11 @@ class PublicActionsTestCase(TestCase):
 
         current_followups = ticket.followup_set.all().count()
 
-        response = self.client.get('%s?ticket=%s&email=%s&close' % (
+        response = self.client.get('%s?ticket=%s&email=%s&close&key=%s' % (
             reverse('helpdesk:public_view'),
             ticket.ticket_for_url,
-            'test.submitter@example.com'))
+            'test.submitter@example.com',
+            ticket.secret_key))
 
         ticket = Ticket.objects.get(id=self.ticket.id)
 

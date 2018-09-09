@@ -12,7 +12,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import views as auth_views
 from django.views.generic import TemplateView
 
-from helpdesk.decorators import helpdesk_staff_member_required
+from helpdesk.decorators import helpdesk_staff_member_required, protect_view
 from helpdesk import settings as helpdesk_settings
 from helpdesk.views import feeds, staff, public, kb
 
@@ -45,10 +45,6 @@ urlpatterns = [
     url(r'^tickets/update/$',
         staff.mass_update,
         name='mass_update'),
-
-    url(r'^tickets/submit/$',
-        staff.create_ticket,
-        name='submit'),
 
     url(r'^tickets/(?P<ticket_id>[0-9]+)/$',
         staff.view_ticket,
@@ -149,8 +145,12 @@ urlpatterns = [
 
 urlpatterns += [
     url(r'^$',
-        public.homepage,
+        protect_view(public.Homepage.as_view()),
         name='home'),
+
+    url(r'^tickets/submit/$',
+        public.create_ticket,
+        name='submit'),
 
     url(r'^view/$',
         public.view_ticket,
