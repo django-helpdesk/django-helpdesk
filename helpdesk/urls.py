@@ -222,6 +222,6 @@ urlpatterns += [
         name='help_context'),
 
     url(r'^system_settings/$',
-        DirectTemplateView.as_view(template_name='helpdesk/system_settings.html'),
+        login_required(DirectTemplateView.as_view(template_name='helpdesk/system_settings.html')),
         name='system_settings'),
 ]
