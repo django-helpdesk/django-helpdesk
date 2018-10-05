@@ -49,7 +49,7 @@ class CreateTicketView(FormView):
                 (request.user.is_authenticated and
                  helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE):
             try:
-                if request.user.usersettings_helpdesk.settings.get('login_view_ticketlist', False):
+                if request.user.usersettings_helpdesk.login_view_ticketlist:
                     return HttpResponseRedirect(reverse('helpdesk:list'))
                 else:
                     return HttpResponseRedirect(reverse('helpdesk:dashboard'))

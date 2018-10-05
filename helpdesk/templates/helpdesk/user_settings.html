@@ -7,11 +7,14 @@
 
 <p>{% blocktrans %}Use the following options to change the way your helpdesk system works for you. These settings do not impact any other user.{% endblocktrans %}</p>
 
-<form role="form" method='post' action='./'>
+{% block form_content %}
+<form role="form" method="post">
+    {% csrf_token %}
     {{ form|bootstrap }}
     <div class="form-group">
-        <input class="btn btn-primary" type='submit' value='{% trans "Save Options" %}' />
+      <input type="submit" value="Submit"/>
     </div>
-{% csrf_token %}</form>
+</form>
+{% endblock %}
 
 {% endblock %}

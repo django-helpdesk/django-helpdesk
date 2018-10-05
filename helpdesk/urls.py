@@ -127,7 +127,7 @@ urlpatterns = [
         name='delete_query'),
 
     url(r'^settings/$',
-        staff.user_settings,
+        staff.EditUserSettingsView.as_view(),
         name='user_settings'),
 
     url(r'^ignore/$',
