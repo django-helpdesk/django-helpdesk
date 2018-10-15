@@ -344,6 +344,7 @@ ORDER_COLUMN_CHOICES = Choices(
     ('8', 'assigned_to')
 )
 
+
 def query_tickets_by_args(objects, order_by, **kwargs):
     """
     This function takes in a list of ticket objects from the views and throws it
@@ -370,13 +371,13 @@ def query_tickets_by_args(objects, order_by, **kwargs):
 
     if search_value:
         queryset = queryset.filter(Q(id__icontains=search_value) |
-                                    Q(priority__icontains=search_value) |
-                                    Q(title__icontains=search_value) |
-                                    Q(queue__title__icontains=search_value) |
-                                    Q(status__icontains=search_value) |
-                                    Q(created__icontains=search_value) |
-                                    Q(due_date__icontains=search_value) |
-                                    Q(assigned_to__email__icontains=search_value))
+                                   Q(priority__icontains=search_value) |
+                                   Q(title__icontains=search_value) |
+                                   Q(queue__title__icontains=search_value) |
+                                   Q(status__icontains=search_value) |
+                                   Q(created__icontains=search_value) |
+                                   Q(due_date__icontains=search_value) |
+                                   Q(assigned_to__email__icontains=search_value))
 
     count = queryset.count()
     queryset = queryset.order_by(order_column)[start:start + length]
@@ -385,4 +386,4 @@ def query_tickets_by_args(objects, order_by, **kwargs):
         'count': count,
         'total': total,
         'draw': draw
-}
+    }

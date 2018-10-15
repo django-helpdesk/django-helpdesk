@@ -10,6 +10,7 @@ datatables for ticket_list.html. Called from staff.datatables_ticket_list.
 
 """
 
+
 class TicketSerializer(serializers.ModelSerializer):
     ticket = serializers.SerializerMethodField()
     assigned_to = serializers.SerializerMethodField()
@@ -24,7 +25,7 @@ class TicketSerializer(serializers.ModelSerializer):
         fields = ('ticket', 'id', 'priority', 'title', 'queue', 'status', 'created', 'due_date', 'assigned_to', 'row_class')
 
     def get_ticket(self, obj):
-        return (str(obj.id)+" "+obj.ticket)
+        return (str(obj.id) + " " + obj.ticket)
 
     def get_status(self, obj):
         return (obj.get_status)
