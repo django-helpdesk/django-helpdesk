@@ -7,3 +7,5 @@ lxml
 simplejson
 pytz
 six
+djangorestframework
+django-model-utils

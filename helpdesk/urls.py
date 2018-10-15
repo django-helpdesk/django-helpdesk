@@ -141,6 +141,10 @@ urlpatterns = [
     url(r'^ignore/delete/(?P<id>[0-9]+)/$',
         staff.email_ignore_del,
         name='email_ignore_del'),
+
+    url(r'^datatables_ticket_list/$',
+        staff.datatables_ticket_list,
+        name="datatables_ticket_list"),
 ]
 
 urlpatterns += [
@@ -222,6 +226,6 @@ urlpatterns += [
         name='help_context'),
 
     url(r'^system_settings/$',
-        DirectTemplateView.as_view(template_name='helpdesk/system_settings.html'),
+        login_required(DirectTemplateView.as_view(template_name='helpdesk/system_settings.html')),
         name='system_settings'),
 ]

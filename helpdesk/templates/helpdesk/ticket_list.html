@@ -7,32 +7,100 @@
 {% block helpdesk_head %}
 <script src='{% static "helpdesk/filter.js" %}'></script>
 <script>
-$(document).ready(function() {
+    {% if server_side %}
+        $(document).ready(function()
+        {
+          let url = ""
+            //DataTables Initialization
+            let tasks_table = $('#ticketTable').DataTable({
+                "language": {
+                    "emptyTable": "{% trans 'No Tickets Match Your Selection' %}"
+                },
+                "processing": true,
+                "serverSide": true,
+                "ajax": {
+                    "url": "/datatables_ticket_list/",
+                    "type": "GET",
+                },
+                createdRow: function( row, data, dataIndex )
+                {
+                    $( row ).addClass(data.row_class);
+                },
 
-    $('#ticketTable').DataTable({
-            "oLanguage": {
-                "sEmptyTable": "{% trans 'No Tickets Match Your Selection' %}"
-            },
-            "order": [],
-            responsive: true
-    });
-
-    $("#select_all").click(function() {
-        $(".ticket_multi_select").attr('checked', true);
-        return false;
-    });
-    $("#select_none").click(function() {
-        $(".ticket_multi_select").attr('checked', false);
-        return false;
-    });
-    $("#select_inverse").click(function() {
-        $(".ticket_multi_select").each(function() {
-            $(this).attr('checked', !$(this).attr('checked'));
+                "columns": [
+                  {"data": "ticket",
+                    "render": function (data, type, row, meta)
+                    {
+                        var id = data.split(" ")[0];
+                        var name = data.split(" ")[1];
+                        let url = "{% url 'helpdesk:view' 1234 %}".replace(/1234/, id.toString());
+                        if (type === 'display')
+                        {
+                          data = '<b><a href="' + url + '" >' + name + '</a></b>';
+                        }
+                        return data
+                    }
+                  },
+                  {"data": "id",
+                    "orderable": false,
+                    "render": function(data, type, row, meta)
+                    {
+                      var pk = data;
+                      if(type === 'display'){
+                        data = "<input type='checkbox' name='ticket_id' value='"+pk+"'"+ "class='ticket_multi_select' />"
+                      }
+                        return data
+                      }
+                  },
+                  {"data": "priority"},
+                  {"data": "title",
+                    "render": function (data, type, row, meta)
+                    {
+                      if (type === 'display')
+                      {
+                        data = '<b><a href="' + url + '" >' + data + '</a></b>';
+                      }
+                      return data
+                    }
+                  },
+                  {"data": "queue"},
+                  {"data": "status"},
+                  {"data": "created"},
+                  {"data": "due_date"},
+                  {"data": "assigned_to"},
+                ]
+            });
+          })
+    {% else %}
+        $('#ticketTable').DataTable({
+          "oLanguage": {
+              "sEmptyTable": "{% trans 'No Tickets Match Your Selection' %}"
+          },
+          "order": [],
+          responsive: true
         });
-        return false;
-    });
-});
+    {% endif %}
+    $(document).ready(function()
+    {
+        $("#select_all").click(function() {
+        $(".ticket_multi_select").attr('checked', true);
+            return false;
+        });
+        $("#select_none").click(function() {
+            $(".ticket_multi_select").attr('checked', false);
+            return false;
+        });
+        $("#select_inverse").click(function() {
+            $(".ticket_multi_select").each(function() {
+                $(this).attr('checked', !$(this).attr('checked'));
+            });
+            return false;
+        });
+      })
 </script>
+
+
+
 {% endblock %}
 
 {% block h1_title %}Tickets
@@ -237,21 +305,9 @@ $(document).ready(function() {
                                             <th>{% trans "Owner" %}</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
-                                        {% for ticket in tickets %}
-                                        <tr class="{{ ticket.get_priority_css_class }}">
-                                            <th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.ticket }}</a></th>
-                                            <td><input type='checkbox' name='ticket_id' value='{{ ticket.id }}' class='ticket_multi_select' /></td>
-                                            <td>{{ ticket.priority }}</td>
-                                            <th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></th>
-                                            <td>{{ ticket.queue }}</td>
-                                            <td>{{ ticket.get_status }}</td>
-                                            <td data-order='{{ ticket.created|date:"U" }}'><span title='{{ ticket.created|date:"r" }}'>{{ ticket.created|naturaltime }}</span></td>
-                                            <td data-order='{{ ticket.due_date|date:"U" }}'><span title='{{ ticket.due_date|date:"r" }}'>{{ ticket.due_date|naturaltime }}</span></td>
-                                            <td>{{ ticket.get_assigned_to }}</td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
+                                    {% if not server_side %}
+                                    {% include 'helpdesk/ticket_list_table.html' %}
+                                    {% endif %}
                                 </table>
                             {% csrf_token %}
 

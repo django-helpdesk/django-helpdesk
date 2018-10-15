@@ -57,12 +57,10 @@ class CreateTicketView(FormView):
                 return HttpResponseRedirect(reverse('helpdesk:dashboard'))
         return super().dispatch(*args, **kwargs)
 
-    def get_context(self):
-        knowledgebase_categories = KBCategory.objects.all()
-        return {
-            'helpdesk_settings': helpdesk_settings,
-            'kb_categories': knowledgebase_categories
-        }
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['kb_categories'] = KBCategory.objects.all()
+        return context
 
     def get_initial(self):
         request = self.request
