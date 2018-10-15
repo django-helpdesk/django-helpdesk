@@ -141,6 +141,10 @@ urlpatterns = [
     url(r'^ignore/delete/(?P<id>[0-9]+)/$',
         staff.email_ignore_del,
         name='email_ignore_del'),
+
+    url(r'^datatables_ticket_list/$',
+        staff.datatables_ticket_list,
+        name="datatables_ticket_list"),
 ]
 
 urlpatterns += [

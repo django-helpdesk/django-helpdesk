@@ -21,6 +21,8 @@ from helpdesk.models import Attachment, EmailTemplate
 
 import six
 
+from model_utils import Choices
+
 if six.PY3:
     from base64 import encodebytes as b64encode
     from base64 import decodebytes as b64decode
@@ -329,3 +331,58 @@ def process_attachments(followup, attached_files):
                 attachments.append([filename, att.file])
 
     return attachments
+
+
+ORDER_COLUMN_CHOICES = Choices(
+    ('0', 'id'),
+    ('2', 'priority'),
+    ('3', 'title'),
+    ('4', 'queue'),
+    ('5', 'status'),
+    ('6', 'created'),
+    ('7', 'due_date'),
+    ('8', 'assigned_to')
+)
+
+def query_tickets_by_args(objects, order_by, **kwargs):
+    """
+    This function takes in a list of ticket objects from the views and throws it
+    to the datatables on ticket_list.html. If a search string was entered, this
+    function filters existing dataset on search string and returns a filtered
+    filtered list. The `draw`, `length` etc parameters are for datatables to
+    display meta data on the table contents. The returning queryset is passed
+    to a Serializer called TicketSerializer in serializers.py.
+    """
+    draw = int(kwargs.get('draw', None)[0])
+    length = int(kwargs.get('length', None)[0])
+    start = int(kwargs.get('start', None)[0])
+    search_value = kwargs.get('search[value]', None)[0]
+    order_column = kwargs.get('order[0][column]', None)[0]
+    order = kwargs.get('order[0][dir]', None)[0]
+
+    order_column = ORDER_COLUMN_CHOICES[order_column]
+    # django orm '-' -> desc
+    if order == 'desc':
+        order_column = '-' + order_column
+
+    queryset = objects.all().order_by(order_by)
+    total = queryset.count()
+
+    if search_value:
+        queryset = queryset.filter(Q(id__icontains=search_value) |
+                                    Q(priority__icontains=search_value) |
+                                    Q(title__icontains=search_value) |
+                                    Q(queue__title__icontains=search_value) |
+                                    Q(status__icontains=search_value) |
+                                    Q(created__icontains=search_value) |
+                                    Q(due_date__icontains=search_value) |
+                                    Q(assigned_to__email__icontains=search_value))
+
+    count = queryset.count()
+    queryset = queryset.order_by(order_column)[start:start + length]
+    return {
+        'items': queryset,
+        'count': count,
+        'total': total,
+        'draw': draw
+}

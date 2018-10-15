@@ -30,6 +30,14 @@ from django.views.generic.edit import FormView
 
 from django.utils import six
 
+# For datatables serverside
+from django.core.cache import cache
+from rest_framework import viewsets, status
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
+from helpdesk.lib import query_tickets_by_args
+from helpdesk.serializers import TicketSerializer
+
 from helpdesk.decorators import (
     helpdesk_staff_member_required, helpdesk_superuser_required,
     is_helpdesk_staff
@@ -980,6 +988,14 @@ def ticket_list(request):
 
     user_saved_queries = SavedSearch.objects.filter(Q(user=request.user) | Q(shared__exact=True))
 
+    # Serverside processing on datatables is optional. Set
+    # USE_SERVERSIDE_PROCESSING to False in settings.py to disable
+    if helpdesk_settings.USE_SERVERSIDE_PROCESSING:
+        cache.set('ticket_qs', ticket_qs)
+        context['server_side'] = True
+    else:
+        context['server_side'] = False
+
     return render(request, 'helpdesk/ticket_list.html', dict(
         context,
         tickets=ticket_qs,
@@ -997,6 +1013,28 @@ def ticket_list(request):
 
 
 ticket_list = staff_member_required(ticket_list)
+
+
+@helpdesk_staff_member_required
+@api_view(['GET', 'POST'])
+def datatables_ticket_list(request):
+    """
+    Datatable on ticket_list.html uses this view from to get objects to display
+    on the table. query_tickets_by_args is at lib.py, TicketSerializer is in
+    serializers.py. The serializers and this view use django-rest_framework methods
+    """
+    try:
+        model_object = query_tickets_by_args(cache.get('ticket_qs'), '-date_created', **request.query_params)
+        serializer = TicketSerializer(model_object['items'], many=True)
+        result = dict()
+        result['data'] = serializer.data
+        result['draw'] = model_object['draw']
+        result['recordsTotal'] = model_object['total']
+        result['recordsFiltered'] = model_object['count']
+        return (Response(result, status=status.HTTP_200_OK, template_name=None, content_type=None))
+
+    except TypeError as e:
+        return (Response(e, status=status.HTTP_404_NOT_FOUND, template_name=None, content_type=None))
 
 
 @helpdesk_staff_member_required
