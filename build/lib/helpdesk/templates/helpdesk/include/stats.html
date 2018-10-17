@@ -1,0 +1,41 @@
+{% load i18n %}
+
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="panel panel-primary">
+                        <div class="panel-heading">
+                            {% trans "Helpdesk Summary" %}
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div class="panel-body">
+                            {% for entry in basic_ticket_stats.open_ticket_stats %}
+                                <div class="col-lg-4 col-md-6">
+                                    <div class="panel panel-{{ entry.2 }}">
+                                        <div class="panel-heading">
+                                            <div class="row">
+                                                <div class="col-xs-3">
+                                                    <i class="fa fa-calendar fa-5x"></i>
+                                                </div>
+                                                <div class="col-xs-9 text-right">
+                                                    <div class="huge">{{ entry.1 }}</div>
+                                                    <div>{{ entry.0 }}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% if entry.1 > 0 %}<a href="{% url 'helpdesk:list' %}?{{ entry.3 }}">{% else %}<a href="#">{% endif %}
+                                            <div class="panel-footer">
+                                                <span class="pull-left">{% if entry.1 > 0 %}{% trans "View Tickets" %}{% else %}{% trans "No tickets in this range" %}{% endif %}</span>
+                                                {% if entry.1 > 0 %}<span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>{% endif %}
+                                                <div class="clearfix"></div>
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <!-- /.panel-body -->
+                    </div>
+                    <!-- /.panel -->
+                </div>
+            </div>
+

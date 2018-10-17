@@ -1,0 +1,100 @@
+{% extends "helpdesk/base.html" %}{% load i18n %}
+
+{% block helpdesk_title %}{% trans "Reports &amp; Statistics" %}{% endblock %}
+
+{% block helpdesk_body %}
+<h2>{% trans "Reports &amp; Statistics" %}</h2>
+
+{% if number_tickets == 0 %}
+<p>{% trans "You haven't created any tickets yet, so you cannot run any reports." %}</p>
+{% else %}
+
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="panel panel-primary">
+                        <div class="panel-heading">
+                            {% trans "Current Ticket Stats" %}
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div class="panel-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-bordered table-hover">
+                                    <tbody>
+                                        <tr>
+                                            <td>{% trans "Average number of days until ticket is closed (all tickets): " %}</td>
+                                            <td><strong style="color: red;">{{ basic_ticket_stats.average_nbr_days_until_ticket_closed }}</strong>.</td>
+                                        </tr>
+                                        <tr>
+                                            <td>{% trans "Average number of days until ticket is closed (tickets opened in last 60 days): " %}</td>
+                                            <td><strong style="color: red;">{{ basic_ticket_stats.average_nbr_days_until_ticket_closed_last_60_days }}</strong>. {% trans "Click" %} <strong><a href="{% url 'helpdesk:report_index' %}daysuntilticketclosedbymonth">here</a></strong> {% trans "for detailed average by month." %} </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <!-- /.table-responsive -->
+                            <div class="table-responsive">
+                                <table class="table table-striped table-bordered table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>{% trans "Queue" %}</th>
+                                            <th>{% trans "Open" %}</th>
+                                            <th>{% trans "Resolved" %}</th>
+                                            <th>{% trans "Closed" %}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for queue in dash_tickets %}
+                                        <tr>{% url 'helpdesk:list' as hdlist %}
+                                            <td><a href='{{ hdlist }}?queue={{ queue.queue }}&status=1&status=2'>{{ queue.name }}</a></td>
+                                            <td>{% if queue.open %}<a href='{{ hdlist }}?queue={{ queue.queue }}&status=1&status=2'>{% endif %}{{ queue.open }}{% if queue.open %}</a>{% endif %}</td>
+                                            <td>{% if queue.resolved %}<a href='{{ hdlist }}?queue={{ queue.queue }}&status=3'>{% endif %}{{ queue.resolved }}{% if queue.resolved %}</a>{% endif %}</td>
+                                            <td>{% if queue.closed %}<a href='{{ hdlist }}?queue={{ queue.queue }}&status=4'>{% endif %}{{ queue.closed }}{% if queue.closed %}</a>{% endif %}</td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr><td colspan='6'>{% trans "There are no unassigned tickets." %}</td></tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <!-- /.table-responsive -->
+                        </div>
+                        <!-- /.panel-body -->
+                    </div>
+                    <!-- /.panel -->
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="panel panel-primary">
+                        <div class="panel-heading">
+                            {% trans "Generate Report" %}
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div class="panel-body">
+                            <ul>
+                                <li>{% trans "Reports By User" %}
+                                    <ul>
+                                        <li><a href='userpriority/{% if saved_query %}?saved_query={{ saved_query }}{% endif %}'>{% trans "by Priority" %}</a></li>
+                                        <li><a href='userqueue/{% if saved_query %}?saved_query={{ saved_query }}{% endif %}'>{% trans "by Queue" %}</a></li>
+                                        <li><a href='userstatus/{% if saved_query %}?saved_query={{ saved_query }}{% endif %}'>{% trans "by Status" %}</a></li>
+                                        <li><a href='usermonth/{% if saved_query %}?saved_query={{ saved_query }}{% endif %}'>{% trans "by Month" %}</a></li>
+                                    </ul>
+                                </li>
+                                <li>{% trans "Reports By Queue" %}
+                                    <ul>
+                                        <li><a href='queuepriority/{% if saved_query %}?saved_query={{ saved_query }}{% endif %}'>{% trans "by Priority" %}</a></li>
+                                        <li><a href='queuestatus/{% if saved_query %}?saved_query={{ saved_query }}{% endif %}'>{% trans "by Status" %}</a></li>
+                                        <li><a href='queuemonth/{% if saved_query %}?saved_query={{ saved_query }}{% endif %}'>{% trans "by Month" %}</a></li>
+                                        <li><a href='daysuntilticketclosedbymonth/{% if saved_query %}?saved_query={{ saved_query }}{% endif %}'>{% trans "Days until ticket closed by Month" %}</a></li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                        <!-- /.panel-body -->
+                    </div>
+                    <!-- /.panel -->
+                </div>
+            </div>
+
+{% endif %}{% endblock %}

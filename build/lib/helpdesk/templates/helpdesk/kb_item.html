@@ -1,0 +1,42 @@
+{% extends "helpdesk/public_base.html" %}{% load i18n %}{% load markdown_deux_tags %}
+
+{% block helpdesk_body %}
+<h2>{% trans 'Knowledgebase' %}:{% blocktrans with item.title as item %}{{ item }}{% endblocktrans %}</h2>
+
+<div class="col-lg-12">
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <h4>{{ item.question }}</h4>
+        </div>
+        <div class="panel-body">
+            <p>{{ item.answer|markdown }}</p>
+        </div>
+        <div class="panel-footer">
+            <div class="row">
+                <div class="col-lg-2">
+                    <p>{% trans "Did you find this article useful?" %}</p>
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <a href='vote/?vote=up'><button type="button" class="btn btn-success btn-circle btn-xl"><i class="fa fa-thumbs-up fa-lg"></i></button></a>
+                        </div>
+                        <div class="col-lg-6">
+                            <a href='vote/?vote=down'><button type="button" class="btn btn-danger btn-circle btn-xl"><i class="fa fa-thumbs-down fa-lg"></i></button></a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-10">
+                    <p>{% trans "The results of voting by other readers of this article are below:" %}</p>
+                    <ul>
+                    <li>{% blocktrans with item.recommendations as recommendations %}Recommendations: {{ recommendations }}{% endblocktrans %}</li>
+                    <li>{% blocktrans with item.votes as votes %}Votes: {{ votes }}{% endblocktrans %}</li>
+                    <li>{% blocktrans with item.score as score %}Overall Rating: {{ score }}{% endblocktrans %}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<p>{% blocktrans with item.category.title as category_title and item.category.get_absolute_url as category_url %}View <a href='{{ category_url }}'>other <em>{{ category_title }}</em> articles</a>, or continue <a href='../'>viewing other knowledgebase articles</a>.{% endblocktrans %}</p>
+
+{% endblock %}

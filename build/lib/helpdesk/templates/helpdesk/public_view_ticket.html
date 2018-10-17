@@ -1,0 +1,77 @@
+{% extends "helpdesk/public_base.html" %}{% load i18n humanize %}
+{% load static from staticfiles %}
+{% block helpdesk_title %}{% trans "View a Ticket" %}{% endblock %}
+
+{% block helpdesk_body %}
+
+<table class="table table-hover table-bordered table-striped">
+<caption>{{ ticket.ticket }} . {{ ticket.title }} [{{ ticket.get_status }}]</caption>
+<thead>
+<tr><th colspan='2'>{% blocktrans with ticket.queue as queue_name %}Queue: {{ queue_name }}{% endblocktrans %}</th></tr>
+</thead>
+<tbody>
+<tr>
+    <th>{% trans "Submitted On" %}</th>
+    <td>{{ ticket.created|date:"r" }} ({{ ticket.created|naturaltime }})</td>
+</tr>
+
+<tr>
+    <th>{% trans "Submitter E-Mail" %}</th>
+    <td>{{ ticket.submitter_email }}</td>
+</tr>
+
+<tr>
+    <th>{% trans "Priority" %}</th>
+    <td>{{ ticket.get_priority_display }}</td>
+</tr>
+
+{% for customfield in ticket.ticketcustomfieldvalue_set.all %}
+<tr>
+    <th>{{ customfield.field.label }}</th>
+    <td>{{ customfield.value }}</td>
+</tr>{% endfor %}
+
+{% if tags_enabled %}
+<tr>
+    <th>{% trans "Tags" %}</th>
+    <td>{{ ticket.tags }}</td>
+</tr>
+{% endif %}
+
+<tr>
+    <th colspan='2'>{% trans "Description" %}</th>
+</tr>
+<tr>
+    <td colspan='2'>{{ ticket.description|force_escape|urlizetrunc:50|linebreaksbr }}</td>
+</tr>
+
+{% if ticket.resolution %}<tr>
+    <th colspan='2'>{% trans "Resolution" %}{% if ticket.get_status_display == "Resolved" %} <a href='{{ ticket.ticket_url }}&close'><button type="button" class="btn btn-primary btn-xs">{% trans "Accept and Close" %}</button></a>{% endif %}</th>
+</tr>
+<tr>
+    <td colspan='2'>{{ ticket.resolution|urlizetrunc:50|linebreaksbr }}</td>
+</tr>{% endif %}
+</tbody>
+</table>
+
+{% if ticket.followup_set.public_followups %}
+<h3>{% trans "Follow-Ups" %}</h3>
+{% load ticket_to_link %}
+{% for followup in ticket.followup_set.public_followups %}
+<div class='followup well'>
+<div class='title'>{{ followup.title }} <span class='byline text-info'>{% if followup.user %}by {{ followup.user }}{% endif %} <span title='{{ followup.date|date:"r" }}'>{{ followup.date|naturaltime }}</span></span></div>
+{{ followup.comment|force_escape|urlizetrunc:50|num_to_link|linebreaksbr }}
+{% if followup.ticketchange_set.all %}<div class='changes'><ul>
+{% for change in followup.ticketchange_set.all %}
+<li>{% blocktrans with change.field as field and change.old_value as old_value and change.new_value as new_value %}Changed {{ field }} from {{ old_value }} to {{ new_value }}.{% endblocktrans %}</li>
+{% endfor %}
+</ul></div>{% endif %}
+{% for attachment in followup.attachment_set.all %}{% if forloop.first %}<div class='attachments'><ul>{% endif %}
+<li><a href='{{ attachment.file.url }}'>{{ attachment.filename }}</a> ({{ attachment.mime_type }}, {{ attachment.size|filesizeformat }})</li>
+{% if forloop.last %}</ul></div>{% endif %}
+{% endfor %}
+</div>
+{% endfor %}
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,67 @@
+{% extends "helpdesk/base.html" %}{% load i18n bootstrap %}
+
+{% block helpdesk_title %}{% trans "Create Ticket" %}{% endblock %}
+
+{% block helpdesk_head %}
+<script type='text/javascript' language='javascript'>
+// this function listens for changes on any file input, and
+// emits the appropriate event to update the input's text.
+// Needed to have properly styled file input buttons! (this really shouldn't be this hard...)
+$(document).on('change', ':file', function() {
+    var input = $(this),
+        inputWidgetNum = $(this).attr('id').split("file")[1],
+        numFiles = input.get(0).files ? input.get(0).files.length : 1,
+        label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
+    input.trigger('fileselect', [numFiles, label, inputWidgetNum]);
+});
+</script>
+{% endblock %}
+
+{% block helpdesk_body %}
+
+
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="panel panel-primary">
+                        <div class="panel-heading">
+                            <h3>{% trans "Submit a Ticket" %}</h3>
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div class="panel-body">
+                            <p>{% trans "Unless otherwise stated, all fields are required." %} {% trans "Please provide as descriptive a title and description as possible." %}</p>
+                            <form method='post' action='./' enctype='multipart/form-data'>
+                                <fieldset class='col-xs-8'>
+                                    {% comment %}{{ form|bootstrap }}{% endcomment %}
+                                    {% for field in form %}
+                                        {% if field.is_hidden %}
+                                            {{ field }}
+                                        {% else %}
+                                            <div class="form-group">
+                                                <dt><label for='id_{{ field.name }}'>{% trans field.label %}</label>{% if not field.field.required %} <span class='form_optional'>{% trans "(Optional)" %}</span>{% endif %}</dt>
+                                                <dd>{{ field }}</dd>
+                                                {% if field.errors %}<dd class='error'>{{ field.errors }}</dd>{% endif %}
+                                                {% if field.help_text %}<dd class='form_help_text help-block'>{% trans field.help_text %}</dd>{% endif %}
+                                            </div>
+                                        {% endif %}
+                                    {% endfor %}
+
+                                    <div class='buttons form-group'>
+                                        <button type="submit" class="btn btn-primary btn-lg btn-block"><i class="fa fa-send"></i>&nbsp;{% trans "Submit Ticket" %}</button>
+                                    </div>
+                                </fieldset>
+                            {% csrf_token %}</form>
+                            <!-- /.form -->
+                        </div>
+                        <!-- /.panel-body -->
+                    </div>
+                    <!-- /.panel -->
+                </div>
+            </div>
+
+            <script>
+                $( function() {
+                    $( "#id_due_date" ).datepicker();
+                } );
+            </script>
+
+{% endblock %}

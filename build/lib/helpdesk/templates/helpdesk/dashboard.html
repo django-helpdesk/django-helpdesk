@@ -1,0 +1,33 @@
+{% extends "helpdesk/base.html" %}{% load i18n %}
+{% block helpdesk_title %}{% trans "Helpdesk Dashboard" %}{% endblock %}
+
+{% block helpdesk_body %}
+
+<div class="row">
+    <div class="col-lg-8">
+    {% include 'helpdesk/include/stats.html' %}
+    </div>
+    <div class="col-lg-4">
+        <div class="alert alert-warning">
+            <p>{% trans "Welcome to your Helpdesk Dashboard! From here you can quickly see tickets submitted by you, tickets you are working on, and those tickets that have no owner." %}</p>
+        </div>
+    </div>
+</div>
+
+{% if all_tickets_reported_by_current_user %}
+{% trans "All Tickets submitted by you" as ticket_list_caption %}
+{% include 'helpdesk/include/tickets.html' with ticket_list=all_tickets_reported_by_current_user ticket_list_empty_message="" %}
+{% endif %}
+
+{% trans "Open Tickets assigned to you (you are working on this ticket)" as ticket_list_caption %}
+{% trans "You have no tickets assigned to you." as no_assigned_tickets %}
+{% include 'helpdesk/include/tickets.html' with ticket_list=user_tickets ticket_list_empty_message=no_assigned_tickets %}
+
+{% include 'helpdesk/include/unassigned.html' %}
+
+{% if user_tickets_closed_resolved %}
+{% trans "Closed & resolved Tickets you used to work on" as ticket_list_caption %}
+{% include 'helpdesk/include/tickets.html' with ticket_list=user_tickets_closed_resolved ticket_list_empty_message="" %}
+{% endif %}
+
+{% endblock %}

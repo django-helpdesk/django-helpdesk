@@ -1,0 +1,140 @@
+{% load i18n %}
+{% load saved_queries %}
+{% load load_helpdesk_settings %}
+{% load static from staticfiles %}
+{% with request|load_helpdesk_settings as helpdesk_settings %}
+{% with user|saved_queries as user_saved_queries_ %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>{% block helpdesk_title %}Helpdesk{% endblock %} :: {% trans "Powered by django-helpdesk" %}</title>
+
+    <!-- Bootstrap Core CSS -->
+    {% if helpdesk_settings.HELPDESK_USE_CDN %}
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    {% else %}
+    <link href="{% static 'helpdesk/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    {% endif %}
+
+    <!-- MetisMenu CSS -->
+    <link href="{% static 'helpdesk/vendor/metisMenu/metisMenu.min.css' %}" rel="stylesheet">
+
+    <!-- Morris Charts CSS -->
+    {% if helpdesk_settings.HELPDESK_USE_CDN %}
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.css">
+    {% else %}
+    <link href="{% static 'helpdesk/vendor/morrisjs/morris.css' %}" rel="stylesheet">
+    {% endif %}
+
+    <!-- DataTables CSS -->
+    <link href="{% static 'helpdesk/vendor/datatables/css/dataTables.bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'helpdesk/vendor/datatables/extensions/Responsive/css/responsive.bootstrap.min.css' %}" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="{% static 'helpdesk/dist/css/sb-admin-2.css' %}" rel="stylesheet">
+    <link rel='stylesheet' href='{% static "helpdesk/helpdesk-extend.css" %}' type='text/css'  media="screen" >
+
+    <!-- Custom Fonts -->
+    <link href="{% static 'helpdesk/vendor/font-awesome/css/font-awesome.min.css' %}" rel="stylesheet" type="text/css">
+
+    <!-- jQuery -->
+    {% if helpdesk_settings.HELPDESK_USE_CDN %}
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+    {% else %}
+    <script src="{% static 'helpdesk/vendor/jquery/jquery.min.js' %}"></script>
+    {% endif %}
+
+    <!-- jQuery UI DatePicker -->
+    <script src='{% static "helpdesk/vendor/jquery-ui/jquery-ui.min.js" %}' type='text/javascript' language='javascript'></script>
+    <link href="{% static 'helpdesk/vendor/jquery-ui/jquery-ui.css' %}" rel="stylesheet">
+
+    <!-- Bootstrap Core JavaScript -->
+    {% if helpdesk_settings.HELPDESK_USE_CDN %}
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    {% else %}
+    <script src="{% static 'helpdesk/vendor/bootstrap/js/bootstrap.min.js' %}"></script>
+    {% endif %}
+
+    <!-- DataTables JavaScript -->
+    <script src="{% static 'helpdesk/vendor/datatables/js/jquery.dataTables.min.js' %}"></script>
+    <script src="{% static 'helpdesk/vendor/datatables/js/dataTables.bootstrap.min.js' %}"></script>
+    <script src="{% static 'helpdesk/vendor/datatables/extensions/Responsive/js/dataTables.responsive.min.js' %}"></script>
+
+    <!-- Custom Theme JavaScript -->
+    <script src="{% static 'helpdesk/dist/js/sb-admin-2.js' %}"></script>
+
+    <!-- RSS -->
+    <link rel='alternate' href='{% url 'helpdesk:rss_user' user.get_username %}' type='application/rss+xml' title='{% trans "My Open Tickets" %}' />
+    <link rel='alternate' href='{% url 'helpdesk:rss_activity' %}' type='application/rss+xml' title='{% trans "All Recent Activity" %}' />
+    <link rel='alternate' href='{% url 'helpdesk:rss_unassigned' %}' type='application/rss+xml' title='{% trans "Unassigned Tickets" %}' />
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <style type="text/css">
+    /* hide google translate top bar */
+    .goog-te-banner-frame {display: none !important;}
+    .goog-te-balloon-frame {display: none !important;}
+    /* hide google translate tooltips (generated for every translated item) */
+    .goog-tooltip {display: none !important; }
+    </style>
+
+    <style type="text/css">
+    /* header */
+    #dropdown li.headerlink { width: auto; float: left; text-align: center; }
+
+    /* query list */
+    #dropdown li.headerlink ul {    display: none;
+                                    text-align: left;
+                                    position: absolute;
+                                    padding: 5px;
+                                    z-index: 2; }
+    /* query entries */
+    #dropdown li.headerlink:hover ul { display: block; width: auto; }
+    #dropdown li.headerlink:hover ul li { padding: 5px; margin: 1px; float: none; display: block; }
+    </style>
+
+    {% block helpdesk_head %}{% endblock %}
+
+</head>
+
+<body id="helpdesk-body">
+
+    <div id='container' class="container">
+        <div id='header' class="row">
+            <h1>{% block h1_title %}{% trans "Helpdesk" %}{% endblock %}</h1>
+            {% include "helpdesk/navigation.html" %}
+        </div>
+
+        <div id='body' class="row">
+            {% block helpdesk_body %}{% endblock %}
+        </div>
+
+        <div id='footer' class="row">
+            <div class="col-md-2">{% include "helpdesk/attribution.html" %}</div>
+        </div>
+    </div>
+    {% include "helpdesk/debug.html" %}
+
+    <!-- Metis Menu Plugin JavaScript -->
+    <script src="{% static 'helpdesk/vendor/metisMenu/metisMenu.min.js' %}"></script>
+
+    <!-- Custom Theme JavaScript -->
+    <script src="{% static 'helpdesk/dist/js/sb-admin-2.js' %}"></script>
+
+</body>
+</html>
+{% endwith %}
+{% endwith %}
