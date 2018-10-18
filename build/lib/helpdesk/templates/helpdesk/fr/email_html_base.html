@@ -1,9 +1,0 @@
-<h1 style='font-family: "Trebuchet MS", Arial, sans-serif; font-size: 14pt; color: #6593C0'>{% block header %}Helpdesk{% endblock %}</h1>
-
-{% block content %}{% endblock %}
-
-<p style='font-family: "Trebuchet MS", Arial, sans-serif; font-size: 11pt;'>Cordialement,</p>
-
-<p style='font-family: "Trebuchet MS", Arial, sans-serif; font-size: 11pt;'><b>{{ queue.title }}</b>{% if queue.email_address %}<br><a href='mailto:{{ queue.email_address }}'>{{ queue.email_address }}</a>{% endif %}</p>
-    
-<p style='font-family: "Trebuchet MS", Arial, sans-serif; font-size: 9pt; color: #808080;' color='#808080'>Ce courriel vous a été envoyé en tant qu'utilisateur de notre service de support, en accord avec notre politique de confidentialité. Merci de nous informer si vous pensez que ce message ne vous était pas destiné.</p>

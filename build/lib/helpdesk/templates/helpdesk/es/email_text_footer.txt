@@ -1,6 +1,0 @@
-Saludos,
-
-{{ queue.title }}{% if queue.email_address %}
-{{ queue.email_address }}{% endif %}
-    
-Este e-mail fue enviado a usted como usuario de nuestro servicio de soporte, de acuerdo a nuestra política de privacidad. Por favor indicar si usted cree que recibió este e-mail por error.
