@@ -83,18 +83,17 @@ def process_email(quiet=False):
             allow_email_submission=True):
 
         logger = logging.getLogger('django.helpdesk.queue.' + q.slug)
-        if not q.logging_type or q.logging_type == 'none':
+        logging_types = {
+            'info': logging.INFO,
+            'warn': logging.WARN,
+            'error': logging.ERROR,
+            'crit': logging.CRITICAL,
+            'debug': logging.DEBUG,
+        }
+        if q.logging_type in logging_types:
+             logger.setLevel(logging_types[q.logging_type])
+        elif not q.logging_type or q.logging_type == 'none':
             logging.disable(logging.CRITICAL)  # disable all messages
-        elif q.logging_type == 'info':
-            logger.setLevel(logging.INFO)
-        elif q.logging_type == 'warn':
-            logger.setLevel(logging.WARN)
-        elif q.logging_type == 'error':
-            logger.setLevel(logging.ERROR)
-        elif q.logging_type == 'crit':
-            logger.setLevel(logging.CRITICAL)
-        elif q.logging_type == 'debug':
-            logger.setLevel(logging.DEBUG)
         if quiet:
             logger.propagate = False  # do not propagate to root logger that would log to console
         logdir = q.logging_dir or '/var/log/helpdesk/'
