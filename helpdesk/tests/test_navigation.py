@@ -6,7 +6,7 @@ from django.test import TestCase
 
 from helpdesk import settings as helpdesk_settings
 from helpdesk.models import Queue
-from helpdesk.tests.helpers import (get_staff_user, reload_urlconf, User, update_user_settings, delete_user_settings, create_ticket, print_response)
+from helpdesk.tests.helpers import (get_staff_user, reload_urlconf, User, create_ticket, print_response)
 
 
 class KBDisabledTestCase(TestCase):
@@ -228,11 +228,8 @@ class HomePageTestCase(TestCase):
         user = get_staff_user()
 
         # login_view_ticketlist is False...
-        update_user_settings(user, login_view_ticketlist=False)
-        self.assertUserRedirectedToView(user, 'helpdesk:dashboard')
-
-        # ... or missing
-        delete_user_settings(user, 'login_view_ticketlist')
+        user.usersettings_helpdesk.login_view_ticketlist = False
+        user.usersettings_helpdesk.save()
         self.assertUserRedirectedToView(user, 'helpdesk:dashboard')
 
     def test_no_user_settings_redirect_to_dashboard(self):
@@ -246,7 +243,8 @@ class HomePageTestCase(TestCase):
     def test_redirect_to_ticket_list(self):
         """Authenticated users are redirected to the ticket list based on their user settings"""
         user = get_staff_user()
-        update_user_settings(user, login_view_ticketlist=True)
+        user.usersettings_helpdesk.login_view_ticketlist = True
+        user.usersettings_helpdesk.save()
 
         self.assertUserRedirectedToView(user, 'helpdesk:list')
 

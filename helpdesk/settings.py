@@ -6,20 +6,18 @@ import warnings
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 
+DEFAULT_USER_SETTINGS = {
+    'login_view_ticketlist': True,
+    'email_on_ticket_change': True,
+    'email_on_ticket_assign': True,
+    'tickets_per_page': 25,
+    'use_email_as_submitter': True,
+}
 
 try:
-    DEFAULT_USER_SETTINGS = settings.HELPDESK_DEFAULT_SETTINGS
+    DEFAULT_USER_SETTINGS.update(settings.HELPDESK_DEFAULT_SETTINGS)
 except AttributeError:
-    DEFAULT_USER_SETTINGS = None
-
-if not isinstance(DEFAULT_USER_SETTINGS, dict):
-    DEFAULT_USER_SETTINGS = {
-        'use_email_as_submitter': True,
-        'email_on_ticket_assign': True,
-        'email_on_ticket_change': True,
-        'login_view_ticketlist': True,
-        'tickets_per_page': 25
-    }
+    pass
 
 
 HAS_TAG_SUPPORT = False

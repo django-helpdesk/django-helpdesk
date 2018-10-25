@@ -29,5 +29,4 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         """handle command line"""
         for u in User.objects.all():
-            UserSettings.objects.get_or_create(user=u,
-                                               defaults={'settings': DEFAULT_USER_SETTINGS})
+            UserSettings.objects.get_or_create(user=u)

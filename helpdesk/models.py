@@ -1119,15 +1119,39 @@ class SavedSearch(models.Model):
         verbose_name_plural = _('Saved searches')
 
 
+def get_default_setting(setting):
+    from helpdesk.settings import DEFAULT_USER_SETTINGS
+    return DEFAULT_USER_SETTINGS[setting]
+
+
+def login_view_ticketlist_default():
+    return get_default_setting('login_view_ticketlist')
+
+
+def email_on_ticket_change_default():
+    return get_default_setting('email_on_ticket_change')
+
+
+def email_on_ticket_assign_default():
+    return get_default_setting('email_on_ticket_assign')
+
+
+def tickets_per_page_default():
+    return get_default_setting('tickets_per_page')
+
+
+def use_email_as_submitter_default():
+    return get_default_setting('use_email_as_submitter')
+
+
 @python_2_unicode_compatible
 class UserSettings(models.Model):
     """
     A bunch of user-specific settings that we want to be able to define, such
     as notification preferences and other things that should probably be
     configurable.
-
-    We should always refer to user.usersettings_helpdesk.settings['setting_name'].
     """
+    PAGE_SIZES = ((10, '10'), (25, '25'), (50, '50'), (100, '100'))
 
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
@@ -1135,41 +1159,46 @@ class UserSettings(models.Model):
         related_name="usersettings_helpdesk")
 
     settings_pickled = models.TextField(
-        _('Settings Dictionary'),
-        help_text=_('This is a base64-encoded representation of a pickled Python dictionary. '
+        _('DEPRECATED! Settings Dictionary DEPRECATED!'),
+        help_text=_('DEPRECATED! This is a base64-encoded representation of a pickled Python dictionary. '
                     'Do not change this field via the admin.'),
         blank=True,
         null=True,
     )
 
-    def _set_settings(self, data):
-        # data should always be a Python dictionary.
-        try:
-            import pickle
-        except ImportError:
-            import cPickle as pickle
-        from helpdesk.lib import b64encode
-        if six.PY2:
-            self.settings_pickled = b64encode(pickle.dumps(data))
-        else:
-            self.settings_pickled = b64encode(pickle.dumps(data)).decode()
+    login_view_ticketlist = models.BooleanField(
+        verbose_name=_('Show Ticket List on Login?'),
+        help_text=_('Display the ticket list upon login? Otherwise, the dashboard is shown.'),
+        default=login_view_ticketlist_default,
+    )
 
-    def _get_settings(self):
-        # return a python dictionary representing the pickled data.
-        try:
-            import pickle
-        except ImportError:
-            import cPickle as pickle
-        from helpdesk.lib import b64decode
-        try:
-            if six.PY2:
-                return pickle.loads(b64decode(str(self.settings_pickled)))
-            else:
-                return pickle.loads(b64decode(self.settings_pickled.encode('utf-8')))
-        except pickle.UnpicklingError:
-            return {}
+    email_on_ticket_change = models.BooleanField(
+        verbose_name=_('E-mail me on ticket change?'),
+        help_text=_('If you\'re the ticket owner and the ticket is changed via the web by somebody else, do you want to receive an e-mail?'),
+        default=email_on_ticket_change_default,
+    )
 
-    settings = property(_get_settings, _set_settings)
+    email_on_ticket_assign = models.BooleanField(
+        verbose_name=_('E-mail me when assigned a ticket?'),
+        help_text=_('If you are assigned a ticket via the web, do you want to receive an e-mail?'),
+        default=email_on_ticket_assign_default,
+    )
+
+    tickets_per_page = models.IntegerField(
+        verbose_name=_('Number of tickets to show per page'),
+        help_text=_('How many tickets do you want to see on the Ticket List page?'),
+        default=tickets_per_page_default,
+        choices=PAGE_SIZES,
+    )
+
+    use_email_as_submitter = models.BooleanField(
+        verbose_name=_('Use my e-mail address when submitting tickets?'),
+        help_text=_('When you submit a ticket, do you want to automatically '
+                    'use your e-mail address as the submitter address? You '
+                    'can type a different e-mail address when entering the '
+                    'ticket if needed, this option only changes the default.'),
+        default=use_email_as_submitter_default,
+    )
 
     def __str__(self):
         return 'Preferences for %s' % self.user
@@ -1188,9 +1217,8 @@ def create_usersettings(sender, instance, created, **kwargs):
     If we end up with users with no UserSettings, then we get horrible
     'DoesNotExist: UserSettings matching query does not exist.' errors.
     """
-    from helpdesk.settings import DEFAULT_USER_SETTINGS
     if created:
-        UserSettings.objects.create(user=instance, settings=DEFAULT_USER_SETTINGS)
+        UserSettings.objects.create(user=instance)
 
 
 models.signals.post_save.connect(create_usersettings, sender=settings.AUTH_USER_MODEL)

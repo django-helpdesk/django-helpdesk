@@ -43,24 +43,6 @@ def reload_urlconf(urlconf=None):
     clear_url_caches()
 
 
-def update_user_settings(user, **kwargs):
-    usersettings = user.usersettings_helpdesk
-    settings = usersettings.settings
-    settings.update(kwargs)
-    usersettings.settings = settings
-    usersettings.save()
-
-
-def delete_user_settings(user, *args):
-    usersettings = user.usersettings_helpdesk
-    settings = usersettings.settings
-    for setting in args:
-        if setting in settings:
-            del settings[setting]
-    usersettings.settings = settings
-    usersettings.save()
-
-
 def create_ticket(**kwargs):
     q = kwargs.get('queue', None)
     if q is None:

@@ -15,7 +15,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.contenttypes.models import ContentType
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.db import connection
 from django.db.models import Q
@@ -26,7 +26,7 @@ from django.utils.translation import ugettext as _
 from django.utils.html import escape
 from django import forms
 from django.utils import timezone
-from django.views.generic.edit import FormView
+from django.views.generic.edit import FormView, UpdateView
 
 from django.utils import six
 
@@ -52,7 +52,7 @@ from helpdesk.lib import (
 )
 from helpdesk.models import (
     Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch,
-    IgnoreEmail, TicketCC, TicketDependency,
+    IgnoreEmail, TicketCC, TicketDependency, UserSettings,
 )
 from helpdesk import settings as helpdesk_settings
 from helpdesk.views.permissions import MustBeStaffMixin
@@ -643,11 +643,9 @@ def update_ticket(request, ticket_id, public=False):
 
         if (not reassigned or
                 (reassigned and
-                    ticket.assigned_to.usersettings_helpdesk.settings.get(
-                        'email_on_ticket_assign', False))) or \
+                    ticket.assigned_to.usersettings_helpdesk.email_on_ticket_assign)) or \
             (not reassigned and
-                ticket.assigned_to.usersettings_helpdesk.settings.get(
-                    'email_on_ticket_change', False)):
+                ticket.assigned_to.usersettings_helpdesk.email_on_ticket_change):
 
             send_templated_mail(
                 template_staff,
@@ -999,7 +997,7 @@ def ticket_list(request):
     return render(request, 'helpdesk/ticket_list.html', dict(
         context,
         tickets=ticket_qs,
-        default_tickets_per_page=request.user.usersettings_helpdesk.settings.get('tickets_per_page') or 25,
+        default_tickets_per_page=request.user.usersettings_helpdesk.tickets_per_page,
         user_choices=User.objects.filter(is_active=True, is_staff=True),
         queue_choices=user_queues,
         status_choices=Ticket.STATUS_CHOICES,
@@ -1066,7 +1064,7 @@ class CreateTicketView(MustBeStaffMixin, FormView):
     def get_initial(self):
         initial_data = {}
         request = self.request
-        if request.user.usersettings_helpdesk.settings.get('use_email_as_submitter', False) and request.user.email:
+        if request.user.usersettings_helpdesk.use_email_as_submitter and request.user.email:
             initial_data['submitter_email'] = request.user.email
         if 'queue' in request.GET:
             initial_data['queue'] = request.GET['queue']
@@ -1433,21 +1431,14 @@ def delete_saved_query(request, id):
 delete_saved_query = staff_member_required(delete_saved_query)
 
 
-@helpdesk_staff_member_required
-def user_settings(request):
-    s = request.user.usersettings_helpdesk
-    if request.POST:
-        form = UserSettingsForm(request.POST)
-        if form.is_valid():
-            s.settings = form.cleaned_data
-            s.save()
-    else:
-        form = UserSettingsForm(s.settings)
+class EditUserSettingsView(MustBeStaffMixin, UpdateView):
+    template_name = 'helpdesk/user_settings.html'
+    form_class = UserSettingsForm
+    model = UserSettings
+    success_url = reverse_lazy('helpdesk:dashboard')
 
-    return render(request, 'helpdesk/user_settings.html', {'form': form})
-
-
-user_settings = staff_member_required(user_settings)
+    def get_object(self):
+        return UserSettings.objects.get_or_create(user=self.request.user)[0]
 
 
 @helpdesk_superuser_required

@@ -19,7 +19,7 @@ from django.utils import timezone
 
 from helpdesk.lib import send_templated_mail, safe_template_context, process_attachments
 from helpdesk.models import (Ticket, Queue, FollowUp, Attachment, IgnoreEmail, TicketCC,
-                             CustomField, TicketCustomFieldValue, TicketDependency)
+                             CustomField, TicketCustomFieldValue, TicketDependency, UserSettings)
 from helpdesk import settings as helpdesk_settings
 
 User = get_user_model()
@@ -253,7 +253,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
 
         if ticket.assigned_to and \
                 ticket.assigned_to != user and \
-                ticket.assigned_to.usersettings_helpdesk.settings.get('email_on_ticket_assign', False) and \
+                ticket.assigned_to.usersettings_helpdesk.email_on_ticket_assign and \
                 ticket.assigned_to.email and \
                 ticket.assigned_to.email not in messages_sent_to:
             send_templated_mail(
@@ -406,40 +406,11 @@ class PublicTicketForm(AbstractTicketForm):
         return ticket
 
 
-class UserSettingsForm(forms.Form):
-    login_view_ticketlist = forms.BooleanField(
-        label=_('Show Ticket List on Login?'),
-        help_text=_('Display the ticket list upon login? Otherwise, the dashboard is shown.'),
-        required=False,
-    )
+class UserSettingsForm(forms.ModelForm):
 
-    email_on_ticket_change = forms.BooleanField(
-        label=_('E-mail me on ticket change?'),
-        help_text=_('If you\'re the ticket owner and the ticket is changed via the web by somebody else, do you want to receive an e-mail?'),
-        required=False,
-    )
-
-    email_on_ticket_assign = forms.BooleanField(
-        label=_('E-mail me when assigned a ticket?'),
-        help_text=_('If you are assigned a ticket via the web, do you want to receive an e-mail?'),
-        required=False,
-    )
-
-    tickets_per_page = forms.ChoiceField(
-        label=_('Number of tickets to show per page'),
-        help_text=_('How many tickets do you want to see on the Ticket List page?'),
-        required=False,
-        choices=((10, '10'), (25, '25'), (50, '50'), (100, '100')),
-    )
-
-    use_email_as_submitter = forms.BooleanField(
-        label=_('Use my e-mail address when submitting tickets?'),
-        help_text=_('When you submit a ticket, do you want to automatically '
-                    'use your e-mail address as the submitter address? You '
-                    'can type a different e-mail address when entering the '
-                    'ticket if needed, this option only changes the default.'),
-        required=False,
-    )
+    class Meta:
+        model = UserSettings
+        exclude = ['user', 'settings_pickled']
 
 
 class EmailIgnoreForm(forms.ModelForm):
