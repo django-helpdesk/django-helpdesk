@@ -39,7 +39,7 @@ from django.utils.translation import ugettext as _
 from django.utils import encoding, timezone
 
 from helpdesk import settings
-from helpdesk.lib import send_templated_mail, safe_template_context, process_attachments
+from helpdesk.lib import safe_template_context, process_attachments
 from helpdesk.models import Queue, Ticket, TicketCC, FollowUp, IgnoreEmail
 from django.contrib.auth.models import User
 
@@ -53,6 +53,7 @@ STRIPPED_SUBJECT_STRINGS = [
     "FW: ",
     "Automatic reply: ",
 ]
+
 
 def process_email(quiet=False):
     for q in Queue.objects.filter(
@@ -463,47 +464,18 @@ def ticket_from_message(message, queue, logger):
     context = safe_template_context(t)
 
     if new:
-        if sender_email:
-            send_templated_mail(
-                'newticket_submitter',
-                context,
-                recipients=sender_email,
-                sender=queue.from_address,
-                fail_silently=True,
-            )
-        if queue.new_ticket_cc:
-            send_templated_mail(
-                'newticket_cc',
-                context,
-                recipients=queue.new_ticket_cc,
-                sender=queue.from_address,
-                fail_silently=True,
-            )
-        if queue.updated_ticket_cc and queue.updated_ticket_cc != queue.new_ticket_cc:
-            send_templated_mail(
-                'newticket_cc',
-                context,
-                recipients=queue.updated_ticket_cc,
-                sender=queue.from_address,
-                fail_silently=True,
-            )
+        t.send(
+            {'submitter': ('newticket_submitter', context),
+             'new_ticket_cc': ('newticket_cc', context),
+             'ticket_cc': ('newticket_cc', context)},
+            fail_silently=True,
+        )
     else:
         context.update(comment=f.comment)
-        if t.assigned_to:
-            send_templated_mail(
-                'updated_owner',
-                context,
-                recipients=t.assigned_to.email,
-                sender=queue.from_address,
-                fail_silently=True,
-            )
-        if queue.updated_ticket_cc:
-            send_templated_mail(
-                'updated_cc',
-                context,
-                recipients=queue.updated_ticket_cc,
-                sender=queue.from_address,
-                fail_silently=True,
-            )
+        t.send(
+            {'assigned_to': ('updated_owner', context),
+             'ticket_cc': ('updated_cc', context)},
+            fail_silently=True,
+        )
 
     return t

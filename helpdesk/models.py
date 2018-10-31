@@ -23,6 +23,8 @@ import re
 import six
 import uuid
 
+from .templated_email import send_templated_mail
+
 
 @python_2_unicode_compatible
 class Queue(models.Model):
@@ -490,6 +492,54 @@ class Ticket(models.Model):
         max_length=36,
         default=mk_secret,
     )
+
+    def send(self, roles, dont_send_to=None, **kwargs):
+        """
+        Send notifications to everyone interested in this ticket.
+
+        The the roles argument is a dictionary mapping from roles to (template, context) pairs.
+        If a role is not present in the dictionary, users of that type will not recieve the notification.
+
+        The following roles exist:
+
+          - 'submitter'
+          - 'new_ticket_cc'
+          - 'ticket_cc'
+          - 'assigned_to'
+
+        Here is an example roles dictionary:
+
+        {
+            'submitter': (template_name, context),
+            'assigned_to': (template_name2, context),
+        }
+
+        **kwargs are passed to send_templated_mail defined in templated_mail.py
+
+        returns the set of email addresses the notification was delivered to.
+
+        """
+        recipients = set()
+
+        if dont_send_to is not None:
+            recipients.update(dont_send_to)
+
+        def should_receive(email):
+            return email and email not in recipients
+
+        def send(role, recipient):
+            if recipient and recipient not in recipients and role in roles:
+                template, context = roles[role]
+                send_templated_mail(template, context, recipient, sender=self.queue.from_address, **kwargs)
+                recipients.add(recipient)
+        send('submitter', self.submitter_email)
+        send('new_ticket_cc', self.queue.new_ticket_cc)
+        if self.assigned_to and self.assigned_to.usersettings_helpdesk.email_on_ticket_assign:
+            send('assigned_to', self.assigned_to.email)
+        send('ticket_cc', self.queue.updated_ticket_cc)
+        for cc in self.ticketcc_set.all():
+            send('ticket_cc', cc.email_address)
+        return recipients
 
     def _get_assigned_to(self):
         """ Custom property to allow us to easily print 'Unassigned' if a
