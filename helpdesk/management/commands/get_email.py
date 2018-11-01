@@ -401,10 +401,10 @@ def ticket_from_message(message, queue, logger):
         if ">" in mail.text:
             body = mail.find('body')
             try:
-              body = body.text
-              body = body.encode('ascii', errors='ignore')
+               body = body.text
+               body = body.encode('ascii', errors='ignore')
             except AttributeError:
-              body = ''
+               body = ''
         else:
             body = mail.text
 
