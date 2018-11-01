@@ -400,8 +400,11 @@ def ticket_from_message(message, queue, logger):
         mail = BeautifulSoup(part.get_payload(), "lxml")
         if ">" in mail.text:
             body = mail.find('body')
-            body = body.text
-            body = body.encode('ascii', errors='ignore')
+            try:
+              body = body.text
+              body = body.encode('ascii', errors='ignore')
+            except AttributeError:
+              body = ''
         else:
             body = mail.text
 
