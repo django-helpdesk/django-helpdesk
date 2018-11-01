@@ -47,7 +47,7 @@ from helpdesk.forms import (
     TicketCCEmailForm, TicketCCUserForm, EditFollowUpForm, TicketDependencyForm
 )
 from helpdesk.lib import (
-    send_templated_mail, query_to_dict, apply_query, safe_template_context,
+    query_to_dict, apply_query, safe_template_context,
     process_attachments, queue_template_context,
 )
 from helpdesk.models import (
@@ -578,8 +578,6 @@ def update_ticket(request, ticket_id, public=False):
         if new_status == Ticket.RESOLVED_STATUS or ticket.resolution is None:
             ticket.resolution = comment
 
-    messages_sent_to = []
-
     # ticket might have changed above, so we re-instantiate context with the
     # (possibly) updated ticket.
     context = safe_template_context(ticket)
@@ -588,6 +586,11 @@ def update_ticket(request, ticket_id, public=False):
         comment=f.comment,
     )
 
+    messages_sent_to = set()
+    try:
+        messages_sent_to.add(request.user.email)
+    except AttributeError:
+        pass
     if public and (f.comment or (
         f.new_status in (Ticket.RESOLVED_STATUS,
                          Ticket.CLOSED_STATUS))):
@@ -598,83 +601,44 @@ def update_ticket(request, ticket_id, public=False):
         else:
             template = 'updated_'
 
-        template_suffix = 'submitter'
+        roles = {
+            'submitter': (template + 'submitter', context),
+            'ticket_cc': (template + 'cc', context),
+            'assigned_to': (template + 'cc', context),
+        }
+        messages_sent_to.update(ticket.send(roles, dont_send_to=messages_sent_to, fail_silently=True, files=files,))
 
-        if ticket.submitter_email:
-            send_templated_mail(
-                template + template_suffix,
-                context,
-                recipients=ticket.submitter_email,
-                sender=ticket.queue.from_address,
-                fail_silently=True,
-                files=files,
-            )
-            messages_sent_to.append(ticket.submitter_email)
+    if reassigned:
+        template_staff = 'assigned_owner'
+    elif f.new_status == Ticket.RESOLVED_STATUS:
+        template_staff = 'resolved_owner'
+    elif f.new_status == Ticket.CLOSED_STATUS:
+        template_staff = 'closed_owner'
+    else:
+        template_staff = 'updated_owner'
 
-        template_suffix = 'cc'
+    messages_sent_to.update(ticket.send(
+        {'assigned_to': (template_staff, context)},
+        dont_send_to=messages_sent_to,
+        fail_silently=True,
+        files=files,
+    ))
 
-        for cc in ticket.ticketcc_set.all():
-            if cc.email_address not in messages_sent_to:
-                send_templated_mail(
-                    template + template_suffix,
-                    context,
-                    recipients=cc.email_address,
-                    sender=ticket.queue.from_address,
-                    fail_silently=True,
-                    files=files,
-                )
-                messages_sent_to.append(cc.email_address)
+    if reassigned:
+        template_cc = 'assigned_cc'
+    elif f.new_status == Ticket.RESOLVED_STATUS:
+        template_cc = 'resolved_cc'
+    elif f.new_status == Ticket.CLOSED_STATUS:
+        template_cc = 'closed_cc'
+    else:
+        template_cc = 'updated_cc'
 
-    if ticket.assigned_to and \
-            request.user != ticket.assigned_to and \
-            ticket.assigned_to.email and \
-            ticket.assigned_to.email not in messages_sent_to:
-        # We only send e-mails to staff members if the ticket is updated by
-        # another user. The actual template varies, depending on what has been
-        # changed.
-        if reassigned:
-            template_staff = 'assigned_owner'
-        elif f.new_status == Ticket.RESOLVED_STATUS:
-            template_staff = 'resolved_owner'
-        elif f.new_status == Ticket.CLOSED_STATUS:
-            template_staff = 'closed_owner'
-        else:
-            template_staff = 'updated_owner'
-
-        if (not reassigned or
-                (reassigned and
-                    ticket.assigned_to.usersettings_helpdesk.email_on_ticket_assign)) or \
-            (not reassigned and
-                ticket.assigned_to.usersettings_helpdesk.email_on_ticket_change):
-
-            send_templated_mail(
-                template_staff,
-                context,
-                recipients=ticket.assigned_to.email,
-                sender=ticket.queue.from_address,
-                fail_silently=True,
-                files=files,
-            )
-            messages_sent_to.append(ticket.assigned_to.email)
-
-    if ticket.queue.updated_ticket_cc and ticket.queue.updated_ticket_cc not in messages_sent_to:
-        if reassigned:
-            template_cc = 'assigned_cc'
-        elif f.new_status == Ticket.RESOLVED_STATUS:
-            template_cc = 'resolved_cc'
-        elif f.new_status == Ticket.CLOSED_STATUS:
-            template_cc = 'closed_cc'
-        else:
-            template_cc = 'updated_cc'
-
-        send_templated_mail(
-            template_cc,
-            context,
-            recipients=ticket.queue.updated_ticket_cc,
-            sender=ticket.queue.from_address,
-            fail_silently=True,
-            files=files,
-        )
+    messages_sent_to.update(ticket.send(
+        {'ticket_cc': (template_cc, context)},
+        dont_send_to=messages_sent_to,
+        fail_silently=True,
+        files=files,
+    ))
 
     ticket.save()
 
@@ -760,51 +724,19 @@ def mass_update(request):
             context.update(resolution=t.resolution,
                            queue=queue_template_context(t.queue))
 
-            messages_sent_to = []
+            messages_sent_to = set()
+            try:
+                messages_sent_to.add(request.user.email)
+            except AttributeError:
+                pass
 
-            if t.submitter_email:
-                send_templated_mail(
-                    'closed_submitter',
-                    context,
-                    recipients=t.submitter_email,
-                    sender=t.queue.from_address,
-                    fail_silently=True,
-                )
-                messages_sent_to.append(t.submitter_email)
-
-            for cc in t.ticketcc_set.all():
-                if cc.email_address not in messages_sent_to:
-                    send_templated_mail(
-                        'closed_submitter',
-                        context,
-                        recipients=cc.email_address,
-                        sender=t.queue.from_address,
-                        fail_silently=True,
-                    )
-                    messages_sent_to.append(cc.email_address)
-
-            if t.assigned_to and \
-                    request.user != t.assigned_to and \
-                    t.assigned_to.email and \
-                    t.assigned_to.email not in messages_sent_to:
-                send_templated_mail(
-                    'closed_owner',
-                    context,
-                    recipients=t.assigned_to.email,
-                    sender=t.queue.from_address,
-                    fail_silently=True,
-                )
-                messages_sent_to.append(t.assigned_to.email)
-
-            if t.queue.updated_ticket_cc and \
-                    t.queue.updated_ticket_cc not in messages_sent_to:
-                send_templated_mail(
-                    'closed_cc',
-                    context,
-                    recipients=t.queue.updated_ticket_cc,
-                    sender=t.queue.from_address,
-                    fail_silently=True,
-                )
+            messages_sent_to.update(t.send(
+                {'submitter': ('closed_submitter', context),
+                 'ticket_cc': ('closed_cc', context),
+                 'assigned_to': ('closded_owner', context)},
+                dont_send_to=messages_sent_to,
+                fail_silently=True,
+            ))
 
         elif action == 'delete':
             t.delete()

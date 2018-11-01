@@ -17,7 +17,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 
-from helpdesk.lib import send_templated_mail, safe_template_context, process_attachments
+from helpdesk.lib import safe_template_context, process_attachments
 from helpdesk.models import (Ticket, Queue, FollowUp, Attachment, IgnoreEmail, TicketCC,
                              CustomField, TicketCustomFieldValue, TicketDependency, UserSettings)
 from helpdesk import settings as helpdesk_settings
@@ -238,56 +238,16 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
         context = safe_template_context(ticket)
         context['comment'] = followup.comment
 
-        messages_sent_to = []
-
-        if ticket.submitter_email:
-            send_templated_mail(
-                'newticket_submitter',
-                context,
-                recipients=ticket.submitter_email,
-                sender=queue.from_address,
-                fail_silently=True,
-                files=files,
-            )
-            messages_sent_to.append(ticket.submitter_email)
-
-        if ticket.assigned_to and \
-                ticket.assigned_to != user and \
-                ticket.assigned_to.usersettings_helpdesk.email_on_ticket_assign and \
-                ticket.assigned_to.email and \
-                ticket.assigned_to.email not in messages_sent_to:
-            send_templated_mail(
-                'assigned_owner',
-                context,
-                recipients=ticket.assigned_to.email,
-                sender=queue.from_address,
-                fail_silently=True,
-                files=files,
-            )
-            messages_sent_to.append(ticket.assigned_to.email)
-
-        if queue.new_ticket_cc and queue.new_ticket_cc not in messages_sent_to:
-            send_templated_mail(
-                'newticket_cc',
-                context,
-                recipients=queue.new_ticket_cc,
-                sender=queue.from_address,
-                fail_silently=True,
-                files=files,
-            )
-            messages_sent_to.append(queue.new_ticket_cc)
-
-        if queue.updated_ticket_cc and \
-                queue.updated_ticket_cc != queue.new_ticket_cc and \
-                queue.updated_ticket_cc not in messages_sent_to:
-            send_templated_mail(
-                'newticket_cc',
-                context,
-                recipients=queue.updated_ticket_cc,
-                sender=queue.from_address,
-                fail_silently=True,
-                files=files,
-            )
+        roles = {'submitter': ('newticket_submitter', context),
+                 'new_ticket_cc': ('newticket_cc', context),
+                 'ticket_cc': ('newticket_cc', context)}
+        if ticket.assigned_to and ticket.assigned_to.usersettings_helpdesk.email_on_ticket_assign:
+            roles['assigned_to'] = ('assigned_owner', context)
+        ticket.send(
+            roles,
+            fail_silently=True,
+            files=files,
+        )
 
 
 class TicketForm(AbstractTicketForm):

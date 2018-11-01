@@ -98,8 +98,8 @@ class GetEmailParametricTemplate(object):
         else:
             # Test local email reading
             if self.method == 'local':
-                with mock.patch('helpdesk.management.commands.get_email.listdir') as mocked_listdir, \
-                        mock.patch('helpdesk.management.commands.get_email.isfile') as mocked_isfile, \
+                with mock.patch('helpdesk.email.listdir') as mocked_listdir, \
+                        mock.patch('helpdesk.email.isfile') as mocked_isfile, \
                         mock.patch('builtins.open' if six.PY3 else '__builtin__.open', mock.mock_open(read_data=test_email)):
                     mocked_isfile.return_value = True
                     mocked_listdir.return_value = ['filename1', 'filename2']
@@ -120,7 +120,7 @@ class GetEmailParametricTemplate(object):
                 mocked_poplib_server = mock.Mock()
                 mocked_poplib_server.list = mock.Mock(return_value=pop3_mail_list)
                 mocked_poplib_server.retr = mock.Mock(side_effect=lambda x: pop3_emails[x])
-                with mock.patch('helpdesk.management.commands.get_email.poplib', autospec=True) as mocked_poplib:
+                with mock.patch('helpdesk.email.poplib', autospec=True) as mocked_poplib:
                     mocked_poplib.POP3 = mock.Mock(return_value=mocked_poplib_server)
                     call_command('get_email')
 
@@ -136,7 +136,7 @@ class GetEmailParametricTemplate(object):
 
                 # we ignore the second arg as the data item/mime-part is constant (RFC822)
                 mocked_imaplib_server.fetch = mock.Mock(side_effect=lambda x, _: imap_emails[x])
-                with mock.patch('helpdesk.management.commands.get_email.imaplib', autospec=True) as mocked_imaplib:
+                with mock.patch('helpdesk.email.imaplib', autospec=True) as mocked_imaplib:
                     mocked_imaplib.IMAP4 = mock.Mock(return_value=mocked_imaplib_server)
                     call_command('get_email')
 
@@ -171,8 +171,8 @@ class GetEmailParametricTemplate(object):
         else:
             # Test local email reading
             if self.method == 'local':
-                with mock.patch('helpdesk.management.commands.get_email.listdir') as mocked_listdir, \
-                        mock.patch('helpdesk.management.commands.get_email.isfile') as mocked_isfile, \
+                with mock.patch('helpdesk.email.listdir') as mocked_listdir, \
+                        mock.patch('helpdesk.email.isfile') as mocked_isfile, \
                         mock.patch('builtins.open' if six.PY3 else '__builtin__.open', mock.mock_open(read_data=test_email)):
                     mocked_isfile.return_value = True
                     mocked_listdir.return_value = ['filename1', 'filename2']
@@ -193,7 +193,7 @@ class GetEmailParametricTemplate(object):
                 mocked_poplib_server = mock.Mock()
                 mocked_poplib_server.list = mock.Mock(return_value=pop3_mail_list)
                 mocked_poplib_server.retr = mock.Mock(side_effect=lambda x: pop3_emails[x])
-                with mock.patch('helpdesk.management.commands.get_email.poplib', autospec=True) as mocked_poplib:
+                with mock.patch('helpdesk.email.poplib', autospec=True) as mocked_poplib:
                     mocked_poplib.POP3 = mock.Mock(return_value=mocked_poplib_server)
                     call_command('get_email')
 
@@ -209,7 +209,7 @@ class GetEmailParametricTemplate(object):
 
                 # we ignore the second arg as the data item/mime-part is constant (RFC822)
                 mocked_imaplib_server.fetch = mock.Mock(side_effect=lambda x, _: imap_emails[x])
-                with mock.patch('helpdesk.management.commands.get_email.imaplib', autospec=True) as mocked_imaplib:
+                with mock.patch('helpdesk.email.imaplib', autospec=True) as mocked_imaplib:
                     mocked_imaplib.IMAP4 = mock.Mock(return_value=mocked_imaplib_server)
                     call_command('get_email')
 
@@ -284,8 +284,8 @@ class GetEmailParametricTemplate(object):
         else:
             # Test local email reading
             if self.method == 'local':
-                with mock.patch('helpdesk.management.commands.get_email.listdir') as mocked_listdir, \
-                        mock.patch('helpdesk.management.commands.get_email.isfile') as mocked_isfile, \
+                with mock.patch('helpdesk.email.listdir') as mocked_listdir, \
+                        mock.patch('helpdesk.email.isfile') as mocked_isfile, \
                         mock.patch('builtins.open' if six.PY3 else '__builtin__.open', mock.mock_open(read_data=msg.as_string())):
                     mocked_isfile.return_value = True
                     mocked_listdir.return_value = ['filename1', 'filename2']
@@ -306,7 +306,7 @@ class GetEmailParametricTemplate(object):
                 mocked_poplib_server = mock.Mock()
                 mocked_poplib_server.list = mock.Mock(return_value=pop3_mail_list)
                 mocked_poplib_server.retr = mock.Mock(side_effect=lambda x: pop3_emails[x])
-                with mock.patch('helpdesk.management.commands.get_email.poplib', autospec=True) as mocked_poplib:
+                with mock.patch('helpdesk.email.poplib', autospec=True) as mocked_poplib:
                     mocked_poplib.POP3 = mock.Mock(return_value=mocked_poplib_server)
                     call_command('get_email')
 
@@ -322,7 +322,7 @@ class GetEmailParametricTemplate(object):
 
                 # we ignore the second arg as the data item/mime-part is constant (RFC822)
                 mocked_imaplib_server.fetch = mock.Mock(side_effect=lambda x, _: imap_emails[x])
-                with mock.patch('helpdesk.management.commands.get_email.imaplib', autospec=True) as mocked_imaplib:
+                with mock.patch('helpdesk.email.imaplib', autospec=True) as mocked_imaplib:
                     mocked_imaplib.IMAP4 = mock.Mock(return_value=mocked_imaplib_server)
                     call_command('get_email')
 
@@ -531,8 +531,8 @@ a9eiiQ+3V1v+7wWHXCzq
         else:
             # Test local email reading
             if self.method == 'local':
-                with mock.patch('helpdesk.management.commands.get_email.listdir') as mocked_listdir, \
-                        mock.patch('helpdesk.management.commands.get_email.isfile') as mocked_isfile, \
+                with mock.patch('helpdesk.email.listdir') as mocked_listdir, \
+                        mock.patch('helpdesk.email.isfile') as mocked_isfile, \
                         mock.patch('builtins.open' if six.PY3 else '__builtin__.open', mock.mock_open(read_data=test_email)):
                     mocked_isfile.return_value = True
                     mocked_listdir.return_value = ['filename1']
@@ -551,7 +551,7 @@ a9eiiQ+3V1v+7wWHXCzq
                 mocked_poplib_server = mock.Mock()
                 mocked_poplib_server.list = mock.Mock(return_value=pop3_mail_list)
                 mocked_poplib_server.retr = mock.Mock(side_effect=lambda x: pop3_emails['1'])
-                with mock.patch('helpdesk.management.commands.get_email.poplib', autospec=True) as mocked_poplib:
+                with mock.patch('helpdesk.email.poplib', autospec=True) as mocked_poplib:
                     mocked_poplib.POP3 = mock.Mock(return_value=mocked_poplib_server)
                     call_command('get_email')
 
@@ -566,7 +566,7 @@ a9eiiQ+3V1v+7wWHXCzq
 
                 # we ignore the second arg as the data item/mime-part is constant (RFC822)
                 mocked_imaplib_server.fetch = mock.Mock(side_effect=lambda x, _: imap_emails[x])
-                with mock.patch('helpdesk.management.commands.get_email.imaplib', autospec=True) as mocked_imaplib:
+                with mock.patch('helpdesk.email.imaplib', autospec=True) as mocked_imaplib:
                     mocked_imaplib.IMAP4 = mock.Mock(return_value=mocked_imaplib_server)
                     call_command('get_email')
 
@@ -701,8 +701,8 @@ class GetEmailCCHandling(TestCase):
         test_email = "To: queue@example.com\nCc: " + test_email_cc_one + ", " + test_email_cc_one + ", " + test_email_cc_two + ", " + test_email_cc_three + "\nCC: " + test_email_cc_one + ", " + test_email_cc_three + ", " + test_email_cc_four + ", " + ticket_user_emails + "\nFrom: " + test_email_from + "\nSubject: " + test_email_subject + "\n\n" + test_email_body
         test_mail_len = len(test_email)
 
-        with mock.patch('helpdesk.management.commands.get_email.listdir') as mocked_listdir, \
-                mock.patch('helpdesk.management.commands.get_email.isfile') as mocked_isfile, \
+        with mock.patch('helpdesk.email.listdir') as mocked_listdir, \
+                mock.patch('helpdesk.email.isfile') as mocked_isfile, \
                 mock.patch('builtins.open' if six.PY3 else '__builtin__.open', mock.mock_open(read_data=test_email)):
 
             mocked_isfile.return_value = True
