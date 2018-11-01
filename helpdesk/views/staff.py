@@ -604,8 +604,9 @@ def update_ticket(request, ticket_id, public=False):
         roles = {
             'submitter': (template + 'submitter', context),
             'ticket_cc': (template + 'cc', context),
-            'assigned_to': (template + 'cc', context),
         }
+        if ticket.assigned_to and ticket.assigned_to.usersettings_helpdesk.email_on_ticket_change:
+            roles['assigned_to'] = (template + 'cc', context)
         messages_sent_to.update(ticket.send(roles, dont_send_to=messages_sent_to, fail_silently=True, files=files,))
 
     if reassigned:
@@ -617,12 +618,13 @@ def update_ticket(request, ticket_id, public=False):
     else:
         template_staff = 'updated_owner'
 
-    messages_sent_to.update(ticket.send(
-        {'assigned_to': (template_staff, context)},
-        dont_send_to=messages_sent_to,
-        fail_silently=True,
-        files=files,
-    ))
+    if ticket.assigned_to and (ticket.assigned_to.usersettings_helpdesk.email_on_ticket_change or (reassigned and ticket.assigned_to.usersettings_helpdesk.email_on_ticket_assigned)):
+        messages_sent_to.update(ticket.send(
+            {'assigned_to': (template_staff, context)},
+            dont_send_to=messages_sent_to,
+            fail_silently=True,
+            files=files,
+        ))
 
     if reassigned:
         template_cc = 'assigned_cc'
@@ -730,10 +732,15 @@ def mass_update(request):
             except AttributeError:
                 pass
 
+            roles = {
+                'submitter': ('closed_submitter', context),
+                'ticket_cc': ('closed_cc', context),
+            }
+            if ticket.assigned_to and ticket.assigned_to.usersettings_helpdesk.email_on_ticket_change:
+                roles['assigned_to'] = ('closed_owner', context),
+
             messages_sent_to.update(t.send(
-                {'submitter': ('closed_submitter', context),
-                 'ticket_cc': ('closed_cc', context),
-                 'assigned_to': ('closded_owner', context)},
+                roles,
                 dont_send_to=messages_sent_to,
                 fail_silently=True,
             ))

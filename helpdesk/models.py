@@ -534,7 +534,7 @@ class Ticket(models.Model):
                 recipients.add(recipient)
         send('submitter', self.submitter_email)
         send('new_ticket_cc', self.queue.new_ticket_cc)
-        if self.assigned_to and self.assigned_to.usersettings_helpdesk.email_on_ticket_assign:
+        if self.assigned_to:
             send('assigned_to', self.assigned_to.email)
         send('ticket_cc', self.queue.updated_ticket_cc)
         for cc in self.ticketcc_set.all():
