@@ -15,7 +15,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.contenttypes.models import ContentType
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.db import connection
 from django.db.models import Q
@@ -26,7 +26,7 @@ from django.utils.translation import ugettext as _
 from django.utils.html import escape
 from django import forms
 from django.utils import timezone
-from django.views.generic.edit import FormView
+from django.views.generic.edit import FormView, UpdateView
 
 from django.utils import six
 
@@ -47,12 +47,12 @@ from helpdesk.forms import (
     TicketCCEmailForm, TicketCCUserForm, EditFollowUpForm, TicketDependencyForm
 )
 from helpdesk.lib import (
-    send_templated_mail, query_to_dict, apply_query, safe_template_context,
+    query_to_dict, apply_query, safe_template_context,
     process_attachments, queue_template_context,
 )
 from helpdesk.models import (
     Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch,
-    IgnoreEmail, TicketCC, TicketDependency,
+    IgnoreEmail, TicketCC, TicketDependency, UserSettings,
 )
 from helpdesk import settings as helpdesk_settings
 from helpdesk.views.permissions import MustBeStaffMixin
@@ -578,8 +578,6 @@ def update_ticket(request, ticket_id, public=False):
         if new_status == Ticket.RESOLVED_STATUS or ticket.resolution is None:
             ticket.resolution = comment
 
-    messages_sent_to = []
-
     # ticket might have changed above, so we re-instantiate context with the
     # (possibly) updated ticket.
     context = safe_template_context(ticket)
@@ -588,6 +586,11 @@ def update_ticket(request, ticket_id, public=False):
         comment=f.comment,
     )
 
+    messages_sent_to = set()
+    try:
+        messages_sent_to.add(request.user.email)
+    except AttributeError:
+        pass
     if public and (f.comment or (
         f.new_status in (Ticket.RESOLVED_STATUS,
                          Ticket.CLOSED_STATUS))):
@@ -598,85 +601,46 @@ def update_ticket(request, ticket_id, public=False):
         else:
             template = 'updated_'
 
-        template_suffix = 'submitter'
+        roles = {
+            'submitter': (template + 'submitter', context),
+            'ticket_cc': (template + 'cc', context),
+        }
+        if ticket.assigned_to and ticket.assigned_to.usersettings_helpdesk.email_on_ticket_change:
+            roles['assigned_to'] = (template + 'cc', context)
+        messages_sent_to.update(ticket.send(roles, dont_send_to=messages_sent_to, fail_silently=True, files=files,))
 
-        if ticket.submitter_email:
-            send_templated_mail(
-                template + template_suffix,
-                context,
-                recipients=ticket.submitter_email,
-                sender=ticket.queue.from_address,
-                fail_silently=True,
-                files=files,
-            )
-            messages_sent_to.append(ticket.submitter_email)
+    if reassigned:
+        template_staff = 'assigned_owner'
+    elif f.new_status == Ticket.RESOLVED_STATUS:
+        template_staff = 'resolved_owner'
+    elif f.new_status == Ticket.CLOSED_STATUS:
+        template_staff = 'closed_owner'
+    else:
+        template_staff = 'updated_owner'
 
-        template_suffix = 'cc'
-
-        for cc in ticket.ticketcc_set.all():
-            if cc.email_address not in messages_sent_to:
-                send_templated_mail(
-                    template + template_suffix,
-                    context,
-                    recipients=cc.email_address,
-                    sender=ticket.queue.from_address,
-                    fail_silently=True,
-                    files=files,
-                )
-                messages_sent_to.append(cc.email_address)
-
-    if ticket.assigned_to and \
-            request.user != ticket.assigned_to and \
-            ticket.assigned_to.email and \
-            ticket.assigned_to.email not in messages_sent_to:
-        # We only send e-mails to staff members if the ticket is updated by
-        # another user. The actual template varies, depending on what has been
-        # changed.
-        if reassigned:
-            template_staff = 'assigned_owner'
-        elif f.new_status == Ticket.RESOLVED_STATUS:
-            template_staff = 'resolved_owner'
-        elif f.new_status == Ticket.CLOSED_STATUS:
-            template_staff = 'closed_owner'
-        else:
-            template_staff = 'updated_owner'
-
-        if (not reassigned or
-                (reassigned and
-                    ticket.assigned_to.usersettings_helpdesk.settings.get(
-                        'email_on_ticket_assign', False))) or \
-            (not reassigned and
-                ticket.assigned_to.usersettings_helpdesk.settings.get(
-                    'email_on_ticket_change', False)):
-
-            send_templated_mail(
-                template_staff,
-                context,
-                recipients=ticket.assigned_to.email,
-                sender=ticket.queue.from_address,
-                fail_silently=True,
-                files=files,
-            )
-            messages_sent_to.append(ticket.assigned_to.email)
-
-    if ticket.queue.updated_ticket_cc and ticket.queue.updated_ticket_cc not in messages_sent_to:
-        if reassigned:
-            template_cc = 'assigned_cc'
-        elif f.new_status == Ticket.RESOLVED_STATUS:
-            template_cc = 'resolved_cc'
-        elif f.new_status == Ticket.CLOSED_STATUS:
-            template_cc = 'closed_cc'
-        else:
-            template_cc = 'updated_cc'
-
-        send_templated_mail(
-            template_cc,
-            context,
-            recipients=ticket.queue.updated_ticket_cc,
-            sender=ticket.queue.from_address,
+    if ticket.assigned_to and (ticket.assigned_to.usersettings_helpdesk.email_on_ticket_change or (reassigned and ticket.assigned_to.usersettings_helpdesk.email_on_ticket_assigned)):
+        messages_sent_to.update(ticket.send(
+            {'assigned_to': (template_staff, context)},
+            dont_send_to=messages_sent_to,
             fail_silently=True,
             files=files,
-        )
+        ))
+
+    if reassigned:
+        template_cc = 'assigned_cc'
+    elif f.new_status == Ticket.RESOLVED_STATUS:
+        template_cc = 'resolved_cc'
+    elif f.new_status == Ticket.CLOSED_STATUS:
+        template_cc = 'closed_cc'
+    else:
+        template_cc = 'updated_cc'
+
+    messages_sent_to.update(ticket.send(
+        {'ticket_cc': (template_cc, context)},
+        dont_send_to=messages_sent_to,
+        fail_silently=True,
+        files=files,
+    ))
 
     ticket.save()
 
@@ -762,51 +726,24 @@ def mass_update(request):
             context.update(resolution=t.resolution,
                            queue=queue_template_context(t.queue))
 
-            messages_sent_to = []
+            messages_sent_to = set()
+            try:
+                messages_sent_to.add(request.user.email)
+            except AttributeError:
+                pass
 
-            if t.submitter_email:
-                send_templated_mail(
-                    'closed_submitter',
-                    context,
-                    recipients=t.submitter_email,
-                    sender=t.queue.from_address,
-                    fail_silently=True,
-                )
-                messages_sent_to.append(t.submitter_email)
+            roles = {
+                'submitter': ('closed_submitter', context),
+                'ticket_cc': ('closed_cc', context),
+            }
+            if ticket.assigned_to and ticket.assigned_to.usersettings_helpdesk.email_on_ticket_change:
+                roles['assigned_to'] = ('closed_owner', context),
 
-            for cc in t.ticketcc_set.all():
-                if cc.email_address not in messages_sent_to:
-                    send_templated_mail(
-                        'closed_submitter',
-                        context,
-                        recipients=cc.email_address,
-                        sender=t.queue.from_address,
-                        fail_silently=True,
-                    )
-                    messages_sent_to.append(cc.email_address)
-
-            if t.assigned_to and \
-                    request.user != t.assigned_to and \
-                    t.assigned_to.email and \
-                    t.assigned_to.email not in messages_sent_to:
-                send_templated_mail(
-                    'closed_owner',
-                    context,
-                    recipients=t.assigned_to.email,
-                    sender=t.queue.from_address,
-                    fail_silently=True,
-                )
-                messages_sent_to.append(t.assigned_to.email)
-
-            if t.queue.updated_ticket_cc and \
-                    t.queue.updated_ticket_cc not in messages_sent_to:
-                send_templated_mail(
-                    'closed_cc',
-                    context,
-                    recipients=t.queue.updated_ticket_cc,
-                    sender=t.queue.from_address,
-                    fail_silently=True,
-                )
+            messages_sent_to.update(t.send(
+                roles,
+                dont_send_to=messages_sent_to,
+                fail_silently=True,
+            ))
 
         elif action == 'delete':
             t.delete()
@@ -999,7 +936,7 @@ def ticket_list(request):
     return render(request, 'helpdesk/ticket_list.html', dict(
         context,
         tickets=ticket_qs,
-        default_tickets_per_page=request.user.usersettings_helpdesk.settings.get('tickets_per_page') or 25,
+        default_tickets_per_page=request.user.usersettings_helpdesk.tickets_per_page,
         user_choices=User.objects.filter(is_active=True, is_staff=True),
         queue_choices=user_queues,
         status_choices=Ticket.STATUS_CHOICES,
@@ -1066,7 +1003,7 @@ class CreateTicketView(MustBeStaffMixin, FormView):
     def get_initial(self):
         initial_data = {}
         request = self.request
-        if request.user.usersettings_helpdesk.settings.get('use_email_as_submitter', False) and request.user.email:
+        if request.user.usersettings_helpdesk.use_email_as_submitter and request.user.email:
             initial_data['submitter_email'] = request.user.email
         if 'queue' in request.GET:
             initial_data['queue'] = request.GET['queue']
@@ -1433,21 +1370,14 @@ def delete_saved_query(request, id):
 delete_saved_query = staff_member_required(delete_saved_query)
 
 
-@helpdesk_staff_member_required
-def user_settings(request):
-    s = request.user.usersettings_helpdesk
-    if request.POST:
-        form = UserSettingsForm(request.POST)
-        if form.is_valid():
-            s.settings = form.cleaned_data
-            s.save()
-    else:
-        form = UserSettingsForm(s.settings)
+class EditUserSettingsView(MustBeStaffMixin, UpdateView):
+    template_name = 'helpdesk/user_settings.html'
+    form_class = UserSettingsForm
+    model = UserSettings
+    success_url = reverse_lazy('helpdesk:dashboard')
 
-    return render(request, 'helpdesk/user_settings.html', {'form': form})
-
-
-user_settings = staff_member_required(user_settings)
+    def get_object(self):
+        return UserSettings.objects.get_or_create(user=self.request.user)[0]
 
 
 @helpdesk_superuser_required
