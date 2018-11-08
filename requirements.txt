@@ -1,5 +1,7 @@
 Django>=1.11,<3
 django-bootstrap-form>=3.3,<4
+celery
+django-celery-beat
 email-reply-parser
 django-markdown-deux
 beautifulsoup4

@@ -3,13 +3,13 @@ Configuration
 
 Before django-helpdesk will be much use, you need to do some basic configuration. Most of this is done via the Django admin screens.
 
-1. Visit ``http://yoursite/admin/`` and add a Helpdesk Queue. If you wish, enter your POP3 or IMAP server details. 
+1. Visit ``http://yoursite/admin/`` and add a Helpdesk Queue. If you wish, enter your POP3 or IMAP server details.
 
    **IMPORTANT NOTE**: Any tickets created via POP3 or IMAP mailboxes will DELETE the original e-mail from the mail server.
 
-2. Visit ``http://yoursite/helpdesk/`` (or whatever path as defined in your ``urls.py``) 
+2. Visit ``http://yoursite/helpdesk/`` (or whatever path as defined in your ``urls.py``)
 
-3. If you wish to automatically create tickets from the contents of an e-mail inbox, set up a cronjob to run the management command on a regular basis. 
+3. If you wish to automatically create tickets from the contents of an e-mail inbox, set up a cronjob to run the management command on a regular basis. (Or use Celery, see below)
 
    Don't forget to set the relevant Django environment variables in your crontab::
 
@@ -19,10 +19,12 @@ Before django-helpdesk will be much use, you need to do some basic configuration
 
    **IMPORTANT NOTE**: Any tickets created via POP3 or IMAP mailboxes will DELETE the original e-mail from the mail server.
 
+ If you wish to use `celery` instead of cron, you must add 'django_celery_beat' to `INSTALLED_APPS` and add a periodic celery task through the Django admin.
+
 4. If you wish to automatically escalate tickets based on their age, set up a cronjob to run the escalation command on a regular basis::
-   
+
        0 * * * * /path/to/helpdesksite/manage.py escalate_tickets
-   
+
    This will run the escalation process hourly, using the 'Escalation Days' setting for each queue to determine which tickets to escalate.
 
 5. If you wish to exclude some days (eg, weekends) from escalation calculations, enter the dates manually via the Admin, or setup a cronjob to run a management command on a regular basis::
