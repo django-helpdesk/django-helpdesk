@@ -1,3 +1,7 @@
+0.2.6+nimbis.19 (2018-11-15):
+
+    * Add management command to migrate tickets from one email to another.
+
 0.2.6+nimbis.18 (2018-08-29):
 
 	* Remove attachments from all sent emails.
