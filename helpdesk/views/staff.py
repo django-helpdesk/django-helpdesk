@@ -7,40 +7,45 @@ views/staff.py - The bulk of the application - provides most business logic and
                  renders all staff-facing views.
 """
 from __future__ import unicode_literals
-from datetime import date, datetime, timedelta
+
 import re
+from datetime import date, datetime, timedelta
+from pydoc import locate
 
 from django import VERSION as DJANGO_VERSION
+from django import forms
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import user_passes_test
-from django.urls import reverse
-from django.core.exceptions import ValidationError, PermissionDenied
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import connection
 from django.db.models import Q
-from django.http import HttpResponseRedirect, Http404, HttpResponse
-from django.shortcuts import render, get_object_or_404
+from django.http import Http404, HttpResponse, HttpResponseRedirect
+from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
+from django.utils import six, timezone
 from django.utils.dates import MONTHS_3
-from django.utils.translation import ugettext as _
 from django.utils.html import escape
-from django import forms
-from django.utils import timezone
+from django.utils.translation import ugettext as _
 
-from django.utils import six
-
-from helpdesk.forms import (
-    TicketForm, UserSettingsForm, EmailIgnoreForm, EditTicketForm, TicketCCForm,
-    TicketCCEmailForm, TicketCCUserForm, EditFollowUpForm, TicketDependencyForm
-)
-from helpdesk.lib import (
-    send_templated_mail, query_to_dict, apply_query, safe_template_context,
-    process_attachments, queue_template_context,
-)
-from helpdesk.models import (
-    Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch,
-    IgnoreEmail, TicketCC, TicketDependency,
-)
 from helpdesk import settings as helpdesk_settings
+from helpdesk.lib import (apply_query, process_attachments, query_to_dict,
+                          queue_template_context, safe_template_context,
+                          send_templated_mail)
+from helpdesk.models import (Attachment, FollowUp, IgnoreEmail, PreSetReply,
+                             Queue, SavedSearch, Ticket, TicketCC,
+                             TicketChange, TicketDependency)
+
+# Import form for override easily
+TicketForm = locate(helpdesk_settings.HELPDESK_FORM_TICKET)
+UserSettingsForm = locate(helpdesk_settings.HELPDESK_FORM_USERSETTING)
+EmailIgnoreForm = locate(helpdesk_settings.HELPDESK_FORM_EMAIL_IGNORE)
+EditTicketForm = locate(helpdesk_settings.HELPDESK_FORM_EDIT_TICKET)
+TicketCCForm = locate(helpdesk_settings.HELPDESK_FORM_TICKETCC)
+TicketCCEmailForm = locate(helpdesk_settings.HELPDESK_FORM_TICKETCC_EMAIL)
+TicketCCUserForm = locate(helpdesk_settings.HELPDESK_FORM_TICKETCC_USER)
+EditFollowUpForm = locate(helpdesk_settings.HELPDESK_FORM_EDIT_FOLLOWUP)
+TicketDependencyForm = locate(helpdesk_settings.HELPDESK_FORM_TICKET_DEPENDENCY)
 
 User = get_user_model()
 
