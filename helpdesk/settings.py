@@ -81,6 +81,10 @@ HELPDESK_VIEW_A_TICKET_PUBLIC = getattr(settings, 'HELPDESK_VIEW_A_TICKET_PUBLIC
 HELPDESK_SUBMIT_A_TICKET_PUBLIC = getattr(settings, 'HELPDESK_SUBMIT_A_TICKET_PUBLIC', True)
 
 
+HELPDESK_FORM_TICKET_PUBLIC = getattr(
+    settings,
+    "HELPDESK_FORM_TICKET_PUBLIC", "helpdesk.forms.PublicTicketForm")
+
 ###################################
 # options for update_ticket views #
 ###################################
