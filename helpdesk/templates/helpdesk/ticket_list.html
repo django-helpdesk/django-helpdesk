@@ -18,7 +18,7 @@
                 "processing": true,
                 "serverSide": true,
                 "ajax": {
-                    "url": "/datatables_ticket_list/",
+                    "url": "{% url 'helpdesk:datatables_ticket_list' %}",
                     "type": "GET",
                 },
                 createdRow: function( row, data, dataIndex )
