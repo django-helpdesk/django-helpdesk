@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('helpdesk', '0017_default_owner_on_delete_null'),
+        ('helpdesk', '0020_depickle_user_settings'),
     ]
 
     operations = [
