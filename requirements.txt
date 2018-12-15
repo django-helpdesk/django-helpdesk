@@ -1,5 +1,7 @@
 Django>=2,<3
 django-bootstrap4-form
+celery
+django-celery-beat
 email-reply-parser
 django-markdown-deux
 beautifulsoup4

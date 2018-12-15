@@ -15,6 +15,10 @@ from django.views.generic import TemplateView
 from helpdesk.decorators import helpdesk_staff_member_required, protect_view
 from helpdesk import settings as helpdesk_settings
 from helpdesk.views import feeds, staff, public, kb
+try:
+    import helpdesk.tasks
+except ImportError:
+    pass
 
 
 class DirectTemplateView(TemplateView):
