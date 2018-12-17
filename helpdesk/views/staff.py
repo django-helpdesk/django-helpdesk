@@ -49,7 +49,6 @@ TicketDependencyForm = locate(helpdesk_settings.HELPDESK_FORM_TICKET_DEPENDENCY)
 
 User = get_user_model()
 
-
 if helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE:
     # treat 'normal' users like 'staff'
     staff_member_required = user_passes_test(

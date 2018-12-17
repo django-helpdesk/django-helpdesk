@@ -21,9 +21,12 @@ from django.conf import settings
 
 from helpdesk import settings as helpdesk_settings
 from helpdesk.decorators import protect_view
-from helpdesk.forms import PublicTicketForm
 from helpdesk.lib import text_is_spam
 from helpdesk.models import Ticket, Queue, UserSettings, KBCategory
+from pydoc import locate
+
+
+PublicTicketForm = locate(helpdesk_settings.HELPDESK_FORM_TICKET_PUBLIC)
 
 
 @protect_view
