@@ -362,11 +362,13 @@ def ticket_from_message(message, queue, logger):
 
     if not body:
         mail = BeautifulSoup(part.get_payload(), "lxml")
-        if ">" in mail.text:
-            body = mail.find('body')
-            body = body.text
-            body = body.encode('ascii', errors='ignore')
-        else:
+        if "body>" in mail.text:
+            beautiful_body = mail.find('body')
+            try:
+                body = beautiful_body.text
+            except AttributeError:
+                pass
+        if not body:
             body = mail.text
 
     if ticket:
