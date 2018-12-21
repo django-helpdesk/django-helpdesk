@@ -89,6 +89,10 @@ These changes are visible throughout django-helpdesk
 - **HELPDESK_ANON_ACCESS_RAISES_404** If True, redirects user to a 404 page when attempting to reach ticket pages while not logged in, rather than redirecting to a login screen.
 
   **Default:** ``HELPDESK_ANON_ACCESS_RAISES_404 = False``
+  
+- **HELPDESK_USE_SERVERSIDE_PROCESSING** If True, may improve performance by utilizing server-side processing of the full ticket list whenever performing queries on the ticket list. Set to False to restore the "classic" functionality using javascript.
+
+  **Default:** ``HELPDESK_USE_SERVERSIDE_PROCESSING = True``
 
 
 Options shown on public pages
