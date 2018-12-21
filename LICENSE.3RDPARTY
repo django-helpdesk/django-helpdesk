@@ -1,7 +1,7 @@
 This file contains license details for 3rd party software which is
 distributed with django-helpdesk.
 
-1. License for jQuery & jQuery UI
+1. License for jQuery & jQuery UI v3.3.1
 2. License for jQuery UI 'Smoothness' theme
 3. License for akismet.py
 4. License for jqPlot
@@ -16,7 +16,7 @@ distributed with django-helpdesk.
 
 ----------------------------------------------------------------------
 
-1. License for jQuery & jQuery UI
+1. License for jQuery & jQuery UI v3.3.1
 
 Copyright (c) 2007 John Resig, http://jquery.com/
 
