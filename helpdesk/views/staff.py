@@ -926,8 +926,8 @@ def ticket_list(request):
     user_saved_queries = SavedSearch.objects.filter(Q(user=request.user) | Q(shared__exact=True))
 
     # Serverside processing on datatables is optional. Set
-    # USE_SERVERSIDE_PROCESSING to False in settings.py to disable
-    if helpdesk_settings.USE_SERVERSIDE_PROCESSING:
+    # HELPDESK_USE_SERVERSIDE_PROCESSING to False in settings.py to disable
+    if helpdesk_settings.HELPDESK_USE_SERVERSIDE_PROCESSING:
         cache.set('ticket_qs', ticket_qs)
         context['server_side'] = True
     else:
