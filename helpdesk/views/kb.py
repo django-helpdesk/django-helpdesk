@@ -47,7 +47,7 @@ def vote(request, item):
     item = get_object_or_404(KBItem, pk=item)
     vote = request.GET.get('vote', None)
     if vote in ('up', 'down'):
-        if request.user not in item.voted_by: 
+        if request.user not in item.voted_by:
 
             item.votes += 1
             if vote == 'up':
