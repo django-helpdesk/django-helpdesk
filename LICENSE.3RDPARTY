@@ -5,7 +5,7 @@ distributed with django-helpdesk.
 2. License for jQuery UI 'Smoothness' theme
 3. License for akismet.py
 4. License for jqPlot
-5. License for StartBootstrap SB Admin v2.0 theme
+5. License for StartBootstrap SB Admin v5.0.2 theme
 6. License for Raphael
 7. License for Morris.js
 8. License for DataTables
@@ -114,11 +114,11 @@ THE SOFTWARE.
 
 ----------------------------------------------------------------------
 
-5. License for StartBootstrap SB Admin v2.0 theme
+5. License for StartBootstrap SB Admin v5.0.2 theme
 
 The MIT License (MIT)
 
-Copyright (c) 2013-2016 Blackrock Digital LLC.
+Copyright (c) 2013-2018 Blackrock Digital LLC
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
