@@ -37,6 +37,7 @@ def category(request, slug):
 def item(request, item):
     item = get_object_or_404(KBItem, pk=item)
     return render(request, 'helpdesk/kb_item.html', {
+        'category': item.category,
         'item': item,
         'helpdesk_settings': helpdesk_settings,
     })

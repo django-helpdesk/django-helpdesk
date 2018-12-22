@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'django.contrib.humanize',
     'markdown_deux',
-    'bootstrapform',
+    'bootstrap4form',
     'helpdesk'
 ]
 
@@ -104,6 +104,8 @@ HELPDESK_REDIRECT_TO_LOGIN_BY_DEFAULT = False
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/login/'
 
+# Turn off server-side processing for this local demo
+HELPDESK_USE_SERVERSIDE_PROCESSING = False
 
 # Database
 # - by default, we use SQLite3 for the demo, but you can also

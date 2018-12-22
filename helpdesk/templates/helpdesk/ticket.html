@@ -1,7 +1,9 @@
 {% extends "helpdesk/base.html" %}
-{% load i18n bootstrap humanize %}
+{% load i18n bootstrap4form humanize %}
 {% load static from staticfiles %}
+
 {% block helpdesk_title %}{{ ticket.queue.slug }}-{{ ticket.id }} : {% trans "View Ticket Details" %}{% endblock %}
+
 {% block helpdesk_head %}
 <script type='text/javascript' language='javascript'>
 $(document).ready(function() {
@@ -60,6 +62,15 @@ $(document).on('change', ':file', function() {
 {% endblock %}
 
 {% block h1_title %}{{ ticket.ticket_for_url }}{% endblock %}
+
+{% block helpdesk_breadcrumb %}
+<li class="breadcrumb-item">
+    <a href="{% url 'helpdesk:list' %}">{% trans "Tickets" %}</a>
+</li>
+<li class="breadcrumb-item active">
+    {{ ticket.queue.slug }}-{{ ticket.id }}
+</li>
+{% endblock %}
 
 {% block helpdesk_body %}
 {% if helpdesk_settings.HELPDESK_TRANSLATE_TICKET_COMMENTS %}

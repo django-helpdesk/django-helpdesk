@@ -9,28 +9,31 @@
 
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>{% block helpdesk_title %}{% trans 'Helpdesk' %}{% endblock %}</title>
+    <title>{% block helpdesk_title %}{% trans 'Helpdesk' %}{% endblock %} :: {% trans "Powered by django-helpdesk" %}</title>
 
     <!-- Bootstrap Core CSS -->
     {% if helpdesk_settings.HELPDESK_USE_CDN %}
-    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" rel="stylesheet">
     {% else %}
     <link href="{% static 'helpdesk/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
     {% endif %}
+    
+    <!-- Font Awesome -->
+    <link href="{% static 'helpdesk/vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet" type="text/css">
+    
+    <!-- DataTables CSS-->
+    <link href="{% static 'helpdesk/vendor/datatables/css/dataTables.bootstrap4.css' %}" rel="stylesheet">
 
     <!-- MetisMenu CSS -->
     <link href="{% static 'helpdesk/vendor/metisMenu/metisMenu.min.css' %}" rel="stylesheet">
 
     <!-- Custom CSS -->
-    <link href="{% static 'helpdesk/dist/css/sb-admin-2.css' %}" rel="stylesheet">
+    <link href="{% static 'helpdesk/css/sb-admin.css' %}" rel="stylesheet">
     <link rel='stylesheet' href='{% static "helpdesk/helpdesk-extend.css" %}' type='text/css'  media="screen" >
-
-    <!-- Custom Fonts -->
-    <link href="{% static 'helpdesk/vendor/font-awesome/css/font-awesome.min.css' %}" rel="stylesheet" type="text/css">
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -43,44 +46,64 @@
 
 </head>
 
-<body id="helpdesk-body">
+<body id="bg-dark">
 
-    <div id='container' class="container">
-        <div id='header' class="row">
-            <h1>{% block h1_title %}{% trans "Helpdesk" %}{% endblock %}</h1>
-            {% include "helpdesk/navigation.html" %}
-        </div>
+    {% include "helpdesk/navigation-header.html" %}
+    
+    <div id="wrapper">
+        {% include "helpdesk/navigation-sidebar.html" %}
+        
+        <div id="content-wrapper">
+        
+            <div class="container-fluid">
 
-        <div id='body' class="row">
-            {% block helpdesk_body %}{% endblock %}
+                <!-- Breadcrumbs-->
+                <ol class="breadcrumb">
+                    {% block helpdesk_breadcrumb %}{% endblock %}
+                </ol>
+            
+                {% block helpdesk_body %}{% endblock %}
+            
+            </div>
+            <!-- /.container-fluid -->
+        
+            {% include "helpdesk/attribution.html" %}
         </div>
+        <!-- /.content-wrapper -->
 
-        <div id='footer' class="row">
-            <div class="col-md-2">{% include "helpdesk/attribution.html" %}</div>
-        </div>
     </div>
+    <!-- /#wrapper -->
+    
     {% include "helpdesk/debug.html" %}
 
-    <!-- jQuery -->
+    <!-- jQuery and Bootstrap Core -->
     {% if helpdesk_settings.HELPDESK_USE_CDN %}
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
     {% else %}
     <script src="{% static 'helpdesk/vendor/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'helpdesk/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
     {% endif %}
-    <script src='{% static "helpdesk/vendor/jquery-ui/jquery-ui.min.js" %}'></script>
+    
+    <!-- Core plugin JavaScript-->
+    <script src="{% static 'helpdesk/vendor/jquery-easing/jquery.easing.min.js' %}"></script>
+    
+    <!-- Page level plugin JavaScript-->
+    <script src="{% static 'helpdesk/vendor/chart.js/Chart.min.js' %}"></script>
+    <script src="{% static 'helpdesk/vendor/datatables/js/jquery.dataTables.js' %}"></script>
+    <script src="{% static 'helpdesk/vendor/datatables/js/dataTables.bootstrap4.js' %}"></script>
 
-    <!-- Bootstrap Core JavaScript -->
-    {% if helpdesk_settings.HELPDESK_USE_CDN %}
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-    {% else %}
-    <script src="{% static 'helpdesk/vendor/bootstrap/js/bootstrap.min.js' %}"></script>
-    {% endif %}
+    <!-- jQuery UI DatePicker -->
+    <script src='{% static "helpdesk/vendor/jquery-ui/jquery-ui.min.js" %}' type='text/javascript' language='javascript'></script>
+    <link href="{% static 'helpdesk/vendor/jquery-ui/jquery-ui.css' %}" rel="stylesheet">
 
     <!-- Metis Menu Plugin JavaScript -->
     <script src="{% static 'helpdesk/vendor/metisMenu/metisMenu.min.js' %}"></script>
 
     <!-- Custom Theme JavaScript -->
-    <script src="{% static 'helpdesk/dist/js/sb-admin-2.js' %}"></script>
+    <script src="{% static 'helpdesk/js/sb-admin.js' %}"></script>
+    
+    {% block helpdesk_js %}{% endblock %}
 
 </body>
 </html>

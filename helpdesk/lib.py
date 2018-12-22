@@ -19,10 +19,26 @@ from helpdesk.models import Attachment, EmailTemplate
 
 from model_utils import Choices
 
-from base64 import encodebytes as b64encode
-from base64 import decodebytes as b64decode
+from base64 import b64encode
+from base64 import b64decode
+
+import json
 
 logger = logging.getLogger('helpdesk')
+
+
+def query_to_base64(query):
+    """
+    Converts a query dict object to a base64-encoded bytes object.
+    """
+    return b64encode(json.dumps(query).encode('UTF-8'))
+
+
+def query_from_base64(b64data):
+    """
+    Converts base64-encoded bytes object back to a query dict object.
+    """
+    return json.loads(b64decode(b64data).decode('utf-8'))
 
 
 def query_to_dict(results, descriptions):

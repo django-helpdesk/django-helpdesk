@@ -1,5 +1,13 @@
 {% extends "helpdesk/base.html" %}{% load i18n %}
+
 {% block helpdesk_title %}{% trans "Helpdesk Dashboard" %}{% endblock %}
+
+{% block helpdesk_breadcrumb %}
+<li class="breadcrumb-item">
+    <a href="#">Dashboard</a>
+</li>
+<li class="breadcrumb-item active">Overview</li>
+{% endblock %}
 
 {% block helpdesk_body %}
 
