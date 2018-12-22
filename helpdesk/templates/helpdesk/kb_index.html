@@ -16,20 +16,14 @@
 
 {% for category in kb_categories %}
 {% cycle 'one' 'two' 'three' as catnumperrow silent %}
-{% if catnumperrow == 'one' %}<div class="row">{% endif %}
-    <div class="col-lg-4">
-        <div class="panel panel-primary">
-            <div class="panel-heading">
-                <h3>{{ category.title }}</h3>
-            </div>
-            <div class="panel-body">
-                <p>{{ category.description }}</p>
-            </div>
-            <div class="panel-footer">
-                <a href='{{ category.get_absolute_url }}'>{% trans 'View articles' %}<i class="fa fa-arrow-right"></i></a>
-            </div>
-        </div>
+{% if catnumperrow == 'one' %}<div class="card-deck">{% endif %}
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">{{ category.title }}</h5>
+        <p class="card-text">{{ category.description }}</p>
+        <p class="card-text"><small class="text-muted"><a href='{{ category.get_absolute_url }}'>{% trans 'View articles' %}<i class="fa fa-arrow-right"></i></a></small></p>
     </div>
+</div>
 {% if catnumperrow == 'three' %}</div>{% endif %}
 {% endfor %}
 
