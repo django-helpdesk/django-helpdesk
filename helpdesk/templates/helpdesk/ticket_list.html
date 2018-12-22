@@ -18,7 +18,12 @@
 <li class="breadcrumb-item">
     <a href="{% url 'helpdesk:list' %}">{% trans "Tickets" %}</a>
 </li>
+{% if from_saved_query and saved_query.user == user %}
+<li class="breadcrumb-item">{% trans "Saved Query" %}</li>
+<li class="breadcrumb-item active">{{ saved_query.title }}</li>
+{% else %}
 <li class="breadcrumb-item active">Overview</li>
+{% endif %}
 {% endblock %}
 
 
