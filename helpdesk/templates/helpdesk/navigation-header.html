@@ -26,10 +26,6 @@
       {% if helpdesk_settings.HELPDESK_NAVIGATION_ENABLED and user.is_authenticated or user|is_helpdesk_staff %}
         {% if user_saved_queries_ %}
         <li class="nav-item dropdown no-arrow mx-1">
-          <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <i class="fas fa-search fa-fw"></i>
-            <span class="badge badge-danger">5+</span>
-          </a>
           <div class="dropdown-menu dropdown-menu-right" aria-labelledby="alertsDropdown">
             {% for q in user_saved_queries_ %}
                 <a class="dropdown-item" href="{% url 'helpdesk:list' %}?saved_query={{ q.id }}">{{ q.title }}
