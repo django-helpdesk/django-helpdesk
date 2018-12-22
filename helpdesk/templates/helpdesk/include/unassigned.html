@@ -1,15 +1,15 @@
 {% load i18n humanize %}
 
 <!-- DataTables Example -->
-          <div class="card mb-3">
-            <div class="card-header">
-              <i class="fas fa-table"></i>
-              {% trans "Unassigned Tickets" %} {% trans "(pick up a ticket if you start to work on it)" %}
-            </div>
-            <div class="card-body">
-              <div class="table-responsive">
-                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-                  <thead>
+<div class="card mb-3">
+    <div class="card-header">
+        <i class="fas fa-table"></i>
+        {% trans "Unassigned Tickets" %} {% trans "(pick up a ticket if you start to work on it)" %}
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                <thead>
                     <tr>
                       <th>#</th>
                       <th>{% trans "Pr" %}</th>
@@ -18,10 +18,10 @@
                       <th>{% trans "Status" %}</th>
                       <th>&nbsp;</th>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {% for ticket in unassigned_tickets %}
-                      <tr class="{{ ticket.get_priority_css_class }}">
+                </thead>
+                <tbody>
+                {% for ticket in unassigned_tickets %}
+                    <tr class="{{ ticket.get_priority_css_class }}">
                         <td><a href='{{ ticket.get_absolute_url }}'>{{ ticket.ticket }}</a></td>
                         <td>{{ ticket.priority }}</td>
                         <td><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></td>
@@ -31,14 +31,14 @@
                           <a href='{{ ticket.get_absolute_url }}?take'><button class='btn btn-primary btn-xs'><i class="fas fa-hand-paper"></i>&nbsp;{% trans "Take" %}</button></a> |
                           <a href='{% url 'helpdesk:delete' ticket.id %}'><button class='btn btn-danger btn-xs'><i class="fas fa-trash"></i>&nbsp;{% trans "Delete" %}</button></a>
                         </td>
-                      </tr>
-                    {% empty %}
-                      <tr><td colspan='6'>{% trans "There are no unassigned tickets." %}</td></tr>
-                    {% endfor %}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-            <div class="card-footer small text-muted">Updated yesterday at 11:59 PM</div>
-          </div>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan='6'>{% trans "There are no unassigned tickets." %}</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card-footer small text-muted">Listing {{ unassigned_tickets|length }} ticket(s).</div>
+</div>
 
