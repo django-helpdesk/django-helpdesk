@@ -5,7 +5,7 @@
 {% block helpdesk_title %}{% trans "Tickets" %}{% endblock %}
 
 {% block helpdesk_head %}
-<script src='{% static "helpdesk/filter.js" %}'></script>
+
 {% endblock %}
 
 
@@ -235,7 +235,22 @@
                 <button id='select_inverse_btn' type="button" class="btn btn-primary btn-sm"><i class="fas fa-expand-arrows-alt"></i>&nbsp;{% trans "Invert" %}</button>
             </p>
 
-            <p><label for='id_mass_action'>{% trans "With Selected Tickets:" %}</label> <select name='action' id='id_mass_action'><option value='take'>{% trans "Take (Assign to me)" %}</option><option value='delete'>{% trans "Delete" %}</option><optgroup label='{% trans "Close" %}'><option value='close'>{% trans "Close (Don't Send E-Mail)" %}</option><option value='close_public'>{% trans "Close (Send E-Mail)" %}</option></optgroup><optgroup label='{% trans "Assign To" %}'><option value='unassign'>{% trans "Nobody (Unassign)" %}</option>{% for u in user_choices %}<option value='assign_{{ u.id }}'>{{ u.get_username }}</option>{% endfor %}</optgroup></select> <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-arrow-circle-right"></i>&nbsp;{% trans "Go" %}</button></p>
+            <p>
+                <label for='id_mass_action'>{% trans "With Selected Tickets:" %}</label>
+                <select name='action' id='id_mass_action'>
+                    <option value='take'>{% trans "Take (Assign to me)" %}</option>
+                    <option value='delete'>{% trans "Delete" %}</option>
+                    <optgroup label='{% trans "Close" %}'>
+                        <option value='close'>{% trans "Close (Don't Send E-Mail)" %}</option>
+                        <option value='close_public'>{% trans "Close (Send E-Mail)" %}</option>
+                    </optgroup>
+                    <optgroup label='{% trans "Assign To" %}'>
+                        <option value='unassign'>{% trans "Nobody (Unassign)" %}</option>
+                        {% for u in user_choices %}<option value='assign_{{ u.id }}'>{{ u.get_username }}</option>{% endfor %}
+                    </optgroup>
+                </select>
+                <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-arrow-circle-right"></i>&nbsp;{% trans "Go" %}</button>
+            </p>
         {% csrf_token %}</form>
     </div>
     <!-- /.panel-body -->
@@ -246,6 +261,7 @@
 
 
 {% block helpdesk_js %}
+<script src='{% static "helpdesk/filter.js" %}'></script>
 <script>
     {% if not server_side %}
         $('#ticketTable').DataTable({

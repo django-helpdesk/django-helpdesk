@@ -819,16 +819,12 @@ def ticket_list(request):
             return HttpResponseRedirect(reverse('helpdesk:list'))
 
         import json
-        from helpdesk.lib import b64decode
+        from helpdesk.lib import query_from_base64
         try:
-            if six.PY3:
-                if DJANGO_VERSION[0] > 1:
-                    # if Django >= 2.0
-                    query_params = json.loads(b64decode(str(saved_query.query).lstrip("b\\'")).decode())
-                else:
-                    query_params = json.loads(b64decode(str(saved_query.query)).decode())
-            else:
-                query_params = json.loads(b64decode(str(saved_query.query)))
+            # we get a string like: b'stuff'
+            # so leave of the first two chars (b') and last (')
+            b64query = saved_query.query[2:-1]
+            query_params = query_from_base64(b64query)
         except ValueError:
             # Query deserialization failed. (E.g. was a pickled query)
             return HttpResponseRedirect(reverse('helpdesk:list'))
@@ -920,8 +916,8 @@ def ticket_list(request):
             'Django Documentation on string matching in SQLite</a>.')
 
     import json
-    from helpdesk.lib import b64encode
-    urlsafe_query = b64encode(json.dumps(query_params).encode('UTF-8'))
+    from helpdesk.lib import query_to_base64
+    urlsafe_query = query_to_base64(query_params)
 
     user_saved_queries = SavedSearch.objects.filter(Q(user=request.user) | Q(shared__exact=True))
 
@@ -1153,16 +1149,12 @@ def run_report(request, report):
             return HttpResponseRedirect(reverse('helpdesk:report_index'))
 
         import json
-        from helpdesk.lib import b64decode
+        from helpdesk.lib import query_from_base64
         try:
-            if six.PY3:
-                if DJANGO_VERSION[0] > 1:
-                    # if Django >= 2.0
-                    query_params = json.loads(b64decode(str(saved_query.query).lstrip("b\\'")).decode())
-                else:
-                    query_params = json.loads(b64decode(str(saved_query.query)).decode())
-            else:
-                query_params = json.loads(b64decode(str(saved_query.query)))
+            # we get a string like: b'stuff'
+            # so leave of the first two chars (b') and last (')
+            b64query = saved_query.query[2:-1]
+            query_params = query_from_base64(b64query)
         except json.JSONDecodeError:
             return HttpResponseRedirect(reverse('helpdesk:report_index'))
 
