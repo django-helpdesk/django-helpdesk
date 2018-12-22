@@ -26,11 +26,13 @@ import json
 
 logger = logging.getLogger('helpdesk')
 
+
 def query_to_base64(query):
     """
     Converts a query dict object to a base64-encoded bytes object.
     """
     return b64encode(json.dumps(query).encode('UTF-8'))
+
 
 def query_from_base64(b64data):
     """
