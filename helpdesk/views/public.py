@@ -87,6 +87,10 @@ class CreateTicketView(FormView):
 
         if request.user.is_authenticated and request.user.email:
             initial_data['submitter_email'] = request.user.email
+
+        query_param_fields = ['submitter_email', 'title', 'body']
+        for qpf in query_param_fields:
+            initial_data[qpf] = request.GET.get(qpf, initial_data.get(qpf, ""))
         return initial_data
 
     def form_valid(self, form):
