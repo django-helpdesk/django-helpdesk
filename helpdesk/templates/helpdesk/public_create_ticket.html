@@ -1,5 +1,5 @@
 {% extends "helpdesk/public_base.html" %}
-{% load i18n bootstrap %}
+{% load i18n bootstrap4form %}
 
 {% block helpdesk_body %}
 
@@ -13,7 +13,7 @@
 
 <form role="form" method='post' action='./#submit' enctype='multipart/form-data'>
 <fieldset>
-        {{ form|bootstrap }}
+        {{ form|bootstrap4form }}
         {% comment %}
         {% for field in form %}
 
