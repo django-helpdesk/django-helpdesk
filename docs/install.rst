@@ -9,19 +9,14 @@ Prerequisites
 
 Before getting started, ensure your system meets the following dependencies:
 
-* Python 3.4+, or Python 2.7
-* Django 1.11.x (Django 2.0 support is coming in a future release; older
-  releases such as 1.8-1.10 *may* work, but are not guaranteed. Django's
-  deprecation policy suggests that any project that worked with 1.8 should
-  be able to upgrade to 1.11 without any problems)
+* Python 3.5+
+* Django 2.x
   
 Ensure any extra Django modules you wish to use are compatible before continuing.
 
-**NOTE**: Python 2.7 support is deprecated in both ``django-helpdesk`` and Django.
-Future releases of ``django-helpdesk`` may remove support for Python 2.7,
-and Django will no longer support Python 2.7 as of the Django 2.0 release.
-It is highly recommended to start new projects using Python 3.4+, or migrate
-existing projects to Python 3.4+.
+**NOTE**: Python 2.7 support was deprecated in ``django-helpdesk`` as of version 0.2.x
+and completely removed in version 0.3.0. Users that still need Python 2 support should
+remain on version 0.2.x.
 
 
 Getting The Code
@@ -63,7 +58,7 @@ errors with trying to create User settings.
         'django.contrib.admin',  # Required for helpdesk admin/maintenance
         'django.contrib.humanize',  # Required for elapsed time formatting
         'markdown_deux',  # Required for Knowledgebase item formatting
-        'bootstrapform', # Required for nicer formatting of forms with the default templates
+        'bootstrap4form', # Required for nicer formatting of forms with the default templates
         'helpdesk',  # This is us!
     )
 
