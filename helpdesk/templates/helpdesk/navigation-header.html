@@ -4,10 +4,11 @@
 
       <a class="navbar-brand" href="{% url 'helpdesk:home' %}">{% trans 'Helpdesk' %}</a>
 
-      <button class="btn btn-link btn-sm text-white order-1 order-sm-0" id="sidebarToggle" href="#">
+      <button class="btn btn-link btn-sm text-white order-1 order-sm-0 mr-auto" id="sidebarToggle" href="#">
         <i class="fas fa-bars"></i>
       </button>
 
+      {% if helpdesk_settings.HELPDESK_NAVIGATION_ENABLED and user.is_authenticated or user|is_helpdesk_staff %}
       <!-- Navbar Search -->
       <form class="d-none d-md-inline-block form-inline ml-auto mr-0 mr-md-3 my-2 my-md-0" id='searchform' method='get' action="{% url 'helpdesk:list' %}">
         <div class="input-group">
@@ -21,8 +22,9 @@
         </div>
         {% csrf_token %}
       </form>
+      {% endif %}
       <!-- Navbar -->
-      <ul class="navbar-nav ml-auto ml-md-0">
+      <ul class="navbar-nav mr-md-0">
       {% if helpdesk_settings.HELPDESK_NAVIGATION_ENABLED and user.is_authenticated or user|is_helpdesk_staff %}
         {% if user_saved_queries_ %}
         <li class="nav-item dropdown no-arrow mx-1">
@@ -67,21 +69,6 @@
             <li class="nav-item dropdown no-arrow">
                 <a class="nav-link dropdown-toggle" href="{% url 'helpdesk:submit' %}" id="userDropdown" role="button" aria-haspopup="true" aria-expanded="false">
                     <i class="fas fa-user-circle fa-fw"></i> {% trans "Submit a Ticket" %}
-                </a>
-            </li>
-        {% else %}
-          {% if helpdesk_settings.HELPDESK_SUBMIT_A_TICKET_PUBLIC %}
-            <li class="nav-item dropdown no-arrow">
-                <a class="nav-link dropdown-toggle" href="{% url 'helpdesk:submit' %}" id="userDropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                    <i class="fas fa-plus-circle fa-fw"></i> {% trans "Submit a Ticket" %}
-                </a>
-            </li>
-          {% endif %}
-        {% endif %}
-        {% if helpdesk_settings.HELPDESK_KB_ENABLED %}
-            <li class="nav-item dropdown no-arrow">
-                <a class="nav-link dropdown-toggle" href="{% url 'helpdesk:kb_index' %}" id="userDropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                    <i class="fas fa-fw fa-database"></i> {% trans "Knowledgebase" %}
                 </a>
             </li>
         {% endif %}
