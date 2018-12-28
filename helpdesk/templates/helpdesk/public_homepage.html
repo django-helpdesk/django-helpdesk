@@ -1,27 +1,37 @@
 {% extends "helpdesk/public_base.html" %}
 {% load i18n bootstrap4form %}
 
+{% block helpdesk_title %}{% trans "Welcome to Helpdesk" %}{% endblock %}
+
+{% block helpdesk_breadcrumb %}
+<li class="breadcrumb-item">
+    <a href="#">Public</a>
+</li>
+<li class="breadcrumb-item active">Homepage</li>
+{% endblock %}
+
 {% block helpdesk_body %}
 
-{% if kb_categories %}
-<h2>{% trans "Knowledgebase Articles" %}</h2>
+<div class="container-fluid">
+  <div class="row">
 
-<table class="table table-hover table-bordered table-striped">
-<caption>{% trans "Knowledgebase Categories" %}</caption>
-<thead>
-<tr><th>{% trans "Category" %}</th></tr>
-</thead>
-<tbody>
+{% if kb_categories %}
+<div class="col-sm">
+<h2>{% trans "Knowledgebase Articles" %}</h2>
 {% for category in kb_categories %}
-<tr><th><a href='{{ category.get_absolute_url }}'>{{ category.title }}</a></th></tr>
-<tr><td>{{ category.description }}</td></tr>
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">{{ category.title }}</h5>
+        <p class="card-text">{{ category.description }}</p>
+        <p class="card-text"><small class="text-muted"><a href='{{ category.get_absolute_url }}'>{% trans 'View articles' %}<i class="fa fa-arrow-right"></i></a></small></p>
+    </div>
+</div>
 {% endfor %}
-</tbody>
-</table>
+</div>
 {% endif %}
 
 {% if helpdesk_settings.HELPDESK_SUBMIT_A_TICKET_PUBLIC %}
-<div class="col-xs-6">
+<div class="col-sm">
 <div class="panel panel-default">
 
 <div class="panel-body">
@@ -67,27 +77,28 @@
 {% endif %}
 
 {% if helpdesk_settings.HELPDESK_VIEW_A_TICKET_PUBLIC %}
-<div class="col-xs-6">
-<div class="panel panel-default">
-<div class="panel-body">
-<h2>{% trans "View a Ticket" %}</h2>
+<div class="col-sm">
+    <div class="panel panel-default">
+    <div class="panel-body">
+    <h2>{% trans "View a Ticket" %}</h2>
 
-<form method='get' action="{% url 'helpdesk:public_view' %}">
-<fieldset>
-    <div class="form-group {% if field.errors %}has-error{% endif %}">
-        <label for='id_ticket'>{% trans "Ticket" %}</label>
-        <div class="input-group"><input type='text' name='ticket' /></div>
-    </div>
-    <div class="form-group {% if field.errors %}has-error{% endif %}">
-        <label for='id_email'>{% trans "Your E-mail Address" %}</label>
-        <div class="input-group"><input type='text' name='email' /></div>
-    </div>
-    <div class='buttons form-group'>
-    <input type='submit' class="btn btn-primary"  value='{% trans "View Ticket" %}' />
-    </div>
-</fieldset>
-{% csrf_token %}</form>
-</div></div></div>
+    <form method='get' action="{% url 'helpdesk:public_view' %}">
+    <fieldset>
+        <div class="form-group {% if field.errors %}has-error{% endif %}">
+            <label for='id_ticket'>{% trans "Ticket" %}</label>
+            <div class="input-group"><input type='text' name='ticket' /></div>
+        </div>
+        <div class="form-group {% if field.errors %}has-error{% endif %}">
+            <label for='id_email'>{% trans "Your E-mail Address" %}</label>
+            <div class="input-group"><input type='text' name='email' /></div>
+        </div>
+        <div class='buttons form-group'>
+        <input type='submit' class="btn btn-primary"  value='{% trans "View Ticket" %}' />
+        </div>
+    </fieldset>
+    {% csrf_token %}</form>
+    </div></div>
+</div>
 {% endif %}
 
 {% endblock %}

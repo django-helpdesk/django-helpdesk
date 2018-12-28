@@ -1,47 +1,30 @@
 {% extends "helpdesk/public_base.html" %}
 {% load i18n bootstrap4form %}
 
+{% block helpdesk_title %}{% trans "Create Ticket" %}{% endblock %}
+
+{% block helpdesk_breadcrumb %}
+<li class="breadcrumb-item">
+    <a href="{% url 'helpdesk:home' %}">Public</a>
+</li>
+<li class="breadcrumb-item active">Create Ticket</li>
+{% endblock %}
+
 {% block helpdesk_body %}
-
 {% if helpdesk_settings.HELPDESK_SUBMIT_A_TICKET_PUBLIC %}
-<div class="col-xs-6">
-<div class="panel panel-default">
-
-<div class="panel-body">
-    <h2 name='submit'>{% trans "Submit a Ticket" %}</h2>
-<p>{% trans "Please provide as descriptive a title and description as possible." %}</p>
-
-<form role="form" method='post' action='./#submit' enctype='multipart/form-data'>
-<fieldset>
-        {{ form|bootstrap4form }}
-        {% comment %}
-        {% for field in form %}
-
-            {% if field.is_hidden %}
-                {{ field }}
-            {% else %}
-
-
-            <div class="form-group {% if field.errors %}has-error{% endif %}">
-                <label class="control-label" for='id_{{ field.name }}'>{{ field.label }}</label>{% if not field.field.required %} <span class='form_optional'>{% trans "(Optional)" %}</span>{% endif %}</dt>
-                <div class="input-group">{{ field }}</div>
-                {% if field.errors %}<div class="help-block">{{ field.errors }}</div>{% endif %}
-                {% if field.help_text %}<span class='fhelp-block'>{{ field.help_text }}</span>{% endif %}
-            </div>
-
-        {% endif %}
-
-        {% endfor %}
-        {% endcomment %}
-
-    <div class='buttons form-group'>
-        <input type='submit' class="btn btn-primary" value='{% trans "Submit Ticket" %}' />
+    <div class="container">
+      <div class="card card-register mx-auto mt-5">
+        <div class="card-header">{% trans "Submit a Ticket" %}</div>
+        <div class="card-body">
+          <p>{% trans "Unless otherwise stated, all fields are required." %} {% trans "Please provide as descriptive a title and description as possible." %}</p>
+          <form method='post' action='./#submit' enctype='multipart/form-data'>
+            {{ form|bootstrap4form }}
+            <button type="submit" class="btn btn-primary btn-lg btn-block"><i class="fa fa-send"></i>&nbsp;{% trans "Submit Ticket" %}</button>
+          {% csrf_token %}</form>
+        </div>
+      </div>
     </div>
-</fieldset>
-
-{% csrf_token %}</form>
-</div>
-</div>
-</div>
+{% else %}
+<h2>{% trans "Public ticket submission is disabled. Please contact the administrator for assistance." %}</h2>
 {% endif %}
 {% endblock %}

@@ -54,27 +54,15 @@
     {% else %}
         {# Public menu #}
         <li class="nav-item active">
-          <a class="nav-link" href="{% url 'helpdesk:dashboard' %}">
-            <i class="fas fa-fw fa-tachometer-alt"></i>
-            <span>{% trans "Dashboard" %}</span>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'helpdesk:list' %}">
-            <i class="fas fa-fw fa-tasks"></i>
-            <span>{% trans "Tickets" %}</span>
+          <a class="nav-link" href="{% url 'helpdesk:home' %}">
+            <i class="fas fa-fw fa-home"></i>
+            <span>{% trans "Homepage" %}</span>
           </a>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="{% url 'helpdesk:submit' %}">
             <i class="fas fa-fw fa-plus-circle"></i>
             <span>{% trans "New Ticket" %}</span>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'helpdesk:report_index' %}">
-            <i class="fas fa-fw fa-chart-area"></i>
-            <span>{% trans "Stats" %}</span>
           </a>
         </li>
         {% if helpdesk_settings.HELPDESK_KB_ENABLED %}

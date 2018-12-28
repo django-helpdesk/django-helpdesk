@@ -10,18 +10,6 @@
 {% endblock %}
 
 {% block helpdesk_head %}
-<script type='text/javascript' language='javascript'>
-// this function listens for changes on any file input, and
-// emits the appropriate event to update the input's text.
-// Needed to have properly styled file input buttons! (this really shouldn't be this hard...)
-$(document).on('change', ':file', function() {
-    var input = $(this),
-        inputWidgetNum = $(this).attr('id').split("file")[1],
-        numFiles = input.get(0).files ? input.get(0).files.length : 1,
-        label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
-    input.trigger('fileselect', [numFiles, label, inputWidgetNum]);
-});
-</script>
 {% endblock %}
 
 {% block helpdesk_body %}
@@ -58,9 +46,22 @@ $(document).on('change', ':file', function() {
 {% endblock %}
 
 {% block helpdesk_js %}
-    <script>
-        $( function() {
-            $( "#id_due_date" ).datepicker();
-        } );
-    </script>
+<script type='text/javascript' language='javascript'>
+// this function listens for changes on any file input, and
+// emits the appropriate event to update the input's text.
+// Needed to have properly styled file input buttons! (this really shouldn't be this hard...)
+$(document).on('change', ':file', function() {
+    var input = $(this),
+        inputWidgetNum = $(this).attr('id').split("file")[1],
+        numFiles = input.get(0).files ? input.get(0).files.length : 1,
+        label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
+    input.trigger('fileselect', [numFiles, label, inputWidgetNum]);
+});
+</script>
+
+<script>
+    $( function() {
+        $( "#id_due_date" ).datepicker();
+    } );
+</script>
 {% endblock %}
