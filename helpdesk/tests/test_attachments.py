@@ -1,10 +1,4 @@
 # vim: set fileencoding=utf-8 :
-from __future__ import unicode_literals
-
-import os
-import shutil
-from tempfile import gettempdir
-
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 from django.test import override_settings, TestCase
@@ -12,12 +6,12 @@ from django.utils.encoding import smart_text
 
 from helpdesk import lib, models
 
-try:
-    # Python >= 3.3
-    from unittest import mock
-except ImportError:
-    # Python < 3.3
-    import mock
+import os
+import shutil
+from tempfile import gettempdir
+
+from unittest import mock
+
 
 MEDIA_DIR = os.path.join(gettempdir(), 'helpdesk_test_media')
 

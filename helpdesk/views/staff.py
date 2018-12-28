@@ -6,10 +6,6 @@ django-helpdesk - A Django powered ticket tracker for small enterprise.
 views/staff.py - The bulk of the application - provides most business logic and
                  renders all staff-facing views.
 """
-from __future__ import unicode_literals
-from datetime import date, datetime, timedelta
-import re
-
 from django import VERSION as DJANGO_VERSION
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -27,14 +23,9 @@ from django.utils.html import escape
 from django import forms
 from django.utils import timezone
 from django.views.generic.edit import FormView, UpdateView
-
-from django.utils import six
-
 # For datatables serverside
 from django.core.cache import cache
-from rest_framework import viewsets, status
-from rest_framework.response import Response
-from rest_framework.decorators import api_view
+
 from helpdesk.lib import query_tickets_by_args
 from helpdesk.serializers import TicketSerializer
 
@@ -56,6 +47,14 @@ from helpdesk.models import (
 )
 from helpdesk import settings as helpdesk_settings
 from helpdesk.views.permissions import MustBeStaffMixin
+
+from rest_framework import viewsets, status
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
+
+from datetime import date, datetime, timedelta
+import re
+
 
 User = get_user_model()
 

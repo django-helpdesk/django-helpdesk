@@ -7,7 +7,6 @@ models.py - Model (and hence database) definitions. This is the core of the
             helpdesk structure.
 """
 
-from __future__ import unicode_literals
 from django.contrib.auth.models import Permission
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
@@ -15,18 +14,15 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
-from django.utils import six
 from django.utils.translation import ugettext_lazy as _, ugettext
-from django.utils.encoding import python_2_unicode_compatible
+from io import StringIO
 import re
 
-import six
 import uuid
 
 from .templated_email import send_templated_mail
 
 
-@python_2_unicode_compatible
 class Queue(models.Model):
     """
     A queue is a collection of tickets into what would generally be business
@@ -358,7 +354,6 @@ def mk_secret():
     return str(uuid.uuid4())
 
 
-@python_2_unicode_compatible
 class Ticket(models.Model):
     """
     To allow a ticket to be entered as quickly as possible, only the
@@ -694,7 +689,6 @@ class FollowUpManager(models.Manager):
         return self.filter(public=True)
 
 
-@python_2_unicode_compatible
 class FollowUp(models.Model):
     """
     A FollowUp is a comment and/or change to a ticket. We keep a simple
@@ -776,7 +770,6 @@ class FollowUp(models.Model):
         super(FollowUp, self).save(*args, **kwargs)
 
 
-@python_2_unicode_compatible
 class TicketChange(models.Model):
     """
     For each FollowUp, any changes to the parent ticket (eg Title, Priority,
@@ -839,7 +832,6 @@ def attachment_path(instance, filename):
     return os.path.join(path, filename)
 
 
-@python_2_unicode_compatible
 class Attachment(models.Model):
     """
     Represents a file attached to a follow-up. This could come from an e-mail
@@ -882,7 +874,6 @@ class Attachment(models.Model):
         verbose_name_plural = _('Attachments')
 
 
-@python_2_unicode_compatible
 class PreSetReply(models.Model):
     """
     We can allow the admin to define a number of pre-set replies, used to
@@ -924,7 +915,6 @@ class PreSetReply(models.Model):
         return '%s' % self.name
 
 
-@python_2_unicode_compatible
 class EscalationExclusion(models.Model):
     """
     An 'EscalationExclusion' lets us define a date on which escalation should
@@ -961,7 +951,6 @@ class EscalationExclusion(models.Model):
         verbose_name_plural = _('Escalation exclusions')
 
 
-@python_2_unicode_compatible
 class EmailTemplate(models.Model):
     """
     Since these are more likely to be changed than other templates, we store
@@ -1021,7 +1010,6 @@ class EmailTemplate(models.Model):
         verbose_name_plural = _('e-mail templates')
 
 
-@python_2_unicode_compatible
 class KBCategory(models.Model):
     """
     Lets help users help themselves: the Knowledge Base is a categorised
@@ -1054,7 +1042,6 @@ class KBCategory(models.Model):
         return reverse('helpdesk:kb_category', kwargs={'slug': self.slug})
 
 
-@python_2_unicode_compatible
 class KBItem(models.Model):
     """
     An item within the knowledgebase. Very straightforward question/answer
@@ -1123,7 +1110,6 @@ class KBItem(models.Model):
         return reverse('helpdesk:kb_item', args=(self.id,))
 
 
-@python_2_unicode_compatible
 class SavedSearch(models.Model):
     """
     Allow a user to save a ticket search, eg their filtering and sorting
@@ -1195,7 +1181,6 @@ def use_email_as_submitter_default():
     return get_default_setting('use_email_as_submitter')
 
 
-@python_2_unicode_compatible
 class UserSettings(models.Model):
     """
     A bunch of user-specific settings that we want to be able to define, such
@@ -1275,7 +1260,6 @@ def create_usersettings(sender, instance, created, **kwargs):
 models.signals.post_save.connect(create_usersettings, sender=settings.AUTH_USER_MODEL)
 
 
-@python_2_unicode_compatible
 class IgnoreEmail(models.Model):
     """
     This model lets us easily ignore e-mails from certain senders when
@@ -1362,7 +1346,6 @@ class IgnoreEmail(models.Model):
             return False
 
 
-@python_2_unicode_compatible
 class TicketCC(models.Model):
     """
     Often, there are people who wish to follow a ticket who aren't the
@@ -1433,7 +1416,6 @@ class CustomFieldManager(models.Manager):
         return super(CustomFieldManager, self).get_queryset().order_by('ordering')
 
 
-@python_2_unicode_compatible
 class CustomField(models.Model):
     """
     Definitions for custom fields that are glued onto each ticket.
@@ -1517,7 +1499,6 @@ class CustomField(models.Model):
     )
 
     def _choices_as_array(self):
-        from django.utils.six import StringIO
         valuebuffer = StringIO(self.list_values)
         choices = [[item.strip(), item.strip()] for item in valuebuffer.readlines()]
         valuebuffer.close()
@@ -1547,7 +1528,6 @@ class CustomField(models.Model):
         verbose_name_plural = _('Custom fields')
 
 
-@python_2_unicode_compatible
 class TicketCustomFieldValue(models.Model):
     ticket = models.ForeignKey(
         Ticket,
@@ -1572,7 +1552,6 @@ class TicketCustomFieldValue(models.Model):
         verbose_name_plural = _('Ticket custom field values')
 
 
-@python_2_unicode_compatible
 class TicketDependency(models.Model):
     """
     The ticket identified by `ticket` cannot be resolved until the ticket in `depends_on` has been resolved.
