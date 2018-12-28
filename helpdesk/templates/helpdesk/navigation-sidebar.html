@@ -15,7 +15,7 @@
             <span>Tickets</span>
           </a>
           <div class="dropdown-menu" aria-labelledby="ticketsDropdown">
-            <a class="dropdown-item" href="{% url 'helpdesk:list' %}">{% trans "Tickets" %}</a>
+            <a class="dropdown-item" href="{% url 'helpdesk:list' %}">{% trans "All Tickets" %}</a>
             <div class="dropdown-divider"></div>
             {% if user_saved_queries_ %}
             <h6 class="dropdown-header">Saved Queries:</h6>
@@ -26,6 +26,8 @@
                 {% endif %}
             </a>
             {% endfor %}
+            {% else %}
+            <p>{% trans "No saved queries currently available. You can create one in the All Tickets page." %}</p>
             {% endif %}
           </div>
         </li>
