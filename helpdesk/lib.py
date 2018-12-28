@@ -12,7 +12,7 @@ import os
 
 from django.conf import settings
 from django.db.models import Q
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_text, smart_str
 from django.utils.safestring import mark_safe
 
 from helpdesk.models import Attachment, EmailTemplate

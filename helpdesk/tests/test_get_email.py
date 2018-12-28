@@ -328,11 +328,13 @@ class GetEmailParametricTemplate(object):
             attach1 = get_object_or_404(Attachment, pk=1)
             self.assertEqual(attach1.followup.id, 1)
             self.assertEqual(attach1.filename, 'email_html_body.html')
-            cc1 = get_object_or_404(TicketCC, pk=1)
+            cc0 = get_object_or_404(TicketCC, pk=1)
+            self.assertEqual(cc0.email, you)
+            cc1 = get_object_or_404(TicketCC, pk=2)
             self.assertEqual(cc1.email, cc_one)
-            cc2 = get_object_or_404(TicketCC, pk=2)
+            cc2 = get_object_or_404(TicketCC, pk=3)
             self.assertEqual(cc2.email, cc_two)
-            self.assertEqual(len(TicketCC.objects.filter(ticket=1)), 2)
+            self.assertEqual(len(TicketCC.objects.filter(ticket=1)), 3)
 
             ticket2 = get_object_or_404(Ticket, pk=2)
             self.assertEqual(ticket2.ticket_for_url, "QQ-%s" % ticket2.id)
@@ -704,25 +706,29 @@ class GetEmailCCHandling(TestCase):
             mocked_listdir.assert_called_with('/var/lib/mail/helpdesk/')
             mocked_isfile.assert_any_call('/var/lib/mail/helpdesk/filename1')
 
-        # ensure these 4 CCs (test_email_cc one thru four) are the only ones
-        # created and added to the existing staff_user that was CC'd,
-        # and the observer user that gets CC'd to new email.,
-        # and that submitter and assignee are not added as CC either
-        # (in other words, even though everyone was CC'd to this email,
-        #  we should come out with only 6 CCs after filtering)
-        self.assertEqual(len(TicketCC.objects.filter(ticket=1)), 6)
+        # 9 unique email addresses are CC'd when all is done
+        self.assertEqual(len(TicketCC.objects.filter(ticket=1)), 9)
         # next we make sure no duplicates were added, and the
         # staff users nor submitter were not re-added as email TicketCCs
-        cc0 = get_object_or_404(TicketCC, pk=2)
-        self.assertEqual(cc0.user, User.objects.get(username='observer'))
-        cc1 = get_object_or_404(TicketCC, pk=3)
-        self.assertEqual(cc1.email, test_email_cc_one)
-        cc2 = get_object_or_404(TicketCC, pk=4)
-        self.assertEqual(cc2.email, test_email_cc_two)
-        cc3 = get_object_or_404(TicketCC, pk=5)
-        self.assertEqual(cc3.email, test_email_cc_three)
-        cc4 = get_object_or_404(TicketCC, pk=6)
-        self.assertEqual(cc4.email, test_email_cc_four)
+        cc1 = get_object_or_404(TicketCC, pk=1)
+        self.assertEqual(cc1.user, User.objects.get(username='staff'))
+        cc2 = get_object_or_404(TicketCC, pk=2)
+        self.assertEqual(cc2.email, "alice@example.com")
+        cc3 = get_object_or_404(TicketCC, pk=3)
+        self.assertEqual(cc3.email, test_email_cc_two)
+        cc4 = get_object_or_404(TicketCC, pk=4)
+        self.assertEqual(cc4.email, test_email_cc_three)
+        cc5 = get_object_or_404(TicketCC, pk=5)
+        self.assertEqual(cc5.email, test_email_cc_four)
+        cc6 = get_object_or_404(TicketCC, pk=6)
+        self.assertEqual(cc6.email, "assigned@example.com")
+        cc7 = get_object_or_404(TicketCC, pk=7)
+        self.assertEqual(cc7.email, "staff@example.com")
+        cc8 = get_object_or_404(TicketCC, pk=8)
+        self.assertEqual(cc8.email, "submitter@example.com")
+        cc9 = get_object_or_404(TicketCC, pk=9)
+        self.assertEqual(cc9.user, User.objects.get(username='observer'))
+        self.assertEqual(cc9.email, "observer@example.com")
 
 
 # build matrix of test cases

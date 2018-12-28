@@ -1,16 +1,10 @@
-#!/usr/bin/python
 """
 Django Helpdesk - A Django powered ticket tracker for small enterprise.
 
 (c) Copyright 2008 Jutda. Copyright 2018 Timothy Hobbs. All Rights Reserved.
 See LICENSE for details.
-
-scripts/get_email.py - Designed to be run from cron, this script checks the
-                       POP and IMAP boxes, or a local mailbox directory,
-                       defined for the queues within a
-                       helpdesk, creating tickets from the new messages (or
-                       adding to existing tickets if needed)
 """
+from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management.base import BaseCommand
@@ -27,6 +21,8 @@ from datetime import timedelta
 import base64
 import binascii
 import email
+from email.header import decode_header
+from email.utils import getaddresses, parseaddr, collapse_rfc2231_value
 import imaplib
 import mimetypes
 from os import listdir, unlink
@@ -37,6 +33,7 @@ import socket
 import ssl
 import sys
 from time import ctime
+from optparse import make_option
 
 from bs4 import BeautifulSoup
 
@@ -114,7 +111,7 @@ def pop3_sync(q, logger, server):
             full_message = "\n".join([elm.decode('utf-8') for elm in raw_content])
         else:
             full_message = encoding.force_text("\n".join(raw_content), errors='replace')
-        ticket = ticket_from_message(message=full_message, queue=q, logger=logger)
+        ticket = object_from_message(message=full_message, queue=q, logger=logger)
 
         if ticket:
             server.dele(msgNum)
@@ -153,7 +150,7 @@ def imap_sync(q, logger, server):
             status, data = server.fetch(num, '(RFC822)')
             full_message = encoding.force_text(data[0][1], errors='replace')
             try:
-                ticket = ticket_from_message(message=full_message, queue=q, logger=logger)
+                ticket = object_from_message(message=full_message, queue=q, logger=logger)
             except TypeError:
                 ticket = None  # hotfix. Need to work out WHY.
             if ticket:
@@ -240,7 +237,7 @@ def process_queue(q, logger):
             logger.info("Processing message %d" % i)
             with open(m, 'r') as f:
                 full_message = encoding.force_text(f.read(), errors='replace')
-                ticket = ticket_from_message(message=full_message, queue=q, logger=logger)
+                ticket = object_from_message(message=full_message, queue=q, logger=logger)
             if ticket:
                 logger.info("Successfully processed message %d, ticket/comment created." % i)
                 try:
@@ -269,9 +266,157 @@ def decode_mail_headers(string):
     return u' '.join([str(msg, encoding=charset, errors='replace') if charset else str(msg) for msg, charset in decoded])
 
 
-def ticket_from_message(message, queue, logger):
+def create_ticket_cc(ticket, cc_list):
+
+    if not cc_list:
+        return []
+    
+    # Local import to deal with non-defined / circular reference problem
+    from helpdesk.views.staff import User, subscribe_to_ticket_updates
+
+    new_ticket_ccs = []
+    for cced_name, cced_email in cc_list:
+
+        cced_email = cced_email.strip()
+        if cced_email == ticket.queue.email_address:
+            continue
+
+        user = None
+
+        try:
+            user = User.objects.get(email=cced_email)
+        except User.DoesNotExist: 
+            pass
+
+        try:
+            ticket_cc = subscribe_to_ticket_updates(ticket=ticket, user=user, email=cced_email)
+            new_ticket_ccs.append(ticket_cc)
+        except ValidationError as err:
+            pass
+
+    return new_ticket_ccs
+
+
+def create_object_from_email_message(message, ticket_id, payload, files, logger):
+
+    ticket, previous_followup, new = None, None, False
+    now = timezone.now()
+
+    queue = payload['queue']
+    sender_email = payload['sender_email']
+
+    to_list = getaddresses(message.get_all('To', []))
+    cc_list = getaddresses(message.get_all('Cc', []))
+
+    message_id = message.get('Message-Id')
+    in_reply_to = message.get('In-Reply-To')
+
+    if in_reply_to is not None:
+        try:
+            queryset = FollowUp.objects.filter(message_id=in_reply_to).order_by('-date')
+            if queryset.count() > 0:
+                previous_followup = queryset.first()
+                ticket = previous_followup.ticket
+        except FollowUp.DoesNotExist:
+            pass #play along. The header may be wrong
+
+    if previous_followup is None and ticket_id is not None:
+        try:
+            ticket = Ticket.objects.get(id=ticket_id)
+            new = False
+        except Ticket.DoesNotExist:
+            ticket = None
+
+    # New issue, create a new <Ticket> instance
+    if ticket is None:
+        if not settings.QUEUE_EMAIL_BOX_UPDATE_ONLY:
+            ticket = Ticket.objects.create(
+                title = payload['subject'],
+                queue = queue,
+                submitter_email = sender_email,
+                created = now,
+                description = payload['body'],
+                priority = payload['priority'],
+            )
+            ticket.save()
+            logger.debug("Created new ticket %s-%s" % (ticket.queue.slug, ticket.id))
+
+            new = True
+            update = ''
+
+    # Old issue being re-opened
+    elif ticket.status == Ticket.CLOSED_STATUS:
+        ticket.status = Ticket.REOPENED_STATUS
+        ticket.save()
+
+    f = FollowUp(
+        ticket = ticket,
+        title = _('E-Mail Received from %(sender_email)s' % {'sender_email': sender_email}),
+        date = now,
+        public = True,
+        comment = payload['body'],
+        message_id = message_id,
+    )
+
+    if ticket.status == Ticket.REOPENED_STATUS:
+        f.new_status = Ticket.REOPENED_STATUS
+        f.title = _('Ticket Re-Opened by E-Mail Received from %(sender_email)s' % {'sender_email': sender_email})
+    
+    f.save()
+    logger.debug("Created new FollowUp for Ticket")
+
+    logger.info("[%s-%s] %s" % (ticket.queue.slug, ticket.id, ticket.title,))
+    
+    attached = process_attachments(f, files)
+    for att_file in attached:
+        logger.info("Attachment '%s' (with size %s) successfully added to ticket from email." % (att_file[0], att_file[1].size))
+
+    context = safe_template_context(ticket)
+
+    new_ticket_ccs = []
+    new_ticket_ccs.append(create_ticket_cc(ticket, to_list + cc_list))
+
+    notifications_to_be_sent = [sender_email,]
+    
+    if queue.enable_notifications_on_email_events and len(notifications_to_be_sent):
+
+        ticket_cc_list = TicketCC.objects.filter(ticket=ticket).all().values_list('email', flat=True)
+
+        for email in ticket_cc_list : 
+            notifications_to_be_sent.append(email)
+    
+    # send mail to appropriate people now depending on what objects
+    # were created and who was CC'd
+    if new:
+        ticket.send(
+            {'submitter': ('newticket_submitter', context),
+             'new_ticket_cc': ('newticket_cc', context),
+             'ticket_cc': ('newticket_cc', context)},
+            fail_silently=True,
+            extra_headers={'In-Reply-To': message_id},
+        )
+    else:
+        context.update(comment=f.comment)
+        ticket.send(
+            {'submitter': ('newticket_submitter', context),
+             'assigned_to': ('updated_owner', context),},
+            fail_silently=True,
+            extra_headers={'In-Reply-To': message_id},
+        )
+        if queue.enable_notifications_on_email_events:
+            ticket.send(
+                {'ticket_cc': ('updated_cc', context),},
+                fail_silently=True,
+                extra_headers={'In-Reply-To': message_id},
+            )
+
+    return ticket
+
+
+def object_from_message(message, queue, logger):
     # 'message' must be an RFC822 formatted message.
     message = email.message_from_string(message)
+    
     subject = message.get('subject', _('Comment from e-mail'))
     subject = decode_mail_headers(decodeUnknown(message.get_charset(), subject))
     for affix in STRIPPED_SUBJECT_STRINGS:
@@ -281,7 +426,9 @@ def ticket_from_message(message, queue, logger):
     sender = message.get('from', _('Unknown Sender'))
     sender = decode_mail_headers(decodeUnknown(message.get_charset(), sender))
     sender_email = email.utils.parseaddr(sender)[1]
-
+    
+    body_plain, body_html = '', ''
+    
     cc = message.get_all('cc', None)
     if cc:
         # first, fixup the encoding if necessary
@@ -370,113 +517,19 @@ def ticket_from_message(message, queue, logger):
         if not body:
             body = mail.text
 
-    if ticket:
-        try:
-            t = Ticket.objects.get(id=ticket)
-        except Ticket.DoesNotExist:
-            logger.info("Tracking ID %s-%s not associated with existing ticket. Creating new ticket." % (queue.slug, ticket))
-            ticket = None
-        else:
-            logger.info("Found existing ticket with Tracking ID %s-%s" % (t.queue.slug, t.id))
-            if t.status == Ticket.CLOSED_STATUS:
-                t.status = Ticket.REOPENED_STATUS
-                t.save()
-            new = False
-
     smtp_priority = message.get('priority', '')
     smtp_importance = message.get('importance', '')
     high_priority_types = {'high', 'important', '1', 'urgent'}
     priority = 2 if high_priority_types & {smtp_priority, smtp_importance} else 3
+    
+    payload = {
+        'body': body,
+        'subject': subject,
+        'queue': queue,
+        'sender_email': sender_email,
+        'priority': priority,
+        'files': files,
+    }
+    
+    return create_object_from_email_message(message, ticket, payload, files, logger=logger)
 
-    if ticket is None:
-        if settings.QUEUE_EMAIL_BOX_UPDATE_ONLY:
-            return None
-        new = True
-        t = Ticket.objects.create(
-            title=subject,
-            queue=queue,
-            submitter_email=sender_email,
-            created=timezone.now(),
-            description=body,
-            priority=priority,
-        )
-        logger.debug("Created new ticket %s-%s" % (t.queue.slug, t.id))
-
-    if cc:
-        # get list of currently CC'd emails
-        current_cc = TicketCC.objects.filter(ticket=ticket)
-        current_cc_emails = [x.email for x in current_cc if x.email]
-        # get emails of any Users CC'd to email, if defined
-        # (some Users may not have an associated email, e.g, when using LDAP)
-        current_cc_users = [x.user.email for x in current_cc if x.user and x.user.email]
-        # ensure submitter, assigned user, queue email not added
-        other_emails = [queue.email_address]
-        if t.submitter_email:
-            other_emails.append(t.submitter_email)
-        if t.assigned_to:
-            other_emails.append(t.assigned_to.email)
-        current_cc = set(current_cc_emails + current_cc_users + other_emails)
-        # first, add any User not previously CC'd (as identified by User's email)
-        all_users = User.objects.all()
-        all_user_emails = set([x.email for x in all_users])
-        users_not_currently_ccd = all_user_emails.difference(set(current_cc))
-        users_to_cc = cc.intersection(users_not_currently_ccd)
-        for user in users_to_cc:
-            tcc = TicketCC.objects.create(
-                ticket=t,
-                user=User.objects.get(email=user),
-                can_view=True,
-                can_update=False
-            )
-            tcc.save()
-        # then add remaining emails alphabetically, makes testing easy
-        new_cc = cc.difference(current_cc).difference(all_user_emails)
-        new_cc = sorted(list(new_cc))
-        for ccemail in new_cc:
-            tcc = TicketCC.objects.create(
-                ticket=t,
-                email=ccemail.replace('\n', ' ').replace('\r', ' '),
-                can_view=True,
-                can_update=False
-            )
-            tcc.save()
-
-    f = FollowUp(
-        ticket=t,
-        title=_('E-Mail Received from %(sender_email)s' % {'sender_email': sender_email}),
-        date=timezone.now(),
-        public=True,
-        comment=body,
-    )
-
-    if t.status == Ticket.REOPENED_STATUS:
-        f.new_status = Ticket.REOPENED_STATUS
-        f.title = _('Ticket Re-Opened by E-Mail Received from %(sender_email)s' % {'sender_email': sender_email})
-
-    f.save()
-    logger.debug("Created new FollowUp for Ticket")
-
-    logger.info("[%s-%s] %s" % (t.queue.slug, t.id, t.title,))
-
-    attached = process_attachments(f, files)
-    for att_file in attached:
-        logger.info("Attachment '%s' (with size %s) successfully added to ticket from email." % (att_file[0], att_file[1].size))
-
-    context = safe_template_context(t)
-
-    if new:
-        t.send(
-            {'submitter': ('newticket_submitter', context),
-             'new_ticket_cc': ('newticket_cc', context),
-             'ticket_cc': ('newticket_cc', context)},
-            fail_silently=True,
-        )
-    else:
-        context.update(comment=f.comment)
-        t.send(
-            {'assigned_to': ('updated_owner', context),
-             'ticket_cc': ('updated_cc', context)},
-            fail_silently=True,
-        )
-
-    return t

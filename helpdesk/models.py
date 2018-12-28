@@ -108,6 +108,15 @@ class Queue(models.Model):
                     'multiple addresses with a comma.'),
     )
 
+    enable_notifications_on_email_events = models.BooleanField(
+        _('Notify contacts when email updates arrive'),
+        blank=True,
+        default=False,
+        help_text=_('When an email arrives to either create a ticket or to '
+            'interact with an existing discussion. Should email notifications be sent ? '
+            'Note: the new_ticket_cc and updated_ticket_cc work independently of this feature'),
+        )
+
     email_box_type = models.CharField(
         _('E-Mail Box Type'),
         max_length=5,
@@ -493,7 +502,7 @@ class Ticket(models.Model):
         Send notifications to everyone interested in this ticket.
 
         The the roles argument is a dictionary mapping from roles to (template, context) pairs.
-        If a role is not present in the dictionary, users of that type will not recieve the notification.
+        If a role is not present in the dictionary, users of that type will not receive the notification.
 
         The following roles exist:
 
@@ -528,12 +537,13 @@ class Ticket(models.Model):
                 send_templated_mail(template, context, recipient, sender=self.queue.from_address, **kwargs)
                 recipients.add(recipient)
         send('submitter', self.submitter_email)
+        send('ticket_cc', self.queue.updated_ticket_cc)
         send('new_ticket_cc', self.queue.new_ticket_cc)
         if self.assigned_to:
             send('assigned_to', self.assigned_to.email)
-        send('ticket_cc', self.queue.updated_ticket_cc)
-        for cc in self.ticketcc_set.all():
-            send('ticket_cc', cc.email_address)
+        if self.queue.enable_notifications_on_email_events:
+            for cc in self.ticketcc_set.all():
+                send('ticket_cc', cc.email_address)
         return recipients
 
     def _get_assigned_to(self):
@@ -749,6 +759,15 @@ class FollowUp(models.Model):
         null=True,
         help_text=_('If the status was changed, what was it changed to?'),
     )
+
+    message_id = models.CharField(
+        _('E-Mail ID'),
+        max_length=256,
+        blank=True,
+        null=True,
+        help_text=_("The Message ID of the submitter's email."),
+        editable=False,
+        )
 
     objects = FollowUpManager()
 

@@ -14,7 +14,8 @@ def send_templated_mail(template_name,
                         sender=None,
                         bcc=None,
                         fail_silently=False,
-                        files=None):
+                        files=None,
+                        extra_headers={}):
     """
     send_templated_mail() is a wrapper around Django's e-mail routines that
     allows us to easily send multipart (text/plain & text/html) e-mails using
@@ -39,6 +40,9 @@ def send_templated_mail(template_name,
 
     files can be a list of tuples. Each tuple should be a filename to attach,
         along with the File objects to be read. files can be blank.
+        
+    extra_headers is a dictionary of extra email headers, needed to process
+        email replies and keep proper threading.
 
     """
     from django.core.mail import EmailMultiAlternatives
