@@ -40,7 +40,7 @@ def send_templated_mail(template_name,
 
     files can be a list of tuples. Each tuple should be a filename to attach,
         along with the File objects to be read. files can be blank.
-        
+
     extra_headers is a dictionary of extra email headers, needed to process
         email replies and keep proper threading.
 

@@ -113,9 +113,9 @@ class Queue(models.Model):
         blank=True,
         default=False,
         help_text=_('When an email arrives to either create a ticket or to '
-            'interact with an existing discussion. Should email notifications be sent ? '
-            'Note: the new_ticket_cc and updated_ticket_cc work independently of this feature'),
-        )
+                    'interact with an existing discussion. Should email notifications be sent ? '
+                    'Note: the new_ticket_cc and updated_ticket_cc work independently of this feature'),
+    )
 
     email_box_type = models.CharField(
         _('E-Mail Box Type'),
@@ -767,7 +767,7 @@ class FollowUp(models.Model):
         null=True,
         help_text=_("The Message ID of the submitter's email."),
         editable=False,
-        )
+    )
 
     objects = FollowUpManager()
 

@@ -270,7 +270,7 @@ def create_ticket_cc(ticket, cc_list):
 
     if not cc_list:
         return []
-    
+
     # Local import to deal with non-defined / circular reference problem
     from helpdesk.views.staff import User, subscribe_to_ticket_updates
 
@@ -285,7 +285,7 @@ def create_ticket_cc(ticket, cc_list):
 
         try:
             user = User.objects.get(email=cced_email)
-        except User.DoesNotExist: 
+        except User.DoesNotExist:
             pass
 
         try:
@@ -318,7 +318,7 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
                 previous_followup = queryset.first()
                 ticket = previous_followup.ticket
         except FollowUp.DoesNotExist:
-            pass #play along. The header may be wrong
+            pass  # play along. The header may be wrong
 
     if previous_followup is None and ticket_id is not None:
         try:
@@ -331,12 +331,12 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
     if ticket is None:
         if not settings.QUEUE_EMAIL_BOX_UPDATE_ONLY:
             ticket = Ticket.objects.create(
-                title = payload['subject'],
-                queue = queue,
-                submitter_email = sender_email,
-                created = now,
-                description = payload['body'],
-                priority = payload['priority'],
+                title=payload['subject'],
+                queue=queue,
+                submitter_email=sender_email,
+                created=now,
+                description=payload['body'],
+                priority=payload['priority'],
             )
             ticket.save()
             logger.debug("Created new ticket %s-%s" % (ticket.queue.slug, ticket.id))
@@ -350,23 +350,23 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
         ticket.save()
 
     f = FollowUp(
-        ticket = ticket,
-        title = _('E-Mail Received from %(sender_email)s' % {'sender_email': sender_email}),
-        date = now,
-        public = True,
-        comment = payload['body'],
-        message_id = message_id,
+        ticket=ticket,
+        title=_('E-Mail Received from %(sender_email)s' % {'sender_email': sender_email}),
+        date=now,
+        public=True,
+        comment=payload['body'],
+        message_id=message_id
     )
 
     if ticket.status == Ticket.REOPENED_STATUS:
         f.new_status = Ticket.REOPENED_STATUS
         f.title = _('Ticket Re-Opened by E-Mail Received from %(sender_email)s' % {'sender_email': sender_email})
-    
+
     f.save()
     logger.debug("Created new FollowUp for Ticket")
 
     logger.info("[%s-%s] %s" % (ticket.queue.slug, ticket.id, ticket.title,))
-    
+
     attached = process_attachments(f, files)
     for att_file in attached:
         logger.info("Attachment '%s' (with size %s) successfully added to ticket from email." % (att_file[0], att_file[1].size))
@@ -376,15 +376,15 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
     new_ticket_ccs = []
     new_ticket_ccs.append(create_ticket_cc(ticket, to_list + cc_list))
 
-    notifications_to_be_sent = [sender_email,]
-    
+    notifications_to_be_sent = [sender_email]
+
     if queue.enable_notifications_on_email_events and len(notifications_to_be_sent):
 
         ticket_cc_list = TicketCC.objects.filter(ticket=ticket).all().values_list('email', flat=True)
 
-        for email in ticket_cc_list : 
+        for email in ticket_cc_list:
             notifications_to_be_sent.append(email)
-    
+
     # send mail to appropriate people now depending on what objects
     # were created and who was CC'd
     if new:
@@ -399,13 +399,13 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
         context.update(comment=f.comment)
         ticket.send(
             {'submitter': ('newticket_submitter', context),
-             'assigned_to': ('updated_owner', context),},
+             'assigned_to': ('updated_owner', context)},
             fail_silently=True,
             extra_headers={'In-Reply-To': message_id},
         )
         if queue.enable_notifications_on_email_events:
             ticket.send(
-                {'ticket_cc': ('updated_cc', context),},
+                {'ticket_cc': ('updated_cc', context)},
                 fail_silently=True,
                 extra_headers={'In-Reply-To': message_id},
             )
@@ -416,7 +416,7 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
 def object_from_message(message, queue, logger):
     # 'message' must be an RFC822 formatted message.
     message = email.message_from_string(message)
-    
+
     subject = message.get('subject', _('Comment from e-mail'))
     subject = decode_mail_headers(decodeUnknown(message.get_charset(), subject))
     for affix in STRIPPED_SUBJECT_STRINGS:
@@ -426,9 +426,9 @@ def object_from_message(message, queue, logger):
     sender = message.get('from', _('Unknown Sender'))
     sender = decode_mail_headers(decodeUnknown(message.get_charset(), sender))
     sender_email = email.utils.parseaddr(sender)[1]
-    
+
     body_plain, body_html = '', ''
-    
+
     cc = message.get_all('cc', None)
     if cc:
         # first, fixup the encoding if necessary
@@ -521,7 +521,7 @@ def object_from_message(message, queue, logger):
     smtp_importance = message.get('importance', '')
     high_priority_types = {'high', 'important', '1', 'urgent'}
     priority = 2 if high_priority_types & {smtp_priority, smtp_importance} else 3
-    
+
     payload = {
         'body': body,
         'subject': subject,
@@ -530,6 +530,5 @@ def object_from_message(message, queue, logger):
         'priority': priority,
         'files': files,
     }
-    
-    return create_object_from_email_message(message, ticket, payload, files, logger=logger)
 
+    return create_object_from_email_message(message, ticket, payload, files, logger=logger)

@@ -388,6 +388,7 @@ def return_ticketccstring_and_show_subscribe(user, ticket):
 
     return ticketcc_string, show_subscribe
 
+
 def subscribe_to_ticket_updates(ticket, user=None, email=None, can_view=True, can_update=False):
 
     if ticket is not None:
@@ -400,8 +401,8 @@ def subscribe_to_ticket_updates(ticket, user=None, email=None, can_view=True, ca
 
         if user is None and len(email) < 5:
             raise ValidationError(
-                _('When you add somebody on Cc, you must provide either a User or a valid email. Email: %s' %email)
-                )
+                _('When you add somebody on Cc, you must provide either a User or a valid email. Email: %s' % email)
+            )
 
         ticketcc = TicketCC(
             ticket=ticket,
@@ -411,14 +412,14 @@ def subscribe_to_ticket_updates(ticket, user=None, email=None, can_view=True, ca
             can_update=can_update
         )
         ticketcc.save()
-        
+
         return ticketcc
 
 
 def subscribe_staff_member_to_ticket(ticket, user, email=''):
     """used in view_ticket() and update_ticket()"""
     return subscribe_to_ticket_updates(ticket=ticket, user=user, email=email, can_view=can_view, can_update=can_update)
-    
+
 
 def update_ticket(request, ticket_id, public=False):
     if not (public or (
