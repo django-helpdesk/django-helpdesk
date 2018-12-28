@@ -5,60 +5,6 @@
 {% block helpdesk_title %}{{ ticket.queue.slug }}-{{ ticket.id }} : {% trans "View Ticket Details" %}{% endblock %}
 
 {% block helpdesk_head %}
-<script type='text/javascript' language='javascript'>
-$(document).ready(function() {
-    $("#ShowFurtherEditOptions").click(function() {
-        $("#FurtherEditOptions").fadeIn();
-        $("#ShowFurtherOptPara").hide();
-        return false;
-    });
-
-    $("#ShowFileUpload").click(function() {
-        $("#FileUpload").fadeIn();
-        $("#ShowFileUploadPara").hide();
-        return false;
-    });
-
-    $('#id_preset').change(function() {
-        preset = $('#id_preset').val();
-        if (preset != '') {
-            $.get("{% url 'helpdesk:raw' "preset" %}?id=" + preset, function(data) {
-                $("#commentBox").val(data)
-            });
-        }
-    });
-
-    $("[data-toggle=tooltip]").tooltip();
-
-    // lists for file input change events, then updates the associated text label
-    // with the file name selected
-    $('.add_file_fields_wrap').on('fileselect', ':file', function(event, numFiles, label, browseButtonNum) {
-        $("#selectedfilename"+browseButtonNum).html(label);
-    });
-
-    var x = 0;
-    var wrapper         = $(".add_file_fields_wrap"); //Fields wrapper
-    var add_button      = $(".add_file_field_button"); //Add button ID
-
-    $(add_button).click(function(e){ //on add input button click
-        x++;
-        e.preventDefault();
-        $(wrapper).append("<div><label class='btn btn-primary btn-sm btn-file'>Browse... <input type='file' name='attachment' id='file" + x + "' multiple style='display: none;'/></label><span>&nbsp;</span><span id='selectedfilename" + x + "'>{% trans 'No files selected.' %}</span></div>"); //add input box
-    });
-
-});
-
-// this function listens for changes on any file input, and
-// emits the appropriate event to update the input's text.
-// Needed to have properly styled file input buttons! (this really shouldn't be this hard...)
-$(document).on('change', ':file', function() {
-    var input = $(this),
-        inputWidgetNum = $(this).attr('id').split("file")[1],
-        numFiles = input.get(0).files ? input.get(0).files.length : 1,
-        label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
-    input.trigger('fileselect', [numFiles, label, inputWidgetNum]);
-});
-</script>
 {% endblock %}
 
 {% block h1_title %}{{ ticket.ticket_for_url }}{% endblock %}
@@ -258,11 +204,68 @@ $(document).on('change', ':file', function() {
 {% csrf_token %}</form>
 
 </div>
+{% endblock %}
 
-<script>
+
+{% block helpdesk_js %}
+<script type='text/javascript' language='javascript'>
 $( function() {
     $( "#id_due_date" ).datepicker();
 } );
 </script>
 
+<script type='text/javascript' language='javascript'>
+$(document).ready(function() {
+    $("#ShowFurtherEditOptions").click(function() {
+        $("#FurtherEditOptions").fadeIn();
+        $("#ShowFurtherOptPara").hide();
+        return false;
+    });
+
+    $("#ShowFileUpload").click(function() {
+        $("#FileUpload").fadeIn();
+        $("#ShowFileUploadPara").hide();
+        return false;
+    });
+
+    $('#id_preset').change(function() {
+        preset = $('#id_preset').val();
+        if (preset != '') {
+            $.get("{% url 'helpdesk:raw' "preset" %}?id=" + preset, function(data) {
+                $("#commentBox").val(data)
+            });
+        }
+    });
+
+    $("[data-toggle=tooltip]").tooltip();
+
+    // lists for file input change events, then updates the associated text label
+    // with the file name selected
+    $('.add_file_fields_wrap').on('fileselect', ':file', function(event, numFiles, label, browseButtonNum) {
+        $("#selectedfilename"+browseButtonNum).html(label);
+    });
+
+    var x = 0;
+    var wrapper         = $(".add_file_fields_wrap"); //Fields wrapper
+    var add_button      = $(".add_file_field_button"); //Add button ID
+
+    $(add_button).click(function(e){ //on add input button click
+        x++;
+        e.preventDefault();
+        $(wrapper).append("<div><label class='btn btn-primary btn-sm btn-file'>Browse... <input type='file' name='attachment' id='file" + x + "' multiple style='display: none;'/></label><span>&nbsp;</span><span id='selectedfilename" + x + "'>{% trans 'No files selected.' %}</span></div>"); //add input box
+    });
+
+});
+
+// this function listens for changes on any file input, and
+// emits the appropriate event to update the input's text.
+// Needed to have properly styled file input buttons! (this really shouldn't be this hard...)
+$(document).on('change', ':file', function() {
+    var input = $(this),
+        inputWidgetNum = $(this).attr('id').split("file")[1],
+        numFiles = input.get(0).files ? input.get(0).files.length : 1,
+        label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
+    input.trigger('fileselect', [numFiles, label, inputWidgetNum]);
+});
+</script>
 {% endblock %}
