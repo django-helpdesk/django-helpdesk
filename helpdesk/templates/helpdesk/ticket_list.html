@@ -59,7 +59,7 @@
                             <option value='Keywords'>{% trans "Keywords" %}</option>
                             <option value='Dates'>{% trans "Date Range" %}</option>
                         </select>
-                        <button class='btn btn-success btn-xs' id='filterBuilderButton'><i class="fas fa-plus-circle"></i></button>
+                        <button class='btn btn-success btn-sm' id='filterBuilderButton'><i class="fas fa-plus-circle"></i></button>
                     {% csrf_token %}</form>
                             
                     <form method='get' action='./'>
@@ -88,7 +88,7 @@
                         <label for='id_sortreverse'>{% trans "Reverse" %}</label>
                         <input type='checkbox' name='sortreverse' id='id_sortreverse'{% if query_params.sortreverse %} checked='checked'{% endif %} />
                         <p class='filterHelp'>{% trans "Ordering applied to tickets" %}</p>
-                        <button class='filterBuilderRemove btn btn-danger btn-xs'><i class="fas fa-trash-alt"></i></button>
+                        <button class='filterBuilderRemove btn btn-danger btn-sm'><i class="fas fa-trash-alt"></i></button>
                         </div>
 
                         <div class='thumbnail filterBox{% if query_params.filtering.assigned_to__id__in %} filterBoxShow{% endif %}' id='filterBoxOwner'>
@@ -101,32 +101,32 @@
                             {% endfor %}
                         </select>
                         <p class='filterHelp'>{% trans "Ctrl-Click to select multiple options" %}</p>
-                        <button class='filterBuilderRemove btn btn-danger btn-xs'><i class="fas fa-trash-alt"></i></button></a>
+                        <button class='filterBuilderRemove btn btn-danger btn-sm'><i class="fas fa-trash-alt"></i></button></a>
                         </div>
 
                         <div class='thumbnail filterBox{% if query_params.filtering.queue__id__in %} filterBoxShow{% endif %}' id='filterBoxQueue'>
                         <label for='id_queues'>{% trans "Queue(s)" %}</label><select id='id_queues' name='queue' multiple='selected' size='5'>{% for q in queue_choices %}<option value='{{ q.id }}'{% if q.id|in_list:query_params.filtering.queue__id__in %} selected='selected'{% endif %}>{{ q.title }}</option>{% endfor %}</select>
                         <p class='filterHelp'>{% trans "Ctrl-click to select multiple options" %}</p>
-                        <button class='filterBuilderRemove btn btn-danger btn-xs'><i class="fas fa-trash-alt"></i></button>
+                        <button class='filterBuilderRemove btn btn-danger btn-sm'><i class="fas fa-trash-alt"></i></button>
                         </div>
 
                         <div class='thumbnail filterBox{% if query_params.filtering.status__in %} filterBoxShow{% endif %}' id='filterBoxStatus'>
                         <label for='id_statuses'>{% trans "Status(es)" %}</label><select id='id_statuses' name='status' multiple='selected' size='5'>{% for s in status_choices %}<option value='{{ s.0 }}'{% if s.0|in_list:query_params.filtering.status__in %} selected='selected'{% endif %}>{{ s.1 }}</option>{% endfor %}</select>
                         <p class='filterHelp'>{% trans "Ctrl-click to select multiple options" %}</p>
-                        <button class='filterBuilderRemove btn btn-danger btn-xs'><i class="fas fa-trash-alt"></i></button>
+                        <button class='filterBuilderRemove btn btn-danger btn-sm'><i class="fas fa-trash-alt"></i></button>
                         </div>
 
                         <div class='thumbnail filterBox{% if query_params.filtering.created__gte or query_params.filtering.created__lte %} filterBoxShow{% endif %}' id='filterBoxDates'>
                         <label for='id_date_from'>{% trans "Date (From)" %}</label><input type='text' name='date_from' value='{{ query_params.filtering.created__gte }}' id='id_date_from' />
                         <label for='id_date_to'>{% trans "Date (To)" %}</label><input type='text' name='date_to' value='{{ query_params.filtering.created__lte }}' id='id_date_to' />
                         <p class='filterHelp'>{% trans "Use YYYY-MM-DD date format, eg 2018-01-30" %}</p>
-                        <button class='filterBuilderRemove btn btn-danger btn-xs'><i class="fas fa-trash-alt"></i></button>
+                        <button class='filterBuilderRemove btn btn-danger btn-sm'><i class="fas fa-trash-alt"></i></button>
                         </div>
 
                         <div class='thumbnail filterBox{% if query %} filterBoxShow{% endif %}' id='filterBoxKeywords'>
                         <label for='id_query'>{% trans "Keywords" %}</label><input type='text' name='q' value='{{ query }}' id='id_query' />
                         <p class='filterHelp'>{% trans "Keywords are case-insensitive, and will be looked for in the title, body and submitter fields." %}</p>
-                        <button class='filterBuilderRemove btn btn-danger btn-xs'><i class="fas fa-trash-alt"></i></button>
+                        <button class='filterBuilderRemove btn btn-danger btn-sm'><i class="fas fa-trash-alt"></i></button>
                         </div>
                         <hr style='clear: both;' />
                         <input class="btn btn-primary" type='submit' value='{% trans "Apply Filter" %}' />

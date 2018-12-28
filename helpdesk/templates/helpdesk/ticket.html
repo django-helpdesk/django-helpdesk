@@ -32,23 +32,20 @@
 
 {% if ticket.followup_set.all %}
 {% load ticket_to_link %}
-<div class="panel panel-primary">
-    <div class="panel-heading">
-        <h4><i class="fa fa-clock-o fa-fw fa-lg"></i>&nbsp;{% trans "Follow-Ups" %}</h4>
-    </div>
-    <!-- /.panel-heading -->
-    <div class="panel-body">
-        <ul class="timeline">
-        {% for followup in ticket.followup_set.all %}
-            <li{% if not followup.user %} class="timeline-inverted"{% endif %}>
-                <div class="timeline-badge{% if forloop.first %} success{% endif %}"><i class="fa {% if forloop.first %}fa-plus-square{% else %}{% if followup.ticketchange_set.all %}fa-gears{% else %}{% if followup.user %}fa-share{% else %}fa-reply{% endif %}{% endif %}{% endif %}"></i></div>
-                <div class="timeline-panel">
-                    <div class="timeline-heading">
-                        <h4 class="timeline-title">{{ followup.title }}</h4>
-                        <p><small class="text-muted"><i class="fa fa-clock-o"></i>&nbsp;<span class='byline text-info'>{% if followup.user %}by {{ followup.user }}{% endif %} <span title='{{ followup.date|date:"r" }}'>{{ followup.date|naturaltime }}</span>{% if not followup.public %} <span class='private'>({% trans "Private" %})</span>{% endif %}</span></small></p>
+    <div class="card mb-3">
+        <div class="card-header"><i class="fas fa-clock fa-fw fa-lg"></i>&nbsp;{% trans "Follow-Ups" %}</div>
+        <div class="card-body">
+            <div class="list-group">
+            {% for followup in ticket.followup_set.all %}
+                <div class="list-group-item list-group-item-action">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">{{ followup.title }}</h5>
+                        <small><i class="fas fa-clock"></i>&nbsp;<span class='byline text-info'>{% if followup.user %}by {{ followup.user }},{% endif %} <span title='{{ followup.date|date:"r" }}'>{{ followup.date|naturaltime }}</span>{% if not followup.public %} <span class='private'>({% trans "Private" %})</span>{% endif %}</span></small>
                     </div>
-                    <div class="timeline-body">
-                        <p>{% if followup.comment %}{{ followup.comment|force_escape|urlizetrunc:50|num_to_link|linebreaksbr }}{% endif %}</p>
+                    <p class="mb-1">
+                        {% if followup.comment %}
+                            <p>{{ followup.comment|force_escape|urlizetrunc:50|num_to_link|linebreaksbr }}</p>
+                        {% endif %}
                         {% for change in followup.ticketchange_set.all %}
                             {% if forloop.first %}<div class='changes'><ul>{% endif %}
                             <li>{% blocktrans with change.field as field and change.old_value as old_value and change.new_value as new_value %}Changed {{ field }} from {{ old_value }} to {{ new_value }}.{% endblocktrans %}</li>
@@ -57,44 +54,44 @@
                         {% for attachment in followup.attachment_set.all %}{% if forloop.first %}<hr><div class='attachments'><ul>{% endif %}
                             <li><a href='{{ attachment.file.url }}'>{{ attachment.filename }}</a> ({{ attachment.mime_type }}, {{ attachment.size|filesizeformat }})
                             {% if followup.user and request.user == followup.user %}
-                            <a href='{% url 'helpdesk:attachment_del' ticket.id attachment.id %}'><button class="btn btn-danger btn-xs"><i class="fa fa-trash"></i>&nbsp;{% trans 'Delete' %}</button></a>
+                            <a href='{% url 'helpdesk:attachment_del' ticket.id attachment.id %}'><button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i>&nbsp;{% trans 'Delete' %}</button></a>
                             {% endif %}
                             </li>
                             {% if forloop.last %}</ul></div>{% endif %}
                         {% endfor %}
-<!--- ugly long test to suppress the following if it will be empty, to save vertical space -->
-{% with possible=helpdesk_settings.HELPDESK_SHOW_EDIT_BUTTON_FOLLOW_UP %}
-    {% if  possible and followup.user and request.user == followup.user and not followup.ticketchange_set.all or  possible and user.is_superuser and helpdesk_settings.HELPDESK_SHOW_DELETE_BUTTON_SUPERUSER_FOLLOW_UP %}
-                        <hr>
-                        <div class="btn-group">
+                    </p>
+                    <!--- ugly long test to suppress the following if it will be empty, to save vertical space -->
+                    {% with possible=helpdesk_settings.HELPDESK_SHOW_EDIT_BUTTON_FOLLOW_UP %}
+                        {% if  possible and followup.user and request.user == followup.user and not followup.ticketchange_set.all or  possible and user.is_superuser and helpdesk_settings.HELPDESK_SHOW_DELETE_BUTTON_SUPERUSER_FOLLOW_UP %}
+                        <small>
                             {% if helpdesk_settings.HELPDESK_SHOW_EDIT_BUTTON_FOLLOW_UP %}
                                 {% if followup.user and request.user == followup.user and not followup.ticketchange_set.all %}
-                                <a href="{% url 'helpdesk:followup_edit' ticket.id followup.id %}" class='followup-edit'><button type="button" class="btn btn-warning btn-xs"><i class="fa fa-edit"></i>&nbsp;{% trans "Edit" %}</button></a>
+                                    <a href="{% url 'helpdesk:followup_edit' ticket.id followup.id %}" class='followup-edit'><button type="button" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i>&nbsp;{% trans "Edit" %}</button></a>
                                 {% endif %}
                             {% endif %}
                             {% if user.is_superuser and helpdesk_settings.HELPDESK_SHOW_DELETE_BUTTON_SUPERUSER_FOLLOW_UP %}
-                                <a href="{% url 'helpdesk:followup_delete' ticket.id followup.id %}" class='followup-edit'><button type="button" class="btn btn-warning btn-xs"><i class="fa fa-trash"></i>&nbsp;{% trans "Delete" %}</button></a>
+                                <a href="{% url 'helpdesk:followup_delete' ticket.id followup.id %}" class='followup-edit'><button type="button" class="btn btn-warning btn-sm"><i class="fas fa-trash"></i>&nbsp;{% trans "Delete" %}</button></a>
                             {% endif %}
-                        </div>
-{% endif %}{% endwith %}
-                    </div>
+                        </small>
+                    {% endif %}{% endwith %}
                 </div>
-            </li>
-        {% endfor %}
-
-        </ul>
+                <!-- /.list-group-item -->
+            {% endfor %}
+            </div>
+            <!-- /.list-group -->
+        </div>
+        <!-- /.card-body -->
     </div>
-    <!-- /.panel-body -->
-</div>
-<!-- /.panel -->
+    <!-- /.card -->
 
 {% endif %}
 {% if helpdesk_settings.HELPDESK_TRANSLATE_TICKET_COMMENTS %}
 </div>
 {% endif %}
 
-<div id='add-followup' class="well">
-<h3>{% trans "Respond to this ticket" %}</h3>
+<div class="card mb-3">
+    <div class="card-header">{% trans "Respond to this ticket" %}</div>
+    <div class="card-body">
 
 <form method='post' action='update/' enctype='multipart/form-data'>
 
@@ -203,6 +200,7 @@
 
 {% csrf_token %}</form>
 
+    </div>
 </div>
 {% endblock %}
 
