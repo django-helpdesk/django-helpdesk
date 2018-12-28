@@ -9,15 +9,18 @@
             <span>{% trans "Dashboard" %}</span>
           </a>
         </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'helpdesk:list' %}">
+            <i class="fas fa-fw fa-tasks"></i>
+            <span>{% trans "All Tickets" %}</span>
+          </a>
+        </li>
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" id="ticketsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <i class="fas fa-fw fa-tasks"></i>
-            <span>Tickets</span>
+            <i class="fas fa-fw fa-search"></i>
+            <span>{% trans "Saved Queries" %}</span>
           </a>
           <div class="dropdown-menu" aria-labelledby="ticketsDropdown">
-            <a class="dropdown-item" href="{% url 'helpdesk:list' %}">{% trans "All Tickets" %}</a>
-            <div class="dropdown-divider"></div>
-            <h6 class="dropdown-header">Saved Queries:</h6>
             {% if user_saved_queries_ %}
             {% for q in user_saved_queries_ %}
             <a class="dropdown-item" href="{% url 'helpdesk:list' %}?saved_query={{ q.id }}">{{ q.title }}
