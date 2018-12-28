@@ -23,7 +23,7 @@
           <div class="dropdown-menu" aria-labelledby="ticketsDropdown">
             {% if user_saved_queries_ %}
             {% for q in user_saved_queries_ %}
-            <a class="dropdown-item" href="{% url 'helpdesk:list' %}?saved_query={{ q.id }}">{{ q.title }}
+            <a class="dropdown-item small" href="{% url 'helpdesk:list' %}?saved_query={{ q.id }}">{{ q.title }}
                 {% if q.shared %}
                 (Shared{% ifnotequal user q.user %} by {{ q.user.get_username }}{% endifnotequal %})
                 {% endif %}
