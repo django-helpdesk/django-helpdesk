@@ -22,11 +22,6 @@ help:
 develop:
 	$(PIP) install -e .
 
-#: develop2 - Install minimal development utilities for Python2.
-.PHONY: develop2
-develop2:
-	pip2 install -e .
-
 
 #: clean - Basic cleanup, mostly temporary files.
 .PHONY: clean
@@ -94,29 +89,10 @@ demo:
 	demodesk loaddata emailtemplate.json
 	demodesk loaddata demo.json
 
-#: demo2 - Setup demo project using Python2.
-.PHONY: demo2
-demo2:
-	pip2 install -e .
-	pip2 install -e demo
-	demodesk migrate --noinput
-	# Create superuser; user will be prompted to manually set a password.
-	# When you get a prompt, enter a password of your choosing.
-	# We suggest a default of 'Test1234' for the demo project.
-	demodesk createsuperuser --username admin --email helpdesk@example.com
-	# Install fixtures (helpdesk templates as well as demo ticket data)
-	demodesk loaddata emailtemplate.json
-	demodesk loaddata demo.json
-
 
 #: rundemo - Run demo server using Python3.
 .PHONY: rundemo
 rundemo: demo
-	demodesk runserver 8080
-
-#: rundemo2 - Run demo server using Python2.
-.PHONY: rundemo2
-rundemo2: demo2
 	demodesk runserver 8080
 
 

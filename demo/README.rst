@@ -17,8 +17,6 @@ in the top level of the django-helpdesk directory.
 Running the demo
 ----------------
 
-By default, the demo is configured for Python 3.
-
 While not recommended, the simplest way to get
 started is to simply install django-helpdesk
 to your system python package directory.
@@ -59,25 +57,10 @@ before running:
 
     make rundemo
 
-*NOTE ON USING PYTHON 2*
-
-By default, the demo uses Python 3, as Python 3
-will be the recommended version of python for
-django-helpdesk and even Django itself in the near future.
-However, if you wish to use Python 2, you can
-instead run the following:
-
-    sudo make rundemo2
-
-Then navigate to the site in a browser as above.
-
 *NOTE ON DJANGO VERISON*
 
-The demo project was also created with Django 1.11
-in mind. If you are using an older version of Django,
-slight tweaks might be necessary to make the demo work.
-Please remember that we do not currently support any
-version of Django other than 1.11.
+The demo project was configured with Django 2.x in mind.
+Django 1.11 is NOT supported.
 
 *NOTE ON ATTACHMENTS*
 
