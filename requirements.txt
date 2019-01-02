@@ -3,6 +3,7 @@ django-bootstrap4-form
 celery
 django-celery-beat
 email-reply-parser
+akismet
 django-markdown-deux
 beautifulsoup4
 lxml

@@ -167,7 +167,7 @@ def text_is_spam(text, request):
     from django.contrib.sites.models import Site
     from django.core.exceptions import ImproperlyConfigured
     try:
-        from helpdesk.akismet import Akismet
+        from akismet import Akismet
     except ImportError:
         return False
     try:
