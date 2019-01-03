@@ -176,9 +176,9 @@ def text_is_spam(text, request):
         site = Site(domain='configure-django-sites.com')
 
     # see https://akismet.readthedocs.io/en/latest/overview.html#using-akismet
-    
+
     apikey = None
-    
+
     if hasattr(settings, 'TYPEPAD_ANTISPAM_API_KEY'):
         apikey = settings.TYPEPAD_ANTISPAM_API_KEY
         ak.baseurl = 'api.antispam.typepad.com/1.1/'
