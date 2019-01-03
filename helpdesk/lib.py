@@ -175,18 +175,26 @@ def text_is_spam(text, request):
     except ImproperlyConfigured:
         site = Site(domain='configure-django-sites.com')
 
-    ak = Akismet(
-        blog_url='http://%s/' % site.domain,
-        agent='django-helpdesk',
-    )
-
+    # see https://akismet.readthedocs.io/en/latest/overview.html#using-akismet
+    
+    apikey = None
+    
     if hasattr(settings, 'TYPEPAD_ANTISPAM_API_KEY'):
-        ak.setAPIKey(key=settings.TYPEPAD_ANTISPAM_API_KEY)
+        apikey = settings.TYPEPAD_ANTISPAM_API_KEY
         ak.baseurl = 'api.antispam.typepad.com/1.1/'
+    elif hasattr(settings, 'PYTHON_AKISMET_API_KEY'):
+        # new env var expected by python-akismet package
+        apikey = settings.PYTHON_AKISMET_API_KEY
     elif hasattr(settings, 'AKISMET_API_KEY'):
-        ak.setAPIKey(key=settings.AKISMET_API_KEY)
+        # deprecated, but kept for backward compatibility
+        apikey = settings.AKISMET_API_KEY
     else:
         return False
+
+    ak = Akismet(
+        blog_url='http://%s/' % site.domain,
+        key=apikey,
+    )
 
     if ak.verify_key():
         ak_data = {
