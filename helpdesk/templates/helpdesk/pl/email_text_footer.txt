@@ -1,0 +1,6 @@
+Pozdrawiamy,
+
+{{ queue.title }}{% if queue.email_address %}
+{{ queue.email_address }}{% endif %}
+    
+Ten e-mail został wysłany do Ciebie jako użytkownika naszej usługi pomocy technicznej, zgodnie z naszą polityką prywatności. Powiadom nas, jeśli uważasz, że otrzymałeś ten adres e-mail przez pomyłkę.
