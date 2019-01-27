@@ -51,6 +51,8 @@ class FollowUpAdmin(admin.ModelAdmin):
 @admin.register(KBItem)
 class KBItemAdmin(admin.ModelAdmin):
     list_display = ('category', 'title', 'last_updated',)
+    readonly_fields = ('voted_by',)
+
     list_display_links = ('title',)
 
 
