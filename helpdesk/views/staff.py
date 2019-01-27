@@ -58,18 +58,36 @@ superuser_required = user_passes_test(
     lambda u: u.is_authenticated and u.is_active and u.is_superuser)
 
 
-def _get_user_queues(user):
+def get_queue_choices(queues):
+    """Return list of `choices` array for html form for given queues
+
+    idea is to return only one choice if there is only one queue or add empty
+    choice at the beginning of the list, if there are more queues
+    """
+
+    queue_choices = []
+    if len(queues) > 1:
+        queue_choices = [('', '--------')]
+    queue_choices += [(q.id, q.title) for q in queues]
+    return queue_choices
+
+
+def get_user_queues(user):
     """Return the list of Queues the user can access.
 
     :param user: The User (the class should have the has_perm method)
     :return: A Python list of Queues
     """
     all_queues = Queue.objects.all()
+    public_ids = [q.pk for q in
+                  Queue.objects.filter(allow_public_submission=True)]
+
     limit_queues_by_user = \
         helpdesk_settings.HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION \
         and not user.is_superuser
     if limit_queues_by_user:
         id_list = [q.pk for q in all_queues if user.has_perm(q.permission_name)]
+        id_list += public_ids
         return all_queues.filter(pk__in=id_list)
     else:
         return all_queues
@@ -91,7 +109,8 @@ def _has_access_to_queue(user, queue):
 def _is_my_ticket(user, ticket):
     """Check to see if the user has permission to access
     a ticket. If not then deny access."""
-    if user.is_superuser or user.is_staff or user.id == ticket.assigned_to.id:
+    if user.is_superuser or user.is_staff or \
+       (ticket.assigned_to and user.id == ticket.assigned_to.id):
         return True
     else:
         return False
@@ -115,7 +134,7 @@ def dashboard(request):
         assigned_to=request.user,
         status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS])
 
-    user_queues = _get_user_queues(request.user)
+    user_queues = get_user_queues(request.user)
 
     unassigned_tickets = Ticket.objects.select_related('queue').filter(
         assigned_to__isnull=True,
@@ -143,7 +162,7 @@ def dashboard(request):
     # Queue 1    10     4
     # Queue 2     4    12
 
-    queues = _get_user_queues(request.user).values_list('id', flat=True)
+    queues = get_user_queues(request.user).values_list('id', flat=True)
 
     from_clause = """FROM    helpdesk_ticket t,
                     helpdesk_queue q"""
@@ -258,8 +277,8 @@ def view_ticket(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
     if not _has_access_to_queue(request.user, ticket.queue):
         raise PermissionDenied()
-    if not _is_my_ticket(request.user, ticket):
-        raise PermissionDenied()
+    # if not _is_my_ticket(request.user, ticket):
+    #    raise PermissionDenied()
 
     if 'take' in request.GET:
         # Allow the user to assign the ticket to themselves whilst viewing it.
@@ -787,7 +806,7 @@ mass_update = staff_member_required(mass_update)
 def ticket_list(request):
     context = {}
 
-    user_queues = _get_user_queues(request.user)
+    user_queues = get_user_queues(request.user)
     # Prefilter the allowed tickets
     base_tickets = Ticket.objects.filter(queue__in=user_queues)
 
@@ -1002,8 +1021,8 @@ def create_ticket(request):
 
     if request.method == 'POST':
         form = TicketForm(request.POST, request.FILES)
-        form.fields['queue'].choices = [('', '--------')] + [
-            (q.id, q.title) for q in Queue.objects.all()]
+        queue_choices = get_queue_choices(get_user_queues(request.user))
+        form.fields['queue'].choices = queue_choices
         form.fields['assigned_to'].choices = [('', '--------')] + [
             (u.id, u.get_username()) for u in assignable_users]
         if form.is_valid():
@@ -1020,8 +1039,8 @@ def create_ticket(request):
             initial_data['queue'] = request.GET['queue']
 
         form = TicketForm(initial=initial_data)
-        form.fields['queue'].choices = [('', '--------')] + [
-            (q.id, q.title) for q in Queue.objects.all()]
+        queue_choices = get_queue_choices(get_user_queues(request.user))
+        form.fields['queue'].choices = queue_choices
         form.fields['assigned_to'].choices = [('', '--------')] + [
             (u.id, u.get_username()) for u in assignable_users]
         if helpdesk_settings.HELPDESK_CREATE_TICKET_HIDE_ASSIGNED_TO:
@@ -1103,7 +1122,7 @@ def report_index(request):
     number_tickets = Ticket.objects.all().count()
     saved_query = request.GET.get('saved_query', None)
 
-    user_queues = _get_user_queues(request.user)
+    user_queues = get_user_queues(request.user)
     Tickets = Ticket.objects.filter(queue__in=user_queues)
     basic_ticket_stats = calc_basic_ticket_stats(Tickets)
 
@@ -1143,7 +1162,7 @@ def run_report(request, report):
         return HttpResponseRedirect(reverse("helpdesk:report_index"))
 
     report_queryset = Ticket.objects.all().select_related().filter(
-        queue__in=_get_user_queues(request.user)
+        queue__in=get_user_queues(request.user)
     )
 
     from_saved_query = False
@@ -1213,7 +1232,7 @@ def run_report(request, report):
     elif report == 'userqueue':
         title = _('User by Queue')
         col1heading = _('User')
-        queue_options = _get_user_queues(request.user)
+        queue_options = get_user_queues(request.user)
         possible_options = [q.title for q in queue_options]
         charttype = 'bar'
 

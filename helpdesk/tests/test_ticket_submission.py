@@ -70,6 +70,8 @@ class TicketBasicsTestCase(TestCase):
         self.assertEqual(email_count + 3, len(mail.outbox))
 
     def test_create_ticket_private(self):
+        from helpdesk import settings as helpdesk_settings
+        helpdesk_settings.HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION = True
         email_count = len(mail.outbox)
         post_data = {
             'title': 'Private ticket test',
