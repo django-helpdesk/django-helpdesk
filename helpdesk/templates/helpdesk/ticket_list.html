@@ -61,7 +61,7 @@
                         </select>
                         <button class='btn btn-success btn-sm' id='filterBuilderButton'><i class="fas fa-plus-circle"></i></button>
                     {% csrf_token %}</form>
-                            
+
                     <form method='get' action='./'>
                         <div class='thumbnail filterBox{% if query_params.sorting %} filterBoxShow{% endif %}' id='filterBoxSort'>
                         <label for='id_sort'>{% trans "Sorting" %}</label>
@@ -140,7 +140,7 @@
                 </div>
                 </div>
             </div> <!-- end card -->
-                    
+
             <div class="card">
                 <div class="card-header" id="headingTwo">
                 <h5 class="mb-0">
@@ -171,7 +171,7 @@
                 </div>
                 </div>
             </div> <!-- end card -->
-                    
+
             <div class="card">
                 <div class="card-header" id="headingThree">
                 <h5 class="mb-0">
@@ -230,13 +230,13 @@
             </table>
 
             <p><label>{% trans "Select:" %} </label>
-            
+
                 <button id="select_all_btn" type="button" class="btn btn-primary btn-sm" />
                 <i class="fas fa-check-circle"></i>&nbsp;{% trans "All" %}
                 </button>
-                
+
                 <button id='select_none_btn' type="button" class="btn btn-primary btn-sm"><i class="fas fa-times-circle"></i>&nbsp;{% trans "None" %}</button>
-                
+
                 <button id='select_inverse_btn' type="button" class="btn btn-primary btn-sm"><i class="fas fa-expand-arrows-alt"></i>&nbsp;{% trans "Invert" %}</button>
             </p>
 
@@ -277,9 +277,12 @@
           responsive: true
         });
     {% else %}
+        function get_url(row)
+        {
+            return "{% url 'helpdesk:view' 1234 %}".replace(/1234/, row.id.toString());
+        }
         $(document).ready(function()
         {
-          let url = ""
             //DataTables Initialization
             let tasks_table = $('#ticketTable').DataTable({
                 "language": {
@@ -302,10 +305,9 @@
                     {
                         var id = data.split(" ")[0];
                         var name = data.split(" ")[1];
-                        let url = "{% url 'helpdesk:view' 1234 %}".replace(/1234/, id.toString());
                         if (type === 'display')
                         {
-                          data = '<b><a href="' + url + '" >' + name + '</a></b>';
+                          data = '<b><a href="' + get_url(row) + '" >' + name + '</a></b>';
                         }
                         return data
                     }
@@ -327,7 +329,7 @@
                     {
                       if (type === 'display')
                       {
-                        data = '<b><a href="' + url + '" >' + data + '</a></b>';
+                        data = '<b><a href="' + get_url(row) + '" >' + data + '</a></b>';
                       }
                       return data
                     }
