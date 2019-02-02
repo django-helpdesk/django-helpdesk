@@ -168,7 +168,7 @@
 
         <dt><label for='id_priority'>{% trans "Priority" %}</label></dt>
         <dd><select id='id_priority' name='priority'>{% for p in priorities %}<option value='{{ p.0 }}'{% ifequal p.0 ticket.priority %} selected='selected'{% endifequal %}>{{ p.1 }}</option>{% endfor %}</select></dd>
-        
+
         <dt><label for='id_due_date'>{% trans "Due on" %}</label></dt>
         <dd>{{ form.due_date }}</dd>
 
@@ -215,8 +215,7 @@ $( function() {
 <script type='text/javascript' language='javascript'>
 $(document).ready(function() {
     $("#ShowFurtherEditOptions").click(function() {
-        $("#FurtherEditOptions").fadeIn();
-        $("#ShowFurtherOptPara").hide();
+        $("#FurtherEditOptions").toggle();
         return false;
     });
 
