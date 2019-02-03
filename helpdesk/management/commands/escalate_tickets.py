@@ -32,7 +32,7 @@ class Command(BaseCommand):
     def __init__(self):
         BaseCommand.__init__(self)
 
-        self.option_list += (
+        self.option_list = (
             make_option(
                 '--queues',
                 help='Queues to include (default: all). Use queue slugs'),
