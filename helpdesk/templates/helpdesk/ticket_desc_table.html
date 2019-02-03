@@ -37,7 +37,11 @@
                     </tr>{% endif %}
                     <tr>
                         <th>{% trans "Due Date" %}</th>
-                        <td>{{ ticket.due_date|date:"r" }} ({{ ticket.due_date|naturaltime }})</td>
+                        <td>{{ ticket.due_date|date:"r" }} ({{ ticket.due_date|naturaltime }})
+                        <strong>
+                           <a href='#FurtherEditOptions'><button type="button" class="btn btn-sm btn-warning float-right" onclick="$('#FurtherEditOptions').fadeIn()"><i class="fas fa-pencil-alt"></i></button></a>
+                        </strong>
+                        </td>
                     </tr>
                     <tr>
                         <th>{% trans "Submitted On" %}</th>
@@ -45,17 +49,28 @@
                     </tr>
                     <tr>
                         <th>{% trans "Assigned To" %}</th>
-                        <td>{{ ticket.get_assigned_to }}{% ifequal ticket.get_assigned_to _('Unassigned') %} <strong><a href='?take'><button type="button" class="btn btn-primary btn-sm"><i class="fas fa-hand-paper"></i>&nbsp;{% trans "Take" %}</button></a></strong>{% endifequal %}</td>
+                        <td>{{ ticket.get_assigned_to }}{% ifequal ticket.get_assigned_to _('Unassigned') %} <strong>
+                           <a href='?take'><button type="button" class="btn btn-primary btn-sm"><i class="fas fa-hand-paper"></i>&nbsp;{% trans "Take" %}</button></a>
+                        </strong>{% endifequal %}
+                        <strong>
+                           <a href='#FurtherEditOptions'><button type="button" class="btn btn-sm btn-warning float-right" onclick="$('#FurtherEditOptions').fadeIn()"><i class="fas fa-pencil-alt"></i></button></a>
+                        </strong>
+                        </td>
                     </tr>
                     <tr>
                         <th>{% trans "Submitter E-Mail" %}</th>
                         <td>{{ ticket.submitter_email }}
                         {% if user.is_superuser %} {% if submitter_userprofile_url %}<strong><a href='{{submitter_userprofile_url}}'><button type="button" class="btn btn-primary btn-sm"><i class="fas fa-address-book"></i>&nbsp;{% trans "Profile" %}</button></a></strong>{% endif %}
-                        <strong><a href='{% url 'helpdesk:email_ignore_add' %}?email={{ ticket.submitter_email }}'><button type="button" class="btn btn-warning btn-sm"><i class="fas fa-eye-slash"></i>&nbsp;{% trans "Ignore" %}</button></a></strong>{% endif %}</td>
+                        <strong><a href='{% url 'helpdesk:email_ignore_add' %}?email={{ ticket.submitter_email }}'><button type="button" class="btn btn-warning btn-sm"><i class="fas fa-eye-slash"></i>&nbsp;{% trans "Ignore" %}</button></a></strong>{% endif %}
+                        </td>
                     </tr>
                     <tr>
                         <th>{% trans "Priority" %}</th>
-                        <td>{{ ticket.get_priority_display }}</td>
+                        <td>{{ ticket.get_priority_display }}
+                        <strong>
+                           <a href='#FurtherEditOptions'><button type="button" class="btn btn-sm btn-warning float-right" onclick="$('#FurtherEditOptions').fadeIn()"><i class="fas fa-pencil-alt"></i></button></a>
+                        </strong>
+                        </td>
                     </tr>
                     <tr>
                         <th>{% trans "Copies To" %}</th>
