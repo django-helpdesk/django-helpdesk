@@ -48,9 +48,9 @@ class Command(BaseCommand):
         queue_slugs = None
         queues = []
 
-        if options['verboseescalation']:
+        if 'verboseescalation' in options:
             verbose = True
-        if options['queues']:
+        if 'queues' in options:
             queue_slugs = options['queues']
 
         if queue_slugs is not None:
