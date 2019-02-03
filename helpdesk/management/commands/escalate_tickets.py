@@ -32,7 +32,7 @@ class Command(BaseCommand):
     def __init__(self):
         BaseCommand.__init__(self)
 
-        self.option_list += (
+        self.option_list = (
             make_option(
                 '--queues',
                 help='Queues to include (default: all). Use queue slugs'),
@@ -48,9 +48,9 @@ class Command(BaseCommand):
         queue_slugs = None
         queues = []
 
-        if options['verboseescalation']:
+        if 'verboseescalation' in options:
             verbose = True
-        if options['queues']:
+        if 'queues' in options:
             queue_slugs = options['queues']
 
         if queue_slugs is not None:
