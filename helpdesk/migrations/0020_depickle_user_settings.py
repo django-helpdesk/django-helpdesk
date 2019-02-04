@@ -24,7 +24,7 @@ def move_old_values(apps, schema_editor):
         if user_settings.settings_pickled:
             settings_dict = unpickle_settings(user_settings.settings_pickled)
             for setting, value in settings_dict.items():
-                user_settings.__set_attr__(setting, value)
+                user_settings.__setattr__(setting, value)
 
 
 class Migration(migrations.Migration):
