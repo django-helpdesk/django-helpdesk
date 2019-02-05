@@ -5,6 +5,7 @@ from django.urls import reverse
 from django.test import TestCase
 from django.test.client import Client
 from helpdesk.models import CustomField, Queue, Ticket
+from helpdesk import settings as helpdesk_settings
 
 try:  # python 3
     from urllib.parse import urlparse
@@ -27,12 +28,21 @@ class TicketActionsTestCase(TestCase):
             updated_ticket_cc='update.public@example.com'
         )
 
+        self.queue_private = Queue.objects.create(
+            title='Queue 2',
+            slug='q2',
+            allow_public_submission=False,
+            new_ticket_cc='new.private@example.com',
+            updated_ticket_cc='update.private@example.com'
+        )
+
         self.ticket_data = {
             'title': 'Test Ticket',
             'description': 'Some Test Ticket',
         }
 
         self.client = Client()
+        helpdesk_settings.HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION = False
 
     def loginUser(self, is_staff=True):
         """Create a staff user and login"""
@@ -143,14 +153,14 @@ class TicketActionsTestCase(TestCase):
 
         initial_data = {
             'title': 'Private ticket test',
-            'queue': self.queue_public,
+            'queue': self.queue_private,
             'assigned_to': self.user,
             'status': Ticket.OPEN_STATUS,
         }
 
         # create ticket
+        helpdesk_settings.HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION = True
         ticket = Ticket.objects.create(**initial_data)
-
         self.assertEqual(_is_my_ticket(self.user, ticket), True)
         self.assertEqual(_is_my_ticket(self.user2, ticket), False)
 

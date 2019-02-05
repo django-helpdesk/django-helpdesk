@@ -275,8 +275,11 @@ class TicketForm(AbstractTicketForm):
         """
         Add any custom fields that are defined to the form.
         """
+        queue_choices = kwargs.pop("queue_choices")
+
         super().__init__(*args, **kwargs)
-        self.fields['queue'].choices = [('', '--------')] + [(q.id, q.title) for q in Queue.objects.all()]
+
+        self.fields['queue'].choices = queue_choices
         if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS:
             assignable_users = User.objects.filter(is_active=True, is_staff=True).order_by(User.USERNAME_FIELD)
         else:
