@@ -12,6 +12,7 @@
         <td data-order='{{ ticket.created|date:"U" }}'><span title='{{ ticket.created|date:"r" }}'>{{ ticket.created|naturaltime }}</span></td>
         <td data-order='{{ ticket.due_date|date:"U" }}'><span title='{{ ticket.due_date|date:"r" }}'>{{ ticket.due_date|naturaltime }}</span></td>
         <td>{{ ticket.get_assigned_to }}</td>
+        <td>{{ ticket.time_spent }}</td>
     </tr>
     {% endfor %}
 </tbody>

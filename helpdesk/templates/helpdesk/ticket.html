@@ -46,6 +46,9 @@
                         {% if followup.comment %}
                             <p>{{ followup.comment|force_escape|urlizetrunc:50|num_to_link|linebreaksbr }}</p>
                         {% endif %}
+                        {% if followup.time_spent %}
+                        <small>{% trans "Time spent" %}: {{ followup.time_spent }}</small></p>
+                        {% endif %}
                         {% for change in followup.ticketchange_set.all %}
                             {% if forloop.first %}<div class='changes'><ul>{% endif %}
                             <li>{% blocktrans with change.field as field and change.old_value as old_value and change.new_value as new_value %}Changed {{ field }} from {{ old_value }} to {{ new_value }}.{% endblocktrans %}</li>
@@ -152,6 +155,11 @@
         <dd><input type='checkbox' name='public' value='1' checked='checked' />&nbsp; {% trans 'Yes, make this update public.' %}</dd>
         <dd class='form_help_text'>{% trans "If this is public, the submitter will be e-mailed your comment or resolution." %}</dd>
         {% endif %}
+
+        <dt>
+            <label for='id_time_spent'>{% trans "Time spent" %}</label> <span class='form_optional'>{% trans "(Optional)" %}</span>
+        </dt>
+        <dd><input name='time_spent' type="time" /></dd>
     </dl>
 
 <p id='ShowFurtherOptPara'><button class="btn btn-warning btn-sm" id='ShowFurtherEditOptions'>{% trans "Change Further Details &raquo;" %}</button></p>
