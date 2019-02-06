@@ -22,7 +22,9 @@ class TicketSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ticket
         # fields = '__all__'
-        fields = ('ticket', 'id', 'priority', 'title', 'queue', 'status', 'created', 'due_date', 'assigned_to', 'row_class')
+        fields = ('ticket', 'id', 'priority', 'title', 'queue', 'status',
+                  'created', 'due_date', 'assigned_to', 'row_class',
+                  'time_spent')
 
     def get_ticket(self, obj):
         return (str(obj.id) + " " + obj.ticket)

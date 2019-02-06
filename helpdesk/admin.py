@@ -14,7 +14,8 @@ class QueueAdmin(admin.ModelAdmin):
 
 @admin.register(Ticket)
 class TicketAdmin(admin.ModelAdmin):
-    list_display = ('title', 'status', 'assigned_to', 'queue', 'hidden_submitter_email',)
+    list_display = ('title', 'status', 'assigned_to', 'queue',
+                    'hidden_submitter_email', 'time_spent')
     date_hierarchy = 'created'
     list_filter = ('queue', 'assigned_to', 'status')
 
@@ -28,6 +29,9 @@ class TicketAdmin(admin.ModelAdmin):
             return ticket.submitter_email
     hidden_submitter_email.short_description = _('Submitter E-Mail')
 
+    def time_spent(self, ticket):
+        return ticket.time_spent
+
 
 class TicketChangeInline(admin.StackedInline):
     model = TicketChange
@@ -40,7 +44,8 @@ class AttachmentInline(admin.StackedInline):
 @admin.register(FollowUp)
 class FollowUpAdmin(admin.ModelAdmin):
     inlines = [TicketChangeInline, AttachmentInline]
-    list_display = ('ticket_get_ticket_for_url', 'title', 'date', 'ticket', 'user', 'new_status')
+    list_display = ('ticket_get_ticket_for_url', 'title', 'date', 'ticket',
+                    'user', 'new_status', 'time_spent')
     list_filter = ('user', 'date', 'new_status')
 
     def ticket_get_ticket_for_url(self, obj):

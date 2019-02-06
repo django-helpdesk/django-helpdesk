@@ -237,6 +237,7 @@ def followup_edit(request, ticket_id, followup_id):
             'comment': escape(followup.comment),
             'public': followup.public,
             'new_status': followup.new_status,
+            'time_spent': followup.time_spent,
         })
 
         ticketcc_string, show_subscribe = \
@@ -256,9 +257,13 @@ def followup_edit(request, ticket_id, followup_id):
             comment = form.cleaned_data['comment']
             public = form.cleaned_data['public']
             new_status = form.cleaned_data['new_status']
+            time_spent = form.cleaned_data['time_spent']
             # will save previous date
             old_date = followup.date
-            new_followup = FollowUp(title=title, date=old_date, ticket=_ticket, comment=comment, public=public, new_status=new_status, )
+            new_followup = FollowUp(title=title, date=old_date, ticket=_ticket,
+                                    comment=comment, public=public,
+                                    new_status=new_status,
+                                    time_spent=time_spent)
             # keep old user if one did exist before.
             if followup.user:
                 new_followup.user = followup.user
@@ -469,6 +474,11 @@ def update_ticket(request, ticket_id, public=False):
     due_date_year = int(request.POST.get('due_date_year', 0))
     due_date_month = int(request.POST.get('due_date_month', 0))
     due_date_day = int(request.POST.get('due_date_day', 0))
+    if request.POST.get("time_spent"):
+        (hours, minutes) = [int(f) for f in request.POST.get("time_spent").split(":")]
+        time_spent = timedelta(hours=hours, minutes=minutes)
+    else:
+        time_spent = None
     # NOTE: jQuery's default for dates is mm/dd/yy
     # very US-centric but for now that's the only format supported
     # until we clean up code to internationalize a little more
@@ -523,7 +533,8 @@ def update_ticket(request, ticket_id, public=False):
     if owner is -1 and ticket.assigned_to:
         owner = ticket.assigned_to.id
 
-    f = FollowUp(ticket=ticket, date=timezone.now(), comment=comment)
+    f = FollowUp(ticket=ticket, date=timezone.now(), comment=comment,
+                 time_spent=time_spent)
 
     if is_helpdesk_staff(request.user):
         f.user = request.user
@@ -1161,6 +1172,7 @@ def report_index(request):
             'open': queue.ticket_set.filter(status__in=[1, 2]).count(),
             'resolved': queue.ticket_set.filter(status=3).count(),
             'closed': queue.ticket_set.filter(status=4).count(),
+            'time_spent': queue.time_spent
         }
         dash_tickets.append(dash_ticket)
 
