@@ -1,0 +1,29 @@
+To: helpdesk@auto-mat.cz
+From: Timothy Hobbs <timothy.hobbs@auto-mat.cz>
+Subject: Attachment without body
+Openpgp: preference=signencrypt
+Message-ID: <b05893cd-77b5-3450-4b84-9a1ad5119def@auto-mat.cz>
+Date: Fri, 15 Feb 2019 13:58:05 +0100
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:60.0) Gecko/20100101
+ Thunderbird/60.4.0
+MIME-Version: 1.0
+Content-Type: multipart/mixed;
+ boundary="------------7E95F315EB4B016F5948B17F"
+Content-Language: en-US
+
+This is a multi-part message in MIME format.
+--------------7E95F315EB4B016F5948B17F
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+
+
+
+--------------7E95F315EB4B016F5948B17F
+Content-Type: text/plain; charset=UTF-8;
+ name="baf"
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment;
+ filename="baf"
+
+WW91IHNob3VsZG4ndCBzZWUgdGhpcy4K
+--------------7E95F315EB4B016F5948B17F--

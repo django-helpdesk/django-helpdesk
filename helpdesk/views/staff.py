@@ -71,6 +71,20 @@ superuser_required = user_passes_test(
     lambda u: u.is_authenticated and u.is_active and u.is_superuser)
 
 
+def _get_queue_choices(queues):
+    """Return list of `choices` array for html form for given queues
+
+    idea is to return only one choice if there is only one queue or add empty
+    choice at the beginning of the list, if there are more queues
+    """
+
+    queue_choices = []
+    if len(queues) > 1:
+        queue_choices = [('', '--------')]
+    queue_choices += [(q.id, q.title) for q in queues]
+    return queue_choices
+
+
 def _get_user_queues(user):
     """Return the list of Queues the user can access.
 
@@ -78,11 +92,15 @@ def _get_user_queues(user):
     :return: A Python list of Queues
     """
     all_queues = Queue.objects.all()
+    public_ids = [q.pk for q in
+                  Queue.objects.filter(allow_public_submission=True)]
+
     limit_queues_by_user = \
         helpdesk_settings.HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION \
         and not user.is_superuser
     if limit_queues_by_user:
         id_list = [q.pk for q in all_queues if user.has_perm(q.permission_name)]
+        id_list += public_ids
         return all_queues.filter(pk__in=id_list)
     else:
         return all_queues
@@ -104,7 +122,10 @@ def _has_access_to_queue(user, queue):
 def _is_my_ticket(user, ticket):
     """Check to see if the user has permission to access
     a ticket. If not then deny access."""
-    if user.is_superuser or user.is_staff or user.id == ticket.assigned_to.id:
+    if _has_access_to_queue(user, ticket.queue):
+        return True
+    elif user.is_superuser or user.is_staff or \
+            (ticket.assigned_to and user.id == ticket.assigned_to.id):
         return True
     else:
         return False
@@ -323,8 +344,11 @@ def view_ticket(request, ticket_id):
     else:
         users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
 
+    queues = _get_user_queues(request.user)
+    queue_choices = _get_queue_choices(queues)
     # TODO: shouldn't this template get a form to begin with?
-    form = TicketForm(initial={'due_date': ticket.due_date})
+    form = TicketForm(initial={'due_date': ticket.due_date},
+                      queue_choices=queue_choices)
 
     ticketcc_string, show_subscribe = \
         return_ticketccstring_and_show_subscribe(request.user, ticket)
@@ -1024,6 +1048,12 @@ class CreateTicketView(MustBeStaffMixin, FormView):
         if 'queue' in request.GET:
             initial_data['queue'] = request.GET['queue']
         return initial_data
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        queues = _get_user_queues(self.request.user)
+        kwargs["queue_choices"] = _get_queue_choices(queues)
+        return kwargs
 
     def form_valid(self, form):
         self.ticket = form.save()
