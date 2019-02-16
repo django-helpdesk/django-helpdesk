@@ -507,7 +507,7 @@ def object_from_message(message, queue, logger):
         counter += 1
 
     if not body:
-        mail = BeautifulSoup(part.get_payload(), "lxml")
+        mail = BeautifulSoup(str(message), "html.parser")
         beautiful_body = mail.find('body')
         if beautiful_body:
             try:
@@ -515,7 +515,7 @@ def object_from_message(message, queue, logger):
             except AttributeError:
                 pass
         if not body:
-            body = mail.text
+            body = ""
 
     smtp_priority = message.get('priority', '')
     smtp_importance = message.get('importance', '')
