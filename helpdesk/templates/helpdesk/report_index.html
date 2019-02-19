@@ -55,7 +55,7 @@
                         <td>{% if queue.open %}<a href='{{ hdlist }}?queue={{ queue.queue }}&status=1&status=2'>{% endif %}{{ queue.open }}{% if queue.open %}</a>{% endif %}</td>
                         <td>{% if queue.resolved %}<a href='{{ hdlist }}?queue={{ queue.queue }}&status=3'>{% endif %}{{ queue.resolved }}{% if queue.resolved %}</a>{% endif %}</td>
                         <td>{% if queue.closed %}<a href='{{ hdlist }}?queue={{ queue.queue }}&status=4'>{% endif %}{{ queue.closed }}{% if queue.closed %}</a>{% endif %}</td>
-                        <td>{{ queue.time_spent }}</td>
+                        <td>{{ queue.time_spent }}{% if queue.dedicated_time %} / {{ queue.dedicated_time }}{% endif %}</td>
                     </tr>
                     {% empty %}
                     <tr><td colspan='6'>{% trans "There are no unassigned tickets." %}</td></tr>
