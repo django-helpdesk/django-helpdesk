@@ -8,8 +8,16 @@ from helpdesk.models import CustomField
 
 @admin.register(Queue)
 class QueueAdmin(admin.ModelAdmin):
-    list_display = ('title', 'slug', 'email_address', 'locale')
+    list_display = ('title', 'slug', 'email_address', 'locale', 'time_spent')
     prepopulated_fields = {"slug": ("title",)}
+
+    def time_spent(self, q):
+        if q.dedicated_time:
+            return "{} / {}".format(q.time_spent, q.dedicated_time)
+        elif q.time_spent:
+            return q.time_spent
+        else:
+            return "-"
 
 
 @admin.register(Ticket)

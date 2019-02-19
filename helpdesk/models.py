@@ -276,6 +276,11 @@ class Queue(models.Model):
         verbose_name=_('Default owner'),
     )
 
+    dedicated_time = models.DurationField(
+        help_text=_("Time to be spent on this Queue in total"),
+        blank=True, null=True
+    )
+
     def __str__(self):
         return "%s" % self.title
 
