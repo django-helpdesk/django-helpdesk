@@ -67,7 +67,7 @@ def homepage(request):
 
         # add pre-defined data for public ticket
         if hasattr(settings, 'HELPDESK_PUBLIC_TICKET_QUEUE'):
-            slug=settings.HELPDESK_PUBLIC_TICKET_QUEUE
+            slug = settings.HELPDESK_PUBLIC_TICKET_QUEUE
             queue = Queue.objects.get(slug=slug)
         if hasattr(settings, 'HELPDESK_PUBLIC_TICKET_PRIORITY'):
             initial_data['priority'] = settings.HELPDESK_PUBLIC_TICKET_PRIORITY
