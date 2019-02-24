@@ -17,6 +17,7 @@ from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _, ugettext
 from io import StringIO
 import re
+import datetime
 
 import uuid
 
@@ -275,6 +276,11 @@ class Queue(models.Model):
         verbose_name=_('Default owner'),
     )
 
+    dedicated_time = models.DurationField(
+        help_text=_("Time to be spent on this Queue in total"),
+        blank=True, null=True
+    )
+
     def __str__(self):
         return "%s" % self.title
 
@@ -300,6 +306,17 @@ class Queue(models.Model):
         else:
             return u'%s <%s>' % (self.title, self.email_address)
     from_address = property(_from_address)
+
+    @property
+    def time_spent(self):
+        """Return back total time spent on the ticket. This is calculated value
+        based on total sum from all FollowUps
+        """
+        total = datetime.timedelta(0)
+        for val in self.ticket_set.all():
+            if val.time_spent:
+                total = total + val.time_spent
+        return total
 
     def prepare_permission_name(self):
         """Prepare internally the codename for the permission and store it in permission_name.
@@ -496,6 +513,17 @@ class Ticket(models.Model):
         max_length=36,
         default=mk_secret,
     )
+
+    @property
+    def time_spent(self):
+        """Return back total time spent on the ticket. This is calculated value
+        based on total sum from all FollowUps
+        """
+        total = datetime.timedelta(0)
+        for val in self.followup_set.all():
+            if val.time_spent:
+                total = total + val.time_spent
+        return total
 
     def send(self, roles, dont_send_to=None, **kwargs):
         """
@@ -770,6 +798,11 @@ class FollowUp(models.Model):
     )
 
     objects = FollowUpManager()
+
+    time_spent = models.DurationField(
+        help_text=_("Time spent on this follow up"),
+        blank=True, null=True
+    )
 
     class Meta:
         ordering = ('date',)
