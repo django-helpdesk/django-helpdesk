@@ -57,7 +57,6 @@ errors with trying to create User settings.
         'django.contrib.sites',  # Required for determining domain url for use in emails
         'django.contrib.admin',  # Required for helpdesk admin/maintenance
         'django.contrib.humanize',  # Required for elapsed time formatting
-        'markdown_deux',  # Required for Knowledgebase item formatting
         'bootstrap4form', # Required for nicer formatting of forms with the default templates
         'helpdesk',  # This is us!
     )
@@ -114,21 +113,17 @@ errors with trying to create User settings.
 
    Ideally, accessing http://MEDIA_URL/helpdesk/attachments/ will give you a 403 access denied error.
 
-7. If it's not already installed, install ``markdown_deux`` and ensure it's in your ``INSTALLED_APPS``::
-
-      pip install django-markdown-deux
-
-8. If you already have a view handling your logins, then great! If not, add the following to ``settings.py`` to get your Django installation to use the login view included in ``django-helpdesk``::
+7. If you already have a view handling your logins, then great! If not, add the following to ``settings.py`` to get your Django installation to use the login view included in ``django-helpdesk``::
 
       LOGIN_URL = '/helpdesk/login/'
 
    Alter the URL to suit your installation path.
 
-9. Load initial e-mail templates, otherwise you will not be able to send e-mail::
+8. Load initial e-mail templates, otherwise you will not be able to send e-mail::
 
    python manage.py loaddata emailtemplate.json
 
-10. If you intend on using local mail directories for processing email into tickets, be sure to create the mail directory before adding it to the queue in the Django administrator interface. The default mail directory is ``/var/lib/mail/helpdesk/``. Ensure that the directory has appropriate permissions so that your Django/web server instance may read and write files from this directory.
+9. If you intend on using local mail directories for processing email into tickets, be sure to create the mail directory before adding it to the queue in the Django administrator interface. The default mail directory is ``/var/lib/mail/helpdesk/``. Ensure that the directory has appropriate permissions so that your Django/web server instance may read and write files from this directory.
 
    Note that by default, any mail files placed in your local directory will be permanently deleted after being successfully processed. It is strongly recommended that you take further steps to save emails if you wish to retain backups.
 
