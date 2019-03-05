@@ -2,6 +2,8 @@
 {% load i18n bootstrap4form humanize %}
 {% load static from staticfiles %}
 
+
+
 {% block helpdesk_title %}{{ ticket.queue.slug }}-{{ ticket.id }} : {% trans "View Ticket Details" %}{% endblock %}
 
 {% block helpdesk_head %}
@@ -44,7 +46,7 @@
                     </div>
                     <p class="mb-1">
                         {% if followup.comment %}
-                            <p>{{ followup.comment|force_escape|urlizetrunc:50|num_to_link|linebreaksbr }}</p>
+                            <p>{{ followup.get_markdown|urlizetrunc:50|num_to_link|linebreaksbr }}</p>
                         {% endif %}
                         {% if followup.time_spent %}
                         <small>{% trans "Time spent" %}: {{ followup.time_spent }}</small></p>
