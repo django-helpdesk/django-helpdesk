@@ -77,3 +77,9 @@ Add your custom styles here
 }
 #helpdesk-body {padding-top: 100px;}
 img.brand {padding-right: 30px;}
+
+pre {
+	background: #eee;
+	padding: 1em;
+	border: 1pt solid white;
+}

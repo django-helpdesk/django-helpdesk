@@ -1,4 +1,4 @@
-{% extends "helpdesk/public_base.html" %}{% load i18n %}{% load markdown_deux_tags %}
+{% extends "helpdesk/public_base.html" %}{% load i18n %}
 
 {% block helpdesk_breadcrumb %}
 <li class="breadcrumb-item">
@@ -19,7 +19,7 @@
         {{ item.question }}
     </div>
     <div class="card-body">
-        <p>{{ item.answer|markdown }}</p>
+        <p>{{ item.get_markdown }}</p>
     </div>
     <div class="card-footer">
         <div class="row">
