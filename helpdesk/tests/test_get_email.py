@@ -56,6 +56,23 @@ class GetEmailCommonTests(TestCase):
         self.assertEqual(ticket.title, "Attachment without body")
         self.assertEqual(ticket.description, "")
 
+    def test_email_with_blank_body_and_attachment(self):
+        """
+        Tests that emails with quoted-printable bodies work.
+        """
+        with open(os.path.join(THIS_DIR, "test_files/quoted_printable.eml")) as fd:
+            test_email = fd.read()
+        ticket = helpdesk.email.object_from_message(test_email, self.queue_public, self.logger)
+        self.assertEqual(ticket.title, "Český test")
+        self.assertEqual(ticket.description, "Tohle je test českých písmen odeslaných z gmailu.")
+        followups = FollowUp.objects.filter(ticket=ticket)
+        self.assertEqual(len(followups), 1)
+        followup = followups[0]
+        attachments = Attachment.objects.filter(followup=followup)
+        self.assertEqual(len(attachments), 1)
+        attachment = attachments[0]
+        self.assertEqual(attachment.file.read().decode("utf-8"), '<div dir="ltr">Tohle je test českých písmen odeslaných z gmailu.</div>\n')
+
 
 class GetEmailParametricTemplate(object):
     """TestCase that checks basic email functionality across methods and socks configs."""
