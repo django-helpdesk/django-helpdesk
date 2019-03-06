@@ -19,9 +19,35 @@ from io import StringIO
 import re
 import datetime
 
+from django.utils.safestring import mark_safe
+from markdown import markdown
+from markdown.extensions import Extension
+
+
 import uuid
 
 from .templated_email import send_templated_mail
+
+
+class EscapeHtml(Extension):
+    def extendMarkdown(self, md, md_globals):
+        del md.preprocessors['html_block']
+        del md.inlinePatterns['html']
+
+
+def get_markdown(text):
+    if not text:
+        return ""
+
+    return mark_safe(
+        markdown(
+            text,
+            extensions=[
+                EscapeHtml(), 'markdown.extensions.nl2br',
+                'markdown.extensions.fenced_code'
+            ]
+        )
+    )
 
 
 class Queue(models.Model):
@@ -717,6 +743,9 @@ class Ticket(models.Model):
         queue = '-'.join(parts[0:-1])
         return queue, parts[-1]
 
+    def get_markdown(self):
+        return get_markdown(self.description)
+
 
 class FollowUpManager(models.Manager):
 
@@ -768,8 +797,10 @@ class FollowUp(models.Model):
         _('Public'),
         blank=True,
         default=False,
-        help_text=_('Public tickets are viewable by the submitter and all '
-                    'staff, but non-public tickets can only be seen by staff.'),
+        help_text=_(
+            'Public tickets are viewable by the submitter and all '
+            'staff, but non-public tickets can only be seen by staff.'
+        ),
     )
 
     user = models.ForeignKey(
@@ -820,6 +851,9 @@ class FollowUp(models.Model):
         t.modified = timezone.now()
         t.save()
         super(FollowUp, self).save(*args, **kwargs)
+
+    def get_markdown(self):
+        return get_markdown(self.comment)
 
 
 class TicketChange(models.Model):
@@ -1160,6 +1194,9 @@ class KBItem(models.Model):
     def get_absolute_url(self):
         from django.urls import reverse
         return reverse('helpdesk:kb_item', args=(self.id,))
+
+    def get_markdown(self):
+        return get_markdown(self.answer)
 
 
 class SavedSearch(models.Model):

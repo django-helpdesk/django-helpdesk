@@ -27,7 +27,6 @@ class QuickDjangoTest(object):
         'django.contrib.sessions',
         'django.contrib.sites',
         'django.contrib.staticfiles',
-        'markdown_deux',
         'bootstrap4form'
     )
     MIDDLEWARE = [
