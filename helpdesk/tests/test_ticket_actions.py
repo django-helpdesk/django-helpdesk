@@ -55,6 +55,18 @@ class TicketActionsTestCase(TestCase):
         self.user.save()
         self.client.login(username='User_1', password='pass')
 
+    def test_ticket_markdown(self):
+
+        ticket_data = {
+            'queue': self.queue_public,
+            'title': 'Test Ticket',
+            'description': '*bold*',
+        }
+
+        ticket = Ticket.objects.create(**ticket_data)
+        self.assertEqual(ticket.get_markdown(),
+                         "<p><em>bold</em></p>")
+
     def test_delete_ticket_staff(self):
         # make staff user
         self.loginUser()
