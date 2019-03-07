@@ -42,7 +42,7 @@ from helpdesk.lib import (
     process_attachments, queue_template_context,
 )
 from helpdesk.models import (
-    Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch,
+    Ticket, Queue, FollowUp, TicketChange, PreSetReply, FollowUpAttachment, SavedSearch,
     IgnoreEmail, TicketCC, TicketDependency, UserSettings,
 )
 from helpdesk import settings as helpdesk_settings
@@ -269,7 +269,7 @@ def followup_edit(request, ticket_id, followup_id):
                 new_followup.user = followup.user
             new_followup.save()
             # get list of old attachments & link them to new_followup
-            attachments = Attachment.objects.filter(followup=followup)
+            attachments = FolllowUpAttachment.objects.filter(followup=followup)
             for attachment in attachments:
                 attachment.followup = new_followup
                 attachment.save()
@@ -1581,7 +1581,7 @@ def attachment_del(request, ticket_id, attachment_id):
     if not _is_my_ticket(request.user, ticket):
         raise PermissionDenied()
 
-    attachment = get_object_or_404(Attachment, id=attachment_id)
+    attachment = get_object_or_404(FolllowUpAttachment, id=attachment_id)
     if request.method == 'POST':
         attachment.delete()
         return HttpResponseRedirect(reverse('helpdesk:view', args=[ticket_id]))

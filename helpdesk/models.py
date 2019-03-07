@@ -17,6 +17,8 @@ from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _, ugettext
 from io import StringIO
 import re
+import os
+import mimetypes
 import datetime
 
 from django.utils.safestring import mark_safe
@@ -904,18 +906,8 @@ class TicketChange(models.Model):
 
 
 def attachment_path(instance, filename):
-    """
-    Provide a file path that will help prevent files being overwritten, by
-    putting attachments in a folder off attachments for ticket/followup_id/.
-    """
-    import os
-    os.umask(0)
-    path = 'helpdesk/attachments/%s-%s/%s' % (instance.followup.ticket.ticket_for_url, instance.followup.ticket.secret_key, instance.followup.id)
-    att_path = os.path.join(settings.MEDIA_ROOT, path)
-    if settings.DEFAULT_FILE_STORAGE == "django.core.files.storage.FileSystemStorage":
-        if not os.path.exists(att_path):
-            os.makedirs(att_path, 0o777)
-    return os.path.join(path, filename)
+    """Just bridge"""
+    return instance.attachment_path(filename)
 
 
 class Attachment(models.Model):
@@ -923,12 +915,6 @@ class Attachment(models.Model):
     Represents a file attached to a follow-up. This could come from an e-mail
     attachment, or it could be uploaded via the web interface.
     """
-
-    followup = models.ForeignKey(
-        FollowUp,
-        on_delete=models.CASCADE,
-        verbose_name=_('Follow-up'),
-    )
 
     file = models.FileField(
         _('File'),
@@ -938,26 +924,102 @@ class Attachment(models.Model):
 
     filename = models.CharField(
         _('Filename'),
+        blank=True,
         max_length=1000,
     )
 
     mime_type = models.CharField(
         _('MIME Type'),
+        blank=True,
         max_length=255,
     )
 
     size = models.IntegerField(
         _('Size'),
+        blank=True,
         help_text=_('Size of this file in bytes'),
     )
 
     def __str__(self):
         return '%s' % self.filename
 
+    def save(self, *args, **kwargs):
+
+        if not self.size:
+            self.size = self.get_size()
+
+        if not self.filename:
+            self.filename = self.get_filename()
+
+        if not self.mime_type:
+            self.mime_type = \
+                mimetypes.guess_type(self.filename, strict=False)[0] or \
+                'application/octet-stream'
+
+        return super(Attachment, self).save(*args, **kwargs)
+
+    def get_filename(self):
+        return str(self.file)
+
+    def get_size(self):
+        return self.file.file.size
+
+    def attachment_path(self, filename):
+        """Provide a file path that will help prevent files being overwritten, by
+        putting attachments in a folder off attachments for ticket/followup_id/.
+        """
+        assert NotImplementedError(
+            "This method is to be implemented by Attachment classes"
+        )
+
     class Meta:
         ordering = ('filename',)
         verbose_name = _('Attachment')
         verbose_name_plural = _('Attachments')
+        abstract = True
+
+
+class FollowUpAttachment(Attachment):
+
+    followup = models.ForeignKey(
+        FollowUp,
+        on_delete=models.CASCADE,
+        verbose_name=_('Follow-up'),
+    )
+
+    def attachment_path(self, filename):
+
+        os.umask(0)
+        path = 'helpdesk/attachments/{ticket_for_url}-{secret_key}/{id_}'.format(
+            ticket_for_url=self.followup.ticket.ticket_for_url,
+            secret_key=self.followup.ticket.secret_key,
+            id_=self.followup.id)
+        att_path = os.path.join(settings.MEDIA_ROOT, path)
+        if settings.DEFAULT_FILE_STORAGE == "django.core.files.storage.FileSystemStorage":
+            if not os.path.exists(att_path):
+                os.makedirs(att_path, 0o777)
+        return os.path.join(path, filename)
+
+
+class KBIAttachment(Attachment):
+
+    kbitem = models.ForeignKey(
+        "KBItem",
+        on_delete=models.CASCADE,
+        verbose_name=_('Knowledge base item'),
+    )
+
+    def attachment_path(self, filename):
+
+        os.umask(0)
+        path = 'helpdesk/attachments/kb/{category}/{kbi}'.format(
+            category=self.kbitem.category,
+            kbi=self.kbitem.id)
+        att_path = os.path.join(settings.MEDIA_ROOT, path)
+        if settings.DEFAULT_FILE_STORAGE == "django.core.files.storage.FileSystemStorage":
+            if not os.path.exists(att_path):
+                os.makedirs(att_path, 0o777)
+        return os.path.join(path, filename)
 
 
 class PreSetReply(models.Model):
