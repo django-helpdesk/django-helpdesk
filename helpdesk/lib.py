@@ -15,7 +15,7 @@ from django.db.models import Q
 from django.utils.encoding import smart_text, smart_str
 from django.utils.safestring import mark_safe
 
-from helpdesk.models import Attachment, EmailTemplate
+from helpdesk.models import FollowUpAttachment, EmailTemplate
 
 from model_utils import Choices
 
@@ -218,7 +218,7 @@ def process_attachments(followup, attached_files):
 
         if attached.size:
             filename = smart_text(attached.name)
-            att = Attachment(
+            att = FollowUpAttachment(
                 followup=followup,
                 file=attached,
                 filename=filename,
