@@ -56,7 +56,7 @@ class GetEmailCommonTests(TestCase):
         self.assertEqual(ticket.title, "FollowUpAttachment without body")
         self.assertEqual(ticket.description, "")
 
-    def test_email_with_blank_body_and_attachment(self):
+    def test_email_with_quoted_printable_body(self):
         """
         Tests that emails with quoted-printable bodies work.
         """
@@ -72,6 +72,17 @@ class GetEmailCommonTests(TestCase):
         self.assertEqual(len(attachments), 1)
         attachment = attachments[0]
         self.assertEqual(attachment.file.read().decode("utf-8"), '<div dir="ltr">Tohle je test českých písmen odeslaných z gmailu.</div>\n')
+
+    def test_email_with_8bit_encoding_and_utf_8(self):
+        """
+        Tests that emails with 8bit transfer encoding and utf-8 charset
+        https://github.com/django-helpdesk/django-helpdesk/issues/732
+        """
+        with open(os.path.join(THIS_DIR, "test_files/all-special-chars.eml")) as fd:
+            test_email = fd.read()
+        ticket = helpdesk.email.object_from_message(test_email, self.queue_public, self.logger)
+        self.assertEqual(ticket.title, "Testovácí email")
+        self.assertEqual(ticket.description, "íářčšáíéřášč")
 
 
 class GetEmailParametricTemplate(object):
