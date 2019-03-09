@@ -72,7 +72,7 @@
                         </li>
                         <li><a href='{% url 'helpdesk:rss_index' %}'><i class="fa fa-rss-square fa-fw"></i> {% trans "RSS Feeds" %}</a></li>
                         {% if helpdesk_settings.HELPDESK_SHOW_CHANGE_PASSWORD and user.has_usable_password %}
-                        <li><a href="{% url 'auth_password_change' %}"><i class="fa fa-user-secret fa-fw"></i> {% trans "Change password" %}</a></li>
+                        <li><a href="{% url 'helpdesk:password_change' %}"><i class="fa fa-user-secret fa-fw"></i> {% trans "Change password" %}</a></li>
                         {% endif %}
                         <li class="divider"></li>
                         {% if user.is_superuser %}
