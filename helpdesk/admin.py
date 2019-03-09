@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _
 from helpdesk.models import Queue, Ticket, FollowUp, PreSetReply, KBCategory
 from helpdesk.models import EscalationExclusion, EmailTemplate, KBItem
-from helpdesk.models import TicketChange, Attachment, IgnoreEmail
+from helpdesk.models import TicketChange, KBIAttachment, FollowUpAttachment, IgnoreEmail
 from helpdesk.models import CustomField
 
 
@@ -43,15 +43,22 @@ class TicketAdmin(admin.ModelAdmin):
 
 class TicketChangeInline(admin.StackedInline):
     model = TicketChange
+    extra = 0
 
 
-class AttachmentInline(admin.StackedInline):
-    model = Attachment
+class FollowUpAttachmentInline(admin.StackedInline):
+    model = FollowUpAttachment
+    extra = 0
+
+
+class KBIAttachmentInline(admin.StackedInline):
+    model = KBIAttachment
+    extra = 0
 
 
 @admin.register(FollowUp)
 class FollowUpAdmin(admin.ModelAdmin):
-    inlines = [TicketChangeInline, AttachmentInline]
+    inlines = [TicketChangeInline, FollowUpAttachmentInline]
     list_display = ('ticket_get_ticket_for_url', 'title', 'date', 'ticket',
                     'user', 'new_status', 'time_spent')
     list_filter = ('user', 'date', 'new_status')
@@ -64,6 +71,7 @@ class FollowUpAdmin(admin.ModelAdmin):
 @admin.register(KBItem)
 class KBItemAdmin(admin.ModelAdmin):
     list_display = ('category', 'title', 'last_updated',)
+    inlines = [KBIAttachmentInline]
     readonly_fields = ('voted_by',)
 
     list_display_links = ('title',)
