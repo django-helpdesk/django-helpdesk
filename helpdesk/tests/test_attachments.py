@@ -110,19 +110,39 @@ class AttachmentUnitTests(TestCase):
         self.assertEqual(filename, self.file_attrs['filename'])
 
     @mock.patch('helpdesk.lib.FollowUpAttachment', autospec=True)
-    def xest_autofill_(self, mock_att_save, mock_queue_save, mock_ticket_save, mock_follow_up_save):
+    def test_autofill(self, mock_att_save, mock_queue_save, mock_ticket_save, mock_follow_up_save):
         """ check utf-8 data is parsed correcltly """
-        filename, fileobj = lib.process_attachments(self.follow_up, [self.test_file])[0]
-        obj = mock_att_save.assert_called_with(
-            file=self.test_file,
-            filename=None,
-            mime_type=None,
-            size=None,
-            followup=self.follow_up
+        self.follow_up.pk = 100
+        obj = models.FollowUpAttachment.objects.create(
+            followup=self.follow_up,
+            file=self.test_file
         )
         self.assertEqual(obj.filename, self.file_attrs['filename'])
         self.assertEqual(obj.size, len(self.file_attrs['content']))
-        self.assertEqual(obj.mime_type, self.file_attrs['content-type'])
+        self.assertEqual(obj.mime_type, "text/plain")
+
+    def test_kbi_attachment(self, mock_att_save, mock_queue_save, mock_ticket_save):
+        """ check utf-8 data is parsed correcltly """
+
+        kbcategory = models.KBCategory.objects.create(
+            title="Title",
+            slug="slug",
+            description="Description"
+        )
+        kbitem = models.KBItem.objects.create(
+            category=kbcategory,
+            title="Title",
+            question="Question",
+            answer="Answer"
+        )
+
+        obj = models.KBIAttachment.objects.create(
+            kbitem=kbitem,
+            file=self.test_file
+        )
+        self.assertEqual(obj.filename, self.file_attrs['filename'])
+        self.assertEqual(obj.size, len(self.file_attrs['content']))
+        self.assertEqual(obj.mime_type, "text/plain")
 
     @mock.patch.object(lib.FollowUpAttachment, 'save', autospec=True)
     @override_settings(MEDIA_ROOT=MEDIA_DIR)
