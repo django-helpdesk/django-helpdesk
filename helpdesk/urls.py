@@ -194,13 +194,13 @@ urlpatterns += [
             template_name='helpdesk/registration/login.html',
             next_page='../'),
         name='logout'),
-        
+
     url(r'^password_change/$',
         auth_views.PasswordChangeView.as_view(
             template_name='helpdesk/registration/change_password.html',
             success_url='./done'),
         name='password_change'),
-    
+
     url(r'^password_change/done$',
         auth_views.PasswordChangeDoneView.as_view(
             template_name='helpdesk/registration/change_password_done.html',),
