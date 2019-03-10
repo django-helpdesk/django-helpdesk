@@ -77,3 +77,7 @@ Add your custom styles here
 }
 #helpdesk-body {padding-top: 100px;}
 img.brand {padding-right: 30px;}
+
+div.card-body img {
+	max-width: 900px;
+}
