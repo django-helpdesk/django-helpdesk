@@ -954,7 +954,7 @@ class Attachment(models.Model):
         if not self.mime_type:
             self.mime_type = \
                 mimetypes.guess_type(self.filename, strict=False)[0] or \
-                'application/octet-stream',
+                'application/octet-stream'
 
         return super(Attachment, self).save(*args, **kwargs)
 
