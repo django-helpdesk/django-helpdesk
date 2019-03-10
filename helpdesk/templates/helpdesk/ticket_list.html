@@ -41,7 +41,7 @@
             <div class="card">
                 <div class="card-header" id="headingOne">
                 <h5 class="mb-0">
-                    <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                    <button class="btn btn-link btn-sm" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
                     <i class="fas fa-question-circle"></i>
                     <strong>{% trans "Change Query" %}</strong>
                     </button>
@@ -51,7 +51,9 @@
                 <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#queryAccordion">
                 <div class="card-body">
                     <form>
-                        <select name='select' id='filterBuilderSelect'>
+                        <div class="form-group">
+                        <label for="filterBuilderSelect">{% trans "Select filter" %}:</label>
+                        <select aria-describedby="select-description" name='select' id='filterBuilderSelect'>
                             <option value='Sort'>{% trans "Sorting" %}</option>
                             <option value='Owner'>{% trans "Owner" %}</option>
                             <option value='Queue'>{% trans "Queue" %}</option>
@@ -59,10 +61,13 @@
                             <option value='Keywords'>{% trans "Keywords" %}</option>
                             <option value='Dates'>{% trans "Date Range" %}</option>
                         </select>
-                        <button class='btn btn-success btn-sm' id='filterBuilderButton'><i class="fas fa-plus-circle"></i></button>
+                        <small id="select-description" class="form-text text-muted">{% trans "Add another filter to list of filers for finer selection of displayed tickets" %}</small>
+                        <button class='btn btn-success btn-sm' id='filterBuilderButton'>{% trans "Add selected filter" %} <i class="fas fa-plus-circle"></i></button>
                     {% csrf_token %}</form>
+                        </div>
 
                     <form method='get' action='./'>
+                        <div class="d-flex align-items-stretch">
                         <div class='thumbnail filterBox{% if query_params.sorting %} filterBoxShow{% endif %}' id='filterBoxSort'>
                         <label for='id_sort'>{% trans "Sorting" %}</label>
                         <select id='id_sort' name='sort'>
@@ -128,15 +133,17 @@
                         <p class='filterHelp'>{% trans "Keywords are case-insensitive, and will be looked for in the title, body and submitter fields." %}</p>
                         <button class='filterBuilderRemove btn btn-danger btn-sm'><i class="fas fa-trash-alt"></i></button>
                         </div>
+                        </div> <!-- end div d-flex class -->
                         <hr style='clear: both;' />
-                        <input class="btn btn-primary" type='submit' value='{% trans "Apply Filter" %}' />
+                        <input class="btn btn-primary btn-sm" type='submit' value='{% trans "Apply Filters" %}' />
                         {% if from_saved_query and saved_query.user == user %}
                         <p>{% blocktrans with saved_query.title as query_name %}You are currently viewing saved query <strong>"{{ query_name }}"</strong>.{% endblocktrans %} <a href='{% url 'helpdesk:delete_query' saved_query.id %}'>{% trans "Delete Saved Query" %}</a></p>
                         {% endif %}
                         {% if from_saved_query %}
                         <p>{% blocktrans with saved_query.id as query_id %}<a href='../reports/?saved_query={{ query_id }}'>Run a report</a> on this query to see stats and charts for the data listed below.{% endblocktrans %}</p>
                         {% endif %}
-                    {% csrf_token %}</form>
+                    {% csrf_token %}
+                    </form>
                 </div>
                 </div>
             </div> <!-- end card -->
@@ -144,7 +151,7 @@
             <div class="card">
                 <div class="card-header" id="headingTwo">
                 <h5 class="mb-0">
-                    <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                    <button class="btn btn-link collapsed btn-sm" type="button" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
                     <i class="fas fa-save"></i>
                     <strong>{% trans "Save Query" %}</strong>
                     </button>
@@ -175,7 +182,7 @@
             <div class="card">
                 <div class="card-header" id="headingThree">
                 <h5 class="mb-0">
-                    <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                    <button class="btn btn-link collapsed btn-sm" type="button" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
                     <i class="fas fa-clipboard-check"></i>
                     <strong>{% trans "Use Saved Query" %}</strong>
                     </button>
@@ -210,13 +217,12 @@
     <div class="card-body">
         {{ search_message|safe }}
         <form method='post' action='{% url 'helpdesk:mass_update' %}' id="ticket_mass_update">
-            <table width="100%" class="table table-striped table-bordered table-hover" id="ticketTable" data-page-length='{{ default_tickets_per_page }}'>
-                <thead>
+            <table width="100%" class="table table-sm table-striped table-bordered table-hover" id="ticketTable" data-page-length='{{ default_tickets_per_page }}'>
+                <thead class="thead-light">
                     <tr>
-                        <th>#</th>
                         <th>&nbsp;</th>
-                        <th>{% trans "Pr" %}</th>
-                        <th>{% trans "Title" %}</th>
+                        <th>{% trans "Ticket" %}</th>
+                        <th>{% trans "Prority" %}</th>
                         <th>{% trans "Queue" %}</th>
                         <th>{% trans "Status" %}</th>
                         <th>{% trans "Created" %}</th>
@@ -301,18 +307,6 @@
                 },
 
                 "columns": [
-                  {"data": "ticket",
-                    "render": function (data, type, row, meta)
-                    {
-                        var id = data.split(" ")[0];
-                        var name = data.split(" ")[1];
-                        if (type === 'display')
-                        {
-                          data = '<b><a href="' + get_url(row) + '" >' + name + '</a></b>';
-                        }
-                        return data
-                    }
-                  },
                   {"data": "id",
                     "orderable": false,
                     "render": function(data, type, row, meta)
@@ -324,22 +318,49 @@
                         return data
                       }
                   },
-                  {"data": "priority"},
-                  {"data": "title",
+                  {"data": "ticket",
                     "render": function (data, type, row, meta)
                     {
-                      if (type === 'display')
-                      {
-                        data = '<b><a href="' + get_url(row) + '" >' + data + '</a></b>';
-                      }
-                      return data
+                        var id = data.split(" ")[0];
+                        var name = data.split(" ")[1];
+                        if (type === 'display')
+                        {
+                                data = '<div class="tickettitle"><a href="' + get_url(row) + '" >' + 
+                                        row.id + '. ' + 
+                                        row.title + '</a></div>';
+                        }
+                        return data
                     }
                   },
-                  {"data": "queue"},
+                  {"data": "priority",
+                   "render": function (data, type, row, meta) {
+                           var priority = "success";
+                           if (data == 4 ) {
+                                priority = "warning";
+                           } else if (data == 5) {
+                                priority = "danger";
+                           }
+                           return '<p class="text-'+priority+'">'+data+'</p>';
+                        }
+                  },
+                  {"data": "queue",
+                   "render": function(data, type, row, meta) {
+                           return data.title;
+                   }
+                  },
                   {"data": "status"},
                   {"data": "created"},
                   {"data": "due_date"},
-                  {"data": "assigned_to"},
+                  {"data": "assigned_to",
+                   "render": function(data, type, row, meta) {
+                           if (data != "None") {
+                                return data;
+                           } 
+                           else {
+                                return "";
+                           }
+                   }
+                  },
                   {"data": "time_spent"},
                 ]
             });

@@ -5,7 +5,7 @@
     <tr class="{{ ticket.get_priority_css_class }}">
         <th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.ticket }}</a></th>
         <td><input type='checkbox' name='ticket_id' value='{{ ticket.id }}' class='ticket_multi_select' /></td>
-        <td>{{ ticket.priority }}</td>
+        <td>{{ ticket.priority }}|||||</td>
         <th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></th>
         <td>{{ ticket.queue }}</td>
         <td>{{ ticket.get_status }}</td>

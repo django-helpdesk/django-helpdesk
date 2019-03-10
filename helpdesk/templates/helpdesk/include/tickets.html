@@ -8,12 +8,11 @@
     </div>
     <div class="card-body">
         <div class="table-responsive">
-        <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-            <thead>
+        <table class="table table-bordered table-sm table-striped" id="dataTable" width="100%" cellspacing="0">
+            <thead class="thead-light">
                 <tr>
-                    <th>#</th>
-                    <th>{% trans "Pr" %}</th>
-                    <th>{% trans "Title" %}</th>
+                    <th>{% trans "Ticket" %}</th>
+                    <th>{% trans "Priority" %}</th>
                     <th>{% trans "Queue" %}</th>
                     <th>{% trans "Status" %}</th>
                     <th>{% trans "Last Update" %}</th>
@@ -22,9 +21,8 @@
             <tbody>
                 {% for ticket in ticket_list %}
                 <tr class="{{ ticket.get_priority_css_class }}">
-                    <td><a href='{{ ticket.get_absolute_url }}'>{{ ticket.ticket }}</a></td>
+                    <td class="tickettitle"><a href="{{ ticket.get_absolute_url }}">{{ ticket.id }}. {{ ticket.title }}</a></td>
                     <td>{{ ticket.priority }}</td>
-                    <td><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></td>
                     <td>{{ ticket.queue }}</td>
                     <td>{{ ticket.get_status }}</td>
                     <td><span title='{{ ticket.modified|date:"r" }}'>{{ ticket.modified|naturaltime }}</span></td>
