@@ -26,7 +26,7 @@
                         <th colspan='2'>{% trans "Description" %}</th>
                     </tr>
                     <tr>
-                        <td id="ticket-description" colspan='2'>{{ ticket.description|force_escape|urlizetrunc:50|num_to_link|linebreaksbr }}</td>
+                        <td id="ticket-description" colspan='2'>{{ ticket.get_markdown|urlizetrunc:50|num_to_link|linebreaksbr }}</td>
                     </tr>
 
                     {% if ticket.resolution %}<tr>
@@ -88,6 +88,10 @@
                             {% endfor %}
                             <p><a data-toggle='tooltip' href='{% url 'helpdesk:ticket_dependency_add' ticket.id %}' title="{% trans "Click on 'Add Dependency', if you want to make this ticket dependent on another ticket. A ticket may not be closed until all tickets it depends on are closed." %}"><button type="button" class="btn btn-primary btn-sm"><i class="fas fa-child"></i>&nbsp;{% trans "Add Dependency" %}</button></a></p>
                         </td>
+                    </tr>
+                    <tr>
+                        <th>{% trans "Total time spent" %}</th>
+                        <td>{{ ticket.time_spent }}</td>
                     </tr>
                 </tbody>
             </table>

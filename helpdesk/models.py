@@ -17,10 +17,39 @@ from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _, ugettext
 from io import StringIO
 import re
+import os
+import mimetypes
+import datetime
+
+from django.utils.safestring import mark_safe
+from markdown import markdown
+from markdown.extensions import Extension
+
 
 import uuid
 
 from .templated_email import send_templated_mail
+
+
+class EscapeHtml(Extension):
+    def extendMarkdown(self, md, md_globals):
+        del md.preprocessors['html_block']
+        del md.inlinePatterns['html']
+
+
+def get_markdown(text):
+    if not text:
+        return ""
+
+    return mark_safe(
+        markdown(
+            text,
+            extensions=[
+                EscapeHtml(), 'markdown.extensions.nl2br',
+                'markdown.extensions.fenced_code'
+            ]
+        )
+    )
 
 
 class Queue(models.Model):
@@ -275,6 +304,11 @@ class Queue(models.Model):
         verbose_name=_('Default owner'),
     )
 
+    dedicated_time = models.DurationField(
+        help_text=_("Time to be spent on this Queue in total"),
+        blank=True, null=True
+    )
+
     def __str__(self):
         return "%s" % self.title
 
@@ -300,6 +334,17 @@ class Queue(models.Model):
         else:
             return u'%s <%s>' % (self.title, self.email_address)
     from_address = property(_from_address)
+
+    @property
+    def time_spent(self):
+        """Return back total time spent on the ticket. This is calculated value
+        based on total sum from all FollowUps
+        """
+        total = datetime.timedelta(0)
+        for val in self.ticket_set.all():
+            if val.time_spent:
+                total = total + val.time_spent
+        return total
 
     def prepare_permission_name(self):
         """Prepare internally the codename for the permission and store it in permission_name.
@@ -497,6 +542,17 @@ class Ticket(models.Model):
         default=mk_secret,
     )
 
+    @property
+    def time_spent(self):
+        """Return back total time spent on the ticket. This is calculated value
+        based on total sum from all FollowUps
+        """
+        total = datetime.timedelta(0)
+        for val in self.followup_set.all():
+            if val.time_spent:
+                total = total + val.time_spent
+        return total
+
     def send(self, roles, dont_send_to=None, **kwargs):
         """
         Send notifications to everyone interested in this ticket.
@@ -689,6 +745,9 @@ class Ticket(models.Model):
         queue = '-'.join(parts[0:-1])
         return queue, parts[-1]
 
+    def get_markdown(self):
+        return get_markdown(self.description)
+
 
 class FollowUpManager(models.Manager):
 
@@ -740,8 +799,10 @@ class FollowUp(models.Model):
         _('Public'),
         blank=True,
         default=False,
-        help_text=_('Public tickets are viewable by the submitter and all '
-                    'staff, but non-public tickets can only be seen by staff.'),
+        help_text=_(
+            'Public tickets are viewable by the submitter and all '
+            'staff, but non-public tickets can only be seen by staff.'
+        ),
     )
 
     user = models.ForeignKey(
@@ -771,6 +832,11 @@ class FollowUp(models.Model):
 
     objects = FollowUpManager()
 
+    time_spent = models.DurationField(
+        help_text=_("Time spent on this follow up"),
+        blank=True, null=True
+    )
+
     class Meta:
         ordering = ('date',)
         verbose_name = _('Follow-up')
@@ -787,6 +853,9 @@ class FollowUp(models.Model):
         t.modified = timezone.now()
         t.save()
         super(FollowUp, self).save(*args, **kwargs)
+
+    def get_markdown(self):
+        return get_markdown(self.comment)
 
 
 class TicketChange(models.Model):
@@ -837,18 +906,8 @@ class TicketChange(models.Model):
 
 
 def attachment_path(instance, filename):
-    """
-    Provide a file path that will help prevent files being overwritten, by
-    putting attachments in a folder off attachments for ticket/followup_id/.
-    """
-    import os
-    os.umask(0)
-    path = 'helpdesk/attachments/%s-%s/%s' % (instance.followup.ticket.ticket_for_url, instance.followup.ticket.secret_key, instance.followup.id)
-    att_path = os.path.join(settings.MEDIA_ROOT, path)
-    if settings.DEFAULT_FILE_STORAGE == "django.core.files.storage.FileSystemStorage":
-        if not os.path.exists(att_path):
-            os.makedirs(att_path, 0o777)
-    return os.path.join(path, filename)
+    """Just bridge"""
+    return instance.attachment_path(filename)
 
 
 class Attachment(models.Model):
@@ -856,12 +915,6 @@ class Attachment(models.Model):
     Represents a file attached to a follow-up. This could come from an e-mail
     attachment, or it could be uploaded via the web interface.
     """
-
-    followup = models.ForeignKey(
-        FollowUp,
-        on_delete=models.CASCADE,
-        verbose_name=_('Follow-up'),
-    )
 
     file = models.FileField(
         _('File'),
@@ -871,26 +924,102 @@ class Attachment(models.Model):
 
     filename = models.CharField(
         _('Filename'),
+        blank=True,
         max_length=1000,
     )
 
     mime_type = models.CharField(
         _('MIME Type'),
+        blank=True,
         max_length=255,
     )
 
     size = models.IntegerField(
         _('Size'),
+        blank=True,
         help_text=_('Size of this file in bytes'),
     )
 
     def __str__(self):
         return '%s' % self.filename
 
+    def save(self, *args, **kwargs):
+
+        if not self.size:
+            self.size = self.get_size()
+
+        if not self.filename:
+            self.filename = self.get_filename()
+
+        if not self.mime_type:
+            self.mime_type = \
+                mimetypes.guess_type(self.filename, strict=False)[0] or \
+                'application/octet-stream',
+
+        return super(Attachment, self).save(*args, **kwargs)
+
+    def get_filename(self):
+        return str(self.file)
+
+    def get_size(self):
+        return self.file.file.size
+
+    def attachment_path(self, filename):
+        """Provide a file path that will help prevent files being overwritten, by
+        putting attachments in a folder off attachments for ticket/followup_id/.
+        """
+        assert NotImplementedError(
+            "This method is to be implemented by Attachment classes"
+        )
+
     class Meta:
         ordering = ('filename',)
         verbose_name = _('Attachment')
         verbose_name_plural = _('Attachments')
+        abstract = True
+
+
+class FollowUpAttachment(Attachment):
+
+    followup = models.ForeignKey(
+        FollowUp,
+        on_delete=models.CASCADE,
+        verbose_name=_('Follow-up'),
+    )
+
+    def attachment_path(self, filename):
+
+        os.umask(0)
+        path = 'helpdesk/attachments/{ticket_for_url}-{secret_key}/{id_}'.format(
+            ticket_for_url=self.followup.ticket.ticket_for_url,
+            secret_key=self.followup.ticket.secret_key,
+            id_=self.followup.id)
+        att_path = os.path.join(settings.MEDIA_ROOT, path)
+        if settings.DEFAULT_FILE_STORAGE == "django.core.files.storage.FileSystemStorage":
+            if not os.path.exists(att_path):
+                os.makedirs(att_path, 0o777)
+        return os.path.join(path, filename)
+
+
+class KBIAttachment(Attachment):
+
+    kbitem = models.ForeignKey(
+        "KBItem",
+        on_delete=models.CASCADE,
+        verbose_name=_('Knowledge base item'),
+    )
+
+    def attachment_path(self, filename):
+
+        os.umask(0)
+        path = 'helpdesk/attachments/kb/{category}/{kbi}'.format(
+            category=self.kbitem.category,
+            kbi=self.kbitem.id)
+        att_path = os.path.join(settings.MEDIA_ROOT, path)
+        if settings.DEFAULT_FILE_STORAGE == "django.core.files.storage.FileSystemStorage":
+            if not os.path.exists(att_path):
+                os.makedirs(att_path, 0o777)
+        return os.path.join(path, filename)
 
 
 class PreSetReply(models.Model):
@@ -1127,6 +1256,9 @@ class KBItem(models.Model):
     def get_absolute_url(self):
         from django.urls import reverse
         return reverse('helpdesk:kb_item', args=(self.id,))
+
+    def get_markdown(self):
+        return get_markdown(self.answer)
 
 
 class SavedSearch(models.Model):

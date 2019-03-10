@@ -4,7 +4,7 @@ celery
 django-celery-beat
 email-reply-parser
 akismet
-django-markdown-deux
+markdown
 beautifulsoup4
 lxml
 simplejson

@@ -42,7 +42,7 @@ from helpdesk.lib import (
     process_attachments, queue_template_context,
 )
 from helpdesk.models import (
-    Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch,
+    Ticket, Queue, FollowUp, TicketChange, PreSetReply, FollowUpAttachment, SavedSearch,
     IgnoreEmail, TicketCC, TicketDependency, UserSettings,
 )
 from helpdesk import settings as helpdesk_settings
@@ -237,6 +237,7 @@ def followup_edit(request, ticket_id, followup_id):
             'comment': escape(followup.comment),
             'public': followup.public,
             'new_status': followup.new_status,
+            'time_spent': followup.time_spent,
         })
 
         ticketcc_string, show_subscribe = \
@@ -256,15 +257,19 @@ def followup_edit(request, ticket_id, followup_id):
             comment = form.cleaned_data['comment']
             public = form.cleaned_data['public']
             new_status = form.cleaned_data['new_status']
+            time_spent = form.cleaned_data['time_spent']
             # will save previous date
             old_date = followup.date
-            new_followup = FollowUp(title=title, date=old_date, ticket=_ticket, comment=comment, public=public, new_status=new_status, )
+            new_followup = FollowUp(title=title, date=old_date, ticket=_ticket,
+                                    comment=comment, public=public,
+                                    new_status=new_status,
+                                    time_spent=time_spent)
             # keep old user if one did exist before.
             if followup.user:
                 new_followup.user = followup.user
             new_followup.save()
             # get list of old attachments & link them to new_followup
-            attachments = Attachment.objects.filter(followup=followup)
+            attachments = FolllowUpAttachment.objects.filter(followup=followup)
             for attachment in attachments:
                 attachment.followup = new_followup
                 attachment.save()
@@ -469,6 +474,11 @@ def update_ticket(request, ticket_id, public=False):
     due_date_year = int(request.POST.get('due_date_year', 0))
     due_date_month = int(request.POST.get('due_date_month', 0))
     due_date_day = int(request.POST.get('due_date_day', 0))
+    if request.POST.get("time_spent"):
+        (hours, minutes) = [int(f) for f in request.POST.get("time_spent").split(":")]
+        time_spent = timedelta(hours=hours, minutes=minutes)
+    else:
+        time_spent = None
     # NOTE: jQuery's default for dates is mm/dd/yy
     # very US-centric but for now that's the only format supported
     # until we clean up code to internationalize a little more
@@ -523,7 +533,8 @@ def update_ticket(request, ticket_id, public=False):
     if owner is -1 and ticket.assigned_to:
         owner = ticket.assigned_to.id
 
-    f = FollowUp(ticket=ticket, date=timezone.now(), comment=comment)
+    f = FollowUp(ticket=ticket, date=timezone.now(), comment=comment,
+                 time_spent=time_spent)
 
     if is_helpdesk_staff(request.user):
         f.user = request.user
@@ -1161,6 +1172,8 @@ def report_index(request):
             'open': queue.ticket_set.filter(status__in=[1, 2]).count(),
             'resolved': queue.ticket_set.filter(status=3).count(),
             'closed': queue.ticket_set.filter(status=4).count(),
+            'time_spent': queue.time_spent,
+            'dedicated_time': queue.dedicated_time
         }
         dash_tickets.append(dash_ticket)
 
@@ -1568,7 +1581,7 @@ def attachment_del(request, ticket_id, attachment_id):
     if not _is_my_ticket(request.user, ticket):
         raise PermissionDenied()
 
-    attachment = get_object_or_404(Attachment, id=attachment_id)
+    attachment = get_object_or_404(FolllowUpAttachment, id=attachment_id)
     if request.method == 'POST':
         attachment.delete()
         return HttpResponseRedirect(reverse('helpdesk:view', args=[ticket_id]))

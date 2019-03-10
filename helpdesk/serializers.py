@@ -18,11 +18,14 @@ class TicketSerializer(serializers.ModelSerializer):
     due_date = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
     row_class = serializers.SerializerMethodField()
+    time_spent = serializers.SerializerMethodField()
 
     class Meta:
         model = Ticket
         # fields = '__all__'
-        fields = ('ticket', 'id', 'priority', 'title', 'queue', 'status', 'created', 'due_date', 'assigned_to', 'row_class')
+        fields = ('ticket', 'id', 'priority', 'title', 'queue', 'status',
+                  'created', 'due_date', 'assigned_to', 'row_class',
+                  'time_spent')
 
     def get_ticket(self, obj):
         return (str(obj.id) + " " + obj.ticket)
@@ -44,6 +47,9 @@ class TicketSerializer(serializers.ModelSerializer):
                 return (obj.assigned_to.email)
         else:
             return ("None")
+
+    def get_time_spent(self, obj):
+        return str(obj.time_spent)
 
     def get_row_class(self, obj):
         return (obj.get_priority_css_class)

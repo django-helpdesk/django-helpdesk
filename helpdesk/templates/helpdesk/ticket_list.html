@@ -222,6 +222,7 @@
                         <th>{% trans "Created" %}</th>
                         <th>{% trans "Due Date" %}</th>
                         <th>{% trans "Owner" %}</th>
+                        <th>{% trans "Time Spent" %}</th>
                     </tr>
                 </thead>
                 {% if not server_side %}
@@ -339,6 +340,7 @@
                   {"data": "created"},
                   {"data": "due_date"},
                   {"data": "assigned_to"},
+                  {"data": "time_spent"},
                 ]
             });
           })

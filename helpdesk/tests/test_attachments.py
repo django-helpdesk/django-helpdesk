@@ -58,7 +58,7 @@ class AttachmentIntegrationTests(TestCase):
         self.assertContains(response, test_file.name)
 
         # Ensure attachment is available with correct content
-        att = models.Attachment.objects.get(followup__ticket=response.context['ticket'])
+        att = models.FollowUpAttachment.objects.get(followup__ticket=response.context['ticket'])
         with open(os.path.join(MEDIA_DIR, att.file.name)) as file_on_disk:
             disk_content = file_on_disk.read()
         self.assertEqual(disk_content, 'attached file content')
@@ -76,7 +76,7 @@ class AttachmentIntegrationTests(TestCase):
         self.assertContains(response, test_file.name)
 
         # Ensure attachment is available with correct content
-        att = models.Attachment.objects.get(followup__ticket=response.context['ticket'])
+        att = models.FollowUpAttachment.objects.get(followup__ticket=response.context['ticket'])
         with open(os.path.join(MEDIA_DIR, att.file.name)) as file_on_disk:
             disk_content = smart_text(file_on_disk.read(), 'utf-8')
         self.assertEqual(disk_content, 'โจ')
@@ -96,7 +96,7 @@ class AttachmentUnitTests(TestCase):
         self.test_file = SimpleUploadedFile.from_dict(self.file_attrs)
         self.follow_up = models.FollowUp(ticket=models.Ticket(queue=models.Queue()))
 
-    @mock.patch('helpdesk.lib.Attachment', autospec=True)
+    @mock.patch('helpdesk.lib.FollowUpAttachment', autospec=True)
     def test_unicode_attachment_filename(self, mock_att_save, mock_queue_save, mock_ticket_save, mock_follow_up_save):
         """ check utf-8 data is parsed correcltly """
         filename, fileobj = lib.process_attachments(self.follow_up, [self.test_file])[0]
@@ -109,7 +109,22 @@ class AttachmentUnitTests(TestCase):
         )
         self.assertEqual(filename, self.file_attrs['filename'])
 
-    @mock.patch.object(lib.Attachment, 'save', autospec=True)
+    @mock.patch('helpdesk.lib.FollowUpAttachment', autospec=True)
+    def xest_autofill_(self, mock_att_save, mock_queue_save, mock_ticket_save, mock_follow_up_save):
+        """ check utf-8 data is parsed correcltly """
+        filename, fileobj = lib.process_attachments(self.follow_up, [self.test_file])[0]
+        obj = mock_att_save.assert_called_with(
+            file=self.test_file,
+            filename=None,
+            mime_type=None,
+            size=None,
+            followup=self.follow_up
+        )
+        self.assertEqual(obj.filename, self.file_attrs['filename'])
+        self.assertEqual(obj.size, len(self.file_attrs['content']))
+        self.assertEqual(obj.mime_type, self.file_attrs['content-type'])
+
+    @mock.patch.object(lib.FollowUpAttachment, 'save', autospec=True)
     @override_settings(MEDIA_ROOT=MEDIA_DIR)
     def test_unicode_filename_to_filesystem(self, mock_att_save, mock_queue_save, mock_ticket_save, mock_follow_up_save):
         """ don't mock saving to filesystem to test file renames caused by storage layer """
@@ -118,7 +133,7 @@ class AttachmentUnitTests(TestCase):
         attachment_obj = mock_att_save.call_args[0][0]
 
         mock_att_save.assert_called_once_with(attachment_obj)
-        self.assertIsInstance(attachment_obj, models.Attachment)
+        self.assertIsInstance(attachment_obj, models.FollowUpAttachment)
         self.assertEqual(attachment_obj.filename, self.file_attrs['filename'])
 
 

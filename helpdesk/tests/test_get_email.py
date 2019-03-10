@@ -5,7 +5,7 @@ from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 
-from helpdesk.models import Queue, Ticket, TicketCC, FollowUp, Attachment
+from helpdesk.models import Queue, Ticket, TicketCC, FollowUp, FollowUpAttachment
 import helpdesk.email
 
 import itertools
@@ -53,8 +53,36 @@ class GetEmailCommonTests(TestCase):
         with open(os.path.join(THIS_DIR, "test_files/blank-body-with-attachment.eml")) as fd:
             test_email = fd.read()
         ticket = helpdesk.email.object_from_message(test_email, self.queue_public, self.logger)
-        self.assertEqual(ticket.title, "Attachment without body")
+        self.assertEqual(ticket.title, "FollowUpAttachment without body")
         self.assertEqual(ticket.description, "")
+
+    def test_email_with_quoted_printable_body(self):
+        """
+        Tests that emails with quoted-printable bodies work.
+        """
+        with open(os.path.join(THIS_DIR, "test_files/quoted_printable.eml")) as fd:
+            test_email = fd.read()
+        ticket = helpdesk.email.object_from_message(test_email, self.queue_public, self.logger)
+        self.assertEqual(ticket.title, "Český test")
+        self.assertEqual(ticket.description, "Tohle je test českých písmen odeslaných z gmailu.")
+        followups = FollowUp.objects.filter(ticket=ticket)
+        self.assertEqual(len(followups), 1)
+        followup = followups[0]
+        attachments = FollowUpAttachment.objects.filter(followup=followup)
+        self.assertEqual(len(attachments), 1)
+        attachment = attachments[0]
+        self.assertEqual(attachment.file.read().decode("utf-8"), '<div dir="ltr">Tohle je test českých písmen odeslaných z gmailu.</div>\n')
+
+    def test_email_with_8bit_encoding_and_utf_8(self):
+        """
+        Tests that emails with 8bit transfer encoding and utf-8 charset
+        https://github.com/django-helpdesk/django-helpdesk/issues/732
+        """
+        with open(os.path.join(THIS_DIR, "test_files/all-special-chars.eml")) as fd:
+            test_email = fd.read()
+        ticket = helpdesk.email.object_from_message(test_email, self.queue_public, self.logger)
+        self.assertEqual(ticket.title, "Testovácí email")
+        self.assertEqual(ticket.description, "íářčšáíéřášč")
 
 
 class GetEmailParametricTemplate(object):
@@ -346,7 +374,7 @@ class GetEmailParametricTemplate(object):
             # HTML MIME part should be attached to follow up
             followup1 = get_object_or_404(FollowUp, pk=1)
             self.assertEqual(followup1.ticket.id, 1)
-            attach1 = get_object_or_404(Attachment, pk=1)
+            attach1 = get_object_or_404(FollowUpAttachment, pk=1)
             self.assertEqual(attach1.followup.id, 1)
             self.assertEqual(attach1.filename, 'email_html_body.html')
             cc0 = get_object_or_404(TicketCC, pk=1)
@@ -365,7 +393,7 @@ class GetEmailParametricTemplate(object):
             # HTML MIME part should be attached to follow up
             followup2 = get_object_or_404(FollowUp, pk=2)
             self.assertEqual(followup2.ticket.id, 2)
-            attach2 = get_object_or_404(Attachment, pk=2)
+            attach2 = get_object_or_404(FollowUpAttachment, pk=2)
             self.assertEqual(attach2.followup.id, 2)
             self.assertEqual(attach2.filename, 'email_html_body.html')
 
@@ -432,7 +460,7 @@ class GetEmailParametricTemplate(object):
             # MIME part should be attached to follow up
             followup1 = get_object_or_404(FollowUp, pk=1)
             self.assertEqual(followup1.ticket.id, 1)
-            attach1 = get_object_or_404(Attachment, pk=1)
+            attach1 = get_object_or_404(FollowUpAttachment, pk=1)
             self.assertEqual(attach1.followup.id, 1)
             self.assertEqual(attach1.filename, 'signature.asc')
             self.assertEqual(attach1.file.read(), b"""-----BEGIN PGP SIGNATURE-----

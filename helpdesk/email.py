@@ -481,8 +481,9 @@ def object_from_message(message, queue, logger):
                     body.encode('utf-8')
                 logger.debug("Discovered plain text MIME part")
             else:
+                payload = encoding.smart_bytes(part.get_payload(decode=True))
                 files.append(
-                    SimpleUploadedFile(_("email_html_body.html"), encoding.smart_bytes(part.get_payload()), 'text/html')
+                    SimpleUploadedFile(_("email_html_body.html"), payload, 'text/html')
                 )
                 logger.debug("Discovered HTML MIME part")
         else:
