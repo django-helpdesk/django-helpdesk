@@ -41,7 +41,7 @@ resides in the `demo/` top-level folder.
 It's likely that you can start up a demo project server by running
 only the command::
 
-    sudo make rundemo
+    make rundemo
 
 then pointing your web browser at `localhost:8080`.
 
