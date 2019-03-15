@@ -2,6 +2,7 @@
 from django.urls import reverse
 from django.test import TestCase
 
+from helpdesk.models import KBCategory
 from helpdesk.tests.helpers import get_staff_user, reload_urlconf
 
 
@@ -36,3 +37,11 @@ class TestKBDisabled(TestCase):
                 raise
         else:
             self.assertEqual(response.status_code, 200)
+
+    def test_public_homepage_with_kb_category(self):
+        KBCategory.objects.create(title="KB Cat 1",
+                                  slug="kbcat1",
+                                  description="Some category of KB info")
+        response = self.client.get(reverse('helpdesk:home'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'helpdesk/public_homepage.html')

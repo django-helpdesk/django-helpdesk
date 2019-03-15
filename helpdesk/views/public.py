@@ -87,7 +87,10 @@ def homepage(request):
         form.fields['queue'].choices = [('', '--------')] + [
             (q.id, q.title) for q in Queue.objects.filter(allow_public_submission=True)]
 
-    knowledgebase_categories = KBCategory.objects.all()
+    knowledgebase_categories = None
+
+    if helpdesk_settings.HELPDESK_KB_ENABLED:
+        knowledgebase_categories = KBCategory.objects.all()
 
     return render(request, 'helpdesk/public_homepage.html', {
         'form': form,
