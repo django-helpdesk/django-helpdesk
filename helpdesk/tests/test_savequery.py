@@ -2,7 +2,7 @@
 from django.urls import reverse
 from django.test import TestCase
 from helpdesk.models import Queue
-from helpdesk.tests.helpers import get_staff_user
+from helpdesk.tests.helpers import get_user
 
 
 class TestSavingSharedQuery(TestCase):
@@ -14,7 +14,7 @@ class TestSavingSharedQuery(TestCase):
     def test_cansavequery(self):
         """Can a query be saved"""
         url = reverse('helpdesk:savequery')
-        self.client.login(username=get_staff_user().get_username(),
+        self.client.login(username=get_user(is_staff=True).get_username(),
                           password='password')
         response = self.client.post(
             url,
