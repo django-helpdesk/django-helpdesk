@@ -5,12 +5,18 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 
-def get_staff_user(username='helpdesk.staff', password='password'):
+def get_user(username='helpdesk.staff',
+             password='password',
+             is_staff=False,
+             is_superuser=False):
     try:
         user = User.objects.get(username=username)
     except User.DoesNotExist:
-        user = User.objects.create_user(username=username, password=password, email='staff@example.com')
-        user.is_staff = True
+        user = User.objects.create_user(username=username,
+                                        password=password,
+                                        email='%s@example.com' % username)
+        user.is_staff = is_staff
+        user.is_superuser = is_superuser
         user.save()
     else:
         user.set_password(password)

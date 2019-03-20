@@ -3,7 +3,7 @@ from django.urls import reverse
 from django.test import TestCase
 
 from helpdesk.models import KBCategory
-from helpdesk.tests.helpers import get_staff_user, reload_urlconf
+from helpdesk.tests.helpers import get_user, reload_urlconf
 
 
 class TestKBDisabled(TestCase):
@@ -26,7 +26,7 @@ class TestKBDisabled(TestCase):
         """Test proper rendering of navigation.html by accessing the dashboard"""
         from django.urls import NoReverseMatch
 
-        self.client.login(username=get_staff_user().get_username(), password='password')
+        self.client.login(username=get_user(is_staff=True).get_username(), password='password')
         self.assertRaises(NoReverseMatch, reverse, 'helpdesk:kb_index')
         try:
             response = self.client.get(reverse('helpdesk:dashboard'))
@@ -45,3 +45,48 @@ class TestKBDisabled(TestCase):
         response = self.client.get(reverse('helpdesk:home'))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'helpdesk/public_homepage.html')
+
+
+class TestDecorator(TestCase):
+
+    def test_staff_member_restrictions(self):
+        user = get_user(username='helpdesk.user',
+                        password='password')
+
+        self.client.login(username=user.get_username(),
+                          password='password')
+        response = self.client.get(reverse('helpdesk:list'))
+        self.assertEqual(response.status_code, 403)
+
+    def test_staff_member_access(self):
+        user = get_user(username='helpdesk.user',
+                        password='password',
+                        is_staff=True)
+
+        self.client.login(username=user.get_username(),
+                          password='password')
+        response = self.client.get(reverse('helpdesk:list'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'helpdesk/ticket_list.html')
+
+    def test_superuser_member_restrictions(self):
+        user = get_user(username='helpdesk.superuser',
+                        password='password',
+                        is_staff=True)
+
+        self.client.login(username=user.get_username(),
+                          password='password')
+        response = self.client.get(reverse('helpdesk:email_ignore'))
+        self.assertEqual(response.status_code, 403)
+
+    def test_superuser_member_access(self):
+        user = get_user(username='helpdesk.superuser',
+                        password='password',
+                        is_staff=True,
+                        is_superuser=True)
+
+        self.client.login(username=user.get_username(),
+                          password='password')
+        response = self.client.get(reverse('helpdesk:email_ignore'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'helpdesk/email_ignore_list.html')
