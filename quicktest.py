@@ -110,6 +110,8 @@ if __name__ == '__main__':
         usage="[args]",
         description="Run Django tests."
     )
-    parser.add_argument('tests', nargs='+', type=str)
+    parser.add_argument('tests', nargs="*", type=str)
     args = parser.parse_args()
+    if not args.tests:
+        args.tests = ['helpdesk']
     QuickDjangoTest(*args.tests)
