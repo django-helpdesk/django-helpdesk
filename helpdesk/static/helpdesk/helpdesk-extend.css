@@ -87,3 +87,11 @@ pre {
 	padding: 1em;
 	border: 1pt solid white;
 }
+
+table .tickettitle {
+  max-width: 250px;
+  font-weight: bold;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

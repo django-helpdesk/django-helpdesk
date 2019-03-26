@@ -19,6 +19,7 @@ class TicketSerializer(serializers.ModelSerializer):
     status = serializers.SerializerMethodField()
     row_class = serializers.SerializerMethodField()
     time_spent = serializers.SerializerMethodField()
+    queue = serializers.SerializerMethodField()
 
     class Meta:
         model = Ticket
@@ -26,6 +27,9 @@ class TicketSerializer(serializers.ModelSerializer):
         fields = ('ticket', 'id', 'priority', 'title', 'queue', 'status',
                   'created', 'due_date', 'assigned_to', 'row_class',
                   'time_spent')
+
+    def get_queue(self, obj):
+        return ({"title": obj.queue.title, "id": obj.queue.id})
 
     def get_ticket(self, obj):
         return (str(obj.id) + " " + obj.ticket)

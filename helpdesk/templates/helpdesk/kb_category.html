@@ -24,12 +24,13 @@
 {% cycle 'one' 'two' 'three' as itemnumperrow silent %}
 {% ifequal itemnumperrow 'one' %}<div class="card-deck">{% endifequal %}
 <div class="card">
-    <div class="card-body">
+      <div class="card-header">
         <h5 class="card-title">{{ item.title }}</h5>
+      </div>
+      <div class="card-body">
         <p class="card-text">{{ item.question }}</p>
         <p class="card-text">
-            <p>
-                {% blocktrans with item.get_absolute_url as url %}View <a href='{{ url }}'>Answer <i class="fa fa-arrow-right"></i></a>{% endblocktrans %}
+                {% blocktrans with item.get_absolute_url as url %}<a href='{{ url }}' class="btn btn-primary"> Go to answer <i class="fa fa-share"></i></a>{% endblocktrans %}
             </p>
             <div class="well well-sm">
                 <p>{% trans 'Rating' %}: {{ item.score }}</p>
