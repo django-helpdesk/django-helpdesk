@@ -71,7 +71,7 @@ class GetEmailCommonTests(TestCase):
         attachments = FollowUpAttachment.objects.filter(followup=followup)
         self.assertEqual(len(attachments), 1)
         attachment = attachments[0]
-        self.assertEqual(attachment.file.read().decode("utf-8"), '<div dir="ltr">Tohle je test českých písmen odeslaných z gmailu.</div>\n')
+        self.assertIn('<div dir="ltr">Tohle je test českých písmen odeslaných z gmailu.</div>\n', attachment.file.read().decode("utf-8"))
 
     def test_email_with_8bit_encoding_and_utf_8(self):
         """
