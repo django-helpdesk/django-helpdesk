@@ -471,9 +471,12 @@ def object_from_message(message, queue, logger):
 
         if part.get_content_maintype() == 'text' and name is None:
             if part.get_content_subtype() == 'plain':
-                body = EmailReplyParser.parse_reply(
-                    decodeUnknown(part.get_content_charset(), part.get_payload(decode=True))
-                )
+                body = part.get_payload(decode=True)
+                # https://github.com/django-helpdesk/django-helpdesk/issues/732
+                if part['Content-Transfer-Encoding'] == '8bit' and part.get_content_charset() == 'utf-8':
+                    body = body.decode('unicode_escape')
+                body = decodeUnknown(part.get_content_charset(), body)
+                body = EmailReplyParser.parse_reply(body)
                 # workaround to get unicode text out rather than escaped text
                 try:
                     body = body.encode('ascii').decode('unicode_escape')
