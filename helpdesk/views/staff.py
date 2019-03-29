@@ -269,7 +269,7 @@ def followup_edit(request, ticket_id, followup_id):
                 new_followup.user = followup.user
             new_followup.save()
             # get list of old attachments & link them to new_followup
-            attachments = FolllowUpAttachment.objects.filter(followup=followup)
+            attachments = FollowUpAttachment.objects.filter(followup=followup)
             for attachment in attachments:
                 attachment.followup = new_followup
                 attachment.save()
@@ -1581,7 +1581,7 @@ def attachment_del(request, ticket_id, attachment_id):
     if not _is_my_ticket(request.user, ticket):
         raise PermissionDenied()
 
-    attachment = get_object_or_404(FolllowUpAttachment, id=attachment_id)
+    attachment = get_object_or_404(FollowUpAttachment, id=attachment_id)
     if request.method == 'POST':
         attachment.delete()
         return HttpResponseRedirect(reverse('helpdesk:view', args=[ticket_id]))
