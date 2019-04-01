@@ -748,6 +748,10 @@ class Ticket(models.Model):
     def get_markdown(self):
         return get_markdown(self.description)
 
+    @property
+    def get_resolution_markdown(self):
+        return get_markdown(self.resolution)
+
 
 class FollowUpManager(models.Manager):
 
