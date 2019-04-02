@@ -33,7 +33,7 @@
                         <th colspan='2'>{% trans "Resolution" %}{% ifequal ticket.get_status_display "Resolved" %} <a href='?close'><button type="button" class="btn btn-warning btn-sm">{% trans "Accept and Close" %}</button></a>{% endifequal %}</th>
                     </tr>
                     <tr>
-                        <td colspan='2'>{{ ticket.resolution|force_escape|urlizetrunc:50|linebreaksbr }}</td>
+                        <td colspan='2'>{{ ticket.get_resolution_markdown|urlizetrunc:50|linebreaksbr }}</td>
                     </tr>{% endif %}
                     <tr>
                         <th>{% trans "Due Date" %}</th>

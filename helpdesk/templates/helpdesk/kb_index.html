@@ -18,10 +18,12 @@
 {% cycle 'one' 'two' 'three' as catnumperrow silent %}
 {% if catnumperrow == 'one' %}<div class="card-deck">{% endif %}
 <div class="card">
+    <div class="card-header">
+      <h5>{{ category.title }}</h5>
+    </div>
     <div class="card-body">
-        <h5 class="card-title">{{ category.title }}</h5>
         <p class="card-text">{{ category.description }}</p>
-        <p class="card-text"><small class="text-muted"><a href='{{ category.get_absolute_url }}'>{% trans 'View articles' %}<i class="fa fa-arrow-right"></i></a></small></p>
+        <p class="card-text"><small class="text-muted"><a class="btn btn-primary" href='{{ category.get_absolute_url }}'>{% trans 'View articles' %} <i class="fa fa-share"></i></a></small></p>
     </div>
 </div>
 {% if catnumperrow == 'three' %}</div>{% endif %}
