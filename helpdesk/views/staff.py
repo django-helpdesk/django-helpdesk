@@ -1012,7 +1012,8 @@ def datatables_ticket_list(request):
     serializers.py. The serializers and this view use django-rest_framework methods
     """
     try:
-        model_object = query_tickets_by_args(cache.get('ticket_qs'), '-date_created', **request.query_params)
+        objects = cache.get('ticket_qs')
+        model_object = query_tickets_by_args(objects, '-date_created', **request.query_params)
         serializer = TicketSerializer(model_object['items'], many=True)
         result = dict()
         result['data'] = serializer.data
