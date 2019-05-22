@@ -74,4 +74,79 @@
 {% endfor %}
 {% endif %}
 
+<form method='post' action="{% url 'helpdesk:update' ticket.id %}" enctype='multipart/form-data'>
+    <input type="hidden" name="key" value="{{ key }}" />
+    <input type="hidden" name="mail" value="{{ mail }}" />
+
+<fieldset>
+    <dl>
+        {% if preset_replies %}
+        <dt><label for='id_preset'>{% trans "Use a Pre-set Reply" %}</label> <span class='form_optional'>{% trans "(Optional)" %}</span></dt>
+        <dd><select name='preset' id='id_preset'><option value=''>------</option>{% for preset in preset_replies %}<option value='{{ preset.id }}'>{{ preset.name }}</option>{% endfor %}</select></dd>
+        <dd class='form_help_text'>{% trans "Selecting a pre-set reply will over-write your comment below. You can then modify the pre-set reply to your liking before saving this update." %}</dd>
+        {% endif %}
+
+        <dt><label for='commentBox'>{% trans "Comment / Resolution" %}</label></dt>
+        <dd><textarea rows='8' cols='70' name='comment' id='commentBox'></textarea></dd>
+        <dd class='form_help_text'>{% trans "You can insert ticket and queue details in your message. For more information, see the <a href='../../help/context/'>context help page</a>." %}</dd>
+
+        {% if not ticket.can_be_resolved %}<dd>{% trans "This ticket cannot be resolved or closed until the tickets it depends on are resolved." %}</dd>{% endif %}
+        {% ifequal ticket.status 1 %}
+        <input type="hidden" name="new_status" value="{{ ticket.status }}" />
+        {% endifequal %}
+        {% ifequal ticket.status 2 %}
+        <dd><div class="form-group">
+            <label for='st_reopened' class='active radio-inline'><input type='radio' name='new_status' value='2' id='st_reopened' checked='checked'>{% trans "Reopened" %} &raquo;</label>
+            <label class="radio-inline" for='st_resolved'><input type='radio' name='new_status' value='3' id='st_resolved'{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}>{% trans "Resolved" %} &raquo;</label>
+            <label class="radio-inline" for='st_closed'><input type='radio' name='new_status' value='4' id='st_closed'{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}>{% trans "Closed" %} &raquo;</label>
+            <label class="radio-inline" for='st_duplicate'><input type='radio' name='new_status' value='5' id='st_duplicate'>{% trans "Duplicate" %}</label>
+        </div></dd>
+        {% endifequal %}
+        {% ifequal ticket.status 3 %}
+        <dd><div class="form-group">
+            <label for='st_reopened' class="radio-inline"><input type='radio' name='new_status' value='2' id='st_reopened'>{% trans "Reopened" %} &laquo;</label>
+            <label for='st_resolved' class='active radio-inline'><input type='radio' name='new_status' value='3' id='st_resolved' checked='checked'>{% trans "Resolved" %} &raquo;</label>
+            <label class="radio-inline" for='st_closed'><input type='radio' name='new_status' value='4' id='st_closed'>{% trans "Closed" %}</label>
+        </div></dd>
+        {% endifequal %}
+        {% ifequal ticket.status 4 %}
+        <dd><div class="form-group"><label for='st_reopened' class="radio-inline"><input type='radio' name='new_status' value='2' id='st_reopened'>{% trans "Reopened" %} &laquo;</label>
+        <label class="radio-inline" for='st_closed'><input type='radio' name='new_status' value='4' id='st_closed' checked='checked'>{% trans "Closed" %}</label></div></dd>
+        {% endifequal %}
+        {% ifequal ticket.status 5 %}
+        <dd><div class="form-group">
+            <label class="radio-inline" for='st_reopened'><input type='radio' name='new_status' value='2' id='st_reopened'>{% trans "Reopened" %} &laquo;</label>
+            <label class="radio-inline" for='st_duplicate'><input type='radio' name='new_status' value='5' id='st_duplicate' checked='checked'>{% trans "Duplicate" %}</label>
+        </div></dd>
+        {% endifequal %}
+
+        <input type='hidden' name='public' value='1'>
+
+    </dl>
+
+<p id='ShowFileUploadPara'><button class="btn btn-warning btn-sm"
+    id='ShowFileUpload' onclick="$('#FileUpload')[0].style.display='block';return false;" >{% trans "Attach File(s) &raquo;" %}</button></p>
+
+<div id='FileUpload' style='display: none;'>
+
+    <dl>
+        <dt><label for='id_file'>{% trans "Attach a File" %}</label></dt>
+        <dd>
+            <div class="add_file_fields_wrap">
+                <div><label class='btn btn-primary btn-sm btn-file'>
+                        Browse... <input type="file" name='attachment' id='file0' style='display: none;'/>
+                </label><span>&nbsp;</span><span id='selectedfilename0'>{% trans 'No files selected.' %}</span></div>
+            </div>
+        </dd>
+    </dl>
+
+</div>
+
+</fieldset>
+
+<button class="btn btn-primary btn-lg" type='submit'>{% trans "Update This Ticket" %}</button>
+
+{% csrf_token %}</form>
+
+
 {% endblock %}

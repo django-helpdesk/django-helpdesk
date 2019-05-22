@@ -451,15 +451,32 @@ def subscribe_staff_member_to_ticket(ticket, user, email=''):
 
 
 def update_ticket(request, ticket_id, public=False):
+
+    ticket = None
+
     if not (public or (
             request.user.is_authenticated and
             request.user.is_active and (
                 is_helpdesk_staff(request.user) or
                 helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE))):
-        return HttpResponseRedirect('%s?next=%s' %
-                                    (reverse('helpdesk:login'), request.path))
 
-    ticket = get_object_or_404(Ticket, id=ticket_id)
+        key = request.POST.get('key')
+        email = request.POST.get('mail')
+
+        if key and email:
+            ticket = Ticket.objects.get(
+                id=ticket_id,
+                submitter_email__iexact=email,
+                secret_key__iexact=key
+            )
+
+        if not ticket:
+            return HttpResponseRedirect(
+                '%s?next=%s' % (reverse('helpdesk:login'), request.path)
+            )
+
+    if not ticket:
+        ticket = get_object_or_404(Ticket, id=ticket_id)
 
     date_re = re.compile(
         r'(?P<month>\d{1,2})/(?P<day>\d{1,2})/(?P<year>\d{4})$'

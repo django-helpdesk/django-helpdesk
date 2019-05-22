@@ -181,6 +181,8 @@ def view_ticket(request):
         redirect_url = reverse('helpdesk:view', args=[ticket_id])
 
     return render(request, 'helpdesk/public_view_ticket.html', {
+        'key': key,
+        'mail': email,
         'ticket': ticket,
         'helpdesk_settings': helpdesk_settings,
         'next': redirect_url,
