@@ -93,6 +93,22 @@
                         <th>{% trans "Total time spent" %}</th>
                         <td>{{ ticket.time_spent }}</td>
                     </tr>
+                    <tr>
+                        <th>{% trans "Attachments" %}</th>
+                        <td>
+                            <ul>
+                            {% for followup in ticket.followup_set.all %}
+                            {% for attachment in followup.followupattachment_set.all %}
+                            <li><a href='{{ attachment.file.url }}'>{{ attachment.filename }}</a> ({{ attachment.mime_type }}, {{ attachment.size|filesizeformat }})
+                            {% if followup.user and request.user == followup.user %}
+                            <a href='{% url 'helpdesk:attachment_del' ticket.id attachment.id %}'><button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i>&nbsp;{% trans 'Delete' %}</button></a>
+                            {% endif %}
+                            </li>
+                            {% endfor %}
+                            {% endfor %}
+                            </ul>
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         </div>
