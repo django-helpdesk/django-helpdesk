@@ -56,7 +56,7 @@
                             <li>{% blocktrans with change.field as field and change.old_value as old_value and change.new_value as new_value %}Changed {{ field }} from {{ old_value }} to {{ new_value }}.{% endblocktrans %}</li>
                             {% if forloop.last %}</ul></div>{% endif %}
                         {% endfor %}
-                        {% for attachment in followup.attachment_set.all %}{% if forloop.first %}<hr><div class='attachments'><ul>{% endif %}
+                        {% for attachment in followup.followupattachment_set.all %}{% if forloop.first %}<hr><div class='attachments'><ul>{% endif %}
                             <li><a href='{{ attachment.file.url }}'>{{ attachment.filename }}</a> ({{ attachment.mime_type }}, {{ attachment.size|filesizeformat }})
                             {% if followup.user and request.user == followup.user %}
                             <a href='{% url 'helpdesk:attachment_del' ticket.id attachment.id %}'><button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i>&nbsp;{% trans 'Delete' %}</button></a>
