@@ -288,7 +288,6 @@ class TicketForm(AbstractTicketForm):
         self.fields['assigned_to'].choices = [('', '--------')] + [(u.id, u.get_username()) for u in assignable_users]
         self._add_form_custom_fields()
 
-
     def save(self, user=None):
         """
         Writes and returns a Ticket() object
