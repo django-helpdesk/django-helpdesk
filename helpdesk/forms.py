@@ -166,6 +166,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
     due_date = forms.DateTimeField(
         widget=forms.TextInput(attrs={'class': 'form-control'}),
         required=False,
+        input_formats=['%d/%m/%Y', '%m/%d/%Y', "%d.%m.%Y", ],
         label=_('Due on'),
     )
 
@@ -286,6 +287,7 @@ class TicketForm(AbstractTicketForm):
             assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
         self.fields['assigned_to'].choices = [('', '--------')] + [(u.id, u.get_username()) for u in assignable_users]
         self._add_form_custom_fields()
+
 
     def save(self, user=None):
         """
