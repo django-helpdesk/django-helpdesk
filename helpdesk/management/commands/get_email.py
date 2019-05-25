@@ -556,7 +556,6 @@ def ticket_from_message(message, queue, logger):
                     sender=queue.from_address,
                     fail_silently=True,
                 )
-        
 
     return t
 
