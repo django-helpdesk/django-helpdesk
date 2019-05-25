@@ -78,8 +78,8 @@ readme:
 #: demo - Setup demo project using Python3.
 .PHONY: demo
 demo:
-	$(PIP) install -e .
-	$(PIP) install -e demo
+	$(PIP) install -e . --user
+	$(PIP) install -e demo --user
 	demodesk migrate --noinput
 	# Create superuser; user will be prompted to manually set a password
 	# When you get a prompt, enter a password of your choosing.

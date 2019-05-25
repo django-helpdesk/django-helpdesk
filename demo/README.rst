@@ -26,7 +26,7 @@ Ideally, you'd use a virtualenv instead
 To use your system directory, from the top-level
 django-helpdesk directory, simply run:
 
-    sudo make rundemo
+    make rundemo
 
 Once the console gives a prompt that the HTTP
 server is listening, open your web browser

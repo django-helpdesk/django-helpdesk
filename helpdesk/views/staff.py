@@ -13,7 +13,6 @@ from django.contrib.auth.decorators import user_passes_test
 from django.contrib.contenttypes.models import ContentType
 from django.urls import reverse, reverse_lazy
 from django.core.exceptions import ValidationError, PermissionDenied
-from django.db import connection
 from django.db.models import Q
 from django.http import HttpResponseRedirect, Http404, HttpResponse
 from django.shortcuts import render, get_object_or_404
@@ -37,6 +36,7 @@ from helpdesk.forms import (
     TicketForm, UserSettingsForm, EmailIgnoreForm, EditTicketForm, TicketCCForm,
     TicketCCEmailForm, TicketCCUserForm, EditFollowUpForm, TicketDependencyForm
 )
+from helpdesk.decorators import staff_member_required, superuser_required
 from helpdesk.lib import (
     query_to_dict, apply_query, safe_template_context,
     process_attachments, queue_template_context,
@@ -67,8 +67,7 @@ else:
         lambda u: u.is_authenticated and u.is_active and u.is_staff)
 
 
-superuser_required = user_passes_test(
-    lambda u: u.is_authenticated and u.is_active and u.is_superuser)
+User = get_user_model()
 
 
 def _get_queue_choices(queues):
@@ -378,9 +377,6 @@ def view_ticket(request, ticket_id):
         'ticketcc_string': ticketcc_string,
         'SHOW_SUBSCRIBE': show_subscribe,
     })
-
-
-view_ticket = staff_member_required(view_ticket)
 
 
 def return_ticketccstring_and_show_subscribe(user, ticket):
@@ -1607,9 +1603,6 @@ def attachment_del(request, ticket_id, attachment_id):
         'attachment': attachment,
         'filename': attachment.filename,
     })
-
-
-attachment_del = staff_member_required(attachment_del)
 
 
 def calc_average_nbr_days_until_ticket_resolved(Tickets):
