@@ -49,7 +49,7 @@
                             <p>{{ followup.get_markdown|urlizetrunc:50|num_to_link|linebreaksbr }}</p>
                         {% endif %}
                         {% if followup.time_spent %}
-                        <small>{% trans "Time spent" %}: {{ followup.time_spent }}</small></p>
+                        <small>{% trans "Time spent" %}: {{ followup.time_spent_formated }}</small></p>
                         {% endif %}
                         {% for change in followup.ticketchange_set.all %}
                             {% if forloop.first %}<div class='changes'><ul>{% endif %}

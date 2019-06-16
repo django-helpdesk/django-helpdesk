@@ -291,3 +291,18 @@ def query_tickets_by_args(objects, order_by, **kwargs):
         'total': total,
         'draw': draw
     }
+
+
+def format_time_spent(time_spent):
+    """Format time_spent attribute to "[H]HHh:MMm" text string to be allign in
+    all graphical outputs
+    """
+
+    if time_spent:
+        time_spent = "{0:02d}h:{0:02d}m".format(
+            int(time_spent.total_seconds() // 3600),
+            int((time_spent.total_seconds() % 3600) / 60)
+        )
+    else:
+        time_spent = ""
+    return time_spent
