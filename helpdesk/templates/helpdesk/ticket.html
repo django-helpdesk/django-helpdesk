@@ -42,24 +42,21 @@
                 <div class="list-group-item list-group-item-action">
                     <div class="d-flex w-100 justify-content-between">
                         <h5 class="mb-1">{{ followup.title }}</h5>
-                        <small><i class="fas fa-clock"></i>&nbsp;<span class='byline text-info'>{% if followup.user %}by {{ followup.user }},{% endif %} <span title='{{ followup.date|date:"r" }}'>{{ followup.date|naturaltime }}</span>{% if not followup.public %} <span class='private'>({% trans "Private" %})</span>{% endif %}</span></small>
+                        <small><i class="fas fa-clock"></i>&nbsp;<span class='byline text-info'>{% if followup.user %}by {{ followup.user }},{% endif %} <span title='{{ followup.date|date:"r" }}'>{{ followup.date|naturaltime }}</span>{% if followup.time_spent %}, <span>{% trans "time spent" %}: {{ followup.time_spent_formated }}</span>{% endif %} {% if not followup.public %} <span class='private'>({% trans "Private" %})</span>{% endif %}</span></small>
                     </div>
                     <p class="mb-1">
                         {% if followup.comment %}
                             <p>{{ followup.get_markdown|urlizetrunc:50|num_to_link|linebreaksbr }}</p>
-                        {% endif %}
-                        {% if followup.time_spent %}
-                        <small>{% trans "Time spent" %}: {{ followup.time_spent_formated }}</small></p>
                         {% endif %}
                         {% for change in followup.ticketchange_set.all %}
                             {% if forloop.first %}<div class='changes'><ul>{% endif %}
                             <li>{% blocktrans with change.field as field and change.old_value as old_value and change.new_value as new_value %}Changed {{ field }} from {{ old_value }} to {{ new_value }}.{% endblocktrans %}</li>
                             {% if forloop.last %}</ul></div>{% endif %}
                         {% endfor %}
-                        {% for attachment in followup.followupattachment_set.all %}{% if forloop.first %}<hr><div class='attachments'><ul>{% endif %}
+                        {% for attachment in followup.followupattachment_set.all %}{% if forloop.first %}{% trans "Attachments" %}:<div class='attachments'><ul>{% endif %}
                             <li><a href='{{ attachment.file.url }}'>{{ attachment.filename }}</a> ({{ attachment.mime_type }}, {{ attachment.size|filesizeformat }})
                             {% if followup.user and request.user == followup.user %}
-                            <a href='{% url 'helpdesk:attachment_del' ticket.id attachment.id %}'><button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i>&nbsp;{% trans 'Delete' %}</button></a>
+                            <a href='{% url 'helpdesk:attachment_del' ticket.id attachment.id %}'><button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button></a>
                             {% endif %}
                             </li>
                             {% if forloop.last %}</ul></div>{% endif %}
@@ -71,11 +68,11 @@
                         <small>
                             {% if helpdesk_settings.HELPDESK_SHOW_EDIT_BUTTON_FOLLOW_UP %}
                                 {% if followup.user and request.user == followup.user and not followup.ticketchange_set.all %}
-                                    <a href="{% url 'helpdesk:followup_edit' ticket.id followup.id %}" class='followup-edit'><button type="button" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i>&nbsp;{% trans "Edit" %}</button></a>
+                                <a href="{% url 'helpdesk:followup_edit' ticket.id followup.id %}" class='followup-edit'><button type="button" class="btn btn-warning btn-sm float-right"><i class="fas fa-edit"></i></button></a>
                                 {% endif %}
                             {% endif %}
                             {% if user.is_superuser and helpdesk_settings.HELPDESK_SHOW_DELETE_BUTTON_SUPERUSER_FOLLOW_UP %}
-                                <a href="{% url 'helpdesk:followup_delete' ticket.id followup.id %}" class='followup-edit'><button type="button" class="btn btn-warning btn-sm"><i class="fas fa-trash"></i>&nbsp;{% trans "Delete" %}</button></a>
+                                <a href="{% url 'helpdesk:followup_delete' ticket.id followup.id %}" class='followup-edit'><button type="button" class="btn btn-warning btn-sm float-right"><i class="fas fa-trash"></i></button></a>
                             {% endif %}
                         </small>
                     {% endif %}{% endwith %}
@@ -208,7 +205,7 @@
 
 </fieldset>
 
-<button class="btn btn-primary btn-lg" type='submit'>{% trans "Update This Ticket" %}</button>
+<button class="btn btn-primary float-right" type='submit'>{% trans "Update This Ticket" %}</button>
 
 {% csrf_token %}</form>
 
