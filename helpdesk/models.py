@@ -666,7 +666,12 @@ class Ticket(models.Model):
             site = Site.objects.get_current()
         except ImproperlyConfigured:
             site = Site(domain='configure-django-sites.com')
-        return u"http://%s%s?ticket=%s&email=%s&key=%s" % (
+        if settings.HELPDESK_USE_HTTPS_IN_EMAIL_LINK:
+            protocol = 'https'
+        else:
+            protocol = 'http'
+        return u"%s://%s%s?ticket=%s&email=%s&key=%s" % (
+            protocol,
             site.domain,
             reverse('helpdesk:public_view'),
             self.ticket_for_url,
@@ -687,7 +692,12 @@ class Ticket(models.Model):
             site = Site.objects.get_current()
         except ImproperlyConfigured:
             site = Site(domain='configure-django-sites.com')
-        return u"http://%s%s" % (
+        if settings.HELPDESK_USE_HTTPS_IN_EMAIL_LINK:
+            protocol = 'https'
+        else:
+            protocol = 'http'
+        return u"%s://%s%s" % (
+            protocol,
             site.domain,
             reverse('helpdesk:view',
                     args=[self.id])
