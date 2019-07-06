@@ -1,0 +1,20 @@
+{% load i18n humanize %}
+<div class="form-row">
+    <div class="col col-sm-3">
+          <label for='id_date_from'>{% trans "Date (From)" %}</label>
+    </div>
+    <div class="col col-sm-3">
+          <input type='text' name='date_from' value='{{ query_params.filtering.created__gte }}' id='id_date_from' />
+    </div>
+    <div class="col col-sm-2">
+          <label for='id_date_to'>{% trans "Date (To)" %}</label>
+    </div>
+    <div class="col col-sm-3">
+          <input type='text' name='date_to' value='{{ query_params.filtering.created__lte }}' id='id_date_to' />
+    </div>
+  <div class="col col-sm-1">
+                        <button class='float-right filterBuilderRemove btn btn-danger btn-sm'><i class="fas fa-trash-alt"></i></button>
+    </div>
+
+                        <p class='filterHelp'>{% trans "Use YYYY-MM-DD date format, eg 2018-01-30" %}</p>
+</div>
