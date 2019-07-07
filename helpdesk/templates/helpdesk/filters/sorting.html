@@ -1,0 +1,39 @@
+{% load i18n humanize %}
+{% load static from staticfiles %}
+  <div class="form-row">
+    <div class="col col-sm-3">
+      <label for='id_sort' class="col-form-label">{% trans "Sorting" %}:</label>
+    </div>
+    <div class="col col-sm-3">
+            <select id='id_sortx' name='sortx' class="">
+                <option value='created'{% ifequal query_params.sorting "created"%} selected='selected'{% endifequal %}>
+                    {% trans "Created" %}
+                </option>
+                <option value='title'{% ifequal query_params.sorting "title"%} selected='selected'{% endifequal %}>
+                    {% trans "Title" %}
+                </option>
+                <option value='queue'{% ifequal query_params.sorting "queue"%} selected='selected'{% endifequal %}>
+                    {% trans "Queue" %}
+                </option>
+                <option value='status'{% ifequal query_params.sorting "status"%} selected='selected'{% endifequal %}>
+                    {% trans "Status" %}
+                </option>
+                <option value='priority'{% ifequal query_params.sorting "priority"%} selected='selected'{% endifequal %}>
+                    {% trans "Priority" %}
+                </option>
+                <option value='assigned_to'{% ifequal query_params.sorting "assigned_to"%} selected='selected'{% endifequal %}>
+                    {% trans "Owner" %}
+                </option>
+            </select>
+  </div>
+  <div class="col col-sm-2">
+    <label for='id_sortreverse' class="col-form-label">{% trans "Reverse" %}</label>
+  </div>
+  <div class="col col-sm-3">
+    <input type='checkbox' name='sortreverse' id='id_sortreverse'{% if query_params.sortreverse %} checked='checked'{% endif %} />
+  </div>
+  <div class="col col-sm-1">
+    <button class="filterBuilderRemove btn btn-danger btn-sm float-right"><i class="fas fa-trash-alt"></i></button>
+  </div>
+   <div class="form-row filterHelp">{% trans "Ordering applied to tickets" %}</div>
+</div>

@@ -31,6 +31,17 @@ import uuid
 from .templated_email import send_templated_mail
 
 
+def format_time_spent(time_spent):
+    if time_spent:
+        time_spent = "{0:02d}h:{0:02d}m".format(
+            int(time_spent.total_seconds() // (3600)),
+            int((time_spent.total_seconds() % 3600) / 60)
+        )
+    else:
+        time_spent = ""
+    return time_spent
+
+
 class EscapeHtml(Extension):
     def extendMarkdown(self, md, md_globals):
         del md.preprocessors['html_block']
@@ -346,6 +357,10 @@ class Queue(models.Model):
                 total = total + val.time_spent
         return total
 
+    @property
+    def time_spent_formated(self):
+        return format_time_spent(self.time_spent)
+
     def prepare_permission_name(self):
         """Prepare internally the codename for the permission and store it in permission_name.
         :return: The codename that can be used to create a new Permission object.
@@ -552,6 +567,10 @@ class Ticket(models.Model):
             if val.time_spent:
                 total = total + val.time_spent
         return total
+
+    @property
+    def time_spent_formated(self):
+        return format_time_spent(self.time_spent)
 
     def send(self, roles, dont_send_to=None, **kwargs):
         """
@@ -870,6 +889,10 @@ class FollowUp(models.Model):
 
     def get_markdown(self):
         return get_markdown(self.comment)
+
+    @property
+    def time_spent_formated(self):
+        return format_time_spent(self.time_spent)
 
 
 class TicketChange(models.Model):

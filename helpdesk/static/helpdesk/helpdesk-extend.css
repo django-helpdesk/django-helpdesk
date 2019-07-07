@@ -24,7 +24,6 @@ Bootstrap overrides
 }
 
 .thumbnail.filterBox {
-    display: none;
     float: left;
     border: solid #ccc 1px;
     padding: 10px;
@@ -33,9 +32,13 @@ Bootstrap overrides
     min-height: 200px;
 }
 
-.thumbnail.filterBoxShow {
+.filterBox {
+    display: none;
+}
+.filterBoxShow {
     display: block;
 }
+
 
 .filterBox label {
     clear: both;

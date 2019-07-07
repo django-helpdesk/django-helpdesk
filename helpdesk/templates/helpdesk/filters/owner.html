@@ -1,0 +1,21 @@
+{% load i18n humanize %}
+{% load static from staticfiles %}
+{% load in_list %}
+<div class="form-row">
+    <div class="col col-sm-3">
+        <label for='id_owners' class="col-form-label">{% trans "Owner(s)" %}:</label>
+    </div>
+    <div class="col col-sm-3">
+        <select id='id_owners' name='assigned_to' multiple='selected' size='5'>
+            {% for u in user_choices %}
+            <option value='{{ u.id }}'{% if u.id|in_list:query_params.filtering.assigned_to__id__in %} selected='selected'{% endif %}>
+                {{ u.get_username }}{% ifequal u user %} {% trans "(ME)" %}{% endifequal %}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+  <div class="col col-sm-6">
+    <button class="filterBuilderRemove btn btn-danger btn-sm float-right"><i class="fas fa-trash-alt"></i></button>
+  </div>
+  <div class='form-row filterHelp'>{% trans "Ctrl-Click to select multiple options" %}</div>
+</div>

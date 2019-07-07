@@ -39,7 +39,7 @@ from helpdesk.forms import (
 from helpdesk.decorators import staff_member_required, superuser_required
 from helpdesk.lib import (
     query_to_dict, apply_query, safe_template_context,
-    process_attachments, queue_template_context,
+    process_attachments, queue_template_context, format_time_spent
 )
 from helpdesk.models import (
     Ticket, Queue, FollowUp, TicketChange, PreSetReply, FollowUpAttachment, SavedSearch,
@@ -47,6 +47,7 @@ from helpdesk.models import (
 )
 from helpdesk import settings as helpdesk_settings
 from helpdesk.views.permissions import MustBeStaffMixin
+from ..lib import format_time_spent
 
 from rest_framework import viewsets, status
 from rest_framework.response import Response
@@ -236,7 +237,7 @@ def followup_edit(request, ticket_id, followup_id):
             'comment': escape(followup.comment),
             'public': followup.public,
             'new_status': followup.new_status,
-            'time_spent': followup.time_spent,
+            'time_spent': format_time_spent(followup.time_spent),
         })
 
         ticketcc_string, show_subscribe = \
@@ -908,6 +909,7 @@ def ticket_list(request):
         # show open/reopened/resolved (not closed) cases sorted by creation
         # date.
 
+        all_queues = Queue.objects.all()
         query_params = {
             'filtering': {'status__in': [1, 2, 3]},
             'sorting': 'created',
@@ -1186,8 +1188,8 @@ def report_index(request):
             'open': queue.ticket_set.filter(status__in=[1, 2]).count(),
             'resolved': queue.ticket_set.filter(status=3).count(),
             'closed': queue.ticket_set.filter(status=4).count(),
-            'time_spent': queue.time_spent,
-            'dedicated_time': queue.dedicated_time
+            'time_spent': format_time_spent(queue.time_spent),
+            'dedicated_time': format_time_spent(queue.dedicated_time)
         }
         dash_tickets.append(dash_ticket)
 

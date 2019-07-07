@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from .models import Ticket
+from .lib import format_time_spent
 
 from django.contrib.humanize.templatetags import humanize
 
@@ -53,7 +54,7 @@ class TicketSerializer(serializers.ModelSerializer):
             return ("None")
 
     def get_time_spent(self, obj):
-        return str(obj.time_spent)
+        return format_time_spent(obj.time_spent)
 
     def get_row_class(self, obj):
         return (obj.get_priority_css_class)
