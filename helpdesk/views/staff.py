@@ -410,8 +410,7 @@ def update_ticket(request, ticket_id, public=False):
             request.user.is_active and (
                 request.user.is_staff or
                 helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE))):
-        return HttpResponseRedirect('%s?next=%s' %
-                                    (reverse('helpdesk:login'), request.path))
+        raise Http404("Not logged in")
 
     ticket = get_object_or_404(Ticket, id=ticket_id)
 
