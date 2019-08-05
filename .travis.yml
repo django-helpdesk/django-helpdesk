@@ -1,13 +1,12 @@
 language: python
-dist: xenial # Python 3.7 requires xenial because of dependencies
+dist: bionic # use LTS 18.04
 
 python:
-    - "3.5"
     - "3.6"
     - "3.7"
 
 env:
-    - DJANGO=2.2
+    - DJANGO=2.2.4
 
 install:
     - pip install -q Django==$DJANGO

@@ -11,7 +11,7 @@ from django.core.management.base import BaseCommand
 from django.db.models import Q
 from django.utils.translation import ugettext as _
 from django.utils import encoding, timezone
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 
 from helpdesk import settings
 from helpdesk.lib import safe_template_context, process_attachments
@@ -40,6 +40,9 @@ from bs4 import BeautifulSoup
 from email_reply_parser import EmailReplyParser
 
 import logging
+
+# import User model, which may be a custom model
+User = get_user_model()
 
 
 STRIPPED_SUBJECT_STRINGS = [
