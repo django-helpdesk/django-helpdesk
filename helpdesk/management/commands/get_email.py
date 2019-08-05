@@ -31,6 +31,8 @@ from bs4 import BeautifulSoup
 
 from email_reply_parser import EmailReplyParser
 
+
+from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management.base import BaseCommand
@@ -41,9 +43,10 @@ from django.utils import encoding, six, timezone
 from helpdesk import settings
 from helpdesk.lib import send_templated_mail, safe_template_context, process_attachments
 from helpdesk.models import Queue, Ticket, TicketCC, FollowUp, IgnoreEmail
-from django.contrib.auth.models import User
 
 import logging
+
+User = get_user_model()
 
 
 STRIPPED_SUBJECT_STRINGS = [
