@@ -1,13 +1,15 @@
 language: python
+dist: bionic # use LTS 18.04
 
 python:
     - "2.7"
     - "3.4"
     - "3.5"
     - "3.6"
+    - "3.7"
 
 env:
-    - DJANGO=1.11.13
+    - DJANGO=1.11.23
 
 install:
     - pip install -q Django==$DJANGO
