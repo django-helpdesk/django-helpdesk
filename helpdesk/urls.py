@@ -13,7 +13,7 @@ from django.contrib.auth import views as auth_views
 from django.views.generic import TemplateView
 
 from helpdesk import settings as helpdesk_settings
-from helpdesk.views import feeds, staff, public, kb
+from helpdesk.views import feeds, staff, public, kb, login
 
 
 class DirectTemplateView(TemplateView):
@@ -185,8 +185,7 @@ urlpatterns += [
 
 urlpatterns += [
     url(r'^login/$',
-        auth_views.LoginView.as_view(
-            template_name='helpdesk/registration/login.html'),
+        login.login,
         name='login'),
 
     url(r'^logout/$',
