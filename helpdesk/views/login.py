@@ -5,7 +5,7 @@ from django.shortcuts import resolve_url
 
 
 default_login_view = auth_views.LoginView.as_view(
-        template_name='helpdesk/registration/login.html')
+    template_name='helpdesk/registration/login.html')
 
 
 def login(request):
