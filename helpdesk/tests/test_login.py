@@ -35,3 +35,11 @@ class TestLoginRedirect(TestCase):
         """Test that default login is used when LOGIN_URL is None"""
         response = self.client.get(reverse('helpdesk:login'))
         self.assertTemplateUsed(response, 'helpdesk/registration/login.html')
+
+    @override_settings(LOGIN_URL='admin:login', SITE_ID=1)
+    def test_custom_login_view_with_name(self):
+        """Test that LOGIN_URL can be a view name"""
+        response = self.client.get(reverse('helpdesk:login'))
+        home_url = reverse('helpdesk:home')
+        expected = reverse('admin:login') + "?next=" + home_url
+        self.assertRedirects(response, expected)
