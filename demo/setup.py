@@ -23,7 +23,8 @@ CLASSIFIERS = ['Development Status :: 4 - Beta',
                'Programming Language :: Python :: 3.6',
                'Programming Language :: Python :: 3.7',
                'Framework :: Django :: 2.0',
-               'Framework :: Django :: 2.1']
+               'Framework :: Django :: 2.1',
+               'Framework :: Django :: 2.2']
 KEYWORDS = []
 PACKAGES = ['demodesk']
 REQUIREMENTS = [

@@ -132,6 +132,7 @@ setup(
         "Framework :: Django",
         "Framework :: Django :: 2.0",
         "Framework :: Django :: 2.1",
+        'Framework :: Django :: 2.2',
         "Environment :: Web Environment",
         "Operating System :: OS Independent",
         "Intended Audience :: Customer Service",

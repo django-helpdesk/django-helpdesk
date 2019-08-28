@@ -87,7 +87,8 @@ def apply_query(queryset, params):
             Q(title__icontains=search) |
             Q(description__icontains=search) |
             Q(resolution__icontains=search) |
-            Q(submitter_email__icontains=search)
+            Q(submitter_email__icontains=search) |
+            Q(ticketcustomfieldvalue__value__icontains=search)
         )
 
         queryset = queryset.filter(qset)

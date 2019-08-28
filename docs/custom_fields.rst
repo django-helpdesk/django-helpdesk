@@ -5,4 +5,4 @@ django-helpdesk supports custom fields on the ``Ticket`` model. These fields are
 
 The demo at http://django-helpdesk-demo.herokuapp.com contains an example of each type of custom field, including a mix of mandatory and optional fields.
 
-Custom fields are relatively inefficient, and you cannot search by them. They can be useful for tracking extra information that your organisation needs but that isn't supported out of the box.
+Custom fields are relatively inefficient; you can search them, but this might degrade performance of your installation if you make use of custom fields. They can be useful for tracking extra information that your organisation needs but that isn't supported out of the box.

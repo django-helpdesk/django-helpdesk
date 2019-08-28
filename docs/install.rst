@@ -7,9 +7,9 @@ Installation
 Prerequisites
 -------------
 
-Before getting started, ensure your system meets the following dependencies:
+Before getting started, ensure your system meets the following recommended dependencies:
 
-* Python 3.5+
+* Python 3.6+
 * Django 2.x
   
 Ensure any extra Django modules you wish to use are compatible before continuing.
