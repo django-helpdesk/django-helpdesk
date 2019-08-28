@@ -7,21 +7,18 @@ Installation
 Prerequisites
 -------------
 
-Before getting started, ensure your system meets the following dependencies:
+Before getting started, ensure your system meets the following recommended dependencies:
 
-* Python 3.4+, or Python 2.7
-* Django 1.11.x (Django 2.0 support is coming in a future release; older
-  releases such as 1.8-1.10 *may* work, but are not guaranteed. Django's
-  deprecation policy suggests that any project that worked with 1.8 should
-  be able to upgrade to 1.11 without any problems)
+* Python 3.6+, or Python 2.7 (Python 3.4+ may also work but unsupported)
+* Django 1.11.x (Django 2.x should also work though, and recommended for new projects)
   
 Ensure any extra Django modules you wish to use are compatible before continuing.
 
 **NOTE**: Python 2.7 support is deprecated in both ``django-helpdesk`` and Django.
 Future releases of ``django-helpdesk`` may remove support for Python 2.7,
 and Django will no longer support Python 2.7 as of the Django 2.0 release.
-It is highly recommended to start new projects using Python 3.4+, or migrate
-existing projects to Python 3.4+.
+It is highly recommended to start new projects using Python 3.6+, or migrate
+existing projects to Python 3.6+.
 
 
 Getting The Code
