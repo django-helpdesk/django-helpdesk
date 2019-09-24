@@ -100,13 +100,10 @@ def send_templated_mail(template_name,
 
     if files:
         for filename, filefield in files:
-            mime = mimetypes.guess_type(filename)
-            if mime[0] is not None and mime[0] == "text/plain":
-                with open(filefield.path, 'r') as attachedfile:
-                    content = attachedfile.read()
-                    msg.attach(filename, content)
-            else:
-                msg.attach_file(filefield.path)
+            filefield.open('rb')
+            content = filefield.read()
+            msg.attach(filename, content)
+            filefield.close()
     logger.debug('Sending email to: {!r}'.format(recipients))
 
     try:
