@@ -6,6 +6,8 @@ django-helpdesk - A Django powered ticket tracker for small enterprise.
 views/staff.py - The bulk of the application - provides most business logic and
                  renders all staff-facing views.
 """
+from copy import deepcopy
+
 from django import VERSION as DJANGO_VERSION
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -840,6 +842,10 @@ def ticket_list(request):
         'keyword': None,
         'search_string': None,
     }
+    default_query_params = {
+        'filtering': {'status__in': [1, 2, 3]},
+        'sorting': 'created',
+    }
 
     from_saved_query = False
 
@@ -898,46 +904,25 @@ def ticket_list(request):
             # Query deserialization failed. (E.g. was a pickled query)
             return HttpResponseRedirect(reverse('helpdesk:list'))
 
-    elif not ('queue' in request.GET or
-              'assigned_to' in request.GET or
-              'status' in request.GET or
-              'q' in request.GET or
-              'sort' in request.GET or
-              'sortreverse' in request.GET):
-
-        # Fall-back if no querying is being done, force the list to only
-        # show open/reopened/resolved (not closed) cases sorted by creation
-        # date.
-
+    elif not {'queue', 'assigned_to', 'status', 'q', 'sort', 'sortreverse'}.intersection(request.GET):
+        # Fall-back if no querying is being done
         all_queues = Queue.objects.all()
-        query_params = {
-            'filtering': {'status__in': [1, 2, 3]},
-            'sorting': 'created',
-        }
+        query_params = deepcopy(default_query_params)
     else:
-        queues = request.GET.getlist('queue')
-        if queues:
-            try:
-                queues = [int(q) for q in queues]
-                query_params['filtering']['queue__id__in'] = queues
-            except ValueError:
-                pass
+        filter_in_params = [
+            ('queue', 'queue__id__in'),
+            ('assigned_to', 'assigned_to__id__in'),
+            ('status', 'status__in'),
+        ]
 
-        owners = request.GET.getlist('assigned_to')
-        if owners:
-            try:
-                owners = [int(u) for u in owners]
-                query_params['filtering']['assigned_to__id__in'] = owners
-            except ValueError:
-                pass
-
-        statuses = request.GET.getlist('status')
-        if statuses:
-            try:
-                statuses = [int(s) for s in statuses]
-                query_params['filtering']['status__in'] = statuses
-            except ValueError:
-                pass
+        for param, filter_command in filter_in_params:
+            patterns = request.GET.getlist(param)
+            if patterns:
+                try:
+                    pattern_pks = [int(pattern) for pattern in patterns]
+                    query_params['filtering'][filter_command] = pattern_pks
+                except ValueError:
+                    pass
 
         date_from = request.GET.get('date_from')
         if date_from:
@@ -969,11 +954,7 @@ def ticket_list(request):
         ticket_qs = apply_query(tickets, query_params)
     except ValidationError:
         # invalid parameters in query, return default query
-        query_params = {
-            'filtering': {'status__in': [1, 2, 3]},
-            'sorting': 'created',
-        }
-        ticket_qs = apply_query(tickets, query_params)
+        ticket_qs = apply_query(tickets, default_query_params)
 
     search_message = ''
     if 'query' in context and settings.DATABASES['default']['ENGINE'].endswith('sqlite'):
@@ -1001,7 +982,6 @@ def ticket_list(request):
 
     return render(request, 'helpdesk/ticket_list.html', dict(
         context,
-        tickets=ticket_qs,
         default_tickets_per_page=request.user.usersettings_helpdesk.tickets_per_page,
         user_choices=User.objects.filter(is_active=True, is_staff=True),
         queue_choices=user_queues,
