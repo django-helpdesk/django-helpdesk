@@ -24,7 +24,6 @@ from django.utils.html import escape
 from django import forms
 from django.utils import timezone
 from django.views.generic.edit import FormView, UpdateView
-# For datatables serverside
 from django.core.cache import cache
 
 from helpdesk.lib import query_tickets_by_args
@@ -972,13 +971,7 @@ def ticket_list(request):
 
     user_saved_queries = SavedSearch.objects.filter(Q(user=request.user) | Q(shared__exact=True))
 
-    # Serverside processing on datatables is optional. Set
-    # HELPDESK_USE_SERVERSIDE_PROCESSING to False in settings.py to disable
-    if helpdesk_settings.HELPDESK_USE_SERVERSIDE_PROCESSING:
-        cache.set('ticket_qs', ticket_qs)
-        context['server_side'] = True
-    else:
-        context['server_side'] = False
+    cache.set('ticket_qs', ticket_qs)
 
     return render(request, 'helpdesk/ticket_list.html', dict(
         context,
