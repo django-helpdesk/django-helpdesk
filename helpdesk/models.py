@@ -685,7 +685,7 @@ class Ticket(models.Model):
             site = Site.objects.get_current()
         except ImproperlyConfigured:
             site = Site(domain='configure-django-sites.com')
-        if settings.HELPDESK_USE_HTTPS_IN_EMAIL_LINK:
+        if helpdesk_settings.HELPDESK_USE_HTTPS_IN_EMAIL_LINK:
             protocol = 'https'
         else:
             protocol = 'http'
@@ -711,7 +711,7 @@ class Ticket(models.Model):
             site = Site.objects.get_current()
         except ImproperlyConfigured:
             site = Site(domain='configure-django-sites.com')
-        if settings.HELPDESK_USE_HTTPS_IN_EMAIL_LINK:
+        if helpdesk_settings.HELPDESK_USE_HTTPS_IN_EMAIL_LINK:
             protocol = 'https'
         else:
             protocol = 'http'
