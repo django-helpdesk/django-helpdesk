@@ -1,4 +1,5 @@
 from django.db.models import Q
+from django.core.cache import cache
 
 from model_utils import Choices
 
@@ -85,6 +86,18 @@ def apply_query(queryset, params):
         queryset = queryset.order_by(sorting)
 
     return queryset
+
+
+def get_query(query, huser):
+    # Prefilter the allowed tickets
+    objects = cache.get(huser.user.email + query)
+    if objects is not None:
+        return objects
+    tickets = huser.get_tickets_in_queues().select_related()
+    query_params = query_from_base64(query)
+    ticket_qs = apply_query(tickets, query_params)
+    cache.set(huser.user.email + query, ticket_qs, timeout=60*60)
+    return ticket_qs
 
 
 ORDER_COLUMN_CHOICES = Choices(
