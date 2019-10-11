@@ -27,7 +27,13 @@ from django.utils import timezone
 from django.views.generic.edit import FormView, UpdateView
 from django.core.cache import cache
 
-from helpdesk.lib import query_tickets_by_args, query_to_base64, query_from_base64
+from helpdesk.query import (
+    query_to_dict,
+    apply_query,
+    query_tickets_by_args,
+    query_to_base64,
+    query_from_base64,
+)
 
 from helpdesk.serializers import DatatablesTicketSerializer
 
@@ -41,8 +47,10 @@ from helpdesk.forms import (
 )
 from helpdesk.decorators import staff_member_required, superuser_required
 from helpdesk.lib import (
-    query_to_dict, apply_query, safe_template_context,
-    process_attachments, queue_template_context, format_time_spent
+    safe_template_context,
+    process_attachments,
+    queue_template_context,
+    format_time_spent,
 )
 from helpdesk.models import (
     Ticket, Queue, FollowUp, TicketChange, PreSetReply, FollowUpAttachment, SavedSearch,
