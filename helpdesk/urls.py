@@ -37,6 +37,8 @@ class DirectTemplateView(TemplateView):
 
 app_name = 'helpdesk'
 
+base64_pattern = r'(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$'
+
 urlpatterns = [
     url(r'^dashboard/$',
         staff.dashboard,
@@ -146,7 +148,7 @@ urlpatterns = [
         staff.email_ignore_del,
         name='email_ignore_del'),
 
-    url(r'^datatables_ticket_list/$',
+    url(r'^datatables_ticket_list/(?P<query>{})$'.format(base64_pattern),
         staff.datatables_ticket_list,
         name="datatables_ticket_list"),
 ]

@@ -84,7 +84,7 @@
                             <li class="list-group-item filterBox{% if query_params.filtering.created__gte or query_params.filtering.created__lte %} filterBoxShow{% endif %}" id='filterBoxDates'>
                         {% include './filters/date.html' %}
                             </li>
-                            <li class="list-group-item filterBox{% if query %} filterBoxShow{% endif %}" id="filterBoxKeywords">
+                            <li class="list-group-item filterBox{% if query_params.search_string %} filterBoxShow{% endif %}" id="filterBoxKeywords">
                         {% include './filters/keywords.html' %}
                             </li>
                         </ul>
@@ -185,9 +185,6 @@
                         <th>{% trans "Time Spent" %}</th>
                     </tr>
                 </thead>
-                {% if not server_side %}
-                {% include 'helpdesk/ticket_list_table.html' %}
-                {% endif %}
             </table>
 
             <p><label>{% trans "Select:" %} </label>
@@ -229,135 +226,126 @@
 {% block helpdesk_js %}
 <script src='{% static "helpdesk/filter.js" %}'></script>
 <script>
-    {% if not server_side %}
-        $('#ticketTable').DataTable({
-          "language": {
-              "emptyTable": "{% trans 'No Tickets Match Your Selection' %}"
-          },
-          "order": [],
-          responsive: true
-        });
-    {% else %}
-        function get_url(row)
-        {
-            return "{% url 'helpdesk:view' 1234 %}".replace(/1234/, row.id.toString());
-        }
-        $(document).ready(function()
-        {
-            //DataTables Initialization
-            let tasks_table = $('#ticketTable').DataTable({
-                "language": {
-                    "emptyTable": "{% trans 'No Tickets Match Your Selection' %}"
-                },
-                "processing": true,
-                "serverSide": true,
-                "ajax": {
-                    "url": "{% url 'helpdesk:datatables_ticket_list' %}",
-                    "type": "GET",
-                },
-                createdRow: function( row, data, dataIndex )
-                {
-                    $( row ).addClass(data.row_class);
-                },
+ function get_url(row)
+ {
+     return "{% url 'helpdesk:view' 1234 %}".replace(/1234/, row.id.toString());
+ }
+ $(document).ready(function()
+ {
+     //DataTables Initialization
+     let tasks_table = $('#ticketTable').DataTable({
+         "language": {
+             "emptyTable": "{% trans 'No Tickets Match Your Selection' %}"
+         },
+         "processing": true,
+         "serverSide": true,
+         "ajax": {
+    "url": "{% url 'helpdesk:datatables_ticket_list' urlsafe_query %}",
+             "type": "GET",
+         },
+         createdRow: function( row, data, dataIndex )
+         {
+             $( row ).addClass(data.row_class);
+         },
 
-                "columns": [
-                  {"data": "id",
-                    "orderable": false,
-                    "render": function(data, type, row, meta)
-                    {
-                      var pk = data;
-                      if(type === 'display'){
-                        data = "<input type='checkbox' name='ticket_id' value='"+pk+"'"+ "class='ticket_multi_select' />"
-                      }
-                        return data
-                      }
-                  },
-                  {"data": "ticket",
-                    "render": function (data, type, row, meta)
-                    {
-                        var id = data.split(" ")[0];
-                        var name = data.split(" ")[1];
-                        if (type === 'display')
-                        {
-                                data = '<div class="tickettitle"><a href="' + get_url(row) + '" >' + 
-                                        row.id + '. ' + 
-                                        row.title + '</a></div>';
-                        }
-                        return data
-                    }
-                  },
-                  {"data": "priority",
-                   "render": function (data, type, row, meta) {
-                           var priority = "success";
-                           if (data == 4 ) {
-                                priority = "warning";
-                           } else if (data == 5) {
-                                priority = "danger";
-                           }
-                           return '<p class="text-'+priority+'">'+data+'</p>';
-                        }
-                  },
-                  {"data": "queue",
-                   "render": function(data, type, row, meta) {
-                           return data.title;
-                   }
-                  },
-                  {"data": "status"},
-                  {"data": "created"},
-                  {"data": "due_date"},
-                  {"data": "assigned_to",
-                   "render": function(data, type, row, meta) {
-                           if (data != "None") {
-                                return data;
-                           } 
-                           else {
-                                return "";
-                           }
-                   }
-                  },
-                  {"data": "time_spent"},
-                ]
-            });
-          })
-    {% endif %}
-    $(document).ready(function()
-    {
-        $("#select_all_btn").click(function() {
-            $(".ticket_multi_select").prop('checked', true);
-        });
-        $("#select_none_btn").click(function() {
-            $(".ticket_multi_select").prop('checked', false);
-        });
-        $("#select_inverse_btn").click(function() {
-            $(".ticket_multi_select").each(function() {
-                $(this).prop('checked', !$(this).prop('checked'));
-            });
-        });
-    })
+         "columns": [
+             {"data": "id",
+              "orderable": false,
+              "render": function(data, type, row, meta)
+              {
+                  var pk = data;
+                  if(type === 'display'){
+                      data = "<input type='checkbox' name='ticket_id' value='"+pk+"'"+ "class='ticket_multi_select' />"
+                  }
+                  return data
+              }
+             },
+             {"data": "ticket",
+              "render": function (data, type, row, meta)
+              {
+                  var id = data.split(" ")[0];
+                  var name = data.split(" ")[1];
+                  if (type === 'display')
+                  {
+                      data = '<div class="tickettitle"><a href="' + get_url(row) + '" >' + 
+                             row.id + '. ' + 
+                             row.title + '</a></div>';
+                  }
+                  return data
+              }
+             },
+             {"data": "priority",
+              "render": function (data, type, row, meta) {
+                  var priority = "success";
+                  if (data == 4 ) {
+                      priority = "warning";
+                  } else if (data == 5) {
+                      priority = "danger";
+                  }
+                  return '<p class="text-'+priority+'">'+data+'</p>';
+              }
+             },
+             {"data": "queue",
+              "render": function(data, type, row, meta) {
+                  return data.title;
+              }
+             },
+             {"data": "status"},
+             {"data": "created"},
+             {"data": "due_date"},
+             {"data": "assigned_to",
+              "render": function(data, type, row, meta) {
+                  if (data != "None") {
+                      return data;
+                  } 
+                  else {
+                      return "";
+                  }
+              }
+             },
+             {"data": "time_spent"},
+         ]
+     });
+ })
 
-    /**
-     * Disable active filtering options in filter select menu
-     */
-    $(document).ready(function() {
-        {% if query_params.sorting %}
-        $("#filterBuilderSelect-Sort")[0].disabled = "disabled";
-        {% endif %}
-        {% if query_params.filtering.assigned_to__id__in %}
-        $("#filterBuilderSelect-Owner")[0].disabled = "disabled";
-        {% endif %}
-        {% if query_params.filtering.queue__id__in %}
-        $("#filterBuilderSelect-Queue")[0].disabled = "disabled";
-        {% endif %}
-        {% if query_params.filtering.status__in %}
-        $("#filterBuilderSelect-Status")[0].disabled = "disabled";
-        {% endif %}
-        {% if query_params.filtering.created__gte or query_params.filtering.created__lte %}
-        $("#filterBuilderSelect-Dates")[0].disabled = "disabled";
-        {% endif %}
-        {% if query %}
-        $("#filterBuilderSelect-Keywords")[0].disabled = "disabled";
-        {% endif %}
-    });
+ $(document).ready(function()
+ {
+     $("#select_all_btn").click(function() {
+         $(".ticket_multi_select").prop('checked', true);
+     });
+     $("#select_none_btn").click(function() {
+         $(".ticket_multi_select").prop('checked', false);
+     });
+     $("#select_inverse_btn").click(function() {
+         $(".ticket_multi_select").each(function() {
+             $(this).prop('checked', !$(this).prop('checked'));
+         });
+     });
+ })
+
+ /**
+  * Disable active filtering options in filter select menu
+  */
+ $(document).ready(function() {
+     {% if query_params.sorting %}
+     $("#filterBuilderSelect-Sort")[0].disabled = "disabled";
+     {% endif %}
+     {% if query_params.filtering.assigned_to__id__in %}
+     $("#filterBuilderSelect-Owner")[0].disabled = "disabled";
+     {% endif %}
+     {% if query_params.filtering.queue__id__in %}
+     $("#filterBuilderSelect-Queue")[0].disabled = "disabled";
+     {% endif %}
+     {% if query_params.filtering.status__in %}
+     $("#filterBuilderSelect-Status")[0].disabled = "disabled";
+     {% endif %}
+     {% if query_params.filtering.created__gte or query_params.filtering.created__lte %}
+     $("#filterBuilderSelect-Dates")[0].disabled = "disabled";
+     {% endif %}
+     {% if query_params.search_string %}
+     $("#filterBuilderSelect-Keywords")[0].disabled = "disabled";
+     {% endif %}
+ });
 
 {% for f in query_params.filtering %}
 {% endfor %}
