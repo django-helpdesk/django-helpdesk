@@ -7,6 +7,7 @@ views/staff.py - The bulk of the application - provides most business logic and
                  renders all staff-facing views.
 """
 from copy import deepcopy
+import json
 
 from django import VERSION as DJANGO_VERSION
 from django.conf import settings
@@ -26,8 +27,9 @@ from django.utils import timezone
 from django.views.generic.edit import FormView, UpdateView
 from django.core.cache import cache
 
-from helpdesk.lib import query_tickets_by_args
-from helpdesk.serializers import TicketSerializer
+from helpdesk.lib import query_tickets_by_args, query_to_base64, query_from_base64
+
+from helpdesk.serializers import DatatablesTicketSerializer
 
 from helpdesk.decorators import (
     helpdesk_staff_member_required, helpdesk_superuser_required,
@@ -838,15 +840,14 @@ def ticket_list(request):
         'filtering': {},
         'sorting': None,
         'sortreverse': False,
-        'keyword': None,
-        'search_string': None,
+        'search_string': '',
     }
     default_query_params = {
         'filtering': {'status__in': [1, 2, 3]},
         'sorting': 'created',
+        'search_string': '',
+        'sortreverse': False,
     }
-
-    from_saved_query = False
 
     # If the user is coming from the header/navigation search box, lets' first
     # look at their query to see if they have entered a valid ticket number. If
@@ -882,27 +883,13 @@ def ticket_list(request):
                 # Go on to standard keyword searching
                 pass
 
-    saved_query = None
-    if request.GET.get('saved_query', None):
-        from_saved_query = True
-        try:
-            saved_query = SavedSearch.objects.get(pk=request.GET.get('saved_query'))
-        except SavedSearch.DoesNotExist:
-            return HttpResponseRedirect(reverse('helpdesk:list'))
-        if not (saved_query.shared or saved_query.user == request.user):
-            return HttpResponseRedirect(reverse('helpdesk:list'))
+    try:
+        saved_query, query_params = load_saved_query(request, query_params)
+    except QueryLoadError:
+        return HttpResponseRedirect(reverse('helpdesk:list'))
 
-        import json
-        from helpdesk.lib import query_from_base64
-        try:
-            # we get a string like: b'stuff'
-            # so leave of the first two chars (b') and last (')
-            b64query = saved_query.query[2:-1]
-            query_params = query_from_base64(b64query)
-        except ValueError:
-            # Query deserialization failed. (E.g. was a pickled query)
-            return HttpResponseRedirect(reverse('helpdesk:list'))
-
+    if saved_query:
+        pass
     elif not {'queue', 'assigned_to', 'status', 'q', 'sort', 'sortreverse'}.intersection(request.GET):
         # Fall-back if no querying is being done
         all_queues = Queue.objects.all()
@@ -932,11 +919,9 @@ def ticket_list(request):
             query_params['filtering']['created__lte'] = date_to
 
         # KEYWORD SEARCHING
-        q = request.GET.get('q', None)
-
-        if q:
-            context = dict(context, query=q)
-            query_params['search_string'] = q
+        q = request.GET.get('q', '')
+        context['query'] = q
+        query_params['search_string'] = q
 
         # SORTING
         sort = request.GET.get('sort', None)
@@ -955,8 +940,14 @@ def ticket_list(request):
         # invalid parameters in query, return default query
         ticket_qs = apply_query(tickets, default_query_params)
 
+    urlsafe_query = query_to_base64(query_params)
+
+    cache.set('ticket_qs', ticket_qs)
+
+    user_saved_queries = SavedSearch.objects.filter(Q(user=request.user) | Q(shared__exact=True))
+
     search_message = ''
-    if 'query' in context and settings.DATABASES['default']['ENGINE'].endswith('sqlite'):
+    if query_params['search_string'] and settings.DATABASES['default']['ENGINE'].endswith('sqlite'):
         search_message = _(
             '<p><strong>Note:</strong> Your keyword search is case sensitive '
             'because of your database. This means the search will <strong>not</strong> '
@@ -965,13 +956,6 @@ def ticket_list(request):
             '<a href="http://docs.djangoproject.com/en/dev/ref/databases/#sqlite-string-matching">'
             'Django Documentation on string matching in SQLite</a>.')
 
-    import json
-    from helpdesk.lib import query_to_base64
-    urlsafe_query = query_to_base64(query_params)
-
-    user_saved_queries = SavedSearch.objects.filter(Q(user=request.user) | Q(shared__exact=True))
-
-    cache.set('ticket_qs', ticket_qs)
 
     return render(request, 'helpdesk/ticket_list.html', dict(
         context,
@@ -982,7 +966,7 @@ def ticket_list(request):
         urlsafe_query=urlsafe_query,
         user_saved_queries=user_saved_queries,
         query_params=query_params,
-        from_saved_query=from_saved_query,
+        from_saved_query=saved_query is not None,
         saved_query=saved_query,
         search_message=search_message,
     ))
@@ -991,18 +975,43 @@ def ticket_list(request):
 ticket_list = staff_member_required(ticket_list)
 
 
+class QueryLoadError(Exception):
+    pass
+
+
+def load_saved_query(request, query_params=None):
+    saved_query = None
+
+    if request.GET.get('saved_query', None):
+        try:
+            saved_query = SavedSearch.objects.get(pk=request.GET.get('saved_query'))
+        except SavedSearch.DoesNotExist:
+            raise QueryLoadError()
+        if not (saved_query.shared or saved_query.user == request.user):
+            raise QueryLoadError()
+
+        try:
+            # we get a string like: b'stuff'
+            # so leave of the first two chars (b') and last (')
+            b64query = saved_query.query[2:-1]
+            query_params = query_from_base64(b64query)
+        except json.JSONDecodeError:
+            raise QueryLoadError()
+    return (saved_query, query_params)
+
+
 @helpdesk_staff_member_required
-@api_view(['GET', 'POST'])
+@api_view(['GET'])
 def datatables_ticket_list(request):
     """
     Datatable on ticket_list.html uses this view from to get objects to display
-    on the table. query_tickets_by_args is at lib.py, TicketSerializer is in
+    on the table. query_tickets_by_args is at lib.py, DatatablesTicketSerializer is in
     serializers.py. The serializers and this view use django-rest_framework methods
     """
     try:
         objects = cache.get('ticket_qs')
         model_object = query_tickets_by_args(objects, '-date_created', **request.query_params)
-        serializer = TicketSerializer(model_object['items'], many=True)
+        serializer = DatatablesTicketSerializer(model_object['items'], many=True)
         result = dict()
         result['data'] = serializer.data
         result['draw'] = model_object['draw']
@@ -1188,28 +1197,12 @@ def run_report(request, report):
         queue__in=_get_user_queues(request.user)
     )
 
-    from_saved_query = False
-    saved_query = None
+    try:
+        saved_query, query_params = load_saved_query(request)
+    except QueryLoadError:
+        return HttpResponseRedirect(reverse('helpdesk:report_index'))
 
     if request.GET.get('saved_query', None):
-        from_saved_query = True
-        try:
-            saved_query = SavedSearch.objects.get(pk=request.GET.get('saved_query'))
-        except SavedSearch.DoesNotExist:
-            return HttpResponseRedirect(reverse('helpdesk:report_index'))
-        if not (saved_query.shared or saved_query.user == request.user):
-            return HttpResponseRedirect(reverse('helpdesk:report_index'))
-
-        import json
-        from helpdesk.lib import query_from_base64
-        try:
-            # we get a string like: b'stuff'
-            # so leave of the first two chars (b') and last (')
-            b64query = saved_query.query[2:-1]
-            query_params = query_from_base64(b64query)
-        except json.JSONDecodeError:
-            return HttpResponseRedirect(reverse('helpdesk:report_index'))
-
         report_queryset = apply_query(report_queryset, query_params)
 
     from collections import defaultdict
@@ -1372,7 +1365,7 @@ def run_report(request, report):
         'headings': column_headings,
         'series_names': series_names,
         'morrisjs_data': morrisjs_data,
-        'from_saved_query': from_saved_query,
+        'from_saved_query': saved_query is not None,
         'saved_query': saved_query,
     })
 

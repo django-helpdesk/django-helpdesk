@@ -38,7 +38,11 @@ def query_from_base64(b64data):
     """
     Converts base64-encoded bytes object back to a query dict object.
     """
-    return json.loads(b64decode(b64data).decode('utf-8'))
+    query = {'search_string': ''}
+    query.update(json.loads(b64decode(b64data).decode('utf-8')))
+    if query['search_string'] is None:
+        query['search_string'] = ''
+    return query
 
 
 def query_to_dict(results, descriptions):
@@ -81,7 +85,7 @@ def apply_query(queryset, params):
         filter = {key: params['filtering'][key]}
         queryset = queryset.filter(**filter)
 
-    search = params.get('search_string', None)
+    search = params.get('search_string', '')
     if search:
         qset = (
             Q(title__icontains=search) |
@@ -257,7 +261,7 @@ def query_tickets_by_args(objects, order_by, **kwargs):
     function filters existing dataset on search string and returns a filtered
     filtered list. The `draw`, `length` etc parameters are for datatables to
     display meta data on the table contents. The returning queryset is passed
-    to a Serializer called TicketSerializer in serializers.py.
+    to a Serializer called DatatablesTicketSerializer in serializers.py.
     """
     draw = int(kwargs.get('draw', None)[0])
     length = int(kwargs.get('length', None)[0])

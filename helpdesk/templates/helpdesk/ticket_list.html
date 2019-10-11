@@ -84,7 +84,7 @@
                             <li class="list-group-item filterBox{% if query_params.filtering.created__gte or query_params.filtering.created__lte %} filterBoxShow{% endif %}" id='filterBoxDates'>
                         {% include './filters/date.html' %}
                             </li>
-                            <li class="list-group-item filterBox{% if query %} filterBoxShow{% endif %}" id="filterBoxKeywords">
+                            <li class="list-group-item filterBox{% if query_params.search_string %} filterBoxShow{% endif %}" id="filterBoxKeywords">
                         {% include './filters/keywords.html' %}
                             </li>
                         </ul>
@@ -342,7 +342,7 @@
      {% if query_params.filtering.created__gte or query_params.filtering.created__lte %}
      $("#filterBuilderSelect-Dates")[0].disabled = "disabled";
      {% endif %}
-     {% if query %}
+     {% if query_params.search_string %}
      $("#filterBuilderSelect-Keywords")[0].disabled = "disabled";
      {% endif %}
  });

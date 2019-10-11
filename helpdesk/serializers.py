@@ -12,7 +12,7 @@ datatables for ticket_list.html. Called from staff.datatables_ticket_list.
 """
 
 
-class TicketSerializer(serializers.ModelSerializer):
+class DatatablesTicketSerializer(serializers.ModelSerializer):
     ticket = serializers.SerializerMethodField()
     assigned_to = serializers.SerializerMethodField()
     created = serializers.SerializerMethodField()
