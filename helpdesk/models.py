@@ -28,6 +28,8 @@ from markdown.extensions import Extension
 
 import uuid
 
+from helpdesk import settings as helpdesk_settings
+
 from .templated_email import send_templated_mail
 
 

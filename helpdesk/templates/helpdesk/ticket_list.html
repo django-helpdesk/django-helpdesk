@@ -240,7 +240,7 @@
          "processing": true,
          "serverSide": true,
          "ajax": {
-             "url": "{% url 'helpdesk:datatables_ticket_list' %}",
+    "url": "{% url 'helpdesk:datatables_ticket_list' urlsafe_query %}",
              "type": "GET",
          },
          createdRow: function( row, data, dataIndex )

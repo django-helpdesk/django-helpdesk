@@ -17,7 +17,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.urls import reverse, reverse_lazy
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.db.models import Q
-from django.http import HttpResponseRedirect, Http404, HttpResponse
+from django.http import HttpResponseRedirect, Http404, HttpResponse, JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.utils.dates import MONTHS_3
 from django.utils.translation import ugettext as _
@@ -942,7 +942,7 @@ def ticket_list(request):
 
     urlsafe_query = query_to_base64(query_params)
 
-    cache.set('ticket_qs', ticket_qs)
+    cache.set(request.user.email + urlsafe_query, ticket_qs, timeout=60*60)
 
     user_saved_queries = SavedSearch.objects.filter(Q(user=request.user) | Q(shared__exact=True))
 
@@ -993,7 +993,10 @@ def load_saved_query(request, query_params=None):
         try:
             # we get a string like: b'stuff'
             # so leave of the first two chars (b') and last (')
-            b64query = saved_query.query[2:-1]
+            if saved_query.query.startswith('b\''):
+                b64query = saved_query.query[2:-1]
+            else:
+                b64query = saved_query.query
             query_params = query_from_base64(b64query)
         except json.JSONDecodeError:
             raise QueryLoadError()
@@ -1002,25 +1005,22 @@ def load_saved_query(request, query_params=None):
 
 @helpdesk_staff_member_required
 @api_view(['GET'])
-def datatables_ticket_list(request):
+def datatables_ticket_list(request, query):
     """
     Datatable on ticket_list.html uses this view from to get objects to display
     on the table. query_tickets_by_args is at lib.py, DatatablesTicketSerializer is in
     serializers.py. The serializers and this view use django-rest_framework methods
     """
-    try:
-        objects = cache.get('ticket_qs')
-        model_object = query_tickets_by_args(objects, '-date_created', **request.query_params)
-        serializer = DatatablesTicketSerializer(model_object['items'], many=True)
-        result = dict()
-        result['data'] = serializer.data
-        result['draw'] = model_object['draw']
-        result['recordsTotal'] = model_object['total']
-        result['recordsFiltered'] = model_object['count']
-        return (Response(result, status=status.HTTP_200_OK, template_name=None, content_type=None))
-
-    except TypeError as e:
-        return (Response(e, status=status.HTTP_404_NOT_FOUND, template_name=None, content_type=None))
+    objects = cache.get(request.user.email + query)
+    query_params = query_from_base64(query)
+    model_object = query_tickets_by_args(objects, '-date_created', **request.query_params)
+    serializer = DatatablesTicketSerializer(model_object['items'], many=True)
+    result = dict()
+    result['data'] = serializer.data
+    result['draw'] = model_object['draw']
+    result['recordsTotal'] = model_object['total']
+    result['recordsFiltered'] = model_object['count']
+    return (JsonResponse(result, status=status.HTTP_200_OK))
 
 
 @helpdesk_staff_member_required
