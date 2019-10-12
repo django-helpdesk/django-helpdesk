@@ -98,7 +98,7 @@ class AttachmentUnitTests(TestCase):
 
     @mock.patch('helpdesk.lib.FollowUpAttachment', autospec=True)
     def test_unicode_attachment_filename(self, mock_att_save, mock_queue_save, mock_ticket_save, mock_follow_up_save):
-        """ check utf-8 data is parsed correcltly """
+        """ check utf-8 data is parsed correctly """
         filename, fileobj = lib.process_attachments(self.follow_up, [self.test_file])[0]
         mock_att_save.assert_called_with(
             file=self.test_file,
@@ -111,7 +111,7 @@ class AttachmentUnitTests(TestCase):
 
     @mock.patch('helpdesk.lib.FollowUpAttachment', autospec=True)
     def test_autofill(self, mock_att_save, mock_queue_save, mock_ticket_save, mock_follow_up_save):
-        """ check utf-8 data is parsed correcltly """
+        """ check utf-8 data is parsed correctly """
         self.follow_up.pk = 100
         obj = models.FollowUpAttachment.objects.create(
             followup=self.follow_up,
@@ -122,7 +122,7 @@ class AttachmentUnitTests(TestCase):
         self.assertEqual(obj.mime_type, "text/plain")
 
     def test_kbi_attachment(self, mock_att_save, mock_queue_save, mock_ticket_save):
-        """ check utf-8 data is parsed correcltly """
+        """ check utf-8 data is parsed correctly """
 
         kbcategory = models.KBCategory.objects.create(
             title="Title",
