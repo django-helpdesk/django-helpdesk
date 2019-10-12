@@ -96,7 +96,7 @@ def get_query(query, huser):
     tickets = huser.get_tickets_in_queues().select_related()
     query_params = query_from_base64(query)
     ticket_qs = apply_query(tickets, query_params)
-    cache.set(huser.user.email + query, ticket_qs, timeout=60*60)
+    cache.set(huser.user.email + query, ticket_qs, timeout=3600)
     return ticket_qs
 
 

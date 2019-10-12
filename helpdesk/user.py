@@ -5,6 +5,7 @@ from helpdesk.models import (
 
 from helpdesk import settings as helpdesk_settings
 
+
 class HelpdeskUser:
     def __init__(self, user):
         self.user = user
@@ -32,7 +33,6 @@ class HelpdeskUser:
     def get_tickets_in_queues(self):
         return Ticket.objects.filter(queue__in=self.get_queues())
 
-
     def can_access_queue(self, queue):
         """Check if a certain user can access a certain queue.
 
@@ -46,7 +46,6 @@ class HelpdeskUser:
         else:
             return user.has_perm(queue.permission_name)
 
-
     def can_access_ticket(self, ticket):
         """Check to see if the user has permission to access
             a ticket. If not then deny access."""
@@ -54,7 +53,7 @@ class HelpdeskUser:
         if self.can_access_queue(ticket.queue):
             return True
         elif user.is_superuser or user.is_staff or \
-             (ticket.assigned_to and user.id == ticket.assigned_to.id):
+                (ticket.assigned_to and user.id == ticket.assigned_to.id):
             return True
         else:
             return False

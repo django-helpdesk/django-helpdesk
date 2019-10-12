@@ -178,12 +178,14 @@ def dashboard(request):
 
 dashboard = staff_member_required(dashboard)
 
+
 def ticket_perm_check(request, ticket):
     huser = HelpdeskUser(request.user)
     if not huser.can_access_queue(ticket.queue):
         raise PermissionDenied()
     if not huser.can_access_ticket(ticket):
         raise PermissionDenied()
+
 
 @helpdesk_staff_member_required
 def delete_ticket(request, ticket_id):
@@ -909,7 +911,7 @@ def ticket_list(request):
     tickets_base = get_query(urlsafe_query, huser)
 
     user_saved_queries = SavedSearch.objects.filter(Q(user=request.user) | Q(shared__exact=True))
-    
+
     ticket_qs = None
     try:
         ticket_qs = apply_query(tickets_base, query_params)
@@ -930,7 +932,6 @@ def ticket_list(request):
             'better searching! For more information, read the '
             '<a href="http://docs.djangoproject.com/en/dev/ref/databases/#sqlite-string-matching">'
             'Django Documentation on string matching in SQLite</a>.')
-
 
     return render(request, 'helpdesk/ticket_list.html', dict(
         context,
