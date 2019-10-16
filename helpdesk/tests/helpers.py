@@ -26,6 +26,10 @@ def get_user(username='helpdesk.staff',
     return user
 
 
+def get_staff_user():
+    return get_user(is_staff=True)
+
+
 def reload_urlconf(urlconf=None):
 
     from importlib import reload

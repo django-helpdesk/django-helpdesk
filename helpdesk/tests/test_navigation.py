@@ -25,7 +25,7 @@ class KBDisabledTestCase(TestCase):
         """Test proper rendering of navigation.html by accessing the dashboard"""
         from django.urls import NoReverseMatch
 
-        self.client.login(username=get_user(is_staff=True).get_username(), password='password')
+        self.client.login(username=get_staff_user().get_username(), password='password')
         self.assertRaises(NoReverseMatch, reverse, 'helpdesk:kb_index')
         try:
             response = self.client.get(reverse('helpdesk:dashboard'))
