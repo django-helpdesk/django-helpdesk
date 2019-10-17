@@ -17,7 +17,6 @@ except ImportError:  # python 2
     from urlparse import urlparse
 
 from helpdesk.templatetags.ticket_to_link import num_to_link
-from helpdesk.views.staff import _is_my_ticket
 
 
 class TimeSpentTestCase(TestCase):

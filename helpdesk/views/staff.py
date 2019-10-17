@@ -98,18 +98,6 @@ def _get_queue_choices(queues):
     return queue_choices
 
 
-def _is_my_ticket(user, ticket):
-    """Check to see if the user has permission to access
-    a ticket. If not then deny access."""
-    if (user, ticket.queue):
-        return True
-    elif user.is_superuser or user.is_staff or \
-            (ticket.assigned_to and user.id == ticket.assigned_to.id):
-        return True
-    else:
-        return False
-
-
 @helpdesk_staff_member_required
 def dashboard(request):
     """
@@ -908,20 +896,9 @@ def ticket_list(request):
 
     urlsafe_query = query_to_base64(query_params)
 
-    tickets_base = get_query(urlsafe_query, huser)
+    get_query(urlsafe_query, huser)
 
     user_saved_queries = SavedSearch.objects.filter(Q(user=request.user) | Q(shared__exact=True))
-
-    ticket_qs = None
-    try:
-        ticket_qs = apply_query(tickets_base, query_params)
-    except ValidationError:
-        # invalid parameters in query, return default query
-        query_params = {
-            'filtering': {'status__in': [1, 2, 3]},
-            'sorting': 'created',
-        }
-        ticket_qs = apply_query(tickets_base, query_params)
 
     search_message = ''
     if query_params['search_string'] and settings.DATABASES['default']['ENGINE'].endswith('sqlite'):
@@ -935,7 +912,6 @@ def ticket_list(request):
 
     return render(request, 'helpdesk/ticket_list.html', dict(
         context,
-        tickets=ticket_qs,
         default_tickets_per_page=request.user.usersettings_helpdesk.tickets_per_page,
         user_choices=User.objects.filter(is_active=True, is_staff=True),
         queue_choices=huser.get_queues(),

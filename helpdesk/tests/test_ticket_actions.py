@@ -13,7 +13,7 @@ except ImportError:  # python 2
     from urlparse import urlparse
 
 from helpdesk.templatetags.ticket_to_link import num_to_link
-from helpdesk.views.staff import _is_my_ticket
+from helpdesk.user import HelpdeskUser
 
 
 class TicketActionsTestCase(TestCase):
@@ -150,7 +150,7 @@ class TicketActionsTestCase(TestCase):
         response = self.client.post(reverse('helpdesk:update', kwargs={'ticket_id': ticket_id}), post_data, follow=True)
         self.assertContains(response, 'Changed Status from Open to Closed')
 
-    def test_is_my_ticket(self):
+    def test_can_access_ticket(self):
         """Tests whether non-staff but assigned user still counts as owner"""
 
         # make non-staff user
@@ -173,8 +173,8 @@ class TicketActionsTestCase(TestCase):
         # create ticket
         helpdesk_settings.HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION = True
         ticket = Ticket.objects.create(**initial_data)
-        self.assertEqual(_is_my_ticket(self.user, ticket), True)
-        self.assertEqual(_is_my_ticket(self.user2, ticket), False)
+        self.assertEqual(HelpdeskUser(self.user).can_access_ticket(ticket), True)
+        self.assertEqual(HelpdeskUser(self.user2).can_access_ticket(ticket), False)
 
     def test_num_to_link(self):
         """Test that we are correctly expanding links to tickets from IDs"""
