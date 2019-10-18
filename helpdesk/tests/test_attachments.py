@@ -94,7 +94,11 @@ class AttachmentUnitTests(TestCase):
             'content-type': 'text/utf8',
         }
         self.test_file = SimpleUploadedFile.from_dict(self.file_attrs)
-        self.follow_up = models.FollowUp(ticket=models.Ticket(queue=models.Queue()))
+        self.follow_up = models.FollowUp.objects.create(
+            ticket=models.Ticket.objects.create(
+                queue=models.Queue.objects.create()
+            )
+        )
 
     @mock.patch('helpdesk.lib.FollowUpAttachment', autospec=True)
     def test_unicode_attachment_filename(self, mock_att_save, mock_queue_save, mock_ticket_save, mock_follow_up_save):
@@ -109,6 +113,7 @@ class AttachmentUnitTests(TestCase):
         )
         self.assertEqual(filename, self.file_attrs['filename'])
 
+<<<<<<< HEAD
     # TODO: FIXME: what's wrong with this test that we get integrity errors?
     # @mock.patch('helpdesk.lib.FollowUpAttachment', autospec=True)
     # def test_autofill(self, mock_att_save, mock_queue_save, mock_ticket_save, mock_follow_up_save):
@@ -122,6 +127,18 @@ class AttachmentUnitTests(TestCase):
     #     self.assertEqual(obj.filename, self.file_attrs['filename'])
     #     self.assertEqual(obj.size, len(self.file_attrs['content']))
     #     self.assertEqual(obj.mime_type, "text/plain")
+=======
+    @mock.patch('helpdesk.lib.FollowUpAttachment', autospec=True)
+    def test_autofill(self, mock_att_save, mock_queue_save, mock_ticket_save, mock_follow_up_save):
+        """ check utf-8 data is parsed correctly """
+        obj = models.FollowUpAttachment.objects.create(
+            followup=self.follow_up,
+            file=self.test_file
+        )
+        self.assertEqual(obj.filename, self.file_attrs['filename'])
+        self.assertEqual(obj.size, len(self.file_attrs['content']))
+        self.assertEqual(obj.mime_type, "text/plain")
+>>>>>>> b899c97... Remove hardcoded pk from test suit
 
     def test_kbi_attachment(self, mock_att_save, mock_queue_save, mock_ticket_save):
         """ check utf-8 data is parsed correctly """
