@@ -32,6 +32,63 @@
 
 <div class="card mb-3">
     <div class="card-header">
+        <i class="fas fa-table"></i>
+        {% trans "Query Results" %}
+    </div>
+    <div class="card-body">
+        {{ search_message|safe }}
+        <form method='post' action='{% url 'helpdesk:mass_update' %}' id="ticket_mass_update">
+            <table width="100%" class="table table-sm table-striped table-bordered table-hover" id="ticketTable" data-page-length='{{ default_tickets_per_page }}'>
+                <thead class="thead-light">
+                    <tr>
+                        <th>&nbsp;</th>
+                        <th>{% trans "Ticket" %}</th>
+                        <th>{% trans "Prority" %}</th>
+                        <th>{% trans "Queue" %}</th>
+                        <th>{% trans "Status" %}</th>
+                        <th>{% trans "Created" %}</th>
+                        <th>{% trans "Due Date" %}</th>
+                        <th>{% trans "Owner" %}</th>
+                        <th>{% trans "Time Spent" %}</th>
+                    </tr>
+                </thead>
+            </table>
+
+            <p><label>{% trans "Select:" %} </label>
+
+                <button id="select_all_btn" type="button" class="btn btn-primary btn-sm" />
+                <i class="fas fa-check-circle"></i>&nbsp;{% trans "All" %}
+                </button>
+
+                <button id='select_none_btn' type="button" class="btn btn-primary btn-sm"><i class="fas fa-times-circle"></i>&nbsp;{% trans "None" %}</button>
+
+                <button id='select_inverse_btn' type="button" class="btn btn-primary btn-sm"><i class="fas fa-expand-arrows-alt"></i>&nbsp;{% trans "Invert" %}</button>
+            </p>
+
+            <p>
+                <label for='id_mass_action'>{% trans "With Selected Tickets:" %}</label>
+                <select name='action' id='id_mass_action'>
+                    <option value='take'>{% trans "Take (Assign to me)" %}</option>
+                    <option value='delete'>{% trans "Delete" %}</option>
+                    <optgroup label='{% trans "Close" %}'>
+                        <option value='close'>{% trans "Close (Don't Send E-Mail)" %}</option>
+                        <option value='close_public'>{% trans "Close (Send E-Mail)" %}</option>
+                    </optgroup>
+                    <optgroup label='{% trans "Assign To" %}'>
+                        <option value='unassign'>{% trans "Nobody (Unassign)" %}</option>
+                        {% for u in user_choices %}<option value='assign_{{ u.id }}'>{{ u.get_username }}</option>{% endfor %}
+                    </optgroup>
+                </select>
+                <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-arrow-circle-right"></i>&nbsp;{% trans "Go" %}</button>
+            </p>
+        {% csrf_token %}</form>
+    </div>
+    <!-- /.panel-body -->
+</div>
+<!-- /.panel -->
+
+<div class="card mb-3">
+    <div class="card-header">
         <i class="fas fa-hand-pointer"></i>
         {% trans "Query Selection" %}
     </div>
@@ -161,64 +218,6 @@
     <!-- end card-body -->
 </div>
 <!-- end top card -->
-
-
-<div class="card mb-3">
-    <div class="card-header">
-        <i class="fas fa-table"></i>
-        {% trans "Query Results" %}
-    </div>
-    <div class="card-body">
-        {{ search_message|safe }}
-        <form method='post' action='{% url 'helpdesk:mass_update' %}' id="ticket_mass_update">
-            <table width="100%" class="table table-sm table-striped table-bordered table-hover" id="ticketTable" data-page-length='{{ default_tickets_per_page }}'>
-                <thead class="thead-light">
-                    <tr>
-                        <th>&nbsp;</th>
-                        <th>{% trans "Ticket" %}</th>
-                        <th>{% trans "Prority" %}</th>
-                        <th>{% trans "Queue" %}</th>
-                        <th>{% trans "Status" %}</th>
-                        <th>{% trans "Created" %}</th>
-                        <th>{% trans "Due Date" %}</th>
-                        <th>{% trans "Owner" %}</th>
-                        <th>{% trans "Time Spent" %}</th>
-                    </tr>
-                </thead>
-            </table>
-
-            <p><label>{% trans "Select:" %} </label>
-
-                <button id="select_all_btn" type="button" class="btn btn-primary btn-sm" />
-                <i class="fas fa-check-circle"></i>&nbsp;{% trans "All" %}
-                </button>
-
-                <button id='select_none_btn' type="button" class="btn btn-primary btn-sm"><i class="fas fa-times-circle"></i>&nbsp;{% trans "None" %}</button>
-
-                <button id='select_inverse_btn' type="button" class="btn btn-primary btn-sm"><i class="fas fa-expand-arrows-alt"></i>&nbsp;{% trans "Invert" %}</button>
-            </p>
-
-            <p>
-                <label for='id_mass_action'>{% trans "With Selected Tickets:" %}</label>
-                <select name='action' id='id_mass_action'>
-                    <option value='take'>{% trans "Take (Assign to me)" %}</option>
-                    <option value='delete'>{% trans "Delete" %}</option>
-                    <optgroup label='{% trans "Close" %}'>
-                        <option value='close'>{% trans "Close (Don't Send E-Mail)" %}</option>
-                        <option value='close_public'>{% trans "Close (Send E-Mail)" %}</option>
-                    </optgroup>
-                    <optgroup label='{% trans "Assign To" %}'>
-                        <option value='unassign'>{% trans "Nobody (Unassign)" %}</option>
-                        {% for u in user_choices %}<option value='assign_{{ u.id }}'>{{ u.get_username }}</option>{% endfor %}
-                    </optgroup>
-                </select>
-                <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-arrow-circle-right"></i>&nbsp;{% trans "Go" %}</button>
-            </p>
-        {% csrf_token %}</form>
-    </div>
-    <!-- /.panel-body -->
-</div>
-<!-- /.panel -->
 
 {% endblock %}
 
