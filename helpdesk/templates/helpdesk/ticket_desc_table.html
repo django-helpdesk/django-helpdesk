@@ -37,8 +37,10 @@
                         </strong>{% endifequal %}
                         </td>
                         <th class="table-active">{% trans "Submitter E-Mail" %}</th>
-                        <td>{{ ticket.submitter_email }}
-                        {% if user.is_superuser %} {% if submitter_userprofile_url %}<strong><a href='{{submitter_userprofile_url}}'><button type="button" class="btn btn-primary btn-sm"><i class="fas fa-address-book"></i></button></a></strong>{% endif %}
+                        <td> {{ ticket.submitter_email }}
+                                                         {% if user.is_superuser %} {% if submitter_userprofile_url %}<strong><a href='{{submitter_userprofile_url}}'><button type="button" class="btn btn-primary btn-sm"><i class="fas fa-address-book"></i></button></a></strong>{% endif %}
+                            <strong><a href ="{% url 'helpdesk:list'%}?q={{ticket.submitter_email}}">
+                                <button type="button" class="btn btn-primary btn-sm"><i class="fas fa-search"></i></button></a></strong>
                         <strong><a href='{% url 'helpdesk:email_ignore_add' %}?email={{ ticket.submitter_email }}'>
                                 <button type="button" class="btn btn-warning btn-sm float-right"><i class="fas fa-eye-slash"></i></button></a></strong>{% endif %}
                         </td>
