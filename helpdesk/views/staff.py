@@ -976,6 +976,46 @@ def datatables_ticket_list(request, query):
 
 
 @helpdesk_staff_member_required
+@api_view(['GET'])
+def timeline_ticket_list(request, query):
+    """
+    Datatable on ticket_list.html uses this view from to get objects to display
+    on the table. query_tickets_by_args is at lib.py, DatatablesTicketSerializer is in
+    serializers.py. The serializers and this view use django-rest_framework methods
+    """
+    tickets = get_query(query, HelpdeskUser(request.user))
+    events = []
+
+    def mk_timeline_date(date):
+        return {
+            'year': date.year,
+            'month': date.month,
+            'day': date.day,
+            'hour': date.hour,
+            'minute': date.minute,
+            'second': date.second,
+            'second': date.second,
+        }
+    for ticket in tickets:
+        for followup in ticket.followup_set.all():
+            event = {
+                'start_date': mk_timeline_date(followup.date),
+                'text': {
+                    'headline': ticket.title + '<br/>' + followup.title,
+                    'text': (followup.comment if followup.comment else _('No text')) + '<br/> <a href="%s" class="btn" role="button">%s</a>' %
+                    (reverse('helpdesk:view', kwargs={'ticket_id': ticket.pk}), _("View ticket")),
+                },
+                'group': _('Messages'),
+            }
+            events.append(event)
+
+    result = {
+        'events': events,
+    }
+    return (JsonResponse(result, status=status.HTTP_200_OK))
+
+
+@helpdesk_staff_member_required
 def edit_ticket(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
     ticket_perm_check(request, ticket)
