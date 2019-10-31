@@ -27,17 +27,13 @@ from django.utils import timezone
 from django.views.generic.edit import FormView, UpdateView
 
 from helpdesk.query import (
+    get_query_class,
     query_to_dict,
-    get_query,
-    apply_query,
-    query_tickets_by_args,
     query_to_base64,
     query_from_base64,
 )
 
 from helpdesk.user import HelpdeskUser
-
-from helpdesk.serializers import DatatablesTicketSerializer
 
 from helpdesk.decorators import (
     helpdesk_staff_member_required, helpdesk_superuser_required,
@@ -71,6 +67,7 @@ import re
 
 
 User = get_user_model()
+Query = get_query_class()
 
 if helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE:
     # treat 'normal' users like 'staff'
@@ -896,7 +893,7 @@ def ticket_list(request):
 
     urlsafe_query = query_to_base64(query_params)
 
-    get_query(urlsafe_query, huser)
+    Query(huser, base64query=urlsafe_query).refresh_query()
 
     user_saved_queries = SavedSearch.objects.filter(Q(user=request.user) | Q(shared__exact=True))
 
@@ -964,15 +961,16 @@ def datatables_ticket_list(request, query):
     on the table. query_tickets_by_args is at lib.py, DatatablesTicketSerializer is in
     serializers.py. The serializers and this view use django-rest_framework methods
     """
-    objects = get_query(query, HelpdeskUser(request.user))
-    model_object = query_tickets_by_args(objects, '-date_created', **request.query_params)
-    serializer = DatatablesTicketSerializer(model_object['items'], many=True)
-    result = dict()
-    result['data'] = serializer.data
-    result['draw'] = model_object['draw']
-    result['recordsTotal'] = model_object['total']
-    result['recordsFiltered'] = model_object['count']
+    query = Query(HelpdeskUser(request.user), base64query=query)
+    result = query.get_datatables_context(**request.query_params)
     return (JsonResponse(result, status=status.HTTP_200_OK))
+
+
+@helpdesk_staff_member_required
+@api_view(['GET'])
+def timeline_ticket_list(request, query):
+    query = Query(HelpdeskUser(request.user), base64query=query)
+    return (JsonResponse(query.get_timeline_context(), status=status.HTTP_200_OK))
 
 
 @helpdesk_staff_member_required

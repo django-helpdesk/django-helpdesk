@@ -6,7 +6,7 @@ from django.test.client import Client
 
 from helpdesk.models import Queue, Ticket
 from helpdesk import settings
-from helpdesk.query import get_query
+from helpdesk.query import __Query__
 from helpdesk.user import HelpdeskUser
 
 
@@ -166,7 +166,7 @@ class PerQueueStaffMembershipTestCase(TestCase):
         for identifier in self.IDENTIFIERS:
             self.client.login(username='User_%d' % identifier, password=str(identifier))
             response = self.client.get(reverse('helpdesk:list'))
-            tickets = get_query(response.context['urlsafe_query'], HelpdeskUser(self.identifier_users[identifier]))
+            tickets = __Query__(HelpdeskUser(self.identifier_users[identifier]), base64query=response.context['urlsafe_query']).get()
             self.assertEqual(
                 len(tickets),
                 identifier * 2,
@@ -186,7 +186,7 @@ class PerQueueStaffMembershipTestCase(TestCase):
         # Superuser
         self.client.login(username='superuser', password='superuser')
         response = self.client.get(reverse('helpdesk:list'))
-        tickets = get_query(response.context['urlsafe_query'], HelpdeskUser(self.superuser))
+        tickets = __Query__(HelpdeskUser(self.superuser), base64query=response.context['urlsafe_query']).get()
         self.assertEqual(
             len(tickets),
             6,

@@ -151,6 +151,11 @@ urlpatterns = [
     url(r'^datatables_ticket_list/(?P<query>{})$'.format(base64_pattern),
         staff.datatables_ticket_list,
         name="datatables_ticket_list"),
+
+    url(r'^timeline_ticket_list/(?P<query>{})$'.format(base64_pattern),
+        staff.timeline_ticket_list,
+        name="timeline_ticket_list"),
+
 ]
 
 urlpatterns += [
