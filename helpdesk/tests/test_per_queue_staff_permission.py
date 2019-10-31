@@ -166,7 +166,7 @@ class PerQueueStaffMembershipTestCase(TestCase):
         for identifier in self.IDENTIFIERS:
             self.client.login(username='User_%d' % identifier, password=str(identifier))
             response = self.client.get(reverse('helpdesk:list'))
-            tickets = __Query__(HelpdeskUser(self.identifier_users[identifier]), base64query = response.context['urlsafe_query']).get()
+            tickets = __Query__(HelpdeskUser(self.identifier_users[identifier]), base64query=response.context['urlsafe_query']).get()
             self.assertEqual(
                 len(tickets),
                 identifier * 2,
@@ -186,7 +186,7 @@ class PerQueueStaffMembershipTestCase(TestCase):
         # Superuser
         self.client.login(username='superuser', password='superuser')
         response = self.client.get(reverse('helpdesk:list'))
-        tickets = __Query__(HelpdeskUser(self.superuser), base64query = response.context['urlsafe_query']).get()
+        tickets = __Query__(HelpdeskUser(self.superuser), base64query=response.context['urlsafe_query']).get()
         self.assertEqual(
             len(tickets),
             6,
