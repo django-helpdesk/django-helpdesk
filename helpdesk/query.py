@@ -118,7 +118,7 @@ class __Query__:
 
         sorting: The name of the column to sort by
         """
-        for key in self.params['filtering'].keys():
+        for key in self.params.get('filtering', {}).keys():
             filter = {key: self.params['filtering'][key]}
             queryset = queryset.filter(**filter)
         queryset = queryset.filter(self.get_search_filter_args())
@@ -130,15 +130,18 @@ class __Query__:
             queryset = queryset.order_by(sorting)
         return queryset
 
+    def get_cache_key(self):
+        return str(self.huser.user.pk) + ":" + self.base64
+
     def refresh_query(self):
         tickets = self.huser.get_tickets_in_queues().select_related()
         ticket_qs = self.__run__(tickets)
-        cache.set(self.huser.user.email + self.base64, ticket_qs, timeout=3600)
+        cache.set(self.get_cache_key(), ticket_qs, timeout=3600)
         return ticket_qs
 
     def get(self):
         # Prefilter the allowed tickets
-        objects = cache.get(self.huser.user.email + self.base64)
+        objects = cache.get(self.get_cache_key())
         if objects is not None:
             return objects
         return self.refresh_query()
@@ -189,7 +192,7 @@ class __Query__:
                 event = {
                     'start_date': self.mk_timeline_date(followup.date),
                     'text': {
-                        'headline': ticket.title + '<br/>' + followup.title,
+                        'headline': ticket.title + ' - ' + followup.title,
                         'text': (followup.comment if followup.comment else _('No text')) + '<br/> <a href="%s" class="btn" role="button">%s</a>' %
                         (reverse('helpdesk:view', kwargs={'ticket_id': ticket.pk}), _("View ticket")),
                     },
