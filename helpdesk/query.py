@@ -56,18 +56,23 @@ def get_search_filter_args(search):
         return Q(queue__title__icontains=search[len('queue:'):])
     if search.startswith('priority:'):
         return Q(priority__icontains=search[len('priority:'):])
-    return (
-        Q(id__icontains=search) |
-        Q(title__icontains=search) |
-        Q(description__icontains=search) |
-        Q(priority__icontains=search) |
-        Q(resolution__icontains=search) |
-        Q(submitter_email__icontains=search) |
-        Q(assigned_to__email__icontains=search) |
-        Q(ticketcustomfieldvalue__value__icontains=search) |
-        Q(created__icontains=search) |
-        Q(due_date__icontains=search)
-    )
+    filter = Q()
+    for subsearch in search.split("OR"):
+        subsearch = subsearch.strip()
+        filter = (
+            filter |
+            Q(id__icontains=subsearch) |
+            Q(title__icontains=subsearch) |
+            Q(description__icontains=subsearch) |
+            Q(priority__icontains=subsearch) |
+            Q(resolution__icontains=subsearch) |
+            Q(submitter_email__icontains=subsearch) |
+            Q(assigned_to__email__icontains=subsearch) |
+            Q(ticketcustomfieldvalue__value__icontains=subsearch) |
+            Q(created__icontains=subsearch) |
+            Q(due_date__icontains=subsearch)
+        )
+    return filter
 
 
 DATATABLES_ORDER_COLUMN_CHOICES = Choices(
