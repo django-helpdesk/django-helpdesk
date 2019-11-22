@@ -197,7 +197,8 @@ def apply_query(queryset, params):
             Q(ticketcustomfieldvalue__value__icontains=search)
         )
 
-        queryset = queryset.filter(qset)
+        # Distinct works, when there are multiple custom fields
+        queryset = queryset.filter(qset).distinct()
 
     sorting = params.get('sorting', None)
     if sorting:
