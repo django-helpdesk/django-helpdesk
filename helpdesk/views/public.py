@@ -88,6 +88,11 @@ class CreateTicketView(FormView):
             initial_data[qpf] = request.GET.get(qpf, initial_data.get(qpf, ""))
         return initial_data
 
+    def get_form_kwargs(self, *args, **kwargs):
+        kwargs = super().get_form_kwargs(*args, **kwargs)
+        kwargs['hidden_fields'] = self.request.GET.get('_hide_fields_', '').split(',')
+        return kwargs
+
     def form_valid(self, form):
         request = self.request
         if text_is_spam(form.cleaned_data['body'], request):

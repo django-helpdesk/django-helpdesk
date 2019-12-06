@@ -337,34 +337,22 @@ class PublicTicketForm(AbstractTicketForm):
         help_text=_('We will e-mail you when your ticket is updated.'),
     )
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, hidden_fields=(), *args, **kwargs):
         """
         Add any (non-staff) custom fields that are defined to the form
         """
         super(PublicTicketForm, self).__init__(*args, **kwargs)
-        if hasattr(settings, 'HELPDESK_PUBLIC_TICKET_QUEUE'):
-            del self.fields['queue']
-        else:
-            self.fields['queue'].choices = [
-                ('', '--------')
-            ] + [
-                (q.id, q.title) for q in Queue.objects.filter(allow_public_submission=True)
-            ]
-        if hasattr(settings, 'HELPDESK_PUBLIC_TICKET_PRIORITY'):
-            self.fields['priority'].widget = forms.HiddenInput()
-        if hasattr(settings, 'HELPDESK_PUBLIC_TICKET_DUE_DATE'):
-            self.fields['due_date'].widget = forms.HiddenInput()
+        field_hide_table = {
+            'queue': 'HELPDESK_PUBLIC_TICKET_QUEUE',
+            'priority': 'HELPDESK_PUBLIC_TICKET_PRIORITY',
+            'due_date': 'HELPDESK_PUBLIC_TICKET_DUE_DATE',
+        }
+        for (field, setting) in field_hide_table.items():
+            if hasattr(settings, setting) or field in hidden_fields:
+                self.fields[field].widget = forms.HiddenInput()
 
-    def _get_queue(self):
-        if getattr(settings, 'HELPDESK_PUBLIC_TICKET_QUEUE', None):
-            # force queue to be the pre-defined one
-            # (only for anon submissions)
-            return Queue.objects.filter(
-                slug=settings.HELPDESK_PUBLIC_TICKET_QUEUE
-            ).first()
-        else:
-            # get the queue user entered
-            return Queue.objects.get(id=int(self.cleaned_data['queue']))
+        self.fields['queue'].choices = [('', '--------')] + [
+            (q.id, q.title) for q in Queue.objects.filter(allow_public_submission=True)]
 
     def save(self):
         """
