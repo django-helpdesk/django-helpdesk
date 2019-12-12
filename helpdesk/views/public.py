@@ -31,8 +31,7 @@ def create_ticket(request, *args, **kwargs):
         return CreateTicketView.as_view()(request, *args, **kwargs)
 
 
-class CreateTicketView(FormView):
-    template_name = 'helpdesk/public_create_ticket.html'
+class BaseCreateTicketView(FormView):
     form_class = PublicTicketForm
 
     def dispatch(self, *args, **kwargs):
@@ -113,6 +112,14 @@ class CreateTicketView(FormView):
 
     def get_success_url(self):
         request = self.request
+
+
+class CreateTicketIframeView(BaseCreateTicketView):
+    template_name = 'helpdesk/public_create_ticket_iframe.html'
+
+
+class CreateTicketView(BaseCreateTicketView):
+    template_name = 'helpdesk/public_create_ticket.html'
 
 
 class Homepage(CreateTicketView):

@@ -1,0 +1,74 @@
+{% load i18n %}
+{% load saved_queries %}
+{% load load_helpdesk_settings %}
+{% load static from staticfiles %}
+{% with request|load_helpdesk_settings as helpdesk_settings %}
+{% with user|saved_queries as user_saved_queries_ %}
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="description" content="">
+<meta name="author" content="">
+
+<title>{% block helpdesk_title %}Helpdesk{% endblock %} :: {% trans "Powered by django-helpdesk" %}</title>
+
+
+<!-- Bootstrap Core CSS -->
+{% if helpdesk_settings.HELPDESK_USE_CDN %}
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" rel="stylesheet">
+{% else %}
+<link href="{% static 'helpdesk/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+{% endif %}
+
+<!-- Font Awesome -->
+<link href="{% static 'helpdesk/vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet" type="text/css">
+
+<!-- DataTables CSS-->
+<link href="{% static 'helpdesk/vendor/datatables/css/dataTables.bootstrap4.css' %}" rel="stylesheet">
+
+<!-- MetisMenu CSS -->
+<link href="{% static 'helpdesk/vendor/metisMenu/metisMenu.min.css' %}" rel="stylesheet">
+
+<!-- Morris Charts CSS -->
+{% if helpdesk_settings.HELPDESK_USE_CDN %}
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.css">
+{% else %}
+<link href="{% static 'helpdesk/vendor/morrisjs/morris.css' %}" rel="stylesheet">
+{% endif %}
+
+<!-- Custom CSS -->
+<link href="{% static 'helpdesk/css/sb-admin.css' %}" rel="stylesheet">
+<link rel='stylesheet' href='{% static "helpdesk/helpdesk-extend.css" %}' type='text/css'  media="screen" >
+
+{% if user.id %}
+<!-- RSS -->
+<link rel='alternate' href='{% url 'helpdesk:rss_user' user.get_username %}' type='application/rss+xml' title='{% trans "My Open Tickets" %}' />
+<link rel='alternate' href='{% url 'helpdesk:rss_activity' %}' type='application/rss+xml' title='{% trans "All Recent Activity" %}' />
+<link rel='alternate' href='{% url 'helpdesk:rss_unassigned' %}' type='application/rss+xml' title='{% trans "Unassigned Tickets" %}' />
+
+<style type="text/css">
+/* hide google translate top bar */
+.goog-te-banner-frame {display: none !important;}
+.goog-te-balloon-frame {display: none !important;}
+/* hide google translate tooltips (generated for every translated item) */
+.goog-tooltip {display: none !important; }
+</style>
+
+<style type="text/css">
+/* header */
+#dropdown li.headerlink { width: auto; float: left; text-align: center; }
+
+/* query list */
+#dropdown li.headerlink ul {    display: none;
+                                text-align: left;
+                                position: absolute;
+                                padding: 5px;
+                                z-index: 2; }
+/* query entries */
+#dropdown li.headerlink:hover ul { display: block; width: auto; }
+#dropdown li.headerlink:hover ul li { padding: 5px; margin: 1px; float: none; display: block; }
+</style>
+{% endif %}
+{% endwith %}
+{% endwith %}

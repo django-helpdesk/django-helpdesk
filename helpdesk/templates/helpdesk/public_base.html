@@ -1,47 +1,13 @@
 {% load i18n %}
-{% load load_helpdesk_settings %}
 {% load static from staticfiles %}
+{% load load_helpdesk_settings %}
 {% with request|load_helpdesk_settings as helpdesk_settings %}
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
 
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
-
-    <title>{% block helpdesk_title %}{% trans 'Helpdesk' %}{% endblock %} :: {% trans "Powered by django-helpdesk" %}</title>
-
-    <!-- Bootstrap Core CSS -->
-    {% if helpdesk_settings.HELPDESK_USE_CDN %}
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" rel="stylesheet">
-    {% else %}
-    <link href="{% static 'helpdesk/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
-    {% endif %}
-    
-    <!-- Font Awesome -->
-    <link href="{% static 'helpdesk/vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet" type="text/css">
-    
-    <!-- DataTables CSS-->
-    <link href="{% static 'helpdesk/vendor/datatables/css/dataTables.bootstrap4.css' %}" rel="stylesheet">
-
-    <!-- MetisMenu CSS -->
-    <link href="{% static 'helpdesk/vendor/metisMenu/metisMenu.min.css' %}" rel="stylesheet">
-
-    <!-- Custom CSS -->
-    <link href="{% static 'helpdesk/css/sb-admin.css' %}" rel="stylesheet">
-    <link rel='stylesheet' href='{% static "helpdesk/helpdesk-extend.css" %}' type='text/css'  media="screen" >
-
-    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-    <!--[if lt IE 9]>
-        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
-    <![endif]-->
-
+    {% include 'helpdesk/base-head.html' %}
     {% block helpdesk_head %}{% endblock %}
 
 </head>

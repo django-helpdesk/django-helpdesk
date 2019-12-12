@@ -167,6 +167,10 @@ urlpatterns += [
         public.create_ticket,
         name='submit'),
 
+    url(r'^tickets/submit_iframe/$',
+        public.CreateTicketIframeView.as_view(),
+        name='submit_iframe'),
+
     url(r'^view/$',
         public.view_ticket,
         name='public_view'),
