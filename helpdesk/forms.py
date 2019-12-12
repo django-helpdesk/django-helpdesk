@@ -342,6 +342,8 @@ class PublicTicketForm(AbstractTicketForm):
         Add any (non-staff) custom fields that are defined to the form
         """
         super(PublicTicketForm, self).__init__(*args, **kwargs)
+        self._add_form_custom_fields(False)
+
         field_hide_table = {
             'queue': 'HELPDESK_PUBLIC_TICKET_QUEUE',
             'priority': 'HELPDESK_PUBLIC_TICKET_PRIORITY',
