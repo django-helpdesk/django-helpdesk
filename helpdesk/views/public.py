@@ -21,7 +21,7 @@ from helpdesk.decorators import protect_view, is_helpdesk_staff
 import helpdesk.views.staff as staff
 from helpdesk.forms import PublicTicketForm
 from helpdesk.lib import text_is_spam
-from helpdesk.models import Ticket, Queue, UserSettings, KBCategory
+from helpdesk.models import CustomField, Ticket, Queue, UserSettings, KBCategory
 
 
 def create_ticket(request, *args, **kwargs):
@@ -83,6 +83,8 @@ class BaseCreateTicketView(FormView):
             initial_data['submitter_email'] = request.user.email
 
         query_param_fields = ['submitter_email', 'title', 'body']
+        custom_fields = ["custom_%s" % f.name for f in CustomField.objects.filter(staff_only=False)]
+        query_param_fields += custom_fields
         for qpf in query_param_fields:
             initial_data[qpf] = request.GET.get(qpf, initial_data.get(qpf, ""))
         return initial_data
