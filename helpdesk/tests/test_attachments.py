@@ -113,6 +113,7 @@ class AttachmentUnitTests(TestCase):
     def test_autofill(self, mock_att_save, mock_queue_save, mock_ticket_save, mock_follow_up_save):
         """ check utf-8 data is parsed correctly """
         self.follow_up.pk = 100
+        self.follow_up.save()
         obj = models.FollowUpAttachment.objects.create(
             followup=self.follow_up,
             file=self.test_file
