@@ -9,7 +9,12 @@ def unpickle_settings(settings_pickled):
         import pickle
     except ImportError:
         import cPickle as pickle
-    from helpdesk.lib import b64decode
+    try:
+        # Python 2 support
+        from base64 import urlsafe_b64decode as b64decode
+    except ImportError:
+        # Python 3 support
+        from base64 import decodebytes as b64decode
     try:
         return pickle.loads(b64decode(settings_pickled.encode('utf-8')))
     except Exception:
