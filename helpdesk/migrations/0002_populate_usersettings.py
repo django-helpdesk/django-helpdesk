@@ -1,19 +1,17 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from django.contrib.auth import get_user_model
 from django.db import models, migrations
 
 from helpdesk.settings import DEFAULT_USER_SETTINGS
 
 
-def picke_settings(data):
+def pickle_settings(data):
     """Pickling as defined at migration's creation time"""
     try:
         import pickle
     except ImportError:
         import cPickle as pickle
-    from helpdesk.lib import b64encode
+    from helpdesk.query import b64encode
     return b64encode(pickle.dumps(data))
 
 
@@ -29,7 +27,7 @@ def populate_usersettings(apps, schema_editor):
     # Import historical version of models
     UserSettings = apps.get_model("helpdesk", "UserSettings")
 
-    settings_pickled = picke_settings(DEFAULT_USER_SETTINGS)
+    settings_pickled = pickle_settings(DEFAULT_USER_SETTINGS)
 
     for u in User.objects.all():
         try:

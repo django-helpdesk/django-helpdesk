@@ -1,4 +1,4 @@
-{% extends "helpdesk/public_base.html" %}{% load i18n bootstrap %}
+{% extends "helpdesk/public_base.html" %}{% load i18n bootstrap4form %}
 {% block helpdesk_title %}{% trans "Helpdesk Login" %}{% endblock %}
 
 {% block helpdesk_body %}
@@ -7,34 +7,39 @@
     <meta http-equiv="REFRESH" content="0;url={% url 'helpdesk:home' %}">
 {% else %}
 
-    <div class="col-md-4 col-md-offset-4">
-        <div class="login-panel panel panel-default">
-            <div class="panel-heading">
-                <h3 class="panel-title">{% trans 'Please Sign In' %}</h3>
-            </div>
-            <div class="panel-body">
-                <form role="form" method='post' action='./'>
+    <div class="container">
+      <div class="card card-login mx-auto mt-5">
+        <div class="card-header">{% trans 'Please Sign In' %}</div>
+        <div class="card-body">
+          <form role="form" method='post' action='./'>
                 {% if form.errors %}
                 <div class="alert alert-danger">{% trans "Your username and password didn't match. Please try again." %}</div>
                 {% endif %}
-                    <fieldset>
-                        <div class="form-group">
-                            <input class="form-control" placeholder="Username" name="username" type="text" autofocus>
-                        </div>
-                        <div class="form-group">
-                            <input class="form-control" placeholder="Password" name="password" type="password" value="">
-                        </div>
-                        <div class="checkbox">
-                            <label>
-                                <input name="remember" type="checkbox" value="Remember Me">{% trans 'Remember Me' %}
-                            </label>
-                        </div>
-                        <input class="btn btn-lg btn-success btn-block" type='submit' value='{% trans "Login" %}' />
-                        <input type="hidden" name="next" value="{% if next %}{{ next }}{% else %}../{% endif %}" />
-                    </fieldset>
-                {% csrf_token %}</form>
+            <div class="form-group">
+              <div class="form-label-group">
+                <input type="text" id="username" name="username" class="form-control" placeholder="Username" required="required" autofocus="autofocus">
+                <label for="username">Username</label>
+              </div>
             </div>
+            <div class="form-group">
+              <div class="form-label-group">
+                <input type="password" id="password" name="password" class="form-control" placeholder="Password" required="required">
+                <label for="password">Password</label>
+              </div>
+            </div>
+            <div class="form-group">
+              <div class="checkbox">
+                <label>
+                  <input type="checkbox" value="remember-me">
+                  {% trans 'Remember Password' %}
+                </label>
+              </div>
+            </div>
+            <input class="btn btn-lg btn-primary btn-block" type='submit' value='{% trans "Login" %}' />
+            <input type="hidden" name="next" value="{% if next %}{{ next }}{% else %}../{% endif %}" />
+          {% csrf_token %}</form>
         </div>
+      </div>
     </div>
 
 {% endif %}

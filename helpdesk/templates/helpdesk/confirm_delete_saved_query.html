@@ -1,5 +1,12 @@
 {% extends "helpdesk/base.html" %}{% load i18n %}
 
+{% block helpdesk_breadcrumb %}
+<li class="breadcrumb-item">
+    <a href="#">Tickets</a>
+</li>
+<li class="breadcrumb-item active">{% trans "Delete Saved Query" %}</li>
+{% endblock %}
+
 {% block helpdesk_title %}{% trans "Delete Saved Query" %}{% endblock %}
 
 {% block helpdesk_body %}

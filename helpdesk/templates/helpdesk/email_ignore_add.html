@@ -2,6 +2,13 @@
 
 {% block helpdesk_title %}{% trans "Ignore E-Mail Address" %}{% endblock %}
 
+{% block helpdesk_breadcrumb %}
+<li class="breadcrumb-item">
+    <a href="{% url 'helpdesk:list' %}">{% trans "Tickets" %}</a>
+</li>
+<li class="breadcrumb-item active">{% trans "Ignore E-Mail Address" %}</li>
+{% endblock %}
+
 {% block helpdesk_body %}
 <h2>{% trans "Ignore E-Mail Address" %}</h2>
 

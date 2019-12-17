@@ -27,7 +27,8 @@ class QuickDjangoTest(object):
         'django.contrib.sessions',
         'django.contrib.sites',
         'django.contrib.staticfiles',
-        'bootstrapform',
+        'bootstrap4form',
+        'helpdesk',
     )
     MIDDLEWARE = [
         'django.middleware.security.SecurityMiddleware',
@@ -60,8 +61,9 @@ class QuickDjangoTest(object):
         },
     ]
 
+
     def __init__(self, *args, **kwargs):
-        self.apps = args
+        self.tests = args
         self._tests()
 
     def _tests(self):
@@ -78,18 +80,20 @@ class QuickDjangoTest(object):
                     'PORT': '',
                 }
             },
-            INSTALLED_APPS=self.INSTALLED_APPS + self.apps,
+            INSTALLED_APPS=self.INSTALLED_APPS,
             MIDDLEWARE=self.MIDDLEWARE,
             ROOT_URLCONF='helpdesk.tests.urls',
             STATIC_URL='/static/',
-            TEMPLATES=self.TEMPLATES
+            LOGIN_URL='/helpdesk/login/',
+            TEMPLATES=self.TEMPLATES,
+            SITE_ID=1
         )
 
         from django.test.runner import DiscoverRunner
         test_runner = DiscoverRunner(verbosity=1)
         django.setup()
 
-        failures = test_runner.run_tests(self.apps)
+        failures = test_runner.run_tests(self.tests)
         if failures:
             sys.exit(failures)
 
@@ -99,13 +103,15 @@ if __name__ == '__main__':
 
     Example usage:
 
-        $ python quicktest.py app1 app2
+        $ python quicktest.py test1 test2
 
     """
     parser = argparse.ArgumentParser(
         usage="[args]",
-        description="Run Django tests on the provided applications."
+        description="Run Django tests."
     )
-    parser.add_argument('apps', nargs='+', type=str)
+    parser.add_argument('tests', nargs="*", type=str)
     args = parser.parse_args()
-    QuickDjangoTest(*args.apps)
+    if not args.tests:
+        args.tests = ['helpdesk']
+    QuickDjangoTest(*args.tests)

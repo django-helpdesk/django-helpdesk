@@ -1,65 +1,24 @@
 {% extends "helpdesk/base.html" %}
-{% load i18n bootstrap humanize %}
+{% load i18n bootstrap4form humanize %}
 {% load static from staticfiles %}
+
+
+
 {% block helpdesk_title %}{{ ticket.queue.slug }}-{{ ticket.id }} : {% trans "View Ticket Details" %}{% endblock %}
+
 {% block helpdesk_head %}
-<script type='text/javascript' language='javascript'>
-$(document).ready(function() {
-    $("#ShowFurtherEditOptions").click(function() {
-        $("#FurtherEditOptions").fadeIn();
-        $("#ShowFurtherOptPara").hide();
-        return false;
-    });
-
-    $("#ShowFileUpload").click(function() {
-        $("#FileUpload").fadeIn();
-        $("#ShowFileUploadPara").hide();
-        return false;
-    });
-
-    $('#id_preset').change(function() {
-        preset = $('#id_preset').val();
-        if (preset != '') {
-            $.get("{% url 'helpdesk:raw' "preset" %}?id=" + preset, function(data) {
-                $("#commentBox").val(data)
-            });
-        }
-    });
-
-    $("[data-toggle=tooltip]").tooltip();
-
-    // lists for file input change events, then updates the associated text label
-    // with the file name selected
-    $('.add_file_fields_wrap').on('fileselect', ':file', function(event, numFiles, label, browseButtonNum) {
-        $("#selectedfilename"+browseButtonNum).html(label);
-    });
-
-    var x = 0;
-    var wrapper         = $(".add_file_fields_wrap"); //Fields wrapper
-    var add_button      = $(".add_file_field_button"); //Add button ID
-
-    $(add_button).click(function(e){ //on add input button click
-        x++;
-        e.preventDefault();
-        $(wrapper).append("<div><label class='btn btn-primary btn-sm btn-file'>Browse... <input type='file' name='attachment' id='file" + x + "' multiple style='display: none;'/></label><span>&nbsp;</span><span id='selectedfilename" + x + "'>{% trans 'No files selected.' %}</span></div>"); //add input box
-    });
-
-});
-
-// this function listens for changes on any file input, and
-// emits the appropriate event to update the input's text.
-// Needed to have properly styled file input buttons! (this really shouldn't be this hard...)
-$(document).on('change', ':file', function() {
-    var input = $(this),
-        inputWidgetNum = $(this).attr('id').split("file")[1],
-        numFiles = input.get(0).files ? input.get(0).files.length : 1,
-        label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
-    input.trigger('fileselect', [numFiles, label, inputWidgetNum]);
-});
-</script>
 {% endblock %}
 
 {% block h1_title %}{{ ticket.ticket_for_url }}{% endblock %}
+
+{% block helpdesk_breadcrumb %}
+<li class="breadcrumb-item">
+    <a href="{% url 'helpdesk:list' %}">{% trans "Tickets" %}</a>
+</li>
+<li class="breadcrumb-item active">
+    {{ ticket.queue.slug }}-{{ ticket.id }}
+</li>
+{% endblock %}
 
 {% block helpdesk_body %}
 {% if helpdesk_settings.HELPDESK_TRANSLATE_TICKET_COMMENTS %}
@@ -75,69 +34,66 @@ $(document).on('change', ':file', function() {
 
 {% if ticket.followup_set.all %}
 {% load ticket_to_link %}
-<div class="panel panel-primary">
-    <div class="panel-heading">
-        <h4><i class="fa fa-clock-o fa-fw fa-lg"></i>&nbsp;{% trans "Follow-Ups" %}</h4>
-    </div>
-    <!-- /.panel-heading -->
-    <div class="panel-body">
-        <ul class="timeline">
-        {% for followup in ticket.followup_set.all %}
-            <li{% if not followup.user %} class="timeline-inverted"{% endif %}>
-                <div class="timeline-badge{% if forloop.first %} success{% endif %}"><i class="fa {% if forloop.first %}fa-plus-square{% else %}{% if followup.ticketchange_set.all %}fa-gears{% else %}{% if followup.user %}fa-share{% else %}fa-reply{% endif %}{% endif %}{% endif %}"></i></div>
-                <div class="timeline-panel">
-                    <div class="timeline-heading">
-                        <h4 class="timeline-title">{{ followup.title }}</h4>
-                        <p><small class="text-muted"><i class="fa fa-clock-o"></i>&nbsp;<span class='byline text-info'>{% if followup.user %}by {{ followup.user }}{% endif %} <span title='{{ followup.date|date:"r" }}'>{{ followup.date|naturaltime }}</span>{% if not followup.public %} <span class='private'>({% trans "Private" %})</span>{% endif %}</span></small></p>
+    <div class="card mb-3">
+        <div class="card-header"><i class="fas fa-clock fa-fw fa-lg"></i>&nbsp;{% trans "Follow-Ups" %}</div>
+        <div class="card-body">
+            <div class="list-group">
+            {% for followup in ticket.followup_set.all %}
+                <div class="list-group-item list-group-item-action">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">{{ followup.title }}</h5>
+                        <small><i class="fas fa-clock"></i>&nbsp;<span class='byline text-info'>{% if followup.user %}by {{ followup.user }},{% endif %} <span title='{{ followup.date|date:"r" }}'>{{ followup.date|naturaltime }}</span>{% if followup.time_spent %}, <span>{% trans "time spent" %}: {{ followup.time_spent_formated }}</span>{% endif %} {% if not followup.public %} <span class='private'>({% trans "Private" %})</span>{% endif %}</span></small>
                     </div>
-                    <div class="timeline-body">
-                        <p>{% if followup.comment %}{{ followup.comment|force_escape|urlizetrunc:50|num_to_link|linebreaksbr }}{% endif %}</p>
+                    <p class="mb-1">
+                        {% if followup.comment %}
+                            <p>{{ followup.get_markdown|urlizetrunc:50|num_to_link|linebreaksbr }}</p>
+                        {% endif %}
                         {% for change in followup.ticketchange_set.all %}
                             {% if forloop.first %}<div class='changes'><ul>{% endif %}
                             <li>{% blocktrans with change.field as field and change.old_value as old_value and change.new_value as new_value %}Changed {{ field }} from {{ old_value }} to {{ new_value }}.{% endblocktrans %}</li>
                             {% if forloop.last %}</ul></div>{% endif %}
                         {% endfor %}
-                        {% for attachment in followup.attachment_set.all %}{% if forloop.first %}<hr><div class='attachments'><ul>{% endif %}
+                        {% for attachment in followup.followupattachment_set.all %}{% if forloop.first %}{% trans "Attachments" %}:<div class='attachments'><ul>{% endif %}
                             <li><a href='{{ attachment.file.url }}'>{{ attachment.filename }}</a> ({{ attachment.mime_type }}, {{ attachment.size|filesizeformat }})
                             {% if followup.user and request.user == followup.user %}
-                            <a href='{% url 'helpdesk:attachment_del' ticket.id attachment.id %}'><button class="btn btn-danger btn-xs"><i class="fa fa-trash"></i>&nbsp;{% trans 'Delete' %}</button></a>
+                            <a href='{% url 'helpdesk:attachment_del' ticket.id attachment.id %}'><button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button></a>
                             {% endif %}
                             </li>
                             {% if forloop.last %}</ul></div>{% endif %}
                         {% endfor %}
-<!--- ugly long test to suppress the following if it will be empty, to save vertical space -->
-{% with possible=helpdesk_settings.HELPDESK_SHOW_EDIT_BUTTON_FOLLOW_UP %}
-    {% if  possible and followup.user and request.user == followup.user and not followup.ticketchange_set.all or  possible and user.is_superuser and helpdesk_settings.HELPDESK_SHOW_DELETE_BUTTON_SUPERUSER_FOLLOW_UP %}
-                        <hr>
-                        <div class="btn-group">
+                    </p>
+                    <!--- ugly long test to suppress the following if it will be empty, to save vertical space -->
+                    {% with possible=helpdesk_settings.HELPDESK_SHOW_EDIT_BUTTON_FOLLOW_UP %}
+                        {% if  possible and followup.user and request.user == followup.user and not followup.ticketchange_set.all or  possible and user.is_superuser and helpdesk_settings.HELPDESK_SHOW_DELETE_BUTTON_SUPERUSER_FOLLOW_UP %}
+                        <small>
                             {% if helpdesk_settings.HELPDESK_SHOW_EDIT_BUTTON_FOLLOW_UP %}
                                 {% if followup.user and request.user == followup.user and not followup.ticketchange_set.all %}
-                                <a href="{% url 'helpdesk:followup_edit' ticket.id followup.id %}" class='followup-edit'><button type="button" class="btn btn-warning btn-xs"><i class="fa fa-edit"></i>&nbsp;{% trans "Edit" %}</button></a>
+                                <a href="{% url 'helpdesk:followup_edit' ticket.id followup.id %}" class='followup-edit'><button type="button" class="btn btn-warning btn-sm float-right"><i class="fas fa-edit"></i></button></a>
                                 {% endif %}
                             {% endif %}
                             {% if user.is_superuser and helpdesk_settings.HELPDESK_SHOW_DELETE_BUTTON_SUPERUSER_FOLLOW_UP %}
-                                <a href="{% url 'helpdesk:followup_delete' ticket.id followup.id %}" class='followup-edit'><button type="button" class="btn btn-warning btn-xs"><i class="fa fa-trash"></i>&nbsp;{% trans "Delete" %}</button></a>
+                                <a href="{% url 'helpdesk:followup_delete' ticket.id followup.id %}" class='followup-edit'><button type="button" class="btn btn-warning btn-sm float-right"><i class="fas fa-trash"></i></button></a>
                             {% endif %}
-                        </div>
-{% endif %}{% endwith %}
-                    </div>
+                        </small>
+                    {% endif %}{% endwith %}
                 </div>
-            </li>
-        {% endfor %}
-
-        </ul>
+                <!-- /.list-group-item -->
+            {% endfor %}
+            </div>
+            <!-- /.list-group -->
+        </div>
+        <!-- /.card-body -->
     </div>
-    <!-- /.panel-body -->
-</div>
-<!-- /.panel -->
+    <!-- /.card -->
 
 {% endif %}
 {% if helpdesk_settings.HELPDESK_TRANSLATE_TICKET_COMMENTS %}
 </div>
 {% endif %}
 
-<div id='add-followup' class="well">
-<h3>{% trans "Respond to this ticket" %}</h3>
+<div class="card mb-3">
+    <div class="card-header">{% trans "Respond to this ticket" %}</div>
+    <div class="card-body">
 
 <form method='post' action='update/' enctype='multipart/form-data'>
 
@@ -198,6 +154,13 @@ $(document).on('change', ':file', function() {
         <dd><input type='checkbox' name='public' value='1' checked='checked' />&nbsp; {% trans 'Yes, make this update public.' %}</dd>
         <dd class='form_help_text'>{% trans "If this is public, the submitter will be e-mailed your comment or resolution." %}</dd>
         {% endif %}
+
+        {% if user.is_staff %}
+        <dt>
+            <label for='id_time_spent'>{% trans "Time spent" %}</label> <span class='form_optional'>{% trans "(Optional)" %}</span>
+        </dt>
+        <dd><input name='time_spent' type="time" /></dd>
+        {% endif %}
     </dl>
 
 <p id='ShowFurtherOptPara'><button class="btn btn-warning btn-sm" id='ShowFurtherEditOptions'>{% trans "Change Further Details &raquo;" %}</button></p>
@@ -214,7 +177,7 @@ $(document).on('change', ':file', function() {
 
         <dt><label for='id_priority'>{% trans "Priority" %}</label></dt>
         <dd><select id='id_priority' name='priority'>{% for p in priorities %}<option value='{{ p.0 }}'{% ifequal p.0 ticket.priority %} selected='selected'{% endifequal %}>{{ p.1 }}</option>{% endfor %}</select></dd>
-        
+
         <dt><label for='id_due_date'>{% trans "Due on" %}</label></dt>
         <dd>{{ form.due_date }}</dd>
 
@@ -242,16 +205,73 @@ $(document).on('change', ':file', function() {
 
 </fieldset>
 
-<button class="btn btn-primary btn-lg" type='submit'>{% trans "Update This Ticket" %}</button>
+<button class="btn btn-primary float-right" type='submit'>{% trans "Update This Ticket" %}</button>
 
 {% csrf_token %}</form>
 
+    </div>
 </div>
+{% endblock %}
 
-<script>
+
+{% block helpdesk_js %}
+<script type='text/javascript' language='javascript'>
 $( function() {
 	$( "#id_due_date" ).datepicker({dateFormat: 'yy-mm-dd'});
 } );
 </script>
 
+<script type='text/javascript' language='javascript'>
+$(document).ready(function() {
+    $("#ShowFurtherEditOptions").click(function() {
+        $("#FurtherEditOptions").toggle();
+        return false;
+    });
+
+    $("#ShowFileUpload").click(function() {
+        $("#FileUpload").fadeIn();
+        $("#ShowFileUploadPara").hide();
+        return false;
+    });
+
+    $('#id_preset').change(function() {
+        preset = $('#id_preset').val();
+        if (preset != '') {
+            $.get("{% url 'helpdesk:raw' "preset" %}?id=" + preset, function(data) {
+                $("#commentBox").val(data)
+            });
+        }
+    });
+
+    $("[data-toggle=tooltip]").tooltip();
+
+    // lists for file input change events, then updates the associated text label
+    // with the file name selected
+    $('.add_file_fields_wrap').on('fileselect', ':file', function(event, numFiles, label, browseButtonNum) {
+        $("#selectedfilename"+browseButtonNum).html(label);
+    });
+
+    var x = 0;
+    var wrapper         = $(".add_file_fields_wrap"); //Fields wrapper
+    var add_button      = $(".add_file_field_button"); //Add button ID
+
+    $(add_button).click(function(e){ //on add input button click
+        x++;
+        e.preventDefault();
+        $(wrapper).append("<div><label class='btn btn-primary btn-sm btn-file'>Browse... <input type='file' name='attachment' id='file" + x + "' multiple style='display: none;'/></label><span>&nbsp;</span><span id='selectedfilename" + x + "'>{% trans 'No files selected.' %}</span></div>"); //add input box
+    });
+
+});
+
+// this function listens for changes on any file input, and
+// emits the appropriate event to update the input's text.
+// Needed to have properly styled file input buttons! (this really shouldn't be this hard...)
+$(document).on('change', ':file', function() {
+    var input = $(this),
+        inputWidgetNum = $(this).attr('id').split("file")[1],
+        numFiles = input.get(0).files ? input.get(0).files.length : 1,
+        label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
+    input.trigger('fileselect', [numFiles, label, inputWidgetNum]);
+});
+</script>
 {% endblock %}

@@ -1,0 +1,8 @@
+Dobrý den,
+
+{{ queue.title }}{% if queue.email_address %}
+{{ queue.email_address }}{% endif %}
+    
+Tento automaticky generovaný e-mail Vám byl odeslán jako uživateli naší podpory
+v souladu s naší politikou ochrany soukromých dat.
+Prosím napište nám, pokud si myslíte, že posílat Vám tento e-mail je chyba.

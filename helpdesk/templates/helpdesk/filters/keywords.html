@@ -1,0 +1,13 @@
+{% load i18n humanize %}
+<div class="form-row">
+    <div class="col col-sm-3">
+        <label for='id_query'>{% trans "Keywords" %}</label>
+    </div>
+    <div class="col col-sm-3">
+        <input type='text' name='q' value='{{ query_params.search_string }}' id='id_query' />
+    </div>
+    <div class="col col-sm-6">
+        <button class='filterBuilderRemove btn btn-danger btn-sm float-right'><i class="fas fa-trash-alt"></i></button>
+    </div>
+      <p class='filterHelp'>{% trans "Keywords are case-insensitive, and will be looked for in the title, body and submitter fields." %}</p>
+</div>

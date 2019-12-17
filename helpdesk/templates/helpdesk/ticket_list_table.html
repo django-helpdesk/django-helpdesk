@@ -1,0 +1,18 @@
+{% load i18n humanize %}
+
+<tbody>
+    {% for ticket in tickets %}
+    <tr class="{{ ticket.get_priority_css_class }}">
+        <th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.ticket }}</a></th>
+        <td><input type='checkbox' name='ticket_id' value='{{ ticket.id }}' class='ticket_multi_select' /></td>
+        <td>{{ ticket.priority }}|||||</td>
+        <th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></th>
+        <td>{{ ticket.queue }}</td>
+        <td>{{ ticket.get_status }}</td>
+        <td data-order='{{ ticket.created|date:"U" }}'><span title='{{ ticket.created|date:"r" }}'>{{ ticket.created|naturaltime }}</span></td>
+        <td data-order='{{ ticket.due_date|date:"U" }}'><span title='{{ ticket.due_date|date:"r" }}'>{{ ticket.due_date|naturaltime }}</span></td>
+        <td>{{ ticket.get_assigned_to }}</td>
+        <td>{{ ticket.time_spent_formated }}</td>
+    </tr>
+    {% endfor %}
+</tbody>

@@ -2,6 +2,16 @@
 
 {% block helpdesk_title %}{% trans "Add Ticket Dependency" %}{% endblock %}
 
+{% block helpdesk_breadcrumb %}
+<li class="breadcrumb-item">
+    <a href="{% url 'helpdesk:list' %}">{% trans "Tickets" %}</a>
+</li>
+<li class="breadcrumb-item">
+    <a href="{% url 'helpdesk:list' %}{{ ticket.id }}/">{{ ticket.queue.slug }}-{{ ticket.id }}</a>
+</li>
+<li class="breadcrumb-item active">{% trans "Add Ticket Dependency" %}</li>
+{% endblock %}
+
 {% block helpdesk_body %}{% blocktrans %}
 <h2>Add Ticket Dependency</h2>
 

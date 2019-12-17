@@ -1,6 +1,17 @@
 {% extends "helpdesk/base.html" %}{% load i18n %}
 {% load static from staticfiles %}
+
 {% block helpdesk_title %}{% trans "RSS Feeds" %}{% endblock %}
+
+{% block helpdesk_breadcrumb %}
+<li class="breadcrumb-item">
+    <a href="{% url 'helpdesk:list' %}">{% trans "Tickets" %}</a>
+</li>
+<li class="breadcrumb-item active">
+    RSS Feeds
+</li>
+{% endblock %}
+
 {% block helpdesk_body %}
 <h2>{% trans "RSS Feeds" %}</h2>
 

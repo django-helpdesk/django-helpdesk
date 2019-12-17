@@ -1,0 +1,12 @@
+<h1 style='font-family: "Trebuchet MS", Arial, sans-serif; font-size: 14pt; color: #6593C0'>{% block header %}Helpdesk{% endblock %}</h1>
+
+{% block content %}{% endblock %}
+
+<p style='font-family: "Trebuchet MS", Arial, sans-serif; font-size: 11pt;'>Dobrý den,</p>
+
+<p style='font-family: "Trebuchet MS", Arial, sans-serif; font-size: 11pt;'><b>{{ queue.title }}</b>{% if queue.email_address %}<br><a href='mailto:{{ queue.email_address }}'>{{ queue.email_address }}</a>{% endif %}</p>
+    
+<p style='font-family: "Trebuchet MS", Arial, sans-serif; font-size: 9pt; color: #808080;'>
+Tento automaticky generovaný e-mail Vám byl odeslán jako uživateli naší podpory
+v souladu s naší politikou ochrany soukromých dat.
+Prosím napište nám, pokud si myslíte, že posílat Vám tento e-mail je chyba.</p>

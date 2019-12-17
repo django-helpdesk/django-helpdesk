@@ -5,6 +5,7 @@ from django.urls import reverse
 from django.test import TestCase
 from django.test.client import Client
 from helpdesk.models import CustomField, Queue, Ticket
+from helpdesk import settings as helpdesk_settings
 
 try:  # python 3
     from urllib.parse import urlparse
@@ -12,7 +13,7 @@ except ImportError:  # python 2
     from urlparse import urlparse
 
 from helpdesk.templatetags.ticket_to_link import num_to_link
-from helpdesk.views.staff import _is_my_ticket
+from helpdesk.user import HelpdeskUser
 
 
 class TicketActionsTestCase(TestCase):
@@ -27,12 +28,21 @@ class TicketActionsTestCase(TestCase):
             updated_ticket_cc='update.public@example.com'
         )
 
+        self.queue_private = Queue.objects.create(
+            title='Queue 2',
+            slug='q2',
+            allow_public_submission=False,
+            new_ticket_cc='new.private@example.com',
+            updated_ticket_cc='update.private@example.com'
+        )
+
         self.ticket_data = {
             'title': 'Test Ticket',
             'description': 'Some Test Ticket',
         }
 
         self.client = Client()
+        helpdesk_settings.HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION = False
 
     def loginUser(self, is_staff=True):
         """Create a staff user and login"""
@@ -44,6 +54,18 @@ class TicketActionsTestCase(TestCase):
         self.user.set_password('pass')
         self.user.save()
         self.client.login(username='User_1', password='pass')
+
+    def test_ticket_markdown(self):
+
+        ticket_data = {
+            'queue': self.queue_public,
+            'title': 'Test Ticket',
+            'description': '*bold*',
+        }
+
+        ticket = Ticket.objects.create(**ticket_data)
+        self.assertEqual(ticket.get_markdown(),
+                         "<p><em>bold</em></p>")
 
     def test_delete_ticket_staff(self):
         # make staff user
@@ -128,7 +150,7 @@ class TicketActionsTestCase(TestCase):
         response = self.client.post(reverse('helpdesk:update', kwargs={'ticket_id': ticket_id}), post_data, follow=True)
         self.assertContains(response, 'Changed Status from Open to Closed')
 
-    def test_is_my_ticket(self):
+    def test_can_access_ticket(self):
         """Tests whether non-staff but assigned user still counts as owner"""
 
         # make non-staff user
@@ -143,16 +165,16 @@ class TicketActionsTestCase(TestCase):
 
         initial_data = {
             'title': 'Private ticket test',
-            'queue': self.queue_public,
+            'queue': self.queue_private,
             'assigned_to': self.user,
             'status': Ticket.OPEN_STATUS,
         }
 
         # create ticket
+        helpdesk_settings.HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION = True
         ticket = Ticket.objects.create(**initial_data)
-
-        self.assertEqual(_is_my_ticket(self.user, ticket), True)
-        self.assertEqual(_is_my_ticket(self.user2, ticket), False)
+        self.assertEqual(HelpdeskUser(self.user).can_access_ticket(ticket), True)
+        self.assertEqual(HelpdeskUser(self.user2).can_access_ticket(ticket), False)
 
     def test_num_to_link(self):
         """Test that we are correctly expanding links to tickets from IDs"""

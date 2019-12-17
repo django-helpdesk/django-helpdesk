@@ -37,6 +37,7 @@ def category(request, slug):
 def item(request, item):
     item = get_object_or_404(KBItem, pk=item)
     return render(request, 'helpdesk/kb_item.html', {
+        'category': item.category,
         'item': item,
         'helpdesk_settings': helpdesk_settings,
     })
@@ -46,9 +47,11 @@ def vote(request, item):
     item = get_object_or_404(KBItem, pk=item)
     vote = request.GET.get('vote', None)
     if vote in ('up', 'down'):
-        item.votes += 1
-        if vote == 'up':
-            item.recommendations += 1
-        item.save()
+        if request.user not in item.voted_by:
+
+            item.votes += 1
+            if vote == 'up':
+                item.recommendations += 1
+            item.save()
 
     return HttpResponseRedirect(item.get_absolute_url())

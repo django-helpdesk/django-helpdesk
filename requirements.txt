@@ -1,9 +1,14 @@
-Django>=1.11,<3
-django-bootstrap-form>=3.3,<4
+Django>=2.2,<3
+django-bootstrap4-form
+celery
+django-celery-beat
 email-reply-parser
-django-markdown-deux
+akismet
+markdown
 beautifulsoup4
 lxml
 simplejson
 pytz
 six
+djangorestframework
+django-model-utils

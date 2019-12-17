@@ -1,17 +1,29 @@
-{% extends "helpdesk/base.html" %}{% load i18n bootstrap %}
+{% extends "helpdesk/base.html" %}{% load i18n bootstrap4form %}
 
 {% block helpdesk_title %}{% trans "Change User Settings" %}{% endblock %}
+
+{% block helpdesk_breadcrumb %}
+<li class="breadcrumb-item">
+    <a href="{% url 'helpdesk:user_settings' %}">{% trans "Settings" %}</a>
+</li>
+<li class="breadcrumb-item active">
+    Change User Settings
+</li>
+{% endblock %}
 
 {% block helpdesk_body %}
 <h2>{% trans "User Settings" %}</h2>
 
 <p>{% blocktrans %}Use the following options to change the way your helpdesk system works for you. These settings do not impact any other user.{% endblocktrans %}</p>
 
+{% block form_content %}
 <form role="form" method='post' action='./'>
-    {{ form|bootstrap }}
+    {% csrf_token %}
+    {{ form|bootstrap4form }}
     <div class="form-group">
-        <input class="btn btn-primary" type='submit' value='{% trans "Save Options" %}' />
+      <input type="submit" value="Submit"/>
     </div>
-{% csrf_token %}</form>
+</form>
+{% endblock %}
 
 {% endblock %}

@@ -2,6 +2,8 @@
 import sys
 from django.contrib.auth import get_user_model
 
+from helpdesk.models import Ticket, Queue, UserSettings
+
 User = get_user_model()
 
 
@@ -24,13 +26,13 @@ def get_user(username='helpdesk.staff',
     return user
 
 
+def get_staff_user():
+    return get_user(is_staff=True)
+
+
 def reload_urlconf(urlconf=None):
 
-    from django.utils import six
-    if six.PY2:
-        from imp import reload
-    else:
-        from importlib import reload
+    from importlib import reload
 
     if urlconf is None:
         from django.conf import settings
@@ -47,4 +49,28 @@ def reload_urlconf(urlconf=None):
     clear_url_caches()
 
 
+def create_ticket(**kwargs):
+    q = kwargs.get('queue', None)
+    if q is None:
+        try:
+            q = Queue.objects.all()[0]
+        except IndexError:
+            q = Queue.objects.create(title='Test Q', slug='test', )
+    data = {
+        'title': "I wish to register a complaint",
+        'queue': q,
+    }
+    data.update(kwargs)
+    return Ticket.objects.create(**data)
+
+
 HELPDESK_URLCONF = 'helpdesk.urls'
+
+
+def print_response(response, stdout=False):
+    content = response.content.decode()
+    if stdout:
+        print(content)
+    else:
+        with open("response.html", "w") as f:  # pragma: no cover
+            f.write(content)  # pragma: no cover

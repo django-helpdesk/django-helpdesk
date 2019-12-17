@@ -7,20 +7,64 @@ models.py - Model (and hence database) definitions. This is the core of the
             helpdesk structure.
 """
 
-from __future__ import unicode_literals
 from django.contrib.auth.models import Permission
+from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
-from django.utils import six
 from django.utils.translation import ugettext_lazy as _, ugettext
-from django.utils.encoding import python_2_unicode_compatible
+from io import StringIO
 import re
+import os
+import mimetypes
+import datetime
+
+from django.utils.safestring import mark_safe
+from markdown import markdown
+from markdown.extensions import Extension
 
 
-@python_2_unicode_compatible
+import uuid
+
+from helpdesk import settings as helpdesk_settings
+
+from .templated_email import send_templated_mail
+
+
+def format_time_spent(time_spent):
+    if time_spent:
+        time_spent = "{0:02d}h:{0:02d}m".format(
+            int(time_spent.total_seconds() // (3600)),
+            int((time_spent.total_seconds() % 3600) / 60)
+        )
+    else:
+        time_spent = ""
+    return time_spent
+
+
+class EscapeHtml(Extension):
+    def extendMarkdown(self, md, md_globals):
+        del md.preprocessors['html_block']
+        del md.inlinePatterns['html']
+
+
+def get_markdown(text):
+    if not text:
+        return ""
+
+    return mark_safe(
+        markdown(
+            text,
+            extensions=[
+                EscapeHtml(), 'markdown.extensions.nl2br',
+                'markdown.extensions.fenced_code'
+            ]
+        )
+    )
+
+
 class Queue(models.Model):
     """
     A queue is a collection of tickets into what would generally be business
@@ -104,6 +148,15 @@ class Queue(models.Model):
                     'receive notification of all activity (new tickets, closed '
                     'tickets, updates, reassignments, etc) for this queue. Separate '
                     'multiple addresses with a comma.'),
+    )
+
+    enable_notifications_on_email_events = models.BooleanField(
+        _('Notify contacts when email updates arrive'),
+        blank=True,
+        default=False,
+        help_text=_('When an email arrives to either create a ticket or to '
+                    'interact with an existing discussion. Should email notifications be sent ? '
+                    'Note: the new_ticket_cc and updated_ticket_cc work independently of this feature'),
     )
 
     email_box_type = models.CharField(
@@ -264,6 +317,11 @@ class Queue(models.Model):
         verbose_name=_('Default owner'),
     )
 
+    dedicated_time = models.DurationField(
+        help_text=_("Time to be spent on this Queue in total"),
+        blank=True, null=True
+    )
+
     def __str__(self):
         return "%s" % self.title
 
@@ -289,6 +347,21 @@ class Queue(models.Model):
         else:
             return u'%s <%s>' % (self.title, self.email_address)
     from_address = property(_from_address)
+
+    @property
+    def time_spent(self):
+        """Return back total time spent on the ticket. This is calculated value
+        based on total sum from all FollowUps
+        """
+        total = datetime.timedelta(0)
+        for val in self.ticket_set.all():
+            if val.time_spent:
+                total = total + val.time_spent
+        return total
+
+    @property
+    def time_spent_formated(self):
+        return format_time_spent(self.time_spent)
 
     def prepare_permission_name(self):
         """Prepare internally the codename for the permission and store it in permission_name.
@@ -348,7 +421,10 @@ class Queue(models.Model):
                 pass
 
 
-@python_2_unicode_compatible
+def mk_secret():
+    return str(uuid.uuid4())
+
+
 class Ticket(models.Model):
     """
     To allow a ticket to be entered as quickly as possible, only the
@@ -477,6 +553,76 @@ class Ticket(models.Model):
                     'automatically by management/commands/escalate_tickets.py.'),
     )
 
+    secret_key = models.CharField(
+        _("Secret key needed for viewing/editing ticket by non-logged in users"),
+        max_length=36,
+        default=mk_secret,
+    )
+
+    @property
+    def time_spent(self):
+        """Return back total time spent on the ticket. This is calculated value
+        based on total sum from all FollowUps
+        """
+        total = datetime.timedelta(0)
+        for val in self.followup_set.all():
+            if val.time_spent:
+                total = total + val.time_spent
+        return total
+
+    @property
+    def time_spent_formated(self):
+        return format_time_spent(self.time_spent)
+
+    def send(self, roles, dont_send_to=None, **kwargs):
+        """
+        Send notifications to everyone interested in this ticket.
+
+        The the roles argument is a dictionary mapping from roles to (template, context) pairs.
+        If a role is not present in the dictionary, users of that type will not receive the notification.
+
+        The following roles exist:
+
+          - 'submitter'
+          - 'new_ticket_cc'
+          - 'ticket_cc'
+          - 'assigned_to'
+
+        Here is an example roles dictionary:
+
+        {
+            'submitter': (template_name, context),
+            'assigned_to': (template_name2, context),
+        }
+
+        **kwargs are passed to send_templated_mail defined in templated_mail.py
+
+        returns the set of email addresses the notification was delivered to.
+
+        """
+        recipients = set()
+
+        if dont_send_to is not None:
+            recipients.update(dont_send_to)
+
+        def should_receive(email):
+            return email and email not in recipients
+
+        def send(role, recipient):
+            if recipient and recipient not in recipients and role in roles:
+                template, context = roles[role]
+                send_templated_mail(template, context, recipient, sender=self.queue.from_address, **kwargs)
+                recipients.add(recipient)
+        send('submitter', self.submitter_email)
+        send('ticket_cc', self.queue.updated_ticket_cc)
+        send('new_ticket_cc', self.queue.new_ticket_cc)
+        if self.assigned_to:
+            send('assigned_to', self.assigned_to.email)
+        if self.queue.enable_notifications_on_email_events:
+            for cc in self.ticketcc_set.all():
+                send('ticket_cc', cc.email_address)
+        return recipients
+
     def _get_assigned_to(self):
         """ Custom property to allow us to easily print 'Unassigned' if a
         ticket has no owner, or the users name if it's assigned. If the user
@@ -541,11 +687,17 @@ class Ticket(models.Model):
             site = Site.objects.get_current()
         except ImproperlyConfigured:
             site = Site(domain='configure-django-sites.com')
-        return u"http://%s%s?ticket=%s&email=%s" % (
+        if helpdesk_settings.HELPDESK_USE_HTTPS_IN_EMAIL_LINK:
+            protocol = 'https'
+        else:
+            protocol = 'http'
+        return u"%s://%s%s?ticket=%s&email=%s&key=%s" % (
+            protocol,
             site.domain,
             reverse('helpdesk:public_view'),
             self.ticket_for_url,
-            self.submitter_email
+            self.submitter_email,
+            self.secret_key
         )
     ticket_url = property(_get_ticket_url)
 
@@ -561,7 +713,12 @@ class Ticket(models.Model):
             site = Site.objects.get_current()
         except ImproperlyConfigured:
             site = Site(domain='configure-django-sites.com')
-        return u"http://%s%s" % (
+        if helpdesk_settings.HELPDESK_USE_HTTPS_IN_EMAIL_LINK:
+            protocol = 'https'
+        else:
+            protocol = 'http'
+        return u"%s://%s%s" % (
+            protocol,
             site.domain,
             reverse('helpdesk:view',
                     args=[self.id])
@@ -578,6 +735,13 @@ class Ticket(models.Model):
         return TicketDependency.objects.filter(ticket=self).filter(
             depends_on__status__in=OPEN_STATUSES).count() == 0
     can_be_resolved = property(_can_be_resolved)
+
+    def get_submitter_userprofile(self):
+        User = get_user_model()
+        try:
+            return User.objects.get(email=self.submitter_email)
+        except User.DoesNotExist:
+            return None
 
     class Meta:
         get_latest_by = "created"
@@ -612,6 +776,13 @@ class Ticket(models.Model):
         queue = '-'.join(parts[0:-1])
         return queue, parts[-1]
 
+    def get_markdown(self):
+        return get_markdown(self.description)
+
+    @property
+    def get_resolution_markdown(self):
+        return get_markdown(self.resolution)
+
 
 class FollowUpManager(models.Manager):
 
@@ -622,7 +793,6 @@ class FollowUpManager(models.Manager):
         return self.filter(public=True)
 
 
-@python_2_unicode_compatible
 class FollowUp(models.Model):
     """
     A FollowUp is a comment and/or change to a ticket. We keep a simple
@@ -664,8 +834,10 @@ class FollowUp(models.Model):
         _('Public'),
         blank=True,
         default=False,
-        help_text=_('Public tickets are viewable by the submitter and all '
-                    'staff, but non-public tickets can only be seen by staff.'),
+        help_text=_(
+            'Public tickets are viewable by the submitter and all '
+            'staff, but non-public tickets can only be seen by staff.'
+        ),
     )
 
     user = models.ForeignKey(
@@ -684,7 +856,21 @@ class FollowUp(models.Model):
         help_text=_('If the status was changed, what was it changed to?'),
     )
 
+    message_id = models.CharField(
+        _('E-Mail ID'),
+        max_length=256,
+        blank=True,
+        null=True,
+        help_text=_("The Message ID of the submitter's email."),
+        editable=False,
+    )
+
     objects = FollowUpManager()
+
+    time_spent = models.DurationField(
+        help_text=_("Time spent on this follow up"),
+        blank=True, null=True
+    )
 
     class Meta:
         ordering = ('date',)
@@ -703,8 +889,14 @@ class FollowUp(models.Model):
         t.save()
         super(FollowUp, self).save(*args, **kwargs)
 
+    def get_markdown(self):
+        return get_markdown(self.comment)
 
-@python_2_unicode_compatible
+    @property
+    def time_spent_formated(self):
+        return format_time_spent(self.time_spent)
+
+
 class TicketChange(models.Model):
     """
     For each FollowUp, any changes to the parent ticket (eg Title, Priority,
@@ -753,32 +945,15 @@ class TicketChange(models.Model):
 
 
 def attachment_path(instance, filename):
-    """
-    Provide a file path that will help prevent files being overwritten, by
-    putting attachments in a folder off attachments for ticket/followup_id/.
-    """
-    import os
-    os.umask(0)
-    path = 'helpdesk/attachments/%s/%s' % (instance.followup.ticket.ticket_for_url, instance.followup.id)
-    att_path = os.path.join(settings.MEDIA_ROOT, path)
-    if settings.DEFAULT_FILE_STORAGE == "django.core.files.storage.FileSystemStorage":
-        if not os.path.exists(att_path):
-            os.makedirs(att_path, 0o777)
-    return os.path.join(path, filename)
+    """Just bridge"""
+    return instance.attachment_path(filename)
 
 
-@python_2_unicode_compatible
 class Attachment(models.Model):
     """
     Represents a file attached to a follow-up. This could come from an e-mail
     attachment, or it could be uploaded via the web interface.
     """
-
-    followup = models.ForeignKey(
-        FollowUp,
-        on_delete=models.CASCADE,
-        verbose_name=_('Follow-up'),
-    )
 
     file = models.FileField(
         _('File'),
@@ -788,29 +963,104 @@ class Attachment(models.Model):
 
     filename = models.CharField(
         _('Filename'),
+        blank=True,
         max_length=1000,
     )
 
     mime_type = models.CharField(
         _('MIME Type'),
+        blank=True,
         max_length=255,
     )
 
     size = models.IntegerField(
         _('Size'),
+        blank=True,
         help_text=_('Size of this file in bytes'),
     )
 
     def __str__(self):
         return '%s' % self.filename
 
+    def save(self, *args, **kwargs):
+
+        if not self.size:
+            self.size = self.get_size()
+
+        if not self.filename:
+            self.filename = self.get_filename()
+
+        if not self.mime_type:
+            self.mime_type = \
+                mimetypes.guess_type(self.filename, strict=False)[0] or \
+                'application/octet-stream'
+
+        return super(Attachment, self).save(*args, **kwargs)
+
+    def get_filename(self):
+        return str(self.file)
+
+    def get_size(self):
+        return self.file.file.size
+
+    def attachment_path(self, filename):
+        """Provide a file path that will help prevent files being overwritten, by
+        putting attachments in a folder off attachments for ticket/followup_id/.
+        """
+        assert NotImplementedError(
+            "This method is to be implemented by Attachment classes"
+        )
+
     class Meta:
         ordering = ('filename',)
         verbose_name = _('Attachment')
         verbose_name_plural = _('Attachments')
+        abstract = True
 
 
-@python_2_unicode_compatible
+class FollowUpAttachment(Attachment):
+
+    followup = models.ForeignKey(
+        FollowUp,
+        on_delete=models.CASCADE,
+        verbose_name=_('Follow-up'),
+    )
+
+    def attachment_path(self, filename):
+
+        os.umask(0)
+        path = 'helpdesk/attachments/{ticket_for_url}-{secret_key}/{id_}'.format(
+            ticket_for_url=self.followup.ticket.ticket_for_url,
+            secret_key=self.followup.ticket.secret_key,
+            id_=self.followup.id)
+        att_path = os.path.join(settings.MEDIA_ROOT, path)
+        if settings.DEFAULT_FILE_STORAGE == "django.core.files.storage.FileSystemStorage":
+            if not os.path.exists(att_path):
+                os.makedirs(att_path, 0o777)
+        return os.path.join(path, filename)
+
+
+class KBIAttachment(Attachment):
+
+    kbitem = models.ForeignKey(
+        "KBItem",
+        on_delete=models.CASCADE,
+        verbose_name=_('Knowledge base item'),
+    )
+
+    def attachment_path(self, filename):
+
+        os.umask(0)
+        path = 'helpdesk/attachments/kb/{category}/{kbi}'.format(
+            category=self.kbitem.category,
+            kbi=self.kbitem.id)
+        att_path = os.path.join(settings.MEDIA_ROOT, path)
+        if settings.DEFAULT_FILE_STORAGE == "django.core.files.storage.FileSystemStorage":
+            if not os.path.exists(att_path):
+                os.makedirs(att_path, 0o777)
+        return os.path.join(path, filename)
+
+
 class PreSetReply(models.Model):
     """
     We can allow the admin to define a number of pre-set replies, used to
@@ -852,7 +1102,6 @@ class PreSetReply(models.Model):
         return '%s' % self.name
 
 
-@python_2_unicode_compatible
 class EscalationExclusion(models.Model):
     """
     An 'EscalationExclusion' lets us define a date on which escalation should
@@ -889,7 +1138,6 @@ class EscalationExclusion(models.Model):
         verbose_name_plural = _('Escalation exclusions')
 
 
-@python_2_unicode_compatible
 class EmailTemplate(models.Model):
     """
     Since these are more likely to be changed than other templates, we store
@@ -949,7 +1197,6 @@ class EmailTemplate(models.Model):
         verbose_name_plural = _('e-mail templates')
 
 
-@python_2_unicode_compatible
 class KBCategory(models.Model):
     """
     Lets help users help themselves: the Knowledge Base is a categorised
@@ -982,12 +1229,12 @@ class KBCategory(models.Model):
         return reverse('helpdesk:kb_category', kwargs={'slug': self.slug})
 
 
-@python_2_unicode_compatible
 class KBItem(models.Model):
     """
     An item within the knowledgebase. Very straightforward question/answer
     style system.
     """
+    voted_by = models.ManyToManyField(settings.AUTH_USER_MODEL)
     category = models.ForeignKey(
         KBCategory,
         on_delete=models.CASCADE,
@@ -1049,8 +1296,10 @@ class KBItem(models.Model):
         from django.urls import reverse
         return reverse('helpdesk:kb_item', args=(self.id,))
 
+    def get_markdown(self):
+        return get_markdown(self.answer)
 
-@python_2_unicode_compatible
+
 class SavedSearch(models.Model):
     """
     Allow a user to save a ticket search, eg their filtering and sorting
@@ -1097,15 +1346,38 @@ class SavedSearch(models.Model):
         verbose_name_plural = _('Saved searches')
 
 
-@python_2_unicode_compatible
+def get_default_setting(setting):
+    from helpdesk.settings import DEFAULT_USER_SETTINGS
+    return DEFAULT_USER_SETTINGS[setting]
+
+
+def login_view_ticketlist_default():
+    return get_default_setting('login_view_ticketlist')
+
+
+def email_on_ticket_change_default():
+    return get_default_setting('email_on_ticket_change')
+
+
+def email_on_ticket_assign_default():
+    return get_default_setting('email_on_ticket_assign')
+
+
+def tickets_per_page_default():
+    return get_default_setting('tickets_per_page')
+
+
+def use_email_as_submitter_default():
+    return get_default_setting('use_email_as_submitter')
+
+
 class UserSettings(models.Model):
     """
     A bunch of user-specific settings that we want to be able to define, such
     as notification preferences and other things that should probably be
     configurable.
-
-    We should always refer to user.usersettings_helpdesk.settings['setting_name'].
     """
+    PAGE_SIZES = ((10, '10'), (25, '25'), (50, '50'), (100, '100'))
 
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
@@ -1113,41 +1385,46 @@ class UserSettings(models.Model):
         related_name="usersettings_helpdesk")
 
     settings_pickled = models.TextField(
-        _('Settings Dictionary'),
-        help_text=_('This is a base64-encoded representation of a pickled Python dictionary. '
+        _('DEPRECATED! Settings Dictionary DEPRECATED!'),
+        help_text=_('DEPRECATED! This is a base64-encoded representation of a pickled Python dictionary. '
                     'Do not change this field via the admin.'),
         blank=True,
         null=True,
     )
 
-    def _set_settings(self, data):
-        # data should always be a Python dictionary.
-        try:
-            import pickle
-        except ImportError:
-            import cPickle as pickle
-        from helpdesk.lib import b64encode
-        if six.PY2:
-            self.settings_pickled = b64encode(pickle.dumps(data))
-        else:
-            self.settings_pickled = b64encode(pickle.dumps(data)).decode()
+    login_view_ticketlist = models.BooleanField(
+        verbose_name=_('Show Ticket List on Login?'),
+        help_text=_('Display the ticket list upon login? Otherwise, the dashboard is shown.'),
+        default=login_view_ticketlist_default,
+    )
 
-    def _get_settings(self):
-        # return a python dictionary representing the pickled data.
-        try:
-            import pickle
-        except ImportError:
-            import cPickle as pickle
-        from helpdesk.lib import b64decode
-        try:
-            if six.PY2:
-                return pickle.loads(b64decode(str(self.settings_pickled)))
-            else:
-                return pickle.loads(b64decode(self.settings_pickled.encode('utf-8')))
-        except pickle.UnpicklingError:
-            return {}
+    email_on_ticket_change = models.BooleanField(
+        verbose_name=_('E-mail me on ticket change?'),
+        help_text=_('If you\'re the ticket owner and the ticket is changed via the web by somebody else, do you want to receive an e-mail?'),
+        default=email_on_ticket_change_default,
+    )
 
-    settings = property(_get_settings, _set_settings)
+    email_on_ticket_assign = models.BooleanField(
+        verbose_name=_('E-mail me when assigned a ticket?'),
+        help_text=_('If you are assigned a ticket via the web, do you want to receive an e-mail?'),
+        default=email_on_ticket_assign_default,
+    )
+
+    tickets_per_page = models.IntegerField(
+        verbose_name=_('Number of tickets to show per page'),
+        help_text=_('How many tickets do you want to see on the Ticket List page?'),
+        default=tickets_per_page_default,
+        choices=PAGE_SIZES,
+    )
+
+    use_email_as_submitter = models.BooleanField(
+        verbose_name=_('Use my e-mail address when submitting tickets?'),
+        help_text=_('When you submit a ticket, do you want to automatically '
+                    'use your e-mail address as the submitter address? You '
+                    'can type a different e-mail address when entering the '
+                    'ticket if needed, this option only changes the default.'),
+        default=use_email_as_submitter_default,
+    )
 
     def __str__(self):
         return 'Preferences for %s' % self.user
@@ -1166,15 +1443,13 @@ def create_usersettings(sender, instance, created, **kwargs):
     If we end up with users with no UserSettings, then we get horrible
     'DoesNotExist: UserSettings matching query does not exist.' errors.
     """
-    from helpdesk.settings import DEFAULT_USER_SETTINGS
     if created:
-        UserSettings.objects.create(user=instance, settings=DEFAULT_USER_SETTINGS)
+        UserSettings.objects.create(user=instance)
 
 
 models.signals.post_save.connect(create_usersettings, sender=settings.AUTH_USER_MODEL)
 
 
-@python_2_unicode_compatible
 class IgnoreEmail(models.Model):
     """
     This model lets us easily ignore e-mails from certain senders when
@@ -1261,7 +1536,6 @@ class IgnoreEmail(models.Model):
             return False
 
 
-@python_2_unicode_compatible
 class TicketCC(models.Model):
     """
     Often, there are people who wish to follow a ticket who aren't the
@@ -1332,7 +1606,6 @@ class CustomFieldManager(models.Manager):
         return super(CustomFieldManager, self).get_queryset().order_by('ordering')
 
 
-@python_2_unicode_compatible
 class CustomField(models.Model):
     """
     Definitions for custom fields that are glued onto each ticket.
@@ -1416,7 +1689,6 @@ class CustomField(models.Model):
     )
 
     def _choices_as_array(self):
-        from django.utils.six import StringIO
         valuebuffer = StringIO(self.list_values)
         choices = [[item.strip(), item.strip()] for item in valuebuffer.readlines()]
         valuebuffer.close()
@@ -1446,7 +1718,6 @@ class CustomField(models.Model):
         verbose_name_plural = _('Custom fields')
 
 
-@python_2_unicode_compatible
 class TicketCustomFieldValue(models.Model):
     ticket = models.ForeignKey(
         Ticket,
@@ -1471,7 +1742,6 @@ class TicketCustomFieldValue(models.Model):
         verbose_name_plural = _('Ticket custom field values')
 
 
-@python_2_unicode_compatible
 class TicketDependency(models.Model):
     """
     The ticket identified by `ticket` cannot be resolved until the ticket in `depends_on` has been resolved.

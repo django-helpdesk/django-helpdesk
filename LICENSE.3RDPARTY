@@ -1,22 +1,22 @@
 This file contains license details for 3rd party software which is
 distributed with django-helpdesk.
 
-1. License for jQuery & jQuery UI
+1. License for jQuery & jQuery UI v3.3.1
 2. License for jQuery UI 'Smoothness' theme
 3. License for akismet.py
 4. License for jqPlot
-5. License for StartBootstrap SB Admin v2.0 theme
+5. License for StartBootstrap SB Admin v5.0.2 theme
 6. License for Raphael
 7. License for Morris.js
-8. License for DataTables
+8. License for DataTables v1.10.18
 9. License for Flot
 10. License for Metis Menu
-11. License for Bootstrap CSS
-12. License for Font Awesome
+11. License for Bootstrap CSS v4.2.1
+12. License for Font Awesome v5.6.3
 
 ----------------------------------------------------------------------
 
-1. License for jQuery & jQuery UI
+1. License for jQuery & jQuery UI v3.3.1
 
 Copyright (c) 2007 John Resig, http://jquery.com/
 
@@ -114,11 +114,11 @@ THE SOFTWARE.
 
 ----------------------------------------------------------------------
 
-5. License for StartBootstrap SB Admin v2.0 theme
+5. License for StartBootstrap SB Admin v5.0.2 theme
 
 The MIT License (MIT)
 
-Copyright (c) 2013-2016 Blackrock Digital LLC.
+Copyright (c) 2013-2018 Blackrock Digital LLC
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -193,25 +193,27 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----------------------------------------------------------------------
 
-8. License for DataTables
+8. License for DataTables v1.10.18
 
-Copyright (C) 2008-2016, SpryMedia Ltd.
+MIT license
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
-the Software, and to permit persons to whom the Software is furnished to do so,
+Copyright (C) 2008-2018, SpryMedia Ltd.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of 
+this software and associated documentation files (the "Software"), to deal in 
+the Software without restriction, including without limitation the rights to 
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of 
+the Software, and to permit persons to whom the Software is furnished to do so, 
 subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all
+The above copyright notice and this permission notice shall be included in all 
 copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
-IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS 
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR 
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER 
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN 
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ----------------------------------------------------------------------
@@ -266,9 +268,12 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ----------------------------------------------------------------------
 
-11. License for Bootstrap CSS
+11. License for Bootstrap CSS v4.2.1
 
-Copyright (c) 2011-2016 Twitter, Inc.
+The MIT License (MIT)
+
+Copyright (c) 2011-2018 Twitter, Inc.
+Copyright (c) 2011-2018 The Bootstrap Authors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -290,36 +295,39 @@ THE SOFTWARE.
 
 ----------------------------------------------------------------------
 
-12. License for Font Awesome
+12. License for Font Awesome v5.6.3
 
 
-Font License
+Font Awesome Free is free, open source, and GPL friendly. You can use it for
+commercial projects, open source projects, or really almost whatever you want.
+Full Font Awesome Free license: https://fontawesome.com/license/free.
 
-    Applies to all desktop and webfont files in the following directory:
-      font-awesome/fonts/.
-    License: SIL OFL 1.1
-    URL: http://scripts.sil.org/OFL
+# Icons: CC BY 4.0 License (https://creativecommons.org/licenses/by/4.0/)
+In the Font Awesome Free download, the CC BY 4.0 license applies to all icons
+packaged as SVG and JS file types.
 
-Code License
+# Fonts: SIL OFL 1.1 License (https://scripts.sil.org/OFL)
+In the Font Awesome Free download, the SIL OFL license applies to all icons
+packaged as web and desktop font files.
 
-    Applies to all CSS and LESS files in the following directories:
-      font-awesome/css/, font-awesome/less/, and font-awesome/scss/.
-    License: MIT License
-    URL: http://opensource.org/licenses/mit-license.html
+# Code: MIT License (https://opensource.org/licenses/MIT)
+In the Font Awesome Free download, the MIT license applies to all non-font and
+non-icon files.
 
-Documentation License
+# Attribution
+Attribution is required by MIT, SIL OFL, and CC BY licenses. Downloaded Font
+Awesome Free files already contain embedded comments with sufficient
+attribution, so you shouldn't need to do anything additional when using these
+files normally.
 
-    Applies to all Font Awesome project files that are not a part of the Font or
-      Code licenses.
-    License: CC BY 3.0
-    URL: http://creativecommons.org/licenses/by/3.0/
+We've kept attribution comments terse, so we ask that you do not actively work
+to remove them from files, especially code. They're a great way for folks to
+learn about Font Awesome.
 
-Brand Icons
-
-    All brand icons are trademarks of their respective owners.
-    The use of these trademarks does not indicate endorsement of the trademark
-      holder by Font Awesome, nor vice versa.
-    Brand icons should only be used to represent the company or product to which
-      they refer.
+# Brand Icons
+All brand icons are trademarks of their respective owners. The use of these
+trademarks does not indicate endorsement of the trademark holder by Font
+Awesome, nor vice versa. **Please do not use brand logos for any purpose except
+to represent the company, product, or service to which they refer.**
 
 

@@ -9,29 +9,49 @@
 </script>
 {% endblock helpdesk_head %}
 
+{% block helpdesk_breadcrumb %}
+<li class="breadcrumb-item">
+    <a href="{% url 'helpdesk:list' %}">{% trans "Tickets" %}</a>
+</li>
+<li class="breadcrumb-item">
+    <a href="{{ ticket.get_absolute_url }}">{{ ticket.queue.slug }}-{{ ticket.id }}</a>
+</li>
+<li class="breadcrumb-item active">
+    {% trans "Edit FollowUp" %}
+</li>
+{% endblock %}
+
 {% block helpdesk_body %}
 
 {% include "helpdesk/ticket_desc_table.html" %}
 
-<h3>{% trans "Edit FollowUp" %}</h3>
-    <form action="." method="POST" name="edit_followup_form">
-        {{ form.non_field_errors }}
-        <fieldset>
-        <dl>
-            <dt><label for='id_ticket'>{% trans "Reassign ticket:" %}</label></dt>
-            <dd>{{ form.ticket }}</dd>
-            <dt><label for="id_title">{% trans "Title:" %}</label></dt>
-            <dd>{{ form.title }}</dd>
-            <dt><label for="id_comment">{% trans "Comment:" %}</label></dt>
-            <dd>{{ form.comment }}</dd>
-            <dt><label for="id_public">Public:</label></dt>
-            <dd>{{ form.public }}</dd>
-                <p>Public tickets are viewable by the submitter and all staff, but non-public tickets can only be seen by staff.</p>
-            <dt><label for="id_new_status">New Status:</label></dt>
-            <dd>{{ form.new_status }}</dd>
-                <p>If the status was changed, what was it changed to?</p>
-        </dl>
-        </fieldset>
-        <p><input class="btn btn-primary" type="submit" value="Submit"></p>{% csrf_token %}
-    </form>
+<div class="card mb-3">
+    <div class="card-header">
+        {% trans "Edit FollowUp" %}
+    </div>
+    <div class="card-body">
+        <form action="." method="POST" name="edit_followup_form">
+            {{ form.non_field_errors }}
+            <fieldset>
+            <dl>
+                <dt><label for='id_ticket'>{% trans "Reassign ticket:" %}</label></dt>
+                <dd>{{ form.ticket }}</dd>
+                <dt><label for="id_title">{% trans "Title:" %}</label></dt>
+                <dd>{{ form.title }}</dd>
+                <dt><label for="id_comment">{% trans "Comment:" %}</label></dt>
+                <dd>{{ form.comment }}</dd>
+                <dt><label for="id_public">Public:</label></dt>
+                <dd>{{ form.public }}</dd>
+                    <p>Public tickets are viewable by the submitter and all staff, but non-public tickets can only be seen by staff.</p>
+                <dt><label for="id_new_status">New Status:</label></dt>
+                <dd>{{ form.new_status }}</dd>
+                    <p>If the status was changed, what was it changed to?</p>
+                <dt><label for="id_time_spent">Time spent:</label></dt>
+                <dd>{{ form.time_spent }}</dd>
+            </dl>
+            </fieldset>
+            <p><input class="btn btn-primary btn-sm" type="submit" value="Submit"></p>{% csrf_token %}
+        </form>
+    </div>
+</div>
 {% endblock helpdesk_body %}

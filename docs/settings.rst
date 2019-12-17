@@ -89,8 +89,7 @@ These changes are visible throughout django-helpdesk
 - **HELPDESK_ANON_ACCESS_RAISES_404** If True, redirects user to a 404 page when attempting to reach ticket pages while not logged in, rather than redirecting to a login screen.
 
   **Default:** ``HELPDESK_ANON_ACCESS_RAISES_404 = False``
-
-
+  
 Options shown on public pages
 -----------------------------
 
@@ -124,8 +123,12 @@ Options for public ticket submission form
 Options that change ticket updates
 ----------------------------------
 
-- **HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE** Allow non-staff users to interact with tickets? This will also change how 'staff_member_required'
-  in staff.py will be defined.
+- **HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE** Allow non-staff users to interact with tickets?
+  Set to True to allow any authenticated user to manage tickets.
+  You can also apply a custom authorisation logic for identifying helpdesk staff members, by setting this to a callable.
+  In that case, the value should be a function accepting the active user as a parameter and returning True if the user is considered helpdesk staff, e.g.
+
+    lambda u: u.is_authenticated() and u.is_active and u.groups.filter(name='helpdesk_staff').exists()))
 
   **Default:** ``HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = False``
 

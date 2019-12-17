@@ -1,6 +1,7 @@
 /*
 Bootstrap overrides
 */
+@import 'helpdesk-customize.css';
 
 .btn-file {
     position: relative;
@@ -23,7 +24,6 @@ Bootstrap overrides
 }
 
 .thumbnail.filterBox {
-    display: none;
     float: left;
     border: solid #ccc 1px;
     padding: 10px;
@@ -32,9 +32,13 @@ Bootstrap overrides
     min-height: 200px;
 }
 
-.thumbnail.filterBoxShow {
+.filterBox {
+    display: none;
+}
+.filterBoxShow {
     display: block;
 }
+
 
 .filterBox label {
     clear: both;
@@ -79,4 +83,18 @@ img.brand {padding-right: 30px;}
 
 div.card-body img {
 	max-width: 900px;
+}
+
+pre {
+	background: #eee;
+	padding: 1em;
+	border: 1pt solid white;
+}
+
+table .tickettitle {
+  max-width: 250px;
+  font-weight: bold;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }

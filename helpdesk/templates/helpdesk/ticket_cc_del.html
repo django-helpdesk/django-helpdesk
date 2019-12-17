@@ -2,6 +2,19 @@
 
 {% block helpdesk_title %}{% trans "Delete Ticket CC" %}{% endblock %}
 
+{% block helpdesk_breadcrumb %}
+<li class="breadcrumb-item">
+    <a href="{% url 'helpdesk:list' %}">{% trans "Tickets" %}</a>
+</li>
+<li class="breadcrumb-item">
+    <a href="{% url 'helpdesk:list' %}{{ ticket.id }}/">{{ ticket.queue.slug }}-{{ ticket.id }}</a>
+</li>
+<li class="breadcrumb-item">
+    <a href="{% url 'helpdesk:ticket_cc' ticket.id %}">{% trans "CC Settings" %}</a>
+</li>
+<li class="breadcrumb-item active">{% trans "Delete CC" %}</li>
+{% endblock %}
+
 {% block helpdesk_body %}{% blocktrans with cc.email_address as email_address %}
 <h2>Delete Ticket CC</h2>
 

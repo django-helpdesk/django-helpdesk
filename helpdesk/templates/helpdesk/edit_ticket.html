@@ -1,6 +1,16 @@
-{% extends "helpdesk/base.html" %}{% load i18n bootstrap %}
+{% extends "helpdesk/base.html" %}{% load i18n bootstrap4form %}
 
 {% block helpdesk_title %}{% trans "Edit Ticket" %}{% endblock %}
+
+{% block helpdesk_breadcrumb %}
+<li class="breadcrumb-item">
+    <a href="{% url 'helpdesk:list' %}">{% trans "Tickets" %}</a>
+</li>
+<li class="breadcrumb-item">
+    <a href="{% url 'helpdesk:list' %}{{ ticket.id }}/">{{ ticket.queue.slug }}-{{ ticket.id }}</a>
+</li>
+<li class="breadcrumb-item active">{% trans "Edit Ticket" %}</li>
+{% endblock %}
 
 {% block helpdesk_body %}
 <div class="col-xs-6">
@@ -14,7 +24,7 @@
 
 <form method='post' action='./'>
 <fieldset>
-    {{ form|bootstrap }}
+    {{ form|bootstrap4form }}
     {% comment %}
         {% for field in form %}
             {% if field.is_hidden %}
@@ -29,7 +39,7 @@
     </dl>
     {% endcomment %}
     <div class='buttons form-group'>
-        <input type='submit' class="btn btn-primary" value='{% trans "Save Changes" %}' />
+        <input type='submit' class="btn btn-primary btn-sm" value='{% trans "Save Changes" %}' />
     </div>
 </fieldset>
 

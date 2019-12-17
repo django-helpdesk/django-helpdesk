@@ -7,7 +7,6 @@ django-helpdesk - A Django powered ticket tracker for small enterprise.
 scripts/escalate_tickets.py - Easy way to escalate tickets based on their age,
                               designed to be run from Cron or similar.
 """
-from __future__ import print_function
 
 from datetime import timedelta, date
 import getopt
@@ -17,14 +16,10 @@ import sys
 from django.core.management.base import BaseCommand, CommandError
 from django.db.models import Q
 from django.utils.translation import ugettext as _
-
-try:
-    from django.utils import timezone
-except ImportError:
-    from datetime import datetime as timezone
+from django.utils import timezone
 
 from helpdesk.models import Queue, Ticket, FollowUp, EscalationExclusion, TicketChange
-from helpdesk.lib import send_templated_mail, safe_template_context
+from helpdesk.lib import safe_template_context
 
 
 class Command(BaseCommand):
@@ -107,32 +102,12 @@ def escalate_tickets(queues, verbose):
 
             context = safe_template_context(t)
 
-            if t.submitter_email:
-                send_templated_mail(
-                    'escalated_submitter',
-                    context,
-                    recipients=t.submitter_email,
-                    sender=t.queue.from_address,
-                    fail_silently=True,
-                )
-
-            if t.queue.updated_ticket_cc:
-                send_templated_mail(
-                    'escalated_cc',
-                    context,
-                    recipients=t.queue.updated_ticket_cc,
-                    sender=t.queue.from_address,
-                    fail_silently=True,
-                )
-
-            if t.assigned_to:
-                send_templated_mail(
-                    'escalated_owner',
-                    context,
-                    recipients=t.assigned_to.email,
-                    sender=t.queue.from_address,
-                    fail_silently=True,
-                )
+            t.send(
+                {'submitter': ('escalated_submitter', context),
+                 'ticket_cc': ('escalated_cc', context),
+                 'assigned_to': ('escalated_owner', context)}
+                fail_silently=True,
+            )
 
             if verbose:
                 print("  - Esclating %s from %s>%s" % (

@@ -2,23 +2,22 @@
 Default settings for django-helpdesk.
 
 """
-
+import warnings
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 
-try:
-    DEFAULT_USER_SETTINGS = settings.HELPDESK_DEFAULT_SETTINGS
-except AttributeError:
-    DEFAULT_USER_SETTINGS = None
+DEFAULT_USER_SETTINGS = {
+    'login_view_ticketlist': True,
+    'email_on_ticket_change': True,
+    'email_on_ticket_assign': True,
+    'tickets_per_page': 25,
+    'use_email_as_submitter': True,
+}
 
-if not isinstance(DEFAULT_USER_SETTINGS, dict):
-    DEFAULT_USER_SETTINGS = {
-        'use_email_as_submitter': True,
-        'email_on_ticket_assign': True,
-        'email_on_ticket_change': True,
-        'login_view_ticketlist': True,
-        'tickets_per_page': 25
-    }
+try:
+    DEFAULT_USER_SETTINGS.update(settings.HELPDESK_DEFAULT_SETTINGS)
+except AttributeError:
+    pass
 
 
 HAS_TAG_SUPPORT = False
@@ -85,12 +84,12 @@ HELPDESK_SUBMIT_A_TICKET_PUBLIC = getattr(settings, 'HELPDESK_SUBMIT_A_TICKET_PU
 # options for update_ticket views #
 ###################################
 
+''' options for update_ticket views '''
 # allow non-staff users to interact with tickets?
-# this will also change how 'staff_member_required'
-# in staff.py will be defined.
-HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = getattr(settings,
-                                                 'HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE',
-                                                 False)
+# can be True/False or a callable accepting the active user and returning True if they must be considered helpdesk staff
+HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = getattr(settings, 'HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE', False)
+if not (HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE in (True, False) or callable(HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE)):
+    warnings.warn("HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE should be set to either True/False or a callable.", RuntimeWarning)
 
 # show edit buttons in ticket follow ups.
 HELPDESK_SHOW_EDIT_BUTTON_FOLLOW_UP = getattr(settings,
@@ -149,3 +148,6 @@ QUEUE_EMAIL_BOX_UPDATE_ONLY = getattr(settings, 'QUEUE_EMAIL_BOX_UPDATE_ONLY', F
 # only allow users to access queues that they are members of?
 HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION = getattr(
     settings, 'HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION', False)
+
+# use https in the email links
+HELPDESK_USE_HTTPS_IN_EMAIL_LINK = getattr(settings, 'HELPDESK_USE_HTTPS_IN_EMAIL_LINK', False)

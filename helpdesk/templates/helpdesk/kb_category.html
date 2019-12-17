@@ -1,37 +1,44 @@
 {% extends "helpdesk/public_base.html" %}{% load i18n humanize %}
 
+{% block helpdesk_breadcrumb %}
+<li class="breadcrumb-item">
+    <a href="{% url 'helpdesk:kb_index' %}">{% trans "Knowledgebase" %}</a>
+</li>
+<li class="breadcrumb-item active">{% blocktrans with category.title as kbcat %}{{ kbcat }}{% endblocktrans %}</li>
+{% endblock %}
+
 {% block helpdesk_body %}
 <h2>{% trans 'Knowledgebase Category' %}:{% blocktrans with category.title as kbcat %}{{ kbcat }}{% endblocktrans %}</h2>
 
-<div class="col-lg-12">
-    <div class="well well-sm">
-        <h4>{% blocktrans with category.title as kbcat %}You are viewing all items in the {{ kbcat }} category.{% endblocktrans %}</h4>
+<div class="card mb-3">
+    <div class="card-header">
+        <i class="fas fa-info-circle"></i>
+        {% blocktrans with category.title as kbcat %}You are viewing all items in the {{ kbcat }} category.{% endblocktrans %}
+    </div>
+    <div class="card-body">
         <p>{{ category.description }}</p>
     </div>
 </div>
 
 {% for item in items %}
 {% cycle 'one' 'two' 'three' as itemnumperrow silent %}
-{% ifequal itemnumperrow 'one' %}<div class="row">{% endifequal %}
-    <div class="col-lg-3">
-        <div class="panel panel-primary">
-            <div class="panel-heading">
-                <h4>{{ item.title }}</h4>
+{% ifequal itemnumperrow 'one' %}<div class="card-deck">{% endifequal %}
+<div class="card">
+      <div class="card-header">
+        <h5 class="card-title">{{ item.title }}</h5>
+      </div>
+      <div class="card-body">
+        <p class="card-text">{{ item.question }}</p>
+        <p class="card-text">
+                {% blocktrans with item.get_absolute_url as url %}<a href='{{ url }}' class="btn btn-primary"> Go to answer <i class="fa fa-share"></i></a>{% endblocktrans %}
+            </p>
+            <div class="well well-sm">
+                <p>{% trans 'Rating' %}: {{ item.score }}</p>
+                <p>{% trans 'Last Update' %}: {{ item.last_updated|naturaltime }}</p>
             </div>
-            <div class="panel-body">
-                <p>{{ item.question }}</p>
-            </div>
-            <div class="panel-footer">
-                <p>
-                    {% blocktrans with item.get_absolute_url as url %}View <a href='{{ url }}'>Answer <i class="fa fa-arrow-right"></i></a>{% endblocktrans %}
-                </p>
-                <div class="well well-sm">
-                    <p>{% trans 'Rating' %}: {{ item.score }}</p>
-                    <p>{% trans 'Last Update' %}: {{ item.last_updated|naturaltime }}</p>
-                </div>
-            </div>
-        </div>
+        </p>
     </div>
+</div>
 {% ifequal itemnumperrow 'three' %}</div>{% endifequal %}
 {% endfor %}
 

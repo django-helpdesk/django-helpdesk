@@ -6,7 +6,7 @@ from distutils.util import convert_path
 from fnmatch import fnmatchcase
 from setuptools import setup, find_packages
 
-version = '0.2.18'
+version = '0.3.0.dev2'
 
 # Provided as an attribute, so you can append to these instead
 # of replicating them:
@@ -110,33 +110,26 @@ def get_requirements():
     return requirements_list
 
 
-LONG_DESCRIPTION = """
-===============
-django-helpdesk
-===============
+def get_long_description():
+    with open(os.path.join(os.path.dirname(__file__), "README.rst")) as f:
+        long_desc = f.read()
+        
+    return long_desc
 
-This is a Django-powered helpdesk ticket tracker, designed to
-plug into an existing Django website and provide you with
-internal (or, perhaps, external) helpdesk management.
-"""
 
 setup(
     name='django-helpdesk',
     version=version,
     description="Django-powered ticket tracker for your helpdesk",
-    long_description=LONG_DESCRIPTION,
+    long_description=get_long_description(),
     classifiers=[
         "Development Status :: 4 - Beta",
         "Programming Language :: Python",
-        "Programming Language :: Python :: 2",
-        "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.4",
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Framework :: Django",
-        "Framework :: Django :: 1.11",
         "Framework :: Django :: 2.0",
         "Framework :: Django :: 2.1",
         'Framework :: Django :: 2.2',

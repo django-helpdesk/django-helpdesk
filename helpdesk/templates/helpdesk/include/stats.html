@@ -1,41 +1,25 @@
 {% load i18n %}
 
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="panel panel-primary">
-                        <div class="panel-heading">
-                            {% trans "Helpdesk Summary" %}
-                        </div>
-                        <!-- /.panel-heading -->
-                        <div class="panel-body">
-                            {% for entry in basic_ticket_stats.open_ticket_stats %}
-                                <div class="col-lg-4 col-md-6">
-                                    <div class="panel panel-{{ entry.2 }}">
-                                        <div class="panel-heading">
-                                            <div class="row">
-                                                <div class="col-xs-3">
-                                                    <i class="fa fa-calendar fa-5x"></i>
-                                                </div>
-                                                <div class="col-xs-9 text-right">
-                                                    <div class="huge">{{ entry.1 }}</div>
-                                                    <div>{{ entry.0 }}</div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        {% if entry.1 > 0 %}<a href="{% url 'helpdesk:list' %}?{{ entry.3 }}">{% else %}<a href="#">{% endif %}
-                                            <div class="panel-footer">
-                                                <span class="pull-left">{% if entry.1 > 0 %}{% trans "View Tickets" %}{% else %}{% trans "No tickets in this range" %}{% endif %}</span>
-                                                {% if entry.1 > 0 %}<span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>{% endif %}
-                                                <div class="clearfix"></div>
-                                            </div>
-                                        </a>
-                                    </div>
-                                </div>
-                            {% endfor %}
-                        </div>
-                        <!-- /.panel-body -->
-                    </div>
-                    <!-- /.panel -->
+<!-- Icon Cards-->
+          <div class="row">
+            {% for entry in basic_ticket_stats.open_ticket_stats %}
+            <div class="col-xl-3 col-sm-6 mb-3">
+              <div class="card text-white bg-{{ entry.2 }} o-hidden h-100">
+                <div class="card-body">
+                  <div class="card-body-icon">
+                    <i class="fas fa-fw fa-list"></i>
+                  </div>
+                  <div class="mr-5">{{ entry.1 }} {{ entry.0 }}</div>
                 </div>
+                <a class="card-footer text-white clearfix small z-1" href="{% if entry.1 > 0 %}{% url 'helpdesk:list' %}?{{ entry.3 }}{% else %}#{% endif %}">
+                  <span class="float-left">{% if entry.1 > 0 %}{% trans "View Tickets" %}{% else %}{% trans "No tickets in this range" %}{% endif %}</span>
+                  <span class="float-right">
+                    <i class="fas fa-angle-right"></i>
+                  </span>
+                </a>
+              </div>
             </div>
+            {% endfor %}
+          </div>
+
 

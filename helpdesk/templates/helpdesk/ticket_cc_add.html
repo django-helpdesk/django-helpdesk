@@ -2,62 +2,71 @@
 
 {% block helpdesk_title %}{% trans "Add Ticket CC" %}{% endblock %}
 
+{% block helpdesk_breadcrumb %}
+<li class="breadcrumb-item">
+    <a href="{% url 'helpdesk:list' %}">{% trans "Tickets" %}</a>
+</li>
+<li class="breadcrumb-item">
+    <a href="{% url 'helpdesk:list' %}{{ ticket.id }}/">{{ ticket.queue.slug }}-{{ ticket.id }}</a>
+</li>
+<li class="breadcrumb-item">
+    <a href="{% url 'helpdesk:ticket_cc' ticket.id %}">{% trans "CC Settings" %}</a>
+</li>
+<li class="breadcrumb-item active">{% trans "Add CC" %}</li>
+{% endblock %}
+
 {% block helpdesk_body %}
 <h2>{% trans 'Add Ticket CC' %}</h2>
 
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="panel panel-primary">
-                        <div class="panel-heading">
-                            {% trans 'To automatically send an email to a user or e-mail address when this ticket is updated, select the user or enter an e-mail address below.' %}
-                        </div>
-                        <!-- /.panel-heading -->
-                        <div class="panel-body">
-                            <!-- Nav tabs -->
-                            <ul class="nav nav-tabs">
-                                <li class="active"><a href="#EmailCC" data-toggle="tab">{% trans 'Email' %}</a>
-                                </li>
-                                <li><a href="#UserCC" data-toggle="tab">{% trans 'User' %}</a>
-                                </li>
-                            </ul>
+<div class="card mb-3">
+    <div class="card-header">
+        <i class="fas fa-hand-pointer"></i>
+        {% trans 'To automatically send an email to a user or e-mail address when this ticket is updated, select the user or enter an e-mail address below.' %}
+    </div>
+    <div class="card-body">
+        <!-- Nav tabs -->
+        <ul class="nav nav-tabs">
+            <li class="active"><a href="#EmailCC" data-toggle="tab">{% trans 'Email' %}</a>
+            </li>
+            <li><a href="#UserCC" data-toggle="tab">{% trans 'User' %}</a>
+            </li>
+        </ul>
 
-                            <!-- Tab panes -->
-                            <div class="tab-content">
-                                <div class="tab-pane fade in active" id="EmailCC">
-                                    <h4>{% trans 'Add Email' %}</h4>
-                                    <form method='post' action='./'>
-                                        <fieldset>
-                                            <dl>{% for field in form_email %}
-                                                <dt><label for='id_{{ field.name }}'>{{ field.label }}</label></dt>
-                                                <dd>{{ field }}</dd>
-                                                {% if field.errors %}<dd class='error'>{{ field.errors }}</dd>{% endif %}
-                                                {% if field.help_text %}<dd class='form_help_text'>{{ field.help_text }}</dd>{% endif %}
-                                            {% endfor %}</dl>
-                                        </fieldset>
-                                        <button class="btn btn-primary" type='submit'>{% trans "Save Ticket CC" %}</button>
-                                    {% csrf_token %}</form>
-                                </div>
-                                <div class="tab-pane fade" id="UserCC">
-                                    <h4>{% trans 'Add User' %}</h4>
-                                    <form method='post' action='./'>
-                                        <fieldset>
-                                            <dl>{% for field in form_user %}
-                                                <dt><label for='id_{{ field.name }}'>{{ field.label }}</label></dt>
-                                                <dd>{{ field }}</dd>
-                                                {% if field.errors %}<dd class='error'>{{ field.errors }}</dd>{% endif %}
-                                                {% if field.help_text %}<dd class='form_help_text'>{{ field.help_text }}</dd>{% endif %}
-                                            {% endfor %}</dl>
-                                        </fieldset>
-                                        <button class="btn btn-primary" type='submit'>{% trans "Save Ticket CC" %}</button>
-                                    {% csrf_token %}</form>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- /.panel-body -->
-                    </div>
-                    <!-- /.panel -->
-                </div>
+        <!-- Tab panes -->
+        <div class="tab-content">
+            <div class="tab-pane fade in active" id="EmailCC">
+                <h4>{% trans 'Add Email' %}</h4>
+                <form method='post' action='./'>
+                    <fieldset>
+                        <dl>{% for field in form_email %}
+                            <dt><label for='id_{{ field.name }}'>{{ field.label }}</label></dt>
+                            <dd>{{ field }}</dd>
+                            {% if field.errors %}<dd class='error'>{{ field.errors }}</dd>{% endif %}
+                            {% if field.help_text %}<dd class='form_help_text'>{{ field.help_text }}</dd>{% endif %}
+                        {% endfor %}</dl>
+                    </fieldset>
+                    <button class="btn btn-primary" type='submit'>{% trans "Save Ticket CC" %}</button>
+                {% csrf_token %}</form>
             </div>
-            <!-- /.row -->
+            <div class="tab-pane fade" id="UserCC">
+                <h4>{% trans 'Add User' %}</h4>
+                <form method='post' action='./'>
+                    <fieldset>
+                        <dl>{% for field in form_user %}
+                            <dt><label for='id_{{ field.name }}'>{{ field.label }}</label></dt>
+                            <dd>{{ field }}</dd>
+                            {% if field.errors %}<dd class='error'>{{ field.errors }}</dd>{% endif %}
+                            {% if field.help_text %}<dd class='form_help_text'>{{ field.help_text }}</dd>{% endif %}
+                        {% endfor %}</dl>
+                    </fieldset>
+                    <button class="btn btn-primary" type='submit'>{% trans "Save Ticket CC" %}</button>
+                {% csrf_token %}</form>
+            </div>
+        </div>
+    </div>
+    <!-- /.card-body -->
+</div>
+<!-- /.card -->
+
 
 {% endblock %}

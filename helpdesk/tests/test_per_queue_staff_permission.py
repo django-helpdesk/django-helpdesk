@@ -6,6 +6,8 @@ from django.test.client import Client
 
 from helpdesk.models import Queue, Ticket
 from helpdesk import settings
+from helpdesk.query import get_query
+from helpdesk.user import HelpdeskUser
 
 
 class PerQueueStaffMembershipTestCase(TestCase):
@@ -14,8 +16,8 @@ class PerQueueStaffMembershipTestCase(TestCase):
 
     def setUp(self):
         """
-        Create user_1 with access to queue_1 containing 1 ticket
-        and    user_2 with access to queue_2 containing 2 tickets
+        Create user_1 with access to queue_1 containing 2 ticket
+        and    user_2 with access to queue_2 containing 4 tickets
         and superuser who should be able to access both queues
         """
         self.HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION = settings.HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION
@@ -31,6 +33,8 @@ class PerQueueStaffMembershipTestCase(TestCase):
         self.superuser.set_password('superuser')
         self.superuser.save()
 
+        self.identifier_users = {}
+
         for identifier in self.IDENTIFIERS:
             queue = self.__dict__['queue_%d' % identifier] = Queue.objects.create(
                 title='Queue %d' % identifier,
@@ -40,9 +44,11 @@ class PerQueueStaffMembershipTestCase(TestCase):
             user = self.__dict__['user_%d' % identifier] = User.objects.create(
                 username='User_%d' % identifier,
                 is_staff=True,
+                email="foo%s@example.com" % identifier
             )
             user.set_password(str(identifier))
             user.save()
+            self.identifier_users[identifier] = user
 
             # The prefix 'helpdesk.' must be trimmed
             p = Permission.objects.get(codename=queue.permission_name[9:])
@@ -68,7 +74,7 @@ class PerQueueStaffMembershipTestCase(TestCase):
     def test_dashboard_ticket_counts(self):
         """
         Check that the regular users' dashboard only shows 1 of the 2 queues,
-        that user_1 only sees a total of 1 ticket, that user_2 sees a total of 2
+        that user_1 only sees a total of 2 tickets, that user_2 sees a total of 4
         tickets, but that the superuser's dashboard shows all queues and tickets.
         """
 
@@ -105,7 +111,7 @@ class PerQueueStaffMembershipTestCase(TestCase):
     def test_report_ticket_counts(self):
         """
         Check that the regular users' report only shows 1 of the 2 queues,
-        that user_1 only sees a total of 1 ticket, that user_2 sees a total of 2
+        that user_1 only sees a total of 2 tickets, that user_2 sees a total of 4
         tickets, but that the superuser's report shows all queues and tickets.
         """
 
@@ -153,15 +159,16 @@ class PerQueueStaffMembershipTestCase(TestCase):
     def test_ticket_list_per_queue_user_restrictions(self):
         """
         Ensure that while the superuser can list all tickets, user_1 can only
-        list the 1 ticket in his queue and user_2 can list only the 2 tickets
+        list the 2 tickets in his queue and user_2 can list only the 4 tickets
         in his queue.
         """
         # Regular users
         for identifier in self.IDENTIFIERS:
             self.client.login(username='User_%d' % identifier, password=str(identifier))
             response = self.client.get(reverse('helpdesk:list'))
+            tickets = get_query(response.context['urlsafe_query'], HelpdeskUser(self.identifier_users[identifier]))
             self.assertEqual(
-                len(response.context['tickets']),
+                len(tickets),
                 identifier * 2,
                 'Ticket list was not properly limited by queue membership'
             )
@@ -179,8 +186,9 @@ class PerQueueStaffMembershipTestCase(TestCase):
         # Superuser
         self.client.login(username='superuser', password='superuser')
         response = self.client.get(reverse('helpdesk:list'))
+        tickets = get_query(response.context['urlsafe_query'], HelpdeskUser(self.superuser))
         self.assertEqual(
-            len(response.context['tickets']),
+            len(tickets),
             6,
             'Ticket list was limited by queue membership for a superuser'
         )

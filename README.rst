@@ -1,10 +1,10 @@
 django-helpdesk - A Django powered ticket tracker for small businesses.
 =======================================================================
 
-.. image:: https://travis-ci.org/django-helpdesk/django-helpdesk.png?branch=master
+.. image:: https://travis-ci.org/django-helpdesk/django-helpdesk.png?branch=develop
     :target: https://travis-ci.org/django-helpdesk/django-helpdesk
 
-.. image:: https://codecov.io/gh/django-helpdesk/django-helpdesk/branch/master/graph/badge.svg
+.. image:: https://codecov.io/gh/django-helpdesk/django-helpdesk/branch/develop/graph/badge.svg
   :target: https://codecov.io/gh/django-helpdesk/django-helpdesk
 
 Copyright 2009-2019 Ross Poulton and django-helpdesk contributors. All Rights Reserved.
@@ -34,8 +34,8 @@ included packages.
 Demo Quickstart
 ---------------
 
-django-helpdesk includes a basic demo Django project so that you may easily
-get started with testing or developing django-helpdesk. The demo project
+`django-helpdesk` includes a basic demo Django project so that you may easily
+get started with testing or developing `django-helpdesk`. The demo project
 resides in the `demo/` top-level folder.
 
 It's likely that you can start up a demo project server by running
@@ -62,20 +62,8 @@ Installation
 
 `django-helpdesk` requires:
 
-* Django 1.11.x
-* either Python 2.7 or 3.6+ (likely 3.4+ still works though, but unsupported)
-
-**NOTE REGARDING PYTHON VERSION:**
-The recommended combination is Python 3.6+ with Django 1.11.
-Support for Python 2 will end in the next versions of both `django-helpdesk`
-and Django itself (Django 2.0), so users and developers are encouraged to begin
-transitioning to Python 3 if have not already. New projects should definitely
-use Python 3!
-
-**NOTE REGARDING DJANGO VERSION:**
-The recommended release is Django 1.11. However, there initial support of
-Django 2.x as of version 0.2.7 if you'd like to try it out.
-Please report any bugs you find!
+* Python 3.6+
+* Django 2.2 LTS (latest bugfix release highly recommended)
 
 You can quickly install the latest stable version of `django-helpdesk`
 app via `pip`::

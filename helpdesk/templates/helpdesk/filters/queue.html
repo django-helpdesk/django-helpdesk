@@ -1,0 +1,20 @@
+{% load i18n humanize %}
+{% load static from staticfiles %}
+{% load in_list %}
+<div class="form-row">
+    <div class="col col-sm-3">
+          <label for='id_queues'>{% trans "Queue(s)" %}:</label>
+    </div>
+    <div class="col col-sm-3">
+        <select id='id_queues' name='queue' multiple='selected' size='5'>
+          {% for q in queue_choices %}
+            <option value='{{ q.id }}'{% if q.id|in_list:query_params.filtering.queue__id__in %} selected="selected"{% endif %}>{{ q.title }}</option>
+            {% endfor %}
+        </select>
+    </div>
+  <div class="col col-sm-6">
+      <button class="filterBuilderRemove btn btn-danger btn-sm float-right"><i class="fas fa-trash-alt"></i></button>
+  </div>
+  <div class="form-row filterHelp">{% trans "Ctrl-click to select multiple options" %}</div>
+</div>
+

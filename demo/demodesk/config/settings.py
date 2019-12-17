@@ -37,8 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.sites',
     'django.contrib.humanize',
-    'markdown_deux',
-    'bootstrapform',
+    'bootstrap4form',
     'helpdesk'
 ]
 
@@ -106,7 +105,6 @@ HELPDESK_SHOW_CHANGE_PASSWORD = True
 HELPDESK_REDIRECT_TO_LOGIN_BY_DEFAULT = False
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/login/'
-
 
 # Database
 # - by default, we use SQLite3 for the demo, but you can also

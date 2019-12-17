@@ -2,6 +2,15 @@
 
 {% block helpdesk_title %}{% trans "Change System Settings" %}{% endblock %}
 
+{% block helpdesk_breadcrumb %}
+<li class="breadcrumb-item">
+    <a href="{% url 'helpdesk:user_settings' %}">{% trans "Settings" %}</a>
+</li>
+<li class="breadcrumb-item active">
+    System Settings
+</li>
+{% endblock %}
+
 {% block helpdesk_body %}
 <h2>{% trans "System Settings" %}</h2>
 
