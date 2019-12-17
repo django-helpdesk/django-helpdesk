@@ -5,7 +5,7 @@ We're really glad you're reading this and considering contributing to
 `django-helpdesk`! As an open source project, we rely on volunteers
 to improve and grow the project. Welcome!
 
-django-helpdesk is an open-source project and as such contributions from the
+`django-helpdesk` is an open-source project and as such contributions from the
 community are welcomed and encouraged!
 
 Please read these guidelines to get up to speed quickly. If you have any
@@ -19,7 +19,7 @@ Testing
 -------
 
 If you don't mind testing pre-releases (don't use in production!), we appreciate
-continuous feedback on the `develop` branch, which is our work toward the next
+continuous feedback on the `master` branch, which is our work toward the next
 major release. Please file bug reports, and tag the report with the "pre-release"
 tag.
 
@@ -31,35 +31,27 @@ Pull Requests
 
 Please fork the project on GitHub, make your changes, and submit a
 pull request back into the appropriate branch of the
-django-helpdesk repository.
+`django-helpdesk` repository.
 
 Short story:
 
-* pull requests for `master` are for bugfixes to current release
-* pull requests for `develop` are for major features in future release
+* pull requests for `master` are for the next major release
+* pull requests for a current release should go to appropriate release branch
+  (for example, bugfixes for 0.2 should go to the `0.2.x` branch.)
 
 Longer story:
 
 In general, our git branching scheme looks like the following.
 
-* `master` always points to the latest major release, plus bugfixes
-* `develop` always points to development for the next major release
-* major releases are found in their own branches:
+* `master` always points to development for the next major release,
+  major new features should go here
+* current and past major releases are found in their own branches:
 
   * `0.2.x` is the branch for the 0.2 release and any bugfix releases
   * `0.1` is the branch for the legacy code; it is no longer supported
 
-If you are submitting a patch for a 0.2 release, apply your pull request
-to the `master` branch. Once patches are tested and gathered into a new
-bugfix release, it will be merged into the `0.2.x` branch by a
-maintainer.
-
-If you are helping develop the next release, apply your pull requests
-to the `develop` branch instead.
-
 We reserve the right to decline a pull request if it is not for
-the appropriate branch. For example, major new features shouldn't
-be applied to the `master` branch, and will be rejected.
+the appropriate branch.
 
 Wherever possible please break git commits up into small chunks that are
 specific to a single bit of functionality. For example, a commit should *not*
