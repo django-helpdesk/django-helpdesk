@@ -839,7 +839,7 @@ def ticket_list(request):
 
         if filter:
             try:
-                ticket = huser.get_tickets_in_queues.get(**filter)
+                ticket = huser.get_tickets_in_queues().get(**filter)
                 return HttpResponseRedirect(ticket.staff_url)
             except Ticket.DoesNotExist:
                 # Go on to standard keyword searching
