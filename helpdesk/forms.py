@@ -337,7 +337,7 @@ class PublicTicketForm(AbstractTicketForm):
         help_text=_('We will e-mail you when your ticket is updated.'),
     )
 
-    def __init__(self, hidden_fields=(), *args, **kwargs):
+    def __init__(self, hidden_fields=(), readonly_fields=(), *args, **kwargs):
         """
         Add any (non-staff) custom fields that are defined to the form
         """
@@ -354,6 +354,8 @@ class PublicTicketForm(AbstractTicketForm):
             setting = field_hide_table.get(field, None)
             if (setting and hasattr(settings, setting)) or field in hidden_fields:
                 self.fields[field].widget = forms.HiddenInput()
+            if field in readonly_fields:
+                self.fields[field].disabled = True
 
         self.fields['queue'].choices = [('', '--------')] + [
             (q.id, q.title) for q in Queue.objects.filter(allow_public_submission=True)]

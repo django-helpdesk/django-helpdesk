@@ -41,5 +41,9 @@
 </div>
 {% ifequal itemnumperrow 'three' %}</div>{% endifequal %}
 {% endfor %}
+{% ifnotequal itemnumperrow 'three' %}</div>{% endifnotequal %}
+{% if category.queue %}
+<a href='{% url 'helpdesk:submit' %}?queue={{category.queue.pk}};_readonly_fields_=queue'><button type="button" class="btn btn-success btn-circle btn-xl float-right"><i class="fa fa-envelope fa-lg"></i> {% trans 'Get help with this topic' %}</button></a>
+{% endif %}
 
 {% endblock %}

@@ -1216,6 +1216,15 @@ class KBCategory(models.Model):
         _('Description'),
     )
 
+    queue = models.ForeignKey(
+        Queue,
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE,
+        verbose_name=_('Default queue when creating a ticket after viewing this category.'),
+    )
+
+
     def __str__(self):
         return '%s' % self.title
 

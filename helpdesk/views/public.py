@@ -92,6 +92,7 @@ class BaseCreateTicketView(FormView):
     def get_form_kwargs(self, *args, **kwargs):
         kwargs = super().get_form_kwargs(*args, **kwargs)
         kwargs['hidden_fields'] = self.request.GET.get('_hide_fields_', '').split(',')
+        kwargs['readonly_fields'] = self.request.GET.get('_readonly_fields_', '').split(',')
         return kwargs
 
     def form_valid(self, form):
