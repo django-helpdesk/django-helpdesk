@@ -349,10 +349,9 @@ class PublicTicketForm(AbstractTicketForm):
             'priority': 'HELPDESK_PUBLIC_TICKET_PRIORITY',
             'due_date': 'HELPDESK_PUBLIC_TICKET_DUE_DATE',
         }
-        for cf in CustomField.objects.filter(staff_only=False):
-            field_hide_table["custom_%s" % cf.name] = None
 
-        for (field, setting) in field_hide_table.items():
+        for field in self.fields.keys():
+            setting = field_hide_table.get(field, None)
             if (setting and hasattr(settings, setting)) or field in hidden_fields:
                 self.fields[field].widget = forms.HiddenInput()
 
