@@ -18,7 +18,7 @@ from django.utils import timezone
 
 from helpdesk.lib import safe_template_context, process_attachments
 from helpdesk.models import (Ticket, Queue, FollowUp, IgnoreEmail, TicketCC,
-                             CustomField, TicketCustomFieldValue, TicketDependency, UserSettings)
+                             CustomField, TicketCustomFieldValue, TicketDependency, UserSettings, KBItem)
 from helpdesk import settings as helpdesk_settings
 
 User = get_user_model()
@@ -197,7 +197,10 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
         return Queue.objects.get(id=int(self.cleaned_data['queue']))
 
     def _create_ticket(self):
-        queue = self._get_queue()
+        queue = Queue.objects.get(id=int(self.cleaned_data['queue']))
+        kbitem = None
+        if 'kbitem' in self.cleaned_data:
+            kbitem = KBItem.objects.get(id=int(self.cleaned_data['kbitem']))
 
         ticket = Ticket(title=self.cleaned_data['title'],
                         submitter_email=self.cleaned_data['submitter_email'],
@@ -207,6 +210,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
                         description=self.cleaned_data['body'],
                         priority=self.cleaned_data['priority'],
                         due_date=self.cleaned_data['due_date'],
+                        kbitem=kbitem,
                         )
 
         return ticket, queue
@@ -337,12 +341,21 @@ class PublicTicketForm(AbstractTicketForm):
         help_text=_('We will e-mail you when your ticket is updated.'),
     )
 
-    def __init__(self, hidden_fields=(), readonly_fields=(), *args, **kwargs):
+    def __init__(self, hidden_fields=(), readonly_fields=(), kbcategory=None, *args, **kwargs):
         """
         Add any (non-staff) custom fields that are defined to the form
         """
         super(PublicTicketForm, self).__init__(*args, **kwargs)
         self._add_form_custom_fields(False)
+
+        if kbcategory:
+            self.fields['kbitem'] =  forms.ChoiceField(
+                widget=forms.Select(attrs={'class': 'form-control'}),
+                required=False,
+                label=_('Knowedge Base Item'),
+                choices=[(kbi.pk, kbi.title) for kbi in KBItem.objects.filter(category=kbcategory.pk)],
+            )
+
 
         field_hide_table = {
             'queue': 'HELPDESK_PUBLIC_TICKET_QUEUE',

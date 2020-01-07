@@ -559,6 +559,14 @@ class Ticket(models.Model):
         default=mk_secret,
     )
 
+    kbitem = models.ForeignKey(
+        "KBItem",
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE,
+        verbose_name=_('Knowledge base item the user was viewing when they created this ticket.'),
+    )
+
     @property
     def time_spent(self):
         """Return back total time spent on the ticket. This is calculated value
@@ -1310,7 +1318,7 @@ class KBItem(models.Model):
 
     def get_absolute_url(self):
         from django.urls import reverse
-        return reverse('helpdesk:kb_item', args=(self.id,))
+        return str(reverse('helpdesk:kb_category', args=(self.category.slug,)))+"?kbitem="+str(self.pk)
 
     def get_markdown(self):
         return get_markdown(self.answer)

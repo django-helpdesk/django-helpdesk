@@ -21,7 +21,7 @@ from helpdesk.decorators import protect_view, is_helpdesk_staff
 import helpdesk.views.staff as staff
 from helpdesk.forms import PublicTicketForm
 from helpdesk.lib import text_is_spam
-from helpdesk.models import CustomField, Ticket, Queue, UserSettings, KBCategory
+from helpdesk.models import CustomField, Ticket, Queue, UserSettings, KBCategory, KBItem
 
 
 def create_ticket(request, *args, **kwargs):
@@ -82,7 +82,7 @@ class BaseCreateTicketView(FormView):
         if request.user.is_authenticated and request.user.email:
             initial_data['submitter_email'] = request.user.email
 
-        query_param_fields = ['submitter_email', 'title', 'body', 'queue']
+        query_param_fields = ['submitter_email', 'title', 'body', 'queue', 'kbitem']
         custom_fields = ["custom_%s" % f.name for f in CustomField.objects.filter(staff_only=False)]
         query_param_fields += custom_fields
         for qpf in query_param_fields:
@@ -93,6 +93,12 @@ class BaseCreateTicketView(FormView):
         kwargs = super().get_form_kwargs(*args, **kwargs)
         kwargs['hidden_fields'] = self.request.GET.get('_hide_fields_', '').split(',')
         kwargs['readonly_fields'] = self.request.GET.get('_readonly_fields_', '').split(',')
+        kbitem = self.request.GET.get('kbitem', None)
+        if kbitem:
+            try:
+                kwargs['kbcategory'] = KBItem.objects.get(pk=int(kbitem))
+            except (ValueError, KBItem.DoesNotExist):
+                pass
         return kwargs
 
     def form_valid(self, form):

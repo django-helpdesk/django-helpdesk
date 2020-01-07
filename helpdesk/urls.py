@@ -232,10 +232,6 @@ if helpdesk_settings.HELPDESK_KB_ENABLED:
             kb.index,
             name='kb_index'),
 
-        url(r'^kb/(?P<item>[0-9]+)/$',
-            kb.item,
-            name='kb_item'),
-
         url(r'^kb/(?P<item>[0-9]+)/vote/$',
             kb.vote,
             name='kb_vote'),

@@ -27,18 +27,15 @@ def index(request):
 def category(request, slug):
     category = get_object_or_404(KBCategory, slug__iexact=slug)
     items = category.kbitem_set.all()
+    selected_item = request.GET.get('kbitem', None)
+    try:
+        selected_item = int(selected_item)
+    except ValueError:
+        pass
     return render(request, 'helpdesk/kb_category.html', {
         'category': category,
         'items': items,
-        'helpdesk_settings': helpdesk_settings,
-    })
-
-
-def item(request, item):
-    item = get_object_or_404(KBItem, pk=item)
-    return render(request, 'helpdesk/kb_item.html', {
-        'category': item.category,
-        'item': item,
+        'selected_item': selected_item,
         'helpdesk_settings': helpdesk_settings,
     })
 

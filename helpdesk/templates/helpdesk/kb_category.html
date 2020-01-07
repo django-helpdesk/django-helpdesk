@@ -19,29 +19,37 @@
         <p>{{ category.description }}</p>
     </div>
 </div>
-
+<div id="accordion">
 {% for item in items %}
-{% cycle 'one' 'two' 'three' as itemnumperrow silent %}
-{% ifequal itemnumperrow 'one' %}<div class="card-deck">{% endifequal %}
-<div class="card">
-      <div class="card-header">
-        <h5 class="card-title">{{ item.title }}</h5>
-      </div>
-      <div class="card-body">
-        <p class="card-text">{{ item.question }}</p>
-        <p class="card-text">
-                {% blocktrans with item.get_absolute_url as url %}<a href='{{ url }}' class="btn btn-primary"> Go to answer <i class="fa fa-share"></i></a>{% endblocktrans %}
-            </p>
-            <div class="well well-sm">
-                <p>{% trans 'Rating' %}: {{ item.score }}</p>
-                <p>{% trans 'Last Update' %}: {{ item.last_updated|naturaltime }}</p>
+<div class="card mb-3">
+    <button class="btn btn-link" data-toggle="collapse" data-target="#collapse{{item.id}}" aria-expanded="true" aria-controls="collapse{{item.id}}">
+        <div class="card-header" id="header{{item.id}}">
+            <h5 class="mb-0">
+                {{ item.title }}
+            </h5>
+        </div>
+    </button>
+    <div id="collapse{{item.id}}" class="collapse {% if item.id == selected_item %}show{% endif %}" aria-labelledby="header{{item.id}}" data-parent="#accordion">
+        <div class="card-body">
+            <p class="card-text">{{ item.question }}</p>
+            <p>{{ item.get_markdown }}</p>
+            <div class="row">
+                {% if request.user.pk %}
+                <div>
+                    <a href='{% url "helpdesk:kb_vote" item.pk %}?vote=up'><button type="button" class="btn btn-success btn-circle btn-xl"><i class="fa fa-thumbs-up fa-lg"></i></button></a>
+                </div>
+                <div>
+                    <a href='{% url "helpdesk:kb_vote" item.pk %}?vote=down'><button type="button" class="btn btn-danger btn-circle btn-xl"><i class="fa fa-thumbs-down fa-lg"></i></button></a>
+                </div>
+                {% blocktrans with recommendations=item.recommendations votes=item.votes  %}{{ recommendations }} people found this answer useful of {{votes}}. {% endblocktrans %}
+                {% endif %}
             </div>
-        </p>
+
+        </div>
     </div>
 </div>
-{% ifequal itemnumperrow 'three' %}</div>{% endifequal %}
 {% endfor %}
-{% ifnotequal itemnumperrow 'three' %}</div>{% endifnotequal %}
+</div>
 {% if category.queue %}
 <a href='{% url 'helpdesk:submit' %}?queue={{category.queue.pk}};_readonly_fields_=queue'><button type="button" class="btn btn-success btn-circle btn-xl float-right"><i class="fa fa-envelope fa-lg"></i> {% trans 'Get help with this topic' %}</button></a>
 {% endif %}
