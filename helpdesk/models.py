@@ -1243,7 +1243,14 @@ class KBItem(models.Model):
     An item within the knowledgebase. Very straightforward question/answer
     style system.
     """
-    voted_by = models.ManyToManyField(settings.AUTH_USER_MODEL)
+    voted_by = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        related_name='votes',
+    )
+    downvoted_by = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        related_name='downvotes',
+    )
     category = models.ForeignKey(
         KBCategory,
         on_delete=models.CASCADE,

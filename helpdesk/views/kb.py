@@ -46,12 +46,21 @@ def item(request, item):
 def vote(request, item):
     item = get_object_or_404(KBItem, pk=item)
     vote = request.GET.get('vote', None)
-    if vote in ('up', 'down'):
-        if request.user not in item.voted_by:
-
+    if vote == 'up':
+        if not item.voted_by.filter(pk=request.user.pk):
             item.votes += 1
-            if vote == 'up':
-                item.recommendations += 1
-            item.save()
-
+            item.voted_by.add(request.user.pk)
+            item.recommendations += 1
+        if item.downvoted_by.filter(pk=request.user.pk):
+            item.votes -= 1
+            item.downvoted_by.remove(request.user.pk)
+    if vote == 'down':
+        if not item.downvoted_by.filter(pk=request.user.pk):
+            item.votes += 1
+            item.downvoted_by.add(request.user.pk)
+            item.recommendations -= 1
+        if item.voted_by.filter(pk=request.user.pk):
+            item.votes -= 1
+            item.voted_by.remove(request.user.pk)
+    item.save()
     return HttpResponseRedirect(item.get_absolute_url())
