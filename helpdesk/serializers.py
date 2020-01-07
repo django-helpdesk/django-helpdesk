@@ -46,8 +46,8 @@ class DatatablesTicketSerializer(serializers.ModelSerializer):
 
     def get_assigned_to(self, obj):
         if obj.assigned_to:
-            if obj.assigned_to.first_name:
-                return (obj.assigned_to.first_name)
+            if obj.assigned_to.get_full_name():
+                return (obj.assigned_to.get_full_name())
             else:
                 return (obj.assigned_to.email)
         else:
