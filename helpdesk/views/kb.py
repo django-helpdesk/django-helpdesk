@@ -40,6 +40,7 @@ def category(request, slug, iframe=False):
     template = 'helpdesk/kb_category.html'
     if iframe:
         template = 'helpdesk/kb_category_iframe.html'
+    staff = request.user.is_authenticated and request.user.is_staff
     return render(request, template, {
         'category': category,
         'items': items,
@@ -47,6 +48,7 @@ def category(request, slug, iframe=False):
         'query_param_string': qparams.urlencode(),
         'helpdesk_settings': helpdesk_settings,
         'iframe': iframe,
+        'staff': staff,
     })
 
 

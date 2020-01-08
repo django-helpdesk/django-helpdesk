@@ -1323,6 +1323,9 @@ class KBItem(models.Model):
         from django.urls import reverse
         return str(reverse('helpdesk:list')) + "?kbitem=" + str(self.pk)
 
+    def num_open_tickets(self):
+        return Ticket.objects.filter(kbitem=self, status__in=(1, 2)).count()
+
     def get_markdown(self):
         return get_markdown(self.answer)
 
