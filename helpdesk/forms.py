@@ -180,13 +180,12 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
     def __init__(self, kbcategory=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if kbcategory:
-            self.fields['kbitem'] =  forms.ChoiceField(
+            self.fields['kbitem'] = forms.ChoiceField(
                 widget=forms.Select(attrs={'class': 'form-control'}),
                 required=False,
                 label=_('Knowedge Base Item'),
                 choices=[(kbi.pk, kbi.title) for kbi in KBItem.objects.filter(category=kbcategory.pk)],
             )
-
 
     def _add_form_custom_fields(self, staff_only_filter=None):
         if staff_only_filter is None:
@@ -195,8 +194,11 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
             queryset = CustomField.objects.filter(staff_only=staff_only_filter)
 
         for field in queryset:
-            instanceargs = { 'label': field.label, 'help_text':
-                             field.help_text, 'required': field.required, }
+            instanceargs = {
+                'label': field.label,
+                'help_text': field.help_text,
+                'required': field.required,
+            }
 
             self.customfield_to_field(field, instanceargs)
 

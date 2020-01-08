@@ -1232,7 +1232,6 @@ class KBCategory(models.Model):
         verbose_name=_('Default queue when creating a ticket after viewing this category.'),
     )
 
-
     def __str__(self):
         return '%s' % self.title
 
@@ -1318,12 +1317,11 @@ class KBItem(models.Model):
 
     def get_absolute_url(self):
         from django.urls import reverse
-        return str(reverse('helpdesk:kb_category', args=(self.category.slug,)))+"?kbitem="+str(self.pk)
+        return str(reverse('helpdesk:kb_category', args=(self.category.slug,))) + "?kbitem=" + str(self.pk)
 
     def query_url(self):
         from django.urls import reverse
-        return str(reverse('helpdesk:list')) +"?kbitem="+str(self.pk)
-
+        return str(reverse('helpdesk:list')) + "?kbitem=" + str(self.pk)
 
     def get_markdown(self):
         return get_markdown(self.answer)
