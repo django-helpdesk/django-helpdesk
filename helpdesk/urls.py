@@ -239,6 +239,10 @@ if helpdesk_settings.HELPDESK_KB_ENABLED:
         url(r'^kb/(?P<slug>[A-Za-z0-9_-]+)/$',
             kb.category,
             name='kb_category'),
+
+        url(r'^kb_iframe/(?P<slug>[A-Za-z0-9_-]+)/$',
+            kb.category_iframe,
+            name='kb_category_iframe'),
     ]
 
 urlpatterns += [

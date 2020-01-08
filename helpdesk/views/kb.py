@@ -24,7 +24,7 @@ def index(request):
     })
 
 
-def category(request, slug):
+def category(request, slug, iframe=False):
     category = get_object_or_404(KBCategory, slug__iexact=slug)
     items = category.kbitem_set.all()
     selected_item = request.GET.get('kbitem', None)
@@ -37,13 +37,21 @@ def category(request, slug):
         del qparams['kbitem']
     except KeyError:
         pass
-    return render(request, 'helpdesk/kb_category.html', {
+    template = 'helpdesk/kb_category.html'
+    if iframe:
+        template = 'helpdesk/kb_category_iframe.html'
+    return render(request, template, {
         'category': category,
         'items': items,
         'selected_item': selected_item,
         'query_param_string': qparams.urlencode(),
         'helpdesk_settings': helpdesk_settings,
+        'iframe': iframe,
     })
+
+
+def category_iframe(request, slug):
+    return category(request, slug, iframe=True)
 
 
 def vote(request, item):
