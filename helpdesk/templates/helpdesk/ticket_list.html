@@ -171,6 +171,7 @@
                             <option id="filterBuilderSelect-Status" value="Status">{% trans "Status" %}</option>
                             <option id="filterBuilderSelect-Keywords" value="Keywords">{% trans "Keywords" %}</option>
                             <option id="filterBuilderSelect-Dates" value="Dates">{% trans "Date Range" %}</option>
+                            <option id="filterBuilderSelect-KBItems" value="KBItems">{% trans "Knowledge base items" %}</option>
                         </select>
                     {% csrf_token %}
                     </form>
@@ -195,6 +196,9 @@
                             </li>
                             <li class="list-group-item filterBox{% if query_params.search_string %} filterBoxShow{% endif %}" id="filterBoxKeywords">
                         {% include './filters/keywords.html' %}
+                            </li>
+                            <li class="list-group-item filterBox{% if query_params.filtering.kbitem__in %} filterBoxShow{% endif %}" id="filterBoxKBItems">
+                                {% include './filters/kbitems.html' %}
                             </li>
                         </ul>
 
@@ -318,8 +322,8 @@
                   var name = data.split(" ")[1];
                   if (type === 'display')
                   {
-                      data = '<div class="tickettitle"><a href="' + get_url(row) + '" >' + 
-                             row.id + '. ' + 
+                      data = '<div class="tickettitle"><a href="' + get_url(row) + '" >' +
+                             row.id + '. ' +
                              row.title + '</a></div>';
                   }
                   return data
@@ -348,7 +352,7 @@
               "render": function(data, type, row, meta) {
                   if (data != "None") {
                       return data;
-                  } 
+                  }
                   else {
                       return "";
                   }
@@ -395,6 +399,9 @@
      {% endif %}
      {% if query_params.search_string %}
      $("#filterBuilderSelect-Keywords")[0].disabled = "disabled";
+     {% endif %}
+     {% if query_params.filtering.kbitem__in %}
+     $("#filterBuilderSelect-KBItems")[0].disabled = "disabled";
      {% endif %}
  });
 

@@ -1320,6 +1320,11 @@ class KBItem(models.Model):
         from django.urls import reverse
         return str(reverse('helpdesk:kb_category', args=(self.category.slug,)))+"?kbitem="+str(self.pk)
 
+    def query_url(self):
+        from django.urls import reverse
+        return str(reverse('helpdesk:list')) +"?kbitem="+str(self.pk)
+
+
     def get_markdown(self):
         return get_markdown(self.answer)
 

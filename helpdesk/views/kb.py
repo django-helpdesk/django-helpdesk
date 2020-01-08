@@ -30,12 +30,18 @@ def category(request, slug):
     selected_item = request.GET.get('kbitem', None)
     try:
         selected_item = int(selected_item)
-    except ValueError:
+    except TypeError:
+        pass
+    qparams = request.GET.copy()
+    try:
+        del qparams['kbitem']
+    except KeyError:
         pass
     return render(request, 'helpdesk/kb_category.html', {
         'category': category,
         'items': items,
         'selected_item': selected_item,
+        'query_param_string': qparams.urlencode(),
         'helpdesk_settings': helpdesk_settings,
     })
 

@@ -177,6 +177,17 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
         help_text=_('You can attach a file such as a document or screenshot to this ticket.'),
     )
 
+    def __init__(self, kbcategory=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if kbcategory:
+            self.fields['kbitem'] =  forms.ChoiceField(
+                widget=forms.Select(attrs={'class': 'form-control'}),
+                required=False,
+                label=_('Knowedge Base Item'),
+                choices=[(kbi.pk, kbi.title) for kbi in KBItem.objects.filter(category=kbcategory.pk)],
+            )
+
+
     def _add_form_custom_fields(self, staff_only_filter=None):
         if staff_only_filter is None:
             queryset = CustomField.objects.all()
@@ -184,11 +195,8 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
             queryset = CustomField.objects.filter(staff_only=staff_only_filter)
 
         for field in queryset:
-            instanceargs = {
-                'label': field.label,
-                'help_text': field.help_text,
-                'required': field.required,
-            }
+            instanceargs = { 'label': field.label, 'help_text':
+                             field.help_text, 'required': field.required, }
 
             self.customfield_to_field(field, instanceargs)
 
@@ -341,21 +349,12 @@ class PublicTicketForm(AbstractTicketForm):
         help_text=_('We will e-mail you when your ticket is updated.'),
     )
 
-    def __init__(self, hidden_fields=(), readonly_fields=(), kbcategory=None, *args, **kwargs):
+    def __init__(self, hidden_fields=(), readonly_fields=(), *args, **kwargs):
         """
         Add any (non-staff) custom fields that are defined to the form
         """
         super(PublicTicketForm, self).__init__(*args, **kwargs)
         self._add_form_custom_fields(False)
-
-        if kbcategory:
-            self.fields['kbitem'] =  forms.ChoiceField(
-                widget=forms.Select(attrs={'class': 'form-control'}),
-                required=False,
-                label=_('Knowedge Base Item'),
-                choices=[(kbi.pk, kbi.title) for kbi in KBItem.objects.filter(category=kbcategory.pk)],
-            )
-
 
         field_hide_table = {
             'queue': 'HELPDESK_PUBLIC_TICKET_QUEUE',

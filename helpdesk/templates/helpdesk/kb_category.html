@@ -43,6 +43,7 @@
                 </div>
                 {% blocktrans with recommendations=item.recommendations votes=item.votes  %}{{ recommendations }} people found this answer useful of {{votes}}. {% endblocktrans %}
                 {% endif %}
+                <a href='{% url 'helpdesk:submit' %}?{% if category.queue %}queue={{category.queue.pk}};_readonly_fields_=queue;{%endif%}kbitem={{item.id}};{{query_param_string}}'><button type="button" class="btn btn-success btn-circle btn-xl float-right"><i class="fa fa-envelope fa-lg"></i> {% trans 'Get help with this topic' %}</button></a>
             </div>
 
         </div>
@@ -51,7 +52,7 @@
 {% endfor %}
 </div>
 {% if category.queue %}
-<a href='{% url 'helpdesk:submit' %}?queue={{category.queue.pk}};_readonly_fields_=queue'><button type="button" class="btn btn-success btn-circle btn-xl float-right"><i class="fa fa-envelope fa-lg"></i> {% trans 'Get help with this topic' %}</button></a>
+<a href='{% url 'helpdesk:submit' %}?queue={{category.queue.pk}};_readonly_fields_=queue;{{query_param_string}}'><button type="button" class="btn btn-success btn-circle btn-xl float-right"><i class="fa fa-envelope fa-lg"></i> {% trans 'Get help with this topic' %}</button></a>
 {% endif %}
 
 {% endblock %}
