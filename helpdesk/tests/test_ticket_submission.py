@@ -2,7 +2,7 @@
 import email
 import uuid
 
-from helpdesk.models import Queue, CustomField, FollowUp, Ticket, TicketCC
+from helpdesk.models import Queue, CustomField, FollowUp, Ticket, TicketCC, KBCategory, KBItem
 from django.test import TestCase
 from django.core import mail
 from django.core.exceptions import ObjectDoesNotExist
@@ -11,6 +11,7 @@ from django.test.client import Client
 from django.urls import reverse
 
 from helpdesk.email import object_from_message, create_ticket_cc
+from helpdesk.tests.helpers import print_response
 
 from urllib.parse import urlparse
 
@@ -976,3 +977,24 @@ class EmailInteractionsTestCase(TestCase):
         # public_update_queue: +1
         expected_email_count += 1 + 2 + 1
         self.assertEqual(expected_email_count, len(mail.outbox))
+
+    def test_ticket_field_autofill(self):
+        cat = KBCategory.objects.create(
+            title="Test Cat",
+            slug="test_cat",
+            description="This is a test category",
+            queue=self.queue_public,
+        )
+        cat.save()
+        self.kbitem1 = KBItem.objects.create(
+            category=cat,
+            title="KBItem 1",
+            question="What?",
+            answer="A KB Item",
+        )
+        self.kbitem1.save()
+        cat_url = reverse('helpdesk:submit') + "?kbitem=1;submitter_email=foo@bar.cz;title=lol;"
+        response = self.client.get(cat_url)
+        self.assertContains(response, '<option value="1" selected>KBItem 1</option>')
+        self.assertContains(response, '<input type="email" name="submitter_email" value="foo@bar.cz" class="form-control form-control" required id="id_submitter_email">')
+        self.assertContains(response, '<input type="text" name="title" value="lol" class="form-control form-control" maxlength="100" required id="id_title">')

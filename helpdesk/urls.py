@@ -232,13 +232,13 @@ if helpdesk_settings.HELPDESK_KB_ENABLED:
             kb.index,
             name='kb_index'),
 
-        url(r'^kb/(?P<item>[0-9]+)/vote/$',
-            kb.vote,
-            name='kb_vote'),
-
         url(r'^kb/(?P<slug>[A-Za-z0-9_-]+)/$',
             kb.category,
             name='kb_category'),
+
+        url(r'^kb/(?P<item>[0-9]+)/vote/$',
+            kb.vote,
+            name='kb_vote'),
 
         url(r'^kb_iframe/(?P<slug>[A-Za-z0-9_-]+)/$',
             kb.category_iframe,
