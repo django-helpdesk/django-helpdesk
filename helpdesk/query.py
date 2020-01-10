@@ -133,7 +133,7 @@ class __Query__:
             if sortreverse:
                 sorting = "-%s" % sorting
             queryset = queryset.order_by(sorting)
-        return queryset
+        return queryset.distinct()  # https://stackoverflow.com/questions/30487056/django-queryset-contains-duplicate-entries
 
     def get_cache_key(self):
         return str(self.huser.user.pk) + ":" + self.base64
