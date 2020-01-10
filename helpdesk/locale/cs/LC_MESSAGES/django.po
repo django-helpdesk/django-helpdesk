@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: django-helpdesk\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-02-04 15:00+0000\n"
-"PO-Revision-Date: 2019-02-02 12:47+0000\n"
+"POT-Creation-Date: 2020-01-10 14:47+0100\n"
+"PO-Revision-Date: 2020-01-10 15:00+0100\n"
 "Last-Translator: jachym <jachym.cepicky@gmail.com>\n"
 "Language-Team: Czech (http://www.transifex.com/django-helpdesk/django-"
 "helpdesk/language/cs/)\n"
@@ -20,85 +20,126 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n >= 2 && n "
 "<= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;\n"
+"X-Generator: Poedit 1.8.11\n"
 
-#: helpdesk/admin.py:29 helpdesk/models.py:415
-#: helpdesk/templates/helpdesk/public_view_ticket.html:19
-#: helpdesk/templates/helpdesk/ticket_desc_table.html:57
+#: third_party/django-helpdesk/helpdesk/admin.py:38
+#: third_party/django-helpdesk/helpdesk/models.py:491
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/public_view_ticket.html:19
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_desc_table.html:39
 msgid "Submitter E-Mail"
 msgstr "E-mail zadavatele"
 
-#: helpdesk/admin.py:48 helpdesk/models.py:40 helpdesk/models.py:965
-#: helpdesk/models.py:1374
+#: third_party/django-helpdesk/helpdesk/admin.py:68
+#: third_party/django-helpdesk/helpdesk/models.py:84
+#: third_party/django-helpdesk/helpdesk/models.py:1220
+#: third_party/django-helpdesk/helpdesk/models.py:1677
 msgid "Slug"
 msgstr "Slug"
 
-#: helpdesk/forms.py:139 helpdesk/models.py:272 helpdesk/models.py:399
-#: helpdesk/templates/helpdesk/include/tickets.html:18
-#: helpdesk/templates/helpdesk/include/unassigned.html:18
-#: helpdesk/templates/helpdesk/report_index.html:39
-#: helpdesk/templates/helpdesk/rss_list.html:34
-#: helpdesk/templates/helpdesk/ticket_list.html:63
-#: helpdesk/templates/helpdesk/ticket_list.html:82
-#: helpdesk/templates/helpdesk/ticket_list.html:223
-#: helpdesk/views/staff.py:1253 helpdesk/views/staff.py:1259
-#: helpdesk/views/staff.py:1265 helpdesk/views/staff.py:1271
+#: third_party/django-helpdesk/helpdesk/email.py:357
+#, python-format
+msgid "E-Mail Received from %(sender_email)s"
+msgstr "E-mail obdržen od %(sender_email)s"
+
+#: third_party/django-helpdesk/helpdesk/email.py:366
+#, python-format
+msgid "Ticket Re-Opened by E-Mail Received from %(sender_email)s"
+msgstr "Ticket znovu otevřen e-mailem od%(sender_email)s"
+
+#: third_party/django-helpdesk/helpdesk/email.py:423
+msgid "Comment from e-mail"
+msgstr "Komentář z e-mailu"
+
+#: third_party/django-helpdesk/helpdesk/email.py:429
+msgid "Unknown Sender"
+msgstr "Neznámý odesílatel"
+
+#: third_party/django-helpdesk/helpdesk/email.py:498
+msgid "email_html_body.html"
+msgstr "email_html_body.html"
+
+#: third_party/django-helpdesk/helpdesk/forms.py:138
+#: third_party/django-helpdesk/helpdesk/models.py:330
+#: third_party/django-helpdesk/helpdesk/models.py:475
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/filters/sorting.html:16
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/include/tickets.html:16
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/include/unassigned.html:16
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/report_index.html:44
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/rss_list.html:45
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_list.html:64
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_list.html:170
+#: third_party/django-helpdesk/helpdesk/views/staff.py:1211
+#: third_party/django-helpdesk/helpdesk/views/staff.py:1217
+#: third_party/django-helpdesk/helpdesk/views/staff.py:1223
+#: third_party/django-helpdesk/helpdesk/views/staff.py:1229
 msgid "Queue"
 msgstr "Fronta požadavků"
 
-#: helpdesk/forms.py:148
+#: third_party/django-helpdesk/helpdesk/forms.py:147
 msgid "Summary of the problem"
 msgstr "Shrnutí problému"
 
-#: helpdesk/forms.py:153
+#: third_party/django-helpdesk/helpdesk/forms.py:152
 msgid "Description of your issue"
 msgstr "Popis problému"
 
-#: helpdesk/forms.py:155
+#: third_party/django-helpdesk/helpdesk/forms.py:154
 msgid "Please be as descriptive as possible and include all details"
 msgstr ""
 "Prosíme, popište problém co nejdetailněji, abychom jej byli schopni vyřešit."
 
-#: helpdesk/forms.py:163 helpdesk/management/commands/escalate_tickets.py:156
-#: helpdesk/models.py:459
-#: helpdesk/templates/helpdesk/public_view_ticket.html:24
-#: helpdesk/templates/helpdesk/ticket.html:215
-#: helpdesk/templates/helpdesk/ticket_desc_table.html:62
-#: helpdesk/templates/helpdesk/ticket_list.html:88 helpdesk/views/staff.py:548
+#: third_party/django-helpdesk/helpdesk/forms.py:162
+#: third_party/django-helpdesk/helpdesk/management/commands/escalate_tickets.py:131
+#: third_party/django-helpdesk/helpdesk/models.py:535
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/filters/sorting.html:22
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/include/tickets.html:15
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/public_view_ticket.html:24
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket.html:178
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_desc_table.html:49
+#: third_party/django-helpdesk/helpdesk/views/staff.py:593
 msgid "Priority"
 msgstr "Priorita"
 
-#: helpdesk/forms.py:164
+#: third_party/django-helpdesk/helpdesk/forms.py:163
 msgid "Please select a priority carefully. If unsure, leave it as '3'."
 msgstr ""
 "Prosím volte prioritu uvážlivě. Pokud si nejste jisti, ponechte číslo '3'."
 
-#: helpdesk/forms.py:170 helpdesk/models.py:467
-#: helpdesk/templates/helpdesk/ticket.html:218 helpdesk/views/staff.py:558
+#: third_party/django-helpdesk/helpdesk/forms.py:170
+#: third_party/django-helpdesk/helpdesk/models.py:543
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket.html:181
+#: third_party/django-helpdesk/helpdesk/views/staff.py:603
 msgid "Due on"
 msgstr "Vyřešit do"
 
-#: helpdesk/forms.py:175
+#: third_party/django-helpdesk/helpdesk/forms.py:176
 msgid "Attach File"
 msgstr "Přiložit soubor"
 
-#: helpdesk/forms.py:176
+#: third_party/django-helpdesk/helpdesk/forms.py:177
 msgid "You can attach a file such as a document or screenshot to this ticket."
 msgstr "K ticketu můžete přiložit soubor, dokument nebo snímek obrazovky."
 
-#: helpdesk/forms.py:299
+#: third_party/django-helpdesk/helpdesk/forms.py:186
+#, fuzzy
+#| msgid "Knowledge base item"
+msgid "Knowedge Base Item"
+msgstr "Položka znalostní báze"
+
+#: third_party/django-helpdesk/helpdesk/forms.py:274
 msgid "Submitter E-Mail Address"
 msgstr "E-mailová adresa zadavatele"
 
-#: helpdesk/forms.py:301
+#: third_party/django-helpdesk/helpdesk/forms.py:276
 msgid ""
 "This e-mail address will receive copies of all public updates to this ticket."
 msgstr "Na tuto adresu budou zasílány všechny veřejné aktualizace k ticketu."
 
-#: helpdesk/forms.py:309
+#: third_party/django-helpdesk/helpdesk/forms.py:282
 msgid "Case owner"
 msgstr "Vlastník případu"
 
-#: helpdesk/forms.py:310
+#: third_party/django-helpdesk/helpdesk/forms.py:283
 msgid ""
 "If you select an owner other than yourself, they'll be e-mailed details of "
 "this ticket immediately."
@@ -106,93 +147,38 @@ msgstr ""
 "Pokud vyberete jiného vlastníka než sami sebe, budou mu okamžitě e-mailem "
 "odeslány detaily ticketu."
 
-#: helpdesk/forms.py:338
+#: third_party/django-helpdesk/helpdesk/forms.py:322
 #, python-format
 msgid "Ticket Opened & Assigned to %(name)s"
 msgstr "Ticket byl otevřen a přiřazen 1%(name)s"
 
-#: helpdesk/forms.py:339
+#: third_party/django-helpdesk/helpdesk/forms.py:323
 msgid "<invalid user>"
 msgstr ""
 
-#: helpdesk/forms.py:342
+#: third_party/django-helpdesk/helpdesk/forms.py:326
 msgid "Ticket Opened"
 msgstr "Ticket byl otevřen"
 
-#: helpdesk/forms.py:362
+#: third_party/django-helpdesk/helpdesk/forms.py:346
 msgid "Your E-Mail Address"
 msgstr "Váš e-mail"
 
-#: helpdesk/forms.py:363
+#: third_party/django-helpdesk/helpdesk/forms.py:347
 msgid "We will e-mail you when your ticket is updated."
 msgstr "Při aktualizaci ticketu budete informováni e-mailem."
 
-#: helpdesk/forms.py:392
+#: third_party/django-helpdesk/helpdesk/forms.py:384
 msgid "Ticket Opened Via Web"
 msgstr "Ticket založen prostřednictvím webového formuláře."
 
-#: helpdesk/forms.py:405
-msgid "Show Ticket List on Login?"
-msgstr "Zobrazit seznam ticketů po přihlášení?"
-
-#: helpdesk/forms.py:406
-msgid "Display the ticket list upon login? Otherwise, the dashboard is shown."
-msgstr ""
-"Zobrazit seznam ticketů po přihlášení? V opačném případě bude zobrazena "
-"nástěnka."
-
-#: helpdesk/forms.py:411
-msgid "E-mail me on ticket change?"
-msgstr "Poslat mi e-mail při změně ticketu?"
-
-#: helpdesk/forms.py:412
-msgid ""
-"If you're the ticket owner and the ticket is changed via the web by somebody "
-"else, do you want to receive an e-mail?"
-msgstr ""
-"Přejete si dostat e-mail v případě, pokud jste vlastník ticketu a ticket je "
-"změněn prostřednictvím webového formuláře někým dalším."
-
-#: helpdesk/forms.py:417
-msgid "E-mail me when assigned a ticket?"
-msgstr "Poslat e-mail, pokud mi byl přiřazen ticket?"
-
-#: helpdesk/forms.py:418
-msgid ""
-"If you are assigned a ticket via the web, do you want to receive an e-mail?"
-msgstr ""
-"Přejete si dostat e-mail, pokud Vám byl přiřazen ticket prostřednictvím "
-"webového formuláře?"
-
-#: helpdesk/forms.py:423
-msgid "Number of tickets to show per page"
-msgstr "Počet ticketů zobrazených na stránku"
-
-#: helpdesk/forms.py:424
-msgid "How many tickets do you want to see on the Ticket List page?"
-msgstr "Kolik ticketů chcete vidět na stránce Seznam ticketů?"
-
-#: helpdesk/forms.py:430
-msgid "Use my e-mail address when submitting tickets?"
-msgstr "Použít můj e-mail, pokud zadávám nový ticket?"
-
-#: helpdesk/forms.py:431
-msgid ""
-"When you submit a ticket, do you want to automatically use your e-mail "
-"address as the submitter address? You can type a different e-mail address "
-"when entering the ticket if needed, this option only changes the default."
-msgstr ""
-"V případě, že zadáte nový ticket, chcete, aby Váš e-mail byl automaticky "
-"přiřazen jako e-mail zadavatele? Můžete také zadat jiný e-mail, pokud je to "
-"potřeba, tato volba pouze nastaví výchozí hodnotu."
-
-#: helpdesk/management/commands/create_queue_permissions.py:69
-#: helpdesk/migrations/0009_migrate_queuemembership.py:30
-#: helpdesk/models.py:331
+#: third_party/django-helpdesk/helpdesk/management/commands/create_queue_permissions.py:69
+#: third_party/django-helpdesk/helpdesk/migrations/0009_migrate_queuemembership.py:28
+#: third_party/django-helpdesk/helpdesk/models.py:404
 msgid "Permission for queue: "
 msgstr ""
 
-#: helpdesk/management/commands/create_usersettings.py:24
+#: third_party/django-helpdesk/helpdesk/management/commands/create_usersettings.py:24
 msgid ""
 "Check for user without django-helpdesk UserSettings and create settings if "
 "required. Uses settings.DEFAULT_USER_SETTINGS which can be overridden to "
@@ -202,44 +188,23 @@ msgstr ""
 "požadováno, vytvořit nastavení. Používá settings.DEFAULT_USER_SETTINGS, "
 "které může být přepsáno pro váš případ."
 
-#: helpdesk/management/commands/escalate_tickets.py:150
+#: third_party/django-helpdesk/helpdesk/management/commands/escalate_tickets.py:125
 #, python-format
 msgid "Ticket escalated after %s days"
 msgstr "Priorita ticketu zvýšena po %s dnech"
 
-#: helpdesk/management/commands/get_email.py:306
-msgid "Comment from e-mail"
-msgstr "Komentář z e-mailu"
-
-#: helpdesk/management/commands/get_email.py:312
-msgid "Unknown Sender"
-msgstr "Neznámý odesílatel"
-
-#: helpdesk/management/commands/get_email.py:369
-msgid "email_html_body.html"
-msgstr "email_html_body.html"
-
-#: helpdesk/management/commands/get_email.py:481
-#, python-format
-msgid "E-Mail Received from %(sender_email)s"
-msgstr "E-mail obdržen od %(sender_email)s"
-
-#: helpdesk/management/commands/get_email.py:489
-#, python-format
-msgid "Ticket Re-Opened by E-Mail Received from %(sender_email)s"
-msgstr "Ticket znovu otevřen e-mailem od%(sender_email)s"
-
-#: helpdesk/models.py:35 helpdesk/models.py:392 helpdesk/models.py:651
-#: helpdesk/models.py:960 helpdesk/models.py:998
-#: helpdesk/templates/helpdesk/include/tickets.html:17
-#: helpdesk/templates/helpdesk/include/unassigned.html:17
-#: helpdesk/templates/helpdesk/ticket.html:209
-#: helpdesk/templates/helpdesk/ticket_list.html:79
-#: helpdesk/templates/helpdesk/ticket_list.html:222 helpdesk/views/staff.py:520
+#: third_party/django-helpdesk/helpdesk/models.py:79
+#: third_party/django-helpdesk/helpdesk/models.py:468
+#: third_party/django-helpdesk/helpdesk/models.py:829
+#: third_party/django-helpdesk/helpdesk/models.py:1215
+#: third_party/django-helpdesk/helpdesk/models.py:1268
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/filters/sorting.html:13
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket.html:172
+#: third_party/django-helpdesk/helpdesk/views/staff.py:565
 msgid "Title"
 msgstr "Nadpis"
 
-#: helpdesk/models.py:43
+#: third_party/django-helpdesk/helpdesk/models.py:87
 msgid ""
 "This slug is used when building ticket ID's. Once set, try not to change it "
 "or e-mailing may get messy."
@@ -248,13 +213,15 @@ msgstr ""
 "tvorbě ID ticketu. Pokud je jednou nastaven, již jej neměňte, protože "
 "nastane zmatek v e-mailech."
 
-#: helpdesk/models.py:48 helpdesk/models.py:1208 helpdesk/models.py:1291
-#: helpdesk/models.py:1371
-#: helpdesk/templates/helpdesk/email_ignore_list.html:25
+#: third_party/django-helpdesk/helpdesk/models.py:92
+#: third_party/django-helpdesk/helpdesk/models.py:1513
+#: third_party/django-helpdesk/helpdesk/models.py:1595
+#: third_party/django-helpdesk/helpdesk/models.py:1674
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/email_ignore_list.html:25
 msgid "E-Mail Address"
 msgstr "Adresa e-mailu"
 
-#: helpdesk/models.py:51
+#: third_party/django-helpdesk/helpdesk/models.py:95
 msgid ""
 "All outgoing e-mails for this queue will use this e-mail address. If you use "
 "IMAP or POP3, this should be the e-mail address for that mailbox."
@@ -262,11 +229,12 @@ msgstr ""
 "Všechny odchozí e-maily této fronty budou odeslány z této e-mailové adresy. "
 "Pokud používáte IMAP nebo POP3, tato adresa je adresa Vašeho mailboxu."
 
-#: helpdesk/models.py:57 helpdesk/models.py:936
+#: third_party/django-helpdesk/helpdesk/models.py:101
+#: third_party/django-helpdesk/helpdesk/models.py:1192
 msgid "Locale"
 msgstr "Locale"
 
-#: helpdesk/models.py:61
+#: third_party/django-helpdesk/helpdesk/models.py:105
 msgid ""
 "Locale of this queue. All correspondence in this queue will be in this "
 "language."
@@ -274,28 +242,28 @@ msgstr ""
 "Jazykové nastavení fronty. Veškerá korespondence této fronty bude používat "
 "tento jazyk."
 
-#: helpdesk/models.py:66
+#: third_party/django-helpdesk/helpdesk/models.py:110
 msgid "Allow Public Submission?"
 msgstr "Povolit veřejné podání?"
 
-#: helpdesk/models.py:69
+#: third_party/django-helpdesk/helpdesk/models.py:113
 msgid "Should this queue be listed on the public submission form?"
 msgstr "Má tato fronta být uvedena v seznamu veřejného formuláře pro podání?"
 
-#: helpdesk/models.py:73
+#: third_party/django-helpdesk/helpdesk/models.py:117
 msgid "Allow E-Mail Submission?"
 msgstr "Povolit e-mailové podání?"
 
-#: helpdesk/models.py:76
+#: third_party/django-helpdesk/helpdesk/models.py:120
 msgid "Do you want to poll the e-mail box below for new tickets?"
 msgstr ""
 "Má si tato fronta stahovat nové tickety z e-mailové schránky automaticky?"
 
-#: helpdesk/models.py:81
+#: third_party/django-helpdesk/helpdesk/models.py:125
 msgid "Escalation Days"
 msgstr "Počet dní do zvýšení priority"
 
-#: helpdesk/models.py:84
+#: third_party/django-helpdesk/helpdesk/models.py:128
 msgid ""
 "For tickets which are not held, how often do you wish to increase their "
 "priority? Set to 0 for no escalation."
@@ -303,11 +271,11 @@ msgstr ""
 "Jak často chcete zvýšit prioritu ticketů, které nejsou pozdržené? Nastavte "
 "'0' pro ponechání původní priority."
 
-#: helpdesk/models.py:89
+#: third_party/django-helpdesk/helpdesk/models.py:133
 msgid "New Ticket CC Address"
 msgstr "CC adresa pro nové tickety"
 
-#: helpdesk/models.py:93
+#: third_party/django-helpdesk/helpdesk/models.py:137
 msgid ""
 "If an e-mail address is entered here, then it will receive notification of "
 "all new tickets created for this queue. Enter a comma between multiple e-"
@@ -316,11 +284,11 @@ msgstr ""
 "Pokud zadáte e-mailovou adresu, tato adresa bude dostávat upozornění na nové "
 "tickety této fronty. Více adres může být odděleno čárkou."
 
-#: helpdesk/models.py:99
+#: third_party/django-helpdesk/helpdesk/models.py:143
 msgid "Updated Ticket CC Address"
 msgstr "CC adresa pro aktualizaci ticketů"
 
-#: helpdesk/models.py:103
+#: third_party/django-helpdesk/helpdesk/models.py:147
 msgid ""
 "If an e-mail address is entered here, then it will receive notification of "
 "all activity (new tickets, closed tickets, updates, reassignments, etc) for "
@@ -330,23 +298,34 @@ msgstr ""
 "všech aktualizacích ticketů této fronty (nové tickety, uzavřené tickety, "
 "aktualizace, přiřazení, atd.). Více adres může být odděleno čárkou."
 
-#: helpdesk/models.py:110
+#: third_party/django-helpdesk/helpdesk/models.py:154
+msgid "Notify contacts when email updates arrive"
+msgstr ""
+
+#: third_party/django-helpdesk/helpdesk/models.py:157
+msgid ""
+"When an email arrives to either create a ticket or to interact with an "
+"existing discussion. Should email notifications be sent ? Note: the "
+"new_ticket_cc and updated_ticket_cc work independently of this feature"
+msgstr ""
+
+#: third_party/django-helpdesk/helpdesk/models.py:163
 msgid "E-Mail Box Type"
 msgstr "Typ mailové schránky"
 
-#: helpdesk/models.py:112
+#: third_party/django-helpdesk/helpdesk/models.py:165
 msgid "POP 3"
 msgstr "POP 3"
 
-#: helpdesk/models.py:112
+#: third_party/django-helpdesk/helpdesk/models.py:165
 msgid "IMAP"
 msgstr "IMAP"
 
-#: helpdesk/models.py:112
+#: third_party/django-helpdesk/helpdesk/models.py:165
 msgid "Local Directory"
 msgstr ""
 
-#: helpdesk/models.py:115
+#: third_party/django-helpdesk/helpdesk/models.py:168
 msgid ""
 "E-Mail server type for creating tickets automatically from a mailbox - both "
 "POP3 and IMAP are supported, as well as reading from a local directory."
@@ -354,21 +333,21 @@ msgstr ""
 "Typ e-mailového serveru pro automatické vytváření ticketů - jsou podporovány "
 "protokoly IMAP a POP3, stejně jako čtená z lokální složky."
 
-#: helpdesk/models.py:121
+#: third_party/django-helpdesk/helpdesk/models.py:174
 msgid "E-Mail Hostname"
 msgstr "E-mail Hostname"
 
-#: helpdesk/models.py:125
+#: third_party/django-helpdesk/helpdesk/models.py:178
 msgid ""
 "Your e-mail server address - either the domain name or IP address. May be "
 "\"localhost\"."
 msgstr "Doména mail serveru nebo IP adresa. Může být i \"localhost\"."
 
-#: helpdesk/models.py:130
+#: third_party/django-helpdesk/helpdesk/models.py:183
 msgid "E-Mail Port"
 msgstr "Port"
 
-#: helpdesk/models.py:133
+#: third_party/django-helpdesk/helpdesk/models.py:186
 msgid ""
 "Port number to use for accessing e-mail. Default for POP3 is \"110\", and "
 "for IMAP is \"143\". This may differ on some servers. Leave it blank to use "
@@ -378,37 +357,37 @@ msgstr ""
 "Některé servery mají vlastní nastavení. Pro použití výchozích hodnot "
 "ponechte prázdné."
 
-#: helpdesk/models.py:139
+#: third_party/django-helpdesk/helpdesk/models.py:192
 msgid "Use SSL for E-Mail?"
 msgstr "Použít SSL pro e-mail?"
 
-#: helpdesk/models.py:142
+#: third_party/django-helpdesk/helpdesk/models.py:195
 msgid ""
 "Whether to use SSL for IMAP or POP3 - the default ports when using SSL are "
 "993 for IMAP and 995 for POP3."
 msgstr "Pokud je použito SSL, výchozí port pro POP3 je 995 a pro IMAP je 993."
 
-#: helpdesk/models.py:147
+#: third_party/django-helpdesk/helpdesk/models.py:200
 msgid "E-Mail Username"
 msgstr "uživatelské jméno e-mailu"
 
-#: helpdesk/models.py:151
+#: third_party/django-helpdesk/helpdesk/models.py:204
 msgid "Username for accessing this mailbox."
 msgstr "Uživatel s právy k poštovní schránce."
 
-#: helpdesk/models.py:155
+#: third_party/django-helpdesk/helpdesk/models.py:208
 msgid "E-Mail Password"
 msgstr "Heslo k e-mailu"
 
-#: helpdesk/models.py:159
+#: third_party/django-helpdesk/helpdesk/models.py:212
 msgid "Password for the above username"
 msgstr "Heslo pro výše nastaveného uživatele."
 
-#: helpdesk/models.py:163
+#: third_party/django-helpdesk/helpdesk/models.py:216
 msgid "IMAP Folder"
 msgstr "Adresář pro IMAP"
 
-#: helpdesk/models.py:167
+#: third_party/django-helpdesk/helpdesk/models.py:220
 msgid ""
 "If using IMAP, what folder do you wish to fetch messages from? This allows "
 "you to use one IMAP account for multiple queues, by filtering messages on "
@@ -418,94 +397,95 @@ msgstr ""
 "umožní použít jeden účet IMAP pro více front prostřednictvím filtrování "
 "zpráv na serveru IMAP do několika složek. Výchozí: INBOX"
 
-#: helpdesk/models.py:174
+#: third_party/django-helpdesk/helpdesk/models.py:227
 msgid "E-Mail Local Directory"
 msgstr "Lokální složka pro e-mail"
 
-#: helpdesk/models.py:178
+#: third_party/django-helpdesk/helpdesk/models.py:231
 msgid ""
 "If using a local directory, what directory path do you wish to poll for new "
 "email? Example: /var/lib/mail/helpdesk/"
 msgstr ""
 
-#: helpdesk/models.py:184
+#: third_party/django-helpdesk/helpdesk/models.py:237
 msgid "Django auth permission name"
 msgstr ""
 
-#: helpdesk/models.py:189
+#: third_party/django-helpdesk/helpdesk/models.py:242
 msgid "Name used in the django.contrib.auth permission system"
 msgstr ""
 
-#: helpdesk/models.py:193
+#: third_party/django-helpdesk/helpdesk/models.py:246
 msgid "E-Mail Check Interval"
 msgstr "Interval kontroly e-mailu"
 
-#: helpdesk/models.py:194
+#: third_party/django-helpdesk/helpdesk/models.py:247
 msgid "How often do you wish to check this mailbox? (in Minutes)"
 msgstr "Jak často si přejete kontrolovat mailbox? (minuty)"
 
-#: helpdesk/models.py:208
+#: third_party/django-helpdesk/helpdesk/models.py:261
 msgid "Socks Proxy Type"
 msgstr ""
 
-#: helpdesk/models.py:210
+#: third_party/django-helpdesk/helpdesk/models.py:263
 msgid "SOCKS4"
 msgstr ""
 
-#: helpdesk/models.py:210
+#: third_party/django-helpdesk/helpdesk/models.py:263
 msgid "SOCKS5"
 msgstr ""
 
-#: helpdesk/models.py:213
+#: third_party/django-helpdesk/helpdesk/models.py:266
 msgid ""
 "SOCKS4 or SOCKS5 allows you to proxy your connections through a SOCKS server."
 msgstr ""
 
-#: helpdesk/models.py:217
+#: third_party/django-helpdesk/helpdesk/models.py:270
 msgid "Socks Proxy Host"
 msgstr ""
 
-#: helpdesk/models.py:220
+#: third_party/django-helpdesk/helpdesk/models.py:273
 msgid "Socks proxy IP address. Default: 127.0.0.1"
 msgstr ""
 
-#: helpdesk/models.py:224
+#: third_party/django-helpdesk/helpdesk/models.py:277
 msgid "Socks Proxy Port"
 msgstr ""
 
-#: helpdesk/models.py:227
+#: third_party/django-helpdesk/helpdesk/models.py:280
 msgid "Socks proxy port number. Default: 9150 (default TOR port)"
 msgstr ""
 
-#: helpdesk/models.py:231
+#: third_party/django-helpdesk/helpdesk/models.py:284
 msgid "Logging Type"
 msgstr ""
 
-#: helpdesk/models.py:234 helpdesk/templates/helpdesk/ticket_list.html:250
+#: third_party/django-helpdesk/helpdesk/models.py:287
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_list.html:80
 msgid "None"
 msgstr "Žádný"
 
-#: helpdesk/models.py:235
+#: third_party/django-helpdesk/helpdesk/models.py:288
 msgid "Debug"
 msgstr "Debug"
 
-#: helpdesk/models.py:236
+#: third_party/django-helpdesk/helpdesk/models.py:289
 msgid "Information"
 msgstr "Informace"
 
-#: helpdesk/models.py:237
+#: third_party/django-helpdesk/helpdesk/models.py:290
 msgid "Warning"
 msgstr "Varování"
 
-#: helpdesk/models.py:238
+#: third_party/django-helpdesk/helpdesk/models.py:291
 msgid "Error"
 msgstr "Chyba"
 
-#: helpdesk/models.py:239
+#: third_party/django-helpdesk/helpdesk/models.py:292
 msgid "Critical"
 msgstr "Kritická"
 
-#: helpdesk/models.py:243
+#: third_party/django-helpdesk/helpdesk/models.py:296
 msgid ""
 "Set the default logging level. All messages at that level or above will be "
 "logged to the directory set below. If no level is set, logging will be "
@@ -515,147 +495,171 @@ msgstr ""
 "nebo vyšší do složky nastavené níže. Pokud úroveň nenastavíte, bude logování "
 "vypnuto."
 
-#: helpdesk/models.py:249
+#: third_party/django-helpdesk/helpdesk/models.py:302
 msgid "Logging Directory"
 msgstr "Složka pro log soubory"
 
-#: helpdesk/models.py:253
+#: third_party/django-helpdesk/helpdesk/models.py:306
 msgid ""
 "If logging is enabled, what directory should we use to store log files for "
 "this queue? If no directory is set, default to /var/log/helpdesk/"
 msgstr ""
 
-#: helpdesk/models.py:264
+#: third_party/django-helpdesk/helpdesk/models.py:317
 msgid "Default owner"
 msgstr "Výchozí vlastník"
 
-#: helpdesk/models.py:273 helpdesk/templates/helpdesk/email_ignore_list.html:27
+#: third_party/django-helpdesk/helpdesk/models.py:321
+msgid "Time to be spent on this Queue in total"
+msgstr ""
+
+#: third_party/django-helpdesk/helpdesk/models.py:331
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/email_ignore_list.html:27
 msgid "Queues"
 msgstr "Fronty"
 
-#: helpdesk/models.py:376 helpdesk/templates/helpdesk/report_index.html:40
-#: helpdesk/templates/helpdesk/ticket.html:160
+#: third_party/django-helpdesk/helpdesk/models.py:452
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/report_index.html:45
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket.html:116
 msgid "Open"
 msgstr "Otevřené"
 
-#: helpdesk/models.py:377 helpdesk/templates/helpdesk/ticket.html:168
-#: helpdesk/templates/helpdesk/ticket.html:176
-#: helpdesk/templates/helpdesk/ticket.html:182
-#: helpdesk/templates/helpdesk/ticket.html:187
+#: third_party/django-helpdesk/helpdesk/models.py:453
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/public_view_ticket.html:99
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/public_view_ticket.html:107
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/public_view_ticket.html:113
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/public_view_ticket.html:118
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket.html:124
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket.html:132
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket.html:138
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket.html:143
 msgid "Reopened"
 msgstr "Znovu otevřené"
 
-#: helpdesk/models.py:378 helpdesk/templates/helpdesk/report_index.html:41
-#: helpdesk/templates/helpdesk/ticket.html:161
-#: helpdesk/templates/helpdesk/ticket.html:169
-#: helpdesk/templates/helpdesk/ticket.html:177
+#: third_party/django-helpdesk/helpdesk/models.py:454
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/public_view_ticket.html:100
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/public_view_ticket.html:108
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/report_index.html:46
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket.html:117
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket.html:125
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket.html:133
 msgid "Resolved"
 msgstr "Vyřešené"
 
-#: helpdesk/models.py:379 helpdesk/templates/helpdesk/report_index.html:42
-#: helpdesk/templates/helpdesk/ticket.html:162
-#: helpdesk/templates/helpdesk/ticket.html:170
-#: helpdesk/templates/helpdesk/ticket.html:178
-#: helpdesk/templates/helpdesk/ticket.html:183
+#: third_party/django-helpdesk/helpdesk/models.py:455
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/public_view_ticket.html:101
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/public_view_ticket.html:109
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/public_view_ticket.html:114
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/report_index.html:47
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket.html:118
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket.html:126
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket.html:134
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket.html:139
 msgid "Closed"
 msgstr "Uzavřené"
 
-#: helpdesk/models.py:380 helpdesk/templates/helpdesk/ticket.html:163
-#: helpdesk/templates/helpdesk/ticket.html:171
-#: helpdesk/templates/helpdesk/ticket.html:188
+#: third_party/django-helpdesk/helpdesk/models.py:456
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/public_view_ticket.html:102
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/public_view_ticket.html:119
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket.html:119
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket.html:127
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket.html:144
 msgid "Duplicate"
 msgstr "Duplicitní"
 
-#: helpdesk/models.py:384
+#: third_party/django-helpdesk/helpdesk/models.py:460
 msgid "1. Critical"
 msgstr "1. kritická"
 
-#: helpdesk/models.py:385
+#: third_party/django-helpdesk/helpdesk/models.py:461
 msgid "2. High"
 msgstr "2. vysoká"
 
-#: helpdesk/models.py:386
+#: third_party/django-helpdesk/helpdesk/models.py:462
 msgid "3. Normal"
 msgstr "3. normální"
 
-#: helpdesk/models.py:387
+#: third_party/django-helpdesk/helpdesk/models.py:463
 msgid "4. Low"
 msgstr "4. nízká"
 
-#: helpdesk/models.py:388
+#: third_party/django-helpdesk/helpdesk/models.py:464
 msgid "5. Very Low"
 msgstr "5. velmi nízká"
 
-#: helpdesk/models.py:403
-#: helpdesk/templates/helpdesk/include/unassigned.html:19
-#: helpdesk/templates/helpdesk/ticket_list.html:76
-#: helpdesk/templates/helpdesk/ticket_list.html:225
+#: third_party/django-helpdesk/helpdesk/models.py:479
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/filters/sorting.html:10
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/include/unassigned.html:17
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_list.html:66
 msgid "Created"
 msgstr "Vytvořeno"
 
-#: helpdesk/models.py:405
+#: third_party/django-helpdesk/helpdesk/models.py:481
 msgid "Date this ticket was first created"
 msgstr "Datum prvního založení ticketu"
 
-#: helpdesk/models.py:409
+#: third_party/django-helpdesk/helpdesk/models.py:485
 msgid "Modified"
 msgstr "Změněno"
 
-#: helpdesk/models.py:411
+#: third_party/django-helpdesk/helpdesk/models.py:487
 msgid "Date this ticket was most recently changed."
 msgstr "Datum poslední změny ticketu"
 
-#: helpdesk/models.py:418
+#: third_party/django-helpdesk/helpdesk/models.py:494
 msgid ""
 "The submitter will receive an email for all public follow-ups left for this "
 "task."
 msgstr ""
 "Na zadavatelův e-mail budou zasílány všechny veřejné aktualizace ticketu."
 
-#: helpdesk/models.py:428
+#: third_party/django-helpdesk/helpdesk/models.py:504
 msgid "Assigned to"
 msgstr "Přiřazeno"
 
-#: helpdesk/models.py:432 helpdesk/templates/helpdesk/include/tickets.html:19
-#: helpdesk/templates/helpdesk/ticket_list.html:64
-#: helpdesk/templates/helpdesk/ticket_list.html:85
-#: helpdesk/templates/helpdesk/ticket_list.html:224 helpdesk/views/staff.py:530
+#: third_party/django-helpdesk/helpdesk/models.py:508
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/filters/sorting.html:19
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/include/tickets.html:17
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_list.html:65
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_list.html:171
+#: third_party/django-helpdesk/helpdesk/views/staff.py:575
 msgid "Status"
 msgstr "Stav"
 
-#: helpdesk/models.py:438
+#: third_party/django-helpdesk/helpdesk/models.py:514
 msgid "On Hold"
 msgstr "Pozdrženo"
 
-#: helpdesk/models.py:441
+#: third_party/django-helpdesk/helpdesk/models.py:517
 msgid "If a ticket is on hold, it will not automatically be escalated."
 msgstr "Ticketu se stavem \"pozdrženo\" nebude automaticky zvýšena priorita."
 
-#: helpdesk/models.py:445 helpdesk/models.py:969
-#: helpdesk/templates/helpdesk/public_view_ticket.html:42
-#: helpdesk/templates/helpdesk/ticket_desc_table.html:29
+#: third_party/django-helpdesk/helpdesk/models.py:521
+#: third_party/django-helpdesk/helpdesk/models.py:1224
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/public_view_ticket.html:42
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_desc_table.html:95
 msgid "Description"
 msgstr "Popis"
 
-#: helpdesk/models.py:448
+#: third_party/django-helpdesk/helpdesk/models.py:524
 msgid "The content of the customers query."
 msgstr "Obsah zákaznického požadavku"
 
-#: helpdesk/models.py:452
-#: helpdesk/templates/helpdesk/public_view_ticket.html:49
-#: helpdesk/templates/helpdesk/ticket_desc_table.html:36
+#: third_party/django-helpdesk/helpdesk/models.py:528
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/public_view_ticket.html:49
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_desc_table.html:100
 msgid "Resolution"
 msgstr "Rozřešení"
 
-#: helpdesk/models.py:455
+#: third_party/django-helpdesk/helpdesk/models.py:531
 msgid "The resolution provided to the customer by our staff."
 msgstr "Rozřešení nastavené námi směrem k zákazníkům."
 
-#: helpdesk/models.py:463
+#: third_party/django-helpdesk/helpdesk/models.py:539
 msgid "1 = Highest Priority, 5 = Low Priority"
 msgstr "1 = nejvyšší priorita, 5 = nejnižší priorita"
 
-#: helpdesk/models.py:476
+#: third_party/django-helpdesk/helpdesk/models.py:552
 msgid ""
 "The date this ticket was last escalated - updated automatically by "
 "management/commands/escalate_tickets.py."
@@ -663,46 +667,79 @@ msgstr ""
 "Datum, kdy byla priorita ticketu zvýšena - ticket byl automaticky "
 "aktualizován pomocí skriptu management/commands/escalte_tickets.py."
 
-#: helpdesk/models.py:485 helpdesk/templates/helpdesk/ticket_desc_table.html:53
-#: helpdesk/views/feeds.py:93 helpdesk/views/feeds.py:118
-#: helpdesk/views/feeds.py:170 helpdesk/views/staff.py:492
+#: third_party/django-helpdesk/helpdesk/models.py:557
+msgid "Secret key needed for viewing/editing ticket by non-logged in users"
+msgstr ""
+
+#: third_party/django-helpdesk/helpdesk/models.py:567
+msgid "Knowledge base item the user was viewing when they created this ticket."
+msgstr ""
+
+#: third_party/django-helpdesk/helpdesk/models.py:639
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_desc_table.html:35
+#: third_party/django-helpdesk/helpdesk/views/feeds.py:93
+#: third_party/django-helpdesk/helpdesk/views/feeds.py:118
+#: third_party/django-helpdesk/helpdesk/views/feeds.py:170
+#: third_party/django-helpdesk/helpdesk/views/staff.py:535
 msgid "Unassigned"
 msgstr "Nepřiřazeno"
 
-#: helpdesk/models.py:525
+#: third_party/django-helpdesk/helpdesk/models.py:679
 msgid " - On Hold"
 msgstr "- Pozdrženo"
 
-#: helpdesk/models.py:528
+#: third_party/django-helpdesk/helpdesk/models.py:682
 msgid " - Open dependencies"
 msgstr "- Otevřít závislosti"
 
-#: helpdesk/models.py:585 helpdesk/models.py:642 helpdesk/models.py:1278
-#: helpdesk/models.py:1454 helpdesk/models.py:1489
-#: helpdesk/templates/helpdesk/public_homepage.html:79
-#: helpdesk/templates/helpdesk/public_view_form.html:12
+#: third_party/django-helpdesk/helpdesk/models.py:757
+#: third_party/django-helpdesk/helpdesk/models.py:820
+#: third_party/django-helpdesk/helpdesk/models.py:1582
+#: third_party/django-helpdesk/helpdesk/models.py:1755
+#: third_party/django-helpdesk/helpdesk/models.py:1789
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/include/tickets.html:14
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/include/unassigned.html:14
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/public_homepage.html:89
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/public_view_form.html:12
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_list.html:62
 msgid "Ticket"
 msgstr "Ticket"
 
-#: helpdesk/models.py:586 helpdesk/templates/helpdesk/navigation.html:23
-#: helpdesk/templates/helpdesk/ticket_list.html:4
+#: third_party/django-helpdesk/helpdesk/models.py:758
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/create_ticket.html:7
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/delete_ticket.html:7
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/edit_ticket.html:7
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/email_ignore_add.html:7
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/followup_edit.html:14
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/rss_list.html:8
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket.html:16
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_cc_add.html:7
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_cc_del.html:7
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_cc_list.html:7
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_dependency_add.html:7
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_dependency_del.html:7
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_list.html:5
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_list.html:19
 msgid "Tickets"
 msgstr "Tickety"
 
-#: helpdesk/models.py:646 helpdesk/models.py:880 helpdesk/models.py:1201
-#: helpdesk/models.py:1368
+#: third_party/django-helpdesk/helpdesk/models.py:824
+#: third_party/django-helpdesk/helpdesk/models.py:1137
+#: third_party/django-helpdesk/helpdesk/models.py:1506
+#: third_party/django-helpdesk/helpdesk/models.py:1671
 msgid "Date"
 msgstr "Datum"
 
-#: helpdesk/models.py:658 helpdesk/views/staff.py:509
+#: third_party/django-helpdesk/helpdesk/models.py:836
+#: third_party/django-helpdesk/helpdesk/views/staff.py:552
 msgid "Comment"
 msgstr "Komentář"
 
-#: helpdesk/models.py:664
+#: third_party/django-helpdesk/helpdesk/models.py:842
 msgid "Public"
 msgstr "Veřejný"
 
-#: helpdesk/models.py:667
+#: third_party/django-helpdesk/helpdesk/models.py:846
 msgid ""
 "Public tickets are viewable by the submitter and all staff, but non-public "
 "tickets can only be seen by staff."
@@ -710,100 +747,129 @@ msgstr ""
 "Veřejné tickety jsou viditelné zadavatelem a naším personálem, ale neveřejné "
 "tickety jsou viděny pouze naším personálem. "
 
-#: helpdesk/models.py:676 helpdesk/models.py:1068 helpdesk/models.py:1287
-#: helpdesk/templates/helpdesk/ticket_cc_add.html:20
-#: helpdesk/views/staff.py:1228 helpdesk/views/staff.py:1234
-#: helpdesk/views/staff.py:1241 helpdesk/views/staff.py:1247
+#: third_party/django-helpdesk/helpdesk/models.py:856
+#: third_party/django-helpdesk/helpdesk/models.py:1347
+#: third_party/django-helpdesk/helpdesk/models.py:1591
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_cc_add.html:31
+#: third_party/django-helpdesk/helpdesk/views/staff.py:1186
+#: third_party/django-helpdesk/helpdesk/views/staff.py:1192
+#: third_party/django-helpdesk/helpdesk/views/staff.py:1199
+#: third_party/django-helpdesk/helpdesk/views/staff.py:1205
 msgid "User"
 msgstr "Uživatel"
 
-#: helpdesk/models.py:680 helpdesk/templates/helpdesk/ticket.html:156
+#: third_party/django-helpdesk/helpdesk/models.py:860
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket.html:112
 msgid "New Status"
 msgstr "Nový stav"
 
-#: helpdesk/models.py:684
+#: third_party/django-helpdesk/helpdesk/models.py:864
 msgid "If the status was changed, what was it changed to?"
 msgstr "Pokud byl stav změněn, na co?"
 
-#: helpdesk/models.py:691 helpdesk/models.py:717 helpdesk/models.py:780
+#: third_party/django-helpdesk/helpdesk/models.py:868
+#, fuzzy
+#| msgid "E-Mail Port"
+msgid "E-Mail ID"
+msgstr "Port"
+
+#: third_party/django-helpdesk/helpdesk/models.py:872
+msgid "The Message ID of the submitter's email."
+msgstr ""
+
+#: third_party/django-helpdesk/helpdesk/models.py:879
+msgid "Time spent on this follow up"
+msgstr ""
+
+#: third_party/django-helpdesk/helpdesk/models.py:885
+#: third_party/django-helpdesk/helpdesk/models.py:917
+#: third_party/django-helpdesk/helpdesk/models.py:1034
 msgid "Follow-up"
 msgstr "Aktualizace"
 
-#: helpdesk/models.py:692
+#: third_party/django-helpdesk/helpdesk/models.py:886
 msgid "Follow-ups"
 msgstr "Aktualizace"
 
-#: helpdesk/models.py:721 helpdesk/models.py:1460
+#: third_party/django-helpdesk/helpdesk/models.py:921
+#: third_party/django-helpdesk/helpdesk/models.py:1761
 msgid "Field"
 msgstr "Pole"
 
-#: helpdesk/models.py:726
+#: third_party/django-helpdesk/helpdesk/models.py:926
 msgid "Old Value"
 msgstr "Stará hodnota"
 
-#: helpdesk/models.py:732
+#: third_party/django-helpdesk/helpdesk/models.py:932
 msgid "New Value"
 msgstr "Nová hodnota"
 
-#: helpdesk/models.py:740
+#: third_party/django-helpdesk/helpdesk/models.py:940
 msgid "removed"
 msgstr "Smazáno"
 
-#: helpdesk/models.py:742
+#: third_party/django-helpdesk/helpdesk/models.py:942
 #, python-format
 msgid "set to %s"
 msgstr "nastaveno na %s"
 
-#: helpdesk/models.py:744
+#: third_party/django-helpdesk/helpdesk/models.py:944
 #, python-format
 msgid "changed from \"%(old_value)s\" to \"%(new_value)s\""
 msgstr "změněno z \"%(old_value)s\" na \"%(new_value)s\""
 
-#: helpdesk/models.py:751
+#: third_party/django-helpdesk/helpdesk/models.py:951
 msgid "Ticket change"
 msgstr "Změna ticketu"
 
-#: helpdesk/models.py:752
+#: third_party/django-helpdesk/helpdesk/models.py:952
 msgid "Ticket changes"
 msgstr "Změny ticketu"
 
-#: helpdesk/models.py:784
+#: third_party/django-helpdesk/helpdesk/models.py:967
 msgid "File"
 msgstr "Soubor"
 
-#: helpdesk/models.py:790
+#: third_party/django-helpdesk/helpdesk/models.py:973
 msgid "Filename"
 msgstr "Jméno souboru"
 
-#: helpdesk/models.py:795
+#: third_party/django-helpdesk/helpdesk/models.py:979
 msgid "MIME Type"
 msgstr "MIME Type"
 
-#: helpdesk/models.py:800
+#: third_party/django-helpdesk/helpdesk/models.py:985
 msgid "Size"
 msgstr "Velikost"
 
-#: helpdesk/models.py:801
+#: third_party/django-helpdesk/helpdesk/models.py:987
 msgid "Size of this file in bytes"
 msgstr "Velikost souboru [bytes]"
 
-#: helpdesk/models.py:809
+#: third_party/django-helpdesk/helpdesk/models.py:1024
 msgid "Attachment"
 msgstr "Příloha"
 
-#: helpdesk/models.py:810
+#: third_party/django-helpdesk/helpdesk/models.py:1025
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket.html:56
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_desc_table.html:78
 msgid "Attachments"
 msgstr "Přílohy"
 
-#: helpdesk/models.py:827
+#: third_party/django-helpdesk/helpdesk/models.py:1056
+#: third_party/django-helpdesk/helpdesk/models.py:1315
+msgid "Knowledge base item"
+msgstr "Položka znalostní báze"
+
+#: third_party/django-helpdesk/helpdesk/models.py:1085
 msgid "Pre-set reply"
 msgstr "Přednastavená odpověď"
 
-#: helpdesk/models.py:828
+#: third_party/django-helpdesk/helpdesk/models.py:1086
 msgid "Pre-set replies"
 msgstr "Přednastavené odpovědi"
 
-#: helpdesk/models.py:833
+#: third_party/django-helpdesk/helpdesk/models.py:1091
 msgid ""
 "Leave blank to allow this reply to be used for all queues, or select those "
 "queues you wish to limit this reply to."
@@ -811,23 +877,25 @@ msgstr ""
 "Ponechte prázdné aby bylo možno tuto odpověď použít pro všechny fronty nebo "
 "vyberte jednu z front, na kterou chcete tuto odpověď aplikovat."
 
-#: helpdesk/models.py:838 helpdesk/models.py:875 helpdesk/models.py:1196
-#: helpdesk/templates/helpdesk/email_ignore_list.html:24
+#: third_party/django-helpdesk/helpdesk/models.py:1096
+#: third_party/django-helpdesk/helpdesk/models.py:1132
+#: third_party/django-helpdesk/helpdesk/models.py:1501
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/email_ignore_list.html:24
 msgid "Name"
 msgstr "Název"
 
-#: helpdesk/models.py:840
+#: third_party/django-helpdesk/helpdesk/models.py:1098
 msgid ""
 "Only used to assist users with selecting a reply - not shown to the user."
 msgstr ""
 "Je použit pouze pro uživatele, aby vybrali správnou odpověď - jinak není "
 "zobrazen."
 
-#: helpdesk/models.py:845
+#: third_party/django-helpdesk/helpdesk/models.py:1103
 msgid "Body"
 msgstr "Obsah"
 
-#: helpdesk/models.py:846
+#: third_party/django-helpdesk/helpdesk/models.py:1104
 msgid ""
 "Context available: {{ ticket }} - ticket object (eg {{ ticket.title }}); "
 "{{ queue }} - The queue; and {{ user }} - the current user."
@@ -835,7 +903,7 @@ msgstr ""
 "Dostupný kontext: {{ ticket }} - Ticket (např. {{ ticket.title }}); "
 "{{ queue }} - Fronta; and {{ user }} - současný uživatel."
 
-#: helpdesk/models.py:870
+#: third_party/django-helpdesk/helpdesk/models.py:1127
 msgid ""
 "Leave blank for this exclusion to be applied to all queues, or select those "
 "queues you wish to exclude with this entry."
@@ -843,27 +911,27 @@ msgstr ""
 "Ponechte prázdné, pokud si přejete aplikovat na všechny fronty nebo vyberte "
 "frontu, na kterou se tento záznam vztáhne."
 
-#: helpdesk/models.py:881
+#: third_party/django-helpdesk/helpdesk/models.py:1138
 msgid "Date on which escalation should not happen"
 msgstr "Datum, kdy se priorita ticketu nemá zvyšovat."
 
-#: helpdesk/models.py:888
+#: third_party/django-helpdesk/helpdesk/models.py:1145
 msgid "Escalation exclusion"
 msgstr "Vynechání zvýšení priority"
 
-#: helpdesk/models.py:889
+#: third_party/django-helpdesk/helpdesk/models.py:1146
 msgid "Escalation exclusions"
 msgstr "Vynechání zvýšeních priority"
 
-#: helpdesk/models.py:903
+#: third_party/django-helpdesk/helpdesk/models.py:1159
 msgid "Template Name"
 msgstr "Název šablony"
 
-#: helpdesk/models.py:908
+#: third_party/django-helpdesk/helpdesk/models.py:1164
 msgid "Subject"
 msgstr "Předmět"
 
-#: helpdesk/models.py:910
+#: third_party/django-helpdesk/helpdesk/models.py:1166
 msgid ""
 "This will be prefixed with \"[ticket.ticket] ticket.title\". We recommend "
 "something simple such as \"(Updated\") or \"(Closed)\" - the same context is "
@@ -873,11 +941,11 @@ msgstr ""
 "použít něco jednoduchého, jako např.  \"(Aktualizováno\") nebo "
 "\"(Uzavřeno)\" - stejný obsah je dostupný jako prostý text níže."
 
-#: helpdesk/models.py:916
+#: third_party/django-helpdesk/helpdesk/models.py:1172
 msgid "Heading"
 msgstr "Nadpis"
 
-#: helpdesk/models.py:918
+#: third_party/django-helpdesk/helpdesk/models.py:1174
 msgid ""
 "In HTML e-mails, this will be the heading at the top of the email - the same "
 "context is available as in plain_text, below."
@@ -885,11 +953,11 @@ msgstr ""
 "V HTML e-mailech bude toto použito zcela na začátku e-mailu - stejný obsah "
 "je použit jako prostý text níže."
 
-#: helpdesk/models.py:924
+#: third_party/django-helpdesk/helpdesk/models.py:1180
 msgid "Plain Text"
 msgstr "Prostý text"
 
-#: helpdesk/models.py:925
+#: third_party/django-helpdesk/helpdesk/models.py:1181
 msgid ""
 "The context available to you includes {{ ticket }}, {{ queue }}, and "
 "depending on the time of the call: {{ resolution }} or {{ comment }}."
@@ -897,144 +965,208 @@ msgstr ""
 "Dostupný obsah obsahuje {{ ticket }}, {{ queue }}, a v závislosti na čase "
 "výzvy: {{ resolution }} nebo {{ comment }}."
 
-#: helpdesk/models.py:931
+#: third_party/django-helpdesk/helpdesk/models.py:1187
 msgid "HTML"
 msgstr "HTML"
 
-#: helpdesk/models.py:932
+#: third_party/django-helpdesk/helpdesk/models.py:1188
 msgid "The same context is available here as in plain_text, above."
 msgstr "Stejný obsah zde jako prostý text jako výše."
 
-#: helpdesk/models.py:940
+#: third_party/django-helpdesk/helpdesk/models.py:1196
 msgid "Locale of this template."
 msgstr "Nastavení Locale této šablony"
 
-#: helpdesk/models.py:948
+#: third_party/django-helpdesk/helpdesk/models.py:1204
 msgid "e-mail template"
 msgstr "šablona pro e-mail"
 
-#: helpdesk/models.py:949
+#: third_party/django-helpdesk/helpdesk/models.py:1205
 msgid "e-mail templates"
 msgstr "šablony pro e-mail"
 
-#: helpdesk/models.py:977
-msgid "Knowledge base category"
-msgstr "Katorie znalostní báze"
+#: third_party/django-helpdesk/helpdesk/models.py:1232
+msgid "Default queue when creating a ticket after viewing this category."
+msgstr ""
 
-#: helpdesk/models.py:978
+#: third_party/django-helpdesk/helpdesk/models.py:1240
+msgid "Knowledge base category"
+msgstr "Kategorie znalostní báze"
+
+#: third_party/django-helpdesk/helpdesk/models.py:1241
 msgid "Knowledge base categories"
 msgstr "Kategorie znalostní báze"
 
-#: helpdesk/models.py:994 helpdesk/templates/helpdesk/public_homepage.html:12
+#: third_party/django-helpdesk/helpdesk/models.py:1264
 msgid "Category"
 msgstr "Kategorie"
 
-#: helpdesk/models.py:1003
+#: third_party/django-helpdesk/helpdesk/models.py:1273
 msgid "Question"
 msgstr "Otázka"
 
-#: helpdesk/models.py:1007
+#: third_party/django-helpdesk/helpdesk/models.py:1277
 msgid "Answer"
 msgstr "Odpověď"
 
-#: helpdesk/models.py:1011
+#: third_party/django-helpdesk/helpdesk/models.py:1281
 msgid "Votes"
 msgstr "Hlasy"
 
-#: helpdesk/models.py:1012
+#: third_party/django-helpdesk/helpdesk/models.py:1282
 msgid "Total number of votes cast for this item"
 msgstr "Celkový počet hlasů pro tuto položku"
 
-#: helpdesk/models.py:1017
+#: third_party/django-helpdesk/helpdesk/models.py:1287
 msgid "Positive Votes"
 msgstr "Pozitivní hlasy"
 
-#: helpdesk/models.py:1018
+#: third_party/django-helpdesk/helpdesk/models.py:1288
 msgid "Number of votes for this item which were POSITIVE."
 msgstr "Počet hlasů pro tuto položku, které byly POZITIVNÍ"
 
-#: helpdesk/models.py:1023
+#: third_party/django-helpdesk/helpdesk/models.py:1293
 msgid "Last Updated"
 msgstr "Naposledy aktualizováno"
 
-#: helpdesk/models.py:1024
+#: third_party/django-helpdesk/helpdesk/models.py:1294
 msgid "The date on which this question was most recently changed."
 msgstr "Datum poslední aktualizace této otázky"
 
-#: helpdesk/models.py:1037
+#: third_party/django-helpdesk/helpdesk/models.py:1307
 msgid "Unrated"
 msgstr "Nehodnoceno"
 
-#: helpdesk/models.py:1045
-msgid "Knowledge base item"
-msgstr "Položka znalostní báze"
-
-#: helpdesk/models.py:1046
+#: third_party/django-helpdesk/helpdesk/models.py:1316
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_list.html:174
 msgid "Knowledge base items"
 msgstr "Položky znalostní báze"
 
-#: helpdesk/models.py:1072 helpdesk/templates/helpdesk/ticket_list.html:160
+#: third_party/django-helpdesk/helpdesk/models.py:1351
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_list.html:232
 msgid "Query Name"
 msgstr "Název dotazu"
 
-#: helpdesk/models.py:1074
+#: third_party/django-helpdesk/helpdesk/models.py:1353
 msgid "User-provided name for this query"
 msgstr "Název dotazu zadaný uživatelem"
 
-#: helpdesk/models.py:1078
+#: third_party/django-helpdesk/helpdesk/models.py:1357
 msgid "Shared With Other Users?"
 msgstr "Sdílet s dalšími uživateli?"
 
-#: helpdesk/models.py:1081
+#: third_party/django-helpdesk/helpdesk/models.py:1360
 msgid "Should other users see this query?"
 msgstr "Mohou i ostatní uživatelé vidět tento dataz?"
 
-#: helpdesk/models.py:1085
+#: third_party/django-helpdesk/helpdesk/models.py:1364
 msgid "Search Query"
 msgstr "Prohledat dotaz"
 
-#: helpdesk/models.py:1086
+#: third_party/django-helpdesk/helpdesk/models.py:1365
 msgid "Pickled query object. Be wary changing this."
 msgstr "Zabalený objekt dotazu. Toto měňte pouze s nevyšší opatrností."
 
-#: helpdesk/models.py:1096
+#: third_party/django-helpdesk/helpdesk/models.py:1375
 msgid "Saved search"
 msgstr "Uložené hledání"
 
-#: helpdesk/models.py:1097
+#: third_party/django-helpdesk/helpdesk/models.py:1376
 msgid "Saved searches"
 msgstr "Uložená hledání"
 
-#: helpdesk/models.py:1116
-msgid "Settings Dictionary"
+#: third_party/django-helpdesk/helpdesk/models.py:1418
+#, fuzzy
+#| msgid "Settings Dictionary"
+msgid "DEPRECATED! Settings Dictionary DEPRECATED!"
 msgstr "Slovník nastavení"
 
-#: helpdesk/models.py:1117
+#: third_party/django-helpdesk/helpdesk/models.py:1419
+#, fuzzy
+#| msgid ""
+#| "This is a base64-encoded representation of a pickled Python dictionary. "
+#| "Do not change this field via the admin."
 msgid ""
-"This is a base64-encoded representation of a pickled Python dictionary. Do "
-"not change this field via the admin."
+"DEPRECATED! This is a base64-encoded representation of a pickled Python "
+"dictionary. Do not change this field via the admin."
 msgstr ""
 "Toto je reprezentace zabaleného slovníku jazyka Python do base64. Toto pole "
 "rozhodně neměňte v administrativním rozhraní. "
 
-#: helpdesk/models.py:1156
+#: third_party/django-helpdesk/helpdesk/models.py:1426
+msgid "Show Ticket List on Login?"
+msgstr "Zobrazit seznam ticketů po přihlášení?"
+
+#: third_party/django-helpdesk/helpdesk/models.py:1427
+msgid "Display the ticket list upon login? Otherwise, the dashboard is shown."
+msgstr ""
+"Zobrazit seznam ticketů po přihlášení? V opačném případě bude zobrazena "
+"nástěnka."
+
+#: third_party/django-helpdesk/helpdesk/models.py:1432
+msgid "E-mail me on ticket change?"
+msgstr "Poslat mi e-mail při změně ticketu?"
+
+#: third_party/django-helpdesk/helpdesk/models.py:1433
+msgid ""
+"If you're the ticket owner and the ticket is changed via the web by somebody "
+"else, do you want to receive an e-mail?"
+msgstr ""
+"Přejete si dostat e-mail v případě, pokud jste vlastník ticketu a ticket je "
+"změněn prostřednictvím webového formuláře někým dalším."
+
+#: third_party/django-helpdesk/helpdesk/models.py:1438
+msgid "E-mail me when assigned a ticket?"
+msgstr "Poslat e-mail, pokud mi byl přiřazen ticket?"
+
+#: third_party/django-helpdesk/helpdesk/models.py:1439
+msgid ""
+"If you are assigned a ticket via the web, do you want to receive an e-mail?"
+msgstr ""
+"Přejete si dostat e-mail, pokud Vám byl přiřazen ticket prostřednictvím "
+"webového formuláře?"
+
+#: third_party/django-helpdesk/helpdesk/models.py:1444
+msgid "Number of tickets to show per page"
+msgstr "Počet ticketů zobrazených na stránku"
+
+#: third_party/django-helpdesk/helpdesk/models.py:1445
+msgid "How many tickets do you want to see on the Ticket List page?"
+msgstr "Kolik ticketů chcete vidět na stránce Seznam ticketů?"
+
+#: third_party/django-helpdesk/helpdesk/models.py:1451
+msgid "Use my e-mail address when submitting tickets?"
+msgstr "Použít můj e-mail, pokud zadávám nový ticket?"
+
+#: third_party/django-helpdesk/helpdesk/models.py:1452
+msgid ""
+"When you submit a ticket, do you want to automatically use your e-mail "
+"address as the submitter address? You can type a different e-mail address "
+"when entering the ticket if needed, this option only changes the default."
+msgstr ""
+"V případě, že zadáte nový ticket, chcete, aby Váš e-mail byl automaticky "
+"přiřazen jako e-mail zadavatele? Můžete také zadat jiný e-mail, pokud je to "
+"potřeba, tato volba pouze nastaví výchozí hodnotu."
+
+#: third_party/django-helpdesk/helpdesk/models.py:1463
 msgid "User Setting"
 msgstr "Uživatelskáé nastavení."
 
-#: helpdesk/models.py:1157 helpdesk/templates/helpdesk/navigation.html:71
-#: helpdesk/templates/helpdesk/user_settings.html:6
+#: third_party/django-helpdesk/helpdesk/models.py:1464
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/navigation-header.html:49
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/user_settings.html:15
 msgid "User Settings"
 msgstr "Uživatelská nastavení"
 
-#: helpdesk/models.py:1185
+#: third_party/django-helpdesk/helpdesk/models.py:1490
 msgid "Ignored e-mail address"
 msgstr "Ignorovaná e-mailová adresa"
 
-#: helpdesk/models.py:1186
+#: third_party/django-helpdesk/helpdesk/models.py:1491
 msgid "Ignored e-mail addresses"
 msgstr "Ignorované e-mailové adresy"
 
-#: helpdesk/models.py:1191
+#: third_party/django-helpdesk/helpdesk/models.py:1496
 msgid ""
 "Leave blank for this e-mail to be ignored on all queues, or select those "
 "queues you wish to ignore this e-mail for."
@@ -1042,11 +1174,11 @@ msgstr ""
 "Ponechte prázdné pokud chcete, aby byl e-mail ignorován ve všech frontách a "
 "nebo vyberte fronty, pro které si přejete ignorovat e-mail."
 
-#: helpdesk/models.py:1202
+#: third_party/django-helpdesk/helpdesk/models.py:1507
 msgid "Date on which this e-mail address was added"
 msgstr "Datum přidání e-mailové adresy."
 
-#: helpdesk/models.py:1210
+#: third_party/django-helpdesk/helpdesk/models.py:1515
 msgid ""
 "Enter a full e-mail address, or portions with wildcards, eg *@domain.com or "
 "postmaster@*."
@@ -1054,11 +1186,11 @@ msgstr ""
 "Přidejte plnou e-mailovou adresu nebo její část pomocí divokých znaků, např. "
 "*@doména.cz nebo postmaster@*."
 
-#: helpdesk/models.py:1215
+#: third_party/django-helpdesk/helpdesk/models.py:1520
 msgid "Save Emails in Mailbox?"
 msgstr "Ukládat e-maily do Mailboxu?"
 
-#: helpdesk/models.py:1218
+#: third_party/django-helpdesk/helpdesk/models.py:1523
 msgid ""
 "Do you want to save emails from this address in the mailbox? If this is "
 "unticked, emails from this address will be deleted."
@@ -1066,35 +1198,35 @@ msgstr ""
 "Přejete si ukládat e-maily z této adresy do mailboxu? Pokud nezatrhnete, e-"
 "maily z této adresy budou mazány."
 
-#: helpdesk/models.py:1286
+#: third_party/django-helpdesk/helpdesk/models.py:1590
 msgid "User who wishes to receive updates for this ticket."
 msgstr "Uživatel, který si přeje být informován o tomto ticketu."
 
-#: helpdesk/models.py:1294
+#: third_party/django-helpdesk/helpdesk/models.py:1598
 msgid "For non-user followers, enter their e-mail address"
 msgstr "Pro neregistrované uživatele zadejte jejich e-mail"
 
-#: helpdesk/models.py:1298
+#: third_party/django-helpdesk/helpdesk/models.py:1602
 msgid "Can View Ticket?"
 msgstr "Může vidět ticket?"
 
-#: helpdesk/models.py:1301
+#: third_party/django-helpdesk/helpdesk/models.py:1605
 msgid "Can this CC login to view the ticket details?"
 msgstr "Může tento uživatel v kopii vidět detaily ticketu?"
 
-#: helpdesk/models.py:1305
+#: third_party/django-helpdesk/helpdesk/models.py:1609
 msgid "Can Update Ticket?"
 msgstr "Může aktualizovat?"
 
-#: helpdesk/models.py:1308
+#: third_party/django-helpdesk/helpdesk/models.py:1612
 msgid "Can this CC login and update the ticket?"
 msgstr "Může tento uživatel v kopii aktualizovat ticket?"
 
-#: helpdesk/models.py:1342
+#: third_party/django-helpdesk/helpdesk/models.py:1645
 msgid "Field Name"
 msgstr "Název pole"
 
-#: helpdesk/models.py:1343
+#: third_party/django-helpdesk/helpdesk/models.py:1646
 msgid ""
 "As used in the database and behind the scenes. Must be unique and consist of "
 "only lowercase letters with no punctuation."
@@ -1102,87 +1234,87 @@ msgstr ""
 "Bude použito v databázi na pozadí. Musí být unikátní a obsahovat pouze malá "
 "písmena a žádnou interpunkci."
 
-#: helpdesk/models.py:1349
+#: third_party/django-helpdesk/helpdesk/models.py:1652
 msgid "Label"
 msgstr "Štítek"
 
-#: helpdesk/models.py:1351
+#: third_party/django-helpdesk/helpdesk/models.py:1654
 msgid "The display label for this field"
 msgstr "Zobrazený štítek pro toto pole"
 
-#: helpdesk/models.py:1355
+#: third_party/django-helpdesk/helpdesk/models.py:1658
 msgid "Help Text"
 msgstr "Nápověda"
 
-#: helpdesk/models.py:1356
+#: third_party/django-helpdesk/helpdesk/models.py:1659
 msgid "Shown to the user when editing the ticket"
 msgstr "Zobrazí se uživateli při editaci ticketu"
 
-#: helpdesk/models.py:1362
+#: third_party/django-helpdesk/helpdesk/models.py:1665
 msgid "Character (single line)"
 msgstr "Řetězec znaků (jeden řádek)"
 
-#: helpdesk/models.py:1363
+#: third_party/django-helpdesk/helpdesk/models.py:1666
 msgid "Text (multi-line)"
 msgstr "Text (více řádků)"
 
-#: helpdesk/models.py:1364
+#: third_party/django-helpdesk/helpdesk/models.py:1667
 msgid "Integer"
 msgstr "Celé číslo"
 
-#: helpdesk/models.py:1365
+#: third_party/django-helpdesk/helpdesk/models.py:1668
 msgid "Decimal"
 msgstr "Číslo s plovoucí desetinnou čárkou"
 
-#: helpdesk/models.py:1366
+#: third_party/django-helpdesk/helpdesk/models.py:1669
 msgid "List"
 msgstr "Seznam"
 
-#: helpdesk/models.py:1367
+#: third_party/django-helpdesk/helpdesk/models.py:1670
 msgid "Boolean (checkbox yes/no)"
 msgstr "Pravda/nepravda (zaškrtávátko ano/ne)"
 
-#: helpdesk/models.py:1369
+#: third_party/django-helpdesk/helpdesk/models.py:1672
 msgid "Time"
 msgstr "Čas"
 
-#: helpdesk/models.py:1370
+#: third_party/django-helpdesk/helpdesk/models.py:1673
 msgid "Date & Time"
 msgstr "Datum a čas"
 
-#: helpdesk/models.py:1372
+#: third_party/django-helpdesk/helpdesk/models.py:1675
 msgid "URL"
 msgstr "URL"
 
-#: helpdesk/models.py:1373
+#: third_party/django-helpdesk/helpdesk/models.py:1676
 msgid "IP Address"
 msgstr "IP Adresa"
 
-#: helpdesk/models.py:1378
+#: third_party/django-helpdesk/helpdesk/models.py:1681
 msgid "Data Type"
 msgstr "Datový typ"
 
-#: helpdesk/models.py:1380
+#: third_party/django-helpdesk/helpdesk/models.py:1683
 msgid "Allows you to restrict the data entered into this field"
 msgstr "Umožní omezit vstup tohoto pole"
 
-#: helpdesk/models.py:1385
+#: third_party/django-helpdesk/helpdesk/models.py:1688
 msgid "Maximum Length (characters)"
 msgstr "Maximální počet znaků"
 
-#: helpdesk/models.py:1391
+#: third_party/django-helpdesk/helpdesk/models.py:1694
 msgid "Decimal Places"
 msgstr "Počet desetinných míst"
 
-#: helpdesk/models.py:1392
+#: third_party/django-helpdesk/helpdesk/models.py:1695
 msgid "Only used for decimal fields"
 msgstr "Použito pouze pro pole typu Číslo s plovoucí desetinnou čárkou"
 
-#: helpdesk/models.py:1398
+#: third_party/django-helpdesk/helpdesk/models.py:1701
 msgid "Add empty first choice to List?"
 msgstr "Přiřadit první prázdnou volbu do seznamu?"
 
-#: helpdesk/models.py:1400
+#: third_party/django-helpdesk/helpdesk/models.py:1703
 msgid ""
 "Only for List: adds an empty first entry to the choices list, which enforces "
 "that the user makes an active choice."
@@ -1190,70 +1322,84 @@ msgstr ""
 "Pouze pro seznamy: přidá prázdnou volbu jako první položku seznamu, což "
 "uživatele přiměje k aktivnímu výběru některé z možností."
 
-#: helpdesk/models.py:1405
+#: third_party/django-helpdesk/helpdesk/models.py:1708
 msgid "List Values"
 msgstr "Položky seznamu"
 
-#: helpdesk/models.py:1406
+#: third_party/django-helpdesk/helpdesk/models.py:1709
 msgid "For list fields only. Enter one option per line."
 msgstr "Pouze pro pole typu Seznam. Zadejte volby na zvláštní řádek."
 
-#: helpdesk/models.py:1412
+#: third_party/django-helpdesk/helpdesk/models.py:1715
 msgid "Ordering"
 msgstr "Řazení"
 
-#: helpdesk/models.py:1413
+#: third_party/django-helpdesk/helpdesk/models.py:1716
 msgid "Lower numbers are displayed first; higher numbers are listed later"
 msgstr "Nižší hodnoty se zobrazí první; vyšší hodnoty až nakonec"
 
-#: helpdesk/models.py:1427
+#: third_party/django-helpdesk/helpdesk/models.py:1729
 msgid "Required?"
 msgstr "Poviné pole?"
 
-#: helpdesk/models.py:1428
+#: third_party/django-helpdesk/helpdesk/models.py:1730
 msgid "Does the user have to enter a value for this field?"
 msgstr "Musí uživatel toto pole vyplnit?"
 
-#: helpdesk/models.py:1433
+#: third_party/django-helpdesk/helpdesk/models.py:1735
 msgid "Staff Only?"
 msgstr "Pouze pro naše pracovníky?"
 
-#: helpdesk/models.py:1434
+#: third_party/django-helpdesk/helpdesk/models.py:1736
 msgid ""
 "If this is ticked, then the public submission form will NOT show this field"
 msgstr ""
 "Pokud je zaškrtnuto, toto pole NEBUDE zobrazeno ve formuláři pro veřejné "
 "zadávání."
 
-#: helpdesk/models.py:1445
+#: third_party/django-helpdesk/helpdesk/models.py:1747
 msgid "Custom field"
 msgstr "Vlastní pole"
 
-#: helpdesk/models.py:1446
+#: third_party/django-helpdesk/helpdesk/models.py:1748
 msgid "Custom fields"
 msgstr "Vlastní pole"
 
-#: helpdesk/models.py:1470
+#: third_party/django-helpdesk/helpdesk/models.py:1771
 msgid "Ticket custom field value"
 msgstr "Hodnota vlastního pole u ticketu"
 
-#: helpdesk/models.py:1471
+#: third_party/django-helpdesk/helpdesk/models.py:1772
 msgid "Ticket custom field values"
 msgstr "Hodnoty vlastních polí u ticketu"
 
-#: helpdesk/models.py:1483
+#: third_party/django-helpdesk/helpdesk/models.py:1783
 msgid "Ticket dependency"
 msgstr "Vzájemná závislost ticketů"
 
-#: helpdesk/models.py:1484
+#: third_party/django-helpdesk/helpdesk/models.py:1784
 msgid "Ticket dependencies"
 msgstr "Vzájemné závislosti ticketů"
 
-#: helpdesk/models.py:1496
+#: third_party/django-helpdesk/helpdesk/models.py:1796
 msgid "Depends On Ticket"
 msgstr "Závisí na ticketu"
 
-#: helpdesk/templates/helpdesk/attribution.html:2
+#: third_party/django-helpdesk/helpdesk/query.py:201
+msgid "No text"
+msgstr ""
+
+#: third_party/django-helpdesk/helpdesk/query.py:202
+#, fuzzy
+#| msgid "View Ticket"
+msgid "View ticket"
+msgstr "Prohlédnout ticket"
+
+#: third_party/django-helpdesk/helpdesk/query.py:204
+msgid "Messages"
+msgstr ""
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/attribution.html:6
 msgid ""
 "<a href='https://github.com/django-helpdesk/django-helpdesk'>django-"
 "helpdesk</a>."
@@ -1261,43 +1407,37 @@ msgstr ""
 "<a href='https://github.com/django-helpdesk/django-helpdesk'>django-"
 "helpdesk</a>."
 
-#: helpdesk/templates/helpdesk/base.html:18
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/base-head.html:14
 msgid "Powered by django-helpdesk"
 msgstr "Powered by django-helpdesk"
 
-#: helpdesk/templates/helpdesk/base.html:75
-#: helpdesk/templates/helpdesk/rss_list.html:10
-#: helpdesk/templates/helpdesk/rss_list.html:36
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/base-head.html:46
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/rss_list.html:21
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/rss_list.html:47
 msgid "My Open Tickets"
 msgstr "Mé otevřené tickety"
 
-#: helpdesk/templates/helpdesk/base.html:76
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/base-head.html:47
 msgid "All Recent Activity"
 msgstr "Veškerá poslední aktivita"
 
-#: helpdesk/templates/helpdesk/base.html:77
-#: helpdesk/templates/helpdesk/include/unassigned.html:7
-#: helpdesk/templates/helpdesk/rss_list.html:16
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/base-head.html:48
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/include/unassigned.html:7
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/rss_list.html:27
 msgid "Unassigned Tickets"
 msgstr "Nepřiřazené tickety"
 
-#: helpdesk/templates/helpdesk/base.html:117
-#: helpdesk/templates/helpdesk/navigation.html:12
-#: helpdesk/templates/helpdesk/public_base.html:16
-#: helpdesk/templates/helpdesk/public_base.html:50
-msgid "Helpdesk"
-msgstr "Helpdesk"
-
-#: helpdesk/templates/helpdesk/confirm_delete_saved_query.html:3
-#: helpdesk/templates/helpdesk/ticket_list.html:140
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/confirm_delete_saved_query.html:7
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/confirm_delete_saved_query.html:10
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_list.html:207
 msgid "Delete Saved Query"
 msgstr "Smazat Uložený dotaz"
 
-#: helpdesk/templates/helpdesk/confirm_delete_saved_query.html:6
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/confirm_delete_saved_query.html:13
 msgid "Delete Query"
 msgstr "Smazat Dotaz"
 
-#: helpdesk/templates/helpdesk/confirm_delete_saved_query.html:8
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/confirm_delete_saved_query.html:15
 #, python-format
 msgid ""
 "Are you sure you want to delete this saved filter (<em>%(query_title)s</"
@@ -1308,7 +1448,7 @@ msgstr ""
 "opětovné vytvoření budete potřebovat ruční nastavení filtru v seznamu "
 "ticketů."
 
-#: helpdesk/templates/helpdesk/confirm_delete_saved_query.html:11
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/confirm_delete_saved_query.html:18
 msgid ""
 "You have shared this query, so other users may be using it. If you delete "
 "it, they will have to manually create their own query."
@@ -1316,54 +1456,57 @@ msgstr ""
 "Sdílíte tento dotaz, aby jej mohli sdílet i další. Pokud jej smažete, budou "
 "si muset ručně vytvořit vlastní dotazy."
 
-#: helpdesk/templates/helpdesk/confirm_delete_saved_query.html:14
-#: helpdesk/templates/helpdesk/delete_ticket.html:10
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/confirm_delete_saved_query.html:21
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/delete_ticket.html:20
 msgid "No, Don't Delete It"
 msgstr "Ne, nemazat."
 
-#: helpdesk/templates/helpdesk/confirm_delete_saved_query.html:17
-#: helpdesk/templates/helpdesk/delete_ticket.html:13
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/confirm_delete_saved_query.html:24
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/delete_ticket.html:23
 msgid "Yes I Understand - Delete It Anyway"
 msgstr "Ano rozumím - přesto smazat"
 
-#: helpdesk/templates/helpdesk/create_ticket.html:3
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/create_ticket.html:3
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/create_ticket.html:9
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/public_create_ticket.html:4
 msgid "Create Ticket"
 msgstr "Vytvořit ticket"
 
-#: helpdesk/templates/helpdesk/create_ticket.html:27
-#: helpdesk/templates/helpdesk/navigation.html:95
-#: helpdesk/templates/helpdesk/navigation.html:98
-#: helpdesk/templates/helpdesk/public_homepage.html:28
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/create_ticket.html:19
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/navigation-header.html:71
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/public_create_ticket.html:16
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/public_homepage.html:38
 msgid "Submit a Ticket"
 msgstr "Odeslat ticket"
 
-#: helpdesk/templates/helpdesk/create_ticket.html:31
-#: helpdesk/templates/helpdesk/edit_ticket.html:11
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/create_ticket.html:21
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/edit_ticket.html:21
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/public_create_ticket_base.html:6
 msgid "Unless otherwise stated, all fields are required."
 msgstr "Pokud není řečeno jinak, jsou všechna pole poviná."
 
-#: helpdesk/templates/helpdesk/create_ticket.html:31
-#: helpdesk/templates/helpdesk/edit_ticket.html:11
-#: helpdesk/templates/helpdesk/public_homepage.html:29
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/create_ticket.html:21
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/edit_ticket.html:21
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/public_create_ticket_base.html:6
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/public_homepage.html:39
 msgid "Please provide as descriptive a title and description as possible."
 msgstr "Prosím poskytněte nám co nejvíce popisný souhrn a popis problému."
 
-#: helpdesk/templates/helpdesk/create_ticket.html:41
-#: helpdesk/templates/helpdesk/ticket.html:147
-#: helpdesk/templates/helpdesk/ticket.html:196
-msgid "(Optional)"
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/create_ticket.html:29
+msgid "Optional"
 msgstr "(Volitelné)"
 
-#: helpdesk/templates/helpdesk/create_ticket.html:50
-#: helpdesk/templates/helpdesk/public_homepage.html:56
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/create_ticket.html:40
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/public_create_ticket_base.html:9
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/public_homepage.html:66
 msgid "Submit Ticket"
 msgstr "Odeslat ticket"
 
-#: helpdesk/templates/helpdesk/dashboard.html:2
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/dashboard.html:3
 msgid "Helpdesk Dashboard"
 msgstr "Nástěnka helpdesku"
 
-#: helpdesk/templates/helpdesk/dashboard.html:12
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/dashboard.html:20
 msgid ""
 "Welcome to your Helpdesk Dashboard! From here you can quickly see tickets "
 "submitted by you, tickets you are working on, and those tickets that have no "
@@ -1372,28 +1515,29 @@ msgstr ""
 "Vítejte na nástěnce Helpdesku! Na tomto místě máte přehled o ticketech, "
 "které jste zadali, ticketech, na kterých pracujete a ticketech bez majitele."
 
-#: helpdesk/templates/helpdesk/dashboard.html:18
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/dashboard.html:26
 msgid "All Tickets submitted by you"
 msgstr "Všechny Vámi zadané tickety"
 
-#: helpdesk/templates/helpdesk/dashboard.html:22
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/dashboard.html:30
 msgid "Open Tickets assigned to you (you are working on this ticket)"
 msgstr "Otevřít přiřazené tickety (pracujete na tomto ticketu)"
 
-#: helpdesk/templates/helpdesk/dashboard.html:23
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/dashboard.html:31
 msgid "You have no tickets assigned to you."
 msgstr "Nemáte žádné přiřazené tickety"
 
-#: helpdesk/templates/helpdesk/dashboard.html:29
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/dashboard.html:37
 msgid "Closed & resolved Tickets you used to work on"
 msgstr "Zavřené a vyřešené tickety, na kterých jste pracoval(a)"
 
-#: helpdesk/templates/helpdesk/delete_ticket.html:3
-#: helpdesk/templates/helpdesk/delete_ticket.html:6
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/delete_ticket.html:3
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/delete_ticket.html:12
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/delete_ticket.html:16
 msgid "Delete Ticket"
 msgstr "Smazat ticket"
 
-#: helpdesk/templates/helpdesk/delete_ticket.html:8
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/delete_ticket.html:18
 #, python-format
 msgid ""
 "Are you sure you want to delete this ticket (<em>%(ticket_title)s</em>)? All "
@@ -1403,19 +1547,20 @@ msgstr ""
 "Jste si jisti smazáním ticketu (<em>%(ticket_title)s</em>)? Všechny stopy "
 "ticketu včetně návazností, příloh a aktualizací budou nenávratně odstraněny."
 
-#: helpdesk/templates/helpdesk/edit_ticket.html:3
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/edit_ticket.html:3
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/edit_ticket.html:12
 msgid "Edit Ticket"
 msgstr "Změnit ticket"
 
-#: helpdesk/templates/helpdesk/edit_ticket.html:9
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/edit_ticket.html:19
 msgid "Edit a Ticket"
 msgstr "Změnit ticket"
 
-#: helpdesk/templates/helpdesk/edit_ticket.html:13
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/edit_ticket.html:23
 msgid "Note"
 msgstr "Poznámka"
 
-#: helpdesk/templates/helpdesk/edit_ticket.html:13
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/edit_ticket.html:23
 msgid ""
 "Editing a ticket does <em>not</em> send an e-mail to the ticket owner or "
 "submitter. No new details should be entered, this form should only be used "
@@ -1425,17 +1570,18 @@ msgstr ""
 "zadavateli. Neměly by být vloženy žádné nové detaily. Tento formulář by měl "
 "být použít pouze pro opravu nesprávných detailů nebo vyčištění zadání.."
 
-#: helpdesk/templates/helpdesk/edit_ticket.html:33
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/edit_ticket.html:43
 msgid "Save Changes"
 msgstr "Uložit změny"
 
-#: helpdesk/templates/helpdesk/email_ignore_add.html:3
-#: helpdesk/templates/helpdesk/email_ignore_add.html:6
-#: helpdesk/templates/helpdesk/email_ignore_add.html:23
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/email_ignore_add.html:3
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/email_ignore_add.html:9
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/email_ignore_add.html:13
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/email_ignore_add.html:30
 msgid "Ignore E-Mail Address"
 msgstr "Ignorovat e-mailové adresy"
 
-#: helpdesk/templates/helpdesk/email_ignore_add.html:8
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/email_ignore_add.html:15
 msgid ""
 "To ignore an e-mail address and prevent any emails from that address "
 "creating tickets automatically, enter the e-mail address below."
@@ -1443,7 +1589,7 @@ msgstr ""
 "Pro ignorování e-mailvoé adresy a zajištění, aby z této adresy nebyly "
 "automaticky vytvářeny žádné tickety, vložte níže tuto adresu."
 
-#: helpdesk/templates/helpdesk/email_ignore_add.html:10
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/email_ignore_add.html:17
 msgid ""
 "You can either enter a whole e-mail address such as <em>email@domain.com</"
 "em> or a portion of an e-mail address with a wildcard, such as <em>*@domain."
@@ -1452,15 +1598,15 @@ msgstr ""
 "Můžete vložit celou adresu jako např. <em>email@domena.cz</em> nebo použít "
 "divoké znaky, jako např. <em>*@domena.cz</em> nebo <em>uzivatel@*</em>."
 
-#: helpdesk/templates/helpdesk/email_ignore_del.html:3
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/email_ignore_del.html:3
 msgid "Delete Ignored E-Mail Address"
 msgstr "Smazat ignorovanou e-mailovou adresu"
 
-#: helpdesk/templates/helpdesk/email_ignore_del.html:6
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/email_ignore_del.html:6
 msgid "Un-Ignore E-Mail Address"
 msgstr "Přestat ignorovat e-mailovou adresu."
 
-#: helpdesk/templates/helpdesk/email_ignore_del.html:8
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/email_ignore_del.html:8
 #, python-format
 msgid ""
 "Are you sure you wish to stop removing this email address (<em>"
@@ -1471,20 +1617,20 @@ msgstr ""
 "automaticky vytvářet tickety ve vašem systému? Tuto adresu můžete samozřejmě "
 "přidat zpět kdykoliv v budoucnu."
 
-#: helpdesk/templates/helpdesk/email_ignore_del.html:10
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/email_ignore_del.html:10
 msgid "Keep Ignoring It"
 msgstr "Pokračovat v ignorování"
 
-#: helpdesk/templates/helpdesk/email_ignore_del.html:13
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/email_ignore_del.html:13
 msgid "Stop Ignoring It"
 msgstr "Přestat ignorovat"
 
-#: helpdesk/templates/helpdesk/email_ignore_list.html:3
-#: helpdesk/templates/helpdesk/email_ignore_list.html:15
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/email_ignore_list.html:3
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/email_ignore_list.html:15
 msgid "Ignored E-Mail Addresses"
 msgstr "Ignorované e-mailové adresy"
 
-#: helpdesk/templates/helpdesk/email_ignore_list.html:5
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/email_ignore_list.html:5
 msgid ""
 "\n"
 "<h2>Ignored E-Mail Addresses</h2>\n"
@@ -1499,40 +1645,38 @@ msgstr ""
 "<p>Tyto e-maillové adresy jsou procesorem ignorovány. Můžete přidat na "
 "seznam nové adresy nebo smazat některou z položek níže.</p>"
 
-#: helpdesk/templates/helpdesk/email_ignore_list.html:19
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/email_ignore_list.html:19
 msgid "Add an Email"
 msgstr "Přidat e-mail"
 
-#: helpdesk/templates/helpdesk/email_ignore_list.html:26
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/email_ignore_list.html:26
 msgid "Date Added"
 msgstr "Přidáno datum"
 
-#: helpdesk/templates/helpdesk/email_ignore_list.html:28
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/email_ignore_list.html:28
 msgid "Keep in mailbox?"
 msgstr "Ponechat v mailboxu?"
 
-#: helpdesk/templates/helpdesk/email_ignore_list.html:29
-#: helpdesk/templates/helpdesk/email_ignore_list.html:40
-#: helpdesk/templates/helpdesk/include/unassigned.html:33
-#: helpdesk/templates/helpdesk/ticket.html:103
-#: helpdesk/templates/helpdesk/ticket.html:119
-#: helpdesk/templates/helpdesk/ticket_cc_list.html:28
-#: helpdesk/templates/helpdesk/ticket_cc_list.html:37
-#: helpdesk/templates/helpdesk/ticket_desc_table.html:17
-#: helpdesk/templates/helpdesk/ticket_list.html:254
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/email_ignore_list.html:29
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/email_ignore_list.html:40
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/include/unassigned.html:30
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_cc_list.html:38
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_cc_list.html:47
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_desc_table.html:16
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_list.html:89
 msgid "Delete"
 msgstr "Smazat"
 
-#: helpdesk/templates/helpdesk/email_ignore_list.html:38
-#: helpdesk/templates/helpdesk/ticket_list.html:249
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/email_ignore_list.html:38
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_list.html:77
 msgid "All"
 msgstr "Všechny"
 
-#: helpdesk/templates/helpdesk/email_ignore_list.html:39
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/email_ignore_list.html:39
 msgid "Keep"
 msgstr "Ponechat"
 
-#: helpdesk/templates/helpdesk/email_ignore_list.html:56
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/email_ignore_list.html:56
 msgid ""
 "<strong>Note:</strong> If the 'Keep' option is not selected, emails sent "
 "from that address will be deleted permanently."
@@ -1540,103 +1684,183 @@ msgstr ""
 "<strong>Poznámka:</strong> Pokud volba 'Ponechat' není zatržena, jsou e-"
 "maily automaticky mazány ze serveru."
 
-#: helpdesk/templates/helpdesk/followup_edit.html:2
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/filters/date.html:4
+msgid "Date (From)"
+msgstr "Datum (Od)"
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/filters/date.html:10
+msgid "Date (To)"
+msgstr "Datum (Do)"
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/filters/date.html:19
+#, fuzzy
+#| msgid "Use YYYY-MM-DD date format, eg 2011-05-29"
+msgid "Use YYYY-MM-DD date format, eg 2018-01-30"
+msgstr "Použijte formát RRRR-MM-DD, např. 2011-05-29"
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/filters/kbitems.html:6
+#, fuzzy
+#| msgid "Knowledge base items"
+msgid "Knowledge base item(s)"
+msgstr "Položky znalostní báze"
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/filters/kbitems.html:14
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/filters/queue.html:18
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/filters/status.html:14
+msgid "Ctrl-click to select multiple options"
+msgstr "Ctrl-klik pro výběr více možností"
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/filters/keywords.html:4
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_list.html:172
+msgid "Keywords"
+msgstr "Klíčová slova"
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/filters/keywords.html:12
+msgid ""
+"Keywords are case-insensitive, and will be looked for pretty much everywhere "
+"possible. Prepend with 'queue:' or 'priority:' to search by queue or "
+"priority. You can also use the keyword OR to combine multiple searches."
+msgstr ""
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/filters/owner.html:6
+msgid "Owner(s)"
+msgstr "Vlastník(ci)"
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/filters/owner.html:12
+msgid "(ME)"
+msgstr "(Já)"
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/filters/owner.html:20
+msgid "Ctrl-Click to select multiple options"
+msgstr "Ctrl-Klik pro výběr více voleb"
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/filters/queue.html:6
+msgid "Queue(s)"
+msgstr "Fronta(y)"
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/filters/sorting.html:5
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_list.html:168
+msgid "Sorting"
+msgstr "Řazení"
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/filters/sorting.html:25
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket.html:175
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_list.html:68
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_list.html:169
+#: third_party/django-helpdesk/helpdesk/views/staff.py:584
+msgid "Owner"
+msgstr "Vlastník"
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/filters/sorting.html:30
+msgid "Reverse"
+msgstr "Převrátit směr řazení"
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/filters/sorting.html:38
+msgid "Ordering applied to tickets"
+msgstr "Řazení použité na tickety"
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/filters/status.html:6
+msgid "Status(es)"
+msgstr "Stav(y)"
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/followup_edit.html:2
 msgid "Edit followup"
 msgstr "Editovat návazné"
 
-#: helpdesk/templates/helpdesk/followup_edit.html:16
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/followup_edit.html:20
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/followup_edit.html:30
 msgid "Edit FollowUp"
 msgstr "Editovat návazné"
 
-#: helpdesk/templates/helpdesk/followup_edit.html:21
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/followup_edit.html:37
 msgid "Reassign ticket:"
 msgstr "Znovu přiřadit ticket"
 
-#: helpdesk/templates/helpdesk/followup_edit.html:23
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/followup_edit.html:39
 msgid "Title:"
 msgstr "Nadpis:"
 
-#: helpdesk/templates/helpdesk/followup_edit.html:25
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/followup_edit.html:41
 msgid "Comment:"
 msgstr "Komentář"
 
-#: helpdesk/templates/helpdesk/include/stats.html:7
-msgid "Helpdesk Summary"
-msgstr "Souhrn Helpdesku"
-
-#: helpdesk/templates/helpdesk/include/stats.html:27
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/include/stats.html:15
 msgid "View Tickets"
 msgstr "Prohlédnout tickety"
 
-#: helpdesk/templates/helpdesk/include/stats.html:27
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/include/stats.html:15
 msgid "No tickets in this range"
 msgstr "V tomto rozsahu nejsou žádné tickety"
 
-#: helpdesk/templates/helpdesk/include/tickets.html:7
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/include/tickets.html:7
 msgid "Your Tickets"
 msgstr "Vaše Tickety"
 
-#: helpdesk/templates/helpdesk/include/tickets.html:16
-#: helpdesk/templates/helpdesk/include/unassigned.html:16
-#: helpdesk/templates/helpdesk/ticket_list.html:221
-msgid "Pr"
-msgstr "Pr"
-
-#: helpdesk/templates/helpdesk/include/tickets.html:20
-#: helpdesk/templates/helpdesk/kb_category.html:30
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/include/tickets.html:18
 msgid "Last Update"
 msgstr "Poslední aktualizace"
 
-#: helpdesk/templates/helpdesk/include/tickets.html:34
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/include/tickets.html:31
 msgid "You do not have any pending tickets."
 msgstr ""
 
-#: helpdesk/templates/helpdesk/include/unassigned.html:7
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/include/unassigned.html:7
 msgid "(pick up a ticket if you start to work on it)"
 msgstr "(převzít ticket, pokud na něm začnete pracovat)"
 
-#: helpdesk/templates/helpdesk/include/unassigned.html:32
-#: helpdesk/templates/helpdesk/ticket_desc_table.html:53
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/include/unassigned.html:15
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_list.html:63
+msgid "Prority"
+msgstr "Priorita"
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/include/unassigned.html:18
+msgid "Actions"
+msgstr ""
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/include/unassigned.html:29
 msgid "Take"
 msgstr "Převzít"
 
-#: helpdesk/templates/helpdesk/include/unassigned.html:37
-#: helpdesk/templates/helpdesk/report_index.html:54
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/include/unassigned.html:34
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/report_index.html:61
 msgid "There are no unassigned tickets."
 msgstr "Nejsou žádné nepřiřazené tickety"
 
-#: helpdesk/templates/helpdesk/kb_category.html:4
-msgid "Knowledgebase Category"
-msgstr "Katorie znalostní báze"
-
-#: helpdesk/templates/helpdesk/kb_category.html:4
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/kb_category.html:4
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/kb_category.html:10
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/kb_category_base.html:2
 #, python-format
 msgid "%(kbcat)s"
 msgstr "%(kbcat)s"
 
-#: helpdesk/templates/helpdesk/kb_category.html:8
-#, python-format
-msgid "You are viewing all items in the %(kbcat)s category."
-msgstr "Díváte se na všechny položky kategorie %(kbcat)s"
-
-#: helpdesk/templates/helpdesk/kb_category.html:26
-#, python-format
-msgid "View <a href='%(url)s'>Answer <i class=\"fa fa-arrow-right\"></i></a>"
-msgstr ""
-"Prohlédnout <a href='%(url)s'>Odpověď <i class=\"fa fa-arrow-right\"></i></a>"
-
-#: helpdesk/templates/helpdesk/kb_category.html:29
-msgid "Rating"
-msgstr "Hodnocení"
-
-#: helpdesk/templates/helpdesk/kb_index.html:4
-#: helpdesk/templates/helpdesk/kb_item.html:4
-#: helpdesk/templates/helpdesk/navigation.html:33
-#: helpdesk/templates/helpdesk/navigation.html:101
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/kb_category.html:8
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/kb_index.html:3
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/kb_index.html:7
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/kb_index.html:13
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/navigation-sidebar.html:53
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/navigation-sidebar.html:75
 msgid "Knowledgebase"
 msgstr "Znalostní báze"
 
-#: helpdesk/templates/helpdesk/kb_index.html:6
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/kb_category_base.html:2
+msgid "Knowledgebase Category"
+msgstr "Kategorie znalostní báze"
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/kb_category_base.html:27
+msgid "open tickets"
+msgstr "otevřené tickety"
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/kb_category_base.html:32
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/kb_category_base.html:46
+msgid "Contact a human"
+msgstr "Napište nám"
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/kb_category_base.html:36
+#, python-format
+msgid "%(recommendations)s people found this answer useful of %(votes)s"
+msgstr ""
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/kb_index.html:15
 msgid ""
 "We have listed a number of Knowledgebase articles for your perusal in the "
 "following categories. Please check to see if any of these articles address "
@@ -1646,152 +1870,137 @@ msgstr ""
 "podívejte se, jestli některé články neřeší Váš problém před tím, než "
 "otevřete nový ticket"
 
-#: helpdesk/templates/helpdesk/kb_index.html:20
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/kb_index.html:26
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/public_homepage.html:26
 msgid "View articles"
 msgstr "Prohlédnout články"
 
-#: helpdesk/templates/helpdesk/kb_item.html:4
-#, python-format
-msgid "%(item)s"
-msgstr "%(item)s"
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/navigation-header.html:5
+msgid "Helpdesk"
+msgstr "Helpdesk"
 
-#: helpdesk/templates/helpdesk/kb_item.html:17
-msgid "Did you find this article useful?"
-msgstr "Pomohl Vám tento článek?"
-
-#: helpdesk/templates/helpdesk/kb_item.html:28
-msgid "The results of voting by other readers of this article are below:"
-msgstr "Výsledky hlasování dalších čtenářů jsou níže"
-
-#: helpdesk/templates/helpdesk/kb_item.html:30
-#, python-format
-msgid "Recommendations: %(recommendations)s"
-msgstr "Doporučení: %(recommendations)s"
-
-#: helpdesk/templates/helpdesk/kb_item.html:31
-#, python-format
-msgid "Votes: %(votes)s"
-msgstr "Hlasování: %(votes)s"
-
-#: helpdesk/templates/helpdesk/kb_item.html:32
-#, python-format
-msgid "Overall Rating: %(score)s"
-msgstr "Celkové hodnocení: %(score)s"
-
-#: helpdesk/templates/helpdesk/kb_item.html:40
-#, python-format
-msgid ""
-"View <a href='%(category_url)s'>other <em>%(category_title)s</em> articles</"
-"a>, or continue <a href='../'>viewing other knowledgebase articles</a>."
-msgstr ""
-"Prohlédnout <a href='%(category_url)s'>další <em>%(category_title)s</em> "
-"články</a>, nebo pokračovat <a href='../'>v prohlížení dalších článků "
-"znalostní báze</a>."
-
-#: helpdesk/templates/helpdesk/navigation.html:7
-msgid "Toggle navigation"
-msgstr ""
-
-#: helpdesk/templates/helpdesk/navigation.html:20
-#: helpdesk/templates/helpdesk/navigation.html:94
-msgid "Dashboard"
-msgstr "Nástěnka"
-
-#: helpdesk/templates/helpdesk/navigation.html:26
-msgid "New Ticket"
-msgstr "Nový ticket"
-
-#: helpdesk/templates/helpdesk/navigation.html:29
-msgid "Stats"
-msgstr "Statistiky"
-
-#: helpdesk/templates/helpdesk/navigation.html:38
-msgid "Saved Query"
-msgstr "Uložené dotazy"
-
-#: helpdesk/templates/helpdesk/navigation.html:53
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/navigation-header.html:15
 msgid "Search..."
 msgstr "Vyhledávat..."
 
-#: helpdesk/templates/helpdesk/navigation.html:53
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/navigation-header.html:15
 msgid "Enter a keyword, or a ticket number to jump straight to that ticket."
 msgstr "Vložte klíčové slovo, číslo ticketu nebo skočte rovnou na ticket."
 
-#: helpdesk/templates/helpdesk/navigation.html:57
-#: helpdesk/templates/helpdesk/ticket_list.html:254
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/navigation-header.html:19
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_list.html:99
 msgid "Go"
 msgstr ""
 
-#: helpdesk/templates/helpdesk/navigation.html:73
-#: helpdesk/templates/helpdesk/rss_list.html:3
-#: helpdesk/templates/helpdesk/rss_list.html:5
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/navigation-header.html:50
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/rss_list.html:4
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/rss_list.html:16
 msgid "RSS Feeds"
 msgstr "RSS kanály"
 
-#: helpdesk/templates/helpdesk/navigation.html:75
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/navigation-header.html:52
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/registration/change_password.html:2
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/registration/change_password_done.html:2
 msgid "Change password"
 msgstr "Změnit heslo"
 
-#: helpdesk/templates/helpdesk/navigation.html:79
-#: helpdesk/templates/helpdesk/system_settings.html:6
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/navigation-header.html:56
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/system_settings.html:15
 msgid "System Settings"
 msgstr "Systémová nastavení"
 
-#: helpdesk/templates/helpdesk/navigation.html:82
-#: helpdesk/templates/helpdesk/navigation.html:103
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/navigation-header.html:59
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/navigation-header.html:78
 msgid "Logout"
 msgstr "Odhlásit"
 
-#: helpdesk/templates/helpdesk/navigation.html:103
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/navigation-header.html:66
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/navigation-sidebar.html:9
+msgid "Dashboard"
+msgstr "Nástěnka"
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/navigation-header.html:80
 msgid "Log In"
 msgstr "Přihlásit"
 
-#: helpdesk/templates/helpdesk/public_change_language.html:2
-#: helpdesk/templates/helpdesk/public_homepage.html:74
-#: helpdesk/templates/helpdesk/public_view_form.html:4
-#: helpdesk/templates/helpdesk/public_view_ticket.html:3
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/navigation-sidebar.html:15
+msgid "All Tickets"
+msgstr "Všechny tickety"
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/navigation-sidebar.html:21
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/report_output.html:23
+msgid "Saved Queries"
+msgstr "Uložené dotazy"
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/navigation-sidebar.html:33
+msgid ""
+"No saved queries currently available. You can create one in the All Tickets "
+"page."
+msgstr ""
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/navigation-sidebar.html:40
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/navigation-sidebar.html:68
+msgid "New Ticket"
+msgstr "Nový ticket"
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/navigation-sidebar.html:46
+#, fuzzy
+#| msgid "Reports By User"
+msgid "Reports"
+msgstr "Zprávy na uživatele"
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/navigation-sidebar.html:62
+msgid "Homepage"
+msgstr "Domovská stránka"
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/public_change_language.html:2
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/public_homepage.html:84
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/public_view_form.html:4
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/public_view_ticket.html:3
 msgid "View a Ticket"
 msgstr "Prohlédnout ticket"
 
-#: helpdesk/templates/helpdesk/public_change_language.html:5
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/public_change_language.html:5
 msgid "Change the display language"
 msgstr "Změnit zobrazený jazyk"
 
-#: helpdesk/templates/helpdesk/public_homepage.html:7
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/public_create_ticket_base.html:12
+msgid ""
+"Public ticket submission is disabled. Please contact the administrator for "
+"assistance."
+msgstr ""
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/public_homepage.html:4
+msgid "Welcome to Helpdesk"
+msgstr ""
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/public_homepage.html:20
 msgid "Knowledgebase Articles"
 msgstr "Články znalostní báze"
 
-#: helpdesk/templates/helpdesk/public_homepage.html:10
-msgid "Knowledgebase Categories"
-msgstr "Kategorie znalostní báze"
-
-#: helpdesk/templates/helpdesk/public_homepage.html:29
-msgid "All fields are required."
-msgstr "Všechny položky jsou vyžadovány."
-
-#: helpdesk/templates/helpdesk/public_homepage.html:67
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/public_homepage.html:77
 msgid "Please use button at upper right to login first."
 msgstr "Prosím použijte tlačítko vpravo-nahoře pro přihlášení."
 
-#: helpdesk/templates/helpdesk/public_homepage.html:83
-#: helpdesk/templates/helpdesk/public_view_form.html:15
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/public_homepage.html:93
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/public_view_form.html:15
 msgid "Your E-mail Address"
 msgstr "Váš e-mail"
 
-#: helpdesk/templates/helpdesk/public_homepage.html:87
-#: helpdesk/templates/helpdesk/public_view_form.html:19
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/public_homepage.html:97
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/public_view_form.html:19
 msgid "View Ticket"
 msgstr "Prohlédnout ticket"
 
-#: helpdesk/templates/helpdesk/public_spam.html:4
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/public_spam.html:4
 msgid "Unable To Open Ticket"
 msgstr "Nelze otevřít ticket"
 
-#: helpdesk/templates/helpdesk/public_spam.html:5
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/public_spam.html:5
 msgid "Sorry, but there has been an error trying to submit your ticket."
 msgstr "Promiňte, při ukládání ticketu se vyskytla chyba."
 
-#: helpdesk/templates/helpdesk/public_spam.html:6
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/public_spam.html:6
 msgid ""
 "Our system has marked your submission as <strong>spam</strong>, so we are "
 "unable to save it. If this is not spam, please press back and re-type your "
@@ -1803,7 +2012,7 @@ msgstr ""
 "Pokuste se neznít 'jako spam', např. pokud máte hodně linků, zkuste je "
 "odstranit pokud je to možné."
 
-#: helpdesk/templates/helpdesk/public_spam.html:7
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/public_spam.html:7
 msgid ""
 "We are sorry for any inconvenience, however this check is required to avoid "
 "our helpdesk resources being overloaded by spammers."
@@ -1811,45 +2020,156 @@ msgstr ""
 "Omlouváme se za potíže, tato kontrola je nutná, aby nedošlo k zaspamování "
 "helpdesku."
 
-#: helpdesk/templates/helpdesk/public_view_form.html:8
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/public_view_form.html:8
 msgid "Error:"
 msgstr "Chyba:"
 
-#: helpdesk/templates/helpdesk/public_view_ticket.html:10
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/public_view_ticket.html:10
 #, python-format
 msgid "Queue: %(queue_name)s"
 msgstr "Fronta: %(queue_name)s"
 
-#: helpdesk/templates/helpdesk/public_view_ticket.html:14
-#: helpdesk/templates/helpdesk/ticket_desc_table.html:47
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/public_view_ticket.html:14
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_desc_table.html:30
 msgid "Submitted On"
 msgstr "Zadáno dne"
 
-#: helpdesk/templates/helpdesk/public_view_ticket.html:36
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/public_view_ticket.html:36
 msgid "Tags"
 msgstr "Tagy"
 
-#: helpdesk/templates/helpdesk/public_view_ticket.html:49
-#: helpdesk/templates/helpdesk/ticket_desc_table.html:36
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/public_view_ticket.html:49
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_desc_table.html:100
 msgid "Accept and Close"
 msgstr "Akceptovat a zavřít"
 
-#: helpdesk/templates/helpdesk/public_view_ticket.html:58
-#: helpdesk/templates/helpdesk/ticket.html:80
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/public_view_ticket.html:58
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket.html:38
 msgid "Follow-Ups"
 msgstr "Následovníci"
 
-#: helpdesk/templates/helpdesk/public_view_ticket.html:66
-#: helpdesk/templates/helpdesk/ticket.html:97
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/public_view_ticket.html:66
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket.html:53
 #, python-format
 msgid "Changed %(field)s from %(old_value)s to %(new_value)s."
 msgstr "Změněno %(field)s z %(old_value)s na %(new_value)s."
 
-#: helpdesk/templates/helpdesk/registration/logged_out.html:2
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/public_view_ticket.html:84
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket.html:103
+msgid "Use a Pre-set Reply"
+msgstr "Použít přednastavenou odpověď"
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/public_view_ticket.html:84
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket.html:103
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket.html:152
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket.html:160
+msgid "(Optional)"
+msgstr "(Volitelné)"
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/public_view_ticket.html:86
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket.html:105
+msgid ""
+"Selecting a pre-set reply will over-write your comment below. You can then "
+"modify the pre-set reply to your liking before saving this update."
+msgstr ""
+"Pokud vyberete přednastavenou odpověď, přepíšete Vaše komentáře níže. "
+"Přednastavený text můžete následně upravit, než jej uložíte jako aktualizaci."
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/public_view_ticket.html:89
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket.html:108
+msgid "Comment / Resolution"
+msgstr "Komentáře / usnesení"
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/public_view_ticket.html:91
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket.html:110
+msgid ""
+"You can insert ticket and queue details in your message. For more "
+"information, see the <a href='../../help/context/'>context help page</a>."
+msgstr ""
+"Do zprávy můžete vložit detaily fronty a zprávy. Pro více informací se "
+"podívejte na stránku <a href='../../help/context/'>kontextové nápovědy</a>."
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/public_view_ticket.html:93
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket.html:113
+msgid ""
+"This ticket cannot be resolved or closed until the tickets it depends on are "
+"resolved."
+msgstr ""
+"Tento ticket nelze rozřešit nebo uzavřít dokud nejsou rozřešeny tickety na "
+"kterých závisí."
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/public_view_ticket.html:128
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket.html:188
+msgid "Attach File(s) &raquo;"
+msgstr "Přidat soubor(y) &raquo;"
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/public_view_ticket.html:133
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket.html:193
+msgid "Attach a File"
+msgstr "Přidat soubor"
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/public_view_ticket.html:138
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket.html:199
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket.html:261
+msgid "No files selected."
+msgstr ""
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/public_view_ticket.html:147
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket.html:208
+msgid "Update This Ticket"
+msgstr "Aktualizovat ticket"
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/registration/change_password.html:6
+#, fuzzy
+#| msgid "Change password"
+msgid "Change Password"
+msgstr "Změnit heslo"
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/registration/change_password.html:12
+msgid "Please correct the error below."
+msgstr ""
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/registration/change_password.html:12
+msgid "Please correct the errors below."
+msgstr ""
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/registration/change_password.html:17
+msgid ""
+"Please enter your old password, for security's sake, and then enter your new "
+"password twice so we can verify you typed it in correctly."
+msgstr ""
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/registration/change_password.html:45
+#, fuzzy
+#| msgid "Change password"
+msgid "Change my password"
+msgstr "Změnit heslo"
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/registration/change_password_done.html:6
+msgid "Success!"
+msgstr ""
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/registration/change_password_done.html:8
+msgid "Your password was changed."
+msgstr ""
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/registration/logged_out.html:2
 msgid "Logged Out"
 msgstr "Odhlášení"
 
-#: helpdesk/templates/helpdesk/registration/logged_out.html:4
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/registration/logged_out.html:4
+#, fuzzy
+#| msgid ""
+#| "\n"
+#| "\n"
+#| "    <div class=\"col-md-4 col-md-offset-4\">\n"
+#| "        <div class=\"alert alert-success\">\n"
+#| "            <h2>Successfully Logged Out</h2>\n"
+#| "            <p>Thanks for being here. Hopefully you've helped resolve a "
+#| "few tickets and make the world a better place.</p>\n"
+#| "        </div>\n"
+#| "    </div>\n"
+#| "\n"
 msgid ""
 "\n"
 "\n"
@@ -1857,7 +2177,7 @@ msgid ""
 "        <div class=\"alert alert-success\">\n"
 "            <h2>Successfully Logged Out</h2>\n"
 "            <p>Thanks for being here. Hopefully you've helped resolve a few "
-"tickets and make the world a better place.</p>\n"
+"tickets and made the world a better place.</p>\n"
 "        </div>\n"
 "    </div>\n"
 "\n"
@@ -1873,46 +2193,48 @@ msgstr ""
 "    </div>\n"
 "\n"
 
-#: helpdesk/templates/helpdesk/registration/login.html:2
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/registration/login.html:2
 msgid "Helpdesk Login"
 msgstr "Přihlášení do Helpdesku"
 
-#: helpdesk/templates/helpdesk/registration/login.html:13
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/registration/login.html:12
 msgid "Please Sign In"
 msgstr ""
 
-#: helpdesk/templates/helpdesk/registration/login.html:18
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/registration/login.html:16
 msgid "Your username and password didn't match. Please try again."
 msgstr "Uživatelské jméno a heslo nesedí. Zkuste to prosím ještě jednou"
 
-#: helpdesk/templates/helpdesk/registration/login.html:29
-msgid "Remember Me"
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/registration/login.html:34
+msgid "Remember Password"
 msgstr ""
 
-#: helpdesk/templates/helpdesk/registration/login.html:32
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/registration/login.html:38
 msgid "Login"
 msgstr "Přihlášení"
 
-#: helpdesk/templates/helpdesk/report_index.html:3
-#: helpdesk/templates/helpdesk/report_index.html:6
-#: helpdesk/templates/helpdesk/report_output.html:4
-#: helpdesk/templates/helpdesk/report_output.html:29
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/report_index.html:3
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/report_index.html:7
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/report_index.html:13
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/report_output.html:4
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/report_output.html:12
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/report_output.html:18
 msgid "Reports &amp; Statistics"
 msgstr "Zprávy a statistiky"
 
-#: helpdesk/templates/helpdesk/report_index.html:9
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/report_index.html:16
 msgid "You haven't created any tickets yet, so you cannot run any reports."
 msgstr "Zatím jste nevytvořili žádné tickety, takže nemůžete mít žádné zprávy."
 
-#: helpdesk/templates/helpdesk/report_index.html:16
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/report_index.html:22
 msgid "Current Ticket Stats"
 msgstr "Aktulání stav ticketu"
 
-#: helpdesk/templates/helpdesk/report_index.html:24
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/report_index.html:29
 msgid "Average number of days until ticket is closed (all tickets): "
 msgstr "Průměrný počet dní do zavření ticketu (všechny tickety):"
 
-#: helpdesk/templates/helpdesk/report_index.html:28
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/report_index.html:33
 msgid ""
 "Average number of days until ticket is closed (tickets opened in last 60 "
 "days): "
@@ -1920,70 +2242,71 @@ msgstr ""
 "Průměrný počet dní do zavření ticketu (tickety otevřené v posledních 60 "
 "dnech):"
 
-#: helpdesk/templates/helpdesk/report_index.html:29
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/report_index.html:34
 msgid "Click"
 msgstr "Klik"
 
-#: helpdesk/templates/helpdesk/report_index.html:29
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/report_index.html:34
 msgid "for detailed average by month."
 msgstr "pro detailní průměr po měsících"
 
-#: helpdesk/templates/helpdesk/report_index.html:71
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/report_index.html:48
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket.html:160
+msgid "Time spent"
+msgstr ""
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/report_index.html:75
 msgid "Generate Report"
 msgstr "Generovat zprávu"
 
-#: helpdesk/templates/helpdesk/report_index.html:76
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/report_index.html:79
 msgid "Reports By User"
 msgstr "Zprávy na uživatele"
 
-#: helpdesk/templates/helpdesk/report_index.html:78
-#: helpdesk/templates/helpdesk/report_index.html:86
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/report_index.html:81
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/report_index.html:89
 msgid "by Priority"
 msgstr "podle Priority"
 
-#: helpdesk/templates/helpdesk/report_index.html:79
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/report_index.html:82
 msgid "by Queue"
 msgstr "podle Fronty"
 
-#: helpdesk/templates/helpdesk/report_index.html:80
-#: helpdesk/templates/helpdesk/report_index.html:87
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/report_index.html:83
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/report_index.html:90
 msgid "by Status"
 msgstr "podle Stavu"
 
-#: helpdesk/templates/helpdesk/report_index.html:81
-#: helpdesk/templates/helpdesk/report_index.html:88
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/report_index.html:84
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/report_index.html:91
 msgid "by Month"
 msgstr "podle Měsíce"
 
-#: helpdesk/templates/helpdesk/report_index.html:84
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/report_index.html:87
 msgid "Reports By Queue"
 msgstr "Zprávy podle Fronty"
 
-#: helpdesk/templates/helpdesk/report_index.html:89
-#: helpdesk/views/staff.py:1270
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/report_index.html:92
+#: third_party/django-helpdesk/helpdesk/views/staff.py:1228
 msgid "Days until ticket closed by Month"
 msgstr "Počet dní do zavření ticketu podle Měsíce"
 
-#: helpdesk/templates/helpdesk/report_output.html:35
-msgid "Saved Queries"
-msgstr "Uložené dotazy"
-
-#: helpdesk/templates/helpdesk/report_output.html:40
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/report_output.html:27
 msgid ""
 "You can run this query on filtered data by using one of your saved queries."
 msgstr ""
 "Tento dotaz můžete pustit na filtrovaná data tak, že použijete některý z "
 "uložených dotazů."
 
-#: helpdesk/templates/helpdesk/report_output.html:42
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/report_output.html:29
 msgid "Select Query:"
 msgstr "Vybrat dotaz:"
 
-#: helpdesk/templates/helpdesk/report_output.html:47
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/report_output.html:34
 msgid "Filter Report"
 msgstr "Zpráva z filtru"
 
-#: helpdesk/templates/helpdesk/report_output.html:50
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/report_output.html:37
 msgid ""
 "Want to filter this report to just show a subset of data? Go to the Ticket "
 "List, filter your query, and save your query."
@@ -1991,7 +2314,7 @@ msgstr ""
 "Potřebujete filtrovat ještě menší podmnožinu dat? Jděte na Seznam ticketů, "
 "nastavte filtr a uložte jej."
 
-#: helpdesk/templates/helpdesk/rss_list.html:7
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/rss_list.html:18
 msgid ""
 "The following RSS feeds are available for you to monitor using your "
 "preferred RSS software. With the exception of the 'Latest Activity' feed, "
@@ -2003,7 +2326,7 @@ msgstr ""
 "otevřených a znovu otevřených případech. To má zajistit, aby Vaše čtečka "
 "nebyla přeplněna informacemi o zavřených a historických úlohách."
 
-#: helpdesk/templates/helpdesk/rss_list.html:11
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/rss_list.html:22
 msgid ""
 "A summary of your open tickets - useful for getting alerted to new tickets "
 "opened for you"
@@ -2011,11 +2334,11 @@ msgstr ""
 "Přehled Vašich otevřených ticketů - to je užitečné, pokud checete být "
 "informován o nově otevřených ticketech."
 
-#: helpdesk/templates/helpdesk/rss_list.html:13
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/rss_list.html:24
 msgid "Latest Activity"
 msgstr "Nejnovější aktivita"
 
-#: helpdesk/templates/helpdesk/rss_list.html:14
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/rss_list.html:25
 msgid ""
 "A summary of all helpdesk activity - including comments, emails, "
 "attachments, and more"
@@ -2023,7 +2346,7 @@ msgstr ""
 "Přehled veškeré aktivity na helpdesku - včetně komentářů, e-mailů, příloh a "
 "dalšího"
 
-#: helpdesk/templates/helpdesk/rss_list.html:17
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/rss_list.html:28
 msgid ""
 "All unassigned tickets - useful for being alerted to new tickets opened by "
 "the public via the web or via e-mail"
@@ -2031,7 +2354,7 @@ msgstr ""
 "Všechny nepřiřazené tickety - užitečné propřehled o nových ticketech "
 "otevřených prostřednictvím veřejného formuláře nebo e-mailem."
 
-#: helpdesk/templates/helpdesk/rss_list.html:20
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/rss_list.html:31
 msgid ""
 "These RSS feeds allow you to view a summary of either your own tickets, or "
 "all tickets, for each of the queues in your helpdesk. For example, if you "
@@ -2043,155 +2366,105 @@ msgstr ""
 "řídíte Vaše kolegy využíající určitou frontu, tento kanál Vám dá přehled o "
 "nových přicházejících ticketech."
 
-#: helpdesk/templates/helpdesk/rss_list.html:26
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/rss_list.html:37
 msgid "Per-Queue Feeds"
 msgstr "RSS kanály pro každou frontu"
 
-#: helpdesk/templates/helpdesk/rss_list.html:35
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/rss_list.html:46
 msgid "All Open Tickets"
 msgstr "Všechny otevřené tickety"
 
-#: helpdesk/templates/helpdesk/system_settings.html:3
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/system_settings.html:3
 msgid "Change System Settings"
 msgstr "Změnit nastavení systému"
 
-#: helpdesk/templates/helpdesk/system_settings.html:8
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/system_settings.html:7
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/user_settings.html:7
+#, fuzzy
+#| msgid "User Settings"
+msgid "Settings"
+msgstr "Uživatelská nastavení"
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/system_settings.html:17
 msgid "The following items can be maintained by you or other superusers:"
 msgstr "Následující položky lze spravovat Vámi nebo dalšími superuživateli:"
 
-#: helpdesk/templates/helpdesk/system_settings.html:11
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/system_settings.html:20
 msgid "E-Mail Ignore list"
 msgstr "Seznam ignorovaných e-mailů"
 
-#: helpdesk/templates/helpdesk/system_settings.html:12
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/system_settings.html:21
 msgid "Maintain Queues"
 msgstr "Spravovat fronty"
 
-#: helpdesk/templates/helpdesk/system_settings.html:13
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/system_settings.html:22
 msgid "Maintain Pre-Set Replies"
 msgstr "Spravovat přednastavené odpovědi"
 
-#: helpdesk/templates/helpdesk/system_settings.html:14
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/system_settings.html:23
 msgid "Maintain Knowledgebase Categories"
 msgstr "Spravovat kategorie znalostní báze"
 
-#: helpdesk/templates/helpdesk/system_settings.html:15
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/system_settings.html:24
 msgid "Maintain Knowledgebase Items"
 msgstr "Spravovat položky znalostní báze"
 
-#: helpdesk/templates/helpdesk/system_settings.html:16
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/system_settings.html:25
 msgid "Maintain E-Mail Templates"
 msgstr "Spravovat e-mailové šablony"
 
-#: helpdesk/templates/helpdesk/system_settings.html:17
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/system_settings.html:26
 msgid "Maintain Users"
 msgstr "Spravovat uživatele"
 
-#: helpdesk/templates/helpdesk/ticket.html:4
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket.html:7
 msgid "View Ticket Details"
 msgstr "Zobrazit detaily ticketu"
 
-#: helpdesk/templates/helpdesk/ticket.html:44
-#: helpdesk/templates/helpdesk/ticket.html:236
-msgid "No files selected."
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket.html:45
+msgid "time spent"
 msgstr ""
 
-#: helpdesk/templates/helpdesk/ticket.html:91
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket.html:45
 msgid "Private"
 msgstr "Soukromý"
 
-#: helpdesk/templates/helpdesk/ticket.html:115
-#: helpdesk/templates/helpdesk/ticket_desc_table.html:16
-msgid "Edit"
-msgstr ""
-
-#: helpdesk/templates/helpdesk/ticket.html:140
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket.html:95
 msgid "Respond to this ticket"
 msgstr "Odpovědět na ticket"
 
-#: helpdesk/templates/helpdesk/ticket.html:147
-msgid "Use a Pre-set Reply"
-msgstr "Použít přednastavenou odpověď"
-
-#: helpdesk/templates/helpdesk/ticket.html:149
-msgid ""
-"Selecting a pre-set reply will over-write your comment below. You can then "
-"modify the pre-set reply to your liking before saving this update."
-msgstr ""
-"Pokud vyberete přednastavenou odpověď, přepíšete Vaše komentáře níže. "
-"Přednastavený text můžete následně upravit, než jej uložíte jako aktualizaci."
-
-#: helpdesk/templates/helpdesk/ticket.html:152
-msgid "Comment / Resolution"
-msgstr "Komentáře / usnesení"
-
-#: helpdesk/templates/helpdesk/ticket.html:154
-msgid ""
-"You can insert ticket and queue details in your message. For more "
-"information, see the <a href='../../help/context/'>context help page</a>."
-msgstr ""
-"Do zprávy můžete vložit detaily fronty a zprávy. Pro více informací se "
-"podívejte na stránku <a href='../../help/context/'>kontextové nápovědy</a>."
-
-#: helpdesk/templates/helpdesk/ticket.html:157
-msgid ""
-"This ticket cannot be resolved or closed until the tickets it depends on are "
-"resolved."
-msgstr ""
-"Tento ticket nelze rozřešit nebo uzavřít dokud nejsou rozřešeny tickety na "
-"kterých závisí."
-
-#: helpdesk/templates/helpdesk/ticket.html:196
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket.html:152
 msgid "Is this update public?"
 msgstr "Jedná se o veřejnou aktualizaci?"
 
-#: helpdesk/templates/helpdesk/ticket.html:198
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket.html:154
 msgid "Yes, make this update public."
 msgstr "Ano, ať je tato aktualizace veřejná."
 
-#: helpdesk/templates/helpdesk/ticket.html:199
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket.html:155
 msgid ""
 "If this is public, the submitter will be e-mailed your comment or resolution."
 msgstr ""
 "Pokud se jedná o veřejnou aktualizaci, zadavatel dostane e-mail s Vaším "
 "komentářem nebo rozřešením."
 
-#: helpdesk/templates/helpdesk/ticket.html:203
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket.html:166
 msgid "Change Further Details &raquo;"
 msgstr "Změnit další detaily &raquo;"
 
-#: helpdesk/templates/helpdesk/ticket.html:212
-#: helpdesk/templates/helpdesk/ticket_list.html:62
-#: helpdesk/templates/helpdesk/ticket_list.html:91
-#: helpdesk/templates/helpdesk/ticket_list.html:227 helpdesk/views/staff.py:539
-msgid "Owner"
-msgstr "Vlastník"
-
-#: helpdesk/templates/helpdesk/ticket.html:213
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket.html:176
 msgid "Unassign"
 msgstr "Odstoupit"
 
-#: helpdesk/templates/helpdesk/ticket.html:225
-msgid "Attach File(s) &raquo;"
-msgstr "Přidat soubor(y) &raquo;"
-
-#: helpdesk/templates/helpdesk/ticket.html:230
-msgid "Attach a File"
-msgstr "Přidat soubor"
-
-#: helpdesk/templates/helpdesk/ticket.html:233
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket.html:196
 msgid "Add Another File"
 msgstr "Přidat další soubor"
 
-#: helpdesk/templates/helpdesk/ticket.html:245
-msgid "Update This Ticket"
-msgstr "Aktualizovat ticket"
-
-#: helpdesk/templates/helpdesk/ticket_attachment_del.html:3
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_attachment_del.html:3
 msgid "Delete Ticket Attachment"
 msgstr "Smazat přílohu ticketu"
 
-#: helpdesk/templates/helpdesk/ticket_attachment_del.html:5
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_attachment_del.html:5
 #, python-format
 msgid ""
 "\n"
@@ -2202,23 +2475,37 @@ msgid ""
 "database, but the attachment itself will still exist on the server.</p>\n"
 msgstr ""
 
-#: helpdesk/templates/helpdesk/ticket_attachment_del.html:11
-#: helpdesk/templates/helpdesk/ticket_cc_del.html:12
-#: helpdesk/templates/helpdesk/ticket_dependency_del.html:11
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_attachment_del.html:11
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_cc_del.html:25
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_dependency_del.html:21
 msgid "Don't Delete"
 msgstr "Neodstraňovat"
 
-#: helpdesk/templates/helpdesk/ticket_attachment_del.html:14
-#: helpdesk/templates/helpdesk/ticket_dependency_del.html:14
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_attachment_del.html:14
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_dependency_del.html:24
 msgid "Yes, I Understand - Delete"
 msgstr ""
 
-#: helpdesk/templates/helpdesk/ticket_cc_add.html:3
-#: helpdesk/templates/helpdesk/ticket_cc_add.html:6
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_cc_add.html:3
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_cc_add.html:19
 msgid "Add Ticket CC"
 msgstr "Přidat CC k ticketu"
 
-#: helpdesk/templates/helpdesk/ticket_cc_add.html:12
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_cc_add.html:13
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_cc_del.html:13
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_cc_list.html:12
+#, fuzzy
+#| msgid "Ticket CC Settings"
+msgid "CC Settings"
+msgstr "Nastavení CC k ticketu"
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_cc_add.html:15
+#, fuzzy
+#| msgid "Add Ticket CC"
+msgid "Add CC"
+msgstr "Přidat CC k ticketu"
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_cc_add.html:24
 msgid ""
 "To automatically send an email to a user or e-mail address when this ticket "
 "is updated, select the user or enter an e-mail address below."
@@ -2226,28 +2513,34 @@ msgstr ""
 "Pro automatické zaslání zprávy uživateli nebo na e-mail pokaždé, když je "
 "ticket aktualizován, vyberte uživatele nebo zadejte jeho adresu níže."
 
-#: helpdesk/templates/helpdesk/ticket_cc_add.html:18
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_cc_add.html:29
 msgid "Email"
 msgstr ""
 
-#: helpdesk/templates/helpdesk/ticket_cc_add.html:27
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_cc_add.html:38
 msgid "Add Email"
 msgstr ""
 
-#: helpdesk/templates/helpdesk/ticket_cc_add.html:37
-#: helpdesk/templates/helpdesk/ticket_cc_add.html:51
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_cc_add.html:48
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_cc_add.html:62
 msgid "Save Ticket CC"
 msgstr "Uložit CC k ticketu"
 
-#: helpdesk/templates/helpdesk/ticket_cc_add.html:41
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_cc_add.html:52
 msgid "Add User"
 msgstr "Přidat uživatele"
 
-#: helpdesk/templates/helpdesk/ticket_cc_del.html:3
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_cc_del.html:3
 msgid "Delete Ticket CC"
 msgstr "Odhlásit odběr CC ticketu"
 
-#: helpdesk/templates/helpdesk/ticket_cc_del.html:5
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_cc_del.html:15
+#, fuzzy
+#| msgid "Delete"
+msgid "Delete CC"
+msgstr "Smazat"
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_cc_del.html:18
 #, python-format
 msgid ""
 "\n"
@@ -2263,15 +2556,15 @@ msgstr ""
 "<p>Určitě chcete odstranit CC (<em>%(email_address)s</em>) z ticketu? Na "
 "daný e-mail přestanou chodit oznámení o aktualizacích.</p>\n"
 
-#: helpdesk/templates/helpdesk/ticket_cc_del.html:15
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_cc_del.html:28
 msgid "Yes I Understand - Delete"
 msgstr "Ano rozumím - Odstranit"
 
-#: helpdesk/templates/helpdesk/ticket_cc_list.html:3
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_cc_list.html:3
 msgid "Ticket CC Settings"
 msgstr "Nastavení CC k ticketu"
 
-#: helpdesk/templates/helpdesk/ticket_cc_list.html:5
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_cc_list.html:15
 #, python-format
 msgid ""
 "\n"
@@ -2294,36 +2587,37 @@ msgstr ""
 "<p>Můžete přidat novou adresu na seznam nebo smazat některou z položek níže."
 "</p>"
 
-#: helpdesk/templates/helpdesk/ticket_cc_list.html:16
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_cc_list.html:26
 msgid "Ticket CC List"
 msgstr "Seznam CC pro ticket"
 
-#: helpdesk/templates/helpdesk/ticket_cc_list.html:20
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_cc_list.html:30
 msgid "Add an Email or Helpdesk User"
 msgstr ""
 
-#: helpdesk/templates/helpdesk/ticket_cc_list.html:25
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_cc_list.html:35
 msgid "E-Mail Address or Helpdesk User"
 msgstr "Adresa e-mailu nebo uživatel Helpdesku"
 
-#: helpdesk/templates/helpdesk/ticket_cc_list.html:26
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_cc_list.html:36
 msgid "View?"
 msgstr "Prohlédnout?"
 
-#: helpdesk/templates/helpdesk/ticket_cc_list.html:27
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_cc_list.html:37
 msgid "Update?"
 msgstr "Aktualizovat?"
 
-#: helpdesk/templates/helpdesk/ticket_cc_list.html:53
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_cc_list.html:63
 #, python-format
 msgid "Return to <em>%(ticket_title)s</em>"
 msgstr "Návrat do <em>%(ticket_title)s</em>"
 
-#: helpdesk/templates/helpdesk/ticket_dependency_add.html:3
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_dependency_add.html:3
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_dependency_add.html:12
 msgid "Add Ticket Dependency"
 msgstr "Přidat závislost"
 
-#: helpdesk/templates/helpdesk/ticket_dependency_add.html:5
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_dependency_add.html:15
 msgid ""
 "\n"
 "<h2>Add Ticket Dependency</h2>\n"
@@ -2337,15 +2631,16 @@ msgstr ""
 "<p>Přidáním závislosti Vám znemožní ticket rozřešit, dokue nebudou všechny "
 "podřízené tickety rozřešeny nebo uzavřeny</p>"
 
-#: helpdesk/templates/helpdesk/ticket_dependency_add.html:21
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_dependency_add.html:31
 msgid "Save Ticket Dependency"
 msgstr "Uložit závislost"
 
-#: helpdesk/templates/helpdesk/ticket_dependency_del.html:3
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_dependency_del.html:3
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_dependency_del.html:12
 msgid "Delete Ticket Dependency"
 msgstr "Smazat závislost"
 
-#: helpdesk/templates/helpdesk/ticket_dependency_del.html:5
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_dependency_del.html:15
 msgid ""
 "\n"
 "<h2>Delete Ticket Dependency</h2>\n"
@@ -2357,41 +2652,37 @@ msgstr ""
 "\n"
 "<p>Jste si jisti odstraněním závislosti na ticketu?</p>\n"
 
-#: helpdesk/templates/helpdesk/ticket_desc_table.html:8
-msgid "Ticket Summary"
-msgstr "Souhrn ticketu"
-
-#: helpdesk/templates/helpdesk/ticket_desc_table.html:18
-msgid "Unhold"
-msgstr "Aktivovat"
-
-#: helpdesk/templates/helpdesk/ticket_desc_table.html:18
-msgid "Hold"
-msgstr "Pozdržet"
-
-#: helpdesk/templates/helpdesk/ticket_desc_table.html:20
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_desc_table.html:13
 #, python-format
 msgid "Queue: %(queue)s"
 msgstr "Fronta: %(queue)s"
 
-#: helpdesk/templates/helpdesk/ticket_desc_table.html:43
-#: helpdesk/templates/helpdesk/ticket_list.html:226
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_desc_table.html:15
+msgid "Edit"
+msgstr ""
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_desc_table.html:17
+msgid "Unhold"
+msgstr "Aktivovat"
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_desc_table.html:17
+msgid "Hold"
+msgstr "Pozdržet"
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_desc_table.html:27
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_list.html:67
 msgid "Due Date"
 msgstr "Datum do kdy"
 
-#: helpdesk/templates/helpdesk/ticket_desc_table.html:52
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_desc_table.html:34
 msgid "Assigned To"
 msgstr "Přiřazeno"
 
-#: helpdesk/templates/helpdesk/ticket_desc_table.html:58
-msgid "Ignore"
-msgstr "Ingorovat"
-
-#: helpdesk/templates/helpdesk/ticket_desc_table.html:67
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_desc_table.html:52
 msgid "Copies To"
 msgstr "Kopie na"
 
-#: helpdesk/templates/helpdesk/ticket_desc_table.html:68
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_desc_table.html:53
 msgid ""
 "Click here to add / remove people who should receive an e-mail whenever this "
 "ticket is updated."
@@ -2399,11 +2690,7 @@ msgstr ""
 "Pro přidání a nebo odebrání lidí, kteří by měli dostávat e-mail kdykoliv je "
 "ticket aktualizován, klikněte zde."
 
-#: helpdesk/templates/helpdesk/ticket_desc_table.html:68
-msgid "Manage"
-msgstr "Spravovat"
-
-#: helpdesk/templates/helpdesk/ticket_desc_table.html:68
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_desc_table.html:53
 msgid ""
 "Click here to subscribe yourself to this ticket, if you want to receive an e-"
 "mail whenever this ticket is updated."
@@ -2411,29 +2698,11 @@ msgstr ""
 "Klikněte zde pro vaše přihlášení k tomuto ticketu, pokud chcete dostávat "
 "kopie e-mailů kdykoliv je ticket aktualizován."
 
-#: helpdesk/templates/helpdesk/ticket_desc_table.html:68
-msgid "Subscribe"
-msgstr "Přihlásit"
-
-#: helpdesk/templates/helpdesk/ticket_desc_table.html:72
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_desc_table.html:57
 msgid "Dependencies"
 msgstr "Závislosti"
 
-#: helpdesk/templates/helpdesk/ticket_desc_table.html:74
-msgid ""
-"This ticket cannot be resolved until the following ticket(s) are resolved"
-msgstr ""
-"Tento ticket nelze rozřešit, dokud nejsou rozřešeny následující tickety"
-
-#: helpdesk/templates/helpdesk/ticket_desc_table.html:75
-msgid "Remove Dependency"
-msgstr "Odstranit závislost"
-
-#: helpdesk/templates/helpdesk/ticket_desc_table.html:78
-msgid "This ticket has no dependencies."
-msgstr "Tento ticket nemá žádnou závislost"
-
-#: helpdesk/templates/helpdesk/ticket_desc_table.html:80
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_desc_table.html:59
 msgid ""
 "Click on 'Add Dependency', if you want to make this ticket dependent on "
 "another ticket. A ticket may not be closed until all tickets it depends on "
@@ -2443,100 +2712,123 @@ msgstr ""
 "'Přidat závislost'. Ticket pak nebude možné uzavřít, dokud nebudou uzavřeny "
 "všechny tickety na kterých závisí."
 
-#: helpdesk/templates/helpdesk/ticket_desc_table.html:80
-msgid "Add Dependency"
-msgstr "Přidat závislost"
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_desc_table.html:61
+msgid ""
+"This ticket cannot be resolved until the following ticket(s) are resolved"
+msgstr ""
+"Tento ticket nelze rozřešit, dokud nejsou rozřešeny následující tickety"
 
-#: helpdesk/templates/helpdesk/ticket_list.html:13
-msgid "No Tickets Match Your Selection"
-msgstr "Vašemu výběru neodpovídá žádný ticket."
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_desc_table.html:65
+msgid "This ticket has no dependencies."
+msgstr "Tento ticket nemá žádnou závislost"
 
-#: helpdesk/templates/helpdesk/ticket_list.html:46
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_desc_table.html:68
+msgid "Total time spent"
+msgstr ""
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_desc_table.html:73
+#, fuzzy
+#| msgid "Knowledge base item"
+msgid "Knowlegebase item"
+msgstr "Položka znalostní báze"
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_desc_table.html:107
+#, fuzzy
+#| msgid "Edit Ticket"
+msgid "Edit details"
+msgstr "Změnit ticket"
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_list.html:22
+msgid "Saved Query"
+msgstr "Uložené dotazy"
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_list.html:37
+msgid "Query Results"
+msgstr "Výsledek dotazu"
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_list.html:42
+msgid "Table"
+msgstr ""
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_list.html:48
+#, fuzzy
+#| msgid "Time"
+msgid "Timeline"
+msgstr "Čas"
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_list.html:69
+msgid "Time Spent"
+msgstr ""
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_list.html:74
+msgid "Select:"
+msgstr "Vybrat"
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_list.html:82
+msgid "Invert"
+msgstr "Obrátit"
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_list.html:86
+msgid "With Selected Tickets:"
+msgstr "Provézt s vybranými tickety:"
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_list.html:88
+msgid "Take (Assign to me)"
+msgstr "Převízt (přiřadit mě)"
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_list.html:90
+msgid "Close"
+msgstr "Uzavřít"
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_list.html:91
+msgid "Close (Don't Send E-Mail)"
+msgstr "Uzavřít (bez odeslání e-mailu)"
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_list.html:92
+msgid "Close (Send E-Mail)"
+msgstr "Uzavřít (a odeslat e-mail)"
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_list.html:94
+msgid "Assign To"
+msgstr "Přiřadit"
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_list.html:95
+msgid "Nobody (Unassign)"
+msgstr "Nikomu (odstranit přiřazení)"
+
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_list.html:145
 msgid "Query Selection"
 msgstr "Výběr"
 
-#: helpdesk/templates/helpdesk/ticket_list.html:54
-msgid "Change Query"
-msgstr "Změnit dotaz"
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_list.html:155
+#, fuzzy
+#| msgid "Apply Filter"
+msgid "Filters"
+msgstr "Použit filtr"
 
-#: helpdesk/templates/helpdesk/ticket_list.html:61
-#: helpdesk/templates/helpdesk/ticket_list.html:73
-msgid "Sorting"
-msgstr "Řazení"
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_list.html:164
+#, fuzzy
+#| msgid "Add User"
+msgid "Add filter"
+msgstr "Přidat uživatele"
 
-#: helpdesk/templates/helpdesk/ticket_list.html:65
-#: helpdesk/templates/helpdesk/ticket_list.html:133
-msgid "Keywords"
-msgstr "Klíčová slova"
-
-#: helpdesk/templates/helpdesk/ticket_list.html:66
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_list.html:173
 msgid "Date Range"
 msgstr "Časový rozsah"
 
-#: helpdesk/templates/helpdesk/ticket_list.html:94
-msgid "Reverse"
-msgstr "Převrátit směr řazení"
-
-#: helpdesk/templates/helpdesk/ticket_list.html:96
-msgid "Ordering applied to tickets"
-msgstr "Řazení použité na tickety"
-
-#: helpdesk/templates/helpdesk/ticket_list.html:101
-msgid "Owner(s)"
-msgstr "Vlastník(ci)"
-
-#: helpdesk/templates/helpdesk/ticket_list.html:105
-msgid "(ME)"
-msgstr "(Já)"
-
-#: helpdesk/templates/helpdesk/ticket_list.html:109
-msgid "Ctrl-Click to select multiple options"
-msgstr "Ctrl-Klik pro výběr více voleb"
-
-#: helpdesk/templates/helpdesk/ticket_list.html:114
-msgid "Queue(s)"
-msgstr "Fronta(y)"
-
-#: helpdesk/templates/helpdesk/ticket_list.html:115
-#: helpdesk/templates/helpdesk/ticket_list.html:121
-msgid "Ctrl-click to select multiple options"
-msgstr "Ctrl-klik pro výběr více možností"
-
-#: helpdesk/templates/helpdesk/ticket_list.html:120
-msgid "Status(es)"
-msgstr "Stav(y)"
-
-#: helpdesk/templates/helpdesk/ticket_list.html:126
-msgid "Date (From)"
-msgstr "Datum (Od)"
-
-#: helpdesk/templates/helpdesk/ticket_list.html:127
-msgid "Date (To)"
-msgstr "Datum (Do)"
-
-#: helpdesk/templates/helpdesk/ticket_list.html:128
-msgid "Use YYYY-MM-DD date format, eg 2011-05-29"
-msgstr "Použijte formát RRRR-MM-DD, např. 2011-05-29"
-
-#: helpdesk/templates/helpdesk/ticket_list.html:134
-msgid ""
-"Keywords are case-insensitive, and will be looked for in the title, body and "
-"submitter fields."
-msgstr ""
-"Klíčová slova mohou být napsána velkým i malým písmem. Prohledává se nadpis, "
-"tělo ticketu a zadavatel."
-
-#: helpdesk/templates/helpdesk/ticket_list.html:138
-msgid "Apply Filter"
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_list.html:205
+#, fuzzy
+#| msgid "Apply Filter"
+msgid "Apply Filters"
 msgstr "Použit filtr"
 
-#: helpdesk/templates/helpdesk/ticket_list.html:140
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_list.html:207
 #, python-format
 msgid ""
 "You are currently viewing saved query <strong>\"%(query_name)s\"</strong>."
 msgstr "Prohlížíte uložený výběr <strong>\"%(query_name)s\"</strong>."
 
-#: helpdesk/templates/helpdesk/ticket_list.html:143
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_list.html:210
 #, python-format
 msgid ""
 "<a href='../reports/?saved_query=%(query_id)s'>Run a report</a> on this "
@@ -2545,12 +2837,12 @@ msgstr ""
 "<a href='../reports/?saved_query=%(query_id)s'>Spustit hlášení</a> na tento "
 "výběr a uvidíte statistiku a grafy pro níže vypsaná data."
 
-#: helpdesk/templates/helpdesk/ticket_list.html:152
-#: helpdesk/templates/helpdesk/ticket_list.html:170
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_list.html:223
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_list.html:242
 msgid "Save Query"
 msgstr "Uložit výběr"
 
-#: helpdesk/templates/helpdesk/ticket_list.html:162
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_list.html:234
 msgid ""
 "This name appears in the drop-down list of saved queries. If you share your "
 "query, other users will see this name, so choose something clear and "
@@ -2560,15 +2852,15 @@ msgstr ""
 "výběr sdílet, uvidí tento název i ostatní uživatelé, takže zvolte něco na "
 "první pohled jasného!"
 
-#: helpdesk/templates/helpdesk/ticket_list.html:164
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_list.html:236
 msgid "Shared?"
 msgstr "Sdíleno?"
 
-#: helpdesk/templates/helpdesk/ticket_list.html:165
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_list.html:237
 msgid "Yes, share this query with other users."
 msgstr "Ano, sdílet tento výběr s dalšími uživateli."
 
-#: helpdesk/templates/helpdesk/ticket_list.html:166
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_list.html:238
 msgid ""
 "If you share this query, it will be visible by <em>all</em> other logged-in "
 "users."
@@ -2576,63 +2868,27 @@ msgstr ""
 "Pokud budete tento výběr sdílet, bude viditelný <em>všemi</em> dalšími "
 "přihlášenými uživateli."
 
-#: helpdesk/templates/helpdesk/ticket_list.html:179
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_list.html:254
 msgid "Use Saved Query"
 msgstr "Použít uložený výběr"
 
-#: helpdesk/templates/helpdesk/ticket_list.html:185
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_list.html:261
 msgid "Query"
 msgstr "Výběr"
 
-#: helpdesk/templates/helpdesk/ticket_list.html:190
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_list.html:266
 msgid "Run Query"
 msgstr "Spustit výběr"
 
-#: helpdesk/templates/helpdesk/ticket_list.html:210
-msgid "Query Results"
-msgstr "Výsledek dotazu"
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/ticket_list.html:293
+msgid "No Tickets Match Your Selection"
+msgstr "Vašemu výběru neodpovídá žádný ticket."
 
-#: helpdesk/templates/helpdesk/ticket_list.html:248
-msgid "Select:"
-msgstr "Vybrat"
-
-#: helpdesk/templates/helpdesk/ticket_list.html:251
-msgid "Invert"
-msgstr "Obrátit"
-
-#: helpdesk/templates/helpdesk/ticket_list.html:254
-msgid "With Selected Tickets:"
-msgstr "Provézt s vybranými tickety:"
-
-#: helpdesk/templates/helpdesk/ticket_list.html:254
-msgid "Take (Assign to me)"
-msgstr "Převízt (přiřadit mě)"
-
-#: helpdesk/templates/helpdesk/ticket_list.html:254
-msgid "Close"
-msgstr "Uzavřít"
-
-#: helpdesk/templates/helpdesk/ticket_list.html:254
-msgid "Close (Don't Send E-Mail)"
-msgstr "Uzavřít (bez odeslání e-mailu)"
-
-#: helpdesk/templates/helpdesk/ticket_list.html:254
-msgid "Close (Send E-Mail)"
-msgstr "Uzavřít (a odeslat e-mail)"
-
-#: helpdesk/templates/helpdesk/ticket_list.html:254
-msgid "Assign To"
-msgstr "Přiřadit"
-
-#: helpdesk/templates/helpdesk/ticket_list.html:254
-msgid "Nobody (Unassign)"
-msgstr "Nikomu (odstranit přiřazení)"
-
-#: helpdesk/templates/helpdesk/user_settings.html:3
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/user_settings.html:3
 msgid "Change User Settings"
 msgstr "Změnit uživatelská nastevení"
 
-#: helpdesk/templates/helpdesk/user_settings.html:8
+#: third_party/django-helpdesk/helpdesk/templates/helpdesk/user_settings.html:17
 msgid ""
 "Use the following options to change the way your helpdesk system works for "
 "you. These settings do not impact any other user."
@@ -2640,43 +2896,39 @@ msgstr ""
 "Zvolte následující možnosti pro upravení chování helpdesku. Tato Vaše "
 "nastavení se neprojeví ostatním uživatelům."
 
-#: helpdesk/templates/helpdesk/user_settings.html:13
-msgid "Save Options"
-msgstr "Uložit změny"
-
-#: helpdesk/views/feeds.py:37
+#: third_party/django-helpdesk/helpdesk/views/feeds.py:37
 #, python-format
 msgid "Helpdesk: Open Tickets in queue %(queue)s for %(username)s"
 msgstr "Helpdesk: Otevřít tickety ve frontě %(queue)s pro %(username)s"
 
-#: helpdesk/views/feeds.py:42
+#: third_party/django-helpdesk/helpdesk/views/feeds.py:42
 #, python-format
 msgid "Helpdesk: Open Tickets for %(username)s"
 msgstr "Helpdesk: Otevřít tickety pro %(username)s"
 
-#: helpdesk/views/feeds.py:48
+#: third_party/django-helpdesk/helpdesk/views/feeds.py:48
 #, python-format
 msgid "Open and Reopened Tickets in queue %(queue)s for %(username)s"
 msgstr "Otevřít a znovu otevřít tickety ve frontě %(queue)s pro %(username)s"
 
-#: helpdesk/views/feeds.py:53
+#: third_party/django-helpdesk/helpdesk/views/feeds.py:53
 #, python-format
 msgid "Open and Reopened Tickets for %(username)s"
 msgstr "Otevřít a znovu otevřít tickety pro %(username)s"
 
-#: helpdesk/views/feeds.py:100
+#: third_party/django-helpdesk/helpdesk/views/feeds.py:100
 msgid "Helpdesk: Unassigned Tickets"
 msgstr "Helpdesk: Nepřiřazené tickety"
 
-#: helpdesk/views/feeds.py:101
+#: third_party/django-helpdesk/helpdesk/views/feeds.py:101
 msgid "Unassigned Open and Reopened tickets"
 msgstr "Nepřiřazené Otevřené a Znovu otevřené tickety"
 
-#: helpdesk/views/feeds.py:125
+#: third_party/django-helpdesk/helpdesk/views/feeds.py:125
 msgid "Helpdesk: Recent Followups"
 msgstr "Helpdesk: Nejčerstvější návazné"
 
-#: helpdesk/views/feeds.py:126
+#: third_party/django-helpdesk/helpdesk/views/feeds.py:126
 msgid ""
 "Recent FollowUps, such as e-mail replies, comments, attachments and "
 "resolutions"
@@ -2684,55 +2936,63 @@ msgstr ""
 "Nejčerstvější návazné akce, jako jsou odpovědi z e-mailů, komentáře, přílohy "
 "a rozřešení"
 
-#: helpdesk/views/feeds.py:141
+#: third_party/django-helpdesk/helpdesk/views/feeds.py:141
 #, python-format
 msgid "Helpdesk: Open Tickets in queue %(queue)s"
 msgstr "Helpdesk: Otevřít tickety ve frontě %(queue)s"
 
-#: helpdesk/views/feeds.py:146
+#: third_party/django-helpdesk/helpdesk/views/feeds.py:146
 #, python-format
 msgid "Open and Reopened Tickets in queue %(queue)s"
 msgstr "Otevřít a znovu otevřít tickety ve frontě %(queue)s"
 
-#: helpdesk/views/public.py:112 helpdesk/views/public.py:114
-msgid "Invalid ticket ID or e-mail address. Please try again."
-msgstr "Špatné ID ticketu nebo e-mailová adresa. Zkuste to znovu prosím."
-
-#: helpdesk/views/public.py:130
-msgid "Submitter accepted resolution and closed ticket"
-msgstr "Zadavatel akceptoval rozřešení a uzavřel ticket"
-
-#: helpdesk/views/public.py:151
+#: third_party/django-helpdesk/helpdesk/views/public.py:140
 msgid "Missing ticket ID or e-mail address. Please try again."
 msgstr "Chybí ID ticketu nebo e-mailová adresa. Zkuste to znovu prosím."
 
-#: helpdesk/views/staff.py:317
+#: third_party/django-helpdesk/helpdesk/views/public.py:149
+msgid "Invalid ticket ID or e-mail address. Please try again."
+msgstr "Špatné ID ticketu nebo e-mailová adresa. Zkuste to znovu prosím."
+
+#: third_party/django-helpdesk/helpdesk/views/public.py:165
+msgid "Submitter accepted resolution and closed ticket"
+msgstr "Zadavatel akceptoval rozřešení a uzavřel ticket"
+
+#: third_party/django-helpdesk/helpdesk/views/staff.py:306
 msgid "Accepted resolution and closed ticket"
 msgstr "Rozřešení akceptováno a ticket uzavřen."
 
-#: helpdesk/views/staff.py:485
+#: third_party/django-helpdesk/helpdesk/views/staff.py:394
+#, python-format
+msgid ""
+"When you add somebody on Cc, you must provide either a User or a valid "
+"email. Email: %s"
+msgstr ""
+
+#: third_party/django-helpdesk/helpdesk/views/staff.py:528
 #, python-format
 msgid "Assigned to %(username)s"
 msgstr "Přiřazeno %(username)s"
 
-#: helpdesk/views/staff.py:511
+#: third_party/django-helpdesk/helpdesk/views/staff.py:554
 msgid "Updated"
 msgstr "Aktualizováno"
 
-#: helpdesk/views/staff.py:711
+#: third_party/django-helpdesk/helpdesk/views/staff.py:723
 #, python-format
 msgid "Assigned to %(username)s in bulk update"
 msgstr "Přiřazeno %(username)s v rámci hromadné aktualizace"
 
-#: helpdesk/views/staff.py:722
+#: third_party/django-helpdesk/helpdesk/views/staff.py:734
 msgid "Unassigned in bulk update"
 msgstr "Vlastník odstraněn v rámci hromadné aktualizace"
 
-#: helpdesk/views/staff.py:731 helpdesk/views/staff.py:741
+#: third_party/django-helpdesk/helpdesk/views/staff.py:743
+#: third_party/django-helpdesk/helpdesk/views/staff.py:753
 msgid "Closed in bulk update"
 msgstr "Uzavřeno v rámci hromadné aktualizace"
 
-#: helpdesk/views/staff.py:963
+#: third_party/django-helpdesk/helpdesk/views/staff.py:907
 msgid ""
 "<p><strong>Note:</strong> Your keyword search is case sensitive because of "
 "your database. This means the search will <strong>not</strong> be accurate. "
@@ -2749,41 +3009,126 @@ msgstr ""
 "#sqlite-string-matching\">Dokumentaci k Djangu o vyhledávání textu v SQLite</"
 "a>."
 
-#: helpdesk/views/staff.py:1085
+#: third_party/django-helpdesk/helpdesk/views/staff.py:1057
 msgid "Ticket taken off hold"
 msgstr "Ticket znovu aktivní"
 
-#: helpdesk/views/staff.py:1088
+#: third_party/django-helpdesk/helpdesk/views/staff.py:1060
 msgid "Ticket placed on hold"
 msgstr "Ticket pozdržen"
 
-#: helpdesk/views/staff.py:1227
+#: third_party/django-helpdesk/helpdesk/views/staff.py:1185
 msgid "User by Priority"
 msgstr "Uživatelé podle priority"
 
-#: helpdesk/views/staff.py:1233
+#: third_party/django-helpdesk/helpdesk/views/staff.py:1191
 msgid "User by Queue"
 msgstr "Uživatelé podle fronty"
 
-#: helpdesk/views/staff.py:1240
+#: third_party/django-helpdesk/helpdesk/views/staff.py:1198
 msgid "User by Status"
 msgstr "Uživatelé podle stavu"
 
-#: helpdesk/views/staff.py:1246
+#: third_party/django-helpdesk/helpdesk/views/staff.py:1204
 msgid "User by Month"
 msgstr "Uživatel podle měsíce"
 
-#: helpdesk/views/staff.py:1252
+#: third_party/django-helpdesk/helpdesk/views/staff.py:1210
 msgid "Queue by Priority"
 msgstr "Fronta podle priority"
 
-#: helpdesk/views/staff.py:1258
+#: third_party/django-helpdesk/helpdesk/views/staff.py:1216
 msgid "Queue by Status"
 msgstr "Fronta podle stavu"
 
-#: helpdesk/views/staff.py:1264
+#: third_party/django-helpdesk/helpdesk/views/staff.py:1222
 msgid "Queue by Month"
 msgstr "Fronta podle měsíce"
+
+#~ msgid "Helpdesk Summary"
+#~ msgstr "Souhrn Helpdesku"
+
+#~ msgid "Pr"
+#~ msgstr "Pr"
+
+#~ msgid "You are viewing all items in the %(kbcat)s category."
+#~ msgstr "Díváte se na všechny položky kategorie %(kbcat)s"
+
+#~ msgid ""
+#~ "View <a href='%(url)s'>Answer <i class=\"fa fa-arrow-right\"></i></a>"
+#~ msgstr ""
+#~ "Prohlédnout <a href='%(url)s'>Odpověď <i class=\"fa fa-arrow-right\"></"
+#~ "i></a>"
+
+#~ msgid "Rating"
+#~ msgstr "Hodnocení"
+
+#~ msgid "%(item)s"
+#~ msgstr "%(item)s"
+
+#~ msgid "Did you find this article useful?"
+#~ msgstr "Pomohl Vám tento článek?"
+
+#~ msgid "The results of voting by other readers of this article are below:"
+#~ msgstr "Výsledky hlasování dalších čtenářů jsou níže"
+
+#~ msgid "Recommendations: %(recommendations)s"
+#~ msgstr "Doporučení: %(recommendations)s"
+
+#~ msgid "Votes: %(votes)s"
+#~ msgstr "Hlasování: %(votes)s"
+
+#~ msgid "Overall Rating: %(score)s"
+#~ msgstr "Celkové hodnocení: %(score)s"
+
+#~ msgid ""
+#~ "View <a href='%(category_url)s'>other <em>%(category_title)s</em> "
+#~ "articles</a>, or continue <a href='../'>viewing other knowledgebase "
+#~ "articles</a>."
+#~ msgstr ""
+#~ "Prohlédnout <a href='%(category_url)s'>další <em>%(category_title)s</em> "
+#~ "články</a>, nebo pokračovat <a href='../'>v prohlížení dalších článků "
+#~ "znalostní báze</a>."
+
+#~ msgid "Stats"
+#~ msgstr "Statistiky"
+
+#~ msgid "Knowledgebase Categories"
+#~ msgstr "Kategorie znalostní báze"
+
+#~ msgid "All fields are required."
+#~ msgstr "Všechny položky jsou vyžadovány."
+
+#~ msgid "Ticket Summary"
+#~ msgstr "Souhrn ticketu"
+
+#~ msgid "Ignore"
+#~ msgstr "Ingorovat"
+
+#~ msgid "Manage"
+#~ msgstr "Spravovat"
+
+#~ msgid "Subscribe"
+#~ msgstr "Přihlásit"
+
+#~ msgid "Remove Dependency"
+#~ msgstr "Odstranit závislost"
+
+#~ msgid "Add Dependency"
+#~ msgstr "Přidat závislost"
+
+#~ msgid "Change Query"
+#~ msgstr "Změnit dotaz"
+
+#~ msgid ""
+#~ "Keywords are case-insensitive, and will be looked for in the title, body "
+#~ "and submitter fields."
+#~ msgstr ""
+#~ "Klíčová slova mohou být napsána velkým i malým písmem. Prohledává se "
+#~ "nadpis, tělo ticketu a zadavatel."
+
+#~ msgid "Save Options"
+#~ msgstr "Uložit změny"
 
 #~ msgid "Description of Issue"
 #~ msgstr "Popis problému"
@@ -2861,9 +3206,6 @@ msgstr "Fronta podle měsíce"
 
 #~ msgid "Accept"
 #~ msgstr "Akceptovat"
-
-#~ msgid "Open Tickets"
-#~ msgstr "Otevřené tickety"
 
 #~ msgid "Attach another File"
 #~ msgstr "Přiřadit další soubor"
