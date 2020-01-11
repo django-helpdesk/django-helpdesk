@@ -192,8 +192,12 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
 
             self.customfield_to_field(field, instanceargs)
 
+    def _get_queue(self):
+        # this procedure is re-defined for anon submission form
+        return Queue.objects.get(id=int(self.cleaned_data['queue']))
+
     def _create_ticket(self):
-        queue = Queue.objects.get(id=int(self.cleaned_data['queue']))
+        queue = self._get_queue()
 
         ticket = Ticket(title=self.cleaned_data['title'],
                         submitter_email=self.cleaned_data['submitter_email'],
@@ -338,15 +342,29 @@ class PublicTicketForm(AbstractTicketForm):
         Add any (non-staff) custom fields that are defined to the form
         """
         super(PublicTicketForm, self).__init__(*args, **kwargs)
-
         if hasattr(settings, 'HELPDESK_PUBLIC_TICKET_QUEUE'):
-            self.fields['queue'].widget = forms.HiddenInput()
+            del self.fields['queue']
+        else:
+            self.fields['queue'].choices = [
+                ('', '--------')
+            ] + [
+                (q.id, q.title) for q in Queue.objects.filter(allow_public_submission=True)
+            ]
         if hasattr(settings, 'HELPDESK_PUBLIC_TICKET_PRIORITY'):
             self.fields['priority'].widget = forms.HiddenInput()
         if hasattr(settings, 'HELPDESK_PUBLIC_TICKET_DUE_DATE'):
             self.fields['due_date'].widget = forms.HiddenInput()
-        self.fields['queue'].choices = [('', '--------')] + [
-            (q.id, q.title) for q in Queue.objects.filter(allow_public_submission=True)]
+
+    def _get_queue(self):
+        if getattr(settings, 'HELPDESK_PUBLIC_TICKET_QUEUE', None):
+            # force queue to be the pre-defined one
+            # (only for anon submissions)
+            return Queue.objects.filter(
+                slug=settings.HELPDESK_PUBLIC_TICKET_QUEUE
+            ).first()
+        else:
+            # get the queue user entered
+            return Queue.objects.get(id=int(self.cleaned_data['queue']))
 
     def save(self):
         """
