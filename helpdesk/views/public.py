@@ -72,11 +72,8 @@ class CreateTicketView(FormView):
 
         # add pre-defined data for public ticket
         if hasattr(settings, 'HELPDESK_PUBLIC_TICKET_QUEUE'):
-            # get the requested queue; return an error if queue not found
-            try:
-                queue = Queue.objects.get(slug=settings.HELPDESK_PUBLIC_TICKET_QUEUE)
-            except Queue.DoesNotExist:
-                return HttpResponse(status=500)
+            slug = settings.HELPDESK_PUBLIC_TICKET_QUEUE
+            queue = Queue.objects.get(slug=slug)
         if hasattr(settings, 'HELPDESK_PUBLIC_TICKET_PRIORITY'):
             initial_data['priority'] = settings.HELPDESK_PUBLIC_TICKET_PRIORITY
         if hasattr(settings, 'HELPDESK_PUBLIC_TICKET_DUE_DATE'):
