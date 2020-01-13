@@ -10,6 +10,7 @@ views/kb.py - Public-facing knowledgebase views. The knowledgebase is a
 
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
+from django.views.decorators.clickjacking import xframe_options_exempt
 
 from helpdesk import settings as helpdesk_settings
 from helpdesk.models import KBCategory, KBItem
@@ -51,7 +52,7 @@ def category(request, slug, iframe=False):
         'staff': staff,
     })
 
-
+@xframe_options_exempt
 def category_iframe(request, slug):
     return category(request, slug, iframe=True)
 
