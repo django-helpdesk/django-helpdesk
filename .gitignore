@@ -11,6 +11,7 @@ docs/doctrees/*
 .pydevproject
 .directory
 *.swp
+.idea
 
 # ignore demo attachments that user might have added
 helpdesk/attachments/
