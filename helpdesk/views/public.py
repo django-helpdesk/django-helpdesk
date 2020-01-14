@@ -14,6 +14,7 @@ from django.utils.http import urlquote
 from django.utils.translation import ugettext as _
 from django.conf import settings
 from django.views.decorators.clickjacking import xframe_options_exempt
+from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import FormView
 
@@ -101,6 +102,7 @@ class BaseCreateTicketView(abstract_views.AbstractCreateTicketMixin, FormView):
 class CreateTicketIframeView(BaseCreateTicketView):
     template_name = 'helpdesk/public_create_ticket_iframe.html'
 
+    @csrf_exempt
     @xframe_options_exempt
     def dispatch(self, *args, **kwargs):
         return super().dispatch(*args, **kwargs)
