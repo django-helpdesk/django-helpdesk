@@ -107,6 +107,13 @@ class CreateTicketIframeView(BaseCreateTicketView):
     def dispatch(self, *args, **kwargs):
         return super().dispatch(*args, **kwargs)
 
+    def form_valid(self, form):
+        if super().form_valid(form).status_code == 302:
+            return HttpResponseRedirect(reverse('helpdesk:success_iframe'))
+
+
+class SuccessIframeView(TemplateView):
+    template_name = 'helpdesk/success_iframe.html'
 
 
 class CreateTicketView(BaseCreateTicketView):

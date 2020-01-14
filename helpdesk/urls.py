@@ -171,6 +171,10 @@ urlpatterns += [
         public.CreateTicketIframeView.as_view(),
         name='submit_iframe'),
 
+    url(r'^tickets/success_iframe/$',  # Ticket was submitted successfully
+        public.SuccessIframeView.as_view(),
+        name='success_iframe'),
+
     url(r'^view/$',
         public.view_ticket,
         name='public_view'),
