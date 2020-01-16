@@ -115,6 +115,10 @@ class CreateTicketIframeView(BaseCreateTicketView):
 class SuccessIframeView(TemplateView):
     template_name = 'helpdesk/success_iframe.html'
 
+    @xframe_options_exempt
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
+
 
 class CreateTicketView(BaseCreateTicketView):
     template_name = 'helpdesk/public_create_ticket.html'
