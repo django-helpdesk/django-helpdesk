@@ -613,6 +613,8 @@ class Ticket(models.Model):
         if dont_send_to is not None:
             recipients.update(dont_send_to)
 
+        recipients.add(self.queue.email_address)
+
         def should_receive(email):
             return email and email not in recipients
 

@@ -140,6 +140,37 @@ class TicketBasicsTestCase(TestCase):
         # Ensure only two e-mails were sent - submitter & updated.
         self.assertEqual(email_count + 2, len(mail.outbox))
 
+    def test_create_ticket_public_no_loopback(self):
+        """
+        Don't send emails to the queue's own inbox. It'll create a loop.
+        """
+        email_count = len(mail.outbox)
+
+        self.queue_public.email_address = "queue@example.com"
+        self.queue_public.save()
+
+        post_data = {
+            'title': 'Test ticket title',
+            'queue': self.queue_public.id,
+            'submitter_email': 'queue@example.com',
+            'body': 'Test ticket body',
+            'priority': 3,
+        }
+
+        response = self.client.post(reverse('helpdesk:home'), post_data, follow=True)
+        last_redirect = response.redirect_chain[-1]
+        last_redirect_url = last_redirect[0]
+        # last_redirect_status = last_redirect[1]
+
+        # Ensure we landed on the "View" page.
+        # Django 1.9 compatible way of testing this
+        # https://docs.djangoproject.com/en/1.9/releases/1.9/#http-redirects-no-longer-forced-to-absolute-uris
+        urlparts = urlparse(last_redirect_url)
+        self.assertEqual(urlparts.path, reverse('helpdesk:public_view'))
+
+        # Ensure submitter, new-queue + update-queue were all emailed.
+        self.assertEqual(email_count + 2, len(mail.outbox))
+
 
 class EmailInteractionsTestCase(TestCase):
     fixtures = ['emailtemplate.json']
