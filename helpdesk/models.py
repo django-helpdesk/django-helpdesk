@@ -559,6 +559,14 @@ class Ticket(models.Model):
         default=mk_secret,
     )
 
+    kbitem = models.ForeignKey(
+        "KBItem",
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE,
+        verbose_name=_('Knowledge base item the user was viewing when they created this ticket.'),
+    )
+
     @property
     def time_spent(self):
         """Return back total time spent on the ticket. This is calculated value
@@ -604,6 +612,8 @@ class Ticket(models.Model):
 
         if dont_send_to is not None:
             recipients.update(dont_send_to)
+
+        recipients.add(self.queue.email_address)
 
         def should_receive(email):
             return email and email not in recipients
@@ -1216,6 +1226,14 @@ class KBCategory(models.Model):
         _('Description'),
     )
 
+    queue = models.ForeignKey(
+        Queue,
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE,
+        verbose_name=_('Default queue when creating a ticket after viewing this category.'),
+    )
+
     def __str__(self):
         return '%s' % self.title
 
@@ -1234,7 +1252,14 @@ class KBItem(models.Model):
     An item within the knowledgebase. Very straightforward question/answer
     style system.
     """
-    voted_by = models.ManyToManyField(settings.AUTH_USER_MODEL)
+    voted_by = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        related_name='votes',
+    )
+    downvoted_by = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        related_name='downvotes',
+    )
     category = models.ForeignKey(
         KBCategory,
         on_delete=models.CASCADE,
@@ -1294,7 +1319,14 @@ class KBItem(models.Model):
 
     def get_absolute_url(self):
         from django.urls import reverse
-        return reverse('helpdesk:kb_item', args=(self.id,))
+        return str(reverse('helpdesk:kb_category', args=(self.category.slug,))) + "?kbitem=" + str(self.pk)
+
+    def query_url(self):
+        from django.urls import reverse
+        return str(reverse('helpdesk:list')) + "?kbitem=" + str(self.pk)
+
+    def num_open_tickets(self):
+        return Ticket.objects.filter(kbitem=self, status__in=(1, 2)).count()
 
     def get_markdown(self):
         return get_markdown(self.answer)

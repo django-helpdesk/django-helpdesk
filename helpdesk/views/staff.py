@@ -27,17 +27,13 @@ from django.utils import timezone
 from django.views.generic.edit import FormView, UpdateView
 
 from helpdesk.query import (
+    get_query_class,
     query_to_dict,
-    get_query,
-    apply_query,
-    query_tickets_by_args,
     query_to_base64,
     query_from_base64,
 )
 
 from helpdesk.user import HelpdeskUser
-
-from helpdesk.serializers import DatatablesTicketSerializer
 
 from helpdesk.decorators import (
     helpdesk_staff_member_required, helpdesk_superuser_required,
@@ -56,9 +52,10 @@ from helpdesk.lib import (
 )
 from helpdesk.models import (
     Ticket, Queue, FollowUp, TicketChange, PreSetReply, FollowUpAttachment, SavedSearch,
-    IgnoreEmail, TicketCC, TicketDependency, UserSettings,
+    IgnoreEmail, TicketCC, TicketDependency, UserSettings, KBItem,
 )
 from helpdesk import settings as helpdesk_settings
+import helpdesk.views.abstract_views as abstract_views
 from helpdesk.views.permissions import MustBeStaffMixin
 from ..lib import format_time_spent
 
@@ -71,6 +68,7 @@ import re
 
 
 User = get_user_model()
+Query = get_query_class()
 
 if helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE:
     # treat 'normal' users like 'staff'
@@ -805,7 +803,9 @@ def ticket_list(request):
         'search_string': '',
     }
     default_query_params = {
-        'filtering': {'status__in': [1, 2, 3]},
+        'filtering': {
+            'status__in': [1, 2, 3],
+        },
         'sorting': 'created',
         'search_string': '',
         'sortreverse': False,
@@ -852,7 +852,7 @@ def ticket_list(request):
 
     if saved_query:
         pass
-    elif not {'queue', 'assigned_to', 'status', 'q', 'sort', 'sortreverse'}.intersection(request.GET):
+    elif not {'queue', 'assigned_to', 'status', 'q', 'sort', 'sortreverse', 'kbitem'}.intersection(request.GET):
         # Fall-back if no querying is being done
         all_queues = Queue.objects.all()
         query_params = deepcopy(default_query_params)
@@ -861,6 +861,7 @@ def ticket_list(request):
             ('queue', 'queue__id__in'),
             ('assigned_to', 'assigned_to__id__in'),
             ('status', 'status__in'),
+            ('kbitem', 'kbitem__in'),
         ]
 
         for param, filter_command in filter_in_params:
@@ -887,7 +888,7 @@ def ticket_list(request):
 
         # SORTING
         sort = request.GET.get('sort', None)
-        if sort not in ('status', 'assigned_to', 'created', 'title', 'queue', 'priority'):
+        if sort not in ('status', 'assigned_to', 'created', 'title', 'queue', 'priority', 'kbitem'):
             sort = 'created'
         query_params['sorting'] = sort
 
@@ -896,7 +897,7 @@ def ticket_list(request):
 
     urlsafe_query = query_to_base64(query_params)
 
-    get_query(urlsafe_query, huser)
+    Query(huser, base64query=urlsafe_query).refresh_query()
 
     user_saved_queries = SavedSearch.objects.filter(Q(user=request.user) | Q(shared__exact=True))
 
@@ -910,12 +911,15 @@ def ticket_list(request):
             '<a href="http://docs.djangoproject.com/en/dev/ref/databases/#sqlite-string-matching">'
             'Django Documentation on string matching in SQLite</a>.')
 
+    kbitem_choices = [(item.pk, item.title) for item in KBItem.objects.all()]
+
     return render(request, 'helpdesk/ticket_list.html', dict(
         context,
         default_tickets_per_page=request.user.usersettings_helpdesk.tickets_per_page,
         user_choices=User.objects.filter(is_active=True, is_staff=True),
         queue_choices=huser.get_queues(),
         status_choices=Ticket.STATUS_CHOICES,
+        kbitem_choices=kbitem_choices,
         urlsafe_query=urlsafe_query,
         user_saved_queries=user_saved_queries,
         query_params=query_params,
@@ -964,15 +968,16 @@ def datatables_ticket_list(request, query):
     on the table. query_tickets_by_args is at lib.py, DatatablesTicketSerializer is in
     serializers.py. The serializers and this view use django-rest_framework methods
     """
-    objects = get_query(query, HelpdeskUser(request.user))
-    model_object = query_tickets_by_args(objects, '-date_created', **request.query_params)
-    serializer = DatatablesTicketSerializer(model_object['items'], many=True)
-    result = dict()
-    result['data'] = serializer.data
-    result['draw'] = model_object['draw']
-    result['recordsTotal'] = model_object['total']
-    result['recordsFiltered'] = model_object['count']
+    query = Query(HelpdeskUser(request.user), base64query=query)
+    result = query.get_datatables_context(**request.query_params)
     return (JsonResponse(result, status=status.HTTP_200_OK))
+
+
+@helpdesk_staff_member_required
+@api_view(['GET'])
+def timeline_ticket_list(request, query):
+    query = Query(HelpdeskUser(request.user), base64query=query)
+    return (JsonResponse(query.get_timeline_context(), status=status.HTTP_200_OK))
 
 
 @helpdesk_staff_member_required
@@ -994,17 +999,12 @@ def edit_ticket(request, ticket_id):
 edit_ticket = staff_member_required(edit_ticket)
 
 
-class CreateTicketView(MustBeStaffMixin, FormView):
+class CreateTicketView(MustBeStaffMixin, abstract_views.AbstractCreateTicketMixin, FormView):
     template_name = 'helpdesk/create_ticket.html'
     form_class = TicketForm
 
     def get_initial(self):
-        initial_data = {}
-        request = self.request
-        if request.user.usersettings_helpdesk.use_email_as_submitter and request.user.email:
-            initial_data['submitter_email'] = request.user.email
-        if 'queue' in request.GET:
-            initial_data['queue'] = request.GET['queue']
+        initial_data = super().get_initial()
         return initial_data
 
     def get_form_kwargs(self):

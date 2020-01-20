@@ -1,0 +1,48 @@
+{% load i18n %}
+<h2>{% trans 'Knowledgebase Category' %}:{% blocktrans with category.title as kbcat %}{{ kbcat }}{% endblocktrans %}</h2>
+<p>{{ category.description }}</p>
+<div id="accordion">
+{% for item in items %}
+<div class="card mb-3">
+    <button class="btn btn-link" data-toggle="collapse" data-target="#collapse{{item.id}}" aria-expanded="true" aria-controls="collapse{{item.id}}">
+        <div class="card-header" id="header{{item.id}}">
+            <h5 class="mb-0">
+                {{ item.title }}
+            </h5>
+        </div>
+    </button>
+    <div id="collapse{{item.id}}" class="collapse {% if item.id == selected_item %}show{% endif %}" aria-labelledby="header{{item.id}}" data-parent="#accordion">
+        <div class="card-body">
+            <p class="card-text">{{ item.question }}</p>
+            <p>{{ item.get_markdown }}</p>
+            <div class="row">
+                {% if request.user.pk %}
+                <div class="col-sm">
+                    <a href='{% url "helpdesk:kb_vote" item.pk %}?vote=up'><button type="button" class="btn btn-success btn-circle btn-xl"><i class="fa fa-thumbs-up fa-lg"></i></button></a>
+                    <a href='{% url "helpdesk:kb_vote" item.pk %}?vote=down'><button type="button" class="btn btn-danger btn-circle btn-xl"><i class="fa fa-thumbs-down fa-lg"></i></button></a>
+                </div>
+                {% endif %}
+                {% if staff %}
+                <a href='{% url 'helpdesk:list' %}?kbitem={{item.id}}' class="col-sm">
+                    <button type="button" class="btn btn-success btn-circle btn-xl float-right"><i class="fa fa-search fa-lg"></i> {{item.num_open_tickets}} {% trans 'open tickets' %}</button>
+                </a>
+
+                {% endif %}
+                <a href='{% if iframe %}{% url 'helpdesk:submit_iframe' %}{% else %}{% url 'helpdesk:submit' %}{%endif%}?{% if category.queue %}queue={{category.queue.pk}};_readonly_fields_=queue;{%endif%}kbitem={{item.id}};{{query_param_string}}' class="col-sm">
+                    <button type="button" class="btn btn-success btn-circle btn-xl float-right"><i class="fa fa-envelope fa-lg"></i> {% trans 'Contact a human' %}</button>
+                </a>
+            </div>
+            <div>
+            {% blocktrans with recommendations=item.recommendations votes=item.votes  %}{{ recommendations }} people found this answer useful of {{votes}}{% endblocktrans %}
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endfor %}
+</div>
+{% if category.queue %}
+<a href='{% if iframe %}{% url 'helpdesk:submit_iframe' %}{% else %}{% url 'helpdesk:submit' %}{%endif%}?queue={{category.queue.pk}};_readonly_fields_=queue;{{query_param_string}}'>
+    <button type="button" class="btn btn-danger btn-circle btn-xl float-right"><i class="fa fa-envelope fa-lg"></i> {% trans 'Contact a human' %}</button>
+</a>
+{% endif %}

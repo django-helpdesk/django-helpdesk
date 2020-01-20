@@ -18,7 +18,7 @@ from django.utils import timezone
 
 from helpdesk.lib import safe_template_context, process_attachments
 from helpdesk.models import (Ticket, Queue, FollowUp, IgnoreEmail, TicketCC,
-                             CustomField, TicketCustomFieldValue, TicketDependency, UserSettings)
+                             CustomField, TicketCustomFieldValue, TicketDependency, UserSettings, KBItem)
 from helpdesk import settings as helpdesk_settings
 
 User = get_user_model()
@@ -177,6 +177,16 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
         help_text=_('You can attach a file such as a document or screenshot to this ticket.'),
     )
 
+    def __init__(self, kbcategory=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if kbcategory:
+            self.fields['kbitem'] = forms.ChoiceField(
+                widget=forms.Select(attrs={'class': 'form-control'}),
+                required=False,
+                label=_('Knowedge Base Item'),
+                choices=[(kbi.pk, kbi.title) for kbi in KBItem.objects.filter(category=kbcategory.pk)],
+            )
+
     def _add_form_custom_fields(self, staff_only_filter=None):
         if staff_only_filter is None:
             queryset = CustomField.objects.all()
@@ -197,7 +207,10 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
         return Queue.objects.get(id=int(self.cleaned_data['queue']))
 
     def _create_ticket(self):
-        queue = self._get_queue()
+        queue = Queue.objects.get(id=int(self.cleaned_data['queue']))
+        kbitem = None
+        if 'kbitem' in self.cleaned_data:
+            kbitem = KBItem.objects.get(id=int(self.cleaned_data['kbitem']))
 
         ticket = Ticket(title=self.cleaned_data['title'],
                         submitter_email=self.cleaned_data['submitter_email'],
@@ -207,6 +220,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
                         description=self.cleaned_data['body'],
                         priority=self.cleaned_data['priority'],
                         due_date=self.cleaned_data['due_date'],
+                        kbitem=kbitem,
                         )
 
         return ticket, queue
@@ -337,34 +351,28 @@ class PublicTicketForm(AbstractTicketForm):
         help_text=_('We will e-mail you when your ticket is updated.'),
     )
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, hidden_fields=(), readonly_fields=(), *args, **kwargs):
         """
         Add any (non-staff) custom fields that are defined to the form
         """
         super(PublicTicketForm, self).__init__(*args, **kwargs)
-        if hasattr(settings, 'HELPDESK_PUBLIC_TICKET_QUEUE'):
-            del self.fields['queue']
-        else:
-            self.fields['queue'].choices = [
-                ('', '--------')
-            ] + [
-                (q.id, q.title) for q in Queue.objects.filter(allow_public_submission=True)
-            ]
-        if hasattr(settings, 'HELPDESK_PUBLIC_TICKET_PRIORITY'):
-            self.fields['priority'].widget = forms.HiddenInput()
-        if hasattr(settings, 'HELPDESK_PUBLIC_TICKET_DUE_DATE'):
-            self.fields['due_date'].widget = forms.HiddenInput()
+        self._add_form_custom_fields(False)
 
-    def _get_queue(self):
-        if getattr(settings, 'HELPDESK_PUBLIC_TICKET_QUEUE', None):
-            # force queue to be the pre-defined one
-            # (only for anon submissions)
-            return Queue.objects.filter(
-                slug=settings.HELPDESK_PUBLIC_TICKET_QUEUE
-            ).first()
-        else:
-            # get the queue user entered
-            return Queue.objects.get(id=int(self.cleaned_data['queue']))
+        field_hide_table = {
+            'queue': 'HELPDESK_PUBLIC_TICKET_QUEUE',
+            'priority': 'HELPDESK_PUBLIC_TICKET_PRIORITY',
+            'due_date': 'HELPDESK_PUBLIC_TICKET_DUE_DATE',
+        }
+
+        for field in self.fields.keys():
+            setting = field_hide_table.get(field, None)
+            if (setting and hasattr(settings, setting)) or field in hidden_fields:
+                self.fields[field].widget = forms.HiddenInput()
+            if field in readonly_fields:
+                self.fields[field].disabled = True
+
+        self.fields['queue'].choices = [('', '--------')] + [
+            (q.id, q.title) for q in Queue.objects.filter(allow_public_submission=True)]
 
     def save(self):
         """

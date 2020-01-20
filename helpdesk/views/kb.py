@@ -10,6 +10,7 @@ views/kb.py - Public-facing knowledgebase views. The knowledgebase is a
 
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
+from django.views.decorators.clickjacking import xframe_options_exempt
 
 from helpdesk import settings as helpdesk_settings
 from helpdesk.models import KBCategory, KBItem
@@ -24,34 +25,57 @@ def index(request):
     })
 
 
-def category(request, slug):
+def category(request, slug, iframe=False):
     category = get_object_or_404(KBCategory, slug__iexact=slug)
     items = category.kbitem_set.all()
-    return render(request, 'helpdesk/kb_category.html', {
+    selected_item = request.GET.get('kbitem', None)
+    try:
+        selected_item = int(selected_item)
+    except TypeError:
+        pass
+    qparams = request.GET.copy()
+    try:
+        del qparams['kbitem']
+    except KeyError:
+        pass
+    template = 'helpdesk/kb_category.html'
+    if iframe:
+        template = 'helpdesk/kb_category_iframe.html'
+    staff = request.user.is_authenticated and request.user.is_staff
+    return render(request, template, {
         'category': category,
         'items': items,
+        'selected_item': selected_item,
+        'query_param_string': qparams.urlencode(),
         'helpdesk_settings': helpdesk_settings,
+        'iframe': iframe,
+        'staff': staff,
     })
 
 
-def item(request, item):
-    item = get_object_or_404(KBItem, pk=item)
-    return render(request, 'helpdesk/kb_item.html', {
-        'category': item.category,
-        'item': item,
-        'helpdesk_settings': helpdesk_settings,
-    })
+@xframe_options_exempt
+def category_iframe(request, slug):
+    return category(request, slug, iframe=True)
 
 
 def vote(request, item):
     item = get_object_or_404(KBItem, pk=item)
     vote = request.GET.get('vote', None)
-    if vote in ('up', 'down'):
-        if request.user not in item.voted_by:
-
+    if vote == 'up':
+        if not item.voted_by.filter(pk=request.user.pk):
             item.votes += 1
-            if vote == 'up':
-                item.recommendations += 1
-            item.save()
-
+            item.voted_by.add(request.user.pk)
+            item.recommendations += 1
+        if item.downvoted_by.filter(pk=request.user.pk):
+            item.votes -= 1
+            item.downvoted_by.remove(request.user.pk)
+    if vote == 'down':
+        if not item.downvoted_by.filter(pk=request.user.pk):
+            item.votes += 1
+            item.downvoted_by.add(request.user.pk)
+            item.recommendations -= 1
+        if item.voted_by.filter(pk=request.user.pk):
+            item.votes -= 1
+            item.voted_by.remove(request.user.pk)
+    item.save()
     return HttpResponseRedirect(item.get_absolute_url())

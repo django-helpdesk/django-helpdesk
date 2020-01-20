@@ -15,6 +15,7 @@ datatables for ticket_list.html. Called from staff.datatables_ticket_list.
 class DatatablesTicketSerializer(serializers.ModelSerializer):
     ticket = serializers.SerializerMethodField()
     assigned_to = serializers.SerializerMethodField()
+    submitter = serializers.SerializerMethodField()
     created = serializers.SerializerMethodField()
     due_date = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
@@ -26,7 +27,7 @@ class DatatablesTicketSerializer(serializers.ModelSerializer):
         model = Ticket
         # fields = '__all__'
         fields = ('ticket', 'id', 'priority', 'title', 'queue', 'status',
-                  'created', 'due_date', 'assigned_to', 'row_class',
+                  'created', 'due_date', 'assigned_to', 'submitter', 'row_class',
                   'time_spent')
 
     def get_queue(self, obj):
@@ -52,6 +53,9 @@ class DatatablesTicketSerializer(serializers.ModelSerializer):
                 return (obj.assigned_to.email)
         else:
             return ("None")
+
+    def get_submitter(self, obj):
+        return obj.submitter_email
 
     def get_time_spent(self, obj):
         return format_time_spent(obj.time_spent)

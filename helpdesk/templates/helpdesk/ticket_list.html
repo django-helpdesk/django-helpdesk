@@ -30,6 +30,116 @@
 {% block helpdesk_body %}
 {% load in_list %}
 
+<div class="card">
+    <div class="card-header">
+    <ul class="nav nav-tabs">
+        <li class="nav-item" style="width: 200px;">
+            {% trans "Query Results" %}: 
+        </li>
+        <li class="nav-item"">
+            <a class="nav-link active" href="#datatabletabcontents" id="datatabletabcontents-tab"  data-toggle="tab" role="tab" aria-controls="datatabletabcontents" aria-selected=true>
+            <i class="fas fa-th-list"></i>
+            {% trans "Table" %}
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#timelinetabcontents" id="timelinetabcontents-tab" data-toggle="tab" role="tab" aria-controls="timelinetabcontents" aria-selected=false>
+            <i class="fas fa-history"></i>
+             {% trans "Timeline" %}
+            </a>
+        </li>
+    </ul>
+    </div>
+    <div class="card-body">
+        {{ search_message|safe }}
+        <div class="tab-content" id="myTabContent">
+            <div class="tab-pane fade show active" id="datatabletabcontents" role="tabpanel" aria-labelledby="datatabletabcontents-tab">
+                <form method='post' action='{% url 'helpdesk:mass_update' %}' id="ticket_mass_update">
+                    <table width="100%" class="table table-sm table-striped table-bordered table-hover" id="ticketTable" data-page-length='{{ default_tickets_per_page }}'>
+                        <thead class="thead-light">
+                            <tr>
+                                <th>&nbsp;</th>
+                                <th>{% trans "Ticket" %}</th>
+                                <th>{% trans "Prority" %}</th>
+                                <th>{% trans "Queue" %}</th>
+                                <th>{% trans "Status" %}</th>
+                                <th>{% trans "Created" %}</th>
+                                <th>{% trans "Due Date" %}</th>
+                                <th>{% trans "Owner" %}</th>
+                                <th>{% trans "Submitter" %}</th>
+                                <th>{% trans "Time Spent" %}</th>
+                            </tr>
+                        </thead>
+                    </table>
+
+                    <p><label>{% trans "Select:" %} </label>
+
+                        <button id="select_all_btn" type="button" class="btn btn-primary btn-sm" />
+                        <i class="fas fa-check-circle"></i>&nbsp;{% trans "All" %}
+                </button>
+
+                <button id='select_none_btn' type="button" class="btn btn-primary btn-sm"><i class="fas fa-times-circle"></i>&nbsp;{% trans "None" %}</button>
+
+                <button id='select_inverse_btn' type="button" class="btn btn-primary btn-sm"><i class="fas fa-expand-arrows-alt"></i>&nbsp;{% trans "Invert" %}</button>
+                    </p>
+
+                    <p>
+                        <label for='id_mass_action'>{% trans "With Selected Tickets:" %}</label>
+                        <select name='action' id='id_mass_action'>
+                            <option value='take'>{% trans "Take (Assign to me)" %}</option>
+                            <option value='delete'>{% trans "Delete" %}</option>
+                            <optgroup label='{% trans "Close" %}'>
+                                <option value='close'>{% trans "Close (Don't Send E-Mail)" %}</option>
+                                <option value='close_public'>{% trans "Close (Send E-Mail)" %}</option>
+                            </optgroup>
+                            <optgroup label='{% trans "Assign To" %}'>
+                                <option value='unassign'>{% trans "Nobody (Unassign)" %}</option>
+                                {% for u in user_choices %}<option value='assign_{{ u.id }}'>{{ u.get_username }}</option>{% endfor %}
+                            </optgroup>
+                        </select>
+                        <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-arrow-circle-right"></i>&nbsp;{% trans "Go" %}</button>
+                    </p>
+                    {% csrf_token %}</form>
+
+            </div>
+            <div class="tab-pane fade" id="timelinetabcontents" role="tabpanel" aria-labelledby="timelinetabcontents-tab">
+                <div id='timeline-embed' style="width: 100%; height: 80vh"></div>
+                <!-- 1 -->
+                <link title="timeline-styles" rel="stylesheet" href="https://cdn.knightlab.com/libs/timeline3/latest/css/timeline.css">
+
+                <!-- 2 -->
+                <script src="https://cdn.knightlab.com/libs/timeline3/latest/js/timeline.js"></script>
+
+
+                <!-- 3 -->
+                <script type="text/javascript">
+                 // The TL.Timeline constructor takes at least two arguments:
+                 // the id of the Timeline container (no '#'), and
+                 // the URL to your JSON data file or Google spreadsheet.
+                 // the id must refer to an element "above" this code,
+                 // and the element must have CSS styling to give it width and height
+                 // optionally, a third argument with configuration options can be passed.
+                 // See below for more about options.
+                 var timeline_loaded = false;
+                 $(function () {
+                     $('#timelinetabcontents-tab').on('shown.bs.tab', function (e) {
+                         if(!timeline_loaded){
+                             timeline = new TL.Timeline(
+                                 'timeline-embed',
+                                 '{% url 'helpdesk:timeline_ticket_list' urlsafe_query %}'
+                            );
+                            timeline_loaded = true;
+                         }
+                 });
+                 })
+                </script>
+            </div>
+        </div>
+    </div>
+    <!-- /.panel-body -->
+</div>
+<!-- /.panel -->
+
 <div class="card mb-3">
     <div class="card-header">
         <i class="fas fa-hand-pointer"></i>
@@ -62,6 +172,7 @@
                             <option id="filterBuilderSelect-Status" value="Status">{% trans "Status" %}</option>
                             <option id="filterBuilderSelect-Keywords" value="Keywords">{% trans "Keywords" %}</option>
                             <option id="filterBuilderSelect-Dates" value="Dates">{% trans "Date Range" %}</option>
+                            <option id="filterBuilderSelect-KBItems" value="KBItems">{% trans "Knowledge base items" %}</option>
                         </select>
                     {% csrf_token %}
                     </form>
@@ -86,6 +197,9 @@
                             </li>
                             <li class="list-group-item filterBox{% if query_params.search_string %} filterBoxShow{% endif %}" id="filterBoxKeywords">
                         {% include './filters/keywords.html' %}
+                            </li>
+                            <li class="list-group-item filterBox{% if query_params.filtering.kbitem__in %} filterBoxShow{% endif %}" id="filterBoxKBItems">
+                                {% include './filters/kbitems.html' %}
                             </li>
                         </ul>
 
@@ -162,64 +276,6 @@
 </div>
 <!-- end top card -->
 
-
-<div class="card mb-3">
-    <div class="card-header">
-        <i class="fas fa-table"></i>
-        {% trans "Query Results" %}
-    </div>
-    <div class="card-body">
-        {{ search_message|safe }}
-        <form method='post' action='{% url 'helpdesk:mass_update' %}' id="ticket_mass_update">
-            <table width="100%" class="table table-sm table-striped table-bordered table-hover" id="ticketTable" data-page-length='{{ default_tickets_per_page }}'>
-                <thead class="thead-light">
-                    <tr>
-                        <th>&nbsp;</th>
-                        <th>{% trans "Ticket" %}</th>
-                        <th>{% trans "Prority" %}</th>
-                        <th>{% trans "Queue" %}</th>
-                        <th>{% trans "Status" %}</th>
-                        <th>{% trans "Created" %}</th>
-                        <th>{% trans "Due Date" %}</th>
-                        <th>{% trans "Owner" %}</th>
-                        <th>{% trans "Time Spent" %}</th>
-                    </tr>
-                </thead>
-            </table>
-
-            <p><label>{% trans "Select:" %} </label>
-
-                <button id="select_all_btn" type="button" class="btn btn-primary btn-sm" />
-                <i class="fas fa-check-circle"></i>&nbsp;{% trans "All" %}
-                </button>
-
-                <button id='select_none_btn' type="button" class="btn btn-primary btn-sm"><i class="fas fa-times-circle"></i>&nbsp;{% trans "None" %}</button>
-
-                <button id='select_inverse_btn' type="button" class="btn btn-primary btn-sm"><i class="fas fa-expand-arrows-alt"></i>&nbsp;{% trans "Invert" %}</button>
-            </p>
-
-            <p>
-                <label for='id_mass_action'>{% trans "With Selected Tickets:" %}</label>
-                <select name='action' id='id_mass_action'>
-                    <option value='take'>{% trans "Take (Assign to me)" %}</option>
-                    <option value='delete'>{% trans "Delete" %}</option>
-                    <optgroup label='{% trans "Close" %}'>
-                        <option value='close'>{% trans "Close (Don't Send E-Mail)" %}</option>
-                        <option value='close_public'>{% trans "Close (Send E-Mail)" %}</option>
-                    </optgroup>
-                    <optgroup label='{% trans "Assign To" %}'>
-                        <option value='unassign'>{% trans "Nobody (Unassign)" %}</option>
-                        {% for u in user_choices %}<option value='assign_{{ u.id }}'>{{ u.get_username }}</option>{% endfor %}
-                    </optgroup>
-                </select>
-                <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-arrow-circle-right"></i>&nbsp;{% trans "Go" %}</button>
-            </p>
-        {% csrf_token %}</form>
-    </div>
-    <!-- /.panel-body -->
-</div>
-<!-- /.panel -->
-
 {% endblock %}
 
 
@@ -267,8 +323,8 @@
                   var name = data.split(" ")[1];
                   if (type === 'display')
                   {
-                      data = '<div class="tickettitle"><a href="' + get_url(row) + '" >' + 
-                             row.id + '. ' + 
+                      data = '<div class="tickettitle"><a href="' + get_url(row) + '" >' +
+                             row.id + '. ' +
                              row.title + '</a></div>';
                   }
                   return data
@@ -297,12 +353,13 @@
               "render": function(data, type, row, meta) {
                   if (data != "None") {
                       return data;
-                  } 
+                  }
                   else {
                       return "";
                   }
               }
              },
+             {"data": "submitter"},
              {"data": "time_spent"},
          ]
      });
@@ -344,6 +401,9 @@
      {% endif %}
      {% if query_params.search_string %}
      $("#filterBuilderSelect-Keywords")[0].disabled = "disabled";
+     {% endif %}
+     {% if query_params.filtering.kbitem__in %}
+     $("#filterBuilderSelect-KBItems")[0].disabled = "disabled";
      {% endif %}
  });
 

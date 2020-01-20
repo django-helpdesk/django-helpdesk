@@ -72,7 +72,7 @@ class FollowUpAdmin(admin.ModelAdmin):
 class KBItemAdmin(admin.ModelAdmin):
     list_display = ('category', 'title', 'last_updated',)
     inlines = [KBIAttachmentInline]
-    readonly_fields = ('voted_by',)
+    readonly_fields = ('voted_by', 'downvoted_by')
 
     list_display_links = ('title',)
 
