@@ -52,6 +52,7 @@ def category(request, slug, iframe=False):
         'staff': staff,
     })
 
+
 @xframe_options_exempt
 def category_iframe(request, slug):
     return category(request, slug, iframe=True)
