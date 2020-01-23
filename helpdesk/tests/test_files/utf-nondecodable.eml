@@ -1,0 +1,72 @@
+Delivered-To: helpdesk@example.cz
+Received: by 2002:a17:90a:f983:0:0:0:0 with SMTP id cq3csp4021504pjb;
+        Tue, 21 Jan 2020 04:28:48 -0800 (PST)
+X-Received: by 2002:a05:6000:50:: with SMTP id k16mr4730387wrx.145.1579609728626;
+        Tue, 21 Jan 2020 04:28:48 -0800 (PST)
+X-Received: by 2002:a5d:50d2:: with SMTP id f18mr4914314wrt.366.1579609727642;
+        Tue, 21 Jan 2020 04:28:47 -0800 (PST)
+Return-Path: <john.smith@example.cz>
+Received: from [10.0.0.179] (ip-89-176-203-67.net.upcbroadband.cz. [89.176.203.67])
+        by smtp.gmail.com with ESMTPSA id w83sm3724796wmb.42.2020.01.21.04.28.46
+        for <helpdesk@example.cz>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Tue, 21 Jan 2020 04:28:47 -0800 (PST)
+Subject: =?UTF-8?Q?Fwd=3a_Cyklozam=c4=9bstnavatel_-_zm=c4=9bna_vyhodnocen?=
+ =?UTF-8?B?w60=?=
+References: <CAK0Q_=uQY=3V5iUSgEN16GLtYoJ-6oQu-vYjsgQ=jv6DwOkuLQ@mail.gmail.com>
+To: helpdesk@example.cz
+From: John Smith <john.smith@example.cz>
+Openpgp: preference=signencrypt
+X-Forwarded-Message-Id: <CAK0Q_=uQY=3V5iUSgEN16GLtYoJ-6oQu-vYjsgQ=jv6DwOkuLQ@mail.gmail.com>
+Message-ID: <00d73ce5-774a-5ea1-6742-af73ef58c01c@example.cz>
+Date: Tue, 21 Jan 2020 13:28:46 +0100
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:60.0) Gecko/20100101
+ Thunderbird/60.9.0
+MIME-Version: 1.0
+In-Reply-To: <CAK0Q_=uQY=3V5iUSgEN16GLtYoJ-6oQu-vYjsgQ=jv6DwOkuLQ@mail.gmail.com>
+Content-Type: multipart/alternative;
+ boundary="------------1E8B96489BB357387CBD04A6"
+Content-Language: en-US
+
+This is a multi-part message in MIME format.
+--------------1E8B96489BB357387CBD04A6
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+
+
+
+-------- Forwarded Message --------
+Subject: 	Cyklozaměstnavatel - změna vyhodnocení
+Date: 	Thu, 9 Jan 2020 16:24:28 +0100
+From: 	Nikola <nikola@example.cz>
+To: 	John Smith <john.smith@example.cz>, Jiří Houdek
+<jiri.houdek@example.cz>
+
+
+
+Ahoj Johne,
+podle domluvy bych Tě poprosila o změnu vyhodnocení soutěže
+Cyklozaměstnavatel. 
+Poprosím, aby se ve výsledné tabulce pro každé město zobrazoval
+jednotlivý zaměstnavatel *jen jednou s průměrným výsledkem, *který vyjde
+po zprůměrování hodnocení všech zaměstnanců tohoto zaměstnavatele. 
+Díky moc!
+n. 
+
+	
+--------------1E8B96489BB357387CBD04A6
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+<body>
+ <p>
+ prosazuje lepší
+ prostředí pro
+ kvalitní život
+ ve městě.
+ </p>
+</body>
+
+
+--------------1E8B96489BB357387CBD04A6--
