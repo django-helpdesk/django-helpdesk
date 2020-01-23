@@ -487,13 +487,18 @@ def object_from_message(message, queue, logger):
                     body.encode('utf-8')
                 logger.debug("Discovered plain text MIME part")
             else:
+                try:
+                    email_body = encoding.smart_text(part.get_payload(decode=True))
+                except UnicodeDecodeError:
+                    email_body = encoding.smart_text(part.get_payload(decode=False))
+
                 payload = """
 <html>
 <head>
 <meta charset="utf-8"/>
 </head>
 %s
-</html>""" % encoding.smart_text(part.get_payload(decode=True))
+</html>""" % email_body
                 files.append(
                     SimpleUploadedFile(_("email_html_body.html"), payload.encode("utf-8"), 'text/html')
                 )
