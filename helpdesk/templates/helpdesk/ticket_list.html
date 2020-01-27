@@ -96,6 +96,10 @@
                                 <option value='unassign'>{% trans "Nobody (Unassign)" %}</option>
                                 {% for u in user_choices %}<option value='assign_{{ u.id }}'>{{ u.get_username }}</option>{% endfor %}
                             </optgroup>
+                            <optgroup label='{% trans "Set KB Item" %}'>
+                                <option value='kbitem_none'>{% trans "No KB Item" %}</option>
+                                {% for kbi in kb_items %}<option value='kbitem_{{ kbi.id }}'>{{ kbi.title }}</option>{% endfor %}
+                            </optgroup>
                         </select>
                         <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-arrow-circle-right"></i>&nbsp;{% trans "Go" %}</button>
                     </p>

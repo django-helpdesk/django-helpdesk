@@ -130,7 +130,7 @@ class Homepage(CreateTicketView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['kb_categories'] = huser_from_request(self.request).get_kb_categories()
+        context['kb_categories'] = huser_from_request(self.request).get_allowed_kb_categories()
         return context
 
 

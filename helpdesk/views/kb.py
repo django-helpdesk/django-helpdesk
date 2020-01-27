@@ -21,7 +21,7 @@ def index(request):
     huser = user.huser_from_request(request)
     # TODO: It'd be great to have a list of most popular items here.
     return render(request, 'helpdesk/kb_index.html', {
-        'kb_categories': huser.get_kb_categories(),
+        'kb_categories': huser.get_allowed_kb_categories(),
         'helpdesk_settings': helpdesk_settings,
     })
 

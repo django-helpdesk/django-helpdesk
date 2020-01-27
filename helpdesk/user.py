@@ -2,6 +2,7 @@ from helpdesk.models import (
     Ticket,
     Queue,
     KBCategory,
+    KBItem,
 )
 
 from helpdesk import settings as helpdesk_settings
@@ -35,12 +36,19 @@ class HelpdeskUser:
         else:
             return all_queues
 
-    def get_kb_categories(self):
+    def get_allowed_kb_categories(self):
         categories = []
         for cat in KBCategory.objects.all():
             if self.can_access_kbcategory(cat):
                 categories.append(cat)
         return categories
+
+    def get_assigned_kb_items(self):
+        kbitems = []
+        for item in KBItem.objects.all():
+            if item.team and item.team.is_member(self.user):
+                kbitems.append(item)
+        return kbitems
 
     def get_tickets_in_queues(self):
         return Ticket.objects.filter(queue__in=self.get_queues())

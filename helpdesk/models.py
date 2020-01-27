@@ -1343,6 +1343,9 @@ class KBItem(models.Model):
     def num_open_tickets(self):
         return Ticket.objects.filter(kbitem=self, status__in=(1, 2)).count()
 
+    def unassigned_tickets(self):
+        return Ticket.objects.filter(kbitem=self, status__in=(1, 2), assigned_to__isnull=True)
+
     def get_markdown(self):
         return get_markdown(self.answer)
 
