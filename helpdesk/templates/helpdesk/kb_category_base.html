@@ -33,7 +33,9 @@
                 </a>
             </div>
             <div>
+            {% if item.votes != 0 %}
             {% blocktrans with recommendations=item.recommendations votes=item.votes  %}{{ recommendations }} people found this answer useful of {{votes}}{% endblocktrans %}
+            {% endif %}
             </div>
 
         </div>
