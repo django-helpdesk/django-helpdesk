@@ -12,3 +12,4 @@ pytz
 six
 djangorestframework
 django-model-utils
+pinax-teams

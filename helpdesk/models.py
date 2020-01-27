@@ -25,6 +25,8 @@ from django.utils.safestring import mark_safe
 from markdown import markdown
 from markdown.extensions import Extension
 
+import pinax.teams.models
+
 
 import uuid
 
@@ -1234,6 +1236,11 @@ class KBCategory(models.Model):
         verbose_name=_('Default queue when creating a ticket after viewing this category.'),
     )
 
+    public = models.BooleanField(
+        default=True,
+        verbose_name=_("Is KBCategory publicly visible?")
+    )
+
     def __str__(self):
         return '%s' % self.title
 
@@ -1295,6 +1302,14 @@ class KBItem(models.Model):
         _('Last Updated'),
         help_text=_('The date on which this question was most recently changed.'),
         blank=True,
+    )
+
+    team = models.ForeignKey(
+        pinax.teams.models.Team,
+        on_delete=models.CASCADE,
+        verbose_name=_('Team'),
+        blank=True,
+        null=True,
     )
 
     def save(self, *args, **kwargs):

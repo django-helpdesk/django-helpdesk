@@ -58,7 +58,11 @@ errors with trying to create User settings.
         'django.contrib.admin',  # Required for helpdesk admin/maintenance
         'django.contrib.humanize',  # Required for elapsed time formatting
         'bootstrap4form', # Required for nicer formatting of forms with the default templates
+        'account',  # Required by pinax-teams
+        'pinax.inviations',  # required by pinax-teams
+        'pinax.teams',  # team support
         'helpdesk',  # This is us!
+        'reversion',  # required by pinax-teams
     )
 
    Your ``settings.py`` file should also define a ``SITE_ID`` that allows multiple projects to share

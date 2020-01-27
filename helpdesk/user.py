@@ -1,9 +1,14 @@
 from helpdesk.models import (
     Ticket,
-    Queue
+    Queue,
+    KBCategory,
 )
 
 from helpdesk import settings as helpdesk_settings
+
+
+def huser_from_request(req):
+    return HelpdeskUser(req.user)
 
 
 class HelpdeskUser:
@@ -30,8 +35,18 @@ class HelpdeskUser:
         else:
             return all_queues
 
+    def get_kb_categories(self):
+        categories = []
+        for cat in KBCategory.objects.all():
+            if self.can_access_kbcategory(cat):
+                categories.append(cat)
+        return categories
+
     def get_tickets_in_queues(self):
         return Ticket.objects.filter(queue__in=self.get_queues())
+
+    def has_full_access(self):
+        return self.user.is_superuser or self.user.is_staff
 
     def can_access_queue(self, queue):
         """Check if a certain user can access a certain queue.
@@ -40,11 +55,10 @@ class HelpdeskUser:
         :param queue: The django-helpdesk Queue instance
         :return: True if the user has permission (either by default or explicitly), false otherwise
         """
-        user = self.user
-        if user.is_superuser or not helpdesk_settings.HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION:
+        if self.has_full_access():
             return True
         else:
-            return user.has_perm(queue.permission_name)
+            return helpdesk_settings.HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION and self.user.has_perm(queue.permission_name)
 
     def can_access_ticket(self, ticket):
         """Check to see if the user has permission to access
@@ -52,8 +66,13 @@ class HelpdeskUser:
         user = self.user
         if self.can_access_queue(ticket.queue):
             return True
-        elif user.is_superuser or user.is_staff or \
+        elif self.has_full_access() or \
                 (ticket.assigned_to and user.id == ticket.assigned_to.id):
             return True
         else:
             return False
+
+    def can_access_kbcategory(self, category):
+        if category.public:
+            return True
+        return self.has_full_access() or (category.queue and self.can_access_queue(category.queue))

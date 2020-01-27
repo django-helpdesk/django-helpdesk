@@ -15,6 +15,7 @@ Contents
    settings
    spam
    custom_fields
+   integration
    contributing
    license
 

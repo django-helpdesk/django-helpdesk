@@ -25,6 +25,7 @@ import helpdesk.views.abstract_views as abstract_views
 from helpdesk.forms import PublicTicketForm
 from helpdesk.lib import text_is_spam
 from helpdesk.models import CustomField, Ticket, Queue, UserSettings, KBCategory, KBItem
+from helpdesk.user import huser_from_request
 
 
 def create_ticket(request, *args, **kwargs):
@@ -129,7 +130,7 @@ class Homepage(CreateTicketView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['kb_categories'] = KBCategory.objects.all()
+        context['kb_categories'] = huser_from_request(self.request).get_kb_categories()
         return context
 
 
