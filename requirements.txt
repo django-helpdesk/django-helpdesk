@@ -12,4 +12,4 @@ pytz
 six
 djangorestframework
 django-model-utils
-pinax-teams
+pinax-teams @ git+https://github.com/auto-mat/pinax-teams.git@slugify#egg=pinax-teams
