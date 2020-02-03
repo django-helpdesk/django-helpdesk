@@ -77,13 +77,16 @@ def get_search_filter_args(search):
 
 DATATABLES_ORDER_COLUMN_CHOICES = Choices(
     ('0', 'id'),
+    ('1', 'title'),
     ('2', 'priority'),
-    ('3', 'title'),
-    ('4', 'queue'),
-    ('5', 'status'),
-    ('6', 'created'),
-    ('7', 'due_date'),
-    ('8', 'assigned_to')
+    ('3', 'queue'),
+    ('4', 'status'),
+    ('5', 'created'),
+    ('6', 'due_date'),
+    ('7', 'assigned_to'),
+    ('8', 'submitter_email'),
+    #('9', 'time_spent'),
+    ('10', 'kbitem'),
 )
 
 
@@ -123,10 +126,9 @@ class __Query__:
 
         sorting: The name of the column to sort by
         """
-        for key in self.params.get('filtering', {}).keys():
-            filter = {key: self.params['filtering'][key]}
-            queryset = queryset.filter(**filter)
-        queryset = queryset.filter(self.get_search_filter_args())
+        filter = self.params.get('filtering', {})
+        filter_or = self.params.get('filtering_or', {})
+        queryset = queryset.filter((Q(**filter) | Q(**filter_or)) & self.get_search_filter_args())
         sorting = self.params.get('sorting', None)
         if sorting:
             sortreverse = self.params.get('sortreverse', None)
@@ -177,7 +179,7 @@ class __Query__:
         queryset = objects.all().order_by(order_by)
         total = queryset.count()
 
-        if search_value:
+        if search_value:  # Dead code currently
             queryset = queryset.filter(get_search_filter_args(search_value))
 
         count = queryset.count()

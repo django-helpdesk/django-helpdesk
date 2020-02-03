@@ -68,6 +68,7 @@
                                 <th>{% trans "Owner" %}</th>
                                 <th>{% trans "Submitter" %}</th>
                                 <th>{% trans "Time Spent" %}</th>
+                                <th>{% trans "KB item" %}</th>
                             </tr>
                         </thead>
                     </table>
@@ -98,7 +99,7 @@
                             </optgroup>
                             <optgroup label='{% trans "Set KB Item" %}'>
                                 <option value='kbitem_none'>{% trans "No KB Item" %}</option>
-                                {% for kbi in kb_items %}<option value='kbitem_{{ kbi.id }}'>{{ kbi.title }}</option>{% endfor %}
+                                {% for kbi in kb_items %}<option value='kbitem_{{ kbi.id }}'>{{kbi.category.title}}: {{ kbi.title }}</option>{% endfor %}
                             </optgroup>
                         </select>
                         <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-arrow-circle-right"></i>&nbsp;{% trans "Go" %}</button>
@@ -307,6 +308,8 @@
          {
              $( row ).addClass(data.row_class);
          },
+         dom: 'ltBp',
+         buttons: ["colvis"],
 
          "columns": [
              {"data": "id",
@@ -343,16 +346,18 @@
                       priority = "danger";
                   }
                   return '<p class="text-'+priority+'">'+data+'</p>';
-              }
+              },
+              "visible": false,
              },
              {"data": "queue",
               "render": function(data, type, row, meta) {
                   return data.title;
-              }
+              },
+              "visible": false,
              },
              {"data": "status"},
              {"data": "created"},
-             {"data": "due_date"},
+             {"data": "due_date", "visible": false},
              {"data": "assigned_to",
               "render": function(data, type, row, meta) {
                   if (data != "None") {
@@ -364,7 +369,8 @@
               }
              },
              {"data": "submitter"},
-             {"data": "time_spent"},
+             {"data": "time_spent", "visible": false},
+             {"data": "kbitem"},
          ]
      });
  })

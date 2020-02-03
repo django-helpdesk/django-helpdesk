@@ -819,6 +819,7 @@ def ticket_list(request):
     # a query, to be saved if needed:
     query_params = {
         'filtering': {},
+        'filtering_or': {},
         'sorting': None,
         'sortreverse': False,
         'search_string': '',
@@ -884,12 +885,19 @@ def ticket_list(request):
             ('status', 'status__in'),
             ('kbitem', 'kbitem__in'),
         ]
-
+        filter_null_params = dict([
+            ('queue', 'queue__id__isnull'),
+            ('assigned_to', 'assigned_to__id__isnull'),
+            ('status', 'status__isnull'),
+            ('kbitem', 'kbitem__isnull'),
+        ])
         for param, filter_command in filter_in_params:
-            patterns = request.GET.getlist(param)
-            if patterns:
+            if not request.GET.get(param) is None:
+                patterns = request.GET.getlist(param)
                 try:
                     pattern_pks = [int(pattern) for pattern in patterns]
+                    if -1 in pattern_pks:
+                        query_params['filtering_or'][filter_null_params[param]] = True
                     query_params['filtering'][filter_command] = pattern_pks
                 except ValueError:
                     pass
