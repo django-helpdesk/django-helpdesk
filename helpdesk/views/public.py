@@ -6,9 +6,13 @@ django-helpdesk - A Django powered ticket tracker for small enterprise.
 views/public.py - All public facing views, eg non-staff (no authentication
                   required) views.
 """
-from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
+import logging
+
+from django.core.exceptions import (
+    ObjectDoesNotExist, PermissionDenied, ImproperlyConfigured,
+)
 from django.urls import reverse
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.utils.http import urlquote
 from django.utils.translation import ugettext as _
@@ -25,6 +29,8 @@ import helpdesk.views.abstract_views as abstract_views
 from helpdesk.forms import PublicTicketForm
 from helpdesk.lib import text_is_spam
 from helpdesk.models import CustomField, Ticket, Queue, UserSettings, KBCategory, KBItem
+
+logger = logging.getLogger(__name__)
 
 
 def create_ticket(request, *args, **kwargs):
@@ -55,16 +61,22 @@ class BaseCreateTicketView(abstract_views.AbstractCreateTicketMixin, FormView):
         return super().dispatch(*args, **kwargs)
 
     def get_initial(self):
-        request = self.request
         initial_data = super().get_initial()
 
         # add pre-defined data for public ticket
         if hasattr(settings, 'HELPDESK_PUBLIC_TICKET_QUEUE'):
             # get the requested queue; return an error if queue not found
             try:
-                initial_data['queue'] = Queue.objects.get(slug=settings.HELPDESK_PUBLIC_TICKET_QUEUE).id
-            except Queue.DoesNotExist:
-                return HttpResponse(status=500)
+                initial_data['queue'] = Queue.objects.get(
+                    slug=settings.HELPDESK_PUBLIC_TICKET_QUEUE,
+                    allow_public_submission=True
+                ).id
+            except Queue.DoesNotExist as e:
+                logger.fatal(
+                    "Public queue '%s' is configured as default but can't be found",
+                    settings.HELPDESK_PUBLIC_TICKET_QUEUE
+                )
+                raise ImproperlyConfigured("Wrong public queue configuration") from e
         if hasattr(settings, 'HELPDESK_PUBLIC_TICKET_PRIORITY'):
             initial_data['priority'] = settings.HELPDESK_PUBLIC_TICKET_PRIORITY
         if hasattr(settings, 'HELPDESK_PUBLIC_TICKET_DUE_DATE'):
@@ -73,7 +85,8 @@ class BaseCreateTicketView(abstract_views.AbstractCreateTicketMixin, FormView):
 
     def get_form_kwargs(self, *args, **kwargs):
         kwargs = super().get_form_kwargs(*args, **kwargs)
-        kwargs['hidden_fields'] = self.request.GET.get('_hide_fields_', '').split(',')
+        if '_hide_fields_' in self.request.GET:
+            kwargs['hidden_fields'] = self.request.GET.get('_hide_fields_', '').split(',')
         kwargs['readonly_fields'] = self.request.GET.get('_readonly_fields_', '').split(',')
         return kwargs
 
