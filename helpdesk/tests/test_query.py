@@ -61,12 +61,13 @@ class QueryTests(TestCase):
         response = self.client.get(reverse('helpdesk:datatables_ticket_list', args=[query]))
         self.assertEqual(
             response.json(),
-            {"data":
-             [{"ticket": "1 [test_queue-1]", "id": 1, "priority": 3, "title": "unassigned to kbitem", "queue": {"title": "Test queue", "id": 1}, "status": "Open", "created": "now", "due_date": None, "assigned_to": "None", "submitter": None, "row_class": "", "time_spent": "", "kbitem": ""},
-              {"ticket": "2 [test_queue-2]", "id": 2, "priority": 3, "title": "assigned to kbitem", "queue": {"title": "Test queue", "id": 1}, "status": "Open", "created": "now", "due_date": None, "assigned_to": "None", "submitter": None, "row_class": "", "time_spent": "", "kbitem": "KBItem 1"}],
-             "recordsFiltered": 2,
-             "recordsTotal": 2,
-             "draw": 0,
+            {
+                "data":
+                [{"ticket": "1 [test_queue-1]", "id": 1, "priority": 3, "title": "unassigned to kbitem", "queue": {"title": "Test queue", "id": 1}, "status": "Open", "created": "now", "due_date": None, "assigned_to": "None", "submitter": None, "row_class": "", "time_spent": "", "kbitem": ""},
+                 {"ticket": "2 [test_queue-2]", "id": 2, "priority": 3, "title": "assigned to kbitem", "queue": {"title": "Test queue", "id": 1}, "status": "Open", "created": "now", "due_date": None, "assigned_to": "None", "submitter": None, "row_class": "", "time_spent": "", "kbitem": "KBItem 1"}],
+                "recordsFiltered": 2,
+                "recordsTotal": 2,
+                "draw": 0,
             },
         )
 
@@ -78,11 +79,12 @@ class QueryTests(TestCase):
         response = self.client.get(reverse('helpdesk:datatables_ticket_list', args=[query]))
         self.assertEqual(
             response.json(),
-            {"data":
-             [{"ticket": "2 [test_queue-2]", "id": 2, "priority": 3, "title": "assigned to kbitem", "queue": {"title": "Test queue", "id": 1}, "status": "Open", "created": "now", "due_date": None, "assigned_to": "None", "submitter": None, "row_class": "", "time_spent": "", "kbitem": "KBItem 1"}],
-             "recordsFiltered": 1,
-             "recordsTotal": 1,
-             "draw": 0,
+            {
+                "data":
+                [{"ticket": "2 [test_queue-2]", "id": 2, "priority": 3, "title": "assigned to kbitem", "queue": {"title": "Test queue", "id": 1}, "status": "Open", "created": "now", "due_date": None, "assigned_to": "None", "submitter": None, "row_class": "", "time_spent": "", "kbitem": "KBItem 1"}],
+                "recordsFiltered": 1,
+                "recordsTotal": 1,
+                "draw": 0,
             },
         )
 
@@ -94,10 +96,11 @@ class QueryTests(TestCase):
         response = self.client.get(reverse('helpdesk:datatables_ticket_list', args=[query]))
         self.assertEqual(
             response.json(),
-            {"data":
-             [{"ticket": "2 [test_queue-2]", "id": 2, "priority": 3, "title": "assigned to kbitem", "queue": {"title": "Test queue", "id": 1}, "status": "Open", "created": "now", "due_date": None, "assigned_to": "None", "submitter": None, "row_class": "", "time_spent": "", "kbitem": "KBItem 1"}],
-             "recordsFiltered": 1,
-             "recordsTotal": 1,
-             "draw": 0,
+            {
+                "data":
+                [{"ticket": "2 [test_queue-2]", "id": 2, "priority": 3, "title": "assigned to kbitem", "queue": {"title": "Test queue", "id": 1}, "status": "Open", "created": "now", "due_date": None, "assigned_to": "None", "submitter": None, "row_class": "", "time_spent": "", "kbitem": "KBItem 1"}],
+                "recordsFiltered": 1,
+                "recordsTotal": 1,
+                "draw": 0,
             },
         )

@@ -85,7 +85,7 @@ DATATABLES_ORDER_COLUMN_CHOICES = Choices(
     ('6', 'due_date'),
     ('7', 'assigned_to'),
     ('8', 'submitter_email'),
-    #('9', 'time_spent'),
+    # ('9', 'time_spent'),
     ('10', 'kbitem'),
 )
 

@@ -66,4 +66,3 @@ class DatatablesTicketSerializer(serializers.ModelSerializer):
 
     def get_kbitem(self, obj):
         return obj.kbitem.title if obj.kbitem else ""
-
