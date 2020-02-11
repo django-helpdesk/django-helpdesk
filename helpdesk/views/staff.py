@@ -942,7 +942,7 @@ def ticket_list(request):
             '<a href="http://docs.djangoproject.com/en/dev/ref/databases/#sqlite-string-matching">'
             'Django Documentation on string matching in SQLite</a>.')
 
-    kbitem_choices = [(item.pk, item.title) for item in KBItem.objects.all()]
+    kbitem_choices = [(item.pk, str(item)) for item in KBItem.objects.all()]
 
     return render(request, 'helpdesk/ticket_list.html', dict(
         context,
