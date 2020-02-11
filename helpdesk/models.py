@@ -1325,7 +1325,7 @@ class KBItem(models.Model):
     score = property(_score)
 
     def __str__(self):
-        return '%s' % self.title
+        return '%s: %s' % (self.category.title, self.title)
 
     class Meta:
         ordering = ('title',)
