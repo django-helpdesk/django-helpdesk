@@ -164,12 +164,12 @@ class __Query__:
         """
         objects = self.get()
         order_by = '-date_created'
-        draw = int(kwargs.get('draw', None)[0])
-        length = int(kwargs.get('length', None)[0])
-        start = int(kwargs.get('start', None)[0])
-        search_value = kwargs.get('search[value]', None)[0]
-        order_column = kwargs.get('order[0][column]', None)[0]
-        order = kwargs.get('order[0][dir]', None)[0]
+        draw = int(kwargs.get('draw', [0])[0])
+        length = int(kwargs.get('length', [25])[0])
+        start = int(kwargs.get('start', [0])[0])
+        search_value = kwargs.get('search[value]', [""])[0]
+        order_column = kwargs.get('order[0][column]', ['5'])[0]
+        order = kwargs.get('order[0][dir]', ["asc"])[0]
 
         order_column = DATATABLES_ORDER_COLUMN_CHOICES[order_column]
         # django orm '-' -> desc

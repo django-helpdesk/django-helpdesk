@@ -898,6 +898,8 @@ def ticket_list(request):
                     pattern_pks = [int(pattern) for pattern in patterns]
                     if -1 in pattern_pks:
                         query_params['filtering_or'][filter_null_params[param]] = True
+                    else:
+                        query_params['filtering_or'][filter_command] = pattern_pks
                     query_params['filtering'][filter_command] = pattern_pks
                 except ValueError:
                     pass
