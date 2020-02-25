@@ -1,6 +1,8 @@
 {% load i18n %}
-<h2>{% trans 'Knowledgebase Category' %}:{% blocktrans with category.title as kbcat %}{{ kbcat }}{% endblocktrans %}</h2>
-<p>{{ category.description }}</p>
+{% block header %}
+<h2>{% blocktrans with category.title as kbcat %}{{ kbcat }}{% endblocktrans %}</h2>
+<p>{{ category.description|linebreaks }}</p>
+{% endblock %}
 <div id="accordion">
 {% for item in items %}
 <div class="card mb-3">
@@ -29,7 +31,7 @@
 
                 {% endif %}
                 <a href='{% if iframe %}{% url 'helpdesk:submit_iframe' %}{% else %}{% url 'helpdesk:submit' %}{%endif%}?{% if category.queue %}queue={{category.queue.pk}};_readonly_fields_=queue;{%endif%}kbitem={{item.id}};{{query_param_string}}' class="col-sm">
-                    <button type="button" class="btn btn-success btn-circle btn-xl float-right"><i class="fa fa-envelope fa-lg"></i> {% trans 'Contact a human' %}</button>
+                    <button type="button" class="btn btn-success btn-circle btn-xl float-right"><i  class="fa fa-envelope fa-lg"></i> {% trans 'Contact a human' %}</button>
                 </a>
             </div>
             <div>
@@ -43,8 +45,12 @@
 </div>
 {% endfor %}
 </div>
+{% block footer %}
+{% endblock %}
 {% if category.queue %}
 <a href='{% if iframe %}{% url 'helpdesk:submit_iframe' %}{% else %}{% url 'helpdesk:submit' %}{%endif%}?queue={{category.queue.pk}};_readonly_fields_=queue;{{query_param_string}}'>
+    {% block submit_button %}
     <button type="button" class="btn btn-danger btn-circle btn-xl float-right"><i class="fa fa-envelope fa-lg"></i> {% trans 'Contact a human' %}</button>
+    {% endblock %}
 </a>
 {% endif %}
