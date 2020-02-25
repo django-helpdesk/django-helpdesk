@@ -1,0 +1,6 @@
+Terveisin,
+
+{{ queue.title }}{% if queue.email_address %}
+{{ queue.email_address }}{% endif %}
+    
+Tämä sähköposti lähetettiin sinulle tukipalvelumme käyttäjänä tietosuojakäytäntömme mukaisesti. Kerro meille, jos uskot, että olet saanut tämän sähköpostin erehdyksessä.
