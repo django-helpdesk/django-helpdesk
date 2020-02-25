@@ -1317,6 +1317,12 @@ class KBItem(models.Model):
         null=True,
     )
 
+    order = models.PositiveIntegerField(
+        _('Order'),
+        blank=True,
+        null=True,
+    )
+
     def save(self, *args, **kwargs):
         if not self.last_updated:
             self.last_updated = timezone.now()
@@ -1333,7 +1339,7 @@ class KBItem(models.Model):
         return '%s: %s' % (self.category.title, self.title)
 
     class Meta:
-        ordering = ('title',)
+        ordering = ('order', 'title',)
         verbose_name = _('Knowledge base item')
         verbose_name_plural = _('Knowledge base items')
 
