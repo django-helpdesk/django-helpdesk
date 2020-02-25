@@ -1323,6 +1323,11 @@ class KBItem(models.Model):
         null=True,
     )
 
+    enabled = models.BooleanField(
+        _('Enabled to display to users'),
+        default=True,
+    )
+
     def save(self, *args, **kwargs):
         if not self.last_updated:
             self.last_updated = timezone.now()
