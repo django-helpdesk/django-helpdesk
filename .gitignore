@@ -25,3 +25,8 @@ demo/demodesk/media/helpdesk/attachments/DH-3/4/*
 !demo/demodesk/media/helpdesk/attachments/DH-3/3/someinfo.txt
 !demo/demodesk/media/helpdesk/attachments/DH-3/4/helpdesk.png
 
+# ignore virtual environment and test project
+/venv
+/project
+/db.sqlite3
+/manage.py
