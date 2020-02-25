@@ -1215,8 +1215,13 @@ class KBCategory(models.Model):
     listing of questions & answers.
     """
 
+    name = models.CharField(
+        _('Name of the category'),
+        max_length=100,
+    )
+
     title = models.CharField(
-        _('Title'),
+        _('Title on knowledgebase page'),
         max_length=100,
     )
 
@@ -1242,7 +1247,7 @@ class KBCategory(models.Model):
     )
 
     def __str__(self):
-        return '%s' % self.title
+        return '%s' % self.name
 
     class Meta:
         ordering = ('title',)

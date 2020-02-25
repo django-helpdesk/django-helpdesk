@@ -93,6 +93,10 @@ class IgnoreEmailAdmin(admin.ModelAdmin):
     list_display = ('name', 'queue_list', 'email_address', 'keep_in_mailbox')
 
 
+@admin.register(KBCategory)
+class KBCategoryAdmin(admin.ModelAdmin):
+    list_display = ('name', 'title', 'slug', )
+
+
 admin.site.register(PreSetReply)
 admin.site.register(EscalationExclusion)
-admin.site.register(KBCategory)
