@@ -19,7 +19,9 @@
         {% block card_body %}
         <div class="card-body">
             <p class="card-text">{{ item.question }}</p>
-            {{ item.get_markdown }}
+            <div class="card-answer">
+               {{ item.get_markdown }}
+            </div>
             <div class="row">
                 {% if request.user.pk %}
                 <div class="col-sm">

@@ -95,7 +95,7 @@ class IgnoreEmailAdmin(admin.ModelAdmin):
 
 @admin.register(KBCategory)
 class KBCategoryAdmin(admin.ModelAdmin):
-    list_display = ('name', 'title', 'slug', )
+    list_display = ('name', 'title', 'slug', 'public')
 
 
 admin.site.register(PreSetReply)
