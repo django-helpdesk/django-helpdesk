@@ -30,7 +30,7 @@ def category(request, slug, iframe=False):
     category = get_object_or_404(KBCategory, slug__iexact=slug)
     if not user.huser_from_request(request).can_access_kbcategory(category):
         raise Http404
-    items = category.kbitem_set.all()
+    items = category.kbitem_set.filter(enabled=True)
     selected_item = request.GET.get('kbitem', None)
     try:
         selected_item = int(selected_item)

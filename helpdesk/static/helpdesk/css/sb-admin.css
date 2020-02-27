@@ -242,6 +242,10 @@ body.fixed-nav.sidebar-toggled #content-wrapper {
   overflow-y: auto;
 }
 
+.card-text {
+   font-weight: bold;
+}
+
 .card-body-icon {
   position: absolute;
   z-index: 0;

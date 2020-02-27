@@ -183,8 +183,8 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
             self.fields['kbitem'] = forms.ChoiceField(
                 widget=forms.Select(attrs={'class': 'form-control'}),
                 required=False,
-                label=_('Knowedge Base Item'),
-                choices=[(kbi.pk, kbi.title) for kbi in KBItem.objects.filter(category=kbcategory.pk)],
+                label=_('Knowledge Base Item'),
+                choices=[(kbi.pk, kbi.title) for kbi in KBItem.objects.filter(category=kbcategory.pk, enabled=True)],
             )
 
     def _add_form_custom_fields(self, staff_only_filter=None):
