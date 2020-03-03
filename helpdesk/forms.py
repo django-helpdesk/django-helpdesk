@@ -318,7 +318,7 @@ class TicketForm(AbstractTicketForm):
         super(TicketForm, self).__init__(*args, **kwargs)
         self._add_form_custom_fields()
 
-    def save(self, user=None):
+    def save(self, user):
         """
         Writes and returns a Ticket() object
         """
@@ -378,7 +378,7 @@ class PublicTicketForm(AbstractTicketForm):
 
         self._add_form_custom_fields(False)
 
-    def save(self):
+    def save(self, user):
         """
         Writes and returns a Ticket() object
         """
@@ -389,7 +389,8 @@ class PublicTicketForm(AbstractTicketForm):
 
         self._create_custom_fields(ticket)
 
-        followup = self._create_follow_up(ticket, title=_('Ticket Opened Via Web'))
+        followup = self._create_follow_up(
+            ticket, title=_('Ticket Opened Via Web'), user=user)
         followup.save()
 
         files = self._attach_files_to_follow_up(followup)
