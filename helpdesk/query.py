@@ -77,13 +77,16 @@ def get_search_filter_args(search):
 
 DATATABLES_ORDER_COLUMN_CHOICES = Choices(
     ('0', 'id'),
+    ('1', 'title'),
     ('2', 'priority'),
-    ('3', 'title'),
-    ('4', 'queue'),
-    ('5', 'status'),
-    ('6', 'created'),
-    ('7', 'due_date'),
-    ('8', 'assigned_to')
+    ('3', 'queue'),
+    ('4', 'status'),
+    ('5', 'created'),
+    ('6', 'due_date'),
+    ('7', 'assigned_to'),
+    ('8', 'submitter_email'),
+    # ('9', 'time_spent'),
+    ('10', 'kbitem'),
 )
 
 
@@ -123,10 +126,9 @@ class __Query__:
 
         sorting: The name of the column to sort by
         """
-        for key in self.params.get('filtering', {}).keys():
-            filter = {key: self.params['filtering'][key]}
-            queryset = queryset.filter(**filter)
-        queryset = queryset.filter(self.get_search_filter_args())
+        filter = self.params.get('filtering', {})
+        filter_or = self.params.get('filtering_or', {})
+        queryset = queryset.filter((Q(**filter) | Q(**filter_or)) & self.get_search_filter_args())
         sorting = self.params.get('sorting', None)
         if sorting:
             sortreverse = self.params.get('sortreverse', None)
@@ -162,12 +164,12 @@ class __Query__:
         """
         objects = self.get()
         order_by = '-date_created'
-        draw = int(kwargs.get('draw', None)[0])
-        length = int(kwargs.get('length', None)[0])
-        start = int(kwargs.get('start', None)[0])
-        search_value = kwargs.get('search[value]', None)[0]
-        order_column = kwargs.get('order[0][column]', None)[0]
-        order = kwargs.get('order[0][dir]', None)[0]
+        draw = int(kwargs.get('draw', [0])[0])
+        length = int(kwargs.get('length', [25])[0])
+        start = int(kwargs.get('start', [0])[0])
+        search_value = kwargs.get('search[value]', [""])[0]
+        order_column = kwargs.get('order[0][column]', ['5'])[0]
+        order = kwargs.get('order[0][dir]', ["asc"])[0]
 
         order_column = DATATABLES_ORDER_COLUMN_CHOICES[order_column]
         # django orm '-' -> desc
@@ -177,7 +179,7 @@ class __Query__:
         queryset = objects.all().order_by(order_by)
         total = queryset.count()
 
-        if search_value:
+        if search_value:  # Dead code currently
             queryset = queryset.filter(get_search_filter_args(search_value))
 
         count = queryset.count()

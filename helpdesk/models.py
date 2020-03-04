@@ -25,6 +25,8 @@ from django.utils.safestring import mark_safe
 from markdown import markdown
 from markdown.extensions import Extension
 
+import pinax.teams.models
+
 
 import uuid
 
@@ -1213,8 +1215,13 @@ class KBCategory(models.Model):
     listing of questions & answers.
     """
 
+    name = models.CharField(
+        _('Name of the category'),
+        max_length=100,
+    )
+
     title = models.CharField(
-        _('Title'),
+        _('Title on knowledgebase page'),
         max_length=100,
     )
 
@@ -1234,8 +1241,13 @@ class KBCategory(models.Model):
         verbose_name=_('Default queue when creating a ticket after viewing this category.'),
     )
 
+    public = models.BooleanField(
+        default=True,
+        verbose_name=_("Is KBCategory publicly visible?")
+    )
+
     def __str__(self):
-        return '%s' % self.title
+        return '%s' % self.name
 
     class Meta:
         ordering = ('title',)
@@ -1297,6 +1309,25 @@ class KBItem(models.Model):
         blank=True,
     )
 
+    team = models.ForeignKey(
+        pinax.teams.models.Team,
+        on_delete=models.CASCADE,
+        verbose_name=_('Team'),
+        blank=True,
+        null=True,
+    )
+
+    order = models.PositiveIntegerField(
+        _('Order'),
+        blank=True,
+        null=True,
+    )
+
+    enabled = models.BooleanField(
+        _('Enabled to display to users'),
+        default=True,
+    )
+
     def save(self, *args, **kwargs):
         if not self.last_updated:
             self.last_updated = timezone.now()
@@ -1310,10 +1341,10 @@ class KBItem(models.Model):
     score = property(_score)
 
     def __str__(self):
-        return '%s' % self.title
+        return '%s: %s' % (self.category.title, self.title)
 
     class Meta:
-        ordering = ('title',)
+        ordering = ('order', 'title',)
         verbose_name = _('Knowledge base item')
         verbose_name_plural = _('Knowledge base items')
 
@@ -1327,6 +1358,9 @@ class KBItem(models.Model):
 
     def num_open_tickets(self):
         return Ticket.objects.filter(kbitem=self, status__in=(1, 2)).count()
+
+    def unassigned_tickets(self):
+        return Ticket.objects.filter(kbitem=self, status__in=(1, 2), assigned_to__isnull=True)
 
     def get_markdown(self):
         return get_markdown(self.answer)

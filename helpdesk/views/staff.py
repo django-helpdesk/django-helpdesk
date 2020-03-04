@@ -103,6 +103,7 @@ def dashboard(request):
     showing ticket counts by queue/status, and a list of unassigned tickets
     with options for them to 'Take' ownership of said tickets.
     """
+    huser = HelpdeskUser(request.user)
     active_tickets = Ticket.objects.select_related('queue').exclude(
         status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
     )
@@ -117,12 +118,15 @@ def dashboard(request):
         assigned_to=request.user,
         status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS])
 
-    user_queues = HelpdeskUser(request.user).get_queues()
+    user_queues = huser.get_queues()
 
     unassigned_tickets = active_tickets.filter(
         assigned_to__isnull=True,
+        kbitem__isnull=True,
         queue__in=user_queues
     )
+
+    kbitems = huser.get_assigned_kb_items()
 
     # all tickets, reported by current user
     all_tickets_reported_by_current_user = ''
@@ -157,6 +161,7 @@ def dashboard(request):
         'user_tickets': tickets,
         'user_tickets_closed_resolved': tickets_closed_resolved,
         'unassigned_tickets': unassigned_tickets,
+        'kbitems': kbitems,
         'all_tickets_reported_by_current_user': all_tickets_reported_by_current_user,
         'basic_ticket_stats': basic_ticket_stats,
     })
@@ -706,6 +711,13 @@ def mass_update(request):
         parts = action.split('_')
         user = User.objects.get(id=parts[1])
         action = 'assign'
+    if action == 'kbitem_none':
+        kbitem = None
+        action = 'set_kbitem'
+    if action.startswith('kbitem_'):
+        parts = action.split('_')
+        kbitem = KBItem.objects.get(id=parts[1])
+        action = 'set_kbitem'
     elif action == 'take':
         user = request.user
         action = 'assign'
@@ -733,6 +745,15 @@ def mass_update(request):
                          date=timezone.now(),
                          title=_('Unassigned in bulk update'),
                          public=True,
+                         user=request.user)
+            f.save()
+        elif action == 'set_kbitem':
+            t.kbitem = kbitem
+            t.save()
+            f = FollowUp(ticket=t,
+                         date=timezone.now(),
+                         title=_('KBItem set in bulk update'),
+                         public=False,
                          user=request.user)
             f.save()
         elif action == 'close' and t.status != Ticket.CLOSED_STATUS:
@@ -798,13 +819,14 @@ def ticket_list(request):
     # a query, to be saved if needed:
     query_params = {
         'filtering': {},
+        'filtering_or': {},
         'sorting': None,
         'sortreverse': False,
         'search_string': '',
     }
     default_query_params = {
         'filtering': {
-            'status__in': [1, 2, 3],
+            'status__in': [1, 2],
         },
         'sorting': 'created',
         'search_string': '',
@@ -863,12 +885,21 @@ def ticket_list(request):
             ('status', 'status__in'),
             ('kbitem', 'kbitem__in'),
         ]
-
+        filter_null_params = dict([
+            ('queue', 'queue__id__isnull'),
+            ('assigned_to', 'assigned_to__id__isnull'),
+            ('status', 'status__isnull'),
+            ('kbitem', 'kbitem__isnull'),
+        ])
         for param, filter_command in filter_in_params:
-            patterns = request.GET.getlist(param)
-            if patterns:
+            if not request.GET.get(param) is None:
+                patterns = request.GET.getlist(param)
                 try:
                     pattern_pks = [int(pattern) for pattern in patterns]
+                    if -1 in pattern_pks:
+                        query_params['filtering_or'][filter_null_params[param]] = True
+                    else:
+                        query_params['filtering_or'][filter_command] = pattern_pks
                     query_params['filtering'][filter_command] = pattern_pks
                 except ValueError:
                     pass
@@ -911,12 +942,13 @@ def ticket_list(request):
             '<a href="http://docs.djangoproject.com/en/dev/ref/databases/#sqlite-string-matching">'
             'Django Documentation on string matching in SQLite</a>.')
 
-    kbitem_choices = [(item.pk, item.title) for item in KBItem.objects.all()]
+    kbitem_choices = [(item.pk, str(item)) for item in KBItem.objects.all()]
 
     return render(request, 'helpdesk/ticket_list.html', dict(
         context,
         default_tickets_per_page=request.user.usersettings_helpdesk.tickets_per_page,
         user_choices=User.objects.filter(is_active=True, is_staff=True),
+        kb_items=KBItem.objects.all(),
         queue_choices=huser.get_queues(),
         status_choices=Ticket.STATUS_CHOICES,
         kbitem_choices=kbitem_choices,

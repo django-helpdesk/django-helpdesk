@@ -8,26 +8,29 @@ views/kb.py - Public-facing knowledgebase views. The knowledgebase is a
               resolutions to common problems.
 """
 
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.clickjacking import xframe_options_exempt
 
 from helpdesk import settings as helpdesk_settings
+from helpdesk import user
 from helpdesk.models import KBCategory, KBItem
 
 
 def index(request):
-    category_list = KBCategory.objects.all()
+    huser = user.huser_from_request(request)
     # TODO: It'd be great to have a list of most popular items here.
     return render(request, 'helpdesk/kb_index.html', {
-        'kb_categories': category_list,
+        'kb_categories': huser.get_allowed_kb_categories(),
         'helpdesk_settings': helpdesk_settings,
     })
 
 
 def category(request, slug, iframe=False):
     category = get_object_or_404(KBCategory, slug__iexact=slug)
-    items = category.kbitem_set.all()
+    if not user.huser_from_request(request).can_access_kbcategory(category):
+        raise Http404
+    items = category.kbitem_set.filter(enabled=True)
     selected_item = request.GET.get('kbitem', None)
     try:
         selected_item = int(selected_item)

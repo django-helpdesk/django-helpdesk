@@ -15,6 +15,8 @@
 <script src="{% static 'helpdesk/vendor/chart.js/Chart.min.js' %}"></script>
 <script src="{% static 'helpdesk/vendor/datatables/js/jquery.dataTables.js' %}"></script>
 <script src="{% static 'helpdesk/vendor/datatables/js/dataTables.bootstrap4.js' %}"></script>
+<script src="{% static 'helpdesk/vendor/datatables/js/dataTables.buttons.js' %}"></script>
+<script src="{% static 'helpdesk/vendor/datatables/js/buttons.colVis.js' %}"></script>
 
 <!-- jQuery UI DatePicker -->
 <script src='{% static "helpdesk/vendor/jquery-ui/jquery-ui.min.js" %}' type='text/javascript' language='javascript'></script>
@@ -25,3 +27,6 @@
 
 <!-- Custom Theme JavaScript -->
 <script src="{% static 'helpdesk/js/sb-admin.js' %}"></script>
+
+{% block js_bottom %}
+{% endblock %}

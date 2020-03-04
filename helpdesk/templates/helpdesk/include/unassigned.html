@@ -1,6 +1,5 @@
 {% load i18n humanize %}
 
-<!-- DataTables Example -->
 <div class="card mb-3">
     <div class="card-header">
         <i class="fas fa-table"></i>
@@ -40,3 +39,43 @@
     <div class="card-footer small text-muted">Listing {{ unassigned_tickets|length }} ticket(s).</div>
 </div>
 
+{% for kbitem in kbitems %}
+<div class="card mb-3">
+    <div class="card-header">
+        <i class="fas fa-table"></i>
+        {% trans "KBItem:" %} {{kbitem.title}} {% trans "Team:" %} {{kbitem.team.name}} {% trans "(pick up a ticket if you start to work on it)" %}
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered table-sm table-striped" id="dataTable" width="100%" cellspacing="0">
+                <thead class="thead-light">
+                    <tr>
+                      <th>{% trans "Ticket" %}</th>
+                      <th>{% trans "Prority" %}</th>
+                      <th>{% trans "Queue" %}</th>
+                      <th>{% trans "Created" %}</th>
+                      <th>{% trans "Actions" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for ticket in kbitem.unassigned_tickets %}
+                    <tr class="{{ ticket.get_priority_css_class }}">
+                        <td class="tickettitle"><a href='{{ ticket.get_absolute_url }}'>{{ ticket.id }}. {{ ticket.title }} </a></td>
+                        <td>{{ ticket.priority }}</td>
+                        <td>{{ ticket.queue }}</td>
+                        <td><span title='{{ ticket.created|date:"r" }}'>{{ ticket.created|naturaltime }}</span></td>
+                        <td class="text-center">
+                          <a href='{{ ticket.get_absolute_url }}?take'><button class='btn btn-primary btn-sm'><i class="fas fa-hand-paper"></i>&nbsp;{% trans "Take" %}</button></a>
+                          <a href='{% url 'helpdesk:delete' ticket.id %}'><button class='btn btn-danger btn-sm'><i class="fas fa-trash"></i>&nbsp;{% trans "Delete" %}</button></a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan='6'>{% trans "There are no unassigned tickets." %}</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card-footer small text-muted">Listing {{ kbitem.unassigned_tickets|length }} ticket(s).</div>
+</div>
+{% endfor %}
