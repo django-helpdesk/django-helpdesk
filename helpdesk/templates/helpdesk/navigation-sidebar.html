@@ -16,10 +16,12 @@
           </a>
         </li>
         <li class="nav-item dropdown">
+          {% if not helpdesk_settings.HELPDESK_HIDE_SAVED_QUERIES %}
           <a class="nav-link dropdown-toggle" href="#" id="ticketsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <i class="fas fa-fw fa-search"></i>
             <span>{% trans "Saved Queries" %}</span>
           </a>
+          {% endif %}
           <div class="dropdown-menu" aria-labelledby="ticketsDropdown">
             {% if user_saved_queries_ %}
             {% for q in user_saved_queries_ %}

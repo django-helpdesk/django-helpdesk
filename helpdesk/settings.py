@@ -121,6 +121,7 @@ if HELPDESK_EMAIL_SUBJECT_TEMPLATE.find("ticket.ticket") < 0:
 # default fallback locale when queue locale not found
 HELPDESK_EMAIL_FALLBACK_LOCALE = getattr(settings, 'HELPDESK_EMAIL_FALLBACK_LOCALE', 'en')
 
+HELPDESK_HIDE_SAVED_QUERIES = getattr(settings, 'HELPDESK_HIDE_SAVED_QUERIES', False)
 
 ########################################
 # options for staff.create_ticket view #

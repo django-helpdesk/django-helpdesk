@@ -34,7 +34,7 @@
     <div class="card-header">
     <ul class="nav nav-tabs">
         <li class="nav-item" style="width: 200px;">
-            {% trans "Query Results" %}: 
+            {% trans "Query Results" %}:
         </li>
         <li class="nav-item"">
             <a class="nav-link active" href="#datatabletabcontents" id="datatabletabcontents-tab"  data-toggle="tab" role="tab" aria-controls="datatabletabcontents" aria-selected=true>
@@ -145,7 +145,8 @@
 </div>
 <!-- /.panel -->
 
-<div class="card mb-3">
+
+<div class="card mb-3"{% if helpdesk_settings.HELPDESK_HIDE_SAVED_QUERIES %} style="display: none;"{% endif %}>
     <div class="card-header">
         <i class="fas fa-hand-pointer"></i>
         {% trans "Query Selection" %}
