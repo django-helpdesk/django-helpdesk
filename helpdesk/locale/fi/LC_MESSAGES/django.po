@@ -31,25 +31,25 @@ msgstr ""
 
 #: forms.py:137
 msgid "Summary of the problem"
-msgstr ""
+msgstr "Tukipyynnön otsikko"
 
 #: forms.py:142
 msgid "Submitter E-Mail Address"
-msgstr ""
+msgstr "Tukipyynnön lähettäjän sähköpostiosoite"
 
 #: forms.py:144
 msgid ""
 "This e-mail address will receive copies of all public updates to this "
 "ticket."
-msgstr ""
+msgstr "Tämä sähköpostiosoite saa kopion kaikista päivityksistä tähän tukipyyntöön."
 
 #: forms.py:150
 msgid "Description of Issue"
-msgstr ""
+msgstr "Tukipyynnön kuvaus"
 
 #: forms.py:157
 msgid "Case owner"
-msgstr ""
+msgstr "Tukipyynnön jättäjä"
 
 #: forms.py:158
 msgid ""
@@ -63,28 +63,28 @@ msgstr ""
 #: templates/helpdesk/ticket_desc_table.html:47
 #: templates/helpdesk/ticket_list.html:94 views/staff.py:429
 msgid "Priority"
-msgstr ""
+msgstr "Kiireellisyys"
 
 #: forms.py:167
 msgid "Please select a priority carefully. If unsure, leave it as '3'."
-msgstr ""
+msgstr "Valitse kiireellisyys varovasti. Jos olet epävarma jätä se oletusasetusarvoksi (3)."
 
 #: forms.py:174 forms.py:365 models.py:335 templates/helpdesk/ticket.html:186
 #: views/staff.py:439
 msgid "Due on"
-msgstr ""
+msgstr "Eräpäivä"
 
 #: forms.py:186 forms.py:370
 msgid "Attach File"
-msgstr ""
+msgstr "Liitä tiedosto"
 
 #: forms.py:187 forms.py:371
 msgid "You can attach a file such as a document or screenshot to this ticket."
-msgstr ""
+msgstr "Voit liittää tukipyyntöön tiedoston, kuten asiakirjan tai kuvakaappauksen."
 
 #: forms.py:240
 msgid "Ticket Opened"
-msgstr ""
+msgstr "Tukipyyntö avattu"
 
 #: forms.py:247
 #, python-format
@@ -105,7 +105,7 @@ msgstr ""
 
 #: forms.py:348
 msgid "Description of your issue"
-msgstr ""
+msgstr "Tukipyynnön kuvaus"
 
 #: forms.py:350
 msgid ""
@@ -1172,7 +1172,7 @@ msgstr ""
 #: templates/helpdesk/navigation.html:65 templates/helpdesk/navigation.html:68
 #: templates/helpdesk/public_homepage.html:27
 msgid "Submit a Ticket"
-msgstr ""
+msgstr "Jätä tukipyyntö"
 
 #: templates/helpdesk/create_ticket.html:11
 #: templates/helpdesk/edit_ticket.html:11
@@ -1183,7 +1183,7 @@ msgstr ""
 #: templates/helpdesk/edit_ticket.html:11
 #: templates/helpdesk/public_homepage.html:28
 msgid "Please provide as descriptive a title and description as possible."
-msgstr ""
+msgstr "Anna mahdollisimman kuvaava otsikko ja selitys"
 
 #: templates/helpdesk/create_ticket.html:30
 #: templates/helpdesk/public_homepage.html:55
