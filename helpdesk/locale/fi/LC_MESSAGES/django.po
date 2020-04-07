@@ -27,7 +27,7 @@ msgstr ""
 #: templates/helpdesk/ticket_list.html:225 views/staff.py:1032
 #: views/staff.py:1038 views/staff.py:1044 views/staff.py:1050
 msgid "Queue"
-msgstr ""
+msgstr "Aihealue"
 
 #: forms.py:137
 msgid "Summary of the problem"
@@ -99,6 +99,9 @@ msgstr ""
 msgid "Your E-Mail Address"
 msgstr "Sähköpostiosoitteesi"
 
+msgid "Homepage"
+msgstr "Etusivu"
+
 #: forms.py:343
 msgid "We will e-mail you when your ticket is updated."
 msgstr "Lähetämme sinulle sähköpostin aina kun tukipyyntöäsi on päivitetty."
@@ -126,7 +129,7 @@ msgstr ""
 
 #: forms.py:419
 msgid "Ticket Opened Via Web"
-msgstr ""
+msgstr "Tukipyyntö jätetty webin kautta"
 
 #: forms.py:486
 msgid "Show Ticket List on Login?"
@@ -188,7 +191,7 @@ msgstr ""
 #: templates/helpdesk/ticket.html:178 templates/helpdesk/ticket_list.html:85
 #: templates/helpdesk/ticket_list.html:225 views/staff.py:419
 msgid "Title"
-msgstr ""
+msgstr "Otsikko"
 
 #: models.py:40 models.py:822 models.py:1206
 msgid "Slug"
@@ -250,7 +253,7 @@ msgstr ""
 
 #: models.py:87
 msgid "New Ticket CC Address"
-msgstr ""
+msgstr "Uuden tukipyynnnön cc-osoite"
 
 #: models.py:91
 msgid ""
@@ -388,23 +391,23 @@ msgstr "Duplikaatti"
 
 #: models.py:253
 msgid "1. Critical"
-msgstr "1. Erittäin kiireellinen"
+msgstr "1. Heti tai niin pian kuin mahdollista"
 
 #: models.py:254
 msgid "2. High"
-msgstr "2. Kiireellinen"
+msgstr "2. Päivän parin sisällä"
 
 #: models.py:255
 msgid "3. Normal"
-msgstr "3. Normaali"
+msgstr "3. Muutaman päivän odottelu on ok"
 
 #: models.py:256
 msgid "4. Low"
-msgstr "4. Ei kovin kiireellinen"
+msgstr "4. Viikon odottelu on vielä ok"
 
 #: models.py:257
 msgid "5. Very Low"
-msgstr "5. Ei lainkaan kiireellinen"
+msgstr "5. Ei kiirettä, jos nyt tässä kuussa"
 
 #: models.py:271 templates/helpdesk/dashboard.html:100
 #: templates/helpdesk/ticket_list.html:82
@@ -603,11 +606,11 @@ msgstr ""
 
 #: models.py:665
 msgid "Attachment"
-msgstr ""
+msgstr "Liite"
 
 #: models.py:666
 msgid "Attachments"
-msgstr ""
+msgstr "Liitteet"
 
 #: models.py:685
 msgid ""
@@ -1113,7 +1116,7 @@ msgstr ""
 #: templates/helpdesk/base.html:52 templates/helpdesk/public_base.html:6
 #: templates/helpdesk/public_base.html:18
 msgid "Helpdesk"
-msgstr ""
+msgstr "Tuki"
 
 #: templates/helpdesk/base.html:62 templates/helpdesk/rss_list.html:9
 #: templates/helpdesk/rss_list.html:12 templates/helpdesk/rss_list.html:15
@@ -1169,7 +1172,7 @@ msgstr ""
 
 #: templates/helpdesk/create_ticket.html:3
 msgid "Create Ticket"
-msgstr ""
+msgstr "Jätä tukipyyntö"
 
 #: templates/helpdesk/create_ticket.html:10
 #: templates/helpdesk/navigation.html:65 templates/helpdesk/navigation.html:68
@@ -1180,7 +1183,7 @@ msgstr "Jätä tukipyyntö"
 #: templates/helpdesk/create_ticket.html:11
 #: templates/helpdesk/edit_ticket.html:11
 msgid "Unless otherwise stated, all fields are required."
-msgstr ""
+msgstr "Kaikki kentät vaaditaan."
 
 #: templates/helpdesk/create_ticket.html:11
 #: templates/helpdesk/edit_ticket.html:11
@@ -1191,7 +1194,7 @@ msgstr "Anna mahdollisimman kuvaava otsikko ja selitys"
 #: templates/helpdesk/create_ticket.html:30
 #: templates/helpdesk/public_homepage.html:55
 msgid "Submit Ticket"
-msgstr ""
+msgstr "Jätä tukipyyntö"
 
 #: templates/helpdesk/dashboard.html:2
 msgid "Helpdesk Dashboard"
@@ -1444,7 +1447,7 @@ msgstr ""
 #: templates/helpdesk/kb_index.html:4 templates/helpdesk/navigation.html:21
 #: templates/helpdesk/navigation.html:71
 msgid "Knowledgebase"
-msgstr ""
+msgstr "Usein kysytyt kysymykset"
 
 #: templates/helpdesk/kb_index.html:6
 msgid ""
@@ -1515,11 +1518,11 @@ msgstr ""
 
 #: templates/helpdesk/navigation.html:18
 msgid "New Ticket"
-msgstr ""
+msgstr "Uusi tukipyyntö"
 
 #: templates/helpdesk/navigation.html:19
 msgid "Stats"
-msgstr ""
+msgstr "Tilastot"
 
 #: templates/helpdesk/navigation.html:24
 msgid "Saved Query"
@@ -1550,19 +1553,19 @@ msgstr ""
 #: templates/helpdesk/public_view_form.html:4
 #: templates/helpdesk/public_view_ticket.html:2
 msgid "View a Ticket"
-msgstr ""
+msgstr "Katso tukipyyntöä"
 
 #: templates/helpdesk/public_change_language.html:5
 msgid "Change the display language"
-msgstr ""
+msgstr "Vaihda kieltä"
 
 #: templates/helpdesk/public_homepage.html:6
 msgid "Knowledgebase Articles"
-msgstr ""
+msgstr "Usein kysyttyä"
 
 #: templates/helpdesk/public_homepage.html:28
 msgid "All fields are required."
-msgstr ""
+msgstr "Kaikki kentät vaaditaan"
 
 #: templates/helpdesk/public_homepage.html:66
 msgid "Please use button at upper right to login first."
@@ -1571,20 +1574,20 @@ msgstr ""
 #: templates/helpdesk/public_homepage.html:82
 #: templates/helpdesk/public_view_form.html:15
 msgid "Your E-mail Address"
-msgstr ""
+msgstr "Sähköpostiosoitteesi"
 
 #: templates/helpdesk/public_homepage.html:86
 #: templates/helpdesk/public_view_form.html:19
 msgid "View Ticket"
-msgstr ""
+msgstr "Katso tukipyyntöä"
 
 #: templates/helpdesk/public_spam.html:4
 msgid "Unable To Open Ticket"
-msgstr ""
+msgstr "Tukipyyntöä ei löydy"
 
 #: templates/helpdesk/public_spam.html:5
 msgid "Sorry, but there has been an error trying to submit your ticket."
-msgstr ""
+msgstr "Tukipyynnön jättämisessä oli ongelma."
 
 #: templates/helpdesk/public_spam.html:6
 msgid ""
@@ -1602,36 +1605,36 @@ msgstr ""
 
 #: templates/helpdesk/public_view_form.html:8
 msgid "Error:"
-msgstr ""
+msgstr "Virhe:"
 
 #: templates/helpdesk/public_view_ticket.html:9
 #, python-format
 msgid "Queue: %(queue_name)s"
-msgstr ""
+msgstr "Aihealue: %(queue_name)s"
 
 #: templates/helpdesk/public_view_ticket.html:13
 #: templates/helpdesk/ticket_desc_table.html:32
 msgid "Submitted On"
-msgstr ""
+msgstr "Jätetty"
 
 #: templates/helpdesk/public_view_ticket.html:35
 msgid "Tags"
-msgstr ""
+msgstr "Tägit"
 
 #: templates/helpdesk/public_view_ticket.html:48
 #: templates/helpdesk/ticket_desc_table.html:26
 msgid "Accept"
-msgstr ""
+msgstr "Hyväksy"
 
 #: templates/helpdesk/public_view_ticket.html:48
 #: templates/helpdesk/ticket_desc_table.html:26
 msgid "Accept and Close"
-msgstr ""
+msgstr "Hyväksy ja sulje"
 
 #: templates/helpdesk/public_view_ticket.html:57
 #: templates/helpdesk/ticket.html:66
 msgid "Follow-Ups"
-msgstr ""
+msgstr "Jatko"
 
 #: templates/helpdesk/public_view_ticket.html:65
 #: templates/helpdesk/ticket.html:100
@@ -1644,7 +1647,7 @@ msgstr ""
 #: templates/helpdesk/report_output.html:3
 #: templates/helpdesk/report_output.html:16
 msgid "Reports &amp; Statistics"
-msgstr ""
+msgstr "Raportit &amp; tilastot"
 
 #: templates/helpdesk/report_index.html:9
 msgid "You haven't created any tickets yet, so you cannot run any reports."
@@ -1792,19 +1795,19 @@ msgstr ""
 
 #: templates/helpdesk/ticket.html:34
 msgid "Attach another File"
-msgstr ""
+msgstr "Liitä toinen tiedosto"
 
 #: templates/helpdesk/ticket.html:34 templates/helpdesk/ticket.html.py:200
 msgid "Add Another File"
-msgstr ""
+msgstr "Lisää toinen tiedosto"
 
 #: templates/helpdesk/ticket.html:73 templates/helpdesk/ticket.html.py:86
 msgid "Private"
-msgstr ""
+msgstr "Yksityinen"
 
 #: templates/helpdesk/ticket.html:119
 msgid "Respond to this ticket"
-msgstr ""
+msgstr "Vastaa tähän tukipyyntöön"
 
 #: templates/helpdesk/ticket.html:126
 msgid "Use a Pre-set Reply"
@@ -1822,19 +1825,19 @@ msgstr ""
 
 #: templates/helpdesk/ticket.html:131
 msgid "Comment / Resolution"
-msgstr ""
+msgstr "Kommentti / ratkaisu"
 
 #: templates/helpdesk/ticket.html:133
 msgid ""
 "You can insert ticket and queue details in your message. For more "
 "information, see the <a href='../../help/context/'>context help page</a>."
-msgstr ""
+msgstr "Voit käyttää tukipyynnön ja aihealueen tietoja viestissäsi jos haluat. Lisätietoja <a href='../../help/context/'>context help page</a>."
 
 #: templates/helpdesk/ticket.html:136
 msgid ""
 "This ticket cannot be resolved or closed until the tickets it depends on are"
 " resolved."
-msgstr ""
+msgstr "Tätä tukipyyntöä ei voi merkata ratkaistuksi ennen kuin riippuvat tukipyynnöt on ratkaistu."
 
 #: templates/helpdesk/ticket.html:166
 msgid "Is this update public?"
@@ -1862,19 +1865,19 @@ msgstr ""
 
 #: templates/helpdesk/ticket.html:193
 msgid "Attach File(s) &raquo;"
-msgstr ""
+msgstr "Liitä tiedostoja &raquo;"
 
 #: templates/helpdesk/ticket.html:199
 msgid "Attach a File"
-msgstr ""
+msgstr "Liitä tiedosto"
 
 #: templates/helpdesk/ticket.html:207
 msgid "Update This Ticket"
-msgstr ""
+msgstr "Päivitä tätä tukipyyntöä"
 
 #: templates/helpdesk/ticket_cc_add.html:3
 msgid "Add Ticket CC"
-msgstr ""
+msgstr "Lisää CC tukipyyntöön"
 
 #: templates/helpdesk/ticket_cc_add.html:5
 msgid ""
