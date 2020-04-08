@@ -189,6 +189,9 @@ msgstr "Päivämäärä jolloin tukipyyntöä viimeksi muokattiin"
 msgid "Submitter E-Mail"
 msgstr "Tukipyynnön jättäjän sähköposti"
 
+msgid "Submitter"
+msgstr "Tukipyynnön jättäjä"
+
 #: models.py:295
 msgid "Assigned to"
 msgstr "Vastuullinen"
@@ -535,16 +538,49 @@ msgstr ""
 "articles</a>."
 
 msgid "Recommendations: %(recommendations)s"
-msgstr "Recommendations: %(recommendations)s"
+msgstr "Suositukset: %(recommendations)s"
+
+msgid "Query Results"
+msgstr "Kyselyn tulokset"
+
+msgid "Table"
+msgstr "Taulukko"
+
+msgid "Time Spent"
+msgstr "Käytetty aika"
+
+msgid "Due Date"
+msgstr "Eräpäivä"
+
+msgid "Query Selection"
+msgstr "Kyselyn valinnat"
+
+msgid "Filters"
+msgstr "Seulat"
+
+msgid "Add filter"
+msgstr "Lisää seula"
+
+msgid "Apply Filters"
+msgstr "Seulo tulokset"
+
+msgid "Timeline"
+msgstr "Aikajana"
+
+msgid "Overview"
+msgstr "Yleiskatsaus"
+
+msgid "overview"
+msgstr "yleiskatsaus"
 
 msgid "Votes: %(votes)s"
-msgstr "Votes: %(votes)s"
+msgstr "Ääniä: %(votes)s"
 
 msgid "Overall Rating: %(score)s"
-msgstr "Overall Rating: %(score)s"
+msgstr "Yleisearvosana: %(score)s"
 
 msgid "Search..."
-msgstr "Search..."
+msgstr "Hae..."
 
 msgid "Changed %(field)s from %(old_value)s to %(new_value)s."
 msgstr "Changed %(field)s from %(old_value)s to %(new_value)s."
@@ -599,31 +635,31 @@ msgstr ""
 "query to see stats and charts for the data listed below."
 
 msgid "Page %(ticket_num)s of %(num_pages)s."
-msgstr "Page %(ticket_num)s of %(num_pages)s."
+msgstr "Sivu %(ticket_num)s / %(num_pages)s."
 
 msgid "Helpdesk: Open Tickets in queue %(queue)s for %(username)s"
-msgstr "Helpdesk: Open Tickets in queue %(queue)s for %(username)s"
+msgstr "Tuki: Avoimia tukipyyntöjä %(queue)s käyttäjälle %(username)s"
 
 msgid "Helpdesk: Open Tickets for %(username)s"
-msgstr "Helpdesk: Open Tickets for %(username)s"
+msgstr "Tuki: Avoimia tukipyyntöjä käyttäjälle %(username)s"
 
 msgid "Open and Reopened Tickets in queue %(queue)s for %(username)s"
-msgstr "Open and Reopened Tickets in queue %(queue)s for %(username)s"
+msgstr "Avoimet ja uudelleenavatut tukipyynnöt alueessa %(queue)s käyttäjälle %(username)s"
 
 msgid "Open and Reopened Tickets for %(username)s"
-msgstr "Open and Reopened Tickets for %(username)s"
+msgstr "Avoimet ja uudelleenavatut tukipyynnöt käyttäjälle %(username)s"
 
 msgid "Helpdesk: Open Tickets in queue %(queue)s"
-msgstr "Helpdesk: Open Tickets in queue %(queue)s"
+msgstr "Tuki: Avoimet tukipyynnöt alueessa %(queue)s"
 
 msgid "Open and Reopened Tickets in queue %(queue)s"
-msgstr "Open and Reopened Tickets in queue %(queue)s"
+msgstr "Avoimet ja uudelleenavatut tukipyynnöt alueessa %(queue)s"
 
 msgid "Assigned to %(username)s"
-msgstr "Assigned to %(username)s"
+msgstr "Vastuulliseksi henkilöksi asetettu %(username)s"
 
 msgid "Assigned to %(username)s in bulk update"
-msgstr "Assigned to %(username)s in bulk update"
+msgstr "Vastuulliseksi henkilöksi asetettu %(username)s massapäivityksellä"
 
 msgid ""
 "If you select an owner other than yourself, they'll be e-mailed details of "
@@ -1376,6 +1412,12 @@ msgstr "Avoimien tukipyyntöjen lukumäärä"
 msgid "All Tickets submitted by you"
 msgstr "Kaikki lähettämäsi tukipyynnöt"
 
+msgid "All Tickets"
+msgstr "Kaikki tukipyynnöt"
+
+msgid "Reports"
+msgstr "Raportit"
+
 msgid "Pr"
 msgstr "Pr"
 
@@ -1558,7 +1600,7 @@ msgid "Enter a keyword, or a ticket number to jump straight to that ticket."
 msgstr "Kirjoita avainsana tai tukipyynnön numero hypätäksesi suoraan tukipyyntöun."
 
 msgid "Logout"
-msgstr "Kirjautua ulos"
+msgstr "Kirjaudu ulos"
 
 msgid "Log In"
 msgstr "Kirjaudu sisään"
