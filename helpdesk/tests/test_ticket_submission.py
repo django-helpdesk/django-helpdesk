@@ -4,6 +4,7 @@ import uuid
 
 from helpdesk.models import Queue, CustomField, FollowUp, Ticket, TicketCC, KBCategory, KBItem
 from django.test import TestCase
+from django.contrib.auth import get_user_model
 from django.core import mail
 from django.core.exceptions import ObjectDoesNotExist
 from django.forms import ValidationError
@@ -42,6 +43,10 @@ class TicketBasicsTestCase(TestCase):
             'title': 'Test Ticket',
             'description': 'Some Test Ticket',
         }
+
+        self.user = get_user_model().objects.create(
+            username='User_1',
+        )
 
         self.client = Client()
 
@@ -84,6 +89,45 @@ class TicketBasicsTestCase(TestCase):
 
         # Ensure submitter, new-queue + update-queue were all emailed.
         self.assertEqual(email_count + 3, len(mail.outbox))
+
+        ticket = Ticket.objects.last()
+        self.assertEqual(ticket.followup_set.count(), 1)
+        # Follow up is anonymous
+        self.assertIsNone(ticket.followup_set.first().user)
+
+    def test_create_ticket_authorized(self):
+        email_count = len(mail.outbox)
+        self.client.force_login(self.user)
+
+        response = self.client.get(reverse('helpdesk:home'))
+        self.assertEqual(response.status_code, 200)
+
+        post_data = {
+            'title': 'Test ticket title',
+            'queue': self.queue_public.id,
+            'submitter_email': 'ticket1.submitter@example.com',
+            'body': 'Test ticket body',
+            'priority': 3,
+        }
+
+        response = self.client.post(reverse('helpdesk:home'), post_data, follow=True)
+        last_redirect = response.redirect_chain[-1]
+        last_redirect_url = last_redirect[0]
+        # last_redirect_status = last_redirect[1]
+
+        # Ensure we landed on the "View" page.
+        # Django 1.9 compatible way of testing this
+        # https://docs.djangoproject.com/en/1.9/releases/1.9/#http-redirects-no-longer-forced-to-absolute-uris
+        urlparts = urlparse(last_redirect_url)
+        self.assertEqual(urlparts.path, reverse('helpdesk:public_view'))
+
+        # Ensure submitter, new-queue + update-queue were all emailed.
+        self.assertEqual(email_count + 3, len(mail.outbox))
+
+        ticket = Ticket.objects.last()
+        self.assertEqual(ticket.followup_set.count(), 1)
+        # Follow up is for registered user
+        self.assertEqual(ticket.followup_set.first().user, self.user)
 
     def test_create_ticket_private(self):
         email_count = len(mail.outbox)
