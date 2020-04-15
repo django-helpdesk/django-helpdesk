@@ -551,7 +551,7 @@ def ticket_from_message(message, queue, logger):
         # copy email to all those CC'd to this particular ticket
         for cc in t.ticketcc_set.all():
             # don't duplicate email to assignee
-            if t.assigned_to.email != cc.email_address:
+            if not t.assigned_to or (t.assigned_to.email != cc.email_address):
                 send_templated_mail(
                     'updated_cc',
                     context,
