@@ -70,6 +70,7 @@ class QuickDjangoTest(object):
 
         settings.configure(
             DEBUG=True,
+            TIME_ZONE='UTC',
             DATABASES={
                 'default': {
                     'ENGINE': 'django.db.backends.sqlite3',
