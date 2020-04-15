@@ -1046,8 +1046,7 @@ class CreateTicketView(MustBeStaffMixin, abstract_views.AbstractCreateTicketMixi
         return kwargs
 
     def form_valid(self, form):
-        self.ticket = form.save(
-                    user=self.request.user if self.request.user.is_authenticated else None)
+        self.ticket = form.save(user=self.request.user if self.request.user.is_authenticated else None)
         return super().form_valid(form)
 
     def get_success_url(self):
