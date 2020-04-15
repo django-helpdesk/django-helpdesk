@@ -6,11 +6,10 @@ django-helpdesk - A Django powered ticket tracker for small enterprise.
 forms.py - Definitions of newforms-based forms for creating and maintaining
            tickets.
 """
-
+import logging
 
 from django.core.exceptions import ObjectDoesNotExist
 from django import forms
-from django.forms import widgets
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth import get_user_model
@@ -18,9 +17,10 @@ from django.utils import timezone
 
 from helpdesk.lib import safe_template_context, process_attachments
 from helpdesk.models import (Ticket, Queue, FollowUp, IgnoreEmail, TicketCC,
-                             CustomField, TicketCustomFieldValue, TicketDependency, UserSettings)
+                             CustomField, TicketCustomFieldValue, TicketDependency, UserSettings, KBItem)
 from helpdesk import settings as helpdesk_settings
 
+logger = logging.getLogger(__name__)
 User = get_user_model()
 
 CUSTOMFIELD_TO_FIELD_DICT = {
@@ -158,7 +158,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
         widget=forms.Select(attrs={'class': 'form-control'}),
         choices=Ticket.PRIORITY_CHOICES,
         required=True,
-        initial='3',
+        initial=getattr(settings, 'HELPDESK_PUBLIC_TICKET_PRIORITY', '3'),
         label=_('Priority'),
         help_text=_("Please select a priority carefully. If unsure, leave it as '3'."),
     )
@@ -177,6 +177,16 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
         help_text=_('You can attach a file such as a document or screenshot to this ticket.'),
     )
 
+    def __init__(self, kbcategory=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if kbcategory:
+            self.fields['kbitem'] = forms.ChoiceField(
+                widget=forms.Select(attrs={'class': 'form-control'}),
+                required=False,
+                label=_('Knowledge Base Item'),
+                choices=[(kbi.pk, kbi.title) for kbi in KBItem.objects.filter(category=kbcategory.pk, enabled=True)],
+            )
+
     def _add_form_custom_fields(self, staff_only_filter=None):
         if staff_only_filter is None:
             queryset = CustomField.objects.all()
@@ -192,18 +202,33 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
 
             self.customfield_to_field(field, instanceargs)
 
-    def _create_ticket(self):
-        queue = Queue.objects.get(id=int(self.cleaned_data['queue']))
+    def _get_queue(self):
+        # this procedure is re-defined for public submission form
+        return Queue.objects.get(id=int(self.cleaned_data['queue']))
 
-        ticket = Ticket(title=self.cleaned_data['title'],
-                        submitter_email=self.cleaned_data['submitter_email'],
-                        created=timezone.now(),
-                        status=Ticket.OPEN_STATUS,
-                        queue=queue,
-                        description=self.cleaned_data['body'],
-                        priority=self.cleaned_data['priority'],
-                        due_date=self.cleaned_data['due_date'],
-                        )
+    def _create_ticket(self):
+        queue = self._get_queue()
+        kbitem = None
+        if 'kbitem' in self.cleaned_data:
+            kbitem = KBItem.objects.get(id=int(self.cleaned_data['kbitem']))
+
+        ticket = Ticket(
+            title=self.cleaned_data['title'],
+            submitter_email=self.cleaned_data['submitter_email'],
+            created=timezone.now(),
+            status=Ticket.OPEN_STATUS,
+            queue=queue,
+            description=self.cleaned_data['body'],
+            priority=self.cleaned_data.get(
+                'priority',
+                getattr(settings, "HELPDESK_PUBLIC_TICKET_PRIORITY", "3")
+            ),
+            due_date=self.cleaned_data.get(
+                'due_date',
+                getattr(settings, "HELPDESK_PUBLIC_TICKET_DUE_DATE", None)
+            ) or None,
+            kbitem=kbitem,
+        )
 
         return ticket, queue
 
@@ -263,7 +288,11 @@ class TicketForm(AbstractTicketForm):
                     'updates to this ticket.'),
     )
     assigned_to = forms.ChoiceField(
-        widget=forms.Select(attrs={'class': 'form-control'}) if not helpdesk_settings.HELPDESK_CREATE_TICKET_HIDE_ASSIGNED_TO else forms.HiddenInput(),
+        widget=(
+            forms.Select(attrs={'class': 'form-control'})
+            if not helpdesk_settings.HELPDESK_CREATE_TICKET_HIDE_ASSIGNED_TO
+            else forms.HiddenInput()
+        ),
         required=False,
         label=_('Case owner'),
         help_text=_('If you select an owner other than yourself, they\'ll be '
@@ -333,20 +362,55 @@ class PublicTicketForm(AbstractTicketForm):
         help_text=_('We will e-mail you when your ticket is updated.'),
     )
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, hidden_fields=(), readonly_fields=(), *args, **kwargs):
         """
         Add any (non-staff) custom fields that are defined to the form
         """
         super(PublicTicketForm, self).__init__(*args, **kwargs)
+        self._add_form_custom_fields(False)
 
-        if hasattr(settings, 'HELPDESK_PUBLIC_TICKET_QUEUE'):
-            self.fields['queue'].widget = forms.HiddenInput()
-        if hasattr(settings, 'HELPDESK_PUBLIC_TICKET_PRIORITY'):
-            self.fields['priority'].widget = forms.HiddenInput()
-        if hasattr(settings, 'HELPDESK_PUBLIC_TICKET_DUE_DATE'):
-            self.fields['due_date'].widget = forms.HiddenInput()
-        self.fields['queue'].choices = [('', '--------')] + [
-            (q.id, q.title) for q in Queue.objects.filter(allow_public_submission=True)]
+        field_hide_table = {
+            'queue': 'HELPDESK_PUBLIC_TICKET_QUEUE',
+            'priority': 'HELPDESK_PUBLIC_TICKET_PRIORITY',
+            'due_date': 'HELPDESK_PUBLIC_TICKET_DUE_DATE',
+        }
+
+        for field_name, field_setting_key in field_hide_table.items():
+            has_settings_default_value = getattr(settings, field_setting_key, None)
+            if has_settings_default_value is not None:
+                hidden_fields += (field_name,)
+
+        for field in hidden_fields:
+            if field in self.fields:
+                del self.fields[field]
+
+        public_queues = Queue.objects.filter(allow_public_submission=True)
+
+        if len(public_queues) == 0:
+            logger.warning(
+                "There are no public queues defined - public ticket creation is impossible"
+            )
+
+        if 'queue' in self.fields:
+            self.fields['queue'].choices = [('', '--------')] + [
+                (q.id, q.title) for q in public_queues]
+
+    def _get_queue(self):
+        if getattr(settings, 'HELPDESK_PUBLIC_TICKET_QUEUE', None) is not None:
+            # force queue to be the pre-defined one
+            # (only for public submissions)
+            public_queue = Queue.objects.filter(
+                slug=settings.HELPDESK_PUBLIC_TICKET_QUEUE
+            ).first()
+            if not public_queue:
+                logger.fatal(
+                    "Public queue '%s' is configured as default but can't be found",
+                    settings.HELPDESK_PUBLIC_TICKET_QUEUE
+                )
+            return public_queue
+        else:
+            # get the queue user entered
+            return Queue.objects.get(id=int(self.cleaned_data['queue']))
 
     def save(self):
         """

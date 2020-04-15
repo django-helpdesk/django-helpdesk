@@ -1,0 +1,14 @@
+{% load i18n %}
+{% load saved_queries %}
+<!DOCTYPE html>
+<head>
+    {% include 'helpdesk/base-head.html' %}
+    {% block helpdesk_head %}{% endblock %}
+</head>
+
+<body>
+    {% block helpdesk_body %}
+    {% include 'helpdesk/kb_category_base.html' %}
+    {% endblock %}
+    {% include 'helpdesk/base_js.html' %}
+</body>

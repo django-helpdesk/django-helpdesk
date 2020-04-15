@@ -15,6 +15,8 @@ Contents
    settings
    spam
    custom_fields
+   integration
+   teams
    contributing
    license
 

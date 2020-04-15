@@ -113,7 +113,7 @@ def get_requirements():
 def get_long_description():
     with open(os.path.join(os.path.dirname(__file__), "README.rst")) as f:
         long_desc = f.read()
-        
+
     return long_desc
 
 

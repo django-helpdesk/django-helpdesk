@@ -70,9 +70,9 @@ class FollowUpAdmin(admin.ModelAdmin):
 
 @admin.register(KBItem)
 class KBItemAdmin(admin.ModelAdmin):
-    list_display = ('category', 'title', 'last_updated',)
+    list_display = ('category', 'title', 'last_updated', 'team', 'order', 'enabled')
     inlines = [KBIAttachmentInline]
-    readonly_fields = ('voted_by',)
+    readonly_fields = ('voted_by', 'downvoted_by')
 
     list_display_links = ('title',)
 
@@ -93,6 +93,10 @@ class IgnoreEmailAdmin(admin.ModelAdmin):
     list_display = ('name', 'queue_list', 'email_address', 'keep_in_mailbox')
 
 
+@admin.register(KBCategory)
+class KBCategoryAdmin(admin.ModelAdmin):
+    list_display = ('name', 'title', 'slug', 'public')
+
+
 admin.site.register(PreSetReply)
 admin.site.register(EscalationExclusion)
-admin.site.register(KBCategory)

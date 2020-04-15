@@ -6,27 +6,32 @@ django-helpdesk - A Django powered ticket tracker for small enterprise.
 views/public.py - All public facing views, eg non-staff (no authentication
                   required) views.
 """
-from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
-try:
-    # Django 2.0+
-    from django.urls import reverse
-except ImportError:
-    # Django < 2
-    from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect, HttpResponse
+import logging
+
+from django.core.exceptions import (
+    ObjectDoesNotExist, PermissionDenied, ImproperlyConfigured,
+)
+from django.urls import reverse
+from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.utils.http import urlquote
 from django.utils.translation import ugettext as _
 from django.conf import settings
+from django.views.decorators.clickjacking import xframe_options_exempt
+from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import FormView
 
 from helpdesk import settings as helpdesk_settings
 from helpdesk.decorators import protect_view, is_helpdesk_staff
 import helpdesk.views.staff as staff
+import helpdesk.views.abstract_views as abstract_views
 from helpdesk.forms import PublicTicketForm
 from helpdesk.lib import text_is_spam
-from helpdesk.models import Ticket, Queue, UserSettings, KBCategory
+from helpdesk.models import CustomField, Ticket, Queue, UserSettings, KBCategory, KBItem
+from helpdesk.user import huser_from_request
+
+logger = logging.getLogger(__name__)
 
 
 def create_ticket(request, *args, **kwargs):
@@ -36,8 +41,7 @@ def create_ticket(request, *args, **kwargs):
         return CreateTicketView.as_view()(request, *args, **kwargs)
 
 
-class CreateTicketView(FormView):
-    template_name = 'helpdesk/public_create_ticket.html'
+class BaseCreateTicketView(abstract_views.AbstractCreateTicketMixin, FormView):
     form_class = PublicTicketForm
 
     def dispatch(self, *args, **kwargs):
@@ -57,41 +61,35 @@ class CreateTicketView(FormView):
                 return HttpResponseRedirect(reverse('helpdesk:dashboard'))
         return super().dispatch(*args, **kwargs)
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['kb_categories'] = KBCategory.objects.all()
-        return context
-
     def get_initial(self):
-        request = self.request
-        initial_data = {}
-        try:
-            queue = Queue.objects.get(slug=request.GET.get('queue', None))
-        except Queue.DoesNotExist:
-            queue = None
+        initial_data = super().get_initial()
 
         # add pre-defined data for public ticket
         if hasattr(settings, 'HELPDESK_PUBLIC_TICKET_QUEUE'):
             # get the requested queue; return an error if queue not found
             try:
-                queue = Queue.objects.get(slug=settings.HELPDESK_PUBLIC_TICKET_QUEUE)
-            except Queue.DoesNotExist:
-                return HttpResponse(status=500)
+                initial_data['queue'] = Queue.objects.get(
+                    slug=settings.HELPDESK_PUBLIC_TICKET_QUEUE,
+                    allow_public_submission=True
+                ).id
+            except Queue.DoesNotExist as e:
+                logger.fatal(
+                    "Public queue '%s' is configured as default but can't be found",
+                    settings.HELPDESK_PUBLIC_TICKET_QUEUE
+                )
+                raise ImproperlyConfigured("Wrong public queue configuration") from e
         if hasattr(settings, 'HELPDESK_PUBLIC_TICKET_PRIORITY'):
             initial_data['priority'] = settings.HELPDESK_PUBLIC_TICKET_PRIORITY
         if hasattr(settings, 'HELPDESK_PUBLIC_TICKET_DUE_DATE'):
             initial_data['due_date'] = settings.HELPDESK_PUBLIC_TICKET_DUE_DATE
-
-        if queue:
-            initial_data['queue'] = queue.id
-
-        if request.user.is_authenticated and request.user.email:
-            initial_data['submitter_email'] = request.user.email
-
-        query_param_fields = ['submitter_email', 'title', 'body']
-        for qpf in query_param_fields:
-            initial_data[qpf] = request.GET.get(qpf, initial_data.get(qpf, ""))
         return initial_data
+
+    def get_form_kwargs(self, *args, **kwargs):
+        kwargs = super().get_form_kwargs(*args, **kwargs)
+        if '_hide_fields_' in self.request.GET:
+            kwargs['hidden_fields'] = self.request.GET.get('_hide_fields_', '').split(',')
+        kwargs['readonly_fields'] = self.request.GET.get('_readonly_fields_', '').split(',')
+        return kwargs
 
     def form_valid(self, form):
         request = self.request
@@ -115,8 +113,38 @@ class CreateTicketView(FormView):
         request = self.request
 
 
+class CreateTicketIframeView(BaseCreateTicketView):
+    template_name = 'helpdesk/public_create_ticket_iframe.html'
+
+    @csrf_exempt
+    @xframe_options_exempt
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
+
+    def form_valid(self, form):
+        if super().form_valid(form).status_code == 302:
+            return HttpResponseRedirect(reverse('helpdesk:success_iframe'))
+
+
+class SuccessIframeView(TemplateView):
+    template_name = 'helpdesk/success_iframe.html'
+
+    @xframe_options_exempt
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
+
+
+class CreateTicketView(BaseCreateTicketView):
+    template_name = 'helpdesk/public_create_ticket.html'
+
+
 class Homepage(CreateTicketView):
     template_name = 'helpdesk/public_homepage.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['kb_categories'] = huser_from_request(self.request).get_allowed_kb_categories()
+        return context
 
 
 def search_for_ticket(request, error_message=None):

@@ -84,6 +84,21 @@ class GetEmailCommonTests(TestCase):
         self.assertEqual(ticket.title, "Testovácí email")
         self.assertEqual(ticket.description, "íářčšáíéřášč")
 
+    def test_email_with_utf_8_non_decodable_sequences(self):
+        """
+        Tests that emails with utf-8 non-decodable sequences are parsed correctly
+        """
+        with open(os.path.join(THIS_DIR, "test_files/utf-nondecodable.eml")) as fd:
+            test_email = fd.read()
+        ticket = helpdesk.email.object_from_message(test_email, self.queue_public, self.logger)
+        self.assertEqual(ticket.title, "Fwd: Cyklozaměstnavatel - změna vyhodnocení")
+        self.assertIn("prosazuje lepší", ticket.description)
+        followups = FollowUp.objects.filter(ticket=ticket)
+        followup = followups[0]
+        attachments = FollowUpAttachment.objects.filter(followup=followup)
+        attachment = attachments[0]
+        self.assertIn('prosazuje lepší', attachment.file.read().decode("utf-8"))
+
 
 class GetEmailParametricTemplate(object):
     """TestCase that checks basic email functionality across methods and socks configs."""

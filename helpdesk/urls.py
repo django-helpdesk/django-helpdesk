@@ -151,6 +151,11 @@ urlpatterns = [
     url(r'^datatables_ticket_list/(?P<query>{})$'.format(base64_pattern),
         staff.datatables_ticket_list,
         name="datatables_ticket_list"),
+
+    url(r'^timeline_ticket_list/(?P<query>{})$'.format(base64_pattern),
+        staff.timeline_ticket_list,
+        name="timeline_ticket_list"),
+
 ]
 
 urlpatterns += [
@@ -161,6 +166,14 @@ urlpatterns += [
     url(r'^tickets/submit/$',
         public.create_ticket,
         name='submit'),
+
+    url(r'^tickets/submit_iframe/$',
+        public.CreateTicketIframeView.as_view(),
+        name='submit_iframe'),
+
+    url(r'^tickets/success_iframe/$',  # Ticket was submitted successfully
+        public.SuccessIframeView.as_view(),
+        name='success_iframe'),
 
     url(r'^view/$',
         public.view_ticket,
@@ -223,17 +236,17 @@ if helpdesk_settings.HELPDESK_KB_ENABLED:
             kb.index,
             name='kb_index'),
 
-        url(r'^kb/(?P<item>[0-9]+)/$',
-            kb.item,
-            name='kb_item'),
+        url(r'^kb/(?P<slug>[A-Za-z0-9_-]+)/$',
+            kb.category,
+            name='kb_category'),
 
         url(r'^kb/(?P<item>[0-9]+)/vote/$',
             kb.vote,
             name='kb_vote'),
 
-        url(r'^kb/(?P<slug>[A-Za-z0-9_-]+)/$',
-            kb.category,
-            name='kb_category'),
+        url(r'^kb_iframe/(?P<slug>[A-Za-z0-9_-]+)/$',
+            kb.category_iframe,
+            name='kb_category_iframe'),
     ]
 
 urlpatterns += [

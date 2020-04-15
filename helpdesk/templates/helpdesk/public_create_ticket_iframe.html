@@ -1,0 +1,12 @@
+{% load i18n %}
+{% load saved_queries %}
+<!DOCTYPE html>
+<head>
+    {% include 'helpdesk/base-head.html' %}
+</head>
+
+<body>
+    {% block helpdesk_body %}
+    {% include 'helpdesk/public_create_ticket_base.html' %}
+    {% endblock %}
+</body>

@@ -25,6 +25,8 @@ from django.utils.safestring import mark_safe
 from markdown import markdown
 from markdown.extensions import Extension
 
+import pinax.teams.models
+
 
 import uuid
 
@@ -35,9 +37,9 @@ from .templated_email import send_templated_mail
 
 def format_time_spent(time_spent):
     if time_spent:
-        time_spent = "{0:02d}h:{0:02d}m".format(
-            int(time_spent.total_seconds() // (3600)),
-            int((time_spent.total_seconds() % 3600) / 60)
+        time_spent = "{0:02d}h:{1:02d}m".format(
+            time_spent.seconds // 3600,
+            time_spent.seconds // 60
         )
     else:
         time_spent = ""
@@ -559,6 +561,14 @@ class Ticket(models.Model):
         default=mk_secret,
     )
 
+    kbitem = models.ForeignKey(
+        "KBItem",
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE,
+        verbose_name=_('Knowledge base item the user was viewing when they created this ticket.'),
+    )
+
     @property
     def time_spent(self):
         """Return back total time spent on the ticket. This is calculated value
@@ -604,6 +614,8 @@ class Ticket(models.Model):
 
         if dont_send_to is not None:
             recipients.update(dont_send_to)
+
+        recipients.add(self.queue.email_address)
 
         def should_receive(email):
             return email and email not in recipients
@@ -1203,8 +1215,13 @@ class KBCategory(models.Model):
     listing of questions & answers.
     """
 
+    name = models.CharField(
+        _('Name of the category'),
+        max_length=100,
+    )
+
     title = models.CharField(
-        _('Title'),
+        _('Title on knowledgebase page'),
         max_length=100,
     )
 
@@ -1216,8 +1233,21 @@ class KBCategory(models.Model):
         _('Description'),
     )
 
+    queue = models.ForeignKey(
+        Queue,
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE,
+        verbose_name=_('Default queue when creating a ticket after viewing this category.'),
+    )
+
+    public = models.BooleanField(
+        default=True,
+        verbose_name=_("Is KBCategory publicly visible?")
+    )
+
     def __str__(self):
-        return '%s' % self.title
+        return '%s' % self.name
 
     class Meta:
         ordering = ('title',)
@@ -1234,7 +1264,14 @@ class KBItem(models.Model):
     An item within the knowledgebase. Very straightforward question/answer
     style system.
     """
-    voted_by = models.ManyToManyField(settings.AUTH_USER_MODEL)
+    voted_by = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        related_name='votes',
+    )
+    downvoted_by = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        related_name='downvotes',
+    )
     category = models.ForeignKey(
         KBCategory,
         on_delete=models.CASCADE,
@@ -1272,6 +1309,25 @@ class KBItem(models.Model):
         blank=True,
     )
 
+    team = models.ForeignKey(
+        pinax.teams.models.Team,
+        on_delete=models.CASCADE,
+        verbose_name=_('Team'),
+        blank=True,
+        null=True,
+    )
+
+    order = models.PositiveIntegerField(
+        _('Order'),
+        blank=True,
+        null=True,
+    )
+
+    enabled = models.BooleanField(
+        _('Enabled to display to users'),
+        default=True,
+    )
+
     def save(self, *args, **kwargs):
         if not self.last_updated:
             self.last_updated = timezone.now()
@@ -1285,16 +1341,26 @@ class KBItem(models.Model):
     score = property(_score)
 
     def __str__(self):
-        return '%s' % self.title
+        return '%s: %s' % (self.category.title, self.title)
 
     class Meta:
-        ordering = ('title',)
+        ordering = ('order', 'title',)
         verbose_name = _('Knowledge base item')
         verbose_name_plural = _('Knowledge base items')
 
     def get_absolute_url(self):
         from django.urls import reverse
-        return reverse('helpdesk:kb_item', args=(self.id,))
+        return str(reverse('helpdesk:kb_category', args=(self.category.slug,))) + "?kbitem=" + str(self.pk)
+
+    def query_url(self):
+        from django.urls import reverse
+        return str(reverse('helpdesk:list')) + "?kbitem=" + str(self.pk)
+
+    def num_open_tickets(self):
+        return Ticket.objects.filter(kbitem=self, status__in=(1, 2)).count()
+
+    def unassigned_tickets(self):
+        return Ticket.objects.filter(kbitem=self, status__in=(1, 2), assigned_to__isnull=True)
 
     def get_markdown(self):
         return get_markdown(self.answer)

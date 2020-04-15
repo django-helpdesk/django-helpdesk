@@ -28,7 +28,11 @@ class QuickDjangoTest(object):
         'django.contrib.sites',
         'django.contrib.staticfiles',
         'bootstrap4form',
+        'account',
+        'pinax.invitations',
+        'pinax.teams',
         'helpdesk',
+        'reversion',
     )
     MIDDLEWARE = [
         'django.middleware.security.SecurityMiddleware',
