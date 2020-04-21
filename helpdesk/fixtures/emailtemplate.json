@@ -1726,5 +1726,198 @@
          "template_name" : "updated_submitter"
       },
       "model" : "helpdesk.emailtemplate"
-   }
+   },
+    {
+        "model": "helpdesk.emailtemplate",
+        "pk": 145,
+        "fields": {
+            "template_name": "assigned_cc",
+            "subject": "(Asiakaspalvelijan vaihto)",
+            "heading": "Palvelupyynn\u00f6n asiakaspalvelija muuttunut",
+            "plain_text": "Hei,\r\n\r\nSaat t\u00e4m\u00e4n s\u00e4hk\u00f6postin tiedoksi siit\u00e4 ett\u00e4 palvelupyynt\u00f6 {{ ticket.ticket }} (\"{{ ticket.title }}\") jonka j\u00e4tti {{ ticket.submitter_email }} on {% if ticket.assigned_to %}ohjattu {{ ticket.assigned_to }}{% else %}ilman asiakaspalvelijaa{% endif %}.\r\n\r\nPalvelupyynn\u00f6n tunniste: {{ ticket.ticket }}\r\nJono: {{ queue.title }}\r\nOtsikko: {{ ticket.title }}\r\nVastaanotettu: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}\r\nL\u00e4hett\u00e4j\u00e4: {{ ticket.submitter_email|default:\"Tuntematon\" }}\r\nT\u00e4rkeysj\u00e4rjestys: {{ ticket.get_priority_display }}\r\nTila: {{ ticket.get_status }}\r\nAsiakaspalvelija: {{ ticket.get_assigned_to }}\r\nKatso netiss\u00e4: {{ ticket.staff_url }}\r\n\r\nPalvelupyynn\u00f6n alkuper\u00e4inen kuvaus oli:\r\n\r\n{{ ticket.description }}",
+            "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Hei,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Saat t\u00e4m\u00e4n s\u00e4hk\u00f6postin tiedoksi siit\u00e4 ett\u00e4 palvelupyynt\u00f6 <a href=\"{{ ticket.staff_url }}\"><b>{{ ticket.ticket }}</b></a> (<em>{{ ticket.title }}</em>) jonka j\u00e4tti {{ ticket.submitter_email }} on {% if ticket.assigned_to %}ohjattu {{ ticket.assigned_to }}{% else %}ilman asiakaspalvelijaa{% endif %}.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">\r\n<b>Palvelupyynn\u00f6n tunniste</b>: {{ ticket.ticket }}<br>\r\n<b>Jono</b>: {{ queue.title }}<br>\r\n<b>Title</b>: {{ ticket.title }}<br>\r\n<b>Vastaanotettu</b>: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}<br>\r\n<b>L\u00e4hett\u00e4j\u00e4</b>: {{ ticket.submitter_email|default:\"Unknown\" }}<br>\r\n<b>T\u00e4rkeysj\u00e4rjestys</b>: {{ ticket.get_priority_display }}<br>\r\n<b>Tila</b>: {{ ticket.get_status }}<br>\r\n<b>Asiakaspalvelija</b>: {{ ticket.get_assigned_to }}<br>\r\n<b><a href='{{ ticket.staff_url }}'>Katso netiss\u00e4</a></b> p\u00e4ivitt\u00e4\u00e4ksesi palvelupyynt\u00f6\u00e4 (kirjautuminen vaaditaan)</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Palvelupyynn\u00f6n alkuper\u00e4inen kuvaus oli:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.description|linebreaksbr }}</blockquote>",
+            "locale": "fi"
+        }
+    },
+    {
+        "model": "helpdesk.emailtemplate",
+        "pk": 146,
+        "fields": {
+            "template_name": "assigned_owner",
+            "subject": "(Osoitettu sinulle)",
+            "heading": "Palvelupyynt\u00f6 osoitettu sinulle",
+            "plain_text": "Hei,\r\n\r\nSaat t\u00e4m\u00e4n s\u00e4hk\u00f6postin tiedoksi siit\u00e4 ett\u00e4 palvelupyynt\u00f6 {{ ticket.ticket }} (\"{{ ticket.title }}\") jonka j\u00e4tti {{ ticket.submitter_email }} on osoitettu sinulle.\r\n\r\nPalvelupyynn\u00f6n tunniste: {{ ticket.ticket }}\r\nJono: {{ queue.title }}\r\nOtsikko: {{ ticket.title }}\r\nVastaanotettu: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}\r\nL\u00e4hett\u00e4j\u00e4: {{ ticket.submitter_email|default:\"Tuntematon\" }}\r\nT\u00e4rkeysj\u00e4rjestys: {{ ticket.get_priority_display }}\r\nTila: {{ ticket.get_status }}\r\nAsiakaspalvelija: SIN\u00c4\r\nKatso netiss\u00e4: {{ ticket.staff_url }} (kirjautuminen vaaditaan)\r\n\r\nPalvelupyynn\u00f6n alkuper\u00e4inen kuvaus oli:\r\n\r\n{{ ticket.description }}",
+            "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Hei,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Saat t\u00e4m\u00e4n s\u00e4hk\u00f6postin tiedoksi siit\u00e4 ett\u00e4 palvelupyynt\u00f6 <a href=\"{{ ticket.staff_url }}\"><b>{{ ticket.ticket }}</b></a> (<em>{{ ticket.title }}</em>) jonka j\u00e4tti {{ ticket.submitter_email }} on osoitettu sinulle.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">\r\n<b>Palvelupyynn\u00f6n tunniste</b>: {{ ticket.ticket }}<br>\r\n<b>Jono</b>: {{ queue.title }}<br>\r\n<b>Title</b>: {{ ticket.title }}<br>\r\n<b>Vastaanotettu</b>: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}<br>\r\n<b>L\u00e4hett\u00e4j\u00e4</b>: {{ ticket.submitter_email|default:\"Unknown\" }}<br>\r\n<b>T\u00e4rkeysj\u00e4rjestys</b>: {{ ticket.get_priority_display }}<br>\r\n<b>Tila</b>: {{ ticket.get_status }}<br>\r\n<b>Asiakaspalvelija</b>: SIN\u00c4<br>\r\n<b><a href='{{ ticket.staff_url }}'>Katso netiss\u00e4</a></b> p\u00e4ivitt\u00e4\u00e4ksesi palvelupyynt\u00f6\u00e4 (kirjautuminen vaaditaan)</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Palvelupyynn\u00f6n alkuper\u00e4inen kuvaus oli:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.description|linebreaksbr }}</blockquote>",
+            "locale": "fi"
+        }
+    },
+    {
+        "model": "helpdesk.emailtemplate",
+        "pk": 147,
+        "fields": {
+            "template_name": "closed_cc",
+            "subject": "(Valmistunut)",
+            "heading": "Palvelupyynt\u00f6 valmistunut",
+            "plain_text": "Hei,\r\n\r\nPalvelupyynt\u00f6 {{ ticket.title }} ('{{ ticket.title }}') {% if ticket.assigned_to %}, joka on osoitettu {{ ticket.get_assigned_to }}{% endif %} on valmistunut.\r\n\r\nPalvelupyynn\u00f6n tunniste: {{ ticket.ticket }}\r\nJono: {{ queue.title }}\r\nOtsikko: {{ ticket.title }}\r\nVastaanotettu: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}\r\nL\u00e4hett\u00e4j\u00e4: {{ ticket.submitter_email|default:\"Tuntematon\" }}\r\nT\u00e4rkeysj\u00e4rjestys: {{ ticket.get_priority_display }}\r\nTila: {{ ticket.get_status }}\r\nAsiakaspalvelija: {{ ticket.get_assigned_to }}\r\nKatso netiss\u00e4: {{ ticket.staff_url }} (kirjautuminen vaaditaan)\r\n\r\nPalvelupyynn\u00f6n alkuper\u00e4inen kuvaus oli:\r\n\r\n{{ ticket.description }}\r\n\r\nAsiakaspalvelijamme kommentit liittyen palvelupyynn\u00f6n valmistumiseen:\r\n\r\n{{ resolution }}",
+            "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Hello,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Palvelupyynt\u00f6 <i>{{ ticket.title }}</i> ('{{ ticket.title }}'){% if ticket.assigned_to %}, joka on osoitettu {{ ticket.get_assigned_to }}{% endif %} on valmistunut.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">\r\n<b>Palvelupyynn\u00f6n tunniste</b>: {{ ticket.ticket }}<br>\r\n<b>Jono</b>: {{ queue.title }}<br>\r\n<b>Title</b>: {{ ticket.title }}<br>\r\n<b>Vastaanotettu</b>: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}<br>\r\n<b>L\u00e4hett\u00e4j\u00e4</b>: {{ ticket.submitter_email|default:\"Unknown\" }}<br>\r\n<b>T\u00e4rkeysj\u00e4rjestys</b>: {{ ticket.get_priority_display }}<br>\r\n<b>Tila</b>: {{ ticket.get_status }}<br>\r\n<b>Asiakaspalvelija</b>: {{ ticket.get_assigned_to }}<br>\r\n<b><a href='{{ ticket.staff_url }}'>Katso netiss\u00e4</a></b> p\u00e4ivitt\u00e4\u00e4ksesi palvelupyynt\u00f6\u00e4 (kirjautuminen vaaditaan)</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Palvelupyynn\u00f6n alkuper\u00e4inen kuvaus oli:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.description|linebreaksbr }}</blockquote>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Asiakaspalvelijamme kommentit liittyen palvelupyynn\u00f6n valmistumiseen:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ resolution }}</blockquote>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Voit tutkia palvelupyynt\u00f6\u00e4 netiss\u00e4 <a href='{{ ticket.staff_url }}'>{{ ticket.staff_url }}</a>.</p>",
+            "locale": "fi"
+        }
+    },
+    {
+        "model": "helpdesk.emailtemplate",
+        "pk": 148,
+        "fields": {
+            "template_name": "closed_owner",
+            "subject": "(Valmistunut)",
+            "heading": "Palvelupyynt\u00f6 valmistunut",
+            "plain_text": "Hei,\r\n\r\nAlla oleva sinulle osoitettu palvelupyynt\u00f6 on valmistunut.\r\n\r\nPalvelupyynn\u00f6n tunniste: {{ ticket.ticket }}\r\nJono: {{ queue.title }}\r\nOtsikko: {{ ticket.title }}\r\nVastaanotettu: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}\r\nL\u00e4hett\u00e4j\u00e4: {{ ticket.submitter_email|default:\"Tuntematon\" }}\r\nT\u00e4rkeysj\u00e4rjestys: {{ ticket.get_priority_display }}\r\nTila: {{ ticket.get_status }}\r\nAsiakaspalvelija: {{ ticket.get_assigned_to }}\r\n\r\nVoit katsoa palvelupyynt\u00f6\u00e4 netiss\u00e4 linkist\u00e4 {{ ticket.staff_url }}",
+            "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Hei,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Alla oleva sinulle osoitettu palvelupyynt\u00f6 on valmistunut.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">\r\n<b>Palvelupyynn\u00f6n tunniste</b>: {{ ticket.ticket }}<br>\r\n<b>Jono</b>: {{ queue.title }}<br>\r\n<b>Title</b>: {{ ticket.title }}<br>\r\n<b>Vastaanotettu</b>: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}<br>\r\n<b>L\u00e4hett\u00e4j\u00e4</b>: {{ ticket.submitter_email|default:\"Unknown\" }}<br>\r\n<b>T\u00e4rkeysj\u00e4rjestys</b>: {{ ticket.get_priority_display }}<br>\r\n<b>Tila</b>: {{ ticket.get_status }}<br>\r\n<b>Asiakaspalvelija</b>: {{ ticket.get_assigned_to }}<br>\r\n<b><a href='{{ ticket.staff_url }}'>Katso netiss\u00e4</a></b> p\u00e4ivitt\u00e4\u00e4ksesi palvelupyynt\u00f6\u00e4 (kirjautuminen vaaditaan)</p>",
+            "locale": "fi"
+        }
+    },
+    {
+        "model": "helpdesk.emailtemplate",
+        "pk": 149,
+        "fields": {
+            "template_name": "closed_submitter",
+            "subject": "(Valmistunut)",
+            "heading": "Palvelupyynt\u00f6si on merkitty valmistuneeksi",
+            "plain_text": "Hei,\r\n\r\nOlit j\u00e4tt\u00e4nyt palvelupyynn\u00f6n aiheesta \"{{ticket.title}}\". Palvelupyynt\u00f6 on nyt merkitty valmistuneeksi.\r\n\r\nJos uskot, ett\u00e4 palvelupyynt\u00f6 tarvitsee viel\u00e4 lis\u00e4selvityst\u00e4, ota meihin yhteytt\u00e4 vastaamalla t\u00e4h\u00e4n s\u00e4hk\u00f6postiin ja pit\u00e4m\u00e4ll\u00e4 otsikko ennallaan.\r\n\r\nJos haluat tutkia palvelupyynn\u00f6n sis\u00e4lt\u00f6\u00e4 netiss\u00e4: {{ ticket.ticket_url }}.\r\n\r\nAsiakaspalvelijamme kommentit liittyen palvelupyynn\u00f6n valmistumiseen:\r\n\r\n{{ ticket.resolution }}",
+            "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Hei,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Olit j\u00e4tt\u00e4nyt palvelupyynn\u00f6n aiheesta <i>{{ ticket.title }}</i>. Palvelupyynt\u00f6 on nyt merkitty valmistuneeksi.</p>\r\n\r\n<p>Jos uskot, ett\u00e4 palvelupyynt\u00f6 tarvitsee viel\u00e4 lis\u00e4selvityst\u00e4, ota meihin yhteytt\u00e4 vastaamalla t\u00e4h\u00e4n s\u00e4hk\u00f6postiin ja pit\u00e4m\u00e4ll\u00e4 otsikko ennallaan.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Asiakaspalvelijamme kommentit liittyen palvelupyynn\u00f6n valmistumiseen:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.resolution }}</blockquote>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Jos haluat tutkia palvelupyynn\u00f6n sis\u00e4lt\u00f6\u00e4 netiss\u00e4: <a href=\"{{ ticket.ticket_url }}\">{{ ticket.ticket_url }}</a></p>",
+            "locale": "fi"
+        }
+    },
+    {
+        "model": "helpdesk.emailtemplate",
+        "pk": 150,
+        "fields": {
+            "template_name": "escalated_cc",
+            "subject": "(Eskaloitu)",
+            "heading": "Palvelupyynt\u00f6 eskaloitu",
+            "plain_text": "Hei,\r\n\r\nSaat t\u00e4m\u00e4n s\u00e4hk\u00f6postin tiedoksi siit\u00e4 ett\u00e4 palvelupyynt\u00f6 {{ ticket.ticket }} (\"{{ ticket.title }}\") on eskaloitu automaattisesti.\r\n\r\nPalvelupyynn\u00f6n tunniste: {{ ticket.ticket }}\r\nJono: {{ queue.title }}\r\nOtsikko: {{ ticket.title }}\r\nVastaanotettu: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}\r\nL\u00e4hett\u00e4j\u00e4: {{ ticket.submitter_email|default:\"Tuntematon\" }}\r\nT\u00e4rkeysj\u00e4rjestys: {{ ticket.get_priority_display }}\r\nTila: {{ ticket.get_status }}\r\nAsiakaspalvelija: {{ ticket.get_assigned_to }}\r\nKatso netiss\u00e4: {{ ticket.staff_url }} (kirjautuminen vaaditaan)\r\n\r\nPalvelupyynn\u00f6n alkuper\u00e4inen kuvaus oli:\r\n\r\n{{ ticket.description }}",
+            "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Hei,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Saat t\u00e4m\u00e4n s\u00e4hk\u00f6postin tiedoksi siit\u00e4 ett\u00e4 palvelupyynt\u00f6 <i>{{ ticket.ticket }}</i> ('{{ ticket.title }}') on eskaloitu automaattisesti.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">\r\n<b>Palvelupyynn\u00f6n tunniste</b>: {{ ticket.ticket }}<br>\r\n<b>Jono</b>: {{ queue.title }}<br>\r\n<b>Title</b>: {{ ticket.title }}<br>\r\n<b>Vastaanotettu</b>: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}<br>\r\n<b>L\u00e4hett\u00e4j\u00e4</b>: {{ ticket.submitter_email|default:\"Unknown\" }}<br>\r\n<b>T\u00e4rkeysj\u00e4rjestys</b>: {{ ticket.get_priority_display }}<br>\r\n<b>Tila</b>: {{ ticket.get_status }}<br>\r\n<b>Asiakaspalvelija</b>: {{ ticket.get_assigned_to }}<br>\r\n<b><a href='{{ ticket.staff_url }}'>Katso netiss\u00e4</a></b> p\u00e4ivitt\u00e4\u00e4ksesi palvelupyynt\u00f6\u00e4 (kirjautuminen vaaditaan)</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Palvelupyynn\u00f6n alkuper\u00e4inen kuvaus oli:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.description|linebreaksbr }}</blockquote>",
+            "locale": "fi"
+        }
+    },
+    {
+        "model": "helpdesk.emailtemplate",
+        "pk": 151,
+        "fields": {
+            "template_name": "escalated_owner",
+            "subject": "(Eskaloitu)",
+            "heading": "Sinulle osoitettu palvelupyynt\u00f6 eskaloitu",
+            "plain_text": "Hei,\r\n\r\nSinulle ohjattu palvelupyynt\u00f6 on automaattisesti eskaloitu koska sen ratkaisu on kest\u00e4nyt pidemp\u00e4\u00e4n mit\u00e4 odotettu.\r\n\r\nPalvelupyynn\u00f6n tunniste: {{ ticket.ticket }}\r\nJono: {{ queue.title }}\r\nOtsikko: {{ ticket.title }}\r\nVastaanotettu: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}\r\nL\u00e4hett\u00e4j\u00e4: {{ ticket.submitter_email|default:\"Tuntematon\" }}\r\nT\u00e4rkeysj\u00e4rjestys: {{ ticket.get_priority_display }}\r\nTila: {{ ticket.get_status }}\r\nAsiakaspalvelija: {{ ticket.get_assigned_to }}\r\nKatso netiss\u00e4: {{ ticket.staff_url }} (kirjautuminen vaaditaan)\r\n\r\nPalvelupyynn\u00f6n alkuper\u00e4inen kuvaus oli:\r\n\r\n{{ ticket.description }}\r\n\r\nPlease review this ticket and attempt to provide a resolution as soon as possible.",
+            "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Hei,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Sinulle ohjattu palvelupyynt\u00f6 on automaattisesti eskaloitu koska sen ratkaisu on kest\u00e4nyt pidemp\u00e4\u00e4n mit\u00e4 odotettu.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">\r\n<b>Palvelupyynn\u00f6n tunniste</b>: {{ ticket.ticket }}<br>\r\n<b>Jono</b>: {{ queue.title }}<br>\r\n<b>Title</b>: {{ ticket.title }}<br>\r\n<b>Vastaanotettu</b>: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}<br>\r\n<b>L\u00e4hett\u00e4j\u00e4</b>: {{ ticket.submitter_email|default:\"Unknown\" }}<br>\r\n<b>T\u00e4rkeysj\u00e4rjestys</b>: {{ ticket.get_priority_display }}<br>\r\n<b>Tila</b>: {{ ticket.get_status }}<br>\r\n<b>Asiakaspalvelija</b>: {{ ticket.get_assigned_to }}<br>\r\n<b><a href='{{ ticket.staff_url }}'>Katso netiss\u00e4</a></b> p\u00e4ivitt\u00e4\u00e4ksesi palvelupyynt\u00f6\u00e4 (kirjautuminen vaaditaan)</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Palvelupyynn\u00f6n alkuper\u00e4inen kuvaus oli:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.description|linebreaksbr }}</blockquote>",
+            "locale": "fi"
+        }
+    },
+    {
+        "model": "helpdesk.emailtemplate",
+        "pk": 152,
+        "fields": {
+            "template_name": "escalated_submitter",
+            "subject": "(Escalated)",
+            "heading": "Palvelupyynt\u00f6si on eskaloitu",
+            "plain_text": "Hei,\r\n\r\nOlit j\u00e4tt\u00e4nyt meille palvelupyynn\u00f6n otsikolla \"{{ ticket.title }}\". T\u00e4m\u00e4 s\u00e4hk\u00f6posti on tiedoksi siit\u00e4 ett\u00e4 palvelupyynt\u00f6si on eskaloitu koska sen ratkaisu on kest\u00e4nyt pidemp\u00e4\u00e4n mit\u00e4 odotettu.\r\n\r\nSelvittelemme palvelupyynt\u00f6\u00e4si ja palaamme asiaan niin pian kuin mahdollista.\r\n\r\nJos haluat katsella palvelupyynt\u00f6\u00e4 netiss\u00e4 n\u00e4et sen linkin {{ ticket.ticket_url }} kautta.",
+            "html": "<p style=\"font-family: sans-serif; font-size: 11pt;\">Hei,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 11pt;\">Olit j\u00e4tt\u00e4nyt meille palvelupyynn\u00f6n otsikolla <i>{{ ticket.title }}</i> with us. T\u00e4m\u00e4 s\u00e4hk\u00f6posti on tiedoksi siit\u00e4 ett\u00e4 palvelupyynt\u00f6si on eskaloitu koska sen ratkaisu on kest\u00e4nyt pidemp\u00e4\u00e4n mit\u00e4 odotettu.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 11pt;\">Selvittelemme palvelupyynt\u00f6\u00e4si ja palaamme asiaan niin pian kuin mahdollista.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 11pt;\">Jos haluat katsella palvelupyynt\u00f6\u00e4 netiss\u00e4 n\u00e4et sen linkin <a href=\"{{ ticket.ticket_url }}\">{{ ticket.ticket_url }}</a> kautta.</p>",
+            "locale": "fi"
+        }
+    },
+    {
+        "model": "helpdesk.emailtemplate",
+        "pk": 153,
+        "fields": {
+            "template_name": "newticket_cc",
+            "subject": "(Avattu)",
+            "heading": "Uusi palvelupyynt\u00f6 avattu",
+            "plain_text": "Hei,\r\n\r\nUusi palvelupyynt\u00f6 on avattu.\r\n\r\nPalvelupyynn\u00f6n tunniste: {{ ticket.ticket }}\r\nJono: {{ queue.title }}\r\nOtsikko: {{ ticket.title }}\r\nVastaanotettu: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}\r\nL\u00e4hett\u00e4j\u00e4: {{ ticket.submitter_email|default:\"Tuntematon\" }}\r\nT\u00e4rkeysj\u00e4rjestys: {{ ticket.get_priority_display }}\r\nTila: {{ ticket.get_status }}\r\nAsiakaspalvelija: {{ ticket.get_assigned_to }}\r\nKatso netiss\u00e4: {{ ticket.staff_url }} (kirjautuminen vaaditaan)\r\n\r\nPalvelupyynn\u00f6n kuvaus:\r\n\r\n{{ ticket.description }}",
+            "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Hei,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Uusi palvelupyynt\u00f6 on avattu.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">\r\n<b>Palvelupyynn\u00f6n tunniste</b>: {{ ticket.ticket }}<br>\r\n<b>Jono</b>: {{ queue.title }}<br>\r\n<b>Title</b>: {{ ticket.title }}<br>\r\n<b>Vastaanotettu</b>: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}<br>\r\n<b>L\u00e4hett\u00e4j\u00e4</b>: {{ ticket.submitter_email|default:\"Unknown\" }}<br>\r\n<b>T\u00e4rkeysj\u00e4rjestys</b>: {{ ticket.get_priority_display }}<br>\r\n<b>Tila</b>: {{ ticket.get_status }}<br>\r\n<b>Asiakaspalvelija</b>: {{ ticket.get_assigned_to }}<br>\r\n<b><a href='{{ ticket.staff_url }}'>Katso netiss\u00e4</a></b> p\u00e4ivitt\u00e4\u00e4ksesi palvelupyynt\u00f6\u00e4 (kirjautuminen vaaditaan)</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Palvelupyynn\u00f6n kuvaus:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.description|linebreaksbr }}</blockquote>",
+            "locale": "fi"
+        }
+    },
+    {
+        "model": "helpdesk.emailtemplate",
+        "pk": 154,
+        "fields": {
+            "template_name": "newticket_submitter",
+            "subject": "(Avattu)",
+            "heading": "Palvelupyynt\u00f6si vastaanotettu",
+            "plain_text": "Hei,\r\n\r\nOlemme vastaanottaneet palvelupyynt\u00f6si jonka otsikko oli \"{{ ticket.title }}\". \r\n\r\nSinun ei tarvitse tehd\u00e4 mit\u00e4\u00e4n enemm\u00e4n t\u00e4ss\u00e4 vaiheessa. Lipullesi on annettu numero {{ticket.ticket}}, ja siihen vastataan pian.\r\n\r\nJos haluat l\u00e4hett\u00e4\u00e4 meille lis\u00e4tietoja tai jos sinulla on kysytt\u00e4v\u00e4\u00e4 t\u00e4st\u00e4 palvelupyynn\u00f6st\u00e4, lis\u00e4\u00e4 s\u00e4hk\u00f6postin otsikkoon palvelupyynn\u00f6n tunniste '{{ticket.ticket}}'. Helpoin tapa tehd\u00e4 t\u00e4m\u00e4 on vain painamalla \"Vastaa\" (\"Reply\") t\u00e4h\u00e4n viestiin.\r\n\r\nJos haluat katsoa t\u00e4t\u00e4 palvelupyynt\u00f6\u00e4 tarjotaksesi lis\u00e4tietoja, liitt\u00e4\u00e4ksesi tiedostoja tai tarkastellaksesi viimeisimpi\u00e4 p\u00e4ivityksi\u00e4, voit k\u00e4yd\u00e4 {{ticket.ticket_url}}.\r\n\r\nTutkimme palvelupyynt\u00f6\u00e4si ja yrit\u00e4mme ratkaista sen mahdollisimman pian. Saat lis\u00e4tietoja p\u00e4ivityksist\u00e4 ja ratkaisusta t\u00e4h\u00e4n s\u00e4hk\u00f6postiosoitteeseen.",
+            "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Hei,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Olemme vastaanottaneet palvelupyynt\u00f6si jonka otsikko oli <i>{{ ticket.title }}</i>.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Sinun ei tarvitse tehd\u00e4 mit\u00e4\u00e4n enemm\u00e4n t\u00e4ss\u00e4 vaiheessa. Lipullesi on annettu numero <b>{{ ticket.ticket }}</b> ja siihen vastataan pian.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Jos haluat l\u00e4hett\u00e4\u00e4 meille lis\u00e4tietoja tai jos sinulla on kysytt\u00e4v\u00e4\u00e4 t\u00e4st\u00e4 palvelupyynn\u00f6st\u00e4, lis\u00e4\u00e4 s\u00e4hk\u00f6postin otsikkoon palvelupyynn\u00f6n tunniste <b>{{ticket.ticket}}</b>. Helpoin tapa tehd\u00e4 t\u00e4m\u00e4 on vain painamalla \"Vastaa\" (\"Reply\") t\u00e4h\u00e4n viestiin.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Jos haluat katsoa t\u00e4t\u00e4 palvelupyynt\u00f6\u00e4 tarjotaksesi lis\u00e4tietoja, liitt\u00e4\u00e4ksesi tiedostoja tai tarkastellaksesi viimeisimpi\u00e4 p\u00e4ivityksi\u00e4, voit k\u00e4yd\u00e4 <a href=\"{{ ticket.ticket_url }}\">{{ ticket.ticket_url }}</a>.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Tutkimme palvelupyynt\u00f6\u00e4si ja yrit\u00e4mme ratkaista sen mahdollisimman pian. Saat lis\u00e4tietoja p\u00e4ivityksist\u00e4 ja ratkaisusta t\u00e4h\u00e4n s\u00e4hk\u00f6postiosoitteeseen.</p>",
+            "locale": "fi"
+        }
+    },
+    {
+        "model": "helpdesk.emailtemplate",
+        "pk": 155,
+        "fields": {
+            "template_name": "resolved_cc",
+            "subject": "(Ratkaistu)",
+            "heading": "Palvelupyynt\u00f6 ratkaistu",
+            "plain_text": "Hello,\r\n\r\nSeuraava palvelupyynt\u00f6 on ratkaistu:\r\n\r\nPalvelupyynn\u00f6n tunniste: {{ ticket.ticket }}\r\nJono: {{ queue.title }}\r\nOtsikko: {{ ticket.title }}\r\nVastaanotettu: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}\r\nL\u00e4hett\u00e4j\u00e4: {{ ticket.submitter_email|default:\"Tuntematon\" }}\r\nT\u00e4rkeysj\u00e4rjestys: {{ ticket.get_priority_display }}\r\nTila: {{ ticket.get_status }}\r\nAsiakaspalvelija: {{ ticket.get_assigned_to }}\r\nKatso netiss\u00e4: {{ ticket.staff_url }} (kirjautuminen vaaditaan)\r\n\r\nPalvelupyynn\u00f6n alkuper\u00e4inen kuvaus oli:\r\n\r\n{{ ticket.description }}\r\n\r\nAsiakaspalvelijan kommentit liittyen ratkaisuun:\r\n\r\n{{ ticket.resolution }}\r\n\r\nT\u00e4m\u00e4 tiedote on my\u00f6s l\u00e4hetetty s\u00e4hk\u00f6postitse palvelupyynn\u00f6n l\u00e4hett\u00e4j\u00e4lle, joka tarkistaa sen ennen kuin voit sulkea palvelupyynn\u00f6n.",
+            "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Hello,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Seuraava palvelupyynt\u00f6 on ratkaistu:</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">\r\n<b>Palvelupyynn\u00f6n tunniste</b>: {{ ticket.ticket }}<br>\r\n<b>Jono</b>: {{ queue.title }}<br>\r\n<b>Title</b>: {{ ticket.title }}<br>\r\n<b>Vastaanotettu</b>: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}<br>\r\n<b>L\u00e4hett\u00e4j\u00e4</b>: {{ ticket.submitter_email|default:\"Unknown\" }}<br>\r\n<b>T\u00e4rkeysj\u00e4rjestys</b>: {{ ticket.get_priority_display }}<br>\r\n<b>Tila</b>: {{ ticket.get_status }}<br>\r\n<b>Asiakaspalvelija</b>: {{ ticket.get_assigned_to }}<br>\r\n<b><a href='{{ ticket.staff_url }}'>Katso netiss\u00e4</a></b> p\u00e4ivitt\u00e4\u00e4ksesi palvelupyynt\u00f6\u00e4 (kirjautuminen vaaditaan)</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Just for reference, the original ticket description was:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.description|linebreaksbr }}</blockquote>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Asiakaspalvelijan kommentit liittyen ratkaisuun:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.resolution }}</blockquote>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">T\u00e4m\u00e4 tiedote on my\u00f6s l\u00e4hetetty s\u00e4hk\u00f6postitse palvelupyynn\u00f6n l\u00e4hett\u00e4j\u00e4lle, joka tarkistaa sen ennen kuin voit sulkea palvelupyynn\u00f6n.</p>",
+            "locale": "fi"
+        }
+    },
+    {
+        "model": "helpdesk.emailtemplate",
+        "pk": 156,
+        "fields": {
+            "template_name": "resolved_owner",
+            "subject": "(Ratkaistu)",
+            "heading": "Palvelupyynt\u00f6 ratkaistu",
+            "plain_text": "Hello,\r\n\r\nSeuraava sinulle ohjattu palvelupyynt\u00f6 on ratkaistu:\r\n\r\nPalvelupyynn\u00f6n tunniste: {{ ticket.ticket }}\r\nJono: {{ queue.title }}\r\nOtsikko: {{ ticket.title }}\r\nVastaanotettu: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}\r\nL\u00e4hett\u00e4j\u00e4: {{ ticket.submitter_email|default:\"Tuntematon\" }}\r\nT\u00e4rkeysj\u00e4rjestys: {{ ticket.get_priority_display }}\r\nTila: {{ ticket.get_status }}\r\nAsiakaspalvelija: {{ ticket.get_assigned_to }}\r\nKatso netiss\u00e4: {{ ticket.staff_url }} (kirjautuminen vaaditaan)\r\n\r\nPalvelupyynn\u00f6n alkuper\u00e4inen kuvaus oli:\r\n\r\n{{ ticket.description }}\r\n\r\nAsiakaspalvelijamme kommentit ratkaisuun liittyen:\r\n\r\n{{ ticket.resolution }}\r\n\r\nT\u00e4m\u00e4 tiedote on my\u00f6s l\u00e4hetetty s\u00e4hk\u00f6postitse palvelupyynn\u00f6n l\u00e4hett\u00e4j\u00e4lle, joka tarkistaa sen ennen kuin voit sulkea palvelupyynn\u00f6n.",
+            "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Hello,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Seuraava sinulle ohjattu palvelupyynt\u00f6 on ratkaistu:</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">\r\n<b>Palvelupyynn\u00f6n tunniste</b>: {{ ticket.ticket }}<br>\r\n<b>Jono</b>: {{ queue.title }}<br>\r\n<b>Title</b>: {{ ticket.title }}<br>\r\n<b>Vastaanotettu</b>: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}<br>\r\n<b>L\u00e4hett\u00e4j\u00e4</b>: {{ ticket.submitter_email|default:\"Unknown\" }}<br>\r\n<b>T\u00e4rkeysj\u00e4rjestys</b>: {{ ticket.get_priority_display }}<br>\r\n<b>Tila</b>: {{ ticket.get_status }}<br>\r\n<b>Asiakaspalvelija</b>: {{ ticket.get_assigned_to }}<br>\r\n<b><a href='{{ ticket.staff_url }}'>Katso netiss\u00e4</a></b> p\u00e4ivitt\u00e4\u00e4ksesi palvelupyynt\u00f6\u00e4 (kirjautuminen vaaditaan)</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Palvelupyynn\u00f6n alkuper\u00e4inen kuvaus oli:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.description|linebreaksbr }}</blockquote>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Asiakaspalvelijamme kommentit ratkaisuun liittyen:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.resolution }}</blockquote>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">T\u00e4m\u00e4 tiedote on my\u00f6s l\u00e4hetetty s\u00e4hk\u00f6postitse palvelupyynn\u00f6n l\u00e4hett\u00e4j\u00e4lle, joka tarkistaa sen ennen kuin voit sulkea palvelupyynn\u00f6n.</p>",
+            "locale": "fi"
+        }
+    },
+    {
+        "model": "helpdesk.emailtemplate",
+        "pk": 157,
+        "fields": {
+            "template_name": "resolved_submitter",
+            "subject": "(Ratkaistu)",
+            "heading": "Palvelupyynt\u00f6si on merkitty ratkaistuksi",
+            "plain_text": "Hei,\r\n\r\nOlit j\u00e4tt\u00e4nyt meille palvelupyynn\u00f6n otsikolla \"{{ ticket.title }}\". T\u00e4m\u00e4 s\u00e4hk\u00f6posti on tiedote siit\u00e4 ett\u00e4 palvelupyynt\u00f6 on merkitty ratkaistuksi.\r\n\r\nAlla asiakaspalvelijamme kommentit liittyen palvelupyynn\u00f6n {{ ticket.ticket }} ratkaisuun:\r\n\r\n{{ resolution }}\r\n\r\nVoitteko tarkistaa, ett\u00e4 t\u00e4m\u00e4 ratkaisu vastaa tarpeitasi, jotta voimme sulkea t\u00e4m\u00e4n lipun? Jos sinulla on kysytt\u00e4v\u00e4\u00e4 tai et usko t\u00e4m\u00e4n ratkaisun olevan riitt\u00e4v\u00e4, vastaa t\u00e4h\u00e4n s\u00e4hk\u00f6postiin ja pid\u00e4 s\u00e4hk\u00f6postin otsikko ennallaan.\r\n\r\nJos haluat n\u00e4hd\u00e4 t\u00e4m\u00e4n palvelupyynn\u00f6n verkossa, voit k\u00e4yd\u00e4 t\u00e4\u00e4ll\u00e4 {{ ticket.ticket_url }}",
+            "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Hei,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Olit j\u00e4tt\u00e4nyt meille palvelupyynn\u00f6n otsikolla <i>{{ ticket.title }}</i>. T\u00e4m\u00e4 s\u00e4hk\u00f6posti on tiedote siit\u00e4 ett\u00e4 palvelupyynt\u00f6 on merkitty ratkaistuksi.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Alla asiakaspalvelijamme kommentit liittyen palvelupyynn\u00f6n <b>{{ ticket.ticket }}</b> ratkaisuun:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ resolution }}</blockquote>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Voitteko tarkistaa, ett\u00e4 t\u00e4m\u00e4 ratkaisu vastaa tarpeitasi, jotta voimme sulkea t\u00e4m\u00e4n lipun? Jos sinulla on kysytt\u00e4v\u00e4\u00e4 tai et usko t\u00e4m\u00e4n ratkaisun olevan riitt\u00e4v\u00e4, vastaa t\u00e4h\u00e4n s\u00e4hk\u00f6postiin ja pid\u00e4 s\u00e4hk\u00f6postin otsikko ennallaan.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Jos haluat n\u00e4hd\u00e4 t\u00e4m\u00e4n palvelupyynn\u00f6n verkossa, voit k\u00e4yd\u00e4 t\u00e4\u00e4ll\u00e4 <a href=\"{{ ticket.ticket_url }}\">{{ ticket.ticket_url }}</a>.</p>",
+            "locale": "fi"
+        }
+    },
+    {
+        "model": "helpdesk.emailtemplate",
+        "pk": 158,
+        "fields": {
+            "template_name": "updated_cc",
+            "subject": "(Muokattu)",
+            "heading": "Palvelupyynt\u00f6\u00e4 muokattu",
+            "plain_text": "Hei,\r\n\r\nT\u00e4m\u00e4 on s\u00e4hk\u00f6postitiedote siit\u00e4 ett\u00e4 palvelupyynt\u00f6\u00e4 {{ ticket.ticket }} (\"{{ ticket.title }}\") jonka j\u00e4tti {{ ticket.submitter_email }} on p\u00e4ivitetty.\r\n\r\nPalvelupyynn\u00f6n tunniste: {{ ticket.ticket }}\r\nJono: {{ queue.title }}\r\nOtsikko: {{ ticket.title }}\r\nVastaanotettu: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}\r\nL\u00e4hett\u00e4j\u00e4: {{ ticket.submitter_email|default:\"Tuntematon\" }}\r\nT\u00e4rkeysj\u00e4rjestys: {{ ticket.get_priority_display }}\r\nTila: {{ ticket.get_status }}\r\nAsiakaspalvelija: {{ ticket.get_assigned_to }}\r\nKatso netiss\u00e4: {{ ticket.staff_url }} (kirjautuminen vaaditaan)\r\n\r\nAlkuper\u00e4inen kuvaus:\r\n\r\n{{ ticket.description }}\r\n\r\nSeuraava kommentti lis\u00e4ttiin:\r\n\r\n{{ comment }}\r\n\r\n{% if private%}N\u00e4it\u00e4 tietoja ei{% else %}N\u00e4m\u00e4 tiedot on{% endif%} l\u00e4hetetty s\u00e4hk\u00f6postitse palvelupyynn\u00f6n l\u00e4hett\u00e4j\u00e4lle.",
+            "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Hei,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">T\u00e4m\u00e4 on s\u00e4hk\u00f6postitiedote siit\u00e4 ett\u00e4 palvelupyynt\u00f6\u00e4 {{ ticket.ticket }} (\"{{ ticket.title }}\") jonka j\u00e4tti {{ ticket.submitter_email }} on p\u00e4ivitetty.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">\r\n<b>Palvelupyynn\u00f6n tunniste</b>: {{ ticket.ticket }}<br>\r\n<b>Jono</b>: {{ queue.title }}<br>\r\n<b>Title</b>: {{ ticket.title }}<br>\r\n<b>Vastaanotettu</b>: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}<br>\r\n<b>L\u00e4hett\u00e4j\u00e4</b>: {{ ticket.submitter_email|default:\"Unknown\" }}<br>\r\n<b>T\u00e4rkeysj\u00e4rjestys</b>: {{ ticket.get_priority_display }}<br>\r\n<b>Tila</b>: {{ ticket.get_status }}<br>\r\n<b>Asiakaspalvelija</b>: {{ ticket.get_assigned_to }}<br>\r\n<b><a href='{{ ticket.staff_url }}'>Katso netiss\u00e4</a></b> p\u00e4ivitt\u00e4\u00e4ksesi palvelupyynt\u00f6\u00e4 (kirjautuminen vaaditaan)</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Alkuper\u00e4inen kuvaus:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.description|linebreaksbr }}</blockquote>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Seuraava kommentti lis\u00e4ttiin:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ comment }}</blockquote>\r\n\r\n<p style=\"font-family: Tahoma, Arial, sans-serif; font-size: 11pt;\">{% if private%}N\u00e4it\u00e4 tietoja ei{% else %}N\u00e4m\u00e4 tiedot on{% endif%} l\u00e4hetetty s\u00e4hk\u00f6postitse palvelupyynn\u00f6n l\u00e4hett\u00e4j\u00e4lle.</p>",
+            "locale": "fi"
+        }
+    },
+    {
+        "model": "helpdesk.emailtemplate",
+        "pk": 159,
+        "fields": {
+            "template_name": "updated_owner",
+            "subject": "(Muokattu)",
+            "heading": "Palvelupyynt\u00f6\u00e4 muokattu",
+            "plain_text": "Hei,\r\n\r\nT\u00e4m\u00e4 on s\u00e4hk\u00f6postitiedote siit\u00e4 ett\u00e4 sinulle osoitettua palvelupyynt\u00f6\u00e4 {{ ticket.ticket }} (\"{{ ticket.title }}\") jonka j\u00e4tti {{ ticket.submitter_email }} on p\u00e4ivitetty.\r\n\r\nPalvelupyynn\u00f6n tunniste: {{ ticket.ticket }}\r\nJono: {{ queue.title }}\r\nOtsikko: {{ ticket.title }}\r\nVastaanotettu: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}\r\nL\u00e4hett\u00e4j\u00e4: {{ ticket.submitter_email|default:\"Tuntematon\" }}\r\nT\u00e4rkeysj\u00e4rjestys: {{ ticket.get_priority_display }}\r\nTila: {{ ticket.get_status }}\r\nAsiakaspalvelija: SIN\u00c4\r\nKatso netiss\u00e4: {{ ticket.staff_url }} (kirjautuminen vaaditaan)\r\n\r\nAlkuper\u00e4inen kuvaus:\r\n\r\n{{ ticket.description }}\r\n\r\nSeuraava kommentti lis\u00e4ttiin:\r\n\r\n{{ comment }}\r\n\r\n{% if private%}N\u00e4it\u00e4 tietoja ei{% else %}N\u00e4m\u00e4 tiedot on{% endif%} l\u00e4hetetty s\u00e4hk\u00f6postitse palvelupyynn\u00f6n l\u00e4hett\u00e4j\u00e4lle.",
+            "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Hei,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">T\u00e4m\u00e4 on s\u00e4hk\u00f6postitiedote siit\u00e4 ett\u00e4 sinulle osoitettua palvelupyynt\u00f6\u00e4 {{ ticket.ticket }} (\"{{ ticket.title }}\") jonka j\u00e4tti {{ ticket.submitter_email }} on p\u00e4ivitetty</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">\r\n<b>Palvelupyynn\u00f6n tunniste</b>: {{ ticket.ticket }}<br>\r\n<b>Jono</b>: {{ queue.title }}<br>\r\n<b>Title</b>: {{ ticket.title }}<br>\r\n<b>Vastaanotettu</b>: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}<br>\r\n<b>L\u00e4hett\u00e4j\u00e4</b>: {{ ticket.submitter_email|default:\"Unknown\" }}<br>\r\n<b>T\u00e4rkeysj\u00e4rjestys</b>: {{ ticket.get_priority_display }}<br>\r\n<b>Tila</b>: {{ ticket.get_status }}<br>\r\n<b>Asiakaspalvelija</b>: SIN\u00c4<br>\r\n<b><a href='{{ ticket.staff_url }}'>Katso netiss\u00e4</a></b> p\u00e4ivitt\u00e4\u00e4ksesi palvelupyynt\u00f6\u00e4 (kirjautuminen vaaditaan)</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Alkuper\u00e4inen kuvaus:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ ticket.description|linebreaksbr }}</blockquote>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Seuraava kommentti lis\u00e4ttiin:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ comment }}</blockquote>\r\n\r\n<p style=\"font-family: Tahoma, Arial, sans-serif; font-size: 11pt;\">{% if private%}N\u00e4it\u00e4 tietoja ei{% else %}N\u00e4m\u00e4 tiedot on{% endif%} l\u00e4hetetty s\u00e4hk\u00f6postitse palvelupyynn\u00f6n l\u00e4hett\u00e4j\u00e4lle.</p>",
+            "locale": "fi"
+        }
+    },
+    {
+        "model": "helpdesk.emailtemplate",
+        "pk": 160,
+        "fields": {
+            "template_name": "updated_submitter",
+            "subject": "(Muokattu)",
+            "heading": "Palvelupyynt\u00f6\u00e4si muokattu",
+            "plain_text": "Hei,\r\n\r\nT\u00e4m\u00e4 on s\u00e4hk\u00f6postitiedote siit\u00e4 ett\u00e4 j\u00e4tt\u00e4m\u00e4\u00e4si palvelupyynt\u00f6\u00e4 \"{{ ticket.title }}\" on p\u00e4ivitetty.\r\n\r\nSeuraava kommentti lis\u00e4ttiin palvelupyynt\u00f6\u00f6n {{ ticket.ticket }}:\r\n\r\n{{ comment }}\r\n\r\nJos sinun on annettava meille lis\u00e4tietoja, vastaa t\u00e4h\u00e4n s\u00e4hk\u00f6postiin ja pid\u00e4 otsikko ennallaan. Voit my\u00f6s tarkastella ja p\u00e4ivitt\u00e4\u00e4 lippua verkossa k\u00e4ym\u00e4ll\u00e4 {{ ticket.ticket_url }}",
+            "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Hei,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">T\u00e4m\u00e4 on s\u00e4hk\u00f6postitiedote siit\u00e4 ett\u00e4 j\u00e4tt\u00e4m\u00e4\u00e4si palvelupyynt\u00f6\u00e4 <i>{{ ticket.title }}</i> on p\u00e4ivitetty.</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Seuraava kommentti lis\u00e4ttiin palvelupyynt\u00f6\u00f6n <b>{{ ticket.ticket }}</b>:</p>\r\n\r\n<blockquote style=\"font-family: sans-serif; font-size: 1em;\">{{ comment }}</blockquote>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">Jos sinun on annettava meille lis\u00e4tietoja, vastaa t\u00e4h\u00e4n s\u00e4hk\u00f6postiin ja pid\u00e4 otsikko ennallaan. Voit my\u00f6s tarkastella ja p\u00e4ivitt\u00e4\u00e4 lippua verkossa k\u00e4ym\u00e4ll\u00e4 <a href=\"{{ ticket.ticket_url }}\">{{ ticket.ticket_url }}</a>.</p>",
+            "locale": "fi"
+        }
+    }
 ]
+
