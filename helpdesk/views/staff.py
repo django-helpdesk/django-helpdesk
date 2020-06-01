@@ -94,7 +94,7 @@ def dashboard(request):
     """
 
     # user settings num tickets per page
-    tickets_per_page = request.user.usersettings_helpdesk.tickets_per_page
+    tickets_per_page = request.user.usersettings_helpdesk.settings.get('tickets_per_page') or 25
 
     # page vars for the three ticket tables
     user_tickets_page = request.GET.get('ut_page', 1)
