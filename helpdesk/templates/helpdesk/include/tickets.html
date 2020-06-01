@@ -37,6 +37,27 @@
                                 </table>
                             </div>
                             <!-- /.table-responsive -->
+                            {% if ticket_list.has_other_pages %}
+                                <ul class="pagination">
+                                    {% if ticket_list.has_previous %}
+                                        <li><a href="?{{ page_var }}={{ ticket_list.previous_page_number }}">&laquo;</a></li>
+                                    {% else %}
+                                        <li class="disabled"><span>&laquo;</span></li>
+                                    {% endif %}
+                                    {% for i in ticket_list.paginator.page_range %}
+                                        {% if ticket_list.number == i %}
+                                            <li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
+                                        {% else %}
+                                            <li><a href="?{{ page_var }}={{ i }}">{{ i }}</a></li>
+                                        {% endif %}
+                                    {% endfor %}
+                                    {% if ticket_list.has_next %}
+                                        <li><a href="?{{ page_var }}={{ ticket_list.next_page_number }}">&raquo;</a></li>
+                                    {% else %}
+                                        <li class="disabled"><span>&raquo;</span></li>
+                                    {% endif %}
+                                </ul>
+                            {% endif %}
                         </div>
                         <!-- /.panel-body -->
                     </div>
