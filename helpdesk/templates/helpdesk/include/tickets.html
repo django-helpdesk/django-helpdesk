@@ -41,7 +41,7 @@
                                 <ul class="pagination">
                                     <!-- if we aren't on page one, go back to start and go back one controls -->
                                     {% if ticket_list.has_previous %}
-                                        <li><a href=?{{ page_var }}=1">&laquo;&laquo;</a></li>
+                                        <li><a href="?{{ page_var }}=1">&laquo;&laquo;</a></li>
                                         <li><a href="?{{ page_var }}={{ ticket_list.previous_page_number }}">&laquo;</a></li>
                                     {% else %}
                                         <li class="disabled"><span>&laquo;&laquo;</span></li>
@@ -60,7 +60,7 @@
                                     <!-- if we aren't on the last page, go forward one and go to end controls -->
                                     {% if ticket_list.has_next %}
                                         <li><a href="?{{ page_var }}={{ ticket_list.next_page_number }}">&raquo;</a></li>
-                                        <li><a href=?{{ page_var }}={{ ticket_list.paginator.num_pages }}">&raquo;&raquo;</a></li>
+                                        <li><a href="?{{ page_var }}={{ ticket_list.paginator.num_pages }}">&raquo;&raquo;</a></li>
                                     {% else %}
                                         <li class="disabled"><span>&raquo;</span></li>
                                         <li class="disabled"><span>&raquo;&raquo;</span></li>
