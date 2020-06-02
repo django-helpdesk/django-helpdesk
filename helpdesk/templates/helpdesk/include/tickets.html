@@ -47,13 +47,12 @@
                                         <li class="disabled"><span>&laquo;&laquo;</span></li>
                                         <li class="disabled"><span>&laquo;</span></li>
                                     {% endif %}
-                                    <!-- Page - 5 to page + 5 controls -->
-                                    {% with ''|center:11 as range %}
-                                    {% for _ in range %}
-                                        {% with ticket_list.number|add:forloop.counter|add:"-5" as i %}
+                                    <!-- other pages, set thresh to the number to show before and after active -->
+                                    {% with 5 as thresh %}
+                                    {% for i in ticket_list.paginator.page_range %}
                                         {% if ticket_list.number == i %}
                                             <li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
-                                        {% else if i in ticket_list.paginator.page_range %}
+                                        {% else if i <= ticket_list.number|add:5 and i >= ticket_list.number|-5 %}
                                             <li><a href="?{{ page_var }}={{ i }}">{{ i }}</a></li>
                                         {% endif %}
                                     {% endfor %}
