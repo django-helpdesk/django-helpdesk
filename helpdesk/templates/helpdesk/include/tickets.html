@@ -56,6 +56,7 @@
                                             <li><a href="?{{ page_var }}={{ i }}">{{ i }}</a></li>
                                         {% endif %}
                                     {% endfor %}
+                                    {% endwith %}
                                     <!-- if we aren't on the last page, go forward one and go to end controls -->
                                     {% if ticket_list.has_next %}
                                         <li><a href="?{{ page_var }}={{ ticket_list.next_page_number }}">&raquo;</a></li>
