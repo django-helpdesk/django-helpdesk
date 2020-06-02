@@ -53,7 +53,7 @@
                                         {% with ticket_list.number|add:forloop.counter|add:"-5" as i %}
                                         {% if ticket_list.number == i %}
                                             <li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
-                                        {% else if ticket_list.pages%}
+                                        {% else if i in ticket_list.paginator.page_range %}
                                             <li><a href="?{{ page_var }}={{ i }}">{{ i }}</a></li>
                                         {% endif %}
                                     {% endfor %}
