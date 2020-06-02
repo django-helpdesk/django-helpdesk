@@ -50,7 +50,7 @@
                                     <!-- Page - 5 to page + 5 controls -->
                                     {% with ''|center:11 as range %}
                                     {% for _ in range %}
-                                        {% with ticket_list.number|add:forloop.counter|sub:"5" as i %}
+                                        {% with ticket_list.number|add:forloop.counter|add:"-5" as i %}
                                         {% if ticket_list.number == i %}
                                             <li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
                                         {% else if ticket_list.pages%}
