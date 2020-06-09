@@ -16,7 +16,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: django-helpdesk\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-06-09 14:52+0200\n"
+"POT-Creation-Date: 2020-06-09 16:18+0200\n"
 "PO-Revision-Date: 2016-06-07 12:22+0000\n"
 "Last-Translator: Antoine Nguyen <tonio@ngyn.org>\n"
 "Language-Team: French (http://www.transifex.com/rossp/django-helpdesk/"
@@ -205,9 +205,9 @@ msgid ""
 "required. Uses settings.DEFAULT_USER_SETTINGS which can be overridden to "
 "suit your situation."
 msgstr ""
-"Recherche les utilisateurs sans les UserSettings de django-helpdesk et crée leur "
-"configuration si nécessaire. Utilise settings.DEFAULT_USER_SETTINGS que vous "
-"pouvez personnaliser pour s'adapter à vos besoins."
+"Recherche les utilisateurs sans les UserSettings de django-helpdesk et crée "
+"leur configuration si nécessaire. Utilise settings.DEFAULT_USER_SETTINGS que "
+"vous pouvez personnaliser pour s'adapter à vos besoins."
 
 #: .\management\commands\escalate_tickets.py:150
 #, python-format
@@ -264,9 +264,9 @@ msgid ""
 "All outgoing e-mails for this queue will use this e-mail address. If you use "
 "IMAP or POP3, this should be the e-mail address for that mailbox."
 msgstr ""
-"Tous les e-mails sortants pour cette file utiliseront cette "
-"adresse e-mail. Si vous utilisez IMAP ou POP3, ce doit être l'adresse e-mail "
-"pour cette boîte aux lettres."
+"Tous les e-mails sortants pour cette file utiliseront cette adresse e-mail. "
+"Si vous utilisez IMAP ou POP3, ce doit être l'adresse e-mail pour cette "
+"boîte aux lettres."
 
 #: .\models.py:57 .\models.py:936
 msgid "Locale"
@@ -277,8 +277,8 @@ msgid ""
 "Locale of this queue. All correspondence in this queue will be in this "
 "language."
 msgstr ""
-"Localisation de cette file. Toute la correspondance dans cette "
-"file sera dans cette langue."
+"Localisation de cette file. Toute la correspondance dans cette file sera "
+"dans cette langue."
 
 #: .\models.py:66
 msgid "Allow Public Submission?"
@@ -287,8 +287,7 @@ msgstr "Autoriser la publication publique ?"
 #: .\models.py:69
 msgid "Should this queue be listed on the public submission form?"
 msgstr ""
-"Cette file doit-elle être listée dans le formulaire public de "
-"soumission ?"
+"Cette file doit-elle être listée dans le formulaire public de soumission ?"
 
 #: .\models.py:73
 msgid "Allow E-Mail Submission?"
@@ -363,7 +362,8 @@ msgid ""
 "POP3 and IMAP are supported, as well as reading from a local directory."
 msgstr ""
 "Type de serveur mail pour la création automatique de tickets depuis une "
-"boîte aux lettres - POP3 et IMAP sont supportés, ainsi que la lecture sur un dossier local."
+"boîte aux lettres - POP3 et IMAP sont supportés, ainsi que la lecture sur un "
+"dossier local."
 
 #: .\models.py:121
 msgid "E-Mail Hostname"
@@ -431,8 +431,8 @@ msgid ""
 msgstr ""
 "Si vous utilisez IMAP, à partir de quel dossier souhaitez-vous extraire les "
 "messages? Cela vous permet d'utiliser un compte IMAP pour plusieurs files, "
-"en filtrant les messages sur votre serveur IMAP dans des dossiers "
-"distincts. Par défaut: INBOX."
+"en filtrant les messages sur votre serveur IMAP dans des dossiers distincts. "
+"Par défaut: INBOX."
 
 #: .\models.py:174
 msgid "E-Mail Local Directory"
@@ -443,8 +443,8 @@ msgid ""
 "If using a local directory, what directory path do you wish to poll for new "
 "email? Example: /var/lib/mail/helpdesk/"
 msgstr ""
-"Si vous utilisez un dossier local, quel chemin souhaitez-vous pour récupérer les "
-"nouveaux e-mails dans votre dossier ? Exemple: /var/lib/mail/helpdesk/"
+"Si vous utilisez un dossier local, quel chemin souhaitez-vous pour récupérer "
+"les nouveaux e-mails dans votre dossier ? Exemple: /var/lib/mail/helpdesk/"
 
 #: .\models.py:184
 msgid "Django auth permission name"
@@ -478,7 +478,8 @@ msgstr "SOCKS5"
 #: .\models.py:213
 msgid ""
 "SOCKS4 or SOCKS5 allows you to proxy your connections through a SOCKS server."
-msgstr "SOCKS4 ou SOCKS5 vous permrmettent de vous connecter via un server SOCKS"
+msgstr ""
+"SOCKS4 ou SOCKS5 vous permrmettent de vous connecter via un server SOCKS"
 
 #: .\models.py:217
 msgid "Socks Proxy Host"
@@ -530,9 +531,9 @@ msgid ""
 "logged to the directory set below. If no level is set, logging will be "
 "disabled."
 msgstr ""
-"Définir le niveau de logging par défaut. Tous les messages de ce niveau ou au-dessus seront "
-"loggé sur le répertoire défini plus haut. Si aucun niveau n'est défini, les logs seront "
-"désactivés."
+"Définir le niveau de logging par défaut. Tous les messages de ce niveau ou "
+"au-dessus seront loggé sur le répertoire défini plus haut. Si aucun niveau "
+"n'est défini, les logs seront désactivés."
 
 #: .\models.py:249
 msgid "Logging Directory"
@@ -543,8 +544,9 @@ msgid ""
 "If logging is enabled, what directory should we use to store log files for "
 "this queue? If no directory is set, default to /var/log/helpdesk/"
 msgstr ""
-"Si les logs sont activés, quel dossier doit être utilisé pour stocker les fichiers de logs "
-"pour cette file ? Si aucun dossier n'est défini, cela sera /var/log/helpdesk/ par défaut"
+"Si les logs sont activés, quel dossier doit être utilisé pour stocker les "
+"fichiers de logs pour cette file ? Si aucun dossier n'est défini, cela sera /"
+"var/log/helpdesk/ par défaut"
 
 #: .\models.py:264
 msgid "Default owner"
@@ -821,8 +823,8 @@ msgid ""
 "queues you wish to limit this reply to."
 msgstr ""
 "Laissez vide pour permettre à cette réponse d'être utilisée pour toutes les "
-"files, ou sélectionnez les files auxquelles vous "
-"souhaitez limiter cette réponse."
+"files, ou sélectionnez les files auxquelles vous souhaitez limiter cette "
+"réponse."
 
 #: .\models.py:838 .\models.py:875 .\models.py:1196
 #: .\templates\helpdesk\email_ignore_list.html:24
@@ -853,8 +855,8 @@ msgid ""
 "Leave blank for this exclusion to be applied to all queues, or select those "
 "queues you wish to exclude with this entry."
 msgstr ""
-"Laissez vide pour appliquer cette exclusion à toutes les files, ou sélectionnez "
-" celles que vous souhaitez exclure pour cette éntrée"
+"Laissez vide pour appliquer cette exclusion à toutes les files, ou "
+"sélectionnez  celles que vous souhaitez exclure pour cette éntrée"
 
 #: .\models.py:881
 msgid "Date on which escalation should not happen"
@@ -1052,9 +1054,8 @@ msgid ""
 "Leave blank for this e-mail to be ignored on all queues, or select those "
 "queues you wish to ignore this e-mail for."
 msgstr ""
-"Laissez vide cet e-mail pour qu'il soit ignoré par toutes les files, "
-"ou sélectionner les files qui doivent ignorer cet e-"
-"mail."
+"Laissez vide cet e-mail pour qu'il soit ignoré par toutes les files, ou "
+"sélectionner les files qui doivent ignorer cet e-mail."
 
 #: .\models.py:1202
 msgid "Date on which this e-mail address was added"
@@ -1279,7 +1280,8 @@ msgid ""
 "<a href='https://github.com/django-helpdesk/django-helpdesk'>django-"
 "helpdesk</a>."
 msgstr ""
-"<a href='https://github.com/django-helpdesk/django-helpdesk'>django-helpdesk</a>."
+"<a href='https://github.com/django-helpdesk/django-helpdesk'>django-"
+"helpdesk</a>."
 
 #: .\templates\helpdesk\base.html:18
 msgid "Powered by django-helpdesk"
@@ -1395,7 +1397,7 @@ msgstr ""
 msgid "All Tickets submitted by you"
 msgstr "Tous les tickets que vous avez soumis"
 
-#: .\templates\helpdesk\dashboard.html:19
+#: .\templates\helpdesk\dashboard.html:19 .\views\staff.py:102
 msgid "atrbcu_page"
 msgstr "page_tickets_soumis"
 
@@ -1407,7 +1409,7 @@ msgstr "Tickets ouverts qui vous sont assignés (vous travaillez sur ce ticket)"
 msgid "You have no tickets assigned to you."
 msgstr "Vous n'avez aucun ticket qui vous est assigné."
 
-#: .\templates\helpdesk\dashboard.html:25
+#: .\templates\helpdesk\dashboard.html:25 .\views\staff.py:100
 msgid "ut_page"
 msgstr "page_tickets_utilisateur"
 
@@ -1415,7 +1417,7 @@ msgstr "page_tickets_utilisateur"
 msgid "Closed & resolved Tickets you used to work on"
 msgstr "Les tickets fermés et résolus sur lesquels vous avez travaillé."
 
-#: .\templates\helpdesk\dashboard.html:32
+#: .\templates\helpdesk\dashboard.html:32 .\views\staff.py:101
 msgid "utcr_page"
 msgstr "page_tickets_utilisateur_ferme_resolu"
 
@@ -1503,8 +1505,8 @@ msgid ""
 "tickets in your system? You can re-add this e-mail address at any time."
 msgstr ""
 "Êtes-vous certain de vouloir retirer le courriel (<em>%(email_address)s</"
-"em>) et de permettre la création automatique des tickets dans votre système ?  "
-"Vous pouvez remettre le courriel en tout temps."
+"em>) et de permettre la création automatique des tickets dans votre "
+"système ?  Vous pouvez remettre le courriel en tout temps."
 
 #: .\templates\helpdesk\email_ignore_del.html:10
 msgid "Keep Ignoring It"
@@ -1532,9 +1534,8 @@ msgstr ""
 "<h2> Adresses E-Mail Ignorées</h2>\n"
 "\n"
 "<p> Les adresses e-mail suivantes sont actuellement ignorées par le "
-"traitement du courrier électronique entrant. Vous pouvez ajouter une "
-"adresse e-mail à la liste ou supprimer l'un des "
-"éléments ci-dessous, au besoin. </p>"
+"traitement du courrier électronique entrant. Vous pouvez ajouter une adresse "
+"e-mail à la liste ou supprimer l'un des éléments ci-dessous, au besoin. </p>"
 
 #: .\templates\helpdesk\email_ignore_list.html:19
 msgid "Add an Email"
@@ -1837,9 +1838,9 @@ msgid ""
 "links please try removing them if possible."
 msgstr ""
 "Notre système a classé votre soumission comme <strong>spam</strong>, alors "
-"nous sommes dans l’impossibilité de le sauvegarder. Si ceci n’est pas du spam, "
-"revenez en arrière svp et retapez votre message en vous assurant de ne pas être « Spammy "
-"», si vous avez beaucoup de liens, retirez-les."
+"nous sommes dans l’impossibilité de le sauvegarder. Si ceci n’est pas du "
+"spam, revenez en arrière svp et retapez votre message en vous assurant de ne "
+"pas être « Spammy », si vous avez beaucoup de liens, retirez-les."
 
 #: .\templates\helpdesk\public_spam.html:7
 msgid ""
@@ -1902,8 +1903,8 @@ msgid ""
 "password twice so we can verify you typed it in correctly."
 msgstr ""
 "Pour des raisons de sécurité, saisissez votre ancien mot de passe, puis "
-"saisissez votre nouveau mot de passe deux fois pour que nous puissions vérifier "
-"que vous l'avez bien taper correctement."
+"saisissez votre nouveau mot de passe deux fois pour que nous puissions "
+"vérifier que vous l'avez bien taper correctement."
 
 #: .\templates\helpdesk\registration\change_password.html:45
 msgid "Change my password"
@@ -1939,8 +1940,8 @@ msgstr ""
 "    <div class=\"col-md-4 col-md-offset-4\">\n"
 "        <div class=\"alert alert-success\">\n"
 "            <h2>Déconnecté</h2>\n"
-"            <p>J'espère que vous avez aidé à résoudre quelques "
-"tickets et faire de ce monde un meilleur endroit.</p>\n"
+"            <p>J'espère que vous avez aidé à résoudre quelques tickets et "
+"faire de ce monde un meilleur endroit.</p>\n"
 "        </div>\n"
 "    </div>\n"
 "\n"
@@ -2283,9 +2284,10 @@ msgstr ""
 "\n"
 "<h2>Suppression d'un fichier joint au ticket</h2>\n"
 "\n"
-"<p>Êtes-vous sûr de vouloir supprimer le fichier joint <i>%(filename)s</i> de "
-"ce ticket ? Les données du fichiers seront supprimées définitivement de la "
-"base de données, mais le fichier en lui-même continuera d'exister sur le serveur.</p>\n"
+"<p>Êtes-vous sûr de vouloir supprimer le fichier joint <i>%(filename)s</i> "
+"de ce ticket ? Les données du fichiers seront supprimées définitivement de "
+"la base de données, mais le fichier en lui-même continuera d'exister sur le "
+"serveur.</p>\n"
 
 #: .\templates\helpdesk\ticket_attachment_del.html:11
 #: .\templates\helpdesk\ticket_cc_del.html:12
@@ -2308,8 +2310,9 @@ msgid ""
 "To automatically send an email to a user or e-mail address when this ticket "
 "is updated, select the user or enter an e-mail address below."
 msgstr ""
-"Pour automatiquement envoyer un email à un utilisateur ou à une adresse mail lorsque ce ticket "
-"est mis à jour, sélectionnez l'utilisateur ou saisissez l'adresse mail ci-dessous."
+"Pour automatiquement envoyer un email à un utilisateur ou à une adresse mail "
+"lorsque ce ticket est mis à jour, sélectionnez l'utilisateur ou saisissez "
+"l'adresse mail ci-dessous."
 
 #: .\templates\helpdesk\ticket_cc_add.html:18
 msgid "Email"
@@ -2358,6 +2361,7 @@ msgid "Ticket CC Settings"
 msgstr "Paramètres \"copie à\" du ticket"
 
 #: .\templates\helpdesk\ticket_cc_list.html:5
+#, python-format
 msgid ""
 "\n"
 "<h2>Ticket CC Settings</h2>\n"
@@ -2372,13 +2376,13 @@ msgstr ""
 "\n"
 "<h2> Paramètres Ticket CC </h2>\n"
 "\n"
-"<p> Les personnes suivantes recevront un e-mail à chaque fois que <em><a href='../'>"
-"%(ticket_title)s</a></em> est mis à jour. Certaines "
-"personnes peuvent également consulter ou modifier le ticket via les pages des "
-"tickets publics. </p>\n"
+"<p> Les personnes suivantes recevront un e-mail à chaque fois que <em><a "
+"href='../'>%(ticket_title)s</a></em> est mis à jour. Certaines personnes "
+"peuvent également consulter ou modifier le ticket via les pages des tickets "
+"publics. </p>\n"
 "\n"
-"<p>Vous pouvez ajouter une nouvelle adresse mail à la liste ou "
-"supprimer l'un des éléments ci-dessous, au besoin. </p>"
+"<p>Vous pouvez ajouter une nouvelle adresse mail à la liste ou supprimer "
+"l'un des éléments ci-dessous, au besoin. </p>"
 
 #: .\templates\helpdesk\ticket_cc_list.html:16
 msgid "Ticket CC List"
@@ -2629,8 +2633,9 @@ msgid ""
 "<a href='../reports/?saved_query=%(query_id)s'>Run a report</a> on this "
 "query to see stats and charts for the data listed below."
 msgstr ""
-"<a href='../reports/?saved_query=%(query_id)s'>Exécuter un rapport</a> sur cette "
-"requête pour voir les statistique et graphiques pour les données ci-dessous."
+"<a href='../reports/?saved_query=%(query_id)s'>Exécuter un rapport</a> sur "
+"cette requête pour voir les statistique et graphiques pour les données ci-"
+"dessous."
 
 #: .\templates\helpdesk\ticket_list.html:152
 #: .\templates\helpdesk\ticket_list.html:170
@@ -2735,8 +2740,7 @@ msgstr "Enregistrer les options"
 #: .\views\feeds.py:37
 #, python-format
 msgid "Helpdesk: Open Tickets in queue %(queue)s for %(username)s"
-msgstr ""
-"Helpdesk: Ticket ouvert pour %(username)s dans la file %(queue)s"
+msgstr "Helpdesk: Ticket ouvert pour %(username)s dans la file %(queue)s"
 
 #: .\views\feeds.py:42
 #, python-format
@@ -2747,8 +2751,7 @@ msgstr "Helpdesk: Tickets ouverts pour %(username)s "
 #, python-format
 msgid "Open and Reopened Tickets in queue %(queue)s for %(username)s"
 msgstr ""
-"Tickets Ouverts et Ré-ouverts pour %(username)s dans la file "
-"%(queue)s "
+"Tickets Ouverts et Ré-ouverts pour %(username)s dans la file %(queue)s "
 
 #: .\views\feeds.py:53
 #, python-format
