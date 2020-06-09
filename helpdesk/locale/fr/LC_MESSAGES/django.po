@@ -16,7 +16,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: django-helpdesk\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-06-09 16:18+0200\n"
+"POT-Creation-Date: 2020-06-09 16:28+0200\n"
 "PO-Revision-Date: 2016-06-07 12:22+0000\n"
 "Last-Translator: Antoine Nguyen <tonio@ngyn.org>\n"
 "Language-Team: French (http://www.transifex.com/rossp/django-helpdesk/"
@@ -2002,8 +2002,12 @@ msgid "Click"
 msgstr "Cliquer"
 
 #: .\templates\helpdesk\report_index.html:29
+msgid "here"
+msgstr "ici"
+
+#: .\templates\helpdesk\report_index.html:29
 msgid "for detailed average by month."
-msgstr "Pour la moyenne par mois détaillé"
+msgstr "pour la moyenne par mois détaillé"
 
 #: .\templates\helpdesk\report_index.html:71
 msgid "Generate Report"
