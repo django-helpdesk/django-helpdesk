@@ -28,7 +28,10 @@ $(document).on('change', ':file', function() {
                         </div>
                         <!-- /.panel-heading -->
                         <div class="panel-body">
-                            <p>{% trans "Unless otherwise stated, all fields are required." %} {% trans "Please provide as descriptive a title and description as possible." %}</p>
+                            <p>
+                                {% trans "Unless otherwise stated, all fields are required." %}
+                                {% trans "Please provide as descriptive a title and description as possible." %}
+                            </p>
                             <form method='post' action='./' enctype='multipart/form-data'>
                                 <fieldset class='col-xs-8'>
                                     {% comment %}{{ form|bootstrap }}{% endcomment %}
@@ -37,7 +40,10 @@ $(document).on('change', ':file', function() {
                                             {{ field }}
                                         {% else %}
                                             <div class="form-group">
-                                                <dt><label for='id_{{ field.name }}'>{% trans field.label %}</label>{% if not field.field.required %} <span class='form_optional'>{% trans "(Optional)" %}</span>{% endif %}</dt>
+                                                <dt>
+                                                    <label for='id_{{ field.name }}'>{{ field.label }}</label>
+                                                    {% if not field.field.required %} <span class='form_optional'>{% trans "(Optional)" %}</span>{% endif %}
+                                                </dt>
                                                 <dd>{{ field }}</dd>
                                                 {% if field.errors %}<dd class='error'>{{ field.errors }}</dd>{% endif %}
                                                 {% if field.help_text %}<dd class='form_help_text help-block'>{% trans field.help_text %}</dd>{% endif %}

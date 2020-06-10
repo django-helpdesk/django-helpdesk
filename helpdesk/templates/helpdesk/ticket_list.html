@@ -184,7 +184,7 @@ $(document).ready(function() {
                                             <form method='get' action='{% url 'helpdesk:list' %}'>
                                                 <p><label for='id_query_selector'>{% trans "Query" %}</label> <select name='saved_query' id='id_query_selector'>
                                                     {% for q in user_saved_queries %}
-                                                    <option value='{{ q.id }}'>{{ q.title }}{% if q.shared %} (Shared{% ifnotequal user q.user %} by {{ q.user.get_username }}{% endifnotequal %}){% endif %}</option>
+                                                    <option value='{{ q.id }}'>{{ q.title }}{% if q.shared %} ({% trans "Shared" %}{% ifnotequal user q.user %} by {{ q.user.get_username }}{% endifnotequal %}){% endif %}</option>
                                                     {% endfor %}
                                                 </select></p>
                                                 <input class="btn btn-primary" type='submit' value='{% trans "Run Query" %}'>

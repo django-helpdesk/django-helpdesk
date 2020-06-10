@@ -97,9 +97,9 @@ def dashboard(request):
     tickets_per_page = request.user.usersettings_helpdesk.settings.get('tickets_per_page') or 25
 
     # page vars for the three ticket tables
-    user_tickets_page = request.GET.get('ut_page', 1)
-    user_tickets_closed_resolved_page = request.GET.get('utcr_page', 1)
-    all_tickets_reported_by_current_user_page = request.GET.get('atrbcu_page', 1)
+    user_tickets_page = request.GET.get(_('ut_page'), 1)
+    user_tickets_closed_resolved_page = request.GET.get(_('utcr_page'), 1)
+    all_tickets_reported_by_current_user_page = request.GET.get(_('atrbcu_page'), 1)
 
     # open & reopened tickets, assigned to current user
     tickets = Ticket.objects.select_related('queue').filter(
