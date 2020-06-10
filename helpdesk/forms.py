@@ -8,7 +8,7 @@ forms.py - Definitions of newforms-based forms for creating and maintaining
 """
 
 
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.utils.six import StringIO
 from django import forms
 from django.forms import widgets
@@ -16,6 +16,7 @@ from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth import get_user_model
 from django.utils import timezone
+from django_select2.forms import ModelSelect2MultipleWidget
 
 from helpdesk.lib import send_templated_mail, safe_template_context, process_attachments
 from helpdesk.models import (Ticket, Queue, FollowUp, Attachment, IgnoreEmail, TicketCC,
@@ -459,6 +460,13 @@ class TicketCCForm(forms.ModelForm):
             users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
         self.fields['user'].queryset = users
 
+    def clean(self):
+        cleaned_data = super().clean()
+        email = cleaned_data.get('email', None)
+        user = cleaned_data.get('user', None)
+        if not email and not user:
+            raise ValidationError(_('Please fill an email address or choose a user'))
+
 
 class TicketCCUserForm(forms.ModelForm):
     ''' Adds a helpdesk user as a CC on a Ticket '''
@@ -474,6 +482,15 @@ class TicketCCUserForm(forms.ModelForm):
     class Meta:
         model = TicketCC
         exclude = ('ticket', 'email',)
+        widgets = {
+            'user': ModelSelect2MultipleWidget(
+                model=User,
+                search_fields=[
+                    'username__icontains', 'first_name__icontains', 'last_name__icontains', 'email__icontains'
+                ],
+                attrs={'style': 'width: 100%'}
+            )
+        }
 
 
 class TicketCCEmailForm(forms.ModelForm):
@@ -485,6 +502,9 @@ class TicketCCEmailForm(forms.ModelForm):
     class Meta:
         model = TicketCC
         exclude = ('ticket', 'user',)
+        widgets = {
+            'email': forms.TextInput(attrs={'class': 'form-control'})
+        }
 
 
 class TicketDependencyForm(forms.ModelForm):

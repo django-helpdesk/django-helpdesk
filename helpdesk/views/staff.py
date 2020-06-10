@@ -1439,21 +1439,22 @@ def ticket_cc_add(request, ticket_id):
     if not _is_my_ticket(request.user, ticket):
         raise PermissionDenied()
 
+    form = None
     if request.method == 'POST':
         form = TicketCCForm(request.POST)
         if form.is_valid():
             ticketcc = form.save(commit=False)
             ticketcc.ticket = ticket
             ticketcc.save()
-            return HttpResponseRedirect(reverse('helpdesk:ticket_cc',
-                                                kwargs={'ticket_id': ticket.id}))
-    else:
-        form_email = TicketCCEmailForm()
-        form_user = TicketCCUserForm()
+            return HttpResponseRedirect(
+                reverse('helpdesk:ticket_cc', kwargs={'ticket_id': ticket.id})
+            )
+
     return render(request, 'helpdesk/ticket_cc_add.html', {
         'ticket': ticket,
-        'form_email': form_email,
-        'form_user': form_user,
+        'form': form,
+        'form_email': TicketCCEmailForm(),
+        'form_user': TicketCCUserForm(),
     })
 
 
