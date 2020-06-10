@@ -16,7 +16,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: django-helpdesk\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-06-09 16:28+0200\n"
+"POT-Creation-Date: 2020-06-10 11:34+0200\n"
 "PO-Revision-Date: 2016-06-07 12:22+0000\n"
 "Last-Translator: Antoine Nguyen <tonio@ngyn.org>\n"
 "Language-Team: French (http://www.transifex.com/rossp/django-helpdesk/"
@@ -1357,24 +1357,24 @@ msgstr "Créer un ticket"
 msgid "Submit a Ticket"
 msgstr "Soumettre un Ticket"
 
-#: .\templates\helpdesk\create_ticket.html:31
+#: .\templates\helpdesk\create_ticket.html:32
 #: .\templates\helpdesk\edit_ticket.html:11
 msgid "Unless otherwise stated, all fields are required."
 msgstr "Sauf mention contraire, tous les champs sont requis."
 
-#: .\templates\helpdesk\create_ticket.html:31
+#: .\templates\helpdesk\create_ticket.html:33
 #: .\templates\helpdesk\edit_ticket.html:11
 #: .\templates\helpdesk\public_homepage.html:29
 msgid "Please provide as descriptive a title and description as possible."
 msgstr ""
 "Veuillez fournir un titre et une description aussi détaillés que possible."
 
-#: .\templates\helpdesk\create_ticket.html:41
+#: .\templates\helpdesk\create_ticket.html:46
 #: .\templates\helpdesk\ticket.html:147 .\templates\helpdesk\ticket.html:196
 msgid "(Optional)"
 msgstr "(Optionnel)"
 
-#: .\templates\helpdesk\create_ticket.html:50
+#: .\templates\helpdesk\create_ticket.html:56
 #: .\templates\helpdesk\public_homepage.html:56
 msgid "Submit Ticket"
 msgstr "Soumettre un ticket"
@@ -2679,6 +2679,10 @@ msgstr "Utiliser la requête enregistrée"
 #: .\templates\helpdesk\ticket_list.html:185
 msgid "Query"
 msgstr "Requête"
+
+#: .\templates\helpdesk\ticket_list.html:187
+msgid "Shared"
+msgstr "Partagée"
 
 #: .\templates\helpdesk\ticket_list.html:190
 msgid "Run Query"
