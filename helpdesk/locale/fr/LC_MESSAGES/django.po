@@ -1339,7 +1339,7 @@ msgstr ""
 #: .\templates\helpdesk\confirm_delete_saved_query.html:14
 #: .\templates\helpdesk\delete_ticket.html:10
 msgid "No, Don't Delete It"
-msgstr "Non, ne le supprimez pas."
+msgstr "Non, ne le supprimer pas."
 
 #: .\templates\helpdesk\confirm_delete_saved_query.html:17
 #: .\templates\helpdesk\delete_ticket.html:13
