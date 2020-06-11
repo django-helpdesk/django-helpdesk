@@ -153,7 +153,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
     )
 
     body = forms.CharField(
-        widget=forms.Textarea(attrs={'class': 'form-control'}),
+        widget=forms.Textarea(attrs={'class': 'form-control resize-vertical'}),
         label=_('Description of your issue'),
         required=True,
         help_text=_('Please be as descriptive as possible and include all details'),
@@ -168,10 +168,10 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
         help_text=_("Please select a priority carefully. If unsure, leave it as '3'."),
     )
 
-    due_date = forms.DateTimeField(
-        widget=forms.TextInput(attrs={'class': 'form-control'}),
+    due_date = CustomDateTimeField(
         required=False,
         label=_('Due on'),
+        form_control=True
     )
 
     attachment = forms.FileField(

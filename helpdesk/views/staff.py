@@ -1022,7 +1022,7 @@ def create_ticket(request):
         form.fields['queue'].choices = [('', '--------')] + [
             (q.id, q.title) for q in Queue.objects.all()]
         form.fields['assigned_to'].choices = [('', '--------')] + [
-            (u.id, u.get_username()) for u in assignable_users]
+            (u.id, str(u)) for u in assignable_users]
         if form.is_valid():
             ticket = form.save(user=request.user)
             if _has_access_to_queue(request.user, ticket.queue):
@@ -1040,7 +1040,7 @@ def create_ticket(request):
         form.fields['queue'].choices = [('', '--------')] + [
             (q.id, q.title) for q in Queue.objects.all()]
         form.fields['assigned_to'].choices = [('', '--------')] + [
-            (u.id, u.get_username()) for u in assignable_users]
+            (u.id, str(u)) for u in assignable_users]
         if helpdesk_settings.HELPDESK_CREATE_TICKET_HIDE_ASSIGNED_TO:
             form.fields['assigned_to'].widget = forms.HiddenInput()
 
