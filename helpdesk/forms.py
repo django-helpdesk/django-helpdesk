@@ -23,6 +23,8 @@ from helpdesk.models import (Ticket, Queue, FollowUp, Attachment, IgnoreEmail, T
                              CustomField, TicketCustomFieldValue, TicketDependency)
 from helpdesk import settings as helpdesk_settings
 
+from base.fields import CustomDateTimeField
+
 User = get_user_model()
 
 CUSTOMFIELD_TO_FIELD_DICT = {
@@ -76,6 +78,7 @@ class CustomFieldMixin(object):
 
 
 class EditTicketForm(CustomFieldMixin, forms.ModelForm):
+    due_date = CustomDateTimeField(required=False)
 
     class Meta:
         model = Ticket
