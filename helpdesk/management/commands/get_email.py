@@ -358,9 +358,12 @@ def ticket_from_message(message, queue, logger):
 
         if part.get_content_maintype() == 'text' and name is None:
             if part.get_content_subtype() == 'plain':
-                body = EmailReplyParser.parse_reply(
-                    decodeUnknown(part.get_content_charset(), part.get_payload(decode=True))
-                )
+                body = part.get_payload(decode=True)
+                # https://github.com/django-helpdesk/django-helpdesk/issues/732
+                if part['Content-Transfer-Encoding'] == '8bit' and part.get_content_charset() == 'utf-8':
+                    body = body.decode('unicode_escape')
+                body = decodeUnknown(part.get_content_charset(), body)
+                body = EmailReplyParser.parse_reply(body)
                 # workaround to get unicode text out rather than escaped text
                 try:
                     body = body.encode('ascii').decode('unicode_escape')
@@ -368,8 +371,20 @@ def ticket_from_message(message, queue, logger):
                     body.encode('utf-8')
                 logger.debug("Discovered plain text MIME part")
             else:
+                try:
+                    email_body = encoding.smart_text(part.get_payload(decode=True))
+                except UnicodeDecodeError:
+                    email_body = encoding.smart_text(part.get_payload(decode=False))
+
+                payload = """
+                <html>
+                <head>
+                <meta charset="utf-8"/>
+                </head>
+                %s
+                </html>""" % email_body
                 files.append(
-                    SimpleUploadedFile(_("email_html_body.html"), encoding.smart_bytes(part.get_payload()), 'text/html')
+                    SimpleUploadedFile(_("email_html_body.html"), payload.encode("utf-8"), 'text/html')
                 )
                 logger.debug("Discovered HTML MIME part")
         else:
@@ -400,13 +415,14 @@ def ticket_from_message(message, queue, logger):
         counter += 1
 
     if not body:
-        mail = BeautifulSoup(part.get_payload(), "lxml")
-        if ">" in mail.text:
-            body = mail.find('body')
-            body = body.text
-            body = body.encode('ascii', errors='ignore')
-        else:
-            body = mail.text
+        mail = BeautifulSoup(str(message), "html.parser")
+        beautiful_body = mail.find('body')
+        body = ""
+        if beautiful_body:
+            try:
+                body = beautiful_body.text
+            except AttributeError:
+                pass
 
     if ticket:
         try:
