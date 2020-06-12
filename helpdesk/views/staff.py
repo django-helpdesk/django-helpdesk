@@ -12,14 +12,16 @@ import re
 
 from django import VERSION as DJANGO_VERSION
 from django.conf import settings
+from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
 from django.http import HttpResponseRedirect, Http404, HttpResponse
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.utils.dates import MONTHS_3
+from django.utils.timezone import make_aware
 from django.utils.translation import ugettext as _
 from django.utils.html import escape
 from django import forms
@@ -42,6 +44,7 @@ from helpdesk.models import (
 )
 from helpdesk import settings as helpdesk_settings
 
+from config.settings.base import DATETIME_LOCAL_FORMAT
 
 User = get_user_model()
 
@@ -280,7 +283,13 @@ def followup_delete(request, ticket_id, followup_id):
 
 @staff_member_required
 def view_ticket(request, ticket_id):
-    ticket = get_object_or_404(Ticket, id=ticket_id)
+    ticket = get_object_or_404(
+        Ticket.objects.prefetch_related(
+            'followup_set__user', 'followup_set__ticketchange_set',
+            'followup_set__attachment_set', 'ticketdependency__depends_on'
+        ),
+        id=ticket_id
+    )
     if not _has_access_to_queue(request.user, ticket.queue):
         raise PermissionDenied()
     if not _is_my_ticket(request.user, ticket):
@@ -424,23 +433,7 @@ def update_ticket(request, ticket_id, public=False):
     due_date = request.POST.get('due_date', None) or None
 
     if due_date is not None:
-        # based on Django code to parse dates:
-        # https://docs.djangoproject.com/en/2.0/_modules/django/utils/dateparse/
-        match = date_re.match(due_date)
-        if match:
-            kw = {k: int(v) for k, v in match.groupdict().items()}
-            due_date = date(**kw)
-    else:
-        # old way, probably deprecated?
-        if not (due_date_year and due_date_month and due_date_day):
-            due_date = ticket.due_date
-        else:
-            # NOTE: must be an easier way to create a new date than doing it this way?
-            if ticket.due_date:
-                due_date = ticket.due_date
-            else:
-                due_date = timezone.now()
-            due_date = due_date.replace(due_date_year, due_date_month, due_date_day)
+        due_date = make_aware(datetime.strptime(due_date, DATETIME_LOCAL_FORMAT))
 
     no_changes = all([
         not request.FILES,
@@ -453,6 +446,7 @@ def update_ticket(request, ticket_id, public=False):
         (owner and User.objects.get(id=owner) == ticket.assigned_to),
     ])
     if no_changes:
+        messages.info(request, "Aucune modification n'a été apportée.")
         return return_to_ticket(request.user, helpdesk_settings, ticket)
 
     # We need to allow the 'ticket' and 'queue' contexts to be applied to the
@@ -1476,16 +1470,15 @@ def ticket_dependency_add(request, ticket_id):
         raise PermissionDenied()
     if not _is_my_ticket(request.user, ticket):
         raise PermissionDenied()
-    if request.method == 'POST':
-        form = TicketDependencyForm(request.POST)
-        if form.is_valid():
-            ticketdependency = form.save(commit=False)
-            ticketdependency.ticket = ticket
-            if ticketdependency.ticket != ticketdependency.depends_on:
-                ticketdependency.save()
-            return HttpResponseRedirect(reverse('helpdesk:view', args=[ticket.id]))
-    else:
-        form = TicketDependencyForm()
+    form = TicketDependencyForm(request.POST or None)
+    form.fields['depends_on'].queryset = Ticket.objects.exclude(
+        Q(id=ticket.id) | Q(ticketdependency__depends_on=ticket)
+    )
+    if form.is_valid():
+        ticketdependency = form.save(commit=False)
+        ticketdependency.ticket = ticket
+        ticketdependency.save()
+        return redirect(ticket)
     return render(request, 'helpdesk/ticket_dependency_add.html', {
         'ticket': ticket,
         'form': form,

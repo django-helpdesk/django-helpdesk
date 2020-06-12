@@ -15,6 +15,7 @@ from django.db import models
 from django.conf import settings
 from django.utils import timezone
 from django.utils import six
+from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _, ugettext
 from django.utils.encoding import python_2_unicode_compatible
 import re
@@ -575,9 +576,8 @@ class Ticket(models.Model):
         False = There are non-resolved dependencies
         """
         OPEN_STATUSES = (Ticket.OPEN_STATUS, Ticket.REOPENED_STATUS)
-        return TicketDependency.objects.filter(ticket=self).filter(
-            depends_on__status__in=OPEN_STATUSES).count() == 0
-    can_be_resolved = property(_can_be_resolved)
+        return self.ticketdependency.filter(depends_on__status__in=OPEN_STATUSES).count() == 0
+    can_be_resolved = cached_property(_can_be_resolved)
 
     class Meta:
         get_latest_by = "created"

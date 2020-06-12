@@ -335,6 +335,9 @@ table.dataTable thead .sorting:after {
   border-bottom: 15px solid transparent;
   border-left: 15px solid #ccc;
 }
+.timeline > li > .internal-comment {
+  background-color: #eee;
+}
 .timeline > li > .timeline-panel:after {
   content: " ";
   display: inline-block;
@@ -345,6 +348,9 @@ table.dataTable thead .sorting:after {
   border-right: 0 solid #fff;
   border-bottom: 14px solid transparent;
   border-left: 14px solid #fff;
+}
+.timeline > li > .timeline-panel.internal-comment:after {
+  border-left: 14px solid #eee;
 }
 .timeline > li > .timeline-badge {
   z-index: 100;
