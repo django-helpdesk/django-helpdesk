@@ -16,7 +16,7 @@ from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth import get_user_model
 from django.utils import timezone
-from django_select2.forms import ModelSelect2MultipleWidget
+from django_select2.forms import ModelSelect2MultipleWidget, ModelSelect2Widget
 
 from helpdesk.lib import send_templated_mail, safe_template_context, process_attachments
 from helpdesk.models import (Ticket, Queue, FollowUp, Attachment, IgnoreEmail, TicketCC,
@@ -125,7 +125,18 @@ class EditFollowUpForm(forms.ModelForm):
 
     class Meta:
         model = FollowUp
-        exclude = ('date', 'user',)
+        exclude = ('date', 'user')
+        labels = {
+            'ticket': _("Reassign ticket:")
+        }
+        widgets = {
+            'ticket': ModelSelect2Widget(
+                model=Ticket,
+                search_fields=['title__icontains', 'id__iexact'],
+                attrs={'style': 'width: 100%', 'data-minimum-input-length': 0}
+            ),
+            'comment': forms.Textarea(attrs={'class': 'resize-vertical'})
+        }
 
     def __init__(self, *args, **kwargs):
         """Filter not openned tickets here."""
