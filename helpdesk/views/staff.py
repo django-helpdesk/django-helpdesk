@@ -1475,16 +1475,17 @@ def ticket_dependency_add(request, ticket_id):
         raise PermissionDenied()
     if not _is_my_ticket(request.user, ticket):
         raise PermissionDenied()
-    if request.method == 'POST':
-        form = TicketDependencyForm(request.POST)
-        if form.is_valid():
-            ticketdependency = form.save(commit=False)
-            ticketdependency.ticket = ticket
-            if ticketdependency.ticket != ticketdependency.depends_on:
-                ticketdependency.save()
-            return HttpResponseRedirect(reverse('helpdesk:view', args=[ticket.id]))
-    else:
-        form = TicketDependencyForm()
+
+    form = TicketDependencyForm(request.POST or None)
+    # A ticket cannot depends on itself or on a ticket already depending on it
+    form.fields['depends_on'].queryset = Ticket.objects.exclude(
+        Q(id=ticket.id) | Q(ticketdependency__depends_on=ticket)
+    )
+    if form.is_valid():
+        ticketdependency = form.save(commit=False)
+        ticketdependency.ticket = ticket
+        ticketdependency.save()
+        return HttpResponseRedirect(reverse('helpdesk:view', args=[ticket.id]))
     return render(request, 'helpdesk/ticket_dependency_add.html', {
         'ticket': ticket,
         'form': form,
