@@ -24,6 +24,7 @@ from helpdesk.models import (Ticket, Queue, FollowUp, Attachment, IgnoreEmail, T
 from helpdesk import settings as helpdesk_settings
 
 from base.fields import CustomDateTimeField
+from sphinx.models import Customer, Site, CustomerProducts
 
 User = get_user_model()
 
@@ -77,7 +78,50 @@ class CustomFieldMixin(object):
         self.fields['custom_%s' % field.name] = fieldclass(**instanceargs)
 
 
-class EditTicketForm(CustomFieldMixin, forms.ModelForm):
+class PhoenixTicketForm(forms.Form):
+    """ Add special fields for Phoenix """
+    link_open = forms.URLField(
+        widget=forms.HiddenInput()
+    )
+
+    customer = forms.ModelChoiceField(
+        label='Client',
+        queryset=Customer.objects.all(),
+        widget=ModelSelect2Widget(
+            model=Customer,
+            search_fields=['group__name__icontains'],
+            attrs={'style': 'width: 100%'}
+        ),
+        required=False
+    )
+
+    site = forms.ModelChoiceField(
+        label='Site',
+        queryset=Site.objects.all(),
+        widget=ModelSelect2Widget(
+            model=Site,
+            search_fields=['customer__group__name__icontains', 'name__icontains'],
+            attrs={'style': 'width: 100%'}
+        ),
+        required=False
+    )
+
+    customer_product = forms.ModelChoiceField(
+        label='Produit client',
+        queryset=CustomerProducts.objects.all(),
+        widget=ModelSelect2Widget(
+            model=CustomerProducts,
+            search_fields=[
+                'site__customer__group__name__icontains', 'site__name__icontains',
+                'comment__icontains', 'product__name__icontains'
+            ],
+            attrs={'style': 'width: 100%'}
+        ),
+        required=False
+    )
+
+
+class EditTicketForm(CustomFieldMixin, PhoenixTicketForm, forms.ModelForm):
     due_date = CustomDateTimeField(required=False)
 
     class Meta:
@@ -208,12 +252,20 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
 
     def _create_ticket(self):
         queue = Queue.objects.get(id=int(self.cleaned_data['queue']))
+        link_open = self.cleaned_data.get('link_open')
+        customer = self.cleaned_data.get('customer')
+        site = self.cleaned_data.get('site')
+        customer_product = self.cleaned_data.get('customer_product')
 
         ticket = Ticket(title=self.cleaned_data['title'],
                         submitter_email=self.cleaned_data['submitter_email'],
                         created=timezone.now(),
                         status=Ticket.OPEN_STATUS,
                         queue=queue,
+                        link_open=link_open,
+                        customer=customer,
+                        site=site,
+                        customer_product=customer_product,
                         description=self.cleaned_data['body'],
                         priority=self.cleaned_data['priority'],
                         due_date=self.cleaned_data['due_date'],
@@ -305,7 +357,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
             )
 
 
-class TicketForm(AbstractTicketForm):
+class TicketForm(PhoenixTicketForm, AbstractTicketForm):
     """
     Ticket Form creation for registered users.
     """

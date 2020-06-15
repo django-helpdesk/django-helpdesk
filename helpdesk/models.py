@@ -20,6 +20,8 @@ from django.utils.translation import ugettext_lazy as _, ugettext
 from django.utils.encoding import python_2_unicode_compatible
 import re
 
+from sphinx.models import CustomerProducts, Site, Customer
+
 
 @python_2_unicode_compatible
 class Queue(models.Model):
@@ -476,6 +478,36 @@ class Ticket(models.Model):
         editable=False,
         help_text=_('The date this ticket was last escalated - updated '
                     'automatically by management/commands/escalate_tickets.py.'),
+    )
+
+    link_open = models.URLField(
+        null=True,
+        blank=True,
+        help_text="Lien depuis lequel le ticket a été ouvert."
+    )
+
+    customer = models.ForeignKey(
+        Customer,
+        on_delete=models.SET_NULL,
+        related_name='tickets',
+        null=True,
+        blank=True
+    )
+
+    site = models.ForeignKey(
+        Site,
+        on_delete=models.SET_NULL,
+        related_name='tickets',
+        null=True,
+        blank=True
+    )
+
+    customer_product = models.ForeignKey(
+        CustomerProducts,
+        on_delete=models.SET_NULL,
+        related_name='tickets',
+        null=True,
+        blank=True
     )
 
     def _get_assigned_to(self):
