@@ -527,3 +527,6 @@ class TicketDependencyForm(forms.ModelForm):
     class Meta:
         model = TicketDependency
         exclude = ('ticket',)
+        widgets = {
+            'depends_on': forms.Select(attrs={'class': 'form-control'})
+        }
