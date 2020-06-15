@@ -7,13 +7,14 @@ views/staff.py - The bulk of the application - provides most business logic and
                  renders all staff-facing views.
 """
 from __future__ import unicode_literals
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 import re
 
 from django import VERSION as DJANGO_VERSION
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import get_user_model
+from django.template.defaultfilters import date
 from django.urls import reverse
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -553,8 +554,8 @@ def update_ticket(request, ticket_id, public=False):
         c = TicketChange(
             followup=f,
             field=_('Due on'),
-            old_value=ticket.due_date,
-            new_value=due_date,
+            old_value=date(timezone.localtime(ticket.due_date), 'DATETIME_FORMAT'),
+            new_value=date(due_date, 'DATETIME_FORMAT'),
         )
         c.save()
         ticket.due_date = due_date
