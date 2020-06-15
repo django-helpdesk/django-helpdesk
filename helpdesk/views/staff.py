@@ -364,9 +364,11 @@ def return_ticketccstring_and_show_subscribe(user, ticket):
     # subscribed
     username = user.get_username().upper()
     useremail = user.email.upper()
+    user_full_name = str(user).upper()
     strings_to_check = list()
     strings_to_check.append(username)
     strings_to_check.append(useremail)
+    strings_to_check.append(user_full_name)
 
     ticketcc_string = ''
     all_ticketcc = ticket.ticketcc_set.all()
@@ -377,7 +379,7 @@ def return_ticketccstring_and_show_subscribe(user, ticket):
         ticketcc_string += ticketcc_this_entry
         if i < counter_all_ticketcc:
             ticketcc_string += ', '
-        if strings_to_check.__contains__(ticketcc_this_entry.upper()):
+        if ticketcc_this_entry.upper() in strings_to_check:
             show_subscribe = False
 
     # check whether current user is a submitter or assigned to ticket
@@ -387,7 +389,7 @@ def return_ticketccstring_and_show_subscribe(user, ticket):
         submitter_email = ticket.submitter_email.upper()
         strings_to_check.append(submitter_email)
     strings_to_check.append(assignedto_username)
-    if strings_to_check.__contains__(username) or strings_to_check.__contains__(useremail):
+    if username in strings_to_check or useremail in strings_to_check or user_full_name in strings_to_check:
         show_subscribe = False
 
     return ticketcc_string, show_subscribe
@@ -395,13 +397,14 @@ def return_ticketccstring_and_show_subscribe(user, ticket):
 
 def subscribe_staff_member_to_ticket(ticket, user):
     """used in view_ticket() and update_ticket()"""
-    ticketcc = TicketCC(
-        ticket=ticket,
-        user=user,
-        can_view=True,
-        can_update=True,
-    )
-    ticketcc.save()
+    if not ticket.ticketcc_set.filter(user=user).exists():
+        ticketcc = TicketCC(
+            ticket=ticket,
+            user=user,
+            can_view=True,
+            can_update=True,
+        )
+        ticketcc.save()
 
 
 def update_ticket(request, ticket_id, public=False):
@@ -1438,12 +1441,19 @@ def ticket_cc_add(request, ticket_id):
     if request.method == 'POST':
         form = TicketCCForm(request.POST)
         if form.is_valid():
-            ticketcc = form.save(commit=False)
-            ticketcc.ticket = ticket
-            ticketcc.save()
-            return HttpResponseRedirect(
-                reverse('helpdesk:ticket_cc', kwargs={'ticket_id': ticket.id})
-            )
+            user = form.cleaned_data.get('user')
+            email = form.cleaned_data.get('email')
+            if user and ticket.ticketcc_set.filter(user=user).exists():
+                form.add_error('user', "Impossible d'ajouter deux fois le même utilisateur")
+            elif email and ticket.ticketcc_set.filter(email=email).exists():
+                form.add_error('email', "Impossible d'ajouter deux fois la même adresse mail")
+            else:
+                ticketcc = form.save(commit=False)
+                ticketcc.ticket = ticket
+                ticketcc.save()
+                return HttpResponseRedirect(
+                    reverse('helpdesk:ticket_cc', kwargs={'ticket_id': ticket.id})
+                )
 
     return render(request, 'helpdesk/ticket_cc_add.html', {
         'ticket': ticket,
