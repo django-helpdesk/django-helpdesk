@@ -364,7 +364,7 @@ class TicketForm(PhoenixTicketForm, AbstractTicketForm):
     submitter_email = forms.EmailField(
         required=False,
         label=_('Submitter E-Mail Address'),
-        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        widget=forms.TextInput(attrs={'class': 'form-control submitter-email-autocomplete', 'autocomplete': 'off'}),
         help_text=_('This e-mail address will receive copies of all public '
                     'updates to this ticket.'),
     )
