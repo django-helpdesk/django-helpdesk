@@ -46,6 +46,7 @@ from helpdesk.models import (
 from helpdesk import settings as helpdesk_settings
 
 from config.settings.base import DATETIME_LOCAL_FORMAT
+from sphinx.models import Customer, Site, CustomerProducts
 
 User = get_user_model()
 
@@ -341,7 +342,12 @@ def view_ticket(request, ticket_id):
         users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
 
     # TODO: shouldn't this template get a form to begin with?
-    form = TicketForm(initial={'due_date': ticket.due_date})
+    form = TicketForm(initial={
+        'due_date': ticket.due_date,
+        'customer': ticket.customer,
+        'site': ticket.site,
+        'customer_product': ticket.customer_product,
+    })
 
     ticketcc_string, show_subscribe = \
         return_ticketccstring_and_show_subscribe(request.user, ticket)
@@ -418,26 +424,21 @@ def update_ticket(request, ticket_id, public=False):
 
     ticket = get_object_or_404(Ticket, id=ticket_id)
 
-    date_re = re.compile(
-        r'(?P<month>\d{1,2})/(?P<day>\d{1,2})/(?P<year>\d{4})$'
-    )
-
     comment = request.POST.get('comment', '')
     new_status = int(request.POST.get('new_status', ticket.status))
     title = request.POST.get('title', '')
     public = request.POST.get('public', False)
     owner = int(request.POST.get('owner', -1))
     priority = int(request.POST.get('priority', ticket.priority))
-    due_date_year = int(request.POST.get('due_date_year', 0))
-    due_date_month = int(request.POST.get('due_date_month', 0))
-    due_date_day = int(request.POST.get('due_date_day', 0))
-    # NOTE: jQuery's default for dates is mm/dd/yy
-    # very US-centric but for now that's the only format supported
-    # until we clean up code to internationalize a little more
-    due_date = request.POST.get('due_date', None) or None
+    due_date = request.POST.get('due_date', None)
+    customer_id = int(request.POST.get('customer')) if request.POST.get('customer') else None
+    site_id = int(request.POST.get('site', None)) if request.POST.get('site') else None
+    customer_product_id = int(request.POST.get('customer_product', None)) if request.POST.get('customer_product') else None
 
-    if due_date is not None:
+    if due_date:
         due_date = make_aware(datetime.strptime(due_date, DATETIME_LOCAL_FORMAT))
+    else:
+        due_date = None
 
     no_changes = all([
         not request.FILES,
@@ -446,6 +447,9 @@ def update_ticket(request, ticket_id, public=False):
         title == ticket.title,
         priority == int(ticket.priority),
         due_date == ticket.due_date,
+        customer_id == ticket.customer.id,
+        site_id == ticket.site.id,
+        customer_product_id == ticket.customer_product.id,
         (owner == -1) or (not owner and not ticket.assigned_to) or
         (owner and User.objects.get(id=owner) == ticket.assigned_to),
     ])
@@ -516,52 +520,86 @@ def update_ticket(request, ticket_id, public=False):
     files = process_attachments(f, request.FILES.getlist('attachment'))
 
     if title and title != ticket.title:
-        c = TicketChange(
+        TicketChange.objects.create(
             followup=f,
             field=_('Title'),
             old_value=ticket.title,
             new_value=title,
         )
-        c.save()
         ticket.title = title
 
     if new_status != old_status:
-        c = TicketChange(
+        TicketChange.objects.create(
             followup=f,
             field=_('Status'),
             old_value=old_status_str,
             new_value=ticket.get_status_display(),
         )
-        c.save()
 
     if ticket.assigned_to != old_owner:
-        c = TicketChange(
+        TicketChange.objects.create(
             followup=f,
             field=_('Owner'),
             old_value=old_owner,
             new_value=ticket.assigned_to,
         )
-        c.save()
 
     if priority != ticket.priority:
-        c = TicketChange(
+        TicketChange.objects.create(
             followup=f,
             field=_('Priority'),
             old_value=ticket.priority,
             new_value=priority,
         )
-        c.save()
         ticket.priority = priority
 
     if due_date != ticket.due_date:
-        c = TicketChange(
+        TicketChange.objects.create(
             followup=f,
             field=_('Due on'),
             old_value=date(timezone.localtime(ticket.due_date), 'DATETIME_FORMAT'),
             new_value=date(due_date, 'DATETIME_FORMAT'),
         )
-        c.save()
         ticket.due_date = due_date
+
+    if customer_id != ticket.customer.id:
+        try:
+            customer = Customer.objects.get(id=customer_id)
+            TicketChange.objects.create(
+                followup=f,
+                field='Client',
+                old_value=str(ticket.customer),
+                new_value=str(customer),
+            )
+            ticket.customer = customer
+        except Customer.DoesNotExist:
+            pass
+
+    if site_id != ticket.site.id:
+        try:
+            site = Site.objects.get(id=site_id)
+            TicketChange.objects.create(
+                followup=f,
+                field='Site',
+                old_value=str(ticket.site),
+                new_value=str(site),
+            )
+            ticket.site = site
+        except Site.DoesNotExist:
+            pass
+
+    if customer_product_id != ticket.customer_product.id:
+        try:
+            customer_product = CustomerProducts.objects.get(id=customer_product_id)
+            TicketChange.objects.create(
+                followup=f,
+                field='Produit client',
+                old_value=str(ticket.customer_product),
+                new_value=str(customer_product),
+            )
+            ticket.customer_product = customer_product
+        except CustomerProducts.DoesNotExist:
+            pass
 
     if new_status in (Ticket.RESOLVED_STATUS, Ticket.CLOSED_STATUS):
         if new_status == Ticket.RESOLVED_STATUS or ticket.resolution is None:
