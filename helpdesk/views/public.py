@@ -85,8 +85,6 @@ def homepage(request):
             initial_data['submitter_email'] = request.user.email
 
         form = PublicTicketForm(initial=initial_data)
-        form.fields['queue'].choices = [('', '--------')] + [
-            (q.id, q.title) for q in Queue.objects.filter(allow_public_submission=True)]
 
     knowledgebase_categories = None
 

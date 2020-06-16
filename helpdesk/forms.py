@@ -193,11 +193,11 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
     Contain all the common code and fields between "TicketForm" and
     "PublicTicketForm". This Form is not intended to be used directly.
     """
-    queue = forms.ChoiceField(
+    queue = forms.ModelChoiceField(
+        queryset=Queue.objects.all(),
         widget=forms.Select(attrs={'class': 'form-control'}),
         label=_('Queue'),
         required=True,
-        choices=()
     )
 
     title = forms.CharField(
@@ -251,7 +251,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
             self.customfield_to_field(field, instanceargs)
 
     def _create_ticket(self):
-        queue = Queue.objects.get(id=int(self.cleaned_data['queue']))
+        queue = self.cleaned_data['queue']
         link_open = self.cleaned_data.get('link_open')
         customer = self.cleaned_data.get('customer')
         site = self.cleaned_data.get('site')
@@ -369,9 +369,9 @@ class TicketForm(PhoenixTicketForm, AbstractTicketForm):
                     'updates to this ticket.'),
     )
 
-    assigned_to = forms.ChoiceField(
+    assigned_to = forms.ModelChoiceField(
+        queryset=User.objects.none(),
         widget=forms.Select(attrs={'class': 'form-control'}),
-        choices=(),
         required=False,
         label=_('Case owner'),
         help_text=_('If you select an owner other than yourself, they\'ll be '
@@ -383,6 +383,13 @@ class TicketForm(PhoenixTicketForm, AbstractTicketForm):
         Add any custom fields that are defined to the form.
         """
         super(TicketForm, self).__init__(*args, **kwargs)
+        if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS:
+            assignable_users = User.objects.filter(is_active=True, is_staff=True).order_by(User.USERNAME_FIELD)
+        else:
+            assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
+        self.fields['assigned_to'].queryset = assignable_users
+        if helpdesk_settings.HELPDESK_CREATE_TICKET_HIDE_ASSIGNED_TO:
+            self.fields['assigned_to'].widget = forms.HiddenInput()
         self._add_form_custom_fields()
 
     def save(self, user):
@@ -442,6 +449,8 @@ class PublicTicketForm(AbstractTicketForm):
             self.fields['priority'].widget = forms.HiddenInput()
         if hasattr(settings, 'HELPDESK_PUBLIC_TICKET_DUE_DATE'):
             self.fields['due_date'].widget = forms.HiddenInput()
+
+        self.fields['queue'].queryset = Queue.objects.filter(allow_public_submission=True)
 
         self._add_form_custom_fields(False)
 
