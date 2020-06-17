@@ -14,6 +14,7 @@ from django import VERSION as DJANGO_VERSION
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import get_user_model
+from django.contrib.auth.decorators import login_required
 from django.template.defaultfilters import date
 from django.urls import reverse
 from django.core.exceptions import ValidationError, PermissionDenied
@@ -25,7 +26,6 @@ from django.utils.dates import MONTHS_3
 from django.utils.timezone import make_aware
 from django.utils.translation import ugettext as _
 from django.utils.html import escape
-from django import forms
 from django.utils import timezone
 
 from django.utils import six
@@ -342,12 +342,15 @@ def view_ticket(request, ticket_id):
         users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
 
     # TODO: shouldn't this template get a form to begin with?
-    form = TicketForm(initial={
-        'due_date': ticket.due_date,
-        'customer': ticket.customer,
-        'site': ticket.site,
-        'customer_product': ticket.customer_product,
-    })
+    form = TicketForm(
+        initial={
+            'due_date': ticket.due_date,
+            'customer': ticket.customer,
+            'site': ticket.site,
+            'customer_product': ticket.customer_product,
+        },
+        user=request.user
+    )
 
     ticketcc_string, show_subscribe = \
         return_ticketccstring_and_show_subscribe(request.user, ticket)
@@ -1046,15 +1049,30 @@ def edit_ticket(request, ticket_id):
     return render(request, 'helpdesk/edit_ticket.html', {'form': form})
 
 
-@staff_member_required
+@login_required
 def create_ticket(request):
     if request.method == 'POST':
         # Add prefix if form has been submitted through the modal (and so has the ticket prefix)
-        form = TicketForm(request.POST, request.FILES, prefix='ticket' if 'ticket-title' in request.POST else '')
+        form = TicketForm(
+            data=request.POST,
+            files=request.FILES,
+            prefix='ticket' if 'ticket-title' in request.POST else '',
+            user=request.user
+        )
         if form.is_valid():
             ticket = form.save(user=request.user)
             if _has_access_to_queue(request.user, ticket.queue):
-                return HttpResponseRedirect(ticket.get_absolute_url())
+                if request.user.is_staff:
+                    return HttpResponseRedirect(ticket.get_absolute_url())
+                else:
+                    # Redirect to public ticket page
+                    return HttpResponseRedirect(
+                        '{}?ticket={}&email={}'.format(
+                            reverse('helpdesk:public_view'),
+                            ticket.id,
+                            form.cleaned_data['submitter_email']
+                        )
+                    )
             else:
                 return HttpResponseRedirect(reverse('helpdesk:dashboard'))
     else:
@@ -1064,7 +1082,7 @@ def create_ticket(request):
         if 'queue' in request.GET:
             initial_data['queue'] = request.GET['queue']
 
-        form = TicketForm(initial=initial_data)
+        form = TicketForm(initial=initial_data, user=request.user)
 
     return render(request, 'helpdesk/create_ticket.html', {'form': form})
 

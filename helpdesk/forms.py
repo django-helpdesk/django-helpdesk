@@ -378,18 +378,39 @@ class TicketForm(PhoenixTicketForm, AbstractTicketForm):
                     'e-mailed details of this ticket immediately.'),
     )
 
-    def __init__(self, *args, **kwargs):
+    # Hide contextual fields in the Ticket Creation Form
+    customer = forms.ModelChoiceField(queryset=Customer.objects.all(), widget=forms.HiddenInput(), required=False)
+    site = forms.ModelChoiceField(queryset=Site.objects.all(), widget=forms.HiddenInput(), required=False)
+    customer_product = forms.ModelChoiceField(
+        queryset=CustomerProducts.objects.all(),
+        widget=forms.HiddenInput(),
+        required=False
+    )
+
+    def __init__(self, user, *args, **kwargs):
         """
-        Add any custom fields that are defined to the form.
+        Prepare the form based on if the user is staff or not.
         """
         super(TicketForm, self).__init__(*args, **kwargs)
-        if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS:
-            assignable_users = User.objects.filter(is_active=True, is_staff=True).order_by(User.USERNAME_FIELD)
+
+        if user.is_staff:
+            if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS:
+                assignable_users = User.objects.filter(is_active=True, is_staff=True).order_by(User.USERNAME_FIELD)
+            else:
+                assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
+            self.fields['assigned_to'].queryset = assignable_users
+            if helpdesk_settings.HELPDESK_CREATE_TICKET_HIDE_ASSIGNED_TO:
+                self.fields['assigned_to'].widget = forms.HiddenInput()
         else:
-            assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
-        self.fields['assigned_to'].queryset = assignable_users
-        if helpdesk_settings.HELPDESK_CREATE_TICKET_HIDE_ASSIGNED_TO:
+            # Hide some fields
+            self.fields['priority'].widget = forms.HiddenInput()
             self.fields['assigned_to'].widget = forms.HiddenInput()
+            # Set initial submitter email
+            if user.email:
+                self.initial['submitter_email'] = user.email
+                self.fields['submitter_email'].widget = forms.HiddenInput()
+
+        # Add any custom fields that are defined to the form
         self._add_form_custom_fields()
 
     def save(self, user):
@@ -399,11 +420,7 @@ class TicketForm(PhoenixTicketForm, AbstractTicketForm):
 
         ticket, queue = self._create_ticket()
         if self.cleaned_data['assigned_to']:
-            try:
-                u = User.objects.get(id=self.cleaned_data['assigned_to'])
-                ticket.assigned_to = u
-            except User.DoesNotExist:
-                ticket.assigned_to = None
+            ticket.assigned_to = self.cleaned_data['assigned_to']
         ticket.save()
 
         self._create_custom_fields(ticket)
