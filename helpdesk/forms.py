@@ -378,16 +378,7 @@ class TicketForm(PhoenixTicketForm, AbstractTicketForm):
                     'e-mailed details of this ticket immediately.'),
     )
 
-    # Hide contextual fields in the Ticket Creation Form
-    customer = forms.ModelChoiceField(queryset=Customer.objects.all(), widget=forms.HiddenInput(), required=False)
-    site = forms.ModelChoiceField(queryset=Site.objects.all(), widget=forms.HiddenInput(), required=False)
-    customer_product = forms.ModelChoiceField(
-        queryset=CustomerProducts.objects.all(),
-        widget=forms.HiddenInput(),
-        required=False
-    )
-
-    def __init__(self, user, *args, **kwargs):
+    def __init__(self, user, edit_contextual_fields=False, *args, **kwargs):
         """
         Prepare the form based on if the user is staff or not.
         """
@@ -409,6 +400,12 @@ class TicketForm(PhoenixTicketForm, AbstractTicketForm):
             if user.email:
                 self.initial['submitter_email'] = user.email
                 self.fields['submitter_email'].widget = forms.HiddenInput()
+
+        # Hide contextual fields by default (it is only possible on the ticket view page)
+        if not edit_contextual_fields:
+            self.fields['customer'].widget = forms.HiddenInput()
+            self.fields['site'].widget = forms.HiddenInput()
+            self.fields['customer_product'].widget = forms.HiddenInput()
 
         # Add any custom fields that are defined to the form
         self._add_form_custom_fields()

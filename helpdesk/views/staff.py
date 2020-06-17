@@ -349,7 +349,8 @@ def view_ticket(request, ticket_id):
             'site': ticket.site,
             'customer_product': ticket.customer_product,
         },
-        user=request.user
+        user=request.user,
+        edit_contextual_fields=True
     )
 
     ticketcc_string, show_subscribe = \
@@ -450,9 +451,9 @@ def update_ticket(request, ticket_id, public=False):
         title == ticket.title,
         priority == int(ticket.priority),
         due_date == ticket.due_date,
-        customer_id == ticket.customer.id,
-        site_id == ticket.site.id,
-        customer_product_id == ticket.customer_product.id,
+        customer_id == (ticket.customer.id if ticket.customer else None),
+        site_id == (ticket.site.id if ticket.site else None),
+        customer_product_id == (ticket.customer_product.id if ticket.customer_product else None),
         (owner == -1) or (not owner and not ticket.assigned_to) or
         (owner and User.objects.get(id=owner) == ticket.assigned_to),
     ])
@@ -565,44 +566,44 @@ def update_ticket(request, ticket_id, public=False):
         )
         ticket.due_date = due_date
 
-    if customer_id != ticket.customer.id:
+    if customer_id != (ticket.customer.id if ticket.customer else None):
         try:
             customer = Customer.objects.get(id=customer_id)
-            TicketChange.objects.create(
-                followup=f,
-                field='Client',
-                old_value=str(ticket.customer),
-                new_value=str(customer),
-            )
-            ticket.customer = customer
         except Customer.DoesNotExist:
-            pass
+            customer = None
+        TicketChange.objects.create(
+            followup=f,
+            field='Client',
+            old_value=str(ticket.customer),
+            new_value=str(customer),
+        )
+        ticket.customer = customer
 
-    if site_id != ticket.site.id:
+    if site_id != (ticket.site.id if ticket.site else None):
         try:
             site = Site.objects.get(id=site_id)
-            TicketChange.objects.create(
-                followup=f,
-                field='Site',
-                old_value=str(ticket.site),
-                new_value=str(site),
-            )
-            ticket.site = site
         except Site.DoesNotExist:
-            pass
+            site = None
+        TicketChange.objects.create(
+            followup=f,
+            field='Site',
+            old_value=str(ticket.site),
+            new_value=str(site),
+        )
+        ticket.site = site
 
-    if customer_product_id != ticket.customer_product.id:
+    if customer_product_id != (ticket.customer_product.id if ticket.customer_product else None):
         try:
             customer_product = CustomerProducts.objects.get(id=customer_product_id)
-            TicketChange.objects.create(
-                followup=f,
-                field='Produit client',
-                old_value=str(ticket.customer_product),
-                new_value=str(customer_product),
-            )
-            ticket.customer_product = customer_product
         except CustomerProducts.DoesNotExist:
-            pass
+            customer_product = None
+        TicketChange.objects.create(
+            followup=f,
+            field='Produit client',
+            old_value=str(ticket.customer_product),
+            new_value=str(customer_product),
+        )
+        ticket.customer_product = customer_product
 
     if new_status in (Ticket.RESOLVED_STATUS, Ticket.CLOSED_STATUS):
         if new_status == Ticket.RESOLVED_STATUS or ticket.resolution is None:
