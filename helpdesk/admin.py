@@ -10,7 +10,7 @@ from helpdesk.models import CustomField
 class QueueAdmin(admin.ModelAdmin):
     list_display = ('title', 'slug', 'email_address', 'locale')
     prepopulated_fields = {"slug": ("title",)}
-    raw_id_fields = ('default_owner',)
+    autocomplete_fields = ('default_owner',)
 
 
 @admin.register(Ticket)
@@ -19,7 +19,7 @@ class TicketAdmin(admin.ModelAdmin):
     date_hierarchy = 'created'
     list_filter = ('queue', 'status', 'priority', 'on_hold')
     search_fields = ('id', 'title', 'description')
-    raw_id_fields = ('assigned_to',)
+    autocomplete_fields = ('assigned_to', 'customer', 'site', 'customer_product')
     list_select_related = ('queue', 'assigned_to')
 
     def hidden_submitter_email(self, ticket):
@@ -46,7 +46,7 @@ class FollowUpAdmin(admin.ModelAdmin):
     inlines = [TicketChangeInline, AttachmentInline]
     list_display = ('ticket_get_ticket_for_url', 'title', 'date', 'ticket', 'user', 'new_status')
     list_filter = ('new_status', 'public')
-    raw_id_fields = ('user', 'ticket')
+    autocomplete_fields = ('user', 'ticket')
     date_hierarchy = 'date'
     search_fields = ('ticket__id', 'title', 'comment')
     list_select_related = ('ticket__queue', 'user')
