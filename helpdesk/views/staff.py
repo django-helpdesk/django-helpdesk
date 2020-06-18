@@ -1524,7 +1524,9 @@ def ticket_dependency_add(request, ticket_id):
         raise PermissionDenied()
     if not _is_my_ticket(request.user, ticket):
         raise PermissionDenied()
+
     form = TicketDependencyForm(request.POST or None)
+    # A ticket cannot depends on itself or on a ticket already depending on it
     form.fields['depends_on'].queryset = Ticket.objects.exclude(
         Q(id=ticket.id) | Q(ticketdependency__depends_on=ticket)
     )
