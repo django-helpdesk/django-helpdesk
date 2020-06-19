@@ -752,9 +752,7 @@ def mass_update(request):
             t.save()
             f = FollowUp(ticket=t,
                          date=timezone.now(),
-                         title=_('Assigned to %(username)s in bulk update' % {
-                             'username': user.get_username()
-                         }),
+                         title=_('Assigned to %s in bulk update' % user),
                          public=True,
                          user=request.user)
             f.save()
