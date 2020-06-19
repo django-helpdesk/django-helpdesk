@@ -86,9 +86,8 @@ class PhoenixTicketForm(forms.Form):
 
     customer_contact = forms.ModelChoiceField(
         label='Utilisateur client',
-        queryset=User.objects.all(),
+        queryset=User.objects.filter(is_active=True),
         widget=ModelSelect2Widget(
-            queryset=User.objects.filter(is_active=True),
             search_fields=['username__icontains', 'first_name__icontains', 'last_name__icontains', 'email__icontains'],
             attrs={'style': 'width: 100%'}
         ),
@@ -99,7 +98,6 @@ class PhoenixTicketForm(forms.Form):
         label='Client',
         queryset=Customer.objects.all(),
         widget=ModelSelect2Widget(
-            model=Customer,
             search_fields=['group__name__icontains'],
             attrs={'style': 'width: 100%'}
         ),
@@ -110,7 +108,6 @@ class PhoenixTicketForm(forms.Form):
         label='Site',
         queryset=Site.objects.all(),
         widget=ModelSelect2Widget(
-            model=Site,
             search_fields=['customer__group__name__icontains', 'name__icontains'],
             attrs={'style': 'width: 100%'}
         ),
@@ -119,9 +116,8 @@ class PhoenixTicketForm(forms.Form):
 
     customer_product = forms.ModelChoiceField(
         label='Produit client',
-        queryset=CustomerProducts.objects.active_only(),
+        queryset=CustomerProducts.objects.filter(termination_date__isnull=True),
         widget=ModelSelect2Widget(
-            model=CustomerProducts,
             search_fields=[
                 'site__customer__group__name__icontains', 'site__name__icontains',
                 'comment__icontains', 'product__name__icontains'
