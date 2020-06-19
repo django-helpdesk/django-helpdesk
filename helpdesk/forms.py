@@ -406,6 +406,9 @@ class TicketForm(PhoenixTicketForm, AbstractTicketForm):
             self.fields['customer_contact'].widget = forms.HiddenInput()
             self.fields['priority'].widget = forms.HiddenInput()
             self.fields['assigned_to'].widget = forms.HiddenInput()
+            # Set customer contact
+            self.initial['customer_contact'] = user
+            self.fields['customer_contact'].widget = forms.HiddenInput()
             # Set initial submitter email
             if user.email:
                 self.initial['submitter_email'] = user.email
