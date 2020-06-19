@@ -435,6 +435,7 @@ def update_ticket(request, ticket_id, public=False):
     owner = int(request.POST.get('owner', -1))
     priority = int(request.POST.get('priority', ticket.priority))
     due_date = request.POST.get('due_date', None)
+    customer_contact_id = int(request.POST.get('customer_contact')) if request.POST.get('customer_contact') else None
     customer_id = int(request.POST.get('customer')) if request.POST.get('customer') else None
     site_id = int(request.POST.get('site', None)) if request.POST.get('site') else None
     customer_product_id = int(request.POST.get('customer_product', None)) if request.POST.get('customer_product') else None
@@ -451,6 +452,7 @@ def update_ticket(request, ticket_id, public=False):
         title == ticket.title,
         priority == int(ticket.priority),
         due_date == ticket.due_date,
+        customer_contact_id == (ticket.customer_contact.id if ticket.customer_contact else None),
         customer_id == (ticket.customer.id if ticket.customer else None),
         site_id == (ticket.site.id if ticket.site else None),
         customer_product_id == (ticket.customer_product.id if ticket.customer_product else None),
@@ -565,6 +567,19 @@ def update_ticket(request, ticket_id, public=False):
             new_value=date(due_date, 'DATETIME_FORMAT'),
         )
         ticket.due_date = due_date
+
+    if customer_contact_id != (ticket.customer_contact.id if ticket.customer_contact else None):
+        try:
+            customer_contact = User.objects.get(id=customer_contact_id)
+        except User.DoesNotExist:
+            customer_contact = None
+        TicketChange.objects.create(
+            followup=f,
+            field='Contact client',
+            old_value=str(ticket.customer_contact),
+            new_value=str(customer_contact),
+        )
+        ticket.customer_contact = customer_contact
 
     if customer_id != (ticket.customer.id if ticket.customer else None):
         try:

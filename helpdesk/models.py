@@ -486,6 +486,14 @@ class Ticket(models.Model):
         help_text="Lien depuis lequel le ticket a été ouvert."
     )
 
+    customer_contact = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name='tickets',
+        null=True,
+        blank=True
+    )
+
     customer = models.ForeignKey(
         Customer,
         on_delete=models.SET_NULL,

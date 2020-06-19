@@ -84,6 +84,17 @@ class PhoenixTicketForm(forms.Form):
         widget=forms.HiddenInput()
     )
 
+    customer_contact = forms.ModelChoiceField(
+        label='Utilisateur client',
+        queryset=User.objects.all(),
+        widget=ModelSelect2Widget(
+            queryset=User.objects.filter(is_active=True),
+            search_fields=['username__icontains', 'first_name__icontains', 'last_name__icontains', 'email__icontains'],
+            attrs={'style': 'width: 100%'}
+        ),
+        required=False
+    )
+
     customer = forms.ModelChoiceField(
         label='Client',
         queryset=Customer.objects.all(),
@@ -108,7 +119,7 @@ class PhoenixTicketForm(forms.Form):
 
     customer_product = forms.ModelChoiceField(
         label='Produit client',
-        queryset=CustomerProducts.objects.all(),
+        queryset=CustomerProducts.objects.active_only(),
         widget=ModelSelect2Widget(
             model=CustomerProducts,
             search_fields=[
@@ -253,6 +264,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
     def _create_ticket(self):
         queue = self.cleaned_data['queue']
         link_open = self.cleaned_data.get('link_open')
+        customer_contact = self.cleaned_data.get('customer_contact')
         customer = self.cleaned_data.get('customer')
         site = self.cleaned_data.get('site')
         customer_product = self.cleaned_data.get('customer_product')
@@ -264,6 +276,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
                         queue=queue,
                         link_open=link_open,
                         customer=customer,
+                        customer_contact=customer_contact,
                         site=site,
                         customer_product=customer_product,
                         description=self.cleaned_data['body'],
@@ -394,6 +407,7 @@ class TicketForm(PhoenixTicketForm, AbstractTicketForm):
                 self.fields['assigned_to'].widget = forms.HiddenInput()
         else:
             # Hide some fields
+            self.fields['customer_contact'].widget = forms.HiddenInput()
             self.fields['priority'].widget = forms.HiddenInput()
             self.fields['assigned_to'].widget = forms.HiddenInput()
             # Set initial submitter email
@@ -403,6 +417,7 @@ class TicketForm(PhoenixTicketForm, AbstractTicketForm):
 
         # Hide contextual fields by default (it is only possible on the ticket view page)
         if not edit_contextual_fields:
+            self.fields['customer_contact'].widget = forms.HiddenInput()
             self.fields['customer'].widget = forms.HiddenInput()
             self.fields['site'].widget = forms.HiddenInput()
             self.fields['customer_product'].widget = forms.HiddenInput()
