@@ -1091,8 +1091,6 @@ def create_ticket(request):
                 return HttpResponseRedirect(reverse('helpdesk:dashboard'))
     else:
         initial_data = {}
-        if request.user.usersettings_helpdesk.settings.get('use_email_as_submitter', False) and request.user.email:
-            initial_data['submitter_email'] = request.user.email
         if 'queue' in request.GET:
             initial_data['queue'] = request.GET['queue']
 

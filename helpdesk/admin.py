@@ -19,7 +19,7 @@ class TicketAdmin(admin.ModelAdmin):
     date_hierarchy = 'created'
     list_filter = ('queue', 'status', 'priority', 'on_hold')
     search_fields = ('id', 'title', 'description')
-    autocomplete_fields = ('assigned_to', 'customer', 'site', 'customer_product')
+    autocomplete_fields = ('assigned_to', 'customer_contact', 'customer', 'site', 'customer_product')
     list_select_related = ('queue', 'assigned_to')
 
     def hidden_submitter_email(self, ticket):
