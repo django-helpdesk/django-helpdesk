@@ -22,6 +22,8 @@ from helpdesk.lib import send_templated_mail, safe_template_context, process_att
 from helpdesk.models import (Ticket, Queue, FollowUp, Attachment, IgnoreEmail, TicketCC,
                              CustomField, TicketCustomFieldValue, TicketDependency)
 from helpdesk import settings as helpdesk_settings
+from phonenumber_field.formfields import PhoneNumberField
+from phonenumber_field.widgets import PhoneNumberInternationalFallbackWidget
 
 from base.fields import CustomDateTimeField
 from sphinx.models import Customer, Site, CustomerProducts
@@ -378,6 +380,13 @@ class TicketForm(PhoenixTicketForm, AbstractTicketForm):
                     'updates to this ticket.'),
     )
 
+    phone_number = PhoneNumberField(
+        max_length=20,
+        label='Numéro de téléphone',
+        widget=PhoneNumberInternationalFallbackWidget(attrs={'class': 'form-control'}),
+        help_text='Numéro de téléphone de la personne à contacter.'
+    )
+
     assigned_to = forms.ModelChoiceField(
         queryset=User.objects.none(),
         widget=forms.Select(attrs={'class': 'form-control'}),
@@ -406,9 +415,10 @@ class TicketForm(PhoenixTicketForm, AbstractTicketForm):
             self.fields['customer_contact'].widget = forms.HiddenInput()
             self.fields['priority'].widget = forms.HiddenInput()
             self.fields['assigned_to'].widget = forms.HiddenInput()
-            # Set customer contact
+            # Set customer contact and phone number
             self.initial['customer_contact'] = user
             self.fields['customer_contact'].widget = forms.HiddenInput()
+            self.initial['phone_number'] = user.employee.phone_number
             # Set initial submitter email
             if user.email:
                 self.initial['submitter_email'] = user.email
