@@ -22,6 +22,7 @@ import re
 
 from phonenumber_field.modelfields import PhoneNumberField
 
+from base.models import SpentTime
 from sphinx.models import CustomerProducts, Site, Customer
 
 
@@ -1543,3 +1544,21 @@ class TicketDependency(models.Model):
 
     def __str__(self):
         return '%s / %s' % (self.ticket, self.depends_on)
+
+
+class TicketSpentTime(SpentTime):
+    """
+    :param OrderProductStep order_product_step: the step of an OrderProduct
+    """
+    ticket = models.ForeignKey(
+        Ticket,
+        on_delete=models.CASCADE,
+        related_name="spent_times"
+    )
+
+    class Meta:
+        verbose_name = "Temps passé sur un ticket"
+        verbose_name_plural = "Temps passés sur un ticket"
+
+    def __str__(self):
+        return 'Temps passé par %s sur %s' % (self.employee, self.ticket)
