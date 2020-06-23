@@ -13,6 +13,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.conf import settings
+from django.urls import reverse
 from django.utils import timezone
 from django.utils import six
 from django.utils.functional import cached_property
@@ -656,6 +657,12 @@ class Ticket(models.Model):
         parts = query.split('-')
         queue = '-'.join(parts[0:-1])
         return queue, parts[-1]
+
+    @property
+    def total_spent_time(self):
+        """:return: the sum of the step's spent times """
+        return self.spent_times.filter(status=SpentTime.FINISHED, duration__isnull=False) \
+            .aggregate(total=models.Sum('duration'))['total']
 
 
 class FollowUpManager(models.Manager):
@@ -1562,3 +1569,12 @@ class TicketSpentTime(SpentTime):
 
     def __str__(self):
         return 'Temps passé par %s sur %s' % (self.employee, self.ticket)
+
+    def get_edit_url(self):
+        return reverse('helpdesk:edit_spent_time', kwargs={'ticket_id': self.ticket.id, 'spent_time_id': self.id})
+
+    def get_object_url(self):
+        return self.ticket.get_absolute_url()
+
+    def get_object_display(self):
+        return 'Ticket {}'.format(self.ticket.title)

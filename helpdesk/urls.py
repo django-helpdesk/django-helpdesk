@@ -73,6 +73,24 @@ urlpatterns = [
         staff.delete_ticket,
         name='delete'),
 
+    url(
+        r'^tickets/(?P<ticket_id>[0-9]+)/spent-times/$',
+        staff.ticket_spent_times,
+        name='ticket_spent_times'
+    ),
+
+    url(
+        r'^tickets/(?P<ticket_id>[0-9]+)/spent-times/(?P<spent_time_id>[0-9]+)$',
+        staff.ticket_spent_times,
+        name='edit_spent_time'
+    ),
+
+    url(
+        r'^tickets/(?P<ticket_id>[0-9]+)/start-time-track/(?P<employee_id>[0-9]+)/$',
+        staff.start_spent_time,
+        name='start_spent_time'
+    ),
+
     url(r'^tickets/(?P<ticket_id>[0-9]+)/hold/$',
         staff.hold_ticket,
         name='hold'),

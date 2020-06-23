@@ -8,7 +8,6 @@ views/staff.py - The bulk of the application - provides most business logic and
 """
 from __future__ import unicode_literals
 from datetime import datetime, timedelta
-import re
 
 from django import VERSION as DJANGO_VERSION
 from django.conf import settings
@@ -16,11 +15,12 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.template.defaultfilters import date
+from django.template.loader import render_to_string
 from django.urls import reverse
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
-from django.http import HttpResponseRedirect, Http404, HttpResponse
+from django.http import HttpResponseRedirect, Http404, HttpResponse, JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils.dates import MONTHS_3
 from django.utils.timezone import make_aware
@@ -41,10 +41,12 @@ from helpdesk.lib import (
 )
 from helpdesk.models import (
     Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch,
-    IgnoreEmail, TicketCC, TicketDependency,
+    IgnoreEmail, TicketCC, TicketDependency, TicketSpentTime,
 )
 from helpdesk import settings as helpdesk_settings
 
+from base.forms import SpentTimeForm
+from base.models import Employee
 from config.settings.base import DATETIME_LOCAL_FORMAT
 from sphinx.models import Customer, Site, CustomerProducts
 
@@ -365,6 +367,77 @@ def view_ticket(request, ticket_id):
             Q(queues=ticket.queue) | Q(queues__isnull=True)),
         'ticketcc_string': ticketcc_string,
         'SHOW_SUBSCRIBE': show_subscribe,
+    })
+
+
+@staff_member_required
+def ticket_spent_times(request, ticket_id, spent_time_id=None):
+    """ List of the spent times of the ticket """
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+    spent_times = ticket.spent_times.select_related('employee__user')
+
+    edit_spent_time = None
+    if spent_time_id:
+        edit_spent_time = get_object_or_404(spent_times, id=spent_time_id)
+
+    form = SpentTimeForm(request.POST or None, instance=edit_spent_time, initial={
+        'status': edit_spent_time.status if edit_spent_time else TicketSpentTime.FINISHED,
+        'end_date': edit_spent_time.end_date if edit_spent_time else timezone.now()
+    })
+    if form.is_valid():
+        spent_time = form.save(commit=False)
+        spent_time.ticket = ticket
+        spent_time.employee = request.user.employee
+        spent_time.save()
+
+        # If the end_date has been filled, set the duration
+        if form.cleaned_data['end_date']:
+            spent_time.end_track(form.cleaned_data['end_date'], with_error=spent_time.status == TicketSpentTime.ERROR)
+        else:
+            # Remove duration
+            spent_time.duration = None
+            spent_time.save(update_fields=['duration'])
+
+        if edit_spent_time:
+            text = 'modifié'
+        else:
+            text = 'ajouté'
+        messages.success(request, "L'enregistrement de temps a bien été %s au ticket." % text)
+
+        return redirect('helpdesk:ticket_spent_times', ticket_id)
+
+    return render(request, 'helpdesk/ticket_spent_times.html', {
+        'ticket': ticket,
+        'spent_times': spent_times,
+        'edit_spent_time': edit_spent_time,
+        'form': form
+    })
+
+@staff_member_required
+def start_spent_time(request, ticket_id, employee_id):
+    """ Create a new OrderProductStepSpentTime for the user on the order product step """
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+    employee = get_object_or_404(Employee, id=employee_id)
+
+    # Check first if the user has no ongoing spent time
+    if not employee.spent_times.filter(status=TicketSpentTime.ONGOING).exists():
+        spent_time = TicketSpentTime.objects.create(ticket=ticket, employee=employee)
+    else:
+        return JsonResponse({'success': False, 'error': 'Un chrono a déjà été lancé !'})
+
+    return JsonResponse({
+        'success': True,
+        'spent_time_id': spent_time.id,
+        'ongoing_spent_time_top_navigation': render_to_string('base/components/ongoing_spent_time_top_navigation.html', {
+            'ongoing_spent_time': spent_time
+        }),
+        'ongoing_spent_time_actions': render_to_string('geant/components/ongoing_spent_time_actions.html', {
+            'ongoing_spent_time': spent_time
+        }),
+        'table': render_to_string('base/components/spent_times_table.html', {
+            'request': request,
+            'spent_times': spent_time.ticket.spent_times.select_related('employee__user')
+        })
     })
 
 
