@@ -20,6 +20,8 @@ from django.utils.translation import ugettext_lazy as _, ugettext
 from django.utils.encoding import python_2_unicode_compatible
 import re
 
+from phonenumber_field.modelfields import PhoneNumberField
+
 from sphinx.models import CustomerProducts, Site, Customer
 
 
@@ -493,6 +495,8 @@ class Ticket(models.Model):
         null=True,
         blank=True
     )
+
+    contact_phone_number = PhoneNumberField('numéro de téléphone', blank=True)
 
     customer = models.ForeignKey(
         Customer,

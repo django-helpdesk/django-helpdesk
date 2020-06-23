@@ -1075,13 +1075,16 @@ def create_ticket(request):
         )
         if form.is_valid():
             ticket = form.save(user=request.user)
-            # Update phone number if it has been changed
-            phone_number = form.cleaned_data.get('phone_number')
-            customer_contact = form.cleaned_data.get('customer_contact')
-            if customer_contact and phone_number is not None and customer_contact.employee.phone_number != phone_number:
-                customer_contact.employee.phone_number = phone_number
-                customer_contact.employee.save(update_fields=['phone_number'])
-                messages.info(request, 'Le numéro de téléphone de contact a été mis à jour.')
+            # Check if user wants to update his phone number
+            if form.cleaned_data.get('update_phone_number'):
+                # Update phone number if it has been changed
+                contact_phone_number = form.cleaned_data.get('contact_phone_number')
+                customer_contact = form.cleaned_data.get('customer_contact')
+                if customer_contact and contact_phone_number is not None \
+                        and customer_contact.employee.phone_number != contact_phone_number:
+                    customer_contact.employee.phone_number = contact_phone_number
+                    customer_contact.employee.save(update_fields=['phone_number'])
+                    messages.info(request, 'Le numéro de téléphone de contact a bien été mis à jour.')
             if _has_access_to_queue(request.user, ticket.queue):
                 if request.user.is_staff:
                     return HttpResponseRedirect(ticket.get_absolute_url())

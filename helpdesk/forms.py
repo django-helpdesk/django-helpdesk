@@ -263,6 +263,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
         queue = self.cleaned_data['queue']
         link_open = self.cleaned_data.get('link_open')
         customer_contact = self.cleaned_data.get('customer_contact')
+        contact_phone_number = self.cleaned_data.get('contact_phone_number')
         customer = self.cleaned_data.get('customer')
         site = self.cleaned_data.get('site')
         customer_product = self.cleaned_data.get('customer_product')
@@ -275,6 +276,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
                         link_open=link_open,
                         customer=customer,
                         customer_contact=customer_contact,
+                        contact_phone_number=contact_phone_number,
                         site=site,
                         customer_product=customer_product,
                         description=self.cleaned_data['body'],
@@ -380,11 +382,17 @@ class TicketForm(PhoenixTicketForm, AbstractTicketForm):
                     'updates to this ticket.'),
     )
 
-    phone_number = PhoneNumberField(
+    contact_phone_number = PhoneNumberField(
         max_length=20,
         label='Numéro de téléphone',
+        required=False,
         widget=PhoneNumberInternationalFallbackWidget(attrs={'class': 'form-control'}),
         help_text='Numéro de téléphone de la personne à contacter.'
+    )
+    update_phone_number = forms.BooleanField(
+        label='Mettre à jour le numéro de téléphone sur le contact client ?',
+        required=False,
+        widget=forms.CheckboxInput(attrs={'class': 'flat'})
     )
 
     assigned_to = forms.ModelChoiceField(
@@ -418,7 +426,11 @@ class TicketForm(PhoenixTicketForm, AbstractTicketForm):
             # Set customer contact and phone number
             self.initial['customer_contact'] = user
             self.fields['customer_contact'].widget = forms.HiddenInput()
-            self.initial['phone_number'] = user.employee.phone_number
+            # Set initial customer phone number and make it mandatory
+            self.initial['contact_phone_number'] = user.employee.phone_number
+            self.fields['contact_phone_number'].required = True
+            self.fields['update_phone_number'].label = 'Utiliser pour mettre à jour mon numéro de téléphone ' \
+                                                        'sur mon profil ?'
             # Set initial submitter email
             if user.email:
                 self.initial['submitter_email'] = user.email
