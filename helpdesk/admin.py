@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _
-from helpdesk.models import Queue, Ticket, FollowUp, PreSetReply, KBCategory, TicketSpentTime
+from helpdesk.models import Queue, Ticket, FollowUp, PreSetReply, KBCategory, TicketSpentTime, TicketCategory
 from helpdesk.models import EscalationExclusion, EmailTemplate, KBItem
 from helpdesk.models import TicketChange, Attachment, IgnoreEmail
 from helpdesk.models import CustomField
@@ -11,6 +11,12 @@ class QueueAdmin(admin.ModelAdmin):
     list_display = ('title', 'slug', 'email_address', 'locale')
     prepopulated_fields = {"slug": ("title",)}
     autocomplete_fields = ('default_owner',)
+
+
+@admin.register(TicketCategory)
+class TicketCategoryAdmin(admin.ModelAdmin):
+    list_display = ('name',)
+    search_fields = ('name',)
 
 
 @admin.register(Ticket)

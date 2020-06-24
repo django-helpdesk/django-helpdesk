@@ -355,6 +355,18 @@ class Queue(models.Model):
                 pass
 
 
+class TicketCategory(models.Model):
+    name = models.CharField('nom', max_length=50, unique=True)
+
+    class Meta:
+        verbose_name = 'Catégorie ticket'
+        verbose_name_plural = 'Catégories ticket'
+        ordering = ('name',)
+
+    def __str__(self):
+        return self.name
+
+
 @python_2_unicode_compatible
 class Ticket(models.Model):
     """
@@ -439,6 +451,14 @@ class Ticket(models.Model):
         _('Status'),
         choices=STATUS_CHOICES,
         default=OPEN_STATUS,
+    )
+
+    category = models.ForeignKey(
+        TicketCategory,
+        verbose_name='catégorie',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
     )
 
     on_hold = models.BooleanField(
