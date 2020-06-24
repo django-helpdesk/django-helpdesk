@@ -367,6 +367,19 @@ class TicketCategory(models.Model):
         return self.name
 
 
+class TicketType(models.Model):
+    name = models.CharField('nom', max_length=50, unique=True)
+    mandatory_facturation = models.BooleanField('facturation obligatoire', default=False)
+
+    class Meta:
+        verbose_name = 'Type ticket'
+        verbose_name_plural = 'Types ticket'
+        ordering = ('name',)
+
+    def __str__(self):
+        return self.name
+
+
 @python_2_unicode_compatible
 class Ticket(models.Model):
     """
@@ -456,6 +469,13 @@ class Ticket(models.Model):
     category = models.ForeignKey(
         TicketCategory,
         verbose_name='catégorie',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+
+    type = models.ForeignKey(
+        TicketType,
         on_delete=models.SET_NULL,
         null=True,
         blank=True
