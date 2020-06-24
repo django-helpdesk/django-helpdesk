@@ -91,6 +91,12 @@ urlpatterns = [
         name='start_spent_time'
     ),
 
+    url(
+        r'^tickets/(?P<ticket_id>[0-9]+)/customer/(?P<customer_id>[0-9]+)/$',
+        staff.choose_customer_for_ticket,
+        name='choose_customer_for_ticket'
+    ),
+
     url(r'^tickets/(?P<ticket_id>[0-9]+)/hold/$',
         staff.hold_ticket,
         name='hold'),

@@ -500,6 +500,19 @@ def subscribe_staff_member_to_ticket(ticket, user):
         ticketcc.save()
 
 
+@staff_member_required
+def choose_customer_for_ticket(request, ticket_id, customer_id):
+    """ Link customer to the ticket given in parameter """
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+    customer = get_object_or_404(Customer, id=customer_id)
+
+    ticket.customer = customer
+    ticket.save(update_fields=['customer'])
+    messages.success(request, 'Le client {} est désormais associé au ticket {}'.format(customer, ticket.ticket_for_url))
+
+    return redirect(ticket)
+
+
 def update_ticket(request, ticket_id, public=False):
     if not (public or (
             request.user.is_authenticated and
