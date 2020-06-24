@@ -241,11 +241,15 @@ def followup_edit(request, ticket_id, followup_id):
         ticketcc_string, show_subscribe = \
             return_ticketccstring_and_show_subscribe(request.user, ticket)
 
+        # Filter the ongoing spent_time on this step
+        spent_times = ticket.spent_times.filter(status=TicketSpentTime.ONGOING)
+
         return render(request, 'helpdesk/followup_edit.html', {
             'followup': followup,
             'ticket': ticket,
             'form': form,
             'ticketcc_string': ticketcc_string,
+            'spent_times': spent_times
         })
     elif request.method == 'POST':
         form = EditFollowUpForm(request.POST)
@@ -358,6 +362,9 @@ def view_ticket(request, ticket_id):
     ticketcc_string, show_subscribe = \
         return_ticketccstring_and_show_subscribe(request.user, ticket)
 
+    # Filter the ongoing spent_time on this step
+    spent_times = ticket.spent_times.filter(status=TicketSpentTime.ONGOING)
+
     return render(request, 'helpdesk/ticket.html', {
         'ticket': ticket,
         'form': form,
@@ -367,6 +374,7 @@ def view_ticket(request, ticket_id):
             Q(queues=ticket.queue) | Q(queues__isnull=True)),
         'ticketcc_string': ticketcc_string,
         'SHOW_SUBSCRIBE': show_subscribe,
+        'spent_times': spent_times
     })
 
 
@@ -428,13 +436,15 @@ def start_spent_time(request, ticket_id, employee_id):
     return JsonResponse({
         'success': True,
         'spent_time_id': spent_time.id,
-        'ongoing_spent_time_top_navigation': render_to_string('base/components/ongoing_spent_time_top_navigation.html', {
+        'ongoing_spent_time_top_navigation': render_to_string(
+            'base/components/spent_time/ongoing_spent_time_top_navigation.html', {
             'ongoing_spent_time': spent_time
         }),
-        'ongoing_spent_time_actions': render_to_string('geant/components/ongoing_spent_time_actions.html', {
+        'ongoing_spent_time_actions': render_to_string(
+            'base/components/spent_time/ongoing_spent_time_actions.html', {
             'ongoing_spent_time': spent_time
         }),
-        'table': render_to_string('base/components/spent_times_table.html', {
+        'table': render_to_string('base/components/spent_time/spent_times_table.html', {
             'request': request,
             'spent_times': spent_time.ticket.spent_times.select_related('employee__user')
         })
