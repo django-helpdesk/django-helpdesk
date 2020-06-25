@@ -25,7 +25,6 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.utils.dates import MONTHS_3
 from django.utils.timezone import make_aware
 from django.utils.translation import ugettext as _
-from django.utils.html import escape
 from django.utils import timezone
 
 from django.utils import six
@@ -229,51 +228,17 @@ def followup_edit(request, ticket_id, followup_id):
     if not _is_my_ticket(request.user, ticket):
         raise PermissionDenied()
 
-    if request.method == 'GET':
-        form = EditFollowUpForm(initial={
-            'title': escape(followup.title),
-            'ticket': followup.ticket,
-            'comment': escape(followup.comment),
-            'public': followup.public,
-            'new_status': followup.new_status,
-        })
+    form = EditFollowUpForm(request.POST or None, instance=followup)
+    if form.is_valid():
+        form.save()
+        messages.success(request, 'La réponse a bien été mise à jour.')
+        return redirect(ticket)
 
-        ticketcc_string, show_subscribe = \
-            return_ticketccstring_and_show_subscribe(request.user, ticket)
-
-        # Filter the ongoing spent_time on this step
-        spent_times = ticket.spent_times.filter(status=TicketSpentTime.ONGOING)
-
-        return render(request, 'helpdesk/followup_edit.html', {
-            'followup': followup,
-            'ticket': ticket,
-            'form': form,
-            'ticketcc_string': ticketcc_string,
-            'spent_times': spent_times
-        })
-    elif request.method == 'POST':
-        form = EditFollowUpForm(request.POST)
-        if form.is_valid():
-            title = form.cleaned_data['title']
-            _ticket = form.cleaned_data['ticket']
-            comment = form.cleaned_data['comment']
-            public = form.cleaned_data['public']
-            new_status = form.cleaned_data['new_status']
-            # will save previous date
-            old_date = followup.date
-            new_followup = FollowUp(title=title, date=old_date, ticket=_ticket, comment=comment, public=public, new_status=new_status, )
-            # keep old user if one did exist before.
-            if followup.user:
-                new_followup.user = followup.user
-            new_followup.save()
-            # get list of old attachments & link them to new_followup
-            attachments = Attachment.objects.filter(followup=followup)
-            for attachment in attachments:
-                attachment.followup = new_followup
-                attachment.save()
-            # delete old followup
-            followup.delete()
-        return HttpResponseRedirect(reverse('helpdesk:view', args=[ticket.id]))
+    return render(request, 'helpdesk/followup_edit.html', {
+        'followup': followup,
+        'ticket': ticket,
+        'form': form,
+    })
 
 
 @staff_member_required
