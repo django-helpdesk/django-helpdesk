@@ -186,6 +186,16 @@ class EditTicketForm(CustomFieldMixin, PhoenixTicketForm, forms.ModelForm):
         return super(EditTicketForm, self).save(*args, **kwargs)
 
 
+class CreateFollowUpForm(forms.ModelForm):
+    # TODO add change status
+    class Meta:
+        model = FollowUp
+        fields = ('comment',)
+        widgets = {
+            'comment': forms.Textarea(attrs={'class': 'form-control resize-vertical'})
+        }
+
+
 class EditFollowUpForm(forms.ModelForm):
 
     class Meta:

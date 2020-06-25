@@ -32,7 +32,8 @@ from django.views.decorators.http import require_POST
 
 from helpdesk.forms import (
     TicketForm, UserSettingsForm, EmailIgnoreForm, EditTicketForm, TicketCCForm,
-    TicketCCEmailForm, TicketCCUserForm, EditFollowUpForm, TicketDependencyForm, InformationTicketForm
+    TicketCCEmailForm, TicketCCUserForm, EditFollowUpForm, TicketDependencyForm, InformationTicketForm,
+    CreateFollowUpForm
 )
 from helpdesk.decorators import staff_member_required, superuser_required
 from helpdesk.lib import (
@@ -84,9 +85,16 @@ def _has_access_to_queue(user, queue):
 
 
 def _is_my_ticket(user, ticket):
-    """Check to see if the user has permission to access
-    a ticket. If not then deny access."""
-    if user.is_superuser or user.is_staff or user.id == ticket.assigned_to.id:
+    """
+    Check to see if the user has permission to access a ticket. If not then deny access.
+
+    :param User user:
+    :param Ticket ticket:
+    :rtype: bool
+    """
+    if user.is_superuser or user.is_staff \
+            or ticket.customer_contact and ticket.customer_contact == user \
+            or ticket.customer and user.has_perm('view_customer', ticket.customer):
         return True
     else:
         return False
@@ -276,12 +284,13 @@ def quick_update_ticket(request, ticket_id):
 
     setattr(ticket, field + ('_id' if field != 'billing' else ''), value)
     ticket.save(update_fields=[field])
+    ticket.refresh_from_db()
     if field == 'type' and ticket.type.mandatory_facturation:
         return JsonResponse({'success': True, 'mandatory_facturation': True})
     return JsonResponse({'success': True})
 
 
-@staff_member_required
+@login_required
 def view_ticket(request, ticket_id):
     ticket = get_object_or_404(
         Ticket.objects.prefetch_related(
@@ -339,25 +348,42 @@ def view_ticket(request, ticket_id):
     else:
         users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
 
-    # TODO: shouldn't this template get a form to begin with?
-    form = TicketForm(
-        initial={
-            'due_date': ticket.due_date,
-            'customer': ticket.customer,
-            'site': ticket.site,
-            'customer_product': ticket.customer_product,
-        },
-        user=request.user,
-        edit_contextual_fields=True
-    )
+    if request.user.is_staff:
+        form = TicketForm(
+            initial={
+                'due_date': ticket.due_date,
+                'customer': ticket.customer,
+                'customer_contact': ticket.customer_contact,
+                'site': ticket.site,
+                'customer_product': ticket.customer_product,
+            },
+            user=request.user,
+            edit_contextual_fields=True
+        )
 
-    information_form = InformationTicketForm(instance=ticket)
+        information_form = InformationTicketForm(instance=ticket)
+
+        # Filter the ongoing spent_time on this step
+        spent_times = ticket.spent_times.filter(status=TicketSpentTime.ONGOING)
+    else:
+        # Non staff users don't need these
+        form = CreateFollowUpForm(request.POST or None)
+        if form.is_valid():
+            follow_up = form.save(commit=False)
+            follow_up.ticket = ticket
+            follow_up.user = request.user
+            follow_up.title = 'Réponse client'
+            follow_up.public = True
+            # TODO handle status change
+            follow_up.save()
+            messages.success(request, 'Votre réponse a bien été envoyé')
+            # TODO send mail
+            return redirect(ticket)
+        information_form = None
+        spent_times = None
 
     ticketcc_string, show_subscribe = \
         return_ticketccstring_and_show_subscribe(request.user, ticket)
-
-    # Filter the ongoing spent_time on this step
-    spent_times = ticket.spent_times.filter(status=TicketSpentTime.ONGOING)
 
     return render(request, 'helpdesk/ticket.html', {
         'ticket': ticket,
