@@ -498,7 +498,6 @@ class Ticket(models.Model):
     billing = models.PositiveSmallIntegerField(
         'facturation',
         choices=BILLINGS,
-        default=MAINTENANCE_CONTRACT,
         null=True,
         blank=True
     )
