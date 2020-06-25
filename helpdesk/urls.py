@@ -53,6 +53,10 @@ urlpatterns = [
         staff.view_ticket,
         name='view'),
 
+    url(r'^tickets/(?P<ticket_id>[0-9]+)/quick_update$',
+        staff.quick_update_ticket,
+        name='quick_update_ticket'),
+
     url(r'^tickets/(?P<ticket_id>[0-9]+)/followup_edit/(?P<followup_id>[0-9]+)/$',
         staff.followup_edit,
         name='followup_edit'),

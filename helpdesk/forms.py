@@ -14,11 +14,11 @@ from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth import get_user_model
 from django.utils import timezone
-from django_select2.forms import ModelSelect2MultipleWidget, ModelSelect2Widget
+from django_select2.forms import ModelSelect2MultipleWidget, ModelSelect2Widget, Select2Widget
 
 from helpdesk.lib import send_templated_mail, safe_template_context, process_attachments
 from helpdesk.models import (Ticket, Queue, FollowUp, IgnoreEmail, TicketCC,
-                             CustomField, TicketCustomFieldValue, TicketDependency)
+                             CustomField, TicketCustomFieldValue, TicketDependency, TicketCategory, TicketType)
 from helpdesk import settings as helpdesk_settings
 from phonenumber_field.formfields import PhoneNumberField
 from phonenumber_field.widgets import PhoneNumberInternationalFallbackWidget
@@ -126,6 +126,20 @@ class PhoenixTicketForm(forms.Form):
         ),
         required=False
     )
+
+
+class InformationTicketForm(forms.ModelForm):
+    class Meta:
+        model = Ticket
+        fields = ('category', 'type', 'billing')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Remove empty labl for required fields
+        if self.instance.category:
+            self.fields['category'].empty_label = None
+        if self.instance.type:
+            self.fields['type'].empty_label = None
 
 
 class EditTicketForm(CustomFieldMixin, PhoenixTicketForm, forms.ModelForm):

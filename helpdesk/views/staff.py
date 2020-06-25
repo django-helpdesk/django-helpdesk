@@ -28,10 +28,11 @@ from django.utils.translation import ugettext as _
 from django.utils import timezone
 
 from django.utils import six
+from django.views.decorators.http import require_POST
 
 from helpdesk.forms import (
     TicketForm, UserSettingsForm, EmailIgnoreForm, EditTicketForm, TicketCCForm,
-    TicketCCEmailForm, TicketCCUserForm, EditFollowUpForm, TicketDependencyForm
+    TicketCCEmailForm, TicketCCUserForm, EditFollowUpForm, TicketDependencyForm, InformationTicketForm
 )
 from helpdesk.decorators import staff_member_required, superuser_required
 from helpdesk.lib import (
@@ -254,6 +255,30 @@ def followup_delete(request, ticket_id, followup_id):
     return HttpResponseRedirect(reverse('helpdesk:view', args=[ticket.id]))
 
 
+@require_POST
+@staff_member_required
+def quick_update_ticket(request, ticket_id):
+    """ Update ticket category, type or billing through AJAX """
+    if not request.is_ajax():
+        return Http404()
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+    field = request.POST.get('field')
+    if not field:
+        return JsonResponse({'success': False, 'error': "Le champ du ticket n'est pas spécifié."})
+    try:
+        value = int(request.POST['value'])
+    except KeyError:
+        return JsonResponse({'success': False, 'error': "La valeur n'est pas spécifié."})
+    except ValueError:
+        return JsonResponse({'success': False, 'error': "Veuillez choisir une option dans la liste."})
+    if not hasattr(ticket, field):
+        return JsonResponse({'success': False, 'error': "Le champ %s n'existe pas sur le ticket."})
+
+    setattr(ticket, field + ('_id' if field != 'billing' else ''), value)
+    ticket.save(update_fields=[field])
+    return JsonResponse({'success': True})
+
+
 @staff_member_required
 def view_ticket(request, ticket_id):
     ticket = get_object_or_404(
@@ -324,6 +349,8 @@ def view_ticket(request, ticket_id):
         edit_contextual_fields=True
     )
 
+    information_form = InformationTicketForm(instance=ticket)
+
     ticketcc_string, show_subscribe = \
         return_ticketccstring_and_show_subscribe(request.user, ticket)
 
@@ -333,6 +360,7 @@ def view_ticket(request, ticket_id):
     return render(request, 'helpdesk/ticket.html', {
         'ticket': ticket,
         'form': form,
+        'information_form': information_form,
         'active_users': users,
         'priorities': Ticket.PRIORITY_CHOICES,
         'preset_replies': PreSetReply.objects.filter(
