@@ -276,6 +276,8 @@ def quick_update_ticket(request, ticket_id):
 
     setattr(ticket, field + ('_id' if field != 'billing' else ''), value)
     ticket.save(update_fields=[field])
+    if field == 'type' and ticket.type.mandatory_facturation:
+        return JsonResponse({'success': True, 'mandatory_facturation': True})
     return JsonResponse({'success': True})
 
 
