@@ -420,6 +420,20 @@ class Ticket(models.Model):
         (5, _('5. Very Low')),
     )
 
+    MAINTENANCE_CONTRACT = 1
+    TOKENS = 2
+    QUOTE = 3
+    FREE = 4
+    BILLING_WRONGLY = 5
+
+    BILLINGS = (
+        (MAINTENANCE_CONTRACT, 'Contrat de maintenance'),
+        (TOKENS, 'Carnet de jeton'),
+        (QUOTE, 'Devis'),
+        (FREE, 'Offert'),
+        (BILLING_WRONGLY, 'Facturation à tort')
+    )
+
     title = models.CharField(
         _('Title'),
         max_length=200,
@@ -477,6 +491,14 @@ class Ticket(models.Model):
     type = models.ForeignKey(
         TicketType,
         on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+
+    billing = models.PositiveSmallIntegerField(
+        'facturation',
+        choices=BILLINGS,
+        default=MAINTENANCE_CONTRACT,
         null=True,
         blank=True
     )

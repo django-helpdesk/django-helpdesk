@@ -29,12 +29,19 @@ class TicketCategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Ticket)
 class TicketAdmin(admin.ModelAdmin):
-    list_display = ('id', 'title', 'status', 'assigned_to', 'queue', 'hidden_submitter_email', 'on_hold')
+    list_display = (
+        'id', 'title', 'status', 'assigned_to', 'queue', 'submitter_email', 'category', 'type', 'billing', 'on_hold'
+    )
     date_hierarchy = 'created'
-    list_filter = ('queue', 'status', 'priority', 'on_hold')
-    search_fields = ('id', 'title', 'description')
-    autocomplete_fields = ('assigned_to', 'customer_contact', 'customer', 'site', 'customer_product')
-    list_select_related = ('queue', 'assigned_to')
+    list_filter = ('queue', 'status', 'priority', 'category', 'type', 'billing', 'on_hold')
+    search_fields = (
+        'id', 'title', 'description', 'category__name', 'type__name', 'submitter_email',
+        'assigned_to__username', 'assigned_to__first_name', 'assigned_to__last_name'
+    )
+    autocomplete_fields = (
+        'assigned_to', 'customer_contact', 'customer', 'site', 'customer_product', 'category', 'type'
+    )
+    list_select_related = ('queue', 'assigned_to', 'category', 'type')
 
     def hidden_submitter_email(self, ticket):
         if ticket.submitter_email:
