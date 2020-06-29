@@ -1031,8 +1031,9 @@ class KBItem(models.Model):
         return super(KBItem, self).save(*args, **kwargs)
 
     def _score(self):
+        """ Return a score out of 10 or Unrated if no votes """
         if self.votes > 0:
-            return int(self.recommendations / self.votes)
+            return (self.recommendations / self.votes) * 10
         else:
             return _('Unrated')
     score = property(_score)
