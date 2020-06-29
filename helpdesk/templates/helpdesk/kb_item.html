@@ -29,7 +29,7 @@
                     <ul>
                     <li>{% blocktrans with item.recommendations as recommendations %}Recommendations: {{ recommendations }}{% endblocktrans %}</li>
                     <li>{% blocktrans with item.votes as votes %}Votes: {{ votes }}{% endblocktrans %}</li>
-                    <li>{% blocktrans with item.score as score %}Overall Rating: {{ score }}{% endblocktrans %}</li>
+                    <li>{% blocktrans with item.score|floatformat as score %}Overall Rating: {{ score }}{% endblocktrans %}/10</li>
                     </ul>
                 </div>
             </div>
