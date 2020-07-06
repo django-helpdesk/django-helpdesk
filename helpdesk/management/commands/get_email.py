@@ -446,6 +446,18 @@ def ticket_from_message(message, queue, logger):
         if settings.QUEUE_EMAIL_BOX_UPDATE_ONLY:
             return None
         new = True
+        # Try to find corresponding user thanks to submitter email
+        search_users = User.objects.filter(email=sender_email)
+        customer_contact = None
+        customer = None
+        if len(search_users) == 1:
+            customer_contact = search_users.first()
+            logger.debug("Found associated user with mail address %s : %s" % (sender_email, customer_contact))
+            # Associate customer if the user belongs to only one customer
+            search_customers = customer_contact.groups.exclude(customer=None)
+            if len(search_customers) == 1:
+                customer = search_customers.first().customer
+                logger.debug("Found associated customer : %s" % customer)
         t = Ticket.objects.create(
             title=subject,
             queue=queue,
@@ -453,6 +465,8 @@ def ticket_from_message(message, queue, logger):
             created=timezone.now(),
             description=body,
             priority=priority,
+            customer_contact=customer_contact,
+            customer=customer
         )
         logger.debug("Created new ticket %s-%s" % (t.queue.slug, t.id))
 
