@@ -304,17 +304,29 @@ def view_ticket(request, ticket_id):
     if not _is_my_ticket(request.user, ticket):
         raise PermissionDenied()
 
-    if 'take' in request.GET:
-        # Allow the user to assign the ticket to themselves whilst viewing it.
-
-        # Trick the update_ticket() view into thinking it's being called with
-        # a valid POST.
+    if 'take' in request.GET or ('close' in request.GET and ticket.status == Ticket.RESOLVED_STATUS):
+        # Trick the update_ticket() view into thinking it's being called with a valid POST.
         request.POST = {
-            'owner': request.user.id,
             'public': 1,
             'title': ticket.title,
-            'comment': ''
+            'comment': '',
+            'due_date': datetime.strftime(timezone.localtime(ticket.due_date),
+                                          DATETIME_LOCAL_FORMAT) if ticket.due_date else None,
+            'customer_contact': ticket.customer_contact.id if ticket.customer_contact else None,
+            'customer': ticket.customer.id if ticket.customer else None,
+            'site': ticket.site.id if ticket.site else None,
+            'customer_product': ticket.customer_product.id if ticket.customer_product else None,
         }
+        if 'take' in request.GET:
+            # Allow the user to assign the ticket to themselves whilst viewing it
+            request.POST['owner'] = request.user.id
+        elif 'close' in request.GET:
+            # Allow the user to close the ticket only if it is resolved
+            if ticket.assigned_to:
+                request.POST['owner'] = ticket.assigned_to.id
+            request.POST['new_status'] = Ticket.CLOSED_STATUS
+            request.POST['comment'] = _('Accepted resolution and closed ticket')
+
         return update_ticket(request, ticket_id)
 
     if 'subscribe' in request.GET:
@@ -324,24 +336,6 @@ def view_ticket(request, ticket_id):
         if show_subscribe:
             subscribe_staff_member_to_ticket(ticket, request.user)
             return HttpResponseRedirect(reverse('helpdesk:view', args=[ticket.id]))
-
-    if 'close' in request.GET and ticket.status == Ticket.RESOLVED_STATUS:
-        if not ticket.assigned_to:
-            owner = 0
-        else:
-            owner = ticket.assigned_to.id
-
-        # Trick the update_ticket() view into thinking it's being called with
-        # a valid POST.
-        request.POST = {
-            'new_status': Ticket.CLOSED_STATUS,
-            'public': 1,
-            'owner': owner,
-            'title': ticket.title,
-            'comment': _('Accepted resolution and closed ticket'),
-        }
-
-        return update_ticket(request, ticket_id)
 
     if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS:
         users = User.objects.filter(is_active=True, is_staff=True).order_by(User.USERNAME_FIELD)
@@ -552,10 +546,10 @@ def update_ticket(request, ticket_id, public=False):
     public = request.POST.get('public', False)
     owner = int(request.POST.get('owner', -1))
     priority = int(request.POST.get('priority', ticket.priority))
-    due_date = request.POST.get('due_date', None)
+    due_date = request.POST.get('due_date')
     customer_contact_id = int(request.POST.get('customer_contact')) if request.POST.get('customer_contact') else None
     customer_id = int(request.POST.get('customer')) if request.POST.get('customer') else None
-    site_id = int(request.POST.get('site', None)) if request.POST.get('site') else None
+    site_id = int(request.POST.get('site')) if request.POST.get('site') else None
     customer_product_id = int(request.POST.get('customer_product', None)) if request.POST.get('customer_product') else None
 
     if due_date:
@@ -626,8 +620,8 @@ def update_ticket(request, ticket_id, public=False):
     if new_status != ticket.status:
         ticket.status = new_status
         ticket.save()
+        messages.info(request, 'Le ticket est désormais dans le statut %s' % ticket.get_status_display())
         f.new_status = new_status
-        ticket_status_changed = True
         if f.title:
             f.title += ' and %s' % ticket.get_status_display()
         else:
@@ -664,8 +658,8 @@ def update_ticket(request, ticket_id, public=False):
         TicketChange.objects.create(
             followup=f,
             field=_('Owner'),
-            old_value=old_owner,
-            new_value=ticket.assigned_to,
+            old_value=old_owner if old_owner else _('Unassigned'),
+            new_value=ticket.assigned_to if ticket.assigned_to else _('Unassigned'),
         )
 
     if priority != ticket.priority:
@@ -681,8 +675,8 @@ def update_ticket(request, ticket_id, public=False):
         TicketChange.objects.create(
             followup=f,
             field=_('Due on'),
-            old_value=date(timezone.localtime(ticket.due_date), 'DATETIME_FORMAT'),
-            new_value=date(due_date, 'DATETIME_FORMAT'),
+            old_value=date(timezone.localtime(ticket.due_date), 'DATETIME_FORMAT') if ticket.due_date else 'Non définie',
+            new_value=date(due_date, 'DATETIME_FORMAT') if due_date else 'Non définie',
         )
         ticket.due_date = due_date
 
@@ -694,8 +688,8 @@ def update_ticket(request, ticket_id, public=False):
         TicketChange.objects.create(
             followup=f,
             field='Contact client',
-            old_value=str(ticket.customer_contact),
-            new_value=str(customer_contact),
+            old_value=str(ticket.customer_contact) if ticket.customer_contact else _('Unassigned'),
+            new_value=str(customer_contact) if customer_contact else _('Unassigned'),
         )
         ticket.customer_contact = customer_contact
 
@@ -707,8 +701,8 @@ def update_ticket(request, ticket_id, public=False):
         TicketChange.objects.create(
             followup=f,
             field='Client',
-            old_value=str(ticket.customer),
-            new_value=str(customer),
+            old_value=str(ticket.customer) if ticket.customer else _('Unassigned'),
+            new_value=str(customer) if customer else _('Unassigned'),
         )
         ticket.customer = customer
 
@@ -720,8 +714,8 @@ def update_ticket(request, ticket_id, public=False):
         TicketChange.objects.create(
             followup=f,
             field='Site',
-            old_value=str(ticket.site),
-            new_value=str(site),
+            old_value=str(ticket.site) if ticket.site else _('Unassigned'),
+            new_value=str(site) if site else _('Unassigned'),
         )
         ticket.site = site
 
@@ -733,8 +727,8 @@ def update_ticket(request, ticket_id, public=False):
         TicketChange.objects.create(
             followup=f,
             field='Produit client',
-            old_value=str(ticket.customer_product),
-            new_value=str(customer_product),
+            old_value=str(ticket.customer_product) if ticket.customer_product else _('Unassigned'),
+            new_value=str(customer_product) if customer_product else _('Unassigned'),
         )
         ticket.customer_product = customer_product
 
@@ -1195,13 +1189,10 @@ def edit_ticket(request, ticket_id):
     if not _is_my_ticket(request.user, ticket):
         raise PermissionDenied()
 
-    if request.method == 'POST':
-        form = EditTicketForm(request.POST, instance=ticket)
-        if form.is_valid():
-            ticket = form.save()
-            return HttpResponseRedirect(ticket.get_absolute_url())
-    else:
-        form = EditTicketForm(instance=ticket)
+    form = EditTicketForm(request.POST or None, instance=ticket)
+    if form.is_valid():
+        ticket = form.save()
+        return redirect(ticket)
 
     return render(request, 'helpdesk/edit_ticket.html', {'form': form})
 
