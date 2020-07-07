@@ -144,10 +144,16 @@ class InformationTicketForm(forms.ModelForm):
 
 class EditTicketForm(CustomFieldMixin, PhoenixTicketForm, forms.ModelForm):
     due_date = CustomDateTimeField(required=False)
+    link_open = forms.URLField(
+        label='Lien ouverture du ticket',
+        required=False,
+        widget=forms.URLInput(attrs={'palceholder': 'https://phoenix.ipexia.com/...'})
+    )
 
     class Meta:
         model = Ticket
         exclude = ('created', 'modified', 'status', 'on_hold', 'resolution', 'last_escalation', 'assigned_to')
+        widgets = {'link_open': forms.URLInput()}
 
     def __init__(self, *args, **kwargs):
         """
