@@ -17,16 +17,16 @@ $(document).ready(function() {
     });
 
     $("#select_all").click(function() {
-        $(".ticket_multi_select").attr('checked', true);
+        $(".ticket_multi_select").prop('checked', true);
         return false;
     });
     $("#select_none").click(function() {
-        $(".ticket_multi_select").attr('checked', false);
+        $(".ticket_multi_select").prop('checked', false);
         return false;
     });
     $("#select_inverse").click(function() {
         $(".ticket_multi_select").each(function() {
-            $(this).attr('checked', !$(this).attr('checked'));
+            $(this).prop('checked', !$(this).prop('checked'));
         });
         return false;
     });
