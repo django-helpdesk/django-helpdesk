@@ -42,7 +42,7 @@ from helpdesk.lib import (
 )
 from helpdesk.models import (
     Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch,
-    IgnoreEmail, TicketCC, TicketDependency, TicketSpentTime,
+    IgnoreEmail, TicketCC, TicketDependency, TicketSpentTime, TicketCategory, TicketType,
 )
 from helpdesk import settings as helpdesk_settings
 
@@ -441,6 +441,7 @@ def ticket_spent_times(request, ticket_id, spent_time_id=None):
         'edit_spent_time': edit_spent_time,
         'form': form
     })
+
 
 @staff_member_required
 def start_spent_time(request, ticket_id, employee_id):
@@ -1041,14 +1042,7 @@ def ticket_list(request):
         import json
         from helpdesk.lib import b64decode
         try:
-            if six.PY3:
-                if DJANGO_VERSION[0] > 1:
-                    # if Django >= 2.0
-                    query_params = json.loads(b64decode(str(saved_query.query).lstrip("b\\'")).decode())
-                else:
-                    query_params = json.loads(b64decode(str(saved_query.query)).decode())
-            else:
-                query_params = json.loads(b64decode(str(saved_query.query)))
+            query_params = json.loads(b64decode(str(saved_query.query).lstrip("b\\'")).decode())
         except ValueError:
             # Query deserialization failed. (E.g. was a pickled query)
             return HttpResponseRedirect(reverse('helpdesk:list'))
@@ -1067,6 +1061,7 @@ def ticket_list(request):
         query_params = {
             'filtering': {'status__in': [1, 2, 3]},
             'sorting': 'created',
+            'sortreverse': True
         }
     else:
         queues = request.GET.getlist('queue')
@@ -1074,6 +1069,30 @@ def ticket_list(request):
             try:
                 queues = [int(q) for q in queues]
                 query_params['filtering']['queue__id__in'] = queues
+            except ValueError:
+                pass
+
+        categories = request.GET.getlist('categories')
+        if categories:
+            try:
+                categories = [int(c) for c in categories]
+                query_params['filtering']['category__id__in'] = categories
+            except ValueError:
+                pass
+
+        types = request.GET.getlist('types')
+        if types:
+            try:
+                types = [int(t) for t in types]
+                query_params['filtering']['type__id__in'] = types
+            except ValueError:
+                pass
+
+        billings = request.GET.getlist('billings')
+        if billings:
+            try:
+                billings = [int(b) for b in billings]
+                query_params['filtering']['billing__in'] = billings
             except ValueError:
                 pass
 
@@ -1109,23 +1128,27 @@ def ticket_list(request):
             query_params['search_string'] = q
 
         # SORTING
-        sort = request.GET.get('sort', None)
-        if sort not in ('status', 'assigned_to', 'created', 'title', 'queue', 'priority'):
-            sort = 'created'
-        query_params['sorting'] = sort
-
-        sortreverse = request.GET.get('sortreverse', None)
+        sortreverse = request.GET.get('sortreverse', False)
         query_params['sortreverse'] = sortreverse
 
-    tickets = base_tickets.select_related()
+        sort = request.GET.get('sort', None)
+        if sort not in ('status', 'assigned_to', 'created', 'title', 'queue', 'priority'):
+            # Fallback to sort by created in reverse
+            sort = 'created'
+            query_params['sortreverse'] = True
+        query_params['sorting'] = sort
+
+    tickets = base_tickets.select_related('category', 'type', 'customer_contact', 'customer')
 
     try:
         ticket_qs = apply_query(tickets, query_params)
     except ValidationError:
+        messages.error(request, "Une erreur s'est produite pendant le requête de filtre.")
         # invalid parameters in query, return default query
         query_params = {
             'filtering': {'status__in': [1, 2, 3]},
             'sorting': 'created',
+            'sortreverse': True
         }
         ticket_qs = apply_query(tickets, query_params)
 
@@ -1151,6 +1174,9 @@ def ticket_list(request):
         default_tickets_per_page=request.user.usersettings_helpdesk.settings.get('tickets_per_page') or 25,
         user_choices=User.objects.filter(is_active=True, is_staff=True),
         queue_choices=user_queues,
+        category_choices=TicketCategory.objects.all(),
+        type_choices=TicketType.objects.all(),
+        billing_choices=Ticket.BILLINGS,
         status_choices=Ticket.STATUS_CHOICES,
         urlsafe_query=urlsafe_query,
         user_saved_queries=user_saved_queries,
