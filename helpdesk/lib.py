@@ -191,6 +191,10 @@ def apply_query(queryset, params):
     if search:
         qset = (
             Q(title__icontains=search) |
+            Q(customer__group__name__icontains=search) |
+            Q(site__name__icontains=search) |
+            Q(customer_product__product__name__icontains=search) |
+            Q(customer_product__comment__icontains=search) |
             Q(description__icontains=search) |
             Q(resolution__icontains=search) |
             Q(submitter_email__icontains=search) |

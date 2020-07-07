@@ -28,7 +28,7 @@ Bootstrap overrides
     border: solid #ccc 1px;
     padding: 10px;
     margin: 4px;
-    max-width: 24%;
+    max-width: 44%;
     min-height: 200px;
 }
 
@@ -45,6 +45,11 @@ Bootstrap overrides
     color: #aaa;
     font-size: 0.8em;
     clear: both;
+}
+
+.form_help_text {
+    color: #666;
+    font-size: 95%;
 }
 
 #searchtabs {margin-bottom: 20px;}
