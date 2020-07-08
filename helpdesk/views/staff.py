@@ -371,7 +371,7 @@ def view_ticket(request, ticket_id):
             # TODO handle status change
             follow_up.save()
             messages.success(request, 'Votre réponse a bien été envoyé')
-            # TODO send mail
+            # TODO send mail and notification
             return redirect(ticket)
         information_form = None
         spent_times = None
@@ -637,6 +637,7 @@ def update_ticket(request, ticket_id, public=False):
 
     files = process_attachments(f, request.FILES.getlist('attachment'))
 
+    # Add Ticket Changes
     if title and title != ticket.title:
         TicketChange.objects.create(
             followup=f,
