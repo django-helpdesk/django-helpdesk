@@ -132,6 +132,11 @@ class InformationTicketForm(forms.ModelForm):
     class Meta:
         model = Ticket
         fields = ('category', 'type', 'billing')
+        widgets = {
+            'category': forms.Select(attrs={'class': 'form-control'}),
+            'type': forms.Select(attrs={'class': 'form-control'}),
+            'billing': forms.Select(attrs={'class': 'form-control'}),
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
