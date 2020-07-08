@@ -190,6 +190,7 @@ def apply_query(queryset, params):
     search = params.get('search_string', None)
     if search:
         qset = (
+            Q(id=search) |
             Q(title__icontains=search) |
             Q(customer__group__name__icontains=search) |
             Q(site__name__icontains=search) |
