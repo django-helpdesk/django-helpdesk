@@ -612,16 +612,21 @@ class Ticket(models.Model):
 
     def _get_priority_css_class(self):
         """
-        Return the boostrap class corresponding to the priority.
+        Return the boostrap class based on the last followup whether it needs an action or not.
         """
-        if self.priority == 2:
-            return "warning"
-        elif self.priority == 1:
+        last_followup = self.followup_set.last()
+
+        if last_followup.public:
+            # If last public answer was made by a technical user, it's good
+            if last_followup.user and last_followup.user.is_staff:
+                return 'success'
+            # Else, it must be by the customer, so it requires an action, unless the ticket is closed
+            if self.status == self.CLOSED_STATUS:
+                return ''
             return "danger"
-        elif self.priority == 5:
-            return "success"
+        # If it is a private followup, then there is no speacial color
         else:
-            return ""
+            return ''
     get_priority_css_class = property(_get_priority_css_class)
 
     def _get_status(self):
