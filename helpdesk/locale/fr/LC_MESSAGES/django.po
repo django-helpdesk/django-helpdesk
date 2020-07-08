@@ -598,7 +598,7 @@ msgstr "1. Critique"
 
 #: .\models.py:388
 msgid "2. High"
-msgstr "2. Haut"
+msgstr "2. Haute"
 
 #: .\models.py:389
 msgid "3. Normal"
