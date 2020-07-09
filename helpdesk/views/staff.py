@@ -304,6 +304,18 @@ def view_ticket(request, ticket_id):
     if not _is_my_ticket(request.user, ticket):
         raise PermissionDenied()
 
+    # Try to save the quick comment if it is an AJAX POST request
+    if request.is_ajax() and request.method == 'POST':
+        if request.POST.get('quickComment') is None:
+            return JsonResponse({'success': False, 'error': 'Commentaire introuvable dans la requête'})
+
+        ticket.quick_comment = request.POST.get('quickComment')
+        try:
+            ticket.save()
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+        return JsonResponse({'success': True})
+
     if 'take' in request.GET or ('close' in request.GET and ticket.status == Ticket.RESOLVED_STATUS):
         # Trick the update_ticket() view into thinking it's being called with a valid POST.
         request.POST = {
@@ -350,6 +362,7 @@ def view_ticket(request, ticket_id):
                 'customer_contact': ticket.customer_contact,
                 'site': ticket.site,
                 'customer_product': ticket.customer_product,
+                'quick_comment': ticket.quick_comment,
             },
             user=request.user,
             edit_contextual_fields=True

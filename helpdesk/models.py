@@ -585,6 +585,12 @@ class Ticket(models.Model):
         blank=True
     )
 
+    quick_comment = models.CharField(
+        'commentaire rapide',
+        max_length=200,
+        blank=True
+    )
+
     def _get_assigned_to(self):
         """ Custom property to allow us to easily print 'Unassigned' if a
         ticket has no owner, or the users name if it's assigned. If the user

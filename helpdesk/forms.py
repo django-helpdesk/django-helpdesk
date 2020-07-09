@@ -14,11 +14,11 @@ from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth import get_user_model
 from django.utils import timezone
-from django_select2.forms import ModelSelect2MultipleWidget, ModelSelect2Widget, Select2Widget
+from django_select2.forms import ModelSelect2MultipleWidget, ModelSelect2Widget
 
 from helpdesk.lib import send_templated_mail, safe_template_context, process_attachments
-from helpdesk.models import (Ticket, Queue, FollowUp, IgnoreEmail, TicketCC,
-                             CustomField, TicketCustomFieldValue, TicketDependency, TicketCategory, TicketType)
+from helpdesk.models import Ticket, Queue, FollowUp, IgnoreEmail, TicketCC, CustomField, TicketCustomFieldValue,\
+    TicketDependency
 from helpdesk import settings as helpdesk_settings
 from phonenumber_field.formfields import PhoneNumberField
 from phonenumber_field.widgets import PhoneNumberInternationalFallbackWidget
@@ -435,6 +435,11 @@ class TicketForm(PhoenixTicketForm, AbstractTicketForm):
         label=_('Case owner'),
         help_text=_('If you select an owner other than yourself, they\'ll be '
                     'e-mailed details of this ticket immediately.'),
+    )
+    quick_comment = forms.CharField(
+        label='Commentaire rapide',
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'maxlength': '200'})
     )
 
     def __init__(self, user, edit_contextual_fields=False, *args, **kwargs):
