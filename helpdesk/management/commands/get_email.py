@@ -101,7 +101,7 @@ def process_email(quiet=False):
         if quiet:
             logger.propagate = False  # do not propagate to root logger that would log to console
         logdir = q.logging_dir or '/var/log/helpdesk/'
-        
+
         try:
             handler = logging.FileHandler(join(logdir, q.slug + '_get_email.log'))
             logger.addHandler(handler)
