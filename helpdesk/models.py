@@ -620,7 +620,7 @@ class Ticket(models.Model):
         """
         Return the boostrap class based on the last followup whether it needs an action or not.
         """
-        last_followup = self.followup_set.last()
+        last_followup = self.followup_set.select_related('user').last()
 
         if last_followup.public:
             # If last public answer was made by a technical user, it's good

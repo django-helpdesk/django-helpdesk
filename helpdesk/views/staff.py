@@ -1146,7 +1146,7 @@ def ticket_list(request):
             query_params['sortreverse'] = True
         query_params['sorting'] = sort
 
-    tickets = base_tickets.select_related('category', 'type', 'customer_contact', 'customer')
+    tickets = base_tickets.select_related('queue', 'category', 'type', 'customer_contact', 'customer')
 
     try:
         ticket_qs = apply_query(tickets, query_params)
@@ -1174,7 +1174,7 @@ def ticket_list(request):
     from helpdesk.lib import b64encode
     urlsafe_query = b64encode(json.dumps(query_params).encode('UTF-8'))
 
-    user_saved_queries = SavedSearch.objects.filter(Q(user=request.user) | Q(shared__exact=True))
+    user_saved_queries = SavedSearch.objects.select_related('user').filter(Q(user=request.user) | Q(shared__exact=True))
 
     return render(request, 'helpdesk/ticket_list.html', dict(
         context,
