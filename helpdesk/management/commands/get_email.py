@@ -46,6 +46,8 @@ from helpdesk.models import Queue, Ticket, TicketCC, FollowUp, IgnoreEmail
 
 import logging
 
+from base.models import Notification
+
 User = get_user_model()
 
 
@@ -569,6 +571,13 @@ def ticket_from_message(message, queue, logger):
                 recipients=t.assigned_to.email,
                 sender=queue.from_address,
                 fail_silently=True,
+            )
+            # Send Phoenix notification
+            Notification.objects.create(
+                module=Notification.TICKET,
+                message="Une nouvelle réponse a été ajouté au ticket %s par mail via l'adresse %s" % (t.title, sender_email),
+                link_redirect=t.get_absolute_url(),
+                user_list=[t.assigned_to]
             )
         if queue.updated_ticket_cc:
             send_templated_mail(

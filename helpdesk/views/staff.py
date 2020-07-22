@@ -47,7 +47,7 @@ from helpdesk.models import (
 from helpdesk import settings as helpdesk_settings
 
 from base.forms import SpentTimeForm
-from base.models import Employee
+from base.models import Employee, Notification
 from config.settings.base import DATETIME_LOCAL_FORMAT
 from sphinx.models import Customer, Site, CustomerProducts
 
@@ -384,7 +384,24 @@ def view_ticket(request, ticket_id):
             # TODO handle status change
             follow_up.save()
             messages.success(request, 'Votre réponse a bien été envoyé')
-            # TODO send mail and notification
+            # Send mail to assigned user
+            if ticket.assigned_to:
+                context = safe_template_context(ticket)
+                context.update(comment=follow_up.comment)
+                send_templated_mail(
+                    'updated_owner',
+                    context,
+                    recipients=ticket.assigned_to.email,
+                    sender=ticket.queue.from_address,
+                    fail_silently=True,
+                )
+                # Send Phoenix notification
+                Notification.objects.create(
+                    module=Notification.TICKET,
+                    message='Une nouvelle réponse a été ajouté au ticket %s par %s' % (ticket.title, request.user),
+                    link_redirect=ticket.get_absolute_url(),
+                    user_list=[ticket.assigned_to]
+                )
             return redirect(ticket)
         information_form = None
         spent_times = None
