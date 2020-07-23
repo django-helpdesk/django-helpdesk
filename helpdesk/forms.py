@@ -140,7 +140,7 @@ class InformationTicketForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Remove empty labl for required fields
+        # Remove empty label for required fields
         if self.instance.category:
             self.fields['category'].empty_label = None
         if self.instance.type:
