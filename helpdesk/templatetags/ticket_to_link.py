@@ -21,6 +21,7 @@ from helpdesk.models import Ticket
 
 
 def num_to_link(text):
+    """ Display a link to ticket when finding #ID (eg: " #31 " and 31 matches a ticket ID) """
     if text == '':
         return text
 
@@ -37,9 +38,25 @@ def num_to_link(text):
             ticket = None
 
         if ticket:
-            style = ticket.get_status_display()
-            text = "%s <a href='%s' class='ticket_link_status ticket_link_status_%s'>#%s</a>%s" % (
-                text[:match.start() + 1], url, style, match.groups()[0], text[match.end():])
+            style = 'text-'
+            if ticket.status == Ticket.CLOSED_STATUS:
+                style += 'line-through'
+            elif ticket.status == Ticket.OPEN_STATUS:
+                style += 'info'
+            elif ticket.status == Ticket.REOPENED_STATUS:
+                style += 'warning'
+            elif ticket.status == Ticket.RESOLVED_STATUS:
+                style += 'success'
+            elif ticket.status == Ticket.DUPLICATE_STATUS:
+                style += 'danger'
+            text = "%s <a href='%s' class='%s' data-toggle='tooltip' title='%s'>#%s</a>%s" % (
+                text[:match.start() + 1],
+                url,
+                style,
+                '%s (%s)' % (ticket.title, ticket.get_status_display()),
+                match.groups()[0],
+                text[match.end():]
+            )
     return mark_safe(text)
 
 
