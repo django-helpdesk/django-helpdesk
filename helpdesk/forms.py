@@ -23,7 +23,7 @@ from helpdesk import settings as helpdesk_settings
 from phonenumber_field.formfields import PhoneNumberField
 from phonenumber_field.widgets import PhoneNumberInternationalFallbackWidget
 
-from base.fields import CustomDateTimeField
+from base.fields import CustomDateTimeField, CustomTinyMCE
 from sphinx.models import Customer, Site, CustomerProducts
 
 User = get_user_model()
@@ -158,7 +158,10 @@ class EditTicketForm(CustomFieldMixin, PhoenixTicketForm, forms.ModelForm):
     class Meta:
         model = Ticket
         exclude = ('created', 'modified', 'status', 'on_hold', 'resolution', 'last_escalation', 'assigned_to')
-        widgets = {'link_open': forms.URLInput()}
+        widgets = {
+            'link_open': forms.URLInput(),
+            'description': CustomTinyMCE()
+        }
 
     def __init__(self, *args, **kwargs):
         """
@@ -203,7 +206,7 @@ class CreateFollowUpForm(forms.ModelForm):
         model = FollowUp
         fields = ('comment',)
         widgets = {
-            'comment': forms.Textarea(attrs={'class': 'form-control resize-vertical'})
+            'comment': CustomTinyMCE()
         }
 
 
@@ -221,7 +224,7 @@ class EditFollowUpForm(forms.ModelForm):
                 search_fields=['title__icontains', 'id__iexact'],
                 attrs={'style': 'width: 100%', 'data-minimum-input-length': 0}
             ),
-            'comment': forms.Textarea(attrs={'class': 'resize-vertical'})
+            'comment': CustomTinyMCE()
         }
 
     def __init__(self, *args, **kwargs):
@@ -250,7 +253,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
     )
 
     body = forms.CharField(
-        widget=forms.Textarea(attrs={'class': 'form-control resize-vertical'}),
+        widget=CustomTinyMCE(),
         label=_('Description of your issue'),
         required=True,
         help_text=_('Please be as descriptive as possible and include all details'),
@@ -480,6 +483,9 @@ class TicketForm(PhoenixTicketForm, AbstractTicketForm):
             self.fields['customer'].widget = forms.HiddenInput()
             self.fields['site'].widget = forms.HiddenInput()
             self.fields['customer_product'].widget = forms.HiddenInput()
+        else:
+            # Remove the body field that is causing conflict with the tinymce js depency in ticket detail page
+            self.fields.pop('body')
 
         # Add any custom fields that are defined to the form
         self._add_form_custom_fields()

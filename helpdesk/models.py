@@ -22,6 +22,7 @@ from django.utils.encoding import python_2_unicode_compatible
 import re
 
 from phonenumber_field.modelfields import PhoneNumberField
+from tinymce import HTMLField
 
 from base.models import SpentTime
 from sphinx.models import CustomerProducts, Site, Customer
@@ -509,17 +510,15 @@ class Ticket(models.Model):
         help_text=_('If a ticket is on hold, it will not automatically be escalated.'),
     )
 
-    description = models.TextField(
+    description = HTMLField(
         _('Description'),
         blank=True,
-        null=True,
         help_text=_('The content of the customers query.'),
     )
 
-    resolution = models.TextField(
+    resolution = HTMLField(
         _('Resolution'),
         blank=True,
-        null=True,
         help_text=_('The resolution provided to the customer by our staff.'),
     )
 
@@ -778,10 +777,9 @@ class FollowUp(models.Model):
         null=True,
     )
 
-    comment = models.TextField(
+    comment = HTMLField(
         _('Comment'),
-        blank=True,
-        null=True,
+        blank=True
     )
 
     public = models.BooleanField(
@@ -965,7 +963,7 @@ class PreSetReply(models.Model):
                     'shown to the user.'),
     )
 
-    body = models.TextField(
+    body = HTMLField(
         _('Body'),
         help_text=_('Context available: {{ ticket }} - ticket object (eg '
                     '{{ ticket.title }}); {{ queue }} - The queue; and {{ user }} '

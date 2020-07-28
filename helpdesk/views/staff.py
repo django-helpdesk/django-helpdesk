@@ -354,6 +354,8 @@ def view_ticket(request, ticket_id):
     else:
         users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
 
+    followup_form = CreateFollowUpForm(request.POST or None)
+
     if request.user.is_staff:
         form = TicketForm(
             initial={
@@ -374,9 +376,8 @@ def view_ticket(request, ticket_id):
         spent_times = ticket.spent_times.filter(status=TicketSpentTime.ONGOING)
     else:
         # Non staff users don't need these
-        form = CreateFollowUpForm(request.POST or None)
-        if form.is_valid():
-            follow_up = form.save(commit=False)
+        if followup_form.is_valid():
+            follow_up = followup_form.save(commit=False)
             follow_up.ticket = ticket
             follow_up.user = request.user
             follow_up.title = 'Réponse client'
@@ -403,6 +404,7 @@ def view_ticket(request, ticket_id):
                     user_list=[ticket.assigned_to]
                 )
             return redirect(ticket)
+        form = None
         information_form = None
         spent_times = None
 
@@ -412,6 +414,7 @@ def view_ticket(request, ticket_id):
     return render(request, 'helpdesk/ticket.html', {
         'ticket': ticket,
         'form': form,
+        'followup_form': followup_form,
         'information_form': information_form,
         'active_users': users,
         'priorities': Ticket.PRIORITY_CHOICES,
