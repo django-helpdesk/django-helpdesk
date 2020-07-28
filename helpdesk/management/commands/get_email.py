@@ -308,10 +308,11 @@ def decodeUnknown(charset, string):
 
 def decode_mail_headers(string):
     decoded = email.header.decode_header(string) if six.PY3 else email.header.decode_header(string.encode('utf-8'))
-    if six.PY2:
-        return u' '.join([unicode(msg, charset or 'utf-8') for msg, charset in decoded])
-    elif six.PY3:
-        return u' '.join([str(msg, encoding=charset, errors='replace') if charset else str(msg) for msg, charset in decoded])
+    return email.utils.getaddresses(decoded)
+    #if six.PY2:
+        #return u' '.join([unicode(msg, charset or 'utf-8') for msg, charset in decoded])
+    #elif six.PY3:
+        #return u' '.join([str(msg, encoding=charset, errors='replace') if charset else str(msg) for msg, charset in decoded])
 
 
 def ticket_from_message(message, queue, logger):
