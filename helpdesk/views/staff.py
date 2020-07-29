@@ -384,7 +384,10 @@ def view_ticket(request, ticket_id):
             follow_up.public = True
             # TODO handle status change
             follow_up.save()
-            messages.success(request, 'Votre réponse a bien été envoyé')
+            messages.success(request, 'Votre réponse a bien été envoyé.')
+            files = process_attachments(follow_up, request.FILES.getlist('attachment'))
+            if files:
+                messages.info(request, 'Les fichiers joints ont également été associés à la réponse.')
             # Send mail to assigned user
             if ticket.assigned_to:
                 context = safe_template_context(ticket)
@@ -395,6 +398,7 @@ def view_ticket(request, ticket_id):
                     recipients=ticket.assigned_to.email,
                     sender=ticket.queue.from_address,
                     fail_silently=True,
+                    files=files
                 )
                 # Send Phoenix notification
                 Notification.objects.create(

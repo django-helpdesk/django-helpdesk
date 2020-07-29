@@ -10,6 +10,7 @@ import logging
 import mimetypes
 import os
 from smtplib import SMTPException
+from bs4 import BeautifulSoup
 
 try:
     # Python 2 support
@@ -94,20 +95,31 @@ def send_templated_mail(template_name,
 
     footer_file = os.path.join('helpdesk', locale, 'email_text_footer.txt')
 
-    text_part = from_string(
-        "%s{%% include '%s' %%}" % (t.plain_text, footer_file)
-    ).render(context)
-
+    # Do HTML part first in order to mark safe the HTML
     email_html_base_file = os.path.join('helpdesk', locale, 'email_html_base.html')
-    # keep new lines in html emails
     if 'comment' in context:
-        context['comment'] = mark_safe(context['comment'].replace('\r\n', '<br>'))
+        context['comment'] = mark_safe(context['comment'])
+    if 'description' in context:
+        context['description'] = mark_safe(context['description'])
+    if 'resolution' in context:
+        context['resolution'] = mark_safe(context['resolution'])
 
     html_part = from_string(
         "{%% extends '%s' %%}{%% block title %%}"
         "%s"
         "{%% endblock %%}{%% block content %%}%s{%% endblock %%}" %
         (email_html_base_file, t.heading, t.html)
+    ).render(context)
+
+    # Then use BeautifulSoup to extract text from HTML
+    if 'comment' in context:
+        context['comment'] = BeautifulSoup(context['comment'], 'html.parser').get_text()
+    if 'description' in context:
+        context['description'] = BeautifulSoup(context['description'], 'html.parser').get_text()
+    if 'resolution' in context:
+        context['resolution'] = BeautifulSoup(context['resolution'], 'html.parser').get_text()
+    text_part = from_string(
+        "%s{%% include '%s' %%}" % (t.plain_text, footer_file)
     ).render(context)
 
     if isinstance(recipients, str):
@@ -337,5 +349,7 @@ def process_attachments(followup, attached_files):
                 # Only files smaller than 512kb (or as defined in
                 # settings.MAX_EMAIL_ATTACHMENT_SIZE) are sent via email.
                 attachments.append([filename, att.file])
+            else:
+                print('%s est trop lourd pour être envoyé par mail : %skb' % (filename, attached.size / 1000))
 
     return attachments
