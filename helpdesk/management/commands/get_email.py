@@ -325,8 +325,13 @@ def ticket_from_message(message, queue, logger):
 
     sender = message.get('from', _('Unknown Sender'))
     sender = decode_mail_headers(decodeUnknown(message.get_charset(), sender))
-    # sender_email = email.utils.parseaddr(sender)[1]
-    sender_email = email.utils.getaddresses(sender)[1]
+    # to address bug #832, we wrap all the text in front of the email address in
+    # double quotes by using replace() on the email string. Then,
+    # take first item of list, second item of tuple is the actual email address.
+    # Note that the replace won't work on just an email with no real name,
+    # but the getaddresses() function seems to be able to handle just unclosed quotes
+    # correctly. Not ideal, but this seems to work for now.
+    sender_email = email.utils.getaddresses(['\"' + sender.replace('<', '\" <')])[0][1]
 
     cc = message.get_all('cc', None)
     if cc:
