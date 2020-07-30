@@ -205,6 +205,79 @@ class GetEmailParametricTemplate(object):
             self.assertEqual(ticket2.title, test_email_subject)
             self.assertEqual(ticket2.description, test_email_body)
 
+    def test_commas_in_mail_headers(self):
+        """Tests correctly decoding mail headers when a comma is encoded into
+           UTF-8. See bug report #832."""
+
+        # example email text from Django docs: https://docs.djangoproject.com/en/1.10/ref/unicode/
+        test_email_from = "Bernard-Bouissières, Benjamin <bbb@example.com>"
+        test_email_subject = "Commas in From lines"
+        test_email_body = "Testing commas in from email UTF-8."
+        test_email = "To: helpdesk@example.com\nFrom: " + test_email_from + "\nSubject: " + test_email_subject + "\n\n" + test_email_body
+        test_mail_len = len(test_email)
+
+        if self.socks:
+            from socks import ProxyConnectionError
+            with self.assertRaisesRegex(ProxyConnectionError, '%s:%s' % (unrouted_socks_server, unused_port)):
+                call_command('get_email')
+
+        else:
+            # Test local email reading
+            if self.method == 'local':
+                with mock.patch('helpdesk.management.commands.get_email.listdir') as mocked_listdir, \
+                        mock.patch('helpdesk.management.commands.get_email.isfile') as mocked_isfile, \
+                        mock.patch('builtins.open' if six.PY3 else '__builtin__.open', mock.mock_open(read_data=test_email)):
+                    mocked_isfile.return_value = True
+                    mocked_listdir.return_value = ['filename1', 'filename2']
+
+                    call_command('get_email')
+
+                    mocked_listdir.assert_called_with('/var/lib/mail/helpdesk/')
+                    mocked_isfile.assert_any_call('/var/lib/mail/helpdesk/filename1')
+                    mocked_isfile.assert_any_call('/var/lib/mail/helpdesk/filename2')
+
+            elif self.method == 'pop3':
+                # mock poplib.POP3's list and retr methods to provide responses as per RFC 1939
+                pop3_emails = {
+                    '1': ("+OK", test_email.split('\n')),
+                    '2': ("+OK", test_email.split('\n')),
+                }
+                pop3_mail_list = ("+OK 2 messages", ("1 %d" % test_mail_len, "2 %d" % test_mail_len))
+                mocked_poplib_server = mock.Mock()
+                mocked_poplib_server.list = mock.Mock(return_value=pop3_mail_list)
+                mocked_poplib_server.retr = mock.Mock(side_effect=lambda x: pop3_emails[x])
+                with mock.patch('helpdesk.management.commands.get_email.poplib', autospec=True) as mocked_poplib:
+                    mocked_poplib.POP3 = mock.Mock(return_value=mocked_poplib_server)
+                    call_command('get_email')
+
+            elif self.method == 'imap':
+                # mock imaplib.IMAP4's search and fetch methods with responses from RFC 3501
+                imap_emails = {
+                    "1": ("OK", (("1", test_email),)),
+                    "2": ("OK", (("2", test_email),)),
+                }
+                imap_mail_list = ("OK", ("1 2",))
+                mocked_imaplib_server = mock.Mock()
+                mocked_imaplib_server.search = mock.Mock(return_value=imap_mail_list)
+
+                # we ignore the second arg as the data item/mime-part is constant (RFC822)
+                mocked_imaplib_server.fetch = mock.Mock(side_effect=lambda x, _: imap_emails[x])
+                with mock.patch('helpdesk.management.commands.get_email.imaplib', autospec=True) as mocked_imaplib:
+                    mocked_imaplib.IMAP4 = mock.Mock(return_value=mocked_imaplib_server)
+                    call_command('get_email')
+
+            ticket1 = get_object_or_404(Ticket, pk=1)
+            self.assertEqual(ticket1.ticket_for_url, "QQ-%s" % ticket1.id)
+            self.assertEqual(ticket1.submitter_email, 'bbb@example.com')
+            self.assertEqual(ticket1.title, test_email_subject)
+            self.assertEqual(ticket1.description, test_email_body)
+
+            ticket2 = get_object_or_404(Ticket, pk=2)
+            self.assertEqual(ticket2.ticket_for_url, "QQ-%s" % ticket2.id)
+            self.assertEqual(ticket2.submitter_email, 'bbb@example.com')
+            self.assertEqual(ticket2.title, test_email_subject)
+            self.assertEqual(ticket2.description, test_email_body)
+
     def test_read_email_with_template_tag(self):
         """Tests reading plain text emails from a queue and creating tickets,
            except this time the email body contains a Django template tag.

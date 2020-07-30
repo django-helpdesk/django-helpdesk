@@ -101,11 +101,11 @@ errors with trying to create User settings.
 
    (substitute www-data for the user / group that your web server runs as, eg 'apache' or 'httpd')
 
-   If all else fails ensure all users can write to it::
+   If all else fails, you could ensure all users can write to it::
 
       chmod 777 attachments/
 
-   This is NOT recommended, especially if you're on a shared server.
+   But this is NOT recommended, especially if you're on a shared server.
 
 6. Ensure that your ``attachments`` folder has directory listings turned off, to ensure users don't download files that they are not specifically linked to from their tickets.
 
