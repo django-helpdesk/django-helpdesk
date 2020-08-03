@@ -28,12 +28,12 @@ import sys
 from time import ctime
 
 from bs4 import BeautifulSoup
+from django.template.defaultfilters import linebreaksbr
 
 from email_reply_parser import EmailReplyParser
 
 
 from django.contrib.auth import get_user_model
-from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management.base import BaseCommand
 from django.db.models import Q
@@ -359,7 +359,7 @@ def ticket_from_message(message, queue, logger):
             name = email.utils.collapse_rfc2231_value(name)
 
         if part.get_content_maintype() == 'text' and name is None:
-            if part.get_content_subtype() == 'plain':
+            if part.get_content_subtype() == 'plain' and body is None:
                 body = part.get_payload(decode=True)
                 # https://github.com/django-helpdesk/django-helpdesk/issues/732
                 if part['Content-Transfer-Encoding'] == '8bit' and part.get_content_charset() == 'utf-8':
@@ -371,24 +371,26 @@ def ticket_from_message(message, queue, logger):
                     body = body.encode('ascii').decode('unicode_escape')
                 except UnicodeEncodeError:
                     body.encode('utf-8')
+                # Add <br> tag for new lines
+                body = linebreaksbr(body)
                 logger.debug("Discovered plain text MIME part")
             else:
                 try:
-                    email_body = encoding.smart_text(part.get_payload(decode=True))
+                    body = encoding.smart_text(part.get_payload(decode=True))
                 except UnicodeDecodeError:
-                    email_body = encoding.smart_text(part.get_payload(decode=False))
-
-                payload = """
-                <html>
-                <head>
-                <meta charset="utf-8"/>
-                </head>
-                %s
-                </html>""" % email_body
-                files.append(
-                    SimpleUploadedFile(_("email_html_body.html"), payload.encode("utf-8"), 'text/html')
-                )
-                logger.debug("Discovered HTML MIME part")
+                    body = encoding.smart_text(part.get_payload(decode=False))
+                # It's no longer needed to store the HTML as an attachment to ticket
+                # payload = """
+                # <html>
+                # <head>
+                # <meta charset="utf-8"/>
+                # </head>
+                # %s
+                # </html>""" % email_body
+                # files.append(
+                #     SimpleUploadedFile(_("email_html_body.html"), payload.encode("utf-8"), 'text/html')
+                # )
+                logger.debug("Discovered HTML MIME part and set as the ticket body")
         else:
             if not name:
                 ext = mimetypes.guess_extension(part.get_content_type())
