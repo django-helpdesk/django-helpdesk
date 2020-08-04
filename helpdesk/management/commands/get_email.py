@@ -313,7 +313,7 @@ def decode_mail_headers(string):
     if six.PY2:
         return u' '.join([unicode(msg, charset or 'utf-8') for msg, charset in decoded])
     elif six.PY3:
-        return u' '.join([str(msg, encoding=charset, errors='replace').replace(',', '') if charset else str(msg) for msg, charset in decoded])
+        return u' '.join([str(msg, encoding=charset, errors='replace') if charset else str(msg) for msg, charset in decoded])
 
 
 def ticket_from_message(message, queue, logger):
