@@ -157,8 +157,8 @@ class Akismet(object):
         ``Akismet`` instance.
         """
         if key is None and isfile('apikey.txt'):
-            the_file = [l.strip() for l in open('apikey.txt').readlines()
-                        if l.strip() and not l.strip().startswith('#')]
+            the_file = [line.strip() for line in open('apikey.txt').readlines()
+                        if line.strip() and not line.strip().startswith('#')]
             try:
                 self.key = the_file[0]
                 self.blog_url = the_file[1]

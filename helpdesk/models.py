@@ -763,7 +763,8 @@ def attachment_path(instance, filename):
     att_path = os.path.join(settings.MEDIA_ROOT, path)
     if settings.DEFAULT_FILE_STORAGE == "django.core.files.storage.FileSystemStorage":
         if not os.path.exists(att_path):
-            os.makedirs(att_path, 0o777)
+            # TODO: is there a better way to handle directory permissions more consistently?
+            os.makedirs(att_path, 0o700)
     return os.path.join(path, filename)
 
 

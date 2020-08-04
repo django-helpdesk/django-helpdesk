@@ -129,8 +129,8 @@ $(document).ready(function() {
                                             <button class='filterBuilderRemove btn btn-danger btn-xs'><i class="fa fa-trash-o"></i></button>
                                             </div>
 
-                                            <div class='thumbnail filterBox{% if query %} filterBoxShow{% endif %}' id='filterBoxKeywords'>
-                                            <label for='id_query'>{% trans "Keywords" %}</label><input type='text' name='q' value='{{ query }}' id='id_query' />
+                                            <div class='thumbnail filterBox{% if query_params.search_string %} filterBoxShow{% endif %}' id='filterBoxKeywords'>
+                                            <label for='id_query'>{% trans "Keywords" %}</label><input type='text' name='q' value='{{ query_params.search_string|default:"" }}' id='id_query' />
                                             <p class='filterHelp'>{% trans "Keywords are case-insensitive, and will be looked for in the title, body and submitter fields." %}</p>
                                             <button class='filterBuilderRemove btn btn-danger btn-xs'><i class="fa fa-trash-o"></i></button>
                                             </div>
