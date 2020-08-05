@@ -620,7 +620,9 @@ class Ticket(models.Model):
         """
         last_followup = self.followup_set.select_related('user').last()
 
-        if last_followup.public:
+        if not last_followup:
+            return "danger"
+        elif last_followup.public:
             # If last public answer was made by a technical user, it's good
             if last_followup.user and last_followup.user.is_staff:
                 return 'success'
