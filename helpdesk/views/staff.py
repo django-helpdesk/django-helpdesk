@@ -319,7 +319,7 @@ def view_ticket(request, ticket_id):
     if 'take' in request.GET or ('close' in request.GET and ticket.status == Ticket.RESOLVED_STATUS):
         # Trick the update_ticket() view into thinking it's being called with a valid POST.
         request.POST = {
-            'public': 1,
+            'public': True,
             'title': ticket.title,
             'comment': '',
             'due_date': datetime.strftime(timezone.localtime(ticket.due_date),
@@ -338,6 +338,10 @@ def view_ticket(request, ticket_id):
                 request.POST['owner'] = ticket.assigned_to.id
             request.POST['new_status'] = Ticket.CLOSED_STATUS
             request.POST['comment'] = _('Accepted resolution and closed ticket')
+            # Let user to close ticket without notifying customer
+            if 'private' in request.GET:
+                request.POST['public'] = False
+                request.POST['comment'] = 'Solution acceptée et ticket fermé sans notification au client'
 
         return update_ticket(request, ticket_id)
 
