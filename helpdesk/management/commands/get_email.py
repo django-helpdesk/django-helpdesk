@@ -254,7 +254,8 @@ def process_queue(q, logger):
                 full_message = encoding.force_text(data[0][1], errors='replace')
                 try:
                     ticket = ticket_from_message(message=full_message, queue=q, logger=logger)
-                except TypeError:
+                except TypeError as e:
+                    logger.error(e)
                     ticket = None  # hotfix. Need to work out WHY.
                 if ticket:
                     server.store(num, '+FLAGS', '\\Deleted')
@@ -337,14 +338,15 @@ def ticket_from_message(message, queue, logger):
 
     cc = message.get_all('cc', None)
     if cc:
+        cc = {mail for name, mail in email.utils.getaddresses(cc)}
         # first, fixup the encoding if necessary
-        cc = [decode_mail_headers(decodeUnknown(message.get_charset(), x)) for x in cc]
+        # cc = [decode_mail_headers(decodeUnknown(message.get_charset(), x)) for x in cc]
         # get_all checks if multiple CC headers, but individual emails may be comma separated too
-        tempcc = []
-        for hdr in cc:
-            tempcc.extend(hdr.split(','))
+        # tempcc = []
+        # for hdr in cc:
+        #     tempcc.extend(hdr.split(','))
         # use a set to ensure no duplicates
-        cc = set([x.strip() for x in tempcc])
+        # cc = set([x.strip() for x in tempcc])
 
     for ignore in IgnoreEmail.objects.filter(Q(queues=queue) | Q(queues__isnull=True)):
         if ignore.test(sender_email):
@@ -493,7 +495,7 @@ def ticket_from_message(message, queue, logger):
 
     if cc:
         # get list of currently CC'd emails
-        current_cc = TicketCC.objects.filter(ticket=ticket)
+        current_cc = t.ticketcc_set.all()
         current_cc_emails = [x.email for x in current_cc if x.email]
         # get emails of any Users CC'd to email, if defined
         # (some Users may not have an associated email, e.g, when using LDAP)
@@ -502,33 +504,37 @@ def ticket_from_message(message, queue, logger):
         other_emails = [queue.email_address]
         if t.submitter_email:
             other_emails.append(t.submitter_email)
+        if t.customer_contact:
+            other_emails.append(t.customer_contact.email)
         if t.assigned_to:
             other_emails.append(t.assigned_to.email)
         current_cc = set(current_cc_emails + current_cc_users + other_emails)
         # first, add any User not previously CC'd (as identified by User's email)
-        all_users = User.objects.all()
-        all_user_emails = set([x.email for x in all_users])
+        all_user_emails = set([x.email for x in User.objects.all()])
         users_not_currently_ccd = all_user_emails.difference(set(current_cc))
         users_to_cc = cc.intersection(users_not_currently_ccd)
-        for user in users_to_cc:
-            tcc = TicketCC.objects.create(
-                ticket=t,
-                user=User.objects.get(email=user),
-                can_view=True,
-                can_update=False
-            )
-            tcc.save()
+        for user_email in users_to_cc:
+            try:
+                TicketCC.objects.create(
+                    ticket=t,
+                    user=User.objects.get(email=user_email),
+                    can_view=True,
+                    can_update=False
+                )
+            except User.MultipleObjectsReturned:
+                print('oops')
+                print(user_email)
+                pass
         # then add remaining emails alphabetically, makes testing easy
         new_cc = cc.difference(current_cc).difference(all_user_emails)
         new_cc = sorted(list(new_cc))
         for ccemail in new_cc:
-            tcc = TicketCC.objects.create(
+            TicketCC.objects.create(
                 ticket=t,
-                email=ccemail.replace('\n', ' ').replace('\r', ' '),
+                email=ccemail,
                 can_view=True,
                 can_update=False
             )
-            tcc.save()
 
     f = FollowUp(
         ticket=t,

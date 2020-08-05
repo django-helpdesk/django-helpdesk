@@ -1440,7 +1440,7 @@ class TicketCC(models.Model):
 
     def _display(self):
         if self.user:
-            return self.user
+            return '{} <{}>'.format(self.user, self.user.email)
         else:
             return self.email
     display = property(_display)
