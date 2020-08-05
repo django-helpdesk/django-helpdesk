@@ -25,7 +25,6 @@ from phonenumber_field.modelfields import PhoneNumberField
 from tinymce import HTMLField
 
 from base.models import SpentTime
-from sphinx.models import CustomerProducts, Site, Customer
 
 
 @python_2_unicode_compatible
@@ -561,7 +560,7 @@ class Ticket(models.Model):
     contact_phone_number = PhoneNumberField('numéro de téléphone', blank=True)
 
     customer = models.ForeignKey(
-        Customer,
+        'sphinx.Customer',
         on_delete=models.SET_NULL,
         related_name='tickets',
         null=True,
@@ -569,7 +568,7 @@ class Ticket(models.Model):
     )
 
     site = models.ForeignKey(
-        Site,
+        'sphinx.Site',
         on_delete=models.SET_NULL,
         related_name='tickets',
         null=True,
@@ -577,7 +576,7 @@ class Ticket(models.Model):
     )
 
     customer_product = models.ForeignKey(
-        CustomerProducts,
+        'sphinx.CustomerProducts',
         on_delete=models.SET_NULL,
         related_name='tickets',
         null=True,
