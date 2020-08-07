@@ -32,6 +32,7 @@ from helpdesk.query import (
     query_to_dict,
     query_to_base64,
     query_from_base64,
+    apply_query,
 )
 
 from helpdesk.user import HelpdeskUser
