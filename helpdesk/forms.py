@@ -356,16 +356,16 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
 
         messages_sent_to = []
 
-        if ticket.submitter_email:
+        if ticket.get_submitter_emails():
             send_templated_mail(
                 'newticket_submitter',
                 context,
-                recipients=ticket.submitter_email,
+                recipients=ticket.get_submitter_emails(),
                 sender=queue.from_address,
                 fail_silently=True,
                 files=files,
             )
-            messages_sent_to.append(ticket.submitter_email)
+            messages_sent_to += ticket.get_submitter_emails()
 
         if ticket.assigned_to and \
                 ticket.assigned_to != user and \
@@ -685,3 +685,23 @@ class TicketDependencyForm(forms.ModelForm):
         widgets = {
             'depends_on': forms.Select(attrs={'class': 'form-control'})
         }
+
+
+class MultipleTicketSelectForm(forms.Form):
+    tickets = forms.ModelMultipleChoiceField(
+        label='Tickets à fusionner',
+        queryset=Ticket.objects.all(),
+        widget=ModelSelect2MultipleWidget(
+            model=Ticket,
+            search_fields=['id__iexact', 'title__icontains'],
+            attrs={'style': 'width: 100%', 'data-minimum-input-length': 1}
+        )
+    )
+
+    def clean_tickets(self):
+        tickets = self.cleaned_data.get('tickets')
+        if len(tickets) < 2:
+            raise ValidationError('Veuillez sélectionner au moins 2 tickets')
+        if len(tickets) > 4:
+            raise ValidationError('Impossible de fusionner plus de 4 tickets...')
+        return tickets

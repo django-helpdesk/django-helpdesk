@@ -234,7 +234,8 @@ def ticket_template_context(ticket):
                   'status', 'get_status_display', 'on_hold', 'description',
                   'resolution', 'priority', 'get_priority_display',
                   'last_escalation', 'ticket', 'ticket_for_url',
-                  'get_status', 'ticket_url', 'staff_url', '_get_assigned_to'
+                  'get_status', 'ticket_url', 'staff_url', '_get_assigned_to',
+                  'merged_to'
                   ):
         attr = getattr(ticket, field, None)
         if callable(attr):

@@ -107,11 +107,11 @@ def escalate_tickets(queues, verbose):
 
             context = safe_template_context(t)
 
-            if t.submitter_email:
+            if t.get_submitter_emails():
                 send_templated_mail(
                     'escalated_submitter',
                     context,
-                    recipients=t.submitter_email,
+                    recipients=t.get_submitter_emails(),
                     sender=t.queue.from_address,
                     fail_silently=True,
                 )

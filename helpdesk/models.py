@@ -589,6 +589,15 @@ class Ticket(models.Model):
         blank=True
     )
 
+    merged_to = models.ForeignKey(
+        'self',
+        verbose_name='fusionné à',
+        related_name='merged_tickets',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True
+    )
+
     def _get_assigned_to(self):
         """ Custom property to allow us to easily print 'Unassigned' if a
         ticket has no owner, or the users name if it's assigned. If the user
@@ -735,6 +744,50 @@ class Ticket(models.Model):
         """:return: the sum of the step's spent times """
         return self.spent_times.filter(status=SpentTime.FINISHED, duration__isnull=False) \
             .aggregate(total=models.Sum('duration'))['total']
+
+    def get_submitter_emails(self):
+        """ Return customer contact email if it exists and submitter email if different """
+        recipients = []
+        if self.customer_contact and self.customer_contact.email:
+            recipients.append(self.customer_contact.email)
+        if self.submitter_email and self.submitter_email not in recipients:
+            recipients.append(self.submitter_email)
+        return recipients
+
+    def add_email_to_ticketcc_if_not_in(self, email=None, user=None, ticketcc=None):
+        """
+        Check that given email/user email/ticketcc email is not already present on the ticket
+        (submitter email, customer contact, assigned to, in ticket CCs) and add it to a new ticket CC,
+        or move the given one
+
+        :param str email:
+        :param User user:
+        :param TicketCC ticketcc:
+        """
+        if ticketcc:
+            email = ticketcc.display
+        elif user:
+            if user.email:
+                email = user.email
+            else:
+                return
+        elif not email:
+            return
+
+        # Check that email is not already part of the ticket
+        if (
+                email != self.submitter_email and
+                (self.customer_contact and email != self.customer_contact.email) and
+                (self.assigned_to and email != self.assigned_to.email) and
+                email not in [x.display for x in self.ticketcc_set.all()]
+        ):
+            if ticketcc:
+                ticketcc.ticket = self
+                ticketcc.save(update_fields=['ticket'])
+            elif user:
+                self.ticketcc_set.create(user=user)
+            else:
+                self.ticketcc_set.create(email=email)
 
 
 class FollowUpManager(models.Manager):

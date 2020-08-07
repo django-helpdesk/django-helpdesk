@@ -1,0 +1,103 @@
+{% extends "helpdesk/base.html" %}
+
+{% load i18n %}
+
+{% block helpdesk_title %}Fusion de tickets{% endblock %}
+{% block h1_title %}{% endblock %}
+
+{% block stylesheet %}
+    {{ ticket_select_form.media.css }}
+{% endblock %}
+
+{% block helpdesk_body %}
+    <div class="page-title">
+        <div class="h4 title_left">
+            <a href="{% url 'helpdesk:list' %}">
+                <i class="fa fa-arrow-circle-left"></i>
+                Retour liste des tickets
+            </a>
+        </div>
+    </div>
+
+    <div class="clearfix"></div>
+
+    <div class="row">
+        <div class="col-sm-6 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>Fusion de tickets</h2>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    <form method="get">
+                        <div class="form-group">
+                            {{ ticket_select_form.tickets.label_tag }}
+                            {{ ticket_select_form.tickets }}
+                            {{ ticket_select_form.tickets.errors }}
+                        </div>
+                        <button type="submit" class="btn btn-default">OK</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xs-12">
+            <div class="well">
+                <p>
+                    Sélectionnez le ticket qui sera conservé puis pour chaque information, vous pouvez décider d'utiliser
+                    la donnée d'un autre ticket à fusionner. Si vous ne sélectionnez rien sur une ligne, <b>l'information
+                    du ticket principal restera inchangé</b>.
+                </p>
+                <p>
+                    Les <b>réponses</b> et les <b>pièce-jointes</b> des tickets fusionnées seront déplacés vers le
+                    ticket conservé.<br>
+                    Les <b>personnes impliquées</b> (le soumetteur du ticket et autres personnes en copie) seront également
+                    ajoutés à la liste des CC du ticket conservé.<br>
+                    Les dépendances des tickets fusionnées <b>ne seront pas</b> transférées.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    {% if tickets %}
+        <div class="well">
+            <form method="post">
+                {% csrf_token %}
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover table-bordered jambo_table">
+                        <thead>
+                        <tr>
+                            <th class="text-center">Champs</th>
+                            {% for ticket in tickets %}
+                                <th class="text-center">
+                                    <label>
+                                        {{ ticket }}
+                                        <input name="chosen_ticket" type="radio" value="{{ ticket.id }}"
+                                           class="flat"{% if forloop.first %} checked{% endif %}>
+                                        <a href="{{ ticket.get_absolute_url }}" target="_blank" class="btn btn-default btn-xs">
+                                            Ouvrir le ticket
+                                            <i class="fa fa-external-link"></i>
+                                        </a>
+                                    </label>
+                                </th>
+                            {% endfor %}
+                        </tr>
+                        </thead>
+                        <tbody>
+                            {% for attr, name_attr in ticket_attributes %}
+                                {% include 'helpdesk/include/merge_table_row.html' %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary">Valider</button>
+                </div>
+            </form>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block custom_javascripts %}
+    {{ ticket_select_form.media.js }}
+{% endblock %}

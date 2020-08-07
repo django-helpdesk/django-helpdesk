@@ -455,6 +455,11 @@ def ticket_from_message(message, queue, logger):
             ticket = None
         else:
             logger.info("Found existing ticket with Tracking ID %s-%s" % (t.queue.slug, t.id))
+            # Check if the ticket has been merged to another ticket
+            if t.merged_to:
+                logger.info("Ticket has been merged to %s-%s" % (t.merged_to.queue.slug, t.merged_to.id))
+                # Use the merged ticket for the next operations
+                t = t.merged_to
             if t.status == Ticket.CLOSED_STATUS:
                 t.status = Ticket.REOPENED_STATUS
                 t.save()

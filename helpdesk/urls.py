@@ -45,6 +45,10 @@ urlpatterns = [
         staff.mass_update,
         name='mass_update'),
 
+    url(r'^tickets/fusion$',
+        staff.fusion_tickets,
+        name='fusion'),
+
     url(r'^tickets/submit/$',
         staff.create_ticket,
         name='submit'),

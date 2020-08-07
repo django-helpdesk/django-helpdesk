@@ -33,7 +33,7 @@ from django.views.decorators.http import require_POST
 from helpdesk.forms import (
     TicketForm, UserSettingsForm, EmailIgnoreForm, EditTicketForm, TicketCCForm,
     TicketCCEmailForm, TicketCCUserForm, EditFollowUpForm, TicketDependencyForm, InformationTicketForm,
-    CreateFollowUpForm
+    CreateFollowUpForm, MultipleTicketSelectForm
 )
 from helpdesk.decorators import staff_member_required, superuser_required
 from helpdesk.lib import (
@@ -800,16 +800,16 @@ def update_ticket(request, ticket_id, public=False):
 
         template_suffix = 'submitter'
 
-        if ticket.submitter_email:
+        if ticket.get_submitter_emails():
             send_templated_mail(
                 template + template_suffix,
                 context,
-                recipients=ticket.submitter_email,
+                recipients=ticket.get_submitter_emails(),
                 sender=ticket.queue.from_address,
                 fail_silently=True,
                 files=files,
             )
-            messages_sent_to.append(ticket.submitter_email)
+            messages_sent_to += ticket.get_submitter_emails()
 
         template_suffix = 'cc'
 
@@ -902,7 +902,8 @@ def mass_update(request):
     tickets = request.POST.getlist('ticket_id')
     action = request.POST.get('action', None)
     if not (tickets and action):
-        return HttpResponseRedirect(reverse('helpdesk:list'))
+        messages.warning(request, 'Veuillez sélectionner au minimum 1 ticket et choisir une action à effectuer.')
+        return redirect('helpdesk:list')
 
     if action.startswith('assign_'):
         parts = action.split('_')
@@ -911,6 +912,26 @@ def mass_update(request):
     elif action == 'take':
         user = request.user
         action = 'assign'
+    elif action == 'delete':
+        tickets = Ticket.objects.filter(id__in=tickets)
+        tickets_count = len(tickets)
+        tickets.delete()
+        if tickets_count == 1:
+            msg = 'Un ticket a été supprimé.'
+        else:
+            msg = '%d tickets ont été supprimés' % tickets_count
+        messages.success(request, msg)
+        return redirect('helpdesk:list')
+    elif action == 'fusion':
+        if len(tickets) < 2:
+            messages.warning(request, 'Veuillez sélectionner au minimum 2 tickets pour pouvoir les fusionner.')
+        elif len(tickets) > 4:
+            messages.warning(request, "Oulà, ça risque d'être compliqué pour moi plus de 4 tickets...")
+        else:
+            return redirect(
+                reverse('helpdesk:fusion') + '?' + '&'.join(['tickets=%s' % ticket_id for ticket_id in tickets])
+            )
+        return redirect('helpdesk:list')
 
     for t in Ticket.objects.filter(id__in=tickets):
         if not _has_access_to_queue(request.user, t.queue):
@@ -961,15 +982,15 @@ def mass_update(request):
 
             messages_sent_to = []
 
-            if t.submitter_email:
+            if t.get_submitter_emails():
                 send_templated_mail(
                     'closed_submitter',
                     context,
-                    recipients=t.submitter_email,
+                    recipients=t.get_submitter_emails(),
                     sender=t.queue.from_address,
                     fail_silently=True,
                 )
-                messages_sent_to.append(t.submitter_email)
+                messages_sent_to += t.get_submitter_emails()
 
             for cc in t.ticketcc_set.all():
                 if cc.email_address not in messages_sent_to:
@@ -1005,10 +1026,99 @@ def mass_update(request):
                     fail_silently=True,
                 )
 
-        elif action == 'delete':
-            t.delete()
+    return redirect('helpdesk:list')
 
-    return HttpResponseRedirect(reverse('helpdesk:list'))
+
+ticket_attributes = (
+    ('created', 'Date de création'),
+    ('due_date', "Date d'échéance"),
+    ('get_status_display', 'Statut'),
+    ('submitter_email', 'Email émetteur'),
+    ('customer_contact', 'Utilisateur Phoenix'),
+    ('contact_phone_number', 'Téléphone de contact'),
+    ('customer', 'Client'),
+    ('site', 'Site'),
+    ('customer_product', 'Produit client'),
+    ('link_open', "Lien d'ouverture ticket"),
+    ('category', 'Catégorie'),
+    ('type', 'Type'),
+    ('get_billing_display', 'Facturation'),
+    ('get_priority_display', 'Priorité'),
+    ('quick_comment', 'Commentaire rapide'),
+    ('description', 'Description'),
+    ('resolution', 'Solution'),
+)
+
+
+@staff_member_required
+def fusion_tickets(request):
+    ticket_select_form = MultipleTicketSelectForm(request.GET or None)
+    tickets = None
+    if ticket_select_form.is_valid():
+        tickets = ticket_select_form.cleaned_data.get('tickets')
+
+        if request.method == 'POST':
+            try:
+                chosen_ticket = tickets.get(id=request.POST.get('chosen_ticket'))
+            except Ticket.DoesNotExist:
+                messages.error(request, 'Veuillez sélectionner un ticket dans lequel sera effectuée la fusion.')
+            else:
+                for attr, _ in ticket_attributes:
+                    id_for_attr = request.POST.get(attr)
+                    if id_for_attr != chosen_ticket.id:
+                        try:
+                            selected_ticket = tickets.get(id=id_for_attr)
+                        except Ticket.DoesNotExist:
+                            pass
+                        else:
+                            # Check if attr is a get_FIELD_display
+                            if attr.startswith('get_') and attr.endswith('_display'):
+                                # Keep only the FIELD part
+                                attr = attr[4:-8]
+                            value = getattr(selected_ticket, attr)
+                            setattr(chosen_ticket, attr, value)
+                # Save changes
+                chosen_ticket.save()
+
+                for ticket in tickets.exclude(id=chosen_ticket.id):
+                    ticket.merged_to = chosen_ticket
+                    ticket.status = Ticket.DUPLICATE_STATUS
+                    ticket.save()
+
+                    # Send mail to submitter email
+                    context = safe_template_context(ticket)
+                    if ticket.get_submitter_emails():
+                        send_templated_mail(
+                            'merged',
+                            context,
+                            recipients=ticket.get_submitter_emails(),
+                            sender=ticket.queue.from_address,
+                            fail_silently=True
+                        )
+
+                    # Move all followups and update their title to know they come from another ticket
+                    ticket.followup_set.update(
+                        ticket=chosen_ticket,
+                        # Next might exceed maximum 200 characters limit
+                        title='[Fusion de #%d] %s' % (ticket.id, ticket.title)
+                    )
+
+                    # Add submitter_email, assigned_to email and ticketcc to chosen ticket if necessary
+                    chosen_ticket.add_email_to_ticketcc_if_not_in(email=ticket.submitter_email)
+                    if ticket.customer_contact and ticket.customer_contact.email:
+                        chosen_ticket.add_email_to_ticketcc_if_not_in(email=ticket.customer_contact.email)
+                    if ticket.assigned_to and ticket.assigned_to.email:
+                        chosen_ticket.add_email_to_ticketcc_if_not_in(email=ticket.assigned_to.email)
+                    for ticketcc in ticket.ticketcc_set.all():
+                        chosen_ticket.add_email_to_ticketcc_if_not_in(ticketcc=ticketcc)
+                messages.success(request, 'Les tickets ont bien été fusionnées dans le ticket %s' % chosen_ticket)
+                return redirect(chosen_ticket)
+
+    return render(request, 'helpdesk/ticket_merge.html', {
+        'tickets': tickets,
+        'ticket_attributes': ticket_attributes,
+        'ticket_select_form': ticket_select_form
+    })
 
 
 @staff_member_required

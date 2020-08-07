@@ -1,0 +1,13 @@
+{% load base_tags %}
+<tr>
+    <td class="text-right">{{ name_attr }}</td>
+    {% for ticket in tickets %}
+        <td>
+            <label>
+                <input name="{{ attr }}" type="radio" value="{{ ticket.id }}"
+                       class="flat"{% if ticket.id|to_string == request.POST|get:attr %} checked{% endif %}>
+                {{ ticket|get_attribute:attr|default:"Non défini" }}
+            </label>
+        </td>
+    {% endfor %}
+</tr>
