@@ -305,7 +305,7 @@ def view_ticket(request, ticket_id):
         raise PermissionDenied()
 
     # Try to save the quick comment if it is an AJAX POST request
-    if request.is_ajax() and request.method == 'POST':
+    if request.user.is_staff and request.is_ajax() and request.method == 'POST':
         if request.POST.get('quickComment') is None:
             return JsonResponse({'success': False, 'error': 'Commentaire introuvable dans la requête'})
 
