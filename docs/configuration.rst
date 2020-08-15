@@ -19,6 +19,8 @@ Before django-helpdesk will be much use, you need to do some basic configuration
 
    **IMPORTANT NOTE**: Any tickets created via POP3 or IMAP mailboxes will DELETE the original e-mail from the mail server.
 
+   You will need to create a support queue, and associated login/host values, in the Django admin interface, in order for mail to be picked-up from the mail server and placed in the tickets table of your database. The values in the settings file alone, will not create the necessary values to trigger the get_email function.
+
 4. If you wish to automatically escalate tickets based on their age, set up a cronjob to run the escalation command on a regular basis::
    
        0 * * * * /path/to/helpdesksite/manage.py escalate_tickets
