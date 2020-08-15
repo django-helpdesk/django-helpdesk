@@ -1,7 +1,7 @@
 {% extends "helpdesk/public_base.html" %}{% load i18n humanize %}
 
 {% block helpdesk_body %}
-<h2>{% trans 'Knowledgebase Category' %}:{% blocktrans with category.title as kbcat %}{{ kbcat }}{% endblocktrans %}</h2>
+<h2>{% trans 'Knowledgebase Category' %}: {% blocktrans with category.title as kbcat %}{{ kbcat }}{% endblocktrans %}</h2>
 
 <div class="col-lg-12">
     <div class="well well-sm">
