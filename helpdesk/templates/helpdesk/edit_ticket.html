@@ -40,6 +40,7 @@
     {% endcomment %}
     <div class='buttons form-group'>
         <input type='submit' class="btn btn-primary btn-sm" value='{% trans "Save Changes" %}' />
+        <a href='{{ ticket.get_absolute_url }}'><button class="btn btn-danger">{% trans "Cancel Changes" %}</button></a>
     </div>
 </fieldset>
 
