@@ -27,6 +27,7 @@ from markdown.extensions import Extension
 
 import pinax.teams.models
 
+from tinymce import HTMLField
 
 import uuid
 
@@ -1712,6 +1713,7 @@ class CustomField(models.Model):
         ('url', _('URL')),
         ('ipaddress', _('IP Address')),
         ('slug', _('Slug')),
+        ('htmlmulti', _('HTML multi-line')),
     )
 
     data_type = models.CharField(

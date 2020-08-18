@@ -20,6 +20,8 @@ from helpdesk.models import (Ticket, Queue, FollowUp, IgnoreEmail, TicketCC,
                              CustomField, TicketCustomFieldValue, TicketDependency, UserSettings, KBItem)
 from helpdesk import settings as helpdesk_settings
 
+from tinymce import TinyMCE
+
 logger = logging.getLogger(__name__)
 User = get_user_model()
 
@@ -62,6 +64,10 @@ class CustomFieldMixin(object):
             if field.empty_selection_list:
                 choices.insert(0, ('', '---------'))
             instanceargs['choices'] = choices
+        elif field.data_type == 'htmlmulti':
+            fieldclass = forms.CharField
+            instanceargs['widget'] = TinyMCE
+            instanceargs['max_length'] = field.max_length
         else:
             # Try to use the immediate equivalences dictionary
             try:

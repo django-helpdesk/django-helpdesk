@@ -21,8 +21,16 @@
                     {% for customfield in ticket.ticketcustomfieldvalue_set.all %}
                     <tr>
                         <th class="table-secondary">{{ customfield.field.label }}</th>
-                        <td>{% ifequal customfield.field.data_type "url" %}<a href='{{ customfield.value }}'>{{ customfield.value }}</a>{% else %}{{ customfield.value }}{% endifequal %}</td>
-                    </tr>{% endfor %}
+                        <td>{% if customfield.field.data_type == "url" %}
+                                <a href='{{ customfield.value }}'>{{ customfield.value }}</a>
+                            {% elif customfield.field.data_type == "htmlmulti" %}
+                                {{ customfield.value|safe }}
+                            {% else %}
+                                {{ customfield.value }}
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
                     <tr>
                         <th class="table-active">{% trans "Due Date" %}</th>
                         <td>{{ ticket.due_date|date:"d. E Y" }} {% if ticket.due_date %}({{ ticket.due_date|naturaltime }}){% endif %}
