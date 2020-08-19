@@ -29,7 +29,12 @@
                     <ul>
                     <li>{% blocktrans with item.recommendations as recommendations %}Recommendations: {{ recommendations }}{% endblocktrans %}</li>
                     <li>{% blocktrans with item.votes as votes %}Votes: {{ votes }}{% endblocktrans %}</li>
-                    <li>{% blocktrans with item.score|floatformat as score %}Overall Rating: {{ score }}{% endblocktrans %}/10</li>
+                    <li>{% trans 'Rating' %}: 
+                        {% if item.votes > 0 %}
+                            {{ item.score|floatformat }}/10
+                        {% else %}
+                            {% trans 'no score yet' %}
+                        {% endif %}</li>
                     </ul>
                 </div>
             </div>
