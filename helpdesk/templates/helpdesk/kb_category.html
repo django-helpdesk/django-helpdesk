@@ -26,7 +26,13 @@
                     {% blocktrans with item.get_absolute_url as url %}View <a href='{{ url }}'>Answer <i class="fa fa-arrow-right"></i></a>{% endblocktrans %}
                 </p>
                 <div class="well well-sm">
-                    <p>{% trans 'Rating' %}: {{ item.score }}</p>
+                    <p>{% trans 'Rating' %}: 
+                        {% if item.votes > 0 %}
+                            {{ item.score|floatformat }}/10
+                        {% else %}
+                            {% trans 'no score yet' %}
+                        {% endif %}
+                    </p>
                     <p>{% trans 'Last Update' %}: {{ item.last_updated|naturaltime }}</p>
                 </div>
             </div>
