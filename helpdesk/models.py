@@ -1703,4 +1703,4 @@ class TicketSpentTime(SpentTime):
         return self.ticket.get_absolute_url()
 
     def get_object_display(self):
-        return 'Ticket {}'.format(self.ticket.title)
+        return 'Ticket {} [{}]'.format(self.ticket.title, self.ticket.id)
