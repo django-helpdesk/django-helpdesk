@@ -359,11 +359,11 @@ def ticket_from_message(message, queue, logger):
     matchobj = re.match(r".*\[" + queue.slug + r"-(?P<id>\d+)\]", subject)
     if matchobj:
         # This is a reply or forward.
-        ticket = matchobj.group('id')
-        logger.info("Matched tracking ID %s-%s" % (queue.slug, ticket))
+        ticket_id = matchobj.group('id')
+        logger.info("Matched tracking ID %s-%s" % (queue.slug, ticket_id))
     else:
         logger.info("No tracking ID matched.")
-        ticket = None
+        ticket_id = None
 
     body = None
     counter = 0
@@ -447,22 +447,25 @@ def ticket_from_message(message, queue, logger):
             except AttributeError:
                 pass
 
-    if ticket:
+    ticket = None
+    new = True
+    if ticket_id:
         try:
-            t = Ticket.objects.get(id=ticket)
+            ticket = Ticket.objects.get(id=ticket_id)
         except Ticket.DoesNotExist:
-            logger.info("Tracking ID %s-%s not associated with existing ticket. Creating new ticket." % (queue.slug, ticket))
-            ticket = None
+            logger.info("Tracking ID %s-%s not associated with existing ticket. Creating new ticket." % (queue.slug, ticket_id))
         else:
-            logger.info("Found existing ticket with Tracking ID %s-%s" % (t.queue.slug, t.id))
+            logger.info("Found existing ticket with Tracking ID %s-%s" % (ticket.queue.slug, ticket.id))
             # Check if the ticket has been merged to another ticket
-            if t.merged_to:
-                logger.info("Ticket has been merged to %s-%s" % (t.merged_to.queue.slug, t.merged_to.id))
+            if ticket.merged_to:
+                logger.info("Ticket has been merged to %s-%s" % (ticket.merged_to.queue.slug, ticket.merged_to.id))
                 # Use the merged ticket for the next operations
-                t = t.merged_to
-            if t.status == Ticket.CLOSED_STATUS:
-                t.status = Ticket.REOPENED_STATUS
-                t.save()
+                ticket = ticket.merged_to
+            # Reopen ticket if it was closed
+            if ticket.status == Ticket.CLOSED_STATUS:
+                logger.info("Ticket has been reopened.")
+                ticket.status = Ticket.REOPENED_STATUS
+                ticket.save()
             new = False
 
     smtp_priority = message.get('priority', '')
@@ -470,10 +473,9 @@ def ticket_from_message(message, queue, logger):
     high_priority_types = {'high', 'important', '1', 'urgent'}
     priority = 2 if high_priority_types & {smtp_priority, smtp_importance} else 3
 
-    if ticket is None:
+    if new:
         if settings.QUEUE_EMAIL_BOX_UPDATE_ONLY:
             return None
-        new = True
         # Try to find corresponding user thanks to submitter email
         search_users = User.objects.filter(email=sender_email)
         customer_contact = None
@@ -486,7 +488,7 @@ def ticket_from_message(message, queue, logger):
             if len(search_customers) == 1:
                 customer = search_customers.first().customer
                 logger.debug("Found associated customer : %s" % customer)
-        t = Ticket.objects.create(
+        ticket = Ticket.objects.create(
             title=subject,
             queue=queue,
             submitter_email=sender_email,
@@ -496,23 +498,24 @@ def ticket_from_message(message, queue, logger):
             customer_contact=customer_contact,
             customer=customer
         )
-        logger.debug("Created new ticket %s-%s" % (t.queue.slug, t.id))
+        logger.debug("Created new ticket %s-%s" % (ticket.queue.slug, ticket.id))
 
-    if cc:
+    # Create TicketCC for ticket
+    if ticket and cc:
         # get list of currently CC'd emails
-        current_cc = t.ticketcc_set.all()
+        current_cc = ticket.ticketcc_set.all()
         current_cc_emails = [x.email for x in current_cc if x.email]
         # get emails of any Users CC'd to email, if defined
         # (some Users may not have an associated email, e.g, when using LDAP)
         current_cc_users = [x.user.email for x in current_cc if x.user and x.user.email]
         # ensure submitter, assigned user, queue email not added
         other_emails = [queue.email_address]
-        if t.submitter_email:
-            other_emails.append(t.submitter_email)
-        if t.customer_contact:
-            other_emails.append(t.customer_contact.email)
-        if t.assigned_to:
-            other_emails.append(t.assigned_to.email)
+        if ticket.submitter_email:
+            other_emails.append(ticket.submitter_email)
+        if ticket.customer_contact:
+            other_emails.append(ticket.customer_contact.email)
+        if ticket.assigned_to:
+            other_emails.append(ticket.assigned_to.email)
         current_cc = set(current_cc_emails + current_cc_users + other_emails)
         # first, add any User not previously CC'd (as identified by User's email)
         all_user_emails = set([x.email for x in User.objects.all()])
@@ -520,52 +523,49 @@ def ticket_from_message(message, queue, logger):
         users_to_cc = cc.intersection(users_not_currently_ccd)
         for user_email in users_to_cc:
             try:
-                TicketCC.objects.create(
-                    ticket=t,
+                ticket.ticketcc_set.create(
                     user=User.objects.get(email=user_email),
                     can_view=True,
                     can_update=False
                 )
             except User.MultipleObjectsReturned:
-                print('oops')
-                print(user_email)
+                logger.error('Multiple users has this email address : %s' % user_email)
                 pass
         # then add remaining emails alphabetically, makes testing easy
         new_cc = cc.difference(current_cc).difference(all_user_emails)
         new_cc = sorted(list(new_cc))
         for ccemail in new_cc:
-            TicketCC.objects.create(
-                ticket=t,
+            ticket.ticketcc_set.create(
                 email=ccemail,
                 can_view=True,
                 can_update=False
             )
 
     f = FollowUp(
-        ticket=t,
-        title=_('E-Mail Received from %(sender_email)s' % {'sender_email': sender_email}),
+        ticket=ticket,
+        title='E-Mail reçu de %s' % sender_email,
         date=timezone.now(),
         public=True,
         comment=body,
     )
 
-    if t.status == Ticket.REOPENED_STATUS:
+    if ticket.status == Ticket.REOPENED_STATUS:
         f.new_status = Ticket.REOPENED_STATUS
-        f.title = _('Ticket Re-Opened by E-Mail Received from %(sender_email)s' % {'sender_email': sender_email})
+        f.title = 'Ticket réouvert par un mail reçu de %s' % sender_email
 
     f.save()
     logger.debug("Created new FollowUp for Ticket")
 
     if six.PY2:
-        logger.info(("[%s-%s] %s" % (t.queue.slug, t.id, t.title,)).encode('ascii', 'replace'))
+        logger.info(("[%s-%s] %s" % (ticket.queue.slug, ticket.id, ticket.title,)).encode('ascii', 'replace'))
     elif six.PY3:
-        logger.info("[%s-%s] %s" % (t.queue.slug, t.id, t.title,))
+        logger.info("[%s-%s] %s" % (ticket.queue.slug, ticket.id, ticket.title,))
 
     attached = process_attachments(f, files)
     for att_file in attached:
         logger.info("Attachment '%s' (with size %s) successfully added to ticket from email." % (att_file[0], att_file[1].size))
 
-    context = safe_template_context(t)
+    context = safe_template_context(ticket)
 
     if new:
         if sender_email:
@@ -594,20 +594,20 @@ def ticket_from_message(message, queue, logger):
             )
     else:
         context.update(comment=f.comment)
-        if t.assigned_to:
+        if ticket.assigned_to:
             send_templated_mail(
                 'updated_owner',
                 context,
-                recipients=t.assigned_to.email,
+                recipients=ticket.assigned_to.email,
                 sender=queue.from_address,
                 fail_silently=True,
             )
-            # Send Phoenix notification
+            # Send Phoenix notification to user assigned to the ticket
             Notification.objects.create(
                 module=Notification.TICKET,
-                message="Une nouvelle réponse a été ajouté au ticket %s par mail via l'adresse %s" % (t.title, sender_email),
-                link_redirect=t.get_absolute_url(),
-                user_list=[t.assigned_to]
+                message="Une nouvelle réponse a été ajouté au ticket %s par mail via l'adresse %s" % (ticket.title, sender_email),
+                link_redirect=ticket.get_absolute_url(),
+                user_list=[ticket.assigned_to]
             )
         if queue.updated_ticket_cc:
             send_templated_mail(
@@ -618,9 +618,9 @@ def ticket_from_message(message, queue, logger):
                 fail_silently=True,
             )
         # copy email to all those CC'd to this particular ticket
-        for cc in t.ticketcc_set.all():
+        for cc in ticket.ticketcc_set.all():
             # don't duplicate email to assignee
-            if not t.assigned_to or (t.assigned_to.email != cc.email_address):
+            if not ticket.assigned_to or (ticket.assigned_to.email != cc.email_address):
                 send_templated_mail(
                     'updated_cc',
                     context,
@@ -629,7 +629,7 @@ def ticket_from_message(message, queue, logger):
                     fail_silently=True,
                 )
 
-    return t
+    return ticket
 
 
 if __name__ == '__main__':
