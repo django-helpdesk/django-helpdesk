@@ -457,6 +457,20 @@ class Ticket(models.Model):
         help_text=_('Date this ticket was most recently changed.'),
     )
 
+    resolved = models.DateTimeField(
+        _('Resolved'),
+        null=True,
+        blank=True,
+        help_text=_('Date this ticket was resolved'),
+    )
+
+    closed = models.DateTimeField(
+        _('Closed'),
+        null=True,
+        blank=True,
+        help_text=_('Date this ticket was closed'),
+    )
+
     submitter_email = models.EmailField(
         _('Submitter E-Mail'),
         blank=True,
@@ -727,7 +741,24 @@ class Ticket(models.Model):
         if not self.priority:
             self.priority = 3
 
+        # Update modified date
         self.modified = timezone.now()
+
+        # Update resolved date
+        if self.status == self.RESOLVED_STATUS and not self.resolved:
+            self.resolved = timezone.now()
+            # If closed date was still set, remove it
+            if self.closed:
+                self.closed = None
+
+        # Update closed date when closing or setting as duplicate
+        elif self.status in [self.CLOSED_STATUS, self.DUPLICATE_STATUS] and not self.closed:
+            self.closed = timezone.now()
+
+        # If ticket is reopened, remove closed and resolved dates
+        elif self.status in [self.OPEN_STATUS, self.REOPENED_STATUS] and (self.closed or self.resolved):
+            self.closed = None
+            self.resolved = None
 
         super(Ticket, self).save(*args, **kwargs)
 

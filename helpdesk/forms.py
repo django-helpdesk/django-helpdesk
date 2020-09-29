@@ -157,7 +157,10 @@ class EditTicketForm(CustomFieldMixin, PhoenixTicketForm, forms.ModelForm):
 
     class Meta:
         model = Ticket
-        exclude = ('created', 'modified', 'status', 'on_hold', 'resolution', 'last_escalation', 'assigned_to')
+        exclude = (
+            'created', 'modified', 'resolved', 'closed', 'status',
+            'on_hold', 'resolution', 'last_escalation', 'assigned_to'
+        )
         widgets = {
             'link_open': forms.URLInput(),
             'description': CustomTinyMCE()

@@ -1469,14 +1469,30 @@ def report_index(request):
     # Queue 2     4    12
     Queues = user_queues if user_queues else Queue.objects.all()
 
+    # Filter results with a date range picker
+    from_date = datetime.today() - timedelta(7)
+    to_date = datetime.today()
+    date_range = request.POST.get('dateRange')
+    if date_range and ' - ' in date_range:
+        from_date_string, to_date_string = date_range.split(' - ')
+        # Try to convert string to date
+        try:
+            from_date = datetime.strptime(from_date_string, '%d/%m/%Y')
+        except ValueError:
+            pass
+        try:
+            to_date = datetime.strptime(to_date_string, '%d/%m/%Y')
+        except ValueError:
+            pass
+
     dash_tickets = []
     for queue in Queues:
         dash_ticket = {
             'queue': queue.id,
             'name': queue.title,
-            'open': queue.ticket_set.filter(status__in=[1, 2]).count(),
-            'resolved': queue.ticket_set.filter(status=3).count(),
-            'closed': queue.ticket_set.filter(status=4).count(),
+            'open': queue.ticket_set.filter(created__date__range=(from_date, to_date)).filter(status__in=[1, 2]).count(),
+            'resolved': queue.ticket_set.filter(resolved__date__range=(from_date, to_date)).filter(status=3).count(),
+            'closed': queue.ticket_set.filter(closed__date__range=(from_date, to_date)).filter(status__in=[4, 5]).count(),
         }
         dash_tickets.append(dash_ticket)
 
@@ -1485,6 +1501,8 @@ def report_index(request):
         'saved_query': saved_query,
         'basic_ticket_stats': basic_ticket_stats,
         'dash_tickets': dash_tickets,
+        'from': from_date,
+        'to': to_date,
     })
 
 
