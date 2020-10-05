@@ -1453,6 +1453,110 @@ def rss_list(request):
     return render(request, 'helpdesk/rss_list.html', {'queues': Queue.objects.all()})
 
 
+#
+USER_PRIORITY = 'userpriority'
+USER_QUEUE = 'userqueue'
+USER_STATUS = 'userstatus'
+USER_CATEGORY = 'usercategory'
+USER_TYPE = 'usertype'
+USER_BILLING = 'userbilling'
+USER_MONTH = 'usermonth'
+QUEUE_PRIORITY = 'queuepriority'
+QUEUE_STATUS = 'queuestatus'
+QUEUE_CATEGORY = 'queuecategory'
+QUEUE_TYPE = 'queuetype'
+QUEUE_BILLING = 'queuebilling'
+QUEUE_MONTH = 'queuemonth'
+DAYS_UNTIL_TICKET_CLOSED_BY_MONTH = 'daysuntilticketclosedbymonth'
+
+reports = {
+    USER_PRIORITY: {
+        'title': _('User by Priority'),
+        'title_index': _('by Priority'),
+        'col1_heading': _('User'),
+        'chart_type': 'bar'
+    },
+    USER_QUEUE: {
+        'title': _('User by Priority'),
+        'title_index': _('by Queue'),
+        'col1_heading': _('User'),
+        'chart_type': 'bar'
+    },
+    USER_STATUS: {
+        'title': _('User by Status'),
+        'title_index': _('by Status'),
+        'col1_heading': _('User'),
+        'chart_type': 'bar'
+    },
+    USER_CATEGORY: {
+        'title': 'Utilisateur par Catégorie',
+        'title_index': 'par Catégorie',
+        'col1_heading': _('User'),
+        'chart_type': 'bar'
+    },
+    USER_TYPE: {
+        'title': 'Utilisateur par Type',
+        'title_index': 'par Type',
+        'col1_heading': _('User'),
+        'chart_type': 'bar'
+    },
+    USER_BILLING: {
+        'title': 'Utilisateur par Facturation',
+        'title_index': 'par Facturation',
+        'col1_heading': _('User'),
+        'chart_type': 'bar'
+    },
+    USER_MONTH: {
+        'title': _('User by Month'),
+        'title_index': _('by Month'),
+        'col1_heading': _('User'),
+        'chart_type': 'date'
+    },
+    QUEUE_PRIORITY: {
+        'title': _('Queue by Priority'),
+        'title_index': _('by Priority'),
+        'col1_heading': _('Queue'),
+        'chart_type': 'bar'
+    },
+    QUEUE_STATUS: {
+        'title': _('Queue by Status'),
+        'title_index': _('by Status'),
+        'col1_heading': _('Queue'),
+        'chart_type': 'bar'
+    },
+    QUEUE_CATEGORY: {
+        'title': 'File par Catégorie',
+        'title_index': 'par Catégorie',
+        'col1_heading': _('Queue'),
+        'chart_type': 'bar'
+    },
+    QUEUE_TYPE: {
+        'title': 'File par Type',
+        'title_index': 'par Type',
+        'col1_heading': _('Queue'),
+        'chart_type': 'bar'
+    },
+    QUEUE_BILLING: {
+        'title': 'File par Facturation',
+        'title_index': 'par Facturation',
+        'col1_heading': _('Queue'),
+        'chart_type': 'bar'
+    },
+    QUEUE_MONTH: {
+        'title': _('Queue by Month'),
+        'title_index': _('by Month'),
+        'col1_heading': _('Queue'),
+        'chart_type': 'date'
+    },
+    DAYS_UNTIL_TICKET_CLOSED_BY_MONTH: {
+        'title': _('Days until ticket closed by Month'),
+        'title_index': _('Days until ticket closed by Month'),
+        'col1_heading': _('Queue'),
+        'chart_type': 'date'
+    }
+}
+
+
 @staff_member_required
 def report_index(request):
     number_tickets = Ticket.objects.all().count()
@@ -1497,21 +1601,27 @@ def report_index(request):
         dash_tickets.append(dash_ticket)
 
     return render(request, 'helpdesk/report_index.html', {
+        'user_reports': {i: r for i, r in reports.items() if r['col1_heading'] == _('User')},
+        'queue_reports': {i: r for i, r in reports.items() if r['col1_heading'] == _('Queue')},
         'number_tickets': number_tickets,
         'saved_query': saved_query,
         'basic_ticket_stats': basic_ticket_stats,
         'dash_tickets': dash_tickets,
         'from': from_date,
         'to': to_date,
+        'DAYS_UNTIL_TICKET_CLOSED_BY_MONTH': DAYS_UNTIL_TICKET_CLOSED_BY_MONTH
     })
 
 
 @staff_member_required
 def run_report(request, report):
-    if Ticket.objects.all().count() == 0 or report not in (
-            'queuemonth', 'usermonth', 'queuestatus', 'queuepriority', 'userstatus',
-            'userpriority', 'userqueue', 'daysuntilticketclosedbymonth', 'queuecategory', 'queuetype', 'queuebilling'):
-        return HttpResponseRedirect(reverse("helpdesk:report_index"))
+    #
+    if Ticket.objects.count() == 0:
+        messages.info(request, 'Aucun ticket à analyser')
+        redirect("helpdesk:report_index")
+    if report not in reports.keys():
+        messages.error(request, 'Aucun rapport du nom de "%s"' % report)
+        return redirect("helpdesk:report_index")
 
     report_queryset = Ticket.objects.all().select_related().filter(
         queue__in=_get_user_queues(request.user)
@@ -1575,135 +1685,125 @@ def run_report(request, report):
             working = False
         periods.append("%s-%s" % (year, month))
 
-    if report == 'userpriority':
-        title = _('User by Priority')
-        col1heading = _('User')
-        possible_options = [t[1].title() for t in Ticket.PRIORITY_CHOICES]
-        charttype = 'bar'
+    possible_options = None
 
-    elif report == 'userqueue':
-        title = _('User by Queue')
-        col1heading = _('User')
+    if report == USER_PRIORITY:
+        possible_options = [t[1].title() for t in Ticket.PRIORITY_CHOICES]
+
+    elif report == USER_QUEUE:
         queue_options = _get_user_queues(request.user)
         possible_options = [q.title for q in queue_options]
-        charttype = 'bar'
 
-    elif report == 'userstatus':
-        title = _('User by Status')
-        col1heading = _('User')
+    elif report == USER_STATUS:
         possible_options = [s[1].title() for s in Ticket.STATUS_CHOICES]
-        charttype = 'bar'
 
-    elif report == 'usermonth':
-        title = _('User by Month')
-        col1heading = _('User')
-        possible_options = periods
-        charttype = 'date'
-
-    elif report == 'queuepriority':
-        title = _('Queue by Priority')
-        col1heading = _('Queue')
-        possible_options = [t[1].title() for t in Ticket.PRIORITY_CHOICES]
-        charttype = 'bar'
-
-    elif report == 'queuestatus':
-        title = _('Queue by Status')
-        col1heading = _('Queue')
-        possible_options = [s[1].title() for s in Ticket.STATUS_CHOICES]
-        charttype = 'bar'
-
-    elif report == 'queuecategory':
-        title = 'File par Catégorie'
-        col1heading = _('Queue')
+    elif report == USER_CATEGORY:
         possible_options = list(TicketCategory.objects.values_list('name', flat=True)) + ['Non définie']
-        charttype = 'bar'
 
-    elif report == 'queuetype':
-        title = 'File par Type'
-        col1heading = _('Queue')
+    elif report == USER_TYPE:
         possible_options = list(TicketType.objects.values_list('name', flat=True)) + ['Non défini']
-        charttype = 'bar'
 
-    elif report == 'queuebilling':
-        title = 'File par Facturation'
-        col1heading = _('Queue')
+    elif report == USER_BILLING:
         possible_options = [s[1] for s in Ticket.BILLINGS] + ['Non définie']
-        charttype = 'bar'
 
-    elif report == 'queuemonth':
-        title = _('Queue by Month')
-        col1heading = _('Queue')
+    elif report == USER_MONTH:
         possible_options = periods
-        charttype = 'date'
 
-    elif report == 'daysuntilticketclosedbymonth':
-        title = _('Days until ticket closed by Month')
-        col1heading = _('Queue')
+    elif report == QUEUE_PRIORITY:
+        possible_options = [t[1].title() for t in Ticket.PRIORITY_CHOICES]
+
+    elif report == QUEUE_STATUS:
+        possible_options = [s[1].title() for s in Ticket.STATUS_CHOICES]
+
+    elif report == QUEUE_CATEGORY:
+        possible_options = list(TicketCategory.objects.values_list('name', flat=True)) + ['Non définie']
+
+    elif report == QUEUE_TYPE:
+        possible_options = list(TicketType.objects.values_list('name', flat=True)) + ['Non défini']
+
+    elif report == QUEUE_BILLING:
+        possible_options = [s[1] for s in Ticket.BILLINGS] + ['Non définie']
+
+    elif report == QUEUE_MONTH:
         possible_options = periods
-        charttype = 'date'
+
+    elif report == DAYS_UNTIL_TICKET_CLOSED_BY_MONTH:
+        possible_options = periods
 
     metric3 = False
     for ticket in report_queryset:
-        if report == 'userpriority':
-            metric1 = u'%s' % ticket.get_assigned_to
-            metric2 = u'%s' % ticket.get_priority_display()
+        if report == USER_PRIORITY:
+            metric1 = ticket.get_assigned_to
+            metric2 = ticket.get_priority_display()
 
-        elif report == 'userqueue':
-            metric1 = u'%s' % ticket.get_assigned_to
-            metric2 = u'%s' % ticket.queue.title
+        elif report == USER_QUEUE:
+            metric1 = ticket.get_assigned_to
+            metric2 = ticket.queue.title
 
-        elif report == 'userstatus':
-            metric1 = u'%s' % ticket.get_assigned_to
-            metric2 = u'%s' % ticket.get_status_display()
+        elif report == USER_STATUS:
+            metric1 = ticket.get_assigned_to
+            metric2 = ticket.get_status_display()
 
-        elif report == 'usermonth':
-            metric1 = u'%s' % ticket.get_assigned_to
-            metric2 = u'%s-%s' % (ticket.created.year, ticket.created.month)
+        elif report == USER_CATEGORY:
+            metric1 = ticket.get_assigned_to
+            metric2 = '%s' % (ticket.category if ticket.category else 'Non définie')
 
-        elif report == 'queuepriority':
-            metric1 = u'%s' % ticket.queue.title
-            metric2 = u'%s' % ticket.get_priority_display()
+        elif report == USER_TYPE:
+            metric1 = ticket.get_assigned_to
+            metric2 = '%s' % (ticket.type if ticket.type else 'Non défini')
 
-        elif report == 'queuestatus':
-            metric1 = u'%s' % ticket.queue.title
-            metric2 = u'%s' % ticket.get_status_display()
+        elif report == USER_BILLING:
+            metric1 = ticket.get_assigned_to
+            metric2 = '%s' % (ticket.get_billing_display() if ticket.billing else 'Non définie')
 
-        elif report == 'queuemonth':
-            metric1 = u'%s' % ticket.queue.title
-            metric2 = u'%s-%s' % (ticket.created.year, ticket.created.month)
+        elif report == USER_MONTH:
+            metric1 = ticket.get_assigned_to
+            metric2 = '%s-%s' % (ticket.created.year, ticket.created.month)
 
-        elif report == 'queuecategory':
+        elif report == QUEUE_PRIORITY:
+            metric1 = ticket.queue.title
+            metric2 = ticket.get_priority_display()
+
+        elif report == QUEUE_STATUS:
+            metric1 = ticket.queue.title
+            metric2 = ticket.get_status_display()
+
+        elif report == QUEUE_MONTH:
+            metric1 = ticket.queue.title
+            metric2 = '%s-%s' % (ticket.created.year, ticket.created.month)
+
+        elif report == QUEUE_CATEGORY:
             metric1 = ticket.queue.title
             metric2 = '%s' % (ticket.category if ticket.category else 'Non définie')
 
-        elif report == 'queuetype':
+        elif report == QUEUE_TYPE:
             metric1 = ticket.queue.title
             metric2 = '%s' % (ticket.type if ticket.type else 'Non défini')
 
-        elif report == 'queuebilling':
+        elif report == QUEUE_BILLING:
             metric1 = ticket.queue.title
             metric2 = '%s' % (ticket.get_billing_display() if ticket.billing else 'Non définie')
 
-        elif report == 'daysuntilticketclosedbymonth':
-            metric1 = u'%s' % ticket.queue.title
-            metric2 = u'%s-%s' % (ticket.created.year, ticket.created.month)
+        elif report == DAYS_UNTIL_TICKET_CLOSED_BY_MONTH:
+            metric1 = ticket.queue.title
+            metric2 = '%s-%s' % (ticket.created.year, ticket.created.month)
             metric3 = ticket.modified - ticket.created
             metric3 = metric3.days
 
         summarytable[metric1, metric2] += 1
         if metric3:
-            if report == 'daysuntilticketclosedbymonth':
+            if report == DAYS_UNTIL_TICKET_CLOSED_BY_MONTH:
                 summarytable2[metric1, metric2] += metric3
 
     table = []
 
-    if report == 'daysuntilticketclosedbymonth':
+    if report == DAYS_UNTIL_TICKET_CLOSED_BY_MONTH:
         for key in summarytable2.keys():
             summarytable[key] = summarytable2[key] / summarytable[key]
 
     header1 = sorted(set(list(i for i, _ in summarytable.keys())))
 
-    column_headings = [col1heading] + possible_options
+    column_headings = [reports[report]['col1_heading']] + possible_options
 
     # Pivot the data so that 'header1' fields are always first column
     # in the row, and 'possible_options' are always the 2nd - nth columns.
@@ -1740,8 +1840,8 @@ def run_report(request, report):
     table.append(['Total'] + total_data)
 
     return render(request, 'helpdesk/report_output.html', {
-        'title': title,
-        'charttype': charttype,
+        'title': reports[report]['title'],
+        'chart_type': reports[report]['chart_type'],
         'data': table,
         'headings': column_headings,
         'series_names': series_names,
