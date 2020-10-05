@@ -48,6 +48,7 @@ from helpdesk import settings as helpdesk_settings
 
 from base.forms import SpentTimeForm
 from base.models import Employee, Notification
+from base.utils import handle_date_range_picker_filter
 from config.settings.base import DATETIME_LOCAL_FORMAT
 from sphinx.models import Customer, Site, CustomerProducts
 
@@ -1574,20 +1575,7 @@ def report_index(request):
     Queues = user_queues if user_queues else Queue.objects.all()
 
     # Filter results with a date range picker
-    from_date = datetime.today() - timedelta(7)
-    to_date = datetime.today()
-    date_range = request.POST.get('dateRange')
-    if date_range and ' - ' in date_range:
-        from_date_string, to_date_string = date_range.split(' - ')
-        # Try to convert string to date
-        try:
-            from_date = datetime.strptime(from_date_string, '%d/%m/%Y')
-        except ValueError:
-            pass
-        try:
-            to_date = datetime.strptime(to_date_string, '%d/%m/%Y')
-        except ValueError:
-            pass
+    from_date, to_date = handle_date_range_picker_filter(request.POST.get('dateRange'))
 
     dash_tickets = []
     for queue in Queues:
@@ -1623,14 +1611,16 @@ def run_report(request, report):
         messages.error(request, 'Aucun rapport du nom de "%s"' % report)
         return redirect("helpdesk:report_index")
 
-    report_queryset = Ticket.objects.all().select_related().filter(
-        queue__in=_get_user_queues(request.user)
+    from_date, to_date = handle_date_range_picker_filter(request.POST.get('dateRange'))
+
+    report_queryset = Ticket.objects.select_related().filter(
+        queue__in=_get_user_queues(request.user), created__date__range=(from_date, to_date)
     )
 
     from_saved_query = False
     saved_query = None
 
-    if request.GET.get('saved_query', None):
+    if request.GET.get('saved_query'):
         from_saved_query = True
         try:
             saved_query = SavedSearch.objects.get(pk=request.GET.get('saved_query'))
@@ -1655,189 +1645,169 @@ def run_report(request, report):
 
         report_queryset = apply_query(report_queryset, query_params)
 
-    from collections import defaultdict
-    summarytable = defaultdict(int)
-    # a second table for more complex queries
-    summarytable2 = defaultdict(int)
-
-    def month_name(m):
-        MONTHS_3[m].title()
-
-    first_ticket = Ticket.objects.all().order_by('created')[0]
-    first_month = first_ticket.created.month
-    first_year = first_ticket.created.year
-
-    last_ticket = Ticket.objects.all().order_by('-created')[0]
-    last_month = last_ticket.created.month
-    last_year = last_ticket.created.year
-
-    periods = []
-    year, month = first_year, first_month
-    working = True
-    periods.append("%s-%s" % (year, month))
-
-    while working:
-        month += 1
-        if month > 12:
-            year += 1
-            month = 1
-        if (year > last_year) or (month > last_month and year >= last_year):
-            working = False
-        periods.append("%s-%s" % (year, month))
-
-    possible_options = None
-
-    if report == USER_PRIORITY:
-        possible_options = [t[1].title() for t in Ticket.PRIORITY_CHOICES]
-
-    elif report == USER_QUEUE:
-        queue_options = _get_user_queues(request.user)
-        possible_options = [q.title for q in queue_options]
-
-    elif report == USER_STATUS:
-        possible_options = [s[1].title() for s in Ticket.STATUS_CHOICES]
-
-    elif report == USER_CATEGORY:
-        possible_options = list(TicketCategory.objects.values_list('name', flat=True)) + ['Non définie']
-
-    elif report == USER_TYPE:
-        possible_options = list(TicketType.objects.values_list('name', flat=True)) + ['Non défini']
-
-    elif report == USER_BILLING:
-        possible_options = [s[1] for s in Ticket.BILLINGS] + ['Non définie']
-
-    elif report == USER_MONTH:
-        possible_options = periods
-
-    elif report == QUEUE_PRIORITY:
-        possible_options = [t[1].title() for t in Ticket.PRIORITY_CHOICES]
-
-    elif report == QUEUE_STATUS:
-        possible_options = [s[1].title() for s in Ticket.STATUS_CHOICES]
-
-    elif report == QUEUE_CATEGORY:
-        possible_options = list(TicketCategory.objects.values_list('name', flat=True)) + ['Non définie']
-
-    elif report == QUEUE_TYPE:
-        possible_options = list(TicketType.objects.values_list('name', flat=True)) + ['Non défini']
-
-    elif report == QUEUE_BILLING:
-        possible_options = [s[1] for s in Ticket.BILLINGS] + ['Non définie']
-
-    elif report == QUEUE_MONTH:
-        possible_options = periods
-
-    elif report == DAYS_UNTIL_TICKET_CLOSED_BY_MONTH:
-        possible_options = periods
-
-    metric3 = False
-    for ticket in report_queryset:
-        if report == USER_PRIORITY:
-            metric1 = ticket.get_assigned_to
-            metric2 = ticket.get_priority_display()
-
-        elif report == USER_QUEUE:
-            metric1 = ticket.get_assigned_to
-            metric2 = ticket.queue.title
-
-        elif report == USER_STATUS:
-            metric1 = ticket.get_assigned_to
-            metric2 = ticket.get_status_display()
-
-        elif report == USER_CATEGORY:
-            metric1 = ticket.get_assigned_to
-            metric2 = '%s' % (ticket.category if ticket.category else 'Non définie')
-
-        elif report == USER_TYPE:
-            metric1 = ticket.get_assigned_to
-            metric2 = '%s' % (ticket.type if ticket.type else 'Non défini')
-
-        elif report == USER_BILLING:
-            metric1 = ticket.get_assigned_to
-            metric2 = '%s' % (ticket.get_billing_display() if ticket.billing else 'Non définie')
-
-        elif report == USER_MONTH:
-            metric1 = ticket.get_assigned_to
-            metric2 = '%s-%s' % (ticket.created.year, ticket.created.month)
-
-        elif report == QUEUE_PRIORITY:
-            metric1 = ticket.queue.title
-            metric2 = ticket.get_priority_display()
-
-        elif report == QUEUE_STATUS:
-            metric1 = ticket.queue.title
-            metric2 = ticket.get_status_display()
-
-        elif report == QUEUE_MONTH:
-            metric1 = ticket.queue.title
-            metric2 = '%s-%s' % (ticket.created.year, ticket.created.month)
-
-        elif report == QUEUE_CATEGORY:
-            metric1 = ticket.queue.title
-            metric2 = '%s' % (ticket.category if ticket.category else 'Non définie')
-
-        elif report == QUEUE_TYPE:
-            metric1 = ticket.queue.title
-            metric2 = '%s' % (ticket.type if ticket.type else 'Non défini')
-
-        elif report == QUEUE_BILLING:
-            metric1 = ticket.queue.title
-            metric2 = '%s' % (ticket.get_billing_display() if ticket.billing else 'Non définie')
-
-        elif report == DAYS_UNTIL_TICKET_CLOSED_BY_MONTH:
-            metric1 = ticket.queue.title
-            metric2 = '%s-%s' % (ticket.created.year, ticket.created.month)
-            metric3 = ticket.modified - ticket.created
-            metric3 = metric3.days
-
-        summarytable[metric1, metric2] += 1
-        if metric3:
-            if report == DAYS_UNTIL_TICKET_CLOSED_BY_MONTH:
-                summarytable2[metric1, metric2] += metric3
-
+    # Init variables
     table = []
-
-    if report == DAYS_UNTIL_TICKET_CLOSED_BY_MONTH:
-        for key in summarytable2.keys():
-            summarytable[key] = summarytable2[key] / summarytable[key]
-
-    header1 = sorted(set(list(i for i, _ in summarytable.keys())))
-
-    column_headings = [reports[report]['col1_heading']] + possible_options
-
-    # Pivot the data so that 'header1' fields are always first column
-    # in the row, and 'possible_options' are always the 2nd - nth columns.
-    totals = {}
-    for item in header1:
-        data = []
-        for hdr in possible_options:
-            if hdr not in totals.keys():
-                totals[hdr] = summarytable[item, hdr]
-            else:
-                totals[hdr] += summarytable[item, hdr]
-            data.append(summarytable[item, hdr])
-        table.append([item] + data)
-
-    # Zip data and headers together in one list for Morris.js charts
-    # will get a list like [(Header1, Data1), (Header2, Data2)...]
-    seriesnum = 0
-    morrisjs_data = []
-    for label in column_headings[1:]:
-        seriesnum += 1
-        datadict = {"x": label}
-        for n in range(0, len(table)):
-            datadict[n] = table[n][seriesnum]
-        morrisjs_data.append(datadict)
-
+    column_headings = [reports[report]['col1_heading']]
     series_names = []
-    for series in table:
-        series_names.append(series[0])
+    morrisjs_data = []
 
-    # Add total row to table
-    total_data = []
-    for hdr in possible_options:
-        total_data.append(str(totals[hdr]))
-    table.append(['Total'] + total_data)
+    if not report_queryset:
+        messages.info(request, "Le filtre utilisé n'a retourné aucun ticket")
+    else:
+        from collections import defaultdict
+        summarytable = defaultdict(int)
+        # a second table for more complex queries
+        summarytable2 = defaultdict(int)
+
+        first_ticket = report_queryset.earliest('created')
+        first_month = first_ticket.created.month
+        first_year = first_ticket.created.year
+
+        last_ticket = report_queryset.latest('created')
+        last_month = last_ticket.created.month
+        last_year = last_ticket.created.year
+
+        # Prepare periods
+        periods = []
+        year, month = first_year, first_month
+        working = True
+        periods.append("%s-%s" % (year, month))
+        while working:
+            month += 1
+            if month > 12:
+                year += 1
+                month = 1
+            if (year > last_year) or (month > last_month and year >= last_year):
+                working = False
+            periods.append("%s-%s" % (year, month))
+
+        # Prepare possible options and add it to column headings
+        possible_options = None
+        if report == USER_PRIORITY:
+            possible_options = [t[1].title() for t in Ticket.PRIORITY_CHOICES]
+        elif report == USER_QUEUE:
+            queue_options = _get_user_queues(request.user)
+            possible_options = [q.title for q in queue_options]
+        elif report == USER_STATUS:
+            possible_options = [s[1].title() for s in Ticket.STATUS_CHOICES]
+        elif report == USER_CATEGORY:
+            possible_options = list(TicketCategory.objects.values_list('name', flat=True)) + ['Non définie']
+        elif report == USER_TYPE:
+            possible_options = list(TicketType.objects.values_list('name', flat=True)) + ['Non défini']
+        elif report == USER_BILLING:
+            possible_options = [s[1] for s in Ticket.BILLINGS] + ['Non définie']
+        elif report == USER_MONTH:
+            possible_options = periods
+        elif report == QUEUE_PRIORITY:
+            possible_options = [t[1].title() for t in Ticket.PRIORITY_CHOICES]
+        elif report == QUEUE_STATUS:
+            possible_options = [s[1].title() for s in Ticket.STATUS_CHOICES]
+        elif report == QUEUE_CATEGORY:
+            possible_options = list(TicketCategory.objects.values_list('name', flat=True)) + ['Non définie']
+        elif report == QUEUE_TYPE:
+            possible_options = list(TicketType.objects.values_list('name', flat=True)) + ['Non défini']
+        elif report == QUEUE_BILLING:
+            possible_options = [s[1] for s in Ticket.BILLINGS] + ['Non définie']
+        elif report == QUEUE_MONTH:
+            possible_options = periods
+        elif report == DAYS_UNTIL_TICKET_CLOSED_BY_MONTH:
+            possible_options = periods
+        column_headings += possible_options
+
+        # Calculate each value for each ticket
+        metric3 = False
+        for ticket in report_queryset:
+            if report == USER_PRIORITY:
+                metric1 = ticket.get_assigned_to
+                metric2 = ticket.get_priority_display()
+            elif report == USER_QUEUE:
+                metric1 = ticket.get_assigned_to
+                metric2 = ticket.queue.title
+            elif report == USER_STATUS:
+                metric1 = ticket.get_assigned_to
+                metric2 = ticket.get_status_display()
+            elif report == USER_CATEGORY:
+                metric1 = ticket.get_assigned_to
+                metric2 = '%s' % (ticket.category if ticket.category else 'Non définie')
+            elif report == USER_TYPE:
+                metric1 = ticket.get_assigned_to
+                metric2 = '%s' % (ticket.type if ticket.type else 'Non défini')
+            elif report == USER_BILLING:
+                metric1 = ticket.get_assigned_to
+                metric2 = '%s' % (ticket.get_billing_display() if ticket.billing else 'Non définie')
+            elif report == USER_MONTH:
+                metric1 = ticket.get_assigned_to
+                metric2 = '%s-%s' % (ticket.created.year, ticket.created.month)
+            elif report == QUEUE_PRIORITY:
+                metric1 = ticket.queue.title
+                metric2 = ticket.get_priority_display()
+            elif report == QUEUE_STATUS:
+                metric1 = ticket.queue.title
+                metric2 = ticket.get_status_display()
+            elif report == QUEUE_MONTH:
+                metric1 = ticket.queue.title
+                metric2 = '%s-%s' % (ticket.created.year, ticket.created.month)
+            elif report == QUEUE_CATEGORY:
+                metric1 = ticket.queue.title
+                metric2 = '%s' % (ticket.category if ticket.category else 'Non définie')
+            elif report == QUEUE_TYPE:
+                metric1 = ticket.queue.title
+                metric2 = '%s' % (ticket.type if ticket.type else 'Non défini')
+            elif report == QUEUE_BILLING:
+                metric1 = ticket.queue.title
+                metric2 = '%s' % (ticket.get_billing_display() if ticket.billing else 'Non définie')
+            elif report == DAYS_UNTIL_TICKET_CLOSED_BY_MONTH:
+                metric1 = ticket.queue.title
+                metric2 = '%s-%s' % (ticket.created.year, ticket.created.month)
+                metric3 = ticket.modified - ticket.created
+                metric3 = metric3.days
+            else:
+                raise ValueError('%s report is not handled.' % report)
+
+            summarytable[metric1, metric2] += 1
+            if metric3:
+                if report == DAYS_UNTIL_TICKET_CLOSED_BY_MONTH:
+                    summarytable2[metric1, metric2] += metric3
+
+        if report == DAYS_UNTIL_TICKET_CLOSED_BY_MONTH:
+            for key in summarytable2.keys():
+                summarytable[key] = summarytable2[key] / summarytable[key]
+
+        header1 = sorted({i for i, _ in summarytable.keys()})
+
+        # Pivot the data so that 'header1' fields are always first column
+        # in the row, and 'possible_options' are always the 2nd - nth columns.
+        totals = {}
+        for item in header1:
+            data = []
+            for column in possible_options:
+                value = summarytable[item, column]
+                data.append(value)
+                # Add value to total for this column
+                if column not in totals.keys():
+                    totals[column] = value
+                else:
+                    totals[column] += value
+            table.append([item] + data)
+
+        # Zip data and headers together in one list for Morris.js charts
+        # will get a list like [(Header1, Data1), (Header2, Data2)...]
+        seriesnum = 0
+        for label in column_headings[1:]:
+            seriesnum += 1
+            datadict = {"x": label}
+            for n in range(0, len(table)):
+                datadict[n] = table[n][seriesnum]
+            morrisjs_data.append(datadict)
+
+        for series in table:
+            series_names.append(series[0])
+
+        # Add total row to table
+        total_data = []
+        for column in possible_options:
+            total_data.append(str(totals[column]))
+        table.append(['Total'] + total_data)
 
     return render(request, 'helpdesk/report_output.html', {
         'title': reports[report]['title'],
@@ -1848,6 +1818,8 @@ def run_report(request, report):
         'morrisjs_data': morrisjs_data,
         'from_saved_query': from_saved_query,
         'saved_query': saved_query,
+        'from': from_date,
+        'to': to_date,
     })
 
 
