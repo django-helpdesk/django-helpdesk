@@ -1510,7 +1510,7 @@ def report_index(request):
 def run_report(request, report):
     if Ticket.objects.all().count() == 0 or report not in (
             'queuemonth', 'usermonth', 'queuestatus', 'queuepriority', 'userstatus',
-            'userpriority', 'userqueue', 'daysuntilticketclosedbymonth'):
+            'userpriority', 'userqueue', 'daysuntilticketclosedbymonth', 'queuecategory', 'queuetype', 'queuebilling'):
         return HttpResponseRedirect(reverse("helpdesk:report_index"))
 
     report_queryset = Ticket.objects.all().select_related().filter(
@@ -1612,6 +1612,24 @@ def run_report(request, report):
         possible_options = [s[1].title() for s in Ticket.STATUS_CHOICES]
         charttype = 'bar'
 
+    elif report == 'queuecategory':
+        title = 'File par Catégorie'
+        col1heading = _('Queue')
+        possible_options = list(TicketCategory.objects.values_list('name', flat=True)) + ['Non définie']
+        charttype = 'bar'
+
+    elif report == 'queuetype':
+        title = 'File par Type'
+        col1heading = _('Queue')
+        possible_options = list(TicketType.objects.values_list('name', flat=True)) + ['Non défini']
+        charttype = 'bar'
+
+    elif report == 'queuebilling':
+        title = 'File par Facturation'
+        col1heading = _('Queue')
+        possible_options = [s[1] for s in Ticket.BILLINGS] + ['Non définie']
+        charttype = 'bar'
+
     elif report == 'queuemonth':
         title = _('Queue by Month')
         col1heading = _('Queue')
@@ -1653,6 +1671,18 @@ def run_report(request, report):
         elif report == 'queuemonth':
             metric1 = u'%s' % ticket.queue.title
             metric2 = u'%s-%s' % (ticket.created.year, ticket.created.month)
+
+        elif report == 'queuecategory':
+            metric1 = ticket.queue.title
+            metric2 = '%s' % (ticket.category if ticket.category else 'Non définie')
+
+        elif report == 'queuetype':
+            metric1 = ticket.queue.title
+            metric2 = '%s' % (ticket.type if ticket.type else 'Non défini')
+
+        elif report == 'queuebilling':
+            metric1 = ticket.queue.title
+            metric2 = '%s' % (ticket.get_billing_display() if ticket.billing else 'Non définie')
 
         elif report == 'daysuntilticketclosedbymonth':
             metric1 = u'%s' % ticket.queue.title
