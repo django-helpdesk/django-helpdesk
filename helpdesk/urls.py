@@ -149,6 +149,10 @@ urlpatterns = [
         staff.report_index,
         name='report_index'),
 
+    url(r'^reports/queue/(?P<queue_id>\d+)$',
+        staff.report_queue,
+        name='report_queue'),
+
     url(r'^reports/(?P<report>\w+)/$',
         staff.run_report,
         name='run_report'),

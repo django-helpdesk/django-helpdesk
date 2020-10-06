@@ -22,7 +22,6 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
 from django.http import HttpResponseRedirect, Http404, HttpResponse, JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
-from django.utils.dates import MONTHS_3
 from django.utils.timezone import make_aware
 from django.utils.translation import ugettext as _
 from django.utils import timezone
@@ -48,7 +47,7 @@ from helpdesk import settings as helpdesk_settings
 
 from base.forms import SpentTimeForm
 from base.models import Employee, Notification
-from base.utils import handle_date_range_picker_filter
+from base.utils import handle_date_range_picker_filter, daterange
 from config.settings.base import DATETIME_LOCAL_FORMAT
 from sphinx.models import Customer, Site, CustomerProducts
 
@@ -1560,31 +1559,31 @@ reports = {
 
 @staff_member_required
 def report_index(request):
-    number_tickets = Ticket.objects.all().count()
-    saved_query = request.GET.get('saved_query', None)
+    number_tickets = Ticket.objects.count()
+    saved_query = request.GET.get('saved_query')
 
     user_queues = _get_user_queues(request.user)
-    Tickets = Ticket.objects.filter(queue__in=user_queues)
-    basic_ticket_stats = calc_basic_ticket_stats(Tickets)
+    tickets = Ticket.objects.filter(queue__in=user_queues)
+    basic_ticket_stats = calc_basic_ticket_stats(tickets)
 
     # The following query builds a grid of queues & ticket statuses,
     # to be displayed to the user. EG:
     #          Open  Resolved
     # Queue 1    10     4
     # Queue 2     4    12
-    Queues = user_queues if user_queues else Queue.objects.all()
+    queues = user_queues if user_queues else Queue.objects.all()
 
     # Filter results with a date range picker
     from_date, to_date = handle_date_range_picker_filter(request.POST.get('dateRange'))
 
     dash_tickets = []
-    for queue in Queues:
+    for queue in queues:
         dash_ticket = {
-            'queue': queue.id,
+            'id': queue.id,
             'name': queue.title,
-            'open': queue.ticket_set.filter(created__date__range=(from_date, to_date)).filter(status__in=[1, 2]).count(),
-            'resolved': queue.ticket_set.filter(resolved__date__range=(from_date, to_date)).filter(status=3).count(),
-            'closed': queue.ticket_set.filter(closed__date__range=(from_date, to_date)).filter(status__in=[4, 5]).count(),
+            'open': queue.ticket_set.filter(created__date__range=(from_date, to_date), status__in=[1, 2]).count(),
+            'resolved': queue.ticket_set.filter(resolved__date__range=(from_date, to_date), status=3).count(),
+            'closed': queue.ticket_set.filter(closed__date__range=(from_date, to_date), status__in=[4, 5]).count(),
         }
         dash_tickets.append(dash_ticket)
 
@@ -1598,6 +1597,44 @@ def report_index(request):
         'from': from_date,
         'to': to_date,
         'DAYS_UNTIL_TICKET_CLOSED_BY_MONTH': DAYS_UNTIL_TICKET_CLOSED_BY_MONTH
+    })
+
+
+@staff_member_required
+def report_queue(request, queue_id):
+    queue = get_object_or_404(_get_user_queues(request.user), id=queue_id)
+
+    # Filter results with a date range picker
+    from_date, to_date = handle_date_range_picker_filter(request.POST.get('dateRange'))
+
+    # Prepare status labels
+    _OPEN = 'Ouvert'
+    _RESOLVED = 'Résolu'
+    _CLOSED = 'Fermé'
+    status = [_OPEN, _RESOLVED, _CLOSED]
+
+    # Construct data in order to build the Morris area chart
+    morrisjs_data = []
+    for single_date in daterange(from_date, to_date + timedelta(1)):
+        datadict = {"x": single_date.strftime("%Y-%m-%d")}
+        for i, state in enumerate(status):
+            if state == _OPEN:
+                datadict[i] = queue.ticket_set.filter(created__date=single_date, status__in=[1, 2]).count()
+            elif state == _RESOLVED:
+                datadict[i] = queue.ticket_set.filter(resolved__date=single_date, status=3).count()
+            elif state == _CLOSED:
+                datadict[i] = queue.ticket_set.filter(closed__date=single_date, status__in=[4, 5]).count()
+        morrisjs_data.append(datadict)
+
+    return render(request, 'helpdesk/report_queue.html', {
+        'queue': queue,
+        'from': from_date,
+        'to': to_date,
+        'open': queue.ticket_set.filter(created__date__range=(from_date, to_date), status__in=[1, 2]).count(),
+        'resolved': queue.ticket_set.filter(resolved__date__range=(from_date, to_date), status=3).count(),
+        'closed': queue.ticket_set.filter(closed__date__range=(from_date, to_date), status__in=[4, 5]).count(),
+        'morrisjs_data': morrisjs_data,
+        'status': status,
     })
 
 
