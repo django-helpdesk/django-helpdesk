@@ -413,9 +413,9 @@ table.dataTable thead .sorting:after {
     left: 40px;
   }
   ul.timeline > li > .timeline-panel {
-    width: calc(10%);
-    width: -moz-calc(10%);
-    width: -webkit-calc(10%);
+    width: calc(75%);
+    width: -moz-calc(75%);
+    width: -webkit-calc(75%);
   }
   ul.timeline > li > .timeline-badge {
     top: 16px;
@@ -436,5 +436,9 @@ table.dataTable thead .sorting:after {
     left: -14px;
     border-right-width: 14px;
     border-left-width: 0;
+  }
+  .timeline > li > .timeline-panel.internal-comment:after {
+    border-left: 0 solid #eee;
+    border-right: 14px solid #eee;
   }
 }
