@@ -1129,15 +1129,21 @@ def ticket_list(request):
     # Prefilter the allowed tickets
     base_tickets = Ticket.objects.filter(queue__in=user_queues)
 
+    # Prepare a default query params
+    default_query_params = {
+        'filtering': {'status__in': [1, 2, 3]},
+        'sorting': 'created',
+        'sortreverse': True,
+        'search_string': None,
+        'created_relative': {
+            'days': None,
+            'direction': 'before'
+        }
+    }
+
     # Query_params will hold a dictionary of parameters relating to
     # a query, to be saved if needed:
-    query_params = {
-        'filtering': {},
-        'sorting': None,
-        'sortreverse': False,
-        'keyword': None,
-        'search_string': None,
-    }
+    query_params = default_query_params
 
     from_saved_query = False
 
@@ -1146,7 +1152,7 @@ def ticket_list(request):
     # they have, just redirect to that ticket number. Otherwise, we treat it as
     # a keyword search.
 
-    if request.GET.get('search_type', None) == 'header':
+    if request.GET.get('search_type') == 'header':
         query = request.GET.get('q')
         filter = None
         if query.find('-') > 0:
@@ -1176,7 +1182,7 @@ def ticket_list(request):
                 pass
 
     saved_query = None
-    if request.GET.get('saved_query', None):
+    if request.GET.get('saved_query'):
         from_saved_query = True
         try:
             saved_query = SavedSearch.objects.get(pk=request.GET.get('saved_query'))
@@ -1204,11 +1210,7 @@ def ticket_list(request):
         # show open/reopened/resolved (not closed) cases sorted by creation
         # date.
 
-        query_params = {
-            'filtering': {'status__in': [1, 2, 3]},
-            'sorting': 'created',
-            'sortreverse': True
-        }
+        query_params = default_query_params
     else:
         queues = request.GET.getlist('queue')
         if queues:
@@ -1266,8 +1268,18 @@ def ticket_list(request):
         if date_to:
             query_params['filtering']['created__lte'] = date_to
 
+        created_relative_days = request.GET.get('created_relative_days')
+        if created_relative_days:
+            try:
+                created_relative_days = int(created_relative_days)
+            except ValueError:
+                pass
+            else:
+                query_params['created_relative']['days'] = created_relative_days
+        query_params['created_relative']['direction'] = request.GET.get('direction', 'before')
+
         # KEYWORD SEARCHING
-        q = request.GET.get('q', None)
+        q = request.GET.get('q')
 
         if q:
             context = dict(context, query=q)
@@ -1277,7 +1289,7 @@ def ticket_list(request):
         sortreverse = request.GET.get('sortreverse', False)
         query_params['sortreverse'] = sortreverse
 
-        sort = request.GET.get('sort', None)
+        sort = request.GET.get('sort')
         if sort not in ('status', 'assigned_to', 'created', 'title', 'queue', 'priority'):
             # Fallback to sort by created in reverse
             sort = 'created'
@@ -1291,11 +1303,7 @@ def ticket_list(request):
     except ValidationError:
         messages.error(request, "Une erreur s'est produite pendant le requête de filtre.")
         # invalid parameters in query, return default query
-        query_params = {
-            'filtering': {'status__in': [1, 2, 3]},
-            'sorting': 'created',
-            'sortreverse': True
-        }
+        query_params = default_query_params
         ticket_qs = apply_query(tickets, query_params)
 
     search_message = ''
@@ -1329,7 +1337,7 @@ def ticket_list(request):
         query_params=query_params,
         from_saved_query=from_saved_query,
         saved_query=saved_query,
-        search_message=search_message,
+        search_message=search_message
     ))
 
 

@@ -22,18 +22,13 @@ Bootstrap overrides
     display: block;
 }
 
-.thumbnail.filterBox {
-    display: none;
+.filterBox {
     float: left;
     border: solid #ccc 1px;
     padding: 10px;
     margin: 4px;
     max-width: 44%;
-    min-height: 200px;
-}
-
-.thumbnail.filterBoxShow {
-    display: block;
+    min-height: 222px;
 }
 
 .filterBox label {

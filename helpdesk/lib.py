@@ -9,6 +9,7 @@ lib.py - Common functions (eg multipart e-mail)
 import logging
 import mimetypes
 import os
+from datetime import date, timedelta
 from smtplib import SMTPException
 from bs4 import BeautifulSoup
 
@@ -191,18 +192,29 @@ def apply_query(queryset, params):
         filtering: A dict of Django ORM filters, eg:
             {'user__id__in': [1, 3, 103], 'title__contains': 'foo'}
 
+        created_relative: A dict with the number of days from which to filter the created date, and the direction, eg:
+            {'days': 30, 'direction': 'before'}
+
         search_string: A freetext search string
 
         sorting: The name of the column to sort by
+        sortreverse: The direction of the ordering
     """
     for key in params['filtering'].keys():
         filter = {key: params['filtering'][key]}
         queryset = queryset.filter(**filter)
 
-    search = params.get('search_string', None)
+    if params['created_relative'].get('days') and params['created_relative'].get('direction'):
+        relative_date = date.today() - timedelta(params['created_relative']['days'])
+        operation = 'created__lt'  # It is before by default
+        if params['created_relative']['direction'] == 'after':
+            operation = 'created__gt'
+        queryset = queryset.filter(**{operation: relative_date.strftime('%Y-%m-%d')})
+
+    search = params.get('search_string')
     if search:
         qset = (
-            Q(id=search) |
+            Q(id__iexact=search) |
             Q(title__icontains=search) |
             Q(customer__group__name__icontains=search) |
             Q(site__name__icontains=search) |
@@ -217,9 +229,9 @@ def apply_query(queryset, params):
         # Distinct works, when there are multiple custom fields
         queryset = queryset.filter(qset).distinct()
 
-    sorting = params.get('sorting', None)
+    sorting = params.get('sorting')
     if sorting:
-        sortreverse = params.get('sortreverse', None)
+        sortreverse = params.get('sortreverse')
         if sortreverse and sorting[0] != '-':
             sorting = "-%s" % sorting
         queryset = queryset.order_by(sorting)
