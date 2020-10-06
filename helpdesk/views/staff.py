@@ -1613,26 +1613,41 @@ def report_queue(request, queue_id):
     _CLOSED = 'Fermé'
     status = [_OPEN, _RESOLVED, _CLOSED]
 
-    # Construct data in order to build the Morris area chart
+    # Construct data in order to build the Morris chart
     morrisjs_data = []
     for single_date in daterange(from_date, to_date + timedelta(1)):
         datadict = {"x": single_date.strftime("%Y-%m-%d")}
         for i, state in enumerate(status):
             if state == _OPEN:
-                datadict[i] = queue.ticket_set.filter(created__date=single_date, status__in=[1, 2]).count()
+                datadict[i] = queue.ticket_set.filter(created__date=single_date).count()
             elif state == _RESOLVED:
-                datadict[i] = queue.ticket_set.filter(resolved__date=single_date, status=3).count()
+                datadict[i] = queue.ticket_set.filter(resolved__date=single_date).count()
             elif state == _CLOSED:
-                datadict[i] = queue.ticket_set.filter(closed__date=single_date, status__in=[4, 5]).count()
+                datadict[i] = queue.ticket_set.filter(closed__date=single_date).count()
         morrisjs_data.append(datadict)
+
+    # Count total for each status
+    open_total = queue.ticket_set.filter(created__date__range=(from_date, to_date), status__in=[1, 2]).count()
+    resolved_total = queue.ticket_set.filter(resolved__date__range=(from_date, to_date), status=3).count()
+    closed_total = queue.ticket_set.filter(closed__date__range=(from_date, to_date), status__in=[4, 5]).count()
+    # Calculate the delta between beginning and end date in days
+    delta = (to_date + timedelta(1)) - from_date
+    delta = delta.days
+    # Compute average values for each status
+    open_average = open_total / delta
+    resolved_average = resolved_total / delta
+    closed_average = closed_total / delta
 
     return render(request, 'helpdesk/report_queue.html', {
         'queue': queue,
         'from': from_date,
         'to': to_date,
-        'open': queue.ticket_set.filter(created__date__range=(from_date, to_date), status__in=[1, 2]).count(),
-        'resolved': queue.ticket_set.filter(resolved__date__range=(from_date, to_date), status=3).count(),
-        'closed': queue.ticket_set.filter(closed__date__range=(from_date, to_date), status__in=[4, 5]).count(),
+        'open_total': open_total,
+        'open_average': open_average,
+        'resolved_total': resolved_total,
+        'resolved_average': resolved_average,
+        'closed_total': closed_total,
+        'closed_average': closed_average,
         'morrisjs_data': morrisjs_data,
         'status': status,
     })
