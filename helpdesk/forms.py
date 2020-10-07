@@ -299,30 +299,24 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
             self.customfield_to_field(field, instanceargs)
 
     def _create_ticket(self):
-        queue = self.cleaned_data['queue']
-        link_open = self.cleaned_data.get('link_open')
-        customer_contact = self.cleaned_data.get('customer_contact')
-        contact_phone_number = self.cleaned_data.get('contact_phone_number')
-        customer = self.cleaned_data.get('customer')
-        site = self.cleaned_data.get('site')
-        customer_product = self.cleaned_data.get('customer_product')
-
-        ticket = Ticket(title=self.cleaned_data['title'],
-                        submitter_email=self.cleaned_data['submitter_email'],
-                        created=timezone.now(),
-                        status=Ticket.OPEN_STATUS,
-                        queue=queue,
-                        link_open=link_open,
-                        customer=customer,
-                        customer_contact=customer_contact,
-                        contact_phone_number=contact_phone_number,
-                        site=site,
-                        customer_product=customer_product,
-                        description=self.cleaned_data['body'],
-                        priority=self.cleaned_data['priority'],
-                        due_date=self.cleaned_data['due_date'],
-                        )
-
+        queue = self.cleaned_data.get('queue')
+        ticket = Ticket(
+            queue=queue,
+            title=self.cleaned_data.get('title'),
+            description=self.cleaned_data.get('body'),
+            submitter_email=self.cleaned_data['submitter_email'],
+            created=timezone.now(),
+            status=Ticket.OPEN_STATUS,
+            link_open=self.cleaned_data.get('link_open'),
+            customer=self.cleaned_data.get('customer'),
+            customer_contact=self.cleaned_data.get('customer_contact'),
+            contact_phone_number=self.cleaned_data.get('contact_phone_number'),
+            site=self.cleaned_data.get('site'),
+            customer_product=self.cleaned_data.get('customer_product'),
+            priority=self.cleaned_data.get('priority'),
+            due_date=self.cleaned_data.get('due_date'),
+            quick_comment=self.cleaned_data.get('quick_comment', ''),
+        )
         return ticket, queue
 
     def _create_custom_fields(self, ticket):
@@ -464,6 +458,7 @@ class TicketForm(PhoenixTicketForm, AbstractTicketForm):
                 self.fields['assigned_to'].widget = forms.HiddenInput()
         else:
             # Hide some fields
+            self.fields.pop('quick_comment')
             self.fields['customer_contact'].widget = forms.HiddenInput()
             self.fields['priority'].widget = forms.HiddenInput()
             self.fields['assigned_to'].widget = forms.HiddenInput()

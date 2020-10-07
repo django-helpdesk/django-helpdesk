@@ -1365,7 +1365,7 @@ def create_ticket(request):
         form = TicketForm(
             data=request.POST,
             files=request.FILES,
-            prefix='ticket' if 'ticket-title' in request.POST else '',
+            prefix='ticket' if 'ticket-title' in request.POST else None,
             user=request.user
         )
         if form.is_valid():
@@ -1381,19 +1381,9 @@ def create_ticket(request):
                     customer_contact.employee.save(update_fields=['phone_number'])
                     messages.info(request, 'Le numéro de téléphone de contact a bien été mis à jour.')
             if _has_access_to_queue(request.user, ticket.queue):
-                if request.user.is_staff:
-                    return HttpResponseRedirect(ticket.get_absolute_url())
-                else:
-                    # Redirect to public ticket page
-                    return HttpResponseRedirect(
-                        '{}?ticket={}&email={}'.format(
-                            reverse('helpdesk:public_view'),
-                            ticket.id,
-                            form.cleaned_data['submitter_email']
-                        )
-                    )
+                return redirect(ticket)
             else:
-                return HttpResponseRedirect(reverse('helpdesk:dashboard'))
+                return redirect('helpdesk:dashboard')
     else:
         initial_data = {}
         if 'queue' in request.GET:
