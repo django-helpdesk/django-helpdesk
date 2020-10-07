@@ -75,6 +75,10 @@
                                         {% for d in data %}<tr class='row_{% cycle 'odd' 'even' %}'>
                                             {% for f in d %}<td class='report'>{{ f }}</td>{% endfor %}
                                         </tr>{% endfor %}
+                                        {# Total row #}
+                                        <tr>
+                                            {% for f in total_data %}<td class='report'>{{ f }}</td>{% endfor %}
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -96,7 +100,7 @@ Morris.Line({
   element: 'chart-content',
   data: {% autoescape on %}{{ morrisjs_data|safe }}{% endautoescape %},
   xkey: 'x',
-  ykeys: [{% for d in data|slice:":-1" %}{{ forloop.counter0 }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+  ykeys: [{% for d in data %}{{ forloop.counter0 }}{% if not forloop.last %}, {% endif %}{% endfor %}],
   labels: [{% for n in series_names %}"{{ n }}"{% if not forloop.last %}, {% endif %}{% endfor %}],
   xLabels: "month"
 });
@@ -110,7 +114,7 @@ Morris.Bar({
   element: 'chart-content',
   data: {% autoescape on %}{{ morrisjs_data|safe }}{% endautoescape %},
   xkey: 'x',
-  ykeys: [{% for d in data|slice:":-1" %}{{ forloop.counter0 }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+  ykeys: [{% for d in data %}{{ forloop.counter0 }}{% if not forloop.last %}, {% endif %}{% endfor %}],
   labels: [{% for n in series_names %}"{{ n }}"{% if not forloop.last %}, {% endif %}{% endfor %}]
 });
 

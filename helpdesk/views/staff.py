@@ -1339,15 +1339,15 @@ def run_report(request, report):
         series_names.append(series[0])
 
     # Add total row to table
-    total_data = []
+    total_data = ['Total']
     for hdr in possible_options:
         total_data.append(str(totals[hdr]))
-    table.append(['Total'] + total_data)
 
     return render(request, 'helpdesk/report_output.html', {
         'title': title,
         'charttype': charttype,
         'data': table,
+        'total_data': total_data,
         'headings': column_headings,
         'series_names': series_names,
         'morrisjs_data': morrisjs_data,
