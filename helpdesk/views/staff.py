@@ -94,6 +94,7 @@ def _is_my_ticket(user, ticket):
     """
     if user.is_superuser or user.is_staff \
             or ticket.customer_contact and ticket.customer_contact == user \
+            or ticket.submitter_email and ticket.submitter_email == user.email \
             or ticket.customer and user.has_perm('view_customer', ticket.customer):
         return True
     else:
@@ -300,9 +301,9 @@ def view_ticket(request, ticket_id):
         id=ticket_id
     )
     if not _has_access_to_queue(request.user, ticket.queue):
-        raise PermissionDenied()
+        raise PermissionDenied('User has not access to the queue')
     if not _is_my_ticket(request.user, ticket):
-        raise PermissionDenied()
+        raise PermissionDenied('User has not access to ticket')
 
     # Try to save the quick comment if it is an AJAX POST request
     if request.user.is_staff and request.is_ajax() and request.method == 'POST':

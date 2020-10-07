@@ -150,7 +150,7 @@ def view_ticket(request):
         error_message = _('Missing ticket ID or e-mail address. Please try again.')
 
     return render(request, 'helpdesk/public_view_form.html', {
-        'ticket': False,
+        'ticket': ticket_req,
         'email': email,
         'error_message': error_message,
         'helpdesk_settings': helpdesk_settings,
