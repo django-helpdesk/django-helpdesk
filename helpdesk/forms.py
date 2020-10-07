@@ -448,7 +448,7 @@ class TicketForm(PhoenixTicketForm, AbstractTicketForm):
         """
         super(TicketForm, self).__init__(*args, **kwargs)
 
-        if user.is_staff:
+        if user.employee.is_ipexia_member():
             if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS:
                 assignable_users = User.objects.filter(is_active=True, is_staff=True).order_by(User.USERNAME_FIELD)
             else:
@@ -462,6 +462,10 @@ class TicketForm(PhoenixTicketForm, AbstractTicketForm):
             self.fields['customer_contact'].widget = forms.HiddenInput()
             self.fields['priority'].widget = forms.HiddenInput()
             self.fields['assigned_to'].widget = forms.HiddenInput()
+            # Set directly the customer if the employee is in only one company
+            if user.groups.exclude(customer=None).count() == 1:
+                self.initial['customer'] = user.groups.exclude(customer=None).get()
+
             # Set customer contact and phone number
             self.initial['customer_contact'] = user
             self.fields['customer_contact'].widget = forms.HiddenInput()

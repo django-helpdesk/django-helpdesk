@@ -92,7 +92,7 @@ def _is_my_ticket(user, ticket):
     :param Ticket ticket:
     :rtype: bool
     """
-    if user.is_superuser or user.is_staff \
+    if user.is_superuser or user.employee.is_ipexia_member() \
             or ticket.customer_contact and ticket.customer_contact == user \
             or ticket.submitter_email and ticket.submitter_email == user.email \
             or ticket.customer and user.has_perm('view_customer', ticket.customer):
@@ -361,7 +361,7 @@ def view_ticket(request, ticket_id):
 
     followup_form = CreateFollowUpForm(request.POST or None)
 
-    if request.user.is_staff:
+    if request.user.employee.is_ipexia_member():
         form = TicketForm(
             initial={
                 'due_date': ticket.due_date,
@@ -380,14 +380,14 @@ def view_ticket(request, ticket_id):
         # Filter the ongoing spent_time on this step
         spent_times = ticket.spent_times.filter(status=TicketSpentTime.ONGOING)
     else:
-        # Non staff users don't need these
+        # Non ipexia users don't need these
         if followup_form.is_valid():
             follow_up = followup_form.save(commit=False)
             follow_up.ticket = ticket
             follow_up.user = request.user
             follow_up.title = 'Réponse client'
             follow_up.public = True
-            # TODO handle status change
+            # TODO handle status change ?
             follow_up.save()
             messages.success(request, 'Votre réponse a bien été envoyé.')
             files = process_attachments(follow_up, request.FILES.getlist('attachment'))
