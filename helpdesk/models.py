@@ -380,6 +380,17 @@ class TicketType(models.Model):
         return self.name
 
 
+class TicketQuerySet(models.QuerySet):
+    def opened(self):
+        return self.filter(status__in=[Ticket.OPEN_STATUS, Ticket.REOPENED_STATUS])
+
+    def resolved(self):
+        return self.filter(status=Ticket.RESOLVED_STATUS)
+
+    def closed(self):
+        return self.filter(status__in=[Ticket.CLOSED_STATUS, Ticket.DUPLICATE_STATUS])
+
+
 @python_2_unicode_compatible
 class Ticket(models.Model):
     """
@@ -611,6 +622,8 @@ class Ticket(models.Model):
         null=True,
         blank=True
     )
+
+    objects = TicketQuerySet.as_manager()
 
     def _get_assigned_to(self):
         """ Custom property to allow us to easily print 'Unassigned' if a
