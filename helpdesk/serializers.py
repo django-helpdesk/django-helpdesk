@@ -32,28 +32,30 @@ class DatatablesTicketSerializer(serializers.ModelSerializer):
                   'time_spent', 'kbitem')
 
     def get_queue(self, obj):
-        return ({"title": obj.queue.title, "id": obj.queue.id})
+        return {"title": obj.queue.title, "id": obj.queue.id}
 
     def get_ticket(self, obj):
-        return (str(obj.id) + " " + obj.ticket)
+        return str(obj.id) + " " + obj.ticket
 
     def get_status(self, obj):
-        return (obj.get_status)
+        return obj.get_status
 
     def get_created(self, obj):
-        return (humanize.naturaltime(obj.created))
+        return humanize.naturaltime(obj.created)
 
     def get_due_date(self, obj):
-        return (humanize.naturaltime(obj.due_date))
+        return humanize.naturaltime(obj.due_date)
 
     def get_assigned_to(self, obj):
         if obj.assigned_to:
             if obj.assigned_to.get_full_name():
-                return (obj.assigned_to.get_full_name())
+                return obj.assigned_to.get_full_name()
+            elif obj.assigned_to.email:
+                return obj.assigned_to.email
             else:
-                return (obj.assigned_to.email)
+                return obj.assigned_to.username
         else:
-            return ("None")
+            return "None"
 
     def get_submitter(self, obj):
         return obj.submitter_email
@@ -62,7 +64,7 @@ class DatatablesTicketSerializer(serializers.ModelSerializer):
         return format_time_spent(obj.time_spent)
 
     def get_row_class(self, obj):
-        return (obj.get_priority_css_class)
+        return obj.get_priority_css_class
 
     def get_kbitem(self, obj):
         return obj.kbitem.title if obj.kbitem else ""
