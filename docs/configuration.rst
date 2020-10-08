@@ -21,6 +21,8 @@ Before django-helpdesk will be much use, you need to do some basic configuration
 
  If you wish to use `celery` instead of cron, you must add 'django_celery_beat' to `INSTALLED_APPS` and add a periodic celery task through the Django admin.
 
+   You will need to create a support queue, and associated login/host values, in the Django admin interface, in order for mail to be picked-up from the mail server and placed in the tickets table of your database. The values in the settings file alone, will not create the necessary values to trigger the get_email function.
+
 4. If you wish to automatically escalate tickets based on their age, set up a cronjob to run the escalation command on a regular basis::
 
        0 * * * * /path/to/helpdesksite/manage.py escalate_tickets
