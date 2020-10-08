@@ -99,7 +99,7 @@ def dashboard(request):
     with options for them to 'Take' ownership of said tickets.
     """
     # user settings num tickets per page
-    tickets_per_page = request.user.usersettings_helpdesk.settings.get('tickets_per_page') or 25
+    tickets_per_page = request.user.usersettings_helpdesk.tickets_per_page or 25
 
     # page vars for the three ticket tables
     user_tickets_page = request.GET.get(_('ut_page'), 1)
