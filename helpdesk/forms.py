@@ -448,6 +448,16 @@ class TicketForm(PhoenixTicketForm, AbstractTicketForm):
         """
         super(TicketForm, self).__init__(*args, **kwargs)
 
+        # Hide contextual fields by default (it is only possible on the ticket view page)
+        if not edit_contextual_fields:
+            self.fields['customer_contact'].widget = forms.HiddenInput()
+            self.fields['customer'].widget = forms.HiddenInput()
+            self.fields['site'].widget = forms.HiddenInput()
+            self.fields['customer_product'].widget = forms.HiddenInput()
+        else:
+            # Remove the body field that is causing conflict with the tinymce js depency in ticket detail page
+            self.fields.pop('body')
+
         if user.employee.is_ipexia_member():
             if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS:
                 assignable_users = User.objects.filter(is_active=True, is_staff=True).order_by(User.USERNAME_FIELD)
@@ -463,12 +473,20 @@ class TicketForm(PhoenixTicketForm, AbstractTicketForm):
             self.fields['priority'].widget = forms.HiddenInput()
             self.fields['assigned_to'].widget = forms.HiddenInput()
             # Set directly the customer if the employee is in only one company
-            if user.groups.exclude(customer=None).count() == 1:
-                self.initial['customer'] = user.groups.exclude(customer=None).get()
-
-            # Set customer contact and phone number
+            user_customers = Customer.objects.filter(group__user=user)
+            # Automatically set the customer if there is only one
+            if len(user_customers) == 1:
+                self.initial['customer'] = user_customers.get()
+            # Or present a select in order to choose for which the user is opening the ticket
+            elif len(user_customers) > 1:
+                self.fields['customer'] = forms.ModelChoiceField(
+                    label='Client concerné',
+                    required=True,
+                    queryset=user_customers,
+                    widget=forms.Select(attrs={'class': 'form-control'})
+                )
+            # Set customer contact
             self.initial['customer_contact'] = user
-            self.fields['customer_contact'].widget = forms.HiddenInput()
             # Set initial customer phone number and make it mandatory
             self.initial['contact_phone_number'] = user.employee.phone_number
             self.fields['contact_phone_number'].required = True
@@ -478,16 +496,6 @@ class TicketForm(PhoenixTicketForm, AbstractTicketForm):
             if user.email:
                 self.initial['submitter_email'] = user.email
                 self.fields['submitter_email'].widget = forms.HiddenInput()
-
-        # Hide contextual fields by default (it is only possible on the ticket view page)
-        if not edit_contextual_fields:
-            self.fields['customer_contact'].widget = forms.HiddenInput()
-            self.fields['customer'].widget = forms.HiddenInput()
-            self.fields['site'].widget = forms.HiddenInput()
-            self.fields['customer_product'].widget = forms.HiddenInput()
-        else:
-            # Remove the body field that is causing conflict with the tinymce js depency in ticket detail page
-            self.fields.pop('body')
 
         # Add any custom fields that are defined to the form
         self._add_form_custom_fields()
