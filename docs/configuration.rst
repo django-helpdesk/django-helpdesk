@@ -1,11 +1,11 @@
 Configuration
 =============
 
+   **IMPORTANT NOTE**: Any tickets created via POP3 or IMAP mailboxes will DELETE the original e-mail from the mail server.
+
 Before django-helpdesk will be much use, you need to do some basic configuration. Most of this is done via the Django admin screens.
 
 1. Visit ``http://yoursite/admin/`` and add a Helpdesk Queue. If you wish, enter your POP3 or IMAP server details. 
-
-   **IMPORTANT NOTE**: Any tickets created via POP3 or IMAP mailboxes will DELETE the original e-mail from the mail server.
 
 2. Visit ``http://yoursite/helpdesk/`` (or whatever path as defined in your ``urls.py``) 
 
@@ -16,8 +16,6 @@ Before django-helpdesk will be much use, you need to do some basic configuration
        */5 * * * * /path/to/helpdesksite/manage.py get_email
 
    This will run the e-mail import every 5 minutes
-
-   **IMPORTANT NOTE**: Any tickets created via POP3 or IMAP mailboxes will DELETE the original e-mail from the mail server.
 
    You will need to create a support queue, and associated login/host values, in the Django admin interface, in order for mail to be picked-up from the mail server and placed in the tickets table of your database. The values in the settings file alone, will not create the necessary values to trigger the get_email function.
 
@@ -44,3 +42,15 @@ Before django-helpdesk will be much use, you need to do some basic configuration
 8. If you wish to use SOCKS4/5 proxy with Helpdesk Queue email operations, install PySocks manually. Please note that mixing both SOCKS and non-SOCKS email sources for different queues is only supported under Python 2; on Python 3, SOCKS proxy support is all-or-nothing: either all queue email sources must use SOCKS or none may use it. If you need this functionality on Python 3 please `let us know <https://github.com/django-helpdesk/django-helpdesk/issues/new>`_.
 
 You're now up and running! Happy ticketing.
+
+Queue settings via admin interface
+----------------------------------
+E-Mail Check Interval
+^^^^^^^^^^^^^^^^^^^^^
+This setting does not trigger e-mail collection, it merely throttles it. In order to trigger e-mail collection you must run a crontab to trigger ``manage.py get_email``. The setting in *E-Mail Check Interval* prevents your crontab from running the e-mail trigger more often than the interval set.
+
+For example, setting *E-Mail Check Interval* to ``5`` will limit the collection of e-mail to once every five minutes, even if your crontab is firing every five seconds. If your cron job is set to fire once every hour, then e-mail will only be collected once every hour.
+
+The cron job triggers the collection of e-mail, *E-Mail Check Interval* restricts how often the trigger is effective.
+
+To remove this limit, set *E-Mail Check Interval* to ``0``.
