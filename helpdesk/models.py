@@ -752,7 +752,7 @@ class Ticket(models.Model):
         User = get_user_model()
         try:
             return User.objects.get(email=self.submitter_email)
-        except User.DoesNotExist:
+        except (User.DoesNotExist, User.MultipleObjectsReturned):
             return None
 
     class Meta:
