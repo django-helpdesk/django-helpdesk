@@ -1133,7 +1133,7 @@ def ticket_list(request):
     # Prepare a default query params
     default_query_params = {
         'filtering': {'status__in': [1, 2, 3]},
-        'sorting': 'created',
+        'sorting': 'modified',
         'sortreverse': True,
         'search_string': None,
         'created_relative': {
@@ -1291,9 +1291,9 @@ def ticket_list(request):
         query_params['sortreverse'] = sortreverse
 
         sort = request.GET.get('sort')
-        if sort not in ('status', 'assigned_to', 'created', 'title', 'queue', 'priority'):
+        if sort not in ('status', 'assigned_to', 'created', 'modified', 'title', 'queue', 'priority'):
             # Fallback to sort by created in reverse
-            sort = 'created'
+            sort = 'modified'
             query_params['sortreverse'] = True
         query_params['sorting'] = sort
 
