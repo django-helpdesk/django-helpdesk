@@ -647,9 +647,8 @@ def update_ticket(request, ticket_id, public=False):
     if owner is not -1:
         if owner != 0 and ((ticket.assigned_to and owner != ticket.assigned_to.id) or not ticket.assigned_to):
             new_user = User.objects.get(id=owner)
-            f.title = _('Assigned to %(username)s') % {
-                'username': new_user.get_username(),
-            }
+            # TODO fix translate
+            f.title = 'Assigné à %s' % new_user
             ticket.assigned_to = new_user
             reassigned = True
         # user changed owner to 'unassign'
@@ -665,7 +664,8 @@ def update_ticket(request, ticket_id, public=False):
         messages.info(request, 'Le ticket est désormais dans le statut %s' % ticket.get_status_display())
         f.new_status = new_status
         if f.title:
-            f.title += ' and %s' % ticket.get_status_display()
+            # TODO translate
+            f.title += ' et %s' % ticket.get_status_display()
         else:
             f.title = '%s' % ticket.get_status_display()
 
@@ -943,7 +943,8 @@ def mass_update(request):
             t.save()
             f = FollowUp(ticket=t,
                          date=timezone.now(),
-                         title=_('Assigned to %s in bulk update' % user),
+                         # TODO fix translate
+                         title="Assigné à %s dans l'édition en masse" % user,
                          public=True,
                          user=request.user)
             f.save()
