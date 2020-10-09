@@ -40,5 +40,9 @@ class TicketFilter(df.FilterSet):
             Q(customer_contact__first_name__icontains=value) |
             Q(customer_contact__username__icontains=value) |
             Q(customer_contact__email__icontains=value) |
+            Q(assigned_to__last_name__icontains=value) |
+            Q(assigned_to__first_name__icontains=value) |
+            Q(assigned_to__username__icontains=value) |
+            Q(assigned_to__email__icontains=value) |
             Q(submitter_email__icontains=value)
         ).distinct()
