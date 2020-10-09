@@ -16,7 +16,7 @@ from django.contrib.auth import get_user_model
 from django.utils import timezone
 from django_select2.forms import ModelSelect2MultipleWidget, ModelSelect2Widget
 
-from helpdesk.lib import send_templated_mail, safe_template_context, process_attachments
+from helpdesk.lib import send_templated_mail, safe_template_context, process_attachments, get_assignable_users
 from helpdesk.models import Ticket, Queue, FollowUp, IgnoreEmail, TicketCC, CustomField, TicketCustomFieldValue,\
     TicketDependency
 from helpdesk import settings as helpdesk_settings
@@ -460,17 +460,7 @@ class TicketForm(PhoenixTicketForm, AbstractTicketForm):
             self.fields.pop('body')
 
         if user.employee.is_ipexia_member():
-            if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS:
-                # Try to show only members of the technical service
-                technical_service = get_technical_service()
-                if technical_service:
-                    assignable_users = User.objects.filter(is_active=True, groups=technical_service)
-                else:
-                    # Or if it doesn't exist, only staff users
-                    assignable_users = User.objects.filter(is_active=True, is_staff=True)
-            else:
-                assignable_users = User.objects.filter(is_active=True)
-            self.fields['assigned_to'].queryset = assignable_users.order_by(User.USERNAME_FIELD)
+            self.fields['assigned_to'].queryset = get_assignable_users()
             if helpdesk_settings.HELPDESK_CREATE_TICKET_HIDE_ASSIGNED_TO:
                 self.fields['assigned_to'].widget = forms.HiddenInput()
         else:

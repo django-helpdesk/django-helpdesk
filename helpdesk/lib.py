@@ -12,6 +12,10 @@ import os
 from datetime import date, timedelta
 from smtplib import SMTPException
 from bs4 import BeautifulSoup
+from django.contrib.auth import get_user_model
+from helpdesk import settings as helpdesk_settings
+
+from base.models import get_technical_service
 
 try:
     # Python 2 support
@@ -33,6 +37,8 @@ from django.utils.encoding import smart_text
 from django.utils.safestring import mark_safe
 
 from helpdesk.models import Attachment, EmailTemplate
+
+User = get_user_model()
 
 logger = logging.getLogger('helpdesk')
 
@@ -366,3 +372,17 @@ def process_attachments(followup, attached_files):
                 print('%s est trop lourd pour être envoyé par mail : %skb' % (filename, attached.size / 1000))
 
     return attachments
+
+
+def get_assignable_users():
+    if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS:
+        # Try to show only members of the technical service
+        technical_service = get_technical_service()
+        if technical_service:
+            assignable_users = User.objects.filter(is_active=True, groups=technical_service)
+        else:
+            # Or if it doesn't exist, only staff users
+            assignable_users = User.objects.filter(is_active=True, is_staff=True)
+    else:
+        assignable_users = User.objects.filter(is_active=True)
+    return assignable_users.order_by(User.USERNAME_FIELD)

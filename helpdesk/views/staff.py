@@ -37,7 +37,7 @@ from helpdesk.forms import (
 from helpdesk.decorators import staff_member_required, superuser_required
 from helpdesk.lib import (
     send_templated_mail, apply_query, safe_template_context,
-    process_attachments, queue_template_context,
+    process_attachments, queue_template_context, get_assignable_users,
 )
 from helpdesk.models import (
     Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch,
@@ -1327,7 +1327,7 @@ def ticket_list(request):
         context,
         tickets=ticket_qs,
         default_tickets_per_page=request.user.usersettings_helpdesk.settings.get('tickets_per_page') or 25,
-        user_choices=User.objects.filter(is_active=True, is_staff=True),
+        user_choices=get_assignable_users(),
         queue_choices=user_queues,
         category_choices=TicketCategory.objects.all(),
         type_choices=TicketType.objects.all(),
