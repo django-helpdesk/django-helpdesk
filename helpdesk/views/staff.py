@@ -1263,11 +1263,11 @@ def ticket_list(request):
 
         date_from = request.GET.get('date_from')
         if date_from:
-            query_params['filtering']['created__gte'] = date_from
+            query_params['filtering']['created__date__gte'] = date_from
 
         date_to = request.GET.get('date_to')
         if date_to:
-            query_params['filtering']['created__lte'] = date_to
+            query_params['filtering']['created__date__lte'] = date_to
 
         created_relative_days = request.GET.get('created_relative_days')
         if created_relative_days:
