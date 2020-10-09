@@ -907,7 +907,7 @@ class FollowUp(models.Model):
     objects = FollowUpManager()
 
     class Meta:
-        ordering = ('date',)
+        ordering = ('-date',)
         verbose_name = _('Follow-up')
         verbose_name_plural = _('Follow-ups')
 
