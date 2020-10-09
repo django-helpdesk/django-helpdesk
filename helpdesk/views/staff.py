@@ -1476,7 +1476,7 @@ reports = {
         'chart_type': 'bar'
     },
     USER_QUEUE: {
-        'title': _('User by Priority'),
+        'title': _('User by Queue'),
         'title_index': _('by Queue'),
         'col1_heading': _('User'),
         'chart_type': 'bar'

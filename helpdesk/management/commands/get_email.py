@@ -551,7 +551,7 @@ def ticket_from_message(message, queue, logger):
 
     if ticket.status == Ticket.REOPENED_STATUS:
         f.new_status = Ticket.REOPENED_STATUS
-        f.title = 'Ticket réouvert par un mail reçu de %s' % sender_email
+        f.title = 'Ticket rouvert par un mail reçu de %s' % sender_email
 
     f.save()
     logger.debug("Created new FollowUp for Ticket")
