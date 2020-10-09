@@ -24,6 +24,7 @@ from phonenumber_field.formfields import PhoneNumberField
 from phonenumber_field.widgets import PhoneNumberInternationalFallbackWidget
 
 from base.fields import CustomDateTimeField, CustomTinyMCE
+from base.models import get_technical_service
 from sphinx.models import Customer, Site, CustomerProducts
 
 User = get_user_model()
@@ -460,10 +461,16 @@ class TicketForm(PhoenixTicketForm, AbstractTicketForm):
 
         if user.employee.is_ipexia_member():
             if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS:
-                assignable_users = User.objects.filter(is_active=True, is_staff=True).order_by(User.USERNAME_FIELD)
+                # Try to show only members of the technical service
+                technical_service = get_technical_service()
+                if technical_service:
+                    assignable_users = User.objects.filter(is_active=True, groups=technical_service)
+                else:
+                    # Or if it doesn't exist, only staff users
+                    assignable_users = User.objects.filter(is_active=True, is_staff=True)
             else:
-                assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
-            self.fields['assigned_to'].queryset = assignable_users
+                assignable_users = User.objects.filter(is_active=True)
+            self.fields['assigned_to'].queryset = assignable_users.order_by(User.USERNAME_FIELD)
             if helpdesk_settings.HELPDESK_CREATE_TICKET_HIDE_ASSIGNED_TO:
                 self.fields['assigned_to'].widget = forms.HiddenInput()
         else:
