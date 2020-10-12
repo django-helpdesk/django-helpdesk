@@ -32,7 +32,6 @@ from helpdesk.query import (
     query_to_dict,
     query_to_base64,
     query_from_base64,
-    apply_query,
 )
 
 from helpdesk.user import HelpdeskUser
@@ -1218,7 +1217,7 @@ def run_report(request, report):
         return HttpResponseRedirect(reverse('helpdesk:report_index'))
 
     if request.GET.get('saved_query', None):
-        report_queryset = apply_query(report_queryset, query_params)
+        Query(report_queryset, query_to_base64(query_params))
 
     from collections import defaultdict
     summarytable = defaultdict(int)
