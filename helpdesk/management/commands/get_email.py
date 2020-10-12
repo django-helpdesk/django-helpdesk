@@ -396,19 +396,20 @@ def ticket_from_message(message, queue, logger):
             else:
                 try:
                     body = encoding.smart_text(part.get_payload(decode=True))
-                except UnicodeDecodeError:
+                except UnicodeDecodeError as e:
+                    logger.error("UnicodeDecodeError on body decoding : %s" % e)
                     body = encoding.smart_text(part.get_payload(decode=False))
-                # It's no longer needed to store the HTML as an attachment to ticket
-                # payload = """
-                # <html>
-                # <head>
-                # <meta charset="utf-8"/>
-                # </head>
-                # %s
-                # </html>""" % email_body
-                # files.append(
-                #     SimpleUploadedFile(_("email_html_body.html"), payload.encode("utf-8"), 'text/html')
-                # )
+                # Attach email body in order to debug
+                payload = """
+                <html>
+                <head>
+                <meta charset="utf-8"/>
+                </head>
+                %s
+                </html>""" % body
+                files.append(
+                    SimpleUploadedFile(_("email_html_body.html"), payload.encode("utf-8"), 'text/html')
+                )
                 logger.debug("Discovered HTML MIME part and set as the ticket body")
         else:
             if not name:
