@@ -1350,11 +1350,17 @@ def run_report(request, report):
 
     column_headings = [col1heading] + possible_options
 
+    # Prepare a dict to store totals for each possible option
+    totals = {}
     # Pivot the data so that 'header1' fields are always first column
     # in the row, and 'possible_options' are always the 2nd - nth columns.
     for item in header1:
         data = []
         for hdr in possible_options:
+            if hdr not in totals.keys():
+                totals[hdr] = summarytable[item, hdr]
+            else:
+                totals[hdr] += summarytable[item, hdr]
             data.append(summarytable[item, hdr])
         table.append([item] + data)
 
@@ -1373,10 +1379,16 @@ def run_report(request, report):
     for series in table:
         series_names.append(series[0])
 
+    # Add total row to table
+    total_data = ['Total']
+    for hdr in possible_options:
+        total_data.append(str(totals[hdr]))
+
     return render(request, 'helpdesk/report_output.html', {
         'title': title,
         'charttype': charttype,
         'data': table,
+        'total_data': total_data,
         'headings': column_headings,
         'series_names': series_names,
         'morrisjs_data': morrisjs_data,
