@@ -1,7 +1,7 @@
 {% load i18n %}
 {% load saved_queries %}
 {% load load_helpdesk_settings %}
-{% load static from staticfiles %}
+{% load static %}
 {% with request|load_helpdesk_settings as helpdesk_settings %}
 {% with user|saved_queries as user_saved_queries_ %}
 <!DOCTYPE html>
