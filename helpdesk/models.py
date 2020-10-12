@@ -1318,6 +1318,9 @@ class SavedSearch(models.Model):
         verbose_name = _('Saved search')
         verbose_name_plural = _('Saved searches')
 
+    def get_absolute_url(self):
+        return '%s?saved_query=%s' % (reverse('helpdesk:list'), self.id)
+
 
 @python_2_unicode_compatible
 class UserSettings(models.Model):
