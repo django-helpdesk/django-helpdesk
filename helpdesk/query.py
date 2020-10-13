@@ -163,7 +163,7 @@ class __Query__:
         to a Serializer called DatatablesTicketSerializer in serializers.py.
         """
         objects = self.get()
-        order_by = '-date_created'
+        order_by = '-created'
         draw = int(kwargs.get('draw', [0])[0])
         length = int(kwargs.get('length', [25])[0])
         start = int(kwargs.get('start', [0])[0])
