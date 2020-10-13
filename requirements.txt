@@ -1,4 +1,4 @@
-Django
+Django>=3.1,<4
 django-bootstrap4-form
 celery
 django-celery-beat
