@@ -1,5 +1,5 @@
 language: python
-dist: bionic # use LTS 18.04
+dist: focal # use LTS 20.04
 
 python:
     - "3.6"
@@ -7,7 +7,7 @@ python:
     - "3.8"
 
 env:
-    - DJANGO=2.2.8
+    - DJANGO=3.1.2
 
 install:
     - pip install -q Django==$DJANGO
