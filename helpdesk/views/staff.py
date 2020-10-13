@@ -1381,6 +1381,17 @@ def create_ticket(request):
                     customer_contact.employee.phone_number = contact_phone_number
                     customer_contact.employee.save(update_fields=['phone_number'])
                     messages.info(request, 'Le numéro de téléphone de contact a bien été mis à jour.')
+            # Send a notification if ticket has been added by a customer
+            if not request.user.employee.is_ipexia_member():
+                messages.success(request, 'Votre ticket a bien été créé !')
+                # Send notification to technical service
+                Notification.objects.create_for_technical_service(
+                    message="Un nouveau ticket vient d'être ouvert sur Phoenix : %s" % ticket,
+                    module=Notification.TICKET,
+                    link_redirect=ticket.get_absolute_url()
+                )
+            else:
+                messages.success(request, 'Le ticket a bien été créé.')
             if _has_access_to_queue(request.user, ticket.queue):
                 return redirect(ticket)
             else:
