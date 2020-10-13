@@ -5,15 +5,22 @@ templatetags/saved_queries.py - This template tag returns previously saved
                                 queries. Therefore you don't need to modify
                                 any views.
 """
-from django.template import Library
+from django import template
 from django.db.models import Q
 
 from helpdesk.models import SavedSearch
 
 
+register = template.Library()
+
+
+@register.filter
 def saved_queries(user):
     try:
-        user_saved_queries = SavedSearch.objects.filter(Q(user=user) | Q(shared__exact=True))
+        filters = Q(shared__exact=True)
+        if user.is_authenticated:
+            filters |= Q(user=user)
+        user_saved_queries = SavedSearch.objects.filter(filters)
         return user_saved_queries
     except Exception as e:
         import sys
@@ -21,7 +28,3 @@ def saved_queries(user):
               file=sys.stderr)
         print(e, file=sys.stderr)
         return ''
-
-
-register = Library()
-register.filter('saved_queries', saved_queries)
