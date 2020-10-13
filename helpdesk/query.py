@@ -219,5 +219,4 @@ class __Query__:
             'hour': date.hour,
             'minute': date.minute,
             'second': date.second,
-            'second': date.second,
         }
