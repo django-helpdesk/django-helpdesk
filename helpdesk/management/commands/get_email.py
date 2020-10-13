@@ -477,7 +477,7 @@ def ticket_from_message(message, queue, logger):
         if settings.QUEUE_EMAIL_BOX_UPDATE_ONLY:
             return None
         # Try to find corresponding user thanks to submitter email
-        search_users = User.objects.filter(email=sender_email)
+        search_users = User.objects.filter(email__iexact=sender_email)
         customer_contact = None
         customer = None
         if len(search_users) == 1:
