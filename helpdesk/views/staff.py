@@ -9,7 +9,6 @@ views/staff.py - The bulk of the application - provides most business logic and
 from copy import deepcopy
 import json
 
-from django import VERSION as DJANGO_VERSION
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import user_passes_test
@@ -20,16 +19,13 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
 from django.http import HttpResponseRedirect, Http404, HttpResponse, JsonResponse
 from django.shortcuts import render, get_object_or_404
-from django.utils.dates import MONTHS_3
 from django.utils.translation import ugettext as _
 from django.utils.html import escape
-from django import forms
 from django.utils import timezone
 from django.views.generic.edit import FormView, UpdateView
 
 from helpdesk.query import (
     get_query_class,
-    query_to_dict,
     query_to_base64,
     query_from_base64,
 )
@@ -44,12 +40,11 @@ from helpdesk.forms import (
     TicketForm, UserSettingsForm, EmailIgnoreForm, EditTicketForm, TicketCCForm,
     TicketCCEmailForm, TicketCCUserForm, EditFollowUpForm, TicketDependencyForm
 )
-from helpdesk.decorators import staff_member_required, superuser_required
+from helpdesk.decorators import superuser_required
 from helpdesk.lib import (
     safe_template_context,
     process_attachments,
     queue_template_context,
-    format_time_spent,
 )
 from helpdesk.models import (
     Ticket, Queue, FollowUp, TicketChange, PreSetReply, FollowUpAttachment, SavedSearch,
@@ -60,8 +55,7 @@ import helpdesk.views.abstract_views as abstract_views
 from helpdesk.views.permissions import MustBeStaffMixin
 from ..lib import format_time_spent
 
-from rest_framework import viewsets, status
-from rest_framework.response import Response
+from rest_framework import status
 from rest_framework.decorators import api_view
 
 from datetime import date, datetime, timedelta
@@ -104,6 +98,14 @@ def dashboard(request):
     showing ticket counts by queue/status, and a list of unassigned tickets
     with options for them to 'Take' ownership of said tickets.
     """
+    # user settings num tickets per page
+    tickets_per_page = request.user.usersettings_helpdesk.tickets_per_page or 25
+
+    # page vars for the three ticket tables
+    user_tickets_page = request.GET.get(_('ut_page'), 1)
+    user_tickets_closed_resolved_page = request.GET.get(_('utcr_page'), 1)
+    all_tickets_reported_by_current_user_page = request.GET.get(_('atrbcu_page'), 1)
+
     huser = HelpdeskUser(request.user)
     active_tickets = Ticket.objects.select_related('queue').exclude(
         status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
@@ -447,7 +449,7 @@ def subscribe_to_ticket_updates(ticket, user=None, email=None, can_view=True, ca
         return ticketcc
 
 
-def subscribe_staff_member_to_ticket(ticket, user, email=''):
+def subscribe_staff_member_to_ticket(ticket, user, email='', can_view=True, can_update=False):
     """used in view_ticket() and update_ticket()"""
     return subscribe_to_ticket_updates(ticket=ticket, user=user, email=email, can_view=can_view, can_update=can_update)
 
@@ -827,7 +829,7 @@ def mass_update(request):
                 'submitter': ('closed_submitter', context),
                 'ticket_cc': ('closed_cc', context),
             }
-            if ticket.assigned_to and ticket.assigned_to.usersettings_helpdesk.email_on_ticket_change:
+            if t.assigned_to and t.assigned_to.usersettings_helpdesk.email_on_ticket_change:
                 roles['assigned_to'] = ('closed_owner', context),
 
             messages_sent_to.update(t.send(
@@ -1009,10 +1011,10 @@ def load_saved_query(request, query_params=None):
 
     if request.GET.get('saved_query', None):
         try:
-            saved_query = SavedSearch.objects.get(pk=request.GET.get('saved_query'))
-        except SavedSearch.DoesNotExist:
-            raise QueryLoadError()
-        if not (saved_query.shared or saved_query.user == request.user):
+            saved_query = SavedSearch.objects.get(
+                Q(pk=request.GET.get('saved_query')) & (Q(shared=True) | Q(user=request.user))
+            )
+        except (SavedSearch.DoesNotExist, ValueError):
             raise QueryLoadError()
 
         try:
@@ -1224,9 +1226,6 @@ def run_report(request, report):
     # a second table for more complex queries
     summarytable2 = defaultdict(int)
 
-    def month_name(m):
-        MONTHS_3[m].title()
-
     first_ticket = Ticket.objects.all().order_by('created')[0]
     first_month = first_ticket.created.month
     first_year = first_ticket.created.year
@@ -1349,11 +1348,17 @@ def run_report(request, report):
 
     column_headings = [col1heading] + possible_options
 
+    # Prepare a dict to store totals for each possible option
+    totals = {}
     # Pivot the data so that 'header1' fields are always first column
     # in the row, and 'possible_options' are always the 2nd - nth columns.
     for item in header1:
         data = []
         for hdr in possible_options:
+            if hdr not in totals.keys():
+                totals[hdr] = summarytable[item, hdr]
+            else:
+                totals[hdr] += summarytable[item, hdr]
             data.append(summarytable[item, hdr])
         table.append([item] + data)
 
@@ -1372,10 +1377,16 @@ def run_report(request, report):
     for series in table:
         series_names.append(series[0])
 
+    # Add total row to table
+    total_data = ['Total']
+    for hdr in possible_options:
+        total_data.append(str(totals[hdr]))
+
     return render(request, 'helpdesk/report_output.html', {
         'title': title,
         'charttype': charttype,
         'data': table,
+        'total_data': total_data,
         'headings': column_headings,
         'series_names': series_names,
         'morrisjs_data': morrisjs_data,
