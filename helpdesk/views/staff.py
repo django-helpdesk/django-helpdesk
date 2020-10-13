@@ -1218,6 +1218,9 @@ def run_report(request, report):
     except QueryLoadError:
         return HttpResponseRedirect(reverse('helpdesk:report_index'))
 
+    if request.GET.get('saved_query', None):
+        Query(report_queryset, query_to_base64(query_params))
+
     from collections import defaultdict
     summarytable = defaultdict(int)
     # a second table for more complex queries
