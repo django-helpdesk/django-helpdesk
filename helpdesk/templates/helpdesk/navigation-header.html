@@ -1,5 +1,7 @@
 {% load i18n helpdesk_staff %}
 
+    {% include 'helpdesk/custom_navigation_header.html' %}
+
     <nav class="navbar navbar-expand navbar-dark bg-dark static-top">
 
       <a class="navbar-brand" href="{% url 'helpdesk:home' %}">{% trans 'Helpdesk' %}</a>
