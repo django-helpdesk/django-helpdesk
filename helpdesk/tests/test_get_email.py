@@ -6,8 +6,10 @@ from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 
 from helpdesk.models import Queue, Ticket, TicketCC, FollowUp, FollowUpAttachment
+from helpdesk.management.commands.get_email import Command
 import helpdesk.email
 
+import six
 import itertools
 from shutil import rmtree
 import sys
@@ -15,11 +17,7 @@ import os
 from tempfile import mkdtemp
 import logging
 
-
-from urllib.parse import urlparse
-
 from unittest import mock
-
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -39,11 +37,13 @@ class GetEmailCommonTests(TestCase):
     # tests correct syntax for command line option
     def test_get_email_quiet_option(self):
         """Test quiet option is properly propagated"""
-        with mock.patch('helpdesk.management.commands.get_email.process_email') as mocked_processemail:
-            call_command('get_email', quiet=True)
-            mocked_processemail.assert_called_with(quiet=True)
-            call_command('get_email')
-            mocked_processemail.assert_called_with(quiet=False)
+        # Test get_email with quiet set to True and also False, and verify handle receives quiet option set properly
+        for quiet_test_value in [True, False]:
+            with mock.patch.object(Command, 'handle', return_value=None) as mocked_handle:
+                call_command('get_email', quiet=quiet_test_value)
+                mocked_handle.assert_called_once()
+                for args, kwargs in mocked_handle.call_args_list:
+                    self.assertEqual(quiet_test_value, (kwargs['quiet']))
 
     def test_email_with_blank_body_and_attachment(self):
         """
@@ -224,8 +224,8 @@ class GetEmailParametricTemplate(object):
         else:
             # Test local email reading
             if self.method == 'local':
-                with mock.patch('helpdesk.management.commands.get_email.listdir') as mocked_listdir, \
-                        mock.patch('helpdesk.management.commands.get_email.isfile') as mocked_isfile, \
+                with mock.patch('helpdesk.email.listdir') as mocked_listdir, \
+                        mock.patch('helpdesk.email.isfile') as mocked_isfile, \
                         mock.patch('builtins.open' if six.PY3 else '__builtin__.open', mock.mock_open(read_data=test_email)):
                     mocked_isfile.return_value = True
                     mocked_listdir.return_value = ['filename1', 'filename2']
@@ -246,7 +246,7 @@ class GetEmailParametricTemplate(object):
                 mocked_poplib_server = mock.Mock()
                 mocked_poplib_server.list = mock.Mock(return_value=pop3_mail_list)
                 mocked_poplib_server.retr = mock.Mock(side_effect=lambda x: pop3_emails[x])
-                with mock.patch('helpdesk.management.commands.get_email.poplib', autospec=True) as mocked_poplib:
+                with mock.patch('helpdesk.email.poplib', autospec=True) as mocked_poplib:
                     mocked_poplib.POP3 = mock.Mock(return_value=mocked_poplib_server)
                     call_command('get_email')
 
@@ -262,7 +262,7 @@ class GetEmailParametricTemplate(object):
 
                 # we ignore the second arg as the data item/mime-part is constant (RFC822)
                 mocked_imaplib_server.fetch = mock.Mock(side_effect=lambda x, _: imap_emails[x])
-                with mock.patch('helpdesk.management.commands.get_email.imaplib', autospec=True) as mocked_imaplib:
+                with mock.patch('helpdesk.email.imaplib', autospec=True) as mocked_imaplib:
                     mocked_imaplib.IMAP4 = mock.Mock(return_value=mocked_imaplib_server)
                     call_command('get_email')
 
@@ -576,7 +576,6 @@ class GetEmailCCHandling(TestCase):
     """TestCase that checks CC handling in email. Needs its own test harness."""
 
     def setUp(self):
-
         self.temp_logdir = mkdtemp()
 
         kwargs = {
@@ -640,7 +639,6 @@ class GetEmailCCHandling(TestCase):
         self.original_cc = TicketCC.objects.create(**cc_kwargs)
 
     def tearDown(self):
-
         rmtree(self.temp_logdir)
 
     def test_read_email_cc(self):
@@ -675,7 +673,6 @@ class GetEmailCCHandling(TestCase):
         with mock.patch('helpdesk.email.listdir') as mocked_listdir, \
                 mock.patch('helpdesk.email.isfile') as mocked_isfile, \
                 mock.patch('builtins.open', mock.mock_open(read_data=test_email)):
-
             mocked_isfile.return_value = True
             mocked_listdir.return_value = ['filename1']
 
