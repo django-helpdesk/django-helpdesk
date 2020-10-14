@@ -77,7 +77,7 @@ The crontab interval overrides the *E-Mail Check Interval*, and resets the *E-Ma
 
 Custom Navigation Header
 ------------------------
-You may add own site specific navigation header to be included inside the <body> tag and before django-helpdesk navbar.
+You may add your own site specific navigation header to be included inside the <body> tag and before django-helpdesk navbar.
 
 1. Create an override template in your project's templates directory::
 
