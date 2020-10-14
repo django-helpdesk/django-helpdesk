@@ -99,7 +99,6 @@ def text_is_spam(text, request):
 
     if hasattr(settings, 'TYPEPAD_ANTISPAM_API_KEY'):
         apikey = settings.TYPEPAD_ANTISPAM_API_KEY
-        ak.baseurl = 'api.antispam.typepad.com/1.1/'
     elif hasattr(settings, 'PYTHON_AKISMET_API_KEY'):
         # new env var expected by python-akismet package
         apikey = settings.PYTHON_AKISMET_API_KEY
@@ -113,6 +112,9 @@ def text_is_spam(text, request):
         blog_url='http://%s/' % site.domain,
         key=apikey,
     )
+
+    if hasattr(settings, 'TYPEPAD_ANTISPAM_API_KEY'):
+        ak.baseurl = 'api.antispam.typepad.com/1.1/'
 
     if ak.verify_key():
         ak_data = {
