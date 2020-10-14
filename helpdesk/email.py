@@ -154,24 +154,24 @@ def imap_sync(q, logger, server):
 
     try:
         status, data = server.search(None, 'NOT', 'DELETED')
+        if data:
+            msgnums = data[0].split()
+            logger.info("Received %d messages from IMAP server" % len(msgnums))
+            for num in msgnums:
+                logger.info("Processing message %s" % num)
+                status, data = server.fetch(num, '(RFC822)')
+                full_message = encoding.force_text(data[0][1], errors='replace')
+                try:
+                    ticket = object_from_message(message=full_message, queue=q, logger=logger)
+                except TypeError:
+                    ticket = None  # hotfix. Need to work out WHY.
+                if ticket:
+                    server.store(num, '+FLAGS', '\\Deleted')
+                    logger.info("Successfully processed message %s, deleted from IMAP server" % num)
+                else:
+                    logger.warn("Message %s was not successfully processed, and will be left on IMAP server" % num)
     except imaplib.IMAP4.error:
         logger.error("IMAP retrieve failed. Is the folder '%s' spelled correctly, and does it exist on the server?" % q.email_box_imap_folder)
-    if data:
-        msgnums = data[0].split()
-        logger.info("Received %d messages from IMAP server" % len(msgnums))
-        for num in msgnums:
-            logger.info("Processing message %s" % num)
-            status, data = server.fetch(num, '(RFC822)')
-            full_message = encoding.force_text(data[0][1], errors='replace')
-            try:
-                ticket = object_from_message(message=full_message, queue=q, logger=logger)
-            except TypeError:
-                ticket = None  # hotfix. Need to work out WHY.
-            if ticket:
-                server.store(num, '+FLAGS', '\\Deleted')
-                logger.info("Successfully processed message %s, deleted from IMAP server" % num)
-            else:
-                logger.warn("Message %s was not successfully processed, and will be left on IMAP server" % num)
 
     server.expunge()
     server.close()
