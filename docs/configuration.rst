@@ -74,3 +74,13 @@ The result is that if both crontab and *E-Mail Check Interval* are set to run at
 To avoid this problem set the crontab and *E-Mail Check Interval* to marginally different values (or set *E-Mail Check Interval* to ``0``). *E-Mail Check Interval* will only take an integer value, in minutes, so if you want a five minute interval between mail checks, then you will either have to set *E-Mail Check Interval* to ``4`` and the crontab interval to ``300 seconds``, or the *E-Mail Check Interval* to ``5`` and the crontab interval to ``305 seconds``.
 
 The crontab interval overrides the *E-Mail Check Interval*, and resets the *E-Mail Check Interval* each time it fires, as long as the crontab interval is greater than *E-Mail Check Interval*.
+
+Custom Navigation Header
+------------------------
+You may add own site specific navigation header to be included inside the <body> tag and before django-helpdesk navbar.
+
+1. Create an override template in your project's templates directory::
+
+       helpdesk/custom_navigation_header.html
+
+2. Update the contents to display your custom navigation.
