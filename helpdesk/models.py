@@ -60,6 +60,8 @@ class Queue(models.Model):
                     'address for that mailbox.'),
     )
 
+    phone_number = PhoneNumberField('numéro de téléphone', blank=True)
+
     locale = models.CharField(
         _('Locale'),
         max_length=10,

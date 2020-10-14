@@ -9,7 +9,7 @@ from helpdesk.models import CustomField
 
 @admin.register(Queue)
 class QueueAdmin(admin.ModelAdmin):
-    list_display = ('title', 'slug', 'email_address', 'locale')
+    list_display = ('title', 'slug', 'email_address', 'phone_number', 'locale')
     prepopulated_fields = {"slug": ("title",)}
     autocomplete_fields = ('default_owner',)
 

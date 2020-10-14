@@ -1,6 +1,7 @@
 Regards,
 
 {{ queue.title }}{% if queue.email_address %}
-{{ queue.email_address }}{% endif %}
-    
+{{ queue.email_address }}{% endif %}{% if queue.phone_number %}
+{{ queue.phone_number }}{% endif %}
+
 This e-mail was sent to you as a user of our support service, in accordance with our privacy policy. Please advise us if you believe you have received this e-mail in error.
