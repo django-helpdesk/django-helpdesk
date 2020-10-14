@@ -10,7 +10,7 @@ Prerequisites
 Before getting started, ensure your system meets the following recommended dependencies:
 
 * Python 3.6+
-* Django 2.x
+* Django 2.2+, 3.x
   
 Ensure any extra Django modules you wish to use are compatible before continuing.
 
@@ -125,7 +125,7 @@ errors with trying to create User settings.
 
 8. Load initial e-mail templates, otherwise you will not be able to send e-mail::
 
-   python manage.py loaddata emailtemplate.json
+        python manage.py loaddata emailtemplate.json
 
 9. If you intend on using local mail directories for processing email into tickets, be sure to create the mail directory before adding it to the queue in the Django administrator interface. The default mail directory is ``/var/lib/mail/helpdesk/``. Ensure that the directory has appropriate permissions so that your Django/web server instance may read and write files from this directory.
 
