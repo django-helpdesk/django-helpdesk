@@ -84,13 +84,13 @@ Upgrading from previous versions
 --------------------------------
 
 If you are upgrading from a previous version of `django-helpdesk` that used
-migrations, get an up to date version of the code base (eg by using
+migrations, get an up to date version of the code base (eg-by using
 `git pull` or `pip install --upgrade django-helpdesk`) then migrate the database::
 
     python manage.py migrate helpdesk --db-dry-run # DB untouched
     python manage.py migrate helpdesk
 
-Lastly, restart your web server software (eg Apache) or FastCGI instance, to
+Lastly, restart your web server software (eg-Apache) or FastCGI instance, to
 ensure the latest changes are in use.
 
 Unfortunately we are unable to assist if you are upgrading from a
