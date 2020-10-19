@@ -763,7 +763,8 @@ def attachment_path(instance, filename):
     att_path = os.path.join(settings.MEDIA_ROOT, path)
     if settings.DEFAULT_FILE_STORAGE == "django.core.files.storage.FileSystemStorage":
         if not os.path.exists(att_path):
-            os.makedirs(att_path, 0o777)
+            # TODO: is there a better way to handle directory permissions more consistently?
+            os.makedirs(att_path, 0o700)
     return os.path.join(path, filename)
 
 
@@ -1031,8 +1032,9 @@ class KBItem(models.Model):
         return super(KBItem, self).save(*args, **kwargs)
 
     def _score(self):
+        """ Return a score out of 10 or Unrated if no votes """
         if self.votes > 0:
-            return int(self.recommendations / self.votes)
+            return (self.recommendations / self.votes) * 10
         else:
             return _('Unrated')
     score = property(_score)

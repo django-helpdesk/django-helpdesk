@@ -75,6 +75,10 @@
                                         {% for d in data %}<tr class='row_{% cycle 'odd' 'even' %}'>
                                             {% for f in d %}<td class='report'>{{ f }}</td>{% endfor %}
                                         </tr>{% endfor %}
+                                        {# Total row #}
+                                        <tr>
+                                            {% for f in total_data %}<td class='report'>{{ f }}</td>{% endfor %}
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>

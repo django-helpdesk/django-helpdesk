@@ -1,7 +1,7 @@
 {% extends "helpdesk/public_base.html" %}{% load i18n humanize %}
 
 {% block helpdesk_body %}
-<h2>{% trans 'Knowledgebase Category' %}:{% blocktrans with category.title as kbcat %}{{ kbcat }}{% endblocktrans %}</h2>
+<h2>{% trans 'Knowledgebase Category' %}: {% blocktrans with category.title as kbcat %}{{ kbcat }}{% endblocktrans %}</h2>
 
 <div class="col-lg-12">
     <div class="well well-sm">
@@ -26,7 +26,13 @@
                     {% blocktrans with item.get_absolute_url as url %}View <a href='{{ url }}'>Answer <i class="fa fa-arrow-right"></i></a>{% endblocktrans %}
                 </p>
                 <div class="well well-sm">
-                    <p>{% trans 'Rating' %}: {{ item.score }}</p>
+                    <p>{% trans 'Rating' %}: 
+                        {% if item.votes > 0 %}
+                            {{ item.score|floatformat }}/10
+                        {% else %}
+                            {% trans 'no score yet' %}
+                        {% endif %}
+                    </p>
                     <p>{% trans 'Last Update' %}: {{ item.last_updated|naturaltime }}</p>
                 </div>
             </div>

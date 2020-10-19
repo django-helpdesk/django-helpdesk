@@ -37,6 +37,36 @@
                                 </table>
                             </div>
                             <!-- /.table-responsive -->
+                            {% if ticket_list.has_other_pages %}
+                                <ul class="pagination">
+                                    <!-- if we aren't on page one, go back to start and go back one controls -->
+                                    {% if ticket_list.has_previous %}
+                                        <li><a href="?{{ page_var }}=1">&laquo;&laquo;</a></li>
+                                        <li><a href="?{{ page_var }}={{ ticket_list.previous_page_number }}">&laquo;</a></li>
+                                    {% else %}
+                                        <li class="disabled"><span>&laquo;&laquo;</span></li>
+                                        <li class="disabled"><span>&laquo;</span></li>
+                                    {% endif %}
+                                    <!-- other pages, set thresh to the number to show before and after active -->
+                                    {% with 5 as thresh %}
+                                    {% for i in ticket_list.paginator.page_range %}
+                                        {% if ticket_list.number == i %}
+                                            <li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
+                                        {% elif i <= ticket_list.number|add:5 and i >= ticket_list.number|add:-5 %}
+                                            <li><a href="?{{ page_var }}={{ i }}">{{ i }}</a></li>
+                                        {% endif %}
+                                    {% endfor %}
+                                    {% endwith %}
+                                    <!-- if we aren't on the last page, go forward one and go to end controls -->
+                                    {% if ticket_list.has_next %}
+                                        <li><a href="?{{ page_var }}={{ ticket_list.next_page_number }}">&raquo;</a></li>
+                                        <li><a href="?{{ page_var }}={{ ticket_list.paginator.num_pages }}">&raquo;&raquo;</a></li>
+                                    {% else %}
+                                        <li class="disabled"><span>&raquo;</span></li>
+                                        <li class="disabled"><span>&raquo;&raquo;</span></li>
+                                    {% endif %}
+                                </ul>
+                            {% endif %}
                         </div>
                         <!-- /.panel-body -->
                     </div>

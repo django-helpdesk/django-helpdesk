@@ -82,6 +82,10 @@ These changes are visible throughout django-helpdesk
 
   **Default:** ``HELPDESK_EMAIL_FALLBACK_LOCALE = "en"``
   
+- **HELPDESK_MAX_EMAIL_ATTACHMENT_SIZE** Maximum size, in bytes, of file attachments that will be sent via email
+
+  **Default:** ``HELPDESK_MAX_EMAIL_ATTACHMENT_SIZE = 512000``
+  
 - **QUEUE_EMAIL_BOX_UPDATE_ONLY** Only process mail with a valid tracking ID; all other mail will be ignored instead of creating a new ticket.
 
   **Default:** ``QUEUE_EMAIL_BOX_UPDATE_ONLY = False``
