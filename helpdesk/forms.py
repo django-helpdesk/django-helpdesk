@@ -42,30 +42,39 @@ class CustomFieldMixin(object):
     """
 
     def customfield_to_field(self, field, instanceargs):
+        # Use TextInput widget by default
+        instanceargs['widget'] = forms.TextInput(attrs={'class': 'form-control'})
         # if-elif branches start with special cases
         if field.data_type == 'varchar':
             fieldclass = forms.CharField
             instanceargs['max_length'] = field.max_length
         elif field.data_type == 'text':
             fieldclass = forms.CharField
-            instanceargs['widget'] = forms.Textarea
+            instanceargs['widget'] = forms.Textarea(attrs={'class': 'form-control'})
             instanceargs['max_length'] = field.max_length
         elif field.data_type == 'integer':
             fieldclass = forms.IntegerField
+            instanceargs['widget'] = forms.NumberInput(attrs={'class': 'form-control'})
         elif field.data_type == 'decimal':
             fieldclass = forms.DecimalField
             instanceargs['decimal_places'] = field.decimal_places
             instanceargs['max_digits'] = field.max_length
+            instanceargs['widget'] = forms.NumberInput(attrs={'class': 'form-control'})
         elif field.data_type == 'list':
             fieldclass = forms.ChoiceField
             choices = field.choices_as_array
             if field.empty_selection_list:
                 choices.insert(0, ('', '---------'))
             instanceargs['choices'] = choices
+            instanceargs['widget'] = forms.Select(attrs={'class': 'form-control'})
         else:
             # Try to use the immediate equivalences dictionary
             try:
                 fieldclass = CUSTOMFIELD_TO_FIELD_DICT[field.data_type]
+                # Change widget in case it is a boolean
+                if fieldclass == forms.BooleanField:
+                    instanceargs['widget'] = forms.CheckboxInput(attrs={'class': 'form-control'})
+
             except KeyError:
                 # The data_type was not found anywhere
                 raise NameError("Unrecognized data_type %s" % field.data_type)
