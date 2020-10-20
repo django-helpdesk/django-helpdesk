@@ -13,6 +13,7 @@ from datetime import date, timedelta
 from smtplib import SMTPException
 from bs4 import BeautifulSoup
 from django.contrib.auth import get_user_model
+from django.core.mail import mail_admins
 from helpdesk import settings as helpdesk_settings
 
 from base.models import get_technical_service
@@ -39,8 +40,6 @@ from django.utils.safestring import mark_safe
 from helpdesk.models import Attachment, EmailTemplate
 
 User = get_user_model()
-
-logger = logging.getLogger('helpdesk')
 
 
 def send_templated_mail(template_name,
@@ -92,7 +91,10 @@ def send_templated_mail(template_name,
         try:
             t = EmailTemplate.objects.get(template_name__iexact=template_name, locale__isnull=True)
         except EmailTemplate.DoesNotExist:
-            logger.warning('template "%s" does not exist, no mail sent', template_name)
+            mail_admins(
+                'Template de mail introuvable',
+                "Le template de mail \"%s\" n'existe pas, le mail n'a pa spu être envoyé" % template_name
+            )
             return  # just ignore if template doesn't exist
 
     subject_part = from_string(
@@ -155,12 +157,15 @@ def send_templated_mail(template_name,
                         content = attachedfile.read()
                         msg.attach(filename, content)
 
-    logger.debug('Sending email to: {!r}'.format(recipients))
+    print('Sending email to: %s' % ', '.join(recipients))
 
     try:
         return msg.send()
     except SMTPException as e:
-        logger.exception('SMTPException raised while sending email to {}'.format(recipients))
+        mail_admins(
+            'Erreur envoi de mail Helpdesk',
+            "Une excpetion SMTP a eu lieu lors de l'envoi d'un mail à : %s.\n\n%s" % (', '.join(recipients), e)
+        )
         if not fail_silently:
             raise e
         return 0
