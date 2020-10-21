@@ -7,6 +7,8 @@ views/public.py - All public facing views, eg non-staff (no authentication
                   required) views.
 """
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Q
+
 try:
     # Django 2.0+
     from django.urls import reverse
@@ -106,7 +108,11 @@ def view_ticket(request):
     if ticket_req and email:
         queue, ticket_id = Ticket.queue_and_id_from_query(ticket_req)
         try:
-            ticket = Ticket.objects.get(id=ticket_id, submitter_email__iexact=email)
+            ticket = Ticket.objects.get(
+                Q(id=ticket_id) & (
+                    Q(submitter_email__iexact=email) | (Q(ticketcc__email__iexact=email) & Q(ticketcc__can_view=True))
+                )
+            )
         except ObjectDoesNotExist:
             error_message = _('Invalid ticket ID or e-mail address. Please try again.')
         except ValueError:
