@@ -106,12 +106,9 @@ def send_templated_mail(template_name,
 
     # Do HTML part first in order to mark safe the HTML
     email_html_base_file = os.path.join('helpdesk', locale, 'email_html_base.html')
-    if 'comment' in context:
-        context['comment'] = mark_safe(context['comment'])
-    if 'description' in context:
-        context['description'] = mark_safe(context['description'])
-    if 'resolution' in context:
-        context['resolution'] = mark_safe(context['resolution'])
+    for field in ('comment', 'description', 'resolution'):
+        if field in context:
+            context[field] = mark_safe(context[field])
 
     html_part = from_string(
         "{%% extends '%s' %%}{%% block title %%}"
@@ -120,13 +117,11 @@ def send_templated_mail(template_name,
         (email_html_base_file, t.heading, t.html)
     ).render(context)
 
-    # Then use BeautifulSoup to extract text from HTML
-    if 'comment' in context:
-        context['comment'] = BeautifulSoup(context['comment'], 'html.parser').get_text()
-    if 'description' in context:
-        context['description'] = BeautifulSoup(context['description'], 'html.parser').get_text()
-    if 'resolution' in context:
-        context['resolution'] = BeautifulSoup(context['resolution'], 'html.parser').get_text()
+    # Then use BeautifulSoup to extract text from HTML fields
+    for field in ('comment', 'description', 'resolution'):
+        if field in context:
+            context[field] = BeautifulSoup(context[field], 'html.parser').get_text()
+
     text_part = from_string(
         "%s{%% include '%s' %%}" % (t.plain_text, footer_file)
     ).render(context)

@@ -636,6 +636,14 @@ def update_ticket(request, ticket_id, public=False):
 
     f = FollowUp(ticket=ticket, date=timezone.now(), comment=comment)
 
+    # Add signature at the bottom of the followup comment
+    signature = '<p><strong>%s</strong></p>' % request.user
+    if request.user.employee.signature:
+        signature = request.user.employee.signature
+    # Append signature preceded by a newline in order to conserve it later in plain text version of the sent mails
+    f.comment += """
+    %s""" % signature
+
     if request.user.is_staff or helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE:
         f.user = request.user
 
@@ -789,9 +797,7 @@ def update_ticket(request, ticket_id, public=False):
         comment=f.comment,
     )
 
-    if public and (f.comment or (
-        f.new_status in (Ticket.RESOLVED_STATUS,
-                         Ticket.CLOSED_STATUS))):
+    if public and (f.comment or (f.new_status in (Ticket.RESOLVED_STATUS, Ticket.CLOSED_STATUS))):
         if f.new_status == Ticket.RESOLVED_STATUS:
             template = 'resolved_'
         elif f.new_status == Ticket.CLOSED_STATUS:
