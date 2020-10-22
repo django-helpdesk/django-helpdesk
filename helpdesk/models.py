@@ -835,6 +835,18 @@ class Ticket(models.Model):
             else:
                 self.ticketcc_set.create(email=email)
 
+    def is_closed_and_too_old(self):
+        """
+        :return: True if the ticket is closed since more than 15 days
+        :rtype: bool
+        """
+        ticket_too_old = False
+        if self.closed:
+            delta_since_closed = timezone.now() - self.closed
+            if delta_since_closed.days > 15:
+                ticket_too_old = True
+        return ticket_too_old
+
 
 class FollowUpManager(models.Manager):
 

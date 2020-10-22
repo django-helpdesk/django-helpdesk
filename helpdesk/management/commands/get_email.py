@@ -456,17 +456,33 @@ def ticket_from_message(message, queue, logger):
             logger.info("Tracking ID %s-%s not associated with existing ticket. Creating new ticket." % (queue.slug, ticket_id))
         else:
             logger.info("Found existing ticket with Tracking ID %s-%s" % (ticket.queue.slug, ticket.id))
+
             # Check if the ticket has been merged to another ticket
             if ticket.merged_to:
-                logger.info("Ticket has been merged to %s-%s" % (ticket.merged_to.queue.slug, ticket.merged_to.id))
+                logger.info("Ticket was merged to %s-%s. Using this to add follow up."
+                            % (ticket.merged_to.queue.slug, ticket.merged_to.id))
                 # Use the merged ticket for the next operations
                 ticket = ticket.merged_to
-            # Reopen ticket if it was closed
-            if ticket.status == Ticket.CLOSED_STATUS:
-                logger.info("Ticket has been reopened.")
-                ticket.status = Ticket.REOPENED_STATUS
-                ticket.save()
-            new = False
+
+            # Check if ticket is not too old to get reopened
+            if ticket.is_closed_and_too_old():
+                logger.info("Ticket is too old to get reopened. Creating new ticket.")
+                # Add reference to original ticket at the top of the body
+                body = "<p>Ouverture d'un nouveau ticket car #%s était fermé depuis plus de 15 jours.</p><hr>%s" \
+                       % (ticket.id, body)
+                # Update the subject to better show the link with previous ticket
+                subject = '%s - Suite ticket #%s' % (
+                    subject.replace(('[%s-%s]' % (ticket.queue.slug, ticket.id)), '').strip(),
+                    ticket.id
+                )
+                ticket = None
+            else:
+                new = False
+                # Reopen ticket if it was closed
+                if ticket.status == Ticket.CLOSED_STATUS:
+                    logger.info("Ticket has been reopened.")
+                    ticket.status = Ticket.REOPENED_STATUS
+                    ticket.save()
 
     smtp_priority = message.get('priority', '')
     smtp_importance = message.get('importance', '')

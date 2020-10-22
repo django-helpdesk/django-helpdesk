@@ -40,11 +40,12 @@ from helpdesk.lib import (
     process_attachments, queue_template_context, get_assignable_users,
 )
 from helpdesk.models import (
-    Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch,
+    Ticket, Queue, FollowUp, PreSetReply, Attachment, SavedSearch,
     IgnoreEmail, TicketCC, TicketDependency, TicketSpentTime, TicketCategory, TicketType,
 )
 from helpdesk import settings as helpdesk_settings
 
+from base.decorators import ipexia_protected
 from base.forms import SpentTimeForm
 from base.models import Employee, Notification
 from base.utils import handle_date_range_picker_filter, daterange
@@ -381,7 +382,11 @@ def view_ticket(request, ticket_id):
         spent_times = ticket.spent_times.filter(status=TicketSpentTime.ONGOING)
     else:
         # Non ipexia users don't need these
-        if followup_form.is_valid():
+        form = None
+        information_form = None
+        spent_times = None
+        # Check if follow up is valid, only if ticket is not too old
+        if followup_form.is_valid() and not ticket.is_closed_and_too_old:
             follow_up = followup_form.save(commit=False)
             follow_up.ticket = ticket
             follow_up.user = request.user
@@ -413,9 +418,6 @@ def view_ticket(request, ticket_id):
                     user_list=[ticket.assigned_to]
                 )
             return redirect(ticket)
-        form = None
-        information_form = None
-        spent_times = None
 
     ticketcc_string, show_subscribe = \
         return_ticketccstring_and_show_subscribe(request.user, ticket)
@@ -571,6 +573,8 @@ def choose_customer_for_ticket(request, ticket_id, customer_id):
     return redirect(ticket)
 
 
+@login_required
+@ipexia_protected()
 def update_ticket(request, ticket_id, public=False):
     if not (public or (
             request.user.is_authenticated and
@@ -634,7 +638,7 @@ def update_ticket(request, ticket_id, public=False):
     if owner is -1 and ticket.assigned_to:
         owner = ticket.assigned_to.id
 
-    f = FollowUp(ticket=ticket, date=timezone.now(), comment=comment)
+    f = FollowUp(ticket=ticket, user=request.user, date=timezone.now(), comment=comment, public=public)
 
     # Add signature at the bottom of the followup comment
     signature = '<p><strong>%s</strong></p>' % request.user
@@ -644,14 +648,10 @@ def update_ticket(request, ticket_id, public=False):
     f.comment += """
     %s""" % signature
 
-    if request.user.is_staff or helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE:
-        f.user = request.user
-
-    f.public = public
-
     reassigned = False
-
     old_owner = ticket.assigned_to
+
+    # Build followup title
     if owner is not -1:
         if owner != 0 and ((ticket.assigned_to and owner != ticket.assigned_to.id) or not ticket.assigned_to):
             new_user = User.objects.get(id=owner)
@@ -689,8 +689,7 @@ def update_ticket(request, ticket_id, public=False):
 
     # Add Ticket Changes
     if title and title != ticket.title:
-        TicketChange.objects.create(
-            followup=f,
+        f.ticketchange_set.create(
             field=_('Title'),
             old_value=ticket.title,
             new_value=title,
@@ -698,24 +697,21 @@ def update_ticket(request, ticket_id, public=False):
         ticket.title = title
 
     if new_status != old_status:
-        TicketChange.objects.create(
-            followup=f,
+        f.ticketchange_set.create(
             field=_('Status'),
             old_value=old_status_str,
             new_value=ticket.get_status_display(),
         )
 
     if ticket.assigned_to != old_owner:
-        TicketChange.objects.create(
-            followup=f,
+        f.ticketchange_set.create(
             field=_('Owner'),
             old_value=old_owner if old_owner else _('Unassigned'),
             new_value=ticket.assigned_to if ticket.assigned_to else _('Unassigned'),
         )
 
     if priority != ticket.priority:
-        TicketChange.objects.create(
-            followup=f,
+        f.ticketchange_set.create(
             field=_('Priority'),
             old_value=ticket.priority,
             new_value=priority,
@@ -723,8 +719,7 @@ def update_ticket(request, ticket_id, public=False):
         ticket.priority = priority
 
     if due_date != ticket.due_date:
-        TicketChange.objects.create(
-            followup=f,
+        f.ticketchange_set.create(
             field=_('Due on'),
             old_value=date(timezone.localtime(ticket.due_date), 'DATETIME_FORMAT') if ticket.due_date else 'Non définie',
             new_value=date(due_date, 'DATETIME_FORMAT') if due_date else 'Non définie',
@@ -736,8 +731,7 @@ def update_ticket(request, ticket_id, public=False):
             customer_contact = User.objects.get(id=customer_contact_id)
         except User.DoesNotExist:
             customer_contact = None
-        TicketChange.objects.create(
-            followup=f,
+        f.ticketchange_set.create(
             field='Contact client',
             old_value=str(ticket.customer_contact) if ticket.customer_contact else _('Unassigned'),
             new_value=str(customer_contact) if customer_contact else _('Unassigned'),
@@ -749,8 +743,7 @@ def update_ticket(request, ticket_id, public=False):
             customer = Customer.objects.get(id=customer_id)
         except Customer.DoesNotExist:
             customer = None
-        TicketChange.objects.create(
-            followup=f,
+        f.ticketchange_set.create(
             field='Client',
             old_value=str(ticket.customer) if ticket.customer else _('Unassigned'),
             new_value=str(customer) if customer else _('Unassigned'),
@@ -762,8 +755,7 @@ def update_ticket(request, ticket_id, public=False):
             site = Site.objects.get(id=site_id)
         except Site.DoesNotExist:
             site = None
-        TicketChange.objects.create(
-            followup=f,
+        f.ticketchange_set.create(
             field='Site',
             old_value=str(ticket.site) if ticket.site else _('Unassigned'),
             new_value=str(site) if site else _('Unassigned'),
@@ -775,8 +767,7 @@ def update_ticket(request, ticket_id, public=False):
             customer_product = CustomerProducts.objects.get(id=customer_product_id)
         except CustomerProducts.DoesNotExist:
             customer_product = None
-        TicketChange.objects.create(
-            followup=f,
+        f.ticketchange_set.create(
             field='Produit client',
             old_value=str(ticket.customer_product) if ticket.customer_product else _('Unassigned'),
             new_value=str(customer_product) if customer_product else _('Unassigned'),
