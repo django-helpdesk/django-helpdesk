@@ -100,7 +100,8 @@ class PhoenixTicketForm(forms.Form):
         queryset=Customer.objects.all(),
         widget=ModelSelect2Widget(
             search_fields=['group__name__icontains'],
-            attrs={'style': 'width: 100%'}
+            dependent_fields={'site': 'site', 'customer_product': 'site__customerproducts'},
+            attrs={'style': 'width: 100%', 'data-minimum-input-length': 0}
         ),
         required=False
     )
@@ -110,7 +111,8 @@ class PhoenixTicketForm(forms.Form):
         queryset=Site.objects.all(),
         widget=ModelSelect2Widget(
             search_fields=['customer__group__name__icontains', 'name__icontains'],
-            attrs={'style': 'width: 100%'}
+            dependent_fields={'customer': 'customer', 'customer_product': 'customerproducts'},
+            attrs={'style': 'width: 100%', 'data-minimum-input-length': 0}
         ),
         required=False
     )
@@ -123,7 +125,8 @@ class PhoenixTicketForm(forms.Form):
                 'site__customer__group__name__icontains', 'site__name__icontains',
                 'comment__icontains', 'product__name__icontains'
             ],
-            attrs={'style': 'width: 100%'}
+            dependent_fields={'site': 'site', 'customer': 'site__customer'},
+            attrs={'style': 'width: 100%', 'data-minimum-input-length': 0}
         ),
         required=False
     )
