@@ -15,6 +15,13 @@
     <td>{{ ticket.created|date:"r" }} ({{ ticket.created|naturaltime }})</td>
 </tr>
 
+{% if ticket.due_date %}
+    <tr>
+        <th>{% trans "Due On" %}</th>
+        <td>{{ ticket.due_date|date:"r" }} ({{ ticket.due_date|naturaltime }})</td>
+    </tr>
+{% endif %}
+
 <tr>
     <th>{% trans "Submitter E-Mail" %}</th>
     <td>{{ ticket.submitter_email }}</td>
@@ -26,10 +33,11 @@
 </tr>
 
 {% for customfield in ticket.ticketcustomfieldvalue_set.all %}
-<tr>
-    <th>{{ customfield.field.label }}</th>
-    <td>{{ customfield.value }}</td>
-</tr>{% endfor %}
+    <tr>
+        <th>{{ customfield.field.label }}</th>
+        <td>{{ customfield.value|default:"" }}</td>
+    </tr>
+{% endfor %}
 
 {% if tags_enabled %}
 <tr>
