@@ -137,6 +137,12 @@ class SuccessIframeView(TemplateView):
 class CreateTicketView(BaseCreateTicketView):
     template_name = 'helpdesk/public_create_ticket.html'
 
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        # Add the CSS error class to the form in order to better see them in the page
+        form.error_css_class = 'text-danger'
+        return form
+
 
 class Homepage(CreateTicketView):
     template_name = 'helpdesk/public_homepage.html'
