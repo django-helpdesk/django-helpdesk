@@ -26,7 +26,7 @@
                         <td><span title='{{ ticket.created|date:"r" }}'>{{ ticket.created|naturaltime }}</span></td>
                         <td class="text-center">
                           <a href='{{ ticket.get_absolute_url }}?take'><button class='btn btn-primary btn-sm'><i class="fas fa-hand-paper"></i>&nbsp;{% trans "Take" %}</button></a>
-                          <a href='{% url 'helpdesk:delete' ticket.id %}'><button class='btn btn-danger btn-sm'><i class="fas fa-trash"></i>&nbsp;{% trans "Delete" %}</button></a>
+                          <a href='{% url 'helpdesk:delete' ticket.id %}?next=dashboard'><button class='btn btn-danger btn-sm'><i class="fas fa-trash"></i>&nbsp;{% trans "Delete" %}</button></a>
                         </td>
                     </tr>
                 {% empty %}
@@ -66,7 +66,7 @@
                         <td><span title='{{ ticket.created|date:"r" }}'>{{ ticket.created|naturaltime }}</span></td>
                         <td class="text-center">
                           <a href='{{ ticket.get_absolute_url }}?take'><button class='btn btn-primary btn-sm'><i class="fas fa-hand-paper"></i>&nbsp;{% trans "Take" %}</button></a>
-                          <a href='{% url 'helpdesk:delete' ticket.id %}'><button class='btn btn-danger btn-sm'><i class="fas fa-trash"></i>&nbsp;{% trans "Delete" %}</button></a>
+                          <a href='{% url 'helpdesk:delete' ticket.id %}?next=dashboard'><button class='btn btn-danger btn-sm'><i class="fas fa-trash"></i>&nbsp;{% trans "Delete" %}</button></a>
                         </td>
                     </tr>
                 {% empty %}

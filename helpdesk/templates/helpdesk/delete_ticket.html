@@ -20,6 +20,8 @@
 <p><a href='../'><button class="btn btn-primary btn-lg">{% trans "No, Don't Delete It" %}</button></a></p>
 
 <form method='post' action='./'>
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ next }}">
     <button class="btn btn-danger" type='submit'>{% trans "Yes I Understand - Delete It Anyway" %}</button>
-{% csrf_token %}</form>
+</form>
 {% endblock %}

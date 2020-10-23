@@ -227,10 +227,14 @@ def delete_ticket(request, ticket_id):
     if request.method == 'GET':
         return render(request, 'helpdesk/delete_ticket.html', {
             'ticket': ticket,
+            'next': request.GET.get('next', 'home')
         })
     else:
         ticket.delete()
-        return HttpResponseRedirect(reverse('helpdesk:home'))
+        redirect_to = 'helpdesk:home'
+        if request.POST.get('next') == 'dashboard':
+            redirect_to = 'helpdesk:dashboard'
+        return HttpResponseRedirect(reverse(redirect_to))
 
 
 delete_ticket = staff_member_required(delete_ticket)
