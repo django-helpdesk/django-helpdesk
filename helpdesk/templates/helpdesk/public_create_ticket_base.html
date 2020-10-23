@@ -1,16 +1,24 @@
 {% load i18n bootstrap4form %}
 {% load load_helpdesk_settings %}
-{% with request|load_helpdesk_settings as helpdesk_settings %}
 
-{% if helpdesk_settings.HELPDESK_SUBMIT_A_TICKET_PUBLIC %}
-{% block form_header %}
-<p>{% trans "Unless otherwise stated, all fields are required." %} {% trans "Please provide as descriptive a title and description as possible." %}</p>
-{% endblock %}
-<form method='post' enctype='multipart/form-data'>
-    {{ form|bootstrap4form }}
-    <button type="submit" class="btn btn-primary btn-lg btn-block"><i class="fa fa-send"></i>&nbsp;{% trans "Submit Ticket" %}</button>
-    {% csrf_token %}</form>
-{% else %}
-<h2>{% trans "Public ticket submission is disabled. Please contact the administrator for assistance." %}</h2>
-{% endif %}
+{% with request|load_helpdesk_settings as helpdesk_settings %}
+    {% if helpdesk_settings.HELPDESK_SUBMIT_A_TICKET_PUBLIC %}
+        <p>
+            {% trans "Unless otherwise stated, all fields are required." %}
+            {% trans "Please provide as descriptive a title and description as possible." %}
+        </p>
+
+        {% if form.errors %}
+            {% include 'helpdesk/include/alert_form_errors.html' %}
+        {% endif %}
+        <form role="form" method='post' enctype='multipart/form-data'>
+            {% csrf_token %}
+            {{ form|bootstrap4form }}
+            <button type="submit" class="btn btn-primary btn-lg btn-block">
+                {% trans "Submit Ticket" %} <i class="fa fa-paper-plane"></i>
+            </button>
+        </form>
+    {% else %}
+        <p>{% trans "Public ticket submission is disabled. Please contact the administrator for assistance." %}</p>
+    {% endif %}
 {% endwith %}

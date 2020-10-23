@@ -3,65 +3,74 @@
 {% block helpdesk_title %}{% trans "Create Ticket" %}{% endblock %}
 
 {% block helpdesk_breadcrumb %}
-<li class="breadcrumb-item">
-    <a href="#">{% trans "Tickets" %}</a>
-</li>
-<li class="breadcrumb-item active">{% trans "Create Ticket" %}</li>
+    <li class="breadcrumb-item">
+        <a href="#">{% trans "Tickets" %}</a>
+    </li>
+    <li class="breadcrumb-item active">{% trans "Create Ticket" %}</li>
 {% endblock %}
 
 {% block helpdesk_head %}
 {% endblock %}
 
 {% block helpdesk_body %}
-
     <div class="container">
-      <div class="card card-register mx-auto mt-5">
-        <div class="card-header">{% trans "Submit a Ticket" %}</div>
-        <div class="card-body">
-          <p>{% trans "Unless otherwise stated, all fields are required." %} {% trans "Please provide as descriptive a title and description as possible." %}</p>
-          <form method='post' action='./' enctype='multipart/form-data'>
-            {% for field in form %}
-              {% if field.is_hidden %}
-                {{ field }}
-              {% else %}
-                <div class="form-group">
-                    <!--<input type="email" id="inputEmail" class="form-control" placeholder="Email address" required="required">-->
-                    <label for='id_{{ field.name }}'>{% trans field.label %}{% if not field.field.required %}&nbsp;({% trans "Optional" %}){% endif %}</label>
-                    {{ field }}
-                    {% if field.errors %}
-                      <small class='error'>{{ field.errors }}</small>
-                    {% endif %}
-                    {% if field.help_text %}
-                      <small class='form_help_text help-block'>{% trans field.help_text %}</small>
-                    {% endif %}
-                </div>
-              {% endif %}
-            {% endfor %}
-            <button type="submit" class="btn btn-primary btn-lg btn-block"><i class="fa fa-send"></i>&nbsp;{% trans "Submit Ticket" %}</button>
-          {% csrf_token %}</form>
+        <div class="card card-register mx-auto mt-5">
+            <div class="card-header">{% trans "Submit a Ticket" %}</div>
+            <div class="card-body">
+                <p>
+                    {% trans "Unless otherwise stated, all fields are required." %}
+                    {% trans "Please provide as descriptive a title and description as possible." %}
+                </p>
+
+                {% if form.errors %}
+                    {% include 'helpdesk/include/alert_form_errors.html' %}
+                {% endif %}
+
+                <form method='post' enctype='multipart/form-data'>
+                    {% csrf_token %}
+                    {% for field in form %}
+                        {% if field.is_hidden %}
+                            {{ field }}
+                        {% else %}
+                            <div class="form-group">
+                                <label for='id_{{ field.name }}'>
+                                    {% trans field.label %}
+                                    {% if not field.field.required %}
+                                        ({% trans "Optional" %})
+                                    {% endif %}
+                                </label>
+                                {{ field }}
+                                {% if field.errors %}
+                                    <small class='error'>{{ field.errors }}</small>
+                                {% endif %}
+                                {% if field.help_text %}
+                                    <small class='form_help_text help-block'>{% trans field.help_text %}</small>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                    <button type="submit" class="btn btn-primary btn-lg btn-block">
+                        <i class="fa fa-send"></i> {% trans "Submit Ticket" %}
+                    </button>
+                </form>
+            </div>
         </div>
-      </div>
     </div>
 
 {% endblock %}
 
 {% block helpdesk_js %}
-<script type='text/javascript' language='javascript'>
-// this function listens for changes on any file input, and
-// emits the appropriate event to update the input's text.
-// Needed to have properly styled file input buttons! (this really shouldn't be this hard...)
-$(document).on('change', ':file', function() {
-    var input = $(this),
-        inputWidgetNum = $(this).attr('id').split("file")[1],
-        numFiles = input.get(0).files ? input.get(0).files.length : 1,
-        label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
-    input.trigger('fileselect', [numFiles, label, inputWidgetNum]);
-});
-</script>
-
-<script>
-    $( function() {
-        $( "#id_due_date" ).datepicker();
-    } );
-</script>
+    {{ form.media.js }}
+    <script>
+        // this function listens for changes on any file input, and
+        // emits the appropriate event to update the input's text.
+        // Needed to have properly styled file input buttons! (this really shouldn't be this hard...)
+        $(document).on('change', ':file', function () {
+            const input = $(this),
+                inputWidgetNum = $(this).attr('id').split("file")[1],
+                numFiles = input.get(0).files ? input.get(0).files.length : 1,
+                label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
+            input.trigger('fileselect', [numFiles, label, inputWidgetNum]);
+        });
+    </script>
 {% endblock %}

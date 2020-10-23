@@ -173,9 +173,9 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
     )
 
     due_date = forms.DateTimeField(
-        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        widget=forms.TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
         required=False,
-        input_formats=['%d/%m/%Y', '%m/%d/%Y', "%d.%m.%Y", ],
+        input_formats=['%d/%m/%Y', '%m/%d/%Y', "%d.%m.%Y"],
         label=_('Due on'),
     )
 
@@ -185,6 +185,9 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
         label=_('Attach File'),
         help_text=_('You can attach a file such as a document or screenshot to this ticket.'),
     )
+
+    class Media:
+        js = ('helpdesk/js/init_due_date.js',)
 
     def __init__(self, kbcategory=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
