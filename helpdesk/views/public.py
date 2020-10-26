@@ -108,20 +108,19 @@ def view_ticket(request):
     if ticket_req and email:
         queue, ticket_id = Ticket.queue_and_id_from_query(ticket_req)
         try:
-            ticket = Ticket.objects.get(
+            ticket = Ticket.objects.filter(
                 Q(id=ticket_id) & (
                     Q(submitter_email__iexact=email) | (Q(ticketcc__email__iexact=email) & Q(ticketcc__can_view=True))
                 )
             ).distinct()
-        except Ticket.DoesNotExist:
-            error_message = _('Invalid ticket ID or e-mail address. Please try again.')
-        except Ticket.MultipleObjectsReturned:
-            print(Ticket.objects.filter(
-                Q(id=ticket_id) & (
-                    Q(submitter_email__iexact=email) | (Q(ticketcc__email__iexact=email) & Q(ticketcc__can_view=True))
-                )
-            ))
-            error_message = 'Plusieurs tickets correspondent à la recherche.'
+            if len(ticket) == 0:
+                raise ValueError
+            elif len(ticket) > 1:
+                print('Plusieurs tickets correspondent :')
+                print(ticket)
+                raise ValueError
+            else:
+                ticket = ticket.get()
         except ValueError:
             error_message = _('Invalid ticket ID or e-mail address. Please try again.')
         else:
