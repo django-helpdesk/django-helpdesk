@@ -111,10 +111,17 @@ def view_ticket(request):
             ticket = Ticket.objects.get(
                 Q(id=ticket_id) & (
                     Q(submitter_email__iexact=email) | (Q(ticketcc__email__iexact=email) & Q(ticketcc__can_view=True))
-                )
+                ).distinct()
             )
-        except ObjectDoesNotExist:
+        except Ticket.ObjectDoesNotExist:
             error_message = _('Invalid ticket ID or e-mail address. Please try again.')
+        except Ticket.MultipleObjectsReturned:
+            print(Ticket.objects.filter(
+                Q(id=ticket_id) & (
+                    Q(submitter_email__iexact=email) | (Q(ticketcc__email__iexact=email) & Q(ticketcc__can_view=True))
+                )
+            ))
+            error_message = 'Plusieurs tickets correspondent à la recherche.'
         except ValueError:
             error_message = _('Invalid ticket ID or e-mail address. Please try again.')
         else:
