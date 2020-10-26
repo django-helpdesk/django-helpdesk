@@ -640,13 +640,14 @@ def update_ticket(request, ticket_id, public=False):
 
     f = FollowUp(ticket=ticket, user=request.user, date=timezone.now(), comment=comment, public=public)
 
-    # Add signature at the bottom of the followup comment
-    signature = '<p><strong>%s</strong></p>' % request.user
-    if request.user.employee.signature:
-        signature = request.user.employee.signature
-    # Append signature preceded by a newline in order to conserve it later in plain text version of the sent mails
-    f.comment += """
-    %s""" % signature
+    if comment:
+        # Add signature at the bottom of the followup comment
+        signature = '<p><strong>%s</strong></p>' % request.user
+        if request.user.employee.signature:
+            signature = request.user.employee.signature
+        # Append signature preceded by a newline in order to conserve it later in plain text version of the sent mails
+        f.comment += """
+        %s""" % signature
 
     reassigned = False
     old_owner = ticket.assigned_to
