@@ -290,44 +290,36 @@ def process_queue(q, logger):
                 logger.warn("Message %d was not successfully processed, and will be left in local directory" % i)
 
 
-def decodeUnknown(charset, string):
-    if six.PY2:
+def decode_unknown(charset, string):
+    if type(string) is not str:
         if not charset:
             try:
-                return string.decode('utf-8', 'replace')
+                return str(string, encoding='utf-8', errors='replace')
             except UnicodeError:
-                return string.decode('iso8859-1', 'replace')
-        return unicode(string, charset)
-    elif six.PY3:
-        if type(string) is not str:
-            if not charset:
-                try:
-                    return str(string, encoding='utf-8', errors='replace')
-                except UnicodeError:
-                    return str(string, encoding='iso8859-1', errors='replace')
-            return str(string, encoding=charset, errors='replace')
-        return string
+                return str(string, encoding='iso8859-1', errors='replace')
+        return str(string, encoding=charset, errors='replace')
+    return string
 
 
 def decode_mail_headers(string):
-    decoded = email.header.decode_header(string) if six.PY3 else email.header.decode_header(string.encode('utf-8'))
-    if six.PY2:
-        return u' '.join([unicode(msg, charset or 'utf-8') for msg, charset in decoded])
-    elif six.PY3:
-        return u' '.join([str(msg, encoding=charset, errors='replace') if charset else str(msg) for msg, charset in decoded])
+    decoded = email.header.decode_header(string)
+    return ' '.join([
+        str(msg, encoding=charset, errors='replace') if charset else str(msg) for msg, charset in decoded
+    ])
 
 
 def ticket_from_message(message, queue, logger):
     # 'message' must be an RFC822 formatted message.
     message = email.message_from_string(message) if six.PY3 else email.message_from_string(message.encode('utf-8'))
     subject = message.get('subject', _('Comment from e-mail'))
-    subject = decode_mail_headers(decodeUnknown(message.get_charset(), subject))
+    subject = decode_mail_headers(decode_unknown(message.get_charset(), subject))
     for affix in STRIPPED_SUBJECT_STRINGS:
         subject = subject.replace(affix, "")
     subject = subject.strip()
 
     sender = message.get('from', _('Unknown Sender'))
-    sender = decode_mail_headers(decodeUnknown(message.get_charset(), sender))
+    sender = decode_mail_headers(decode_unknown(message.get_charset(), sender))
+    logger.debug('sender = "%s"' % sender)
     # to address bug #832, we wrap all the text in front of the email address in
     # double quotes by using replace() on the email string. Then,
     # take first item of list, second item of tuple is the actual email address.
@@ -335,6 +327,7 @@ def ticket_from_message(message, queue, logger):
     # but the getaddresses() function seems to be able to handle just unclosed quotes
     # correctly. Not ideal, but this seems to work for now.
     sender_email = email.utils.getaddresses(['\"' + sender.replace('<', '\" <')])[0][1]
+    logger.debug('sender_email = "%s"' % sender_email)
 
     cc = message.get_all('cc', None)
     if cc:
@@ -383,7 +376,7 @@ def ticket_from_message(message, queue, logger):
                 # https://github.com/django-helpdesk/django-helpdesk/issues/732
                 if part['Content-Transfer-Encoding'] == '8bit' and part.get_content_charset() == 'utf-8':
                     body = body.decode('unicode_escape')
-                body = decodeUnknown(part.get_content_charset(), body)
+                body = decode_unknown(part.get_content_charset(), body)
                 body = EmailReplyParser.parse_reply(body)
                 # workaround to get unicode text out rather than escaped text
                 try:
