@@ -236,9 +236,8 @@ class EditFollowUpForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
-        """Filter not openned tickets here."""
         super(EditFollowUpForm, self).__init__(*args, **kwargs)
-        self.fields["ticket"].queryset = Ticket.objects.filter(status__in=(Ticket.OPEN_STATUS, Ticket.REOPENED_STATUS))
+        self.fields["ticket"].queryset = Ticket.objects.opened()
 
 
 class AbstractTicketForm(CustomFieldMixin, forms.Form):
