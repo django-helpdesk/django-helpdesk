@@ -520,6 +520,9 @@ class TicketForm(PhoenixTicketForm, AbstractTicketForm):
         else:
             title = _('Ticket Opened')
         followup = self._create_follow_up(ticket, title=title, user=user)
+        # Append signature at the bottom of the followup comment if user is from ipexia
+        if user.employee.is_ipexia_member():
+            followup.append_signature(user)
         followup.save()
 
         files = self._attach_files_to_follow_up(followup)

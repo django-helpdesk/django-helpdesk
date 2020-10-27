@@ -937,6 +937,17 @@ class FollowUp(models.Model):
         t.save()
         super(FollowUp, self).save(*args, **kwargs)
 
+    def append_signature(self, user):
+        """ Append the signature at the bottom of the followup message if user is defined """
+        if not user:
+            return ''
+        signature = '<p><strong>%s</strong></p>' % user
+        if user.employee.signature:
+            signature = user.employee.signature
+        # Append signature preceded by a newline in order to conserve it later in plain text version of the sent mails
+        self.comment += """
+        %s""" % signature
+
 
 @python_2_unicode_compatible
 class TicketChange(models.Model):
