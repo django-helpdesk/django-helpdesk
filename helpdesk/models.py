@@ -731,8 +731,8 @@ class Ticket(models.Model):
         True = any dependencies are resolved
         False = There are non-resolved dependencies
         """
-        OPEN_STATUSES = (Ticket.OPEN_STATUS, Ticket.REOPENED_STATUS)
-        return self.ticketdependency.filter(depends_on__status__in=OPEN_STATUSES).count() == 0
+        open_statuses = (Ticket.OPEN_STATUS, Ticket.REOPENED_STATUS)
+        return not self.ticketdependency.filter(depends_on__status__in=open_statuses).exists()
     can_be_resolved = cached_property(_can_be_resolved)
 
     class Meta:
