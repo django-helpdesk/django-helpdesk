@@ -570,6 +570,8 @@ def ticket_from_message(message, queue, logger):
     elif six.PY3:
         logger.info("[%s-%s] %s" % (ticket.queue.slug, ticket.id, ticket.title,))
 
+    logger.debug('Files to attach :')
+    logger.debug(files)
     attached = process_attachments(f, files)
     for att_file in attached:
         logger.info("Attachment '%s' (with size %s) successfully added to ticket from email." % (att_file[0], att_file[1].size))

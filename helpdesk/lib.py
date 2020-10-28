@@ -351,9 +351,9 @@ def process_attachments(followup, attached_files):
     attachments = []
 
     for attached in attached_files:
+        filename = smart_text(attached.name)
         if attached.size:
-            filename = smart_text(attached.name)
-            att = Attachment(
+            att = Attachment.objects.create(
                 followup=followup,
                 file=attached,
                 filename=filename,
@@ -362,7 +362,6 @@ def process_attachments(followup, attached_files):
                 'application/octet-stream',
                 size=attached.size,
             )
-            att.save()
 
             if attached.size < max_email_attachment_size:
                 # Only files smaller than 512kb (or as defined in
@@ -370,6 +369,8 @@ def process_attachments(followup, attached_files):
                 attachments.append([filename, att.file])
             else:
                 print('%s est trop lourd pour être envoyé par mail : %skb' % (filename, attached.size / 1000))
+        else:
+            print('%s has no size' % filename)
 
     return attachments
 
