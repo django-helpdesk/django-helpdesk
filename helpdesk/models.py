@@ -569,6 +569,15 @@ class Ticket(models.Model):
         verbose_name=_('Knowledge base item the user was viewing when they created this ticket.'),
     )
 
+    merged_to = models.ForeignKey(
+        'self',
+        verbose_name=_('merged to'),
+        related_name='merged_tickets',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True
+    )
+
     @property
     def time_spent(self):
         """Return back total time spent on the ticket. This is calculated value
