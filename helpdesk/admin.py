@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _
 from helpdesk.models import Queue, Ticket, FollowUp, PreSetReply, KBCategory, TicketSpentTime, TicketCategory, \
-    TicketType
+    TicketType, FeedbackSurvey
 from helpdesk.models import EscalationExclusion, EmailTemplate, KBItem
 from helpdesk.models import TicketChange, Attachment, IgnoreEmail
 from helpdesk.models import CustomField
@@ -122,6 +122,15 @@ class TicketSpentTimeAdmin(admin.ModelAdmin):
     date_hierarchy = 'start_date'
     autocomplete_fields = ('ticket', 'employee')
     list_select_related = ('ticket', 'employee__user')
+
+
+@admin.register(FeedbackSurvey)
+class FeedbackSurveyAdmin(admin.ModelAdmin):
+    list_display = ('id', 'ticket', 'author', 'created_at', 'score')
+    list_filter = ('score',)
+    search_fields = ('ticket__id', 'ticket__title', 'message', 'author__username')
+    date_hierarchy = 'created_at'
+    autocomplete_fields = ('ticket', 'author')
 
 
 admin.site.register(PreSetReply)
