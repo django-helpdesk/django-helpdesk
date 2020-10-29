@@ -21,8 +21,10 @@
                     {% include 'base/components/alert_error.html' %}
                 {% endif %}
                 <div class="form-group">
-                    Comment évaluez vous la résolution du ticket
-                    <a href="{% if request.user.is_authenticated %}{{ ticket.get_absolute_url }}{% else %}{{ ticket.ticket_url }}{% endif %}" target="_blank">{{ ticket.ticket_for_url }} <i class="fa fa-external-link"></i></a> ?
+                    Comment évaluez-vous la résolution du ticket
+                    <a href="{% if request.user.is_authenticated %}{{ ticket.get_absolute_url }}{% else %}{{ ticket.ticket_url }}{% endif %}" target="_blank">
+                        {{ ticket.ticket_for_url }} <i class="fa fa-external-link"></i>
+                    </a>{% if ticket.assigned_to %} traité par {{ ticket.assigned_to }}{% endif %} ?
                 </div>
                 <div class="row form-group">
                     <div class="col-sm-6 col-xs-12">

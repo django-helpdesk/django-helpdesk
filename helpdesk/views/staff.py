@@ -28,6 +28,7 @@ from django.utils import timezone
 
 from django.utils import six
 from django.views.decorators.http import require_POST
+from helpdesk.filters import FeedbackSurveyFilter
 
 from helpdesk.forms import (
     TicketForm, UserSettingsForm, EmailIgnoreForm, EditTicketForm, TicketCCForm,
@@ -41,7 +42,7 @@ from helpdesk.lib import (
 )
 from helpdesk.models import (
     Ticket, Queue, FollowUp, PreSetReply, Attachment, SavedSearch,
-    IgnoreEmail, TicketCC, TicketDependency, TicketSpentTime, TicketCategory, TicketType,
+    IgnoreEmail, TicketCC, TicketDependency, TicketSpentTime, TicketCategory, TicketType, FeedbackSurvey,
 )
 from helpdesk import settings as helpdesk_settings
 
@@ -2157,3 +2158,24 @@ def date_rel_to_today(today, offset):
 def sort_string(begin, end):
     return 'sort=created&date_from=%s&date_to=%s&status=%s&status=%s&status=%s' % (
         begin, end, Ticket.OPEN_STATUS, Ticket.REOPENED_STATUS, Ticket.RESOLVED_STATUS)
+
+
+def feedback_survey_list(request):
+    queryset = FeedbackSurvey.objects.order_by('-created_at')
+
+    f = FeedbackSurveyFilter(request.GET, queryset=queryset)
+
+    page = request.GET.get('page', 1)
+
+    paginator = Paginator(f.qs, 20)
+    try:
+        feedback_surveys = paginator.page(page)
+    except PageNotAnInteger:
+        feedback_surveys = paginator.page(1)
+    except EmptyPage:
+        feedback_surveys = paginator.page(paginator.num_pages)
+
+    return render(request, 'helpdesk/feedback_survey_list.html', {
+        'filter': f,
+        'feedback_surveys': feedback_surveys,
+    })

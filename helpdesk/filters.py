@@ -1,8 +1,9 @@
 import django_filters as df
 from django import forms
 from django.db.models import Q
-from django_select2.forms import Select2MultipleWidget
-from helpdesk.models import Ticket
+from django_select2.forms import Select2MultipleWidget, ModelSelect2MultipleWidget
+from helpdesk.lib import get_assignable_users
+from helpdesk.models import Ticket, FeedbackSurvey
 
 from geant.filters import MyCustomDateRangeWidget
 
@@ -46,3 +47,49 @@ class TicketFilter(df.FilterSet):
             Q(assigned_to__email__icontains=value) |
             Q(submitter_email__icontains=value)
         ).distinct()
+
+
+class FeedbackSurveyFilter(df.FilterSet):
+    tickets = df.ModelMultipleChoiceFilter(
+        field_name='ticket',
+        label='Tickets',
+        queryset=Ticket.objects.all(),
+        widget=ModelSelect2MultipleWidget(
+            model=Ticket,
+            search_fields=['id__iexact', 'title__icontains'],
+            attrs={'style': 'width: 100%'}
+        )
+    )
+    score = df.MultipleChoiceFilter(
+        field_name='score',
+        label='Score',
+        choices=[(0, "à améliorer"), (1, "moyen"), (2, "très bon")],
+        widget=forms.CheckboxSelectMultiple(
+            attrs={'class': 'list-inline flat'}
+        )
+    )
+    created_between = df.DateFromToRangeFilter(
+        field_name='created_at',
+        label='Date de création entre',
+        widget=MyCustomDateRangeWidget()
+    )
+    assigned_to = df.ModelMultipleChoiceFilter(
+        method='filter_assigned_to',
+        label='Assigné à',
+        queryset=get_assignable_users(),
+        widget=ModelSelect2MultipleWidget(
+            queryset=get_assignable_users(),
+            search_fields=['username__icontains', 'first_name__icontains', 'last_name__icontains'],
+            attrs={'style': 'width: 100%'}
+        )
+    )
+
+    class Meta:
+        model = FeedbackSurvey
+        fields = ('tickets', 'score', 'created_between')
+
+    def filter_assigned_to(self, queryset, name, value):
+        """ Custom method to filter tickets by assigned_to """
+        if value:
+            return queryset.filter(ticket__assigned_to__in=value).distinct()
+        return queryset

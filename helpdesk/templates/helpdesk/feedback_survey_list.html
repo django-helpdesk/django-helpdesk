@@ -1,0 +1,116 @@
+{% extends "helpdesk/base.html" %}
+
+{% load static avatar_tags %}
+
+{% block h1_title %}Enquêtes de satisfaction{% endblock %}
+
+{% block helpdesk_head %}
+    {{ filter.form.media.css }}
+{% endblock %}
+
+{% block helpdesk_body %}
+    <div class="x_panel">
+        <div class="x_title">
+            <h2>Liste des réponses aux enquêtes de satisfaction</h2>
+            <ul class="nav navbar-right panel_toolbox">
+                <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
+            </ul>
+            <div class="clearfix"></div>
+        </div>
+        <div class="x_content">
+            <div class="well">
+                <form method="get">
+                    <div class="row">
+                        <div class="col-sm-3 col-xs-12 form-group">
+                            {{ filter.form.tickets.label_tag }}
+                            {{ filter.form.tickets }}
+                            {{ filter.form.tickets.errors }}
+                        </div>
+                        <div class="col-sm-3 col-xs-12 form-group">
+                            {{ filter.form.assigned_to.label_tag }}
+                            {{ filter.form.assigned_to }}
+                            {{ filter.form.assigned_to.errors }}
+                        </div>
+                        <div class="col-sm-3 col-xs-12 form-group">
+                            {{ filter.form.created_between.label_tag }}<br>
+                            {{ filter.form.created_between }}
+                            {{ filter.form.created_between.errors }}
+                        </div>
+                        <div class="col-sm-3 col-xs-12 form-group">
+                            {{ filter.form.score.label_tag }}
+                            {{ filter.form.score }}
+                            {{ filter.form.score.errors }}
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary">
+                            Filtrer
+                            <i class="fa fa-filter"></i>
+                        </button>
+                        <a href="{% url 'helpdesk:feedback_survey_list' %}" class="btn btn-default">
+                            Effacer les filtres
+                            <i class="fa fa-eraser"></i>
+                        </a>
+                    </div>
+                </form>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th class="text-center">Note</th>
+                            <th class="text-center">Date</th>
+                            <th>Ticket</th>
+                            <th>Assigné à</th>
+                            <th>Auteur</th>
+                            <th>Message</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for feedback_survey in feedback_surveys %}
+                            <tr>
+                                <td class="text-center">
+                                    {% if feedback_survey.score == 2 %}
+                                        <img src="{% static 'helpdesk/img/feedback_good.jpg' %}" alt="Emoji Content" width="30px">
+                                    {% elif feedback_survey.score == 1 %}
+                                        <img src="{% static 'helpdesk/img/feedback_ok.png' %}" alt="Emoji Neutre" width="30px">
+                                    {% elif feedback_survey.score == 0 %}
+                                        <img src="{% static 'helpdesk/img/feedback_bad.png' %}" alt="Emoji Mécontent" width="30px">
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">{{ feedback_survey.created_at }}</td>
+                                <td>
+                                    <a href="{{ feedback_survey.ticket.get_absolute_url }}">
+                                        {{ feedback_survey.ticket }}
+                                    </a>
+                                </td>
+                                <td>
+                                    {% if feedback_survey.ticket.assigned_to %}
+                                        {% avatar feedback_survey.ticket.assigned_to 30 class="img-circle" %}
+                                        {{ feedback_survey.ticket.assigned_to }}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if feedback_survey.ticket.author %}
+                                        {% avatar feedback_survey.ticket.author 30 class="img-circle" %}
+                                        {{ feedback_survey.ticket.author }}
+                                    {% endif %}
+                                </td>
+                                <td>{{ feedback_survey.message|linebreaksbr }}</td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                            <td colspan="6">Aucun résultat pour cette recherche.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% include 'base/components/pagination.html' with objects=feedback_surveys filter_parameter='score' %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block custom_javascripts %}
+    {{ filter.form.media.js }}
+{% endblock %}

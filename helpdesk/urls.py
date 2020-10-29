@@ -180,6 +180,12 @@ urlpatterns = [
     url(r'^ignore/delete/(?P<id>[0-9]+)/$',
         staff.email_ignore_del,
         name='email_ignore_del'),
+
+    url(
+        r'^feedback_survey$',
+        staff.feedback_survey_list,
+        name='feedback_survey_list'
+    )
 ]
 
 urlpatterns += [
