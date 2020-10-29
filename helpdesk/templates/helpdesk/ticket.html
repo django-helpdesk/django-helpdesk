@@ -21,196 +21,198 @@
 {% endblock %}
 
 {% block helpdesk_body %}
-{% if helpdesk_settings.HELPDESK_TRANSLATE_TICKET_COMMENTS %}
-{% comment %}
-<div id='translate_dropdown'>{% trans "Translate ticket comments into" %} </div>
-<div id='translate_block'>
-{% endcomment %}
-<div id="google_translate_element"></div>
-<script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
-{% endif %}
+    {% if helpdesk_settings.HELPDESK_TRANSLATE_TICKET_COMMENTS %}
+        <div id="google_translate_element"></div>
+        <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+    {% endif %}
 
-{% include "helpdesk/ticket_desc_table.html" %}
+    {% include "helpdesk/ticket_desc_table.html" %}
 
-{% if ticket.followup_set.all %}
-{% load ticket_to_link %}
-    <div class="card mb-3">
-        <div class="card-header"><i class="fas fa-clock fa-fw fa-lg"></i>&nbsp;{% trans "Follow-Ups" %}</div>
-        <div class="card-body">
-            <div class="list-group">
-            {% for followup in ticket.followup_set.all %}
-                <div class="list-group-item list-group-item-action">
-                    <div class="d-flex w-100 justify-content-between">
-                        <h5 class="mb-1">{{ followup.title }}</h5>
-                        <small><i class="fas fa-clock"></i>&nbsp;<span class='byline text-info'>{% if followup.user %}by {{ followup.user }},{% endif %} <span title='{{ followup.date|date:"r" }}'>{{ followup.date|naturaltime }}</span>{% if followup.time_spent %}, <span>{% trans "time spent" %}: {{ followup.time_spent_formated }}</span>{% endif %} {% if not followup.public %} <span class='private'>({% trans "Private" %})</span>{% endif %}</span></small>
-                    </div>
-                    <p class="mb-1">
-                        {% if followup.comment %}
-                            <p>{{ followup.get_markdown|urlizetrunc:50|num_to_link|linebreaksbr }}</p>
-                        {% endif %}
-                        {% for change in followup.ticketchange_set.all %}
-                            {% if forloop.first %}<div class='changes'><ul>{% endif %}
-                            <li>{% blocktrans with change.field as field and change.old_value as old_value and change.new_value as new_value %}Changed {{ field }} from {{ old_value }} to {{ new_value }}.{% endblocktrans %}</li>
-                            {% if forloop.last %}</ul></div>{% endif %}
-                        {% endfor %}
-                        {% for attachment in followup.followupattachment_set.all %}{% if forloop.first %}{% trans "Attachments" %}:<div class='attachments'><ul>{% endif %}
-                            <li><a href='{{ attachment.file.url }}'>{{ attachment.filename }}</a> ({{ attachment.mime_type }}, {{ attachment.size|filesizeformat }})
-                            {% if followup.user and request.user == followup.user %}
-                            <a href='{% url 'helpdesk:attachment_del' ticket.id attachment.id %}'><button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button></a>
-                            {% endif %}
-                            </li>
-                            {% if forloop.last %}</ul></div>{% endif %}
-                        {% endfor %}
-                    </p>
-                    <!--- ugly long test to suppress the following if it will be empty, to save vertical space -->
-                    {% with possible=helpdesk_settings.HELPDESK_SHOW_EDIT_BUTTON_FOLLOW_UP %}
-                        {% if  possible and followup.user and request.user == followup.user and not followup.ticketchange_set.all or  possible and user.is_superuser and helpdesk_settings.HELPDESK_SHOW_DELETE_BUTTON_SUPERUSER_FOLLOW_UP %}
-                        <small>
-                            {% if helpdesk_settings.HELPDESK_SHOW_EDIT_BUTTON_FOLLOW_UP %}
-                                {% if followup.user and request.user == followup.user and not followup.ticketchange_set.all %}
-                                <a href="{% url 'helpdesk:followup_edit' ticket.id followup.id %}" class='followup-edit'><button type="button" class="btn btn-warning btn-sm float-right"><i class="fas fa-edit"></i></button></a>
-                                {% endif %}
-                            {% endif %}
-                            {% if user.is_superuser and helpdesk_settings.HELPDESK_SHOW_DELETE_BUTTON_SUPERUSER_FOLLOW_UP %}
-                                <a href="{% url 'helpdesk:followup_delete' ticket.id followup.id %}" class='followup-edit'><button type="button" class="btn btn-warning btn-sm float-right"><i class="fas fa-trash"></i></button></a>
-                            {% endif %}
-                        </small>
-                    {% endif %}{% endwith %}
-                </div>
-                <!-- /.list-group-item -->
-            {% endfor %}
-            </div>
-            <!-- /.list-group -->
+    {% if ticket.merged_to %}
+        <div class="card card-body bg-light">
+            <h3 class="text-center">
+                {% trans "This ticket has been merged into ticket" %}
+                <a href="{{ ticket.merged_to.get_absolute_url }}">{{ ticket.merged_to }}</a>
+            </h3>
         </div>
-        <!-- /.card-body -->
-    </div>
-    <!-- /.card -->
-
-{% endif %}
-{% if helpdesk_settings.HELPDESK_TRANSLATE_TICKET_COMMENTS %}
-</div>
-{% endif %}
-
-<div class="card mb-3">
-    <div class="card-header">{% trans "Respond to this ticket" %}</div>
-    <div class="card-body">
-
-<form method='post' action='update/' enctype='multipart/form-data'>
-
-<fieldset>
-    <dl>
-        {% if preset_replies %}
-        <dt><label for='id_preset'>{% trans "Use a Pre-set Reply" %}</label> <span class='form_optional'>{% trans "(Optional)" %}</span></dt>
-        <dd><select name='preset' id='id_preset'><option value=''>------</option>{% for preset in preset_replies %}<option value='{{ preset.id }}'>{{ preset.name }}</option>{% endfor %}</select></dd>
-        <dd class='form_help_text'>{% trans "Selecting a pre-set reply will over-write your comment below. You can then modify the pre-set reply to your liking before saving this update." %}</dd>
-        {% endif %}
-
-        <dt><label for='commentBox'>{% trans "Comment / Resolution" %}</label></dt>
-        <dd><textarea rows='8' cols='70' name='comment' id='commentBox'></textarea></dd>
-        <dd class='form_help_text'>{% trans "You can insert ticket and queue details in your message. For more information, see the <a href='../../help/context/'>context help page</a>." %}</dd>
-
-        <dt><label>{% trans "New Status" %}</label></dt>
-        {% if not ticket.can_be_resolved %}<dd>{% trans "This ticket cannot be resolved or closed until the tickets it depends on are resolved." %}</dd>{% endif %}
-        {% ifequal ticket.status 1 %}
-        <dd><div class="form-group">
-            <label for='st_open' class='active radio-inline'><input type='radio' name='new_status' value='1' id='st_open' checked='checked'>{% trans "Open" %} &raquo;</label>
-            <label for='st_resolved' class="radio-inline"><input type='radio' name='new_status' value='3' id='st_resolved'{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}>{% trans "Resolved" %} &raquo;</label>
-            <label for='st_closed' class="radio-inline"><input type='radio' name='new_status' value='4' id='st_closed'{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}>{% trans "Closed" %} &raquo;</label>
-            <label class="radio-inline" for='st_duplicate'><input type='radio' name='new_status' value='5' id='st_duplicate'>{% trans "Duplicate" %}</label>
-        </div></dd>
-        {% endifequal %}
-        {% ifequal ticket.status 2 %}
-        <dd><div class="form-group">
-            <label for='st_reopened' class='active radio-inline'><input type='radio' name='new_status' value='2' id='st_reopened' checked='checked'>{% trans "Reopened" %} &raquo;</label>
-            <label class="radio-inline" for='st_resolved'><input type='radio' name='new_status' value='3' id='st_resolved'{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}>{% trans "Resolved" %} &raquo;</label>
-            <label class="radio-inline" for='st_closed'><input type='radio' name='new_status' value='4' id='st_closed'{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}>{% trans "Closed" %} &raquo;</label>
-            <label class="radio-inline" for='st_duplicate'><input type='radio' name='new_status' value='5' id='st_duplicate'>{% trans "Duplicate" %}</label>
-        </div></dd>
-        {% endifequal %}
-        {% ifequal ticket.status 3 %}
-        <dd><div class="form-group">
-            <label for='st_reopened' class="radio-inline"><input type='radio' name='new_status' value='2' id='st_reopened'>{% trans "Reopened" %} &laquo;</label>
-            <label for='st_resolved' class='active radio-inline'><input type='radio' name='new_status' value='3' id='st_resolved' checked='checked'>{% trans "Resolved" %} &raquo;</label>
-            <label class="radio-inline" for='st_closed'><input type='radio' name='new_status' value='4' id='st_closed'>{% trans "Closed" %}</label>
-        </div></dd>
-        {% endifequal %}
-        {% ifequal ticket.status 4 %}
-        <dd><div class="form-group"><label for='st_reopened' class="radio-inline"><input type='radio' name='new_status' value='2' id='st_reopened'>{% trans "Reopened" %} &laquo;</label>
-        <label class="radio-inline" for='st_closed'><input type='radio' name='new_status' value='4' id='st_closed' checked='checked'>{% trans "Closed" %}</label></div></dd>
-        {% endifequal %}
-        {% ifequal ticket.status 5 %}
-        <dd><div class="form-group">
-            <label class="radio-inline" for='st_reopened'><input type='radio' name='new_status' value='2' id='st_reopened'>{% trans "Reopened" %} &laquo;</label>
-            <label class="radio-inline" for='st_duplicate'><input type='radio' name='new_status' value='5' id='st_duplicate' checked='checked'>{% trans "Duplicate" %}</label>
-        </div></dd>
-        {% endifequal %}
-
-        {% if helpdesk_settings.HELPDESK_UPDATE_PUBLIC_DEFAULT %}
-        <input type='hidden' name='public' value='1'>
-        {% else %}
-        <dt>
-            <label for='id_public'>{% trans "Is this update public?" %}</label> <span class='form_optional'>{% trans "(Optional)" %}</span>
-        </dt>
-        <dd><input type='checkbox' name='public' value='1' checked='checked' />&nbsp; {% trans 'Yes, make this update public.' %}</dd>
-        <dd class='form_help_text'>{% trans "If this is public, the submitter will be e-mailed your comment or resolution." %}</dd>
-        {% endif %}
-
-        {% if user.is_staff %}
-        <dt>
-            <label for='id_time_spent'>{% trans "Time spent" %}</label> <span class='form_optional'>{% trans "(Optional)" %}</span>
-        </dt>
-        <dd><input name='time_spent' type="time" /></dd>
-        {% endif %}
-    </dl>
-
-<p id='ShowFurtherOptPara'><button class="btn btn-warning btn-sm" id='ShowFurtherEditOptions'>{% trans "Change Further Details &raquo;" %}</button></p>
-
-<div id='FurtherEditOptions' style='display: none;'>
-
-    <dl>
-
-        <dt><label for='id_title'>{% trans "Title" %}</label></dt>
-        <dd><input type='text' name='title' value='{{ ticket.title|escape }}' /></dd>
-
-        <dt><label for='id_owner'>{% trans "Owner" %}</label></dt>
-        <dd><select id='id_owner' name='owner'><option value='0'>{% trans "Unassign" %}</option>{% for u in active_users %}<option value='{{ u.id }}' {% ifequal u.id ticket.assigned_to.id %}selected{% endifequal %}>{{ u }}</option>{% endfor %}</select></dd>
-
-        <dt><label for='id_priority'>{% trans "Priority" %}</label></dt>
-        <dd><select id='id_priority' name='priority'>{% for p in priorities %}<option value='{{ p.0 }}'{% ifequal p.0 ticket.priority %} selected='selected'{% endifequal %}>{{ p.1 }}</option>{% endfor %}</select></dd>
-
-        <dt><label for='id_due_date'>{% trans "Due on" %}</label></dt>
-        <dd>{{ form.due_date }}</dd>
-
-    </dl>
-
-</div>
-
-<p id='ShowFileUploadPara'><button class="btn btn-warning btn-sm" id='ShowFileUpload'>{% trans "Attach File(s) &raquo;" %}</button></p>
-
-<div id='FileUpload' style='display: none;'>
-
-    <dl>
-        <dt><label for='id_file'>{% trans "Attach a File" %}</label></dt>
-        <dd>
-            <div class="add_file_fields_wrap">
-                <button class="add_file_field_button btn btn-success btn-xs">{% trans "Add Another File" %}</button>
-                <div><label class='btn btn-primary btn-sm btn-file'>
-                        Browse... <input type="file" name='attachment' id='file0' style='display: none;'/>
-                </label><span>&nbsp;</span><span id='selectedfilename0'>{% trans 'No files selected.' %}</span></div>
+    {% else %}
+        {% if ticket.followup_set.all %}
+        {% load ticket_to_link %}
+            <div class="card mb-3">
+                <div class="card-header"><i class="fas fa-clock fa-fw fa-lg"></i>&nbsp;{% trans "Follow-Ups" %}</div>
+                <div class="card-body">
+                    <div class="list-group">
+                    {% for followup in ticket.followup_set.all %}
+                        <div class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">{{ followup.title|num_to_link }}</h5>
+                                <small><i class="fas fa-clock"></i>&nbsp;<span class='byline text-info'>{% if followup.user %}by {{ followup.user }},{% endif %} <span title='{{ followup.date|date:"r" }}'>{{ followup.date|naturaltime }}</span>{% if followup.time_spent %}, <span>{% trans "time spent" %}: {{ followup.time_spent_formated }}</span>{% endif %} {% if not followup.public %} <span class='private'>({% trans "Private" %})</span>{% endif %}</span></small>
+                            </div>
+                            <p class="mb-1">
+                                {% if followup.comment %}
+                                    <p>{{ followup.get_markdown|urlizetrunc:50|num_to_link|linebreaksbr }}</p>
+                                {% endif %}
+                                {% for change in followup.ticketchange_set.all %}
+                                    {% if forloop.first %}<div class='changes'><ul>{% endif %}
+                                    <li>{% blocktrans with change.field as field and change.old_value as old_value and change.new_value as new_value %}Changed {{ field }} from {{ old_value }} to {{ new_value }}.{% endblocktrans %}</li>
+                                    {% if forloop.last %}</ul></div>{% endif %}
+                                {% endfor %}
+                                {% for attachment in followup.followupattachment_set.all %}{% if forloop.first %}{% trans "Attachments" %}:<div class='attachments'><ul>{% endif %}
+                                    <li><a href='{{ attachment.file.url }}'>{{ attachment.filename }}</a> ({{ attachment.mime_type }}, {{ attachment.size|filesizeformat }})
+                                    {% if followup.user and request.user == followup.user %}
+                                    <a href='{% url 'helpdesk:attachment_del' ticket.id attachment.id %}'><button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button></a>
+                                    {% endif %}
+                                    </li>
+                                    {% if forloop.last %}</ul></div>{% endif %}
+                                {% endfor %}
+                            </p>
+                            <!--- ugly long test to suppress the following if it will be empty, to save vertical space -->
+                            {% with possible=helpdesk_settings.HELPDESK_SHOW_EDIT_BUTTON_FOLLOW_UP %}
+                                {% if  possible and followup.user and request.user == followup.user and not followup.ticketchange_set.all or  possible and user.is_superuser and helpdesk_settings.HELPDESK_SHOW_DELETE_BUTTON_SUPERUSER_FOLLOW_UP %}
+                                <small>
+                                    {% if helpdesk_settings.HELPDESK_SHOW_EDIT_BUTTON_FOLLOW_UP %}
+                                        {% if followup.user and request.user == followup.user and not followup.ticketchange_set.all %}
+                                        <a href="{% url 'helpdesk:followup_edit' ticket.id followup.id %}" class='followup-edit'><button type="button" class="btn btn-warning btn-sm float-right"><i class="fas fa-edit"></i></button></a>
+                                        {% endif %}
+                                    {% endif %}
+                                    {% if user.is_superuser and helpdesk_settings.HELPDESK_SHOW_DELETE_BUTTON_SUPERUSER_FOLLOW_UP %}
+                                        <a href="{% url 'helpdesk:followup_delete' ticket.id followup.id %}" class='followup-edit'><button type="button" class="btn btn-warning btn-sm float-right"><i class="fas fa-trash"></i></button></a>
+                                    {% endif %}
+                                </small>
+                            {% endif %}{% endwith %}
+                        </div>
+                        <!-- /.list-group-item -->
+                    {% endfor %}
+                    </div>
+                    <!-- /.list-group -->
+                </div>
+                <!-- /.card-body -->
             </div>
-        </dd>
-    </dl>
+            <!-- /.card -->
 
-</div>
+        {% endif %}
 
-</fieldset>
+        <div class="card mb-3">
+            <div class="card-header">{% trans "Respond to this ticket" %}</div>
+            <div class="card-body">
 
-<button class="btn btn-primary float-right" type='submit'>{% trans "Update This Ticket" %}</button>
+        <form method='post' action='update/' enctype='multipart/form-data'>
 
-{% csrf_token %}</form>
+        <fieldset>
+            <dl>
+                {% if preset_replies %}
+                <dt><label for='id_preset'>{% trans "Use a Pre-set Reply" %}</label> <span class='form_optional'>{% trans "(Optional)" %}</span></dt>
+                <dd><select name='preset' id='id_preset'><option value=''>------</option>{% for preset in preset_replies %}<option value='{{ preset.id }}'>{{ preset.name }}</option>{% endfor %}</select></dd>
+                <dd class='form_help_text'>{% trans "Selecting a pre-set reply will over-write your comment below. You can then modify the pre-set reply to your liking before saving this update." %}</dd>
+                {% endif %}
 
-    </div>
-</div>
+                <dt><label for='commentBox'>{% trans "Comment / Resolution" %}</label></dt>
+                <dd><textarea rows='8' cols='70' name='comment' id='commentBox'></textarea></dd>
+                <dd class='form_help_text'>{% trans "You can insert ticket and queue details in your message. For more information, see the <a href='../../help/context/'>context help page</a>." %}</dd>
+
+                <dt><label>{% trans "New Status" %}</label></dt>
+                {% if not ticket.can_be_resolved %}<dd>{% trans "This ticket cannot be resolved or closed until the tickets it depends on are resolved." %}</dd>{% endif %}
+                {% ifequal ticket.status 1 %}
+                <dd><div class="form-group">
+                    <label for='st_open' class='active radio-inline'><input type='radio' name='new_status' value='1' id='st_open' checked='checked'>{% trans "Open" %} &raquo;</label>
+                    <label for='st_resolved' class="radio-inline"><input type='radio' name='new_status' value='3' id='st_resolved'{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}>{% trans "Resolved" %} &raquo;</label>
+                    <label for='st_closed' class="radio-inline"><input type='radio' name='new_status' value='4' id='st_closed'{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}>{% trans "Closed" %} &raquo;</label>
+                    <label class="radio-inline" for='st_duplicate'><input type='radio' name='new_status' value='5' id='st_duplicate'>{% trans "Duplicate" %}</label>
+                </div></dd>
+                {% endifequal %}
+                {% ifequal ticket.status 2 %}
+                <dd><div class="form-group">
+                    <label for='st_reopened' class='active radio-inline'><input type='radio' name='new_status' value='2' id='st_reopened' checked='checked'>{% trans "Reopened" %} &raquo;</label>
+                    <label class="radio-inline" for='st_resolved'><input type='radio' name='new_status' value='3' id='st_resolved'{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}>{% trans "Resolved" %} &raquo;</label>
+                    <label class="radio-inline" for='st_closed'><input type='radio' name='new_status' value='4' id='st_closed'{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}>{% trans "Closed" %} &raquo;</label>
+                    <label class="radio-inline" for='st_duplicate'><input type='radio' name='new_status' value='5' id='st_duplicate'>{% trans "Duplicate" %}</label>
+                </div></dd>
+                {% endifequal %}
+                {% ifequal ticket.status 3 %}
+                <dd><div class="form-group">
+                    <label for='st_reopened' class="radio-inline"><input type='radio' name='new_status' value='2' id='st_reopened'>{% trans "Reopened" %} &laquo;</label>
+                    <label for='st_resolved' class='active radio-inline'><input type='radio' name='new_status' value='3' id='st_resolved' checked='checked'>{% trans "Resolved" %} &raquo;</label>
+                    <label class="radio-inline" for='st_closed'><input type='radio' name='new_status' value='4' id='st_closed'>{% trans "Closed" %}</label>
+                </div></dd>
+                {% endifequal %}
+                {% ifequal ticket.status 4 %}
+                <dd><div class="form-group"><label for='st_reopened' class="radio-inline"><input type='radio' name='new_status' value='2' id='st_reopened'>{% trans "Reopened" %} &laquo;</label>
+                <label class="radio-inline" for='st_closed'><input type='radio' name='new_status' value='4' id='st_closed' checked='checked'>{% trans "Closed" %}</label></div></dd>
+                {% endifequal %}
+                {% ifequal ticket.status 5 %}
+                <dd><div class="form-group">
+                    <label class="radio-inline" for='st_reopened'><input type='radio' name='new_status' value='2' id='st_reopened'>{% trans "Reopened" %} &laquo;</label>
+                    <label class="radio-inline" for='st_duplicate'><input type='radio' name='new_status' value='5' id='st_duplicate' checked='checked'>{% trans "Duplicate" %}</label>
+                </div></dd>
+                {% endifequal %}
+
+                {% if helpdesk_settings.HELPDESK_UPDATE_PUBLIC_DEFAULT %}
+                <input type='hidden' name='public' value='1'>
+                {% else %}
+                <dt>
+                    <label for='id_public'>{% trans "Is this update public?" %}</label> <span class='form_optional'>{% trans "(Optional)" %}</span>
+                </dt>
+                <dd><input type='checkbox' name='public' value='1' checked='checked' />&nbsp; {% trans 'Yes, make this update public.' %}</dd>
+                <dd class='form_help_text'>{% trans "If this is public, the submitter will be e-mailed your comment or resolution." %}</dd>
+                {% endif %}
+
+                {% if user.is_staff %}
+                <dt>
+                    <label for='id_time_spent'>{% trans "Time spent" %}</label> <span class='form_optional'>{% trans "(Optional)" %}</span>
+                </dt>
+                <dd><input name='time_spent' type="time" /></dd>
+                {% endif %}
+            </dl>
+
+        <p id='ShowFurtherOptPara'><button class="btn btn-warning btn-sm" id='ShowFurtherEditOptions'>{% trans "Change Further Details &raquo;" %}</button></p>
+
+        <div id='FurtherEditOptions' style='display: none;'>
+
+            <dl>
+
+                <dt><label for='id_title'>{% trans "Title" %}</label></dt>
+                <dd><input type='text' name='title' value='{{ ticket.title|escape }}' /></dd>
+
+                <dt><label for='id_owner'>{% trans "Owner" %}</label></dt>
+                <dd><select id='id_owner' name='owner'><option value='0'>{% trans "Unassign" %}</option>{% for u in active_users %}<option value='{{ u.id }}' {% ifequal u.id ticket.assigned_to.id %}selected{% endifequal %}>{{ u }}</option>{% endfor %}</select></dd>
+
+                <dt><label for='id_priority'>{% trans "Priority" %}</label></dt>
+                <dd><select id='id_priority' name='priority'>{% for p in priorities %}<option value='{{ p.0 }}'{% ifequal p.0 ticket.priority %} selected='selected'{% endifequal %}>{{ p.1 }}</option>{% endfor %}</select></dd>
+
+                <dt><label for='id_due_date'>{% trans "Due on" %}</label></dt>
+                <dd>{{ form.due_date }}</dd>
+
+            </dl>
+
+        </div>
+
+        <p id='ShowFileUploadPara'><button class="btn btn-warning btn-sm" id='ShowFileUpload'>{% trans "Attach File(s) &raquo;" %}</button></p>
+
+        <div id='FileUpload' style='display: none;'>
+
+            <dl>
+                <dt><label for='id_file'>{% trans "Attach a File" %}</label></dt>
+                <dd>
+                    <div class="add_file_fields_wrap">
+                        <button class="add_file_field_button btn btn-success btn-xs">{% trans "Add Another File" %}</button>
+                        <div><label class='btn btn-primary btn-sm btn-file'>
+                                Browse... <input type="file" name='attachment' id='file0' style='display: none;'/>
+                        </label><span>&nbsp;</span><span id='selectedfilename0'>{% trans 'No files selected.' %}</span></div>
+                    </div>
+                </dd>
+            </dl>
+
+        </div>
+
+        </fieldset>
+
+        <button class="btn btn-primary float-right" type='submit'>{% trans "Update This Ticket" %}</button>
+
+        {% csrf_token %}</form>
+
+            </div>
+        </div>
+    {% endif %}
 {% endblock %}
 
 
