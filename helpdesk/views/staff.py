@@ -18,7 +18,7 @@ from django.core.exceptions import ValidationError, PermissionDenied
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
 from django.http import HttpResponseRedirect, Http404, HttpResponse, JsonResponse
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.utils.translation import ugettext as _
 from django.utils.html import escape
 from django.utils import timezone
@@ -38,7 +38,7 @@ from helpdesk.decorators import (
 )
 from helpdesk.forms import (
     TicketForm, UserSettingsForm, EmailIgnoreForm, EditTicketForm, TicketCCForm,
-    TicketCCEmailForm, TicketCCUserForm, EditFollowUpForm, TicketDependencyForm
+    TicketCCEmailForm, TicketCCUserForm, EditFollowUpForm, TicketDependencyForm, MultipleTicketSelectForm
 )
 from helpdesk.decorators import superuser_required
 from helpdesk.lib import (
@@ -48,7 +48,7 @@ from helpdesk.lib import (
 )
 from helpdesk.models import (
     Ticket, Queue, FollowUp, TicketChange, PreSetReply, FollowUpAttachment, SavedSearch,
-    IgnoreEmail, TicketCC, TicketDependency, UserSettings, KBItem,
+    IgnoreEmail, TicketCC, TicketDependency, UserSettings, KBItem, CustomField, TicketCustomFieldValue,
 )
 from helpdesk import settings as helpdesk_settings
 import helpdesk.views.abstract_views as abstract_views
@@ -61,6 +61,7 @@ from rest_framework.decorators import api_view
 from datetime import date, datetime, timedelta
 import re
 
+from ..templated_email import send_templated_mail
 
 User = get_user_model()
 Query = get_query_class()
@@ -766,6 +767,11 @@ def mass_update(request):
     elif action == 'take':
         user = request.user
         action = 'assign'
+    elif action == 'merge':
+        # Redirect to the Merge View with selected tickets id in the GET request
+        return redirect(
+            reverse('helpdesk:merge_tickets') + '?' + '&'.join(['tickets=%s' % ticket_id for ticket_id in tickets])
+        )
 
     huser = HelpdeskUser(request.user)
     for t in Ticket.objects.filter(id__in=tickets):
@@ -852,6 +858,144 @@ def mass_update(request):
 
 
 mass_update = staff_member_required(mass_update)
+
+
+# Prepare ticket attributes which will be displayed in the table to choose which value to keep when merging
+ticket_attributes = (
+    ('created', _('Created date')),
+    ('due_date', _('Due on')),
+    ('get_status_display', _('Status')),
+    ('submitter_email', _('Submitter email')),
+    ('description', _('Description')),
+    ('resolution', _('Resolution')),
+)
+
+
+@staff_member_required
+def merge_tickets(request):
+    """ TODO """
+    ticket_select_form = MultipleTicketSelectForm(request.GET or None)
+    tickets = custom_fields = None
+    if ticket_select_form.is_valid():
+        tickets = ticket_select_form.cleaned_data.get('tickets')
+
+        custom_fields = CustomField.objects.all()
+        default = _('Not defined')
+        for ticket in tickets:
+            ticket.values = {}
+            # Prepare the value for each attributes of this ticket
+            for attr, display_name in ticket_attributes:
+                value = getattr(ticket, attr, default)
+                # Check if attr is a get_FIELD_display
+                if attr.startswith('get_') and attr.endswith('_display'):
+                    # Hack to call methods like get_FIELD_display()
+                    value = getattr(ticket, attr, default)()
+                ticket.values[attr] = {
+                    'value': value,
+                    'checked': str(ticket.id) == request.POST.get(attr)
+                }
+            # Prepare the value for each custom fields of this ticket
+            for custom_field in custom_fields:
+                try:
+                    value = ticket.ticketcustomfieldvalue_set.get(field=custom_field).value
+                except (TicketCustomFieldValue.DoesNotExist, ValueError):
+                    value = default
+                ticket.values[custom_field.name] = {
+                    'value': value,
+                    'checked': str(ticket.id) == request.POST.get(custom_field.name)
+                }
+
+        if request.method == 'POST':
+            # Find which ticket has been chosen to be the main one
+            try:
+                chosen_ticket = tickets.get(id=request.POST.get('chosen_ticket'))
+            except Ticket.DoesNotExist:
+                ticket_select_form.add_error(
+                    field='tickets',
+                    error=_('Please choose a ticket in which the others will be merged into.')
+                )
+            else:
+                # Save ticket fields values
+                for attr, display_name in ticket_attributes:
+                    id_for_attr = request.POST.get(attr)
+                    if id_for_attr != chosen_ticket.id:
+                        try:
+                            selected_ticket = tickets.get(id=id_for_attr)
+                        except Ticket.DoesNotExist:
+                            pass
+                        else:
+                            # Check if attr is a get_FIELD_display
+                            if attr.startswith('get_') and attr.endswith('_display'):
+                                # Keep only the FIELD part
+                                attr = attr[4:-8]
+                            value = getattr(selected_ticket, attr)
+                            setattr(chosen_ticket, attr, value)
+                # Save custom fields values
+                for custom_field in custom_fields:
+                    id_for_attr = request.POST.get(custom_field.name)
+                    if id_for_attr != chosen_ticket.id:
+                        try:
+                            selected_ticket = tickets.get(id=id_for_attr)
+                        except (Ticket.DoesNotExist, ValueError):
+                            continue
+
+                        # Check if the value for this ticket custom field exists
+                        try:
+                            value = selected_ticket.ticketcustomfieldvalue_set.get(field=custom_field).value
+                        except TicketCustomFieldValue.DoesNotExist:
+                            continue
+
+                        # Create the custom field value or update it with the value from the selected ticket
+                        custom_field_value, created = chosen_ticket.ticketcustomfieldvalue_set.get_or_create(
+                            field=custom_field,
+                            defaults={'value': value}
+                        )
+                        if not created:
+                            custom_field_value.value = value
+                            custom_field_value.save(update_fields=['value'])
+                # Save changes
+                chosen_ticket.save()
+
+                # For other tickets, save the link to ticket in which they have been merged to
+                # and set status as DUPLICATE
+                for ticket in tickets.exclude(id=chosen_ticket.id):
+                    ticket.merged_to = chosen_ticket
+                    ticket.status = Ticket.DUPLICATE_STATUS
+                    ticket.save()
+
+                    # Send mail to submitter email and ticket CC to let them know ticket has been merged
+                    context = safe_template_context(ticket)
+                    if ticket.submitter_email:
+                        send_templated_mail(
+                            template_name='merged',
+                            context=context,
+                            recipients=[ticket.submitter_email],
+                            bcc=[cc.email_address for cc in ticket.ticketcc_set.select_related('user')],
+                            sender=ticket.queue.from_address,
+                            fail_silently=True
+                        )
+
+                    # Move all followups and update their title to know they come from another ticket
+                    ticket.followup_set.update(
+                        ticket=chosen_ticket,
+                        # Next might exceed maximum 200 characters limit
+                        title=_('[Merged from #%d] %s') % (ticket.id, ticket.title)
+                    )
+
+                    # Add submitter_email, assigned_to email and ticketcc to chosen ticket if necessary
+                    chosen_ticket.add_email_to_ticketcc_if_not_in(email=ticket.submitter_email)
+                    if ticket.assigned_to and ticket.assigned_to.email:
+                        chosen_ticket.add_email_to_ticketcc_if_not_in(email=ticket.assigned_to.email)
+                    for ticketcc in ticket.ticketcc_set.all():
+                        chosen_ticket.add_email_to_ticketcc_if_not_in(ticketcc=ticketcc)
+                return redirect(chosen_ticket)
+
+    return render(request, 'helpdesk/ticket_merge.html', {
+        'tickets': tickets,
+        'ticket_attributes': ticket_attributes,
+        'custom_fields': custom_fields,
+        'ticket_select_form': ticket_select_form
+    })
 
 
 @helpdesk_staff_member_required

@@ -3,6 +3,7 @@ import mimetypes
 import logging
 from smtplib import SMTPException
 
+from django.conf import settings
 from django.utils.safestring import mark_safe
 
 logger = logging.getLogger('helpdesk')

@@ -804,6 +804,40 @@ class Ticket(models.Model):
     def get_resolution_markdown(self):
         return get_markdown(self.resolution)
 
+    def add_email_to_ticketcc_if_not_in(self, email=None, user=None, ticketcc=None):
+        """
+        Check that given email/user_email/ticketcc_email is not already present on the ticket
+        (submitter email, assigned to, or in ticket CCs) and add it to a new ticket CC,
+        or move the given one
+
+        :param str email:
+        :param User user:
+        :param TicketCC ticketcc:
+        """
+        if ticketcc:
+            email = ticketcc.display
+        elif user:
+            if user.email:
+                email = user.email
+            else:
+                return
+        elif not email:
+            return
+
+        # Check that email is not already part of the ticket
+        if (
+                email != self.submitter_email and
+                (self.assigned_to and email != self.assigned_to.email) and
+                email not in [x.display for x in self.ticketcc_set.all()]
+        ):
+            if ticketcc:
+                ticketcc.ticket = self
+                ticketcc.save(update_fields=['ticket'])
+            elif user:
+                self.ticketcc_set.create(user=user)
+            else:
+                self.ticketcc_set.create(email=email)
+
 
 class FollowUpManager(models.Manager):
 

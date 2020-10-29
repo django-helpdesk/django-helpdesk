@@ -1,0 +1,13 @@
+{% load helpdesk_util %}
+<tr>
+    <td class="text-right">{{ display_attr }}</td>
+    {% for ticket in tickets %}
+        <td>
+            <label>
+                <input name="{{ attr }}" type="radio" value="{{ ticket.id }}"
+                       class="flat"{% if ticket.values|get:attr|get:"checked" %} checked{% endif %}>
+                {{ ticket.values|get:attr|get:"value"|default:"Not defined" }}
+            </label>
+        </td>
+    {% endfor %}
+</tr>
