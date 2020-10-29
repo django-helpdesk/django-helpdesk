@@ -1,0 +1,89 @@
+{% extends "helpdesk/public_base.html" %}
+
+{% load static %}
+
+{% block helpdesk_body %}
+    <div class="col-xs-12">
+        <h2>Enquête de satisfaction</h2>
+        {% if success %}
+            <div class="text-center">
+                <div class="well">
+                    <h3>Merci pour votre retour, ils sont très précieux pour nous !</h3>
+                </div>
+                <a class="btn btn-default" href="{% if request.user.is_authenticated %}{{ ticket.get_absolute_url }}{% else %}{{ ticket.ticket_url }}{% endif %}">
+                    Retourner sur la page du ticket
+                </a>
+            </div>
+        {% else %}
+            <form method="post">
+                {% csrf_token %}
+                {% if form.errors %}
+                    {% include 'base/components/alert_error.html' %}
+                {% endif %}
+                <div class="form-group">
+                    Comment évaluez vous la résolution du ticket
+                    <a href="{% if request.user.is_authenticated %}{{ ticket.get_absolute_url }}{% else %}{{ ticket.ticket_url }}{% endif %}" target="_blank">{{ ticket.ticket_for_url }} <i class="fa fa-external-link"></i></a> ?
+                </div>
+                <div class="row form-group">
+                    <div class="col-sm-6 col-xs-12">
+                        <div class="col-xs-4 text-center">
+                            <label>
+                                <img src="{% static 'helpdesk/img/feedback_good.jpg' %}" alt="Emoji Content" width="50px">
+                                <br>
+                                <input type="radio" name="score" value="2" required{% if form.score.initial == "2" %} checked{% endif %}>
+                                Très bon
+                            </label>
+                        </div>
+                        <div class="col-xs-4 text-center">
+                            <label>
+                                <img src="{% static 'helpdesk/img/feedback_ok.png' %}" alt="Emoji Neutre" width="50px">
+                                <br>
+                                <input type="radio" name="score" value="1" required{% if form.score.initial == "1" %} checked{% endif %}>
+                                moyen
+                            </label>
+                        </div>
+                        <div class="col-xs-4 text-center">
+                            <label>
+                                <img src="{% static 'helpdesk/img/feedback_bad.png' %}" alt="Emoji Mécontent" width="50px">
+                                <br>
+                                <input type="radio" name="score" value="0" required{% if form.score.initial == "0" %} checked{% endif %}>
+                                à améliorer
+                            </label>
+                        </div>
+                    </div>
+                    {% if form.score.errors %}
+                        <div class="col-sm-6 col-xs-12">
+                            {{ form.score.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+                <blockquote class="form-group" id="info"></blockquote>
+                <div class="form-group">
+                    {{ form.message.label_tag }}
+                    {{ form.message }}
+                    {{ form.message.errors }}
+                    <p class="form_help_text">
+                        Le message est facultatif mais nous aurions vraiment besoin de votre commentaire
+                        dans le cas d'un retour négatif afin de pouvoir progresser et continuer à vous satisfaire.
+                    </p>
+                </div>
+                <button type="submit" class="btn btn-success">Soumettre</button>
+            </form>
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% block helpdesk_js %}
+    <script>
+        messages = {
+            2: "Merci !<br>Vous avez comblé ma journée !",
+            1: "Oh, ce n'est pas le service que vous souhaitiez...<br>Pouvez-vous nous dire comment nous améliorer ?",
+            0: "Ah, c'est embarrassant...<br>Pouvez-vous nous dire comment nous pourrions éviter ce genre d'erreur à l'avenir ?",
+        }
+        $(() => {
+            $('input[name=score]').on('input', function() {
+                $('#info').html(messages[$(this).val()])
+            })
+        })
+    </script>
+{% endblock %}

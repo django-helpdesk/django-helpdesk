@@ -14,6 +14,7 @@ from smtplib import SMTPException
 from bs4 import BeautifulSoup
 from django.contrib.auth import get_user_model
 from django.core.mail import mail_admins
+from django.urls import reverse, set_script_prefix, clear_script_prefix
 from helpdesk import settings as helpdesk_settings
 
 from base.models import get_technical_service
@@ -110,10 +111,20 @@ def send_templated_mail(template_name,
         if field in context:
             context[field] = mark_safe(context[field])
 
+    # Set script url to the site URL in order to have absolute url in the mail
+    set_script_prefix(settings.SITE_URL)
+
+    # Add feedback_survey_url  to context if it is a closed ticket
+    if template_name == 'closed_submitter':
+        context['feedback_survey_url'] = reverse(
+            'helpdesk:feedback_survey',
+            kwargs={'ticket_id': context['ticket']['id']}
+        )
+
     html_part = from_string(
-        "{%% extends '%s' %%}{%% block title %%}"
-        "%s"
-        "{%% endblock %%}{%% block content %%}%s{%% endblock %%}" %
+        "{%% extends '%s' %%}"
+        "{%% block title %%}%s{%% endblock %%}"
+        "{%% block content %%}%s{%% endblock %%}" %
         (email_html_base_file, t.heading, t.html)
     ).render(context)
 
@@ -123,8 +134,10 @@ def send_templated_mail(template_name,
             context[field] = BeautifulSoup(context[field], 'html.parser').get_text()
 
     text_part = from_string(
-        "%s{%% include '%s' %%}" % (t.plain_text, footer_file)
+        "%s\n\n{%% include '%s' %%}" % (t.plain_text, footer_file)
     ).render(context)
+
+    clear_script_prefix()
 
     if isinstance(recipients, str):
         if recipients.find(','):

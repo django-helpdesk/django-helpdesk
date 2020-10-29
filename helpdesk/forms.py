@@ -17,8 +17,8 @@ from django.utils import timezone
 from django_select2.forms import ModelSelect2MultipleWidget, ModelSelect2Widget
 
 from helpdesk.lib import send_templated_mail, safe_template_context, process_attachments, get_assignable_users
-from helpdesk.models import Ticket, Queue, FollowUp, IgnoreEmail, TicketCC, CustomField, TicketCustomFieldValue,\
-    TicketDependency
+from helpdesk.models import Ticket, Queue, FollowUp, IgnoreEmail, TicketCC, CustomField, TicketCustomFieldValue, \
+    TicketDependency, FeedbackSurvey
 from helpdesk import settings as helpdesk_settings
 from phonenumber_field.formfields import PhoneNumberField
 from phonenumber_field.widgets import PhoneNumberInternationalFallbackWidget
@@ -718,3 +718,12 @@ class MultipleTicketSelectForm(forms.Form):
         if len(tickets) > 4:
             raise ValidationError('Impossible de fusionner plus de 4 tickets...')
         return tickets
+
+
+class FeedbackSurveyForm(forms.ModelForm):
+    class Meta:
+        model = FeedbackSurvey
+        exclude = ('ticket', 'author')
+        widgets = {
+            'message': forms.Textarea(attrs={'class': 'form-control resize-vertical'})
+        }

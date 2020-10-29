@@ -194,6 +194,12 @@ urlpatterns += [
     url(r'^change_language/$',
         public.change_language,
         name='public_change_language'),
+
+    url(
+        r'^feedback_survey/(?P<ticket_id>[0-9]+)/$',
+        public.feedback_survey_view,
+        name='feedback_survey'
+    )
 ]
 
 urlpatterns += [

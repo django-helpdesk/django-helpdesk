@@ -11,6 +11,7 @@ from __future__ import unicode_literals
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.validators import MaxValueValidator
 from django.db import models
 from django.conf import settings
 from django.urls import reverse
@@ -995,6 +996,35 @@ class TicketChange(models.Model):
     class Meta:
         verbose_name = _('Ticket change')
         verbose_name_plural = _('Ticket changes')
+
+
+class FeedbackSurvey(models.Model):
+    ticket = models.ForeignKey(
+        Ticket,
+        verbose_name=_('Ticket'),
+        on_delete=models.CASCADE,
+        related_name='feedback_surveys'
+    )
+    created_at = models.DateTimeField(
+        _('Created'),
+        auto_now_add=True
+    )
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_('Author'),
+        on_delete=models.SET_NULL,
+        related_name='feedback_survey_answers',
+        null=True,
+        blank=True
+    )
+    score = models.PositiveSmallIntegerField(
+        _('Score'),
+        validators=[MaxValueValidator(2)]
+    )
+    message = models.TextField(
+        _('Message'),
+        blank=True
+    )
 
 
 def attachment_path(instance, filename):

@@ -16,14 +16,14 @@ except ImportError:
     # Django < 2
     from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponse
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404, redirect
 from django.utils.http import urlquote
 from django.utils.translation import ugettext as _
 from django.conf import settings
 
 from helpdesk import settings as helpdesk_settings
 from helpdesk.decorators import protect_view
-from helpdesk.forms import PublicTicketForm
+from helpdesk.forms import PublicTicketForm, FeedbackSurveyForm
 from helpdesk.lib import text_is_spam
 from helpdesk.models import Ticket, Queue, UserSettings, KBCategory
 
@@ -175,3 +175,21 @@ def change_language(request):
         return_to = request.GET['return_to']
 
     return render(request, 'helpdesk/public_change_language.html', {'next': return_to})
+
+
+def feedback_survey_view(request, ticket_id):
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+    form = FeedbackSurveyForm(request.POST or None)
+    success = False
+    if form.is_valid():
+        feedback_survey = form.save(commit=False)
+        feedback_survey.ticket = ticket
+        if request.user.is_authenticated:
+            feedback_survey.author = request.user
+        feedback_survey.save()
+        success = True
+    return render(request, 'helpdesk/public_feedback_survey.html', {
+        'ticket': ticket,
+        'form': form,
+        'success': success
+    })
