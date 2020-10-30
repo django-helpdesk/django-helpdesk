@@ -986,7 +986,7 @@ def merge_tickets(request):
                     ticket.followup_set.update(
                         ticket=chosen_ticket,
                         # Next might exceed maximum 200 characters limit
-                        title=_('[Merged from #%d] %s') % (ticket.id, ticket.title)
+                        title=_('[Merged from #%(id)d] %(title)s') % {'id': ticket.id, 'title': ticket.title}
                     )
 
                     # Add submitter_email, assigned_to email and ticketcc to chosen ticket if necessary
