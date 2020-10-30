@@ -63,7 +63,7 @@ class FeedbackSurveyFilter(df.FilterSet):
     score = df.MultipleChoiceFilter(
         field_name='score',
         label='Score',
-        choices=[(0, "à améliorer"), (1, "moyen"), (2, "très bon")],
+        choices=[(2, "Très bon"), (1, "Moyen"), (0, "À améliorer")],
         widget=forms.CheckboxSelectMultiple(
             attrs={'class': 'list-inline flat'}
         )

@@ -998,6 +998,17 @@ class TicketChange(models.Model):
         verbose_name_plural = _('Ticket changes')
 
 
+class FeedbackSurveyQueryset(models.QuerySet):
+    def bad(self):
+        return self.filter(score=0)
+
+    def neutral(self):
+        return self.filter(score=1)
+
+    def good(self):
+        return self.filter(score=2)
+
+
 class FeedbackSurvey(models.Model):
     ticket = models.ForeignKey(
         Ticket,
@@ -1025,6 +1036,8 @@ class FeedbackSurvey(models.Model):
         _('Message'),
         blank=True
     )
+
+    objects = FeedbackSurveyQueryset.as_manager()
 
 
 def attachment_path(instance, filename):

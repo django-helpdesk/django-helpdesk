@@ -18,41 +18,49 @@
             <div class="clearfix"></div>
         </div>
         <div class="x_content">
-            <div class="well">
-                <form method="get">
-                    <div class="row">
-                        <div class="col-sm-3 col-xs-12 form-group">
-                            {{ filter.form.tickets.label_tag }}
-                            {{ filter.form.tickets }}
-                            {{ filter.form.tickets.errors }}
-                        </div>
-                        <div class="col-sm-3 col-xs-12 form-group">
-                            {{ filter.form.assigned_to.label_tag }}
-                            {{ filter.form.assigned_to }}
-                            {{ filter.form.assigned_to.errors }}
-                        </div>
-                        <div class="col-sm-3 col-xs-12 form-group">
-                            {{ filter.form.created_between.label_tag }}<br>
-                            {{ filter.form.created_between }}
-                            {{ filter.form.created_between.errors }}
-                        </div>
-                        <div class="col-sm-3 col-xs-12 form-group">
-                            {{ filter.form.score.label_tag }}
-                            {{ filter.form.score }}
-                            {{ filter.form.score.errors }}
-                        </div>
+            <div class="row">
+                <div class="col-sm-10 col-xs-12">
+                    <div class="well">
+                        <form method="get">
+                            <div class="row">
+                                <div class="col-sm-3 col-xs-12 form-group">
+                                    {{ filter.form.tickets.label_tag }}
+                                    {{ filter.form.tickets }}
+                                    {{ filter.form.tickets.errors }}
+                                </div>
+                                <div class="col-sm-3 col-xs-12 form-group">
+                                    {{ filter.form.assigned_to.label_tag }}
+                                    {{ filter.form.assigned_to }}
+                                    {{ filter.form.assigned_to.errors }}
+                                </div>
+                                <div class="col-sm-4 col-xs-12 form-group">
+                                    {{ filter.form.created_between.label_tag }}<br>
+                                    {{ filter.form.created_between }}
+                                    {{ filter.form.created_between.errors }}
+                                </div>
+                                <div class="col-sm-2 col-xs-12 form-group">
+                                    {{ filter.form.score.label_tag }}
+                                    {{ filter.form.score }}
+                                    {{ filter.form.score.errors }}
+                                </div>
+                            </div>
+                            <div class="text-center">
+                                <button type="submit" class="btn btn-primary">
+                                    Filtrer
+                                    <i class="fa fa-filter"></i>
+                                </button>
+                                <a href="{% url 'helpdesk:feedback_survey_list' %}" class="btn btn-default">
+                                    Effacer les filtres
+                                    <i class="fa fa-eraser"></i>
+                                </a>
+                            </div>
+                        </form>
                     </div>
-                    <div class="text-center">
-                        <button type="submit" class="btn btn-primary">
-                            Filtrer
-                            <i class="fa fa-filter"></i>
-                        </button>
-                        <a href="{% url 'helpdesk:feedback_survey_list' %}" class="btn btn-default">
-                            Effacer les filtres
-                            <i class="fa fa-eraser"></i>
-                        </a>
-                    </div>
-                </form>
+                </div>
+                <div class="col-sm-2 col-xs-12">
+                    <strong>Statistiques :</strong>
+                    <canvas id="doughnutChart"></canvas>
+                </div>
             </div>
             <div class="table-responsive">
                 <table class="table table-striped">
@@ -71,11 +79,11 @@
                             <tr>
                                 <td class="text-center">
                                     {% if feedback_survey.score == 2 %}
-                                        <img src="{% static 'helpdesk/img/feedback_good.jpg' %}" alt="Emoji Content" width="30px">
+                                        <img src="{% static 'helpdesk/img/feedback_good.jpg' %}" alt="Emoji Content" title="Très bon" width="30px">
                                     {% elif feedback_survey.score == 1 %}
-                                        <img src="{% static 'helpdesk/img/feedback_ok.png' %}" alt="Emoji Neutre" width="30px">
+                                        <img src="{% static 'helpdesk/img/feedback_ok.png' %}" alt="Emoji Neutre" title="Moyen" width="30px">
                                     {% elif feedback_survey.score == 0 %}
-                                        <img src="{% static 'helpdesk/img/feedback_bad.png' %}" alt="Emoji Mécontent" width="30px">
+                                        <img src="{% static 'helpdesk/img/feedback_bad.png' %}" alt="Emoji Mécontent" title="À améliorer" width="30px">
                                     {% endif %}
                                 </td>
                                 <td class="text-center">{{ feedback_survey.created_at }}</td>
@@ -113,4 +121,40 @@
 
 {% block custom_javascripts %}
     {{ filter.form.media.js }}
+    <!-- Chart.js -->
+    <script src="{% static  'base/vendors/Chart.js/dist/Chart.min.js' %}"></script>
+    <script>
+        $(() => {
+            new Chart($('#doughnutChart'), {
+                type: 'doughnut',
+                tooltipFillColor: "rgba(51, 51, 51, 0.55)",
+                data: {
+                    labels: [
+                        "Très bon",
+                        "Moyen",
+                        "À améliorer"
+                    ],
+                    datasets: [{
+                        data: [{{ filter.qs.good.count }}, {{ filter.qs.neutral.count }}, {{ filter.qs.bad.count }}],
+                        backgroundColor: [
+                            "#1ABB9C",
+                            "#eae156",
+                            "#E74C3C"
+                        ],
+                        hoverBackgroundColor: [
+                            "#2BCCAD",
+                            "#fbf267",
+                            "#F85D4D"
+                        ]
+                    }]
+                },
+                options: {
+                    legend: false,
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    aspectRatio: 1
+                }
+            })
+        })
+    </script>
 {% endblock %}
