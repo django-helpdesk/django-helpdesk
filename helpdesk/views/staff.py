@@ -866,6 +866,7 @@ ticket_attributes = (
     ('due_date', _('Due on')),
     ('get_status_display', _('Status')),
     ('submitter_email', _('Submitter email')),
+    ('assigned_to', _('Owner')),
     ('description', _('Description')),
     ('resolution', _('Resolution')),
 )
