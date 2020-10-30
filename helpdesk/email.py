@@ -337,9 +337,15 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
     if previous_followup is None and ticket_id is not None:
         try:
             ticket = Ticket.objects.get(id=ticket_id)
-            new = False
         except Ticket.DoesNotExist:
             ticket = None
+        else:
+            new = False
+            # Check if the ticket has been merged to another ticket
+            if ticket.merged_to:
+                logger.info("Ticket has been merged to %s" % ticket.merged_to.ticket)
+                # Use the ticket in which it was merged to for next operations
+                ticket = ticket.merged_to
 
     # New issue, create a new <Ticket> instance
     if ticket is None:
