@@ -873,7 +873,12 @@ ticket_attributes = (
 
 @staff_member_required
 def merge_tickets(request):
-    """ TODO """
+    """
+    An intermediate view to merge up to 3 tickets in one main ticket.
+    The user has to first select which ticket will receive the other tickets information and can also choose which
+    data to keep per attributes as well as custom fields.
+    Follow-ups and ticketCC will be moved to the main ticket and other tickets won't be able to receive new answers.
+    """
     ticket_select_form = MultipleTicketSelectForm(request.GET or None)
     tickets = custom_fields = None
     if ticket_select_form.is_valid():
@@ -884,15 +889,15 @@ def merge_tickets(request):
         for ticket in tickets:
             ticket.values = {}
             # Prepare the value for each attributes of this ticket
-            for attr, display_name in ticket_attributes:
-                value = getattr(ticket, attr, default)
+            for attribute, display_name in ticket_attributes:
+                value = getattr(ticket, attribute, default)
                 # Check if attr is a get_FIELD_display
-                if attr.startswith('get_') and attr.endswith('_display'):
+                if attribute.startswith('get_') and attribute.endswith('_display'):
                     # Hack to call methods like get_FIELD_display()
-                    value = getattr(ticket, attr, default)()
-                ticket.values[attr] = {
+                    value = getattr(ticket, attribute, default)()
+                ticket.values[attribute] = {
                     'value': value,
-                    'checked': str(ticket.id) == request.POST.get(attr)
+                    'checked': str(ticket.id) == request.POST.get(attribute)
                 }
             # Prepare the value for each custom fields of this ticket
             for custom_field in custom_fields:
@@ -916,26 +921,27 @@ def merge_tickets(request):
                 )
             else:
                 # Save ticket fields values
-                for attr, display_name in ticket_attributes:
-                    id_for_attr = request.POST.get(attr)
-                    if id_for_attr != chosen_ticket.id:
+                for attribute, display_name in ticket_attributes:
+                    id_for_attribute = request.POST.get(attribute)
+                    if id_for_attribute != chosen_ticket.id:
                         try:
-                            selected_ticket = tickets.get(id=id_for_attr)
-                        except Ticket.DoesNotExist:
-                            pass
-                        else:
-                            # Check if attr is a get_FIELD_display
-                            if attr.startswith('get_') and attr.endswith('_display'):
-                                # Keep only the FIELD part
-                                attr = attr[4:-8]
-                            value = getattr(selected_ticket, attr)
-                            setattr(chosen_ticket, attr, value)
+                            selected_ticket = tickets.get(id=id_for_attribute)
+                        except (Ticket.DoesNotExist, ValueError):
+                            continue
+
+                        # Check if attr is a get_FIELD_display
+                        if attribute.startswith('get_') and attribute.endswith('_display'):
+                            # Keep only the FIELD part
+                            attribute = attribute[4:-8]
+                        # Get value from selected ticket and then save it on the chosen ticket
+                        value = getattr(selected_ticket, attribute)
+                        setattr(chosen_ticket, attribute, value)
                 # Save custom fields values
                 for custom_field in custom_fields:
-                    id_for_attr = request.POST.get(custom_field.name)
-                    if id_for_attr != chosen_ticket.id:
+                    id_for_custom_field = request.POST.get(custom_field.name)
+                    if id_for_custom_field != chosen_ticket.id:
                         try:
-                            selected_ticket = tickets.get(id=id_for_attr)
+                            selected_ticket = tickets.get(id=id_for_custom_field)
                         except (Ticket.DoesNotExist, ValueError):
                             continue
 
@@ -956,8 +962,8 @@ def merge_tickets(request):
                 # Save changes
                 chosen_ticket.save()
 
-                # For other tickets, save the link to ticket in which they have been merged to
-                # and set status as DUPLICATE
+                # For other tickets, save the link to the ticket in which they have been merged to
+                # and set status to DUPLICATE
                 for ticket in tickets.exclude(id=chosen_ticket.id):
                     ticket.merged_to = chosen_ticket
                     ticket.status = Ticket.DUPLICATE_STATUS
