@@ -71,12 +71,11 @@
                             {% for ticket in tickets %}
                                 <th class="text-center">
                                     <label>
+                                        <input name="chosen_ticket" type="radio" value="{{ ticket.id }}"{% if forloop.first %} checked{% endif %}>
                                         {{ ticket }}
-                                        <input name="chosen_ticket" type="radio" value="{{ ticket.id }}"
-                                           class="flat"{% if forloop.first %} checked{% endif %}>
                                         <a href="{{ ticket.get_absolute_url }}" target="_blank" class="btn btn-outline-primary btn-sm" role="button">
                                             {% trans "Open ticket" %}
-                                            <i class="fa fa-external-link"></i>
+                                            <i class="fa fa-external-link-alt"></i>
                                         </a>
                                     </label>
                                 </th>
