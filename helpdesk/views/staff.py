@@ -1508,21 +1508,27 @@ def ticket_cc_add(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
     ticket_perm_check(request, ticket)
 
+    form = None
     if request.method == 'POST':
         form = TicketCCForm(request.POST)
         if form.is_valid():
-            ticketcc = form.save(commit=False)
-            ticketcc.ticket = ticket
-            ticketcc.save()
-            return HttpResponseRedirect(reverse('helpdesk:ticket_cc',
-                                                kwargs={'ticket_id': ticket.id}))
-    else:
-        form_email = TicketCCEmailForm()
-        form_user = TicketCCUserForm()
+            user = form.cleaned_data.get('user')
+            email = form.cleaned_data.get('email')
+            if user and ticket.ticketcc_set.filter(user=user).exists():
+                form.add_error('user', _('Impossible to add twice the same user'))
+            elif email and ticket.ticketcc_set.filter(email=email).exists():
+                form.add_error('email', _('Impossible to add twice the same email address'))
+            else:
+                ticketcc = form.save(commit=False)
+                ticketcc.ticket = ticket
+                ticketcc.save()
+                return HttpResponseRedirect(reverse('helpdesk:ticket_cc', kwargs={'ticket_id': ticket.id}))
+
     return render(request, 'helpdesk/ticket_cc_add.html', {
         'ticket': ticket,
-        'form_email': form_email,
-        'form_user': form_user,
+        'form': form,
+        'form_email': TicketCCEmailForm(),
+        'form_user': TicketCCUserForm(),
     })
 
 
@@ -1531,13 +1537,14 @@ ticket_cc_add = staff_member_required(ticket_cc_add)
 
 @helpdesk_staff_member_required
 def ticket_cc_del(request, ticket_id, cc_id):
+    ticket = get_object_or_404(Ticket, id=ticket_id)
     cc = get_object_or_404(TicketCC, ticket__id=ticket_id, id=cc_id)
 
     if request.method == 'POST':
         cc.delete()
-        return HttpResponseRedirect(reverse('helpdesk:ticket_cc',
-                                            kwargs={'ticket_id': cc.ticket.id}))
-    return render(request, 'helpdesk/ticket_cc_del.html', {'cc': cc})
+        return HttpResponseRedirect(reverse('helpdesk:ticket_cc', kwargs={'ticket_id': cc.ticket.id}))
+
+    return render(request, 'helpdesk/ticket_cc_del.html', {'ticket': ticket, 'cc': cc})
 
 
 ticket_cc_del = staff_member_required(ticket_cc_del)
