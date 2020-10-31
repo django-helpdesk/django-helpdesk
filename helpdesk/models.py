@@ -10,7 +10,7 @@ models.py - Model (and hence database) definitions. This is the core of the
 from django.contrib.auth.models import Permission
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
@@ -1665,6 +1665,10 @@ class TicketCC(models.Model):
 
     def __str__(self):
         return '%s for %s' % (self.display, self.ticket.title)
+
+    def clean(self):
+        if self.user and not self.user.email:
+            raise ValidationError('User has no email address')
 
 
 class CustomFieldManager(models.Manager):
