@@ -1036,6 +1036,7 @@ ticket_attributes = (
     ('site', 'Site'),
     ('customer_product', 'Produit client'),
     ('link_open', "Lien d'ouverture ticket"),
+    ('assigned_to', "Technien affecté"),
     ('category', 'Catégorie'),
     ('type', 'Type'),
     ('get_billing_display', 'Facturation'),
