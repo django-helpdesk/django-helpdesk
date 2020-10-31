@@ -813,6 +813,7 @@ class Ticket(models.Model):
         :param str email:
         :param User user:
         :param TicketCC ticketcc:
+        :rtype: TicketCC|None
         """
         if ticketcc:
             email = ticketcc.display
@@ -820,23 +821,28 @@ class Ticket(models.Model):
             if user.email:
                 email = user.email
             else:
+                # Ignore if user has no email address
                 return
         elif not email:
-            return
+            raise ValueError('You must provide at least one parameter to get the email from')
+
+        # Prepare all emails already into the ticket
+        ticket_emails = [x.display for x in self.ticketcc_set.all()]
+        if self.submitter_email:
+            ticket_emails.append(self.submitter_email)
+        if self.assigned_to and self.assigned_to.email:
+            ticket_emails.append(self.assigned_to.email)
 
         # Check that email is not already part of the ticket
-        if (
-                email != self.submitter_email and
-                (self.assigned_to and email != self.assigned_to.email) and
-                email not in [x.display for x in self.ticketcc_set.all()]
-        ):
+        if email not in ticket_emails:
             if ticketcc:
                 ticketcc.ticket = self
                 ticketcc.save(update_fields=['ticket'])
             elif user:
-                self.ticketcc_set.create(user=user)
+                ticketcc = self.ticketcc_set.create(user=user)
             else:
-                self.ticketcc_set.create(email=email)
+                ticketcc = self.ticketcc_set.create(email=email)
+            return ticketcc
 
 
 class FollowUpManager(models.Manager):
