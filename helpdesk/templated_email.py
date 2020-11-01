@@ -3,6 +3,7 @@ import mimetypes
 import logging
 from smtplib import SMTPException
 
+from django.conf import settings
 from django.utils.safestring import mark_safe
 
 logger = logging.getLogger('helpdesk')
@@ -72,7 +73,7 @@ def send_templated_mail(template_name,
     footer_file = os.path.join('helpdesk', locale, 'email_text_footer.txt')
 
     text_part = from_string(
-        "%s{%% include '%s' %%}" % (t.plain_text, footer_file)
+        "%s\n\n{%% include '%s' %%}" % (t.plain_text, footer_file)
     ).render(context)
 
     email_html_base_file = os.path.join('helpdesk', locale, 'email_html_base.html')
@@ -81,9 +82,9 @@ def send_templated_mail(template_name,
         context['comment'] = mark_safe(context['comment'].replace('\r\n', '<br>'))
 
     html_part = from_string(
-        "{%% extends '%s' %%}{%% block title %%}"
-        "%s"
-        "{%% endblock %%}{%% block content %%}%s{%% endblock %%}" %
+        "{%% extends '%s' %%}"
+        "{%% block title %%}%s{%% endblock %%}"
+        "{%% block content %%}%s{%% endblock %%}" %
         (email_html_base_file, t.heading, t.html)
     ).render(context)
 

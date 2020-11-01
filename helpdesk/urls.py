@@ -52,6 +52,10 @@ urlpatterns = [
         staff.mass_update,
         name='mass_update'),
 
+    url(r'^tickets/merge$',
+        staff.merge_tickets,
+        name='merge_tickets'),
+
     url(r'^tickets/(?P<ticket_id>[0-9]+)/$',
         staff.view_ticket,
         name='view'),

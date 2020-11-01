@@ -8,7 +8,7 @@ forms.py - Definitions of newforms-based forms for creating and maintaining
 """
 import logging
 
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django import forms
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
@@ -510,3 +510,22 @@ class TicketDependencyForm(forms.ModelForm):
     class Meta:
         model = TicketDependency
         exclude = ('ticket',)
+
+
+class MultipleTicketSelectForm(forms.Form):
+    tickets = forms.ModelMultipleChoiceField(
+        label=_('Tickets to merge'),
+        queryset=Ticket.objects.filter(merged_to=None),
+        widget=forms.SelectMultiple(attrs={'class': 'form-control'})
+    )
+
+    def clean_tickets(self):
+        tickets = self.cleaned_data.get('tickets')
+        if len(tickets) < 2:
+            raise ValidationError(_('Please choose at least 2 tickets.'))
+        if len(tickets) > 4:
+            raise ValidationError(_('Impossible to merge more than 4 tickets...'))
+        queues = tickets.order_by('queue').distinct().values_list('queue', flat=True)
+        if len(queues) != 1:
+            raise ValidationError(_('All selected tickets must share the same queue in order to be merged.'))
+        return tickets

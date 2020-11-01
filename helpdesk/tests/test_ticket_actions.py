@@ -4,6 +4,8 @@ from django.core import mail
 from django.urls import reverse
 from django.test import TestCase
 from django.test.client import Client
+from django.utils import timezone
+
 from helpdesk.models import CustomField, Queue, Ticket
 from helpdesk import settings as helpdesk_settings
 
@@ -206,3 +208,100 @@ class TicketActionsTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
 
         # TODO this needs to be checked further
+
+    def test_merge_tickets(self):
+        self.loginUser()
+
+        # Create two tickets
+        ticket_1 = Ticket.objects.create(
+            queue=self.queue_public,
+            title='Ticket 1',
+            description='Description from ticket 1',
+            submitter_email='user1@mail.com',
+            status=Ticket.RESOLVED_STATUS,
+            resolution='Awesome resolution for ticket 1'
+        )
+        ticket_1_follow_up = ticket_1.followup_set.create(title='Ticket 1 creation')
+        ticket_1_cc = ticket_1.ticketcc_set.create(user=self.user)
+        ticket_1_created = ticket_1.created
+        due_date = timezone.now()
+        ticket_2 = Ticket.objects.create(
+            queue=self.queue_public,
+            title='Ticket 2',
+            description='Description from ticket 2',
+            submitter_email='user2@mail.com',
+            due_date=due_date,
+            assigned_to=self.user
+        )
+        ticket_2_follow_up = ticket_1.followup_set.create(title='Ticket 2 creation')
+        ticket_2_cc = ticket_2.ticketcc_set.create(email='random@mail.com')
+
+        # Create custom fields and set values for tickets
+        custom_field_1 = CustomField.objects.create(
+            name='test',
+            label='Test',
+            data_type='varchar',
+        )
+        ticket_1_field_1 = 'This is for the test field'
+        ticket_1.ticketcustomfieldvalue_set.create(field=custom_field_1, value=ticket_1_field_1)
+        ticket_2_field_1 = 'Another test text'
+        ticket_2.ticketcustomfieldvalue_set.create(field=custom_field_1, value=ticket_2_field_1)
+        custom_field_2 = CustomField.objects.create(
+            name='number',
+            label='Number',
+            data_type='integer',
+        )
+        ticket_2_field_2 = '444'
+        ticket_2.ticketcustomfieldvalue_set.create(field=custom_field_2, value=ticket_2_field_2)
+
+        # Check that it correctly redirects to the intermediate page
+        response = self.client.post(
+            reverse('helpdesk:mass_update'),
+            data={
+                'ticket_id': [str(ticket_1.id), str(ticket_2.id)],
+                'action': 'merge'
+            },
+            follow=True
+        )
+        redirect_url = '%s?tickets=%s&tickets=%s' % (reverse('helpdesk:merge_tickets'), ticket_1.id, ticket_2.id)
+        self.assertRedirects(response, redirect_url)
+        self.assertContains(response, ticket_1.description)
+        self.assertContains(response, ticket_1.resolution)
+        self.assertContains(response, ticket_1.submitter_email)
+        self.assertContains(response, ticket_1_field_1)
+        self.assertContains(response, ticket_2.description)
+        self.assertContains(response, ticket_2.submitter_email)
+        self.assertContains(response, ticket_2_field_1)
+        self.assertContains(response, ticket_2_field_2)
+
+        # Check that the merge is correctly done
+        response = self.client.post(
+            redirect_url,
+            data={
+                'chosen_ticket': str(ticket_1.id),
+                'due_date': str(ticket_2.id),
+                'status': str(ticket_1.id),
+                'submitter_email': str(ticket_2.id),
+                'description': str(ticket_2.id),
+                'assigned_to': str(ticket_2.id),
+                custom_field_1.name: str(ticket_1.id),
+                custom_field_2.name: str(ticket_2.id),
+            },
+            follow=True
+        )
+        self.assertRedirects(response, ticket_1.get_absolute_url())
+        ticket_2.refresh_from_db()
+        self.assertEqual(ticket_2.merged_to, ticket_1)
+        self.assertEqual(ticket_2.followup_set.count(), 0)
+        self.assertEqual(ticket_2.ticketcc_set.count(), 0)
+        ticket_1.refresh_from_db()
+        self.assertEqual(ticket_1.created, ticket_1_created)
+        self.assertEqual(ticket_1.due_date, due_date)
+        self.assertEqual(ticket_1.status, Ticket.RESOLVED_STATUS)
+        self.assertEqual(ticket_1.submitter_email, ticket_2.submitter_email)
+        self.assertEqual(ticket_1.description, ticket_2.description)
+        self.assertEqual(ticket_1.assigned_to, ticket_2.assigned_to)
+        self.assertEqual(ticket_1.ticketcustomfieldvalue_set.get(field=custom_field_1).value, ticket_1_field_1)
+        self.assertEqual(ticket_1.ticketcustomfieldvalue_set.get(field=custom_field_2).value, ticket_2_field_2)
+        self.assertEqual(list(ticket_1.followup_set.all()), [ticket_1_follow_up, ticket_2_follow_up])
+        self.assertEqual(list(ticket_1.ticketcc_set.all()), [ticket_1_cc, ticket_2_cc])
