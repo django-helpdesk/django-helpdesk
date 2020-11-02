@@ -610,7 +610,7 @@ def ticket_from_message(message, queue, logger):
             link_redirect=ticket.get_absolute_url()
         )
     else:
-        context.update(comment=f.comment)
+        context['ticket']['comment'] = f.comment
         if ticket.assigned_to:
             send_templated_mail(
                 'updated_owner',
@@ -641,10 +641,22 @@ def ticket_from_message(message, queue, logger):
                 sender=queue.from_address,
                 fail_silently=True,
             )
+        # Send mail to submitter if the follow up was made by someone else
+        if sender_email not in ticket.get_submitter_emails():
+            send_templated_mail(
+                'updated_submitter',
+                context,
+                recipients=ticket.get_submitter_emails(),
+                sender=queue.from_address,
+                fail_silently=True,
+            )
         # copy email to all those CC'd to this particular ticket
         for cc in ticket.ticketcc_set.all():
             # don't duplicate email to assignee
-            if not ticket.assigned_to or (ticket.assigned_to.email != cc.email_address):
+            address_to_ignore = [sender_email]
+            if ticket.assigned_to and ticket.assigned_to.email:
+                address_to_ignore.append(ticket.assigned_to.email)
+            if cc.email_address not in address_to_ignore:
                 send_templated_mail(
                     'updated_cc',
                     context,
