@@ -108,8 +108,8 @@ def send_templated_mail(template_name,
     # Do HTML part first in order to mark safe the HTML
     email_html_base_file = os.path.join('helpdesk', locale, 'email_html_base.html')
     for field in ('comment', 'description', 'resolution'):
-        if field in context:
-            context[field] = mark_safe(context[field])
+        if field in context['ticket']:
+            context['ticket'][field] = mark_safe(context['ticket'][field])
 
     # Set script url to the site URL in order to have absolute url in the mail
     set_script_prefix(settings.SITE_URL)
@@ -130,8 +130,8 @@ def send_templated_mail(template_name,
 
     # Then use BeautifulSoup to extract text from HTML fields
     for field in ('comment', 'description', 'resolution'):
-        if field in context:
-            context[field] = BeautifulSoup(context[field], 'html.parser').get_text()
+        if field in context['ticket']:
+            context['ticket'][field] = BeautifulSoup(context['ticket'][field], 'html.parser').get_text()
 
     text_part = from_string(
         "%s\n\n{%% include '%s' %%}" % (t.plain_text, footer_file)
@@ -261,7 +261,7 @@ def apply_query(queryset, params):
 def ticket_template_context(ticket):
     context = {}
 
-    for field in ('title', 'created', 'modified', 'submitter_email',
+    for field in ('id', 'title', 'created', 'modified', 'submitter_email',
                   'status', 'get_status_display', 'on_hold', 'description',
                   'resolution', 'priority', 'get_priority_display',
                   'last_escalation', 'ticket', 'ticket_for_url',

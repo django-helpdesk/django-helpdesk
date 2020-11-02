@@ -336,15 +336,44 @@ def view_ticket(request, ticket_id):
             # Allow the user to assign the ticket to themselves whilst viewing it
             request.POST['owner'] = request.user.id
         elif 'close' in request.GET:
-            # Allow the user to close the ticket only if it is resolved
-            if ticket.assigned_to:
-                request.POST['owner'] = ticket.assigned_to.id
-            request.POST['new_status'] = Ticket.CLOSED_STATUS
-            request.POST['comment'] = _('Accepted resolution and closed ticket')
-            # Let user to close ticket without notifying customer
-            if 'private' in request.GET:
-                request.POST['public'] = False
-                request.POST['comment'] = 'Solution acceptée et ticket fermé sans notification au client'
+            if request.user.is_staff:
+                if ticket.assigned_to:
+                    request.POST['owner'] = ticket.assigned_to.id
+                request.POST['new_status'] = Ticket.CLOSED_STATUS
+                request.POST['comment'] = _('Accepted resolution and closed ticket')
+                # Let user to close ticket without notifying customer
+                if 'private' in request.GET:
+                    request.POST['public'] = False
+                    request.POST['comment'] = 'Solution acceptée et ticket fermé sans notification au client'
+            else:
+                ticket.status = Ticket.CLOSED_STATUS
+                ticket.save()
+                ticket.followup_set.create(
+                    title=ticket.get_status_display(),
+                    comment='Solution acceptée par le client.',
+                    public=True,
+                    new_status=Ticket.CLOSED_STATUS
+                )
+                context = safe_template_context(ticket)
+                # Send mail to assigned user
+                if ticket.assigned_to:
+                    send_templated_mail(
+                        'closed_owner',
+                        context,
+                        recipients=ticket.assigned_to.email,
+                        sender=ticket.queue.from_address,
+                        fail_silently=True
+                    )
+                    # Send Phoenix notification
+                    Notification.objects.create(
+                        module=Notification.TICKET,
+                        message="Le ticket %s vient d'être fermé par %s" % (ticket, request.user),
+                        link_redirect=ticket.get_absolute_url(),
+                        user_list=[ticket.assigned_to]
+                    )
+                messages.success(request, 'Le ticket a bien été fermé.')
+                # FIXME Ticket CC and queue CC don't receive mails
+                return redirect('helpdesk:feedback_survey', ticket.id)
 
         return update_ticket(request, ticket_id)
 
@@ -387,7 +416,7 @@ def view_ticket(request, ticket_id):
         information_form = None
         spent_times = None
         # Check if follow up is valid, only if ticket is not too old
-        if followup_form.is_valid() and not ticket.is_closed_and_too_old:
+        if followup_form.is_valid() and not ticket.is_closed_and_too_old():
             follow_up = followup_form.save(commit=False)
             follow_up.ticket = ticket
             follow_up.user = request.user
@@ -402,7 +431,7 @@ def view_ticket(request, ticket_id):
             # Send mail to assigned user
             if ticket.assigned_to:
                 context = safe_template_context(ticket)
-                context.update(comment=follow_up.comment)
+                context['ticket']['comment'] = follow_up.comment
                 send_templated_mail(
                     'updated_owner',
                     context,
@@ -414,10 +443,11 @@ def view_ticket(request, ticket_id):
                 # Send Phoenix notification
                 Notification.objects.create(
                     module=Notification.TICKET,
-                    message='Une nouvelle réponse a été ajouté au ticket %s par %s' % (ticket.title, request.user),
+                    message='Une nouvelle réponse a été ajouté au ticket %s par %s' % (ticket, request.user),
                     link_redirect=ticket.get_absolute_url(),
                     user_list=[ticket.assigned_to]
                 )
+            # FIXME Ticket CC and queue CC don't receive emails
             return redirect(ticket)
 
     ticketcc_string, show_subscribe = \
@@ -780,10 +810,7 @@ def update_ticket(request, ticket_id, public=False):
     # ticket might have changed above, so we re-instantiate context with the
     # (possibly) updated ticket.
     context = safe_template_context(ticket)
-    context.update(
-        resolution=ticket.resolution,
-        comment=f.comment,
-    )
+    context[ticket]['comment'] = f.comment
 
     if public and (f.comment or (f.new_status in (Ticket.RESOLVED_STATUS, Ticket.CLOSED_STATUS))):
         if f.new_status == Ticket.RESOLVED_STATUS:
