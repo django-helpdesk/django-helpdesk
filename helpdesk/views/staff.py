@@ -1209,53 +1209,28 @@ def ticket_list(request):
 
         query_params = default_query_params
     else:
-        queues = request.GET.getlist('queue')
-        if queues:
-            try:
-                queues = [int(q) for q in queues]
-                query_params['filtering']['queue__id__in'] = queues
-            except ValueError:
-                pass
+        def add_to_query_params(query_params_dict, name, name_plural=None, use_id=True):
+            """
+            :param dict query_params_dict: dictionnary with all params for the query to filter tickets
+            :param str name: name of the field
+            :param str name_plural: name of the field in plural
+            """
+            object_ids = request.GET.getlist(name_plural if name_plural else name)
+            if object_ids:
+                try:
+                    key = '%s__id__in' if use_id else '%s__in'
+                    query_params_dict['filtering'][key % name] = [int(obj) for obj in object_ids]
+                except ValueError:
+                    pass
+            return query_params_dict
 
-        categories = request.GET.getlist('categories')
-        if categories:
-            try:
-                categories = [int(c) for c in categories]
-                query_params['filtering']['category__id__in'] = categories
-            except ValueError:
-                pass
-
-        types = request.GET.getlist('types')
-        if types:
-            try:
-                types = [int(t) for t in types]
-                query_params['filtering']['type__id__in'] = types
-            except ValueError:
-                pass
-
-        billings = request.GET.getlist('billings')
-        if billings:
-            try:
-                billings = [int(b) for b in billings]
-                query_params['filtering']['billing__in'] = billings
-            except ValueError:
-                pass
-
-        owners = request.GET.getlist('assigned_to')
-        if owners:
-            try:
-                owners = [int(u) for u in owners]
-                query_params['filtering']['assigned_to__id__in'] = owners
-            except ValueError:
-                pass
-
-        statuses = request.GET.getlist('status')
-        if statuses:
-            try:
-                statuses = [int(s) for s in statuses]
-                query_params['filtering']['status__in'] = statuses
-            except ValueError:
-                pass
+        query_params = add_to_query_params(query_params, 'queue', 'queues')
+        query_params = add_to_query_params(query_params, 'customer', 'customers')
+        query_params = add_to_query_params(query_params, 'category', 'categories')
+        query_params = add_to_query_params(query_params, 'type', 'types')
+        query_params = add_to_query_params(query_params, 'billing', 'billings', use_id=False)
+        query_params = add_to_query_params(query_params, 'assigned_to')
+        query_params = add_to_query_params(query_params, 'status', use_id=False)
 
         date_from = request.GET.get('date_from')
         if date_from:
@@ -1293,7 +1268,9 @@ def ticket_list(request):
             query_params['sortreverse'] = True
         query_params['sorting'] = sort
 
-    tickets = base_tickets.select_related('queue', 'category', 'type', 'customer_contact', 'customer')
+    tickets = base_tickets.select_related(
+        'queue', 'category', 'type', 'customer_contact', 'customer__group', 'assigned_to'
+    )
 
     try:
         ticket_qs = apply_query(tickets, query_params)
@@ -1325,6 +1302,7 @@ def ticket_list(request):
         default_tickets_per_page=request.user.usersettings_helpdesk.settings.get('tickets_per_page') or 25,
         user_choices=get_assignable_users(),
         queue_choices=user_queues,
+        customer_choices=Customer.objects.select_related('group'),
         category_choices=TicketCategory.objects.all(),
         type_choices=TicketType.objects.all(),
         billing_choices=Ticket.BILLINGS,
