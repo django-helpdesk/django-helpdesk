@@ -812,7 +812,7 @@ class Ticket(models.Model):
         :param TicketCC ticketcc:
         """
         if ticketcc:
-            email = ticketcc.display
+            email = ticketcc.email_address
         elif user:
             if user.email:
                 email = user.email
@@ -826,7 +826,7 @@ class Ticket(models.Model):
                 email != self.submitter_email and
                 (self.customer_contact and email != self.customer_contact.email) and
                 (self.assigned_to and email != self.assigned_to.email) and
-                email not in [x.display for x in self.ticketcc_set.all()]
+                email not in [x.email_address for x in self.ticketcc_set.all()]
         ):
             if ticketcc:
                 ticketcc.ticket = self
