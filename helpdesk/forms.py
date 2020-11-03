@@ -462,7 +462,7 @@ class TicketForm(PhoenixTicketForm, AbstractTicketForm):
             # Remove the body field that is causing conflict with the tinymce js depency in ticket detail page
             self.fields.pop('body')
 
-        if user.employee.is_ipexia_member():
+        if user.employee.is_ipexia_member:
             self.fields['assigned_to'].queryset = get_assignable_users()
             if helpdesk_settings.HELPDESK_CREATE_TICKET_HIDE_ASSIGNED_TO:
                 self.fields['assigned_to'].widget = forms.HiddenInput()
@@ -520,7 +520,7 @@ class TicketForm(PhoenixTicketForm, AbstractTicketForm):
             title = _('Ticket Opened')
         followup = self._create_follow_up(ticket, title=title, user=user)
         # Append signature at the bottom of the followup comment if user is from ipexia
-        if user.employee.is_ipexia_member():
+        if user.employee.is_ipexia_member:
             followup.append_signature(user)
         followup.save()
 

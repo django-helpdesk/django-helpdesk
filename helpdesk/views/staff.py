@@ -94,7 +94,7 @@ def _is_my_ticket(user, ticket):
     :param Ticket ticket:
     :rtype: bool
     """
-    if user.is_superuser or user.employee.is_ipexia_member() \
+    if user.is_superuser or user.employee.is_ipexia_member \
             or ticket.customer_contact and ticket.customer_contact == user \
             or ticket.submitter_email and ticket.submitter_email == user.email \
             or ticket.customer and user.has_perm('view_customer', ticket.customer):
@@ -392,7 +392,7 @@ def view_ticket(request, ticket_id):
 
     followup_form = CreateFollowUpForm(request.POST or None)
 
-    if request.user.employee.is_ipexia_member():
+    if request.user.employee.is_ipexia_member:
         form = TicketForm(
             initial={
                 'due_date': ticket.due_date,
@@ -1390,7 +1390,7 @@ def create_ticket(request):
                     customer_contact.employee.save(update_fields=['phone_number'])
                     messages.info(request, 'Le numéro de téléphone de contact a bien été mis à jour.')
             # Send a notification if ticket has been added by a customer
-            if not request.user.employee.is_ipexia_member():
+            if not request.user.employee.is_ipexia_member:
                 messages.success(request, 'Votre ticket a bien été créé !')
                 # Send notification to technical service
                 Notification.objects.create_for_technical_service(
