@@ -1231,7 +1231,7 @@ def ticket_list(request):
             # Query deserialization failed. (E.g. was a pickled query)
             return HttpResponseRedirect(reverse('helpdesk:list'))
 
-    elif not ('queue' in request.GET or
+    elif not ('queues' in request.GET or
               'assigned_to' in request.GET or
               'status' in request.GET or
               'q' in request.GET or
@@ -1597,12 +1597,13 @@ def report_index(request):
 
     dash_tickets = []
     for queue in queues:
+        ticket_set = queue.ticket_set.filter(created__date__range=(from_date, to_date))
         dash_ticket = {
             'id': queue.id,
             'name': queue.title,
-            'open': queue.ticket_set.filter(created__date__range=(from_date, to_date), status__in=[1, 2]).count(),
-            'resolved': queue.ticket_set.filter(resolved__date__range=(from_date, to_date), status=3).count(),
-            'closed': queue.ticket_set.filter(closed__date__range=(from_date, to_date), status__in=[4, 5]).count(),
+            'open': ticket_set.filter(status__in=(1, 2)).count(),
+            'resolved': ticket_set.filter(status=3).count(),
+            'closed': ticket_set.filter(status__in=(4, 5)).count(),
         }
         dash_tickets.append(dash_ticket)
 
@@ -1646,8 +1647,8 @@ def report_queue(request, queue_id):
         morrisjs_data.append(datadict)
 
     # Count total for each status
-    open_total = queue.ticket_set.filter(created__date__range=(from_date, to_date), status__in=[1, 2]).count()
-    resolved_total = queue.ticket_set.filter(resolved__date__range=(from_date, to_date), status=3).count()
+    open_total = queue.ticket_set.filter(created__date__range=(from_date, to_date)).count()
+    resolved_total = queue.ticket_set.filter(resolved__date__range=(from_date, to_date), status__in=[3, 4, 5]).count()
     closed_total = queue.ticket_set.filter(closed__date__range=(from_date, to_date), status__in=[4, 5]).count()
     # Calculate the delta between beginning and end date in days
     delta = (to_date + timedelta(1)) - from_date
