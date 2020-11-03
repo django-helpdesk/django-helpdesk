@@ -810,7 +810,7 @@ def update_ticket(request, ticket_id, public=False):
     # ticket might have changed above, so we re-instantiate context with the
     # (possibly) updated ticket.
     context = safe_template_context(ticket)
-    context[ticket]['comment'] = f.comment
+    context['ticket']['comment'] = f.comment
 
     if public and (f.comment or (f.new_status in (Ticket.RESOLVED_STATUS, Ticket.CLOSED_STATUS))):
         if f.new_status == Ticket.RESOLVED_STATUS:
@@ -1107,6 +1107,14 @@ def fusion_tickets(request):
                 for ticket in tickets.exclude(id=chosen_ticket.id):
                     ticket.merged_to = chosen_ticket
                     ticket.status = Ticket.DUPLICATE_STATUS
+                    # Override values from chosen ticket
+                    ticket.assigned_to = ticket.merged_to.assigned_to
+                    ticket.category = ticket.merged_to.category
+                    ticket.type = ticket.merged_to.type
+                    ticket.billing = ticket.merged_to.billing
+                    ticket.customer = ticket.merged_to.customer
+                    ticket.site = ticket.merged_to.site
+                    ticket.customer_product = ticket.merged_to.customer_product
                     ticket.save()
 
                     # Send mail to submitter email

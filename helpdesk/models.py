@@ -778,6 +778,17 @@ class Ticket(models.Model):
 
         super(Ticket, self).save(*args, **kwargs)
 
+        # Override values onto merged tickets
+        self.merged_tickets.update(
+            assigned_to=self.assigned_to,
+            category=self.category,
+            type=self.type,
+            billing=self.billing,
+            customer=self.customer,
+            site=self.site,
+            customer_product=self.customer_product,
+        )
+
     @staticmethod
     def queue_and_id_from_query(query):
         # Apply the opposite logic here compared to self._get_ticket_for_url
