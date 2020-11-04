@@ -692,15 +692,8 @@ class Ticket(models.Model):
         Returns a publicly-viewable URL for this ticket, used when giving
         a URL to the submitter of a ticket.
         """
-        from django.contrib.sites.models import Site
-        from django.core.exceptions import ImproperlyConfigured
-        from django.urls import reverse
-        try:
-            site = Site.objects.get_current()
-        except ImproperlyConfigured:
-            site = Site(domain='configure-django-sites.com')
-        return u"http://%s%s?ticket=%s&email=%s" % (
-            site.domain,
+        return "%s%s?ticket=%s&email=%s" % (
+            settings.SITE_URL,
             reverse('helpdesk:public_view'),
             self.ticket_for_url,
             self.submitter_email
@@ -712,15 +705,8 @@ class Ticket(models.Model):
         Returns a staff-only URL for this ticket, used when giving a URL to
         a staff member (in emails etc)
         """
-        from django.contrib.sites.models import Site
-        from django.core.exceptions import ImproperlyConfigured
-        from django.urls import reverse
-        try:
-            site = Site.objects.get_current()
-        except ImproperlyConfigured:
-            site = Site(domain='configure-django-sites.com')
-        return u"http://%s%s" % (
-            site.domain,
+        return "%s%s" % (
+            settings.SITE_URL,
             reverse('helpdesk:view',
                     args=[self.id])
         )
