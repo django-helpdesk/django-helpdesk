@@ -1688,6 +1688,8 @@ def run_report(request, report):
     report_queryset = Ticket.objects.select_related().filter(
         queue__in=_get_user_queues(request.user), created__date__range=(from_date, to_date)
     )
+    if report == DAYS_UNTIL_TICKET_CLOSED_BY_MONTH:
+        report_queryset = report_queryset.filter(status__in=(Ticket.CLOSED_STATUS, Ticket.DUPLICATE_STATUS))
 
     from_saved_query = False
     saved_query = None
