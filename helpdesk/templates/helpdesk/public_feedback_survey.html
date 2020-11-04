@@ -8,7 +8,10 @@
         {% if success %}
             <div class="text-center">
                 <div class="well">
-                    <h3>Merci pour votre retour, ils sont très précieux pour nous !</h3>
+                    <h3>
+                        Nous avons bien reçu votre retour.<br>
+                        Merci de nous permettre de nous améliorer au quotidien !
+                    </h3>
                 </div>
                 <a class="btn btn-default" href="{% if request.user.is_authenticated %}{{ ticket.get_absolute_url }}{% else %}{{ ticket.ticket_url }}{% endif %}">
                     Retourner sur la page du ticket

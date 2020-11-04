@@ -4,4 +4,4 @@ Cordialement,
 {{ queue.email_address }}{% endif %}{% if queue.phone_number %}
 {{ queue.phone_number }}{% endif %}
 
-Ce courriel vous a été envoyé en tant qu'utilisateur de notre service de support, en accord avec notre politique de confidentialité. Merci de nous informer si vous pensez que ce message ne vous était pas destiné.
+Vous recevez cet email car vous êtes utilisateur de notre service support. Merci de nous informer si vous pensez que ce message ne vous était pas destiné.
