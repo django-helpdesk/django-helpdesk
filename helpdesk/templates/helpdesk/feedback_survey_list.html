@@ -79,11 +79,11 @@
                             <tr>
                                 <td class="text-center">
                                     {% if feedback_survey.score == 2 %}
-                                        <img src="{% static 'helpdesk/img/feedback_good.jpg' %}" alt="Emoji Content" title="Très bon" width="30px">
+                                        <img src="{% static 'helpdesk/img/thumb_up.png' %}" alt="Emoji Content" title="Très bon" width="30px">
                                     {% elif feedback_survey.score == 1 %}
-                                        <img src="{% static 'helpdesk/img/feedback_ok.png' %}" alt="Emoji Neutre" title="Moyen" width="30px">
+                                        <img src="{% static 'helpdesk/img/thumb_middle.png' %}" alt="Emoji Neutre" title="Moyen" width="30px">
                                     {% elif feedback_survey.score == 0 %}
-                                        <img src="{% static 'helpdesk/img/feedback_bad.png' %}" alt="Emoji Mécontent" title="À améliorer" width="30px">
+                                        <img src="{% static 'helpdesk/img/thumb_down.png' %}" alt="Emoji Mécontent" title="À améliorer" width="30px">
                                     {% endif %}
                                 </td>
                                 <td class="text-center">{{ feedback_survey.created_at }}</td>

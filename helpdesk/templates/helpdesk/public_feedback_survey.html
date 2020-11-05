@@ -33,7 +33,7 @@
                     <div class="col-sm-6 col-xs-12">
                         <div class="col-xs-4 text-center">
                             <label>
-                                <img src="{% static 'helpdesk/img/feedback_good.jpg' %}" alt="Emoji Content" width="50px">
+                                <img src="{% static 'helpdesk/img/thumb_up.png' %}" alt="Emoji Content" width="70px">
                                 <br>
                                 <input type="radio" name="score" value="2" required{% if form.score.initial == "2" %} checked{% endif %}>
                                 Très bon
@@ -41,18 +41,18 @@
                         </div>
                         <div class="col-xs-4 text-center">
                             <label>
-                                <img src="{% static 'helpdesk/img/feedback_ok.png' %}" alt="Emoji Neutre" width="50px">
+                                <img src="{% static 'helpdesk/img/thumb_middle.png' %}" alt="Emoji Neutre" width="70px">
                                 <br>
                                 <input type="radio" name="score" value="1" required{% if form.score.initial == "1" %} checked{% endif %}>
-                                moyen
+                                Moyen
                             </label>
                         </div>
                         <div class="col-xs-4 text-center">
                             <label>
-                                <img src="{% static 'helpdesk/img/feedback_bad.png' %}" alt="Emoji Mécontent" width="50px">
+                                <img src="{% static 'helpdesk/img/thumb_down.png' %}" alt="Emoji Mécontent" width="70px">
                                 <br>
                                 <input type="radio" name="score" value="0" required{% if form.score.initial == "0" %} checked{% endif %}>
-                                à améliorer
+                                À améliorer
                             </label>
                         </div>
                     </div>
@@ -89,6 +89,9 @@
             $('input[name=score]').on('input', function() {
                 $('#info').html(messages[$(this).val()])
             })
+            {% if form.score.initial in "012" %}
+                $('#info').html(messages[{{ form.score.initial }}])
+            {% endif %}
         })
     </script>
 {% endblock %}

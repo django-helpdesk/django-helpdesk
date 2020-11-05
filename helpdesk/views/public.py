@@ -179,7 +179,7 @@ def change_language(request):
 
 def feedback_survey_view(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
-    form = FeedbackSurveyForm(request.POST or None)
+    form = FeedbackSurveyForm(request.POST or None, initial={'score': request.GET.get('note')})
     success = False
     if form.is_valid():
         feedback_survey = form.save(commit=False)
