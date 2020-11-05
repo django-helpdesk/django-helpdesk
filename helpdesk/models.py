@@ -845,6 +845,16 @@ class Ticket(models.Model):
                 ticket_too_old = True
         return ticket_too_old
 
+    def get_time_first_answer(self):
+        """
+        :return: the delta between ticket creation date and the first answer by an ipexia member
+        :rtype: datetime.timedelta|None
+        """
+        for f in self.followup_set.order_by('date'):
+            if f.public and f.user and f.user.employee.is_ipexia_member:
+                return f.date - self.created
+        return None
+
 
 class FollowUpManager(models.Manager):
 
