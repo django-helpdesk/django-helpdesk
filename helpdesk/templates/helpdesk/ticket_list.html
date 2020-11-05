@@ -173,7 +173,7 @@
                                         <option id="filterBuilderSelect-Keywords" value="Keywords"{% if query_params.search_string %} disabled{% endif %}>
                                             {% trans "Keywords" %}
                                         </option>
-                                        <option id="filterBuilderSelect-Dates" value="Dates"{% if query_params.filtering.created__gte %} disabled{% endif %}>
+                                        <option id="filterBuilderSelect-Dates" value="Dates"{% if query_params.filtering.created__gte or query_params.filtering.created__lte %} disabled{% endif %}>
                                             {% trans "Date Range" %}
                                         </option>
                                         <option id="filterBuilderSelect-KBItems" value="KBItems"{% if query_params.filtering.kbitem__in %} disabled{% endif %}>
