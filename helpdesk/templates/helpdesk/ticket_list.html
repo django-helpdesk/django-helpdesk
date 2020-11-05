@@ -220,8 +220,7 @@
                                 </li>
                                 {% if from_saved_query and saved_query.user == user %}
                                     <li class="list-group-item">
-                                        {% blocktrans with saved_query.title as query_name %}You are currently viewing saved
-                                        query <strong>"{{ query_name }}"</strong>.{% endblocktrans %}
+                                        {% blocktrans with saved_query.title as query_name %}You are currently viewing saved query <strong>"{{ query_name }}"</strong>.{% endblocktrans %}
                                         <a href='{% url 'helpdesk:delete_query' saved_query.id %}'>
                                             {% trans "Delete Saved Query" %}
                                         </a>
@@ -229,9 +228,7 @@
                                 {% endif %}
                                 {% if from_saved_query %}
                                     <li class="list-group-item">
-                                        {% blocktrans with saved_query.id as query_id %}
-                                        <a href='../reports/?saved_query={{ query_id }}'>Run a report</a> on this query to
-                                        see stats and charts for the data listed below.{% endblocktrans %}
+                                        {% blocktrans with saved_query.id as query_id %}<a href='../reports/?saved_query={{ query_id }}'>Run a report</a> on this query to see stats and charts for the data listed below.{% endblocktrans %}
                                     </li>
                                 {% endif %}
                             </ul>
