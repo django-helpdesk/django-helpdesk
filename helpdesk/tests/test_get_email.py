@@ -2,6 +2,7 @@
 
 from __future__ import unicode_literals
 
+from django.template.defaultfilters import linebreaksbr
 from helpdesk.models import Queue, Ticket, TicketCC, FollowUp, Attachment
 from django.test import TestCase
 from django.core.management import call_command
@@ -140,12 +141,12 @@ class GetEmailParametricTemplate(object):
                     mocked_imaplib.IMAP4 = mock.Mock(return_value=mocked_imaplib_server)
                     call_command('get_email')
 
-            ticket1 = get_object_or_404(Ticket, pk=1)
+            ticket1 = Ticket.objects.first()
             self.assertEqual(ticket1.ticket_for_url, "QQ-%s" % ticket1.id)
             self.assertEqual(ticket1.title, test_email_subject)
             self.assertEqual(ticket1.description, test_email_body)
 
-            ticket2 = get_object_or_404(Ticket, pk=2)
+            ticket2 = Ticket.objects.last()
             self.assertEqual(ticket2.ticket_for_url, "QQ-%s" % ticket2.id)
             self.assertEqual(ticket2.title, test_email_subject)
             self.assertEqual(ticket2.description, test_email_body)
@@ -211,13 +212,13 @@ class GetEmailParametricTemplate(object):
                     mocked_imaplib.IMAP4 = mock.Mock(return_value=mocked_imaplib_server)
                     call_command('get_email')
 
-            ticket1 = get_object_or_404(Ticket, pk=1)
+            ticket1 = Ticket.objects.first()
             self.assertEqual(ticket1.ticket_for_url, "QQ-%s" % ticket1.id)
             self.assertEqual(ticket1.submitter_email, 'bbb@example.com')
             self.assertEqual(ticket1.title, test_email_subject)
             self.assertEqual(ticket1.description, test_email_body)
 
-            ticket2 = get_object_or_404(Ticket, pk=2)
+            ticket2 = Ticket.objects.last()
             self.assertEqual(ticket2.ticket_for_url, "QQ-%s" % ticket2.id)
             self.assertEqual(ticket2.submitter_email, 'bbb@example.com')
             self.assertEqual(ticket2.title, test_email_subject)
@@ -286,12 +287,12 @@ class GetEmailParametricTemplate(object):
                     mocked_imaplib.IMAP4 = mock.Mock(return_value=mocked_imaplib_server)
                     call_command('get_email')
 
-            ticket1 = get_object_or_404(Ticket, pk=1)
+            ticket1 = Ticket.objects.first()
             self.assertEqual(ticket1.ticket_for_url, "QQ-%s" % ticket1.id)
             self.assertEqual(ticket1.title, test_email_subject)
             self.assertEqual(ticket1.description, test_email_body)
 
-            ticket2 = get_object_or_404(Ticket, pk=2)
+            ticket2 = Ticket.objects.last()
             self.assertEqual(ticket2.ticket_for_url, "QQ-%s" % ticket2.id)
             self.assertEqual(ticket2.title, test_email_subject)
             self.assertEqual(ticket2.description, test_email_body)
@@ -399,33 +400,29 @@ class GetEmailParametricTemplate(object):
                     mocked_imaplib.IMAP4 = mock.Mock(return_value=mocked_imaplib_server)
                     call_command('get_email')
 
-            ticket1 = get_object_or_404(Ticket, pk=1)
-            self.assertEqual(ticket1.ticket_for_url, "QQ-%s" % ticket1.id)
+            ticket1 = Ticket.objects.first()
+            self.assertEqual(ticket1.ticket_for_url, "QQ-%d" % ticket1.id)
             self.assertEqual(ticket1.title, subject)
             # plain text should become description
-            self.assertEqual(ticket1.description, text)
+            self.assertEqual(ticket1.description, linebreaksbr(text))
             # HTML MIME part should be attached to follow up
-            followup1 = get_object_or_404(FollowUp, pk=1)
-            self.assertEqual(followup1.ticket.id, 1)
-            attach1 = get_object_or_404(Attachment, pk=1)
-            self.assertEqual(attach1.followup.id, 1)
+            followup1 = FollowUp.objects.first()
+            attach1 = Attachment.objects.first()
             self.assertEqual(attach1.filename, 'email_html_body.html')
-            cc1 = get_object_or_404(TicketCC, pk=1)
+            cc1 = TicketCC.objects.first()
             self.assertEqual(cc1.email, cc_one)
-            cc2 = get_object_or_404(TicketCC, pk=2)
+            cc2 = TicketCC.objects.last()
             self.assertEqual(cc2.email, cc_two)
-            self.assertEqual(len(TicketCC.objects.filter(ticket=1)), 2)
+            self.assertEqual(TicketCC.objects.filter(ticket=ticket1).count(), 2)
 
-            ticket2 = get_object_or_404(Ticket, pk=2)
-            self.assertEqual(ticket2.ticket_for_url, "QQ-%s" % ticket2.id)
+            ticket2 = Ticket.objects.last()
+            self.assertEqual(ticket2.ticket_for_url, "QQ-%d" % ticket2.id)
             self.assertEqual(ticket2.title, subject)
             # plain text should become description
-            self.assertEqual(ticket2.description, text)
+            self.assertEqual(ticket2.description, linebreaksbr(text))
             # HTML MIME part should be attached to follow up
-            followup2 = get_object_or_404(FollowUp, pk=2)
-            self.assertEqual(followup2.ticket.id, 2)
-            attach2 = get_object_or_404(Attachment, pk=2)
-            self.assertEqual(attach2.followup.id, 2)
+            followup2 = FollowUp.objects.last()
+            attach2 = Attachment.objects.last()
             self.assertEqual(attach2.filename, 'email_html_body.html')
 
     def test_read_pgp_signed_email(self):
@@ -643,15 +640,13 @@ a9eiiQ+3V1v+7wWHXCzq
                     mocked_imaplib.IMAP4 = mock.Mock(return_value=mocked_imaplib_server)
                     call_command('get_email')
 
-            ticket1 = get_object_or_404(Ticket, pk=1)
+            ticket1 = Ticket.objects.first()
             self.assertEqual(ticket1.ticket_for_url, "QQ-%s" % ticket1.id)
             self.assertEqual(ticket1.title, "example email that crashes django-helpdesk get_email")
-            self.assertEqual(ticket1.description, """hi, thanks for looking into this :)\n\nhttps://github.com/django-helpdesk/django-helpdesk/issues/567#issuecomment-342954233""")
+            self.assertEqual(ticket1.description, """hi, thanks for looking into this :)<br><br>https://github.com/django-helpdesk/django-helpdesk/issues/567#issuecomment-342954233""")
             # MIME part should be attached to follow up
-            followup1 = get_object_or_404(FollowUp, pk=1)
-            self.assertEqual(followup1.ticket.id, 1)
-            attach1 = get_object_or_404(Attachment, pk=1)
-            self.assertEqual(attach1.followup.id, 1)
+            followup1 = FollowUp.objects.first()
+            attach1 = Attachment.objects.first()
             self.assertEqual(attach1.filename, 'signature.asc')
             self.assertEqual(attach1.file.read(), b"""-----BEGIN PGP SIGNATURE-----
 
@@ -750,12 +745,12 @@ class GetEmailCCHandling(TestCase):
            particularly to test appropriate handling of CC'd emails."""
 
         # first, check that test ticket exists
-        ticket1 = get_object_or_404(Ticket, pk=1)
-        self.assertEqual(ticket1.ticket_for_url, "CC-1")
+        ticket1 = Ticket.objects.first()
+        self.assertEqual(ticket1.ticket_for_url, "CC-%d" % ticket1.id)
         self.assertEqual(ticket1.title, "Original Ticket")
         # only the staff_user is CC'd for now
-        self.assertEqual(len(TicketCC.objects.filter(ticket=1)), 1)
-        ccstaff = get_object_or_404(TicketCC, pk=1)
+        self.assertEqual(TicketCC.objects.filter(ticket=ticket1).count(), 1)
+        ccstaff = TicketCC.objects.first()
         self.assertEqual(ccstaff.user, User.objects.get(username='staff'))
         self.assertEqual(ticket1.assigned_to, User.objects.get(username='assigned'))
 
@@ -764,15 +759,15 @@ class GetEmailCCHandling(TestCase):
         # NOTE: CC emails are in alphabetical order and must be tested as such!
         # implementation uses sets, so only way to ensure tickets created
         # in right order is to change set to list and sort it
-        test_email_cc_one = "Alice Ráðormsdóttir <alice@example.com>"
+        email_1 = 'alice@example.com'
+        test_email_cc_one = "Alice Ráðormsdóttir <%s>" % email_1
         test_email_cc_two = "nobody@example.com"
         test_email_cc_three = "other@example.com"
         test_email_cc_four = "someone@example.com"
         ticket_user_emails = "assigned@example.com, staff@example.com, submitter@example.com, observer@example.com, queue@example.com"
-        test_email_subject = "[CC-1] My visit to Sør-Trøndelag"
+        test_email_subject = "[CC-%d] My visit to Sør-Trøndelag" % ticket1.id
         test_email_body = "Unicode helpdesk comment with an s-hat (ŝ) via email."
         test_email = "To: queue@example.com\nCc: " + test_email_cc_one + ", " + test_email_cc_one + ", " + test_email_cc_two + ", " + test_email_cc_three + "\nCC: " + test_email_cc_one + ", " + test_email_cc_three + ", " + test_email_cc_four + ", " + ticket_user_emails + "\nFrom: " + test_email_from + "\nSubject: " + test_email_subject + "\n\n" + test_email_body
-        test_mail_len = len(test_email)
 
         with mock.patch('helpdesk.management.commands.get_email.listdir') as mocked_listdir, \
                 mock.patch('helpdesk.management.commands.get_email.isfile') as mocked_isfile, \
@@ -792,19 +787,14 @@ class GetEmailCCHandling(TestCase):
         # and that submitter and assignee are not added as CC either
         # (in other words, even though everyone was CC'd to this email,
         #  we should come out with only 6 CCs after filtering)
-        self.assertEqual(len(TicketCC.objects.filter(ticket=1)), 6)
+        self.assertEqual(ticket1.ticketcc_set.count(), 6)
         # next we make sure no duplicates were added, and the
         # staff users nor submitter were not re-added as email TicketCCs
-        cc0 = get_object_or_404(TicketCC, pk=2)
-        self.assertEqual(cc0.user, User.objects.get(username='observer'))
-        cc1 = get_object_or_404(TicketCC, pk=3)
-        self.assertEqual(cc1.email, test_email_cc_one)
-        cc2 = get_object_or_404(TicketCC, pk=4)
-        self.assertEqual(cc2.email, test_email_cc_two)
-        cc3 = get_object_or_404(TicketCC, pk=5)
-        self.assertEqual(cc3.email, test_email_cc_three)
-        cc4 = get_object_or_404(TicketCC, pk=6)
-        self.assertEqual(cc4.email, test_email_cc_four)
+        self.assertTrue(ticket1.ticketcc_set.filter(user=User.objects.get(username='observer')).exists())
+        self.assertTrue(ticket1.ticketcc_set.filter(email=email_1).exists())
+        self.assertTrue(ticket1.ticketcc_set.filter(email=test_email_cc_two).exists())
+        self.assertTrue(ticket1.ticketcc_set.filter(email=test_email_cc_three).exists())
+        self.assertTrue(ticket1.ticketcc_set.filter(email=test_email_cc_four).exists())
 
 
 # build matrix of test cases
