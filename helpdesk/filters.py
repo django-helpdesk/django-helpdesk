@@ -77,11 +77,7 @@ class FeedbackSurveyFilter(df.FilterSet):
         method='filter_assigned_to',
         label='Assigné à',
         queryset=get_assignable_users(),
-        widget=ModelSelect2MultipleWidget(
-            queryset=get_assignable_users(),
-            search_fields=['username__icontains', 'first_name__icontains', 'last_name__icontains'],
-            attrs={'style': 'width: 100%'}
-        )
+        widget=Select2MultipleWidget(attrs={'style': 'width: 100%'})
     )
 
     class Meta:

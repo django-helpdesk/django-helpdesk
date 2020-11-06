@@ -99,9 +99,14 @@
                                     {% endif %}
                                 </td>
                                 <td>
-                                    {% if feedback_survey.ticket.author %}
-                                        {% avatar feedback_survey.ticket.author 30 class="img-circle" %}
-                                        {{ feedback_survey.ticket.author }}
+                                    {% if feedback_survey.author %}
+                                        {% avatar feedback_survey.author 30 class="img-circle" %}
+                                        {{ feedback_survey.author }}
+                                    {% elif feedback_survey.ticket.customer_contact %}
+                                        {% avatar feedback_survey.ticket.customer_contact 30 class="img-circle" %}
+                                        {{ feedback_survey.ticket.customer_contact }} (émetteur ticket)
+                                    {% else %}
+                                        {{ feedback_survey.ticket.submitter_email }}
                                     {% endif %}
                                 </td>
                                 <td>{{ feedback_survey.message|linebreaksbr }}</td>
