@@ -326,7 +326,9 @@ def ticket_from_message(message, queue, logger):
     # Note that the replace won't work on just an email with no real name,
     # but the getaddresses() function seems to be able to handle just unclosed quotes
     # correctly. Not ideal, but this seems to work for now.
-    sender_email = email.utils.getaddresses(['\"' + sender.replace('<', '\" <')])[0][1]
+    if sender[0] != '"':
+        sender = '\"' + sender.replace('<', '\" <')
+    sender_email = email.utils.getaddresses([sender])[0][1]
     logger.debug('sender_email = "%s"' % sender_email)
 
     cc = message.get_all('cc', None)
