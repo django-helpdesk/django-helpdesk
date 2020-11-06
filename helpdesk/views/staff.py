@@ -14,12 +14,13 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
+from django.db.models.functions import Concat
 from django.template.defaultfilters import date
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.db.models import Q
+from django.db.models import Q, Value
 from django.http import HttpResponseRedirect, Http404, HttpResponse, JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils.timezone import make_aware
@@ -1131,7 +1132,7 @@ def fusion_tickets(request):
                     ticket.followup_set.update(
                         ticket=chosen_ticket,
                         # Next might exceed maximum 200 characters limit
-                        title='[Fusion de #%d] %s' % (ticket.id, ticket.title)
+                        title=Concat(Value('[Fusion de #%d] ' % ticket.id), 'title')
                     )
 
                     # Add submitter_email, assigned_to email and ticketcc to chosen ticket if necessary
