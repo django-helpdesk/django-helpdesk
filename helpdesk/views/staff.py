@@ -1000,8 +1000,7 @@ def mass_update(request):
             f.save()
             # Send email to Submitter, Owner, Queue CC
             context = safe_template_context(t)
-            context.update(resolution=t.resolution,
-                           queue=queue_template_context(t.queue))
+            context['ticket']['resolution'] = t.resolution
 
             messages_sent_to = []
 
@@ -1018,7 +1017,7 @@ def mass_update(request):
             for cc in t.ticketcc_set.all():
                 if cc.email_address not in messages_sent_to:
                     send_templated_mail(
-                        'closed_submitter',
+                        'closed_cc',
                         context,
                         recipients=cc.email_address,
                         sender=t.queue.from_address,
