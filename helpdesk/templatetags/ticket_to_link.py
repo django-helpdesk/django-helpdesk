@@ -15,6 +15,7 @@ import re
 
 from django import template
 from django.urls import reverse
+from django.utils.html import escape
 from django.utils.safestring import mark_safe
 
 from helpdesk.models import Ticket
@@ -49,11 +50,11 @@ def num_to_link(text):
                 style += 'success'
             elif ticket.status == Ticket.DUPLICATE_STATUS:
                 style += 'danger'
-            text = "%s <a href='%s' class='%s' data-toggle='tooltip' title='%s'>#%s</a>%s" % (
+            text = '%s <a href="%s" class="%s" data-toggle="tooltip" title="%s">#%s</a>%s' % (
                 text[:match.start() + 1],
                 url,
                 style,
-                '%s (%s)' % (ticket.title, ticket.get_status_display()),
+                '%s (%s)' % (escape(ticket.title), ticket.get_status_display()),
                 match.groups()[0],
                 text[match.end():]
             )
