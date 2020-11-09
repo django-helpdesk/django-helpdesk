@@ -2100,8 +2100,8 @@ def calc_average_nbr_days_until_ticket_resolved(Tickets):
 
 
 def calc_basic_ticket_stats(Tickets):
-    # all not closed tickets (open, reopened, resolved,) - independent of user
-    all_open_tickets = Tickets.exclude(status=Ticket.CLOSED_STATUS)
+    # all not closed tickets (open, reopened, resolved) - independent of user
+    all_open_tickets = Tickets.exclude(status__in=(Ticket.CLOSED_STATUS, Ticket.DUPLICATE_STATUS))
     today = datetime.today()
 
     date_30 = date_rel_to_today(today, 30)
@@ -2134,7 +2134,7 @@ def calc_basic_ticket_stats(Tickets):
                 sort_string('', date_60_str), ])
 
     # all closed tickets - independent of user.
-    all_closed_tickets = Tickets.filter(status=Ticket.CLOSED_STATUS)
+    all_closed_tickets = Tickets.filter(status__in=(Ticket.CLOSED_STATUS, Ticket.DUPLICATE_STATUS))
     average_nbr_days_until_ticket_closed = \
         calc_average_nbr_days_until_ticket_resolved(all_closed_tickets)
     # all closed tickets that were opened in the last 60 days.
