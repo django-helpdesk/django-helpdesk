@@ -9,6 +9,8 @@ views/public.py - All public facing views, eg non-staff (no authentication
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
 
+from base.models import Notification
+
 try:
     # Django 2.0+
     from django.urls import reverse
@@ -187,6 +189,20 @@ def feedback_survey_view(request, ticket_id):
         if request.user.is_authenticated:
             feedback_survey.author = request.user
         feedback_survey.save()
+        link_redirect = '%s?tickets=%d' % (reverse('helpdesk:feedback_survey_list'), ticket.id)
+        if ticket.assigned_to:
+            Notification.objects.create(
+                message="Tu viens de recevoir un nouveau feedback sur ton ticket %s" % ticket,
+                module=Notification.TICKET,
+                link_redirect=link_redirect,
+                user_list=[ticket.assigned_to]
+            )
+        else:
+            Notification.objects.create_for_technical_service(
+                message="Nouvelle réponse à une enquête de satisfaction sur le ticket %s" % ticket,
+                module=Notification.TICKET,
+                link_redirect=link_redirect
+            )
         success = True
     return render(request, 'helpdesk/public_feedback_survey.html', {
         'ticket': ticket,

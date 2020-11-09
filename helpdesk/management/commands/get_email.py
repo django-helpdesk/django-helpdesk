@@ -631,7 +631,7 @@ def ticket_from_message(message, queue, logger):
         else:
             # Send notification to technical service
             Notification.objects.create_for_technical_service(
-                message="Un réponse vient d'être ajoutée au ticket par mail : %s" % ticket,
+                message="Une réponse vient d'être ajoutée au ticket par mail : %s" % ticket,
                 module=Notification.TICKET,
                 link_redirect=ticket.get_absolute_url()
             )
