@@ -1598,6 +1598,7 @@ def report_index(request):
     dash_tickets = []
     for queue in queues:
         ticket_set = queue.ticket_set.filter(created__date__range=(from_date, to_date))
+
         dash_ticket = {
             'id': queue.id,
             'name': queue.title,
@@ -1605,6 +1606,20 @@ def report_index(request):
             'resolved': ticket_set.filter(status=3).count(),
             'closed': ticket_set.filter(status__in=(4, 5)).count(),
         }
+
+        # Calculation of the tickets first answer time average
+        total_first_answer_times = timedelta()
+        number_under_one_hour = []
+        for ticket in ticket_set:
+            first_answer_time = ticket.get_time_first_answer()
+            if first_answer_time:
+                total_first_answer_times += first_answer_time
+                number_under_one_hour.append(first_answer_time < timedelta(hours=1))
+        count = len(number_under_one_hour)
+        if count > 0:
+            dash_ticket['first_answer_time_average'] = total_first_answer_times / count
+            dash_ticket['percentage_uner_one_hour'] = round(number_under_one_hour.count(True) / count * 100)
+
         dash_tickets.append(dash_ticket)
 
     return render(request, 'helpdesk/report_index.html', {
