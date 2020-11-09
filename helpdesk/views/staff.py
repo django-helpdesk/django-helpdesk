@@ -1802,6 +1802,7 @@ def run_report(request, report):
         elif report == DAYS_UNTIL_TICKET_CLOSED_BY_MONTH:
             possible_options = periods
         column_headings += possible_options
+        column_headings.append('Total')
 
         # Calculate each value for each ticket
         metric3 = False
@@ -1877,12 +1878,13 @@ def run_report(request, report):
                     totals[column] = value
                 else:
                     totals[column] += value
+            data.append(sum(data))
             table.append([item] + data)
 
         # Zip data and headers together in one list for Morris.js charts
         # will get a list like [(Header1, Data1), (Header2, Data2)...]
         seriesnum = 0
-        for label in column_headings[1:]:
+        for label in column_headings[1:-1]:
             seriesnum += 1
             datadict = {"x": label}
             for n in range(0, len(table)):
@@ -1895,7 +1897,8 @@ def run_report(request, report):
         # Add total row to table
         total_data = []
         for column in possible_options:
-            total_data.append(str(totals[column]))
+            total_data.append(totals[column])
+        total_data.append(sum(total_data))
         table.append(['Total'] + total_data)
 
     return render(request, 'helpdesk/report_output.html', {
