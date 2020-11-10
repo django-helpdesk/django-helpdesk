@@ -254,17 +254,14 @@ def followup_edit(request, ticket_id, followup_id):
     })
 
 
-@staff_member_required
+@superuser_required
 def followup_delete(request, ticket_id, followup_id):
-    """followup delete for superuser"""
-
+    """ Followup delete for superuser only """
     ticket = get_object_or_404(Ticket, id=ticket_id)
-    if not request.user.is_superuser:
-        return HttpResponseRedirect(reverse('helpdesk:view', args=[ticket.id]))
-
-    followup = get_object_or_404(FollowUp, id=followup_id)
+    followup = get_object_or_404(ticket.followup_set.all(), id=followup_id)
     followup.delete()
-    return HttpResponseRedirect(reverse('helpdesk:view', args=[ticket.id]))
+    messages.success(request, 'Le suivi a bien été supprimé.')
+    return redirect(ticket)
 
 
 @require_POST
