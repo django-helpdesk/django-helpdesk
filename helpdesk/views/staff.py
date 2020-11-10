@@ -392,6 +392,10 @@ def view_ticket(request, ticket_id):
         users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
 
     followup_form = CreateFollowUpForm(request.POST or None)
+    if ticket.status == Ticket.CLOSED_STATUS:
+        followup_form.fields['toggle_ticket_status'].label = 'Rouvrir le ticket'
+    else:
+        followup_form.fields['toggle_ticket_status'].label = 'Fermer le ticket'
 
     if request.user.employee.is_ipexia_member:
         form = TicketForm(
@@ -423,18 +427,34 @@ def view_ticket(request, ticket_id):
             follow_up.user = request.user
             follow_up.title = 'Réponse client'
             follow_up.public = True
-            # TODO handle status change ?
+            message = 'Votre réponse a bien été envoyée'
+            # Change ticket status if the checkbox has been checked
+            if followup_form.cleaned_data.get('toggle_ticket_status'):
+                follow_up.title = 'Rouverture client' if ticket.status == Ticket.CLOSED_STATUS else 'Fermeture client'
+                new_status = Ticket.REOPENED_STATUS if ticket.status == Ticket.CLOSED_STATUS else Ticket.CLOSED_STATUS
+                follow_up.new_status = new_status
+                ticket.status = new_status
+                # Save comment as ticket resolution if closing and it doesn't have a resolution before
+                if new_status == Ticket.CLOSED_STATUS and not ticket.resolution:
+                    ticket.resolution = follow_up.comment
+                ticket.save()
+                message += ' et le ticket est maintenant ' + ticket.get_status_display()
             follow_up.save()
-            messages.success(request, 'Votre réponse a bien été envoyé.')
+            messages.success(request, message + '.')
             files = process_attachments(follow_up, request.FILES.getlist('attachment'))
             if files:
                 messages.info(request, 'Les fichiers joints ont également été associés à la réponse.')
+
             # Send mail to assigned user
+            context = safe_template_context(ticket)
+            context['ticket']['comment'] = follow_up.comment
+            if follow_up.new_status == Ticket.CLOSED_STATUS:
+                template = 'closed_'
+            else:
+                template = 'updated_'
             if ticket.assigned_to:
-                context = safe_template_context(ticket)
-                context['ticket']['comment'] = follow_up.comment
                 send_templated_mail(
-                    'updated_owner',
+                    template + 'owner',
                     context,
                     recipients=ticket.assigned_to.email,
                     sender=ticket.queue.from_address,
@@ -448,7 +468,27 @@ def view_ticket(request, ticket_id):
                     link_redirect=ticket.get_absolute_url(),
                     user_list=[ticket.assigned_to]
                 )
-            # FIXME Ticket CC and queue CC don't receive emails
+
+            # Send mail to ticket CC and queue CC
+            for cc in ticket.ticketcc_set.all():
+                send_templated_mail(
+                    template + 'cc',
+                    context,
+                    recipients=cc.email_address,
+                    sender=ticket.queue.from_address,
+                    fail_silently=True,
+                    files=files,
+                )
+            if ticket.queue.updated_ticket_cc:
+                send_templated_mail(
+                    template + 'cc',
+                    context,
+                    recipients=ticket.queue.updated_ticket_cc,
+                    sender=ticket.queue.from_address,
+                    fail_silently=True,
+                    files=files,
+                )
+
             return redirect(ticket)
 
     ticketcc_string, show_subscribe = \

@@ -209,7 +209,11 @@ class EditTicketForm(CustomFieldMixin, PhoenixTicketForm, forms.ModelForm):
 
 
 class CreateFollowUpForm(forms.ModelForm):
-    # TODO add change status
+    toggle_ticket_status = forms.BooleanField(
+        required=False,
+        widget=forms.CheckboxInput(attrs={'class': 'flat'})
+    )
+
     class Meta:
         model = FollowUp
         fields = ('comment',)
