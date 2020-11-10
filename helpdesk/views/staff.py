@@ -672,8 +672,8 @@ def update_ticket(request, ticket_id, public=False):
 
     f = FollowUp(ticket=ticket, user=request.user, date=timezone.now(), comment=comment, public=public)
 
-    # Append signature at the bottom of the followup comment if a comment was made
-    if comment:
+    # Append signature at the bottom of the followup comment if a comment was made and the followup is public
+    if comment and public:
         f.append_signature(request.user)
 
     reassigned = False
