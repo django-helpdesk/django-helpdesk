@@ -94,7 +94,7 @@ def send_templated_mail(template_name,
         except EmailTemplate.DoesNotExist:
             mail_admins(
                 'Template de mail introuvable',
-                "Le template de mail \"%s\" n'existe pas, le mail n'a pa spu être envoyé" % template_name
+                "Le template de mail \"%s\" n'existe pas, le mail n'a pas pu être envoyé" % template_name
             )
             return  # just ignore if template doesn't exist
 
