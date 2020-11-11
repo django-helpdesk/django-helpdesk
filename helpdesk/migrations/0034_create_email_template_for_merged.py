@@ -7,6 +7,7 @@ def forwards_func(apps, schema_editor):
     EmailTemplate = apps.get_model("helpdesk", "EmailTemplate")
     db_alias = schema_editor.connection.alias
     EmailTemplate.objects.using(db_alias).create(
+        id=EmailTemplate.objects.order_by('-id').first().id + 1,  # because PG sequences are not reset
         template_name='merged',
         subject='(Merged)',
         heading='Ticket merged',
@@ -23,6 +24,7 @@ From now on, please answer on this ticket, or you can include the tag {{ ticket.
         locale='en'
     )
     EmailTemplate.objects.using(db_alias).create(
+        id=EmailTemplate.objects.order_by('-id').first().id + 1,  # because PG sequences are not reset
         template_name='merged',
         subject='(Fusionné)',
         heading='Ticket Fusionné',
@@ -32,7 +34,7 @@ Ce courriel indicatif permet de vous prévenir que le ticket  {{ ticket.ticket }
 
 Veillez à répondre sur ce ticket dorénavant, ou bien inclure la balise {{ ticket.merged_to.ticket }} dans le sujet de votre réponse par mail.""",
         html="""<p style="font-family: sans-serif; font-size: 1em;">Bonjour,</p>
-        
+
 <p style="font-family: sans-serif; font-size: 1em;">Ce courriel indicatif permet de vous prévenir que le ticket <b>{{ ticket.ticket }}</b> (<em>{{ ticket.title }}</em>) par {{ ticket.submitter_email }}  a été fusionné au ticket <a href="{{ ticket.merged_to.staff_url }}">{{ ticket.merged_to.ticket }}</a>.</p>
 
 <p style="font-family: sans-serif; font-size: 1em;">Veillez à répondre sur ce ticket dorénavant, ou bien inclure la balise <b>{{ ticket.merged_to.ticket }}</b> dans le sujet de votre réponse par mail.</p>""",
