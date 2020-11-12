@@ -54,7 +54,8 @@ class HelpdeskUser:
         return Ticket.objects.filter(queue__in=self.get_queues())
 
     def has_full_access(self):
-        return self.user.is_superuser or self.user.is_staff
+        return self.user.is_superuser or self.user.is_staff \
+                or helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE
 
     def can_access_queue(self, queue):
         """Check if a certain user can access a certain queue.
