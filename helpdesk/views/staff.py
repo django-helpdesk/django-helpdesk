@@ -79,7 +79,8 @@ def _has_access_to_queue(user, queue):
 def _is_my_ticket(user, ticket):
     """Check to see if the user has permission to access
     a ticket. If not then deny access."""
-    if user.is_superuser or user.is_staff or (ticket.assigned_to and user.id == ticket.assigned_to.id):
+    if user.is_superuser or user.is_staff or helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE \
+            or (ticket.assigned_to and user.id == ticket.assigned_to.id):
         return True
     else:
         return False
