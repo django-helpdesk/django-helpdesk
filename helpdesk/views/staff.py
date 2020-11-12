@@ -42,7 +42,6 @@ from helpdesk.models import (
 )
 from helpdesk import settings as helpdesk_settings
 
-
 User = get_user_model()
 
 
@@ -80,7 +79,7 @@ def _is_my_ticket(user, ticket):
     """Check to see if the user has permission to access
     a ticket. If not then deny access."""
     if user.is_superuser or user.is_staff or helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE \
-        or (ticket.assigned_to and user.id == ticket.assigned_to.id):
+            or (ticket.assigned_to and user.id == ticket.assigned_to.id):
         return True
     else:
         return False
@@ -251,7 +250,8 @@ def followup_edit(request, ticket_id, followup_id):
             new_status = form.cleaned_data['new_status']
             # will save previous date
             old_date = followup.date
-            new_followup = FollowUp(title=title, date=old_date, ticket=_ticket, comment=comment, public=public, new_status=new_status, )
+            new_followup = FollowUp(title=title, date=old_date, ticket=_ticket, comment=comment, public=public,
+                                    new_status=new_status, )
             # keep old user if one did exist before.
             if followup.user:
                 new_followup.user = followup.user
@@ -399,8 +399,8 @@ def update_ticket(request, ticket_id, public=False):
     if not (public or (
             request.user.is_authenticated and
             request.user.is_active and (
-                request.user.is_staff or
-                helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE))):
+                    request.user.is_staff or
+                    helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE))):
         return HttpResponseRedirect('%s?next=%s' %
                                     (reverse('helpdesk:login'), request.path))
 
@@ -466,7 +466,8 @@ def update_ticket(request, ticket_id, public=False):
     # broken into two stages to prevent changes from first replace being themselves
     # changed by the second replace due to conflicting syntax
     comment = comment.replace('{%', 'X-HELPDESK-COMMENT-VERBATIM').replace('%}', 'X-HELPDESK-COMMENT-ENDVERBATIM')
-    comment = comment.replace('X-HELPDESK-COMMENT-VERBATIM', '{% verbatim %}{%').replace('X-HELPDESK-COMMENT-ENDVERBATIM', '%}{% endverbatim %}')
+    comment = comment.replace('X-HELPDESK-COMMENT-VERBATIM', '{% verbatim %}{%').replace(
+        'X-HELPDESK-COMMENT-ENDVERBATIM', '%}{% endverbatim %}')
     # render the neutralized template
     comment = template_func(comment).render(context)
 
@@ -581,8 +582,8 @@ def update_ticket(request, ticket_id, public=False):
     )
 
     if public and (f.comment or (
-        f.new_status in (Ticket.RESOLVED_STATUS,
-                         Ticket.CLOSED_STATUS))):
+            f.new_status in (Ticket.RESOLVED_STATUS,
+                             Ticket.CLOSED_STATUS))):
         if f.new_status == Ticket.RESOLVED_STATUS:
             template = 'resolved_'
         elif f.new_status == Ticket.CLOSED_STATUS:
@@ -634,12 +635,12 @@ def update_ticket(request, ticket_id, public=False):
             template_staff = 'updated_owner'
 
         if (not reassigned or
-                (reassigned and
-                    ticket.assigned_to.usersettings_helpdesk.settings.get(
-                        'email_on_ticket_assign', False))) or \
-            (not reassigned and
-                ticket.assigned_to.usersettings_helpdesk.settings.get(
-                    'email_on_ticket_change', False)):
+            (reassigned and
+             ticket.assigned_to.usersettings_helpdesk.settings.get(
+                 'email_on_ticket_assign', False))) or \
+                (not reassigned and
+                 ticket.assigned_to.usersettings_helpdesk.settings.get(
+                     'email_on_ticket_change', False)):
             send_templated_mail(
                 template_staff,
                 context,
