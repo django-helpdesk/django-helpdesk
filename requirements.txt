@@ -12,6 +12,4 @@ pytz
 six
 djangorestframework
 django-model-utils
-
-# specific commit because the current release has no required library upgrade
-pinax-teams @ git+https://github.com/pinax/pinax-teams.git@dd75e1c#egg=pinax-teams
+pinax-teams>=2.0

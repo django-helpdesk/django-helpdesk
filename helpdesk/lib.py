@@ -26,7 +26,7 @@ def ticket_template_context(ticket):
     for field in ('title', 'created', 'modified', 'submitter_email',
                   'status', 'get_status_display', 'on_hold', 'description',
                   'resolution', 'priority', 'get_priority_display',
-                  'last_escalation', 'ticket', 'ticket_for_url',
+                  'last_escalation', 'ticket', 'ticket_for_url', 'merged_to',
                   'get_status', 'ticket_url', 'staff_url', '_get_assigned_to'
                   ):
         attr = getattr(ticket, field, None)

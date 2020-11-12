@@ -61,8 +61,12 @@ table.table caption {
 table.ticket-stats caption {color: #fbff00; font-style: italic;}
 table.ticket-stats tbody th, table.ticket-stats tbody tr {padding-left: 20px}
 
-.errorlist {list-style: none;}
-.errorlist {padding: 0;}
+.errorlist {
+    list-style: none;
+    padding: 0;
+    color: red;
+}
+
 .has-error .input-group input, .has-error .input-group select, .has-error .input-group textarea {border-color: #b94a48}
 
 #helpdesk-nav-collapse #searchform {

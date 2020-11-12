@@ -1,0 +1,105 @@
+{% extends "helpdesk/base.html" %}
+
+{% load i18n helpdesk_util %}
+
+{% block helpdesk_title %}{% trans "Merge Tickets" %}{% endblock %}
+{% block h1_title %}{% endblock %}
+
+{% block helpdesk_head %}
+    {{ ticket_select_form.media.css }}
+{% endblock %}
+
+{% block helpdesk_breadcrumb %}
+    <li class="breadcrumb-item">
+        <a href="{% url 'helpdesk:list' %}">{% trans "Tickets" %}</a>
+    </li>
+    <li class="breadcrumb-item active">{% trans "Merge Tickets" %}</li>
+{% endblock %}
+
+{% block helpdesk_body %}
+    <div class="row">
+        <div class="col-sm-6 col-xs-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3>{% trans "Merge Tickets" %}</h3>
+                </div>
+                <div class="card-body">
+                    <form method="get">
+                        <div class="form-group">
+                            {{ ticket_select_form.tickets.label_tag }}
+                            {{ ticket_select_form.tickets }}
+                            {{ ticket_select_form.tickets.errors }}
+                        </div>
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary">{% trans "OK" %}</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xs-12">
+            <div class="card card-body bg-light">
+                <p>
+                    {% blocktrans %}
+                        Choose the ticket which will be conserved and then, for each information, you can decide to use
+                        a data from another ticket to merge. I you don't select a data on a row, <b>the information
+                        from the main ticket will stay unchanged</b>.
+                    {% endblocktrans %}
+                </p>
+                <p>
+                    {% blocktrans %}
+                        The  <b>follow-ups</b> and <b>attachments</b> from the merged tickets will be moved to
+                        the main ticket.<br>
+                        <b>Involved users</b> (the ticket submitter and emails in CC) will also be added in the
+                        main ticket CC list.<br>
+                        However, ticket dependencies from the merged ticket won't be applied to the main ticket.
+                    {% endblocktrans %}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    {% if tickets %}
+        <hr>
+        <form method="post">
+            {% csrf_token %}
+            <div class="table-responsive">
+                <table class="table table-striped table-hover table-bordered">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th class="text-center">{% trans "Fields" %}</th>
+                            {% for ticket in tickets %}
+                                <th class="text-center">
+                                    <label>
+                                        <input name="chosen_ticket" type="radio" value="{{ ticket.id }}"{% if forloop.first %} checked{% endif %}>
+                                        {{ ticket }}
+                                        <a href="{{ ticket.get_absolute_url }}" target="_blank" class="btn btn-outline-primary btn-sm" role="button">
+                                            {% trans "Open ticket" %}
+                                            <i class="fa fa-external-link-alt"></i>
+                                        </a>
+                                    </label>
+                                </th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for attr, display_attr in ticket_attributes %}
+                            {% include 'helpdesk/include/ticket_merge_row.html' %}
+                        {% endfor %}
+                        {% for custom_field in custom_fields %}
+                            {% include 'helpdesk/include/ticket_merge_row.html' with display_attr=custom_field.label attr=custom_field.name %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="text-center">
+                <button type="submit" class="btn btn-lg btn-primary">{% trans "Validate" %}</button>
+            </div>
+        </form>
+    {% endif %}
+{% endblock %}
+
+{% block helpdesk_js %}
+    {{ ticket_select_form.media.js }}
+{% endblock %}

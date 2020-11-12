@@ -8,7 +8,7 @@ forms.py - Definitions of newforms-based forms for creating and maintaining
 """
 import logging
 
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django import forms
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
@@ -42,30 +42,39 @@ class CustomFieldMixin(object):
     """
 
     def customfield_to_field(self, field, instanceargs):
+        # Use TextInput widget by default
+        instanceargs['widget'] = forms.TextInput(attrs={'class': 'form-control'})
         # if-elif branches start with special cases
         if field.data_type == 'varchar':
             fieldclass = forms.CharField
             instanceargs['max_length'] = field.max_length
         elif field.data_type == 'text':
             fieldclass = forms.CharField
-            instanceargs['widget'] = forms.Textarea
+            instanceargs['widget'] = forms.Textarea(attrs={'class': 'form-control'})
             instanceargs['max_length'] = field.max_length
         elif field.data_type == 'integer':
             fieldclass = forms.IntegerField
+            instanceargs['widget'] = forms.NumberInput(attrs={'class': 'form-control'})
         elif field.data_type == 'decimal':
             fieldclass = forms.DecimalField
             instanceargs['decimal_places'] = field.decimal_places
             instanceargs['max_digits'] = field.max_length
+            instanceargs['widget'] = forms.NumberInput(attrs={'class': 'form-control'})
         elif field.data_type == 'list':
             fieldclass = forms.ChoiceField
             choices = field.choices_as_array
             if field.empty_selection_list:
                 choices.insert(0, ('', '---------'))
             instanceargs['choices'] = choices
+            instanceargs['widget'] = forms.Select(attrs={'class': 'form-control'})
         else:
             # Try to use the immediate equivalences dictionary
             try:
                 fieldclass = CUSTOMFIELD_TO_FIELD_DICT[field.data_type]
+                # Change widget in case it is a boolean
+                if fieldclass == forms.BooleanField:
+                    instanceargs['widget'] = forms.CheckboxInput(attrs={'class': 'form-control'})
+
             except KeyError:
                 # The data_type was not found anywhere
                 raise NameError("Unrecognized data_type %s" % field.data_type)
@@ -164,9 +173,9 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
     )
 
     due_date = forms.DateTimeField(
-        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        widget=forms.TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
         required=False,
-        input_formats=['%d/%m/%Y', '%m/%d/%Y', "%d.%m.%Y", ],
+        input_formats=['%d/%m/%Y', '%m/%d/%Y', "%d.%m.%Y"],
         label=_('Due on'),
     )
 
@@ -176,6 +185,9 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
         label=_('Attach File'),
         help_text=_('You can attach a file such as a document or screenshot to this ticket.'),
     )
+
+    class Media:
+        js = ('helpdesk/js/init_due_date.js',)
 
     def __init__(self, kbcategory=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -498,3 +510,22 @@ class TicketDependencyForm(forms.ModelForm):
     class Meta:
         model = TicketDependency
         exclude = ('ticket',)
+
+
+class MultipleTicketSelectForm(forms.Form):
+    tickets = forms.ModelMultipleChoiceField(
+        label=_('Tickets to merge'),
+        queryset=Ticket.objects.filter(merged_to=None),
+        widget=forms.SelectMultiple(attrs={'class': 'form-control'})
+    )
+
+    def clean_tickets(self):
+        tickets = self.cleaned_data.get('tickets')
+        if len(tickets) < 2:
+            raise ValidationError(_('Please choose at least 2 tickets.'))
+        if len(tickets) > 4:
+            raise ValidationError(_('Impossible to merge more than 4 tickets...'))
+        queues = tickets.order_by('queue').distinct().values_list('queue', flat=True)
+        if len(queues) != 1:
+            raise ValidationError(_('All selected tickets must share the same queue in order to be merged.'))
+        return tickets

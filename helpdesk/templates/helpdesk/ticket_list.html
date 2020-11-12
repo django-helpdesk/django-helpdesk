@@ -1,12 +1,12 @@
 {% extends "helpdesk/base.html" %}
-{% load i18n humanize %}
-{% load static %}
+
+{% load i18n humanize static in_list %}
 
 {% block helpdesk_title %}{% trans "Tickets" %}{% endblock %}
 
 {% block helpdesk_head %}
+    <link title="timeline-styles" rel="stylesheet" href="https://cdn.knightlab.com/libs/timeline3/latest/css/timeline.css">
 {% endblock %}
-
 
 {% block h1_title %}Tickets
     {% if from_saved_query %} [{{ saved_query.title }}]{% endif %}
@@ -14,52 +14,55 @@
 
 
 {% block helpdesk_breadcrumb %}
-<li class="breadcrumb-item">
-    <a href="{% url 'helpdesk:list' %}">{% trans "Tickets" %}</a>
-</li>
-{% if from_saved_query and saved_query.user == user %}
-<li class="breadcrumb-item">{% trans "Saved Query" %}</li>
-<li class="breadcrumb-item active">{{ saved_query.title }}</li>
-{% else %}
-<li class="breadcrumb-item active">{% trans "Overview" %}</li>
-{% endif %}
+    <li class="breadcrumb-item">
+        <a href="{% url 'helpdesk:list' %}">{% trans "Tickets" %}</a>
+    </li>
+    {% if from_saved_query and saved_query.user == user %}
+        <li class="breadcrumb-item">{% trans "Saved Query" %}</li>
+        <li class="breadcrumb-item active">{{ saved_query.title }}</li>
+    {% else %}
+        <li class="breadcrumb-item active">{% trans "Overview" %}</li>
+    {% endif %}
 {% endblock %}
 
 
 {% block helpdesk_body %}
-{% load in_list %}
-
-<div class="card">
-    <div class="card-header">
-    <ul class="nav nav-tabs">
-        <li class="nav-item" style="width: 200px;">
-            {% trans "Query Results" %}: 
-        </li>
-        <li class="nav-item"">
-            <a class="nav-link active" href="#datatabletabcontents" id="datatabletabcontents-tab"  data-toggle="tab" role="tab" aria-controls="datatabletabcontents" aria-selected=true>
-            <i class="fas fa-th-list"></i>
-            {% trans "Table" %}
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="#timelinetabcontents" id="timelinetabcontents-tab" data-toggle="tab" role="tab" aria-controls="timelinetabcontents" aria-selected=false>
-            <i class="fas fa-history"></i>
-             {% trans "Timeline" %}
-            </a>
-        </li>
-    </ul>
-    </div>
-    <div class="card-body">
-        {{ search_message|safe }}
-        <div class="tab-content" id="myTabContent">
-            <div class="tab-pane fade show active" id="datatabletabcontents" role="tabpanel" aria-labelledby="datatabletabcontents-tab">
-                <form method='post' action='{% url 'helpdesk:mass_update' %}' id="ticket_mass_update">
-                    <table width="100%" class="table table-sm table-striped table-bordered table-hover" id="ticketTable" data-page-length='{{ default_tickets_per_page }}'>
-                        <thead class="thead-light">
+    <div class="card">
+        <div class="card-header">
+            <ul class="nav nav-tabs">
+                <li class="nav-item" style="width: 200px;">
+                    {% trans "Query Results" %}:
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="#datatabletabcontents" id="datatabletabcontents-tab"
+                       data-toggle="tab" role="tab" aria-controls="datatabletabcontents" aria-selected=true>
+                        <i class="fas fa-th-list"></i>
+                        {% trans "Table" %}
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#timelinetabcontents" id="timelinetabcontents-tab" data-toggle="tab"
+                       role="tab" aria-controls="timelinetabcontents" aria-selected=false>
+                        <i class="fas fa-history"></i>
+                        {% trans "Timeline" %}
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <div class="card-body">
+            {{ search_message|safe }}
+            <div class="tab-content" id="myTabContent">
+                <div class="tab-pane fade show active" id="datatabletabcontents" role="tabpanel"
+                     aria-labelledby="datatabletabcontents-tab">
+                    <form method='post' action='{% url 'helpdesk:mass_update' %}' id="ticket_mass_update">
+                        {% csrf_token %}
+                        <table class="table table-sm table-striped table-bordered table-hover"
+                               id="ticketTable" data-page-length='{{ default_tickets_per_page }}'>
+                            <thead class="thead-light">
                             <tr>
-                                <th>&nbsp;</th>
+                                <th></th>
                                 <th>{% trans "Ticket" %}</th>
-                                <th>{% trans "Prority" %}</th>
+                                <th>{% trans "Priority" %}</th>
                                 <th>{% trans "Queue" %}</th>
                                 <th>{% trans "Status" %}</th>
                                 <th>{% trans "Created" %}</th>
@@ -69,356 +72,365 @@
                                 <th>{% trans "Time Spent" %}</th>
                                 <th>{% trans "KB item" %}</th>
                             </tr>
-                        </thead>
-                    </table>
+                            </thead>
+                        </table>
 
-                    <p><label>{% trans "Select:" %} </label>
+                        <p>
+                            <label>{% trans "Select:" %}</label>
 
-                        <button id="select_all_btn" type="button" class="btn btn-primary btn-sm" />
-                        <i class="fas fa-check-circle"></i>&nbsp;{% trans "All" %}
-                </button>
+                            <button id="select_all_btn" type="button" class="btn btn-primary btn-sm">
+                                <i class="fas fa-check-circle"></i> {% trans "All" %}
+                            </button>
 
-                <button id='select_none_btn' type="button" class="btn btn-primary btn-sm"><i class="fas fa-times-circle"></i>&nbsp;{% trans "None" %}</button>
+                            <button id='select_none_btn' type="button" class="btn btn-primary btn-sm">
+                                <i class="fas fa-times-circle"></i> {% trans "None" %}
+                            </button>
 
-                <button id='select_inverse_btn' type="button" class="btn btn-primary btn-sm"><i class="fas fa-expand-arrows-alt"></i>&nbsp;{% trans "Invert" %}</button>
-                    </p>
+                            <button id='select_inverse_btn' type="button" class="btn btn-primary btn-sm">
+                                <i class="fas fa-expand-arrows-alt"></i> {% trans "Invert" %}
+                            </button>
+                        </p>
 
-                    <p>
-                        <label for='id_mass_action'>{% trans "With Selected Tickets:" %}</label>
-                        <select name='action' id='id_mass_action'>
-                            <option value='take'>{% trans "Take (Assign to me)" %}</option>
-                            <option value='delete'>{% trans "Delete" %}</option>
-                            <optgroup label='{% trans "Close" %}'>
-                                <option value='close'>{% trans "Close (Don't Send E-Mail)" %}</option>
-                                <option value='close_public'>{% trans "Close (Send E-Mail)" %}</option>
-                            </optgroup>
-                            <optgroup label='{% trans "Assign To" %}'>
-                                <option value='unassign'>{% trans "Nobody (Unassign)" %}</option>
-                                {% for u in user_choices %}<option value='assign_{{ u.id }}'>{{ u.get_username }}</option>{% endfor %}
-                            </optgroup>
-                            <optgroup label='{% trans "Set KB Item" %}'>
-                                <option value='kbitem_none'>{% trans "No KB Item" %}</option>
-                                {% for kbi in kb_items %}<option value='kbitem_{{ kbi.id }}'>{{kbi.category.title}}: {{ kbi.title }}</option>{% endfor %}
-                            </optgroup>
-                        </select>
-                        <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-arrow-circle-right"></i>&nbsp;{% trans "Go" %}</button>
-                    </p>
-                    {% csrf_token %}</form>
-
-            </div>
-            <div class="tab-pane fade" id="timelinetabcontents" role="tabpanel" aria-labelledby="timelinetabcontents-tab">
-                <div id='timeline-embed' style="width: 100%; height: 80vh"></div>
-                <!-- 1 -->
-                <link title="timeline-styles" rel="stylesheet" href="https://cdn.knightlab.com/libs/timeline3/latest/css/timeline.css">
-
-                <!-- 2 -->
-                <script src="https://cdn.knightlab.com/libs/timeline3/latest/js/timeline.js"></script>
-
-
-                <!-- 3 -->
-                <script type="text/javascript">
-                 // The TL.Timeline constructor takes at least two arguments:
-                 // the id of the Timeline container (no '#'), and
-                 // the URL to your JSON data file or Google spreadsheet.
-                 // the id must refer to an element "above" this code,
-                 // and the element must have CSS styling to give it width and height
-                 // optionally, a third argument with configuration options can be passed.
-                 // See below for more about options.
-                 var timeline_loaded = false;
-                 $(function () {
-                     $('#timelinetabcontents-tab').on('shown.bs.tab', function (e) {
-                         if(!timeline_loaded){
-                             timeline = new TL.Timeline(
-                                 'timeline-embed',
-                                 '{% url 'helpdesk:timeline_ticket_list' urlsafe_query %}'
-                            );
-                            timeline_loaded = true;
-                         }
-                 });
-                 })
-                </script>
-            </div>
-        </div>
-    </div>
-    <!-- /.panel-body -->
-</div>
-<!-- /.panel -->
-
-<div class="card mb-3">
-    <div class="card-header">
-        <i class="fas fa-hand-pointer"></i>
-        {% trans "Query Selection" %}
-    </div>
-    <div class="card-body">
-        <!-- start accordion -->
-        <div class="accordion" id="queryAccordion">
-            <div class="card">
-                <div class="card-header" id="headingOne">
-                <h5 class="mb-0">
-                    <button class="btn btn-link btn-sm" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                    <i class="fas fa-filter"></i>
-                    {% trans "Filters" %}
-                    </button>
-                </h5>
-                </div>
-
-                <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#queryAccordion">
-                <div class="card-body">
-                    <form>
-                        <div class="form-group float-right">
-                        <label for="filterBuilderSelect">{% trans "Add filter" %}:</label>
-                        <select class="custom-select custom-select-sm mb-0" aria-describedby="select-description" name="select" id="filterBuilderSelect"
-                                onChange="onFilterChange(this.value)">
-                            <option value="">--</option>
-                            <option id="filterBuilderSelect-Sort" value="Sort">{% trans "Sorting" %}</option>
-                            <option id="filterBuilderSelect-Owner" value="Owner">{% trans "Owner" %}</option>
-                            <option id="filterBuilderSelect-Queue" value="Queue">{% trans "Queue" %}</option>
-                            <option id="filterBuilderSelect-Status" value="Status">{% trans "Status" %}</option>
-                            <option id="filterBuilderSelect-Keywords" value="Keywords">{% trans "Keywords" %}</option>
-                            <option id="filterBuilderSelect-Dates" value="Dates">{% trans "Date Range" %}</option>
-                            <option id="filterBuilderSelect-KBItems" value="KBItems">{% trans "Knowledge base items" %}</option>
-                        </select>
-                    {% csrf_token %}
-                    </form>
-                        </div>
-
-                    <form method='get' action='./'>
-                        <ul class="list-group list-group-flush">
-                            <li id="filterBoxSort" class="filterBox{% if query_params.sorting %} filterBoxShow{% endif %} list-group-item" id="filterBoxSort">
-                        {% include './filters/sorting.html' %}
-                            </li>
-                            <li class="filterBox{% if query_params.filtering.assigned_to__id__in %} filterBoxShow{% endif %} list-group-item" id=filterBoxOwner>
-                        {% include './filters/owner.html' %}
-                            </li>
-                            <li class="list-group-item filterBox{% if query_params.filtering.queue__id__in %} filterBoxShow{% endif %}" id="filterBoxQueue">
-                        {% include './filters/queue.html' %}
-                            </li>
-                            <li class="list-group-item filterBox{% if query_params.filtering.status__in %} filterBoxShow{% endif %}" id="filterBoxStatus">
-                        {% include './filters/status.html' %}
-                            </li>
-                            <li class="list-group-item filterBox{% if query_params.filtering.created__gte or query_params.filtering.created__lte %} filterBoxShow{% endif %}" id='filterBoxDates'>
-                        {% include './filters/date.html' %}
-                            </li>
-                            <li class="list-group-item filterBox{% if query_params.search_string %} filterBoxShow{% endif %}" id="filterBoxKeywords">
-                        {% include './filters/keywords.html' %}
-                            </li>
-                            <li class="list-group-item filterBox{% if query_params.filtering.kbitem__in %} filterBoxShow{% endif %}" id="filterBoxKBItems">
-                                {% include './filters/kbitems.html' %}
-                            </li>
-                        </ul>
-
-                        <input class="btn btn-primary btn-sm" type='submit' value='{% trans "Apply Filters" %}' />
-                        {% if from_saved_query and saved_query.user == user %}
-                        <p>{% blocktrans with saved_query.title as query_name %}You are currently viewing saved query <strong>"{{ query_name }}"</strong>.{% endblocktrans %} <a href='{% url 'helpdesk:delete_query' saved_query.id %}'>{% trans "Delete Saved Query" %}</a></p>
-                        {% endif %}
-                        {% if from_saved_query %}
-                        <p>{% blocktrans with saved_query.id as query_id %}<a href='../reports/?saved_query={{ query_id }}'>Run a report</a> on this query to see stats and charts for the data listed below.{% endblocktrans %}</p>
-                        {% endif %}
-                    {% csrf_token %}
+                        <p>
+                            <label for='id_mass_action'>{% trans "With Selected Tickets:" %}</label>
+                            <select name='action' id='id_mass_action'>
+                                <option value='take'>{% trans "Take (Assign to me)" %}</option>
+                                <option value='delete'>{% trans "Delete" %}</option>
+                                <option value='merge'>{% trans "Merge" %}</option>
+                                <optgroup label='{% trans "Close" %}'>
+                                    <option value='close'>{% trans "Close (Don't Send E-Mail)" %}</option>
+                                    <option value='close_public'>{% trans "Close (Send E-Mail)" %}</option>
+                                </optgroup>
+                                <optgroup label='{% trans "Assign To" %}'>
+                                    <option value='unassign'>{% trans "Nobody (Unassign)" %}</option>
+                                    {% for u in user_choices %}
+                                        <option value='assign_{{ u.id }}'>{{ u.get_username }}</option>
+                                    {% endfor %}
+                                </optgroup>
+                                <optgroup label='{% trans "Set KB Item" %}'>
+                                    <option value='kbitem_none'>{% trans "No KB Item" %}</option>
+                                    {% for kbi in kb_items %}
+                                        <option value='kbitem_{{ kbi.id }}'>{{ kbi.category.title }}: {{ kbi.title }}</option>
+                                    {% endfor %}
+                                </optgroup>
+                            </select>
+                            <button type="submit" class="btn btn-primary btn-sm">
+                                <i class="fas fa-arrow-circle-right"></i> {% trans "Go" %}
+                            </button>
+                        </p>
                     </form>
                 </div>
+                <div class="tab-pane fade" id="timelinetabcontents" role="tabpanel" aria-labelledby="timelinetabcontents-tab">
+                    <div id='timeline-embed' style="width: 100%; height: 80vh"></div>
                 </div>
-            </div> <!-- end card -->
-
-            <div class="card">
-                <div class="card-header" id="headingTwo">
-                <h5 class="mb-0">
-                    <button class="btn btn-link collapsed btn-sm" type="button" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                    <i class="fas fa-save"></i>
-                    {% trans "Save Query" %}
-                    </button>
-                </h5>
-                </div>
-                <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#queryAccordion">
-                <div class="card-body">
-                    <form method='post' action='{% url 'helpdesk:savequery' %}'>
-                        <input type='hidden' name='query_encoded' value='{{ urlsafe_query }}' />
-                        <dl>
-                            <dt><label for='id_title'>{% trans "Query Name" %}</label></dt>
-                            <dd><input type='text' name='title' id='id_title' /></dd>
-                            <dd class='form_help_text'>{% trans "This name appears in the drop-down list of saved queries. If you share your query, other users will see this name, so choose something clear and descriptive!" %}</dd>
-
-                            <dt><label for='id_shared'>{% trans "Shared?" %}</label></dt>
-                            <dd><input type='checkbox' name='shared' id='id_shared' /> {% trans "Yes, share this query with other users." %}</dd>
-                            <dd class='form_help_text'>{% trans "If you share this query, it will be visible by <em>all</em> other logged-in users." %}</dd>
-
-                        </dl>
-                        <div class='buttons'>
-                            <input class="btn btn-primary" type='submit' value='{% trans "Save Query" %}'>
-                        </div>
-                    {% csrf_token %}</form>
-                </div>
-                </div>
-            </div> <!-- end card -->
-
-            <div class="card">
-                <div class="card-header" id="headingThree">
-                <h5 class="mb-0">
-                    <button class="btn btn-link collapsed btn-sm" type="button" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-                    <i class="fas fa-clipboard-check"></i>
-                    {% trans "Use Saved Query" %}
-                    </button>
-                </h5>
-                </div>
-                <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#queryAccordion">
-                <div class="card-body">
-                    <form method='get' action='{% url 'helpdesk:list' %}'>
-                        <p><label for='id_query_selector'>{% trans "Query" %}</label><select name='saved_query' id='id_query_selector'>
-                            {% for q in user_saved_queries %}
-                            <option value='{{ q.id }}'>{{ q.title }}{% if q.shared %} (Shared{% ifnotequal user q.user %} by {{ q.user.get_username }}{% endifnotequal %}){% endif %}</option>
-                            {% endfor %}
-                        </select></p>
-                        <input class="btn btn-primary" type='submit' value='{% trans "Run Query" %}'>
-                    {% csrf_token %}</form>
-                </div>
-                </div>
-            </div> <!-- end card -->
+            </div>
         </div>
-        <!-- end accordion -->
+        <!-- /.panel-body -->
     </div>
-    <!-- end card-body -->
-</div>
-<!-- end top card -->
+    <!-- /.panel -->
+
+    <div class="card mb-3">
+        <div class="card-header">
+            <i class="fas fa-hand-pointer"></i>
+            {% trans "Query Selection" %}
+        </div>
+        <div class="card-body">
+            <!-- start accordion -->
+            <div class="accordion" id="queryAccordion">
+                <div class="card">
+                    <div class="card-header" id="headingOne">
+                        <h5 class="mb-0">
+                            <button class="btn btn-link btn-sm" type="button" data-toggle="collapse"
+                                    data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                <i class="fas fa-filter"></i>
+                                {% trans "Filters" %}
+                            </button>
+                        </h5>
+                    </div>
+
+                    <div id="collapseOne" class="collapse show" aria-labelledby="headingOne"
+                         data-parent="#queryAccordion">
+                        <div class="card-body">
+                            <form method="get">
+                                <div class="form-group float-right">
+                                    <label for="filterBuilderSelect">{% trans "Add filter" %}:</label>
+                                    <select class="custom-select custom-select-sm mb-0"
+                                            aria-describedby="select-description" name="select" id="filterBuilderSelect"
+                                            onChange="onFilterChange(this.value)">
+                                        <option value="">--</option>
+                                        <option id="filterBuilderSelect-Sort" value="Sort"{% if query_params.sorting %} disabled{% endif %}>
+                                            {% trans "Sorting" %}
+                                        </option>
+                                        <option id="filterBuilderSelect-Owner" value="Owner"{% if query_params.filtering.assigned_to__id__in %} disabled{% endif %}>
+                                            {% trans "Owner" %}
+                                        </option>
+                                        <option id="filterBuilderSelect-Queue" value="Queue"{% if query_params.filtering.queue__id__in %} disabled{% endif %}>
+                                            {% trans "Queue" %}
+                                        </option>
+                                        <option id="filterBuilderSelect-Status" value="Status"{% if query_params.filtering.status__in %} disabled{% endif %}>
+                                            {% trans "Status" %}
+                                        </option>
+                                        <option id="filterBuilderSelect-Keywords" value="Keywords"{% if query_params.search_string %} disabled{% endif %}>
+                                            {% trans "Keywords" %}
+                                        </option>
+                                        <option id="filterBuilderSelect-Dates" value="Dates"{% if query_params.filtering.created__gte or query_params.filtering.created__lte %} disabled{% endif %}>
+                                            {% trans "Date Range" %}
+                                        </option>
+                                        <option id="filterBuilderSelect-KBItems" value="KBItems"{% if query_params.filtering.kbitem__in %} disabled{% endif %}>
+                                            {% trans "Knowledge base items" %}
+                                        </option>
+                                    </select>
+                                </div>
+                            </form>
+                        </div>
+
+                        <form method="get">
+                            <ul class="list-group list-group-flush">
+                                <li id="filterBoxSort"
+                                    class="filterBox{% if query_params.sorting %} filterBoxShow{% endif %} list-group-item"
+                                    id="filterBoxSort">
+                                    {% include 'helpdesk/filters/sorting.html' %}
+                                </li>
+                                <li class="filterBox{% if query_params.filtering.assigned_to__id__in %} filterBoxShow{% endif %} list-group-item"
+                                    id=filterBoxOwner>
+                                    {% include 'helpdesk/filters/owner.html' %}
+                                </li>
+                                <li class="list-group-item filterBox{% if query_params.filtering.queue__id__in %} filterBoxShow{% endif %}"
+                                    id="filterBoxQueue">
+                                    {% include 'helpdesk/filters/queue.html' %}
+                                </li>
+                                <li class="list-group-item filterBox{% if query_params.filtering.status__in %} filterBoxShow{% endif %}"
+                                    id="filterBoxStatus">
+                                    {% include 'helpdesk/filters/status.html' %}
+                                </li>
+                                <li class="list-group-item filterBox{% if query_params.filtering.created__gte or query_params.filtering.created__lte %} filterBoxShow{% endif %}"
+                                    id='filterBoxDates'>
+                                    {% include 'helpdesk/filters/date.html' %}
+                                </li>
+                                <li class="list-group-item filterBox{% if query_params.search_string %} filterBoxShow{% endif %}"
+                                    id="filterBoxKeywords">
+                                    {% include 'helpdesk/filters/keywords.html' %}
+                                </li>
+                                <li class="list-group-item filterBox{% if query_params.filtering.kbitem__in %} filterBoxShow{% endif %}"
+                                    id="filterBoxKBItems">
+                                    {% include 'helpdesk/filters/kbitems.html' %}
+                                </li>
+                                <li class="list-group-item">
+                                    <input class="btn btn-primary btn-sm" type='submit' value='{% trans "Apply Filters" %}'/>
+                                </li>
+                                {% if from_saved_query and saved_query.user == user %}
+                                    <li class="list-group-item">
+                                        {% blocktrans with saved_query.title as query_name %}You are currently viewing saved query <strong>"{{ query_name }}"</strong>.{% endblocktrans %}
+                                        <a href='{% url 'helpdesk:delete_query' saved_query.id %}'>
+                                            {% trans "Delete Saved Query" %}
+                                        </a>
+                                    </li>
+                                {% endif %}
+                                {% if from_saved_query %}
+                                    <li class="list-group-item">
+                                        {% blocktrans with saved_query.id as query_id %}<a href='../reports/?saved_query={{ query_id }}'>Run a report</a> on this query to see stats and charts for the data listed below.{% endblocktrans %}
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </form>
+                    </div>
+                </div> <!-- end card -->
+
+                <div class="card">
+                    <div class="card-header" id="headingTwo">
+                        <h5 class="mb-0">
+                            <button class="btn btn-link collapsed btn-sm" type="button" data-toggle="collapse"
+                                    data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                <i class="fas fa-save"></i>
+                                {% trans "Save Query" %}
+                            </button>
+                        </h5>
+                    </div>
+                    <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#queryAccordion">
+                        <div class="card-body">
+                            <form method='post' action='{% url 'helpdesk:savequery' %}'>
+                                {% csrf_token %}
+                                <input type='hidden' name='query_encoded' value='{{ urlsafe_query }}'/>
+                                <dl>
+                                    <dt><label for='id_title'>{% trans "Query Name" %}</label></dt>
+                                    <dd><input type='text' name='title' id='id_title'/></dd>
+                                    <dd class='form_help_text'>{% trans "This name appears in the drop-down list of saved queries. If you share your query, other users will see this name, so choose something clear and descriptive!" %}</dd>
+
+                                    <dt><label for='id_shared'>{% trans "Shared?" %}</label></dt>
+                                    <dd><input type='checkbox' name='shared'
+                                               id='id_shared'/> {% trans "Yes, share this query with other users." %}
+                                    </dd>
+                                    <dd class='form_help_text'>{% trans "If you share this query, it will be visible by <em>all</em> other logged-in users." %}</dd>
+
+                                </dl>
+                                <div class='buttons'>
+                                    <input class="btn btn-primary" type='submit' value='{% trans "Save Query" %}'>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div> <!-- end card -->
+
+                {% if user_saved_queries %}
+                    <div class="card">
+                        <div class="card-header" id="headingThree">
+                            <h5 class="mb-0">
+                                <button class="btn btn-link collapsed btn-sm" type="button" data-toggle="collapse"
+                                        data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                    <i class="fas fa-clipboard-check"></i>
+                                    {% trans "Use Saved Query" %}
+                                </button>
+                            </h5>
+                        </div>
+                        <div id="collapseThree" class="collapse" aria-labelledby="headingThree"
+                             data-parent="#queryAccordion">
+                            <div class="card-body">
+                                <form action='{% url 'helpdesk:list' %}'>
+                                    <p>
+                                        <label for='id_query_selector'>{% trans "Query" %}</label>
+                                        <select name='saved_query' id='id_query_selector'>
+                                        {% for q in user_saved_queries %}
+                                            <option value='{{ q.id }}'>
+                                                {{ q.title }}{% if q.shared %}
+                                                    (Shared{% if user != q.user %} by {{ q.user.get_username }}{% endif %})
+                                                {% endif %}
+                                            </option>
+                                        {% endfor %}
+                                    </select></p>
+                                    <input class="btn btn-primary" type='submit' value='{% trans "Run Query" %}'>
+                                </form>
+                            </div>
+                        </div>
+                    </div> <!-- end card -->
+                {% endif %}
+            </div>
+            <!-- end accordion -->
+        </div>
+        <!-- end card-body -->
+    </div>
+    <!-- end top card -->
 
 {% endblock %}
 
 
 {% block helpdesk_js %}
-<script src='{% static "helpdesk/filter.js" %}'></script>
-<script>
- function get_url(row)
- {
-     return "{% url 'helpdesk:view' 1234 %}".replace(/1234/, row.id.toString());
- }
- $(document).ready(function()
- {
-     //DataTables Initialization
-     let tasks_table = $('#ticketTable').DataTable({
-         "language": {
-             "emptyTable": "{% trans 'No Tickets Match Your Selection' %}"
-         },
-         "processing": true,
-         "serverSide": true,
-         "ajax": {
-    "url": "{% url 'helpdesk:datatables_ticket_list' urlsafe_query %}",
-             "type": "GET",
-         },
-         createdRow: function( row, data, dataIndex )
-         {
-             $( row ).addClass(data.row_class);
-         },
-         dom: 'ltBp',
-         buttons: ["colvis"],
+    <script src='{% static "helpdesk/filter.js" %}'></script>
+    <script src="https://cdn.knightlab.com/libs/timeline3/latest/js/timeline.js"></script>
+    <script>
+        function get_url(row) {
+            return "{% url 'helpdesk:view' 1234 %}".replace(/1234/, row.id.toString());
+        }
 
-         "columns": [
-             {"data": "id",
-              "orderable": false,
-              "render": function(data, type, row, meta)
-              {
-                  var pk = data;
-                  if(type === 'display'){
-                      data = "<input type='checkbox' name='ticket_id' value='"+pk+"'"+ "class='ticket_multi_select' />"
-                  }
-                  return data
-              }
-             },
-             {"data": "ticket",
-              "render": function (data, type, row, meta)
-              {
-                  var id = data.split(" ")[0];
-                  var name = data.split(" ")[1];
-                  if (type === 'display')
-                  {
-                      data = '<div class="tickettitle"><a href="' + get_url(row) + '" >' +
-                             row.id + '. ' +
-                             row.title + '</a></div>';
-                  }
-                  return data
-              }
-             },
-             {"data": "priority",
-              "render": function (data, type, row, meta) {
-                  var priority = "success";
-                  if (data == 4 ) {
-                      priority = "warning";
-                  } else if (data == 5) {
-                      priority = "danger";
-                  }
-                  return '<p class="text-'+priority+'">'+data+'</p>';
-              },
-              "visible": false,
-             },
-             {"data": "queue",
-              "render": function(data, type, row, meta) {
-                  return data.title;
-              },
-              "visible": false,
-             },
-             {"data": "status"},
-             {"data": "created"},
-             {"data": "due_date", "visible": false},
-             {"data": "assigned_to",
-              "render": function(data, type, row, meta) {
-                  if (data != "None") {
-                      return data;
-                  }
-                  else {
-                      return "";
-                  }
-              }
-             },
-             {"data": "submitter"},
-             {"data": "time_spent", "visible": false},
-             {"data": "kbitem"},
-         ]
-     });
- })
+        $(document).ready(function () {
+            // Ticket DataTable Initialization
+            $('#ticketTable').DataTable({
+                language: {
+                    "emptyTable": "{% trans 'No Tickets Match Your Selection' %}"
+                },
+                processing: true,
+                serverSide: true,
+                ajax: {
+                    "url": "{% url 'helpdesk:datatables_ticket_list' urlsafe_query %}",
+                    "type": "GET",
+                },
+                createdRow: function (row, data, dataIndex) {
+                    $(row).addClass(data.row_class);
+                },
+                dom: 'ltBp',
+                buttons: ["colvis"],
+                columns: [
+                    {
+                        data: "id",
+                        orderable: false,
+                        render: function (data, type, row, meta) {
+                            const pk = data;
+                            if (type === 'display') {
+                                data = "<input type='checkbox' name='ticket_id' value='" + pk + "' class='ticket_multi_select' />"
+                            }
+                            return data
+                        }
+                    },
+                    {
+                        data: "ticket",
+                        render: function (data, type, row, meta) {
+                            if (type === 'display') {
+                                data = '<div class="tickettitle"><a href="' + get_url(row) + '" >' +
+                                    row.id + '. ' +
+                                    row.title + '</a></div>';
+                            }
+                            return data
+                        }
+                    },
+                    {
+                        data: "priority",
+                        render: function (data, type, row, meta) {
+                            let priority = "success";
+                            if (data === 4) {
+                                priority = "warning";
+                            } else if (data === 5) {
+                                priority = "danger";
+                            }
+                            return '<p class="text-' + priority + '">' + data + '</p>';
+                        },
+                        visible: false,
+                    },
+                    {
+                        data: "queue",
+                        render: function (data, type, row, meta) {
+                            return data.title;
+                        },
+                        visible: false,
+                    },
+                    {data: "status"},
+                    {data: "created"},
+                    {data: "due_date", "visible": false},
+                    {
+                        data: "assigned_to",
+                        render: function (data, type, row, meta) {
+                            if (data !== "None") {
+                                return data;
+                            }
+                            return "";
+                        }
+                    },
+                    {data: "submitter"},
+                    {data: "time_spent", "visible": false},
+                    {data: "kbitem"},
+                ]
+            });
 
- $(document).ready(function()
- {
-     $("#select_all_btn").click(function() {
-         $(".ticket_multi_select").prop('checked', true);
-     });
-     $("#select_none_btn").click(function() {
-         $(".ticket_multi_select").prop('checked', false);
-     });
-     $("#select_inverse_btn").click(function() {
-         $(".ticket_multi_select").each(function() {
-             $(this).prop('checked', !$(this).prop('checked'));
-         });
-     });
- })
+            {# Timeline initialization when tab is displayed #}
+            // The TL.Timeline constructor takes at least two arguments:
+            // the id of the Timeline container (no '#'), and
+            // the URL to your JSON data file or Google spreadsheet.
+            // the id must refer to an element "above" this code,
+            // and the element must have CSS styling to give it width and height
+            // optionally, a third argument with configuration options can be passed.
+            // See below for more about options.
+            let timeline_loaded = false;
+            $('#timelinetabcontents-tab').on('shown.bs.tab', function (e) {
+                if (!timeline_loaded) {
+                    new TL.Timeline(
+                        'timeline-embed',
+                        '{% url 'helpdesk:timeline_ticket_list' urlsafe_query %}'
+                    );
+                    timeline_loaded = true;
+                }
+            });
 
- /**
-  * Disable active filtering options in filter select menu
-  */
- $(document).ready(function() {
-     {% if query_params.sorting %}
-     $("#filterBuilderSelect-Sort")[0].disabled = "disabled";
-     {% endif %}
-     {% if query_params.filtering.assigned_to__id__in %}
-     $("#filterBuilderSelect-Owner")[0].disabled = "disabled";
-     {% endif %}
-     {% if query_params.filtering.queue__id__in %}
-     $("#filterBuilderSelect-Queue")[0].disabled = "disabled";
-     {% endif %}
-     {% if query_params.filtering.status__in %}
-     $("#filterBuilderSelect-Status")[0].disabled = "disabled";
-     {% endif %}
-     {% if query_params.filtering.created__gte or query_params.filtering.created__lte %}
-     $("#filterBuilderSelect-Dates")[0].disabled = "disabled";
-     {% endif %}
-     {% if query_params.search_string %}
-     $("#filterBuilderSelect-Keywords")[0].disabled = "disabled";
-     {% endif %}
-     {% if query_params.filtering.kbitem__in %}
-     $("#filterBuilderSelect-KBItems")[0].disabled = "disabled";
-     {% endif %}
- });
-
-{% for f in query_params.filtering %}
-{% endfor %}
-
-</script>
+            {# Shortcuts to select/unselect multiple tickets #}
+            $("#select_all_btn").click(function () {
+                $(".ticket_multi_select").prop('checked', true);
+            });
+            $("#select_none_btn").click(function () {
+                $(".ticket_multi_select").prop('checked', false);
+            });
+            $("#select_inverse_btn").click(function () {
+                $(".ticket_multi_select").each(function () {
+                    $(this).prop('checked', !$(this).prop('checked'));
+                });
+            });
+        })
+    </script>
 {% endblock %}
 

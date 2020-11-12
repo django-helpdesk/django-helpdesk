@@ -1,24 +1,24 @@
 $(document).ready(function() {
     $("#filterBuilderButton").click(function() {
-        var boxName = "#filterBox" + $("#filterBuilderSelect").val();
+        const boxName = "#filterBox" + $("#filterBuilderSelect").val();
         $(boxName).slideDown();
         return false;
     });
     $(".filterBuilderRemove").click(function() {
-        var boxName = "#" + $(this).parents(".filterBox").attr('id');
+        const boxName = "#" + $(this).parents(".filterBox").attr('id');
         $(boxName).slideUp();
-        $(boxName).children("input:text").each(function() {
+        $(boxName).find("input:text").each(function() {
             $(this).val("");
         });
-        $(boxName).children("input:checkbox").each(function() {
+        $(boxName).find("input:checkbox").each(function() {
             this.checked = false;
         });
-        $(boxName).children("select").each(function() {
+        $(boxName).find("select").each(function() {
             this.selectedIndex = -1;
         });
 
-        var selectId = $(this).parents(".filterBox").attr('id');
-        var attr = selectId.replace("filterBox", "");
+        let selectId = $(this).parents(".filterBox").attr('id');
+        const attr = selectId.replace("filterBox", "");
         $("#filterBuilderSelect-" + attr)[0].disabled = "";
 
         return false;
@@ -31,9 +31,9 @@ $(document).ready(function() {
  *
  * @param {string} val name of selected filter value
  */
-var onFilterChange = function(val) {
+const onFilterChange = function(val) {
   if (val) {
-    var boxName = "#filterBox" + val;
+    const boxName = "#filterBox" + val;
     $(boxName).slideDown();
     $(boxName)[0].style.display="block";
 

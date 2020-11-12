@@ -10,7 +10,7 @@ models.py - Model (and hence database) definitions. This is the core of the
 from django.contrib.auth.models import Permission
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
@@ -569,6 +569,15 @@ class Ticket(models.Model):
         verbose_name=_('Knowledge base item the user was viewing when they created this ticket.'),
     )
 
+    merged_to = models.ForeignKey(
+        'self',
+        verbose_name=_('merged to'),
+        related_name='merged_tickets',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True
+    )
+
     @property
     def time_spent(self):
         """Return back total time spent on the ticket. This is calculated value
@@ -794,6 +803,46 @@ class Ticket(models.Model):
     @property
     def get_resolution_markdown(self):
         return get_markdown(self.resolution)
+
+    def add_email_to_ticketcc_if_not_in(self, email=None, user=None, ticketcc=None):
+        """
+        Check that given email/user_email/ticketcc_email is not already present on the ticket
+        (submitter email, assigned to, or in ticket CCs) and add it to a new ticket CC,
+        or move the given one
+
+        :param str email:
+        :param User user:
+        :param TicketCC ticketcc:
+        :rtype: TicketCC|None
+        """
+        if ticketcc:
+            email = ticketcc.display
+        elif user:
+            if user.email:
+                email = user.email
+            else:
+                # Ignore if user has no email address
+                return
+        elif not email:
+            raise ValueError('You must provide at least one parameter to get the email from')
+
+        # Prepare all emails already into the ticket
+        ticket_emails = [x.display for x in self.ticketcc_set.all()]
+        if self.submitter_email:
+            ticket_emails.append(self.submitter_email)
+        if self.assigned_to and self.assigned_to.email:
+            ticket_emails.append(self.assigned_to.email)
+
+        # Check that email is not already part of the ticket
+        if email not in ticket_emails:
+            if ticketcc:
+                ticketcc.ticket = self
+                ticketcc.save(update_fields=['ticket'])
+            elif user:
+                ticketcc = self.ticketcc_set.create(user=user)
+            else:
+                ticketcc = self.ticketcc_set.create(email=email)
+            return ticketcc
 
 
 class FollowUpManager(models.Manager):
@@ -1665,6 +1714,10 @@ class TicketCC(models.Model):
 
     def __str__(self):
         return '%s for %s' % (self.display, self.ticket.title)
+
+    def clean(self):
+        if self.user and not self.user.email:
+            raise ValidationError('User has no email address')
 
 
 class CustomFieldManager(models.Manager):
