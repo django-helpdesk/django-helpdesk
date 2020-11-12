@@ -221,6 +221,13 @@ class CreateFollowUpForm(forms.ModelForm):
             'comment': CustomTinyMCE()
         }
 
+    def clean_comment(self):
+        """ Check that comment is not empty """
+        comment = self.cleaned_data.get('comment')
+        if not comment:
+            raise ValidationError('Merci de saisir votre réponse dans le champ texte.')
+        return comment
+
 
 class EditFollowUpForm(forms.ModelForm):
 
