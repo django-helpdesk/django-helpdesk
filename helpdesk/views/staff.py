@@ -520,6 +520,7 @@ def ticket_spent_times(request, ticket_id, spent_time_id=None):
         'status': edit_spent_time.status if edit_spent_time else TicketSpentTime.FINISHED,
         'end_date': edit_spent_time.end_date if edit_spent_time else timezone.now()
     })
+    form._meta.model = TicketSpentTime
     if form.is_valid():
         spent_time = form.save(commit=False)
         spent_time.ticket = ticket
@@ -558,7 +559,7 @@ def start_spent_time(request, ticket_id, employee_id):
 
     # Check first if the user has no ongoing spent time
     if not employee.spent_times.filter(status=TicketSpentTime.ONGOING).exists():
-        spent_time = TicketSpentTime.objects.create(ticket=ticket, employee=employee)
+        spent_time = ticket.spent_times.create(employee=employee)
     else:
         return JsonResponse({'success': False, 'error': 'Un chrono a déjà été lancé !'})
 
@@ -567,15 +568,17 @@ def start_spent_time(request, ticket_id, employee_id):
         'spent_time_id': spent_time.id,
         'ongoing_spent_time_top_navigation': render_to_string(
             'base/components/spent_time/ongoing_spent_time_top_navigation.html', {
-            'ongoing_spent_time': spent_time
-        }),
+                'ongoing_spent_time': spent_time
+            }
+        ),
         'ongoing_spent_time_actions': render_to_string(
             'base/components/spent_time/ongoing_spent_time_actions.html', {
-            'ongoing_spent_time': spent_time
-        }),
+                'ongoing_spent_time': spent_time
+            }
+        ),
         'table': render_to_string('base/components/spent_time/spent_times_table.html', {
             'request': request,
-            'spent_times': spent_time.ticket.spent_times.select_related('employee__user')
+            'spent_times': ticket.spent_times.select_related('employee__user')
         })
     })
 
