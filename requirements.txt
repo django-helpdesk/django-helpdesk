@@ -7,3 +7,4 @@ lxml
 simplejson
 pytz
 six
+O365
