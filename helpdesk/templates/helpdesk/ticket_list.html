@@ -9,7 +9,7 @@
     {% if helpdesk_settings.HELPDESK_USE_CDN %}
     <link title="timeline-styles" rel="stylesheet" href="https://cdn.knightlab.com/libs/timeline3/latest/css/timeline.css">
     {% else %}
-    <link title="timeline-styles" rel="stylesheet" href="{% static 'helpdesk/vendor/timeline/css/bootstrap.min.css' %}">
+    <link title="timeline-styles" rel="stylesheet" href="{% static 'helpdesk/vendor/timeline3/css/timeline.css' %}">
     {% endif %}
 {% endblock %}
 
@@ -324,7 +324,7 @@
     {% if helpdesk_settings.HELPDESK_USE_CDN %}
     <script src="https://cdn.knightlab.com/libs/timeline3/latest/js/timeline.js"></script>
     {% else %}
-    <script src="{% static 'helpdesk/vendor/timeline/timeline.js' %}"></script>
+    <script src="{% static 'helpdesk/vendor/timeline3/js/timeline.js' %}"></script>
     {% endif %}
     <script>
         function get_url(row) {
