@@ -5,7 +5,12 @@
 {% block helpdesk_title %}{% trans "Tickets" %}{% endblock %}
 
 {% block helpdesk_head %}
+    <!-- Timeline 3 CSS -->
+    {% if helpdesk_settings.HELPDESK_USE_CDN %}
     <link title="timeline-styles" rel="stylesheet" href="https://cdn.knightlab.com/libs/timeline3/latest/css/timeline.css">
+    {% else %}
+    <link title="timeline-styles" rel="stylesheet" href="{% static 'helpdesk/vendor/timeline/css/bootstrap.min.css' %}">
+    {% endif %}
 {% endblock %}
 
 {% block h1_title %}Tickets
@@ -315,7 +320,12 @@
 
 {% block helpdesk_js %}
     <script src='{% static "helpdesk/filter.js" %}'></script>
+    <!-- Timeline 3 JavaScript -->
+    {% if helpdesk_settings.HELPDESK_USE_CDN %}
     <script src="https://cdn.knightlab.com/libs/timeline3/latest/js/timeline.js"></script>
+    {% else %}
+    <script src="{% static 'helpdesk/vendor/timeline/timeline.js' %}"></script>
+    {% endif %}
     <script>
         function get_url(row) {
             return "{% url 'helpdesk:view' 1234 %}".replace(/1234/, row.id.toString());
