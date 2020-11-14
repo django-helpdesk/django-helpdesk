@@ -24,7 +24,7 @@ except ImportError:
     from datetime import datetime as timezone
 
 from helpdesk.models import Queue, Ticket, FollowUp, EscalationExclusion, TicketChange
-from helpdesk.lib import send_templated_mail, safe_template_context
+from helpdesk.lib import send_templated_mail, safe_template_context, queue_mail_settings
 
 
 class Command(BaseCommand):
@@ -106,6 +106,7 @@ def escalate_tickets(queues, verbose):
             t.save()
 
             context = safe_template_context(t)
+            mail_settings = queue_mail_settings(q)
 
             if t.submitter_email:
                 send_templated_mail(
@@ -114,6 +115,7 @@ def escalate_tickets(queues, verbose):
                     recipients=t.submitter_email,
                     sender=t.queue.from_address,
                     fail_silently=True,
+                    mail_settings=mail_settings,
                 )
 
             if t.queue.updated_ticket_cc:
@@ -123,6 +125,7 @@ def escalate_tickets(queues, verbose):
                     recipients=t.queue.updated_ticket_cc,
                     sender=t.queue.from_address,
                     fail_silently=True,
+                    mail_settings=mail_settings,
                 )
 
             if t.assigned_to:
@@ -132,6 +135,7 @@ def escalate_tickets(queues, verbose):
                     recipients=t.assigned_to.email,
                     sender=t.queue.from_address,
                     fail_silently=True,
+                    mail_settings=mail_settings,
                 )
 
             if verbose:

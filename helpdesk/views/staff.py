@@ -34,7 +34,7 @@ from helpdesk.forms import (
 from helpdesk.decorators import staff_member_required, superuser_required
 from helpdesk.lib import (
     send_templated_mail, apply_query, safe_template_context,
-    process_attachments, queue_template_context,
+    process_attachments, queue_template_context, queue_mail_settings
 )
 from helpdesk.models import (
     Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch,
@@ -579,6 +579,8 @@ def update_ticket(request, ticket_id, public=False):
         comment=f.comment,
     )
 
+    mail_settings = queue_mail_settings(ticket.queue)
+
     if public and (f.comment or (
         f.new_status in (Ticket.RESOLVED_STATUS,
                          Ticket.CLOSED_STATUS))):
@@ -599,6 +601,7 @@ def update_ticket(request, ticket_id, public=False):
                 sender=ticket.queue.from_address,
                 fail_silently=True,
                 files=files,
+                mail_settings=mail_settings,
             )
             messages_sent_to.append(ticket.submitter_email)
 
@@ -613,6 +616,7 @@ def update_ticket(request, ticket_id, public=False):
                     sender=ticket.queue.from_address,
                     fail_silently=True,
                     files=files,
+                    mail_settings=mail_settings,
                 )
                 messages_sent_to.append(cc.email_address)
 
@@ -646,6 +650,7 @@ def update_ticket(request, ticket_id, public=False):
                 sender=ticket.queue.from_address,
                 fail_silently=True,
                 files=files,
+                mail_settings=mail_settings,
             )
             messages_sent_to.append(ticket.assigned_to.email)
 
@@ -666,6 +671,7 @@ def update_ticket(request, ticket_id, public=False):
             sender=ticket.queue.from_address,
             fail_silently=True,
             files=files,
+            mail_settings=mail_settings,
         )
 
     ticket.save()
@@ -761,6 +767,7 @@ def mass_update(request):
                     recipients=t.submitter_email,
                     sender=t.queue.from_address,
                     fail_silently=True,
+                    mail_settings=mail_settings,
                 )
                 messages_sent_to.append(t.submitter_email)
 
@@ -772,6 +779,7 @@ def mass_update(request):
                         recipients=cc.email_address,
                         sender=t.queue.from_address,
                         fail_silently=True,
+                        mail_settings=mail_settings,
                     )
                     messages_sent_to.append(cc.email_address)
 
@@ -785,6 +793,7 @@ def mass_update(request):
                     recipients=t.assigned_to.email,
                     sender=t.queue.from_address,
                     fail_silently=True,
+                    mail_settings=mail_settings,
                 )
                 messages_sent_to.append(t.assigned_to.email)
 
@@ -796,6 +805,7 @@ def mass_update(request):
                     recipients=t.queue.updated_ticket_cc,
                     sender=t.queue.from_address,
                     fail_silently=True,
+                    mail_settings=mail_settings,
                 )
 
         elif action == 'delete':

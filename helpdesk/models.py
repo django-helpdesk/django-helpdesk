@@ -109,12 +109,12 @@ class Queue(models.Model):
     email_box_type = models.CharField(
         _('E-Mail Box Type'),
         max_length=5,
-        choices=(('pop3', _('POP 3')), ('imap', _('IMAP')), ('local', _('Local Directory'))),
+        choices=(('pop3', _('POP 3')), ('imap', _('IMAP')), ('local', _('Local Directory')), ('o365', _('Office 365 API'))),
         blank=True,
         null=True,
         help_text=_('E-Mail server type for creating tickets automatically '
                     'from a mailbox - both POP3 and IMAP are supported, as well as '
-                    'reading from a local directory.'),
+                    'reading from a local directory or reading from the Office 365 API.'),
     )
 
     email_box_host = models.CharField(
@@ -178,6 +178,54 @@ class Queue(models.Model):
         help_text=_('If using a local directory, what directory path do you '
                     'wish to poll for new email? '
                     'Example: /var/lib/mail/helpdesk/'),
+    )
+
+    o365_client_id = models.CharField(
+        _('Office 365 Client ID'),
+        max_length=200,
+        blank=True,
+        null=True,
+        help_text=_('If using Office 365, enter your client ID'),
+    )
+
+    o365_client_secret = models.CharField(
+        _('Office 365 Client Secret'),
+        max_length=200,
+        blank=True,
+        null=True,
+        help_text=_('If using Office 365, enter your client secret'),
+    )
+
+    o365_tenant_id = models.CharField(
+        _('Office 365 Tenant ID'),
+        max_length=200,
+        blank=True,
+        null=True,
+        help_text=_('If using Office 365, enter your tenant ID'),
+    )
+
+    o365_resource_mailbox = models.CharField(
+        _('Office 365 Resource Mailbox'),
+        max_length=200,
+        blank=True,
+        null=True,
+        help_text=_('If using Office 365, enter the resource mailbox'),
+    )
+
+    o365_mailbox_folder = models.CharField(
+        _('Office 365 Mailbox folder'),
+        max_length=200,
+        blank=True,
+        null=True,
+        help_text=_('If using Office 365, enter the name of the folder in the resource mailbox. Defaults to \'Inbox\'.'),
+    )
+
+    send_through_o365 = models.BooleanField(
+        _('Send emails through Office 365?'),
+        blank=True,
+        default=False,
+        help_text=_('Do you want emails relating to this queue to be '
+                    'sent through Office 365?'),
     )
 
     permission_name = models.CharField(

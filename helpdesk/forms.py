@@ -17,7 +17,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 
-from helpdesk.lib import send_templated_mail, safe_template_context, process_attachments
+from helpdesk.lib import send_templated_mail, safe_template_context, process_attachments, queue_mail_settings
 from helpdesk.models import (Ticket, Queue, FollowUp, Attachment, IgnoreEmail, TicketCC,
                              CustomField, TicketCustomFieldValue, TicketDependency)
 from helpdesk import settings as helpdesk_settings
@@ -237,7 +237,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
     def _send_messages(ticket, queue, followup, files, user=None):
         context = safe_template_context(ticket)
         context['comment'] = followup.comment
-
+        mail_settings = queue_mail_settings(queue)
         messages_sent_to = []
 
         if ticket.submitter_email:
@@ -248,6 +248,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
                 sender=queue.from_address,
                 fail_silently=True,
                 files=files,
+                mail_settings=mail_settings,
             )
             messages_sent_to.append(ticket.submitter_email)
 
@@ -263,6 +264,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
                 sender=queue.from_address,
                 fail_silently=True,
                 files=files,
+                mail_settings=mail_settings,
             )
             messages_sent_to.append(ticket.assigned_to.email)
 
@@ -274,6 +276,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
                 sender=queue.from_address,
                 fail_silently=True,
                 files=files,
+                mail_settings=mail_settings,
             )
             messages_sent_to.append(queue.new_ticket_cc)
 
@@ -287,6 +290,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
                 sender=queue.from_address,
                 fail_silently=True,
                 files=files,
+                mail_settings=mail_settings,
             )
 
 

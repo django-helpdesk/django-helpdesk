@@ -26,7 +26,7 @@ import socket
 import ssl
 import sys
 from time import ctime
-
+import os, os.path
 from bs4 import BeautifulSoup
 
 from email_reply_parser import EmailReplyParser
@@ -41,8 +41,10 @@ from django.utils.translation import ugettext as _
 from django.utils import encoding, six, timezone
 
 from helpdesk import settings
-from helpdesk.lib import send_templated_mail, safe_template_context, process_attachments
+from helpdesk.lib import send_templated_mail, safe_template_context, process_attachments, queue_mail_settings
 from helpdesk.models import Queue, Ticket, TicketCC, FollowUp, IgnoreEmail
+
+from O365 import Account
 
 import logging
 
@@ -101,6 +103,9 @@ def process_email(quiet=False):
         if quiet:
             logger.propagate = False  # do not propagate to root logger that would log to console
         logdir = q.logging_dir or '/var/log/helpdesk/'
+
+        if not os.path.exists(logdir):
+            os.makedirs(logdir)
 
         try:
             handler = logging.FileHandler(join(logdir, q.slug + '_get_email.log'))
@@ -286,6 +291,38 @@ def process_queue(q, logger):
             else:
                 logger.warn("Message %d was not successfully processed, and will be left in local directory" % i)
 
+    elif email_box_type == 'o365':
+        credentials = (q.o365_client_id,
+                       q.o365_client_secret)
+        
+        account = Account(credentials, auth_flow_type='credentials', tenant_id=q.o365_tenant_id)
+
+        logger.info("Attempting O365 authentication")
+
+        # Authenticate O365
+        if not account.authenticate():
+            logger.error("O365 authentication failed. Check that the client ID, client secret and tenant ID are correct.")
+            sys.exit()
+
+        mailbox = account.mailbox(resource=q.o365_resource_mailbox)
+
+        folder = mailbox.get_folder(folder_name=q.o365_mailbox_folder or 'Inbox')
+        messages = folder.get_messages(limit=25)
+        
+        logger.info("Received messages from O365")
+        
+        for num, message in enumerate(messages):
+            logger.info("Processing message %s" % num)
+            full_message = message.get_mime_content().decode("utf-8")
+            try:
+                ticket = ticket_from_message(message=full_message, queue=q, logger=logger)
+            except TypeError:
+                ticket = None  # hotfix. Need to work out WHY.
+            if ticket:
+                message.delete()
+                logger.info("Successfully processed message %s, deleted from O365 Inbox" % num)
+            else:
+                logger.warning("Message %s was not successfully processed, and will be left in the O365 Inbox" % num)
 
 def decodeUnknown(charset, string):
     if six.PY2:
@@ -521,6 +558,7 @@ def ticket_from_message(message, queue, logger):
         logger.info("Attachment '%s' (with size %s) successfully added to ticket from email." % (att_file[0], att_file[1].size))
 
     context = safe_template_context(t)
+    mail_settings = queue_mail_settings(queue)
 
     if new:
         if sender_email:
@@ -530,6 +568,7 @@ def ticket_from_message(message, queue, logger):
                 recipients=sender_email,
                 sender=queue.from_address,
                 fail_silently=True,
+                mail_settings=mail_settings,
             )
         if queue.new_ticket_cc:
             send_templated_mail(
@@ -538,6 +577,7 @@ def ticket_from_message(message, queue, logger):
                 recipients=queue.new_ticket_cc,
                 sender=queue.from_address,
                 fail_silently=True,
+                mail_settings=mail_settings,
             )
         if queue.updated_ticket_cc and queue.updated_ticket_cc != queue.new_ticket_cc:
             send_templated_mail(
@@ -546,6 +586,7 @@ def ticket_from_message(message, queue, logger):
                 recipients=queue.updated_ticket_cc,
                 sender=queue.from_address,
                 fail_silently=True,
+                mail_settings=mail_settings,
             )
     else:
         context.update(comment=f.comment)
@@ -556,6 +597,7 @@ def ticket_from_message(message, queue, logger):
                 recipients=t.assigned_to.email,
                 sender=queue.from_address,
                 fail_silently=True,
+                mail_settings=mail_settings,
             )
         if queue.updated_ticket_cc:
             send_templated_mail(
@@ -564,6 +606,7 @@ def ticket_from_message(message, queue, logger):
                 recipients=queue.updated_ticket_cc,
                 sender=queue.from_address,
                 fail_silently=True,
+                mail_settings=mail_settings,
             )
         # copy email to all those CC'd to this particular ticket
         for cc in t.ticketcc_set.all():
@@ -575,6 +618,7 @@ def ticket_from_message(message, queue, logger):
                     recipients=cc.email_address,
                     sender=queue.from_address,
                     fail_silently=True,
+                    mail_settings=mail_settings,
                 )
 
     return t

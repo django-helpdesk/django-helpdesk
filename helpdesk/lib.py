@@ -41,7 +41,8 @@ def send_templated_mail(template_name,
                         sender=None,
                         bcc=None,
                         fail_silently=False,
-                        files=None):
+                        files=None,
+                        mail_settings=None):
     """
     send_templated_mail() is a wrapper around Django's e-mail routines that
     allows us to easily send multipart (text/plain & text/html) e-mails using
@@ -70,6 +71,7 @@ def send_templated_mail(template_name,
     """
     from django.core.mail import EmailMultiAlternatives
     from django.template import engines
+    from O365 import Account
     from_string = engines['django'].from_string
 
     from helpdesk.models import EmailTemplate
@@ -116,25 +118,66 @@ def send_templated_mail(template_name,
     elif type(recipients) != list:
         recipients = [recipients]
 
-    msg = EmailMultiAlternatives(subject_part, text_part,
-                                 sender or settings.DEFAULT_FROM_EMAIL,
-                                 recipients, bcc=bcc)
-    msg.attach_alternative(html_part, "text/html")
+    if mail_settings and mail_settings.get('email_box_type') == 'o365' and mail_settings.get('send_through_o365'):
+        credentials = (mail_settings.get('o365_client_id'),
+                       mail_settings.get('o365_client_secret'))
+        
+        account = Account(credentials, auth_flow_type='credentials', tenant_id=mail_settings.get('o365_tenant_id'))
 
-    if files:
-        for filename, filefield in files:
-            content = filefield.read()
-            msg.attach(filename, content)
+        logger.info("Attempting O365 authentication")
 
-    logger.debug('Sending email to: {!r}'.format(recipients))
+        # Authenticate O365
+        if not account.authenticate():
+            logger.error("O365 authentication failed. Check that the client ID, client secret and tenant ID are correct.")
+            sys.exit()
 
-    try:
-        return msg.send()
-    except SMTPException as e:
-        logger.exception('SMTPException raised while sending email to {}'.format(recipients))
-        if not fail_silently:
-            raise e
-        return 0
+        mailbox = account.mailbox(resource=mail_settings.get('o365_resource_mailbox'))
+
+        m = mailbox.new_message()
+        if recipients:
+            for r in recipients:
+                m.to.add(r)
+        if bcc:
+            for r in bcc:
+                m.bcc.add(r)
+        m.subject = subject_part
+        m.body = html_part
+        m.sender.address = sender
+
+        if files:
+            for filename, filefield in files:
+                m.attachments.add(filefield.path)
+
+        logger.debug('Sending email to: {!r}'.format(recipients))
+        
+        if m.send(save_to_sent_folder=False):
+            return True
+        else:
+            logger.exception('Exception raised while sending email to {}'.format(recipients))
+            if not fail_silently:
+                raise Exception
+            return 0
+            
+    else:
+        msg = EmailMultiAlternatives(subject_part, text_part,
+                                    sender or settings.DEFAULT_FROM_EMAIL,
+                                    recipients, bcc=bcc)
+        msg.attach_alternative(html_part, "text/html")
+
+        if files:
+            for filename, filefield in files:
+                content = filefield.read()
+                msg.attach(filename, content)
+
+        logger.debug('Sending email to: {!r}'.format(recipients))
+
+        try:
+            return msg.send()
+        except SMTPException as e:
+            logger.exception('SMTPException raised while sending email to {}'.format(recipients))
+            if not fail_silently:
+                raise e
+            return 0
 
 
 def query_to_dict(results, descriptions):
@@ -231,6 +274,18 @@ def queue_template_context(queue):
 
     return context
 
+def queue_mail_settings(queue):
+    
+    settings = {}
+
+    for field in ('email_box_type', 'o365_client_id', 'o365_client_secret', 'o365_tenant_id', 'o365_resource_mailbox', 'send_through_o365'):
+        attr = getattr(queue, field, None)
+        if callable(attr):
+            settings[field] = attr()
+        else:
+            settings[field] = attr
+
+    return settings
 
 def safe_template_context(ticket):
     """
