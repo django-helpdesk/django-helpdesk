@@ -43,14 +43,15 @@ from helpdesk.lib import (
 )
 from helpdesk.models import (
     Ticket, Queue, FollowUp, PreSetReply, Attachment, SavedSearch,
-    IgnoreEmail, TicketCC, TicketDependency, TicketSpentTime, TicketCategory, TicketType, FeedbackSurvey,
+    IgnoreEmail, TicketCC, TicketDependency, TicketCategory, TicketType, FeedbackSurvey,
 )
 from helpdesk import settings as helpdesk_settings
 
 from base.decorators import ipexia_protected
 from base.forms import SpentTimeForm
-from base.models import Employee, Notification
+from base.models import Notification, SpentTime
 from base.utils import handle_date_range_picker_filter, daterange
+from base.views import start_spent_time_on_object_and_return_json
 from config.settings.base import DATETIME_LOCAL_FORMAT
 from sphinx.models import Customer, Site, CustomerProducts
 
@@ -410,8 +411,8 @@ def view_ticket(request, ticket_id):
 
         information_form = InformationTicketForm(instance=ticket)
 
-        # Filter the ongoing spent_time on this step
-        spent_times = ticket.spent_times.filter(status=TicketSpentTime.ONGOING)
+        # Filter the ongoing spent_time on this ticket
+        spent_times = ticket.spent_times.ongoing()
     else:
         # Non ipexia users don't need these
         form = None
@@ -514,22 +515,21 @@ def ticket_spent_times(request, ticket_id, spent_time_id=None):
 
     edit_spent_time = None
     if spent_time_id:
-        edit_spent_time = get_object_or_404(spent_times, id=spent_time_id)
+        edit_spent_time = get_object_or_404(spent_times.filter(employee=request.user.employee), id=spent_time_id)
 
     form = SpentTimeForm(request.POST or None, instance=edit_spent_time, initial={
-        'status': edit_spent_time.status if edit_spent_time else TicketSpentTime.FINISHED,
+        'status': edit_spent_time.status if edit_spent_time else SpentTime.FINISHED,
         'end_date': edit_spent_time.end_date if edit_spent_time else timezone.now()
     })
-    form._meta.model = TicketSpentTime
     if form.is_valid():
         spent_time = form.save(commit=False)
-        spent_time.ticket = ticket
+        spent_time.content_object = ticket
         spent_time.employee = request.user.employee
         spent_time.save()
 
         # If the end_date has been filled, set the duration
         if form.cleaned_data['end_date']:
-            spent_time.end_track(form.cleaned_data['end_date'], with_error=spent_time.status == TicketSpentTime.ERROR)
+            spent_time.end_track(form.cleaned_data['end_date'], with_error=spent_time.status == SpentTime.ERROR)
         else:
             # Remove duration
             spent_time.duration = None
@@ -552,35 +552,10 @@ def ticket_spent_times(request, ticket_id, spent_time_id=None):
 
 
 @staff_member_required
-def start_spent_time(request, ticket_id, employee_id):
+def start_spent_time(request, ticket_id):
     """ Create a new OrderProductStepSpentTime for the user on the order product step """
     ticket = get_object_or_404(Ticket, id=ticket_id)
-    employee = get_object_or_404(Employee, id=employee_id)
-
-    # Check first if the user has no ongoing spent time
-    if not employee.spent_times.filter(status=TicketSpentTime.ONGOING).exists():
-        spent_time = ticket.spent_times.create(employee=employee)
-    else:
-        return JsonResponse({'success': False, 'error': 'Un chrono a déjà été lancé !'})
-
-    return JsonResponse({
-        'success': True,
-        'spent_time_id': spent_time.id,
-        'ongoing_spent_time_top_navigation': render_to_string(
-            'base/components/spent_time/ongoing_spent_time_top_navigation.html', {
-                'ongoing_spent_time': spent_time
-            }
-        ),
-        'ongoing_spent_time_actions': render_to_string(
-            'base/components/spent_time/ongoing_spent_time_actions.html', {
-                'ongoing_spent_time': spent_time
-            }
-        ),
-        'table': render_to_string('base/components/spent_time/spent_times_table.html', {
-            'request': request,
-            'spent_times': ticket.spent_times.select_related('employee__user')
-        })
-    })
+    return start_spent_time_on_object_and_return_json(ticket, request)
 
 
 def return_ticketccstring_and_show_subscribe(user, ticket):

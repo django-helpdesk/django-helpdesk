@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _
-from helpdesk.models import Queue, Ticket, FollowUp, PreSetReply, KBCategory, TicketSpentTime, TicketCategory, \
+from helpdesk.models import Queue, Ticket, FollowUp, PreSetReply, KBCategory, TicketCategory, \
     TicketType, FeedbackSurvey
 from helpdesk.models import EscalationExclusion, EmailTemplate, KBItem
 from helpdesk.models import TicketChange, Attachment, IgnoreEmail
@@ -109,19 +109,6 @@ class IgnoreEmailAdmin(admin.ModelAdmin):
     list_display = ('name', 'date', 'queue_list', 'email_address', 'keep_in_mailbox')
     date_hierarchy = 'date'
     list_filter = ('keep_in_mailbox',)
-
-
-@admin.register(TicketSpentTime)
-class TicketSpentTimeAdmin(admin.ModelAdmin):
-    list_display = ('id', 'ticket', 'employee', 'start_date', 'duration', 'end_date', 'status', 'comment')
-    list_filter = ('status',)
-    search_fields = (
-        'employee__user__username', 'employee__user__first_name', 'employee__user_last_name', 'comment',
-        'ticket__id'
-    )
-    date_hierarchy = 'start_date'
-    autocomplete_fields = ('ticket', 'employee')
-    list_select_related = ('ticket', 'employee__user')
 
 
 @admin.register(FeedbackSurvey)

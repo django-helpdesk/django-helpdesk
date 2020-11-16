@@ -9,6 +9,7 @@ models.py - Model (and hence database) definitions. This is the core of the
 
 from __future__ import unicode_literals
 from django.contrib.auth.models import Permission
+from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.validators import MaxValueValidator
@@ -627,6 +628,8 @@ class Ticket(models.Model):
         blank=True
     )
 
+    spent_times = GenericRelation(SpentTime, related_name='tickets')
+
     objects = TicketQuerySet.as_manager()
 
     def _get_assigned_to(self):
@@ -786,9 +789,8 @@ class Ticket(models.Model):
 
     @property
     def total_spent_time(self):
-        """:return: the sum of the step's spent times """
-        return self.spent_times.filter(status=SpentTime.FINISHED, duration__isnull=False) \
-            .aggregate(total=models.Sum('duration'))['total']
+        """:return: the sum of the ticket's spent times """
+        return self.spent_times.finished().total_duration()
 
     def get_submitter_emails(self):
         """ Return customer contact email if it exists and submitter email if different """
@@ -1800,30 +1802,3 @@ class TicketDependency(models.Model):
 
     def __str__(self):
         return '%s / %s' % (self.ticket, self.depends_on)
-
-
-class TicketSpentTime(SpentTime):
-    """
-    :param OrderProductStep order_product_step: the step of an OrderProduct
-    """
-    ticket = models.ForeignKey(
-        Ticket,
-        on_delete=models.CASCADE,
-        related_name="spent_times"
-    )
-
-    class Meta:
-        verbose_name = "Temps passé sur un ticket"
-        verbose_name_plural = "Temps passés sur un ticket"
-
-    def __str__(self):
-        return 'Temps passé par %s sur %s' % (self.employee, self.ticket)
-
-    def get_edit_url(self):
-        return reverse('helpdesk:edit_spent_time', kwargs={'ticket_id': self.ticket.id, 'spent_time_id': self.id})
-
-    def get_object_url(self):
-        return self.ticket.get_absolute_url()
-
-    def get_object_display(self):
-        return 'Ticket {} [{}]'.format(self.ticket.title, self.ticket.id)

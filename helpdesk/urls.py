@@ -94,7 +94,7 @@ urlpatterns = [
     ),
 
     url(
-        r'^tickets/(?P<ticket_id>[0-9]+)/start-time-track/(?P<employee_id>[0-9]+)/$',
+        r'^tickets/(?P<ticket_id>[0-9]+)/start-time-track/$',
         staff.start_spent_time,
         name='start_spent_time'
     ),
