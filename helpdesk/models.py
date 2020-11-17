@@ -787,11 +787,6 @@ class Ticket(models.Model):
         queue = '-'.join(parts[0:-1])
         return queue, parts[-1]
 
-    @property
-    def total_spent_time(self):
-        """:return: the sum of the ticket's spent times """
-        return self.spent_times.finished().total_duration()
-
     def get_submitter_emails(self):
         """ Return customer contact email if it exists and submitter email if different """
         recipients = []
