@@ -161,7 +161,7 @@ urlpatterns = [
         staff.save_query,
         name='savequery'),
 
-    url(r'^delete_query/(?P<id>[0-9]+)/$',
+    url(r'^delete_query/(?P<saved_search_id>[0-9]+)/$',
         staff.delete_saved_query,
         name='delete_query'),
 
@@ -177,7 +177,7 @@ urlpatterns = [
         staff.email_ignore_add,
         name='email_ignore_add'),
 
-    url(r'^ignore/delete/(?P<id>[0-9]+)/$',
+    url(r'^ignore/delete/(?P<ignore_email_id>[0-9]+)/$',
         staff.email_ignore_del,
         name='email_ignore_del'),
 

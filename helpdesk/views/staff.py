@@ -16,7 +16,6 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.db.models.functions import Concat
 from django.template.defaultfilters import date
-from django.template.loader import render_to_string
 from django.urls import reverse
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -39,7 +38,7 @@ from helpdesk.forms import (
 from helpdesk.decorators import staff_member_required, superuser_required
 from helpdesk.lib import (
     send_templated_mail, apply_query, safe_template_context,
-    process_attachments, queue_template_context, get_assignable_users,
+    process_attachments, get_assignable_users,
 )
 from helpdesk.models import (
     Ticket, Queue, FollowUp, PreSetReply, Attachment, SavedSearch,
@@ -224,12 +223,11 @@ def delete_ticket(request, ticket_id):
         raise PermissionDenied()
 
     if request.method == 'GET':
-        return render(request, 'helpdesk/delete_ticket.html', {
-            'ticket': ticket,
-        })
+        return render(request, 'helpdesk/delete_ticket.html', {'ticket': ticket})
     else:
         ticket.delete()
-        return HttpResponseRedirect(reverse('helpdesk:home'))
+        messages.success(request, "Le ticket a bien été supprimé.")
+        return redirect('helpdesk:home')
 
 
 @staff_member_required
@@ -382,7 +380,7 @@ def view_ticket(request, ticket_id):
             return_ticketccstring_and_show_subscribe(request.user, ticket)
         if show_subscribe:
             subscribe_staff_member_to_ticket(ticket, request.user)
-            return HttpResponseRedirect(reverse('helpdesk:view', args=[ticket.id]))
+            return redirect(ticket)
 
     if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS:
         users = User.objects.filter(is_active=True, is_staff=True).order_by(User.USERNAME_FIELD)
@@ -666,7 +664,7 @@ def update_ticket(request, ticket_id, public=False):
     ])
     if no_changes:
         messages.info(request, "Aucune modification n'a été apportée.")
-        return return_to_ticket(request.user, helpdesk_settings, ticket)
+        return return_to_ticket(request.user, ticket)
 
     # We need to allow the 'ticket' and 'queue' contexts to be applied to the
     # comment.
@@ -923,16 +921,15 @@ def update_ticket(request, ticket_id, public=False):
         if SHOW_SUBSCRIBE:
             subscribe_staff_member_to_ticket(ticket, request.user)
 
-    return return_to_ticket(request.user, helpdesk_settings, ticket)
+    return return_to_ticket(request.user, ticket)
 
 
-def return_to_ticket(user, helpdesk_settings, ticket):
+def return_to_ticket(user, ticket):
     """Helper function for update_ticket"""
-
     if user.is_staff or helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE:
-        return HttpResponseRedirect(ticket.get_absolute_url())
+        return redirect(ticket)
     else:
-        return HttpResponseRedirect(ticket.ticket_url)
+        return redirect(ticket.ticket_url)
 
 
 @staff_member_required
@@ -1223,7 +1220,7 @@ def ticket_list(request):
         if filter:
             try:
                 ticket = base_tickets.get(**filter)
-                return HttpResponseRedirect(ticket.staff_url)
+                return redirect(ticket.staff_url)
             except Ticket.DoesNotExist:
                 # Go on to standard keyword searching
                 pass
@@ -1231,12 +1228,12 @@ def ticket_list(request):
     saved_query = None
     if request.GET.get('saved_query'):
         from_saved_query = True
+        saved_query_id = request.GET.get('saved_query')
         try:
-            saved_query = SavedSearch.objects.get(pk=request.GET.get('saved_query'))
-        except SavedSearch.DoesNotExist:
-            return HttpResponseRedirect(reverse('helpdesk:list'))
-        if not (saved_query.shared or saved_query.user == request.user):
-            return HttpResponseRedirect(reverse('helpdesk:list'))
+            saved_query = SavedSearch.objects.filter(Q(shared=True) | Q(user=request.user)).get(pk=int(saved_query_id))
+        except (ValueError, SavedSearch.DoesNotExist):
+            messages.warning(request, "Impossible de charger la requête sauvegardée n°%s" % saved_query_id)
+            return redirect('helpdesk:list')
 
         import json
         from helpdesk.lib import b64decode
@@ -1244,7 +1241,7 @@ def ticket_list(request):
             query_params = json.loads(b64decode(str(saved_query.query).lstrip("b\\'")).decode())
         except ValueError:
             # Query deserialization failed. (E.g. was a pickled query)
-            return HttpResponseRedirect(reverse('helpdesk:list'))
+            return redirect('helpdesk:list')
 
     elif not ('queues' in request.GET or
               'assigned_to' in request.GET or
@@ -1264,6 +1261,7 @@ def ticket_list(request):
             :param dict query_params_dict: dictionnary with all params for the query to filter tickets
             :param str name: name of the field
             :param str name_plural: name of the field in plural
+            :param boolean use_id: Use the ID by default to execute the filter in
             """
             object_ids = request.GET.getlist(name_plural if name_plural else name)
             if object_ids:
@@ -1344,7 +1342,7 @@ def ticket_list(request):
     from helpdesk.lib import b64encode
     urlsafe_query = b64encode(json.dumps(query_params).encode('UTF-8'))
 
-    user_saved_queries = SavedSearch.objects.select_related('user').filter(Q(user=request.user) | Q(shared__exact=True))
+    user_saved_queries = SavedSearch.objects.select_related('user').filter(Q(user=request.user) | Q(shared=True))
 
     return render(request, 'helpdesk/ticket_list.html', dict(
         context,
@@ -1474,7 +1472,7 @@ def hold_ticket(request, ticket_id, unhold=False):
 
     ticket.save()
 
-    return HttpResponseRedirect(ticket.get_absolute_url())
+    return redirect(ticket.get_absolute_url())
 
 
 @staff_member_required
@@ -1726,12 +1724,12 @@ def run_report(request, report):
 
     if request.GET.get('saved_query'):
         from_saved_query = True
+        saved_query_id = request.GET.get('saved_query')
         try:
-            saved_query = SavedSearch.objects.get(pk=request.GET.get('saved_query'))
-        except SavedSearch.DoesNotExist:
-            return HttpResponseRedirect(reverse('helpdesk:report_index'))
-        if not (saved_query.shared or saved_query.user == request.user):
-            return HttpResponseRedirect(reverse('helpdesk:report_index'))
+            saved_query = SavedSearch.objects.filter(Q(shared=True) | Q(user=request.user)).get(pk=saved_query_id)
+        except (ValueError, SavedSearch.DoesNotExist):
+            messages.warning(request, "Impossible de charger la requête sauvegardée n°%s" % saved_query_id)
+            return redirect('helpdesk:report_index')
 
         import json
         from helpdesk.lib import b64decode
@@ -1745,7 +1743,7 @@ def run_report(request, report):
             else:
                 query_params = json.loads(b64decode(str(saved_query.query)))
         except json.JSONDecodeError:
-            return HttpResponseRedirect(reverse('helpdesk:report_index'))
+            return redirect('helpdesk:report_index')
 
         report_queryset = apply_query(report_queryset, query_params)
 
@@ -1939,21 +1937,21 @@ def save_query(request):
     query_encoded = request.POST.get('query_encoded', None)
 
     if not title or not query_encoded:
-        return HttpResponseRedirect(reverse('helpdesk:list'))
+        return redirect('helpdesk:list')
 
-    query = SavedSearch(title=title, shared=shared, query=query_encoded, user=request.user)
-    query.save()
+    query = SavedSearch.objects.create(title=title, shared=shared, query=query_encoded, user=request.user)
 
-    return HttpResponseRedirect('%s?saved_query=%s' % (reverse('helpdesk:list'), query.id))
+    return redirect('%s?saved_query=%s' % (reverse('helpdesk:list'), query.id))
 
 
 @staff_member_required
-def delete_saved_query(request, id):
-    query = get_object_or_404(SavedSearch, id=id, user=request.user)
+def delete_saved_query(request, saved_search_id):
+    query = get_object_or_404(SavedSearch, id=saved_search_id, user=request.user)
 
     if request.method == 'POST':
         query.delete()
-        return HttpResponseRedirect(reverse('helpdesk:list'))
+        messages.success(request, "La requête sauvegardée a bien été supprimée.")
+        return redirect('helpdesk:list')
     else:
         return render(request, 'helpdesk/confirm_delete_saved_query.html', {'query': query})
 
@@ -1985,19 +1983,28 @@ def email_ignore_add(request):
         form = EmailIgnoreForm(request.POST)
         if form.is_valid():
             form.save()
-            return HttpResponseRedirect(reverse('helpdesk:email_ignore'))
+            messages.success(
+                request,
+                "L'adresse email %s a bien été ajoutée à la liste des adresses à ignorer."
+                % form.cleaned_data.get('email_address')
+            )
+            return redirect('helpdesk:email_ignore')
     else:
-        form = EmailIgnoreForm(request.GET)
+        form = EmailIgnoreForm(initial={
+            'email_address': request.GET.get('email'),
+            'queues': request.GET.get('queue')
+        })
 
     return render(request, 'helpdesk/email_ignore_add.html', {'form': form})
 
 
 @superuser_required
-def email_ignore_del(request, id):
-    ignore = get_object_or_404(IgnoreEmail, id=id)
+def email_ignore_del(request, ignore_email_id):
+    ignore = get_object_or_404(IgnoreEmail, id=ignore_email_id)
     if request.method == 'POST':
         ignore.delete()
-        return HttpResponseRedirect(reverse('helpdesk:email_ignore'))
+        messages.success(request, "L'adresse email n'est plus ignorée à présent.")
+        return redirect('helpdesk:email_ignore')
     else:
         return render(request, 'helpdesk/email_ignore_del.html', {'ignore': ignore})
 
@@ -2010,9 +2017,8 @@ def ticket_cc(request, ticket_id):
     if not _is_my_ticket(request.user, ticket):
         raise PermissionDenied()
 
-    copies_to = ticket.ticketcc_set.all()
     return render(request, 'helpdesk/ticket_cc_list.html', {
-        'copies_to': copies_to,
+        'copies_to': ticket.ticketcc_set.all(),
         'ticket': ticket,
     })
 
@@ -2039,9 +2045,7 @@ def ticket_cc_add(request, ticket_id):
                 ticketcc = form.save(commit=False)
                 ticketcc.ticket = ticket
                 ticketcc.save()
-                return HttpResponseRedirect(
-                    reverse('helpdesk:ticket_cc', kwargs={'ticket_id': ticket.id})
-                )
+                return redirect('helpdesk:ticket_cc', ticket.id)
 
     return render(request, 'helpdesk/ticket_cc_add.html', {
         'ticket': ticket,
@@ -2057,8 +2061,8 @@ def ticket_cc_del(request, ticket_id, cc_id):
 
     if request.method == 'POST':
         cc.delete()
-        return HttpResponseRedirect(reverse('helpdesk:ticket_cc',
-                                            kwargs={'ticket_id': cc.ticket.id}))
+        messages.success(request, "La personne en CC a bien été supprimée.")
+        return redirect('helpdesk:ticket_cc', cc.ticket.id)
     return render(request, 'helpdesk/ticket_cc_del.html', {'cc': cc})
 
 
@@ -2091,7 +2095,7 @@ def ticket_dependency_del(request, ticket_id, dependency_id):
     dependency = get_object_or_404(TicketDependency, ticket__id=ticket_id, id=dependency_id)
     if request.method == 'POST':
         dependency.delete()
-        return HttpResponseRedirect(reverse('helpdesk:view', args=[ticket_id]))
+        return redirect('helpdesk:view', ticket_id)
     return render(request, 'helpdesk/ticket_dependency_del.html', {'dependency': dependency})
 
 
@@ -2106,7 +2110,7 @@ def attachment_del(request, ticket_id, attachment_id):
     attachment = get_object_or_404(Attachment, id=attachment_id)
     if request.method == 'POST':
         attachment.delete()
-        return HttpResponseRedirect(reverse('helpdesk:view', args=[ticket_id]))
+        return redirect('helpdesk:view', ticket_id)
     return render(request, 'helpdesk/ticket_attachment_del.html', {
         'attachment': attachment,
         'filename': attachment.filename,
