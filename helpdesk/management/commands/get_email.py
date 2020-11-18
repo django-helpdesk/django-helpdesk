@@ -529,7 +529,7 @@ def ticket_from_message(message, queue, logger):
             other_emails.append(ticket.assigned_to.email)
         current_cc = set(current_cc_emails + current_cc_users + other_emails)
         # first, add any User not previously CC'd (as identified by User's email)
-        all_user_emails = set([x.email for x in User.objects.all()])
+        all_user_emails = set([x.email for x in User.objects.exclude(email=None)])
         users_not_currently_ccd = all_user_emails.difference(set(current_cc))
         users_to_cc = cc.intersection(users_not_currently_ccd)
         for user_email in users_to_cc:
