@@ -50,7 +50,6 @@ from base.decorators import ipexia_protected
 from base.forms import SpentTimeForm
 from base.models import Notification, SpentTime
 from base.utils import handle_date_range_picker_filter, daterange
-from base.views import start_spent_time_on_object_and_return_json
 from config.settings.base import DATETIME_LOCAL_FORMAT
 from sphinx.models import Customer, Site, CustomerProducts
 
@@ -547,13 +546,6 @@ def ticket_spent_times(request, ticket_id, spent_time_id=None):
         'edit_spent_time': edit_spent_time,
         'form': form
     })
-
-
-@staff_member_required
-def start_spent_time(request, ticket_id):
-    """ Create a new OrderProductStepSpentTime for the user on the order product step """
-    ticket = get_object_or_404(Ticket, id=ticket_id)
-    return start_spent_time_on_object_and_return_json(ticket, request)
 
 
 def return_ticketccstring_and_show_subscribe(user, ticket):
