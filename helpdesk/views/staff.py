@@ -14,6 +14,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
+from django.contrib.contenttypes.models import ContentType
 from django.db.models.functions import Concat
 from django.template.defaultfilters import date
 from django.urls import reverse
@@ -22,6 +23,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q, Value
 from django.http import HttpResponseRedirect, Http404, HttpResponse, JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
+from django.utils.html import format_html
 from django.utils.timezone import make_aware
 from django.utils.translation import ugettext as _
 from django.utils import timezone
@@ -408,13 +410,23 @@ def view_ticket(request, ticket_id):
 
         information_form = InformationTicketForm(instance=ticket)
 
-        # Filter the ongoing spent_time on this ticket
-        spent_times = ticket.spent_times.ongoing()
+        # Notify staff users that they can start a timer on their ticket if they don't already have one running
+        if request.user.is_staff \
+                and ticket.assigned_to == request.user \
+                and not request.user.employee.spent_times.ongoing().exists():
+            messages.info(
+                request,
+                format_html(
+                    'Lancer un chrono sur ce ticket qui vous est assigné ? '
+                    '<a href="{}" class="btn btn-default btn-xs ajaxLink" data-action="startTimer">'
+                    '<i class="fa fa-play" onclick="$(this).parent().fadeOut()"></i></a>',
+                    reverse('start_spent_time', args=[ContentType.objects.get_for_model(ticket).id, ticket.id])
+                )
+            )
     else:
         # Non ipexia users don't need these
         form = None
         information_form = None
-        spent_times = None
         # Check if follow up is valid, only if ticket is not too old
         if followup_form.is_valid() and not ticket.is_closed_and_too_old():
             follow_up = followup_form.save(commit=False)
@@ -499,8 +511,7 @@ def view_ticket(request, ticket_id):
         'preset_replies': PreSetReply.objects.filter(
             Q(queues=ticket.queue) | Q(queues__isnull=True)),
         'ticketcc_string': ticketcc_string,
-        'SHOW_SUBSCRIBE': show_subscribe,
-        'spent_times': spent_times
+        'SHOW_SUBSCRIBE': show_subscribe
     })
 
 
