@@ -509,7 +509,7 @@ def view_ticket(request, ticket_id):
 def ticket_spent_times(request, ticket_id, spent_time_id=None):
     """ List of the spent times of the ticket """
     ticket = get_object_or_404(Ticket, id=ticket_id)
-    spent_times = ticket.spent_times.select_related('employee__user')
+    spent_times = ticket.spent_times.select_related('employee__user', 'content_type')
 
     edit_spent_time = None
     if spent_time_id:
