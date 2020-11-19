@@ -1694,6 +1694,27 @@ def report_queue(request, queue_id):
     resolved_average = resolved_total / delta
     closed_average = closed_total / delta
 
+    # Construct data for the stats for each users
+    morrisjs_data_users = []
+    user_stats = {}
+    users = list(get_assignable_users()) + [None]
+    for state in status:
+        datadict = {"x": state}
+        for user in users:
+            user_name = str(user) if user else 'Non assigné'
+            if user_name not in user_stats.keys():
+                user_stats[user_name] = {}
+            if state == _OPEN:
+                datadict[user_name] = open_tickets.filter(assigned_to=user).count()
+                user_stats[user_name]['open_total'] = datadict[user_name]
+            elif state == _RESOLVED:
+                datadict[user_name] = resolved_tickets.filter(assigned_to=user).count()
+                user_stats[user_name]['resolved_total'] = datadict[user_name]
+            elif state == _CLOSED:
+                datadict[user_name] = closed_tickets.filter(assigned_to=user).count()
+                user_stats[user_name]['closed_total'] = datadict[user_name]
+        morrisjs_data_users.append(datadict)
+
     return render(request, 'helpdesk/report_queue.html', {
         'queue': queue,
         'from': from_date,
@@ -1705,6 +1726,8 @@ def report_queue(request, queue_id):
         'closed_total': closed_total,
         'closed_average': closed_average,
         'morrisjs_data': morrisjs_data,
+        'morrisjs_data_users': morrisjs_data_users,
+        'user_stats': user_stats,
         'status': status,
     })
 
