@@ -1654,6 +1654,8 @@ def report_index(request):
 @staff_member_required
 def report_queue(request, queue_id):
     queue = get_object_or_404(_get_user_queues(request.user), id=queue_id)
+    # Ignore duplicate status
+    queue_ticket_set = queue.ticket_set.exclude(status=Ticket.DUPLICATE_STATUS)
 
     # Filter results with a date range picker
     from_date, to_date = handle_date_range_picker_filter(request.POST.get('dateRange'))
@@ -1670,17 +1672,20 @@ def report_queue(request, queue_id):
         datadict = {"x": single_date.strftime("%Y-%m-%d")}
         for i, state in enumerate(status):
             if state == _OPEN:
-                datadict[i] = queue.ticket_set.filter(created__date=single_date).count()
+                datadict[i] = queue_ticket_set.filter(created__date=single_date).count()
             elif state == _RESOLVED:
-                datadict[i] = queue.ticket_set.filter(resolved__date=single_date).count()
+                datadict[i] = queue_ticket_set.filter(resolved__date=single_date).count()
             elif state == _CLOSED:
-                datadict[i] = queue.ticket_set.filter(closed__date=single_date).count()
+                datadict[i] = queue_ticket_set.filter(closed__date=single_date).count()
         morrisjs_data.append(datadict)
 
     # Count total for each status
-    open_total = queue.ticket_set.filter(created__date__range=(from_date, to_date)).count()
-    resolved_total = queue.ticket_set.filter(resolved__date__range=(from_date, to_date), status__in=[3, 4, 5]).count()
-    closed_total = queue.ticket_set.filter(closed__date__range=(from_date, to_date), status__in=[4, 5]).count()
+    open_tickets = queue_ticket_set.filter(created__date__range=(from_date, to_date))
+    open_total = open_tickets.count()
+    resolved_tickets = queue_ticket_set.filter(resolved__date__range=(from_date, to_date))
+    resolved_total = resolved_tickets.count()
+    closed_tickets = queue_ticket_set.filter(closed__date__range=(from_date, to_date))
+    closed_total = closed_tickets.count()
     # Calculate the delta between beginning and end date in days
     delta = (to_date + timedelta(1)) - from_date
     delta = delta.days
@@ -1706,7 +1711,6 @@ def report_queue(request, queue_id):
 
 @staff_member_required
 def run_report(request, report):
-    #
     if Ticket.objects.count() == 0:
         messages.info(request, 'Aucun ticket à analyser')
         redirect("helpdesk:report_index")
