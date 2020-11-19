@@ -400,3 +400,20 @@ def get_assignable_users():
     else:
         assignable_users = User.objects.filter(is_active=True)
     return assignable_users.order_by(User.USERNAME_FIELD)
+
+
+def calc_tickets_first_answer_statistics(tickets):
+    """ Calculation of the tickets first answer time average and the percentage of which are under one hour """
+    first_answer_time_average = percentage_under_one_hour = None
+    total_first_answer_times = timedelta()
+    number_under_one_hour = []
+    for ticket in tickets:
+        first_answer_time = ticket.get_time_first_answer()
+        if first_answer_time:
+            total_first_answer_times += first_answer_time
+            number_under_one_hour.append(first_answer_time < timedelta(hours=1))
+    count = len(number_under_one_hour)
+    if count > 0:
+        first_answer_time_average = total_first_answer_times / count
+        percentage_under_one_hour = round(number_under_one_hour.count(True) / count * 100)
+    return first_answer_time_average, percentage_under_one_hour

@@ -848,9 +848,9 @@ class Ticket(models.Model):
         :return: the delta between ticket creation date and the first answer by a staff user
         :rtype: datetime.timedelta|None
         """
-        for f in self.followup_set.order_by('date'):
-            if f.public and f.user and f.user.is_staff:
-                return office_time_between(self.created, f.date)
+        first_answer = self.followup_set.filter(public=True, user__is_staff=True).order_by('date').first()
+        if first_answer:
+            return office_time_between(self.created, first_answer.date)
         return None
 
 

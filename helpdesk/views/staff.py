@@ -40,7 +40,7 @@ from helpdesk.forms import (
 from helpdesk.decorators import staff_member_required, superuser_required
 from helpdesk.lib import (
     send_templated_mail, apply_query, safe_template_context,
-    process_attachments, get_assignable_users,
+    process_attachments, get_assignable_users, calc_tickets_first_answer_statistics,
 )
 from helpdesk.models import (
     Ticket, Queue, FollowUp, PreSetReply, Attachment, SavedSearch,
@@ -1624,17 +1624,10 @@ def report_index(request):
         }
 
         # Calculation of the tickets first answer time average
-        total_first_answer_times = timedelta()
-        number_under_one_hour = []
-        for ticket in ticket_set:
-            first_answer_time = ticket.get_time_first_answer()
-            if first_answer_time:
-                total_first_answer_times += first_answer_time
-                number_under_one_hour.append(first_answer_time < timedelta(hours=1))
-        count = len(number_under_one_hour)
-        if count > 0:
-            dash_ticket['first_answer_time_average'] = total_first_answer_times / count
-            dash_ticket['percentage_uner_one_hour'] = round(number_under_one_hour.count(True) / count * 100)
+        average, percentage = calc_tickets_first_answer_statistics(ticket_set)
+        if average is not None and percentage is not None:
+            dash_ticket['first_answer_time_average'] = average
+            dash_ticket['percentage_under_one_hour'] = percentage
 
         dash_tickets.append(dash_ticket)
 
@@ -1707,6 +1700,13 @@ def report_queue(request, queue_id):
             if state == _OPEN:
                 datadict[user_name] = open_tickets.filter(assigned_to=user).count()
                 user_stats[user_name]['open_total'] = datadict[user_name]
+                # Calculation of the user tickets first answer time average and percentage
+                average, percentage = calc_tickets_first_answer_statistics(
+                    open_tickets.filter(assigned_to=user).prefetch_related('followup_set__user')
+                )
+                if average is not None and percentage is not None:
+                    user_stats[user_name]['first_answer_time_average'] = average
+                    user_stats[user_name]['percentage_under_one_hour'] = percentage
             elif state == _RESOLVED:
                 datadict[user_name] = resolved_tickets.filter(assigned_to=user).count()
                 user_stats[user_name]['resolved_total'] = datadict[user_name]
