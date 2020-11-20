@@ -1068,7 +1068,6 @@ def mass_update(request):
 
 
 ticket_attributes = (
-    ('created', 'Date de création'),
     ('due_date', "Date d'échéance"),
     ('get_status_display', 'Statut'),
     ('submitter_email', 'Email émetteur'),
@@ -1116,6 +1115,8 @@ def fusion_tickets(request):
                                 attr = attr[4:-8]
                             value = getattr(selected_ticket, attr)
                             setattr(chosen_ticket, attr, value)
+                # Save the created date using the oldest one in order to avoid error in time first answer calculation
+                chosen_ticket.created = tickets.earliest('created').created
                 # Save changes
                 chosen_ticket.save()
 
