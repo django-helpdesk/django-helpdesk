@@ -334,6 +334,8 @@ def ticket_from_message(message, queue, logger):
     cc = message.get_all('cc', None)
     if cc:
         cc = {mail for name, mail in email.utils.getaddresses(cc)}
+        logger.debug('CC list :')
+        logger.debug(cc)
         # first, fixup the encoding if necessary
         # cc = [decode_mail_headers(decodeUnknown(message.get_charset(), x)) for x in cc]
         # get_all checks if multiple CC headers, but individual emails may be comma separated too
