@@ -297,6 +297,8 @@ def view_ticket(request, ticket_id):
         Ticket.objects.prefetch_related(
             'followup_set__user', 'followup_set__ticketchange_set',
             'followup_set__attachment_set', 'ticketdependency__depends_on'
+        ).select_related(
+            'customer__group', 'site', 'customer_product', 'customer_contact', 'category', 'type', 'merged_to'
         ),
         id=ticket_id
     )
