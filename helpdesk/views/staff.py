@@ -1594,6 +1594,40 @@ reports = {
     }
 }
 
+column_choices = {
+    'created': 'Date de création',
+    'resolved': 'Date de résolution',
+    'closed': 'Date de fermeture',
+    'no_filter': 'Aucune',
+}
+
+
+def get_filter_params_from_column(post_request, from_date, to_date, **other_params):
+    """
+    Util function to prepare filter params according to the use of the date range picker filter with the column select
+
+    :param dict post_request: the post request in which the column name is extracted
+    :param datetime from_date: beginning date of the filter
+    :param datetime to_date: end date of the filter
+    :param dict other_params: other params to add in the filter_params
+    :return: the completed filter params
+    :rtype: dict
+    """
+    filter_params = {
+        'merged_to': None  # Ignore merged tickets
+    }
+    filter_params.update(**other_params)
+    # Get column name from POST or set default
+    default_column = 'created'
+    column = post_request.get('column', default_column)
+    # Check that column name is valid
+    if column not in column_choices.keys():
+        column = default_column
+    if column != 'no_filter':
+        # Add filter on the chosen column
+        filter_params[column + '__date__range'] = (from_date, to_date)
+    return column, filter_params
+
 
 @staff_member_required
 def report_index(request):
@@ -1601,7 +1635,7 @@ def report_index(request):
     saved_query = request.GET.get('saved_query')
 
     user_queues = _get_user_queues(request.user)
-    tickets = Ticket.objects.filter(queue__in=user_queues)
+    tickets = Ticket.objects.filter(queue__in=user_queues).select_related('queue', 'assigned_to')
     basic_ticket_stats = calc_basic_ticket_stats(tickets)
 
     # The following query builds a grid of queues & ticket statuses,
@@ -1614,9 +1648,11 @@ def report_index(request):
     # Filter results with a date range picker
     from_date, to_date = handle_date_range_picker_filter(request.POST.get('dateRange'))
 
+    column, filter_params = get_filter_params_from_column(request.POST, from_date, to_date)
+
     dash_tickets = []
     for queue in queues:
-        ticket_set = queue.ticket_set.filter(created__date__range=(from_date, to_date))
+        ticket_set = queue.ticket_set.filter(**filter_params)
 
         dash_ticket = {
             'id': queue.id,
@@ -1643,6 +1679,8 @@ def report_index(request):
         'dash_tickets': dash_tickets,
         'from': from_date,
         'to': to_date,
+        'column': column,
+        'column_choices': column_choices,
         'DAYS_UNTIL_TICKET_CLOSED_BY_MONTH': DAYS_UNTIL_TICKET_CLOSED_BY_MONTH
     })
 
@@ -1746,11 +1784,16 @@ def run_report(request, report):
 
     from_date, to_date = handle_date_range_picker_filter(request.POST.get('dateRange'))
 
-    report_queryset = Ticket.objects.select_related().filter(
-        queue__in=_get_user_queues(request.user), created__date__range=(from_date, to_date)
+    column, filter_params = get_filter_params_from_column(
+        request.POST,
+        from_date,
+        to_date,
+        queue__in=_get_user_queues(request.user)
     )
+    report_queryset = Ticket.objects.select_related('queue', 'assigned_to').filter(**filter_params)
+
     if report == DAYS_UNTIL_TICKET_CLOSED_BY_MONTH:
-        report_queryset = report_queryset.filter(status__in=(Ticket.CLOSED_STATUS, Ticket.DUPLICATE_STATUS))
+        report_queryset = report_queryset.filter(status=Ticket.CLOSED_STATUS)
 
     from_saved_query = False
     saved_query = None
@@ -1916,14 +1959,14 @@ def run_report(request, report):
         totals = {}
         for item in header1:
             data = []
-            for column in possible_options:
-                value = summarytable[item, column]
+            for option in possible_options:
+                value = summarytable[item, option]
                 data.append(value)
                 # Add value to total for this column
-                if column not in totals.keys():
-                    totals[column] = value
+                if option not in totals.keys():
+                    totals[option] = value
                 else:
-                    totals[column] += value
+                    totals[option] += value
             data.append(sum(data))
             table.append([item] + data)
 
@@ -1942,8 +1985,8 @@ def run_report(request, report):
 
         # Add total row to table
         total_data = []
-        for column in possible_options:
-            total_data.append(totals[column])
+        for option in possible_options:
+            total_data.append(totals[option])
         total_data.append(sum(total_data))
         table.append(['Total'] + total_data)
 
@@ -1958,6 +2001,8 @@ def run_report(request, report):
         'saved_query': saved_query,
         'from': from_date,
         'to': to_date,
+        'column': column,
+        'column_choices': column_choices
     })
 
 
