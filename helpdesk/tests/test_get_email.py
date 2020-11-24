@@ -708,7 +708,10 @@ class GetEmailCCHandling(TestCase):
 
 # build matrix of test cases
 case_methods = [c[0] for c in Queue._meta.get_field('email_box_type').choices]
-case_socks = [False] + [c[0] for c in Queue._meta.get_field('socks_proxy_type').choices]
+
+# uncomment if you want to run tests with socks - which is much slover
+# case_socks = [False] + [c[0] for c in Queue._meta.get_field('socks_proxy_type').choices]
+case_socks = [False]
 case_matrix = list(itertools.product(case_methods, case_socks))
 
 # Populate TestCases from the matrix of parameters
