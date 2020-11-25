@@ -332,9 +332,11 @@ def ticket_from_message(message, queue, logger):
     logger.debug('sender_email = "%s"' % sender_email)
 
     cc = message.get_all('cc', None)
+    logger.debug('CC list before :')
+    logger.debug(cc)
     if cc:
         cc = {mail for name, mail in email.utils.getaddresses(cc)}
-        logger.debug('CC list :')
+        logger.debug('CC list after :')
         logger.debug(cc)
         # first, fixup the encoding if necessary
         # cc = [decode_mail_headers(decodeUnknown(message.get_charset(), x)) for x in cc]
