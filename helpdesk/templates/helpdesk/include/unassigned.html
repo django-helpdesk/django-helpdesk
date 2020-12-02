@@ -43,7 +43,7 @@
 <div class="card mb-3">
     <div class="card-header">
         <i class="fas fa-table"></i>
-        {% trans "KBItem:" %} {{kbitem.title}} {% trans "Team:" %} {{kbitem.team.name}} {% trans "(pick up a ticket if you start to work on it)" %}
+        {% trans "KBItem:" %} {{kbitem.title}} {% trans "Team:" %} {{kbitem.get_team.name}} {% trans "(pick up a ticket if you start to work on it)" %}
     </div>
     <div class="card-body">
         <div class="table-responsive">

@@ -25,8 +25,6 @@ from django.utils.safestring import mark_safe
 from markdown import markdown
 from markdown.extensions import Extension
 
-import pinax.teams.models
-
 
 import uuid
 
@@ -1359,7 +1357,7 @@ class KBItem(models.Model):
     )
 
     team = models.ForeignKey(
-        pinax.teams.models.Team,
+        helpdesk_settings.HELPDESK_TEAMS_MODEL,
         on_delete=models.CASCADE,
         verbose_name=_('Team'),
         blank=True,
@@ -1381,6 +1379,9 @@ class KBItem(models.Model):
         if not self.last_updated:
             self.last_updated = timezone.now()
         return super(KBItem, self).save(*args, **kwargs)
+
+    def get_team(self):
+        return helpdesk_settings.HELPDESK_KBITEM_TEAM_GETTER(self)
 
     def _score(self):
         """ Return a score out of 10 or Unrated if no votes """
