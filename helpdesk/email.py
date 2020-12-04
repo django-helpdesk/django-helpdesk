@@ -101,6 +101,10 @@ def process_email(quiet=False):
 
 def pop3_sync(q, logger, server):
     server.getwelcome()
+    try:
+        server.stls()
+    except Exception:
+        logger.warning("POP3 StartTLS failed or unsupported. Connection will be unencrypted.")
     server.user(q.email_box_user or settings.QUEUE_EMAIL_BOX_USER)
     server.pass_(q.email_box_pass or settings.QUEUE_EMAIL_BOX_PASSWORD)
 
@@ -138,6 +142,10 @@ def pop3_sync(q, logger, server):
 
 def imap_sync(q, logger, server):
     try:
+        try:
+            server.starttl()
+        except Exception:
+            logger.warning("IMAP4 StartTLS unsupported or failed. Connection will be unencrypted.")
         server.login(q.email_box_user or
                      settings.QUEUE_EMAIL_BOX_USER,
                      q.email_box_pass or
