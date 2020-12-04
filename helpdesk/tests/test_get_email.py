@@ -153,9 +153,10 @@ class GetEmailParametricTemplate(object):
         else:
             # Test local email reading
             if self.method == 'local':
-                with mock.patch('helpdesk.email.listdir') as mocked_listdir, \
+                with mock.patch('os.listdir') as mocked_listdir, \
                         mock.patch('helpdesk.email.isfile') as mocked_isfile, \
-                        mock.patch('builtins.open', mock.mock_open(read_data=test_email)):
+                        mock.patch('builtins.open', mock.mock_open(read_data=test_email)), \
+                        mock.patch('os.unlink'):
                     mocked_isfile.return_value = True
                     mocked_listdir.return_value = ['filename1', 'filename2']
 
@@ -224,9 +225,10 @@ class GetEmailParametricTemplate(object):
         else:
             # Test local email reading
             if self.method == 'local':
-                with mock.patch('helpdesk.email.listdir') as mocked_listdir, \
+                with mock.patch('os.listdir') as mocked_listdir, \
                         mock.patch('helpdesk.email.isfile') as mocked_isfile, \
-                        mock.patch('builtins.open' if six.PY3 else '__builtin__.open', mock.mock_open(read_data=test_email)):
+                        mock.patch('builtins.open' if six.PY3 else '__builtin__.open', mock.mock_open(read_data=test_email)), \
+                        mock.patch('os.unlink'):
                     mocked_isfile.return_value = True
                     mocked_listdir.return_value = ['filename1', 'filename2']
 
@@ -299,9 +301,10 @@ class GetEmailParametricTemplate(object):
         else:
             # Test local email reading
             if self.method == 'local':
-                with mock.patch('helpdesk.email.listdir') as mocked_listdir, \
+                with mock.patch('os.listdir') as mocked_listdir, \
                         mock.patch('helpdesk.email.isfile') as mocked_isfile, \
-                        mock.patch('builtins.open', mock.mock_open(read_data=test_email)):
+                        mock.patch('builtins.open', mock.mock_open(read_data=test_email)), \
+                        mock.patch('os.unlink'):
                     mocked_isfile.return_value = True
                     mocked_listdir.return_value = ['filename1', 'filename2']
 
@@ -412,9 +415,10 @@ class GetEmailParametricTemplate(object):
         else:
             # Test local email reading
             if self.method == 'local':
-                with mock.patch('helpdesk.email.listdir') as mocked_listdir, \
+                with mock.patch('os.listdir') as mocked_listdir, \
                         mock.patch('helpdesk.email.isfile') as mocked_isfile, \
-                        mock.patch('builtins.open', mock.mock_open(read_data=msg.as_string())):
+                        mock.patch('builtins.open', mock.mock_open(read_data=msg.as_string())), \
+                        mock.patch('os.unlink'):
                     mocked_isfile.return_value = True
                     mocked_listdir.return_value = ['filename1', 'filename2']
 
@@ -502,9 +506,10 @@ class GetEmailParametricTemplate(object):
         else:
             # Test local email reading
             if self.method == 'local':
-                with mock.patch('helpdesk.email.listdir') as mocked_listdir, \
+                with mock.patch('os.listdir') as mocked_listdir, \
                         mock.patch('helpdesk.email.isfile') as mocked_isfile, \
-                        mock.patch('builtins.open', mock.mock_open(read_data=test_email)):
+                        mock.patch('builtins.open', mock.mock_open(read_data=test_email)), \
+                        mock.patch('os.unlink'):
                     mocked_isfile.return_value = True
                     mocked_listdir.return_value = ['filename1']
 
@@ -670,9 +675,10 @@ class GetEmailCCHandling(TestCase):
         test_email = "To: queue@example.com\nCc: " + test_email_cc_one + ", " + test_email_cc_one + ", " + test_email_cc_two + ", " + test_email_cc_three + "\nCC: " + test_email_cc_one + ", " + test_email_cc_three + ", " + test_email_cc_four + ", " + ticket_user_emails + "\nFrom: " + test_email_from + "\nSubject: " + test_email_subject + "\n\n" + test_email_body
         test_mail_len = len(test_email)
 
-        with mock.patch('helpdesk.email.listdir') as mocked_listdir, \
+        with mock.patch('os.listdir') as mocked_listdir, \
                 mock.patch('helpdesk.email.isfile') as mocked_isfile, \
-                mock.patch('builtins.open', mock.mock_open(read_data=test_email)):
+                mock.patch('builtins.open', mock.mock_open(read_data=test_email)), \
+                mock.patch('os.unlink'):
             mocked_isfile.return_value = True
             mocked_listdir.return_value = ['filename1']
 
