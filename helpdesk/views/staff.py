@@ -1756,6 +1756,19 @@ def report_queue(request, queue_id):
                 user_stats[user_name]['closed_total'] = datadict[user_name]
         morrisjs_data_users.append(datadict)
 
+    # Search users with no stats for the selected period of time
+    usernames_to_remove = []
+    for username, stats in user_stats.items():
+        if not stats['open_total'] and not stats['resolved_total'] and not stats['closed_total']:
+            usernames_to_remove.append(username)
+
+    for username in usernames_to_remove:
+        # Del user name key in user_stats
+        del user_stats[username]
+        # Also delete it in each state from morrisjs_data_users
+        for state in morrisjs_data_users:
+            del state[username]
+
     return render(request, 'helpdesk/report_queue.html', {
         'queue': queue,
         'from': from_date,
