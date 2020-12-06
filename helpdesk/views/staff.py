@@ -1729,45 +1729,38 @@ def report_queue(request, queue_id):
     closed_average = closed_total / delta
 
     # Construct data for the stats for each users
-    morrisjs_data_users = []
-    user_stats = {}
     users = list(get_assignable_users()) + [None]
+    user_stats = {}
+    for user in users:
+        user_name = str(user) if user else 'Non assigné'
+        user_data = {
+            'open_total': open_tickets.filter(assigned_to=user).count(),
+            'resolved_total': resolved_tickets.filter(assigned_to=user).count(),
+            'closed_total': closed_tickets.filter(assigned_to=user).count(),
+        }
+        # Ignore users who have handled 0 tickets in the selected time range
+        if list(user_data.values()) == [0, 0, 0]:
+            continue
+        average, percentage = calc_tickets_first_answer_statistics(
+            open_tickets.filter(assigned_to=user).prefetch_related('followup_set__user')
+        )
+        if average is not None and percentage is not None:
+            user_data['first_answer_time_average'] = average
+            user_data['percentage_under_one_hour'] = percentage
+        user_stats[user_name] = user_data
+
+    # Pivot the data for the morris chart
+    morrisjs_data_users = []
     for state in status:
         datadict = {"x": state}
-        for user in users:
-            user_name = str(user) if user else 'Non assigné'
-            if user_name not in user_stats.keys():
-                user_stats[user_name] = {}
+        for user_name, user_data in user_stats.items():
             if state == _OPEN:
-                datadict[user_name] = open_tickets.filter(assigned_to=user).count()
-                user_stats[user_name]['open_total'] = datadict[user_name]
-                # Calculation of the user tickets first answer time average and percentage
-                average, percentage = calc_tickets_first_answer_statistics(
-                    open_tickets.filter(assigned_to=user).prefetch_related('followup_set__user')
-                )
-                if average is not None and percentage is not None:
-                    user_stats[user_name]['first_answer_time_average'] = average
-                    user_stats[user_name]['percentage_under_one_hour'] = percentage
+                datadict[user_name] = user_data['open_total']
             elif state == _RESOLVED:
-                datadict[user_name] = resolved_tickets.filter(assigned_to=user).count()
-                user_stats[user_name]['resolved_total'] = datadict[user_name]
+                datadict[user_name] = user_data['resolved_total']
             elif state == _CLOSED:
-                datadict[user_name] = closed_tickets.filter(assigned_to=user).count()
-                user_stats[user_name]['closed_total'] = datadict[user_name]
+                datadict[user_name] = user_data['closed_total']
         morrisjs_data_users.append(datadict)
-
-    # Search users with no stats for the selected period of time
-    usernames_to_remove = []
-    for username, stats in user_stats.items():
-        if not stats['open_total'] and not stats['resolved_total'] and not stats['closed_total']:
-            usernames_to_remove.append(username)
-
-    for username in usernames_to_remove:
-        # Del user name key in user_stats
-        del user_stats[username]
-        # Also delete it in each state from morrisjs_data_users
-        for state in morrisjs_data_users:
-            del state[username]
 
     return render(request, 'helpdesk/report_queue.html', {
         'queue': queue,
