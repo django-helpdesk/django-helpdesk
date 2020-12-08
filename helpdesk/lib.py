@@ -208,8 +208,8 @@ def apply_query(queryset, params):
              MyModel.objects.filter(user=request.user)
 
     params is a dictionary that contains the following:
-        filtering: A dict of Django ORM filters, eg:
-            {'user__id__in': [1, 3, 103], 'title__contains': 'foo'}
+        filtering: A dict of Django ORM filters (-1 will add the isnull lookup), eg:
+            {'user__id__in': [1, 3, 103], 'title__contains': 'foo', 'customer__id__in': [-1]}
 
         created_relative: A dict with the number of days from which to filter the created date, and the direction, eg:
             {'days': 30, 'direction': 'before'}
@@ -220,8 +220,13 @@ def apply_query(queryset, params):
         sortreverse: The direction of the ordering
     """
     for key in params['filtering'].keys():
-        filter = {key: params['filtering'][key]}
-        queryset = queryset.filter(**filter)
+        object_ids = params['filtering'][key]
+        # Check if unnassigned has been selected in order to add the isnull lookup and perform a OR
+        if -1 in object_ids:
+            null_key = key.replace('__in', '__isnull')
+            queryset = queryset.filter(Q(**{key: object_ids}) | Q(**{null_key: True}))
+        else:
+            queryset = queryset.filter(**{key: object_ids})
 
     if params['created_relative'].get('days') and params['created_relative'].get('direction'):
         relative_date = date.today() - timedelta(params['created_relative']['days'])
