@@ -222,7 +222,7 @@ def apply_query(queryset, params):
     for key in params['filtering'].keys():
         object_ids = params['filtering'][key]
         # Check if unnassigned has been selected in order to add the isnull lookup and perform a OR
-        if -1 in object_ids:
+        if '__in' == key[-4:] and -1 in object_ids:
             null_key = key.replace('__in', '__isnull')
             queryset = queryset.filter(Q(**{key: object_ids}) | Q(**{null_key: True}))
         else:

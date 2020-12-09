@@ -1304,6 +1304,14 @@ def ticket_list(request):
                 query_params['created_relative']['days'] = created_relative_days
         query_params['created_relative']['direction'] = request.GET.get('direction', 'before')
 
+        # Resolution filtering
+        no_resolution = request.GET.get('no_resolution')
+        search_resolution = request.GET.get('resolution')
+        if no_resolution:
+            query_params['filtering']['resolution'] = ''
+        elif search_resolution:
+            query_params['filtering']['resolution__icontains'] = search_resolution
+
         # KEYWORD SEARCHING
         q = request.GET.get('q')
 
@@ -1316,7 +1324,7 @@ def ticket_list(request):
         query_params['sortreverse'] = sortreverse
 
         sort = request.GET.get('sort')
-        if sort not in ('status', 'assigned_to', 'created', 'modified', 'title', 'queue', 'priority'):
+        if sort not in ('status', 'assigned_to', 'created', 'modified', 'resolved', 'closed', 'title', 'queue', 'priority'):
             # Fallback to sort by created in reverse
             sort = 'modified'
             query_params['sortreverse'] = True
