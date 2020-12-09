@@ -13,7 +13,7 @@ from helpdesk.models import SavedSearch
 
 def saved_queries(user):
     try:
-        user_saved_queries = SavedSearch.objects.filter(Q(user=user) | Q(shared__exact=True))
+        user_saved_queries = SavedSearch.objects.filter(Q(user=user) | Q(shared__exact=True)).select_related('user')
         return user_saved_queries
     except Exception as e:
         import sys

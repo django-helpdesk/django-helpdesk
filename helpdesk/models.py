@@ -661,7 +661,8 @@ class Ticket(models.Model):
         """
         Return the boostrap class based on the last followup whether it needs an action or not.
         """
-        last_followup = self.followup_set.select_related('user').latest('date')
+        # Follow ups are already ordered by date desc, so the first is the latest
+        last_followup = self.followup_set.first()
 
         if not last_followup:
             return "danger"
@@ -686,8 +687,9 @@ class Ticket(models.Model):
         if self.on_hold:
             held_msg = _(' - On Hold')
         dep_msg = ''
-        if not self.can_be_resolved:
-            dep_msg = _(' - Open dependencies')
+        # Stop searching for open dependencies to reduce number of queries on ticket list
+        # if not self.can_be_resolved:
+        #     dep_msg = _(' - Open dependencies')
         return u'%s%s%s' % (self.get_status_display(), held_msg, dep_msg)
     get_status = property(_get_status)
 

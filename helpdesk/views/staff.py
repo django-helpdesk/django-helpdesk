@@ -1177,7 +1177,7 @@ def ticket_list(request):
 
     user_queues = _get_user_queues(request.user)
     # Prefilter the allowed tickets
-    base_tickets = Ticket.objects.filter(queue__in=user_queues)
+    base_tickets = Ticket.objects.filter(queue__in=user_queues).prefetch_related('followup_set__user')
 
     # Prepare a default query params
     default_query_params = {
