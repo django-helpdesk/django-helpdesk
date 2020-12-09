@@ -7,7 +7,7 @@ $(document).ready(function() {
     $(".filterBuilderRemove").click(function() {
         const boxName = "#" + $(this).parents(".filterBox").attr('id');
         $(boxName).slideUp();
-        $(boxName).find("input:text, input[type=number]").each(function() {
+        $(boxName).find("input:text, input[type=number], input[type=date]").each(function() {
             $(this).val("");
         });
         $(boxName).find("input:checkbox, input:radio").each(function() {
