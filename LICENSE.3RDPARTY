@@ -13,6 +13,7 @@ distributed with django-helpdesk.
 10. License for Metis Menu
 11. License for Bootstrap CSS v4.2.1
 12. License for Font Awesome v5.6.3
+13. License for Timeline 3
 
 ----------------------------------------------------------------------
 
@@ -329,5 +330,29 @@ All brand icons are trademarks of their respective owners. The use of these
 trademarks does not indicate endorsement of the trademark holder by Font
 Awesome, nor vice versa. **Please do not use brand logos for any purpose except
 to represent the company, product, or service to which they refer.**
+
+----------------------------------------------------------------------
+
+13. License for Timeline 3
+
+TimelineJS is released under the Mozilla Public License (MPL), version 2.0.
+That means that TimelineJS is free to "use, reproduce, make available, modify,
+display, perform, distribute" or otherwise employ. You don't need our permission
+to publish stories with TimelineJS and you don't need to pay us any fees or
+arrange any further license beyond the MPL. You may also make changes to our
+source code, although if you use changed code publicly, you must make the source
+code to your modified version available.
+
+Note that this page is not offered as legal counsel and you may wish to consult
+your own lawyers.
+
+If you have more questions, feel free to reach out to us.
+
+You may:
+embed TimelineJS in a personal or commercial website.
+receive compensation for a page containing Timelines you have created, whether
+from a client or from display advertising.
+copy, modify, clone or fork the code for personal or commercial use.
+host the TimelineJS source code on your own server.
 
 

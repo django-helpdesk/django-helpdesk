@@ -1,3 +1,10 @@
+"""
+Usage:
+$ python -m venv .venv
+$ source .venv/bin/activate
+$ pip install -r requirements-testing.txt -r requirements.txt
+$ python ./quicktest.py
+"""
 import os
 import sys
 import argparse
@@ -65,7 +72,6 @@ class QuickDjangoTest(object):
         },
     ]
 
-
     def __init__(self, *args, **kwargs):
         self.tests = args
         self._tests()
@@ -101,6 +107,7 @@ class QuickDjangoTest(object):
         failures = test_runner.run_tests(self.tests)
         if failures:
             sys.exit(failures)
+
 
 if __name__ == '__main__':
     """

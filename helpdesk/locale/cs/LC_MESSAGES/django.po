@@ -502,7 +502,7 @@ msgstr "Složka pro log soubory"
 #: third_party/django-helpdesk/helpdesk/models.py:306
 msgid ""
 "If logging is enabled, what directory should we use to store log files for "
-"this queue? If no directory is set, default to /var/log/helpdesk/"
+"this queue? The standard logging mechanims are used if no directory is set"
 msgstr ""
 
 #: third_party/django-helpdesk/helpdesk/models.py:317
