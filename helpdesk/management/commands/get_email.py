@@ -314,12 +314,12 @@ def process_queue(q, logger):
         for num, message in enumerate(messages):
             logger.info("Processing message %s" % num)
             full_message = message.get_mime_content().decode("utf-8")
-            try:
-                ticket = ticket_from_message(message=full_message, queue=q, logger=logger)
-            except TypeError:
-                ticket = None  # hotfix. Need to work out WHY.
+            ticket = ticket_from_message(message=full_message, queue=q, logger=logger)
+            subject = message.subject
+            deleted = message.move(mailbox.deleted_folder())
             if ticket:
-                message.delete()
+                if not deleted:
+                    print("Error! Couldn't remove message\"" + subject + "\"!")
                 logger.info("Successfully processed message %s, deleted from O365 Inbox" % num)
             else:
                 logger.warning("Message %s was not successfully processed, and will be left in the O365 Inbox" % num)
@@ -454,7 +454,11 @@ def ticket_from_message(message, queue, logger):
         counter += 1
 
     if not body:
-        mail = BeautifulSoup(part.get_payload(), "lxml")
+        try:
+            mail = BeautifulSoup(part.get_payload(), "lxml")
+        except TypeError:
+            return False
+
         if ">" in mail.text:
             body = mail.find('body')
             body = body.text
@@ -532,6 +536,11 @@ def ticket_from_message(message, queue, logger):
                 can_update=False
             )
             tcc.save()
+
+    latest_followup_fromuser = FollowUp.objects.filter(user=None, ticket=t).order_by('-date')[:1].first()
+    if latest_followup_fromuser:
+        if latest_followup_fromuser.comment == body:
+            return False # Cancel followup creation
 
     f = FollowUp(
         ticket=t,
