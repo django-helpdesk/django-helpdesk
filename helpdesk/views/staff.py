@@ -30,7 +30,7 @@ from django.utils import timezone
 
 from django.utils import six
 from django.views.decorators.http import require_POST
-from helpdesk.filters import FeedbackSurveyFilter
+from helpdesk.filters import FeedbackSurveyFilter, GenericIncidentFilter
 
 from helpdesk.forms import (
     TicketForm, UserSettingsForm, EmailIgnoreForm, EditTicketForm, TicketCCForm,
@@ -43,7 +43,7 @@ from helpdesk.lib import (
     process_attachments, get_assignable_users, calc_tickets_first_answer_statistics,
 )
 from helpdesk.models import (
-    Ticket, Queue, FollowUp, PreSetReply, Attachment, SavedSearch,
+    Ticket, Queue, FollowUp, PreSetReply, Attachment, SavedSearch, GenericIncident,
     IgnoreEmail, TicketCC, TicketDependency, TicketCategory, TicketType, FeedbackSurvey,
 )
 from helpdesk import settings as helpdesk_settings
@@ -2327,4 +2327,25 @@ def feedback_survey_list(request):
     return render(request, 'helpdesk/feedback_survey_list.html', {
         'filter': f,
         'feedback_surveys': feedback_surveys,
+    })
+
+
+def generic_incident_list(request):
+    queryset = GenericIncident.objects.order_by('-start_date')
+
+    f = GenericIncidentFilter(request.GET, queryset=queryset)
+
+    page = request.GET.get('page', 1)
+
+    paginator = Paginator(f.qs, 20)
+    try:
+        generic_incidents = paginator.page(page)
+    except PageNotAnInteger:
+        generic_incidents = paginator.page(1)
+    except EmptyPage:
+        generic_incidents = paginator.page(paginator.num_pages)
+
+    return render(request, 'helpdesk/generic_incident_list.html', {
+        'filter': f,
+        'generic_incidents': generic_incidents,
     })

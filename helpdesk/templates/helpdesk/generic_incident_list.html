@@ -1,0 +1,70 @@
+{% extends "helpdesk/base.html" %}
+
+{% load static avatar_tags %}
+
+{% block h1_title %}Enquêtes de satisfaction{% endblock %}
+
+{% block helpdesk_head %}
+    {{ filter.form.media.css }}
+{% endblock %}
+
+{% block helpdesk_body %}
+    <div class="x_title">
+            <h2>Liste des réponses aux enquêtes de satisfaction</h2>
+            <ul class="nav navbar-right panel_toolbox">
+                <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
+            </ul>
+            <div class="clearfix"></div>
+        </div>
+        <div class="x_content">
+            <form method="get">
+                {{ filter.form }}
+                <button type="submit" class="btn btn-primary">
+                    Filtrer
+                    <i class="fa fa-filter"></i>
+                </button>
+                <a href="{% url 'helpdesk:generic_incident_list' %}" class="btn btn-default">
+                    Effacer les filtres
+                    <i class="fa fa-eraser"></i>
+                </a>
+            </form>
+
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Nom</th>
+                            <th class="text-center">Date début</th>
+                            <th class="text-center">Date fin</th>
+                            <th class="text-center">Catégorie</th>
+                            <th class="text-center">Lien externe</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for generic_incident in generic_incidents %}
+                            <tr>
+                                <td><a href="{{ generic_incident.get_absolute_url }}">{{ generic_incident.name }}</a></td>
+                                <td class="text-center">{{ generic_incident.start_date }}</td>
+                                <td class="text-center">{{ generic_incident.end_date|default:"En cours" }}</td>
+                                <td class="text-center">{{ generic_incident.category|default:"" }}</td>
+                                <td class="text-center">
+                                    {% if generic_incident.external_link %}
+                                        <a href="{{ generic_incident.external_link }}" target="_blank">
+                                            {{ generic_incident.external_link }}
+                                            <i class="fa fa-external-link"></i>
+                                        </a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% include 'base/components/pagination.html' with objects=generic_incidents filter_parameter='name' %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block custom_javascripts %}
+    {{ filter.form.media.js }}
+{% endblock %}

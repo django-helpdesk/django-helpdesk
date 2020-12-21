@@ -179,6 +179,12 @@ urlpatterns = [
         r'^feedback_survey$',
         staff.feedback_survey_list,
         name='feedback_survey_list'
+    ),
+
+    url(
+        r'^generic_incidents$',
+        staff.generic_incident_list,
+        name='generic_incident_list'
     )
 ]
 

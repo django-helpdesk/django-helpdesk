@@ -1818,6 +1818,7 @@ class GenericIncident(TimeStampedModel):
         "rapport d'intervention",
         upload_to='intervention_reports/%Y/%m/', blank=True
     )
+    followups = GenericRelation('sphinx.GenericInformation', related_query_name='generic_incident')
 
     class Meta:
         verbose_name = 'Incident Générique'

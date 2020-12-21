@@ -3,8 +3,7 @@ from django import forms
 from django.db.models import Q
 from django_select2.forms import Select2MultipleWidget, ModelSelect2MultipleWidget
 from helpdesk.lib import get_assignable_users
-from helpdesk.models import Ticket, FeedbackSurvey
-
+from helpdesk.models import Ticket, FeedbackSurvey, GenericIncident
 from geant.filters import MyCustomDateRangeWidget
 
 
@@ -89,3 +88,25 @@ class FeedbackSurveyFilter(df.FilterSet):
         if value:
             return queryset.filter(ticket__assigned_to__in=value).distinct()
         return queryset
+
+
+class GenericIncidentFilter(df.FilterSet):
+    text = df.CharFilter(
+        method='filter_text',
+        label='Recherche',
+        widget=forms.TextInput
+    )
+    created_between = df.DateFromToRangeFilter(
+        field_name='created_at',
+        label='Date de création entre',
+        widget=MyCustomDateRangeWidget()
+    )
+
+    class Meta:
+        model = GenericIncident
+        fields = ('text', 'created_between', 'category')
+
+    def filter_text(self, queryset, name, value):
+        return queryset.filter(
+            Q(id__iexact=value) | Q(name__icontains=value) | Q(description__icontains=value)
+        ).distinct()
