@@ -26,7 +26,7 @@ import re
 from phonenumber_field.modelfields import PhoneNumberField
 from tinymce import HTMLField
 
-from base.models import SpentTime
+from base.models import SpentTime, TimeStampedModel
 from base.utils import office_time_between
 
 
@@ -1799,3 +1799,29 @@ class TicketDependency(models.Model):
 
     def __str__(self):
         return '%s / %s' % (self.ticket, self.depends_on)
+
+
+class GenericIncident(TimeStampedModel):
+    name = models.CharField('nom', max_length=100)
+    start_date = models.DateTimeField('date de début', default=timezone.now)
+    end_date = models.DateTimeField('date de fin', null=True, blank=True)
+    description = models.TextField(blank=True)
+    category = models.ForeignKey(
+        TicketCategory,
+        verbose_name='catégorie',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+    external_link = models.URLField('lien externe', blank=True)
+    intervention_report = models.FileField(
+        "rapport d'intervention",
+        upload_to='intervention_reports/%Y/%m/', blank=True
+    )
+
+    class Meta:
+        verbose_name = 'Incident Générique'
+        verbose_name_plural = 'Incidents Génériques'
+
+    def __str__(self):
+        return self.name

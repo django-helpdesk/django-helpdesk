@@ -1,10 +1,8 @@
 from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _
 from helpdesk.models import Queue, Ticket, FollowUp, PreSetReply, KBCategory, TicketCategory, \
-    TicketType, FeedbackSurvey
-from helpdesk.models import EscalationExclusion, EmailTemplate, KBItem
-from helpdesk.models import TicketChange, Attachment, IgnoreEmail
-from helpdesk.models import CustomField
+    TicketType, FeedbackSurvey, TicketChange, Attachment, IgnoreEmail, CustomField, EscalationExclusion, \
+    EmailTemplate, KBItem, GenericIncident
 
 
 @admin.register(Queue)
@@ -118,6 +116,19 @@ class FeedbackSurveyAdmin(admin.ModelAdmin):
     search_fields = ('ticket__id', 'ticket__title', 'message', 'author__username')
     date_hierarchy = 'created_at'
     autocomplete_fields = ('ticket', 'author')
+
+
+@admin.register(GenericIncident)
+class GenericIncidentAdmin(admin.ModelAdmin):
+    list_display = (
+        'name', 'start_date', 'end_date', 'category', 'external_link', 'created_at', 'updated_at'
+    )
+    list_filter = ('end_date',)
+    search_fields = ('name', 'category__name')
+    date_hierarchy = 'start_date'
+    ordering = ('-start_date',)
+    autocomplete_fields = ('category',)
+    list_select_related = ('category',)
 
 
 admin.site.register(PreSetReply)
