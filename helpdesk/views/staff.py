@@ -319,7 +319,8 @@ def view_ticket(request, ticket_id):
             return JsonResponse({'success': False, 'error': str(e)})
         return JsonResponse({'success': True})
 
-    if 'take' in request.GET or ('close' in request.GET and ticket.status == Ticket.RESOLVED_STATUS):
+    if 'take' in request.GET or\
+            'close' in request.GET and ticket.status in (Ticket.RESOLVED_STATUS, Ticket.REOPENED_STATUS):
         # Trick the update_ticket() view into thinking it's being called with a valid POST.
         request.POST = {
             'public': True,
@@ -497,7 +498,9 @@ def view_ticket(request, ticket_id):
                     fail_silently=True,
                     files=files,
                 )
-
+            # Redirect to feedback survey if customer has closed the ticket
+            if new_status == Ticket.CLOSED_STATUS:
+                return redirect('helpdesk:feedback_survey', ticket.id)
             return redirect(ticket)
 
     ticketcc_string, show_subscribe = \
