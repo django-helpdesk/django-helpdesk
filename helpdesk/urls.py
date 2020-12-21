@@ -190,7 +190,12 @@ urlpatterns = [
         r'^generic_incidents/create$',
         staff.generic_incident_create,
         name='generic_incident_create'
-    )
+    ),
+    url(
+        r'^generic_incidents/(?P<generic_incident_id>[0-9]+)/update$',
+        staff.generic_incident_update,
+        name='generic_incident_update'
+    ),
 ]
 
 urlpatterns += [

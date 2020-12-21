@@ -2309,6 +2309,7 @@ def sort_string(begin, end):
         begin, end, Ticket.OPEN_STATUS, Ticket.REOPENED_STATUS, Ticket.RESOLVED_STATUS)
 
 
+@staff_member_required
 def feedback_survey_list(request):
     queryset = FeedbackSurvey.objects.order_by('-created_at')
 
@@ -2330,6 +2331,7 @@ def feedback_survey_list(request):
     })
 
 
+@staff_member_required
 def generic_incident_list(request):
     queryset = GenericIncident.objects.order_by('-start_date')
 
@@ -2351,11 +2353,24 @@ def generic_incident_list(request):
     })
 
 
+@staff_member_required
 def generic_incident_create(request):
     form = GenericIncidentForm(request.POST or None, files=request.FILES or None)
     if form.is_valid():
         generic_incident = form.save()
-        messages.success(request, "L'incident générique a bien été créé")
+        messages.success(request, "L'incident générique a bien été créé.")
         #return redirect(generic_incident)
         return redirect('helpdesk:generic_incident_list')
     return render(request, 'helpdesk/generic_incident_form.html', {'form': form})
+
+
+@staff_member_required
+def generic_incident_update(request, generic_incident_id):
+    generic_incident = get_object_or_404(GenericIncident, id=generic_incident_id)
+    form = GenericIncidentForm(request.POST or None, files=request.FILES or None, instance=generic_incident)
+    if form.is_valid():
+        generic_incident = form.save()
+        messages.success(request, "L'incident générique a bien été modifié.")
+        #return redirect(generic_incident)
+        return redirect('helpdesk:generic_incident_list')
+    return render(request, 'helpdesk/generic_incident_form.html', {'form': form, 'generic_incident': generic_incident})
