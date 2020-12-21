@@ -165,8 +165,6 @@ def send_templated_mail(template_name,
                         content = attachedfile.read()
                         msg.attach(filename, content)
 
-    print('Sending email to: %s' % ', '.join(recipients))
-
     try:
         return msg.send()
     except SMTPException as e:
