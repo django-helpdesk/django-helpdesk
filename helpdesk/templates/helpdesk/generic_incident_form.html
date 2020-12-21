@@ -1,0 +1,40 @@
+{% extends "helpdesk/base.html" %}
+
+{% load static avatar_tags %}
+
+{% block helpdesk_title %}Créer Incident Générique{% endblock %}
+{% block h1_title %}{% endblock %}
+
+{% block helpdesk_head %}
+    {{ form.media.css }}
+{% endblock %}
+
+{% block helpdesk_body %}
+    <div class="row">
+        <div class="col-sm-8 col-sm-offset-2 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                        <h2>Créer un nouvel incident générique</h2>
+                        <ul class="nav navbar-right panel_toolbox">
+                            <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
+                        </ul>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="x_content">
+                        <form method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            {{ form.as_p }}
+                            <div class="text-center">
+                                <button type="submit" class="btn btn-primary btn-lg">Créer</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block custom_javascripts %}
+    {{ form.media.js }}
+{% endblock %}

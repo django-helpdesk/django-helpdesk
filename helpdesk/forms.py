@@ -18,7 +18,7 @@ from django_select2.forms import ModelSelect2MultipleWidget, ModelSelect2Widget
 
 from helpdesk.lib import send_templated_mail, safe_template_context, process_attachments, get_assignable_users
 from helpdesk.models import Ticket, Queue, FollowUp, IgnoreEmail, TicketCC, CustomField, TicketCustomFieldValue, \
-    TicketDependency, FeedbackSurvey
+    TicketDependency, FeedbackSurvey, GenericIncident
 from helpdesk import settings as helpdesk_settings
 from phonenumber_field.formfields import PhoneNumberField
 from phonenumber_field.widgets import PhoneNumberInternationalFallbackWidget
@@ -741,3 +741,26 @@ class FeedbackSurveyForm(forms.ModelForm):
         widgets = {
             'message': forms.Textarea(attrs={'class': 'form-control resize-vertical'})
         }
+
+
+class GenericIncidentForm(forms.ModelForm):
+    start_date = CustomDateTimeField(
+        label='Date de début',
+        form_control=True
+    )
+    end_date = CustomDateTimeField(
+        label='Date de fin',
+        required=False,
+        form_control=True,
+        help_text="Laisser vide pour indiquer que l'IG est en cours."
+    )
+    class Meta:
+        model = GenericIncident
+        fields = '__all__'
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'description': forms.Textarea(attrs={'class': 'form-control resize-vertical'}),
+            'external_link': forms.TextInput(attrs={'class': 'form-control'}),
+            'category': forms.Select(attrs={'class': 'form-control'}),
+        }
+

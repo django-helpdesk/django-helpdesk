@@ -35,7 +35,7 @@ from helpdesk.filters import FeedbackSurveyFilter, GenericIncidentFilter
 from helpdesk.forms import (
     TicketForm, UserSettingsForm, EmailIgnoreForm, EditTicketForm, TicketCCForm,
     TicketCCEmailForm, TicketCCUserForm, EditFollowUpForm, TicketDependencyForm, InformationTicketForm,
-    CreateFollowUpForm, MultipleTicketSelectForm
+    CreateFollowUpForm, MultipleTicketSelectForm, GenericIncidentForm
 )
 from helpdesk.decorators import staff_member_required, superuser_required
 from helpdesk.lib import (
@@ -2349,3 +2349,13 @@ def generic_incident_list(request):
         'filter': f,
         'generic_incidents': generic_incidents,
     })
+
+
+def generic_incident_create(request):
+    form = GenericIncidentForm(request.POST or None, files=request.FILES or None)
+    if form.is_valid():
+        generic_incident = form.save()
+        messages.success(request, "L'incident générique a bien été créé")
+        #return redirect(generic_incident)
+        return redirect('helpdesk:generic_incident_list')
+    return render(request, 'helpdesk/generic_incident_form.html', {'form': form})

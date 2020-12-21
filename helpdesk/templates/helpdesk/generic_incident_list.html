@@ -2,16 +2,25 @@
 
 {% load static avatar_tags %}
 
-{% block h1_title %}Enquêtes de satisfaction{% endblock %}
+{% block helpdesk_title %}Incidents Génériques{% endblock %}
+{% block h1_title %}{% endblock %}
 
 {% block helpdesk_head %}
     {{ filter.form.media.css }}
 {% endblock %}
 
 {% block helpdesk_body %}
-    <div class="x_title">
-            <h2>Liste des réponses aux enquêtes de satisfaction</h2>
+    <div class="x_panel">
+        <div class="x_title">
+            <h2>Liste des incidents génériques</h2>
             <ul class="nav navbar-right panel_toolbox">
+                <li>
+                    <a href="{% url 'helpdesk:generic_incident_create' %}">
+                        <i class="fa fa-plus"></i>
+                        Créer un nouvel incident
+                    </a>
+                </li>
+                <li class="divider"></li>
                 <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
             </ul>
             <div class="clearfix"></div>
