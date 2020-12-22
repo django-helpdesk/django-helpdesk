@@ -2358,7 +2358,7 @@ def generic_incident_create(request):
     form = GenericIncidentForm(request.POST or None, files=request.FILES or None)
     if form.is_valid():
         generic_incident = form.save()
-        messages.success(request, "L'incident générique a bien été créé.")
+        messages.success(request, "L'incident générique %s a bien été créé." % generic_incident)
         #return redirect(generic_incident)
         return redirect('helpdesk:generic_incident_list')
     return render(request, 'helpdesk/generic_incident_form.html', {'form': form})
@@ -2370,7 +2370,17 @@ def generic_incident_update(request, generic_incident_id):
     form = GenericIncidentForm(request.POST or None, files=request.FILES or None, instance=generic_incident)
     if form.is_valid():
         generic_incident = form.save()
-        messages.success(request, "L'incident générique a bien été modifié.")
+        messages.success(request, "L'incident générique %s a bien été modifié." % generic_incident)
         #return redirect(generic_incident)
         return redirect('helpdesk:generic_incident_list')
     return render(request, 'helpdesk/generic_incident_form.html', {'form': form, 'generic_incident': generic_incident})
+
+
+@staff_member_required
+def generic_incident_delete(request, generic_incident_id):
+    generic_incident = get_object_or_404(GenericIncident, id=generic_incident_id)
+    if request.method == 'POST':
+        generic_incident.delete()
+        messages.success(request, "L'incident générique %s a bien été supprimé." % generic_incident)
+        return redirect('helpdesk:generic_incident_list')
+    return render(request, 'helpdesk/generic_incident_confirm_delete.html', {'generic_incident': generic_incident})

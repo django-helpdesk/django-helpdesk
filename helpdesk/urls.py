@@ -196,6 +196,11 @@ urlpatterns = [
         staff.generic_incident_update,
         name='generic_incident_update'
     ),
+    url(
+        r'^generic_incidents/(?P<generic_incident_id>[0-9]+)/delete$',
+        staff.generic_incident_delete,
+        name='generic_incident_delete'
+    ),
 ]
 
 urlpatterns += [

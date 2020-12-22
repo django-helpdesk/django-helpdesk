@@ -1,0 +1,25 @@
+{% extends "helpdesk/base.html" %}
+
+{% block helpdesk_title %}Suppression Incident Générique{% endblock %}
+{% block h1_title %}Gestion des IG{% endblock %}
+
+{% block helpdesk_body %}
+    <div class="row">
+        <div class="col-sm-6 col-sm-offset-3 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">Suppression incident <b>{{ generic_incident }}</b></div>
+                <div class="x_content">
+                    <form method="post">
+                        {% csrf_token %}
+                        <p>
+                            Êtes-vous certain de vouloir supprimer l'incident générique <b>{{ generic_incident }}</b> ?<br>
+                            Tous les suivis associés seont également supprimés.
+                        </p>
+                        <button type="submit" class="btn btn-danger">Oui, je suis sûr</button>
+                        <a href="{{ generic_incident.get_absolute_url }}" class="btn btn-default">Annuler</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
