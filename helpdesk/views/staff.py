@@ -400,6 +400,7 @@ def view_ticket(request, ticket_id):
                 'customer_contact': ticket.customer_contact,
                 'site': ticket.site,
                 'customer_product': ticket.customer_product,
+                'generic_incident': ticket.generic_incident,
                 'quick_comment': ticket.quick_comment,
             },
             user=request.user,
@@ -644,7 +645,8 @@ def update_ticket(request, ticket_id, public=False):
     customer_contact_id = int(request.POST.get('customer_contact')) if request.POST.get('customer_contact') else None
     customer_id = int(request.POST.get('customer')) if request.POST.get('customer') else None
     site_id = int(request.POST.get('site')) if request.POST.get('site') else None
-    customer_product_id = int(request.POST.get('customer_product', None)) if request.POST.get('customer_product') else None
+    customer_product_id = int(request.POST.get('customer_product')) if request.POST.get('customer_product') else None
+    generic_incident_id = int(request.POST.get('generic_incident')) if request.POST.get('generic_incident') else None
 
     if due_date:
         due_date = make_aware(datetime.strptime(due_date, DATETIME_LOCAL_FORMAT))
@@ -662,6 +664,7 @@ def update_ticket(request, ticket_id, public=False):
         customer_id == (ticket.customer.id if ticket.customer else None),
         site_id == (ticket.site.id if ticket.site else None),
         customer_product_id == (ticket.customer_product.id if ticket.customer_product else None),
+        generic_incident_id == (ticket.generic_incident.id if ticket.generic_incident else None),
         (owner == -1) or (not owner and not ticket.assigned_to) or
         (owner and User.objects.get(id=owner) == ticket.assigned_to),
     ])
@@ -817,6 +820,18 @@ def update_ticket(request, ticket_id, public=False):
             new_value=str(customer_product) if customer_product else _('Unassigned'),
         )
         ticket.customer_product = customer_product
+
+    if generic_incident_id != (ticket.generic_incident.id if ticket.generic_incident else None):
+        try:
+            generic_incident = GenericIncident.objects.get(id=generic_incident_id)
+        except GenericIncident.DoesNotExist:
+            generic_incident = None
+        f.ticketchange_set.create(
+            field='Incident Générique',
+            old_value=str(ticket.generic_incident) if ticket.generic_incident else _('None'),
+            new_value=str(generic_incident) if generic_incident else _('None'),
+        )
+        ticket.generic_incident = generic_incident
 
     if new_status in (Ticket.RESOLVED_STATUS, Ticket.CLOSED_STATUS):
         if new_status == Ticket.RESOLVED_STATUS or ticket.resolution is None:

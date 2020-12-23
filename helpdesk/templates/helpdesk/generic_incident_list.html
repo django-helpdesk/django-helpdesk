@@ -24,16 +24,33 @@
             <div class="clearfix"></div>
         </div>
         <div class="x_content">
-            <form method="get">
-                {{ filter.form }}
-                <button type="submit" class="btn btn-primary">
-                    Filtrer
-                    <i class="fa fa-filter"></i>
-                </button>
-                <a href="{% url 'helpdesk:generic_incident_list' %}" class="btn btn-default">
-                    Effacer les filtres
-                    <i class="fa fa-eraser"></i>
-                </a>
+            <form method="get" class="row">
+                <div class="col-sm-3 col-xs-12">
+                    {{ filter.form.text.label_tag }}
+                    {{ filter.form.text }}
+                    {{ filter.form.text.errors }}
+                </div>
+                <div class="col-sm-3 col-xs-12">
+                    {{ filter.form.created_between.label_tag }}<br>
+                    {{ filter.form.created_between }}
+                    {{ filter.form.created_between.errors }}
+                </div>
+                <div class="col-sm-3 col-xs-12">
+                    {{ filter.form.category.label_tag }}
+                    {{ filter.form.category }}
+                    {{ filter.form.category.errors }}
+                </div>
+                <div class="col-sm-3 col-xs-12 text-center">
+                    <br>
+                    <button type="submit" class="btn btn-primary">
+                        Filtrer
+                        <i class="fa fa-filter"></i>
+                    </button>
+                    <a href="{% url 'helpdesk:generic_incident_list' %}" class="btn btn-default">
+                        Effacer les filtres
+                        <i class="fa fa-eraser"></i>
+                    </a>
+                </div>
             </form>
 
             <div class="table-responsive">

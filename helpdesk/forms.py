@@ -24,6 +24,7 @@ from phonenumber_field.formfields import PhoneNumberField
 from phonenumber_field.widgets import PhoneNumberInternationalFallbackWidget
 
 from base.fields import CustomDateTimeField, CustomTinyMCE
+from base.widgets import MyModelSelect2Widget
 from base.models import get_technical_service
 from sphinx.models import Customer, Site, CustomerProducts
 
@@ -131,6 +132,13 @@ class PhoenixTicketForm(forms.Form):
             dependent_fields={'site': ('site', 'using_sites'), 'customer': 'site__customer'},
             attrs={'style': 'width: 100%', 'data-minimum-input-length': 0}
         ),
+        required=False
+    )
+
+    generic_incident = forms.ModelChoiceField(
+        label='Incident générique lié',
+        queryset=GenericIncident.objects.all(),
+        widget=MyModelSelect2Widget,
         required=False
     )
 
@@ -421,7 +429,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
             )
 
 
-class TicketForm(PhoenixTicketForm, AbstractTicketForm):
+class TicketForm(AbstractTicketForm, PhoenixTicketForm):
     """
     Ticket Form creation for registered users.
     """
@@ -483,6 +491,7 @@ class TicketForm(PhoenixTicketForm, AbstractTicketForm):
         else:
             # Hide some fields
             self.fields.pop('quick_comment')
+            self.fields.pop('generic_incident')
             self.fields['customer_contact'].widget = forms.HiddenInput()
             self.fields['priority'].widget = forms.HiddenInput()
             self.fields['assigned_to'].widget = forms.HiddenInput()

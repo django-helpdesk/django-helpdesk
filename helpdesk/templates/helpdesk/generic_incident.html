@@ -18,20 +18,22 @@
         <div class="x_title">
             <h2>Détail de l'incident générique <b>{{ generic_incident }}</b></h2>
             <ul class="nav navbar-right panel_toolbox">
-                <li>
-                    <a href="{% url 'helpdesk:generic_incident_update' generic_incident.id %}">
-                        <i class="fa fa-edit"></i>
-                        Editer l'incident
-                    </a>
-                </li>
-                <li class="divider"></li>
-                <li>
-                    <a href="{% url 'helpdesk:generic_incident_delete' generic_incident.id %}">
-                        <i class="fa fa-trash"></i>
-                        Supprimer l'incident
-                    </a>
-                </li>
-                <li class="divider"></li>
+                {% if request.user.is_staff %}
+                    <li>
+                        <a href="{% url 'helpdesk:generic_incident_update' generic_incident.id %}">
+                            <i class="fa fa-edit"></i>
+                            Editer l'incident
+                        </a>
+                    </li>
+                    <li class="divider"></li>
+                    <li>
+                        <a href="{% url 'helpdesk:generic_incident_delete' generic_incident.id %}">
+                            <i class="fa fa-trash"></i>
+                            Supprimer l'incident
+                        </a>
+                    </li>
+                    <li class="divider"></li>
+                {% endif %}
                 <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
             </ul>
             <div class="clearfix"></div>

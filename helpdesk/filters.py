@@ -3,7 +3,7 @@ from django import forms
 from django.db.models import Q
 from django_select2.forms import Select2MultipleWidget, ModelSelect2MultipleWidget
 from helpdesk.lib import get_assignable_users
-from helpdesk.models import Ticket, FeedbackSurvey, GenericIncident
+from helpdesk.models import Ticket, FeedbackSurvey, GenericIncident, TicketCategory
 from geant.filters import MyCustomDateRangeWidget
 
 
@@ -94,12 +94,18 @@ class GenericIncidentFilter(df.FilterSet):
     text = df.CharFilter(
         method='filter_text',
         label='Recherche',
-        widget=forms.TextInput
+        widget=forms.TextInput(attrs={'class': 'form-control'})
     )
     created_between = df.DateFromToRangeFilter(
         field_name='created_at',
         label='Date de création entre',
         widget=MyCustomDateRangeWidget()
+    )
+    category = df.ModelChoiceFilter(
+        field_name='category',
+        label='Catégorie',
+        queryset=TicketCategory.objects.all(),
+        widget=forms.Select(attrs={'class': 'form-control'})
     )
 
     class Meta:
