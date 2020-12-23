@@ -534,15 +534,18 @@ def ticket_from_message(message, queue, logger):
         current_cc = set(current_cc_emails + current_cc_users + other_emails)
         # first, add any User not previously CC'd (as identified by User's email)
         all_user_emails = set([x.email for x in User.objects.exclude(email=None)])
-        users_not_currently_ccd = all_user_emails.difference(set(current_cc))
+        users_not_currently_ccd = all_user_emails.difference(current_cc)
         users_to_cc = cc.intersection(users_not_currently_ccd)
+        logger.debug('users_to_cc :')
+        logger.debug(users_to_cc)
         for user_email in users_to_cc:
             try:
-                ticket.ticketcc_set.create(
-                    user=User.objects.get(email=user_email),
-                    can_view=True,
-                    can_update=False
-                )
+                if user_email:
+                    ticket.ticketcc_set.create(
+                        user=User.objects.get(email=user_email),
+                        can_view=True,
+                        can_update=False
+                    )
             except User.MultipleObjectsReturned:
                 logger.error('Multiple users has this email address : %s' % user_email)
                 pass
