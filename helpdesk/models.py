@@ -372,6 +372,36 @@ class TicketCategory(models.Model):
         return self.name
 
 
+class GenericIncident(TimeStampedModel):
+    name = models.CharField('nom', max_length=100)
+    start_date = models.DateTimeField('date de début', default=timezone.now)
+    end_date = models.DateTimeField('date de fin', null=True, blank=True)
+    description = models.TextField(blank=True)
+    category = models.ForeignKey(
+        TicketCategory,
+        verbose_name='catégorie',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+    external_link = models.URLField('lien externe', blank=True)
+    intervention_report = models.FileField(
+        "rapport d'intervention",
+        upload_to='intervention_reports/%Y/%m/', blank=True
+    )
+    followups = GenericRelation('sphinx.GenericInformation', related_query_name='generic_incident')
+
+    class Meta:
+        verbose_name = 'Incident Générique'
+        verbose_name_plural = 'Incidents Génériques'
+
+    def __str__(self):
+        return self.name
+
+    def get_absolute_url(self):
+        return reverse('helpdesk:generic_incident_detail', kwargs={'generic_incident_id': self.id})
+
+
 class TicketType(models.Model):
     name = models.CharField('nom', max_length=50, unique=True)
     mandatory_facturation = models.BooleanField('facturation obligatoire', default=False)
@@ -624,6 +654,15 @@ class Ticket(models.Model):
         verbose_name='fusionné à',
         related_name='merged_tickets',
         on_delete=models.CASCADE,
+        null=True,
+        blank=True
+    )
+
+    generic_incident = models.ForeignKey(
+        GenericIncident,
+        verbose_name='inicident générique',
+        related_name='tickets',
+        on_delete=models.SET_NULL,
         null=True,
         blank=True
     )
@@ -1799,33 +1838,3 @@ class TicketDependency(models.Model):
 
     def __str__(self):
         return '%s / %s' % (self.ticket, self.depends_on)
-
-
-class GenericIncident(TimeStampedModel):
-    name = models.CharField('nom', max_length=100)
-    start_date = models.DateTimeField('date de début', default=timezone.now)
-    end_date = models.DateTimeField('date de fin', null=True, blank=True)
-    description = models.TextField(blank=True)
-    category = models.ForeignKey(
-        TicketCategory,
-        verbose_name='catégorie',
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True
-    )
-    external_link = models.URLField('lien externe', blank=True)
-    intervention_report = models.FileField(
-        "rapport d'intervention",
-        upload_to='intervention_reports/%Y/%m/', blank=True
-    )
-    followups = GenericRelation('sphinx.GenericInformation', related_query_name='generic_incident')
-
-    class Meta:
-        verbose_name = 'Incident Générique'
-        verbose_name_plural = 'Incidents Génériques'
-
-    def __str__(self):
-        return self.name
-
-    def get_absolute_url(self):
-        return reverse('helpdesk:generic_incident_detail', kwargs={'generic_incident_id': self.id})

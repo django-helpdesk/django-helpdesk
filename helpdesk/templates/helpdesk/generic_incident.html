@@ -47,9 +47,11 @@
                             Date de début d'incident : <b>{{ generic_incident.end_date|default:"En cours" }}</b>
                         </div>
                     </div>
-                    <h4>Tickets liés</h4>
+                    <h4>Tickets liés <span class="badge" title="Nombre total de tickets liés">{{ generic_incident.tickets.count }}</span></h4>
                     <div class="list-group">
-                        <a class="list-group-item">Ticket 44888...</a>
+                        {% for ticket in tickets %}
+                            <a class="list-group-item" href="{{ ticket.get_absolute_url }}">{{ ticket }}</a>
+                        {% endfor %}
                     </div>
                 </div>
                 <div class="col-sm-4 col-xs-12">

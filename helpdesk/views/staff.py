@@ -26,26 +26,20 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.utils.html import format_html
 from django.utils.timezone import make_aware
 from django.utils.translation import ugettext as _
-from django.utils import timezone
-
-from django.utils import six
+from django.utils import timezone, six
 from django.views.decorators.http import require_POST
-from helpdesk.filters import FeedbackSurveyFilter, GenericIncidentFilter
 
-from helpdesk.forms import (
-    TicketForm, UserSettingsForm, EmailIgnoreForm, EditTicketForm, TicketCCForm,
-    TicketCCEmailForm, TicketCCUserForm, EditFollowUpForm, TicketDependencyForm, InformationTicketForm,
+from guardian.shortcuts import get_objects_for_user
+
+from helpdesk.filters import FeedbackSurveyFilter, GenericIncidentFilter
+from helpdesk.forms import TicketForm, UserSettingsForm, EmailIgnoreForm, EditTicketForm, TicketCCForm, \
+    TicketCCEmailForm, TicketCCUserForm, EditFollowUpForm, TicketDependencyForm, InformationTicketForm, \
     CreateFollowUpForm, MultipleTicketSelectForm, GenericIncidentForm
-)
 from helpdesk.decorators import staff_member_required, superuser_required
-from helpdesk.lib import (
-    send_templated_mail, apply_query, safe_template_context,
-    process_attachments, get_assignable_users, calc_tickets_first_answer_statistics,
-)
-from helpdesk.models import (
-    Ticket, Queue, FollowUp, PreSetReply, Attachment, SavedSearch, GenericIncident,
-    IgnoreEmail, TicketCC, TicketDependency, TicketCategory, TicketType, FeedbackSurvey,
-)
+from helpdesk.lib import send_templated_mail, apply_query, safe_template_context, process_attachments,\
+    get_assignable_users, calc_tickets_first_answer_statistics
+from helpdesk.models import Ticket, Queue, FollowUp, PreSetReply, Attachment, SavedSearch, GenericIncident, \
+    IgnoreEmail, TicketCC, TicketDependency, TicketCategory, TicketType, FeedbackSurvey
 from helpdesk import settings as helpdesk_settings
 
 from base.decorators import ipexia_protected
@@ -2334,7 +2328,8 @@ def feedback_survey_list(request):
 
 @staff_member_required
 def generic_incident_list(request):
-    queryset = GenericIncident.objects.order_by('-start_date')
+    queryset = GenericIncident.objects.select_related('category')\
+        .prefetch_related('tickets', 'followups').order_by('-start_date')
 
     f = GenericIncidentFilter(request.GET, queryset=queryset)
 
@@ -2356,15 +2351,22 @@ def generic_incident_list(request):
 
 @login_required
 def generic_incident_detail(request, generic_incident_id):
-    generic_incident = get_object_or_404(GenericIncident, id=generic_incident_id)
+    generic_incident = get_object_or_404(
+        GenericIncident.objects.select_related('category').prefetch_related('tickets', 'followups'),
+        id=generic_incident_id
+    )
 
     # Generic information form
     generic_information_form, success = handle_generic_information_form(generic_incident, request)
     if success:
         return redirect(generic_incident.get_absolute_url())
 
+    # Filter the customers that are accesibles to the user
+    authorized_customers = get_objects_for_user(request.user, 'sphinx.view_customer')
+
     return render(request, 'helpdesk/generic_incident.html', {
         'generic_incident': generic_incident,
+        'tickets': generic_incident.tickets.filter(customer__in=authorized_customers),
         'information_set': generic_incident.followups.all(),
         'generic_information_form': generic_information_form
     })

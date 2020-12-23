@@ -45,6 +45,8 @@
                             <th class="text-center">Date fin</th>
                             <th class="text-center">Catégorie</th>
                             <th class="text-center">Lien externe</th>
+                            <th class="text-center">Tickets liés</th>
+                            <th class="text-center">Nombre de suivis</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -61,6 +63,12 @@
                                             <i class="fa fa-external-link"></i>
                                         </a>
                                     {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge">{{ generic_incident.tickets.count }}</span>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge">{{ generic_incident.followups.count }}</span>
                                 </td>
                             </tr>
                         {% endfor %}
