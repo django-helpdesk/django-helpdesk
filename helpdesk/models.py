@@ -1826,3 +1826,6 @@ class GenericIncident(TimeStampedModel):
 
     def __str__(self):
         return self.name
+
+    def get_absolute_url(self):
+        return reverse('helpdesk:generic_incident_detail', kwargs={'generic_incident_id': self.id})

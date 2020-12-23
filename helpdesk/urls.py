@@ -187,6 +187,11 @@ urlpatterns = [
         name='generic_incident_list'
     ),
     url(
+        r'^generic_incidents/(?P<generic_incident_id>[0-9]+)/$',
+        staff.generic_incident_detail,
+        name='generic_incident_detail'
+    ),
+    url(
         r'^generic_incidents/create$',
         staff.generic_incident_create,
         name='generic_incident_create'

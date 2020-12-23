@@ -1,0 +1,88 @@
+{% extends "helpdesk/base.html" %}
+
+{% block helpdesk_title %}Incident Générique {{ generic_incident }}{% endblock %}
+{% block h1_title %}{% endblock %}
+
+{% block helpdesk_body %}
+    {% if request.user.is_staff %}
+        <div class="page-title">
+            <div class="h4 title_left">
+                <a href="{% url 'helpdesk:generic_incident_list' %}">
+                    <i class="fa fa-chevron-circle-left"></i> Retour à la liste des incidents
+                </a>
+            </div>
+        </div>
+    {% endif %}
+
+    <div class="x_panel">
+        <div class="x_title">
+            <h2>Détail de l'incident générique <b>{{ generic_incident }}</b></h2>
+            <ul class="nav navbar-right panel_toolbox">
+                <li>
+                    <a href="{% url 'helpdesk:generic_incident_update' generic_incident.id %}">
+                        <i class="fa fa-edit"></i>
+                        Editer l'incident
+                    </a>
+                </li>
+                <li class="divider"></li>
+                <li>
+                    <a href="{% url 'helpdesk:generic_incident_delete' generic_incident.id %}">
+                        <i class="fa fa-trash"></i>
+                        Supprimer l'incident
+                    </a>
+                </li>
+                <li class="divider"></li>
+                <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
+            </ul>
+            <div class="clearfix"></div>
+        </div>
+        <div class="x_content">
+            <div class="row">
+                <div class="col-sm-8 col-xs-12">
+                    <div class="row">
+                        <div class="col-sm-6 col-xs-12">
+                            Date de début d'incident : <b>{{ generic_incident.start_date }}</b>
+                        </div>
+                        <div class="col-sm-6 col-xs-12 text-right">
+                            Date de début d'incident : <b>{{ generic_incident.end_date|default:"En cours" }}</b>
+                        </div>
+                    </div>
+                    <h4>Tickets liés</h4>
+                    <div class="list-group">
+                        <a class="list-group-item">Ticket 44888...</a>
+                    </div>
+                </div>
+                <div class="col-sm-4 col-xs-12">
+                    <h4>Catégorie : <b>{{ generic_incident.category|default:"Non définie" }}</b></h4>
+                    <h4>
+                        Rapport d'incident :
+                        {% if generic_incident.intervention_report %}
+                            <a class="btn btn-default btn-sm" href="{{ generic_incident.intervention_report.url }}" target="_blank">
+                                <i class="fa fa-download"></i>
+                            </a>
+                        {% else %}
+                            <span class="text-italic">Non disponible</span>
+                        {% endif %}
+                    </h4>
+                    {% if generic_incident.description %}
+                        <h4>Description :</h4>
+                        <div class="well well-sm">
+                            {{ generic_incident.description|linebreaksbr }}
+                        </div>
+                    {% endif %}
+                    {% if request.user.is_staff and generic_incident.external_link %}
+                        <p>
+                            Lien externe :
+                            <a href="{{ generic_incident.external_link }}" target="_blank">
+                                {{ generic_incident.external_link }}
+                                <i class="fa fa-external-link"></i>
+                            </a>
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% include 'sphinx/components/generic_information.html' with information_title='Suivis' %}
+{% endblock %}

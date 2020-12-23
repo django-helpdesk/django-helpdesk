@@ -54,6 +54,7 @@ from base.models import Notification, SpentTime
 from base.utils import handle_date_range_picker_filter, daterange
 from config.settings.base import DATETIME_LOCAL_FORMAT
 from sphinx.models import Customer, Site, CustomerProducts
+from sphinx.utils import handle_generic_information_form
 
 User = get_user_model()
 
@@ -2350,6 +2351,22 @@ def generic_incident_list(request):
     return render(request, 'helpdesk/generic_incident_list.html', {
         'filter': f,
         'generic_incidents': generic_incidents,
+    })
+
+
+@login_required
+def generic_incident_detail(request, generic_incident_id):
+    generic_incident = get_object_or_404(GenericIncident, id=generic_incident_id)
+
+    # Generic information form
+    generic_information_form, success = handle_generic_information_form(generic_incident, request)
+    if success:
+        return redirect(generic_incident.get_absolute_url())
+
+    return render(request, 'helpdesk/generic_incident.html', {
+        'generic_incident': generic_incident,
+        'information_set': generic_incident.followups.all(),
+        'generic_information_form': generic_information_form
     })
 
 
