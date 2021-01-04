@@ -215,10 +215,6 @@ urlpatterns += [
     url(r'^login/$',
         login.login,
         name='login'),
-    
-    url(r'^accounts/login/$',
-        login.login,
-        name='login'),
 
     url(r'^logout/$',
         auth_views.LogoutView.as_view(
