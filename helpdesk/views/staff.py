@@ -434,6 +434,7 @@ def view_ticket(request, ticket_id):
             follow_up.title = 'Réponse client'
             follow_up.public = True
             message = 'Votre réponse a bien été envoyée'
+            new_status = None
             # Change ticket status if the checkbox has been checked
             if followup_form.cleaned_data.get('toggle_ticket_status'):
                 follow_up.title = 'Rouverture client' if ticket.status == Ticket.CLOSED_STATUS else 'Fermeture client'
