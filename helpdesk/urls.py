@@ -192,6 +192,11 @@ urlpatterns = [
         name='generic_incident_detail'
     ),
     url(
+        r'^generic_incidents/(?P<generic_incident_id>[0-9]+)/subscribe$',
+        staff.generic_incident_toggle_subscribe,
+        name='generic_incident_toggle_subscribe'
+    ),
+    url(
         r'^generic_incidents/create$',
         staff.generic_incident_create,
         name='generic_incident_create'

@@ -765,7 +765,7 @@ class GenericIncidentForm(forms.ModelForm):
     )
     class Meta:
         model = GenericIncident
-        fields = '__all__'
+        exclude = ('subscribers',)
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'description': forms.Textarea(attrs={'class': 'form-control resize-vertical'}),

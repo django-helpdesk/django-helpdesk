@@ -17,7 +17,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.contenttypes.models import ContentType
 from django.db.models.functions import Concat
 from django.template.defaultfilters import date
-from django.urls import reverse
+from django.urls import reverse, set_script_prefix, clear_script_prefix
+from django.core.mail import EmailMessage
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q, Value
@@ -42,7 +43,7 @@ from helpdesk.models import Ticket, Queue, FollowUp, PreSetReply, Attachment, Sa
     IgnoreEmail, TicketCC, TicketDependency, TicketCategory, TicketType, FeedbackSurvey
 from helpdesk import settings as helpdesk_settings
 
-from base.decorators import ipexia_protected
+from base.decorators import ipexia_protected, require_ajax
 from base.forms import SpentTimeForm
 from base.models import Notification, SpentTime
 from base.utils import handle_date_range_picker_filter, daterange
@@ -2345,7 +2346,7 @@ def feedback_survey_list(request):
 @staff_member_required
 def generic_incident_list(request):
     queryset = GenericIncident.objects.select_related('category')\
-        .prefetch_related('tickets', 'followups').order_by('-start_date')
+        .prefetch_related('tickets', 'followups', 'subscribers').order_by('-start_date')
 
     f = GenericIncidentFilter(request.GET, queryset=queryset)
 
@@ -2368,13 +2369,36 @@ def generic_incident_list(request):
 @login_required
 def generic_incident_detail(request, generic_incident_id):
     generic_incident = get_object_or_404(
-        GenericIncident.objects.select_related('category').prefetch_related('tickets', 'followups'),
+        GenericIncident.objects.select_related('category').prefetch_related('tickets', 'followups', 'subscribers'),
         id=generic_incident_id
     )
 
     # Generic information form
     generic_information_form, success = handle_generic_information_form(generic_incident, request)
     if success:
+        if generic_incident.subscribers.exists():
+            # Send notification and email to all subscribers
+            message = "Un nouveau suivi a été ajouté sur l'incident générique %s" % generic_incident
+            Notification.objects.create(
+                generic_incident.subscribers.all(),
+                message=message,
+                module=Notification.TICKET,
+                link_redirect=generic_incident.get_absolute_url()
+            )
+            # Add comment to message
+            set_script_prefix(settings.SITE_URL)
+            message += " :\n\n%s\n\nVoir détail de l'IG : %s" % (request.POST.get('comment'), generic_incident.get_absolute_url())
+            clear_script_prefix()
+            email_message = EmailMessage(
+                subject='[Phoenix] Nouveau suivi Incident Générique %s' % generic_incident,
+                body=message,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                bcc=[user.email for user in generic_incident.subscribers.all()]
+            )
+            try:
+                email_message.send()
+            except Exception as e:
+                messages.error(request, "Erreur lors de l'envoi du mail : %s" % e)
         return redirect(generic_incident.get_absolute_url())
 
     # Filter the customers that are accesibles to the user
@@ -2382,10 +2406,35 @@ def generic_incident_detail(request, generic_incident_id):
 
     return render(request, 'helpdesk/generic_incident.html', {
         'generic_incident': generic_incident,
+        'user_is_subscribed': request.user in generic_incident.subscribers.all(),
         'tickets': generic_incident.tickets.filter(customer__in=authorized_customers),
         'information_set': generic_incident.followups.all(),
         'generic_information_form': generic_information_form
     })
+
+
+@login_required
+@require_ajax
+def generic_incident_toggle_subscribe(request, generic_incident_id):
+    generic_incident = get_object_or_404(
+        GenericIncident.objects.select_related('category').prefetch_related('tickets', 'followups'),
+        id=generic_incident_id
+    )
+
+    if not request.user.email:
+        return JsonResponse({
+            'success': False,
+            'error': "Veuillez renseigner votre adresse mail dans votre profil afin de recevoir des notifications."
+        })
+
+    subscribed = True
+    if request.user in generic_incident.subscribers.all():
+        generic_incident.subscribers.remove(request.user)
+        subscribed = False
+    else:
+        generic_incident.subscribers.add(request.user)
+
+    return JsonResponse({'success': True, 'subscribed': subscribed})
 
 
 @staff_member_required
@@ -2394,8 +2443,7 @@ def generic_incident_create(request):
     if form.is_valid():
         generic_incident = form.save()
         messages.success(request, "L'incident générique %s a bien été créé." % generic_incident)
-        #return redirect(generic_incident)
-        return redirect('helpdesk:generic_incident_list')
+        return redirect(generic_incident)
     return render(request, 'helpdesk/generic_incident_form.html', {'form': form})
 
 
@@ -2406,8 +2454,7 @@ def generic_incident_update(request, generic_incident_id):
     if form.is_valid():
         generic_incident = form.save()
         messages.success(request, "L'incident générique %s a bien été modifié." % generic_incident)
-        #return redirect(generic_incident)
-        return redirect('helpdesk:generic_incident_list')
+        return redirect(generic_incident)
     return render(request, 'helpdesk/generic_incident_form.html', {'form': form, 'generic_incident': generic_incident})
 
 

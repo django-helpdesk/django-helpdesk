@@ -64,6 +64,7 @@
                             <th class="text-center">Lien externe</th>
                             <th class="text-center">Tickets liés</th>
                             <th class="text-center">Nombre de suivis</th>
+                            <th class="text-center">Nombre d'abonnés</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -86,6 +87,9 @@
                                 </td>
                                 <td class="text-center">
                                     <span class="badge">{{ generic_incident.followups.count }}</span>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge">{{ generic_incident.subscribers.count }}</span>
                                 </td>
                             </tr>
                         {% endfor %}

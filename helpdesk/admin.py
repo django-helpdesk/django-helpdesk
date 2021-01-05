@@ -127,7 +127,7 @@ class GenericIncidentAdmin(admin.ModelAdmin):
     search_fields = ('name', 'category__name')
     date_hierarchy = 'start_date'
     ordering = ('-start_date',)
-    autocomplete_fields = ('category',)
+    autocomplete_fields = ('category', 'subscribers')
     list_select_related = ('category',)
 
 

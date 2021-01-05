@@ -21,6 +21,7 @@ from django.utils import six
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _, ugettext
 from django.utils.encoding import python_2_unicode_compatible
+from django.forms import ValidationError
 import re
 
 from phonenumber_field.modelfields import PhoneNumberField
@@ -390,6 +391,12 @@ class GenericIncident(TimeStampedModel):
         upload_to='intervention_reports/%Y/%m/', blank=True
     )
     followups = GenericRelation('sphinx.GenericInformation', related_query_name='generic_incident')
+    subscribers = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        verbose_name='abonnés',
+        help_text='List of people who wish to receive updates about this generic incident',
+        blank=True
+    )
 
     class Meta:
         verbose_name = 'Incident Générique'
@@ -400,6 +407,10 @@ class GenericIncident(TimeStampedModel):
 
     def get_absolute_url(self):
         return reverse('helpdesk:generic_incident_detail', kwargs={'generic_incident_id': self.id})
+
+    def clean(self):
+        if self.end_date and self.end_date < self.start_date:
+            raise ValidationError({'end_date': 'La date de fin ne peut pas être antérieure à la date de début.'})
 
 
 class TicketType(models.Model):

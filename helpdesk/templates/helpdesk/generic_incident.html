@@ -49,7 +49,14 @@
                             Date de début d'incident : <b>{{ generic_incident.end_date|default:"En cours" }}</b>
                         </div>
                     </div>
-                    <h4>Tickets liés <span class="badge" title="Nombre total de tickets liés">{{ generic_incident.tickets.count }}</span></h4>
+                    <h4>
+                        Nombre de personnes abonnées
+                        <span class="badge" id="subscribersCount">{{ generic_incident.subscribers.count }}</span>
+                    </h4>
+                    <h4>
+                        Tickets liés
+                        <span class="badge" title="Nombre total de tickets liés">{{ generic_incident.tickets.count }}</span>
+                    </h4>
                     <div class="list-group">
                         {% for ticket in tickets %}
                             <a class="list-group-item" href="{{ ticket.get_absolute_url }}">{{ ticket }}</a>
@@ -88,5 +95,34 @@
         </div>
     </div>
 
-    {% include 'sphinx/components/generic_information.html' with information_title='Suivis' %}
+    {% include 'sphinx/components/generic_information.html' with information_title='Suivis' show_subscribe=True %}
+{% endblock %}
+
+{% block custom_javascripts %}
+    <script>
+        $(() => {
+            {# Call the toggle subscribe view when the switch input is clicked. Also update the subscribers count #}
+            $('#switchInput').on('change', function() {
+                $.post('{% url 'helpdesk:generic_incident_toggle_subscribe' generic_incident.id %}')
+                    .done(response => {
+                        if (response.success) {
+                            const subscribersCount = parseInt($('#subscribersCount').text())
+                            let message;
+                            if (response.subscribed) {
+                                message = "Vous recevrez dorénavant une notification lors d'une mise à jour sur cet incident générique."
+                                $('#subscribersCount').text(subscribersCount + 1)
+                            } else {
+                                message = "Vous ne recevrez plus de notification lors des prochaines mises à jour sur cet incident générique."
+                                $('#subscribersCount').text(subscribersCount - 1)
+                            }
+                            notification(message)
+                        } else {
+                            notification(response.error, 'error')
+                            // Rollback the switch
+                            $(this).prop('checked', !$(this).is(':checked'))
+                        }
+                    }).fail(ajaxFail)
+            });
+        })
+    </script>
 {% endblock %}
