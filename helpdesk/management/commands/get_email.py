@@ -448,6 +448,7 @@ def ticket_from_message(message, queue, logger):
 
     ticket = None
     new = True
+    reopened = False
     if ticket_id:
         try:
             ticket = Ticket.objects.get(id=ticket_id)
@@ -482,6 +483,7 @@ def ticket_from_message(message, queue, logger):
                     logger.info("Ticket has been reopened.")
                     ticket.status = Ticket.REOPENED_STATUS
                     ticket.save()
+                    reopened = True
 
     smtp_priority = message.get('priority', '')
     smtp_importance = message.get('importance', '')
@@ -567,7 +569,7 @@ def ticket_from_message(message, queue, logger):
         comment=body,
     )
 
-    if ticket.status == Ticket.REOPENED_STATUS:
+    if reopened:
         f.new_status = Ticket.REOPENED_STATUS
         f.title = 'Ticket rouvert par un mail reçu de %s' % sender_email
 
