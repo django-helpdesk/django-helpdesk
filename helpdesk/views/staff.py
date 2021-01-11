@@ -1795,12 +1795,12 @@ def calc_basic_ticket_stats(Tickets):
     # (O)pen (T)icket (S)tats
     ots = list()
     # label, number entries, color, sort_string
-    ots.append(['Tickets < 30 days', N_ota_le_30, 'success',
+    ots.append(['Tickets < 30 dias', N_ota_le_30, 'success',
                 sort_string(date_30_str, ''), ])
-    ots.append(['Tickets 30 - 60 days', N_ota_le_60_ge_30,
+    ots.append(['Tickets 30 - 60 dias', N_ota_le_60_ge_30,
                 'success' if N_ota_le_60_ge_30 == 0 else 'warning',
                 sort_string(date_60_str, date_30_str), ])
-    ots.append(['Tickets > 60 days', N_ota_ge_60,
+    ots.append(['Tickets > 60 dias', N_ota_ge_60,
                 'success' if N_ota_ge_60 == 0 else 'danger',
                 sort_string('', date_60_str), ])
 
