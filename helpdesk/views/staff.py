@@ -688,7 +688,7 @@ def update_ticket(request, ticket_id, public=False):
     # render the neutralized template
     comment = template_func(comment).render(context)
 
-    if owner is -1 and ticket.assigned_to:
+    if owner == -1 and ticket.assigned_to:
         owner = ticket.assigned_to.id
 
     f = FollowUp(ticket=ticket, user=request.user, date=timezone.now(), comment=comment, public=public)
@@ -701,7 +701,7 @@ def update_ticket(request, ticket_id, public=False):
     old_owner = ticket.assigned_to
 
     # Build followup title
-    if owner is not -1:
+    if owner != -1:
         if owner != 0 and ((ticket.assigned_to and owner != ticket.assigned_to.id) or not ticket.assigned_to):
             new_user = User.objects.get(id=owner)
             # TODO fix translate
