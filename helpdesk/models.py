@@ -615,6 +615,7 @@ class Ticket(models.Model):
     )
 
     link_open = models.URLField(
+        max_length=300,
         null=True,
         blank=True,
         help_text="Lien depuis lequel le ticket a été ouvert."
