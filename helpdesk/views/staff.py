@@ -1824,7 +1824,7 @@ def report_queue(request, queue_id):
     type_stats = {}
     for stat in all_type_stats:
         ticket_type = mapping_types[stat['type']]
-        str_date = f"{stat['year']}-{stat['month']:02}-{stat['day']:02}"
+        str_date = f"{stat['day']:02}/{stat['month']:02}/{stat['year']}"
         if str_date in type_stats:
             type_stats[str_date][ticket_type] = stat['count']
         else:
