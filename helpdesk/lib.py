@@ -410,7 +410,7 @@ def calc_tickets_first_answer_statistics(tickets):
     first_answer_time_average = percentage_under_one_hour = None
     total_first_answer_times = timedelta()
     number_under_one_hour = []
-    for ticket in tickets:
+    for ticket in tickets.prefetch_related('followup_set__user'):
         first_answer_time = ticket.get_time_first_answer()
         if first_answer_time:
             total_first_answer_times += first_answer_time

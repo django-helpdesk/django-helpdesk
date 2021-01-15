@@ -901,7 +901,12 @@ class Ticket(models.Model):
         :return: the delta between ticket creation date and the first answer by a staff user
         :rtype: datetime.timedelta|None
         """
-        first_answer = self.followup_set.filter(public=True, user__is_staff=True).order_by('date').first()
+        first_answer = None
+        # Use followup_set.all(), it should have been prefetch to be optimized
+        for followup in reversed(self.followup_set.all()):  # Reverse it since it is DESC by default and we want ASC
+            if followup.public and followup.user and followup.user.is_staff:
+                first_answer = followup
+                break
         if first_answer:
             return office_time_between(self.created, first_answer.date)
         return None

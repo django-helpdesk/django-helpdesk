@@ -15,13 +15,13 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.contrib.contenttypes.models import ContentType
-from django.db.models.functions import Concat
+from django.db.models.functions import Concat, ExtractYear, ExtractMonth, ExtractDay
 from django.template.defaultfilters import date
 from django.urls import reverse, set_script_prefix, clear_script_prefix
 from django.core.mail import EmailMessage
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.db.models import Q, Value
+from django.db.models import Q, Value, Count
 from django.http import HttpResponseRedirect, Http404, HttpResponse, JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils.html import format_html
@@ -1723,25 +1723,51 @@ def report_queue(request, queue_id):
     _CLOSED = 'Fermé'
     status = [_OPEN, _RESOLVED, _CLOSED]
 
+    open_tickets = queue_ticket_set.filter(created__date__range=(from_date, to_date))
+    all_opened_stats = open_tickets.annotate(
+        year=ExtractYear('created'),
+        month=ExtractMonth('created'),
+        day=ExtractDay('created')
+    ).values('year', 'month', 'day').annotate(count=Count('id')).order_by()
+
+    resolved_tickets = queue_ticket_set.filter(resolved__date__range=(from_date, to_date))
+    all_resolved_stats = resolved_tickets.exclude(resolved=None).annotate(
+        year=ExtractYear('resolved'),
+        month=ExtractMonth('resolved'),
+        day=ExtractDay('resolved')
+    ).values('year', 'month', 'day').annotate(count=Count('id')).order_by()
+
+    closed_tickets = queue_ticket_set.filter(closed__date__range=(from_date, to_date))
+    all_closed_stats = closed_tickets.exclude(closed=None).annotate(
+        year=ExtractYear('closed'),
+        month=ExtractMonth('closed'),
+        day=ExtractDay('closed')
+    ).values('year', 'month', 'day').annotate(count=Count('id')).order_by()
+
     # Construct data in order to build the Morris chart
-    morrisjs_data = []
+    morrisjs_data = {}
+
+    def add_to_morrisjs_data(stats, status):
+        for stat in stats:
+            str_date = f"{stat['year']}-{stat['month']:02}-{stat['day']:02}"
+            if str_date in morrisjs_data:
+                morrisjs_data[str_date][status] = stat['count']
+            else:
+                morrisjs_data[str_date] = {'x': str_date, status: stat['count']}
+
+    add_to_morrisjs_data(all_opened_stats, _OPEN)
+    add_to_morrisjs_data(all_resolved_stats, _RESOLVED)
+    add_to_morrisjs_data(all_closed_stats, _CLOSED)
+
+    # Add zero for date that are missing in the range
     for single_date in daterange(from_date, to_date + timedelta(1)):
-        datadict = {"x": single_date.strftime("%Y-%m-%d")}
-        for i, state in enumerate(status):
-            if state == _OPEN:
-                datadict[i] = queue_ticket_set.filter(created__date=single_date).count()
-            elif state == _RESOLVED:
-                datadict[i] = queue_ticket_set.filter(resolved__date=single_date).count()
-            elif state == _CLOSED:
-                datadict[i] = queue_ticket_set.filter(closed__date=single_date).count()
-        morrisjs_data.append(datadict)
+        str_date = single_date.strftime('%Y-%m-%d')
+        if str_date not in morrisjs_data:
+            morrisjs_data[str_date] = {'x': str_date, _OPEN: 0, _RESOLVED: 0, _CLOSED: 0}
 
     # Count total for each status
-    open_tickets = queue_ticket_set.filter(created__date__range=(from_date, to_date))
     open_total = open_tickets.count()
-    resolved_tickets = queue_ticket_set.filter(resolved__date__range=(from_date, to_date))
     resolved_total = resolved_tickets.count()
-    closed_tickets = queue_ticket_set.filter(closed__date__range=(from_date, to_date))
     closed_total = closed_tickets.count()
     # Calculate the delta between beginning and end date in days
     delta = (to_date + timedelta(1)) - from_date
@@ -1765,7 +1791,7 @@ def report_queue(request, queue_id):
         if list(user_data.values()) == [0, 0, 0]:
             continue
         average, percentage = calc_tickets_first_answer_statistics(
-            open_tickets.filter(assigned_to=user).prefetch_related('followup_set__user')
+            open_tickets.filter(assigned_to=user)
         )
         if average is not None and percentage is not None:
             user_data['first_answer_time_average'] = average
@@ -1785,6 +1811,29 @@ def report_queue(request, queue_id):
                 datadict[user_name] = user_data['closed_total']
         morrisjs_data_users.append(datadict)
 
+    all_type_stats = open_tickets.annotate(
+        year=ExtractYear('created'),
+        month=ExtractMonth('created'),
+        day=ExtractDay('created')
+    ).values('year', 'month', 'day', 'type').annotate(count=Count('id')).order_by()
+
+
+    mapping_types = {ticket_type.id: ticket_type.name for ticket_type in TicketType.objects.all()}
+    mapping_types[None] = 'Non défini'
+
+    type_stats = {}
+    for stat in all_type_stats:
+        ticket_type = mapping_types[stat['type']]
+        str_date = f"{stat['year']}-{stat['month']:02}-{stat['day']:02}"
+        if str_date in type_stats:
+            type_stats[str_date][ticket_type] = stat['count']
+        else:
+            type_stats[str_date] = {
+                'x': str_date,
+                ticket_type: stat['count']
+            }
+
+
     return render(request, 'helpdesk/report_queue.html', {
         'queue': queue,
         'from': from_date,
@@ -1795,10 +1844,12 @@ def report_queue(request, queue_id):
         'resolved_average': resolved_average,
         'closed_total': closed_total,
         'closed_average': closed_average,
-        'morrisjs_data': morrisjs_data,
+        'morrisjs_data': [data for data in morrisjs_data.values()],
         'morrisjs_data_users': morrisjs_data_users,
         'user_stats': user_stats,
         'status': status,
+        'type_stats': [value for value in type_stats.values()],
+        'mapping_types': mapping_types
     })
 
 
