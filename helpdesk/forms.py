@@ -98,6 +98,9 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
             try:
                 current_value = TicketCustomFieldValue.objects.get(ticket=self.instance, field=field)
                 initial_value = current_value.value
+                # If it is boolean field, transform the value to a real boolean instead of a string
+                if current_value.field.data_type == 'boolean':
+                    initial_value = initial_value == 'True'
             except TicketCustomFieldValue.DoesNotExist:
                 initial_value = None
             instanceargs = {
