@@ -249,17 +249,12 @@ class EditFollowUpForm(forms.ModelForm):
             'ticket': _("Reassign ticket:")
         }
         widgets = {
-            'ticket': ModelSelect2Widget(
-                model=Ticket,
-                search_fields=['title__icontains', 'id__iexact'],
-                attrs={'style': 'width: 100%', 'data-minimum-input-length': 0}
+            'ticket': MyModelSelect2Widget(
+                queryset=Ticket.objects.opened(),
+                search_fields=['title__icontains', 'id__iexact']
             ),
             'comment': CustomTinyMCE()
         }
-
-    def __init__(self, *args, **kwargs):
-        super(EditFollowUpForm, self).__init__(*args, **kwargs)
-        self.fields["ticket"].queryset = Ticket.objects.opened()
 
 
 class AbstractTicketForm(CustomFieldMixin, forms.Form):

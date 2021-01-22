@@ -237,11 +237,11 @@ def followup_edit(request, ticket_id, followup_id):
     if not _is_my_ticket(request.user, ticket):
         raise PermissionDenied()
 
-    form = EditFollowUpForm(request.POST or None, instance=followup)
+    form = EditFollowUpForm(request.POST or None, instance=followup, prefix='followup')
     if form.is_valid():
-        form.save()
+        followup = form.save()
         messages.success(request, 'La réponse a bien été mise à jour.')
-        return redirect(ticket)
+        return redirect(followup.ticket)
 
     return render(request, 'helpdesk/followup_edit.html', {
         'followup': followup,
