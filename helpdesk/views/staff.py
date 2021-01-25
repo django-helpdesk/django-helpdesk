@@ -1873,7 +1873,7 @@ def run_report(request, report):
     report_queryset = Ticket.objects.select_related('queue', 'assigned_to').filter(**filter_params)
 
     if report == DAYS_UNTIL_TICKET_CLOSED_BY_MONTH:
-        report_queryset = report_queryset.filter(status=Ticket.CLOSED_STATUS)
+        report_queryset = report_queryset.exclude(closed=None)
 
     from_saved_query = False
     saved_query = None
@@ -2018,7 +2018,7 @@ def run_report(request, report):
             elif report == DAYS_UNTIL_TICKET_CLOSED_BY_MONTH:
                 metric1 = ticket.queue.title
                 metric2 = '%s-%s' % (ticket.created.year, ticket.created.month)
-                metric3 = ticket.modified - ticket.created
+                metric3 = ticket.closed - ticket.created
                 metric3 = metric3.days
             else:
                 raise ValueError('%s report is not handled.' % report)
@@ -2082,7 +2082,8 @@ def run_report(request, report):
         'from': from_date,
         'to': to_date,
         'column': column,
-        'column_choices': column_choices
+        'column_choices': column_choices,
+        'ticket_count': report_queryset.count()
     })
 
 
