@@ -118,11 +118,8 @@ def dashboard(request):
     all_tickets_reported_by_current_user_page = request.GET.get(_('atrbcu_page'), 1)
 
     # open & reopened tickets, assigned to current user
-    tickets = Ticket.objects.select_related('queue').filter(
-        assigned_to=request.user,
-    ).exclude(
-        status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
-    )
+    tickets = request.user.assigned_to.select_related('queue')\
+        .filter(status__in=(Ticket.OPEN_STATUS, Ticket.REOPENED_STATUS))
 
     # closed & resolved tickets, assigned to current user
     tickets_closed_resolved = Ticket.objects.select_related('queue').filter(
