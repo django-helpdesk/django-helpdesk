@@ -108,8 +108,8 @@ HELPDESK_SHOW_CHANGE_PASSWORD = True
 # Instead of showing the public web portal first,
 # we can instead redirect users straight to the login page.
 HELPDESK_REDIRECT_TO_LOGIN_BY_DEFAULT = False
-LOGIN_URL = '/login/'
-LOGIN_REDIRECT_URL = '/login/'
+LOGIN_URL = 'helpdesk:login'
+LOGIN_REDIRECT_URL = 'helpdesk:home'
 
 # Database
 # - by default, we use SQLite3 for the demo, but you can also

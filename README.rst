@@ -80,6 +80,11 @@ Django project.
 For further installation information see `docs/install.html`
 and `docs/configuration.html`
 
+Testing
+-------
+
+See quicktest.py for usage details
+
 Upgrading from previous versions
 --------------------------------
 
@@ -111,3 +116,4 @@ We're happy to include any type of contribution! This can be:
 For more information on contributing, please see the `CONTRIBUTING.rst` file.
 
 .. _note: http://docs.djangoproject.com/en/dev/ref/databases/#sqlite-string-matching
+

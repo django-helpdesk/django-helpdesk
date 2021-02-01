@@ -522,11 +522,10 @@ msgstr "Dossier de logs"
 #: .\models.py:308
 msgid ""
 "If logging is enabled, what directory should we use to store log files for "
-"this queue? If no directory is set, default to /var/log/helpdesk/"
+"this queue? The standard logging mechanims are used if no directory is set"
 msgstr ""
 "Si les logs sont activés, quel dossier doit être utilisé pour stocker les "
-"fichiers de logs pour cette file ? Si aucun dossier n'est défini, cela sera /"
-"var/log/helpdesk/ par défaut"
+"fichiers de logs pour cette file?"
 
 #: .\models.py:319
 msgid "Default owner"

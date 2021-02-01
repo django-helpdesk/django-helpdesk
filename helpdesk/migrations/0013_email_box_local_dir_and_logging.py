@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='queue',
             name='logging_dir',
-            field=models.CharField(blank=True, help_text='If logging is enabled, what directory should we use to store log files for this queue? If no directory is set, default to /var/log/helpdesk/', max_length=200, null=True, verbose_name='Logging Directory'),
+            field=models.CharField(blank=True, help_text='If logging is enabled, what directory should we use to store log files for this queue? The standard logging mechanims are used if no directory is set', max_length=200, null=True, verbose_name='Logging Directory'),
         ),
         migrations.AddField(
             model_name='queue',

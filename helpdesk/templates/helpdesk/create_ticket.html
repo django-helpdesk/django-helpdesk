@@ -34,7 +34,7 @@
                         {% else %}
                             <div class="form-group">
                                 <label for='id_{{ field.name }}'>
-                                    {% trans field.label %}
+                                    {{ field.label }}
                                     {% if not field.field.required %}
                                         ({% trans "Optional" %})
                                     {% endif %}
