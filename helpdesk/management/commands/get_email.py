@@ -616,6 +616,7 @@ def ticket_from_message(message, queue, logger):
             )
         # Send notification to technical service
         Notification.objects.create_for_technical_service(
+            filter_params={'employee__receive_ticket_notification': True},
             message="Un nouveau ticket vient d'être ouvert par mail : %s" % ticket,
             module=Notification.TICKET,
             link_redirect=ticket.get_absolute_url()
@@ -631,15 +632,17 @@ def ticket_from_message(message, queue, logger):
                 fail_silently=True,
             )
             # Send Phoenix notification to the user assigned to the ticket
-            Notification.objects.create(
-                module=Notification.TICKET,
-                message="Une nouvelle réponse a été ajouté par mail sur votre ticket %s" % ticket,
-                link_redirect=ticket.get_absolute_url(),
-                user_list=[ticket.assigned_to]
-            )
+            if ticket.assigned_to.employee.receive_ticket_notification:
+                Notification.objects.create(
+                    module=Notification.TICKET,
+                    message="Une nouvelle réponse a été ajouté par mail sur votre ticket %s" % ticket,
+                    link_redirect=ticket.get_absolute_url(),
+                    user_list=[ticket.assigned_to]
+                )
         else:
             # Send notification to technical service
             Notification.objects.create_for_technical_service(
+                filter_params={'employee__receive_ticket_notification': True},
                 message="Une réponse vient d'être ajoutée au ticket par mail : %s" % ticket,
                 module=Notification.TICKET,
                 link_redirect=ticket.get_absolute_url()

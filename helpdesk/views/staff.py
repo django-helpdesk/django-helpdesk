@@ -359,12 +359,13 @@ def view_ticket(request, ticket_id):
                         fail_silently=True
                     )
                     # Send Phoenix notification
-                    Notification.objects.create(
-                        module=Notification.TICKET,
-                        message="Le ticket %s vient d'être fermé par %s" % (ticket, request.user),
-                        link_redirect=ticket.get_absolute_url(),
-                        user_list=[ticket.assigned_to]
-                    )
+                    if ticket.assigned_to.employee.receive_ticket_notification:
+                        Notification.objects.create(
+                            module=Notification.TICKET,
+                            message="Le ticket %s vient d'être fermé par %s" % (ticket, request.user),
+                            link_redirect=ticket.get_absolute_url(),
+                            user_list=[ticket.assigned_to]
+                        )
                 messages.success(request, 'Le ticket a bien été fermé.')
                 # FIXME Ticket CC and queue CC don't receive mails
                 return redirect('helpdesk:feedback_survey', ticket.id)
@@ -467,12 +468,13 @@ def view_ticket(request, ticket_id):
                     files=files
                 )
                 # Send Phoenix notification
-                Notification.objects.create(
-                    module=Notification.TICKET,
-                    message='Une nouvelle réponse a été ajouté au ticket %s par %s' % (ticket, request.user),
-                    link_redirect=ticket.get_absolute_url(),
-                    user_list=[ticket.assigned_to]
-                )
+                if ticket.assigned_to.employee.receive_ticket_notification:
+                    Notification.objects.create(
+                        module=Notification.TICKET,
+                        message='Une nouvelle réponse a été ajouté au ticket %s par %s' % (ticket, request.user),
+                        link_redirect=ticket.get_absolute_url(),
+                        user_list=[ticket.assigned_to]
+                    )
 
             # Send mail to ticket CC and queue CC
             for cc in ticket.ticketcc_set.all():
@@ -1433,6 +1435,7 @@ def create_ticket(request):
                 messages.success(request, 'Votre ticket a bien été créé !')
                 # Send notification to technical service
                 Notification.objects.create_for_technical_service(
+                    filter_params={'employee__receive_ticket_notification': True},
                     message="Un nouveau ticket vient d'être ouvert sur Phoenix : %s" % ticket,
                     module=Notification.TICKET,
                     link_redirect=ticket.get_absolute_url()

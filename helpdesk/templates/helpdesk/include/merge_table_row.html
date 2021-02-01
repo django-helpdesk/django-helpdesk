@@ -6,7 +6,7 @@
             <label>
                 <input name="{{ attr }}" type="radio" value="{{ ticket.id }}"
                        class="flat"{% if ticket.id|to_string == request.POST|get:attr %} checked{% endif %}>
-                {{ ticket|get_attribute:attr|default:"Non défini" }}
+                {{ ticket|get_attribute:attr|default:"Non défini"|safe }}
             </label>
         </td>
     {% endfor %}
