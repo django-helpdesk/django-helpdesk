@@ -1485,10 +1485,10 @@ def hold_ticket(request, ticket_id, unhold=False):
 
     if unhold:
         ticket.on_hold = False
-        title = _('Ticket taken off hold')
+        title = "Le ticket n'est plus en attente client"
     else:
         ticket.on_hold = True
-        title = _('Ticket placed on hold')
+        title = 'Ticket mis en attente de retour client'
 
     f = FollowUp(
         ticket=ticket,

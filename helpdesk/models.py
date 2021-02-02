@@ -436,6 +436,9 @@ class TicketQuerySet(models.QuerySet):
     def closed(self):
         return self.filter(status__in=[Ticket.CLOSED_STATUS, Ticket.DUPLICATE_STATUS])
 
+    def on_hold(self):
+        return self.filter(on_hold=True)
+
 
 @python_2_unicode_compatible
 class Ticket(models.Model):
