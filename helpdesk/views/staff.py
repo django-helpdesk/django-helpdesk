@@ -639,7 +639,8 @@ def update_ticket(request, ticket_id, public=False):
     comment = request.POST.get('comment', '')
     new_status = int(request.POST.get('new_status', ticket.status))
     title = request.POST.get('title', '')
-    public = request.POST.get('public', False)
+    public = 'public' in request.POST
+    on_hold = 'on_hold' in request.POST
     owner = int(request.POST.get('owner', -1))
     priority = int(request.POST.get('priority', ticket.priority))
     due_date = request.POST.get('due_date')
@@ -661,6 +662,7 @@ def update_ticket(request, ticket_id, public=False):
         title == ticket.title,
         priority == int(ticket.priority),
         due_date == ticket.due_date,
+        on_hold == ticket.on_hold,
         customer_contact_id == (ticket.customer_contact.id if ticket.customer_contact else None),
         customer_id == (ticket.customer.id if ticket.customer else None),
         site_id == (ticket.site.id if ticket.site else None),
@@ -750,6 +752,14 @@ def update_ticket(request, ticket_id, public=False):
             old_value=old_status_str,
             new_value=ticket.get_status_display(),
         )
+
+    if on_hold != ticket.on_hold:
+        f.ticketchange_set.create(
+            field='En attente retour client',
+            old_value='Oui' if ticket.on_hold else 'Non',
+            new_value='Oui' if on_hold else 'Non',
+        )
+        ticket.on_hold = on_hold
 
     if ticket.assigned_to != old_owner:
         f.ticketchange_set.create(
