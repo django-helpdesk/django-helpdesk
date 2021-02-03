@@ -27,7 +27,7 @@ import re
 from phonenumber_field.modelfields import PhoneNumberField
 from tinymce import HTMLField
 
-from base.models import SpentTime, TimeStampedModel
+from base.models import SpentTime, AbstractGenericIncident
 from base.utils import office_time_between
 
 
@@ -373,11 +373,7 @@ class TicketCategory(models.Model):
         return self.name
 
 
-class GenericIncident(TimeStampedModel):
-    name = models.CharField('nom', max_length=100)
-    start_date = models.DateTimeField('date de début', default=timezone.now)
-    end_date = models.DateTimeField('date de fin', null=True, blank=True)
-    description = models.TextField(blank=True)
+class GenericIncident(AbstractGenericIncident):
     category = models.ForeignKey(
         TicketCategory,
         verbose_name='catégorie',
@@ -402,15 +398,8 @@ class GenericIncident(TimeStampedModel):
         verbose_name = 'Incident Générique'
         verbose_name_plural = 'Incidents Génériques'
 
-    def __str__(self):
-        return self.name
-
     def get_absolute_url(self):
         return reverse('helpdesk:generic_incident_detail', kwargs={'generic_incident_id': self.id})
-
-    def clean(self):
-        if self.end_date and self.end_date < self.start_date:
-            raise ValidationError({'end_date': 'La date de fin ne peut pas être antérieure à la date de début.'})
 
 
 class TicketType(models.Model):
