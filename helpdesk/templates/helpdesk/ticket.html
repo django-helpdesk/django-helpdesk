@@ -46,7 +46,7 @@
                         <div class="list-group-item list-group-item-action">
                             <div class="d-flex w-100 justify-content-between">
                                 <h5 class="mb-1">{{ followup.title|num_to_link }}</h5>
-                                <small><i class="fas fa-clock"></i>&nbsp;<span class='byline text-info'>{% if followup.user %}by {{ followup.user }},{% endif %} <span title='{{ followup.date|date:"r" }}'>{{ followup.date|naturaltime }}</span>{% if followup.time_spent %}, <span>{% trans "time spent" %}: {{ followup.time_spent_formated }}</span>{% endif %} {% if not followup.public %} <span class='private'>({% trans "Private" %})</span>{% endif %}</span></small>
+                                <small><i class="fas fa-clock"></i>&nbsp;<span class='byline text-info'>{% if followup.user %}by {{ followup.user }},{% endif %} <span title='{{ followup.date|date }}'>{{ followup.date|naturaltime }}</span>{% if followup.time_spent %}, <span>{% trans "time spent" %}: {{ followup.time_spent_formated }}</span>{% endif %} {% if not followup.public %} <span class='private'>({% trans "Private" %})</span>{% endif %}</span></small>
                             </div>
                             <p class="mb-1">
                                 {% if followup.comment %}
