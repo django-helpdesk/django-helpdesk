@@ -12,13 +12,13 @@
 <tbody>
 <tr>
     <th>{% trans "Submitted On" %}</th>
-    <td>{{ ticket.created|date }} ({{ ticket.created|naturaltime }})</td>
+    <td>{{ ticket.created|date:"DATETIME_FORMAT" }} ({{ ticket.created|naturaltime }})</td>
 </tr>
 
 {% if ticket.due_date %}
     <tr>
         <th>{% trans "Due On" %}</th>
-        <td>{{ ticket.due_date|date }} ({{ ticket.due_date|naturaltime }})</td>
+        <td>{{ ticket.due_date|date:"DATETIME_FORMAT" }} ({{ ticket.due_date|naturaltime }})</td>
     </tr>
 {% endif %}
 
@@ -67,7 +67,7 @@
 {% load ticket_to_link %}
 {% for followup in ticket.followup_set.public_followups %}
 <div class='followup well'>
-<div class='title'>{{ followup.title }} <span class='byline text-info'>{% if followup.user %}by {{ followup.user }}{% endif %} <span title='{{ followup.date|date }}'>{{ followup.date|naturaltime }}</span></span></div>
+<div class='title'>{{ followup.title }} <span class='byline text-info'>{% if followup.user %}by {{ followup.user }}{% endif %} <span title='{{ followup.date|date:"DATETIME_FORMAT" }}'>{{ followup.date|naturaltime }}</span></span></div>
 {{ followup.comment|force_escape|urlizetrunc:50|num_to_link|linebreaksbr }}
 {% if followup.ticketchange_set.all %}<div class='changes'><ul>
 {% for change in followup.ticketchange_set.all %}
