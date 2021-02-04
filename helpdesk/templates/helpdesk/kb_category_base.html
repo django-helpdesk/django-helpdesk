@@ -36,7 +36,7 @@
 
                 {% endif %}
                 <a href='{% if iframe %}{% url 'helpdesk:submit_iframe' %}{% else %}{% url 'helpdesk:submit' %}{%endif%}?{% if category.queue %}queue={{category.queue.pk}};_readonly_fields_=queue;{%endif%}kbitem={{item.id}};{{query_param_string}}' class="col-sm">
-                    <div class="btn btn-success btn-circle btn-xl float-right"><i  class="fa fa-envelope fa-lg"></i> {% trans 'Contact a human' %}</div>
+                    <div class="btn btn-success btn-circle btn-xl float-right"><i  class="fa fa-plus-circle fa-lg"></i> {% trans 'Create New Ticket' %}{% trans " Queue: " %}{{item}}</div>
                 </a>
             </div>
             <div>
@@ -57,7 +57,7 @@
 {% if category.queue %}
 <a href='{% if iframe %}{% url 'helpdesk:submit_iframe' %}{% else %}{% url 'helpdesk:submit' %}{%endif%}?queue={{category.queue.pk}};_readonly_fields_=queue;{{query_param_string}}'>
     {% block submit_button %}
-    <div class="btn btn-danger btn-circle btn-xl float-right"><i class="fa fa-envelope fa-lg"></i> {% trans 'Contact a human' %}</div>
+    <div class="btn btn-danger btn-circle btn-xl float-right"><i class="fa fa-plus-circle fa-lg"></i> {% trans 'Create New Ticket' %}{% if category.queue %}{% trans " Queue: " %}{{category.queue}}{% endif %}</div>
     {% endblock %}
 </a>
 {% endif %}
