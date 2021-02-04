@@ -83,6 +83,12 @@ class CustomFieldMixin(object):
 
 
 class EditTicketForm(CustomFieldMixin, forms.ModelForm):
+    merged_to = forms.ModelChoiceField(
+        label=_('Merged to'),
+        help_text=_('This ticket is merged into the selected ticket.'),
+        queryset=Ticket.objects.all(),
+        disabled=True
+    )
 
     class Meta:
         model = Ticket
