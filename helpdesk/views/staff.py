@@ -329,6 +329,9 @@ def view_ticket(request, ticket_id):
         if 'take' in request.GET:
             # Allow the user to assign the ticket to themselves whilst viewing it
             request.POST['owner'] = request.user.id
+            request.POST['comment'] = "<p>Un technicien vient de s'affecter à votre ticket. " \
+                                      "Il reviendra vers vous dans les meilleurs délais.</p>" \
+                                      "<p>Cordialement,<br>Le service support</p>"
         elif 'close' in request.GET:
             if request.user.is_staff:
                 if ticket.assigned_to:
@@ -370,7 +373,7 @@ def view_ticket(request, ticket_id):
                 # FIXME Ticket CC and queue CC don't receive mails
                 return redirect('helpdesk:feedback_survey', ticket.id)
 
-        return update_ticket(request, ticket_id)
+        return update_ticket(request, ticket_id, append_signature=False)
 
     if 'subscribe' in request.GET:
         # Allow the user to subscribe him/herself to the ticket whilst viewing it.
@@ -625,7 +628,7 @@ def choose_customer_for_ticket(request, ticket_id, customer_id):
 
 @login_required
 @ipexia_protected()
-def update_ticket(request, ticket_id, public=False):
+def update_ticket(request, ticket_id, append_signature=True, public=False):
     if not (public or (
             request.user.is_authenticated and
             request.user.is_active and (
@@ -695,7 +698,7 @@ def update_ticket(request, ticket_id, public=False):
     f = FollowUp(ticket=ticket, user=request.user, date=timezone.now(), comment=comment, public=public)
 
     # Append signature at the bottom of the followup comment if a comment was made and the followup is public
-    if comment and public:
+    if comment and public and append_signature:
         f.append_signature(request.user)
 
     reassigned = False
