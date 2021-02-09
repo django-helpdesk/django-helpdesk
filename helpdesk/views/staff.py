@@ -1213,13 +1213,10 @@ def edit_ticket(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
     ticket_perm_check(request, ticket)
 
-    if request.method == 'POST':
-        form = EditTicketForm(request.POST, instance=ticket)
-        if form.is_valid():
-            ticket = form.save()
-            return HttpResponseRedirect(ticket.get_absolute_url())
-    else:
-        form = EditTicketForm(instance=ticket)
+    form = EditTicketForm(request.POST or None, instance=ticket)
+    if form.is_valid():
+        ticket = form.save()
+        return redirect(ticket)
 
     return render(request, 'helpdesk/edit_ticket.html', {'form': form, 'ticket': ticket})
 

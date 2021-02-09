@@ -33,15 +33,15 @@
                     <tr>
                         <th class="table-active">{% trans "Assigned To" %}</th>
                         <td>{{ ticket.get_assigned_to }}{% ifequal ticket.get_assigned_to _('Unassigned') %} <strong>
-                                <a href='?take'><button type="button" class="btn btn-primary btn-sm float-right"><i class="fas fa-hand-paper"></i></button></a>
+                                <a data-toggle="tooltip" href='?take' title='{% trans "Assign this ticket to " %}{{ request.user.email }}'><button type="button" class="btn btn-primary btn-sm float-right"><i class="fas fa-hand-paper"></i></button></a>
                         </strong>{% endifequal %}
                         </td>
                         <th class="table-active">{% trans "Submitter E-Mail" %}</th>
                         <td> {{ ticket.submitter_email }}
-                                                         {% if user.is_superuser %} {% if submitter_userprofile_url %}<strong><a href='{{submitter_userprofile_url}}'><button type="button" class="btn btn-primary btn-sm"><i class="fas fa-address-book"></i></button></a></strong>{% endif %}
-                            <strong><a href ="{% url 'helpdesk:list'%}?q={{ticket.submitter_email}}">
+                                                         {% if user.is_superuser %} {% if submitter_userprofile_url %}<strong><a data-toggle="tooltip" href='{{submitter_userprofile_url}}' title='{% trans "Edit " %}{{ ticket.submitter_email }}{% trans " user profile" %}'><button type="button" class="btn btn-primary btn-sm"><i class="fas fa-address-book"></i></button></a></strong>{% endif %}
+                            <strong><a data-toggle="tooltip" href ="{% url 'helpdesk:list'%}?q={{ticket.submitter_email}}" title='{% trans "Display tickets filtered for " %}{{ ticket.submitter_email }}{% trans " as a keyword" %}'>
                                 <button type="button" class="btn btn-primary btn-sm"><i class="fas fa-search"></i></button></a></strong>
-                        <strong><a href='{% url 'helpdesk:email_ignore_add' %}?email={{ ticket.submitter_email }}'>
+                        <strong><a data-toggle="tooltip" href='{% url 'helpdesk:email_ignore_add' %}?email={{ ticket.submitter_email }}' title='{% trans "Add email address for the ticket system to ignore." %}'>
                                 <button type="button" class="btn btn-warning btn-sm float-right"><i class="fas fa-eye-slash"></i></button></a></strong>{% endif %}
                         </td>
                     </tr>
