@@ -1218,7 +1218,7 @@ def edit_ticket(request, ticket_id):
         ticket = form.save()
         return redirect(ticket)
 
-    return render(request, 'helpdesk/edit_ticket.html', {'form': form, 'ticket': ticket})
+    return render(request, 'helpdesk/edit_ticket.html', {'form': form, 'ticket': ticket, 'errors': form.errors})
 
 
 edit_ticket = staff_member_required(edit_ticket)
