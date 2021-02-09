@@ -26,6 +26,7 @@
                     <strong>{% trans "Note" %}:</strong>
                     {% blocktrans %}Editing a ticket does <em>not</em> send an e-mail to the ticket owner or submitter. No new details should be entered, this form should only be used to fix incorrect details or clean up the submission.{% endblocktrans %}
                 </p>
+                {% if errors %}{% for error in errors %}{% trans "Error: " %}{{ error }}{% endfor %}{% endif %}
                 <form method='post'>
                     {% csrf_token %}
                     <fieldset>
