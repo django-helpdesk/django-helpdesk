@@ -1,5 +1,6 @@
 {% load i18n humanize ticket_to_link %}
 {% load static %}
+{% load helpdesk_util %}
 
 <div class="card mb-3">
     <!--div class="card-header">
@@ -9,7 +10,7 @@
         <div class="table-responsive">
             <table class="table table-sm table-border">
                 <thead class="thead-light">
-                    <tr class=''><th colspan='4'><h3>{{ ticket.queue.slug }}-{{ ticket.id }}. {{ ticket.title }} [{{ ticket.get_status }}]</h3> 
+                    <tr class=''><th colspan='4'><h3>{{ ticket.queue.slug }}-{{ ticket.id }}. {{ ticket.title }} [{{ ticket.get_status }}]</h3>
                             {% blocktrans with ticket.queue as queue %}Queue: {{ queue }}{% endblocktrans %}
                             <span class='ticket_toolbar float-right'>
                         <a href="{% url 'helpdesk:edit' ticket.id %}" class="ticket-edit"><button class="btn btn-warning btn-sm"><i class="fas fa-pencil-alt"></i> {% trans "Edit" %}</button></a>
@@ -21,20 +22,25 @@
                     {% for customfield in ticket.ticketcustomfieldvalue_set.all %}
                     <tr>
                         <th class="table-secondary">{{ customfield.field.label }}</th>
-                        <td>{% ifequal customfield.field.data_type "url" %}<a href='{{ customfield.value }}'>{{ customfield.value }}</a>{% else %}{{ customfield.value|default:"" }}{% endifequal %}</td>
+                        <td>{% spaceless %}{% if "url" == customfield.field.data_type %}<a href='{{ customfield.value }}'>{{ customfield.value }}</a>
+                            {% elif "datetime" == customfield.field.data_type %}{{ customfield.value|datetime_string_format }}
+                            {% elif "date" == customfield.field.data_type %}{{ customfield.value|datetime_string_format }}
+                            {% elif "time" == customfield.field.data_type %}{{ customfield.value|datetime_string_format }}
+                            {% else %}{{ customfield.value|default:"" }}
+                            {% endif %}{% endspaceless %}</td>
                     </tr>{% endfor %}
                     <tr>
                         <th class="table-active">{% trans "Due Date" %}</th>
-                        <td>{{ ticket.due_date|date }} {% if ticket.due_date %}({{ ticket.due_date|naturaltime }}){% endif %}
+                        <td>{{ ticket.due_date|date:"DATETIME_FORMAT" }} {% if ticket.due_date %}({{ ticket.due_date|naturaltime }}){% endif %}
                         </td>
                         <th class="table-active">{% trans "Submitted On" %}</th>
-                        <td>{{ ticket.created|date }} ({{ ticket.created|naturaltime }})</td>
+                        <td>{{ ticket.created|date:"DATETIME_FORMAT" }} ({{ ticket.created|naturaltime }})</td>
                     </tr>
                     <tr>
                         <th class="table-active">{% trans "Assigned To" %}</th>
-                        <td>{{ ticket.get_assigned_to }}{% ifequal ticket.get_assigned_to _('Unassigned') %} <strong>
+                        <td>{{ ticket.get_assigned_to }}{% if _('Unassigned') == ticket.get_assigned_to  %} <strong>
                                 <a data-toggle="tooltip" href='?take' title='{% trans "Assign this ticket to " %}{{ request.user.email }}'><button type="button" class="btn btn-primary btn-sm float-right"><i class="fas fa-hand-paper"></i></button></a>
-                        </strong>{% endifequal %}
+                        </strong>{% endif %}
                         </td>
                         <th class="table-active">{% trans "Submitter E-Mail" %}</th>
                         <td> {{ ticket.submitter_email }}
@@ -97,7 +103,7 @@
                     </tr>
 
                     {% if ticket.resolution %}<tr>
-                        <th colspan='2'>{% trans "Resolution" %}{% ifequal ticket.get_status_display "Resolved" %} <a href='?close'><button type="button" class="btn btn-warning btn-sm">{% trans "Accept and Close" %}</button></a>{% endifequal %}</th>
+                        <th colspan='2'>{% trans "Resolution" %}{% if "Resolved" == ticket.get_status_display %} <a href='?close'><button type="button" class="btn btn-warning btn-sm">{% trans "Accept and Close" %}</button></a>{% endif %}</th>
                     </tr>
                     <tr>
                         <td colspan='2'>{{ ticket.get_resolution_markdown|urlizetrunc:50|linebreaksbr }}</td>

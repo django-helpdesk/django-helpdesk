@@ -7,6 +7,7 @@ forms.py - Definitions of newforms-based forms for creating and maintaining
            tickets.
 """
 import logging
+from datetime import datetime, date, time
 
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django import forms
@@ -34,6 +35,10 @@ CUSTOMFIELD_TO_FIELD_DICT = {
     'ipaddress': forms.GenericIPAddressField,
     'slug': forms.SlugField,
 }
+
+CUSTOMFIELD_DATE_FORMAT = "%Y-%m-%d"
+CUSTOMFIELD_TIME_FORMAT = "%H:%M:%S"
+CUSTOMFIELD_DATETIME_FORMAT = f"{CUSTOMFIELD_DATE_FORMAT} {CUSTOMFIELD_TIME_FORMAT}"
 
 
 class CustomFieldMixin(object):
@@ -71,8 +76,14 @@ class CustomFieldMixin(object):
             # Try to use the immediate equivalences dictionary
             try:
                 fieldclass = CUSTOMFIELD_TO_FIELD_DICT[field.data_type]
-                # Change widget in case it is a boolean
-                if fieldclass == forms.BooleanField:
+                # Change widgets for the following classes
+                if fieldclass == forms.DateField:
+                    instanceargs['widget'] = forms.DateInput(attrs={'class': 'form-control date-field'})
+                elif fieldclass == forms.DateTimeField:
+                    instanceargs['widget'] = forms.DateTimeInput(attrs={'class': 'form-control datetime-field'})
+                elif fieldclass == forms.TimeField:
+                    instanceargs['widget'] = forms.TimeInput(attrs={'class': 'form-control time-field'})
+                elif fieldclass == forms.BooleanField:
                     instanceargs['widget'] = forms.CheckboxInput(attrs={'class': 'form-control'})
 
             except KeyError:
@@ -88,6 +99,9 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
         model = Ticket
         exclude = ('created', 'modified', 'status', 'on_hold', 'resolution', 'last_escalation', 'assigned_to')
 
+    class Media:
+        js = ('helpdesk/js/init_due_date.js', 'helpdesk/js/init_datetime_classes.js')
+
     def __init__(self, *args, **kwargs):
         """
         Add any custom fields that are defined to the form
@@ -99,14 +113,24 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
         self.fields['merged_to'].help_text = _('This ticket is merged into the selected ticket.')
 
         for field in CustomField.objects.all():
+            initial_value = None
             try:
                 current_value = TicketCustomFieldValue.objects.get(ticket=self.instance, field=field)
                 initial_value = current_value.value
+                # Attempt to convert from fixed format string to date/time data type
+                if 'datetime' == current_value.field.data_type:
+                    initial_value = datetime.strptime(initial_value, CUSTOMFIELD_DATETIME_FORMAT)
+                elif 'date' == current_value.field.data_type:
+                    initial_value = datetime.strptime(initial_value, CUSTOMFIELD_DATE_FORMAT)
+                elif 'time' == current_value.field.data_type:
+                    initial_value = datetime.strptime(initial_value, CUSTOMFIELD_TIME_FORMAT)
                 # If it is boolean field, transform the value to a real boolean instead of a string
-                if current_value.field.data_type == 'boolean':
-                    initial_value = initial_value == 'True'
-            except TicketCustomFieldValue.DoesNotExist:
-                initial_value = None
+                elif 'boolean' == current_value.field.data_type:
+                    initial_value = 'True' == initial_value
+            except (TicketCustomFieldValue.DoesNotExist, ValueError, TypeError):
+                # ValueError error if parsing fails, using initial_value = current_value.value
+                # TypeError if parsing None type
+                pass
             instanceargs = {
                 'label': field.label,
                 'help_text': field.help_text,
@@ -126,7 +150,16 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
                     cfv = TicketCustomFieldValue.objects.get(ticket=self.instance, field=customfield)
                 except ObjectDoesNotExist:
                     cfv = TicketCustomFieldValue(ticket=self.instance, field=customfield)
-                cfv.value = value
+
+                # Convert date/time data type to known fixed format string.
+                if datetime is type(value):
+                    cfv.value = value.strftime(CUSTOMFIELD_DATETIME_FORMAT)
+                elif date is type(value):
+                    cfv.value = value.strftime(CUSTOMFIELD_DATE_FORMAT)
+                elif time is type(value):
+                    cfv.value = value.strftime(CUSTOMFIELD_TIME_FORMAT)
+                else:
+                    cfv.value = value
                 cfv.save()
 
         return super(EditTicketForm, self).save(*args, **kwargs)
@@ -182,7 +215,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
     due_date = forms.DateTimeField(
         widget=forms.TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
         required=False,
-        input_formats=['%d/%m/%Y', '%m/%d/%Y', "%d.%m.%Y"],
+        input_formats=[CUSTOMFIELD_DATE_FORMAT, CUSTOMFIELD_DATETIME_FORMAT, '%d/%m/%Y', '%m/%d/%Y', "%d.%m.%Y"],
         label=_('Due on'),
     )
 
@@ -194,7 +227,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
     )
 
     class Media:
-        js = ('helpdesk/js/init_due_date.js',)
+        js = ('helpdesk/js/init_due_date.js', 'helpdesk/js/init_datetime_classes.js')
 
     def __init__(self, kbcategory=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
