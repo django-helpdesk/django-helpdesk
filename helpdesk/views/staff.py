@@ -24,6 +24,7 @@ from django.utils.html import escape
 from django.utils import timezone
 from django.views.generic.edit import FormView, UpdateView
 
+from helpdesk.forms import CUSTOMFIELD_DATE_FORMAT
 from helpdesk.query import (
     get_query_class,
     query_to_base64,
@@ -73,9 +74,6 @@ if helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE:
 else:
     staff_member_required = user_passes_test(
         lambda u: u.is_authenticated and u.is_active and u.is_staff)
-
-
-User = get_user_model()
 
 
 def _get_queue_choices(queues):
@@ -382,6 +380,7 @@ def view_ticket(request, ticket_id):
         )
     else:
         submitter_userprofile_url = None
+
     return render(request, 'helpdesk/ticket.html', {
         'ticket': ticket,
         'submitter_userprofile_url': submitter_userprofile_url,
@@ -1774,8 +1773,8 @@ def calc_basic_ticket_stats(Tickets):
 
     date_30 = date_rel_to_today(today, 30)
     date_60 = date_rel_to_today(today, 60)
-    date_30_str = date_30.strftime('%Y-%m-%d')
-    date_60_str = date_60.strftime('%Y-%m-%d')
+    date_30_str = date_30.strftime(CUSTOMFIELD_DATE_FORMAT)
+    date_60_str = date_60.strftime(CUSTOMFIELD_DATE_FORMAT)
 
     # > 0 & <= 30
     ota_le_30 = all_open_tickets.filter(created__gte=date_30_str)
