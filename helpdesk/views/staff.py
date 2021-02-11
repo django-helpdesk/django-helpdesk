@@ -848,8 +848,13 @@ def update_ticket(request, ticket_id, append_signature=True, public=False):
         ticket.generic_incident = generic_incident
 
     if new_status in (Ticket.RESOLVED_STATUS, Ticket.CLOSED_STATUS):
+        # Set comment as resolution if ticket get resolved or closed and resolution wasn't set
         if new_status == Ticket.RESOLVED_STATUS or ticket.resolution is None:
             ticket.resolution = comment
+        # Remove on hold when ticket is closed
+        if new_status == Ticket.CLOSED_STATUS and ticket.on_hold:
+            ticket.on_hold = False
+            messages.info(request, "Le ticket n'est plus en attente de retour client.")
 
     messages_sent_to = []
 
