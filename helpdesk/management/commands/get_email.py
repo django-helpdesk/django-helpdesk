@@ -313,13 +313,14 @@ def process_queue(q, logger):
         
         for num, message in enumerate(messages):
             logger.info("Processing message %s" % num)
-            ticket = o365_message_to_ticket(message=message, queue=q, logger=logger)
+            ticket = ticket_from_message(message=message, queue=q, logger=logger, o365=True)
             subject = message.subject
-            #deleted = message.move(mailbox.deleted_folder())
             if ticket:
-                #if not deleted:
-                #    logger.warning("Error! Couldn't remove message\"" + subject + "\"!")
-                logger.info("Successfully processed message %s, deleted from O365 Inbox" % num)
+                deleted = message.move(mailbox.deleted_folder())
+                if not deleted:
+                    logger.error("Error! Couldn't remove message\"" + subject + "\"!")
+                else:
+                    logger.info("Successfully processed message %s, deleted from O365 Inbox" % num)
             else:
                 logger.warning("Message %s was not successfully processed, and will be left in the O365 Inbox" % num)
 
@@ -350,144 +351,211 @@ def decode_mail_headers(string):
         return u' '.join([str(msg, encoding=charset, errors='replace') if charset else str(msg) for msg, charset in decoded])
 
 
-def ticket_from_message(message, queue, logger):
-    # 'message' must be an RFC822 formatted message.
-    message = email.message_from_string(message) if six.PY3 else email.message_from_string(message.encode('utf-8'))
-    subject = message.get('subject', _('Comment from e-mail'))
-    subject = decode_mail_headers(decodeUnknown(message.get_charset(), subject))
-    for affix in STRIPPED_SUBJECT_STRINGS:
-        subject = subject.replace(affix, "")
-    subject = subject.strip()
+def ticket_from_message(message, queue, logger, o365=False):
+    if o365:
 
-    sender = message.get('from', _('Unknown Sender'))
-    sender = decode_mail_headers(decodeUnknown(message.get_charset(), sender))
-    # to address bug #832, we wrap all the text in front of the email address in
-    # double quotes by using replace() on the email string. Then,
-    # take first item of list, second item of tuple is the actual email address.
-    # Note that the replace won't work on just an email with no real name,
-    # but the getaddresses() function seems to be able to handle just unclosed quotes
-    # correctly. Not ideal, but this seems to work for now.
-    sender_email = email.utils.getaddresses(['\"' + sender.replace('<', '\" <')])[0][1]
+        def get_address(recipient):
+            if isinstance(recipient, str):
+                email = email.utils.getaddresses(['\"' + recipient.replace('<', '\" <')])[0][1]
+            else:
+                email = recipient.address
+            return email
 
-    cc = message.get_all('cc', None)
-    if cc:
-        # first, fixup the encoding if necessary
-        cc = [decode_mail_headers(decodeUnknown(message.get_charset(), x)) for x in cc]
-        # get_all checks if multiple CC headers, but individual emails may be comma separated too
+        # 'message' must be an RFC822 formatted message.
+        subject = message.subject
+        for affix in STRIPPED_SUBJECT_STRINGS:
+            subject = subject.replace(affix, "")
+        subject = subject.strip()
+        subject = subject[:200]
+        sender_email = get_address(message.sender)
+
         tempcc = []
-        for hdr in cc:
-            tempcc.extend(hdr.split(','))
-        # use a set to ensure no duplicates
+        for recipient in message.cc:
+            recipient_email = get_address(recipient)
+            tempcc.append(recipient_email)
         cc = set([x.strip() for x in tempcc])
+        for ignore in IgnoreEmail.objects.filter(Q(queues=queue) | Q(queues__isnull=True)):
+            if ignore.test(sender_email):
+                if ignore.keep_in_mailbox:
+                    # By returning 'False' the message will be kept in the mailbox,
+                    # and the 'True' will cause the message to be deleted.
+                    return False
+                return True
 
-    for ignore in IgnoreEmail.objects.filter(Q(queues=queue) | Q(queues__isnull=True)):
-        if ignore.test(sender_email):
-            if ignore.keep_in_mailbox:
-                # By returning 'False' the message will be kept in the mailbox,
-                # and the 'True' will cause the message to be deleted.
-                return False
-            return True
-
-    matchobj = re.match(r".*\[" + queue.slug + r"-(?P<id>\d+)\]", subject)
-    if matchobj:
-        # This is a reply or forward.
-        ticket = matchobj.group('id')
-        logger.info("Matched tracking ID %s-%s" % (queue.slug, ticket))
-    else:
-        logger.info("No tracking ID matched.")
-        ticket = None
-
-    body = None
-    counter = 0
-    files = []
-
-    for part in message.walk():
-        if part.get_content_maintype() == 'multipart':
-            continue
-
-        name = part.get_param("name")
-        if name:
-            name = email.utils.collapse_rfc2231_value(name)
-
-        if part.get_content_maintype() == 'text' and name is None:
-            if part.get_content_subtype() == 'plain':
-                body = EmailReplyParser.parse_reply(
-                    decodeUnknown(part.get_content_charset(), part.get_payload(decode=True))
-                )
-                # workaround to get unicode text out rather than escaped text
-                try:
-                    body = body.encode('ascii').decode('unicode_escape')
-                except UnicodeEncodeError:
-                    body.encode('utf-8')
-                logger.debug("Discovered plain text MIME part")
-            else:
-                files.append(
-                    SimpleUploadedFile(_("email_html_body.html"), encoding.smart_bytes(part.get_payload()), 'text/html')
-                )
-                logger.debug("Discovered HTML MIME part")
+        matchobj = re.match(r".*\[" + queue.slug + r"-(?P<id>\d+)\]", subject)
+        if matchobj:
+            # This is a reply or forward.
+            ticket = matchobj.group('id')
+            logger.info("Matched tracking ID %s-%s" % (queue.slug, ticket))
         else:
-            if not name:
-                ext = mimetypes.guess_extension(part.get_content_type())
-                name = "part-%i%s" % (counter, ext)
-            payload = part.get_payload()
-            if isinstance(payload, list):
-                payload = payload.pop().as_string()
-            payloadToWrite = payload
-            # check version of python to ensure use of only the correct error type
-            if six.PY2:
-                non_b64_err = binascii.Error
-            else:
-                non_b64_err = TypeError
-            try:
-                logger.debug("Try to base64 decode the attachment payload")
-                if six.PY2:
-                    payloadToWrite = base64.decodestring(payload)
-                else:
-                    payloadToWrite = base64.decodebytes(payload)
-            except non_b64_err:
-                logger.debug("Payload was not base64 encoded, using raw bytes")
-                payloadToWrite = payload
-            files.append(SimpleUploadedFile(name, part.get_payload(decode=True), mimetypes.guess_type(name)[0]))
-            logger.debug("Found MIME attachment %s" % name)
-
-        counter += 1
-
-    if not body:
-        try:
-            mail = BeautifulSoup(part.get_payload(), "lxml")
-        except TypeError:
-            return False
-
-        if ">" in mail.text:
-            body = mail.find('body')
-            body = body.text
-            body = body.encode('ascii', errors='ignore')
-        else:
-            body = mail.text
-
-    if ticket:
-        try:
-            t = Ticket.objects.get(id=ticket)
-        except Ticket.DoesNotExist:
-            logger.info("Tracking ID %s-%s not associated with existing ticket. Creating new ticket." % (queue.slug, ticket))
+            logger.info("No tracking ID matched.")
             ticket = None
-        else:
-            logger.info("Found existing ticket with Tracking ID %s-%s" % (t.queue.slug, t.id))
-            if t.status == Ticket.CLOSED_STATUS:
-                t.status = Ticket.REOPENED_STATUS
-                t.save()
-            new = False
 
-    smtp_priority = message.get('priority', '')
-    smtp_importance = message.get('importance', '')
-    high_priority_types = {'high', 'important', '1', 'urgent'}
-    priority = 2 if high_priority_types & {smtp_priority, smtp_importance} else 3
+        files = []
+        body = message.get_body_text()
+        files.append(
+            SimpleUploadedFile(_("email_html_body.html"), message.body.encode(), 'text/html')
+        )
+
+        message.attachments.download_attachments()
+        for attachment in message.attachments:
+            files.append(SimpleUploadedFile(attachment.name, base64.b64decode(attachment.content), attachment.attachment_type))
+        
+        if ticket:
+            try:
+                t = Ticket.objects.get(id=ticket)
+            except Ticket.DoesNotExist:
+                logger.info("Tracking ID %s-%s not associated with existing ticket. Creating new ticket." % (queue.slug, ticket))
+                ticket = None
+            else:
+                logger.info("Found existing ticket with Tracking ID %s-%s" % (t.queue.slug, t.id))
+                if t.status == Ticket.CLOSED_STATUS:
+                    t.status = Ticket.REOPENED_STATUS
+                    t.save()
+                new = False
+        priority_types = {'low': 3, 'normal': 2, 'high': 1}
+        priority = priority_types[message.importance.value]
+
+    else:
+        # 'message' must be an RFC822 formatted message.
+        message = email.message_from_string(message) if six.PY3 else email.message_from_string(message.encode('utf-8'))
+        subject = message.get('subject', _('Comment from e-mail'))
+        subject = decode_mail_headers(decodeUnknown(message.get_charset(), subject))
+        for affix in STRIPPED_SUBJECT_STRINGS:
+            subject = subject.replace(affix, "")
+        subject = subject.strip()
+        subject = subject[:200]
+
+        sender = message.get('from', _('Unknown Sender'))
+        sender = decode_mail_headers(decodeUnknown(message.get_charset(), sender))
+        # to address bug #832, we wrap all the text in front of the email address in
+        # double quotes by using replace() on the email string. Then,
+        # take first item of list, second item of tuple is the actual email address.
+        # Note that the replace won't work on just an email with no real name,
+        # but the getaddresses() function seems to be able to handle just unclosed quotes
+        # correctly. Not ideal, but this seems to work for now.
+        sender_email = email.utils.getaddresses(['\"' + sender.replace('<', '\" <')])[0][1]
+
+        cc = message.get_all('cc', None)
+        if cc:
+            # first, fixup the encoding if necessary
+            cc = [decode_mail_headers(decodeUnknown(message.get_charset(), x)) for x in cc]
+            # get_all checks if multiple CC headers, but individual emails may be comma separated too
+            tempcc = []
+            for hdr in cc:
+                tempcc.extend(hdr.split(','))
+            # use a set to ensure no duplicates
+            cc = set([x.strip() for x in tempcc])
+
+        for ignore in IgnoreEmail.objects.filter(Q(queues=queue) | Q(queues__isnull=True)):
+            if ignore.test(sender_email):
+                if ignore.keep_in_mailbox:
+                    # By returning 'False' the message will be kept in the mailbox,
+                    # and the 'True' will cause the message to be deleted.
+                    return False
+                return True
+
+        matchobj = re.match(r".*\[" + queue.slug + r"-(?P<id>\d+)\]", subject)
+        if matchobj:
+            # This is a reply or forward.
+            ticket = matchobj.group('id')
+            logger.info("Matched tracking ID %s-%s" % (queue.slug, ticket))
+        else:
+            logger.info("No tracking ID matched.")
+            ticket = None
+
+        body = None
+        counter = 0
+        files = []
+
+        for part in message.walk():
+            if part.get_content_maintype() == 'multipart':
+                continue
+
+            name = part.get_param("name")
+            if name:
+                name = email.utils.collapse_rfc2231_value(name)
+
+            if part.get_content_maintype() == 'text' and name is None:
+                if part.get_content_subtype() == 'plain':
+                    body = EmailReplyParser.parse_reply(
+                        decodeUnknown(part.get_content_charset(), part.get_payload(decode=True))
+                    )
+                    # workaround to get unicode text out rather than escaped text
+                    try:
+                        body = body.encode('ascii').decode('unicode_escape')
+                    except UnicodeEncodeError:
+                        body.encode('utf-8')
+                    logger.debug("Discovered plain text MIME part")
+                else:
+                    files.append(
+                        SimpleUploadedFile(_("email_html_body.html"), encoding.smart_bytes(part.get_payload()), 'text/html')
+                    )
+                    logger.debug("Discovered HTML MIME part")
+            else:
+                if not name:
+                    ext = mimetypes.guess_extension(part.get_content_type())
+                    name = "part-%i%s" % (counter, ext)
+                payload = part.get_payload()
+                if isinstance(payload, list):
+                    payload = payload.pop().as_string()
+                payloadToWrite = payload
+                # check version of python to ensure use of only the correct error type
+                if six.PY2:
+                    non_b64_err = binascii.Error
+                else:
+                    non_b64_err = TypeError
+                try:
+                    logger.debug("Try to base64 decode the attachment payload")
+                    if six.PY2:
+                        payloadToWrite = base64.decodestring(payload)
+                    else:
+                        payloadToWrite = base64.decodebytes(payload)
+                except non_b64_err:
+                    logger.debug("Payload was not base64 encoded, using raw bytes")
+                    payloadToWrite = payload
+                files.append(SimpleUploadedFile(name, part.get_payload(decode=True), mimetypes.guess_type(name)[0]))
+                logger.debug("Found MIME attachment %s" % name)
+
+            counter += 1
+
+        if not body:
+            try:
+                mail = BeautifulSoup(part.get_payload(), "lxml")
+            except TypeError:
+                return False
+
+            if ">" in mail.text:
+                body = mail.find('body')
+                body = body.text
+                body = body.encode('ascii', errors='ignore')
+            else:
+                body = mail.text
+
+        if ticket:
+            try:
+                t = Ticket.objects.get(id=ticket)
+            except Ticket.DoesNotExist:
+                logger.info("Tracking ID %s-%s not associated with existing ticket. Creating new ticket." % (queue.slug, ticket))
+                ticket = None
+            else:
+                logger.info("Found existing ticket with Tracking ID %s-%s" % (t.queue.slug, t.id))
+                if t.status == Ticket.CLOSED_STATUS:
+                    t.status = Ticket.REOPENED_STATUS
+                    t.save()
+                new = False
+
+        smtp_priority = message.get('priority', '')
+        smtp_importance = message.get('importance', '')
+        high_priority_types = {'high', 'important', '1', 'urgent'}
+        priority = 2 if high_priority_types & {smtp_priority, smtp_importance} else 3
+
 
     if ticket is None:
         if settings.QUEUE_EMAIL_BOX_UPDATE_ONLY:
             return None
         new = True
-        t = Ticket.objects.create(
+        t = Ticket(
             title=subject,
             queue=queue,
             submitter_email=sender_email,
@@ -495,6 +563,11 @@ def ticket_from_message(message, queue, logger):
             description=body,
             priority=priority,
         )
+        ticket_hash = t.get_hash()
+        if len(Ticket.objects.filter(hash=ticket_hash)) > 0:
+            return False
+        else:
+            t.save()
         logger.debug("Created new ticket %s-%s" % (t.queue.slug, t.id))
 
     if cc:
@@ -630,18 +703,6 @@ def ticket_from_message(message, queue, logger):
                 )
 
     return t
-
-def o365_message_to_ticket(message, queue, logger):
-    # 'message' must be an RFC822 formatted message.
-    subject = message.subject
-    subject = decode_mail_headers(decodeUnknown(message.get_charset(), subject))
-    for affix in STRIPPED_SUBJECT_STRINGS:
-        subject = subject.replace(affix, "")
-    subject = subject.strip()
-    sender_email = message.sender.email
-
-    cc = message.cc
-    
 
 if __name__ == '__main__':
     process_email()

@@ -18,6 +18,7 @@ from django.utils import six
 from django.utils.translation import ugettext_lazy as _, ugettext
 from django.utils.encoding import python_2_unicode_compatible
 import re
+import hashlib
 
 
 @python_2_unicode_compatible
@@ -525,6 +526,12 @@ class Ticket(models.Model):
                     'automatically by management/commands/escalate_tickets.py.'),
     )
 
+    hash = models.CharField(
+        blank=True,
+        null=True,
+        max_length=200,
+    )
+
     def _get_assigned_to(self):
         """ Custom property to allow us to easily print 'Unassigned' if a
         ticket has no owner, or the users name if it's assigned. If the user
@@ -626,7 +633,6 @@ class Ticket(models.Model):
         return TicketDependency.objects.filter(ticket=self).filter(
             depends_on__status__in=OPEN_STATUSES).count() == 0
     can_be_resolved = property(_can_be_resolved)
-
     class Meta:
         get_latest_by = "created"
         ordering = ('id',)
@@ -659,6 +665,18 @@ class Ticket(models.Model):
         parts = query.split('-')
         queue = '-'.join(parts[0:-1])
         return queue, parts[-1]
+    
+    def get_hash(self):
+        if not self.hash:
+            string = self.submitter_email + self.title + self.description
+            hash = str(hashlib.md5(string.encode("utf-8")).hexdigest())
+            self.hash = hash
+        else:
+            hash = self.hash
+        return hash
+
+        
+
 
 
 class FollowUpManager(models.Manager):
