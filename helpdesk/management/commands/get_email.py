@@ -313,13 +313,12 @@ def process_queue(q, logger):
         
         for num, message in enumerate(messages):
             logger.info("Processing message %s" % num)
-            full_message = message.get_mime_content().decode("utf-8")
-            ticket = ticket_from_message(message=full_message, queue=q, logger=logger)
+            ticket = o365_message_to_ticket(message=message, queue=q, logger=logger)
             subject = message.subject
-            deleted = message.move(mailbox.deleted_folder())
+            #deleted = message.move(mailbox.deleted_folder())
             if ticket:
-                if not deleted:
-                    print("Error! Couldn't remove message\"" + subject + "\"!")
+                #if not deleted:
+                #    logger.warning("Error! Couldn't remove message\"" + subject + "\"!")
                 logger.info("Successfully processed message %s, deleted from O365 Inbox" % num)
             else:
                 logger.warning("Message %s was not successfully processed, and will be left in the O365 Inbox" % num)
@@ -632,6 +631,17 @@ def ticket_from_message(message, queue, logger):
 
     return t
 
+def o365_message_to_ticket(message, queue, logger):
+    # 'message' must be an RFC822 formatted message.
+    subject = message.subject
+    subject = decode_mail_headers(decodeUnknown(message.get_charset(), subject))
+    for affix in STRIPPED_SUBJECT_STRINGS:
+        subject = subject.replace(affix, "")
+    subject = subject.strip()
+    sender_email = message.sender.email
+
+    cc = message.cc
+    
 
 if __name__ == '__main__':
     process_email()
