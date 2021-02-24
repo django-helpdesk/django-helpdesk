@@ -30,5 +30,6 @@ def datetime_string_format(value):
             try:
                 new_value = date_filter(datetime.strptime(value, CUSTOMFIELD_TIME_FORMAT), settings.TIME_FORMAT)
             except (TypeError, ValueError):
-                new_value = value
+                # If NoneType return empty string, else return original value
+                new_value = "" if value is None else value
     return new_value
