@@ -23,12 +23,12 @@ def datetime_string_format(value):
     """
     try:
         new_value = date_filter(datetime.strptime(value, CUSTOMFIELD_DATETIME_FORMAT), settings.DATETIME_FORMAT)
-    except ValueError:
+    except (TypeError, ValueError):
         try:
             new_value = date_filter(datetime.strptime(value, CUSTOMFIELD_DATE_FORMAT), settings.DATE_FORMAT)
-        except ValueError:
+        except (TypeError, ValueError):
             try:
                 new_value = date_filter(datetime.strptime(value, CUSTOMFIELD_TIME_FORMAT), settings.TIME_FORMAT)
-            except ValueError:
+            except (TypeError, ValueError):
                 new_value = value
     return new_value
