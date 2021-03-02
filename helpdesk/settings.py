@@ -79,6 +79,13 @@ HELPDESK_VIEW_A_TICKET_PUBLIC = getattr(settings, 'HELPDESK_VIEW_A_TICKET_PUBLIC
 # show 'submit a ticket' section on public page?
 HELPDESK_SUBMIT_A_TICKET_PUBLIC = getattr(settings, 'HELPDESK_SUBMIT_A_TICKET_PUBLIC', True)
 
+# change that to custom class to have extra fields or validation (like captcha)
+HELPDESK_PUBLIC_TICKET_FORM_CLASS = getattr(
+    settings,
+    "HELPDESK_PUBLIC_TICKET_FORM_CLASS",
+    "helpdesk.forms.PublicTicketForm"
+)
+
 
 ###################################
 # options for update_ticket views #

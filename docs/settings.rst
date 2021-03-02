@@ -81,19 +81,19 @@ These changes are visible throughout django-helpdesk
 - **HELPDESK_EMAIL_FALLBACK_LOCALE** Fallback locale for templated emails when queue locale not found
 
   **Default:** ``HELPDESK_EMAIL_FALLBACK_LOCALE = "en"``
-  
+
 - **HELPDESK_MAX_EMAIL_ATTACHMENT_SIZE** Maximum size, in bytes, of file attachments that will be sent via email
 
   **Default:** ``HELPDESK_MAX_EMAIL_ATTACHMENT_SIZE = 512000``
-  
+
 - **QUEUE_EMAIL_BOX_UPDATE_ONLY** Only process mail with a valid tracking ID; all other mail will be ignored instead of creating a new ticket.
 
   **Default:** ``QUEUE_EMAIL_BOX_UPDATE_ONLY = False``
-  
+
 - **HELPDESK_ANON_ACCESS_RAISES_404** If True, redirects user to a 404 page when attempting to reach ticket pages while not logged in, rather than redirecting to a login screen.
 
   **Default:** ``HELPDESK_ANON_ACCESS_RAISES_404 = False``
-  
+
 Options shown on public pages
 -----------------------------
 
@@ -106,6 +106,10 @@ These options only change display of items on public-facing pages, not staff pag
 - **HELPDESK_SUBMIT_A_TICKET_PUBLIC** Show 'submit a ticket' section & form on public page?
 
   **Default:** ``HELPDESK_SUBMIT_A_TICKET_PUBLIC = True``
+
+- **HELPDESK_PUBLIC_TICKET_FORM_CLASS** Define custom form class to show on public pages for anon users. You can use it for adding custom fields and validation, captcha and so on.
+
+  **Default:** ``HELPDESK_PUBLIC_TICKET_FORM_CLASS = "helpdesk.forms.PublicTicketForm"``
 
 
 Options for public ticket submission form
