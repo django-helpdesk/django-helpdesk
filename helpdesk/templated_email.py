@@ -1,5 +1,4 @@
 import os
-import mimetypes
 import logging
 from smtplib import SMTPException
 

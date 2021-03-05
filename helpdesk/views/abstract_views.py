@@ -1,5 +1,3 @@
-from django.views.generic.edit import FormView
-
 from helpdesk.models import CustomField, KBItem, Queue
 
 
@@ -11,8 +9,9 @@ class AbstractCreateTicketMixin():
             initial_data['queue'] = Queue.objects.get(slug=request.GET.get('queue', None)).id
         except Queue.DoesNotExist:
             pass
-        if request.user.is_authenticated and request.user.usersettings_helpdesk.use_email_as_submitter and request.user.email:
-            initial_data['submitter_email'] = request.user.email
+        u = request.user
+        if u.is_authenticated and u.usersettings_helpdesk.use_email_as_submitter and u.email:
+            initial_data['submitter_email'] = u.email
 
         query_param_fields = ['submitter_email', 'title', 'body', 'queue', 'kbitem']
         custom_fields = ["custom_%s" % f.name for f in CustomField.objects.filter(staff_only=False)]

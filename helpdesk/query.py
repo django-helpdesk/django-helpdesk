@@ -1,6 +1,7 @@
 from django.db.models import Q
 from django.core.cache import cache
 from django.urls import reverse
+from django.utils.html import escape
 from django.utils.translation import ugettext as _
 
 from base64 import b64encode
@@ -135,7 +136,8 @@ class __Query__:
             if sortreverse:
                 sorting = "-%s" % sorting
             queryset = queryset.order_by(sorting)
-        return queryset.distinct()  # https://stackoverflow.com/questions/30487056/django-queryset-contains-duplicate-entries
+        # https://stackoverflow.com/questions/30487056/django-queryset-contains-duplicate-entries
+        return queryset.distinct()
 
     def get_cache_key(self):
         return str(self.huser.user.pk) + ":" + self.base64
@@ -200,8 +202,13 @@ class __Query__:
                     'start_date': self.mk_timeline_date(followup.date),
                     'text': {
                         'headline': ticket.title + ' - ' + followup.title,
-                        'text': (followup.comment if followup.comment else _('No text')) + '<br/> <a href="%s" class="btn" role="button">%s</a>' %
-                        (reverse('helpdesk:view', kwargs={'ticket_id': ticket.pk}), _("View ticket")),
+                        'text': (
+                            (escape(followup.comment) if followup.comment else _('No text'))
+                            +
+                            '<br/> <a href="%s" class="btn" role="button">%s</a>'
+                            %
+                            (reverse('helpdesk:view', kwargs={'ticket_id': ticket.pk}), _("View ticket"))
+                        ),
                     },
                     'group': _('Messages'),
                 }

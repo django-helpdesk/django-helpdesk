@@ -28,7 +28,7 @@ from helpdesk.decorators import protect_view, is_helpdesk_staff
 import helpdesk.views.staff as staff
 import helpdesk.views.abstract_views as abstract_views
 from helpdesk.lib import text_is_spam
-from helpdesk.models import CustomField, Ticket, Queue, UserSettings, KBCategory, KBItem
+from helpdesk.models import Ticket, Queue, UserSettings
 from helpdesk.user import huser_from_request
 
 logger = logging.getLogger(__name__)
@@ -118,9 +118,6 @@ class BaseCreateTicketView(abstract_views.AbstractCreateTicketMixin, FormView):
             except ValueError:
                 # if someone enters a non-int string for the ticket
                 return HttpResponseRedirect(reverse('helpdesk:home'))
-
-    def get_success_url(self):
-        request = self.request
 
 
 class CreateTicketIframeView(BaseCreateTicketView):
