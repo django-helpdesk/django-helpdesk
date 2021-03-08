@@ -551,6 +551,8 @@ def object_from_message(message, queue, logger):
             if not name:
                 ext = mimetypes.guess_extension(part.get_content_type())
                 name = "part-%i%s" % (counter, ext)
+            else:
+                name = ("part-%i_" % counter) + name
 
             # FIXME: this code gets the paylods, then does something with it and then completely ignores it
             # writing the part.get_payload(decode=True) instead; and then the payload variable is
