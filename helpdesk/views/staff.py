@@ -695,11 +695,11 @@ def update_ticket(request, ticket_id, append_signature=True, public=False):
     if owner == -1 and ticket.assigned_to:
         owner = ticket.assigned_to.id
 
-    f = FollowUp(ticket=ticket, user=request.user, date=timezone.now(), comment=comment, public=public)
+    followup = FollowUp(ticket=ticket, user=request.user, date=timezone.now(), comment=comment, public=public)
 
     # Append signature at the bottom of the followup comment if a comment was made and the followup is public
     if comment and public and append_signature:
-        f.append_signature(request.user)
+        followup.append_signature(request.user)
 
     reassigned = False
     old_owner = ticket.assigned_to
@@ -709,12 +709,12 @@ def update_ticket(request, ticket_id, append_signature=True, public=False):
         if owner != 0 and ((ticket.assigned_to and owner != ticket.assigned_to.id) or not ticket.assigned_to):
             new_user = User.objects.get(id=owner)
             # TODO fix translate
-            f.title = 'Assigné à %s' % new_user
+            followup.title = 'Assigné à %s' % new_user
             ticket.assigned_to = new_user
             reassigned = True
         # user changed owner to 'unassign'
         elif owner == 0 and ticket.assigned_to is not None:
-            f.title = _('Unassigned')
+            followup.title = _('Unassigned')
             ticket.assigned_to = None
 
     old_status_str = ticket.get_status_display()
@@ -723,26 +723,27 @@ def update_ticket(request, ticket_id, append_signature=True, public=False):
         ticket.status = new_status
         ticket.save()
         messages.info(request, 'Le ticket est désormais dans le statut %s' % ticket.get_status_display())
-        f.new_status = new_status
-        if f.title:
+        followup.new_status = new_status
+        if followup.title:
             # TODO translate
-            f.title += ' et %s' % ticket.get_status_display()
+            followup.title += ' et %s' % ticket.get_status_display()
         else:
-            f.title = '%s' % ticket.get_status_display()
+            followup.title = '%s' % ticket.get_status_display()
 
-    if not f.title:
-        if f.comment:
-            f.title = _('Comment')
+    if not followup.title:
+        if followup.comment:
+            followup.title = _('Comment')
         else:
-            f.title = _('Updated')
+            followup.title = _('Updated')
 
-    f.save()
+    # Instantiate followup to be able to create related objects
+    followup.save()
 
-    files = process_attachments(f, request.FILES.getlist('attachment'))
+    files = process_attachments(followup, request.FILES.getlist('attachment'))
 
     # Add Ticket Changes
     if title and title != ticket.title:
-        f.ticketchange_set.create(
+        followup.ticketchange_set.create(
             field=_('Title'),
             old_value=ticket.title,
             new_value=title,
@@ -750,29 +751,37 @@ def update_ticket(request, ticket_id, append_signature=True, public=False):
         ticket.title = title
 
     if new_status != old_status:
-        f.ticketchange_set.create(
+        followup.ticketchange_set.create(
             field=_('Status'),
             old_value=old_status_str,
             new_value=ticket.get_status_display(),
         )
+        # Remove on hold when ticket is closed
+        if new_status == Ticket.CLOSED_STATUS and ticket.on_hold:
+            ticket.on_hold = False
+            messages.info(request, "Le ticket étant fermé, il n'est plus en attente de retour client.")
 
     if on_hold != ticket.on_hold:
-        f.ticketchange_set.create(
-            field='En attente retour client',
-            old_value='Oui' if ticket.on_hold else 'Non',
-            new_value='Oui' if on_hold else 'Non',
-        )
-        ticket.on_hold = on_hold
+        # A closed ticket cannot be on hold
+        if on_hold and ticket.status == Ticket.CLOSED_STATUS:
+            messages.info(request, "Le ticket étant fermé, il ne peut pas être mis en attente de retour client.")
+        else:
+            followup.ticketchange_set.create(
+                field='En attente retour client',
+                old_value='Oui' if ticket.on_hold else 'Non',
+                new_value='Oui' if on_hold else 'Non',
+            )
+            ticket.on_hold = on_hold
 
     if ticket.assigned_to != old_owner:
-        f.ticketchange_set.create(
+        followup.ticketchange_set.create(
             field=_('Owner'),
             old_value=old_owner if old_owner else _('Unassigned'),
             new_value=ticket.assigned_to if ticket.assigned_to else _('Unassigned'),
         )
 
     if priority != ticket.priority:
-        f.ticketchange_set.create(
+        followup.ticketchange_set.create(
             field=_('Priority'),
             old_value=ticket.priority,
             new_value=priority,
@@ -780,7 +789,7 @@ def update_ticket(request, ticket_id, append_signature=True, public=False):
         ticket.priority = priority
 
     if due_date != ticket.due_date:
-        f.ticketchange_set.create(
+        followup.ticketchange_set.create(
             field=_('Due on'),
             old_value=date(timezone.localtime(ticket.due_date), 'DATETIME_FORMAT') if ticket.due_date else 'Non définie',
             new_value=date(due_date, 'DATETIME_FORMAT') if due_date else 'Non définie',
@@ -792,7 +801,7 @@ def update_ticket(request, ticket_id, append_signature=True, public=False):
             customer_contact = User.objects.get(id=customer_contact_id)
         except User.DoesNotExist:
             customer_contact = None
-        f.ticketchange_set.create(
+        followup.ticketchange_set.create(
             field='Contact client',
             old_value=str(ticket.customer_contact) if ticket.customer_contact else _('Unassigned'),
             new_value=str(customer_contact) if customer_contact else _('Unassigned'),
@@ -804,7 +813,7 @@ def update_ticket(request, ticket_id, append_signature=True, public=False):
             customer = Customer.objects.get(id=customer_id)
         except Customer.DoesNotExist:
             customer = None
-        f.ticketchange_set.create(
+        followup.ticketchange_set.create(
             field='Client',
             old_value=str(ticket.customer) if ticket.customer else _('Unassigned'),
             new_value=str(customer) if customer else _('Unassigned'),
@@ -816,7 +825,7 @@ def update_ticket(request, ticket_id, append_signature=True, public=False):
             site = Site.objects.get(id=site_id)
         except Site.DoesNotExist:
             site = None
-        f.ticketchange_set.create(
+        followup.ticketchange_set.create(
             field='Site',
             old_value=str(ticket.site) if ticket.site else _('Unassigned'),
             new_value=str(site) if site else _('Unassigned'),
@@ -828,7 +837,7 @@ def update_ticket(request, ticket_id, append_signature=True, public=False):
             customer_product = CustomerProducts.objects.get(id=customer_product_id)
         except CustomerProducts.DoesNotExist:
             customer_product = None
-        f.ticketchange_set.create(
+        followup.ticketchange_set.create(
             field='Produit client',
             old_value=str(ticket.customer_product) if ticket.customer_product else _('Unassigned'),
             new_value=str(customer_product) if customer_product else _('Unassigned'),
@@ -840,33 +849,28 @@ def update_ticket(request, ticket_id, append_signature=True, public=False):
             generic_incident = GenericIncident.objects.get(id=generic_incident_id)
         except GenericIncident.DoesNotExist:
             generic_incident = None
-        f.ticketchange_set.create(
+        followup.ticketchange_set.create(
             field='Incident Générique',
             old_value=str(ticket.generic_incident) if ticket.generic_incident else _('None'),
             new_value=str(generic_incident) if generic_incident else _('None'),
         )
         ticket.generic_incident = generic_incident
 
-    if new_status in (Ticket.RESOLVED_STATUS, Ticket.CLOSED_STATUS):
-        # Set comment as resolution if ticket get resolved or closed and resolution wasn't set
-        if new_status == Ticket.RESOLVED_STATUS or ticket.resolution is None:
-            ticket.resolution = comment
-        # Remove on hold when ticket is closed
-        if new_status == Ticket.CLOSED_STATUS and ticket.on_hold:
-            ticket.on_hold = False
-            messages.info(request, "Le ticket n'est plus en attente de retour client.")
+    # Set comment as resolution if ticket becomes resolved or closed and resolution wasn't set
+    if new_status in (Ticket.RESOLVED_STATUS, Ticket.CLOSED_STATUS) and not ticket.resolution:
+        ticket.resolution = comment
 
     messages_sent_to = []
 
     # ticket might have changed above, so we re-instantiate context with the
     # (possibly) updated ticket.
     context = safe_template_context(ticket)
-    context['ticket']['comment'] = f.comment
+    context['ticket']['comment'] = followup.comment
 
-    if public and (f.comment or (f.new_status in (Ticket.RESOLVED_STATUS, Ticket.CLOSED_STATUS))):
-        if f.new_status == Ticket.RESOLVED_STATUS:
+    if public and (followup.comment or (followup.new_status in (Ticket.RESOLVED_STATUS, Ticket.CLOSED_STATUS))):
+        if followup.new_status == Ticket.RESOLVED_STATUS:
             template = 'resolved_'
-        elif f.new_status == Ticket.CLOSED_STATUS:
+        elif followup.new_status == Ticket.CLOSED_STATUS:
             template = 'closed_'
         else:
             template = 'updated_'
@@ -907,9 +911,9 @@ def update_ticket(request, ticket_id, append_signature=True, public=False):
         # changed.
         if reassigned:
             template_staff = 'assigned_owner'
-        elif f.new_status == Ticket.RESOLVED_STATUS:
+        elif followup.new_status == Ticket.RESOLVED_STATUS:
             template_staff = 'resolved_owner'
-        elif f.new_status == Ticket.CLOSED_STATUS:
+        elif followup.new_status == Ticket.CLOSED_STATUS:
             template_staff = 'closed_owner'
         else:
             template_staff = 'updated_owner'
@@ -934,9 +938,9 @@ def update_ticket(request, ticket_id, append_signature=True, public=False):
     if ticket.queue.updated_ticket_cc and ticket.queue.updated_ticket_cc not in messages_sent_to:
         if reassigned:
             template_cc = 'assigned_cc'
-        elif f.new_status == Ticket.RESOLVED_STATUS:
+        elif followup.new_status == Ticket.RESOLVED_STATUS:
             template_cc = 'resolved_cc'
-        elif f.new_status == Ticket.CLOSED_STATUS:
+        elif followup.new_status == Ticket.CLOSED_STATUS:
             template_cc = 'closed_cc'
         else:
             template_cc = 'updated_cc'
@@ -1476,21 +1480,8 @@ def create_ticket(request):
 
 @staff_member_required
 def raw_details(request, type):
-    # TODO: This currently only supports spewing out 'PreSetReply' objects,
-    # in the future it needs to be expanded to include other items. All it
-    # does is return a plain-text representation of an object.
-
-    if type not in ('preset',):
-        raise Http404
-
-    if type == 'preset' and request.GET.get('id', False):
-        try:
-            preset = PreSetReply.objects.get(id=request.GET.get('id'))
-            return HttpResponse(preset.body)
-        except PreSetReply.DoesNotExist:
-            raise Http404
-
-    raise Http404
+    preset = get_object_or_404(PreSetReply, id=request.GET.get('id'))
+    return HttpResponse(preset.body)
 
 
 @staff_member_required

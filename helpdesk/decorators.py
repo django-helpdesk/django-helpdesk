@@ -37,6 +37,8 @@ def staff_member_required(view_func):
             return redirect('helpdesk:login')
         if not helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE and not request.user.is_staff:
             raise PermissionDenied()
+        if helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE and not request.user.employee.is_ipexia_member:
+            raise PermissionDenied()
         return view_func(request, *args, **kwargs)
 
     return _wrapped_view
