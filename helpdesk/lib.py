@@ -12,6 +12,7 @@ import os
 from datetime import date, timedelta
 from smtplib import SMTPException
 from bs4 import BeautifulSoup
+from copy import deepcopy
 from django.contrib.auth import get_user_model
 from django.core.mail import mail_admins
 from django.urls import reverse, set_script_prefix, clear_script_prefix
@@ -83,6 +84,9 @@ def send_templated_mail(template_name,
     from helpdesk.models import EmailTemplate
     from helpdesk.settings import HELPDESK_EMAIL_SUBJECT_TEMPLATE, \
         HELPDESK_EMAIL_FALLBACK_LOCALE
+
+    # Create a deep copy of the context before aplying any modifications
+    context = deepcopy(context)
 
     locale = context['queue'].get('locale') or HELPDESK_EMAIL_FALLBACK_LOCALE
 
