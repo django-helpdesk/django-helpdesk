@@ -143,7 +143,7 @@ def pop3_sync(q, logger, server):
 def imap_sync(q, logger, server):
     try:
         try:
-            server.starttl()
+            server.starttls()
         except Exception:
             logger.warning("IMAP4 StartTLS unsupported or failed. Connection will be unencrypted.")
         server.login(q.email_box_user or
