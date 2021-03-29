@@ -24,7 +24,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q, Value, Count
 from django.http import HttpResponseRedirect, Http404, HttpResponse, JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
-from django.utils.html import format_html
+from django.utils.html import format_html, linebreaks
 from django.utils.timezone import make_aware
 from django.utils.translation import ugettext as _
 from django.utils import timezone, six
@@ -699,7 +699,7 @@ def update_ticket(request, ticket_id, append_signature=True, public=False):
 
     # Append signature at the bottom of the followup comment if a comment was made and the followup is public
     if comment and public and append_signature:
-        followup.append_signature(request.user)
+        followup.append_signature()
 
     reassigned = False
     old_owner = ticket.assigned_to
@@ -2441,29 +2441,57 @@ def generic_incident_detail(request, generic_incident_id):
     # Generic information form
     generic_information_form, success = handle_generic_information_form(generic_incident, request)
     if success:
+        message = f"Un nouveau suivi a été ajouté sur l'incident générique {generic_incident}"
+        # Send notification and email to all subscribers
         if generic_incident.subscribers.exists():
-            # Send notification and email to all subscribers
-            message = "Un nouveau suivi a été ajouté sur l'incident générique %s" % generic_incident
             Notification.objects.create(
                 generic_incident.subscribers.all(),
                 message=message,
                 module=Notification.TICKET,
                 link_redirect=generic_incident.get_absolute_url()
             )
-            # Add comment to message
-            set_script_prefix(settings.SITE_URL)
-            message += " :\n\n%s\n\nVoir détail de l'IG : %s" % (request.POST.get('comment'), generic_incident.get_absolute_url())
-            clear_script_prefix()
+
+        comment = request.POST.get('comment')
+        # Format a html message containing the comment and a link to the generic incident
+        html_comment = linebreaks(format_html(
+            '<p>Un nouveau suivi a été ajouté sur <a href="{link}">l\'incident générique {generic_incident}</a> :</p>'
+            '<blockquote>{comment}</blockquote>',
+            link=generic_incident.get_absolute_url(), generic_incident=generic_incident, comment=comment
+        ))
+
+        # Create email list set and loop through each tickets to add submitter email and also, attach a followup
+        email_list_set = {user.email for user in generic_incident.subscribers.all()}
+        for ticket in generic_incident.tickets.all():
+            for email in ticket.get_submitter_emails():
+                email_list_set.add(email)
+            followup = FollowUp(
+                ticket=ticket,
+                title="Nouveau suivi de l'incident générique lié",
+                comment=html_comment,
+                public=True,
+                user=request.user
+            )
+            followup.append_signature()
+            followup.save()
+
+        # Append comment to message and change script prefix to have absolute url in email
+        set_script_prefix(settings.SITE_URL)
+        message += f" par {request.user} :" \
+                   f"\n\n{comment}" \
+                   f"\n\nVoir détail de l'IG : {generic_incident.get_absolute_url()}"
+        clear_script_prefix()
+        # Send mail if there is at least one person to notify
+        if email_list_set:
             email_message = EmailMessage(
-                subject='[Phoenix] Nouveau suivi Incident Générique %s' % generic_incident,
+                subject=f'[Phoenix] Nouveau suivi Incident Générique {generic_incident}',
                 body=message,
                 from_email=settings.DEFAULT_FROM_EMAIL,
-                bcc=[user.email for user in generic_incident.subscribers.all()]
+                bcc=email_list_set
             )
             try:
                 email_message.send()
             except Exception as e:
-                messages.error(request, "Erreur lors de l'envoi du mail : %s" % e)
+                messages.error(request, f"Erreur lors de l'envoi du mail : {e}")
         return redirect(generic_incident.get_absolute_url())
 
     # Filter the customers that are accesibles to the user
@@ -2472,7 +2500,7 @@ def generic_incident_detail(request, generic_incident_id):
     return render(request, 'helpdesk/generic_incident.html', {
         'generic_incident': generic_incident,
         'user_is_subscribed': request.user in generic_incident.subscribers.all(),
-        'tickets': generic_incident.tickets.filter(customer__in=authorized_customers),
+        'authorized_tickets': generic_incident.tickets.filter(customer__in=authorized_customers),
         'information_set': generic_incident.followups.all(),
         'generic_information_form': generic_information_form
     })

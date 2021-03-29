@@ -53,15 +53,24 @@
                         Nombre de personnes abonnées
                         <span class="badge" id="subscribersCount">{{ generic_incident.subscribers.count }}</span>
                     </h4>
-                    <h4>
-                        Tickets liés
-                        <span class="badge" title="Nombre total de tickets liés">{{ generic_incident.tickets.count }}</span>
-                    </h4>
-                    <div class="list-group">
-                        {% for ticket in tickets %}
-                            <a class="list-group-item" href="{{ ticket.get_absolute_url }}">{{ ticket }}</a>
-                        {% endfor %}
-                    </div>
+                    {% if request.user.is_staff %}
+                        <h4>
+                            Tickets liés
+                            <span class="badge" title="Nombre total de tickets liés">{{ generic_incident.tickets.count }}</span>
+                        </h4>
+                        <div class="list-group">
+                            {% for ticket in generic_incident.tickets.all %}
+                                <a class="list-group-item" href="{{ ticket.get_absolute_url }}">{{ ticket }}</a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <h4>Mes tickets liés</h4>
+                        <div class="list-group">
+                            {% for ticket in authorized_tickets %}
+                                <a class="list-group-item" href="{{ ticket.get_absolute_url }}">{{ ticket }}</a>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
                 </div>
                 <div class="col-sm-4 col-xs-12">
                     <h4>Catégorie : <b>{{ generic_incident.category|default:"Non définie" }}</b></h4>

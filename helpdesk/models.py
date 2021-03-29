@@ -985,27 +985,30 @@ class FollowUp(models.Model):
         verbose_name_plural = _('Follow-ups')
 
     def __str__(self):
-        return '%s' % self.title
+        return self.title
 
     def get_absolute_url(self):
-        return u"%s#followup%s" % (self.ticket.get_absolute_url(), self.id)
+        return f'{self.ticket.get_absolute_url()}#followup{self.id}'
 
     def save(self, *args, **kwargs):
+        # Cascade update ticket's modified date field
         t = self.ticket
         t.modified = timezone.now()
         t.save()
         super(FollowUp, self).save(*args, **kwargs)
 
-    def append_signature(self, user):
+    def append_signature(self):
         """ Append the signature at the bottom of the followup message if user is defined """
-        if not user:
-            return ''
-        signature = '<p><strong>%s</strong></p>' % user
-        if user.employee.signature:
-            signature = user.employee.signature
+        if not self.user:
+            return
+        # Define default signature
+        signature = f'<p><strong>{self.user}</strong></p>'
+        # Override signature if employee user has one
+        if self.user.employee.signature:
+            signature = self.user.employee.signature
         # Append signature preceded by a newline in order to conserve it later in plain text version of the sent mails
-        self.comment += """
-        %s""" % signature
+        self.comment += f"""<br>
+        {signature}"""
 
 
 @python_2_unicode_compatible
