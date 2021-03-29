@@ -337,6 +337,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
             priority=self.cleaned_data.get('priority'),
             due_date=self.cleaned_data.get('due_date'),
             quick_comment=self.cleaned_data.get('quick_comment', ''),
+            generic_incident=self.cleaned_data.get('generic_incident'),
         )
         return ticket, queue
 
