@@ -6,8 +6,6 @@ django-helpdesk - A Django powered ticket tracker for small enterprise.
 forms.py - Definitions of newforms-based forms for creating and maintaining
            tickets.
 """
-
-
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django import forms
 from django.conf import settings
@@ -346,18 +344,20 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
             if field.startswith('custom_'):
                 field_name = field.replace('custom_', '', 1)
                 custom_field = CustomField.objects.get(name=field_name)
-                cfv = TicketCustomFieldValue(ticket=ticket,
-                                             field=custom_field,
-                                             value=value)
-                cfv.save()
+                cfv = TicketCustomFieldValue.objects.create(
+                    ticket=ticket,
+                    field=custom_field,
+                    value=value
+                )
 
     def _create_follow_up(self, ticket, title, user=None):
-        followup = FollowUp(ticket=ticket,
-                            title=title,
-                            date=timezone.now(),
-                            public=True,
-                            comment=self.cleaned_data['body'],
-                            )
+        followup = FollowUp(
+            ticket=ticket,
+            title=title,
+            date=timezone.now(),
+            public=True,
+            comment=self.cleaned_data['body']
+        )
         if user:
             followup.user = user
         return followup
@@ -433,8 +433,7 @@ class TicketForm(AbstractTicketForm, PhoenixTicketForm):
         required=False,
         label=_('Submitter E-Mail Address'),
         widget=forms.TextInput(attrs={'class': 'form-control submitter-email-autocomplete', 'autocomplete': 'off'}),
-        help_text=_('This e-mail address will receive copies of all public '
-                    'updates to this ticket.'),
+        help_text=_('This e-mail address will receive copies of all public updates to this ticket.'),
     )
 
     contact_phone_number = PhoneNumberField(
@@ -540,15 +539,17 @@ class TicketForm(AbstractTicketForm, PhoenixTicketForm):
         followup = self._create_follow_up(ticket, title=title, user=user)
         # Append signature at the bottom of the followup comment if user is from ipexia
         if user.employee.is_ipexia_member:
-            followup.append_signature(user)
+            followup.append_signature()
         followup.save()
 
         files = self._attach_files_to_follow_up(followup)
-        self._send_messages(ticket=ticket,
-                            queue=queue,
-                            followup=followup,
-                            files=files,
-                            user=user)
+        self._send_messages(
+            ticket=ticket,
+            queue=queue,
+            followup=followup,
+            files=files,
+            user=user
+        )
         return ticket
 
 
@@ -596,10 +597,11 @@ class PublicTicketForm(AbstractTicketForm):
         followup.save()
 
         files = self._attach_files_to_follow_up(followup)
-        self._send_messages(ticket=ticket,
-                            queue=queue,
-                            followup=followup,
-                            files=files)
+        self._send_messages(
+            ticket=ticket,
+            queue=queue,
+            followup=followup,
+            files=files)
         return ticket
 
 
