@@ -779,6 +779,9 @@ def update_ticket(request, ticket_id, append_signature=True, public=False):
             old_value=old_owner if old_owner else _('Unassigned'),
             new_value=ticket.assigned_to if ticket.assigned_to else _('Unassigned'),
         )
+        # Create a notification for the new ticket owner if it not himself
+        if request.user != ticket.assigned_to:
+            ticket.send_notification_changed_assigned_to(request.user)
 
     if priority != ticket.priority:
         followup.ticketchange_set.create(
@@ -1009,96 +1012,120 @@ def mass_update(request):
             )
         return redirect('helpdesk:list')
 
-    for t in Ticket.objects.filter(id__in=tickets):
-        if not _has_access_to_queue(request.user, t.queue):
+    for ticket in Ticket.objects.filter(id__in=tickets):
+        if not _has_access_to_queue(request.user, ticket.queue):
             continue
 
-        if action == 'assign' and t.assigned_to != user:
-            t.assigned_to = user
-            t.save()
-            f = FollowUp(ticket=t,
-                         date=timezone.now(),
-                         # TODO fix translate
-                         title="Assigné à %s dans l'édition en masse" % user,
-                         public=True,
-                         user=request.user)
-            f.save()
-        elif action == 'unassign' and t.assigned_to is not None:
-            t.assigned_to = None
-            t.save()
-            f = FollowUp(ticket=t,
-                         date=timezone.now(),
-                         title=_('Unassigned in bulk update'),
-                         public=True,
-                         user=request.user)
-            f.save()
-        elif action == 'close' and t.status != Ticket.CLOSED_STATUS:
-            t.status = Ticket.CLOSED_STATUS
-            t.save()
-            f = FollowUp(ticket=t,
-                         date=timezone.now(),
-                         title=_('Closed in bulk update'),
-                         public=False,
-                         user=request.user,
-                         new_status=Ticket.CLOSED_STATUS)
-            f.save()
-        elif action == 'close_public' and t.status != Ticket.CLOSED_STATUS:
-            t.status = Ticket.CLOSED_STATUS
-            t.save()
-            f = FollowUp(ticket=t,
-                         date=timezone.now(),
-                         title=_('Closed in bulk update'),
-                         public=True,
-                         user=request.user,
-                         new_status=Ticket.CLOSED_STATUS)
-            f.save()
+        # Store old values in variables
+        old_owner = ticket.assigned_to
+        old_status_str = ticket.get_status_display()
+        if action == 'assign' and ticket.assigned_to != user:
+            ticket.assigned_to = user
+            ticket.save()
+            if ticket.assigned_to != request.user:
+                ticket.send_notification_changed_assigned_to(request.user)
+            followup = ticket.followup_set.create(
+                date=timezone.now(),
+                title="Assigné à %s dans l'édition en masse" % user,  # TODO fix translate
+                public=True,
+                user=request.user
+            )
+            followup.ticketchange_set.create(
+                field=_('Owner'),
+                old_value=old_owner if old_owner else _('Unassigned'),
+                new_value=ticket.assigned_to if ticket.assigned_to else _('Unassigned'),
+            )
+        elif action == 'unassign' and ticket.assigned_to is not None:
+            ticket.assigned_to = None
+            ticket.save()
+            followup = ticket.followup_set.create(
+                date=timezone.now(),
+                title=_('Unassigned in bulk update'),
+                public=True,
+                user=request.user
+            )
+            followup.ticketchange_set.create(
+                field=_('Owner'),
+                old_value=old_owner,
+                new_value=_('Unassigned'),
+            )
+        elif action == 'close' and ticket.status != Ticket.CLOSED_STATUS:
+            ticket.status = Ticket.CLOSED_STATUS
+            ticket.save()
+            followup = ticket.followup_set.create(
+                date=timezone.now(),
+                title=_('Closed in bulk update'),
+                public=False,
+                user=request.user,
+                new_status=Ticket.CLOSED_STATUS
+            )
+            followup.ticketchange_set.create(
+                field=_('Status'),
+                old_value=old_status_str,
+                new_value=ticket.get_status_display(),
+            )
+        elif action == 'close_public' and ticket.status != Ticket.CLOSED_STATUS:
+            ticket.status = Ticket.CLOSED_STATUS
+            ticket.save()
+            followup = ticket.followup_set.create(
+                date=timezone.now(),
+                title=_('Closed in bulk update'),
+                public=True,
+                user=request.user,
+                new_status=Ticket.CLOSED_STATUS
+            )
+            followup.ticketchange_set.create(
+                field=_('Status'),
+                old_value=old_status_str,
+                new_value=ticket.get_status_display(),
+            )
             # Send email to Submitter, Owner, Queue CC
-            context = safe_template_context(t)
-            context['ticket']['resolution'] = t.resolution
+            context = safe_template_context(ticket)
+            context['ticket']['resolution'] = ticket.resolution
 
             messages_sent_to = []
 
-            if t.get_submitter_emails():
+            if ticket.get_submitter_emails():
                 send_templated_mail(
                     'closed_submitter',
                     context,
-                    recipients=t.get_submitter_emails(),
-                    sender=t.queue.from_address,
+                    recipients=ticket.get_submitter_emails(),
+                    sender=ticket.queue.from_address,
                     fail_silently=True,
                 )
-                messages_sent_to += t.get_submitter_emails()
+                messages_sent_to += ticket.get_submitter_emails()
 
-            for cc in t.ticketcc_set.all():
+            for cc in ticket.ticketcc_set.all():
                 if cc.email_address not in messages_sent_to:
                     send_templated_mail(
                         'closed_cc',
                         context,
                         recipients=cc.email_address,
-                        sender=t.queue.from_address,
+                        sender=ticket.queue.from_address,
                         fail_silently=True,
                     )
                     messages_sent_to.append(cc.email_address)
 
-            if t.assigned_to and \
-                    request.user != t.assigned_to and \
-                    t.assigned_to.email and \
-                    t.assigned_to.email not in messages_sent_to:
+            if ticket.assigned_to and \
+                    request.user != ticket.assigned_to and \
+                    ticket.assigned_to.email and \
+                    ticket.assigned_to.email not in messages_sent_to:
                 send_templated_mail(
                     'closed_owner',
                     context,
-                    recipients=t.assigned_to.email,
-                    sender=t.queue.from_address,
+                    recipients=ticket.assigned_to.email,
+                    sender=ticket.queue.from_address,
                     fail_silently=True,
                 )
-                messages_sent_to.append(t.assigned_to.email)
+                messages_sent_to.append(ticket.assigned_to.email)
 
-            if t.queue.updated_ticket_cc and \
-                    t.queue.updated_ticket_cc not in messages_sent_to:
+            if ticket.queue.updated_ticket_cc and \
+                    ticket.queue.updated_ticket_cc not in messages_sent_to:
                 send_templated_mail(
                     'closed_cc',
                     context,
-                    recipients=t.queue.updated_ticket_cc,
-                    sender=t.queue.from_address,
+                    recipients=ticket.queue.updated_ticket_cc,
+                    sender=ticket.queue.from_address,
                     fail_silently=True,
                 )
 
@@ -1425,6 +1452,8 @@ def edit_ticket(request, ticket_id):
     form = EditTicketForm(request.POST or None, instance=ticket)
     if form.is_valid():
         ticket = form.save()
+        if 'assigned_to' in form.changed_data and request.user != ticket.assigned_to:
+            ticket.send_notification_changed_assigned_to(request.user)
         return redirect(ticket)
 
     return render(request, 'helpdesk/edit_ticket.html', {'form': form})

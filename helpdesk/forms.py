@@ -167,6 +167,12 @@ class EditTicketForm(CustomFieldMixin, PhoenixTicketForm, forms.ModelForm):
         required=False,
         widget=forms.URLInput(attrs={'palceholder': 'https://phoenix.ipexia.com/...'})
     )
+    assigned_to = assigned_to = forms.ModelChoiceField(
+        queryset=get_assignable_users(),
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        required=False,
+        label=_('Case owner'),
+    )
 
     class Meta:
         model = Ticket

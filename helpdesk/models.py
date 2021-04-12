@@ -27,7 +27,7 @@ import re
 from phonenumber_field.modelfields import PhoneNumberField
 from tinymce import HTMLField
 
-from base.models import SpentTime, AbstractGenericIncident
+from base.models import SpentTime, AbstractGenericIncident, Notification
 from base.utils import office_time_between
 
 
@@ -905,6 +905,20 @@ class Ticket(models.Model):
         if first_answer:
             return office_time_between(self.created, first_answer.date)
         return None
+
+    def send_notification_changed_assigned_to(self, user):
+        """
+        Send a notification to the new ticket's owner
+
+        :param User user: user that made the change of assigned_to
+        """
+        if ticket.assigned_to:
+            Notification.objects.create(
+                user_list=[self.assigned_to],
+                module=Notification.TICKET,
+                message=f"{user} vient de t'affecter le ticket {self}.",
+                link_redirect=self.get_absolute_url()
+            )
 
 
 class FollowUpManager(models.Manager):
