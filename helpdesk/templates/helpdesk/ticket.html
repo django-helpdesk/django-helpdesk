@@ -50,7 +50,7 @@
                             </div>
                             <p class="mb-1">
                                 {% if followup.comment %}
-                                    <p>{{ followup.get_markdown|urlizetrunc:50|num_to_link|linebreaksbr }}</p>
+                                    <p>{{ followup.get_markdown|urlizetrunc:50|num_to_link }}</p>
                                 {% endif %}
                                 {% for change in followup.ticketchange_set.all %}
                                     {% if forloop.first %}<div class='changes'><ul>{% endif %}
