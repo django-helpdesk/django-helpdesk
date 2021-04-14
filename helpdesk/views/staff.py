@@ -24,7 +24,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q, Value, Count
 from django.http import HttpResponseRedirect, Http404, HttpResponse, JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
-from django.utils.html import format_html, linebreaks
+from django.utils.html import format_html, linebreaks, urlize
 from django.utils.timezone import make_aware
 from django.utils.translation import ugettext as _
 from django.utils import timezone, six
@@ -2482,11 +2482,11 @@ def generic_incident_detail(request, generic_incident_id):
 
         comment = request.POST.get('comment')
         # Format a html message containing the comment and a link to the generic incident
-        html_comment = linebreaks(format_html(
+        html_comment = urlize(linebreaks(format_html(
             '<p>Un nouveau suivi a été ajouté sur <a href="{link}">l\'incident générique {generic_incident}</a> :</p>'
             '<blockquote>{comment}</blockquote>',
             link=generic_incident.get_absolute_url(), generic_incident=generic_incident, comment=comment
-        ))
+        )), trim_url_limit=50)
 
         # Create email list set and loop through each tickets to add submitter email and also, attach a followup
         email_list_set = {user.email for user in generic_incident.subscribers.all()}
