@@ -8,6 +8,9 @@ models.py - Model (and hence database) definitions. This is the core of the
 """
 
 from __future__ import unicode_literals
+
+import datetime
+
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.contenttypes.models import ContentType
@@ -656,6 +659,12 @@ class Ticket(models.Model):
         blank=True
     )
 
+    time_before_first_answer = models.DurationField(
+        'temps avant la première réponse',
+        null=True,
+        blank=True
+    )
+
     merged_to = models.ForeignKey(
         'self',
         verbose_name='fusionné à',
@@ -891,8 +900,11 @@ class Ticket(models.Model):
                 ticket_too_old = True
         return ticket_too_old
 
-    def get_time_first_answer(self):
+    def calc_time_before_first_answer(self):
         """
+        Calculate the time between the creation of the ticket and the first public answer made by a staff user.
+        This function shouldn't be used anymore.
+
         :return: the delta between ticket creation date and the first answer by a staff user
         :rtype: datetime.timedelta|None
         """
@@ -903,6 +915,9 @@ class Ticket(models.Model):
                 first_answer = followup
                 break
         if first_answer:
+            # If a ticket has a followup older than its creation (because of a fusion), return 0
+            if self.created > first_answer.date:
+                return datetime.timedelta(0)
             return office_time_between(self.created, first_answer.date)
         return None
 
@@ -1006,9 +1021,14 @@ class FollowUp(models.Model):
 
     def save(self, *args, **kwargs):
         # Cascade update ticket's modified date field
-        t = self.ticket
-        t.modified = timezone.now()
-        t.save()
+        self.ticket.modified = timezone.now()
+
+        # Check if this is the first public answer by a staff user on the ticket
+        if not self.ticket.time_before_first_answer and self.public and self.user and self.user.is_staff:
+            # Save the difference between ticket's creation date and this followup's date
+            self.ticket.time_before_first_answer = self.date - self.ticket.created
+
+        self.ticket.save()
         super(FollowUp, self).save(*args, **kwargs)
 
     def append_signature(self):
