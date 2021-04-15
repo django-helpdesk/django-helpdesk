@@ -24,6 +24,7 @@ def migrate_time_before_first_answer(apps, schema_editor):
             # If a ticket has a followup older than its creation (because of a fusion), return 0
             if ticket.created > first_answer.date:
                 ticket.time_before_first_answer = timedelta(0)
+                print(ticket.id)
             else:
                 ticket.time_before_first_answer = office_time_between(ticket.created, first_answer.date)
             ticket.save()
