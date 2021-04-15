@@ -302,6 +302,21 @@ def decode_mail_headers(string):
     ])
 
 
+def is_autoreply(message):
+    """
+    Accepting message as something with .get(header_name) method
+    Returns True if it's likely to be auto-reply or False otherwise
+    So we don't start mail loops
+    """
+    any_if_this = [
+        False if not message.get("Auto-Submitted") else message.get("Auto-Submitted").lower() != "no",
+        True if message.get("X-Auto-Response-Suppress") in ("DR", "AutoReply", "All") else False,
+        message.get("List-Id"),
+        message.get("List-Unsubscribe"),
+    ]
+    return any(any_if_this)
+
+
 def create_ticket_cc(ticket, cc_list):
 
     if not cc_list:
@@ -429,30 +444,41 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
         for email_address in ticket_cc_list:
             notifications_to_be_sent.append(email_address)
 
-    # send mail to appropriate people now depending on what objects
-    # were created and who was CC'd
-    if new:
-        ticket.send(
-            {'submitter': ('newticket_submitter', context),
-             'new_ticket_cc': ('newticket_cc', context),
-             'ticket_cc': ('newticket_cc', context)},
-            fail_silently=True,
-            extra_headers={'In-Reply-To': message_id},
-        )
+    autoreply = is_autoreply(message)
+    if autoreply:
+        logger.info("Message seems to be auto-reply, not sending any emails back to the sender")
     else:
-        context.update(comment=f.comment)
-        ticket.send(
-            {'submitter': ('newticket_submitter', context),
-             'assigned_to': ('updated_owner', context)},
-            fail_silently=True,
-            extra_headers={'In-Reply-To': message_id},
-        )
-        if queue.enable_notifications_on_email_events:
+        # send mail to appropriate people now depending on what objects
+        # were created and who was CC'd
+        # Add auto-reply headers because it's an auto-reply and we must
+        extra_headers = {
+            'In-Reply-To': message_id,
+            "Auto-Submitted": "auto-replied",
+            "X-Auto-Response-Suppress": "All",
+            "Precedence": "auto_reply",
+        }
+        if new:
             ticket.send(
-                {'ticket_cc': ('updated_cc', context)},
+                {'submitter': ('newticket_submitter', context),
+                 'new_ticket_cc': ('newticket_cc', context),
+                 'ticket_cc': ('newticket_cc', context)},
                 fail_silently=True,
-                extra_headers={'In-Reply-To': message_id},
+                extra_headers=extra_headers,
             )
+        else:
+            context.update(comment=f.comment)
+            ticket.send(
+                {'submitter': ('newticket_submitter', context),
+                 'assigned_to': ('updated_owner', context)},
+                fail_silently=True,
+                extra_headers=extra_headers,
+            )
+            if queue.enable_notifications_on_email_events:
+                ticket.send(
+                    {'ticket_cc': ('updated_cc', context)},
+                    fail_silently=True,
+                    extra_headers=extra_headers,
+                )
 
     return ticket
 
@@ -469,6 +495,7 @@ def object_from_message(message, queue, logger):
 
     sender = message.get('from', _('Unknown Sender'))
     sender = decode_mail_headers(decodeUnknown(message.get_charset(), sender))
+
     # to address bug #832, we wrap all the text in front of the email address in
     # double quotes by using replace() on the email string. Then,
     # take first item of list, second item of tuple is the actual email address.

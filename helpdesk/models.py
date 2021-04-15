@@ -614,7 +614,7 @@ class Ticket(models.Model):
             'assigned_to': (template_name2, context),
         }
 
-        **kwargs are passed to send_templated_mail defined in templated_mail.py
+        **kwargs are passed to send_templated_mail defined in templated_email.py
 
         returns the set of email addresses the notification was delivered to.
 
@@ -634,6 +634,7 @@ class Ticket(models.Model):
                 template, context = roles[role]
                 send_templated_mail(template, context, recipient, sender=self.queue.from_address, **kwargs)
                 recipients.add(recipient)
+
         send('submitter', self.submitter_email)
         send('ticket_cc', self.queue.updated_ticket_cc)
         send('new_ticket_cc', self.queue.new_ticket_cc)
