@@ -24,7 +24,6 @@ from django.utils import six
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _, ugettext
 from django.utils.encoding import python_2_unicode_compatible
-from django.forms import ValidationError
 import re
 
 from phonenumber_field.modelfields import PhoneNumberField

@@ -156,14 +156,6 @@ def dashboard(request):
 
     queues = _get_user_queues(request.user).values_list('id', flat=True)
 
-    from_clause = """FROM    helpdesk_ticket t,
-                    helpdesk_queue q"""
-    if queues:
-        where_clause = """WHERE   q.id = t.queue_id AND
-                        q.id IN (%s)""" % (",".join(("%d" % pk for pk in queues)))
-    else:
-        where_clause = """WHERE   q.id = t.queue_id"""
-
     # get user assigned tickets page
     paginator = Paginator(
         tickets, tickets_per_page)
@@ -1011,6 +1003,9 @@ def mass_update(request):
                 reverse('helpdesk:fusion') + '?' + '&'.join(['tickets=%s' % ticket_id for ticket_id in tickets])
             )
         return redirect('helpdesk:list')
+    else:
+        messages.error(request, f"Impossible de traiter l'action \"{action}\"...")
+        return redirect('helpdesk:list')
 
     for ticket in Ticket.objects.filter(id__in=tickets):
         if not _has_access_to_queue(request.user, ticket.queue):
@@ -1259,40 +1254,6 @@ def ticket_list(request):
     query_params = default_query_params
 
     from_saved_query = False
-
-    # If the user is coming from the header/navigation search box, lets' first
-    # look at their query to see if they have entered a valid ticket number. If
-    # they have, just redirect to that ticket number. Otherwise, we treat it as
-    # a keyword search.
-
-    if request.GET.get('search_type') == 'header':
-        query = request.GET.get('q')
-        filter = None
-        if query.find('-') > 0:
-            try:
-                queue, id = Ticket.queue_and_id_from_query(query)
-                id = int(id)
-            except ValueError:
-                id = None
-
-            if id:
-                filter = {'queue__slug': queue, 'id': id}
-        else:
-            try:
-                query = int(query)
-            except ValueError:
-                query = None
-
-            if query:
-                filter = {'id': int(query)}
-
-        if filter:
-            try:
-                ticket = base_tickets.get(**filter)
-                return redirect(ticket.staff_url)
-            except Ticket.DoesNotExist:
-                # Go on to standard keyword searching
-                pass
 
     saved_query = None
     if request.GET.get('saved_query'):
@@ -1859,7 +1820,6 @@ def report_queue(request, queue_id):
         day=ExtractDay('created')
     ).values('year', 'month', 'day', 'type').annotate(count=Count('id')).order_by()
 
-
     mapping_types = {ticket_type.id: ticket_type.name for ticket_type in TicketType.objects.all()}
     mapping_types[None] = 'Non défini'
 
@@ -1874,7 +1834,6 @@ def report_queue(request, queue_id):
                 'x': str_date,
                 ticket_type: stat['count']
             }
-
 
     return render(request, 'helpdesk/report_queue.html', {
         'queue': queue,

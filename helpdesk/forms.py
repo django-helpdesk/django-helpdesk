@@ -23,7 +23,6 @@ from phonenumber_field.widgets import PhoneNumberInternationalFallbackWidget
 
 from base.fields import CustomDateTimeField, CustomTinyMCE
 from base.widgets import MyModelSelect2Widget
-from base.models import get_technical_service
 from sphinx.models import Customer, Site, CustomerProducts
 
 User = get_user_model()
@@ -167,11 +166,11 @@ class EditTicketForm(CustomFieldMixin, PhoenixTicketForm, forms.ModelForm):
         required=False,
         widget=forms.URLInput(attrs={'palceholder': 'https://phoenix.ipexia.com/...'})
     )
-    assigned_to = assigned_to = forms.ModelChoiceField(
+    assigned_to = forms.ModelChoiceField(
         queryset=get_assignable_users(),
         widget=forms.Select(attrs={'class': 'form-control'}),
         required=False,
-        label=_('Case owner'),
+        label=_('Case owner')
     )
 
     class Meta:
@@ -350,7 +349,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
             if field.startswith('custom_'):
                 field_name = field.replace('custom_', '', 1)
                 custom_field = CustomField.objects.get(name=field_name)
-                cfv = TicketCustomFieldValue.objects.create(
+                TicketCustomFieldValue.objects.create(
                     ticket=ticket,
                     field=custom_field,
                     value=value
@@ -515,7 +514,7 @@ class TicketForm(AbstractTicketForm, PhoenixTicketForm):
             self.initial['contact_phone_number'] = user.employee.phone_number
             self.fields['contact_phone_number'].required = True
             self.fields['update_phone_number'].label = 'Utiliser pour mettre à jour mon numéro de téléphone ' \
-                                                        'sur mon profil ?'
+                                                       'sur mon profil ?'
             # Set initial submitter email
             if user.email:
                 self.initial['submitter_email'] = user.email
@@ -620,7 +619,8 @@ class UserSettingsForm(forms.Form):
 
     email_on_ticket_change = forms.BooleanField(
         label=_('E-mail me on ticket change?'),
-        help_text=_('If you\'re the ticket owner and the ticket is changed via the web by somebody else, do you want to receive an e-mail?'),
+        help_text=_('If you\'re the ticket owner and the ticket is changed via the web by somebody else, '
+                    'do you want to receive an e-mail?'),
         required=False,
     )
 
@@ -655,7 +655,7 @@ class EmailIgnoreForm(forms.ModelForm):
 
 
 class TicketCCForm(forms.ModelForm):
-    ''' Adds either an email address or helpdesk user as a CC on a Ticket. Used for processing POST requests. '''
+    """ Adds either an email address or helpdesk user as a CC on a Ticket. Used for processing POST requests. """
 
     class Meta:
         model = TicketCC
@@ -678,7 +678,7 @@ class TicketCCForm(forms.ModelForm):
 
 
 class TicketCCUserForm(forms.ModelForm):
-    ''' Adds a helpdesk user as a CC on a Ticket '''
+    """ Adds a helpdesk user as a CC on a Ticket """
 
     def __init__(self, *args, **kwargs):
         super(TicketCCUserForm, self).__init__(*args, **kwargs)
@@ -703,7 +703,7 @@ class TicketCCUserForm(forms.ModelForm):
 
 
 class TicketCCEmailForm(forms.ModelForm):
-    ''' Adds an email address as a CC on a Ticket '''
+    """ Adds an email address as a CC on a Ticket """
 
     def __init__(self, *args, **kwargs):
         super(TicketCCEmailForm, self).__init__(*args, **kwargs)
@@ -717,7 +717,7 @@ class TicketCCEmailForm(forms.ModelForm):
 
 
 class TicketDependencyForm(forms.ModelForm):
-    ''' Adds a different ticket as a dependency for this Ticket '''
+    """ Adds a different ticket as a dependency for this Ticket """
 
     class Meta:
         model = TicketDependency
@@ -767,6 +767,7 @@ class GenericIncidentForm(forms.ModelForm):
         form_control=True,
         help_text="Laisser vide pour indiquer que l'IG est en cours."
     )
+
     class Meta:
         model = GenericIncident
         exclude = ('subscribers',)
@@ -776,4 +777,3 @@ class GenericIncidentForm(forms.ModelForm):
             'external_link': forms.TextInput(attrs={'class': 'form-control'}),
             'category': forms.Select(attrs={'class': 'form-control'}),
         }
-

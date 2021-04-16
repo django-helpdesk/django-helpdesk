@@ -6,7 +6,6 @@ django-helpdesk - A Django powered ticket tracker for small enterprise.
 lib.py - Common functions (eg multipart e-mail)
 """
 
-import logging
 import mimetypes
 import os
 from datetime import date, timedelta
@@ -39,7 +38,7 @@ from django.utils import six
 from django.utils.encoding import smart_text
 from django.utils.safestring import mark_safe
 
-from helpdesk.models import Attachment, EmailTemplate
+from helpdesk.models import Attachment
 
 User = get_user_model()
 

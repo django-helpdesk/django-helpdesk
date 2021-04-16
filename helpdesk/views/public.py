@@ -6,19 +6,13 @@ django-helpdesk - A Django powered ticket tracker for small enterprise.
 views/public.py - All public facing views, eg non-staff (no authentication
                   required) views.
 """
-from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
 
 from base.models import Notification
 
-try:
-    # Django 2.0+
-    from django.urls import reverse
-except ImportError:
-    # Django < 2
-    from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.http import HttpResponseRedirect, HttpResponse
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import render, get_object_or_404
 from django.utils.http import urlquote
 from django.utils.translation import ugettext as _
 from django.conf import settings
