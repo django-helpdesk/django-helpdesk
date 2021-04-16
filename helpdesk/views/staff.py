@@ -1355,7 +1355,7 @@ def ticket_list(request):
         query_params['sorting'] = sort
 
     tickets = base_tickets.select_related(
-        'queue', 'category', 'type', 'customer_contact', 'customer__group', 'assigned_to'
+        'queue', 'category', 'type', 'customer_contact__employee', 'customer__group', 'assigned_to'
     )
 
     try:
