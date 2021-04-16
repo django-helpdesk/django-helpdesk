@@ -927,7 +927,7 @@ class Ticket(models.Model):
 
         :param User user: user that made the change of assigned_to
         """
-        if ticket.assigned_to:
+        if self.assigned_to:
             Notification.objects.create(
                 user_list=[self.assigned_to],
                 module=Notification.TICKET,
