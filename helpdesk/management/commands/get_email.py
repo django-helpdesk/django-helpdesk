@@ -42,7 +42,7 @@ from django.utils import encoding, six, timezone
 
 from helpdesk import settings
 from helpdesk.lib import send_templated_mail, safe_template_context, process_attachments
-from helpdesk.models import Queue, Ticket, TicketCC, FollowUp, IgnoreEmail
+from helpdesk.models import Queue, Ticket, FollowUp, IgnoreEmail
 
 import logging
 
@@ -365,6 +365,7 @@ def ticket_from_message(message, queue, logger):
         ticket_id = None
 
     body = None
+    full_body = None
     counter = 0
     files = []
 
@@ -383,7 +384,17 @@ def ticket_from_message(message, queue, logger):
                 if part['Content-Transfer-Encoding'] == '8bit' and part.get_content_charset() == 'utf-8':
                     body = body.decode('unicode_escape')
                 body = decode_unknown(part.get_content_charset(), body)
-                body = EmailReplyParser.parse_reply(body)
+                if ticket_id is None:
+                    # First message in thread, we save full body to avoid losing forwards and things like that
+                    body_parts = []
+                    for f in EmailReplyParser.read(body).fragments:
+                        body_parts.append(f.content)
+                    full_body = '\n\n'.join(body_parts)
+                    body = EmailReplyParser.parse_reply(body)
+                else:
+                    # Second and other reply, save only first part of the message
+                    body = EmailReplyParser.parse_reply(body)
+                    full_body = body
                 # workaround to get unicode text out rather than escaped text
                 try:
                     body = body.encode('ascii').decode('unicode_escape')
@@ -398,13 +409,21 @@ def ticket_from_message(message, queue, logger):
                 except UnicodeDecodeError as e:
                     logger.debug("UnicodeDecodeError on body decoding : %s" % e)
                     email_body = encoding.smart_text(part.get_payload(decode=False))
-                payload = """
-                <html>
-                <head>
-                <meta charset="utf-8"/>
-                </head>
-                %s
-                </html>""" % email_body
+                if not body and not full_body:
+                    # No text has been parsed so far - try such deep parsing for some messages
+                    altered_body = email_body.replace("</p>", "</p>\n").replace("<br", "\n<br")
+                    mail = BeautifulSoup(str(altered_body), "html.parser")
+                    full_body = mail.get_text()
+
+                if "<body" not in email_body:
+                    email_body = f"<body>{email_body}</body>"
+
+                payload = f'<html>' \
+                          f'<head>' \
+                          f'<meta charset="utf-8"/>' \
+                          f'</head>' \
+                          f'{email_body}' \
+                          f'</html>'
                 files.append(
                     SimpleUploadedFile(_("email_html_body.html"), payload.encode("utf-8"), 'text/html')
                 )
@@ -413,24 +432,6 @@ def ticket_from_message(message, queue, logger):
             if not name:
                 ext = mimetypes.guess_extension(part.get_content_type())
                 name = "part-%i%s" % (counter, ext)
-            payload = part.get_payload()
-            if isinstance(payload, list):
-                payload = payload.pop().as_string()
-            payloadToWrite = payload
-            # check version of python to ensure use of only the correct error type
-            if six.PY2:
-                non_b64_err = binascii.Error
-            else:
-                non_b64_err = TypeError
-            try:
-                logger.debug("Try to base64 decode the attachment payload")
-                if six.PY2:
-                    payloadToWrite = base64.decodestring(payload)
-                else:
-                    payloadToWrite = base64.decodebytes(payload)
-            except non_b64_err:
-                logger.debug("Payload was not base64 encoded, using raw bytes")
-                payloadToWrite = payload
             files.append(SimpleUploadedFile(name, part.get_payload(decode=True), mimetypes.guess_type(name)[0]))
             logger.debug("Found MIME attachment %s" % name)
 
@@ -443,8 +444,21 @@ def ticket_from_message(message, queue, logger):
         if beautiful_body:
             try:
                 body = beautiful_body.text
+                full_body = body
             except AttributeError:
                 pass
+
+    # Save message as attachment in case of some complex markup renders wrong
+    files.append(
+        SimpleUploadedFile(
+            _("original_message.eml").replace(
+                ".eml",
+                timezone.localtime().strftime("_%d-%m-%Y_%H:%M") + ".eml"
+            ),
+            str(message).encode("utf-8"),
+            'text/plain'
+        )
+    )
 
     ticket = None
     new = True
@@ -566,7 +580,7 @@ def ticket_from_message(message, queue, logger):
         title='E-Mail reçu de %s' % sender_email,
         date=timezone.now(),
         public=True,
-        comment=body,
+        comment=full_body or body or "",
     )
 
     if reopened:
