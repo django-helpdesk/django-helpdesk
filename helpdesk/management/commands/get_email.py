@@ -370,12 +370,16 @@ def ticket_from_message(message, queue, logger):
     files = []
 
     for part in message.walk():
+        logger.debug(
+            f"Part {counter} | Maintype = {part.get_content_maintype()} | Subtype = {part.get_content_subtype()}"
+        )
         if part.get_content_maintype() == 'multipart':
             continue
 
         name = part.get_param("name")
         if name:
             name = email.utils.collapse_rfc2231_value(name)
+            logger.debug(f'Part name : {name}')
 
         if part.get_content_maintype() == 'text' and name is None:
             if part.get_content_subtype() == 'plain' and body is None:
@@ -398,10 +402,14 @@ def ticket_from_message(message, queue, logger):
                 # workaround to get unicode text out rather than escaped text
                 try:
                     body = body.encode('ascii').decode('unicode_escape')
+                    full_body = body.encode('ascii').decode('unicode_escape')
                 except UnicodeEncodeError:
+                    logger.debug('UnicodeEncodeError so use utf-8')
                     body.encode('utf-8')
+                    full_body.encode('utf-8')
                 # Add <br> tag for new lines
                 body = linebreaksbr(body)
+                full_body = linebreaksbr(full_body)
                 logger.debug("Discovered plain text MIME part")
             else:
                 try:
@@ -410,6 +418,7 @@ def ticket_from_message(message, queue, logger):
                     logger.debug("UnicodeDecodeError on body decoding : %s" % e)
                     email_body = encoding.smart_text(part.get_payload(decode=False))
                 if not body and not full_body:
+                    logger.debug("Can't find body so use altered body")
                     # No text has been parsed so far - try such deep parsing for some messages
                     altered_body = email_body.replace("</p>", "</p>\n").replace("<br", "\n<br")
                     mail = BeautifulSoup(str(altered_body), "html.parser")
@@ -448,17 +457,18 @@ def ticket_from_message(message, queue, logger):
             except AttributeError:
                 pass
 
+    # Commented this because eml file wasn't read well
     # Save message as attachment in case of some complex markup renders wrong
-    files.append(
-        SimpleUploadedFile(
-            _("original_message.eml").replace(
-                ".eml",
-                timezone.localtime().strftime("_%d-%m-%Y_%H:%M") + ".eml"
-            ),
-            str(message).encode("utf-8"),
-            'text/plain'
-        )
-    )
+    # files.append(
+    #     SimpleUploadedFile(
+    #         _("original_message.eml").replace(
+    #             ".eml",
+    #             timezone.localtime().strftime("_%d-%m-%Y_%H:%M") + ".eml"
+    #         ),
+    #         str(message).encode("utf-8"),
+    #         'text/plain'
+    #     )
+    # )
 
     ticket = None
     new = True
