@@ -21,6 +21,7 @@ from os.path import isfile, join
 from time import ctime
 
 from bs4 import BeautifulSoup
+from django.conf import settings as django_settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -394,7 +395,7 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
         title=_('E-Mail Received from %(sender_email)s' % {'sender_email': sender_email}),
         date=now,
         public=True,
-        comment=payload['body'],
+        comment=payload.get('full_body', payload['body']) or "",
         message_id=message_id
     )
 
@@ -505,6 +506,7 @@ def object_from_message(message, queue, logger):
         ticket = None
 
     body = None
+    full_body = None
     counter = 0
     files = []
 
@@ -523,7 +525,19 @@ def object_from_message(message, queue, logger):
                 if part['Content-Transfer-Encoding'] == '8bit' and part.get_content_charset() == 'utf-8':
                     body = body.decode('unicode_escape')
                 body = decodeUnknown(part.get_content_charset(), body)
-                body = EmailReplyParser.parse_reply(body)
+                # have to use django_settings here so overwritting it works in tests
+                # the default value is False anyway
+                if ticket is None and getattr(django_settings, 'HELPDESK_FULL_FIRST_MESSAGE_FROM_EMAIL', False):
+                    # first message in thread, we save full body to avoid losing forwards and things like that
+                    body_parts = []
+                    for f in EmailReplyParser.read(body).fragments:
+                        body_parts.append(f.content)
+                    full_body = '\n\n'.join(body_parts)
+                    body = EmailReplyParser.parse_reply(body)
+                else:
+                    # second and other reply, save only first part of the message
+                    body = EmailReplyParser.parse_reply(body)
+                    full_body = body
                 # workaround to get unicode text out rather than escaped text
                 try:
                     body = body.encode('ascii').decode('unicode_escape')
@@ -536,13 +550,23 @@ def object_from_message(message, queue, logger):
                 except UnicodeDecodeError:
                     email_body = encoding.smart_text(part.get_payload(decode=False))
 
-                payload = """
-<html>
-<head>
-<meta charset="utf-8"/>
-</head>
-%s
-</html>""" % email_body
+                if not body and not full_body:
+                    # no text has been parsed so far - try such deep parsing for some messages
+                    altered_body = email_body.replace("</p>", "</p>\n").replace("<br", "\n<br")
+                    mail = BeautifulSoup(str(altered_body), "html.parser")
+                    full_body = mail.get_text()
+
+                if "<body" not in email_body:
+                    email_body = f"<body>{email_body}</body>"
+
+                payload = (
+                    '<html>'
+                    '<head>'
+                    '<meta charset="utf-8" />'
+                    '</head>'
+                    '%s'
+                    '</html>'
+                ) % email_body
                 files.append(
                     SimpleUploadedFile(_("email_html_body.html"), payload.encode("utf-8"), 'text/html')
                 )
@@ -554,22 +578,22 @@ def object_from_message(message, queue, logger):
             else:
                 name = ("part-%i_" % counter) + name
 
-            # FIXME: this code gets the paylods, then does something with it and then completely ignores it
-            # writing the part.get_payload(decode=True) instead; and then the payload variable is
-            # replaced by some dict later.
-            # the `payloadToWrite` has been also ignored so was commented
-            payload = part.get_payload()
-            if isinstance(payload, list):
-                payload = payload.pop().as_string()
-            # payloadToWrite = payload
-            # check version of python to ensure use of only the correct error type
-            non_b64_err = TypeError
-            try:
-                logger.debug("Try to base64 decode the attachment payload")
-                # payloadToWrite = base64.decodebytes(payload)
-            except non_b64_err:
-                logger.debug("Payload was not base64 encoded, using raw bytes")
-                # payloadToWrite = payload
+            # # FIXME: this code gets the paylods, then does something with it and then completely ignores it
+            # # writing the part.get_payload(decode=True) instead; and then the payload variable is
+            # # replaced by some dict later.
+            # # the `payloadToWrite` has been also ignored so was commented
+            # payload = part.get_payload()
+            # if isinstance(payload, list):
+            #     payload = payload.pop().as_string()
+            # # payloadToWrite = payload
+            # # check version of python to ensure use of only the correct error type
+            # non_b64_err = TypeError
+            # try:
+            #     logger.debug("Try to base64 decode the attachment payload")
+            #     # payloadToWrite = base64.decodebytes(payload)
+            # except non_b64_err:
+            #     logger.debug("Payload was not base64 encoded, using raw bytes")
+            #     # payloadToWrite = payload
             files.append(SimpleUploadedFile(name, part.get_payload(decode=True), mimetypes.guess_type(name)[0]))
             logger.debug("Found MIME attachment %s" % name)
 
@@ -581,10 +605,24 @@ def object_from_message(message, queue, logger):
         if beautiful_body:
             try:
                 body = beautiful_body.text
+                full_body = body
             except AttributeError:
                 pass
         if not body:
             body = ""
+
+    if getattr(django_settings, 'HELPDESK_ALWAYS_SAVE_INCOMING_EMAIL_MESSAGE', False):
+        # save message as attachment in case of some complex markup renders wrong
+        files.append(
+            SimpleUploadedFile(
+                _("original_message.eml").replace(
+                    ".eml",
+                    timezone.localtime().strftime("_%d-%m-%Y_%H:%M") + ".eml"
+                ),
+                str(message).encode("utf-8"),
+                'text/plain'
+            )
+        )
 
     smtp_priority = message.get('priority', '')
     smtp_importance = message.get('importance', '')
@@ -593,6 +631,7 @@ def object_from_message(message, queue, logger):
 
     payload = {
         'body': body,
+        'full_body': full_body or body,
         'subject': subject,
         'queue': queue,
         'sender_email': sender_email,

@@ -223,3 +223,7 @@ The following settings were defined in previous versions and are no longer suppo
 - **HELPDESK_FOOTER_SHOW_CHANGE_LANGUAGE_LINK** Is never shown. Use your own template if required.
 
 - **HELPDESK_ENABLE_PER_QUEUE_MEMBERSHIP** Discontinued in favor of HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION.
+
+- **HELPDESK_FULL_FIRST_MESSAGE_FROM_EMAIL** Do not ignore fowarded and replied text from the email messages which create a new ticket; useful for cases when customer forwards some email (error from service or something) and wants support to see that
+
+- **HELPDESK_ALWAYS_SAVE_INCOMING_EMAIL_MESSAGE** Any incoming .eml message is saved and available, helps when customer spent some time doing fancy markup which has been corrupted during the email-to-ticket-comment translate process

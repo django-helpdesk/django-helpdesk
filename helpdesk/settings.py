@@ -162,3 +162,12 @@ HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION = getattr(
 
 # use https in the email links
 HELPDESK_USE_HTTPS_IN_EMAIL_LINK = getattr(settings, 'HELPDESK_USE_HTTPS_IN_EMAIL_LINK', False)
+
+# Include all signatures and forwards in the first ticket message if set
+# Useful if you get forwards dropped from them while they are useful part of request
+HELPDESK_FULL_FIRST_MESSAGE_FROM_EMAIL = getattr(settings, 'HELPDESK_FULL_FIRST_MESSAGE_FROM_EMAIL', False)
+
+# If set then we always save incoming emails as .eml attachments
+# which is quite noisy but very helpful for complicated markup, forwards and so on
+# (which gets stripped/corrupted otherwise)
+HELPDESK_ALWAYS_SAVE_INCOMING_EMAIL_MESSAGE = getattr(settings, "HELPDESK_ALWAYS_SAVE_INCOMING_EMAIL_MESSAGE", False)
