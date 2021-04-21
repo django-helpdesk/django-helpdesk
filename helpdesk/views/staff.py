@@ -293,7 +293,7 @@ def view_ticket(request, ticket_id):
         raise PermissionDenied('User has not access to ticket')
 
     # Warn staff user that ticket doesn't have a submitter email or customer contact
-    if request.user.is_staff and not (ticket.submitter_email or ticket.customer_contact):
+    if request.user.is_staff and not ticket.submitter_email and not ticket.customer_contact:
         messages.warning(request, "Le ticket n'a pas d'émetteur.\n"
                                   "Il faudrait peut-être en mettre un si tu veux qu'il reçoive les mails de réponse !")
 
