@@ -485,6 +485,7 @@ class TicketForm(AbstractTicketForm, PhoenixTicketForm):
             self.fields.pop('body')
 
         if user.employee.is_ipexia_member:
+            self.fields['submitter_email'].required = True
             self.fields['assigned_to'].queryset = get_assignable_users()
             if helpdesk_settings.HELPDESK_CREATE_TICKET_HIDE_ASSIGNED_TO:
                 self.fields['assigned_to'].widget = forms.HiddenInput()
