@@ -28,6 +28,7 @@ import sys
 from time import ctime
 
 from bs4 import BeautifulSoup
+from django.core.mail import mail_admins
 from django.template.defaultfilters import linebreaksbr
 
 from email_reply_parser import EmailReplyParser
@@ -306,6 +307,21 @@ def decode_mail_headers(string):
     return ' '.join([
         str(msg, encoding=charset, errors='replace') if charset else str(msg) for msg, charset in decoded
     ])
+
+
+def is_autoreply(message):
+    """
+    Accepting message as something with .get(header_name) method
+    Returns True if it's likely to be auto-reply or False otherwise
+    So we don't start mail loops
+    """
+    any_if_this = [
+        False if not message.get("Auto-Submitted") else message.get("Auto-Submitted").lower() != "no",
+        True if message.get("X-Auto-Response-Suppress") in ("DR", "AutoReply", "All") else False,
+        message.get("List-Id"),
+        message.get("List-Unsubscribe"),
+    ]
+    return any(any_if_this)
 
 
 def ticket_from_message(message, queue, logger):
@@ -600,10 +616,7 @@ def ticket_from_message(message, queue, logger):
     f.save()
     logger.debug("Created new FollowUp for Ticket")
 
-    if six.PY2:
-        logger.info(("[%s-%s] %s" % (ticket.queue.slug, ticket.id, ticket.title,)).encode('ascii', 'replace'))
-    elif six.PY3:
-        logger.info("[%s-%s] %s" % (ticket.queue.slug, ticket.id, ticket.title,))
+    logger.info("[%s-%s] %s" % (ticket.queue.slug, ticket.id, ticket.title,))
 
     logger.debug('Files to attach :')
     logger.debug(files)
@@ -611,97 +624,122 @@ def ticket_from_message(message, queue, logger):
     for att_file in attached:
         logger.info("Attachment '%s' (with size %s) successfully added to ticket from email." % (att_file[0], att_file[1].size))
 
-    context = safe_template_context(ticket)
-
-    if new:
-        if sender_email:
-            send_templated_mail(
-                'newticket_submitter',
-                context,
-                recipients=sender_email,
-                sender=queue.from_address,
-                fail_silently=True,
-            )
-        if queue.new_ticket_cc:
-            send_templated_mail(
-                'newticket_cc',
-                context,
-                recipients=queue.new_ticket_cc,
-                sender=queue.from_address,
-                fail_silently=True,
-            )
-        if queue.updated_ticket_cc and queue.updated_ticket_cc != queue.new_ticket_cc:
-            send_templated_mail(
-                'newticket_cc',
-                context,
-                recipients=queue.updated_ticket_cc,
-                sender=queue.from_address,
-                fail_silently=True,
-            )
-        # Send notification to technical service
-        Notification.objects.create_for_technical_service(
-            filter_params={'employee__receive_ticket_notification': True},
-            message="Un nouveau ticket vient d'être ouvert par mail : %s" % ticket,
-            module=Notification.TICKET,
-            link_redirect=ticket.get_absolute_url()
+    autoreply = is_autoreply(message)
+    if autoreply:
+        logger.info("Message seems to be auto-reply, not sending any emails back to the sender")
+        mail_admins(
+            'Mail de réponse automatique ignoré',
+            "Un mail de l'outil ticketing vient d'être ignoré via les Headers de réponse automatique.\n"
+            "Faudrait peut-être vérifier que c'est bien le cas."
         )
     else:
-        context['ticket']['comment'] = f.comment
-        if ticket.assigned_to:
-            send_templated_mail(
-                'updated_owner',
-                context,
-                recipients=ticket.assigned_to.email,
-                sender=queue.from_address,
-                fail_silently=True,
-            )
-            # Send Phoenix notification to the user assigned to the ticket
-            if ticket.assigned_to.employee.receive_ticket_notification:
-                Notification.objects.create(
-                    module=Notification.TICKET,
-                    message="Une nouvelle réponse a été ajouté par mail sur votre ticket %s" % ticket,
-                    link_redirect=ticket.get_absolute_url(),
-                    user_list=[ticket.assigned_to]
+        context = safe_template_context(ticket)
+
+        # send mail to appropriate people now depending on what objects
+        # were created and who was CC'd
+        # Add auto-reply headers because it's an auto-reply and we must
+        extra_headers = {
+            "Auto-Submitted": "auto-replied",
+            "X-Auto-Response-Suppress": "All",
+            "Precedence": "auto_reply",
+        }
+
+        if new:
+            if sender_email:
+                send_templated_mail(
+                    'newticket_submitter',
+                    context,
+                    recipients=sender_email,
+                    sender=queue.from_address,
+                    fail_silently=True,
+                    extra_headers=extra_headers
                 )
-        else:
+            if queue.new_ticket_cc:
+                send_templated_mail(
+                    'newticket_cc',
+                    context,
+                    recipients=queue.new_ticket_cc,
+                    sender=queue.from_address,
+                    fail_silently=True,
+                    extra_headers=extra_headers
+                )
+            if queue.updated_ticket_cc and queue.updated_ticket_cc != queue.new_ticket_cc:
+                send_templated_mail(
+                    'newticket_cc',
+                    context,
+                    recipients=queue.updated_ticket_cc,
+                    sender=queue.from_address,
+                    fail_silently=True,
+                    extra_headers=extra_headers
+                )
             # Send notification to technical service
             Notification.objects.create_for_technical_service(
                 filter_params={'employee__receive_ticket_notification': True},
-                message="Une réponse vient d'être ajoutée au ticket par mail : %s" % ticket,
+                message="Un nouveau ticket vient d'être ouvert par mail : %s" % ticket,
                 module=Notification.TICKET,
                 link_redirect=ticket.get_absolute_url()
             )
-        if queue.updated_ticket_cc:
-            send_templated_mail(
-                'updated_cc',
-                context,
-                recipients=queue.updated_ticket_cc,
-                sender=queue.from_address,
-                fail_silently=True,
-            )
-        # Send mail to submitter if the follow up was made by someone else
-        if sender_email not in ticket.get_submitter_emails():
-            send_templated_mail(
-                'updated_submitter',
-                context,
-                recipients=ticket.get_submitter_emails(),
-                sender=queue.from_address,
-                fail_silently=True,
-            )
-        # copy email to all those CC'd to this particular ticket
-        for cc in ticket.ticketcc_set.all():
-            # don't duplicate email to assignee
-            address_to_ignore = [sender_email]
-            if ticket.assigned_to and ticket.assigned_to.email:
-                address_to_ignore.append(ticket.assigned_to.email)
-            if cc.email_address not in address_to_ignore:
+        else:
+            context['ticket']['comment'] = f.comment
+            if ticket.assigned_to:
+                send_templated_mail(
+                    'updated_owner',
+                    context,
+                    recipients=ticket.assigned_to.email,
+                    sender=queue.from_address,
+                    fail_silently=True,
+                    extra_headers=extra_headers
+                )
+                # Send Phoenix notification to the user assigned to the ticket
+                if ticket.assigned_to.employee.receive_ticket_notification:
+                    Notification.objects.create(
+                        module=Notification.TICKET,
+                        message="Une nouvelle réponse a été ajouté par mail sur votre ticket %s" % ticket,
+                        link_redirect=ticket.get_absolute_url(),
+                        user_list=[ticket.assigned_to]
+                    )
+            else:
+                # Send notification to technical service
+                Notification.objects.create_for_technical_service(
+                    filter_params={'employee__receive_ticket_notification': True},
+                    message="Une réponse vient d'être ajoutée au ticket par mail : %s" % ticket,
+                    module=Notification.TICKET,
+                    link_redirect=ticket.get_absolute_url()
+                )
+            if queue.updated_ticket_cc:
                 send_templated_mail(
                     'updated_cc',
                     context,
-                    recipients=cc.email_address,
+                    recipients=queue.updated_ticket_cc,
                     sender=queue.from_address,
                     fail_silently=True,
+                    extra_headers=extra_headers
                 )
+            # Send mail to submitter if the follow up was made by someone else
+            if sender_email not in ticket.get_submitter_emails():
+                send_templated_mail(
+                    'updated_submitter',
+                    context,
+                    recipients=ticket.get_submitter_emails(),
+                    sender=queue.from_address,
+                    fail_silently=True,
+                    extra_headers=extra_headers
+                )
+            # copy email to all those CC'd to this particular ticket
+            for cc in ticket.ticketcc_set.all():
+                # don't duplicate email to assignee
+                address_to_ignore = [sender_email]
+                if ticket.assigned_to and ticket.assigned_to.email:
+                    address_to_ignore.append(ticket.assigned_to.email)
+                if cc.email_address not in address_to_ignore:
+                    send_templated_mail(
+                        'updated_cc',
+                        context,
+                        recipients=cc.email_address,
+                        sender=queue.from_address,
+                        fail_silently=True,
+                        extra_headers=extra_headers
+                    )
 
     return ticket
 

@@ -49,7 +49,8 @@ def send_templated_mail(template_name,
                         sender=None,
                         bcc=None,
                         fail_silently=False,
-                        files=None):
+                        files=None,
+                        extra_headers=None):
     """
     send_templated_mail() is a wrapper around Django's e-mail routines that
     allows us to easily send multipart (text/plain & text/html) e-mails using
@@ -83,6 +84,8 @@ def send_templated_mail(template_name,
     from helpdesk.models import EmailTemplate
     from helpdesk.settings import HELPDESK_EMAIL_SUBJECT_TEMPLATE, \
         HELPDESK_EMAIL_FALLBACK_LOCALE
+
+    headers = extra_headers or {}
 
     # Create a deep copy of the context before aplying any modifications
     context = deepcopy(context)
@@ -148,9 +151,14 @@ def send_templated_mail(template_name,
     elif type(recipients) != list:
         recipients = [recipients]
 
-    msg = EmailMultiAlternatives(subject_part, text_part,
-                                 sender or settings.DEFAULT_FROM_EMAIL,
-                                 recipients, bcc=bcc)
+    msg = EmailMultiAlternatives(
+        subject_part,
+        text_part,
+        sender or settings.DEFAULT_FROM_EMAIL,
+        recipients,
+        bcc=bcc,
+        headers=headers
+    )
     msg.attach_alternative(html_part, "text/html")
 
     if files:
