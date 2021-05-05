@@ -1025,7 +1025,7 @@ class FollowUp(models.Model):
         # Check if this is the first public answer by a staff user on the ticket
         if not self.ticket.time_before_first_answer and self.public and self.user and self.user.is_staff:
             # Save the difference between ticket's creation date and this followup's date
-            self.ticket.time_before_first_answer = self.date - self.ticket.created
+            self.ticket.time_before_first_answer = office_time_between(self.ticket.created, self.date)
 
         self.ticket.save()
         super(FollowUp, self).save(*args, **kwargs)
