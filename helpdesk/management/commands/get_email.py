@@ -626,12 +626,7 @@ def ticket_from_message(message, queue, logger):
 
     autoreply = is_autoreply(message)
     if autoreply:
-        logger.info("Message seems to be auto-reply, not sending any emails back to the sender")
-        mail_admins(
-            'Mail de réponse automatique ignoré',
-            "Un mail de l'outil ticketing vient d'être ignoré via les Headers de réponse automatique.\n"
-            "Faudrait peut-être vérifier que c'est bien le cas."
-        )
+        logger.info("Message seems to be auto-reply, not sending any emails back to the sender.")
     else:
         context = safe_template_context(ticket)
 
