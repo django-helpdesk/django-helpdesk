@@ -981,6 +981,11 @@ def mass_update(request):
         messages.warning(request, 'Veuillez sélectionner au minimum 1 ticket et choisir une action à effectuer.')
         return redirect('helpdesk:list')
 
+    if action not in ('take', 'delete', 'fusion', 'close', 'close_public', 'unassign') and \
+            not action.startswith('assign_'):
+        messages.error(request, f"L'action '{action}' n'est pas reconnue.")
+        return redirect('helpdesk:list')
+
     if action.startswith('assign_'):
         parts = action.split('_')
         user = User.objects.get(id=parts[1])
@@ -1007,9 +1012,6 @@ def mass_update(request):
             return redirect(
                 reverse('helpdesk:fusion') + '?' + '&'.join(['tickets=%s' % ticket_id for ticket_id in tickets])
             )
-        return redirect('helpdesk:list')
-    else:
-        messages.error(request, f"Impossible de traiter l'action \"{action}\"...")
         return redirect('helpdesk:list')
 
     for ticket in Ticket.objects.filter(id__in=tickets):
