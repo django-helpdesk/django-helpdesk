@@ -624,9 +624,10 @@ def ticket_from_message(message, queue, logger):
     for att_file in attached:
         logger.info("Attachment '%s' (with size %s) successfully added to ticket from email." % (att_file[0], att_file[1].size))
 
-    autoreply = is_autoreply(message)
-    if autoreply:
-        logger.info("Message seems to be auto-reply, not sending any emails back to the sender.")
+    if is_autoreply(message):
+        logger.info(
+            f"Message seems to be auto-reply for ticket {ticket}."
+            f"Not sending any emails back to the sender {sender_email}.")
     else:
         context = safe_template_context(ticket)
 
