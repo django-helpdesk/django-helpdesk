@@ -371,14 +371,14 @@ def view_ticket(request, ticket_id):
         return_ticketccstring_and_show_subscribe(request.user, ticket)
 
     submitter_userprofile = ticket.get_submitter_userprofile()
-    if submitter_userprofile is not None:
+    """if submitter_userprofile is not None:
         content_type = ContentType.objects.get_for_model(submitter_userprofile)
         submitter_userprofile_url = reverse(
             'admin:{app}_{model}_change'.format(app=content_type.app_label, model=content_type.model),
-            kwargs={'object_id': submitter_userprofile.id}
+            kwargs={'object_id': submitter_userprofile.id}  # TODO problem
         )
-    else:
-        submitter_userprofile_url = None
+    else:"""
+    submitter_userprofile_url = None
 
     return render(request, 'helpdesk/ticket.html', {
         'ticket': ticket,
