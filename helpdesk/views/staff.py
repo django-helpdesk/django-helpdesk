@@ -49,7 +49,7 @@ from base.models import Notification, SpentTime
 from base.utils import handle_date_range_picker_filter, daterange
 from config.settings.base import DATETIME_LOCAL_FORMAT
 from sphinx.models import Customer, Site, CustomerProducts
-from sphinx.utils import handle_generic_information_form
+from sphinx.forms import handle_generic_information_form
 
 User = get_user_model()
 
