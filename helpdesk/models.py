@@ -27,12 +27,14 @@ from markdown.extensions import Extension
 
 import pinax.teams.models
 
-
 import uuid
 
 from helpdesk import settings as helpdesk_settings
 
 from .templated_email import send_templated_mail
+
+from seed.lib.superperms.orgs.models import Organization
+from django.contrib.postgres.fields import JSONField
 
 
 def format_time_spent(time_spent):
@@ -425,6 +427,24 @@ class Queue(models.Model):
 
 def mk_secret():
     return str(uuid.uuid4())
+
+class Form(models.Model):
+
+    organization_id = models.ForeignKey(Organization, on_delete=models.CASCADE)
+    name = models.CharField(max_length=255, null=True, blank=True)
+    description = models.TextField(blank=True, null=True)  # Introduction text included in the form
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+    extra_data = JSONField(default=dict, blank=True)
+    # alert_data = JSONField(default=dict, blank=True)
+
+    class Meta:
+        # TODO index by organization and id?
+        get_latest_by = "created"
+        ordering = ('pk',)
+
+    def __str__(self):
+        return 'Form - %s %s' % (self.id, self.name)
 
 
 class Ticket(models.Model):
