@@ -1518,7 +1518,7 @@ class UserSettings(models.Model):
     email_on_ticket_change = models.BooleanField(
         verbose_name=_('E-mail me on ticket change?'),
         help_text=_(
-            'If you\'re the ticket owner and the ticket is changed via the web by somebody else,'
+            'If you\'re the ticket owner and the ticket is changed via the web by somebody else, '
             'do you want to receive an e-mail?'
         ),
         default=email_on_ticket_change_default,
