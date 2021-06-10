@@ -428,23 +428,23 @@ class Queue(models.Model):
 def mk_secret():
     return str(uuid.uuid4())
 
-class Form(models.Model):
+class FormType(models.Model):
 
-    organization_id = models.ForeignKey(Organization, on_delete=models.CASCADE)
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
     name = models.CharField(max_length=255, null=True, blank=True)
     description = models.TextField(blank=True, null=True)  # Introduction text included in the form
-    created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now=True)
+    created = models.DateTimeField(auto_now_add=True, blank=True)
+    updated = models.DateTimeField(auto_now=True, blank=True)
     extra_data = JSONField(default=dict, blank=True)
     # alert_data = JSONField(default=dict, blank=True)
 
     class Meta:
         # TODO index by organization and id?
         get_latest_by = "created"
-        ordering = ('pk',)
+        ordering = ('id',)
 
     def __str__(self):
-        return 'Form - %s %s' % (self.id, self.name)
+        return 'FormType - %s %s' % (self.id, self.name)
 
 
 class Ticket(models.Model):
