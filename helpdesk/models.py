@@ -35,6 +35,8 @@ from .templated_email import send_templated_mail
 
 from seed.lib.superperms.orgs.models import Organization
 from django.contrib.postgres.fields import JSONField
+from django.db.models.signals import post_init
+from django.dispatch import receiver
 
 
 def format_time_spent(time_spent):
@@ -447,6 +449,22 @@ class FormType(models.Model):
         return 'FormType - %s %s' % (self.id, self.name)
 
 
+"""@receiver(post_init, sender=FormType, dispatch_uid="create_default_fields")
+def _create_default_fields(sender, instance, **kwargs):
+    # Create the default list of fields for a form.
+       
+    for field in CustomField.DEFAULT_FIELDS:
+        details = {
+            'form_type_id': sender.id
+        }
+        details.update(field)
+        
+        # In Seed, here _create_default_columns makes list of field names, compares the current field
+        # to them, and sets more attributes of the CustomField based on that.
+        
+        CustomField.objects.create(**details)"""
+
+
 class Ticket(models.Model):
     """
     To allow a ticket to be entered as quickly as possible, only the
@@ -486,117 +504,52 @@ class Ticket(models.Model):
         (5, _('5. Very Low')),
     )
 
-    title = models.CharField(
-        _('Title'),
-        max_length=200,
-    )
+    # Labels are built-in for these fields, and not overwritten.
+    assigned_to = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True,
+                                    related_name='assigned_to', verbose_name=_('Assigned to'))
+    created = models.DateTimeField(_('Created'), auto_now_add=True,
+                                   help_text=_('Date this ticket was first created'), )
+    modified = models.DateTimeField(_('Modified'), auto_now=True,
+                                    help_text=_('Date this ticket was most recently changed.'))
+    status = models.IntegerField(_('Status'), choices=STATUS_CHOICES, default=OPEN_STATUS)
+    on_hold = models.BooleanField(_('On Hold'), blank=True, default=False,
+                                  help_text=_('If a ticket is on hold, it will not automatically be escalated.'))
+    resolution = models.TextField(_('Resolution'), blank=True, null=True,
+                                  help_text=_('The resolution provided to the customer by our staff.'))
+    last_escalation = models.DateTimeField(blank=True, null=True, editable=False,
+                                           help_text=_('The date this ticket was last escalated - updated '
+                                                       'automatically by management/commands/escalate_tickets.py.'))
+    secret_key = models.CharField(_("Secret key needed for viewing/editing ticket by non-logged in users"),
+                                  max_length=36, default=mk_secret)
+    kbitem = models.ForeignKey("KBItem", blank=True, null=True, on_delete=models.CASCADE,
+                               verbose_name=_('Knowledge base item the user was viewing '
+                                              'when they created this ticket.'))
+    merged_to = models.ForeignKey('self', verbose_name=_('merged to'), related_name='merged_tickets',
+                                  on_delete=models.CASCADE, null=True, blank=True)
 
-    queue = models.ForeignKey(
-        Queue,
-        on_delete=models.CASCADE,
-        verbose_name=_('Queue'),
-    )
+    # Labels for these fields are provided by TicketDisplay table by default, on form-creation
+    queue = models.ForeignKey(Queue, on_delete=models.CASCADE, verbose_name=_('Queue'))
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True, null=True)
+    priority = models.IntegerField(choices=PRIORITY_CHOICES, default=3, blank=3)
+    due_date = models.DateTimeField(blank=True, null=True)
+    submitter_email = models.EmailField(blank=True, null=True)
 
-    created = models.DateTimeField(
-        _('Created'),
-        blank=True,
-        help_text=_('Date this ticket was first created'),
-    )
+    # SEED fields
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, blank=True, null=True)
+    ticket_form = models.ForeignKey(FormType, on_delete=models.CASCADE)
+    # inventory_type = models.IntegerField(choices=VIEW_LIST_INVENTORY_TYPE, default=VIEW_LIST_PROPERTY)
 
-    modified = models.DateTimeField(
-        _('Modified'),
-        blank=True,
-        help_text=_('Date this ticket was most recently changed.'),
-    )
+    # Contains extra fields
+    extra_data = JSONField(default=dict, blank=True)
 
-    submitter_email = models.EmailField(
-        _('Submitter E-Mail'),
-        blank=True,
-        null=True,
-        help_text=_('The submitter will receive an email for all public '
-                    'follow-ups left for this task.'),
-    )
-
-    assigned_to = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name='assigned_to',
-        blank=True,
-        null=True,
-        verbose_name=_('Assigned to'),
-    )
-
-    status = models.IntegerField(
-        _('Status'),
-        choices=STATUS_CHOICES,
-        default=OPEN_STATUS,
-    )
-
-    on_hold = models.BooleanField(
-        _('On Hold'),
-        blank=True,
-        default=False,
-        help_text=_('If a ticket is on hold, it will not automatically be escalated.'),
-    )
-
-    description = models.TextField(
-        _('Description'),
-        blank=True,
-        null=True,
-        help_text=_('The content of the customers query.'),
-    )
-
-    resolution = models.TextField(
-        _('Resolution'),
-        blank=True,
-        null=True,
-        help_text=_('The resolution provided to the customer by our staff.'),
-    )
-
-    priority = models.IntegerField(
-        _('Priority'),
-        choices=PRIORITY_CHOICES,
-        default=3,
-        blank=3,
-        help_text=_('1 = Highest Priority, 5 = Low Priority'),
-    )
-
-    due_date = models.DateTimeField(
-        _('Due on'),
-        blank=True,
-        null=True,
-    )
-
-    last_escalation = models.DateTimeField(
-        blank=True,
-        null=True,
-        editable=False,
-        help_text=_('The date this ticket was last escalated - updated '
-                    'automatically by management/commands/escalate_tickets.py.'),
-    )
-
-    secret_key = models.CharField(
-        _("Secret key needed for viewing/editing ticket by non-logged in users"),
-        max_length=36,
-        default=mk_secret,
-    )
-
-    kbitem = models.ForeignKey(
-        "KBItem",
-        blank=True,
-        null=True,
-        on_delete=models.CASCADE,
-        verbose_name=_('Knowledge base item the user was viewing when they created this ticket.'),
-    )
-
-    merged_to = models.ForeignKey(
-        'self',
-        verbose_name=_('merged to'),
-        related_name='merged_tickets',
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True
-    )
+    # Default contact fields
+    contact_name = models.CharField(max_length=200, blank=True, null=True)
+    contact_email = models.CharField(max_length=200, blank=True, null=True)
+    building_name = models.CharField(max_length=200, blank=True, null=True)
+    building_address = models.TextField(blank=True, null=True)
+    pm_id = models.CharField(max_length=200, blank=True, null=True)
+    building_id = models.CharField(max_length=200, blank=True, null=True)
 
     @property
     def time_spent(self):
@@ -1754,18 +1707,148 @@ class CustomField(models.Model):
     """
     Definitions for custom fields that are glued onto each ticket.
     """
+    # default fields
+    DEFAULT_FIELDS = [
+        {
+            # 'form_type': ,
+            'field_name': 'queue',
+            'label': 'Queue',
+            'help_text': '',
+            'data_type': 'integer',
+            'ordering': None,
+            'required': True,
+            'staff_only': True,
+            'is_extra_data': False,
+        }, {
+            'field_name': 'title',
+            'label': 'Subject',
+            'help_text': '',
+            'data_type': 'varchar',
+            'max_length': 200,
+            'ordering': None,
+            'required': False,
+            'staff_only': False,
+            'is_extra_data': False,
+        }, {
+            'field_name': 'description',
+            'label': 'Description',
+            'help_text': '',
+            'data_type': 'text',
+            'ordering': None,
+            'required': False,
+            'staff_only': False,
+            'is_extra_data': False,
+        }, {
+            'field_name': 'priority',
+            'label': 'Priority',
+            'help_text': "Please select a priority carefully. If unsure, leave it as '3'.",
+            'data_type': 'list',
+            'empty_selection_list': False,
+            'list_values': Ticket.PRIORITY_CHOICES,
+            'ordering': None,
+            'required': False,
+            'staff_only': False,
+            'is_extra_data': False,
+        }, {
+            'field_name': 'due_date',
+            'label': 'Due Date',
+            'data_type': 'datetime',  # TODO should change this just to date
+            'ordering': None,
+            'required': False,
+            'staff_only': False,
+            'is_extra_data': False,
+        }, {
+            'field_name': 'attachment',
+            'label': 'Attach',
+            'data_type': '',  # TODO need to add attachment data type
+            'ordering': None,
+            'required': False,
+            'staff_only': False,
+            'is_extra_data': False,
+        }, {
+            'field_name': 'submitter_email',
+            'label': 'Submitter Email',  # TODO Both submitter email and contact email should get updates of ticket
+            'help_text': 'This e-mail address will receive copies of all public updates to this ticket.',
+            'data_type': 'email',
+            'max_length': 200,
+            'ordering': None,
+            'required': True,
+            'staff_only': False,
+            'is_extra_data': False,
+        }, {
+            'field_name': 'contact_name',
+            'label': 'Primary Contact Name',
+            'data_type': 'varchar',
+            'max_length': 200,
+            'ordering': None,
+            'required': True,
+            'staff_only': False,
+            'is_extra_data': False,
+        }, {
+            'field_name': 'contact_email',
+            'label': 'Primary Contact Email',
+            'help_text': 'This e-mail address will receive copies of all public updates to this ticket.',
+            'data_type': 'email',
+            'max_length': 200,
+            'ordering': None,
+            'required': True,
+            'staff_only': False,
+            'is_extra_data': False,
+        }, {
+            'field_name': 'building_name',
+            'label': 'Building Name',
+            'data_type': 'varchar',
+            'max_length': 200,
+            'ordering': None,
+            'required': False,
+            'staff_only': False,
+            'is_extra_data': False,
+        }, {
+            'field_name': 'building_address',
+            'label': 'Building Address',  # TODO can we set a max number of lines?
+            'data_type': 'text',
+            'ordering': None,
+            'required': False,
+            'staff_only': False,
+            'is_extra_data': False,
+        }, {
+            'field_name': 'pm_id',
+            'label': 'Portfolio Manager ID',
+            'help_text': '',
+            'data_type': 'varchar',
+            'max_length': 200,
+            'ordering': None,
+            'required': False,
+            'staff_only': False,
+            'is_extra_data': False,
+        }, {
+            'field_name': 'building_id',
+            'label': 'Building ID',
+            'help_text': '',
+            'data_type': 'varchar',
+            'max_length': 200,
+            'ordering': None,
+            'required': False,
+            'staff_only': False,
+            'is_extra_data': False,
+        }
+    ]
 
-    name = models.SlugField(
+    form_type = models.ForeignKey(FormType, on_delete=models.CASCADE)
+
+    field_name = models.SlugField(
         _('Field Name'),
         help_text=_('As used in the database and behind the scenes. '
-                    'Must be unique and consist of only lowercase letters with no punctuation.'),
-        unique=True,
+                    'Must consist of only lowercase letters with no punctuation.'),
+        unique=False,
     )
 
     label = models.CharField(
         _('Label'),
-        max_length=30,
+        max_length=200,
         help_text=_('The display label for this field'),
+        blank=True,
+        null=True
     )
 
     help_text = models.TextField(
@@ -1852,14 +1935,24 @@ class CustomField(models.Model):
         default=False,
     )
 
-    objects = CustomFieldManager()
+    objects = CustomFieldManager()  # for ordering objects based on "ordering"
+
+    # beam_field = models.ForeignKey(Column, blank=True, null=True)  # name of the field in BEAM that this field associates with
+    is_extra_data = models.BooleanField(default=False)
+    # alerts = ???
+
+    created = models.DateTimeField(auto_now_add=True)
+    modified = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return '%s' % self.name
+        return 'Custom Field - %s %s' % (self.pk, self.field_name)
 
     class Meta:
         verbose_name = _('Custom field')
         verbose_name_plural = _('Custom fields')
+        unique_together = ('field_name', 'form_type')
+        # Django 3.2 option
+        # constraints = [models.UniqueConstraint(fields=['field_name', 'form_type'], name='unique_form_field')]
 
 
 class TicketCustomFieldValue(models.Model):

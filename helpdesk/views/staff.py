@@ -910,9 +910,9 @@ def merge_tickets(request):
                     value = ticket.ticketcustomfieldvalue_set.get(field=custom_field).value
                 except (TicketCustomFieldValue.DoesNotExist, ValueError):
                     value = default
-                ticket.values[custom_field.name] = {
+                ticket.values[custom_field.field_name] = {
                     'value': value,
-                    'checked': str(ticket.id) == request.POST.get(custom_field.name)
+                    'checked': str(ticket.id) == request.POST.get(custom_field.field_name)
                 }
 
         if request.method == 'POST':
@@ -943,7 +943,7 @@ def merge_tickets(request):
                         setattr(chosen_ticket, attribute, value)
                 # Save custom fields values
                 for custom_field in custom_fields:
-                    id_for_custom_field = request.POST.get(custom_field.name)
+                    id_for_custom_field = request.POST.get(custom_field.field_name)
                     if id_for_custom_field != chosen_ticket.id:
                         try:
                             selected_ticket = tickets.get(id=id_for_custom_field)

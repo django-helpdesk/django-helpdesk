@@ -90,7 +90,7 @@ class CustomFieldMixin(object):
                 # The data_type was not found anywhere
                 raise NameError("Unrecognized data_type %s" % field.data_type)
 
-        self.fields['custom_%s' % field.name] = fieldclass(**instanceargs)
+        self.fields['custom_%s' % field.field_name] = fieldclass(**instanceargs)
 
 
 class EditTicketForm(CustomFieldMixin, forms.ModelForm):

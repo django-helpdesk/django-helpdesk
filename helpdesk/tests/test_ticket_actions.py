@@ -284,8 +284,8 @@ class TicketActionsTestCase(TestCase):
                 'submitter_email': str(ticket_2.id),
                 'description': str(ticket_2.id),
                 'assigned_to': str(ticket_2.id),
-                custom_field_1.name: str(ticket_1.id),
-                custom_field_2.name: str(ticket_2.id),
+                custom_field_1.field_name: str(ticket_1.id),
+                custom_field_2.field_name: str(ticket_2.id),
             },
             follow=True
         )

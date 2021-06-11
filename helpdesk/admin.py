@@ -79,7 +79,7 @@ class KBItemAdmin(admin.ModelAdmin):
 
 @admin.register(CustomField)
 class CustomFieldAdmin(admin.ModelAdmin):
-    list_display = ('name', 'label', 'data_type')
+    list_display = ('field_name', 'label', 'data_type')
 
 
 @admin.register(EmailTemplate)

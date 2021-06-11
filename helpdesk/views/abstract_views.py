@@ -14,7 +14,7 @@ class AbstractCreateTicketMixin():
             initial_data['submitter_email'] = u.email
 
         query_param_fields = ['submitter_email', 'title', 'body', 'queue', 'kbitem']
-        custom_fields = ["custom_%s" % f.name for f in CustomField.objects.filter(staff_only=False)]
+        custom_fields = ["custom_%s" % f.field_name for f in CustomField.objects.filter(staff_only=False)]
         query_param_fields += custom_fields
         for qpf in query_param_fields:
             initial_data[qpf] = request.GET.get(qpf, initial_data.get(qpf, ""))
