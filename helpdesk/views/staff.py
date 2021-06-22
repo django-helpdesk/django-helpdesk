@@ -35,7 +35,7 @@ from guardian.shortcuts import get_objects_for_user
 from helpdesk.filters import FeedbackSurveyFilter, GenericIncidentFilter
 from helpdesk.forms import TicketForm, UserSettingsForm, EmailIgnoreForm, EditTicketForm, TicketCCForm, \
     TicketCCEmailForm, TicketCCUserForm, EditFollowUpForm, TicketDependencyForm, InformationTicketForm, \
-    CreateFollowUpForm, MultipleTicketSelectForm, GenericIncidentForm
+    CreateFollowUpForm, MultipleTicketSelectForm, GenericIncidentForm, QuickCommentForm
 from helpdesk.decorators import staff_member_required, superuser_required
 from helpdesk.lib import send_templated_mail, apply_query, safe_template_context, process_attachments,\
     get_assignable_users, calc_tickets_first_answer_statistics
@@ -515,6 +515,22 @@ def view_ticket(request, ticket_id):
         'ticketcc_string': ticketcc_string,
         'SHOW_SUBSCRIBE': show_subscribe
     })
+
+
+@require_POST
+@require_ajax
+@staff_member_required
+def edit_quick_comment(request, ticket_id):
+    if request.POST.get('quickComment') is None:
+        return JsonResponse({'success': False, 'error': 'Commentaire introuvable dans la requête'})
+
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+    ticket.quick_comment = request.POST.get('quickComment')
+    try:
+        ticket.save()
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+    return JsonResponse({'success': True})
 
 
 @staff_member_required
@@ -1388,6 +1404,9 @@ def ticket_list(request):
     urlsafe_query = b64encode(json.dumps(query_params).encode('UTF-8'))
 
     user_saved_queries = SavedSearch.objects.select_related('user').filter(Q(user=request.user) | Q(shared=True))
+
+    for ticket in ticket_qs:
+        ticket.form = QuickCommentForm(instance=ticket)
 
     return render(request, 'helpdesk/ticket_list.html', dict(
         context,

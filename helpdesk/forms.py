@@ -222,6 +222,17 @@ class EditTicketForm(CustomFieldMixin, PhoenixTicketForm, forms.ModelForm):
         return super(EditTicketForm, self).save(*args, **kwargs)
 
 
+class QuickCommentForm(forms.ModelForm):
+    class Meta:
+        model = Ticket
+        fields = ("quick_comment",)
+        widgets = {
+            "quick_comment": forms.Textarea(attrs={
+                "class": "form-control resize-vertical"
+            })
+        }
+
+
 class CreateFollowUpForm(forms.ModelForm):
     toggle_ticket_status = forms.BooleanField(
         required=False,
