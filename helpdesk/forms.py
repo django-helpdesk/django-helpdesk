@@ -300,7 +300,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
 
         # TODO hard codes this -- change in the future (for now it doesn't really matter)
         ticket_form = FormType.objects.get(pk=1)
-        organization = Organization.objects.get(pk=4)
+        organization = Organization.objects.all().first()
 
         ticket = Ticket(
             # TODO Necessary fields
