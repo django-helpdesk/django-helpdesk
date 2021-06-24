@@ -11,11 +11,32 @@
         {% if form.errors %}
             {% include 'helpdesk/include/alert_form_errors.html' %}
         {% endif %}
-        <form role="form" method='post' enctype='multipart/form-data'>
+
+        <form method='post' enctype='multipart/form-data'>
             {% csrf_token %}
-            {{ form|bootstrap4form }}
+            {% for field in form %}
+                {% if field.is_hidden %}
+                    {{ field }}
+                {% else %}
+                    <div class="form-group">
+                        <label for='id_{{ field.name }}'>
+                            {{ field.label }}
+                            {% if not field.field.required %}
+                                ({% trans "Optional" %})
+                            {% endif %}
+                        </label>
+                        {{ field }}
+                        {% if field.errors %}
+                            <small class='error'>{{ field.errors }}</small>
+                        {% endif %}
+                        {% if field.help_text %}
+                            <small class='form_help_text help-block'>{% trans field.help_text %}</small>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            {% endfor %}
             <button type="submit" class="btn btn-primary btn-lg btn-block">
-                {% trans "Submit Ticket" %} <i class="fa fa-paper-plane"></i>
+                <i class="fa fa-send"></i> {% trans "Submit Ticket" %}
             </button>
         </form>
     {% else %}

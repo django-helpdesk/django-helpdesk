@@ -380,6 +380,15 @@ def view_ticket(request, ticket_id):
     else:"""
     submitter_userprofile_url = None
 
+    display_data = CustomField.objects.filter(ticket_form=ticket.ticket_form).values()
+    extra_data = []
+    for field in display_data:
+        if not field['unlisted']:
+            if field['field_name'] in ticket.extra_data:
+                field['value'] = ticket.extra_data[field['field_name']]
+            field['value'] = getattr(ticket, field['field_name'], None)
+            extra_data.append(field)
+
     return render(request, 'helpdesk/ticket.html', {
         'ticket': ticket,
         'submitter_userprofile_url': submitter_userprofile_url,
@@ -390,6 +399,7 @@ def view_ticket(request, ticket_id):
             Q(queues=ticket.queue) | Q(queues__isnull=True)),
         'ticketcc_string': ticketcc_string,
         'SHOW_SUBSCRIBE': show_subscribe,
+        'extra_data': extra_data
     })
 
 

@@ -18,8 +18,11 @@ from django.utils import timezone
 
 from helpdesk.lib import safe_template_context, process_attachments
 from helpdesk.models import (Ticket, Queue, FollowUp, IgnoreEmail, TicketCC,
-                             CustomField, TicketCustomFieldValue, TicketDependency, UserSettings, KBItem)
+                             CustomField, TicketCustomFieldValue, TicketDependency, UserSettings, KBItem,
+                             FormType)
 from helpdesk import settings as helpdesk_settings
+
+from seed.lib.superperms.orgs.models import Organization
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -34,6 +37,7 @@ CUSTOMFIELD_TO_FIELD_DICT = {
     'url': forms.URLField,
     'ipaddress': forms.GenericIPAddressField,
     'slug': forms.SlugField,
+    # TODO Add attachment type here? and foreignkey?
 }
 
 CUSTOMFIELD_DATE_FORMAT = "%Y-%m-%d"
@@ -47,10 +51,14 @@ class CustomFieldMixin(object):
     """
 
     def customfield_to_field(self, field, instanceargs):
+        # Field is an object in CustomField, with attributes like field_name, label, help_text, etc
+        # instanceargs dict is for the frontend display settings like max_length, the kind of form widget, etc
         # Use TextInput widget by default
         instanceargs['widget'] = forms.TextInput(attrs={'class': 'form-control'})
         # if-elif branches start with special cases
-        if field.data_type == 'varchar':
+        if field.data_type is None:
+            fieldclass = forms.NullBooleanField
+        elif field.data_type == 'varchar':
             fieldclass = forms.CharField
             instanceargs['max_length'] = field.max_length
         elif field.data_type == 'text':
@@ -90,14 +98,25 @@ class CustomFieldMixin(object):
                 # The data_type was not found anywhere
                 raise NameError("Unrecognized data_type %s" % field.data_type)
 
-        self.fields['custom_%s' % field.field_name] = fieldclass(**instanceargs)
+        # TODO change this
+        if field.is_extra_data:
+            self.fields['e_%s' % field.field_name] = fieldclass(**instanceargs)
+        else:
+            self.fields[field.field_name] = fieldclass(**instanceargs)
+
+
+# TODO
+"""non_extra_fields = ['queue', 'title', 'description', 'priority', 'due_date', 'attachment', 'submitter_email',
+                    'contact_name', 'contact_email', 'building_name', 'building_address', 'pm_id', 'building_id']
+builtin_fields = ['assigned_to', 'created', 'modified', 'status', 'on_hold', 'resolution', 'last_escalation']"""
 
 
 class EditTicketForm(CustomFieldMixin, forms.ModelForm):
 
     class Meta:
         model = Ticket
-        exclude = ('created', 'modified', 'status', 'on_hold', 'resolution', 'last_escalation', 'assigned_to')
+        exclude = ('assigned_to', 'created', 'modified', 'status', 'on_hold', 'resolution', 'last_escalation',
+                   'organization', 'ticket_form')
 
     class Media:
         js = ('helpdesk/js/init_due_date.js', 'helpdesk/js/init_datetime_classes.js')
@@ -107,62 +126,67 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
         Add any custom fields that are defined to the form
         """
         super(EditTicketForm, self).__init__(*args, **kwargs)
+        form_id = self.instance.ticket_form.pk
+        extra_data = self.instance.extra_data
+
+        # CustomField already excludes builtin_fields and SEED fields
+        display_objects = CustomField.objects.filter(ticket_form=form_id).exclude(field_name='queue')
 
         # Disable and add help_text to the merged_to field on this form
         self.fields['merged_to'].disabled = True
         self.fields['merged_to'].help_text = _('This ticket is merged into the selected ticket.')
-
-        for field in CustomField.objects.all():
+        for display_data in display_objects:
             initial_value = None
-            try:
-                current_value = TicketCustomFieldValue.objects.get(ticket=self.instance, field=field)
-                initial_value = current_value.value
-                # Attempt to convert from fixed format string to date/time data type
-                if 'datetime' == current_value.field.data_type:
-                    initial_value = datetime.strptime(initial_value, CUSTOMFIELD_DATETIME_FORMAT)
-                elif 'date' == current_value.field.data_type:
-                    initial_value = datetime.strptime(initial_value, CUSTOMFIELD_DATE_FORMAT)
-                elif 'time' == current_value.field.data_type:
-                    initial_value = datetime.strptime(initial_value, CUSTOMFIELD_TIME_FORMAT)
-                # If it is boolean field, transform the value to a real boolean instead of a string
-                elif 'boolean' == current_value.field.data_type:
-                    initial_value = 'True' == initial_value
-            except (TicketCustomFieldValue.DoesNotExist, ValueError, TypeError):
-                # ValueError error if parsing fails, using initial_value = current_value.value
-                # TypeError if parsing None type
-                pass
-            instanceargs = {
-                'label': field.label,
-                'help_text': field.help_text,
-                'required': field.required,
-                'initial': initial_value,
-            }
-
-            self.customfield_to_field(field, instanceargs)
-
-    def save(self, *args, **kwargs):
-
-        for field, value in self.cleaned_data.items():
-            if field.startswith('custom_'):
-                field_name = field.replace('custom_', '', 1)
-                customfield = CustomField.objects.get(name=field_name)
+            if display_data.editable and display_data.is_extra_data:
                 try:
-                    cfv = TicketCustomFieldValue.objects.get(ticket=self.instance, field=customfield)
-                except ObjectDoesNotExist:
-                    cfv = TicketCustomFieldValue(ticket=self.instance, field=customfield)
+                    initial_value = extra_data[display_data.field_name]
+                    # Attempt to convert from fixed format string to date/time data type
+                    if 'datetime' == display_data.data_type:
+                        initial_value = datetime.strptime(initial_value, CUSTOMFIELD_DATETIME_FORMAT)
+                    elif 'date' == display_data.data_type:
+                        initial_value = datetime.strptime(initial_value, CUSTOMFIELD_DATE_FORMAT)
+                    elif 'time' == display_data.data_type:
+                        initial_value = datetime.strptime(initial_value, CUSTOMFIELD_TIME_FORMAT)
+                    # If it is boolean field, transform the value to a real boolean instead of a string
+                    elif 'boolean' == display_data.data_type:
+                        initial_value = 'True' == initial_value
+                except (KeyError, ValueError, TypeError):  # TicketCustomFieldValue.DoesNotExist,
+                    # ValueError error if parsing fails, using initial_value = current_value.value
+                    # TypeError if parsing None type
+                    pass
+                instanceargs = {
+                    'label': display_data.label,
+                    'help_text': display_data.help_text,
+                    'required': display_data.required,
+                    'initial': initial_value,
+                }
+                self.customfield_to_field(display_data, instanceargs)
+            elif display_data.field_name in self.fields:
+                if not display_data.editable:
+                    self.fields[display_data.field_name].widget = forms.HiddenInput()
+                else:
+                    fields = ['label', 'help_text', 'list_values', 'required',]  # TODO ordering too
+                    for attr in fields:
+                        display_info = getattr(display_data, attr, None)
+                        if display_info is not None and display_info != '':
+                            setattr(self.fields[display_data.field_name], attr, display_info)
+                            # print('--%s: %s' % (attr, display_info))
+        self.fields['extra_data'].widget = forms.HiddenInput()
 
+    def clean(self):
+        cleaned_data = super(EditTicketForm, self).clean()
+        for field, value in cleaned_data.items():
+            if field.startswith('e_'):
+                field_name = field.replace('e_', '', 1)
                 # Convert date/time data type to known fixed format string.
                 if datetime is type(value):
-                    cfv.value = value.strftime(CUSTOMFIELD_DATETIME_FORMAT)
+                    value = value.strftime(CUSTOMFIELD_DATETIME_FORMAT)
                 elif date is type(value):
-                    cfv.value = value.strftime(CUSTOMFIELD_DATE_FORMAT)
+                    value = value.strftime(CUSTOMFIELD_DATE_FORMAT)
                 elif time is type(value):
-                    cfv.value = value.strftime(CUSTOMFIELD_TIME_FORMAT)
-                else:
-                    cfv.value = value
-                cfv.save()
-
-        return super(EditTicketForm, self).save(*args, **kwargs)
+                    value = value.strftime(CUSTOMFIELD_TIME_FORMAT)
+                cleaned_data['extra_data'][field_name] = value
+        return cleaned_data
 
 
 class EditFollowUpForm(forms.ModelForm):
@@ -189,7 +213,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
         choices=()
     )
 
-    title = forms.CharField(
+    """title = forms.CharField(
         max_length=100,
         required=True,
         widget=forms.TextInput(attrs={'class': 'form-control'}),
@@ -201,35 +225,29 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
         label=_('Description of your issue'),
         required=True,
         help_text=_('Please be as descriptive as possible and include all details'),
-    )
+    )"""
 
     priority = forms.ChoiceField(
         widget=forms.Select(attrs={'class': 'form-control'}),
         choices=Ticket.PRIORITY_CHOICES,
-        required=True,
         initial=getattr(settings, 'HELPDESK_PUBLIC_TICKET_PRIORITY', '3'),
-        label=_('Priority'),
-        help_text=_("Please select a priority carefully. If unsure, leave it as '3'."),
     )
 
-    due_date = forms.DateTimeField(
+    """due_date = forms.DateTimeField(
         widget=forms.TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
         required=False,
         input_formats=[CUSTOMFIELD_DATE_FORMAT, CUSTOMFIELD_DATETIME_FORMAT, '%d/%m/%Y', '%m/%d/%Y', "%d.%m.%Y"],
         label=_('Due on'),
-    )
+    )"""
 
     attachment = forms.FileField(
         widget=forms.FileInput(attrs={'class': 'form-control-file'}),
-        required=False,
-        label=_('Attach File'),
-        help_text=_('You can attach a file such as a document or screenshot to this ticket.'),
     )
 
     class Media:
         js = ('helpdesk/js/init_due_date.js', 'helpdesk/js/init_datetime_classes.js')
 
-    def __init__(self, kbcategory=None, *args, **kwargs):
+    def __init__(self, kbcategory=None, form_id=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if kbcategory:
             self.fields['kbitem'] = forms.ChoiceField(
@@ -239,20 +257,27 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
                 choices=[(kbi.pk, kbi.title) for kbi in KBItem.objects.filter(category=kbcategory.pk, enabled=True)],
             )
 
-    def _add_form_custom_fields(self, staff_only_filter=None):
-        if staff_only_filter is None:
-            queryset = CustomField.objects.all()
-        else:
-            queryset = CustomField.objects.filter(staff_only=staff_only_filter)
-
-        for field in queryset:
-            instanceargs = {
-                'label': field.label,
-                'help_text': field.help_text,
-                'required': field.required,
-            }
-
-            self.customfield_to_field(field, instanceargs)
+    # TODO move this init
+    def _add_form_custom_fields(self, form_id=None, staff_only_filter=None):
+        if form_id is not None:
+            if staff_only_filter is None:
+                queryset = CustomField.objects.filter(ticket_form=form_id)
+            else:
+                queryset = CustomField.objects.filter(ticket_form=form_id, staff_only=staff_only_filter)
+            for field in queryset:
+                if field.field_name in self.fields:
+                    fields = ['label', 'help_text', 'list_values', 'required']  # TODO ordering too
+                    for attr in fields:
+                        display_info = getattr(field, attr, None)
+                        if display_info is not None and display_info != '':
+                            setattr(self.fields[field.field_name], attr, display_info)
+                else:
+                    instanceargs = {
+                        'label': field.label,
+                        'help_text': field.help_text,
+                        'required': field.required,
+                    }
+                    self.customfield_to_field(field, instanceargs)
 
     def _get_queue(self):
         # this procedure is re-defined for public submission form
@@ -264,13 +289,30 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
         if 'kbitem' in self.cleaned_data:
             kbitem = KBItem.objects.get(id=int(self.cleaned_data['kbitem']))
 
+        extra_data = {}
+        if 'extra_data' in self.cleaned_data:
+           extra_data = self.cleaned_data['extra_data']
+
+        for field, value in self.cleaned_data.items():
+            if field.startswith('e_'):
+                field_name = field.replace('e_', '', 1)
+                extra_data[field_name] = value
+
+        # TODO hard codes this -- change in the future (for now it doesn't really matter)
+        ticket_form = FormType.objects.get(pk=1)
+        organization = Organization.objects.get(pk=4)
+
         ticket = Ticket(
+            # TODO Necessary fields
+            ticket_form=ticket_form,  # self.cleaned_data['ticket_form'],
+            organization=organization,  # self.cleaned_data['organization'],
+            # Default fields + kbitem
             title=self.cleaned_data['title'],
             submitter_email=self.cleaned_data['submitter_email'],
             created=timezone.now(),
             status=Ticket.OPEN_STATUS,
             queue=queue,
-            description=self.cleaned_data['body'],
+            description=self.cleaned_data['description'],
             priority=self.cleaned_data.get(
                 'priority',
                 getattr(settings, "HELPDESK_PUBLIC_TICKET_PRIORITY", "3")
@@ -280,6 +322,14 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
                 getattr(settings, "HELPDESK_PUBLIC_TICKET_DUE_DATE", None)
             ) or None,
             kbitem=kbitem,
+            # BEAM's default fields
+            contact_name=self.cleaned_data['contact_name'],
+            contact_email=self.cleaned_data['contact_email'],
+            building_name=self.cleaned_data['building_name'],
+            building_address=self.cleaned_data['building_address'],
+            pm_id=self.cleaned_data['pm_id'],
+            building_id=self.cleaned_data['building_id'],
+            extra_data=extra_data
         )
 
         return ticket, queue
@@ -299,8 +349,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
                             title=title,
                             date=timezone.now(),
                             public=True,
-                            comment=self.cleaned_data['body'],
-                            )
+                            comment=self.cleaned_data['description'],)
         if user:
             followup.user = user
         return followup
@@ -360,6 +409,7 @@ class TicketForm(AbstractTicketForm):
         queue_choices = kwargs.pop("queue_choices")
 
         super().__init__(*args, **kwargs)
+        self._add_form_custom_fields(1)  # TODO ticket_form is hardcoded
 
         self.fields['queue'].choices = queue_choices
         if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS:
@@ -367,7 +417,6 @@ class TicketForm(AbstractTicketForm):
         else:
             assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
         self.fields['assigned_to'].choices = [('', '--------')] + [(u.id, u.get_username()) for u in assignable_users]
-        self._add_form_custom_fields()
 
     def save(self, user):
         """
@@ -419,7 +468,7 @@ class PublicTicketForm(AbstractTicketForm):
         Add any (non-staff) custom fields that are defined to the form
         """
         super(PublicTicketForm, self).__init__(*args, **kwargs)
-        self._add_form_custom_fields(False)
+        self._add_form_custom_fields(1, False)  # TODO ticket_form is hardcoded
 
         field_hide_table = {
             'queue': 'HELPDESK_PUBLIC_TICKET_QUEUE',

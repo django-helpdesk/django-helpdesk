@@ -32,11 +32,16 @@
     <td>{{ ticket.get_priority_display }}</td>
 </tr>
 
-{% for customfield in ticket.ticketcustomfieldvalue_set.all %}
-    <tr>
-        <th>{{ customfield.field.label }}</th>
-        <td>{{ customfield.value|default:"" }}</td>
-    </tr>
+{% for field in extra_data %}
+<tr>
+    <th>{{ field.label }}</th>
+    <td>{% spaceless %}{% if "url" == field.data_type %}<a href='{{ field.value }}'>{{ field.value }}</a>
+        {% elif "datetime" == field.data_type %}{{ field.value|date:"DATETIME_FORMAT" }} ({{ field.value|naturaltime }})
+        {% elif "date" == field.data_type %}{{ field.value|date:"DATETIME_FORMAT" }} ({{ field.value|naturaltime }})
+        {% elif "time" == field.data_type %}{{ field.value|date:"DATETIME_FORMAT" }} ({{ field.value|naturaltime }})
+        {% else %}{{ field.value|default:"" }}
+        {% endif %}{% endspaceless %}</td>
+</tr>
 {% endfor %}
 
 {% if tags_enabled %}

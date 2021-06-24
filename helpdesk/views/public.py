@@ -28,7 +28,7 @@ from helpdesk.decorators import protect_view, is_helpdesk_staff
 import helpdesk.views.staff as staff
 import helpdesk.views.abstract_views as abstract_views
 from helpdesk.lib import text_is_spam
-from helpdesk.models import Ticket, Queue, UserSettings
+from helpdesk.models import Ticket, Queue, UserSettings, CustomField
 from helpdesk.user import huser_from_request
 
 logger = logging.getLogger(__name__)
@@ -103,7 +103,7 @@ class BaseCreateTicketView(abstract_views.AbstractCreateTicketMixin, FormView):
 
     def form_valid(self, form):
         request = self.request
-        if text_is_spam(form.cleaned_data['body'], request):
+        if text_is_spam(form.cleaned_data['description'], request):
             # This submission is spam. Let's not save it.
             return render(request, template_name='helpdesk/public_spam.html')
         else:
@@ -221,12 +221,22 @@ def view_ticket(request):
     if helpdesk_settings.HELPDESK_NAVIGATION_ENABLED:
         redirect_url = reverse('helpdesk:view', args=[ticket_id])
 
+    extra_display = CustomField.objects.filter(ticket_form=ticket.ticket_form).values()
+    extra_data = []
+    for field in extra_display:
+        if (not field['staff_only']) and (not field['unlisted']):
+            if field['field_name'] in ticket.extra_data:
+                field['value'] = ticket.extra_data[field['field_name']]
+            field['value'] = getattr(ticket, field['field_name'], None)
+            extra_data.append(field)
+
     return render(request, 'helpdesk/public_view_ticket.html', {
         'key': key,
         'mail': email,
         'ticket': ticket,
         'helpdesk_settings': helpdesk_settings,
         'next': redirect_url,
+        'extra_data': extra_data
     })
 
 

@@ -431,6 +431,7 @@ def mk_secret():
     return str(uuid.uuid4())
 
 class FormType(models.Model):
+    # TODO rename to TicketForm
 
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
     name = models.CharField(max_length=255, null=True, blank=True)
@@ -455,7 +456,7 @@ def _create_default_fields(sender, instance, **kwargs):
        
     for field in CustomField.DEFAULT_FIELDS:
         details = {
-            'form_type_id': sender.id
+            'ticket_form_id': sender.id
         }
         details.update(field)
         
@@ -504,6 +505,7 @@ class Ticket(models.Model):
         (5, _('5. Very Low')),
     )
 
+    # These fields are required by all tickets.
     # Labels are built-in for these fields, and not overwritten.
     assigned_to = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True,
                                     related_name='assigned_to', verbose_name=_('Assigned to'))
@@ -527,7 +529,8 @@ class Ticket(models.Model):
     merged_to = models.ForeignKey('self', verbose_name=_('merged to'), related_name='merged_tickets',
                                   on_delete=models.CASCADE, null=True, blank=True)
 
-    # Labels for these fields are provided by TicketDisplay table by default, on form-creation
+    # These fields are required by all tickets.
+    # Labels for these fields are provided by CustomField by default.
     queue = models.ForeignKey(Queue, on_delete=models.CASCADE, verbose_name=_('Queue'))
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True, null=True)
@@ -540,10 +543,11 @@ class Ticket(models.Model):
     ticket_form = models.ForeignKey(FormType, on_delete=models.CASCADE)
     # inventory_type = models.IntegerField(choices=VIEW_LIST_INVENTORY_TYPE, default=VIEW_LIST_PROPERTY)
 
-    # Contains extra fields
+    # Contains extra fields, determined by items in CustomField
     extra_data = JSONField(default=dict, blank=True)
 
     # Default contact fields
+    # Labels for these fields must be added in CustomField (not part of default)
     contact_name = models.CharField(max_length=200, blank=True, null=True)
     contact_email = models.CharField(max_length=200, blank=True, null=True)
     building_name = models.CharField(max_length=200, blank=True, null=True)
@@ -1700,7 +1704,7 @@ class TicketCC(models.Model):
 class CustomFieldManager(models.Manager):
 
     def get_queryset(self):
-        return super(CustomFieldManager, self).get_queryset().order_by('ordering')
+        return super(CustomFieldManager, self).get_queryset().order_by('form_ordering')
 
 
 class CustomField(models.Model):
@@ -1708,17 +1712,19 @@ class CustomField(models.Model):
     Definitions for custom fields that are glued onto each ticket.
     """
     # default fields
+    # TODO update ordering field and employ these
     DEFAULT_FIELDS = [
         {
-            # 'form_type': ,
+            # 'ticket_form': ,
             'field_name': 'queue',
             'label': 'Queue',
             'help_text': '',
-            'data_type': 'integer',
             'ordering': None,
             'required': True,
             'staff_only': True,
             'is_extra_data': False,
+            'editable': True,
+            'unlisted': True,
         }, {
             'field_name': 'title',
             'label': 'Subject',
@@ -1729,6 +1735,8 @@ class CustomField(models.Model):
             'required': False,
             'staff_only': False,
             'is_extra_data': False,
+            'editable': True,
+            'unlisted': False,
         }, {
             'field_name': 'description',
             'label': 'Description',
@@ -1738,17 +1746,19 @@ class CustomField(models.Model):
             'required': False,
             'staff_only': False,
             'is_extra_data': False,
+            'editable': True,
+            'unlisted': False,
         }, {
             'field_name': 'priority',
             'label': 'Priority',
             'help_text': "Please select a priority carefully. If unsure, leave it as '3'.",
             'data_type': 'list',
-            'empty_selection_list': False,
-            'list_values': Ticket.PRIORITY_CHOICES,
             'ordering': None,
             'required': False,
             'staff_only': False,
             'is_extra_data': False,
+            'editable': True,
+            'unlisted': True,
         }, {
             'field_name': 'due_date',
             'label': 'Due Date',
@@ -1757,14 +1767,17 @@ class CustomField(models.Model):
             'required': False,
             'staff_only': False,
             'is_extra_data': False,
+            'editable': True,
+            'unlisted': False,
         }, {
             'field_name': 'attachment',
             'label': 'Attach',
-            'data_type': '',  # TODO need to add attachment data type
             'ordering': None,
             'required': False,
             'staff_only': False,
             'is_extra_data': False,
+            'editable': False,
+            'unlisted': True,
         }, {
             'field_name': 'submitter_email',
             'label': 'Submitter Email',  # TODO Both submitter email and contact email should get updates of ticket
@@ -1775,6 +1788,8 @@ class CustomField(models.Model):
             'required': True,
             'staff_only': False,
             'is_extra_data': False,
+            'editable': True,
+            'unlisted': False,
         }, {
             'field_name': 'contact_name',
             'label': 'Primary Contact Name',
@@ -1784,6 +1799,8 @@ class CustomField(models.Model):
             'required': True,
             'staff_only': False,
             'is_extra_data': False,
+            'editable': True,
+            'unlisted': False,
         }, {
             'field_name': 'contact_email',
             'label': 'Primary Contact Email',
@@ -1794,6 +1811,8 @@ class CustomField(models.Model):
             'required': True,
             'staff_only': False,
             'is_extra_data': False,
+            'editable': True,
+            'unlisted': False,
         }, {
             'field_name': 'building_name',
             'label': 'Building Name',
@@ -1803,6 +1822,8 @@ class CustomField(models.Model):
             'required': False,
             'staff_only': False,
             'is_extra_data': False,
+            'editable': True,
+            'unlisted': False,
         }, {
             'field_name': 'building_address',
             'label': 'Building Address',  # TODO can we set a max number of lines?
@@ -1811,6 +1832,8 @@ class CustomField(models.Model):
             'required': False,
             'staff_only': False,
             'is_extra_data': False,
+            'editable': True,
+            'unlisted': False,
         }, {
             'field_name': 'pm_id',
             'label': 'Portfolio Manager ID',
@@ -1821,6 +1844,8 @@ class CustomField(models.Model):
             'required': False,
             'staff_only': False,
             'is_extra_data': False,
+            'editable': True,
+            'unlisted': False,
         }, {
             'field_name': 'building_id',
             'label': 'Building ID',
@@ -1831,11 +1856,15 @@ class CustomField(models.Model):
             'required': False,
             'staff_only': False,
             'is_extra_data': False,
+            'editable': True,
+            'unlisted': False,
         }
     ]
 
-    form_type = models.ForeignKey(FormType, on_delete=models.CASCADE)
+    ticket_form = models.ForeignKey(FormType, on_delete=models.CASCADE)
 
+    # Must be unique with the ticket_form.
+    # TODO also can't be a field whose labels are built in
     field_name = models.SlugField(
         _('Field Name'),
         help_text=_('As used in the database and behind the scenes. '
@@ -1879,6 +1908,8 @@ class CustomField(models.Model):
         max_length=100,
         help_text=_('Allows you to restrict the data entered into this field'),
         choices=DATA_TYPE_CHOICES,
+        blank=True,
+        null=True
     )
 
     max_length = models.IntegerField(
@@ -1908,9 +1939,20 @@ class CustomField(models.Model):
         null=True,
     )
 
-    ordering = models.IntegerField(
-        _('Ordering'),
-        help_text=_('Lower numbers are displayed first; higher numbers are listed later'),
+    # TODO employ ordering
+    form_ordering = models.IntegerField(
+        _('Form Ordering'),
+        help_text=_('Order of fields when submitting a form. '
+                    'Lower numbers are displayed first; higher numbers are listed later'),
+        blank=True,
+        null=True,
+    )
+
+    # TODO employ ordering
+    view_ordering = models.IntegerField(
+        _('View Ordering'),
+        help_text=_('Order of fields when viewing a ticket. '
+                    'Lower numbers are displayed first; higher numbers are listed later'),
         blank=True,
         null=True,
     )
@@ -1935,10 +1977,16 @@ class CustomField(models.Model):
         default=False,
     )
 
+    editable = models.BooleanField(_('Editable by staff?'), default=True,
+                                   help_text=_('Can this field be edited by a staff user?'), )
+    unlisted = models.BooleanField(_('Is this field represented another way on the ticket view?'),
+                                   help_text=_('Used for default fields like queue and priority.'),
+                                   default=False)
+    is_extra_data = models.BooleanField(default=False)
+
     objects = CustomFieldManager()  # for ordering objects based on "ordering"
 
-    # beam_field = models.ForeignKey(Column, blank=True, null=True)  # name of the field in BEAM that this field associates with
-    is_extra_data = models.BooleanField(default=False)
+    # beam_field = models.ForeignKey(Column, blank=True, null=True)  # associated field in BEAM
     # alerts = ???
 
     created = models.DateTimeField(auto_now_add=True)
@@ -1950,9 +1998,10 @@ class CustomField(models.Model):
     class Meta:
         verbose_name = _('Custom field')
         verbose_name_plural = _('Custom fields')
-        unique_together = ('field_name', 'form_type')
+        unique_together = ('field_name', 'ticket_form')
+        ordering = ['form_ordering']
         # Django 3.2 option
-        # constraints = [models.UniqueConstraint(fields=['field_name', 'form_type'], name='unique_form_field')]
+        # constraints = [models.UniqueConstraint(fields=['field_name', 'ticket_form'], name='unique_form_field')]
 
 
 class TicketCustomFieldValue(models.Model):

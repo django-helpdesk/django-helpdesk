@@ -69,7 +69,7 @@ def get_search_filter_args(search):
             Q(resolution__icontains=subsearch) |
             Q(submitter_email__icontains=subsearch) |
             Q(assigned_to__email__icontains=subsearch) |
-            Q(ticketcustomfieldvalue__value__icontains=subsearch) |
+            Q(ticketcustomfieldvalue__value__icontains=subsearch) |  # TODO need to add custom stuff to querying
             Q(created__icontains=subsearch) |
             Q(due_date__icontains=subsearch)
         )

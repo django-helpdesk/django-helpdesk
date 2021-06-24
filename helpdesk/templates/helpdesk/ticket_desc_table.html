@@ -1,7 +1,6 @@
 {% load i18n humanize ticket_to_link %}
 {% load static %}
 {% load helpdesk_util %}
-
 <div class="card mb-3">
     <!--div class="card-header">
         {# trans "Ticket Summary" #}
@@ -19,16 +18,19 @@
                     </span></th></tr>
                 </thead>
                 <tbody>
-                    {% for customfield in ticket.ticketcustomfieldvalue_set.all %}
-                    <tr>
-                        <th class="table-secondary">{{ customfield.field.label }}</th>
-                        <td>{% spaceless %}{% if "url" == customfield.field.data_type %}<a href='{{ customfield.value }}'>{{ customfield.value }}</a>
-                            {% elif "datetime" == customfield.field.data_type %}{{ customfield.value|datetime_string_format }}
-                            {% elif "date" == customfield.field.data_type %}{{ customfield.value|datetime_string_format }}
-                            {% elif "time" == customfield.field.data_type %}{{ customfield.value|datetime_string_format }}
-                            {% else %}{{ customfield.value|default:"" }}
-                            {% endif %}{% endspaceless %}</td>
-                    </tr>{% endfor %}
+                    {% for field in extra_data %}
+                        {% cycle 'row' '' as row silent %}
+                        {% if row %}<tr>{% endif %}
+                            <th class="table-secondary">{{ field.label }}</th>
+                            {% if forloop.last %} <td colspan="3"> {% else %} <td> {% endif%}
+                            {% spaceless %}{% if "url" == field.data_type %}<a href='{{ field.value }}'>{{ field.value }}</a>
+                                {% elif "datetime" == field.data_type %}{{ field.value|datetime_string_format }}
+                                {% elif "date" == field.data_type %}{{ field.value|datetime_string_format }}
+                                {% elif "time" == field.data_type %}{{ field.value|datetime_string_format }}
+                                {% else %}{{ field.value|default:"" }}
+                                {% endif %}{% endspaceless %}</td>
+                        {% if not row %}</tr>{% endif %}
+                    {% endfor %}
                     <tr>
                         <th class="table-active">{% trans "Due Date" %}</th>
                         <td>{{ ticket.due_date|date:"DATETIME_FORMAT" }} {% if ticket.due_date %}({{ ticket.due_date|naturaltime }}){% endif %}
