@@ -79,7 +79,12 @@ class KBItemAdmin(admin.ModelAdmin):
 
 @admin.register(CustomField)
 class CustomFieldAdmin(admin.ModelAdmin):
-    list_display = ('field_name', 'label', 'data_type')
+    list_display = ('ticket_form_type', 'field_name', 'label', 'data_type', 'is_extra_data')
+
+    def ticket_form_type(self, ticket):
+        if ticket.ticket_form:
+            return ticket.ticket_form.name
+    ticket_form_type.short_description = _('Ticket Form')
 
 
 @admin.register(EmailTemplate)
