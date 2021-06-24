@@ -508,18 +508,22 @@ def view_ticket(request, ticket_id):
 
     if ticketCC_form.is_valid():
         email_input = ticketCC_form.cleaned_data['email_input']
-        count = 0
+        valid = True
+        valid_emails = []
         for email in email_input.splitlines():
             try:
                 validate_email(email)
             except ValidationError:
                 ticketCC_form.add_error('email_input', ValidationError(f"{email} n'est pas une adresse mail valide."))
+                valid = False
                 continue
-            TicketCC.objects.create(email=email, ticket=ticket, can_view=True)
-            count += 1
+            valid_emails.append(email)
 
-        messages.success(request, f"{count} emails ont été ajoutés en copie")
-        return redirect(ticket)
+        if valid:
+            for email in valid_emails:
+                TicketCC.objects.create(email=email, ticket=ticket, can_view=True)
+            messages.success(request, f"{len(valid_emails)} emails ont été ajoutés en copie")
+            return redirect(ticket)
 
 
     return render(request, 'helpdesk/ticket.html', {
