@@ -233,6 +233,12 @@ class QuickCommentForm(forms.ModelForm):
         }
 
 
+class MultipleEmailForm(forms.Form):
+    email_input = forms.CharField(widget=forms.Textarea(attrs={
+        "class": "form-control resize-none"
+    }))
+
+
 class CreateFollowUpForm(forms.ModelForm):
     toggle_ticket_status = forms.BooleanField(
         required=False,

@@ -21,6 +21,7 @@ from django.urls import reverse, set_script_prefix, clear_script_prefix
 from django.core.mail import EmailMessage
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.core.validators import validate_email
 from django.db.models import Q, Value, Count
 from django.http import HttpResponseRedirect, Http404, HttpResponse, JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
@@ -35,7 +36,7 @@ from guardian.shortcuts import get_objects_for_user
 from helpdesk.filters import FeedbackSurveyFilter, GenericIncidentFilter
 from helpdesk.forms import TicketForm, UserSettingsForm, EmailIgnoreForm, EditTicketForm, TicketCCForm, \
     TicketCCEmailForm, TicketCCUserForm, EditFollowUpForm, TicketDependencyForm, InformationTicketForm, \
-    CreateFollowUpForm, MultipleTicketSelectForm, GenericIncidentForm, QuickCommentForm
+    CreateFollowUpForm, MultipleTicketSelectForm, GenericIncidentForm, QuickCommentForm, MultipleEmailForm
 from helpdesk.decorators import staff_member_required, superuser_required
 from helpdesk.lib import send_templated_mail, apply_query, safe_template_context, process_attachments,\
     get_assignable_users, calc_tickets_first_answer_statistics
@@ -503,11 +504,30 @@ def view_ticket(request, ticket_id):
     ticketcc_string, show_subscribe = \
         return_ticketccstring_and_show_subscribe(request.user, ticket)
 
+    ticketCC_form = MultipleEmailForm(request.POST or None)
+
+    if ticketCC_form.is_valid():
+        email_input = ticketCC_form.cleaned_data['email_input']
+        count = 0
+        for email in email_input.splitlines():
+            try:
+                validate_email(email)
+            except ValidationError:
+                ticketCC_form.add_error('email_input', ValidationError(f"{email} n'est pas une adresse mail valide."))
+                continue
+            TicketCC.objects.create(email=email, ticket=ticket, can_view=True)
+            count += 1
+
+        messages.success(request, f"{count} emails ont été ajoutés en copie")
+        return redirect(ticket)
+
+
     return render(request, 'helpdesk/ticket.html', {
         'ticket': ticket,
         'form': form,
         'followup_form': followup_form,
         'information_form': information_form,
+        'ticketCC_form': ticketCC_form,
         'active_users': users,
         'priorities': Ticket.PRIORITY_CHOICES,
         'preset_replies': PreSetReply.objects.filter(

@@ -65,7 +65,20 @@
 
                                         <tr>
                                             <th>{% trans "Copies To" %}</th>
-                                            <td>{{ ticketcc_string }} <a data-toggle='tooltip' href='{% url 'helpdesk:ticket_cc' ticket.id %}' title='{% trans "Click here to add / remove people who should receive an e-mail whenever this ticket is updated." %}'><strong><button type="button" class="btn btn-warning btn-xs"><i class="fa fa-share"></i>&nbsp;{% trans "Manage" %}</button></strong></a>{% if SHOW_SUBSCRIBE %}, <strong><a data-toggle='tooltip' href='?subscribe' title='{% trans "Click here to subscribe yourself to this ticket, if you want to receive an e-mail whenever this ticket is updated." %}'><button type="button" class="btn btn-warning btn-xs"><i class="fa fa-rss"></i>&nbsp;{% trans "Subscribe" %}</button></a></strong>{% endif %}</td>
+                                            <td>{{ ticketcc_string }}
+                                                <strong>
+                                                    <a data-toggle='tooltip' href='{% url 'helpdesk:ticket_cc' ticket.id %}' title='{% trans "Click here to add / remove people who should receive an e-mail whenever this ticket is updated." %}'>
+                                                        <button type="button" class="btn btn-warning btn-xs"><i class="fa fa-share"></i>&nbsp;{% trans "Manage" %}</button>
+                                                    </a>
+                                                </strong>
+                                                {% if SHOW_SUBSCRIBE %},
+                                                    <strong>
+                                                        <a data-toggle='tooltip' href='?subscribe' title='{% trans "Click here to subscribe yourself to this ticket, if you want to receive an e-mail whenever this ticket is updated." %}'>
+                                                            <button type="button" class="btn btn-warning btn-xs"><i class="fa fa-rss"></i>&nbsp;{% trans "Subscribe" %}</button>
+                                                        </a>
+                                                    </strong>
+                                                {% endif %}
+                                            </td>
                                         </tr>
 
                                         <tr>
