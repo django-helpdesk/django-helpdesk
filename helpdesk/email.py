@@ -390,8 +390,7 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
         if not settings.QUEUE_EMAIL_BOX_UPDATE_ONLY:
             organization = Organization.objects.all().first()  # TODO remove hardcoding
             ticket_form = FormType.objects.get_or_create(name=settings.HELPDESK_EMAIL_FORM_NAME,
-                                                         organization=organization,
-                                                         defaults={description: ''})
+                                                         organization=organization)
             ticket = Ticket.objects.create(
                 title=payload['subject'],
                 queue=queue,
