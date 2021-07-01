@@ -6,7 +6,7 @@
         <li class="nav-item active">
           <a class="nav-link" href="{% url 'helpdesk:dashboard' %}">
             <i class="fas fa-fw fa-tachometer-alt"></i>
-            <span>{% trans "Dashboard" %}</span>
+            <span>{% trans "Helpdesk Dashboard" %}</span>
           </a>
         </li>
         <li class="nav-item">
@@ -54,6 +54,12 @@
           </a>
         </li>
         {% endif %}
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'seed:home' %}#/properties">
+                <i class="fas fa-city"></i>
+                <span>BEAM {% trans "Inventory" %}</span>
+            </a>
+        </li>
     {% else %}
         {# Public menu #}
         <li class="nav-item active">
