@@ -174,3 +174,6 @@ HELPDESK_FULL_FIRST_MESSAGE_FROM_EMAIL = getattr(settings, 'HELPDESK_FULL_FIRST_
 # which is quite noisy but very helpful for complicated markup, forwards and so on
 # (which gets stripped/corrupted otherwise)
 HELPDESK_ALWAYS_SAVE_INCOMING_EMAIL_MESSAGE = getattr(settings, "HELPDESK_ALWAYS_SAVE_INCOMING_EMAIL_MESSAGE", False)
+
+# TODO should be based on organization
+HELPDESK_EMAIL_FORM_NAME = getattr(settings, "HELPDESK_EMAIL_TICKET_FORM", "Email Form")

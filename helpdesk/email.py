@@ -32,7 +32,8 @@ from email_reply_parser import EmailReplyParser
 
 from helpdesk import settings
 from helpdesk.lib import safe_template_context, process_attachments
-from helpdesk.models import Queue, Ticket, TicketCC, FollowUp, IgnoreEmail
+from helpdesk.models import Queue, Ticket, TicketCC, FollowUp, IgnoreEmail, FormType
+from seed.lib.superperms.orgs.models import Organization
 
 
 # import User model, which may be a custom model
@@ -373,7 +374,7 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
 
     if previous_followup is None and ticket_id is not None:
         try:
-            ticket = Ticket.objects.get(id=ticket_id)
+            ticket = Ticket.objects.get(id=ticket_id)  # TODO also add in organization id? or, just ticket form (which will be diff for each org)?
         except Ticket.DoesNotExist:
             ticket = None
         else:
@@ -387,6 +388,10 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
     # New issue, create a new <Ticket> instance
     if ticket is None:
         if not settings.QUEUE_EMAIL_BOX_UPDATE_ONLY:
+            organization = Organization.objects.all().first()  # TODO remove hardcoding
+            ticket_form = FormType.objects.get_or_create(name=settings.HELPDESK_EMAIL_FORM_NAME,
+                                                         organization=organization,
+                                                         defaults={description: ''})
             ticket = Ticket.objects.create(
                 title=payload['subject'],
                 queue=queue,
@@ -394,6 +399,7 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
                 created=now,
                 description=payload['body'],
                 priority=payload['priority'],
+                ticket_form=ticket_form
             )
             ticket.save()
             logger.debug("Created new ticket %s-%s" % (ticket.queue.slug, ticket.id))
