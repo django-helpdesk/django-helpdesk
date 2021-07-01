@@ -34,14 +34,15 @@ from helpdesk.user import huser_from_request
 logger = logging.getLogger(__name__)
 
 
-def create_ticket(request, *args, **kwargs):
+def create_ticket(request, form_id=None,  *args, **kwargs, ):
     if is_helpdesk_staff(request.user):
-        return staff.CreateTicketView.as_view()(request, *args, **kwargs)
+        return staff.CreateTicketView.as_view(form_id=form_id)(request, *args, **kwargs)
     else:
-        return CreateTicketView.as_view()(request, *args, **kwargs)
+        return CreateTicketView.as_view(form_id=form_id)(request, *args, **kwargs)
 
 
 class BaseCreateTicketView(abstract_views.AbstractCreateTicketMixin, FormView):
+    form_id = None
 
     def get_form_class(self):
         try:
@@ -99,6 +100,7 @@ class BaseCreateTicketView(abstract_views.AbstractCreateTicketMixin, FormView):
         if '_hide_fields_' in self.request.GET:
             kwargs['hidden_fields'] = self.request.GET.get('_hide_fields_', '').split(',')
         kwargs['readonly_fields'] = self.request.GET.get('_readonly_fields_', '').split(',')
+        kwargs['form_id'] = self.form_id
         return kwargs
 
     def form_valid(self, form):
@@ -107,7 +109,7 @@ class BaseCreateTicketView(abstract_views.AbstractCreateTicketMixin, FormView):
             # This submission is spam. Let's not save it.
             return render(request, template_name='helpdesk/public_spam.html')
         else:
-            ticket = form.save(user=self.request.user if self.request.user.is_authenticated else None)
+            ticket = form.save(form_id=self.form_id, user=self.request.user if self.request.user.is_authenticated else None)
             try:
                 return HttpResponseRedirect('%s?ticket=%s&email=%s&key=%s' % (
                     reverse('helpdesk:public_view'),

@@ -206,6 +206,8 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
     Contain all the common code and fields between "TicketForm" and
     "PublicTicketForm". This Form is not intended to be used directly.
     """
+    form_id = None
+
     queue = forms.ChoiceField(
         widget=forms.Select(attrs={'class': 'form-control'}),
         label=_('Queue'),
@@ -247,7 +249,8 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
     class Media:
         js = ('helpdesk/js/init_due_date.js', 'helpdesk/js/init_datetime_classes.js')
 
-    def __init__(self, kbcategory=None, form_id=None, *args, **kwargs):
+    def __init__(self, kbcategory=None, *args, **kwargs):
+        self.form_id = kwargs.pop("form_id")
         super().__init__(*args, **kwargs)
         if kbcategory:
             self.fields['kbitem'] = forms.ChoiceField(
@@ -258,12 +261,12 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
             )
 
     # TODO move this init
-    def _add_form_custom_fields(self, form_id=None, staff_only_filter=None):
-        if form_id is not None:
+    def _add_form_custom_fields(self, staff_only_filter=None):
+        if self.form_id is not None:
             if staff_only_filter is None:
-                queryset = CustomField.objects.filter(ticket_form=form_id)
+                queryset = CustomField.objects.filter(ticket_form=self.form_id)
             else:
-                queryset = CustomField.objects.filter(ticket_form=form_id, staff_only=staff_only_filter)
+                queryset = CustomField.objects.filter(ticket_form=self.form_id, staff_only=staff_only_filter)
             for field in queryset:
                 if field.field_name in self.fields:
                     fields = ['label', 'help_text', 'list_values', 'required']  # TODO ordering too
@@ -298,8 +301,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
                 field_name = field.replace('e_', '', 1)
                 extra_data[field_name] = value
 
-        # TODO hard codes this -- change in the future (for now it doesn't really matter)
-        ticket_form = FormType.objects.get(pk=1)
+        ticket_form = FormType.objects.get(pk=self.form_id)
         organization = Organization.objects.all().first()
 
         ticket = Ticket(
@@ -409,7 +411,7 @@ class TicketForm(AbstractTicketForm):
         queue_choices = kwargs.pop("queue_choices")
 
         super().__init__(*args, **kwargs)
-        self._add_form_custom_fields(1)  # TODO ticket_form is hardcoded
+        self._add_form_custom_fields()
 
         self.fields['queue'].choices = queue_choices
         if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS:
@@ -418,11 +420,11 @@ class TicketForm(AbstractTicketForm):
             assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
         self.fields['assigned_to'].choices = [('', '--------')] + [(u.id, u.get_username()) for u in assignable_users]
 
-    def save(self, user):
+    def save(self, user, form_id=None):
         """
         Writes and returns a Ticket() object
         """
-
+        self.form_id = form_id
         ticket, queue = self._create_ticket()
         if self.cleaned_data['assigned_to']:
             try:
@@ -468,7 +470,7 @@ class PublicTicketForm(AbstractTicketForm):
         Add any (non-staff) custom fields that are defined to the form
         """
         super(PublicTicketForm, self).__init__(*args, **kwargs)
-        self._add_form_custom_fields(1, False)  # TODO ticket_form is hardcoded
+        self._add_form_custom_fields(False)
 
         field_hide_table = {
             'queue': 'HELPDESK_PUBLIC_TICKET_QUEUE',
@@ -513,10 +515,11 @@ class PublicTicketForm(AbstractTicketForm):
             # get the queue user entered
             return Queue.objects.get(id=int(self.cleaned_data['queue']))
 
-    def save(self, user):
+    def save(self, user, form_id=None):
         """
         Writes and returns a Ticket() object
         """
+        self.form_id = form_id
         ticket, queue = self._create_ticket()
         if queue.default_owner and not ticket.assigned_to:
             ticket.assigned_to = queue.default_owner

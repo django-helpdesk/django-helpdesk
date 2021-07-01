@@ -168,7 +168,7 @@ urlpatterns += [
         protect_view(public.Homepage.as_view()),
         name='home'),
 
-    url(r'^tickets/submit/$',
+    url(r'^tickets/submit/(?P<form_id>[0-9]+)/$',
         public.create_ticket,
         name='submit'),
 

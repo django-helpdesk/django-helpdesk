@@ -1,4 +1,4 @@
-from helpdesk.models import CustomField, KBItem, Queue
+from helpdesk.models import CustomField, KBItem, Queue, FormType
 
 
 class AbstractCreateTicketMixin():
@@ -13,8 +13,9 @@ class AbstractCreateTicketMixin():
         if u.is_authenticated and u.usersettings_helpdesk.use_email_as_submitter and u.email:
             initial_data['submitter_email'] = u.email
 
-        query_param_fields = ['submitter_email', 'title', 'body', 'queue', 'kbitem']
-        custom_fields = ["custom_%s" % f.field_name for f in CustomField.objects.filter(staff_only=False)]
+        query_param_fields = ['submitter_email', 'title', 'description', 'queue', 'kbitem']
+        custom_fields = ["e_%s" % f.field_name for f in CustomField.objects.filter(staff_only=False,
+                                                                                   ticket_form=self.form_id)]
         query_param_fields += custom_fields
         for qpf in query_param_fields:
             initial_data[qpf] = request.GET.get(qpf, initial_data.get(qpf, ""))

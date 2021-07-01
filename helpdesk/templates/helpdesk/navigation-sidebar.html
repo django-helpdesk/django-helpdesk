@@ -35,7 +35,7 @@
           </div>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="{% url 'helpdesk:submit' %}">
+          <a class="nav-link" href="{% url 'helpdesk:submit' 1 %}">
             <i class="fas fa-fw fa-plus-circle"></i>
             <span>{% trans "New Ticket" %}</span>
           </a>
@@ -63,7 +63,7 @@
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="{% url 'helpdesk:submit' %}">
+          <a class="nav-link" href="{% url 'helpdesk:submit' 1 %}"> {# TODO hardcoded #}
             <i class="fas fa-fw fa-plus-circle"></i>
             <span>{% trans "New Ticket" %}</span>
           </a>

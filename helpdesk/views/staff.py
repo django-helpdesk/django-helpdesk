@@ -365,7 +365,8 @@ def view_ticket(request, ticket_id):
     queue_choices = _get_queue_choices(queues)
     # TODO: shouldn't this template get a form to begin with?
     form = TicketForm(initial={'due_date': ticket.due_date},
-                      queue_choices=queue_choices)
+                      queue_choices=queue_choices,
+                      form_id=ticket.ticket_form)
 
     ticketcc_string, show_subscribe = \
         return_ticketccstring_and_show_subscribe(request.user, ticket)
@@ -1240,6 +1241,7 @@ edit_ticket = staff_member_required(edit_ticket)
 class CreateTicketView(MustBeStaffMixin, abstract_views.AbstractCreateTicketMixin, FormView):
     template_name = 'helpdesk/create_ticket.html'
     form_class = TicketForm
+    form_id = None
 
     def get_initial(self):
         initial_data = super().get_initial()
@@ -1249,10 +1251,11 @@ class CreateTicketView(MustBeStaffMixin, abstract_views.AbstractCreateTicketMixi
         kwargs = super().get_form_kwargs()
         queues = HelpdeskUser(self.request.user).get_queues()
         kwargs["queue_choices"] = _get_queue_choices(queues)
+        kwargs['form_id'] = self.form_id
         return kwargs
 
     def form_valid(self, form):
-        self.ticket = form.save(user=self.request.user if self.request.user.is_authenticated else None)
+        self.ticket = form.save(form_id=self.form_id, user=self.request.user if self.request.user.is_authenticated else None)
         return super().form_valid(form)
 
     def get_success_url(self):

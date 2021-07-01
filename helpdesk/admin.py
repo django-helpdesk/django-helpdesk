@@ -1,9 +1,10 @@
 from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _
+from django.utils.html import format_html
 from helpdesk.models import Queue, Ticket, FollowUp, PreSetReply, KBCategory
 from helpdesk.models import EscalationExclusion, EmailTemplate, KBItem
 from helpdesk.models import TicketChange, KBIAttachment, FollowUpAttachment, IgnoreEmail
-from helpdesk.models import CustomField
+from helpdesk.models import CustomField, FormType
 
 
 @admin.register(Queue)
@@ -85,6 +86,19 @@ class CustomFieldAdmin(admin.ModelAdmin):
         if ticket.ticket_form:
             return ticket.ticket_form.name
     ticket_form_type.short_description = _('Ticket Form')
+
+
+@admin.register(FormType)
+class FormTypeAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name', 'extra_data_cleaned', 'organization', )
+    list_display_links = ('name',)
+
+    def extra_data_cleaned(self, form):
+        display = ''
+        for item in form.extra_data:
+            display += ('%s<br />' % item)
+        return format_html(display)
+    extra_data_cleaned.short_description = _('Extra Data')
 
 
 @admin.register(EmailTemplate)
