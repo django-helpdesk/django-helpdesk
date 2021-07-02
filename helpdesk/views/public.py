@@ -101,6 +101,8 @@ class BaseCreateTicketView(abstract_views.AbstractCreateTicketMixin, FormView):
             kwargs['hidden_fields'] = self.request.GET.get('_hide_fields_', '').split(',')
         kwargs['readonly_fields'] = self.request.GET.get('_readonly_fields_', '').split(',')
         kwargs['form_id'] = self.form_id
+        if self.form_id is None:
+            kwargs['form_id'] = self.form_id = 1  # TODO remove hardcoding!!!!!
         return kwargs
 
     def form_valid(self, form):
