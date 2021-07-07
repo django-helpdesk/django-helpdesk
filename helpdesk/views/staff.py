@@ -398,7 +398,10 @@ def return_ticketccstring_and_show_subscribe(user, ticket):
     # create the ticketcc_string and check whether current user is already
     # subscribed
     username = user.get_username().upper()
-    useremail = user.email.upper()
+    try:
+        useremail = user.email.upper()
+    except AttributeError:
+        useremail = ""
     strings_to_check = list()
     strings_to_check.append(username)
     strings_to_check.append(useremail)
