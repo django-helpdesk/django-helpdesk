@@ -1,5 +1,4 @@
 from django.db.models import Q
-from django.core.cache import cache
 from django.urls import reverse
 from django.utils.html import escape
 from django.utils.translation import ugettext as _
@@ -139,21 +138,10 @@ class __Query__:
         # https://stackoverflow.com/questions/30487056/django-queryset-contains-duplicate-entries
         return queryset.distinct()
 
-    def get_cache_key(self):
-        return str(self.huser.user.pk) + ":" + self.base64
-
-    def refresh_query(self):
-        tickets = self.huser.get_tickets_in_queues().select_related()
-        ticket_qs = self.__run__(tickets)
-        cache.set(self.get_cache_key(), ticket_qs, timeout=3600)
-        return ticket_qs
-
     def get(self):
         # Prefilter the allowed tickets
-        objects = cache.get(self.get_cache_key())
-        if objects is not None:
-            return objects
-        return self.refresh_query()
+        tickets = self.huser.get_tickets_in_queues().select_related()
+        return self.__run__(tickets)
 
     def get_datatables_context(self, **kwargs):
         """

@@ -1130,8 +1130,6 @@ def ticket_list(request):
 
     urlsafe_query = query_to_base64(query_params)
 
-    Query(huser, base64query=urlsafe_query).refresh_query()
-
     user_saved_queries = SavedSearch.objects.filter(Q(user=request.user) | Q(shared__exact=True))
 
     search_message = ''
