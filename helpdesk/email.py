@@ -25,6 +25,7 @@ from django.conf import settings as django_settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.core.mail import BadHeaderError
 from django.db.models import Q
 from django.utils import encoding, timezone
 from django.utils.translation import ugettext as _
@@ -180,6 +181,9 @@ def imap_sync(q, logger, server):
                     ticket = object_from_message(message=full_message, queue=q, logger=logger)
                 except TypeError:
                     ticket = None  # hotfix. Need to work out WHY.
+                except BadHeaderError:
+                    # Malformed email received from the server
+                    ticket = None
                 if ticket:
                     server.store(num, '+FLAGS', '\\Deleted')
                     logger.info("Successfully processed message %s, deleted from IMAP server" % num)
