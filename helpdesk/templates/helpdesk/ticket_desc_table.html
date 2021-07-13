@@ -22,7 +22,7 @@
                         {% cycle 'row' '' as row silent %}
                         {% if row %}<tr>{% endif %}
                             <th class="table-secondary">{{ field.label }}</th>
-                            {% if forloop.last %} <td colspan="3"> {% else %} <td> {% endif%}
+                            {% if forloop.last %} <td colspan="3"> {% else %} <td> {% endif %}
                             {% spaceless %}{% if "url" == field.data_type %}<a href='{{ field.value }}'>{{ field.value }}</a>
                                 {% elif "datetime" == field.data_type %}{{ field.value|datetime_string_format }}
                                 {% elif "date" == field.data_type %}{{ field.value|datetime_string_format }}

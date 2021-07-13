@@ -366,7 +366,7 @@ def view_ticket(request, ticket_id):
     # TODO: shouldn't this template get a form to begin with?
     form = TicketForm(initial={'due_date': ticket.due_date},
                       queue_choices=queue_choices,
-                      form_id=ticket.ticket_form)
+                      form_id=ticket.ticket_form.pk)
 
     ticketcc_string, show_subscribe = \
         return_ticketccstring_and_show_subscribe(request.user, ticket)
@@ -387,7 +387,8 @@ def view_ticket(request, ticket_id):
         if not field['unlisted']:
             if field['field_name'] in ticket.extra_data:
                 field['value'] = ticket.extra_data[field['field_name']]
-            field['value'] = getattr(ticket, field['field_name'], None)
+            else:
+                field['value'] = getattr(ticket, field['field_name'], None)
             extra_data.append(field)
 
     return render(request, 'helpdesk/ticket.html', {

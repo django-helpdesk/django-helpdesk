@@ -231,7 +231,8 @@ def view_ticket(request):
         if (not field['staff_only']) and (not field['unlisted']):
             if field['field_name'] in ticket.extra_data:
                 field['value'] = ticket.extra_data[field['field_name']]
-            field['value'] = getattr(ticket, field['field_name'], None)
+            else:
+                field['value'] = getattr(ticket, field['field_name'], None)
             extra_data.append(field)
 
     return render(request, 'helpdesk/public_view_ticket.html', {

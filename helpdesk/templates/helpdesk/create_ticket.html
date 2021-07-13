@@ -15,11 +15,16 @@
 {% block helpdesk_body %}
     <div class="container">
         <div class="card card-register mx-auto mt-5">
-            <div class="card-header">{% trans "Submit a Ticket" %}</div>
+            <div class="card-header">
+                {% blocktrans with title=form.form_title %}
+                Submit a {{ title }}
+                {% endblocktrans %}
+            </div>
             <div class="card-body">
                 <p>
-                    {% trans "Unless otherwise stated, all fields are required." %}
-                    {% trans "Please provide as descriptive a title and description as possible." %}
+                    {% blocktrans with intro=form.form_introduction %}
+                    {{ intro }}
+                    {% endblocktrans %}
                 </p>
 
                 {% if form.errors %}
@@ -44,7 +49,11 @@
                                     <small class='error'>{{ field.errors }}</small>
                                 {% endif %}
                                 {% if field.help_text %}
-                                    <small class='form_help_text help-block'>{% trans field.help_text %}</small>
+                                    <small class='form_help_text help-block'>
+                                        {% blocktrans with help_text=field.help_text|safe %}
+                                        {{ help_text }}
+                                        {% endblocktrans %}
+                                    </small>
                                 {% endif %}
                             </div>
                         {% endif %}

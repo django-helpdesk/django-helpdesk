@@ -4,8 +4,9 @@
 {% with request|load_helpdesk_settings as helpdesk_settings %}
     {% if helpdesk_settings.HELPDESK_SUBMIT_A_TICKET_PUBLIC %}
         <p>
-            {% trans "Unless otherwise stated, all fields are required." %}
-            {% trans "Please provide as descriptive a title and description as possible." %}
+            {% blocktrans with intro=form.form_introduction %}
+            {{ intro }}
+            {% endblocktrans %}
         </p>
 
         {% if form.errors %}
@@ -30,7 +31,11 @@
                             <small class='error'>{{ field.errors }}</small>
                         {% endif %}
                         {% if field.help_text %}
-                            <small class='form_help_text help-block'>{% trans field.help_text %}</small>
+                            <small class='form_help_text help-block'>
+                                {% blocktrans with help_text=field.help_text|safe %}
+                                {{ help_text }}
+                                {% endblocktrans %}
+                            </small>
                         {% endif %}
                     </div>
                 {% endif %}

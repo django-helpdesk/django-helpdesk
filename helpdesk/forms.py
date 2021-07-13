@@ -8,6 +8,7 @@ forms.py - Definitions of newforms-based forms for creating and maintaining
 """
 import logging
 from datetime import datetime, date, time
+from operator import itemgetter
 
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django import forms
@@ -165,7 +166,7 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
                 if not display_data.editable:
                     self.fields[display_data.field_name].widget = forms.HiddenInput()
                 else:
-                    fields = ['label', 'help_text', 'list_values', 'required',]  # TODO ordering too
+                    fields = ['label', 'help_text', 'list_values', 'required']  # TODO add ordering -- or not?
                     for attr in fields:
                         display_info = getattr(display_data, attr, None)
                         if display_info is not None and display_info != '':
@@ -207,6 +208,8 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
     "PublicTicketForm". This Form is not intended to be used directly.
     """
     form_id = None
+    form_title = None
+    form_introduction = None
 
     queue = forms.ChoiceField(
         widget=forms.Select(attrs={'class': 'form-control'}),
@@ -252,6 +255,10 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
     def __init__(self, kbcategory=None, *args, **kwargs):
         self.form_id = kwargs.pop("form_id")
         super().__init__(*args, **kwargs)
+        form = FormType.objects.get(pk=self.form_id)
+        self.form_title = form.name
+        self.form_introduction = form.description
+
         if kbcategory:
             self.fields['kbitem'] = forms.ChoiceField(
                 widget=forms.Select(attrs={'class': 'form-control'}),
@@ -269,7 +276,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
                 queryset = CustomField.objects.filter(ticket_form=self.form_id, staff_only=staff_only_filter)
             for field in queryset:
                 if field.field_name in self.fields:
-                    fields = ['label', 'help_text', 'list_values', 'required']  # TODO ordering too
+                    fields = ['label', 'help_text', 'list_values', 'required']  # TODO view-side ordering too
                     for attr in fields:
                         display_info = getattr(field, attr, None)
                         if display_info is not None and display_info != '':
@@ -281,6 +288,19 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
                         'required': field.required,
                     }
                     self.customfield_to_field(field, instanceargs)
+
+            # ordering fields based on form_ordering
+            # if form_ordering is None, field is sorted to end of list
+            ordering = sorted(
+                queryset.values('field_name', 'form_ordering', 'is_extra_data'),
+                key=lambda x: float('inf') if x['form_ordering'] is None else x['form_ordering']
+            )
+            ordering = [
+                "e_%s" % field['field_name'] if field['is_extra_data']
+                else field['field_name']
+                for field in ordering
+            ]
+            self.order_fields(ordering)
 
     def _get_queue(self):
         # this procedure is re-defined for public submission form

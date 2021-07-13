@@ -37,7 +37,11 @@
             <div class="col-sm">
                 <div class="panel panel-default">
                     <div class="panel-body">
-                        <h2>{% trans "Submit a Ticket" %}</h2>
+                        <h2>
+                            {% blocktrans with title=form.form_title %}
+                            Submit a {{ title }}
+                            {% endblocktrans %}
+                        </h2>
                         {% include 'helpdesk/public_create_ticket_base.html' %}
                     </div>
                 </div>
