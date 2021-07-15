@@ -17,15 +17,11 @@
         <div class="card card-register mx-auto mt-5">
             <div class="card-header">
                 {% blocktrans with title=form.form_title %}
-                Submit a {{ title }}
+                {{ title }}
                 {% endblocktrans %}
             </div>
             <div class="card-body">
-                <p>
-                    {% blocktrans with intro=form.form_introduction %}
-                    {{ intro }}
-                    {% endblocktrans %}
-                </p>
+                <p>{% blocktrans with intro=form.form_introduction|safe|linebreaksbr %}{{ intro }}{% endblocktrans %}</p>
 
                 {% if form.errors %}
                     {% include 'helpdesk/include/alert_form_errors.html' %}
