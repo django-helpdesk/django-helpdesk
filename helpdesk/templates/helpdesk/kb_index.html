@@ -1,4 +1,4 @@
-{% extends "helpdesk/public_base.html" %}{% load i18n %}
+{% extends "helpdesk/public_base.html" %}{% load i18n bootstrap4form helpdesk_staff %}
 
 {% block helpdesk_title %}{% trans "Knowledgebase" %}{% endblock %}
 
@@ -10,23 +10,59 @@
 {% endblock %}
 
 {% block helpdesk_body %}
-<h2>{% trans "Knowledgebase" %}</h2>
 
-<p>{% trans "We have listed a number of Knowledgebase articles for your perusal in the following categories. Please check to see if any of these articles address your problem prior to opening a support ticket." %}</p>
+{% if helpdesk_settings.HELPDESK_VIEW_A_TICKET_PUBLIC and not user.is_authenticated and not user|is_helpdesk_staff %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-8">
+        {% endif %}
+            <h2>{% trans "Knowledgebase" %}</h2>
+            <p>{% trans "We have listed a number of Knowledgebase articles for your perusal in the following categories. Please check to see if any of these articles address your problem prior to opening a support ticket." %}</p>
+            {% for category in kb_categories %}
+            {% cycle 'one' 'two' 'three' as catnumperrow silent %}
+            {% if catnumperrow == 'one' %}<div class="card-deck">{% endif %}
+                <div class="card" style="margin-top: 15px">
+                    <div class="card-header">
+                        <h5>{{ category.title }}</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">{% if not category.preview_description %}{{ category.description }}{% else %}{{ category.preview_description }}{% endif %}</p>
+                        <p class="card-text"><small class="text-muted"><a class="btn btn-primary" href='{{ category.get_absolute_url }}'>{% trans 'View articles' %} <i class="fa fa-share"></i></a></small></p>
+                    </div>
+                </div>
+            {% if catnumperrow == 'three' or forloop.last %}</div>{% endif %}
+            {% endfor %}
 
-{% for category in kb_categories %}
-{% cycle 'one' 'two' 'three' as catnumperrow silent %}
-{% if catnumperrow == 'one' %}<div class="card-deck">{% endif %}
-<div class="card">
-    <div class="card-header">
-      <h5>{{ category.title }}</h5>
-    </div>
-    <div class="card-body">
-        <p class="card-text">{{ category.description }}</p>
-        <p class="card-text"><small class="text-muted"><a class="btn btn-primary" href='{{ category.get_absolute_url }}'>{% trans 'View articles' %} <i class="fa fa-share"></i></a></small></p>
+        {% if helpdesk_settings.HELPDESK_VIEW_A_TICKET_PUBLIC and not user.is_authenticated and not user|is_helpdesk_staff %}
+        </div>
+        <div class="col-sm">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <h2>{% trans "View a Ticket" %}</h2>
+                    <form method='get' action="{% url 'helpdesk:public_view' %}">
+                        <fieldset>
+                            <div class="form-group {% if field.errors %}has-error{% endif %}">
+                                <label for='id_ticket'>{% trans "Ticket" %}</label>
+                                <div class="input-group">
+                                    <input type='text' name='ticket' class='form-control'/>
+                                </div>
+                            </div>
+                            <div class="form-group {% if field.errors %}has-error{% endif %}">
+                                <label for='id_email'>{% trans "Your E-mail Address" %}</label>
+                                <div class="input-group">
+                                    <input type='text' name='email' class='form-control'/>
+                                </div>
+                            </div>
+                            <div class='buttons form-group'>
+                                <input type='submit' class="btn btn-primary" value='{% trans "View Ticket" %}'/>
+                            </div>
+                        </fieldset>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
-{% if catnumperrow == 'three' %}</div>{% endif %}
-{% endfor %}
+{% endif %}
 
 {% endblock %}

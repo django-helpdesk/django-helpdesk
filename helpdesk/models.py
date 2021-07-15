@@ -1258,8 +1258,14 @@ class KBCategory(models.Model):
         _('Slug'),
     )
 
+    preview_description = models.TextField(
+        _('Preview description on knowledgebase page'),
+        blank=True,
+        null=True,
+    )
+
     description = models.TextField(
-        _('Description'),
+        _('Full description on knowledgebase category page'),
     )
 
     queue = models.ForeignKey(

@@ -20,7 +20,7 @@
                         <div class="card" style="margin-top: 15px">
                             <div class="card-body">
                                 <h5 class="card-title">{{ category.title }}</h5>
-                                <p class="card-text">{{ category.description }}</p>
+                                <p class="card-text">{% if not category.preview_description %}{{ category.description }}{% else %}{{ category.preview_description }}{% endif %}</p>
                                 <p class="card-text">
                                     <small class="text-muted">
                                         <a href='{{ category.get_absolute_url }}'>
