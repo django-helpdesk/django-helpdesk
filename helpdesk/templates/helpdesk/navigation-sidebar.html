@@ -1,4 +1,6 @@
 {% load i18n helpdesk_staff %}
+{% load form_list %}
+{% with user|form_list as forms %}
 
     <!-- Sidebar -->
     <ul class="sidebar navbar-nav">
@@ -34,11 +36,20 @@
             {% endif %}
           </div>
         </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'helpdesk:submit' 1 %}">
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="ticketsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <i class="fas fa-fw fa-plus-circle"></i>
             <span>{% trans "New Ticket" %}</span>
           </a>
+          <div class="dropdown-menu" aria-labelledby="ticketsDropdown">
+            {% if forms %}
+            {% for f in forms %}
+            <a class="dropdown-item small" href="{% url 'helpdesk:submit' f.id %}">{{ f.name }}</a>
+            {% endfor %}
+            {% else %}
+            <p class="dropdown-item small text-wrap">{% trans "No forms are available." %}</p>
+            {% endif %}
+          </div>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="{% url 'helpdesk:report_index' %}">
@@ -84,3 +95,5 @@
         {% endif %}
     {% endif %}
     </ul>
+
+{% endwith %}
