@@ -25,8 +25,8 @@
                     <div class="card-header">
                         <h5>{{ category.title }}</h5>
                     </div>
-                    <div class="card-body">
-                        <p class="card-text">{% if not category.preview_description %}{{ category.description }}{% else %}{{ category.preview_description }}{% endif %}</p>
+                    <div class="card-body" style="margin-top:-15px">
+                        <p class="card-text">{% if not category.get_preview_markdown %}{{ category.get_description_markdown }}{% else %}{{ category.get_preview_markdown }}{% endif %}</p>
                         <p class="card-text"><small class="text-muted"><a class="btn btn-primary" href='{{ category.get_absolute_url }}'>{% trans 'View articles' %} <i class="fa fa-share"></i></a></small></p>
                     </div>
                 </div>

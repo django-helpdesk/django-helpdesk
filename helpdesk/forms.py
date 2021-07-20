@@ -157,7 +157,7 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
                     pass
                 instanceargs = {
                     'label': display_data.label,
-                    'help_text': display_data.help_text,
+                    'help_text': display_data.get_markdown(),
                     'required': display_data.required,
                     'initial': initial_value,
                 }
@@ -170,7 +170,10 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
                     for attr in fields:
                         display_info = getattr(display_data, attr, None)
                         if display_info is not None and display_info != '':
-                            setattr(self.fields[display_data.field_name], attr, display_info)
+                            if attr == 'help_text':
+                                setattr(self.fields[display_data.field_name], attr, display_data.get_markdown())
+                            else:
+                                setattr(self.fields[display_data.field_name], attr, display_info)
                             # print('--%s: %s' % (attr, display_info))
         self.fields['extra_data'].widget = forms.HiddenInput()
 
@@ -257,7 +260,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
         super().__init__(*args, **kwargs)
         form = FormType.objects.get(pk=self.form_id)
         self.form_title = form.name
-        self.form_introduction = form.description
+        self.form_introduction = form.get_markdown()
 
         if kbcategory:
             self.fields['kbitem'] = forms.ChoiceField(
@@ -280,11 +283,14 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
                     for attr in fields:
                         display_info = getattr(field, attr, None)
                         if display_info is not None and display_info != '':
-                            setattr(self.fields[field.field_name], attr, display_info)
+                            if attr == 'help_text':
+                                setattr(self.fields[field.field_name], attr, field.get_markdown())
+                            else:
+                                setattr(self.fields[field.field_name], attr, display_info)
                 else:
                     instanceargs = {
                         'label': field.label,
-                        'help_text': field.help_text,
+                        'help_text': field.get_markdown(),
                         'required': field.required,
                     }
                     self.customfield_to_field(field, instanceargs)

@@ -451,6 +451,9 @@ class FormType(models.Model):
     def __str__(self):
         return 'FormType - %s %s' % (self.id, self.name)
 
+    def get_markdown(self):
+        return get_markdown(self.description)
+
 
 """@receiver(post_init, sender=FormType, dispatch_uid="create_default_fields")
 def _create_default_fields(sender, instance, **kwargs):
@@ -1293,6 +1296,12 @@ class KBCategory(models.Model):
         from django.urls import reverse
         return reverse('helpdesk:kb_category', kwargs={'slug': self.slug})
 
+    def get_description_markdown(self):
+        return get_markdown(self.description)
+
+    def get_preview_markdown(self):
+        return get_markdown(self.preview_description)
+
 
 class KBItem(models.Model):
     """
@@ -2010,6 +2019,9 @@ class CustomField(models.Model):
         ordering = ['ticket_form', 'form_ordering']
         # Django 3.2 option
         # constraints = [models.UniqueConstraint(fields=['field_name', 'ticket_form'], name='unique_form_field')]
+
+    def get_markdown(self):
+        return get_markdown(self.help_text)
 
 
 class TicketCustomFieldValue(models.Model):

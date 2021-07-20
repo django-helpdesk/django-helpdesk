@@ -6,7 +6,7 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-sm" style="margin-top: 15px">
-            {{ category.description|safe|linebreaks }}
+            {{ category.get_description_markdown }}
         </div>
         <div class="col-sm-8">
             {% block item_list %}

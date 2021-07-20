@@ -20,8 +20,8 @@
                 {{ title }}
                 {% endblocktrans %}
             </div>
-            <div class="card-body">
-                <p>{% blocktrans with intro=form.form_introduction|safe|linebreaksbr %}{{ intro }}{% endblocktrans %}</p>
+            <div class="card-body" style="margin-top:-15px">
+                <p>{% blocktrans with intro=form.form_introduction %}{{ intro }}{% endblocktrans %}</p>
 
                 {% if form.errors %}
                     {% include 'helpdesk/include/alert_form_errors.html' %}
@@ -46,7 +46,7 @@
                                 {% endif %}
                                 {% if field.help_text %}
                                     <small class='form_help_text help-block'>
-                                        {% blocktrans with help_text=field.help_text|safe %}
+                                        {% blocktrans with help_text=field.help_text %}
                                         {{ help_text }}
                                         {% endblocktrans %}
                                     </small>
