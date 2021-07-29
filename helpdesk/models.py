@@ -788,6 +788,9 @@ class Ticket(models.Model):
 
         self.modified = timezone.now()
 
+        if len(self.title) > 200:
+            self.title = self.title[:197] + "..."
+
         super(Ticket, self).save(*args, **kwargs)
 
     @staticmethod

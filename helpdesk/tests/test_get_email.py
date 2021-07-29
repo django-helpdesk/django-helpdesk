@@ -53,7 +53,13 @@ class GetEmailCommonTests(TestCase):
         with open(os.path.join(THIS_DIR, "test_files/blank-body-with-attachment.eml")) as fd:
             test_email = fd.read()
         ticket = helpdesk.email.object_from_message(test_email, self.queue_public, self.logger)
-        self.assertEqual(ticket.title, "Attachment without body")
+
+        # title got truncated because of max_lengh of the model.title field
+        assert ticket.title == (
+            "Attachment without body - and a loooooooooooooooooooooooooooooooooo"
+            "ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+            "ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo..."
+        )
         self.assertEqual(ticket.description, "")
 
     def test_email_with_quoted_printable_body(self):
