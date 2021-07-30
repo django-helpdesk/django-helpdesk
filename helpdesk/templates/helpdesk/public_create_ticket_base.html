@@ -13,13 +13,13 @@
             {% include 'helpdesk/include/alert_form_errors.html' %}
         {% endif %}
 
-        <form method='post' enctype='multipart/form-data'>
+        <form method='post' enctype='multipart/form-data' id=’ticket_submission_form'>
             {% csrf_token %}
             {% for field in form %}
                 {% if field.is_hidden %}
                     {{ field }}
                 {% else %}
-                    <div class="form-group">
+                    <div class="form-group" id='id_group_{{ field.name }}'>
                         <label for='id_{{ field.name }}'>
                             {{ field.label }}
                             {% if not field.field.required %}
