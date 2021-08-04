@@ -8,13 +8,11 @@ lib.py - Common functions (eg multipart e-mail)
 
 import logging
 import mimetypes
-import os
 
 from django.conf import settings
-from django.utils.encoding import smart_text, smart_str
-from django.utils.safestring import mark_safe
+from django.utils.encoding import smart_text
 
-from helpdesk.models import FollowUpAttachment, EmailTemplate
+from helpdesk.models import FollowUpAttachment
 
 
 logger = logging.getLogger('helpdesk')

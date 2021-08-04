@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.core.management import call_command
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
@@ -84,9 +84,11 @@ class GetEmailCommonTests(TestCase):
         self.assertEqual(ticket.title, "Testovácí email")
         self.assertEqual(ticket.description, "íářčšáíéřášč")
 
+    @override_settings(HELPDESK_FULL_FIRST_MESSAGE_FROM_EMAIL=True)
     def test_email_with_utf_8_non_decodable_sequences(self):
         """
         Tests that emails with utf-8 non-decodable sequences are parsed correctly
+        The message is fowarded as well
         """
         with open(os.path.join(THIS_DIR, "test_files/utf-nondecodable.eml")) as fd:
             test_email = fd.read()
@@ -98,6 +100,20 @@ class GetEmailCommonTests(TestCase):
         attachments = FollowUpAttachment.objects.filter(followup=followup)
         attachment = attachments[0]
         self.assertIn('prosazuje lepší', attachment.file.read().decode("utf-8"))
+
+    @override_settings(HELPDESK_FULL_FIRST_MESSAGE_FROM_EMAIL=True)
+    def test_email_with_forwarded_message(self):
+        """
+        Forwarded message of that format must be still attached correctly
+        """
+        with open(os.path.join(THIS_DIR, "test_files/forwarded-message.eml")) as fd:
+            test_email = fd.read()
+        ticket = helpdesk.email.object_from_message(test_email, self.queue_public, self.logger)
+        self.assertEqual(ticket.title, "Test with original message from GitHub")
+        self.assertIn("This is email body", ticket.description)
+        assert "Hello there!" not in ticket.description, ticket.description
+        assert FollowUp.objects.filter(ticket=ticket).count() == 1
+        assert "Hello there!" in FollowUp.objects.filter(ticket=ticket).first().comment
 
 
 class GetEmailParametricTemplate(object):
@@ -153,9 +169,10 @@ class GetEmailParametricTemplate(object):
         else:
             # Test local email reading
             if self.method == 'local':
-                with mock.patch('helpdesk.email.listdir') as mocked_listdir, \
+                with mock.patch('os.listdir') as mocked_listdir, \
                         mock.patch('helpdesk.email.isfile') as mocked_isfile, \
-                        mock.patch('builtins.open', mock.mock_open(read_data=test_email)):
+                        mock.patch('builtins.open', mock.mock_open(read_data=test_email)), \
+                        mock.patch('os.unlink'):
                     mocked_isfile.return_value = True
                     mocked_listdir.return_value = ['filename1', 'filename2']
 
@@ -224,9 +241,10 @@ class GetEmailParametricTemplate(object):
         else:
             # Test local email reading
             if self.method == 'local':
-                with mock.patch('helpdesk.email.listdir') as mocked_listdir, \
+                with mock.patch('os.listdir') as mocked_listdir, \
                         mock.patch('helpdesk.email.isfile') as mocked_isfile, \
-                        mock.patch('builtins.open' if six.PY3 else '__builtin__.open', mock.mock_open(read_data=test_email)):
+                        mock.patch('builtins.open' if six.PY3 else '__builtin__.open', mock.mock_open(read_data=test_email)), \
+                        mock.patch('os.unlink'):
                     mocked_isfile.return_value = True
                     mocked_listdir.return_value = ['filename1', 'filename2']
 
@@ -299,9 +317,10 @@ class GetEmailParametricTemplate(object):
         else:
             # Test local email reading
             if self.method == 'local':
-                with mock.patch('helpdesk.email.listdir') as mocked_listdir, \
+                with mock.patch('os.listdir') as mocked_listdir, \
                         mock.patch('helpdesk.email.isfile') as mocked_isfile, \
-                        mock.patch('builtins.open', mock.mock_open(read_data=test_email)):
+                        mock.patch('builtins.open', mock.mock_open(read_data=test_email)), \
+                        mock.patch('os.unlink'):
                     mocked_isfile.return_value = True
                     mocked_listdir.return_value = ['filename1', 'filename2']
 
@@ -412,9 +431,10 @@ class GetEmailParametricTemplate(object):
         else:
             # Test local email reading
             if self.method == 'local':
-                with mock.patch('helpdesk.email.listdir') as mocked_listdir, \
+                with mock.patch('os.listdir') as mocked_listdir, \
                         mock.patch('helpdesk.email.isfile') as mocked_isfile, \
-                        mock.patch('builtins.open', mock.mock_open(read_data=msg.as_string())):
+                        mock.patch('builtins.open', mock.mock_open(read_data=msg.as_string())), \
+                        mock.patch('os.unlink'):
                     mocked_isfile.return_value = True
                     mocked_listdir.return_value = ['filename1', 'filename2']
 
@@ -502,9 +522,10 @@ class GetEmailParametricTemplate(object):
         else:
             # Test local email reading
             if self.method == 'local':
-                with mock.patch('helpdesk.email.listdir') as mocked_listdir, \
+                with mock.patch('os.listdir') as mocked_listdir, \
                         mock.patch('helpdesk.email.isfile') as mocked_isfile, \
-                        mock.patch('builtins.open', mock.mock_open(read_data=test_email)):
+                        mock.patch('builtins.open', mock.mock_open(read_data=test_email)), \
+                        mock.patch('os.unlink'):
                     mocked_isfile.return_value = True
                     mocked_listdir.return_value = ['filename1']
 
@@ -550,7 +571,7 @@ class GetEmailParametricTemplate(object):
             self.assertEqual(followup1.ticket.id, 1)
             attach1 = get_object_or_404(FollowUpAttachment, pk=1)
             self.assertEqual(attach1.followup.id, 1)
-            self.assertEqual(attach1.filename, 'signature.asc')
+            self.assertEqual(attach1.filename, 'part-1_signature.asc')
             self.assertEqual(attach1.file.read(), b"""-----BEGIN PGP SIGNATURE-----
 
 iQIcBAEBCAAGBQJaA3dnAAoJELBLc7QPITnLN54P/3Zsu7+AIQWDFTvziJfCqswG
@@ -670,9 +691,10 @@ class GetEmailCCHandling(TestCase):
         test_email = "To: queue@example.com\nCc: " + test_email_cc_one + ", " + test_email_cc_one + ", " + test_email_cc_two + ", " + test_email_cc_three + "\nCC: " + test_email_cc_one + ", " + test_email_cc_three + ", " + test_email_cc_four + ", " + ticket_user_emails + "\nFrom: " + test_email_from + "\nSubject: " + test_email_subject + "\n\n" + test_email_body
         test_mail_len = len(test_email)
 
-        with mock.patch('helpdesk.email.listdir') as mocked_listdir, \
+        with mock.patch('os.listdir') as mocked_listdir, \
                 mock.patch('helpdesk.email.isfile') as mocked_isfile, \
-                mock.patch('builtins.open', mock.mock_open(read_data=test_email)):
+                mock.patch('builtins.open', mock.mock_open(read_data=test_email)), \
+                mock.patch('os.unlink'):
             mocked_isfile.return_value = True
             mocked_listdir.return_value = ['filename1']
 

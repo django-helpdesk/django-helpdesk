@@ -79,6 +79,13 @@ HELPDESK_VIEW_A_TICKET_PUBLIC = getattr(settings, 'HELPDESK_VIEW_A_TICKET_PUBLIC
 # show 'submit a ticket' section on public page?
 HELPDESK_SUBMIT_A_TICKET_PUBLIC = getattr(settings, 'HELPDESK_SUBMIT_A_TICKET_PUBLIC', True)
 
+# change that to custom class to have extra fields or validation (like captcha)
+HELPDESK_PUBLIC_TICKET_FORM_CLASS = getattr(
+    settings,
+    "HELPDESK_PUBLIC_TICKET_FORM_CLASS",
+    "helpdesk.forms.PublicTicketForm"
+)
+
 
 ###################################
 # options for update_ticket views #
@@ -89,7 +96,10 @@ HELPDESK_SUBMIT_A_TICKET_PUBLIC = getattr(settings, 'HELPDESK_SUBMIT_A_TICKET_PU
 # can be True/False or a callable accepting the active user and returning True if they must be considered helpdesk staff
 HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = getattr(settings, 'HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE', False)
 if not (HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE in (True, False) or callable(HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE)):
-    warnings.warn("HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE should be set to either True/False or a callable.", RuntimeWarning)
+    warnings.warn(
+        "HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE should be set to either True/False or a callable.",
+        RuntimeWarning
+    )
 
 # show edit buttons in ticket follow ups.
 HELPDESK_SHOW_EDIT_BUTTON_FOLLOW_UP = getattr(settings,
@@ -159,3 +169,13 @@ HELPDESK_USE_HTTPS_IN_EMAIL_LINK = getattr(settings, 'HELPDESK_USE_HTTPS_IN_EMAI
 HELPDESK_TEAMS_MODEL = getattr(settings, 'HELPDESK_TEAMS_MODEL', 'pinax_teams.Team')
 HELPDESK_TEAMS_MIGRATION_DEPENDENCIES = getattr(settings, 'HELPDESK_TEAMS_MIGRATION_DEPENDENCIES', [('pinax_teams', '0004_auto_20170511_0856')])
 HELPDESK_KBITEM_TEAM_GETTER = getattr(settings, 'HELPDESK_KBITEM_TEAM_GETTER', lambda kbitem: kbitem.team)
+
+# Include all signatures and forwards in the first ticket message if set
+# Useful if you get forwards dropped from them while they are useful part of request
+HELPDESK_FULL_FIRST_MESSAGE_FROM_EMAIL = getattr(settings, 'HELPDESK_FULL_FIRST_MESSAGE_FROM_EMAIL', False)
+
+# If set then we always save incoming emails as .eml attachments
+# which is quite noisy but very helpful for complicated markup, forwards and so on
+# (which gets stripped/corrupted otherwise)
+HELPDESK_ALWAYS_SAVE_INCOMING_EMAIL_MESSAGE = getattr(settings, "HELPDESK_ALWAYS_SAVE_INCOMING_EMAIL_MESSAGE", False)
+

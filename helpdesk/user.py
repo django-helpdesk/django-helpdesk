@@ -67,7 +67,11 @@ class HelpdeskUser:
         if self.has_full_access():
             return True
         else:
-            return helpdesk_settings.HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION and self.user.has_perm(queue.permission_name)
+            return (
+                helpdesk_settings.HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION
+                and
+                self.user.has_perm(queue.permission_name)
+            )
 
     def can_access_ticket(self, ticket):
         """Check to see if the user has permission to access

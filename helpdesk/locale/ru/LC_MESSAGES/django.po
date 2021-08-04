@@ -531,13 +531,15 @@ msgstr ""
 
 #: models.py:247
 msgid "Logging Directory"
-msgstr ""
+msgstr "Директория логов"
 
 #: models.py:251
 msgid ""
 "If logging is enabled, what directory should we use to store log files for "
-"this queue? If no directory is set, default to /var/log/helpdesk/"
+"this queue? The standard logging mechanims are used if no directory is set"
 msgstr ""
+"Директория в которую будут сохраняться файлы с логами; стандартная конфигурация "
+"используется если ничего не указано"
 
 #: models.py:261
 msgid "Default owner"

@@ -7,6 +7,7 @@ views/public.py - All public facing views, eg non-staff (no authentication
                   required) views.
 """
 import logging
+from importlib import import_module
 
 from django.core.exceptions import (
     ObjectDoesNotExist, PermissionDenied, ImproperlyConfigured,
@@ -26,9 +27,8 @@ from helpdesk import settings as helpdesk_settings
 from helpdesk.decorators import protect_view, is_helpdesk_staff
 import helpdesk.views.staff as staff
 import helpdesk.views.abstract_views as abstract_views
-from helpdesk.forms import PublicTicketForm
 from helpdesk.lib import text_is_spam
-from helpdesk.models import CustomField, Ticket, Queue, UserSettings, KBCategory, KBItem
+from helpdesk.models import Ticket, Queue, UserSettings
 from helpdesk.user import huser_from_request
 
 logger = logging.getLogger(__name__)
@@ -42,7 +42,17 @@ def create_ticket(request, *args, **kwargs):
 
 
 class BaseCreateTicketView(abstract_views.AbstractCreateTicketMixin, FormView):
-    form_class = PublicTicketForm
+
+    def get_form_class(self):
+        try:
+            the_module, the_form_class = helpdesk_settings.HELPDESK_PUBLIC_TICKET_FORM_CLASS.rsplit(".", 1)
+            the_module = import_module(the_module)
+            the_form_class = getattr(the_module, the_form_class)
+        except Exception as e:
+            raise ImproperlyConfigured(
+                f"Invalid custom form class {helpdesk_settings.HELPDESK_PUBLIC_TICKET_FORM_CLASS}"
+            ) from e
+        return the_form_class
 
     def dispatch(self, *args, **kwargs):
         request = self.request
@@ -108,9 +118,6 @@ class BaseCreateTicketView(abstract_views.AbstractCreateTicketMixin, FormView):
             except ValueError:
                 # if someone enters a non-int string for the ticket
                 return HttpResponseRedirect(reverse('helpdesk:home'))
-
-    def get_success_url(self):
-        request = self.request
 
 
 class CreateTicketIframeView(BaseCreateTicketView):

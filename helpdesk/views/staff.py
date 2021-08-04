@@ -24,6 +24,7 @@ from django.utils.html import escape
 from django.utils import timezone
 from django.views.generic.edit import FormView, UpdateView
 
+from helpdesk.forms import CUSTOMFIELD_DATE_FORMAT
 from helpdesk.query import (
     get_query_class,
     query_to_base64,
@@ -73,9 +74,6 @@ if helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE:
 else:
     staff_member_required = user_passes_test(
         lambda u: u.is_authenticated and u.is_active and u.is_staff)
-
-
-User = get_user_model()
 
 
 def _get_queue_choices(queues):
@@ -153,16 +151,15 @@ def dashboard(request):
     #          Open  Resolved
     # Queue 1    10     4
     # Queue 2     4    12
-
-    queues = HelpdeskUser(request.user).get_queues().values_list('id', flat=True)
-
-    from_clause = """FROM    helpdesk_ticket t,
-                    helpdesk_queue q"""
-    if queues:
-        where_clause = """WHERE   q.id = t.queue_id AND
-                        q.id IN (%s)""" % (",".join(("%d" % pk for pk in queues)))
-    else:
-        where_clause = """WHERE   q.id = t.queue_id"""
+    # code never used (and prone to sql injections)
+    # queues = HelpdeskUser(request.user).get_queues().values_list('id', flat=True)
+    # from_clause = """FROM    helpdesk_ticket t,
+    #                 helpdesk_queue q"""
+    # if queues:
+    #     where_clause = """WHERE   q.id = t.queue_id AND
+    #                     q.id IN (%s)""" % (",".join(("%d" % pk for pk in queues)))
+    # else:
+    #     where_clause = """WHERE   q.id = t.queue_id"""
 
     # get user assigned tickets page
     paginator = Paginator(
@@ -382,6 +379,7 @@ def view_ticket(request, ticket_id):
         )
     else:
         submitter_userprofile_url = None
+
     return render(request, 'helpdesk/ticket.html', {
         'ticket': ticket,
         'submitter_userprofile_url': submitter_userprofile_url,
@@ -555,7 +553,11 @@ def update_ticket(request, ticket_id, public=False):
     # broken into two stages to prevent changes from first replace being themselves
     # changed by the second replace due to conflicting syntax
     comment = comment.replace('{%', 'X-HELPDESK-COMMENT-VERBATIM').replace('%}', 'X-HELPDESK-COMMENT-ENDVERBATIM')
-    comment = comment.replace('X-HELPDESK-COMMENT-VERBATIM', '{% verbatim %}{%').replace('X-HELPDESK-COMMENT-ENDVERBATIM', '%}{% endverbatim %}')
+    comment = comment.replace(
+        'X-HELPDESK-COMMENT-VERBATIM', '{% verbatim %}{%'
+    ).replace(
+        'X-HELPDESK-COMMENT-ENDVERBATIM', '%}{% endverbatim %}'
+    )
     # render the neutralized template
     comment = template_func(comment).render(context)
 
@@ -592,7 +594,6 @@ def update_ticket(request, ticket_id, public=False):
         ticket.status = new_status
         ticket.save()
         f.new_status = new_status
-        ticket_status_changed = True
         if f.title:
             f.title += ' and %s' % ticket.get_status_display()
         else:
@@ -702,7 +703,10 @@ def update_ticket(request, ticket_id, public=False):
     else:
         template_staff = 'updated_owner'
 
-    if ticket.assigned_to and (ticket.assigned_to.usersettings_helpdesk.email_on_ticket_change or (reassigned and ticket.assigned_to.usersettings_helpdesk.email_on_ticket_assigned)):
+    if ticket.assigned_to and (
+        ticket.assigned_to.usersettings_helpdesk.email_on_ticket_change
+        or (reassigned and ticket.assigned_to.usersettings_helpdesk.email_on_ticket_assigned)
+    ):
         messages_sent_to.update(ticket.send(
             {'assigned_to': (template_staff, context)},
             dont_send_to=messages_sent_to,
@@ -1072,7 +1076,6 @@ def ticket_list(request):
         pass
     elif not {'queue', 'assigned_to', 'status', 'q', 'sort', 'sortreverse', 'kbitem'}.intersection(request.GET):
         # Fall-back if no querying is being done
-        all_queues = Queue.objects.all()
         query_params = deepcopy(default_query_params)
     else:
         filter_in_params = [
@@ -1213,15 +1216,12 @@ def edit_ticket(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
     ticket_perm_check(request, ticket)
 
-    if request.method == 'POST':
-        form = EditTicketForm(request.POST, instance=ticket)
-        if form.is_valid():
-            ticket = form.save()
-            return HttpResponseRedirect(ticket.get_absolute_url())
-    else:
-        form = EditTicketForm(instance=ticket)
+    form = EditTicketForm(request.POST or None, instance=ticket)
+    if form.is_valid():
+        ticket = form.save()
+        return redirect(ticket)
 
-    return render(request, 'helpdesk/edit_ticket.html', {'form': form, 'ticket': ticket})
+    return render(request, 'helpdesk/edit_ticket.html', {'form': form, 'ticket': ticket, 'errors': form.errors})
 
 
 edit_ticket = staff_member_required(edit_ticket)
@@ -1777,8 +1777,8 @@ def calc_basic_ticket_stats(Tickets):
 
     date_30 = date_rel_to_today(today, 30)
     date_60 = date_rel_to_today(today, 60)
-    date_30_str = date_30.strftime('%Y-%m-%d')
-    date_60_str = date_60.strftime('%Y-%m-%d')
+    date_30_str = date_30.strftime(CUSTOMFIELD_DATE_FORMAT)
+    date_60_str = date_60.strftime(CUSTOMFIELD_DATE_FORMAT)
 
     # > 0 & <= 30
     ota_le_30 = all_open_tickets.filter(created__gte=date_30_str)

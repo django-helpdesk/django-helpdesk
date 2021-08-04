@@ -16,7 +16,8 @@ from helpdesk.decorators import helpdesk_staff_member_required, protect_view
 from helpdesk import settings as helpdesk_settings
 from helpdesk.views import feeds, staff, public, kb, login
 try:
-    import helpdesk.tasks
+    # TODO: why is it imported? due to some side-effect or by mistake?
+    import helpdesk.tasks  # NOQA
 except ImportError:
     pass
 

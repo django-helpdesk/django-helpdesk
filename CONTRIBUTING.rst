@@ -155,7 +155,7 @@ collaborative translation. If you want to help translate django-helpdesk into
 languages other than English, we encourage you to make use of our Transifex
 project:
 
-http://www.transifex.net/projects/p/django-helpdesk/resource/core/
+http://www.transifex.com/projects/p/django-helpdesk/resource/core/
 
 Once you have translated content via Transifex, please raise an issue on the
 project Github page and tag it as "translations" to let us know it's ready to

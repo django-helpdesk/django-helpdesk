@@ -11,7 +11,14 @@ default_login_view = auth_views.LoginView.as_view(
 def login(request):
     login_url = settings.LOGIN_URL
     # Prevent redirect loop by checking that LOGIN_URL is not this view's name
-    if login_url and (login_url != resolve_url(request.resolver_match.view_name) and (login_url != request.resolver_match.view_name)):
+    condition = (
+        login_url
+        and (
+            login_url != resolve_url(request.resolver_match.view_name)
+            and (login_url != request.resolver_match.view_name)
+        )
+    )
+    if condition:
         if 'next' in request.GET:
             return_to = request.GET['next']
         else:

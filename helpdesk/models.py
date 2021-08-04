@@ -305,7 +305,7 @@ class Queue(models.Model):
         null=True,
         help_text=_('If logging is enabled, what directory should we use to '
                     'store log files for this queue? '
-                    'If no directory is set, default to /var/log/helpdesk/'),
+                    'The standard logging mechanims are used if no directory is set'),
     )
 
     default_owner = models.ForeignKey(
@@ -612,7 +612,7 @@ class Ticket(models.Model):
             'assigned_to': (template_name2, context),
         }
 
-        **kwargs are passed to send_templated_mail defined in templated_mail.py
+        **kwargs are passed to send_templated_mail defined in templated_email.py
 
         returns the set of email addresses the notification was delivered to.
 
@@ -632,6 +632,7 @@ class Ticket(models.Model):
                 template, context = roles[role]
                 send_templated_mail(template, context, recipient, sender=self.queue.from_address, **kwargs)
                 recipients.add(recipient)
+
         send('submitter', self.submitter_email)
         send('ticket_cc', self.queue.updated_ticket_cc)
         send('new_ticket_cc', self.queue.new_ticket_cc)
@@ -1517,7 +1518,10 @@ class UserSettings(models.Model):
 
     email_on_ticket_change = models.BooleanField(
         verbose_name=_('E-mail me on ticket change?'),
-        help_text=_('If you\'re the ticket owner and the ticket is changed via the web by somebody else, do you want to receive an e-mail?'),
+        help_text=_(
+            'If you\'re the ticket owner and the ticket is changed via the web by somebody else,'
+            'do you want to receive an e-mail?'
+        ),
         default=email_on_ticket_change_default,
     )
 

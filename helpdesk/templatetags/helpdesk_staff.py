@@ -1,11 +1,11 @@
 """
 django-helpdesk - A Django powered ticket tracker for small enterprise.
 
-templatetags/helpdesk_staff.py - The is_helpdesk_staff template filter returns True if the user qualifies as Helpdesk staff.
+The is_helpdesk_staff template filter returns True if the user qualifies as Helpdesk staff.
+templatetags/helpdesk_staff.py
 """
 import logging
 from django.template import Library
-from django.db.models import Q
 
 from helpdesk.decorators import is_helpdesk_staff
 
@@ -18,5 +18,5 @@ register = Library()
 def helpdesk_staff(user):
     try:
         return is_helpdesk_staff(user)
-    except Exception as e:
+    except Exception:
         logger.exception("'helpdesk_staff' template tag (django-helpdesk) crashed")

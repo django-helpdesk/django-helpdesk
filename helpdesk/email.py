@@ -4,42 +4,36 @@ Django Helpdesk - A Django powered ticket tracker for small enterprise.
 (c) Copyright 2008 Jutda. Copyright 2018 Timothy Hobbs. All Rights Reserved.
 See LICENSE for details.
 """
-from django.core.exceptions import ValidationError
-from django.core.files.base import ContentFile
-from django.core.files.uploadedfile import SimpleUploadedFile
-from django.core.management.base import BaseCommand
-from django.db.models import Q
-from django.utils.translation import ugettext as _
-from django.utils import encoding, timezone
-from django.contrib.auth import get_user_model
-
-from helpdesk import settings
-from helpdesk.lib import safe_template_context, process_attachments
-from helpdesk.models import Queue, Ticket, TicketCC, FollowUp, IgnoreEmail
-
-from datetime import timedelta
-import base64
-import binascii
+# import base64
 import email
-from email.header import decode_header
-from email.utils import getaddresses, parseaddr, collapse_rfc2231_value
 import imaplib
+import logging
 import mimetypes
-from os import listdir, unlink
-from os.path import isfile, join
+import os
 import poplib
 import re
 import socket
 import ssl
 import sys
+from datetime import timedelta
+from email.utils import getaddresses
+from os.path import isfile, join
 from time import ctime
-from optparse import make_option
 
 from bs4 import BeautifulSoup
-
+from django.conf import settings as django_settings
+from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.db.models import Q
+from django.utils import encoding, timezone
+from django.utils.translation import ugettext as _
 from email_reply_parser import EmailReplyParser
 
-import logging
+from helpdesk import settings
+from helpdesk.lib import safe_template_context, process_attachments
+from helpdesk.models import Queue, Ticket, TicketCC, FollowUp, IgnoreEmail
+
 
 # import User model, which may be a custom model
 User = get_user_model()
@@ -70,37 +64,48 @@ def process_email(quiet=False):
         if q.logging_type in logging_types:
             logger.setLevel(logging_types[q.logging_type])
         elif not q.logging_type or q.logging_type == 'none':
-            logging.disable(logging.CRITICAL)  # disable all messages
+            # disable all handlers so messages go to nowhere
+            logger.handlers = []
+            logger.propagate = False
         if quiet:
             logger.propagate = False  # do not propagate to root logger that would log to console
-        logdir = q.logging_dir or '/var/log/helpdesk/'
+
+        # Log messages to specific file only if the queue has it configured
+        if (q.logging_type in logging_types) and q.logging_dir:  # if it's enabled and the dir is set
+            log_file_handler = logging.FileHandler(join(q.logging_dir, q.slug + '_get_email.log'))
+            logger.addHandler(log_file_handler)
+        else:
+            log_file_handler = None
 
         try:
-            handler = logging.FileHandler(join(logdir, q.slug + '_get_email.log'))
-            logger.addHandler(handler)
-
             if not q.email_box_last_check:
                 q.email_box_last_check = timezone.now() - timedelta(minutes=30)
 
             queue_time_delta = timedelta(minutes=q.email_box_interval or 0)
-
             if (q.email_box_last_check + queue_time_delta) < timezone.now():
                 process_queue(q, logger=logger)
                 q.email_box_last_check = timezone.now()
                 q.save()
         finally:
+            # we must close the file handler correctly if it's created
             try:
-                handler.close()
+                if log_file_handler:
+                    log_file_handler.close()
             except Exception as e:
                 logging.exception(e)
             try:
-                logger.removeHandler(handler)
+                if log_file_handler:
+                    logger.removeHandler(log_file_handler)
             except Exception as e:
                 logging.exception(e)
 
 
 def pop3_sync(q, logger, server):
     server.getwelcome()
+    try:
+        server.stls()
+    except Exception:
+        logger.warning("POP3 StartTLS failed or unsupported. Connection will be unencrypted.")
     server.user(q.email_box_user or settings.QUEUE_EMAIL_BOX_USER)
     server.pass_(q.email_box_pass or settings.QUEUE_EMAIL_BOX_PASSWORD)
 
@@ -138,17 +143,27 @@ def pop3_sync(q, logger, server):
 
 def imap_sync(q, logger, server):
     try:
+        try:
+            server.starttls()
+        except Exception:
+            logger.warning("IMAP4 StartTLS unsupported or failed. Connection will be unencrypted.")
         server.login(q.email_box_user or
                      settings.QUEUE_EMAIL_BOX_USER,
                      q.email_box_pass or
                      settings.QUEUE_EMAIL_BOX_PASSWORD)
         server.select(q.email_box_imap_folder)
     except imaplib.IMAP4.abort:
-        logger.error("IMAP login failed. Check that the server is accessible and that the username and password are correct.")
+        logger.error(
+            "IMAP login failed. Check that the server is accessible and that "
+            "the username and password are correct."
+        )
         server.logout()
         sys.exit()
     except ssl.SSLError:
-        logger.error("IMAP login failed due to SSL error. This is often due to a timeout. Please check your connection and try again.")
+        logger.error(
+            "IMAP login failed due to SSL error. This is often due to a timeout. "
+            "Please check your connection and try again."
+        )
         server.logout()
         sys.exit()
 
@@ -171,7 +186,10 @@ def imap_sync(q, logger, server):
                 else:
                     logger.warn("Message %s was not successfully processed, and will be left on IMAP server" % num)
     except imaplib.IMAP4.error:
-        logger.error("IMAP retrieve failed. Is the folder '%s' spelled correctly, and does it exist on the server?" % q.email_box_imap_folder)
+        logger.error(
+            "IMAP retrieve failed. Is the folder '%s' spelled correctly, and does it exist on the server?",
+            q.email_box_imap_folder
+        )
 
     server.expunge()
     server.close()
@@ -243,7 +261,7 @@ def process_queue(q, logger):
 
     elif email_box_type == 'local':
         mail_dir = q.email_box_local_dir or '/var/lib/mail/helpdesk/'
-        mail = [join(mail_dir, f) for f in listdir(mail_dir) if isfile(join(mail_dir, f))]
+        mail = [join(mail_dir, f) for f in os.listdir(mail_dir) if isfile(join(mail_dir, f))]
         logger.info("Found %d messages in local mailbox directory" % len(mail))
 
         logger.info("Found %d messages in local mailbox directory" % len(mail))
@@ -253,15 +271,15 @@ def process_queue(q, logger):
                 full_message = encoding.force_text(f.read(), errors='replace')
                 ticket = object_from_message(message=full_message, queue=q, logger=logger)
             if ticket:
-                logger.info("Successfully processed message %d, ticket/comment created." % i)
+                logger.info("Successfully processed message %d, ticket/comment created.", i)
                 try:
-                    unlink(m)  # delete message file if ticket was successful
-                except OSError:
-                    logger.error("Unable to delete message %d." % i)
+                    os.unlink(m)  # delete message file if ticket was successful
+                except OSError as e:
+                    logger.error("Unable to delete message %d (%s).", i, str(e))
                 else:
-                    logger.info("Successfully deleted message %d." % i)
+                    logger.info("Successfully deleted message %d.", i)
             else:
-                logger.warn("Message %d was not successfully processed, and will be left in local directory" % i)
+                logger.warn("Message %d was not successfully processed, and will be left in local directory", i)
 
 
 def decodeUnknown(charset, string):
@@ -277,7 +295,26 @@ def decodeUnknown(charset, string):
 
 def decode_mail_headers(string):
     decoded = email.header.decode_header(string)
-    return u' '.join([str(msg, encoding=charset, errors='replace') if charset else str(msg) for msg, charset in decoded])
+    return u' '.join([
+        str(msg, encoding=charset, errors='replace') if charset else str(msg)
+        for msg, charset
+        in decoded
+    ])
+
+
+def is_autoreply(message):
+    """
+    Accepting message as something with .get(header_name) method
+    Returns True if it's likely to be auto-reply or False otherwise
+    So we don't start mail loops
+    """
+    any_if_this = [
+        False if not message.get("Auto-Submitted") else message.get("Auto-Submitted").lower() != "no",
+        True if message.get("X-Auto-Response-Suppress") in ("DR", "AutoReply", "All") else False,
+        message.get("List-Id"),
+        message.get("List-Unsubscribe"),
+    ]
+    return any(any_if_this)
 
 
 def create_ticket_cc(ticket, cc_list):
@@ -305,7 +342,7 @@ def create_ticket_cc(ticket, cc_list):
         try:
             ticket_cc = subscribe_to_ticket_updates(ticket=ticket, user=user, email=cced_email)
             new_ticket_ccs.append(ticket_cc)
-        except ValidationError as err:
+        except ValidationError:
             pass
 
     return new_ticket_ccs
@@ -362,7 +399,6 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
             logger.debug("Created new ticket %s-%s" % (ticket.queue.slug, ticket.id))
 
             new = True
-            update = ''
 
     # Old issue being re-opened
     elif ticket.status == Ticket.CLOSED_STATUS:
@@ -374,7 +410,7 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
         title=_('E-Mail Received from %(sender_email)s' % {'sender_email': sender_email}),
         date=now,
         public=True,
-        comment=payload['body'],
+        comment=payload.get('full_body', payload['body']) or "",
         message_id=message_id
     )
 
@@ -389,7 +425,10 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
 
     attached = process_attachments(f, files)
     for att_file in attached:
-        logger.info("Attachment '%s' (with size %s) successfully added to ticket from email." % (att_file[0], att_file[1].size))
+        logger.info(
+            "Attachment '%s' (with size %s) successfully added to ticket from email.",
+            att_file[0], att_file[1].size
+        )
 
     context = safe_template_context(ticket)
 
@@ -402,33 +441,44 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
 
         ticket_cc_list = TicketCC.objects.filter(ticket=ticket).all().values_list('email', flat=True)
 
-        for email in ticket_cc_list:
-            notifications_to_be_sent.append(email)
+        for email_address in ticket_cc_list:
+            notifications_to_be_sent.append(email_address)
 
-    # send mail to appropriate people now depending on what objects
-    # were created and who was CC'd
-    if new:
-        ticket.send(
-            {'submitter': ('newticket_submitter', context),
-             'new_ticket_cc': ('newticket_cc', context),
-             'ticket_cc': ('newticket_cc', context)},
-            fail_silently=True,
-            extra_headers={'In-Reply-To': message_id},
-        )
+    autoreply = is_autoreply(message)
+    if autoreply:
+        logger.info("Message seems to be auto-reply, not sending any emails back to the sender")
     else:
-        context.update(comment=f.comment)
-        ticket.send(
-            {'submitter': ('newticket_submitter', context),
-             'assigned_to': ('updated_owner', context)},
-            fail_silently=True,
-            extra_headers={'In-Reply-To': message_id},
-        )
-        if queue.enable_notifications_on_email_events:
+        # send mail to appropriate people now depending on what objects
+        # were created and who was CC'd
+        # Add auto-reply headers because it's an auto-reply and we must
+        extra_headers = {
+            'In-Reply-To': message_id,
+            "Auto-Submitted": "auto-replied",
+            "X-Auto-Response-Suppress": "All",
+            "Precedence": "auto_reply",
+        }
+        if new:
             ticket.send(
-                {'ticket_cc': ('updated_cc', context)},
+                {'submitter': ('newticket_submitter', context),
+                 'new_ticket_cc': ('newticket_cc', context),
+                 'ticket_cc': ('newticket_cc', context)},
                 fail_silently=True,
-                extra_headers={'In-Reply-To': message_id},
+                extra_headers=extra_headers,
             )
+        else:
+            context.update(comment=f.comment)
+            ticket.send(
+                {'submitter': ('newticket_submitter', context),
+                 'assigned_to': ('updated_owner', context)},
+                fail_silently=True,
+                extra_headers=extra_headers,
+            )
+            if queue.enable_notifications_on_email_events:
+                ticket.send(
+                    {'ticket_cc': ('updated_cc', context)},
+                    fail_silently=True,
+                    extra_headers=extra_headers,
+                )
 
     return ticket
 
@@ -445,6 +495,7 @@ def object_from_message(message, queue, logger):
 
     sender = message.get('from', _('Unknown Sender'))
     sender = decode_mail_headers(decodeUnknown(message.get_charset(), sender))
+
     # to address bug #832, we wrap all the text in front of the email address in
     # double quotes by using replace() on the email string. Then,
     # take first item of list, second item of tuple is the actual email address.
@@ -452,8 +503,6 @@ def object_from_message(message, queue, logger):
     # but the getaddresses() function seems to be able to handle just unclosed quotes
     # correctly. Not ideal, but this seems to work for now.
     sender_email = email.utils.getaddresses(['\"' + sender.replace('<', '\" <')])[0][1]
-
-    body_plain, body_html = '', ''
 
     cc = message.get_all('cc', None)
     if cc:
@@ -484,6 +533,7 @@ def object_from_message(message, queue, logger):
         ticket = None
 
     body = None
+    full_body = None
     counter = 0
     files = []
 
@@ -502,7 +552,19 @@ def object_from_message(message, queue, logger):
                 if part['Content-Transfer-Encoding'] == '8bit' and part.get_content_charset() == 'utf-8':
                     body = body.decode('unicode_escape')
                 body = decodeUnknown(part.get_content_charset(), body)
-                body = EmailReplyParser.parse_reply(body)
+                # have to use django_settings here so overwritting it works in tests
+                # the default value is False anyway
+                if ticket is None and getattr(django_settings, 'HELPDESK_FULL_FIRST_MESSAGE_FROM_EMAIL', False):
+                    # first message in thread, we save full body to avoid losing forwards and things like that
+                    body_parts = []
+                    for f in EmailReplyParser.read(body).fragments:
+                        body_parts.append(f.content)
+                    full_body = '\n\n'.join(body_parts)
+                    body = EmailReplyParser.parse_reply(body)
+                else:
+                    # second and other reply, save only first part of the message
+                    body = EmailReplyParser.parse_reply(body)
+                    full_body = body
                 # workaround to get unicode text out rather than escaped text
                 try:
                     body = body.encode('ascii').decode('unicode_escape')
@@ -515,13 +577,23 @@ def object_from_message(message, queue, logger):
                 except UnicodeDecodeError:
                     email_body = encoding.smart_text(part.get_payload(decode=False))
 
-                payload = """
-<html>
-<head>
-<meta charset="utf-8"/>
-</head>
-%s
-</html>""" % email_body
+                if not body and not full_body:
+                    # no text has been parsed so far - try such deep parsing for some messages
+                    altered_body = email_body.replace("</p>", "</p>\n").replace("<br", "\n<br")
+                    mail = BeautifulSoup(str(altered_body), "html.parser")
+                    full_body = mail.get_text()
+
+                if "<body" not in email_body:
+                    email_body = f"<body>{email_body}</body>"
+
+                payload = (
+                    '<html>'
+                    '<head>'
+                    '<meta charset="utf-8" />'
+                    '</head>'
+                    '%s'
+                    '</html>'
+                ) % email_body
                 files.append(
                     SimpleUploadedFile(_("email_html_body.html"), payload.encode("utf-8"), 'text/html')
                 )
@@ -530,18 +602,25 @@ def object_from_message(message, queue, logger):
             if not name:
                 ext = mimetypes.guess_extension(part.get_content_type())
                 name = "part-%i%s" % (counter, ext)
-            payload = part.get_payload()
-            if isinstance(payload, list):
-                payload = payload.pop().as_string()
-            payloadToWrite = payload
-            # check version of python to ensure use of only the correct error type
-            non_b64_err = TypeError
-            try:
-                logger.debug("Try to base64 decode the attachment payload")
-                payloadToWrite = base64.decodebytes(payload)
-            except non_b64_err:
-                logger.debug("Payload was not base64 encoded, using raw bytes")
-                payloadToWrite = payload
+            else:
+                name = ("part-%i_" % counter) + name
+
+            # # FIXME: this code gets the paylods, then does something with it and then completely ignores it
+            # # writing the part.get_payload(decode=True) instead; and then the payload variable is
+            # # replaced by some dict later.
+            # # the `payloadToWrite` has been also ignored so was commented
+            # payload = part.get_payload()
+            # if isinstance(payload, list):
+            #     payload = payload.pop().as_string()
+            # # payloadToWrite = payload
+            # # check version of python to ensure use of only the correct error type
+            # non_b64_err = TypeError
+            # try:
+            #     logger.debug("Try to base64 decode the attachment payload")
+            #     # payloadToWrite = base64.decodebytes(payload)
+            # except non_b64_err:
+            #     logger.debug("Payload was not base64 encoded, using raw bytes")
+            #     # payloadToWrite = payload
             files.append(SimpleUploadedFile(name, part.get_payload(decode=True), mimetypes.guess_type(name)[0]))
             logger.debug("Found MIME attachment %s" % name)
 
@@ -553,10 +632,24 @@ def object_from_message(message, queue, logger):
         if beautiful_body:
             try:
                 body = beautiful_body.text
+                full_body = body
             except AttributeError:
                 pass
         if not body:
             body = ""
+
+    if getattr(django_settings, 'HELPDESK_ALWAYS_SAVE_INCOMING_EMAIL_MESSAGE', False):
+        # save message as attachment in case of some complex markup renders wrong
+        files.append(
+            SimpleUploadedFile(
+                _("original_message.eml").replace(
+                    ".eml",
+                    timezone.localtime().strftime("_%d-%m-%Y_%H:%M") + ".eml"
+                ),
+                str(message).encode("utf-8"),
+                'text/plain'
+            )
+        )
 
     smtp_priority = message.get('priority', '')
     smtp_importance = message.get('importance', '')
@@ -565,6 +658,7 @@ def object_from_message(message, queue, logger):
 
     payload = {
         'body': body,
+        'full_body': full_body or body,
         'subject': subject,
         'queue': queue,
         'sender_email': sender_email,

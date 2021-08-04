@@ -25,7 +25,7 @@
                     <td>{{ ticket.priority }}</td>
                     <td>{{ ticket.queue }}</td>
                     <td>{{ ticket.get_status }}</td>
-                    <td><span title='{{ ticket.modified|date:"r" }}'>{{ ticket.modified|naturaltime }}</span></td>
+                    <td><span title='{{ ticket.modified|date:"DATETIME_FORMAT" }}'>{{ ticket.modified|naturaltime }}</span></td>
                 </tr>
                 {% empty %}
                 <tr>{% if ticket_list_empty_message %}<td colspan='6'>{{ ticket_list_empty_message }}</td>{% else %}<td colspan='6'>{% trans "You do not have any pending tickets." %}</td>{% endif %}</tr>

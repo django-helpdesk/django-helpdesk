@@ -1,0 +1,27 @@
+Return-Path: sender@domain.tld
+To: recipient@domain.tld
+From: The Sender <sender@domain.tld>
+Subject: Test with original message from GitHub
+Message-ID: <0d3a17d5-7136-75c0-c8ba-a7698c57ac42@gmail.com>
+Date: Tue, 13 Apr 2021 12:56:39 +0200
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Thunderbird/78.8.1
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Content-Language: en-US
+
+This is email body
+
+-----Original Message-----
+From: GitHub <noreply@github.com>
+Sent: Tuesday, 6 April 2021 9:09 AM
+Subject: [GitHub API] Update notice for access token [SEC=UNOFFICIAL]
+
+Hello there!
+
+We noticed that, at April 5th, 2021 at 23:09 (UTC) your application accessed the GitHub API with a token that has an outdated format.
+
+Thanks,
+The GitHub Team
+

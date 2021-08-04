@@ -47,7 +47,7 @@ class KBTests(TestCase):
         self.assertContains(response, 'This is a test category')
         self.assertContains(response, 'KBItem 1')
         self.assertContains(response, 'KBItem 2')
-        self.assertContains(response, 'Contact a human')
+        self.assertContains(response, 'Create New Ticket Queue:')
         self.client.login(username=self.user.get_username(), password='password')
         response = self.client.get(reverse('helpdesk:kb_category', args=("test_cat", )))
         self.assertContains(response, '<i class="fa fa-thumbs-up fa-lg"></i>')

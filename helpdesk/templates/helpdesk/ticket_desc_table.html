@@ -1,5 +1,6 @@
 {% load i18n humanize ticket_to_link %}
 {% load static %}
+{% load helpdesk_util %}
 
 <div class="card mb-3">
     <!--div class="card-header">
@@ -9,7 +10,7 @@
         <div class="table-responsive">
             <table class="table table-sm table-border">
                 <thead class="thead-light">
-                    <tr class=''><th colspan='4'><h3>{{ ticket.queue.slug }}-{{ ticket.id }}. {{ ticket.title }} [{{ ticket.get_status }}]</h3> 
+                    <tr class=''><th colspan='4'><h3>{{ ticket.queue.slug }}-{{ ticket.id }}. {{ ticket.title }} [{{ ticket.get_status }}]</h3>
                             {% blocktrans with ticket.queue as queue %}Queue: {{ queue }}{% endblocktrans %}
                             <span class='ticket_toolbar float-right'>
                         <a href="{% url 'helpdesk:edit' ticket.id %}" class="ticket-edit"><button class="btn btn-warning btn-sm"><i class="fas fa-pencil-alt"></i> {% trans "Edit" %}</button></a>
@@ -21,27 +22,32 @@
                     {% for customfield in ticket.ticketcustomfieldvalue_set.all %}
                     <tr>
                         <th class="table-secondary">{{ customfield.field.label }}</th>
-                        <td>{% ifequal customfield.field.data_type "url" %}<a href='{{ customfield.value }}'>{{ customfield.value }}</a>{% else %}{{ customfield.value|default:"" }}{% endifequal %}</td>
+                        <td>{% spaceless %}{% if "url" == customfield.field.data_type %}<a href='{{ customfield.value }}'>{{ customfield.value }}</a>
+                            {% elif "datetime" == customfield.field.data_type %}{{ customfield.value|datetime_string_format }}
+                            {% elif "date" == customfield.field.data_type %}{{ customfield.value|datetime_string_format }}
+                            {% elif "time" == customfield.field.data_type %}{{ customfield.value|datetime_string_format }}
+                            {% else %}{{ customfield.value|default:"" }}
+                            {% endif %}{% endspaceless %}</td>
                     </tr>{% endfor %}
                     <tr>
                         <th class="table-active">{% trans "Due Date" %}</th>
-                        <td>{{ ticket.due_date|date:"d. E Y" }} {% if ticket.due_date %}({{ ticket.due_date|naturaltime }}){% endif %}
+                        <td>{{ ticket.due_date|date:"DATETIME_FORMAT" }} {% if ticket.due_date %}({{ ticket.due_date|naturaltime }}){% endif %}
                         </td>
                         <th class="table-active">{% trans "Submitted On" %}</th>
-                        <td>{{ ticket.created|date:"d. E Y" }} ({{ ticket.created|naturaltime }})</td>
+                        <td>{{ ticket.created|date:"DATETIME_FORMAT" }} ({{ ticket.created|naturaltime }})</td>
                     </tr>
                     <tr>
                         <th class="table-active">{% trans "Assigned To" %}</th>
-                        <td>{{ ticket.get_assigned_to }}{% ifequal ticket.get_assigned_to _('Unassigned') %} <strong>
-                                <a href='?take'><button type="button" class="btn btn-primary btn-sm float-right"><i class="fas fa-hand-paper"></i></button></a>
-                        </strong>{% endifequal %}
+                        <td>{{ ticket.get_assigned_to }}{% if _('Unassigned') == ticket.get_assigned_to  %} <strong>
+                                <a data-toggle="tooltip" href='?take' title='{% trans "Assign this ticket to " %}{{ request.user.email }}'><button type="button" class="btn btn-primary btn-sm float-right"><i class="fas fa-hand-paper"></i></button></a>
+                        </strong>{% endif %}
                         </td>
                         <th class="table-active">{% trans "Submitter E-Mail" %}</th>
                         <td> {{ ticket.submitter_email }}
-                                                         {% if user.is_superuser %} {% if submitter_userprofile_url %}<strong><a href='{{submitter_userprofile_url}}'><button type="button" class="btn btn-primary btn-sm"><i class="fas fa-address-book"></i></button></a></strong>{% endif %}
-                            <strong><a href ="{% url 'helpdesk:list'%}?q={{ticket.submitter_email}}">
+                                                         {% if user.is_superuser %} {% if submitter_userprofile_url %}<strong><a data-toggle="tooltip" href='{{submitter_userprofile_url}}' title='{% trans "Edit " %}{{ ticket.submitter_email }}{% trans " user profile" %}'><button type="button" class="btn btn-primary btn-sm"><i class="fas fa-address-book"></i></button></a></strong>{% endif %}
+                            <strong><a data-toggle="tooltip" href ="{% url 'helpdesk:list'%}?q={{ticket.submitter_email}}" title='{% trans "Display tickets filtered for " %}{{ ticket.submitter_email }}{% trans " as a keyword" %}'>
                                 <button type="button" class="btn btn-primary btn-sm"><i class="fas fa-search"></i></button></a></strong>
-                        <strong><a href='{% url 'helpdesk:email_ignore_add' %}?email={{ ticket.submitter_email }}'>
+                        <strong><a data-toggle="tooltip" href='{% url 'helpdesk:email_ignore_add' %}?email={{ ticket.submitter_email }}' title='{% trans "Add email address for the ticket system to ignore." %}'>
                                 <button type="button" class="btn btn-warning btn-sm float-right"><i class="fas fa-eye-slash"></i></button></a></strong>{% endif %}
                         </td>
                     </tr>
@@ -50,7 +56,7 @@
                         <td class="{% if ticket.priority < 3 %}table-warning{% endif %}">{{ ticket.get_priority_display }}
                         </td>
                         <th class="table-active">{% trans "Copies To" %}</th>
-                        <td>{{ ticketcc_string }} <a data-toggle='tooltip' href='{% url 'helpdesk:ticket_cc' ticket.id %}' title='{% trans "Click here to add / remove people who should receive an e-mail whenever this ticket is updated." %}'><strong><button type="button" class="btn btn-warning btn-sm float-right"><i class="fa fa-share"></i></button></strong></a>{% if SHOW_SUBSCRIBE %}, <strong><a data-toggle='tooltip' href='?subscribe' title='{% trans "Click here to subscribe yourself to this ticket, if you want to receive an e-mail whenever this ticket is updated." %}'><button type="button" class="btn btn-warning btn-sm float-right"><i class="fas fa-rss-square"></i></button></a></strong>{% endif %}</td>
+                        <td>{{ ticketcc_string }} <a data-toggle='tooltip' href='{% url 'helpdesk:ticket_cc' ticket.id %}' title='{% trans "Click here to add / remove people who should receive an e-mail whenever this ticket is updated." %}'><strong><button type="button" class="btn btn-warning btn-sm float-right"><i class="fa fa-share"></i></button></strong></a>{% if SHOW_SUBSCRIBE %} <strong><a data-toggle='tooltip' href='?subscribe' title='{% trans "Click here to subscribe yourself to this ticket, if you want to receive an e-mail whenever this ticket is updated." %}'><button type="button" class="btn btn-warning btn-sm float-right"><i class="fas fa-rss-square"></i></button></a></strong>{% endif %}</td>
                     </tr>
 
                     <tr>
@@ -93,11 +99,11 @@
                     <tr>
                         <td id="ticket-description" colspan='4'>
                             <h4>{% trans "Description" %}</h4>
-                            {{ ticket.get_markdown|urlizetrunc:50|num_to_link|linebreaksbr }}</td>
+                            {{ ticket.get_markdown|urlizetrunc:50|num_to_link }}</td>
                     </tr>
 
                     {% if ticket.resolution %}<tr>
-                        <th colspan='2'>{% trans "Resolution" %}{% ifequal ticket.get_status_display "Resolved" %} <a href='?close'><button type="button" class="btn btn-warning btn-sm">{% trans "Accept and Close" %}</button></a>{% endifequal %}</th>
+                        <th colspan='2'>{% trans "Resolution" %}{% if "Resolved" == ticket.get_status_display %} <a href='?close'><button type="button" class="btn btn-warning btn-sm">{% trans "Accept and Close" %}</button></a>{% endif %}</th>
                     </tr>
                     <tr>
                         <td colspan='2'>{{ ticket.get_resolution_markdown|urlizetrunc:50|linebreaksbr }}</td>

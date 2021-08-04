@@ -13,7 +13,6 @@ from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
 
 from helpdesk.models import UserSettings
-from helpdesk.settings import DEFAULT_USER_SETTINGS
 
 User = get_user_model()
 

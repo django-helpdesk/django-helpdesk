@@ -81,19 +81,19 @@ These changes are visible throughout django-helpdesk
 - **HELPDESK_EMAIL_FALLBACK_LOCALE** Fallback locale for templated emails when queue locale not found
 
   **Default:** ``HELPDESK_EMAIL_FALLBACK_LOCALE = "en"``
-  
+
 - **HELPDESK_MAX_EMAIL_ATTACHMENT_SIZE** Maximum size, in bytes, of file attachments that will be sent via email
 
   **Default:** ``HELPDESK_MAX_EMAIL_ATTACHMENT_SIZE = 512000``
-  
+
 - **QUEUE_EMAIL_BOX_UPDATE_ONLY** Only process mail with a valid tracking ID; all other mail will be ignored instead of creating a new ticket.
 
   **Default:** ``QUEUE_EMAIL_BOX_UPDATE_ONLY = False``
-  
+
 - **HELPDESK_ANON_ACCESS_RAISES_404** If True, redirects user to a 404 page when attempting to reach ticket pages while not logged in, rather than redirecting to a login screen.
 
   **Default:** ``HELPDESK_ANON_ACCESS_RAISES_404 = False``
-  
+
 Options shown on public pages
 -----------------------------
 
@@ -106,6 +106,10 @@ These options only change display of items on public-facing pages, not staff pag
 - **HELPDESK_SUBMIT_A_TICKET_PUBLIC** Show 'submit a ticket' section & form on public page?
 
   **Default:** ``HELPDESK_SUBMIT_A_TICKET_PUBLIC = True``
+
+- **HELPDESK_PUBLIC_TICKET_FORM_CLASS** Define custom form class to show on public pages for anon users. You can use it for adding custom fields and validation, captcha and so on.
+
+  **Default:** ``HELPDESK_PUBLIC_TICKET_FORM_CLASS = "helpdesk.forms.PublicTicketForm"``
 
 
 Options for public ticket submission form
@@ -219,3 +223,7 @@ The following settings were defined in previous versions and are no longer suppo
 - **HELPDESK_FOOTER_SHOW_CHANGE_LANGUAGE_LINK** Is never shown. Use your own template if required.
 
 - **HELPDESK_ENABLE_PER_QUEUE_MEMBERSHIP** Discontinued in favor of HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION.
+
+- **HELPDESK_FULL_FIRST_MESSAGE_FROM_EMAIL** Do not ignore fowarded and replied text from the email messages which create a new ticket; useful for cases when customer forwards some email (error from service or something) and wants support to see that
+
+- **HELPDESK_ALWAYS_SAVE_INCOMING_EMAIL_MESSAGE** Any incoming .eml message is saved and available, helps when customer spent some time doing fancy markup which has been corrupted during the email-to-ticket-comment translate process
