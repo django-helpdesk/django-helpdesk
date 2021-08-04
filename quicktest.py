@@ -35,11 +35,13 @@ class QuickDjangoTest(object):
         'django.contrib.sites',
         'django.contrib.staticfiles',
         'bootstrap4form',
-        'account',
-        'pinax.invitations',
-        'pinax.teams',
+        ## The following commented apps are optional, 
+        ## related to teams functionalities
+        #'account',
+        #'pinax.invitations',
+        #'pinax.teams',
         'helpdesk',
-        'reversion',
+        #'reversion',
     )
     MIDDLEWARE = [
         'django.middleware.security.SecurityMiddleware',
