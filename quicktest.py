@@ -99,7 +99,11 @@ class QuickDjangoTest(object):
             STATIC_URL='/static/',
             LOGIN_URL='/helpdesk/login/',
             TEMPLATES=self.TEMPLATES,
-            SITE_ID=1
+            SITE_ID=1,
+            ## The following settings disable teams
+            HELPDESK_TEAMS_MODEL = 'auth.User',
+            HELPDESK_TEAMS_MIGRATION_DEPENDENCIES = [],
+            HELPDESK_KBITEM_TEAM_GETTER = lambda _: None
         )
 
         from django.test.runner import DiscoverRunner
