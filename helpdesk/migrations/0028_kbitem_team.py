@@ -3,18 +3,19 @@
 from django.db import migrations, models
 import django.db.models.deletion
 
+from helpdesk import settings as helpdesk_settings
+
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('pinax_teams', '0004_auto_20170511_0856'),
         ('helpdesk', '0027_auto_20200107_1221'),
-    ]
+    ] + helpdesk_settings.HELPDESK_TEAMS_MIGRATION_DEPENDENCIES
 
     operations = [
         migrations.AddField(
             model_name='kbitem',
             name='team',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='pinax_teams.Team', verbose_name='Team'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to=helpdesk_settings.HELPDESK_TEAMS_MODEL, verbose_name='Team'),
         ),
     ]

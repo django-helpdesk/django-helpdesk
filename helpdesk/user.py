@@ -46,7 +46,7 @@ class HelpdeskUser:
     def get_assigned_kb_items(self):
         kbitems = []
         for item in KBItem.objects.all():
-            if item.team and item.team.is_member(self.user):
+            if item.get_team() and item.get_team().is_member(self.user):
                 kbitems.append(item)
         return kbitems
 

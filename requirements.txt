@@ -12,4 +12,3 @@ pytz
 six
 djangorestframework
 django-model-utils
-pinax-teams>=2.0

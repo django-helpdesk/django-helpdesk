@@ -65,6 +65,8 @@ errors with trying to create User settings.
         'reversion',  # required by pinax-teams
     )
 
+   Note: you do not need to use pinax-teams. To dissable teams see the :doc:`teams` section.
+
    Your ``settings.py`` file should also define a ``SITE_ID`` that allows multiple projects to share
    a single database, and is required by ``django.contrib.sites`` in Django 1.9+.
    If you aren't running multiple sites, you can simply add a default ``SITE_ID`` to ``settings.py``::

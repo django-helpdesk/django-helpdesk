@@ -166,6 +166,10 @@ HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION = getattr(
 # use https in the email links
 HELPDESK_USE_HTTPS_IN_EMAIL_LINK = getattr(settings, 'HELPDESK_USE_HTTPS_IN_EMAIL_LINK', False)
 
+HELPDESK_TEAMS_MODEL = getattr(settings, 'HELPDESK_TEAMS_MODEL', 'pinax_teams.Team')
+HELPDESK_TEAMS_MIGRATION_DEPENDENCIES = getattr(settings, 'HELPDESK_TEAMS_MIGRATION_DEPENDENCIES', [('pinax_teams', '0004_auto_20170511_0856')])
+HELPDESK_KBITEM_TEAM_GETTER = getattr(settings, 'HELPDESK_KBITEM_TEAM_GETTER', lambda kbitem: kbitem.team)
+
 # Include all signatures and forwards in the first ticket message if set
 # Useful if you get forwards dropped from them while they are useful part of request
 HELPDESK_FULL_FIRST_MESSAGE_FROM_EMAIL = getattr(settings, 'HELPDESK_FULL_FIRST_MESSAGE_FROM_EMAIL', False)
@@ -174,3 +178,4 @@ HELPDESK_FULL_FIRST_MESSAGE_FROM_EMAIL = getattr(settings, 'HELPDESK_FULL_FIRST_
 # which is quite noisy but very helpful for complicated markup, forwards and so on
 # (which gets stripped/corrupted otherwise)
 HELPDESK_ALWAYS_SAVE_INCOMING_EMAIL_MESSAGE = getattr(settings, "HELPDESK_ALWAYS_SAVE_INCOMING_EMAIL_MESSAGE", False)
+
