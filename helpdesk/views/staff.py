@@ -398,7 +398,10 @@ def return_ticketccstring_and_show_subscribe(user, ticket):
     # create the ticketcc_string and check whether current user is already
     # subscribed
     username = user.get_username().upper()
-    useremail = user.email.upper()
+    try:
+        useremail = user.email.upper()
+    except AttributeError:
+        useremail = ""
     strings_to_check = list()
     strings_to_check.append(username)
     strings_to_check.append(useremail)
@@ -1126,8 +1129,6 @@ def ticket_list(request):
         query_params['sortreverse'] = sortreverse
 
     urlsafe_query = query_to_base64(query_params)
-
-    Query(huser, base64query=urlsafe_query).refresh_query()
 
     user_saved_queries = SavedSearch.objects.filter(Q(user=request.user) | Q(shared__exact=True))
 
