@@ -421,20 +421,22 @@ class PublicTicketForm(AbstractTicketForm):
         super(PublicTicketForm, self).__init__(*args, **kwargs)
         self._add_form_custom_fields(False)
 
-        field_hide_table = {
+        for field in self.fields.keys():
+            if field in hidden_fields:
+                self.fields[field].widget = forms.HiddenInput()
+            if field in readonly_fields:
+                self.fields[field].disabled = True
+
+        field_deletion_table = {
             'queue': 'HELPDESK_PUBLIC_TICKET_QUEUE',
             'priority': 'HELPDESK_PUBLIC_TICKET_PRIORITY',
             'due_date': 'HELPDESK_PUBLIC_TICKET_DUE_DATE',
         }
 
-        for field_name, field_setting_key in field_hide_table.items():
+        for field_name, field_setting_key in field_deletion_table.items():
             has_settings_default_value = getattr(settings, field_setting_key, None)
             if has_settings_default_value is not None:
-                hidden_fields += (field_name,)
-
-        for field in hidden_fields:
-            if field in self.fields:
-                del self.fields[field]
+                del self.fields[field_name]
 
         public_queues = Queue.objects.filter(allow_public_submission=True)
 
