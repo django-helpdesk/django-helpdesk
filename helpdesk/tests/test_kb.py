@@ -74,7 +74,7 @@ class KBTests(TestCase):
         self.assertContains(response, '0 people found this answer useful of 1')
 
     def test_kb_category_iframe(self):
-        cat_url = reverse('helpdesk:kb_category', args=("test_cat",)) + "?kbitem=1;submitter_email=foo@bar.cz;title=lol;"
+        cat_url = reverse('helpdesk:kb_category', args=("test_cat",)) + "?kbitem=1&submitter_email=foo@bar.cz&title=lol&"
         response = self.client.get(cat_url)
         # Assert that query params are passed on to ticket submit form
-        self.assertContains(response, "'/helpdesk/tickets/submit/?queue=1;_readonly_fields_=queue;kbitem=1;submitter_email=foo%40bar.cz&amp;title=lol")
+        self.assertContains(response, "'/helpdesk/tickets/submit/?queue=1&_readonly_fields_=queue&kbitem=1&submitter_email=foo%40bar.cz&amp;title=lol")
