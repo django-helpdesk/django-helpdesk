@@ -95,6 +95,26 @@ class TicketBasicsTestCase(TestCase):
         # Follow up is anonymous
         self.assertIsNone(ticket.followup_set.first().user)
 
+
+    def test_create_ticket_public_with_hidden_fields(self):
+        email_count = len(mail.outbox)
+
+        response = self.client.get(reverse('helpdesk:home'))
+        self.assertEqual(response.status_code, 200)
+
+        post_data = {
+            'title': 'Test ticket title',
+            'queue': self.queue_public.id,
+            'submitter_email': 'ticket1.submitter@example.com',
+            'body': 'Test ticket body',
+            'priority': 4,
+        }
+
+        response = self.client.post(reverse('helpdesk:home') + "?_hide_fields_=priority", post_data, follow=True)
+        ticket = Ticket.objects.last()
+        self.assertEqual(ticket.priority, 4)
+
+
     def test_create_ticket_authorized(self):
         email_count = len(mail.outbox)
         self.client.force_login(self.user)
@@ -1068,7 +1088,7 @@ class EmailInteractionsTestCase(TestCase):
             answer="A KB Item",
         )
         self.kbitem1.save()
-        cat_url = reverse('helpdesk:submit') + "?kbitem=1;submitter_email=foo@bar.cz;title=lol;"
+        cat_url = reverse('helpdesk:submit') + "?kbitem=1&submitter_email=foo@bar.cz&title=lol"
         response = self.client.get(cat_url)
         self.assertContains(response, '<option value="1" selected>KBItem 1</option>')
         self.assertContains(response, '<input type="email" name="submitter_email" value="foo@bar.cz" class="form-control form-control" required id="id_submitter_email">')
