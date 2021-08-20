@@ -7,7 +7,7 @@ django-helpdesk - A Django powered ticket tracker for small businesses.
 .. image:: https://codecov.io/gh/django-helpdesk/django-helpdesk/branch/develop/graph/badge.svg
   :target: https://codecov.io/gh/django-helpdesk/django-helpdesk
 
-Copyright 2009-2020 Ross Poulton and django-helpdesk contributors. All Rights Reserved.
+Copyright 2009-2021 Ross Poulton and django-helpdesk contributors. All Rights Reserved.
 See LICENSE for details.
 
 django-helpdesk was formerly known as Jutda Helpdesk, named after the
@@ -63,7 +63,7 @@ Installation
 `django-helpdesk` requires:
 
 * Python 3.6+
-* Django 2.2 LTS (latest bugfix release highly recommended)
+* Django 2.2 LTS or 3.2 LTS (recommend migration to 3.2 as soon as possible)
 
 You can quickly install the latest stable version of `django-helpdesk`
 app via `pip`::
@@ -83,7 +83,7 @@ and `docs/configuration.html`
 Testing
 -------
 
-See quicktest.py for usage details
+See `quicktest.py` for usage details.
 
 Upgrading from previous versions
 --------------------------------
