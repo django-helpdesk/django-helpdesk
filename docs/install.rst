@@ -61,8 +61,8 @@ errors with trying to create User settings.
         'account',  # Required by pinax-teams
         'pinax.invitations',  # required by pinax-teams
         'pinax.teams',  # team support
-        'helpdesk',  # This is us!
         'reversion',  # required by pinax-teams
+        'helpdesk',  # This is us!
     )
 
    Note: you do not need to use pinax-teams. To dissable teams see the :doc:`teams` section.

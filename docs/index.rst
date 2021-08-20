@@ -11,6 +11,7 @@ Contents
    :glob:
 
    install
+   upgrade
    configuration
    settings
    spam
@@ -68,10 +69,4 @@ Licensing
 ---------
 django-helpdesk is released under the BSD license, however it packages 3rd party applications which may be using a different license. More details can be found in the :doc:`license` documentation.
 
-Dependencies
-------------
-
-1. Python 3.4+ (or 2.7, but deprecated and support will be removed next release)
-2. Django 1.11 or newer
-3. An existing **working** Django project with database etc. If you cannot log into the Admin, you won't get this product working! This means you **must** run `migrate` **before** you add ``helpdesk`` to your ``INSTALLED_APPS``.
 
