@@ -23,7 +23,7 @@ class QueueAdmin(admin.ModelAdmin):
 
 @admin.register(Ticket)
 class TicketAdmin(admin.ModelAdmin):
-    list_display = ('title', 'status', 'assigned_to', 'queue',
+    list_display = ('title_view', 'status', 'assigned_to', 'queue',
                     'hidden_submitter_email', 'time_spent')
     date_hierarchy = 'created'
     list_filter = ('queue', 'assigned_to', 'status')
@@ -40,6 +40,12 @@ class TicketAdmin(admin.ModelAdmin):
 
     def time_spent(self, ticket):
         return ticket.time_spent
+
+    def title_view(self, obj):
+        if not obj.title:
+            return '(no title)'
+        return obj.title
+    title_view.short_description = _('Title')
 
 
 class TicketChangeInline(admin.StackedInline):
@@ -77,10 +83,41 @@ class KBItemAdmin(admin.ModelAdmin):
 
     list_display_links = ('title',)
 
+def make_extra_data_true(modeladmin, request, queryset):
+    queryset.update(is_extra_data=True)
+
+def make_extra_data_false(modeladmin, request, queryset):
+    queryset.update(is_extra_data=False)
+
+def make_required_true(modeladmin, request, queryset):
+    queryset.update(required=True)
+
+def make_required_false(modeladmin, request, queryset):
+    queryset.update(required=False)
+
+def make_staff_true(modeladmin, request, queryset):
+    queryset.update(staff_only=True)
+
+def make_staff_false(modeladmin, request, queryset):
+    queryset.update(staff_only=False)
+
+
+make_extra_data_true.short_description = "Set 'is_extra_data' to True"
+make_extra_data_false.short_description = "Set 'is_extra_data' to False"
+make_required_true.short_description = "Set 'required' to True"
+make_required_false.short_description = "Set 'required' to False"
+make_staff_true.short_description = "Set 'staff_only' to True"
+make_staff_false.short_description = "Set 'staff_only' to False"
 
 @admin.register(CustomField)
 class CustomFieldAdmin(admin.ModelAdmin):
-    list_display = ('ticket_form_type', 'field_name', 'label', 'data_type', 'is_extra_data')
+    list_display = ('ticket_form_type', 'field_name', 'label', 'data_type',
+                    'required', 'staff_only', 'is_extra_data')
+    list_filter = ('ticket_form',)
+    list_display_links = ('field_name',)
+    actions = [make_extra_data_true, make_extra_data_false,
+               make_required_true, make_required_false,
+               make_staff_true, make_staff_false]
 
     def ticket_form_type(self, ticket):
         if ticket.ticket_form:
