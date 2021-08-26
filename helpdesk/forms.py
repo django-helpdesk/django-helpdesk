@@ -120,7 +120,7 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
                    'organization', 'ticket_form')
 
     class Media:
-        js = ('helpdesk/js/init_due_date.js', 'helpdesk/js/init_datetime_classes.js', 'helpdesk/js/validate.js')
+        js = ('helpdesk/js/init_due_date.js', 'helpdesk/js/init_datetime_classes.js')
 
     def __init__(self, *args, **kwargs):
         """
@@ -253,7 +253,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
     )
 
     class Media:
-        js = ('helpdesk/js/init_due_date.js', 'helpdesk/js/init_datetime_classes.js', 'helpdesk/js/validate.js')
+        js = ('helpdesk/js/init_due_date.js', 'helpdesk/js/init_datetime_classes.js')
 
     def __init__(self, kbcategory=None, *args, **kwargs):
         self.form_id = kwargs.pop("form_id")
