@@ -528,7 +528,7 @@ def object_from_message(message, queue, logger):
         cc = set([x.strip() for x in tempcc])
 
     for ignore in IgnoreEmail.objects.filter(Q(queues=queue) | Q(queues__isnull=True)):
-        if ignore.test(sender_email) || ignore.test(to_email):
+        if ignore.test(sender_email) or ignore.test(to_email):
             if ignore.keep_in_mailbox:
                 # By returning 'False' the message will be kept in the mailbox,
                 # and the 'True' will cause the message to be deleted.
