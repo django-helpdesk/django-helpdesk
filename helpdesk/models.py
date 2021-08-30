@@ -436,12 +436,18 @@ class FormType(models.Model):
     name = models.CharField(max_length=255, null=True, blank=True)
     description = models.TextField(blank=True, null=True,
                                    help_text=_('Introduction text included in the form.'))
+    queue = models.ForeignKey(Queue, on_delete=models.SET_NULL, null=True, blank=True,
+                              help_text=_('Tickets should automatically be added to this queue.'
+                                          'This option will hide the Queue field on the form.'))
     created = models.DateTimeField(auto_now_add=True, blank=True)
     updated = models.DateTimeField(auto_now=True, blank=True)
+    public = models.BooleanField(_('Public'), blank=True, default=True,
+                                 help_text=_('Should this form be visible on the public-side list of forms?'))
+    staff = models.BooleanField(_('Staff'), blank=True, default=True,
+                                help_text=_('Should this form be visible on the staff-side list of forms?'))
     extra_data = JSONField(default=list, blank=True,
                            help_text=_('List of CustomField field_names that belong to this form. '
                                        'Format: [\"field_name1\", \"field_name2\"]'))
-    # alert_data = JSONField(default=dict, blank=True)
 
     class Meta:
         # TODO index by organization and id?

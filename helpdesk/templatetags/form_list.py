@@ -15,7 +15,9 @@ def form_list(user):
     try:
         sidebar_form_list = []
         if user.is_authenticated:
-            sidebar_form_list = FormType.objects.all().values('name', 'id')  # TODO change to by-org or by-staff
+            sidebar_form_list = FormType.objects.filter(staff=True).values('name', 'id')  # TODO change to by-org or by-staff
+        else:
+            sidebar_form_list = FormType.objects.filter(public=True).values('name', 'id')  # TODO change to by-org or by-staff
         return sidebar_form_list
     except Exception as e:
         import sys

@@ -127,7 +127,7 @@ class CustomFieldAdmin(admin.ModelAdmin):
 
 @admin.register(FormType)
 class FormTypeAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'extra_data_cleaned', 'organization', )
+    list_display = ('id', 'name', 'extra_data_cleaned', 'queue', 'public', 'staff', 'organization', )
     list_display_links = ('name',)
 
     def extra_data_cleaned(self, form):

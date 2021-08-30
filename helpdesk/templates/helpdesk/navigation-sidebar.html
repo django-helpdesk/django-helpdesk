@@ -79,11 +79,20 @@
             <span>{% trans "Homepage" %}</span>
           </a>
         </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'helpdesk:submit' 1 %}"> {# TODO hardcoded #}
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="ticketsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <i class="fas fa-fw fa-plus-circle"></i>
             <span>{% trans "New Ticket" %}</span>
           </a>
+          <div class="dropdown-menu" aria-labelledby="ticketsDropdown">
+            {% if forms %}
+            {% for f in forms %}
+            <a class="dropdown-item small text-wrap" href="{% url 'helpdesk:submit' f.id %}">{{ f.name }}</a>
+            {% endfor %}
+            {% else %}
+            <p class="dropdown-item small text-wrap">{% trans "No forms are available." %}</p>
+            {% endif %}
+          </div>
         </li>
         {% if helpdesk_settings.HELPDESK_KB_ENABLED %}
         <li class="nav-item">
