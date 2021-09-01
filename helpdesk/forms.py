@@ -87,11 +87,11 @@ class CustomFieldMixin(object):
                 fieldclass = CUSTOMFIELD_TO_FIELD_DICT[field.data_type]
                 # Change widgets for the following classes
                 if fieldclass == forms.DateField:
-                    instanceargs['widget'] = forms.DateInput(attrs={'class': 'form-control date-field'})
+                    instanceargs['widget'] = forms.DateInput(attrs={'class': 'form-control date-field', 'autocomplete': 'off'})
                 elif fieldclass == forms.DateTimeField:
-                    instanceargs['widget'] = forms.DateTimeInput(attrs={'class': 'form-control datetime-field'})
+                    instanceargs['widget'] = forms.DateTimeInput(attrs={'class': 'form-control datetime-field', 'autocomplete': 'off'})
                 elif fieldclass == forms.TimeField:
-                    instanceargs['widget'] = forms.TimeInput(attrs={'class': 'form-control time-field'})
+                    instanceargs['widget'] = forms.TimeInput(attrs={'class': 'form-control time-field', 'autocomplete': 'off'})
                 elif fieldclass == forms.BooleanField:
                     instanceargs['widget'] = forms.CheckboxInput(attrs={'class': 'form-control'})
 
@@ -166,12 +166,15 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
                 if not display_data.editable:
                     self.fields[display_data.field_name].widget = forms.HiddenInput()
                 else:
-                    fields = ['label', 'help_text', 'list_values', 'required']  # TODO add ordering -- or not?
-                    for attr in fields:
+                    attrs = ['label', 'help_text', 'list_values', 'required', 'data_type']  # TODO add ordering -- or not?
+                    for attr in attrs:
                         display_info = getattr(display_data, attr, None)
                         if display_info is not None and display_info != '':
                             if attr == 'help_text':
                                 setattr(self.fields[display_data.field_name], attr, display_data.get_markdown())
+                            elif attr == 'data_type':
+                                if display_info == 'datetime' or display_info == 'time' or display_info == 'date':
+                                    self.fields[display_data.field_name].widget.attrs.update({'autocomplete': 'off'})
                             else:
                                 setattr(self.fields[display_data.field_name], attr, display_info)
                             # print('--%s: %s' % (attr, display_info))
@@ -223,34 +226,11 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
         required=True,
         choices=()
     )
-
-    """title = forms.CharField(
-        max_length=100,
-        required=True,
-        widget=forms.TextInput(attrs={'class': 'form-control'}),
-        label=_('Summary of the problem'),
-    )
-
-    body = forms.CharField(
-        widget=forms.Textarea(attrs={'class': 'form-control'}),
-        label=_('Description of your issue'),
-        required=True,
-        help_text=_('Please be as descriptive as possible and include all details'),
-    )"""
-
     priority = forms.ChoiceField(
         widget=forms.Select(attrs={'class': 'form-control'}),
         choices=Ticket.PRIORITY_CHOICES,
         initial=getattr(settings, 'HELPDESK_PUBLIC_TICKET_PRIORITY', '3'),
     )
-
-    """due_date = forms.DateTimeField(
-        widget=forms.TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
-        required=False,
-        input_formats=[CUSTOMFIELD_DATE_FORMAT, CUSTOMFIELD_DATETIME_FORMAT, '%d/%m/%Y', '%m/%d/%Y', "%d.%m.%Y"],
-        label=_('Due on'),
-    )"""
-
     attachment = forms.FileField(
         widget=forms.FileInput(attrs={'class': 'form-control-file'}),
     )
@@ -292,12 +272,15 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
 
             for field in queryset:
                 if field.field_name in self.fields:
-                    attrs = ['label', 'help_text', 'list_values', 'required']  # TODO view-side ordering too
+                    attrs = ['label', 'help_text', 'list_values', 'required', 'data_type']  # TODO view-side ordering too
                     for attr in attrs:
                         display_info = getattr(field, attr, None)
                         if display_info is not None and display_info != '':
                             if attr == 'help_text':
                                 setattr(self.fields[field.field_name], attr, field.get_markdown())
+                            elif attr == 'data_type':
+                                if display_info == 'datetime' or display_info == 'time' or display_info == 'date':
+                                    self.fields[display_data.field_name].widget.attrs.update({'autocomplete': 'off'})
                             else:
                                 setattr(self.fields[field.field_name], attr, display_info)
                 else:
@@ -390,17 +373,6 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
 
         return ticket, queue
 
-    def _create_custom_fields(self, ticket):
-        # TODO delete this
-        for field, value in self.cleaned_data.items():
-            if field.startswith('custom_'):
-                field_name = field.replace('custom_', '', 1)
-                custom_field = CustomField.objects.get(name=field_name)
-                cfv = TicketCustomFieldValue(ticket=ticket,
-                                             field=custom_field,
-                                             value=value)
-                cfv.save()
-
     def _create_follow_up(self, ticket, title, user=None):
         followup = FollowUp(ticket=ticket,
                             title=title,
@@ -491,8 +463,6 @@ class TicketForm(AbstractTicketForm):
                 ticket.assigned_to = None
         ticket.save()
 
-        self._create_custom_fields(ticket)
-
         if self.cleaned_data['assigned_to']:
             title = _('Ticket Opened & Assigned to %(name)s') % {
                 'name': ticket.get_assigned_to or _("<invalid user>")
@@ -555,8 +525,6 @@ class PublicTicketForm(AbstractTicketForm):
         if queue.default_owner and not ticket.assigned_to:
             ticket.assigned_to = queue.default_owner
         ticket.save()
-
-        self._create_custom_fields(ticket)
 
         followup = self._create_follow_up(
             ticket, title=_('Ticket Opened Via Web'), user=user)
