@@ -72,29 +72,6 @@ class BaseCreateTicketView(abstract_views.AbstractCreateTicketMixin, FormView):
                 return HttpResponseRedirect(reverse('helpdesk:dashboard'))
         return super().dispatch(*args, **kwargs)
 
-    def get_initial(self):
-        initial_data = super().get_initial()
-
-        # add pre-defined data for public ticket
-        if hasattr(settings, 'HELPDESK_PUBLIC_TICKET_QUEUE'):
-            # get the requested queue; return an error if queue not found
-            try:
-                initial_data['queue'] = Queue.objects.get(
-                    slug=settings.HELPDESK_PUBLIC_TICKET_QUEUE,
-                    allow_public_submission=True
-                ).id
-            except Queue.DoesNotExist as e:
-                logger.fatal(
-                    "Public queue '%s' is configured as default but can't be found",
-                    settings.HELPDESK_PUBLIC_TICKET_QUEUE
-                )
-                raise ImproperlyConfigured("Wrong public queue configuration") from e
-        if hasattr(settings, 'HELPDESK_PUBLIC_TICKET_PRIORITY'):
-            initial_data['priority'] = settings.HELPDESK_PUBLIC_TICKET_PRIORITY
-        if hasattr(settings, 'HELPDESK_PUBLIC_TICKET_DUE_DATE'):
-            initial_data['due_date'] = settings.HELPDESK_PUBLIC_TICKET_DUE_DATE
-        return initial_data
-
     def get_form_kwargs(self, *args, **kwargs):
         kwargs = super().get_form_kwargs(*args, **kwargs)
         if '_hide_fields_' in self.request.GET:
@@ -107,7 +84,7 @@ class BaseCreateTicketView(abstract_views.AbstractCreateTicketMixin, FormView):
 
     def form_valid(self, form):
         request = self.request
-        if text_is_spam(form.cleaned_data['description'], request):
+        if 'description' in form.cleaned_data and text_is_spam(form.cleaned_data['description'], request):
             # This submission is spam. Let's not save it.
             return render(request, template_name='helpdesk/public_spam.html')
         else:

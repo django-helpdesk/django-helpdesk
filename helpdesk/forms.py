@@ -210,9 +210,12 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
     Contain all the common code and fields between "TicketForm" and
     "PublicTicketForm". This Form is not intended to be used directly.
     """
+    # TODO clean up form fields
     form_id = None
     form_title = None
     form_introduction = None
+    form_queue = None
+    hidden_fields = []
 
     queue = forms.ChoiceField(
         widget=forms.Select(attrs={'class': 'form-control'}),
@@ -258,9 +261,13 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
     def __init__(self, kbcategory=None, *args, **kwargs):
         self.form_id = kwargs.pop("form_id")
         super().__init__(*args, **kwargs)
+
         form = FormType.objects.get(pk=self.form_id)
         self.form_title = form.name
         self.form_introduction = form.get_markdown()
+        self.form_queue = form.queue
+        if form.queue:
+            del self.fields['queue']
 
         if kbcategory:
             self.fields['kbitem'] = forms.ChoiceField(
@@ -275,12 +282,18 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
         if self.form_id is not None:
             if staff_only_filter is None:
                 queryset = CustomField.objects.filter(ticket_form=self.form_id)
+                hidden_queryset = []
             else:
                 queryset = CustomField.objects.filter(ticket_form=self.form_id, staff_only=staff_only_filter)
+                hidden_queryset = CustomField.objects.filter(ticket_form=self.form_id, staff_only=(not staff_only_filter))
+                self.hidden_fields = hidden_queryset.values_list('field_name', 'data_type')
+            if self.form_queue:
+                queryset = queryset.exclude(field_name='queue')
+
             for field in queryset:
                 if field.field_name in self.fields:
-                    fields = ['label', 'help_text', 'list_values', 'required']  # TODO view-side ordering too
-                    for attr in fields:
+                    attrs = ['label', 'help_text', 'list_values', 'required']  # TODO view-side ordering too
+                    for attr in attrs:
                         display_info = getattr(field, attr, None)
                         if display_info is not None and display_info != '':
                             if attr == 'help_text':
@@ -294,6 +307,10 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
                         'required': field.required,
                     }
                     self.customfield_to_field(field, instanceargs)
+            for field in hidden_queryset:
+                if field.field_name not in self.fields:
+                    self.customfield_to_field(field, {})
+                self.fields[field.field_name].widget = forms.HiddenInput()
 
             # ordering fields based on form_ordering
             # if form_ordering is None, field is sorted to end of list
@@ -308,19 +325,29 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
             ]
             self.order_fields(ordering)
 
-    def _get_queue(self):
-        # this procedure is re-defined for public submission form
-        return Queue.objects.get(id=int(self.cleaned_data['queue']))
+    def clean(self):
+        cleaned_data = super(AbstractTicketForm, self).clean()
+
+        # for hidden fields required by helpdesk code, like description
+        for field, type in self.hidden_fields:
+            if field in self.errors:
+                cleaned_data[field] = '' if type in ['varchar', 'text', 'email'] else None
+                del self._errors[field]
+
+        form = FormType.objects.get(id=self.form_id)
+        if form.queue:
+            cleaned_data['queue'] = form.queue.id
+
+        return cleaned_data
 
     def _create_ticket(self):
-        queue = self._get_queue()
         kbitem = None
         if 'kbitem' in self.cleaned_data:
             kbitem = KBItem.objects.get(id=int(self.cleaned_data['kbitem']))
 
         extra_data = {}
         if 'extra_data' in self.cleaned_data:
-           extra_data = self.cleaned_data['extra_data']
+            extra_data = self.cleaned_data['extra_data']
 
         for field, value in self.cleaned_data.items():
             if field.startswith('e_'):
@@ -329,6 +356,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
 
         ticket_form = FormType.objects.get(pk=self.form_id)
         organization = Organization.objects.all().first()
+        queue = Queue.objects.get(id=int(self.cleaned_data['queue']))
 
         ticket = Ticket(
             # TODO Necessary fields
@@ -363,6 +391,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
         return ticket, queue
 
     def _create_custom_fields(self, ticket):
+        # TODO delete this
         for field, value in self.cleaned_data.items():
             if field.startswith('custom_'):
                 field_name = field.replace('custom_', '', 1)
@@ -439,7 +468,9 @@ class TicketForm(AbstractTicketForm):
         super().__init__(*args, **kwargs)
         self._add_form_custom_fields()
 
-        self.fields['queue'].choices = queue_choices
+        if self.form_queue is None:
+            self.fields['queue'].choices = queue_choices
+
         if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS:
             assignable_users = User.objects.filter(is_active=True, is_staff=True).order_by(User.USERNAME_FIELD)
         else:
@@ -484,6 +515,7 @@ class PublicTicketForm(AbstractTicketForm):
     """
     Ticket Form creation for all users (public-facing).
     """
+    # TODO remove this, replace w/ contact email
     submitter_email = forms.EmailField(
         widget=forms.TextInput(attrs={'class': 'form-control', 'type': 'email'}),
         required=True,
@@ -498,50 +530,21 @@ class PublicTicketForm(AbstractTicketForm):
         super(PublicTicketForm, self).__init__(*args, **kwargs)
         self._add_form_custom_fields(False)
 
+        # Hiding fields based on CustomField attributes has already been done; this is hiding based on kwargs
         for field in self.fields.keys():
             if field in hidden_fields:
                 self.fields[field].widget = forms.HiddenInput()
             if field in readonly_fields:
                 self.fields[field].disabled = True
-
-        field_deletion_table = {
-            'queue': 'HELPDESK_PUBLIC_TICKET_QUEUE',
-            'priority': 'HELPDESK_PUBLIC_TICKET_PRIORITY',
-            'due_date': 'HELPDESK_PUBLIC_TICKET_DUE_DATE',
-        }
-
-        for field_name, field_setting_key in field_deletion_table.items():
-            has_settings_default_value = getattr(settings, field_setting_key, False)
-            if has_settings_default_value is not False:
-                del self.fields[field_name]
-
-        public_queues = Queue.objects.filter(allow_public_submission=True)
+   
+        public_queues = Queue.objects.filter(allow_public_submission=True)  # TODO base off org_id
 
         if len(public_queues) == 0:
-            logger.warning(
-                "There are no public queues defined - public ticket creation is impossible"
-            )
+            logger.warning("There are no public queues defined - public ticket creation is impossible")
 
-        if 'queue' in self.fields:
+        if self.form_queue is None:
             self.fields['queue'].choices = [('', '--------')] + [
                 (q.id, q.title) for q in public_queues]
-
-    def _get_queue(self):
-        if getattr(settings, 'HELPDESK_PUBLIC_TICKET_QUEUE', None) is not None:
-            # force queue to be the pre-defined one
-            # (only for public submissions)
-            public_queue = Queue.objects.filter(
-                slug=settings.HELPDESK_PUBLIC_TICKET_QUEUE
-            ).first()
-            if not public_queue:
-                logger.fatal(
-                    "Public queue '%s' is configured as default but can't be found",
-                    settings.HELPDESK_PUBLIC_TICKET_QUEUE
-                )
-            return public_queue
-        else:
-            # get the queue user entered
-            return Queue.objects.get(id=int(self.cleaned_data['queue']))
 
     def save(self, user, form_id=None):
         """
