@@ -21,11 +21,12 @@
                 {% endblocktrans %}
             </div>
             <div class="card-body" style="margin-top:-15px">
+                <p>
+                    {% if form.errors %}
+                        {% include 'helpdesk/include/alert_form_errors.html' %}
+                    {% endif %}
+                </p>
                 <p>{% blocktrans with intro=form.form_introduction %}{{ intro }}{% endblocktrans %}</p>
-
-                {% if form.errors %}
-                    {% include 'helpdesk/include/alert_form_errors.html' %}
-                {% endif %}
 
                 <form method='post' enctype='multipart/form-data' id='ticket_submission_form'>
                     {% csrf_token %}
