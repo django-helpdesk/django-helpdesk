@@ -79,7 +79,9 @@
               {% if user.is_authenticated %}
                 <a class="nav-link dropdown-toggle" href="{% url 'helpdesk:logout' %}" id="userDropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fas fa-fw fa-sign-out-alt"></i> {% trans "Logout" %}</a>
               {% else %}
+                <!--
                 <a class="nav-link dropdown-toggle" href="{% url 'helpdesk:login' %}?next={% if next %}{{ next|escape }}{% else %}{% url 'helpdesk:home' %}{% endif %}" id="userDropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fas fa-fw fa-sign-in-alt"></i> {% trans "Log In" %}</a>
+                -->
               {% endif %}
             </li>
         {% endif %}
