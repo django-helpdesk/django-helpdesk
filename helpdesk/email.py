@@ -524,6 +524,10 @@ def object_from_message(message, queue, logger):
         # use a set to ensure no duplicates
         cc = set([x.strip() for x in tempcc])
 
+    if sender_email == '':
+        # Delete emails if the sender email cannot be parsed correctly. This ensures that
+        # mailing list emails do not become tickets as well as malformatted emails
+        return True
     for ignore in IgnoreEmail.objects.filter(Q(queues=queue) | Q(queues__isnull=True)):
         if ignore.test(sender_email):
             if ignore.keep_in_mailbox:
