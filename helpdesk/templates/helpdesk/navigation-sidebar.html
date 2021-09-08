@@ -18,11 +18,11 @@
           </a>
         </li>
         <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" id="ticketsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <a class="nav-link dropdown-toggle" href="#" id="queriesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <i class="fas fa-fw fa-search"></i>
             <span>{% trans "Saved Queries" %}</span>
           </a>
-          <div class="dropdown-menu" aria-labelledby="ticketsDropdown">
+          <div class="dropdown-menu" aria-labelledby="queriesDropdown">
             {% if user_saved_queries_ %}
             {% for q in user_saved_queries_ %}
             <a class="dropdown-item small text-wrap" href="{% url 'helpdesk:list' %}?saved_query={{ q.id }}">{{ q.title }}
@@ -65,6 +65,26 @@
           </a>
         </li>
         {% endif %}
+        <li class="dropdown-divider"></li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class="fas fa-user-circle fa-fw"></i>
+              <span>{{ user.get_full_name|default:user.get_username }}</span>
+          </a>
+          <div class="dropdown-menu" aria-labelledby="userDropdown">
+            <a class="dropdown-item small text-wrap" href="{% url 'helpdesk:user_settings' %}"><i class="fas fa-fw fa-user-cog"></i> {% trans "User Settings" %}</a>
+            <a class="dropdown-item small text-wrap" href="{% url 'helpdesk:rss_index' %}"><i class="fas fa-fw fa-rss-square"></i> {% trans "RSS Feeds" %}</a>
+            {% if helpdesk_settings.HELPDESK_SHOW_CHANGE_PASSWORD and user.has_usable_password %}
+            <a class="dropdown-item small text-wrap" href="{% url 'helpdesk:password_change' %}"><i class="fas fa-fw fa-user-secret"></i> {% trans "Change password" %}</a>
+            {% endif %}
+            <div class="dropdown-divider"></div>
+            {% if user.is_superuser %}
+            <a class="dropdown-item small text-wrap" href="{% url 'helpdesk:system_settings' %}"><i class="fas fa-fw fa-cogs"></i> {% trans "System Settings" %}</a>
+            <div class="dropdown-divider"></div>
+            {% endif %}
+            <a class="dropdown-item small text-wrap" href="{% url 'helpdesk:logout' %}"><i class="fas fa-fw fa-sign-out-alt"></i> {% trans "Logout" %}</a>
+          </div>
+        </li>
         <li class="nav-item">
             <a class="nav-link" href="{% url 'seed:home' %}#/properties">
                 <i class="fas fa-city"></i>

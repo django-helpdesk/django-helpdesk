@@ -102,3 +102,12 @@ table .tickettitle {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+/* DC font and background */
+body {
+    font-family: century-gothic, sans-serif;
+}
+
+.bg-dc {
+    background-color: #218d45;
+}
