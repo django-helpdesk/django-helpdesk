@@ -504,8 +504,6 @@ def object_from_message(message, queue, logger):
 
     sender = message.get('from', _('Unknown Sender'))
     sender = decode_mail_headers(decodeUnknown(message.get_charset(), sender))
-    to = message.get('to', _('Unknown Sender'))
-    to = decode_mail_headers(decodeUnknown(message.get_charset(), to))
 
     # to address bug #832, we wrap all the text in front of the email address in
     # double quotes by using replace() on the email string. Then,
@@ -514,7 +512,6 @@ def object_from_message(message, queue, logger):
     # but the getaddresses() function seems to be able to handle just unclosed quotes
     # correctly. Not ideal, but this seems to work for now.
     sender_email = email.utils.getaddresses(['\"' + sender.replace('<', '\" <')])[0][1]
-    to_email = email.utils.getaddresses(['\"' + to.replace('<', '\" <')])[0][1]
 
     cc = message.get_all('cc', None)
     if cc:
@@ -527,8 +524,12 @@ def object_from_message(message, queue, logger):
         # use a set to ensure no duplicates
         cc = set([x.strip() for x in tempcc])
 
+    if sender_email == '':
+        # Delete emails if the sender email cannot be parsed correctly. This ensures that
+        # mailing list emails do not become tickets as well as malformatted emails
+        return True
     for ignore in IgnoreEmail.objects.filter(Q(queues=queue) | Q(queues__isnull=True)):
-        if ignore.test(sender_email) or ignore.test(to_email):
+        if ignore.test(sender_email):
             if ignore.keep_in_mailbox:
                 # By returning 'False' the message will be kept in the mailbox,
                 # and the 'True' will cause the message to be deleted.
