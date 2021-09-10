@@ -1644,13 +1644,17 @@ class IgnoreEmail(models.Model):
             1-4 return True, 5 returns False.
         """
 
-        own_parts = self.email_address.split("@")
-        email_parts = email.split("@")
+        # matches case before comparing
+        self_email = self.email_address.lower()
+        compare_email = email.lower()
 
-        if self.email_address == email or \
-                own_parts[0] == "*" and own_parts[1] == email_parts[1] or \
-                own_parts[1] == "*" and own_parts[0] == email_parts[0] or \
-                own_parts[0] == "*" and own_parts[1] == "*":
+        self_parts = self_email.split("@")
+        compare_parts = compare_email.split("@")
+
+        if self_email == compare_email or \
+                self_parts[0] == "*" and self_parts[1] == compare_parts[1] or \
+                self_parts[1] == "*" and self_parts[0] == compare_parts[0] or \
+                self_parts[0] == "*" and self_parts[1] == "*":
             return True
         else:
             return False
