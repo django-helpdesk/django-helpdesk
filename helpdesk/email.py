@@ -84,7 +84,7 @@ def process_email(quiet=False):
                 q.email_box_last_check = timezone.now() - timedelta(minutes=30)
 
             queue_time_delta = timedelta(minutes=q.email_box_interval or 0)
-            if (q.email_box_last_check + queue_time_delta) < timezone.now():
+            if (q.email_box_last_check + queue_time_delta) < timezone.now():  # to debug: comment out this line
                 process_queue(q, logger=logger)
                 q.email_box_last_check = timezone.now()
                 q.save()
@@ -135,7 +135,7 @@ def pop3_sync(q, logger, server):
         ticket = object_from_message(message=full_message, queue=q, logger=logger)
 
         if ticket:
-            server.dele(msgNum)
+            server.dele(msgNum)  # hide line if debugging
             logger.info("Successfully processed message %s, deleted from POP3 server" % msgNum)
         else:
             logger.warn("Message %s was not successfully processed, and will be left on POP3 server" % msgNum)
@@ -186,7 +186,7 @@ def imap_sync(q, logger, server):
                     # Malformed email received from the server
                     ticket = None
                 if ticket:
-                    server.store(num, '+FLAGS', '\\Deleted')
+                    server.store(num, '+FLAGS', '\\Deleted')  # hide line if debugging
                     logger.info("Successfully processed message %s, deleted from IMAP server" % num)
                 else:
                     logger.warn("Message %s was not successfully processed, and will be left on IMAP server" % num)
@@ -361,9 +361,6 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
     queue = payload['queue']
     sender_email = payload['sender_email']
 
-    to_list = getaddresses(message.get_all('To', []))
-    cc_list = getaddresses(message.get_all('Cc', []))
-
     message_id = message.get('Message-Id')
     in_reply_to = message.get('In-Reply-To')
 
@@ -441,8 +438,10 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
 
     context = safe_template_context(ticket)
 
+    # TODO This block seems to be redundant? create_ticket_cc DOES save data to database,
+    #  but the list isn't used for anything afterwards
     new_ticket_ccs = []
-    new_ticket_ccs.append(create_ticket_cc(ticket, to_list + cc_list))
+    new_ticket_ccs.append(create_ticket_cc(ticket, payload['to_list'] + payload['cc_list']))
 
     notifications_to_be_sent = [sender_email]
 
@@ -496,45 +495,41 @@ def object_from_message(message, queue, logger):
     # 'message' must be an RFC822 formatted message.
     message = email.message_from_string(message)
 
+    # Replaces original helpdesk "get_charset()", which wasn't an actual method ?
+    charset = list(filter(lambda s: s is not None, message.get_charsets()))
+    if charset:
+        charset = charset[0]
+
     subject = message.get('subject', _('Comment from e-mail'))
-    subject = decode_mail_headers(decodeUnknown(message.get_charset(), subject))
+    subject = decode_mail_headers(decodeUnknown(charset, subject))
     for affix in STRIPPED_SUBJECT_STRINGS:
         subject = subject.replace(affix, "")
     subject = subject.strip()
 
+    # Replaced original helpdesk bugfix code with cleaner fix
     sender = message.get('from', _('Unknown Sender'))
-    sender = decode_mail_headers(decodeUnknown(message.get_charset(), sender))
-
-    # to address bug #832, we wrap all the text in front of the email address in
-    # double quotes by using replace() on the email string. Then,
-    # take first item of list, second item of tuple is the actual email address.
-    # Note that the replace won't work on just an email with no real name,
-    # but the getaddresses() function seems to be able to handle just unclosed quotes
-    # correctly. Not ideal, but this seems to work for now.
-    sender_email = email.utils.getaddresses(['\"' + sender.replace('<', '\" <')])[0][1]
-
-    cc = message.get_all('cc', None)
-    if cc:
-        # first, fixup the encoding if necessary
-        cc = [decode_mail_headers(decodeUnknown(message.get_charset(), x)) for x in cc]
-        # get_all checks if multiple CC headers, but individual emails may be comma separated too
-        tempcc = []
-        for hdr in cc:
-            tempcc.extend(hdr.split(','))
-        # use a set to ensure no duplicates
-        cc = set([x.strip() for x in tempcc])
+    sender = decode_mail_headers(decodeUnknown(charset, sender))
+    sender_email = email.utils.getaddresses([sender])[0][1]
 
     if sender_email == '':
         # Delete emails if the sender email cannot be parsed correctly. This ensures that
         # mailing list emails do not become tickets as well as malformatted emails
         return True
+
+    # Removed original helpdesk code that seemed to be redundant/dead?
+
+    to_list = getaddresses(message.get_all('To', []))
+    cc_list = getaddresses(message.get_all('Cc', []))
+
+    # Ignore List applies to sender, TO emails, and CC list
     for ignore in IgnoreEmail.objects.filter(Q(queues=queue) | Q(queues__isnull=True)):
-        if ignore.test(sender_email):
-            if ignore.keep_in_mailbox:
-                # By returning 'False' the message will be kept in the mailbox,
-                # and the 'True' will cause the message to be deleted.
-                return False
-            return True
+        for name, to_email in [('', sender_email)] + to_list + cc_list:
+            if ignore.test(to_email):
+                if ignore.keep_in_mailbox:
+                    # By returning 'False' the message will be kept in the mailbox,
+                    # and the 'True' will cause the message to be deleted.
+                    return False
+                return True
 
     matchobj = re.match(r".*\[" + queue.slug + r"-(?P<id>\d+)\]", subject)
     if matchobj:
@@ -677,6 +672,8 @@ def object_from_message(message, queue, logger):
         'sender_email': sender_email,
         'priority': priority,
         'files': files,
+        'cc_list': cc_list,
+        'to_list': to_list,
     }
 
     return create_object_from_email_message(message, ticket, payload, files, logger=logger)
