@@ -55,7 +55,7 @@
 {% block footer %}
 {% endblock %}
 {% if category.queue %}
-<a href='{% if iframe %}{% url 'helpdesk:submit_iframe' %}{% else %}{% url 'helpdesk:submit' %}{%endif%}?queue={{category.queue.pk}};_readonly_fields_=queue;{{query_param_string}}'>
+<a href='{% if iframe %}{% url 'helpdesk:submit_iframe' %}{% else %}{% url 'helpdesk:submit' %}{%endif%}?queue={{category.queue.pk}}&_readonly_fields_=queue&{{query_param_string}}'>
     {% block submit_button %}
     <div class="btn btn-danger btn-circle btn-xl float-right"><i class="fa fa-plus-circle fa-lg"></i> {% trans 'Create New Ticket' %}{% if category.queue %}{% trans " Queue: " %}{{category.queue}}{% endif %}</div>
     {% endblock %}
