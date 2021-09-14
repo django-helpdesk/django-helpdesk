@@ -40,6 +40,7 @@
 </div>
 
 {% for kbitem in kbitems %}
+{% if kbitem.unassigned_tickets %}
 <div class="card mb-3">
     <div class="card-header">
         <i class="fas fa-table"></i>
@@ -78,4 +79,5 @@
     </div>
     <div class="card-footer small text-muted">Listing {{ kbitem.unassigned_tickets|length }} ticket(s).</div>
 </div>
+{% endif %}
 {% endfor %}
