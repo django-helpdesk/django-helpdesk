@@ -27,7 +27,7 @@ body {
 }
 
 body.fixed-nav #content-wrapper {
-  margin-top: 56px;
+  margin-top: 86px;
   padding-left: 90px;
 }
 
@@ -133,7 +133,7 @@ body.fixed-nav.sidebar-toggled #content-wrapper {
 .sidebar {
   width: 90px !important;
   background-color: #212529;
-  min-height: calc(100vh - 56px);
+  min-height: calc(100vh - 86px);
 }
 
 .sidebar .nav-item:last-child {
@@ -237,8 +237,8 @@ body.fixed-nav.sidebar-toggled #content-wrapper {
 }
 
 .sidebar.fixed-top {
-  top: 56px;
-  height: calc(100vh - 56px);
+  top: 86px;
+  height: calc(100vh - 86px);
   overflow-y: auto;
 }
 
