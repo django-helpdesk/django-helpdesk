@@ -1,0 +1,31 @@
+{% load i18n %}
+{% block header %}
+<h2>{% blocktrans with item.question as itemq %}{{ itemq }}{% endblocktrans %}</h2>
+{% endblock %}
+
+<div class="container-fluid">
+    <div class="row" style="margin-top:15px">
+        {{ item.get_markdown }}
+    </div>
+    <div class="row" style="margin-top:20px">
+        {# TODO helpdesk:submit is hardcoded #}
+        <a href="{% if iframe %}{% url 'helpdesk:submit_iframe' %}{% else %}{% url 'helpdesk:submit' 1 %}{%endif%}?{% if category.queue %}queue={{category.queue.pk}};_readonly_fields_=queue;{%endif%}kbitem={{item.id}};{{query_param_string}}">
+            <div class="btn btn-success btn-circle btn-xl"><i class="fa fa-plus-circle fa-lg"></i> {% trans 'Ask for more help with ' %} "{{ item.question }}"</div>
+        </a>
+
+        {% if staff %}
+        <a href="{% url 'helpdesk:list' %}?kbitem={{item.id}}" class="col-sm">
+            <div class="btn btn-warning btn-circle btn-xl"><i class="fa fa-search fa-lg"></i> {{item.num_open_tickets}} {% trans 'open tickets' %}</div>
+        </a>
+        {% endif %}
+    </div>
+</div>
+{% block footer %}
+{% endblock %}
+{% if category.queue %}
+    <a href="'{% if iframe %}{% url 'helpdesk:submit_iframe' %}{% else %}{% url 'helpdesk:submit' 1 %}{%endif%}?queue={{category.queue.pk}};_readonly_fields_=queue;{{query_param_string}}">
+        {% block submit_button %}
+        <div class="btn btn-success btn-circle btn-xl float-right"><i class="fa fa-plus-circle fa-lg"></i> {% trans 'Ask a question on this topic' %}</div>
+        {% endblock %}
+    </a>
+{% endif %}
