@@ -1401,7 +1401,7 @@ class KBItem(models.Model):
 
     def get_absolute_url(self):
         from django.urls import reverse
-        return str(reverse('helpdesk:kb_category', args=(self.category.slug,))) + "?kbitem=" + str(self.pk)
+        return str(reverse('helpdesk:kb_category', args=(self.category.slug,))) + str(self.pk)
 
     def query_url(self):
         from django.urls import reverse

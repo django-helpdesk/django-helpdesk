@@ -44,11 +44,29 @@ def category(request, slug, iframe=False):
     template = 'helpdesk/kb_category.html'
     if iframe:
         template = 'helpdesk/kb_category_iframe.html'
-    staff = request.user.is_authenticated and request.user.is_staff
     return render(request, template, {
         'category': category,
         'items': items,
-        'selected_item': selected_item,
+        'query_param_string': qparams.urlencode(),
+        'helpdesk_settings': helpdesk_settings,
+        'iframe': iframe,
+    })
+
+def article(request, slug, pk, iframe=False):
+    category = get_object_or_404(KBCategory, slug__iexact=slug)
+    if not user.huser_from_request(request).can_access_kbcategory(category):
+        raise Http404
+    item = category.kbitem_set.get(enabled=True, pk=pk)
+    qparams = request.GET.copy()
+    try:
+        del qparams['kbitem']
+    except KeyError:
+        pass
+    template = 'helpdesk/kb_article.html'
+    staff = request.user.is_authenticated and request.user.is_staff
+    return render(request, template, {
+        'category': category,
+        'item': item,
         'query_param_string': qparams.urlencode(),
         'helpdesk_settings': helpdesk_settings,
         'iframe': iframe,
