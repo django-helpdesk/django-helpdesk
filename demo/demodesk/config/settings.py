@@ -214,6 +214,10 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # your own projects unless you make your own fixtures
 FIXTURE_DIRS = [os.path.join(BASE_DIR, 'fixtures')]
 
+
+# for Django 3.2+, set default for autofields:
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
 try:
     from .local_settings import *
 except ImportError:
