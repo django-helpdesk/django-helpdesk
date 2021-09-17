@@ -11,7 +11,9 @@
 </li>
 <li class="breadcrumb-item active">{% blocktrans with item.title as kbitem %}{{ kbitem }}{% endblocktrans %}</li>
 {% endblock %}
+
 {% block helpdesk_body %}
 {% include 'helpdesk/kb_article_base.html' %}
 </div>
+
 {% endblock %}
