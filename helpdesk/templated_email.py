@@ -54,6 +54,8 @@ def send_templated_mail(template_name,
         HELPDESK_EMAIL_FALLBACK_LOCALE
 
     headers = extra_headers or {}
+    for key, value in headers.items():
+        headers[key] = value.strip()
 
     locale = context['queue'].get('locale') or HELPDESK_EMAIL_FALLBACK_LOCALE
 
@@ -94,6 +96,7 @@ def send_templated_mail(template_name,
             recipients = recipients.split(',')
     elif type(recipients) != list:
         recipients = [recipients]
+    recipients = list(map(str.lower, recipients))
 
     msg = EmailMultiAlternatives(subject_part, text_part,
                                  sender or settings.DEFAULT_FROM_EMAIL,
@@ -110,9 +113,15 @@ def send_templated_mail(template_name,
     logger.debug('Sending email to: {!r}'.format(recipients))
 
     try:
+        # debugging: comment out msg.send() to not send emails
         return msg.send()
     except SMTPException as e:
         logger.exception('SMTPException raised while sending email to {}'.format(recipients))
         if not fail_silently:
             raise e
+        return 0
+    except Exception as e2:
+        logger.exception('Raised failure while sending email.')
+        if not fail_silently:
+            raise e2
         return 0
