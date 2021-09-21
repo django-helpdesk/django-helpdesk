@@ -16,7 +16,7 @@ import socket
 import ssl
 import sys
 from datetime import timedelta
-from email.utils import getaddresses
+from email.utils import getaddresses, parseaddr
 from os.path import isfile, join
 from time import ctime
 
@@ -33,7 +33,7 @@ from email_reply_parser import EmailReplyParser
 
 from helpdesk import settings
 from helpdesk.lib import safe_template_context, process_attachments
-from helpdesk.models import Queue, Ticket, TicketCC, FollowUp, IgnoreEmail, FormType
+from helpdesk.models import Queue, Ticket, TicketCC, FollowUp, IgnoreEmail, FormType, CustomField
 from seed.lib.superperms.orgs.models import Organization
 
 
@@ -84,7 +84,7 @@ def process_email(quiet=False):
                 q.email_box_last_check = timezone.now() - timedelta(minutes=30)
 
             queue_time_delta = timedelta(minutes=q.email_box_interval or 0)
-            if (q.email_box_last_check + queue_time_delta) < timezone.now():  # to debug: comment out this line
+            if (q.email_box_last_check + queue_time_delta) < timezone.now():  # debugging: comment out this line
                 process_queue(q, logger=logger)
                 q.email_box_last_check = timezone.now()
                 q.save()
@@ -111,23 +111,23 @@ def pop3_sync(q, logger, server):
     server.user(q.email_box_user or settings.QUEUE_EMAIL_BOX_USER)
     server.pass_(q.email_box_pass or settings.QUEUE_EMAIL_BOX_PASSWORD)
 
-    messagesInfo = server.list()[1]
-    logger.info("Received %d messages from POP3 server" % len(messagesInfo))
+    messages_info = server.list()[1]
+    logger.info("Received %s messages from POP3 server" % len(messages_info))
 
-    for msgRaw in messagesInfo:
-        if type(msgRaw) is bytes:
+    for msg_raw in messages_info:
+        if type(msg_raw) is bytes:
             try:
-                msg = msgRaw.decode("utf-8")
+                msg = msg_raw.decode("utf-8")
             except UnicodeError:
                 # if couldn't decode easily, just leave it raw
-                msg = msgRaw
+                msg = msg_raw
         else:
             # already a str
-            msg = msgRaw
-        msgNum = msg.split(" ")[0]
-        logger.info("Processing message %s" % msgNum)
+            msg = msg_raw
+        msg_num = msg.split(" ")[0]
+        logger.info("Processing message %s" % msg_num)
 
-        raw_content = server.retr(msgNum)[1]
+        raw_content = server.retr(msg_num)[1]
         if type(raw_content[0]) is bytes:
             full_message = "\n".join([elm.decode('utf-8') for elm in raw_content])
         else:
@@ -135,10 +135,10 @@ def pop3_sync(q, logger, server):
         ticket = object_from_message(message=full_message, queue=q, logger=logger)
 
         if ticket:
-            server.dele(msgNum)  # hide line if debugging
-            logger.info("Successfully processed message %s, deleted from POP3 server" % msgNum)
+            server.dele(msg_num)  # hide line if debugging
+            logger.info("Successfully processed message %s, deleted from POP3 server" % msg_num)
         else:
-            logger.warn("Message %s was not successfully processed, and will be left on POP3 server" % msgNum)
+            logger.warn("Message %s was not successfully processed, and will be left on POP3 server" % msg_num)
 
     server.quit()
 
@@ -172,9 +172,20 @@ def imap_sync(q, logger, server):
     try:
         status, data = server.search(None, 'NOT', 'DELETED')
         if data:
-            msgnums = data[0].split()
-            logger.info("Received %d messages from IMAP server" % len(msgnums))
-            for num in msgnums:
+            msg_nums = data[0].split()
+            logger.info("Received %s messages from IMAP server" % len(msg_nums))
+
+            for num_raw in msg_nums:
+                if type(num_raw) is bytes:
+                    try:
+                        num = num_raw.decode("utf-8")
+                    except UnicodeError:
+                        # if couldn't decode easily, just leave it raw
+                        num = num_raw
+                else:
+                    # already a str
+                    num = num_raw
+
                 logger.info("Processing message %s" % num)
                 status, data = server.fetch(num, '(RFC822)')
                 full_message = encoding.force_text(data[0][1], errors='replace')
@@ -287,7 +298,7 @@ def process_queue(q, logger):
                 logger.warn("Message %d was not successfully processed, and will be left in local directory", i)
 
 
-def decodeUnknown(charset, string):
+def decode_unknown(charset, string):
     if type(string) is not str:
         if not charset:
             try:
@@ -332,13 +343,11 @@ def create_ticket_cc(ticket, cc_list):
 
     new_ticket_ccs = []
     for cced_name, cced_email in cc_list:
-
         cced_email = cced_email.strip()
         if cced_email == ticket.queue.email_address:
             continue
 
         user = None
-
         try:
             user = User.objects.get(email=cced_email)
         except User.DoesNotExist:
@@ -359,10 +368,11 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
     now = timezone.now()
 
     queue = payload['queue']
-    sender_email = payload['sender_email']
+    sender_name = payload['sender'][0]
+    sender_email = payload['sender'][1]
 
-    message_id = message.get('Message-Id')
-    in_reply_to = message.get('In-Reply-To')
+    message_id = parseaddr(message.get('Message-Id'))[1]
+    in_reply_to = parseaddr(message.get('In-Reply-To'))[1]
 
     if in_reply_to is not None:
         try:
@@ -392,9 +402,13 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
             organization = Organization.objects.all().first()  # TODO remove hardcoding
             ticket_form = FormType.objects.get_or_create(name=settings.HELPDESK_EMAIL_FORM_NAME,
                                                          organization=organization)[0]
+            fields = CustomField.objects.filter(ticket_form=ticket_form.id).values_list('field_name', flat=True)
+
             ticket = Ticket.objects.create(
                 title=payload['subject'],
                 queue=queue,
+                contact_name=sender_name if 'contact_name' in fields else None,
+                contact_email=sender_email if 'contact_email' in fields else None,
                 submitter_email=sender_email,
                 created=now,
                 description=payload['body'],
@@ -423,10 +437,9 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
     if ticket.status == Ticket.REOPENED_STATUS:
         f.new_status = Ticket.REOPENED_STATUS
         f.title = _('Ticket Re-Opened by E-Mail Received from %(sender_email)s' % {'sender_email': sender_email})
-
     f.save()
-    logger.debug("Created new FollowUp for Ticket")
 
+    logger.debug("Created new FollowUp for Ticket")
     logger.info("[%s-%s] %s" % (ticket.queue.slug, ticket.id, ticket.title,))
 
     attached = process_attachments(f, files)
@@ -438,17 +451,11 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
 
     context = safe_template_context(ticket)
 
-    # TODO This block seems to be redundant? create_ticket_cc DOES save data to database,
-    #  but the list isn't used for anything afterwards
-    new_ticket_ccs = []
-    new_ticket_ccs.append(create_ticket_cc(ticket, payload['to_list'] + payload['cc_list']))
+    create_ticket_cc(ticket, payload['to_list'] + payload['cc_list'])
 
     notifications_to_be_sent = [sender_email]
-
     if queue.enable_notifications_on_email_events and len(notifications_to_be_sent):
-
         ticket_cc_list = TicketCC.objects.filter(ticket=ticket).all().values_list('email', flat=True)
-
         for email_address in ticket_cc_list:
             notifications_to_be_sent.append(email_address)
 
@@ -469,7 +476,8 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
             ticket.send(
                 {'submitter': ('newticket_submitter', context),
                  'new_ticket_cc': ('newticket_cc', context),
-                 'ticket_cc': ('newticket_cc', context)},
+                 'ticket_cc': ('newticket_cc', context),
+                 'extra': ('newticket_cc', context)},
                 fail_silently=True,
                 extra_headers=extra_headers,
             )
@@ -477,13 +485,14 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
             context.update(comment=f.comment)
             ticket.send(
                 {'submitter': ('newticket_submitter', context),
-                 'assigned_to': ('updated_owner', context)},
+                 'assigned_to': ('updated_owner', context),},
                 fail_silently=True,
                 extra_headers=extra_headers,
             )
             if queue.enable_notifications_on_email_events:
                 ticket.send(
-                    {'ticket_cc': ('updated_cc', context)},
+                    {'ticket_cc': ('updated_cc', context),
+                     'extra': ('updated_cc', context)},
                     fail_silently=True,
                     extra_headers=extra_headers,
                 )
@@ -495,41 +504,34 @@ def object_from_message(message, queue, logger):
     # 'message' must be an RFC822 formatted message.
     message = email.message_from_string(message)
 
-    # Replaces original helpdesk "get_charset()", which wasn't an actual method ?
+    # Replaces original helpdesk code "get_charset()", which wasn't an actual method ?
     charset = list(filter(lambda s: s is not None, message.get_charsets()))
     if charset:
         charset = charset[0]
 
     subject = message.get('subject', _('Comment from e-mail'))
-    subject = decode_mail_headers(decodeUnknown(charset, subject))
+    subject = decode_mail_headers(decode_unknown(charset, subject))
     for affix in STRIPPED_SUBJECT_STRINGS:
         subject = subject.replace(affix, "")
     subject = subject.strip()
 
-    # Replaced original helpdesk bugfix code with cleaner fix
-    sender = message.get('from', _('Unknown Sender'))
-    sender = decode_mail_headers(decodeUnknown(charset, sender))
-    sender_email = email.utils.getaddresses([sender])[0][1]
-
-    if sender_email == '':
+    sender = parseaddr(message.get('from', _('Unknown Sender')))
+    if sender[1] == '':
         # Delete emails if the sender email cannot be parsed correctly. This ensures that
         # mailing list emails do not become tickets as well as malformatted emails
         return True
-
-    # Removed original helpdesk code that seemed to be redundant/dead?
 
     to_list = getaddresses(message.get_all('To', []))
     cc_list = getaddresses(message.get_all('Cc', []))
 
     # Ignore List applies to sender, TO emails, and CC list
-    for ignore in IgnoreEmail.objects.filter(Q(queues=queue) | Q(queues__isnull=True)):
-        for name, to_email in [('', sender_email)] + to_list + cc_list:
-            if ignore.test(to_email):
-                if ignore.keep_in_mailbox:
-                    # By returning 'False' the message will be kept in the mailbox,
-                    # and the 'True' will cause the message to be deleted.
-                    return False
-                return True
+    for ignored_address in IgnoreEmail.objects.filter(Q(queues=queue) | Q(queues__isnull=True)):
+        for name, address in [sender] + to_list + cc_list:
+            if ignored_address.test(address):
+                logger.debug("Email address matched an ignored address. Ticket will not be created")
+                if ignored_address.keep_in_mailbox:
+                    return False  # By returning 'False' the message will be kept in the mailbox,
+                return True  # and the 'True' will cause the message to be deleted.
 
     matchobj = re.match(r".*\[" + queue.slug + r"-(?P<id>\d+)\]", subject)
     if matchobj:
@@ -559,7 +561,7 @@ def object_from_message(message, queue, logger):
                 # https://github.com/django-helpdesk/django-helpdesk/issues/732
                 if part['Content-Transfer-Encoding'] == '8bit' and part.get_content_charset() == 'utf-8':
                     body = body.decode('unicode_escape')
-                body = decodeUnknown(part.get_content_charset(), body)
+                body = decode_unknown(part.get_content_charset(), body)
                 # have to use django_settings here so overwritting it works in tests
                 # the default value is False anyway
                 if ticket is None and getattr(django_settings, 'HELPDESK_FULL_FIRST_MESSAGE_FROM_EMAIL', False):
@@ -669,11 +671,10 @@ def object_from_message(message, queue, logger):
         'full_body': full_body or body,
         'subject': subject,
         'queue': queue,
-        'sender_email': sender_email,
+        'sender': sender,
         'priority': priority,
         'files': files,
         'cc_list': cc_list,
         'to_list': to_list,
     }
-
     return create_object_from_email_message(message, ticket, payload, files, logger=logger)

@@ -701,9 +701,11 @@ def update_ticket(request, ticket_id, public=False):
         roles = {
             'submitter': (template + 'submitter', context),
             'ticket_cc': (template + 'cc', context),
+            'extra': (template + 'cc', context),
         }
         if ticket.assigned_to and ticket.assigned_to.usersettings_helpdesk.email_on_ticket_change:
             roles['assigned_to'] = (template + 'cc', context)
+
         messages_sent_to.update(ticket.send(roles, dont_send_to=messages_sent_to, fail_silently=True, files=files,))
 
     if reassigned:
@@ -857,6 +859,7 @@ def mass_update(request):
             roles = {
                 'submitter': ('closed_submitter', context),
                 'ticket_cc': ('closed_cc', context),
+                'extra': ('closed_cc', context),
             }
             if t.assigned_to and t.assigned_to.usersettings_helpdesk.email_on_ticket_change:
                 roles['assigned_to'] = ('closed_owner', context),

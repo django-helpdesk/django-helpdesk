@@ -585,18 +585,19 @@ class Ticket(models.Model):
         """
         Send notifications to everyone interested in this ticket.
 
-        The the roles argument is a dictionary mapping from roles to (template, context) pairs.
-        If a role is not present in the dictionary, users of that type will not receive the notification.
+        The roles argument is a dictionary mapping from roles to (template, context) pairs.
+        This method attempts to send a message to every possible role (see below), but the inner send method will
+            ensure only the roles passed in will be sent a message.
 
         The following roles exist:
-
           - 'submitter'
           - 'new_ticket_cc'
           - 'ticket_cc'
           - 'assigned_to'
+          - 'contact_email'
+          - 'extra'
 
         Here is an example roles dictionary:
-
         {
             'submitter': (template_name, context),
             'assigned_to': (template_name2, context),
@@ -607,15 +608,12 @@ class Ticket(models.Model):
         returns the set of email addresses the notification was delivered to.
 
         """
-        recipients = set()
+        recipients = set()  # list of people already set to receive an email
 
         if dont_send_to is not None:
             recipients.update(dont_send_to)
 
         recipients.add(self.queue.email_address)
-
-        def should_receive(email):
-            return email and email not in recipients
 
         def send(role, recipient):
             if recipient and recipient not in recipients and role in roles:
@@ -623,14 +621,29 @@ class Ticket(models.Model):
                 send_templated_mail(template, context, recipient, sender=self.queue.from_address, **kwargs)
                 recipients.add(recipient)
 
+        send('submitter', self.contact_email)  # TODO add a new role/template for contact_email field?
         send('submitter', self.submitter_email)
         send('ticket_cc', self.queue.updated_ticket_cc)
         send('new_ticket_cc', self.queue.new_ticket_cc)
+
         if self.assigned_to:
             send('assigned_to', self.assigned_to.email)
+
         if self.queue.enable_notifications_on_email_events:
             for cc in self.ticketcc_set.all():
                 send('ticket_cc', cc.email_address)
+
+            # TODO: 'extra' fields currently get sent the same templates as cc.
+            #  Add a method to pair specific extra fields with specific templates
+            extra_fields = CustomField.objects.filter(
+                ticket_form=self.ticket_form,
+                data_type='email',
+                notifications=True
+            ).values_list('field_name', flat=True)
+            for field in extra_fields:
+                if field in self.extra_data and self.extra_data[field]:
+                    send('extra', self.extra_data[field])
+
         return recipients
 
     def _get_assigned_to(self):
@@ -1615,7 +1628,7 @@ class IgnoreEmail(models.Model):
     )
 
     def __str__(self):
-        return '%s' % self.name
+        return '%s <%s>' % (self.name, self.email_address)
 
     def save(self, *args, **kwargs):
         if not self.date:
@@ -1950,6 +1963,13 @@ class CustomField(models.Model):
         help_text=_('Only used for decimal fields'),
         blank=True,
         null=True,
+    )
+
+    notifications = models.BooleanField(
+        _('Use this email for notifications?'),
+        default=False,
+        help_text=_('Only for Email Address: adds this email to the list of addresses that receive notifications of '
+                    'ticket updates. By default, only submitter_email and contact_email receive notifications.'),
     )
 
     empty_selection_list = models.BooleanField(
