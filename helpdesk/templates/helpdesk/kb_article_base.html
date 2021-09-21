@@ -3,8 +3,8 @@
 <h2>{% blocktrans with item.question as itemq %}{{ itemq }}{% endblocktrans %}</h2>
 {% endblock %}
 
-<div class="container-fluid">
-    <div class="row" style="margin-top:15px">
+<div class="container">
+    <div class="row" style="margin-top:15px;display:block;">
         {{ item.get_markdown }}
     </div>
     <div class="row" style="margin-top:20px">
