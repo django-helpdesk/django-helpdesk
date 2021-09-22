@@ -3,10 +3,10 @@
 {% load in_list %}
 <div class="form-row">
     <div class="col col-sm-3">
-        <label for='id_statuses'>{% trans "Knowledge base item(s)" %}:</label>
+        <label for='id_kbitems'>{% trans "Knowledge base item(s)" %}:</label>
     </div>
-    <div class="col col-sm-3">
-        <select id='id_kbitems' name='kbitem' multiple='selected' size='5'>
+    <div class="col col-sm-8" >
+        <select id='id_kbitems' name='kbitem' size='5' style="max-width:100%" multiple>
             {% with magic_number=-1 %}
             <option value='{{magic_number}}'{% if magic_number|in_list:query_params.filtering.kbitem__in %} selected='selected'{% endif %}>
                 {% trans "Uncategorized" %}
@@ -17,7 +17,7 @@
             {% endfor %}
         </select>
     </div>
-    <div class="col col-sm-6">
+    <div class="col col-sm-1">
         <button class="filterBuilderRemove btn btn-danger btn-sm float-right"><i class="fas fa-trash-alt"></i></button>
     </div>
     <div class='form-row filterHelp'>{% trans "Ctrl-click to select multiple options" %}</div>
