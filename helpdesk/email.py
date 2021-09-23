@@ -362,6 +362,12 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
     message_id = message.get('Message-Id')
     in_reply_to = message.get('In-Reply-To')
 
+    if message_id:
+        message_id = message_id.strip()
+
+    if in_reply_to:
+        in_reply_to = in_reply_to.strip()
+
     if in_reply_to is not None:
         try:
             queryset = FollowUp.objects.filter(message_id=in_reply_to).order_by('-date')
