@@ -102,3 +102,10 @@ table .tickettitle {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+.mass_action_el > * {
+    margin-right:10px;
+}
+.select_el > * {
+    margin-right:5px;
+}

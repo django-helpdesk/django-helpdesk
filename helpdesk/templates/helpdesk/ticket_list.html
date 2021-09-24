@@ -59,10 +59,10 @@
             <div class="tab-content" id="myTabContent">
                 <div class="tab-pane fade show active" id="datatabletabcontents" role="tabpanel"
                      aria-labelledby="datatabletabcontents-tab">
-                    <form method='post' action='{% url 'helpdesk:mass_update' %}' id="ticket_mass_update">
+                    <form method='post' action="{% url 'helpdesk:mass_update' %}" id="ticket_mass_update">
                         {% csrf_token %}
                         <table class="table table-sm table-striped table-bordered table-hover"
-                               id="ticketTable" data-page-length='{{ default_tickets_per_page }}'>
+                               id="ticketTable" data-page-length='{{ default_tickets_per_page }}' style="width:100%">
                             <thead class="thead-light">
                             <tr>
                                 <th></th>
@@ -79,50 +79,6 @@
                             </tr>
                             </thead>
                         </table>
-
-                        <p>
-                            <label>{% trans "Select:" %}</label>
-
-                            <button id="select_all_btn" type="button" class="btn btn-primary btn-sm">
-                                <i class="fas fa-check-circle"></i> {% trans "All" %}
-                            </button>
-
-                            <button id='select_none_btn' type="button" class="btn btn-primary btn-sm">
-                                <i class="fas fa-times-circle"></i> {% trans "None" %}
-                            </button>
-
-                            <button id='select_inverse_btn' type="button" class="btn btn-primary btn-sm">
-                                <i class="fas fa-expand-arrows-alt"></i> {% trans "Invert" %}
-                            </button>
-                        </p>
-
-                        <p>
-                            <label for='id_mass_action'>{% trans "With Selected Tickets:" %}</label>
-                            <select name='action' id='id_mass_action'>
-                                <option value='take'>{% trans "Take (Assign to me)" %}</option>
-                                <option value='delete'>{% trans "Delete" %}</option>
-                                <option value='merge'>{% trans "Merge" %}</option>
-                                <optgroup label='{% trans "Close" %}'>
-                                    <option value='close'>{% trans "Close (Don't Send E-Mail)" %}</option>
-                                    <option value='close_public'>{% trans "Close (Send E-Mail)" %}</option>
-                                </optgroup>
-                                <optgroup label='{% trans "Assign To" %}'>
-                                    <option value='unassign'>{% trans "Nobody (Unassign)" %}</option>
-                                    {% for u in user_choices %}
-                                        <option value='assign_{{ u.id }}'>{{ u.get_username }}</option>
-                                    {% endfor %}
-                                </optgroup>
-                                <optgroup label='{% trans "Set KB Item" %}'>
-                                    <option value='kbitem_none'>{% trans "No KB Item" %}</option>
-                                    {% for kbi in kb_items %}
-                                        <option value='kbitem_{{ kbi.id }}'>{{ kbi.category.title }}: {{ kbi.title }}</option>
-                                    {% endfor %}
-                                </optgroup>
-                            </select>
-                            <button type="submit" class="btn btn-primary btn-sm">
-                                <i class="fas fa-arrow-circle-right"></i> {% trans "Go" %}
-                            </button>
-                        </p>
                     </form>
                 </div>
                 <div class="tab-pane fade" id="timelinetabcontents" role="tabpanel" aria-labelledby="timelinetabcontents-tab">
@@ -346,8 +302,20 @@
                 createdRow: function (row, data, dataIndex) {
                     $(row).addClass(data.row_class);
                 },
-                dom: 'ltBp',
-                buttons: ["colvis"],
+                dom: "<'row'" +
+                        "<'col col-sm-auto'<'select_el'>>" +
+                         "<'col col-lg-auto'<'mass_action_el'>>" +
+                        "<'col'<'float-right'B>>" +
+                    ">" +
+                    "t" +
+                    "<'row'" +
+                        "<'col float-left'l>" +
+                        "<'col float-right'p>" +
+                    ">",
+                buttons: [{
+                    extend: 'colvis',
+                    columns: ':gt(1)'
+                }],
                 columns: [
                     {
                         data: "id",
@@ -427,6 +395,46 @@
                     timeline_loaded = true;
                 }
             });
+
+            $("div.select_el").html(
+                "<label>{% trans 'Select:' %}</label>" +
+                "<button id='select_all_btn' type='button' class='btn btn-primary btn-sm'>" +
+                    "<i class='fas fa-check-circle'></i> {% trans 'All' %}" +
+                "</button>" +
+                "<button id='select_none_btn' type='button' class='btn btn-primary btn-sm'>" +
+                    "<i class='fas fa-times-circle'></i> {% trans 'None' %}" +
+                "</button>" +
+                "<button id='select_inverse_btn' type='button' class='btn btn-primary btn-sm'>" +
+                    "<i class='fas fa-expand-arrows-alt'></i> {% trans 'Invert' %}" +
+                "</button>"
+            );
+            $("div.mass_action_el").html(
+                "<label for='id_mass_action'>{% trans 'With Selected Tickets:' %} </label>" +
+                "<select name='action' id='id_mass_action' style='width: 250px;'>" +
+                    "<option value='take'>{% trans 'Take (Assign to me)' %}</option>" +
+                    "<option value='delete'>{% trans 'Delete' %}</option>" +
+                    "<option value='merge'>{% trans 'Merge' %}</option>" +
+                    "<optgroup label='{% trans 'Close' %}'>" +
+                        "<option value='close'>{% trans "Close (Don't Send E-Mail)" %}</option>" +
+                        "<option value='close_public'>{% trans 'Close (Send E-Mail)' %}</option>" +
+                    "</optgroup>" +
+                    "<optgroup label='{% trans 'Assign To' %}'>" +
+                        "<option value='unassign'>{% trans 'Nobody (Unassign)' %}</option>" +
+                        "{% for u in user_choices %}" +
+                        "<option value='assign_{{ u.id }}'>{{ u.get_username }}</option>" +
+                        "{% endfor %}" +
+                    "</optgroup>" +
+                    "<optgroup label='{% trans 'Set KB Item' %}'>" +
+                        "<option value='kbitem_none'>{% trans 'No KB Item' %}</option>" +
+                        "{% for kbi in kb_items %}" +
+                        "<option value='kbitem_{{ kbi.id }}'>{{ kbi.category.title }}: {{ kbi.title }}</option>" +
+                        "{% endfor %}" +
+                    "</optgroup>" +
+                "</select>" +
+                "<button type='submit' class='btn btn-primary btn-sm'>" +
+                    "<i class='fas fa-arrow-circle-right'></i> {% trans 'Go' %}" +
+                "</button>"
+            );
 
             {# Shortcuts to select/unselect multiple tickets #}
             $("#select_all_btn").click(function () {
