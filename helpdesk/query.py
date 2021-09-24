@@ -76,7 +76,7 @@ def get_search_filter_args(search):
     return filter
 
 
-DATATABLES_ORDER_COLUMN_CHOICES = Choices(
+DATATABLES_ORDER_COLUMN_CHOICES = dict([
     ('0', 'id'),
     ('1', 'title'),
     ('2', 'priority'),
@@ -88,7 +88,7 @@ DATATABLES_ORDER_COLUMN_CHOICES = Choices(
     ('8', 'submitter_email'),
     # ('9', 'time_spent'),
     ('10', 'kbitem'),
-)
+])
 
 
 def get_query_class():
@@ -165,27 +165,33 @@ class __Query__:
         to a Serializer called DatatablesTicketSerializer in serializers.py.
         """
         objects = self.get()
-        order_by = '-created'
-        draw = int(kwargs.get('draw', [0])[0])
+
         length = int(kwargs.get('length', [25])[0])
         start = int(kwargs.get('start', [0])[0])
+
         search_value = kwargs.get('search[value]', [""])[0]
-        order_column = kwargs.get('order[0][column]', ['5'])[0]
-        order = kwargs.get('order[0][dir]', ["asc"])[0]
+        draw = int(kwargs.get('draw', [0])[0])
 
-        order_column = DATATABLES_ORDER_COLUMN_CHOICES[order_column]
-        # django orm '-' -> desc
-        if order == 'desc':
-            order_column = '-' + order_column
+        sort_column = kwargs.get('order[0][column]', ['5'])[0]
+        sort_order = kwargs.get('order[0][dir]', ["asc"])[0]
+        # Validating sort data
+        if sort_column != '0':
+            sort_column = DATATABLES_ORDER_COLUMN_CHOICES[sort_column]
+        elif 'sorting' in self.params and self.params['sorting'] in DATATABLES_ORDER_COLUMN_CHOICES.values():
+            sort_column = self.params['sorting']
+            sort_order = 'desc' if self.params['sortreverse'] is None else 'asc'
 
-        queryset = objects.all().order_by(order_by)
+        if sort_order == 'desc':
+            sort_column = '-' + sort_column  # django orm '-' -> desc
+
+        queryset = objects.all()  # .order_by(order_by)
         total = queryset.count()
 
         if search_value:  # Dead code currently
             queryset = queryset.filter(get_search_filter_args(search_value))
 
         count = queryset.count()
-        queryset = queryset.order_by(order_column)[start:start + length]
+        queryset = queryset.order_by(sort_column)[start:start + length]
         return {
             'data': DatatablesTicketSerializer(queryset, many=True).data,
             'recordsFiltered': count,

@@ -1044,8 +1044,8 @@ def ticket_list(request):
             'status__in': [1, 2],
         },
         'sorting': 'created',
-        'search_string': '',
         'sortreverse': False,
+        'search_string': '',
     }
 
     # If the user is coming from the header/navigation search box, lets' first
@@ -1087,34 +1087,36 @@ def ticket_list(request):
     except QueryLoadError:
         return HttpResponseRedirect(reverse('helpdesk:list'))
 
+    filter_in_params = dict([
+        ('queue', 'queue__id__in'),
+        ('assigned_to', 'assigned_to__id__in'),
+        ('status', 'status__in'),
+        ('kbitem', 'kbitem__in'),
+        ('submitter', 'submitter_email__in'),
+    ])
+    filter_null_params = dict([
+        ('queue', 'queue__id__isnull'),
+        ('assigned_to', 'assigned_to__id__isnull'),
+        ('status', 'status__isnull'),
+        ('kbitem', 'kbitem__isnull'),
+        ('submitter', 'submitter_email__isnull'),
+    ])
+
     if saved_query:
         pass
-    elif not {'queue', 'assigned_to', 'status', 'q', 'sort', 'sortreverse', 'kbitem'}.intersection(request.GET):
+    elif not {'queue', 'assigned_to', 'status', 'q', 'sort', 'sortreverse', 'kbitem', 'submitter'}.intersection(request.GET):
         # Fall-back if no querying is being done
         query_params = deepcopy(default_query_params)
     else:
-        filter_in_params = [
-            ('queue', 'queue__id__in'),
-            ('assigned_to', 'assigned_to__id__in'),
-            ('status', 'status__in'),
-            ('kbitem', 'kbitem__in'),
-        ]
-        filter_null_params = dict([
-            ('queue', 'queue__id__isnull'),
-            ('assigned_to', 'assigned_to__id__isnull'),
-            ('status', 'status__isnull'),
-            ('kbitem', 'kbitem__isnull'),
-        ])
-        for param, filter_command in filter_in_params:
+        for param, filter_command in filter_in_params.items():
             if not request.GET.get(param) is None:
                 patterns = request.GET.getlist(param)
                 try:
                     pattern_pks = [int(pattern) for pattern in patterns]
                     if -1 in pattern_pks:
-                        query_params['filtering_or'][filter_null_params[param]] = True
+                        query_params['filtering'][filter_null_params[param]] = True
                     else:
-                        query_params['filtering_or'][filter_command] = pattern_pks
-                    query_params['filtering'][filter_command] = pattern_pks
+                        query_params['filtering'][filter_command] = pattern_pks
                 except ValueError:
                     pass
 
@@ -1133,7 +1135,7 @@ def ticket_list(request):
 
         # SORTING
         sort = request.GET.get('sort', None)
-        if sort not in ('status', 'assigned_to', 'created', 'title', 'queue', 'priority', 'kbitem'):
+        if sort not in ('status', 'assigned_to', 'created', 'title', 'queue', 'priority', 'kbitem', 'submitter'):
             sort = 'created'
         query_params['sorting'] = sort
 
@@ -1141,7 +1143,6 @@ def ticket_list(request):
         query_params['sortreverse'] = sortreverse
 
     urlsafe_query = query_to_base64(query_params)
-
     Query(huser, base64query=urlsafe_query).refresh_query()
 
     user_saved_queries = SavedSearch.objects.filter(Q(user=request.user) | Q(shared__exact=True))
@@ -1157,6 +1158,12 @@ def ticket_list(request):
             'Django Documentation on string matching in SQLite</a>.')
 
     kbitem_choices = [(item.pk, str(item)) for item in KBItem.objects.all()]
+
+    # After query is run, replaces null-filters with in-filters=[-1], so page can properly display that filter.
+    for param, null_query in filter_null_params.items():
+        popped = query_params['filtering'].pop(null_query, None)
+        if popped is not None:
+            query_params['filtering'][filter_in_params[param]] = [-1]
 
     return render(request, 'helpdesk/ticket_list.html', dict(
         context,

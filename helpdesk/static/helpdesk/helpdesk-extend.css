@@ -111,3 +111,10 @@ body {
 .bg-dc {
     background-color: #218d45;
 }
+
+.mass_action_el > * {
+    margin-right:10px;
+}
+.select_el > * {
+    margin-right:5px;
+}
