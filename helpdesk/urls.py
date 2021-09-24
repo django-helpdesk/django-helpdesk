@@ -164,9 +164,10 @@ urlpatterns = [
 ]
 
 urlpatterns += [
-    url(r'^$',
-        protect_view(public.Homepage.as_view()),
-        name='home'),
+    # 9/24: Removed form and 'View Ticket' feature from homepage -- so just display the KB home. Add this back later
+    # url(r'^$',
+    #    protect_view(public.Homepage.as_view()),
+    #    name='home'),
 
     url(r'^tickets/submit/(?P<form_id>[0-9]+)/$',
         public.create_ticket,
@@ -237,6 +238,10 @@ urlpatterns += [
 
 if helpdesk_settings.HELPDESK_KB_ENABLED:
     urlpatterns += [
+        url(r'^$',  # 9/24: Displaying KB index as Home, delete later
+            kb.index,
+            name='home'),
+
         url(r'^kb/$',
             kb.index,
             name='kb_index'),
@@ -256,6 +261,12 @@ if helpdesk_settings.HELPDESK_KB_ENABLED:
         url(r'^kb_iframe/(?P<slug>[A-Za-z0-9_-]+)/$',
             kb.category_iframe,
             name='kb_category_iframe'),
+    ]
+else:  # 9/24: else-block added in case KB isn't enabled. Delete block later
+    urlpatterns += [
+        url(r'^$',
+            protect_view(public.Homepage.as_view()),
+            name='home'),
     ]
 
 urlpatterns += [
