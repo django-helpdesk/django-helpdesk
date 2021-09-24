@@ -28,17 +28,30 @@ from helpdesk.decorators import protect_view, is_helpdesk_staff
 import helpdesk.views.staff as staff
 import helpdesk.views.abstract_views as abstract_views
 from helpdesk.lib import text_is_spam
-from helpdesk.models import Ticket, Queue, UserSettings, CustomField
+from helpdesk.models import Ticket, Queue, UserSettings, CustomField, FormType
 from helpdesk.user import huser_from_request
 
 logger = logging.getLogger(__name__)
 
 
 def create_ticket(request, form_id=None,  *args, **kwargs, ):
+    # Verify form_id provided by URL.
+    try:
+        form_int = int(form_id)
+    except TypeError:
+        return HttpResponseRedirect(reverse('helpdesk:home'))
+
     if is_helpdesk_staff(request.user):
-        return staff.CreateTicketView.as_view(form_id=form_id)(request, *args, **kwargs)
+        return staff.CreateTicketView.as_view(form_id=form_int)(request, *args, **kwargs)
+
+    # If not user: Check if form is public, and if not, return to login or homepage
+    form = FormType.objects.filter(id=form_int).first()
+    if form is not None and form.public:
+        return CreateTicketView.as_view(form_id=form_int)(request, *args, **kwargs)
+    elif helpdesk_settings.HELPDESK_REDIRECT_TO_LOGIN_BY_DEFAULT:
+        return HttpResponseRedirect(reverse('login'))
     else:
-        return CreateTicketView.as_view(form_id=form_id)(request, *args, **kwargs)
+        return HttpResponseRedirect(reverse('helpdesk:home'))
 
 
 class BaseCreateTicketView(abstract_views.AbstractCreateTicketMixin, FormView):
