@@ -56,19 +56,13 @@ class EscapeHtml(Extension):
         del md.inlinePatterns['html']
 
 
-def get_markdown(text):
+def get_markdown(text, kb=False):
     if not text:
         return ""
-
-    return mark_safe(
-        markdown(
-            text,
-            extensions=[
-                EscapeHtml(), 'markdown.extensions.nl2br',
-                'markdown.extensions.fenced_code'
-            ]
-        )
-    )
+    extensions = [EscapeHtml(), 'markdown.extensions.nl2br', 'markdown.extensions.fenced_code']
+    if kb:
+        extensions.append('markdown.extensions.attr_list')
+    return mark_safe(markdown(text, extensions=extensions))
 
 
 class Queue(models.Model):
@@ -1427,6 +1421,49 @@ class KBItem(models.Model):
         return Ticket.objects.filter(kbitem=self, status__in=(1, 2), assigned_to__isnull=True)
 
     def get_markdown(self):
+        """
+        Converts KB article text from Markdown to HTML.
+        This method searches for two new patterns, !~! and ~!~, to replace with HTML tags for a collapsing
+        subsection.
+
+        - !~! and ~!~ both must be on their own line
+        - They must directly follow a block of text (blank lines divide a block)
+        - They must be followed by a blank line
+
+        Example:
+            Title of Subsection
+            !~!
+
+            Body of subsection.
+            I can add many lines of text to this.
+            It will all be included in the section.
+            ~!~
+
+            This, however, won't be included in the collapsing section.
+        """
+
+        class MarkdownNumbers(object):
+            def __init__(self, start=1, pattern=''):
+                self.count = start - 1
+                self.pattern = pattern
+
+            def __call__(self, match):
+                self.count += 1
+                return self.pattern.format(self.count)
+
+        title_pattern = r'!~!'
+        body_pattern = r'~!~'
+
+        title = "{{: .card .btn .btn-link style='text-align: left;' " \
+                "data-toggle='collapse' data-target='#collapse{0}' role='region' " \
+                "aria-expanded='false' aria-controls='collapse{0}' .card-header #header{0} .h5 .mb-0 }}"
+        body = "{{ #collapse{0} .collapse role='region' aria-labelledby='header{0}' data-parent='#header{0}' " \
+               "style='padding-top:0;padding-bottom:0;margin:0;' .card-body }}"
+
+        new_answer, title_count = re.subn(title_pattern, MarkdownNumbers(start=1, pattern=title), self.answer)
+        new_answer, body_count = re.subn(body_pattern, MarkdownNumbers(start=1, pattern=body), new_answer)
+        if title_count != 0 and title_count == body_count:
+            return get_markdown(new_answer, kb=True)
         return get_markdown(self.answer)
 
 
