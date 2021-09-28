@@ -25,6 +25,18 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+# SECURITY WARNING: you probably want to configure your server
+# to use HTTPS with secure cookies, then you'd want to set
+# the following settings:
+#
+#SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+#SESSION_COOKIE_SECURE = True
+#CSRF_COOKIE_SECURE = True
+#
+# We leave them commented out here because most likely for
+# an internal demo you don't need such security, but please
+# remember when setting up your own development / production server!
+
 
 # Application definition
 
