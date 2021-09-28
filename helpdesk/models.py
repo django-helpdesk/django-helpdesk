@@ -24,6 +24,7 @@ import datetime
 from django.utils.safestring import mark_safe
 from markdown import markdown
 from markdown.extensions import Extension
+from markdown_deux.templatetags.markdown_deux_tags import markdown_allowed
 
 import pinax.teams.models
 
@@ -1346,6 +1347,16 @@ class KBItem(models.Model):
 
     answer = models.TextField(
         _('Answer'),
+        help_text=_(markdown_allowed() + '<br/><br/>'
+                    'To add a collapsing section: '
+                    'Add !~! on a line following the section title, followed by a blank line. '
+                    'Add ~!~ on a line following the section body, followed by another blank line. <br/>'
+                    'The body may have multiple lines of text, but no blank lines.<br/><br/>'
+                    'Example:<div style="margin-left: 40px;">This text comes before the section.<br/><br/>'
+                    'Title of Subsection<br/>!~!<br/><br/>'
+                    'Body of subsection.<br/>I can add many lines of text to this. '
+                    "It will all be included in the section.<br/>~!~<br/><br/>"
+                    "This, however, won't be included in the collapsing section.</div>"),
     )
 
     votes = models.IntegerField(
