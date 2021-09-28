@@ -5,6 +5,7 @@ Default settings for django-helpdesk.
 import warnings
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
+import os
 
 DEFAULT_USER_SETTINGS = {
     'login_view_ticketlist': True,
@@ -21,6 +22,13 @@ except AttributeError:
 
 
 HAS_TAG_SUPPORT = False
+
+# check for secure cookie support
+if os.environ.get('SECURE_PROXY_SSL_HEADER'):
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
 
 ##########################################
 # generic options - visible on all pages #
