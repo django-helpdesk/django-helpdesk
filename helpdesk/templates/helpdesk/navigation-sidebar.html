@@ -1,17 +1,19 @@
 {% load i18n helpdesk_staff %}
 {% load form_list %}
 {% with user|form_list as forms %}
-
+{% load saved_queries %}
+{% with user|saved_queries as user_saved_queries_ %}
+{% with request.resolver_match.url_name as url_name %}
     <!-- Sidebar -->
     <ul class="sidebar navbar-nav">
     {% if helpdesk_settings.HELPDESK_NAVIGATION_ENABLED and user.is_authenticated or user|is_helpdesk_staff %}
-        <li class="nav-item active">
+        <li class="nav-item {% if url_name == 'dashboard' %}active{% endif %}">
           <a class="nav-link" href="{% url 'helpdesk:dashboard' %}">
             <i class="fas fa-fw fa-tachometer-alt"></i>
             <span>{% trans "Helpdesk Dashboard" %}</span>
           </a>
         </li>
-        <li class="nav-item">
+        <li class="nav-item {% if url_name == 'list' %}active{% endif %}">
           <a class="nav-link" href="{% url 'helpdesk:list' %}">
             <i class="fas fa-fw fa-tasks"></i>
             <span>{% trans "All Tickets" %}</span>
@@ -36,7 +38,7 @@
             {% endif %}
           </div>
         </li>
-        <li class="nav-item dropdown">
+        <li class="nav-item dropdown {% if url_name == 'submit' %}active{% endif %}">
           <a class="nav-link dropdown-toggle" href="#" id="ticketsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <i class="fas fa-fw fa-plus-circle"></i>
             <span>{% trans "New Ticket" %}</span>
@@ -51,14 +53,14 @@
             {% endif %}
           </div>
         </li>
-        <li class="nav-item">
+        <li class="nav-item {% if url_name == 'report_index' %}active{% endif %}">
           <a class="nav-link" href="{% url 'helpdesk:report_index' %}">
             <i class="fas fa-fw fa-chart-area"></i>
             <span>{% trans "Reports" %}</span>
           </a>
         </li>
         {% if helpdesk_settings.HELPDESK_KB_ENABLED %}
-        <li class="nav-item">
+        <li class="nav-item {% if 'kb_' in url_name %}active{% endif %}">
           <a class="nav-link" href="{% url 'helpdesk:kb_index' %}">
             <i class="fas fa-fw fa-database"></i>
             <span>{% trans "Knowledgebase" %}</span>
@@ -66,7 +68,7 @@
         </li>
         {% endif %}
         <li class="dropdown-divider"></li>
-        <li class="nav-item dropdown">
+        <li class="nav-item dropdown {% if url_name == 'user_settings' or url_name == 'system_settings' or 'rss_' in url_name %}active{% endif %}">
           <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <i class="fas fa-user-circle fa-fw"></i>
               <span>{{ user.get_full_name|default:user.get_username }}</span>
@@ -93,13 +95,13 @@
         </li>
     {% else %}
         {# Public menu #}
-        <li class="nav-item active">
+        <li class="nav-item {% if url_name == 'home' %}active{% endif %}">
           <a class="nav-link" href="{% url 'helpdesk:home' %}">
             <i class="fas fa-fw fa-home"></i>
             <span>{% trans "Homepage" %}</span>
           </a>
         </li>
-        <li class="nav-item dropdown">
+        <li class="nav-item dropdown {% if url_name == 'submit' %}active{% endif %}">
           <a class="nav-link dropdown-toggle" href="#" id="ticketsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <i class="fas fa-fw fa-plus-circle"></i>
             <span>{% trans "New Ticket" %}</span>
@@ -115,7 +117,7 @@
           </div>
         </li>
         {% if helpdesk_settings.HELPDESK_KB_ENABLED %}
-        <li class="nav-item">
+        <li class="nav-item {% if 'kb_' in url_name %}active{% endif %}">
           <a class="nav-link" href="{% url 'helpdesk:kb_index' %}">
             <i class="fas fa-fw fa-database"></i>
             <span>{% trans "Knowledgebase" %}</span>
@@ -125,4 +127,6 @@
     {% endif %}
     </ul>
 
+{% endwith %}
+{% endwith %}
 {% endwith %}
