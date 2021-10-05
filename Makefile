@@ -95,6 +95,11 @@ demo:
 .PHONY: rundemo
 rundemo: demo
 	demodesk runserver 8080
+	
+#: migrations - Create Django migrations for this project.
+.PHONY: migrations
+migrations: demo
+	    demodesk makemigrations
 
 
 #: release - Tag and push to PyPI.

@@ -30,6 +30,8 @@ import uuid
 
 from helpdesk import settings as helpdesk_settings
 
+from .validators import validate_file_extension
+
 from .templated_email import send_templated_mail
 
 
@@ -1022,6 +1024,7 @@ class Attachment(models.Model):
         _('File'),
         upload_to=attachment_path,
         max_length=1000,
+        validators=[validate_file_extension]
     )
 
     filename = models.CharField(
