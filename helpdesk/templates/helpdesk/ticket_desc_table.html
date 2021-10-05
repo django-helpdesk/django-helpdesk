@@ -15,7 +15,18 @@
                             <span class='ticket_toolbar float-right'>
                         <a href="{% url 'helpdesk:edit' ticket.id %}" class="ticket-edit"><button class="btn btn-warning btn-sm"><i class="fas fa-pencil-alt"></i> {% trans "Edit" %}</button></a>
                     | <a href="{% url 'helpdesk:delete' ticket.id %}" class="ticket-delete"><button class="btn btn-danger btn-sm"><i class="fas fa-trash-alt"></i> {% trans "Delete" %}</button></a>
-                    {% if ticket.on_hold %} | <a href="{% url 'helpdesk:unhold' ticket.id %}" class="ticket-hold"><button class="btn btn-warning btn-sm"><i class="fas fa-play"></i> {% trans "Unhold" %}</button></a>{% else %} | <a href="{% url 'helpdesk:hold' ticket.id %}" class="ticket-hold"><button class="btn btn-warning btn-sm"><i class="fas fa-pause"></i> {% trans "Hold" %}</button></a>{% endif %}
+                    |
+                    {% if ticket.on_hold %}
+                    <form class="form-inline ticket-hold" method='post' action='unhold/'>
+                        {% csrf_token %}
+                        <button class="btn btn-warning btn-sm" type='submit'><i class="fas fa-play"></i> {% trans "Unhold" %}</button>
+                    </form>
+                    {% else %}
+                    <form class="form-inline ticket-hold" method='post' action='hold/'>
+                        {% csrf_token %}
+                        <button class="btn btn-warning btn-sm" type='submit'><i class="fas fa-pause"></i> {% trans "Hold" %}</button>
+                    </form>
+                    {% endif %}
                     </span></th></tr>
                 </thead>
                 <tbody>

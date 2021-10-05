@@ -1277,6 +1277,7 @@ raw_details = staff_member_required(raw_details)
 
 
 @helpdesk_staff_member_required
+@requires_csrf_token
 def hold_ticket(request, ticket_id, unhold=False):
     ticket = get_object_or_404(Ticket, id=ticket_id)
     ticket_perm_check(request, ticket)
@@ -1306,6 +1307,7 @@ hold_ticket = staff_member_required(hold_ticket)
 
 
 @helpdesk_staff_member_required
+@requires_csrf_token
 def unhold_ticket(request, ticket_id):
     return hold_ticket(request, ticket_id, unhold=True)
 
