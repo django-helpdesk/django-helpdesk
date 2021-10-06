@@ -97,6 +97,7 @@ def send_templated_mail(template_name,
     elif type(recipients) != list:
         recipients = [recipients]
     recipients = list(map(str.lower, recipients))
+    headers["X-BEAMHelpdesk-Delivered"] = ','.join(str(r) for r in recipients + bcc)
 
     msg = EmailMultiAlternatives(subject_part, text_part,
                                  sender or settings.DEFAULT_FROM_EMAIL,
@@ -113,7 +114,7 @@ def send_templated_mail(template_name,
     logger.debug('Sending email to: {!r}'.format(recipients))
 
     try:
-        # debugging: comment out msg.send() to not send emails
+        # debugging: comment out msg.send() to not send emails, replace with 'return 0'
         return msg.send()
     except SMTPException as e:
         logger.exception('SMTPException raised while sending email to {}'.format(recipients))

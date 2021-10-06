@@ -542,6 +542,19 @@ def object_from_message(message, queue, logger):
         logger.info("No tracking ID matched.")
         ticket = None
 
+    # Accounting for forwarding loops
+    auto_forward = message.get('X-BEAMHelpdesk-Delivered', None)
+
+    if auto_forward or sender[1].lower() == queue.email_address.lower():
+        logger.info("Found a forwarding loop")
+        if ticket:
+            auto_forward = to_list if not auto_forward else auto_forward.split(',')
+            for address in auto_forward:
+                cc = TicketCC.objects.filter(ticket_id=ticket, email__iexact=address)
+                cc.delete()
+                logger.info("Deleted the CC'd address from the ticket")
+        return True
+
     body = None
     full_body = None
     counter = 0
