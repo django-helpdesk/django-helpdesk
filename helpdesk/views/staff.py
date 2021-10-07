@@ -804,7 +804,7 @@ def mass_update(request):
                          title=_('Assigned to %(username)s in bulk update' % {
                              'username': user.get_username()
                          }),
-                         public=True,
+                         public=False,  # DC
                          user=request.user)
             f.save()
         elif action == 'unassign' and t.assigned_to is not None:
@@ -813,7 +813,7 @@ def mass_update(request):
             f = FollowUp(ticket=t,
                          date=timezone.now(),
                          title=_('Unassigned in bulk update'),
-                         public=True,
+                         public=False,  # DC
                          user=request.user)
             f.save()
         elif action == 'set_kbitem':

@@ -97,7 +97,10 @@ def send_templated_mail(template_name,
     elif type(recipients) != list:
         recipients = [recipients]
     recipients = list(map(str.lower, recipients))
-    headers["X-BEAMHelpdesk-Delivered"] = ','.join(str(r) for r in recipients + bcc)
+    if bcc:
+        headers["X-BEAMHelpdesk-Delivered"] = ','.join(str(r) for r in recipients + bcc)
+    else:
+        headers["X-BEAMHelpdesk-Delivered"] = ','.join(str(r) for r in recipients)
 
     msg = EmailMultiAlternatives(subject_part, text_part,
                                  sender or settings.DEFAULT_FROM_EMAIL,
