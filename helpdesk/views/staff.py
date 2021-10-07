@@ -324,7 +324,7 @@ def view_ticket(request, ticket_id):
         # a valid POST.
         request.POST = {
             'owner': request.user.id,
-            'public': 1,
+            'public': 0,
             'title': ticket.title,
             'comment': ''
         }
