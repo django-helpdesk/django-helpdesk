@@ -20,6 +20,7 @@ strategy:
       PYTHON_VERSION: '3.9'
     Python310:
       PYTHON_VERSION: '3.10'
+  maxParallel: 1
 
 steps:
 - task: UsePythonVersion@0
