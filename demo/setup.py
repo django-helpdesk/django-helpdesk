@@ -13,7 +13,7 @@ project_root = os.path.dirname(here)
 NAME = 'django-helpdesk-demodesk'
 DESCRIPTION = 'A demo Django project using django-helpdesk'
 README = open(os.path.join(here, 'README.rst')).read()
-VERSION = '0.3.0'
+VERSION = '0.4.0a1'
 #VERSION = open(os.path.join(project_root, 'VERSION')).read().strip()
 AUTHOR = 'django-helpdesk team'
 URL = 'https://github.com/django-helpdesk/django-helpdesk'
@@ -22,7 +22,6 @@ CLASSIFIERS = ['Development Status :: 4 - Beta',
                'Programming Language :: Python :: 3.8',
                'Programming Language :: Python :: 3.9',
                'Programming Language :: Python :: 3.10',
-               'Framework :: Django :: 2.2',
                'Framework :: Django :: 3.2']
 KEYWORDS = []
 PACKAGES = ['demodesk']

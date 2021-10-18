@@ -53,7 +53,7 @@ Installation
 `django-helpdesk` requires:
 
 * Python 3.8+
-* Django 2.2 LTS or 3.2 LTS (recommend migration to 3.2 as soon as possible)
+* Django 3.2 LTS
 
 You can quickly install the latest stable version of `django-helpdesk`
 app via `pip`::
