@@ -10,16 +10,36 @@ pool:
   vmImage: ubuntu-latest
 strategy:
   matrix:
-    Python36:
+    Python36Django22:
       PYTHON_VERSION: '3.6'
-    Python37:
+      DJANGO_VERSION: '22'
+    Python37Django22:
       PYTHON_VERSION: '3.7'
-    Python38:
+      DJANGO_VERSION: '22'
+    Python38Django22:
       PYTHON_VERSION: '3.8'
-    Python39:
+      DJANGO_VERSION: '22'
+    Python39Django22:
       PYTHON_VERSION: '3.9'
-    Python310:
+      DJANGO_VERSION: '22'
+    Python310Django22:
       PYTHON_VERSION: '3.10'
+      DJANGO_VERSION: '22'
+    Python36Django32:
+      PYTHON_VERSION: '3.6'
+      DJANGO_VERSION: '32'
+    Python37Django32:
+      PYTHON_VERSION: '3.7'
+      DJANGO_VERSION: '32'
+    Python38Django32:
+      PYTHON_VERSION: '3.8'
+      DJANGO_VERSION: '32'
+    Python39Django32:
+      PYTHON_VERSION: '3.9'
+      DJANGO_VERSION: '32'
+    Python310Django32:
+      PYTHON_VERSION: '3.10'
+      DJANGO_VERSION: '32'
   maxParallel: 1
 
 steps:
@@ -46,7 +66,7 @@ steps:
 
 - script: |
     python -m pip install --upgrade pip setuptools wheel
-    pip install -r requirements.txt
+    pip install -c constraint-Django$(DJANGO_VERSION).txt -r requirements.txt
     pip install unittest-xml-reporting
   displayName: 'Install prerequisites'
 
