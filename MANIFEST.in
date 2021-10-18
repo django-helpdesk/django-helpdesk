@@ -1,5 +1,6 @@
 include README.rst
 include CONTRIBUTING.rst
+include SECURITY.md
 include AUTHORS
 include LICENSE*
 include requirements.txt

@@ -16,7 +16,7 @@ The tips below are based on modifications of the original installation instructi
 
 - Under `INSTALLED_APPS`, `bootstrapform` needs to be replaced with `bootstrap4form`
 
-- Unless turning off `pinax_teams`, need to add the following to `INSTALLED_APPS` for `pinax_teams`:
+- Unless turning off `pinax_teams`, add the following to `INSTALLED_APPS` for `pinax_teams`:
   ```
   "account",
   "pinax.invitations",

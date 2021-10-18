@@ -59,7 +59,7 @@ before running:
 
 *NOTE ON DJANGO VERISON*
 
-The demo project was configured with Django 2.2+ in mind.
+The demo project was configured with Django 2.2 in mind.
 Django 3.2 LTS is highly recommended.
 Django 1.11 is NOT supported.
 

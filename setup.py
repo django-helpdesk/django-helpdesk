@@ -4,7 +4,7 @@ from distutils.util import convert_path
 from fnmatch import fnmatchcase
 from setuptools import setup, find_packages
 
-version = '0.3.0b5'
+version = '0.3.0'
 
 # Provided as an attribute, so you can append to these instead
 # of replicating them:
@@ -124,10 +124,9 @@ setup(
         "Development Status :: 4 - Beta",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
         "Framework :: Django",
         'Framework :: Django :: 2.2',
         "Framework :: Django :: 3.0",

@@ -21,16 +21,6 @@ or online at http://django-helpdesk.readthedocs.org/.
 You can see a demo installation at http://django-helpdesk-demo.herokuapp.com/,
 or run a demo locally in just a couple steps!
 
-Licensing
----------
-
-django-helpdesk is licensed under terms of the BSD 3-clause license.
-See the file 'LICENSE' for full licensing terms.
-
-Note that django-helpdesk is distributed with 3rd party products which
-have their own licenses. See LICENSE.3RDPARTY for license terms for
-included packages.
-
 Demo Quickstart
 ---------------
 
@@ -62,7 +52,7 @@ Installation
 
 `django-helpdesk` requires:
 
-* Python 3.6+
+* Python 3.8+
 * Django 2.2 LTS or 3.2 LTS (recommend migration to 3.2 as soon as possible)
 
 You can quickly install the latest stable version of `django-helpdesk`
@@ -114,6 +104,17 @@ We're happy to include any type of contribution! This can be:
 * writing improved documentation and demos
 
 For more information on contributing, please see the `CONTRIBUTING.rst` file.
+
+
+Licensing
+---------
+
+django-helpdesk is licensed under terms of the BSD 3-clause license.
+See the `LICENSE` file for full licensing terms.
+
+Note that django-helpdesk is distributed with 3rd party products which
+have their own licenses. See LICENSE.3RDPARTY for license terms for
+included packages.
 
 .. _note: http://docs.djangoproject.com/en/dev/ref/databases/#sqlite-string-matching
 
