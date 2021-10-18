@@ -4,11 +4,11 @@
 
 The following chart shows versions of `django-helpdesk` that are currently receiving bugfixes and security patches.
 
-| Version | Supported          |
-| ------- | ------------------ |
-| 0.3.x   | :white_check_mark: |
-| 0.2.x   | :white_check_mark: |
-| < 0.2   | :x:                |
+| Version | Support History    | Last Date of Support             |
+| ------- | ------------------ | -------------------------------- |
+| 0.3.x   | :white_check_mark: | will be set after release of 0.4 |
+| 0.2.x   | :white_check_mark: | 2021-12-31                       |
+| < 0.2   | :x:                | 2016-10-31
 
 ## Reporting a Vulnerability
 
