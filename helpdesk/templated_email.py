@@ -6,6 +6,7 @@ from django.conf import settings
 from django.utils.safestring import mark_safe
 
 logger = logging.getLogger('helpdesk')
+DEBUGGING = False
 
 
 def send_templated_mail(template_name,
@@ -45,6 +46,7 @@ def send_templated_mail(template_name,
         email replies and keep proper threading.
 
     """
+    print('sending email to %s' % recipients)
     from django.core.mail import EmailMultiAlternatives
     from django.template import engines
     from_string = engines['django'].from_string
@@ -114,11 +116,14 @@ def send_templated_mail(template_name,
             content = filefield.read()
             msg.attach(filename, content)
             filefield.close()
-    logger.debug('Sending email to: {!r}'.format(recipients))
 
+    logger.info('Sending email.')
     try:
-        # debugging: comment out msg.send() to not send emails, replace with 'return 0'
-        return msg.send()
+        if DEBUGGING:
+            logger.debug('DEBUG No emails sent.')
+            return 0
+        else:
+            msg.send()
     except SMTPException as e:
         logger.exception('SMTPException raised while sending email to {}'.format(recipients))
         if not fail_silently:

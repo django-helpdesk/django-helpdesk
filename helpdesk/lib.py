@@ -7,7 +7,7 @@ lib.py - Common functions (eg multipart e-mail)
 """
 
 import logging
-import mimetypes
+from mimetypes import guess_type
 
 from django.conf import settings
 from django.utils.encoding import smart_text
@@ -141,7 +141,7 @@ def process_attachments(followup, attached_files):
                 file=attached,
                 filename=filename,
                 mime_type=attached.content_type or
-                mimetypes.guess_type(filename, strict=False)[0] or
+                guess_type(filename, strict=False)[0] or
                 'application/octet-stream',
                 size=attached.size,
             )

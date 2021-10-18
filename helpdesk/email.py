@@ -49,6 +49,7 @@ STRIPPED_SUBJECT_STRINGS = [
     "Automatic reply: ",
 ]
 
+DEBUGGING = False
 
 def process_email(quiet=False):
     for q in Queue.objects.filter(
@@ -84,7 +85,12 @@ def process_email(quiet=False):
                 q.email_box_last_check = timezone.now() - timedelta(minutes=30)
 
             queue_time_delta = timedelta(minutes=q.email_box_interval or 0)
-            if (q.email_box_last_check + queue_time_delta) < timezone.now():  # debugging: comment out this line
+            if not DEBUGGING:
+                if (q.email_box_last_check + queue_time_delta) < timezone.now():
+                    process_queue(q, logger=logger)
+                    q.email_box_last_check = timezone.now()
+                    q.save()
+            else:
                 process_queue(q, logger=logger)
                 q.email_box_last_check = timezone.now()
                 q.save()
@@ -135,7 +141,8 @@ def pop3_sync(q, logger, server):
         ticket = object_from_message(message=full_message, queue=q, logger=logger)
 
         if ticket:
-            server.dele(msg_num)  # hide line if debugging
+            if not DEBUGGING:
+                server.dele(msg_num)
             logger.info("Successfully processed message %s, deleted from POP3 server" % msg_num)
         else:
             logger.warn("Message %s was not successfully processed, and will be left on POP3 server" % msg_num)
@@ -197,7 +204,8 @@ def imap_sync(q, logger, server):
                     # Malformed email received from the server
                     ticket = None
                 if ticket:
-                    server.store(num, '+FLAGS', '\\Deleted')  # hide line if debugging
+                    if not DEBUGGING:
+                        server.store(num, '+FLAGS', '\\Deleted')
                     logger.info("Successfully processed message %s, deleted from IMAP server" % num)
                 else:
                     logger.warn("Message %s was not successfully processed, and will be left on IMAP server" % num)

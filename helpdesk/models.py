@@ -631,12 +631,13 @@ class Ticket(models.Model):
             # TODO: 'extra' fields currently get sent the same templates as cc.
             #  Add a method to pair specific extra fields with specific templates
             extra_fields = CustomField.objects.filter(
-                ticket_form=self.ticket_form,
+                ticket_form=self.ticket_form_id,
                 data_type='email',
-                notifications=True
+                notifications=True,
+                is_extra_data=True
             ).values_list('field_name', flat=True)
             for field in extra_fields:
-                if field in self.extra_data and self.extra_data[field]:
+                if field in self.extra_data and self.extra_data[field] is not None and self.extra_data[field] != '':
                     send('extra', self.extra_data[field])
 
         return recipients
