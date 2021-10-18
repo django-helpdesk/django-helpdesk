@@ -37,7 +37,7 @@ Short story:
 
 * pull requests for `master` are for the next major release
 * pull requests for a current release should go to appropriate release branch
-  (for example, bugfixes for 0.2 should go to the `0.2.x` branch.)
+  (for example, bugfixes for 0.3 should go to the `0.3` branch.)
 
 Longer story:
 
@@ -47,6 +47,7 @@ In general, our git branching scheme looks like the following.
   major new features should go here
 * current and past major releases are found in their own branches:
 
+  * `0.3` is the branch for the 0.3 release and any bugfix releases
   * `0.2.x` is the branch for the 0.2 release and any bugfix releases
   * `0.1` is the branch for the legacy code; it is no longer supported
 
