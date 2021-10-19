@@ -1,8 +1,7 @@
 django-helpdesk - A Django powered ticket tracker for small businesses.
 =======================================================================
 
-.. image:: https://travis-ci.org/django-helpdesk/django-helpdesk.png?branch=develop
-    :target: https://travis-ci.org/django-helpdesk/django-helpdesk
+[![Build Status](https://dev.azure.com/django-helpdesk/django-helpdesk/_apis/build/status/django-helpdesk.django-helpdesk?branchName=master)](https://dev.azure.com/django-helpdesk/django-helpdesk/_build/latest?definitionId=1&branchName=master)
 
 .. image:: https://codecov.io/gh/django-helpdesk/django-helpdesk/branch/develop/graph/badge.svg
   :target: https://codecov.io/gh/django-helpdesk/django-helpdesk
