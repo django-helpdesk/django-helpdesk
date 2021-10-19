@@ -5,6 +5,11 @@
 
 trigger:
 - master
+- 0.3
+
+pr:
+- master
+- 0.3
 
 pool:
   vmImage: ubuntu-latest
@@ -54,17 +59,12 @@ steps:
 
 - script: |
     python -m pip install --upgrade pip setuptools wheel
-    pip install -c constraint-Django$(DJANGO_VERSION).txt -r requirements.txt
+    pip install -c constraints-Django$(DJANGO_VERSION).txt -r requirements.txt
     pip install unittest-xml-reporting
   displayName: 'Install prerequisites'
 
 - script: |
     pushd '$(projectRoot)'
-    python manage.py test --testrunner xmlrunner.extra.djangotestrunner.XMLTestRunner --no-input
+    #python manage.py test --testrunner xmlrunner.extra.djangotestrunner.XMLTestRunner --no-input
+    python quicktest.py helpdesk
   displayName: 'Run tests'
-
-- task: PublishTestResults@2
-  inputs:
-    testResultsFiles: "**/TEST-*.xml"
-    testRunTitle: 'Python $(PYTHON_VERSION)'
-  condition: succeededOrFailed()

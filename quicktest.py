@@ -100,6 +100,7 @@ class QuickDjangoTest(object):
             LOGIN_URL='/helpdesk/login/',
             TEMPLATES=self.TEMPLATES,
             SITE_ID=1,
+            SECRET_KEY='wowdonotusethisfakesecuritykeyyouneedarealsecure1',
             ## The following settings disable teams
             HELPDESK_TEAMS_MODEL = 'auth.User',
             HELPDESK_TEAMS_MIGRATION_DEPENDENCIES = [],
