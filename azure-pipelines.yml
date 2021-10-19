@@ -5,6 +5,11 @@
 
 trigger:
 - master
+- 0.3
+
+pr:
+- master
+- 0.3
 
 pool:
   vmImage: ubuntu-latest
@@ -63,9 +68,3 @@ steps:
     #python manage.py test --testrunner xmlrunner.extra.djangotestrunner.XMLTestRunner --no-input
     python quicktest.py helpdesk
   displayName: 'Run tests'
-
-- task: PublishTestResults@2
-  inputs:
-    testResultsFiles: "**/TEST-*.xml"
-    testRunTitle: 'Python $(PYTHON_VERSION)'
-  condition: succeededOrFailed()
