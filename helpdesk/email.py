@@ -143,9 +143,9 @@ def pop3_sync(q, logger, server):
         if ticket:
             if not DEBUGGING:
                 server.dele(msg_num)
-            logger.info("Successfully processed message %s, deleted from POP3 server" % msg_num)
+            logger.info("Successfully processed message %s, deleted from POP3 server\n" % msg_num)
         else:
-            logger.warn("Message %s was not successfully processed, and will be left on POP3 server" % msg_num)
+            logger.warn("Message %s was not successfully processed, and will be left on POP3 server\n" % msg_num)
 
     server.quit()
 
@@ -206,9 +206,9 @@ def imap_sync(q, logger, server):
                 if ticket:
                     if not DEBUGGING:
                         server.store(num, '+FLAGS', '\\Deleted')
-                    logger.info("Successfully processed message %s, deleted from IMAP server" % num)
+                    logger.info("Successfully processed message %s, deleted from IMAP server\n" % num)
                 else:
-                    logger.warn("Message %s was not successfully processed, and will be left on IMAP server" % num)
+                    logger.warn("Message %s was not successfully processed, and will be left on IMAP server\n" % num)
     except imaplib.IMAP4.error:
         logger.error(
             "IMAP retrieve failed. Is the folder '%s' spelled correctly, and does it exist on the server?",

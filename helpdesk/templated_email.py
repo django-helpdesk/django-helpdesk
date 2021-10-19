@@ -6,8 +6,8 @@ from django.conf import settings
 from django.utils.safestring import mark_safe
 
 logger = logging.getLogger('helpdesk')
-DEBUGGING = False
 
+DEBUGGING = False
 
 def send_templated_mail(template_name,
                         context,
@@ -46,7 +46,6 @@ def send_templated_mail(template_name,
         email replies and keep proper threading.
 
     """
-    print('sending email to %s' % recipients)
     from django.core.mail import EmailMultiAlternatives
     from django.template import engines
     from_string = engines['django'].from_string
@@ -54,6 +53,10 @@ def send_templated_mail(template_name,
     from helpdesk.models import EmailTemplate
     from helpdesk.settings import HELPDESK_EMAIL_SUBJECT_TEMPLATE, \
         HELPDESK_EMAIL_FALLBACK_LOCALE
+
+    if DEBUGGING and 'queue' in context:
+        logger = logging.getLogger('django.helpdesk.queue.' + context['queue']['slug'])
+        logger.setLevel(logging.DEBUG)
 
     headers = extra_headers or {}
     for key, value in headers.items():
@@ -117,10 +120,10 @@ def send_templated_mail(template_name,
             msg.attach(filename, content)
             filefield.close()
 
-    logger.info('Sending email.')
+    logger.debug('Sending an email...')
     try:
         if DEBUGGING:
-            logger.debug('DEBUG No emails sent.')
+            logger.debug('No emails sent.')
             return 0
         else:
             msg.send()
