@@ -33,7 +33,7 @@ strategy:
     Python310Django32:
       PYTHON_VERSION: '3.10'
       DJANGO_VERSION: '32'
-  maxParallel: 1
+  maxParallel: 10
 
 steps:
 - task: UsePythonVersion@0
@@ -42,19 +42,19 @@ steps:
     architecture: 'x64'
 
 - task: PythonScript@0
-  displayName: 'Export project path'
+  displayName: 'Export quicktest.py path'
   inputs:
     scriptSource: 'inline'
     script: |
-      """Search all subdirectories for `manage.py`."""
+      """Search all subdirectories for `quicktest.py`."""
       from glob import iglob
       from os import path
       # Python >= 3.5
-      manage_py = next(iglob(path.join('**', 'manage.py'), recursive=True), None)
+      quicktest_py = next(iglob(path.join('**', 'quicktest.py'), recursive=True), None)
       if not manage_py:
-          raise SystemExit('Could not find a Django project')
+          raise SystemExit('Could not find quicktest.py for django-helpdesk')
       project_location = path.dirname(path.abspath(manage_py))
-      print('Found Django project in', project_location)
+      print('Found quicktest.py in', project_location)
       print('##vso[task.setvariable variable=projectRoot]{}'.format(project_location))
 
 - script: |
@@ -65,6 +65,5 @@ steps:
 
 - script: |
     pushd '$(projectRoot)'
-    #python manage.py test --testrunner xmlrunner.extra.djangotestrunner.XMLTestRunner --no-input
     python quicktest.py helpdesk
   displayName: 'Run tests'
