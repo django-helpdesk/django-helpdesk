@@ -51,9 +51,9 @@ steps:
       from os import path
       # Python >= 3.5
       quicktest_py = next(iglob(path.join('**', 'quicktest.py'), recursive=True), None)
-      if not manage_py:
+      if not quicktest_py:
           raise SystemExit('Could not find quicktest.py for django-helpdesk')
-      project_location = path.dirname(path.abspath(manage_py))
+      project_location = path.dirname(path.abspath(quicktest_py))
       print('Found quicktest.py in', project_location)
       print('##vso[task.setvariable variable=projectRoot]{}'.format(project_location))
 
