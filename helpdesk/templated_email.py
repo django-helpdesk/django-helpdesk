@@ -54,10 +54,6 @@ def send_templated_mail(template_name,
     from helpdesk.settings import HELPDESK_EMAIL_SUBJECT_TEMPLATE, \
         HELPDESK_EMAIL_FALLBACK_LOCALE
 
-    if DEBUGGING and 'queue' in context:
-        logger = logging.getLogger('django.helpdesk.queue.' + context['queue']['slug'])
-        logger.setLevel(logging.DEBUG)
-
     headers = extra_headers or {}
     for key, value in headers.items():
         headers[key] = value.strip()
@@ -120,10 +116,8 @@ def send_templated_mail(template_name,
             msg.attach(filename, content)
             filefield.close()
 
-    logger.debug('Sending an email...')
     try:
         if DEBUGGING:
-            logger.debug('No emails sent.')
             return 0
         else:
             msg.send()
