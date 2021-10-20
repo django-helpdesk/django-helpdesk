@@ -20,6 +20,7 @@ import re
 import os
 import mimetypes
 import datetime
+import logging
 
 from django.utils.safestring import mark_safe
 from markdown import markdown
@@ -39,6 +40,8 @@ from django.contrib.postgres.fields import JSONField
 from django.db.models.signals import post_init
 from django.dispatch import receiver
 
+
+logger = logging.getLogger(__name__)
 
 def format_time_spent(time_spent):
     if time_spent:
@@ -603,6 +606,7 @@ class Ticket(models.Model):
         returns the set of email addresses the notification was delivered to.
 
         """
+        logger.info('Sending emails from ticket model.')
         recipients = set()  # list of people already set to receive an email
 
         if dont_send_to is not None:
@@ -638,6 +642,7 @@ class Ticket(models.Model):
                 notifications=True,
                 is_extra_data=True
             ).values_list('field_name', flat=True)
+
             for field in extra_fields:
                 if field in self.extra_data and self.extra_data[field] is not None and self.extra_data[field] != '':
                     send('extra', self.extra_data[field])

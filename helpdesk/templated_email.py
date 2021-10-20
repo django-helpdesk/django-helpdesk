@@ -5,7 +5,7 @@ from smtplib import SMTPException
 from django.conf import settings
 from django.utils.safestring import mark_safe
 
-logger = logging.getLogger('helpdesk')
+logger = logging.getLogger(__name__)
 
 DEBUGGING = False
 
@@ -116,6 +116,7 @@ def send_templated_mail(template_name,
             msg.attach(filename, content)
             filefield.close()
 
+    logger.info('Sending emails...')
     try:
         if DEBUGGING:
             return 0
@@ -127,7 +128,7 @@ def send_templated_mail(template_name,
             raise e
         return 0
     except Exception as e2:
-        logger.exception('Raised failure while sending email.')
+        logger.exception('Raised failure while sending email to {}'.format(recipients))
         if not fail_silently:
             raise e2
         return 0
