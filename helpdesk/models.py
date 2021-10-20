@@ -39,7 +39,7 @@ def format_time_spent(time_spent):
     if time_spent:
         time_spent = "{0:02d}h:{1:02d}m".format(
             time_spent.seconds // 3600,
-            time_spent.seconds // 60
+            time_spent.seconds % 3600 // 60
         )
     else:
         time_spent = ""
