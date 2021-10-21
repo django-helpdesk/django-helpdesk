@@ -441,9 +441,7 @@ def return_ticketccstring_and_show_subscribe(user, ticket):
 
 
 def subscribe_to_ticket_updates(ticket, user=None, email=None, can_view=True, can_update=False):
-
     if ticket is not None:
-
         queryset = TicketCC.objects.filter(ticket=ticket, user=user, email=email)
 
         # Don't create duplicate entries for subscribers
@@ -463,7 +461,6 @@ def subscribe_to_ticket_updates(ticket, user=None, email=None, can_view=True, ca
             can_update=can_update
         )
         ticketcc.save()
-
         return ticketcc
 
 
@@ -473,9 +470,10 @@ def subscribe_staff_member_to_ticket(ticket, user, email='', can_view=True, can_
 
 
 def update_ticket(request, ticket_id, public=False):
-
     ticket = None
 
+    # So if the update isnt public, or the user isn't a staff member:
+    # Locate the ticket through the submitter email and the secret key.
     if not (public or (
             request.user.is_authenticated and
             request.user.is_active and (
@@ -488,7 +486,7 @@ def update_ticket(request, ticket_id, public=False):
         if key and email:
             ticket = Ticket.objects.get(
                 id=ticket_id,
-                submitter_email__iexact=email,
+                submitter_email__iexact=email,  # TODO: Other email fields should work for this too.
                 secret_key__iexact=key
             )
 
@@ -513,16 +511,17 @@ def update_ticket(request, ticket_id, public=False):
     due_date_year = int(request.POST.get('due_date_year', 0))
     due_date_month = int(request.POST.get('due_date_month', 0))
     due_date_day = int(request.POST.get('due_date_day', 0))
+
     if request.POST.get("time_spent"):
         (hours, minutes) = [int(f) for f in request.POST.get("time_spent").split(":")]
         time_spent = timedelta(hours=hours, minutes=minutes)
     else:
         time_spent = None
+
     # NOTE: jQuery's default for dates is mm/dd/yy
     # very US-centric but for now that's the only format supported
     # until we clean up code to internationalize a little more
     due_date = request.POST.get('due_date', None) or None
-
     if due_date is not None:
         # based on Django code to parse dates:
         # https://docs.djangoproject.com/en/2.0/_modules/django/utils/dateparse/
@@ -688,9 +687,7 @@ def update_ticket(request, ticket_id, public=False):
         messages_sent_to.add(request.user.email)
     except AttributeError:
         pass
-    if public and (f.comment or (
-        f.new_status in (Ticket.RESOLVED_STATUS,
-                         Ticket.CLOSED_STATUS))):
+    if public and (f.comment or (f.new_status in (Ticket.RESOLVED_STATUS, Ticket.CLOSED_STATUS))):
         if f.new_status == Ticket.RESOLVED_STATUS:
             template = 'resolved_'
         elif f.new_status == Ticket.CLOSED_STATUS:

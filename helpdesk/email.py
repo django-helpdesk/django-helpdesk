@@ -421,7 +421,8 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
                 created=now,
                 description=payload['body'],
                 priority=payload['priority'],
-                ticket_form=ticket_form
+                ticket_form=ticket_form,
+                assigned_to=queue.default_owner if queue.default_owner else None,
             )
             ticket.save()
             logger.debug("Created new ticket %s-%s" % (ticket.queue.slug, ticket.id))

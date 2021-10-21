@@ -456,12 +456,16 @@ class TicketForm(AbstractTicketForm):
         """
         self.form_id = form_id
         ticket, queue = self._create_ticket()
+
         if self.cleaned_data['assigned_to']:
             try:
                 u = User.objects.get(id=self.cleaned_data['assigned_to'])
                 ticket.assigned_to = u
             except User.DoesNotExist:
                 ticket.assigned_to = None
+        elif queue.default_owner and not ticket.assigned_to:
+            ticket.assigned_to = queue.default_owner
+
         ticket.save()
 
         if self.cleaned_data['assigned_to']:
@@ -523,6 +527,7 @@ class PublicTicketForm(AbstractTicketForm):
         """
         self.form_id = form_id
         ticket, queue = self._create_ticket()
+
         if queue.default_owner and not ticket.assigned_to:
             ticket.assigned_to = queue.default_owner
         ticket.save()
