@@ -8,7 +8,7 @@ See LICENSE for details.
 import email
 import imaplib
 import logging
-import mimetypes
+from mimetypes import guess_extension, guess_type
 import os
 import poplib
 import re
@@ -632,7 +632,7 @@ def object_from_message(message, queue, logger):
                 logger.debug("Discovered HTML MIME part")
         else:
             if not name:
-                ext = mimetypes.guess_extension(part.get_content_type())
+                ext = guess_extension(part.get_content_type())
                 name = "part-%i%s" % (counter, ext)
             else:
                 name = ("part-%i_" % counter) + name
@@ -653,7 +653,7 @@ def object_from_message(message, queue, logger):
             # except non_b64_err:
             #     logger.debug("Payload was not base64 encoded, using raw bytes")
             #     # payloadToWrite = payload
-            files.append(SimpleUploadedFile(name, part.get_payload(decode=True), mimetypes.guess_type(name)[0]))
+            files.append(SimpleUploadedFile(name, part.get_payload(decode=True), guess_type(name)[0]))
             logger.debug("Found MIME attachment %s" % name)
 
         counter += 1

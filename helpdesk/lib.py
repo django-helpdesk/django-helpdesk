@@ -15,7 +15,7 @@ from django.utils.encoding import smart_text
 from helpdesk.models import FollowUpAttachment
 
 
-logger = logging.getLogger('helpdesk')
+logger = logging.getLogger(__name__)
 
 
 def ticket_template_context(ticket):
@@ -133,24 +133,26 @@ def process_attachments(followup, attached_files):
     attachments = []
 
     for attached in attached_files:
+        try:
+            if attached.size:
+                filename = smart_text(attached.name)
+                att = FollowUpAttachment(
+                    followup=followup,
+                    file=attached,
+                    filename=filename,
+                    mime_type=attached.content_type or
+                    guess_type(filename, strict=False)[0] or
+                    'application/octet-stream',
+                    size=attached.size,
+                )
+                att.save()
 
-        if attached.size:
-            filename = smart_text(attached.name)
-            att = FollowUpAttachment(
-                followup=followup,
-                file=attached,
-                filename=filename,
-                mime_type=attached.content_type or
-                guess_type(filename, strict=False)[0] or
-                'application/octet-stream',
-                size=attached.size,
-            )
-            att.save()
-
-            if attached.size < max_email_attachment_size:
-                # Only files smaller than 512kb (or as defined in
-                # settings.HELPDESK_MAX_EMAIL_ATTACHMENT_SIZE) are sent via email.
-                attachments.append([filename, att.file])
+                if attached.size < max_email_attachment_size:
+                    # Only files smaller than 512kb (or as defined in
+                    # settings.HELPDESK_MAX_EMAIL_ATTACHMENT_SIZE) are sent via email.
+                    attachments.append([filename, att.file])
+        except Exception as e:
+            logger.exception('Exception occurred while processing an attachment.')
 
     return attachments
 

@@ -18,7 +18,7 @@ from django.utils.translation import ugettext_lazy as _, ugettext
 from io import StringIO
 import re
 import os
-import mimetypes
+from mimetypes import guess_type
 import datetime
 import logging
 
@@ -1058,7 +1058,7 @@ class Attachment(models.Model):
 
         if not self.mime_type:
             self.mime_type = \
-                mimetypes.guess_type(self.filename, strict=False)[0] or \
+                guess_type(self.filename, strict=False)[0] or \
                 'application/octet-stream'
 
         return super(Attachment, self).save(*args, **kwargs)
