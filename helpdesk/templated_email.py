@@ -103,6 +103,10 @@ def send_templated_mail(template_name,
     else:
         headers["X-BEAMHelpdesk-Delivered"] = ','.join(str(r) for r in recipients)
 
+    if sender is None:
+        if 'queue' in context:
+            sender = context['queue']['from_address']
+
     msg = EmailMultiAlternatives(subject_part, text_part,
                                  sender or settings.DEFAULT_FROM_EMAIL,
                                  recipients, bcc=bcc,
@@ -123,12 +127,12 @@ def send_templated_mail(template_name,
         else:
             msg.send()
     except SMTPException as e:
-        logger.exception('SMTPException raised while sending email to {}'.format(recipients))
+        logger.exception('SMTPException raised while sending email from {} to {}'.format(sender, recipients))
         if not fail_silently:
             raise e
         return 0
     except Exception as e2:
-        logger.exception('Raised failure while sending email to {}'.format(recipients))
+        logger.exception('Raised failure while sending email from {} to {}'.format(sender, recipients))
         if not fail_silently:
             raise e2
         return 0
