@@ -46,7 +46,8 @@ def send_templated_mail(template_name,
         email replies and keep proper threading.
 
     """
-    from django.core.mail import EmailMultiAlternatives
+    logger.debug('About to send emails...')
+    from django.core.mail import EmailMultiAlternatives, BadHeaderError
     from django.template import engines
     from_string = engines['django'].from_string
 
@@ -99,9 +100,9 @@ def send_templated_mail(template_name,
         recipients = [recipients]
     recipients = list(map(str.lower, recipients))
     if bcc:
-        headers["X-BEAMHelpdesk-Delivered"] = ','.join(str(r) for r in recipients + bcc)
+        headers["X-BEAMHelpdesk-Delivered"] = ','.join(str(r).strip() for r in recipients + bcc)
     else:
-        headers["X-BEAMHelpdesk-Delivered"] = ','.join(str(r) for r in recipients)
+        headers["X-BEAMHelpdesk-Delivered"] = ','.join(str(r).strip() for r in recipients)
 
     if sender is None:
         if 'queue' in context:
@@ -120,7 +121,7 @@ def send_templated_mail(template_name,
             msg.attach(filename, content)
             filefield.close()
 
-    logger.info('Sending emails...')
+    logger.debug('Sending emails...')
     try:
         if DEBUGGING:
             return 0
@@ -130,6 +131,11 @@ def send_templated_mail(template_name,
         logger.exception('SMTPException raised while sending email from {} to {}'.format(sender, recipients))
         if not fail_silently:
             raise e
+        return 0
+    except BadHeaderError as e1:
+        logger.exception('BadHeaderError raised while sending email from {} to {}.'.format(sender, recipients))
+        if not fail_silently:
+            raise e1
         return 0
     except Exception as e2:
         logger.exception('Raised failure while sending email from {} to {}'.format(sender, recipients))
