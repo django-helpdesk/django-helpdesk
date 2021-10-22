@@ -556,15 +556,17 @@ def object_from_message(message, queue, logger):
 
     # Accounting for forwarding loops
     auto_forward = message.get('X-BEAMHelpdesk-Delivered', None)
-
-    if auto_forward or sender[1].lower() == queue.email_address.lower():
+    if auto_forward is not None or sender[1].lower() == queue.email_address.lower():
         logger.info("Found a forwarding loop.")
-        if ticket:
-            auto_forward = to_list if not auto_forward else auto_forward.split(',')
+        if ticket and Ticket.objects.filter(pk=ticket).exists():
+            auto_forward = auto_forward.split(',') if auto_forward else to_list
             for address in auto_forward:
+                if type(address) is tuple:
+                    address = address[1]
                 cc = TicketCC.objects.filter(ticket_id=ticket, email__iexact=address)
-                cc.delete()
-                logger.info("Deleted the CC'd address from the ticket")
+                if cc:
+                    cc.delete()
+                    logger.info("Deleted the CC'd address from the ticket")
         return True
 
     body = None
