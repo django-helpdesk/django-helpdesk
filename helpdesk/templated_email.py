@@ -46,7 +46,6 @@ def send_templated_mail(template_name,
         email replies and keep proper threading.
 
     """
-    logger.debug('About to send emails...')
     from django.core.mail import EmailMultiAlternatives, BadHeaderError
     from django.template import engines
     from_string = engines['django'].from_string
@@ -99,10 +98,6 @@ def send_templated_mail(template_name,
     elif type(recipients) != list:
         recipients = [recipients]
     recipients = list(map(str.lower, recipients))
-    if bcc:
-        headers["X-BEAMHelpdesk-Delivered"] = ','.join(str(r).strip() for r in recipients + bcc)
-    else:
-        headers["X-BEAMHelpdesk-Delivered"] = ','.join(str(r).strip() for r in recipients)
 
     if sender is None:
         if 'queue' in context:
@@ -121,7 +116,7 @@ def send_templated_mail(template_name,
             msg.attach(filename, content)
             filefield.close()
 
-    logger.debug('Sending emails...')
+    logger.debug('Sending emails.')
     try:
         if DEBUGGING:
             return 0

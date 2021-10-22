@@ -8,7 +8,7 @@ See LICENSE for details.
 import email
 import imaplib
 import logging
-from mimetypes import guess_extension, guess_type
+import mimetypes
 import os
 import poplib
 import re
@@ -462,11 +462,14 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
 
     create_ticket_cc(ticket, payload['to_list'] + payload['cc_list'])
 
-    notifications_to_be_sent = [sender_email]
-    if queue.enable_notifications_on_email_events and len(notifications_to_be_sent):
+    notifications_to_be_sent = {sender_email}
+    if len(notifications_to_be_sent) and queue.enable_notifications_on_email_events:
         ticket_cc_list = TicketCC.objects.filter(ticket=ticket).all().values_list('email', flat=True)
         for email_address in ticket_cc_list:
-            notifications_to_be_sent.append(email_address)
+            notifications_to_be_sent.add(email_address)
+    if None in notifications_to_be_sent:
+        notifications_to_be_sent.remove(None)
+    notifications_to_be_sent = ','.join(notifications_to_be_sent)
 
     autoreply = is_autoreply(message)
     if autoreply:
@@ -480,21 +483,21 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
             "Auto-Submitted": "auto-replied",
             "X-Auto-Response-Suppress": "All",
             "Precedence": "auto_reply",
+            "X-BEAMHelpdesk-Delivered": notifications_to_be_sent,
         }
         if new:
-            ticket.send(
-                {'submitter': ('newticket_submitter', context),
-                 'new_ticket_cc': ('newticket_cc', context),
-                 'ticket_cc': ('newticket_cc', context),
-                 'extra': ('newticket_cc', context)},
-                fail_silently=True,
-                extra_headers=extra_headers,
-            )
+            roles = {'submitter': ('newticket_submitter', context),
+                     'new_ticket_cc': ('newticket_cc', context),
+                     'ticket_cc': ('newticket_cc', context),
+                     'extra': ('newticket_cc', context)}
+            if ticket.assigned_to:
+                roles['assigned_to'] = ('newticket_cc', context)
+            ticket.send(roles, fail_silently=True, extra_headers=extra_headers)
         else:
             context.update(comment=f.comment)
             ticket.send(
                 {'submitter': ('newticket_submitter', context),
-                 'assigned_to': ('updated_owner', context),},
+                 'assigned_to': ('updated_owner', context)},
                 fail_silently=True,
                 extra_headers=extra_headers,
             )
@@ -555,7 +558,7 @@ def object_from_message(message, queue, logger):
     auto_forward = message.get('X-BEAMHelpdesk-Delivered', None)
 
     if auto_forward or sender[1].lower() == queue.email_address.lower():
-        logger.info("Found a forwarding loop")
+        logger.info("Found a forwarding loop.")
         if ticket:
             auto_forward = to_list if not auto_forward else auto_forward.split(',')
             for address in auto_forward:
@@ -632,7 +635,7 @@ def object_from_message(message, queue, logger):
                 logger.debug("Discovered HTML MIME part")
         else:
             if not name:
-                ext = guess_extension(part.get_content_type())
+                ext = mimetypes.guess_extension(part.get_content_type())
                 name = "part-%i%s" % (counter, ext)
             else:
                 name = ("part-%i_" % counter) + name
@@ -653,7 +656,7 @@ def object_from_message(message, queue, logger):
             # except non_b64_err:
             #     logger.debug("Payload was not base64 encoded, using raw bytes")
             #     # payloadToWrite = payload
-            files.append(SimpleUploadedFile(name, part.get_payload(decode=True), guess_type(name)[0]))
+            files.append(SimpleUploadedFile(name, part.get_payload(decode=True), mimetypes.guess_type(name)[0]))
             logger.debug("Found MIME attachment %s" % name)
 
         counter += 1
