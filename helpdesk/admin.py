@@ -27,7 +27,6 @@ class CustomFieldInline(admin.TabularInline):
     # Allows user to edit form fields on the same page as the Form Type model.
     model = CustomField
     exclude = ('empty_selection_list',)
-    formfield_overrides = {models.TextField: {'widget': forms.TextInput}}
     can_delete = False
     extra = 0
 
@@ -96,7 +95,6 @@ class CustomFieldAdmin(admin.ModelAdmin):
         if ticket.ticket_form:
             return ticket.ticket_form.name
     ticket_form_type.short_description = _('Ticket Form')
-
 
     # TODO when django is updated to ver3, use @action decorator for these actions instead
     def make_required_true(modeladmin, request, queryset):
