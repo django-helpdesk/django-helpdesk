@@ -23,8 +23,6 @@ from helpdesk.models import (Ticket, Queue, FollowUp, IgnoreEmail, TicketCC,
                              FormType)
 from helpdesk import settings as helpdesk_settings
 
-from seed.lib.superperms.orgs.models import Organization
-
 logger = logging.getLogger(__name__)
 User = get_user_model()
 
@@ -104,12 +102,6 @@ class CustomFieldMixin(object):
             self.fields['e_%s' % field.field_name] = fieldclass(**instanceargs)
         else:
             self.fields[field.field_name] = fieldclass(**instanceargs)
-
-
-# TODO
-"""non_extra_fields = ['queue', 'title', 'description', 'priority', 'due_date', 'attachment', 'submitter_email',
-                    'contact_name', 'contact_email', 'building_name', 'building_address', 'pm_id', 'building_id']
-builtin_fields = ['assigned_to', 'created', 'modified', 'status', 'on_hold', 'resolution', 'last_escalation']"""
 
 
 class EditTicketForm(CustomFieldMixin, forms.ModelForm):
@@ -257,57 +249,6 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
                 choices=[(kbi.pk, kbi.title) for kbi in KBItem.objects.filter(category=kbcategory.pk, enabled=True)],
             )
 
-    # TODO move this init
-    def _add_form_custom_fields(self, staff_only_filter=None):
-        if self.form_id is not None:
-            if staff_only_filter is None:
-                queryset = CustomField.objects.filter(ticket_form=self.form_id)
-                hidden_queryset = []
-            else:
-                queryset = CustomField.objects.filter(ticket_form=self.form_id, staff_only=staff_only_filter)
-                hidden_queryset = CustomField.objects.filter(ticket_form=self.form_id, staff_only=(not staff_only_filter))
-                self.hidden_fields = hidden_queryset.values_list('field_name', 'data_type')
-            if self.form_queue:
-                queryset = queryset.exclude(field_name='queue')
-
-            for field in queryset:
-                if field.field_name in self.fields:
-                    attrs = ['label', 'help_text', 'list_values', 'required', 'data_type']  # TODO view-side ordering too
-                    for attr in attrs:
-                        display_info = getattr(field, attr, None)
-                        if display_info is not None and display_info != '':
-                            if attr == 'help_text':
-                                setattr(self.fields[field.field_name], attr, field.get_markdown())
-                            elif attr == 'data_type':
-                                if display_info == 'datetime' or display_info == 'time' or display_info == 'date':
-                                    self.fields[display_data.field_name].widget.attrs.update({'autocomplete': 'off'})
-                            else:
-                                setattr(self.fields[field.field_name], attr, display_info)
-                else:
-                    instanceargs = {
-                        'label': field.label,
-                        'help_text': field.get_markdown(),
-                        'required': field.required,
-                    }
-                    self.customfield_to_field(field, instanceargs)
-            for field in hidden_queryset:
-                if field.field_name not in self.fields:
-                    self.customfield_to_field(field, {})
-                self.fields[field.field_name].widget = forms.HiddenInput()
-
-            # ordering fields based on form_ordering
-            # if form_ordering is None, field is sorted to end of list
-            ordering = sorted(
-                queryset.values('field_name', 'form_ordering', 'is_extra_data'),
-                key=lambda x: float('inf') if x['form_ordering'] is None else x['form_ordering']
-            )
-            ordering = [
-                "e_%s" % field['field_name'] if field['is_extra_data']
-                else field['field_name']
-                for field in ordering
-            ]
-            self.order_fields(ordering)
-
     def clean(self):
         cleaned_data = super(AbstractTicketForm, self).clean()
 
@@ -338,13 +279,11 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
                 extra_data[field_name] = value
 
         ticket_form = FormType.objects.get(pk=self.form_id)
-        organization = Organization.objects.all().first()
         queue = Queue.objects.get(id=int(self.cleaned_data['queue']))
 
         ticket = Ticket(
             # TODO Necessary fields
             ticket_form=ticket_form,  # self.cleaned_data['ticket_form'],
-            organization=organization,  # self.cleaned_data['organization'],
             # Default fields + kbitem
             title=self.cleaned_data['title'],
             submitter_email=self.cleaned_data['submitter_email'],
@@ -354,8 +293,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
             description=self.cleaned_data['description'],
             priority=self.cleaned_data.get(
                 'priority',
-                getattr(settings, "HELPDESK_PUBLIC_TICKET_PRIORITY", "3")
-            ),
+                getattr(settings, "HELPDESK_PUBLIC_TICKET_PRIORITY", "3")),
             due_date=self.cleaned_data.get(
                 'due_date',
                 getattr(settings, "HELPDESK_PUBLIC_TICKET_DUE_DATE", None)
@@ -405,6 +343,60 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
             fail_silently=True,
             files=files,
         )
+
+    # TODO move this init
+    def _add_form_custom_fields(self, staff_only_filter=None):
+        if self.form_id is not None:
+            if staff_only_filter is None:
+                queryset = CustomField.objects.filter(ticket_form=self.form_id)
+                hidden_queryset = []
+            else:
+                queryset = CustomField.objects.filter(ticket_form=self.form_id, staff_only=staff_only_filter)
+                hidden_queryset = CustomField.objects.filter(ticket_form=self.form_id,
+                                                             staff_only=(not staff_only_filter))
+                self.hidden_fields = hidden_queryset.values_list('field_name', 'data_type')
+            if self.form_queue:
+                queryset = queryset.exclude(field_name='queue')
+
+            for field in queryset:
+                if field.field_name in self.fields:
+                    attrs = ['label', 'help_text', 'list_values', 'required',
+                             'data_type']  # TODO view-side ordering too
+                    for attr in attrs:
+                        display_info = getattr(field, attr, None)
+                        if display_info is not None and display_info != '':
+                            if attr == 'help_text':
+                                setattr(self.fields[field.field_name], attr, field.get_markdown())
+                            elif attr == 'data_type':
+                                if display_info == 'datetime' or display_info == 'time' or display_info == 'date':
+                                    self.fields[display_data.field_name].widget.attrs.update(
+                                        {'autocomplete': 'off'})
+                            else:
+                                setattr(self.fields[field.field_name], attr, display_info)
+                else:
+                    instanceargs = {
+                        'label': field.label,
+                        'help_text': field.get_markdown(),
+                        'required': field.required,
+                    }
+                    self.customfield_to_field(field, instanceargs)
+            for field in hidden_queryset:
+                if field.field_name not in self.fields:
+                    self.customfield_to_field(field, {})
+                self.fields[field.field_name].widget = forms.HiddenInput()
+
+            # ordering fields based on form_ordering
+            # if form_ordering is None, field is sorted to end of list
+            ordering = sorted(
+                queryset.values('field_name', 'form_ordering', 'is_extra_data'),
+                key=lambda x: float('inf') if x['form_ordering'] is None else x['form_ordering']
+            )
+            ordering = [
+                "e_%s" % field['field_name'] if field['is_extra_data']
+                else field['field_name']
+                for field in ordering
+            ]
+            self.order_fields(ordering)
 
 
 class TicketForm(AbstractTicketForm):
@@ -559,7 +551,7 @@ class EmailIgnoreForm(forms.ModelForm):
 
 
 class TicketCCForm(forms.ModelForm):
-    ''' Adds either an email address or helpdesk user as a CC on a Ticket. Used for processing POST requests. '''
+    """ Adds either an email address or helpdesk user as a CC on a Ticket. Used for processing POST requests. """
 
     class Meta:
         model = TicketCC
@@ -575,7 +567,7 @@ class TicketCCForm(forms.ModelForm):
 
 
 class TicketCCUserForm(forms.ModelForm):
-    ''' Adds a helpdesk user as a CC on a Ticket '''
+    """ Adds a helpdesk user as a CC on a Ticket """
 
     def __init__(self, *args, **kwargs):
         super(TicketCCUserForm, self).__init__(*args, **kwargs)
@@ -591,7 +583,7 @@ class TicketCCUserForm(forms.ModelForm):
 
 
 class TicketCCEmailForm(forms.ModelForm):
-    ''' Adds an email address as a CC on a Ticket '''
+    """ Adds an email address as a CC on a Ticket """
 
     def __init__(self, *args, **kwargs):
         super(TicketCCEmailForm, self).__init__(*args, **kwargs)
@@ -602,7 +594,7 @@ class TicketCCEmailForm(forms.ModelForm):
 
 
 class TicketDependencyForm(forms.ModelForm):
-    ''' Adds a different ticket as a dependency for this Ticket '''
+    """ Adds a different ticket as a dependency for this Ticket """
 
     class Meta:
         model = TicketDependency

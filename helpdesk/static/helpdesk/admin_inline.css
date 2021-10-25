@@ -1,0 +1,11 @@
+/* CSS added to Helpdesk's admin page for the FormType model.
+   Sticks the header of the inline CustomField table to the top of the screen. */
+
+fieldset.module > table > thead > tr {
+    position: sticky !important;
+    top: 0px !important;
+    z-index:5;
+}
+fieldset.module > table > thead > tr > th {
+    background-color: rgb(230, 230, 230);
+}

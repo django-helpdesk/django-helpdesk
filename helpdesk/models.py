@@ -35,10 +35,8 @@ from helpdesk import settings as helpdesk_settings
 
 from .templated_email import send_templated_mail
 
-from seed.lib.superperms.orgs.models import Organization
 from django.contrib.postgres.fields import JSONField
-from django.db.models.signals import post_init
-from django.dispatch import receiver
+from seed.lib.superperms.orgs.models import Organization
 
 
 logger = logging.getLogger(__name__)
@@ -364,7 +362,7 @@ class Queue(models.Model):
         return total
 
     @property
-    def time_spent_formated(self):
+    def time_spent_formatted(self):
         return format_time_spent(self.time_spent)
 
     def prepare_permission_name(self):
@@ -443,11 +441,14 @@ class FormType(models.Model):
                                  help_text=_('Should this form be visible on the public-side list of forms?'))
     staff = models.BooleanField(_('Staff'), blank=True, default=True,
                                 help_text=_('Should this form be visible on the staff-side list of forms?'))
+    # TODO make this a ManytoMany field, or remove entirely?
     extra_data = JSONField(default=list, blank=True,
                            help_text=_('List of CustomField field_names that belong to this form. '
                                        'Format: [\"field_name1\", \"field_name2\"]'))
 
     class Meta:
+        verbose_name = _("Form")
+        verbose_name_plural = _("Forms")
         # TODO index by organization and id?
         get_latest_by = "created"
         ordering = ('id',)
@@ -457,22 +458,6 @@ class FormType(models.Model):
 
     def get_markdown(self):
         return get_markdown(self.description)
-
-
-"""@receiver(post_init, sender=FormType, dispatch_uid="create_default_fields")
-def _create_default_fields(sender, instance, **kwargs):
-    # Create the default list of fields for a form.
-       
-    for field in CustomField.DEFAULT_FIELDS:
-        details = {
-            'ticket_form_id': sender.id
-        }
-        details.update(field)
-        
-        # In Seed, here _create_default_columns makes list of field names, compares the current field
-        # to them, and sets more attributes of the CustomField based on that.
-        
-        CustomField.objects.create(**details)"""
 
 
 class Ticket(models.Model):
@@ -547,10 +532,8 @@ class Ticket(models.Model):
     due_date = models.DateTimeField(blank=True, null=True)
     submitter_email = models.EmailField(blank=True, null=True)
 
-    # SEED fields
-    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, blank=True, null=True)
-    ticket_form = models.ForeignKey(FormType, on_delete=models.CASCADE)
-    # inventory_type = models.IntegerField(choices=VIEW_LIST_INVENTORY_TYPE, default=VIEW_LIST_PROPERTY)
+    # BEAM fields
+    ticket_form = models.ForeignKey(FormType, on_delete=models.PROTECT)
 
     # Contains extra fields, determined by items in CustomField
     extra_data = JSONField(default=dict, blank=True)
@@ -561,8 +544,8 @@ class Ticket(models.Model):
     contact_email = models.CharField(max_length=200, blank=True, null=True)
     building_name = models.CharField(max_length=200, blank=True, null=True)
     building_address = models.TextField(blank=True, null=True)
-    pm_id = models.CharField(max_length=200, blank=True, null=True)
-    building_id = models.CharField(max_length=200, blank=True, null=True)
+    pm_id = models.CharField(_("Portfolio Manager ID"), max_length=200, blank=True, null=True)
+    building_id = models.CharField(_("Building ID"), max_length=200, blank=True, null=True)
 
     @property
     def time_spent(self):
@@ -576,7 +559,7 @@ class Ticket(models.Model):
         return total
 
     @property
-    def time_spent_formated(self):
+    def time_spent_formatted(self):
         return format_time_spent(self.time_spent)
 
     def send(self, roles, dont_send_to=None, **kwargs):
@@ -959,7 +942,7 @@ class FollowUp(models.Model):
         return get_markdown(self.comment)
 
     @property
-    def time_spent_formated(self):
+    def time_spent_formatted(self):
         return format_time_spent(self.time_spent)
 
 
@@ -1111,7 +1094,7 @@ class KBIAttachment(Attachment):
     kbitem = models.ForeignKey(
         "KBItem",
         on_delete=models.CASCADE,
-        verbose_name=_('Knowledge base item'),
+        verbose_name=_('Knowledgebase Article'),
     )
 
     def attachment_path(self, filename):
@@ -1311,8 +1294,8 @@ class KBCategory(models.Model):
 
     class Meta:
         ordering = ('title',)
-        verbose_name = _('Knowledge base category')
-        verbose_name_plural = _('Knowledge base categories')
+        verbose_name = _('Knowledgebase category')
+        verbose_name_plural = _('Knowledgebase categories')
 
     def get_absolute_url(self):
         from django.urls import reverse
@@ -1422,8 +1405,8 @@ class KBItem(models.Model):
 
     class Meta:
         ordering = ('order', 'title',)
-        verbose_name = _('Knowledge base item')
-        verbose_name_plural = _('Knowledge base items')
+        verbose_name = _('Knowledgebase article')
+        verbose_name_plural = _('Knowledgebase articles')
 
     def get_absolute_url(self):
         from django.urls import reverse
@@ -1807,157 +1790,6 @@ class CustomField(models.Model):
     """
     Definitions for custom fields that are glued onto each ticket.
     """
-    # default fields
-    # TODO update ordering field and employ these
-    DEFAULT_FIELDS = [
-        {
-            # 'ticket_form': ,
-            'field_name': 'queue',
-            'label': 'Queue',
-            'help_text': '',
-            'ordering': None,
-            'required': True,
-            'staff_only': True,
-            'is_extra_data': False,
-            'editable': True,
-            'unlisted': True,
-        }, {
-            'field_name': 'title',
-            'label': 'Subject',
-            'help_text': '',
-            'data_type': 'varchar',
-            'max_length': 200,
-            'ordering': None,
-            'required': False,
-            'staff_only': False,
-            'is_extra_data': False,
-            'editable': True,
-            'unlisted': False,
-        }, {
-            'field_name': 'description',
-            'label': 'Description',
-            'help_text': '',
-            'data_type': 'text',
-            'ordering': None,
-            'required': False,
-            'staff_only': False,
-            'is_extra_data': False,
-            'editable': True,
-            'unlisted': False,
-        }, {
-            'field_name': 'priority',
-            'label': 'Priority',
-            'help_text': "Please select a priority carefully. If unsure, leave it as '3'.",
-            'data_type': 'list',
-            'ordering': None,
-            'required': False,
-            'staff_only': False,
-            'is_extra_data': False,
-            'editable': True,
-            'unlisted': True,
-        }, {
-            'field_name': 'due_date',
-            'label': 'Due Date',
-            'data_type': 'datetime',  # TODO should change this just to date
-            'ordering': None,
-            'required': False,
-            'staff_only': False,
-            'is_extra_data': False,
-            'editable': True,
-            'unlisted': False,
-        }, {
-            'field_name': 'attachment',
-            'label': 'Attach',
-            'ordering': None,
-            'required': False,
-            'staff_only': False,
-            'is_extra_data': False,
-            'editable': False,
-            'unlisted': True,
-        }, {
-            'field_name': 'submitter_email',
-            'label': 'Submitter Email',  # TODO Both submitter email and contact email should get updates of ticket
-            'help_text': 'This e-mail address will receive copies of all public updates to this ticket.',
-            'data_type': 'email',
-            'max_length': 200,
-            'ordering': None,
-            'required': True,
-            'staff_only': False,
-            'is_extra_data': False,
-            'editable': True,
-            'unlisted': False,
-        }, {
-            'field_name': 'contact_name',
-            'label': 'Primary Contact Name',
-            'data_type': 'varchar',
-            'max_length': 200,
-            'ordering': None,
-            'required': True,
-            'staff_only': False,
-            'is_extra_data': False,
-            'editable': True,
-            'unlisted': False,
-        }, {
-            'field_name': 'contact_email',
-            'label': 'Primary Contact Email',
-            'help_text': 'This e-mail address will receive copies of all public updates to this ticket.',
-            'data_type': 'email',
-            'max_length': 200,
-            'ordering': None,
-            'required': True,
-            'staff_only': False,
-            'is_extra_data': False,
-            'editable': True,
-            'unlisted': False,
-        }, {
-            'field_name': 'building_name',
-            'label': 'Building Name',
-            'data_type': 'varchar',
-            'max_length': 200,
-            'ordering': None,
-            'required': False,
-            'staff_only': False,
-            'is_extra_data': False,
-            'editable': True,
-            'unlisted': False,
-        }, {
-            'field_name': 'building_address',
-            'label': 'Building Address',  # TODO can we set a max number of lines?
-            'data_type': 'text',
-            'ordering': None,
-            'required': False,
-            'staff_only': False,
-            'is_extra_data': False,
-            'editable': True,
-            'unlisted': False,
-        }, {
-            'field_name': 'pm_id',
-            'label': 'Portfolio Manager ID',
-            'help_text': '',
-            'data_type': 'varchar',
-            'max_length': 200,
-            'ordering': None,
-            'required': False,
-            'staff_only': False,
-            'is_extra_data': False,
-            'editable': True,
-            'unlisted': False,
-        }, {
-            'field_name': 'building_id',
-            'label': 'Building ID',
-            'help_text': '',
-            'data_type': 'varchar',
-            'max_length': 200,
-            'ordering': None,
-            'required': False,
-            'staff_only': False,
-            'is_extra_data': False,
-            'editable': True,
-            'unlisted': False,
-        }
-    ]
-
-    ticket_form = models.ForeignKey(FormType, on_delete=models.CASCADE)
 
     # Must be unique with the ticket_form.
     # TODO also can't be a field whose labels are built in
@@ -2051,7 +1883,7 @@ class CustomField(models.Model):
         null=True,
     )
 
-    # TODO employ ordering
+    # TODO remove this ordering
     view_ordering = models.IntegerField(
         _('View Ordering'),
         help_text=_('Order of fields when viewing a ticket. '
@@ -2067,40 +1899,32 @@ class CustomField(models.Model):
         return choices
     choices_as_array = property(_choices_as_array)
 
-    required = models.BooleanField(
-        _('Required?'),
-        help_text=_('Does the user have to enter a value for this field?'),
-        default=False,
-    )
-
-    staff_only = models.BooleanField(
-        _('Staff Only?'),
-        help_text=_('If this is ticked, then the public submission form '
-                    'will NOT show this field'),
-        default=False,
-    )
-
-    editable = models.BooleanField(_('Editable by staff?'), default=True,
-                                   help_text=_('Can this field be edited by a staff user?'), )
-    unlisted = models.BooleanField(_('Is this field represented another way on the ticket view?'),
-                                   help_text=_('Used for default fields like queue and priority.'),
+    required = models.BooleanField(_('Required?'), help_text=_('Does the user have to enter a value for this field?'),
                                    default=False)
-    is_extra_data = models.BooleanField(default=False)
+    staff_only = models.BooleanField(_('Staff Only?'), help_text=_('If this is ticked, then the public submission form '
+                                     'will NOT show this field'), default=False)
+    editable = models.BooleanField(_('Editable by staff?'), default=True,
+                                   help_text=_('Can this field be edited by a staff user?'))
+    unlisted = models.BooleanField(_('Hide field in view table?'),
+                                   help_text=_('Used for default fields like queue and priority, '
+                                               'which are displayed elsewhere.'),
+                                   default=False)
+    is_extra_data = models.BooleanField(_('Non-default field?'), default=True,
+                                        help_text=_('Is this an extra data field?'))
 
-    objects = CustomFieldManager()  # for ordering objects based on "ordering"
+    ticket_form = models.ForeignKey(FormType, on_delete=models.CASCADE)
 
-    # beam_field = models.ForeignKey(Column, blank=True, null=True)  # associated field in BEAM
-    # alerts = ???
 
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
+    objects = CustomFieldManager()  # for ordering objects based on "ordering"
 
     def __str__(self):
         return 'Custom Field - %s %s' % (self.pk, self.field_name)
 
     class Meta:
-        verbose_name = _('Custom field')
-        verbose_name_plural = _('Custom fields')
+        verbose_name = _("Form field")
+        verbose_name_plural = _("Form fields")
         unique_together = ('field_name', 'ticket_form')
         ordering = ['ticket_form', 'form_ordering']
         # Django 3.2 option
