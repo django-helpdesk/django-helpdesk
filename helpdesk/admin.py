@@ -46,8 +46,9 @@ class FormTypeAdmin(admin.ModelAdmin):
 
     def extra_data_cleaned(self, form):
         display = ''
-        for item in form.extra_data:
-            display += ('%s<br />' % item)
+        extra_fields = form.get_extra_field_names()
+        for item in extra_fields:
+            display += ('%s,<br />' % item)
         return format_html(display)
     extra_data_cleaned.short_description = _('Extra Data')
 

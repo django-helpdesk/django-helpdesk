@@ -441,10 +441,6 @@ class FormType(models.Model):
                                  help_text=_('Should this form be visible on the public-side list of forms?'))
     staff = models.BooleanField(_('Staff'), blank=True, default=True,
                                 help_text=_('Should this form be visible on the staff-side list of forms?'))
-    # TODO make this a ManytoMany field, or remove entirely?
-    extra_data = JSONField(default=list, blank=True,
-                           help_text=_('List of CustomField field_names that belong to this form. '
-                                       'Format: [\"field_name1\", \"field_name2\"]'))
 
     class Meta:
         verbose_name = _("Form")
@@ -458,6 +454,9 @@ class FormType(models.Model):
 
     def get_markdown(self):
         return get_markdown(self.description)
+
+    def get_extra_field_names(self):
+        return CustomField.objects.filter(ticket_form=self.id, is_extra_data=True).values_list('field_name', flat=True)
 
 
 class Ticket(models.Model):
