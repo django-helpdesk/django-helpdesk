@@ -7,6 +7,7 @@ from helpdesk.models import Queue, Ticket, FollowUp, PreSetReply, KBCategory
 from helpdesk.models import EscalationExclusion, EmailTemplate, KBItem
 from helpdesk.models import TicketChange, KBIAttachment, FollowUpAttachment, IgnoreEmail
 from helpdesk.models import CustomField, FormType
+from seed.models import Column, Property, TaxLot
 
 
 @admin.register(Queue)
@@ -27,6 +28,7 @@ class CustomFieldInline(admin.TabularInline):
     # Allows user to edit form fields on the same page as the Form Type model.
     model = CustomField
     exclude = ('empty_selection_list',)
+    raw_id_fields = ("columns",)
     can_delete = False
     extra = 0
 
@@ -53,6 +55,24 @@ class FormTypeAdmin(admin.ModelAdmin):
     extra_data_cleaned.short_description = _('Extra Data')
 
 
+class TicketAdminForm(forms.ModelForm):
+    # Allows beam_property and beam_taxlot's querysets to be filtered.
+    class Meta:
+        model = Ticket
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.update_ticket_set(self.instance)
+
+    def update_ticket_set(self, obj):
+        if obj and hasattr(obj, 'ticket_form'):
+            self.fields['beam_property'].queryset = Property.objects.filter(
+                organization_id=obj.ticket_form.organization_id).order_by('id')
+            self.fields['beam_taxlot'].queryset = TaxLot.objects.filter(
+                organization_id=obj.ticket_form.organization_id).order_by('id')
+
+
 @admin.register(Ticket)
 class TicketAdmin(admin.ModelAdmin):
     list_display = ('id', 'title_view', 'status', 'assigned_to', 'queue', 'ticket_form',
@@ -64,8 +84,16 @@ class TicketAdmin(admin.ModelAdmin):
     # TODO set a different ordering that doesn't require them all to be written out?
     fields = ('queue', 'ticket_form', 'title', 'description', 'contact_name', 'contact_email', 'submitter_email',
               'building_name', 'building_address', 'pm_id', 'building_id', 'extra_data',
+              'beam_property', 'beam_taxlot',
               'assigned_to', 'status', 'on_hold', 'resolution', 'secret_key', 'kbitem', 'merged_to',
               'priority', 'due_date',)
+
+    form = TicketAdminForm
+    filter_horizontal = ('beam_property', 'beam_taxlot')
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        form.update_ticket_set(obj)
 
     def title_view(self, obj):
         return '(no title)' if not obj.title else obj.title
@@ -85,17 +113,42 @@ class TicketAdmin(admin.ModelAdmin):
     hidden_submitter_email.short_description = _('Submitter E-Mail')
 
 
+class CustomFieldAdminForm(forms.ModelForm):
+    # Overrides admin form for CustomField to add filtering for columns' queryset.
+    class Meta:
+        model = CustomField
+        fields = '__all__'
+
+    def update_columns_set(self, obj):
+        if obj and hasattr(obj, 'ticket_form'):
+            self.fields['columns'].queryset = Column.objects \
+                .filter(organization_id=obj.ticket_form.organization_id) \
+                .exclude(table_name='') \
+                .exclude(table_name=None) \
+                .order_by('id')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.update_columns_set(self.instance)
+
+
 @admin.register(CustomField)
 class CustomFieldAdmin(admin.ModelAdmin):
+    form = CustomFieldAdminForm
     list_display = ('ticket_form_type', 'field_name', 'label', 'data_type',
                     'required', 'staff_only', 'is_extra_data')
     list_filter = ('ticket_form',)
     list_display_links = ('field_name',)
+    filter_horizontal = ('columns',)
 
     def ticket_form_type(self, ticket):
         if ticket.ticket_form:
             return ticket.ticket_form.name
     ticket_form_type.short_description = _('Ticket Form')
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        form.update_columns_set(obj)
 
     # TODO when django is updated to ver3, use @action decorator for these actions instead
     def make_required_true(modeladmin, request, queryset):

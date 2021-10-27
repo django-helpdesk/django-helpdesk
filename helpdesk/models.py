@@ -37,6 +37,16 @@ from .templated_email import send_templated_mail
 
 from django.contrib.postgres.fields import JSONField
 from seed.lib.superperms.orgs.models import Organization
+from seed.models import (
+    Column,
+    Cycle,
+    PropertyView,
+    PropertyState,
+    Property,
+    TaxLotView,
+    TaxLotState,
+    TaxLot,
+)
 
 
 logger = logging.getLogger(__name__)
@@ -533,6 +543,10 @@ class Ticket(models.Model):
 
     # BEAM fields
     ticket_form = models.ForeignKey(FormType, on_delete=models.PROTECT)
+    beam_property = models.ManyToManyField(Property, blank=True, related_name='helpdesk_ticket',
+                                           verbose_name='BEAM Property')
+    beam_taxlot = models.ManyToManyField(TaxLot, blank=True, related_name='helpdesk_ticket',
+                                         verbose_name='BEAM Taxlot')  # TODO hide prop/taxlot from form fields
 
     # Contains extra fields, determined by items in CustomField
     extra_data = JSONField(default=dict, blank=True)
@@ -830,6 +844,73 @@ class Ticket(models.Model):
             else:
                 ticketcc = self.ticketcc_set.create(email=email)
             return ticketcc
+
+    # TODO: Change this method to something that runs whenever a Ticket object is saved in django --
+    #  probably using a post-save signal.
+    #  CURRENTLY DOESNT RUN DURING TICKET CREATION IN FORMS!!
+    def building_lookup(self):
+        """
+        Looks up the buildings in BEAM that match info from the ticket, and pairs the buildings to the ticket.
+        The function searches only the first cycle that has data for properties and/or taxlots, to save time.
+        If a matching property or taxlot isn't found, nothing happens, and the staff user can manually match
+        the ticket to a property/taxlot in BEAM.
+        :return: self
+        """
+        org = self.ticket_form.organization_id
+
+        def lookup(query, state, view, cycle_id, building):
+            """ Queries database for either properties or taxlots. """
+            if query and cycle_id:
+                # TODO see if you can add state prefetching to this
+                possible_views = view.objects.filter(cycle=cycle_id).values_list('state_id', flat=True)
+                if possible_views is not None:
+                    states = state.objects.filter(organization_id=org, id__in=list(possible_views)).filter(
+                        **query).only('id')
+                    if states is not None:
+                        buildings = building.objects.filter(views__state_id__in=list(states)).distinct('pk') \
+                            .only('pk').order_by('pk')
+                        if buildings is not None:
+                            return list(buildings)
+            return None
+
+        lookups = {'PropertyState': {}, 'TaxLotState': {}}
+        # Gathers all fields that have an associated column in BEAM, and prefetches those columns as well.
+        fields = CustomField.objects.filter(ticket_form=self.ticket_form_id).exclude(columns=None).only('field_name') \
+            .prefetch_related(models.Prefetch(
+                'columns',
+                queryset=Column.objects.all().only('column_name', 'is_extra_data', 'table_name'),
+                to_attr='beam'))
+
+        for f in fields:
+            # Locates value from ticket that will be searched for in BEAM
+            if f.field_name in self.extra_data \
+                    and self.extra_data[f.field_name] is not None and self.extra_data[f.field_name] != '':
+                value = self.extra_data[f.field_name]
+            elif hasattr(self, f.field_name) \
+                    and getattr(self, f.field_name, None) is not None and getattr(self, f.field_name, None) != '':
+                value = getattr(self, f.field_name, None)
+            else:
+                continue
+            # TODO: Check for the data type and cast value as that type before putting it in lookups?
+            # Creates a query term and pairs it with the value
+            for c in f.beam:
+                if c.column_name and hasattr(c, 'is_extra_data') and c.table_name:
+                    query_term = 'extra_data__%s' % c.column_name if c.is_extra_data else c.column_name
+                    lookups[c.table_name][query_term] = value
+
+        # Finds a cycle that works for properties and/or taxlots
+        cycles = Cycle.objects.filter(organization_id=org, end__isnull=False) \
+            .order_by('end').values_list('id', flat=True)
+        cycle = None
+        for c in cycles:
+            if (not (lookups['PropertyState'] and not PropertyView.objects.filter(cycle=c).exists())) \
+                    or (not (lookups['TaxLotState'] and not TaxLotView.objects.filter(cycle=c).exists())):
+                cycle = c
+                break  # prevents more database hits
+
+        self.beam_property.set(lookup(lookups['PropertyState'], PropertyState, PropertyView, cycle, Property))
+        self.beam_taxlot.set(lookup(lookups['TaxLotState'], TaxLotState, TaxLotView, cycle, TaxLot))
+        return self
 
 
 class FollowUpManager(models.Manager):
@@ -1912,7 +1993,8 @@ class CustomField(models.Model):
                                         help_text=_('Is this an extra data field?'))
 
     ticket_form = models.ForeignKey(FormType, on_delete=models.CASCADE)
-
+    columns = models.ManyToManyField(Column, blank=True, related_name='helpdesk_fields',
+                                     verbose_name=_('Associated BEAM columns'))
 
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)

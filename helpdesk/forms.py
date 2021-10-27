@@ -44,6 +44,30 @@ CUSTOMFIELD_TIME_FORMAT = "%H:%M:%S"
 CUSTOMFIELD_DATETIME_FORMAT = f"{CUSTOMFIELD_DATE_FORMAT} {CUSTOMFIELD_TIME_FORMAT}"
 
 
+def _building_lookup(instance, changed_data):
+    """
+    :param instance: Ticket object.
+    :param changed_data: List of strings. The strings are names of all changed form fields.
+
+    Checks if any changed fields are associated with columns in BEAM.
+    If so, calls Ticket.building_lookup() to pair the Ticket object with buildings in BEAM.
+
+    :return: Ticket object with updated beam_property and beam_taxlot values.
+
+    Called by save() in EditTicketForm and AbstractTicketField.
+    TODO: This process should be moved to the Ticket model. It's currently in forms because it's easy
+    TODO: to get the changed data that way.
+    """
+    changed_data = map(lambda f: f.replace('e_', '', 1) if f.startswith('e_') else f, changed_data)
+    custom_fields = CustomField.objects.filter(
+        ticket_form=instance.ticket_form_id,
+        field_name__in=changed_data,
+    ).exclude(columns=None)
+    if custom_fields.exists():
+        return instance.building_lookup()
+    return instance
+
+
 class CustomFieldMixin(object):
     """
     Mixin that provides a method to turn CustomFields into an actual field
@@ -109,7 +133,7 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
     class Meta:
         model = Ticket
         exclude = ('assigned_to', 'created', 'modified', 'status', 'on_hold', 'resolution', 'last_escalation',
-                   'organization', 'ticket_form')
+                   'organization', 'ticket_form', 'beam_property', 'beam_taxlot')
 
     class Media:
         js = ('helpdesk/js/init_due_date.js', 'helpdesk/js/init_datetime_classes.js', 'helpdesk/js/validate.js')
@@ -187,6 +211,14 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
                 cleaned_data['extra_data'][field_name] = value
         return cleaned_data
 
+    def save(self, commit=True):
+        # Overrides save() SOLELY to include building lookup method.
+        instance = super(EditTicketForm, self).save(commit=False)
+        instance = _building_lookup(instance, self.changed_data)
+        if commit:
+            instance.save()
+        return instance
+
 
 class EditFollowUpForm(forms.ModelForm):
 
@@ -226,6 +258,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
     attachment = forms.FileField(
         widget=forms.FileInput(attrs={'class': 'form-control-file'}),
     )
+    # TODO add beam_property and beam_taxlot so they can be viewed on the staff-side ticket page
 
     class Media:
         js = ('helpdesk/js/init_due_date.js', 'helpdesk/js/init_datetime_classes.js', 'helpdesk/js/validate.js')
@@ -263,6 +296,14 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
             cleaned_data['queue'] = form.queue.id
 
         return cleaned_data
+
+    def save(self, commit=True):
+        # Overrides save() SOLELY to include building lookup method.
+        instance = super(AbstractTicketForm, self).save(commit=False)
+        instance = _building_lookup(instance, self.changed_data)
+        if commit:
+            instance.save()
+        return instance
 
     def _create_ticket(self):
         kbitem = None
