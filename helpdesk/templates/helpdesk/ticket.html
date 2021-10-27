@@ -117,7 +117,8 @@
                     <label for='st_open' class='active radio-inline'><input type='radio' name='new_status' value='1' id='st_open' checked='checked'>{% trans "Open" %} &raquo;</label>
                     <label for='st_resolved' class="radio-inline"><input type='radio' name='new_status' value='3' id='st_resolved'{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}>{% trans "Resolved" %} &raquo;</label>
                     <label for='st_closed' class="radio-inline"><input type='radio' name='new_status' value='4' id='st_closed'{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}>{% trans "Closed" %} &raquo;</label>
-                    <label class="radio-inline" for='st_duplicate'><input type='radio' name='new_status' value='5' id='st_duplicate'>{% trans "Duplicate" %}</label>
+                    <label for='st_duplicate' class="radio-inline"><input type='radio' name='new_status' value='5' id='st_duplicate'>{% trans "Duplicate" %} &raquo;</label>
+                    <label for='st_replied' class="radio-inline"><input type='radio' name='new_status' value='6' id='st_replied'>{% trans "Replied" %}</label>
                 </div></dd>
                 {% endifequal %}
                 {% ifequal ticket.status 2 %}
@@ -125,7 +126,8 @@
                     <label for='st_reopened' class='active radio-inline'><input type='radio' name='new_status' value='2' id='st_reopened' checked='checked'>{% trans "Reopened" %} &raquo;</label>
                     <label class="radio-inline" for='st_resolved'><input type='radio' name='new_status' value='3' id='st_resolved'{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}>{% trans "Resolved" %} &raquo;</label>
                     <label class="radio-inline" for='st_closed'><input type='radio' name='new_status' value='4' id='st_closed'{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}>{% trans "Closed" %} &raquo;</label>
-                    <label class="radio-inline" for='st_duplicate'><input type='radio' name='new_status' value='5' id='st_duplicate'>{% trans "Duplicate" %}</label>
+                    <label class="radio-inline" for='st_duplicate'><input type='radio' name='new_status' value='5' id='st_duplicate'>{% trans "Duplicate" %} &raquo;</label>
+                    <label for='st_replied' class="radio-inline"><input type='radio' name='new_status' value='6' id='st_replied'>{% trans "Replied" %}</label>
                 </div></dd>
                 {% endifequal %}
                 {% ifequal ticket.status 3 %}
@@ -144,6 +146,14 @@
                     <label class="radio-inline" for='st_reopened'><input type='radio' name='new_status' value='2' id='st_reopened'>{% trans "Reopened" %} &laquo;</label>
                     <label class="radio-inline" for='st_duplicate'><input type='radio' name='new_status' value='5' id='st_duplicate' checked='checked'>{% trans "Duplicate" %}</label>
                 </div></dd>
+				{% endifequal %} 
+				{% ifequal ticket.status 6 %}
+				<dd><div class="form-group">
+                    <label for='st_resolved' class="radio-inline"><input type='radio' name='new_status' value='3' id='st_resolved'{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}>{% trans "Resolved" %} &laquo;</label>
+                    <label for='st_closed' class="radio-inline"><input type='radio' name='new_status' value='4' id='st_closed'{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}>{% trans "Closed" %} &laquo;</label>
+                    <label for='st_duplicate' class="radio-inline"><input type='radio' name='new_status' value='5' id='st_duplicate'>{% trans "Duplicate" %} &laquo;</label>
+                    <label for='st_replied' class="radio-inline"><input type='radio' name='new_status' value='6' id='st_replied' checked='checked'>{% trans "Replied" %}</label>
+				</div></dd>
                 {% endifequal %}
 
                 {% if helpdesk_settings.HELPDESK_UPDATE_PUBLIC_DEFAULT %}
