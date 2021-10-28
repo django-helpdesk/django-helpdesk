@@ -11,6 +11,11 @@
     {% else %}
     <link title="timeline-styles" rel="stylesheet" href="{% static 'helpdesk/vendor/timeline3/css/timeline.css' %}">
     {% endif %}
+<style>
+thead input {
+	width: 100%;
+}	
+</style>
 {% endblock %}
 
 {% block h1_title %}Tickets
@@ -286,10 +291,11 @@
         function get_url(row) {
             return "{% url 'helpdesk:view' 1234 %}".replace(/1234/, row.id.toString());
         }
-
+		// Duplicate thead
+		$('#ticketTable thead tr').clone(true).addClass('filters').appendTo('#ticketTable thead');
         $(document).ready(function () {
             // Ticket DataTable Initialization
-            $('#ticketTable').DataTable({
+            var table = $('#ticketTable').DataTable({
                 language: {
                     "emptyTable": "{% trans 'No Tickets Match Your Selection' %}"
                 },
@@ -374,9 +380,53 @@
                     {data: "submitter"},
                     {data: "time_spent", "visible": false},
                     {data: "kbitem"},
-                ]
-            });
+                ],
+				orderCellsTop: true,
+				fixedHeader: true,
+				initComplete: function () {
+					var api = this.api();
+					// For each column
+					api.columns().eq(0).each(function (colIdx) {
+							// Set the header cell to contain the input element
+							var cell = $('.filters th').eq(
+								$(api.column(colIdx).header()).index()
+							);
+							var title = $(cell).text();
+							if (title != "") {
+								$(cell).html('<input type="text" placeholder="' + title + '" />');
+							}
+							// On every keypress in this input
+							$('input',
+								$('.filters th').eq($(api.column(colIdx).header()).index())
+							)
+								.off('keyup change')
+								.on('keyup change', function (e) {
+									e.stopPropagation();
 
+									// Get the search value
+									$(this).attr('title', $(this).val());
+									var regexr = '({search})'; //$(this).parents('th').find('select').val();
+
+									var cursorPosition = this.selectionStart;
+									// Search the column for that value
+									api
+										.column(colIdx)
+										.search(
+											this.value != ''
+												? regexr.replace('{search}', '(((' + this.value + ')))')
+												: '',
+											this.value != '',
+											this.value == ''
+										)
+										.draw();
+
+									$(this)
+										.focus()[0]
+										.setSelectionRange(cursorPosition, cursorPosition);
+								});
+						});
+				},
+            });
             {# Timeline initialization when tab is displayed #}
             // The TL.Timeline constructor takes at least two arguments:
             // the id of the Timeline container (no '#'), and
