@@ -483,7 +483,6 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
             "Auto-Submitted": "auto-replied",
             "X-Auto-Response-Suppress": "All",
             "Precedence": "auto_reply",
-            "X-BEAMHelpdesk-Delivered": notifications_to_be_sent,
         }
         if new:
             roles = {'submitter': ('newticket_submitter', context),
@@ -556,17 +555,20 @@ def object_from_message(message, queue, logger):
 
     # Accounting for forwarding loops
     auto_forward = message.get('X-BEAMHelpdesk-Delivered', None)
+
     if auto_forward is not None or sender[1].lower() == queue.email_address.lower():
         logger.info("Found a forwarding loop.")
         if ticket and Ticket.objects.filter(pk=ticket).exists():
-            auto_forward = auto_forward.split(',') if auto_forward else to_list
+            if sender[1].lower() == queue.email_address.lower() and auto_forward is None:
+                auto_forward = [i[1] for i in to_list]
+            else:
+                auto_forward = auto_forward.strip().split(',')
             for address in auto_forward:
-                if type(address) is tuple:
-                    address = address[1]
                 cc = TicketCC.objects.filter(ticket_id=ticket, email__iexact=address)
                 if cc:
                     cc.delete()
                     logger.info("Deleted the CC'd address from the ticket")
+                    logger.debug("Address deleted was %s" % address)  # TODO remove later for privacy
         return True
 
     body = None
