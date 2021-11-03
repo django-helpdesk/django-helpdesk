@@ -543,9 +543,9 @@ class Ticket(models.Model):
 
     # BEAM fields
     ticket_form = models.ForeignKey(FormType, on_delete=models.PROTECT)
-    beam_property = models.ManyToManyField(Property, blank=True, related_name='helpdesk_ticket',
+    beam_property = models.ManyToManyField(Property, blank=True, related_name='helpdesk_ticket',  # TODO make plural
                                            verbose_name='BEAM Property')
-    beam_taxlot = models.ManyToManyField(TaxLot, blank=True, related_name='helpdesk_ticket',
+    beam_taxlot = models.ManyToManyField(TaxLot, blank=True, related_name='helpdesk_ticket',  # TODO make plural
                                          verbose_name='BEAM Taxlot')  # TODO hide prop/taxlot from form fields
 
     # Contains extra fields, determined by items in CustomField

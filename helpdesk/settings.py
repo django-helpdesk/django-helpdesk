@@ -95,7 +95,7 @@ HELPDESK_PUBLIC_TICKET_FORM_CLASS = getattr(
 ''' options for update_ticket views '''
 # allow non-staff users to interact with tickets?
 # can be True/False or a callable accepting the active user and returning True if they must be considered helpdesk staff
-HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = getattr(settings, 'HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE', True)
+HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = getattr(settings, 'HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE', False)
 if not (HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE in (True, False) or callable(HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE)):
     warnings.warn(
         "HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE should be set to either True/False or a callable.",

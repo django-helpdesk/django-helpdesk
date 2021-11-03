@@ -8,6 +8,8 @@ from django.contrib.auth.decorators import user_passes_test
 
 
 from helpdesk import settings as helpdesk_settings
+from seed.lib.superperms.orgs.decorators import requires_member
+from seed.lib.superperms.orgs.models import OrganizationUser
 
 
 def check_staff_status(check_staff=False):
@@ -19,10 +21,16 @@ def check_staff_status(check_staff=False):
     def check_superuser_status(check_superuser):
         def check_user_status(u):
             is_ok = u.is_authenticated and u.is_active
+            org_user = OrganizationUser.objects.filter(user=u)
+            if not org_user.exists():
+                return false
+            org_user = org_user.first()  # TODO change later using the user's current org
+            is_member = requires_member(org_user)
+
             if check_staff:
-                return is_ok and u.is_staff
+                return is_ok and u.is_staff and is_member
             elif check_superuser:
-                return is_ok and u.is_superuser
+                return is_ok and u.is_superuser and is_member
             else:
                 return is_ok
         return check_user_status
