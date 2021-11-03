@@ -77,6 +77,7 @@ class Queue(models.Model):
     a queue for each of Accounts, Pre-Sales, and Support.
 
     """
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
 
     title = models.CharField(
         _('Title'),
@@ -442,7 +443,7 @@ class FormType(models.Model):
                                  help_text=_('Should this form be visible on the public-side list of forms?'))
     staff = models.BooleanField(_('Staff'), blank=True, default=True,
                                 help_text=_('Should this form be visible on the staff-side list of forms?'))
-    
+
     # Add Preset Form Fields to the Database, avoiding having to run a PSQL command in another terminal window.
     # This will happen automatically upon FormType Creation
 
@@ -537,7 +538,7 @@ class Ticket(models.Model):
     due_date = models.DateTimeField(blank=True, null=True)
     submitter_email = models.EmailField(blank=True, null=True)
 
-    # BEAM fields
+    # BEAM fieldsclass
     ticket_form = models.ForeignKey(FormType, on_delete=models.PROTECT)
 
     # Contains extra fields, determined by items in CustomField

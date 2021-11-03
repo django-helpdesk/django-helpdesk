@@ -75,6 +75,17 @@ else:
     staff_member_required = user_passes_test(
         lambda u: u.is_authenticated and u.is_active and u.is_staff)
 
+@helpdesk_staff_member_required
+def set_default_org(request, user_id, org_id):
+    '''
+    Change the default org of the user based on their dropdown menu selection
+    Reload them back to the same page
+    '''
+    from seed.landing.models import SEEDUser as User
+    user = User.objects.get(pk=user_id)
+    user.default_organization_id = org_id
+    user.save()
+    return redirect(request.META['HTTP_REFERER'])
 
 def _get_queue_choices(queues):
     """Return list of `choices` array for html form for given queues
@@ -113,32 +124,42 @@ def dashboard(request):
         status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
     )
 
+    # Get only active tickets available to their default organization
+    active_tickets = active_tickets.filter(
+        queue__in=Queue.objects.filter(
+            organization=request.user.default_organization_id))
+
     # open & reopened tickets, assigned to current user
     tickets = active_tickets.filter(
         assigned_to=request.user,
     )
 
-    # closed & resolved tickets, assigned to current user
+    # closed & resolved tickets, assigned to current user, and belonging to their default org
     tickets_closed_resolved = Ticket.objects.select_related('queue').filter(
         assigned_to=request.user,
-        status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS])
+        status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
+        queue__in=Queue.objects.filter(
+            organization=request.user.default_organization_id),
+    )
 
     user_queues = huser.get_queues()
 
     unassigned_tickets = active_tickets.filter(
         assigned_to__isnull=True,
         kbitem__isnull=True,
-        queue__in=user_queues
+        queue__in=user_queues,
     )
 
     kbitems = huser.get_assigned_kb_items()
 
-    # all tickets, reported by current user
+    # all tickets, reported by current user, in their default org
     all_tickets_reported_by_current_user = ''
     email_current_user = request.user.email
     if email_current_user:
         all_tickets_reported_by_current_user = Ticket.objects.select_related('queue').filter(
             submitter_email=email_current_user,
+            queue__in=Queue.objects.filter(
+                organization=request.user.default_organization_id)
         ).order_by('status')
 
     tickets_in_queues = Ticket.objects.filter(
@@ -1343,11 +1364,13 @@ rss_list = staff_member_required(rss_list)
 
 @helpdesk_staff_member_required
 def report_index(request):
-    number_tickets = Ticket.objects.all().count()
+    number_tickets = Ticket.objects.filter(queue__in=Queue.objects.filter(
+            organization=request.user.default_organization_id)).count()
     saved_query = request.GET.get('saved_query', None)
 
     user_queues = HelpdeskUser(request.user).get_queues()
-    Tickets = Ticket.objects.filter(queue__in=user_queues)
+    Tickets = Ticket.objects.filter(queue__in=Queue.objects.filter(
+            organization=request.user.default_organization_id))
     basic_ticket_stats = calc_basic_ticket_stats(Tickets)
 
     # The following query builds a grid of queues & ticket statuses,
@@ -1867,3 +1890,6 @@ def date_rel_to_today(today, offset):
 def sort_string(begin, end):
     return 'sort=created&date_from=%s&date_to=%s&status=%s&status=%s&status=%s' % (
         begin, end, Ticket.OPEN_STATUS, Ticket.REOPENED_STATUS, Ticket.RESOLVED_STATUS)
+
+
+

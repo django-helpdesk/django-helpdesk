@@ -23,7 +23,8 @@ class HelpdeskUser:
         :return: A Python list of Queues
         """
         user = self.user
-        all_queues = Queue.objects.all()
+        # All queues for the users default org
+        all_queues = Queue.objects.filter(organization=user.default_organization_id)
         public_ids = [q.pk for q in
                       Queue.objects.filter(allow_public_submission=True)]
         limit_queues_by_user = \
@@ -55,7 +56,7 @@ class HelpdeskUser:
 
     def has_full_access(self):
         return self.user.is_superuser or self.user.is_staff \
-            or helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE
+               or helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE
 
     def can_access_queue(self, queue):
         """Check if a certain user can access a certain queue.
@@ -77,10 +78,11 @@ class HelpdeskUser:
         """Check to see if the user has permission to access
             a ticket. If not then deny access."""
         user = self.user
-        if self.can_access_queue(ticket.queue):
+        if self.can_access_queue(ticket.queue) and \
+            (ticket.queue.organization == user.default_organization_id):
             return True
         elif self.has_full_access() or \
-                (ticket.assigned_to and user.id == ticket.assigned_to.id):
+            (ticket.assigned_to and user.id == ticket.assigned_to.id):
             return True
         else:
             return False
