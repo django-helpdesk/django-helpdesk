@@ -79,7 +79,7 @@ class HelpdeskUser:
             a ticket. If not then deny access."""
         user = self.user
         if self.can_access_queue(ticket.queue) and \
-            (ticket.queue.organization == user.default_organization_id):
+            (ticket.queue.organization.id == user.default_organization_id):
             return True
         elif self.has_full_access() or \
             (ticket.assigned_to and user.id == ticket.assigned_to.id):
