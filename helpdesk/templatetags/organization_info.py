@@ -19,9 +19,12 @@ def organization_info(user):
     '''
     if user.is_authenticated:
         return_info = {'orgs': user.orgs.all(),
-                       'default_org_id': user.default_organization_id,
-                       'default_org_name': Organization.objects.get(id=user.default_organization_id).name
+                       'default_org': Organization.objects.get(id=user.default_organization_id),
                        }
     else:
         return_info = {}
     return return_info
+
+@register.filter
+def replace_slash(string):
+    return string.replace("\\", "")

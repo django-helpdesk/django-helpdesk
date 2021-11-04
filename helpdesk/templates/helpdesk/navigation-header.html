@@ -3,8 +3,6 @@
 {% with user|organization_info as user_info %}
 
     {% include 'helpdesk/custom_navigation_header.html' %}
-<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
-
     <nav class="navbar navbar-expand navbar-dark bg-dc static-top">
       <button class="btn btn-link btn-sm text-white order-1 order-sm-0" id="sidebarToggle" href="#">
         <i class="fas fa-bars"></i>
@@ -30,12 +28,12 @@
 	  {% if helpdesk_settings.HELPDESK_NAVIGATION_ENABLED and user.is_authenticated or user|is_helpdesk_staff %}
       <div class="org-dropdown-btn">
         <button onclick="showOrgs()" class="btnUserOrgs" type="button" class="dropbtn">
-          {{ user_info.default_org_name }} <span class="caret"></span>
+          {{ user_info.default_org.name }} <span class="caret"></span>
         </button>
         <div id="org-dropdown-menu" class="org-dropdown-items">
           {% for org in user_info.orgs %}
           <a href="{% url 'helpdesk:set_default_org' user_id=user.id org_id=org.id %}"> {{ org.name }}
-            {% if org.id == user_info.default_org_id %}
+            {% if org.id == user.default_organization_id %}
             <i class="fa fa-check"></i>
             {% endif %}
           </a>
@@ -44,10 +42,14 @@
       </div>
     {% endif %}
       <!-- DC logo -->
-      <img src="{{ STATIC_URL }}helpdesk/images/dc_green_doee_logo_white.png" title="{$:: 'BEAM' | translate $}" style="max-height:70px;">
+      <!--<img src="{{ STATIC_URL }}helpdesk/images/dc_green_doee_logo_white.png" title="{$:: 'BEAM' | translate $}" style="max-height:70px;">-->
+      {% if user_info.default_org.logo %}
+      <img src="{{ STATIC_URL }}{{ user_info.default_org.logo }}" title="{$:: 'BEAM' | translate $}" style="max-height:70px;">
+      {% endif %}
     </nav>
-{% endwith %}
 
+
+<!-- Org dropdown menu Styling and Functionality -->
 <style>
 /* Dropdown Button */
 .btnUserOrgs {
@@ -129,3 +131,19 @@ window.onclick = function(event) {
   }
 }
 </script>
+<!-- Organization specici font and background -->
+<style>
+{% if user_info.default_org.styling %}
+  {{ user_info.default_org.styling|replace_slash }}
+{% else %}
+  /* Default Styling */
+  body {
+    font-family: century-gothic, sans-serif;
+  }
+
+  .bg-dc {
+    background-color: #218d45;
+  }
+{% endif %}
+</style>
+{% endwith %}
