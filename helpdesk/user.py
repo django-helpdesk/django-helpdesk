@@ -60,12 +60,15 @@ class HelpdeskUser:
 
     def can_access_queue(self, queue):
         """Check if a certain user can access a certain queue.
+            Users should only be able to access that queue if it is within their org
 
         :param user: The User (the class should have the has_perm method)
         :param queue: The django-helpdesk Queue instance
         :return: True if the user has permission (either by default or explicitly), false otherwise
         """
-        if self.has_full_access():
+        if self.user.default_organization_id != queue.organization.id:
+            return False
+        elif self.has_full_access():
             return True
         else:
             return (
@@ -78,8 +81,7 @@ class HelpdeskUser:
         """Check to see if the user has permission to access
             a ticket. If not then deny access."""
         user = self.user
-        if self.can_access_queue(ticket.queue) and \
-            (ticket.queue.organization.id == user.default_organization_id):
+        if self.can_access_queue(ticket.queue):
             return True
         elif self.has_full_access() or \
             (ticket.assigned_to and user.id == ticket.assigned_to.id):
