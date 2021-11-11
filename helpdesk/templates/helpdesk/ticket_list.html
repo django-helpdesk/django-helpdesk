@@ -330,7 +330,11 @@
         function get_url(row) {
             return "{% url 'helpdesk:view' 1234 %}".replace(/1234/, row.id.toString());
         }
-
+        
+        function htmlEntities(str) {
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+        
         $(document).ready(function () {
             // Ticket DataTable Initialization
             $('#ticketTable').DataTable({
@@ -366,7 +370,7 @@
                             if (type === 'display') {
                                 data = '<div class="tickettitle"><a href="' + get_url(row) + '" >' +
                                     row.id + '. ' +
-                                    row.title + '</a></div>';
+                                    htmlEntities(row.title) + '</a></div>';
                             }
                             return data
                         }
