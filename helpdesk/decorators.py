@@ -21,12 +21,13 @@ def check_staff_status(check_staff=False):
     def check_superuser_status(check_superuser):
         def check_user_status(u):
             is_ok = u.is_authenticated and u.is_active
-            org_user = OrganizationUser.objects.filter(user=u)
-            if not org_user.exists():
-                return false
-            org_user = org_user.first()  # TODO change later using the user's current org
-            is_member = requires_member(org_user)
-
+            is_member = False
+            if u.is_authenticated:  # If False, person is an AnonymousUser and can't be searched for
+                org_user = OrganizationUser.objects.filter(user=u)
+                if not org_user.exists():
+                    return false
+                org_user = org_user.first()  # TODO change later using the user's current org
+                is_member = requires_member(org_user)
             if check_staff:
                 return is_ok and u.is_staff and is_member
             elif check_superuser:
