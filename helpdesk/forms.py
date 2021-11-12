@@ -128,14 +128,6 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
     class Media:
         js = ('helpdesk/js/init_due_date.js', 'helpdesk/js/init_datetime_classes.js', 'helpdesk/js/validate.js')
 
-    lookup = forms.BooleanField(
-        widget=forms.CheckboxInput(attrs={'class': 'form-control'}),
-        label=_('Use this data to match this ticket to a building?'),
-        help_text=_('This will override previous pairings with buildings.'),
-        initial=False,
-        required=False,
-    )
-
     def __init__(self, *args, **kwargs):
         """
         Add any custom fields that are defined to the form
