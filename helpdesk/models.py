@@ -790,8 +790,9 @@ class Ticket(models.Model):
 
         super(Ticket, self).save(*args, **kwargs)
 
-        if query_fields is not None:
-            self.building_lookup()
+        # TODO Temp removing
+        # if query_fields is not None:
+            # self.building_lookup()
 
     @staticmethod
     def queue_and_id_from_query(query):

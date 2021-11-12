@@ -234,8 +234,8 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
         # Overrides save() to include building lookup method.
         instance = super(EditTicketForm, self).save(commit=False)
         changed_fields = None
-        if self.cleaned_data['lookup']:
-            changed_fields = _building_lookup(instance.ticket_form.id, self.changed_data)
+        # if self.cleaned_data['lookup']:
+            # changed_fields = _building_lookup(instance.ticket_form.id, self.changed_data) # TODO Temp removed
         if commit:
             instance.save(query_fields=changed_fields)
         return instance
@@ -317,14 +317,6 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
             cleaned_data['queue'] = form.queue.id
 
         return cleaned_data
-
-    def save(self, commit=True):
-        # Overrides save() SOLELY to include building lookup method.
-        instance = super(AbstractTicketForm, self).save(commit=False)
-        instance = _building_lookup(instance, self.changed_data)
-        if commit:
-            instance.save()
-        return instance
 
     def _create_ticket(self):
         kbitem = None
@@ -422,8 +414,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
 
             for field in queryset:
                 if field.field_name in self.fields:
-                    attrs = ['label', 'help_text', 'list_values', 'required',
-                             'data_type']  # TODO view-side ordering too
+                    attrs = ['label', 'help_text', 'list_values', 'required', 'data_type']
                     for attr in attrs:
                         display_info = getattr(field, attr, None)
                         if display_info is not None and display_info != '':
@@ -508,7 +499,7 @@ class TicketForm(AbstractTicketForm):
         elif queue.default_owner and not ticket.assigned_to:
             ticket.assigned_to = queue.default_owner
 
-        changed_fields = _building_lookup(ticket.ticket_form.id, self.changed_data)
+        changed_fields = None  # _building_lookup(ticket.ticket_form.id, self.changed_data) # TODO Temp removed
         ticket.save(query_fields=changed_fields)
 
         if self.cleaned_data['assigned_to']:
@@ -574,7 +565,7 @@ class PublicTicketForm(AbstractTicketForm):
         if queue.default_owner and not ticket.assigned_to:
             ticket.assigned_to = queue.default_owner
 
-        changed_fields = _building_lookup(ticket.ticket_form.id, self.changed_data)
+        changed_fields = None  # _building_lookup(ticket.ticket_form.id, self.changed_data) # TODO Temp removed
         ticket.save(query_fields=changed_fields)
 
         followup = self._create_follow_up(
