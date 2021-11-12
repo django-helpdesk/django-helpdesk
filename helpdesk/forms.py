@@ -44,6 +44,20 @@ CUSTOMFIELD_TIME_FORMAT = "%H:%M:%S"
 CUSTOMFIELD_DATETIME_FORMAT = f"{CUSTOMFIELD_DATE_FORMAT} {CUSTOMFIELD_TIME_FORMAT}"
 
 
+def _field_ordering(queryset):
+    # ordering fields based on form_ordering
+    # if form_ordering is None, field is sorted to end of list
+    ordering = sorted(
+        queryset.values('field_name', 'form_ordering', 'is_extra_data'),
+        key=lambda x: float('inf') if x['form_ordering'] is None else x['form_ordering']
+    )
+    ordering = [
+        "e_%s" % field['field_name'] if field['is_extra_data']
+        else field['field_name']
+        for field in ordering
+    ]
+    return ordering
+
 class CustomFieldMixin(object):
     """
     Mixin that provides a method to turn CustomFields into an actual field
@@ -114,6 +128,14 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
     class Media:
         js = ('helpdesk/js/init_due_date.js', 'helpdesk/js/init_datetime_classes.js', 'helpdesk/js/validate.js')
 
+    lookup = forms.BooleanField(
+        widget=forms.CheckboxInput(attrs={'class': 'form-control'}),
+        label=_('Use this data to match this ticket to a building?'),
+        help_text=_('This will override previous pairings with buildings.'),
+        initial=False,
+        required=False,
+    )
+
     def __init__(self, *args, **kwargs):
         """
         Add any custom fields that are defined to the form
@@ -154,11 +176,12 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
                     'initial': initial_value,
                 }
                 self.customfield_to_field(display_data, instanceargs)
+
             elif display_data.field_name in self.fields:
                 if not display_data.editable:
                     self.fields[display_data.field_name].widget = forms.HiddenInput()
                 else:
-                    attrs = ['label', 'help_text', 'list_values', 'required', 'data_type']  # TODO add ordering -- or not?
+                    attrs = ['label', 'help_text', 'list_values', 'required', 'data_type']
                     for attr in attrs:
                         display_info = getattr(display_data, attr, None)
                         if display_info is not None and display_info != '':
@@ -171,6 +194,8 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
                                 setattr(self.fields[display_data.field_name], attr, display_info)
                             # print('--%s: %s' % (attr, display_info))
         self.fields['extra_data'].widget = forms.HiddenInput()
+
+        self.order_fields(_field_ordering(display_objects))
 
     def clean(self):
         cleaned_data = super(EditTicketForm, self).clean()
@@ -385,18 +410,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
                     self.customfield_to_field(field, {})
                 self.fields[field.field_name].widget = forms.HiddenInput()
 
-            # ordering fields based on form_ordering
-            # if form_ordering is None, field is sorted to end of list
-            ordering = sorted(
-                queryset.values('field_name', 'form_ordering', 'is_extra_data'),
-                key=lambda x: float('inf') if x['form_ordering'] is None else x['form_ordering']
-            )
-            ordering = [
-                "e_%s" % field['field_name'] if field['is_extra_data']
-                else field['field_name']
-                for field in ordering
-            ]
-            self.order_fields(ordering)
+            self.order_fields(_field_ordering(queryset))
 
 
 class TicketForm(AbstractTicketForm):
@@ -420,7 +434,6 @@ class TicketForm(AbstractTicketForm):
         label=_('Case owner'),
         help_text=_('If you select an owner other than yourself, they\'ll be '
                     'e-mailed details of this ticket immediately.'),
-
         choices=()
     )
 
