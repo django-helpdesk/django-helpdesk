@@ -44,28 +44,23 @@ CUSTOMFIELD_TIME_FORMAT = "%H:%M:%S"
 CUSTOMFIELD_DATETIME_FORMAT = f"{CUSTOMFIELD_DATE_FORMAT} {CUSTOMFIELD_TIME_FORMAT}"
 
 
-def _building_lookup(instance, changed_data):
+def _building_lookup(ticket_form_id, changed_data):
     """
-    :param instance: Ticket object.
-    :param changed_data: List of strings. The strings are names of all changed form fields.
+    :param ticket_form_id: int. The ID of a ticket.
+    :param changed_data: list of strings. The strings are names of all changed form fields.
+    :return: list of strings. The strings are names of all changed field forms that are associated with columns
 
-    Checks if any changed fields are associated with columns in BEAM.
-    If so, calls Ticket.building_lookup() to pair the Ticket object with buildings in BEAM.
-
-    :return: Ticket object with updated beam_property and beam_taxlot values.
-
-    Called by save() in EditTicketForm and AbstractTicketField.
-    TODO: This process should be moved to the Ticket model. It's currently in forms because it's easy
-    TODO: to get the changed data that way.
+    Checks if any changed fields are associated with columns in BEAM, and returns a list of them.
+    Called by save() in EditTicketForm, TicketForm and PublicTicketForm.
     """
     changed_data = map(lambda f: f.replace('e_', '', 1) if f.startswith('e_') else f, changed_data)
     custom_fields = CustomField.objects.filter(
-        ticket_form=instance.ticket_form_id,
+        ticket_form=ticket_form_id,
         field_name__in=changed_data,
     ).exclude(columns=None)
     if custom_fields.exists():
-        return instance.building_lookup()
-    return instance
+        return custom_fields.values_list('field_name', flat=True)
+    return []
 
 def _field_ordering(queryset):
     # ordering fields based on form_ordering
@@ -236,11 +231,13 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
         return cleaned_data
 
     def save(self, commit=True):
-        # Overrides save() SOLELY to include building lookup method.
+        # Overrides save() to include building lookup method.
         instance = super(EditTicketForm, self).save(commit=False)
-        instance = _building_lookup(instance, self.changed_data)
+        changed_fields = None
+        if self.cleaned_data['lookup']:
+            changed_fields = _building_lookup(instance.ticket_form.id, self.changed_data)
         if commit:
-            instance.save()
+            instance.save(query_fields=changed_fields)
         return instance
 
 
@@ -511,7 +508,8 @@ class TicketForm(AbstractTicketForm):
         elif queue.default_owner and not ticket.assigned_to:
             ticket.assigned_to = queue.default_owner
 
-        ticket.save()
+        changed_fields = _building_lookup(ticket.ticket_form.id, self.changed_data)
+        ticket.save(query_fields=changed_fields)
 
         if self.cleaned_data['assigned_to']:
             title = _('Ticket Opened & Assigned to %(name)s') % {
@@ -575,7 +573,9 @@ class PublicTicketForm(AbstractTicketForm):
 
         if queue.default_owner and not ticket.assigned_to:
             ticket.assigned_to = queue.default_owner
-        ticket.save()
+
+        changed_fields = _building_lookup(ticket.ticket_form.id, self.changed_data)
+        ticket.save(query_fields=changed_fields)
 
         followup = self._create_follow_up(
             ticket, title=_('Ticket Opened Via Web'), user=user)

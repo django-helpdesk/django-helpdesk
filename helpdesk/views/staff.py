@@ -16,7 +16,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.urls import reverse, reverse_lazy
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.db.models import Q
+from django.db.models import Q, Prefetch
 from django.http import HttpResponseRedirect, Http404, HttpResponse, JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils.translation import ugettext as _
@@ -51,6 +51,7 @@ from helpdesk.models import (
     Ticket, Queue, FollowUp, TicketChange, PreSetReply, FollowUpAttachment, SavedSearch,
     IgnoreEmail, TicketCC, TicketDependency, UserSettings, KBItem, CustomField, TicketCustomFieldValue,
 )
+from seed.models import Column
 from helpdesk import settings as helpdesk_settings
 import helpdesk.views.abstract_views as abstract_views
 from helpdesk.views.permissions import MustBeStaffMixin
@@ -381,15 +382,22 @@ def view_ticket(request, ticket_id):
     else:"""
     submitter_userprofile_url = None
 
-    display_data = CustomField.objects.filter(ticket_form=ticket.ticket_form).values()
+    display_data = CustomField.objects.filter(ticket_form=ticket.ticket_form).only(
+        'label', 'data_type',
+        'unlisted', 'field_name', 'columns',
+    )
     extra_data = []
-    for field in display_data:
-        if not field['unlisted']:
-            if field['field_name'] in ticket.extra_data:
-                field['value'] = ticket.extra_data[field['field_name']]
+    for values, object in zip(display_data.values(), display_data):  # TODO check how many queries this runs
+        if not values['unlisted']:
+            if values['field_name'] in ticket.extra_data:
+                values['value'] = ticket.extra_data[values['field_name']]
             else:
-                field['value'] = getattr(ticket, field['field_name'], None)
-            extra_data.append(field)
+                values['value'] = getattr(ticket, values['field_name'], None)
+            values['has_columns'] = True if object.columns.exists() else False
+            extra_data.append(values)
+
+    property_count = ticket.beam_property.all().count()  # TODO check how many queries this runs
+    taxlot_count = ticket.beam_taxlot.all().count()
 
     return render(request, 'helpdesk/ticket.html', {
         'ticket': ticket,
@@ -401,7 +409,9 @@ def view_ticket(request, ticket_id):
             Q(queues=ticket.queue) | Q(queues__isnull=True)),
         'ticketcc_string': ticketcc_string,
         'SHOW_SUBSCRIBE': show_subscribe,
-        'extra_data': extra_data
+        'extra_data': extra_data,
+        'properties': property_count,
+        'taxlots': taxlot_count,
     })
 
 

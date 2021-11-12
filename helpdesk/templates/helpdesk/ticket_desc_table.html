@@ -21,7 +21,10 @@
                     {% for field in extra_data %}
                         {% cycle 'row' '' as row silent %}
                         {% if row %}<tr>{% endif %}
-                            <th class="table-secondary">{{ field.label }}</th>
+                            <th class="table-secondary">
+                                {% if field.has_columns %}<span title="This field is paired to a column in BEAM's inventory.">{{ field.label }}*</span>
+                                {% else %}{{ field.label }}{% endif %}
+                            </th>
                             {% if forloop.last %} <td colspan="3"> {% else %} <td> {% endif %}
                             {% spaceless %}{% if "url" == field.data_type %}<a href='{{ field.value }}'>{{ field.value }}</a>
                                 {% elif "datetime" == field.data_type %}{{ field.value|datetime_string_format }}
@@ -82,6 +85,12 @@
                         <td> <a href ="{{ticket.kbitem.query_url}}"> {{ticket.kbitem}} </a> </td>
                     </tr>
                     {% endif %}
+                    <tr>
+                        <th class="table-active">{% trans "Properties Paired" %}</th>
+                        <td>{{ properties }}</td>
+                        <th class="table-active">{% trans "Taxlots Paired" %}</th>
+                        <td>{{ taxlots }}</td>
+                    </tr>
                     <tr>
                         <th class="table-active">{% trans "Attachments" %}</th>
                         <td colspan="3">
