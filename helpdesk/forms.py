@@ -478,7 +478,7 @@ class TicketForm(AbstractTicketForm):
             self.fields['queue'].choices = queue_choices
 
         if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS:
-            assignable_users = User.objects.filter(is_active=True, is_staff=True).order_by(User.USERNAME_FIELD)
+            assignable_users = User.objects.filter(is_active=True, is_staff=True).order_by(User.USERNAME_FIELD)  # TODO perms: remove use of is_staff
         else:
             assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
         self.fields['assigned_to'].choices = [('', '--------')] + [(u.id, u.get_username()) for u in assignable_users]
@@ -604,7 +604,7 @@ class TicketCCForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(TicketCCForm, self).__init__(*args, **kwargs)
         if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_CC:
-            users = User.objects.filter(is_active=True, is_staff=True).order_by(User.USERNAME_FIELD)
+            users = User.objects.filter(is_active=True, is_staff=True).order_by(User.USERNAME_FIELD)  # TODO perms: remove use of is_staff
         else:
             users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
         self.fields['user'].queryset = users
@@ -616,7 +616,7 @@ class TicketCCUserForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(TicketCCUserForm, self).__init__(*args, **kwargs)
         if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_CC:
-            users = User.objects.filter(is_active=True, is_staff=True).order_by(User.USERNAME_FIELD)
+            users = User.objects.filter(is_active=True, is_staff=True).order_by(User.USERNAME_FIELD)  # TODO perms: remove use of is_staff
         else:
             users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
         self.fields['user'].queryset = users

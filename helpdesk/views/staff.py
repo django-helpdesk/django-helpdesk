@@ -68,13 +68,8 @@ from ..templated_email import send_templated_mail
 User = get_user_model()
 Query = get_query_class()
 
-if helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE:
-    # treat 'normal' users like 'staff'
-    staff_member_required = user_passes_test(
-        lambda u: u.is_authenticated and u.is_active)
-else:
-    staff_member_required = user_passes_test(
-        lambda u: u.is_authenticated and u.is_active and u.is_staff)
+staff_member_required = user_passes_test(
+    lambda u: u.is_authenticated and u.is_active and is_helpdesk_staff(u))
 
 
 def _get_queue_choices(queues):
@@ -358,7 +353,7 @@ def view_ticket(request, ticket_id):
         return update_ticket(request, ticket_id)
 
     if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS:
-        users = User.objects.filter(is_active=True, is_staff=True).order_by(User.USERNAME_FIELD)
+        users = User.objects.filter(is_active=True, is_staff=True).order_by(User.USERNAME_FIELD)  # TODO perms: remove use of is_staff
     else:
         users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
 
@@ -412,6 +407,7 @@ def view_ticket(request, ticket_id):
         'extra_data': extra_data,
         'properties': property_count,
         'taxlots': taxlot_count,
+        'is_staff': is_helpdesk_staff(request.user),
     })
 
 
@@ -487,8 +483,7 @@ def update_ticket(request, ticket_id, public=False):
     if not (public or (
             request.user.is_authenticated and
             request.user.is_active and (
-                is_helpdesk_staff(request.user) or
-                helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE))):
+                is_helpdesk_staff(request.user)))):
 
         key = request.POST.get('key')
         email = request.POST.get('mail')
@@ -897,7 +892,7 @@ ticket_attributes = (
     ('resolution', _('Resolution')),
 )
 
-
+# TODO fix
 @staff_member_required
 def merge_tickets(request):
     """
@@ -1175,7 +1170,7 @@ def ticket_list(request):
     return render(request, 'helpdesk/ticket_list.html', dict(
         context,
         default_tickets_per_page=request.user.usersettings_helpdesk.tickets_per_page,
-        user_choices=User.objects.filter(is_active=True, is_staff=True),
+        user_choices=User.objects.filter(is_active=True, is_staff=True),  # TODO perms: remove use of is_staff
         kb_items=KBItem.objects.all(),
         queue_choices=huser.get_queues(),
         status_choices=Ticket.STATUS_CHOICES,
