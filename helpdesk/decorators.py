@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import user_passes_test
 
 
 from helpdesk import settings as helpdesk_settings
-from seed.lib.superperms.orgs.decorators import requires_member #, requires_building_user
+from seed.lib.superperms.orgs.decorators import requires_member, requires_building_user
 from seed.lib.superperms.orgs.models import OrganizationUser
 
 
@@ -30,12 +30,11 @@ def check_staff_status(check_staff=False):  # 1st bool -- unused
                 return False
             org_user = org_user.first()  # TODO change later using the user's current org
 
-            # is_building_user = requires_building_user(org_user)
+            is_building_user = requires_building_user(org_user)
             is_member = requires_member(org_user)
 
             # If you're a building_user or lower than a member role in BEAM
-            # if is_building_user or not is_member:
-            if not is_member:
+            if is_building_user or not is_member:
                 return False
 
             # Whether or not a user has is_staff set to true is irrelevant in Helpdesk.
