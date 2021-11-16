@@ -15,10 +15,11 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-sm-8">
-        {% endif %}
+{% endif %}
             <h2>{% trans "Knowledgebase" %}</h2>
             <p>{% trans "We have listed a number of Knowledgebase articles for your perusal in the following categories. Please check to see if any of these articles address your problem prior to opening a support ticket." %}</p>
             {% for category in kb_categories %}
+            {% if category.public %}
             {% cycle 'one' 'two' 'three' as catnumperrow silent %}
             {% if catnumperrow == 'one' %}<div class="card-deck">{% endif %}
                 <div class="card" style="margin-top: 15px">
@@ -31,6 +32,7 @@
                     </div>
                 </div>
             {% if catnumperrow == 'three' or forloop.last %}</div>{% endif %}
+            {% endif %}
             {% endfor %}
 
         {% if helpdesk_settings.HELPDESK_VIEW_A_TICKET_PUBLIC and not user.is_authenticated and not user|is_helpdesk_staff %}
@@ -63,6 +65,6 @@
         </div>
     </div>
 </div>
-{% endif %}
+        {% endif %}
 
 {% endblock %}

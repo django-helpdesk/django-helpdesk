@@ -63,7 +63,7 @@ def article(request, slug, pk, iframe=False):
     except KeyError:
         pass
     template = 'helpdesk/kb_article.html'
-    staff = request.user.is_authenticated and request.user.is_staff
+    staff = request.user.is_authenticated and is_helpdesk_staff(request.user)
     return render(request, template, {
         'category': category,
         'item': item,
