@@ -145,6 +145,7 @@ def process_attachments(followup, attached_files):
                 'application/octet-stream',
                 size=attached.size,
             )
+            att.full_clean()
             att.save()
 
             if attached.size < max_email_attachment_size:
