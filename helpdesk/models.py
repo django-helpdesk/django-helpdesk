@@ -56,9 +56,18 @@ def get_markdown(text):
     if not text:
         return ""
 
-    schemes = '|'.join(helpdesk_settings.ALLOWED_URL_SCHEMES)
-    pattern = fr'([\[\s\S\]]*?)\((?!({schemes})).*:(.+)\)'
-    text = re.sub(pattern, '\\1(\\3)', text, flags=re.IGNORECASE)
+    pattern = fr'([\[\s\S\]]*?)\(([\s\S]*?):([\[\s\S\]]*?)\)'
+    # Regex check
+    if re.match(pattern, text):
+        # get get value of group regex
+        scheme = re.search(pattern, text, re.IGNORECASE).group(2)
+        # scheme check
+        if scheme in helpdesk_settings.ALLOWED_URL_SCHEMES:
+            replacement = '\\1(\\2:\\3)'
+        else:
+            replacement = '\\1(\\3)'
+
+        text = re.sub(pattern, replacement, text, flags=re.IGNORECASE)
 
     return mark_safe(
         markdown(
