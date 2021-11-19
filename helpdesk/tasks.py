@@ -1,8 +1,8 @@
-from celery.decorators import task
+from celery import shared_task
 
 from .email import process_email
 
 
-@task()
+@shared_task
 def helpdesk_process_email():
     process_email()
