@@ -15,6 +15,7 @@ from django.views.decorators.clickjacking import xframe_options_exempt
 from helpdesk import settings as helpdesk_settings
 from helpdesk import user
 from helpdesk.models import KBCategory, KBItem
+from helpdesk.decorators import is_helpdesk_staff
 
 
 def index(request):
