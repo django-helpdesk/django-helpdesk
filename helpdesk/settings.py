@@ -76,7 +76,10 @@ HELPDESK_AUTO_SUBSCRIBE_ON_TICKET_RESPONSE = getattr(settings,
                                                      'HELPDESK_AUTO_SUBSCRIBE_ON_TICKET_RESPONSE',
                                                      False)
 
-
+# URL schemes that are allowed within links
+ALLOWED_URL_SCHEMES = getattr(settings, 'ALLOWED_URL_SCHEMES', (
+     'file', 'ftp', 'ftps', 'http', 'https', 'irc', 'mailto', 'sftp', 'ssh', 'tel', 'telnet', 'tftp', 'vnc', 'xmpp',
+))
 ############################
 # options for public pages #
 ############################
