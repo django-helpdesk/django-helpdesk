@@ -56,7 +56,7 @@ def get_markdown(text):
     if not text:
         return ""
 
-    pattern = fr'([\[\s\S\]]*?)\(([\s\S]*?):([\[\s\S\]]*?)\)'
+    pattern = fr'([\[\s\S\]]*?)\(([\s\S]*?):([\s\S]*?)\)'
     # Regex check
     if re.match(pattern, text):
         # get get value of group regex
