@@ -57,8 +57,8 @@ def get_markdown(text):
         return ""
 
     schemes = '|'.join(helpdesk_settings.ALLOWED_URL_SCHEMES)
-    pattern = fr'\[(.+)\]\((?!({schemes})).*:(.+)\)'
-    text = re.sub(pattern, '[\\1](\\3)', text, flags=re.IGNORECASE)
+    pattern = fr'([\[\s\S\]]*?)\((?!({schemes})).*:(.+)\)'
+    text = re.sub(pattern, '\\1(\\3)', text, flags=re.IGNORECASE)
 
     return mark_safe(
         markdown(
