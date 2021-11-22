@@ -4,11 +4,13 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/python
 
 trigger:
-- master
+- unstable
+- stable
 - 0.3
 
 pr:
-- master
+- unstable
+- stable
 - 0.3
 
 pool:
