@@ -19,7 +19,7 @@ Testing
 -------
 
 If you don't mind testing pre-releases (don't use in production!), we appreciate
-continuous feedback on the `master` branch, which is our work toward the next
+continuous feedback on the `unstable` branch, which is our work toward the next
 major release. Please file bug reports, and tag the report with the "pre-release"
 tag.
 
@@ -35,21 +35,27 @@ pull request back into the appropriate branch of the
 
 Short story:
 
-* pull requests for `master` are for the next major release
-* pull requests for a current release should go to appropriate release branch
-  (for example, bugfixes for 0.3 should go to the `0.3` branch.)
+* pull requests for `unstable` are for the next major release
+* pull requests for `stable` are for the current release
 
 Longer story:
 
 In general, our git branching scheme looks like the following.
 
-* `master` always points to development for the next major release,
+* `unstable` always points to development for the next major release,
   major new features should go here
-* current and past major releases are found in their own branches:
+* `stable` always points to the latest stable release,
+  bugfixes and security patches should go here
+* current and past major releases can also be found in their own branches:
 
   * `0.3` is the branch for the 0.3 release and any bugfix releases
   * `0.2.x` is the branch for the 0.2 release and any bugfix releases
   * `0.1` is the branch for the legacy code; it is no longer supported
+  
+If you want to submit a specific patch for an older release,
+you can put your pull request against that branch specifically.
+However, we don't currently support any older release beyond
+the latest release (currently 0.3).
 
 We reserve the right to decline a pull request if it is not for
 the appropriate branch.
