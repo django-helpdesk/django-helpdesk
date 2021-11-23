@@ -55,7 +55,7 @@ Bootstrap overrides
 
 .row_tablehead, table.table caption {background-color: #dbd5d9;}
 table.table caption {
-    padding-left: 2em; 
+    padding-left: 2em;
     line-height: 2em; font-weight: bold;
 }
 table.ticket-stats caption {color: #fbff00; font-style: italic;}
@@ -101,15 +101,6 @@ table .tickettitle {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-/* DC font and background */
-body {
-    font-family: century-gothic, sans-serif;
-}
-
-.bg-dc {
-    background-color: #218d45;
 }
 
 .mass_action_el > * {

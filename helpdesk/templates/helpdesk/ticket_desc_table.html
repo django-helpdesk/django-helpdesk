@@ -16,6 +16,9 @@
                     | <a href="{% url 'helpdesk:delete' ticket.id %}" class="ticket-delete"><button class="btn btn-danger btn-sm"><i class="fas fa-trash-alt"></i> {% trans "Delete" %}</button></a>
                     {% if ticket.on_hold %} | <a href="{% url 'helpdesk:unhold' ticket.id %}" class="ticket-hold"><button class="btn btn-warning btn-sm"><i class="fas fa-play"></i> {% trans "Unhold" %}</button></a>{% else %} | <a href="{% url 'helpdesk:hold' ticket.id %}" class="ticket-hold"><button class="btn btn-warning btn-sm"><i class="fas fa-pause"></i> {% trans "Hold" %}</button></a>{% endif %}
                     </span></th></tr>
+					<tr class=''><th colspan='4'>
+						<a href="{{ ticket.ticket_url }}">Link to Public View</a>
+					</th></tr>
                 </thead>
                 <tbody>
                     {% for field in extra_data %}

@@ -11,6 +11,8 @@ from django.contrib.auth.models import Permission
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
@@ -76,7 +78,6 @@ def get_markdown(text, kb=False):
         extensions.append('markdown.extensions.attr_list')
     return mark_safe(markdown(text, extensions=extensions))
 
-
 class Queue(models.Model):
     """
     A queue is a collection of tickets into what would generally be business
@@ -86,6 +87,7 @@ class Queue(models.Model):
     a queue for each of Accounts, Pre-Sales, and Support.
 
     """
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
 
     title = models.CharField(
         _('Title'),
@@ -452,6 +454,9 @@ class FormType(models.Model):
     staff = models.BooleanField(_('Staff'), blank=True, default=True,
                                 help_text=_('Should this form be visible on the staff-side list of forms?'))
 
+    # Add Preset Form Fields to the Database, avoiding having to run a PSQL command in another terminal window.
+    # This will happen automatically upon FormType Creation
+
     class Meta:
         verbose_name = _("Form")
         verbose_name_plural = _("Forms")
@@ -491,6 +496,7 @@ class Ticket(models.Model):
     RESOLVED_STATUS = 3
     CLOSED_STATUS = 4
     DUPLICATE_STATUS = 5
+    REPLIED_STATUS = 6
 
     STATUS_CHOICES = (
         (OPEN_STATUS, _('Open')),
@@ -498,6 +504,7 @@ class Ticket(models.Model):
         (RESOLVED_STATUS, _('Resolved')),
         (CLOSED_STATUS, _('Closed')),
         (DUPLICATE_STATUS, _('Duplicate')),
+        (REPLIED_STATUS, _('Replied')),
     )
 
     PRIORITY_CHOICES = (
@@ -541,7 +548,7 @@ class Ticket(models.Model):
     due_date = models.DateTimeField(blank=True, null=True)
     submitter_email = models.EmailField(blank=True, null=True)
 
-    # BEAM fields
+    # BEAM fieldsclass
     ticket_form = models.ForeignKey(FormType, on_delete=models.PROTECT)
     beam_property = models.ManyToManyField(Property, blank=True, related_name='helpdesk_ticket',  # TODO make plural
                                            verbose_name='BEAM Property')
@@ -2066,3 +2073,20 @@ class TicketDependency(models.Model):
 
     def __str__(self):
         return '%s / %s' % (self.ticket, self.depends_on)
+
+
+
+#---
+# Signals. Should be placed in a separate signals.py file?
+# https://stackoverflow.com/questions/30494589/django-call-method-after-object-save-with-new-instance
+from helpdesk.preset_form_fields import get_preset_fields
+@receiver(post_save, sender=FormType)
+def insert_presets_to_db(instance, created, **kwargs):
+    # Generate the 13 different preset forms fields (with 19 fields each) and set them to a specific form type
+    kwargs_for_CF = get_preset_fields(instance.id)
+    # Only add preset fields if the object was just created
+    if created:
+        for kwarg_CF in kwargs_for_CF:
+            new_CustomField = CustomField(**kwarg_CF)
+            new_CustomField.save()
+#---
