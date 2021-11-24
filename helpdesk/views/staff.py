@@ -1801,10 +1801,32 @@ def calc_basic_ticket_stats(Tickets):
     all_open_tickets = Tickets.exclude(status=Ticket.CLOSED_STATUS)
     today = datetime.today()
 
+    date_3 = date_rel_to_today(today, 3)
+    date_7 = date_rel_to_today(today, 7)
+    date_14 = date_rel_to_today(today, 14)
     date_30 = date_rel_to_today(today, 30)
     date_60 = date_rel_to_today(today, 60)
+    date_3_str = date_3.strftime(CUSTOMFIELD_DATE_FORMAT)
+    date_7_str = date_7.strftime(CUSTOMFIELD_DATE_FORMAT)
+    date_14_str = date_14.strftime(CUSTOMFIELD_DATE_FORMAT)
     date_30_str = date_30.strftime(CUSTOMFIELD_DATE_FORMAT)
     date_60_str = date_60.strftime(CUSTOMFIELD_DATE_FORMAT)
+
+    # > 0 & <= 3
+    ota_le_3 = all_open_tickets.filter(created__gte=date_3_str)
+    N_ota_le_3 = len(ota_le_3)
+
+    # > 3 & <= 7
+    ota_le_7_ge_3 = all_open_tickets.filter(created__gte=date_7_str, created__lt=date_3_str)
+    N_ota_le_7_ge_3 = len(ota_le_7_ge_3)
+
+    # > 7 & <= 14
+    ota_le_14_ge_7 = all_open_tickets.filter(created__gte=date_14_str, created__lt=date_7_str)
+    N_ota_le_14_ge_7 = len(ota_le_14_ge_7)
+
+    # > 14
+    ota_ge_14 = all_open_tickets.filter(created__lt=date_14_str)
+    N_ota_ge_14 = len(ota_ge_14)
 
     # > 0 & <= 30
     ota_le_30 = all_open_tickets.filter(created__gte=date_30_str)
@@ -1821,14 +1843,20 @@ def calc_basic_ticket_stats(Tickets):
     # (O)pen (T)icket (S)tats
     ots = list()
     # label, number entries, color, sort_string
-    ots.append(['Tickets < 30 days', N_ota_le_30, 'success',
-                sort_string(date_30_str, ''), ])
-    ots.append(['Tickets 30 - 60 days', N_ota_le_60_ge_30,
-                'success' if N_ota_le_60_ge_30 == 0 else 'warning',
-                sort_string(date_60_str, date_30_str), ])
-    ots.append(['Tickets > 60 days', N_ota_ge_60,
-                'success' if N_ota_ge_60 == 0 else 'danger',
-                sort_string('', date_60_str), ])
+    ots.append(['Tickets < 3 days', N_ota_le_3, 'success',
+                sort_string(date_3_str, ''), ])
+    ots.append(['Tickets 4 - 7 days', N_ota_le_7_ge_3, 'success',
+                'success' if N_ota_le_7_ge_3 == 0 else 'warning',
+                sort_string(date_7_str, date_3_str), ])
+    ots.append(['Tickets 8 - 14 days', N_ota_le_14_ge_7, 'success',
+                'success' if N_ota_le_14_ge_7 == 0 else 'danger',
+                sort_string(date_14_str, date_7_str), ])
+#    ots.append(['Tickets 30 - 60 days', N_ota_le_60_ge_30,
+#                'success' if N_ota_le_60_ge_30 == 0 else 'warning',
+#                sort_string(date_60_str, date_30_str), ])
+    ots.append(['Tickets > 14 days', N_ota_ge_14,
+                'success' if N_ota_ge_14 == 0 else 'danger',
+                sort_string('', date_14_str), ])
 
     # all closed tickets - independent of user.
     all_closed_tickets = Tickets.filter(status=Ticket.CLOSED_STATUS)
