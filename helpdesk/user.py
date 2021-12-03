@@ -66,6 +66,8 @@ class HelpdeskUser:
         :param queue: The django-helpdesk Queue instance
         :return: True if the user has permission (either by default or explicitly), false otherwise
         """
+        if self.user.is_anonymous:  # If someone who is not logged in at all
+            return False
         if self.user.default_organization_id != queue.organization.id:
             return False
         elif self.has_full_access():
@@ -83,7 +85,7 @@ class HelpdeskUser:
         user = self.user
         if self.can_access_queue(ticket.queue):
             return True
-        elif self.has_full_access() or \
+        elif (self.has_full_access() and self.user.default_organization == ticket.queue.organization) or \
             (ticket.assigned_to and user.id == ticket.assigned_to.id):
             return True
         else:

@@ -720,10 +720,11 @@ class Ticket(models.Model):
             protocol = 'https'
         else:
             protocol = 'http'
-        return u"%s://%s%s?ticket=%s&email=%s&key=%s" % (
+        return u"%s://%s%s?org=%s&ticket=%s&email=%s&key=%s" % (
             protocol,
             site.domain,
             reverse('helpdesk:public_view'),
+            self.queue.organization.id,
             self.ticket_for_url,
             self.submitter_email,
             self.secret_key

@@ -498,7 +498,7 @@ def update_ticket(request, ticket_id, public=False):
     if not (public or (
             request.user.is_authenticated and
             request.user.is_active and (
-                is_helpdesk_staff(request.user) or
+                (is_helpdesk_staff(request.user)) or
                 helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE))):
 
         key = request.POST.get('key')
@@ -775,8 +775,10 @@ def update_ticket(request, ticket_id, public=False):
 
 def return_to_ticket(user, helpdesk_settings, ticket):
     """Helper function for update_ticket"""
-
-    if is_helpdesk_staff(user):
+    huser = HelpdeskUser(user)
+    print(huser.can_access_ticket(ticket))
+    print(huser.has_full_access())
+    if is_helpdesk_staff(user) and huser.can_access_ticket(ticket):
         return HttpResponseRedirect(ticket.get_absolute_url())
     else:
         return HttpResponseRedirect(ticket.ticket_url)

@@ -1,6 +1,18 @@
 {% load i18n humanize ticket_to_link %}
 {% load static %}
 {% load helpdesk_util %}
+<script>
+copy_public_link = function() {
+  console.log('{{ticket.ticket_url}}')
+  var input = document.createElement('input');
+  input.value = '{{ticket.ticket_url}}';
+  document.body.appendChild(input);
+  input.select();
+  document.execCommand("copy");
+  document.body.removeChild(input);
+}
+</script>
+
 <div class="card mb-3">
     <!--div class="card-header">
         {# trans "Ticket Summary" #}
@@ -17,7 +29,7 @@
                     {% if ticket.on_hold %} | <a href="{% url 'helpdesk:unhold' ticket.id %}" class="ticket-hold"><button class="btn btn-warning btn-sm"><i class="fas fa-play"></i> {% trans "Unhold" %}</button></a>{% else %} | <a href="{% url 'helpdesk:hold' ticket.id %}" class="ticket-hold"><button class="btn btn-warning btn-sm"><i class="fas fa-pause"></i> {% trans "Hold" %}</button></a>{% endif %}
                     </span></th></tr>
 					<tr class=''><th colspan='4'>
-						<a href="{{ ticket.ticket_url }}">Link to Public View</a>
+            <a href="#" onclick="copy_public_link()">Click to copy Public Link to your Clipboard</a>
 					</th></tr>
                 </thead>
                 <tbody>

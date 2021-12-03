@@ -169,6 +169,7 @@ def search_for_ticket(request, error_message=None):
 
 @protect_view
 def view_ticket(request):
+    ticket_org = request.GET.get('org', None)
     ticket_req = request.GET.get('ticket', None)
     email = request.GET.get('email', None)
     key = request.GET.get('key', '')
@@ -187,8 +188,7 @@ def view_ticket(request):
             ticket = Ticket.objects.get(id=ticket_id, submitter_email__iexact=email, secret_key__iexact=key)
     except (ObjectDoesNotExist, ValueError):
         return search_for_ticket(request, _('Invalid ticket ID or e-mail address. Please try again.'))
-
-    if is_helpdesk_staff(request.user):
+    if is_helpdesk_staff(request.user) and ticket_org == request.user.default_organization_id:
         redirect_url = reverse('helpdesk:view', args=[ticket_id])
         if 'close' in request.GET:
             redirect_url += '?close'
