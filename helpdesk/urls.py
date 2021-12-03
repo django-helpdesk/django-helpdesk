@@ -161,6 +161,9 @@ urlpatterns = [
         staff.timeline_ticket_list,
         name="timeline_ticket_list"),
 
+    url(r'set_default_org/(?P<user_id>[0-9]+)/(?P<org_id>[0-9]+)/$',
+        staff.set_default_org,
+        name="set_default_org")
 ]
 
 urlpatterns += [
