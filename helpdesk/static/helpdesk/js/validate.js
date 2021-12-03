@@ -9,7 +9,7 @@ var key = {
 //LOCAL    affordable_list: 'type_affordable_housing',
     acp_list: 'e_acp_type',
     property_list: 'e_property_type',
-//LOCAL    property_list: 'property_type',
+//LOCAL	property_list: 'property_type',
     pathway_list: 'e_pathway',
 };
 var id = {
@@ -134,7 +134,7 @@ $(id.property_list).change(function(){
     }
    //High performing categories, hide Standard Target Pathway
     if ($.inArray($(id.property_list).val(), high_perf) == -1) {
-//        $(id.pathway_list + " option[value='Standard Target Pathway']").remove();
+        $(id.pathway_list + " option[value='Standard Target Pathway']").remove();
     } else {
         pathway_options = []
         var values = $(id.pathway_list + " option").map(function() {pathway_options.push(this.value);})
