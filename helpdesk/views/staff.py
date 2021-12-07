@@ -776,8 +776,6 @@ def update_ticket(request, ticket_id, public=False):
 def return_to_ticket(user, helpdesk_settings, ticket):
     """Helper function for update_ticket"""
     huser = HelpdeskUser(user)
-    print(huser.can_access_ticket(ticket))
-    print(huser.has_full_access())
     if is_helpdesk_staff(user) and huser.can_access_ticket(ticket):
         return HttpResponseRedirect(ticket.get_absolute_url())
     else:

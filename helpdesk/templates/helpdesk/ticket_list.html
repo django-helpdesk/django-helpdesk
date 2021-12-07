@@ -290,6 +290,7 @@ thead input {
         function get_url(row) {
             return "{% url 'helpdesk:view' 1234 %}".replace(/1234/, row.id.toString());
         }
+
         $(document).ready(function () {
             // Duplicate thead for column filtering
             $('#ticketTable thead tr').clone(true).addClass('filters').appendTo('#ticketTable thead');
@@ -342,6 +343,9 @@ thead input {
                                     row.id + '. ' +
                                     row.title + '</a></div>';
                             }
+                            else {
+                                data = row.id + '. ' + row.title;
+                            }
                             return data
                         }
                     },
@@ -381,44 +385,38 @@ thead input {
                     {data: "time_spent", "visible": false},
                     {data: "kbitem"},
                 ],
-            orderCellsTop: true,
-            fixedHeader: true,
-            initComplete: function () {
-              var api = this.api();
-              // For each column
-              api.columns().eq(0).each(function (colIdx) {
-                  // Set the header cell to contain the input element
-                  var cell = $('.filters th').eq(
-                    $(api.column(colIdx).header()).index()
-                  );
-                  var title = $(cell).text();
-                  if (title != "") {
-                    $(cell).html('<input type="text" placeholder="' + title + '" />');
-                  }
-                  // On every keypress in this input
-                  $('input',
-                    $('.filters th').eq($(api.column(colIdx).header()).index())
-                  )
-                    .off('keyup change')
-                    .on('keyup change', function (e) {
-                      e.stopPropagation();
-
-                      // Get the search value
-                      $(this).attr('title', $(this).val());
-                      var regexr = '({search})'; //$(this).parents('th').find('select').val();
-                      console.log(regexr.replace('{search}', '(((' + this.value + ')))'));
-                      console.log(this.value);
-                      // Search the column for that value
-                      api
-                        .column(colIdx)
-                        .search(
-                            this.value
+                orderCellsTop: true,
+                fixedHeader: true,
+                initComplete: function () {
+                    var api = this.api();
+                    // For each column
+                    api.columns().eq(0).each(function (colIdx) {
+                        // Set the header cell to contain the input element
+                        var cell = $('.filters th').eq(
+                            $(api.column(colIdx).header()).index()
+                        );
+                        var title = $(cell).text();
+                        if (title != "") {
+                            $(cell).html('<input type="text" placeholder="' + title + '" />');
+                        }
+                        // On every keypress in this input
+                        $('input',
+                            $('.filters th').eq($(api.column(colIdx).header()).index())
                         )
-                        .draw();
+                        .off('keyup change')
+                        .on('keyup change', function (e) {
+                            e.stopPropagation();
+                            api
+                                .column(colIdx)
+                                .search(
+                                    this.value
+                                )
+                                .draw();
+                        });
                     });
+                },
             });
-				},
-            });
+
             {# Timeline initialization when tab is displayed #}
             // The TL.Timeline constructor takes at least two arguments:
             // the id of the Timeline container (no '#'), and
@@ -427,6 +425,7 @@ thead input {
             // and the element must have CSS styling to give it width and height
             // optionally, a third argument with configuration options can be passed.
             // See below for more about options.
+
             let timeline_loaded = false;
             $('#timelinetabcontents-tab').on('shown.bs.tab', function (e) {
                 if (!timeline_loaded) {
