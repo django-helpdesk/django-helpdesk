@@ -137,6 +137,19 @@ urlpatterns = [
         staff.delete_saved_query,
         name='delete_query'),
 
+    url(r'^reject_query/(?P<id>[0-9]+)/$',
+        staff.reject_saved_query,
+        name='reject_query'),
+
+    url(r'^reshare_query/(?P<id>[0-9]+)/$',
+        staff.reshare_saved_query,
+        name='reshare_query'),
+
+    url(r'^unshare_query/(?P<id>[0-9]+)/$',
+        staff.unshare_saved_query,
+        name='unshare_query'),
+
+
     url(r'^settings/$',
         staff.EditUserSettingsView.as_view(),
         name='user_settings'),

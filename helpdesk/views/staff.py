@@ -73,7 +73,7 @@ if helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE:
         lambda u: u.is_authenticated and u.is_active)
 else:
     staff_member_required = user_passes_test(
-        lambda u: u.is_authenticated and u.is_active and u.is_staff)
+        lambda u: u.is_authenticated and u.is_active and is_helpdesk_staff(u))
 
 @helpdesk_staff_member_required
 def set_default_org(request, user_id, org_id):
@@ -1163,7 +1163,9 @@ def ticket_list(request):
     urlsafe_query = query_to_base64(query_params)
     Query(huser, base64query=urlsafe_query).refresh_query()
 
-    user_saved_queries = SavedSearch.objects.filter(Q(user=request.user) | Q(shared__exact=True))
+    # Return queries that the user created, or that have been shared with everyone and the user hasn't rejected
+    user_saved_queries = SavedSearch.objects.filter(Q(user=request.user)
+                                                    | (Q(shared__exact=True) & ~Q(opted_out_users__in=[request.user])))
 
     search_message = ''
     if query_params['search_string'] and settings.DATABASES['default']['ENGINE'].endswith('sqlite'):
@@ -1205,7 +1207,7 @@ ticket_list = staff_member_required(ticket_list)
 
 class QueryLoadError(Exception):
     pass
-
+# Q(user=request.user) | (Q(shared__exact=True) & ~Q(opted_out_users__in=[request.user]))
 
 def load_saved_query(request, query_params=None):
     saved_query = None
@@ -1213,7 +1215,8 @@ def load_saved_query(request, query_params=None):
     if request.GET.get('saved_query', None):
         try:
             saved_query = SavedSearch.objects.get(
-                Q(pk=request.GET.get('saved_query')) & (Q(shared=True) | Q(user=request.user))
+                Q(pk=request.GET.get('saved_query')) &
+                ((Q(shared=True) & ~Q(opted_out_users__in=[request.user])) | Q(user=request.user))
             )
         except (SavedSearch.DoesNotExist, ValueError):
             raise QueryLoadError()
@@ -1632,6 +1635,45 @@ def delete_saved_query(request, id):
 
 
 delete_saved_query = staff_member_required(delete_saved_query)
+
+
+@helpdesk_staff_member_required
+def reject_saved_query(request, id):
+    user = request.user
+    query = get_object_or_404(SavedSearch, id=id)
+
+    query.opted_out_users.add(user)
+    return HttpResponseRedirect(reverse('helpdesk:list'))
+
+
+reject_saved_query = staff_member_required(reject_saved_query)
+
+
+@helpdesk_staff_member_required
+def reshare_saved_query(request, id):
+    user = request.user
+    query = get_object_or_404(SavedSearch, id=id, user=user)
+
+    query.opted_out_users.clear()
+    query.shared = True
+    query.save()
+    return HttpResponseRedirect(reverse('helpdesk:list'))
+
+
+reject_saved_query = staff_member_required(reject_saved_query)
+
+
+@helpdesk_staff_member_required
+def unshare_saved_query(request, id):
+    user = request.user
+    query = get_object_or_404(SavedSearch, id=id, user=user)
+
+    query.shared = False
+    query.save()
+    return HttpResponseRedirect(reverse('helpdesk:list'))
+
+
+reject_saved_query = staff_member_required(reject_saved_query)
 
 
 class EditUserSettingsView(MustBeStaffMixin, UpdateView):

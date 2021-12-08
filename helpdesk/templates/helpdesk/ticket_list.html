@@ -179,12 +179,27 @@
                                 <li class="list-group-item">
                                     <input class="btn btn-primary btn-sm" type='submit' value='{% trans "Apply Filters" %}'/>
                                 </li>
-                                {% if from_saved_query and saved_query.user == user %}
+                                {% if from_saved_query %}
                                     <li class="list-group-item">
+                                    {% if saved_query.user == user %}
                                         {% blocktrans with saved_query.title as query_name %}You are currently viewing saved query <strong>"{{ query_name }}"</strong>.{% endblocktrans %}
-                                        <a href='{% url 'helpdesk:delete_query' saved_query.id %}'>
-                                            {% trans "Delete Saved Query" %}
+                                        <a href="{% url 'helpdesk:delete_query' saved_query.id %}" class="btn btn-primary btn-sm">
+                                            {% trans "Delete Query" %}
                                         </a>
+                                        {% if saved_query.shared %}
+                                            <a href="{% url 'helpdesk:unshare_query' saved_query.id %}" class="btn btn-primary btn-sm">
+                                                {% trans "Un-share Query" %}
+                                            </a>
+                                        {% else %}
+                                            <a href="{% url 'helpdesk:reshare_query' saved_query.id %}" class="btn btn-primary btn-sm">
+                                                {% trans "Re-share Query" %}
+                                            </a>
+                                        {% endif %}
+                                    {% elif saved_query.user != user %}
+                                        <a href="{% url 'helpdesk:reject_query' saved_query.id %}" class="btn btn-primary btn-sm">
+                                            {% trans "Reject Query" %}
+                                        </a>
+                                    {% endif %}
                                     </li>
                                 {% endif %}
                                 {% if from_saved_query %}

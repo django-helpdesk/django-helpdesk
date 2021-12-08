@@ -1340,6 +1340,9 @@ class KBCategory(models.Model):
     listing of questions & answers.
     """
 
+    # TODO Add Organizations here for later filtering
+    # TODO In permissions file, also make sure that it's filtering on org if queue not available
+
     name = models.CharField(
         _('Name of the category'),
         max_length=100,
@@ -1590,6 +1593,13 @@ class SavedSearch(models.Model):
     query = models.TextField(
         _('Search Query'),
         help_text=_('Pickled query object. Be wary changing this.'),
+    )
+
+    opted_out_users = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        blank=True,
+        help_text=_('Users who have opted out of seeing this query'),
+        related_name='opted_out'
     )
 
     def __str__(self):
