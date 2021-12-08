@@ -78,6 +78,7 @@ def get_markdown(text, kb=False):
         extensions.append('markdown.extensions.attr_list')
     return mark_safe(markdown(text, extensions=extensions))
 
+
 class Queue(models.Model):
     """
     A queue is a collection of tickets into what would generally be business
@@ -438,6 +439,7 @@ class Queue(models.Model):
 def mk_secret():
     return str(uuid.uuid4())
 
+
 class FormType(models.Model):
 
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
@@ -472,6 +474,18 @@ class FormType(models.Model):
 
     def get_extra_field_names(self):
         return CustomField.objects.filter(ticket_form=self.id, is_extra_data=True).values_list('field_name', flat=True)
+
+
+@receiver(post_save, sender=FormType)
+def insert_presets_to_db(instance, created, **kwargs):
+    from helpdesk.preset_form_fields import get_preset_fields
+    # Generate the 13 different preset forms fields (with 19 fields each) and set them to a specific form type
+    kwargs_for_CF = get_preset_fields(instance.id)
+    # Only add preset fields if the object was just created
+    if created:
+        for kwarg_CF in kwargs_for_CF:
+            new_CustomField = CustomField(**kwarg_CF)
+            new_CustomField.save()
 
 
 class Ticket(models.Model):
@@ -2084,20 +2098,3 @@ class TicketDependency(models.Model):
 
     def __str__(self):
         return '%s / %s' % (self.ticket, self.depends_on)
-
-
-
-#---
-# Signals. Should be placed in a separate signals.py file?
-# https://stackoverflow.com/questions/30494589/django-call-method-after-object-save-with-new-instance
-from helpdesk.preset_form_fields import get_preset_fields
-@receiver(post_save, sender=FormType)
-def insert_presets_to_db(instance, created, **kwargs):
-    # Generate the 13 different preset forms fields (with 19 fields each) and set them to a specific form type
-    kwargs_for_CF = get_preset_fields(instance.id)
-    # Only add preset fields if the object was just created
-    if created:
-        for kwarg_CF in kwargs_for_CF:
-            new_CustomField = CustomField(**kwarg_CF)
-            new_CustomField.save()
-#---

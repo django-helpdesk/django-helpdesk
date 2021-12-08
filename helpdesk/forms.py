@@ -22,6 +22,8 @@ from helpdesk.models import (Ticket, Queue, FollowUp, IgnoreEmail, TicketCC,
                              CustomField, TicketCustomFieldValue, TicketDependency, UserSettings, KBItem,
                              FormType)
 from helpdesk import settings as helpdesk_settings
+from helpdesk.email import create_ticket_cc
+import re
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -149,11 +151,17 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
         # CustomField already excludes builtin_fields and SEED fields
         display_objects = CustomField.objects.filter(ticket_form=form_id).exclude(field_name='queue')
 
+        # Manually add in queue, not doing so would show all queues
+        queues = Queue.objects.filter(organization=self.instance.ticket_form.organization)
+        setattr(self.fields['queue'], 'queryset', queues)
+
         # Disable and add help_text to the merged_to field on this form
         self.fields['merged_to'].disabled = True
         self.fields['merged_to'].help_text = _('This ticket is merged into the selected ticket.')
+
         for display_data in display_objects:
             initial_value = None
+
             if display_data.editable and display_data.is_extra_data:
                 try:
                     initial_value = extra_data[display_data.field_name]
@@ -439,6 +447,15 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
             ]
             self.order_fields(ordering)
 
+    def _add_cc_emails(self, ticket):
+        if self.cleaned_data['cc_emails']:
+            # Parse cc_emails for emails, should be separated by a space at least
+            # Could be in format name <email> or simply <email> or email
+            emails = re.findall("([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)", self.cleaned_data['cc_emails'])
+            name_placeholder = [None] * len(emails)
+            emails = list(zip(name_placeholder, emails))
+            create_ticket_cc(ticket, emails)
+
 
 class TicketForm(AbstractTicketForm):
     """
@@ -501,6 +518,8 @@ class TicketForm(AbstractTicketForm):
 
         ticket.save()
 
+        self._add_cc_emails(ticket)
+
         if self.cleaned_data['assigned_to']:
             title = _('Ticket Opened & Assigned to %(name)s') % {
                 'name': ticket.get_assigned_to or _("<invalid user>")
@@ -544,7 +563,7 @@ class PublicTicketForm(AbstractTicketForm):
                 self.fields[field].widget = forms.HiddenInput()
             if field in readonly_fields:
                 self.fields[field].disabled = True
-   
+
         public_queues = Queue.objects.filter(allow_public_submission=True)  # TODO base off org_id
 
         if len(public_queues) == 0:
@@ -564,6 +583,8 @@ class PublicTicketForm(AbstractTicketForm):
         if queue.default_owner and not ticket.assigned_to:
             ticket.assigned_to = queue.default_owner
         ticket.save()
+
+        self._add_cc_emails(ticket)
 
         followup = self._create_follow_up(
             ticket, title=_('Ticket Opened Via Web'), user=user)

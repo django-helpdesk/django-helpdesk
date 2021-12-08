@@ -1,7 +1,12 @@
 import datetime
 # Contains the SQL command used to initialze the databse.
 '''
-// Replace # with Ticket Form Id
+// Preset Fields:
+//    Queue           Submitter Email     Primary Contact Name        Subject/Title           Description
+//    Building Name   Building Address    Building ID                 Portfolio ManagerID     Attachments
+//    Due Date        Priority            Email
+
+// Replace # with a FormType id/pk
 PSQL Command
 INSERT INTO helpdesk_customfield(
 field_name, label, help_text,
@@ -87,88 +92,101 @@ NOW(), NOW(), #),
 null,null,null,null, False, False,
 13,13,
 False, False, True, True, False,
+NOW(), NOW(), #),
+
+('cc_emails', 'Email Addresses to CC', 'List email addresses to add to a ticket's CC list when it is created.',
+'text',null,null,null,False,True,
+14,14,
+False,False,False,True,False,
 NOW(), NOW(), #);
+
 '''
 
 def get_preset_fields(ticket_form):
     to_insert = [
             ('queue', 'Queue', '',
-            None,None,None,None, False, False,
-            1,1,
-            True, True, True, True, False,
+            None, None, None, None, False, False,
+            1, 1,
+            True, False, True, True, False,
             datetime.datetime.now(), datetime.datetime.now(), ticket_form),
 
             ('submitter_email', 'Submitter Email', 'This e-mail address will receive copies of all public updates to this ticket.',
-            'email',200,None,None, False, True,
-            2,2,
+            'email', 200, None, None, False, True,
+            2, 2,
             True, False, True, True, False,
             datetime.datetime.now(), datetime.datetime.now(), ticket_form),
 
             ('contact_name', 'Primary Contact Name', '',
-            'varchar',200,None,None, False, False,
-            3,3,
+            'varchar', 200, None, None, False, False,
+            3, 3,
             True, False, True, False, False,
             datetime.datetime.now(), datetime.datetime.now(), ticket_form),
 
             ('contact_email', 'Primary Contact Email', 'This e-mail address will receive copies of all public updates to this ticket.',
-            'email',200,None,None, False, True,
-            4,4,
+            'email', 200, None, None, False, True,
+            4, 4,
             True, False, True, False, False,
             datetime.datetime.now(), datetime.datetime.now(), ticket_form),
 
             ('title', 'Subject', '',
-            'varchar',200,None,None, False, False,
-            5,5,
+            'varchar', 200, None, None, False, False,
+            5, 5,
             False, False, True, True, False,
             datetime.datetime.now(), datetime.datetime.now(), ticket_form),
 
             ('description', 'Description', '',
-            'text',None,None,None, False, False,
-            6,6,
+            'text', None, None, None, False, False,
+            6, 6,
             False, False, True, True, False,
             datetime.datetime.now(), datetime.datetime.now(), ticket_form),
 
             ('building_name', 'Building Name', '',
-            'varchar',200,None,None, False, False,
-            7,7,
+            'varchar', 200, None, None, False, False,
+            7, 7,
             False, False, True, False, False,
             datetime.datetime.now(), datetime.datetime.now(), ticket_form),
 
             ('building_address', 'Building Address', '',
-            'text',None,None,None, False, False,
-            8,8,
+            'text', None, None, None, False, False,
+            8, 8,
             False, False, True, False, False,
             datetime.datetime.now(), datetime.datetime.now(), ticket_form),
 
             ('building_id', 'Building ID', '',
-            'varchar',200,None,None, False, False,
-            9,9,
+            'varchar', 200, None, None, False, False,
+            9, 9,
             False, False, True, False, False,
             datetime.datetime.now(), datetime.datetime.now(), ticket_form),
 
             ('pm_id', 'Portfolio Manager ID', '',
-            'varchar',200,None,None, False, False,
-            10,10,
+            'varchar', 200, None, None, False, False,
+            10, 10,
             False, False, True, False, False,
             datetime.datetime.now(), datetime.datetime.now(), ticket_form),
 
             ('attachment', 'Attachments', '',
-            None,None,None,None, False, False,
-            11,11,
+            None, None, None, None, False, False,
+            11, 11,
             False, False, False, True, False,
             datetime.datetime.now(), datetime.datetime.now(), ticket_form),
 
             ('due_date', 'Due Date', '',
-            None,None,None,None, False, False,
-            12,12,
+            None, None, None, None, False, False,
+            12, 12,
             False, False, True, True, False,
             datetime.datetime.now(), datetime.datetime.now(), ticket_form),
 
             ('priority', 'Priority', 'Please select a priority carefully. If unsure, leave it as \'3\'.',
-            None,None,None,None, False, False,
-            13,13,
+            None, None, None, None, False, False,
+            13, 13,
             False, False, True, True, False,
-            datetime.datetime.now(), datetime.datetime.now(), ticket_form)
+            datetime.datetime.now(), datetime.datetime.now(), ticket_form),
+
+            ('cc_emails', 'Email Addresses to CC', "List emails to add to a ticket's CC list when it is created.",
+            'text', None, None, None, False, False,
+            14, 14,
+            False, False, False, True, False,
+            datetime.datetime.now(), datetime.datetime.now(), ticket_form),
             ]
     to_return = []
     for field in to_insert:
