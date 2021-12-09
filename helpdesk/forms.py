@@ -44,29 +44,37 @@ CUSTOMFIELD_TIME_FORMAT = "%H:%M:%S"
 CUSTOMFIELD_DATETIME_FORMAT = f"{CUSTOMFIELD_DATE_FORMAT} {CUSTOMFIELD_TIME_FORMAT}"
 
 
-def _building_lookup(instance, changed_data):
+def _building_lookup(ticket_form_id, changed_data):
     """
-    :param instance: Ticket object.
-    :param changed_data: List of strings. The strings are names of all changed form fields.
+    :param ticket_form_id: int. The ID of a ticket.
+    :param changed_data: list of strings. The strings are names of all changed form fields.
+    :return: list of strings. The strings are names of all changed field forms that are associated with columns
 
-    Checks if any changed fields are associated with columns in BEAM.
-    If so, calls Ticket.building_lookup() to pair the Ticket object with buildings in BEAM.
-
-    :return: Ticket object with updated beam_property and beam_taxlot values.
-
-    Called by save() in EditTicketForm and AbstractTicketField.
-    TODO: This process should be moved to the Ticket model. It's currently in forms because it's easy
-    TODO: to get the changed data that way.
+    Checks if any changed fields are associated with columns in BEAM, and returns a list of them.
+    Called by save() in EditTicketForm, TicketForm and PublicTicketForm.
     """
     changed_data = map(lambda f: f.replace('e_', '', 1) if f.startswith('e_') else f, changed_data)
     custom_fields = CustomField.objects.filter(
-        ticket_form=instance.ticket_form_id,
+        ticket_form=ticket_form_id,
         field_name__in=changed_data,
     ).exclude(columns=None)
     if custom_fields.exists():
-        return instance.building_lookup()
-    return instance
+        return custom_fields.values_list('field_name', flat=True)
+    return []
 
+def _field_ordering(queryset):
+    # ordering fields based on form_ordering
+    # if form_ordering is None, field is sorted to end of list
+    ordering = sorted(
+        queryset.values('field_name', 'form_ordering', 'is_extra_data'),
+        key=lambda x: float('inf') if x['form_ordering'] is None else x['form_ordering']
+    )
+    ordering = [
+        "e_%s" % field['field_name'] if field['is_extra_data']
+        else field['field_name']
+        for field in ordering
+    ]
+    return ordering
 
 class CustomFieldMixin(object):
     """
@@ -138,6 +146,14 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
     class Media:
         js = ('helpdesk/js/init_due_date.js', 'helpdesk/js/init_datetime_classes.js', 'helpdesk/js/validate.js')
 
+    lookup = forms.BooleanField(
+        widget=forms.CheckboxInput(attrs={'class': 'form-control'}),
+        label=_('Use this data to match this ticket to a building?'),
+        help_text=_('This will override previous pairings with buildings.'),
+        initial=False,
+        required=False,
+    )
+
     def __init__(self, *args, **kwargs):
         """
         Add any custom fields that are defined to the form
@@ -178,11 +194,12 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
                     'initial': initial_value,
                 }
                 self.customfield_to_field(display_data, instanceargs)
+
             elif display_data.field_name in self.fields:
                 if not display_data.editable:
                     self.fields[display_data.field_name].widget = forms.HiddenInput()
                 else:
-                    attrs = ['label', 'help_text', 'list_values', 'required', 'data_type']  # TODO add ordering -- or not?
+                    attrs = ['label', 'help_text', 'list_values', 'required', 'data_type']
                     for attr in attrs:
                         display_info = getattr(display_data, attr, None)
                         if display_info is not None and display_info != '':
@@ -195,6 +212,8 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
                                 setattr(self.fields[display_data.field_name], attr, display_info)
                             # print('--%s: %s' % (attr, display_info))
         self.fields['extra_data'].widget = forms.HiddenInput()
+
+        self.order_fields(_field_ordering(display_objects))
 
     def clean(self):
         cleaned_data = super(EditTicketForm, self).clean()
@@ -212,11 +231,13 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
         return cleaned_data
 
     def save(self, commit=True):
-        # Overrides save() SOLELY to include building lookup method.
+        # Overrides save() to include building lookup method.
         instance = super(EditTicketForm, self).save(commit=False)
-        instance = _building_lookup(instance, self.changed_data)
+        changed_fields = None
+        # if self.cleaned_data['lookup']:
+            # changed_fields = _building_lookup(instance.ticket_form.id, self.changed_data) # TODO Temp removed
         if commit:
-            instance.save()
+            instance.save(query_fields=changed_fields)
         return instance
 
 
@@ -296,14 +317,6 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
             cleaned_data['queue'] = form.queue.id
 
         return cleaned_data
-
-    def save(self, commit=True):
-        # Overrides save() SOLELY to include building lookup method.
-        instance = super(AbstractTicketForm, self).save(commit=False)
-        instance = _building_lookup(instance, self.changed_data)
-        if commit:
-            instance.save()
-        return instance
 
     def _create_ticket(self):
         kbitem = None
@@ -401,8 +414,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
 
             for field in queryset:
                 if field.field_name in self.fields:
-                    attrs = ['label', 'help_text', 'list_values', 'required',
-                             'data_type']  # TODO view-side ordering too
+                    attrs = ['label', 'help_text', 'list_values', 'required', 'data_type']
                     for attr in attrs:
                         display_info = getattr(field, attr, None)
                         if display_info is not None and display_info != '':
@@ -426,18 +438,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
                     self.customfield_to_field(field, {})
                 self.fields[field.field_name].widget = forms.HiddenInput()
 
-            # ordering fields based on form_ordering
-            # if form_ordering is None, field is sorted to end of list
-            ordering = sorted(
-                queryset.values('field_name', 'form_ordering', 'is_extra_data'),
-                key=lambda x: float('inf') if x['form_ordering'] is None else x['form_ordering']
-            )
-            ordering = [
-                "e_%s" % field['field_name'] if field['is_extra_data']
-                else field['field_name']
-                for field in ordering
-            ]
-            self.order_fields(ordering)
+            self.order_fields(_field_ordering(queryset))
 
 
 class TicketForm(AbstractTicketForm):
@@ -461,7 +462,6 @@ class TicketForm(AbstractTicketForm):
         label=_('Case owner'),
         help_text=_('If you select an owner other than yourself, they\'ll be '
                     'e-mailed details of this ticket immediately.'),
-
         choices=()
     )
 
@@ -478,7 +478,7 @@ class TicketForm(AbstractTicketForm):
             self.fields['queue'].choices = queue_choices
 
         if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS:
-            assignable_users = User.objects.filter(is_active=True, is_staff=True).order_by(User.USERNAME_FIELD)
+            assignable_users = User.objects.filter(is_active=True, is_staff=True).order_by(User.USERNAME_FIELD)  # TODO perms: remove use of is_staff
         else:
             assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
         self.fields['assigned_to'].choices = [('', '--------')] + [(u.id, u.get_username()) for u in assignable_users]
@@ -499,7 +499,8 @@ class TicketForm(AbstractTicketForm):
         elif queue.default_owner and not ticket.assigned_to:
             ticket.assigned_to = queue.default_owner
 
-        ticket.save()
+        changed_fields = None  # _building_lookup(ticket.ticket_form.id, self.changed_data) # TODO Temp removed
+        ticket.save(query_fields=changed_fields)
 
         if self.cleaned_data['assigned_to']:
             title = _('Ticket Opened & Assigned to %(name)s') % {
@@ -563,7 +564,9 @@ class PublicTicketForm(AbstractTicketForm):
 
         if queue.default_owner and not ticket.assigned_to:
             ticket.assigned_to = queue.default_owner
-        ticket.save()
+
+        changed_fields = None  # _building_lookup(ticket.ticket_form.id, self.changed_data) # TODO Temp removed
+        ticket.save(query_fields=changed_fields)
 
         followup = self._create_follow_up(
             ticket, title=_('Ticket Opened Via Web'), user=user)
@@ -601,7 +604,7 @@ class TicketCCForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(TicketCCForm, self).__init__(*args, **kwargs)
         if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_CC:
-            users = User.objects.filter(is_active=True, is_staff=True).order_by(User.USERNAME_FIELD)
+            users = User.objects.filter(is_active=True, is_staff=True).order_by(User.USERNAME_FIELD)  # TODO perms: remove use of is_staff
         else:
             users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
         self.fields['user'].queryset = users
@@ -613,7 +616,7 @@ class TicketCCUserForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(TicketCCUserForm, self).__init__(*args, **kwargs)
         if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_CC:
-            users = User.objects.filter(is_active=True, is_staff=True).order_by(User.USERNAME_FIELD)
+            users = User.objects.filter(is_active=True, is_staff=True).order_by(User.USERNAME_FIELD)  # TODO perms: remove use of is_staff
         else:
             users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
         self.fields['user'].queryset = users

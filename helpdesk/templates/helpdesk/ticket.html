@@ -2,8 +2,6 @@
 {% load i18n bootstrap4form humanize %}
 {% load static %}
 
-
-
 {% block helpdesk_title %}{{ ticket.queue.slug }}-{{ ticket.id }} : {% trans "View Ticket Details" %}{% endblock %}
 
 {% block helpdesk_head %}
@@ -149,6 +147,7 @@
 				{% endifequal %} 
 				{% ifequal ticket.status 6 %}
 				<dd><div class="form-group">
+                    <label for='st_reopened' class='active radio-inline'><input type='radio' name='new_status' value='2' id='st_reopened' checked='checked'>{% trans "Reopened" %} &raquo;</label>
                     <label for='st_resolved' class="radio-inline"><input type='radio' name='new_status' value='3' id='st_resolved'{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}>{% trans "Resolved" %} &laquo;</label>
                     <label for='st_closed' class="radio-inline"><input type='radio' name='new_status' value='4' id='st_closed'{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}>{% trans "Closed" %} &laquo;</label>
                     <label for='st_duplicate' class="radio-inline"><input type='radio' name='new_status' value='5' id='st_duplicate'>{% trans "Duplicate" %} &laquo;</label>
@@ -216,10 +215,9 @@
 
         </fieldset>
 
-        <button class="btn btn-primary float-right" type='submit'>{% trans "Update This Ticket" %}</button>
-
-        {% csrf_token %}</form>
-
+                    <button class="btn btn-primary float-right" type='submit'>{% trans "Update This Ticket" %}</button>
+                    {% csrf_token %}
+                </form>
             </div>
         </div>
     {% endif %}

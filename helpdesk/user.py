@@ -6,6 +6,7 @@ from helpdesk.models import (
 )
 
 from helpdesk import settings as helpdesk_settings
+from helpdesk.decorators import is_helpdesk_staff
 
 
 def huser_from_request(req):
@@ -55,8 +56,7 @@ class HelpdeskUser:
         return Ticket.objects.filter(queue__in=self.get_queues())
 
     def has_full_access(self):
-        return self.user.is_superuser or self.user.is_staff \
-               or helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE
+        return self.user.is_superuser or is_helpdesk_staff(self.user)
 
     def can_access_queue(self, queue):
         """Check if a certain user can access a certain queue.
