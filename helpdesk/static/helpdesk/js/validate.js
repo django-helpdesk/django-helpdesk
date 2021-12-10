@@ -29,9 +29,9 @@ var high_perf = ['Adult Education','Ambulatory Surgical Center','Multifamily Hou
 /* Alerts */
 
 var alertMsg1 = 'This property type is not eligible for the Standard Target Pathway, please select another pathway.';
-var alertMsg2 = 'You have selected the Prescriptive Pathway, please note that DOEE will not approve this selection until the building owner has submitted an energy audit. For more information please see this FAQ [link to be provided later].';
+var alertMsg2 = 'You have selected the Prescriptive Pathway, please note that DOEE will not approve this selection until the building owner has submitted an energy audit. For more information please see this <a href="https://dc.beam-portal.org/helpdesk/kb/BEPS/55/">FAQ</a>.';
 var alertMsg3 = 'This property type is not eligible for the Extended Deep Energy Retrofit ACP Option, please select another pathway.'
-var alertMsg4 = 'You have selected the Extended Deep Energy Retrofit ACP Option, please note that DOEE will not approve this selection until the building owner has submitted a Proposed Extended Deep Energy Retrofit Milestone Plan. For more information please see this FAQ [link to be provided later].'
+var alertMsg4 = 'You have selected the Prescriptive Pathway, please note that DOEE will not approve this selection until the building owner has submitted an energy audit. For more information please see this <a href="https://dc.beam-portal.org/helpdesk/kb/BEPS/55/">FAQ</a>'
 var alertMsg5 = 'We are unable to accept ACPs through this page at this time. Please check back later.'
 
 /* This field apperas if "Pathway" = "Standard Target Pathway" AND ("Primary Property Type - Portfolio Manager Calculated" NOT IN High PErformance List) */
