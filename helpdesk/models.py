@@ -738,7 +738,7 @@ class Ticket(models.Model):
             protocol,
             site.domain,
             reverse('helpdesk:public_view'),
-            self.queue.organization.id,
+            self.queue.organization.name,
             self.ticket_for_url,
             self.submitter_email,
             self.secret_key
@@ -1354,8 +1354,10 @@ class KBCategory(models.Model):
     listing of questions & answers.
     """
 
-    # TODO Add Organizations here for later filtering
-    # TODO In permissions file, also make sure that it's filtering on org if queue not available
+    organization = models.ForeignKey(
+        Organization,
+        on_delete=models.CASCADE,
+    )
 
     name = models.CharField(
         _('Name of the category'),
