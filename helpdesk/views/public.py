@@ -101,12 +101,7 @@ class BaseCreateTicketView(abstract_views.AbstractCreateTicketMixin, FormView):
         else:
             ticket = form.save(form_id=self.form_id, user=self.request.user if self.request.user.is_authenticated else None)
             try:
-                return HttpResponseRedirect('%s?ticket=%s&email=%s&key=%s' % (
-                    reverse('helpdesk:public_view'),
-                    ticket.ticket_for_url,
-                    urlquote(ticket.submitter_email),
-                    ticket.secret_key)
-                )
+                return HttpResponseRedirect(ticket.ticket_url)
             except ValueError:
                 # if someone enters a non-int string for the ticket
                 return HttpResponseRedirect(reverse('helpdesk:home'))
