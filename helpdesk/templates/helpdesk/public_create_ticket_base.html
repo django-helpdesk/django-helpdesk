@@ -16,7 +16,7 @@
             {% endblocktrans %}
         </p>
 
-        <form method='post' enctype='multipart/form-data' id=’ticket_submission_form'>
+        <form method='post' enctype='multipart/form-data' id='ticket_submission_form'>
             {% csrf_token %}
             {% for field in form %}
                 {% if field.is_hidden %}

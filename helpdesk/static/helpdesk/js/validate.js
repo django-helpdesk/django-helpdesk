@@ -34,7 +34,7 @@ var alertMsg3 = 'This property type is not eligible for the Extended Deep Energy
 var alertMsg4 = 'You have selected the Prescriptive Pathway, please note that DOEE will not approve this selection until the building owner has submitted an energy audit. For more information please see this <a href="https://dc.beam-portal.org/helpdesk/kb/BEPS/55/">FAQ</a>'
 var alertMsg5 = 'We are unable to accept ACPs through this page at this time. Please check back later.'
 
-/* This field apperas if "Pathway" = "Standard Target Pathway" AND ("Primary Property Type - Portfolio Manager Calculated" NOT IN High PErformance List) */
+/* This field appears if "Pathway" = "Standard Target Pathway" AND ("Primary Property Type - Portfolio Manager Calculated" NOT IN High Performance List) */
 jQuery.validator.addMethod('alert1', function (value, element, param) {
     return this.optional(element) || !($(param.path).val() == 'Standard Target Pathway' && ($.inArray(value, high_perf) == -1));
 }, alertMsg1);
@@ -132,7 +132,8 @@ $(id.property_list).change(function(){
         $(group.affordable_list).hide();
         $(id.affordable_list).val('');
     }
-   //High performing categories, hide Standard Target Pathway
+
+   //For non-high performing categories: hide the Standard Target Pathway
     if ($.inArray($(id.property_list).val(), high_perf) == -1) {
         $(id.pathway_list + " option[value='Standard Target Pathway']").remove();
     } else {
