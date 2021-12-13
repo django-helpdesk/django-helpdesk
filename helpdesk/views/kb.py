@@ -15,6 +15,7 @@ from django.views.decorators.clickjacking import xframe_options_exempt
 from helpdesk import settings as helpdesk_settings
 from helpdesk import user
 from helpdesk.models import KBCategory, KBItem
+from helpdesk.decorators import is_helpdesk_staff
 
 
 def index(request):
@@ -63,7 +64,7 @@ def article(request, slug, pk, iframe=False):
     except KeyError:
         pass
     template = 'helpdesk/kb_article.html'
-    staff = request.user.is_authenticated and request.user.is_staff
+    staff = request.user.is_authenticated and is_helpdesk_staff(request.user)
     return render(request, template, {
         'category': category,
         'item': item,

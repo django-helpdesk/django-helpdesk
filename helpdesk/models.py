@@ -800,7 +800,7 @@ class Ticket(models.Model):
         from django.urls import reverse
         return reverse('helpdesk:view', args=(self.id,))
 
-    def save(self, *args, **kwargs):
+    def save(self, query_fields=None, *args, **kwargs):
         if not self.id:
             # This is a new ticket as no ID yet exists.
             self.created = timezone.now()
@@ -811,6 +811,10 @@ class Ticket(models.Model):
         self.modified = timezone.now()
 
         super(Ticket, self).save(*args, **kwargs)
+
+        # TODO Temp removing
+        # if query_fields is not None:
+            # self.building_lookup()
 
     @staticmethod
     def queue_and_id_from_query(query):

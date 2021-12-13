@@ -16,7 +16,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.urls import reverse, reverse_lazy
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.db.models import Q
+from django.db.models import Q, Prefetch
 from django.http import HttpResponseRedirect, Http404, HttpResponse, JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils.translation import ugettext as _
@@ -51,6 +51,7 @@ from helpdesk.models import (
     Ticket, Queue, FollowUp, TicketChange, PreSetReply, FollowUpAttachment, SavedSearch,
     IgnoreEmail, TicketCC, TicketDependency, UserSettings, KBItem, CustomField, TicketCustomFieldValue,
 )
+from seed.models import Column
 from helpdesk import settings as helpdesk_settings
 import helpdesk.views.abstract_views as abstract_views
 from helpdesk.views.permissions import MustBeStaffMixin
@@ -67,13 +68,8 @@ from ..templated_email import send_templated_mail
 User = get_user_model()
 Query = get_query_class()
 
-if helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE:
-    # treat 'normal' users like 'staff'
-    staff_member_required = user_passes_test(
-        lambda u: u.is_authenticated and u.is_active)
-else:
-    staff_member_required = user_passes_test(
-        lambda u: u.is_authenticated and u.is_active and is_helpdesk_staff(u))
+staff_member_required = user_passes_test(
+    lambda u: u.is_authenticated and u.is_active and is_helpdesk_staff(u))
 
 @helpdesk_staff_member_required
 def set_default_org(request, user_id, org_id):
@@ -378,7 +374,7 @@ def view_ticket(request, ticket_id):
         return update_ticket(request, ticket_id)
 
     if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS:
-        users = User.objects.filter(is_active=True, is_staff=True).order_by(User.USERNAME_FIELD)
+        users = User.objects.filter(is_active=True, is_staff=True).order_by(User.USERNAME_FIELD)  # TODO perms: remove use of is_staff
     else:
         users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
 
@@ -402,15 +398,22 @@ def view_ticket(request, ticket_id):
     else:"""
     submitter_userprofile_url = None
 
-    display_data = CustomField.objects.filter(ticket_form=ticket.ticket_form).values()
+    display_data = CustomField.objects.filter(ticket_form=ticket.ticket_form).only(
+        'label', 'data_type',
+        'unlisted', 'field_name', 'columns',
+    )
     extra_data = []
-    for field in display_data:
-        if not field['unlisted']:
-            if field['field_name'] in ticket.extra_data:
-                field['value'] = ticket.extra_data[field['field_name']]
+    for values, object in zip(display_data.values(), display_data):  # TODO check how many queries this runs
+        if not values['unlisted']:
+            if values['field_name'] in ticket.extra_data:
+                values['value'] = ticket.extra_data[values['field_name']]
             else:
-                field['value'] = getattr(ticket, field['field_name'], None)
-            extra_data.append(field)
+                values['value'] = getattr(ticket, values['field_name'], None)
+            values['has_columns'] = True if object.columns.exists() else False
+            extra_data.append(values)
+
+    property_count = ticket.beam_property.all().count()  # TODO check how many queries this runs
+    taxlot_count = ticket.beam_taxlot.all().count()
 
     return render(request, 'helpdesk/ticket.html', {
         'ticket': ticket,
@@ -422,7 +425,10 @@ def view_ticket(request, ticket_id):
             Q(queues=ticket.queue) | Q(queues__isnull=True)),
         'ticketcc_string': ticketcc_string,
         'SHOW_SUBSCRIBE': show_subscribe,
-        'extra_data': extra_data
+        'extra_data': extra_data,
+        'properties': property_count,
+        'taxlots': taxlot_count,
+        'is_staff': is_helpdesk_staff(request.user),
     })
 
 
@@ -908,7 +914,7 @@ ticket_attributes = (
     ('resolution', _('Resolution')),
 )
 
-
+# TODO fix
 @staff_member_required
 def merge_tickets(request):
     """
@@ -1188,7 +1194,7 @@ def ticket_list(request):
     return render(request, 'helpdesk/ticket_list.html', dict(
         context,
         default_tickets_per_page=request.user.usersettings_helpdesk.tickets_per_page,
-        user_choices=User.objects.filter(is_active=True, is_staff=True),
+        user_choices=User.objects.filter(is_active=True, is_staff=True),  # TODO perms: remove use of is_staff
         kb_items=KBItem.objects.all(),
         queue_choices=huser.get_queues(),
         status_choices=Ticket.STATUS_CHOICES,
@@ -1861,10 +1867,32 @@ def calc_basic_ticket_stats(Tickets):
     all_open_tickets = Tickets.exclude(status=Ticket.CLOSED_STATUS)
     today = datetime.today()
 
+    date_3 = date_rel_to_today(today, 3)
+    date_7 = date_rel_to_today(today, 7)
+    date_14 = date_rel_to_today(today, 14)
     date_30 = date_rel_to_today(today, 30)
     date_60 = date_rel_to_today(today, 60)
+    date_3_str = date_3.strftime(CUSTOMFIELD_DATE_FORMAT)
+    date_7_str = date_7.strftime(CUSTOMFIELD_DATE_FORMAT)
+    date_14_str = date_14.strftime(CUSTOMFIELD_DATE_FORMAT)
     date_30_str = date_30.strftime(CUSTOMFIELD_DATE_FORMAT)
     date_60_str = date_60.strftime(CUSTOMFIELD_DATE_FORMAT)
+
+    # > 0 & <= 3
+    ota_le_3 = all_open_tickets.filter(created__gte=date_3_str)
+    N_ota_le_3 = len(ota_le_3)
+
+    # > 3 & <= 7
+    ota_le_7_ge_3 = all_open_tickets.filter(created__gte=date_7_str, created__lt=date_3_str)
+    N_ota_le_7_ge_3 = len(ota_le_7_ge_3)
+
+    # > 7 & <= 14
+    ota_le_14_ge_7 = all_open_tickets.filter(created__gte=date_14_str, created__lt=date_7_str)
+    N_ota_le_14_ge_7 = len(ota_le_14_ge_7)
+
+    # > 14
+    ota_ge_14 = all_open_tickets.filter(created__lt=date_14_str)
+    N_ota_ge_14 = len(ota_ge_14)
 
     # > 0 & <= 30
     ota_le_30 = all_open_tickets.filter(created__gte=date_30_str)
@@ -1881,14 +1909,20 @@ def calc_basic_ticket_stats(Tickets):
     # (O)pen (T)icket (S)tats
     ots = list()
     # label, number entries, color, sort_string
-    ots.append(['Tickets < 30 days', N_ota_le_30, 'success',
-                sort_string(date_30_str, ''), ])
-    ots.append(['Tickets 30 - 60 days', N_ota_le_60_ge_30,
-                'success' if N_ota_le_60_ge_30 == 0 else 'warning',
-                sort_string(date_60_str, date_30_str), ])
-    ots.append(['Tickets > 60 days', N_ota_ge_60,
-                'success' if N_ota_ge_60 == 0 else 'danger',
-                sort_string('', date_60_str), ])
+    ots.append(['Tickets < 3 days', N_ota_le_3, 'success',
+                sort_string(date_3_str, ''), ])
+    ots.append(['Tickets 4 - 7 days', N_ota_le_7_ge_3, 'success',
+                'success' if N_ota_le_7_ge_3 == 0 else 'warning',
+                sort_string(date_7_str, date_3_str), ])
+    ots.append(['Tickets 8 - 14 days', N_ota_le_14_ge_7, 'success',
+                'success' if N_ota_le_14_ge_7 == 0 else 'danger',
+                sort_string(date_14_str, date_7_str), ])
+#    ots.append(['Tickets 30 - 60 days', N_ota_le_60_ge_30,
+#                'success' if N_ota_le_60_ge_30 == 0 else 'warning',
+#                sort_string(date_60_str, date_30_str), ])
+    ots.append(['Tickets > 14 days', N_ota_ge_14,
+                'success' if N_ota_ge_14 == 0 else 'danger',
+                sort_string('', date_14_str), ])
 
     # all closed tickets - independent of user.
     all_closed_tickets = Tickets.filter(status=Ticket.CLOSED_STATUS)

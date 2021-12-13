@@ -130,16 +130,6 @@ Options for public ticket submission form
 
 Options that change ticket updates
 ----------------------------------
-
-- **HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE** Allow non-staff users to interact with tickets?
-  Set to True to allow any authenticated user to manage tickets.
-  You can also apply a custom authorisation logic for identifying helpdesk staff members, by setting this to a callable.
-  In that case, the value should be a function accepting the active user as a parameter and returning True if the user is considered helpdesk staff, e.g.
-
-    lambda u: u.is_authenticated() and u.is_active and u.groups.filter(name='helpdesk_staff').exists()))
-
-  **Default:** ``HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = False``
-
 - **HELPDESK_SHOW_EDIT_BUTTON_FOLLOW_UP** Show edit buttons in ticket follow ups?
 
   **Default:** ``HELPDESK_SHOW_EDIT_BUTTON_FOLLOW_UP = True``
