@@ -1,6 +1,5 @@
 {% load i18n helpdesk_staff %}
 {% load organization_info %}
-{% organization_info user request.get_full_path as user_info %}
 
     {% include 'helpdesk/custom_navigation_header.html' %}
     <nav class="navbar navbar-expand navbar-dark bg-dc static-top">
@@ -8,7 +7,7 @@
         <i class="fas fa-bars"></i>
       </button>
 
-      <a class="navbar-brand mr-auto" href="{% url 'helpdesk:home' %}">{% trans 'Building Performance Helpdesk' %}</a>
+      <a class="navbar-brand mr-auto" href="{% url 'helpdesk:home' %}{% if user|is_helpdesk_staff is False %}?org={{ user_info.default_org.name }}{% endif %}">{% trans 'Building Performance Helpdesk' %}</a>
 
       {% if helpdesk_settings.HELPDESK_NAVIGATION_ENABLED and user.is_authenticated or user|is_helpdesk_staff %}
       <!-- Navbar Search -->
@@ -41,11 +40,6 @@
           {% endfor %}
         </div>
       </div>
-      <!-- DC logo -->
-      <!--<img src="{{ STATIC_URL }}helpdesk/images/dc_green_doee_logo_white.png" title="{$:: 'BEAM' | translate $}" style="max-height:70px;">-->
-      {% if user_info.default_org.logo %}
-      <img src="{{ STATIC_URL }}{{ user_info.default_org.logo }}" title="{$:: 'BEAM' | translate $}" style="max-height:70px;">
-      {% endif %}
       <!-- If user is not staff, we show dropdown with Org Helpdesks they have access to or the One org that led them there -->
       {% elif user|is_helpdesk_staff is False %}
       <div class="org-dropdown-btn">
@@ -53,8 +47,12 @@
           {{ user_info.default_org.name }}
         </button>
       </div>
-
-    {% endif %}
+      {% endif %}
+      <!-- DC logo -->
+      <!--<img src="{{ STATIC_URL }}helpdesk/images/dc_green_doee_logo_white.png" title="{$:: 'BEAM' | translate $}" style="max-height:70px;">-->
+      {% if user_info.default_org.logo %}
+      <img src="{{ STATIC_URL }}{{ user_info.default_org.logo }}" title="{$:: 'BEAM' | translate $}" style="max-height:70px;">
+      {% endif %}
     </nav>
 
 

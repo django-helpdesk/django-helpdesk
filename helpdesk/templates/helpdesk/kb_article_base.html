@@ -1,4 +1,6 @@
 {% load i18n %}
+{% load form_list %}
+{% form_list user request as forms %}
 {% block header %}
 <h2>{% blocktrans with item.question as itemq %}{{ itemq }}{% endblocktrans %}</h2>
 {% endblock %}
@@ -8,11 +10,20 @@
         {{ item.get_markdown|linebreaksbr }}
     </div>
     <div class="row" style="margin-top:20px">
-        {# TODO helpdesk:submit is hardcoded #}
-        <a href="{% if iframe %}{% url 'helpdesk:submit_iframe' %}{% else %}{% url 'helpdesk:submit' 1 %}{%endif%}?{% if category.queue %}queue={{category.queue.pk}};_readonly_fields_=queue;{%endif%}kbitem={{item.id}};{{query_param_string}}">
-            <div class="btn btn-success btn-circle btn-xl"><i class="fa fa-plus-circle fa-lg"></i> {% trans 'Ask for more help with ' %} "{{ item.question }}"</div>
+        <a class="dropdown-toggle btn btn-success btn-circle btn-xl" href="#" id="ticketsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class="fas fa-fw fa-plus-circle"></i> {% trans 'Ask for more help with ' %} "{{ item.question }}" by submitting a ticket
         </a>
-
+        <div class="dropdown-menu" aria-labelledby="ticketsDropdown">
+            {% if forms %}
+            {% for f in forms %}
+            {% if f.organization__name == user_info.default_org.name %}
+            <a class="dropdown-item small text-wrap" href="{% if iframe %}{% url 'helpdesk:submit_iframe' %}{% else %}{% url 'helpdesk:submit' f.id %}{%endif%}?{% if category.queue %}queue={{category.queue.pk}}&_readonly_fields_=queue&{%endif%}kbitem={{item.id}}&{{query_param_string}}">{{ f.name }}</a>
+            {% endif %}
+            {% endfor %}
+            {% else %}
+            <p class="dropdown-item small text-wrap">{% trans "No forms are available." %}</p>
+            {% endif %}
+        </div>
         {% if staff %}
         <a href="{% url 'helpdesk:list' %}?kbitem={{item.id}}" class="col-sm">
             <div class="btn btn-warning btn-circle btn-xl"><i class="fa fa-search fa-lg"></i> {{item.num_open_tickets}} {% trans 'open tickets' %}</div>

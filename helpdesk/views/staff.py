@@ -231,7 +231,7 @@ dashboard = staff_member_required(dashboard)
 
 
 def ticket_perm_check(request, ticket):
-    huser = HelpdeskUser(request.user)
+    huser = HelpdeskUser(request.user, request)
     if not huser.can_access_queue(ticket.queue):
         raise PermissionDenied()
     if not huser.can_access_ticket(ticket):
@@ -573,7 +573,7 @@ def update_ticket(request, ticket_id, public=False):
         (owner and User.objects.get(id=owner) == ticket.assigned_to),
     ])
     if no_changes:
-        return return_to_ticket(request.user, helpdesk_settings, ticket)
+        return return_to_ticket(request.user, request, helpdesk_settings, ticket)
 
     # We need to allow the 'ticket' and 'queue' contexts to be applied to the
     # comment.
@@ -770,12 +770,12 @@ def update_ticket(request, ticket_id, public=False):
         if SHOW_SUBSCRIBE:
             subscribe_staff_member_to_ticket(ticket, request.user)
 
-    return return_to_ticket(request.user, helpdesk_settings, ticket)
+    return return_to_ticket(request.user, request, helpdesk_settings, ticket)
 
 
-def return_to_ticket(user, helpdesk_settings, ticket):
+def return_to_ticket(user, request, helpdesk_settings, ticket):
     """Helper function for update_ticket"""
-    huser = HelpdeskUser(user)
+    huser = HelpdeskUser(user, request)
     if is_helpdesk_staff(user) and huser.can_access_ticket(ticket):
         return HttpResponseRedirect(ticket.get_absolute_url())
     else:
@@ -1281,7 +1281,7 @@ class CreateTicketView(MustBeStaffMixin, abstract_views.AbstractCreateTicketMixi
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        queues = HelpdeskUser(self.request.user).get_queues()
+        queues = HelpdeskUser(self.request.user, self.request).get_queues()
         kwargs["queue_choices"] = _get_queue_choices(queues)
         kwargs['form_id'] = self.form_id
         return kwargs
@@ -1292,7 +1292,7 @@ class CreateTicketView(MustBeStaffMixin, abstract_views.AbstractCreateTicketMixi
 
     def get_success_url(self):
         request = self.request
-        if HelpdeskUser(request.user).can_access_queue(self.ticket.queue):
+        if HelpdeskUser(request.user, request).can_access_queue(self.ticket.queue):
             return self.ticket.get_absolute_url()
         else:
             return reverse('helpdesk:dashboard')

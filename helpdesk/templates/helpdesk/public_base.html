@@ -2,6 +2,8 @@
 {% load static %}
 {% load load_helpdesk_settings %}
 {% with request|load_helpdesk_settings as helpdesk_settings %}
+{% load organization_info %}
+{% organization_info user request.get_full_path as user_info %}
 <!DOCTYPE html>
 <html lang="en">
 

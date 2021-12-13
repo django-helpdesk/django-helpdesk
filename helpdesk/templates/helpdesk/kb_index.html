@@ -1,10 +1,9 @@
 {% extends "helpdesk/public_base.html" %}{% load i18n bootstrap4form helpdesk_staff %}
-
 {% block helpdesk_title %}{% trans "Knowledgebase" %}{% endblock %}
 
 {% block helpdesk_breadcrumb %}
 <li class="breadcrumb-item">
-    <a href="{% url 'helpdesk:kb_index' %}">{% trans "Knowledgebase" %}</a>
+    <a href="{% url 'helpdesk:kb_index' %}{% if user|is_helpdesk_staff is False %}?org={{ user_info.default_org.name }}{% endif %}">{% trans "Knowledgebase" %}</a>
 </li>
 <li class="breadcrumb-item active">{% trans "Overview" %}</li>
 {% endblock %}
@@ -15,7 +14,7 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-sm-8">
-        {% endif %}
+{% endif %}
             <h2>{% trans "Knowledgebase" %}</h2>
             <p>{% trans "We have listed a number of Knowledgebase articles for your perusal in the following categories. Please check to see if any of these articles address your problem prior to opening a support ticket." %}</p>
             {% for category in kb_categories %}
@@ -27,7 +26,7 @@
                     </div>
                     <div class="card-body" style="margin-top:-15px">
                         <p class="card-text">{% if not category.get_preview_markdown %}{{ category.get_description_markdown }}{% else %}{{ category.get_preview_markdown }}{% endif %}</p>
-                        <p class="card-text"><small class="text-muted"><a class="btn btn-primary" href='{{ category.get_absolute_url }}'>{% trans 'View articles' %} <i class="fa fa-share"></i></a></small></p>
+                        <p class="card-text"><small class="text-muted"><a class="btn btn-primary" href='{{ category.get_absolute_url }}{% if user|is_helpdesk_staff is False %}?org={{ user_info.default_org.name }}{% endif %}'>{% trans 'View articles' %} <i class="fa fa-share"></i></a></small></p>
                     </div>
                 </div>
             {% if catnumperrow == 'three' or forloop.last %}</div>{% endif %}
