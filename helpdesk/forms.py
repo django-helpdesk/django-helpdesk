@@ -23,6 +23,8 @@ from helpdesk.models import (Ticket, Queue, FollowUp, IgnoreEmail, TicketCC,
                              FormType)
 from helpdesk import settings as helpdesk_settings
 
+from seed.lib.superperms.orgs.models import ROLE_MEMBER
+
 logger = logging.getLogger(__name__)
 User = get_user_model()
 
@@ -477,10 +479,11 @@ class TicketForm(AbstractTicketForm):
         if self.form_queue is None:
             self.fields['queue'].choices = queue_choices
 
-        if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS:
-            assignable_users = User.objects.filter(is_active=True, is_staff=True).order_by(User.USERNAME_FIELD)  # TODO perms: remove use of is_staff
-        else:
-            assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
+        assignable_users = User.objects.prefetch_related('organizationuser_set') \
+            .filter(organizationuser__role_level__gte=ROLE_MEMBER).distinct()
+        # TODO filter this by current org in place of distinct()
+        # TODO also find all uses of this same query, and replace them with a helper function that does the same thing
+
         self.fields['assigned_to'].choices = [('', '--------')] + [(u.id, u.get_username()) for u in assignable_users]
 
     def save(self, user, form_id=None):

@@ -52,6 +52,8 @@ from helpdesk.models import (
     IgnoreEmail, TicketCC, TicketDependency, UserSettings, KBItem, CustomField, TicketCustomFieldValue,
 )
 from seed.models import Column
+from seed.lib.superperms.orgs.models import ROLE_MEMBER
+
 from helpdesk import settings as helpdesk_settings
 import helpdesk.views.abstract_views as abstract_views
 from helpdesk.views.permissions import MustBeStaffMixin
@@ -373,10 +375,10 @@ def view_ticket(request, ticket_id):
 
         return update_ticket(request, ticket_id)
 
-    if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS:
-        users = User.objects.filter(is_active=True, is_staff=True).order_by(User.USERNAME_FIELD)  # TODO perms: remove use of is_staff
-    else:
-        users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
+    # TODO remove use of HELPDESK_STAFF_ONLY_TICKET_OWNERS from all of helpdesk?
+    users = User.objects.prefetch_related('organizationuser_set')\
+        .filter(organizationuser__role_level__gte=ROLE_MEMBER).distinct()
+    # TODO filter this by current org in place of distinct()
 
     queues = HelpdeskUser(request.user).get_queues()
     queue_choices = _get_queue_choices(queues)
@@ -1188,10 +1190,14 @@ def ticket_list(request):
         if popped is not None:
             query_params['filtering'][filter_in_params[param]] = [-1]
 
+    user_choices = User.objects.prefetch_related('organizationuser_set')\
+        .filter(organizationuser__role_level__gte=ROLE_MEMBER).distinct()
+    # TODO filter this by current org in place of distinct()
+
     return render(request, 'helpdesk/ticket_list.html', dict(
         context,
         default_tickets_per_page=request.user.usersettings_helpdesk.tickets_per_page,
-        user_choices=User.objects.filter(is_active=True, is_staff=True),  # TODO perms: remove use of is_staff
+        user_choices=user_choices,
         kb_items=KBItem.objects.all(),
         queue_choices=huser.get_queues(),
         status_choices=Ticket.STATUS_CHOICES,
