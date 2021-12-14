@@ -1,7 +1,7 @@
 {% extends "helpdesk/public_base.html" %}
 {% load i18n %}
 
-{% block helpdesk_title %}{% blocktrans with category.title as kbcat %}{{ kbcat }}{% endblocktrans %}{% endblock %}
+{% block helpdesk_title %}{% blocktrans with kbcat=category.title kbitem=item.title %}{{ kbitem }} - {{ kbcat }}{% endblocktrans %}{% endblock %}
 {% block helpdesk_breadcrumb %}
 <li class="breadcrumb-item">
     <a href="{% url 'helpdesk:kb_index' %}">{% trans "Knowledgebase" %}</a>
