@@ -484,7 +484,8 @@ class TicketForm(AbstractTicketForm):
         # TODO filter this by current org in place of distinct()
         # TODO also find all uses of this same query, and replace them with a helper function that does the same thing
 
-        self.fields['assigned_to'].choices = [('', '--------')] + [(u.id, u.get_username()) for u in assignable_users]
+        self.fields['assigned_to'].choices = [('', '--------')] + [
+            (u.id, (u.get_full_name() or u.get_username())) for u in assignable_users]
 
     def save(self, user, form_id=None):
         """
