@@ -7,8 +7,8 @@ from django.utils.translation import ugettext as _
 from base64 import b64encode
 from base64 import b64decode
 import json
-
-from model_utils import Choices
+from functools import reduce
+import operator
 
 from helpdesk.serializers import DatatablesTicketSerializer
 
@@ -90,6 +90,21 @@ DATATABLES_ORDER_COLUMN_CHOICES = dict([
     ('10', 'kbitem'),
 ])
 
+# Commented out fields will have further filtering in the front-end since they are changed while rendering
+DATATABLES_FILTER_COLUMN_CHOICES = dict([
+    ('0', 'id__icontains'),
+    # ('1', 'title__icontains'),
+    ('2', 'priority__icontains'),
+    ('3', 'queue__title__icontains'),
+    # ('4', 'status__icontains'),
+    # ('5', 'created__icontains'),
+    # ('6', 'due_date__icontains'),
+    ('7', 'assigned_to__email__icontains'),
+    ('8', 'submitter_email__icontains'),
+    # ('9', 'time_spent__icontains'),
+    ('10', 'kbitem__title__icontains'),
+])
+
 
 def get_query_class():
     from django.conf import settings
@@ -165,7 +180,6 @@ class __Query__:
         to a Serializer called DatatablesTicketSerializer in serializers.py.
         """
         objects = self.get()
-
         length = int(kwargs.get('length', [25])[0])
         start = int(kwargs.get('start', [0])[0])
 
@@ -189,6 +203,17 @@ class __Query__:
 
         if search_value:  # Dead code currently
             queryset = queryset.filter(get_search_filter_args(search_value))
+
+        # Collect and apply column-based filters
+        column_filters = {}
+        for i, field in DATATABLES_FILTER_COLUMN_CHOICES.items():
+            col_name = 'columns[%s][search][value]' % i
+            column_filter = kwargs.get(col_name, [None])[0]
+            if column_filter:
+                column_filters[field] = column_filter
+        if column_filters:
+            filters = reduce(operator.and_, (Q(**d) for d in [dict([i]) for i in column_filters.items()]))
+            queryset = queryset.filter(filters)
 
         count = queryset.count()
         queryset = queryset.order_by(sort_column)[start:start + length]

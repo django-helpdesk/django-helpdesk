@@ -41,10 +41,12 @@ class DatatablesTicketSerializer(serializers.ModelSerializer):
         return obj.get_status
 
     def get_created(self, obj):
-        return humanize.naturaltime(obj.created)
+        created = humanize.naturaltime(obj.created)
+        return created.replace(u'\xa0', ' ') if created else created
 
     def get_due_date(self, obj):
-        return humanize.naturaltime(obj.due_date)
+        due_date = humanize.naturaltime(obj.due_date)
+        return due_date.replace(u'\xa0', ' ') if due_date else due_date
 
     def get_assigned_to(self, obj):
         if obj.assigned_to:

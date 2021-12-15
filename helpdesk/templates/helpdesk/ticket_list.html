@@ -309,6 +309,11 @@ thead input {
         $(document).ready(function () {
             // Duplicate thead for column filtering
             $('#ticketTable thead tr').clone(true).addClass('filters').appendTo('#ticketTable thead');
+            $('.filters th').slice(1,).each( function (i) {
+                i = i+1;
+                var title = $('#ticketTable thead th').eq( $(this).index() ).text();
+                $(this).html( '<input type="text" style="width:auto" placeholder="'+title+'" data-index="'+i+'" />' );
+            } );
 
             // Ticket DataTable Initialization
             var table = $('#ticketTable').DataTable({
@@ -316,10 +321,67 @@ thead input {
                     "emptyTable": "{% trans 'No Tickets Match Your Selection' %}"
                 },
                 processing: true,
-                // serverSide: true,    // Setting this to True causes it to not be able to filter
+                serverSide: true,
                 ajax: {
                     "url": "{% url 'helpdesk:datatables_ticket_list' urlsafe_query %}",
                     "type": "GET",
+                    "dataSrc": function ( json ) {
+                        var title_filter = $('.filters th input[placeholder="Ticket"]')
+                        title_filter = title_filter.length > 0 ? title_filter[0].value.toLowerCase() : undefined
+
+                        var status_filter = $('.filters th input[placeholder="Status"]')
+                        status_filter = status_filter.length > 0 ? status_filter[0].value.toLowerCase() : undefined
+
+                        var created_filter = $('.filters th input[placeholder="Created"]')
+                        created_filter = created_filter.length > 0 ? created_filter[0].value.toLowerCase() : undefined
+
+                        var due_date_filter = $('.filters th input[placeholder="Due Date"]')
+                        due_date_filter = due_date_filter.length > 0 ? due_date_filter[0].value.toLowerCase() : undefined
+
+                        var time_spent_filter = $('.filters th input[placeholder="Time Spent"]')
+                        time_spent_filter = time_spent_filter.length > 0 ? time_spent_filter[0].value.toLowerCase() : undefined
+                        x = json.data.length;
+                        for ( var i=0, ien=json.data.length ; i<ien ; i++ ) {
+                            if ( title_filter ) {
+                                if ( json.data[i].title !== null ) {
+                                    title = json.data[i].id + '. ' + json.data[i].title
+                                    json.data[i].remove = ! title.toLowerCase().includes(title_filter);
+                                } else {
+                                    json.data[i].remove = true;
+                                }
+                            } else if ( status_filter ) {
+                                if ( json.data[i].status !== null ) {
+                                    json.data[i].remove = ! json.data[i].status.toLowerCase().includes(status_filter);
+                                } else {
+                                    json.data[i].remove = true;
+                                }
+                            } else if ( created_filter ) {
+                                if ( json.data[i].created !== null ) {
+                                    json.data[i].remove = ! json.data[i].created.toLowerCase().includes(created_filter);
+                                } else {
+                                    json.data[i].remove = true;
+                                }
+                            } else if ( due_date_filter ) {
+                                if ( json.data[i].due_date !== null ) {
+                                    json.data[i].remove = ! json.data[i].due_date.toLowerCase().includes(due_date_filter);
+                                } else {
+                                    json.data[i].remove = true;
+                                }
+                            } else if ( time_spent_filter ) {
+                                if ( json.data[i].time_spent !== null ) {
+                                    json.data[i].remove = ! json.data[i].time_spent.toLowerCase().includes(time_spent_filter);
+                                } else {
+                                    json.data[i].remove = true;
+                                }
+                            }
+                        }
+                        for ( var i = json.data.length - 1 ; i>=0 ; i-- ) {
+                            if ( json.data[i].remove ) {
+                                json.data.splice(i, 1);
+                            }
+                        }
+                        return json.data;
+                    }
                 },
                 createdRow: function (row, data, dataIndex) {
                     $(row).addClass(data.row_class);
@@ -402,36 +464,15 @@ thead input {
                 ],
                 orderCellsTop: true,
                 fixedHeader: true,
-                initComplete: function () {
-                    var api = this.api();
-                    // For each column
-                    api.columns().eq(0).each(function (colIdx) {
-                        // Set the header cell to contain the input element
-                        var cell = $('.filters th').eq(
-                            $(api.column(colIdx).header()).index()
-                        );
-                        var title = $(cell).text();
-                        if (title != "") {
-                            $(cell).html('<input type="text" placeholder="' + title + '" />');
-                        }
-                        // On every keypress in this input
-                        $('input',
-                            $('.filters th').eq($(api.column(colIdx).header()).index())
-                        )
-                        .off('keyup change')
-                        .on('keyup change', function (e) {
-                            e.stopPropagation();
-                            api
-                                .column(colIdx)
-                                .search(
-                                    this.value
-                                )
-                                .draw();
-                        });
-                    });
-                },
             });
-
+            // Filter event handler
+            $( table.table().container() ).off('keyup change').on( 'keyup', 'thead input', function () {
+                var column = table.column( $(this).data('index') )
+                table
+                    .column( $(this).data('index') )
+                    .search( this.value )
+                    .draw();
+            } );
             {# Timeline initialization when tab is displayed #}
             // The TL.Timeline constructor takes at least two arguments:
             // the id of the Timeline container (no '#'), and
