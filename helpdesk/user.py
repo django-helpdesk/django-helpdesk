@@ -122,6 +122,9 @@ class HelpdeskUser:
             org = Organization.objects.filter(name=url_org).first()
             if org:
                 return org == organization
+            elif not org and self.user.is_authenticated:
+                # If no org in url, default to users default_organization
+                return self.user.default_organization == organization
             else:
                 return False
         else:
