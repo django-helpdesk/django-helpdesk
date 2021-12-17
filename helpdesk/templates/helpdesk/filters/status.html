@@ -6,7 +6,7 @@
         <label for='id_statuses'>{% trans "Status(es)" %}:</label>
     </div>
     <div class="col col-sm-8">
-        <select id='id_statuses' name='status' size='5' style="max-width:100%" multiple>
+        <select id='id_statuses' name='status' size='{{ status_choices|length }} ' style="max-width:100%" multiple>
             {% for s in status_choices %}
             <option value='{{ s.0 }}'{% if s.0|in_list:query_params.filtering.status__in %} selected='selected'{% endif %}>{{ s.1 }}</option>
             {% endfor %}

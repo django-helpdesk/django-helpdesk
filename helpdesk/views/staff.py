@@ -1065,7 +1065,7 @@ def ticket_list(request):
     }
     default_query_params = {
         'filtering': {
-            'status__in': [1, 2],
+            'status__in': [1, 2, 6],
         },
         'sorting': 'created',
         'sortreverse': False,
@@ -1183,7 +1183,9 @@ def ticket_list(request):
             '<a href="http://docs.djangoproject.com/en/dev/ref/databases/#sqlite-string-matching">'
             'Django Documentation on string matching in SQLite</a>.')
 
-    kbitem_choices = [(item.pk, str(item)) for item in KBItem.objects.all()]
+    # Get KBItems that are part of the user's organization
+    kbitem_choices = [(item.pk, str(item)) for item in
+                      KBItem.objects.filter(category__organization=request.user.default_organization)]
 
     # After query is run, replaces null-filters with in-filters=[-1], so page can properly display that filter.
     for param, null_query in filter_null_params.items():
@@ -1191,10 +1193,13 @@ def ticket_list(request):
         if popped is not None:
             query_params['filtering'][filter_in_params[param]] = [-1]
 
+    # Get users that are owners/members
+    user_choices = [u for u in User.objects.filter(is_active=True) if is_helpdesk_staff(u)]
+
     return render(request, 'helpdesk/ticket_list.html', dict(
         context,
         default_tickets_per_page=request.user.usersettings_helpdesk.tickets_per_page,
-        user_choices=User.objects.filter(is_active=True, is_staff=True),  # TODO perms: remove use of is_staff
+        user_choices=user_choices,
         kb_items=KBItem.objects.all(),
         queue_choices=huser.get_queues(),
         status_choices=Ticket.STATUS_CHOICES,
@@ -1663,7 +1668,7 @@ def reshare_saved_query(request, id):
     query.opted_out_users.clear()
     query.shared = True
     query.save()
-    return HttpResponseRedirect(reverse('helpdesk:list'))
+    return HttpResponseRedirect(reverse('helpdesk:list') + '?saved_query=%s' % query.id)
 
 
 reject_saved_query = staff_member_required(reject_saved_query)
@@ -1676,7 +1681,7 @@ def unshare_saved_query(request, id):
 
     query.shared = False
     query.save()
-    return HttpResponseRedirect(reverse('helpdesk:list'))
+    return HttpResponseRedirect(reverse('helpdesk:list') + '?saved_query=%s' % query.id)
 
 
 reject_saved_query = staff_member_required(reject_saved_query)

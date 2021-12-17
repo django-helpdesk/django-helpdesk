@@ -1528,10 +1528,10 @@ class KBItem(models.Model):
         return str(reverse('helpdesk:list')) + "?kbitem=" + str(self.pk)
 
     def num_open_tickets(self):
-        return Ticket.objects.filter(kbitem=self, status__in=(1, 2)).count()
+        return Ticket.objects.filter(kbitem=self, status__in=(1, 2, 6)).count()
 
     def unassigned_tickets(self):
-        return Ticket.objects.filter(kbitem=self, status__in=(1, 2), assigned_to__isnull=True)
+        return Ticket.objects.filter(kbitem=self, status__in=(1, 2, 6), assigned_to__isnull=True)
 
     def get_markdown(self):
         """
