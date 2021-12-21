@@ -12,15 +12,9 @@ class TestQueryActions(TestCase):
         # Create two users to test various query actions
         org = Organization.objects.create(name='org1')
 
-        self.user1 = get_user(username='user1')
-        self.user1.default_organization = org
-        self.user1.save()
-        org.users.add(self.user1)
+        self.user1 = get_user(username='user1', is_staff=True, organization=org)
 
-        self.user2 = get_user(username='user2')
-        self.user2.default_organization = org
-        self.user2.save()
-        org.users.add(self.user2)  # Gets added as an owner
+        self.user2 = get_user(username='user2', is_staff=True, organization=org)
 
         q = Queue(title='Q1', slug='q1', organization=org)
         q.save()

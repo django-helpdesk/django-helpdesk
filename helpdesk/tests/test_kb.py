@@ -1,18 +1,22 @@
 # -*- coding: utf-8 -*-
 from django.urls import reverse
 from django.test import TestCase
+from seed.lib.superperms.orgs.models import Organization
 
-from helpdesk.models import KBCategory, KBItem, Queue, Ticket
+from helpdesk.models import KBCategory, KBItem, Queue, Ticket, FormType
 
 from helpdesk.tests.helpers import (get_staff_user, reload_urlconf, User, create_ticket, print_response)
 
 
 class KBTests(TestCase):
     def setUp(self):
+        self.org = Organization.objects.create()
+        self.form = FormType.objects.create(organization=self.org)
         self.queue = Queue.objects.create(
             title="Test queue",
             slug="test_queue",
             allow_public_submission=True,
+            organization=self.org,
         )
         self.queue.save()
         cat = KBCategory.objects.create(
@@ -20,6 +24,7 @@ class KBTests(TestCase):
             slug="test_cat",
             description="This is a test category",
             queue=self.queue,
+            organization=self.org,
         )
         cat.save()
         self.kbitem1 = KBItem.objects.create(
@@ -36,7 +41,7 @@ class KBTests(TestCase):
             answer="Now",
         )
         self.kbitem2.save()
-        self.user = get_staff_user()
+        self.user = get_staff_user(organization=self.org)
 
     def test_kb_index(self):
         response = self.client.get(reverse('helpdesk:kb_index'))
@@ -56,6 +61,7 @@ class KBTests(TestCase):
             title="Test ticket",
             queue=self.queue,
             kbitem=self.kbitem1,
+            ticket_form=self.form
         )
         ticket.save()
         response = self.client.get(reverse('helpdesk:kb_category', args=("test_cat",)))

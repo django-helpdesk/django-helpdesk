@@ -1,7 +1,8 @@
-from helpdesk.models import Queue, Ticket
+from helpdesk.models import Queue, Ticket, FormType
 from django.test import TestCase
 from django.test.client import Client
 from django.urls import reverse
+from seed.lib.superperms.orgs.models import Organization
 
 
 class PublicActionsTestCase(TestCase):
@@ -16,15 +17,19 @@ class PublicActionsTestCase(TestCase):
         """
         Create a queue & ticket we can use for later tests.
         """
+        self.org = Organization.objects.create()
+        self.form = FormType.objects.create(organization=self.org)
         self.queue = Queue.objects.create(title='Queue 1',
                                           slug='q',
                                           allow_public_submission=True,
                                           new_ticket_cc='new.public@example.com',
-                                          updated_ticket_cc='update.public@example.com')
+                                          updated_ticket_cc='update.public@example.com',
+                                          organization=self.org)
         self.ticket = Ticket.objects.create(title='Test Ticket',
                                             queue=self.queue,
                                             submitter_email='test.submitter@example.com',
-                                            description='This is a test ticket.')
+                                            description='This is a test ticket.',
+                                            ticket_form=self.form)
 
         self.client = Client()
 

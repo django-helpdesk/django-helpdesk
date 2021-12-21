@@ -4,6 +4,7 @@ from django.urls import reverse
 from django.test import TestCase
 from django.test.client import Client
 from helpdesk.models import CustomField, Queue, Ticket
+from seed.lib.superperms.orgs.models import *
 
 try:  # python 3
     from urllib.parse import urlparse
@@ -16,12 +17,14 @@ class TicketActionsTestCase(TestCase):
 
     def setUp(self):
         User = get_user_model()
+        org = Organization.objects.create()
         self.user = User.objects.create(
             username='User_1',
-            is_staff=True,
+            default_organization=org,
         )
         self.user.set_password('pass')
         self.user.save()
+        org.users.add(self.user)            # Gets added as a staff member
         self.client.login(username='User_1', password='pass')
 
     def test_get_user_settings(self):

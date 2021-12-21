@@ -5,6 +5,8 @@ from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 
+from seed.lib.superperms.orgs.models import Organization
+
 from helpdesk.models import Queue, Ticket, TicketCC, FollowUp, FollowUpAttachment
 from helpdesk.management.commands.get_email import Command
 import helpdesk.email
@@ -31,7 +33,8 @@ unused_port = "49151"
 class GetEmailCommonTests(TestCase):
 
     def setUp(self):
-        self.queue_public = Queue.objects.create()
+        org = Organization.objects.create()
+        self.queue_public = Queue.objects.create(organization=org)
         self.logger = logging.getLogger('helpdesk')
 
     # tests correct syntax for command line option
@@ -122,6 +125,7 @@ class GetEmailParametricTemplate(object):
     def setUp(self):
 
         self.temp_logdir = mkdtemp()
+        org = Organization.objects.create()
         kwargs = {
             "title": 'Basic Queue',
             "slug": 'QQ',
@@ -129,7 +133,8 @@ class GetEmailParametricTemplate(object):
             "allow_email_submission": True,
             "email_box_type": self.method,
             "logging_dir": self.temp_logdir,
-            "logging_type": 'none'
+            "logging_type": 'none',
+            "organization": org,
         }
 
         if self.method == 'local':
@@ -599,6 +604,8 @@ class GetEmailCCHandling(TestCase):
     def setUp(self):
         self.temp_logdir = mkdtemp()
 
+        organization = Organization.objects.create(name='org1')
+
         kwargs = {
             "title": 'CC Queue',
             "slug": 'CC',
@@ -608,7 +615,8 @@ class GetEmailCCHandling(TestCase):
             "email_box_type": 'local',
             "email_box_local_dir": '/var/lib/mail/helpdesk/',
             "logging_dir": self.temp_logdir,
-            "logging_type": 'none'
+            "logging_type": 'none',
+            "organization": organization,
         }
         self.queue_public = Queue.objects.create(**kwargs)
 
@@ -616,31 +624,34 @@ class GetEmailCCHandling(TestCase):
             'username': 'staff',
             'email': 'staff@example.com',
             'password': make_password('Test1234'),
-            'is_staff': True,
             'is_superuser': False,
-            'is_active': True
+            'is_active': True,
+            'default_organization': organization
         }
         self.staff_user = User.objects.create(**user1_kwargs)
+        organization.users.add(self.staff_user)         # Gets added as an owner which is a staff user
 
         user2_kwargs = {
             'username': 'assigned',
             'email': 'assigned@example.com',
             'password': make_password('Test1234'),
-            'is_staff': True,
             'is_superuser': False,
-            'is_active': True
+            'is_active': True,
+            'default_organization': organization
         }
         self.assigned_user = User.objects.create(**user2_kwargs)
+        organization.users.add(self.assigned_user)      # Gets added as an owner which is a staff user
 
         user3_kwargs = {
             'username': 'observer',
             'email': 'observer@example.com',
             'password': make_password('Test1234'),
-            'is_staff': True,
             'is_superuser': False,
-            'is_active': True
+            'is_active': True,
+            'default_organization': organization
         }
         self.observer_user = User.objects.create(**user3_kwargs)
+        organization.users.add(self.observer_user)      # Gets added as an owner which is a staff user
 
         ticket_kwargs = {
             'title': 'Original Ticket',
