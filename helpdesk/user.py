@@ -26,8 +26,11 @@ class HelpdeskUser:
         :return: A Python list of Queues
         """
         user = self.user
-        # All queues for the users default org, and public queues available therein
-        all_queues = Queue.objects.filter(organization=user.default_organization_id)
+        # All queues for the users default org, and public queues available therein, unless user is superuser
+        if self.user.is_superuser:
+            all_queues = Queue.objects.all()
+        else:
+            all_queues = Queue.objects.filter(organization=user.default_organization_id)
         public_ids = [q.pk for q in
                       all_queues.filter(allow_public_submission=True)]
         limit_queues_by_user = \
@@ -118,8 +121,11 @@ class HelpdeskUser:
     def can_access_organization(self, organization):
         if self.user.is_anonymous or not is_helpdesk_staff(self.user):
             # Check if the org in the url matches this organization
-            url_org = self.request.GET.get('org')
-            org = Organization.objects.filter(name=url_org).first()
+            try:
+                url_org = self.request.GET.get('org')
+                org = Organization.objects.filter(name=url_org).first()
+            except:
+                org = None
             if org:
                 return org == organization
             elif not org and self.user.is_authenticated:

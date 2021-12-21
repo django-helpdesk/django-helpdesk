@@ -116,29 +116,26 @@ def dashboard(request):
     all_tickets_reported_by_current_user_page = request.GET.get(_('atrbcu_page'), 1)
 
     huser = HelpdeskUser(request.user)
+    user_queues = huser.get_queues()                # Queues in user's default org (or all if superuser)
     active_tickets = Ticket.objects.select_related('queue').exclude(
         status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
     )
 
-    # Get only active tickets available to their default organization
+    # Get only active tickets
     active_tickets = active_tickets.filter(
-        queue__in=Queue.objects.filter(
-            organization=request.user.default_organization_id))
+        queue__in=user_queues)
 
     # open & reopened tickets, assigned to current user
     tickets = active_tickets.filter(
         assigned_to=request.user,
     )
 
-    # closed & resolved tickets, assigned to current user, and belonging to their default org
+    # closed & resolved tickets, assigned to current user
     tickets_closed_resolved = Ticket.objects.select_related('queue').filter(
         assigned_to=request.user,
         status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
-        queue__in=Queue.objects.filter(
-            organization=request.user.default_organization_id),
+        queue__in=user_queues,
     )
-
-    user_queues = huser.get_queues()
 
     unassigned_tickets = active_tickets.filter(
         assigned_to__isnull=True,
@@ -154,8 +151,7 @@ def dashboard(request):
     if email_current_user:
         all_tickets_reported_by_current_user = Ticket.objects.select_related('queue').filter(
             submitter_email=email_current_user,
-            queue__in=Queue.objects.filter(
-                organization=request.user.default_organization_id)
+            queue__in=user_queues
         ).order_by('status')
 
     tickets_in_queues = Ticket.objects.filter(
@@ -373,10 +369,11 @@ def view_ticket(request, ticket_id):
 
         return update_ticket(request, ticket_id)
 
+    users = User.objects.filter(is_active=True)
     if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS:
-        users = User.objects.filter(is_active=True, is_staff=True).order_by(User.USERNAME_FIELD)  # TODO perms: remove use of is_staff
-    else:
-        users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
+        staff_ids = [u.id for u in users if is_helpdesk_staff(u)]
+        users = users.filter(id__in=staff_ids)
+    users = users.order_by(User.USERNAME_FIELD)
 
     queues = HelpdeskUser(request.user).get_queues()
     queue_choices = _get_queue_choices(queues)
@@ -1378,13 +1375,12 @@ rss_list = staff_member_required(rss_list)
 
 @helpdesk_staff_member_required
 def report_index(request):
-    number_tickets = Ticket.objects.filter(queue__in=Queue.objects.filter(
-            organization=request.user.default_organization_id)).count()
+    huser = HelpdeskUser(request.user)
+    user_queues = huser.get_queues()
+    Tickets = Ticket.objects.filter(queue__in=user_queues)
+    number_tickets = Tickets.count()
     saved_query = request.GET.get('saved_query', None)
 
-    user_queues = HelpdeskUser(request.user).get_queues()
-    Tickets = Ticket.objects.filter(queue__in=Queue.objects.filter(
-            organization=request.user.default_organization_id))
     basic_ticket_stats = calc_basic_ticket_stats(Tickets)
 
     # The following query builds a grid of queues & ticket statuses,

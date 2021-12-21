@@ -23,6 +23,7 @@ from helpdesk.models import (Ticket, Queue, FollowUp, IgnoreEmail, TicketCC,
                              FormType)
 from helpdesk import settings as helpdesk_settings
 from helpdesk.email import create_ticket_cc
+from helpdesk.decorators import is_helpdesk_staff
 import re
 
 logger = logging.getLogger(__name__)
@@ -494,10 +495,11 @@ class TicketForm(AbstractTicketForm):
         if self.form_queue is None:
             self.fields['queue'].choices = queue_choices
 
+        assignable_users = User.objects.filter(is_active=True)
         if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS:
-            assignable_users = User.objects.filter(is_active=True, is_staff=True).order_by(User.USERNAME_FIELD)  # TODO perms: remove use of is_staff
-        else:
-            assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
+            staff_ids = [u.id for u in assignable_users if is_helpdesk_staff(u)]
+            assignable_users = assignable_users.filter(id__in=staff_ids)
+        assignable_users = assignable_users.order_by(User.USERNAME_FIELD)
         self.fields['assigned_to'].choices = [('', '--------')] + [(u.id, u.get_username()) for u in assignable_users]
 
     def save(self, user, form_id=None):
@@ -624,11 +626,11 @@ class TicketCCForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(TicketCCForm, self).__init__(*args, **kwargs)
+        users = User.objects.filter(is_active=True)
         if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_CC:
-            users = User.objects.filter(is_active=True, is_staff=True).order_by(User.USERNAME_FIELD)  # TODO perms: remove use of is_staff
-        else:
-            users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
-        self.fields['user'].queryset = users
+            staff_ids = [u.id for u in users if is_helpdesk_staff(u)]
+            users = users.filter(id__in=staff_ids)
+        self.fields['user'].queryset = users.order_by(User.USERNAME_FIELD)
 
 
 class TicketCCUserForm(forms.ModelForm):
@@ -636,11 +638,11 @@ class TicketCCUserForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(TicketCCUserForm, self).__init__(*args, **kwargs)
+        users = User.objects.filter(is_active=True)
         if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_CC:
-            users = User.objects.filter(is_active=True, is_staff=True).order_by(User.USERNAME_FIELD)  # TODO perms: remove use of is_staff
-        else:
-            users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
-        self.fields['user'].queryset = users
+            staff_ids = [u.id for u in users if is_helpdesk_staff(u)]
+            users = users.filter(id__in=staff_ids)
+        self.fields['user'].queryset = users.order_by(User.USERNAME_FIELD)
 
     class Meta:
         model = TicketCC

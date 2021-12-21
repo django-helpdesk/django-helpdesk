@@ -23,12 +23,11 @@ def organization_info(user, url):
     """
     try:
         return_info = {}
-        is_staff = is_helpdesk_staff(user)
-        if is_staff:
+        if is_helpdesk_staff(user):
             orgs = OrganizationUser.objects.filter(user=user, role_level__gt=3).values('organization')
             return_info['orgs'] = Organization.objects.filter(id__in=orgs)
             return_info['default_org'] = Organization.objects.get(id=user.default_organization_id)
-        elif not is_staff:
+        else:
             # Parse request
             query = parse.parse_qs(parse.urlsplit(url).query)  # Returns dict (key, list) of the url parameters
             url_org = query['org'][0] if 'org' in query.keys() else ""

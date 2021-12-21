@@ -144,7 +144,7 @@
                     <label class="radio-inline" for='st_reopened'><input type='radio' name='new_status' value='2' id='st_reopened'>{% trans "Reopened" %} &laquo;</label>
                     <label class="radio-inline" for='st_duplicate'><input type='radio' name='new_status' value='5' id='st_duplicate' checked='checked'>{% trans "Duplicate" %}</label>
                 </div></dd>
-				{% endifequal %} 
+				{% endifequal %}
 				{% ifequal ticket.status 6 %}
 				<dd><div class="form-group">
                     <label for='st_reopened' class='active radio-inline'><input type='radio' name='new_status' value='2' id='st_reopened' checked='checked'>{% trans "Reopened" %} &raquo;</label>
@@ -165,7 +165,7 @@
                 <dd class='form_help_text'>{% trans "If this is public, the submitter will be e-mailed your comment or resolution." %}</dd>
                 {% endif %}
 
-                {% if user.is_staff %}
+                {% if is_staff %}
                 <dt>
                     <label for='id_time_spent'>{% trans "Time spent" %}</label> <span class='form_optional'>{% trans "(Optional)" %}</span>
                 </dt>
