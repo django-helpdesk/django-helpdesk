@@ -220,7 +220,7 @@ class TicketActionsTestCase(TestCase):
 
     def test_create_ticket_getform(self):
         self.loginUser()
-        response = self.client.get(reverse('helpdesk:submit'), follow=True)
+        response = self.client.get(reverse('helpdesk:submit', kwargs={'form_id': self.form.id}), follow=True)
         self.assertEqual(response.status_code, 200)
 
         # TODO this needs to be checked further

@@ -44,16 +44,19 @@ class KBTests(TestCase):
         self.user = get_staff_user(organization=self.org)
 
     def test_kb_index(self):
+        self.client.login(username=self.user.get_username(), password='password')
+
         response = self.client.get(reverse('helpdesk:kb_index'))
         self.assertContains(response, 'This is a test category')
 
     def test_kb_category(self):
+        self.client.login(username=self.user.get_username(), password='password')
+
         response = self.client.get(reverse('helpdesk:kb_category', args=("test_cat", )))
         self.assertContains(response, 'This is a test category')
         self.assertContains(response, 'KBItem 1')
         self.assertContains(response, 'KBItem 2')
         self.assertContains(response, 'Create New Ticket Queue:')
-        self.client.login(username=self.user.get_username(), password='password')
         response = self.client.get(reverse('helpdesk:kb_category', args=("test_cat", )))
         self.assertContains(response, '<i class="fa fa-thumbs-up fa-lg"></i>')
         self.assertContains(response, '0 open tickets')
@@ -80,6 +83,8 @@ class KBTests(TestCase):
         self.assertContains(response, '0 people found this answer useful of 1')
 
     def test_kb_category_iframe(self):
+        self.client.login(username=self.user.get_username(), password='password')
+
         cat_url = reverse('helpdesk:kb_category', args=("test_cat",)) + "?kbitem=1;submitter_email=foo@bar.cz;title=lol;"
         response = self.client.get(cat_url)
         # Assert that query params are passed on to ticket submit form

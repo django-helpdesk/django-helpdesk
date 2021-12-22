@@ -103,7 +103,8 @@ class AttachmentUnitTests(TestCase):
         self.test_file = SimpleUploadedFile.from_dict(self.file_attrs)
         self.follow_up = models.FollowUp.objects.create(
             ticket=models.Ticket.objects.create(
-                queue=models.Queue.objects.create(organization=self.org)
+                queue=models.Queue.objects.create(organization=self.org),
+                ticket_form=models.FormType.objects.create(organization=self.org),
             )
         )
 

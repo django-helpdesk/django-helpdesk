@@ -54,6 +54,7 @@ class TicketBasicsTestCase(TestCase):
             username='User_1',
             default_organization=self.org
         )
+        self.org.users.add(self.user)       # Gets added as a staff member
 
         self.client = Client()
 
@@ -1072,7 +1073,7 @@ class EmailInteractionsTestCase(TestCase):
             slug="test_cat",
             description="This is a test category",
             queue=self.queue_public,
-            organization=self.org.
+            organization=self.org,
         )
         cat.save()
         self.kbitem1 = KBItem.objects.create(
@@ -1082,7 +1083,7 @@ class EmailInteractionsTestCase(TestCase):
             answer="A KB Item",
         )
         self.kbitem1.save()
-        cat_url = reverse('helpdesk:submit') + "?kbitem=1;submitter_email=foo@bar.cz;title=lol;"
+        cat_url = reverse('helpdesk:submit', kwargs={'form_id': self.form.id}) + "?kbitem=1;submitter_email=foo@bar.cz;title=lol;"
         response = self.client.get(cat_url)
         self.assertContains(response, '<option value="1" selected>KBItem 1</option>')
         self.assertContains(response, '<input type="email" name="submitter_email" value="foo@bar.cz" class="form-control form-control" required id="id_submitter_email">')

@@ -38,8 +38,8 @@ class QueryTests(TestCase):
             title="unassigned to kbitem",
             queue=self.queue,
             description="lol",
+            ticket_form=self.form,
         )
-        self.ticket1.save()
         self.ticket2 = Ticket.objects.create(
             title="assigned to kbitem",
             queue=self.queue,
@@ -47,7 +47,9 @@ class QueryTests(TestCase):
             kbitem=self.kbitem1,
             ticket_form=self.form,
         )
-        self.ticket2.save()
+
+    def tearDown(self):
+        Ticket.objects.all().delete()
 
     def loginUser(self, is_staff=True):
         """Create a staff user and login"""
@@ -67,12 +69,14 @@ class QueryTests(TestCase):
         self.loginUser()
         query = query_to_base64({})
         response = self.client.get(reverse('helpdesk:datatables_ticket_list', args=[query]))
+        t1 = Ticket.objects.filter(title='unassigned to kbitem').first()
+        t2 = Ticket.objects.filter(title='assigned to kbitem').first()
         self.assertEqual(
             response.json(),
             {
                 "data":
-                [{"ticket": "1 [test_queue-1]", "id": 1, "priority": 3, "title": "unassigned to kbitem", "queue": {"title": "Test queue", "id": 1}, "status": "Open", "created": "now", "due_date": None, "assigned_to": "None", "submitter": None, "row_class": "", "time_spent": "", "kbitem": ""},
-                 {"ticket": "2 [test_queue-2]", "id": 2, "priority": 3, "title": "assigned to kbitem", "queue": {"title": "Test queue", "id": 1}, "status": "Open", "created": "now", "due_date": None, "assigned_to": "None", "submitter": None, "row_class": "", "time_spent": "", "kbitem": "KBItem 1"}],
+                [{"ticket": "%s [test_queue-%s]" % (t1.id, t1.id), "id": t1.id, "priority": 3, "title": "unassigned to kbitem", "queue": {"title": "Test queue", "id": t1.queue.id}, "status": "Open", "created": "now", "due_date": None, "assigned_to": "None", "submitter": None, "row_class": "", "time_spent": "", "kbitem": ""},
+                 {"ticket": "%s [test_queue-%s]" % (t2.id, t2.id), "id": t2.id, "priority": 3, "title": "assigned to kbitem", "queue": {"title": "Test queue", "id": t2.queue.id}, "status": "Open", "created": "now", "due_date": None, "assigned_to": "None", "submitter": None, "row_class": "", "time_spent": "", "kbitem": "KBItem 1"}],
                 "recordsFiltered": 2,
                 "recordsTotal": 2,
                 "draw": 0,
@@ -85,11 +89,12 @@ class QueryTests(TestCase):
             {'filtering': {'kbitem__in': [self.kbitem1.pk]}}
         )
         response = self.client.get(reverse('helpdesk:datatables_ticket_list', args=[query]))
+        ticket = Ticket.objects.filter(title='assigned to kbitem').first()
         self.assertEqual(
             response.json(),
             {
                 "data":
-                [{"ticket": "2 [test_queue-2]", "id": 2, "priority": 3, "title": "assigned to kbitem", "queue": {"title": "Test queue", "id": 1}, "status": "Open", "created": "now", "due_date": None, "assigned_to": "None", "submitter": None, "row_class": "", "time_spent": "", "kbitem": "KBItem 1"}],
+                [{"ticket": "%s [test_queue-%s]" % (ticket.id, ticket.id), "id": ticket.id, "priority": 3, "title": "assigned to kbitem", "queue": {"title": "Test queue", "id": ticket.queue.id}, "status": "Open", "created": "now", "due_date": None, "assigned_to": "None", "submitter": None, "row_class": "", "time_spent": "", "kbitem": "KBItem 1"}],
                 "recordsFiltered": 1,
                 "recordsTotal": 1,
                 "draw": 0,
@@ -102,11 +107,12 @@ class QueryTests(TestCase):
             {'filtering_or': {'kbitem__in': [self.kbitem1.pk]}}
         )
         response = self.client.get(reverse('helpdesk:datatables_ticket_list', args=[query]))
+        ticket = Ticket.objects.filter(title='assigned to kbitem').first()
         self.assertEqual(
             response.json(),
             {
                 "data":
-                [{"ticket": "2 [test_queue-2]", "id": 2, "priority": 3, "title": "assigned to kbitem", "queue": {"title": "Test queue", "id": 1}, "status": "Open", "created": "now", "due_date": None, "assigned_to": "None", "submitter": None, "row_class": "", "time_spent": "", "kbitem": "KBItem 1"}],
+                [{"ticket": "%s [test_queue-%s]" % (ticket.id, ticket.id), "id": ticket.id, "priority": 3, "title": "assigned to kbitem", "queue": {"title": "Test queue", "id": ticket.queue.id}, "status": "Open", "created": "now", "due_date": None, "assigned_to": "None", "submitter": None, "row_class": "", "time_spent": "", "kbitem": "KBItem 1"}],
                 "recordsFiltered": 1,
                 "recordsTotal": 1,
                 "draw": 0,

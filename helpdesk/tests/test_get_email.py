@@ -2,12 +2,12 @@
 from django.test import TestCase, override_settings
 from django.core.management import call_command
 from django.shortcuts import get_object_or_404
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import make_password
 
 from seed.lib.superperms.orgs.models import Organization
 
-from helpdesk.models import Queue, Ticket, TicketCC, FollowUp, FollowUpAttachment
+from helpdesk.models import Queue, Ticket, TicketCC, FollowUp, FollowUpAttachment, FormType
 from helpdesk.management.commands.get_email import Command
 import helpdesk.email
 
@@ -22,6 +22,7 @@ import logging
 from unittest import mock
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
+User = get_user_model()
 
 # class A addresses can't have first octet of 0
 unrouted_socks_server = "0.0.0.1"
@@ -658,7 +659,8 @@ class GetEmailCCHandling(TestCase):
             'queue': self.queue_public,
             'submitter_email': 'submitter@example.com',
             'assigned_to': self.assigned_user,
-            'status': 1
+            'status': 1,
+            'ticket_form': FormType.objects.create(organization=organization),
         }
         self.original_ticket = Ticket.objects.create(**ticket_kwargs)
 
