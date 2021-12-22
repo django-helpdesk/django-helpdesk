@@ -37,7 +37,6 @@ from helpdesk import settings as helpdesk_settings
 
 from .templated_email import send_templated_mail
 
-from django.contrib.postgres.fields import JSONField
 from seed.lib.superperms.orgs.models import Organization
 from seed.models import (
     Column,
@@ -517,7 +516,7 @@ class Ticket(models.Model):
 
     # These fields are required by all tickets.
     # Labels are built-in for these fields, and not overwritten.
-    assigned_to = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True,
+    assigned_to = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True,
                                     related_name='assigned_to', verbose_name=_('Assigned to'))
     created = models.DateTimeField(_('Created'), auto_now_add=True,
                                    help_text=_('Date this ticket was first created'), )
@@ -533,15 +532,15 @@ class Ticket(models.Model):
                                                        'automatically by management/commands/escalate_tickets.py.'))
     secret_key = models.CharField(_("Secret key needed for viewing/editing ticket by non-logged in users"),
                                   max_length=36, default=mk_secret)
-    kbitem = models.ForeignKey("KBItem", blank=True, null=True, on_delete=models.CASCADE,
+    kbitem = models.ForeignKey("KBItem", blank=True, null=True, on_delete=models.SET_NULL,
                                verbose_name=_('Knowledge base item the user was viewing '
                                               'when they created this ticket.'))
     merged_to = models.ForeignKey('self', verbose_name=_('merged to'), related_name='merged_tickets',
-                                  on_delete=models.CASCADE, null=True, blank=True)
+                                  on_delete=models.SET_NULL, null=True, blank=True)
 
     # These fields are required by all tickets.
     # Labels for these fields are provided by CustomField by default.
-    queue = models.ForeignKey(Queue, on_delete=models.CASCADE, verbose_name=_('Queue'))
+    queue = models.ForeignKey(Queue, on_delete=models.PROTECT, verbose_name=_('Queue'))
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True, null=True)
     priority = models.IntegerField(choices=PRIORITY_CHOICES, default=3, blank=3)
@@ -556,7 +555,7 @@ class Ticket(models.Model):
                                          verbose_name='BEAM Taxlot')  # TODO hide prop/taxlot from form fields
 
     # Contains extra fields, determined by items in CustomField
-    extra_data = JSONField(default=dict, blank=True)
+    extra_data = models.JSONField(default=dict, blank=True)
 
     # Default contact fields
     # Labels for these fields must be added in CustomField (not part of default)
@@ -982,7 +981,7 @@ class FollowUp(models.Model):
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         blank=True,
         null=True,
         verbose_name=_('User'),
@@ -1371,7 +1370,7 @@ class KBCategory(models.Model):
         Queue,
         blank=True,
         null=True,
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         verbose_name=_('Default queue when creating a ticket after viewing this category.'),
     )
 
