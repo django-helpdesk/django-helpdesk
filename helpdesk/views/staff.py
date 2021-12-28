@@ -901,17 +901,17 @@ mass_update = staff_member_required(mass_update)
 
 
 # Prepare ticket attributes which will be displayed in the table to choose which value to keep when merging
+# commented out are duplicate with customfields TODO delete later
 ticket_attributes = (
     ('created', _('Created date')),
-    ('due_date', _('Due on')),
+#    ('due_date', _('Due on')),
     ('get_status_display', _('Status')),
-    ('submitter_email', _('Submitter email')),
+#    ('submitter_email', _('Submitter email')),
     ('assigned_to', _('Owner')),
-    ('description', _('Description')),
+#    ('description', _('Description')),
     ('resolution', _('Resolution')),
 )
 
-# TODO fix
 @staff_member_required
 def merge_tickets(request):
     """
@@ -924,18 +924,21 @@ def merge_tickets(request):
     tickets = custom_fields = None
     if ticket_select_form.is_valid():
         tickets = ticket_select_form.cleaned_data.get('tickets')
+        custom_fields = CustomField.objects.filter(ticket_form_id__in=list(tickets.values_list('ticket_form__id'))
+                                                   ).order_by('field_name').distinct('field_name').exclude(
+                    field_name__in=['cc_emails', 'attachment', 'queue']
+                )
 
-        custom_fields = CustomField.objects.all()
         default = _('Not defined')
         for ticket in tickets:
             ticket.values = {}
-            # Prepare the value for each attributes of this ticket
+            # Prepare the value for each attribute of this ticket
             for attribute, display_name in ticket_attributes:
-                value = getattr(ticket, attribute, default)
-                # Check if attr is a get_FIELD_display
                 if attribute.startswith('get_') and attribute.endswith('_display'):
                     # Hack to call methods like get_FIELD_display()
                     value = getattr(ticket, attribute, default)()
+                else:
+                    value = getattr(ticket, attribute, default)
                 ticket.values[attribute] = {
                     'value': value,
                     'checked': str(ticket.id) == request.POST.get(attribute)
@@ -943,9 +946,13 @@ def merge_tickets(request):
             # Prepare the value for each custom fields of this ticket
             for custom_field in custom_fields:
                 try:
-                    value = ticket.ticketcustomfieldvalue_set.get(field=custom_field).value
-                except (TicketCustomFieldValue.DoesNotExist, ValueError):
-                    value = default
+                    value = getattr(ticket, custom_field.field_name)
+                except AttributeError:
+                    # Search in extra_data
+                    if custom_field.field_name in ticket.extra_data.keys():
+                        value = ticket.extra_data[custom_field.field_name]
+                    else:
+                        value = default
                 ticket.values[custom_field.field_name] = {
                     'value': value,
                     'checked': str(ticket.id) == request.POST.get(custom_field.field_name)
@@ -985,21 +992,17 @@ def merge_tickets(request):
                             selected_ticket = tickets.get(id=id_for_custom_field)
                         except (Ticket.DoesNotExist, ValueError):
                             continue
-
-                        # Check if the value for this ticket custom field exists
                         try:
-                            value = selected_ticket.ticketcustomfieldvalue_set.get(field=custom_field).value
-                        except TicketCustomFieldValue.DoesNotExist:
-                            continue
-
-                        # Create the custom field value or update it with the value from the selected ticket
-                        custom_field_value, created = chosen_ticket.ticketcustomfieldvalue_set.get_or_create(
-                            field=custom_field,
-                            defaults={'value': value}
-                        )
-                        if not created:
-                            custom_field_value.value = value
-                            custom_field_value.save(update_fields=['value'])
+                            value = getattr(selected_ticket, custom_field.field_name)
+                            setattr(chosen_ticket, custom_field.field_name, value)
+                        except AttributeError:
+                            # Search in extra_data
+                            if custom_field.field_name in ticket.extra_data.keys():
+                                value = selected_ticket.extra_data[custom_field.field_name]
+                            else:
+                                value = default
+                            chosen_ticket.extra_data[custom_field.field_name] = value
+    
                 # Save changes
                 chosen_ticket.save()
 
@@ -1025,8 +1028,7 @@ def merge_tickets(request):
                     # Move all followups and update their title to know they come from another ticket
                     ticket.followup_set.update(
                         ticket=chosen_ticket,
-                        # Next might exceed maximum 200 characters limit
-                        title=_('[Merged from #%(id)d] %(title)s') % {'id': ticket.id, 'title': ticket.title}
+                        title=_(('[Merged from #%(id)d] %(title)s') % {'id': ticket.id, 'title': ticket.title})[:200],
                     )
 
                     # Add submitter_email, assigned_to email and ticketcc to chosen ticket if necessary
@@ -1043,6 +1045,7 @@ def merge_tickets(request):
         'custom_fields': custom_fields,
         'ticket_select_form': ticket_select_form
     })
+
 
 
 @helpdesk_staff_member_required
