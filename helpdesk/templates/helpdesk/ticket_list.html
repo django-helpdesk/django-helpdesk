@@ -430,12 +430,33 @@ thead input {
                         data: "priority",
                         render: function (data, type, row, meta) {
                             let priority = "success";
+                            let choice = "";
+                            switch (data) {
+                                case 1:
+                                    choice = "Critical";
+                                    break;
+                                case 2:
+                                    choice = "High";
+                                    break;
+                                case 3:
+                                    choice = "Normal";
+                                    break;
+                                case 4:
+                                    choice = "Low";
+                                    break;
+                                case 5:
+                                    choice = "Very Low";
+                                    break;
+                                default:
+                                    choice = "Normal";
+                                    break;
+                            }
                             if (data === 4) {
                                 priority = "warning";
                             } else if (data === 5) {
                                 priority = "danger";
                             }
-                            return '<p class="text-' + priority + '">' + data + '</p>';
+                            return '<p class="text-' + priority + '">' + choice + '</p>';
                         },
                         visible: false,
                     },
