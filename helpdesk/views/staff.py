@@ -851,7 +851,7 @@ def mass_update(request):
                 'ticket_cc': ('closed_cc', context),
             }
             if t.assigned_to and t.assigned_to.usersettings_helpdesk.email_on_ticket_change:
-                roles['assigned_to'] = ('closed_owner', context),
+                roles['assigned_to'] = ('closed_owner', context)
 
             messages_sent_to.update(t.send(
                 roles,
