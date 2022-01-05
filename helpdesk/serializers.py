@@ -23,13 +23,14 @@ class DatatablesTicketSerializer(serializers.ModelSerializer):
     time_spent = serializers.SerializerMethodField()
     queue = serializers.SerializerMethodField()
     kbitem = serializers.SerializerMethodField()
+    extra_data = serializers.SerializerMethodField()
 
     class Meta:
         model = Ticket
         # fields = '__all__'
         fields = ('ticket', 'id', 'priority', 'title', 'queue', 'status',
                   'created', 'due_date', 'assigned_to', 'submitter', 'row_class',
-                  'time_spent', 'kbitem')
+                  'time_spent', 'kbitem', 'extra_data')
 
     def get_queue(self, obj):
         return {"title": obj.queue.title, "id": obj.queue.id}
@@ -70,3 +71,6 @@ class DatatablesTicketSerializer(serializers.ModelSerializer):
 
     def get_kbitem(self, obj):
         return obj.kbitem.title if obj.kbitem else ""
+
+    def get_extra_data(self, obj):
+        return obj.extra_data if obj.extra_data else ""

@@ -1196,6 +1196,10 @@ def ticket_list(request):
     # Get users that are owners/members
     user_choices = [u for u in User.objects.filter(is_active=True) if is_helpdesk_staff(u)]
 
+    # Get extra data columns to be displayed if only 1 queue is selected
+    data = datatables_ticket_list(request, urlsafe_query).content
+    extra_data_cols = json.loads(data)['extra_data_cols']
+
     return render(request, 'helpdesk/ticket_list.html', dict(
         context,
         default_tickets_per_page=request.user.usersettings_helpdesk.tickets_per_page,
@@ -1210,6 +1214,7 @@ def ticket_list(request):
         from_saved_query=saved_query is not None,
         saved_query=saved_query,
         search_message=search_message,
+        extra_data_cols=extra_data_cols,
     ))
 
 
@@ -1255,8 +1260,47 @@ def datatables_ticket_list(request, query):
     """
     query = Query(HelpdeskUser(request.user), base64query=query)
     result = query.get_datatables_context(**request.query_params)
+    # Modify extra data in result, so all entries have the same extra data
+    # First collect extra field names
+    extra_data_cols = {}
+    for row in result['data']:
+        if row['extra_data']:
+            new_cols = [i for i in row['extra_data'].keys() if i not in extra_data_cols]
+            new_cols = {i: get_viewable_name(row['ticket'], i) for i in new_cols}
+            extra_data_cols.update(new_cols)
+
+    # Update result.data
+    for row in result['data']:
+        if row['extra_data']:
+            # Replace with display names
+            for k in list(row['extra_data'].keys()):
+                disp_name = extra_data_cols[k]
+                row['extra_data'][disp_name] = row['extra_data'].pop(k)
+            # Add in any other col not in extra_data
+            missing_cols = {k:'' for k in extra_data_cols.values() if k not in row['extra_data'].keys()}
+            row['extra_data'].update(missing_cols)
+
+            # Replace extra_data with the cols themselves
+            extra_data = row.pop('extra_data')
+            # Sort it into  an ordered dict
+            keys = list(extra_data.keys())
+            keys.sort()
+            for  k in keys:
+                row.update({k: extra_data[k]})
+
+    # Return list of extra data columns too
+    result['extra_data_cols'] = list(extra_data_cols.values())
     return (JsonResponse(result, status=status.HTTP_200_OK))
 
+def get_viewable_name(ticket_name, extra_data_name):
+    # Helper function to take serialized ticket name and extra_data field and return display name
+    # 12 [queue-2-12]'
+    ticket_id = int(ticket_name.split('[')[0])
+    form_id = Ticket.objects.get(id=ticket_id).ticket_form_id
+    field = CustomField.objects.filter(ticket_form_id=form_id,
+                                           field_name=extra_data_name).first()
+
+    return field.label if field is not None else extra_data_name
 
 @helpdesk_staff_member_required
 @api_view(['GET'])
