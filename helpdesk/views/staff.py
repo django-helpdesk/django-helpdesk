@@ -8,6 +8,7 @@ views/staff.py - The bulk of the application - provides most business logic and
 """
 from copy import deepcopy
 import json
+import pandas as pd
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -17,7 +18,7 @@ from django.urls import reverse, reverse_lazy
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q, Prefetch
-from django.http import HttpResponseRedirect, Http404, HttpResponse, JsonResponse
+from django.http import HttpResponseRedirect, Http404, HttpResponse, JsonResponse, HttpRequest
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils.translation import ugettext as _
 from django.utils.html import escape
@@ -811,6 +812,52 @@ def mass_update(request):
         return redirect(
             reverse('helpdesk:merge_tickets') + '?' + '&'.join(['tickets=%s' % ticket_id for ticket_id in tickets])
         )
+    elif action == 'export':
+        urlsafe_query = request.POST.get('query_e')
+        query_params = request.POST.get('query_p')
+        visible_cols = request.POST.get('visible').split(',')
+        names = {'id': 'Ticket ID', 'ticket': 'Ticket', 'priority': 'Priority', 'queue': 'Queue', 
+                 'status': 'Status', 'created': 'Created', 'due_date': 'Due Date', 
+                 'assigned_to': 'Owner', 'submitter': 'Submitter', 'kbitem': 'KB Item'}
+
+        # Remake request to get data again
+        r = HttpRequest()
+        r.method = 'GET'
+        r.user = request.user
+        r.query_params = query_params
+        json_data = datatables_ticket_list(r, urlsafe_query).content
+        json_data = json.loads(json_data)
+        data = json_data['data']
+        extra_cols = json_data['extra_data_cols']
+
+        # Get selected data
+        output_tickets = []
+        for row in data:
+            ticket_id = str(row['id'])
+            if ticket_id in tickets:
+                # Get the data that is only visible
+                for col in list(set(row.keys()).difference(visible_cols)):
+                    row.pop(col)
+                # Replace default cols with proper names
+                for k in row.keys():
+                    row[names[k]] = row.pop(k)
+                output_tickets.append(row)
+
+        file_name = 'ticket_list_export.csv'
+        file_path = '/tmp/' + file_name  # TODO Better Place to store this temp file? 
+
+        # Convert to pandas dataframe for csv download, after some clean up
+        df = pd.json_normalize(output_tickets)
+        df = df.set_index('Ticket ID')
+        df = df[['Ticket'] + [c for c in df if c not in ['Ticket'] + extra_cols] + extra_cols]
+        df.to_csv(file_path)
+
+        # initiate the download, user will stay on the same page
+        with open(file_path, 'rb') as f:
+            response = HttpResponse(f.read(), content_type='application/vnd.ms-excel')
+            response['Content-Disposition'] = 'attachment; filename=' + file_name
+            response['Content-Type'] = 'application/vnd.ms-excel; charset=utf-16'
+            return response
 
     huser = HelpdeskUser(request.user)
     for t in Ticket.objects.filter(id__in=tickets):
@@ -1263,30 +1310,36 @@ def datatables_ticket_list(request, query):
     # Modify extra data in result, so all entries have the same extra data
     # First collect extra field names
     extra_data_cols = {}
-    for row in result['data']:
-        if row['extra_data']:
-            new_cols = [i for i in row['extra_data'].keys() if i not in extra_data_cols]
-            new_cols = {i: get_viewable_name(row['ticket'], i) for i in new_cols}
-            extra_data_cols.update(new_cols)
+    if 'queue__id__in' in query.params['filtering']:
+        if len(query.params['filtering']['queue__id__in']) == 1: 
+            for row in result['data']:
+                if row['extra_data']:
+                    new_cols = [i for i in row['extra_data'].keys() if i not in extra_data_cols]
+                    new_cols = {i: get_viewable_name(row['ticket'], i) for i in new_cols}
+                    extra_data_cols.update(new_cols)
 
-    # Update result.data
-    for row in result['data']:
-        if row['extra_data']:
-            # Replace with display names
-            for k in list(row['extra_data'].keys()):
-                disp_name = extra_data_cols[k]
-                row['extra_data'][disp_name] = row['extra_data'].pop(k)
-            # Add in any other col not in extra_data
-            missing_cols = {k:'' for k in extra_data_cols.values() if k not in row['extra_data'].keys()}
-            row['extra_data'].update(missing_cols)
+            # Update result.data
+            for row in result['data']:
+                if row['extra_data']:
+                    # Replace with display names
+                    for k in list(row['extra_data'].keys()):
+                        disp_name = extra_data_cols[k]
+                        row['extra_data'][disp_name] = row['extra_data'].pop(k)
+                    # Add in any other col not in extra_data
+                    missing_cols = {k:'' for k in extra_data_cols.values() if k not in row['extra_data'].keys()}
+                    row['extra_data'].update(missing_cols)
 
-            # Replace extra_data with the cols themselves
-            extra_data = row.pop('extra_data')
-            # Sort it into  an ordered dict
-            keys = list(extra_data.keys())
-            keys.sort()
-            for  k in keys:
-                row.update({k: extra_data[k]})
+                    # Replace extra_data with the cols themselves
+                    extra_data = row.pop('extra_data')
+                    # Sort it into  an ordered dict
+                    keys = list(extra_data.keys())
+                    keys.sort()
+                    for  k in keys:
+                        row.update({k: extra_data[k]})
+    else:
+        # Remove extra data field for now
+        for row in result['data']:
+            row.pop('extra_data')
 
     # Return list of extra data columns too
     result['extra_data_cols'] = list(extra_data_cols.values())

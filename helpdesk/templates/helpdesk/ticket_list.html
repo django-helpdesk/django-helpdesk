@@ -84,6 +84,10 @@
                             </tr>
                             </thead>
                         </table>
+                        <!-- Pass Query Params to View for exporting to work Properly -->
+                        <input type='hidden' name='query_e' value='{{ urlsafe_query }}'/>
+                        <input type='hidden' name='query_p' value='{{ query_params }}'/>
+                        <input type='hidden' name='visible' value='' id='is_visible'/>
                     </form>
                 </div>
                 <div class="tab-pane fade" id="timelinetabcontents" role="tabpanel" aria-labelledby="timelinetabcontents-tab">
@@ -384,8 +388,8 @@ thead input {
                         "<'col float-right'p>" +
                     ">",
                 buttons: [{
-                    extend: 'colvis',
-                    columns: ':gt(1)'
+                    extend: "colvis",
+                    columns: ":gt(1)"
                 }],
                 columns: [
                     {
@@ -486,6 +490,25 @@ thead input {
                     .search( this.value )
                     .draw();
             } );
+
+            // Get visible columns for csv filtering and saving
+            table.on( 'buttons-action', function (e) {
+                get_visible_cols(); // For table changes
+            });
+
+            function get_visible_cols() {
+                var all_columns = table.settings().init().columns;
+                var visible_columns = [];
+                for (var i in all_columns) {
+                    if (table.column(i).visible()) {
+                        visible_columns.push(all_columns[i].data);
+                    }
+                }
+                // Add data to post field to be avaiable in mass_update function
+                document.getElementById("is_visible").value = visible_columns.toString();
+            }
+            get_visible_cols() // On initialization
+
             {# Timeline initialization when tab is displayed #}
             // The TL.Timeline constructor takes at least two arguments:
             // the id of the Timeline container (no '#'), and
@@ -524,6 +547,7 @@ thead input {
                     "<option value='take'>{% trans 'Take (Assign to me)' %}</option>" +
                     "<option value='delete'>{% trans 'Delete' %}</option>" +
                     "<option value='merge'>{% trans 'Merge' %}</option>" +
+                    "<option value='export'>{% trans 'Export' %}</option>" +
                     "<optgroup label='{% trans 'Close' %}'>" +
                         "<option value='close'>{% trans "Close (Don't Send E-Mail)" %}</option>" +
                         "<option value='close_public'>{% trans 'Close (Send E-Mail)' %}</option>" +
