@@ -108,12 +108,29 @@ class HelpdeskUser:
         # Otherwise, the category will be visible to superusers
         # Not viewable to anyone else
         if category.public and self.can_access_organization(category.organization):
-            return True
-        elif category.queue:
-            return self.can_access_queue(category.queue)
+            if category.queue:
+                return self.can_access_queue(category.queue)
+            else:
+                return True
         elif is_helpdesk_staff(self.user) and self.can_access_organization(category.organization):
             return True
-        elif self.has_full_access():
+        elif self.has_full_access() and self.can_access_organization(category.organization):
+            return True
+        else:
+            return False
+
+    def can_access_kbarticle(self, article):
+        """Check to see if the user has permission to access
+            a KBarticle. If not deny access. Should be Org
+            dependent. Uses can_access_kbcategory.
+        :param article, Helpdesk model KBArticle
+        :return boolean, whether user has access to it or not
+        """
+        if not HelpdeskUser.can_access_kbcategory(self, article.category):
+            return False
+        elif self.has_full_access() and self.can_access_organization(article.category.organization):
+            return True
+        elif article.enabled:
             return True
         else:
             return False

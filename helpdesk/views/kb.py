@@ -11,6 +11,7 @@ views/kb.py - Public-facing knowledgebase views. The knowledgebase is a
 from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.clickjacking import xframe_options_exempt
+from django.urls import reverse
 
 from helpdesk import settings as helpdesk_settings
 from helpdesk import user
@@ -26,17 +27,14 @@ def index(request):
         'helpdesk_settings': helpdesk_settings,
     })
 
-
 def category(request, slug, iframe=False):
     category = get_object_or_404(KBCategory, slug__iexact=slug)
     if not user.huser_from_request(request).can_access_kbcategory(category):
-        raise Http404
+        return render(request, 'helpdesk/kb_index.html', {
+            'kb_categories': user.huser_from_request(request).get_allowed_kb_categories(),
+            'helpdesk_settings': helpdesk_settings,
+        })
     items = category.kbitem_set.filter(enabled=True)
-    selected_item = request.GET.get('kbitem', None)
-    try:
-        selected_item = int(selected_item)
-    except TypeError:
-        pass
     qparams = request.GET.copy()
     try:
         del qparams['kbitem']
@@ -54,10 +52,12 @@ def category(request, slug, iframe=False):
     })
 
 def article(request, slug, pk, iframe=False):
-    category = get_object_or_404(KBCategory, slug__iexact=slug)
-    if not user.huser_from_request(request).can_access_kbcategory(category):
-        raise Http404
-    item = category.kbitem_set.get(enabled=True, pk=pk)
+    item = get_object_or_404(KBItem, pk=pk)
+    if not user.huser_from_request(request).can_access_kbarticle(item):
+        return render(request, 'helpdesk/kb_index.html', {
+            'kb_categories': user.huser_from_request(request).get_allowed_kb_categories(),
+            'helpdesk_settings': helpdesk_settings,
+        })
     qparams = request.GET.copy()
     try:
         del qparams['kbitem']
@@ -66,14 +66,13 @@ def article(request, slug, pk, iframe=False):
     template = 'helpdesk/kb_article.html'
     staff = request.user.is_authenticated and is_helpdesk_staff(request.user)
     return render(request, template, {
-        'category': category,
+        'category': item.category,
         'item': item,
         'query_param_string': qparams.urlencode(),
         'helpdesk_settings': helpdesk_settings,
         'iframe': iframe,
         'staff': staff,
     })
-
 
 @xframe_options_exempt
 def category_iframe(request, slug):

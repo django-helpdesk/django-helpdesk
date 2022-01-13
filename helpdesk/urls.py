@@ -38,7 +38,7 @@ class DirectTemplateView(TemplateView):
 
 app_name = 'helpdesk'
 
-base64_pattern = r'(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$'
+base64_pattern = r'(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$'  # TODO ?org= part of url should be more explicit
 
 urlpatterns = [
     url(r'^dashboard/$',

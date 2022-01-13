@@ -4,6 +4,7 @@
 {% load saved_queries %}
 {% with user|saved_queries as user_saved_queries_ %}
 {% with request.resolver_match.url_name as url_name %}
+{% load organization_info %}
     <!-- Sidebar -->
     <ul class="sidebar navbar-nav">
     {% if helpdesk_settings.HELPDESK_NAVIGATION_ENABLED and user.is_authenticated or user|is_helpdesk_staff %}
@@ -84,7 +85,7 @@
             <a class="dropdown-item small text-wrap" href="{% url 'helpdesk:system_settings' %}"><i class="fas fa-fw fa-cogs"></i> {% trans "System Settings" %}</a>
             <div class="dropdown-divider"></div>
             {% endif %}
-            <a class="dropdown-item small text-wrap" href="{% url 'helpdesk:logout' %}"><i class="fas fa-fw fa-sign-out-alt"></i> {% trans "Logout" %}</a>
+            <a class="dropdown-item small text-wrap" href="{% url 'helpdesk:logout' %}?next=/helpdesk/?org={{ user_info.default_org.name }}"><i class="fas fa-fw fa-sign-out-alt"></i> {% trans "Logout" %}</a>
           </div>
         </li>
         <li class="nav-item">
