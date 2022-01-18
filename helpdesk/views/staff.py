@@ -372,12 +372,6 @@ def view_ticket(request, ticket_id):
 
         return update_ticket(request, ticket_id)
 
-    """
-    # TODO remove use of HELPDESK_STAFF_ONLY_TICKET_OWNERS from all of helpdesk?
-    users = User.objects.prefetch_related('organizationuser_set')\
-        .filter(organizationuser__role_level__gte=ROLE_MEMBER).distinct()
-    # TODO filter this by current org in place of distinct()
-    """
     users = User.objects.filter(is_active=True)
     if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS:
         staff_ids = [u.id for u in users if is_helpdesk_staff(u)]
@@ -1248,18 +1242,11 @@ def ticket_list(request):
         if popped is not None:
             query_params['filtering'][filter_in_params[param]] = [-1]
 
-    """
-    user_choices = User.objects.prefetch_related('organizationuser_set')\
-        .filter(organizationuser__role_level__gte=ROLE_MEMBER).distinct()
-    # TODO filter this by current org in place of distinct()
-    """
-    # Get users that are owners/members
     user_choices = [u for u in User.objects.filter(is_active=True) if is_helpdesk_staff(u)]
 
     # Get extra data columns to be displayed if only 1 queue is selected
     data = datatables_ticket_list(request, urlsafe_query).content
     extra_data_cols = json.loads(data)['extra_data_cols']
-
 
     return render(request, 'helpdesk/ticket_list.html', dict(
         context,

@@ -457,7 +457,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
         and adds them to the list of Copied-To emails on the ticket.
         """
         # TODO add in check for HELPDESK_STAFF_ONLY_TICKET_CCS?
-        if self.cleaned_data['cc_emails']:
+        if 'cc_emails' in self.cleaned_data:
             # Parse cc_emails for emails, should be separated by a space at least
             # Could be in format name <email> or simply <email> or email
             emails = re.findall("([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)", self.cleaned_data['cc_emails'])
@@ -501,23 +501,15 @@ class TicketForm(AbstractTicketForm):
 
         if self.form_queue is None:
             self.fields['queue'].choices = queue_choices
-        #  TODO!!!!!!!!!!!!!!!
 
-        """
-        assignable_users = User.objects.prefetch_related('organizationuser_set') \
-            .filter(organizationuser__role_level__gte=ROLE_MEMBER).distinct()
-        # TODO filter this by current org in place of distinct()
-        # TODO also find all uses of this same query, and replace them with a helper function that does the same thing
-
-        self.fields['assigned_to'].choices = [('', '--------')] + [
-            (u.id, (u.get_full_name() or u.get_username())) for u in assignable_users]
-        """
         assignable_users = User.objects.filter(is_active=True)
         if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS:
             staff_ids = [u.id for u in assignable_users if is_helpdesk_staff(u)]
             assignable_users = assignable_users.filter(id__in=staff_ids)
+
         assignable_users = assignable_users.order_by(User.USERNAME_FIELD)
-        self.fields['assigned_to'].choices = [('', '--------')] + [(u.id, u.get_username()) for u in assignable_users]
+        self.fields['assigned_to'].choices = [('', '--------')] + [
+            (u.id, (u.get_full_name() or u.get_username())) for u in assignable_users]
 
     def save(self, user, form_id=None):
         """

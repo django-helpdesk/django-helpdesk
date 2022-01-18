@@ -185,7 +185,7 @@ def get_preset_fields(ticket_form):
             ('cc_emails', 'Email Addresses to CC', "List emails to add to a ticket's CC list when it is created.",
             'text', None, None, None, False, False,
             14, 14,
-            False, False, False, True, False,
+            False, True, False, True, False,
             datetime.datetime.now(), datetime.datetime.now(), ticket_form),
             ]
     to_return = []
