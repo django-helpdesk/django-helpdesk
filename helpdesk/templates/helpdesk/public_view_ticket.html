@@ -1,13 +1,32 @@
-{% extends "helpdesk/public_base.html" %}{% load i18n humanize %}
+{% extends "helpdesk/public_base.html" %}{% load i18n humanize helpdesk_staff %}
 {% load static %}
 {% block helpdesk_title %}{% trans "View a Ticket" %}{% endblock %}
+
+{% block helpdesk_breadcrumb %}
+{% if user|is_helpdesk_staff %}
+<li class="breadcrumb-item">
+    <a href="{% url 'helpdesk:list' %}">{% trans "Tickets" %}</a>
+</li>
+<li class="breadcrumb-item active">
+    {{ ticket.queue.slug }}-{{ ticket.id }}
+</li>
+{% else %}
+<li class="breadcrumb-item">
+    <a href="{% url 'helpdesk:home' %}{% if user|is_helpdesk_staff is False %}?org={{ user_info.default_org.name }}{% endif %}">{% trans "Knowledgebase" %}</a>
+</li>
+<li class="breadcrumb-item active">{% trans "Overview" %}</li>
+{% endif %}
+{% endblock %}
+
 
 {% block helpdesk_body %}
 
 <table class="table table-hover table-bordered table-striped">
 <caption>{{ ticket.ticket }} . {{ ticket.title }} [{{ ticket.get_status }}]</caption>
 <thead>
-<tr><th colspan='2'>{% blocktrans with ticket.queue as queue_name %}Queue: {{ queue_name }}{% endblocktrans %}</th></tr>
+<tr><th colspan='2'><h3>{{ ticket.title }} [{{ ticket.get_status }}]</h3>
+                        {% blocktrans with ticket.queue as queue and ticket.queue.organization.name as org %}
+                        {{ org }}'s Queue: {{ queue }}{% endblocktrans %}</th></tr>
 </thead>
 <tbody>
 <tr>
@@ -101,7 +120,7 @@
 
         <dt><label for='commentBox'>{% trans "Comment / Resolution" %}</label></dt>
         <dd><textarea rows='8' cols='70' name='comment' id='commentBox'></textarea></dd>
-        <dd class='form_help_text'>{% trans "You can insert ticket and queue details in your message. For more information, see the <a href='../../help/context/'>context help page</a>." %}</dd>
+        <dd class='form_help_text'>{% trans "You can insert ticket and queue details in your message. For more information, see the <a href='../../helpdesk/help/context/'>context help page</a>." %}</dd>
 
         {% if not ticket.can_be_resolved %}<dd>{% trans "This ticket cannot be resolved or closed until the tickets it depends on are resolved." %}</dd>{% endif %}
         {% ifequal ticket.status 1 %}

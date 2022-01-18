@@ -8,6 +8,8 @@ from helpdesk import settings as helpdesk_settings
 from helpdesk.models import Queue
 from helpdesk.tests.helpers import (get_staff_user, reload_urlconf, User, create_ticket, print_response)
 
+from seed.lib.superperms.orgs.models import Organization, OrganizationUser, ROLE_BUILDING_VIEWER
+
 
 class KBDisabledTestCase(TestCase):
     def setUp(self):
@@ -25,7 +27,8 @@ class KBDisabledTestCase(TestCase):
         """Test proper rendering of navigation.html by accessing the dashboard"""
         from django.urls import NoReverseMatch
 
-        self.client.login(username=get_staff_user().get_username(), password='password')
+        org = Organization.objects.create()
+        self.client.login(username=get_staff_user(organization=org).get_username(), password='password')
         self.assertRaises(NoReverseMatch, reverse, 'helpdesk:kb_index')
         try:
             response = self.client.get(reverse('helpdesk:dashboard'))
@@ -39,15 +42,15 @@ class KBDisabledTestCase(TestCase):
 
 
 class StaffUserTestCaseMixin(object):
-    HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = False
+    # HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = False
 
     def setUp(self):
-        self.original_setting = helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE
-        helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = self.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE
+        # self.original_setting = helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE
+        # helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = self.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE
         self.reload_views()
 
     def tearDown(self):
-        helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = self.original_setting
+        # helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = self.original_setting
         self.reload_views()
 
     def reload_views(self):
@@ -65,7 +68,7 @@ class StaffUserTestCaseMixin(object):
 
 
 class NonStaffUsersAllowedTestCase(StaffUserTestCaseMixin, TestCase):
-    HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = True
+    # HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = True
 
     def test_non_staff_allowed(self):
         """If HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE is True,
@@ -73,8 +76,11 @@ class NonStaffUsersAllowedTestCase(StaffUserTestCaseMixin, TestCase):
         the dashboard.
         """
         from helpdesk.decorators import is_helpdesk_staff
-
-        user = User.objects.create_user(username='henry.wensleydale', password='gouda', email='wensleydale@example.com')
+        org = Organization.objects.create()
+        user = User.objects.create_user(username='henry.wensleydale', password='gouda', email='wensleydale@example.com',
+                                        default_organization=org)
+        org.users.add(user)
+        OrganizationUser.objects.filter(organization=org, user=user).update(role_level=ROLE_BUILDING_VIEWER)
 
         self.assertTrue(is_helpdesk_staff(user))
 
@@ -85,18 +91,23 @@ class NonStaffUsersAllowedTestCase(StaffUserTestCaseMixin, TestCase):
 
 class StaffUsersOnlyTestCase(StaffUserTestCaseMixin, TestCase):
     # Use default values
-    HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = False
+    # HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = False
 
     def setUp(self):
         super().setUp()
-        self.non_staff_user = User.objects.create_user(username='henry.wensleydale', password='gouda', email='wensleydale@example.com')
+        self.org = Organization.objects.create()
+        self.non_staff_user = User.objects.create_user(username='henry.wensleydale', password='gouda',
+                                                       email='wensleydale@example.com', default_organization=self.org)
+        self.org.users.add(self.non_staff_user)
+        OrganizationUser.objects.filter(organization=self.org, user=self.non_staff_user).update(
+            role_level=ROLE_BUILDING_VIEWER)
 
     def test_staff_user_detection(self):
         """Staff and non-staff users are correctly identified"""
         from helpdesk.decorators import is_helpdesk_staff
 
         self.assertFalse(is_helpdesk_staff(self.non_staff_user))
-        self.assertTrue(is_helpdesk_staff(get_staff_user()))
+        self.assertTrue(is_helpdesk_staff(get_staff_user(self.org)))
 
     def test_staff_can_access_dashboard(self):
         """When HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE is False,
@@ -104,7 +115,7 @@ class StaffUsersOnlyTestCase(StaffUserTestCaseMixin, TestCase):
         """
         from helpdesk.decorators import is_helpdesk_staff
 
-        user = get_staff_user()
+        user = get_staff_user(organization=self.org)
         self.client.login(username=user.username, password='password')
         response = self.client.get(reverse('helpdesk:dashboard'), follow=True)
         self.assertTemplateUsed(response, 'helpdesk/dashboard.html')
@@ -124,7 +135,7 @@ class StaffUsersOnlyTestCase(StaffUserTestCaseMixin, TestCase):
         """If HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE is False,
         staff users should be able to access rss feeds.
         """
-        user = get_staff_user()
+        user = get_staff_user(organization=self.org)
         self.client.login(username=user.username, password='password')
         response = self.client.get(reverse('helpdesk:rss_unassigned'), follow=True)
         self.assertContains(response, 'Unassigned Open and Reopened tickets')
@@ -138,6 +149,7 @@ class StaffUsersOnlyTestCase(StaffUserTestCaseMixin, TestCase):
         queue = Queue.objects.create(
             title="Foo",
             slug="test_queue",
+            organization=self.org,
         )
         rss_urls = [
             reverse('helpdesk:rss_user', args=[user.username]),
@@ -157,7 +169,7 @@ class CustomStaffUserTestCase(StaffUserTestCaseMixin, TestCase):
         """Arbitrary user validation function"""
         return user.is_authenticated and user.is_active and user.username.lower().endswith('wensleydale')
 
-    HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = custom_staff_filter
+    # HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = custom_staff_filter
 
     def test_custom_staff_pass(self):
         """If HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE is callable,
@@ -165,7 +177,11 @@ class CustomStaffUserTestCase(StaffUserTestCaseMixin, TestCase):
         """
         from helpdesk.decorators import is_helpdesk_staff
 
-        user = User.objects.create_user(username='henry.wensleydale', password='gouda', email='wensleydale@example.com')
+        org = Organization.objects.create()
+        user = User.objects.create_user(username='henry.wensleydale', password='gouda', email='wensleydale@example.com',
+                                        default_organization=org)
+        org.users.add(user)
+        OrganizationUser.objects.filter(organization=org, user=user).update(role_level=ROLE_BUILDING_VIEWER)
 
         self.assertTrue(is_helpdesk_staff(user))
 
@@ -176,7 +192,11 @@ class CustomStaffUserTestCase(StaffUserTestCaseMixin, TestCase):
     def test_custom_staff_fail(self):
         from helpdesk.decorators import is_helpdesk_staff
 
-        user = User.objects.create_user(username='terry.milton', password='frog', email='milton@example.com')
+        org = Organization.objects.create()
+        user = User.objects.create_user(username='terry.milton', password='frog', email='milton@example.com',
+                                        default_organization=org)
+        org.users.add(user)
+        OrganizationUser.objects.filter(organization=org, user=user).update(role_level=ROLE_BUILDING_VIEWER)
 
         self.assertFalse(is_helpdesk_staff(user))
 
@@ -206,15 +226,16 @@ class HomePageAnonymousUserTestCase(TestCase):
 
 class HomePageTestCase(TestCase):
     def setUp(self):
-        self.original_setting = helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE
-        helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = False
+        # self.original_setting = helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE
+        # helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = False
+        self.org = Organization.objects.create()
         try:
             reload(sys.modules['helpdesk.views.public'])
         except KeyError:
             pass
 
     def tearDown(self):
-        helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = self.original_setting
+        # helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = self.original_setting
         reload(sys.modules['helpdesk.views.public'])
 
     def assertUserRedirectedToView(self, user, view_name):
@@ -225,7 +246,7 @@ class HomePageTestCase(TestCase):
 
     def test_redirect_to_dashboard(self):
         """Authenticated users are redirected to the dashboard"""
-        user = get_staff_user()
+        user = get_staff_user(organization=self.org)
 
         # login_view_ticketlist is False...
         user.usersettings_helpdesk.login_view_ticketlist = False
@@ -235,14 +256,14 @@ class HomePageTestCase(TestCase):
     def test_no_user_settings_redirect_to_dashboard(self):
         """Authenticated users are redirected to the dashboard if user settings are missing"""
         from helpdesk.models import UserSettings
-        user = get_staff_user()
+        user = get_staff_user(organization=self.org)
 
         UserSettings.objects.filter(user=user).delete()
         self.assertUserRedirectedToView(user, 'helpdesk:dashboard')
 
     def test_redirect_to_ticket_list(self):
         """Authenticated users are redirected to the ticket list based on their user settings"""
-        user = get_staff_user()
+        user = get_staff_user(organization=self.org)
         user.usersettings_helpdesk.login_view_ticketlist = True
         user.usersettings_helpdesk.save()
 
@@ -252,16 +273,21 @@ class HomePageTestCase(TestCase):
 class ReturnToTicketTestCase(TestCase):
     def test_staff_user(self):
         from helpdesk.views.staff import return_to_ticket
+        org = Organization.objects.create()
 
-        user = get_staff_user()
+        user = get_staff_user(organization=org)
         ticket = create_ticket()
-        response = return_to_ticket(user, helpdesk_settings, ticket)
+        response = return_to_ticket(user, None, helpdesk_settings, ticket)
         self.assertEqual(response['location'], ticket.get_absolute_url())
 
     def test_non_staff_user(self):
         from helpdesk.views.staff import return_to_ticket
+        org = Organization.objects.create()
 
-        user = User.objects.create_user(username='henry.wensleydale', password='gouda', email='wensleydale@example.com')
+        user = User.objects.create_user(username='henry.wensleydale', password='gouda', email='wensleydale@example.com',
+                                        default_organization=org)
+        org.users.add(user)
+        OrganizationUser.objects.filter(organization=org, user=user).update(role_level=ROLE_BUILDING_VIEWER)
         ticket = create_ticket()
-        response = return_to_ticket(user, helpdesk_settings, ticket)
+        response = return_to_ticket(user, None, helpdesk_settings, ticket)
         self.assertEqual(response['location'], ticket.ticket_url)

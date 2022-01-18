@@ -4,7 +4,9 @@ from django.urls import reverse
 from django.test import TestCase
 from django.test.client import Client
 
-from helpdesk.models import Queue, Ticket
+from seed.lib.superperms.orgs.models import Organization
+
+from helpdesk.models import Queue, Ticket, FormType
 from helpdesk import settings
 from helpdesk.query import __Query__
 from helpdesk.user import HelpdeskUser
@@ -24,30 +26,35 @@ class PerQueueStaffMembershipTestCase(TestCase):
         settings.HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION = True
         self.client = Client()
         User = get_user_model()
-
+        org = Organization.objects.create()
         self.superuser = User.objects.create(
             username='superuser',
-            is_staff=True,
             is_superuser=True,
+            default_organization=org,
         )
         self.superuser.set_password('superuser')
         self.superuser.save()
+        org.users.add(self.superuser)
 
         self.identifier_users = {}
 
         for identifier in self.IDENTIFIERS:
+            org = Organization.objects.create(name='org%s' % identifier)
+            form = FormType.objects.create(organization=org)
             queue = self.__dict__['queue_%d' % identifier] = Queue.objects.create(
                 title='Queue %d' % identifier,
                 slug='q%d' % identifier,
+                organization=org,
             )
 
             user = self.__dict__['user_%d' % identifier] = User.objects.create(
                 username='User_%d' % identifier,
-                is_staff=True,
-                email="foo%s@example.com" % identifier
+                email="foo%s@example.com" % identifier,
+                default_organization=org,
             )
             user.set_password(str(identifier))
             user.save()
+            org.users.add(user)
             self.identifier_users[identifier] = user
 
             # The prefix 'helpdesk.' must be trimmed
@@ -58,11 +65,13 @@ class PerQueueStaffMembershipTestCase(TestCase):
                 Ticket.objects.create(
                     title='Unassigned Ticket %d in Queue %d' % (ticket_number, identifier),
                     queue=queue,
+                    ticket_form=form,
                 )
                 Ticket.objects.create(
                     title='Ticket %d in Queue %d Assigned to User_%d' % (ticket_number, identifier, identifier),
                     queue=queue,
                     assigned_to=user,
+                    ticket_form=form,
                 )
 
     def tearDown(self):

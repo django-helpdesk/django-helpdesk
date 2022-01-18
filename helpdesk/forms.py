@@ -22,6 +22,9 @@ from helpdesk.models import (Ticket, Queue, FollowUp, IgnoreEmail, TicketCC,
                              CustomField, TicketCustomFieldValue, TicketDependency, UserSettings, KBItem,
                              FormType)
 from helpdesk import settings as helpdesk_settings
+from helpdesk.email import create_ticket_cc
+from helpdesk.decorators import is_helpdesk_staff
+import re
 
 from seed.lib.superperms.orgs.models import ROLE_MEMBER
 
@@ -167,11 +170,17 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
         # CustomField already excludes builtin_fields and SEED fields
         display_objects = CustomField.objects.filter(ticket_form=form_id).exclude(field_name='queue')
 
+        # Manually add in queue, not doing so would show all queues
+        queues = Queue.objects.filter(organization=self.instance.ticket_form.organization)
+        setattr(self.fields['queue'], 'queryset', queues)
+
         # Disable and add help_text to the merged_to field on this form
         self.fields['merged_to'].disabled = True
         self.fields['merged_to'].help_text = _('This ticket is merged into the selected ticket.')
+
         for display_data in display_objects:
             initial_value = None
+
             if display_data.editable and display_data.is_extra_data:
                 try:
                     initial_value = extra_data[display_data.field_name]
@@ -442,6 +451,20 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
 
             self.order_fields(_field_ordering(queryset))
 
+    def _add_cc_emails(self, ticket):
+        """
+        Given a ticket with the field 'cc_emails' that is a list of email strings, processes those strings
+        and adds them to the list of Copied-To emails on the ticket.
+        """
+        # TODO add in check for HELPDESK_STAFF_ONLY_TICKET_CCS?
+        if self.cleaned_data['cc_emails']:
+            # Parse cc_emails for emails, should be separated by a space at least
+            # Could be in format name <email> or simply <email> or email
+            emails = re.findall("([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)", self.cleaned_data['cc_emails'])
+            name_placeholder = [None] * len(emails)
+            emails = list(zip(name_placeholder, emails))
+            create_ticket_cc(ticket, emails)
+
 
 class TicketForm(AbstractTicketForm):
     """
@@ -478,7 +501,9 @@ class TicketForm(AbstractTicketForm):
 
         if self.form_queue is None:
             self.fields['queue'].choices = queue_choices
+        #  TODO!!!!!!!!!!!!!!!
 
+        """
         assignable_users = User.objects.prefetch_related('organizationuser_set') \
             .filter(organizationuser__role_level__gte=ROLE_MEMBER).distinct()
         # TODO filter this by current org in place of distinct()
@@ -486,6 +511,13 @@ class TicketForm(AbstractTicketForm):
 
         self.fields['assigned_to'].choices = [('', '--------')] + [
             (u.id, (u.get_full_name() or u.get_username())) for u in assignable_users]
+        """
+        assignable_users = User.objects.filter(is_active=True)
+        if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS:
+            staff_ids = [u.id for u in assignable_users if is_helpdesk_staff(u)]
+            assignable_users = assignable_users.filter(id__in=staff_ids)
+        assignable_users = assignable_users.order_by(User.USERNAME_FIELD)
+        self.fields['assigned_to'].choices = [('', '--------')] + [(u.id, u.get_username()) for u in assignable_users]
 
     def save(self, user, form_id=None):
         """
@@ -505,6 +537,8 @@ class TicketForm(AbstractTicketForm):
 
         changed_fields = None  # _building_lookup(ticket.ticket_form.id, self.changed_data) # TODO Temp removed
         ticket.save(query_fields=changed_fields)
+
+        self._add_cc_emails(ticket)
 
         if self.cleaned_data['assigned_to']:
             title = _('Ticket Opened & Assigned to %(name)s') % {
@@ -549,7 +583,7 @@ class PublicTicketForm(AbstractTicketForm):
                 self.fields[field].widget = forms.HiddenInput()
             if field in readonly_fields:
                 self.fields[field].disabled = True
-   
+
         public_queues = Queue.objects.filter(allow_public_submission=True)  # TODO base off org_id
 
         if len(public_queues) == 0:
@@ -571,6 +605,8 @@ class PublicTicketForm(AbstractTicketForm):
 
         changed_fields = None  # _building_lookup(ticket.ticket_form.id, self.changed_data) # TODO Temp removed
         ticket.save(query_fields=changed_fields)
+
+        self._add_cc_emails(ticket)
 
         followup = self._create_follow_up(
             ticket, title=_('Ticket Opened Via Web'), user=user)
@@ -607,11 +643,11 @@ class TicketCCForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(TicketCCForm, self).__init__(*args, **kwargs)
+        users = User.objects.filter(is_active=True)
         if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_CC:
-            users = User.objects.filter(is_active=True, is_staff=True).order_by(User.USERNAME_FIELD)  # TODO perms: remove use of is_staff
-        else:
-            users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
-        self.fields['user'].queryset = users
+            staff_ids = [u.id for u in users if is_helpdesk_staff(u)]
+            users = users.filter(id__in=staff_ids)
+        self.fields['user'].queryset = users.order_by(User.USERNAME_FIELD)
 
 
 class TicketCCUserForm(forms.ModelForm):
@@ -619,11 +655,11 @@ class TicketCCUserForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(TicketCCUserForm, self).__init__(*args, **kwargs)
+        users = User.objects.filter(is_active=True)
         if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_CC:
-            users = User.objects.filter(is_active=True, is_staff=True).order_by(User.USERNAME_FIELD)  # TODO perms: remove use of is_staff
-        else:
-            users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
-        self.fields['user'].queryset = users
+            staff_ids = [u.id for u in users if is_helpdesk_staff(u)]
+            users = users.filter(id__in=staff_ids)
+        self.fields['user'].queryset = users.order_by(User.USERNAME_FIELD)
 
     class Meta:
         model = TicketCC

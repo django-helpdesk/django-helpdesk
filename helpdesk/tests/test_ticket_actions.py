@@ -6,13 +6,15 @@ from django.test import TestCase
 from django.test.client import Client
 from django.utils import timezone
 
-from helpdesk.models import CustomField, Queue, Ticket
+from helpdesk.models import CustomField, Queue, Ticket, FormType
 from helpdesk import settings as helpdesk_settings
 
 try:  # python 3
     from urllib.parse import urlparse
 except ImportError:  # python 2
     from urlparse import urlparse
+
+from seed.lib.superperms.orgs.models import Organization, OrganizationUser, ROLE_BUILDING_VIEWER
 
 from helpdesk.templatetags.ticket_to_link import num_to_link
 from helpdesk.user import HelpdeskUser
@@ -22,12 +24,15 @@ class TicketActionsTestCase(TestCase):
     fixtures = ['emailtemplate.json']
 
     def setUp(self):
+        self.org = Organization.objects.create()
+        self.form = FormType.objects.create(organization=self.org)
         self.queue_public = Queue.objects.create(
             title='Queue 1',
             slug='q1',
             allow_public_submission=True,
             new_ticket_cc='new.public@example.com',
-            updated_ticket_cc='update.public@example.com'
+            updated_ticket_cc='update.public@example.com',
+            organization=self.org,
         )
 
         self.queue_private = Queue.objects.create(
@@ -35,12 +40,14 @@ class TicketActionsTestCase(TestCase):
             slug='q2',
             allow_public_submission=False,
             new_ticket_cc='new.private@example.com',
-            updated_ticket_cc='update.private@example.com'
+            updated_ticket_cc='update.private@example.com',
+            organization=self.org,
         )
 
         self.ticket_data = {
             'title': 'Test Ticket',
             'description': 'Some Test Ticket',
+            'ticket_form': self.form,
         }
 
         self.client = Client()
@@ -51,10 +58,13 @@ class TicketActionsTestCase(TestCase):
         User = get_user_model()
         self.user = User.objects.create(
             username='User_1',
-            is_staff=is_staff,
+            default_organization=self.org,
         )
         self.user.set_password('pass')
         self.user.save()
+        self.org.users.add(self.user)           # Gets added as staff member of org automatically
+        if not is_staff:
+            OrganizationUser.objects.filter(organization=self.org, user=self.user).update(role_level=ROLE_BUILDING_VIEWER)
         self.client.login(username='User_1', password='pass')
 
     def test_ticket_markdown(self):
@@ -63,6 +73,7 @@ class TicketActionsTestCase(TestCase):
             'queue': self.queue_public,
             'title': 'Test Ticket',
             'description': '*bold*',
+            'ticket_form': self.form,
         }
 
         ticket = Ticket.objects.create(**ticket_data)
@@ -105,14 +116,15 @@ class TicketActionsTestCase(TestCase):
         User = get_user_model()
         self.user2 = User.objects.create(
             username='User_2',
-            is_staff=True,
         )
+        self.org.users.add(self.user2)          # Automatically gets added as a staff member of the org
 
         initial_data = {
             'title': 'Private ticket test',
             'queue': self.queue_public,
             'assigned_to': self.user,
             'status': Ticket.OPEN_STATUS,
+            'ticket_form': self.form,
         }
 
         # create ticket
@@ -162,14 +174,17 @@ class TicketActionsTestCase(TestCase):
         User = get_user_model()
         self.user2 = User.objects.create(
             username='User_2',
-            is_staff=False,
         )
+        self.org.users.add(self.user2)
+        # Update user to not be a staff member
+        OrganizationUser.objects.filter(organization=self.org, user=self.user2).update(role_level=ROLE_BUILDING_VIEWER)
 
         initial_data = {
             'title': 'Private ticket test',
             'queue': self.queue_private,
             'assigned_to': self.user,
             'status': Ticket.OPEN_STATUS,
+            'ticket_form': self.form,
         }
 
         # create ticket
@@ -189,6 +204,7 @@ class TicketActionsTestCase(TestCase):
             'queue': self.queue_public,
             'assigned_to': self.user,
             'status': Ticket.OPEN_STATUS,
+            'ticket_form': self.form,
         }
 
         # create ticket
@@ -204,7 +220,7 @@ class TicketActionsTestCase(TestCase):
 
     def test_create_ticket_getform(self):
         self.loginUser()
-        response = self.client.get(reverse('helpdesk:submit'), follow=True)
+        response = self.client.get(reverse('helpdesk:submit', kwargs={'form_id': self.form.id}), follow=True)
         self.assertEqual(response.status_code, 200)
 
         # TODO this needs to be checked further
@@ -219,7 +235,8 @@ class TicketActionsTestCase(TestCase):
             description='Description from ticket 1',
             submitter_email='user1@mail.com',
             status=Ticket.RESOLVED_STATUS,
-            resolution='Awesome resolution for ticket 1'
+            resolution='Awesome resolution for ticket 1',
+            ticket_form=self.form,
         )
         ticket_1_follow_up = ticket_1.followup_set.create(title='Ticket 1 creation')
         ticket_1_cc = ticket_1.ticketcc_set.create(user=self.user)
@@ -231,7 +248,8 @@ class TicketActionsTestCase(TestCase):
             description='Description from ticket 2',
             submitter_email='user2@mail.com',
             due_date=due_date,
-            assigned_to=self.user
+            assigned_to=self.user,
+            ticket_form=self.form,
         )
         ticket_2_follow_up = ticket_1.followup_set.create(title='Ticket 2 creation')
         ticket_2_cc = ticket_2.ticketcc_set.create(email='random@mail.com')

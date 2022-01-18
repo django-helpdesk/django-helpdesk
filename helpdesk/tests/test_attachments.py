@@ -3,6 +3,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 from django.test import override_settings, TestCase
 from django.utils.encoding import smart_text
+from seed.lib.superperms.orgs.models import Organization
 
 from helpdesk import lib, models
 
@@ -22,12 +23,15 @@ class AttachmentIntegrationTests(TestCase):
     fixtures = ['emailtemplate.json']
 
     def setUp(self):
+        self.org = Organization.objects.create()
+        self.form = models.FormType.objects.create(organization=self.org)
         self.queue_public = models.Queue.objects.create(
             title='Public Queue',
             slug='pub_q',
             allow_public_submission=True,
             new_ticket_cc='new.public@example.com',
             updated_ticket_cc='update.public@example.com',
+            organization=self.org
         )
 
         self.queue_private = models.Queue.objects.create(
@@ -36,6 +40,7 @@ class AttachmentIntegrationTests(TestCase):
             allow_public_submission=False,
             new_ticket_cc='new.private@example.com',
             updated_ticket_cc='update.private@example.com',
+            organization=self.org,
         )
 
         self.ticket_data = {
@@ -43,6 +48,7 @@ class AttachmentIntegrationTests(TestCase):
             'body': 'Test Ticket Desc',
             'priority': 3,
             'submitter_email': 'submitter@example.com',
+            'ticket_form': self.form
         }
 
     def test_create_pub_ticket_with_attachment(self):
@@ -88,6 +94,7 @@ class AttachmentIntegrationTests(TestCase):
 class AttachmentUnitTests(TestCase):
 
     def setUp(self):
+        self.org = Organization.objects.create()
         self.file_attrs = {
             'filename': '°ßäöü.txt',
             'content': 'โจ'.encode('utf-8'),
@@ -96,7 +103,8 @@ class AttachmentUnitTests(TestCase):
         self.test_file = SimpleUploadedFile.from_dict(self.file_attrs)
         self.follow_up = models.FollowUp.objects.create(
             ticket=models.Ticket.objects.create(
-                queue=models.Queue.objects.create()
+                queue=models.Queue.objects.create(organization=self.org),
+                ticket_form=models.FormType.objects.create(organization=self.org),
             )
         )
 
@@ -126,11 +134,11 @@ class AttachmentUnitTests(TestCase):
 
     def test_kbi_attachment(self, mock_att_save, mock_queue_save, mock_ticket_save):
         """ check utf-8 data is parsed correctly """
-
         kbcategory = models.KBCategory.objects.create(
             title="Title",
             slug="slug",
-            description="Description"
+            description="Description",
+            organization=self.org,
         )
         kbitem = models.KBItem.objects.create(
             category=kbcategory,

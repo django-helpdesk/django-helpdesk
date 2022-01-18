@@ -42,7 +42,7 @@
                 <p>
                     {% blocktrans %}
                         Choose the ticket which will be conserved and then, for each information, you can decide to use
-                        a data from another ticket to merge. I you don't select a data on a row, <b>the information
+                        a data from another ticket to merge. If you don't select a data on a row, <b>the information
                         from the main ticket will stay unchanged</b>.
                     {% endblocktrans %}
                 </p>
@@ -87,7 +87,7 @@
                             {% include 'helpdesk/include/ticket_merge_row.html' %}
                         {% endfor %}
                         {% for custom_field in custom_fields %}
-                            {% include 'helpdesk/include/ticket_merge_row.html' with display_attr=custom_field.label attr=custom_field.name %}
+                            {% include 'helpdesk/include/ticket_merge_row.html' with display_attr=custom_field.label attr=custom_field.field_name %}
                         {% endfor %}
                     </tbody>
                 </table>
@@ -103,3 +103,4 @@
 {% block helpdesk_js %}
     {{ ticket_select_form.media.js }}
 {% endblock %}
+

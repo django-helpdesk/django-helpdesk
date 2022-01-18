@@ -8,6 +8,7 @@ views/staff.py - The bulk of the application - provides most business logic and
 """
 from copy import deepcopy
 import json
+import pandas as pd
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -17,7 +18,7 @@ from django.urls import reverse, reverse_lazy
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q, Prefetch
-from django.http import HttpResponseRedirect, Http404, HttpResponse, JsonResponse
+from django.http import HttpResponseRedirect, Http404, HttpResponse, JsonResponse, HttpRequest
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils.translation import ugettext as _
 from django.utils.html import escape
@@ -118,29 +119,26 @@ def dashboard(request):
     all_tickets_reported_by_current_user_page = request.GET.get(_('atrbcu_page'), 1)
 
     huser = HelpdeskUser(request.user)
+    user_queues = huser.get_queues()                # Queues in user's default org (or all if superuser)
     active_tickets = Ticket.objects.select_related('queue').exclude(
         status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
     )
 
-    # Get only active tickets available to their default organization
+    # Get only active tickets
     active_tickets = active_tickets.filter(
-        queue__in=Queue.objects.filter(
-            organization=request.user.default_organization_id))
+        queue__in=user_queues)
 
     # open & reopened tickets, assigned to current user
     tickets = active_tickets.filter(
         assigned_to=request.user,
     )
 
-    # closed & resolved tickets, assigned to current user, and belonging to their default org
+    # closed & resolved tickets, assigned to current user
     tickets_closed_resolved = Ticket.objects.select_related('queue').filter(
         assigned_to=request.user,
         status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
-        queue__in=Queue.objects.filter(
-            organization=request.user.default_organization_id),
+        queue__in=user_queues,
     )
-
-    user_queues = huser.get_queues()
 
     unassigned_tickets = active_tickets.filter(
         assigned_to__isnull=True,
@@ -156,8 +154,7 @@ def dashboard(request):
     if email_current_user:
         all_tickets_reported_by_current_user = Ticket.objects.select_related('queue').filter(
             submitter_email=email_current_user,
-            queue__in=Queue.objects.filter(
-                organization=request.user.default_organization_id)
+            queue__in=user_queues
         ).order_by('status')
 
     tickets_in_queues = Ticket.objects.filter(
@@ -229,7 +226,7 @@ dashboard = staff_member_required(dashboard)
 
 
 def ticket_perm_check(request, ticket):
-    huser = HelpdeskUser(request.user)
+    huser = HelpdeskUser(request.user, request)
     if not huser.can_access_queue(ticket.queue):
         raise PermissionDenied()
     if not huser.can_access_ticket(ticket):
@@ -375,10 +372,17 @@ def view_ticket(request, ticket_id):
 
         return update_ticket(request, ticket_id)
 
+    """
     # TODO remove use of HELPDESK_STAFF_ONLY_TICKET_OWNERS from all of helpdesk?
     users = User.objects.prefetch_related('organizationuser_set')\
         .filter(organizationuser__role_level__gte=ROLE_MEMBER).distinct()
     # TODO filter this by current org in place of distinct()
+    """
+    users = User.objects.filter(is_active=True)
+    if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS:
+        staff_ids = [u.id for u in users if is_helpdesk_staff(u)]
+        users = users.filter(id__in=staff_ids)
+    users = users.order_by(User.USERNAME_FIELD)
 
     queues = HelpdeskUser(request.user).get_queues()
     queue_choices = _get_queue_choices(queues)
@@ -506,7 +510,8 @@ def update_ticket(request, ticket_id, public=False):
     if not (public or (
             request.user.is_authenticated and
             request.user.is_active and (
-                is_helpdesk_staff(request.user)))):
+                (is_helpdesk_staff(request.user)) or
+                helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE))):
 
         key = request.POST.get('key')
         email = request.POST.get('mail')
@@ -580,7 +585,7 @@ def update_ticket(request, ticket_id, public=False):
         (owner and User.objects.get(id=owner) == ticket.assigned_to),
     ])
     if no_changes:
-        return return_to_ticket(request.user, helpdesk_settings, ticket)
+        return return_to_ticket(request.user, request, helpdesk_settings, ticket)
 
     # We need to allow the 'ticket' and 'queue' contexts to be applied to the
     # comment.
@@ -777,13 +782,13 @@ def update_ticket(request, ticket_id, public=False):
         if SHOW_SUBSCRIBE:
             subscribe_staff_member_to_ticket(ticket, request.user)
 
-    return return_to_ticket(request.user, helpdesk_settings, ticket)
+    return return_to_ticket(request.user, request, helpdesk_settings, ticket)
 
 
-def return_to_ticket(user, helpdesk_settings, ticket):
+def return_to_ticket(user, request, helpdesk_settings, ticket):
     """Helper function for update_ticket"""
-
-    if is_helpdesk_staff(user):
+    huser = HelpdeskUser(user, request)
+    if is_helpdesk_staff(user) and huser.can_access_ticket(ticket):
         return HttpResponseRedirect(ticket.get_absolute_url())
     else:
         return HttpResponseRedirect(ticket.ticket_url)
@@ -815,6 +820,52 @@ def mass_update(request):
         return redirect(
             reverse('helpdesk:merge_tickets') + '?' + '&'.join(['tickets=%s' % ticket_id for ticket_id in tickets])
         )
+    elif action == 'export':
+        urlsafe_query = request.POST.get('query_e')
+        query_params = request.POST.get('query_p')
+        visible_cols = request.POST.get('visible').split(',')
+        names = {'id': 'Ticket ID', 'ticket': 'Ticket', 'priority': 'Priority', 'queue': 'Queue', 
+                 'status': 'Status', 'created': 'Created', 'due_date': 'Due Date', 
+                 'assigned_to': 'Owner', 'submitter': 'Submitter', 'kbitem': 'KB Item'}
+
+        # Remake request to get data again
+        r = HttpRequest()
+        r.method = 'GET'
+        r.user = request.user
+        r.query_params = query_params
+        json_data = datatables_ticket_list(r, urlsafe_query).content
+        json_data = json.loads(json_data)
+        data = json_data['data']
+        extra_cols = json_data['extra_data_cols']
+
+        # Get selected data
+        output_tickets = []
+        for row in data:
+            ticket_id = str(row['id'])
+            if ticket_id in tickets:
+                # Get the data that is only visible
+                for col in list(set(row.keys()).difference(visible_cols)):
+                    row.pop(col)
+                # Replace default cols with proper names
+                for k in row.keys():
+                    row[names[k]] = row.pop(k)
+                output_tickets.append(row)
+
+        file_name = 'ticket_list_export.csv'
+        file_path = '/tmp/' + file_name  # TODO Better Place to store this temp file? 
+
+        # Convert to pandas dataframe for csv download, after some clean up
+        df = pd.json_normalize(output_tickets)
+        df = df.set_index('Ticket ID')
+        df = df[['Ticket'] + [c for c in df if c not in ['Ticket'] + extra_cols] + extra_cols]
+        df.to_csv(file_path)
+
+        # initiate the download, user will stay on the same page
+        with open(file_path, 'rb') as f:
+            response = HttpResponse(f.read(), content_type='application/vnd.ms-excel')
+            response['Content-Disposition'] = 'attachment; filename=' + file_name
+            response['Content-Type'] = 'application/vnd.ms-excel; charset=utf-16'
+            return response
 
     huser = HelpdeskUser(request.user)
     for t in Ticket.objects.filter(id__in=tickets):
@@ -905,17 +956,17 @@ mass_update = staff_member_required(mass_update)
 
 
 # Prepare ticket attributes which will be displayed in the table to choose which value to keep when merging
+# commented out are duplicate with customfields TODO delete later
 ticket_attributes = (
     ('created', _('Created date')),
-    ('due_date', _('Due on')),
+#    ('due_date', _('Due on')),
     ('get_status_display', _('Status')),
-    ('submitter_email', _('Submitter email')),
+#    ('submitter_email', _('Submitter email')),
     ('assigned_to', _('Owner')),
-    ('description', _('Description')),
+#    ('description', _('Description')),
     ('resolution', _('Resolution')),
 )
 
-# TODO fix
 @staff_member_required
 def merge_tickets(request):
     """
@@ -928,18 +979,21 @@ def merge_tickets(request):
     tickets = custom_fields = None
     if ticket_select_form.is_valid():
         tickets = ticket_select_form.cleaned_data.get('tickets')
+        custom_fields = CustomField.objects.filter(ticket_form_id__in=list(tickets.values_list('ticket_form__id'))
+                                                   ).order_by('field_name').distinct('field_name').exclude(
+                    field_name__in=['cc_emails', 'attachment', 'queue']
+                )
 
-        custom_fields = CustomField.objects.all()
         default = _('Not defined')
         for ticket in tickets:
             ticket.values = {}
-            # Prepare the value for each attributes of this ticket
+            # Prepare the value for each attribute of this ticket
             for attribute, display_name in ticket_attributes:
-                value = getattr(ticket, attribute, default)
-                # Check if attr is a get_FIELD_display
                 if attribute.startswith('get_') and attribute.endswith('_display'):
                     # Hack to call methods like get_FIELD_display()
                     value = getattr(ticket, attribute, default)()
+                else:
+                    value = getattr(ticket, attribute, default)
                 ticket.values[attribute] = {
                     'value': value,
                     'checked': str(ticket.id) == request.POST.get(attribute)
@@ -947,9 +1001,13 @@ def merge_tickets(request):
             # Prepare the value for each custom fields of this ticket
             for custom_field in custom_fields:
                 try:
-                    value = ticket.ticketcustomfieldvalue_set.get(field=custom_field).value
-                except (TicketCustomFieldValue.DoesNotExist, ValueError):
-                    value = default
+                    value = getattr(ticket, custom_field.field_name)
+                except AttributeError:
+                    # Search in extra_data
+                    if custom_field.field_name in ticket.extra_data.keys():
+                        value = ticket.extra_data[custom_field.field_name]
+                    else:
+                        value = default
                 ticket.values[custom_field.field_name] = {
                     'value': value,
                     'checked': str(ticket.id) == request.POST.get(custom_field.field_name)
@@ -989,21 +1047,17 @@ def merge_tickets(request):
                             selected_ticket = tickets.get(id=id_for_custom_field)
                         except (Ticket.DoesNotExist, ValueError):
                             continue
-
-                        # Check if the value for this ticket custom field exists
                         try:
-                            value = selected_ticket.ticketcustomfieldvalue_set.get(field=custom_field).value
-                        except TicketCustomFieldValue.DoesNotExist:
-                            continue
-
-                        # Create the custom field value or update it with the value from the selected ticket
-                        custom_field_value, created = chosen_ticket.ticketcustomfieldvalue_set.get_or_create(
-                            field=custom_field,
-                            defaults={'value': value}
-                        )
-                        if not created:
-                            custom_field_value.value = value
-                            custom_field_value.save(update_fields=['value'])
+                            value = getattr(selected_ticket, custom_field.field_name)
+                            setattr(chosen_ticket, custom_field.field_name, value)
+                        except AttributeError:
+                            # Search in extra_data
+                            if custom_field.field_name in ticket.extra_data.keys():
+                                value = selected_ticket.extra_data[custom_field.field_name]
+                            else:
+                                value = default
+                            chosen_ticket.extra_data[custom_field.field_name] = value
+    
                 # Save changes
                 chosen_ticket.save()
 
@@ -1029,8 +1083,7 @@ def merge_tickets(request):
                     # Move all followups and update their title to know they come from another ticket
                     ticket.followup_set.update(
                         ticket=chosen_ticket,
-                        # Next might exceed maximum 200 characters limit
-                        title=_('[Merged from #%(id)d] %(title)s') % {'id': ticket.id, 'title': ticket.title}
+                        title=_(('[Merged from #%(id)d] %(title)s') % {'id': ticket.id, 'title': ticket.title})[:200],
                     )
 
                     # Add submitter_email, assigned_to email and ticketcc to chosen ticket if necessary
@@ -1047,6 +1100,7 @@ def merge_tickets(request):
         'custom_fields': custom_fields,
         'ticket_select_form': ticket_select_form
     })
+
 
 
 @helpdesk_staff_member_required
@@ -1066,7 +1120,7 @@ def ticket_list(request):
     }
     default_query_params = {
         'filtering': {
-            'status__in': [1, 2],
+            'status__in': [1, 2, 6],
         },
         'sorting': 'created',
         'sortreverse': False,
@@ -1170,7 +1224,9 @@ def ticket_list(request):
     urlsafe_query = query_to_base64(query_params)
     Query(huser, base64query=urlsafe_query).refresh_query()
 
-    user_saved_queries = SavedSearch.objects.filter(Q(user=request.user) | Q(shared__exact=True))
+    # Return queries that the user created, or that have been shared with everyone and the user hasn't rejected
+    user_saved_queries = SavedSearch.objects.filter(Q(user=request.user)
+                                                    | (Q(shared__exact=True) & ~Q(opted_out_users__in=[request.user])))
 
     search_message = ''
     if query_params['search_string'] and settings.DATABASES['default']['ENGINE'].endswith('sqlite'):
@@ -1182,7 +1238,9 @@ def ticket_list(request):
             '<a href="http://docs.djangoproject.com/en/dev/ref/databases/#sqlite-string-matching">'
             'Django Documentation on string matching in SQLite</a>.')
 
-    kbitem_choices = [(item.pk, str(item)) for item in KBItem.objects.all()]
+    # Get KBItems that are part of the user's organization
+    kbitem_choices = [(item.pk, str(item)) for item in
+                      KBItem.objects.filter(category__organization=request.user.default_organization)]
 
     # After query is run, replaces null-filters with in-filters=[-1], so page can properly display that filter.
     for param, null_query in filter_null_params.items():
@@ -1190,9 +1248,18 @@ def ticket_list(request):
         if popped is not None:
             query_params['filtering'][filter_in_params[param]] = [-1]
 
+    """
     user_choices = User.objects.prefetch_related('organizationuser_set')\
         .filter(organizationuser__role_level__gte=ROLE_MEMBER).distinct()
     # TODO filter this by current org in place of distinct()
+    """
+    # Get users that are owners/members
+    user_choices = [u for u in User.objects.filter(is_active=True) if is_helpdesk_staff(u)]
+
+    # Get extra data columns to be displayed if only 1 queue is selected
+    data = datatables_ticket_list(request, urlsafe_query).content
+    extra_data_cols = json.loads(data)['extra_data_cols']
+
 
     return render(request, 'helpdesk/ticket_list.html', dict(
         context,
@@ -1208,6 +1275,7 @@ def ticket_list(request):
         from_saved_query=saved_query is not None,
         saved_query=saved_query,
         search_message=search_message,
+        extra_data_cols=extra_data_cols,
     ))
 
 
@@ -1216,7 +1284,7 @@ ticket_list = staff_member_required(ticket_list)
 
 class QueryLoadError(Exception):
     pass
-
+# Q(user=request.user) | (Q(shared__exact=True) & ~Q(opted_out_users__in=[request.user]))
 
 def load_saved_query(request, query_params=None):
     saved_query = None
@@ -1224,7 +1292,8 @@ def load_saved_query(request, query_params=None):
     if request.GET.get('saved_query', None):
         try:
             saved_query = SavedSearch.objects.get(
-                Q(pk=request.GET.get('saved_query')) & (Q(shared=True) | Q(user=request.user))
+                Q(pk=request.GET.get('saved_query')) &
+                ((Q(shared=True) & ~Q(opted_out_users__in=[request.user])) | Q(user=request.user))
             )
         except (SavedSearch.DoesNotExist, ValueError):
             raise QueryLoadError()
@@ -1252,8 +1321,53 @@ def datatables_ticket_list(request, query):
     """
     query = Query(HelpdeskUser(request.user), base64query=query)
     result = query.get_datatables_context(**request.query_params)
+    # Modify extra data in result, so all entries have the same extra data
+    # First collect extra field names
+    extra_data_cols = {}
+    if 'queue__id__in' in query.params['filtering']:
+        if len(query.params['filtering']['queue__id__in']) == 1: 
+            for row in result['data']:
+                if row['extra_data']:
+                    new_cols = [i for i in row['extra_data'].keys() if i not in extra_data_cols]
+                    new_cols = {i: get_viewable_name(row['ticket'], i) for i in new_cols}
+                    extra_data_cols.update(new_cols)
+
+            # Update result.data
+            for row in result['data']:
+                if row['extra_data']:
+                    # Replace with display names
+                    for k in list(row['extra_data'].keys()):
+                        disp_name = extra_data_cols[k]
+                        row['extra_data'][disp_name] = row['extra_data'].pop(k)
+                    # Add in any other col not in extra_data
+                    missing_cols = {k:'' for k in extra_data_cols.values() if k not in row['extra_data'].keys()}
+                    row['extra_data'].update(missing_cols)
+
+                    # Replace extra_data with the cols themselves
+                    extra_data = row.pop('extra_data')
+                    # Sort it into  an ordered dict
+                    keys = list(extra_data.keys())
+                    keys.sort()
+                    for  k in keys:
+                        row.update({k: extra_data[k]})
+    else:
+        # Remove extra data field for now
+        for row in result['data']:
+            row.pop('extra_data')
+
+    # Return list of extra data columns too
+    result['extra_data_cols'] = list(extra_data_cols.values())
     return (JsonResponse(result, status=status.HTTP_200_OK))
 
+def get_viewable_name(ticket_name, extra_data_name):
+    # Helper function to take serialized ticket name and extra_data field and return display name
+    # 12 [queue-2-12]'
+    ticket_id = int(ticket_name.split('[')[0])
+    form_id = Ticket.objects.get(id=ticket_id).ticket_form_id
+    field = CustomField.objects.filter(ticket_form_id=form_id,
+                                           field_name=extra_data_name).first()
+
+    return field.label if field is not None else extra_data_name
 
 @helpdesk_staff_member_required
 @api_view(['GET'])
@@ -1289,7 +1403,7 @@ class CreateTicketView(MustBeStaffMixin, abstract_views.AbstractCreateTicketMixi
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        queues = HelpdeskUser(self.request.user).get_queues()
+        queues = HelpdeskUser(self.request.user, self.request).get_queues()
         kwargs["queue_choices"] = _get_queue_choices(queues)
         kwargs['form_id'] = self.form_id
         return kwargs
@@ -1300,7 +1414,7 @@ class CreateTicketView(MustBeStaffMixin, abstract_views.AbstractCreateTicketMixi
 
     def get_success_url(self):
         request = self.request
-        if HelpdeskUser(request.user).can_access_queue(self.ticket.queue):
+        if HelpdeskUser(request.user, request).can_access_queue(self.ticket.queue):
             return self.ticket.get_absolute_url()
         else:
             return reverse('helpdesk:dashboard')
@@ -1375,13 +1489,12 @@ rss_list = staff_member_required(rss_list)
 
 @helpdesk_staff_member_required
 def report_index(request):
-    number_tickets = Ticket.objects.filter(queue__in=Queue.objects.filter(
-            organization=request.user.default_organization_id)).count()
+    huser = HelpdeskUser(request.user)
+    user_queues = huser.get_queues()
+    Tickets = Ticket.objects.filter(queue__in=user_queues)
+    number_tickets = Tickets.count()
     saved_query = request.GET.get('saved_query', None)
 
-    user_queues = HelpdeskUser(request.user).get_queues()
-    Tickets = Ticket.objects.filter(queue__in=Queue.objects.filter(
-            organization=request.user.default_organization_id))
     basic_ticket_stats = calc_basic_ticket_stats(Tickets)
 
     # The following query builds a grid of queues & ticket statuses,
@@ -1643,6 +1756,45 @@ def delete_saved_query(request, id):
 
 
 delete_saved_query = staff_member_required(delete_saved_query)
+
+
+@helpdesk_staff_member_required
+def reject_saved_query(request, id):
+    user = request.user
+    query = get_object_or_404(SavedSearch, id=id)
+
+    query.opted_out_users.add(user)
+    return HttpResponseRedirect(reverse('helpdesk:list'))
+
+
+reject_saved_query = staff_member_required(reject_saved_query)
+
+
+@helpdesk_staff_member_required
+def reshare_saved_query(request, id):
+    user = request.user
+    query = get_object_or_404(SavedSearch, id=id, user=user)
+
+    query.opted_out_users.clear()
+    query.shared = True
+    query.save()
+    return HttpResponseRedirect(reverse('helpdesk:list') + '?saved_query=%s' % query.id)
+
+
+reject_saved_query = staff_member_required(reject_saved_query)
+
+
+@helpdesk_staff_member_required
+def unshare_saved_query(request, id):
+    user = request.user
+    query = get_object_or_404(SavedSearch, id=id, user=user)
+
+    query.shared = False
+    query.save()
+    return HttpResponseRedirect(reverse('helpdesk:list') + '?saved_query=%s' % query.id)
+
+
+reject_saved_query = staff_member_required(reject_saved_query)
 
 
 class EditUserSettingsView(MustBeStaffMixin, UpdateView):

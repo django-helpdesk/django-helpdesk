@@ -2,12 +2,13 @@
 import email
 import uuid
 
-from helpdesk.models import Queue, CustomField, FollowUp, Ticket, TicketCC, KBCategory, KBItem
+from helpdesk.models import Queue, CustomField, FollowUp, Ticket, TicketCC, KBCategory, KBItem, FormType
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.core import mail
 from django.core.exceptions import ObjectDoesNotExist
 from django.forms import ValidationError
+from seed.lib.superperms.orgs.models import Organization
 from django.test.client import Client
 from django.urls import reverse
 
@@ -26,27 +27,34 @@ class TicketBasicsTestCase(TestCase):
     fixtures = ['emailtemplate.json']
 
     def setUp(self):
+        self.org = Organization.objects.create()
+        self.form = FormType.objects.create(organization=self.org)
         self.queue_public = Queue.objects.create(
             title='Queue 1',
             slug='q1',
             allow_public_submission=True,
             new_ticket_cc='new.public@example.com',
-            updated_ticket_cc='update.public@example.com')
+            updated_ticket_cc='update.public@example.com',
+            organization=self.org,)
         self.queue_private = Queue.objects.create(
             title='Queue 2',
             slug='q2',
             allow_public_submission=False,
             new_ticket_cc='new.private@example.com',
-            updated_ticket_cc='update.private@example.com')
+            updated_ticket_cc='update.private@example.com',
+            organization=self.org,)
 
         self.ticket_data = {
             'title': 'Test Ticket',
             'description': 'Some Test Ticket',
+            'ticket_form': self.form,
         }
 
         self.user = get_user_model().objects.create(
             username='User_1',
+            default_organization=self.org
         )
+        self.org.users.add(self.user)       # Gets added as a staff member
 
         self.client = Client()
 
@@ -150,7 +158,8 @@ class TicketBasicsTestCase(TestCase):
             title='Queue 3',
             slug='q3',
             allow_public_submission=True,
-            updated_ticket_cc='update.custom@example.com')
+            updated_ticket_cc='update.custom@example.com',
+            organization=self.org)
         custom_field_1 = CustomField.objects.create(
             name='textfield',
             label='Text Field',
@@ -220,6 +229,8 @@ class EmailInteractionsTestCase(TestCase):
     fixtures = ['emailtemplate.json']
 
     def setUp(self):
+        self.org = Organization.objects.create()
+        self.form = FormType.objects.create(organization=self.org)
         self.queue_public = Queue.objects.create(
             title='Mail Queue 1',
             slug='mq1',
@@ -228,6 +239,7 @@ class EmailInteractionsTestCase(TestCase):
             new_ticket_cc='new.public.with.notifications@example.com',
             updated_ticket_cc='update.public.with.notifications@example.com',
             enable_notifications_on_email_events=True,
+            organization=self.org,
         )
 
         self.queue_public_with_notifications_disabled = Queue.objects.create(
@@ -238,11 +250,13 @@ class EmailInteractionsTestCase(TestCase):
             new_ticket_cc='new.public.without.notifications@example.com',
             updated_ticket_cc='update.public.without.notifications@example.com',
             enable_notifications_on_email_events=False,
+            organization=self.org,
         )
 
         self.ticket_data = {
             'title': 'Test Ticket',
             'description': 'Some Test Ticket',
+            'ticket_form': self.form,
         }
 
     def test_create_ticket_from_email_with_message_id(self):
@@ -1059,6 +1073,7 @@ class EmailInteractionsTestCase(TestCase):
             slug="test_cat",
             description="This is a test category",
             queue=self.queue_public,
+            organization=self.org,
         )
         cat.save()
         self.kbitem1 = KBItem.objects.create(
@@ -1068,7 +1083,7 @@ class EmailInteractionsTestCase(TestCase):
             answer="A KB Item",
         )
         self.kbitem1.save()
-        cat_url = reverse('helpdesk:submit') + "?kbitem=1;submitter_email=foo@bar.cz;title=lol;"
+        cat_url = reverse('helpdesk:submit', kwargs={'form_id': self.form.id}) + "?kbitem=1;submitter_email=foo@bar.cz;title=lol;"
         response = self.client.get(cat_url)
         self.assertContains(response, '<option value="1" selected>KBItem 1</option>')
         self.assertContains(response, '<input type="email" name="submitter_email" value="foo@bar.cz" class="form-control form-control" required id="id_submitter_email">')

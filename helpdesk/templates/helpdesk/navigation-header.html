@@ -1,6 +1,5 @@
 {% load i18n helpdesk_staff %}
 {% load organization_info %}
-{% with user|organization_info as user_info %}
 
     {% include 'helpdesk/custom_navigation_header.html' %}
     <nav class="navbar navbar-expand navbar-dark bg-dc static-top">
@@ -8,7 +7,7 @@
         <i class="fas fa-bars"></i>
       </button>
 
-      <a class="navbar-brand mr-auto" href="{% url 'helpdesk:home' %}">{% trans 'Building Performance Helpdesk' %}</a>
+      <a class="navbar-brand mr-auto" href="{% url 'helpdesk:home' %}{% if user|is_helpdesk_staff is False %}?org={{ user_info.default_org.name }}{% endif %}">{% trans 'Building Performance Helpdesk' %}</a>
 
       {% if helpdesk_settings.HELPDESK_NAVIGATION_ENABLED and user.is_authenticated or user|is_helpdesk_staff %}
       <!-- Navbar Search -->
@@ -25,9 +24,10 @@
         {% csrf_token %}
       </form>
       {% endif %}
-	  {% if helpdesk_settings.HELPDESK_NAVIGATION_ENABLED and user.is_authenticated or user|is_helpdesk_staff %}
+      <!-- Show Org Dropdown, Styling and Logo if User is Staff -->
+	    {% if user.is_authenticated and user|is_helpdesk_staff %}
       <div class="org-dropdown-btn">
-        <button onclick="showOrgs()" class="btnUserOrgs" type="button" class="dropbtn">
+        <button onclick="showOrgs()" class="btnUserOrgs staff" type="button" class="dropbtn">
           {{ user_info.default_org.name }} <span class="caret"></span>
         </button>
         <div id="org-dropdown-menu" class="org-dropdown-items">
@@ -40,7 +40,14 @@
           {% endfor %}
         </div>
       </div>
-    {% endif %}
+      <!-- If user is not staff, we show dropdown with Org Helpdesks they have access to or the One org that led them there -->
+      {% elif user|is_helpdesk_staff is False %}
+      <div class="org-dropdown-btn">
+        <button  class="btnUserOrgs public" >
+          {{ user_info.default_org.name }}
+        </button>
+      </div>
+      {% endif %}
       <!-- DC logo -->
       <!--<img src="{{ STATIC_URL }}helpdesk/images/dc_green_doee_logo_white.png" title="{$:: 'BEAM' | translate $}" style="max-height:70px;">-->
       {% if user_info.default_org.logo %}
@@ -58,13 +65,17 @@
   padding: 16px;
   font-size: 16px;
   border: none;
-  cursor: pointer;
   font-size: 1.25rem;
 }
 
+.btnUserOrgs.public {
+  cursor: default;
+}
+
 /* Dropdown button on hover & focus */
-.btnUserOrgs:hover, .btnUserOrgs:focus {
+.btnUserOrgs.staff:hover, .btnUserOrgs.staff:focus {
   background-color: #2980B9;
+  cursor: pointer;
 }
 
 /* The container <div> - needed to position the dropdown content */
@@ -146,4 +157,3 @@ window.onclick = function(event) {
   }
 {% endif %}
 </style>
-{% endwith %}

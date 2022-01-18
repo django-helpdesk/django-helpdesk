@@ -17,7 +17,10 @@ register = template.Library()
 @register.filter
 def saved_queries(user):
     try:
-        filters = Q(shared__exact=True)
+        if user.is_anonymous:
+            filters = Q(shared__exact=True)
+        else:
+            filters = (Q(shared__exact=True) & ~Q(opted_out_users__in=[user]))
         if user.is_authenticated:
             filters |= Q(user=user)
         user_saved_queries = SavedSearch.objects.filter(filters)

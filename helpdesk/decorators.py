@@ -25,10 +25,11 @@ def check_staff_status(check_staff=False):  # 1st bool -- unused
             if not is_user:  # does not have an account in BEAM
                 return False
 
-            org_user = OrganizationUser.objects.filter(user=u)
+            org_user = OrganizationUser.objects.filter(user=u, organization=u.default_organization)
             if not org_user.exists():
                 return False
-            org_user = org_user.first()  # TODO change later using the user's current org
+
+            org_user = org_user.first()
 
             is_building_user = requires_building_user(org_user)
             is_member = requires_member(org_user)

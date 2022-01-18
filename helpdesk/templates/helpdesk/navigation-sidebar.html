@@ -1,9 +1,10 @@
 {% load i18n helpdesk_staff %}
 {% load form_list %}
-{% with user|form_list as forms %}
+{% form_list user request as forms %}
 {% load saved_queries %}
 {% with user|saved_queries as user_saved_queries_ %}
 {% with request.resolver_match.url_name as url_name %}
+{% load organization_info %}
     <!-- Sidebar -->
     <ul class="sidebar navbar-nav">
     {% if helpdesk_settings.HELPDESK_NAVIGATION_ENABLED and user.is_authenticated or user|is_helpdesk_staff %}
@@ -84,7 +85,7 @@
             <a class="dropdown-item small text-wrap" href="{% url 'helpdesk:system_settings' %}"><i class="fas fa-fw fa-cogs"></i> {% trans "System Settings" %}</a>
             <div class="dropdown-divider"></div>
             {% endif %}
-            <a class="dropdown-item small text-wrap" href="{% url 'helpdesk:logout' %}"><i class="fas fa-fw fa-sign-out-alt"></i> {% trans "Logout" %}</a>
+            <a class="dropdown-item small text-wrap" href="{% url 'helpdesk:logout' %}?next=/helpdesk/?org={{ user_info.default_org.name }}"><i class="fas fa-fw fa-sign-out-alt"></i> {% trans "Logout" %}</a>
           </div>
         </li>
         <li class="nav-item">
@@ -96,7 +97,7 @@
     {% else %}
         {# Public menu #}
         <li class="nav-item {% if url_name == 'home' %}active{% endif %}">
-          <a class="nav-link" href="{% url 'helpdesk:home' %}">
+          <a class="nav-link" href="{% url 'helpdesk:home' %}?org={{ user_info.default_org.name }}">
             <i class="fas fa-fw fa-home"></i>
             <span>{% trans "Homepage" %}</span>
           </a>
@@ -109,7 +110,9 @@
           <div class="dropdown-menu" aria-labelledby="ticketsDropdown">
             {% if forms %}
             {% for f in forms %}
-            <a class="dropdown-item small text-wrap" href="{% url 'helpdesk:submit' f.id %}">{{ f.name }}</a>
+            {% if f.organization__name == user_info.default_org.name %}
+            <a class="dropdown-item small text-wrap" href="{% url 'helpdesk:submit' f.id %}?org={{ user_info.default_org.name }}">{{ f.name }}</a>
+            {% endif %}
             {% endfor %}
             {% else %}
             <p class="dropdown-item small text-wrap">{% trans "No forms are available." %}</p>
@@ -118,15 +121,21 @@
         </li>
         {% if helpdesk_settings.HELPDESK_KB_ENABLED %}
         <li class="nav-item {% if 'kb_' in url_name %}active{% endif %}">
-          <a class="nav-link" href="{% url 'helpdesk:kb_index' %}">
+          <a class="nav-link" href="{% url 'helpdesk:kb_index' %}?org={{ user_info.default_org.name }}">
             <i class="fas fa-fw fa-database"></i>
             <span>{% trans "Knowledgebase" %}</span>
           </a>
         </li>
         {% endif %}
+        <li class="dropdown-divider"></li>
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'seed:home' %}#/properties">
+                <i class="fas fa-city"></i>
+                <span>BEAM {% trans "Inventory" %}</span>
+            </a>
+        </li>
     {% endif %}
     </ul>
 
-{% endwith %}
 {% endwith %}
 {% endwith %}

@@ -101,12 +101,7 @@ class BaseCreateTicketView(abstract_views.AbstractCreateTicketMixin, FormView):
         else:
             ticket = form.save(form_id=self.form_id, user=self.request.user if self.request.user.is_authenticated else None)
             try:
-                return HttpResponseRedirect('%s?ticket=%s&email=%s&key=%s' % (
-                    reverse('helpdesk:public_view'),
-                    ticket.ticket_for_url,
-                    urlquote(ticket.submitter_email),
-                    ticket.secret_key)
-                )
+                return HttpResponseRedirect(ticket.ticket_url)
             except ValueError:
                 # if someone enters a non-int string for the ticket
                 return HttpResponseRedirect(reverse('helpdesk:home'))
@@ -167,6 +162,7 @@ def search_for_ticket(request, error_message=None):
 
 @protect_view
 def view_ticket(request):
+    ticket_org = request.GET.get('org', None)
     ticket_req = request.GET.get('ticket', None)
     email = request.GET.get('email', None)
     key = request.GET.get('key', '')
@@ -185,8 +181,7 @@ def view_ticket(request):
             ticket = Ticket.objects.get(id=ticket_id, submitter_email__iexact=email, secret_key__iexact=key)
     except (ObjectDoesNotExist, ValueError):
         return search_for_ticket(request, _('Invalid ticket ID or e-mail address. Please try again.'))
-
-    if is_helpdesk_staff(request.user):
+    if is_helpdesk_staff(request.user) and ticket_org == request.user.default_organization_id:
         redirect_url = reverse('helpdesk:view', args=[ticket_id])
         if 'close' in request.GET:
             redirect_url += '?close'

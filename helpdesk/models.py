@@ -77,6 +77,7 @@ def get_markdown(text, kb=False):
         extensions.append('markdown.extensions.attr_list')
     return mark_safe(markdown(text, extensions=extensions))
 
+
 class Queue(models.Model):
     """
     A queue is a collection of tickets into what would generally be business
@@ -437,6 +438,7 @@ class Queue(models.Model):
 def mk_secret():
     return str(uuid.uuid4())
 
+
 class FormType(models.Model):
 
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
@@ -471,6 +473,18 @@ class FormType(models.Model):
 
     def get_extra_field_names(self):
         return CustomField.objects.filter(ticket_form=self.id, is_extra_data=True).values_list('field_name', flat=True)
+
+
+@receiver(post_save, sender=FormType)
+def insert_presets_to_db(instance, created, **kwargs):
+    from helpdesk.preset_form_fields import get_preset_fields
+    # Generate the 13 different preset forms fields (with 19 fields each) and set them to a specific form type
+    kwargs_for_CF = get_preset_fields(instance.id)
+    # Only add preset fields if the object was just created
+    if created:
+        for kwarg_CF in kwargs_for_CF:
+            new_CustomField = CustomField(**kwarg_CF)
+            new_CustomField.save()
 
 
 class Ticket(models.Model):
@@ -719,10 +733,11 @@ class Ticket(models.Model):
             protocol = 'https'
         else:
             protocol = 'http'
-        return u"%s://%s%s?ticket=%s&email=%s&key=%s" % (
+        return u"%s://%s%s?org=%s&ticket=%s&email=%s&key=%s" % (
             protocol,
             site.domain,
             reverse('helpdesk:public_view'),
+            self.queue.organization.name,
             self.ticket_for_url,
             self.submitter_email,
             self.secret_key
@@ -1342,6 +1357,11 @@ class KBCategory(models.Model):
     listing of questions & answers.
     """
 
+    organization = models.ForeignKey(
+        Organization,
+        on_delete=models.CASCADE,
+    )
+
     name = models.CharField(
         _('Name of the category'),
         max_length=100,
@@ -1507,10 +1527,10 @@ class KBItem(models.Model):
         return str(reverse('helpdesk:list')) + "?kbitem=" + str(self.pk)
 
     def num_open_tickets(self):
-        return Ticket.objects.filter(kbitem=self, status__in=(1, 2)).count()
+        return Ticket.objects.filter(kbitem=self, status__in=(1, 2, 6)).count()
 
     def unassigned_tickets(self):
-        return Ticket.objects.filter(kbitem=self, status__in=(1, 2), assigned_to__isnull=True)
+        return Ticket.objects.filter(kbitem=self, status__in=(1, 2, 6), assigned_to__isnull=True)
 
     def get_markdown(self):
         """
@@ -1592,6 +1612,13 @@ class SavedSearch(models.Model):
     query = models.TextField(
         _('Search Query'),
         help_text=_('Pickled query object. Be wary changing this.'),
+    )
+
+    opted_out_users = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        blank=True,
+        help_text=_('Users who have opted out of seeing this query'),
+        related_name='opted_out'
     )
 
     def __str__(self):
@@ -2076,20 +2103,3 @@ class TicketDependency(models.Model):
 
     def __str__(self):
         return '%s / %s' % (self.ticket, self.depends_on)
-
-
-
-#---
-# Signals. Should be placed in a separate signals.py file?
-# https://stackoverflow.com/questions/30494589/django-call-method-after-object-save-with-new-instance
-from helpdesk.preset_form_fields import get_preset_fields
-@receiver(post_save, sender=FormType)
-def insert_presets_to_db(instance, created, **kwargs):
-    # Generate the 13 different preset forms fields (with 19 fields each) and set them to a specific form type
-    kwargs_for_CF = get_preset_fields(instance.id)
-    # Only add preset fields if the object was just created
-    if created:
-        for kwarg_CF in kwargs_for_CF:
-            new_CustomField = CustomField(**kwarg_CF)
-            new_CustomField.save()
-#---

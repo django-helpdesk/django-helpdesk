@@ -1,13 +1,13 @@
 {% extends "helpdesk/public_base.html" %}
-{% load i18n %}
+{% load i18n helpdesk_staff %}
 
 {% block helpdesk_title %}{% blocktrans with kbcat=category.title kbitem=item.title %}{{ kbitem }} - {{ kbcat }}{% endblocktrans %}{% endblock %}
 {% block helpdesk_breadcrumb %}
 <li class="breadcrumb-item">
-    <a href="{% url 'helpdesk:kb_index' %}">{% trans "Knowledgebase" %}</a>
+    <a href="{% url 'helpdesk:kb_index' %}{% if user|is_helpdesk_staff is False %}?org={{ user_info.default_org.name }}{% endif %}">{% trans "Knowledgebase" %}</a>
 </li>
 <li class="breadcrumb-item active">
-    <a href="{% url 'helpdesk:kb_category' category.slug %}">{% blocktrans with category.title as kbcat %}{{ kbcat }}{% endblocktrans %}</a>
+    <a href="{% url 'helpdesk:kb_category' category.slug %}{% if user|is_helpdesk_staff is False %}?org={{ user_info.default_org.name }}{% endif %}">{% blocktrans with category.title as kbcat %}{{ kbcat }}{% endblocktrans %}</a>
 </li>
 <li class="breadcrumb-item active">{% blocktrans with item.title as kbitem %}{{ kbitem }}{% endblocktrans %}</li>
 {% endblock %}

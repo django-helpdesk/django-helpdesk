@@ -4,12 +4,13 @@ from django.core import mail
 from django.urls import reverse
 from django.test import TestCase
 from django.test.client import Client
-from helpdesk.models import Queue, Ticket, FollowUp
+from helpdesk.models import Queue, Ticket, FollowUp, FormType
 from helpdesk import settings as helpdesk_settings
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 import uuid
 import datetime
+from seed.lib.superperms.orgs.models import Organization
 
 try:  # python 3
     from urllib.parse import urlparse
@@ -22,16 +23,20 @@ from helpdesk.templatetags.ticket_to_link import num_to_link
 class TimeSpentTestCase(TestCase):
 
     def setUp(self):
+        self.org = Organization.objects.create()
+        self.form = FormType.objects.create(organization=self.org)
         self.queue_public = Queue.objects.create(
             title='Queue 1',
             slug='q1',
             allow_public_submission=True,
-            dedicated_time=datetime.timedelta(minutes=60)
+            dedicated_time=datetime.timedelta(minutes=60),
+            organization=self.org,
         )
 
         self.ticket_data = {
             'title': 'Test Ticket',
             'description': 'Some Test Ticket',
+            'ticket_form': self.form,
         }
 
         ticket_data = dict(queue=self.queue_public, **self.ticket_data)
@@ -43,11 +48,12 @@ class TimeSpentTestCase(TestCase):
             'username': 'staff',
             'email': 'staff@example.com',
             'password': make_password('Test1234'),
-            'is_staff': True,
             'is_superuser': False,
             'is_active': True
         }
+        User = get_user_model()
         self.user = User.objects.create(**user1_kwargs)
+        self.org.users.add(self.user)
 
     def test_add_followup(self):
         """Tests whether staff can delete tickets"""

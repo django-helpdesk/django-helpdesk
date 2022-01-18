@@ -4,18 +4,20 @@ from helpdesk.models import (
     KBCategory,
     KBItem,
 )
+from seed.lib.superperms.orgs.models import Organization
 
 from helpdesk import settings as helpdesk_settings
 from helpdesk.decorators import is_helpdesk_staff
 
 
 def huser_from_request(req):
-    return HelpdeskUser(req.user)
+    return HelpdeskUser(req.user, req)
 
 
 class HelpdeskUser:
-    def __init__(self, user):
+    def __init__(self, user, request=None):
         self.user = user
+        self.request = request
 
     def get_queues(self):
         """Return the list of Queues the user can access.
@@ -24,10 +26,13 @@ class HelpdeskUser:
         :return: A Python list of Queues
         """
         user = self.user
-        # All queues for the users default org
-        all_queues = Queue.objects.filter(organization=user.default_organization_id)
+        # All queues for the users default org, and public queues available therein, unless user is superuser
+        if self.user.is_superuser:
+            all_queues = Queue.objects.all()
+        else:
+            all_queues = Queue.objects.filter(organization=user.default_organization_id)
         public_ids = [q.pk for q in
-                      Queue.objects.filter(allow_public_submission=True)]
+                      all_queues.filter(allow_public_submission=True)]
         limit_queues_by_user = \
             helpdesk_settings.HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION \
             and not user.is_superuser
@@ -56,7 +61,7 @@ class HelpdeskUser:
         return Ticket.objects.filter(queue__in=self.get_queues())
 
     def has_full_access(self):
-        return self.user.is_superuser or is_helpdesk_staff(self.user)
+        return self.user.is_superuser
 
     def can_access_queue(self, queue):
         """Check if a certain user can access a certain queue.
@@ -66,8 +71,8 @@ class HelpdeskUser:
         :param queue: The django-helpdesk Queue instance
         :return: True if the user has permission (either by default or explicitly), false otherwise
         """
-        if self.user.default_organization_id != queue.organization.id:
-            return False
+        if self.can_access_organization(queue.organization):
+            return True
         elif self.has_full_access():
             return True
         else:
@@ -83,13 +88,67 @@ class HelpdeskUser:
         user = self.user
         if self.can_access_queue(ticket.queue):
             return True
-        elif self.has_full_access() or \
-            (ticket.assigned_to and user.id == ticket.assigned_to.id):
+        elif self.has_full_access() or (ticket.assigned_to and user.id == ticket.assigned_to.id):
             return True
         else:
             return False
 
     def can_access_kbcategory(self, category):
-        if category.public:
+        """Check to see if the user has permission to access
+            a KBcategory. If not deny access. Should be Org
+            dependent
+        :param category, Helpdesk model KBCategory
+        :return boolean, whether user has access to it or not
+        """
+        # Order of precedence for access:
+        # A public category should be visible to anyone in the organization
+        # For non-public categories:
+        # If the category has a queue, should be viewable if user has access to the org
+        # If there's no queue, the category should only be visible for staff in the organization (since not public)
+        # Otherwise, the category will be visible to superusers
+        # Not viewable to anyone else
+        if category.public and self.can_access_organization(category.organization):
+            if category.queue:
+                return self.can_access_queue(category.queue)
+            else:
+                return True
+        elif is_helpdesk_staff(self.user) and self.can_access_organization(category.organization):
             return True
-        return self.has_full_access() or (category.queue and self.can_access_queue(category.queue))
+        elif self.has_full_access() and self.can_access_organization(category.organization):
+            return True
+        else:
+            return False
+
+    def can_access_kbarticle(self, article):
+        """Check to see if the user has permission to access
+            a KBarticle. If not deny access. Should be Org
+            dependent. Uses can_access_kbcategory.
+        :param article, Helpdesk model KBArticle
+        :return boolean, whether user has access to it or not
+        """
+        if not HelpdeskUser.can_access_kbcategory(self, article.category):
+            return False
+        elif self.has_full_access() and self.can_access_organization(article.category.organization):
+            return True
+        elif article.enabled:
+            return True
+        else:
+            return False
+
+    def can_access_organization(self, organization):
+        if self.user.is_anonymous or not is_helpdesk_staff(self.user):
+            # Check if the org in the url matches this organization
+            try:
+                url_org = self.request.GET.get('org')
+                org = Organization.objects.filter(name=url_org).first()
+            except:
+                org = None
+            if org:
+                return org == organization
+            elif not org and self.user.is_authenticated:
+                # If no org in url, default to users default_organization
+                return self.user.default_organization == organization
+            else:
+                return False
+        else:
+            return self.user.default_organization == organization

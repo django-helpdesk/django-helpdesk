@@ -11,11 +11,6 @@
     {% else %}
     <link title="timeline-styles" rel="stylesheet" href="{% static 'helpdesk/vendor/timeline3/css/timeline.css' %}">
     {% endif %}
-<style>
-thead input {
-	width: 100%;
-}	
-</style>
 {% endblock %}
 
 {% block h1_title %}Tickets
@@ -81,9 +76,18 @@ thead input {
                                 <th>{% trans "Submitter" %}</th>
                                 <th>{% trans "Time Spent" %}</th>
                                 <th>{% trans "KB item" %}</th>
+                                {% if query_params.filtering.queue__id__in|length == 1 %}
+                                    {% for extra_col in extra_data_cols %}
+                                <th>{{ extra_col }}</th>
+                                    {% endfor %}
+                                {% endif %}
                             </tr>
                             </thead>
                         </table>
+                        <!-- Pass Query Params to View for exporting to work Properly -->
+                        <input type='hidden' name='query_e' value='{{ urlsafe_query }}'/>
+                        <input type='hidden' name='query_p' value='{{ query_params }}'/>
+                        <input type='hidden' name='visible' value='' id='is_visible'/>
                     </form>
                 </div>
                 <div class="tab-pane fade" id="timelinetabcontents" role="tabpanel" aria-labelledby="timelinetabcontents-tab">
@@ -184,12 +188,27 @@ thead input {
                                 <li class="list-group-item">
                                     <input class="btn btn-primary btn-sm" type='submit' value='{% trans "Apply Filters" %}'/>
                                 </li>
-                                {% if from_saved_query and saved_query.user == user %}
+                                {% if from_saved_query %}
                                     <li class="list-group-item">
+                                    {% if saved_query.user == user %}
                                         {% blocktrans with saved_query.title as query_name %}You are currently viewing saved query <strong>"{{ query_name }}"</strong>.{% endblocktrans %}
-                                        <a href='{% url 'helpdesk:delete_query' saved_query.id %}'>
-                                            {% trans "Delete Saved Query" %}
+                                        <a href="{% url 'helpdesk:delete_query' saved_query.id %}" class="btn btn-primary btn-sm">
+                                            {% trans "Delete Query" %}
                                         </a>
+                                        {% if saved_query.shared %}
+                                            <a href="{% url 'helpdesk:unshare_query' saved_query.id %}" class="btn btn-primary btn-sm">
+                                                {% trans "Un-share Query" %}
+                                            </a>
+                                        {% else %}
+                                            <a href="{% url 'helpdesk:reshare_query' saved_query.id %}" class="btn btn-primary btn-sm">
+                                                {% trans "Re-share Query" %}
+                                            </a>
+                                        {% endif %}
+                                    {% elif saved_query.user != user %}
+                                        <a href="{% url 'helpdesk:reject_query' saved_query.id %}" class="btn btn-primary btn-sm">
+                                            {% trans "Reject Query" %}
+                                        </a>
+                                    {% endif %}
                                     </li>
                                 {% endif %}
                                 {% if from_saved_query %}
@@ -278,7 +297,11 @@ thead input {
 
 {% endblock %}
 
-
+<style>
+thead input {
+    width: 100%;
+}
+</style>
 {% block helpdesk_js %}
     <script src='{% static "helpdesk/filter.js" %}'></script>
     <!-- Timeline 3 JavaScript -->
@@ -291,9 +314,15 @@ thead input {
         function get_url(row) {
             return "{% url 'helpdesk:view' 1234 %}".replace(/1234/, row.id.toString());
         }
-		// Duplicate thead
-		$('#ticketTable thead tr').clone(true).addClass('filters').appendTo('#ticketTable thead');
+
         $(document).ready(function () {
+            // Duplicate thead for column filtering
+            $('#ticketTable thead tr').clone(true).addClass('filters').appendTo('#ticketTable thead');
+            $('.filters th').slice(1,).each( function (i) {
+                i = i+1;
+                var title = $('#ticketTable thead th').eq( $(this).index() ).text();
+                $(this).html( '<input type="text" style="width:auto" placeholder="'+title+'" data-index="'+i+'" />' );
+            } );
             // Ticket DataTable Initialization
             var table = $('#ticketTable').DataTable({
                 language: {
@@ -301,9 +330,49 @@ thead input {
                 },
                 processing: true,
                 serverSide: true,
+                scrollX: true, // Allows scrolling horizontally in the table
                 ajax: {
                     "url": "{% url 'helpdesk:datatables_ticket_list' urlsafe_query %}",
                     "type": "GET",
+                    "dataSrc": function ( json ) {
+                        filters = ["Ticket", "Status", "Created", "Due Date", "Time Spent"];
+                        filter_fields = ["title", "status", "created", "due_date", "time_spent"];
+                        filters = filters.concat(json.extra_data_cols);
+                        filter_fields = filter_fields.concat(json.extra_data_cols);
+
+                        for (i=0; i<filters.length; i++) {
+                            for (j=0; j<json.data.length; j++) {
+                                var col_filter = $('.filters th input[placeholder="' + filters[i] + '"]')
+                                col_filter = col_filter.length > 0 ? col_filter[0].value.toLowerCase() : undefined
+                                if ( col_filter ) {
+                                    // If there is something to filter by
+                                    if ( json.data[j][filter_fields[i]] !== null) {
+                                        // Special case for title
+                                        if (filter_fields[i] == "title") {
+                                            contents = json.data[j].id + '. ' + json.data[j].title;
+                                        } else {
+                                            contents = String(json.data[j][filter_fields[i]]); 
+                                        }
+                                        if (json.data[j].remove == undefined && json.data[j].remove != true) {
+                                            // Checking if != true to not override previous filters
+                                            json.data[j].remove = ! contents.toLowerCase().includes(col_filter);
+                                        }
+                                    } else {
+                                        // Otherwise, remove that row of data
+                                        json.data[j].remove = true;
+                                    }
+                                }
+                            }
+                        }
+    
+
+                        for ( var i = json.data.length - 1 ; i>=0 ; i-- ) {
+                            if ( json.data[i].remove ) {
+                                json.data.splice(i, 1);
+                            }
+                        }
+                        return json.data;
+                    }
                 },
                 createdRow: function (row, data, dataIndex) {
                     $(row).addClass(data.row_class);
@@ -319,8 +388,8 @@ thead input {
                         "<'col float-right'p>" +
                     ">",
                 buttons: [{
-                    extend: 'colvis',
-                    columns: ':gt(1)'
+                    extend: "colvis",
+                    columns: ":gt(1)"
                 }],
                 columns: [
                     {
@@ -342,6 +411,9 @@ thead input {
                                     row.id + '. ' +
                                     row.title + '</a></div>';
                             }
+                            else {
+                                data = row.id + '. ' + row.title;
+                            }
                             return data
                         }
                     },
@@ -349,12 +421,33 @@ thead input {
                         data: "priority",
                         render: function (data, type, row, meta) {
                             let priority = "success";
+                            let choice = "";
+                            switch (data) {
+                                case 1:
+                                    choice = "Critical";
+                                    break;
+                                case 2:
+                                    choice = "High";
+                                    break;
+                                case 3:
+                                    choice = "Normal";
+                                    break;
+                                case 4:
+                                    choice = "Low";
+                                    break;
+                                case 5:
+                                    choice = "Very Low";
+                                    break;
+                                default:
+                                    choice = "Normal";
+                                    break;
+                            }
                             if (data === 4) {
                                 priority = "warning";
                             } else if (data === 5) {
                                 priority = "danger";
                             }
-                            return '<p class="text-' + priority + '">' + data + '</p>';
+                            return '<p class="text-' + priority + '">' + choice + '</p>';
                         },
                         visible: false,
                     },
@@ -380,53 +473,42 @@ thead input {
                     {data: "submitter"},
                     {data: "time_spent", "visible": false},
                     {data: "kbitem"},
+                    {% if query_params.filtering.queue__id__in|length == 1 %}
+                        {% for col in extra_data_cols %}
+                    {data: "{{col}}"},
+                        {% endfor %}
+                    {% endif %}
                 ],
-				orderCellsTop: true,
-				fixedHeader: true,
-				initComplete: function () {
-					var api = this.api();
-					// For each column
-					api.columns().eq(0).each(function (colIdx) {
-							// Set the header cell to contain the input element
-							var cell = $('.filters th').eq(
-								$(api.column(colIdx).header()).index()
-							);
-							var title = $(cell).text();
-							if (title != "") {
-								$(cell).html('<input type="text" placeholder="' + title + '" />');
-							}
-							// On every keypress in this input
-							$('input',
-								$('.filters th').eq($(api.column(colIdx).header()).index())
-							)
-								.off('keyup change')
-								.on('keyup change', function (e) {
-									e.stopPropagation();
-
-									// Get the search value
-									$(this).attr('title', $(this).val());
-									var regexr = '({search})'; //$(this).parents('th').find('select').val();
-
-									var cursorPosition = this.selectionStart;
-									// Search the column for that value
-									api
-										.column(colIdx)
-										.search(
-											this.value != ''
-												? regexr.replace('{search}', '(((' + this.value + ')))')
-												: '',
-											this.value != '',
-											this.value == ''
-										)
-										.draw();
-
-									$(this)
-										.focus()[0]
-										.setSelectionRange(cursorPosition, cursorPosition);
-								});
-						});
-				},
+                orderCellsTop: true,
+                fixedHeader: true,
             });
+            // Filter event handler
+            $( table.table().container() ).off('keyup change').on( 'keyup', 'thead input', function () {
+                var column = table.column( $(this).data('index') )
+                table
+                    .column( $(this).data('index') )
+                    .search( this.value )
+                    .draw();
+            } );
+
+            // Get visible columns for csv filtering and saving
+            table.on( 'buttons-action', function (e) {
+                get_visible_cols(); // For table changes
+            });
+
+            function get_visible_cols() {
+                var all_columns = table.settings().init().columns;
+                var visible_columns = [];
+                for (var i in all_columns) {
+                    if (table.column(i).visible()) {
+                        visible_columns.push(all_columns[i].data);
+                    }
+                }
+                // Add data to post field to be avaiable in mass_update function
+                document.getElementById("is_visible").value = visible_columns.toString();
+            }
+            get_visible_cols() // On initialization
+
             {# Timeline initialization when tab is displayed #}
             // The TL.Timeline constructor takes at least two arguments:
             // the id of the Timeline container (no '#'), and
@@ -435,6 +517,7 @@ thead input {
             // and the element must have CSS styling to give it width and height
             // optionally, a third argument with configuration options can be passed.
             // See below for more about options.
+
             let timeline_loaded = false;
             $('#timelinetabcontents-tab').on('shown.bs.tab', function (e) {
                 if (!timeline_loaded) {
@@ -464,6 +547,7 @@ thead input {
                     "<option value='take'>{% trans 'Take (Assign to me)' %}</option>" +
                     "<option value='delete'>{% trans 'Delete' %}</option>" +
                     "<option value='merge'>{% trans 'Merge' %}</option>" +
+                    "<option value='export'>{% trans 'Export' %}</option>" +
                     "<optgroup label='{% trans 'Close' %}'>" +
                         "<option value='close'>{% trans "Close (Don't Send E-Mail)" %}</option>" +
                         "<option value='close_public'>{% trans 'Close (Send E-Mail)' %}</option>" +
