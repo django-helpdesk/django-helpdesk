@@ -192,20 +192,20 @@
                                     <li class="list-group-item">
                                     {% if saved_query.user == user %}
                                         {% blocktrans with saved_query.title as query_name %}You are currently viewing saved query <strong>"{{ query_name }}"</strong>.{% endblocktrans %}
-                                        <a href="{% url 'helpdesk:delete_query' saved_query.id %}" class="btn btn-primary btn-sm">
+                                        <a href="{% url 'helpdesk:delete_query' saved_query.id %}" class="btn btn-danger btn-sm">
                                             {% trans "Delete Query" %}
                                         </a>
                                         {% if saved_query.shared %}
-                                            <a href="{% url 'helpdesk:unshare_query' saved_query.id %}" class="btn btn-primary btn-sm">
+                                            <a href="{% url 'helpdesk:unshare_query' saved_query.id %}" class="btn btn-warning btn-sm">
                                                 {% trans "Un-share Query" %}
                                             </a>
                                         {% else %}
-                                            <a href="{% url 'helpdesk:reshare_query' saved_query.id %}" class="btn btn-primary btn-sm">
+                                            <a href="{% url 'helpdesk:reshare_query' saved_query.id %}" class="btn btn-warning btn-sm">
                                                 {% trans "Re-share Query" %}
                                             </a>
                                         {% endif %}
                                     {% elif saved_query.user != user %}
-                                        <a href="{% url 'helpdesk:reject_query' saved_query.id %}" class="btn btn-primary btn-sm">
+                                        <a href="{% url 'helpdesk:reject_query' saved_query.id %}" class="btn btn-warning btn-sm">
                                             {% trans "Reject Query" %}
                                         </a>
                                     {% endif %}
@@ -263,7 +263,7 @@
                                 <button class="btn btn-link collapsed btn-sm" type="button" data-toggle="collapse"
                                         data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
                                     <i class="fas fa-clipboard-check"></i>
-                                    {% trans "Use Saved Query" %}
+                                    {% trans "View Your Saved Query" %}
                                 </button>
                             </h5>
                         </div>
@@ -282,7 +282,18 @@
                                             </option>
                                         {% endfor %}
                                     </select></p>
-                                    <input class="btn btn-primary" type='submit' value='{% trans "Run Query" %}'>
+                                    <input class="btn btn-primary" id='run_query' type='submit' value='{% trans "Run Query" %}'>
+
+                                    <!-- Only query creater can see from here -->
+                                    <a class="btn btn-danger remove" id='delete_query'>{% trans "Delete Query" %}</a>
+                                    <!-- if shared, show this -->
+                                    <a class="btn btn-warning  share" id='unshare_query'>{% trans "Un-share Query" %}</a>
+                                    <!-- else if not shared, show this -->
+                                    <a class="btn btn-warning  share" id='reshare_query'>{% trans "Re-share Query" %}</a>
+                                    <!-- to here -->
+                                    <!-- if not query creater show this -->
+                                    <a class="btn btn-warning  remove" id='reject_query'>{% trans "Reject Query" %}</a>
+
                                 </form>
                             </div>
                         </div>
@@ -316,6 +327,9 @@ thead input {
         }
 
         $(document).ready(function () {
+            if ( selector ) { 
+                adjust_query_buttons();
+            }
             // Duplicate thead for column filtering
             $('#ticketTable thead tr').clone(true).addClass('filters').appendTo('#ticketTable thead');
             $('.filters th').slice(1,).each( function (i) {
@@ -583,6 +597,91 @@ thead input {
                 });
             });
         })
+        // Handle sharing, unsharing, rejecting, deleting queries
+        var selector = $('#id_query_selector') 
+        if ( selector ) { 
+            selector.onchange = adjust_query_buttons;
+
+            var json_queries = {{ json_queries | safe }};
+            var from_saved_query = {% if from_saved_query %}true{% else %}false{% endif %};
+            
+            function adjust_query_buttons() {
+                var value = selector.val()
+                var q_data = json_queries[value];
+                var user_id = {{ user.id }}
+
+                if (q_data) {
+                    if (user_id == q_data['user_id']) {
+                        $('#reject_query').css('display', 'none')
+                        $('#delete_query').css('display', '')
+                        // Hide or show sharing options 
+                        $('#reshare_query').css('display',  q_data['shared'] ? 'none' : '' )
+                        $('#unshare_query').css('display', q_data['shared'] ? '' : 'none');
+                    } else {
+                        $('.share').css('display', 'none');
+                        $('#delete_query').css('display', 'none')
+                        $('#reject_query').css('display', '');
+                    }
+                } else {
+                    // Remove buttons 
+                    $('.remove').css('display', 'none')
+                    $('.share').css('display', 'none');
+                    $('#run_query').attr('type', 'hidden');
+                    // Add placeholder option
+                    $('#id_query_selector').append('<option>Save a new query to see it here</option>');
+                }
+            }
+
+            $('#delete_query, #unshare_query, #reshare_query, #reject_query').click(function() {
+                var value = selector.val()
+                var action = this.id;
+                var method = "GET";
+                switch (action) {
+                    case 'delete_query':
+                        var url = "{% url 'helpdesk:delete_query' 1234 %}";
+                        method = "POST";
+                        break;
+                    case 'unshare_query':
+                        var url = "{% url 'helpdesk:unshare_query' 1234 %}";
+                        break;
+                    case 'reshare_query':
+                        var url = "{% url 'helpdesk:reshare_query' 1234 %}";
+                        break;
+                    case 'reject_query':
+                        var url = "{% url 'helpdesk:reject_query' 1234 %}";
+                        break;
+                }
+                $.ajax({
+                    method: method,
+                    url: url.replace(/1234/, value),
+                    data: { csrfmiddlewaretoken: '{{ csrf_token }}'},
+                    success: function(data, textStatus) {
+                        if (action == 'delete_query') {
+                            // Remove option from list
+                            $("#id_query_selector option[value='" + value + "']").remove();
+                            location.reload(); // Refresh page
+                        } else if (action == 'reject_query') {
+                            $("#id_query_selector option[value='" + value + "']").remove();
+                            if ( from_saved_query ) {
+                                location.reload(); // Refresh page
+                            }
+                        } else if (action == 'unshare_query') {
+                            // Remove 'Shared' from option
+                            var option = $("#id_query_selector option[value='" + value + "']")
+                            option.text(option.text().replace('(Shared)', ''));
+                            json_queries[value]['shared'] = false; 
+                        } else if (action == 'reshare_query') {
+                            // Add 'Shared' to option
+                            var option = $("#id_query_selector option[value='" + value + "']")
+                            option.text(option.text() + '(Shared)');
+                            json_queries[value]['shared'] = true; 
+                        }
+                        // Reset buttons
+                        adjust_query_buttons();
+                    }
+                })
+            })
+        }
     </script>
 {% endblock %}
 

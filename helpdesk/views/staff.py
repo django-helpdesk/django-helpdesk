@@ -1248,6 +1248,9 @@ def ticket_list(request):
     data = datatables_ticket_list(request, urlsafe_query).content
     extra_data_cols = json.loads(data)['extra_data_cols']
 
+    json_queries = {i['id']:i for i in user_saved_queries.values('id', 'user_id', 'shared')}
+
+
     return render(request, 'helpdesk/ticket_list.html', dict(
         context,
         default_tickets_per_page=request.user.usersettings_helpdesk.tickets_per_page,
@@ -1258,6 +1261,7 @@ def ticket_list(request):
         kbitem_choices=kbitem_choices,
         urlsafe_query=urlsafe_query,
         user_saved_queries=user_saved_queries,
+        json_queries=json.dumps(json_queries),
         query_params=query_params,
         from_saved_query=saved_query is not None,
         saved_query=saved_query,
@@ -1271,7 +1275,6 @@ ticket_list = staff_member_required(ticket_list)
 
 class QueryLoadError(Exception):
     pass
-# Q(user=request.user) | (Q(shared__exact=True) & ~Q(opted_out_users__in=[request.user]))
 
 def load_saved_query(request, query_params=None):
     saved_query = None
