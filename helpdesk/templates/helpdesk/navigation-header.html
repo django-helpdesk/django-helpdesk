@@ -51,7 +51,7 @@
       <!-- DC logo -->
       <!--<img src="{{ STATIC_URL }}helpdesk/images/dc_green_doee_logo_white.png" title="{$:: 'BEAM' | translate $}" style="max-height:70px;">-->
       {% if user_info.default_org.logo %}
-      <img src="{{ STATIC_URL }}{{ user_info.default_org.logo }}" title="{$:: 'BEAM' | translate $}" style="max-height:70px;">
+      <img src="{{ MEDIA_URL }}{{ user_info.default_org.logo }}" title="{$:: 'BEAM' | translate $}" style="max-height:70px;">
       {% endif %}
     </nav>
 
