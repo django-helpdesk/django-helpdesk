@@ -818,7 +818,11 @@ def mass_update(request):
         urlsafe_query = request.POST.get('query_e')
         query_params = request.POST.get('query_p')
         visible_cols = request.POST.get('visible').split(',')
-        names = {'id': 'Ticket ID', 'ticket': 'Ticket', 'priority': 'Priority', 'queue': 'Queue', 
+        # Replace 'ticket' with 'title' as 'ticket' is just metadata
+        # ex: 'ticket' => 32 [queue-2-32]
+        visible_cols[visible_cols.index('ticket')] = 'title'
+
+        names = {'id': 'Ticket ID', 'title': 'Subject', 'ticket': 'Ticket', 'priority': 'Priority', 'queue': 'Queue', 
                  'status': 'Status', 'created': 'Created', 'due_date': 'Due Date', 
                  'assigned_to': 'Owner', 'submitter': 'Submitter', 'kbitem': 'KB Item'}
 
@@ -832,6 +836,9 @@ def mass_update(request):
         data = json_data['data']
         extra_cols = json_data['extra_data_cols']
 
+        # Note, export does not work with paginated data, 
+        # since selection by id does not work on pagination
+
         # Get selected data
         output_tickets = []
         for row in data:
@@ -841,7 +848,7 @@ def mass_update(request):
                 for col in list(set(row.keys()).difference(visible_cols)):
                     row.pop(col)
                 # Replace default cols with proper names
-                for k in row.keys():
+                for k in list(row.keys()):
                     row[names[k]] = row.pop(k)
                 output_tickets.append(row)
 
@@ -851,7 +858,7 @@ def mass_update(request):
         # Convert to pandas dataframe for csv download, after some clean up
         df = pd.json_normalize(output_tickets)
         df = df.set_index('Ticket ID')
-        df = df[['Ticket'] + [c for c in df if c not in ['Ticket'] + extra_cols] + extra_cols]
+        df = df[['Subject'] + [c for c in df if c not in ['Subject'] + extra_cols] + extra_cols]
         df.to_csv(file_path)
 
         # initiate the download, user will stay on the same page
