@@ -11,6 +11,7 @@ from datetime import datetime, date, time
 from operator import itemgetter
 
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.validators import validate_email
 from django import forms
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
@@ -460,9 +461,20 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
         if 'cc_emails' in self.cleaned_data:
             # Parse cc_emails for emails, should be separated by a space at least
             # Could be in format name <email> or simply <email> or email
-            emails = re.findall("([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)", self.cleaned_data['cc_emails'])
-            name_placeholder = [None] * len(emails)
-            emails = list(zip(name_placeholder, emails))
+            # re.findall splits up cc_emails into list of strings that matches regular expression
+            emails = re.findall("([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9]{2,3})", self.cleaned_data['cc_emails'])
+            valid_emails = []
+            for email in emails:
+                try:
+                    validate_email(email)
+                except ValidationError as e:
+                    # Invalid email, don't add
+                    pass
+                else: 
+                    valid_emails.append(email)
+
+            name_placeholder = [None] * len(valid_emails)
+            emails = list(zip(name_placeholder, valid_emails))
             create_ticket_cc(ticket, emails)
 
 
