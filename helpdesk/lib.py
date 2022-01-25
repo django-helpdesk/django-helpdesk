@@ -20,19 +20,30 @@ logger = logging.getLogger(__name__)
 
 def ticket_template_context(ticket):
     context = {}
+    empty_text = ''
 
     for field in ('title', 'created', 'modified', 'submitter_email',
                   'status', 'get_status_display', 'on_hold', 'description',
                   'resolution', 'priority', 'get_priority_display',
                   'last_escalation', 'ticket', 'ticket_for_url', 'merged_to',
-                  'get_status', 'ticket_url', 'staff_url', '_get_assigned_to'
+                  'get_status', 'ticket_url', 'staff_url', '_get_assigned_to',
+                  'contact_name', 'contact_email', 'building_name', 'building_address', 'pm_id', 'building_id'
                   ):
         attr = getattr(ticket, field, None)
         if callable(attr):
             context[field] = '%s' % attr()
+        elif attr is None or attr == '':
+            context[field] = empty_text
         else:
             context[field] = attr
     context['assigned_to'] = context['_get_assigned_to']
+
+    extra_data = getattr(ticket, 'extra_data', {})
+    for field, value in extra_data.items():
+        if value is None or value == '':
+            context[field] = empty_text
+        else:
+            context[field] = '%s' % value
 
     return context
 
