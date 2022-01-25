@@ -29,6 +29,13 @@ from markdown import markdown
 from markdown.extensions import Extension
 from markdown_deux.templatetags.markdown_deux_tags import markdown_allowed
 
+import bleach
+from bleach.linkifier import LinkifyFilter
+from bleach.sanitizer import Cleaner
+from bleach_allowlist import markdown_tags, markdown_attrs, print_tags, print_attrs, all_styles
+from urllib.parse import urlparse
+from functools import partial
+
 import pinax.teams.models
 
 import uuid
@@ -69,13 +76,52 @@ class EscapeHtml(Extension):
         del md.inlinePatterns['html']
 
 
+def _cleaner_set_target(attrs, new=False):
+    """Callback for bleach. Opens external urls in a new tab.
+        Added directly from https://bleach.readthedocs.io/en/latest/linkify.html """
+    from django.contrib.sites.models import Site
+
+    current_site = Site.objects.get_current()
+    p = urlparse(attrs[(None, 'href')])
+    if p.netloc not in [current_site.domain, current_site.name, '']:
+        attrs[(None, 'target')] = '_blank'
+        attrs[(None, 'class')] = 'external'
+    else:
+        attrs.pop((None, 'target'), None)
+    return attrs
+
+def _cleaner_shorten_url(attrs, new=False):
+    """Callback for bleach. Shortens overly-long URLs in the text.
+        Added directly from https://bleach.readthedocs.io/en/latest/linkify.html """
+    # Only adjust newly-created links
+    if not new:
+        return attrs
+    # _text will be the same as the URL for new links
+    text = attrs['_text']
+    if len(text) > 50:
+        attrs['_text'] = text[0:47] + '...'
+    return attrs
+
 def get_markdown(text, kb=False):
     if not text:
         return ""
-    extensions = [EscapeHtml(), 'markdown.extensions.nl2br', 'markdown.extensions.fenced_code']
+    extensions = [EscapeHtml(), 'markdown.extensions.nl2br', 'markdown.extensions.fenced_code', 'markdown.extensions.tables']
+    collapsible_attrs = {}
     if kb:
         extensions.append('markdown.extensions.attr_list')
-    return mark_safe(markdown(text, extensions=extensions))
+        collapsible_attrs = {"p": ["data-target", "data-toggle", "data-parent", "role",
+                                   'aria-controls', 'aria-expanded', 'aria-labelledby', 'id']}
+
+    cleaner = Cleaner(
+        filters=[partial(LinkifyFilter, callbacks=[_cleaner_set_target, _cleaner_shorten_url])],
+        tags=markdown_tags + print_tags,
+        attributes={**markdown_attrs,
+                    **print_attrs,
+                    **collapsible_attrs},
+        styles=all_styles
+    )
+    cleaned = cleaner.clean(markdown(text, extensions=extensions))
+    return mark_safe(cleaned)
 
 
 class Queue(models.Model):

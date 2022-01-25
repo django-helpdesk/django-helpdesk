@@ -109,3 +109,10 @@ table .tickettitle {
 .select_el > * {
     margin-right:5px;
 }
+
+/* Added to stylize Markdown tables */
+/* TODO Added a div class to every container that uses markdown, so that this style only affects markdown text? Or something idk */
+td, th {
+    padding: 5px;
+    border: 1px solid gainsboro;
+}

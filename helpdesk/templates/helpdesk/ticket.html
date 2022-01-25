@@ -47,18 +47,19 @@
                                 <small><i class="fas fa-clock"></i>&nbsp;<span class='byline text-info'>{% if followup.user %}by {{ followup.user.get_full_name|default:followup.user.get_username }},{% endif %} <span title='{{ followup.date|date:"DATETIME_FORMAT" }}'>{{ followup.date|naturaltime }}</span>{% if followup.time_spent %}, <span>{% trans "time spent" %}: {{ followup.time_spent_formatted }}</span>{% endif %} {% if not followup.public %} <span class='private'>({% trans "Private" %})</span>{% endif %}</span></small>
                             </div>
                             <p class="mb-1">
-                                {% if followup.comment %}
-                                    <p>{{ followup.get_markdown|urlizetrunc:50|num_to_link }}</p>
-                                {% endif %}
+                                {% if followup.comment %}<p>
+                                    {% if followup.user %}{{ followup.get_markdown|num_to_link }}
+                                    {% else %}{{ followup.comment|force_escape|urlizetrunc:50|num_to_link|linebreaksbr }}{% endif %}
+                                </p>{% endif %}
                                 {% for change in followup.ticketchange_set.all %}
                                     {% if forloop.first %}<div class='changes'><ul>{% endif %}
-                                    <li>{% blocktrans with change.field as field and change.old_value as old_value and change.new_value as new_value %}Changed {{ field }} from {{ old_value }} to {{ new_value }}.{% endblocktrans %}</li>
+                                        <li>{% blocktrans with change.field as field and change.old_value as old_value and change.new_value as new_value %}Changed {{ field }} from {{ old_value }} to {{ new_value }}.{% endblocktrans %}</li>
                                     {% if forloop.last %}</ul></div>{% endif %}
                                 {% endfor %}
                                 {% for attachment in followup.followupattachment_set.all %}{% if forloop.first %}{% trans "Attachments" %}:<div class='attachments'><ul>{% endif %}
                                     <li><a href='{{ attachment.file.url }}'>{{ attachment.filename }}</a> ({{ attachment.mime_type }}, {{ attachment.size|filesizeformat }})
                                     {% if followup.user and request.user == followup.user %}
-                                    <a href='{% url 'helpdesk:attachment_del' ticket.id attachment.id %}'><button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button></a>
+                                    <a href="{% url 'helpdesk:attachment_del' ticket.id attachment.id %}"><button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button></a>
                                     {% endif %}
                                     </li>
                                     {% if forloop.last %}</ul></div>{% endif %}

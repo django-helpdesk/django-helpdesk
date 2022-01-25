@@ -23,11 +23,14 @@ def num_to_link(text):
     if text == '':
         return text
 
-    matches = []
+    header_matches = []
+    hashtag_matches = []
     for match in re.finditer(r"(?:[^&]|\b|^)#(\d+)\b", text):
-        matches.append(match)
+        hashtag_matches.append(match)
+    for match in re.finditer(r"<h\d>(\d+)<\/h\d>", text):
+        header_matches.append(match)
 
-    for match in reversed(matches):
+    for match in reversed(hashtag_matches):
         number = match.groups()[0]
         url = reverse('helpdesk:view', args=[number])
         try:
@@ -39,6 +42,20 @@ def num_to_link(text):
             style = ticket.get_status_display()
             text = "%s <a href='%s' class='ticket_link_status ticket_link_status_%s'>#%s</a>%s" % (
                 text[:match.start() + 1], url, style, match.groups()[0], text[match.end():])
+
+    for match in reversed(header_matches):
+        number = match.groups()[0]
+        url = reverse('helpdesk:view', args=[number])
+        try:
+            ticket = Ticket.objects.get(id=number)
+        except Ticket.DoesNotExist:
+            ticket = None
+
+        if ticket:
+            style = ticket.get_status_display()
+            text = "%s <a href='%s' class='ticket_link_status ticket_link_status_%s'>#%s</a>%s" % (
+                text[:match.start()], url, style, match.groups()[0], text[match.end():])
+
     return mark_safe(text)
 
 
