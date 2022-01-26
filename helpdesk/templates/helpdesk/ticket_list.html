@@ -325,9 +325,10 @@ thead input {
         function get_url(row) {
             return "{% url 'helpdesk:view' 1234 %}".replace(/1234/, row.id.toString());
         }
-
+        var json_queries = {{ json_queries | safe }};
+        var from_saved_query = {% if from_saved_query %}true{% else %}false{% endif %};
         $(document).ready(function () {
-            if ( selector ) { 
+            if ( selector ) {
                 adjust_query_buttons();
             }
             // Duplicate thead for column filtering
@@ -365,7 +366,7 @@ thead input {
                                         if (filter_fields[i] == "title") {
                                             contents = json.data[j].id + '. ' + json.data[j].title;
                                         } else {
-                                            contents = String(json.data[j][filter_fields[i]]); 
+                                            contents = String(json.data[j][filter_fields[i]]);
                                         }
                                         if (json.data[j].remove == undefined && json.data[j].remove != true) {
                                             // Checking if != true to not override previous filters
@@ -378,7 +379,7 @@ thead input {
                                 }
                             }
                         }
-    
+
 
                         for ( var i = json.data.length - 1 ; i>=0 ; i-- ) {
                             if ( json.data[i].remove ) {
@@ -598,23 +599,23 @@ thead input {
             });
         })
         // Handle sharing, unsharing, rejecting, deleting queries
-        var selector = $('#id_query_selector') 
-        if ( selector ) { 
-            selector.onchange = adjust_query_buttons;
+        var selector = $('#id_query_selector');
+        console.log(selector);
+        if ( selector ) {
+            // selector.onchange = adjust_query_buttons;
+            selector.change(function() {
+                adjust_query_buttons();
+            });
 
-            var json_queries = {{ json_queries | safe }};
-            var from_saved_query = {% if from_saved_query %}true{% else %}false{% endif %};
-            
             function adjust_query_buttons() {
-                var value = selector.val()
+                var value = selector.val();
                 var q_data = json_queries[value];
-                var user_id = {{ user.id }}
-
+                var user_id = {{ user.id }};
                 if (q_data) {
                     if (user_id == q_data['user_id']) {
                         $('#reject_query').css('display', 'none')
                         $('#delete_query').css('display', '')
-                        // Hide or show sharing options 
+                        // Hide or show sharing options
                         $('#reshare_query').css('display',  q_data['shared'] ? 'none' : '' )
                         $('#unshare_query').css('display', q_data['shared'] ? '' : 'none');
                     } else {
@@ -623,7 +624,7 @@ thead input {
                         $('#reject_query').css('display', '');
                     }
                 } else {
-                    // Remove buttons 
+                    // Remove buttons
                     $('.remove').css('display', 'none')
                     $('.share').css('display', 'none');
                     $('#run_query').attr('type', 'hidden');
@@ -656,11 +657,8 @@ thead input {
                     url: url.replace(/1234/, value),
                     data: { csrfmiddlewaretoken: '{{ csrf_token }}'},
                     success: function(data, textStatus) {
-                        if (action == 'delete_query') {
+                        if (action == 'delete_query' || action == 'reject_query') {
                             // Remove option from list
-                            $("#id_query_selector option[value='" + value + "']").remove();
-                            location.reload(); // Refresh page
-                        } else if (action == 'reject_query') {
                             $("#id_query_selector option[value='" + value + "']").remove();
                             if ( from_saved_query ) {
                                 location.reload(); // Refresh page
@@ -669,12 +667,12 @@ thead input {
                             // Remove 'Shared' from option
                             var option = $("#id_query_selector option[value='" + value + "']")
                             option.text(option.text().replace('(Shared)', ''));
-                            json_queries[value]['shared'] = false; 
+                            json_queries[value]['shared'] = false;
                         } else if (action == 'reshare_query') {
                             // Add 'Shared' to option
                             var option = $("#id_query_selector option[value='" + value + "']")
                             option.text(option.text() + '(Shared)');
-                            json_queries[value]['shared'] = true; 
+                            json_queries[value]['shared'] = true;
                         }
                         // Reset buttons
                         adjust_query_buttons();
