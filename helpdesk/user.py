@@ -27,10 +27,7 @@ class HelpdeskUser:
         """
         user = self.user
         # All queues for the users default org, and public queues available therein, unless user is superuser
-        if self.user.is_superuser:
-            all_queues = Queue.objects.all()
-        else:
-            all_queues = Queue.objects.filter(organization=user.default_organization_id)
+        all_queues = Queue.objects.filter(organization=user.default_organization_id)
         public_ids = [q.pk for q in
                       all_queues.filter(allow_public_submission=True)]
         limit_queues_by_user = \

@@ -30,7 +30,7 @@
         <button onclick="showOrgs()" class="btnUserOrgs staff" type="button" class="dropbtn">
           {{ user_info.default_org.name }} <span class="caret"></span>
         </button>
-        <div id="org-dropdown-menu" class="org-dropdown-items">
+        <div id="org-dropdown-menu" class="org-dropdown-items" style="z-index:4;">
           {% for org in user_info.orgs %}
           <a href="{% url 'helpdesk:set_default_org' user_id=user.id org_id=org.id %}"> {{ org.name }}
             {% if org.id == user.default_organization_id %}
