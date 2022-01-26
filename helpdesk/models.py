@@ -105,7 +105,10 @@ def _cleaner_shorten_url(attrs, new=False):
 def get_markdown(text, kb=False):
     if not text:
         return ""
-    extensions = [EscapeHtml(), 'markdown.extensions.nl2br', 'markdown.extensions.fenced_code', 'markdown.extensions.tables']
+    extensions = [EscapeHtml(),
+                  'markdown.extensions.nl2br',  # required for collapsing sections to work; a single newline doesn't break up a section, two newlines do
+                  'markdown.extensions.fenced_code',  # required for collapsing sections
+                  'markdown.extensions.tables']  # requested
     collapsible_attrs = {}
     if kb:
         extensions.append('markdown.extensions.attr_list')
@@ -1502,15 +1505,22 @@ class KBItem(models.Model):
     answer = models.TextField(
         _('Answer'),
         help_text=_(markdown_allowed() + '<br/><br/>'
-                    'To add a collapsing section: '
+                    "<b>Multple newlines:</b><br/>Markdown doesn't recognize multiple blank lines. "
+                    "To display one, write &amp;nbsp; on a blank line.<br/><br/>"
+                    "<b>Table formatting:</b><br/>"
+                    "<pre>First Header  | Second Header</br>"
+                    '------------- | -------------</br>'
+                    'Content Cell  | Content Cell</br>'
+                    'Content Cell  | Content Cell</pre></br>'
+                    '<b>Collapsing section:</b><br/> '
                     'Add !~! on a line following the section title, followed by a blank line. '
                     'Add ~!~ on a line following the section body, followed by another blank line. <br/>'
                     'The body may have multiple lines of text, but no blank lines.<br/><br/>'
-                    'Example:<div style="margin-left: 40px;">This text comes before the section.<br/><br/>'
+                    'Example:<br/><pre>This text comes before the section.<br/><br/>'
                     'Title of Subsection<br/>!~!<br/><br/>'
-                    'Body of subsection.<br/>I can add many lines of text to this. '
+                    '&amp;nbsp;<br/>Body of subsection.<br/>&amp;nbsp;<br/>I can add many lines of text to this. '
                     "It will all be included in the section.<br/>~!~<br/><br/>"
-                    "This, however, won't be included in the collapsing section.</div>"),
+                    "&amp;nbsp;<br/>This, however, won't be included in the collapsing section.</pre>"),
     )
 
     votes = models.IntegerField(
