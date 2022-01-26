@@ -822,8 +822,8 @@ def mass_update(request):
         # ex: 'ticket' => 32 [queue-2-32]
         visible_cols[visible_cols.index('ticket')] = 'title'
 
-        names = {'id': 'Ticket ID', 'title': 'Subject', 'ticket': 'Ticket', 'priority': 'Priority', 'queue': 'Queue', 
-                 'status': 'Status', 'created': 'Created', 'due_date': 'Due Date', 
+        names = {'id': 'Ticket ID', 'title': 'Subject', 'ticket': 'Ticket', 'priority': 'Priority', 'queue': 'Queue',
+                 'status': 'Status', 'created': 'Created', 'due_date': 'Due Date',
                  'assigned_to': 'Owner', 'submitter': 'Submitter', 'kbitem': 'KB Item'}
 
         # Remake request to get data again
@@ -834,9 +834,9 @@ def mass_update(request):
         json_data = datatables_ticket_list(r, urlsafe_query).content
         json_data = json.loads(json_data)
         data = json_data['data']
-        extra_cols = json_data['extra_data_cols']
+        extra_cols = json_data['extra_data_columns']
 
-        # Note, export does not work with paginated data, 
+        # Note, export does not work with paginated data,
         # since selection by id does not work on pagination
 
         # Get selected data
@@ -849,11 +849,12 @@ def mass_update(request):
                     row.pop(col)
                 # Replace default cols with proper names
                 for k in list(row.keys()):
-                    row[names[k]] = row.pop(k)
+                    if k in names:                      # Extra data are already in readable format
+                        row[names[k]] = row.pop(k)
                 output_tickets.append(row)
 
         file_name = 'ticket_list_export.csv'
-        file_path = '/tmp/' + file_name  # TODO Better Place to store this temp file? 
+        file_path = '/tmp/' + file_name  # TODO Better Place to store this temp file?
 
         # Convert to pandas dataframe for csv download, after some clean up
         df = pd.json_normalize(output_tickets)
@@ -1058,7 +1059,7 @@ def merge_tickets(request):
                             else:
                                 value = default
                             chosen_ticket.extra_data[custom_field.field_name] = value
-    
+
                 # Save changes
                 chosen_ticket.save()
 
@@ -1252,11 +1253,11 @@ def ticket_list(request):
     user_choices = [u for u in User.objects.filter(is_active=True) if is_helpdesk_staff(u)]
 
     # Get extra data columns to be displayed if only 1 queue is selected
+    # TODO Figure out a way to get extra_cols without making a full call to datatables_ticket_list?
     data = datatables_ticket_list(request, urlsafe_query).content
-    extra_data_cols = json.loads(data)['extra_data_cols']
+    extra_data_columns = json.loads(data)['extra_data_columns']
 
-    json_queries = {i['id']:i for i in user_saved_queries.values('id', 'user_id', 'shared')}
-
+    json_queries = {i['id']: i for i in user_saved_queries.values('id', 'user_id', 'shared')}
 
     return render(request, 'helpdesk/ticket_list.html', dict(
         context,
@@ -1273,7 +1274,7 @@ def ticket_list(request):
         from_saved_query=saved_query is not None,
         saved_query=saved_query,
         search_message=search_message,
-        extra_data_cols=extra_data_cols,
+        extra_data_cols=extra_data_columns,
     ))
 
 
@@ -1318,53 +1319,9 @@ def datatables_ticket_list(request, query):
     """
     query = Query(HelpdeskUser(request.user), base64query=query)
     result = query.get_datatables_context(**request.query_params)
-    # Modify extra data in result, so all entries have the same extra data
-    # First collect extra field names
-    extra_data_cols = {}
-    if 'queue__id__in' in query.params['filtering']:
-        if len(query.params['filtering']['queue__id__in']) == 1: 
-            for row in result['data']:
-                if row['extra_data']:
-                    new_cols = [i for i in row['extra_data'].keys() if i not in extra_data_cols]
-                    new_cols = {i: get_viewable_name(row['ticket'], i) for i in new_cols}
-                    extra_data_cols.update(new_cols)
 
-            # Update result.data
-            for row in result['data']:
-                if row['extra_data']:
-                    # Replace with display names
-                    for k in list(row['extra_data'].keys()):
-                        disp_name = extra_data_cols[k]
-                        row['extra_data'][disp_name] = row['extra_data'].pop(k)
-                    # Add in any other col not in extra_data
-                    missing_cols = {k:'' for k in extra_data_cols.values() if k not in row['extra_data'].keys()}
-                    row['extra_data'].update(missing_cols)
+    return JsonResponse(result, status=status.HTTP_200_OK)
 
-                    # Replace extra_data with the cols themselves
-                    extra_data = row.pop('extra_data')
-                    # Sort it into  an ordered dict
-                    keys = list(extra_data.keys())
-                    keys.sort()
-                    for  k in keys:
-                        row.update({k: extra_data[k]})
-    else:
-        # Remove extra data field for now
-        for row in result['data']:
-            row.pop('extra_data')
-
-    # Return list of extra data columns too
-    result['extra_data_cols'] = list(extra_data_cols.values())
-    return (JsonResponse(result, status=status.HTTP_200_OK))
-
-def get_viewable_name(ticket_name, extra_data_name):
-    # Helper function to take serialized ticket name and extra_data field and return display name
-    # 12 [queue-2-12]'
-    ticket_id = int(ticket_name.split('[')[0])
-    form_id = Ticket.objects.get(id=ticket_id).ticket_form_id
-    field = CustomField.objects.filter(ticket_form_id=form_id,
-                                           field_name=extra_data_name).first()
-
-    return field.label if field is not None else extra_data_name
 
 @helpdesk_staff_member_required
 @api_view(['GET'])

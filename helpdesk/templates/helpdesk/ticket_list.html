@@ -349,45 +349,6 @@ thead input {
                 ajax: {
                     "url": "{% url 'helpdesk:datatables_ticket_list' urlsafe_query %}",
                     "type": "GET",
-                    "dataSrc": function ( json ) {
-                        filters = ["Ticket", "Status", "Created", "Due Date", "Time Spent"];
-                        filter_fields = ["title", "status", "created", "due_date", "time_spent"];
-                        filters = filters.concat(json.extra_data_cols);
-                        filter_fields = filter_fields.concat(json.extra_data_cols);
-
-                        for (i=0; i<filters.length; i++) {
-                            for (j=0; j<json.data.length; j++) {
-                                var col_filter = $('.filters th input[placeholder="' + filters[i] + '"]')
-                                col_filter = col_filter.length > 0 ? col_filter[0].value.toLowerCase() : undefined
-                                if ( col_filter ) {
-                                    // If there is something to filter by
-                                    if ( json.data[j][filter_fields[i]] !== null) {
-                                        // Special case for title
-                                        if (filter_fields[i] == "title") {
-                                            contents = json.data[j].id + '. ' + json.data[j].title;
-                                        } else {
-                                            contents = String(json.data[j][filter_fields[i]]);
-                                        }
-                                        if (json.data[j].remove == undefined && json.data[j].remove != true) {
-                                            // Checking if != true to not override previous filters
-                                            json.data[j].remove = ! contents.toLowerCase().includes(col_filter);
-                                        }
-                                    } else {
-                                        // Otherwise, remove that row of data
-                                        json.data[j].remove = true;
-                                    }
-                                }
-                            }
-                        }
-
-
-                        for ( var i = json.data.length - 1 ; i>=0 ; i-- ) {
-                            if ( json.data[i].remove ) {
-                                json.data.splice(i, 1);
-                            }
-                        }
-                        return json.data;
-                    }
                 },
                 createdRow: function (row, data, dataIndex) {
                     $(row).addClass(data.row_class);
@@ -436,33 +397,12 @@ thead input {
                         data: "priority",
                         render: function (data, type, row, meta) {
                             let priority = "success";
-                            let choice = "";
-                            switch (data) {
-                                case 1:
-                                    choice = "Critical";
-                                    break;
-                                case 2:
-                                    choice = "High";
-                                    break;
-                                case 3:
-                                    choice = "Normal";
-                                    break;
-                                case 4:
-                                    choice = "Low";
-                                    break;
-                                case 5:
-                                    choice = "Very Low";
-                                    break;
-                                default:
-                                    choice = "Normal";
-                                    break;
-                            }
-                            if (data === 4) {
+                            if (data === 'High') {
                                 priority = "warning";
-                            } else if (data === 5) {
+                            } else if (data === 'Critical') {
                                 priority = "danger";
                             }
-                            return '<p class="text-' + priority + '">' + choice + '</p>';
+                            return '<p class="text-' + priority + '">' + data + '</p>';
                         },
                         visible: false,
                     },
@@ -600,7 +540,6 @@ thead input {
         })
         // Handle sharing, unsharing, rejecting, deleting queries
         var selector = $('#id_query_selector');
-        console.log(selector);
         if ( selector ) {
             // selector.onchange = adjust_query_buttons;
             selector.change(function() {

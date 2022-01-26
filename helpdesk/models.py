@@ -750,6 +750,13 @@ class Ticket(models.Model):
             return ""
     get_priority_css_class = property(_get_priority_css_class)
 
+    def _get_priority(self):
+        """
+        Displays the priority of the ticket
+        """
+        return dict(self.PRIORITY_CHOICES)[self.priority]
+    get_priority = property(_get_priority)
+
     def _get_status(self):
         """
         Displays the ticket status, with an "On Hold" message if needed.
