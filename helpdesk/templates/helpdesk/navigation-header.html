@@ -2,12 +2,12 @@
 {% load organization_info %}
 
     {% include 'helpdesk/custom_navigation_header.html' %}
-    <nav class="navbar navbar-expand navbar-dark bg-dc static-top">
+    <nav class="navbar navbar-expand navbar-dark org-bg static-top">
       <button class="btn btn-link btn-sm text-white order-1 order-sm-0" id="sidebarToggle" href="#">
         <i class="fas fa-bars"></i>
       </button>
 
-      <a class="navbar-brand mr-auto" href="{% url 'helpdesk:home' %}{% if user|is_helpdesk_staff is False %}?org={{ user_info.default_org.name }}{% endif %}">{% trans 'Building Performance Helpdesk' %}</a>
+      <a class="navbar-brand mr-auto beam-navbar-header-text" href="{% url 'helpdesk:home' %}{% if user|is_helpdesk_staff is False %}?org={{ user_info.default_org.name }}{% endif %}">{% trans 'Building Performance Helpdesk' %}</a>
 
       {% if helpdesk_settings.HELPDESK_NAVIGATION_ENABLED and user.is_authenticated or user|is_helpdesk_staff %}
       <!-- Navbar Search -->
@@ -27,7 +27,7 @@
       <!-- Show Org Dropdown, Styling and Logo if User is Staff -->
 	    {% if user.is_authenticated and user|is_helpdesk_staff %}
       <div class="org-dropdown-btn">
-        <button onclick="showOrgs()" class="btnUserOrgs staff" type="button" class="dropbtn">
+        <button onclick="showOrgs()" class="btnUserOrgs staff beam-navbar-header-text" type="button">
           {{ user_info.default_org.name }} <span class="caret"></span>
         </button>
         <div id="org-dropdown-menu" class="org-dropdown-items" style="z-index:4;">
@@ -120,6 +120,10 @@
   border-right: 4px solid transparent;
   border-left: 4px solid transparent;
 }
+
+.beam-navbar-header-text {
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+}
 </style>
 <script>
 /* When the user clicks on the button,
@@ -142,18 +146,16 @@ window.onclick = function(event) {
   }
 }
 </script>
-<!-- Organization specici font and background -->
+<!-- Organization specific font and background -->
 <style>
 {% if user_info.default_org.styling %}
   {{ user_info.default_org.styling|replace_slash }}
 {% else %}
-  /* Default Styling */
   body {
-    font-family: century-gothic, sans-serif;
+    font-family: "Segoe UI";
   }
-
-  .bg-dc {
-    background-color: #218d45;
+  .org-bg {
+    background-color: #d4af36;
   }
 {% endif %}
 </style>
