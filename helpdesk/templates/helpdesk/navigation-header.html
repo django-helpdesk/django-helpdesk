@@ -148,14 +148,10 @@ window.onclick = function(event) {
 </script>
 <!-- Organization specific font and background -->
 <style>
-{% if user_info.default_org.styling %}
-  {{ user_info.default_org.styling|replace_slash }}
-{% else %}
   body {
     font-family: "Segoe UI";
   }
   .org-bg {
-    background-color: #d4af36;
+    background-color: #{{ user_info.default_org.background_color_styling|int_to_hex }};
   }
-{% endif %}
 </style>

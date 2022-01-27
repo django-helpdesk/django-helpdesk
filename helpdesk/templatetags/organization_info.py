@@ -45,6 +45,11 @@ def organization_info(user, url):
         print(e, file=sys.stderr)
         return ''
 
+
 @register.filter
-def replace_slash(string):
-    return string.replace("\\", "")
+def int_to_hex(value):
+    """
+    Given a decimal value for css styling, return the Hex value of that number
+    Ex: Decimal 2198853 => Hex 0x218d45 => 218d45
+    """
+    return hex(value)[2:]
