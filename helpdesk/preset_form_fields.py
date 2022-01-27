@@ -171,7 +171,7 @@ def get_preset_fields(ticket_form):
             datetime.datetime.now(), datetime.datetime.now(), ticket_form),
 
             ('due_date', 'Due Date', '',
-            None, None, None, None, False, False,
+            'datetime', None, None, None, False, False,
             12, 12,
             False, False, True, True, False,
             datetime.datetime.now(), datetime.datetime.now(), ticket_form),

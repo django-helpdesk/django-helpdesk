@@ -8,6 +8,7 @@ forms.py - Definitions of newforms-based forms for creating and maintaining
 """
 import logging
 from datetime import datetime, date, time
+from decimal import Decimal
 from operator import itemgetter
 
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
@@ -26,6 +27,7 @@ from helpdesk import settings as helpdesk_settings
 from helpdesk.email import create_ticket_cc
 from helpdesk.decorators import is_helpdesk_staff
 import re
+import json
 
 from seed.lib.superperms.orgs.models import ROLE_MEMBER
 
@@ -239,6 +241,8 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
                     value = value.strftime(CUSTOMFIELD_DATE_FORMAT)
                 elif time is type(value):
                     value = value.strftime(CUSTOMFIELD_TIME_FORMAT)
+                elif Decimal is type(value):
+                    value = str(value)
                 cleaned_data['extra_data'][field_name] = value
         return cleaned_data
 
@@ -319,14 +323,28 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
         cleaned_data = super(AbstractTicketForm, self).clean()
 
         # for hidden fields required by helpdesk code, like description
-        for field, type in self.hidden_fields:
+        for field, type_ in self.hidden_fields:
             if field in self.errors:
-                cleaned_data[field] = '' if type in ['varchar', 'text', 'email'] else None
+                cleaned_data[field] = '' if type_ in ['varchar', 'text', 'email'] else None
                 del self._errors[field]
 
         form = FormType.objects.get(id=self.form_id)
         if form.queue:
             cleaned_data['queue'] = form.queue.id
+
+        # Clean up extra_data so it can go in json field
+        for field in cleaned_data:
+            if field.startswith('e_'):
+                value = cleaned_data[field]
+                if isinstance(value, datetime):
+                    value = value.strftime(CUSTOMFIELD_DATETIME_FORMAT)
+                elif isinstance(value, date):
+                    value = value.strftime(CUSTOMFIELD_DATE_FORMAT)
+                elif isinstance(value, time):
+                    value = value.strftime(CUSTOMFIELD_TIME_FORMAT)
+                elif isinstance(value, Decimal):
+                    value = str(value)
+                cleaned_data[field] = value
 
         return cleaned_data
 
@@ -470,7 +488,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
                 except ValidationError as e:
                     # Invalid email, don't add
                     pass
-                else: 
+                else:
                     valid_emails.append(email)
 
             name_placeholder = [None] * len(valid_emails)
