@@ -74,6 +74,7 @@ Query = get_query_class()
 staff_member_required = user_passes_test(
     lambda u: u.is_authenticated and u.is_active and is_helpdesk_staff(u))
 
+
 @helpdesk_staff_member_required
 def set_default_org(request, user_id, org_id):
     '''
@@ -85,6 +86,7 @@ def set_default_org(request, user_id, org_id):
     user.default_organization_id = org_id
     user.save()
     return redirect(request.META['HTTP_REFERER'])
+
 
 def _get_queue_choices(queues):
     """Return list of `choices` array for html form for given queues
@@ -1240,9 +1242,9 @@ def ticket_list(request):
             '<a href="http://docs.djangoproject.com/en/dev/ref/databases/#sqlite-string-matching">'
             'Django Documentation on string matching in SQLite</a>.')
 
-    # Get KBItems that are part of the user's organization
-    kbitem_choices = [(item.pk, str(item)) for item in
-                      KBItem.objects.filter(category__organization=request.user.default_organization)]
+    # Get KBItems that are part of the user's helpdesk_organization
+    kbitem_choices = [(item.pk, str(item)) for item in KBItem.objects.filter(
+        category__organization=request.user.default_organization.helpdesk_organization)]
 
     # After query is run, replaces null-filters with in-filters=[-1], so page can properly display that filter.
     for param, null_query in filter_null_params.items():

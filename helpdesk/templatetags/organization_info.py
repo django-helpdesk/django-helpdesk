@@ -7,36 +7,56 @@ templatetags/organization_info.py - This template tag returns two pieces of info
     list of orgs        -- A queryset of the organizations the user is a part of if they are staff
 """
 from django import template
-from seed.lib.superperms.orgs.models import Organization, OrganizationUser
-from urllib import parse
+from seed.lib.superperms.orgs.models import Organization, OrganizationUser, get_helpdesk_organizations
 from helpdesk.decorators import is_helpdesk_staff
 
 register = template.Library()
 
 
 @register.simple_tag
-def organization_info(user, url):
+def organization_info(user, request):
     """
     Given user and request,
-    If user is staff, return Orgs to display in dropdown that they have access to in helpdesk
-    If user is public, returns the one Org belonging to ticket
+    If user is staff, return Helpdesk Orgs to display in dropdown that they have access to in helpdesk
+    If user is public or not logged in, return the org in the url (if available). If no org in url, and user is logged
+        in, return the user's helpdesk org. Otherwise, if one Helpdesk Org available, return that one Helpdesk Org
+    A non-logged in user, with no org in url with multiple Helpdesk Orgs will see an empty helpdesk page.
+    Precedence:
+        Staff Member
+        URL
+        Public Member
+
     """
     try:
         return_info = {}
+        helpdesk_orgs = get_helpdesk_organizations()
         if is_helpdesk_staff(user):
             orgs = OrganizationUser.objects.filter(user=user, role_level__gt=3).values('organization')
-            return_info['orgs'] = Organization.objects.filter(id__in=orgs)
-            return_info['default_org'] = Organization.objects.get(id=user.default_organization_id)
+            return_info['orgs'] = helpdesk_orgs.filter(id__in=orgs)
+            return_info['default_org'] = Organization.objects.get(id=user.default_organization.helpdesk_organization_id)
         else:
-            # Parse request
-            query = parse.parse_qs(parse.urlsplit(url).query)  # Returns dict (key, list) of the url parameters
-            url_org = query['org'][0] if 'org' in query.keys() else ""
-
-            # Org in url has higher precedence than user's default org when they are not staff members
-            if not url_org and not user.is_anonymous:  # Default to users default_organization if org in url unavailable
-                return_info['default_org'] = Organization.objects.get(id=user.default_organization_id)
+            return_info['default_org'] = None
+            return_info['url'] = ''
+            if 'org' in request.GET:
+                url_org = request.GET.get('org')
+                try:
+                    org = Organization.objects.filter(name=url_org).first()
+                    return_info['default_org'] = org.helpdesk_organization
+                    return_info['url'] = '?org=' + org.name
+                except AttributeError:
+                    pass
             else:
-                return_info['default_org'] = Organization.objects.filter(name=url_org).first()
+                if not user.is_anonymous:
+                    org = user.default_organization.helpdesk_organization
+                    return_info['default_org'] = org
+                    return_info['url'] = '?org=' + org.name
+                elif user.is_anonymous and len(helpdesk_orgs) == 1:
+                    return_info['default_org'] = helpdesk_orgs.first()
+                    return_info['url'] = '?org=' + return_info['default_org'].name
+                elif user.is_anonymous and len(helpdesk_orgs) > 1:
+                    return_info['default_org'] = {'name': 'Select an Organization'}
+                    return_info['orgs'] = helpdesk_orgs
+
         return return_info
     except Exception as e:
         import sys
@@ -44,12 +64,3 @@ def organization_info(user, url):
               file=sys.stderr)
         print(e, file=sys.stderr)
         return ''
-
-
-@register.filter
-def int_to_hex(value):
-    """
-    Given a decimal value for css styling, return the Hex value of that number
-    Ex: Decimal 2198853 => Hex 0x218d45 => 218d45
-    """
-    return hex(value)[2:]

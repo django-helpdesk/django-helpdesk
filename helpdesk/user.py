@@ -4,7 +4,7 @@ from helpdesk.models import (
     KBCategory,
     KBItem,
 )
-from seed.lib.superperms.orgs.models import Organization
+from seed.lib.superperms.orgs.models import Organization, get_helpdesk_organizations
 
 from helpdesk import settings as helpdesk_settings
 from helpdesk.decorators import is_helpdesk_staff
@@ -27,7 +27,7 @@ class HelpdeskUser:
         """
         user = self.user
         # All queues for the users default org, and public queues available therein, unless user is superuser
-        all_queues = Queue.objects.filter(organization=user.default_organization_id)
+        all_queues = Queue.objects.filter(organization=user.default_organization.helpdesk_organization)
         public_ids = [q.pk for q in
                       all_queues.filter(allow_public_submission=True)]
         limit_queues_by_user = \
@@ -133,19 +133,18 @@ class HelpdeskUser:
             return False
 
     def can_access_organization(self, organization):
-        if self.user.is_anonymous or not is_helpdesk_staff(self.user):
-            # Check if the org in the url matches this organization
-            try:
+        helpdesk_organizations = get_helpdesk_organizations()
+
+        if is_helpdesk_staff(self.user):
+            return self.user.default_organization.helpdesk_organization == organization
+        else:
+            if 'org' in self.request.GET:
                 url_org = self.request.GET.get('org')
-                org = Organization.objects.filter(name=url_org).first()
-            except:
-                org = None
-            if org:
+                org = helpdesk_organizations.filter(name=url_org).first()
                 return org == organization
-            elif not org and self.user.is_authenticated:
-                # If no org in url, default to users default_organization
-                return self.user.default_organization == organization
+            elif not self.user.is_anonymous:
+                return self.user.default_organization.helpdesk_organization == organization
+            elif len(helpdesk_organizations) == 1:
+                return helpdesk_organizations.first() == organization
             else:
                 return False
-        else:
-            return self.user.default_organization == organization

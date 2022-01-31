@@ -1,5 +1,5 @@
 {% load i18n helpdesk_staff %}
-{% load organization_info %}
+{% load int_to_hex %}
 
     {% include 'helpdesk/custom_navigation_header.html' %}
     <nav class="navbar navbar-expand navbar-dark org-bg static-top">
@@ -7,7 +7,7 @@
         <i class="fas fa-bars"></i>
       </button>
 
-      <a class="navbar-brand mr-auto beam-navbar-header-text" href="{% url 'helpdesk:home' %}{% if user|is_helpdesk_staff is False %}?org={{ user_info.default_org.name }}{% endif %}">{% trans 'Building Performance Helpdesk' %}</a>
+      <a class="navbar-brand mr-auto beam-navbar-header-text" href="{% url 'helpdesk:home' %}{% if user|is_helpdesk_staff is False %}{{ user_info.url }}{% endif %}">{% trans 'Building Performance Helpdesk' %}</a>
 
       {% if helpdesk_settings.HELPDESK_NAVIGATION_ENABLED and user.is_authenticated or user|is_helpdesk_staff %}
       <!-- Navbar Search -->
@@ -24,128 +24,36 @@
         {% csrf_token %}
       </form>
       {% endif %}
-      <!-- Show Org Dropdown, Styling and Logo if User is Staff -->
-	    {% if user.is_authenticated and user|is_helpdesk_staff %}
-      <div class="org-dropdown-btn">
-        <button onclick="showOrgs()" class="btnUserOrgs staff beam-navbar-header-text" type="button">
-          {{ user_info.default_org.name }} <span class="caret"></span>
-        </button>
-        <div id="org-dropdown-menu" class="org-dropdown-items" style="z-index:4;">
-          {% for org in user_info.orgs %}
-          <a href="{% url 'helpdesk:set_default_org' user_id=user.id org_id=org.id %}"> {{ org.name }}
-            {% if org.id == user.default_organization_id %}
-            <i class="fa fa-check"></i>
-            {% endif %}
-          </a>
-          {% endfor %}
-        </div>
-      </div>
-      <!-- If user is not staff, we show dropdown with Org Helpdesks they have access to or the One org that led them there -->
-      {% elif user|is_helpdesk_staff is False %}
-      <div class="org-dropdown-btn">
-        <button  class="btnUserOrgs public" >
+      <!-- Org Name with Org Dropdown Selection -->
+      <div class="dropdown">
+        {% if user_info.orgs %}
+        <button type="button" id='orgDropDownButton' class="btn btn-lg navbar-dark dropdown-toggle" style="background-color: transparent;
+    color: white;" type="button" data-toggle="dropdown" aria-haspopup="true">
           {{ user_info.default_org.name }}
         </button>
+        <div class="dropdown-menu" aria-labelledby="orgDropDownButton">
+          {% for org in user_info.orgs %}
+            {% if user.is_anonymous %}
+            <a class="dropdown-item" href="{{ request.get_full_path }}?org={{ org.name }}">
+            {% else %}
+            <a class="dropdown-item" href="{% url 'helpdesk:set_default_org' user_id=user.id org_id=org.id %}">
+            {% endif %}
+              {{ org.name }} {% if org.id == user_info.default_org.id %}<i class="fa fa-check"></i>{% endif %}
+            </a>
+        {% endfor %}
+        </div>
+        {% else %}
+        <button type="button" id='orgDropDownButton' class="btn btn-lg navbar-dark" style="background-color: transparent;
+    color: white; cursor: default;" >
+          {{ user_info.default_org.name }}
+        </button>
+        {% endif %}
       </div>
-      {% endif %}
-      <!-- DC logo -->
-      <!--<img src="{{ STATIC_URL }}helpdesk/images/dc_green_doee_logo_white.png" title="{$:: 'BEAM' | translate $}" style="max-height:70px;">-->
+
       {% if user_info.default_org.logo %}
       <img src="{{ MEDIA_URL }}{{ user_info.default_org.logo }}" title="{$:: 'BEAM' | translate $}" style="max-height:70px;">
       {% endif %}
     </nav>
-
-
-<!-- Org dropdown menu Styling and Functionality -->
-<style>
-/* Dropdown Button */
-.btnUserOrgs {
-  background-color: transparent;
-  color: white;
-  padding: 16px;
-  font-size: 16px;
-  border: none;
-  font-size: 1.25rem;
-}
-
-.btnUserOrgs.public {
-  cursor: default;
-}
-
-/* Dropdown button on hover & focus */
-.btnUserOrgs.staff:hover, .btnUserOrgs.staff:focus {
-  background-color: #2980B9;
-  cursor: pointer;
-}
-
-/* The container <div> - needed to position the dropdown content */
-.org-dropdown-btn {
-  position: relative;
-  display: inline-block;
-  vertical-align: middle;
-  margin-right: 10px;
-}
-
-/* Dropdown Content (Hidden by Default) */
-.org-dropdown-items {
-  display: none;
-  position: absolute;
-  background-color: #f1f1f1;
-  min-width: 160px;
-  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-  z-index: 1;
-}
-
-/* Links inside the dropdown */
-.org-dropdown-items a {
-  color: black;
-  padding: 12px 16px;
-  text-decoration: none;
-  display: block;
-}
-
-/* Change color of dropdown links on hover */
-.org-dropdown-items a:hover {background-color: #ddd}
-
-/* Show the dropdown menu (use JS to add this class to the .dropdown-content container when the user clicks on the dropdown button) */
-.show {display:block;}
-
-/* Caret */
-.caret {
-  display: inline-block;
-  width: 0;
-  height: 0;
-  vertical-align: middle;
-  border-top: 4px dashed;
-  border-right: 4px solid transparent;
-  border-left: 4px solid transparent;
-}
-
-.beam-navbar-header-text {
-  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
-}
-</style>
-<script>
-/* When the user clicks on the button,
-toggle between hiding and showing the dropdown content */
-function showOrgs() {
-  document.getElementById("org-dropdown-menu").classList.toggle("show");
-}
-
-// Close the dropdown menu if the user clicks outside of it
-window.onclick = function(event) {
-  if (!event.target.matches('.btnUserOrgs')) {
-    var dropdowns = document.getElementsByClassName("org-dropdown-items");
-    var i;
-    for (i = 0; i < dropdowns.length; i++) {
-      var openDropdown = dropdowns[i];
-      if (openDropdown.classList.contains('show')) {
-        openDropdown.classList.remove('show');
-      }
-    }
-  }
-}
-</script>
 <!-- Organization specific font and background -->
 <style>
   body {

@@ -12,7 +12,7 @@
             {% for item in items %}
             <div class="card mb-3">
                 <div class="card-body">
-                     <a href='{{ item.get_absolute_url }}/{% if user|is_helpdesk_staff is False %}?org={{ user_info.default_org.name }}{% endif %}'>
+                     <a href='{{ item.get_absolute_url }}/{% if user|is_helpdesk_staff is False %}{{ user_info.url }}{% endif %}'>
                          <h5 class="card-title">{{ item.question }}</h5>
                      </a>
                 </div>

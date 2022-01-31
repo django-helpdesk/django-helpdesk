@@ -25,7 +25,7 @@ def check_staff_status(check_staff=False):  # 1st bool -- unused
             if not is_user:  # does not have an account in BEAM
                 return False
 
-            org_user = OrganizationUser.objects.filter(user=u, organization=u.default_organization)
+            org_user = OrganizationUser.objects.filter(user=u, organization=u.default_organization.helpdesk_organization)
             if not org_user.exists():
                 return False
 

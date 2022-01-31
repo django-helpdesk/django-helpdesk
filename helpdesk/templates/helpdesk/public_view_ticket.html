@@ -12,7 +12,7 @@
 </li>
 {% else %}
 <li class="breadcrumb-item">
-    <a href="{% url 'helpdesk:home' %}{% if user|is_helpdesk_staff is False %}?org={{ user_info.default_org.name }}{% endif %}">{% trans "Knowledgebase" %}</a>
+    <a href="{% url 'helpdesk:home' %}{% if user|is_helpdesk_staff is False %}{{ user_info.url }}{% endif %}">{% trans "Knowledgebase" %}</a>
 </li>
 <li class="breadcrumb-item active">{% trans "Overview" %}</li>
 {% endif %}

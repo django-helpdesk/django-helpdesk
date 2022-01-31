@@ -8,12 +8,18 @@ from helpdesk.models import EscalationExclusion, EmailTemplate, KBItem
 from helpdesk.models import TicketChange, KBIAttachment, FollowUpAttachment, IgnoreEmail
 from helpdesk.models import CustomField, FormType
 from seed.models import Column, Property, TaxLot
+from seed.lib.superperms.orgs.models import get_helpdesk_organizations
 
 
 @admin.register(Queue)
 class QueueAdmin(admin.ModelAdmin):
     list_display = ('title', 'slug', 'email_address', 'locale', 'time_spent')
     prepopulated_fields = {"slug": ("title",)}
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "organization":
+            kwargs["queryset"] = get_helpdesk_organizations()
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     def time_spent(self, q):
         if q.dedicated_time:
@@ -45,6 +51,11 @@ class FormTypeAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'extra_data_cleaned', 'queue', 'public', 'staff', 'organization', )
     list_display_links = ('name',)
     inlines = [CustomFieldInline]
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "organization":
+            kwargs["queryset"] = get_helpdesk_organizations()
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     def extra_data_cleaned(self, form):
         display = ''
@@ -231,6 +242,11 @@ class IgnoreEmailAdmin(admin.ModelAdmin):
 @admin.register(KBCategory)
 class KBCategoryAdmin(admin.ModelAdmin):
     list_display = ('name', 'title', 'slug', 'public')
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "organization":
+            kwargs["queryset"] = get_helpdesk_organizations()
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
 admin.site.register(PreSetReply)
