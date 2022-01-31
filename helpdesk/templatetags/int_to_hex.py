@@ -17,4 +17,4 @@ def int_to_hex(value):
     if value:
         return hex(value)[2:]
     else:
-        return hex(13938486)[2:]            # Default value
+        return hex(8421504)[2:]            # Default value
