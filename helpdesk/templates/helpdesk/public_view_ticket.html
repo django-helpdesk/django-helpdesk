@@ -91,7 +91,7 @@
 {% for followup in ticket.followup_set.public_followups %}
 <div class='followup well' style="padding:5px;margin:10px;">
     <div class='title'>
-        <h5>{{ followup.title }} {% if followup.user %}by <span class='byline text-info'>{{ followup.user.get_full_name|default:followup.user.get_username }}</span>{% endif %} <span title='{{ followup.date|date:"DATETIME_FORMAT" }}'>({{ followup.date|naturaltime }})</span></h5>
+        <h5>{{ followup.title }} {% if followup.user %}by <span class='byline text-info'>{{ followup.user.get_full_name|default:followup.user.get_username }}</span>{% endif %} <span title='{{ followup.date|naturaltime }}'>({{ followup.date|date:"DATETIME_FORMAT" }})</span></h5>
     </div>
     {% if followup.user %}{{ followup.get_markdown|num_to_link }}
     {% else %}{{ followup.comment|force_escape|urlizetrunc:50|num_to_link|linebreaksbr }}{% endif %}
