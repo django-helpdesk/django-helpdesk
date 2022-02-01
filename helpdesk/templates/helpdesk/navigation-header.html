@@ -56,10 +56,13 @@
     </nav>
 <!-- Organization specific font and background -->
 <style>
-  body {
-    font-family: "Segoe UI";
-  }
+  {% if user_info.default_org.background_color_styling %}
   .org-bg {
     background-color: #{{ user_info.default_org.background_color_styling|int_to_hex }};
   }
+  {% else %}
+  .org-bg {
+    background-color: #00a0af;
+  }
+  {% endif %}
 </style>
