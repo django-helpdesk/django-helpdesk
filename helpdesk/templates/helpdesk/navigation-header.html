@@ -7,7 +7,7 @@
         <i class="fas fa-bars"></i>
       </button>
 
-      <a class="navbar-brand mr-auto beam-navbar-header-text" href="{% url 'helpdesk:home' %}{% if user|is_helpdesk_staff is False %}{{ user_info.url }}{% endif %}">{% trans 'Building Performance Helpdesk' %}</a>
+      <a class="navbar-brand mr-auto beam-navbar-header-shadow" href="{% url 'helpdesk:home' %}{% if user|is_helpdesk_staff is False %}{{ user_info.url }}{% endif %}">{% trans 'Building Performance Helpdesk' %}</a>
 
       {% if helpdesk_settings.HELPDESK_NAVIGATION_ENABLED and user.is_authenticated or user|is_helpdesk_staff %}
       <!-- Navbar Search -->
@@ -27,8 +27,7 @@
       <!-- Org Name with Org Dropdown Selection -->
       <div class="dropdown">
         {% if user_info.orgs %}
-        <button type="button" id='orgDropDownButton' class="btn btn-lg navbar-dark dropdown-toggle" style="background-color: transparent;
-    color: white;" type="button" data-toggle="dropdown" aria-haspopup="true">
+        <button type="button" id='orgDropDownButton' class="btn btn-lg navbar-dark dropdown-toggle beam-navbar-header-shadow" style="background-color: transparent;color: white;" type="button" data-toggle="dropdown" aria-haspopup="true">
           {{ user_info.default_org.name }}
         </button>
         <div class="dropdown-menu" aria-labelledby="orgDropDownButton">
@@ -40,11 +39,10 @@
             {% endif %}
               {{ org.name }} {% if org.id == user_info.default_org.id %}<i class="fa fa-check"></i>{% endif %}
             </a>
-        {% endfor %}
+          {% endfor %}
         </div>
         {% else %}
-        <button type="button" id='orgDropDownButton' class="btn btn-lg navbar-dark" style="background-color: transparent;
-    color: white; cursor: default;" >
+        <button type="button" id='orgDropDownButton' class="btn btn-lg navbar-dark beam-navbar-header-shadow" style="background-color: transparent;color: white; cursor: default;" >
           {{ user_info.default_org.name }}
         </button>
         {% endif %}
