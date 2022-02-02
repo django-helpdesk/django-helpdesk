@@ -63,6 +63,7 @@ class TicketActionsTestCase(TestCase):
         self.user.set_password('pass')
         self.user.save()
         self.org.users.add(self.user)           # Gets added as staff member of org automatically
+        self.user.default_org = self.org
         if not is_staff:
             OrganizationUser.objects.filter(organization=self.org, user=self.user).update(role_level=ROLE_BUILDING_VIEWER)
         self.client.login(username='User_1', password='pass')
@@ -116,6 +117,7 @@ class TicketActionsTestCase(TestCase):
         User = get_user_model()
         self.user2 = User.objects.create(
             username='User_2',
+            default_organization=self.org,
         )
         self.org.users.add(self.user2)          # Automatically gets added as a staff member of the org
 
@@ -172,12 +174,14 @@ class TicketActionsTestCase(TestCase):
 
         # create second user
         User = get_user_model()
+        org_2 = Organization.objects.create()
         self.user2 = User.objects.create(
             username='User_2',
+            default_organization=org_2,
         )
-        self.org.users.add(self.user2)
+        org_2.users.add(self.user2)
         # Update user to not be a staff member
-        OrganizationUser.objects.filter(organization=self.org, user=self.user2).update(role_level=ROLE_BUILDING_VIEWER)
+        OrganizationUser.objects.filter(organization=org_2, user=self.user2).update(role_level=ROLE_BUILDING_VIEWER)
 
         initial_data = {
             'title': 'Private ticket test',
@@ -256,18 +260,20 @@ class TicketActionsTestCase(TestCase):
 
         # Create custom fields and set values for tickets
         custom_field_1 = CustomField.objects.create(
-            name='test',
+            field_name='test',
             label='Test',
             data_type='varchar',
+            ticket_form=self.form,
         )
         ticket_1_field_1 = 'This is for the test field'
         ticket_1.ticketcustomfieldvalue_set.create(field=custom_field_1, value=ticket_1_field_1)
         ticket_2_field_1 = 'Another test text'
         ticket_2.ticketcustomfieldvalue_set.create(field=custom_field_1, value=ticket_2_field_1)
         custom_field_2 = CustomField.objects.create(
-            name='number',
+            field_name='number',
             label='Number',
             data_type='integer',
+            ticket_form=self.form,
         )
         ticket_2_field_2 = '444'
         ticket_2.ticketcustomfieldvalue_set.create(field=custom_field_2, value=ticket_2_field_2)

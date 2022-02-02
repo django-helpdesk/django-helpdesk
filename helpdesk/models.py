@@ -921,7 +921,7 @@ class Ticket(models.Model):
                 ticketcc.ticket = self
                 ticketcc.save(update_fields=['ticket'])
             elif user:
-                ticketcc = self.ticketcc_set.create(user=user)
+                ticketcc = self.ticketcc_set.create(user=user, email=user.email)
             else:
                 ticketcc = self.ticketcc_set.create(email=email)
             return ticketcc

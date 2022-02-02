@@ -28,15 +28,13 @@ def organization_info(user, request):
 
     """
     try:
-        return_info = {}
+        return_info = {'default_org': None, 'orgs': [], 'url': ''}
         helpdesk_orgs = get_helpdesk_organizations()
         if is_helpdesk_staff(user):
             orgs = OrganizationUser.objects.filter(user=user, role_level__gt=3).values('organization')
             return_info['orgs'] = helpdesk_orgs.filter(id__in=orgs)
             return_info['default_org'] = Organization.objects.get(id=user.default_organization.helpdesk_organization_id)
         else:
-            return_info['default_org'] = None
-            return_info['url'] = ''
             if 'org' in request.GET:
                 url_org = request.GET.get('org')
                 try:

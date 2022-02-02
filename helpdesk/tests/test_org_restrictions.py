@@ -108,7 +108,8 @@ class PerOrgMembershipTestCase(TestCase):
         # Test Staff Members
         for n in (1, 2, 4):
             self.client.login(username=self.name[n], password=self.login[n])
-            org_info = organization_info(self.users[n], reverse('helpdesk:home'))
+            request = self.client.get(reverse('helpdesk:home')).wsgi_request
+            org_info = organization_info(self.users[n], request)
             self.assertTrue(is_helpdesk_staff(self.users[n]))
             self.assertEqual(
                 len(org_info['orgs']),
@@ -125,23 +126,31 @@ class PerOrgMembershipTestCase(TestCase):
         self.users[4].default_organization = Organization.objects.get(name='org2')
         self.users[4].save()
 
+
         for n in (1, 2, 4):
             self.client.login(username=self.name[n], password=self.login[n])
-            org_info = organization_info(self.users[n], reverse('helpdesk:home'))
+            request = self.client.get(reverse('helpdesk:home')).wsgi_request
+            org_info = organization_info(self.users[n], request)
             self.assertFalse(is_helpdesk_staff(self.users[n]))
-            self.assertTrue('orgs' not in org_info.keys())
+            print(self.users[n].is_anonymous)
+            self.assertEqual(len(org_info['orgs']),
+                             0,
+                             'Dropdown menu has the wrong number of orgs for public members.')
             self.assertEqual(
                 org_info['default_org'],
                 Organization.objects.get(name='org1' if n == 2 else 'org2'),
-                'Dropdown Menu is not being properly limited by organization for Public members'
+                'Dropdown Menu had wrong default org for public members'
             )
 
         # Test Public Members with Url in org
         for n in (1, 2, 4):
             self.client.login(username=self.name[n], password=self.login[n])
-            org_info = organization_info(self.users[n], reverse('helpdesk:home') + '?org=org3')
+            request = self.client.get(reverse('helpdesk:home') + '?org=org3').wsgi_request
+            org_info = organization_info(self.users[n], request)
             self.assertFalse(is_helpdesk_staff(self.users[n]))
-            self.assertTrue('orgs' not in org_info.keys())
+            self.assertEqual(len(org_info['orgs']),
+                             0,
+                             'Dropdown menu has the wrong number of orgs for public members when org is in url')
             self.assertEqual(
                 org_info['default_org'],
                 Organization.objects.get(name='org3'),
@@ -252,14 +261,15 @@ class PerOrgMembershipTestCase(TestCase):
         Check that index/kb pages show the kb categories belonging to a users organization by staff status and by
         public status
         """
-        # Staff members, user 1 has two, user 2 has one, and user 4 has 4 since they are superuser
+        # Staff members, user 1 has two, user 2 has one, and user 4 has 2 even though they are superuser, they only
+        # see in their associated orgs
         for n in (1, 2, 4):
             self.client.login(username=self.name[n], password=self.login[n])
             response = self.client.get(reverse('helpdesk:home'))
             self.assertTrue(is_helpdesk_staff(self.users[n]))
             self.assertEqual(
                 len(response.context['kb_categories']),
-                2 if n == 1 else 1 if n == 2 else 4,
+                2 if n in [1, 4] else 1,
                 'KB Categories were not properly limited by Organization'
             )
 
@@ -273,25 +283,25 @@ class PerOrgMembershipTestCase(TestCase):
         self.users[4].default_organization = Organization.objects.get(name='org2')
         self.users[4].save()
 
-        for n in (1, 2, 4):
+        for n in (1, 2):
             self.client.login(username=self.name[n], password=self.login[n])
             response = self.client.get(reverse('helpdesk:home'))
             self.assertFalse(is_helpdesk_staff(self.users[n]))
             self.assertEqual(
                 len(response.context['kb_categories']),
-                1 if n == 2 else 0 if n == 1 else 4,
+                1 if n == 2 else 0,
                 'KB Categories were not properly limited by Organization for Public members'
             )
 
-        # Test Org in Url
+        # Test Org in Url, all Users will see the same, even SuperUsers
         for n in (1, 2, 4):
             self.client.login(username=self.name[n], password=self.login[n])
             response = self.client.get(reverse('helpdesk:home') + '?org=org3')
             self.assertFalse(is_helpdesk_staff(self.users[n]))
             self.assertEqual(
                 len(response.context['kb_categories']),
-                1 if n != 4 else 4,
-                'KB Categories were not properly limited by Organization in url for Public members'
+                1,
+                'KB Categories were not properly limitzed by Organization in url for Public members when org is in url'
             )
 
         # Reset default_org fields

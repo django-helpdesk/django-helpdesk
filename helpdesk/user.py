@@ -138,7 +138,7 @@ class HelpdeskUser:
         if is_helpdesk_staff(self.user):
             return self.user.default_organization.helpdesk_organization == organization
         else:
-            if 'org' in self.request.GET:
+            if self.request and 'org' in self.request.GET:
                 url_org = self.request.GET.get('org')
                 org = helpdesk_organizations.filter(name=url_org).first()
                 return org == organization

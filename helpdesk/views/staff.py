@@ -1830,11 +1830,15 @@ def ticket_cc_add(request, ticket_id):
             email = form.cleaned_data.get('email')
             if user and ticket.ticketcc_set.filter(user=user).exists():
                 form.add_error('user', _('Impossible to add twice the same user'))
+            elif user and user.email and ticket.ticketcc_set.filter(email=user.email).exists():
+                form.add_error('user', _('Impossible to add twice the same email address'))
             elif email and ticket.ticketcc_set.filter(email=email).exists():
                 form.add_error('email', _('Impossible to add twice the same email address'))
             else:
                 ticketcc = form.save(commit=False)
                 ticketcc.ticket = ticket
+                if user and user.email:
+                    ticketcc.email = user.email
                 ticketcc.save()
                 return HttpResponseRedirect(reverse('helpdesk:ticket_cc', kwargs={'ticket_id': ticket.id}))
 

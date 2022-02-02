@@ -60,7 +60,7 @@ class TestTicketLookupPublicEnabled(TestCase):
 
     def test_add_email_to_ticketcc_if_not_in(self):
         staff_email = 'staff@mail.com'
-        staff_user = User.objects.create(username='staff', email=staff_email)
+        staff_user = User.objects.create(username=staff_email, password='password', default_organization=self.org)
         self.org.users.add(staff_user)                    # User is now a staff member of the org created in setUp()
         self.ticket.assigned_to = staff_user
         self.ticket.save()
@@ -70,17 +70,19 @@ class TestTicketLookupPublicEnabled(TestCase):
         # Add new email to CC
         email_2 = 'user2@mail.com'
         ticketcc_2 = self.ticket.add_email_to_ticketcc_if_not_in(email=email_2)
-        self.assertEqual(list(self.ticket.ticketcc_set.all()), [ticketcc_1, ticketcc_2])
+        # TicketCCs get added to the front of the queryset
+        self.assertEqual(list(self.ticket.ticketcc_set.all()), [ticketcc_2, ticketcc_1])
 
         # Add existing email, doesn't change anything
         self.ticket.add_email_to_ticketcc_if_not_in(email=email_1)
-        self.assertEqual(list(self.ticket.ticketcc_set.all()), [ticketcc_1, ticketcc_2])
+        self.assertEqual(list(self.ticket.ticketcc_set.all()), [ticketcc_2, ticketcc_1])
 
-        # Add mail from assigned user, doesn't change anything
+        # Add mail from assigned user, doesn't change
+        print()
         self.ticket.add_email_to_ticketcc_if_not_in(email=staff_email)
-        self.assertEqual(list(self.ticket.ticketcc_set.all()), [ticketcc_1, ticketcc_2])
+        self.assertEqual(list(self.ticket.ticketcc_set.all()), [ticketcc_2, ticketcc_1])
         self.ticket.add_email_to_ticketcc_if_not_in(user=staff_user)
-        self.assertEqual(list(self.ticket.ticketcc_set.all()), [ticketcc_1, ticketcc_2])
+        self.assertEqual(list(self.ticket.ticketcc_set.all()), [ticketcc_2, ticketcc_1])
 
         # Move a ticketCC from ticket 1 to ticket 2
         ticket_2 = Ticket.objects.create(queue=self.ticket.queue, title='Ticket 2', submitter_email=email_2,

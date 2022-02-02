@@ -161,11 +161,12 @@ class TicketBasicsTestCase(TestCase):
             updated_ticket_cc='update.custom@example.com',
             organization=self.org)
         custom_field_1 = CustomField.objects.create(
-            name='textfield',
+            ticket_form=self.form,
+            field_name='textfield',
             label='Text Field',
             data_type='varchar',
             max_length=100,
-            ordering=10,
+            form_ordering=10,
             required=False,
             staff_only=False)
         post_data = {
