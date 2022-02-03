@@ -35,14 +35,16 @@ from helpdesk.query import (
 from helpdesk.user import HelpdeskUser
 
 from helpdesk.decorators import (
-    helpdesk_staff_member_required, helpdesk_superuser_required,
-    is_helpdesk_staff
+    helpdesk_staff_member_required,
+    helpdesk_superuser_required,
+    is_helpdesk_staff,
+    list_of_helpdesk_staff,
+    superuser_required,
 )
 from helpdesk.forms import (
     TicketForm, UserSettingsForm, EmailIgnoreForm, EditTicketForm, TicketCCForm,
     TicketCCEmailForm, TicketCCUserForm, EditFollowUpForm, TicketDependencyForm, MultipleTicketSelectForm
 )
-from helpdesk.decorators import superuser_required
 from helpdesk.lib import (
     safe_template_context,
     process_attachments,
@@ -229,16 +231,21 @@ dashboard = staff_member_required(dashboard)
 
 def ticket_perm_check(request, ticket):
     huser = HelpdeskUser(request.user, request)
-    if not huser.can_access_queue(ticket.queue):
-        raise PermissionDenied()
-    if not huser.can_access_ticket(ticket):
-        raise PermissionDenied()
+    if not huser.check_default_org(ticket.ticket_form.organization):
+        return HttpResponseRedirect(reverse('helpdesk:home'))
+    else:
+        if not huser.can_access_queue(ticket.queue):
+            raise PermissionDenied()
+        if not huser.can_access_ticket(ticket):
+            raise PermissionDenied()
 
 
 @helpdesk_staff_member_required
 def delete_ticket(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
-    ticket_perm_check(request, ticket)
+    perm = ticket_perm_check(request, ticket)
+    if perm is not None:
+        return perm
 
     if request.method == 'GET':
         return render(request, 'helpdesk/delete_ticket.html', {
@@ -261,7 +268,9 @@ def followup_edit(request, ticket_id, followup_id):
     """Edit followup options with an ability to change the ticket."""
     followup = get_object_or_404(FollowUp, id=followup_id)
     ticket = get_object_or_404(Ticket, id=ticket_id)
-    ticket_perm_check(request, ticket)
+    perm = ticket_perm_check(request, ticket)
+    if perm is not None:
+        return perm
 
     if request.method == 'GET':
         form = EditFollowUpForm(initial={
@@ -333,7 +342,9 @@ followup_delete = staff_member_required(followup_delete)
 @helpdesk_staff_member_required
 def view_ticket(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
-    ticket_perm_check(request, ticket)
+    perm = ticket_perm_check(request, ticket)
+    if perm is not None:
+        return perm
 
     if 'take' in request.GET:
         # Allow the user to assign the ticket to themselves whilst viewing it.
@@ -375,9 +386,12 @@ def view_ticket(request, ticket_id):
         return update_ticket(request, ticket_id)
 
     users = User.objects.filter(is_active=True)
-    if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS:
-        staff_ids = [u.id for u in users if is_helpdesk_staff(u)]
-        users = users.filter(id__in=staff_ids)
+    org = ticket.ticket_form.organization_id
+    users = list_of_helpdesk_staff(org)
+    # TODO add back HELPDESK_STAFF_ONLY_TICKET_OWNERS setting
+    """if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS:
+        staff_ids = [u.id for u in users if is_helpdesk_staff(u, org=org)]  # todo
+        users = users.filter(id__in=staff_ids)"""
     users = users.order_by(User.USERNAME_FIELD)
 
     queues = HelpdeskUser(request.user).get_queues()
@@ -503,11 +517,7 @@ def update_ticket(request, ticket_id, public=False):
 
     # So if the update isnt public, or the user isn't a staff member:
     # Locate the ticket through the submitter email and the secret key.
-    if not (public or (
-            request.user.is_authenticated and
-            request.user.is_active and (
-                (is_helpdesk_staff(request.user)) or
-                helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE))):
+    if not (public or is_helpdesk_staff(request.user)):
 
         key = request.POST.get('key')
         email = request.POST.get('mail')
@@ -1106,12 +1116,12 @@ def merge_tickets(request):
     })
 
 
-
 @helpdesk_staff_member_required
 def ticket_list(request):
     context = {}
 
     huser = HelpdeskUser(request.user)
+    org = request.user.default_organization.helpdesk_organization
 
     # Query_params will hold a dictionary of parameters relating to
     # a query, to be saved if needed:
@@ -1244,7 +1254,7 @@ def ticket_list(request):
 
     # Get KBItems that are part of the user's helpdesk_organization
     kbitem_choices = [(item.pk, str(item)) for item in KBItem.objects.filter(
-        category__organization=request.user.default_organization.helpdesk_organization)]
+        category__organization=org)]
 
     # After query is run, replaces null-filters with in-filters=[-1], so page can properly display that filter.
     for param, null_query in filter_null_params.items():
@@ -1252,7 +1262,7 @@ def ticket_list(request):
         if popped is not None:
             query_params['filtering'][filter_in_params[param]] = [-1]
 
-    user_choices = [u for u in User.objects.filter(is_active=True) if is_helpdesk_staff(u)]
+    user_choices = list_of_helpdesk_staff(org)
 
     # Get extra data columns to be displayed if only 1 queue is selected
     # TODO Figure out a way to get extra_cols without making a full call to datatables_ticket_list?
@@ -1335,7 +1345,9 @@ def timeline_ticket_list(request, query):
 @helpdesk_staff_member_required
 def edit_ticket(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
-    ticket_perm_check(request, ticket)
+    perm = ticket_perm_check(request, ticket)
+    if perm is not None:
+        return perm
 
     form = EditTicketForm(request.POST or None, instance=ticket)
     if form.is_valid():
@@ -1401,7 +1413,9 @@ raw_details = staff_member_required(raw_details)
 @helpdesk_staff_member_required
 def hold_ticket(request, ticket_id, unhold=False):
     ticket = get_object_or_404(Ticket, id=ticket_id)
-    ticket_perm_check(request, ticket)
+    perm = ticket_perm_check(request, ticket)
+    if perm is not None:
+        return perm
 
     if unhold:
         ticket.on_hold = False
@@ -1805,7 +1819,9 @@ email_ignore_del = superuser_required(email_ignore_del)
 @helpdesk_staff_member_required
 def ticket_cc(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
-    ticket_perm_check(request, ticket)
+    perm = ticket_perm_check(request, ticket)
+    if perm is not None:
+        return perm
 
     copies_to = ticket.ticketcc_set.all()
     return render(request, 'helpdesk/ticket_cc_list.html', {
@@ -1820,7 +1836,9 @@ ticket_cc = staff_member_required(ticket_cc)
 @helpdesk_staff_member_required
 def ticket_cc_add(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
-    ticket_perm_check(request, ticket)
+    perm = ticket_perm_check(request, ticket)
+    if perm is not None:
+        return perm
 
     form = None
     if request.method == 'POST':
@@ -1842,11 +1860,19 @@ def ticket_cc_add(request, ticket_id):
                 ticketcc.save()
                 return HttpResponseRedirect(reverse('helpdesk:ticket_cc', kwargs={'ticket_id': ticket.id}))
 
+    # Add list of users to the TicketCCUserForm
+    users = list_of_helpdesk_staff(ticket.ticket_form.organization)
+    users = users.order_by(User.USERNAME_FIELD)
+
+    form_user = TicketCCUserForm()
+    form_user.fields['user'].choices = [('', '--------')] + [
+        (u.id, (u.get_full_name() or u.get_username())) for u in users]
+
     return render(request, 'helpdesk/ticket_cc_add.html', {
         'ticket': ticket,
         'form': form,
         'form_email': TicketCCEmailForm(),
-        'form_user': TicketCCUserForm(),
+        'form_user': form_user,
     })
 
 
@@ -1871,7 +1897,11 @@ ticket_cc_del = staff_member_required(ticket_cc_del)
 @helpdesk_staff_member_required
 def ticket_dependency_add(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
-    ticket_perm_check(request, ticket)
+
+    perm = ticket_perm_check(request, ticket)
+    if perm is not None:
+        return perm
+
     if request.method == 'POST':
         form = TicketDependencyForm(request.POST)
         if form.is_valid():
@@ -1906,7 +1936,9 @@ ticket_dependency_del = staff_member_required(ticket_dependency_del)
 @helpdesk_staff_member_required
 def attachment_del(request, ticket_id, attachment_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
-    ticket_perm_check(request, ticket)
+    perm = ticket_perm_check(request, ticket)
+    if perm is not None:
+        return perm
 
     attachment = get_object_or_404(FollowUpAttachment, id=attachment_id)
     if request.method == 'POST':

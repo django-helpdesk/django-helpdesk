@@ -30,7 +30,7 @@ def organization_info(user, request):
     try:
         return_info = {'default_org': None, 'orgs': [], 'url': ''}
         helpdesk_orgs = get_helpdesk_organizations()
-        if is_helpdesk_staff(user):
+        if is_helpdesk_staff(user):  # todo - change to "staff of any org" ?
             orgs = OrganizationUser.objects.filter(user=user, role_level__gt=3).values('organization')
             return_info['orgs'] = helpdesk_orgs.filter(id__in=orgs)
             return_info['default_org'] = Organization.objects.get(id=user.default_organization.helpdesk_organization_id)

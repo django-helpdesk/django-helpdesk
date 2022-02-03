@@ -61,90 +61,81 @@ class HelpdeskUser:
         return self.user.is_superuser
 
     def can_access_queue(self, queue):
-        """Check if a certain user can access a certain queue.
-            Users should only be able to access that queue if it is within their org
-
-        :param user: The User (the class should have the has_perm method)
-        :param queue: The django-helpdesk Queue instance
-        :return: True if the user has permission (either by default or explicitly), false otherwise
         """
-        if self.can_access_organization(queue.organization):
-            return True
-        elif self.has_full_access():
-            return True
-        else:
-            return (
-                helpdesk_settings.HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION
-                and
-                self.user.has_perm(queue.permission_name)
-            )
+        Checks if a user can view the queue based on the user's current default_organization.
+            User must be staff or have staff permissions.
+        Works independent of the user's role permissions in the queue's organization.
+        Does not check whether a user (staff or otherwise) is allowed to submit tickets to a queue,
+            and doesn't check if the queue is public or not.
+        """
+        if self.check_default_org(queue.organization):
+            if is_helpdesk_staff(self.user) or self.has_full_access():
+                return True
+            else:
+                return (
+                    helpdesk_settings.HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION
+                    and
+                    self.user.has_perm(queue.permission_name)
+                )
+        return False
 
     def can_access_ticket(self, ticket):
-        """Check to see if the user has permission to access
-            a ticket. If not then deny access."""
-        user = self.user
-        if self.can_access_queue(ticket.queue):
-            return True
-        elif self.has_full_access() or (ticket.assigned_to and user.id == ticket.assigned_to.id):
+        """
+        Checks if a user can view a ticket based on the user's current default_organization.
+            User must be staff, have staff permissions, or be assigned to the ticket.
+        Works independent of the user's role permissions in the ticket's organization alone.
+        Method is intended for staff users - not for the public ticket view.
+        Permits staff users to edit and update tickets in addition to viewing them.
+        """
+        if self.check_default_org(ticket.ticket_form.organization) and (
+                is_helpdesk_staff(self.user) or
+                self.has_full_access() or
+                (ticket.assigned_to and self.user.id == ticket.assigned_to.id)):  # todo add user is CC'd in ticket
             return True
         else:
             return False
 
     def can_access_kbcategory(self, category):
-        """Check to see if the user has permission to access
-            a KBcategory. If not deny access. Should be Org
-            dependent
-        :param category, Helpdesk model KBCategory
-        :return boolean, whether user has access to it or not
         """
-        # Order of precedence for access:
-        # A public category should be visible to anyone in the organization
-        # For non-public categories:
-        # If the category has a queue, should be viewable if user has access to the org
-        # If there's no queue, the category should only be visible for staff in the organization (since not public)
-        # Otherwise, the category will be visible to superusers
-        # Not viewable to anyone else
-        if category.public and self.can_access_organization(category.organization):
-            if category.queue:
-                return self.can_access_queue(category.queue)
-            else:
+        Checks if a user can view the KB category page based on the user's current default_organization.
+            User does NOT have to be staff; if not, category must be public.
+        Works independent of the user's role permissions in the category's organization.
+        """
+        if self.check_default_org(category.organization):
+            if is_helpdesk_staff(self.user) or self.has_full_access() or category.public:
                 return True
-        elif is_helpdesk_staff(self.user) and self.can_access_organization(category.organization):
-            return True
-        elif self.has_full_access() and self.can_access_organization(category.organization):
-            return True
-        else:
-            return False
+        return False
 
     def can_access_kbarticle(self, article):
-        """Check to see if the user has permission to access
-            a KBarticle. If not deny access. Should be Org
-            dependent. Uses can_access_kbcategory.
-        :param article, Helpdesk model KBArticle
-        :return boolean, whether user has access to it or not
         """
-        if not HelpdeskUser.can_access_kbcategory(self, article.category):
-            return False
-        elif self.has_full_access() and self.can_access_organization(article.category.organization):
-            return True
-        elif article.enabled:
-            return True
+        Checks if a user can view the KB article page based on the user's current default_organization.
+            User does NOT have to be staff; if not, article must be public.
+        Works independent of the user's role permissions in the article's organization.
+        """
+        if self.check_default_org(article.category.organization) and (
+            is_helpdesk_staff(self.user) or
+            self.has_full_access() or
+            (article.category.public and article.enabled)):
+                return True
         else:
             return False
 
-    def can_access_organization(self, organization):
-        helpdesk_organizations = get_helpdesk_organizations()
+    def check_default_org(self, organization):
+        """
+        Checks that the user's current default_organization helpdesk matches the given organization.
+        If the user switches to a new organization in the dropdown, this method can be used to check if
+        the user should be kicked off their current page, to be redirected to a different landing page.
 
-        if is_helpdesk_staff(self.user):
-            return self.user.default_organization.helpdesk_organization == organization
-        else:
-            if self.request and 'org' in self.request.GET:
-                url_org = self.request.GET.get('org')
-                org = helpdesk_organizations.filter(name=url_org).first()
-                return org == organization
-            elif not self.user.is_anonymous:
-                return self.user.default_organization.helpdesk_organization == organization
-            elif len(helpdesk_organizations) == 1:
-                return helpdesk_organizations.first() == organization
-            else:
+        :param organization: Organization object
+        """
+        if self.user.is_authenticated and self.user.is_active and self.user.default_organization is not None:
+            return self.user.default_organization.helpdesk_organization.id == organization.id
+        elif self.request and 'org' in self.request.GET:
+            url_org = self.request.GET.get('org')
+            try:
+                org = Organization.objects.get(name=url_org)
+            except Organization.DoesNotExist:
                 return False
+            return org.helpdesk_organization.id == organization.id
+        else:
+            return False

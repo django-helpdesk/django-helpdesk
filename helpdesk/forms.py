@@ -18,6 +18,7 @@ from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth import get_user_model
 from django.utils import timezone
+from django.shortcuts import get_object_or_404
 
 from helpdesk.lib import safe_template_context, process_attachments
 from helpdesk.models import (Ticket, Queue, FollowUp, IgnoreEmail, TicketCC,
@@ -25,11 +26,9 @@ from helpdesk.models import (Ticket, Queue, FollowUp, IgnoreEmail, TicketCC,
                              FormType)
 from helpdesk import settings as helpdesk_settings
 from helpdesk.email import create_ticket_cc
-from helpdesk.decorators import is_helpdesk_staff
+from helpdesk.decorators import list_of_helpdesk_staff
 import re
-import json
 
-from seed.lib.superperms.orgs.models import ROLE_MEMBER
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -83,6 +82,7 @@ def _field_ordering(queryset):
         for field in ordering
     ]
     return ordering
+
 
 class CustomFieldMixin(object):
     """
@@ -532,11 +532,14 @@ class TicketForm(AbstractTicketForm):
         if self.form_queue is None:
             self.fields['queue'].choices = queue_choices
 
-        assignable_users = User.objects.filter(is_active=True)
+        org = get_object_or_404(FormType, pk=self.form_id).organization
+        assignable_users = list_of_helpdesk_staff(org)
+        # TODO add back HELPDESK_STAFF_ONLY_TICKET_OWNERS setting
+        """
         if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS:
-            staff_ids = [u.id for u in assignable_users if is_helpdesk_staff(u)]
+            staff_ids = [u.id for u in assignable_users if is_helpdesk_staff(u, org=org)]
             assignable_users = assignable_users.filter(id__in=staff_ids)
-
+        """
         assignable_users = assignable_users.order_by(User.USERNAME_FIELD)
         self.fields['assigned_to'].choices = [('', '--------')] + [
             (u.id, (u.get_full_name() or u.get_username())) for u in assignable_users]
@@ -606,7 +609,8 @@ class PublicTicketForm(AbstractTicketForm):
             if field in readonly_fields:
                 self.fields[field].disabled = True
 
-        public_queues = Queue.objects.filter(allow_public_submission=True)  # TODO base off org_id
+        org = get_object_or_404(FormType, pk=self.form_id).organization
+        public_queues = Queue.objects.filter(allow_public_submission=True, organization=org)
 
         if len(public_queues) == 0:
             logger.warning("There are no public queues defined - public ticket creation is impossible")
@@ -665,11 +669,6 @@ class TicketCCForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(TicketCCForm, self).__init__(*args, **kwargs)
-        users = User.objects.filter(is_active=True)
-        if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_CC:
-            staff_ids = [u.id for u in users if is_helpdesk_staff(u)]
-            users = users.filter(id__in=staff_ids)
-        self.fields['user'].queryset = users.order_by(User.USERNAME_FIELD)
 
 
 class TicketCCUserForm(forms.ModelForm):
@@ -677,11 +676,6 @@ class TicketCCUserForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(TicketCCUserForm, self).__init__(*args, **kwargs)
-        users = User.objects.filter(is_active=True)
-        if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_CC:
-            staff_ids = [u.id for u in users if is_helpdesk_staff(u)]
-            users = users.filter(id__in=staff_ids)
-        self.fields['user'].queryset = users.order_by(User.USERNAME_FIELD)
 
     class Meta:
         model = TicketCC
