@@ -42,7 +42,11 @@ def create_ticket(request, form_id=None,  *args, **kwargs, ):
         return HttpResponseRedirect(reverse('helpdesk:home'))
 
     if is_helpdesk_staff(request.user):
-        return staff.CreateTicketView.as_view(form_id=form_int)(request, *args, **kwargs)
+        form = FormType.objects.filter(id=form_int).first()
+        if form and (request.user.default_organization.helpdesk_organization != form.organization):
+            return HttpResponseRedirect(reverse('helpdesk:home'))
+        else:
+            return staff.CreateTicketView.as_view(form_id=form_int)(request, *args, **kwargs)
 
     # If not user: Check if form is public, and if not, return to login or homepage
     form = FormType.objects.filter(id=form_int).first()
