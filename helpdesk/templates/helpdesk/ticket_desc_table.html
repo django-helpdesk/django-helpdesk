@@ -45,6 +45,7 @@ copy_public_link = function() {
                                 {% elif "datetime" == field.data_type %}{{ field.value|datetime_string_format }}
                                 {% elif "date" == field.data_type %}{{ field.value|datetime_string_format }}
                                 {% elif "time" == field.data_type %}{{ field.value|datetime_string_format }}
+                                {% elif "boolean" == field.data_type %}{{ field.value }}
                                 {% else %}{{ field.value|default:"" }}
                                 {% endif %}{% endspaceless %}</td>
                         {% if not row %}</tr>{% endif %}

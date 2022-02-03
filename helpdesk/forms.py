@@ -196,7 +196,8 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
                         initial_value = datetime.strptime(initial_value, CUSTOMFIELD_TIME_FORMAT)
                     # If it is boolean field, transform the value to a real boolean instead of a string
                     elif 'boolean' == display_data.data_type:
-                        initial_value = 'True' == initial_value
+                        if isinstance(initial_value, str):
+                            initial_value = 'True' == initial_value
                 except (KeyError, ValueError, TypeError):  # TicketCustomFieldValue.DoesNotExist,
                     # ValueError error if parsing fails, using initial_value = current_value.value
                     # TypeError if parsing None type
