@@ -385,7 +385,6 @@ def view_ticket(request, ticket_id):
 
         return update_ticket(request, ticket_id)
 
-    users = User.objects.filter(is_active=True)
     org = ticket.ticket_form.organization_id
     users = list_of_helpdesk_staff(org)
     # TODO add back HELPDESK_STAFF_ONLY_TICKET_OWNERS setting
@@ -394,7 +393,7 @@ def view_ticket(request, ticket_id):
         users = users.filter(id__in=staff_ids)"""
     users = users.order_by(User.USERNAME_FIELD)
 
-    queues = HelpdeskUser(request.user).get_queues()
+    queues = Queue.objects.filter(organization=org)
     queue_choices = _get_queue_choices(queues)
     # TODO: shouldn't this template get a form to begin with?
     form = TicketForm(initial={'due_date': ticket.due_date},
