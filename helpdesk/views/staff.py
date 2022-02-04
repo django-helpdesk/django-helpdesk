@@ -524,7 +524,7 @@ def update_ticket(request, ticket_id, public=False):
         if key and email:
             ticket = Ticket.objects.get(
                 id=ticket_id,
-                submitter_email__iexact=email,  # TODO: Other email fields should work for this too.
+                submitter_email__iexact=email,  # TODO: Other email fields should work for this too.  # todo todo
                 secret_key__iexact=key
             )
 

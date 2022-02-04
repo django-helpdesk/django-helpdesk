@@ -623,7 +623,7 @@ class Ticket(models.Model):
     # Default contact fields
     # Labels for these fields must be added in CustomField (not part of default)
     contact_name = models.CharField(max_length=200, blank=True, null=True)
-    contact_email = models.CharField(max_length=200, blank=True, null=True)
+    contact_email = models.CharField(max_length=200, blank=True, null=True)  # todo why is this a charfield and not an emailfield??
     building_name = models.CharField(max_length=200, blank=True, null=True)
     building_address = models.TextField(blank=True, null=True)
     pm_id = models.CharField(_("Portfolio Manager ID"), max_length=200, blank=True, null=True)

@@ -453,7 +453,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
                                 setattr(self.fields[field.field_name], attr, field.get_markdown())
                             elif attr == 'data_type':
                                 if display_info == 'datetime' or display_info == 'time' or display_info == 'date':
-                                    self.fields[display_data.field_name].widget.attrs.update(
+                                    self.fields[field.field_name].widget.attrs.update(
                                         {'autocomplete': 'off'})
                             else:
                                 setattr(self.fields[field.field_name], attr, display_info)
