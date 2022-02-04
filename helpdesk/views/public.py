@@ -14,7 +14,7 @@ from django.core.exceptions import (
 )
 from django.urls import reverse
 from django.http import HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.utils.http import urlquote
 from django.utils.translation import ugettext as _
 from django.conf import settings
@@ -41,21 +41,24 @@ def create_ticket(request, form_id=None,  *args, **kwargs, ):
     except TypeError:
         return HttpResponseRedirect(reverse('helpdesk:home'))
 
+    form = get_object_or_404(FormType, id=form_int)
+    has_form_access = huser_from_request(request).can_access_form(form)
     if is_helpdesk_staff(request.user):
-        form = FormType.objects.filter(id=form_int).first()
-        if form and (request.user.default_organization.helpdesk_organization != form.organization):
-            return HttpResponseRedirect(reverse('helpdesk:home'))
-        else:
+        if has_form_access:
             return staff.CreateTicketView.as_view(form_id=form_int)(request, *args, **kwargs)
+        else:
+            return HttpResponseRedirect(reverse('helpdesk:home'))
 
     # If not user: Check if form is public, and if not, return to login or homepage
-    form = FormType.objects.filter(id=form_int).first()
-    if form is not None and form.public:
+    if form is not None and form.public and has_form_access:
         return CreateTicketView.as_view(form_id=form_int)(request, *args, **kwargs)
     elif helpdesk_settings.HELPDESK_REDIRECT_TO_LOGIN_BY_DEFAULT:
         return HttpResponseRedirect(reverse('login'))
     else:
-        return HttpResponseRedirect(reverse('helpdesk:home'))
+        if request.GET and 'org' in request.GET:
+            return HttpResponseRedirect(reverse('helpdesk:home') + '?org=' + request.GET.get('org'))
+        else:
+            return HttpResponseRedirect(reverse('helpdesk:home'))
 
 
 class BaseCreateTicketView(abstract_views.AbstractCreateTicketMixin, FormView):

@@ -120,6 +120,17 @@ class HelpdeskUser:
         else:
             return False
 
+    def can_access_form(self, form):
+        """
+        Checks if a user can view the form based on the user's current default_organization.
+            User must be staff or have staff permissions.
+        Works independent of the user's role permissions in the form's organization.
+        """
+        if self.check_default_org(form.organization):
+            if is_helpdesk_staff(self.user) or self.has_full_access() or form.public:
+                return True
+        return False
+
     def check_default_org(self, organization):
         """
         Checks that the user's current default_organization helpdesk matches the given organization.
@@ -128,14 +139,14 @@ class HelpdeskUser:
 
         :param organization: Organization object
         """
-        if self.user.is_authenticated and self.user.is_active and self.user.default_organization is not None:
-            return self.user.default_organization.helpdesk_organization.id == organization.id
-        elif self.request and 'org' in self.request.GET:
+        if self.request and 'org' in self.request.GET:
             url_org = self.request.GET.get('org')
             try:
                 org = Organization.objects.get(name=url_org)
             except Organization.DoesNotExist:
                 return False
             return org.helpdesk_organization.id == organization.id
+        elif self.user.is_authenticated and self.user.is_active and self.user.default_organization is not None:
+            return self.user.default_organization.helpdesk_organization.id == organization.id
         else:
             return False
