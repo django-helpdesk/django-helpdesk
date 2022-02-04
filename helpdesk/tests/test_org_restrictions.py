@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
-from django.contrib.auth import get_user_model
 from django.urls import reverse
 from django.test import TestCase
 from django.test.client import Client
 
 from helpdesk.models import Queue, Ticket, FormType, KBCategory, KBItem
 
-from seed.lib.superperms.orgs.models import Organization, OrganizationUser, ROLE_VIEWER, ROLE_OWNER, ROLE_MEMBER
-from helpdesk.tests.helpers import (get_user, reload_urlconf, User, create_ticket, print_response)
+from seed.lib.superperms.orgs.models import Organization, OrganizationUser, ROLE_VIEWER
+from helpdesk.tests.helpers import (get_user, User, create_ticket)
 from django.contrib.auth.models import AnonymousUser
 from helpdesk.decorators import is_helpdesk_staff
 from helpdesk.templatetags.organization_info import organization_info
@@ -40,7 +39,6 @@ class PerOrgMembershipTestCase(TestCase):
         Create a 4th user, that is paty of 1 that has superuser permissions
         """
         self.client = Client()
-        User = get_user_model()
         self.users = {}
         self.name = {1: 'user_1', 2: 'user_2', 3: 'anon', 4: 'superuser'}
         self.login = {1: 'password', 2: 'password', 3: 'ymous', 4: 'superuser'}
@@ -60,13 +58,23 @@ class PerOrgMembershipTestCase(TestCase):
 
         # Add users to org with different permissions
         #       User 1
-        OrganizationUser.objects.create(user=self.users[1], organization=org1, role_level=ROLE_OWNER)
-        OrganizationUser.objects.create(user=self.users[1], organization=org2, role_level=ROLE_VIEWER)
+        org1.users.add(self.users[1])       # Gets added as an owner
+        org2.users.add(self.users[1])       # Add to Org2 and then change perms
+        reset_perms = OrganizationUser.objects.get(user=self.users[1], organization=org2)
+        reset_perms.role_level = ROLE_VIEWER
+        reset_perms.save()
         #       User 2
-        OrganizationUser.objects.create(user=self.users[2], organization=org1, role_level=ROLE_VIEWER)
-        OrganizationUser.objects.create(user=self.users[2], organization=org2, role_level=ROLE_OWNER)
+        org1.users.add(self.users[2])       # Add to Org1 and then change perms
+        reset_perms = OrganizationUser.objects.get(user=self.users[2], organization=org1)
+        reset_perms.role_level = ROLE_VIEWER
+        reset_perms.save()
+        org2.users.add(self.users[2])       # Added as Owner
         #       Super User
-        OrganizationUser.objects.create(user=self.users[4], organization=org1, role_level=ROLE_MEMBER)
+        org1.users.add(self.users[4])
+        org2.users.add(self.users[4])
+        reset_perms = OrganizationUser.objects.get(user=self.users[4], organization=org2)
+        reset_perms.role_level = ROLE_VIEWER
+        reset_perms.save()
 
         # Set their default organizations
         self.users[1].default_organization = org1
@@ -132,7 +140,6 @@ class PerOrgMembershipTestCase(TestCase):
             request = self.client.get(reverse('helpdesk:home')).wsgi_request
             org_info = organization_info(self.users[n], request)
             self.assertFalse(is_helpdesk_staff(self.users[n]))
-            print(self.users[n].is_anonymous)
             self.assertEqual(len(org_info['orgs']),
                              0,
                              'Dropdown menu has the wrong number of orgs for public members.')
@@ -234,7 +241,6 @@ class PerOrgMembershipTestCase(TestCase):
             request.method = 'GET'
             request.GET = QueryDict('org=org3')
             request.user = self.users[n]
-            print(request.GET)
             forms = form_list(self.users[n], request)
             self.assertFalse(is_helpdesk_staff(self.users[n]))
             self.assertEqual(
@@ -301,7 +307,7 @@ class PerOrgMembershipTestCase(TestCase):
             self.assertEqual(
                 len(response.context['kb_categories']),
                 1,
-                'KB Categories were not properly limitzed by Organization in url for Public members when org is in url'
+                'KB Categories were not properly limited by Organization in url for Public members when org is in url'
             )
 
         # Reset default_org fields
@@ -312,7 +318,56 @@ class PerOrgMembershipTestCase(TestCase):
         self.users[4].default_organization = Organization.objects.get(name='org1')
         self.users[4].save()
 
+    def test_non_logged_in_user_restriction(self):
+        """
+        Test restrictions for a non-logged in user who is entirely dependent on the Org in the URL
+        When there is an Org in URL, everything gets filtered by that Org
+        Otherwise, if there is only one Org available, they will go to that Org
+                   and if there are multiple, they will have the option to select which Org to go to
+        """
+        # First test Org in Url
+        user = self.users[3]
+        request = self.client.get(reverse('helpdesk:home') + '?org=org1').wsgi_request
+        org_info = organization_info(user, request)
+        self.assertEqual(org_info['default_org'],
+                         Organization.objects.get(name='org1'),
+                         'Non-Logged in User did not get the right default_org when the Org was in the URL')
+        self.assertEqual(org_info['url'],
+                         '?org=org1',
+                         'Non-Logged in User did not get the right URL when the Org was in the URL')
+        self.assertEqual(len(org_info['orgs']),
+                         0,
+                         'Non-Logged in User did not get the right number of Helpdesk Orgs when the Org was in the URL')
 
+        # Remove Org from URL while there are 3 Helpdesk Organizations available
+        request = self.client.get(reverse('helpdesk:home')).wsgi_request
+        org_info = organization_info(user, request)
+        self.assertEqual(org_info['default_org'],
+                         {'name': 'Select an Organization'},
+                         'Non-Logged in User did not get the right default_org when the Org was NOT in the URL with mutliple Helpdesk Orgs')
+        self.assertEqual(org_info['url'],
+                         '',
+                         'Non-Logged in User did not get the right URL when the Org was NOT in URL with mutliple Helpdesk Orgs')
+        self.assertEqual(len(org_info['orgs']),
+                         3,
+                         'Non-Logged in User did not get the right number of Helpdesk Orgs when the Org was NOT in the URL with mutliple Helpdesk Orgs')
+
+        # Remove Org from URL while there is 1 Helpdesk Organization available
+        Ticket.objects.filter(queue=Queue.objects.filter(title='Queue 2').first()).delete()
+        Queue.objects.filter(title='Queue 2').delete()
+        FormType.objects.filter(organization__name__in=['org2', 'org3']).delete()
+        Organization.objects.filter(name__in=['org2', 'org3']).delete()
+        request = self.client.get(reverse('helpdesk:home')).wsgi_request
+        org_info = organization_info(user, request)
+        self.assertEqual(org_info['default_org'],
+                         Organization.objects.get(name='org1'),
+                         'Non-Logged in User did not get the right default_org when the Org was NOT in the URL with a SINGLE Helpdesk Org')
+        self.assertEqual(org_info['url'],
+                         '?org=org1',
+                         'Non-Logged in User did not get the right URL when the Org was NOT in URL with a SIGNLE Helpdesk Org')
+        self.assertEqual(len(org_info['orgs']),
+                         0,
+                         'Non-Logged in User did not get the right number of Helpdesk Orgs when the Org was NOT in the URL with a SINGLE Helpdesk Org')
 
 
 
