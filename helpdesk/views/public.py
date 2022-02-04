@@ -22,13 +22,14 @@ from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import FormView
+from django.db.models import Q
 
 from helpdesk import settings as helpdesk_settings
 from helpdesk.decorators import protect_view, is_helpdesk_staff
 import helpdesk.views.staff as staff
 import helpdesk.views.abstract_views as abstract_views
 from helpdesk.lib import text_is_spam
-from helpdesk.models import Ticket, Queue, UserSettings, CustomField, FormType
+from helpdesk.models import Ticket, Queue, UserSettings, CustomField, FormType, TicketCC
 from helpdesk.user import huser_from_request
 
 logger = logging.getLogger(__name__)
@@ -183,11 +184,39 @@ def view_ticket(request):
     queue, ticket_id = Ticket.queue_and_id_from_query(ticket_req)
     try:
         if hasattr(settings, 'HELPDESK_VIEW_A_TICKET_PUBLIC') and settings.HELPDESK_VIEW_A_TICKET_PUBLIC:
-            ticket = Ticket.objects.get(id=ticket_id, submitter_email__iexact=email)
+            ticket = Ticket.objects.get(id=ticket_id)
         else:
-            ticket = Ticket.objects.get(id=ticket_id, submitter_email__iexact=email, secret_key__iexact=key)
+            ticket = Ticket.objects.get(id=ticket_id, secret_key__iexact=key)
     except (ObjectDoesNotExist, ValueError):
         return search_for_ticket(request, _('Invalid ticket ID or e-mail address. Please try again.'))
+
+    # Search for email in the two default email fields
+    email_lower = email.casefold()
+    emails = {ticket.submitter_email, ticket.contact_email}
+    emails.discard(None)
+    if email_lower not in {e.casefold() for e in emails}:
+        # Search for email in ticket's CCs
+        ticket_cc_emails = TicketCC.objects.filter(
+            Q(ticket=ticket),
+            Q(can_view=True) | Q(can_update=True)
+        ).values_list('email', flat=True)
+        emails.update(ticket_cc_emails)
+        emails.discard(None)
+
+        if email_lower not in {e.casefold() for e in emails}:
+            # Search for email in the ticket's extra_data email fields that can receive notifications
+            ticket_email_fields = CustomField.objects.filter(
+                ticket_form=ticket.ticket_form,
+                data_type='email',
+                notifications=True
+            ).values_list('field_name', flat=True)
+            ticket_email_extra_data_values = [v for k, v in ticket.extra_data.items() if k in ticket_email_fields]
+            emails.update(ticket_email_extra_data_values)
+            emails.discard(None)
+            # Otherwise, not allowed
+            if email_lower not in {e.casefold() for e in emails}:
+                return search_for_ticket(request, _('Invalid ticket ID or e-mail address. Please try again.'))
+
     if is_helpdesk_staff(request.user) and ticket_org == request.user.default_organization.helpdesk_organization:
         redirect_url = reverse('helpdesk:view', args=[ticket_id])
         if 'close' in request.GET:
