@@ -35,7 +35,10 @@ def category(request, slug, iframe=False):
             'kb_categories': user.huser_from_request(request).get_allowed_kb_categories(),
             'helpdesk_settings': helpdesk_settings,
         })
-    items = category.kbitem_set.filter(enabled=True)
+    if is_helpdesk_staff(request.user):
+        items = category.kbitem_set.all()
+    else:
+        items = category.kbitem_set.filter(enabled=True)
     qparams = request.GET.copy()
     try:
         del qparams['kbitem']
