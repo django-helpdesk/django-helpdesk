@@ -325,6 +325,8 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
 
         # for hidden fields required by helpdesk code, like description
         for field, type_ in self.hidden_fields:
+            if 'e_%s' % field in self.errors:
+                field = 'e_%s' % field
             if field in self.errors:
                 cleaned_data[field] = '' if type_ in ['varchar', 'text', 'email'] else None
                 del self._errors[field]
@@ -467,7 +469,10 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
             for field in hidden_queryset:
                 if field.field_name not in self.fields:
                     self.customfield_to_field(field, {})
-                self.fields[field.field_name].widget = forms.HiddenInput()
+                if field.is_extra_data:
+                    self.fields['e_%s' % field.field_name].widget = forms.HiddenInput()
+                else:
+                    self.fields[field.field_name].widget = forms.HiddenInput()
 
             self.order_fields(_field_ordering(queryset))
 

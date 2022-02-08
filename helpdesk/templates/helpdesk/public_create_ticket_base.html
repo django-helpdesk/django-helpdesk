@@ -24,10 +24,7 @@
                 {% else %}
                     <div class="form-group" id='id_group_{{ field.name }}'>
                         <label for='id_{{ field.name }}'>
-                            {{ field.label }}
-                            {% if not field.field.required %}
-                                ({% trans "Optional" %})
-                            {% endif %}
+                            {{ field.label }}{% if field.field.required %}<span style="color:red;">*</span>{% endif %}
                         </label>
                         {{ field }}
                         {% if field.errors %}
