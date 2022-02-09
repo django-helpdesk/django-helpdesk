@@ -4,7 +4,7 @@ from helpdesk.models import (
     KBCategory,
     KBItem,
 )
-from seed.lib.superperms.orgs.models import Organization, get_helpdesk_organizations
+from seed.lib.superperms.orgs.models import Organization, get_helpdesk_count
 
 from helpdesk import settings as helpdesk_settings
 from helpdesk.decorators import is_helpdesk_staff
@@ -101,7 +101,7 @@ class HelpdeskUser:
             User does NOT have to be staff; if not, category must be public.
         Works independent of the user's role permissions in the category's organization.
         """
-        if self.check_default_org(category.organization):
+        if get_helpdesk_count() == 1 or self.check_default_org(category.organization):
             if is_helpdesk_staff(self.user) or self.has_full_access() or category.public:
                 return True
         return False
@@ -112,13 +112,12 @@ class HelpdeskUser:
             User does NOT have to be staff; if not, article must be public.
         Works independent of the user's role permissions in the article's organization.
         """
-        if self.check_default_org(article.category.organization) and (
-            is_helpdesk_staff(self.user) or
-            self.has_full_access() or
-            (article.category.public and article.enabled)):
-                return True
-        else:
-            return False
+        if get_helpdesk_count() == 1 or self.check_default_org(article.category.organization):
+            if (is_helpdesk_staff(self.user) or
+               self.has_full_access() or
+               (article.category.public and article.enabled)):
+                    return True
+        return False
 
     def can_access_form(self, form):
         """
@@ -126,7 +125,7 @@ class HelpdeskUser:
             User must be staff or have staff permissions.
         Works independent of the user's role permissions in the form's organization.
         """
-        if self.check_default_org(form.organization):
+        if get_helpdesk_count() == 1 or self.check_default_org(form.organization):
             if is_helpdesk_staff(self.user) or self.has_full_access() or form.public:
                 return True
         return False

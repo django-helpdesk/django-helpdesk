@@ -32,11 +32,13 @@ def organization_info(user, request):
         helpdesk_orgs = get_helpdesk_organizations()
         if is_helpdesk_staff(user):  # todo - change to "staff of any org" ?
             orgs = OrganizationUser.objects.filter(user=user, role_level__gt=3).values('organization')
+            org = user.default_organization.helpdesk_organization
             return_info['orgs'] = helpdesk_orgs.filter(id__in=orgs)
-            return_info['default_org'] = Organization.objects.get(id=user.default_organization.helpdesk_organization_id)
+            return_info['default_org'] = org
+            return_info['url'] = '?org=' + org.name
         else:
             if 'org' in request.GET:
-                url_org = request.GET.get('org')
+                url_org = request.GET.get('org')  # todo is this unsafe?
                 try:
                     org = Organization.objects.filter(name=url_org).first()
                     return_info['default_org'] = org.helpdesk_organization
@@ -50,7 +52,7 @@ def organization_info(user, request):
                     return_info['url'] = '?org=' + org.name
                 elif user.is_anonymous and len(helpdesk_orgs) == 1:
                     return_info['default_org'] = helpdesk_orgs.first()
-                    return_info['url'] = '?org=' + return_info['default_org'].name
+                    return_info['url'] = ''
                 elif user.is_anonymous and len(helpdesk_orgs) > 1:
                     return_info['default_org'] = {'name': 'Select an Organization'}
                     return_info['orgs'] = helpdesk_orgs

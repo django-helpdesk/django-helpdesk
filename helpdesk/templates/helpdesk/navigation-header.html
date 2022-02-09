@@ -26,7 +26,7 @@
       {% endif %}
       <!-- Org Name with Org Dropdown Selection -->
       <div class="dropdown">
-        {% if user_info.orgs %}
+        {% if user_info.orgs and user_info.orgs|length > 1 %}
         <button type="button" id='orgDropDownButton' class="btn btn-lg navbar-dark dropdown-toggle beam-navbar-header-shadow" style="background-color: transparent;color: white;" type="button" data-toggle="dropdown" aria-haspopup="true">
           {{ user_info.default_org.name }}
         </button>
