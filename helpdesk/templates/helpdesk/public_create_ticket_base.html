@@ -28,7 +28,7 @@
                         </label>
                         {{ field }}
                         {% if field.errors %}
-                            <small class='error'>{{ field.errors }}</small>
+                            <small class='error' style="color:red;">{{ field.errors }}</small>
                         {% endif %}
                         {% if field.help_text %}
                             <small class='form_help_text help-block'>

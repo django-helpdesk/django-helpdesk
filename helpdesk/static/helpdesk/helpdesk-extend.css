@@ -67,6 +67,10 @@ table.ticket-stats tbody th, table.ticket-stats tbody tr {padding-left: 20px}
     color: red;
 }
 
+label.error {
+    color: red;
+}
+
 .has-error .input-group input, .has-error .input-group select, .has-error .input-group textarea {border-color: #b94a48}
 
 #helpdesk-nav-collapse #searchform {
