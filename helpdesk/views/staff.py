@@ -643,24 +643,26 @@ def update_ticket(request, ticket_id, public=False):
     if new_status != ticket.status:
         ticket.status = new_status
         ticket.save()
-    else:
-        # If the status wasn't changed manually and the owner replied, set the status to replied
-        if comment and request.user == ticket.assigned_to and ticket.status == Ticket.OPEN_STATUS:
-            ticket.status = Ticket.REPLIED_STATUS
-            ticket.save()
-            new_status = Ticket.REPLIED_STATUS
-        # If the submitter replies to an owner's reply, change back to open
-        elif comment and request.user.email == ticket.submitter_email and ticket.status == Ticket.REPLIED_STATUS:
-            ticket.status = Ticket.OPEN_STATUS
-            ticket.save()
-            new_status = Ticket.OPEN_STATUS
-        # If a closed ticket get's a comment, reopen it
-        elif comment and ticket.status == Ticket.CLOSED_STATUS:
-            ticket.status = Ticket.REOPENED_STATUS
-            ticket.save()
-            new_status = Ticket.REOPENED_STATUS
-        else:
-            status_changed = False
+    # TODO Commenting out because this is causing duplicate emails to be sent when status changes back to OPEN
+    # Issue happens in email.py, unclear if it happens here too.
+    # else:
+    #     # If the status wasn't changed manually and the owner replied, set the status to replied
+    #     if comment and request.user == ticket.assigned_to and ticket.status == Ticket.OPEN_STATUS:
+    #         ticket.status = Ticket.REPLIED_STATUS
+    #         ticket.save()
+    #         new_status = Ticket.REPLIED_STATUS
+    #     # If the submitter replies to an owner's reply, change back to open
+    #     elif comment and request.user.email == ticket.submitter_email and ticket.status == Ticket.REPLIED_STATUS:
+    #         ticket.status = Ticket.OPEN_STATUS
+    #         ticket.save()
+    #         new_status = Ticket.OPEN_STATUS
+    #     # If a closed ticket get's a comment, reopen it
+    #     elif comment and ticket.status == Ticket.CLOSED_STATUS:
+    #         ticket.status = Ticket.REOPENED_STATUS
+    #         ticket.save()
+    #         new_status = Ticket.REOPENED_STATUS
+    #     else:
+    #         status_changed = False
 
     if status_changed:
         f.new_status = new_status
