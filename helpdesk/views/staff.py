@@ -639,7 +639,7 @@ def update_ticket(request, ticket_id, public=False):
 
     old_status_str = ticket.get_status_display()
     old_status = ticket.status
-    status_changed = True
+    # status_changed = True
     if new_status != ticket.status:
         ticket.status = new_status
         ticket.save()
@@ -664,7 +664,7 @@ def update_ticket(request, ticket_id, public=False):
     #     else:
     #         status_changed = False
 
-    if status_changed:
+    # if status_changed:
         f.new_status = new_status
         if f.title:
             f.title += ' and %s' % ticket.get_status_display()
