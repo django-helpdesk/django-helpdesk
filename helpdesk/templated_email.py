@@ -9,6 +9,7 @@ logger = logging.getLogger(__name__)
 
 DEBUGGING = False
 
+
 def add_custom_header(recipients):
     """
     :return recipients: list of strings
@@ -34,6 +35,7 @@ def add_custom_header(recipients):
         header = ','.join(address_list)
 
     return address_list, header
+
 
 def send_templated_mail(template_name,
                         context,

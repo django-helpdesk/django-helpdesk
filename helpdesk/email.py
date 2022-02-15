@@ -19,6 +19,7 @@ from datetime import timedelta
 from email.utils import getaddresses, parseaddr
 from os.path import isfile, join
 from time import ctime
+from functools import reduce
 
 from bs4 import BeautifulSoup
 from django.conf import settings as django_settings
@@ -51,7 +52,19 @@ STRIPPED_SUBJECT_STRINGS = [
 
 DEBUGGING = False
 
-def process_email(quiet=False):
+DC_IMPORTS = False
+DC_SUBJECTS = [
+    "Benchmarking Report Received",
+    "Benchmarking Report Accepted",
+]
+DC_QUEUE_NAME = "Benchmarking Data Quality"
+
+
+def process_email(quiet=False, dc=False):
+    if dc:
+        global DC_IMPORTS
+        DC_IMPORTS = True
+
     for q in Queue.objects.filter(
             email_box_type__isnull=False,
             allow_email_submission=True):
@@ -562,10 +575,22 @@ def object_from_message(message, queue, logger):
                 return True  # and the 'True' will cause the message to be deleted.
 
     matchobj = re.match(r".*\[" + queue.slug + r"-(?P<id>\d+)\]", subject)
+    matchobj_dc = False
+    if DC_IMPORTS:
+        try:
+            dc_queue = Queue.objects.get(title=DC_QUEUE_NAME)
+        except Queue.DoesNotExist:
+            pass
+        matchobj_dc = re.match(r".*\[" + dc_queue.slug + r"-(?P<id>\d+)\]", subject)
+
     if matchobj:
         # This is a reply or forward.
         ticket = matchobj.group('id')
         logger.info("Matched tracking ID %s-%s" % (queue.slug, ticket))
+    elif matchobj_dc:
+        # This is a reply or forward.
+        ticket = matchobj.group('id')
+        logger.info("Matched tracking ID %s-%s" % (dc_queue.slug, ticket))
     else:
         logger.info("No tracking ID matched.")
         ticket = None
@@ -711,6 +736,13 @@ def object_from_message(message, queue, logger):
     smtp_importance = message.get('importance', '')
     high_priority_types = {'high', 'important', '1', 'urgent'}
     priority = 2 if high_priority_types & {smtp_priority, smtp_importance} else 3
+
+    if DC_IMPORTS:
+        if reduce(lambda prev, s: prev or (s in subject), DC_SUBJECTS, False):
+            try:
+                queue = Queue.objects.get(title=DC_QUEUE_NAME)
+            except Queue.DoesNotExist:
+                pass
 
     payload = {
         'body': body,
