@@ -378,6 +378,7 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
     queue = payload['queue']
     sender_name = payload['sender'][0]
     sender_email = payload['sender'][1]
+    org = queue.organization
 
     message_id = parseaddr(message.get('Message-Id'))[1]
     in_reply_to = parseaddr(message.get('In-Reply-To'))[1]
@@ -408,9 +409,7 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
     old_status = Ticket.OPEN_STATUS
     if ticket is None:
         if not settings.QUEUE_EMAIL_BOX_UPDATE_ONLY:
-            organization = Organization.objects.all().first()  # TODO remove hardcoding
-            ticket_form = FormType.objects.get_or_create(name=settings.HELPDESK_EMAIL_FORM_NAME,
-                                                         organization=organization)[0]
+            ticket_form = FormType.objects.get_or_create(name=settings.HELPDESK_EMAIL_FORM_NAME, organization=org)[0]
             fields = CustomField.objects.filter(ticket_form=ticket_form.id).values_list('field_name', flat=True)
 
             ticket = Ticket.objects.create(
