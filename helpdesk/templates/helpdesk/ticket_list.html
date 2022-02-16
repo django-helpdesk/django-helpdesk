@@ -349,6 +349,10 @@ thead input {
                 ajax: {
                     "url": "{% url 'helpdesk:datatables_ticket_list' urlsafe_query %}",
                     "type": "GET",
+                    "data": function (d) {
+                        // Remove unnecessary data
+                        d.columns = _.map(d.columns, function(v) { return v.search.value === "" ? {} : v});
+                    }
                 },
                 createdRow: function (row, data, dataIndex) {
                     $(row).addClass(data.row_class);
