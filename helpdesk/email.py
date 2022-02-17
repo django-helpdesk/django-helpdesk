@@ -581,7 +581,8 @@ def object_from_message(message, queue, logger):
             dc_queue = Queue.objects.get(title=DC_QUEUE_NAME)
         except Queue.DoesNotExist:
             pass
-        matchobj_dc = re.match(r".*\[" + dc_queue.slug + r"-(?P<id>\d+)\]", subject)
+        else:
+            matchobj_dc = re.match(r".*\[" + dc_queue.slug + r"-(?P<id>\d+)\]", subject)
 
     if matchobj:
         # This is a reply or forward.
