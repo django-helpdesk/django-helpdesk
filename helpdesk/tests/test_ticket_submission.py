@@ -1004,7 +1004,7 @@ class EmailInteractionsTestCase(TestCase):
         expected_email_count += 1
         self.assertEqual(expected_email_count, len(mail.outbox))
 
-    def test_create_followup_from_email_with_valid_message_id_with_original_cc_list_included_two(self):
+    def test_create_followup_from_email_with_valid_message_id_with_expected_cc(self):
         """
         Ensure that if a message is received with an valid In-Reply-To ID,
         the expected <TicketCC> instances are created even if the there were
