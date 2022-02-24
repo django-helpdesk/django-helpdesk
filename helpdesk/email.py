@@ -590,7 +590,7 @@ def object_from_message(message, queue, logger):
         logger.info("Matched tracking ID %s-%s" % (queue.slug, ticket))
     elif matchobj_dc:
         # This is a reply or forward.
-        ticket = matchobj.group('id')
+        ticket = matchobj_dc.group('id')
         logger.info("Matched tracking ID %s-%s" % (dc_queue.slug, ticket))
     else:
         logger.info("No tracking ID matched.")
