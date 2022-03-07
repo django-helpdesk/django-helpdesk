@@ -146,7 +146,6 @@ class Queue(models.Model):
     slug = models.SlugField(
         _('Slug'),
         max_length=50,
-        unique=True,
         help_text=_('This slug is used when building ticket ID\'s. Once set, '
                     'try not to change it or e-mailing may get messy.'),
     )
@@ -392,6 +391,7 @@ class Queue(models.Model):
         ordering = ('title',)
         verbose_name = _('Queue')
         verbose_name_plural = _('Queues')
+        unique_together = ('organization', 'slug')
 
     def _from_address(self):
         """
@@ -1430,6 +1430,7 @@ class KBCategory(models.Model):
 
     slug = models.SlugField(
         _('Slug'),
+        unique=True,
     )
 
     preview_description = models.TextField(
@@ -1456,7 +1457,7 @@ class KBCategory(models.Model):
     )
 
     def __str__(self):
-        return '%s' % self.name
+        return '%s (%s)' % (self.name, self.pk)
 
     class Meta:
         ordering = ('title',)
