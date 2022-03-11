@@ -709,7 +709,7 @@ def update_ticket(request, ticket_id, public=False):
 
     if ticket.assigned_to and (
         ticket.assigned_to.usersettings_helpdesk.email_on_ticket_change
-        or (reassigned and ticket.assigned_to.usersettings_helpdesk.email_on_ticket_assigned)
+        or (reassigned and ticket.assigned_to.usersettings_helpdesk.email_on_ticket_assign)
     ):
         messages_sent_to.update(ticket.send(
             {'assigned_to': (template_staff, context)},
