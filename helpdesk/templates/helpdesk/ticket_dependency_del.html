@@ -7,7 +7,7 @@
     <a href="{% url 'helpdesk:list' %}">{% trans "Tickets" %}</a>
 </li>
 <li class="breadcrumb-item">
-    <a href="{% url 'helpdesk:list' %}{{ ticket.id }}/">{{ ticket.queue.slug }}-{{ ticket.id }}</a>
+    <a href="{% url 'helpdesk:list' %}{{ dependency.ticket.id }}/">{{ dependency.ticket.queue.slug }}-{{ dependency.ticket.id }}</a>
 </li>
 <li class="breadcrumb-item active">{% trans "Delete Ticket Dependency" %}</li>
 {% endblock %}
@@ -18,7 +18,7 @@
 <p>Are you sure you wish to remove the dependency on this ticket?</p>
 {% endblocktrans %}
 
-<p><a href='../../../'><button class="btn btn-primary btn-lg">{% trans "Don't Delete" %}</button></a></p>
+<p><a href='{{ dependency.ticket.get_absolute_url }}'><button class="btn btn-primary btn-lg">{% trans "Don't Delete" %}</button></a></p>
 
 <form method='post' action='./'>
     <button class="btn btn-danger" type='submit'>{% trans "Yes, I Understand - Delete" %}</button>
