@@ -7,7 +7,7 @@
     <a href="{% url 'helpdesk:list' %}">{% trans "Tickets" %}</a>
 </li>
 <li class="breadcrumb-item">
-    <a href="{% url 'helpdesk:list' %}{{ dependency.ticket.id }}/">{{ dependency.ticket.queue.slug }}-{{ dependency.ticket.id }}</a>
+    <a href="{{ dependency.ticket.get_absolute_url }}">{{ dependency.ticket.queue.slug }}-{{ dependency.ticket.id }}</a>
 </li>
 <li class="breadcrumb-item active">{% trans "Delete Ticket Dependency" %}</li>
 {% endblock %}
