@@ -1,7 +1,7 @@
 Django>=2.2
 django-bootstrap4-form
 celery
--e git+ssh://git@github.com/celery/django-celery-beat.git@master#egg=django-celery-beat
+-e git+ssh://git@github.com/celery/django-celery-beat.git@master#egg=django_celery_beat
 email-reply-parser
 akismet
 markdown
