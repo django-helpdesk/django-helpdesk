@@ -27,7 +27,7 @@ from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db.models import Q
 from django.utils import encoding, timezone
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from email_reply_parser import EmailReplyParser
 
 from helpdesk import settings
@@ -129,7 +129,7 @@ def pop3_sync(q, logger, server):
         if type(raw_content[0]) is bytes:
             full_message = "\n".join([elm.decode('utf-8') for elm in raw_content])
         else:
-            full_message = encoding.force_text("\n".join(raw_content), errors='replace')
+            full_message = encoding.force_str("\n".join(raw_content), errors='replace')
         ticket = object_from_message(message=full_message, queue=q, logger=logger)
 
         if ticket:
@@ -175,7 +175,7 @@ def imap_sync(q, logger, server):
             for num in msgnums:
                 logger.info("Processing message %s" % num)
                 status, data = server.fetch(num, '(RFC822)')
-                full_message = encoding.force_text(data[0][1], errors='replace')
+                full_message = encoding.force_str(data[0][1], errors='replace')
                 try:
                     ticket = object_from_message(message=full_message, queue=q, logger=logger)
                 except TypeError:
@@ -268,7 +268,7 @@ def process_queue(q, logger):
         for i, m in enumerate(mail, 1):
             logger.info("Processing message %d" % i)
             with open(m, 'r') as f:
-                full_message = encoding.force_text(f.read(), errors='replace')
+                full_message = encoding.force_str(f.read(), errors='replace')
                 ticket = object_from_message(message=full_message, queue=q, logger=logger)
             if ticket:
                 logger.info("Successfully processed message %d, ticket/comment created.", i)
@@ -579,9 +579,9 @@ def object_from_message(message, queue, logger):
                 logger.debug("Discovered plain text MIME part")
             else:
                 try:
-                    email_body = encoding.smart_text(part.get_payload(decode=True))
+                    email_body = encoding.smart_str(part.get_payload(decode=True))
                 except UnicodeDecodeError:
-                    email_body = encoding.smart_text(part.get_payload(decode=False))
+                    email_body = encoding.smart_str(part.get_payload(decode=False))
 
                 if not body and not full_body:
                     # no text has been parsed so far - try such deep parsing for some messages

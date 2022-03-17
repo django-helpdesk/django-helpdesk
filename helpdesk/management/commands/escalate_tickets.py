@@ -15,7 +15,7 @@ import sys
 
 from django.core.management.base import BaseCommand, CommandError
 from django.db.models import Q
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from django.utils import timezone
 
 from helpdesk.models import Queue, Ticket, FollowUp, EscalationExclusion, TicketChange

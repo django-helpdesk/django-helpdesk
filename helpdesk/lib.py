@@ -10,7 +10,7 @@ import logging
 import mimetypes
 
 from django.conf import settings
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_str
 
 from helpdesk.models import FollowUpAttachment
 
@@ -117,13 +117,13 @@ def text_is_spam(text, request):
     if ak.verify_key():
         ak_data = {
             'user_ip': request.META.get('REMOTE_ADDR', '127.0.0.1'),
-            'user_agent': request.META.get('HTTP_USER_AGENT', ''),
-            'referrer': request.META.get('HTTP_REFERER', ''),
+            'user_agent': request.headers.get('User-Agent', ''),
+            'referrer': request.headers.get('Referer', ''),
             'comment_type': 'comment',
             'comment_author': '',
         }
 
-        return ak.comment_check(smart_text(text), data=ak_data)
+        return ak.comment_check(smart_str(text), data=ak_data)
 
     return False
 
@@ -135,7 +135,7 @@ def process_attachments(followup, attached_files):
     for attached in attached_files:
 
         if attached.size:
-            filename = smart_text(attached.name)
+            filename = smart_str(attached.name)
             att = FollowUpAttachment(
                 followup=followup,
                 file=attached,

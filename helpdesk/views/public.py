@@ -15,8 +15,8 @@ from django.core.exceptions import (
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
-from django.utils.http import urlquote
-from django.utils.translation import ugettext as _
+from urllib.parse import quote
+from django.utils.translation import gettext as _
 from django.conf import settings
 from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.decorators.csrf import csrf_exempt
@@ -112,7 +112,7 @@ class BaseCreateTicketView(abstract_views.AbstractCreateTicketMixin, FormView):
                 return HttpResponseRedirect('%s?ticket=%s&email=%s&key=%s' % (
                     reverse('helpdesk:public_view'),
                     ticket.ticket_for_url,
-                    urlquote(ticket.submitter_email),
+                    quote(ticket.submitter_email),
                     ticket.secret_key)
                 )
             except ValueError:

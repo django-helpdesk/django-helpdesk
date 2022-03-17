@@ -2,7 +2,7 @@
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 from django.test import override_settings, TestCase
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_str
 
 from helpdesk import lib, models
 
@@ -78,7 +78,7 @@ class AttachmentIntegrationTests(TestCase):
         # Ensure attachment is available with correct content
         att = models.FollowUpAttachment.objects.get(followup__ticket=response.context['ticket'])
         with open(os.path.join(MEDIA_DIR, att.file.name)) as file_on_disk:
-            disk_content = smart_text(file_on_disk.read(), 'utf-8')
+            disk_content = smart_str(file_on_disk.read(), 'utf-8')
         self.assertEqual(disk_content, 'โจ')
 
 
