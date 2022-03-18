@@ -1146,13 +1146,18 @@ def ticket_list(request):
             '<a href="http://docs.djangoproject.com/en/dev/ref/databases/#sqlite-string-matching">'
             'Django Documentation on string matching in SQLite</a>.')
 
-    kbitem_choices = [(item.pk, str(item)) for item in KBItem.objects.all()]
+    kbitem_choices = []
+    kbitem = []
+
+    if helpdesk_settings.HELPDESK_KB_ENABLED:
+        kbitem_choices = [(item.pk, str(item)) for item in KBItem.objects.all()]
+        kbitem = KBItem.objects.all()
 
     return render(request, 'helpdesk/ticket_list.html', dict(
         context,
         default_tickets_per_page=request.user.usersettings_helpdesk.tickets_per_page,
         user_choices=User.objects.filter(is_active=True, is_staff=True),
-        kb_items=KBItem.objects.all(),
+        kb_items=kbitem,
         queue_choices=huser.get_queues(),
         status_choices=Ticket.STATUS_CHOICES,
         kbitem_choices=kbitem_choices,
