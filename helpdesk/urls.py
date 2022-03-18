@@ -14,7 +14,13 @@ from django.views.generic import TemplateView
 
 from helpdesk.decorators import helpdesk_staff_member_required, protect_view
 from helpdesk import settings as helpdesk_settings
-from helpdesk.views import feeds, staff, public, kb, login
+from helpdesk.views import feeds, staff, public, login
+from helpdesk import settings as helpdesk_settings
+
+
+if helpdesk_settings.HELPDESK_KB_ENABLED:
+    from helpdesk.views import kb
+
 try:
     # TODO: why is it imported? due to some side-effect or by mistake?
     import helpdesk.tasks  # NOQA

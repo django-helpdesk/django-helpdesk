@@ -50,9 +50,12 @@ from helpdesk.lib import (
 )
 from helpdesk.models import (
     Ticket, Queue, FollowUp, TicketChange, PreSetReply, FollowUpAttachment, SavedSearch,
-    IgnoreEmail, TicketCC, TicketDependency, UserSettings, KBItem, CustomField, TicketCustomFieldValue,
+    IgnoreEmail, TicketCC, TicketDependency, UserSettings, CustomField, TicketCustomFieldValue,
 )
 from helpdesk import settings as helpdesk_settings
+if helpdesk_settings.HELPDESK_KB_ENABLED:
+    from helpdesk.models import (KBItem)
+
 import helpdesk.views.abstract_views as abstract_views
 from helpdesk.views.permissions import MustBeStaffMixin
 from ..lib import format_time_spent

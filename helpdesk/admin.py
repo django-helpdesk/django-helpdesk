@@ -1,10 +1,13 @@
 from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _
-from helpdesk.models import Queue, Ticket, FollowUp, PreSetReply, KBCategory
-from helpdesk.models import EscalationExclusion, EmailTemplate, KBItem
+from helpdesk.models import Queue, Ticket, FollowUp, PreSetReply
+from helpdesk.models import EscalationExclusion, EmailTemplate
 from helpdesk.models import TicketChange, KBIAttachment, FollowUpAttachment, IgnoreEmail
 from helpdesk.models import CustomField
-
+from helpdesk import settings as helpdesk_settings
+if helpdesk_settings.HELPDESK_KB_ENABLED:
+    from helpdesk.models import KBCategory
+    from helpdesk.models import KBItem
 
 @admin.register(Queue)
 class QueueAdmin(admin.ModelAdmin):
@@ -68,13 +71,18 @@ class FollowUpAdmin(admin.ModelAdmin):
     ticket_get_ticket_for_url.short_description = _('Slug')
 
 
-@admin.register(KBItem)
-class KBItemAdmin(admin.ModelAdmin):
-    list_display = ('category', 'title', 'last_updated', 'team', 'order', 'enabled')
-    inlines = [KBIAttachmentInline]
-    readonly_fields = ('voted_by', 'downvoted_by')
+if helpdesk_settings.HELPDESK_KB_ENABLED:
+    @admin.register(KBItem)
+    class KBItemAdmin(admin.ModelAdmin):
+        list_display = ('category', 'title', 'last_updated', 'team', 'order', 'enabled')
+        inlines = [KBIAttachmentInline]
+        readonly_fields = ('voted_by', 'downvoted_by')
 
-    list_display_links = ('title',)
+        list_display_links = ('title',)
+
+    @admin.register(KBCategory)
+    class KBCategoryAdmin(admin.ModelAdmin):
+        list_display = ('name', 'title', 'slug', 'public')
 
 
 @admin.register(CustomField)
@@ -91,11 +99,6 @@ class EmailTemplateAdmin(admin.ModelAdmin):
 @admin.register(IgnoreEmail)
 class IgnoreEmailAdmin(admin.ModelAdmin):
     list_display = ('name', 'queue_list', 'email_address', 'keep_in_mailbox')
-
-
-@admin.register(KBCategory)
-class KBCategoryAdmin(admin.ModelAdmin):
-    list_display = ('name', 'title', 'slug', 'public')
 
 
 admin.site.register(PreSetReply)
