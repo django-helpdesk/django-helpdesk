@@ -18,8 +18,12 @@ from django.utils import timezone
 
 from helpdesk.lib import safe_template_context, process_attachments
 from helpdesk.models import (Ticket, Queue, FollowUp, IgnoreEmail, TicketCC,
-                             CustomField, TicketCustomFieldValue, TicketDependency, UserSettings, KBItem)
+                             CustomField, TicketCustomFieldValue, TicketDependency, UserSettings)
 from helpdesk import settings as helpdesk_settings
+
+
+if helpdesk_settings.HELPDESK_KB_ENABLED:
+    from helpdesk.models import (KBItem)
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -231,13 +235,14 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
 
     def __init__(self, kbcategory=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if kbcategory:
-            self.fields['kbitem'] = forms.ChoiceField(
-                widget=forms.Select(attrs={'class': 'form-control'}),
-                required=False,
-                label=_('Knowledge Base Item'),
-                choices=[(kbi.pk, kbi.title) for kbi in KBItem.objects.filter(category=kbcategory.pk, enabled=True)],
-            )
+        if helpdesk_settings.HELPDESK_KB_ENABLED:
+            if kbcategory:
+                self.fields['kbitem'] = forms.ChoiceField(
+                    widget=forms.Select(attrs={'class': 'form-control'}),
+                    required=False,
+                    label=_('Knowledge Base Item'),
+                    choices=[(kbi.pk, kbi.title) for kbi in KBItem.objects.filter(category=kbcategory.pk, enabled=True)],
+                )
 
     def _add_form_custom_fields(self, staff_only_filter=None):
         if staff_only_filter is None:

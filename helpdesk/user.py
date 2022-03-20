@@ -1,12 +1,15 @@
 from helpdesk.models import (
     Ticket,
-    Queue,
-    KBCategory,
-    KBItem,
+    Queue
 )
 
 from helpdesk import settings as helpdesk_settings
 
+if helpdesk_settings.HELPDESK_KB_ENABLED:
+    from helpdesk.models import (
+        KBCategory,
+        KBItem
+    )
 
 def huser_from_request(req):
     return HelpdeskUser(req.user)
@@ -38,16 +41,18 @@ class HelpdeskUser:
 
     def get_allowed_kb_categories(self):
         categories = []
-        for cat in KBCategory.objects.all():
-            if self.can_access_kbcategory(cat):
-                categories.append(cat)
+        if helpdesk_settings.HELPDESK_KB_ENABLED:
+            for cat in KBCategory.objects.all():
+                if self.can_access_kbcategory(cat):
+                    categories.append(cat)
         return categories
 
     def get_assigned_kb_items(self):
         kbitems = []
-        for item in KBItem.objects.all():
-            if item.get_team() and item.get_team().is_member(self.user):
-                kbitems.append(item)
+        if helpdesk_settings.HELPDESK_KB_ENABLED:
+            for item in KBItem.objects.all():
+                if item.get_team() and item.get_team().is_member(self.user):
+                    kbitems.append(item)
         return kbitems
 
     def get_tickets_in_queues(self):

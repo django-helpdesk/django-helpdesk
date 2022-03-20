@@ -3,13 +3,13 @@
     <!-- Sidebar -->
     <ul class="sidebar navbar-nav">
     {% if helpdesk_settings.HELPDESK_NAVIGATION_ENABLED and user.is_authenticated or user|is_helpdesk_staff %}
-        <li class="nav-item active">
+        <li class="nav-item{% if 'dashboard' in request.path %} active{% endif %}">
           <a class="nav-link" href="{% url 'helpdesk:dashboard' %}">
             <i class="fas fa-fw fa-tachometer-alt"></i>
             <span>{% trans "Dashboard" %}</span>
           </a>
         </li>
-        <li class="nav-item">
+        <li class="nav-item{% if 'tickets' in request.path and 'submit' not in request.path %} active{% endif %}">
           <a class="nav-link" href="{% url 'helpdesk:list' %}">
             <i class="fas fa-fw fa-tasks"></i>
             <span>{% trans "All Tickets" %}</span>
@@ -34,20 +34,20 @@
             {% endif %}
           </div>
         </li>
-        <li class="nav-item">
+        <li class="nav-item{% if 'submit' in request.path %} active{% endif %}">
           <a class="nav-link" href="{% url 'helpdesk:submit' %}">
             <i class="fas fa-fw fa-plus-circle"></i>
             <span>{% trans "New Ticket" %}</span>
           </a>
         </li>
-        <li class="nav-item">
+        <li class="nav-item{% if 'reports' in request.path %} active{% endif %}">
           <a class="nav-link" href="{% url 'helpdesk:report_index' %}">
             <i class="fas fa-fw fa-chart-area"></i>
             <span>{% trans "Reports" %}</span>
           </a>
         </li>
         {% if helpdesk_settings.HELPDESK_KB_ENABLED %}
-        <li class="nav-item">
+        <li class="nav-item{% if 'kb' in request.path %} active{% endif %}">
           <a class="nav-link" href="{% url 'helpdesk:kb_index' %}">
             <i class="fas fa-fw fa-database"></i>
             <span>{% trans "Knowledgebase" %}</span>
@@ -56,20 +56,20 @@
         {% endif %}
     {% else %}
         {# Public menu #}
-        <li class="nav-item active">
+        <li class="nav-item{% if request.path == '/' %} active{% endif %}">
           <a class="nav-link" href="{% url 'helpdesk:home' %}">
             <i class="fas fa-fw fa-home"></i>
             <span>{% trans "Homepage" %}</span>
           </a>
         </li>
-        <li class="nav-item">
+        <li class="nav-item{% if 'submit' in request.path %} active{% endif %}">
           <a class="nav-link" href="{% url 'helpdesk:submit' %}">
             <i class="fas fa-fw fa-plus-circle"></i>
             <span>{% trans "New Ticket" %}</span>
           </a>
         </li>
         {% if helpdesk_settings.HELPDESK_KB_ENABLED %}
-        <li class="nav-item">
+        <li class="nav-item{% if 'kb' in request.path %} active{% endif %}">
           <a class="nav-link" href="{% url 'helpdesk:kb_index' %}">
             <i class="fas fa-fw fa-database"></i>
             <span>{% trans "Knowledgebase" %}</span>

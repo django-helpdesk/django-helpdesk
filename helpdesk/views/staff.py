@@ -50,9 +50,12 @@ from helpdesk.lib import (
 )
 from helpdesk.models import (
     Ticket, Queue, FollowUp, TicketChange, PreSetReply, FollowUpAttachment, SavedSearch,
-    IgnoreEmail, TicketCC, TicketDependency, UserSettings, KBItem, CustomField, TicketCustomFieldValue,
+    IgnoreEmail, TicketCC, TicketDependency, UserSettings, CustomField, TicketCustomFieldValue,
 )
 from helpdesk import settings as helpdesk_settings
+if helpdesk_settings.HELPDESK_KB_ENABLED:
+    from helpdesk.models import (KBItem)
+
 import helpdesk.views.abstract_views as abstract_views
 from helpdesk.views.permissions import MustBeStaffMixin
 from ..lib import format_time_spent
@@ -709,7 +712,7 @@ def update_ticket(request, ticket_id, public=False):
 
     if ticket.assigned_to and (
         ticket.assigned_to.usersettings_helpdesk.email_on_ticket_change
-        or (reassigned and ticket.assigned_to.usersettings_helpdesk.email_on_ticket_assigned)
+        or (reassigned and ticket.assigned_to.usersettings_helpdesk.email_on_ticket_assign)
     ):
         messages_sent_to.update(ticket.send(
             {'assigned_to': (template_staff, context)},
@@ -851,7 +854,7 @@ def mass_update(request):
                 'ticket_cc': ('closed_cc', context),
             }
             if t.assigned_to and t.assigned_to.usersettings_helpdesk.email_on_ticket_change:
-                roles['assigned_to'] = ('closed_owner', context),
+                roles['assigned_to'] = ('closed_owner', context)
 
             messages_sent_to.update(t.send(
                 roles,
@@ -1143,13 +1146,18 @@ def ticket_list(request):
             '<a href="http://docs.djangoproject.com/en/dev/ref/databases/#sqlite-string-matching">'
             'Django Documentation on string matching in SQLite</a>.')
 
-    kbitem_choices = [(item.pk, str(item)) for item in KBItem.objects.all()]
+    kbitem_choices = []
+    kbitem = []
+
+    if helpdesk_settings.HELPDESK_KB_ENABLED:
+        kbitem_choices = [(item.pk, str(item)) for item in KBItem.objects.all()]
+        kbitem = KBItem.objects.all()
 
     return render(request, 'helpdesk/ticket_list.html', dict(
         context,
         default_tickets_per_page=request.user.usersettings_helpdesk.tickets_per_page,
         user_choices=User.objects.filter(is_active=True, is_staff=True),
-        kb_items=KBItem.objects.all(),
+        kb_items=kbitem,
         queue_choices=huser.get_queues(),
         status_choices=Ticket.STATUS_CHOICES,
         kbitem_choices=kbitem_choices,

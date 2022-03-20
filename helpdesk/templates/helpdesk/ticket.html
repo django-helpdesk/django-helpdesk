@@ -239,7 +239,7 @@ $(document).ready(function() {
     $('#id_preset').change(function() {
         preset = $('#id_preset').val();
         if (preset != '') {
-            $.get("{% url 'helpdesk:raw' "preset" %}?id=" + preset, function(data) {
+           $.get("{% url 'helpdesk:raw' 'preset' %}?id=" + preset, function(data) {
                 $("#commentBox").val(data)
             });
         }
