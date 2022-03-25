@@ -549,7 +549,7 @@ def update_ticket(request, ticket_id, public=False):
     due_date_year = int(request.POST.get('due_date_year', 0))
     due_date_month = int(request.POST.get('due_date_month', 0))
     due_date_day = int(request.POST.get('due_date_day', 0))
-    mins_spent = int(request.POST.get("time_spent", 0))
+    mins_spent = int(request.POST.get("time_spent")) if request.POST.get("time_spent") else 0
 
     time_spent = timedelta(minutes=mins_spent)
 

@@ -743,14 +743,12 @@ class Ticket(models.Model):
         """
         Return the boostrap class corresponding to the priority.
         """
-        if self.priority == 2:
-            return "warning"
-        elif self.priority == 1:
+        if self.priority == 1:
             return "danger"
-        elif self.priority == 5:
-            return "success"
+        elif self.priority == 2:
+            return "warning"
         else:
-            return ""
+            return "success"
     get_priority_css_class = property(_get_priority_css_class)
 
     def _get_priority(self):
