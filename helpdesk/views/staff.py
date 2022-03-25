@@ -549,12 +549,9 @@ def update_ticket(request, ticket_id, public=False):
     due_date_year = int(request.POST.get('due_date_year', 0))
     due_date_month = int(request.POST.get('due_date_month', 0))
     due_date_day = int(request.POST.get('due_date_day', 0))
+    mins_spent = int(request.POST.get("time_spent", 0))
 
-    if request.POST.get("time_spent"):
-        (hours, minutes) = [int(f) for f in request.POST.get("time_spent").split(":")]
-        time_spent = timedelta(hours=hours, minutes=minutes)
-    else:
-        time_spent = None
+    time_spent = timedelta(minutes=mins_spent)
 
     # NOTE: jQuery's default for dates is mm/dd/yy
     # very US-centric but for now that's the only format supported
@@ -588,6 +585,7 @@ def update_ticket(request, ticket_id, public=False):
         due_date == ticket.due_date,
         (owner == -1) or (not owner and not ticket.assigned_to) or
         (owner and User.objects.get(id=owner) == ticket.assigned_to),
+        mins_spent == 0,
     ])
     if no_changes:
         return return_to_ticket(request.user, request, helpdesk_settings, ticket)
