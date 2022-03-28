@@ -1693,6 +1693,21 @@ class SavedSearch(models.Model):
         verbose_name = _('Saved search')
         verbose_name_plural = _('Saved searches')
 
+    @property
+    def get_visible_cols(self):
+        """
+        Return the visible cols stored in the query64
+        """
+        from helpdesk.query import query_from_base64
+        import json
+        query_unencoded = query_from_base64(self.query)
+        if 'visible_cols' in query_unencoded:
+            visible_cols = query_unencoded.get('visible_cols', [])
+        else:
+            # For queries made before the change, have them include be default
+            visible_cols = ['id', 'ticket', 'status', 'created', 'assigned_to', 'submitter', 'kbitem']
+        return json.dumps(visible_cols)
+
 
 def get_default_setting(setting):
     from helpdesk.settings import DEFAULT_USER_SETTINGS

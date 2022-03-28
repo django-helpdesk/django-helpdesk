@@ -1718,12 +1718,18 @@ run_report = staff_member_required(run_report)
 def save_query(request):
     title = request.POST.get('title', None)
     shared = request.POST.get('shared', False)
+    visible_cols = request.POST.get('visible', '').split(',')
+
     if shared == 'on':  # django only translates '1', 'true', 't' into True
         shared = True
     query_encoded = request.POST.get('query_encoded', None)
 
     if not title or not query_encoded:
         return HttpResponseRedirect(reverse('helpdesk:list'))
+
+    query_unencoded = query_from_base64(query_encoded)
+    query_unencoded['visible_cols'] = visible_cols
+    query_encoded = query_to_base64(query_unencoded)
 
     query = SavedSearch(title=title, shared=shared, query=query_encoded, user=request.user)
     query.save()
