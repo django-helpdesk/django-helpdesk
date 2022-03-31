@@ -1,18 +1,18 @@
 from rest_framework import serializers
-
-from .models import Ticket
-from .lib import format_time_spent
-
 from django.contrib.humanize.templatetags import humanize
+from rest_framework.exceptions import ValidationError
 
-"""
-A serializer for the Ticket model, returns data in the format as required by
-datatables for ticket_list.html. Called from staff.datatables_ticket_list.
-
-"""
+from .forms import TicketForm
+from .models import Ticket, CustomField
+from .lib import format_time_spent
+from .user import HelpdeskUser
 
 
 class DatatablesTicketSerializer(serializers.ModelSerializer):
+    """
+    A serializer for the Ticket model, returns data in the format as required by
+    datatables for ticket_list.html. Called from staff.datatables_ticket_list.
+    """
     ticket = serializers.SerializerMethodField()
     assigned_to = serializers.SerializerMethodField()
     submitter = serializers.SerializerMethodField()
@@ -68,3 +68,45 @@ class DatatablesTicketSerializer(serializers.ModelSerializer):
 
     def get_kbitem(self, obj):
         return obj.kbitem.title if obj.kbitem else ""
+
+
+class TicketSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Ticket
+        fields = (
+            'id', 'queue', 'title', 'description', 'resolution', 'submitter_email', 'assigned_to', 'status', 'on_hold',
+            'priority', 'due_date', 'last_escalation', 'merged_to'
+        )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Add custom fields
+        for field in CustomField.objects.all():
+            self.fields['custom_%s' % field.name] = field.build_api_field()
+
+    def create(self, validated_data):
+        """ Use TicketForm to validate and create ticket """
+        queues = HelpdeskUser(self.context['request'].user).get_queues()
+        queue_choices = [(q.id, q.title) for q in queues]
+        data = validated_data.copy()
+        data['body'] = data['description']
+        # TicketForm needs id for ForeignKey (not the instance themselves)
+        data['queue'] = data['queue'].id
+        if data['assigned_to']:
+            data['assigned_to'] = data['assigned_to'].id
+        if data['merged_to']:
+            data['merged_to'] = data['merged_to'].id
+
+        ticket_form = TicketForm(data=data, queue_choices=queue_choices)
+        if ticket_form.is_valid():
+            ticket = ticket_form.save(user=self.context['request'].user)
+            ticket.set_custom_field_values()
+            return ticket
+
+        raise ValidationError(ticket_form.errors)
+
+    def update(self, instance, validated_data):
+        instance = super().update(instance, validated_data)
+        instance.save_custom_field_values(validated_data)
+        return instance

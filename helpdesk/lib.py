@@ -8,12 +8,12 @@ lib.py - Common functions (eg multipart e-mail)
 
 import logging
 import mimetypes
+from datetime import datetime, date, time
 
 from django.conf import settings
 from django.utils.encoding import smart_text
 
-from helpdesk.models import FollowUpAttachment
-
+from helpdesk.settings import CUSTOMFIELD_DATETIME_FORMAT, CUSTOMFIELD_DATE_FORMAT, CUSTOMFIELD_TIME_FORMAT
 
 logger = logging.getLogger('helpdesk')
 
@@ -136,8 +136,7 @@ def process_attachments(followup, attached_files):
 
         if attached.size:
             filename = smart_text(attached.name)
-            att = FollowUpAttachment(
-                followup=followup,
+            att = followup.followupattachment_set(
                 file=attached,
                 filename=filename,
                 mime_type=attached.content_type or
@@ -169,3 +168,15 @@ def format_time_spent(time_spent):
     else:
         time_spent = ""
     return time_spent
+
+
+def convert_value(value):
+    """ Convert date/time data type to known fixed format string """
+    if type(value) == datetime:
+        return value.strftime(CUSTOMFIELD_DATETIME_FORMAT)
+    elif type(value) == date:
+        return value.strftime(CUSTOMFIELD_DATE_FORMAT)
+    elif type(value) == time:
+        return value.strftime(CUSTOMFIELD_TIME_FORMAT)
+    else:
+        return value

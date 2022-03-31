@@ -2,10 +2,12 @@
 Default settings for django-helpdesk.
 
 """
+import os
 import warnings
+
+from django import forms
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-import os
 
 DEFAULT_USER_SETTINGS = {
     'login_view_ticketlist': True,
@@ -96,6 +98,21 @@ HELPDESK_PUBLIC_TICKET_FORM_CLASS = getattr(
     "HELPDESK_PUBLIC_TICKET_FORM_CLASS",
     "helpdesk.forms.PublicTicketForm"
 )
+
+# Custom fields constants
+CUSTOMFIELD_TO_FIELD_DICT = {
+    'boolean': forms.BooleanField,
+    'date': forms.DateField,
+    'time': forms.TimeField,
+    'datetime': forms.DateTimeField,
+    'email': forms.EmailField,
+    'url': forms.URLField,
+    'ipaddress': forms.GenericIPAddressField,
+    'slug': forms.SlugField,
+}
+CUSTOMFIELD_DATE_FORMAT = "%Y-%m-%d"
+CUSTOMFIELD_TIME_FORMAT = "%H:%M:%S"
+CUSTOMFIELD_DATETIME_FORMAT = f"{CUSTOMFIELD_DATE_FORMAT}T%H:%M"
 
 
 ###################################
