@@ -1,18 +1,15 @@
 from rest_framework import serializers
+from django.contrib.humanize.templatetags import humanize
 
 from .models import Ticket
 from .lib import format_time_spent
 
-from django.contrib.humanize.templatetags import humanize
-
-"""
-A serializer for the Ticket model, returns data in the format as required by
-datatables for ticket_list.html. Called from staff.datatables_ticket_list.
-
-"""
-
 
 class DatatablesTicketSerializer(serializers.ModelSerializer):
+    """
+    A serializer for the Ticket model, returns data in the format as required by
+    datatables for ticket_list.html. Called from staff.datatables_ticket_list.
+    """
     ticket = serializers.SerializerMethodField()
     assigned_to = serializers.SerializerMethodField()
     submitter = serializers.SerializerMethodField()
@@ -68,3 +65,12 @@ class DatatablesTicketSerializer(serializers.ModelSerializer):
 
     def get_kbitem(self, obj):
         return obj.kbitem.title if obj.kbitem else ""
+
+
+class TicketSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Ticket
+        fields = (
+            'id', 'queue', 'title', 'description', 'resolution', 'submitter_email', 'assigned_to', 'status', 'on_hold',
+            'priority', 'due_date', 'last_escalation', 'merged_to'
+        )
