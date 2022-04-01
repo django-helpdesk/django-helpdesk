@@ -23,4 +23,3 @@ class TicketViewSet(viewsets.ModelViewSet):
         ticket = super().get_object()
         ticket.set_custom_field_values()
         return ticket
-
