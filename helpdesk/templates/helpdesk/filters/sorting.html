@@ -6,22 +6,22 @@
     </div>
     <div class="col col-sm-3">
             <select id='id_sortx' name='sortx' class="">
-                <option value='created'{% ifequal query_params.sorting "created"%} selected='selected'{% endifequal %}>
+                <option value='created'{% if query_params.sorting == "created"%} selected='selected'{% endif %}>
                     {% trans "Created" %}
                 </option>
-                <option value='title'{% ifequal query_params.sorting "title"%} selected='selected'{% endifequal %}>
+                <option value='title'{% if query_params.sorting == "title"%} selected='selected'{% endif %}>
                     {% trans "Title" %}
                 </option>
-                <option value='queue'{% ifequal query_params.sorting "queue"%} selected='selected'{% endifequal %}>
+                <option value='queue'{% if query_params.sorting == "queue"%} selected='selected'{% endif %}>
                     {% trans "Queue" %}
                 </option>
-                <option value='status'{% ifequal query_params.sorting "status"%} selected='selected'{% endifequal %}>
+                <option value='status'{% if query_params.sorting == "status"%} selected='selected'{% endif %}>
                     {% trans "Status" %}
                 </option>
-                <option value='priority'{% ifequal query_params.sorting "priority"%} selected='selected'{% endifequal %}>
+                <option value='priority'{% if query_params.sorting == "priority"%} selected='selected'{% endif %}>
                     {% trans "Priority" %}
                 </option>
-                <option value='assigned_to'{% ifequal query_params.sorting "assigned_to"%} selected='selected'{% endifequal %}>
+                <option value='assigned_to'{% if query_params.sorting == "assigned_to"%} selected='selected'{% endif %}>
                     {% trans "Owner" %}
                 </option>
             </select>
