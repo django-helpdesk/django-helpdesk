@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'pinax.teams',  # team support
     'reversion',  # required by pinax-teams
     'helpdesk',  # This is us!
+    'rest_framework',  # required for the API
 ]
 
 MIDDLEWARE = [
