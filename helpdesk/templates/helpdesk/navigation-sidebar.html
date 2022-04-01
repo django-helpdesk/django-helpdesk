@@ -25,7 +25,7 @@
             {% for q in user_saved_queries_ %}
             <a class="dropdown-item small" href="{% url 'helpdesk:list' %}?saved_query={{ q.id }}">{{ q.title }}
                 {% if q.shared %}
-                (Shared{% ifnotequal user q.user %} by {{ q.user.get_username }}{% endifnotequal %})
+                (Shared{% if user != q.user %} by {{ q.user.get_username }}{% endif %})
                 {% endif %}
             </a>
             {% endfor %}
