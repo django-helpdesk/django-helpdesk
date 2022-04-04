@@ -174,10 +174,10 @@
                 <dd><input type='text' name='title' value='{{ ticket.title|escape }}' /></dd>
 
                 <dt><label for='id_owner'>{% trans "Owner" %}</label></dt>
-                <dd><select id='id_owner' name='owner'><option value='0'>{% trans "Unassign" %}</option>{% for u in active_users %}<option value='{{ u.id }}' {% ifequal u.id ticket.assigned_to.id %}selected{% endifequal %}>{{ u }}</option>{% endfor %}</select></dd>
+                <dd><select id='id_owner' name='owner'><option value='0'>{% trans "Unassign" %}</option>{% for u in active_users %}{% if u.id == ticket.assigned_to.id %}<option value='{{ u.id }}' selected>{{ u }}</option>{% else %}<option value='{{ u.id }}'>{{ u }}</option>{% endif %}{% endfor %}</select></dd>
 
                 <dt><label for='id_priority'>{% trans "Priority" %}</label></dt>
-                <dd><select id='id_priority' name='priority'>{% for p in priorities %}<option value='{{ p.0 }}'{% ifequal p.0 ticket.priority %} selected='selected'{% endifequal %}>{{ p.1 }}</option>{% endfor %}</select></dd>
+                <dd><select id='id_priority' name='priority'>{% for p in priorities %}{% if p.0 == ticket.priority %}<option value='{{ p.0 }}' selected='selected'>{{ p.1 }}</option>{% else %}<option value='{{ p.0 }}'>{{ p.1 }}</option>{% endif %}{% endfor %}</select></dd>
 
                 <dt><label for='id_due_date'>{% trans "Due on" %}</label></dt>
                 <dd>{{ form.due_date }}</dd>
