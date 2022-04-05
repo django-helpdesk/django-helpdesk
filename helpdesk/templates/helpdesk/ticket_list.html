@@ -87,7 +87,7 @@
                         <!-- Pass Query Params to View for exporting to work Properly -->
                         <input type='hidden' name='query_e' value='{{ urlsafe_query }}'/>
                         <input type='hidden' name='query_p' value='{{ query_params }}'/>
-                        <input type='hidden' name='visible' value='' id='is_visible'/>
+                        <input type='hidden' name='visible' value=''/>
                     </form>
                 </div>
                 <div class="tab-pane fade" id="timelinetabcontents" role="tabpanel" aria-labelledby="timelinetabcontents-tab">
@@ -236,6 +236,7 @@
                             <form method='post' action='{% url 'helpdesk:savequery' %}'>
                                 {% csrf_token %}
                                 <input type='hidden' name='query_encoded' value='{{ urlsafe_query }}'/>
+                                <input type='hidden' name='visible' value=''/>
                                 <dl>
                                     <dt><label for='id_title'>{% trans "Query Name" %}</label></dt>
                                     <dd><input type='text' name='title' id='id_title'/></dd>
@@ -373,6 +374,7 @@ thead input {
                 }],
                 columns: [
                     {
+                        name: "id",
                         data: "id",
                         orderable: false,
                         render: function (data, type, row, meta) {
@@ -384,6 +386,7 @@ thead input {
                         }
                     },
                     {
+                        name: "ticket",
                         data: "ticket",
                         render: function (data, type, row, meta) {
                             if (type === 'display') {
@@ -398,6 +401,7 @@ thead input {
                         }
                     },
                     {
+                        name: "priority",
                         data: "priority",
                         render: function (data, type, row, meta) {
                             let priority = "success";
@@ -411,16 +415,18 @@ thead input {
                         visible: false,
                     },
                     {
+                        name: "queue",
                         data: "queue",
                         render: function (data, type, row, meta) {
                             return data.title;
                         },
                         visible: false,
                     },
-                    {data: "status"},
-                    {data: "created"},
-                    {data: "due_date", "visible": false},
+                    {name: "status", data: "status"},
+                    {name: "created", data: "created"},
+                    {name: "due_date", data: "due_date", "visible": false},
                     {
+                        name: "assigned_to",
                         data: "assigned_to",
                         render: function (data, type, row, meta) {
                             if (data !== "None") {
@@ -429,18 +435,31 @@ thead input {
                             return "";
                         }
                     },
-                    {data: "submitter"},
-                    {data: "time_spent", "visible": false},
-                    {data: "kbitem"},
+                    {name: "submitter", data: "submitter"},
+                    {name: "time_spent", data: "time_spent", "visible": false},
+                    {name: "kbitem", data: "kbitem"},
                     {% if query_params.filtering.queue__id__in|length == 1 %}
-                        {% for col in extra_data_cols %}
-                    {data: "{{col}}"},
-                        {% endfor %}
+                    {% for col in extra_data_cols %}
+                    {name: "{{ col }}", data: "{{ col }}"},
+                    {% endfor %}
                     {% endif %}
                 ],
                 orderCellsTop: true,
                 fixedHeader: true,
             });
+            if (from_saved_query) {
+                var all_columns = table.settings().init().columns;
+
+                // Filter visible columns
+                visible_cols = {{ saved_query.get_visible_cols | safe }}
+                table.columns().every(function (ind) {
+                    if (!visible_cols.includes(all_columns[ind].name)) {
+                        table.column(ind).visible(false, false);
+                    }
+                })
+                table.columns.adjust().draw( false );
+            }
+
             // Filter event handler
             $( table.table().container() ).off('keyup change').on( 'keyup', 'thead input', function () {
                 var column = table.column( $(this).data('index') )
@@ -463,8 +482,10 @@ thead input {
                         visible_columns.push(all_columns[i].data);
                     }
                 }
-                // Add data to post field to be avaiable in mass_update function
-                document.getElementById("is_visible").value = visible_columns.toString();
+                // Add data to post field to be avaiable in mass_update function, and save_query
+                $('input[name="visible"]').each(function () {
+                    $(this).val(visible_columns.toString());
+                });
             }
             get_visible_cols() // On initialization
 

@@ -222,6 +222,7 @@ class FollowUpAdmin(admin.ModelAdmin):
 @admin.register(KBItem)
 class KBItemAdmin(admin.ModelAdmin):
     list_display = ('category', 'title', 'last_updated', 'team', 'order', 'enabled')
+    list_filter = ('category__organization', 'category')
     inlines = [KBIAttachmentInline]
     readonly_fields = ('voted_by', 'downvoted_by')
 
@@ -241,7 +242,7 @@ class IgnoreEmailAdmin(admin.ModelAdmin):
 
 @admin.register(KBCategory)
 class KBCategoryAdmin(admin.ModelAdmin):
-    list_display = ('name', 'title', 'slug', 'public')
+    list_display = ('__str__', 'title', 'slug', 'public', 'organization', )
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == "organization":

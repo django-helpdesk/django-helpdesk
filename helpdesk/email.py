@@ -426,10 +426,10 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
             fields = CustomField.objects.filter(ticket_form=ticket_form.id).values_list('field_name', flat=True)
 
             ticket = Ticket.objects.create(
-                title=payload['subject'],
+                title=payload['subject'][0:200],
                 queue=queue,
-                contact_name=sender_name if 'contact_name' in fields else None,
-                contact_email=sender_email if 'contact_email' in fields else None,
+                contact_name=sender_name[0:200] if 'contact_name' in fields else None,
+                contact_email=sender_email[0:200] if 'contact_email' in fields else None,
                 submitter_email=sender_email,
                 created=now,
                 description=payload['body'],
@@ -459,7 +459,7 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
 
     f = FollowUp(
         ticket=ticket,
-        title=_('E-Mail Received from %(sender_email)s' % {'sender_email': sender_email}),
+        title=_('E-Mail Received from %(sender_email)s' % {'sender_email': sender_email})[0:200],
         date=now,
         public=True,
         comment=payload.get('full_body', payload['body']) or "",
@@ -652,6 +652,8 @@ def object_from_message(message, queue, logger):
                     body = body.encode('ascii').decode('unicode_escape')
                 except UnicodeEncodeError:
                     body.encode('utf-8')
+                except UnicodeDecodeError:
+                    body = body.encode('utf-8')  # todo
                 logger.debug("Discovered plain text MIME part")
             else:
                 try:

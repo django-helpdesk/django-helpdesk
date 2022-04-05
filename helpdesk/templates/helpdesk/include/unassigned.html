@@ -21,7 +21,7 @@
                 {% for ticket in unassigned_tickets %}
                     <tr class="{{ ticket.get_priority_css_class }}">
                         <td class="tickettitle"><a href='{{ ticket.get_absolute_url }}'>{{ ticket.id }}. {{ ticket.title }} </a></td>
-                        <td>{{ ticket.priority }}</td>
+                        <td class="text-{{ ticket.get_priority_css_class }}">{{ ticket.get_priority }}</td>
                         <td>{{ ticket.queue }}</td>
                         <td><span title='{{ ticket.modified|naturaltime }}'>{{ ticket.modified|date:"DATETIME_FORMAT" }}</span></td>
                         <td class="text-center">
@@ -61,7 +61,7 @@
                 {% for ticket in kbitem.unassigned_tickets %}
                     <tr class="{{ ticket.get_priority_css_class }}">
                         <td class="tickettitle"><a href='{{ ticket.get_absolute_url }}'>{{ ticket.id }}. {{ ticket.title }} </a></td>
-                        <td>{{ ticket.priority }}</td>
+                        <td class="text-{{ ticket.get_priority_css_class }}">{{ ticket.get_priority }}</td>
                         <td>{{ ticket.queue }}</td>
                         <td><span title='{{ ticket.modified|naturaltime }}'>{{ ticket.modified|date:"DATETIME_FORMAT" }}</span></td>
                         <td class="text-center">

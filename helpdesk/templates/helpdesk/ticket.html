@@ -168,9 +168,9 @@
 
                 {% if is_staff %}
                 <dt>
-                    <label for='id_time_spent'>{% trans "Time spent" %}</label> <span class='form_optional'>{% trans "(Optional)" %}</span>
+                    <label for='id_time_spent'>{% trans "Time spent" %}</label> <span class='form_optional'>{% trans "(Optional, in Minutes)" %}</span>
                 </dt>
-                <dd><input id='id_time_spent' name='time_spent' type="time" /></dd>
+                <dd><input style="" id='id_time_spent' name='time_spent' type="number" min="0"/></dd>
                 {% endif %}
             </dl>
 

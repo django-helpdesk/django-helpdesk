@@ -63,7 +63,7 @@ def format_time_spent(time_spent):
     if time_spent:
         time_spent = "{0:02d}h:{1:02d}m".format(
             time_spent.seconds // 3600,
-            time_spent.seconds // 60
+            time_spent.seconds // 60 % 60,
         )
     else:
         time_spent = ""
@@ -146,7 +146,6 @@ class Queue(models.Model):
     slug = models.SlugField(
         _('Slug'),
         max_length=50,
-        unique=True,
         help_text=_('This slug is used when building ticket ID\'s. Once set, '
                     'try not to change it or e-mailing may get messy.'),
     )
@@ -392,6 +391,7 @@ class Queue(models.Model):
         ordering = ('title',)
         verbose_name = _('Queue')
         verbose_name_plural = _('Queues')
+        unique_together = ('organization', 'slug')
 
     def _from_address(self):
         """
@@ -743,14 +743,12 @@ class Ticket(models.Model):
         """
         Return the boostrap class corresponding to the priority.
         """
-        if self.priority == 2:
-            return "warning"
-        elif self.priority == 1:
+        if self.priority == 1:
             return "danger"
-        elif self.priority == 5:
-            return "success"
+        elif self.priority == 2:
+            return "warning"
         else:
-            return ""
+            return "success"
     get_priority_css_class = property(_get_priority_css_class)
 
     def _get_priority(self):
@@ -1430,6 +1428,7 @@ class KBCategory(models.Model):
 
     slug = models.SlugField(
         _('Slug'),
+        unique=True,
     )
 
     preview_description = models.TextField(
@@ -1456,7 +1455,7 @@ class KBCategory(models.Model):
     )
 
     def __str__(self):
-        return '%s' % self.name
+        return '%s (%s)' % (self.name, self.pk)
 
     class Meta:
         ordering = ('title',)
@@ -1693,6 +1692,21 @@ class SavedSearch(models.Model):
     class Meta:
         verbose_name = _('Saved search')
         verbose_name_plural = _('Saved searches')
+
+    @property
+    def get_visible_cols(self):
+        """
+        Return the visible cols stored in the query64
+        """
+        from helpdesk.query import query_from_base64
+        import json
+        query_unencoded = query_from_base64(self.query)
+        if 'visible_cols' in query_unencoded:
+            visible_cols = query_unencoded.get('visible_cols', [])
+        else:
+            # For queries made before the change, have them include be default
+            visible_cols = ['id', 'ticket', 'status', 'created', 'assigned_to', 'submitter', 'kbitem']
+        return json.dumps(visible_cols)
 
 
 def get_default_setting(setting):

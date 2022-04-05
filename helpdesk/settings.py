@@ -157,7 +157,7 @@ HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION = getattr(
     settings, 'HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION', False)
 
 # use https in the email links
-HELPDESK_USE_HTTPS_IN_EMAIL_LINK = getattr(settings, 'HELPDESK_USE_HTTPS_IN_EMAIL_LINK', False)
+HELPDESK_USE_HTTPS_IN_EMAIL_LINK = getattr(settings, 'HELPDESK_USE_HTTPS_IN_EMAIL_LINK', True)
 
 # Include all signatures and forwards in the first ticket message if set
 # Useful if you get forwards dropped from them while they are useful part of request
