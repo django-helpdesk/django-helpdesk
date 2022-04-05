@@ -420,8 +420,8 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
         context['comment'] = followup.comment
 
         roles = {'submitter': ('newticket_submitter', context),
-                 'new_ticket_cc': ('newticket_cc', context),
-                 'ticket_cc': ('newticket_cc', context),
+                 'queue_new': ('newticket_cc', context),
+                 'queue_updated': ('newticket_cc', context),
                  'extra': ('newticket_cc', context)}
         if ticket.assigned_to and ticket.assigned_to.usersettings_helpdesk.email_on_ticket_assign:
             roles['assigned_to'] = ('assigned_owner', context)

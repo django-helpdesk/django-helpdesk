@@ -652,10 +652,21 @@ class Ticket(models.Model):
         This method attempts to send a message to every possible role (see below), but the inner send method will
             ensure only the roles passed in will be sent a message.
 
+        The following templates are default:
+          - assigned (cc, owner)
+          - closed (cc, owner, submitter)
+          - escalated (cc, owner, submitter)
+          - merged (none)
+          - newticket (cc, submitter)
+          - resolved (cc, owner, submitter)
+          - updated (cc, owner, submitter)
+
         The following roles exist:
           - 'submitter'
-          - 'new_ticket_cc'
-          - 'ticket_cc'
+          - 'new_ticket_cc' ---> 'queue_new'
+          - 'ticket_cc' ---> 'queue_updated'
+          - NEW: 'cc_users'
+          - NEW: 'cc_public'
           - 'assigned_to'
           - 'contact_email'
           - 'extra'
@@ -685,22 +696,28 @@ class Ticket(models.Model):
                 send_templated_mail(template, context, recipient, sender=self.queue.from_address, **kwargs)
                 recipients.add(recipient)
 
+        # Attempts to send an email to every possible field.
+
         if self.submitter_email:
             send('submitter', self.submitter_email)
         if self.contact_email:
             send('submitter', self.contact_email)  # TODO add a new role/template for contact_email field?
-        send('ticket_cc', self.queue.updated_ticket_cc)
-        send('new_ticket_cc', self.queue.new_ticket_cc)
-
+        send('queue_updated', self.queue.updated_ticket_cc)
+        send('queue_new', self.queue.new_ticket_cc)
         if self.assigned_to:
             send('assigned_to', self.assigned_to.email)
 
+        # If queue allows CC'd users to be notified, send them email updates
         if self.queue.enable_notifications_on_email_events:
+            # Send different template to users vs public
             for cc in self.ticketcc_set.all():
-                send('ticket_cc', cc.email_address)
+                if cc.user:
+                    send('cc_users', cc.email_address)
+                else:
+                    send('cc_public', cc.email_address)
 
-            # TODO: 'extra' fields currently get sent the same templates as cc.
-            #  Add a method to pair specific extra fields with specific templates
+            # 'extra' fields are treated as cc_public.
+            #  todo Add a method to pair specific extra fields with specific templates?
             extra_fields = CustomField.objects.filter(
                 ticket_form=self.ticket_form_id,
                 data_type='email',

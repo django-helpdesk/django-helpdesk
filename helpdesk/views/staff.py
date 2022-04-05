@@ -756,7 +756,7 @@ def update_ticket(request, ticket_id, public=False):
 
         roles = {
             'submitter': (template + 'submitter', context),
-            'ticket_cc': (template + 'cc', context),
+            'queue_updated': (template + 'cc', context),
             'extra': (template + 'cc', context),
         }
         if ticket.assigned_to and ticket.assigned_to.usersettings_helpdesk.email_on_ticket_change:
@@ -794,7 +794,7 @@ def update_ticket(request, ticket_id, public=False):
         template_cc = 'updated_cc'
 
     messages_sent_to.update(ticket.send(
-        {'ticket_cc': (template_cc, context)},
+        {'queue_updated': (template_cc, context)},
         dont_send_to=messages_sent_to,
         fail_silently=True,
         files=files,
@@ -968,7 +968,7 @@ def mass_update(request):
 
             roles = {
                 'submitter': ('closed_submitter', context),
-                'ticket_cc': ('closed_cc', context),
+                'queue_updated': ('closed_cc', context),
                 'extra': ('closed_cc', context),
             }
             if t.assigned_to and t.assigned_to.usersettings_helpdesk.email_on_ticket_change:
