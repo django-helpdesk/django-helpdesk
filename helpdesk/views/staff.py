@@ -2044,11 +2044,11 @@ def calc_basic_ticket_stats(Tickets):
     # label, number entries, color, sort_string
     ots.append(['Tickets < 3 days', N_ota_le_3, 'success',
                 sort_string(date_3_str, ''), ])
-    ots.append(['Tickets 4 - 7 days', N_ota_le_7_ge_3, 'success',
+    ots.append(['Tickets 4 - 7 days', N_ota_le_7_ge_3,
                 'success' if N_ota_le_7_ge_3 == 0 else 'warning',
                 sort_string(date_7_str, date_3_str), ])
-    ots.append(['Tickets 8 - 14 days', N_ota_le_14_ge_7, 'success',
-                'success' if N_ota_le_14_ge_7 == 0 else 'danger',
+    ots.append(['Tickets 8 - 14 days', N_ota_le_14_ge_7,
+                'success' if N_ota_le_14_ge_7 == 0 else 'warning',
                 sort_string(date_14_str, date_7_str), ])
 #    ots.append(['Tickets 30 - 60 days', N_ota_le_60_ge_30,
 #                'success' if N_ota_le_60_ge_30 == 0 else 'warning',
@@ -2097,8 +2097,6 @@ def date_rel_to_today(today, offset):
 
 
 def sort_string(begin, end):
-    return 'sort=created&date_from=%s&date_to=%s&status=%s&status=%s&status=%s' % (
-        begin, end, Ticket.OPEN_STATUS, Ticket.REOPENED_STATUS, Ticket.RESOLVED_STATUS)
-
-
+    return 'sort=created&date_from=%s&date_to=%s&status=%s&status=%s&status=%s&status=%s' % (
+        begin, end, Ticket.OPEN_STATUS, Ticket.REOPENED_STATUS, Ticket.RESOLVED_STATUS, Ticket.REPLIED_STATUS)
 
