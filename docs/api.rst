@@ -32,6 +32,8 @@ You need to provide a JSON body with the following data :
 - **last_escalation**: date representation of when last escalation has been done
 - **merged_to**: ID of the ticket to which it is merged
 
+Moreover, if you created custom fields, you can add them into the body with the key ``custom_<custom-field-slug>``.
+
 Here is an example of a cURL request to create a ticket (using Basic authentication) ::
 
     curl --location --request POST 'http://127.0.0.1:8000/api/tickets/' \
