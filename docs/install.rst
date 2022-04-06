@@ -27,10 +27,10 @@ Installing using PIP
 
 Try using ``pip install django-helpdesk``. Go and have a beer to celebrate Python packaging.
 
-Checkout ``master`` from git (Cutting Edge)
+Checkout ``stable`` from git (Cutting Edge)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If you're planning on editing the code or just want to get whatever is the latest and greatest, you can clone the official Git repository with ``git clone git://github.com/django-helpdesk/django-helpdesk.git``. We use the ``master`` branch as our development branch for the next major release of ``django-helpdesk``.
+If you're planning on editing the code or just want to get whatever is the latest and greatest, you can clone the official Git repository with ``git clone git://github.com/django-helpdesk/django-helpdesk.git``. We use the ``stable`` branch as our development branch for the next major release of ``django-helpdesk``.
 
 Copy the ``helpdesk`` folder into your ``PYTHONPATH``.
 
@@ -59,13 +59,14 @@ errors with trying to create User settings.
         'django.contrib.humanize',  # Required for elapsed time formatting
         'bootstrap4form', # Required for nicer formatting of forms with the default templates
         'account',  # Required by pinax-teams
-        'pinax.invitations',  # required by pinax-teams
-        'pinax.teams',  # team support
-        'reversion',  # required by pinax-teams
+        'pinax.invitations',  # Required by pinax-teams
+        'pinax.teams',  # Team support
+        'reversion',  # Required by pinax-teams
+        'rest_framework',  # required for the API
         'helpdesk',  # This is us!
     )
 
-   Note: you do not need to use pinax-teams. To dissable teams see the :doc:`teams` section.
+   Note: you do not need to use pinax-teams. To disable teams see the :doc:`teams` section.
 
    Your ``settings.py`` file should also define a ``SITE_ID`` that allows multiple projects to share
    a single database, and is required by ``django.contrib.sites`` in Django 1.9+.
@@ -75,11 +76,11 @@ errors with trying to create User settings.
 
 2. Make sure django-helpdesk is accessible via ``urls.py``. Add the following line to ``urls.py``::
 
-     url(r'helpdesk/', include('helpdesk.urls')),
+     path('helpdesk/', include('helpdesk.urls')),
 
    Note that you can change 'helpdesk/' to anything you like, such as 'support/' or 'help/'. If you want django-helpdesk to be available at the root of your site (for example at http://support.mysite.tld/) then the line will be as follows::
 
-     url(r'', include('helpdesk.urls', namespace='helpdesk')),
+     path('', include('helpdesk.urls', namespace='helpdesk')),
 
    This line will have to come *after* any other lines in your urls.py such as those used by the Django admin.
 
@@ -90,7 +91,7 @@ errors with trying to create User settings.
 
    Migrate using Django migrations::
 
-     ./manage.py migrate helpdesk
+     python manage.py migrate helpdesk
 
 4. Include your static files in your public web path::
 
