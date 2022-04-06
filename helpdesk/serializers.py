@@ -93,9 +93,9 @@ class TicketSerializer(serializers.ModelSerializer):
         data['body'] = data['description']
         # TicketForm needs id for ForeignKey (not the instance themselves)
         data['queue'] = data['queue'].id
-        if data['assigned_to']:
+        if data.get('assigned_to'):
             data['assigned_to'] = data['assigned_to'].id
-        if data['merged_to']:
+        if data.get('merged_to'):
             data['merged_to'] = data['merged_to'].id
 
         ticket_form = TicketForm(data=data, queue_choices=queue_choices)
