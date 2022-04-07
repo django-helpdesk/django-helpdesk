@@ -32,6 +32,7 @@ from markdown_deux.templatetags.markdown_deux_tags import markdown_allowed
 import bleach
 from bleach.linkifier import LinkifyFilter
 from bleach.sanitizer import Cleaner
+from bleach.css_sanitizer import CSSSanitizer
 from bleach_allowlist import markdown_tags, markdown_attrs, print_tags, print_attrs, all_styles
 from urllib.parse import urlparse
 from functools import partial
@@ -58,6 +59,7 @@ from seed.models import (
 
 
 logger = logging.getLogger(__name__)
+
 
 def format_time_spent(time_spent):
     if time_spent:
@@ -90,6 +92,7 @@ def _cleaner_set_target(attrs, new=False):
         attrs.pop((None, 'target'), None)
     return attrs
 
+
 def _cleaner_shorten_url(attrs, new=False):
     """Callback for bleach. Shortens overly-long URLs in the text.
         Added directly from https://bleach.readthedocs.io/en/latest/linkify.html """
@@ -101,6 +104,7 @@ def _cleaner_shorten_url(attrs, new=False):
     if len(text) > 50:
         attrs['_text'] = text[0:47] + '...'
     return attrs
+
 
 def get_markdown(text, kb=False):
     if not text:
@@ -114,14 +118,14 @@ def get_markdown(text, kb=False):
         extensions.append('markdown.extensions.attr_list')
         collapsible_attrs = {"p": ["data-target", "data-toggle", "data-parent", "role",
                                    'aria-controls', 'aria-expanded', 'aria-labelledby', 'id']}
-
+    css_sanitizer = CSSSanitizer(allowed_css_properties=all_styles)
     cleaner = Cleaner(
         filters=[partial(LinkifyFilter, callbacks=[_cleaner_set_target, _cleaner_shorten_url])],
         tags=markdown_tags + print_tags,
         attributes={**markdown_attrs,
                     **print_attrs,
                     **collapsible_attrs},
-        styles=all_styles
+        css_sanitizer=css_sanitizer,
     )
     cleaned = cleaner.clean(markdown(text, extensions=extensions))
     return mark_safe(cleaned)
