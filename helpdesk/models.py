@@ -1891,7 +1891,7 @@ class CustomField(models.Model):
         choices = self.choices_as_array
         if self.empty_selection_list:
             choices.insert(0, ('', '---------'))
-            return choices
+        return choices
 
     def build_api_field(self):
         customfield_to_api_field_dict = {
