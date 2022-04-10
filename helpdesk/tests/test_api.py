@@ -109,10 +109,10 @@ class TicketTest(APITestCase):
         self.assertEqual(created_ticket.assigned_to, test_user)
         self.assertEqual(created_ticket.submitter_email, 'test@mail.com')
         self.assertEqual(created_ticket.priority, 1)
-        self.assertFalse(created_ticket.on_hold)
+        self.assertFalse(created_ticket.on_hold)  # on_hold is False on creation
         self.assertEqual(created_ticket.status, Ticket.OPEN_STATUS)  # status is always open on creation
         self.assertEqual(created_ticket.due_date, datetime(2022, 4, 10, 15, 6, tzinfo=UTC))
-        self.assertIsNone(created_ticket.merged_to)
+        self.assertIsNone(created_ticket.merged_to)  # merged_to can not be set on creation
 
     def test_edit_api_ticket(self):
         staff_user = User.objects.create_user(username='admin', is_staff=True)

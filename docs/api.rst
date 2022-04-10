@@ -22,15 +22,16 @@ You need to provide a JSON body with the following data :
 - **queue**: ID of the queue
 - **title**: the title (subject) of the ticket
 - **description**: the description of the ticket
-- **resolution**: an optonal text for the resoltuion of the ticket
+- **resolution**: an optional text for the resoltuion of the ticket
 - **submitter_email**: the email of the ticket submitter
 - **assigned_to**: ID of the ticket's assigned user
 - **status**: integer corresponding to the status (OPEN=1, REOPENED=2, RESOLVED=3, CLOSED=4, DUPLICATE=5). It is OPEN by default.
 - **on_hold**: boolean to indicates if the ticket is on hold
 - **priority**: integer corresponding to different degrees of priority 1 to 5 (1 is Critical and 5 is Very Low)
 - **due_date**: date representation for when the ticket is due
-- **last_escalation**: date representation of when last escalation has been done
 - **merged_to**: ID of the ticket to which it is merged
+
+Note that ``status`` will automatically be set to OPEN. Also, some fields are not configurable during creation: ``resolution``, ``on_hold`` and ``merged_to``.
 
 Moreover, if you created custom fields, you can add them into the body with the key ``custom_<custom-field-slug>``.
 
@@ -39,7 +40,7 @@ Here is an example of a cURL request to create a ticket (using Basic authenticat
     curl --location --request POST 'http://127.0.0.1:8000/api/tickets/' \
     --header 'Authorization: Basic YWRtaW46YWRtaW4=' \
     --header 'Content-Type: application/json' \
-    --data-raw '{"queue": 1, "title": "Test Ticket API", "description": "Test create ticket from API", "submitter_email": "test@mail.com","priority": 4}'
+    --data-raw '{"queue": 1, "title": "Test Ticket API", "description": "Test create ticket from API", "submitter_email": "test@mail.com", "priority": 4}'
 
 PUT
 ---
