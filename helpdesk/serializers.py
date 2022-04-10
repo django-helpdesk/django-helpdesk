@@ -75,7 +75,7 @@ class TicketSerializer(serializers.ModelSerializer):
         model = Ticket
         fields = (
             'id', 'queue', 'title', 'description', 'resolution', 'submitter_email', 'assigned_to', 'status', 'on_hold',
-            'priority', 'due_date', 'last_escalation', 'merged_to'
+            'priority', 'due_date', 'merged_to'
         )
 
     def __init__(self, *args, **kwargs):
