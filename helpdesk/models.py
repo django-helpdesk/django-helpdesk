@@ -32,7 +32,6 @@ from markdown_deux.templatetags.markdown_deux_tags import markdown_allowed
 import bleach
 from bleach.linkifier import LinkifyFilter
 from bleach.sanitizer import Cleaner
-from bleach.css_sanitizer import CSSSanitizer
 from bleach_allowlist import markdown_tags, markdown_attrs, print_tags, print_attrs, all_styles
 from urllib.parse import urlparse
 from functools import partial
@@ -118,14 +117,13 @@ def get_markdown(text, kb=False):
         extensions.append('markdown.extensions.attr_list')
         collapsible_attrs = {"p": ["data-target", "data-toggle", "data-parent", "role",
                                    'aria-controls', 'aria-expanded', 'aria-labelledby', 'id']}
-    css_sanitizer = CSSSanitizer(allowed_css_properties=all_styles)
     cleaner = Cleaner(
         filters=[partial(LinkifyFilter, callbacks=[_cleaner_set_target, _cleaner_shorten_url])],
         tags=markdown_tags + print_tags,
         attributes={**markdown_attrs,
                     **print_attrs,
                     **collapsible_attrs},
-        css_sanitizer=css_sanitizer,
+        styles=all_styles
     )
     cleaned = cleaner.clean(markdown(text, extensions=extensions))
     return mark_safe(cleaned)
