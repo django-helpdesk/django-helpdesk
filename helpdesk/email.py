@@ -396,10 +396,11 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
     message_id = parseaddr(message.get('Message-Id'))[1]
     in_reply_to = parseaddr(message.get('In-Reply-To'))[1]
 
-    if in_reply_to is not None:
+    if in_reply_to:
         try:
             queryset = FollowUp.objects.filter(message_id=in_reply_to).order_by('-date')
             if queryset.count() > 0:
+                logger.info('Found ticket based on in_reply_to.')
                 previous_followup = queryset.first()
                 ticket = previous_followup.ticket
         except FollowUp.DoesNotExist:
