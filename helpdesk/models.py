@@ -653,22 +653,21 @@ class Ticket(models.Model):
             ensure only the roles passed in will be sent a message.
 
         The following templates are default:
-          - assigned (cc, owner)
-          - closed (cc, owner, submitter)
-          - escalated (cc, owner, submitter)
+          - assigned (cc_user, owner)
+          - closed (cc_user, cc_public, owner, submitter)
+          - escalated (cc_user, cc_public, owner, submitter)
           - merged (none)
-          - newticket (cc, submitter)
-          - resolved (cc, owner, submitter)
-          - updated (cc, owner, submitter)
+          - newticket (cc_user, cc_public, submitter)
+          - resolved (cc_user, cc_public, owner, submitter)
+          - updated (cc_user, cc_public, owner, submitter)
 
         The following roles exist:
-          - 'submitter'
-          - 'new_ticket_cc' ---> 'queue_new'
-          - 'ticket_cc' ---> 'queue_updated'
-          - NEW: 'cc_users'
-          - NEW: 'cc_public'
+          - 'submitter' (the default field contact_email is treated as the submitter)
+          - 'queue_new'
+          - 'queue_updated'
+          - 'cc_users'
+          - 'cc_public'
           - 'assigned_to'
-          - 'contact_email'
           - 'extra'
 
         Here is an example roles dictionary:
@@ -708,14 +707,13 @@ class Ticket(models.Model):
             send('assigned_to', self.assigned_to.email)
 
         # If queue allows CC'd users to be notified, send them email updates
-        if self.queue.enable_notifications_on_email_events:
-            # Send different template to users vs public
-            for cc in self.ticketcc_set.all():
-                if cc.user:
-                    send('cc_users', cc.email_address)
-                else:
-                    send('cc_public', cc.email_address)
+        for cc in self.ticketcc_set.all():
+            if cc.user:
+                send('cc_users', cc.email_address)
+            elif self.queue.enable_notifications_on_email_events:
+                send('cc_public', cc.email_address)
 
+        if self.queue.enable_notifications_on_email_events:
             # 'extra' fields are treated as cc_public.
             #  todo Add a method to pair specific extra fields with specific templates?
             extra_fields = CustomField.objects.filter(

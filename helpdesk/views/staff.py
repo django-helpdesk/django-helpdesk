@@ -740,12 +740,26 @@ def update_ticket(request, ticket_id, public=False):
         resolution=ticket.resolution,
         comment=f.comment,
     )
+    """
+    Begin emailing updates to users.
+    If public:
+        - submitter
+        - cc_public
+        - extra
+    Always:
+        - queue_updated (if there's a queue updated user)
+        - assigned_user (if there's an assigned user)
+        - cc_users
+    Never:
+        - queue_new
+    """
 
     messages_sent_to = set()
     try:
         messages_sent_to.add(request.user.email)
     except AttributeError:
         pass
+    # Public users (submitter, public CC, and extra_field emails) are only updated if there's a new status or a comment.
     if public and (f.comment or (f.new_status in (Ticket.RESOLVED_STATUS, Ticket.CLOSED_STATUS))):
         if f.new_status == Ticket.RESOLVED_STATUS:
             template = 'resolved_'
@@ -756,16 +770,18 @@ def update_ticket(request, ticket_id, public=False):
 
         roles = {
             'submitter': (template + 'submitter', context),
-            'queue_updated': (template + 'cc', context),
-            'extra': (template + 'cc', context),
+            'cc_public': (template + 'cc_public', context),
+            'extra': (template + 'cc_public', context),
         }
-        if ticket.assigned_to and ticket.assigned_to.usersettings_helpdesk.email_on_ticket_change:
-            roles['assigned_to'] = (template + 'cc', context)
+        # todo is this necessary?
+        # if ticket.assigned_to and ticket.assigned_to.usersettings_helpdesk.email_on_ticket_change:
+        #    roles['assigned_to'] = (template + 'cc', context)  # todo sends a cc template for resolved/closed/updated to the owner. seems very unnecessary
 
         messages_sent_to.update(ticket.send(roles, dont_send_to=messages_sent_to, fail_silently=True, files=files,))
 
+    # Emails an update to the owner
     if reassigned:
-        template_staff = 'assigned_owner'
+        template_staff = 'assigned_owner'  # reassignment template
     elif f.new_status == Ticket.RESOLVED_STATUS:
         template_staff = 'resolved_owner'
     elif f.new_status == Ticket.CLOSED_STATUS:
@@ -777,24 +793,26 @@ def update_ticket(request, ticket_id, public=False):
         ticket.assigned_to.usersettings_helpdesk.email_on_ticket_change
         or (reassigned and ticket.assigned_to.usersettings_helpdesk.email_on_ticket_assigned)
     ):
-        messages_sent_to.update(ticket.send(
+        messages_sent_to.update(ticket.send(    # sends the assigned/resolved/closed/updated_owner template to the owner.
             {'assigned_to': (template_staff, context)},
             dont_send_to=messages_sent_to,
             fail_silently=True,
             files=files,
         ))
 
+    # Emails an update to users who follow all ticket updates.
     if reassigned:
-        template_cc = 'assigned_cc'
+        template_cc = 'assigned_cc_user'  # reassignment template
     elif f.new_status == Ticket.RESOLVED_STATUS:
-        template_cc = 'resolved_cc'
+        template_cc = 'resolved_cc_user'
     elif f.new_status == Ticket.CLOSED_STATUS:
-        template_cc = 'closed_cc'
+        template_cc = 'closed_cc_user'
     else:
-        template_cc = 'updated_cc'
+        template_cc = 'updated_cc_user'
 
     messages_sent_to.update(ticket.send(
-        {'queue_updated': (template_cc, context)},
+        {'queue_updated': (template_cc, context),
+         'cc_users': (template_cc, context)},
         dont_send_to=messages_sent_to,
         fail_silently=True,
         files=files,
@@ -955,7 +973,7 @@ def mass_update(request):
                          user=request.user,
                          new_status=Ticket.CLOSED_STATUS)
             f.save()
-            # Send email to Submitter, Owner, Queue CC
+            # Send email to Submitter, Queue CC, CC'd Users, CC'd Public, Extra Fields, and Owner
             context = safe_template_context(t)
             context.update(resolution=t.resolution,
                            queue=queue_template_context(t.queue))
@@ -968,8 +986,10 @@ def mass_update(request):
 
             roles = {
                 'submitter': ('closed_submitter', context),
-                'queue_updated': ('closed_cc', context),
-                'extra': ('closed_cc', context),
+                'queue_updated': ('closed_cc_user', context),
+                'cc_users': ('closed_cc_user', context),
+                'cc_public': ('closed_cc_public', context),
+                'extra': ('closed_cc_public', context),
             }
             if t.assigned_to and t.assigned_to.usersettings_helpdesk.email_on_ticket_change:
                 roles['assigned_to'] = ('closed_owner', context),

@@ -416,15 +416,20 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
 
     @staticmethod
     def _send_messages(ticket, queue, followup, files, user=None):
+        # Sent when a ticket is saved.
         context = safe_template_context(ticket)
         context['comment'] = followup.comment
 
         roles = {'submitter': ('newticket_submitter', context),
-                 'queue_new': ('newticket_cc', context),
-                 'queue_updated': ('newticket_cc', context),
-                 'extra': ('newticket_cc', context)}
+                 'queue_new': ('newticket_cc_user', context),
+                 'queue_updated': ('newticket_cc_user', context),
+                 'cc_users': ('newticket_cc_user', context)}
+        if followup.public:
+            roles['cc_public'] = ('newticket_cc_public', context)
+            roles['extra'] = ('newticket_cc_public', context)
         if ticket.assigned_to and ticket.assigned_to.usersettings_helpdesk.email_on_ticket_assign:
             roles['assigned_to'] = ('assigned_owner', context)
+
         ticket.send(
             roles,
             fail_silently=True,
