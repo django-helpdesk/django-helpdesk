@@ -59,6 +59,7 @@ from seed.models import (
 
 logger = logging.getLogger(__name__)
 
+
 def format_time_spent(time_spent):
     if time_spent:
         time_spent = "{0:02d}h:{1:02d}m".format(
@@ -90,6 +91,7 @@ def _cleaner_set_target(attrs, new=False):
         attrs.pop((None, 'target'), None)
     return attrs
 
+
 def _cleaner_shorten_url(attrs, new=False):
     """Callback for bleach. Shortens overly-long URLs in the text.
         Added directly from https://bleach.readthedocs.io/en/latest/linkify.html """
@@ -101,6 +103,7 @@ def _cleaner_shorten_url(attrs, new=False):
     if len(text) > 50:
         attrs['_text'] = text[0:47] + '...'
     return attrs
+
 
 def get_markdown(text, kb=False):
     if not text:
@@ -114,7 +117,6 @@ def get_markdown(text, kb=False):
         extensions.append('markdown.extensions.attr_list')
         collapsible_attrs = {"p": ["data-target", "data-toggle", "data-parent", "role",
                                    'aria-controls', 'aria-expanded', 'aria-labelledby', 'id']}
-
     cleaner = Cleaner(
         filters=[partial(LinkifyFilter, callbacks=[_cleaner_set_target, _cleaner_shorten_url])],
         tags=markdown_tags + print_tags,

@@ -2017,7 +2017,7 @@ def calc_average_nbr_days_until_ticket_resolved(Tickets):
 
 def calc_basic_ticket_stats(Tickets):
     # all not closed tickets (open, reopened, resolved,) - independent of user
-    all_open_tickets = Tickets.exclude(status=Ticket.CLOSED_STATUS)
+    all_open_tickets = Tickets.exclude(status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS, Ticket.DUPLICATE_STATUS])
     today = datetime.today()
 
     date_3 = date_rel_to_today(today, 3)
@@ -2117,6 +2117,6 @@ def date_rel_to_today(today, offset):
 
 
 def sort_string(begin, end):
-    return 'sort=created&date_from=%s&date_to=%s&status=%s&status=%s&status=%s&status=%s' % (
-        begin, end, Ticket.OPEN_STATUS, Ticket.REOPENED_STATUS, Ticket.RESOLVED_STATUS, Ticket.REPLIED_STATUS)
+    return 'sort=created&date_from=%s&date_to=%s&status=%s&status=%s&status=%s' % (
+        begin, end, Ticket.OPEN_STATUS, Ticket.REOPENED_STATUS, Ticket.REPLIED_STATUS)
 
