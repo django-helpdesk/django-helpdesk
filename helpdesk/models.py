@@ -1942,7 +1942,7 @@ class TicketCC(models.Model):
         on_delete=models.CASCADE,
         blank=True,
         null=True,
-        help_text=_('User who wishes to receive updates for this ticket.'),
+        help_text=_('This user will receive staff updates from both private and public comments.'),
         verbose_name=_('User'),
     )
 
@@ -1950,21 +1950,21 @@ class TicketCC(models.Model):
         _('E-Mail Address'),
         blank=True,
         null=True,
-        help_text=_('For non-user followers, enter their e-mail address'),
+        help_text=_('This address will not receive updates from private comments.'),
     )
 
     can_view = models.BooleanField(
-        _('Can View Ticket?'),
+        _('View Ticket'),
         blank=True,
         default=False,
-        help_text=_('Can this CC login to view the ticket details?'),
+        help_text=_('Can this person login to view the ticket details?'),
     )
 
     can_update = models.BooleanField(
-        _('Can Update Ticket?'),
+        _('Update Ticket'),
         blank=True,
         default=False,
-        help_text=_('Can this CC login and update the ticket?'),
+        help_text=_('Can this person login and update the ticket?'),
     )
 
     def _email_address(self):
