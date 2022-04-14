@@ -219,12 +219,13 @@ urlpatterns += [
 ]
 
 
-# API
-router = DefaultRouter()
-router.register(r'tickets', TicketViewSet, basename='ticket')
-urlpatterns += [
-    url(r'^api/', include(router.urls))
-]
+# API is added to url conf based on the setting (False by default)
+if helpdesk_settings.HELPDESK_ACTIVATE_API_ENDPOINT:
+    router = DefaultRouter()
+    router.register(r'tickets', TicketViewSet, basename='ticket')
+    urlpatterns += [
+        url(r'^api/', include(router.urls))
+    ]
 
 
 urlpatterns += [

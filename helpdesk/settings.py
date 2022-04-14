@@ -2,10 +2,12 @@
 Default settings for django-helpdesk.
 
 """
+import os
 import warnings
+
+from django import forms
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-import os
 
 DEFAULT_USER_SETTINGS = {
     'login_view_ticketlist': True,
@@ -97,6 +99,21 @@ HELPDESK_PUBLIC_TICKET_FORM_CLASS = getattr(
     "helpdesk.forms.PublicTicketForm"
 )
 
+# Custom fields constants
+CUSTOMFIELD_TO_FIELD_DICT = {
+    'boolean': forms.BooleanField,
+    'date': forms.DateField,
+    'time': forms.TimeField,
+    'datetime': forms.DateTimeField,
+    'email': forms.EmailField,
+    'url': forms.URLField,
+    'ipaddress': forms.GenericIPAddressField,
+    'slug': forms.SlugField,
+}
+CUSTOMFIELD_DATE_FORMAT = "%Y-%m-%d"
+CUSTOMFIELD_TIME_FORMAT = "%H:%M:%S"
+CUSTOMFIELD_DATETIME_FORMAT = f"{CUSTOMFIELD_DATE_FORMAT}T%H:%M"
+
 
 ###################################
 # options for update_ticket views #
@@ -154,6 +171,9 @@ HELPDESK_MAX_EMAIL_ATTACHMENT_SIZE = getattr(settings, 'HELPDESK_MAX_EMAIL_ATTAC
 # hide the 'assigned to' / 'Case owner' field from the 'create_ticket' view?
 HELPDESK_CREATE_TICKET_HIDE_ASSIGNED_TO = getattr(
     settings, 'HELPDESK_CREATE_TICKET_HIDE_ASSIGNED_TO', False)
+
+# Activate the API endpoint to manage tickets thanks to Django REST Framework
+HELPDESK_ACTIVATE_API_ENDPOINT = getattr(settings, 'HELPDESK_ACTIVATE_API_ENDPOINT', False)
 
 
 #################

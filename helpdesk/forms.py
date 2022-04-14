@@ -16,33 +16,18 @@ from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 
-from helpdesk.lib import safe_template_context, process_attachments
+from helpdesk.lib import safe_template_context, process_attachments, convert_value
 from helpdesk.models import (Ticket, Queue, FollowUp, IgnoreEmail, TicketCC,
                              CustomField, TicketCustomFieldValue, TicketDependency, UserSettings)
 from helpdesk import settings as helpdesk_settings
-
+from helpdesk.settings import CUSTOMFIELD_TO_FIELD_DICT, CUSTOMFIELD_DATETIME_FORMAT, \
+    CUSTOMFIELD_DATE_FORMAT, CUSTOMFIELD_TIME_FORMAT
 
 if helpdesk_settings.HELPDESK_KB_ENABLED:
     from helpdesk.models import (KBItem)
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
-
-CUSTOMFIELD_TO_FIELD_DICT = {
-    # Store the immediate equivalences here
-    'boolean': forms.BooleanField,
-    'date': forms.DateField,
-    'time': forms.TimeField,
-    'datetime': forms.DateTimeField,
-    'email': forms.EmailField,
-    'url': forms.URLField,
-    'ipaddress': forms.GenericIPAddressField,
-    'slug': forms.SlugField,
-}
-
-CUSTOMFIELD_DATE_FORMAT = "%Y-%m-%d"
-CUSTOMFIELD_TIME_FORMAT = "%H:%M:%S"
-CUSTOMFIELD_DATETIME_FORMAT = f"{CUSTOMFIELD_DATE_FORMAT} {CUSTOMFIELD_TIME_FORMAT}"
 
 
 class CustomFieldMixin(object):
@@ -71,10 +56,7 @@ class CustomFieldMixin(object):
             instanceargs['widget'] = forms.NumberInput(attrs={'class': 'form-control'})
         elif field.data_type == 'list':
             fieldclass = forms.ChoiceField
-            choices = field.choices_as_array
-            if field.empty_selection_list:
-                choices.insert(0, ('', '---------'))
-            instanceargs['choices'] = choices
+            instanceargs['choices'] = field.get_choices()
             instanceargs['widget'] = forms.Select(attrs={'class': 'form-control'})
         else:
             # Try to use the immediate equivalences dictionary
@@ -155,15 +137,7 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
                 except ObjectDoesNotExist:
                     cfv = TicketCustomFieldValue(ticket=self.instance, field=customfield)
 
-                # Convert date/time data type to known fixed format string.
-                if datetime is type(value):
-                    cfv.value = value.strftime(CUSTOMFIELD_DATETIME_FORMAT)
-                elif date is type(value):
-                    cfv.value = value.strftime(CUSTOMFIELD_DATE_FORMAT)
-                elif time is type(value):
-                    cfv.value = value.strftime(CUSTOMFIELD_TIME_FORMAT)
-                else:
-                    cfv.value = value
+                cfv.value = convert_value(value)
                 cfv.save()
 
         return super(EditTicketForm, self).save(*args, **kwargs)
@@ -290,14 +264,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
         return ticket, queue
 
     def _create_custom_fields(self, ticket):
-        for field, value in self.cleaned_data.items():
-            if field.startswith('custom_'):
-                field_name = field.replace('custom_', '', 1)
-                custom_field = CustomField.objects.get(name=field_name)
-                cfv = TicketCustomFieldValue(ticket=ticket,
-                                             field=custom_field,
-                                             value=value)
-                cfv.save()
+        ticket.save_custom_field_values(self.cleaned_data)
 
     def _create_follow_up(self, ticket, title, user=None):
         followup = FollowUp(ticket=ticket,

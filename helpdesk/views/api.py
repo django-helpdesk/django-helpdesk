@@ -12,3 +12,14 @@ class TicketViewSet(viewsets.ModelViewSet):
     queryset = Ticket.objects.all()
     serializer_class = TicketSerializer
     permission_classes = [IsAdminUser]
+
+    def get_queryset(self):
+        tickets = Ticket.objects.all()
+        for ticket in tickets:
+            ticket.set_custom_field_values()
+        return tickets
+
+    def get_object(self):
+        ticket = super().get_object()
+        ticket.set_custom_field_values()
+        return ticket

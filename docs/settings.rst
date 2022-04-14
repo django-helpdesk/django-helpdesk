@@ -168,6 +168,10 @@ Staff Ticket Creation Settings
 
   **Default:** ``HELPDESK_CREATE_TICKET_HIDE_ASSIGNED_TO = False``
 
+- **HELPDESK_ACTIVATE_API_ENDPOINT** Activate the API endpoint to manage tickets thanks to Django REST Framework. See the API section in documentation for more information.
+
+  **Default:** ``HELPDESK_ACTIVATE_API_ENDPOINT = False``
+
 
 Staff Ticket View Settings
 ------------------------------
