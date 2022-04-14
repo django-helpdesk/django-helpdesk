@@ -136,7 +136,7 @@ def process_attachments(followup, attached_files):
 
         if attached.size:
             filename = smart_text(attached.name)
-            att = followup.followupattachment_set(
+            att = followup.followupattachment_set.create(
                 file=attached,
                 filename=filename,
                 mime_type=attached.content_type or
