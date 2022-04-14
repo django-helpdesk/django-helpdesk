@@ -3,6 +3,10 @@ API
 
 A REST API (built with ``djangorestframework``) is available in order to list, create, update and delete tickets from other tools thanks to HTTP requests.
 
+If you wish to use it, you have to add this line in your settings::
+
+    HELPDESK_ACTIVATE_API_ENDPOINT = True
+
 You must be authenticated to access the API, the URL endpoint is ``/api/tickets/``. You can configure how you wish to authenticate to the API by customizing the ``DEFAULT_AUTHENTICATION_CLASSES`` key in the ``REST_FRAMEWORK`` setting (more information on this page : https://www.django-rest-framework.org/api-guide/authentication/)
 
 GET
