@@ -33,6 +33,7 @@
 
 {% block helpdesk_body %}
     <div class="card">
+        {% if helpdesk_settings.HELPDESK_TICKETS_TIMELINE_ENABLED %}
         <div class="card-header">
             <ul class="nav nav-tabs">
                 <li class="nav-item" style="width: 200px;">
@@ -54,6 +55,7 @@
                 </li>
             </ul>
         </div>
+        {% endif %}
         <div class="card-body">
             {{ search_message|safe }}
             <div class="tab-content" id="myTabContent">
