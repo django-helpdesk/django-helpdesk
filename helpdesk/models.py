@@ -1932,6 +1932,8 @@ class TicketCC(models.Model):
     In this circumstance, a 'person' could be either an e-mail address or
     an existing system user.
     """
+    VIEW_WARNING = 'You do not have permission to view this ticket. Please contact the submitter, %s, to change your ' \
+                   'CC settings for this ticket.'
 
     ticket = models.ForeignKey(
         Ticket,

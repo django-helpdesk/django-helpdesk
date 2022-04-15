@@ -108,6 +108,8 @@
 {% endfor %}
 {% endif %}
 
+{% if cc_user.can_update %}
+{{ cc_user.can_update }}
 <form method='post' action="{% url 'helpdesk:update' ticket.id %}" enctype='multipart/form-data'>
     <input type="hidden" name="key" value="{{ key }}" />
     <input type="hidden" name="mail" value="{{ mail }}" />
@@ -185,6 +187,7 @@
     </fieldset>
     <button class="btn btn-primary btn-lg" type='submit'>{% trans "Update This Ticket" %}</button>
 {% csrf_token %}</form>
+{% endif %}
 
 {% endblock %}
 

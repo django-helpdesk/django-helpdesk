@@ -217,11 +217,19 @@ def view_ticket(request):
             if email_lower not in {e.casefold() for e in emails}:
                 return search_for_ticket(request, _('Invalid ticket ID or e-mail address. Please try again.'))
 
-    if is_helpdesk_staff(request.user) and ticket_org == request.user.default_organization.helpdesk_organization:
+    if is_helpdesk_staff(request.user) and ticket_org == request.user.default_organization.helpdesk_organization.name:
         redirect_url = reverse('helpdesk:view', args=[ticket_id])
         if 'close' in request.GET:
             redirect_url += '?close'
         return HttpResponseRedirect(redirect_url)
+
+    cc_user = TicketCC.objects.filter(ticket=ticket, email=email).first()
+    # Redirect User to Homepage if they aren't allowed to view the ticket
+    if not cc_user.can_view:
+        return render(request, 'helpdesk/public_error.html', {
+            'error_message': TicketCC.VIEW_WARNING % (ticket.submitter_email if ticket.submitter_email else ''),
+            'ticket': ticket,
+        })
 
     if 'close' in request.GET and ticket.status == Ticket.RESOLVED_STATUS:
         from helpdesk.views.staff import update_ticket
@@ -260,7 +268,8 @@ def view_ticket(request):
         'ticket': ticket,
         'helpdesk_settings': helpdesk_settings,
         'next': redirect_url,
-        'extra_data': extra_data
+        'extra_data': extra_data,
+        'cc_user': cc_user,
     })
 
 

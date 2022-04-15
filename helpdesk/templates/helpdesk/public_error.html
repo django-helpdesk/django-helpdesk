@@ -1,0 +1,28 @@
+{% extends "helpdesk/base.html" %}
+{% load i18n bootstrap4form humanize %}
+{% load static %}
+
+{% block helpdesk_title %}{{ ticket.queue.slug }}-{{ ticket.id }}: {% trans "View Ticket Details" %}{% endblock %}
+
+{% block helpdesk_head %}
+{% endblock %}
+
+{% block h1_title %}{{ ticket.ticket_for_url }}{% endblock %}
+
+{% block helpdesk_breadcrumb %}
+<li class="breadcrumb-item">
+    <a href="{% url 'helpdesk:list' %}">{% trans "Tickets" %}</a>
+</li>
+<li class="breadcrumb-item active">
+    {{ ticket.queue.slug }}-{{ ticket.id }}
+</li>
+{% endblock %}
+
+{% block helpdesk_body %}
+<div class="card mb-3">
+        <div class="card-header">Warning</div>
+        <div class="card-body">
+            {{ error_message }}
+        </div>
+</div>
+{% endblock %}
