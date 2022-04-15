@@ -99,6 +99,10 @@
 
         <fieldset>
             <dl>
+                <dt>Notes on Notification Emails</dt>
+                <dd>- Adding a comment or attachment, or changing the due date, spent time, or priority will all send an update notification.
+                    <br>- Changing the status to Reopened, Replied, or Duplicate without changing anything else does not send any notifications.
+                    <br>- Changing the status to Resolved and commenting will add a resolution. To change the resolution, Reopen the ticket and then set it to Resolved with a new comment. </dd>
                 {% if preset_replies %}
                 <dt><label for='id_preset'>{% trans "Use a Pre-set Reply" %}</label> <span class='form_optional'>{% trans "(Optional)" %}</span></dt>
                 <dd><select name='preset' id='id_preset'><option value=''>------</option>{% for preset in preset_replies %}<option value='{{ preset.id }}'>{{ preset.name }}</option>{% endfor %}</select></dd>
