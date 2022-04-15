@@ -108,6 +108,7 @@ def send_templated_mail(template_name,
         "%s\n\n{%% include '%s' %%}" % (t.plain_text, footer_file)
     ).render(context)
 
+    # file found in helpdesk/templates/helpdesk/[locale]/
     email_html_base_file = os.path.join('helpdesk', locale, 'email_html_base.html')
     # keep new lines in html emails
     if 'comment' in context:

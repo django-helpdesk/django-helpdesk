@@ -104,9 +104,11 @@ def escalate_tickets(queues, verbose):
 
             t.send(
                 {'submitter': ('escalated_submitter', context),
-                 'ticket_cc': ('escalated_cc', context),
+                 'queue_updated': ('escalated_cc_user', context),
+                 'cc_users': ('escalated_cc_user', context),
+                 'cc_public': ('escalated_cc_public', context),
                  'assigned_to': ('escalated_owner', context),
-                 'extra': ('escalated_cc', context)},
+                 'extra': ('escalated_cc_public', context)},
                 fail_silently=True,
             )
 

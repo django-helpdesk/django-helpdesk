@@ -654,12 +654,22 @@ class Ticket(models.Model):
         This method attempts to send a message to every possible role (see below), but the inner send method will
             ensure only the roles passed in will be sent a message.
 
+        The following templates are default:
+          - assigned (cc_user, owner)
+          - closed (cc_user, cc_public, owner, submitter)
+          - escalated (cc_user, cc_public, owner, submitter)
+          - merged (none)
+          - newticket (cc_user, cc_public, submitter)
+          - resolved (cc_user, cc_public, owner, submitter)
+          - updated (cc_user, cc_public, owner, submitter)
+
         The following roles exist:
-          - 'submitter'
-          - 'new_ticket_cc'
-          - 'ticket_cc'
+          - 'submitter' (the default field contact_email is treated as the submitter)
+          - 'queue_new'
+          - 'queue_updated'
+          - 'cc_users'
+          - 'cc_public'
           - 'assigned_to'
-          - 'contact_email'
           - 'extra'
 
         Here is an example roles dictionary:
@@ -687,22 +697,27 @@ class Ticket(models.Model):
                 send_templated_mail(template, context, recipient, sender=self.queue.from_address, **kwargs)
                 recipients.add(recipient)
 
+        # Attempts to send an email to every possible field.
+
         if self.submitter_email:
             send('submitter', self.submitter_email)
         if self.contact_email:
             send('submitter', self.contact_email)  # TODO add a new role/template for contact_email field?
-        send('ticket_cc', self.queue.updated_ticket_cc)
-        send('new_ticket_cc', self.queue.new_ticket_cc)
-
+        send('queue_updated', self.queue.updated_ticket_cc)
+        send('queue_new', self.queue.new_ticket_cc)
         if self.assigned_to:
             send('assigned_to', self.assigned_to.email)
 
-        if self.queue.enable_notifications_on_email_events:
-            for cc in self.ticketcc_set.all():
-                send('ticket_cc', cc.email_address)
+        # If queue allows CC'd users to be notified, send them email updates
+        for cc in self.ticketcc_set.all():
+            if cc.user:
+                send('cc_users', cc.email_address)
+            elif self.queue.enable_notifications_on_email_events:
+                send('cc_public', cc.email_address)
 
-            # TODO: 'extra' fields currently get sent the same templates as cc.
-            #  Add a method to pair specific extra fields with specific templates
+        if self.queue.enable_notifications_on_email_events:
+            # 'extra' fields are treated as cc_public.
+            #  todo Add a method to pair specific extra fields with specific templates?
             extra_fields = CustomField.objects.filter(
                 ticket_form=self.ticket_form_id,
                 data_type='email',
@@ -1929,7 +1944,7 @@ class TicketCC(models.Model):
         on_delete=models.CASCADE,
         blank=True,
         null=True,
-        help_text=_('User who wishes to receive updates for this ticket.'),
+        help_text=_('This user will receive staff updates from both private and public comments.'),
         verbose_name=_('User'),
     )
 
@@ -1937,21 +1952,21 @@ class TicketCC(models.Model):
         _('E-Mail Address'),
         blank=True,
         null=True,
-        help_text=_('For non-user followers, enter their e-mail address'),
+        help_text=_('This address will not receive updates from private comments.'),
     )
 
     can_view = models.BooleanField(
-        _('Can View Ticket?'),
+        _('View Ticket'),
         blank=True,
         default=False,
-        help_text=_('Can this CC login to view the ticket details?'),
+        help_text=_('Can this person login to view the ticket details?'),
     )
 
     can_update = models.BooleanField(
-        _('Can Update Ticket?'),
+        _('Update Ticket'),
         blank=True,
         default=False,
-        help_text=_('Can this CC login and update the ticket?'),
+        help_text=_('Can this person login and update the ticket?'),
     )
 
     def _email_address(self):

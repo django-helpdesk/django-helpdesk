@@ -99,6 +99,10 @@
 
         <fieldset>
             <dl>
+                <dt>Notes on Notification Emails</dt>
+                <dd>- Adding a comment or attachment, or changing the due date, spent time, or priority will all send an update notification.
+                    <br>- Changing the status to Reopened, Replied, or Duplicate without changing anything else does not send any notifications.
+                    <br>- Changing the status to Resolved and commenting will add a resolution. To change the resolution, Reopen the ticket and then set it to Resolved with a new comment. </dd>
                 {% if preset_replies %}
                 <dt><label for='id_preset'>{% trans "Use a Pre-set Reply" %}</label> <span class='form_optional'>{% trans "(Optional)" %}</span></dt>
                 <dd><select name='preset' id='id_preset'><option value=''>------</option>{% for preset in preset_replies %}<option value='{{ preset.id }}'>{{ preset.name }}</option>{% endfor %}</select></dd>
@@ -163,7 +167,7 @@
                     <label for='id_public'>{% trans "Is this update public?" %}</label> <span class='form_optional'>{% trans "(Optional)" %}</span>
                 </dt>
                 <dd><input type='checkbox' id='id_public' name='public' value='1' />&nbsp; {% trans 'Yes, make this update public.' %}</dd>
-                <dd class='form_help_text'>{% trans "If this is public, the submitter will be e-mailed your comment or resolution." %}</dd>
+                <dd class='form_help_text'>{% trans "If private, an email will be sent to the ticket owner and any copied <i>users</i>.<br>If public, an email will also be sent to the submitter, primary contact, copied nonusers, and any other email fields on the form. " %}</dd>
                 {% endif %}
 
                 {% if is_staff %}

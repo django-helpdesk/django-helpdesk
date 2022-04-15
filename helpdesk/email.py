@@ -517,24 +517,28 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
         }
         if new:
             roles = {'submitter': ('newticket_submitter', context),
-                     'new_ticket_cc': ('newticket_cc', context),
-                     'ticket_cc': ('newticket_cc', context),
-                     'extra': ('newticket_cc', context)}
+                     'queue_new': ('newticket_cc_user', context),
+                     'queue_updated': ('newticket_cc_user', context),
+                     'cc_users': ('newticket_cc_user', context),
+                     'cc_public': ('newticket_cc_public', context),
+                     'extra': ('newticket_cc_public', context)}
             if ticket.assigned_to:
-                roles['assigned_to'] = ('newticket_cc', context)
+                roles['assigned_to'] = ('assigned_owner', context)
             ticket.send(roles, fail_silently=True, extra_headers=extra_headers)
         else:
             context.update(comment=f.comment)
             ticket.send(
-                {'submitter': ('newticket_submitter', context),
-                 'assigned_to': ('updated_owner', context)},
+                {'submitter': ('updated_submitter', context),
+                 'assigned_to': ('updated_owner', context),
+                 'cc_users': ('updated_cc_user', context)},
                 fail_silently=True,
                 extra_headers=extra_headers,
             )
             if queue.enable_notifications_on_email_events:
                 ticket.send(
-                    {'ticket_cc': ('updated_cc', context),
-                     'extra': ('updated_cc', context)},
+                    {'queue_updated': ('updated_cc_user', context),
+                     'cc_public': ('updated_cc_public', context),
+                     'extra': ('updated_cc_public', context)},
                     fail_silently=True,
                     extra_headers=extra_headers,
                 )
