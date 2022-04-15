@@ -127,9 +127,11 @@
                         </p>
                     </form>
                 </div>
+                {% if helpdesk_settings.HELPDESK_TICKETS_TIMELINE_ENABLED %}
                 <div class="tab-pane fade" id="timelinetabcontents" role="tabpanel" aria-labelledby="timelinetabcontents-tab">
                     <div id='timeline-embed' style="width: 100%; height: 80vh"></div>
                 </div>
+                {% endif %}
             </div>
         </div>
         <!-- /.panel-body -->
