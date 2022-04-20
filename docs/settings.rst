@@ -94,6 +94,10 @@ These changes are visible throughout django-helpdesk
 
   **Default:** ``HELPDESK_ANON_ACCESS_RAISES_404 = False``
 
+- **HELPDESK_TICKETS_TIMELINE_ENABLED** If True, redirects user to a 404 page when attempting to reach ticket pages while not logged in, rather than redirecting to a login screen.
+
+  **Default:** ``HELPDESK_ANON_ACCESS_RAISES_404 = True``
+
 Options shown on public pages
 -----------------------------
 
