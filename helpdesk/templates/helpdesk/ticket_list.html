@@ -74,7 +74,7 @@
                                 <th>{% trans "Due Date" %}</th>
                                 <th>{% trans "Owner" %}</th>
                                 <th>{% trans "Submitter" %}</th>
-                                <th>{% trans "Time Spent" %}</th>
+                                {% if helpdesk_settings.HELPDESK_ENABLE_TIME_SPENT_ON_TICKET %}<th>{% trans "Time Spent" %}</th>{% endif %}
                                 {% if helpdesk_settings.HELPDESK_KB_ENABLED %}<th>{% trans "KB item" %}</th>{% endif %}
                             </tr>
                             </thead>
@@ -408,7 +408,9 @@
                         }
                     },
                     {data: "submitter"},
+                    {% if helpdesk_settings.HELPDESK_ENABLE_TIME_SPENT_ON_TICKET %}
                     {data: "time_spent", "visible": false},
+                    {% endif %}
                     {% if helpdesk_settings.HELPDESK_KB_ENABLED %}
                     {data: "kbitem"},
                     {% endif %}
