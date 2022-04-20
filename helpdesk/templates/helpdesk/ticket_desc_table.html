@@ -82,8 +82,13 @@
                             {% trans "This ticket has no dependencies." %}
                             {% endfor %}
                         </td>
+                    {% if helpdesk_settings.HELPDESK_ENABLE_TIME_SPENT_ON_TICKET %}
                         <th class="table-active">{% trans "Total time spent" %}</th>
                         <td>{{ ticket.time_spent_formated }}</td>
+                    {% else %}
+                        <th class="table-active"></th>
+                        <td></td>
+                    {% endif %}
                     </tr>
                     {% if ticket.kbitem %}
                     <tr>

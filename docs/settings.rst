@@ -94,6 +94,14 @@ These changes are visible throughout django-helpdesk
 
   **Default:** ``HELPDESK_ANON_ACCESS_RAISES_404 = False``
 
+- **HELPDESK_ENABLE_DEPENDENCIES_ON_TICKET** If False, disable the fields on ticket.
+
+  **Default:** ``HELPDESK_ENABLE_DEPENDENCIES_ON_TICKET = True``
+
+- **HELPDESK_ENABLE_TIME_SPENT_ON_TICKET** If False, disable the fields on ticket.
+
+  **Default:** ``HELPDESK_ENABLE_TIME_SPENT_ON_TICKET = True``
+
 Options shown on public pages
 -----------------------------
 

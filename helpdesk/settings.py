@@ -41,6 +41,16 @@ HELPDESK_REDIRECT_TO_LOGIN_BY_DEFAULT = getattr(settings,
                                                 'HELPDESK_REDIRECT_TO_LOGIN_BY_DEFAULT',
                                                 False)
 
+# Enable the Dependencies field on ticket view
+HELPDESK_ENABLE_DEPENDENCIES_ON_TICKET = getattr(settings,
+                                                'HELPDESK_ENABLE_DEPENDENCIES_ON_TICKET',
+                                                True)
+
+# Enable the Time spent on field on ticket view
+HELPDESK_ENABLE_TIME_SPENT_ON_TICKET = getattr(settings,
+                                                'HELPDESK_ENABLE_TIME_SPENT_ON_TICKET',
+                                                True)
+
 # raises a 404 to anon users. It's like it was invisible
 HELPDESK_ANON_ACCESS_RAISES_404 = getattr(settings,
                                           'HELPDESK_ANON_ACCESS_RAISES_404',
