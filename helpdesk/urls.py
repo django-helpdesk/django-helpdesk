@@ -108,14 +108,6 @@ urlpatterns = [
         staff.ticket_cc_del,
         name='ticket_cc_del'),
 
-    url(r'^tickets/(?P<ticket_id>[0-9]+)/dependency/add/$',
-        staff.ticket_dependency_add,
-        name='ticket_dependency_add'),
-
-    url(r'^tickets/(?P<ticket_id>[0-9]+)/dependency/delete/(?P<dependency_id>[0-9]+)/$',
-        staff.ticket_dependency_del,
-        name='ticket_dependency_del'),
-
     url(r'^tickets/(?P<ticket_id>[0-9]+)/attachment_delete/(?P<attachment_id>[0-9]+)/$',
         staff.attachment_del,
         name='attachment_del'),
@@ -169,6 +161,17 @@ urlpatterns = [
         name="timeline_ticket_list"),
 
 ]
+
+if helpdesk_settings.HELPDESK_ENABLE_DEPENDENCIES_ON_TICKET:
+    urlpatterns += [
+            url(r'^tickets/(?P<ticket_id>[0-9]+)/dependency/add/$',
+            staff.ticket_dependency_add,
+            name='ticket_dependency_add'),
+
+        url(r'^tickets/(?P<ticket_id>[0-9]+)/dependency/delete/(?P<dependency_id>[0-9]+)/$',
+            staff.ticket_dependency_del,
+            name='ticket_dependency_del'),
+    ]
 
 urlpatterns += [
     url(r'^$',

@@ -70,7 +70,9 @@
                         <td>{{ ticketcc_string }} <a data-toggle='tooltip' href='{% url 'helpdesk:ticket_cc' ticket.id %}' title='{% trans "Click here to add / remove people who should receive an e-mail whenever this ticket is updated." %}'><strong><button type="button" class="btn btn-warning btn-sm float-right"><i class="fa fa-share"></i></button></strong></a>{% if SHOW_SUBSCRIBE %} <strong><a data-toggle='tooltip' href='?subscribe' title='{% trans "Click here to subscribe yourself to this ticket, if you want to receive an e-mail whenever this ticket is updated." %}'><button type="button" class="btn btn-warning btn-sm float-right"><i class="fas fa-rss-square"></i></button></a></strong>{% endif %}</td>
                     </tr>
 
+                    {% if helpdesk_settings.HELPDESK_ENABLE_DEPENDENCIES_ON_TICKET != False and helpdesk_settings.HELPDESK_ENABLE_TIME_SPENT_ON_TICKET != False %}
                     <tr>
+                    {% if helpdesk_settings.HELPDESK_ENABLE_DEPENDENCIES_ON_TICKET %}
                         <th class="table-active">{% trans "Dependencies" %}</th>
                         <td>
                             <a data-toggle='tooltip' href='{% url 'helpdesk:ticket_dependency_add' ticket.id %}' title="{% trans "Click on 'Add Dependency', if you want to make this ticket dependent on another ticket. A ticket may not be closed until all tickets it depends on are closed." %}"><button type="button" class="btn btn-primary btn-sm float-right"><i class="fas fa-link"></i></button></a>
@@ -82,6 +84,10 @@
                             {% trans "This ticket has no dependencies." %}
                             {% endfor %}
                         </td>
+                    {% else %}
+                        <th class="table-active"></th>
+                        <td></td>
+                    {% endif %}
                     {% if helpdesk_settings.HELPDESK_ENABLE_TIME_SPENT_ON_TICKET %}
                         <th class="table-active">{% trans "Total time spent" %}</th>
                         <td>{{ ticket.time_spent_formated }}</td>
@@ -90,6 +96,7 @@
                         <td></td>
                     {% endif %}
                     </tr>
+                    {% endif %}
                     {% if ticket.kbitem %}
                     <tr>
                         <th class="table-active">{% trans "Knowlegebase item" %}</th>
