@@ -155,7 +155,7 @@ class Homepage(CreateTicketView):
         return context
 
 
-def search_for_ticket(request, error_message=None):
+def search_for_ticket(request, error_message=None, ticket=None):
     if hasattr(settings, 'HELPDESK_VIEW_A_TICKET_PUBLIC') and settings.HELPDESK_VIEW_A_TICKET_PUBLIC:
         email = request.GET.get('email', None)
         return render(request, 'helpdesk/public_view_form.html', {
@@ -165,7 +165,10 @@ def search_for_ticket(request, error_message=None):
             'helpdesk_settings': helpdesk_settings,
         })
     else:
-        raise PermissionDenied("Public viewing of tickets without a secret key is forbidden.")
+        return render(request, 'helpdesk/public_error.html', {
+            'error_message': TicketCC.VIEW_WARNING % (ticket.submitter_email if ticket and ticket.submitter_email else 'Not Found'),
+            'ticket': ticket,
+        })
 
 
 @protect_view
@@ -215,7 +218,8 @@ def view_ticket(request):
             emails.discard(None)
             # Otherwise, not allowed
             if email_lower not in {e.casefold() for e in emails}:
-                return search_for_ticket(request, _('Invalid ticket ID or e-mail address. Please try again.'))
+                return search_for_ticket(request, _('Invalid ticket ID or e-mail address. Please try again.'),
+                                         ticket=ticket)
 
     if is_helpdesk_staff(request.user) and ticket_org == request.user.default_organization.helpdesk_organization.name:
         redirect_url = reverse('helpdesk:view', args=[ticket_id])
@@ -224,12 +228,16 @@ def view_ticket(request):
         return HttpResponseRedirect(redirect_url)
 
     cc_user = TicketCC.objects.filter(ticket=ticket, email=email).first()
-    # Redirect User to Homepage if they aren't allowed to view the ticket
-    if not cc_user.can_view:
+    # Redirect CC User to Homepage if they aren't allowed to view the ticket
+    if cc_user and not cc_user.can_view:
         return render(request, 'helpdesk/public_error.html', {
             'error_message': TicketCC.VIEW_WARNING % (ticket.submitter_email if ticket.submitter_email else ''),
             'ticket': ticket,
         })
+    elif cc_user and cc_user.can_view:
+        can_update = cc_user.can_update
+    elif email == ticket.submitter_email:
+        can_update = True
 
     if 'close' in request.GET and ticket.status == Ticket.RESOLVED_STATUS:
         from helpdesk.views.staff import update_ticket
@@ -269,7 +277,7 @@ def view_ticket(request):
         'helpdesk_settings': helpdesk_settings,
         'next': redirect_url,
         'extra_data': extra_data,
-        'cc_user': cc_user,
+        'can_update': can_update,
     })
 
 
