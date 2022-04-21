@@ -33,7 +33,7 @@ import bleach
 from bleach.linkifier import LinkifyFilter
 from bleach.sanitizer import Cleaner
 from bleach_allowlist import markdown_tags, markdown_attrs, print_tags, print_attrs, all_styles
-from urllib.parse import urlparse
+from urllib.parse import urlparse, quote
 from functools import partial
 
 import pinax.teams.models
@@ -77,14 +77,11 @@ class EscapeHtml(Extension):
         del md.inlinePatterns['html']
 
 
-def _cleaner_set_target(attrs, new=False):
+def _cleaner_set_target(domain, attrs, new=False):
     """Callback for bleach. Opens external urls in a new tab.
         Added directly from https://bleach.readthedocs.io/en/latest/linkify.html """
-    from django.contrib.sites.models import Site
-
-    current_site = Site.objects.get_current()
     p = urlparse(attrs[(None, 'href')])
-    if p.netloc not in [current_site.domain, current_site.name, '']:
+    if p.netloc not in [domain.netloc, domain.hostname, domain.name, '']:
         attrs[(None, 'target')] = '_blank'
         attrs[(None, 'class')] = 'external'
     else:
@@ -105,9 +102,12 @@ def _cleaner_shorten_url(attrs, new=False):
     return attrs
 
 
-def get_markdown(text, kb=False):
+def get_markdown(text, org, kb=False):
     if not text:
         return ""
+
+    domain = org.domain
+
     extensions = [EscapeHtml(),
                   'markdown.extensions.nl2br',  # required for collapsing sections to work; a single newline doesn't break up a section, two newlines do
                   'markdown.extensions.fenced_code',  # required for collapsing sections
@@ -118,7 +118,7 @@ def get_markdown(text, kb=False):
         collapsible_attrs = {"p": ["data-target", "data-toggle", "data-parent", "role",
                                    'aria-controls', 'aria-expanded', 'aria-labelledby', 'id']}
     cleaner = Cleaner(
-        filters=[partial(LinkifyFilter, callbacks=[_cleaner_set_target, _cleaner_shorten_url])],
+        filters=[partial(LinkifyFilter, callbacks=[partial(_cleaner_set_target, domain), _cleaner_shorten_url])],
         tags=markdown_tags + print_tags,
         attributes={**markdown_attrs,
                     **print_attrs,
@@ -520,7 +520,7 @@ class FormType(models.Model):
         return 'FormType - %s %s' % (self.id, self.name)
 
     def get_markdown(self):
-        return get_markdown(self.description)
+        return get_markdown(self.description, self.organization)
 
     def get_extra_field_names(self):
         return CustomField.objects.filter(ticket_form=self.id, is_extra_data=True).values_list('field_name', flat=True)
@@ -797,18 +797,21 @@ class Ticket(models.Model):
         from django.core.exceptions import ImproperlyConfigured
         from django.urls import reverse
         try:
-            site = Site.objects.get_current()
+            domain_name = self.ticket_form.organization.domain.netloc
+        except Exception:
+            domain_name = Site.objects.get_current().domain
         except ImproperlyConfigured:
-            site = Site(domain='configure-django-sites.com')
+            domain_name = Site(domain='configure-django-sites.com').domain
         if helpdesk_settings.HELPDESK_USE_HTTPS_IN_EMAIL_LINK:
             protocol = 'https'
         else:
             protocol = 'http'
+        org_name = quote(self.queue.organization.name)
         return u"%s://%s%s?org=%s&ticket=%s&email=%s&key=%s" % (
             protocol,
-            site.domain,
+            domain_name,
             reverse('helpdesk:public_view'),
-            self.queue.organization.name,
+            org_name,
             self.ticket_for_url,
             self.submitter_email,
             self.secret_key
@@ -824,16 +827,18 @@ class Ticket(models.Model):
         from django.core.exceptions import ImproperlyConfigured
         from django.urls import reverse
         try:
-            site = Site.objects.get_current()
+            domain_name = self.ticket_form.organization.domain.netloc,
+        except Exception:
+            domain_name = Site.objects.get_current().domain
         except ImproperlyConfigured:
-            site = Site(domain='configure-django-sites.com')
+            domain_name = Site(domain='configure-django-sites.com').domain
         if helpdesk_settings.HELPDESK_USE_HTTPS_IN_EMAIL_LINK:
             protocol = 'https'
         else:
             protocol = 'http'
         return u"%s://%s%s" % (
             protocol,
-            site.domain,
+            domain_name,
             reverse('helpdesk:view',
                     args=[self.id])
         )
@@ -895,7 +900,7 @@ class Ticket(models.Model):
         return queue, parts[-1]
 
     def get_markdown(self):
-        return get_markdown(self.description)
+        return get_markdown(self.description, self.ticket_form.organization)
 
     @property
     def get_resolution_markdown(self):
@@ -1115,7 +1120,7 @@ class FollowUp(models.Model):
         super(FollowUp, self).save(*args, **kwargs)
 
     def get_markdown(self):
-        return get_markdown(self.comment)
+        return get_markdown(self.comment, self.ticket.ticket_form.organization)
 
     @property
     def time_spent_formatted(self):
@@ -1484,10 +1489,10 @@ class KBCategory(models.Model):
         return reverse('helpdesk:kb_category', kwargs={'slug': self.slug})
 
     def get_description_markdown(self):
-        return get_markdown(self.description)
+        return get_markdown(self.description, self.organization)
 
     def get_preview_markdown(self):
-        return get_markdown(self.preview_description)
+        return get_markdown(self.preview_description, self.organization)
 
 
 class KBItem(models.Model):
@@ -1654,8 +1659,8 @@ class KBItem(models.Model):
         new_answer, title_count = re.subn(title_pattern, MarkdownNumbers(start=1, pattern=title), self.answer)
         new_answer, body_count = re.subn(body_pattern, MarkdownNumbers(start=1, pattern=body), new_answer)
         if title_count != 0 and title_count == body_count:
-            return get_markdown(new_answer, kb=True)
-        return get_markdown(self.answer)
+            return get_markdown(new_answer, self.category.organization, kb=True)
+        return get_markdown(self.answer, self.category.organization)
 
 
 class SavedSearch(models.Model):
@@ -2145,7 +2150,7 @@ class CustomField(models.Model):
         # constraints = [models.UniqueConstraint(fields=['field_name', 'ticket_form'], name='unique_form_field')]
 
     def get_markdown(self):
-        return get_markdown(self.help_text)
+        return get_markdown(self.help_text, self.ticket_form.organization)
 
 
 class TicketCustomFieldValue(models.Model):
