@@ -94,13 +94,17 @@ These changes are visible throughout django-helpdesk
 
   **Default:** ``HELPDESK_ANON_ACCESS_RAISES_404 = False``
 
-- **HELPDESK_ENABLE_DEPENDENCIES_ON_TICKET** If False, disable the fields on ticket.
+- **HELPDESK_ENABLE_DEPENDENCIES_ON_TICKET** If False, disable the dependencies fields on ticket.
 
   **Default:** ``HELPDESK_ENABLE_DEPENDENCIES_ON_TICKET = True``
 
-- **HELPDESK_ENABLE_TIME_SPENT_ON_TICKET** If False, disable the fields on ticket.
+- **HELPDESK_ENABLE_TIME_SPENT_ON_TICKET** If False, disable the time spent fields on ticket.
 
   **Default:** ``HELPDESK_ENABLE_TIME_SPENT_ON_TICKET = True``
+
+- **HELPDESK_TICKETS_TIMELINE_ENABLED** If False, remove from the dashboard the Timeline view for tickets.
+
+  **Default:** ``HELPDESK_TICKETS_TIMELINE_ENABLED = True``
 
 Options shown on public pages
 -----------------------------

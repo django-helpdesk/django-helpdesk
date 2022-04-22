@@ -114,6 +114,8 @@ HELPDESK_SUBMIT_A_TICKET_PUBLIC = True
 # Should the Knowledgebase be enabled?
 HELPDESK_KB_ENABLED = True
 
+HELPDESK_TICKETS_TIMELINE_ENABLED = True
+
 # Allow users to change their passwords
 HELPDESK_SHOW_CHANGE_PASSWORD = True
 
