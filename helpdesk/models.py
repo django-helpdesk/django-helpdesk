@@ -386,6 +386,9 @@ class Queue(models.Model):
         blank=True, null=True
     )
 
+    keep_mail = models.BooleanField(default=False,
+                                    help_text=_('After processing, should mail be kept in the inbox? (IMAP only.)'))
+
     def __str__(self):
         return "%s" % self.title
 
