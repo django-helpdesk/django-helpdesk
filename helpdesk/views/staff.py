@@ -1167,6 +1167,7 @@ def ticket_list(request):
         from_saved_query=saved_query is not None,
         saved_query=saved_query,
         search_message=search_message,
+        helpdesk_settings=helpdesk_settings,
     ))
 
 

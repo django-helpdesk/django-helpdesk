@@ -94,6 +94,10 @@ These changes are visible throughout django-helpdesk
 
   **Default:** ``HELPDESK_ANON_ACCESS_RAISES_404 = False``
 
+- **HELPDESK_TICKETS_TIMELINE_ENABLED** If False, remove from the dashboard the Timeline view for tickets.
+
+  **Default:** ``HELPDESK_TICKETS_TIMELINE_ENABLED = True``
+
 Options shown on public pages
 -----------------------------
 
