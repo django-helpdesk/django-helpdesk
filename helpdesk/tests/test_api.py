@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from pytz import UTC
 from rest_framework import HTTP_HEADER_ENCODING
 from rest_framework.exceptions import ErrorDetail
-from rest_framework.status import HTTP_201_CREATED, HTTP_200_OK, HTTP_204_NO_CONTENT, HTTP_400_BAD_REQUEST
+from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CONTENT, HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN
 from rest_framework.test import APITestCase
 
 from helpdesk.models import Queue, Ticket, CustomField
@@ -21,13 +21,13 @@ class TicketTest(APITestCase):
 
     def test_create_api_ticket_not_authenticated_user(self):
         response = self.client.post('/api/tickets/')
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, HTTP_403_FORBIDDEN)
 
     def test_create_api_ticket_authenticated_non_staff_user(self):
         non_staff_user = User.objects.create_user(username='test')
         self.client.force_authenticate(non_staff_user)
         response = self.client.post('/api/tickets/')
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, HTTP_403_FORBIDDEN)
 
     def test_create_api_ticket_no_data(self):
         staff_user = User.objects.create_user(username='test', is_staff=True)

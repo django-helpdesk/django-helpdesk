@@ -40,6 +40,7 @@ class QuickDjangoTest(object):
         #'account',
         #'pinax.invitations',
         #'pinax.teams',
+        'rest_framework',
         'helpdesk',
         #'reversion',
     )
@@ -104,7 +105,9 @@ class QuickDjangoTest(object):
             ## The following settings disable teams
             HELPDESK_TEAMS_MODEL = 'auth.User',
             HELPDESK_TEAMS_MIGRATION_DEPENDENCIES = [],
-            HELPDESK_KBITEM_TEAM_GETTER = lambda _: None
+            HELPDESK_KBITEM_TEAM_GETTER = lambda _: None,
+            ## test the API
+            HELPDESK_ACTIVATE_API_ENDPOINT=True
         )
 
         from django.test.runner import DiscoverRunner
