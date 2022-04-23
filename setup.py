@@ -8,9 +8,16 @@ version = '0.4.0a1'
 
 # Provided as an attribute, so you can append to these instead
 # of replicating them:
-standard_exclude = ('*.py', '*.pyc', '*$py.class', '*~', '.*', '*.bak')
-standard_exclude_directories = ('.*', 'CVS', '_darcs', './build',
-                                './dist', 'EGG-INFO', '*.egg-info')
+standard_exclude = ("*.py", "*.pyc", "*$py.class", "*~", ".*", "*.bak")
+standard_exclude_directories = (
+    ".*",
+    "CVS",
+    "_darcs",
+    "./build",
+    "./dist",
+    "EGG-INFO",
+    "*.egg-info",
+)
 
 # (c) 2005 Ian Bicking and contributors; written for Paste (http://pythonpaste.org)
 # Licensed under the MIT license: http://www.opensource.org/licenses/mit-license.php
@@ -18,11 +25,13 @@ standard_exclude_directories = ('.*', 'CVS', '_darcs', './build',
 # you can't import this from another package, when you don't know if
 # that package is installed yet.
 def find_package_data(
-    where='.', package='',
+    where=".",
+    package="",
     exclude=standard_exclude,
     exclude_directories=standard_exclude_directories,
     only_in_packages=True,
-    show_ignored=False):
+    show_ignored=False,
+):
     """
     Return a dictionary suitable for use in ``package_data``
     in a distutils ``setup.py`` file.
@@ -51,7 +60,7 @@ def find_package_data(
     """
 
     out = {}
-    stack = [(convert_path(where), '', package, only_in_packages)]
+    stack = [(convert_path(where), "", package, only_in_packages)]
     while stack:
         where, prefix, package, only_in_packages = stack.pop(0)
         for name in os.listdir(where):
@@ -59,43 +68,40 @@ def find_package_data(
             if os.path.isdir(fn):
                 bad_name = False
                 for pattern in exclude_directories:
-                    if (fnmatchcase(name, pattern)
-                        or fn.lower() == pattern.lower()):
+                    if fnmatchcase(name, pattern) or fn.lower() == pattern.lower():
                         bad_name = True
                         if show_ignored:
                             print(
                                 "Directory %s ignored by pattern %s" % (fn, pattern),
-                                file=sys.stderr
+                                file=sys.stderr,
                             )
 
                         break
                 if bad_name:
                     continue
-                if (os.path.isfile(os.path.join(fn, '__init__.py'))
-                    and not prefix):
+                if os.path.isfile(os.path.join(fn, "__init__.py")) and not prefix:
                     if not package:
                         new_package = name
                     else:
-                        new_package = package + '.' + name
-                    stack.append((fn, '', new_package, False))
+                        new_package = package + "." + name
+                    stack.append((fn, "", new_package, False))
                 else:
-                    stack.append((fn, prefix + name + '/', package, only_in_packages))
+                    stack.append((fn, prefix + name + "/", package, only_in_packages))
             elif package or not only_in_packages:
                 # is a file
                 bad_name = False
                 for pattern in exclude:
-                    if (fnmatchcase(name, pattern)
-                        or fn.lower() == pattern.lower()):
+                    if fnmatchcase(name, pattern) or fn.lower() == pattern.lower():
                         bad_name = True
                         if show_ignored:
                             print(
                                 "File %s ignored by pattern %s" % (fn, pattern),
-                                file=sys.stderr
-                                )
+                                file=sys.stderr,
+                            )
                         break
                 if bad_name:
                     continue
-                out.setdefault(package, []).append(prefix+name)
+                out.setdefault(package, []).append(prefix + name)
     return out
 
 
@@ -116,7 +122,7 @@ def get_long_description():
 
 
 setup(
-    name='django-helpdesk',
+    name="django-helpdesk",
     version=version,
     description="Django-powered ticket tracker for your helpdesk",
     long_description=get_long_description(),
@@ -128,6 +134,10 @@ setup(
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Framework :: Django",
+<<<<<<< HEAD
+=======
+        "Framework :: Django :: 2.2",
+>>>>>>> 55c638aeef0b3032eab28bcdc8ee313da9cbf9c0
         "Framework :: Django :: 3.2",
         "Environment :: Web Environment",
         "Operating System :: OS Independent",
@@ -138,18 +148,26 @@ setup(
         "Topic :: Office/Business",
         "Natural Language :: English",
     ],
-    keywords=['django', 'helpdesk', 'django-helpdesk', 'tickets', 'incidents',
-              'cases', 'bugs', 'track', 'support'],
-    author='Ross Poulton',
-    author_email='ross@rossp.org',
-    maintainer='Garret Wassermann',
-    maintainer_email='gwasser@gmail.com',
-    url='https://github.com/django-helpdesk/django-helpdesk',
-    license='BSD',
+    keywords=[
+        "django",
+        "helpdesk",
+        "django-helpdesk",
+        "tickets",
+        "incidents",
+        "cases",
+        "bugs",
+        "track",
+        "support",
+    ],
+    author="Ross Poulton",
+    author_email="ross@rossp.org",
+    maintainer="Garret Wassermann",
+    maintainer_email="gwasser@gmail.com",
+    url="https://github.com/django-helpdesk/django-helpdesk",
+    license="BSD",
     packages=find_packages(),
     package_data=find_package_data("helpdesk", only_in_packages=False),
     include_package_data=True,
     zip_safe=False,
     install_requires=get_requirements(),
 )
-

@@ -1,7 +1,6 @@
-Django>=2.2,<4
+Django>=2.2
 django-bootstrap4-form
 celery
-django-celery-beat
 email-reply-parser
 akismet
 markdown
