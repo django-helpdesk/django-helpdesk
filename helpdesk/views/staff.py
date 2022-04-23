@@ -19,7 +19,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
 from django.http import HttpResponseRedirect, Http404, HttpResponse, JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from django.utils.html import escape
 from django.utils import timezone
 from django.views.decorators.csrf import requires_csrf_token

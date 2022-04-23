@@ -14,7 +14,7 @@
             {% endwith %}
             {% for u in user_choices %}
             <option value='{{ u.id }}'{% if u.id|in_list:query_params.filtering.assigned_to__id__in %} selected='selected'{% endif %}>
-                {{ u.get_username }}{% ifequal u user %} {% trans "(ME)" %}{% endifequal %}
+                {{ u.get_username }}
             </option>
             {% endfor %}
         </select>
