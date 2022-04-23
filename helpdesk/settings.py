@@ -2,10 +2,12 @@
 Default settings for django-helpdesk.
 
 """
+import os
 import warnings
+
+from django import forms
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-import os
 
 DEFAULT_USER_SETTINGS = {
     'login_view_ticketlist': True,
@@ -39,6 +41,16 @@ HELPDESK_REDIRECT_TO_LOGIN_BY_DEFAULT = getattr(settings,
                                                 'HELPDESK_REDIRECT_TO_LOGIN_BY_DEFAULT',
                                                 False)
 
+# Enable the Dependencies field on ticket view
+HELPDESK_ENABLE_DEPENDENCIES_ON_TICKET = getattr(settings,
+                                                'HELPDESK_ENABLE_DEPENDENCIES_ON_TICKET',
+                                                True)
+
+# Enable the Time spent on field on ticket view
+HELPDESK_ENABLE_TIME_SPENT_ON_TICKET = getattr(settings,
+                                                'HELPDESK_ENABLE_TIME_SPENT_ON_TICKET',
+                                                True)
+
 # raises a 404 to anon users. It's like it was invisible
 HELPDESK_ANON_ACCESS_RAISES_404 = getattr(settings,
                                           'HELPDESK_ANON_ACCESS_RAISES_404',
@@ -46,6 +58,9 @@ HELPDESK_ANON_ACCESS_RAISES_404 = getattr(settings,
 
 # show knowledgebase links?
 HELPDESK_KB_ENABLED = getattr(settings, 'HELPDESK_KB_ENABLED', True)
+
+# Disable Timeline on ticket list
+HELPDESK_TICKETS_TIMELINE_ENABLED = getattr(settings, 'HELPDESK_TICKETS_TIMELINE_ENABLED', True)
 
 # show extended navigation by default, to all users, irrespective of staff status?
 HELPDESK_NAVIGATION_ENABLED = getattr(settings, 'HELPDESK_NAVIGATION_ENABLED', False)
@@ -96,6 +111,21 @@ HELPDESK_PUBLIC_TICKET_FORM_CLASS = getattr(
     "HELPDESK_PUBLIC_TICKET_FORM_CLASS",
     "helpdesk.forms.PublicTicketForm"
 )
+
+# Custom fields constants
+CUSTOMFIELD_TO_FIELD_DICT = {
+    'boolean': forms.BooleanField,
+    'date': forms.DateField,
+    'time': forms.TimeField,
+    'datetime': forms.DateTimeField,
+    'email': forms.EmailField,
+    'url': forms.URLField,
+    'ipaddress': forms.GenericIPAddressField,
+    'slug': forms.SlugField,
+}
+CUSTOMFIELD_DATE_FORMAT = "%Y-%m-%d"
+CUSTOMFIELD_TIME_FORMAT = "%H:%M:%S"
+CUSTOMFIELD_DATETIME_FORMAT = f"{CUSTOMFIELD_DATE_FORMAT}T%H:%M"
 
 
 ###################################
@@ -154,6 +184,9 @@ HELPDESK_MAX_EMAIL_ATTACHMENT_SIZE = getattr(settings, 'HELPDESK_MAX_EMAIL_ATTAC
 # hide the 'assigned to' / 'Case owner' field from the 'create_ticket' view?
 HELPDESK_CREATE_TICKET_HIDE_ASSIGNED_TO = getattr(
     settings, 'HELPDESK_CREATE_TICKET_HIDE_ASSIGNED_TO', False)
+
+# Activate the API endpoint to manage tickets thanks to Django REST Framework
+HELPDESK_ACTIVATE_API_ENDPOINT = getattr(settings, 'HELPDESK_ACTIVATE_API_ENDPOINT', False)
 
 
 #################

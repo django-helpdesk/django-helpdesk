@@ -10,13 +10,14 @@ urls.py - Mapping of URL's to our various views. Note we always used NAMED
 from django.conf.urls import url
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import views as auth_views
+from django.urls import include
 from django.views.generic import TemplateView
+from rest_framework.routers import DefaultRouter
 
 from helpdesk.decorators import helpdesk_staff_member_required, protect_view
-from helpdesk import settings as helpdesk_settings
 from helpdesk.views import feeds, staff, public, login
 from helpdesk import settings as helpdesk_settings
-
+from helpdesk.views.api import TicketViewSet
 
 if helpdesk_settings.HELPDESK_KB_ENABLED:
     from helpdesk.views import kb
@@ -107,14 +108,6 @@ urlpatterns = [
         staff.ticket_cc_del,
         name='ticket_cc_del'),
 
-    url(r'^tickets/(?P<ticket_id>[0-9]+)/dependency/add/$',
-        staff.ticket_dependency_add,
-        name='ticket_dependency_add'),
-
-    url(r'^tickets/(?P<ticket_id>[0-9]+)/dependency/delete/(?P<dependency_id>[0-9]+)/$',
-        staff.ticket_dependency_del,
-        name='ticket_dependency_del'),
-
     url(r'^tickets/(?P<ticket_id>[0-9]+)/attachment_delete/(?P<attachment_id>[0-9]+)/$',
         staff.attachment_del,
         name='attachment_del'),
@@ -169,6 +162,17 @@ urlpatterns = [
 
 ]
 
+if helpdesk_settings.HELPDESK_ENABLE_DEPENDENCIES_ON_TICKET:
+    urlpatterns += [
+            url(r'^tickets/(?P<ticket_id>[0-9]+)/dependency/add/$',
+            staff.ticket_dependency_add,
+            name='ticket_dependency_add'),
+
+        url(r'^tickets/(?P<ticket_id>[0-9]+)/dependency/delete/(?P<dependency_id>[0-9]+)/$',
+            staff.ticket_dependency_del,
+            name='ticket_dependency_del'),
+    ]
+
 urlpatterns += [
     url(r'^$',
         protect_view(public.Homepage.as_view()),
@@ -216,6 +220,15 @@ urlpatterns += [
         helpdesk_staff_member_required(feeds.RecentFollowUps()),
         name='rss_activity'),
 ]
+
+
+# API is added to url conf based on the setting (False by default)
+if helpdesk_settings.HELPDESK_ACTIVATE_API_ENDPOINT:
+    router = DefaultRouter()
+    router.register(r'tickets', TicketViewSet, basename='ticket')
+    urlpatterns += [
+        url(r'^api/', include(router.urls))
+    ]
 
 
 urlpatterns += [

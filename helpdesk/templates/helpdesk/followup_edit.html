@@ -46,8 +46,10 @@
                 <dt><label for="id_new_status">New Status:</label></dt>
                 <dd>{{ form.new_status }}</dd>
                     <p>If the status was changed, what was it changed to?</p>
+                {% if helpdesk_settings.HELPDESK_ENABLE_TIME_SPENT_ON_TICKET %}
                 <dt><label for="id_time_spent">Time spent:</label></dt>
                 <dd>{{ form.time_spent }}</dd>
+                {% endif %}
             </dl>
             </fieldset>
             <p><input class="btn btn-primary btn-sm" type="submit" value="Submit"></p>{% csrf_token %}

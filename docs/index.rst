@@ -16,9 +16,9 @@ Contents
    settings
    spam
    custom_fields
+   api
    integration
    teams
-   contributing
    license
 
 
@@ -40,6 +40,7 @@ django-helpdesk has been designed for small businesses who need to receive, mana
 * Tickets can be opened via email
 * Multiple queues / categories of tickets
 * Integrated FAQ / knowledgebase
+* API to manage tickets
 
 Customer-facing Capabilities
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -62,6 +63,8 @@ If a user is a staff member, they get general helpdesk access, including:
 5. Follow up or respond to tickets
 6. Assign tickets to themselves or other staff members
 7. Resolve tickets
+8. Merge multiple tickets into one
+9. Create, Read, Update and Delete tickets through a REST API
 
 Optionally, their access to view tickets, both on the dashboard and through searches and reports, may be restricted by a list of queues to which they have been granted membership. Create and update permissions for individual tickets are not limited by this optional restriction.
 

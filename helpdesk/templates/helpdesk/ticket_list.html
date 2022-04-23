@@ -33,6 +33,7 @@
 
 {% block helpdesk_body %}
     <div class="card">
+        {% if helpdesk_settings.HELPDESK_TICKETS_TIMELINE_ENABLED %}
         <div class="card-header">
             <ul class="nav nav-tabs">
                 <li class="nav-item" style="width: 200px;">
@@ -54,6 +55,7 @@
                 </li>
             </ul>
         </div>
+        {% endif %}
         <div class="card-body">
             {{ search_message|safe }}
             <div class="tab-content" id="myTabContent">
@@ -74,8 +76,8 @@
                                 <th>{% trans "Due Date" %}</th>
                                 <th>{% trans "Owner" %}</th>
                                 <th>{% trans "Submitter" %}</th>
-                                <th>{% trans "Time Spent" %}</th>
-                                <th>{% trans "KB item" %}</th>
+                                {% if helpdesk_settings.HELPDESK_ENABLE_TIME_SPENT_ON_TICKET %}<th>{% trans "Time Spent" %}</th>{% endif %}
+                                {% if helpdesk_settings.HELPDESK_KB_ENABLED %}<th>{% trans "KB item" %}</th>{% endif %}
                             </tr>
                             </thead>
                         </table>
@@ -125,9 +127,11 @@
                         </p>
                     </form>
                 </div>
+                {% if helpdesk_settings.HELPDESK_TICKETS_TIMELINE_ENABLED %}
                 <div class="tab-pane fade" id="timelinetabcontents" role="tabpanel" aria-labelledby="timelinetabcontents-tab">
                     <div id='timeline-embed' style="width: 100%; height: 80vh"></div>
                 </div>
+                {% endif %}
             </div>
         </div>
         <!-- /.panel-body -->
@@ -408,8 +412,12 @@
                         }
                     },
                     {data: "submitter"},
+                    {% if helpdesk_settings.HELPDESK_ENABLE_TIME_SPENT_ON_TICKET %}
                     {data: "time_spent", "visible": false},
+                    {% endif %}
+                    {% if helpdesk_settings.HELPDESK_KB_ENABLED %}
                     {data: "kbitem"},
+                    {% endif %}
                 ]
             });
 

@@ -52,7 +52,7 @@ class GetEmailCommonTests(TestCase):
         """
         with open(os.path.join(THIS_DIR, "test_files/blank-body-with-attachment.eml")) as fd:
             test_email = fd.read()
-        ticket = helpdesk.email.object_from_message(test_email, self.queue_public, self.logger)
+            ticket = helpdesk.email.object_from_message(test_email, self.queue_public, self.logger)
 
         # title got truncated because of max_lengh of the model.title field
         assert ticket.title == (
@@ -68,7 +68,7 @@ class GetEmailCommonTests(TestCase):
         """
         with open(os.path.join(THIS_DIR, "test_files/quoted_printable.eml")) as fd:
             test_email = fd.read()
-        ticket = helpdesk.email.object_from_message(test_email, self.queue_public, self.logger)
+            ticket = helpdesk.email.object_from_message(test_email, self.queue_public, self.logger)
         self.assertEqual(ticket.title, "Český test")
         self.assertEqual(ticket.description, "Tohle je test českých písmen odeslaných z gmailu.")
         followups = FollowUp.objects.filter(ticket=ticket)
@@ -86,7 +86,7 @@ class GetEmailCommonTests(TestCase):
         """
         with open(os.path.join(THIS_DIR, "test_files/all-special-chars.eml")) as fd:
             test_email = fd.read()
-        ticket = helpdesk.email.object_from_message(test_email, self.queue_public, self.logger)
+            ticket = helpdesk.email.object_from_message(test_email, self.queue_public, self.logger)
         self.assertEqual(ticket.title, "Testovácí email")
         self.assertEqual(ticket.description, "íářčšáíéřášč")
 

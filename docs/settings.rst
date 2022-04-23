@@ -94,6 +94,18 @@ These changes are visible throughout django-helpdesk
 
   **Default:** ``HELPDESK_ANON_ACCESS_RAISES_404 = False``
 
+- **HELPDESK_ENABLE_DEPENDENCIES_ON_TICKET** If False, disable the dependencies fields on ticket.
+
+  **Default:** ``HELPDESK_ENABLE_DEPENDENCIES_ON_TICKET = True``
+
+- **HELPDESK_ENABLE_TIME_SPENT_ON_TICKET** If False, disable the time spent fields on ticket.
+
+  **Default:** ``HELPDESK_ENABLE_TIME_SPENT_ON_TICKET = True``
+
+- **HELPDESK_TICKETS_TIMELINE_ENABLED** If False, remove from the dashboard the Timeline view for tickets.
+
+  **Default:** ``HELPDESK_TICKETS_TIMELINE_ENABLED = True``
+
 Options shown on public pages
 -----------------------------
 
@@ -167,6 +179,10 @@ Staff Ticket Creation Settings
 - **HELPDESK_CREATE_TICKET_HIDE_ASSIGNED_TO** Hide the 'assigned to' / 'Case owner' field from the 'create_ticket' view? It'll still show on the ticket detail/edit form.
 
   **Default:** ``HELPDESK_CREATE_TICKET_HIDE_ASSIGNED_TO = False``
+
+- **HELPDESK_ACTIVATE_API_ENDPOINT** Activate the API endpoint to manage tickets thanks to Django REST Framework. See the API section in documentation for more information.
+
+  **Default:** ``HELPDESK_ACTIVATE_API_ENDPOINT = False``
 
 
 Staff Ticket View Settings
