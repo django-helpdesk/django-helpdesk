@@ -15,6 +15,8 @@
                     <th>{% trans "Priority" %}</th>
                     <th>{% trans "Queue" %}</th>
                     <th>{% trans "Status" %}</th>
+                    <th>{% trans "Submitter" %}</th>
+                    <th>{% trans "Primary Contact" %}</th>
                     <th>{% trans "Last Update" %}</th>
                 </tr>
             </thead>
@@ -25,6 +27,8 @@
                     <td class="text-{{ ticket.get_priority_css_class }}">{{ ticket.get_priority }}</td>
                     <td>{{ ticket.queue }}</td>
                     <td>{{ ticket.get_status }}</td>
+                    <td>{{ ticket.submitter_email }}</td>
+                    <td>{% if ticket.contact_name %}{{ ticket.contact_name }}{% elif ticket.contact_email %}{{ ticket.contact_email}}{% endif %}</td>
                     <td><span title='{{ ticket.modified|naturaltime }}'>{{ ticket.modified|date:"DATETIME_FORMAT" }}</span></td>
                 </tr>
                 {% empty %}

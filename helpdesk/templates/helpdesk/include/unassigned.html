@@ -14,6 +14,8 @@
                       <th>{% trans "Priority" %}</th>
                       <th>{% trans "Queue" %}</th>
                       <th>{% trans "Created" %}</th>
+                      <th>{% trans "Submitter" %}</th>
+                      <th>{% trans "Primary Contact" %}</th>
                       <th>{% trans "Actions" %}</th>
                     </tr>
                 </thead>
@@ -24,6 +26,8 @@
                         <td class="text-{{ ticket.get_priority_css_class }}">{{ ticket.get_priority }}</td>
                         <td>{{ ticket.queue }}</td>
                         <td><span title='{{ ticket.modified|naturaltime }}'>{{ ticket.modified|date:"DATETIME_FORMAT" }}</span></td>
+                        <td>{{ ticket.submitter_email }}</td>
+                        <td>{% if ticket.contact_name %}{{ ticket.contact_name }}{% elif ticket.contact_email %}{{ ticket.contact_email}}{% endif %}</td>
                         <td class="text-center">
                           <a href='{{ ticket.get_absolute_url }}?take'><button class='btn btn-primary btn-sm'><i class="fas fa-hand-paper"></i>&nbsp;{% trans "Take" %}</button></a>
                           <a href='{% url 'helpdesk:delete' ticket.id %}?next=dashboard'><button class='btn btn-danger btn-sm'><i class="fas fa-trash"></i>&nbsp;{% trans "Delete" %}</button></a>
