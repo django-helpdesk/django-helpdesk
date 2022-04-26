@@ -907,7 +907,7 @@ class Ticket(models.Model):
 
     @property
     def get_resolution_markdown(self):
-        return get_markdown(self.resolution)
+        return get_markdown(self.resolution, self.ticket_form.organization)
 
     def add_email_to_ticketcc_if_not_in(self, email=None, user=None, ticketcc=None):
         """
