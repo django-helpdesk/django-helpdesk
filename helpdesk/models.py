@@ -830,7 +830,7 @@ class Ticket(models.Model):
         from django.core.exceptions import ImproperlyConfigured
         from django.urls import reverse
         try:
-            domain_name = self.ticket_form.organization.domain.netloc,
+            domain_name = self.ticket_form.organization.domain.netloc
         except Exception:
             domain_name = Site.objects.get_current().domain
         except ImproperlyConfigured:
