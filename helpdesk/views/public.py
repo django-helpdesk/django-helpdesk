@@ -17,6 +17,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.utils.http import urlquote
 from django.utils.translation import ugettext as _
+from django.utils.timezone import now
 from django.conf import settings
 from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.decorators.csrf import csrf_exempt
@@ -31,6 +32,8 @@ import helpdesk.views.abstract_views as abstract_views
 from helpdesk.lib import text_is_spam
 from helpdesk.models import Ticket, Queue, UserSettings, CustomField, FormType, TicketCC
 from helpdesk.user import huser_from_request
+
+from seed.models import PropertyMilestone
 
 logger = logging.getLogger(__name__)
 
@@ -108,6 +111,14 @@ class BaseCreateTicketView(abstract_views.AbstractCreateTicketMixin, FormView):
             return render(request, template_name='helpdesk/public_spam.html')
         else:
             ticket = form.save(form_id=self.form_id, user=self.request.user if self.request.user.is_authenticated else None)
+            if request.GET.get('milestone_beam_redirect', False):
+                # Pair Ticket to Milestone
+                pm = PropertyMilestone.objects.filter(id=request.GET.get('property_milestone_id', None)).first()
+                if pm:
+                    pm.ticket = ticket
+                    pm.submission_date = now()
+                    pm.implementation_status = PropertyMilestone.MILESTONE_IN_REVIEW
+                    pm.save()
             try:
                 return HttpResponseRedirect(ticket.ticket_url)
             except ValueError:

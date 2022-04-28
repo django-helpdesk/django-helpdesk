@@ -25,7 +25,11 @@
 <thead>
 <tr><th colspan='2'><h3>Ticket details for <span class="byline text-info">{{ ticket.ticket }}{% if ticket.title %} {{ ticket.title }}{% endif %}</span> ({{ ticket.get_status }})</h3>
                         {% blocktrans with ticket.queue as queue and ticket.queue.organization.name as org %}
-                        {{ org }}'s Queue: {{ queue }}{% endblocktrans %}</th></tr>
+                        {{ org }}'s Queue: {{ queue }}{% endblocktrans %}
+                        {% if ticket.property_milestone %}
+                        <br><a href="{{ ticket.property_milestone.property_view_url }}"><button class="btn btn-primary btn-sm"><i class="fas fa-road"></i> {% trans "View Milestone" %}</button></a>
+                        {% endif %}
+</th></tr>
 </thead>
 <tbody>
 <tr>

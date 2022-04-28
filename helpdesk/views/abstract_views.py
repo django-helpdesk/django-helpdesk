@@ -18,7 +18,11 @@ class AbstractCreateTicketMixin():
                                                                                    ticket_form=self.form_id)]
         query_param_fields += custom_fields
         for qpf in query_param_fields:
-            initial_data[qpf] = request.GET.get(qpf, initial_data.get(qpf, ""))
+            # Form only accepts qpf without the e_
+            qpf_name = qpf[2:] if qpf[0:2] == 'e_' else qpf
+            initial_data[qpf_name] = request.GET.get(qpf, initial_data.get(qpf_name, ""))
+
+        initial_data = {k: ('' if v == 'null' else v) for k, v in initial_data.items()}
 
         return initial_data
 
