@@ -46,6 +46,16 @@ Here is an example of a cURL request to create a ticket (using Basic authenticat
     --header 'Content-Type: application/json' \
     --data-raw '{"queue": 1, "title": "Test Ticket API", "description": "Test create ticket from API", "submitter_email": "test@mail.com", "priority": 4}'
 
+Accessing the endpoint ``/api/users/`` with a **POST** request will let you create a new user.
+
+You need to provide a JSON body with the following data :
+
+- **first_name**: first name
+- **last_name**: last name
+- **username**: username
+- **email**: user email
+- **password**: user password
+
 PUT
 ---
 
