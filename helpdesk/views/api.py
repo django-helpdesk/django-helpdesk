@@ -1,8 +1,11 @@
 from rest_framework import viewsets
 from rest_framework.permissions import IsAdminUser
+from rest_framework.viewsets import GenericViewSet
+from rest_framework.mixins import CreateModelMixin
+from django.contrib.auth import get_user_model
 
 from helpdesk.models import Ticket
-from helpdesk.serializers import TicketSerializer
+from helpdesk.serializers import TicketSerializer, UserSerializer
 
 
 class TicketViewSet(viewsets.ModelViewSet):
@@ -23,3 +26,8 @@ class TicketViewSet(viewsets.ModelViewSet):
         ticket = super().get_object()
         ticket.set_custom_field_values()
         return ticket
+
+
+class CreateUserView(CreateModelMixin, GenericViewSet):
+    queryset = get_user_model().objects.all()
+    serializer_class = UserSerializer
