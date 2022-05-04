@@ -174,7 +174,7 @@
                 <dt>
                     <label for='id_time_spent'>{% trans "Time spent" %}</label> <span class='form_optional'>{% trans "(Optional, in Minutes)" %}</span>
                 </dt>
-                <dd><input style="" id='id_time_spent' name='time_spent' type="number" min="0"/></dd>
+                <dd><input style="" id='id_time_spent' name='time_spent' type="number" min="0" value="0"/></dd>
                 {% endif %}
             </dl>
 
@@ -194,7 +194,7 @@
                 <dd><select id='id_priority' name='priority'>{% for p in priorities %}<option value='{{ p.0 }}'{% ifequal p.0 ticket.priority %} selected='selected'{% endifequal %}>{{ p.1 }}</option>{% endfor %}</select></dd>
 
                 <dt><label for='id_due_date'>{% trans "Due on" %}</label></dt>
-                <dd>{{ form.due_date }}</dd>
+                <dd><input type="datetime-local" name="due_date" value="{{ticket.due_date|date:'Y-m-d'}}T{{ticket.due_date|time:'H:i:s'}}"/></dd>
 
             </dl>
 
