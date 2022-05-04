@@ -31,3 +31,4 @@ class TicketViewSet(viewsets.ModelViewSet):
 class CreateUserView(CreateModelMixin, GenericViewSet):
     queryset = get_user_model().objects.all()
     serializer_class = UserSerializer
+    permission_classes = [IsAdminUser]
