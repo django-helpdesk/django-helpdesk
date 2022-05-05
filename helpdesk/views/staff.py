@@ -548,6 +548,8 @@ def update_ticket(request, ticket_id, public=False):
     # very US-centric but for now that's the only format supported
     # until we clean up code to internationalize a little more
     due_date = request.POST.get('due_date', None)
+    due_date = due_date if due_date else None
+
     utc = pytz.timezone('UTC')
     if due_date is not None:
         due_date = dateutil.parser.parse(due_date).astimezone(utc)
@@ -696,11 +698,13 @@ def update_ticket(request, ticket_id, public=False):
         ticket.priority = priority
 
     if due_date != ticket.due_date:
+        old_value = ticket.due_date.astimezone(timezone.get_current_timezone()).strftime(CUSTOMFIELD_DATETIME_FORMAT) if ticket.due_date else 'None'
+        new_value = due_date.astimezone(timezone.get_current_timezone()).strftime(CUSTOMFIELD_DATETIME_FORMAT) if due_date else 'None'
         c = TicketChange(
             followup=f,
             field=_('Due on'),
-            old_value=ticket.due_date.astimezone(timezone.get_current_timezone()).strftime(CUSTOMFIELD_DATETIME_FORMAT),
-            new_value=due_date.astimezone(timezone.get_current_timezone()).strftime(CUSTOMFIELD_DATETIME_FORMAT),
+            old_value=old_value,
+            new_value=new_value,
         )
         c.save()
         ticket.due_date = due_date
