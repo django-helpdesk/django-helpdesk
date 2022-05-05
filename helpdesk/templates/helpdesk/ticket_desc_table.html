@@ -22,12 +22,20 @@ copy_public_link = function() {
             <table class="table table-sm table-border">
                 <thead class="thead-light">
                     <tr class=''><th colspan='4'><h3>{{ ticket.queue.slug }}-{{ ticket.id }}. {{ ticket.title }} [{{ ticket.get_status }}]</h3>
-                            {% blocktrans with ticket.queue as queue %}Queue: {{ queue }}{% endblocktrans %}
-                            <span class='ticket_toolbar float-right'>
-                        <a href="{% url 'helpdesk:edit' ticket.id %}" class="ticket-edit"><button class="btn btn-warning btn-sm"><i class="fas fa-pencil-alt"></i> {% trans "Edit" %}</button></a>
-                    | <a href="{% url 'helpdesk:delete' ticket.id %}" class="ticket-delete"><button class="btn btn-danger btn-sm"><i class="fas fa-trash-alt"></i> {% trans "Delete" %}</button></a>
-                    {% if ticket.on_hold %} | <a href="{% url 'helpdesk:unhold' ticket.id %}" class="ticket-hold"><button class="btn btn-warning btn-sm"><i class="fas fa-play"></i> {% trans "Unhold" %}</button></a>{% else %} | <a href="{% url 'helpdesk:hold' ticket.id %}" class="ticket-hold"><button class="btn btn-warning btn-sm"><i class="fas fa-pause"></i> {% trans "Hold" %}</button></a>{% endif %}
-                    </span></th></tr>
+                        {% blocktrans with ticket.queue as queue %}Queue: {{ queue }}{% endblocktrans %}
+                        <span class='ticket_toolbar float-right'>
+                            {% if ticket.property_milestone %}
+                            <a href="{{ ticket.property_milestone.property_view_url }}"><button class="btn btn-primary btn-sm"><i class="fas fa-road"></i> {% trans "View Milestone" %}</button></a> |
+                            {% endif %}
+                            <a href="{% url 'helpdesk:edit' ticket.id %}" class="ticket-edit"><button class="btn btn-warning btn-sm"><i class="fas fa-pencil-alt"></i> {% trans "Edit" %}</button></a>
+                            | <a href="{% url 'helpdesk:delete' ticket.id %}" class="ticket-delete"><button class="btn btn-danger btn-sm"><i class="fas fa-trash-alt"></i> {% trans "Delete" %}</button></a>
+                            {% if ticket.on_hold %}
+                            | <a href="{% url 'helpdesk:unhold' ticket.id %}" class="ticket-hold"><button class="btn btn-warning btn-sm"><i class="fas fa-play"></i> {% trans "Unhold" %}</button></a>
+                            {% else %}
+                            | <a href="{% url 'helpdesk:hold' ticket.id %}" class="ticket-hold"><button class="btn btn-warning btn-sm"><i class="fas fa-pause"></i> {% trans "Hold" %}</button></a>
+                            {% endif %}
+                        </span>
+                    </th></tr>
 					<tr class=''><th colspan='4'>
                         <a href="#" onclick="copy_public_link()">Click to copy Public Link to your Clipboard</a>
 					</th></tr>

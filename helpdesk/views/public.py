@@ -17,6 +17,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.utils.http import urlquote
 from django.utils.translation import ugettext as _
+from django.utils.timezone import now
 from django.conf import settings
 from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.decorators.csrf import csrf_exempt
@@ -31,6 +32,8 @@ import helpdesk.views.abstract_views as abstract_views
 from helpdesk.lib import text_is_spam
 from helpdesk.models import Ticket, Queue, UserSettings, CustomField, FormType, TicketCC
 from helpdesk.user import huser_from_request
+
+from seed.models import PropertyMilestone
 
 logger = logging.getLogger(__name__)
 
@@ -108,6 +111,14 @@ class BaseCreateTicketView(abstract_views.AbstractCreateTicketMixin, FormView):
             return render(request, template_name='helpdesk/public_spam.html')
         else:
             ticket = form.save(form_id=self.form_id, user=self.request.user if self.request.user.is_authenticated else None)
+            if request.GET.get('milestone_beam_redirect', False):
+                # Pair Ticket to Milestone
+                pm = PropertyMilestone.objects.filter(id=request.GET.get('property_milestone_id', None)).first()
+                if pm:
+                    pm.ticket = ticket
+                    pm.submission_date = now()
+                    pm.implementation_status = PropertyMilestone.MILESTONE_IN_REVIEW
+                    pm.save()
             try:
                 return HttpResponseRedirect(ticket.ticket_url)
             except ValueError:
@@ -155,7 +166,7 @@ class Homepage(CreateTicketView):
         return context
 
 
-def search_for_ticket(request, error_message=None):
+def search_for_ticket(request, error_message=None, ticket=None):
     if hasattr(settings, 'HELPDESK_VIEW_A_TICKET_PUBLIC') and settings.HELPDESK_VIEW_A_TICKET_PUBLIC:
         email = request.GET.get('email', None)
         return render(request, 'helpdesk/public_view_form.html', {
@@ -165,7 +176,10 @@ def search_for_ticket(request, error_message=None):
             'helpdesk_settings': helpdesk_settings,
         })
     else:
-        raise PermissionDenied("Public viewing of tickets without a secret key is forbidden.")
+        return render(request, 'helpdesk/public_error.html', {
+            'error_message': TicketCC.VIEW_WARNING % (ticket.submitter_email if ticket and ticket.submitter_email else 'Not Found'),
+            'ticket': ticket,
+        })
 
 
 @protect_view
@@ -215,13 +229,26 @@ def view_ticket(request):
             emails.discard(None)
             # Otherwise, not allowed
             if email_lower not in {e.casefold() for e in emails}:
-                return search_for_ticket(request, _('Invalid ticket ID or e-mail address. Please try again.'))
+                return search_for_ticket(request, _('Invalid ticket ID or e-mail address. Please try again.'),
+                                         ticket=ticket)
 
-    if is_helpdesk_staff(request.user) and ticket_org == request.user.default_organization.helpdesk_organization:
+    if is_helpdesk_staff(request.user) and ticket_org == request.user.default_organization.helpdesk_organization.name:
         redirect_url = reverse('helpdesk:view', args=[ticket_id])
         if 'close' in request.GET:
             redirect_url += '?close'
         return HttpResponseRedirect(redirect_url)
+
+    cc_user = TicketCC.objects.filter(ticket=ticket, email=email).first()
+    # Redirect CC User to Homepage if they aren't allowed to view the ticket
+    if cc_user and not cc_user.can_view:
+        return render(request, 'helpdesk/public_error.html', {
+            'error_message': TicketCC.VIEW_WARNING % (ticket.submitter_email if ticket.submitter_email else ''),
+            'ticket': ticket,
+        })
+    elif cc_user and cc_user.can_view:
+        can_update = cc_user.can_update
+    elif email == ticket.submitter_email:
+        can_update = True
 
     if 'close' in request.GET and ticket.status == Ticket.RESOLVED_STATUS:
         from helpdesk.views.staff import update_ticket
@@ -260,7 +287,8 @@ def view_ticket(request):
         'ticket': ticket,
         'helpdesk_settings': helpdesk_settings,
         'next': redirect_url,
-        'extra_data': extra_data
+        'extra_data': extra_data,
+        'can_update': can_update,
     })
 
 

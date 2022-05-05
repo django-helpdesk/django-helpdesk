@@ -9,6 +9,8 @@ views/staff.py - The bulk of the application - provides most business logic and
 from copy import deepcopy
 import json
 import pandas as pd
+import dateutil
+import pytz
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -25,7 +27,7 @@ from django.utils.html import escape
 from django.utils import timezone
 from django.views.generic.edit import FormView, UpdateView
 
-from helpdesk.forms import CUSTOMFIELD_DATE_FORMAT
+from helpdesk.forms import CUSTOMFIELD_DATE_FORMAT, CUSTOMFIELD_DATETIME_FORMAT
 from helpdesk.query import (
     get_query_class,
     query_to_base64,
@@ -54,8 +56,6 @@ from helpdesk.models import (
     Ticket, Queue, FollowUp, TicketChange, PreSetReply, FollowUpAttachment, SavedSearch,
     IgnoreEmail, TicketCC, TicketDependency, UserSettings, KBItem, CustomField, TicketCustomFieldValue,
 )
-from seed.models import Column
-from seed.lib.superperms.orgs.models import ROLE_MEMBER
 
 from helpdesk import settings as helpdesk_settings
 import helpdesk.views.abstract_views as abstract_views
@@ -65,8 +65,7 @@ from ..lib import format_time_spent
 from rest_framework import status
 from rest_framework.decorators import api_view
 
-from datetime import date, datetime, timedelta
-import re
+from datetime import datetime, timedelta
 
 from ..templated_email import send_templated_mail
 
@@ -536,45 +535,24 @@ def update_ticket(request, ticket_id, public=False):
     if not ticket:
         ticket = get_object_or_404(Ticket, id=ticket_id)
 
-    date_re = re.compile(
-        r'(?P<month>\d{1,2})/(?P<day>\d{1,2})/(?P<year>\d{4})$'
-    )
-
     comment = request.POST.get('comment', '')
     new_status = int(request.POST.get('new_status', ticket.status))
     title = request.POST.get('title', '')
     public = request.POST.get('public', False)
     owner = int(request.POST.get('owner', -1))
     priority = int(request.POST.get('priority', ticket.priority))
-    due_date_year = int(request.POST.get('due_date_year', 0))
-    due_date_month = int(request.POST.get('due_date_month', 0))
-    due_date_day = int(request.POST.get('due_date_day', 0))
-    mins_spent = int(request.POST.get("time_spent")) if request.POST.get("time_spent") else 0
-
+    mins_spent = int(request.POST.get("time_spent", 0).strip() or 0)
     time_spent = timedelta(minutes=mins_spent)
 
     # NOTE: jQuery's default for dates is mm/dd/yy
     # very US-centric but for now that's the only format supported
     # until we clean up code to internationalize a little more
-    due_date = request.POST.get('due_date', None) or None
+    due_date = request.POST.get('due_date', None)
+    due_date = due_date if due_date else None
+
+    utc = pytz.timezone('UTC')
     if due_date is not None:
-        # based on Django code to parse dates:
-        # https://docs.djangoproject.com/en/2.0/_modules/django/utils/dateparse/
-        match = date_re.match(due_date)
-        if match:
-            kw = {k: int(v) for k, v in match.groupdict().items()}
-            due_date = date(**kw)
-    else:
-        # old way, probably deprecated?
-        if not (due_date_year and due_date_month and due_date_day):
-            due_date = ticket.due_date
-        else:
-            # NOTE: must be an easier way to create a new date than doing it this way?
-            if ticket.due_date:
-                due_date = ticket.due_date
-            else:
-                due_date = timezone.now()
-            due_date = due_date.replace(due_date_year, due_date_month, due_date_day)
+        due_date = dateutil.parser.parse(due_date).astimezone(utc)
 
     no_changes = all([
         not request.FILES,
@@ -720,11 +698,13 @@ def update_ticket(request, ticket_id, public=False):
         ticket.priority = priority
 
     if due_date != ticket.due_date:
+        old_value = ticket.due_date.astimezone(timezone.get_current_timezone()).strftime(CUSTOMFIELD_DATETIME_FORMAT) if ticket.due_date else 'None'
+        new_value = due_date.astimezone(timezone.get_current_timezone()).strftime(CUSTOMFIELD_DATETIME_FORMAT) if due_date else 'None'
         c = TicketChange(
             followup=f,
             field=_('Due on'),
-            old_value=ticket.due_date,
-            new_value=due_date,
+            old_value=old_value,
+            new_value=new_value,
         )
         c.save()
         ticket.due_date = due_date

@@ -92,13 +92,19 @@ DATATABLES_ORDER_COLUMN_CHOICES = dict([
     ('10', 'kbitem'),
 ])
 
-DATATABLES_DJANGO_FILTER_COLUMN_CHOICES = dict([
+DATATABLES_DJANGO_FILTER_COLUMN_CHOICES = [
     ('0', 'id__icontains'),
     ('3', 'queue__title__icontains'),
-    ('7', 'assigned_to__email__icontains'),
     ('8', 'submitter_email__icontains'),
     ('10', 'kbitem__title__icontains'),
-])
+]
+
+ASSIGNED_TO_FILTER_FORMATS = [
+    ('7', 'assigned_to__email__icontains'),
+    ('7', 'assigned_to__first_name__icontains'),
+    ('7', 'assigned_to__last_name__icontains'),
+    ('7', 'assigned_to__username__icontains'),
+]
 
 # These fields go through some post-processing, which is why django filters won't work and why they aren't in the
 # above dict
@@ -236,15 +242,18 @@ class __Query__:
             queryset = queryset.filter(get_search_filter_args(search_value))
 
         # Collect and apply column-based filters that can be done using Django Filtering (Q functions)
-        column_filters = {}
-        for i, field in DATATABLES_DJANGO_FILTER_COLUMN_CHOICES.items():
-            column_filter_key = 'columns[%s][search][value]' % i
-            column_filter = kwargs.get(column_filter_key, [None])[0]
-            if column_filter:
-                column_filters[field] = column_filter
-        if column_filters:
-            filters = reduce(operator.and_, (Q(**d) for d in [dict([i]) for i in column_filters.items()]))
-            queryset = queryset.filter(filters)
+        filters_list = []
+        for i, choices in enumerate([DATATABLES_DJANGO_FILTER_COLUMN_CHOICES, ASSIGNED_TO_FILTER_FORMATS]):
+            op = operator.and_ if i == 0 else operator.or_
+            for col_index, field in choices:
+                column_filter_key = 'columns[%s][search][value]' % col_index
+                column_filter = kwargs.get(column_filter_key, [None])[0]
+                if column_filter:
+                    filters_list.append({field: column_filter})
+            if filters_list:
+                filters = reduce(op, (Q(**d) for d in filters_list))
+                queryset = queryset.filter(filters)
+                filters_list = []
 
         queryset = queryset.order_by(sort_column)
         data = DatatablesTicketSerializer(queryset, many=True).data

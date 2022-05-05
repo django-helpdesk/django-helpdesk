@@ -190,7 +190,10 @@ def imap_sync(q, logger, server):
         sys.exit()
 
     try:
-        status, data = server.search(None, 'NOT', 'DELETED')
+        if q.keep_mail:
+            status, data = server.search(None, 'NOT', 'ANSWERED')
+        else:
+            status, data = server.search(None, 'NOT', 'DELETED')
         if data:
             msg_nums = data[0].split()
             logger.info("Received %s messages from IMAP server" % len(msg_nums))
@@ -217,9 +220,14 @@ def imap_sync(q, logger, server):
                     # Malformed email received from the server
                     ticket = None
                 if ticket:
-                    if not DEBUGGING:
+                    if DEBUGGING:
+                        logger.info("Successfully processed message %s, left untouched on IMAP server\n" % num)
+                    elif q.keep_mail:
+                        server.store(num, '+FLAGS', '\\Answered')
+                        logger.info("Successfully processed message %s, marked as Answered on IMAP server\n" % num)
+                    else:
                         server.store(num, '+FLAGS', '\\Deleted')
-                    logger.info("Successfully processed message %s, deleted from IMAP server\n" % num)
+                        logger.info("Successfully processed message %s, deleted from IMAP server\n" % num)
                 else:
                     logger.warn("Message %s was not successfully processed, and will be left on IMAP server\n" % num)
     except imaplib.IMAP4.error:
