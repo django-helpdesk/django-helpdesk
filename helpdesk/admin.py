@@ -13,7 +13,7 @@ from seed.lib.superperms.orgs.models import get_helpdesk_organizations
 
 @admin.register(Queue)
 class QueueAdmin(admin.ModelAdmin):
-    list_display = ('title', 'slug', 'email_address', 'locale', 'time_spent')
+    list_display = ('title', 'slug', 'time_spent')
     prepopulated_fields = {"slug": ("title",)}
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
