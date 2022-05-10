@@ -46,7 +46,7 @@
           <div class="dropdown-menu" aria-labelledby="ticketsDropdown">
             {% if forms %}
             {% for f in forms %}
-            <a class="dropdown-item small text-wrap" href="{% url 'helpdesk:submit' f.id %}">{{ f.name }}</a>
+            <a class="dropdown-item small text-wrap" href="{% url 'helpdesk:submit' f.id %}{{ user_info.url }}">{{ f.name }}</a>
             {% endfor %}
             {% else %}
             <p class="dropdown-item small text-wrap">{% trans "No forms are available." %}</p>
