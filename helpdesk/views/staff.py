@@ -549,7 +549,7 @@ def update_ticket(request, ticket_id, public=False):
     public = request.POST.get('public', False)
     owner = int(request.POST.get('owner', -1))
     priority = int(request.POST.get('priority', ticket.priority))
-    mins_spent = int(request.POST.get("time_spent", 0).strip() or 0)
+    mins_spent = int(request.POST.get("time_spent", '0').strip() or '0')
     time_spent = timedelta(minutes=mins_spent)
 
     # NOTE: jQuery's default for dates is mm/dd/yy
