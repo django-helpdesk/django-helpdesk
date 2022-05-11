@@ -7,7 +7,7 @@ class TimezoneMiddleware:
 
     def __call__(self, request):
         """
-        Set the timezone for a Helpdesk Session. Persists as long as the user is the Browser session is active
+        Set the timezone for a Helpdesk Session. Persists as long as the user's Browser session is active
         """
         tzname = request.session.get('helpdesk_timezone')
         if tzname:

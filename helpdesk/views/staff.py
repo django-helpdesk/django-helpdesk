@@ -77,12 +77,14 @@ staff_member_required = user_passes_test(
 
 
 def set_user_timezone(request):
-    tz = request.GET.get('timezone')
-    request.session["helpdesk_timezone"] = tz
-    timezone.activate(tz)
-    response_data = {'status': 'true', 'message': 'user timezone set successfully.'}
+    if 'helpdesk_timezone' not in request.session:
+        tz = request.GET.get('timezone')
+        request.session["helpdesk_timezone"] = tz
+        timezone.activate(tz)
+        response_data = {'status': True, 'message': 'user timezone set successfully to %s.' % tz}
+    else:
+        response_data = {'status': False, 'message': 'user timezone has already been set'}
     return JsonResponse(response_data, status=status.HTTP_200_OK)
-
 
 @helpdesk_staff_member_required
 def set_default_org(request, user_id, org_id):
