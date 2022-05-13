@@ -4,6 +4,9 @@ from smtplib import SMTPException
 
 from django.conf import settings
 from django.utils.safestring import mark_safe
+from seed.lib.superperms.orgs.models import Organization
+from seed.models.email_settings import EmailSender
+from seed.utils.seed_send_email import get_email_backend
 
 logger = logging.getLogger(__name__)
 
@@ -88,6 +91,17 @@ def send_templated_mail(template_name,
 
     locale = context['queue'].get('locale') or HELPDESK_EMAIL_FALLBACK_LOCALE
 
+    org_id = context['queue'].get('organization_id', None)
+    org = Organization.objects.get(id=org_id)
+
+    sender_id = context['queue'].get('sender_id', None)
+    backend = None
+    if sender_id:
+        sender_settings = EmailSender.objects.get(id=sender_id)
+        backend = get_email_backend(None, sender_settings)
+    elif org:
+        backend = get_email_backend(org, None)
+
     try:
         t = EmailTemplate.objects.get(template_name__iexact=template_name, locale=locale)
     except EmailTemplate.DoesNotExist:
@@ -132,6 +146,8 @@ def send_templated_mail(template_name,
                                  recipients, bcc=bcc,
                                  headers=headers)
     msg.attach_alternative(html_part, "text/html")
+    if backend:
+        msg.connection = backend
 
     if files:
         for filename, filefield in files:

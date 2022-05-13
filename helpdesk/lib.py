@@ -51,7 +51,7 @@ def ticket_template_context(ticket):
 def queue_template_context(queue):
     context = {}
 
-    for field in ('title', 'slug', 'email_address', 'from_address', 'locale'):
+    for field in ('title', 'slug', 'email_address', 'from_address', 'locale', 'organization_id', 'sender_id'):
         attr = getattr(queue, field, None)
         if callable(attr):
             context[field] = attr()

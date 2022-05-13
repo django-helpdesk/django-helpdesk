@@ -159,6 +159,7 @@ class Queue(models.Model):
                                            "\nNOTE: Importing and sending should be done from the same email address.")
     sender = models.ForeignKey('seed.EmailSender', on_delete=models.SET_NULL, null=True, blank=True,
                                help_text="Assign the email address that this queue should send emails from. "
+                                         "If no sender is provided, the organization's sender will be used. "
                                          "\nNOTE: Importing and sending should be done from the same email address.")
     match_on = models.JSONField(blank=True, default=list,
                                 help_text="A list of strings. If you'd like only emails with "
@@ -273,6 +274,24 @@ class Queue(models.Model):
     @property
     def time_spent_formatted(self):
         return format_time_spent(self.time_spent)
+
+    @property
+    def email_address(self):
+        if self.sender:
+            return self.sender.email_address
+        elif self.organization.sender_email_address:
+            return self.organization.sender_email_address.from_address
+        else:
+            return None
+
+    @property
+    def from_address(self):
+        if self.sender:
+            return self.sender.from_address
+        elif self.organization.sender_email_address:
+            return self.organization.sender_email_address.from_address
+        else:
+            return u'NO EMAIL ADDRESS DEFINED <%s>' % settings.DEFAULT_FROM_EMAIL
 
     def prepare_permission_name(self):
         """Prepare internally the codename for the permission and store it in permission_name.
