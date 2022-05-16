@@ -219,21 +219,6 @@ class Queue(models.Model):
                     'Note: the new_ticket_cc and updated_ticket_cc work independently of this feature'),
     )
 
-    email_box_interval = models.IntegerField(
-        _('E-Mail Check Interval'),
-        help_text=_('How often do you wish to check this mailbox? (in Minutes)'),
-        blank=True,
-        null=True,
-        default='5',
-    )
-
-    email_box_last_check = models.DateTimeField(
-        blank=True,
-        null=True,
-        editable=False,
-        # This is updated by management/commands/get_mail.py.
-    )
-
     default_owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -247,9 +232,6 @@ class Queue(models.Model):
         help_text=_("Time to be spent on this Queue in total"),
         blank=True, null=True
     )
-
-    keep_mail = models.BooleanField(default=False,
-                                    help_text=_('After processing, should mail be kept in the inbox? (IMAP only.)'))
 
     def __str__(self):
         return "%s" % self.title
@@ -1691,11 +1673,11 @@ class IgnoreEmail(models.Model):
         verbose_name = _('Ignored e-mail address')
         verbose_name_plural = _('Ignored e-mail addresses')
 
-    queues = models.ManyToManyField(
-        Queue,
+    importers = models.ManyToManyField(
+        'seed.EmailImporter',
         blank=True,
-        help_text=_('Leave blank for this e-mail to be ignored on all queues, '
-                    'or select those queues you wish to ignore this e-mail for.'),
+        help_text=_('Leave blank for this e-mail to be ignored on all importer emails, '
+                    'or select those importers you wish to ignore this e-mail for.'),
     )
 
     name = models.CharField(
@@ -1733,15 +1715,15 @@ class IgnoreEmail(models.Model):
             self.date = timezone.now()
         return super(IgnoreEmail, self).save(*args, **kwargs)
 
-    def queue_list(self):
-        """Return a list of the queues this IgnoreEmail applies to.
-        If this IgnoreEmail applies to ALL queues, return '*'.
+    def importer_list(self):
+        """Return a list of the importers this IgnoreEmail applies to.
+        If this IgnoreEmail applies to ALL importers, return '*'.
         """
-        queues = self.queues.all().order_by('title')
-        if len(queues) == 0:
+        importers = self.importers.all().order_by('email_box_user')
+        if len(importers) == 0:
             return '*'
         else:
-            return ', '.join([str(q) for q in queues])
+            return ', '.join([str(i) for i in importers])
 
     def test(self, email):
         """

@@ -25,6 +25,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='queue',
             name='sender',
-            field=models.ForeignKey(blank=True, help_text='Assign the email address that this queue should send emails from. \nNOTE: Importing and sending should be done from the same email address.', null=True, on_delete=django.db.models.deletion.SET_NULL, to='seed.emailsender'),
+            field=models.ForeignKey(blank=True, help_text="Assign the email address that this queue should send emails from. If no sender is provided, the organization's sender will be used. \nNOTE: Importing and sending should be done from the same email address.", null=True, on_delete=django.db.models.deletion.SET_NULL, to='seed.emailsender'),
         ),
     ]

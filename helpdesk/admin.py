@@ -13,7 +13,7 @@ from seed.lib.superperms.orgs.models import get_helpdesk_organizations
 
 @admin.register(Queue)
 class QueueAdmin(admin.ModelAdmin):
-    list_display = ('title', 'slug', 'time_spent')
+    list_display = ('title', 'slug', 'organization', 'importer', 'allow_public_submission', 'allow_email_submission', 'match_on')
     prepopulated_fields = {"slug": ("title",)}
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
@@ -237,7 +237,7 @@ class EmailTemplateAdmin(admin.ModelAdmin):
 
 @admin.register(IgnoreEmail)
 class IgnoreEmailAdmin(admin.ModelAdmin):
-    list_display = ('name', 'queue_list', 'email_address', 'keep_in_mailbox')
+    list_display = ('name', 'importer_list', 'email_address', 'keep_in_mailbox')
 
 
 @admin.register(KBCategory)

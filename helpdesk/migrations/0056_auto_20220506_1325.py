@@ -75,4 +75,16 @@ class Migration(migrations.Migration):
             model_name='queue',
             name='socks_proxy_type',
         ),
+        migrations.RemoveField(
+            model_name='queue',
+            name='email_box_interval',
+        ),
+        migrations.RemoveField(
+            model_name='queue',
+            name='email_box_last_check',
+        ),
+        migrations.RemoveField(
+            model_name='queue',
+            name='keep_mail',
+        ),
     ]
