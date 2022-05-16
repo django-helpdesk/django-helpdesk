@@ -75,8 +75,7 @@ def process_email(quiet=False):
                 'matching_queues': matching_queues,
                 'address_matching_queues': address_matching_queues
             }
-
-            logger = logging.getLogger('django.helpdesk.emailimporter.' + importer.email_box_user)  # todo ?
+            logger = logging.getLogger('django.helpdesk.emailimporter.' + importer.email_box_user.replace('@.', '_').replace('.', '_'))
             logging_types = {
                 'info': logging.INFO,
                 'warn': logging.WARN,
