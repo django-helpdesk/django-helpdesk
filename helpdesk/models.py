@@ -165,6 +165,10 @@ class Queue(models.Model):
                                 help_text="A list of strings. If you'd like only emails with "
                                           "certain subject lines to be imported into this queue, "
                                           "list that text here. Otherwise, leave blank.")
+    match_on_addresses = models.JSONField(blank=True, default=list,
+                                          help_text="A list of strings. If you'd like only emails from "
+                                                    "specific addresses to be imported into this queue, "
+                                                    "list those addresses here. Otherwise, leave blank.")
 
     allow_public_submission = models.BooleanField(
         _('Allow Public Submission?'),

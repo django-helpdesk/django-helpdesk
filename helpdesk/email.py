@@ -50,21 +50,10 @@ STRIPPED_SUBJECT_STRINGS = [
     "Automatic reply: ",
 ]
 
-DEBUGGING = True
-
-DC_IMPORTS = False
-DC_SUBJECTS = [
-    "Benchmarking Report Received",
-    "Benchmarking Report Accepted",
-]
-DC_QUEUE_NAME = "Benchmarking Data Quality"
+DEBUGGING = False
 
 
 def process_email(quiet=False):
-    """if dc:
-        global DC_IMPORTS
-        DC_IMPORTS = True"""
-
     for org in Organization.objects.filter(helpdesk_imports=True):
         queue_objects = Queue.objects.filter(organization=org, allow_email_submission=True, importer__isnull=False)\
             .select_related('importer')
@@ -78,10 +67,13 @@ def process_email(quiet=False):
                 default_queue = org.default_queue
             else:
                 default_queue = importer_queues.first()
+            matching_queues = importer_queues.exclude(match_on__exact=[])
+            address_matching_queues = importer_queues.exclude(match_on_addresses__exact=[])
             queues = {
                 'importer_queues': importer_queues,
                 'default_queue': default_queue,
-                'matching_queues': importer_queues.filter(match_on__isnull=False)
+                'matching_queues': matching_queues,
+                'address_matching_queues': address_matching_queues
             }
 
             logger = logging.getLogger('django.helpdesk.emailimporter.' + importer.email_box_user)  # todo ?
@@ -610,13 +602,18 @@ def object_from_message(message, importer, queues, logger):
             queue = q
             logger.info("- Matched tracking ID %s-%s" % (q.slug, ticket))
     if not ticket:
-        queue = None
         logger.info("- No tracking ID matched.")
         for q in queues['matching_queues']:
             if reduce(lambda prev, s: prev or (s in subject), q.match_on, False):
                 queue = q
-                logger.info("- Subject matched subject list from '%s'" % q.slug)
+                logger.info("- Subject matched list from '%s'" % q.slug)
     if not queue:
+        for q in queues['address_matching_queues']:
+            if reduce(lambda prev, e: prev or (e in sender), q.match_on_addresses, False):
+                queue = q
+                logger.info("- Sender address matched list from '%s'" % q.slug)
+    if not queue:
+        logger.info("- Using default queue.")
         queue = queues['default_queue']
 
     # Accounting for forwarding loops
