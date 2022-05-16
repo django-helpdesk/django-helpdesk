@@ -76,12 +76,20 @@ staff_member_required = user_passes_test(
     lambda u: u.is_authenticated and u.is_active and is_helpdesk_staff(u))
 
 
+def set_user_timezone(request):
+    tz = request.GET.get('timezone')
+    request.session["helpdesk_timezone"] = tz
+    timezone.activate(tz)
+    response_data = {'status': 'true', 'message': 'user timezone set successfully.'}
+    return JsonResponse(response_data, status=status.HTTP_200_OK)
+
+
 @helpdesk_staff_member_required
 def set_default_org(request, user_id, org_id):
-    '''
+    """
     Change the default org of the user based on their dropdown menu selection
     Reload them back to the same page
-    '''
+    """
     from seed.landing.models import SEEDUser as User
     user = User.objects.get(pk=user_id)
     user.default_organization_id = org_id
@@ -541,7 +549,7 @@ def update_ticket(request, ticket_id, public=False):
     public = request.POST.get('public', False)
     owner = int(request.POST.get('owner', -1))
     priority = int(request.POST.get('priority', ticket.priority))
-    mins_spent = int(request.POST.get("time_spent", 0).strip() or 0)
+    mins_spent = int(request.POST.get("time_spent", '0').strip() or '0')
     time_spent = timedelta(minutes=mins_spent)
 
     # NOTE: jQuery's default for dates is mm/dd/yy
@@ -1977,7 +1985,7 @@ def attachment_del(request, ticket_id, attachment_id):
 
 
 def calc_average_nbr_days_until_ticket_resolved(Tickets):
-    nbr_closed_tickets = len(Tickets)
+    nbr_closed_tickets = Tickets.count()
     days_per_ticket = 0
     days_each_ticket = list()
 
@@ -1998,7 +2006,7 @@ def calc_average_nbr_days_until_ticket_resolved(Tickets):
 def calc_basic_ticket_stats(Tickets):
     # all not closed tickets (open, reopened, resolved,) - independent of user
     all_open_tickets = Tickets.exclude(status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS, Ticket.DUPLICATE_STATUS])
-    today = datetime.today()
+    today = timezone.now()
 
     date_3 = date_rel_to_today(today, 3)
     date_7 = date_rel_to_today(today, 7)
@@ -2012,32 +2020,32 @@ def calc_basic_ticket_stats(Tickets):
     date_60_str = date_60.strftime(CUSTOMFIELD_DATE_FORMAT)
 
     # > 0 & <= 3
-    ota_le_3 = all_open_tickets.filter(created__gte=date_3_str)
-    N_ota_le_3 = len(ota_le_3)
+    ota_le_3 = all_open_tickets.filter(created__gte=date_3)
+    N_ota_le_3 = ota_le_3.count()
 
     # > 3 & <= 7
-    ota_le_7_ge_3 = all_open_tickets.filter(created__gte=date_7_str, created__lt=date_3_str)
-    N_ota_le_7_ge_3 = len(ota_le_7_ge_3)
+    ota_le_7_ge_3 = all_open_tickets.filter(created__gte=date_7, created__lt=date_3)
+    N_ota_le_7_ge_3 = ota_le_7_ge_3.count()
 
     # > 7 & <= 14
-    ota_le_14_ge_7 = all_open_tickets.filter(created__gte=date_14_str, created__lt=date_7_str)
-    N_ota_le_14_ge_7 = len(ota_le_14_ge_7)
+    ota_le_14_ge_7 = all_open_tickets.filter(created__gte=date_14, created__lt=date_7)
+    N_ota_le_14_ge_7 = ota_le_14_ge_7.count()
 
     # > 14
-    ota_ge_14 = all_open_tickets.filter(created__lt=date_14_str)
-    N_ota_ge_14 = len(ota_ge_14)
+    ota_ge_14 = all_open_tickets.filter(created__lt=date_14)
+    N_ota_ge_14 = ota_ge_14.count()
 
     # > 0 & <= 30
-    ota_le_30 = all_open_tickets.filter(created__gte=date_30_str)
-    N_ota_le_30 = len(ota_le_30)
+    ota_le_30 = all_open_tickets.filter(created__gte=date_30)
+    N_ota_le_30 = ota_le_30.count()
 
     # >= 30 & <= 60
-    ota_le_60_ge_30 = all_open_tickets.filter(created__gte=date_60_str, created__lte=date_30_str)
-    N_ota_le_60_ge_30 = len(ota_le_60_ge_30)
+    ota_le_60_ge_30 = all_open_tickets.filter(created__gte=date_60, created__lte=date_30)
+    N_ota_le_60_ge_30 = ota_le_60_ge_30.count()
 
     # >= 60
-    ota_ge_60 = all_open_tickets.filter(created__lte=date_60_str)
-    N_ota_ge_60 = len(ota_ge_60)
+    ota_ge_60 = all_open_tickets.filter(created__lte=date_60)
+    N_ota_ge_60 = ota_ge_60.count()
 
     # (O)pen (T)icket (S)tats
     ots = list()
@@ -2062,7 +2070,7 @@ def calc_basic_ticket_stats(Tickets):
     average_nbr_days_until_ticket_closed = \
         calc_average_nbr_days_until_ticket_resolved(all_closed_tickets)
     # all closed tickets that were opened in the last 60 days.
-    all_closed_last_60_days = all_closed_tickets.filter(created__gte=date_60_str)
+    all_closed_last_60_days = all_closed_tickets.filter(created__gte=date_60)
     average_nbr_days_until_ticket_closed_last_60_days = \
         calc_average_nbr_days_until_ticket_resolved(all_closed_last_60_days)
 

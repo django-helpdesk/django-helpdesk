@@ -176,7 +176,11 @@ urlpatterns = [
 
     url(r'set_default_org/(?P<user_id>[0-9]+)/(?P<org_id>[0-9]+)/$',
         staff.set_default_org,
-        name="set_default_org")
+        name="set_default_org"),
+
+    url(r'set_user_timezone/$',
+        staff.set_user_timezone,
+        name="set_user_timezone"),
 ]
 
 urlpatterns += [

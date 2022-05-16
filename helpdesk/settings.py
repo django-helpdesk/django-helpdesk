@@ -20,6 +20,7 @@ try:
 except AttributeError:
     pass
 
+settings.MIDDLEWARE = settings.MIDDLEWARE + ('helpdesk.middleware.TimezoneMiddleware',)
 
 HAS_TAG_SUPPORT = False
 
