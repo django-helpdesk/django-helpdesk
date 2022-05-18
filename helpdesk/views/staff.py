@@ -562,7 +562,9 @@ def update_ticket(request, ticket_id, public=False):
 
     utc = pytz.timezone('UTC')
     if due_date is not None:
-        due_date = dateutil.parser.parse(due_date).astimezone(utc)
+        # https://stackoverflow.com/questions/26264897/time-zone-field-in-isoformat
+        due_date = timezone.get_current_timezone().localize(dateutil.parser.parse(due_date))
+        due_date = due_date.astimezone(utc)
 
     no_changes = all([
         not request.FILES,
