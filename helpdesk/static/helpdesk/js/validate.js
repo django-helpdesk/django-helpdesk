@@ -11,6 +11,8 @@ var key = {
     property_list: 'e_property_type',
 //LOCAL	property_list: 'property_type',
     pathway_list: 'e_pathway',
+    backup_pathway_list: 'e_backup_pathway',
+    attachment: 'attachment',
 };
 var id = {
     affordable_boolean: '#id_' + key.affordable_boolean,
@@ -18,11 +20,15 @@ var id = {
     acp_list: '#id_' + key.acp_list,
     property_list: '#id_' + key.property_list,
     pathway_list: '#id_' + key.pathway_list,
+    backup_pathway_list: '#id_' + key.backup_pathway_list,
+    attachment: '#id_' + key.attachment,
 };
 var group = {
     affordable_boolean: '#id_group_' + key.affordable_boolean,
     affordable_list: '#id_group_' + key.affordable_list,
     acp_list: '#id_group_' + key.acp_list,
+    backup_pathway_list: '#id_group_' + key.backup_pathway_list,
+    attachment: '#id_group_' + key.attachment,
 };
 var high_perf = ['Adult Education','Ambulatory Surgical Center','Multifamily Housing','Automobile Dealership','Bank Branch','Bar/Nightclub','Barracks','Courthouse','College/University','Convenience Store with Gas Station','Convenience Store without Gas Station','Financial Office','Data Center','Drinking Water Treatment & Distribution','Enclosed Mall','Office','Fast Food Restaurant','Food Sales','Food Service','Hospital (General Medical & Surgical)','Hotel','Laboratory','Lifestyle Center','Medical Office','Other - Education','Other - Lodging/Residential','Other - Mall','Other - Restaurant/Bar','Other - Specialty Hospital','Outpatient Rehabilitation/Physical Therapy','Pre-school/Daycare','Prison/Incarceration','Residence Hall/Dormitory','Residential Care Facility','Restaurant','Retail Store','Self-Storage Facility','Senior Care Community (also know as Senior Livi Community)','Strip Mall','Supermarket/Grocery Store','Urgent Care/Clinic/Other Outpatient','Veterinary Office','Vocational School','Wastewater Treatment Plant','Wholesale Club/Supercenter']
 
@@ -32,7 +38,7 @@ var alertMsg1 = 'This property type is not eligible for the Standard Target Path
 var alertMsg2 = 'You have selected the Prescriptive Pathway, please note that DOEE will not approve this selection until the building owner has submitted an energy audit. For more information please see this <a href="https://dc.beam-portal.org/helpdesk/kb/BEPS/55/">FAQ</a>.';
 var alertMsg3 = 'This property type is not eligible for the Extended Deep Energy Retrofit ACP Option, please select another pathway.'
 var alertMsg4 = 'You have selected the Prescriptive Pathway, please note that DOEE will not approve this selection until the building owner has submitted an energy audit. For more information please see this <a href="https://dc.beam-portal.org/helpdesk/kb/BEPS/55/">FAQ</a>'
-var alertMsg5 = 'We are unable to accept ACPs through this page at this time. Please check back later.'
+var alertMsg5 = 'If selecting the ACP, you must select a Backup Pathway and attach an ACP proposal with supporting documentation as specified in <a href="https://dc.beam-portal.org/helpdesk/kb/BEPS_Guidebook/69/">Chapter 4</a> of the <a href="https://dc.beam-portal.org/helpdesk/kb/BEPS_Guidebook/">BEPS Guidebook</a>."'
 
 /* This field appears if "Pathway" = "Standard Target Pathway" AND ("Primary Property Type - Portfolio Manager Calculated" NOT IN High Performance List) */
 jQuery.validator.addMethod('alert1', function (value, element, param) {
@@ -80,6 +86,9 @@ var form_validator = $('#ticket_submission_form').validate({
             alert2: true,
             alert5: true
         },
+        [key.backup_pathway_list]: {
+            alert2: true,
+        },
         [key.property_list]: {
             alert1: {
                 param: {
@@ -110,7 +119,11 @@ var form_validator = $('#ticket_submission_form').validate({
 
 $(group.affordable_boolean).hide();
 $(group.affordable_list).hide();
-$(group.acp_list).hide();
+if ($(id.pathway_list).val() != "Alternative Compliance Pathway") {
+    // Show them on ticket reload when there are errors
+    $(group.acp_list).hide();
+    $(group.backup_pathway_list).hide();
+}
 
 $(id.property_list).change(function(){
     //Alert 3 must be checked when either of two fields changes
@@ -169,14 +182,34 @@ $(id.pathway_list).change(function(){
     if ($(id.property_list).val() != '')
         form_validator.element(id.property_list);
 
-    //acp_list field appears if "Pathway Selected" = "Alternative Compliance Pathway"
+    // backup_pathway_list and acp_list fields appears if "Pathway Selected" = "Alternative Compliance Pathway"
     if($(id.pathway_list).val() == "Alternative Compliance Pathway") {
-        $("#ticket_submission_form > button").prop('disabled', true);
-//        $(group.acp_list).show();
+        $(group.acp_list).show();
+        $(group.backup_pathway_list).show();
+        // Mark as required
+        $(group.backup_pathway_list+ ' label').after('<span style="color:red;">*</span>');
+        $(group.acp_list + ' label').after('<span style="color:red;">*</span>');
+        $(group.attachment + ' label').after('<span style="color:red;">*</span>');
     } else {
-        $("#ticket_submission_form > button").prop('disabled', false);
+        // Hide and Reset fields
         $(group.acp_list).hide();
         $(id.acp_list).val('');
+        $(group.backup_pathway_list).hide();
+        $(id.backup_pathway_list).val('');
+        // Remove mark as required
+        $(group.acp_list).children('span').remove();
+        $(group.backup_pathway_list).children('span').remove();
+        $(group.attachment).children('span').remove();
     }
+});
+
+$(id.backup_pathway_list).change(function() {
+    //removes class 'error-okay' so that validator will not ignore changes
+    $(id.backup_pathway_list).removeClass("error-okay");
+    form_validator.element(id.backup_pathway_list);
+
+    //Alert 1 must be checked when either of two fields changes
+    if ($(id.backup_pathway_list).val() != '')
+        form_validator.element(id.backup_pathway_list);
 });
 

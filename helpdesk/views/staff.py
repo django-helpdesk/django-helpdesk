@@ -77,12 +77,14 @@ staff_member_required = user_passes_test(
 
 
 def set_user_timezone(request):
-    tz = request.GET.get('timezone')
-    request.session["helpdesk_timezone"] = tz
-    timezone.activate(tz)
-    response_data = {'status': 'true', 'message': 'user timezone set successfully.'}
+    if 'helpdesk_timezone' not in request.session:
+        tz = request.GET.get('timezone')
+        request.session["helpdesk_timezone"] = tz
+        timezone.activate(tz)
+        response_data = {'status': True, 'message': 'user timezone set successfully to %s.' % tz}
+    else:
+        response_data = {'status': False, 'message': 'user timezone has already been set'}
     return JsonResponse(response_data, status=status.HTTP_200_OK)
-
 
 @helpdesk_staff_member_required
 def set_default_org(request, user_id, org_id):
@@ -560,7 +562,9 @@ def update_ticket(request, ticket_id, public=False):
 
     utc = pytz.timezone('UTC')
     if due_date is not None:
-        due_date = dateutil.parser.parse(due_date).astimezone(utc)
+        # https://stackoverflow.com/questions/26264897/time-zone-field-in-isoformat
+        due_date = timezone.get_current_timezone().localize(dateutil.parser.parse(due_date))
+        due_date = due_date.astimezone(utc)
 
     no_changes = all([
         not request.FILES,
