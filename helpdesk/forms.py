@@ -349,7 +349,24 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
                     value = str(value)
                 cleaned_data[field] = value
 
+        # Handle DC Pathway Form
+        if cleaned_data.get('e_pathway'):
+            self.clean_dc_pathway_form()
+
         return cleaned_data
+
+    def clean_dc_pathway_form(self):
+        if self.cleaned_data.get('e_pathway') == 'Alternative Compliance Pathway':
+            # Check that e_backup_pathway, e_acp_type, and attachment were provided
+            fields = [
+                ('e_backup_pathway', 'A Backup Pathway is required'),
+                ('e_acp_type', 'An ACP Type is required'),
+                ('attachment', 'An attachment is required')
+            ]
+            for field in fields:
+                if not self.cleaned_data.get(field[0]):
+                    msg = forms.ValidationError(field[1] + ' if Alternative Compliance Pathway is selected.')
+                    self.add_error(field[0], msg)
 
     def _create_ticket(self):
         kbitem = None
