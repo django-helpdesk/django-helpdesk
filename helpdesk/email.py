@@ -63,8 +63,8 @@ def process_email(quiet=False):
 
         for importer in importers:
             importer_queues = queue_objects.filter(importer=importer)  # not sure if this is efficient
-            if org.default_queue:
-                default_queue = org.default_queue
+            if importer.default_queue:
+                default_queue = importer.default_queue
             else:
                 default_queue = importer_queues.first()
             matching_queues = importer_queues.exclude(match_on__exact=[])
