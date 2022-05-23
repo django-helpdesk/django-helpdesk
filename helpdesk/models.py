@@ -152,15 +152,7 @@ class Queue(models.Model):
                     'try not to change it or e-mailing may get messy.'),
     )
 
-    importer = models.ForeignKey('seed.EmailImporter', on_delete=models.SET_NULL, null=True, blank=True,
-                                 help_text="Assign the email address that this queue should import from. "
-                                           "If this queue is not the organization's default queue, this queue will only "
-                                           "import responses to tickets, unless match_on is filled out. "
-                                           "\nNOTE: Importing and sending should be done from the same email address.")
-    sender = models.ForeignKey('seed.EmailSender', on_delete=models.SET_NULL, null=True, blank=True,
-                               help_text="Assign the email address that this queue should send emails from. "
-                                         "If no sender is provided, the organization's sender will be used. "
-                                         "\nNOTE: Importing and sending should be done from the same email address.")
+    importer_sender = models.ForeignKey('seed.ImporterSenderMapping', on_delete=models.SET_NULL, null=True, blank=True)
     match_on = models.JSONField(blank=True, default=list,
                                 help_text="A list of strings. If you'd like only emails with "
                                           "certain subject lines to be imported into this queue, "
@@ -263,19 +255,19 @@ class Queue(models.Model):
 
     @property
     def email_address(self):
-        if self.sender:
-            return self.sender.email_address
-        elif self.organization.sender_email_address:
-            return self.organization.sender_email_address.from_address
+        if self.importer_sender:
+            return self.importer_sender.email_address
+        elif self.organization.sender:
+            return self.organization.sender.from_address
         else:
             return None
 
     @property
     def from_address(self):
-        if self.sender:
-            return self.sender.from_address
-        elif self.organization.sender_email_address:
-            return self.organization.sender_email_address.from_address
+        if self.importer_sender:
+            return self.importer_sender.from_address
+        elif self.organization.sender:
+            return self.organization.sender.from_address
         else:
             return u'NO EMAIL ADDRESS DEFINED <%s>' % settings.DEFAULT_FROM_EMAIL
 

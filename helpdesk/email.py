@@ -35,7 +35,7 @@ from email_reply_parser import EmailReplyParser
 from helpdesk import settings
 from helpdesk.lib import safe_template_context, process_attachments
 from helpdesk.models import Queue, Ticket, TicketCC, FollowUp, IgnoreEmail, FormType, CustomField
-from seed.lib.superperms.orgs.models import Organization
+from seed.models import ImporterSenderMapping
 
 
 # import User model, which may be a custom model
@@ -54,77 +54,73 @@ DEBUGGING = False
 
 
 def process_email(quiet=False):
-    for org in Organization.objects.filter(helpdesk_imports=True):
-        queue_objects = Queue.objects.filter(organization=org, allow_email_submission=True, importer__isnull=False)\
-            .select_related('importer')
-        importers = set()
-        for q in queue_objects:
-            importers.add(q.importer)
+    for importer_sender in ImporterSenderMapping.objects.filter(allow_email_imports=True):
+        importer = importer_sender.importer
+        importer_queues = importer_sender.queue_set
+        if importer_sender.default_queue:
+            default_queue = importer_sender.default_queue
+        else:
+            default_queue = importer_queues.first()
 
-        for importer in importers:
-            importer_queues = queue_objects.filter(importer=importer)  # not sure if this is efficient
-            if importer.default_queue:
-                default_queue = importer.default_queue
-            else:
-                default_queue = importer_queues.first()
-            matching_queues = importer_queues.exclude(match_on__exact=[])
-            address_matching_queues = importer_queues.exclude(match_on_addresses__exact=[])
-            queues = {
-                'importer_queues': importer_queues,
-                'default_queue': default_queue,
-                'matching_queues': matching_queues,
-                'address_matching_queues': address_matching_queues
-            }
-            logger = logging.getLogger('django.helpdesk.emailimporter.' + importer.email_box_user.replace('@.', '_').replace('.', '_'))
-            logging_types = {
-                'info': logging.INFO,
-                'warn': logging.WARN,
-                'error': logging.ERROR,
-                'crit': logging.CRITICAL,
-                'debug': logging.DEBUG,
-            }
-            if importer.logging_type in logging_types:
-                logger.setLevel(logging_types[importer.logging_type])
-            elif not importer.logging_type or importer.logging_type == 'none':
-                # disable all handlers so messages go to nowhere
-                logger.handlers = []
-                logger.propagate = False
-            if quiet:
-                logger.propagate = False  # do not propagate to root logger that would log to console
+        matching_queues = importer_queues.exclude(match_on__exact=[])
+        address_matching_queues = importer_queues.exclude(match_on_addresses__exact=[])
+        queues = {
+            'importer_queues': importer_queues,
+            'default_queue': default_queue,
+            'matching_queues': matching_queues,
+            'address_matching_queues': address_matching_queues
+        }
+        logger = logging.getLogger('django.helpdesk.emailimporter.' + importer.email_box_user.replace('@', '_').replace('.', '_'))
+        logging_types = {
+            'info': logging.INFO,
+            'warn': logging.WARN,
+            'error': logging.ERROR,
+            'crit': logging.CRITICAL,
+            'debug': logging.DEBUG,
+        }
+        if importer.logging_type in logging_types:
+            logger.setLevel(logging_types[importer.logging_type])
+        elif not importer.logging_type or importer.logging_type == 'none':
+            # disable all handlers so messages go to nowhere
+            logger.handlers = []
+            logger.propagate = False
+        if quiet:
+            logger.propagate = False  # do not propagate to root logger that would log to console
 
-            # Log messages to specific file only if the queue has it configured
-            if (importer.logging_type in logging_types) and importer.logging_dir:  # if it's enabled and the dir is set
-                log_file_handler = logging.FileHandler(join(importer.logging_dir, importer.email_box_user + '_get_email.log'))
-                logger.addHandler(log_file_handler)
-            else:
-                log_file_handler = None
+        # Log messages to specific file only if the queue has it configured
+        if (importer.logging_type in logging_types) and importer.logging_dir:  # if it's enabled and the dir is set
+            log_file_handler = logging.FileHandler(join(importer.logging_dir, importer.email_box_user + '_get_email.log'))
+            logger.addHandler(log_file_handler)
+        else:
+            log_file_handler = None
 
-            try:
-                if not importer.email_box_last_check:
-                    importer.email_box_last_check = timezone.now() - timedelta(minutes=30)
+        try:
+            logger.info("*** Beginning import for %s" % importer.email_box_user)
+            if not importer.email_box_last_check:
+                importer.email_box_last_check = timezone.now() - timedelta(minutes=30)
 
-                queue_time_delta = timedelta(minutes=importer.email_box_interval or 0)
-                if not DEBUGGING:
-                    if (importer.email_box_last_check + queue_time_delta) < timezone.now():
-                        process_importer(importer, queues, logger=logger)
-                        importer.email_box_last_check = timezone.now()
-                        importer.save()
-                else:
+            queue_time_delta = timedelta(minutes=importer.email_box_interval or 0)
+            if not DEBUGGING:
+                if (importer.email_box_last_check + queue_time_delta) < timezone.now():
                     process_importer(importer, queues, logger=logger)
                     importer.email_box_last_check = timezone.now()
                     importer.save()
-            finally:
-                # we must close the file handler correctly if it's created
-                try:
-                    if log_file_handler:
-                        log_file_handler.close()
-                except Exception as e:
-                    logging.exception(e)
-                try:
-                    if log_file_handler:
-                        logger.removeHandler(log_file_handler)
-                except Exception as e:
-                    logging.exception(e)
+            else:
+                process_importer(importer, queues, logger=logger)
+                importer.email_box_last_check = timezone.now()
+                importer.save()
+        finally:
+            # we must close the file handler correctly if it's created
+            try:
+                if log_file_handler:
+                    log_file_handler.close()
+            except Exception as e:
+                logging.exception(e)
+            try:
+                if log_file_handler:
+                    logger.removeHandler(log_file_handler)
+            except Exception as e:
+                logging.exception(e)
 
 
 def pop3_sync(importer, queues, logger, server):
