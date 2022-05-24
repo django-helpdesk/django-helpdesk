@@ -593,7 +593,6 @@ def object_from_message(message, importer, queues, logger):
     logger.info('Sorting email into queue:')
     ticket, queue = None, None
     for q in queues['importer_queues']:
-        print(q)
         matchobj = re.match(r".*\[" + q.slug + r"-(?P<id>\d+)\]", subject)
         if matchobj and not ticket:
             ticket = matchobj.group('id')
