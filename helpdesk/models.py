@@ -265,7 +265,7 @@ class Queue(models.Model):
     @property
     def from_address(self):
         if self.importer_sender:
-            return self.importer_sender.from_address
+            return self.importer_sender.sender.from_address
         elif self.organization.sender:
             return self.organization.sender.from_address
         else:

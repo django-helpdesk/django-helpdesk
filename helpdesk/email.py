@@ -56,7 +56,7 @@ DEBUGGING = False
 def process_email(quiet=False):
     for importer_sender in ImporterSenderMapping.objects.filter(allow_email_imports=True):
         importer = importer_sender.importer
-        importer_queues = importer_sender.queue_set
+        importer_queues = importer_sender.queue_set.all()
         if importer_sender.default_queue:
             default_queue = importer_sender.default_queue
         else:
@@ -70,7 +70,9 @@ def process_email(quiet=False):
             'matching_queues': matching_queues,
             'address_matching_queues': address_matching_queues
         }
-        logger = logging.getLogger('django.helpdesk.emailimporter.' + importer.email_box_user.replace('@', '_').replace('.', '_'))
+        log_name = importer.email_box_user.replace('@', '_')
+        log_name = log_name.replace('.', '_')
+        logger = logging.getLogger('django.helpdesk.emailimporter.' + log_name)
         logging_types = {
             'info': logging.INFO,
             'warn': logging.WARN,
@@ -89,7 +91,7 @@ def process_email(quiet=False):
 
         # Log messages to specific file only if the queue has it configured
         if (importer.logging_type in logging_types) and importer.logging_dir:  # if it's enabled and the dir is set
-            log_file_handler = logging.FileHandler(join(importer.logging_dir, importer.email_box_user + '_get_email.log'))
+            log_file_handler = logging.FileHandler(join(importer.logging_dir, log_name + '_get_email.log'))
             logger.addHandler(log_file_handler)
         else:
             log_file_handler = None
@@ -591,6 +593,7 @@ def object_from_message(message, importer, queues, logger):
     logger.info('Sorting email into queue:')
     ticket, queue = None, None
     for q in queues['importer_queues']:
+        print(q)
         matchobj = re.match(r".*\[" + q.slug + r"-(?P<id>\d+)\]", subject)
         if matchobj and not ticket:
             ticket = matchobj.group('id')
