@@ -86,6 +86,7 @@ def set_user_timezone(request):
         response_data = {'status': False, 'message': 'user timezone has already been set'}
     return JsonResponse(response_data, status=status.HTTP_200_OK)
 
+
 @helpdesk_staff_member_required
 def set_default_org(request, user_id, org_id):
     """
@@ -130,6 +131,7 @@ def dashboard(request):
     user_tickets_page = request.GET.get(_('ut_page'), 1)
     user_tickets_closed_resolved_page = request.GET.get(_('utcr_page'), 1)
     all_tickets_reported_by_current_user_page = request.GET.get(_('atrbcu_page'), 1)
+    unassigned_tickets_page = request.GET.get(_('uat_page'), 1)
 
     huser = HelpdeskUser(request.user)
     user_queues = huser.get_queues()                # Queues in user's default org (or all if superuser)
@@ -168,7 +170,7 @@ def dashboard(request):
         all_tickets_reported_by_current_user = Ticket.objects.select_related('queue').filter(
             submitter_email=email_current_user,
             queue__in=user_queues
-        ).order_by('status')
+        ).order_by('status', '-id')
 
     tickets_in_queues = Ticket.objects.filter(
         queue__in=user_queues,
@@ -223,6 +225,18 @@ def dashboard(request):
         all_tickets_reported_by_current_user = paginator.page(1)
     except EmptyPage:
         all_tickets_reported_by_current_user = paginator.page(
+            paginator.num_pages)
+
+    # get unassigned tickets page
+    paginator = Paginator(
+        unassigned_tickets, tickets_per_page)
+    try:
+        unassigned_tickets = paginator.page(
+            unassigned_tickets_page)
+    except PageNotAnInteger:
+        unassigned_tickets = paginator.page(1)
+    except EmptyPage:
+        unassigned_tickets = paginator.page(
             paginator.num_pages)
 
     return render(request, 'helpdesk/dashboard.html', {
@@ -566,7 +580,7 @@ def update_ticket(request, ticket_id, public=False):
         due_date = timezone.get_current_timezone().localize(dateutil.parser.parse(due_date))
         due_date = due_date.astimezone(utc)
 
-    no_changes = all([
+    no_changes_excluding_time_spent = all([  # excludes spent time so we can re-use it to send emails
         not request.FILES,
         not comment,
         new_status == ticket.status,
@@ -575,9 +589,8 @@ def update_ticket(request, ticket_id, public=False):
         due_date == ticket.due_date,
         (owner == -1) or (not owner and not ticket.assigned_to) or
         (owner and User.objects.get(id=owner) == ticket.assigned_to),
-        mins_spent == 0,
     ])
-    if no_changes:
+    if no_changes_excluding_time_spent and mins_spent == 0:
         return return_to_ticket(request.user, request, helpdesk_settings, ticket)
 
     # We need to allow the 'ticket' and 'queue' contexts to be applied to the
@@ -751,25 +764,6 @@ def update_ticket(request, ticket_id, public=False):
         messages_sent_to.add(request.user.email)
     except AttributeError:
         pass
-    # Public users (submitter, public CC, and extra_field emails) are only updated if there's a new status or a comment.
-    if public and (f.comment or (f.new_status in (Ticket.RESOLVED_STATUS, Ticket.CLOSED_STATUS))):
-        if f.new_status == Ticket.RESOLVED_STATUS:
-            template = 'resolved_'
-        elif f.new_status == Ticket.CLOSED_STATUS:
-            template = 'closed_'
-        else:
-            template = 'updated_'
-
-        roles = {
-            'submitter': (template + 'submitter', context),
-            'cc_public': (template + 'cc_public', context),
-            'extra': (template + 'cc_public', context),
-        }
-        # todo is this necessary?
-        # if ticket.assigned_to and ticket.assigned_to.usersettings_helpdesk.email_on_ticket_change:
-        #    roles['assigned_to'] = (template + 'cc', context)  # todo sends a cc template for resolved/closed/updated to the owner. seems very unnecessary
-
-        messages_sent_to.update(ticket.send(roles, dont_send_to=messages_sent_to, fail_silently=True, files=files,))
 
     # Emails an update to the owner
     if reassigned:
@@ -781,7 +775,7 @@ def update_ticket(request, ticket_id, public=False):
     else:
         template_staff = 'updated_owner'
 
-    if ticket.assigned_to and (
+    if ticket.assigned_to and (not no_changes_excluding_time_spent) and (
         ticket.assigned_to.usersettings_helpdesk.email_on_ticket_change
         or (reassigned and ticket.assigned_to.usersettings_helpdesk.email_on_ticket_assigned)
     ):
@@ -802,13 +796,38 @@ def update_ticket(request, ticket_id, public=False):
     else:
         template_cc = 'updated_cc_user'
 
-    messages_sent_to.update(ticket.send(
-        {'queue_updated': (template_cc, context),
-         'cc_users': (template_cc, context)},
-        dont_send_to=messages_sent_to,
-        fail_silently=True,
-        files=files,
-    ))
+    if not no_changes_excluding_time_spent:
+        messages_sent_to.update(ticket.send(
+            {'queue_updated': (template_cc, context),
+             'cc_users': (template_cc, context)},
+            dont_send_to=messages_sent_to,
+            fail_silently=True,
+            files=files,
+        ))
+
+        # Public users (submitter, public CC, and extra_field emails) are only updated if there's a new status or a comment.
+        if public and (
+                (f.comment and no_changes_excluding_time_spent)
+                or
+                (f.new_status in (Ticket.RESOLVED_STATUS, Ticket.CLOSED_STATUS))):
+            if f.new_status == Ticket.RESOLVED_STATUS:
+                template = 'resolved_'
+            elif f.new_status == Ticket.CLOSED_STATUS:
+                template = 'closed_'
+            else:
+                template = 'updated_'
+
+            roles = {
+                'submitter': (template + 'submitter', context),
+                'cc_public': (template + 'cc_public', context),
+                'extra': (template + 'cc_public', context),
+            }
+            # todo is this necessary?
+            # if ticket.assigned_to and ticket.assigned_to.usersettings_helpdesk.email_on_ticket_change:
+            #    roles['assigned_to'] = (template + 'cc', context)  # todo sends a cc template for resolved/closed/updated to the owner. seems very unnecessary
+
+            messages_sent_to.update(
+                ticket.send(roles, dont_send_to=messages_sent_to, fail_silently=True, files=files, ))
 
     ticket.save()
 
