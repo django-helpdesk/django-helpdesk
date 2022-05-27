@@ -57,19 +57,7 @@ def process_email(quiet=False):
     for importer_sender in ImporterSenderMapping.objects.filter(allow_email_imports=True):
         importer = importer_sender.importer
         importer_queues = importer_sender.queue_set.all()
-        if importer_sender.default_queue:
-            default_queue = importer_sender.default_queue
-        else:
-            default_queue = importer_queues.first()
 
-        matching_queues = importer_queues.exclude(match_on__exact=[])
-        address_matching_queues = importer_queues.exclude(match_on_addresses__exact=[])
-        queues = {
-            'importer_queues': importer_queues,
-            'default_queue': default_queue,
-            'matching_queues': matching_queues,
-            'address_matching_queues': address_matching_queues
-        }
         log_name = importer.email_box_user.replace('@', '_')
         log_name = log_name.replace('.', '_')
         logger = logging.getLogger('django.helpdesk.emailimporter.' + log_name)
@@ -97,20 +85,35 @@ def process_email(quiet=False):
             log_file_handler = None
 
         try:
-            logger.info("*** Beginning import for %s" % importer.email_box_user)
-            if not importer.email_box_last_check:
-                importer.email_box_last_check = timezone.now() - timedelta(minutes=30)
+            logger.info("*** Importing into %s ***" % importer.email_box_user)
 
-            queue_time_delta = timedelta(minutes=importer.email_box_interval or 0)
-            if not DEBUGGING:
-                if (importer.email_box_last_check + queue_time_delta) < timezone.now():
+            if not importer_sender.default_queue:
+                logger.info("Import canceled: no default queue set")
+            else:
+                default_queue = importer_sender.default_queue
+
+                matching_queues = importer_queues.filter(allow_email_submission=True).exclude(match_on__exact=[])
+                address_matching_queues = importer_queues.filter(allow_email_submission=True).exclude(match_on_addresses__exact=[])
+                queues = {
+                    'importer_queues': importer_queues,
+                    'default_queue': default_queue,
+                    'matching_queues': matching_queues,
+                    'address_matching_queues': address_matching_queues
+                }
+
+                if not importer.email_box_last_check:
+                    importer.email_box_last_check = timezone.now() - timedelta(minutes=30)
+
+                queue_time_delta = timedelta(minutes=importer.email_box_interval or 0)
+                if not DEBUGGING:
+                    if (importer.email_box_last_check + queue_time_delta) < timezone.now():
+                        process_importer(importer, queues, logger=logger)
+                        importer.email_box_last_check = timezone.now()
+                        importer.save()
+                else:
                     process_importer(importer, queues, logger=logger)
                     importer.email_box_last_check = timezone.now()
                     importer.save()
-            else:
-                process_importer(importer, queues, logger=logger)
-                importer.email_box_last_check = timezone.now()
-                importer.save()
         finally:
             # we must close the file handler correctly if it's created
             try:
@@ -590,7 +593,6 @@ def object_from_message(message, importer, queues, logger):
                 return True  # and the 'True' will cause the message to be deleted.
 
     # Sort out which queue this email should go into #
-    logger.info('Sorting email into queue:')
     ticket, queue = None, None
     for q in queues['importer_queues']:
         matchobj = re.match(r".*\[" + q.slug + r"-(?P<id>\d+)\]", subject)
@@ -601,12 +603,16 @@ def object_from_message(message, importer, queues, logger):
     if not ticket:
         logger.info("- No tracking ID matched.")
         for q in queues['matching_queues']:
-            if reduce(lambda prev, s: prev or (s in subject), q.match_on, False):
-                queue = q
-                logger.info("- Subject matched list from '%s'" % q.slug)
+            if not queue:
+                for m in q.match_on:
+                    m_re = re.compile(r'\b%s\b' % m, re.I)
+                    if m_re.search(subject):
+                        queue = q
+                        logger.info("- Subject matched list from '%s'" % q.slug)
     if not queue:
+        sender_lower = sender[1].lower()
         for q in queues['address_matching_queues']:
-            if reduce(lambda prev, e: prev or (e in sender), q.match_on_addresses, False):
+            if reduce(lambda prev, e: prev or (e.lower() in sender_lower), q.match_on_addresses, False):
                 queue = q
                 logger.info("- Sender address matched list from '%s'" % q.slug)
     if not queue:

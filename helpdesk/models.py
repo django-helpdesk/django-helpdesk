@@ -170,11 +170,11 @@ class Queue(models.Model):
     )
 
     allow_email_submission = models.BooleanField(
-        _('Allow E-Mail Submission?'),
+        _('Allow E-Mail Imports?'),
         blank=True,
         default=False,
-        help_text=_('Do you want to poll the e-mail box below for new '
-                    'tickets?'),
+        help_text=_('Turn on or off email imports for queues with match lists only. '
+                    'Does not affect default queues, or follow-up imports.'),
     )
 
     escalate_days = models.IntegerField(
