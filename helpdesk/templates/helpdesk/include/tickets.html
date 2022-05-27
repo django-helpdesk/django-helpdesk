@@ -42,34 +42,34 @@
             <ul class="pagination">
             <!-- if we aren't on page one, go back to start and go back one controls -->
             {% if ticket_list.has_previous %}
-                <li><a href="?{{ page_var }}=1">&laquo;&laquo;</a></li>
-                <li><a href="?{{ page_var }}={{ ticket_list.previous_page_number }}">&laquo;</a></li>
+                <li><a href="?{{ page_var }}=1">&laquo;&laquo;</a>&nbsp;</li>
+                <li><a href="?{{ page_var }}={{ ticket_list.previous_page_number }}">&laquo;</a>&nbsp;</li>
             {% else %}
-                <li class="disabled"><span>&laquo;&laquo;</span></li>
-                <li class="disabled"><span>&laquo;</span></li>
+                <li class="disabled"><span>&laquo;&laquo;&nbsp;</span></li>
+                <li class="disabled"><span>&laquo;&nbsp;</span></li>
             {% endif %}
             <!-- other pages, set thresh to the number to show before and after active -->
             {% with 5 as thresh %}
             {% for i in ticket_list.paginator.page_range %}
             {% if ticket_list.number == i %}
-                <li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
+                <li class="active"><span>{{ i }}&nbsp;<span class="sr-only">(current)</span></span></li>
             {% elif i <= ticket_list.number|add:5 and i >= ticket_list.number|add:-5 %}
-                <li><a href="?{{ page_var }}={{ i }}">{{ i }}</a></li>
+                <li><a href="?{{ page_var }}={{ i }}">{{ i }}</a>&nbsp;</li>
             {% endif %}
             {% endfor %}
             {% endwith %}
             <!-- if we aren't on the last page, go forward one and go to end controls -->
             {% if ticket_list.has_next %}
-                <li><a href="?{{ page_var }}={{ ticket_list.next_page_number }}">&raquo;</a></li>
-                <li><a href="?{{ page_var }}={{ ticket_list.paginator.num_pages }}">&raquo;&raquo;</a></li>
+                <li><a href="?{{ page_var }}={{ ticket_list.next_page_number }}">&raquo;</a>&nbsp;</li>
+                <li><a href="?{{ page_var }}={{ ticket_list.paginator.num_pages }}">&raquo;&raquo;</a>&nbsp;</li>
             {% else %}
-                <li class="disabled"><span>&raquo;</span></li>
-                <li class="disabled"><span>&raquo;&raquo;</span></li>
+                <li class="disabled"><span>&raquo;&nbsp;</span></li>
+                <li class="disabled"><span>&raquo;&raquo;&nbsp;</span></li>
             {% endif %}
             </ul>
         {% endif %}
     </div>
-    <div class="card-footer small text-muted">Listing {{ ticket_list|length }} ticket(s).</div>
+    <div class="card-footer small text-muted">Listing {{ ticket_list|length }} ticket(s) out of {{ ticket_list.paginator.count }}.</div>
 </div>
 
 

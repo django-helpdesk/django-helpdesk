@@ -9,11 +9,21 @@ from helpdesk.models import TicketChange, KBIAttachment, FollowUpAttachment, Ign
 from helpdesk.models import CustomField, FormType
 from seed.models import Column, Property, TaxLot
 from seed.lib.superperms.orgs.models import get_helpdesk_organizations
+from pinax.teams.models import JoinInvitation, Membership, Team
+from pinax.invitations.admin import InvitationStat
+
+admin.site.unregister(JoinInvitation)
+admin.site.unregister(Membership)
+admin.site.unregister(Team)
+admin.site.unregister(InvitationStat)
 
 
 @admin.register(Queue)
 class QueueAdmin(admin.ModelAdmin):
-    list_display = ('title', 'slug', 'email_address', 'locale', 'time_spent')
+    list_display = ('organization', 'title', 'slug', 'importer_sender', 'allow_public_submission', 'allow_email_submission',
+                    'match_on', 'match_on_addresses')
+    list_display_links = ('title',)
+    list_filter = ('organization',)
     prepopulated_fields = {"slug": ("title",)}
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
@@ -161,31 +171,29 @@ class CustomFieldAdmin(admin.ModelAdmin):
         super().save_model(request, obj, form, change)
         form.update_columns_set(obj)
 
-    # TODO when django is updated to ver3, use @action decorator for these actions instead
+    @admin.action(description="Mark field as required")
     def make_required_true(modeladmin, request, queryset):
         queryset.update(required=True)
 
+    @admin.action(description="Mark field as optional")
     def make_required_false(modeladmin, request, queryset):
         queryset.update(required=False)
 
+    @admin.action(description="Display only on staff form")
     def make_staff_true(modeladmin, request, queryset):
         queryset.update(staff_only=True)
 
+    @admin.action(description="Display on public form")
     def make_staff_false(modeladmin, request, queryset):
         queryset.update(staff_only=False)
 
+    @admin.action(description="Mark as a non-default field")
     def make_extra_data_true(modeladmin, request, queryset):
         queryset.update(is_extra_data=True)
 
+    @admin.action(description="Mark as a default field")
     def make_extra_data_false(modeladmin, request, queryset):
         queryset.update(is_extra_data=False)
-
-    make_required_true.short_description = "Mark field as required"
-    make_required_false.short_description = "Mark field as optional"
-    make_staff_true.short_description = "Display only on staff form"
-    make_staff_false.short_description = "Display on public form"
-    make_extra_data_true.short_description = "Mark as a non-default field"
-    make_extra_data_false.short_description = "Mark as a default field"
 
     actions = [make_required_true, make_required_false,
                make_staff_true, make_staff_false,
@@ -237,7 +245,7 @@ class EmailTemplateAdmin(admin.ModelAdmin):
 
 @admin.register(IgnoreEmail)
 class IgnoreEmailAdmin(admin.ModelAdmin):
-    list_display = ('name', 'queue_list', 'email_address', 'keep_in_mailbox')
+    list_display = ('name', 'importer_list', 'email_address', 'keep_in_mailbox')
 
 
 @admin.register(KBCategory)

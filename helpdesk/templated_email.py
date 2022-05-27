@@ -4,6 +4,9 @@ from smtplib import SMTPException
 
 from django.conf import settings
 from django.utils.safestring import mark_safe
+from seed.lib.superperms.orgs.models import Organization
+from seed.models.email_settings import ImporterSenderMapping
+from seed.utils.seed_send_email import get_email_backend
 
 logger = logging.getLogger(__name__)
 
@@ -88,6 +91,21 @@ def send_templated_mail(template_name,
 
     locale = context['queue'].get('locale') or HELPDESK_EMAIL_FALLBACK_LOCALE
 
+    org_id = context['queue'].get('organization_id', None)
+    org = Organization.objects.get(id=org_id)
+
+    importer_sender_id = context['queue'].get('importer_sender_id', None)
+    backend = None
+    if importer_sender_id:
+        importer_sender_settings = ImporterSenderMapping.objects.get(id=importer_sender_id)
+        sender_address = importer_sender_settings.sender.from_address
+        backend = get_email_backend(None, importer_sender_settings.sender)
+    elif org:
+        sender_address = org.sender.from_address
+        backend = get_email_backend(org, None)
+    else:
+        sender_address = sender
+
     try:
         t = EmailTemplate.objects.get(template_name__iexact=template_name, locale=locale)
     except EmailTemplate.DoesNotExist:
@@ -123,15 +141,13 @@ def send_templated_mail(template_name,
 
     recipients, headers['X-BEAMHelpdesk-Delivered'] = add_custom_header(recipients)
 
-    if sender is None:
-        if 'queue' in context:
-            sender = context['queue']['from_address']
-
     msg = EmailMultiAlternatives(subject_part, text_part,
-                                 sender or settings.DEFAULT_FROM_EMAIL,
+                                 sender_address or settings.DEFAULT_FROM_EMAIL,
                                  recipients, bcc=bcc,
                                  headers=headers)
     msg.attach_alternative(html_part, "text/html")
+    if backend:
+        msg.connection = backend
 
     if files:
         for filename, filefield in files:

@@ -35,7 +35,7 @@ from email_reply_parser import EmailReplyParser
 from helpdesk import settings
 from helpdesk.lib import safe_template_context, process_attachments
 from helpdesk.models import Queue, Ticket, TicketCC, FollowUp, IgnoreEmail, FormType, CustomField
-from seed.lib.superperms.orgs.models import Organization
+from seed.models import ImporterSenderMapping
 
 
 # import User model, which may be a custom model
@@ -52,24 +52,15 @@ STRIPPED_SUBJECT_STRINGS = [
 
 DEBUGGING = False
 
-DC_IMPORTS = False
-DC_SUBJECTS = [
-    "Benchmarking Report Received",
-    "Benchmarking Report Accepted",
-]
-DC_QUEUE_NAME = "Benchmarking Data Quality"
 
+def process_email(quiet=False):
+    for importer_sender in ImporterSenderMapping.objects.filter(allow_email_imports=True):
+        importer = importer_sender.importer
+        importer_queues = importer_sender.queue_set.all()
 
-def process_email(quiet=False, dc=False):
-    if dc:
-        global DC_IMPORTS
-        DC_IMPORTS = True
-
-    for q in Queue.objects.filter(
-            email_box_type__isnull=False,
-            allow_email_submission=True):
-
-        logger = logging.getLogger('django.helpdesk.queue.' + q.slug)
+        log_name = importer.email_box_user.replace('@', '_')
+        log_name = log_name.replace('.', '_')
+        logger = logging.getLogger('django.helpdesk.emailimporter.' + log_name)
         logging_types = {
             'info': logging.INFO,
             'warn': logging.WARN,
@@ -77,9 +68,9 @@ def process_email(quiet=False, dc=False):
             'crit': logging.CRITICAL,
             'debug': logging.DEBUG,
         }
-        if q.logging_type in logging_types:
-            logger.setLevel(logging_types[q.logging_type])
-        elif not q.logging_type or q.logging_type == 'none':
+        if importer.logging_type in logging_types:
+            logger.setLevel(logging_types[importer.logging_type])
+        elif not importer.logging_type or importer.logging_type == 'none':
             # disable all handlers so messages go to nowhere
             logger.handlers = []
             logger.propagate = False
@@ -87,26 +78,42 @@ def process_email(quiet=False, dc=False):
             logger.propagate = False  # do not propagate to root logger that would log to console
 
         # Log messages to specific file only if the queue has it configured
-        if (q.logging_type in logging_types) and q.logging_dir:  # if it's enabled and the dir is set
-            log_file_handler = logging.FileHandler(join(q.logging_dir, q.slug + '_get_email.log'))
+        if (importer.logging_type in logging_types) and importer.logging_dir:  # if it's enabled and the dir is set
+            log_file_handler = logging.FileHandler(join(importer.logging_dir, log_name + '_get_email.log'))
             logger.addHandler(log_file_handler)
         else:
             log_file_handler = None
 
         try:
-            if not q.email_box_last_check:
-                q.email_box_last_check = timezone.now() - timedelta(minutes=30)
+            logger.info("*** Importing into %s ***" % importer.email_box_user)
 
-            queue_time_delta = timedelta(minutes=q.email_box_interval or 0)
-            if not DEBUGGING:
-                if (q.email_box_last_check + queue_time_delta) < timezone.now():
-                    process_queue(q, logger=logger)
-                    q.email_box_last_check = timezone.now()
-                    q.save()
+            if not importer_sender.default_queue:
+                logger.info("Import canceled: no default queue set")
             else:
-                process_queue(q, logger=logger)
-                q.email_box_last_check = timezone.now()
-                q.save()
+                default_queue = importer_sender.default_queue
+
+                matching_queues = importer_queues.filter(allow_email_submission=True).exclude(match_on__exact=[])
+                address_matching_queues = importer_queues.filter(allow_email_submission=True).exclude(match_on_addresses__exact=[])
+                queues = {
+                    'importer_queues': importer_queues,
+                    'default_queue': default_queue,
+                    'matching_queues': matching_queues,
+                    'address_matching_queues': address_matching_queues
+                }
+
+                if not importer.email_box_last_check:
+                    importer.email_box_last_check = timezone.now() - timedelta(minutes=30)
+
+                queue_time_delta = timedelta(minutes=importer.email_box_interval or 0)
+                if not DEBUGGING:
+                    if (importer.email_box_last_check + queue_time_delta) < timezone.now():
+                        process_importer(importer, queues, logger=logger)
+                        importer.email_box_last_check = timezone.now()
+                        importer.save()
+                else:
+                    process_importer(importer, queues, logger=logger)
+                    importer.email_box_last_check = timezone.now()
+                    importer.save()
         finally:
             # we must close the file handler correctly if it's created
             try:
@@ -121,14 +128,14 @@ def process_email(quiet=False, dc=False):
                 logging.exception(e)
 
 
-def pop3_sync(q, logger, server):
+def pop3_sync(importer, queues, logger, server):
     server.getwelcome()
     try:
         server.stls()
     except Exception:
         logger.warning("POP3 StartTLS failed or unsupported. Connection will be unencrypted.")
-    server.user(q.email_box_user or settings.QUEUE_EMAIL_BOX_USER)
-    server.pass_(q.email_box_pass or settings.QUEUE_EMAIL_BOX_PASSWORD)
+    server.user(importer.email_box_user or settings.QUEUE_EMAIL_BOX_USER)
+    server.pass_(importer.email_box_pass or settings.QUEUE_EMAIL_BOX_PASSWORD)
 
     messages_info = server.list()[1]
     logger.info("Received %s messages from POP3 server" % len(messages_info))
@@ -151,7 +158,7 @@ def pop3_sync(q, logger, server):
             full_message = "\n".join([elm.decode('utf-8') for elm in raw_content])
         else:
             full_message = encoding.force_text("\n".join(raw_content), errors='replace')
-        ticket = object_from_message(message=full_message, queue=q, logger=logger)
+        ticket = object_from_message(full_message, importer, queues, logger)
 
         if ticket:
             if not DEBUGGING:
@@ -163,17 +170,17 @@ def pop3_sync(q, logger, server):
     server.quit()
 
 
-def imap_sync(q, logger, server):
+def imap_sync(importer, queues, logger, server):
     try:
         try:
             server.starttls()
         except Exception:
             logger.warning("IMAP4 StartTLS unsupported or failed. Connection will be unencrypted.")
-        server.login(q.email_box_user or
+        server.login(importer.email_box_user or
                      settings.QUEUE_EMAIL_BOX_USER,
-                     q.email_box_pass or
+                     importer.email_box_pass or
                      settings.QUEUE_EMAIL_BOX_PASSWORD)
-        server.select(q.email_box_imap_folder)
+        server.select(importer.email_box_imap_folder)
     except imaplib.IMAP4.abort:
         logger.error(
             "IMAP login failed. Check that the server is accessible and that "
@@ -190,7 +197,7 @@ def imap_sync(q, logger, server):
         sys.exit()
 
     try:
-        if q.keep_mail:
+        if importer.keep_mail:
             status, data = server.search(None, 'NOT', 'ANSWERED')
         else:
             status, data = server.search(None, 'NOT', 'DELETED')
@@ -213,7 +220,7 @@ def imap_sync(q, logger, server):
                 status, data = server.fetch(num, '(RFC822)')
                 full_message = encoding.force_text(data[0][1], errors='replace')
                 try:
-                    ticket = object_from_message(message=full_message, queue=q, logger=logger)
+                    ticket = object_from_message(full_message, importer, queues, logger)
                 except TypeError:
                     ticket = None  # hotfix. Need to work out WHY.
                 except BadHeaderError:
@@ -222,7 +229,7 @@ def imap_sync(q, logger, server):
                 if ticket:
                     if DEBUGGING:
                         logger.info("Successfully processed message %s, left untouched on IMAP server\n" % num)
-                    elif q.keep_mail:
+                    elif importer.keep_mail:
                         server.store(num, '+FLAGS', '\\Answered')
                         logger.info("Successfully processed message %s, marked as Answered on IMAP server\n" % num)
                     else:
@@ -233,7 +240,7 @@ def imap_sync(q, logger, server):
     except imaplib.IMAP4.error:
         logger.error(
             "IMAP retrieve failed. Is the folder '%s' spelled correctly, and does it exist on the server?",
-            q.email_box_imap_folder
+            importer.email_box_imap_folder
         )
 
     server.expunge()
@@ -241,10 +248,10 @@ def imap_sync(q, logger, server):
     server.logout()
 
 
-def process_queue(q, logger):
+def process_importer(importer, queues, logger):
     logger.info("***** %s: Begin processing mail for django-helpdesk" % ctime())
 
-    if q.socks_proxy_type and q.socks_proxy_host and q.socks_proxy_port:
+    if importer.socks_proxy_type and importer.socks_proxy_host and importer.socks_proxy_port:
         try:
             import socks
         except ImportError:
@@ -257,14 +264,14 @@ def process_queue(q, logger):
         proxy_type = {
             'socks4': socks.SOCKS4,
             'socks5': socks.SOCKS5,
-        }.get(q.socks_proxy_type)
+        }.get(importer.socks_proxy_type)
 
         socks.set_default_proxy(proxy_type=proxy_type,
-                                addr=q.socks_proxy_host,
-                                port=q.socks_proxy_port)
+                                addr=importer.socks_proxy_host,
+                                port=importer.socks_proxy_port)
         socket.socket = socks.socksocket
 
-    email_box_type = settings.QUEUE_EMAIL_BOX_TYPE or q.email_box_type
+    email_box_type = settings.QUEUE_EMAIL_BOX_TYPE or importer.email_box_type
 
     mail_defaults = {
         'pop3': {
@@ -292,29 +299,27 @@ def process_queue(q, logger):
     }
     if email_box_type in mail_defaults:
         encryption = 'insecure'
-        if q.email_box_ssl or settings.QUEUE_EMAIL_BOX_SSL:
+        if importer.email_box_ssl or settings.QUEUE_EMAIL_BOX_SSL:
             encryption = 'ssl'
-        if not q.email_box_port:
-            q.email_box_port = mail_defaults[email_box_type][encryption]['port']
+        if not importer.email_box_port:
+            importer.email_box_port = mail_defaults[email_box_type][encryption]['port']
 
         server = mail_defaults[email_box_type][encryption]['init'](
-            q.email_box_host or settings.QUEUE_EMAIL_BOX_HOST,
-            int(q.email_box_port)
+            importer.email_box_host or settings.QUEUE_EMAIL_BOX_HOST,
+            int(importer.email_box_port)
         )
         logger.info("Attempting %s server login" % email_box_type.upper())
-        mail_defaults[email_box_type]['sync'](q, logger, server)
+        mail_defaults[email_box_type]['sync'](importer, queues, logger, server)
 
     elif email_box_type == 'local':
-        mail_dir = q.email_box_local_dir or '/var/lib/mail/helpdesk/'
+        mail_dir = importer.email_box_local_dir or '/var/lib/mail/helpdesk/'
         mail = [join(mail_dir, f) for f in os.listdir(mail_dir) if isfile(join(mail_dir, f))]
-        logger.info("Found %d messages in local mailbox directory" % len(mail))
-
         logger.info("Found %d messages in local mailbox directory" % len(mail))
         for i, m in enumerate(mail, 1):
             logger.info("Processing message %d" % i)
             with open(m, 'r') as f:
                 full_message = encoding.force_text(f.read(), errors='replace')
-                ticket = object_from_message(message=full_message, queue=q, logger=logger)
+                ticket = object_from_message(full_message, importer, queues, logger)
             if ticket:
                 logger.info("Successfully processed message %d, ticket/comment created.", i)
                 try:
@@ -554,7 +559,7 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
     return ticket
 
 
-def object_from_message(message, queue, logger):
+def object_from_message(message, importer, queues, logger):
     # 'message' must be an RFC822 formatted message.
     message = email.message_from_string(message)
 
@@ -579,7 +584,7 @@ def object_from_message(message, queue, logger):
     cc_list = getaddresses(message.get_all('Cc', []))
 
     # Ignore List applies to sender, TO emails, and CC list
-    for ignored_address in IgnoreEmail.objects.filter(Q(queues=queue) | Q(queues__isnull=True)):
+    for ignored_address in IgnoreEmail.objects.filter(Q(importers=importer) | Q(importers__isnull=True)):
         for name, address in [sender] + to_list + cc_list:
             if ignored_address.test(address):
                 logger.debug("Email address matched an ignored address. Ticket will not be created")
@@ -587,27 +592,32 @@ def object_from_message(message, queue, logger):
                     return False  # By returning 'False' the message will be kept in the mailbox,
                 return True  # and the 'True' will cause the message to be deleted.
 
-    matchobj = re.match(r".*\[" + queue.slug + r"-(?P<id>\d+)\]", subject)
-    matchobj_dc = False
-    if DC_IMPORTS:
-        try:
-            dc_queue = Queue.objects.get(title=DC_QUEUE_NAME)
-        except Queue.DoesNotExist:
-            pass
-        else:
-            matchobj_dc = re.match(r".*\[" + dc_queue.slug + r"-(?P<id>\d+)\]", subject)
-
-    if matchobj:
-        # This is a reply or forward.
-        ticket = matchobj.group('id')
-        logger.info("Matched tracking ID %s-%s" % (queue.slug, ticket))
-    elif matchobj_dc:
-        # This is a reply or forward.
-        ticket = matchobj_dc.group('id')
-        logger.info("Matched tracking ID %s-%s" % (dc_queue.slug, ticket))
-    else:
-        logger.info("No tracking ID matched.")
-        ticket = None
+    # Sort out which queue this email should go into #
+    ticket, queue = None, None
+    for q in queues['importer_queues']:
+        matchobj = re.match(r".*\[" + q.slug + r"-(?P<id>\d+)\]", subject)
+        if matchobj and not ticket:
+            ticket = matchobj.group('id')
+            queue = q
+            logger.info("- Matched tracking ID %s-%s" % (q.slug, ticket))
+    if not ticket:
+        logger.info("- No tracking ID matched.")
+        for q in queues['matching_queues']:
+            if not queue:
+                for m in q.match_on:
+                    m_re = re.compile(r'\b%s\b' % m, re.I)
+                    if m_re.search(subject):
+                        queue = q
+                        logger.info("- Subject matched list from '%s'" % q.slug)
+    if not queue:
+        sender_lower = sender[1].lower()
+        for q in queues['address_matching_queues']:
+            if reduce(lambda prev, e: prev or (e.lower() in sender_lower), q.match_on_addresses, False):
+                queue = q
+                logger.info("- Sender address matched list from '%s'" % q.slug)
+    if not queue:
+        logger.info("- Using default queue.")
+        queue = queues['default_queue']
 
     # Accounting for forwarding loops
     auto_forward = message.get('X-BEAMHelpdesk-Delivered', None)
@@ -752,13 +762,6 @@ def object_from_message(message, queue, logger):
     smtp_importance = message.get('importance', '')
     high_priority_types = {'high', 'important', '1', 'urgent'}
     priority = 2 if high_priority_types & {smtp_priority, smtp_importance} else 3
-
-    if DC_IMPORTS:
-        if reduce(lambda prev, s: prev or (s in subject), DC_SUBJECTS, False):
-            try:
-                queue = Queue.objects.get(title=DC_QUEUE_NAME)
-            except Queue.DoesNotExist:
-                pass
 
     payload = {
         'body': body,
