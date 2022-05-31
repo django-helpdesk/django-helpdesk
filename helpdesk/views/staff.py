@@ -807,7 +807,7 @@ def update_ticket(request, ticket_id, public=False):
 
         # Public users (submitter, public CC, and extra_field emails) are only updated if there's a new status or a comment.
         if public and (
-                (f.comment and no_changes_excluding_time_spent)
+                (f.comment and not no_changes_excluding_time_spent)
                 or
                 (f.new_status in (Ticket.RESOLVED_STATUS, Ticket.CLOSED_STATUS))):
             if f.new_status == Ticket.RESOLVED_STATUS:
