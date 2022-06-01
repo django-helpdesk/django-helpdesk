@@ -32,7 +32,7 @@ var alertMsg1 = 'This property type is not eligible for the Standard Target Path
 var alertMsg2 = 'You have selected the Prescriptive Pathway, please note that DOEE will not approve this selection until the building owner has submitted an energy audit. For more information please see this <a href="https://dc.beam-portal.org/helpdesk/kb/BEPS/55/">FAQ</a>.';
 var alertMsg3 = 'This property type is not eligible for the Extended Deep Energy Retrofit ACP Option, please select another pathway.'
 var alertMsg4 = 'You have selected the Prescriptive Pathway, please note that DOEE will not approve this selection until the building owner has submitted an energy audit. For more information please see this <a href="https://dc.beam-portal.org/helpdesk/kb/BEPS/55/">FAQ</a>'
-var alertMsg5 = 'If selecting the ACP, you must select a Backup Pathway and attach an ACP proposal with supporting documentation as specified in <a href="https://dc.beam-portal.org/helpdesk/kb/BEPS_Guidebook/69/">Chapter 4</a> of the <a href="https://dc.beam-portal.org/helpdesk/kb/BEPS_Guidebook/">BEPS Guidebook</a>."'
+var alertMsg5 = 'If selecting the ACP, you must select a Backup Pathway and attach an ACP proposal with supporting documentation as specified in <a href="https://dc.beam-portal.org/helpdesk/kb/BEPS_Guidebook/69/">Chapter 4</a> of the <a href="https://dc.beam-portal.org/helpdesk/kb/BEPS_Guidebook/">BEPS Guidebook</a>.'
 
 /* This field appears if "Pathway" = "Standard Target Pathway" AND ("Primary Property Type - Portfolio Manager Calculated" NOT IN High Performance List) */
 jQuery.validator.addMethod('alert1', function (value, element, param) {
