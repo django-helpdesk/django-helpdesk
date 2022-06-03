@@ -12,6 +12,14 @@ var key = {
     backup_pathway_list: 'e_backup_pathway',
     attachment: 'attachment',
 
+    // DC-staging
+    extended_delay_for_QAH: 'e_extended_delay_for_QAH',
+    delay_years: 'delay_years',
+    type_affordable_housing: 'type_affordable_housing',
+    attachment_1: 'attachment_1',
+    attachment_2: 'attachment_2',
+    attachment_3: 'attachment_3',
+
     // Ann Arbor Specific
     ext_or_exempt: 'e_extension_or_exemption',
     ext_reason: 'e_extension_reason'
@@ -237,3 +245,36 @@ $(id.ext_or_exempt).change(function () {
 
 
 });
+
+
+/* Hiding/showing elements in dc-staging-Specific forms based on other fields */
+var QAH_fields = [group.attachment_1, group.type_affordable_housing, group.attachment_3].join(', ');
+if (! $(id.extended_delay_for_QAH).prop('checked')) {
+  $(QAH_fields).each(function(ind, e) {
+    // Only hide if field is not checked, otherwise show in case of Page reload or on error
+    $(e).hide();
+  })
+  $(id.delay_years).attr({"max" : 3, "min" : 1});
+} else {
+  $(id.delay_years).attr({"min": 0})
+}
+
+$(id.extended_delay_for_QAH).change(function() {
+  if ($(id.extended_delay_for_QAH).prop('checked')) {
+    $(QAH_fields).each(function(ind, e) {
+      $(e).show();
+      // Mark as Required
+      $('#' + e.id + ' label').after('<span style="color:red;">*</span>');
+      $(id.delay_years).attr({"min": 0}).removeAttr('max')
+    })
+  } else {
+    $(QAH_fields).each(function(ind, e) {
+      $(e).hide();
+      $(e).children('span').remove();
+      $(id.delay_years).attr({"max" : 3, "min" : 1});
+      if ($(id.delay_years).val() > '3') {
+        $(id.delay_years).val('3');
+      }
+    })
+  }
+})
