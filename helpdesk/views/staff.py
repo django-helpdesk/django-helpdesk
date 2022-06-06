@@ -781,6 +781,7 @@ def update_ticket(request, ticket_id, public=False):
     ):
         messages_sent_to.update(ticket.send(    # sends the assigned/resolved/closed/updated_owner template to the owner.
             {'assigned_to': (template_staff, context)},
+            organization=ticket.ticket_form.organization,
             dont_send_to=messages_sent_to,
             fail_silently=True,
             files=files,
@@ -800,6 +801,7 @@ def update_ticket(request, ticket_id, public=False):
         messages_sent_to.update(ticket.send(
             {'queue_updated': (template_cc, context),
              'cc_users': (template_cc, context)},
+            organization=ticket.ticket_form.organization,
             dont_send_to=messages_sent_to,
             fail_silently=True,
             files=files,
@@ -827,8 +829,7 @@ def update_ticket(request, ticket_id, public=False):
             #    roles['assigned_to'] = (template + 'cc', context)  # todo sends a cc template for resolved/closed/updated to the owner. seems very unnecessary
 
             messages_sent_to.update(
-                ticket.send(roles, dont_send_to=messages_sent_to, fail_silently=True, files=files, ))
-
+                ticket.send(roles, organization=ticket.ticket_form.organization, dont_send_to=messages_sent_to, fail_silently=True, files=files, ))
     ticket.save()
 
     # auto subscribe user if enabled
@@ -1007,6 +1008,7 @@ def mass_update(request):
 
             messages_sent_to.update(t.send(
                 roles,
+                organization=t.ticket_form.organization,
                 dont_send_to=messages_sent_to,
                 fail_silently=True,
             ))
@@ -1142,7 +1144,8 @@ def merge_tickets(request):
                             recipients=[ticket.submitter_email],
                             bcc=[cc.email_address for cc in ticket.ticketcc_set.select_related('user')],
                             sender=ticket.queue.from_address,
-                            fail_silently=True
+                            fail_silently=True,
+                            organization=ticket.ticket_form.organization,
                         )
 
                     # Move all followups and update their title to know they come from another ticket

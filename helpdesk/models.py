@@ -170,7 +170,7 @@ class Queue(models.Model):
     )
 
     allow_email_submission = models.BooleanField(
-        _('Allow E-Mail Imports?'),
+        _('Turn on E-Mail Imports?'),
         blank=True,
         default=False,
         help_text=_('Turn on or off email imports for queues with match lists only. '
@@ -467,7 +467,7 @@ class Ticket(models.Model):
     def time_spent_formatted(self):
         return format_time_spent(self.time_spent)
 
-    def send(self, roles, dont_send_to=None, **kwargs):
+    def send(self, roles, organization=None, dont_send_to=None,  **kwargs):
         """
         Send notifications to everyone interested in this ticket.
 
@@ -515,7 +515,7 @@ class Ticket(models.Model):
         def send(role, recipient):
             if recipient and recipient not in recipients and role in roles:
                 template, context = roles[role]
-                send_templated_mail(template, context, recipient, sender=self.queue.from_address, **kwargs)
+                send_templated_mail(template, context, recipient, sender=self.queue.from_address, organization=organization, **kwargs)
                 recipients.add(recipient)
 
         # Attempts to send an email to every possible field.
@@ -1197,6 +1197,12 @@ class EmailTemplate(models.Model):
     This means that an admin can change email templates without having to have
     access to the filesystem.
     """
+
+    organization = models.ForeignKey(
+        Organization,
+        on_delete=models.CASCADE,
+        null=True,
+    )
 
     template_name = models.CharField(
         _('Template Name'),

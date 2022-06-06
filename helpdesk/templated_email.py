@@ -47,6 +47,7 @@ def send_templated_mail(template_name,
                         bcc=None,
                         fail_silently=False,
                         files=None,
+                        organization=None,
                         extra_headers=None):
     """
     send_templated_mail() is a wrapper around Django's e-mail routines that
@@ -107,10 +108,10 @@ def send_templated_mail(template_name,
         sender_address = sender
 
     try:
-        t = EmailTemplate.objects.get(template_name__iexact=template_name, locale=locale)
+        t = EmailTemplate.objects.get(template_name__iexact=template_name, locale=locale, organization=organization)
     except EmailTemplate.DoesNotExist:
         try:
-            t = EmailTemplate.objects.get(template_name__iexact=template_name, locale__isnull=True)
+            t = EmailTemplate.objects.get(template_name__iexact=template_name, locale__isnull=True, organization=organization)
         except EmailTemplate.DoesNotExist:
             logger.warning('template "%s" does not exist, no mail sent', template_name)
             return  # just ignore if template doesn't exist

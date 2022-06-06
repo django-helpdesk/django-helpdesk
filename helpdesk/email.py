@@ -537,13 +537,14 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
                      'extra': ('newticket_cc_public', context)}
             if ticket.assigned_to:
                 roles['assigned_to'] = ('assigned_owner', context)
-            ticket.send(roles, fail_silently=True, extra_headers=extra_headers)
+            ticket.send(roles, organization=org, fail_silently=True, extra_headers=extra_headers)
         else:
             context.update(comment=f.comment)
             ticket.send(
                 {'submitter': ('updated_submitter', context),
                  'assigned_to': ('updated_owner', context),
                  'cc_users': ('updated_cc_user', context)},
+                organization=org,
                 fail_silently=True,
                 extra_headers=extra_headers,
             )
@@ -552,6 +553,7 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
                     {'queue_updated': ('updated_cc_user', context),
                      'cc_public': ('updated_cc_public', context),
                      'extra': ('updated_cc_public', context)},
+                    organization=org,
                     fail_silently=True,
                     extra_headers=extra_headers,
                 )

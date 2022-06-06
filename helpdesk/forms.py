@@ -478,6 +478,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
 
         ticket.send(
             roles,
+            organization=ticket.ticket_form.organization,
             fail_silently=True,
             files=files,
         )

@@ -240,7 +240,7 @@ class KBItemAdmin(admin.ModelAdmin):
 @admin.register(EmailTemplate)
 class EmailTemplateAdmin(admin.ModelAdmin):
     list_display = ('template_name', 'heading', 'locale')
-    list_filter = ('locale', )
+    list_filter = ('organization', 'locale', )
 
 
 @admin.register(IgnoreEmail)
