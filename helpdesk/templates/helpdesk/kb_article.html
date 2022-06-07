@@ -4,10 +4,10 @@
 {% block helpdesk_title %}{% blocktrans with kbcat=category.title kbitem=item.title %}{{ kbitem }} - {{ kbcat }}{% endblocktrans %}{% endblock %}
 {% block helpdesk_breadcrumb %}
 <li class="breadcrumb-item">
-    <a href="{% url 'helpdesk:kb_index' %}{% if user|is_helpdesk_staff is False %}{{ user_info.url }}{% endif %}">{% trans "Knowledgebase" %}</a>
+    <a href="{% url 'helpdesk:kb_index' %}{{ user_info.url }}">{% trans "Knowledgebase" %}</a>
 </li>
 <li class="breadcrumb-item active">
-    <a href="{% url 'helpdesk:kb_category' category.slug %}{% if user|is_helpdesk_staff is False %}{{ user_info.url }}{% endif %}">{% blocktrans with category.title as kbcat %}{{ kbcat }}{% endblocktrans %}</a>
+    <a href="{% url 'helpdesk:kb_category' category.slug %}{{ user_info.url }}">{% blocktrans with category.title as kbcat %}{{ kbcat }}{% endblocktrans %}</a>
 </li>
 <li class="breadcrumb-item active">{% blocktrans with item.title as kbitem %}{{ kbitem }}{% endblocktrans %}</li>
 {% endblock %}
