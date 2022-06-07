@@ -640,37 +640,28 @@ def update_ticket(request, ticket_id, public=False):
 
     old_status_str = ticket.get_status_display()
     old_status = ticket.status
-    # status_changed = True
+    reply_status = None
+    reopen_status = None
     if new_status != ticket.status:
         ticket.status = new_status
         ticket.save()
-    # TODO Commenting out because this is causing duplicate emails to be sent when status changes back to OPEN
-    # Issue happens in email.py, unclear if it happens here too.
-    # else:
-    #     # If the status wasn't changed manually and the owner replied, set the status to replied
-    #     if comment and request.user == ticket.assigned_to and ticket.status == Ticket.OPEN_STATUS:
-    #         ticket.status = Ticket.REPLIED_STATUS
-    #         ticket.save()
-    #         new_status = Ticket.REPLIED_STATUS
-    #     # If the submitter replies to an owner's reply, change back to open
-    #     elif comment and request.user.email == ticket.submitter_email and ticket.status == Ticket.REPLIED_STATUS:
-    #         ticket.status = Ticket.OPEN_STATUS
-    #         ticket.save()
-    #         new_status = Ticket.OPEN_STATUS
-    #     # If a closed ticket get's a comment, reopen it
-    #     elif comment and ticket.status == Ticket.CLOSED_STATUS:
-    #         ticket.status = Ticket.REOPENED_STATUS
-    #         ticket.save()
-    #         new_status = Ticket.REOPENED_STATUS
-    #     else:
-    #         status_changed = False
 
-    # if status_changed:
         f.new_status = new_status
         if f.title:
             f.title += ' and %s' % ticket.get_status_display()
         else:
             f.title = '%s' % ticket.get_status_display()
+    else:
+        if request.user.is_authenticated:
+            # If the status wasn't changed manually and the owner replied, set the status to replied
+            if comment and request.user == ticket.assigned_to and ticket.status == Ticket.OPEN_STATUS:
+                reply_status = Ticket.REPLIED_STATUS
+            # Anyone else replies, change back to open
+            elif comment and request.user != ticket.assigned_to and ticket.status == Ticket.REPLIED_STATUS:
+                reply_status = Ticket.OPEN_STATUS
+        # If a closed ticket gets a comment, reopen it
+        if comment and ticket.status == Ticket.CLOSED_STATUS:
+            reopen_status = Ticket.REOPENED_STATUS
 
     if not f.title:
         if f.comment:
@@ -830,6 +821,11 @@ def update_ticket(request, ticket_id, public=False):
 
             messages_sent_to.update(
                 ticket.send(roles, organization=ticket.ticket_form.organization, dont_send_to=messages_sent_to, fail_silently=True, files=files, ))
+    if reply_status is not None:
+        ticket.status = reply_status
+    elif reopen_status is not None:
+        ticket.status = reopen_status
+
     ticket.save()
 
     # auto subscribe user if enabled

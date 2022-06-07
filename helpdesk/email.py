@@ -433,7 +433,6 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
                 ticket = ticket.merged_to
 
     # New issue, create a new <Ticket> instance
-    old_status = Ticket.OPEN_STATUS
     if ticket is None:
         if not settings.QUEUE_EMAIL_BOX_UPDATE_ONLY:
             ticket_form = FormType.objects.get_or_create(name=settings.HELPDESK_EMAIL_FORM_NAME, organization=org)[0]
@@ -461,16 +460,6 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
         ticket.status = Ticket.REOPENED_STATUS
         ticket.save()
 
-    # TODO Commenting out because this is causing duplicate emails to be sent when status changes back to OPEN
-    # # Owner replies to ticket, set status to Replied
-    # elif ticket.assigned_to and ticket.assigned_to.email == sender_email and ticket.status == Ticket.OPEN_STATUS:
-    #     ticket.status = Ticket.REPLIED_STATUS
-    #     ticket.save()
-    # # Submitter replies to Owner's reply, set status back to Open
-    # elif ticket.submitter_email and ticket.submitter_email == sender_email and ticket.status == Ticket.REPLIED_STATUS:
-    #     old_status = Ticket.REPLIED_STATUS
-    #     ticket.status = Ticket.OPEN_STATUS
-
     f = FollowUp(
         ticket=ticket,
         title=_('E-Mail Received from %(sender_email)s' % {'sender_email': sender_email})[0:200],
@@ -483,13 +472,6 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
     if ticket.status == Ticket.REOPENED_STATUS:
         f.new_status = Ticket.REOPENED_STATUS
         f.title = _('Ticket Re-Opened by E-Mail Received from %(sender_email)s' % {'sender_email': sender_email})
-    # TODO Commenting out, see TODO above!
-    # elif ticket.status == Ticket.REPLIED_STATUS:
-    #     f.new_status = Ticket.REPLIED_STATUS
-    #     f.title = _('Owner Reply for Ticket Received from %(sender_email)s' % {'sender_email': sender_email})
-    # elif ticket.status == Ticket.OPEN_STATUS and ticket.status != old_status:
-    #     f.new_status = Ticket.OPEN_STATUS
-    #     f.title = _('Reply for Ticket Received from %(sender_email)s' % {'sender_email': sender_email})
     f.save()
 
     logger.debug("Created new FollowUp for Ticket")
@@ -557,6 +539,17 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
                     fail_silently=True,
                     extra_headers=extra_headers,
                 )
+
+    # Automatically Change Statuses when Replying to Ticket
+    if not new:
+        # Owner replies to ticket, set status to Replied
+        if ticket.assigned_to and ticket.assigned_to.email == sender_email and ticket.status == Ticket.OPEN_STATUS:
+            ticket.status = Ticket.REPLIED_STATUS
+            ticket.save()
+        # Set status back to Open if anyone replies to a 'Replied' ticket
+        if ticket.assigned_to and ticket.assigned_to.email != sender_email and ticket.status == Ticket.REPLIED_STATUS:
+            ticket.status = Ticket.OPEN_STATUS
+            ticket.save()
 
     return ticket
 
