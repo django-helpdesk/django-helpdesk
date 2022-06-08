@@ -67,7 +67,7 @@ def safe_template_context(ticket):
     comments and other details with ticket or queue parameters. Note that
     we don't just provide the Ticket & Queue objects to the template as
     they could reveal confidential information. Just imagine these two options:
-        * {{ ticket.queue.email_box_password }}
+        * {{ ticket.queue.password }}
         * {{ ticket.assigned_to.password }}
 
     Ouch!

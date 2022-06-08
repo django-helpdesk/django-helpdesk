@@ -169,14 +169,6 @@ class Queue(models.Model):
         help_text=_('Should this queue be listed on the public submission form?'),
     )
 
-    allow_email_submission = models.BooleanField(
-        _('Turn on E-Mail Imports?'),
-        blank=True,
-        default=False,
-        help_text=_('Turn on or off email imports for queues with match lists only. '
-                    'Does not affect default queues, or follow-up imports.'),
-    )
-
     escalate_days = models.IntegerField(
         _('Escalation Days'),
         blank=True,
@@ -205,11 +197,11 @@ class Queue(models.Model):
                     'tickets, updates, reassignments, etc) for this queue. Separate '
                     'multiple addresses with a comma.'),
     )
-    # TODO remove from HD
+    # TODO implement -- when off, this should turn off ALL notifications in the future
     enable_notifications_on_email_events = models.BooleanField(
         _('Notify contacts when email updates arrive'),
         blank=True,
-        default=False,
+        default=True,
         help_text=_('When an email arrives to either create a ticket or to '
                     'interact with an existing discussion. Should email notifications be sent ? '
                     'Note: the new_ticket_cc and updated_ticket_cc work independently of this feature'),
@@ -1721,7 +1713,7 @@ class IgnoreEmail(models.Model):
         """Return a list of the importers this IgnoreEmail applies to.
         If this IgnoreEmail applies to ALL importers, return '*'.
         """
-        importers = self.importers.all().order_by('email_box_user')
+        importers = self.importers.all().order_by('username')
         if len(importers) == 0:
             return '*'
         else:

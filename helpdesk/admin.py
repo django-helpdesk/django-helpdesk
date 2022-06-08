@@ -20,7 +20,7 @@ admin.site.unregister(InvitationStat)
 
 @admin.register(Queue)
 class QueueAdmin(admin.ModelAdmin):
-    list_display = ('organization', 'title', 'slug', 'importer_sender', 'allow_public_submission', 'allow_email_submission',
+    list_display = ('organization', 'title', 'slug', 'importer_sender', 'allow_public_submission',
                     'match_on', 'match_on_addresses')
     list_display_links = ('title',)
     list_filter = ('organization',)

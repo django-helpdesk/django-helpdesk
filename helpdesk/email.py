@@ -58,7 +58,7 @@ def process_email(quiet=False):
         importer = importer_sender.importer
         importer_queues = importer_sender.queue_set.all()
 
-        log_name = importer.email_box_user.replace('@', '_')
+        log_name = importer.username.replace('@', '_')
         log_name = log_name.replace('.', '_')
         logger = logging.getLogger('django.helpdesk.emailimporter.' + log_name)
         logging_types = {
@@ -85,15 +85,15 @@ def process_email(quiet=False):
             log_file_handler = None
 
         try:
-            logger.info("*** Importing into %s ***" % importer.email_box_user)
+            logger.info("*** Importing into %s ***" % importer.username)
 
             if not importer_sender.default_queue:
                 logger.info("Import canceled: no default queue set")
             else:
                 default_queue = importer_sender.default_queue
 
-                matching_queues = importer_queues.filter(allow_email_submission=True).exclude(match_on__exact=[])
-                address_matching_queues = importer_queues.filter(allow_email_submission=True).exclude(match_on_addresses__exact=[])
+                matching_queues = importer_queues.exclude(match_on__exact=[])
+                address_matching_queues = importer_queues.exclude(match_on_addresses__exact=[])
                 queues = {
                     'importer_queues': importer_queues,
                     'default_queue': default_queue,
@@ -134,8 +134,8 @@ def pop3_sync(importer, queues, logger, server):
         server.stls()
     except Exception:
         logger.warning("POP3 StartTLS failed or unsupported. Connection will be unencrypted.")
-    server.user(importer.email_box_user or settings.QUEUE_EMAIL_BOX_USER)
-    server.pass_(importer.email_box_pass or settings.QUEUE_EMAIL_BOX_PASSWORD)
+    server.user(importer.username or settings.QUEUE_EMAIL_BOX_USER)
+    server.pass_(importer.password or settings.QUEUE_EMAIL_BOX_PASSWORD)
 
     messages_info = server.list()[1]
     logger.info("Received %s messages from POP3 server" % len(messages_info))
@@ -176,9 +176,9 @@ def imap_sync(importer, queues, logger, server):
             server.starttls()
         except Exception:
             logger.warning("IMAP4 StartTLS unsupported or failed. Connection will be unencrypted.")
-        server.login(importer.email_box_user or
+        server.login(importer.username or
                      settings.QUEUE_EMAIL_BOX_USER,
-                     importer.email_box_pass or
+                     importer.password or
                      settings.QUEUE_EMAIL_BOX_PASSWORD)
         server.select(importer.email_box_imap_folder)
     except imaplib.IMAP4.abort:
