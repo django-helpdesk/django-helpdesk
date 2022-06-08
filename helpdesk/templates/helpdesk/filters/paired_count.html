@@ -1,0 +1,19 @@
+{% load i18n %}
+<div class="form-row">
+    <div class="col col-sm-3">
+        <label for='id_paired_count_from'>{% trans "Paired Property+Taxlot Count (From)" %}</label>
+    </div>
+    <div class="col col-sm-2">
+        <input type='text' name='paired_count_from' value='{{ query_params.filtering.paired_count__gte }}' id='id_paired_count_from' style="max-width:100%" />
+    </div>
+    <div class="col col-sm-1"></div>
+    <div class="col col-sm-3">
+        <label for='id_paired_count_to'>{% trans "Paired Property+Taxlot Count (To)" %}</label>
+    </div>
+    <div class="col col-sm-2">
+        <input type='text' name='paired_count_to' value='{{ query_params.filtering.paired_count__lte }}' id='id_paired_count_to' style="max-width:100%" />
+    </div>
+    <div class="col col-sm-1">
+        <button class='float-right filterBuilderRemove btn btn-danger btn-sm'><i class="fas fa-trash-alt"></i></button>
+    </div>
+</div>

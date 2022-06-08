@@ -1271,6 +1271,14 @@ def ticket_list(request):
         if date_to:
             query_params['filtering']['created__lte'] = date_to
 
+        paired_count_from = request.GET.get('paired_count_from')
+        if paired_count_from:
+            query_params['filtering']['paired_count__gte'] = paired_count_from
+
+        paired_count_to = request.GET.get('paired_count_to')
+        if paired_count_to:
+            query_params['filtering']['paired_count__lte'] = paired_count_to
+
         # KEYWORD SEARCHING
         q = request.GET.get('q', '')
         context['query'] = q

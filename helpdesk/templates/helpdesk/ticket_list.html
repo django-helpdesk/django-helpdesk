@@ -150,6 +150,9 @@
                                         <option id="filterBuilderSelect-KBItems" value="KBItems"{% if query_params.filtering.kbitem__in %} disabled{% endif %}>
                                             {% trans "Knowledge base items" %}
                                         </option>
+                                        <option id="filterBuilderSelect-PairedCount" value="PairedCount"{% if query_params.filtering.paired_count__lte or query_params.filtering.paired_count__gte %} disabled{% endif %}>
+                                            {% trans "Paired Count Range" %}
+                                        </option>
                                     </select>
                                 </div>
                             </form>
@@ -185,6 +188,10 @@
                                 <li class="list-group-item filterBox{% if query_params.filtering.kbitem__in %} filterBoxShow{% endif %}"
                                     id="filterBoxKBItems">
                                     {% include 'helpdesk/filters/kbitems.html' %}
+                                </li>
+                                <li class="list-group-item filterBox{% if query_params.filtering.paired_count__lte or query_params.filtering.paired_count__gte %} filterBoxShow{% endif %}"
+                                    id="filterBoxPairedCount">
+                                    {% include 'helpdesk/filters/paired_count.html' %}
                                 </li>
                                 <li class="list-group-item">
                                     <input class="btn btn-primary btn-sm" type='submit' value='{% trans "Apply Filters" %}'/>

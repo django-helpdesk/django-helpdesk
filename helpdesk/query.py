@@ -157,6 +157,8 @@ class __Query__:
         """
         filter = self.params.get('filtering', {})
         filter_or = self.params.get('filtering_or', {})
+        if 'paired_count__lte' in filter or 'paired_count__gte' in filter:
+            queryset = queryset.annotate(paired_count=Count('beam_property') + Count('beam_taxlot'))
         queryset = queryset.filter((Q(**filter) | Q(**filter_or)) & self.get_search_filter_args())
         sorting = self.params.get('sorting', None)
         if sorting:
