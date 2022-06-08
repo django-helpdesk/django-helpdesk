@@ -23,7 +23,7 @@
             <tbody>
                 {% for ticket in ticket_list %}
                 <tr class="{{ ticket.get_priority_css_class }}">
-                    <td class="tickettitle"><a href="{{ ticket.get_absolute_url }}">{{ ticket.id }}. {{ ticket.title }}</a></td>
+                    <td class="tickettitle" data-toggle="tooltip" title="{{ ticket.id }}. {{ ticket.title }}"><a href="{{ ticket.get_absolute_url }}">{{ ticket.id }}. {{ ticket.title }}</a></td>
                     <td class="text-{{ ticket.get_priority_css_class }}">{{ ticket.get_priority }}</td>
                     <td>{{ ticket.queue }}</td>
                     <td>{{ ticket.get_status }}</td>

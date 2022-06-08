@@ -390,12 +390,12 @@ thead input {
                         data: "ticket",
                         render: function (data, type, row, meta) {
                             if (type === 'display') {
-                                data = '<div class="tickettitle"><a href="' + get_url(row) + '" >' +
+                                data = '<div class="tickettitle" data-toggle="tooltip" title="' + row.id + '. ' + row.title + '"><a href="' + get_url(row) + '" >' +
                                     row.id + '. ' +
                                     row.title + '</a></div>';
                             }
                             else {
-                                data = row.id + '. ' + row.title;
+                                data = '<div data-toggle="tooltip" title="' + row.id + '. ' + row.title + '">' + row.id + '. ' + row.title;
                             }
                             return data
                         }
