@@ -1278,7 +1278,8 @@ def ticket_list(request):
 
         # SORTING
         sort = request.GET.get('sort', None)
-        if sort not in ('status', 'assigned_to', 'created', 'title', 'queue', 'priority', 'kbitem', 'submitter'):
+        if sort not in ('status', 'assigned_to', 'created', 'title', 'queue', 'priority', 'kbitem', 'submitter',
+                        'paired_count'):
             sort = 'created'
         query_params['sorting'] = sort
 
@@ -1336,7 +1337,7 @@ def ticket_list(request):
         from_saved_query=saved_query is not None,
         saved_query=saved_query,
         search_message=search_message,
-        extra_data_cols=extra_data_columns,
+        extra_data_columns=extra_data_columns,
     ))
 
 

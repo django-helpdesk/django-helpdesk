@@ -70,6 +70,7 @@
                                 <th>{% trans "Priority" %}</th>
                                 <th>{% trans "Queue" %}</th>
                                 <th>{% trans "Status" %}</th>
+                                <th>{% trans "Paired Count" %}</th>
                                 <th>{% trans "Created" %}</th>
                                 <th>{% trans "Due Date" %}</th>
                                 <th>{% trans "Owner" %}</th>
@@ -77,8 +78,8 @@
                                 <th>{% trans "Time Spent" %}</th>
                                 <th>{% trans "KB item" %}</th>
                                 {% if query_params.filtering.queue__id__in|length == 1 %}
-                                    {% for extra_col in extra_data_cols %}
-                                <th>{{ extra_col }}</th>
+                                    {% for col_name, display_name in extra_data_columns.items %}
+                                <th>{{ display_name }}</th>
                                     {% endfor %}
                                 {% endif %}
                             </tr>
@@ -309,11 +310,6 @@
 
 {% endblock %}
 
-<style>
-thead input {
-    width: 100%;
-}
-</style>
 {% block helpdesk_js %}
     <script src='{% static "helpdesk/filter.js" %}'></script>
     <!-- Timeline 3 JavaScript -->
@@ -322,6 +318,7 @@ thead input {
     {% else %}
     <script src="{% static 'helpdesk/vendor/timeline3/js/timeline.js' %}"></script>
     {% endif %}
+<!--TODO Move this to a separate file, keep django specific code here or use API calls somehow-->
     <script>
         function get_url(row) {
             return "{% url 'helpdesk:view' 1234 %}".replace(/1234/, row.id.toString());
@@ -352,6 +349,7 @@ thead input {
                     "type": "GET",
                     "data": function (d) {
                         // Remove unnecessary data
+                        d.order[0] = Object.assign(d.order[0], {'name': d.columns[d.order[0].column].name});
                         d.columns = _.map(d.columns, function(v) { return v.search.value === "" ? {} : v});
                     }
                 },
@@ -423,6 +421,7 @@ thead input {
                         visible: false,
                     },
                     {name: "status", data: "status"},
+                    {name: "paired_count", data: "paired_count"},
                     {name: "created", data: "created"},
                     {name: "due_date", data: "due_date", "visible": false},
                     {
@@ -439,8 +438,8 @@ thead input {
                     {name: "time_spent", data: "time_spent", "visible": false},
                     {name: "kbitem", data: "kbitem"},
                     {% if query_params.filtering.queue__id__in|length == 1 %}
-                    {% for col in extra_data_cols %}
-                    {name: "{{ col }}", data: "{{ col }}"},
+                    {% for col_name, display_name in extra_data_columns.items %}
+                    {name: "{{ col_name }}", data: "{{ col_name }}"},
                     {% endfor %}
                     {% endif %}
                 ],
