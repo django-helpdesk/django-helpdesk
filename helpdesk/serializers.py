@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.contrib.auth.models import User
 from django.contrib.humanize.templatetags import humanize
 from rest_framework.exceptions import ValidationError
 
@@ -110,3 +111,18 @@ class TicketSerializer(serializers.ModelSerializer):
         instance = super().update(instance, validated_data)
         instance.save_custom_field_values(validated_data)
         return instance
+
+
+class UserSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = User
+        fields = ('first_name', 'last_name', 'username', 'email', 'password')
+
+    def create(self, validated_data):
+        user = super(UserSerializer, self).create(validated_data)
+        user.is_active = True
+        user.set_password(validated_data['password'])
+        user.save()
+        return user
