@@ -39,6 +39,8 @@ def check_staff_status(check_staff=False):  # 1st bool -- unused
     """
     def check_superuser_status(check_superuser):  # 2nd bool
         def check_user_status(u, org=None):
+            if not u:
+                return False
             is_user = u.is_authenticated and u.is_active
             if not is_user:  # does not have an account in BEAM
                 return False

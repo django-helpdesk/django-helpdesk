@@ -69,6 +69,7 @@ def _building_lookup(ticket_form_id, changed_data):
         return custom_fields.values_list('field_name', flat=True)
     return []
 
+
 def _field_ordering(queryset):
     # ordering fields based on form_ordering
     # if form_ordering is None, field is sorted to end of list
@@ -265,9 +266,9 @@ class EditFollowUpForm(forms.ModelForm):
         exclude = ('date', 'user',)
 
     def __init__(self, *args, **kwargs):
-        """Filter not openned tickets here."""
+        """Filter not opened tickets here."""
         super(EditFollowUpForm, self).__init__(*args, **kwargs)
-        self.fields["ticket"].queryset = Ticket.objects.filter(status__in=(Ticket.OPEN_STATUS, Ticket.REOPENED_STATUS))
+        self.fields["ticket"].queryset = Ticket.objects.filter(status__in=(Ticket.OPEN_STATUS, Ticket.REOPENED_STATUS, Ticket.REPLIED_STATUS, Ticket.NEW_STATUS))
 
 
 class AbstractTicketForm(CustomFieldMixin, forms.Form):
@@ -411,7 +412,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
             title=self.cleaned_data.get('title', ''),
             submitter_email=self.cleaned_data['submitter_email'],
             created=timezone.now(),
-            status=Ticket.OPEN_STATUS,
+            status=Ticket.NEW_STATUS,
             queue=queue,
             description=self.cleaned_data.get('description', ''),
             priority=self.cleaned_data.get(

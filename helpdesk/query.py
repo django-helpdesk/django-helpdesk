@@ -112,7 +112,7 @@ ASSIGNED_TO_FILTER_FORMATS = [
 DATATABLES_CUSTOM_FILTER_COLUMN_CHOICES = dict([
     ('1', 'title'),                 # [id]. [title]
     ('2', 'priority'),              # [1:5 => Critical/High/.../Low]
-    ('4', 'status'),                # [1:6 => Open/Closed../Replied]
+    ('4', 'status'),                # [1:7 => Open/Closed../New]
     ('5', 'created'),               # [datetime object => humanized time]
     ('6', 'due_date'),              # [datetime object => humanized time]
     ('9', 'time_spent'),            # "{0:02d}h:{1:02d}m"

@@ -85,7 +85,9 @@ def escalate_tickets(queues, verbose):
 
         for t in q.ticket_set.filter(
             Q(status=Ticket.OPEN_STATUS) |
-                Q(status=Ticket.REOPENED_STATUS)
+            Q(status=Ticket.REOPENED_STATUS) |
+            Q(status=Ticket.REPLIED_STATUS) |
+            Q(status=Ticket.NEW_STATUS)
         ).exclude(
             priority=1
         ).filter(

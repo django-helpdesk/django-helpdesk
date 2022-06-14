@@ -98,91 +98,98 @@
         <form method='post' action='update/' enctype='multipart/form-data'>
 
         <fieldset>
+            {% with open_status=1 reopened_status=2 resolved_status=3 closed_status=4 duplicate_status=5 replied_status=6 new_status=7 %}
             <dl>
-                <dt>Notes on Notification Emails</dt>
-                <dd>- Adding a comment or attachment, or changing the due date, spent time, or priority will all send an update notification.
-                    <br>- Changing the status to Reopened, Replied, or Duplicate without changing anything else does not send any notifications.
-                    <br>- Changing the status to Resolved and commenting will add a resolution. To change the resolution, Reopen the ticket and then set it to Resolved with a new comment. </dd>
+                <dd>This ticket is currently marked <b>{{ ticket.get_status }}</b>
+                {% if ticket.status == open_status or ticket.status == reopened_status or ticket.status == new_status %} and is awaiting a staff update.
+                {% elif ticket.status == replied_status %} and is awaiting a response from the submitter or someone copied on the ticket.
+                {% elif ticket.status == resolved_status %} and is waiting for the submitter to accept and close the ticket.
+                {% else %}.{% endif %}
+                </dd>
+                {% if not ticket.can_be_resolved %}<dd>{% trans "This ticket cannot be resolved or closed until the tickets it depends on are resolved." %}</dd>{% endif %}
+
                 {% if preset_replies %}
-                <dt><label for='id_preset'>{% trans "Use a Pre-set Reply" %}</label> <span class='form_optional'>{% trans "(Optional)" %}</span></dt>
-                <dd><select name='preset' id='id_preset'><option value=''>------</option>{% for preset in preset_replies %}<option value='{{ preset.id }}'>{{ preset.name }}</option>{% endfor %}</select></dd>
-                <dd class='form_help_text'>{% trans "Selecting a pre-set reply will over-write your comment below. You can then modify the pre-set reply to your liking before saving this update." %}</dd>
+                <dd><label for='id_preset'><b>{% trans "Use a Preset Reply?" %}</b></label>
+                <select name='preset' id='id_preset'><option value=''>------</option>{% for preset in preset_replies %}<option value='{{ preset.id }}'>{{ preset.name }}</option>{% endfor %}</select><br/>
+                <small>{% trans "Selecting a preset reply will overwrite your comment below. You can then modify the preset reply to your liking before saving this update." %}</small></dd>
                 {% endif %}
 
                 <dt><label for='commentBox'>{% trans "Comment / Resolution" %}</label></dt>
                 <dd><textarea rows='8' cols='70' name='comment' id='commentBox'></textarea></dd>
-                <dd class='form_help_text'>{% trans "You can insert ticket and queue details in your message. For more information, see the <a href='../../help/context/'>context help page</a>." %}</dd>
+                <dd class='form_help_text'><small>{% trans "You can insert ticket and queue details in your message. For more information, see the <a href='../../help/context/'>context help page</a>." %}</small></dd>
 
-                <dt><label>{% trans "New Status" %}</label></dt>
-                {% if not ticket.can_be_resolved %}<dd>{% trans "This ticket cannot be resolved or closed until the tickets it depends on are resolved." %}</dd>{% endif %}
-                {% ifequal ticket.status 1 %}
-                <dd><div class="form-group">
-                    <label for='st_open' class='active radio-inline'><input type='radio' name='new_status' value='1' id='st_open' checked='checked'>{% trans "Open" %} &raquo;</label>
-                    <label for='st_resolved' class="radio-inline"><input type='radio' name='new_status' value='3' id='st_resolved'{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}>{% trans "Resolved" %} &raquo;</label>
-                    <label for='st_closed' class="radio-inline"><input type='radio' name='new_status' value='4' id='st_closed'{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}>{% trans "Closed" %} &raquo;</label>
-                    <label for='st_duplicate' class="radio-inline"><input type='radio' name='new_status' value='5' id='st_duplicate'>{% trans "Duplicate" %} &raquo;</label>
-                    <label for='st_replied' class="radio-inline"><input type='radio' name='new_status' value='6' id='st_replied'>{% trans "Replied" %}</label>
+                <dt><label>{% trans "Change Ticket Status" %}</label></dt>
+                {% ifequal ticket.status open_status %}
+                <dd><div class="form-group"> <!-- Open -->
+                    <label for='st_open' class=' radio-inline'><input type='radio' name='new_status' value='{{ open_status }}' id='st_open' checked='checked'>&nbsp;<i>{% trans "Keep ticket open" %}</i></label><br/>
+                    <label for='st_replied' class='active radio-inline'><input type='radio' name='new_status' value='{{ replied_status }}' id='st_replied'>&nbsp;{% trans "Mark replied" %}</label><br/>
+                    <label for='st_duplicate' class="radio-inline"><input type='radio' name='new_status' value='{{ duplicate_status }}' id='st_duplicate'>&nbsp;{% trans "Mark as duplicate" %}</label><br/>
+                    <label for='st_resolved' class="radio-inline"><input type='radio' name='new_status' value='{{ resolved_status }}' id='st_resolved'{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}>&nbsp;{% trans "Resolve" %}</label><br/>
+                    <label for='st_closed' class="radio-inline"><input type='radio' name='new_status' value='{{ closed_status }}' id='st_closed'{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}>&nbsp;{% trans "Close" %}</label>
                 </div></dd>
                 {% endifequal %}
-                {% ifequal ticket.status 2 %}
+                {% ifequal ticket.status reopened_status %} <!-- Reopened -->
                 <dd><div class="form-group">
-                    <label for='st_reopened' class='active radio-inline'><input type='radio' name='new_status' value='2' id='st_reopened' checked='checked'>{% trans "Reopened" %} &raquo;</label>
-                    <label class="radio-inline" for='st_resolved'><input type='radio' name='new_status' value='3' id='st_resolved'{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}>{% trans "Resolved" %} &raquo;</label>
-                    <label class="radio-inline" for='st_closed'><input type='radio' name='new_status' value='4' id='st_closed'{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}>{% trans "Closed" %} &raquo;</label>
-                    <label class="radio-inline" for='st_duplicate'><input type='radio' name='new_status' value='5' id='st_duplicate'>{% trans "Duplicate" %} &raquo;</label>
-                    <label for='st_replied' class="radio-inline"><input type='radio' name='new_status' value='6' id='st_replied'>{% trans "Replied" %}</label>
+                    <label for='st_reopened' class='radio-inline'><input type='radio' name='new_status' value='{{ reopened_status }}' id='st_reopened' checked='checked'>&nbsp;<i>{% trans "Keep ticket reopened" %}</i></label><br/>
+                    <label for='st_replied' class='active radio-inline'><input type='radio' name='new_status' value='{{ replied_status }}' id='st_replied'>&nbsp;{% trans "Mark replied" %}</label><br/>
+                    <label class="radio-inline" for='st_duplicate'><input type='radio' name='new_status' value='{{ duplicate_status }}' id='st_duplicate'>&nbsp;{% trans "Mark as duplicate" %}</label><br/>
+                    <label class="radio-inline" for='st_resolved'><input type='radio' name='new_status' value='{{ resolved_status }}' id='st_resolved'{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}>&nbsp;{% trans "Resolve" %}</label><br/>
+                    <label class="radio-inline" for='st_closed'><input type='radio' name='new_status' value='{{ closed_status }}' id='st_closed'{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}>&nbsp;{% trans "Close" %}</label>
                 </div></dd>
                 {% endifequal %}
-                {% ifequal ticket.status 3 %}
+                {% ifequal ticket.status resolved_status %} <!-- Resolved -->
                 <dd><div class="form-group">
-                    <label for='st_reopened' class="radio-inline"><input type='radio' name='new_status' value='2' id='st_reopened'>{% trans "Reopened" %} &laquo;</label>
-                    <label for='st_resolved' class='active radio-inline'><input type='radio' name='new_status' value='3' id='st_resolved' checked='checked'>{% trans "Resolved" %} &raquo;</label>
-                    <label class="radio-inline" for='st_closed'><input type='radio' name='new_status' value='4' id='st_closed'>{% trans "Closed" %}</label>
+                    <label for='st_resolved' class='active radio-inline'><input type='radio' name='new_status' value='{{ resolved_status }}' id='st_resolved' checked='checked'>&nbsp;<i>{% trans "No change in status" %}</i></label><br/>
+                    <label for='st_reopened' class="radio-inline"><input type='radio' name='new_status' value='{{ reopened_status }}' id='st_reopened'>&nbsp;{% trans "Reopen" %}</label><br/>
+                    <label for='st_closed' class="radio-inline"><input type='radio' name='new_status' value='{{ closed_status }}' id='st_closed'>&nbsp;{% trans "Close" %}</label>
                 </div></dd>
                 {% endifequal %}
-                {% ifequal ticket.status 4 %}
-                <dd><div class="form-group"><label for='st_reopened' class="radio-inline"><input type='radio' name='new_status' value='2' id='st_reopened'>{% trans "Reopened" %} &laquo;</label>
-                <label class="radio-inline" for='st_closed'><input type='radio' name='new_status' value='4' id='st_closed' checked='checked'>{% trans "Closed" %}</label></div></dd>
-                {% endifequal %}
-                {% ifequal ticket.status 5 %}
+                {% ifequal ticket.status closed_status %} <!-- Closed -->
                 <dd><div class="form-group">
-                    <label class="radio-inline" for='st_reopened'><input type='radio' name='new_status' value='2' id='st_reopened'>{% trans "Reopened" %} &laquo;</label>
-                    <label class="radio-inline" for='st_duplicate'><input type='radio' name='new_status' value='5' id='st_duplicate' checked='checked'>{% trans "Duplicate" %}</label>
+                    <label for='st_closed' class="radio-inline"><input type='radio' name='new_status' value='{{ closed_status }}' id='st_closed' checked="checked">&nbsp;<i>{% trans "No change in status" %}</i></label><br/>
+                    <label for='st_reopened' class="radio-inline"><input type='radio' name='new_status' value='{{ reopened_status }}' id='st_reopened'>&nbsp;{% trans "Reopen" %}</label>
+                </div></dd>
+                {% endifequal %}
+                {% ifequal ticket.status duplicate_status %} <!-- Duplicate -->
+                <dd><div class="form-group">
+                    <label for='st_closed' class="radio-inline"><input type='radio' name='new_status' value='{{ duplicate_status }}' id='st_duplicate' checked="checked">&nbsp;<i>{% trans "No change in status" %}</i></label><br/>
+                    <label for='st_reopened' class="radio-inline"><input type='radio' name='new_status' value='{{ reopened_status }}' id='st_reopened'>&nbsp;{% trans "Reopen" %}</label>
                 </div></dd>
 				{% endifequal %}
-				{% ifequal ticket.status 6 %}
+				{% ifequal ticket.status replied_status %} <!-- Replied -->
 				<dd><div class="form-group">
-                    <label for='st_reopened' class='active radio-inline'><input type='radio' name='new_status' value='2' id='st_reopened' checked='checked'>{% trans "Reopened" %} &raquo;</label>
-                    <label for='st_resolved' class="radio-inline"><input type='radio' name='new_status' value='3' id='st_resolved'{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}>{% trans "Resolved" %} &laquo;</label>
-                    <label for='st_closed' class="radio-inline"><input type='radio' name='new_status' value='4' id='st_closed'{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}>{% trans "Closed" %} &laquo;</label>
-                    <label for='st_duplicate' class="radio-inline"><input type='radio' name='new_status' value='5' id='st_duplicate'>{% trans "Duplicate" %} &laquo;</label>
-                    <label for='st_replied' class="radio-inline"><input type='radio' name='new_status' value='6' id='st_replied' checked='checked'>{% trans "Replied" %}</label>
+                    <label for='st_replied' class="active radio-inline"><input type='radio' name='new_status' value='{{ replied_status }}' id='st_replied' checked='checked'>&nbsp;<i>{% trans "No change in status" %}</i></label><br/>
+                    <label for='st_open' class='radio-inline'><input type='radio' name='new_status' value='{{ open_status }}' id='st_open'>&nbsp;{% trans "Set ticket to open (needs attention from staff)" %}</label><br/>
+                    <label for='st_duplicate' class="radio-inline"><input type='radio' name='new_status' value='{{ duplicate_status }}' id='st_duplicate'>&nbsp;{% trans "Mark as duplicate" %}</label><br/>
+                    <label for='st_resolved' class="radio-inline"><input type='radio' name='new_status' value='{{ resolved_status }}' id='st_resolved'{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}>&nbsp;{% trans "Resolve" %}</label><br/>
+                    <label for='st_closed' class="radio-inline"><input type='radio' name='new_status' value='{{ closed_status }}' id='st_closed'{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}>&nbsp;{% trans "Close" %}</label>
 				</div></dd>
                 {% endifequal %}
+				{% ifequal ticket.status new_status %} <!-- New -->
+                <dd><div class="form-group">
+                    <label for='st_new' class=' radio-inline'><input type='radio' name='new_status' value='{{ new_status }}' id='st_new' checked='checked'>&nbsp;<i>{% trans "Keep ticket marked 'new'" %}</i></label><br/>
+                    <label for='st_replied' class='active radio-inline'><input type='radio' name='new_status' value='{{ replied_status }}' id='st_replied'>&nbsp;{% trans "Mark replied" %}</label><br/>
+                    <label for='st_duplicate' class="radio-inline"><input type='radio' name='new_status' value='{{ duplicate_status }}' id='st_duplicate'>&nbsp;{% trans "Mark as duplicate" %}</label><br/>
+                    <label for='st_resolved' class="radio-inline"><input type='radio' name='new_status' value='{{ resolved_status }}' id='st_resolved'{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}>&nbsp;{% trans "Resolve" %}</label><br/>
+                    <label for='st_closed' class="radio-inline"><input type='radio' name='new_status' value='{{ closed_status }}' id='st_closed'{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}>&nbsp;{% trans "Close" %}</label>
+                </div></dd>
+                {% endifequal %}
 
-                {% if helpdesk_settings.HELPDESK_UPDATE_PUBLIC_DEFAULT %}
-                <input type='hidden' name='public' value='1'>
-                {% else %}
-                <dt>
-                    <label for='id_public'>{% trans "Is this update public?" %}</label> <span class='form_optional'>{% trans "(Optional)" %}</span>
-                </dt>
-                <dd><input type='checkbox' id='id_public' name='public' value='1' />&nbsp; {% trans 'Yes, make this update public.' %}</dd>
-                <dd class='form_help_text'>{% trans "If private, an email will be sent to the ticket owner and any copied <i>users</i>.<br>If public, an email will also be sent to the submitter, primary contact, copied nonusers, and any other email fields on the form. " %}</dd>
-                {% endif %}
-
-                {% if is_staff %}
-                <dt>
-                    <label for='id_time_spent'>{% trans "Time spent" %}</label> <span class='form_optional'>{% trans "(Optional, in Minutes)" %}</span>
-                </dt>
-                <dd><input style="" id='id_time_spent' name='time_spent' type="number" min="0" value="0"/></dd>
-                {% endif %}
+                <dd><label for='id_public'><input type='checkbox' id='id_public' name='public' value='1' />&nbsp; {% trans 'Make this update public.' %}</label></dd>
             </dl>
+            {% endwith %}
 
         <p id='ShowFurtherOptPara'><button class="btn btn-warning btn-sm" id='ShowFurtherEditOptions'>{% trans "Change Further Details &raquo;" %}</button></p>
 
         <div id='FurtherEditOptions' style='display: none;'>
 
             <dl>
+
+                <dt>Notes on Notification Emails</dt>
+                <dd>- Adding a comment or attachment, or changing the due date, spent time, or priority will all send an update notification.
+                    <br>- Changing the status to Reopened, Replied, or Duplicate without changing anything else does not send any notifications.
+                    <br>- Changing the status to Resolved and commenting will add a resolution. To change the resolution, Reopen the ticket and then set it to Resolved with a new comment. </dd>
+                <dd class='form_help_text'>{% trans "If private, an email will be sent to the ticket owner and any copied <i>users</i>.<br>If public, an email will also be sent to the submitter, primary contact, copied nonusers, and any other email fields on the form. " %}</dd>
 
                 <dt><label for='id_title'>{% trans "Title" %}</label></dt>
                 <dd><input type='text' name='title' value='{{ ticket.title|escape }}' /></dd>
@@ -195,6 +202,13 @@
 
                 <dt><label for='id_due_date'>{% trans "Due on" %}</label></dt>
                 <dd><input type="datetime-local" name="due_date" value="{{ticket.due_date|date:'Y-m-d'}}T{{ticket.due_date|time:'H:i:s'}}"/></dd>
+
+                {% if is_staff %}
+                <dt>
+                    <label for='id_time_spent'>{% trans "Time spent, in minutes" %}</label>
+                </dt>
+                <dd><input style="" id='id_time_spent' name='time_spent' type="number" min="0" value="0"/></dd>
+                {% endif %}
 
             </dl>
 
@@ -219,11 +233,9 @@
         </div>
 
         </fieldset>
-
-                    <button class="btn btn-primary float-right" type='submit'>{% trans "Update This Ticket" %}</button>
-                    {% csrf_token %}
-                </form>
-            </div>
+        <button class="btn btn-primary float-right" type='submit'>{% trans "Update This Ticket" %}</button>
+        {% csrf_token %}
+        </form></div>
         </div>
     {% endif %}
 {% endblock %}

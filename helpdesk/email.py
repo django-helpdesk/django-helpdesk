@@ -34,8 +34,9 @@ from email_reply_parser import EmailReplyParser
 
 from helpdesk import settings
 from helpdesk.lib import safe_template_context, process_attachments
-from helpdesk.models import Queue, Ticket, TicketCC, FollowUp, IgnoreEmail, FormType, CustomField
+from helpdesk.models import Ticket, TicketCC, FollowUp, IgnoreEmail, FormType, CustomField
 from seed.models import ImporterSenderMapping
+from helpdesk.decorators import is_helpdesk_staff
 
 
 # import User model, which may be a custom model
@@ -452,13 +453,7 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
             )
             ticket.save()
             logger.debug("Created new ticket %s-%s" % (ticket.queue.slug, ticket.id))
-
             new = True
-
-    # Old issue being re-opened
-    elif ticket.status == Ticket.CLOSED_STATUS:
-        ticket.status = Ticket.REOPENED_STATUS
-        ticket.save()
 
     f = FollowUp(
         ticket=ticket,
@@ -468,11 +463,30 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
         comment=payload.get('full_body', payload['body']) or "",
         message_id=message_id
     )
-
-    if ticket.status == Ticket.REOPENED_STATUS:
-        f.new_status = Ticket.REOPENED_STATUS
-        f.title = _('Ticket Re-Opened by E-Mail Received from %(sender_email)s' % {'sender_email': sender_email})
+    # Update ticket and follow-up status
+    if not new:
+        updater = User.objects.filter(email=sender_email).first()
+        submitter = User.objects.filter(email=ticket.submitter_email).first()
+        updater_is_staff = is_helpdesk_staff(updater, ticket.ticket_form.organization.id)
+        submitter_is_staff = is_helpdesk_staff(submitter, ticket.ticket_form.organization.id)
+        if (submitter_is_staff and updater is not ticket.assigned_to) or not updater_is_staff:
+            # update is from a public user OR ticket's submitter is a staff member (ticket is internal)
+            #   is ticket closed? -> Reopened
+            #   else -> Open
+            if ticket.status == Ticket.CLOSED_STATUS or ticket.status == Ticket.RESOLVED_STATUS or ticket.status == Ticket.DUPLICATE_STATUS:
+                ticket.status = f.new_status = Ticket.REOPENED_STATUS
+                if updater_is_staff:
+                    f.title = _('Ticket Re-Opened by E-Mail Received from %(user)s' % {'user': updater.get_full_name() or updater.get_username()})
+                else:
+                    f.title = _('Ticket Re-Opened by E-Mail Received from %(sender_email)s' % {'sender_email': sender_email})
+            elif ticket.status == Ticket.REPLIED_STATUS:
+                f.new_status = ticket.status = Ticket.OPEN_STATUS
+        else:
+            # reply is from staff and submitter is not staff -> Replied
+            if ticket.status != Ticket.CLOSED_STATUS and ticket.status != Ticket.RESOLVED_STATUS and ticket.status != Ticket.DUPLICATE_STATUS:
+                ticket.status = f.new_status = Ticket.REPLIED_STATUS
     f.save()
+    ticket.save()
 
     logger.debug("Created new FollowUp for Ticket")
     logger.info("[%s-%s] %s" % (ticket.queue.slug, ticket.id, ticket.title,))
@@ -487,15 +501,6 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
     context = safe_template_context(ticket)
 
     create_ticket_cc(ticket, payload['to_list'] + payload['cc_list'])
-
-    notifications_to_be_sent = {sender_email}
-    if len(notifications_to_be_sent) and queue.enable_notifications_on_email_events:
-        ticket_cc_list = TicketCC.objects.filter(ticket=ticket).all().values_list('email', flat=True)
-        for email_address in ticket_cc_list:
-            notifications_to_be_sent.add(email_address)
-    if None in notifications_to_be_sent:
-        notifications_to_be_sent.remove(None)
-    notifications_to_be_sent = ','.join(notifications_to_be_sent)
 
     autoreply = is_autoreply(message)
     if autoreply:
@@ -539,18 +544,6 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
                     fail_silently=True,
                     extra_headers=extra_headers,
                 )
-
-    # Automatically Change Statuses when Replying to Ticket
-    if not new:
-        # Owner replies to ticket, set status to Replied
-        if ticket.assigned_to and ticket.assigned_to.email == sender_email and ticket.status == Ticket.OPEN_STATUS:
-            ticket.status = Ticket.REPLIED_STATUS
-            ticket.save()
-        # Set status back to Open if anyone replies to a 'Replied' ticket
-        if ticket.assigned_to and ticket.assigned_to.email != sender_email and ticket.status == Ticket.REPLIED_STATUS:
-            ticket.status = Ticket.OPEN_STATUS
-            ticket.save()
-
     return ticket
 
 

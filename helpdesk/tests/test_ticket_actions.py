@@ -125,7 +125,7 @@ class TicketActionsTestCase(TestCase):
             'title': 'Private ticket test',
             'queue': self.queue_public,
             'assigned_to': self.user,
-            'status': Ticket.OPEN_STATUS,
+            'status': Ticket.NEW_STATUS,
             'ticket_form': self.form,
         }
 
@@ -187,7 +187,7 @@ class TicketActionsTestCase(TestCase):
             'title': 'Private ticket test',
             'queue': self.queue_private,
             'assigned_to': self.user,
-            'status': Ticket.OPEN_STATUS,
+            'status': Ticket.NEW_STATUS,
             'ticket_form': self.form,
         }
 
@@ -207,7 +207,7 @@ class TicketActionsTestCase(TestCase):
             'title': 'Some private ticket',
             'queue': self.queue_public,
             'assigned_to': self.user,
-            'status': Ticket.OPEN_STATUS,
+            'status': Ticket.NEW_STATUS,
             'ticket_form': self.form,
         }
 

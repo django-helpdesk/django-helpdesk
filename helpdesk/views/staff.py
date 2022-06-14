@@ -536,8 +536,7 @@ def subscribe_staff_member_to_ticket(ticket, user, email='', can_view=True, can_
 
 def update_ticket(request, ticket_id, public=False):
     ticket = None
-
-    # So if the update isnt public, or the user isn't a staff member:
+    # So if the update isn't public, or the user isn't a staff member:
     # Locate the ticket through the submitter email and the secret key.
     if not (public or is_helpdesk_staff(request.user)):
 
@@ -617,19 +616,22 @@ def update_ticket(request, ticket_id, public=False):
     f = FollowUp(ticket=ticket, date=timezone.now(), comment=comment,
                  time_spent=time_spent)
 
-    if is_helpdesk_staff(request.user):
+    if is_helpdesk_staff(request.user, ticket.ticket_form.organization_id):
         f.user = request.user
 
     f.public = public
 
-    reassigned = False
+    old_status_str = ticket.get_status_display()
+    old_status = ticket.status
 
+    reassigned = False
     old_owner = ticket.assigned_to
+
     if owner != -1:
         if owner != 0 and ((ticket.assigned_to and owner != ticket.assigned_to.id) or not ticket.assigned_to):
             new_user = User.objects.get(id=owner)
-            f.title = _('Assigned to %(username)s') % {
-                'username': new_user.get_username(),
+            f.title = _('Assigned to %(name)s') % {
+                'name': new_user.get_full_name() or new_user.get_username(),
             }
             ticket.assigned_to = new_user
             reassigned = True
@@ -637,31 +639,46 @@ def update_ticket(request, ticket_id, public=False):
         elif owner == 0 and ticket.assigned_to is not None:
             f.title = _('Unassigned')
             ticket.assigned_to = None
+        elif ticket.queue.reassign_when_closed and ticket.assigned_to and owner == ticket.assigned_to.id and (
+                ticket.queue.default_owner and new_status != ticket.status and new_status == Ticket.CLOSED_STATUS):
+            new_user = ticket.queue.default_owner
+            f.title = _('Assigned to %(name)s') % {
+                'name': new_user.get_full_name() or new_user.get_username(),
+            }
+            ticket.assigned_to = new_user
+            reassigned = True
+    elif ticket.queue.reassign_when_closed and (
+            ticket.queue.default_owner and new_status != ticket.status and new_status == Ticket.CLOSED_STATUS):
+        # if no owner already assigned in this update, set the default owner if the ticket is being closed
+        new_user = ticket.queue.default_owner
+        f.title = _('Assigned to %(name)s') % {
+            'name': new_user.get_full_name() or new_user.get_username(),
+        }
+        ticket.assigned_to = new_user
+        reassigned = True
 
-    old_status_str = ticket.get_status_display()
-    old_status = ticket.status
-    reply_status = None
-    reopen_status = None
-    if new_status != ticket.status:
-        ticket.status = new_status
+    submitter_user = User.objects.filter(email=ticket.submitter_email).first()
+    is_internal = is_helpdesk_staff(submitter_user, ticket.ticket_form.organization_id)
+    user_is_staff = is_helpdesk_staff(request.user, ticket.ticket_form.organization_id)
+    closed_statuses = [Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS, Ticket.DUPLICATE_STATUS]
+
+    # Handling public-side updates
+    if not user_is_staff and ticket.status == Ticket.REPLIED_STATUS and ticket.status == new_status:
+        f.new_status = ticket.status = new_status = Ticket.OPEN_STATUS
         ticket.save()
+        f.save()
 
+    if new_status != ticket.status:  # Manually setting status to New, Open, Replied, Resolved, Closed, or Duplicate
+        ticket.status = new_status
         f.new_status = new_status
         if f.title:
             f.title += ' and %s' % ticket.get_status_display()
         else:
             f.title = '%s' % ticket.get_status_display()
-    else:
-        if request.user.is_authenticated:
-            # If the status wasn't changed manually and the owner replied, set the status to replied
-            if comment and request.user == ticket.assigned_to and ticket.status == Ticket.OPEN_STATUS:
-                reply_status = Ticket.REPLIED_STATUS
-            # Anyone else replies, change back to open
-            elif comment and request.user != ticket.assigned_to and ticket.status == Ticket.REPLIED_STATUS:
-                reply_status = Ticket.OPEN_STATUS
-        # If a closed ticket gets a comment, reopen it
-        if comment and ticket.status == Ticket.CLOSED_STATUS:
-            reopen_status = Ticket.REOPENED_STATUS
+    elif comment and not user_is_staff and ticket.status in closed_statuses:
+        # If a non-staff user, set status to Open/Reopened
+        f.new_status = ticket.status = Ticket.REOPENED_STATUS
+        f.save()
 
     if not f.title:
         if f.comment:
@@ -669,6 +686,7 @@ def update_ticket(request, ticket_id, public=False):
         else:
             f.title = _('Updated')
 
+    ticket.save()
     f.save()
 
     files = []
@@ -698,8 +716,8 @@ def update_ticket(request, ticket_id, public=False):
         c = TicketChange(
             followup=f,
             field=_('Owner'),
-            old_value=old_owner,
-            new_value=ticket.assigned_to,
+            old_value=old_owner.get_full_name() or old_owner.get_username(),
+            new_value=ticket.assigned_to.get_full_name() or ticket.assigned_to.get_username(),
         )
         c.save()
 
@@ -778,6 +796,17 @@ def update_ticket(request, ticket_id, public=False):
             files=files,
         ))
 
+    # Send an email about the reassignment to the previously assigned user
+    if old_owner and reassigned and old_owner.email not in messages_sent_to:
+        send_templated_mail(
+            template_name='assigned_cc_user',
+            context=context,
+            recipients=[old_owner.email],
+            sender=ticket.queue.from_address,
+            fail_silently=True,
+            organization=ticket.ticket_form.organization,
+        )
+
     # Emails an update to users who follow all ticket updates.
     if reassigned:
         template_cc = 'assigned_cc_user'  # reassignment template
@@ -816,15 +845,11 @@ def update_ticket(request, ticket_id, public=False):
                 'extra': (template + 'cc_public', context),
             }
             # todo is this necessary?
-            # if ticket.assigned_to and ticket.assigned_to.usersettings_helpdesk.email_on_ticket_change:
-            #    roles['assigned_to'] = (template + 'cc', context)  # todo sends a cc template for resolved/closed/updated to the owner. seems very unnecessary
+            if is_internal:
+                roles['submitter'] = (template + 'cc_user', context)
 
             messages_sent_to.update(
                 ticket.send(roles, organization=ticket.ticket_form.organization, dont_send_to=messages_sent_to, fail_silently=True, files=files, ))
-    if reply_status is not None:
-        ticket.status = reply_status
-    elif reopen_status is not None:
-        ticket.status = reopen_status
 
     ticket.save()
 
@@ -938,7 +963,7 @@ def mass_update(request):
             f = FollowUp(ticket=t,
                          date=timezone.now(),
                          title=_('Assigned to %(username)s in bulk update' % {
-                             'username': user.get_username()
+                             'username': user.get_full_name() or user.get_username()
                          }),
                          public=False,  # DC
                          user=request.user)
@@ -971,6 +996,14 @@ def mass_update(request):
                          user=request.user,
                          new_status=Ticket.CLOSED_STATUS)
             f.save()
+            if t.queue.reassign_when_closed and t.queue.default_owner:
+                new_user = t.queue.default_owner
+                f.title += ' and Assigned to %(name)s' % {
+                    'name': new_user.get_full_name() or new_user.get_username(),
+                }
+                t.assigned_to = new_user
+                f.save()
+                t.save()
         elif action == 'close_public' and t.status != Ticket.CLOSED_STATUS:
             t.status = Ticket.CLOSED_STATUS
             t.save()
@@ -981,6 +1014,16 @@ def mass_update(request):
                          user=request.user,
                          new_status=Ticket.CLOSED_STATUS)
             f.save()
+            if t.queue.reassign_when_closed and t.queue.default_owner:
+                new_user = t.queue.default_owner
+                old_user = t.assigned_to
+                f.title += ' and Assigned to %(name)s' % {
+                    'name': new_user.get_full_name() or new_user.get_username(),
+                }
+                t.assigned_to = new_user
+                f.save()
+                t.save()
+
             # Send email to Submitter, Queue CC, CC'd Users, CC'd Public, Extra Fields, and Owner
             context = safe_template_context(t)
             context.update(resolution=t.resolution,
@@ -1000,7 +1043,7 @@ def mass_update(request):
                 'extra': ('closed_cc_public', context),
             }
             if t.assigned_to and t.assigned_to.usersettings_helpdesk.email_on_ticket_change:
-                roles['assigned_to'] = ('closed_owner', context),
+                roles['assigned_to'] = ('closed_owner', context)
 
             messages_sent_to.update(t.send(
                 roles,
@@ -1008,6 +1051,15 @@ def mass_update(request):
                 dont_send_to=messages_sent_to,
                 fail_silently=True,
             ))
+            if t.queue.reassign_when_closed and t.queue.default_owner and old_user and old_user.email not in messages_sent_to:
+                send_templated_mail(
+                    template_name='closed_owner',
+                    context=context,
+                    recipients=[old_user.email],
+                    sender=t.queue.from_address,
+                    fail_silently=True,
+                    organization=t.ticket_form.organization,
+                )
 
         elif action == 'delete':
             t.delete()
@@ -1022,13 +1074,14 @@ mass_update = staff_member_required(mass_update)
 # commented out are duplicate with customfields TODO delete later
 ticket_attributes = (
     ('created', _('Created date')),
-#    ('due_date', _('Due on')),
+    # ('due_date', _('Due on')),
     ('get_status_display', _('Status')),
-#    ('submitter_email', _('Submitter email')),
+    # ('submitter_email', _('Submitter email')),
     ('assigned_to', _('Owner')),
-#    ('description', _('Description')),
+    # ('description', _('Description')),
     ('resolution', _('Resolution')),
 )
+
 
 @staff_member_required
 def merge_tickets(request):
@@ -1184,7 +1237,7 @@ def ticket_list(request):
     }
     default_query_params = {
         'filtering': {
-            'status__in': [1, 2, 6],
+            'status__in': [Ticket.OPEN_STATUS, Ticket.REOPENED_STATUS, Ticket.REPLIED_STATUS, Ticket.NEW_STATUS],
         },
         'sorting': 'created',
         'sortreverse': False,
@@ -1354,6 +1407,7 @@ ticket_list = staff_member_required(ticket_list)
 
 class QueryLoadError(Exception):
     pass
+
 
 def load_saved_query(request, query_params=None):
     saved_query = None
@@ -2136,6 +2190,6 @@ def date_rel_to_today(today, offset):
 
 
 def sort_string(begin, end):
-    return 'sort=created&date_from=%s&date_to=%s&status=%s&status=%s&status=%s' % (
-        begin, end, Ticket.OPEN_STATUS, Ticket.REOPENED_STATUS, Ticket.REPLIED_STATUS)
+    return 'sort=created&date_from=%s&date_to=%s&status=%s&status=%s&status=%s&status=%s' % (
+        begin, end, Ticket.OPEN_STATUS, Ticket.REOPENED_STATUS, Ticket.REPLIED_STATUS, Ticket.NEW_STATUS)
 

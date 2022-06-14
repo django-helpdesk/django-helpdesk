@@ -216,6 +216,11 @@ class Queue(models.Model):
         verbose_name=_('Default owner'),
     )
 
+    reassign_when_closed = models.BooleanField(
+        default=False,
+        help_text=_('When a ticket is closed, reassign the ticket to the default owner (if one is set).')
+    )
+
     dedicated_time = models.DurationField(
         help_text=_("Time to be spent on this Queue in total"),
         blank=True, null=True
@@ -367,13 +372,13 @@ class Ticket(models.Model):
     Note that assigned_to is optional - unassigned tickets are displayed on
     the dashboard to prompt users to take ownership of them.
     """
-
     OPEN_STATUS = 1
     REOPENED_STATUS = 2
     RESOLVED_STATUS = 3
     CLOSED_STATUS = 4
     DUPLICATE_STATUS = 5
     REPLIED_STATUS = 6
+    NEW_STATUS = 7
 
     STATUS_CHOICES = (
         (OPEN_STATUS, _('Open')),
@@ -382,6 +387,7 @@ class Ticket(models.Model):
         (CLOSED_STATUS, _('Closed')),
         (DUPLICATE_STATUS, _('Duplicate')),
         (REPLIED_STATUS, _('Replied')),
+        (NEW_STATUS, _('New')),
     )
 
     PRIORITY_CHOICES = (
@@ -400,7 +406,7 @@ class Ticket(models.Model):
                                    help_text=_('Date this ticket was first created'), )
     modified = models.DateTimeField(_('Modified'), auto_now=True,
                                     help_text=_('Date this ticket was most recently changed.'))
-    status = models.IntegerField(_('Status'), choices=STATUS_CHOICES, default=OPEN_STATUS)
+    status = models.IntegerField(_('Status'), choices=STATUS_CHOICES, default=NEW_STATUS)
     on_hold = models.BooleanField(_('On Hold'), blank=True, default=False,
                                   help_text=_('If a ticket is on hold, it will not automatically be escalated.'))
     resolution = models.TextField(_('Resolution'), blank=True, null=True,
@@ -663,7 +669,7 @@ class Ticket(models.Model):
         True = any dependencies are resolved
         False = There are non-resolved dependencies
         """
-        OPEN_STATUSES = (Ticket.OPEN_STATUS, Ticket.REOPENED_STATUS)
+        OPEN_STATUSES = (Ticket.OPEN_STATUS, Ticket.REOPENED_STATUS, Ticket.REPLIED_STATUS, Ticket.NEW_STATUS)
         return TicketDependency.objects.filter(ticket=self).filter(
             depends_on__status__in=OPEN_STATUSES).count() == 0
     can_be_resolved = property(_can_be_resolved)
