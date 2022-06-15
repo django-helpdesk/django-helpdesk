@@ -96,15 +96,15 @@ DATATABLES_ORDER_COLUMN_CHOICES = dict([
 DATATABLES_DJANGO_FILTER_COLUMN_CHOICES = [
     ('0', 'id__icontains'),
     ('3', 'queue__title__icontains'),
-    ('8', 'submitter_email__icontains'),
-    ('10', 'kbitem__title__icontains'),
+    ('9', 'submitter_email__icontains'),
+    ('11', 'kbitem__title__icontains'),
 ]
 
 ASSIGNED_TO_FILTER_FORMATS = [
-    ('7', 'assigned_to__email__icontains'),
-    ('7', 'assigned_to__first_name__icontains'),
-    ('7', 'assigned_to__last_name__icontains'),
-    ('7', 'assigned_to__username__icontains'),
+    ('8', 'assigned_to__email__icontains'),
+    ('8', 'assigned_to__first_name__icontains'),
+    ('8', 'assigned_to__last_name__icontains'),
+    ('8', 'assigned_to__username__icontains'),
 ]
 
 # These fields go through some post-processing, which is why django filters won't work and why they aren't in the
@@ -113,9 +113,10 @@ DATATABLES_CUSTOM_FILTER_COLUMN_CHOICES = dict([
     ('1', 'title'),                 # [id]. [title]
     ('2', 'priority'),              # [1:5 => Critical/High/.../Low]
     ('4', 'status'),                # [1:7 => Open/Closed../New]
-    ('5', 'created'),               # [datetime object => humanized time]
-    ('6', 'due_date'),              # [datetime object => humanized time]
-    ('9', 'time_spent'),            # "{0:02d}h:{1:02d}m"
+    ('5', 'paired_count'),          # Sum of ticket.beam_property and ticket.beam_taxlot
+    ('6', 'created'),               # [datetime object => humanized time]
+    ('7', 'due_date'),              # [datetime object => humanized time]
+    ('10', 'time_spent'),           # "{0:02d}h:{1:02d}m"
 ])
 
 
@@ -308,16 +309,18 @@ class __Query__:
 def do_custom_filtering(data, extra_data_columns, **kwargs):
     # Update filter choices with extra_data columns, keeping the same format [int: col_name]
     CUSTOM_FILTER_COLUMN_CHOICES = dict(DATATABLES_CUSTOM_FILTER_COLUMN_CHOICES)
+    num_columns = len(DATATABLES_ORDER_COLUMN_CHOICES) + 1  # Add + 1 since time_spent is commented out
     CUSTOM_FILTER_COLUMN_CHOICES.update(
-        dict(zip(range(11, 11 + len(extra_data_columns)), extra_data_columns.values()))
+        dict(zip(range(num_columns, num_columns + len(extra_data_columns)), extra_data_columns.values()))
     )
+
     for i, field in CUSTOM_FILTER_COLUMN_CHOICES.items():
         column_filter_key = 'columns[%s][search][value]' % i
         column_filter = kwargs.get(column_filter_key, [None])[0]
         if column_filter:
             column_filter = column_filter.lower()
             for j, row in enumerate(data):
-                if row[field]:
+                if row[field] is not None:
                     # Handling post-processing
                     if field == 'title':
                         contents = str(row['id']) + '. ' + row[field]
@@ -325,14 +328,15 @@ def do_custom_filtering(data, extra_data_columns, **kwargs):
                         created = humanize.naturaltime(row[field])
                         contents = created.replace(u'\xa0', ' ') if created else created
                     else:       # Contains ['priority', 'status', 'time_spent'] and any extra_data
-                        contents = row[field]
+                        contents = str(row[field])
 
+                    contents = contents.lower()
                     # Apply filtering and set placeholder var to later prune data
                     if 'remove' in data[j]:
                         if not data[j]['remove']:
-                            data[j]['remove'] = column_filter not in contents.lower()
+                            data[j]['remove'] = column_filter not in contents
                     else:
-                        data[j]['remove'] = column_filter not in contents.lower()
+                        data[j]['remove'] = column_filter not in contents
                 else:
                     data[j]['remove'] = True    # No data found and a filter is applied, gets pruned
 
