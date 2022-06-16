@@ -367,7 +367,7 @@ def get_extra_data_columns(data):
         if row['extra_data'] == '':
             row['extra_data'] = {}
         # Add in any other col not in extra_data
-        missing_cols = {k: '' for k in extra_data_cols.values() if k not in row['extra_data'].keys()}
+        missing_cols = {k: '' for k in extra_data_cols.keys() if k not in row['extra_data'].keys()}
         row['extra_data'].update(missing_cols)
 
         # Replace extra_data with the cols themselves
