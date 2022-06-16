@@ -2193,3 +2193,48 @@ def sort_string(begin, end):
     return 'sort=created&date_from=%s&date_to=%s&status=%s&status=%s&status=%s&status=%s' % (
         begin, end, Ticket.OPEN_STATUS, Ticket.REOPENED_STATUS, Ticket.REPLIED_STATUS, Ticket.NEW_STATUS)
 
+
+@staff_member_required
+def pair_property_milestone(request, ticket_id):
+    """
+    Prompt user to select one of the Ticket's paired property's milestone to pair Ticket to
+    """
+    from seed.models import Milestone, Pathway, PropertyView, PropertyMilestone
+
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+
+    if request.method == 'POST':
+        pv_id = request.POST.get('property_id', '')
+        milestone_id = request.POST.get('milestone_id').split('-')[1]
+
+        pm = PropertyMilestone.objects.get(property_view_id=pv_id, milestone_id=milestone_id)
+
+        pm.ticket = ticket
+        pm.save()
+
+        return return_to_ticket(request.user, request, helpdesk_settings, ticket)
+
+    properties = ticket.beam_property.all()
+
+    # get all pathways attached to those properties and index them by property id
+    # get all milestones for each pathway and index them by pathway id
+    pathways_per_property = {}
+    milestones_per_pathway = {}
+    for p in properties:
+        pv = PropertyView.objects.get(property_id=p.id)
+        pathways = Pathway.objects.filter(cycle_group__cyclegroupmapping__cycle_id=pv.cycle.id)
+        pathways_per_property[pv.id] = pathways
+
+        for pathway in pathways:
+            # milestones = PropertyMilestone.objects.filter(property_view=pv,
+            #                                               milestone__pathwaymilestone__pathway_id=pathway.id)
+            milestones = Milestone.objects.filter(pathwaymilestone__pathway_id=pathway.id,
+                                                  propertymilestone__property_view_id=pv.id)
+            milestones_per_pathway[pathway.id] = milestones
+
+    return render(request, 'helpdesk/pair_property_milestone.html', {
+        'ticket': ticket,
+        'properties': properties,
+        'pathways_per_property': pathways_per_property,
+        'milestones_per_pathway': milestones_per_pathway,
+    })

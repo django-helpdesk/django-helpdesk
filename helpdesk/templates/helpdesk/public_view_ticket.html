@@ -22,49 +22,52 @@
 {% block helpdesk_body %}
 
 <table class="table table-hover table-bordered table-striped">
-<thead>
-<tr><th colspan='2'><h3>Ticket details for <span class="byline text-info">{{ ticket.ticket }}{% if ticket.title %} {{ ticket.title }}{% endif %}</span> {% if ticket.get_status == 'Replied' %}(Open){% else %}({{ ticket.get_status }}){% endif %}</h3>
-                        {% blocktrans with ticket.queue as queue and ticket.queue.organization.name as org %}
-                        {{ org }}'s Queue: {{ queue }}{% endblocktrans %}
-                        {% if ticket.property_milestone %}
-                        <br><a href="{{ ticket.property_milestone.property_view_url }}"><button class="btn btn-primary btn-sm"><i class="fas fa-road"></i> {% trans "View Milestone" %}</button></a>
-                        {% endif %}
-</th></tr>
-</thead>
-<tbody>
-<tr>
-    <th>{% trans "Submitted On" %}</th>
-    <td>{{ ticket.created|date:"DATETIME_FORMAT" }} ({{ ticket.created|naturaltime }})</td>
-</tr>
+    <thead>
+        <tr>
+            <th colspan='2'>
+                <h3>Ticket details for <span class="byline text-info">{{ ticket.ticket }}{% if ticket.title %} {{ ticket.title }}{% endif %}</span> {% if ticket.get_status == 'Replied' %}(Open){% else %}({{ ticket.get_status }}){% endif %}</h3>
+                {% blocktrans with ticket.queue as queue and ticket.queue.organization.name as org %}
+                {{ org }}'s Queue: {{ queue }}{% endblocktrans %}
+                {% if ticket.property_milestone %}
+                <br><a href="{{ ticket.property_milestone.property_view_url }}" target="_blank" rel="noopener noreferrer"><button class="btn btn-primary btn-sm"><i class="fas fa-road"></i> {% trans "View Milestone" %}</button></a>
+                {% endif %}
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <th>{% trans "Submitted On" %}</th>
+            <td>{{ ticket.created|date:"DATETIME_FORMAT" }} ({{ ticket.created|naturaltime }})</td>
+        </tr>
 
-{% if ticket.due_date %}
-    <tr>
-        <th>{% trans "Due On" %}</th>
-        <td>{{ ticket.due_date|date:"DATETIME_FORMAT" }} ({{ ticket.due_date|naturaltime }})</td>
-    </tr>
-{% endif %}
+        {% if ticket.due_date %}
+        <tr>
+            <th>{% trans "Due On" %}</th>
+            <td>{{ ticket.due_date|date:"DATETIME_FORMAT" }} ({{ ticket.due_date|naturaltime }})</td>
+        </tr>
+        {% endif %}
 
-<tr>
-    <th>{% trans "Submitter E-Mail" %}</th>
-    <td>{{ ticket.submitter_email }}</td>
-</tr>
+        <tr>
+            <th>{% trans "Submitter E-Mail" %}</th>
+            <td>{{ ticket.submitter_email }}</td>
+        </tr>
 
-<tr>
-    <th>{% trans "Priority" %}</th>
-    <td>{{ ticket.get_priority_display }}</td>
-</tr>
+        <tr>
+            <th>{% trans "Priority" %}</th>
+            <td>{{ ticket.get_priority_display }}</td>
+        </tr>
 
-{% for field in extra_data %}
-<tr>
-    <th>{{ field.label }}</th>
-    <td>{% spaceless %}{% if "url" == field.data_type %}<a href='{{ field.value }}'>{{ field.value }}</a>
-        {% elif "datetime" == field.data_type %}{{ field.value|date:"DATETIME_FORMAT" }} ({{ field.value|naturaltime }})
-        {% elif "date" == field.data_type %}{{ field.value|date:"DATETIME_FORMAT" }} ({{ field.value|naturaltime }})
-        {% elif "time" == field.data_type %}{{ field.value|date:"DATETIME_FORMAT" }} ({{ field.value|naturaltime }})
-        {% else %}{{ field.value|default:"" }}
-        {% endif %}{% endspaceless %}</td>
-</tr>
-{% endfor %}
+        {% for field in extra_data %}
+        <tr>
+            <th>{{ field.label }}</th>
+            <td>{% spaceless %}{% if "url" == field.data_type %}<a href='{{ field.value }}'>{{ field.value }}</a>
+                {% elif "datetime" == field.data_type %}{{ field.value|date:"DATETIME_FORMAT" }} ({{ field.value|naturaltime }})
+                {% elif "date" == field.data_type %}{{ field.value|date:"DATETIME_FORMAT" }} ({{ field.value|naturaltime }})
+                {% elif "time" == field.data_type %}{{ field.value|date:"DATETIME_FORMAT" }} ({{ field.value|naturaltime }})
+                {% else %}{{ field.value|default:"" }}
+                {% endif %}{% endspaceless %}</td>
+        </tr>
+        {% endfor %}
 
         {% if tags_enabled %}
         <tr>
