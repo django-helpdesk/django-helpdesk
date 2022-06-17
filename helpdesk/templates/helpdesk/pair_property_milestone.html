@@ -31,7 +31,7 @@
             <select class="custom-select" id="property_select" name="property_id">
                 <option value="" selected>Your Property Selection</option>
                 {% for property in properties %}
-                <option value="{{ property.id }}">{{ property.id }}</option>
+                <option value="{{ property.id }}">Property ID: {{ property.id }} - {{ property.state.address_line_1 }}</option>
                 {% endfor %}
             </select>
         </div>

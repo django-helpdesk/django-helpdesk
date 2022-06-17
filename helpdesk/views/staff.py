@@ -2215,6 +2215,7 @@ def pair_property_milestone(request, ticket_id):
         return return_to_ticket(request.user, request, helpdesk_settings, ticket)
 
     properties = ticket.beam_property.all()
+    property_views = []
 
     # get all pathways attached to those properties and index them by property id
     # get all milestones for each pathway and index them by pathway id
@@ -2222,19 +2223,82 @@ def pair_property_milestone(request, ticket_id):
     milestones_per_pathway = {}
     for p in properties:
         pv = PropertyView.objects.get(property_id=p.id)
+        property_views.append(pv)
         pathways = Pathway.objects.filter(cycle_group__cyclegroupmapping__cycle_id=pv.cycle.id)
         pathways_per_property[pv.id] = pathways
 
         for pathway in pathways:
-            # milestones = PropertyMilestone.objects.filter(property_view=pv,
-            #                                               milestone__pathwaymilestone__pathway_id=pathway.id)
-            milestones = Milestone.objects.filter(pathwaymilestone__pathway_id=pathway.id,
-                                                  propertymilestone__property_view_id=pv.id)
-            milestones_per_pathway[pathway.id] = milestones
+            milestones_per_pathway[pathway.id] = Milestone.objects.filter(pathwaymilestone__pathway_id=pathway.id,
+                                                                          propertymilestone__property_view_id=pv.id)
 
     return render(request, 'helpdesk/pair_property_milestone.html', {
         'ticket': ticket,
-        'properties': properties,
+        'properties': property_views,
         'pathways_per_property': pathways_per_property,
         'milestones_per_pathway': milestones_per_pathway,
+    })
+
+
+def add_remove_label(org_id, user, payload, inventory_type):
+    """
+
+    """
+    from seed.views.v3.label_inventories import LabelInventoryViewSet
+    from django.http import QueryDict
+
+    request = HttpRequest()
+    request.method = 'PUT'
+    request.query_params = QueryDict('organization_id='+str(org_id))
+    request.user = user
+    request.data = payload
+    livs = LabelInventoryViewSet()
+    livs.request = request
+    ret = livs.put(request, inventory_type).data
+    return ret
+
+
+@staff_member_required
+def edit_inventory_labels(request, inventory_type, ticket_id):
+    """
+    Prompt User to Add/Remove Labels from a Selected Paired Property
+    """
+    from seed.models import PropertyView, StatusLabel as Label, TaxLotView
+
+    if inventory_type == 'property':
+        view_class = PropertyView
+        beam_inventories = 'beam_property'
+    else:
+        view_class = TaxLotView
+        beam_inventories = 'beam_taxlot'
+
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+    org_id = ticket.ticket_form.organization_id
+
+    if request.method == 'POST':
+        remove_ids = [i.replace('remove_', '') for i in request.POST.keys() if 'remove' in i]
+        add_ids = [i.replace('add_', '') for i in request.POST.keys() if 'add' in i]
+
+        pv_id = request.POST.get('inventory_id', '')
+        payload = {'inventory_ids': [pv_id], 'add_label_ids': add_ids, 'remove_label_ids': remove_ids}
+        add_remove_label(org_id, request.user, payload, inventory_type)
+
+        return return_to_ticket(request.user, request, helpdesk_settings, ticket)
+
+    inventories = getattr(ticket, beam_inventories).all()
+    views = []
+
+    labels_per_view = {}
+    for inv in inventories:
+        view = view_class.objects.get(**{inventory_type + '_id': inv.id})
+        views.append(view)
+        labels_per_view[view.id] = view.labels.all()
+
+    labels = Label.objects.filter(super_organization_id=org_id)
+
+    return render(request, 'helpdesk/edit_inventory_labels.html', {
+        'ticket': ticket,
+        'views': views,
+        'labels_per_view': labels_per_view,
+        'labels': labels,
+        'inventory_type': inventory_type.capitalize(),
     })
