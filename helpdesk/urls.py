@@ -144,8 +144,8 @@ urlpatterns += [
 ]
 
 urlpatterns += [
-    path(
-        "rss/user/<str:user_name>/",
+    re_path(
+        r"^rss/user/(?P<user_name>[a-zA-Z0-9\.]+)/",
         helpdesk_staff_member_required(feeds.OpenTicketsByUser()),
         name="rss_user",
     ),
