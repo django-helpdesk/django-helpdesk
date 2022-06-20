@@ -98,7 +98,7 @@ class QuickDjangoTest(object):
             MIDDLEWARE=self.MIDDLEWARE,
             ROOT_URLCONF='helpdesk.tests.urls',
             STATIC_URL='/static/',
-            LOGIN_URL='/helpdesk/login/',
+            LOGIN_URL='/login/',
             TEMPLATES=self.TEMPLATES,
             SITE_ID=1,
             SECRET_KEY='wowdonotusethisfakesecuritykeyyouneedarealsecure1',

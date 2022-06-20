@@ -29,7 +29,7 @@
                 <label for='saved_query'>{% trans "Select Query:" %}</label>
                 <select name='saved_query'>
                     <option value="">--------</option>{% for q in user_saved_queries_ %}
-                    <option value="{{ q.id }}"{% if saved_query==q %} selected{% endif %}>{{ q.title }}</option>{% endfor %}
+                    <option value="{{ q.id }}"{% if saved_query == q %} selected{% endif %}>{{ q.title }}</option>{% endfor %}
                 </select>
                 <input class="btn btn-primary" type='submit' value='{% trans "Filter Report" %}'>
             </form>

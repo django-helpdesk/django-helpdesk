@@ -12,6 +12,8 @@ from helpdesk.models import Queue, Ticket, CustomField
 
 
 class TicketTest(APITestCase):
+    due_date = datetime(2022, 4, 10, 15, 6)
+
     @classmethod
     def setUpTestData(cls):
         cls.queue = Queue.objects.create(
@@ -96,7 +98,7 @@ class TicketTest(APITestCase):
                 'status': Ticket.RESOLVED_STATUS,
                 'priority': 1,
                 'on_hold': True,
-                'due_date': datetime(2022, 4, 10, 15, 6),
+                'due_date': self.due_date,
                 'merged_to': merge_ticket.id
             }
         )
@@ -111,7 +113,7 @@ class TicketTest(APITestCase):
         self.assertEqual(created_ticket.priority, 1)
         self.assertFalse(created_ticket.on_hold)  # on_hold is False on creation
         self.assertEqual(created_ticket.status, Ticket.OPEN_STATUS)  # status is always open on creation
-        self.assertEqual(created_ticket.due_date, datetime(2022, 4, 10, 15, 6, tzinfo=UTC))
+        self.assertEqual(created_ticket.due_date, self.due_date)
         self.assertIsNone(created_ticket.merged_to)  # merged_to can not be set on creation
 
     def test_edit_api_ticket(self):
@@ -134,7 +136,7 @@ class TicketTest(APITestCase):
                 'status': Ticket.RESOLVED_STATUS,
                 'priority': 1,
                 'on_hold': True,
-                'due_date': datetime(2022, 4, 10, 15, 6),
+                'due_date': self.due_date,
                 'merged_to': merge_ticket.id
             }
         )
@@ -149,7 +151,7 @@ class TicketTest(APITestCase):
         self.assertEqual(test_ticket.priority, 1)
         self.assertTrue(test_ticket.on_hold)
         self.assertEqual(test_ticket.status, Ticket.RESOLVED_STATUS)
-        self.assertEqual(test_ticket.due_date, datetime(2022, 4, 10, 15, 6, tzinfo=UTC))
+        self.assertEqual(test_ticket.due_date, self.due_date)
         self.assertEqual(test_ticket.merged_to, merge_ticket)
 
     def test_partial_edit_api_ticket(self):

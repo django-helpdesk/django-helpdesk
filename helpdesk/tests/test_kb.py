@@ -77,4 +77,4 @@ class KBTests(TestCase):
         cat_url = reverse('helpdesk:kb_category', args=("test_cat",)) + "?kbitem=1&submitter_email=foo@bar.cz&title=lol&"
         response = self.client.get(cat_url)
         # Assert that query params are passed on to ticket submit form
-        self.assertContains(response, "'/helpdesk/tickets/submit/?queue=1&_readonly_fields_=queue&kbitem=1&submitter_email=foo%40bar.cz&amp;title=lol")
+        self.assertContains(response, "'/tickets/submit/?queue=1&_readonly_fields_=queue&kbitem=1&submitter_email=foo%40bar.cz&amp;title=lol")

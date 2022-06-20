@@ -135,6 +135,8 @@ def process_attachments(followup, attached_files):
     for attached in attached_files:
 
         if attached.size:
+            from helpdesk.models import FollowUpAttachment
+
             filename = smart_str(attached.name)
             att = FollowUpAttachment(
                 followup=followup,

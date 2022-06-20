@@ -7,6 +7,7 @@ from django.test import TestCase
 from helpdesk import settings as helpdesk_settings
 from helpdesk.models import Queue
 from helpdesk.tests.helpers import (get_staff_user, reload_urlconf, User, create_ticket, print_response)
+from django.test.utils import override_settings
 
 
 class KBDisabledTestCase(TestCase):
@@ -89,7 +90,8 @@ class StaffUsersOnlyTestCase(StaffUserTestCaseMixin, TestCase):
 
     def setUp(self):
         super().setUp()
-        self.non_staff_user = User.objects.create_user(username='henry.wensleydale', password='gouda', email='wensleydale@example.com')
+        self.non_staff_user_password = "gouda"
+        self.non_staff_user = User.objects.create_user(username='henry.wensleydale', password=self.non_staff_user_password, email='wensleydale@example.com')
 
     def test_staff_user_detection(self):
         """Staff and non-staff users are correctly identified"""
@@ -116,7 +118,7 @@ class StaffUsersOnlyTestCase(StaffUserTestCaseMixin, TestCase):
         from helpdesk.decorators import is_helpdesk_staff
 
         user = self.non_staff_user
-        self.client.login(username=user.username, password=user.password)
+        self.client.login(username=user.username, password=self.non_staff_user_password)
         response = self.client.get(reverse('helpdesk:dashboard'), follow=True)
         self.assertTemplateUsed(response, 'helpdesk/registration/login.html')
 
@@ -125,16 +127,17 @@ class StaffUsersOnlyTestCase(StaffUserTestCaseMixin, TestCase):
         staff users should be able to access rss feeds.
         """
         user = get_staff_user()
-        self.client.login(username=user.username, password='password')
+        self.client.login(username=user.username, password="password")
         response = self.client.get(reverse('helpdesk:rss_unassigned'), follow=True)
         self.assertContains(response, 'Unassigned Open and Reopened tickets')
 
+    @override_settings(HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE=False)
     def test_non_staff_cannot_rss(self):
         """If HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE is False,
         non-staff users should not be able to access rss feeds.
         """
         user = self.non_staff_user
-        self.client.login(username=user.username, password='password')
+        self.client.login(username=user.username, password=self.non_staff_user_password)
         queue = Queue.objects.create(
             title="Foo",
             slug="test_queue",
