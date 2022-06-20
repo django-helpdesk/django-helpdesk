@@ -147,7 +147,7 @@ class AttachmentUnitTests(TestCase):
         self.assertEqual(obj.size, len(self.file_attrs['content']))
         self.assertEqual(obj.mime_type, "text/plain")
 
-    @mock.patch.object('helpdesk.lib.FollowUpAttachment', 'save', autospec=True)
+    # @mock.patch.object('helpdesk.lib.FollowUpAttachment', 'save', autospec=True)
     @override_settings(MEDIA_ROOT=MEDIA_DIR)
     def test_unicode_filename_to_filesystem(self, mock_att_save, mock_queue_save, mock_ticket_save, mock_follow_up_save):
         """ don't mock saving to filesystem to test file renames caused by storage layer """
