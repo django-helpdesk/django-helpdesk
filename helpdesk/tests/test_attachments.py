@@ -83,6 +83,7 @@ class AttachmentIntegrationTests(TestCase):
 
 
 @mock.patch.object(models.FollowUp, 'save', autospec=True)
+@mock.patch.object(models.FollowUpAttachment, 'save', autospec=True)
 @mock.patch.object(models.Ticket, 'save', autospec=True)
 @mock.patch.object(models.Queue, 'save', autospec=True)
 class AttachmentUnitTests(TestCase):
@@ -100,7 +101,6 @@ class AttachmentUnitTests(TestCase):
             )
         )
 
-    @mock.patch('models.FollowUpAttachment', autospec=True)
     def test_unicode_attachment_filename(self, mock_att_save, mock_queue_save, mock_ticket_save, mock_follow_up_save):
         """ check utf-8 data is parsed correctly """
         filename, fileobj = lib.process_attachments(self.follow_up, [self.test_file])[0]
@@ -113,17 +113,18 @@ class AttachmentUnitTests(TestCase):
         )
         self.assertEqual(filename, self.file_attrs['filename'])
 
-    def test_autofill(self, mock_att_save, mock_queue_save, mock_ticket_save):
+    def test_autofill(self, mock_att_save, mock_queue_save, mock_ticket_save, mock_follow_up_save):
         """ check utf-8 data is parsed correctly """
         obj = models.FollowUpAttachment.objects.create(
             followup=self.follow_up,
             file=self.test_file
         )
-        self.assertEqual(obj.filename, self.file_attrs['filename'])
-        self.assertEqual(obj.size, len(self.file_attrs['content']))
-        self.assertEqual(obj.mime_type, "text/plain")
+        obj.save()
+        self.assertEqual(obj.file.name, self.file_attrs['filename'])
+        self.assertEqual(obj.file.size, len(self.file_attrs['content']))
+        self.assertEqual(obj.file.file.content_type, "text/utf8")
 
-    def test_kbi_attachment(self, mock_att_save, mock_queue_save, mock_ticket_save):
+    def test_kbi_attachment(self, mock_att_save, mock_queue_save, mock_ticket_save, mock_follow_up_save):
         """ check utf-8 data is parsed correctly """
 
         kbcategory = models.KBCategory.objects.create(
