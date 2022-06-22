@@ -311,7 +311,7 @@ def do_custom_filtering(data, extra_data_columns, **kwargs):
     CUSTOM_FILTER_COLUMN_CHOICES = dict(DATATABLES_CUSTOM_FILTER_COLUMN_CHOICES)
     num_columns = len(DATATABLES_ORDER_COLUMN_CHOICES) + 1  # Add + 1 since time_spent is commented out
     CUSTOM_FILTER_COLUMN_CHOICES.update(
-        dict(zip(range(num_columns, num_columns + len(extra_data_columns)), extra_data_columns.values()))
+        dict(zip(range(num_columns, num_columns + len(extra_data_columns)), extra_data_columns.keys()))
     )
 
     for i, field in CUSTOM_FILTER_COLUMN_CHOICES.items():
