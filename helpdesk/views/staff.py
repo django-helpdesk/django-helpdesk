@@ -2204,7 +2204,7 @@ def pair_property_milestone(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
 
     if request.method == 'POST':
-        pv_id = request.POST.get('property_id', '')
+        pv_id = request.POST.get('property_id', '').split('-')[1]
         milestone_id = request.POST.get('milestone_id').split('-')[1]
 
         pm = PropertyMilestone.objects.get(property_view_id=pv_id, milestone_id=milestone_id)
@@ -2215,25 +2215,30 @@ def pair_property_milestone(request, ticket_id):
         return return_to_ticket(request.user, request, helpdesk_settings, ticket)
 
     properties = ticket.beam_property.all()
-    property_views = []
 
     # get all pathways attached to those properties and index them by property id
     # get all milestones for each pathway and index them by pathway id
+    properties_per_cycle = {}
     pathways_per_property = {}
     milestones_per_pathway = {}
     for p in properties:
-        pv = PropertyView.objects.get(property_id=p.id)
-        property_views.append(pv)
-        pathways = Pathway.objects.filter(cycle_group__cyclegroupmapping__cycle_id=pv.cycle.id)
-        pathways_per_property[pv.id] = pathways
+        views = PropertyView.objects.filter(property_id=p.id)
+        for view in views:
+            if view.cycle not in properties_per_cycle:
+                properties_per_cycle[view.cycle] = [view]
+            else:
+                properties_per_cycle[view.cycle].append(view)
 
-        for pathway in pathways:
-            milestones_per_pathway[pathway.id] = Milestone.objects.filter(pathwaymilestone__pathway_id=pathway.id,
-                                                                          propertymilestone__property_view_id=pv.id)
+            pathways = Pathway.objects.filter(cycle_group__cyclegroupmapping__cycle_id=view.cycle.id)
+            pathways_per_property[view.id] = pathways
 
+            for pathway in pathways:
+                milestones_per_pathway[pathway.id] = Milestone.objects.filter(pathwaymilestone__pathway_id=pathway.id,
+                                                                              propertymilestone__property_view_id=view.id)
+    print(milestones_per_pathway)
     return render(request, 'helpdesk/pair_property_milestone.html', {
         'ticket': ticket,
-        'properties': property_views,
+        'properties_per_cycle': properties_per_cycle,
         'pathways_per_property': pathways_per_property,
         'milestones_per_pathway': milestones_per_pathway,
     })
@@ -2278,26 +2283,31 @@ def edit_inventory_labels(request, inventory_type, ticket_id):
         remove_ids = [i.replace('remove_', '') for i in request.POST.keys() if 'remove' in i]
         add_ids = [i.replace('add_', '') for i in request.POST.keys() if 'add' in i]
 
-        pv_id = request.POST.get('inventory_id', '')
+        pv_id = request.POST.get('inventory_id', '').split('-')[1]
         payload = {'inventory_ids': [pv_id], 'add_label_ids': add_ids, 'remove_label_ids': remove_ids}
         add_remove_label(org_id, request.user, payload, inventory_type)
 
         return return_to_ticket(request.user, request, helpdesk_settings, ticket)
 
     inventories = getattr(ticket, beam_inventories).all()
-    views = []
 
     labels_per_view = {}
+    property_views_per_cycle = {}
     for inv in inventories:
-        view = view_class.objects.get(**{inventory_type + '_id': inv.id})
-        views.append(view)
-        labels_per_view[view.id] = view.labels.all()
+        views = view_class.objects.filter(**{inventory_type + '_id': inv.id})
+        for view in views:
+            if view.cycle not in property_views_per_cycle:
+                property_views_per_cycle[view.cycle] = [view]
+            else:
+                property_views_per_cycle[view.cycle].append(view)
+
+            labels_per_view[view.id] = view.labels.all()
 
     labels = Label.objects.filter(super_organization_id=org_id)
 
     return render(request, 'helpdesk/edit_inventory_labels.html', {
         'ticket': ticket,
-        'views': views,
+        'property_views_per_cycle': property_views_per_cycle,
         'labels_per_view': labels_per_view,
         'labels': labels,
         'inventory_type': inventory_type.capitalize(),

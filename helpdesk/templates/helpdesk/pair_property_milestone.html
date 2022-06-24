@@ -25,13 +25,25 @@
 <div class="col-lg-12">
     <form method="post">
         {% csrf_token %}
+        <div id="group_cycle_select" class="form-group">
+            <h5>{% blocktrans %}Select a Cycle to select a {{ inventory_type }}{% endblocktrans %}</h5>
+            <!-- Dropdown List of Properties -->
+            <select class="custom-select" id="cycle_select" name="cycle_id">
+                <option value="" selected>Your Cycle Selection</option>
+                {% for cycle in properties_per_cycle %}
+                <option value="{{ cycle.id }}">{{ cycle.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
         <div id="group_property_select" class="form-group">
             <h5>{% trans "Select a Property to pair to this Ticket" %}</h5>
             <!-- Dropdown List of Properties -->
             <select class="custom-select" id="property_select" name="property_id">
                 <option value="" selected>Your Property Selection</option>
-                {% for property in properties %}
-                <option value="{{ property.id }}">Property ID: {{ property.id }} - {{ property.state.address_line_1 }}</option>
+                {% for cycle, views in properties_per_cycle.items %}
+                {% for view in views %}
+                <option value="{{ cycle.id }}-{{ view.id }}">Property ID: {{ view.id }} - {{ view.state.address_line_1 }}</option>
+                {% endfor %}
                 {% endfor %}
             </select>
         </div>
@@ -70,16 +82,34 @@
 {% block helpdesk_js %}
 
 <script type='text/javascript' language='javascript'>
-$('#group_pathway_select, #group_milestone_select').hide()
+$('#group_property_select, #group_pathway_select, #group_milestone_select').hide()
 
 var pathway_options = $('#pathway_select option').detach();
 var milestone_options = $('#milestone_select option').detach();
+var property_options = $('#property_select option').detach();
+
+$('#cycle_select').change(function () {
+    $('#group_property_select, #group_pathway_select, #group_milestone_select').hide()
+    if ($('#cycle_select').val()) {
+        $('#group_property_select').show();
+
+        // Filter Properties to those in selected Cycle
+        $('#property_select').empty().append(property_options.filter(function () {
+            this_cycle_id = $(this).val().split('-')[0];
+            return $('#cycle_select').val() === this_cycle_id || $(this).val() === '';
+        }));
+    } else {
+        $('#group_property_select, #group_pathway_select, #group_milestone_select').hide()
+        $('#property_select').empty().append(property_options);
+    }
+    $('#property_select').val('');
+})
 
 $('#property_select').change(function () {
     if ($('#property_select').val()) {
         $('#group_pathway_select').show()
 
-        pv_id = $('#property_select').val();
+        pv_id = $('#property_select').val().split('-')[1];
 
         //  Limit pathway options to selected propertyview id
         $('#pathway_select').empty().append(pathway_options.filter(function () {
