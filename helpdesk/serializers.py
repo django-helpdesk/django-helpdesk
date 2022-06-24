@@ -4,7 +4,7 @@ from django.contrib.humanize.templatetags import humanize
 from rest_framework.exceptions import ValidationError
 
 from .forms import TicketForm
-from .models import Ticket, CustomField
+from .models import Ticket, CustomField, FollowUp
 from .lib import format_time_spent
 from .user import HelpdeskUser
 
@@ -71,12 +71,22 @@ class DatatablesTicketSerializer(serializers.ModelSerializer):
         return obj.kbitem.title if obj.kbitem else ""
 
 
+class FollowUpSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FollowUp
+        fields = (
+            'id', 'ticket', 'date', 'title', 'comment', 'public', 'user', 'new_status', 'message_id', 'time_spent'
+        )
+
+
 class TicketSerializer(serializers.ModelSerializer):
+    followup_set = FollowUpSerializer(many=True, read_only=True)
+
     class Meta:
         model = Ticket
         fields = (
             'id', 'queue', 'title', 'description', 'resolution', 'submitter_email', 'assigned_to', 'status', 'on_hold',
-            'priority', 'due_date', 'merged_to'
+            'priority', 'due_date', 'merged_to', 'followup_set'
         )
 
     def __init__(self, *args, **kwargs):

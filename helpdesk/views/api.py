@@ -4,8 +4,8 @@ from rest_framework.viewsets import GenericViewSet
 from rest_framework.mixins import CreateModelMixin
 from django.contrib.auth import get_user_model
 
-from helpdesk.models import Ticket
-from helpdesk.serializers import TicketSerializer, UserSerializer
+from helpdesk.models import Ticket, FollowUp
+from helpdesk.serializers import TicketSerializer, UserSerializer, FollowUpSerializer
 
 
 class TicketViewSet(viewsets.ModelViewSet):
@@ -26,6 +26,15 @@ class TicketViewSet(viewsets.ModelViewSet):
         ticket = super().get_object()
         ticket.set_custom_field_values()
         return ticket
+
+
+class FollowUpViewSet(viewsets.ModelViewSet):
+    """
+    A viewset that provides the standard actions to handle FollowUp
+    """
+    queryset = FollowUp.objects.all()
+    serializer_class = FollowUpSerializer
+    permission_classes = [IsAdminUser]
 
 
 class CreateUserView(CreateModelMixin, GenericViewSet):
