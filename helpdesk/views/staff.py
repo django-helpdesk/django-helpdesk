@@ -2235,7 +2235,6 @@ def pair_property_milestone(request, ticket_id):
             for pathway in pathways:
                 milestones_per_pathway[pathway.id] = Milestone.objects.filter(pathwaymilestone__pathway_id=pathway.id,
                                                                               propertymilestone__property_view_id=view.id)
-    print(milestones_per_pathway)
     return render(request, 'helpdesk/pair_property_milestone.html', {
         'ticket': ticket,
         'properties_per_cycle': properties_per_cycle,
