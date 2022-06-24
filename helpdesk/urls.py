@@ -17,7 +17,7 @@ from rest_framework.routers import DefaultRouter
 from helpdesk.decorators import helpdesk_staff_member_required, protect_view
 from helpdesk.views import feeds, staff, public, login
 from helpdesk import settings as helpdesk_settings
-from helpdesk.views.api import TicketViewSet, CreateUserView, FollowUpViewSet
+from helpdesk.views.api import TicketViewSet, CreateUserView, FollowUpViewSet, FollowUpAttachmentViewSet
 
 if helpdesk_settings.HELPDESK_KB_ENABLED:
     from helpdesk.views import kb
@@ -177,6 +177,7 @@ if helpdesk_settings.HELPDESK_ACTIVATE_API_ENDPOINT:
     router = DefaultRouter()
     router.register(r"tickets", TicketViewSet, basename="ticket")
     router.register(r"followups", FollowUpViewSet, basename="followups")
+    router.register(r"followups-attachments", FollowUpAttachmentViewSet, basename="followupattachments")
     router.register(r"users", CreateUserView, basename="user")
     urlpatterns += [re_path(r"^api/", include(router.urls))]
 
