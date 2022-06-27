@@ -169,14 +169,6 @@ class Queue(models.Model):
         help_text=_('Should this queue be listed on the public submission form?'),
     )
 
-    allow_email_submission = models.BooleanField(
-        _('Allow E-Mail Imports?'),
-        blank=True,
-        default=False,
-        help_text=_('Turn on or off email imports for queues with match lists only. '
-                    'Does not affect default queues, or follow-up imports.'),
-    )
-
     escalate_days = models.IntegerField(
         _('Escalation Days'),
         blank=True,
@@ -205,11 +197,11 @@ class Queue(models.Model):
                     'tickets, updates, reassignments, etc) for this queue. Separate '
                     'multiple addresses with a comma.'),
     )
-    # TODO remove from HD
+    # TODO implement -- when off, this should turn off ALL notifications in the future
     enable_notifications_on_email_events = models.BooleanField(
         _('Notify contacts when email updates arrive'),
         blank=True,
-        default=False,
+        default=True,
         help_text=_('When an email arrives to either create a ticket or to '
                     'interact with an existing discussion. Should email notifications be sent ? '
                     'Note: the new_ticket_cc and updated_ticket_cc work independently of this feature'),
@@ -222,6 +214,11 @@ class Queue(models.Model):
         blank=True,
         null=True,
         verbose_name=_('Default owner'),
+    )
+
+    reassign_when_closed = models.BooleanField(
+        default=False,
+        help_text=_('When a ticket is closed, reassign the ticket to the default owner (if one is set).')
     )
 
     dedicated_time = models.DurationField(
@@ -375,13 +372,13 @@ class Ticket(models.Model):
     Note that assigned_to is optional - unassigned tickets are displayed on
     the dashboard to prompt users to take ownership of them.
     """
-
     OPEN_STATUS = 1
     REOPENED_STATUS = 2
     RESOLVED_STATUS = 3
     CLOSED_STATUS = 4
     DUPLICATE_STATUS = 5
     REPLIED_STATUS = 6
+    NEW_STATUS = 7
 
     STATUS_CHOICES = (
         (OPEN_STATUS, _('Open')),
@@ -390,6 +387,7 @@ class Ticket(models.Model):
         (CLOSED_STATUS, _('Closed')),
         (DUPLICATE_STATUS, _('Duplicate')),
         (REPLIED_STATUS, _('Replied')),
+        (NEW_STATUS, _('New')),
     )
 
     PRIORITY_CHOICES = (
@@ -408,7 +406,7 @@ class Ticket(models.Model):
                                    help_text=_('Date this ticket was first created'), )
     modified = models.DateTimeField(_('Modified'), auto_now=True,
                                     help_text=_('Date this ticket was most recently changed.'))
-    status = models.IntegerField(_('Status'), choices=STATUS_CHOICES, default=OPEN_STATUS)
+    status = models.IntegerField(_('Status'), choices=STATUS_CHOICES, default=NEW_STATUS)
     on_hold = models.BooleanField(_('On Hold'), blank=True, default=False,
                                   help_text=_('If a ticket is on hold, it will not automatically be escalated.'))
     resolution = models.TextField(_('Resolution'), blank=True, null=True,
@@ -467,7 +465,7 @@ class Ticket(models.Model):
     def time_spent_formatted(self):
         return format_time_spent(self.time_spent)
 
-    def send(self, roles, dont_send_to=None, **kwargs):
+    def send(self, roles, organization=None, dont_send_to=None,  **kwargs):
         """
         Send notifications to everyone interested in this ticket.
 
@@ -515,7 +513,7 @@ class Ticket(models.Model):
         def send(role, recipient):
             if recipient and recipient not in recipients and role in roles:
                 template, context = roles[role]
-                send_templated_mail(template, context, recipient, sender=self.queue.from_address, **kwargs)
+                send_templated_mail(template, context, recipient, sender=self.queue.from_address, organization=organization, **kwargs)
                 recipients.add(recipient)
 
         # Attempts to send an email to every possible field.
@@ -671,7 +669,7 @@ class Ticket(models.Model):
         True = any dependencies are resolved
         False = There are non-resolved dependencies
         """
-        OPEN_STATUSES = (Ticket.OPEN_STATUS, Ticket.REOPENED_STATUS)
+        OPEN_STATUSES = (Ticket.OPEN_STATUS, Ticket.REOPENED_STATUS, Ticket.REPLIED_STATUS, Ticket.NEW_STATUS)
         return TicketDependency.objects.filter(ticket=self).filter(
             depends_on__status__in=OPEN_STATUSES).count() == 0
     can_be_resolved = property(_can_be_resolved)
@@ -1198,6 +1196,12 @@ class EmailTemplate(models.Model):
     access to the filesystem.
     """
 
+    organization = models.ForeignKey(
+        Organization,
+        on_delete=models.CASCADE,
+        null=True,
+    )
+
     template_name = models.CharField(
         _('Template Name'),
         max_length=100,
@@ -1715,7 +1719,7 @@ class IgnoreEmail(models.Model):
         """Return a list of the importers this IgnoreEmail applies to.
         If this IgnoreEmail applies to ALL importers, return '*'.
         """
-        importers = self.importers.all().order_by('email_box_user')
+        importers = self.importers.all().order_by('username')
         if len(importers) == 0:
             return '*'
         else:

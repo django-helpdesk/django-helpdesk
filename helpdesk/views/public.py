@@ -33,7 +33,7 @@ from helpdesk.lib import text_is_spam
 from helpdesk.models import Ticket, Queue, UserSettings, CustomField, FormType, TicketCC
 from helpdesk.user import huser_from_request
 
-from seed.models import PropertyMilestone
+from seed.models import PropertyMilestone, Note
 
 logger = logging.getLogger(__name__)
 
@@ -119,6 +119,17 @@ class BaseCreateTicketView(abstract_views.AbstractCreateTicketMixin, FormView):
                     pm.submission_date = now()
                     pm.implementation_status = PropertyMilestone.MILESTONE_IN_REVIEW
                     pm.save()
+
+                note_kwargs = {'organization_id': request.GET.get('org_id'), 'user': request.user,
+                               'name': 'Automatically Created', 'property_view': pm.property_view,
+                               'note_type': Note.LOG,
+                               'log_data': [{'model': 'PropertyMilestone', 'name': pm.milestone.name,
+                                             'action': 'edited with the following:'},
+                                            {'field': 'Milestone Submitted Ticket',
+                                             'previous_value': 'None', 'new_value': f'Ticket ID {pm.ticket.id}',
+                                             'state_id': pm.property_view.state.id}]
+                               }
+                Note.objects.create(**note_kwargs)
             try:
                 return HttpResponseRedirect(ticket.ticket_url)
             except ValueError:

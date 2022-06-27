@@ -3,7 +3,7 @@
 
 {% block helpdesk_breadcrumb %}
 <li class="breadcrumb-item">
-    <a href="{% url 'helpdesk:kb_index' %}{% if user|is_helpdesk_staff is False %}{{ user_info.url }}{% endif %}">{% trans "Knowledgebase" %}</a>
+    <a href="{% url 'helpdesk:kb_index' %}{{ user_info.url }}">{% trans "Knowledgebase" %}</a>
 </li>
 <li class="breadcrumb-item active">{% trans "Overview" %}</li>
 {% endblock %}
@@ -26,7 +26,7 @@
                     </div>
                     <div class="card-body" style="margin-top:-15px">
                         <p class="card-text">{% if not category.get_preview_markdown %}{{ category.get_description_markdown }}{% else %}{{ category.get_preview_markdown }}{% endif %}</p>
-                        <p class="card-text"><small class="text-muted"><a class="btn btn-primary" href='{{ category.get_absolute_url }}{% if user|is_helpdesk_staff is False %}{{ user_info.url }}{% endif %}'>{% trans 'View articles' %} <i class="fa fa-share"></i></a></small></p>
+                        <p class="card-text"><small class="text-muted"><a class="btn btn-primary" href='{{ category.get_absolute_url }}{{ user_info.url }}'>{% trans 'View articles' %} <i class="fa fa-share"></i></a></small></p>
                     </div>
                 </div>
             {% if catnumperrow == 'three' or forloop.last %}</div>{% endif %}

@@ -34,8 +34,9 @@ from email_reply_parser import EmailReplyParser
 
 from helpdesk import settings
 from helpdesk.lib import safe_template_context, process_attachments
-from helpdesk.models import Queue, Ticket, TicketCC, FollowUp, IgnoreEmail, FormType, CustomField
+from helpdesk.models import Ticket, TicketCC, FollowUp, IgnoreEmail, FormType, CustomField
 from seed.models import ImporterSenderMapping
+from helpdesk.decorators import is_helpdesk_staff
 
 
 # import User model, which may be a custom model
@@ -58,7 +59,7 @@ def process_email(quiet=False):
         importer = importer_sender.importer
         importer_queues = importer_sender.queue_set.all()
 
-        log_name = importer.email_box_user.replace('@', '_')
+        log_name = importer.username.replace('@', '_')
         log_name = log_name.replace('.', '_')
         logger = logging.getLogger('django.helpdesk.emailimporter.' + log_name)
         logging_types = {
@@ -85,15 +86,15 @@ def process_email(quiet=False):
             log_file_handler = None
 
         try:
-            logger.info("*** Importing into %s ***" % importer.email_box_user)
+            logger.info("*** Importing into %s ***" % importer.username)
 
             if not importer_sender.default_queue:
                 logger.info("Import canceled: no default queue set")
             else:
                 default_queue = importer_sender.default_queue
 
-                matching_queues = importer_queues.filter(allow_email_submission=True).exclude(match_on__exact=[])
-                address_matching_queues = importer_queues.filter(allow_email_submission=True).exclude(match_on_addresses__exact=[])
+                matching_queues = importer_queues.exclude(match_on__exact=[])
+                address_matching_queues = importer_queues.exclude(match_on_addresses__exact=[])
                 queues = {
                     'importer_queues': importer_queues,
                     'default_queue': default_queue,
@@ -134,8 +135,8 @@ def pop3_sync(importer, queues, logger, server):
         server.stls()
     except Exception:
         logger.warning("POP3 StartTLS failed or unsupported. Connection will be unencrypted.")
-    server.user(importer.email_box_user or settings.QUEUE_EMAIL_BOX_USER)
-    server.pass_(importer.email_box_pass or settings.QUEUE_EMAIL_BOX_PASSWORD)
+    server.user(importer.username or settings.QUEUE_EMAIL_BOX_USER)
+    server.pass_(importer.password or settings.QUEUE_EMAIL_BOX_PASSWORD)
 
     messages_info = server.list()[1]
     logger.info("Received %s messages from POP3 server" % len(messages_info))
@@ -176,9 +177,9 @@ def imap_sync(importer, queues, logger, server):
             server.starttls()
         except Exception:
             logger.warning("IMAP4 StartTLS unsupported or failed. Connection will be unencrypted.")
-        server.login(importer.email_box_user or
+        server.login(importer.username or
                      settings.QUEUE_EMAIL_BOX_USER,
-                     importer.email_box_pass or
+                     importer.password or
                      settings.QUEUE_EMAIL_BOX_PASSWORD)
         server.select(importer.email_box_imap_folder)
     except imaplib.IMAP4.abort:
@@ -433,7 +434,6 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
                 ticket = ticket.merged_to
 
     # New issue, create a new <Ticket> instance
-    old_status = Ticket.OPEN_STATUS
     if ticket is None:
         if not settings.QUEUE_EMAIL_BOX_UPDATE_ONLY:
             ticket_form = FormType.objects.get_or_create(name=settings.HELPDESK_EMAIL_FORM_NAME, organization=org)[0]
@@ -453,23 +453,7 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
             )
             ticket.save()
             logger.debug("Created new ticket %s-%s" % (ticket.queue.slug, ticket.id))
-
             new = True
-
-    # Old issue being re-opened
-    elif ticket.status == Ticket.CLOSED_STATUS:
-        ticket.status = Ticket.REOPENED_STATUS
-        ticket.save()
-
-    # TODO Commenting out because this is causing duplicate emails to be sent when status changes back to OPEN
-    # # Owner replies to ticket, set status to Replied
-    # elif ticket.assigned_to and ticket.assigned_to.email == sender_email and ticket.status == Ticket.OPEN_STATUS:
-    #     ticket.status = Ticket.REPLIED_STATUS
-    #     ticket.save()
-    # # Submitter replies to Owner's reply, set status back to Open
-    # elif ticket.submitter_email and ticket.submitter_email == sender_email and ticket.status == Ticket.REPLIED_STATUS:
-    #     old_status = Ticket.REPLIED_STATUS
-    #     ticket.status = Ticket.OPEN_STATUS
 
     f = FollowUp(
         ticket=ticket,
@@ -479,18 +463,30 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
         comment=payload.get('full_body', payload['body']) or "",
         message_id=message_id
     )
-
-    if ticket.status == Ticket.REOPENED_STATUS:
-        f.new_status = Ticket.REOPENED_STATUS
-        f.title = _('Ticket Re-Opened by E-Mail Received from %(sender_email)s' % {'sender_email': sender_email})
-    # TODO Commenting out, see TODO above!
-    # elif ticket.status == Ticket.REPLIED_STATUS:
-    #     f.new_status = Ticket.REPLIED_STATUS
-    #     f.title = _('Owner Reply for Ticket Received from %(sender_email)s' % {'sender_email': sender_email})
-    # elif ticket.status == Ticket.OPEN_STATUS and ticket.status != old_status:
-    #     f.new_status = Ticket.OPEN_STATUS
-    #     f.title = _('Reply for Ticket Received from %(sender_email)s' % {'sender_email': sender_email})
+    # Update ticket and follow-up status
+    if not new:
+        updater = User.objects.filter(email=sender_email).first()
+        submitter = User.objects.filter(email=ticket.submitter_email).first()
+        updater_is_staff = is_helpdesk_staff(updater, ticket.ticket_form.organization.id)
+        submitter_is_staff = is_helpdesk_staff(submitter, ticket.ticket_form.organization.id)
+        if (submitter_is_staff and updater is not ticket.assigned_to) or not updater_is_staff:
+            # update is from a public user OR ticket's submitter is a staff member (ticket is internal)
+            #   is ticket closed? -> Reopened
+            #   else -> Open
+            if ticket.status == Ticket.CLOSED_STATUS or ticket.status == Ticket.RESOLVED_STATUS or ticket.status == Ticket.DUPLICATE_STATUS:
+                ticket.status = f.new_status = Ticket.REOPENED_STATUS
+                if updater_is_staff:
+                    f.title = _('Ticket Re-Opened by E-Mail Received from %(user)s' % {'user': updater.get_full_name() or updater.get_username()})
+                else:
+                    f.title = _('Ticket Re-Opened by E-Mail Received from %(sender_email)s' % {'sender_email': sender_email})
+            elif ticket.status == Ticket.REPLIED_STATUS:
+                f.new_status = ticket.status = Ticket.OPEN_STATUS
+        else:
+            # reply is from staff and submitter is not staff -> Replied
+            if ticket.status != Ticket.CLOSED_STATUS and ticket.status != Ticket.RESOLVED_STATUS and ticket.status != Ticket.DUPLICATE_STATUS:
+                ticket.status = f.new_status = Ticket.REPLIED_STATUS
     f.save()
+    ticket.save()
 
     logger.debug("Created new FollowUp for Ticket")
     logger.info("[%s-%s] %s" % (ticket.queue.slug, ticket.id, ticket.title,))
@@ -505,15 +501,6 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
     context = safe_template_context(ticket)
 
     create_ticket_cc(ticket, payload['to_list'] + payload['cc_list'])
-
-    notifications_to_be_sent = {sender_email}
-    if len(notifications_to_be_sent) and queue.enable_notifications_on_email_events:
-        ticket_cc_list = TicketCC.objects.filter(ticket=ticket).all().values_list('email', flat=True)
-        for email_address in ticket_cc_list:
-            notifications_to_be_sent.add(email_address)
-    if None in notifications_to_be_sent:
-        notifications_to_be_sent.remove(None)
-    notifications_to_be_sent = ','.join(notifications_to_be_sent)
 
     autoreply = is_autoreply(message)
     if autoreply:
@@ -537,13 +524,14 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
                      'extra': ('newticket_cc_public', context)}
             if ticket.assigned_to:
                 roles['assigned_to'] = ('assigned_owner', context)
-            ticket.send(roles, fail_silently=True, extra_headers=extra_headers)
+            ticket.send(roles, organization=org, fail_silently=True, extra_headers=extra_headers)
         else:
             context.update(comment=f.comment)
             ticket.send(
                 {'submitter': ('updated_submitter', context),
                  'assigned_to': ('updated_owner', context),
                  'cc_users': ('updated_cc_user', context)},
+                organization=org,
                 fail_silently=True,
                 extra_headers=extra_headers,
             )
@@ -552,10 +540,10 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
                     {'queue_updated': ('updated_cc_user', context),
                      'cc_public': ('updated_cc_public', context),
                      'extra': ('updated_cc_public', context)},
+                    organization=org,
                     fail_silently=True,
                     extra_headers=extra_headers,
                 )
-
     return ticket
 
 

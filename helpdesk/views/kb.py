@@ -63,6 +63,17 @@ def article(request, slug, pk, iframe=False):
             'kb_categories': user.huser_from_request(request).get_allowed_kb_categories(),
             'helpdesk_settings': helpdesk_settings,
         })
+    items = item.category.kbitem_set.all()
+    item_index = list(items.values_list('id', flat=True)).index(item.id)
+    try:
+        prev_item = items[item_index - 1]
+    except AssertionError:
+        prev_item = None
+    try:
+        next_item = items[item_index + 1]
+    except IndexError:
+        next_item = None
+
     qparams = request.GET.copy()
     try:
         del qparams['kbitem']
@@ -72,7 +83,9 @@ def article(request, slug, pk, iframe=False):
     staff = request.user.is_authenticated and is_helpdesk_staff(request.user)
     return render(request, template, {
         'category': item.category,
+        'prev_item': prev_item,
         'item': item,
+        'next_item': next_item,
         'query_param_string': qparams.urlencode(),
         'helpdesk_settings': helpdesk_settings,
         'iframe': iframe,

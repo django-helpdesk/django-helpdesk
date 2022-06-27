@@ -70,6 +70,7 @@
                                 <th>{% trans "Priority" %}</th>
                                 <th>{% trans "Queue" %}</th>
                                 <th>{% trans "Status" %}</th>
+                                <th>{% trans "Paired Count" %}</th>
                                 <th>{% trans "Created" %}</th>
                                 <th>{% trans "Due Date" %}</th>
                                 <th>{% trans "Owner" %}</th>
@@ -77,8 +78,8 @@
                                 <th>{% trans "Time Spent" %}</th>
                                 <th>{% trans "KB item" %}</th>
                                 {% if query_params.filtering.queue__id__in|length == 1 %}
-                                    {% for extra_col in extra_data_cols %}
-                                <th>{{ extra_col }}</th>
+                                    {% for col_name, display_name in extra_data_columns.items %}
+                                <th>{{ display_name }}</th>
                                     {% endfor %}
                                 {% endif %}
                             </tr>
@@ -149,6 +150,9 @@
                                         <option id="filterBuilderSelect-KBItems" value="KBItems"{% if query_params.filtering.kbitem__in %} disabled{% endif %}>
                                             {% trans "Knowledge base items" %}
                                         </option>
+                                        <option id="filterBuilderSelect-PairedCount" value="PairedCount"{% if query_params.filtering.paired_count__lte or query_params.filtering.paired_count__gte %} disabled{% endif %}>
+                                            {% trans "Paired Count Range" %}
+                                        </option>
                                     </select>
                                 </div>
                             </form>
@@ -184,6 +188,10 @@
                                 <li class="list-group-item filterBox{% if query_params.filtering.kbitem__in %} filterBoxShow{% endif %}"
                                     id="filterBoxKBItems">
                                     {% include 'helpdesk/filters/kbitems.html' %}
+                                </li>
+                                <li class="list-group-item filterBox{% if query_params.filtering.paired_count__lte or query_params.filtering.paired_count__gte %} filterBoxShow{% endif %}"
+                                    id="filterBoxPairedCount">
+                                    {% include 'helpdesk/filters/paired_count.html' %}
                                 </li>
                                 <li class="list-group-item">
                                     <input class="btn btn-primary btn-sm" type='submit' value='{% trans "Apply Filters" %}'/>
@@ -309,11 +317,6 @@
 
 {% endblock %}
 
-<style>
-thead input {
-    width: 100%;
-}
-</style>
 {% block helpdesk_js %}
     <script src='{% static "helpdesk/filter.js" %}'></script>
     <!-- Timeline 3 JavaScript -->
@@ -322,6 +325,7 @@ thead input {
     {% else %}
     <script src="{% static 'helpdesk/vendor/timeline3/js/timeline.js' %}"></script>
     {% endif %}
+<!--TODO Move this to a separate file, keep django specific code here or use API calls somehow-->
     <script>
         function get_url(row) {
             return "{% url 'helpdesk:view' 1234 %}".replace(/1234/, row.id.toString());
@@ -352,6 +356,7 @@ thead input {
                     "type": "GET",
                     "data": function (d) {
                         // Remove unnecessary data
+                        d.order[0] = Object.assign(d.order[0], {'name': d.columns[d.order[0].column].name});
                         d.columns = _.map(d.columns, function(v) { return v.search.value === "" ? {} : v});
                     }
                 },
@@ -390,12 +395,12 @@ thead input {
                         data: "ticket",
                         render: function (data, type, row, meta) {
                             if (type === 'display') {
-                                data = '<div class="tickettitle"><a href="' + get_url(row) + '" >' +
+                                data = '<div class="tickettitle" data-toggle="tooltip" title="' + row.id + '. ' + row.title + '"><a href="' + get_url(row) + '" >' +
                                     row.id + '. ' +
                                     row.title + '</a></div>';
                             }
                             else {
-                                data = row.id + '. ' + row.title;
+                                data = '<div data-toggle="tooltip" title="' + row.id + '. ' + row.title + '">' + row.id + '. ' + row.title;
                             }
                             return data
                         }
@@ -423,6 +428,7 @@ thead input {
                         visible: false,
                     },
                     {name: "status", data: "status"},
+                    {name: "paired_count", data: "paired_count"},
                     {name: "created", data: "created"},
                     {name: "due_date", data: "due_date", "visible": false},
                     {
@@ -439,8 +445,8 @@ thead input {
                     {name: "time_spent", data: "time_spent", "visible": false},
                     {name: "kbitem", data: "kbitem"},
                     {% if query_params.filtering.queue__id__in|length == 1 %}
-                    {% for col in extra_data_cols %}
-                    {name: "{{ col }}", data: "{{ col }}"},
+                    {% for col_name, display_name in extra_data_columns.items %}
+                    {name: "{{ col_name }}", data: "{{ col_name }}"},
                     {% endfor %}
                     {% endif %}
                 ],

@@ -1,4 +1,4 @@
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.core.cache import cache
 from django.urls import reverse
 from django.utils.html import escape
@@ -84,26 +84,27 @@ DATATABLES_ORDER_COLUMN_CHOICES = dict([
     ('2', 'priority'),
     ('3', 'queue'),
     ('4', 'status'),
-    ('5', 'created'),
-    ('6', 'due_date'),
-    ('7', 'assigned_to'),
-    ('8', 'submitter_email'),
-    # ('9', 'time_spent'),
-    ('10', 'kbitem'),
+    ('5', 'paired_count'),
+    ('6', 'created'),
+    ('7', 'due_date'),
+    ('8', 'assigned_to'),
+    ('9', 'submitter_email'),
+    # ('10', 'time_spent'),
+    ('11', 'kbitem'),
 ])
 
 DATATABLES_DJANGO_FILTER_COLUMN_CHOICES = [
     ('0', 'id__icontains'),
     ('3', 'queue__title__icontains'),
-    ('8', 'submitter_email__icontains'),
-    ('10', 'kbitem__title__icontains'),
+    ('9', 'submitter_email__icontains'),
+    ('11', 'kbitem__title__icontains'),
 ]
 
 ASSIGNED_TO_FILTER_FORMATS = [
-    ('7', 'assigned_to__email__icontains'),
-    ('7', 'assigned_to__first_name__icontains'),
-    ('7', 'assigned_to__last_name__icontains'),
-    ('7', 'assigned_to__username__icontains'),
+    ('8', 'assigned_to__email__icontains'),
+    ('8', 'assigned_to__first_name__icontains'),
+    ('8', 'assigned_to__last_name__icontains'),
+    ('8', 'assigned_to__username__icontains'),
 ]
 
 # These fields go through some post-processing, which is why django filters won't work and why they aren't in the
@@ -111,10 +112,11 @@ ASSIGNED_TO_FILTER_FORMATS = [
 DATATABLES_CUSTOM_FILTER_COLUMN_CHOICES = dict([
     ('1', 'title'),                 # [id]. [title]
     ('2', 'priority'),              # [1:5 => Critical/High/.../Low]
-    ('4', 'status'),                # [1:6 => Open/Closed../Replied]
-    ('5', 'created'),               # [datetime object => humanized time]
-    ('6', 'due_date'),              # [datetime object => humanized time]
-    ('9', 'time_spent'),            # "{0:02d}h:{1:02d}m"
+    ('4', 'status'),                # [1:7 => Open/Closed../New]
+    ('5', 'paired_count'),          # Sum of ticket.beam_property and ticket.beam_taxlot
+    ('6', 'created'),               # [datetime object => humanized time]
+    ('7', 'due_date'),              # [datetime object => humanized time]
+    ('10', 'time_spent'),           # "{0:02d}h:{1:02d}m"
 ])
 
 
@@ -156,13 +158,19 @@ class __Query__:
         """
         filter = self.params.get('filtering', {})
         filter_or = self.params.get('filtering_or', {})
+        if 'paired_count__lte' in filter or 'paired_count__gte' in filter:
+            queryset = queryset.annotate(paired_count=Count('beam_property') + Count('beam_taxlot'))
         queryset = queryset.filter((Q(**filter) | Q(**filter_or)) & self.get_search_filter_args())
         sorting = self.params.get('sorting', None)
         if sorting:
             sortreverse = self.params.get('sortreverse', None)
             if sortreverse:
                 sorting = "-%s" % sorting
-            queryset = queryset.order_by(sorting)
+            if 'paired_count' in sorting:
+                queryset = queryset.annotate(paired_count=Count('beam_property') + Count('beam_taxlot')).order_by(
+                    sorting)
+            else:
+                queryset = queryset.order_by(sorting)
         # https://stackoverflow.com/questions/30487056/django-queryset-contains-duplicate-entries
         return queryset.distinct()
 
@@ -226,8 +234,10 @@ class __Query__:
         sort_column = kwargs.get('order[0][column]', ['0'])[0]
         sort_order = kwargs.get('order[0][dir]', ["asc"])[0]
         # Validating sort data
-        if sort_column != '0':
+        if sort_column != '0' and sort_column in DATATABLES_ORDER_COLUMN_CHOICES.keys():
             sort_column = DATATABLES_ORDER_COLUMN_CHOICES[sort_column]
+        elif sort_column != '0' and sort_column not in DATATABLES_ORDER_COLUMN_CHOICES.keys():
+            sort_column = 'extra_data__' + kwargs.get('order[0][name]', [''])[0]
         elif 'sorting' in self.params and self.params['sorting'] in DATATABLES_ORDER_COLUMN_CHOICES.values():
             sort_column = self.params['sorting']
             sort_order = 'desc' if self.params['sortreverse'] is None else 'asc'
@@ -255,7 +265,12 @@ class __Query__:
                 queryset = queryset.filter(filters)
                 filters_list = []
 
-        queryset = queryset.order_by(sort_column)
+        if 'paired_count' in sort_column:
+            queryset = queryset.annotate(paired_count=Count('beam_property') + Count('beam_taxlot')).order_by(
+                sort_column)
+        else:
+            queryset = queryset.order_by(sort_column)
+
         data = DatatablesTicketSerializer(queryset, many=True).data
 
         extra_data_columns = {}
@@ -277,7 +292,7 @@ class __Query__:
             'recordsFiltered': count,   # Total records, after filtering (i.e. the total number of records after filtering has been applied - not just the number of records being returned for this page of data).
             'recordsTotal': total,      # Total records, before filtering (i.e. the total number of records in the database)
             'draw': draw,
-            'extra_data_columns': list(extra_data_columns.values()),
+            'extra_data_columns': extra_data_columns,
         }
 
     def mk_timeline_date(self, date):
@@ -294,16 +309,18 @@ class __Query__:
 def do_custom_filtering(data, extra_data_columns, **kwargs):
     # Update filter choices with extra_data columns, keeping the same format [int: col_name]
     CUSTOM_FILTER_COLUMN_CHOICES = dict(DATATABLES_CUSTOM_FILTER_COLUMN_CHOICES)
+    num_columns = len(DATATABLES_ORDER_COLUMN_CHOICES) + 1  # Add + 1 since time_spent is commented out
     CUSTOM_FILTER_COLUMN_CHOICES.update(
-        dict(zip(range(11, 11 + len(extra_data_columns)), extra_data_columns.values()))
+        dict(zip(range(num_columns, num_columns + len(extra_data_columns)), extra_data_columns.keys()))
     )
+
     for i, field in CUSTOM_FILTER_COLUMN_CHOICES.items():
         column_filter_key = 'columns[%s][search][value]' % i
         column_filter = kwargs.get(column_filter_key, [None])[0]
         if column_filter:
             column_filter = column_filter.lower()
             for j, row in enumerate(data):
-                if row[field]:
+                if row[field] is not None:
                     # Handling post-processing
                     if field == 'title':
                         contents = str(row['id']) + '. ' + row[field]
@@ -311,14 +328,15 @@ def do_custom_filtering(data, extra_data_columns, **kwargs):
                         created = humanize.naturaltime(row[field])
                         contents = created.replace(u'\xa0', ' ') if created else created
                     else:       # Contains ['priority', 'status', 'time_spent'] and any extra_data
-                        contents = row[field]
+                        contents = str(row[field])
 
+                    contents = contents.lower()
                     # Apply filtering and set placeholder var to later prune data
                     if 'remove' in data[j]:
                         if not data[j]['remove']:
-                            data[j]['remove'] = column_filter not in contents.lower()
+                            data[j]['remove'] = column_filter not in contents
                     else:
-                        data[j]['remove'] = column_filter not in contents.lower()
+                        data[j]['remove'] = column_filter not in contents
                 else:
                     data[j]['remove'] = True    # No data found and a filter is applied, gets pruned
 
@@ -330,6 +348,12 @@ def do_custom_filtering(data, extra_data_columns, **kwargs):
 
 
 def get_extra_data_columns(data):
+    """
+    Get the list of extra_data columns in all of the Tickets. Remove it as a nested field and add it back as just
+    another field
+    :param data: json data from DatatablesTicketSerializer
+    :return: modified json data where nested extra_data field is expanded
+    """
     extra_data_cols = {}
 
     for row in data:
@@ -342,30 +366,21 @@ def get_extra_data_columns(data):
     for row in data:
         if row['extra_data'] == '':
             row['extra_data'] = {}
-        for k in list(row['extra_data'].keys()):
-            disp_name = extra_data_cols[k]
-            row['extra_data'][disp_name] = row['extra_data'].pop(k)
         # Add in any other col not in extra_data
-        missing_cols = {k: '' for k in extra_data_cols.values() if k not in row['extra_data'].keys()}
+        missing_cols = {k: '' for k in extra_data_cols.keys() if k not in row['extra_data'].keys()}
         row['extra_data'].update(missing_cols)
 
         # Replace extra_data with the cols themselves
         extra_data = row.pop('extra_data')
-        # Sort it into  an ordered dict
-        keys = list(extra_data.keys())
-        keys.sort()
-        for k in keys:
-            row.update({k: extra_data[k]})
+        row.update(extra_data)
 
     return extra_data_cols, data
 
 
 def get_viewable_name(ticket_name, extra_data_name):
     # Helper function to take serialized ticket name and extra_data field and return display name
-    # 12 [queue-2-12]'
     ticket_id = int(ticket_name.split('[')[0])
     form_id = Ticket.objects.get(id=ticket_id).ticket_form_id
-    field = CustomField.objects.filter(ticket_form_id=form_id,
-                                       field_name=extra_data_name).first()
+    field = CustomField.objects.filter(ticket_form_id=form_id, field_name=extra_data_name).first()
 
     return field.label if field is not None else extra_data_name

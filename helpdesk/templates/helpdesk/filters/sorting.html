@@ -5,6 +5,7 @@
         <label for='id_sort'>{% trans "Sorting" %}:</label>
     </div>
     <div class="col col-sm-2">
+        <!-- TODO Make this a Dynamic List of All the Columns. Show extra_data columns if only 1 queue is selected -->
         <select id='id_sort' name='sort' class="" style="max-width:100%">
             <option value='created'{% if query_params.sorting == "created" %} selected='selected'{% endif %}>
             {% trans "Created" %}
@@ -23,6 +24,9 @@
             </option>
             <option value='assigned_to'{% if query_params.sorting == "assigned_to" %} selected='selected'{% endif %}>
             {% trans "Owner" %}
+            </option>
+            <option value='paired_count'{% if query_params.sorting == "paired_count" %} selected='selected'{% endif %}>
+            {% trans "Paired Count" %}
             </option>
         </select>
     </div>

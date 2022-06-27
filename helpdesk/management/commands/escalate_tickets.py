@@ -85,7 +85,9 @@ def escalate_tickets(queues, verbose):
 
         for t in q.ticket_set.filter(
             Q(status=Ticket.OPEN_STATUS) |
-                Q(status=Ticket.REOPENED_STATUS)
+            Q(status=Ticket.REOPENED_STATUS) |
+            Q(status=Ticket.REPLIED_STATUS) |
+            Q(status=Ticket.NEW_STATUS)
         ).exclude(
             priority=1
         ).filter(
@@ -109,6 +111,7 @@ def escalate_tickets(queues, verbose):
                  'cc_public': ('escalated_cc_public', context),
                  'assigned_to': ('escalated_owner', context),
                  'extra': ('escalated_cc_public', context)},
+                organization=q.organization,
                 fail_silently=True,
             )
 

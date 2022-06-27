@@ -20,7 +20,7 @@ admin.site.unregister(InvitationStat)
 
 @admin.register(Queue)
 class QueueAdmin(admin.ModelAdmin):
-    list_display = ('organization', 'title', 'slug', 'importer_sender', 'allow_public_submission', 'allow_email_submission',
+    list_display = ('organization', 'title', 'slug', 'importer_sender', 'allow_public_submission',
                     'match_on', 'match_on_addresses')
     list_display_links = ('title',)
     list_filter = ('organization',)
@@ -239,8 +239,8 @@ class KBItemAdmin(admin.ModelAdmin):
 
 @admin.register(EmailTemplate)
 class EmailTemplateAdmin(admin.ModelAdmin):
-    list_display = ('template_name', 'heading', 'locale')
-    list_filter = ('locale', )
+    list_display = ('template_name', 'heading', 'organization', 'locale')
+    list_filter = ('organization', 'locale', )
 
 
 @admin.register(IgnoreEmail)

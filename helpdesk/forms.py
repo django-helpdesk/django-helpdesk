@@ -69,6 +69,7 @@ def _building_lookup(ticket_form_id, changed_data):
         return custom_fields.values_list('field_name', flat=True)
     return []
 
+
 def _field_ordering(queryset):
     # ordering fields based on form_ordering
     # if form_ordering is None, field is sorted to end of list
@@ -265,9 +266,9 @@ class EditFollowUpForm(forms.ModelForm):
         exclude = ('date', 'user',)
 
     def __init__(self, *args, **kwargs):
-        """Filter not openned tickets here."""
+        """Filter not opened tickets here."""
         super(EditFollowUpForm, self).__init__(*args, **kwargs)
-        self.fields["ticket"].queryset = Ticket.objects.filter(status__in=(Ticket.OPEN_STATUS, Ticket.REOPENED_STATUS))
+        self.fields["ticket"].queryset = Ticket.objects.filter(status__in=(Ticket.OPEN_STATUS, Ticket.REOPENED_STATUS, Ticket.REPLIED_STATUS, Ticket.NEW_STATUS))
 
 
 class AbstractTicketForm(CustomFieldMixin, forms.Form):
@@ -312,6 +313,10 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
         if form.queue:
             del self.fields['queue']
 
+        if 'extended_delay_for_QAH' in kwargs['initial']:
+            for i in range(1, 4):
+                self.fields[f'attachment_{i}'] = forms.FileField(widget=forms.FileInput(attrs={'class': 'form-control-file'}))
+
         if kbcategory:
             self.fields['kbitem'] = forms.ChoiceField(
                 widget=forms.Select(attrs={'class': 'form-control'}),
@@ -353,6 +358,9 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
         if cleaned_data.get('e_pathway'):
             self.clean_dc_pathway_form()
 
+        if cleaned_data.get('e_extended_delay_for_QAH'):
+            self.clean_dc_delay_of_compliance_form()
+
         return cleaned_data
 
     def clean_dc_pathway_form(self):
@@ -366,6 +374,18 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
             for field in fields:
                 if not self.cleaned_data.get(field[0]):
                     msg = forms.ValidationError(field[1] + ' if Alternative Compliance Pathway is selected.')
+                    self.add_error(field[0], msg)
+
+    def clean_dc_delay_of_compliance_form(self):
+        # If extended_delay_for_QAH, check that attachment_1, type_affordable_housing, attachment_3 were provided
+        if self.cleaned_data.get('e_extended_delay_for_QAH'):
+            fields = [('attachment_1', 'Qualifying Affordable Housing Attachment is required '),
+                      ('type_affordable_housing', 'Type of Affordable Housing option is required '),
+                      ('attachment_3', 'Extended Delay Milestone Plan Attachment is required ')
+                      ]
+            for field in fields:
+                if not self.cleaned_data.get(field[0]):
+                    msg = forms.ValidationError(field[1] + 'if Extended Delay for Qualified Affordable Housing is selected.')
                     self.add_error(field[0], msg)
 
     def _create_ticket(self):
@@ -389,12 +409,12 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
             # TODO Necessary fields
             ticket_form=ticket_form,  # self.cleaned_data['ticket_form'],
             # Default fields + kbitem
-            title=self.cleaned_data['title'],
+            title=self.cleaned_data.get('title', ''),
             submitter_email=self.cleaned_data['submitter_email'],
             created=timezone.now(),
-            status=Ticket.OPEN_STATUS,
+            status=Ticket.NEW_STATUS,
             queue=queue,
-            description=self.cleaned_data['description'],
+            description=self.cleaned_data.get('description', ''),
             priority=self.cleaned_data.get(
                 'priority',
                 getattr(settings, "HELPDESK_PUBLIC_TICKET_PRIORITY", "3")),
@@ -420,15 +440,25 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
                             title=title,
                             date=timezone.now(),
                             public=True,
-                            comment=self.cleaned_data['description'],)
+                            comment=self.cleaned_data.get('description', ''),)
         if user:
             followup.user = user
         return followup
 
     def _attach_files_to_follow_up(self, followup):
-        files = self.cleaned_data['attachment']
+        files = []
+
+        file = self.cleaned_data['attachment']
+        if file:
+            files.append(file)
+
+        if self.cleaned_data.get('e_extended_delay_for_QAH'):
+            for i in range(1, 4):
+                file = self.cleaned_data.get(f'attachment_{i}')
+                if file:
+                    files.append(file)
         if files:
-            files = process_attachments(followup, [files])
+            files = process_attachments(followup, files)
         return files
 
     @staticmethod
@@ -449,6 +479,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
 
         ticket.send(
             roles,
+            organization=ticket.ticket_form.organization,
             fail_silently=True,
             files=files,
         )

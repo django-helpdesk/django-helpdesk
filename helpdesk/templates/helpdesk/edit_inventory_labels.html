@@ -1,0 +1,151 @@
+{% extends "helpdesk/base.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block helpdesk_title %}
+{{ ticket.queue.slug }}-{{ ticket.id }}: {% blocktrans %}Update {{ inventory_type }} Labels{% endblocktrans %}
+{% endblock %}
+
+{% block helpdesk_head %}
+{% endblock %}
+
+{% block helpdesk_breadcrumb %}
+<li class="breadcrumb-item">
+    <a href="{% url 'helpdesk:list' %}">{% trans "Tickets" %}</a>
+</li>
+<li class="breadcrumb-item">
+    <a href="{{ ticket.get_absolute_url }}">{{ ticket.queue.slug }}-{{ ticket.id }}</a>
+</li>
+<li class="breadcrumb-item active">
+    Edit {{ inventory_type }} Labels
+</li>
+{% endblock %}
+
+{% block helpdesk_body %}
+<div class="col-lg-12">
+    <form method="post">
+        {% csrf_token %}
+        <div id="group_cycle_select" class="form-group">
+            <h5>{% blocktrans %}Select a Cycle to select a {{ inventory_type }}{% endblocktrans %}</h5>
+            <!-- Dropdown List of Properties -->
+            <select class="custom-select" id="inventory_cycle_select" name="cycle_id">
+                <option value="" selected>Your Cycle Selection</option>
+                {% for cycle in property_views_per_cycle %}
+                <option value="{{ cycle.id }}">{{ cycle.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div id="group_inventory_type_select" class="form-group">
+            <h5>{% blocktrans %}Select a {{ inventory_type }} to update Labels{% endblocktrans %}</h5>
+            <!-- Dropdown List of Properties -->
+            <select class="custom-select" id="inventory_type_select" name="inventory_id">
+                <option value="" selected>Your {{ inventory_type }} Selection</option>
+                {% for cycle, views in property_views_per_cycle.items %}
+                {% for view in views %}
+                <option value="{{ cycle.id }}-{{ view.id }}">{{ inventory_type }} ID: {{ view.id }} - {{ view.state.address_line_1 }}</option>
+                {% endfor %}
+                {% endfor %}
+            </select>
+        </div>
+        <div id="group_labels" class="form-group">
+            <div style="max-height: 500px;overflow: auto;">
+                <table id="label_table" class="table table-striped table-bordered table-hover table-sm">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>Label Name</th>
+                            <th>Add/Remove</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for label in labels %}
+                        <tr class="{% for view_id, view_labels in labels_per_view.items %}{% for view_label in view_labels %}{% if view_label.id == label.id %}view_{{ view_id }} {% endif %}{% endfor %}{% endfor %}">
+                            <th>{{ label.name }}</th>
+                            <th>
+                                <label class="btn btn-primary">
+                                    <input class="add" id='{{ label.id }}' type="checkbox" autocomplete="off"> <span>Add</span>
+                                </label>
+                            </th>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="form-group text-center">
+            <input class="btn btn-primary col-sm-3" type='submit' id="submit" value='{% trans "Update!" %}' disabled>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block helpdesk_js %}
+<script type='text/javascript' language='javascript'>
+$('#group_inventory_type_select').hide()
+$('#group_labels').hide()
+
+var inventory_view_options = $('#inventory_type_select option').detach();
+
+$('#inventory_cycle_select').change(function () {
+    // Choose InventoryView again
+    $('#group_inventory_type_select').hide()
+    $('#group_labels').hide()
+
+    if ($('#inventory_cycle_select').val()) {
+        $('#group_inventory_type_select').show();
+
+        // Filter InventoryViews to those in selected Cycle
+        $('#inventory_type_select').empty().append(inventory_view_options.filter(function () {
+            this_cycle_id = $(this).val().split('-')[0];
+            return $('#inventory_cycle_select').val() === this_cycle_id || $(this).val() === '';
+        }));
+    } else {
+        $('#group_inventory_type_select, #group_labels').hide()
+        $('#inventory_type_select').empty().append(inventory_view_options);
+    }
+    $('#inventory_type_select').val('');
+})
+
+$('#inventory_type_select').change(function () {
+    // Reset all css classes and text
+    $('#label_table label').removeClass('btn-danger').addClass('btn-primary')
+    $('#label_table span').text('Add')
+
+    // Reset Checkbox info
+    $('#label_table input').removeAttr('name')
+    $('#label_table input').prop('checked', false).removeClass('remove');
+
+    if ($('#inventory_type_select').val()) {
+        $('#group_labels').show();
+
+        // Select Add/Remove if label is already attached to property
+        view_id_class = '.view_' + $('#inventory_type_select').val().split('-')[1]
+        $('#label_table ' + view_id_class + ' label').removeClass('btn-primary').addClass('btn-danger')
+        $('#label_table ' + view_id_class + ' span').text('Remove')
+
+        $('#label_table ' + view_id_class + ' input').removeClass('add').addClass('remove')
+
+        $('#submit').prop( "disabled", false)
+    } else {
+        $('#group_labels').hide()
+
+        $('#submit').prop( "disabled", true)
+    }
+});
+
+$(document).on('click', '.add', function () {
+    if ($(this).prop('checked')) {
+        $(this).attr('name', 'add_' + $(this).attr('id'))
+    } else {
+        $(this).removeAttr('name');
+    }
+});
+
+$(document).on('click', '.remove', function () {
+    if ($(this).prop('checked')) {
+        $(this).attr('name', 'remove_' + $(this).attr('id'))
+    } else {
+        $(this).removeAttr('name');
+    }
+});
+</script>
+{% endblock %}

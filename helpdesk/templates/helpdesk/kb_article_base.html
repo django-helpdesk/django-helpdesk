@@ -1,8 +1,16 @@
-{% load i18n %}
+{% load i18n helpdesk_staff %}
 {% load form_list %}
 {% form_list user request as forms %}
 {% block header %}
-<h2>{% blocktrans with item.question as itemq %}{{ itemq }}{% endblocktrans %}</h2>
+<div class="row" style="display:inline">
+    <h2>{% blocktrans with item.question as itemq %}{{ itemq }}{% endblocktrans %}</h2>
+    <a style="vertial-align:center" class="btn btn-secondary btn-sm{% if not prev_item %} disabled{% endif %}" href="{{ prev_item.get_absolute_url }}/{{ user_info.url }}" role="button">
+        <i class="fa fa-angle-double-left"></i> Previous Item
+    </a>
+    <a class="btn btn-secondary btn-sm{% if not next_item %} disabled{% endif %}" href="{{ next_item.get_absolute_url }}/{{ user_info.url }}">
+        Next Item <i class="fa fa-angle-double-right"></i>
+    </a>
+</div>
 {% endblock %}
 
 <div class="container">
@@ -33,10 +41,3 @@
 </div>
 {% block footer %}
 {% endblock %}
-{% if category.queue %}
-    <a href="'{% if iframe %}{% url 'helpdesk:submit_iframe' %}{% else %}{% url 'helpdesk:submit' 1 %}{%endif%}?queue={{category.queue.pk}};_readonly_fields_=queue;{{query_param_string}}">
-        {% block submit_button %}
-        <div class="btn btn-success btn-circle btn-xl float-right"><i class="fa fa-plus-circle fa-lg"></i> {% trans 'Ask a question on this topic' %}</div>
-        {% endblock %}
-    </a>
-{% endif %}
