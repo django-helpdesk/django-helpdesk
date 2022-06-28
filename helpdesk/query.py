@@ -247,6 +247,7 @@ class __Query__:
 
         queryset = objects.all()  # .order_by(order_by)
         total = queryset.count()
+        all_ticket_ids = list(objects.values_list('id', flat=True))
 
         if search_value:  # Dead code currently
             queryset = queryset.filter(get_search_filter_args(search_value))
@@ -293,6 +294,7 @@ class __Query__:
             'recordsTotal': total,      # Total records, before filtering (i.e. the total number of records in the database)
             'draw': draw,
             'extra_data_columns': extra_data_columns,
+            'all_ticket_ids': all_ticket_ids,
         }
 
     def mk_timeline_date(self, date):
@@ -355,17 +357,18 @@ def get_extra_data_columns(data):
     :return: modified json data where nested extra_data field is expanded
     """
     extra_data_cols = {}
-
     for row in data:
-        if row['extra_data']:
+        # Handle extra_data columns
+        if row['extra_data'] != '':
             new_cols = [i for i in row['extra_data'].keys() if i not in extra_data_cols]
-            new_cols = {i: get_viewable_name(row['ticket'], i) for i in new_cols}
+            ticket_id = row.get('id') if 'id' in row else row['ticket'].split('[')[0]
+            new_cols = {i: get_viewable_name(ticket_id,  i) for i in new_cols}
             extra_data_cols.update(new_cols)
+        else:
+            row['extra_data'] = {}
 
     # Replace extra_data with individual columns
     for row in data:
-        if row['extra_data'] == '':
-            row['extra_data'] = {}
         # Add in any other col not in extra_data
         missing_cols = {k: '' for k in extra_data_cols.keys() if k not in row['extra_data'].keys()}
         row['extra_data'].update(missing_cols)
@@ -377,9 +380,8 @@ def get_extra_data_columns(data):
     return extra_data_cols, data
 
 
-def get_viewable_name(ticket_name, extra_data_name):
+def get_viewable_name(ticket_id, extra_data_name):
     # Helper function to take serialized ticket name and extra_data field and return display name
-    ticket_id = int(ticket_name.split('[')[0])
     form_id = Ticket.objects.get(id=ticket_id).ticket_form_id
     field = CustomField.objects.filter(ticket_form_id=form_id, field_name=extra_data_name).first()
 

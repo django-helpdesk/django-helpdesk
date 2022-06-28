@@ -98,5 +98,22 @@
 </div>
 <!-- /.card -->
 
+<div class="card mb-3">
+    <div class="card-header">
+        <i class="fas fa-info-circle"></i>
+        {% trans "Export Tickets" %}
+    </div>
+    <div class="card-body">
+        <form method='post' action="{% url 'helpdesk:export_report' %}" id="ticket_mass_update">
+            {% csrf_token %}
+            <select name='action' class="custom-select" style='width: 250px;'>
+                <option value='export_all'>{% trans 'Export All' %}</option>
+            </select>
+            <button type='submit' class='btn btn-primary btn-sm'>
+                <i class='fas fa-arrow-circle-right'></i> {% trans 'Go' %}
+            </button>
+        </form>
+    </div>
+</div>
 {% endif %}
 {% endblock %}

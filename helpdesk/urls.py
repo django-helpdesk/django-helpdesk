@@ -189,6 +189,10 @@ urlpatterns = [
     url(r'edit_inventory_labels/(?P<inventory_type>(property|taxlot))/(?P<ticket_id>[0-9]+)/$',
         staff.edit_inventory_labels,
         name="edit_inventory_labels"),
+
+    url(r'export_report/$',
+        staff.export_report,
+        name="export_report"),
 ]
 
 urlpatterns += [
