@@ -25,6 +25,9 @@ except AttributeError:
 
 HAS_TAG_SUPPORT = False
 
+# Use international timezones
+USE_TZ: bool = True
+
 # check for secure cookie support
 if os.environ.get('SECURE_PROXY_SSL_HEADER'):
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
