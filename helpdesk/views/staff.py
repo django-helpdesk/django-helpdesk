@@ -2199,7 +2199,7 @@ def pair_property_milestone(request, ticket_id):
     """
     Prompt user to select one of the Ticket's paired property's milestone to pair Ticket to
     """
-    from seed.models import Milestone, Pathway, PropertyView, PropertyMilestone
+    from seed.models import Milestone,  Note, Pathway, PropertyView, PropertyMilestone
 
     ticket = get_object_or_404(Ticket, id=ticket_id)
 
@@ -2209,7 +2209,28 @@ def pair_property_milestone(request, ticket_id):
 
         pm = PropertyMilestone.objects.get(property_view_id=pv_id, milestone_id=milestone_id)
 
+        # Create Note about pairing
+        note_kwargs = {'organization_id': ticket.ticket_form.organization.id, 'user': request.user,
+                       'name': 'Automatically Created', 'property_view': pm.property_view, 'note_type': Note.LOG,
+                       'log_data': [{'model': 'PropertyMilestone', 'name': pm.milestone.name,
+                                     'action': 'edited with the following:'},
+                                    {'field': 'Milestone Paired Ticket',
+                                     'previous_value': f'Ticket ID {pm.ticket.id if pm.ticket else "None"}',
+                                     'new_value': f'Ticket ID {ticket.id}', 'state_id': pm.property_view.state.id},
+                                    {'field': 'Implementation Status',
+                                     'previous_value': pm.get_implementation_status_display(),
+                                     'new_value': 'In Review', 'state_id': pm.property_view.state.id},
+                                    {'field': 'Submission Date',
+                                     'previous_value': pm.submission_date.strftime('%Y-%m-%d %H:%M:%S') if pm.submission_date else 'None',
+                                     'new_value': timezone.now().strftime('%Y-%m-%d %H:%M:%S'),
+                                     'state_id': pm.property_view.state.id}
+                                    ]
+                       }
+        Note.objects.create(**note_kwargs)
+
         pm.ticket = ticket
+        pm.implementation_status = PropertyMilestone.MILESTONE_IN_REVIEW
+        pm.submission_date = timezone.now()
         pm.save()
 
         return return_to_ticket(request.user, request, helpdesk_settings, ticket)
