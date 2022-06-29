@@ -313,9 +313,13 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
         if form.queue:
             del self.fields['queue']
 
+        widget = forms.FileInput(attrs={'class': 'form-control-file'})
         if 'extended_delay_for_QAH' in kwargs['initial']:
             for i in range(1, 4):
-                self.fields[f'attachment_{i}'] = forms.FileField(widget=forms.FileInput(attrs={'class': 'form-control-file'}))
+                self.fields[f'attachment_{i}'] = forms.FileField(widget=widget)
+
+        if 'eem_package_attachment' in kwargs['initial']:
+            self.fields['eem_package_attachment'] = forms.FileField(widget=widget)
 
         if kbcategory:
             self.fields['kbitem'] = forms.ChoiceField(
@@ -410,7 +414,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
             ticket_form=ticket_form,  # self.cleaned_data['ticket_form'],
             # Default fields + kbitem
             title=self.cleaned_data.get('title', ''),
-            submitter_email=self.cleaned_data['submitter_email'],
+            submitter_email=self.cleaned_data.get('submitter_email', None),
             created=timezone.now(),
             status=Ticket.NEW_STATUS,
             queue=queue,
@@ -424,12 +428,12 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
             ) or None,
             kbitem=kbitem,
             # BEAM's default fields
-            contact_name=self.cleaned_data['contact_name'],
-            contact_email=self.cleaned_data['contact_email'],
-            building_name=self.cleaned_data['building_name'],
-            building_address=self.cleaned_data['building_address'],
-            pm_id=self.cleaned_data['pm_id'],
-            building_id=self.cleaned_data['building_id'],
+            contact_name=self.cleaned_data.get('contact_name', None),
+            contact_email=self.cleaned_data.get('contact_email', None),
+            building_name=self.cleaned_data.get('building_name', None),
+            building_address=self.cleaned_data.get('building_address', None),
+            pm_id=self.cleaned_data.get('pm_id', None),
+            building_id=self.cleaned_data.get('building_id', None),
             extra_data=extra_data
         )
 
