@@ -2308,7 +2308,7 @@ def export_ticket_table(request, tickets):
     do_extra_data = int(num_queues) == 1
 
     return export(qs, DatatablesTicketSerializer, column_display_names, do_extra_data=do_extra_data,
-                  visible_cols=visible_cols, reorder=True, )
+                  visible_cols=visible_cols)
 
 
 @staff_member_required
