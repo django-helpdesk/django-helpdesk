@@ -717,11 +717,16 @@ def update_ticket(request, ticket_id, public=False):
         c.save()
 
     if ticket.assigned_to != old_owner:
+        old_name = new_name = "no one"
+        if old_owner:
+            old_name = old_owner.get_full_name() or old_owner.get_username()
+        if ticket.assigned_to:
+            new_name = ticket.assigned_to.get_full_name() or ticket.assigned_to.get_username()
         c = TicketChange(
             followup=f,
             field=_('Owner'),
-            old_value=old_owner.get_full_name() or old_owner.get_username(),
-            new_value=ticket.assigned_to.get_full_name() or ticket.assigned_to.get_username(),
+            old_value=old_name,
+            new_value=new_name,
         )
         c.save()
 

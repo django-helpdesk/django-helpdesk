@@ -52,7 +52,7 @@ def check_staff_status(check_staff=False):  # 1st bool -- unused
 
             try:
                 org_user = OrganizationUser.objects.get(user=u, organization_id=helpdesk_org)
-            except OrganizationUser.MultipleObjectsReturned or OrganizationUser.DoesNotExist:
+            except (OrganizationUser.MultipleObjectsReturned, OrganizationUser.DoesNotExist) as e:
                 return False
 
             is_building_user = requires_building_user(org_user)
