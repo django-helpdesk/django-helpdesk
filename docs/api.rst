@@ -46,6 +46,33 @@ Here is an example of a cURL request to create a ticket (using Basic authenticat
     --header 'Content-Type: application/json' \
     --data-raw '{"queue": 1, "title": "Test Ticket API", "description": "Test create ticket from API", "submitter_email": "test@mail.com", "priority": 4}'
 
+Note that you can attach one file as attachment but in this case, you cannot use JSON for the request content type. Here is an example with form-data (curl default) ::
+
+    curl --location --request POST 'http://127.0.0.1:8000/api/tickets/' \
+    --header 'Authorization: Basic YWRtaW46YWRtaW4=' \
+    --form 'queue="1"' \
+    --form 'title="Test Ticket API with attachment"' \
+    --form 'description="Test create ticket from API avec attachment"' \
+    --form 'submitter_email="test@mail.com"' \
+    --form 'priority="2"' \
+    --form 'attachment=@"/C:/Users/benbb96/Documents/file.txt"'
+
+----
+
+Accessing the endpoint ``/api/followups/`` with a **POST** request will let you create a new followup on a ticket.
+
+This time, you can attach multiple files thanks to the `attachments` field. Here is an example ::
+
+    curl --location --request POST 'http://127.0.0.1:8000/api/followups/' \
+    --header 'Authorization: Basic YWRtaW46YWRtaW4=' \
+    --form 'ticket="44"' \
+    --form 'title="Test ticket answer"' \
+    --form 'comment="This answer contains multiple files as attachment."' \
+    --form 'attachments=@"/C:/Users/benbb96/Documents/doc.pdf"' \
+    --form 'attachments=@"/C:/Users/benbb96/Documents/image.png"'
+
+----
+
 Accessing the endpoint ``/api/users/`` with a **POST** request will let you create a new user.
 
 You need to provide a JSON body with the following data :
