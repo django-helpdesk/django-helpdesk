@@ -1,20 +1,25 @@
 API
 ===
 
-A REST API (built with ``djangorestframework``) is available in order to list, create, update and delete tickets from other tools thanks to HTTP requests.
+A REST API (built with ``djangorestframework``) is available in order to list, create, update and delete tickets from
+other tools thanks to HTTP requests.
 
 If you wish to use it, you have to add this line in your settings::
 
     HELPDESK_ACTIVATE_API_ENDPOINT = True
 
-You must be authenticated to access the API, the URL endpoint is ``/api/tickets/``. You can configure how you wish to authenticate to the API by customizing the ``DEFAULT_AUTHENTICATION_CLASSES`` key in the ``REST_FRAMEWORK`` setting (more information on this page : https://www.django-rest-framework.org/api-guide/authentication/)
+You must be authenticated to access the API, the URL endpoint is ``/api/tickets/``.
+You can configure how you wish to authenticate to the API by customizing the ``DEFAULT_AUTHENTICATION_CLASSES`` key
+in the ``REST_FRAMEWORK`` setting (more information on this page : https://www.django-rest-framework.org/api-guide/authentication/)
 
 GET
 ---
 
-Accessing the endpoint ``/api/tickets/`` with a **GET** request will return you the complete list of tickets.
+Accessing the endpoint ``/api/tickets/`` with a **GET** request will return you the complete list of tickets with their
+followups and their attachment files.
 
-Accessing the endpoint ``/api/tickets/<ticket-id>`` with a **GET** request will return you the data of the ticket you provided the ID.
+Accessing the endpoint ``/api/tickets/<ticket-id>`` with a **GET** request will return you the data of the ticket you
+provided the ID.
 
 POST
 ----
@@ -35,7 +40,8 @@ You need to provide a JSON body with the following data :
 - **due_date**: date representation for when the ticket is due
 - **merged_to**: ID of the ticket to which it is merged
 
-Note that ``status`` will automatically be set to OPEN. Also, some fields are not configurable during creation: ``resolution``, ``on_hold`` and ``merged_to``.
+Note that ``status`` will automatically be set to OPEN. Also, some fields are not configurable during creation:
+``resolution``, ``on_hold`` and ``merged_to``.
 
 Moreover, if you created custom fields, you can add them into the body with the key ``custom_<custom-field-slug>``.
 
@@ -45,6 +51,34 @@ Here is an example of a cURL request to create a ticket (using Basic authenticat
     --header 'Authorization: Basic YWRtaW46YWRtaW4=' \
     --header 'Content-Type: application/json' \
     --data-raw '{"queue": 1, "title": "Test Ticket API", "description": "Test create ticket from API", "submitter_email": "test@mail.com", "priority": 4}'
+
+Note that you can attach one file as attachment but in this case, you cannot use JSON for the request content type.
+Here is an example with form-data (curl default) ::
+
+    curl --location --request POST 'http://127.0.0.1:8000/api/tickets/' \
+    --header 'Authorization: Basic YWRtaW46YWRtaW4=' \
+    --form 'queue="1"' \
+    --form 'title="Test Ticket API with attachment"' \
+    --form 'description="Test create ticket from API avec attachment"' \
+    --form 'submitter_email="test@mail.com"' \
+    --form 'priority="2"' \
+    --form 'attachment=@"/C:/Users/benbb96/Documents/file.txt"'
+
+----
+
+Accessing the endpoint ``/api/followups/`` with a **POST** request will let you create a new followup on a ticket.
+
+This time, you can attach multiple files thanks to the `attachments` field. Here is an example ::
+
+    curl --location --request POST 'http://127.0.0.1:8000/api/followups/' \
+    --header 'Authorization: Basic YWRtaW46YWRtaW4=' \
+    --form 'ticket="44"' \
+    --form 'title="Test ticket answer"' \
+    --form 'comment="This answer contains multiple files as attachment."' \
+    --form 'attachments=@"/C:/Users/benbb96/Documents/doc.pdf"' \
+    --form 'attachments=@"/C:/Users/benbb96/Documents/image.png"'
+
+----
 
 Accessing the endpoint ``/api/users/`` with a **POST** request will let you create a new user.
 
@@ -59,18 +93,21 @@ You need to provide a JSON body with the following data :
 PUT
 ---
 
-Accessing the endpoint ``/api/tickets/<ticket-id>`` with a **PUT** request will let you update the data of the ticket you provided the ID.
+Accessing the endpoint ``/api/tickets/<ticket-id>`` with a **PUT** request will let you update the data of the ticket
+you provided the ID.
 
 You must include all fields in the JSON body.
 
 PATCH
 -----
 
-Accessing the endpoint ``/api/tickets/<ticket-id>`` with a **PATCH** request will let you do a partial update of the data of the ticket you provided the ID.
+Accessing the endpoint ``/api/tickets/<ticket-id>`` with a **PATCH** request will let you do a partial update of the
+data of the ticket you provided the ID.
 
 You can include only the fields you need to update in the JSON body.
 
 DELETE
 ------
 
-Accessing the endpoint ``/api/tickets/<ticket-id>`` with a **DELETE** request will let you delete the ticket you provided the ID.
+Accessing the endpoint ``/api/tickets/<ticket-id>`` with a **DELETE** request will let you delete the ticket you
+provided the ID.

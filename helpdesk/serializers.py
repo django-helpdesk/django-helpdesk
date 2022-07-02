@@ -4,8 +4,8 @@ from django.contrib.humanize.templatetags import humanize
 from rest_framework.exceptions import ValidationError
 
 from .forms import TicketForm
-from .models import Ticket, CustomField
-from .lib import format_time_spent
+from .models import Ticket, CustomField, FollowUp, FollowUpAttachment
+from .lib import format_time_spent, process_attachments
 from .user import HelpdeskUser
 
 
@@ -71,12 +71,44 @@ class DatatablesTicketSerializer(serializers.ModelSerializer):
         return obj.kbitem.title if obj.kbitem else ""
 
 
+class FollowUpAttachmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FollowUpAttachment
+        fields = ('id', 'followup', 'file', 'filename', 'mime_type', 'size')
+
+
+class FollowUpSerializer(serializers.ModelSerializer):
+    followupattachment_set = FollowUpAttachmentSerializer(many=True, read_only=True)
+    attachments = serializers.ListField(
+        child=serializers.FileField(),
+        write_only=True,
+        required=False
+    )
+
+    class Meta:
+        model = FollowUp
+        fields = (
+            'id', 'ticket', 'date', 'title', 'comment', 'public', 'user', 'new_status', 'message_id',
+            'time_spent', 'followupattachment_set', 'attachments'
+        )
+
+    def create(self, validated_data):
+        attachments = validated_data.pop('attachments', None)
+        followup = super().create(validated_data)
+        if attachments:
+            process_attachments(followup, attachments)
+        return followup
+
+
 class TicketSerializer(serializers.ModelSerializer):
+    followup_set = FollowUpSerializer(many=True, read_only=True)
+    attachment = serializers.FileField(write_only=True, required=False)
+
     class Meta:
         model = Ticket
         fields = (
             'id', 'queue', 'title', 'description', 'resolution', 'submitter_email', 'assigned_to', 'status', 'on_hold',
-            'priority', 'due_date', 'merged_to'
+            'priority', 'due_date', 'merged_to', 'attachment', 'followup_set'
         )
 
     def __init__(self, *args, **kwargs):
@@ -99,7 +131,9 @@ class TicketSerializer(serializers.ModelSerializer):
         if data.get('merged_to'):
             data['merged_to'] = data['merged_to'].id
 
-        ticket_form = TicketForm(data=data, queue_choices=queue_choices)
+        files = {'attachment': data.pop('attachment', None)}
+
+        ticket_form = TicketForm(data=data, files=files, queue_choices=queue_choices)
         if ticket_form.is_valid():
             ticket = ticket_form.save(user=self.context['request'].user)
             ticket.set_custom_field_values()
