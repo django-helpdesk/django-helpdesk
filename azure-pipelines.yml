@@ -17,18 +17,24 @@ pool:
   vmImage: ubuntu-latest
 strategy:
   matrix:
-    Python38Django22:
-      PYTHON_VERSION: '3.8'
-      DJANGO_VERSION: '22'
-    Python39Django22:
-      PYTHON_VERSION: '3.9'
-      DJANGO_VERSION: '22'
     Python38Django32:
       PYTHON_VERSION: '3.8'
       DJANGO_VERSION: '32'
     Python39Django32:
       PYTHON_VERSION: '3.9'
       DJANGO_VERSION: '32'
+    Python310Django32:
+      PYTHON_VERSION: '3.10'
+      DJANGO_VERSION: '32'
+    Python38Django4:
+      PYTHON_VERSION: '3.8'
+      DJANGO_VERSION: '4'
+    Python39Django4:
+      PYTHON_VERSION: '3.9'
+      DJANGO_VERSION: '4'
+    Python310Django4:
+      PYTHON_VERSION: '3.10'
+      DJANGO_VERSION: '4'
   maxParallel: 10
 
 steps:
