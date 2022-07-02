@@ -56,6 +56,7 @@ steps:
 - script: |
     python -m pip install --upgrade pip setuptools wheel
     pip install -c constraints-Django$(DJANGO_VERSION).txt -r requirements.txt
+    pip install -c constraints-Django$(DJANGO_VERSION).txt -r requirements-testing.txt
     pip install unittest-xml-reporting
   displayName: 'Install prerequisites'
 
