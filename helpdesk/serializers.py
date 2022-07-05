@@ -1,7 +1,9 @@
 from rest_framework import serializers
 
-from .models import Ticket
+from .models import Ticket, FollowUp
 from .lib import format_time_spent
+from datetime import datetime
+from helpdesk.decorators import is_helpdesk_staff
 
 from django.contrib.humanize.templatetags import humanize
 
@@ -82,3 +84,80 @@ class DatatablesTicketSerializer(serializers.ModelSerializer):
 
     def get_paired_count(self, obj):
         return obj.beam_property.count() + obj.beam_taxlot.count()
+
+
+class ReportTicketSerializer(serializers.ModelSerializer):
+    formtype = serializers.SerializerMethodField()
+    created = serializers.SerializerMethodField()
+    first_staff_followup = serializers.SerializerMethodField()
+    closed_date = serializers.SerializerMethodField()
+    assigned_to = serializers.SerializerMethodField()
+    time_spent = serializers.SerializerMethodField()
+    is_followup_required = serializers.SerializerMethodField()
+    number_followups = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()
+    kbitem = serializers.SerializerMethodField()
+    merged_to = serializers.SerializerMethodField()
+    queue = serializers.SerializerMethodField()
+    extra_data = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Ticket
+        fields = ('queue', 'formtype', 'created', 'id', 'title', 'status', 'assigned_to', 'submitter_email',
+                  'time_spent', 'description', 'contact_name', 'contact_email', 'building_name', 'building_address',
+                  'pm_id', 'kbitem', 'merged_to', 'first_staff_followup', 'closed_date', 'is_followup_required',
+                  'number_followups', 'extra_data')
+
+    def get_formtype(self, obj):
+        return obj.ticket_form.name
+
+    def get_created(self, obj):
+        return datetime.strftime(obj.created, '%m-%d-%Y %H:%M:%S')
+
+    def get_first_staff_followup(self, obj):
+        followups = [f for f in FollowUp.objects.filter(ticket_id=obj.id).order_by('date') if is_helpdesk_staff(f.user)]
+        return datetime.strftime(followups[0].date, '%m-%d-%Y %H:%M:%S') if followups else 'None'
+
+    def get_closed_date(self, obj):
+        terminal_statuses = [Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS, Ticket.DUPLICATE_STATUS]
+        if obj.status in terminal_statuses:
+            f = FollowUp.objects.filter(ticket_id=obj.id, new_status__in=terminal_statuses).order_by('date').last()
+            return datetime.strftime(f.date, '%m-%d-%Y %H:%M:%S') if f else 'None'
+        else:
+            return 'None'
+
+    def get_assigned_to(self, obj):
+        if obj.assigned_to:
+            if obj.assigned_to.get_full_name():
+                return obj.assigned_to.get_full_name()
+            elif obj.assigned_to.email:
+                return obj.assigned_to.email
+            else:
+                return obj.assigned_to.username
+        else:
+            return 'None'
+
+    def get_time_spent(self, obj):
+        return format_time_spent(obj.time_spent)
+
+    def get_is_followup_required(self, obj):
+        starting_statuses = [Ticket.OPEN_STATUS, Ticket.REOPENED_STATUS, Ticket.NEW_STATUS]
+        return 'Yes' if obj.status in starting_statuses else 'No'
+
+    def get_number_followups(self, obj):
+        return FollowUp.objects.filter(ticket_id=obj.id).count()
+
+    def get_status(self, obj):
+        return obj.get_status
+
+    def get_kbitem(self, obj):
+        return obj.kbitem.title if obj.kbitem else ''
+
+    def get_merged_to(self, obj):
+        return obj.merged_to.queue.title + '-' + str(obj.merged_to.id) if obj.merged_to else ''
+
+    def get_queue(self, obj):
+        return obj.queue.title
+
+    def get_extra_data(self, obj):
+        return obj.extra_data if obj.extra_data else ''

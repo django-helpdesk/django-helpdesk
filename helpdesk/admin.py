@@ -125,10 +125,14 @@ class TicketAdmin(admin.ModelAdmin):
 
     def hidden_submitter_email(self, ticket):
         if ticket.submitter_email:
-            username, domain = ticket.submitter_email.split("@")
-            username = username[:2] + "*" * (len(username) - 2)
-            domain = domain[:1] + "*" * (len(domain) - 2) + domain[-1:]
-            return "%s@%s" % (username, domain)
+            split = ticket.submitter_email.split("@")
+            if len(split) == 2:
+                username, domain = split
+                username = username[:2] + "*" * (len(username) - 2)
+                domain = domain[:1] + "*" * (len(domain) - 2) + domain[-1:]
+                return "%s@%s" % (username, domain)
+            else:
+                return ticket.submitter_email
         else:
             return ticket.submitter_email
     hidden_submitter_email.short_description = _('Submitter E-Mail')

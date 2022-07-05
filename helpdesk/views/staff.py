@@ -32,7 +32,11 @@ from helpdesk.query import (
     get_query_class,
     query_to_base64,
     query_from_base64,
+    get_extra_data_columns,
+    get_viewable_name,
 )
+
+from helpdesk.serializers import DatatablesTicketSerializer, ReportTicketSerializer
 
 from helpdesk.user import HelpdeskUser
 
@@ -713,11 +717,16 @@ def update_ticket(request, ticket_id, public=False):
         c.save()
 
     if ticket.assigned_to != old_owner:
+        old_name = new_name = "no one"
+        if old_owner:
+            old_name = old_owner.get_full_name() or old_owner.get_username()
+        if ticket.assigned_to:
+            new_name = ticket.assigned_to.get_full_name() or ticket.assigned_to.get_username()
         c = TicketChange(
             followup=f,
             field=_('Owner'),
-            old_value=old_owner.get_full_name() or old_owner.get_username(),
-            new_value=ticket.assigned_to.get_full_name() or ticket.assigned_to.get_username(),
+            old_value=old_name,
+            new_value=new_name,
         )
         c.save()
 
@@ -873,10 +882,11 @@ def return_to_ticket(user, request, helpdesk_settings, ticket):
 
 @helpdesk_staff_member_required
 def mass_update(request):
-    tickets = request.POST.getlist('ticket_id')
+    tickets = request.POST.get('selected_ids')
     action = request.POST.get('action', None)
     if not (tickets and action):
         return HttpResponseRedirect(reverse('helpdesk:list'))
+    tickets = tickets.split(',')
 
     if action.startswith('assign_'):
         parts = action.split('_')
@@ -898,59 +908,7 @@ def mass_update(request):
             reverse('helpdesk:merge_tickets') + '?' + '&'.join(['tickets=%s' % ticket_id for ticket_id in tickets])
         )
     elif action == 'export':
-        urlsafe_query = request.POST.get('query_e')
-        query_params = request.POST.get('query_p')
-        visible_cols = request.POST.get('visible').split(',')
-        # Replace 'ticket' with 'title' as 'ticket' is just metadata
-        # ex: 'ticket' => 32 [queue-2-32]
-        visible_cols[visible_cols.index('ticket')] = 'title'
-
-        names = {'id': 'Ticket ID', 'title': 'Subject', 'ticket': 'Ticket', 'priority': 'Priority', 'queue': 'Queue',
-                 'status': 'Status', 'created': 'Created', 'due_date': 'Due Date',
-                 'assigned_to': 'Owner', 'submitter': 'Submitter', 'kbitem': 'KB Item'}
-
-        # Remake request to get data again
-        r = HttpRequest()
-        r.method = 'GET'
-        r.user = request.user
-        r.query_params = query_params
-        json_data = datatables_ticket_list(r, urlsafe_query).content
-        json_data = json.loads(json_data)
-        data = json_data['data']
-        extra_cols = json_data['extra_data_columns']
-
-        # Note, export does not work with paginated data,
-        # since selection by id does not work on pagination
-
-        # Get selected data
-        output_tickets = []
-        for row in data:
-            ticket_id = str(row['id'])
-            if ticket_id in tickets:
-                # Get the data that is only visible
-                for col in list(set(row.keys()).difference(visible_cols)):
-                    row.pop(col)
-                # Replace default cols with proper names
-                for k in list(row.keys()):
-                    if k in names:                      # Extra data are already in readable format
-                        row[names[k]] = row.pop(k)
-                output_tickets.append(row)
-
-        file_name = 'ticket_list_export.csv'
-        file_path = '/tmp/' + file_name  # TODO Better Place to store this temp file?
-
-        # Convert to pandas dataframe for csv download, after some clean up
-        df = pd.json_normalize(output_tickets)
-        df = df.set_index('Ticket ID')
-        df = df[['Subject'] + [c for c in df if c not in ['Subject'] + extra_cols] + extra_cols]
-        df.to_csv(file_path)
-
-        # initiate the download, user will stay on the same page
-        with open(file_path, 'rb') as f:
-            response = HttpResponse(f.read(), content_type='application/vnd.ms-excel')
-            response['Content-Disposition'] = 'attachment; filename=' + file_name
-            response['Content-Type'] = 'application/vnd.ms-excel; charset=utf-16'
-            return response
+        return export_ticket_table(request, tickets)
 
     huser = HelpdeskUser(request.user)
     for t in Ticket.objects.filter(id__in=tickets):
@@ -2332,3 +2290,102 @@ def edit_inventory_labels(request, inventory_type, ticket_id):
         'labels': labels,
         'inventory_type': inventory_type.capitalize(),
     })
+
+
+def export_ticket_table(request, tickets):
+    """
+    Export Tickets as they would be visible in the Ticket List
+    """
+    column_display_names = {'id': 'Ticket ID', 'title': 'Subject', 'ticket': 'Ticket', 'priority': 'Priority',
+                            'queue': 'Queue', 'status': 'Status', 'paired_count': '# of Paired Properties and Taxlots',
+                            'created': 'Created', 'due_date': 'Due Date', 'assigned_to': 'Owner',
+                            'submitter': 'Submitter', 'kbitem': 'KB Item'}
+
+    visible_cols = request.POST.get('visible').split(',')
+    num_queues = request.POST.get('queue_length', '0')
+
+    qs = Ticket.objects.filter(id__in=tickets)
+    do_extra_data = int(num_queues) == 1
+
+    return export(qs, DatatablesTicketSerializer, column_display_names, do_extra_data=do_extra_data,
+                  visible_cols=visible_cols)
+
+
+@staff_member_required
+def export_report(request):
+    """
+    Export Tickets in a report format. This is different from exporting from the TicketList  page which exports the
+    table as it is
+    """
+    action = request.POST.get('action')
+    paginate = action == 'export_year'  # TODO
+
+    user_queues = HelpdeskUser(request.user).get_queues()
+    qs = Ticket.objects.filter(queue__in=user_queues).order_by('created', 'ticket_form')
+
+    # Get display names for the regular columns
+    column_display_names = {'created': 'Ticket Creation Date', 'first_followup': 'Initial Staff Response Date',
+                            'closed_date': 'Closed Date', 'assigned_to': 'Assigned To',
+                            'time_spent': 'Total Time Spent (mins)', 'followup_required': 'Follow Up Required',
+                            'number_followups': 'Number of Interactions', 'status': 'Ticket Status',
+                            'kbitem': 'Knowledgebase Item', 'merged_to': 'Merged With', 'queue': 'Queue',
+                            'id': 'Ticket ID'}
+    varying_columns = ['title', 'description', 'submitter_email', 'contact_name', 'contact_email', 'building_name',
+                       'building_address', 'pm_id']
+
+    return export(qs, ReportTicketSerializer, column_display_names, paginate=paginate, varying_columns=varying_columns)
+
+
+def export(qs, serializer, column_display_names, paginate=False, do_extra_data=True, visible_cols=[],
+           varying_columns=[]):
+    """
+    Helper function for exporting the Ticket Table and for Reports. Lots of input variables describing which process
+    :param qs: QuerySet of Tickets to Serialize and output to csv file.
+    :param serializer: Ticket Serializer
+    :param column_display_names:
+    :param paginate:
+    :param do_extra_data:
+    :param visible_cols:
+    :param varying_columns:
+    :return: None, starts downloading the csv file
+    """
+    from collections import OrderedDict
+
+    data = serializer(qs, many=True).data
+
+    extra_data_cols = {}
+    if do_extra_data:
+        extra_data_cols, data = get_extra_data_columns(data)
+
+    # Process Data
+    for i, row in enumerate(data):
+        ticket_id = row['id']
+        cf_display_names = {}
+        if varying_columns:
+            cf_display_names = {column_name: get_viewable_name(ticket_id, column_name) for column_name in
+                                varying_columns}
+
+        # Get the data that is only visible
+        if visible_cols:
+            for col in list(set(row.keys()).difference(visible_cols)):
+                row.pop(col)
+
+        # Replace Columns with their display names
+        display_names = {**column_display_names, **cf_display_names, **extra_data_cols}
+        renamed_row = OrderedDict((display_names.get(k, k), v if v else '') for k, v in row.items())
+        data[i] = renamed_row
+
+    file_name = 'ticket_export.csv'
+    file_path = '/tmp/' + file_name  # TODO Better Place to store this temp file?
+
+    # Convert to pandas dataframe for csv download, after some clean up
+    df = pd.json_normalize(data)
+    df = df.set_index('Ticket ID')
+    df.to_csv(file_path)
+
+    # initiate the download, user will stay on the same page
+    with open(file_path, 'rb') as f:
+        response = HttpResponse(f.read(), content_type='application/vnd.ms-excel')
+        response['Content-Disposition'] = 'attachment; filename=' + file_name
+        response['Content-Type'] = 'application/vnd.ms-excel; charset=utf-16'
+        return response

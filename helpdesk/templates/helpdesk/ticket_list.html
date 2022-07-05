@@ -85,10 +85,10 @@
                             </tr>
                             </thead>
                         </table>
-                        <!-- Pass Query Params to View for exporting to work Properly -->
-                        <input type='hidden' name='query_e' value='{{ urlsafe_query }}'/>
-                        <input type='hidden' name='query_p' value='{{ query_params }}'/>
+                        <!-- Pass vars to View for exporting to work Properly -->
                         <input type='hidden' name='visible' value=''/>
+                        <input type='hidden' name='selected_ids' value=''/>
+                        <input type="hidden" name="queue_length" value="{{ query_params.filtering.queue__id__in|length }}"/>
                     </form>
                 </div>
                 <div class="tab-pane fade" id="timelinetabcontents" role="tabpanel" aria-labelledby="timelinetabcontents-tab">
@@ -332,6 +332,10 @@
         }
         var json_queries = {{ json_queries | safe }};
         var from_saved_query = {% if from_saved_query %}true{% else %}false{% endif %};
+
+        var selected = [];
+        var all_ticket_ids = [];
+
         $(document).ready(function () {
             if ( selector ) {
                 adjust_query_buttons();
@@ -358,10 +362,17 @@
                         // Remove unnecessary data
                         d.order[0] = Object.assign(d.order[0], {'name': d.columns[d.order[0].column].name});
                         d.columns = _.map(d.columns, function(v) { return v.search.value === "" ? {} : v});
-                    }
+                    },
+                    "dataSrc": function (json) {
+                        all_ticket_ids = json.all_ticket_ids;
+                        return json.data;
+                    },
                 },
                 createdRow: function (row, data, dataIndex) {
                     $(row).addClass(data.row_class);
+                    if ( $.inArray(String(data.id), selected) !== -1 ) {
+                        $(row).find('input').prop('checked', true);
+                    }
                 },
                 dom: "<'row'" +
                         "<'col col-sm-auto'<'select_el'>>" +
@@ -556,19 +567,56 @@
                 "</button>"
             );
 
+            update_selected_ids = function () {
+                // Add data to post field to be avaiable in mass_update function, and save_query
+                $('input[name="selected_ids"]').each(function () {
+                    $(this).val(selected.toString());
+                });
+            }
+
             {# Shortcuts to select/unselect multiple tickets #}
             $("#select_all_btn").click(function () {
                 $(".ticket_multi_select").prop('checked', true);
+                all_ticket_ids.forEach(function(e) {
+                    if (!selected.includes(String(e))) {
+                        selected.push(String(e));
+                    }
+                })
+                update_selected_ids();
             });
+
             $("#select_none_btn").click(function () {
                 $(".ticket_multi_select").prop('checked', false);
+                selected = [];
+                update_selected_ids();
             });
+
             $("#select_inverse_btn").click(function () {
                 $(".ticket_multi_select").each(function () {
                     $(this).prop('checked', !$(this).prop('checked'));
                 });
+                unselected = all_ticket_ids.filter(function (e) {
+                    return !selected.includes(String(e));
+                }).map(e => String(e));
+                selected = unselected;
+                update_selected_ids();
+            });
+
+            $(document).on('click', '.ticket_multi_select', function () {
+                if ($(this).prop('checked')) {
+                    if (!selected.includes($(this).val())) {
+                        selected.push($(this).val())
+                    }
+                } else {
+                    var index = selected.indexOf($(this).val());
+                    if (index !== -1) {
+                      selected.splice(index, 1);
+                    }
+                };
+                update_selected_ids();
             });
         })
+
         // Handle sharing, unsharing, rejecting, deleting queries
         var selector = $('#id_query_selector');
         if ( selector ) {
