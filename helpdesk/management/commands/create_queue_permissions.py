@@ -55,14 +55,17 @@ class Command(BaseCommand):
             self.stdout.write("Preparing Queue %s [%s]" % (q.title, q.slug))
 
             if q.permission_name:
-                self.stdout.write("  .. already has `permission_name=%s`" % q.permission_name)
+                self.stdout.write(
+                    "  .. already has `permission_name=%s`" % q.permission_name)
                 basename = q.permission_name[9:]
             else:
                 basename = q.generate_permission_name()
-                self.stdout.write("  .. generated `permission_name=%s`" % q.permission_name)
+                self.stdout.write(
+                    "  .. generated `permission_name=%s`" % q.permission_name)
                 q.save()
 
-            self.stdout.write("  .. checking permission codename `%s`" % basename)
+            self.stdout.write(
+                "  .. checking permission codename `%s`" % basename)
 
             try:
                 Permission.objects.create(

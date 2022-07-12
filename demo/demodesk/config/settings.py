@@ -97,13 +97,13 @@ WSGI_APPLICATION = 'demo.demodesk.config.wsgi.application'
 # Some common settings are below.
 
 HELPDESK_DEFAULT_SETTINGS = {
-            'use_email_as_submitter': True,
-            'email_on_ticket_assign': True,
-            'email_on_ticket_change': True,
-            'login_view_ticketlist': True,
-            'email_on_ticket_apichange': True,
-            'preset_replies': True,
-            'tickets_per_page': 25
+    'use_email_as_submitter': True,
+    'email_on_ticket_assign': True,
+    'email_on_ticket_change': True,
+    'login_view_ticketlist': True,
+    'email_on_ticket_apichange': True,
+    'preset_replies': True,
+    'tickets_per_page': 25
 }
 
 # Should the public web portal be enabled?
@@ -153,7 +153,7 @@ SITE_ID = 1
 # Sessions
 # https://docs.djangoproject.com/en/1.11/topics/http/sessions
 
-SESSION_COOKIE_AGE = 86400 # = 1 day
+SESSION_COOKIE_AGE = 86400  # = 1 day
 
 # For better default security, set these cookie flags, but
 # these are likely to cause problems when testing locally

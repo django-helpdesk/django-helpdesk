@@ -26,5 +26,6 @@ class TicketActionsTestCase(TestCase):
 
     def test_get_user_settings(self):
 
-        response = self.client.get(reverse('helpdesk:user_settings'), follow=True)
+        response = self.client.get(
+            reverse('helpdesk:user_settings'), follow=True)
         self.assertContains(response, "Use the following options")

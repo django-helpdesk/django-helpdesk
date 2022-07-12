@@ -19,4 +19,5 @@ def helpdesk_staff(user):
     try:
         return is_helpdesk_staff(user)
     except Exception:
-        logger.exception("'helpdesk_staff' template tag (django-helpdesk) crashed")
+        logger.exception(
+            "'helpdesk_staff' template tag (django-helpdesk) crashed")

@@ -72,7 +72,8 @@ def process_email(quiet=False):
 
         # Log messages to specific file only if the queue has it configured
         if (q.logging_type in logging_types) and q.logging_dir:  # if it's enabled and the dir is set
-            log_file_handler = logging.FileHandler(join(q.logging_dir, q.slug + '_get_email.log'))
+            log_file_handler = logging.FileHandler(
+                join(q.logging_dir, q.slug + '_get_email.log'))
             logger.addHandler(log_file_handler)
         else:
             log_file_handler = None
@@ -105,7 +106,8 @@ def pop3_sync(q, logger, server):
     try:
         server.stls()
     except Exception:
-        logger.warning("POP3 StartTLS failed or unsupported. Connection will be unencrypted.")
+        logger.warning(
+            "POP3 StartTLS failed or unsupported. Connection will be unencrypted.")
     server.user(q.email_box_user or settings.QUEUE_EMAIL_BOX_USER)
     server.pass_(q.email_box_pass or settings.QUEUE_EMAIL_BOX_PASSWORD)
 
@@ -127,16 +129,21 @@ def pop3_sync(q, logger, server):
 
         raw_content = server.retr(msgNum)[1]
         if type(raw_content[0]) is bytes:
-            full_message = "\n".join([elm.decode('utf-8') for elm in raw_content])
+            full_message = "\n".join([elm.decode('utf-8')
+                                      for elm in raw_content])
         else:
-            full_message = encoding.force_str("\n".join(raw_content), errors='replace')
-        ticket = object_from_message(message=full_message, queue=q, logger=logger)
+            full_message = encoding.force_str(
+                "\n".join(raw_content), errors='replace')
+        ticket = object_from_message(
+            message=full_message, queue=q, logger=logger)
 
         if ticket:
             server.dele(msgNum)
-            logger.info("Successfully processed message %s, deleted from POP3 server" % msgNum)
+            logger.info(
+                "Successfully processed message %s, deleted from POP3 server" % msgNum)
         else:
-            logger.warn("Message %s was not successfully processed, and will be left on POP3 server" % msgNum)
+            logger.warn(
+                "Message %s was not successfully processed, and will be left on POP3 server" % msgNum)
 
     server.quit()
 
@@ -146,7 +153,8 @@ def imap_sync(q, logger, server):
         try:
             server.starttls()
         except Exception:
-            logger.warning("IMAP4 StartTLS unsupported or failed. Connection will be unencrypted.")
+            logger.warning(
+                "IMAP4 StartTLS unsupported or failed. Connection will be unencrypted.")
         server.login(q.email_box_user or
                      settings.QUEUE_EMAIL_BOX_USER,
                      q.email_box_pass or
@@ -177,14 +185,17 @@ def imap_sync(q, logger, server):
                 status, data = server.fetch(num, '(RFC822)')
                 full_message = encoding.force_str(data[0][1], errors='replace')
                 try:
-                    ticket = object_from_message(message=full_message, queue=q, logger=logger)
+                    ticket = object_from_message(
+                        message=full_message, queue=q, logger=logger)
                 except TypeError:
                     ticket = None  # hotfix. Need to work out WHY.
                 if ticket:
                     server.store(num, '+FLAGS', '\\Deleted')
-                    logger.info("Successfully processed message %s, deleted from IMAP server" % num)
+                    logger.info(
+                        "Successfully processed message %s, deleted from IMAP server" % num)
                 else:
-                    logger.warn("Message %s was not successfully processed, and will be left on IMAP server" % num)
+                    logger.warn(
+                        "Message %s was not successfully processed, and will be left on IMAP server" % num)
     except imaplib.IMAP4.error:
         logger.error(
             "IMAP retrieve failed. Is the folder '%s' spelled correctly, and does it exist on the server?",
@@ -261,7 +272,8 @@ def process_queue(q, logger):
 
     elif email_box_type == 'local':
         mail_dir = q.email_box_local_dir or '/var/lib/mail/helpdesk/'
-        mail = [join(mail_dir, f) for f in os.listdir(mail_dir) if isfile(join(mail_dir, f))]
+        mail = [join(mail_dir, f)
+                for f in os.listdir(mail_dir) if isfile(join(mail_dir, f))]
         logger.info("Found %d messages in local mailbox directory" % len(mail))
 
         logger.info("Found %d messages in local mailbox directory" % len(mail))
@@ -269,17 +281,22 @@ def process_queue(q, logger):
             logger.info("Processing message %d" % i)
             with open(m, 'r') as f:
                 full_message = encoding.force_str(f.read(), errors='replace')
-                ticket = object_from_message(message=full_message, queue=q, logger=logger)
+                ticket = object_from_message(
+                    message=full_message, queue=q, logger=logger)
             if ticket:
-                logger.info("Successfully processed message %d, ticket/comment created.", i)
+                logger.info(
+                    "Successfully processed message %d, ticket/comment created.", i)
                 try:
-                    os.unlink(m)  # delete message file if ticket was successful
+                    # delete message file if ticket was successful
+                    os.unlink(m)
                 except OSError as e:
-                    logger.error("Unable to delete message %d (%s).", i, str(e))
+                    logger.error(
+                        "Unable to delete message %d (%s).", i, str(e))
                 else:
                     logger.info("Successfully deleted message %d.", i)
             else:
-                logger.warn("Message %d was not successfully processed, and will be left in local directory", i)
+                logger.warn(
+                    "Message %d was not successfully processed, and will be left in local directory", i)
 
 
 def decodeUnknown(charset, string):
@@ -309,8 +326,10 @@ def is_autoreply(message):
     So we don't start mail loops
     """
     any_if_this = [
-        False if not message.get("Auto-Submitted") else message.get("Auto-Submitted").lower() != "no",
-        True if message.get("X-Auto-Response-Suppress") in ("DR", "AutoReply", "All") else False,
+        False if not message.get(
+            "Auto-Submitted") else message.get("Auto-Submitted").lower() != "no",
+        True if message.get("X-Auto-Response-Suppress") in ("DR",
+                                                            "AutoReply", "All") else False,
         message.get("List-Id"),
         message.get("List-Unsubscribe"),
     ]
@@ -340,7 +359,8 @@ def create_ticket_cc(ticket, cc_list):
             pass
 
         try:
-            ticket_cc = subscribe_to_ticket_updates(ticket=ticket, user=user, email=cced_email)
+            ticket_cc = subscribe_to_ticket_updates(
+                ticket=ticket, user=user, email=cced_email)
             new_ticket_ccs.append(ticket_cc)
         except ValidationError:
             pass
@@ -370,7 +390,8 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
 
     if in_reply_to is not None:
         try:
-            queryset = FollowUp.objects.filter(message_id=in_reply_to).order_by('-date')
+            queryset = FollowUp.objects.filter(
+                message_id=in_reply_to).order_by('-date')
             if queryset.count() > 0:
                 previous_followup = queryset.first()
                 ticket = previous_followup.ticket
@@ -386,7 +407,8 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
             new = False
             # Check if the ticket has been merged to another ticket
             if ticket.merged_to:
-                logger.info("Ticket has been merged to %s" % ticket.merged_to.ticket)
+                logger.info("Ticket has been merged to %s" %
+                            ticket.merged_to.ticket)
                 # Use the ticket in which it was merged to for next operations
                 ticket = ticket.merged_to
 
@@ -402,7 +424,8 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
                 priority=payload['priority'],
             )
             ticket.save()
-            logger.debug("Created new ticket %s-%s" % (ticket.queue.slug, ticket.id))
+            logger.debug("Created new ticket %s-%s" %
+                         (ticket.queue.slug, ticket.id))
 
             new = True
 
@@ -413,7 +436,8 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
 
     f = FollowUp(
         ticket=ticket,
-        title=_('E-Mail Received from %(sender_email)s' % {'sender_email': sender_email}),
+        title=_('E-Mail Received from %(sender_email)s' %
+                {'sender_email': sender_email}),
         date=now,
         public=True,
         comment=payload.get('full_body', payload['body']) or "",
@@ -422,7 +446,8 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
 
     if ticket.status == Ticket.REOPENED_STATUS:
         f.new_status = Ticket.REOPENED_STATUS
-        f.title = _('Ticket Re-Opened by E-Mail Received from %(sender_email)s' % {'sender_email': sender_email})
+        f.title = _('Ticket Re-Opened by E-Mail Received from %(sender_email)s' %
+                    {'sender_email': sender_email})
 
     f.save()
     logger.debug("Created new FollowUp for Ticket")
@@ -445,14 +470,16 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
 
     if queue.enable_notifications_on_email_events and len(notifications_to_be_sent):
 
-        ticket_cc_list = TicketCC.objects.filter(ticket=ticket).all().values_list('email', flat=True)
+        ticket_cc_list = TicketCC.objects.filter(
+            ticket=ticket).all().values_list('email', flat=True)
 
         for email_address in ticket_cc_list:
             notifications_to_be_sent.append(email_address)
 
     autoreply = is_autoreply(message)
     if autoreply:
-        logger.info("Message seems to be auto-reply, not sending any emails back to the sender")
+        logger.info(
+            "Message seems to be auto-reply, not sending any emails back to the sender")
     else:
         # send mail to appropriate people now depending on what objects
         # were created and who was CC'd
@@ -494,7 +521,8 @@ def object_from_message(message, queue, logger):
     message = email.message_from_string(message)
 
     subject = message.get('subject', _('Comment from e-mail'))
-    subject = decode_mail_headers(decodeUnknown(message.get_charset(), subject))
+    subject = decode_mail_headers(
+        decodeUnknown(message.get_charset(), subject))
     for affix in STRIPPED_SUBJECT_STRINGS:
         subject = subject.replace(affix, "")
     subject = subject.strip()
@@ -508,13 +536,16 @@ def object_from_message(message, queue, logger):
     # Note that the replace won't work on just an email with no real name,
     # but the getaddresses() function seems to be able to handle just unclosed quotes
     # correctly. Not ideal, but this seems to work for now.
-    sender_email = email.utils.getaddresses(['\"' + sender.replace('<', '\" <')])[0][1]
+    sender_email = email.utils.getaddresses(
+        ['\"' + sender.replace('<', '\" <')])[0][1]
 
     cc = message.get_all('cc', None)
     if cc:
         # first, fixup the encoding if necessary
-        cc = [decode_mail_headers(decodeUnknown(message.get_charset(), x)) for x in cc]
-        # get_all checks if multiple CC headers, but individual emails may be comma separated too
+        cc = [decode_mail_headers(decodeUnknown(
+            message.get_charset(), x)) for x in cc]
+        # get_all checks if multiple CC headers, but individual emails may be
+        # comma separated too
         tempcc = []
         for hdr in cc:
             tempcc.extend(hdr.split(','))
@@ -561,14 +592,16 @@ def object_from_message(message, queue, logger):
                 # have to use django_settings here so overwritting it works in tests
                 # the default value is False anyway
                 if ticket is None and getattr(django_settings, 'HELPDESK_FULL_FIRST_MESSAGE_FROM_EMAIL', False):
-                    # first message in thread, we save full body to avoid losing forwards and things like that
+                    # first message in thread, we save full body to avoid
+                    # losing forwards and things like that
                     body_parts = []
                     for f in EmailReplyParser.read(body).fragments:
                         body_parts.append(f.content)
                     full_body = '\n\n'.join(body_parts)
                     body = EmailReplyParser.parse_reply(body)
                 else:
-                    # second and other reply, save only first part of the message
+                    # second and other reply, save only first part of the
+                    # message
                     body = EmailReplyParser.parse_reply(body)
                     full_body = body
                 # workaround to get unicode text out rather than escaped text
@@ -579,13 +612,17 @@ def object_from_message(message, queue, logger):
                 logger.debug("Discovered plain text MIME part")
             else:
                 try:
-                    email_body = encoding.smart_str(part.get_payload(decode=True))
+                    email_body = encoding.smart_str(
+                        part.get_payload(decode=True))
                 except UnicodeDecodeError:
-                    email_body = encoding.smart_str(part.get_payload(decode=False))
+                    email_body = encoding.smart_str(
+                        part.get_payload(decode=False))
 
                 if not body and not full_body:
-                    # no text has been parsed so far - try such deep parsing for some messages
-                    altered_body = email_body.replace("</p>", "</p>\n").replace("<br", "\n<br")
+                    # no text has been parsed so far - try such deep parsing
+                    # for some messages
+                    altered_body = email_body.replace(
+                        "</p>", "</p>\n").replace("<br", "\n<br")
                     mail = BeautifulSoup(str(altered_body), "html.parser")
                     full_body = mail.get_text()
 
@@ -601,7 +638,8 @@ def object_from_message(message, queue, logger):
                     '</html>'
                 ) % email_body
                 files.append(
-                    SimpleUploadedFile(_("email_html_body.html"), payload.encode("utf-8"), 'text/html')
+                    SimpleUploadedFile(
+                        _("email_html_body.html"), payload.encode("utf-8"), 'text/html')
                 )
                 logger.debug("Discovered HTML MIME part")
         else:
@@ -627,7 +665,8 @@ def object_from_message(message, queue, logger):
             # except non_b64_err:
             #     logger.debug("Payload was not base64 encoded, using raw bytes")
             #     # payloadToWrite = payload
-            files.append(SimpleUploadedFile(name, part.get_payload(decode=True), mimetypes.guess_type(name)[0]))
+            files.append(SimpleUploadedFile(name, part.get_payload(
+                decode=True), mimetypes.guess_type(name)[0]))
             logger.debug("Found MIME attachment %s" % name)
 
         counter += 1
@@ -645,7 +684,8 @@ def object_from_message(message, queue, logger):
             body = ""
 
     if getattr(django_settings, 'HELPDESK_ALWAYS_SAVE_INCOMING_EMAIL_MESSAGE', False):
-        # save message as attachment in case of some complex markup renders wrong
+        # save message as attachment in case of some complex markup renders
+        # wrong
         files.append(
             SimpleUploadedFile(
                 _("original_message.eml").replace(
@@ -660,7 +700,8 @@ def object_from_message(message, queue, logger):
     smtp_priority = message.get('priority', '')
     smtp_importance = message.get('importance', '')
     high_priority_types = {'high', 'important', '1', 'urgent'}
-    priority = 2 if high_priority_types & {smtp_priority, smtp_importance} else 3
+    priority = 2 if high_priority_types & {
+        smtp_priority, smtp_importance} else 3
 
     payload = {
         'body': body,

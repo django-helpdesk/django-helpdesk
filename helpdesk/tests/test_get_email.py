@@ -37,7 +37,8 @@ class GetEmailCommonTests(TestCase):
     # tests correct syntax for command line option
     def test_get_email_quiet_option(self):
         """Test quiet option is properly propagated"""
-        # Test get_email with quiet set to True and also False, and verify handle receives quiet option set properly
+        # Test get_email with quiet set to True and also False, and verify
+        # handle receives quiet option set properly
         for quiet_test_value in [True, False]:
             with mock.patch.object(Command, 'handle', return_value=None) as mocked_handle:
                 call_command('get_email', quiet=quiet_test_value)
@@ -52,7 +53,8 @@ class GetEmailCommonTests(TestCase):
         """
         with open(os.path.join(THIS_DIR, "test_files/blank-body-with-attachment.eml")) as fd:
             test_email = fd.read()
-            ticket = helpdesk.email.object_from_message(test_email, self.queue_public, self.logger)
+            ticket = helpdesk.email.object_from_message(
+                test_email, self.queue_public, self.logger)
 
         # title got truncated because of max_lengh of the model.title field
         assert ticket.title == (
@@ -68,16 +70,19 @@ class GetEmailCommonTests(TestCase):
         """
         with open(os.path.join(THIS_DIR, "test_files/quoted_printable.eml")) as fd:
             test_email = fd.read()
-            ticket = helpdesk.email.object_from_message(test_email, self.queue_public, self.logger)
+            ticket = helpdesk.email.object_from_message(
+                test_email, self.queue_public, self.logger)
         self.assertEqual(ticket.title, "Český test")
-        self.assertEqual(ticket.description, "Tohle je test českých písmen odeslaných z gmailu.")
+        self.assertEqual(ticket.description,
+                         "Tohle je test českých písmen odeslaných z gmailu.")
         followups = FollowUp.objects.filter(ticket=ticket)
         self.assertEqual(len(followups), 1)
         followup = followups[0]
         attachments = FollowUpAttachment.objects.filter(followup=followup)
         self.assertEqual(len(attachments), 1)
         attachment = attachments[0]
-        self.assertIn('<div dir="ltr">Tohle je test českých písmen odeslaných z gmailu.</div>\n', attachment.file.read().decode("utf-8"))
+        self.assertIn('<div dir="ltr">Tohle je test českých písmen odeslaných z gmailu.</div>\n',
+                      attachment.file.read().decode("utf-8"))
 
     def test_email_with_8bit_encoding_and_utf_8(self):
         """
@@ -86,7 +91,8 @@ class GetEmailCommonTests(TestCase):
         """
         with open(os.path.join(THIS_DIR, "test_files/all-special-chars.eml")) as fd:
             test_email = fd.read()
-            ticket = helpdesk.email.object_from_message(test_email, self.queue_public, self.logger)
+            ticket = helpdesk.email.object_from_message(
+                test_email, self.queue_public, self.logger)
         self.assertEqual(ticket.title, "Testovácí email")
         self.assertEqual(ticket.description, "íářčšáíéřášč")
 
@@ -98,14 +104,17 @@ class GetEmailCommonTests(TestCase):
         """
         with open(os.path.join(THIS_DIR, "test_files/utf-nondecodable.eml")) as fd:
             test_email = fd.read()
-        ticket = helpdesk.email.object_from_message(test_email, self.queue_public, self.logger)
-        self.assertEqual(ticket.title, "Fwd: Cyklozaměstnavatel - změna vyhodnocení")
+        ticket = helpdesk.email.object_from_message(
+            test_email, self.queue_public, self.logger)
+        self.assertEqual(
+            ticket.title, "Fwd: Cyklozaměstnavatel - změna vyhodnocení")
         self.assertIn("prosazuje lepší", ticket.description)
         followups = FollowUp.objects.filter(ticket=ticket)
         followup = followups[0]
         attachments = FollowUpAttachment.objects.filter(followup=followup)
         attachment = attachments[0]
-        self.assertIn('prosazuje lepší', attachment.file.read().decode("utf-8"))
+        self.assertIn('prosazuje lepší',
+                      attachment.file.read().decode("utf-8"))
 
     @override_settings(HELPDESK_FULL_FIRST_MESSAGE_FROM_EMAIL=True)
     def test_email_with_forwarded_message(self):
@@ -114,12 +123,15 @@ class GetEmailCommonTests(TestCase):
         """
         with open(os.path.join(THIS_DIR, "test_files/forwarded-message.eml")) as fd:
             test_email = fd.read()
-        ticket = helpdesk.email.object_from_message(test_email, self.queue_public, self.logger)
-        self.assertEqual(ticket.title, "Test with original message from GitHub")
+        ticket = helpdesk.email.object_from_message(
+            test_email, self.queue_public, self.logger)
+        self.assertEqual(
+            ticket.title, "Test with original message from GitHub")
         self.assertIn("This is email body", ticket.description)
         assert "Hello there!" not in ticket.description, ticket.description
         assert FollowUp.objects.filter(ticket=ticket).count() == 1
-        assert "Hello there!" in FollowUp.objects.filter(ticket=ticket).first().comment
+        assert "Hello there!" in FollowUp.objects.filter(
+            ticket=ticket).first().comment
 
 
 class GetEmailParametricTemplate(object):
@@ -160,11 +172,13 @@ class GetEmailParametricTemplate(object):
            For each email source supported, we mock the backend to provide
            authentically formatted responses containing our test data."""
 
-        # example email text from Django docs: https://docs.djangoproject.com/en/1.10/ref/unicode/
+        # example email text from Django docs:
+        # https://docs.djangoproject.com/en/1.10/ref/unicode/
         test_email_from = "Arnbjörg Ráðormsdóttir <arnbjorg@example.com>"
         test_email_subject = "My visit to Sør-Trøndelag"
         test_email_body = "Unicode helpdesk comment with an s-hat (ŝ) via email."
-        test_email = "To: helpdesk@example.com\nFrom: " + test_email_from + "\nSubject: " + test_email_subject + "\n\n" + test_email_body
+        test_email = "To: helpdesk@example.com\nFrom: " + test_email_from + \
+            "\nSubject: " + test_email_subject + "\n\n" + test_email_body
         test_mail_len = len(test_email)
 
         if self.socks:
@@ -184,38 +198,51 @@ class GetEmailParametricTemplate(object):
 
                     call_command('get_email')
 
-                    mocked_listdir.assert_called_with('/var/lib/mail/helpdesk/')
-                    mocked_isfile.assert_any_call('/var/lib/mail/helpdesk/filename1')
-                    mocked_isfile.assert_any_call('/var/lib/mail/helpdesk/filename2')
+                    mocked_listdir.assert_called_with(
+                        '/var/lib/mail/helpdesk/')
+                    mocked_isfile.assert_any_call(
+                        '/var/lib/mail/helpdesk/filename1')
+                    mocked_isfile.assert_any_call(
+                        '/var/lib/mail/helpdesk/filename2')
 
             elif self.method == 'pop3':
-                # mock poplib.POP3's list and retr methods to provide responses as per RFC 1939
+                # mock poplib.POP3's list and retr methods to provide responses
+                # as per RFC 1939
                 pop3_emails = {
                     '1': ("+OK", test_email.split('\n')),
                     '2': ("+OK", test_email.split('\n')),
                 }
-                pop3_mail_list = ("+OK 2 messages", ("1 %d" % test_mail_len, "2 %d" % test_mail_len))
+                pop3_mail_list = ("+OK 2 messages", ("1 %d" %
+                                                     test_mail_len, "2 %d" % test_mail_len))
                 mocked_poplib_server = mock.Mock()
-                mocked_poplib_server.list = mock.Mock(return_value=pop3_mail_list)
-                mocked_poplib_server.retr = mock.Mock(side_effect=lambda x: pop3_emails[x])
+                mocked_poplib_server.list = mock.Mock(
+                    return_value=pop3_mail_list)
+                mocked_poplib_server.retr = mock.Mock(
+                    side_effect=lambda x: pop3_emails[x])
                 with mock.patch('helpdesk.email.poplib', autospec=True) as mocked_poplib:
-                    mocked_poplib.POP3 = mock.Mock(return_value=mocked_poplib_server)
+                    mocked_poplib.POP3 = mock.Mock(
+                        return_value=mocked_poplib_server)
                     call_command('get_email')
 
             elif self.method == 'imap':
-                # mock imaplib.IMAP4's search and fetch methods with responses from RFC 3501
+                # mock imaplib.IMAP4's search and fetch methods with responses
+                # from RFC 3501
                 imap_emails = {
                     "1": ("OK", (("1", test_email),)),
                     "2": ("OK", (("2", test_email),)),
                 }
                 imap_mail_list = ("OK", ("1 2",))
                 mocked_imaplib_server = mock.Mock()
-                mocked_imaplib_server.search = mock.Mock(return_value=imap_mail_list)
+                mocked_imaplib_server.search = mock.Mock(
+                    return_value=imap_mail_list)
 
-                # we ignore the second arg as the data item/mime-part is constant (RFC822)
-                mocked_imaplib_server.fetch = mock.Mock(side_effect=lambda x, _: imap_emails[x])
+                # we ignore the second arg as the data item/mime-part is
+                # constant (RFC822)
+                mocked_imaplib_server.fetch = mock.Mock(
+                    side_effect=lambda x, _: imap_emails[x])
                 with mock.patch('helpdesk.email.imaplib', autospec=True) as mocked_imaplib:
-                    mocked_imaplib.IMAP4 = mock.Mock(return_value=mocked_imaplib_server)
+                    mocked_imaplib.IMAP4 = mock.Mock(
+                        return_value=mocked_imaplib_server)
                     call_command('get_email')
 
             ticket1 = get_object_or_404(Ticket, pk=1)
@@ -232,11 +259,13 @@ class GetEmailParametricTemplate(object):
         """Tests correctly decoding mail headers when a comma is encoded into
            UTF-8. See bug report #832."""
 
-        # example email text from Django docs: https://docs.djangoproject.com/en/1.10/ref/unicode/
+        # example email text from Django docs:
+        # https://docs.djangoproject.com/en/1.10/ref/unicode/
         test_email_from = "Bernard-Bouissières, Benjamin <bbb@example.com>"
         test_email_subject = "Commas in From lines"
         test_email_body = "Testing commas in from email UTF-8."
-        test_email = "To: helpdesk@example.com\nFrom: " + test_email_from + "\nSubject: " + test_email_subject + "\n\n" + test_email_body
+        test_email = "To: helpdesk@example.com\nFrom: " + test_email_from + \
+            "\nSubject: " + test_email_subject + "\n\n" + test_email_body
         test_mail_len = len(test_email)
 
         if self.socks:
@@ -256,38 +285,51 @@ class GetEmailParametricTemplate(object):
 
                     call_command('get_email')
 
-                    mocked_listdir.assert_called_with('/var/lib/mail/helpdesk/')
-                    mocked_isfile.assert_any_call('/var/lib/mail/helpdesk/filename1')
-                    mocked_isfile.assert_any_call('/var/lib/mail/helpdesk/filename2')
+                    mocked_listdir.assert_called_with(
+                        '/var/lib/mail/helpdesk/')
+                    mocked_isfile.assert_any_call(
+                        '/var/lib/mail/helpdesk/filename1')
+                    mocked_isfile.assert_any_call(
+                        '/var/lib/mail/helpdesk/filename2')
 
             elif self.method == 'pop3':
-                # mock poplib.POP3's list and retr methods to provide responses as per RFC 1939
+                # mock poplib.POP3's list and retr methods to provide responses
+                # as per RFC 1939
                 pop3_emails = {
                     '1': ("+OK", test_email.split('\n')),
                     '2': ("+OK", test_email.split('\n')),
                 }
-                pop3_mail_list = ("+OK 2 messages", ("1 %d" % test_mail_len, "2 %d" % test_mail_len))
+                pop3_mail_list = ("+OK 2 messages", ("1 %d" %
+                                                     test_mail_len, "2 %d" % test_mail_len))
                 mocked_poplib_server = mock.Mock()
-                mocked_poplib_server.list = mock.Mock(return_value=pop3_mail_list)
-                mocked_poplib_server.retr = mock.Mock(side_effect=lambda x: pop3_emails[x])
+                mocked_poplib_server.list = mock.Mock(
+                    return_value=pop3_mail_list)
+                mocked_poplib_server.retr = mock.Mock(
+                    side_effect=lambda x: pop3_emails[x])
                 with mock.patch('helpdesk.email.poplib', autospec=True) as mocked_poplib:
-                    mocked_poplib.POP3 = mock.Mock(return_value=mocked_poplib_server)
+                    mocked_poplib.POP3 = mock.Mock(
+                        return_value=mocked_poplib_server)
                     call_command('get_email')
 
             elif self.method == 'imap':
-                # mock imaplib.IMAP4's search and fetch methods with responses from RFC 3501
+                # mock imaplib.IMAP4's search and fetch methods with responses
+                # from RFC 3501
                 imap_emails = {
                     "1": ("OK", (("1", test_email),)),
                     "2": ("OK", (("2", test_email),)),
                 }
                 imap_mail_list = ("OK", ("1 2",))
                 mocked_imaplib_server = mock.Mock()
-                mocked_imaplib_server.search = mock.Mock(return_value=imap_mail_list)
+                mocked_imaplib_server.search = mock.Mock(
+                    return_value=imap_mail_list)
 
-                # we ignore the second arg as the data item/mime-part is constant (RFC822)
-                mocked_imaplib_server.fetch = mock.Mock(side_effect=lambda x, _: imap_emails[x])
+                # we ignore the second arg as the data item/mime-part is
+                # constant (RFC822)
+                mocked_imaplib_server.fetch = mock.Mock(
+                    side_effect=lambda x, _: imap_emails[x])
                 with mock.patch('helpdesk.email.imaplib', autospec=True) as mocked_imaplib:
-                    mocked_imaplib.IMAP4 = mock.Mock(return_value=mocked_imaplib_server)
+                    mocked_imaplib.IMAP4 = mock.Mock(
+                        return_value=mocked_imaplib_server)
                     call_command('get_email')
 
             ticket1 = get_object_or_404(Ticket, pk=1)
@@ -308,11 +350,13 @@ class GetEmailParametricTemplate(object):
            For each email source supported, we mock the backend to provide
            authentically formatted responses containing our test data."""
 
-        # example email text from Django docs: https://docs.djangoproject.com/en/1.10/ref/unicode/
+        # example email text from Django docs:
+        # https://docs.djangoproject.com/en/1.10/ref/unicode/
         test_email_from = "Arnbjörg Ráðormsdóttir <arnbjorg@example.com>"
         test_email_subject = "My visit to Sør-Trøndelag"
         test_email_body = "Reporting some issue with the template tag: {% if helpdesk %}."
-        test_email = "To: helpdesk@example.com\nFrom: " + test_email_from + "\nSubject: " + test_email_subject + "\n\n" + test_email_body
+        test_email = "To: helpdesk@example.com\nFrom: " + test_email_from + \
+            "\nSubject: " + test_email_subject + "\n\n" + test_email_body
         test_mail_len = len(test_email)
 
         if self.socks:
@@ -332,38 +376,51 @@ class GetEmailParametricTemplate(object):
 
                     call_command('get_email')
 
-                    mocked_listdir.assert_called_with('/var/lib/mail/helpdesk/')
-                    mocked_isfile.assert_any_call('/var/lib/mail/helpdesk/filename1')
-                    mocked_isfile.assert_any_call('/var/lib/mail/helpdesk/filename2')
+                    mocked_listdir.assert_called_with(
+                        '/var/lib/mail/helpdesk/')
+                    mocked_isfile.assert_any_call(
+                        '/var/lib/mail/helpdesk/filename1')
+                    mocked_isfile.assert_any_call(
+                        '/var/lib/mail/helpdesk/filename2')
 
             elif self.method == 'pop3':
-                # mock poplib.POP3's list and retr methods to provide responses as per RFC 1939
+                # mock poplib.POP3's list and retr methods to provide responses
+                # as per RFC 1939
                 pop3_emails = {
                     '1': ("+OK", test_email.split('\n')),
                     '2': ("+OK", test_email.split('\n')),
                 }
-                pop3_mail_list = ("+OK 2 messages", ("1 %d" % test_mail_len, "2 %d" % test_mail_len))
+                pop3_mail_list = ("+OK 2 messages", ("1 %d" %
+                                                     test_mail_len, "2 %d" % test_mail_len))
                 mocked_poplib_server = mock.Mock()
-                mocked_poplib_server.list = mock.Mock(return_value=pop3_mail_list)
-                mocked_poplib_server.retr = mock.Mock(side_effect=lambda x: pop3_emails[x])
+                mocked_poplib_server.list = mock.Mock(
+                    return_value=pop3_mail_list)
+                mocked_poplib_server.retr = mock.Mock(
+                    side_effect=lambda x: pop3_emails[x])
                 with mock.patch('helpdesk.email.poplib', autospec=True) as mocked_poplib:
-                    mocked_poplib.POP3 = mock.Mock(return_value=mocked_poplib_server)
+                    mocked_poplib.POP3 = mock.Mock(
+                        return_value=mocked_poplib_server)
                     call_command('get_email')
 
             elif self.method == 'imap':
-                # mock imaplib.IMAP4's search and fetch methods with responses from RFC 3501
+                # mock imaplib.IMAP4's search and fetch methods with responses
+                # from RFC 3501
                 imap_emails = {
                     "1": ("OK", (("1", test_email),)),
                     "2": ("OK", (("2", test_email),)),
                 }
                 imap_mail_list = ("OK", ("1 2",))
                 mocked_imaplib_server = mock.Mock()
-                mocked_imaplib_server.search = mock.Mock(return_value=imap_mail_list)
+                mocked_imaplib_server.search = mock.Mock(
+                    return_value=imap_mail_list)
 
-                # we ignore the second arg as the data item/mime-part is constant (RFC822)
-                mocked_imaplib_server.fetch = mock.Mock(side_effect=lambda x, _: imap_emails[x])
+                # we ignore the second arg as the data item/mime-part is
+                # constant (RFC822)
+                mocked_imaplib_server.fetch = mock.Mock(
+                    side_effect=lambda x, _: imap_emails[x])
                 with mock.patch('helpdesk.email.imaplib', autospec=True) as mocked_imaplib:
-                    mocked_imaplib.IMAP4 = mock.Mock(return_value=mocked_imaplib_server)
+                    mocked_imaplib.IMAP4 = mock.Mock(
+                        return_value=mocked_imaplib_server)
                     call_command('get_email')
 
             ticket1 = get_object_or_404(Ticket, pk=1)
@@ -382,7 +439,8 @@ class GetEmailParametricTemplate(object):
            For each email source supported, we mock the backend to provide
            authentically formatted responses containing our test data."""
 
-        # example email text from Python docs: https://docs.python.org/3/library/email-examples.html
+        # example email text from Python docs:
+        # https://docs.python.org/3/library/email-examples.html
         from email.mime.multipart import MIMEMultipart
         from email.mime.text import MIMEText
 
@@ -396,7 +454,8 @@ class GetEmailParametricTemplate(object):
         cc = cc_one + ", " + cc_two
         subject = "Link"
 
-        # Create message container - the correct MIME type is multipart/alternative.
+        # Create message container - the correct MIME type is
+        # multipart/alternative.
         msg = MIMEMultipart('alternative')
         msg['Subject'] = subject
         msg['From'] = me
@@ -446,38 +505,51 @@ class GetEmailParametricTemplate(object):
 
                     call_command('get_email')
 
-                    mocked_listdir.assert_called_with('/var/lib/mail/helpdesk/')
-                    mocked_isfile.assert_any_call('/var/lib/mail/helpdesk/filename1')
-                    mocked_isfile.assert_any_call('/var/lib/mail/helpdesk/filename2')
+                    mocked_listdir.assert_called_with(
+                        '/var/lib/mail/helpdesk/')
+                    mocked_isfile.assert_any_call(
+                        '/var/lib/mail/helpdesk/filename1')
+                    mocked_isfile.assert_any_call(
+                        '/var/lib/mail/helpdesk/filename2')
 
             elif self.method == 'pop3':
-                # mock poplib.POP3's list and retr methods to provide responses as per RFC 1939
+                # mock poplib.POP3's list and retr methods to provide responses
+                # as per RFC 1939
                 pop3_emails = {
                     '1': ("+OK", msg.as_string().split('\n')),
                     '2': ("+OK", msg.as_string().split('\n')),
                 }
-                pop3_mail_list = ("+OK 2 messages", ("1 %d" % test_mail_len, "2 %d" % test_mail_len))
+                pop3_mail_list = ("+OK 2 messages", ("1 %d" %
+                                                     test_mail_len, "2 %d" % test_mail_len))
                 mocked_poplib_server = mock.Mock()
-                mocked_poplib_server.list = mock.Mock(return_value=pop3_mail_list)
-                mocked_poplib_server.retr = mock.Mock(side_effect=lambda x: pop3_emails[x])
+                mocked_poplib_server.list = mock.Mock(
+                    return_value=pop3_mail_list)
+                mocked_poplib_server.retr = mock.Mock(
+                    side_effect=lambda x: pop3_emails[x])
                 with mock.patch('helpdesk.email.poplib', autospec=True) as mocked_poplib:
-                    mocked_poplib.POP3 = mock.Mock(return_value=mocked_poplib_server)
+                    mocked_poplib.POP3 = mock.Mock(
+                        return_value=mocked_poplib_server)
                     call_command('get_email')
 
             elif self.method == 'imap':
-                # mock imaplib.IMAP4's search and fetch methods with responses from RFC 3501
+                # mock imaplib.IMAP4's search and fetch methods with responses
+                # from RFC 3501
                 imap_emails = {
                     "1": ("OK", (("1", msg.as_string()),)),
                     "2": ("OK", (("2", msg.as_string()),)),
                 }
                 imap_mail_list = ("OK", ("1 2",))
                 mocked_imaplib_server = mock.Mock()
-                mocked_imaplib_server.search = mock.Mock(return_value=imap_mail_list)
+                mocked_imaplib_server.search = mock.Mock(
+                    return_value=imap_mail_list)
 
-                # we ignore the second arg as the data item/mime-part is constant (RFC822)
-                mocked_imaplib_server.fetch = mock.Mock(side_effect=lambda x, _: imap_emails[x])
+                # we ignore the second arg as the data item/mime-part is
+                # constant (RFC822)
+                mocked_imaplib_server.fetch = mock.Mock(
+                    side_effect=lambda x, _: imap_emails[x])
                 with mock.patch('helpdesk.email.imaplib', autospec=True) as mocked_imaplib:
-                    mocked_imaplib.IMAP4 = mock.Mock(return_value=mocked_imaplib_server)
+                    mocked_imaplib.IMAP4 = mock.Mock(
+                        return_value=mocked_imaplib_server)
                     call_command('get_email')
 
             ticket1 = get_object_or_404(Ticket, pk=1)
@@ -537,41 +609,54 @@ class GetEmailParametricTemplate(object):
 
                     call_command('get_email')
 
-                    mocked_listdir.assert_called_with('/var/lib/mail/helpdesk/')
-                    mocked_isfile.assert_any_call('/var/lib/mail/helpdesk/filename1')
+                    mocked_listdir.assert_called_with(
+                        '/var/lib/mail/helpdesk/')
+                    mocked_isfile.assert_any_call(
+                        '/var/lib/mail/helpdesk/filename1')
 
             elif self.method == 'pop3':
-                # mock poplib.POP3's list and retr methods to provide responses as per RFC 1939
+                # mock poplib.POP3's list and retr methods to provide responses
+                # as per RFC 1939
                 pop3_emails = {
                     '1': ("+OK", test_email.split('\n')),
                 }
                 pop3_mail_list = ("+OK 1 message", ("1 %d" % test_mail_len))
                 mocked_poplib_server = mock.Mock()
-                mocked_poplib_server.list = mock.Mock(return_value=pop3_mail_list)
-                mocked_poplib_server.retr = mock.Mock(side_effect=lambda x: pop3_emails['1'])
+                mocked_poplib_server.list = mock.Mock(
+                    return_value=pop3_mail_list)
+                mocked_poplib_server.retr = mock.Mock(
+                    side_effect=lambda x: pop3_emails['1'])
                 with mock.patch('helpdesk.email.poplib', autospec=True) as mocked_poplib:
-                    mocked_poplib.POP3 = mock.Mock(return_value=mocked_poplib_server)
+                    mocked_poplib.POP3 = mock.Mock(
+                        return_value=mocked_poplib_server)
                     call_command('get_email')
 
             elif self.method == 'imap':
-                # mock imaplib.IMAP4's search and fetch methods with responses from RFC 3501
+                # mock imaplib.IMAP4's search and fetch methods with responses
+                # from RFC 3501
                 imap_emails = {
                     "1": ("OK", (("1", test_email),)),
                 }
                 imap_mail_list = ("OK", ("1",))
                 mocked_imaplib_server = mock.Mock()
-                mocked_imaplib_server.search = mock.Mock(return_value=imap_mail_list)
+                mocked_imaplib_server.search = mock.Mock(
+                    return_value=imap_mail_list)
 
-                # we ignore the second arg as the data item/mime-part is constant (RFC822)
-                mocked_imaplib_server.fetch = mock.Mock(side_effect=lambda x, _: imap_emails[x])
+                # we ignore the second arg as the data item/mime-part is
+                # constant (RFC822)
+                mocked_imaplib_server.fetch = mock.Mock(
+                    side_effect=lambda x, _: imap_emails[x])
                 with mock.patch('helpdesk.email.imaplib', autospec=True) as mocked_imaplib:
-                    mocked_imaplib.IMAP4 = mock.Mock(return_value=mocked_imaplib_server)
+                    mocked_imaplib.IMAP4 = mock.Mock(
+                        return_value=mocked_imaplib_server)
                     call_command('get_email')
 
             ticket1 = get_object_or_404(Ticket, pk=1)
             self.assertEqual(ticket1.ticket_for_url, "QQ-%s" % ticket1.id)
-            self.assertEqual(ticket1.title, "example email that crashes django-helpdesk get_email")
-            self.assertEqual(ticket1.description, """hi, thanks for looking into this :)\n\nhttps://github.com/django-helpdesk/django-helpdesk/issues/567#issuecomment-342954233""")
+            self.assertEqual(
+                ticket1.title, "example email that crashes django-helpdesk get_email")
+            self.assertEqual(
+                ticket1.description, """hi, thanks for looking into this :)\n\nhttps://github.com/django-helpdesk/django-helpdesk/issues/567#issuecomment-342954233""")
             # MIME part should be attached to follow up
             followup1 = get_object_or_404(FollowUp, pk=1)
             self.assertEqual(followup1.ticket.id, 1)
@@ -680,9 +765,11 @@ class GetEmailCCHandling(TestCase):
         self.assertEqual(len(TicketCC.objects.filter(ticket=1)), 1)
         ccstaff = get_object_or_404(TicketCC, pk=1)
         self.assertEqual(ccstaff.user, User.objects.get(username='staff'))
-        self.assertEqual(ticket1.assigned_to, User.objects.get(username='assigned'))
+        self.assertEqual(ticket1.assigned_to,
+                         User.objects.get(username='assigned'))
 
-        # example email text from Django docs: https://docs.djangoproject.com/en/1.10/ref/unicode/
+        # example email text from Django docs:
+        # https://docs.djangoproject.com/en/1.10/ref/unicode/
         test_email_from = "submitter@example.com"
         # NOTE: CC emails are in alphabetical order and must be tested as such!
         # implementation uses sets, so only way to ensure tickets created
@@ -694,7 +781,10 @@ class GetEmailCCHandling(TestCase):
         ticket_user_emails = "assigned@example.com, staff@example.com, submitter@example.com, observer@example.com, queue@example.com"
         test_email_subject = "[CC-1] My visit to Sør-Trøndelag"
         test_email_body = "Unicode helpdesk comment with an s-hat (ŝ) via email."
-        test_email = "To: queue@example.com\nCc: " + test_email_cc_one + ", " + test_email_cc_one + ", " + test_email_cc_two + ", " + test_email_cc_three + "\nCC: " + test_email_cc_one + ", " + test_email_cc_three + ", " + test_email_cc_four + ", " + ticket_user_emails + "\nFrom: " + test_email_from + "\nSubject: " + test_email_subject + "\n\n" + test_email_body
+        test_email = "To: queue@example.com\nCc: " + test_email_cc_one + ", " + test_email_cc_one + ", " + test_email_cc_two + ", " + test_email_cc_three + "\nCC: " + test_email_cc_one + \
+            ", " + test_email_cc_three + ", " + test_email_cc_four + ", " + ticket_user_emails + \
+            "\nFrom: " + test_email_from + "\nSubject: " + \
+            test_email_subject + "\n\n" + test_email_body
         test_mail_len = len(test_email)
 
         with mock.patch('os.listdir') as mocked_listdir, \
@@ -755,5 +845,6 @@ for method, socks in case_matrix:
     test_name = str(
         "TestGetEmail%s%s" % (method.capitalize(), socks_str))
 
-    cl = type(test_name, (GetEmailParametricTemplate, TestCase), {"method": method, "socks": socks})
+    cl = type(test_name, (GetEmailParametricTemplate, TestCase),
+              {"method": method, "socks": socks})
     setattr(thismodule, test_name, cl)

@@ -46,13 +46,13 @@ HELPDESK_REDIRECT_TO_LOGIN_BY_DEFAULT = getattr(settings,
 
 # Enable the Dependencies field on ticket view
 HELPDESK_ENABLE_DEPENDENCIES_ON_TICKET = getattr(settings,
-                                                'HELPDESK_ENABLE_DEPENDENCIES_ON_TICKET',
-                                                True)
+                                                 'HELPDESK_ENABLE_DEPENDENCIES_ON_TICKET',
+                                                 True)
 
 # Enable the Time spent on field on ticket view
 HELPDESK_ENABLE_TIME_SPENT_ON_TICKET = getattr(settings,
-                                                'HELPDESK_ENABLE_TIME_SPENT_ON_TICKET',
-                                                True)
+                                               'HELPDESK_ENABLE_TIME_SPENT_ON_TICKET',
+                                               True)
 
 # raises a 404 to anon users. It's like it was invisible
 HELPDESK_ANON_ACCESS_RAISES_404 = getattr(settings,
@@ -63,10 +63,13 @@ HELPDESK_ANON_ACCESS_RAISES_404 = getattr(settings,
 HELPDESK_KB_ENABLED = getattr(settings, 'HELPDESK_KB_ENABLED', True)
 
 # Disable Timeline on ticket list
-HELPDESK_TICKETS_TIMELINE_ENABLED = getattr(settings, 'HELPDESK_TICKETS_TIMELINE_ENABLED', True)
+HELPDESK_TICKETS_TIMELINE_ENABLED = getattr(
+    settings, 'HELPDESK_TICKETS_TIMELINE_ENABLED', True)
 
-# show extended navigation by default, to all users, irrespective of staff status?
-HELPDESK_NAVIGATION_ENABLED = getattr(settings, 'HELPDESK_NAVIGATION_ENABLED', False)
+# show extended navigation by default, to all users, irrespective of staff
+# status?
+HELPDESK_NAVIGATION_ENABLED = getattr(
+    settings, 'HELPDESK_NAVIGATION_ENABLED', False)
 
 # use public CDNs to serve jquery and other javascript by default?
 # otherwise, use built-in static copy
@@ -84,7 +87,8 @@ HELPDESK_TRANSLATE_TICKET_COMMENTS_LANG = getattr(settings,
                                                   ["en", "de", "es", "fr", "it", "ru"])
 
 # show link to 'change password' on 'User Settings' page?
-HELPDESK_SHOW_CHANGE_PASSWORD = getattr(settings, 'HELPDESK_SHOW_CHANGE_PASSWORD', False)
+HELPDESK_SHOW_CHANGE_PASSWORD = getattr(
+    settings, 'HELPDESK_SHOW_CHANGE_PASSWORD', False)
 
 # allow user to override default layout for 'followups' - work in progress.
 HELPDESK_FOLLOWUP_MOD = getattr(settings, 'HELPDESK_FOLLOWUP_MOD', False)
@@ -96,17 +100,19 @@ HELPDESK_AUTO_SUBSCRIBE_ON_TICKET_RESPONSE = getattr(settings,
 
 # URL schemes that are allowed within links
 ALLOWED_URL_SCHEMES = getattr(settings, 'ALLOWED_URL_SCHEMES', (
-     'file', 'ftp', 'ftps', 'http', 'https', 'irc', 'mailto', 'sftp', 'ssh', 'tel', 'telnet', 'tftp', 'vnc', 'xmpp',
+    'file', 'ftp', 'ftps', 'http', 'https', 'irc', 'mailto', 'sftp', 'ssh', 'tel', 'telnet', 'tftp', 'vnc', 'xmpp',
 ))
 ############################
 # options for public pages #
 ############################
 
 # show 'view a ticket' section on public page?
-HELPDESK_VIEW_A_TICKET_PUBLIC = getattr(settings, 'HELPDESK_VIEW_A_TICKET_PUBLIC', True)
+HELPDESK_VIEW_A_TICKET_PUBLIC = getattr(
+    settings, 'HELPDESK_VIEW_A_TICKET_PUBLIC', True)
 
 # show 'submit a ticket' section on public page?
-HELPDESK_SUBMIT_A_TICKET_PUBLIC = getattr(settings, 'HELPDESK_SUBMIT_A_TICKET_PUBLIC', True)
+HELPDESK_SUBMIT_A_TICKET_PUBLIC = getattr(
+    settings, 'HELPDESK_SUBMIT_A_TICKET_PUBLIC', True)
 
 # change that to custom class to have extra fields or validation (like captcha)
 HELPDESK_PUBLIC_TICKET_FORM_CLASS = getattr(
@@ -137,8 +143,10 @@ CUSTOMFIELD_DATETIME_FORMAT = f"{CUSTOMFIELD_DATE_FORMAT}T%H:%M"
 
 ''' options for update_ticket views '''
 # allow non-staff users to interact with tickets?
-# can be True/False or a callable accepting the active user and returning True if they must be considered helpdesk staff
-HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = getattr(settings, 'HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE', False)
+# can be True/False or a callable accepting the active user and returning
+# True if they must be considered helpdesk staff
+HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = getattr(
+    settings, 'HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE', False)
 if not (HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE in (True, False) or callable(HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE)):
     warnings.warn(
         "HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE should be set to either True/False or a callable.",
@@ -154,14 +162,18 @@ HELPDESK_SHOW_EDIT_BUTTON_FOLLOW_UP = getattr(settings,
 HELPDESK_SHOW_DELETE_BUTTON_SUPERUSER_FOLLOW_UP = getattr(
     settings, 'HELPDESK_SHOW_DELETE_BUTTON_SUPERUSER_FOLLOW_UP', False)
 
-# make all updates public by default? this will hide the 'is this update public' checkbox
-HELPDESK_UPDATE_PUBLIC_DEFAULT = getattr(settings, 'HELPDESK_UPDATE_PUBLIC_DEFAULT', False)
+# make all updates public by default? this will hide the 'is this update
+# public' checkbox
+HELPDESK_UPDATE_PUBLIC_DEFAULT = getattr(
+    settings, 'HELPDESK_UPDATE_PUBLIC_DEFAULT', False)
 
 # only show staff users in ticket owner drop-downs
-HELPDESK_STAFF_ONLY_TICKET_OWNERS = getattr(settings, 'HELPDESK_STAFF_ONLY_TICKET_OWNERS', False)
+HELPDESK_STAFF_ONLY_TICKET_OWNERS = getattr(
+    settings, 'HELPDESK_STAFF_ONLY_TICKET_OWNERS', False)
 
 # only show staff users in ticket cc drop-down
-HELPDESK_STAFF_ONLY_TICKET_CC = getattr(settings, 'HELPDESK_STAFF_ONLY_TICKET_CC', False)
+HELPDESK_STAFF_ONLY_TICKET_CC = getattr(
+    settings, 'HELPDESK_STAFF_ONLY_TICKET_CC', False)
 
 # allow the subject to have a configurable template.
 HELPDESK_EMAIL_SUBJECT_TEMPLATE = getattr(
@@ -173,11 +185,13 @@ if HELPDESK_EMAIL_SUBJECT_TEMPLATE.find("ticket.ticket") < 0:
     raise ImproperlyConfigured
 
 # default fallback locale when queue locale not found
-HELPDESK_EMAIL_FALLBACK_LOCALE = getattr(settings, 'HELPDESK_EMAIL_FALLBACK_LOCALE', 'en')
+HELPDESK_EMAIL_FALLBACK_LOCALE = getattr(
+    settings, 'HELPDESK_EMAIL_FALLBACK_LOCALE', 'en')
 
 # default maximum email attachment size, in bytes
 # only attachments smaller than this size will be sent via email
-HELPDESK_MAX_EMAIL_ATTACHMENT_SIZE = getattr(settings, 'HELPDESK_MAX_EMAIL_ATTACHMENT_SIZE', 512000)
+HELPDESK_MAX_EMAIL_ATTACHMENT_SIZE = getattr(
+    settings, 'HELPDESK_MAX_EMAIL_ATTACHMENT_SIZE', 512000)
 
 
 ########################################
@@ -189,7 +203,8 @@ HELPDESK_CREATE_TICKET_HIDE_ASSIGNED_TO = getattr(
     settings, 'HELPDESK_CREATE_TICKET_HIDE_ASSIGNED_TO', False)
 
 # Activate the API endpoint to manage tickets thanks to Django REST Framework
-HELPDESK_ACTIVATE_API_ENDPOINT = getattr(settings, 'HELPDESK_ACTIVATE_API_ENDPOINT', False)
+HELPDESK_ACTIVATE_API_ENDPOINT = getattr(
+    settings, 'HELPDESK_ACTIVATE_API_ENDPOINT', False)
 
 
 #################
@@ -204,25 +219,32 @@ QUEUE_EMAIL_BOX_USER = getattr(settings, 'QUEUE_EMAIL_BOX_USER', None)
 QUEUE_EMAIL_BOX_PASSWORD = getattr(settings, 'QUEUE_EMAIL_BOX_PASSWORD', None)
 
 # only process emails with a valid tracking ID? (throws away all other mail)
-QUEUE_EMAIL_BOX_UPDATE_ONLY = getattr(settings, 'QUEUE_EMAIL_BOX_UPDATE_ONLY', False)
+QUEUE_EMAIL_BOX_UPDATE_ONLY = getattr(
+    settings, 'QUEUE_EMAIL_BOX_UPDATE_ONLY', False)
 
 # only allow users to access queues that they are members of?
 HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION = getattr(
     settings, 'HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION', False)
 
 # use https in the email links
-HELPDESK_USE_HTTPS_IN_EMAIL_LINK = getattr(settings, 'HELPDESK_USE_HTTPS_IN_EMAIL_LINK', False)
+HELPDESK_USE_HTTPS_IN_EMAIL_LINK = getattr(
+    settings, 'HELPDESK_USE_HTTPS_IN_EMAIL_LINK', False)
 
-HELPDESK_TEAMS_MODEL = getattr(settings, 'HELPDESK_TEAMS_MODEL', 'pinax_teams.Team')
-HELPDESK_TEAMS_MIGRATION_DEPENDENCIES = getattr(settings, 'HELPDESK_TEAMS_MIGRATION_DEPENDENCIES', [('pinax_teams', '0004_auto_20170511_0856')])
-HELPDESK_KBITEM_TEAM_GETTER = getattr(settings, 'HELPDESK_KBITEM_TEAM_GETTER', lambda kbitem: kbitem.team)
+HELPDESK_TEAMS_MODEL = getattr(
+    settings, 'HELPDESK_TEAMS_MODEL', 'pinax_teams.Team')
+HELPDESK_TEAMS_MIGRATION_DEPENDENCIES = getattr(settings, 'HELPDESK_TEAMS_MIGRATION_DEPENDENCIES', [
+                                                ('pinax_teams', '0004_auto_20170511_0856')])
+HELPDESK_KBITEM_TEAM_GETTER = getattr(
+    settings, 'HELPDESK_KBITEM_TEAM_GETTER', lambda kbitem: kbitem.team)
 
 # Include all signatures and forwards in the first ticket message if set
-# Useful if you get forwards dropped from them while they are useful part of request
-HELPDESK_FULL_FIRST_MESSAGE_FROM_EMAIL = getattr(settings, 'HELPDESK_FULL_FIRST_MESSAGE_FROM_EMAIL', False)
+# Useful if you get forwards dropped from them while they are useful part
+# of request
+HELPDESK_FULL_FIRST_MESSAGE_FROM_EMAIL = getattr(
+    settings, 'HELPDESK_FULL_FIRST_MESSAGE_FROM_EMAIL', False)
 
 # If set then we always save incoming emails as .eml attachments
 # which is quite noisy but very helpful for complicated markup, forwards and so on
 # (which gets stripped/corrupted otherwise)
-HELPDESK_ALWAYS_SAVE_INCOMING_EMAIL_MESSAGE = getattr(settings, "HELPDESK_ALWAYS_SAVE_INCOMING_EMAIL_MESSAGE", False)
-
+HELPDESK_ALWAYS_SAVE_INCOMING_EMAIL_MESSAGE = getattr(
+    settings, "HELPDESK_ALWAYS_SAVE_INCOMING_EMAIL_MESSAGE", False)
