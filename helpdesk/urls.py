@@ -64,12 +64,16 @@ urlpatterns = [
         name="followup_delete",
     ),
     path("tickets/<int:ticket_id>/edit/", staff.edit_ticket, name="edit"),
-    path("tickets/<int:ticket_id>/update/", staff.update_ticket, name="update"),
-    path("tickets/<int:ticket_id>/delete/", staff.delete_ticket, name="delete"),
+    path("tickets/<int:ticket_id>/update/",
+         staff.update_ticket, name="update"),
+    path("tickets/<int:ticket_id>/delete/",
+         staff.delete_ticket, name="delete"),
     path("tickets/<int:ticket_id>/hold/", staff.hold_ticket, name="hold"),
-    path("tickets/<int:ticket_id>/unhold/", staff.unhold_ticket, name="unhold"),
+    path("tickets/<int:ticket_id>/unhold/",
+         staff.unhold_ticket, name="unhold"),
     path("tickets/<int:ticket_id>/cc/", staff.ticket_cc, name="ticket_cc"),
-    path("tickets/<int:ticket_id>/cc/add/", staff.ticket_cc_add, name="ticket_cc_add"),
+    path("tickets/<int:ticket_id>/cc/add/",
+         staff.ticket_cc_add, name="ticket_cc_add"),
     path(
         "tickets/<int:ticket_id>/cc/delete/<int:cc_id>/",
         staff.ticket_cc_del,
@@ -93,13 +97,15 @@ urlpatterns = [
     re_path(r"^raw/(?P<type>\w+)/$", staff.raw_details, name="raw"),
     path("rss/", staff.rss_list, name="rss_index"),
     path("reports/", staff.report_index, name="report_index"),
-    re_path(r"^reports/(?P<report>\w+)/$", staff.run_report, name="run_report"),
+    re_path(r"^reports/(?P<report>\w+)/$",
+            staff.run_report, name="run_report"),
     path("save_query/", staff.save_query, name="savequery"),
     path("delete_query/<int:id>/", staff.delete_saved_query, name="delete_query"),
     path("settings/", staff.EditUserSettingsView.as_view(), name="user_settings"),
     path("ignore/", staff.email_ignore, name="email_ignore"),
     path("ignore/add/", staff.email_ignore_add, name="email_ignore_add"),
-    path("ignore/delete/<int:id>/", staff.email_ignore_del, name="email_ignore_del"),
+    path("ignore/delete/<int:id>/",
+         staff.email_ignore_del, name="email_ignore_del"),
     re_path(
         r"^datatables_ticket_list/(?P<query>{})$".format(base64_pattern),
         staff.datatables_ticket_list,
@@ -140,7 +146,8 @@ urlpatterns += [
         name="success_iframe",
     ),
     path("view/", public.view_ticket, name="public_view"),
-    path("change_language/", public.change_language, name="public_change_language"),
+    path("change_language/", public.change_language,
+         name="public_change_language"),
 ]
 
 urlpatterns += [
@@ -177,7 +184,8 @@ if helpdesk_settings.HELPDESK_ACTIVATE_API_ENDPOINT:
     router = DefaultRouter()
     router.register(r"tickets", TicketViewSet, basename="ticket")
     router.register(r"followups", FollowUpViewSet, basename="followups")
-    router.register(r"followups-attachments", FollowUpAttachmentViewSet, basename="followupattachments")
+    router.register(r"followups-attachments",
+                    FollowUpAttachmentViewSet, basename="followupattachments")
     router.register(r"users", CreateUserView, basename="user")
     urlpatterns += [re_path(r"^api/", include(router.urls))]
 
@@ -211,7 +219,8 @@ urlpatterns += [
 if helpdesk_settings.HELPDESK_KB_ENABLED:
     urlpatterns += [
         path("kb/", kb.index, name="kb_index"),
-        re_path(r"^kb/(?P<slug>[A-Za-z0-9_-]+)/$", kb.category, name="kb_category"),
+        re_path(r"^kb/(?P<slug>[A-Za-z0-9_-]+)/$",
+                kb.category, name="kb_category"),
         path("kb/<int:item>/vote/", kb.vote, name="kb_vote"),
         re_path(
             r"^kb_iframe/(?P<slug>[A-Za-z0-9_-]+)/$",
@@ -229,7 +238,8 @@ urlpatterns += [
     path(
         "system_settings/",
         login_required(
-            DirectTemplateView.as_view(template_name="helpdesk/system_settings.html")
+            DirectTemplateView.as_view(
+                template_name="helpdesk/system_settings.html")
         ),
         name="system_settings",
     ),

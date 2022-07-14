@@ -62,7 +62,8 @@ class Command(BaseCommand):
 
 def escalate_tickets(queues, verbose):
     """ Only include queues with escalation configured """
-    queryset = Queue.objects.filter(escalate_days__isnull=False).exclude(escalate_days=0)
+    queryset = Queue.objects.filter(
+        escalate_days__isnull=False).exclude(escalate_days=0)
     if queues:
         queryset = queryset.filter(slug__in=queues)
 
@@ -143,7 +144,8 @@ def usage():
 
 if __name__ == '__main__':
     try:
-        opts, args = getopt.getopt(sys.argv[1:], ['queues=', 'verboseescalation'])
+        opts, args = getopt.getopt(
+            sys.argv[1:], ['queues=', 'verboseescalation'])
     except getopt.GetoptError:
         usage()
         sys.exit(2)

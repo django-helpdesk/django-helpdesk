@@ -110,7 +110,8 @@ def dashboard(request):
     # page vars for the three ticket tables
     user_tickets_page = request.GET.get(_('ut_page'), 1)
     user_tickets_closed_resolved_page = request.GET.get(_('utcr_page'), 1)
-    all_tickets_reported_by_current_user_page = request.GET.get(_('atrbcu_page'), 1)
+    all_tickets_reported_by_current_user_page = request.GET.get(
+        _('atrbcu_page'), 1)
 
     huser = HelpdeskUser(request.user)
     active_tickets = Ticket.objects.select_related('queue').exclude(
@@ -335,7 +336,8 @@ def view_ticket(request, ticket_id):
         return update_ticket(request, ticket_id)
 
     if 'subscribe' in request.GET:
-        # Allow the user to subscribe him/herself to the ticket whilst viewing it.
+        # Allow the user to subscribe him/herself to the ticket whilst viewing
+        # it.
         ticket_cc, show_subscribe = \
             return_ticketccstring_and_show_subscribe(request.user, ticket)
         if show_subscribe:
@@ -361,9 +363,11 @@ def view_ticket(request, ticket_id):
         return update_ticket(request, ticket_id)
 
     if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS:
-        users = User.objects.filter(is_active=True, is_staff=True).order_by(User.USERNAME_FIELD)
+        users = User.objects.filter(
+            is_active=True, is_staff=True).order_by(User.USERNAME_FIELD)
     else:
-        users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
+        users = User.objects.filter(
+            is_active=True).order_by(User.USERNAME_FIELD)
 
     queues = HelpdeskUser(request.user).get_queues()
     queue_choices = _get_queue_choices(queues)
@@ -378,7 +382,8 @@ def view_ticket(request, ticket_id):
     if submitter_userprofile is not None:
         content_type = ContentType.objects.get_for_model(submitter_userprofile)
         submitter_userprofile_url = reverse(
-            'admin:{app}_{model}_change'.format(app=content_type.app_label, model=content_type.model),
+            'admin:{app}_{model}_change'.format(
+                app=content_type.app_label, model=content_type.model),
             kwargs={'object_id': submitter_userprofile.id}
         )
     else:
@@ -439,7 +444,8 @@ def subscribe_to_ticket_updates(ticket, user=None, email=None, can_view=True, ca
 
     if ticket is not None:
 
-        queryset = TicketCC.objects.filter(ticket=ticket, user=user, email=email)
+        queryset = TicketCC.objects.filter(
+            ticket=ticket, user=user, email=email)
 
         # Don't create duplicate entries for subscribers
         if queryset.count() > 0:
@@ -509,7 +515,8 @@ def update_ticket(request, ticket_id, public=False):
     due_date_month = int(request.POST.get('due_date_month', 0))
     due_date_day = int(request.POST.get('due_date_day', 0))
     if request.POST.get("time_spent"):
-        (hours, minutes) = [int(f) for f in request.POST.get("time_spent").split(":")]
+        (hours, minutes) = [int(f)
+                            for f in request.POST.get("time_spent").split(":")]
         time_spent = timedelta(hours=hours, minutes=minutes)
     else:
         time_spent = None
@@ -530,12 +537,14 @@ def update_ticket(request, ticket_id, public=False):
         if not (due_date_year and due_date_month and due_date_day):
             due_date = ticket.due_date
         else:
-            # NOTE: must be an easier way to create a new date than doing it this way?
+            # NOTE: must be an easier way to create a new date than doing it
+            # this way?
             if ticket.due_date:
                 due_date = ticket.due_date
             else:
                 due_date = timezone.now()
-            due_date = due_date.replace(due_date_year, due_date_month, due_date_day)
+            due_date = due_date.replace(
+                due_date_year, due_date_month, due_date_day)
 
     no_changes = all([
         not request.FILES,
@@ -559,7 +568,8 @@ def update_ticket(request, ticket_id, public=False):
     # this prevents system from trying to render any template tags
     # broken into two stages to prevent changes from first replace being themselves
     # changed by the second replace due to conflicting syntax
-    comment = comment.replace('{%', 'X-HELPDESK-COMMENT-VERBATIM').replace('%}', 'X-HELPDESK-COMMENT-ENDVERBATIM')
+    comment = comment.replace(
+        '{%', 'X-HELPDESK-COMMENT-VERBATIM').replace('%}', 'X-HELPDESK-COMMENT-ENDVERBATIM')
     comment = comment.replace(
         'X-HELPDESK-COMMENT-VERBATIM', '{% verbatim %}{%'
     ).replace(
@@ -699,7 +709,8 @@ def update_ticket(request, ticket_id, public=False):
         }
         if ticket.assigned_to and ticket.assigned_to.usersettings_helpdesk.email_on_ticket_change:
             roles['assigned_to'] = (template + 'cc', context)
-        messages_sent_to.update(ticket.send(roles, dont_send_to=messages_sent_to, fail_silently=True, files=files,))
+        messages_sent_to.update(ticket.send(
+            roles, dont_send_to=messages_sent_to, fail_silently=True, files=files,))
 
     if reassigned:
         template_staff = 'assigned_owner'
@@ -741,7 +752,8 @@ def update_ticket(request, ticket_id, public=False):
 
     # auto subscribe user if enabled
     if helpdesk_settings.HELPDESK_AUTO_SUBSCRIBE_ON_TICKET_RESPONSE and request.user.is_authenticated:
-        ticketcc_string, SHOW_SUBSCRIBE = return_ticketccstring_and_show_subscribe(request.user, ticket)
+        ticketcc_string, SHOW_SUBSCRIBE = return_ticketccstring_and_show_subscribe(
+            request.user, ticket)
         if SHOW_SUBSCRIBE:
             subscribe_staff_member_to_ticket(ticket, request.user)
 
@@ -779,9 +791,11 @@ def mass_update(request):
         user = request.user
         action = 'assign'
     elif action == 'merge':
-        # Redirect to the Merge View with selected tickets id in the GET request
+        # Redirect to the Merge View with selected tickets id in the GET
+        # request
         return redirect(
-            reverse('helpdesk:merge_tickets') + '?' + '&'.join(['tickets=%s' % ticket_id for ticket_id in tickets])
+            reverse('helpdesk:merge_tickets') + '?' +
+            '&'.join(['tickets=%s' % ticket_id for ticket_id in tickets])
         )
 
     huser = HelpdeskUser(request.user)
@@ -871,7 +885,8 @@ def mass_update(request):
 mass_update = staff_member_required(mass_update)
 
 
-# Prepare ticket attributes which will be displayed in the table to choose which value to keep when merging
+# Prepare ticket attributes which will be displayed in the table to choose
+# which value to keep when merging
 ticket_attributes = (
     ('created', _('Created date')),
     ('due_date', _('Due on')),
@@ -914,7 +929,8 @@ def merge_tickets(request):
             # Prepare the value for each custom fields of this ticket
             for custom_field in custom_fields:
                 try:
-                    value = ticket.ticketcustomfieldvalue_set.get(field=custom_field).value
+                    value = ticket.ticketcustomfieldvalue_set.get(
+                        field=custom_field).value
                 except (TicketCustomFieldValue.DoesNotExist, ValueError):
                     value = default
                 ticket.values[custom_field.name] = {
@@ -925,11 +941,13 @@ def merge_tickets(request):
         if request.method == 'POST':
             # Find which ticket has been chosen to be the main one
             try:
-                chosen_ticket = tickets.get(id=request.POST.get('chosen_ticket'))
+                chosen_ticket = tickets.get(
+                    id=request.POST.get('chosen_ticket'))
             except Ticket.DoesNotExist:
                 ticket_select_form.add_error(
                     field='tickets',
-                    error=_('Please choose a ticket in which the others will be merged into.')
+                    error=_(
+                        'Please choose a ticket in which the others will be merged into.')
                 )
             else:
                 # Save ticket fields values
@@ -945,7 +963,8 @@ def merge_tickets(request):
                         if attribute.startswith('get_') and attribute.endswith('_display'):
                             # Keep only the FIELD part
                             attribute = attribute[4:-8]
-                        # Get value from selected ticket and then save it on the chosen ticket
+                        # Get value from selected ticket and then save it on
+                        # the chosen ticket
                         value = getattr(selected_ticket, attribute)
                         setattr(chosen_ticket, attribute, value)
                 # Save custom fields values
@@ -953,17 +972,21 @@ def merge_tickets(request):
                     id_for_custom_field = request.POST.get(custom_field.name)
                     if id_for_custom_field != chosen_ticket.id:
                         try:
-                            selected_ticket = tickets.get(id=id_for_custom_field)
+                            selected_ticket = tickets.get(
+                                id=id_for_custom_field)
                         except (Ticket.DoesNotExist, ValueError):
                             continue
 
-                        # Check if the value for this ticket custom field exists
+                        # Check if the value for this ticket custom field
+                        # exists
                         try:
-                            value = selected_ticket.ticketcustomfieldvalue_set.get(field=custom_field).value
+                            value = selected_ticket.ticketcustomfieldvalue_set.get(
+                                field=custom_field).value
                         except TicketCustomFieldValue.DoesNotExist:
                             continue
 
-                        # Create the custom field value or update it with the value from the selected ticket
+                        # Create the custom field value or update it with the
+                        # value from the selected ticket
                         custom_field_value, created = chosen_ticket.ticketcustomfieldvalue_set.get_or_create(
                             field=custom_field,
                             defaults={'value': value}
@@ -981,31 +1004,39 @@ def merge_tickets(request):
                     ticket.status = Ticket.DUPLICATE_STATUS
                     ticket.save()
 
-                    # Send mail to submitter email and ticket CC to let them know ticket has been merged
+                    # Send mail to submitter email and ticket CC to let them
+                    # know ticket has been merged
                     context = safe_template_context(ticket)
                     if ticket.submitter_email:
                         send_templated_mail(
                             template_name='merged',
                             context=context,
                             recipients=[ticket.submitter_email],
-                            bcc=[cc.email_address for cc in ticket.ticketcc_set.select_related('user')],
+                            bcc=[
+                                cc.email_address for cc in ticket.ticketcc_set.select_related('user')],
                             sender=ticket.queue.from_address,
                             fail_silently=True
                         )
 
-                    # Move all followups and update their title to know they come from another ticket
+                    # Move all followups and update their title to know they
+                    # come from another ticket
                     ticket.followup_set.update(
                         ticket=chosen_ticket,
                         # Next might exceed maximum 200 characters limit
-                        title=_('[Merged from #%(id)d] %(title)s') % {'id': ticket.id, 'title': ticket.title}
+                        title=_('[Merged from #%(id)d] %(title)s') % {
+                            'id': ticket.id, 'title': ticket.title}
                     )
 
-                    # Add submitter_email, assigned_to email and ticketcc to chosen ticket if necessary
-                    chosen_ticket.add_email_to_ticketcc_if_not_in(email=ticket.submitter_email)
+                    # Add submitter_email, assigned_to email and ticketcc to
+                    # chosen ticket if necessary
+                    chosen_ticket.add_email_to_ticketcc_if_not_in(
+                        email=ticket.submitter_email)
                     if ticket.assigned_to and ticket.assigned_to.email:
-                        chosen_ticket.add_email_to_ticketcc_if_not_in(email=ticket.assigned_to.email)
+                        chosen_ticket.add_email_to_ticketcc_if_not_in(
+                            email=ticket.assigned_to.email)
                     for ticketcc in ticket.ticketcc_set.all():
-                        chosen_ticket.add_email_to_ticketcc_if_not_in(ticketcc=ticketcc)
+                        chosen_ticket.add_email_to_ticketcc_if_not_in(
+                            ticketcc=ticketcc)
                 return redirect(chosen_ticket)
 
     return render(request, 'helpdesk/ticket_merge.html', {
@@ -1134,7 +1165,8 @@ def ticket_list(request):
 
     urlsafe_query = query_to_base64(query_params)
 
-    user_saved_queries = SavedSearch.objects.filter(Q(user=request.user) | Q(shared__exact=True))
+    user_saved_queries = SavedSearch.objects.filter(
+        Q(user=request.user) | Q(shared__exact=True))
 
     search_message = ''
     if query_params['search_string'] and settings.DATABASES['default']['ENGINE'].endswith('sqlite'):
@@ -1150,7 +1182,8 @@ def ticket_list(request):
     kbitem = []
 
     if helpdesk_settings.HELPDESK_KB_ENABLED:
-        kbitem_choices = [(item.pk, str(item)) for item in KBItem.objects.all()]
+        kbitem_choices = [(item.pk, str(item))
+                          for item in KBItem.objects.all()]
         kbitem = KBItem.objects.all()
 
     return render(request, 'helpdesk/ticket_list.html', dict(
@@ -1184,7 +1217,8 @@ def load_saved_query(request, query_params=None):
     if request.GET.get('saved_query', None):
         try:
             saved_query = SavedSearch.objects.get(
-                Q(pk=request.GET.get('saved_query')) & (Q(shared=True) | Q(user=request.user))
+                Q(pk=request.GET.get('saved_query')) & (
+                    Q(shared=True) | Q(user=request.user))
             )
         except (SavedSearch.DoesNotExist, ValueError):
             raise QueryLoadError()
@@ -1253,7 +1287,8 @@ class CreateTicketView(MustBeStaffMixin, abstract_views.AbstractCreateTicketMixi
         return kwargs
 
     def form_valid(self, form):
-        self.ticket = form.save(user=self.request.user if self.request.user.is_authenticated else None)
+        self.ticket = form.save(
+            user=self.request.user if self.request.user.is_authenticated else None)
         return super().form_valid(form)
 
     def get_success_url(self):
@@ -1580,7 +1615,8 @@ def save_query(request):
     if not title or not query_encoded:
         return HttpResponseRedirect(reverse('helpdesk:list'))
 
-    query = SavedSearch(title=title, shared=shared, query=query_encoded, user=request.user)
+    query = SavedSearch(title=title, shared=shared,
+                        query=query_encoded, user=request.user)
     query.save()
 
     return HttpResponseRedirect('%s?saved_query=%s' % (reverse('helpdesk:list'), query.id))
@@ -1679,9 +1715,11 @@ def ticket_cc_add(request, ticket_id):
             user = form.cleaned_data.get('user')
             email = form.cleaned_data.get('email')
             if user and ticket.ticketcc_set.filter(user=user).exists():
-                form.add_error('user', _('Impossible to add twice the same user'))
+                form.add_error(
+                    'user', _('Impossible to add twice the same user'))
             elif email and ticket.ticketcc_set.filter(email=email).exists():
-                form.add_error('email', _('Impossible to add twice the same email address'))
+                form.add_error('email', _(
+                    'Impossible to add twice the same email address'))
             else:
                 ticketcc = form.save(commit=False)
                 ticketcc.ticket = ticket
@@ -1739,7 +1777,8 @@ ticket_dependency_add = staff_member_required(ticket_dependency_add)
 
 @helpdesk_staff_member_required
 def ticket_dependency_del(request, ticket_id, dependency_id):
-    dependency = get_object_or_404(TicketDependency, ticket__id=ticket_id, id=dependency_id)
+    dependency = get_object_or_404(
+        TicketDependency, ticket__id=ticket_id, id=dependency_id)
     if request.method == 'POST':
         dependency.delete()
         return HttpResponseRedirect(reverse('helpdesk:view', args=[ticket_id]))
@@ -1798,7 +1837,8 @@ def calc_basic_ticket_stats(Tickets):
     N_ota_le_30 = len(ota_le_30)
 
     # >= 30 & <= 60
-    ota_le_60_ge_30 = all_open_tickets.filter(created__gte=date_60_str, created__lte=date_30_str)
+    ota_le_60_ge_30 = all_open_tickets.filter(
+        created__gte=date_60_str, created__lte=date_30_str)
     N_ota_le_60_ge_30 = len(ota_le_60_ge_30)
 
     # >= 60
@@ -1822,7 +1862,8 @@ def calc_basic_ticket_stats(Tickets):
     average_nbr_days_until_ticket_closed = \
         calc_average_nbr_days_until_ticket_resolved(all_closed_tickets)
     # all closed tickets that were opened in the last 60 days.
-    all_closed_last_60_days = all_closed_tickets.filter(created__gte=date_60_str)
+    all_closed_last_60_days = all_closed_tickets.filter(
+        created__gte=date_60_str)
     average_nbr_days_until_ticket_closed_last_60_days = \
         calc_average_nbr_days_until_ticket_resolved(all_closed_last_60_days)
 
