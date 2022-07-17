@@ -45,7 +45,8 @@ class BaseCreateTicketView(abstract_views.AbstractCreateTicketMixin, FormView):
 
     def get_form_class(self):
         try:
-            the_module, the_form_class = helpdesk_settings.HELPDESK_PUBLIC_TICKET_FORM_CLASS.rsplit(".", 1)
+            the_module, the_form_class = helpdesk_settings.HELPDESK_PUBLIC_TICKET_FORM_CLASS.rsplit(
+                ".", 1)
             the_module = import_module(the_module)
             the_form_class = getattr(the_module, the_form_class)
         except Exception as e:
@@ -87,7 +88,8 @@ class BaseCreateTicketView(abstract_views.AbstractCreateTicketMixin, FormView):
                     "Public queue '%s' is configured as default but can't be found",
                     settings.HELPDESK_PUBLIC_TICKET_QUEUE
                 )
-                raise ImproperlyConfigured("Wrong public queue configuration") from e
+                raise ImproperlyConfigured(
+                    "Wrong public queue configuration") from e
         if hasattr(settings, 'HELPDESK_PUBLIC_TICKET_PRIORITY'):
             initial_data['priority'] = settings.HELPDESK_PUBLIC_TICKET_PRIORITY
         if hasattr(settings, 'HELPDESK_PUBLIC_TICKET_DUE_DATE'):
@@ -97,8 +99,10 @@ class BaseCreateTicketView(abstract_views.AbstractCreateTicketMixin, FormView):
     def get_form_kwargs(self, *args, **kwargs):
         kwargs = super().get_form_kwargs(*args, **kwargs)
         if '_hide_fields_' in self.request.GET:
-            kwargs['hidden_fields'] = self.request.GET.get('_hide_fields_', '').split(',')
-        kwargs['readonly_fields'] = self.request.GET.get('_readonly_fields_', '').split(',')
+            kwargs['hidden_fields'] = self.request.GET.get(
+                '_hide_fields_', '').split(',')
+        kwargs['readonly_fields'] = self.request.GET.get(
+            '_readonly_fields_', '').split(',')
         return kwargs
 
     def form_valid(self, form):
@@ -107,7 +111,8 @@ class BaseCreateTicketView(abstract_views.AbstractCreateTicketMixin, FormView):
             # This submission is spam. Let's not save it.
             return render(request, template_name='helpdesk/public_spam.html')
         else:
-            ticket = form.save(user=self.request.user if self.request.user.is_authenticated else None)
+            ticket = form.save(
+                user=self.request.user if self.request.user.is_authenticated else None)
             try:
                 return HttpResponseRedirect('%s?ticket=%s&email=%s&key=%s' % (
                     reverse('helpdesk:public_view'),
@@ -146,7 +151,8 @@ class CreateTicketView(BaseCreateTicketView):
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
-        # Add the CSS error class to the form in order to better see them in the page
+        # Add the CSS error class to the form in order to better see them in
+        # the page
         form.error_css_class = 'text-danger'
         return form
 
@@ -156,7 +162,8 @@ class Homepage(CreateTicketView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['kb_categories'] = huser_from_request(self.request).get_allowed_kb_categories()
+        context['kb_categories'] = huser_from_request(
+            self.request).get_allowed_kb_categories()
         return context
 
 
@@ -170,7 +177,8 @@ def search_for_ticket(request, error_message=None):
             'helpdesk_settings': helpdesk_settings,
         })
     else:
-        raise PermissionDenied("Public viewing of tickets without a secret key is forbidden.")
+        raise PermissionDenied(
+            "Public viewing of tickets without a secret key is forbidden.")
 
 
 @protect_view
@@ -188,9 +196,11 @@ def view_ticket(request):
     queue, ticket_id = Ticket.queue_and_id_from_query(ticket_req)
     try:
         if hasattr(settings, 'HELPDESK_VIEW_A_TICKET_PUBLIC') and settings.HELPDESK_VIEW_A_TICKET_PUBLIC:
-            ticket = Ticket.objects.get(id=ticket_id, submitter_email__iexact=email)
+            ticket = Ticket.objects.get(
+                id=ticket_id, submitter_email__iexact=email)
         else:
-            ticket = Ticket.objects.get(id=ticket_id, submitter_email__iexact=email, secret_key__iexact=key)
+            ticket = Ticket.objects.get(
+                id=ticket_id, submitter_email__iexact=email, secret_key__iexact=key)
     except (ObjectDoesNotExist, ValueError):
         return search_for_ticket(request, _('Invalid ticket ID or e-mail address. Please try again.'))
 

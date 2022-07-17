@@ -5,7 +5,8 @@ from django.urls import reverse
 from helpdesk.models import KBCategory, KBItem, Queue, Ticket
 from helpdesk.query import query_to_base64
 
-from helpdesk.tests.helpers import (get_staff_user, reload_urlconf, User, create_ticket, print_response)
+from helpdesk.tests.helpers import (
+    get_staff_user, reload_urlconf, User, create_ticket, print_response)
 
 
 class QueryTests(TestCase):
@@ -58,7 +59,8 @@ class QueryTests(TestCase):
     def test_query_basic(self):
         self.loginUser()
         query = query_to_base64({})
-        response = self.client.get(reverse('helpdesk:datatables_ticket_list', args=[query]))
+        response = self.client.get(
+            reverse('helpdesk:datatables_ticket_list', args=[query]))
         self.assertEqual(
             response.json(),
             {
@@ -76,12 +78,14 @@ class QueryTests(TestCase):
         query = query_to_base64(
             {'filtering': {'kbitem__in': [self.kbitem1.pk]}}
         )
-        response = self.client.get(reverse('helpdesk:datatables_ticket_list', args=[query]))
+        response = self.client.get(
+            reverse('helpdesk:datatables_ticket_list', args=[query]))
         self.assertEqual(
             response.json(),
             {
                 "data":
-                [{"ticket": "2 [test_queue-2]", "id": 2, "priority": 3, "title": "assigned to kbitem", "queue": {"title": "Test queue", "id": 1}, "status": "Open", "created": "now", "due_date": None, "assigned_to": "None", "submitter": None, "row_class": "", "time_spent": "", "kbitem": "KBItem 1"}],
+                [{"ticket": "2 [test_queue-2]", "id": 2, "priority": 3, "title": "assigned to kbitem", "queue": {"title": "Test queue", "id": 1}, "status": "Open",
+                    "created": "now", "due_date": None, "assigned_to": "None", "submitter": None, "row_class": "", "time_spent": "", "kbitem": "KBItem 1"}],
                 "recordsFiltered": 1,
                 "recordsTotal": 1,
                 "draw": 0,
@@ -93,12 +97,14 @@ class QueryTests(TestCase):
         query = query_to_base64(
             {'filtering_or': {'kbitem__in': [self.kbitem1.pk]}}
         )
-        response = self.client.get(reverse('helpdesk:datatables_ticket_list', args=[query]))
+        response = self.client.get(
+            reverse('helpdesk:datatables_ticket_list', args=[query]))
         self.assertEqual(
             response.json(),
             {
                 "data":
-                [{"ticket": "2 [test_queue-2]", "id": 2, "priority": 3, "title": "assigned to kbitem", "queue": {"title": "Test queue", "id": 1}, "status": "Open", "created": "now", "due_date": None, "assigned_to": "None", "submitter": None, "row_class": "", "time_spent": "", "kbitem": "KBItem 1"}],
+                [{"ticket": "2 [test_queue-2]", "id": 2, "priority": 3, "title": "assigned to kbitem", "queue": {"title": "Test queue", "id": 1}, "status": "Open",
+                    "created": "now", "due_date": None, "assigned_to": "None", "submitter": None, "row_class": "", "time_spent": "", "kbitem": "KBItem 1"}],
                 "recordsFiltered": 1,
                 "recordsTotal": 1,
                 "draw": 0,

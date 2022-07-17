@@ -37,40 +37,49 @@ class CustomFieldMixin(object):
 
     def customfield_to_field(self, field, instanceargs):
         # Use TextInput widget by default
-        instanceargs['widget'] = forms.TextInput(attrs={'class': 'form-control'})
+        instanceargs['widget'] = forms.TextInput(
+            attrs={'class': 'form-control'})
         # if-elif branches start with special cases
         if field.data_type == 'varchar':
             fieldclass = forms.CharField
             instanceargs['max_length'] = field.max_length
         elif field.data_type == 'text':
             fieldclass = forms.CharField
-            instanceargs['widget'] = forms.Textarea(attrs={'class': 'form-control'})
+            instanceargs['widget'] = forms.Textarea(
+                attrs={'class': 'form-control'})
             instanceargs['max_length'] = field.max_length
         elif field.data_type == 'integer':
             fieldclass = forms.IntegerField
-            instanceargs['widget'] = forms.NumberInput(attrs={'class': 'form-control'})
+            instanceargs['widget'] = forms.NumberInput(
+                attrs={'class': 'form-control'})
         elif field.data_type == 'decimal':
             fieldclass = forms.DecimalField
             instanceargs['decimal_places'] = field.decimal_places
             instanceargs['max_digits'] = field.max_length
-            instanceargs['widget'] = forms.NumberInput(attrs={'class': 'form-control'})
+            instanceargs['widget'] = forms.NumberInput(
+                attrs={'class': 'form-control'})
         elif field.data_type == 'list':
             fieldclass = forms.ChoiceField
             instanceargs['choices'] = field.get_choices()
-            instanceargs['widget'] = forms.Select(attrs={'class': 'form-control'})
+            instanceargs['widget'] = forms.Select(
+                attrs={'class': 'form-control'})
         else:
             # Try to use the immediate equivalences dictionary
             try:
                 fieldclass = CUSTOMFIELD_TO_FIELD_DICT[field.data_type]
                 # Change widgets for the following classes
                 if fieldclass == forms.DateField:
-                    instanceargs['widget'] = forms.DateInput(attrs={'class': 'form-control date-field'})
+                    instanceargs['widget'] = forms.DateInput(
+                        attrs={'class': 'form-control date-field'})
                 elif fieldclass == forms.DateTimeField:
-                    instanceargs['widget'] = forms.DateTimeInput(attrs={'class': 'form-control datetime-field'})
+                    instanceargs['widget'] = forms.DateTimeInput(
+                        attrs={'class': 'form-control datetime-field'})
                 elif fieldclass == forms.TimeField:
-                    instanceargs['widget'] = forms.TimeInput(attrs={'class': 'form-control time-field'})
+                    instanceargs['widget'] = forms.TimeInput(
+                        attrs={'class': 'form-control time-field'})
                 elif fieldclass == forms.BooleanField:
-                    instanceargs['widget'] = forms.CheckboxInput(attrs={'class': 'form-control'})
+                    instanceargs['widget'] = forms.CheckboxInput(
+                        attrs={'class': 'form-control'})
 
             except KeyError:
                 # The data_type was not found anywhere
@@ -83,10 +92,12 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
 
     class Meta:
         model = Ticket
-        exclude = ('created', 'modified', 'status', 'on_hold', 'resolution', 'last_escalation', 'assigned_to')
+        exclude = ('created', 'modified', 'status', 'on_hold',
+                   'resolution', 'last_escalation', 'assigned_to')
 
     class Media:
-        js = ('helpdesk/js/init_due_date.js', 'helpdesk/js/init_datetime_classes.js')
+        js = ('helpdesk/js/init_due_date.js',
+              'helpdesk/js/init_datetime_classes.js')
 
     def __init__(self, *args, **kwargs):
         """
@@ -96,21 +107,28 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
 
         # Disable and add help_text to the merged_to field on this form
         self.fields['merged_to'].disabled = True
-        self.fields['merged_to'].help_text = _('This ticket is merged into the selected ticket.')
+        self.fields['merged_to'].help_text = _(
+            'This ticket is merged into the selected ticket.')
 
         for field in CustomField.objects.all():
             initial_value = None
             try:
-                current_value = TicketCustomFieldValue.objects.get(ticket=self.instance, field=field)
+                current_value = TicketCustomFieldValue.objects.get(
+                    ticket=self.instance, field=field)
                 initial_value = current_value.value
-                # Attempt to convert from fixed format string to date/time data type
+                # Attempt to convert from fixed format string to date/time data
+                # type
                 if 'datetime' == current_value.field.data_type:
-                    initial_value = datetime.strptime(initial_value, CUSTOMFIELD_DATETIME_FORMAT)
+                    initial_value = datetime.strptime(
+                        initial_value, CUSTOMFIELD_DATETIME_FORMAT)
                 elif 'date' == current_value.field.data_type:
-                    initial_value = datetime.strptime(initial_value, CUSTOMFIELD_DATE_FORMAT)
+                    initial_value = datetime.strptime(
+                        initial_value, CUSTOMFIELD_DATE_FORMAT)
                 elif 'time' == current_value.field.data_type:
-                    initial_value = datetime.strptime(initial_value, CUSTOMFIELD_TIME_FORMAT)
-                # If it is boolean field, transform the value to a real boolean instead of a string
+                    initial_value = datetime.strptime(
+                        initial_value, CUSTOMFIELD_TIME_FORMAT)
+                # If it is boolean field, transform the value to a real boolean
+                # instead of a string
                 elif 'boolean' == current_value.field.data_type:
                     initial_value = 'True' == initial_value
             except (TicketCustomFieldValue.DoesNotExist, ValueError, TypeError):
@@ -133,9 +151,11 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
                 field_name = field.replace('custom_', '', 1)
                 customfield = CustomField.objects.get(name=field_name)
                 try:
-                    cfv = TicketCustomFieldValue.objects.get(ticket=self.instance, field=customfield)
+                    cfv = TicketCustomFieldValue.objects.get(
+                        ticket=self.instance, field=customfield)
                 except ObjectDoesNotExist:
-                    cfv = TicketCustomFieldValue(ticket=self.instance, field=customfield)
+                    cfv = TicketCustomFieldValue(
+                        ticket=self.instance, field=customfield)
 
                 cfv.value = convert_value(value)
                 cfv.save()
@@ -152,7 +172,8 @@ class EditFollowUpForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         """Filter not openned tickets here."""
         super(EditFollowUpForm, self).__init__(*args, **kwargs)
-        self.fields["ticket"].queryset = Ticket.objects.filter(status__in=(Ticket.OPEN_STATUS, Ticket.REOPENED_STATUS))
+        self.fields["ticket"].queryset = Ticket.objects.filter(
+            status__in=(Ticket.OPEN_STATUS, Ticket.REOPENED_STATUS))
 
 
 class AbstractTicketForm(CustomFieldMixin, forms.Form):
@@ -178,7 +199,8 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
         widget=forms.Textarea(attrs={'class': 'form-control'}),
         label=_('Description of your issue'),
         required=True,
-        help_text=_('Please be as descriptive as possible and include all details'),
+        help_text=_(
+            'Please be as descriptive as possible and include all details'),
     )
 
     priority = forms.ChoiceField(
@@ -187,13 +209,16 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
         required=True,
         initial=getattr(settings, 'HELPDESK_PUBLIC_TICKET_PRIORITY', '3'),
         label=_('Priority'),
-        help_text=_("Please select a priority carefully. If unsure, leave it as '3'."),
+        help_text=_(
+            "Please select a priority carefully. If unsure, leave it as '3'."),
     )
 
     due_date = forms.DateTimeField(
-        widget=forms.TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
+        widget=forms.TextInput(
+            attrs={'class': 'form-control', 'autocomplete': 'off'}),
         required=False,
-        input_formats=[CUSTOMFIELD_DATE_FORMAT, CUSTOMFIELD_DATETIME_FORMAT, '%d/%m/%Y', '%m/%d/%Y', "%d.%m.%Y"],
+        input_formats=[CUSTOMFIELD_DATE_FORMAT,
+                       CUSTOMFIELD_DATETIME_FORMAT, '%d/%m/%Y', '%m/%d/%Y', "%d.%m.%Y"],
         label=_('Due on'),
     )
 
@@ -205,7 +230,8 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
     )
 
     class Media:
-        js = ('helpdesk/js/init_due_date.js', 'helpdesk/js/init_datetime_classes.js')
+        js = ('helpdesk/js/init_due_date.js',
+              'helpdesk/js/init_datetime_classes.js')
 
     def __init__(self, kbcategory=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -215,7 +241,8 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
                     widget=forms.Select(attrs={'class': 'form-control'}),
                     required=False,
                     label=_('Knowledge Base Item'),
-                    choices=[(kbi.pk, kbi.title) for kbi in KBItem.objects.filter(category=kbcategory.pk, enabled=True)],
+                    choices=[(kbi.pk, kbi.title) for kbi in KBItem.objects.filter(
+                        category=kbcategory.pk, enabled=True)],
                 )
 
     def _add_form_custom_fields(self, staff_only_filter=None):
@@ -307,7 +334,8 @@ class TicketForm(AbstractTicketForm):
     submitter_email = forms.EmailField(
         required=False,
         label=_('Submitter E-Mail Address'),
-        widget=forms.TextInput(attrs={'class': 'form-control', 'type': 'email'}),
+        widget=forms.TextInput(
+            attrs={'class': 'form-control', 'type': 'email'}),
         help_text=_('This e-mail address will receive copies of all public '
                     'updates to this ticket.'),
     )
@@ -335,10 +363,13 @@ class TicketForm(AbstractTicketForm):
 
         self.fields['queue'].choices = queue_choices
         if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS:
-            assignable_users = User.objects.filter(is_active=True, is_staff=True).order_by(User.USERNAME_FIELD)
+            assignable_users = User.objects.filter(
+                is_active=True, is_staff=True).order_by(User.USERNAME_FIELD)
         else:
-            assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
-        self.fields['assigned_to'].choices = [('', '--------')] + [(u.id, u.get_username()) for u in assignable_users]
+            assignable_users = User.objects.filter(
+                is_active=True).order_by(User.USERNAME_FIELD)
+        self.fields['assigned_to'].choices = [
+            ('', '--------')] + [(u.id, u.get_username()) for u in assignable_users]
         self._add_form_custom_fields()
 
     def save(self, user):
@@ -380,7 +411,8 @@ class PublicTicketForm(AbstractTicketForm):
     Ticket Form creation for all users (public-facing).
     """
     submitter_email = forms.EmailField(
-        widget=forms.TextInput(attrs={'class': 'form-control', 'type': 'email'}),
+        widget=forms.TextInput(
+            attrs={'class': 'form-control', 'type': 'email'}),
         required=True,
         label=_('Your E-Mail Address'),
         help_text=_('We will e-mail you when your ticket is updated.'),
@@ -406,7 +438,8 @@ class PublicTicketForm(AbstractTicketForm):
         }
 
         for field_name, field_setting_key in field_deletion_table.items():
-            has_settings_default_value = getattr(settings, field_setting_key, None)
+            has_settings_default_value = getattr(
+                settings, field_setting_key, None)
             if has_settings_default_value is not None:
                 del self.fields[field_name]
 
@@ -485,9 +518,11 @@ class TicketCCForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(TicketCCForm, self).__init__(*args, **kwargs)
         if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_CC:
-            users = User.objects.filter(is_active=True, is_staff=True).order_by(User.USERNAME_FIELD)
+            users = User.objects.filter(
+                is_active=True, is_staff=True).order_by(User.USERNAME_FIELD)
         else:
-            users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
+            users = User.objects.filter(
+                is_active=True).order_by(User.USERNAME_FIELD)
         self.fields['user'].queryset = users
 
 
@@ -497,9 +532,11 @@ class TicketCCUserForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(TicketCCUserForm, self).__init__(*args, **kwargs)
         if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_CC:
-            users = User.objects.filter(is_active=True, is_staff=True).order_by(User.USERNAME_FIELD)
+            users = User.objects.filter(
+                is_active=True, is_staff=True).order_by(User.USERNAME_FIELD)
         else:
-            users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
+            users = User.objects.filter(
+                is_active=True).order_by(User.USERNAME_FIELD)
         self.fields['user'].queryset = users
 
     class Meta:
@@ -538,8 +575,11 @@ class MultipleTicketSelectForm(forms.Form):
         if len(tickets) < 2:
             raise ValidationError(_('Please choose at least 2 tickets.'))
         if len(tickets) > 4:
-            raise ValidationError(_('Impossible to merge more than 4 tickets...'))
-        queues = tickets.order_by('queue').distinct().values_list('queue', flat=True)
+            raise ValidationError(
+                _('Impossible to merge more than 4 tickets...'))
+        queues = tickets.order_by('queue').distinct(
+        ).values_list('queue', flat=True)
         if len(queues) != 1:
-            raise ValidationError(_('All selected tickets must share the same queue in order to be merged.'))
+            raise ValidationError(
+                _('All selected tickets must share the same queue in order to be merged.'))
         return tickets

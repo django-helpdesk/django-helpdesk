@@ -47,7 +47,8 @@ class AttachmentIntegrationTests(TestCase):
         }
 
     def test_create_pub_ticket_with_attachment(self):
-        test_file = SimpleUploadedFile('test_att.txt', b'attached file content', 'text/plain')
+        test_file = SimpleUploadedFile(
+            'test_att.txt', b'attached file content', 'text/plain')
         post_data = self.ticket_data.copy()
         post_data.update({
             'queue': self.queue_public.id,
@@ -55,17 +56,20 @@ class AttachmentIntegrationTests(TestCase):
         })
 
         # Ensure ticket form submits with attachment successfully
-        response = self.client.post(reverse('helpdesk:home'), post_data, follow=True)
+        response = self.client.post(
+            reverse('helpdesk:home'), post_data, follow=True)
         self.assertContains(response, test_file.name)
 
         # Ensure attachment is available with correct content
-        att = models.FollowUpAttachment.objects.get(followup__ticket=response.context['ticket'])
+        att = models.FollowUpAttachment.objects.get(
+            followup__ticket=response.context['ticket'])
         with open(os.path.join(MEDIA_DIR, att.file.name)) as file_on_disk:
             disk_content = file_on_disk.read()
         self.assertEqual(disk_content, 'attached file content')
 
     def test_create_pub_ticket_with_attachment_utf8(self):
-        test_file = SimpleUploadedFile('ß°äöü.txt', 'โจ'.encode('utf-8'), 'text/utf-8')
+        test_file = SimpleUploadedFile(
+            'ß°äöü.txt', 'โจ'.encode('utf-8'), 'text/utf-8')
         post_data = self.ticket_data.copy()
         post_data.update({
             'queue': self.queue_public.id,
@@ -73,11 +77,13 @@ class AttachmentIntegrationTests(TestCase):
         })
 
         # Ensure ticket form submits with attachment successfully
-        response = self.client.post(reverse('helpdesk:home'), post_data, follow=True)
+        response = self.client.post(
+            reverse('helpdesk:home'), post_data, follow=True)
         self.assertContains(response, test_file.name)
 
         # Ensure attachment is available with correct content
-        att = models.FollowUpAttachment.objects.get(followup__ticket=response.context['ticket'])
+        att = models.FollowUpAttachment.objects.get(
+            followup__ticket=response.context['ticket'])
         with open(os.path.join(MEDIA_DIR, att.file.name)) as file_on_disk:
             disk_content = smart_str(file_on_disk.read(), 'utf-8')
         self.assertEqual(disk_content, 'โจ')
@@ -105,7 +111,8 @@ class AttachmentUnitTests(TestCase):
     @skip("Rework with model relocation")
     def test_unicode_attachment_filename(self, mock_att_save, mock_queue_save, mock_ticket_save, mock_follow_up_save):
         """ check utf-8 data is parsed correctly """
-        filename, fileobj = lib.process_attachments(self.follow_up, [self.test_file])[0]
+        filename, fileobj = lib.process_attachments(
+            self.follow_up, [self.test_file])[0]
         mock_att_save.assert_called_with(
             file=self.test_file,
             filename=self.file_attrs['filename'],
@@ -154,8 +161,10 @@ class AttachmentUnitTests(TestCase):
     @override_settings(MEDIA_ROOT=MEDIA_DIR)
     def test_unicode_filename_to_filesystem(self, mock_att_save, mock_queue_save, mock_ticket_save, mock_follow_up_save):
         """ don't mock saving to filesystem to test file renames caused by storage layer """
-        filename, fileobj = lib.process_attachments(self.follow_up, [self.test_file])[0]
-        # Attachment object was zeroth positional arg (i.e. self) of att.save call
+        filename, fileobj = lib.process_attachments(
+            self.follow_up, [self.test_file])[0]
+        # Attachment object was zeroth positional arg (i.e. self) of att.save
+        # call
         attachment_obj = mock_att_save.return_value
 
         mock_att_save.assert_called_once_with(attachment_obj)

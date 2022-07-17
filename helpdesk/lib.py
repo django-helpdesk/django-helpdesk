@@ -129,7 +129,8 @@ def text_is_spam(text, request):
 
 
 def process_attachments(followup, attached_files):
-    max_email_attachment_size = getattr(settings, 'HELPDESK_MAX_EMAIL_ATTACHMENT_SIZE', 512000)
+    max_email_attachment_size = getattr(
+        settings, 'HELPDESK_MAX_EMAIL_ATTACHMENT_SIZE', 512000)
     attachments = []
 
     for attached in attached_files:
@@ -152,7 +153,8 @@ def process_attachments(followup, attached_files):
 
             if attached.size < max_email_attachment_size:
                 # Only files smaller than 512kb (or as defined in
-                # settings.HELPDESK_MAX_EMAIL_ATTACHMENT_SIZE) are sent via email.
+                # settings.HELPDESK_MAX_EMAIL_ATTACHMENT_SIZE) are sent via
+                # email.
                 attachments.append([filename, att.file])
 
     return attachments

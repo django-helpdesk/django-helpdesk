@@ -72,7 +72,8 @@ class TicketTest(APITestCase):
         self.assertEqual(response.status_code, HTTP_201_CREATED)
         created_ticket = Ticket.objects.get()
         self.assertEqual(created_ticket.title, 'Test title')
-        self.assertEqual(created_ticket.description, 'Test description\nMulti lines')
+        self.assertEqual(created_ticket.description,
+                         'Test description\nMulti lines')
         self.assertEqual(created_ticket.submitter_email, 'test@mail.com')
         self.assertEqual(created_ticket.priority, 4)
         self.assertEqual(created_ticket.followup_set.count(), 1)
@@ -80,16 +81,20 @@ class TicketTest(APITestCase):
     def test_create_api_ticket_with_basic_auth(self):
         username = 'admin'
         password = 'admin'
-        User.objects.create_user(username=username, password=password, is_staff=True)
+        User.objects.create_user(
+            username=username, password=password, is_staff=True)
 
         test_user = User.objects.create_user(username='test')
-        merge_ticket = Ticket.objects.create(queue=self.queue, title='merge ticket')
+        merge_ticket = Ticket.objects.create(
+            queue=self.queue, title='merge ticket')
 
         # Generate base64 credentials string
         credentials = f"{username}:{password}"
-        base64_credentials = base64.b64encode(credentials.encode(HTTP_HEADER_ENCODING)).decode(HTTP_HEADER_ENCODING)
+        base64_credentials = base64.b64encode(credentials.encode(
+            HTTP_HEADER_ENCODING)).decode(HTTP_HEADER_ENCODING)
 
-        self.client.credentials(HTTP_AUTHORIZATION=f"Basic {base64_credentials}")
+        self.client.credentials(
+            HTTP_AUTHORIZATION=f"Basic {base64_credentials}")
         response = self.client.post(
             '/api/tickets/',
             {
@@ -111,21 +116,27 @@ class TicketTest(APITestCase):
         created_ticket = Ticket.objects.last()
         self.assertEqual(created_ticket.title, 'Title')
         self.assertEqual(created_ticket.description, 'Description')
-        self.assertIsNone(created_ticket.resolution)  # resolution can not be set on creation
+        # resolution can not be set on creation
+        self.assertIsNone(created_ticket.resolution)
         self.assertEqual(created_ticket.assigned_to, test_user)
         self.assertEqual(created_ticket.submitter_email, 'test@mail.com')
         self.assertEqual(created_ticket.priority, 1)
-        self.assertFalse(created_ticket.on_hold)  # on_hold is False on creation
-        self.assertEqual(created_ticket.status, Ticket.OPEN_STATUS)  # status is always open on creation
+        # on_hold is False on creation
+        self.assertFalse(created_ticket.on_hold)
+        # status is always open on creation
+        self.assertEqual(created_ticket.status, Ticket.OPEN_STATUS)
         self.assertEqual(created_ticket.due_date, self.due_date)
-        self.assertIsNone(created_ticket.merged_to)  # merged_to can not be set on creation
+        # merged_to can not be set on creation
+        self.assertIsNone(created_ticket.merged_to)
 
     def test_edit_api_ticket(self):
         staff_user = User.objects.create_user(username='admin', is_staff=True)
-        test_ticket = Ticket.objects.create(queue=self.queue, title='Test ticket')
+        test_ticket = Ticket.objects.create(
+            queue=self.queue, title='Test ticket')
 
         test_user = User.objects.create_user(username='test')
-        merge_ticket = Ticket.objects.create(queue=self.queue, title='merge ticket')
+        merge_ticket = Ticket.objects.create(
+            queue=self.queue, title='merge ticket')
 
         self.client.force_authenticate(staff_user)
         response = self.client.put(
@@ -160,7 +171,8 @@ class TicketTest(APITestCase):
 
     def test_partial_edit_api_ticket(self):
         staff_user = User.objects.create_user(username='admin', is_staff=True)
-        test_ticket = Ticket.objects.create(queue=self.queue, title='Test ticket')
+        test_ticket = Ticket.objects.create(
+            queue=self.queue, title='Test ticket')
 
         self.client.force_authenticate(staff_user)
         response = self.client.patch(
@@ -176,7 +188,8 @@ class TicketTest(APITestCase):
 
     def test_delete_api_ticket(self):
         staff_user = User.objects.create_user(username='admin', is_staff=True)
-        test_ticket = Ticket.objects.create(queue=self.queue, title='Test ticket')
+        test_ticket = Ticket.objects.create(
+            queue=self.queue, title='Test ticket')
         self.client.force_authenticate(staff_user)
         response = self.client.delete('/api/tickets/%d/' % test_ticket.id)
         self.assertEqual(response.status_code, HTTP_204_NO_CONTENT)
@@ -200,7 +213,8 @@ class TicketTest(APITestCase):
                 Blue
                 Red
                 Yellow'''
-            CustomField.objects.create(name=field_type, label=field_display, data_type=field_type, **extra_data)
+            CustomField.objects.create(
+                name=field_type, label=field_display, data_type=field_type, **extra_data)
 
         staff_user = User.objects.create_user(username='test', is_staff=True)
         self.client.force_authenticate(staff_user)
@@ -214,7 +228,8 @@ class TicketTest(APITestCase):
             'priority': 4
         })
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data, {'custom_integer': [ErrorDetail(string='This field is required.', code='required')]})
+        self.assertEqual(response.data, {'custom_integer': [ErrorDetail(
+            string='This field is required.', code='required')]})
 
         # Test creation with custom field values
         response = self.client.post('/api/tickets/', {
@@ -283,7 +298,8 @@ class TicketTest(APITestCase):
     def test_create_api_ticket_with_attachment(self):
         staff_user = User.objects.create_user(username='test', is_staff=True)
         self.client.force_authenticate(staff_user)
-        test_file = SimpleUploadedFile('file.jpg', b'file_content', content_type='image/jpg')
+        test_file = SimpleUploadedFile(
+            'file.jpg', b'file_content', content_type='image/jpg')
         response = self.client.post('/api/tickets/', {
             'queue': self.queue.id,
             'title': 'Test title',
@@ -295,11 +311,13 @@ class TicketTest(APITestCase):
         self.assertEqual(response.status_code, HTTP_201_CREATED)
         created_ticket = Ticket.objects.get()
         self.assertEqual(created_ticket.title, 'Test title')
-        self.assertEqual(created_ticket.description, 'Test description\nMulti lines')
+        self.assertEqual(created_ticket.description,
+                         'Test description\nMulti lines')
         self.assertEqual(created_ticket.submitter_email, 'test@mail.com')
         self.assertEqual(created_ticket.priority, 4)
         self.assertEqual(created_ticket.followup_set.count(), 1)
-        self.assertEqual(created_ticket.followup_set.get().followupattachment_set.count(), 1)
+        self.assertEqual(created_ticket.followup_set.get(
+        ).followupattachment_set.count(), 1)
         attachment = created_ticket.followup_set.get().followupattachment_set.get()
         self.assertEqual(
             attachment.file.name,
@@ -310,8 +328,10 @@ class TicketTest(APITestCase):
         staff_user = User.objects.create_user(username='test', is_staff=True)
         self.client.force_authenticate(staff_user)
         ticket = Ticket.objects.create(queue=self.queue, title='Test')
-        test_file_1 = SimpleUploadedFile('file.jpg', b'file_content', content_type='image/jpg')
-        test_file_2 = SimpleUploadedFile('doc.pdf', b'Doc content', content_type='application/pdf')
+        test_file_1 = SimpleUploadedFile(
+            'file.jpg', b'file_content', content_type='image/jpg')
+        test_file_2 = SimpleUploadedFile(
+            'doc.pdf', b'Doc content', content_type='application/pdf')
 
         response = self.client.post('/api/followups/', {
             'ticket': ticket.id,
@@ -327,7 +347,11 @@ class TicketTest(APITestCase):
         self.assertEqual(created_followup.title, 'Test')
         self.assertEqual(created_followup.comment, 'Test answer\nMulti lines')
         self.assertEqual(created_followup.followupattachment_set.count(), 2)
-        self.assertEqual(created_followup.followupattachment_set.first().filename, 'doc.pdf')
-        self.assertEqual(created_followup.followupattachment_set.first().mime_type, 'application/pdf')
-        self.assertEqual(created_followup.followupattachment_set.last().filename, 'file.jpg')
-        self.assertEqual(created_followup.followupattachment_set.last().mime_type, 'image/jpg')
+        self.assertEqual(
+            created_followup.followupattachment_set.first().filename, 'doc.pdf')
+        self.assertEqual(
+            created_followup.followupattachment_set.first().mime_type, 'application/pdf')
+        self.assertEqual(
+            created_followup.followupattachment_set.last().filename, 'file.jpg')
+        self.assertEqual(
+            created_followup.followupattachment_set.last().mime_type, 'image/jpg')
