@@ -11,6 +11,7 @@ if helpdesk_settings.HELPDESK_KB_ENABLED:
         KBItem
     )
 
+
 def huser_from_request(req):
     return HelpdeskUser(req.user)
 
@@ -33,7 +34,8 @@ class HelpdeskUser:
             helpdesk_settings.HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION \
             and not user.is_superuser
         if limit_queues_by_user:
-            id_list = [q.pk for q in all_queues if user.has_perm(q.permission_name)]
+            id_list = [q.pk for q in all_queues if user.has_perm(
+                q.permission_name)]
             id_list += public_ids
             return all_queues.filter(pk__in=id_list)
         else:

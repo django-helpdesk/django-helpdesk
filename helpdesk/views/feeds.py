@@ -123,7 +123,8 @@ class RecentFollowUps(Feed):
     description_template = 'helpdesk/rss/recent_activity_description.html'
 
     title = _('Helpdesk: Recent Followups')
-    description = _('Recent FollowUps, such as e-mail replies, comments, attachments and resolutions')
+    description = _(
+        'Recent FollowUps, such as e-mail replies, comments, attachments and resolutions')
     link = '/tickets/'  # reverse('helpdesk:list')
 
     def items(self):

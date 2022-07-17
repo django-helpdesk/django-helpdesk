@@ -78,7 +78,8 @@ class FollowUpAttachmentSerializer(serializers.ModelSerializer):
 
 
 class FollowUpSerializer(serializers.ModelSerializer):
-    followupattachment_set = FollowUpAttachmentSerializer(many=True, read_only=True)
+    followupattachment_set = FollowUpAttachmentSerializer(
+        many=True, read_only=True)
     attachments = serializers.ListField(
         child=serializers.FileField(),
         write_only=True,
@@ -133,7 +134,8 @@ class TicketSerializer(serializers.ModelSerializer):
 
         files = {'attachment': data.pop('attachment', None)}
 
-        ticket_form = TicketForm(data=data, files=files, queue_choices=queue_choices)
+        ticket_form = TicketForm(
+            data=data, files=files, queue_choices=queue_choices)
         if ticket_form.is_valid():
             ticket = ticket_form.save(user=self.context['request'].user)
             ticket.set_custom_field_values()

@@ -78,10 +78,13 @@ class TicketActionsTestCase(TestCase):
         ticket = Ticket.objects.create(**ticket_data)
         ticket_id = ticket.id
 
-        response = self.client.get(reverse('helpdesk:delete', kwargs={'ticket_id': ticket_id}), follow=True)
-        self.assertContains(response, 'Are you sure you want to delete this ticket')
+        response = self.client.get(reverse('helpdesk:delete', kwargs={
+                                   'ticket_id': ticket_id}), follow=True)
+        self.assertContains(
+            response, 'Are you sure you want to delete this ticket')
 
-        response = self.client.post(reverse('helpdesk:delete', kwargs={'ticket_id': ticket_id}), follow=True)
+        response = self.client.post(reverse('helpdesk:delete', kwargs={
+                                    'ticket_id': ticket_id}), follow=True)
         first_redirect = response.redirect_chain[0]
         first_redirect_url = first_redirect[0]
 
@@ -123,7 +126,8 @@ class TicketActionsTestCase(TestCase):
         post_data = {
             'owner': self.user2.id,
         }
-        response = self.client.post(reverse('helpdesk:update', kwargs={'ticket_id': ticket_id}), post_data, follow=True)
+        response = self.client.post(reverse('helpdesk:update', kwargs={
+                                    'ticket_id': ticket_id}), post_data, follow=True)
         self.assertContains(response, 'Changed Owner from User_1 to User_2')
 
         # change status with users email assigned and submitter email assigned,
@@ -142,14 +146,16 @@ class TicketActionsTestCase(TestCase):
 
         # do this also to a newly assigned user (different from logged in one)
         ticket.assigned_to = self.user
-        response = self.client.post(reverse('helpdesk:update', kwargs={'ticket_id': ticket_id}), post_data, follow=True)
+        response = self.client.post(reverse('helpdesk:update', kwargs={
+                                    'ticket_id': ticket_id}), post_data, follow=True)
         self.assertContains(response, 'Changed Status from Open to Closed')
         post_data = {
             'new_status': Ticket.OPEN_STATUS,
             'owner': self.user2.id,
             'public': True
         }
-        response = self.client.post(reverse('helpdesk:update', kwargs={'ticket_id': ticket_id}), post_data, follow=True)
+        response = self.client.post(reverse('helpdesk:update', kwargs={
+                                    'ticket_id': ticket_id}), post_data, follow=True)
         self.assertContains(response, 'Changed Status from Open to Closed')
 
     def test_can_access_ticket(self):
@@ -175,8 +181,10 @@ class TicketActionsTestCase(TestCase):
         # create ticket
         helpdesk_settings.HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION = True
         ticket = Ticket.objects.create(**initial_data)
-        self.assertEqual(HelpdeskUser(self.user).can_access_ticket(ticket), True)
-        self.assertEqual(HelpdeskUser(self.user2).can_access_ticket(ticket), False)
+        self.assertEqual(HelpdeskUser(
+            self.user).can_access_ticket(ticket), True)
+        self.assertEqual(HelpdeskUser(
+            self.user2).can_access_ticket(ticket), False)
 
     def test_num_to_link(self):
         """Test that we are correctly expanding links to tickets from IDs"""
@@ -197,10 +205,13 @@ class TicketActionsTestCase(TestCase):
 
         # generate the URL text
         result = num_to_link('this is ticket#%s' % ticket_id)
-        self.assertEqual(result, "this is ticket <a href='/tickets/%s/' class='ticket_link_status ticket_link_status_Open'>#%s</a>" % (ticket_id, ticket_id))
+        self.assertEqual(
+            result, "this is ticket <a href='/tickets/%s/' class='ticket_link_status ticket_link_status_Open'>#%s</a>" % (ticket_id, ticket_id))
 
-        result2 = num_to_link('whoa another ticket is here #%s huh' % ticket_id)
-        self.assertEqual(result2, "whoa another ticket is here  <a href='/tickets/%s/' class='ticket_link_status ticket_link_status_Open'>#%s</a> huh" % (ticket_id, ticket_id))
+        result2 = num_to_link(
+            'whoa another ticket is here #%s huh' % ticket_id)
+        self.assertEqual(
+            result2, "whoa another ticket is here  <a href='/tickets/%s/' class='ticket_link_status ticket_link_status_Open'>#%s</a> huh" % (ticket_id, ticket_id))
 
     def test_create_ticket_getform(self):
         self.loginUser()
@@ -221,7 +232,8 @@ class TicketActionsTestCase(TestCase):
             status=Ticket.RESOLVED_STATUS,
             resolution='Awesome resolution for ticket 1'
         )
-        ticket_1_follow_up = ticket_1.followup_set.create(title='Ticket 1 creation')
+        ticket_1_follow_up = ticket_1.followup_set.create(
+            title='Ticket 1 creation')
         ticket_1_cc = ticket_1.ticketcc_set.create(user=self.user)
         ticket_1_created = ticket_1.created
         due_date = timezone.now()
@@ -233,7 +245,8 @@ class TicketActionsTestCase(TestCase):
             due_date=due_date,
             assigned_to=self.user
         )
-        ticket_2_follow_up = ticket_1.followup_set.create(title='Ticket 2 creation')
+        ticket_2_follow_up = ticket_1.followup_set.create(
+            title='Ticket 2 creation')
         ticket_2_cc = ticket_2.ticketcc_set.create(email='random@mail.com')
 
         # Create custom fields and set values for tickets
@@ -243,16 +256,19 @@ class TicketActionsTestCase(TestCase):
             data_type='varchar',
         )
         ticket_1_field_1 = 'This is for the test field'
-        ticket_1.ticketcustomfieldvalue_set.create(field=custom_field_1, value=ticket_1_field_1)
+        ticket_1.ticketcustomfieldvalue_set.create(
+            field=custom_field_1, value=ticket_1_field_1)
         ticket_2_field_1 = 'Another test text'
-        ticket_2.ticketcustomfieldvalue_set.create(field=custom_field_1, value=ticket_2_field_1)
+        ticket_2.ticketcustomfieldvalue_set.create(
+            field=custom_field_1, value=ticket_2_field_1)
         custom_field_2 = CustomField.objects.create(
             name='number',
             label='Number',
             data_type='integer',
         )
         ticket_2_field_2 = '444'
-        ticket_2.ticketcustomfieldvalue_set.create(field=custom_field_2, value=ticket_2_field_2)
+        ticket_2.ticketcustomfieldvalue_set.create(
+            field=custom_field_2, value=ticket_2_field_2)
 
         # Check that it correctly redirects to the intermediate page
         response = self.client.post(
@@ -263,7 +279,8 @@ class TicketActionsTestCase(TestCase):
             },
             follow=True
         )
-        redirect_url = '%s?tickets=%s&tickets=%s' % (reverse('helpdesk:merge_tickets'), ticket_1.id, ticket_2.id)
+        redirect_url = '%s?tickets=%s&tickets=%s' % (
+            reverse('helpdesk:merge_tickets'), ticket_1.id, ticket_2.id)
         self.assertRedirects(response, redirect_url)
         self.assertContains(response, ticket_1.description)
         self.assertContains(response, ticket_1.resolution)
@@ -301,7 +318,11 @@ class TicketActionsTestCase(TestCase):
         self.assertEqual(ticket_1.submitter_email, ticket_2.submitter_email)
         self.assertEqual(ticket_1.description, ticket_2.description)
         self.assertEqual(ticket_1.assigned_to, ticket_2.assigned_to)
-        self.assertEqual(ticket_1.ticketcustomfieldvalue_set.get(field=custom_field_1).value, ticket_1_field_1)
-        self.assertEqual(ticket_1.ticketcustomfieldvalue_set.get(field=custom_field_2).value, ticket_2_field_2)
-        self.assertEqual(list(ticket_1.followup_set.all()), [ticket_1_follow_up, ticket_2_follow_up])
-        self.assertEqual(list(ticket_1.ticketcc_set.all()), [ticket_1_cc, ticket_2_cc])
+        self.assertEqual(ticket_1.ticketcustomfieldvalue_set.get(
+            field=custom_field_1).value, ticket_1_field_1)
+        self.assertEqual(ticket_1.ticketcustomfieldvalue_set.get(
+            field=custom_field_2).value, ticket_2_field_2)
+        self.assertEqual(list(ticket_1.followup_set.all()), [
+                         ticket_1_follow_up, ticket_2_follow_up])
+        self.assertEqual(list(ticket_1.ticketcc_set.all()),
+                         [ticket_1_cc, ticket_2_cc])

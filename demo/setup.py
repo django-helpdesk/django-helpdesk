@@ -28,7 +28,7 @@ KEYWORDS = []
 PACKAGES = ['demodesk']
 REQUIREMENTS = [
     'django-helpdesk'
-    ]
+]
 ENTRY_POINTS = {
     'console_scripts': ['demodesk = demodesk.manage:main']
 }

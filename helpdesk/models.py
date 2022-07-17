@@ -128,7 +128,8 @@ class Queue(models.Model):
         _('Allow Public Submission?'),
         blank=True,
         default=False,
-        help_text=_('Should this queue be listed on the public submission form?'),
+        help_text=_(
+            'Should this queue be listed on the public submission form?'),
     )
 
     allow_email_submission = models.BooleanField(
@@ -180,7 +181,8 @@ class Queue(models.Model):
     email_box_type = models.CharField(
         _('E-Mail Box Type'),
         max_length=5,
-        choices=(('pop3', _('POP 3')), ('imap', _('IMAP')), ('local', _('Local Directory'))),
+        choices=(('pop3', _('POP 3')), ('imap', _('IMAP')),
+                 ('local', _('Local Directory'))),
         blank=True,
         null=True,
         help_text=_('E-Mail server type for creating tickets automatically '
@@ -262,7 +264,8 @@ class Queue(models.Model):
 
     email_box_interval = models.IntegerField(
         _('E-Mail Check Interval'),
-        help_text=_('How often do you wish to check this mailbox? (in Minutes)'),
+        help_text=_(
+            'How often do you wish to check this mailbox? (in Minutes)'),
         blank=True,
         null=True,
         default='5',
@@ -281,7 +284,8 @@ class Queue(models.Model):
         choices=(('socks4', _('SOCKS4')), ('socks5', _('SOCKS5'))),
         blank=True,
         null=True,
-        help_text=_('SOCKS4 or SOCKS5 allows you to proxy your connections through a SOCKS server.'),
+        help_text=_(
+            'SOCKS4 or SOCKS5 allows you to proxy your connections through a SOCKS server.'),
     )
 
     socks_proxy_host = models.GenericIPAddressField(
@@ -295,7 +299,8 @@ class Queue(models.Model):
         _('Socks Proxy Port'),
         blank=True,
         null=True,
-        help_text=_('Socks proxy port number. Default: 9150 (default TOR port)'),
+        help_text=_(
+            'Socks proxy port number. Default: 9150 (default TOR port)'),
     )
 
     logging_type = models.CharField(
@@ -356,7 +361,8 @@ class Queue(models.Model):
         """
         if not self.email_address:
             # must check if given in format "Foo <foo@example.com>"
-            default_email = re.match(".*<(?P<email>.*@*.)>", settings.DEFAULT_FROM_EMAIL)
+            default_email = re.match(
+                ".*<(?P<email>.*@*.)>", settings.DEFAULT_FROM_EMAIL)
             if default_email is not None:
                 # already in the right format, so just include it here
                 return u'NO QUEUE EMAIL ADDRESS DEFINED %s' % settings.DEFAULT_FROM_EMAIL
@@ -532,7 +538,8 @@ class Ticket(models.Model):
         _('On Hold'),
         blank=True,
         default=False,
-        help_text=_('If a ticket is on hold, it will not automatically be escalated.'),
+        help_text=_(
+            'If a ticket is on hold, it will not automatically be escalated.'),
     )
 
     description = models.TextField(
@@ -582,7 +589,8 @@ class Ticket(models.Model):
         blank=True,
         null=True,
         on_delete=models.CASCADE,
-        verbose_name=_('Knowledge base item the user was viewing when they created this ticket.'),
+        verbose_name=_(
+            'Knowledge base item the user was viewing when they created this ticket.'),
     )
 
     merged_to = models.ForeignKey(
@@ -648,7 +656,8 @@ class Ticket(models.Model):
         def send(role, recipient):
             if recipient and recipient not in recipients and role in roles:
                 template, context = roles[role]
-                send_templated_mail(template, context, recipient, sender=self.queue.from_address, **kwargs)
+                send_templated_mail(
+                    template, context, recipient, sender=self.queue.from_address, **kwargs)
                 recipients.add(recipient)
 
         send('submitter', self.submitter_email)
@@ -844,7 +853,8 @@ class Ticket(models.Model):
                 # Ignore if user has no email address
                 return
         elif not email:
-            raise ValueError('You must provide at least one parameter to get the email from')
+            raise ValueError(
+                'You must provide at least one parameter to get the email from')
 
         # Prepare all emails already into the ticket
         ticket_emails = [x.display for x in self.ticketcc_set.all()]
@@ -1280,7 +1290,8 @@ class EmailTemplate(models.Model):
 
     html = models.TextField(
         _('HTML'),
-        help_text=_('The same context is available here as in plain_text, above.'),
+        help_text=_(
+            'The same context is available here as in plain_text, above.'),
     )
 
     locale = models.CharField(
@@ -1329,7 +1340,8 @@ class KBCategory(models.Model):
         blank=True,
         null=True,
         on_delete=models.CASCADE,
-        verbose_name=_('Default queue when creating a ticket after viewing this category.'),
+        verbose_name=_(
+            'Default queue when creating a ticket after viewing this category.'),
     )
 
     public = models.BooleanField(
@@ -1396,7 +1408,8 @@ class KBItem(models.Model):
 
     last_updated = models.DateTimeField(
         _('Last Updated'),
-        help_text=_('The date on which this question was most recently changed.'),
+        help_text=_(
+            'The date on which this question was most recently changed.'),
         blank=True,
     )
 
@@ -1555,7 +1568,8 @@ class UserSettings(models.Model):
 
     login_view_ticketlist = models.BooleanField(
         verbose_name=_('Show Ticket List on Login?'),
-        help_text=_('Display the ticket list upon login? Otherwise, the dashboard is shown.'),
+        help_text=_(
+            'Display the ticket list upon login? Otherwise, the dashboard is shown.'),
         default=login_view_ticketlist_default,
     )
 
@@ -1570,13 +1584,15 @@ class UserSettings(models.Model):
 
     email_on_ticket_assign = models.BooleanField(
         verbose_name=_('E-mail me when assigned a ticket?'),
-        help_text=_('If you are assigned a ticket via the web, do you want to receive an e-mail?'),
+        help_text=_(
+            'If you are assigned a ticket via the web, do you want to receive an e-mail?'),
         default=email_on_ticket_assign_default,
     )
 
     tickets_per_page = models.IntegerField(
         verbose_name=_('Number of tickets to show per page'),
-        help_text=_('How many tickets do you want to see on the Ticket List page?'),
+        help_text=_(
+            'How many tickets do you want to see on the Ticket List page?'),
         default=tickets_per_page_default,
         choices=PAGE_SIZES,
     )
@@ -1611,7 +1627,8 @@ def create_usersettings(sender, instance, created, **kwargs):
         UserSettings.objects.create(user=instance)
 
 
-models.signals.post_save.connect(create_usersettings, sender=settings.AUTH_USER_MODEL)
+models.signals.post_save.connect(
+    create_usersettings, sender=settings.AUTH_USER_MODEL)
 
 
 class IgnoreEmail(models.Model):
@@ -1851,14 +1868,16 @@ class CustomField(models.Model):
 
     ordering = models.IntegerField(
         _('Ordering'),
-        help_text=_('Lower numbers are displayed first; higher numbers are listed later'),
+        help_text=_(
+            'Lower numbers are displayed first; higher numbers are listed later'),
         blank=True,
         null=True,
     )
 
     def _choices_as_array(self):
         valuebuffer = StringIO(self.list_values)
-        choices = [[item.strip(), item.strip()] for item in valuebuffer.readlines()]
+        choices = [[item.strip(), item.strip()]
+                   for item in valuebuffer.readlines()]
         valuebuffer.close()
         return choices
     choices_as_array = property(_choices_as_array)
@@ -1912,10 +1931,10 @@ class CustomField(models.Model):
 
         # Prepare attributes for each types
         attributes = {
-                'label': self.label,
-                'help_text': self.help_text,
-                'required': self.required,
-            }
+            'label': self.label,
+            'help_text': self.help_text,
+            'required': self.required,
+        }
         if self.data_type in ('varchar', 'text'):
             attributes['max_length'] = self.max_length
             if self.data_type == 'text':

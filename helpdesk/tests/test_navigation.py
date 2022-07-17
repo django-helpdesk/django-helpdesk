@@ -6,7 +6,8 @@ from django.test import TestCase
 
 from helpdesk import settings as helpdesk_settings
 from helpdesk.models import Queue
-from helpdesk.tests.helpers import (get_staff_user, reload_urlconf, User, create_ticket, print_response)
+from helpdesk.tests.helpers import (
+    get_staff_user, reload_urlconf, User, create_ticket, print_response)
 from django.test.utils import override_settings
 
 
@@ -26,13 +27,15 @@ class KBDisabledTestCase(TestCase):
         """Test proper rendering of navigation.html by accessing the dashboard"""
         from django.urls import NoReverseMatch
 
-        self.client.login(username=get_staff_user().get_username(), password='password')
+        self.client.login(username=get_staff_user(
+        ).get_username(), password='password')
         self.assertRaises(NoReverseMatch, reverse, 'helpdesk:kb_index')
         try:
             response = self.client.get(reverse('helpdesk:dashboard'))
         except NoReverseMatch as e:
             if 'helpdesk:kb_index' in e.message:
-                self.fail("Please verify any unchecked references to helpdesk_kb_index (start with navigation.html)")
+                self.fail(
+                    "Please verify any unchecked references to helpdesk_kb_index (start with navigation.html)")
             else:
                 raise
         else:
@@ -75,7 +78,8 @@ class NonStaffUsersAllowedTestCase(StaffUserTestCaseMixin, TestCase):
         """
         from helpdesk.decorators import is_helpdesk_staff
 
-        user = User.objects.create_user(username='henry.wensleydale', password='gouda', email='wensleydale@example.com')
+        user = User.objects.create_user(
+            username='henry.wensleydale', password='gouda', email='wensleydale@example.com')
 
         self.assertTrue(is_helpdesk_staff(user))
 
@@ -91,7 +95,8 @@ class StaffUsersOnlyTestCase(StaffUserTestCaseMixin, TestCase):
     def setUp(self):
         super().setUp()
         self.non_staff_user_password = "gouda"
-        self.non_staff_user = User.objects.create_user(username='henry.wensleydale', password=self.non_staff_user_password, email='wensleydale@example.com')
+        self.non_staff_user = User.objects.create_user(
+            username='henry.wensleydale', password=self.non_staff_user_password, email='wensleydale@example.com')
 
     def test_staff_user_detection(self):
         """Staff and non-staff users are correctly identified"""
@@ -118,7 +123,8 @@ class StaffUsersOnlyTestCase(StaffUserTestCaseMixin, TestCase):
         from helpdesk.decorators import is_helpdesk_staff
 
         user = self.non_staff_user
-        self.client.login(username=user.username, password=self.non_staff_user_password)
+        self.client.login(username=user.username,
+                          password=self.non_staff_user_password)
         response = self.client.get(reverse('helpdesk:dashboard'), follow=True)
         self.assertTemplateUsed(response, 'helpdesk/registration/login.html')
 
@@ -128,7 +134,8 @@ class StaffUsersOnlyTestCase(StaffUserTestCaseMixin, TestCase):
         """
         user = get_staff_user()
         self.client.login(username=user.username, password="password")
-        response = self.client.get(reverse('helpdesk:rss_unassigned'), follow=True)
+        response = self.client.get(
+            reverse('helpdesk:rss_unassigned'), follow=True)
         self.assertContains(response, 'Unassigned Open and Reopened tickets')
 
     @override_settings(HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE=False)
@@ -137,21 +144,24 @@ class StaffUsersOnlyTestCase(StaffUserTestCaseMixin, TestCase):
         non-staff users should not be able to access rss feeds.
         """
         user = self.non_staff_user
-        self.client.login(username=user.username, password=self.non_staff_user_password)
+        self.client.login(username=user.username,
+                          password=self.non_staff_user_password)
         queue = Queue.objects.create(
             title="Foo",
             slug="test_queue",
         )
         rss_urls = [
             reverse('helpdesk:rss_user', args=[user.username]),
-            reverse('helpdesk:rss_user_queue', args=[user.username, 'test_queue']),
+            reverse('helpdesk:rss_user_queue', args=[
+                    user.username, 'test_queue']),
             reverse('helpdesk:rss_queue', args=['test_queue']),
             reverse('helpdesk:rss_unassigned'),
             reverse('helpdesk:rss_activity'),
         ]
         for rss_url in rss_urls:
             response = self.client.get(rss_url, follow=True)
-            self.assertTemplateUsed(response, 'helpdesk/registration/login.html')
+            self.assertTemplateUsed(
+                response, 'helpdesk/registration/login.html')
 
 
 class CustomStaffUserTestCase(StaffUserTestCaseMixin, TestCase):
@@ -168,7 +178,8 @@ class CustomStaffUserTestCase(StaffUserTestCaseMixin, TestCase):
         """
         from helpdesk.decorators import is_helpdesk_staff
 
-        user = User.objects.create_user(username='henry.wensleydale', password='gouda', email='wensleydale@example.com')
+        user = User.objects.create_user(
+            username='henry.wensleydale', password='gouda', email='wensleydale@example.com')
 
         self.assertTrue(is_helpdesk_staff(user))
 
@@ -179,7 +190,8 @@ class CustomStaffUserTestCase(StaffUserTestCaseMixin, TestCase):
     def test_custom_staff_fail(self):
         from helpdesk.decorators import is_helpdesk_staff
 
-        user = User.objects.create_user(username='terry.milton', password='frog', email='milton@example.com')
+        user = User.objects.create_user(
+            username='terry.milton', password='frog', email='milton@example.com')
 
         self.assertFalse(is_helpdesk_staff(user))
 
@@ -264,7 +276,8 @@ class ReturnToTicketTestCase(TestCase):
     def test_non_staff_user(self):
         from helpdesk.views.staff import return_to_ticket
 
-        user = User.objects.create_user(username='henry.wensleydale', password='gouda', email='wensleydale@example.com')
+        user = User.objects.create_user(
+            username='henry.wensleydale', password='gouda', email='wensleydale@example.com')
         ticket = create_ticket()
         response = return_to_ticket(user, helpdesk_settings, ticket)
         self.assertEqual(response['location'], ticket.ticket_url)
