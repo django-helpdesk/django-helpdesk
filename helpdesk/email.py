@@ -51,7 +51,13 @@ STRIPPED_SUBJECT_STRINGS = [
     "Automatic reply: ",
 ]
 
+PATTERN_UID = re.compile(r'\d+ \(UID (?P<uid>\d+)\)')
 DEBUGGING = False
+
+
+def parse_uid(data):
+    match = PATTERN_UID.match(data)
+    return match.group('uid')
 
 
 def process_email(quiet=False):
@@ -127,6 +133,7 @@ def process_email(quiet=False):
                     logger.removeHandler(log_file_handler)
             except Exception as e:
                 logging.exception(e)
+        logger.info('\n')
 
 
 def pop3_sync(importer, queues, logger, server):
@@ -207,18 +214,14 @@ def imap_sync(importer, queues, logger, server):
             logger.info("Received %s messages from IMAP server" % len(msg_nums))
 
             for num_raw in msg_nums:
-                if type(num_raw) is bytes:
-                    try:
-                        num = num_raw.decode("utf-8")
-                    except UnicodeError:
-                        # if couldn't decode easily, just leave it raw
-                        num = num_raw
-                else:
-                    # already a str
-                    num = num_raw
+                # Get UID and use that
+                resp, uid = server.fetch(num_raw, "(UID)")
+                uid = uid[0].decode('ascii')
+                msg_uid = parse_uid(uid)
+                logger.info("Received message UID: %s" % msg_uid)
 
-                logger.info("Processing message %s" % num)
-                status, data = server.fetch(num, '(RFC822)')
+                # Grab message first to get date to sort by
+                status, data = server.uid('fetch', msg_uid, '(RFC822)')
                 full_message = encoding.force_text(data[0][1], errors='replace')
                 try:
                     ticket = object_from_message(full_message, importer, queues, logger)
@@ -229,15 +232,17 @@ def imap_sync(importer, queues, logger, server):
                     ticket = None
                 if ticket:
                     if DEBUGGING:
-                        logger.info("Successfully processed message %s, left untouched on IMAP server\n" % num)
+                        logger.info("Successfully processed message %s, left untouched on IMAP server\n" % msg_uid)
                     elif importer.keep_mail:
-                        server.store(num, '+FLAGS', '\\Answered')
-                        logger.info("Successfully processed message %s, marked as Answered on IMAP server\n" % num)
+                        # server.store(num, '+FLAGS', '\\Answered')
+                        ov, data = server.uid('STORE', msg_uid, '+FLAGS', '(\\Answered)')
+                        logger.info("Successfully processed message %s, marked as Answered on IMAP server\n" % msg_uid)
                     else:
-                        server.store(num, '+FLAGS', '\\Deleted')
-                        logger.info("Successfully processed message %s, deleted from IMAP server\n" % num)
+                        # server.store(num, '+FLAGS', '\\Deleted')
+                        ov, data = server.uid('STORE', msg_uid, '+FLAGS', '(\\Deleted)')
+                        logger.info("Successfully processed message %s, deleted from IMAP server\n" % msg_uid)
                 else:
-                    logger.warn("Message %s was not successfully processed, and will be left on IMAP server\n" % num)
+                    logger.warn("Message %s was not successfully processed, and will be left on IMAP server\n" % msg_uid)
     except imaplib.IMAP4.error:
         logger.error(
             "IMAP retrieve failed. Is the folder '%s' spelled correctly, and does it exist on the server?",
@@ -418,11 +423,13 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
                 previous_followup = queryset.first()
                 ticket = previous_followup.ticket
         except FollowUp.DoesNotExist:
+            logger.info('FollowUp DoesNotExist error.')
             pass  # play along. The header may be wrong
 
     if previous_followup is None and ticket_id is not None:
         try:
             ticket = Ticket.objects.get(id=ticket_id)  # TODO also add in organization id? or, just ticket form (which will be diff for each org)?
+            logger.info('Ticket found from a ticket_id.')
         except Ticket.DoesNotExist:
             ticket = None
         else:
