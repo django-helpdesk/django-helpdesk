@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 Usage:
 $ python -m venv .venv
