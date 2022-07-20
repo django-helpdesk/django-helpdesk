@@ -9,6 +9,7 @@ if helpdesk_settings.HELPDESK_KB_ENABLED:
     from helpdesk.models import KBCategory
     from helpdesk.models import KBItem
 
+
 @admin.register(Queue)
 class QueueAdmin(admin.ModelAdmin):
     list_display = ('title', 'slug', 'email_address', 'locale', 'time_spent')
@@ -74,7 +75,8 @@ class FollowUpAdmin(admin.ModelAdmin):
 if helpdesk_settings.HELPDESK_KB_ENABLED:
     @admin.register(KBItem)
     class KBItemAdmin(admin.ModelAdmin):
-        list_display = ('category', 'title', 'last_updated', 'team', 'order', 'enabled')
+        list_display = ('category', 'title', 'last_updated',
+                        'team', 'order', 'enabled')
         inlines = [KBIAttachmentInline]
         readonly_fields = ('voted_by', 'downvoted_by')
 

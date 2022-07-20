@@ -13,7 +13,7 @@ project_root = os.path.dirname(here)
 NAME = 'django-helpdesk-demodesk'
 DESCRIPTION = 'A demo Django project using django-helpdesk'
 README = open(os.path.join(here, 'README.rst')).read()
-VERSION = '0.5.0a1'
+VERSION = '0.4.1'
 #VERSION = open(os.path.join(project_root, 'VERSION')).read().strip()
 AUTHOR = 'django-helpdesk team'
 URL = 'https://github.com/django-helpdesk/django-helpdesk'
@@ -28,7 +28,7 @@ KEYWORDS = []
 PACKAGES = ['demodesk']
 REQUIREMENTS = [
     'django-helpdesk'
-    ]
+]
 ENTRY_POINTS = {
     'console_scripts': ['demodesk = demodesk.manage:main']
 }

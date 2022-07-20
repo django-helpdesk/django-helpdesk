@@ -35,8 +35,8 @@ class QuickDjangoTest(object):
         'django.contrib.sites',
         'django.contrib.staticfiles',
         'bootstrap4form',
-        ## The following commented apps are optional, 
-        ## related to teams functionalities
+        # The following commented apps are optional,
+        # related to teams functionalities
         #'account',
         #'pinax.invitations',
         #'pinax.teams',
@@ -98,15 +98,15 @@ class QuickDjangoTest(object):
             MIDDLEWARE=self.MIDDLEWARE,
             ROOT_URLCONF='helpdesk.tests.urls',
             STATIC_URL='/static/',
-            LOGIN_URL='/helpdesk/login/',
+            LOGIN_URL='/login/',
             TEMPLATES=self.TEMPLATES,
             SITE_ID=1,
             SECRET_KEY='wowdonotusethisfakesecuritykeyyouneedarealsecure1',
-            ## The following settings disable teams
-            HELPDESK_TEAMS_MODEL = 'auth.User',
-            HELPDESK_TEAMS_MIGRATION_DEPENDENCIES = [],
-            HELPDESK_KBITEM_TEAM_GETTER = lambda _: None,
-            ## test the API
+            # The following settings disable teams
+            HELPDESK_TEAMS_MODEL='auth.User',
+            HELPDESK_TEAMS_MIGRATION_DEPENDENCIES=[],
+            HELPDESK_KBITEM_TEAM_GETTER=lambda _: None,
+            # test the API
             HELPDESK_ACTIVATE_API_ENDPOINT=True
         )
 

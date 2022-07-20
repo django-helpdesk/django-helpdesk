@@ -4,7 +4,7 @@ from distutils.util import convert_path
 from fnmatch import fnmatchcase
 from setuptools import setup, find_packages
 
-version = '0.5.0a1'
+version = '0.4.1'
 
 # Provided as an attribute, so you can append to these instead
 # of replicating them:
@@ -24,6 +24,8 @@ standard_exclude_directories = (
 # Note: you may want to copy this into your setup.py file verbatim, as
 # you can't import this from another package, when you don't know if
 # that package is installed yet.
+
+
 def find_package_data(
     where=".",
     package="",
@@ -72,7 +74,8 @@ def find_package_data(
                         bad_name = True
                         if show_ignored:
                             print(
-                                "Directory %s ignored by pattern %s" % (fn, pattern),
+                                "Directory %s ignored by pattern %s" % (
+                                    fn, pattern),
                                 file=sys.stderr,
                             )
 
@@ -86,7 +89,8 @@ def find_package_data(
                         new_package = package + "." + name
                     stack.append((fn, "", new_package, False))
                 else:
-                    stack.append((fn, prefix + name + "/", package, only_in_packages))
+                    stack.append((fn, prefix + name + "/",
+                                  package, only_in_packages))
             elif package or not only_in_packages:
                 # is a file
                 bad_name = False
@@ -95,7 +99,8 @@ def find_package_data(
                         bad_name = True
                         if show_ignored:
                             print(
-                                "File %s ignored by pattern %s" % (fn, pattern),
+                                "File %s ignored by pattern %s" % (
+                                    fn, pattern),
                                 file=sys.stderr,
                             )
                         break
