@@ -50,9 +50,10 @@ def format_time_spent(time_spent):
 
 
 class EscapeHtml(Extension):
-    def extendMarkdown(self, md, md_globals):
-        del md.preprocessors['html_block']
-        del md.inlinePatterns['html']
+    def extendMarkdown(self, md, md_globals=None):
+        # del md.preprocessors['html_block']
+        # del md.inlinePatterns['html']
+        pass
 
 
 def get_markdown(text):
