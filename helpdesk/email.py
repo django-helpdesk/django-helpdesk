@@ -37,6 +37,7 @@ from helpdesk.lib import safe_template_context, process_attachments
 from helpdesk.models import Ticket, TicketCC, FollowUp, IgnoreEmail, FormType, CustomField
 from seed.models import ImporterSenderMapping
 from helpdesk.decorators import is_helpdesk_staff
+from helpdesk import email_utils
 
 
 # import User model, which may be a custom model
@@ -92,10 +93,8 @@ def process_email(quiet=False):
             log_file_handler = None
 
         try:
-            logger.info("*** Importing into %s ***" % importer.username)
-
             if not importer_sender.default_queue:
-                logger.info("Import canceled: no default queue set")
+                logger.info("\nImport canceled: no default queue set")
             else:
                 default_queue = importer_sender.default_queue
 
@@ -180,15 +179,49 @@ def pop3_sync(importer, queues, logger, server):
 
 def imap_sync(importer, queues, logger, server):
     try:
-        try:
-            server.starttls()
-        except Exception:
-            logger.warning("IMAP4 StartTLS unsupported or failed. Connection will be unencrypted.")
-        server.login(importer.username or
-                     settings.QUEUE_EMAIL_BOX_USER,
-                     importer.password or
-                     settings.QUEUE_EMAIL_BOX_PASSWORD)
-        server.select(importer.email_box_imap_folder)
+        # Check if importer is Gmail. If so, we must authenticate
+        if importer.email_box_host == 'imap.gmail.com':
+            logger.info("* Checking for tokens.")
+            if not hasattr(importer, 'access_token') or not hasattr(importer, 'refresh_token'):
+                logger.error("Gmail IMAP login failed. Please check that you have provided an access and refresh token.")
+                sys.exit()
+
+            logger.info("* Checking for unexpired access token.")
+            if importer.token_expiration < timezone.now():
+                logger.info("* Generating new access token.")
+                response = email_utils.refresh_tokens(importer.refresh_token)
+                if 'access_token' in response:
+                    importer.access_token = response['access_token']
+                    importer.token_expiration = timezone.now() + timedelta(seconds=response['expires_in'])
+                    importer.save()
+                else:
+                    logger.error("Access token could not be generated.")
+                    sys.exit()
+
+            # Obtain authentication string from access token
+            logger.info("* Obtaining authentication string.")
+            auth_string = email_utils.generate_oauth2_string(importer.username, importer.access_token, base64_encode=False)
+
+            try:
+                logger.info("* Authenticating and selecting box.")
+                authenticated = email_utils.imap_authentication(server, auth_string, importer.email_box_imap_folder)
+            except:
+                logger.error("Gmail IMAP authentication failed. Check that the server is accessible and that "
+                             "the username and password are correct.")
+            else:
+                if not authenticated:
+                    logger.error("Gmail IMAP unable to authenticate. Check that the server is accessible and that "
+                                 "the username and password are correct.")
+        else:
+            # If not Gmail, continue without the rest.
+            try:
+                server.starttls()
+            except Exception:
+                logger.warning("IMAP4 StartTLS unsupported or failed. Connection will be unencrypted.")
+            else:
+                server.login(importer.username or settings.QUEUE_EMAIL_BOX_USER,
+                             importer.password or settings.QUEUE_EMAIL_BOX_PASSWORD)
+                server.select(importer.email_box_imap_folder)
     except imaplib.IMAP4.abort:
         logger.error(
             "IMAP login failed. Check that the server is accessible and that "
@@ -255,7 +288,7 @@ def imap_sync(importer, queues, logger, server):
 
 
 def process_importer(importer, queues, logger):
-    logger.info("***** %s: Begin processing mail for django-helpdesk" % ctime())
+    logger.info("\n***** %s: Begin processing mail for django-helpdesk" % ctime())
 
     if importer.socks_proxy_type and importer.socks_proxy_host and importer.socks_proxy_port:
         try:
