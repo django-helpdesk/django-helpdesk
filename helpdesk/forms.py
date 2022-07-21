@@ -7,7 +7,7 @@ forms.py - Definitions of newforms-based forms for creating and maintaining
            tickets.
 """
 import logging
-from datetime import datetime, date, time
+from datetime import datetime
 
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django import forms
@@ -226,7 +226,10 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
         widget=forms.FileInput(attrs={'class': 'form-control-file'}),
         required=False,
         label=_('Attach File'),
-        help_text=_('You can attach a file to this ticket. Only file types such as plain text (.txt), a document (.pdf, .docx, or .odt), or screenshot (.png or .jpg) may be uploaded.'),
+        help_text=_('You can attach a file to this ticket. '
+                    'Only file types such as plain text (.txt), '
+                    'a document (.pdf, .docx, or .odt), '
+                    'or screenshot (.png or .jpg) may be uploaded.'),
     )
 
     class Media:
