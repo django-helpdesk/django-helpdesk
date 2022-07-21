@@ -20,6 +20,10 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt -r requirements-testing.txt -c constraints-Django32.txt
+      name: autopep8
+      run: |
+        pip install autopep8
+        autopep8 --exit-code --global-config .flake8 helpdesk
     # - name: Lint with flake8
     #   run: |
         # pip install flake8
