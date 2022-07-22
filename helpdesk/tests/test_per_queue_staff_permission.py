@@ -1,11 +1,10 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
-from django.urls import reverse
 from django.test import TestCase
 from django.test.client import Client
-
-from helpdesk.models import Queue, Ticket
+from django.urls import reverse
 from helpdesk import settings
+from helpdesk.models import Queue, Ticket
 from helpdesk.query import __Query__
 from helpdesk.user import HelpdeskUser
 

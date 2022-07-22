@@ -7,17 +7,16 @@ urls.py - Mapping of URL's to our various views. Note we always used NAMED
           views for simplicity in linking later on.
 """
 
-from django.urls import path, re_path
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth import views as auth_views
-from django.urls import include
+from django.contrib.auth.decorators import login_required
+from django.urls import include, path, re_path
 from django.views.generic import TemplateView
+from helpdesk import settings as helpdesk_settings
+from helpdesk.decorators import helpdesk_staff_member_required, protect_view
+from helpdesk.views import feeds, login, public, staff
+from helpdesk.views.api import CreateUserView, FollowUpAttachmentViewSet, FollowUpViewSet, TicketViewSet
 from rest_framework.routers import DefaultRouter
 
-from helpdesk.decorators import helpdesk_staff_member_required, protect_view
-from helpdesk.views import feeds, staff, public, login
-from helpdesk import settings as helpdesk_settings
-from helpdesk.views.api import TicketViewSet, CreateUserView, FollowUpViewSet, FollowUpAttachmentViewSet
 
 if helpdesk_settings.HELPDESK_KB_ENABLED:
     from helpdesk.views import kb

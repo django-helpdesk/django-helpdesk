@@ -1,15 +1,13 @@
 # vim: set fileencoding=utf-8 :
+
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.urls import reverse
 from django.test import override_settings, TestCase
+from django.urls import reverse
 from django.utils.encoding import smart_str
-
 from helpdesk import lib, models
-
 import os
 import shutil
 from tempfile import gettempdir
-
 from unittest import mock
 from unittest.case import skip
 

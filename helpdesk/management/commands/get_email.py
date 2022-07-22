@@ -11,7 +11,6 @@ scripts/get_email.py - Designed to be run from cron, this script checks the
                        adding to existing tickets if needed)
 """
 from django.core.management.base import BaseCommand
-
 from helpdesk.email import process_email
 
 

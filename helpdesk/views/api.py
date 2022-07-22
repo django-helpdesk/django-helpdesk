@@ -1,11 +1,10 @@
+from django.contrib.auth import get_user_model
+from helpdesk.models import FollowUp, FollowUpAttachment, Ticket
+from helpdesk.serializers import FollowUpAttachmentSerializer, FollowUpSerializer, TicketSerializer, UserSerializer
 from rest_framework import viewsets
+from rest_framework.mixins import CreateModelMixin
 from rest_framework.permissions import IsAdminUser
 from rest_framework.viewsets import GenericViewSet
-from rest_framework.mixins import CreateModelMixin
-from django.contrib.auth import get_user_model
-
-from helpdesk.models import Ticket, FollowUp, FollowUpAttachment
-from helpdesk.serializers import TicketSerializer, UserSerializer, FollowUpSerializer, FollowUpAttachmentSerializer
 
 
 class TicketViewSet(viewsets.ModelViewSet):

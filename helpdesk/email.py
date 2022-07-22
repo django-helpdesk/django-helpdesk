@@ -4,23 +4,11 @@ Django Helpdesk - A Django powered ticket tracker for small enterprise.
 (c) Copyright 2008 Jutda. Copyright 2018 Timothy Hobbs. All Rights Reserved.
 See LICENSE for details.
 """
+
 # import base64
-import email
-import imaplib
-import logging
-import mimetypes
-import os
-import poplib
-import re
-import socket
-import ssl
-import sys
-from datetime import timedelta
-from email.utils import getaddresses
-from os.path import isfile, join
-from time import ctime
 
 from bs4 import BeautifulSoup
+from datetime import timedelta
 from django.conf import settings as django_settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
@@ -28,11 +16,23 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db.models import Q
 from django.utils import encoding, timezone
 from django.utils.translation import gettext as _
+import email
+from email.utils import getaddresses
 from email_reply_parser import EmailReplyParser
-
 from helpdesk import settings
-from helpdesk.lib import safe_template_context, process_attachments
-from helpdesk.models import Queue, Ticket, TicketCC, FollowUp, IgnoreEmail
+from helpdesk.lib import process_attachments, safe_template_context
+from helpdesk.models import FollowUp, IgnoreEmail, Queue, Ticket, TicketCC
+import imaplib
+import logging
+import mimetypes
+import os
+from os.path import isfile, join
+import poplib
+import re
+import socket
+import ssl
+import sys
+from time import ctime
 
 
 # import User model, which may be a custom model
@@ -342,7 +342,7 @@ def create_ticket_cc(ticket, cc_list):
         return []
 
     # Local import to deal with non-defined / circular reference problem
-    from helpdesk.views.staff import User, subscribe_to_ticket_updates
+    from helpdesk.views.staff import subscribe_to_ticket_updates, User
 
     new_ticket_ccs = []
     for cced_name, cced_email in cc_list:
