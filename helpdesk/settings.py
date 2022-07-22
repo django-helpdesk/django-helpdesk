@@ -2,12 +2,13 @@
 Default settings for django-helpdesk.
 
 """
-import os
-import warnings
 
 from django import forms
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
+import os
+import warnings
+
 
 DEFAULT_USER_SETTINGS = {
     'login_view_ticketlist': True,

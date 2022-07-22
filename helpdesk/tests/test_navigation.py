@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
-import sys
-from importlib import reload
-from django.urls import reverse
-from django.test import TestCase
 
+
+from django.test import TestCase
+from django.test.utils import override_settings
+from django.urls import reverse
 from helpdesk import settings as helpdesk_settings
 from helpdesk.models import Queue
-from helpdesk.tests.helpers import (
-    get_staff_user, reload_urlconf, User, create_ticket, print_response)
-from django.test.utils import override_settings
+from helpdesk.tests.helpers import create_ticket, get_staff_user, print_response, reload_urlconf, User
+from importlib import reload
+import sys
 
 
 class KBDisabledTestCase(TestCase):

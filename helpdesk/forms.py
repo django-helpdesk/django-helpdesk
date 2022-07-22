@@ -6,25 +6,38 @@ django-helpdesk - A Django powered ticket tracker for small enterprise.
 forms.py - Definitions of newforms-based forms for creating and maintaining
            tickets.
 """
-import logging
-from datetime import datetime
 
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from datetime import datetime
 from django import forms
 from django.conf import settings
-from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.utils import timezone
-
-from helpdesk.lib import safe_template_context, process_attachments, convert_value
-from helpdesk.models import (Ticket, Queue, FollowUp, IgnoreEmail, TicketCC,
-                             CustomField, TicketCustomFieldValue, TicketDependency, UserSettings)
+from django.utils.translation import gettext_lazy as _
 from helpdesk import settings as helpdesk_settings
-from helpdesk.settings import CUSTOMFIELD_TO_FIELD_DICT, CUSTOMFIELD_DATETIME_FORMAT, \
-    CUSTOMFIELD_DATE_FORMAT, CUSTOMFIELD_TIME_FORMAT
+from helpdesk.lib import convert_value, process_attachments, safe_template_context
+from helpdesk.models import (
+    CustomField,
+    FollowUp,
+    IgnoreEmail,
+    Queue,
+    Ticket,
+    TicketCC,
+    TicketCustomFieldValue,
+    TicketDependency,
+    UserSettings
+)
+from helpdesk.settings import (
+    CUSTOMFIELD_DATE_FORMAT,
+    CUSTOMFIELD_DATETIME_FORMAT,
+    CUSTOMFIELD_TIME_FORMAT,
+    CUSTOMFIELD_TO_FIELD_DICT
+)
+import logging
+
 
 if helpdesk_settings.HELPDESK_KB_ENABLED:
-    from helpdesk.models import (KBItem)
+    from helpdesk.models import KBItem
 
 logger = logging.getLogger(__name__)
 User = get_user_model()

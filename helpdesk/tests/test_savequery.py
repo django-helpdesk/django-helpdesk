@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from django.urls import reverse
 from django.test import TestCase
+from django.urls import reverse
 from helpdesk.models import Queue
 from helpdesk.tests.helpers import get_user
 

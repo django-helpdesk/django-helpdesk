@@ -31,6 +31,9 @@ jobs:
         flake8 helpdesk --count --show-source --statistics --exit-zero
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         # flake8 . --count --exit-zero --max-complexity=10 --statistics
+    - name: Sort style check with 'isort'
+      run: |
+        isort --line-length=120 --src helpdesk . --check
     - name: Test with pytest
       run: |
         pip install pytest

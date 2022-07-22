@@ -6,67 +6,78 @@ django-helpdesk - A Django powered ticket tracker for small enterprise.
 views/staff.py - The bulk of the application - provides most business logic and
                  renders all staff-facing views.
 """
-from copy import deepcopy
-import json
 
+from ..lib import format_time_spent
+from ..templated_email import send_templated_mail
+from copy import deepcopy
+from datetime import date, datetime, timedelta
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.contenttypes.models import ContentType
-from django.urls import reverse, reverse_lazy
-from django.core.exceptions import ValidationError, PermissionDenied
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.core.exceptions import PermissionDenied, ValidationError
+from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db.models import Q
-from django.http import HttpResponseRedirect, Http404, HttpResponse, JsonResponse
-from django.shortcuts import render, get_object_or_404, redirect
-from django.utils.translation import gettext as _
-from django.utils.html import escape
+from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse, reverse_lazy
 from django.utils import timezone
+from django.utils.html import escape
+from django.utils.translation import gettext as _
 from django.views.decorators.csrf import requires_csrf_token
 from django.views.generic.edit import FormView, UpdateView
-
-from helpdesk.forms import CUSTOMFIELD_DATE_FORMAT
-from helpdesk.query import (
-    get_query_class,
-    query_to_base64,
-    query_from_base64,
-)
-
-from helpdesk.user import HelpdeskUser
-
+from helpdesk import settings as helpdesk_settings
 from helpdesk.decorators import (
-    helpdesk_staff_member_required, helpdesk_superuser_required,
-    is_helpdesk_staff
+    helpdesk_staff_member_required,
+    helpdesk_superuser_required,
+    is_helpdesk_staff,
+    superuser_required
 )
 from helpdesk.forms import (
-    TicketForm, UserSettingsForm, EmailIgnoreForm, EditTicketForm, TicketCCForm,
-    TicketCCEmailForm, TicketCCUserForm, EditFollowUpForm, TicketDependencyForm, MultipleTicketSelectForm
+    CUSTOMFIELD_DATE_FORMAT,
+    EditFollowUpForm,
+    EditTicketForm,
+    EmailIgnoreForm,
+    MultipleTicketSelectForm,
+    TicketCCEmailForm,
+    TicketCCForm,
+    TicketCCUserForm,
+    TicketDependencyForm,
+    TicketForm,
+    UserSettingsForm
 )
-from helpdesk.decorators import superuser_required
-from helpdesk.lib import (
-    safe_template_context,
-    process_attachments,
-    queue_template_context,
-)
+from helpdesk.lib import process_attachments, queue_template_context, safe_template_context
 from helpdesk.models import (
-    Ticket, Queue, FollowUp, TicketChange, PreSetReply, FollowUpAttachment, SavedSearch,
-    IgnoreEmail, TicketCC, TicketDependency, UserSettings, CustomField, TicketCustomFieldValue,
+    CustomField,
+    FollowUp,
+    FollowUpAttachment,
+    IgnoreEmail,
+    PreSetReply,
+    Queue,
+    SavedSearch,
+    Ticket,
+    TicketCC,
+    TicketChange,
+    TicketCustomFieldValue,
+    TicketDependency,
+    UserSettings
 )
-from helpdesk import settings as helpdesk_settings
-if helpdesk_settings.HELPDESK_KB_ENABLED:
-    from helpdesk.models import (KBItem)
-
+from helpdesk.query import get_query_class, query_from_base64, query_to_base64
+from helpdesk.user import HelpdeskUser
 import helpdesk.views.abstract_views as abstract_views
 from helpdesk.views.permissions import MustBeStaffMixin
-from ..lib import format_time_spent
-
+import json
+import re
 from rest_framework import status
 from rest_framework.decorators import api_view
 
-from datetime import date, datetime, timedelta
-import re
 
-from ..templated_email import send_templated_mail
+if helpdesk_settings.HELPDESK_KB_ENABLED:
+    from helpdesk.models import KBItem
+
+
+
+
 
 User = get_user_model()
 Query = get_query_class()

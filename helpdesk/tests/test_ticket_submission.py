@@ -1,22 +1,19 @@
 
-import email
-import uuid
 
-from helpdesk.models import Queue, CustomField, FollowUp, Ticket, TicketCC, KBCategory, KBItem
-from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.core import mail
 from django.core.exceptions import ObjectDoesNotExist
 from django.forms import ValidationError
+from django.test import TestCase
 from django.test.client import Client
 from django.urls import reverse
-
-from helpdesk.email import object_from_message, create_ticket_cc
+import email
+from helpdesk.email import create_ticket_cc, object_from_message
+from helpdesk.models import CustomField, FollowUp, KBCategory, KBItem, Queue, Ticket, TicketCC
 from helpdesk.tests.helpers import print_response
-
-from urllib.parse import urlparse
-
 import logging
+from urllib.parse import urlparse
+import uuid
 
 
 logger = logging.getLogger('helpdesk')

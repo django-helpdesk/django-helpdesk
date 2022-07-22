@@ -1,21 +1,21 @@
 from django.contrib.auth import get_user_model
 from django.contrib.sites.models import Site
 from django.core import mail
-from django.urls import reverse
 from django.test import TestCase
 from django.test.client import Client
+from django.urls import reverse
 from django.utils import timezone
-
-from helpdesk.models import CustomField, Queue, Ticket
 from helpdesk import settings as helpdesk_settings
+from helpdesk.models import CustomField, Queue, Ticket
+from helpdesk.templatetags.ticket_to_link import num_to_link
+from helpdesk.user import HelpdeskUser
+
 
 try:  # python 3
     from urllib.parse import urlparse
 except ImportError:  # python 2
     from urlparse import urlparse
 
-from helpdesk.templatetags.ticket_to_link import num_to_link
-from helpdesk.user import HelpdeskUser
 
 
 class TicketActionsTestCase(TestCase):

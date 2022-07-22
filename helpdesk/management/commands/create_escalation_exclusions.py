@@ -8,12 +8,11 @@ scripts/create_escalation_exclusion.py - Easy way to routinely add particular
                                          days to the list of days on which no
                                          escalation should take place.
 """
+
+from datetime import date, timedelta
 from django.core.management.base import BaseCommand, CommandError
-
-from helpdesk.models import EscalationExclusion, Queue
-
-from datetime import timedelta, date
 import getopt
+from helpdesk.models import EscalationExclusion, Queue
 from optparse import make_option
 import sys
 

@@ -6,12 +6,12 @@ $ source .venv/bin/activate
 $ pip install -r requirements-testing.txt -r requirements.txt
 $ python ./quicktest.py
 """
-import os
-import sys
-import argparse
 
+import argparse
 import django
 from django.conf import settings
+import os
+import sys
 
 
 class QuickDjangoTest(object):

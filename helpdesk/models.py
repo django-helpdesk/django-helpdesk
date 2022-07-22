@@ -7,35 +7,29 @@ models.py - Model (and hence database) definitions. This is the core of the
             helpdesk structure.
 """
 
-from django.contrib.auth.models import Permission
+
+from .lib import convert_value
+from .templated_email import send_templated_mail
+from .validators import validate_file_extension
+import datetime
+from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import models
-from django.conf import settings
 from django.utils import timezone
-from django.utils.translation import gettext_lazy as _, gettext
-from io import StringIO
-import re
-import os
-import mimetypes
-import datetime
-
 from django.utils.safestring import mark_safe
+from django.utils.translation import gettext, gettext_lazy as _
+from helpdesk import settings as helpdesk_settings
+from io import StringIO
 from markdown import markdown
 from markdown.extensions import Extension
-
-
-import uuid
-
+import mimetypes
+import os
+import re
 from rest_framework import serializers
-
-from helpdesk import settings as helpdesk_settings
-from .lib import convert_value
-
-from .validators import validate_file_extension
-
-from .templated_email import send_templated_mail
+import uuid
 
 
 def format_time_spent(time_spent):

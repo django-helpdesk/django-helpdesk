@@ -10,12 +10,11 @@ templatetags/ticket_to_link.py - Used in ticket comments to allow wiki-style
                                  to show the status of that ticket (eg a closed
                                  ticket would have a strikethrough).
 """
+
 from django import template
 from django.urls import reverse
 from django.utils.safestring import mark_safe
-
 from helpdesk.models import Ticket
-
 import re
 
 
