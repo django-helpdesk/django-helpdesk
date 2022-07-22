@@ -1,17 +1,5 @@
 # -*- coding: utf-8 -*-
 """Python packaging."""
-
-
-
-
-
-
-
-
-
-
-from __future__ import unicode_literals
-
 import os
 from setuptools import setup
 
