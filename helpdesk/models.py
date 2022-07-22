@@ -60,6 +60,25 @@ from seed.models import (
 logger = logging.getLogger(__name__)
 
 
+def is_extra_data(field_name):
+    """
+    Replaces the CustomField field is_extra_data with a method. Returns true if the field is not one of the Ticket's
+    default fields, i.e., the ones in the model.
+    """
+    return field_name not in ['queue', 'submitter_email', 'contact_name', 'contact_email', 'title',
+                              'description', 'building_name', 'building_address', 'building_id', 'pm_id',
+                              'attachment', 'due_date', 'priority', 'cc_emails']
+
+
+def is_unlisted(field_name):
+    """
+    Replaces the CustomField field unlisted with a method. Returns true if the field is one that isn't displayed
+    in the Ticket's table of fields once its created.
+    """
+    return field_name not in ['queue', 'submitter_email', 'title', 'description', 'attachment', 'due_date',
+                              'priority', 'cc_emails']
+
+
 def format_time_spent(time_spent):
     if time_spent:
         time_spent = "{0:02d}h:{1:02d}m".format(
@@ -341,7 +360,8 @@ class FormType(models.Model):
         return get_markdown(self.description, self.organization)
 
     def get_extra_field_names(self):
-        return CustomField.objects.filter(ticket_form=self.id, is_extra_data=True).values_list('field_name', flat=True)
+        fields = CustomField.objects.filter(ticket_form=self.id).values_list('field_name', flat=True)
+        return [field for field in fields if is_extra_data(field)]
 
 
 @receiver(post_save, sender=FormType)
@@ -425,7 +445,7 @@ class Ticket(models.Model):
     # These fields are required by all tickets.
     # Labels for these fields are provided by CustomField by default.
     queue = models.ForeignKey(Queue, on_delete=models.PROTECT, verbose_name=_('Queue'))
-    title = models.CharField(max_length=200)
+    title = models.CharField(max_length=200, default="(no title)")
     description = models.TextField(blank=True, null=True)
     priority = models.IntegerField(choices=PRIORITY_CHOICES, default=3, blank=3)
     due_date = models.DateTimeField(blank=True, null=True)
@@ -537,15 +557,14 @@ class Ticket(models.Model):
         if self.queue.enable_notifications_on_email_events:
             # 'extra' fields are treated as cc_public.
             #  todo Add a method to pair specific extra fields with specific templates?
-            extra_fields = CustomField.objects.filter(
+            email_fields = CustomField.objects.filter(
                 ticket_form=self.ticket_form_id,
                 data_type='email',
                 notifications=True,
-                is_extra_data=True
             ).values_list('field_name', flat=True)
 
-            for field in extra_fields:
-                if field in self.extra_data and self.extra_data[field] is not None and self.extra_data[field] != '':
+            for field in email_fields:
+                if field in self.extra_data and self.extra_data[field] is not None and self.extra_data[field] != '' and is_extra_data(field):
                     send('extra', self.extra_data[field])
 
         return recipients
@@ -1948,12 +1967,6 @@ class CustomField(models.Model):
                                      'will NOT show this field'), default=False)
     editable = models.BooleanField(_('Editable by staff?'), default=True,
                                    help_text=_('Can this field be edited by a staff user?'))
-    unlisted = models.BooleanField(_('Hide field in view table?'),
-                                   help_text=_('Used for default fields like queue and priority, '
-                                               'which are displayed elsewhere.'),
-                                   default=False)
-    is_extra_data = models.BooleanField(_('Non-default field?'), default=True,
-                                        help_text=_('Is this an extra data field?'))
 
     ticket_form = models.ForeignKey(FormType, on_delete=models.CASCADE)
     columns = models.ManyToManyField(Column, blank=True, related_name='helpdesk_fields',

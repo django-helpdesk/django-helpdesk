@@ -1,12 +1,10 @@
 from django.contrib import admin
 from django import forms
-from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.utils.html import format_html
-from helpdesk.models import Queue, Ticket, FollowUp, PreSetReply, KBCategory
-from helpdesk.models import EscalationExclusion, EmailTemplate, KBItem
-from helpdesk.models import TicketChange, KBIAttachment, FollowUpAttachment, IgnoreEmail
-from helpdesk.models import CustomField, FormType
+from helpdesk.models import (
+    Queue, Ticket, FollowUp, PreSetReply, KBCategory, EscalationExclusion, EmailTemplate, KBItem, TicketChange,
+    KBIAttachment, FollowUpAttachment, IgnoreEmail, CustomField, FormType, is_extra_data)
 from seed.models import Column, Property, TaxLot
 from seed.lib.superperms.orgs.models import get_helpdesk_organizations
 from pinax.teams.models import JoinInvitation, Membership, Team
@@ -171,6 +169,12 @@ class CustomFieldAdmin(admin.ModelAdmin):
             return ticket.ticket_form.name
     ticket_form_type.short_description = _('Ticket Form')
 
+    @admin.display(boolean=True)
+    def is_extra_data(self, field):
+        if field.field_name:
+            return is_extra_data(field.field_name)
+    is_extra_data.short_description = _('Non-default field?')
+
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
         form.update_columns_set(obj)
@@ -191,17 +195,8 @@ class CustomFieldAdmin(admin.ModelAdmin):
     def make_staff_false(modeladmin, request, queryset):
         queryset.update(staff_only=False)
 
-    @admin.action(description="Mark as a non-default field")
-    def make_extra_data_true(modeladmin, request, queryset):
-        queryset.update(is_extra_data=True)
-
-    @admin.action(description="Mark as a default field")
-    def make_extra_data_false(modeladmin, request, queryset):
-        queryset.update(is_extra_data=False)
-
     actions = [make_required_true, make_required_false,
-               make_staff_true, make_staff_false,
-               make_extra_data_true, make_extra_data_false]
+               make_staff_true, make_staff_false]
 
 
 class TicketChangeInline(admin.StackedInline):

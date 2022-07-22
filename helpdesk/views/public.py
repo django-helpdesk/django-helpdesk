@@ -30,7 +30,7 @@ from helpdesk.decorators import protect_view, is_helpdesk_staff
 import helpdesk.views.staff as staff
 import helpdesk.views.abstract_views as abstract_views
 from helpdesk.lib import text_is_spam
-from helpdesk.models import Ticket, Queue, UserSettings, CustomField, FormType, TicketCC
+from helpdesk.models import Ticket, UserSettings, CustomField, FormType, TicketCC, is_unlisted
 from helpdesk.user import huser_from_request
 
 from seed.models import PropertyMilestone, Note
@@ -285,7 +285,7 @@ def view_ticket(request):
     extra_display = CustomField.objects.filter(ticket_form=ticket.ticket_form).values()
     extra_data = []
     for field in extra_display:
-        if (not field['staff_only']) and (not field['unlisted']):
+        if (not field['staff_only']) and not is_unlisted(field['field_name']):
             if field['field_name'] in ticket.extra_data:
                 field['value'] = ticket.extra_data[field['field_name']]
             else:
