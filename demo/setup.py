@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
 """Python packaging."""
-
-from __future__ import unicode_literals
-
-from setuptools import setup
 import os
+from setuptools import setup
+
 
 here = os.path.abspath(os.path.dirname(__file__))
 project_root = os.path.dirname(here)

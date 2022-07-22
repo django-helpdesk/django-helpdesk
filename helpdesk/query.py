@@ -1,15 +1,12 @@
+
+from base64 import b64decode, b64encode
 from django.db.models import Q
 from django.urls import reverse
 from django.utils.html import escape
 from django.utils.translation import gettext as _
-
-from base64 import b64encode
-from base64 import b64decode
-import json
-
-from model_utils import Choices
-
 from helpdesk.serializers import DatatablesTicketSerializer
+import json
+from model_utils import Choices
 
 
 def query_to_base64(query):

@@ -13,15 +13,13 @@ scripts/create_queue_permissions.py -
     existing permissions.
 """
 
-from optparse import make_option
-
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand, CommandError
 from django.db.utils import IntegrityError
 from django.utils.translation import gettext_lazy as _
-
 from helpdesk.models import Queue
+from optparse import make_option
 
 
 class Command(BaseCommand):

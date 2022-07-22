@@ -6,14 +6,14 @@ django-helpdesk - A Django powered ticket tracker for small enterprise.
 lib.py - Common functions (eg multipart e-mail)
 """
 
-import logging
-import mimetypes
-from datetime import datetime, date, time
 
+from datetime import date, datetime, time
 from django.conf import settings
 from django.utils.encoding import smart_str
+from helpdesk.settings import CUSTOMFIELD_DATE_FORMAT, CUSTOMFIELD_DATETIME_FORMAT, CUSTOMFIELD_TIME_FORMAT
+import logging
+import mimetypes
 
-from helpdesk.settings import CUSTOMFIELD_DATETIME_FORMAT, CUSTOMFIELD_DATE_FORMAT, CUSTOMFIELD_TIME_FORMAT
 
 logger = logging.getLogger('helpdesk')
 
