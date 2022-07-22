@@ -76,9 +76,6 @@ if helpdesk_settings.HELPDESK_KB_ENABLED:
     from helpdesk.models import KBItem
 
 
-
-
-
 User = get_user_model()
 Query = get_query_class()
 

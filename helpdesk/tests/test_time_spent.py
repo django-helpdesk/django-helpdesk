@@ -20,7 +20,6 @@ except ImportError:  # python 2
     from urlparse import urlparse
 
 
-
 class TimeSpentTestCase(TestCase):
 
     def setUp(self):

@@ -17,7 +17,6 @@ except ImportError:  # python 2
     from urlparse import urlparse
 
 
-
 class TicketActionsTestCase(TestCase):
     fixtures = ['emailtemplate.json']
 
