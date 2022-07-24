@@ -506,7 +506,10 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
     return ticket
 
 
-def object_from_message(message, queue, logger):
+def object_from_message(message: str,
+                        queue: Queue,
+                        logger: logging.Logger
+                        ) -> Ticket:
     # 'message' must be an RFC822 formatted message.
     message = email.message_from_string(message)
 
