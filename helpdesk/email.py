@@ -529,19 +529,6 @@ def object_from_message(message, queue, logger):
     sender_email = email.utils.getaddresses(
         ['\"' + sender.replace('<', '\" <')])[0][1]
 
-    cc = message.get_all('cc', None)
-    if cc:
-        # first, fixup the encoding if necessary
-        cc = [decode_mail_headers(decodeUnknown(
-            message.get_charset(), x)) for x in cc]
-        # get_all checks if multiple CC headers, but individual emails may be
-        # comma separated too
-        tempcc = []
-        for hdr in cc:
-            tempcc.extend(hdr.split(','))
-        # use a set to ensure no duplicates
-        cc = set([x.strip() for x in tempcc])
-
     for ignore in IgnoreEmail.objects.filter(Q(queues=queue) | Q(queues__isnull=True)):
         if ignore.test(sender_email):
             if ignore.keep_in_mailbox:
