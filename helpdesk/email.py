@@ -531,20 +531,18 @@ def object_from_message(message, queue, logger):
 
     for ignore in IgnoreEmail.objects.filter(Q(queues=queue) | Q(queues__isnull=True)):
         if ignore.test(sender_email):
-            if ignore.keep_in_mailbox:
-                # By returning 'False' the message will be kept in the mailbox,
-                # and the 'True' will cause the message to be deleted.
-                return False
-            return True
+            # By returning 'False' the message will be kept in the mailbox,
+            # and the 'True' will cause the message to be deleted.
+            return not ignore.keep_in_mailbox
 
     matchobj = re.match(r".*\[" + queue.slug + r"-(?P<id>\d+)\]", subject)
     if matchobj:
         # This is a reply or forward.
-        ticket = matchobj.group('id')
-        logger.info("Matched tracking ID %s-%s" % (queue.slug, ticket))
+        ticket_id = matchobj.group('id')
+        logger.info("Matched tracking ID %s-%s" % (queue.slug, ticket_id))
     else:
         logger.info("No tracking ID matched.")
-        ticket = None
+        ticket_id = None
 
     body = None
     full_body = None
@@ -568,7 +566,7 @@ def object_from_message(message, queue, logger):
                 body = decodeUnknown(part.get_content_charset(), body)
                 # have to use django_settings here so overwritting it works in tests
                 # the default value is False anyway
-                if ticket is None and getattr(django_settings, 'HELPDESK_FULL_FIRST_MESSAGE_FROM_EMAIL', False):
+                if ticket_id is None and getattr(django_settings, 'HELPDESK_FULL_FIRST_MESSAGE_FROM_EMAIL', False):
                     # first message in thread, we save full body to avoid
                     # losing forwards and things like that
                     body_parts = []
@@ -690,4 +688,4 @@ def object_from_message(message, queue, logger):
         'files': files,
     }
 
-    return create_object_from_email_message(message, ticket, payload, files, logger=logger)
+    return create_object_from_email_message(message, ticket_id, payload, files, logger=logger)
