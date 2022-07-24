@@ -466,16 +466,6 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
     new_ticket_ccs = []
     new_ticket_ccs.append(create_ticket_cc(ticket, to_list + cc_list))
 
-    notifications_to_be_sent = [sender_email]
-
-    if queue.enable_notifications_on_email_events and len(notifications_to_be_sent):
-
-        ticket_cc_list = TicketCC.objects.filter(
-            ticket=ticket).all().values_list('email', flat=True)
-
-        for email_address in ticket_cc_list:
-            notifications_to_be_sent.append(email_address)
-
     autoreply = is_autoreply(message)
     if autoreply:
         logger.info(
