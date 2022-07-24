@@ -33,6 +33,7 @@ import socket
 import ssl
 import sys
 from time import ctime
+import typing
 
 
 # import User model, which may be a custom model
@@ -506,6 +507,27 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
     return ticket
 
 
+def get_ticket_id_from_subject_slug(
+    queue_slug: str,
+    subject: str,
+    logger: logging.Logger
+) -> typing.Optional[int]:
+    """Get a ticket id from the subject string
+
+    Performs a match on the subject using the queue_slug as reference,
+    returning the ticket id if a match is found.
+    """
+    matchobj = re.match(r".*\[" + queue_slug + r"-(?P<id>\d+)\]", subject)
+    ticket_id = None
+    if matchobj:
+        # This is a reply or forward.
+        ticket_id = matchobj.group('id')
+        logger.info("Matched tracking ID %s-%s" % (queue_slug, ticket_id))
+    else:
+        logger.info("No tracking ID matched.")
+    return ticket_id
+
+
 def object_from_message(message: str,
                         queue: Queue,
                         logger: logging.Logger
@@ -538,14 +560,11 @@ def object_from_message(message: str,
             # and the 'True' will cause the message to be deleted.
             return not ignore.keep_in_mailbox
 
-    matchobj = re.match(r".*\[" + queue.slug + r"-(?P<id>\d+)\]", subject)
-    if matchobj:
-        # This is a reply or forward.
-        ticket_id = matchobj.group('id')
-        logger.info("Matched tracking ID %s-%s" % (queue.slug, ticket_id))
-    else:
-        logger.info("No tracking ID matched.")
-        ticket_id = None
+    ticket_id: typing.Optional[int] = get_ticket_id_from_subject_slug(
+        queue.slug,
+        subject,
+        logger
+    )
 
     body = None
     full_body = None
