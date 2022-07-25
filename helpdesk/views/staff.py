@@ -1563,6 +1563,21 @@ def get_report_queryset_or_redirect(request, report):
     return report_queryset, query_params, saved_query, None
 
 
+def get_report_table_and_totals(header1, summarytable, possible_options):
+    table = []
+    totals = {}
+    for item in header1:
+        data = []
+        for hdr in possible_options:
+            if hdr not in totals.keys():
+                totals[hdr] = summarytable[item, hdr]
+            else:
+                totals[hdr] += summarytable[item, hdr]
+            data.append(summarytable[item, hdr])
+        table.append([item] + data)
+    return table, totals
+
+
 @helpdesk_staff_member_required
 def run_report(request, report):
 
@@ -1690,8 +1705,6 @@ def run_report(request, report):
             if report == 'daysuntilticketclosedbymonth':
                 summarytable2[metric1, metric2] += metric3
 
-    table = []
-
     if report == 'daysuntilticketclosedbymonth':
         for key in summarytable2.keys():
             summarytable[key] = summarytable2[key] / summarytable[key]
@@ -1701,18 +1714,9 @@ def run_report(request, report):
     column_headings = [col1heading] + possible_options
 
     # Prepare a dict to store totals for each possible option
-    totals = {}
+    table, totals = get_report_table_and_totals(header1, summarytable, possible_options)
     # Pivot the data so that 'header1' fields are always first column
     # in the row, and 'possible_options' are always the 2nd - nth columns.
-    for item in header1:
-        data = []
-        for hdr in possible_options:
-            if hdr not in totals.keys():
-                totals[hdr] = summarytable[item, hdr]
-            else:
-                totals[hdr] += summarytable[item, hdr]
-            data.append(summarytable[item, hdr])
-        table.append([item] + data)
 
     # Zip data and headers together in one list for Morris.js charts
     # will get a list like [(Header1, Data1), (Header2, Data2)...]
