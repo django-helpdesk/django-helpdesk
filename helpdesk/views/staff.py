@@ -601,6 +601,47 @@ def get_time_spent_from_request(request: WSGIRequest) -> typing.Optional[timedel
     return None
 
 
+def update_messages_sent_to_by_public_and_status(
+    public: bool,
+    ticket: Ticket,
+    follow_up: FollowUp,
+    context: str,
+    messages_sent_to: list[str],
+    files: list[str, str]
+) -> Ticket:
+    """Sets the status of the ticket"""
+    if public and (
+        follow_up.comment or (
+            follow_up.new_status in (
+                Ticket.RESOLVED_STATUS,
+                Ticket.CLOSED_STATUS
+            )
+        )
+    ):
+        if follow_up.new_status == Ticket.RESOLVED_STATUS:
+            template = 'resolved_'
+        elif follow_up.new_status == Ticket.CLOSED_STATUS:
+            template = 'closed_'
+        else:
+            template = 'updated_'
+
+        roles = {
+            'submitter': (template + 'submitter', context),
+            'ticket_cc': (template + 'cc', context),
+        }
+        if ticket.assigned_to and ticket.assigned_to.usersettings_helpdesk.email_on_ticket_change:
+            roles['assigned_to'] = (template + 'cc', context)
+        messages_sent_to.update(
+            ticket.send(
+                roles,
+                dont_send_to=messages_sent_to,
+                fail_silently=True,
+                files=files
+            )
+        )
+    return ticket
+
+
 def update_ticket(request, ticket_id, public=False):
 
     ticket = get_ticket_from_request_with_authorisation(request, ticket_id, public)
@@ -748,24 +789,14 @@ def update_ticket(request, ticket_id, public=False):
         messages_sent_to.add(request.user.email)
     except AttributeError:
         pass
-    if public and (f.comment or (
-        f.new_status in (Ticket.RESOLVED_STATUS,
-                         Ticket.CLOSED_STATUS))):
-        if f.new_status == Ticket.RESOLVED_STATUS:
-            template = 'resolved_'
-        elif f.new_status == Ticket.CLOSED_STATUS:
-            template = 'closed_'
-        else:
-            template = 'updated_'
-
-        roles = {
-            'submitter': (template + 'submitter', context),
-            'ticket_cc': (template + 'cc', context),
-        }
-        if ticket.assigned_to and ticket.assigned_to.usersettings_helpdesk.email_on_ticket_change:
-            roles['assigned_to'] = (template + 'cc', context)
-        messages_sent_to.update(ticket.send(
-            roles, dont_send_to=messages_sent_to, fail_silently=True, files=files,))
+    ticket = update_messages_sent_to_by_public_and_status(
+        public,
+        ticket,
+        f,
+        context,
+        messages_sent_to,
+        files
+    )
 
     if reassigned:
         template_staff = 'assigned_owner'
