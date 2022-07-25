@@ -268,7 +268,7 @@ def followup_edit(request, ticket_id, followup_id):
             'time_spent': format_time_spent(followup.time_spent),
         })
 
-        ticketcc_string, show_subscribe = \
+        ticketcc_string, __ = \
             return_ticketccstring_and_show_subscribe(request.user, ticket)
 
         return render(request, 'helpdesk/followup_edit.html', {
@@ -346,8 +346,10 @@ def view_ticket(request, ticket_id):
     if 'subscribe' in request.GET:
         # Allow the user to subscribe him/herself to the ticket whilst viewing
         # it.
-        ticket_cc, show_subscribe = \
-            return_ticketccstring_and_show_subscribe(request.user, ticket)
+        show_subscribe = return_ticketccstring_and_show_subscribe(
+            request.user, ticket
+        )[1]
+
         if show_subscribe:
             subscribe_staff_member_to_ticket(ticket, request.user)
             return HttpResponseRedirect(reverse('helpdesk:view', args=[ticket.id]))
@@ -760,8 +762,10 @@ def update_ticket(request, ticket_id, public=False):
 
     # auto subscribe user if enabled
     if helpdesk_settings.HELPDESK_AUTO_SUBSCRIBE_ON_TICKET_RESPONSE and request.user.is_authenticated:
-        ticketcc_string, SHOW_SUBSCRIBE = return_ticketccstring_and_show_subscribe(
-            request.user, ticket)
+        SHOW_SUBSCRIBE = return_ticketccstring_and_show_subscribe(
+            request.user, ticket
+        )[1]
+
         if SHOW_SUBSCRIBE:
             subscribe_staff_member_to_ticket(ticket, request.user)
 
@@ -924,7 +928,7 @@ def merge_tickets(request):
         for ticket in tickets:
             ticket.values = {}
             # Prepare the value for each attributes of this ticket
-            for attribute, display_name in ticket_attributes:
+            for attribute, __ in ticket_attributes:
                 value = getattr(ticket, attribute, default)
                 # Check if attr is a get_FIELD_display
                 if attribute.startswith('get_') and attribute.endswith('_display'):
@@ -959,7 +963,7 @@ def merge_tickets(request):
                 )
             else:
                 # Save ticket fields values
-                for attribute, display_name in ticket_attributes:
+                for attribute, __ in ticket_attributes:
                     id_for_attribute = request.POST.get(attribute)
                     if id_for_attribute != chosen_ticket.id:
                         try:
@@ -1086,16 +1090,16 @@ def ticket_list(request):
 
     if request.GET.get('search_type', None) == 'header':
         query = request.GET.get('q')
-        filter = None
+        filter_ = None
         if query.find('-') > 0:
             try:
-                queue, id = Ticket.queue_and_id_from_query(query)
-                id = int(id)
+                queue, id_ = Ticket.queue_and_id_from_query(query)
+                id_ = int(id)
             except ValueError:
-                id = None
+                id_ = None
 
-            if id:
-                filter = {'queue__slug': queue, 'id': id}
+            if id_:
+                filter_ = {'queue__slug': queue, 'id': id_}
         else:
             try:
                 query = int(query)
@@ -1103,11 +1107,11 @@ def ticket_list(request):
                 query = None
 
             if query:
-                filter = {'id': int(query)}
+                filter_ = {'id': int(query)}
 
-        if filter:
+        if filter_:
             try:
-                ticket = huser.get_tickets_in_queues().get(**filter)
+                ticket = huser.get_tickets_in_queues().get(**filter_)
                 return HttpResponseRedirect(ticket.staff_url)
             except Ticket.DoesNotExist:
                 # Go on to standard keyword searching
@@ -1308,15 +1312,15 @@ class CreateTicketView(MustBeStaffMixin, abstract_views.AbstractCreateTicketMixi
 
 
 @helpdesk_staff_member_required
-def raw_details(request, type):
+def raw_details(request, type_):
     # TODO: This currently only supports spewing out 'PreSetReply' objects,
     # in the future it needs to be expanded to include other items. All it
     # does is return a plain-text representation of an object.
 
-    if type not in ('preset',):
+    if type_ not in ('preset',):
         raise Http404
 
-    if type == 'preset' and request.GET.get('id', False):
+    if type_ == 'preset' and request.GET.get('id', False):
         try:
             preset = PreSetReply.objects.get(id=request.GET.get('id'))
             return HttpResponse(preset.body)
@@ -1634,8 +1638,8 @@ save_query = staff_member_required(save_query)
 
 
 @helpdesk_staff_member_required
-def delete_saved_query(request, id):
-    query = get_object_or_404(SavedSearch, id=id, user=request.user)
+def delete_saved_query(request, pk):
+    query = get_object_or_404(SavedSearch, id=pk, user=request.user)
 
     if request.method == 'POST':
         query.delete()
@@ -1684,8 +1688,8 @@ email_ignore_add = superuser_required(email_ignore_add)
 
 
 @helpdesk_superuser_required
-def email_ignore_del(request, id):
-    ignore = get_object_or_404(IgnoreEmail, id=id)
+def email_ignore_del(request, pk):
+    ignore = get_object_or_404(IgnoreEmail, id=pk)
     if request.method == 'POST':
         ignore.delete()
         return HttpResponseRedirect(reverse('helpdesk:email_ignore'))
