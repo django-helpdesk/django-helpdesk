@@ -28,9 +28,8 @@ jobs:
       run: |
         pip install flake8
         # stop the build if there are Python syntax errors or undefined names
-        flake8 helpdesk --count --show-source --statistics --exit-zero
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        # flake8 . --count --exit-zero --max-complexity=10 --statistics
+        flake8 helpdesk --count --show-source --statistics --exit-zero --max-complexity=20
     - name: Sort style check with 'isort'
       run: |
         isort --line-length=120 --src helpdesk . --check
