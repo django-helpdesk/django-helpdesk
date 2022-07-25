@@ -1578,6 +1578,49 @@ def get_report_table_and_totals(header1, summarytable, possible_options):
     return table, totals
 
 
+def update_summary_tables(report_queryset, report, summarytable, summarytable2):
+    metric3 = False
+    for ticket in report_queryset:
+        if report == 'userpriority':
+            metric1 = u'%s' % ticket.get_assigned_to
+            metric2 = u'%s' % ticket.get_priority_display()
+
+        elif report == 'userqueue':
+            metric1 = u'%s' % ticket.get_assigned_to
+            metric2 = u'%s' % ticket.queue.title
+
+        elif report == 'userstatus':
+            metric1 = u'%s' % ticket.get_assigned_to
+            metric2 = u'%s' % ticket.get_status_display()
+
+        elif report == 'usermonth':
+            metric1 = u'%s' % ticket.get_assigned_to
+            metric2 = u'%s-%s' % (ticket.created.year, ticket.created.month)
+
+        elif report == 'queuepriority':
+            metric1 = u'%s' % ticket.queue.title
+            metric2 = u'%s' % ticket.get_priority_display()
+
+        elif report == 'queuestatus':
+            metric1 = u'%s' % ticket.queue.title
+            metric2 = u'%s' % ticket.get_status_display()
+
+        elif report == 'queuemonth':
+            metric1 = u'%s' % ticket.queue.title
+            metric2 = u'%s-%s' % (ticket.created.year, ticket.created.month)
+
+        elif report == 'daysuntilticketclosedbymonth':
+            metric1 = u'%s' % ticket.queue.title
+            metric2 = u'%s-%s' % (ticket.created.year, ticket.created.month)
+            metric3 = ticket.modified - ticket.created
+            metric3 = metric3.days
+
+        summarytable[metric1, metric2] += 1
+        if metric3:
+            if report == 'daysuntilticketclosedbymonth':
+                summarytable2[metric1, metric2] += metric3
+
+
 @helpdesk_staff_member_required
 def run_report(request, report):
 
@@ -1663,48 +1706,7 @@ def run_report(request, report):
         col1heading = _('Queue')
         possible_options = periods
         charttype = 'date'
-
-    metric3 = False
-    for ticket in report_queryset:
-        if report == 'userpriority':
-            metric1 = u'%s' % ticket.get_assigned_to
-            metric2 = u'%s' % ticket.get_priority_display()
-
-        elif report == 'userqueue':
-            metric1 = u'%s' % ticket.get_assigned_to
-            metric2 = u'%s' % ticket.queue.title
-
-        elif report == 'userstatus':
-            metric1 = u'%s' % ticket.get_assigned_to
-            metric2 = u'%s' % ticket.get_status_display()
-
-        elif report == 'usermonth':
-            metric1 = u'%s' % ticket.get_assigned_to
-            metric2 = u'%s-%s' % (ticket.created.year, ticket.created.month)
-
-        elif report == 'queuepriority':
-            metric1 = u'%s' % ticket.queue.title
-            metric2 = u'%s' % ticket.get_priority_display()
-
-        elif report == 'queuestatus':
-            metric1 = u'%s' % ticket.queue.title
-            metric2 = u'%s' % ticket.get_status_display()
-
-        elif report == 'queuemonth':
-            metric1 = u'%s' % ticket.queue.title
-            metric2 = u'%s-%s' % (ticket.created.year, ticket.created.month)
-
-        elif report == 'daysuntilticketclosedbymonth':
-            metric1 = u'%s' % ticket.queue.title
-            metric2 = u'%s-%s' % (ticket.created.year, ticket.created.month)
-            metric3 = ticket.modified - ticket.created
-            metric3 = metric3.days
-
-        summarytable[metric1, metric2] += 1
-        if metric3:
-            if report == 'daysuntilticketclosedbymonth':
-                summarytable2[metric1, metric2] += metric3
-
+    update_summary_tables(report_queryset, report, summarytable, summarytable2)
     if report == 'daysuntilticketclosedbymonth':
         for key in summarytable2.keys():
             summarytable[key] = summarytable2[key] / summarytable[key]
