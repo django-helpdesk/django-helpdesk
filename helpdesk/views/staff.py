@@ -16,6 +16,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import PermissionDenied, ValidationError
+from django.core.handlers.wsgi import WSGIRequest
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db.models import Q
 from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse
@@ -70,11 +71,15 @@ import json
 import re
 from rest_framework import status
 from rest_framework.decorators import api_view
+import typing
 
 
 if helpdesk_settings.HELPDESK_KB_ENABLED:
     from helpdesk.models import KBItem
 
+DATE_RE: re.Pattern = re.compile(
+    r'(?P<month>\d{1,2})/(?P<day>\d{1,2})/(?P<year>\d{4})$'
+)
 
 User = get_user_model()
 Query = get_query_class()
@@ -483,10 +488,20 @@ def subscribe_staff_member_to_ticket(ticket, user, email='', can_view=True, can_
     return subscribe_to_ticket_updates(ticket=ticket, user=user, email=email, can_view=can_view, can_update=can_update)
 
 
-def update_ticket(request, ticket_id, public=False):
+def get_ticket_from_request_with_authorisation(
+    request: WSGIRequest,
+    ticket_id: str,
+    public: bool
+) -> typing.Union[
+    Ticket, typing.NoReturn
+]:
+    """Gets a ticket from the public status and if the user is authenticated and
+    has permissions to update tickets
 
-    ticket = None
+    Raises:
+        Http404 when the ticket can not be found or the user lacks permission
 
+    """
     if not (public or (
             request.user.is_authenticated and
             request.user.is_active and (
@@ -508,41 +523,29 @@ def update_ticket(request, ticket_id, public=False):
                 '%s?next=%s' % (reverse('helpdesk:login'), request.path)
             )
 
-    if not ticket:
-        ticket = get_object_or_404(Ticket, id=ticket_id)
+    return get_object_or_404(Ticket, id=ticket_id)
 
-    date_re = re.compile(
-        r'(?P<month>\d{1,2})/(?P<day>\d{1,2})/(?P<year>\d{4})$'
-    )
 
-    comment = request.POST.get('comment', '')
-    new_status = int(request.POST.get('new_status', ticket.status))
-    title = request.POST.get('title', '')
-    public = request.POST.get('public', False)
-    owner = int(request.POST.get('owner', -1))
-    priority = int(request.POST.get('priority', ticket.priority))
-    due_date_year = int(request.POST.get('due_date_year', 0))
-    due_date_month = int(request.POST.get('due_date_month', 0))
-    due_date_day = int(request.POST.get('due_date_day', 0))
-    if request.POST.get("time_spent"):
-        (hours, minutes) = [int(f)
-                            for f in request.POST.get("time_spent").split(":")]
-        time_spent = timedelta(hours=hours, minutes=minutes)
-    else:
-        time_spent = None
-    # NOTE: jQuery's default for dates is mm/dd/yy
-    # very US-centric but for now that's the only format supported
-    # until we clean up code to internationalize a little more
+def get_due_date_from_request_or_ticket(
+    request: WSGIRequest,
+    ticket: Ticket
+) -> typing.Optional[datetime.date]:
+    """Tries to locate the due date for a ticket from the `request.POST`
+    'due_date' parameter or the `due_date_*` paramaters.
+    """
     due_date = request.POST.get('due_date', None) or None
 
     if due_date is not None:
         # based on Django code to parse dates:
         # https://docs.djangoproject.com/en/2.0/_modules/django/utils/dateparse/
-        match = date_re.match(due_date)
+        match = DATE_RE.match(due_date)
         if match:
             kw = {k: int(v) for k, v in match.groupdict().items()}
             due_date = date(**kw)
     else:
+        due_date_year = int(request.POST.get('due_date_year', 0))
+        due_date_month = int(request.POST.get('due_date_month', 0))
+        due_date_day = int(request.POST.get('due_date_day', 0))
         # old way, probably deprecated?
         if not (due_date_year and due_date_month and due_date_day):
             due_date = ticket.due_date
@@ -553,9 +556,31 @@ def update_ticket(request, ticket_id, public=False):
                 due_date = ticket.due_date
             else:
                 due_date = timezone.now()
-            due_date = due_date.replace(
-                due_date_year, due_date_month, due_date_day)
+                due_date = due_date.replace(
+                    due_date_year, due_date_month, due_date_day)
+    return due_date
 
+
+def update_ticket(request, ticket_id, public=False):
+
+    ticket = get_ticket_from_request_with_authorisation(request, ticket_id, public)
+
+    comment = request.POST.get('comment', '')
+    new_status = int(request.POST.get('new_status', ticket.status))
+    title = request.POST.get('title', '')
+    public = request.POST.get('public', False)
+    owner = int(request.POST.get('owner', -1))
+    priority = int(request.POST.get('priority', ticket.priority))
+    if request.POST.get("time_spent"):
+        (hours, minutes) = [int(f)
+                            for f in request.POST.get("time_spent").split(":")]
+        time_spent = timedelta(hours=hours, minutes=minutes)
+    else:
+        time_spent = None
+    # NOTE: jQuery's default for dates is mm/dd/yy
+    # very US-centric but for now that's the only format supported
+    # until we clean up code to internationalize a little more
+    due_date = get_due_date_from_request_or_ticket(request, ticket)
     no_changes = all([
         not request.FILES,
         not comment,
