@@ -1171,35 +1171,12 @@ def merge_tickets(request):
     })
 
 
-@helpdesk_staff_member_required
-def ticket_list(request):
-    context = {}
-
-    huser = HelpdeskUser(request.user)
-
-    # Query_params will hold a dictionary of parameters relating to
-    # a query, to be saved if needed:
-    query_params = {
-        'filtering': {},
-        'filtering_or': {},
-        'sorting': None,
-        'sortreverse': False,
-        'search_string': '',
-    }
-    default_query_params = {
-        'filtering': {
-            'status__in': [1, 2],
-        },
-        'sorting': 'created',
-        'search_string': '',
-        'sortreverse': False,
-    }
-
-    # If the user is coming from the header/navigation search box, lets' first
-    # look at their query to see if they have entered a valid ticket number. If
-    # they have, just redirect to that ticket number. Otherwise, we treat it as
-    # a keyword search.
-
+def check_redirect_on_user_query(request, huser):
+    """If the user is coming from the header/navigation search box, lets' first
+    look at their query to see if they have entered a valid ticket number. If
+    they have, just redirect to that ticket number. Otherwise, we treat it as
+    a keyword search.
+    """
     if request.GET.get('search_type', None) == 'header':
         query = request.GET.get('q')
         filter_ = None
@@ -1228,7 +1205,37 @@ def ticket_list(request):
             except Ticket.DoesNotExist:
                 # Go on to standard keyword searching
                 pass
+    return None
 
+
+@helpdesk_staff_member_required
+def ticket_list(request):
+    context = {}
+
+    huser = HelpdeskUser(request.user)
+
+    # Query_params will hold a dictionary of parameters relating to
+    # a query, to be saved if needed:
+    query_params = {
+        'filtering': {},
+        'filtering_or': {},
+        'sorting': None,
+        'sortreverse': False,
+        'search_string': '',
+    }
+    default_query_params = {
+        'filtering': {
+            'status__in': [1, 2],
+        },
+        'sorting': 'created',
+        'search_string': '',
+        'sortreverse': False,
+    }
+
+    #: check for a redirect, see function doc for details
+    redirect = check_redirect_on_user_query(request, huser)
+    if redirect:
+        return redirect
     try:
         saved_query, query_params = load_saved_query(request, query_params)
     except QueryLoadError:
