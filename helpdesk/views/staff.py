@@ -563,8 +563,8 @@ def get_due_date_from_request_or_ticket(
 
 def get_and_set_ticket_status(
     new_status: str,
-        ticket: Ticket,
-        follow_up: FollowUp
+    ticket: Ticket,
+    follow_up: FollowUp
 ) -> typing.Tuple[str, str]:
     """Performs comparision on previous status to new status,
     updating the title as required.
