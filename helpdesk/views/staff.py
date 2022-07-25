@@ -657,6 +657,29 @@ def add_staff_subscription(
             subscribe_staff_member_to_ticket(ticket, request.user)
 
 
+def get_template_staff_and_template_cc(
+    reassigned, follow_up:  FollowUp
+) -> tuple[str, str]:
+    if reassigned:
+        template_staff = 'assigned_owner'
+    elif follow_up.new_status == Ticket.RESOLVED_STATUS:
+        template_staff = 'resolved_owner'
+    elif follow_up.new_status == Ticket.CLOSED_STATUS:
+        template_staff = 'closed_owner'
+    else:
+        template_staff = 'updated_owner'
+    if reassigned:
+        template_cc = 'assigned_cc'
+    elif follow_up.new_status == Ticket.RESOLVED_STATUS:
+        template_cc = 'resolved_cc'
+    elif follow_up.new_status == Ticket.CLOSED_STATUS:
+        template_cc = 'closed_cc'
+    else:
+        template_cc = 'updated_cc'
+
+    return template_staff, template_cc
+
+
 def update_ticket(request, ticket_id, public=False):
 
     ticket = get_ticket_from_request_with_authorisation(request, ticket_id, public)
@@ -813,15 +836,7 @@ def update_ticket(request, ticket_id, public=False):
         files
     )
 
-    if reassigned:
-        template_staff = 'assigned_owner'
-    elif f.new_status == Ticket.RESOLVED_STATUS:
-        template_staff = 'resolved_owner'
-    elif f.new_status == Ticket.CLOSED_STATUS:
-        template_staff = 'closed_owner'
-    else:
-        template_staff = 'updated_owner'
-
+    template_staff, template_cc = get_template_staff_and_template_cc(reassigned, f)
     if ticket.assigned_to and (
         ticket.assigned_to.usersettings_helpdesk.email_on_ticket_change
         or (reassigned and ticket.assigned_to.usersettings_helpdesk.email_on_ticket_assign)
@@ -832,15 +847,6 @@ def update_ticket(request, ticket_id, public=False):
             fail_silently=True,
             files=files,
         ))
-
-    if reassigned:
-        template_cc = 'assigned_cc'
-    elif f.new_status == Ticket.RESOLVED_STATUS:
-        template_cc = 'resolved_cc'
-    elif f.new_status == Ticket.CLOSED_STATUS:
-        template_cc = 'closed_cc'
-    else:
-        template_cc = 'updated_cc'
 
     messages_sent_to.update(ticket.send(
         {'ticket_cc': (template_cc, context)},
