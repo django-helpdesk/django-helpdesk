@@ -21,7 +21,7 @@ from email.utils import getaddresses
 from email_reply_parser import EmailReplyParser
 from helpdesk import settings
 from helpdesk.lib import process_attachments, safe_template_context
-from helpdesk.models import FollowUp, IgnoreEmail, Queue, Ticket, TicketCC
+from helpdesk.models import FollowUp, IgnoreEmail, Queue, Ticket
 import imaplib
 import logging
 import mimetypes
@@ -33,6 +33,7 @@ import socket
 import ssl
 import sys
 from time import ctime
+import typing
 
 
 # import User model, which may be a custom model
@@ -176,13 +177,13 @@ def imap_sync(q, logger, server):
         sys.exit()
 
     try:
-        status, data = server.search(None, 'NOT', 'DELETED')
+        data = server.search(None, 'NOT', 'DELETED')[1]
         if data:
             msgnums = data[0].split()
             logger.info("Received %d messages from IMAP server" % len(msgnums))
             for num in msgnums:
                 logger.info("Processing message %s" % num)
-                status, data = server.fetch(num, '(RFC822)')
+                data = server.fetch(num, '(RFC822)')[1]
                 full_message = encoding.force_str(data[0][1], errors='replace')
                 try:
                     ticket = object_from_message(
@@ -345,7 +346,7 @@ def create_ticket_cc(ticket, cc_list):
     from helpdesk.views.staff import subscribe_to_ticket_updates, User
 
     new_ticket_ccs = []
-    for cced_name, cced_email in cc_list:
+    for __, cced_email in cc_list:
 
         cced_email = cced_email.strip()
         if cced_email == ticket.queue.email_address:
@@ -354,7 +355,7 @@ def create_ticket_cc(ticket, cc_list):
         user = None
 
         try:
-            user = User.objects.get(email=cced_email)
+            user = User.objects.get(email=cced_email)  # @UndefinedVariable
         except User.DoesNotExist:
             pass
 
@@ -466,16 +467,6 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
     new_ticket_ccs = []
     new_ticket_ccs.append(create_ticket_cc(ticket, to_list + cc_list))
 
-    notifications_to_be_sent = [sender_email]
-
-    if queue.enable_notifications_on_email_events and len(notifications_to_be_sent):
-
-        ticket_cc_list = TicketCC.objects.filter(
-            ticket=ticket).all().values_list('email', flat=True)
-
-        for email_address in ticket_cc_list:
-            notifications_to_be_sent.append(email_address)
-
     autoreply = is_autoreply(message)
     if autoreply:
         logger.info(
@@ -516,7 +507,77 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
     return ticket
 
 
-def object_from_message(message, queue, logger):
+def get_ticket_id_from_subject_slug(
+    queue_slug: str,
+    subject: str,
+    logger: logging.Logger
+) -> typing.Optional[int]:
+    """Get a ticket id from the subject string
+
+    Performs a match on the subject using the queue_slug as reference,
+    returning the ticket id if a match is found.
+    """
+    matchobj = re.match(r".*\[" + queue_slug + r"-(?P<id>\d+)\]", subject)
+    ticket_id = None
+    if matchobj:
+        # This is a reply or forward.
+        ticket_id = matchobj.group('id')
+        logger.info("Matched tracking ID %s-%s" % (queue_slug, ticket_id))
+    else:
+        logger.info("No tracking ID matched.")
+    return ticket_id
+
+
+def add_file_if_always_save_incoming_email_message(
+    files_,
+    message: str
+) -> None:
+    """When `settings.HELPDESK_ALWAYS_SAVE_INCOMING_EMAIL_MESSAGE` is `True`
+    add a file to the files_ list"""
+    if getattr(django_settings, 'HELPDESK_ALWAYS_SAVE_INCOMING_EMAIL_MESSAGE', False):
+        # save message as attachment in case of some complex markup renders
+        # wrong
+        files_.append(
+            SimpleUploadedFile(
+                _("original_message.eml").replace(
+                    ".eml",
+                    timezone.localtime().strftime("_%d-%m-%Y_%H:%M") + ".eml"
+                ),
+                str(message).encode("utf-8"),
+                'text/plain'
+            )
+        )
+
+
+def get_encoded_body(body: str) -> str:
+    try:
+        return body.encode('ascii').decode('unicode_escape')
+    except UnicodeEncodeError:
+        return body
+
+
+def get_body_from_fragments(body) -> str:
+    """Gets a body from the fragments, joined by a double line break"""
+    return "\n\n".join(f.content for f in EmailReplyParser.read(body).fragments)
+
+
+def get_email_body_from_part_payload(part) -> str:
+    """Gets an decoded body from the payload part, if the decode fails,
+    returns without encoding"""
+    try:
+        return encoding.smart_str(
+            part.get_payload(decode=True)
+        )
+    except UnicodeDecodeError:
+        return encoding.smart_str(
+            part.get_payload(decode=False)
+        )
+
+
+def object_from_message(message: str,
+                        queue: Queue,
+                        logger: logging.Logger
+                        ) -> Ticket:
     # 'message' must be an RFC822 formatted message.
     message = email.message_from_string(message)
 
@@ -541,20 +602,15 @@ def object_from_message(message, queue, logger):
 
     for ignore in IgnoreEmail.objects.filter(Q(queues=queue) | Q(queues__isnull=True)):
         if ignore.test(sender_email):
-            if ignore.keep_in_mailbox:
-                # By returning 'False' the message will be kept in the mailbox,
-                # and the 'True' will cause the message to be deleted.
-                return False
-            return True
+            # By returning 'False' the message will be kept in the mailbox,
+            # and the 'True' will cause the message to be deleted.
+            return not ignore.keep_in_mailbox
 
-    matchobj = re.match(r".*\[" + queue.slug + r"-(?P<id>\d+)\]", subject)
-    if matchobj:
-        # This is a reply or forward.
-        ticket = matchobj.group('id')
-        logger.info("Matched tracking ID %s-%s" % (queue.slug, ticket))
-    else:
-        logger.info("No tracking ID matched.")
-        ticket = None
+    ticket_id: typing.Optional[int] = get_ticket_id_from_subject_slug(
+        queue.slug,
+        subject,
+        logger
+    )
 
     body = None
     full_body = None
@@ -578,13 +634,10 @@ def object_from_message(message, queue, logger):
                 body = decodeUnknown(part.get_content_charset(), body)
                 # have to use django_settings here so overwritting it works in tests
                 # the default value is False anyway
-                if ticket is None and getattr(django_settings, 'HELPDESK_FULL_FIRST_MESSAGE_FROM_EMAIL', False):
+                if ticket_id is None and getattr(django_settings, 'HELPDESK_FULL_FIRST_MESSAGE_FROM_EMAIL', False):
                     # first message in thread, we save full body to avoid
                     # losing forwards and things like that
-                    body_parts = []
-                    for f in EmailReplyParser.read(body).fragments:
-                        body_parts.append(f.content)
-                    full_body = '\n\n'.join(body_parts)
+                    full_body = get_body_from_fragments(body)
                     body = EmailReplyParser.parse_reply(body)
                 else:
                     # second and other reply, save only first part of the
@@ -592,18 +645,10 @@ def object_from_message(message, queue, logger):
                     body = EmailReplyParser.parse_reply(body)
                     full_body = body
                 # workaround to get unicode text out rather than escaped text
-                try:
-                    body = body.encode('ascii').decode('unicode_escape')
-                except UnicodeEncodeError:
-                    body.encode('utf-8')
+                body = get_encoded_body(body)
                 logger.debug("Discovered plain text MIME part")
             else:
-                try:
-                    email_body = encoding.smart_str(
-                        part.get_payload(decode=True))
-                except UnicodeDecodeError:
-                    email_body = encoding.smart_str(
-                        part.get_payload(decode=False))
+                email_body = get_email_body_from_part_payload(part)
 
                 if not body and not full_body:
                     # no text has been parsed so far - try such deep parsing
@@ -670,19 +715,7 @@ def object_from_message(message, queue, logger):
         if not body:
             body = ""
 
-    if getattr(django_settings, 'HELPDESK_ALWAYS_SAVE_INCOMING_EMAIL_MESSAGE', False):
-        # save message as attachment in case of some complex markup renders
-        # wrong
-        files.append(
-            SimpleUploadedFile(
-                _("original_message.eml").replace(
-                    ".eml",
-                    timezone.localtime().strftime("_%d-%m-%Y_%H:%M") + ".eml"
-                ),
-                str(message).encode("utf-8"),
-                'text/plain'
-            )
-        )
+    add_file_if_always_save_incoming_email_message(files, message)
 
     smtp_priority = message.get('priority', '')
     smtp_importance = message.get('importance', '')
@@ -700,4 +733,4 @@ def object_from_message(message, queue, logger):
         'files': files,
     }
 
-    return create_object_from_email_message(message, ticket, payload, files, logger=logger)
+    return create_object_from_email_message(message, ticket_id, payload, files, logger=logger)

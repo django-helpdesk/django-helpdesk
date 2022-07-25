@@ -14,7 +14,7 @@ import os
 import sys
 
 
-class QuickDjangoTest(object):
+class QuickDjangoTest:
     """
     A quick way to run the Django test suite without a fully-configured project.
 
@@ -78,6 +78,7 @@ class QuickDjangoTest(object):
 
     def __init__(self, *args, **kwargs):
         self.tests = args
+        self.kwargs = kwargs or {"verbosity": 1}
         self._tests()
 
     def _tests(self):
@@ -112,7 +113,7 @@ class QuickDjangoTest(object):
         )
 
         from django.test.runner import DiscoverRunner
-        test_runner = DiscoverRunner(verbosity=1)
+        test_runner = DiscoverRunner(verbosity=self.kwargs["verbosity"])
         django.setup()
 
         failures = test_runner.run_tests(self.tests)
@@ -134,7 +135,8 @@ if __name__ == '__main__':
         description="Run Django tests."
     )
     parser.add_argument('tests', nargs="*", type=str)
+    parser.add_argument("--verbosity", "-v", nargs="?", type=int, default=1)
     args = parser.parse_args()
     if not args.tests:
         args.tests = ['helpdesk']
-    QuickDjangoTest(*args.tests)
+    QuickDjangoTest(*args.tests, verbosity=args.verbosity)
