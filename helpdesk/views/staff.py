@@ -1000,6 +1000,37 @@ ticket_attributes = (
 )
 
 
+def merge_ticket_values(
+        request: WSGIRequest,
+        tickets: typing.List[Ticket],
+        custom_fields
+) -> None:
+    for ticket in tickets:
+        ticket.values = {}
+        # Prepare the value for each attributes of this ticket
+        for attribute, __ in ticket_attributes:
+            value = getattr(ticket, attribute, TicketCustomFieldValue.default_value)
+            # Check if attr is a get_FIELD_display
+            if attribute.startswith('get_') and attribute.endswith('_display'):
+                # Hack to call methods like get_FIELD_display()
+                value = getattr(ticket, attribute, TicketCustomFieldValue.default_value)()
+            ticket.values[attribute] = {
+                'value': value,
+                'checked': str(ticket.id) == request.POST.get(attribute)
+            }
+        # Prepare the value for each custom fields of this ticket
+        for custom_field in custom_fields:
+            try:
+                value = ticket.ticketcustomfieldvalue_set.get(
+                    field=custom_field).value
+            except (TicketCustomFieldValue.DoesNotExist, ValueError):
+                value = TicketCustomFieldValue.default_value
+            ticket.values[custom_field.name] = {
+                'value': value,
+                'checked': str(ticket.id) == request.POST.get(custom_field.name)
+            }
+
+
 @staff_member_required
 def merge_tickets(request):
     """
@@ -1014,31 +1045,8 @@ def merge_tickets(request):
         tickets = ticket_select_form.cleaned_data.get('tickets')
 
         custom_fields = CustomField.objects.all()
-        default = _('Not defined')
-        for ticket in tickets:
-            ticket.values = {}
-            # Prepare the value for each attributes of this ticket
-            for attribute, __ in ticket_attributes:
-                value = getattr(ticket, attribute, default)
-                # Check if attr is a get_FIELD_display
-                if attribute.startswith('get_') and attribute.endswith('_display'):
-                    # Hack to call methods like get_FIELD_display()
-                    value = getattr(ticket, attribute, default)()
-                ticket.values[attribute] = {
-                    'value': value,
-                    'checked': str(ticket.id) == request.POST.get(attribute)
-                }
-            # Prepare the value for each custom fields of this ticket
-            for custom_field in custom_fields:
-                try:
-                    value = ticket.ticketcustomfieldvalue_set.get(
-                        field=custom_field).value
-                except (TicketCustomFieldValue.DoesNotExist, ValueError):
-                    value = default
-                ticket.values[custom_field.name] = {
-                    'value': value,
-                    'checked': str(ticket.id) == request.POST.get(custom_field.name)
-                }
+
+        merge_ticket_values(request, tickets, custom_fields)
 
         if request.method == 'POST':
             # Find which ticket has been chosen to be the main one
