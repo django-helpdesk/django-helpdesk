@@ -177,13 +177,13 @@ def imap_sync(q, logger, server):
         sys.exit()
 
     try:
-        status, data = server.search(None, 'NOT', 'DELETED')
+        data = server.search(None, 'NOT', 'DELETED')[1]
         if data:
             msgnums = data[0].split()
             logger.info("Received %d messages from IMAP server" % len(msgnums))
             for num in msgnums:
                 logger.info("Processing message %s" % num)
-                status, data = server.fetch(num, '(RFC822)')
+                data = server.fetch(num, '(RFC822)')[1]
                 full_message = encoding.force_str(data[0][1], errors='replace')
                 try:
                     ticket = object_from_message(
@@ -346,7 +346,7 @@ def create_ticket_cc(ticket, cc_list):
     from helpdesk.views.staff import subscribe_to_ticket_updates, User
 
     new_ticket_ccs = []
-    for cced_name, cced_email in cc_list:
+    for __, cced_email in cc_list:
 
         cced_email = cced_email.strip()
         if cced_email == ticket.queue.email_address:
