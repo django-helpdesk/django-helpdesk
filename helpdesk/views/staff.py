@@ -989,7 +989,7 @@ mass_update = staff_member_required(mass_update)
 
 # Prepare ticket attributes which will be displayed in the table to choose
 # which value to keep when merging
-ticket_attributes = (
+TICKET_ATTRIBUTES = (
     ('created', _('Created date')),
     ('due_date', _('Due on')),
     ('get_status_display', _('Status')),
@@ -1008,7 +1008,7 @@ def merge_ticket_values(
     for ticket in tickets:
         ticket.values = {}
         # Prepare the value for each attributes of this ticket
-        for attribute, __ in ticket_attributes:
+        for attribute, __ in TICKET_ATTRIBUTES:
             value = getattr(ticket, attribute, TicketCustomFieldValue.default_value)
             # Check if attr is a get_FIELD_display
             if attribute.startswith('get_') and attribute.endswith('_display'):
@@ -1061,7 +1061,7 @@ def merge_tickets(request):
                 )
             else:
                 # Save ticket fields values
-                for attribute, __ in ticket_attributes:
+                for attribute, __ in TICKET_ATTRIBUTES:
                     id_for_attribute = request.POST.get(attribute)
                     if id_for_attribute != chosen_ticket.id:
                         try:
@@ -1151,7 +1151,7 @@ def merge_tickets(request):
 
     return render(request, 'helpdesk/ticket_merge.html', {
         'tickets': tickets,
-        'ticket_attributes': ticket_attributes,
+        'TICKET_ATTRIBUTES': TICKET_ATTRIBUTES,
         'custom_fields': custom_fields,
         'ticket_select_form': ticket_select_form
     })
