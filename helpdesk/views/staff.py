@@ -642,6 +642,19 @@ def update_messages_sent_to_by_public_and_status(
     return ticket
 
 
+def add_staff_subscription(
+    request: WSGIRequest,
+    ticket: Ticket
+) -> None:
+    if helpdesk_settings.HELPDESK_AUTO_SUBSCRIBE_ON_TICKET_RESPONSE and request.user.is_authenticated:
+        SHOW_SUBSCRIBE = return_ticketccstring_and_show_subscribe(
+            request.user, ticket
+        )[1]
+
+        if SHOW_SUBSCRIBE:
+            subscribe_staff_member_to_ticket(ticket, request.user)
+
+
 def update_ticket(request, ticket_id, public=False):
 
     ticket = get_ticket_from_request_with_authorisation(request, ticket_id, public)
@@ -833,17 +846,10 @@ def update_ticket(request, ticket_id, public=False):
         fail_silently=True,
         files=files,
     ))
-
+    add_staff_subscription(request, ticket)
     ticket.save()
 
     # auto subscribe user if enabled
-    if helpdesk_settings.HELPDESK_AUTO_SUBSCRIBE_ON_TICKET_RESPONSE and request.user.is_authenticated:
-        SHOW_SUBSCRIBE = return_ticketccstring_and_show_subscribe(
-            request.user, ticket
-        )[1]
-
-        if SHOW_SUBSCRIBE:
-            subscribe_staff_member_to_ticket(ticket, request.user)
 
     return return_to_ticket(request.user, helpdesk_settings, ticket)
 
