@@ -646,6 +646,8 @@ def add_staff_subscription(
     request: WSGIRequest,
     ticket: Ticket
 ) -> None:
+    """Auto subscribe the staff member if that's what the settigs say and the
+    user is authenticated and a staff member"""
     if helpdesk_settings.HELPDESK_AUTO_SUBSCRIBE_ON_TICKET_RESPONSE and request.user.is_authenticated:
         SHOW_SUBSCRIBE = return_ticketccstring_and_show_subscribe(
             request.user, ticket
@@ -846,10 +848,10 @@ def update_ticket(request, ticket_id, public=False):
         fail_silently=True,
         files=files,
     ))
-    add_staff_subscription(request, ticket)
     ticket.save()
 
     # auto subscribe user if enabled
+    add_staff_subscription(request, ticket)
 
     return return_to_ticket(request.user, helpdesk_settings, ticket)
 
