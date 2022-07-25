@@ -565,7 +565,7 @@ def get_and_set_ticket_status(
     new_status: str,
         ticket: Ticket,
         follow_up: FollowUp
-) -> tuple[str, str]:
+) -> typing.Tuple[str, str]:
     """Performs comparision on previous status to new status,
     updating the title as required.
 
@@ -659,7 +659,7 @@ def add_staff_subscription(
 
 def get_template_staff_and_template_cc(
     reassigned, follow_up:  FollowUp
-) -> tuple[str, str]:
+) -> typing.Tuple[str, str]:
     if reassigned:
         template_staff = 'assigned_owner'
     elif follow_up.new_status == Ticket.RESOLVED_STATUS:
