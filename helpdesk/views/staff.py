@@ -1539,12 +1539,18 @@ def report_index(request):
 report_index = staff_member_required(report_index)
 
 
-@helpdesk_staff_member_required
-def run_report(request, report):
+def get_report_queryset_or_redirect(request, report):
     if Ticket.objects.all().count() == 0 or report not in (
-            'queuemonth', 'usermonth', 'queuestatus', 'queuepriority', 'userstatus',
-            'userpriority', 'userqueue', 'daysuntilticketclosedbymonth'):
-        return HttpResponseRedirect(reverse("helpdesk:report_index"))
+        "queuemonth",
+        "usermonth",
+        "queuestatus",
+        "queuepriority",
+        "userstatus",
+        "userpriority",
+        "userqueue",
+        "daysuntilticketclosedbymonth"
+    ):
+        return None, None, HttpResponseRedirect(reverse("helpdesk:report_index"))
 
     report_queryset = Ticket.objects.all().select_related().filter(
         queue__in=HelpdeskUser(request.user).get_queues()
@@ -1553,8 +1559,18 @@ def run_report(request, report):
     try:
         saved_query, query_params = load_saved_query(request)
     except QueryLoadError:
-        return HttpResponseRedirect(reverse('helpdesk:report_index'))
+        return None, HttpResponseRedirect(reverse('helpdesk:report_index'))
+    return report_queryset, query_params, saved_query, None
 
+
+@helpdesk_staff_member_required
+def run_report(request, report):
+
+    report_queryset, query_params, saved_query, redirect = get_report_queryset_or_redirect(
+        request, report
+    )
+    if redirect:
+        return redirect
     if request.GET.get('saved_query', None):
         Query(report_queryset, query_to_base64(query_params))
 
