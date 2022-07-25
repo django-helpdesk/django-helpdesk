@@ -561,6 +561,38 @@ def get_due_date_from_request_or_ticket(
     return due_date
 
 
+def get_and_set_ticket_status(
+    new_status: str,
+        ticket: Ticket,
+        follow_up: FollowUp
+) -> tuple[str, str]:
+    """Performs comparision on previous status to new status,
+    updating the title as required.
+
+    Returns:
+        The old status as a display string, old status code string
+    """
+    old_status_str = ticket.get_status_display()
+    old_status = ticket.status
+    if new_status != ticket.status:
+        ticket.status = new_status
+        ticket.save()
+        follow_up.new_status = new_status
+        if follow_up.title:
+            follow_up.title += ' and %s' % ticket.get_status_display()
+        else:
+            follow_up.title = '%s' % ticket.get_status_display()
+
+    if not follow_up.title:
+        if follow_up.comment:
+            follow_up.title = _('Comment')
+        else:
+            follow_up.title = _('Updated')
+
+    follow_up.save()
+    return (old_status_str, old_status)
+
+
 def update_ticket(request, ticket_id, public=False):
 
     ticket = get_ticket_from_request_with_authorisation(request, ticket_id, public)
@@ -640,24 +672,7 @@ def update_ticket(request, ticket_id, public=False):
             f.title = _('Unassigned')
             ticket.assigned_to = None
 
-    old_status_str = ticket.get_status_display()
-    old_status = ticket.status
-    if new_status != ticket.status:
-        ticket.status = new_status
-        ticket.save()
-        f.new_status = new_status
-        if f.title:
-            f.title += ' and %s' % ticket.get_status_display()
-        else:
-            f.title = '%s' % ticket.get_status_display()
-
-    if not f.title:
-        if f.comment:
-            f.title = _('Comment')
-        else:
-            f.title = _('Updated')
-
-    f.save()
+    old_status_str, old_status = get_and_set_ticket_status(new_status, ticket, f)
 
     files = []
     if request.FILES:
