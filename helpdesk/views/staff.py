@@ -607,7 +607,7 @@ def update_messages_sent_to_by_public_and_status(
     follow_up: FollowUp,
     context: str,
     messages_sent_to: typing.List[str],
-    files: typing.List[str, str]
+    files: typing.List[typing.Tuple[str, str]]
 ) -> Ticket:
     """Sets the status of the ticket"""
     if public and (
