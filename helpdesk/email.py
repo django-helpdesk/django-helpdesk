@@ -529,7 +529,7 @@ def get_ticket_id_from_subject_slug(
 
 
 def add_file_if_always_save_incoming_email_message(
-    files_: list[SimpleUploadedFile],
+    files_,
     message: str
 ) -> None:
     """When `settings.HELPDESK_ALWAYS_SAVE_INCOMING_EMAIL_MESSAGE` is `True`
