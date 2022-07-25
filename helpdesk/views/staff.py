@@ -728,9 +728,12 @@ def update_ticket(request, ticket_id, public=False):
         c.save()
         ticket.due_date = due_date
 
-    if new_status in (Ticket.RESOLVED_STATUS, Ticket.CLOSED_STATUS):
-        if new_status == Ticket.RESOLVED_STATUS or ticket.resolution is None:
-            ticket.resolution = comment
+    if new_status in (
+        Ticket.RESOLVED_STATUS, Ticket.CLOSED_STATUS
+    ) and (
+        new_status == Ticket.RESOLVED_STATUS or ticket.resolution is None
+    ):
+        ticket.resolution = comment
 
     # ticket might have changed above, so we re-instantiate context with the
     # (possibly) updated ticket.
