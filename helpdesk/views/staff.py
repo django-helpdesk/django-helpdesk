@@ -6,9 +6,9 @@ django-helpdesk - A Django powered ticket tracker for small enterprise.
 views/staff.py - The bulk of the application - provides most business logic and
                  renders all staff-facing views.
 """
-
 from ..lib import format_time_spent
 from ..templated_email import send_templated_mail
+from collections import defaultdict
 from copy import deepcopy
 from datetime import date, datetime, timedelta
 from django.conf import settings
@@ -1558,7 +1558,6 @@ def run_report(request, report):
     if request.GET.get('saved_query', None):
         Query(report_queryset, query_to_base64(query_params))
 
-    from collections import defaultdict
     summarytable = defaultdict(int)
     # a second table for more complex queries
     summarytable2 = defaultdict(int)
