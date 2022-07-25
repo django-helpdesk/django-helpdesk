@@ -553,7 +553,7 @@ def get_encoded_body(body: str) -> str:
     try:
         return body.encode('ascii').decode('unicode_escape')
     except UnicodeEncodeError:
-        return body.encode('utf-8')
+        return body
 
 
 def get_body_from_fragments(body) -> str:
@@ -637,7 +637,8 @@ def object_from_message(message: str,
                 if ticket_id is None and getattr(django_settings, 'HELPDESK_FULL_FIRST_MESSAGE_FROM_EMAIL', False):
                     # first message in thread, we save full body to avoid
                     # losing forwards and things like that
-                    body = EmailReplyParser.parse_reply(get_body_from_fragments(body))
+                    full_body = get_body_from_fragments(body)
+                    body = EmailReplyParser.parse_reply(body)
                 else:
                     # second and other reply, save only first part of the
                     # message
