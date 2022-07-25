@@ -355,7 +355,7 @@ def create_ticket_cc(ticket, cc_list):
         user = None
 
         try:
-            user = User.objects.get(email=cced_email)
+            user = User.objects.get(email=cced_email)  # @UndefinedVariable
         except User.DoesNotExist:
             pass
 
