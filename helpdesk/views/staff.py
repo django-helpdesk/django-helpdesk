@@ -989,7 +989,7 @@ mass_update = staff_member_required(mass_update)
 
 # Prepare ticket attributes which will be displayed in the table to choose
 # which value to keep when merging
-ticket_attributes = (
+TICKET_ATTRIBUTES = (
     ('created', _('Created date')),
     ('due_date', _('Due on')),
     ('get_status_display', _('Status')),
@@ -1008,7 +1008,7 @@ def merge_ticket_values(
     for ticket in tickets:
         ticket.values = {}
         # Prepare the value for each attributes of this ticket
-        for attribute, __ in ticket_attributes:
+        for attribute, __ in TICKET_ATTRIBUTES:
             value = getattr(ticket, attribute, TicketCustomFieldValue.default_value)
             # Check if attr is a get_FIELD_display
             if attribute.startswith('get_') and attribute.endswith('_display'):
@@ -1029,6 +1029,102 @@ def merge_ticket_values(
                 'value': value,
                 'checked': str(ticket.id) == request.POST.get(custom_field.name)
             }
+
+
+def redirect_from_chosen_ticket(
+    request,
+    chosen_ticket,
+    tickets,
+    custom_fields
+) -> HttpResponseRedirect:
+    # Save ticket fields values
+    for attribute, __ in TICKET_ATTRIBUTES:
+        id_for_attribute = request.POST.get(attribute)
+        if id_for_attribute != chosen_ticket.id:
+            try:
+                selected_ticket = tickets.get(id=id_for_attribute)
+            except (Ticket.DoesNotExist, ValueError):
+                continue
+
+            # Check if attr is a get_FIELD_display
+            if attribute.startswith('get_') and attribute.endswith('_display'):
+                # Keep only the FIELD part
+                attribute = attribute[4:-8]
+            # Get value from selected ticket and then save it on
+            # the chosen ticket
+            value = getattr(selected_ticket, attribute)
+            setattr(chosen_ticket, attribute, value)
+    # Save custom fields values
+    for custom_field in custom_fields:
+        id_for_custom_field = request.POST.get(custom_field.name)
+        if id_for_custom_field != chosen_ticket.id:
+            try:
+                selected_ticket = tickets.get(
+                    id=id_for_custom_field)
+            except (Ticket.DoesNotExist, ValueError):
+                continue
+
+            # Check if the value for this ticket custom field
+            # exists
+            try:
+                value = selected_ticket.ticketcustomfieldvalue_set.get(
+                    field=custom_field).value
+            except TicketCustomFieldValue.DoesNotExist:
+                continue
+
+            # Create the custom field value or update it with the
+            # value from the selected ticket
+            custom_field_value, created = chosen_ticket.ticketcustomfieldvalue_set.get_or_create(
+                field=custom_field,
+                defaults={'value': value}
+            )
+            if not created:
+                custom_field_value.value = value
+                custom_field_value.save(update_fields=['value'])
+    # Save changes
+    chosen_ticket.save()
+
+    # For other tickets, save the link to the ticket in which they have been merged to
+    # and set status to DUPLICATE
+    for ticket in tickets.exclude(id=chosen_ticket.id):
+        ticket.merged_to = chosen_ticket
+        ticket.status = Ticket.DUPLICATE_STATUS
+        ticket.save()
+
+        # Send mail to submitter email and ticket CC to let them
+        # know ticket has been merged
+        context = safe_template_context(ticket)
+        if ticket.submitter_email:
+            send_templated_mail(
+                template_name='merged',
+                context=context,
+                recipients=[ticket.submitter_email],
+                bcc=[
+                    cc.email_address for cc in ticket.ticketcc_set.select_related('user')],
+                sender=ticket.queue.from_address,
+                fail_silently=True
+            )
+
+        # Move all followups and update their title to know they
+        # come from another ticket
+        ticket.followup_set.update(
+            ticket=chosen_ticket,
+            # Next might exceed maximum 200 characters limit
+            title=_('[Merged from #%(id)d] %(title)s') % {
+                'id': ticket.id, 'title': ticket.title}
+        )
+
+        # Add submitter_email, assigned_to email and ticketcc to
+        # chosen ticket if necessary
+        chosen_ticket.add_email_to_ticketcc_if_not_in(
+            email=ticket.submitter_email)
+        if ticket.assigned_to and ticket.assigned_to.email:
+            chosen_ticket.add_email_to_ticketcc_if_not_in(
+                email=ticket.assigned_to.email)
+        for ticketcc in ticket.ticketcc_set.all():
+            chosen_ticket.add_email_to_ticketcc_if_not_in(
+                ticketcc=ticketcc)
+    return redirect(chosen_ticket)
 
 
 @staff_member_required
@@ -1060,98 +1156,16 @@ def merge_tickets(request):
                         'Please choose a ticket in which the others will be merged into.')
                 )
             else:
-                # Save ticket fields values
-                for attribute, __ in ticket_attributes:
-                    id_for_attribute = request.POST.get(attribute)
-                    if id_for_attribute != chosen_ticket.id:
-                        try:
-                            selected_ticket = tickets.get(id=id_for_attribute)
-                        except (Ticket.DoesNotExist, ValueError):
-                            continue
-
-                        # Check if attr is a get_FIELD_display
-                        if attribute.startswith('get_') and attribute.endswith('_display'):
-                            # Keep only the FIELD part
-                            attribute = attribute[4:-8]
-                        # Get value from selected ticket and then save it on
-                        # the chosen ticket
-                        value = getattr(selected_ticket, attribute)
-                        setattr(chosen_ticket, attribute, value)
-                # Save custom fields values
-                for custom_field in custom_fields:
-                    id_for_custom_field = request.POST.get(custom_field.name)
-                    if id_for_custom_field != chosen_ticket.id:
-                        try:
-                            selected_ticket = tickets.get(
-                                id=id_for_custom_field)
-                        except (Ticket.DoesNotExist, ValueError):
-                            continue
-
-                        # Check if the value for this ticket custom field
-                        # exists
-                        try:
-                            value = selected_ticket.ticketcustomfieldvalue_set.get(
-                                field=custom_field).value
-                        except TicketCustomFieldValue.DoesNotExist:
-                            continue
-
-                        # Create the custom field value or update it with the
-                        # value from the selected ticket
-                        custom_field_value, created = chosen_ticket.ticketcustomfieldvalue_set.get_or_create(
-                            field=custom_field,
-                            defaults={'value': value}
-                        )
-                        if not created:
-                            custom_field_value.value = value
-                            custom_field_value.save(update_fields=['value'])
-                # Save changes
-                chosen_ticket.save()
-
-                # For other tickets, save the link to the ticket in which they have been merged to
-                # and set status to DUPLICATE
-                for ticket in tickets.exclude(id=chosen_ticket.id):
-                    ticket.merged_to = chosen_ticket
-                    ticket.status = Ticket.DUPLICATE_STATUS
-                    ticket.save()
-
-                    # Send mail to submitter email and ticket CC to let them
-                    # know ticket has been merged
-                    context = safe_template_context(ticket)
-                    if ticket.submitter_email:
-                        send_templated_mail(
-                            template_name='merged',
-                            context=context,
-                            recipients=[ticket.submitter_email],
-                            bcc=[
-                                cc.email_address for cc in ticket.ticketcc_set.select_related('user')],
-                            sender=ticket.queue.from_address,
-                            fail_silently=True
-                        )
-
-                    # Move all followups and update their title to know they
-                    # come from another ticket
-                    ticket.followup_set.update(
-                        ticket=chosen_ticket,
-                        # Next might exceed maximum 200 characters limit
-                        title=_('[Merged from #%(id)d] %(title)s') % {
-                            'id': ticket.id, 'title': ticket.title}
-                    )
-
-                    # Add submitter_email, assigned_to email and ticketcc to
-                    # chosen ticket if necessary
-                    chosen_ticket.add_email_to_ticketcc_if_not_in(
-                        email=ticket.submitter_email)
-                    if ticket.assigned_to and ticket.assigned_to.email:
-                        chosen_ticket.add_email_to_ticketcc_if_not_in(
-                            email=ticket.assigned_to.email)
-                    for ticketcc in ticket.ticketcc_set.all():
-                        chosen_ticket.add_email_to_ticketcc_if_not_in(
-                            ticketcc=ticketcc)
-                return redirect(chosen_ticket)
+                return redirect_from_chosen_ticket(
+                    request,
+                    chosen_ticket,
+                    tickets,
+                    custom_fields
+                )
 
     return render(request, 'helpdesk/ticket_merge.html', {
         'tickets': tickets,
-        'ticket_attributes': ticket_attributes,
+        'ticket_attributes': TICKET_ATTRIBUTES,
         'custom_fields': custom_fields,
         'ticket_select_form': ticket_select_form
     })
