@@ -528,6 +528,52 @@ def get_ticket_id_from_subject_slug(
     return ticket_id
 
 
+def add_file_if_always_save_incoming_email_message(
+    files_: list[SimpleUploadedFile],
+    message: str
+) -> None:
+    """When `settings.HELPDESK_ALWAYS_SAVE_INCOMING_EMAIL_MESSAGE` is `True`
+    add a file to the files_ list"""
+    if getattr(django_settings, 'HELPDESK_ALWAYS_SAVE_INCOMING_EMAIL_MESSAGE', False):
+        # save message as attachment in case of some complex markup renders
+        # wrong
+        files_.append(
+            SimpleUploadedFile(
+                _("original_message.eml").replace(
+                    ".eml",
+                    timezone.localtime().strftime("_%d-%m-%Y_%H:%M") + ".eml"
+                ),
+                str(message).encode("utf-8"),
+                'text/plain'
+            )
+        )
+
+
+def get_encoded_body(body: str) -> str:
+    try:
+        return body.encode('ascii').decode('unicode_escape')
+    except UnicodeEncodeError:
+        return body.encode('utf-8')
+
+
+def get_body_from_fragments(body) -> str:
+    """Gets a body from the fragments, joined by a double line break"""
+    return "\n\n".join(f.content for f in EmailReplyParser.read(body).fragments)
+
+
+def get_email_body_from_part_payload(part) -> str:
+    """Gets an decoded body from the payload part, if the decode fails,
+    returns without encoding"""
+    try:
+        return encoding.smart_str(
+            part.get_payload(decode=True)
+        )
+    except UnicodeDecodeError:
+        return encoding.smart_str(
+            part.get_payload(decode=False)
+        )
+
+
 def object_from_message(message: str,
                         queue: Queue,
                         logger: logging.Logger
@@ -591,29 +637,17 @@ def object_from_message(message: str,
                 if ticket_id is None and getattr(django_settings, 'HELPDESK_FULL_FIRST_MESSAGE_FROM_EMAIL', False):
                     # first message in thread, we save full body to avoid
                     # losing forwards and things like that
-                    body_parts = []
-                    for f in EmailReplyParser.read(body).fragments:
-                        body_parts.append(f.content)
-                    full_body = '\n\n'.join(body_parts)
-                    body = EmailReplyParser.parse_reply(body)
+                    body = EmailReplyParser.parse_reply(get_body_from_fragments(body))
                 else:
                     # second and other reply, save only first part of the
                     # message
                     body = EmailReplyParser.parse_reply(body)
                     full_body = body
                 # workaround to get unicode text out rather than escaped text
-                try:
-                    body = body.encode('ascii').decode('unicode_escape')
-                except UnicodeEncodeError:
-                    body.encode('utf-8')
+                body = get_encoded_body(body)
                 logger.debug("Discovered plain text MIME part")
             else:
-                try:
-                    email_body = encoding.smart_str(
-                        part.get_payload(decode=True))
-                except UnicodeDecodeError:
-                    email_body = encoding.smart_str(
-                        part.get_payload(decode=False))
+                email_body = get_email_body_from_part_payload(part)
 
                 if not body and not full_body:
                     # no text has been parsed so far - try such deep parsing
@@ -680,19 +714,7 @@ def object_from_message(message: str,
         if not body:
             body = ""
 
-    if getattr(django_settings, 'HELPDESK_ALWAYS_SAVE_INCOMING_EMAIL_MESSAGE', False):
-        # save message as attachment in case of some complex markup renders
-        # wrong
-        files.append(
-            SimpleUploadedFile(
-                _("original_message.eml").replace(
-                    ".eml",
-                    timezone.localtime().strftime("_%d-%m-%Y_%H:%M") + ".eml"
-                ),
-                str(message).encode("utf-8"),
-                'text/plain'
-            )
-        )
+    add_file_if_always_save_incoming_email_message(files, message)
 
     smtp_priority = message.get('priority', '')
     smtp_importance = message.get('importance', '')
