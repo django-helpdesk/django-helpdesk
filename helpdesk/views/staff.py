@@ -593,6 +593,14 @@ def get_and_set_ticket_status(
     return (old_status_str, old_status)
 
 
+def get_time_spent_from_request(request: WSGIRequest) -> typing.Optional[timedelta]:
+    if request.POST.get("time_spent"):
+        (hours, minutes) = [int(f)
+                            for f in request.POST.get("time_spent").split(":")]
+        return timedelta(hours=hours, minutes=minutes)
+    return None
+
+
 def update_ticket(request, ticket_id, public=False):
 
     ticket = get_ticket_from_request_with_authorisation(request, ticket_id, public)
@@ -603,12 +611,8 @@ def update_ticket(request, ticket_id, public=False):
     public = request.POST.get('public', False)
     owner = int(request.POST.get('owner', -1))
     priority = int(request.POST.get('priority', ticket.priority))
-    if request.POST.get("time_spent"):
-        (hours, minutes) = [int(f)
-                            for f in request.POST.get("time_spent").split(":")]
-        time_spent = timedelta(hours=hours, minutes=minutes)
-    else:
-        time_spent = None
+
+    time_spent = get_time_spent_from_request(request)
     # NOTE: jQuery's default for dates is mm/dd/yy
     # very US-centric but for now that's the only format supported
     # until we clean up code to internationalize a little more
@@ -674,9 +678,7 @@ def update_ticket(request, ticket_id, public=False):
 
     old_status_str, old_status = get_and_set_ticket_status(new_status, ticket, f)
 
-    files = []
-    if request.FILES:
-        files = process_attachments(f, request.FILES.getlist('attachment'))
+    files = process_attachments(f, request.FILES.getlist('attachment')) if request.FILES else []
 
     if title and title != ticket.title:
         c = TicketChange(
