@@ -1964,6 +1964,10 @@ class TicketCustomFieldValue(models.Model):
     def __str__(self):
         return '%s / %s' % (self.ticket, self.field)
 
+    @property
+    def default_value(self) -> str:
+        return _("Not defined")
+
     class Meta:
         unique_together = (('ticket', 'field'),)
         verbose_name = _('Ticket custom field value')
