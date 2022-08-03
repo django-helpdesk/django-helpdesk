@@ -8,12 +8,11 @@ scripts/create_escalation_exclusion.py - Easy way to routinely add particular
                                          days to the list of days on which no
                                          escalation should take place.
 """
+
+from datetime import date, timedelta
 from django.core.management.base import BaseCommand, CommandError
-
-from helpdesk.models import EscalationExclusion, Queue
-
-from datetime import timedelta, date
 import getopt
+from helpdesk.models import EscalationExclusion, Queue
 from optparse import make_option
 import sys
 
@@ -66,7 +65,8 @@ class Command(BaseCommand):
                     raise CommandError("Queue %s does not exist." % queue)
                 queues.append(q)
 
-        create_exclusions(days=days, occurrences=occurrences, verbose=verbose, queues=queues)
+        create_exclusions(days=days, occurrences=occurrences,
+                          verbose=verbose, queues=queues)
 
 
 day_names = {
@@ -90,11 +90,13 @@ def create_exclusions(days, occurrences, verbose, queues):
         while i < occurrences:
             if day == workdate.weekday():
                 if EscalationExclusion.objects.filter(date=workdate).count() == 0:
-                    esc = EscalationExclusion(name='Auto Exclusion for %s' % day_name, date=workdate)
+                    esc = EscalationExclusion(
+                        name='Auto Exclusion for %s' % day_name, date=workdate)
                     esc.save()
 
                     if verbose:
-                        print("Created exclusion for %s %s" % (day_name, workdate))
+                        print("Created exclusion for %s %s" %
+                              (day_name, workdate))
 
                     for q in queues:
                         esc.queues.add(q)
@@ -116,7 +118,8 @@ def usage():
 if __name__ == '__main__':
     # This script can be run from the command-line or via Django's manage.py.
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'd:o:q:v', ['days=', 'occurrences=', 'verbose', 'queues='])
+        opts, args = getopt.getopt(sys.argv[1:], 'd:o:q:v', [
+                                   'days=', 'occurrences=', 'verbose', 'queues='])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -151,4 +154,5 @@ if __name__ == '__main__':
                 sys.exit(2)
             queues.append(q)
 
-    create_exclusions(days=days, occurrences=occurrences, verbose=verbose, queues=queues)
+    create_exclusions(days=days, occurrences=occurrences,
+                      verbose=verbose, queues=queues)

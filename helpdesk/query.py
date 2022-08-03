@@ -1,15 +1,12 @@
+
+from base64 import b64decode, b64encode
 from django.db.models import Q
 from django.urls import reverse
 from django.utils.html import escape
-from django.utils.translation import ugettext as _
-
-from base64 import b64encode
-from base64 import b64decode
-import json
-
-from model_utils import Choices
-
+from django.utils.translation import gettext as _
 from helpdesk.serializers import DatatablesTicketSerializer
+import json
+from model_utils import Choices
 
 
 def query_to_base64(query):
@@ -103,8 +100,10 @@ def get_query_class():
 class __Query__:
     def __init__(self, huser, base64query=None, query_params=None):
         self.huser = huser
-        self.params = query_params if query_params else query_from_base64(base64query)
-        self.base64 = base64query if base64query else query_to_base64(query_params)
+        self.params = query_params if query_params else query_from_base64(
+            base64query)
+        self.base64 = base64query if base64query else query_to_base64(
+            query_params)
         self.result = None
 
     def get_search_filter_args(self):
@@ -128,7 +127,8 @@ class __Query__:
         """
         filter = self.params.get('filtering', {})
         filter_or = self.params.get('filtering_or', {})
-        queryset = queryset.filter((Q(**filter) | Q(**filter_or)) & self.get_search_filter_args())
+        queryset = queryset.filter(
+            (Q(**filter) | Q(**filter_or)) & self.get_search_filter_args())
         sorting = self.params.get('sorting', None)
         if sorting:
             sortreverse = self.params.get('sortreverse', None)
@@ -191,11 +191,13 @@ class __Query__:
                     'text': {
                         'headline': ticket.title + ' - ' + followup.title,
                         'text': (
-                            (escape(followup.comment) if followup.comment else _('No text'))
+                            (escape(followup.comment)
+                             if followup.comment else _('No text'))
                             +
                             '<br/> <a href="%s" class="btn" role="button">%s</a>'
                             %
-                            (reverse('helpdesk:view', kwargs={'ticket_id': ticket.pk}), _("View ticket"))
+                            (reverse('helpdesk:view', kwargs={
+                             'ticket_id': ticket.pk}), _("View ticket"))
                         ),
                     },
                     'group': _('Messages'),

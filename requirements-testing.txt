@@ -5,3 +5,5 @@ coverage
 argparse
 pbr
 mock
+freezegun
+isort

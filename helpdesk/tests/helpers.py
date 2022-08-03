@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-import sys
-from django.contrib.auth import get_user_model
 
-from helpdesk.models import Ticket, Queue, UserSettings
+from django.contrib.auth import get_user_model
+from helpdesk.models import Queue, Ticket, UserSettings
+import sys
+
 
 User = get_user_model()
 

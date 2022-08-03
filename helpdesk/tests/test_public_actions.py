@@ -1,7 +1,7 @@
-from helpdesk.models import Queue, Ticket
 from django.test import TestCase
 from django.test.client import Client
 from django.urls import reverse
+from helpdesk.models import Queue, Ticket
 
 
 class PublicActionsTestCase(TestCase):
@@ -70,7 +70,8 @@ class PublicActionsTestCase(TestCase):
         self.assertTemplateNotUsed(response, 'helpdesk/public_view_form.html')
         self.assertEqual(ticket.status, Ticket.CLOSED_STATUS)
         self.assertEqual(ticket.resolution, resolution_text)
-        self.assertEqual(current_followups + 1, ticket.followup_set.all().count())
+        self.assertEqual(current_followups + 1,
+                         ticket.followup_set.all().count())
 
         ticket.resolution = old_resolution
         ticket.status = old_status

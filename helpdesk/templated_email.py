@@ -1,9 +1,10 @@
-import os
-import logging
-from smtplib import SMTPException
 
 from django.conf import settings
 from django.utils.safestring import mark_safe
+import logging
+import os
+from smtplib import SMTPException
+
 
 logger = logging.getLogger('helpdesk')
 
@@ -50,20 +51,22 @@ def send_templated_mail(template_name,
     from_string = engines['django'].from_string
 
     from helpdesk.models import EmailTemplate
-    from helpdesk.settings import HELPDESK_EMAIL_SUBJECT_TEMPLATE, \
-        HELPDESK_EMAIL_FALLBACK_LOCALE
+    from helpdesk.settings import HELPDESK_EMAIL_FALLBACK_LOCALE, HELPDESK_EMAIL_SUBJECT_TEMPLATE
 
     headers = extra_headers or {}
 
     locale = context['queue'].get('locale') or HELPDESK_EMAIL_FALLBACK_LOCALE
 
     try:
-        t = EmailTemplate.objects.get(template_name__iexact=template_name, locale=locale)
+        t = EmailTemplate.objects.get(
+            template_name__iexact=template_name, locale=locale)
     except EmailTemplate.DoesNotExist:
         try:
-            t = EmailTemplate.objects.get(template_name__iexact=template_name, locale__isnull=True)
+            t = EmailTemplate.objects.get(
+                template_name__iexact=template_name, locale__isnull=True)
         except EmailTemplate.DoesNotExist:
-            logger.warning('template "%s" does not exist, no mail sent', template_name)
+            logger.warning(
+                'template "%s" does not exist, no mail sent', template_name)
             return  # just ignore if template doesn't exist
 
     subject_part = from_string(
@@ -77,10 +80,12 @@ def send_templated_mail(template_name,
         "%s\n\n{%% include '%s' %%}" % (t.plain_text, footer_file)
     ).render(context)
 
-    email_html_base_file = os.path.join('helpdesk', locale, 'email_html_base.html')
+    email_html_base_file = os.path.join(
+        'helpdesk', locale, 'email_html_base.html')
     # keep new lines in html emails
     if 'comment' in context:
-        context['comment'] = mark_safe(context['comment'].replace('\r\n', '<br>'))
+        context['comment'] = mark_safe(
+            context['comment'].replace('\r\n', '<br>'))
 
     html_part = from_string(
         "{%% extends '%s' %%}"
@@ -112,7 +117,8 @@ def send_templated_mail(template_name,
     try:
         return msg.send()
     except SMTPException as e:
-        logger.exception('SMTPException raised while sending email to {}'.format(recipients))
+        logger.exception(
+            'SMTPException raised while sending email to {}'.format(recipients))
         if not fail_silently:
             raise e
         return 0

@@ -1,13 +1,25 @@
+
 from django.contrib import admin
-from django.utils.translation import ugettext_lazy as _
-from helpdesk.models import Queue, Ticket, FollowUp, PreSetReply
-from helpdesk.models import EscalationExclusion, EmailTemplate
-from helpdesk.models import TicketChange, KBIAttachment, FollowUpAttachment, IgnoreEmail
-from helpdesk.models import CustomField
+from django.utils.translation import gettext_lazy as _
 from helpdesk import settings as helpdesk_settings
+from helpdesk.models import (
+    CustomField,
+    EmailTemplate,
+    EscalationExclusion,
+    FollowUp,
+    FollowUpAttachment,
+    IgnoreEmail,
+    KBIAttachment,
+    PreSetReply,
+    Queue,
+    Ticket,
+    TicketChange
+)
+
+
 if helpdesk_settings.HELPDESK_KB_ENABLED:
-    from helpdesk.models import KBCategory
-    from helpdesk.models import KBItem
+    from helpdesk.models import KBCategory, KBItem
+
 
 @admin.register(Queue)
 class QueueAdmin(admin.ModelAdmin):
@@ -74,15 +86,17 @@ class FollowUpAdmin(admin.ModelAdmin):
 if helpdesk_settings.HELPDESK_KB_ENABLED:
     @admin.register(KBItem)
     class KBItemAdmin(admin.ModelAdmin):
-        list_display = ('category', 'title', 'last_updated', 'team', 'order', 'enabled')
+        list_display = ('category', 'title', 'last_updated',
+                        'team', 'order', 'enabled')
         inlines = [KBIAttachmentInline]
         readonly_fields = ('voted_by', 'downvoted_by')
 
         list_display_links = ('title',)
 
-    @admin.register(KBCategory)
-    class KBCategoryAdmin(admin.ModelAdmin):
-        list_display = ('name', 'title', 'slug', 'public')
+    if helpdesk_settings.HELPDESK_KB_ENABLED:
+        @admin.register(KBCategory)
+        class KBCategoryAdmin(admin.ModelAdmin):
+            list_display = ('name', 'title', 'slug', 'public')
 
 
 @admin.register(CustomField)

@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 Usage:
 $ python -m venv .venv
@@ -5,15 +6,15 @@ $ source .venv/bin/activate
 $ pip install -r requirements-testing.txt -r requirements.txt
 $ python ./quicktest.py
 """
-import os
-import sys
-import argparse
 
+import argparse
 import django
 from django.conf import settings
+import os
+import sys
 
 
-class QuickDjangoTest(object):
+class QuickDjangoTest:
     """
     A quick way to run the Django test suite without a fully-configured project.
 
@@ -35,14 +36,14 @@ class QuickDjangoTest(object):
         'django.contrib.sites',
         'django.contrib.staticfiles',
         'bootstrap4form',
-        ## The following commented apps are optional, 
-        ## related to teams functionalities
-        #'account',
-        #'pinax.invitations',
-        #'pinax.teams',
+        #  The following commented apps are optional,
+        #  related to teams functionalities
+        # 'account',
+        # 'pinax.invitations',
+        # 'pinax.teams',
         'rest_framework',
         'helpdesk',
-        #'reversion',
+        # 'reversion',
     )
     MIDDLEWARE = [
         'django.middleware.security.SecurityMiddleware',
@@ -77,6 +78,7 @@ class QuickDjangoTest(object):
 
     def __init__(self, *args, **kwargs):
         self.tests = args
+        self.kwargs = kwargs or {"verbosity": 1}
         self._tests()
 
     def _tests(self):
@@ -98,20 +100,20 @@ class QuickDjangoTest(object):
             MIDDLEWARE=self.MIDDLEWARE,
             ROOT_URLCONF='helpdesk.tests.urls',
             STATIC_URL='/static/',
-            LOGIN_URL='/helpdesk/login/',
+            LOGIN_URL='/login/',
             TEMPLATES=self.TEMPLATES,
             SITE_ID=1,
             SECRET_KEY='wowdonotusethisfakesecuritykeyyouneedarealsecure1',
-            ## The following settings disable teams
-            HELPDESK_TEAMS_MODEL = 'auth.User',
-            HELPDESK_TEAMS_MIGRATION_DEPENDENCIES = [],
-            HELPDESK_KBITEM_TEAM_GETTER = lambda _: None,
-            ## test the API
+            # The following settings disable teams
+            HELPDESK_TEAMS_MODEL='auth.User',
+            HELPDESK_TEAMS_MIGRATION_DEPENDENCIES=[],
+            HELPDESK_KBITEM_TEAM_GETTER=lambda _: None,
+            # test the API
             HELPDESK_ACTIVATE_API_ENDPOINT=True
         )
 
         from django.test.runner import DiscoverRunner
-        test_runner = DiscoverRunner(verbosity=1)
+        test_runner = DiscoverRunner(verbosity=self.kwargs["verbosity"])
         django.setup()
 
         failures = test_runner.run_tests(self.tests)
@@ -133,7 +135,8 @@ if __name__ == '__main__':
         description="Run Django tests."
     )
     parser.add_argument('tests', nargs="*", type=str)
+    parser.add_argument("--verbosity", "-v", nargs="?", type=int, default=1)
     args = parser.parse_args()
     if not args.tests:
         args.tests = ['helpdesk']
-    QuickDjangoTest(*args.tests)
+    QuickDjangoTest(*args.tests, verbosity=args.verbosity)

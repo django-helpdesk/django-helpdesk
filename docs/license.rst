@@ -4,6 +4,7 @@ License
 django-helpdesk is released under the terms of the BSD license. You must agree to these terms before installing or using django-helpdesk.::
 
     Copyright (c) 2008, Ross Poulton (Trading as Jutda)
+    Copyright (c) 2008-2021, django-helpdesk contributors
     All rights reserved.
 
     Redistribution and use in source and binary forms, with or without modification,

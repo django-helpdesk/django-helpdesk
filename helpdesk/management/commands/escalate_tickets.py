@@ -8,18 +8,17 @@ scripts/escalate_tickets.py - Easy way to escalate tickets based on their age,
                               designed to be run from Cron or similar.
 """
 
-from datetime import timedelta, date
-import getopt
-from optparse import make_option
-import sys
 
+from datetime import date, timedelta
 from django.core.management.base import BaseCommand, CommandError
 from django.db.models import Q
-from django.utils.translation import ugettext as _
 from django.utils import timezone
-
-from helpdesk.models import Queue, Ticket, FollowUp, EscalationExclusion, TicketChange
+from django.utils.translation import gettext as _
+import getopt
 from helpdesk.lib import safe_template_context
+from helpdesk.models import EscalationExclusion, FollowUp, Queue, Ticket, TicketChange
+from optparse import make_option
+import sys
 
 
 class Command(BaseCommand):
@@ -62,7 +61,8 @@ class Command(BaseCommand):
 
 def escalate_tickets(queues, verbose):
     """ Only include queues with escalation configured """
-    queryset = Queue.objects.filter(escalate_days__isnull=False).exclude(escalate_days=0)
+    queryset = Queue.objects.filter(
+        escalate_days__isnull=False).exclude(escalate_days=0)
     if queues:
         queryset = queryset.filter(slug__in=queues)
 
@@ -143,7 +143,8 @@ def usage():
 
 if __name__ == '__main__':
     try:
-        opts, args = getopt.getopt(sys.argv[1:], ['queues=', 'verboseescalation'])
+        opts, args = getopt.getopt(
+            sys.argv[1:], ['queues=', 'verboseescalation'])
     except getopt.GetoptError:
         usage()
         sys.exit(2)

@@ -10,7 +10,7 @@ Prerequisites
 Before getting started, ensure your system meets the following recommended dependencies:
 
 * Python 3.8+
-* Django 2.2 LTS or 3.2 LTS (strongly recommend migrating to 3.2 LTS as soon as possible)
+* Django 3.2 LTS
   
 Ensure any extra Django modules you wish to use are compatible before continuing.
 
@@ -63,6 +63,7 @@ errors with trying to create User settings.
         'pinax.teams',  # Team support
         'reversion',  # Required by pinax-teams
         'rest_framework',  # required for the API
+        'django_cleanup.apps.CleanupConfig',  # Remove this if you do NOT want to delete files on the file system when the associated record is deleted in the database
         'helpdesk',  # This is us!
     )
 
@@ -74,11 +75,12 @@ errors with trying to create User settings.
 
      SITE_ID = 1
 
-2. Make sure django-helpdesk is accessible via ``urls.py``. Add the following line to ``urls.py``::
+2. Make sure django-helpdesk is accessible via ``urls.py``. Add the following lines to ``urls.py``::
 
+     from django.conf.urls import include
      path('helpdesk/', include('helpdesk.urls')),
 
-   Note that you can change 'helpdesk/' to anything you like, such as 'support/' or 'help/'. If you want django-helpdesk to be available at the root of your site (for example at http://support.mysite.tld/) then the line will be as follows::
+   Note that you can change 'helpdesk/' to anything you like, such as 'support/' or 'help/'. If you want django-helpdesk to be available at the root of your site (for example at http://support.mysite.tld/) then the path line will be as follows::
 
      path('', include('helpdesk.urls', namespace='helpdesk')),
 

@@ -1,11 +1,10 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
-from django.urls import reverse
 from django.test import TestCase
 from django.test.client import Client
-
-from helpdesk.models import Queue, Ticket
+from django.urls import reverse
 from helpdesk import settings
+from helpdesk.models import Queue, Ticket
 from helpdesk.query import __Query__
 from helpdesk.user import HelpdeskUser
 
@@ -56,11 +55,13 @@ class PerQueueStaffMembershipTestCase(TestCase):
 
             for ticket_number in range(1, identifier + 1):
                 Ticket.objects.create(
-                    title='Unassigned Ticket %d in Queue %d' % (ticket_number, identifier),
+                    title='Unassigned Ticket %d in Queue %d' % (
+                        ticket_number, identifier),
                     queue=queue,
                 )
                 Ticket.objects.create(
-                    title='Ticket %d in Queue %d Assigned to User_%d' % (ticket_number, identifier, identifier),
+                    title='Ticket %d in Queue %d Assigned to User_%d' % (
+                        ticket_number, identifier, identifier),
                     queue=queue,
                     assigned_to=user,
                 )
@@ -80,7 +81,8 @@ class PerQueueStaffMembershipTestCase(TestCase):
 
         # Regular users
         for identifier in self.IDENTIFIERS:
-            self.client.login(username='User_%d' % identifier, password=str(identifier))
+            self.client.login(username='User_%d' %
+                              identifier, password=str(identifier))
             response = self.client.get(reverse('helpdesk:dashboard'))
             self.assertEqual(
                 len(response.context['unassigned_tickets']),
@@ -117,7 +119,8 @@ class PerQueueStaffMembershipTestCase(TestCase):
 
         # Regular users
         for identifier in self.IDENTIFIERS:
-            self.client.login(username='User_%d' % identifier, password=str(identifier))
+            self.client.login(username='User_%d' %
+                              identifier, password=str(identifier))
             response = self.client.get(reverse('helpdesk:report_index'))
             self.assertEqual(
                 len(response.context['dash_tickets']),
@@ -164,9 +167,11 @@ class PerQueueStaffMembershipTestCase(TestCase):
         """
         # Regular users
         for identifier in self.IDENTIFIERS:
-            self.client.login(username='User_%d' % identifier, password=str(identifier))
+            self.client.login(username='User_%d' %
+                              identifier, password=str(identifier))
             response = self.client.get(reverse('helpdesk:list'))
-            tickets = __Query__(HelpdeskUser(self.identifier_users[identifier]), base64query=response.context['urlsafe_query']).get()
+            tickets = __Query__(HelpdeskUser(
+                self.identifier_users[identifier]), base64query=response.context['urlsafe_query']).get()
             self.assertEqual(
                 len(tickets),
                 identifier * 2,
@@ -186,7 +191,8 @@ class PerQueueStaffMembershipTestCase(TestCase):
         # Superuser
         self.client.login(username='superuser', password='superuser')
         response = self.client.get(reverse('helpdesk:list'))
-        tickets = __Query__(HelpdeskUser(self.superuser), base64query=response.context['urlsafe_query']).get()
+        tickets = __Query__(HelpdeskUser(self.superuser),
+                            base64query=response.context['urlsafe_query']).get()
         self.assertEqual(
             len(tickets),
             6,
@@ -201,7 +207,8 @@ class PerQueueStaffMembershipTestCase(TestCase):
         """
         # Regular users
         for identifier in self.IDENTIFIERS:
-            self.client.login(username='User_%d' % identifier, password=str(identifier))
+            self.client.login(username='User_%d' %
+                              identifier, password=str(identifier))
             response = self.client.get(
                 reverse('helpdesk:run_report', kwargs={'report': 'userqueue'})
             )
@@ -212,9 +219,11 @@ class PerQueueStaffMembershipTestCase(TestCase):
                 2,
                 'Queues in report were not properly limited by queue membership'
             )
-            # Each user should see a total number of tickets equal to twice their ID
+            # Each user should see a total number of tickets equal to twice
+            # their ID
             self.assertEqual(
-                sum([sum(user_tickets[1:]) for user_tickets in response.context['data']]),
+                sum([sum(user_tickets[1:])
+                     for user_tickets in response.context['data']]),
                 identifier * 2,
                 'Tickets in report were not properly limited by queue membership'
             )
@@ -224,7 +233,8 @@ class PerQueueStaffMembershipTestCase(TestCase):
                 2,
                 'Queue choices were not properly limited by queue membership'
             )
-            # The queue each user can pick should be the queue named after their ID
+            # The queue each user can pick should be the queue named after
+            # their ID
             self.assertEqual(
                 response.context['headings'][1],
                 "Queue %d" % identifier,
@@ -245,7 +255,8 @@ class PerQueueStaffMembershipTestCase(TestCase):
         )
         # Superuser should see the total ticket count of three tickets
         self.assertEqual(
-            sum([sum(user_tickets[1:]) for user_tickets in response.context['data']]),
+            sum([sum(user_tickets[1:])
+                 for user_tickets in response.context['data']]),
             6,
             'Tickets in report were improperly limited by queue membership for a superuser'
         )

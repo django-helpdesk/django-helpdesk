@@ -1,9 +1,10 @@
 from django.contrib.auth import get_user_model
 from django.core import mail
-from django.urls import reverse
 from django.test import TestCase
 from django.test.client import Client
+from django.urls import reverse
 from helpdesk.models import CustomField, Queue, Ticket
+
 
 try:  # python 3
     from urllib.parse import urlparse
@@ -26,5 +27,6 @@ class TicketActionsTestCase(TestCase):
 
     def test_get_user_settings(self):
 
-        response = self.client.get(reverse('helpdesk:user_settings'), follow=True)
+        response = self.client.get(
+            reverse('helpdesk:user_settings'), follow=True)
         self.assertContains(response, "Use the following options")

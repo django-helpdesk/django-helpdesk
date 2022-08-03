@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
 """Python packaging."""
-
-from __future__ import unicode_literals
-
-from setuptools import setup
 import os
+from setuptools import setup
+
 
 here = os.path.abspath(os.path.dirname(__file__))
 project_root = os.path.dirname(here)
@@ -13,7 +11,7 @@ project_root = os.path.dirname(here)
 NAME = 'django-helpdesk-demodesk'
 DESCRIPTION = 'A demo Django project using django-helpdesk'
 README = open(os.path.join(here, 'README.rst')).read()
-VERSION = '0.3.5'
+VERSION = '0.5.0a1'
 #VERSION = open(os.path.join(project_root, 'VERSION')).read().strip()
 AUTHOR = 'django-helpdesk team'
 URL = 'https://github.com/django-helpdesk/django-helpdesk'
@@ -22,13 +20,13 @@ CLASSIFIERS = ['Development Status :: 4 - Beta',
                'Programming Language :: Python :: 3.8',
                'Programming Language :: Python :: 3.9',
                'Programming Language :: Python :: 3.10',
-               'Framework :: Django :: 2.2',
-               'Framework :: Django :: 3.2']
+               'Framework :: Django :: 3.2',
+               'Framework :: Django :: 4.0']
 KEYWORDS = []
 PACKAGES = ['demodesk']
 REQUIREMENTS = [
     'django-helpdesk'
-    ]
+]
 ENTRY_POINTS = {
     'console_scripts': ['demodesk = demodesk.manage:main']
 }

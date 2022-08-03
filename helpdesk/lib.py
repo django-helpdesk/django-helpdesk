@@ -6,14 +6,14 @@ django-helpdesk - A Django powered ticket tracker for small enterprise.
 lib.py - Common functions (eg multipart e-mail)
 """
 
+
+from datetime import date, datetime, time
+from django.conf import settings
+from django.utils.encoding import smart_str
+from helpdesk.settings import CUSTOMFIELD_DATE_FORMAT, CUSTOMFIELD_DATETIME_FORMAT, CUSTOMFIELD_TIME_FORMAT
 import logging
 import mimetypes
-from datetime import datetime, date, time
 
-from django.conf import settings
-from django.utils.encoding import smart_text
-
-from helpdesk.settings import CUSTOMFIELD_DATETIME_FORMAT, CUSTOMFIELD_DATE_FORMAT, CUSTOMFIELD_TIME_FORMAT
 
 logger = logging.getLogger('helpdesk')
 
@@ -117,26 +117,30 @@ def text_is_spam(text, request):
     if ak.verify_key():
         ak_data = {
             'user_ip': request.META.get('REMOTE_ADDR', '127.0.0.1'),
-            'user_agent': request.META.get('HTTP_USER_AGENT', ''),
-            'referrer': request.META.get('HTTP_REFERER', ''),
+            'user_agent': request.headers.get('User-Agent', ''),
+            'referrer': request.headers.get('Referer', ''),
             'comment_type': 'comment',
             'comment_author': '',
         }
 
-        return ak.comment_check(smart_text(text), data=ak_data)
+        return ak.comment_check(smart_str(text), data=ak_data)
 
     return False
 
 
 def process_attachments(followup, attached_files):
-    max_email_attachment_size = getattr(settings, 'HELPDESK_MAX_EMAIL_ATTACHMENT_SIZE', 512000)
+    max_email_attachment_size = getattr(
+        settings, 'HELPDESK_MAX_EMAIL_ATTACHMENT_SIZE', 512000)
     attachments = []
 
     for attached in attached_files:
 
         if attached.size:
-            filename = smart_text(attached.name)
-            att = followup.followupattachment_set.create(
+            from helpdesk.models import FollowUpAttachment
+
+            filename = smart_str(attached.name)
+            att = FollowUpAttachment(
+                followup=followup,
                 file=attached,
                 filename=filename,
                 mime_type=attached.content_type or
@@ -149,7 +153,8 @@ def process_attachments(followup, attached_files):
 
             if attached.size < max_email_attachment_size:
                 # Only files smaller than 512kb (or as defined in
-                # settings.HELPDESK_MAX_EMAIL_ATTACHMENT_SIZE) are sent via email.
+                # settings.HELPDESK_MAX_EMAIL_ATTACHMENT_SIZE) are sent via
+                # email.
                 attachments.append([filename, att.file])
 
     return attachments
