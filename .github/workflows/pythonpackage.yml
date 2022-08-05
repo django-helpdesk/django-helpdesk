@@ -21,7 +21,7 @@ jobs:
     - uses: actions/cache@v2
       with:
         path: ~/.cache/pip
-        key: ${{ hashFiles('requirements.txt') }}-${{ hashFiles('requirements-testing.txt')}}-${{ hashFiles('tox.ini') }}
+        key: ${{ hashFiles('requirements.txt') }}-${{ hashFiles('requirements-testing.txt')}}-${{ hashFiles('tox.ini') }}-${{ matrix.python-version }}
 
     - name: Install dependencies
       run: |
