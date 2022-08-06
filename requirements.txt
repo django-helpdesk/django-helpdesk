@@ -3,7 +3,7 @@ django-bootstrap4-form
 celery
 email-reply-parser
 akismet
-markdown<3.0
+markdown
 beautifulsoup4
 lxml
 simplejson

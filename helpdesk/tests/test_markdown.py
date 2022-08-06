@@ -20,14 +20,14 @@ class MarkDown(SimpleTestCase):
         self.assertEqual(output_value, expected_value)
 
     def test_markdown_fenced_code(self):
-        expected_value = '<h1>Title</h1>\n<pre><code class="python"># import os\n</code></pre>'
+        expected_value = '<h1>Title</h1>\n<pre><code class="language-python"># import os\n</code></pre>'
         input_value = """
 # Title
 
 ```python
 # import os
 ```
-        """        
+        """
         output_value = get_markdown(input_value)
         self.assertEqual(output_value, expected_value)
 
