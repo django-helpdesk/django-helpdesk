@@ -6,30 +6,29 @@ django-helpdesk - A Django powered ticket tracker for small enterprise.
 views/public.py - All public facing views, eg non-staff (no authentication
                   required) views.
 """
-import logging
-from importlib import import_module
 
-from django.core.exceptions import (
-    ObjectDoesNotExist, PermissionDenied, ImproperlyConfigured,
-)
-from django.urls import reverse
+
+from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured, ObjectDoesNotExist, PermissionDenied
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
-from urllib.parse import quote
+from django.urls import reverse
 from django.utils.translation import gettext as _
-from django.conf import settings
 from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import FormView
-
 from helpdesk import settings as helpdesk_settings
-from helpdesk.decorators import protect_view, is_helpdesk_staff
-import helpdesk.views.staff as staff
-import helpdesk.views.abstract_views as abstract_views
+from helpdesk.decorators import is_helpdesk_staff, protect_view
 from helpdesk.lib import text_is_spam
-from helpdesk.models import Ticket, Queue, UserSettings
+from helpdesk.models import Queue, Ticket, UserSettings
 from helpdesk.user import huser_from_request
+import helpdesk.views.abstract_views as abstract_views
+import helpdesk.views.staff as staff
+from importlib import import_module
+import logging
+from urllib.parse import quote
+
 
 logger = logging.getLogger(__name__)
 
@@ -212,6 +211,7 @@ def view_ticket(request):
 
     if 'close' in request.GET and ticket.status == Ticket.RESOLVED_STATUS:
         from helpdesk.views.staff import update_ticket
+
         # Trick the update_ticket() view into thinking it's being called with
         # a valid POST.
         request.POST = {

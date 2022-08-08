@@ -1,9 +1,10 @@
-import os
-import logging
-from smtplib import SMTPException
 
 from django.conf import settings
 from django.utils.safestring import mark_safe
+import logging
+import os
+from smtplib import SMTPException
+
 
 logger = logging.getLogger('helpdesk')
 
@@ -50,8 +51,7 @@ def send_templated_mail(template_name,
     from_string = engines['django'].from_string
 
     from helpdesk.models import EmailTemplate
-    from helpdesk.settings import HELPDESK_EMAIL_SUBJECT_TEMPLATE, \
-        HELPDESK_EMAIL_FALLBACK_LOCALE
+    from helpdesk.settings import HELPDESK_EMAIL_FALLBACK_LOCALE, HELPDESK_EMAIL_SUBJECT_TEMPLATE
 
     headers = extra_headers or {}
 

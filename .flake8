@@ -2,3 +2,11 @@
 max-line-length = 120
 exclude = .git,__pycache__,.tox,.eggs,*.egg,node_modules,.venv,migrations,docs,demo,tests,setup.py
 import-order-style = pep8
+max-complexity = 20
+
+[pycodestyle]
+max-line-length = 120
+exclude = "migrations"
+in-place = true
+recursive = true
+

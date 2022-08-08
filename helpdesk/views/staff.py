@@ -6,67 +6,80 @@ django-helpdesk - A Django powered ticket tracker for small enterprise.
 views/staff.py - The bulk of the application - provides most business logic and
                  renders all staff-facing views.
 """
+from ..lib import format_time_spent
+from ..templated_email import send_templated_mail
+from collections import defaultdict
 from copy import deepcopy
-import json
-
+from datetime import date, datetime, timedelta
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.contenttypes.models import ContentType
-from django.urls import reverse, reverse_lazy
-from django.core.exceptions import ValidationError, PermissionDenied
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.core.exceptions import PermissionDenied, ValidationError
+from django.core.handlers.wsgi import WSGIRequest
+from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db.models import Q
-from django.http import HttpResponseRedirect, Http404, HttpResponse, JsonResponse
-from django.shortcuts import render, get_object_or_404, redirect
-from django.utils.translation import gettext as _
-from django.utils.html import escape
+from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse, reverse_lazy
 from django.utils import timezone
+from django.utils.html import escape
+from django.utils.translation import gettext as _
 from django.views.decorators.csrf import requires_csrf_token
 from django.views.generic.edit import FormView, UpdateView
-
-from helpdesk.forms import CUSTOMFIELD_DATE_FORMAT
-from helpdesk.query import (
-    get_query_class,
-    query_to_base64,
-    query_from_base64,
-)
-
-from helpdesk.user import HelpdeskUser
-
+from helpdesk import settings as helpdesk_settings
 from helpdesk.decorators import (
-    helpdesk_staff_member_required, helpdesk_superuser_required,
-    is_helpdesk_staff
+    helpdesk_staff_member_required,
+    helpdesk_superuser_required,
+    is_helpdesk_staff,
+    superuser_required
 )
 from helpdesk.forms import (
-    TicketForm, UserSettingsForm, EmailIgnoreForm, EditTicketForm, TicketCCForm,
-    TicketCCEmailForm, TicketCCUserForm, EditFollowUpForm, TicketDependencyForm, MultipleTicketSelectForm
+    CUSTOMFIELD_DATE_FORMAT,
+    EditFollowUpForm,
+    EditTicketForm,
+    EmailIgnoreForm,
+    MultipleTicketSelectForm,
+    TicketCCEmailForm,
+    TicketCCForm,
+    TicketCCUserForm,
+    TicketDependencyForm,
+    TicketForm,
+    UserSettingsForm
 )
-from helpdesk.decorators import superuser_required
-from helpdesk.lib import (
-    safe_template_context,
-    process_attachments,
-    queue_template_context,
-)
+from helpdesk.lib import process_attachments, queue_template_context, safe_template_context
 from helpdesk.models import (
-    Ticket, Queue, FollowUp, TicketChange, PreSetReply, FollowUpAttachment, SavedSearch,
-    IgnoreEmail, TicketCC, TicketDependency, UserSettings, CustomField, TicketCustomFieldValue,
+    CustomField,
+    FollowUp,
+    FollowUpAttachment,
+    IgnoreEmail,
+    PreSetReply,
+    Queue,
+    SavedSearch,
+    Ticket,
+    TicketCC,
+    TicketChange,
+    TicketCustomFieldValue,
+    TicketDependency,
+    UserSettings
 )
-from helpdesk import settings as helpdesk_settings
-if helpdesk_settings.HELPDESK_KB_ENABLED:
-    from helpdesk.models import (KBItem)
-
+from helpdesk.query import get_query_class, query_from_base64, query_to_base64
+from helpdesk.user import HelpdeskUser
 import helpdesk.views.abstract_views as abstract_views
 from helpdesk.views.permissions import MustBeStaffMixin
-from ..lib import format_time_spent
-
+import json
+import re
 from rest_framework import status
 from rest_framework.decorators import api_view
+import typing
 
-from datetime import date, datetime, timedelta
-import re
 
-from ..templated_email import send_templated_mail
+if helpdesk_settings.HELPDESK_KB_ENABLED:
+    from helpdesk.models import KBItem
+
+DATE_RE: re.Pattern = re.compile(
+    r'(?P<month>\d{1,2})/(?P<day>\d{1,2})/(?P<year>\d{4})$'
+)
 
 User = get_user_model()
 Query = get_query_class()
@@ -260,7 +273,7 @@ def followup_edit(request, ticket_id, followup_id):
             'time_spent': format_time_spent(followup.time_spent),
         })
 
-        ticketcc_string, show_subscribe = \
+        ticketcc_string, __ = \
             return_ticketccstring_and_show_subscribe(request.user, ticket)
 
         return render(request, 'helpdesk/followup_edit.html', {
@@ -338,8 +351,10 @@ def view_ticket(request, ticket_id):
     if 'subscribe' in request.GET:
         # Allow the user to subscribe him/herself to the ticket whilst viewing
         # it.
-        ticket_cc, show_subscribe = \
-            return_ticketccstring_and_show_subscribe(request.user, ticket)
+        show_subscribe = return_ticketccstring_and_show_subscribe(
+            request.user, ticket
+        )[1]
+
         if show_subscribe:
             subscribe_staff_member_to_ticket(ticket, request.user)
             return HttpResponseRedirect(reverse('helpdesk:view', args=[ticket.id]))
@@ -473,10 +488,20 @@ def subscribe_staff_member_to_ticket(ticket, user, email='', can_view=True, can_
     return subscribe_to_ticket_updates(ticket=ticket, user=user, email=email, can_view=can_view, can_update=can_update)
 
 
-def update_ticket(request, ticket_id, public=False):
+def get_ticket_from_request_with_authorisation(
+    request: WSGIRequest,
+    ticket_id: str,
+    public: bool
+) -> typing.Union[
+    Ticket, typing.NoReturn
+]:
+    """Gets a ticket from the public status and if the user is authenticated and
+    has permissions to update tickets
 
-    ticket = None
+    Raises:
+        Http404 when the ticket can not be found or the user lacks permission
 
+    """
     if not (public or (
             request.user.is_authenticated and
             request.user.is_active and (
@@ -498,41 +523,29 @@ def update_ticket(request, ticket_id, public=False):
                 '%s?next=%s' % (reverse('helpdesk:login'), request.path)
             )
 
-    if not ticket:
-        ticket = get_object_or_404(Ticket, id=ticket_id)
+    return get_object_or_404(Ticket, id=ticket_id)
 
-    date_re = re.compile(
-        r'(?P<month>\d{1,2})/(?P<day>\d{1,2})/(?P<year>\d{4})$'
-    )
 
-    comment = request.POST.get('comment', '')
-    new_status = int(request.POST.get('new_status', ticket.status))
-    title = request.POST.get('title', '')
-    public = request.POST.get('public', False)
-    owner = int(request.POST.get('owner', -1))
-    priority = int(request.POST.get('priority', ticket.priority))
-    due_date_year = int(request.POST.get('due_date_year', 0))
-    due_date_month = int(request.POST.get('due_date_month', 0))
-    due_date_day = int(request.POST.get('due_date_day', 0))
-    if request.POST.get("time_spent"):
-        (hours, minutes) = [int(f)
-                            for f in request.POST.get("time_spent").split(":")]
-        time_spent = timedelta(hours=hours, minutes=minutes)
-    else:
-        time_spent = None
-    # NOTE: jQuery's default for dates is mm/dd/yy
-    # very US-centric but for now that's the only format supported
-    # until we clean up code to internationalize a little more
+def get_due_date_from_request_or_ticket(
+    request: WSGIRequest,
+    ticket: Ticket
+) -> typing.Optional[datetime.date]:
+    """Tries to locate the due date for a ticket from the `request.POST`
+    'due_date' parameter or the `due_date_*` paramaters.
+    """
     due_date = request.POST.get('due_date', None) or None
 
     if due_date is not None:
         # based on Django code to parse dates:
         # https://docs.djangoproject.com/en/2.0/_modules/django/utils/dateparse/
-        match = date_re.match(due_date)
+        match = DATE_RE.match(due_date)
         if match:
             kw = {k: int(v) for k, v in match.groupdict().items()}
             due_date = date(**kw)
     else:
+        due_date_year = int(request.POST.get('due_date_year', 0))
+        due_date_month = int(request.POST.get('due_date_month', 0))
+        due_date_day = int(request.POST.get('due_date_day', 0))
         # old way, probably deprecated?
         if not (due_date_year and due_date_month and due_date_day):
             due_date = ticket.due_date
@@ -543,9 +556,146 @@ def update_ticket(request, ticket_id, public=False):
                 due_date = ticket.due_date
             else:
                 due_date = timezone.now()
-            due_date = due_date.replace(
-                due_date_year, due_date_month, due_date_day)
+                due_date = due_date.replace(
+                    due_date_year, due_date_month, due_date_day)
+    return due_date
 
+
+def get_and_set_ticket_status(
+    new_status: str,
+    ticket: Ticket,
+    follow_up: FollowUp
+) -> typing.Tuple[str, str]:
+    """Performs comparision on previous status to new status,
+    updating the title as required.
+
+    Returns:
+        The old status as a display string, old status code string
+    """
+    old_status_str = ticket.get_status_display()
+    old_status = ticket.status
+    if new_status != ticket.status:
+        ticket.status = new_status
+        ticket.save()
+        follow_up.new_status = new_status
+        if follow_up.title:
+            follow_up.title += ' and %s' % ticket.get_status_display()
+        else:
+            follow_up.title = '%s' % ticket.get_status_display()
+
+    if not follow_up.title:
+        if follow_up.comment:
+            follow_up.title = _('Comment')
+        else:
+            follow_up.title = _('Updated')
+
+    follow_up.save()
+    return (old_status_str, old_status)
+
+
+def get_time_spent_from_request(request: WSGIRequest) -> typing.Optional[timedelta]:
+    if request.POST.get("time_spent"):
+        (hours, minutes) = [int(f)
+                            for f in request.POST.get("time_spent").split(":")]
+        return timedelta(hours=hours, minutes=minutes)
+    return None
+
+
+def update_messages_sent_to_by_public_and_status(
+    public: bool,
+    ticket: Ticket,
+    follow_up: FollowUp,
+    context: str,
+    messages_sent_to: typing.List[str],
+    files: typing.List[typing.Tuple[str, str]]
+) -> Ticket:
+    """Sets the status of the ticket"""
+    if public and (
+        follow_up.comment or (
+            follow_up.new_status in (
+                Ticket.RESOLVED_STATUS,
+                Ticket.CLOSED_STATUS
+            )
+        )
+    ):
+        if follow_up.new_status == Ticket.RESOLVED_STATUS:
+            template = 'resolved_'
+        elif follow_up.new_status == Ticket.CLOSED_STATUS:
+            template = 'closed_'
+        else:
+            template = 'updated_'
+
+        roles = {
+            'submitter': (template + 'submitter', context),
+            'ticket_cc': (template + 'cc', context),
+        }
+        if ticket.assigned_to and ticket.assigned_to.usersettings_helpdesk.email_on_ticket_change:
+            roles['assigned_to'] = (template + 'cc', context)
+        messages_sent_to.update(
+            ticket.send(
+                roles,
+                dont_send_to=messages_sent_to,
+                fail_silently=True,
+                files=files
+            )
+        )
+    return ticket
+
+
+def add_staff_subscription(
+    request: WSGIRequest,
+    ticket: Ticket
+) -> None:
+    """Auto subscribe the staff member if that's what the settigs say and the
+    user is authenticated and a staff member"""
+    if helpdesk_settings.HELPDESK_AUTO_SUBSCRIBE_ON_TICKET_RESPONSE and request.user.is_authenticated:
+        SHOW_SUBSCRIBE = return_ticketccstring_and_show_subscribe(
+            request.user, ticket
+        )[1]
+
+        if SHOW_SUBSCRIBE:
+            subscribe_staff_member_to_ticket(ticket, request.user)
+
+
+def get_template_staff_and_template_cc(
+    reassigned, follow_up:  FollowUp
+) -> typing.Tuple[str, str]:
+    if reassigned:
+        template_staff = 'assigned_owner'
+    elif follow_up.new_status == Ticket.RESOLVED_STATUS:
+        template_staff = 'resolved_owner'
+    elif follow_up.new_status == Ticket.CLOSED_STATUS:
+        template_staff = 'closed_owner'
+    else:
+        template_staff = 'updated_owner'
+    if reassigned:
+        template_cc = 'assigned_cc'
+    elif follow_up.new_status == Ticket.RESOLVED_STATUS:
+        template_cc = 'resolved_cc'
+    elif follow_up.new_status == Ticket.CLOSED_STATUS:
+        template_cc = 'closed_cc'
+    else:
+        template_cc = 'updated_cc'
+
+    return template_staff, template_cc
+
+
+def update_ticket(request, ticket_id, public=False):
+
+    ticket = get_ticket_from_request_with_authorisation(request, ticket_id, public)
+
+    comment = request.POST.get('comment', '')
+    new_status = int(request.POST.get('new_status', ticket.status))
+    title = request.POST.get('title', '')
+    public = request.POST.get('public', False)
+    owner = int(request.POST.get('owner', -1))
+    priority = int(request.POST.get('priority', ticket.priority))
+
+    time_spent = get_time_spent_from_request(request)
+    # NOTE: jQuery's default for dates is mm/dd/yy
+    # very US-centric but for now that's the only format supported
+    # until we clean up code to internationalize a little more
+    due_date = get_due_date_from_request_or_ticket(request, ticket)
     no_changes = all([
         not request.FILES,
         not comment,
@@ -605,28 +755,9 @@ def update_ticket(request, ticket_id, public=False):
             f.title = _('Unassigned')
             ticket.assigned_to = None
 
-    old_status_str = ticket.get_status_display()
-    old_status = ticket.status
-    if new_status != ticket.status:
-        ticket.status = new_status
-        ticket.save()
-        f.new_status = new_status
-        if f.title:
-            f.title += ' and %s' % ticket.get_status_display()
-        else:
-            f.title = '%s' % ticket.get_status_display()
+    old_status_str, old_status = get_and_set_ticket_status(new_status, ticket, f)
 
-    if not f.title:
-        if f.comment:
-            f.title = _('Comment')
-        else:
-            f.title = _('Updated')
-
-    f.save()
-
-    files = []
-    if request.FILES:
-        files = process_attachments(f, request.FILES.getlist('attachment'))
+    files = process_attachments(f, request.FILES.getlist('attachment')) if request.FILES else []
 
     if title and title != ticket.title:
         c = TicketChange(
@@ -676,9 +807,12 @@ def update_ticket(request, ticket_id, public=False):
         c.save()
         ticket.due_date = due_date
 
-    if new_status in (Ticket.RESOLVED_STATUS, Ticket.CLOSED_STATUS):
-        if new_status == Ticket.RESOLVED_STATUS or ticket.resolution is None:
-            ticket.resolution = comment
+    if new_status in (
+        Ticket.RESOLVED_STATUS, Ticket.CLOSED_STATUS
+    ) and (
+        new_status == Ticket.RESOLVED_STATUS or ticket.resolution is None
+    ):
+        ticket.resolution = comment
 
     # ticket might have changed above, so we re-instantiate context with the
     # (possibly) updated ticket.
@@ -693,34 +827,16 @@ def update_ticket(request, ticket_id, public=False):
         messages_sent_to.add(request.user.email)
     except AttributeError:
         pass
-    if public and (f.comment or (
-        f.new_status in (Ticket.RESOLVED_STATUS,
-                         Ticket.CLOSED_STATUS))):
-        if f.new_status == Ticket.RESOLVED_STATUS:
-            template = 'resolved_'
-        elif f.new_status == Ticket.CLOSED_STATUS:
-            template = 'closed_'
-        else:
-            template = 'updated_'
+    ticket = update_messages_sent_to_by_public_and_status(
+        public,
+        ticket,
+        f,
+        context,
+        messages_sent_to,
+        files
+    )
 
-        roles = {
-            'submitter': (template + 'submitter', context),
-            'ticket_cc': (template + 'cc', context),
-        }
-        if ticket.assigned_to and ticket.assigned_to.usersettings_helpdesk.email_on_ticket_change:
-            roles['assigned_to'] = (template + 'cc', context)
-        messages_sent_to.update(ticket.send(
-            roles, dont_send_to=messages_sent_to, fail_silently=True, files=files,))
-
-    if reassigned:
-        template_staff = 'assigned_owner'
-    elif f.new_status == Ticket.RESOLVED_STATUS:
-        template_staff = 'resolved_owner'
-    elif f.new_status == Ticket.CLOSED_STATUS:
-        template_staff = 'closed_owner'
-    else:
-        template_staff = 'updated_owner'
-
+    template_staff, template_cc = get_template_staff_and_template_cc(reassigned, f)
     if ticket.assigned_to and (
         ticket.assigned_to.usersettings_helpdesk.email_on_ticket_change
         or (reassigned and ticket.assigned_to.usersettings_helpdesk.email_on_ticket_assign)
@@ -732,30 +848,16 @@ def update_ticket(request, ticket_id, public=False):
             files=files,
         ))
 
-    if reassigned:
-        template_cc = 'assigned_cc'
-    elif f.new_status == Ticket.RESOLVED_STATUS:
-        template_cc = 'resolved_cc'
-    elif f.new_status == Ticket.CLOSED_STATUS:
-        template_cc = 'closed_cc'
-    else:
-        template_cc = 'updated_cc'
-
     messages_sent_to.update(ticket.send(
         {'ticket_cc': (template_cc, context)},
         dont_send_to=messages_sent_to,
         fail_silently=True,
         files=files,
     ))
-
     ticket.save()
 
     # auto subscribe user if enabled
-    if helpdesk_settings.HELPDESK_AUTO_SUBSCRIBE_ON_TICKET_RESPONSE and request.user.is_authenticated:
-        ticketcc_string, SHOW_SUBSCRIBE = return_ticketccstring_and_show_subscribe(
-            request.user, ticket)
-        if SHOW_SUBSCRIBE:
-            subscribe_staff_member_to_ticket(ticket, request.user)
+    add_staff_subscription(request, ticket)
 
     return return_to_ticket(request.user, helpdesk_settings, ticket)
 
@@ -887,7 +989,7 @@ mass_update = staff_member_required(mass_update)
 
 # Prepare ticket attributes which will be displayed in the table to choose
 # which value to keep when merging
-ticket_attributes = (
+TICKET_ATTRIBUTES = (
     ('created', _('Created date')),
     ('due_date', _('Due on')),
     ('get_status_display', _('Status')),
@@ -896,6 +998,133 @@ ticket_attributes = (
     ('description', _('Description')),
     ('resolution', _('Resolution')),
 )
+
+
+def merge_ticket_values(
+        request: WSGIRequest,
+        tickets: typing.List[Ticket],
+        custom_fields
+) -> None:
+    for ticket in tickets:
+        ticket.values = {}
+        # Prepare the value for each attributes of this ticket
+        for attribute, __ in TICKET_ATTRIBUTES:
+            value = getattr(ticket, attribute, TicketCustomFieldValue.default_value)
+            # Check if attr is a get_FIELD_display
+            if attribute.startswith('get_') and attribute.endswith('_display'):
+                # Hack to call methods like get_FIELD_display()
+                value = getattr(ticket, attribute, TicketCustomFieldValue.default_value)()
+            ticket.values[attribute] = {
+                'value': value,
+                'checked': str(ticket.id) == request.POST.get(attribute)
+            }
+        # Prepare the value for each custom fields of this ticket
+        for custom_field in custom_fields:
+            try:
+                value = ticket.ticketcustomfieldvalue_set.get(
+                    field=custom_field).value
+            except (TicketCustomFieldValue.DoesNotExist, ValueError):
+                value = TicketCustomFieldValue.default_value
+            ticket.values[custom_field.name] = {
+                'value': value,
+                'checked': str(ticket.id) == request.POST.get(custom_field.name)
+            }
+
+
+def redirect_from_chosen_ticket(
+    request,
+    chosen_ticket,
+    tickets,
+    custom_fields
+) -> HttpResponseRedirect:
+    # Save ticket fields values
+    for attribute, __ in TICKET_ATTRIBUTES:
+        id_for_attribute = request.POST.get(attribute)
+        if id_for_attribute != chosen_ticket.id:
+            try:
+                selected_ticket = tickets.get(id=id_for_attribute)
+            except (Ticket.DoesNotExist, ValueError):
+                continue
+
+            # Check if attr is a get_FIELD_display
+            if attribute.startswith('get_') and attribute.endswith('_display'):
+                # Keep only the FIELD part
+                attribute = attribute[4:-8]
+            # Get value from selected ticket and then save it on
+            # the chosen ticket
+            value = getattr(selected_ticket, attribute)
+            setattr(chosen_ticket, attribute, value)
+    # Save custom fields values
+    for custom_field in custom_fields:
+        id_for_custom_field = request.POST.get(custom_field.name)
+        if id_for_custom_field != chosen_ticket.id:
+            try:
+                selected_ticket = tickets.get(
+                    id=id_for_custom_field)
+            except (Ticket.DoesNotExist, ValueError):
+                continue
+
+            # Check if the value for this ticket custom field
+            # exists
+            try:
+                value = selected_ticket.ticketcustomfieldvalue_set.get(
+                    field=custom_field).value
+            except TicketCustomFieldValue.DoesNotExist:
+                continue
+
+            # Create the custom field value or update it with the
+            # value from the selected ticket
+            custom_field_value, created = chosen_ticket.ticketcustomfieldvalue_set.get_or_create(
+                field=custom_field,
+                defaults={'value': value}
+            )
+            if not created:
+                custom_field_value.value = value
+                custom_field_value.save(update_fields=['value'])
+    # Save changes
+    chosen_ticket.save()
+
+    # For other tickets, save the link to the ticket in which they have been merged to
+    # and set status to DUPLICATE
+    for ticket in tickets.exclude(id=chosen_ticket.id):
+        ticket.merged_to = chosen_ticket
+        ticket.status = Ticket.DUPLICATE_STATUS
+        ticket.save()
+
+        # Send mail to submitter email and ticket CC to let them
+        # know ticket has been merged
+        context = safe_template_context(ticket)
+        if ticket.submitter_email:
+            send_templated_mail(
+                template_name='merged',
+                context=context,
+                recipients=[ticket.submitter_email],
+                bcc=[
+                    cc.email_address for cc in ticket.ticketcc_set.select_related('user')],
+                sender=ticket.queue.from_address,
+                fail_silently=True
+            )
+
+        # Move all followups and update their title to know they
+        # come from another ticket
+        ticket.followup_set.update(
+            ticket=chosen_ticket,
+            # Next might exceed maximum 200 characters limit
+            title=_('[Merged from #%(id)d] %(title)s') % {
+                'id': ticket.id, 'title': ticket.title}
+        )
+
+        # Add submitter_email, assigned_to email and ticketcc to
+        # chosen ticket if necessary
+        chosen_ticket.add_email_to_ticketcc_if_not_in(
+            email=ticket.submitter_email)
+        if ticket.assigned_to and ticket.assigned_to.email:
+            chosen_ticket.add_email_to_ticketcc_if_not_in(
+                email=ticket.assigned_to.email)
+        for ticketcc in ticket.ticketcc_set.all():
+            chosen_ticket.add_email_to_ticketcc_if_not_in(
+                ticketcc=ticketcc)
+    return redirect(chosen_ticket)
 
 
 @staff_member_required
@@ -912,31 +1141,8 @@ def merge_tickets(request):
         tickets = ticket_select_form.cleaned_data.get('tickets')
 
         custom_fields = CustomField.objects.all()
-        default = _('Not defined')
-        for ticket in tickets:
-            ticket.values = {}
-            # Prepare the value for each attributes of this ticket
-            for attribute, display_name in ticket_attributes:
-                value = getattr(ticket, attribute, default)
-                # Check if attr is a get_FIELD_display
-                if attribute.startswith('get_') and attribute.endswith('_display'):
-                    # Hack to call methods like get_FIELD_display()
-                    value = getattr(ticket, attribute, default)()
-                ticket.values[attribute] = {
-                    'value': value,
-                    'checked': str(ticket.id) == request.POST.get(attribute)
-                }
-            # Prepare the value for each custom fields of this ticket
-            for custom_field in custom_fields:
-                try:
-                    value = ticket.ticketcustomfieldvalue_set.get(
-                        field=custom_field).value
-                except (TicketCustomFieldValue.DoesNotExist, ValueError):
-                    value = default
-                ticket.values[custom_field.name] = {
-                    'value': value,
-                    'checked': str(ticket.id) == request.POST.get(custom_field.name)
-                }
+
+        merge_ticket_values(request, tickets, custom_fields)
 
         if request.method == 'POST':
             # Find which ticket has been chosen to be the main one
@@ -950,101 +1156,56 @@ def merge_tickets(request):
                         'Please choose a ticket in which the others will be merged into.')
                 )
             else:
-                # Save ticket fields values
-                for attribute, display_name in ticket_attributes:
-                    id_for_attribute = request.POST.get(attribute)
-                    if id_for_attribute != chosen_ticket.id:
-                        try:
-                            selected_ticket = tickets.get(id=id_for_attribute)
-                        except (Ticket.DoesNotExist, ValueError):
-                            continue
-
-                        # Check if attr is a get_FIELD_display
-                        if attribute.startswith('get_') and attribute.endswith('_display'):
-                            # Keep only the FIELD part
-                            attribute = attribute[4:-8]
-                        # Get value from selected ticket and then save it on
-                        # the chosen ticket
-                        value = getattr(selected_ticket, attribute)
-                        setattr(chosen_ticket, attribute, value)
-                # Save custom fields values
-                for custom_field in custom_fields:
-                    id_for_custom_field = request.POST.get(custom_field.name)
-                    if id_for_custom_field != chosen_ticket.id:
-                        try:
-                            selected_ticket = tickets.get(
-                                id=id_for_custom_field)
-                        except (Ticket.DoesNotExist, ValueError):
-                            continue
-
-                        # Check if the value for this ticket custom field
-                        # exists
-                        try:
-                            value = selected_ticket.ticketcustomfieldvalue_set.get(
-                                field=custom_field).value
-                        except TicketCustomFieldValue.DoesNotExist:
-                            continue
-
-                        # Create the custom field value or update it with the
-                        # value from the selected ticket
-                        custom_field_value, created = chosen_ticket.ticketcustomfieldvalue_set.get_or_create(
-                            field=custom_field,
-                            defaults={'value': value}
-                        )
-                        if not created:
-                            custom_field_value.value = value
-                            custom_field_value.save(update_fields=['value'])
-                # Save changes
-                chosen_ticket.save()
-
-                # For other tickets, save the link to the ticket in which they have been merged to
-                # and set status to DUPLICATE
-                for ticket in tickets.exclude(id=chosen_ticket.id):
-                    ticket.merged_to = chosen_ticket
-                    ticket.status = Ticket.DUPLICATE_STATUS
-                    ticket.save()
-
-                    # Send mail to submitter email and ticket CC to let them
-                    # know ticket has been merged
-                    context = safe_template_context(ticket)
-                    if ticket.submitter_email:
-                        send_templated_mail(
-                            template_name='merged',
-                            context=context,
-                            recipients=[ticket.submitter_email],
-                            bcc=[
-                                cc.email_address for cc in ticket.ticketcc_set.select_related('user')],
-                            sender=ticket.queue.from_address,
-                            fail_silently=True
-                        )
-
-                    # Move all followups and update their title to know they
-                    # come from another ticket
-                    ticket.followup_set.update(
-                        ticket=chosen_ticket,
-                        # Next might exceed maximum 200 characters limit
-                        title=_('[Merged from #%(id)d] %(title)s') % {
-                            'id': ticket.id, 'title': ticket.title}
-                    )
-
-                    # Add submitter_email, assigned_to email and ticketcc to
-                    # chosen ticket if necessary
-                    chosen_ticket.add_email_to_ticketcc_if_not_in(
-                        email=ticket.submitter_email)
-                    if ticket.assigned_to and ticket.assigned_to.email:
-                        chosen_ticket.add_email_to_ticketcc_if_not_in(
-                            email=ticket.assigned_to.email)
-                    for ticketcc in ticket.ticketcc_set.all():
-                        chosen_ticket.add_email_to_ticketcc_if_not_in(
-                            ticketcc=ticketcc)
-                return redirect(chosen_ticket)
+                return redirect_from_chosen_ticket(
+                    request,
+                    chosen_ticket,
+                    tickets,
+                    custom_fields
+                )
 
     return render(request, 'helpdesk/ticket_merge.html', {
         'tickets': tickets,
-        'ticket_attributes': ticket_attributes,
+        'ticket_attributes': TICKET_ATTRIBUTES,
         'custom_fields': custom_fields,
         'ticket_select_form': ticket_select_form
     })
+
+
+def check_redirect_on_user_query(request, huser):
+    """If the user is coming from the header/navigation search box, lets' first
+    look at their query to see if they have entered a valid ticket number. If
+    they have, just redirect to that ticket number. Otherwise, we treat it as
+    a keyword search.
+    """
+    if request.GET.get('search_type', None) == 'header':
+        query = request.GET.get('q')
+        filter_ = None
+        if query.find('-') > 0:
+            try:
+                queue, id_ = Ticket.queue_and_id_from_query(query)
+                id_ = int(id)
+            except ValueError:
+                id_ = None
+
+            if id_:
+                filter_ = {'queue__slug': queue, 'id': id_}
+        else:
+            try:
+                query = int(query)
+            except ValueError:
+                query = None
+
+            if query:
+                filter_ = {'id': int(query)}
+
+        if filter_:
+            try:
+                ticket = huser.get_tickets_in_queues().get(**filter_)
+                return HttpResponseRedirect(ticket.staff_url)
+            except Ticket.DoesNotExist:
+                # Go on to standard keyword searching
+                pass
+    return None
 
 
 @helpdesk_staff_member_required
@@ -1071,40 +1232,10 @@ def ticket_list(request):
         'sortreverse': False,
     }
 
-    # If the user is coming from the header/navigation search box, lets' first
-    # look at their query to see if they have entered a valid ticket number. If
-    # they have, just redirect to that ticket number. Otherwise, we treat it as
-    # a keyword search.
-
-    if request.GET.get('search_type', None) == 'header':
-        query = request.GET.get('q')
-        filter = None
-        if query.find('-') > 0:
-            try:
-                queue, id = Ticket.queue_and_id_from_query(query)
-                id = int(id)
-            except ValueError:
-                id = None
-
-            if id:
-                filter = {'queue__slug': queue, 'id': id}
-        else:
-            try:
-                query = int(query)
-            except ValueError:
-                query = None
-
-            if query:
-                filter = {'id': int(query)}
-
-        if filter:
-            try:
-                ticket = huser.get_tickets_in_queues().get(**filter)
-                return HttpResponseRedirect(ticket.staff_url)
-            except Ticket.DoesNotExist:
-                # Go on to standard keyword searching
-                pass
-
+    #: check for a redirect, see function doc for details
+    redirect = check_redirect_on_user_query(request, huser)
+    if redirect:
+        return redirect
     try:
         saved_query, query_params = load_saved_query(request, query_params)
     except QueryLoadError:
@@ -1300,15 +1431,15 @@ class CreateTicketView(MustBeStaffMixin, abstract_views.AbstractCreateTicketMixi
 
 
 @helpdesk_staff_member_required
-def raw_details(request, type):
+def raw_details(request, type_):
     # TODO: This currently only supports spewing out 'PreSetReply' objects,
     # in the future it needs to be expanded to include other items. All it
     # does is return a plain-text representation of an object.
 
-    if type not in ('preset',):
+    if type_ not in ('preset',):
         raise Http404
 
-    if type == 'preset' and request.GET.get('id', False):
+    if type_ == 'preset' and request.GET.get('id', False):
         try:
             preset = PreSetReply.objects.get(id=request.GET.get('id'))
             return HttpResponse(preset.body)
@@ -1408,12 +1539,18 @@ def report_index(request):
 report_index = staff_member_required(report_index)
 
 
-@helpdesk_staff_member_required
-def run_report(request, report):
+def get_report_queryset_or_redirect(request, report):
     if Ticket.objects.all().count() == 0 or report not in (
-            'queuemonth', 'usermonth', 'queuestatus', 'queuepriority', 'userstatus',
-            'userpriority', 'userqueue', 'daysuntilticketclosedbymonth'):
-        return HttpResponseRedirect(reverse("helpdesk:report_index"))
+        "queuemonth",
+        "usermonth",
+        "queuestatus",
+        "queuepriority",
+        "userstatus",
+        "userpriority",
+        "userqueue",
+        "daysuntilticketclosedbymonth"
+    ):
+        return None, None, HttpResponseRedirect(reverse("helpdesk:report_index"))
 
     report_queryset = Ticket.objects.all().select_related().filter(
         queue__in=HelpdeskUser(request.user).get_queues()
@@ -1422,12 +1559,79 @@ def run_report(request, report):
     try:
         saved_query, query_params = load_saved_query(request)
     except QueryLoadError:
-        return HttpResponseRedirect(reverse('helpdesk:report_index'))
+        return None, HttpResponseRedirect(reverse('helpdesk:report_index'))
+    return report_queryset, query_params, saved_query, None
 
+
+def get_report_table_and_totals(header1, summarytable, possible_options):
+    table = []
+    totals = {}
+    for item in header1:
+        data = []
+        for hdr in possible_options:
+            if hdr not in totals.keys():
+                totals[hdr] = summarytable[item, hdr]
+            else:
+                totals[hdr] += summarytable[item, hdr]
+            data.append(summarytable[item, hdr])
+        table.append([item] + data)
+    return table, totals
+
+
+def update_summary_tables(report_queryset, report, summarytable, summarytable2):
+    metric3 = False
+    for ticket in report_queryset:
+        if report == 'userpriority':
+            metric1 = u'%s' % ticket.get_assigned_to
+            metric2 = u'%s' % ticket.get_priority_display()
+
+        elif report == 'userqueue':
+            metric1 = u'%s' % ticket.get_assigned_to
+            metric2 = u'%s' % ticket.queue.title
+
+        elif report == 'userstatus':
+            metric1 = u'%s' % ticket.get_assigned_to
+            metric2 = u'%s' % ticket.get_status_display()
+
+        elif report == 'usermonth':
+            metric1 = u'%s' % ticket.get_assigned_to
+            metric2 = u'%s-%s' % (ticket.created.year, ticket.created.month)
+
+        elif report == 'queuepriority':
+            metric1 = u'%s' % ticket.queue.title
+            metric2 = u'%s' % ticket.get_priority_display()
+
+        elif report == 'queuestatus':
+            metric1 = u'%s' % ticket.queue.title
+            metric2 = u'%s' % ticket.get_status_display()
+
+        elif report == 'queuemonth':
+            metric1 = u'%s' % ticket.queue.title
+            metric2 = u'%s-%s' % (ticket.created.year, ticket.created.month)
+
+        elif report == 'daysuntilticketclosedbymonth':
+            metric1 = u'%s' % ticket.queue.title
+            metric2 = u'%s-%s' % (ticket.created.year, ticket.created.month)
+            metric3 = ticket.modified - ticket.created
+            metric3 = metric3.days
+
+        summarytable[metric1, metric2] += 1
+        if metric3:
+            if report == 'daysuntilticketclosedbymonth':
+                summarytable2[metric1, metric2] += metric3
+
+
+@helpdesk_staff_member_required
+def run_report(request, report):
+
+    report_queryset, query_params, saved_query, redirect = get_report_queryset_or_redirect(
+        request, report
+    )
+    if redirect:
+        return redirect
     if request.GET.get('saved_query', None):
         Query(report_queryset, query_to_base64(query_params))
 
-    from collections import defaultdict
     summarytable = defaultdict(int)
     # a second table for more complex queries
     summarytable2 = defaultdict(int)
@@ -1502,50 +1706,7 @@ def run_report(request, report):
         col1heading = _('Queue')
         possible_options = periods
         charttype = 'date'
-
-    metric3 = False
-    for ticket in report_queryset:
-        if report == 'userpriority':
-            metric1 = u'%s' % ticket.get_assigned_to
-            metric2 = u'%s' % ticket.get_priority_display()
-
-        elif report == 'userqueue':
-            metric1 = u'%s' % ticket.get_assigned_to
-            metric2 = u'%s' % ticket.queue.title
-
-        elif report == 'userstatus':
-            metric1 = u'%s' % ticket.get_assigned_to
-            metric2 = u'%s' % ticket.get_status_display()
-
-        elif report == 'usermonth':
-            metric1 = u'%s' % ticket.get_assigned_to
-            metric2 = u'%s-%s' % (ticket.created.year, ticket.created.month)
-
-        elif report == 'queuepriority':
-            metric1 = u'%s' % ticket.queue.title
-            metric2 = u'%s' % ticket.get_priority_display()
-
-        elif report == 'queuestatus':
-            metric1 = u'%s' % ticket.queue.title
-            metric2 = u'%s' % ticket.get_status_display()
-
-        elif report == 'queuemonth':
-            metric1 = u'%s' % ticket.queue.title
-            metric2 = u'%s-%s' % (ticket.created.year, ticket.created.month)
-
-        elif report == 'daysuntilticketclosedbymonth':
-            metric1 = u'%s' % ticket.queue.title
-            metric2 = u'%s-%s' % (ticket.created.year, ticket.created.month)
-            metric3 = ticket.modified - ticket.created
-            metric3 = metric3.days
-
-        summarytable[metric1, metric2] += 1
-        if metric3:
-            if report == 'daysuntilticketclosedbymonth':
-                summarytable2[metric1, metric2] += metric3
-
-    table = []
-
+    update_summary_tables(report_queryset, report, summarytable, summarytable2)
     if report == 'daysuntilticketclosedbymonth':
         for key in summarytable2.keys():
             summarytable[key] = summarytable2[key] / summarytable[key]
@@ -1555,18 +1716,9 @@ def run_report(request, report):
     column_headings = [col1heading] + possible_options
 
     # Prepare a dict to store totals for each possible option
-    totals = {}
+    table, totals = get_report_table_and_totals(header1, summarytable, possible_options)
     # Pivot the data so that 'header1' fields are always first column
     # in the row, and 'possible_options' are always the 2nd - nth columns.
-    for item in header1:
-        data = []
-        for hdr in possible_options:
-            if hdr not in totals.keys():
-                totals[hdr] = summarytable[item, hdr]
-            else:
-                totals[hdr] += summarytable[item, hdr]
-            data.append(summarytable[item, hdr])
-        table.append([item] + data)
 
     # Zip data and headers together in one list for Morris.js charts
     # will get a list like [(Header1, Data1), (Header2, Data2)...]
@@ -1626,8 +1778,8 @@ save_query = staff_member_required(save_query)
 
 
 @helpdesk_staff_member_required
-def delete_saved_query(request, id):
-    query = get_object_or_404(SavedSearch, id=id, user=request.user)
+def delete_saved_query(request, pk):
+    query = get_object_or_404(SavedSearch, id=pk, user=request.user)
 
     if request.method == 'POST':
         query.delete()
@@ -1676,8 +1828,8 @@ email_ignore_add = superuser_required(email_ignore_add)
 
 
 @helpdesk_superuser_required
-def email_ignore_del(request, id):
-    ignore = get_object_or_404(IgnoreEmail, id=id)
+def email_ignore_del(request, pk):
+    ignore = get_object_or_404(IgnoreEmail, id=pk)
     if request.method == 'POST':
         ignore.delete()
         return HttpResponseRedirect(reverse('helpdesk:email_ignore'))

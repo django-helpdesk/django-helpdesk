@@ -9,12 +9,12 @@ views/feeds.py - A handful of staff-only RSS feeds to provide ticket details
 
 from django.contrib.auth import get_user_model
 from django.contrib.syndication.views import Feed
-from django.urls import reverse
 from django.db.models import Q
-from django.utils.translation import gettext as _
 from django.shortcuts import get_object_or_404
+from django.urls import reverse
+from django.utils.translation import gettext as _
+from helpdesk.models import FollowUp, Queue, Ticket
 
-from helpdesk.models import Ticket, FollowUp, Queue
 
 User = get_user_model()
 

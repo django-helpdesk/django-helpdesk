@@ -1,13 +1,24 @@
+
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
-from helpdesk.models import Queue, Ticket, FollowUp, PreSetReply, KBCategory
-from helpdesk.models import EscalationExclusion, EmailTemplate, KBItem
-from helpdesk.models import TicketChange, KBIAttachment, FollowUpAttachment, IgnoreEmail
-from helpdesk.models import CustomField
 from helpdesk import settings as helpdesk_settings
+from helpdesk.models import (
+    CustomField,
+    EmailTemplate,
+    EscalationExclusion,
+    FollowUp,
+    FollowUpAttachment,
+    IgnoreEmail,
+    KBIAttachment,
+    PreSetReply,
+    Queue,
+    Ticket,
+    TicketChange
+)
+
+
 if helpdesk_settings.HELPDESK_KB_ENABLED:
-    from helpdesk.models import KBCategory
-    from helpdesk.models import KBItem
+    from helpdesk.models import KBCategory, KBItem
 
 
 @admin.register(Queue)
@@ -82,9 +93,10 @@ if helpdesk_settings.HELPDESK_KB_ENABLED:
 
         list_display_links = ('title',)
 
-    @admin.register(KBCategory)
-    class KBCategoryAdmin(admin.ModelAdmin):
-        list_display = ('name', 'title', 'slug', 'public')
+    if helpdesk_settings.HELPDESK_KB_ENABLED:
+        @admin.register(KBCategory)
+        class KBCategoryAdmin(admin.ModelAdmin):
+            list_display = ('name', 'title', 'slug', 'public')
 
 
 @admin.register(CustomField)
