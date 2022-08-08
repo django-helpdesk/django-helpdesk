@@ -1,23 +1,22 @@
 # -*- coding: utf-8 -*-
-from django.test import TestCase, override_settings
+
+from django.contrib.auth.hashers import make_password
+from django.contrib.auth.models import User
 from django.core.management import call_command
 from django.shortcuts import get_object_or_404
-from django.contrib.auth.models import User
-from django.contrib.auth.hashers import make_password
-
-from helpdesk.models import Queue, Ticket, TicketCC, FollowUp, FollowUpAttachment
-from helpdesk.management.commands.get_email import Command
+from django.test import override_settings, TestCase
 import helpdesk.email
-
-import six
+from helpdesk.management.commands.get_email import Command
+from helpdesk.models import FollowUp, FollowUpAttachment, Queue, Ticket, TicketCC
 import itertools
-from shutil import rmtree
-import sys
-import os
-from tempfile import mkdtemp
 import logging
-
+import os
+from shutil import rmtree
+import six
+import sys
+from tempfile import mkdtemp
 from unittest import mock
+
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 

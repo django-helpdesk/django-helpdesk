@@ -1,15 +1,10 @@
-from helpdesk.models import (
-    Ticket,
-    Queue
-)
 
 from helpdesk import settings as helpdesk_settings
+from helpdesk.models import Queue, Ticket
+
 
 if helpdesk_settings.HELPDESK_KB_ENABLED:
-    from helpdesk.models import (
-        KBCategory,
-        KBItem
-    )
+    from helpdesk.models import KBCategory, KBItem
 
 
 def huser_from_request(req):

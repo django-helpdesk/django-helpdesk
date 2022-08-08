@@ -63,6 +63,7 @@ errors with trying to create User settings.
         'pinax.teams',  # Team support
         'reversion',  # Required by pinax-teams
         'rest_framework',  # required for the API
+        'django_cleanup.apps.CleanupConfig',  # Remove this if you do NOT want to delete files on the file system when the associated record is deleted in the database
         'helpdesk',  # This is us!
     )
 

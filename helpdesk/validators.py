@@ -2,7 +2,9 @@
 #
 # validators for file uploads, etc.
 
+
 from django.conf import settings
+
 
 # TODO: can we use the builtin Django validator instead?
 # see:
@@ -10,8 +12,8 @@ from django.conf import settings
 
 
 def validate_file_extension(value):
-    import os
     from django.core.exceptions import ValidationError
+    import os
     ext = os.path.splitext(value.name)[1]  # [0] returns path+filename
     # TODO: we might improve this with more thorough checks of file types
     # rather than just the extensions.

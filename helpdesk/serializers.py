@@ -1,12 +1,11 @@
-from rest_framework import serializers
+from .forms import TicketForm
+from .lib import format_time_spent, process_attachments
+from .models import CustomField, FollowUp, FollowUpAttachment, Ticket
+from .user import HelpdeskUser
 from django.contrib.auth.models import User
 from django.contrib.humanize.templatetags import humanize
+from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
-
-from .forms import TicketForm
-from .models import Ticket, CustomField, FollowUp, FollowUpAttachment
-from .lib import format_time_spent, process_attachments
-from .user import HelpdeskUser
 
 
 class DatatablesTicketSerializer(serializers.ModelSerializer):

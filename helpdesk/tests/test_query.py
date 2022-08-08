@@ -1,12 +1,9 @@
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
-
 from helpdesk.models import KBCategory, KBItem, Queue, Ticket
 from helpdesk.query import query_to_base64
-
-from helpdesk.tests.helpers import (
-    get_staff_user, reload_urlconf, User, create_ticket, print_response)
+from helpdesk.tests.helpers import create_ticket, get_staff_user, print_response, reload_urlconf, User
 
 
 class QueryTests(TestCase):

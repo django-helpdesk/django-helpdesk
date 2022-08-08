@@ -1,4 +1,4 @@
-Django>=2.2,<4.0
+Django>=3.2,<4.0
 django-bootstrap4-form
 celery
 email-reply-parser
@@ -12,3 +12,4 @@ six
 pinax_teams
 djangorestframework
 django-model-utils
+django-cleanup

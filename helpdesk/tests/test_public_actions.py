@@ -1,7 +1,7 @@
-from helpdesk.models import Queue, Ticket
 from django.test import TestCase
 from django.test.client import Client
 from django.urls import reverse
+from helpdesk.models import Queue, Ticket
 
 
 class PublicActionsTestCase(TestCase):
