@@ -3,6 +3,20 @@
 from django.db import migrations, models
 
 
+def re_add_fields(apps, schema_editor):
+    CustomField = apps.get_model('helpdesk', 'CustomField')
+    fields = CustomField.objects.all()
+    for field in fields:
+        if field.field_name not in ['queue', 'submitter_email', 'contact_name', 'contact_email', 'title',
+                                    'description', 'building_name', 'building_address', 'building_id', 'pm_id',
+                                    'attachment', 'due_date', 'priority', 'cc_emails']:
+            field.is_extra_data = False
+        if field.field_name in ['queue', 'submitter_email', 'title', 'description', 'attachment', 'due_date',
+                                'priority', 'cc_emails']:
+            field.unlisted = True
+        field.save()
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -23,4 +37,5 @@ class Migration(migrations.Migration):
             name='title',
             field=models.CharField(default='(no title)', max_length=200),
         ),
+        migrations.RunPython(migrations.RunPython.noop, re_add_fields)
     ]
