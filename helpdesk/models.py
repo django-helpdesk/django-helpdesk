@@ -41,6 +41,7 @@ import pinax.teams.models
 import uuid
 
 from helpdesk import settings as helpdesk_settings
+from helpdesk.decorators import is_helpdesk_staff
 
 from .templated_email import send_templated_mail
 
@@ -529,7 +530,7 @@ class Ticket(models.Model):
 
         # If queue allows CC'd users to be notified, send them email updates
         for cc in self.ticketcc_set.all():
-            if cc.user:
+            if cc.user and organization and is_helpdesk_staff(cc.user, organization.id):
                 send('cc_users', cc.email_address)
             elif self.queue.enable_notifications_on_email_events:
                 send('cc_public', cc.email_address)
