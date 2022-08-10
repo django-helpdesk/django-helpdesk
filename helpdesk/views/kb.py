@@ -8,6 +8,7 @@ views/kb.py - Public-facing knowledgebase views. The knowledgebase is a
               resolutions to common problems.
 """
 
+from django.conf import settings
 from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.clickjacking import xframe_options_exempt
@@ -25,7 +26,9 @@ def index(request):
     return render(request, 'helpdesk/kb_index.html', {
         'kb_categories': huser.get_allowed_kb_categories(),
         'helpdesk_settings': helpdesk_settings,
+        'debug': settings.DEBUG,
     })
+
 
 def category(request, slug, iframe=False):
     category = get_object_or_404(KBCategory, slug__iexact=slug)
@@ -34,6 +37,7 @@ def category(request, slug, iframe=False):
         return render(request, 'helpdesk/kb_index.html', {
             'kb_categories': user.huser_from_request(request).get_allowed_kb_categories(),
             'helpdesk_settings': helpdesk_settings,
+            'debug': settings.DEBUG,
         })
     if is_helpdesk_staff(request.user):
         items = category.kbitem_set.all()
@@ -53,7 +57,9 @@ def category(request, slug, iframe=False):
         'query_param_string': qparams.urlencode(),
         'helpdesk_settings': helpdesk_settings,
         'iframe': iframe,
+        'debug': settings.DEBUG,
     })
+
 
 def article(request, slug, pk, iframe=False):
     item = get_object_or_404(KBItem, pk=pk)
@@ -62,6 +68,7 @@ def article(request, slug, pk, iframe=False):
         return render(request, 'helpdesk/kb_index.html', {
             'kb_categories': user.huser_from_request(request).get_allowed_kb_categories(),
             'helpdesk_settings': helpdesk_settings,
+            'debug': settings.DEBUG,
         })
     items = item.category.kbitem_set.all()
     item_index = list(items.values_list('id', flat=True)).index(item.id)
@@ -90,7 +97,9 @@ def article(request, slug, pk, iframe=False):
         'helpdesk_settings': helpdesk_settings,
         'iframe': iframe,
         'staff': staff,
+        'debug': settings.DEBUG,
     })
+
 
 @xframe_options_exempt
 def category_iframe(request, slug):
