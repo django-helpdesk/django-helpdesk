@@ -92,8 +92,6 @@ def process_email(quiet=False):
             log_file_handler = None
 
         try:
-            logger.info("*** Importing into %s ***" % importer.username)
-
             if not importer_sender.default_queue:
                 logger.info("Import canceled: no default queue set")
             else:
@@ -121,6 +119,7 @@ def process_email(quiet=False):
                     process_importer(importer, queues, logger=logger)
                     importer.email_box_last_check = timezone.now()
                     importer.save()
+            logger.info('')
         finally:
             # we must close the file handler correctly if it's created
             try:
@@ -133,7 +132,6 @@ def process_email(quiet=False):
                     logger.removeHandler(log_file_handler)
             except Exception as e:
                 logging.exception(e)
-        logger.info('\n')
 
 
 def pop3_sync(importer, queues, logger, server):
@@ -419,9 +417,9 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
         try:
             queryset = FollowUp.objects.filter(message_id=in_reply_to).order_by('-date')
             if queryset.count() > 0:
-                logger.info('Found ticket based on in_reply_to.')
                 previous_followup = queryset.first()
                 ticket = previous_followup.ticket
+                logger.info('Found ticket based on in_reply_to: [%s-%s]' % (ticket.queue.slug, ticket.id))
         except FollowUp.DoesNotExist:
             logger.info('FollowUp DoesNotExist error.')
             pass  # play along. The header may be wrong
@@ -429,7 +427,7 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
     if previous_followup is None and ticket_id is not None:
         try:
             ticket = Ticket.objects.get(id=ticket_id)  # TODO also add in organization id? or, just ticket form (which will be diff for each org)?
-            logger.info('Ticket found from a ticket_id.')
+            logger.info('Ticket found from a ticket_id %s: [%s-%s]' % (ticket_id, ticket.queue.slug, ticket.id))
         except Ticket.DoesNotExist:
             ticket = None
         else:
@@ -462,7 +460,7 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
             logger.debug("Created new ticket %s-%s" % (ticket.queue.slug, ticket.id))
             new = True
 
-    f = FollowUp(
+    f = FollowUp.objects.create(
         ticket=ticket,
         title=_('E-Mail Received from %(sender_email)s' % {'sender_email': sender_email})[0:200],
         date=now,
@@ -481,19 +479,22 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
             #   is ticket closed? -> Reopened
             #   else -> Open
             if ticket.status == Ticket.CLOSED_STATUS or ticket.status == Ticket.RESOLVED_STATUS or ticket.status == Ticket.DUPLICATE_STATUS:
-                ticket.status = f.new_status = Ticket.REOPENED_STATUS
+                ticket.status = Ticket.REOPENED_STATUS
+                f.new_status = Ticket.REOPENED_STATUS
                 if updater_is_staff:
                     f.title = _('Ticket Re-Opened by E-Mail Received from %(user)s' % {'user': updater.get_full_name() or updater.get_username()})
                 else:
                     f.title = _('Ticket Re-Opened by E-Mail Received from %(sender_email)s' % {'sender_email': sender_email})
             elif ticket.status == Ticket.REPLIED_STATUS:
-                f.new_status = ticket.status = Ticket.OPEN_STATUS
+                ticket.status = Ticket.OPEN_STATUS
+                f.new_status = Ticket.OPEN_STATUS
         else:
             # reply is from staff and submitter is not staff -> Replied
             if ticket.status != Ticket.CLOSED_STATUS and ticket.status != Ticket.RESOLVED_STATUS and ticket.status != Ticket.DUPLICATE_STATUS:
-                ticket.status = f.new_status = Ticket.REPLIED_STATUS
-    f.save()
-    ticket.save()
+                ticket.status = Ticket.REPLIED_STATUS
+                f.new_status = Ticket.REPLIED_STATUS
+        ticket.save()
+        f.save()
 
     logger.debug("Created new FollowUp for Ticket")
     logger.info("[%s-%s] %s" % (ticket.queue.slug, ticket.id, ticket.title,))
@@ -506,6 +507,7 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
         )
 
     context = safe_template_context(ticket)
+    logger.debug(context)
 
     create_ticket_cc(ticket, payload['to_list'] + payload['cc_list'])
 
