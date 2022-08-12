@@ -766,6 +766,7 @@ def update_ticket(request, ticket_id, public=False):
     context.update(
         resolution=ticket.resolution,
         comment=f.comment,
+        private=(not public),
     )
     """
     Begin emailing updates to users.
@@ -989,7 +990,8 @@ def mass_update(request):
             # Send email to Submitter, Queue CC, CC'd Users, CC'd Public, Extra Fields, and Owner
             context = safe_template_context(t)
             context.update(resolution=t.resolution,
-                           queue=queue_template_context(t.queue))
+                           queue=queue_template_context(t.queue),
+                           private=False)
 
             messages_sent_to = set()
             try:
@@ -1148,6 +1150,7 @@ def merge_tickets(request):
 
                     # Send mail to submitter email and ticket CC to let them know ticket has been merged
                     context = safe_template_context(ticket)
+                    context['private'] = False
                     if ticket.submitter_email:
                         send_templated_mail(
                             template_name='merged',

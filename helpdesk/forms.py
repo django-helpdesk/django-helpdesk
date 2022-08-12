@@ -470,6 +470,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
         # Sent when a ticket is saved.
         context = safe_template_context(ticket)
         context['comment'] = followup.comment
+        context['private'] = not followup.public
 
         roles = {'submitter': ('newticket_submitter', context),
                  'queue_new': ('newticket_cc_user', context),
