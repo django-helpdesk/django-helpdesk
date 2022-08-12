@@ -460,6 +460,11 @@ def view_ticket(request, ticket_id):
     property_count = ticket.beam_property.all().count()  # TODO check how many queries this runs
     taxlot_count = ticket.beam_taxlot.all().count()
 
+    if hasattr(ticket, 'property_milestone'):
+        property_milestone_url = ticket.property_milestone.property_view_url
+    else:
+        property_milestone_url = None
+
     return render(request, 'helpdesk/ticket.html', {
         'ticket': ticket,
         'submitter_userprofile_url': submitter_userprofile_url,
@@ -474,6 +479,7 @@ def view_ticket(request, ticket_id):
         'properties': property_count,
         'taxlots': taxlot_count,
         'is_staff': is_helpdesk_staff(request.user),
+        'property_milestone_url': property_milestone_url,
         'debug': settings.DEBUG,
     })
 
