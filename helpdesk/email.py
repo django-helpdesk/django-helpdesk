@@ -401,6 +401,10 @@ def create_ticket_cc(ticket, cc_list):
 
 
 def create_object_from_email_message(message, ticket_id, payload, files, logger):
+    # remove later -- present for debugging
+    from django.template import engines
+    from_string = engines['django'].from_string
+    from helpdesk.settings import HELPDESK_EMAIL_SUBJECT_TEMPLATE
 
     ticket, previous_followup, new = None, None, False
     now = timezone.now()
@@ -430,8 +434,10 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
             logger.info('Ticket found from a ticket_id %s: [%s-%s]' % (ticket_id, ticket.queue.slug, ticket.id))
         except Ticket.DoesNotExist:
             ticket = None
+            logger.info('Ticket NOT found from ticket_id %s, ticket is now None')
         else:
             new = False
+            logger.info('Ticket is not new')
             # Check if the ticket has been merged to another ticket
             if ticket.merged_to:
                 logger.info("Ticket has been merged to %s" % ticket.merged_to.ticket)
@@ -534,9 +540,13 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
                      'extra': ('newticket_cc_public', context)}
             if ticket.assigned_to:
                 roles['assigned_to'] = ('assigned_owner', context)
+            logger.debug('new ticket context:')
+            logger.debug(context)
             ticket.send(roles, organization=org, fail_silently=True, extra_headers=extra_headers)
         else:
             context.update(comment=f.comment)
+            logger.debug('sending to submitter, owner, and cc_user:')
+            logger.debug(context)
             ticket.send(
                 {'submitter': ('updated_submitter', context),
                  'assigned_to': ('updated_owner', context),
@@ -546,6 +556,8 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
                 extra_headers=extra_headers,
             )
             if queue.enable_notifications_on_email_events:
+                logger.debug('sending to cc_user, cc_public, and extra data:')
+                logger.debug(context)
                 ticket.send(
                     {'queue_updated': ('updated_cc_user', context),
                      'cc_public': ('updated_cc_public', context),
@@ -554,6 +566,12 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
                     fail_silently=True,
                     extra_headers=extra_headers,
                 )
+
+        subject_part = from_string(
+            HELPDESK_EMAIL_SUBJECT_TEMPLATE % {
+                "subject": '(subject)'
+            }).render(context).replace('\n', '').replace('\r', '')
+        logger.debug('subject line: %s' % subject_part)
     return ticket
 
 
