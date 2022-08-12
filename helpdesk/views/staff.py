@@ -460,6 +460,11 @@ def view_ticket(request, ticket_id):
     property_count = ticket.beam_property.all().count()  # TODO check how many queries this runs
     taxlot_count = ticket.beam_taxlot.all().count()
 
+    if hasattr(ticket, 'property_milestone'):
+        property_milestone_url = ticket.property_milestone.property_view_url
+    else:
+        property_milestone_url = None
+
     return render(request, 'helpdesk/ticket.html', {
         'ticket': ticket,
         'submitter_userprofile_url': submitter_userprofile_url,
@@ -474,6 +479,7 @@ def view_ticket(request, ticket_id):
         'properties': property_count,
         'taxlots': taxlot_count,
         'is_staff': is_helpdesk_staff(request.user),
+        'property_milestone_url': property_milestone_url,
         'debug': settings.DEBUG,
     })
 
@@ -766,6 +772,7 @@ def update_ticket(request, ticket_id, public=False):
     context.update(
         resolution=ticket.resolution,
         comment=f.comment,
+        private=(not public),
     )
     """
     Begin emailing updates to users.
@@ -989,7 +996,8 @@ def mass_update(request):
             # Send email to Submitter, Queue CC, CC'd Users, CC'd Public, Extra Fields, and Owner
             context = safe_template_context(t)
             context.update(resolution=t.resolution,
-                           queue=queue_template_context(t.queue))
+                           queue=queue_template_context(t.queue),
+                           private=False)
 
             messages_sent_to = set()
             try:
@@ -1148,6 +1156,7 @@ def merge_tickets(request):
 
                     # Send mail to submitter email and ticket CC to let them know ticket has been merged
                     context = safe_template_context(ticket)
+                    context['private'] = False
                     if ticket.submitter_email:
                         send_templated_mail(
                             template_name='merged',

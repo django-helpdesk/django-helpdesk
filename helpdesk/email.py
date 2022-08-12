@@ -507,6 +507,7 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
         )
 
     context = safe_template_context(ticket)
+    context['private'] = False
     logger.debug(context)
 
     create_ticket_cc(ticket, payload['to_list'] + payload['cc_list'])

@@ -103,6 +103,7 @@ def escalate_tickets(queues, verbose):
             t.save()
 
             context = safe_template_context(t)
+            context['private'] = False
 
             t.send(
                 {'submitter': ('escalated_submitter', context),
