@@ -542,7 +542,7 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
                 roles['assigned_to'] = ('assigned_owner', context)
             logger.debug('new ticket context:')
             logger.debug(context)
-            ticket.send(roles, organization=org, fail_silently=True, extra_headers=extra_headers)
+            ticket.send(roles, organization=org, fail_silently=True, extra_headers=extra_headers, email_logger=logger)
         else:
             context.update(comment=f.comment)
             logger.debug('sending to submitter, owner, and cc_user:')
@@ -554,6 +554,7 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
                 organization=org,
                 fail_silently=True,
                 extra_headers=extra_headers,
+                email_logger=logger,
             )
             if queue.enable_notifications_on_email_events:
                 logger.debug('sending to cc_user, cc_public, and extra data:')
@@ -565,6 +566,7 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
                     organization=org,
                     fail_silently=True,
                     extra_headers=extra_headers,
+                    email_logger=logger,
                 )
 
         subject_part = from_string(
