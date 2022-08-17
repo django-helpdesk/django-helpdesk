@@ -8,7 +8,7 @@ from seed.lib.superperms.orgs.models import Organization
 from seed.models.email_settings import ImporterSenderMapping
 from seed.utils.seed_send_email import get_email_backend
 
-logger = logging.getLogger(__name__)
+# logger = logging.getLogger(__name__)
 
 DEBUGGING = False
 
@@ -48,7 +48,8 @@ def send_templated_mail(template_name,
                         fail_silently=False,
                         files=None,
                         organization=None,
-                        extra_headers=None):
+                        extra_headers=None,
+                        email_logger=None):
     """
     send_templated_mail() is a wrapper around Django's e-mail routines that
     allows us to easily send multipart (text/plain & text/html) e-mails using
@@ -85,6 +86,11 @@ def send_templated_mail(template_name,
     from helpdesk.models import EmailTemplate
     from helpdesk.settings import HELPDESK_EMAIL_SUBJECT_TEMPLATE, \
         HELPDESK_EMAIL_FALLBACK_LOCALE
+
+    if email_logger:
+        logger = email_logger
+    else:
+        logger = logging.getLogger(__name__)
 
     headers = extra_headers or {}
     for key, value in headers.items():
@@ -156,8 +162,12 @@ def send_templated_mail(template_name,
             content = filefield.read()
             msg.attach(filename, content)
             filefield.close()
-
-    logger.debug('Sending emails.')
+    logger.debug('-------------------')
+    logger.debug('%s' % subject_part)
+    logger.debug('%s' % text_part)
+    logger.debug('-------------------')
+    logger.debug('%s' % html_part)
+    logger.debug('-------------------')
     try:
         if DEBUGGING:
             return 0
