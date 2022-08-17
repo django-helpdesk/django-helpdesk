@@ -10,6 +10,7 @@ var key = {
     property_list: 'e_property_type',
     pathway_list: 'e_pathway',
     backup_pathway_list: 'e_backup_pathway',
+    new_pathway: 'new_pathway',
     attachment: 'attachment',
 
     // DC-staging
@@ -97,6 +98,12 @@ var form_validator = $('#ticket_submission_form').validate({
                     path: id.pathway_list,
                     prop: id.property_list
                 }
+            },
+            alert1: {
+                param: {
+                    path: id.backup_pathway_list,
+                    prop: id.property_list
+                }
             }
         },
         [key.acp_list]: {
@@ -118,12 +125,18 @@ var form_validator = $('#ticket_submission_form').validate({
 
 
 /* Hiding/showing elements in DC-Specific forms based on other fields */
+
+// Pathway Selection Form Logic
 $(group.affordable_boolean).hide();
 $(group.affordable_list).hide();
+groups_to_show = [group.acp_list, group.backup_pathway_list];
+groups_to_mark = [...groups_to_show, group.attachment];
 if ($(id.pathway_list).val() != "Alternative Compliance Pathway") {
     // Show them on ticket reload when there are errors
-    $(group.acp_list).hide();
-    $(group.backup_pathway_list).hide();
+    $(group.acp_list + ', ' + group.backup_pathway_list).hide();
+} else {
+    // Mark them as required too, if needed
+    $(groups_to_mark.join(' label, ') + ' label').each((i, e) => $(e).after('<span style="color:red;">*</span>'))
 }
 
 $(id.property_list).change(function(){
@@ -147,14 +160,20 @@ $(id.property_list).change(function(){
         $(id.affordable_list).val('');
     }
 
-   //For non-high performing categories: hide the Standard Target Pathway
+   //For non-high performing categories: hide the Standard Target Pathway in the Pathway and Backup Pathway lists
     if ($.inArray($(id.property_list).val(), high_perf) == -1) {
         $(id.pathway_list + " option[value='Standard Target Pathway']").remove();
+        $(id.backup_pathway_list + " option[value='Standard Target Pathway']").remove();
     } else {
         pathway_options = []
         var values = $(id.pathway_list + " option").map(function() {pathway_options.push(this.value);})
         if ($.inArray('Standard Target Pathway', pathway_options) == -1){
             $(id.pathway_list).append('<option>Standard Target Pathway</option>');
+        }
+
+        var backup_values = $(id.backup_pathway_list + " option").map(function() {pathway_options.push(this.value);})
+        if ($.inArray('Standard Target Pathway', pathway_options) == -1){
+            $(id.backup_pathway_list).append('<option>Standard Target Pathway</option>');
         }
     }
 
@@ -183,24 +202,22 @@ $(id.pathway_list).change(function(){
     if ($(id.property_list).val() != '')
         form_validator.element(id.property_list);
 
+    fields_to_reset = id.acp_list + ', ' + id.backup_pathway_list;
     // backup_pathway_list and acp_list fields appears if "Pathway Selected" = "Alternative Compliance Pathway"
     if($(id.pathway_list).val() == "Alternative Compliance Pathway") {
-        $(group.acp_list).show();
-        $(group.backup_pathway_list).show();
+        $(groups_to_show.join(', ')).show();
         // Mark as required
-        $(group.backup_pathway_list+ ' label').after('<span style="color:red;">*</span>');
-        $(group.acp_list + ' label').after('<span style="color:red;">*</span>');
-        $(group.attachment + ' label').after('<span style="color:red;">*</span>');
+        $(groups_to_mark.join(' label, ') + ' label').each((i, e) => $(e).after('<span style="color:red;">*</span>'))
     } else {
-        // Hide and Reset fields
-        $(group.acp_list).hide();
-        $(id.acp_list).val('');
-        $(group.backup_pathway_list).hide();
-        $(id.backup_pathway_list).val('');
+        // Hide Groups and Reset inputs
+        $(groups_to_show.join(', ')).hide();
+        $(fields_to_reset).val('');
+
         // Remove mark as required
-        $(group.acp_list).children('span').remove();
-        $(group.backup_pathway_list).children('span').remove();
-        $(group.attachment).children('span').remove();
+        $(groups_to_mark.join(', ')).each((i, e) => $(e).children('span').remove());
+
+        // Remove error message if a different Pathway was selected before Backup Pathway could be changed
+        $(id.backup_pathway_list + '-error').remove();
     }
 });
 
@@ -211,12 +228,29 @@ $(id.backup_pathway_list).change(function() {
 
     //Alert 1 must be checked when either of two fields changes
     if ($(id.backup_pathway_list).val() != '')
-        form_validator.element(id.backup_pathway_list);
+        form_validator.element(id.property_list);
 });
 
 
+// Pathway Change Application Form Logic
+other_pathway_list = id.pathway_list.replace('e_', '');  // Pathway field is not marked as an extra_data field
+$(other_pathway_list).change(function () {
+    //removes class 'error-okay' so that validator will not ignore changes
+    $(other_pathway_list).removeClass("error-okay");
+    form_validator.element(other_pathway_list);
+
+    // (Un)Mark Attachment field as required
+    if($(other_pathway_list).val() == "Alternative Compliance Pathway") {
+        $(group.attachment + ' label').after('<span style="color:red;">*</span>');
+    } else {
+        // Remove mark as required
+        $(group.attachment).children('span').remove();
+    }
+})
 
 /* Hiding/showing elements in Ann Arbor-Specific forms based on other fields */
+
+// Extension/Exemption Request Form Logic
 var options = $(id.ext_reason).children();
 var values = $.map(options ,function(option) {
     if (option.value != '' && option.value != '-----') {
@@ -242,18 +276,15 @@ $(id.ext_or_exempt).change(function () {
     $(group.ext_reason).hide();
     $(id.ext_reason).val('')
   }
-
-
 });
 
 
 /* Hiding/showing elements in dc-staging-Specific forms based on other fields */
+
+// Delay of Compliance Request Form Logic
 var QAH_fields = [group.attachment_1, group.type_affordable_housing, group.attachment_3].join(', ');
 if (! $(id.extended_delay_for_QAH).prop('checked')) {
-  $(QAH_fields).each(function(ind, e) {
-    // Only hide if field is not checked, otherwise show in case of Page reload or on error
-    $(e).hide();
-  })
+  $(QAH_fields).each((ind, e) => $(e).hide());
   $(id.delay_years).attr({"max" : 3, "min" : 1});
 } else {
   $(id.delay_years).attr({"min": 0})

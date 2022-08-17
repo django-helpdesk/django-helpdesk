@@ -250,6 +250,7 @@ def dashboard(request):
         'kbitems': kbitems,
         'all_tickets_reported_by_current_user': all_tickets_reported_by_current_user,
         'basic_ticket_stats': basic_ticket_stats,
+        'debug': settings.DEBUG,
     })
 
 
@@ -277,7 +278,8 @@ def delete_ticket(request, ticket_id):
     if request.method == 'GET':
         return render(request, 'helpdesk/delete_ticket.html', {
             'ticket': ticket,
-            'next': request.GET.get('next', 'home')
+            'next': request.GET.get('next', 'home'),
+            'debug': settings.DEBUG,
         })
     else:
         ticket.delete()
@@ -317,6 +319,7 @@ def followup_edit(request, ticket_id, followup_id):
             'ticket': ticket,
             'form': form,
             'ticketcc_string': ticketcc_string,
+            'debug': settings.DEBUG,
         })
     elif request.method == 'POST':
         form = EditFollowUpForm(request.POST)
@@ -457,6 +460,11 @@ def view_ticket(request, ticket_id):
     property_count = ticket.beam_property.all().count()  # TODO check how many queries this runs
     taxlot_count = ticket.beam_taxlot.all().count()
 
+    if hasattr(ticket, 'property_milestone'):
+        property_milestone_url = ticket.property_milestone.property_view_url
+    else:
+        property_milestone_url = None
+
     return render(request, 'helpdesk/ticket.html', {
         'ticket': ticket,
         'submitter_userprofile_url': submitter_userprofile_url,
@@ -471,6 +479,8 @@ def view_ticket(request, ticket_id):
         'properties': property_count,
         'taxlots': taxlot_count,
         'is_staff': is_helpdesk_staff(request.user),
+        'property_milestone_url': property_milestone_url,
+        'debug': settings.DEBUG,
     })
 
 
@@ -762,6 +772,7 @@ def update_ticket(request, ticket_id, public=False):
     context.update(
         resolution=ticket.resolution,
         comment=f.comment,
+        private=(not public),
     )
     """
     Begin emailing updates to users.
@@ -985,7 +996,8 @@ def mass_update(request):
             # Send email to Submitter, Queue CC, CC'd Users, CC'd Public, Extra Fields, and Owner
             context = safe_template_context(t)
             context.update(resolution=t.resolution,
-                           queue=queue_template_context(t.queue))
+                           queue=queue_template_context(t.queue),
+                           private=False)
 
             messages_sent_to = set()
             try:
@@ -1144,6 +1156,7 @@ def merge_tickets(request):
 
                     # Send mail to submitter email and ticket CC to let them know ticket has been merged
                     context = safe_template_context(ticket)
+                    context['private'] = False
                     if ticket.submitter_email:
                         send_templated_mail(
                             template_name='merged',
@@ -1173,7 +1186,8 @@ def merge_tickets(request):
         'tickets': tickets,
         'ticket_attributes': ticket_attributes,
         'custom_fields': custom_fields,
-        'ticket_select_form': ticket_select_form
+        'ticket_select_form': ticket_select_form,
+        'debug': settings.DEBUG,
     })
 
 
@@ -1357,6 +1371,7 @@ def ticket_list(request):
         saved_query=saved_query,
         search_message=search_message,
         extra_data_columns=extra_data_columns,
+        debug=settings.DEBUG,
     ))
 
 
@@ -1425,7 +1440,7 @@ def edit_ticket(request, ticket_id):
         ticket = form.save()
         return redirect(ticket)
 
-    return render(request, 'helpdesk/edit_ticket.html', {'form': form, 'ticket': ticket, 'errors': form.errors})
+    return render(request, 'helpdesk/edit_ticket.html', {'form': form, 'ticket': ticket, 'errors': form.errors, 'debug': settings.DEBUG})
 
 
 edit_ticket = staff_member_required(edit_ticket)
@@ -1522,7 +1537,7 @@ unhold_ticket = staff_member_required(unhold_ticket)
 
 @helpdesk_staff_member_required
 def rss_list(request):
-    return render(request, 'helpdesk/rss_list.html', {'queues': Queue.objects.all()})
+    return render(request, 'helpdesk/rss_list.html', {'queues': Queue.objects.all(), 'debug': settings.DEBUG})
 
 
 rss_list = staff_member_required(rss_list)
@@ -1563,6 +1578,7 @@ def report_index(request):
         'saved_query': saved_query,
         'basic_ticket_stats': basic_ticket_stats,
         'dash_tickets': dash_tickets,
+        'debug': settings.DEBUG,
     })
 
 
@@ -1759,6 +1775,7 @@ def run_report(request, report):
         'morrisjs_data': morrisjs_data,
         'from_saved_query': saved_query is not None,
         'saved_query': saved_query,
+        'debug': settings.DEBUG,
     })
 
 
@@ -1799,7 +1816,7 @@ def delete_saved_query(request, id):
         query.delete()
         return HttpResponseRedirect(reverse('helpdesk:list'))
     else:
-        return render(request, 'helpdesk/confirm_delete_saved_query.html', {'query': query})
+        return render(request, 'helpdesk/confirm_delete_saved_query.html', {'query': query, 'debug': settings.DEBUG})
 
 
 delete_saved_query = staff_member_required(delete_saved_query)
@@ -1858,6 +1875,7 @@ class EditUserSettingsView(MustBeStaffMixin, UpdateView):
 def email_ignore(request):
     return render(request, 'helpdesk/email_ignore_list.html', {
         'ignore_list': IgnoreEmail.objects.all(),
+        'debug': settings.DEBUG,
     })
 
 
@@ -1874,7 +1892,7 @@ def email_ignore_add(request):
     else:
         form = EmailIgnoreForm(request.GET)
 
-    return render(request, 'helpdesk/email_ignore_add.html', {'form': form})
+    return render(request, 'helpdesk/email_ignore_add.html', {'form': form, 'debug': settings.DEBUG})
 
 
 email_ignore_add = superuser_required(email_ignore_add)
@@ -1887,7 +1905,7 @@ def email_ignore_del(request, id):
         ignore.delete()
         return HttpResponseRedirect(reverse('helpdesk:email_ignore'))
     else:
-        return render(request, 'helpdesk/email_ignore_del.html', {'ignore': ignore})
+        return render(request, 'helpdesk/email_ignore_del.html', {'ignore': ignore, 'debug': settings.DEBUG})
 
 
 email_ignore_del = superuser_required(email_ignore_del)
@@ -1904,6 +1922,7 @@ def ticket_cc(request, ticket_id):
     return render(request, 'helpdesk/ticket_cc_list.html', {
         'copies_to': copies_to,
         'ticket': ticket,
+        'debug': settings.DEBUG,
     })
 
 
@@ -1950,6 +1969,7 @@ def ticket_cc_add(request, ticket_id):
         'form': form,
         'form_email': TicketCCEmailForm(),
         'form_user': form_user,
+        'debug': settings.DEBUG,
     })
 
 
@@ -1965,7 +1985,7 @@ def ticket_cc_del(request, ticket_id, cc_id):
         cc.delete()
         return HttpResponseRedirect(reverse('helpdesk:ticket_cc', kwargs={'ticket_id': cc.ticket.id}))
 
-    return render(request, 'helpdesk/ticket_cc_del.html', {'ticket': ticket, 'cc': cc})
+    return render(request, 'helpdesk/ticket_cc_del.html', {'ticket': ticket, 'cc': cc, 'debug': settings.DEBUG})
 
 
 ticket_cc_del = staff_member_required(ticket_cc_del)
@@ -1992,6 +2012,7 @@ def ticket_dependency_add(request, ticket_id):
     return render(request, 'helpdesk/ticket_dependency_add.html', {
         'ticket': ticket,
         'form': form,
+        'debug': settings.DEBUG,
     })
 
 
@@ -2004,7 +2025,7 @@ def ticket_dependency_del(request, ticket_id, dependency_id):
     if request.method == 'POST':
         dependency.delete()
         return HttpResponseRedirect(reverse('helpdesk:view', args=[ticket_id]))
-    return render(request, 'helpdesk/ticket_dependency_del.html', {'dependency': dependency})
+    return render(request, 'helpdesk/ticket_dependency_del.html', {'dependency': dependency, 'debug': settings.DEBUG})
 
 
 ticket_dependency_del = staff_member_required(ticket_dependency_del)
@@ -2024,6 +2045,7 @@ def attachment_del(request, ticket_id, attachment_id):
     return render(request, 'helpdesk/ticket_attachment_del.html', {
         'attachment': attachment,
         'filename': attachment.filename,
+        'debug': settings.DEBUG,
     })
 
 
@@ -2219,6 +2241,7 @@ def pair_property_milestone(request, ticket_id):
         'properties_per_cycle': properties_per_cycle,
         'pathways_per_property': pathways_per_property,
         'milestones_per_pathway': milestones_per_pathway,
+        'debug': settings.DEBUG,
     })
 
 
@@ -2289,6 +2312,7 @@ def edit_inventory_labels(request, inventory_type, ticket_id):
         'labels_per_view': labels_per_view,
         'labels': labels,
         'inventory_type': inventory_type.capitalize(),
+        'debug': settings.DEBUG,
     })
 
 

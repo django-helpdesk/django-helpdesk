@@ -383,16 +383,20 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
                     value = str(value)
                 cleaned_data[field] = value
 
-        # Handle DC Pathway Form
+        # Handle DC Pathway Selection Form
         if cleaned_data.get('e_pathway'):
-            self.clean_dc_pathway_form()
+            self.clean_dc_ps_form()
+
+        # Handle DC Pathway Change Application Form
+        if cleaned_data.get('pathway'):
+            self.clean_dc_pca_form()
 
         if cleaned_data.get('e_extended_delay_for_QAH'):
             self.clean_dc_delay_of_compliance_form()
 
         return cleaned_data
 
-    def clean_dc_pathway_form(self):
+    def clean_dc_ps_form(self):
         if self.cleaned_data.get('e_pathway') == 'Alternative Compliance Pathway':
             # Check that e_backup_pathway, e_acp_type, and attachment were provided
             fields = [
@@ -404,6 +408,13 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
                 if not self.cleaned_data.get(field[0]):
                     msg = forms.ValidationError(field[1] + ' if Alternative Compliance Pathway is selected.')
                     self.add_error(field[0], msg)
+
+    def clean_dc_pca_form(self):
+        if self.cleaned_data.get('pathway') == 'Alternative Compliance Pathway':
+            # Check that an attachment was provided
+            if not self.cleaned_data.get('attachment'):
+                self.add_error('attachment', forms.ValidationError('An Attachment is required if Alternative Compliance'
+                                                                   ' Pathway is selected for New Pathway Selection'))
 
     def clean_dc_delay_of_compliance_form(self):
         # If extended_delay_for_QAH, check that attachment_1, type_affordable_housing, attachment_3 were provided
@@ -495,6 +506,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
         # Sent when a ticket is saved.
         context = safe_template_context(ticket)
         context['comment'] = followup.comment
+        context['private'] = not followup.public
 
         roles = {'submitter': ('newticket_submitter', context),
                  'queue_new': ('newticket_cc_user', context),
