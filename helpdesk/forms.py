@@ -185,8 +185,8 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
         for display_data in display_objects:
             initial_value = None
 
-            # if a built-in ticket field shouldn't be editable on this page, add its field name here.
-            if display_data.field_name not in ['attachment', 'cc_emails'] and is_extra_data(display_data.field_name):
+            # if a built-in ticket field shouldn't be editable on this page, add its field name to this list to exclude it
+            if is_extra_data(display_data.field_name):
                 try:
                     initial_value = extra_data[display_data.field_name]
                     # Attempt to convert from fixed format string to date/time data type
@@ -205,7 +205,7 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
                     # TypeError if parsing None type
                     pass
                 instanceargs = {
-                    'label': display_data.label,
+                    'label': '%s (Required)' % display_data.label if display_data.required else display_data.label,
                     'help_text': display_data.get_markdown(),
                     'required': display_data.required,
                     'initial': initial_value,
@@ -213,7 +213,7 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
                 self.customfield_to_field(display_data, instanceargs)
 
             elif display_data.field_name in self.fields:
-                # if a built-in ticket field shouldn't be editable on this page, add its field name here.
+                # if a built-in ticket field shouldn't be editable on this page, add its field name to this list
                 if display_data.field_name in ['attachment', 'cc_emails']:
                     self.fields[display_data.field_name].widget = forms.HiddenInput()
                 else:
@@ -226,6 +226,9 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
                             elif attr == 'data_type':
                                 if display_info == 'datetime' or display_info == 'time' or display_info == 'date':
                                     self.fields[display_data.field_name].widget.attrs.update({'autocomplete': 'off'})
+                            elif attr == 'label':
+                                setattr(self.fields[display_data.field_name], attr,
+                                        '%s (Required)' % display_info if display_data.required else display_info)
                             else:
                                 setattr(self.fields[display_data.field_name], attr, display_info)
 
