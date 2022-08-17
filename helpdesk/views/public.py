@@ -285,7 +285,7 @@ def view_ticket(request):
     extra_display = CustomField.objects.filter(ticket_form=ticket.ticket_form).values()
     extra_data = []
     for field in extra_display:
-        if (not field['staff_only']) and not is_unlisted(field['field_name']):
+        if field['public'] and not is_unlisted(field['field_name']):
             if field['field_name'] in ticket.extra_data:
                 field['value'] = ticket.extra_data[field['field_name']]
             else:

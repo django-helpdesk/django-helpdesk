@@ -76,8 +76,8 @@ def is_unlisted(field_name):
     Replaces the CustomField field unlisted with a method. Returns true if the field is one that isn't displayed
     in the Ticket's table of fields once its created.
     """
-    return field_name not in ['queue', 'submitter_email', 'title', 'description', 'attachment', 'due_date',
-                              'priority', 'cc_emails']
+    return field_name in ['queue', 'submitter_email', 'title', 'description', 'attachment', 'due_date',
+                          'priority', 'cc_emails']
 
 
 def format_time_spent(time_spent):
@@ -1964,10 +1964,8 @@ class CustomField(models.Model):
 
     required = models.BooleanField(_('Required?'), help_text=_('Does the user have to enter a value for this field?'),
                                    default=False)
-    staff_only = models.BooleanField(_('Staff Only?'), help_text=_('If this is ticked, then the public submission form '
-                                     'will NOT show this field'), default=False)
-    editable = models.BooleanField(_('Editable by staff?'), default=True,
-                                   help_text=_('Can this field be edited by a staff user?'))
+    staff = models.BooleanField(_('Show on staff form?'), default=True)
+    public = models.BooleanField(_('Show on public form?'), default=True)
 
     ticket_form = models.ForeignKey(FormType, on_delete=models.CASCADE)
     columns = models.ManyToManyField(Column, blank=True, related_name='helpdesk_fields',

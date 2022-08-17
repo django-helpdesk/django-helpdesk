@@ -185,7 +185,8 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
         for display_data in display_objects:
             initial_value = None
 
-            if display_data.editable and is_extra_data(display_data.field_name):
+            # if a built-in ticket field shouldn't be editable on this page, add its field name here.
+            if display_data.field_name not in ['attachment', 'cc_emails'] and is_extra_data(display_data.field_name):
                 try:
                     initial_value = extra_data[display_data.field_name]
                     # Attempt to convert from fixed format string to date/time data type
@@ -212,7 +213,8 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
                 self.customfield_to_field(display_data, instanceargs)
 
             elif display_data.field_name in self.fields:
-                if not display_data.editable:
+                # if a built-in ticket field shouldn't be editable on this page, add its field name here.
+                if display_data.field_name in ['attachment', 'cc_emails']:
                     self.fields[display_data.field_name].widget = forms.HiddenInput()
                 else:
                     attrs = ['label', 'help_text', 'list_values', 'required', 'data_type']
@@ -227,10 +229,11 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
                             else:
                                 setattr(self.fields[display_data.field_name], attr, display_info)
 
-        display_list = display_objects.values_list('field_name', flat=True)
+        display_list = list(display_objects.values_list('field_name', flat=True))
         for field_name in self.fields.keys():
             if field_name not in ['merged_to', 'secret_key', 'submitter_email', 'extra_data', 'queue',
-                                  'kb_item', 'title', 'description'] and field_name not in display_list:
+                                  'kbitem', 'title', 'description'] and (
+                    field_name not in display_list and field_name.replace('e_', '', 1) not in display_list):
                 self.fields[field_name].widget = forms.HiddenInput()
 
         if 'title' not in display_list:
@@ -508,30 +511,26 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
         )
 
     # TODO move this init
-    def _add_form_custom_fields(self, staff_only_filter=None):
+    def _add_form_custom_fields(self, staff_filter=None, public_filter=None):
         if self.form_id is not None:
-            if staff_only_filter is None:
-                queryset = CustomField.objects.filter(ticket_form=self.form_id)
-                hidden_queryset = []
-
-                hidden_ticket_fields = []
-                queryset_values = queryset.values_list('field_name', flat=True)
-                for field_name in self.fields:
-                    if field_name not in queryset_values:
-                        hidden_ticket_fields.append(field_name)
-                        self.hidden_fields.append((field_name, ''))
+            if staff_filter:
+                queryset = CustomField.objects.filter(ticket_form=self.form_id, staff=True)
+                hidden_queryset = CustomField.objects.filter(ticket_form=self.form_id, staff=False)
+            elif public_filter:
+                queryset = CustomField.objects.filter(ticket_form=self.form_id, public=True)
+                hidden_queryset = CustomField.objects.filter(ticket_form=self.form_id, public=False)
             else:
-                queryset = CustomField.objects.filter(ticket_form=self.form_id, staff_only=staff_only_filter)
-                hidden_queryset = CustomField.objects.filter(ticket_form=self.form_id,
-                                                             staff_only=(not staff_only_filter))
-                self.hidden_fields = list(hidden_queryset.values_list('field_name', 'data_type'))
+                queryset = CustomField.objects.filter(ticket_form=self.form_id)
+                hidden_queryset = CustomField.objects.none()
 
-                hidden_ticket_fields = []
-                queryset_values = queryset.values_list('field_name', flat=True)
-                for field_name in self.fields:
-                    if field_name not in queryset_values:
-                        hidden_ticket_fields.append(field_name)
-                        self.hidden_fields.append((field_name, ''))
+            self.hidden_fields = list(hidden_queryset.values_list('field_name', 'data_type'))
+
+            hidden_ticket_fields = []
+            queryset_values = queryset.values_list('field_name', flat=True)
+            for field_name in self.fields:
+                if field_name not in queryset_values:
+                    hidden_ticket_fields.append(field_name)
+                    self.hidden_fields.append((field_name, ''))
 
             if self.form_queue:
                 queryset = queryset.exclude(field_name='queue')
@@ -628,7 +627,7 @@ class TicketForm(AbstractTicketForm):
         queue_choices = kwargs.pop("queue_choices")
 
         super().__init__(*args, **kwargs)
-        self._add_form_custom_fields()
+        self._add_form_custom_fields(staff_filter=True)
 
         if self.form_queue is None:
             self.fields['queue'].choices = queue_choices
@@ -701,7 +700,7 @@ class PublicTicketForm(AbstractTicketForm):
         Add any (non-staff) custom fields that are defined to the form
         """
         super(PublicTicketForm, self).__init__(*args, **kwargs)
-        self._add_form_custom_fields(False)
+        self._add_form_custom_fields(public_filter=True)
 
         # Hiding fields based on CustomField attributes has already been done; this is hiding based on kwargs
         for field in self.fields.keys():

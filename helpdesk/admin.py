@@ -159,7 +159,7 @@ class CustomFieldAdminForm(forms.ModelForm):
 class CustomFieldAdmin(admin.ModelAdmin):
     form = CustomFieldAdminForm
     list_display = ('ticket_form_type', 'field_name', 'label', 'data_type',
-                    'required', 'staff_only', 'is_extra_data')
+                    'required', 'staff', 'public', 'is_extra_data')
     list_filter = ('ticket_form',)
     list_display_links = ('field_name',)
     filter_horizontal = ('columns',)
@@ -187,16 +187,25 @@ class CustomFieldAdmin(admin.ModelAdmin):
     def make_required_false(modeladmin, request, queryset):
         queryset.update(required=False)
 
-    @admin.action(description="Display only on staff form")
+    @admin.action(description="Display on staff form")
     def make_staff_true(modeladmin, request, queryset):
-        queryset.update(staff_only=True)
+        queryset.update(staff=True)
+
+    @admin.action(description="Remove from staff form")
+    def make_staff_false(modeladmin, request, queryset):
+        queryset.update(staff=False)
 
     @admin.action(description="Display on public form")
-    def make_staff_false(modeladmin, request, queryset):
-        queryset.update(staff_only=False)
+    def make_public_true(modeladmin, request, queryset):
+        queryset.update(public=True)
+
+    @admin.action(description="Remove from public form")
+    def make_public_false(modeladmin, request, queryset):
+        queryset.update(public=False)
 
     actions = [make_required_true, make_required_false,
-               make_staff_true, make_staff_false]
+               make_staff_true, make_staff_false,
+               make_public_true, make_public_false]
 
 
 class TicketChangeInline(admin.StackedInline):

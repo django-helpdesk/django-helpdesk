@@ -11,9 +11,13 @@ def re_add_fields(apps, schema_editor):
                                     'description', 'building_name', 'building_address', 'building_id', 'pm_id',
                                     'attachment', 'due_date', 'priority', 'cc_emails']:
             field.is_extra_data = False
-        if field.field_name in ['queue', 'submitter_email', 'title', 'description', 'attachment', 'due_date',
-                                'priority', 'cc_emails']:
+
+        if field.field_name in ['queue', 'submitter_email', 'title', 'description', 'attachment', 'due_date', 'priority', 'cc_emails']:
             field.unlisted = True
+
+        if field.field_name in ['attachment', 'cc_emails']:
+            field.editable = False
+
         field.save()
 
 
@@ -31,6 +35,10 @@ class Migration(migrations.Migration):
         migrations.RemoveField(
             model_name='customfield',
             name='unlisted',
+        ),
+        migrations.RemoveField(
+            model_name='customfield',
+            name='editable',
         ),
         migrations.AlterField(
             model_name='ticket',
