@@ -55,26 +55,36 @@ def query_to_dict(results, descriptions):
 
 
 def get_search_filter_args(search):
+    # Returns a list of Q objects that will search all built-in fields of tickets for keywords.
+    # The search list comes from the query box, "Keywords".
+
     if search.startswith('queue:'):
         return Q(queue__title__icontains=search[len('queue:'):])
     if search.startswith('priority:'):
         return Q(priority__icontains=search[len('priority:'):])
     filter = Q()
     for subsearch in search.split("OR"):
-        subsearch = subsearch.strip()
-        filter = (
-            filter |
-            Q(id__icontains=subsearch) |
-            Q(title__icontains=subsearch) |
-            Q(description__icontains=subsearch) |
-            Q(priority__icontains=subsearch) |
-            Q(resolution__icontains=subsearch) |
-            Q(submitter_email__icontains=subsearch) |
-            Q(assigned_to__email__icontains=subsearch) |
-            Q(ticketcustomfieldvalue__value__icontains=subsearch) |  # TODO need to add custom stuff to querying
-            Q(created__icontains=subsearch) |
-            Q(due_date__icontains=subsearch)
-        )
+        if subsearch:
+            subsearch = subsearch.strip()
+            filter = (
+                filter |
+                Q(id__icontains=subsearch) |
+                Q(title__icontains=subsearch) |
+                Q(description__icontains=subsearch) |
+                Q(priority__icontains=subsearch) |
+                Q(resolution__icontains=subsearch) |
+                Q(submitter_email__icontains=subsearch) |
+                Q(assigned_to__email__icontains=subsearch) |
+                Q(ticketcustomfieldvalue__value__icontains=subsearch) |  # TODO need to add custom stuff to querying
+                Q(created__icontains=subsearch) |
+                Q(due_date__icontains=subsearch) |
+                Q(contact_name__icontains=subsearch) |
+                Q(contact_email__icontains=subsearch) |
+                Q(building_name__icontains=subsearch) |
+                Q(building_address__icontains=subsearch) |
+                Q(pm_id__icontains=subsearch) |
+                Q(building_id__icontains=subsearch)
+            )
     return filter
 
 
@@ -178,7 +188,7 @@ class __Query__:
         return str(self.huser.user.pk) + ":" + self.base64
 
     def refresh_query(self):
-        tickets = self.huser.get_tickets_in_queues().select_related()
+        tickets = self.huser.get_tickets_in_queues().select_related('queue', 'ticket_form')
         ticket_qs = self.__run__(tickets)
         cache.set(self.get_cache_key(), ticket_qs, timeout=3600)
         return ticket_qs

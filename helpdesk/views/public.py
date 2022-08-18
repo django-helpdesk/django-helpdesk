@@ -30,7 +30,7 @@ from helpdesk.decorators import protect_view, is_helpdesk_staff
 import helpdesk.views.staff as staff
 import helpdesk.views.abstract_views as abstract_views
 from helpdesk.lib import text_is_spam
-from helpdesk.models import Ticket, Queue, UserSettings, CustomField, FormType, TicketCC
+from helpdesk.models import Ticket, UserSettings, CustomField, FormType, TicketCC, is_unlisted
 from helpdesk.user import huser_from_request
 
 from seed.models import PropertyMilestone, Note
@@ -108,7 +108,7 @@ class BaseCreateTicketView(abstract_views.AbstractCreateTicketMixin, FormView):
         request = self.request
         if 'description' in form.cleaned_data and text_is_spam(form.cleaned_data['description'], request):
             # This submission is spam. Let's not save it.
-            return render(request, template_name='helpdesk/public_spam.html')
+            return render(request, 'helpdesk/public_spam.html', {'debug': settings.DEBUG})
         else:
             ticket = form.save(form_id=self.form_id, user=self.request.user if self.request.user.is_authenticated else None)
             if request.GET.get('milestone_beam_redirect', False):
@@ -185,11 +185,13 @@ def search_for_ticket(request, error_message=None, ticket=None):
             'email': email,
             'error_message': error_message,
             'helpdesk_settings': helpdesk_settings,
+            'debug': settings.DEBUG,
         })
     else:
         return render(request, 'helpdesk/public_error.html', {
             'error_message': TicketCC.VIEW_WARNING % (ticket.submitter_email if ticket and ticket.submitter_email else 'Not Found'),
             'ticket': ticket,
+            'debug': settings.DEBUG,
         })
 
 
@@ -255,6 +257,7 @@ def view_ticket(request):
         return render(request, 'helpdesk/public_error.html', {
             'error_message': TicketCC.VIEW_WARNING % (ticket.submitter_email if ticket.submitter_email else ''),
             'ticket': ticket,
+            'debug': settings.DEBUG,
         })
     elif cc_user and cc_user.can_view:
         can_update = cc_user.can_update
@@ -285,7 +288,7 @@ def view_ticket(request):
     extra_display = CustomField.objects.filter(ticket_form=ticket.ticket_form).values()
     extra_data = []
     for field in extra_display:
-        if (not field['staff_only']) and (not field['unlisted']):
+        if field['public'] and not is_unlisted(field['field_name']):
             if field['field_name'] in ticket.extra_data:
                 field['value'] = ticket.extra_data[field['field_name']]
             else:
@@ -300,6 +303,7 @@ def view_ticket(request):
         'next': redirect_url,
         'extra_data': extra_data,
         'can_update': can_update,
+        'debug': settings.DEBUG,
     })
 
 
@@ -308,4 +312,4 @@ def change_language(request):
     if 'return_to' in request.GET:
         return_to = request.GET['return_to']
 
-    return render(request, 'helpdesk/public_change_language.html', {'next': return_to})
+    return render(request, 'helpdesk/public_change_language.html', {'next': return_to, 'debug': settings.DEBUG})

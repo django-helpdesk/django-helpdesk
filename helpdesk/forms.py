@@ -22,8 +22,8 @@ from django.shortcuts import get_object_or_404
 
 from helpdesk.lib import safe_template_context, process_attachments
 from helpdesk.models import (Ticket, Queue, FollowUp, IgnoreEmail, TicketCC,
-                             CustomField, TicketCustomFieldValue, TicketDependency, UserSettings, KBItem,
-                             FormType)
+                             CustomField, TicketDependency, UserSettings, KBItem,
+                             FormType, is_extra_data)
 from helpdesk import settings as helpdesk_settings
 from helpdesk.email import create_ticket_cc
 from helpdesk.decorators import list_of_helpdesk_staff
@@ -74,11 +74,11 @@ def _field_ordering(queryset):
     # ordering fields based on form_ordering
     # if form_ordering is None, field is sorted to end of list
     ordering = sorted(
-        queryset.values('field_name', 'form_ordering', 'is_extra_data'),
+        queryset.values('field_name', 'form_ordering'),
         key=lambda x: float('inf') if x['form_ordering'] is None else x['form_ordering']
     )
     ordering = [
-        "e_%s" % field['field_name'] if field['is_extra_data']
+        "e_%s" % field['field_name'] if is_extra_data(field['field_name'])
         else field['field_name']
         for field in ordering
     ]
@@ -139,7 +139,7 @@ class CustomFieldMixin(object):
                 raise NameError("Unrecognized data_type %s" % field.data_type)
 
         # TODO change this
-        if field.is_extra_data:
+        if is_extra_data(field.field_name):
             self.fields['e_%s' % field.field_name] = fieldclass(**instanceargs)
         else:
             self.fields[field.field_name] = fieldclass(**instanceargs)
@@ -154,7 +154,7 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
 
     class Media:
         js = ('helpdesk/js/init_due_date.js', 'helpdesk/js/init_datetime_classes.js', 'helpdesk/js/validate.js')
-
+    """
     lookup = forms.BooleanField(
         widget=forms.CheckboxInput(attrs={'class': 'form-control'}),
         label=_('Use this data to match this ticket to a building?'),
@@ -162,7 +162,7 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
         initial=False,
         required=False,
     )
-
+    """
     def __init__(self, *args, **kwargs):
         """
         Add any custom fields that are defined to the form
@@ -185,7 +185,8 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
         for display_data in display_objects:
             initial_value = None
 
-            if display_data.editable and display_data.is_extra_data:
+            # if a built-in ticket field shouldn't be editable on this page, add its field name to this list to exclude it
+            if is_extra_data(display_data.field_name):
                 try:
                     initial_value = extra_data[display_data.field_name]
                     # Attempt to convert from fixed format string to date/time data type
@@ -204,7 +205,7 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
                     # TypeError if parsing None type
                     pass
                 instanceargs = {
-                    'label': display_data.label,
+                    'label': '%s (Required)' % display_data.label if display_data.required else display_data.label,
                     'help_text': display_data.get_markdown(),
                     'required': display_data.required,
                     'initial': initial_value,
@@ -212,7 +213,8 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
                 self.customfield_to_field(display_data, instanceargs)
 
             elif display_data.field_name in self.fields:
-                if not display_data.editable:
+                # if a built-in ticket field shouldn't be editable on this page, add its field name to this list
+                if display_data.field_name in ['attachment', 'cc_emails']:
                     self.fields[display_data.field_name].widget = forms.HiddenInput()
                 else:
                     attrs = ['label', 'help_text', 'list_values', 'required', 'data_type']
@@ -224,9 +226,21 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
                             elif attr == 'data_type':
                                 if display_info == 'datetime' or display_info == 'time' or display_info == 'date':
                                     self.fields[display_data.field_name].widget.attrs.update({'autocomplete': 'off'})
+                            elif attr == 'label':
+                                setattr(self.fields[display_data.field_name], attr,
+                                        '%s (Required)' % display_info if display_data.required else display_info)
                             else:
                                 setattr(self.fields[display_data.field_name], attr, display_info)
-                            # print('--%s: %s' % (attr, display_info))
+
+        display_list = list(display_objects.values_list('field_name', flat=True))
+        for field_name in self.fields.keys():
+            if field_name not in ['merged_to', 'secret_key', 'submitter_email', 'extra_data', 'queue',
+                                  'kbitem', 'title', 'description'] and (
+                    field_name not in display_list and field_name.replace('e_', '', 1) not in display_list):
+                self.fields[field_name].widget = forms.HiddenInput()
+
+        if 'title' not in display_list:
+            setattr(self.fields['title'], 'required', False)
         self.fields['extra_data'].widget = forms.HiddenInput()
 
         self.order_fields(_field_ordering(display_objects))
@@ -293,9 +307,11 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
         widget=forms.Select(attrs={'class': 'form-control'}),
         choices=Ticket.PRIORITY_CHOICES,
         initial=getattr(settings, 'HELPDESK_PUBLIC_TICKET_PRIORITY', '3'),
+        required=False
     )
     attachment = forms.FileField(
         widget=forms.FileInput(attrs={'class': 'form-control-file'}),
+        required=False
     )
     # TODO add beam_property and beam_taxlot so they can be viewed on the staff-side ticket page
 
@@ -343,6 +359,15 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
         form = FormType.objects.get(id=self.form_id)
         if form.queue:
             cleaned_data['queue'] = form.queue.id
+        elif 'queue' in cleaned_data and cleaned_data['queue'] is None:  # if the queue field is missing from the form
+            if self.fields['queue'].choices:
+                queue_id = self.fields['queue'].choices[1][0]
+                if Queue.objects.filter(id=int(queue_id)).first():
+                    cleaned_data['queue'] = int(queue_id)
+            else:
+                queue = Queue.objects.filter(organization_id=form.organization.id).first()
+                if queue:
+                    cleaned_data['queue'] = queue.id
 
         # Clean up extra_data so it can go in json field
         for field in cleaned_data:
@@ -358,16 +383,20 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
                     value = str(value)
                 cleaned_data[field] = value
 
-        # Handle DC Pathway Form
+        # Handle DC Pathway Selection Form
         if cleaned_data.get('e_pathway'):
-            self.clean_dc_pathway_form()
+            self.clean_dc_ps_form()
+
+        # Handle DC Pathway Change Application Form
+        if cleaned_data.get('pathway'):
+            self.clean_dc_pca_form()
 
         if cleaned_data.get('e_extended_delay_for_QAH'):
             self.clean_dc_delay_of_compliance_form()
 
         return cleaned_data
 
-    def clean_dc_pathway_form(self):
+    def clean_dc_ps_form(self):
         if self.cleaned_data.get('e_pathway') == 'Alternative Compliance Pathway':
             # Check that e_backup_pathway, e_acp_type, and attachment were provided
             fields = [
@@ -379,6 +408,13 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
                 if not self.cleaned_data.get(field[0]):
                     msg = forms.ValidationError(field[1] + ' if Alternative Compliance Pathway is selected.')
                     self.add_error(field[0], msg)
+
+    def clean_dc_pca_form(self):
+        if self.cleaned_data.get('pathway') == 'Alternative Compliance Pathway':
+            # Check that an attachment was provided
+            if not self.cleaned_data.get('attachment'):
+                self.add_error('attachment', forms.ValidationError('An Attachment is required if Alternative Compliance'
+                                                                   ' Pathway is selected for New Pathway Selection'))
 
     def clean_dc_delay_of_compliance_form(self):
         # If extended_delay_for_QAH, check that attachment_1, type_affordable_housing, attachment_3 were provided
@@ -470,6 +506,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
         # Sent when a ticket is saved.
         context = safe_template_context(ticket)
         context['comment'] = followup.comment
+        context['private'] = not followup.public
 
         roles = {'submitter': ('newticket_submitter', context),
                  'queue_new': ('newticket_cc_user', context),
@@ -489,16 +526,27 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
         )
 
     # TODO move this init
-    def _add_form_custom_fields(self, staff_only_filter=None):
+    def _add_form_custom_fields(self, staff_filter=None, public_filter=None):
         if self.form_id is not None:
-            if staff_only_filter is None:
-                queryset = CustomField.objects.filter(ticket_form=self.form_id)
-                hidden_queryset = []
+            if staff_filter:
+                queryset = CustomField.objects.filter(ticket_form=self.form_id, staff=True)
+                hidden_queryset = CustomField.objects.filter(ticket_form=self.form_id, staff=False)
+            elif public_filter:
+                queryset = CustomField.objects.filter(ticket_form=self.form_id, public=True)
+                hidden_queryset = CustomField.objects.filter(ticket_form=self.form_id, public=False)
             else:
-                queryset = CustomField.objects.filter(ticket_form=self.form_id, staff_only=staff_only_filter)
-                hidden_queryset = CustomField.objects.filter(ticket_form=self.form_id,
-                                                             staff_only=(not staff_only_filter))
-                self.hidden_fields = hidden_queryset.values_list('field_name', 'data_type')
+                queryset = CustomField.objects.filter(ticket_form=self.form_id)
+                hidden_queryset = CustomField.objects.none()
+
+            self.hidden_fields = list(hidden_queryset.values_list('field_name', 'data_type'))
+
+            hidden_ticket_fields = []
+            queryset_values = queryset.values_list('field_name', flat=True)
+            for field_name in self.fields:
+                if field_name not in queryset_values:
+                    hidden_ticket_fields.append(field_name)
+                    self.hidden_fields.append((field_name, ''))
+
             if self.form_queue:
                 queryset = queryset.exclude(field_name='queue')
 
@@ -526,10 +574,16 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
             for field in hidden_queryset:
                 if field.field_name not in self.fields:
                     self.customfield_to_field(field, {})
-                if field.is_extra_data:
+                if is_extra_data(field.field_name):
                     self.fields['e_%s' % field.field_name].widget = forms.HiddenInput()
                 else:
                     self.fields[field.field_name].widget = forms.HiddenInput()
+
+            for field_name in hidden_ticket_fields:
+                if field_name == 'queue' and not self.form_queue:
+                    pass  # option to select queue should always be available if a default is not set.
+                elif field_name != 'assigned_to' and field_name != 'submitter_email':
+                    self.fields[field_name].widget = forms.HiddenInput()
 
             self.order_fields(_field_ordering(queryset))
 
@@ -590,7 +644,7 @@ class TicketForm(AbstractTicketForm):
         queue_choices = kwargs.pop("queue_choices")
 
         super().__init__(*args, **kwargs)
-        self._add_form_custom_fields()
+        self._add_form_custom_fields(staff_filter=True)
 
         if self.form_queue is None:
             self.fields['queue'].choices = queue_choices
@@ -663,7 +717,7 @@ class PublicTicketForm(AbstractTicketForm):
         Add any (non-staff) custom fields that are defined to the form
         """
         super(PublicTicketForm, self).__init__(*args, **kwargs)
-        self._add_form_custom_fields(False)
+        self._add_form_custom_fields(public_filter=True)
 
         # Hiding fields based on CustomField attributes has already been done; this is hiding based on kwargs
         for field in self.fields.keys():

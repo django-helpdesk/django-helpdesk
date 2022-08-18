@@ -1,7 +1,7 @@
  var timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
  now = new Date()
  $.ajax({
-    url: "helpdesk/set_user_timezone/",
+    url: "/helpdesk/set_user_timezone/",
     action: "GET",
     data: {
       timezone: timezone,
