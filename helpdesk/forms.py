@@ -580,7 +580,9 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
                     self.fields[field.field_name].widget = forms.HiddenInput()
 
             for field_name in hidden_ticket_fields:
-                if field_name != 'assigned_to' and field_name != 'submitter_email':
+                if field_name == 'queue' and not self.form_queue:
+                    pass  # option to select queue should always be available if a default is not set.
+                elif field_name != 'assigned_to' and field_name != 'submitter_email':
                     self.fields[field_name].widget = forms.HiddenInput()
 
             self.order_fields(_field_ordering(queryset))
