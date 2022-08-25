@@ -8,7 +8,6 @@ from seed.lib.superperms.orgs.models import Organization
 from seed.models.email_settings import ImporterSenderMapping
 from seed.utils.seed_send_email import get_email_backend
 
-# logger = logging.getLogger(__name__)
 
 DEBUGGING = False
 
@@ -162,12 +161,8 @@ def send_templated_mail(template_name,
             content = filefield.read()
             msg.attach(filename, content)
             filefield.close()
-    logger.debug('-------------------')
-    logger.debug('%s' % subject_part)
-    logger.debug('%s' % text_part)
-    logger.debug('-------------------')
-    logger.debug('%s' % html_part)
-    logger.debug('-------------------')
+
+    logger.info('Sending emails.')
     try:
         if DEBUGGING:
             return 0

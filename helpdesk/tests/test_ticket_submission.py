@@ -168,7 +168,7 @@ class TicketBasicsTestCase(TestCase):
             max_length=100,
             form_ordering=10,
             required=False,
-            staff_only=False)
+            staff=True)
         post_data = {
             'queue': queue_custom.id,
             'title': 'Ticket with custom text field',

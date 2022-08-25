@@ -58,7 +58,7 @@ from helpdesk.lib import (
 )
 from helpdesk.models import (
     Ticket, Queue, FollowUp, TicketChange, PreSetReply, FollowUpAttachment, SavedSearch,
-    IgnoreEmail, TicketCC, TicketDependency, UserSettings, KBItem, CustomField, TicketCustomFieldValue,
+    IgnoreEmail, TicketCC, TicketDependency, UserSettings, KBItem, CustomField, is_unlisted
 )
 
 from helpdesk import settings as helpdesk_settings
@@ -445,11 +445,11 @@ def view_ticket(request, ticket_id):
 
     display_data = CustomField.objects.filter(ticket_form=ticket.ticket_form).only(
         'label', 'data_type',
-        'unlisted', 'field_name', 'columns',
+        'field_name', 'columns',
     )
     extra_data = []
     for values, object in zip(display_data.values(), display_data):  # TODO check how many queries this runs
-        if not values['unlisted']:
+        if not is_unlisted(values['field_name']):
             if values['field_name'] in ticket.extra_data:
                 values['value'] = ticket.extra_data[values['field_name']]
             else:
