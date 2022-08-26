@@ -4,7 +4,7 @@ from smtplib import SMTPException
 
 from django.utils.safestring import mark_safe
 from seed.lib.superperms.orgs.models import Organization
-from seed.utils.seed_send_email import send_beam_mail
+from seed.utils.email import send_beam_mail
 
 
 DEBUGGING = False
