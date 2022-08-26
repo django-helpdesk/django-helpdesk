@@ -6,7 +6,7 @@ from django.conf import settings
 from django.utils.safestring import mark_safe
 from seed.lib.superperms.orgs.models import Organization
 from seed.models.email_settings import ImporterSenderMapping
-from seed.utils.seed_send_email import get_email_backend
+from seed.utils.email import get_email_backend
 
 
 DEBUGGING = False
