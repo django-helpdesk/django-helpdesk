@@ -486,7 +486,7 @@ class Ticket(models.Model):
     def time_spent_formatted(self):
         return format_time_spent(self.time_spent)
 
-    def send(self, roles, organization=None, dont_send_to=None,  **kwargs):
+    def send_ticket_mail(self, roles, organization=None, dont_send_to=None,  **kwargs):
         """
         Send notifications to everyone interested in this ticket.
 

@@ -46,7 +46,9 @@ def send_templated_mail(template_name,
                         files=None,
                         organization=None,
                         extra_headers=None,
-                        email_logger=None):
+                        email_logger=None,
+                        source='',
+                        user=None):
     """
     send_templated_mail() is a wrapper around Django's e-mail routines that
     allows us to easily send multipart (text/plain & text/html) e-mails using
@@ -76,7 +78,7 @@ def send_templated_mail(template_name,
         email replies and keep proper threading.
 
     """
-    from django.core.mail import EmailMultiAlternatives, BadHeaderError
+    from django.core.mail import BadHeaderError
     from django.template import engines
     from_string = engines['django'].from_string
 
@@ -135,7 +137,7 @@ def send_templated_mail(template_name,
 
     try:
         # Create and send email out.
-        success = send_beam_mail(
+        send_beam_mail(
             organization=org,
             recipient_emails=recipients,
             bcc=bcc,
@@ -144,8 +146,8 @@ def send_templated_mail(template_name,
             msg_html=html_part,
             files=files,
             headers=headers,
-            source='Helpdesk',  # todo
-            user=None  # todo
+            source='Helpdesk: %s' % source,
+            user=user
         )
     except SMTPException as e:
         logger.exception('SMTPException raised while sending email from {} to {}'.format(sender, recipients))

@@ -518,11 +518,13 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
         if ticket.assigned_to and ticket.assigned_to.usersettings_helpdesk.email_on_ticket_assign:
             roles['assigned_to'] = ('assigned_owner', context)
 
-        ticket.send(
+        ticket.send_ticket_mail(
             roles,
             organization=ticket.ticket_form.organization,
             fail_silently=True,
             files=files,
+            source="new ticket",
+            user=user
         )
 
     # TODO move this init

@@ -808,13 +808,17 @@ def update_ticket(request, ticket_id, public=False):
         ticket.assigned_to.usersettings_helpdesk.email_on_ticket_change
         or (reassigned and ticket.assigned_to.usersettings_helpdesk.email_on_ticket_assigned)
     ):
-        messages_sent_to.update(ticket.send(    # sends the assigned/resolved/closed/updated_owner template to the owner.
-            {'assigned_to': (template_staff, context)},
-            organization=ticket.ticket_form.organization,
-            dont_send_to=messages_sent_to,
-            fail_silently=True,
-            files=files,
-        ))
+        messages_sent_to.update(
+            ticket.send_ticket_mail(    # sends the assigned/resolved/closed/updated_owner template to the owner.
+                {'assigned_to': (template_staff, context)},
+                organization=ticket.ticket_form.organization,
+                dont_send_to=messages_sent_to,
+                fail_silently=True,
+                files=files,
+                user=None if not is_helpdesk_staff(request.user, ticket.ticket_form.organization_id) else request.user,
+                source='updated (owner)'
+            )
+        )
 
     # Send an email about the reassignment to the previously assigned user
     if old_owner and reassigned and old_owner.email not in messages_sent_to:
@@ -825,6 +829,8 @@ def update_ticket(request, ticket_id, public=False):
             sender=ticket.queue.from_address,
             fail_silently=True,
             organization=ticket.ticket_form.organization,
+            user=None if not is_helpdesk_staff(request.user, ticket.ticket_form.organization_id) else request.user,
+            source='updated (reassigned owner)'
         )
 
     # Emails an update to users who follow all ticket updates.
@@ -838,14 +844,17 @@ def update_ticket(request, ticket_id, public=False):
         template_cc = 'updated_cc_user'
 
     if not no_changes_excluding_time_spent:
-        messages_sent_to.update(ticket.send(
-            {'queue_updated': (template_cc, context),
-             'cc_users': (template_cc, context)},
-            organization=ticket.ticket_form.organization,
-            dont_send_to=messages_sent_to,
-            fail_silently=True,
-            files=files,
-        ))
+        messages_sent_to.update(
+            ticket.send_ticket_mail(
+                {'queue_updated': (template_cc, context),
+                 'cc_users': (template_cc, context)},
+                organization=ticket.ticket_form.organization,
+                dont_send_to=messages_sent_to,
+                fail_silently=True,
+                files=files,
+                user=None if not is_helpdesk_staff(request.user, ticket.ticket_form.organization_id) else request.user,
+                source="updated (CC'd staff)"
+            ))
 
         # Public users (submitter, public CC, and extra_field emails) are only updated if there's a new status or a comment.
         if public and (
@@ -869,7 +878,15 @@ def update_ticket(request, ticket_id, public=False):
                 roles['submitter'] = (template + 'cc_user', context)
 
             messages_sent_to.update(
-                ticket.send(roles, organization=ticket.ticket_form.organization, dont_send_to=messages_sent_to, fail_silently=True, files=files, ))
+                ticket.send_ticket_mail(
+                    roles,
+                    organization=ticket.ticket_form.organization,
+                    dont_send_to=messages_sent_to,
+                    fail_silently=True,
+                    files=files,
+                    user=None if not is_helpdesk_staff(request.user, ticket.ticket_form.organization_id) else request.user,
+                    source='updated (public)'
+                ))
 
     ticket.save()
 
@@ -1015,12 +1032,16 @@ def mass_update(request):
             if t.assigned_to and t.assigned_to.usersettings_helpdesk.email_on_ticket_change:
                 roles['assigned_to'] = ('closed_owner', context)
 
-            messages_sent_to.update(t.send(
-                roles,
-                organization=t.ticket_form.organization,
-                dont_send_to=messages_sent_to,
-                fail_silently=True,
-            ))
+            messages_sent_to.update(
+                t.send_ticket_mail(
+                    roles,
+                    organization=t.ticket_form.organization,
+                    dont_send_to=messages_sent_to,
+                    fail_silently=True,
+                    user=None if not is_helpdesk_staff(request.user, t.ticket_form.organization_id) else request.user,
+                    source='bulk (closed)'
+                )
+            )
             if t.queue.reassign_when_closed and t.queue.default_owner and old_user and old_user.email not in messages_sent_to:
                 send_templated_mail(
                     template_name='closed_owner',
@@ -1029,9 +1050,12 @@ def mass_update(request):
                     sender=t.queue.from_address,
                     fail_silently=True,
                     organization=t.ticket_form.organization,
+                    user=None if not is_helpdesk_staff(request.user, t.ticket_form.organization_id) else request.user,
+                    source='bulk (closed and auto-reassigned)'
                 )
 
         elif action == 'delete':
+            # todo create a note of this somewhere?
             t.delete()
 
     return HttpResponseRedirect(reverse('helpdesk:list'))
@@ -1166,6 +1190,8 @@ def merge_tickets(request):
                             sender=ticket.queue.from_address,
                             fail_silently=True,
                             organization=ticket.ticket_form.organization,
+                            user=None if not is_helpdesk_staff(request.user, ticket.ticket_form.organization_id) else request.user,
+                            source='merging'
                         )
 
                     # Move all followups and update their title to know they come from another ticket
