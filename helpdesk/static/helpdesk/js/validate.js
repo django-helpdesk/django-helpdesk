@@ -233,11 +233,11 @@ $(id.backup_pathway_list).change(function() {
 
 
 // Pathway Change Application Form Logic
-other_pathway_list = id.pathway_list.replace('e_', '');  // Pathway field is not marked as an extra_data field
-$(other_pathway_list).change(function () {
+new_pathway_list = id.pathway_list.replace('e_', 'e_new_');  // Pathway field is not marked as an extra_data field
+$(new_pathway_list).change(function () {
     //removes class 'error-okay' so that validator will not ignore changes
-    $(other_pathway_list).removeClass("error-okay");
-    form_validator.element(other_pathway_list);
+    $(new_pathway_list).removeClass("error-okay");
+    form_validator.element(new_pathway_list);
 
     // (Un)Mark Attachment field as required
     if($(other_pathway_list).val() == "Alternative Compliance Pathway") {

@@ -398,10 +398,9 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
 
     def clean_dc_ps_form(self):
         if self.cleaned_data.get('e_pathway') == 'Alternative Compliance Pathway':
-            # Check that e_backup_pathway, e_acp_type, and attachment were provided
+            # Check that e_backup_pathway, and attachment were provided
             fields = [
                 ('e_backup_pathway', 'A Backup Pathway is required'),
-                ('e_acp_type', 'An ACP Type is required'),
                 ('attachment', 'An attachment is required')
             ]
             for field in fields:
@@ -410,7 +409,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
                     self.add_error(field[0], msg)
 
     def clean_dc_pca_form(self):
-        if self.cleaned_data.get('pathway') == 'Alternative Compliance Pathway':
+        if self.cleaned_data.get('e_new_pathway') == 'Alternative Compliance Pathway':
             # Check that an attachment was provided
             if not self.cleaned_data.get('attachment'):
                 self.add_error('attachment', forms.ValidationError('An Attachment is required if Alternative Compliance'
