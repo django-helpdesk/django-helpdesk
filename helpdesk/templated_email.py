@@ -5,6 +5,7 @@ from smtplib import SMTPException
 from django.utils.safestring import mark_safe
 from seed.lib.superperms.orgs.models import Organization
 from seed.utils.email import send_beam_mail
+from seed.models.postoffice import PostOfficeEmail
 
 
 DEBUGGING = False
@@ -146,7 +147,8 @@ def send_templated_mail(template_name,
             msg_html=html_part,
             files=files,
             headers=headers,
-            source='Helpdesk: %s' % source,
+            source_page=PostOfficeEmail.HELPDESK,
+            source_action=source,
             user=user
         )
     except SMTPException as e:
