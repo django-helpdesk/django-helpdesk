@@ -4,38 +4,11 @@ from smtplib import SMTPException
 
 from django.utils.safestring import mark_safe
 from seed.lib.superperms.orgs.models import Organization
-from seed.utils.email import send_beam_mail
+from seed.utils.email import send_beam_mail, add_custom_header
 from seed.models.postoffice import PostOfficeEmail
 
 
 DEBUGGING = False
-
-
-def add_custom_header(recipients):
-    """
-    :return recipients: list of strings
-    :return header: a comma-separated string
-    """
-    address_list = []
-    header = ''
-
-    if isinstance(recipients, str):
-        if ',' in recipients:
-            # Lower string, split into list, strip individual strings, and then assign
-            address_list = recipients.lower().split(',')
-            address_list = list(map(str.strip, address_list))
-            header = ','.join(address_list)
-        else:
-            # Lower string, strip, assign to header, make a list again
-            recipients = recipients.lower().strip()
-            header = recipients
-            address_list = [recipients]
-    elif isinstance(recipients, list):
-        # Map strip to list, map lower to list, turn into a list again, assign
-        address_list = list(map(str.lower, map(str.strip, recipients)))
-        header = ','.join(address_list)
-
-    return address_list, header
 
 
 def send_templated_mail(template_name,
