@@ -46,7 +46,10 @@ def check_staff_status(check_staff=False):  # 1st bool -- unused
                 return False
 
             if org is None:  # check role in the user's current default_org
-                helpdesk_org = u.default_organization.helpdesk_organization
+                if not u.default_organization:
+                    return False
+                else:
+                    helpdesk_org = u.default_organization.helpdesk_organization
             else:  # check role in the given org
                 helpdesk_org = Organization.objects.get(id=org).helpdesk_organization
 
