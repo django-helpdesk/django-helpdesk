@@ -20,7 +20,7 @@ import email
 from email.utils import getaddresses
 from email_reply_parser import EmailReplyParser
 from helpdesk import settings
-from helpdesk.exceptions import IgnoreTicketException
+from helpdesk.exceptions import IgnoreTicketException, DeleteIgnoredTicketException
 from helpdesk.lib import process_attachments, safe_template_context
 from helpdesk.models import FollowUp, IgnoreEmail, Queue, Ticket
 import imaplib
@@ -143,14 +143,18 @@ def pop3_sync(q, logger, server):
         except IgnoreTicketException:
             logger.warn(
                 "Message %s was ignored and will be left on POP3 server" % msgNum)
-
-        if ticket:
-            server.dele(msgNum)
-            logger.info(
-                "Successfully processed message %s, deleted from POP3 server" % msgNum)
-        else:
+        except DeleteIgnoredTicketException:
             logger.warn(
-                "Message %s was not successfully processed, and will be left on POP3 server" % msgNum)
+                "Message %s was ignored and deleted from POP3 server" % msgNum)
+            server.dele(msgNum)
+        else:
+            if ticket:
+                server.dele(msgNum)
+                logger.info(
+                    "Successfully processed message %s, deleted from POP3 server" % msgNum)
+            else:
+                logger.warn(
+                    "Message %s was not successfully processed, and will be left on POP3 server" % msgNum)
 
     server.quit()
 
@@ -195,16 +199,19 @@ def imap_sync(q, logger, server):
                     ticket = object_from_message(message=full_message, queue=q, logger=logger)
                 except IgnoreTicketException:
                     logger.warn("Message %s was ignored and will be left on IMAP server" % num)
-                    return
-                except TypeError as te:
-                    logger.warn(f"Unexpected error processing message: {te}")
-                    ticket = None  # hotfix. Need to work out WHY.
-                if ticket:
+                except DeleteIgnoredTicketException:
                     server.store(num, '+FLAGS', '\\Deleted')
-                    logger.info(
-                        "Successfully processed message %s, deleted from IMAP server" % num)
+                    logger.warn("Message %s was ignored and deleted from IMAP server" % num)
+                except TypeError as te:
+                    # Log the error with stacktrace to help identify what went wrong
+                    logger.error(f"Unexpected error processing message: {te}", exc_info=True)
                 else:
-                    logger.warn(
+                    if ticket:
+                        server.store(num, '+FLAGS', '\\Deleted')
+                        logger.info(
+                            "Successfully processed message %s, deleted from IMAP server" % num)
+                    else:
+                        logger.warn(
                         "Message %s was not successfully processed, and will be left on IMAP server" % num)
     except imaplib.IMAP4.error:
         logger.error(
@@ -295,21 +302,24 @@ def process_queue(q, logger):
                     ticket = object_from_message(message=full_message, queue=q, logger=logger)
                 except IgnoreTicketException:
                     logger.warn("Message %d was ignored and will be left in local directory", i)
-                    return
-            if ticket:
-                logger.info(
-                    "Successfully processed message %d, ticket/comment created.", i)
-                try:
-                    # delete message file if ticket was successful
+                except DeleteIgnoredTicketException:
                     os.unlink(m)
-                except OSError as e:
-                    logger.error(
-                        "Unable to delete message %d (%s).", i, str(e))
+                    logger.warn("Message %d was ignored and deleted local directory", i)
                 else:
-                    logger.info("Successfully deleted message %d.", i)
-            else:
-                logger.warn(
-                    "Message %d was not successfully processed, and will be left in local directory", i)
+                    if ticket:
+                        logger.info(
+                            "Successfully processed message %d, ticket/comment created.", i)
+                        try:
+                            # delete message file if ticket was successful
+                            os.unlink(m)
+                        except OSError as e:
+                            logger.error(
+                                "Unable to delete message %d (%s).", i, str(e))
+                        else:
+                            logger.info("Successfully deleted message %d.", i)
+                    else:
+                        logger.warn(
+                            "Message %d was not successfully processed, and will be left in local directory", i)
 
 
 def decodeUnknown(charset, string):
@@ -700,7 +710,7 @@ def object_from_message(message: str,
 
     for ignore in IgnoreEmail.objects.filter(Q(queues=queue) | Q(queues__isnull=True)):
         if ignore.test(sender_email):
-            raise IgnoreTicketException()
+            raise IgnoreTicketException() if ignore.keep_in_mailbox else DeleteIgnoredTicketException()
 
     ticket_id: typing.Optional[int] = get_ticket_id_from_subject_slug(
         queue.slug,

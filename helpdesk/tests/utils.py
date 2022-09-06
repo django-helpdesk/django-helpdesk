@@ -1,5 +1,6 @@
 """UItility functions facilitate making unit testing easier and less brittle."""
 
+import email
 import factory
 import faker
 import random
@@ -11,7 +12,8 @@ from email.message import Message
 from email.mime.text import MIMEText
 from numpy.random import randint
 from PIL import Image
-from typing import Tuple, Any
+from typing import Tuple, Any, Optional
+import typing
 
 
 def strip_accents(text):
@@ -48,7 +50,7 @@ def text_to_id(text):
 
 def get_random_string(length: int=16) -> str:
     return "".join(
-        [random.choice(string.ascii_letters + string.digits) for n in range(length)]
+        [random.choice(string.ascii_letters + string.digits) for _ in range(length)]
     )
 
 
@@ -91,32 +93,47 @@ def get_fake(provider: str, locale: str = "en_US", min_length: int = 5) -> Any:
     return factory.Faker(provider).evaluate({}, None, {'locale': locale,})
 
 
-def generate_email_address(locale: str="en_US") -> Tuple[str, str, str]:
-    """
-    Generate an email address making sure that the email address itself contains only ascii
-    """
+def generate_email_address(
+        locale: str="en_US",
+        use_short_email: bool=False,
+        real_name_format: Optional[str]="{last_name}, {first_name}",
+        last_name_override: Optional[str]=None) -> Tuple[str, str, str, str]:
+    '''
+    Generate an RFC 2822 email address
+    
+    :param locale: change this to generate locale specific names
+    :param use_short_email: defaults to false. If true then does not include real name in email address
+    :param real_name_format: pass a different format if different than "{last_name}, {first_name}"
+    :param last_name_override: override the fake name if you want some special characters in the last name
+    :returns <RFC2822 formatted email for header>, <short email address>, <first name>, <last_name
+    '''
     fake = faker.Faker(locale=locale)
     first_name = fake.first_name()
-    last_name = fake.last_name()
-    first_name.replace(' ', '').encode("ascii", "ignore").lower()
+    last_name = last_name_override or fake.last_name()
+    real_name = None if use_short_email else real_name_format.format(first_name=first_name, last_name=last_name)
+    # Add a random string to ensure we do not generate a real domain name
     email_address = "{}.{}@{}".format(
         first_name.replace(' ', '').encode("ascii", "ignore").lower().decode(),
         last_name.replace(' ', '').encode("ascii", "ignore").lower().decode(),
         get_random_string(5) + fake.domain_name()
     )
-    return email_address, first_name, last_name
+    # format email address for RFC 2822 and return
+    return email.utils.formataddr((real_name, email_address)), email_address, first_name, last_name
 
 
-def generate_email(locale: str="en_US", content_type: str="text/html", use_short_email: bool=False) -> Message:
+def generate_text_email(locale: str="en_US",
+        content_type: str="text/plain",
+        use_short_email: bool=False
+        ) -> typing.Tuple[Message, typing.Tuple[str, str], typing.Tuple[str, str]]:
     """
-    Generates an email includng headers
+    Generates an email including headers
     """
-    to_meta = generate_email_address(locale)
-    from_meta = generate_email_address(locale)
+    to_meta = generate_email_address(locale, use_short_email=use_short_email)
+    from_meta = generate_email_address(locale, use_short_email=use_short_email)
     body = get_fake("text", locale=locale)
     
     msg = MIMEText(body)
     msg['Subject'] = get_fake("sentence", locale=locale)
-    msg['From'] = from_meta[0] if use_short_email else "{} {}<{}>".format(from_meta[1], from_meta[2], from_meta[0])
-    msg['To'] = to_meta[0] if use_short_email else "{} {}<{}>".format(to_meta[1], to_meta[2], to_meta[0])
-    return msg.as_string()
+    msg['From'] = from_meta[0]
+    msg['To'] = to_meta[0]
+    return msg, from_meta, to_meta

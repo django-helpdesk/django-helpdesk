@@ -7,7 +7,8 @@ from django.shortcuts import get_object_or_404
 from django.test import override_settings, TestCase
 import helpdesk.email
 from helpdesk.management.commands.get_email import Command
-from helpdesk.models import FollowUp, FollowUpAttachment, Queue, Ticket, TicketCC
+from helpdesk.models import FollowUp, FollowUpAttachment, Queue, Ticket, TicketCC,\
+    IgnoreEmail
 import itertools
 import logging
 import os
@@ -16,6 +17,9 @@ import six
 import sys
 from tempfile import mkdtemp
 from unittest import mock
+from helpdesk.tests import utils 
+from helpdesk.exceptions import DeleteIgnoredTicketException, IgnoreTicketException
+from helpdesk.email import object_from_message
 
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -42,7 +46,7 @@ class GetEmailCommonTests(TestCase):
             with mock.patch.object(Command, 'handle', return_value=None) as mocked_handle:
                 call_command('get_email', quiet=quiet_test_value)
                 mocked_handle.assert_called_once()
-                for args, kwargs in mocked_handle.call_args_list:
+                for _, kwargs in mocked_handle.call_args_list:
                     self.assertEqual(quiet_test_value, (kwargs['quiet']))
 
     def test_email_with_blank_body_and_attachment(self):
@@ -132,7 +136,29 @@ class GetEmailCommonTests(TestCase):
         assert "Hello there!" in FollowUp.objects.filter(
             ticket=ticket).first().comment
 
+    def test_will_delete_ignored_email(self):
+        """
+        Tests if an email will be ignored if configured to do so and throws the correct exception
+        to ensure the email is deleted
+        """
+        message, from_meta, _ = utils.generate_text_email(locale="es_ES")
+        ignore = IgnoreEmail(name="Test Ignore", email_address=from_meta[1], keep_in_mailbox=False)
+        ignore.save()
+        with self.assertRaises(DeleteIgnoredTicketException):
+            object_from_message(message.as_string(), self.queue_public, self.logger);
 
+    def test_will_not_delete_ignored_email(self):
+        """
+        Tests if an email will be ignored if configured to do so and throws the correct exception
+        to ensure the email is NOT deleted
+        """
+        message, from_meta, _ = utils.generate_text_email(locale="es_ES")
+        ignore = IgnoreEmail(name="Test Ignore", email_address=from_meta[1], keep_in_mailbox=True)
+        ignore.save()
+        with self.assertRaises(IgnoreTicketException):
+            object_from_message(message.as_string(), self.queue_public, self.logger);
+
+        
 class GetEmailParametricTemplate(object):
     """TestCase that checks basic email functionality across methods and socks configs."""
 
@@ -258,12 +284,12 @@ class GetEmailParametricTemplate(object):
         """Tests correctly decoding mail headers when a comma is encoded into
            UTF-8. See bug report #832."""
 
-        # example email text from Django docs:
-        # https://docs.djangoproject.com/en/1.10/ref/unicode/
-        test_email_from = "Bernard-Bouissières, Benjamin <bbb@example.com>"
+        # Create the from using standard RFC required formats
+        # Override the last_name to ensure we get a non-ascii character in it
+        test_email_from_meta = utils.generate_email_address("fr_FR", last_name_override="Bouissières")
         test_email_subject = "Commas in From lines"
         test_email_body = "Testing commas in from email UTF-8."
-        test_email = "To: helpdesk@example.com\nFrom: " + test_email_from + \
+        test_email = "To: helpdesk@example.com\nFrom: " + test_email_from_meta[0] + \
             "\nSubject: " + test_email_subject + "\n\n" + test_email_body
         test_mail_len = len(test_email)
 
@@ -333,13 +359,13 @@ class GetEmailParametricTemplate(object):
 
             ticket1 = get_object_or_404(Ticket, pk=1)
             self.assertEqual(ticket1.ticket_for_url, "QQ-%s" % ticket1.id)
-            self.assertEqual(ticket1.submitter_email, 'bbb@example.com')
+            self.assertEqual(ticket1.submitter_email, test_email_from_meta[1])
             self.assertEqual(ticket1.title, test_email_subject)
             self.assertEqual(ticket1.description, test_email_body)
 
             ticket2 = get_object_or_404(Ticket, pk=2)
             self.assertEqual(ticket2.ticket_for_url, "QQ-%s" % ticket2.id)
-            self.assertEqual(ticket2.submitter_email, 'bbb@example.com')
+            self.assertEqual(ticket2.submitter_email, test_email_from_meta[1])
             self.assertEqual(ticket2.title, test_email_subject)
             self.assertEqual(ticket2.description, test_email_body)
 
