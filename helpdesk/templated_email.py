@@ -19,6 +19,7 @@ def send_templated_mail(template_name,
                         fail_silently=False,
                         files=None,
                         organization=None,
+                        ticket_id=None,
                         extra_headers=None,
                         email_logger=None,
                         source='',
@@ -122,7 +123,8 @@ def send_templated_mail(template_name,
             headers=headers,
             source_page=PostOfficeEmail.HELPDESK,
             source_action=source,
-            user=user
+            user=user,
+            ticket_id=ticket_id,
         )
     except SMTPException as e:
         logger.exception('SMTPException raised while sending email from {} to {}'.format(sender, recipients))

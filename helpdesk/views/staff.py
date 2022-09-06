@@ -830,7 +830,8 @@ def update_ticket(request, ticket_id, public=False):
             fail_silently=True,
             organization=ticket.ticket_form.organization,
             user=None if not is_helpdesk_staff(request.user, ticket.ticket_form.organization_id) else request.user,
-            source='updated (reassigned owner)'
+            source='updated (reassigned owner)',
+            ticket_id=ticket.pk
         )
 
     # Emails an update to users who follow all ticket updates.
@@ -1051,7 +1052,8 @@ def mass_update(request):
                     fail_silently=True,
                     organization=t.ticket_form.organization,
                     user=None if not is_helpdesk_staff(request.user, t.ticket_form.organization_id) else request.user,
-                    source='bulk (closed and auto-reassigned)'
+                    source='bulk (closed and auto-reassigned)',
+                    ticket_id=t.pk
                 )
 
         elif action == 'delete':
@@ -1191,7 +1193,8 @@ def merge_tickets(request):
                             fail_silently=True,
                             organization=ticket.ticket_form.organization,
                             user=None if not is_helpdesk_staff(request.user, ticket.ticket_form.organization_id) else request.user,
-                            source='merging'
+                            source='merging',
+                            ticket_id=chosen_ticket.pk
                         )
 
                     # Move all followups and update their title to know they come from another ticket
@@ -1199,6 +1202,9 @@ def merge_tickets(request):
                         ticket=chosen_ticket,
                         title=_(('[Merged from #%(id)d] %(title)s') % {'id': ticket.id, 'title': ticket.title})[:200],
                     )
+
+                    # Move all emails to the chosen ticket
+                    ticket.emails.update(ticket_id=chosen_ticket.id)
 
                     # Add submitter_email, assigned_to email and ticketcc to chosen ticket if necessary
                     chosen_ticket.add_email_to_ticketcc_if_not_in(email=ticket.submitter_email)

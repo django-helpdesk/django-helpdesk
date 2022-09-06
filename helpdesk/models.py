@@ -534,7 +534,8 @@ class Ticket(models.Model):
         def send(role, recipient):
             if recipient and recipient not in recipients and role in roles:
                 template, context = roles[role]
-                send_templated_mail(template, context, recipient, sender=self.queue.from_address, organization=organization, **kwargs)
+                send_templated_mail(template, context, recipient, sender=self.queue.from_address,
+                                    organization=organization, ticket_id=self.pk, **kwargs)
                 recipients.add(recipient)
 
         # Attempts to send an email to every possible field.
