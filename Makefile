@@ -56,6 +56,7 @@ test:
 	mkdir -p var
 	$(PIP) install -e .[test]
 	$(TOX)
+	rm -rf var
 
 
 #: documentation - Build documentation (Sphinx, README, ...).
