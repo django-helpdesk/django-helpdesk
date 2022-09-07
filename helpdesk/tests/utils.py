@@ -6,14 +6,18 @@ import faker
 import random
 import re
 import string
+import typing
 import unicodedata
-from io import BytesIO
+from email import encoders
 from email.message import Message
+from email.mime.base import MIMEBase
+from email.mime.image import MIMEImage
 from email.mime.text import MIMEText
+from io import BytesIO
 from numpy.random import randint
 from PIL import Image
 from typing import Tuple, Any, Optional
-import typing
+from email.mime.multipart import MIMEMultipart
 
 
 def strip_accents(text):
@@ -87,11 +91,27 @@ def get_random_image(image_format: str="PNG", size: int=5):
 def get_fake(provider: str, locale: str = "en_US", min_length: int = 5) -> Any:
     """
     Generates a random string, float, integer etc based on provider
+    Provider can be "text', 'sentence', "word" 
+      e.g. `get_fake('name')` ==> 'Buzz Aldrin' 
+    """
+    string = factory.Faker(provider).evaluate({}, None, {'locale': locale,})
+    while len(string) < min_length:
+        string += factory.Faker(provider).evaluate({}, None, {'locale': locale,})
+    return string
+
+
+def get_fake_html(locale: str = "en_US", wrap_in_body_tag=True) -> Any:
+    """
+    Generates a random string, float, integer etc based on provider
     Provider can be "text', 'sentence',  
       e.g. `get_fake('name')` ==> 'Buzz Aldrin' 
     """
-    return factory.Faker(provider).evaluate({}, None, {'locale': locale,})
-
+    html = factory.Faker("sentence").evaluate({}, None, {'locale': locale,})
+    for _ in range(0,4):
+        html += "<li>" + factory.Faker("sentence").evaluate({}, None, {'locale': locale,}) + "</li>"
+    for _ in range(0,4):
+        html += "<p>" + factory.Faker("text").evaluate({}, None, {'locale': locale,})
+    return f"<body>{html}</body>" if wrap_in_body_tag else html
 
 def generate_email_address(
         locale: str="en_US",
@@ -120,20 +140,115 @@ def generate_email_address(
     # format email address for RFC 2822 and return
     return email.utils.formataddr((real_name, email_address)), email_address, first_name, last_name
 
+def generate_file_mime_part(locale: str="en_US",filename: str = None) -> Message:
+    """
+    
+    :param locale: change this to generate locale specific file name and attachment content
+    :param filename: pass a file name if you want t ospecify a specific name otherwise a random name will be generated
+    """
+    part = MIMEBase('application', 'octet-stream')
+    part.set_payload(get_fake("text", locale=locale, min_length=1024))
+    encoders.encode_base64(part)
+    if not filename:
+        filename = get_fake("word", locale=locale, min_length=8) + ".txt"
+    part.add_header('Content-Disposition', "attachment; filename= %s" % filename)
+    return part
+
+def generate_image_mime_part(locale: str="en_US",imagename: str = None) -> Message:
+    """
+    
+    :param locale: change this to generate locale specific file name and attachment content
+    :param filename: pass a file name if you want t ospecify a specific name otherwise a random name will be generated
+    """
+    part = MIMEImage(generate_random_image(image_format="JPEG"))
+    part.set_payload(get_fake("text", locale=locale, min_length=1024))
+    encoders.encode_base64(part)
+    if not imagename:
+        imagename = get_fake("word", locale=locale, min_length=8) + ".jpg"
+    part.add_header('Content-Disposition', "attachment; filename= %s" % imagename)
+    return part
+
+def add_email_headers(message: Message, locale: str="en_US",
+        use_short_email: bool=False
+        ) -> typing.Tuple[typing.Tuple[str, str], typing.Tuple[str, str]]:
+    """
+    Adds the key email headers to a Mime part
+    
+    :param message: the Mime part to add headers to
+    :param locale: change this to generate locale specific "real names" and subject
+    :param use_short_email: produces a "To" or "From" that is only the email address if True
+
+    """
+    to_meta = generate_email_address(locale, use_short_email=use_short_email)
+    from_meta = generate_email_address(locale, use_short_email=use_short_email)
+    
+    message['Subject'] = get_fake("sentence", locale=locale)
+    message['From'] = from_meta[0]
+    message['To'] = to_meta[0]
+    return from_meta, to_meta
+
+def generate_mime_part(locale: str="en_US",
+        part_type: str="plain",
+        use_short_email: bool=False
+        ) -> typing.Tuple[Message, typing.Tuple[str, str], typing.Tuple[str, str]]:
+    """
+    Generates amime part of the sepecified type
+    
+    :param locale: change this to generate locale specific strings
+    :param text_type: options are plain, html, image (attachment), file (attachment)
+    :param use_short_email: produces a "To" or "From" that is only the email address if True
+    """
+    if  "plain" == part_type:
+        body = get_fake("text", locale=locale, min_length=1024)
+        msg = MIMEText(body)
+    elif "html" == part_type:
+        body = get_fake_html(locale=locale, wrap_in_body_tag=True)
+        msg = MIMEText(body)
+    elif "file" == part_type:
+        msg = generate_file_mime_part(locale=locale)
+        msg = MIMEText(body)
+    elif "image" == part_type:
+        msg = generate_image_mime_part(locale=locale)
+        msg = MIMEText(body)
+    else:
+        raise Exception("Mime part not implemented: " + part_type)
+    return msg
+
+def generate_multipart_email(locale: str="en_US",
+        type_list: typing.List[str]=["plain", "html", "attachment"],
+        use_short_email: bool=False
+        ) -> typing.Tuple[Message, typing.Tuple[str, str], typing.Tuple[str, str]]:
+    """
+    Generates an email including headers with the defined multiparts
+    
+    :param locale:
+    :param type_list: options are plain, html, image (attachment), file (attachment)
+    :param use_short_email: produces a "To" or "From" that is only the email address if True
+    """    
+    msg = MIMEMultipart()
+    for part_type in type_list:
+        msg.append(generate_mime_part(locale=locale, part_type=part_type, use_short_email=use_short_email))
+    from_meta, to_meta = add_email_headers(msg, locale=locale, use_short_email=use_short_email)
+    return msg, from_meta, to_meta
 
 def generate_text_email(locale: str="en_US",
-        content_type: str="text/plain",
         use_short_email: bool=False
         ) -> typing.Tuple[Message, typing.Tuple[str, str], typing.Tuple[str, str]]:
     """
     Generates an email including headers
     """
-    to_meta = generate_email_address(locale, use_short_email=use_short_email)
-    from_meta = generate_email_address(locale, use_short_email=use_short_email)
-    body = get_fake("text", locale=locale)
-    
+    body = get_fake("text", locale=locale, min_length=1024)
     msg = MIMEText(body)
-    msg['Subject'] = get_fake("sentence", locale=locale)
-    msg['From'] = from_meta[0]
-    msg['To'] = to_meta[0]
+    from_meta, to_meta = add_email_headers(msg, locale=locale, use_short_email=use_short_email)
+    return msg, from_meta, to_meta
+
+def generate_html_email(locale: str="en_US",
+        use_short_email: bool=False
+        ) -> typing.Tuple[Message, typing.Tuple[str, str], typing.Tuple[str, str]]:
+    """
+    Generates an email including headers
+    """
+    body = get_fake_html(locale=locale)
+    msg = MIMEText(body)
+    from_meta, to_meta = add_email_headers(msg, locale=locale, use_short_email=use_short_email)
     return msg, from_meta, to_meta
