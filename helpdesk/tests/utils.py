@@ -1,23 +1,24 @@
 """UItility functions facilitate making unit testing easier and less brittle."""
 
+
+from PIL import Image
 import email
-import factory
-import faker
-import random
-import re
-import string
-import typing
-import unicodedata
 from email import encoders
 from email.message import Message
 from email.mime.base import MIMEBase
 from email.mime.image import MIMEImage
+from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+import factory
+import faker
 from io import BytesIO
 from numpy.random import randint
-from PIL import Image
-from typing import Tuple, Any, Optional
-from email.mime.multipart import MIMEMultipart
+import random
+import re
+import string
+import typing
+from typing import Any, Optional, Tuple
+import unicodedata
 
 
 def strip_accents(text):

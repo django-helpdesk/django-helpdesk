@@ -1,14 +1,18 @@
 # -*- coding: utf-8 -*-
 
+
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
 from django.shortcuts import get_object_or_404
 from django.test import override_settings, TestCase
 import helpdesk.email
+from helpdesk.email import extract_part_data, object_from_message
+from helpdesk.exceptions import DeleteIgnoredTicketException, IgnoreTicketException
 from helpdesk.management.commands.get_email import Command
-from helpdesk.models import FollowUp, FollowUpAttachment, Queue, Ticket, TicketCC,\
-    IgnoreEmail
+from helpdesk.models import FollowUp, FollowUpAttachment, IgnoreEmail, Queue, Ticket, TicketCC
+from helpdesk.tests import utils
 import itertools
 import logging
 import os
@@ -16,12 +20,8 @@ from shutil import rmtree
 import six
 import sys
 from tempfile import mkdtemp
-from unittest import mock
-from helpdesk.tests import utils 
-from helpdesk.exceptions import DeleteIgnoredTicketException, IgnoreTicketException
-from helpdesk.email import object_from_message, extract_part_data
-from django.core.files.uploadedfile import SimpleUploadedFile
 import typing
+from unittest import mock
 
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
