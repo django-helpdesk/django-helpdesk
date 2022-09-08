@@ -621,7 +621,7 @@ def extract_part_data(
     if name:
         name = email.utils.collapse_rfc2231_value(name)
     part_body = None
-    part_full_body=None
+    part_full_body = None
     if part.get_content_maintype() == 'text' and name is None:
         if part.get_content_subtype() == 'plain':
             part_body = part.get_payload(decode=True)
@@ -629,7 +629,7 @@ def extract_part_data(
             if part['Content-Transfer-Encoding'] == '8bit' and part.get_content_charset() == 'utf-8':
                 part_body = part_body.decode('unicode_escape')
             part_body = decodeUnknown(part.get_content_charset(), part_body)
-            # have to use django_settings here so overwritting it works in tests
+            # have to use django_settings here so overwriting it works in tests
             # the default value is False anyway
             if ticket_id is None and getattr(django_settings, 'HELPDESK_FULL_FIRST_MESSAGE_FROM_EMAIL', False):
                 # first message in thread, we save full body to avoid
@@ -674,12 +674,12 @@ def extract_part_data(
     else:
         if not name:
             ext = mimetypes.guess_extension(part.get_content_type())
-            name = "part-%i%s" % (counter, ext)
+            name = f"part-{counter}{ext}"
         else:
-            name = ("part-%i_" % counter) + name
+            name = f"part-{counter}_{name}"
 
         files.append(SimpleUploadedFile(name, part.get_payload(decode=True), mimetypes.guess_type(name)[0]))
-        logger.debug("Found MIME attachment %s" % name)
+        logger.debug("Found MIME attachment %s", name)
     return part_body, part_full_body
 
 def object_from_message(message: str,

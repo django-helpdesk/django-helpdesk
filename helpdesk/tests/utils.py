@@ -144,7 +144,7 @@ def generate_file_mime_part(locale: str="en_US",filename: str = None) -> Message
     """
     
     :param locale: change this to generate locale specific file name and attachment content
-    :param filename: pass a file name if you want t ospecify a specific name otherwise a random name will be generated
+    :param filename: pass a file name if you want to specify a specific name otherwise a random name will be generated
     """
     part = MIMEBase('application', 'octet-stream')
     part.set_payload(get_fake("text", locale=locale, min_length=1024))
@@ -158,7 +158,7 @@ def generate_image_mime_part(locale: str="en_US",imagename: str = None) -> Messa
     """
     
     :param locale: change this to generate locale specific file name and attachment content
-    :param filename: pass a file name if you want t ospecify a specific name otherwise a random name will be generated
+    :param filename: pass a file name if you want to specify a specific name otherwise a random name will be generated
     """
     part = MIMEImage(generate_random_image(image_format="JPEG"))
     part.set_payload(get_fake("text", locale=locale, min_length=1024))
@@ -168,7 +168,22 @@ def generate_image_mime_part(locale: str="en_US",imagename: str = None) -> Messa
     part.add_header('Content-Disposition', "attachment; filename= %s" % imagename)
     return part
 
-def add_email_headers(message: Message, locale: str="en_US",
+def generate_email_list(address_cnt: int = 3,
+        locale: str="en_US",
+        use_short_email: bool=False
+        ) -> str:
+    """
+    Generates a list of email addresses formatted for email headers on a Mime part
+    
+    :param address_cnt: the number of email addresses to string together
+    :param locale: change this to generate locale specific "real names" and subject
+    :param use_short_email: produces a email address without "real name" if True
+
+    """
+    email_address_list = [generate_email_address(locale, use_short_email=use_short_email)[0] for _ in range(0, address_cnt)]
+    return ",".join(email_address_list)
+
+def add_simple_email_headers(message: Message, locale: str="en_US",
         use_short_email: bool=False
         ) -> typing.Tuple[typing.Tuple[str, str], typing.Tuple[str, str]]:
     """
@@ -228,7 +243,7 @@ def generate_multipart_email(locale: str="en_US",
     msg = MIMEMultipart()
     for part_type in type_list:
         msg.append(generate_mime_part(locale=locale, part_type=part_type, use_short_email=use_short_email))
-    from_meta, to_meta = add_email_headers(msg, locale=locale, use_short_email=use_short_email)
+    from_meta, to_meta = add_simple_email_headers(msg, locale=locale, use_short_email=use_short_email)
     return msg, from_meta, to_meta
 
 def generate_text_email(locale: str="en_US",
@@ -239,7 +254,7 @@ def generate_text_email(locale: str="en_US",
     """
     body = get_fake("text", locale=locale, min_length=1024)
     msg = MIMEText(body)
-    from_meta, to_meta = add_email_headers(msg, locale=locale, use_short_email=use_short_email)
+    from_meta, to_meta = add_simple_email_headers(msg, locale=locale, use_short_email=use_short_email)
     return msg, from_meta, to_meta
 
 def generate_html_email(locale: str="en_US",
@@ -250,5 +265,5 @@ def generate_html_email(locale: str="en_US",
     """
     body = get_fake_html(locale=locale)
     msg = MIMEText(body)
-    from_meta, to_meta = add_email_headers(msg, locale=locale, use_short_email=use_short_email)
+    from_meta, to_meta = add_simple_email_headers(msg, locale=locale, use_short_email=use_short_email)
     return msg, from_meta, to_meta

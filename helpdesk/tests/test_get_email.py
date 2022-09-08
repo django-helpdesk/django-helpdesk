@@ -19,7 +19,9 @@ from tempfile import mkdtemp
 from unittest import mock
 from helpdesk.tests import utils 
 from helpdesk.exceptions import DeleteIgnoredTicketException, IgnoreTicketException
-from helpdesk.email import object_from_message
+from helpdesk.email import object_from_message, extract_part_data
+from django.core.files.uploadedfile import SimpleUploadedFile
+import typing
 
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -157,6 +159,18 @@ class GetEmailCommonTests(TestCase):
         ignore.save()
         with self.assertRaises(IgnoreTicketException):
             object_from_message(message.as_string(), self.queue_public, self.logger);
+
+    def test_utf8_filename_attachment(self):
+        """
+        Tests if an attachment correctly sent with a UTF8 filename in disposition is extracted correctly
+        """
+        filename = "TeléfonoMañana.txt"
+        part = utils.generate_file_mime_part(locale="es_ES", filename=filename)
+        files: typing.List[SimpleUploadedFile] = []
+        extract_part_data(part, counter=1, ticket_id="tst1", files=files, logger=self.logger)
+        sent_file: SimpleUploadedFile = files[0]
+        # The extractor prepends a part identifier so compare the ending
+        self.assertTrue(sent_file.name.endswith(filename), f"Filename extracted does not match: {sent_file.name}")
 
         
 class GetEmailParametricTemplate(object):
