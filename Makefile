@@ -64,12 +64,14 @@ test:
 .PHONY: format
 format:
 	autopep8 --exit-code --global-config .flake8 helpdesk
+	isort --line-length=120 --src helpdesk .
 
 
 #: checkformat - checks formatting against configured format specifications for the project.
 .PHONY: checkformat
 checkformat:
 	flake8 helpdesk --count --show-source --statistics --exit-zero --max-complexity=20
+	isort --line-length=120 --src helpdesk . --check
 
 
 #: documentation - Build documentation (Sphinx, README, ...).
