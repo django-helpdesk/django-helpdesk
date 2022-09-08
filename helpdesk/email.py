@@ -212,7 +212,7 @@ def imap_sync(q, logger, server):
                             "Successfully processed message %s, deleted from IMAP server" % num)
                     else:
                         logger.warn(
-                        "Message %s was not successfully processed, and will be left on IMAP server" % num)
+                            "Message %s was not successfully processed, and will be left on IMAP server" % num)
     except imaplib.IMAP4.error:
         logger.error(
             "IMAP retrieve failed. Is the folder '%s' spelled correctly, and does it exist on the server?",
@@ -595,20 +595,22 @@ def get_email_body_from_part_payload(part) -> str:
             part.get_payload(decode=False)
         )
 
+
 def attempt_body_extract_from_html(message: str) -> str:
-        mail = BeautifulSoup(str(message), "html.parser")
-        beautiful_body = mail.find('body')
-        body = None
-        full_body = None
-        if beautiful_body:
-            try:
-                body = beautiful_body.text
-                full_body = body
-            except AttributeError:
-                pass
-        if not body:
-            body = ""
-        return body, full_body
+    mail = BeautifulSoup(str(message), "html.parser")
+    beautiful_body = mail.find('body')
+    body = None
+    full_body = None
+    if beautiful_body:
+        try:
+            body = beautiful_body.text
+            full_body = body
+        except AttributeError:
+            pass
+    if not body:
+        body = ""
+    return body, full_body
+
 
 def extract_part_data(
         part: Message,
@@ -616,7 +618,7 @@ def extract_part_data(
         ticket_id: int,
         files: List,
         logger: logging.Logger
-        ) -> Tuple[str, str]:
+) -> Tuple[str, str]:
     name = part.get_filename()
     if name:
         name = email.utils.collapse_rfc2231_value(name)
@@ -681,6 +683,7 @@ def extract_part_data(
         files.append(SimpleUploadedFile(name, part.get_payload(decode=True), mimetypes.guess_type(name)[0]))
         logger.debug("Found MIME attachment %s", name)
     return part_body, part_full_body
+
 
 def object_from_message(message: str,
                         queue: Queue,
