@@ -283,7 +283,7 @@ class __Query__:
                 filters_list = []
 
         staff_user_ids = [user.id for user in User.objects.filter(orgs=queryset.first().ticket_form.organization_id)
-                          if is_helpdesk_staff(user)]
+                          if is_helpdesk_staff(user)] if queryset else []
         if 'paired_count' in sort_column:
             queryset = queryset.annotate(paired_count=Count('beam_property') + Count('beam_taxlot'))
         elif 'last_staff_reply' in sort_column or 'last_member_reply' in sort_column:
