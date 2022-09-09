@@ -1,0 +1,5 @@
+tox
+autopep8
+flake8
+pycodestyle
+isort

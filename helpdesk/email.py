@@ -7,6 +7,7 @@ See LICENSE for details.
 
 # import base64
 
+
 from bs4 import BeautifulSoup
 from datetime import timedelta
 from django.conf import settings as django_settings
@@ -17,9 +18,11 @@ from django.db.models import Q
 from django.utils import encoding, timezone
 from django.utils.translation import gettext as _
 import email
+from email.message import Message
 from email.utils import getaddresses
 from email_reply_parser import EmailReplyParser
 from helpdesk import settings
+from helpdesk.exceptions import DeleteIgnoredTicketException, IgnoreTicketException
 from helpdesk.lib import process_attachments, safe_template_context
 from helpdesk.models import FollowUp, IgnoreEmail, Queue, Ticket
 import imaplib
@@ -34,6 +37,7 @@ import ssl
 import sys
 from time import ctime
 import typing
+from typing import List, Tuple
 
 
 # import User model, which may be a custom model
@@ -135,16 +139,23 @@ def pop3_sync(q, logger, server):
         else:
             full_message = encoding.force_str(
                 "\n".join(raw_content), errors='replace')
-        ticket = object_from_message(
-            message=full_message, queue=q, logger=logger)
-
-        if ticket:
-            server.dele(msgNum)
-            logger.info(
-                "Successfully processed message %s, deleted from POP3 server" % msgNum)
-        else:
+        try:
+            ticket = object_from_message(message=full_message, queue=q, logger=logger)
+        except IgnoreTicketException:
             logger.warn(
-                "Message %s was not successfully processed, and will be left on POP3 server" % msgNum)
+                "Message %s was ignored and will be left on POP3 server" % msgNum)
+        except DeleteIgnoredTicketException:
+            logger.warn(
+                "Message %s was ignored and deleted from POP3 server" % msgNum)
+            server.dele(msgNum)
+        else:
+            if ticket:
+                server.dele(msgNum)
+                logger.info(
+                    "Successfully processed message %s, deleted from POP3 server" % msgNum)
+            else:
+                logger.warn(
+                    "Message %s was not successfully processed, and will be left on POP3 server" % msgNum)
 
     server.quit()
 
@@ -186,17 +197,23 @@ def imap_sync(q, logger, server):
                 data = server.fetch(num, '(RFC822)')[1]
                 full_message = encoding.force_str(data[0][1], errors='replace')
                 try:
-                    ticket = object_from_message(
-                        message=full_message, queue=q, logger=logger)
-                except TypeError:
-                    ticket = None  # hotfix. Need to work out WHY.
-                if ticket:
+                    ticket = object_from_message(message=full_message, queue=q, logger=logger)
+                except IgnoreTicketException:
+                    logger.warn("Message %s was ignored and will be left on IMAP server" % num)
+                except DeleteIgnoredTicketException:
                     server.store(num, '+FLAGS', '\\Deleted')
-                    logger.info(
-                        "Successfully processed message %s, deleted from IMAP server" % num)
+                    logger.warn("Message %s was ignored and deleted from IMAP server" % num)
+                except TypeError as te:
+                    # Log the error with stacktrace to help identify what went wrong
+                    logger.error(f"Unexpected error processing message: {te}", exc_info=True)
                 else:
-                    logger.warn(
-                        "Message %s was not successfully processed, and will be left on IMAP server" % num)
+                    if ticket:
+                        server.store(num, '+FLAGS', '\\Deleted')
+                        logger.info(
+                            "Successfully processed message %s, deleted from IMAP server" % num)
+                    else:
+                        logger.warn(
+                            "Message %s was not successfully processed, and will be left on IMAP server" % num)
     except imaplib.IMAP4.error:
         logger.error(
             "IMAP retrieve failed. Is the folder '%s' spelled correctly, and does it exist on the server?",
@@ -282,22 +299,28 @@ def process_queue(q, logger):
             logger.info("Processing message %d" % i)
             with open(m, 'r') as f:
                 full_message = encoding.force_str(f.read(), errors='replace')
-                ticket = object_from_message(
-                    message=full_message, queue=q, logger=logger)
-            if ticket:
-                logger.info(
-                    "Successfully processed message %d, ticket/comment created.", i)
                 try:
-                    # delete message file if ticket was successful
+                    ticket = object_from_message(message=full_message, queue=q, logger=logger)
+                except IgnoreTicketException:
+                    logger.warn("Message %d was ignored and will be left in local directory", i)
+                except DeleteIgnoredTicketException:
                     os.unlink(m)
-                except OSError as e:
-                    logger.error(
-                        "Unable to delete message %d (%s).", i, str(e))
+                    logger.warn("Message %d was ignored and deleted local directory", i)
                 else:
-                    logger.info("Successfully deleted message %d.", i)
-            else:
-                logger.warn(
-                    "Message %d was not successfully processed, and will be left in local directory", i)
+                    if ticket:
+                        logger.info(
+                            "Successfully processed message %d, ticket/comment created.", i)
+                        try:
+                            # delete message file if ticket was successful
+                            os.unlink(m)
+                        except OSError as e:
+                            logger.error(
+                                "Unable to delete message %d (%s).", i, str(e))
+                        else:
+                            logger.info("Successfully deleted message %d.", i)
+                    else:
+                        logger.warn(
+                            "Message %d was not successfully processed, and will be left in local directory", i)
 
 
 def decodeUnknown(charset, string):
@@ -574,37 +597,124 @@ def get_email_body_from_part_payload(part) -> str:
         )
 
 
+def attempt_body_extract_from_html(message: str) -> str:
+    mail = BeautifulSoup(str(message), "html.parser")
+    beautiful_body = mail.find('body')
+    body = None
+    full_body = None
+    if beautiful_body:
+        try:
+            body = beautiful_body.text
+            full_body = body
+        except AttributeError:
+            pass
+    if not body:
+        body = ""
+    return body, full_body
+
+
+def extract_part_data(
+        part: Message,
+        counter: int,
+        ticket_id: int,
+        files: List,
+        logger: logging.Logger
+) -> Tuple[str, str]:
+    name = part.get_filename()
+    if name:
+        name = email.utils.collapse_rfc2231_value(name)
+    part_body = None
+    part_full_body = None
+    if part.get_content_maintype() == 'text' and name is None:
+        if part.get_content_subtype() == 'plain':
+            part_body = part.get_payload(decode=True)
+            # https://github.com/django-helpdesk/django-helpdesk/issues/732
+            if part['Content-Transfer-Encoding'] == '8bit' and part.get_content_charset() == 'utf-8':
+                part_body = part_body.decode('unicode_escape')
+            part_body = decodeUnknown(part.get_content_charset(), part_body)
+            # have to use django_settings here so overwriting it works in tests
+            # the default value is False anyway
+            if ticket_id is None and getattr(django_settings, 'HELPDESK_FULL_FIRST_MESSAGE_FROM_EMAIL', False):
+                # first message in thread, we save full body to avoid
+                # losing forwards and things like that
+                part_full_body = get_body_from_fragments(part_body)
+                part_body = EmailReplyParser.parse_reply(part_body)
+            else:
+                # second and other reply, save only first part of the
+                # message
+                part_body = EmailReplyParser.parse_reply(part_body)
+                part_full_body = part_body
+            # workaround to get unicode text out rather than escaped text
+            part_body = get_encoded_body(part_body)
+            logger.debug("Discovered plain text MIME part")
+        else:
+            email_body = get_email_body_from_part_payload(part)
+
+            if not part_body and not part_full_body:
+                # no text has been parsed so far - try such deep parsing
+                # for some messages
+                altered_body = email_body.replace(
+                    "</p>", "</p>\n").replace("<br", "\n<br")
+                mail = BeautifulSoup(str(altered_body), "html.parser")
+                part_full_body = mail.get_text()
+
+            if "<body" not in email_body:
+                email_body = f"<body>{email_body}</body>"
+
+            payload = (
+                '<html>'
+                '<head>'
+                '<meta charset="utf-8" />'
+                '</head>'
+                '%s'
+                '</html>'
+            ) % email_body
+            files.append(
+                SimpleUploadedFile(
+                    _("email_html_body.html"), payload.encode("utf-8"), 'text/html')
+            )
+            logger.debug("Discovered HTML MIME part")
+    else:
+        if not name:
+            ext = mimetypes.guess_extension(part.get_content_type())
+            name = f"part-{counter}{ext}"
+        else:
+            name = f"part-{counter}_{name}"
+
+        files.append(SimpleUploadedFile(name, part.get_payload(decode=True), mimetypes.guess_type(name)[0]))
+        logger.debug("Found MIME attachment %s", name)
+    return part_body, part_full_body
+
+
 def object_from_message(message: str,
                         queue: Queue,
                         logger: logging.Logger
                         ) -> Ticket:
-    # 'message' must be an RFC822 formatted message.
-    message = email.message_from_string(message)
+    # 'message' must be an RFC822 formatted message to correctly parse.
+    message_obj = email.message_from_string(message)
 
-    subject = message.get('subject', _('Comment from e-mail'))
+    subject = message_obj.get('subject', _('Comment from e-mail'))
     subject = decode_mail_headers(
-        decodeUnknown(message.get_charset(), subject))
+        decodeUnknown(message_obj.get_charset(), subject))
     for affix in STRIPPED_SUBJECT_STRINGS:
         subject = subject.replace(affix, "")
     subject = subject.strip()
 
-    sender = message.get('from', _('Unknown Sender'))
-    sender = decode_mail_headers(decodeUnknown(message.get_charset(), sender))
-
-    # to address bug #832, we wrap all the text in front of the email address in
-    # double quotes by using replace() on the email string. Then,
-    # take first item of list, second item of tuple is the actual email address.
-    # Note that the replace won't work on just an email with no real name,
-    # but the getaddresses() function seems to be able to handle just unclosed quotes
-    # correctly. Not ideal, but this seems to work for now.
-    sender_email = email.utils.getaddresses(
-        ['\"' + sender.replace('<', '\" <')])[0][1]
+    # TODO: Should really be assigning a properly formatted fake email.
+    #       Check if anything relies on this being a "real name" formatted string if no sender is found on message_obj.
+    #       Also not sure it should be accepting emails from unknown senders
+    sender_email = _('Unknown Sender')
+    sender_hdr = message_obj.get('from')
+    if sender_hdr:
+        # Parse the header which extracts the first email address in the list if more than one
+        # The parseaddr method returns a tuple in the form <real name> <email address>
+        # Only need the actual email address from the tuple not the "real name"
+        # Since the spec requires that all email addresses are ASCII, they will not be encoded
+        sender_email = email.utils.parseaddr(sender_hdr)[1]
 
     for ignore in IgnoreEmail.objects.filter(Q(queues=queue) | Q(queues__isnull=True)):
         if ignore.test(sender_email):
-            # By returning 'False' the message will be kept in the mailbox,
-            # and the 'True' will cause the message to be deleted.
-            return not ignore.keep_in_mailbox
+            raise IgnoreTicketException() if ignore.keep_in_mailbox else DeleteIgnoredTicketException()
 
     ticket_id: typing.Optional[int] = get_ticket_id_from_subject_slug(
         queue.slug,
@@ -617,108 +727,23 @@ def object_from_message(message: str,
     counter = 0
     files = []
 
-    for part in message.walk():
+    for part in message_obj.walk():
         if part.get_content_maintype() == 'multipart':
             continue
-
-        name = part.get_param("name")
-        if name:
-            name = email.utils.collapse_rfc2231_value(name)
-
-        if part.get_content_maintype() == 'text' and name is None:
-            if part.get_content_subtype() == 'plain':
-                body = part.get_payload(decode=True)
-                # https://github.com/django-helpdesk/django-helpdesk/issues/732
-                if part['Content-Transfer-Encoding'] == '8bit' and part.get_content_charset() == 'utf-8':
-                    body = body.decode('unicode_escape')
-                body = decodeUnknown(part.get_content_charset(), body)
-                # have to use django_settings here so overwritting it works in tests
-                # the default value is False anyway
-                if ticket_id is None and getattr(django_settings, 'HELPDESK_FULL_FIRST_MESSAGE_FROM_EMAIL', False):
-                    # first message in thread, we save full body to avoid
-                    # losing forwards and things like that
-                    full_body = get_body_from_fragments(body)
-                    body = EmailReplyParser.parse_reply(body)
-                else:
-                    # second and other reply, save only first part of the
-                    # message
-                    body = EmailReplyParser.parse_reply(body)
-                    full_body = body
-                # workaround to get unicode text out rather than escaped text
-                body = get_encoded_body(body)
-                logger.debug("Discovered plain text MIME part")
-            else:
-                email_body = get_email_body_from_part_payload(part)
-
-                if not body and not full_body:
-                    # no text has been parsed so far - try such deep parsing
-                    # for some messages
-                    altered_body = email_body.replace(
-                        "</p>", "</p>\n").replace("<br", "\n<br")
-                    mail = BeautifulSoup(str(altered_body), "html.parser")
-                    full_body = mail.get_text()
-
-                if "<body" not in email_body:
-                    email_body = f"<body>{email_body}</body>"
-
-                payload = (
-                    '<html>'
-                    '<head>'
-                    '<meta charset="utf-8" />'
-                    '</head>'
-                    '%s'
-                    '</html>'
-                ) % email_body
-                files.append(
-                    SimpleUploadedFile(
-                        _("email_html_body.html"), payload.encode("utf-8"), 'text/html')
-                )
-                logger.debug("Discovered HTML MIME part")
-        else:
-            if not name:
-                ext = mimetypes.guess_extension(part.get_content_type())
-                name = "part-%i%s" % (counter, ext)
-            else:
-                name = ("part-%i_" % counter) + name
-
-            # # FIXME: this code gets the paylods, then does something with it and then completely ignores it
-            # # writing the part.get_payload(decode=True) instead; and then the payload variable is
-            # # replaced by some dict later.
-            # # the `payloadToWrite` has been also ignored so was commented
-            # payload = part.get_payload()
-            # if isinstance(payload, list):
-            #     payload = payload.pop().as_string()
-            # # payloadToWrite = payload
-            # # check version of python to ensure use of only the correct error type
-            # non_b64_err = TypeError
-            # try:
-            #     logger.debug("Try to base64 decode the attachment payload")
-            #     # payloadToWrite = base64.decodebytes(payload)
-            # except non_b64_err:
-            #     logger.debug("Payload was not base64 encoded, using raw bytes")
-            #     # payloadToWrite = payload
-            files.append(SimpleUploadedFile(name, part.get_payload(
-                decode=True), mimetypes.guess_type(name)[0]))
-            logger.debug("Found MIME attachment %s" % name)
-
+        # See email.message_obj.Message.get_filename()
+        part_body, part_full_body = extract_part_data(part, counter, ticket_id, files, logger)
+        if part_body:
+            body = part_body
+            full_body = part_full_body
         counter += 1
 
     if not body:
-        mail = BeautifulSoup(str(message), "html.parser")
-        beautiful_body = mail.find('body')
-        if beautiful_body:
-            try:
-                body = beautiful_body.text
-                full_body = body
-            except AttributeError:
-                pass
-        if not body:
-            body = ""
+        body, full_body = attempt_body_extract_from_html(message_obj)
 
-    add_file_if_always_save_incoming_email_message(files, message)
+    add_file_if_always_save_incoming_email_message(files, message_obj)
 
-    smtp_priority = message.get('priority', '')
-    smtp_importance = message.get('importance', '')
+    smtp_priority = message_obj.get('priority', '')
+    smtp_importance = message_obj.get('importance', '')
     high_priority_types = {'high', 'important', '1', 'urgent'}
     priority = 2 if high_priority_types & {
         smtp_priority, smtp_importance} else 3
@@ -733,4 +758,4 @@ def object_from_message(message: str,
         'files': files,
     }
 
-    return create_object_from_email_message(message, ticket_id, payload, files, logger=logger)
+    return create_object_from_email_message(message_obj, ticket_id, payload, files, logger=logger)

@@ -7,3 +7,6 @@ pbr
 mock
 freezegun
 isort
+numpy
+factory_boy
+faker

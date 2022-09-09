@@ -69,8 +69,29 @@ Django project.
 For further installation information see `docs/install.html`
 and `docs/configuration.html`
 
+Developer Environment
+---------------------
+
+Follow these steps to set up your development environment to contribute to helpdesk:
+ - install a virtual environment
+     - using virtualenv from the helpdesk base folder do::
+          virtualenv .venv && source .venv/bin/activate
+
+ - install the requirements for development::
+    pip install -r requirements.txt -r requirements-dev.txt
+
+To see option for the Makefile run: `make`
+
+The project enforces a standardized formatting in the CI/CD pipeline. To ensure you have the correct formatting run::
+    make checkformat
+    
+To auto format any code use this::
+    make format
+
 Testing
 -------
+
+From the command line you can run the tests using: `make test`
 
 See `quicktest.py` for usage details.
 
