@@ -72,6 +72,8 @@
                                 <th>{% trans "Status" %}</th>
                                 <th>{% trans "Paired Count" %}</th>
                                 <th>{% trans "Created" %}</th>
+                                <th>{% trans "Last Staff Reply" %}</th>
+                                <th>{% trans "Last Member Reply" %}</th>
                                 <th>{% trans "Due Date" %}</th>
                                 <th>{% trans "Owner" %}</th>
                                 <th>{% trans "Submitter" %}</th>
@@ -441,6 +443,8 @@
                     {name: "status", data: "status"},
                     {name: "paired_count", data: "paired_count"},
                     {name: "created", data: "created"},
+                    {name: "last_staff_reply", data: "last_staff_reply"},
+                    {name: "last_member_reply", data: "last_member_reply"},
                     {name: "due_date", data: "due_date", "visible": false},
                     {
                         name: "assigned_to",

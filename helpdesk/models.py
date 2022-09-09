@@ -695,6 +695,20 @@ class Ticket(models.Model):
             depends_on__status__in=OPEN_STATUSES).count() == 0
     can_be_resolved = property(_can_be_resolved)
 
+    def get_last_followup(self, level='staff'):
+        """
+        Return the datetime of the last Public or Staff level followup
+        """
+        if level == 'staff':
+            followups = [f for f in self.followup_set.order_by('-date') if is_helpdesk_staff(f.user)]
+        elif level == 'public':
+            followups = [f for f in self.followup_set.order_by('-date') if not is_helpdesk_staff(f.user)]
+
+        if followups:
+            return followups[0].date
+        else:
+            return None
+
     def get_submitter_userprofile(self):
         User = get_user_model()
         try:

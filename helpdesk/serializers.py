@@ -28,13 +28,16 @@ class DatatablesTicketSerializer(serializers.ModelSerializer):
     kbitem = serializers.SerializerMethodField()
     extra_data = serializers.SerializerMethodField()
     paired_count = serializers.SerializerMethodField()
+    last_staff_reply = serializers.SerializerMethodField()
+    last_member_reply = serializers.SerializerMethodField()
 
     class Meta:
         model = Ticket
         # fields = '__all__'
         fields = ('ticket', 'id', 'priority', 'title', 'queue', 'status',
-                  'created', 'due_date', 'assigned_to', 'submitter', 'row_class',
-                  'time_spent', 'kbitem', 'extra_data', 'paired_count',)
+                  'created', 'last_staff_reply', 'last_member_reply', 'due_date',
+                  'assigned_to', 'submitter', 'row_class', 'time_spent', 'kbitem',
+                  'extra_data', 'paired_count', )
 
     def get_queue(self, obj):
         return {"title": obj.queue.title, "id": obj.queue.id}
@@ -51,6 +54,22 @@ class DatatablesTicketSerializer(serializers.ModelSerializer):
     def get_created(self, obj):
         created = humanize.naturaltime(obj.created)
         return created.replace(u'\xa0', ' ') if created else created
+
+    def get_last_staff_reply(self, obj):
+        date = obj.get_last_followup('staff')
+        if date:
+            last_reply = humanize.naturaltime(date)
+            return last_reply.replace(u'\xa0', ' ')
+        else:
+            return ''
+
+    def get_last_member_reply(self, obj):
+        date = obj.get_last_followup('public')
+        if date:
+            last_reply = humanize.naturaltime(date)
+            return last_reply.replace(u'\xa0', ' ')
+        else:
+            return ''
 
     def get_due_date(self, obj):
         due_date = humanize.naturaltime(obj.due_date)
@@ -115,8 +134,8 @@ class ReportTicketSerializer(serializers.ModelSerializer):
         return datetime.strftime(obj.created, '%m-%d-%Y %H:%M:%S')
 
     def get_first_staff_followup(self, obj):
-        followups = [f for f in FollowUp.objects.filter(ticket_id=obj.id).order_by('date') if is_helpdesk_staff(f.user)]
-        return datetime.strftime(followups[0].date, '%m-%d-%Y %H:%M:%S') if followups else 'None'
+        date = obj.get_last_followup('staff')
+        return datetime.strftime(date, '%m-%d-%Y %H:%M:%S') if date else 'None'
 
     def get_closed_date(self, obj):
         terminal_statuses = [Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS, Ticket.DUPLICATE_STATUS]

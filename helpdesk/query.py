@@ -1,5 +1,6 @@
-from django.db.models import Q, Count
 from django.core.cache import cache
+from django.db.models import Q, Count, Max, F, Value, CharField
+from django.db.models.functions import Concat
 from django.urls import reverse
 from django.utils.html import escape
 from django.utils.translation import ugettext as _
@@ -9,10 +10,11 @@ from base64 import b64decode
 import json
 from functools import reduce
 import operator
-from helpdesk.models import Ticket, CustomField
 
+from helpdesk.decorators import is_helpdesk_staff
+from helpdesk.models import Ticket, CustomField
 from helpdesk.serializers import DatatablesTicketSerializer
-from django.contrib.humanize.templatetags import humanize
+from seed.landing.models import SEEDUser as User
 
 
 def query_to_base64(query):
@@ -96,25 +98,27 @@ DATATABLES_ORDER_COLUMN_CHOICES = dict([
     ('4', 'status'),
     ('5', 'paired_count'),
     ('6', 'created'),
-    ('7', 'due_date'),
-    ('8', 'assigned_to'),
-    ('9', 'submitter_email'),
-    # ('10', 'time_spent'),
-    ('11', 'kbitem'),
+    ('7', 'last_staff_reply'),
+    ('8', 'last_member_reply'),
+    ('9', 'due_date'),
+    ('10', 'assigned_to'),
+    ('11', 'submitter_email'),
+    # ('12', 'time_spent'),
+    ('13', 'kbitem'),
 ])
 
 DATATABLES_DJANGO_FILTER_COLUMN_CHOICES = [
     ('0', 'id__icontains'),
     ('3', 'queue__title__icontains'),
-    ('9', 'submitter_email__icontains'),
-    ('11', 'kbitem__title__icontains'),
+    ('11', 'submitter_email__icontains'),
+    ('13', 'kbitem__title__icontains'),
 ]
 
 ASSIGNED_TO_FILTER_FORMATS = [
-    ('8', 'assigned_to__email__icontains'),
-    ('8', 'assigned_to__first_name__icontains'),
-    ('8', 'assigned_to__last_name__icontains'),
-    ('8', 'assigned_to__username__icontains'),
+    ('10', 'assigned_to__email__icontains'),
+    ('10', 'assigned_to__first_name__icontains'),
+    ('10', 'assigned_to__last_name__icontains'),
+    ('10', 'assigned_to__username__icontains'),
 ]
 
 # These fields go through some post-processing, which is why django filters won't work and why they aren't in the
@@ -125,8 +129,10 @@ DATATABLES_CUSTOM_FILTER_COLUMN_CHOICES = dict([
     ('4', 'status'),                # [1:7 => Open/Closed../New]
     ('5', 'paired_count'),          # Sum of ticket.beam_property and ticket.beam_taxlot
     ('6', 'created'),               # [datetime object => humanized time]
-    ('7', 'due_date'),              # [datetime object => humanized time]
-    ('10', 'time_spent'),           # "{0:02d}h:{1:02d}m"
+    ('7', 'last_staff_reply'),       # [followup datetime object => humanized time]
+    ('8', 'last_member_reply'),      # [followup datetime object => humanized time]
+    ('9', 'due_date'),              # [datetime object => humanized time]
+    ('12', 'time_spent'),           # "{0:02d}h:{1:02d}m"
 ])
 
 
@@ -276,11 +282,20 @@ class __Query__:
                 queryset = queryset.filter(filters)
                 filters_list = []
 
+        staff_user_ids = [user.id for user in User.objects.filter(orgs=queryset.first().ticket_form.organization_id)
+                          if is_helpdesk_staff(user)]
         if 'paired_count' in sort_column:
-            queryset = queryset.annotate(paired_count=Count('beam_property') + Count('beam_taxlot')).order_by(
-                sort_column)
-        else:
-            queryset = queryset.order_by(sort_column)
+            queryset = queryset.annotate(paired_count=Count('beam_property') + Count('beam_taxlot'))
+        elif 'last_staff_reply' in sort_column or 'last_member_reply' in sort_column:
+            user_filter = Q(followup__user__id__in=staff_user_ids) if 'last_staff_reply' in sort_column else \
+                ~Q(followup__user__id__in=staff_user_ids)
+            queryset = queryset.annotate(**{sort_column.replace('-', ''): Max('followup__date', filter=user_filter)})
+        elif 'title' in sort_column:
+            queryset = queryset.annotate(
+                modified_title=Concat(F('id'), Value('. '), F('title'), output_field=CharField()))
+            sort_column = sort_column.replace('title', 'modified_title')
+
+        queryset = queryset.order_by(sort_column)
 
         data = DatatablesTicketSerializer(queryset, many=True).data
 
@@ -336,9 +351,6 @@ def do_custom_filtering(data, extra_data_columns, **kwargs):
                     # Handling post-processing
                     if field == 'title':
                         contents = str(row['id']) + '. ' + row[field]
-                    elif field in ['created', 'due_date']:
-                        created = humanize.naturaltime(row[field])
-                        contents = created.replace(u'\xa0', ' ') if created else created
                     else:       # Contains ['priority', 'status', 'time_spent'] and any extra_data
                         contents = str(row[field])
 
