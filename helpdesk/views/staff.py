@@ -1328,6 +1328,14 @@ def ticket_list(request):
         if date_to:
             query_params['filtering']['created__lte'] = date_to
 
+        last_reply_from = request.GET.get('last_reply_from')
+        if last_reply_from:
+            query_params['filtering']['last_reply__gte'] = last_reply_from
+
+        last_reply_to = request.GET.get('last_reply_to')
+        if last_reply_to:
+            query_params['filtering']['last_reply__lte'] = last_reply_to
+
         paired_count_from = request.GET.get('paired_count_from')
         if paired_count_from:
             query_params['filtering']['paired_count__gte'] = paired_count_from

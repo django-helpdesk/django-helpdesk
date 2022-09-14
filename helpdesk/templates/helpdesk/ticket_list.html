@@ -72,8 +72,7 @@
                                 <th>{% trans "Status" %}</th>
                                 <th>{% trans "Paired Count" %}</th>
                                 <th>{% trans "Created" %}</th>
-                                <th>{% trans "Last Staff Reply" %}</th>
-                                <th>{% trans "Last Member Reply" %}</th>
+                                <th>{% trans "Last Reply" %}</th>
                                 <th>{% trans "Due Date" %}</th>
                                 <th>{% trans "Owner" %}</th>
                                 <th>{% trans "Submitter" %}</th>
@@ -155,6 +154,9 @@
                                         <option id="filterBuilderSelect-PairedCount" value="PairedCount"{% if query_params.filtering.paired_count__lte or query_params.filtering.paired_count__gte %} disabled{% endif %}>
                                             {% trans "Paired Count Range" %}
                                         </option>
+                                        <option id="filterBuilderSelect-LastReply" value="LastReply"{% if query_params.filtering.last_reply__lte or query_params.filtering.last_reply__gte %} disabled{% endif %}>
+                                            {% trans "Last Reply Range" %}
+                                        </option>
                                     </select>
                                 </div>
                             </form>
@@ -194,6 +196,10 @@
                                 <li class="list-group-item filterBox{% if query_params.filtering.paired_count__lte or query_params.filtering.paired_count__gte %} filterBoxShow{% endif %}"
                                     id="filterBoxPairedCount">
                                     {% include 'helpdesk/filters/paired_count.html' %}
+                                </li>
+                                <li class="list-group-item filterBox{% if query_params.filtering.last_reply__lte or query_params.filtering.last_reply__gte %} filterBoxShow{% endif %}"
+                                    id="filterBoxLastReply">
+                                    {% include 'helpdesk/filters/last_reply.html' %}
                                 </li>
                                 <li class="list-group-item">
                                     <input class="btn btn-primary btn-sm" type='submit' value='{% trans "Apply Filters" %}'/>
@@ -443,8 +449,7 @@
                     {name: "status", data: "status"},
                     {name: "paired_count", data: "paired_count"},
                     {name: "created", data: "created"},
-                    {name: "last_staff_reply", data: "last_staff_reply"},
-                    {name: "last_member_reply", data: "last_member_reply"},
+                    {name: "last_reply", data: "last_reply"},
                     {name: "due_date", data: "due_date", "visible": false},
                     {
                         name: "assigned_to",

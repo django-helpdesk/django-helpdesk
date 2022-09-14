@@ -28,14 +28,13 @@ class DatatablesTicketSerializer(serializers.ModelSerializer):
     kbitem = serializers.SerializerMethodField()
     extra_data = serializers.SerializerMethodField()
     paired_count = serializers.SerializerMethodField()
-    last_staff_reply = serializers.SerializerMethodField()
-    last_member_reply = serializers.SerializerMethodField()
+    last_reply = serializers.SerializerMethodField()
 
     class Meta:
         model = Ticket
         # fields = '__all__'
         fields = ('ticket', 'id', 'priority', 'title', 'queue', 'status',
-                  'created', 'last_staff_reply', 'last_member_reply', 'due_date',
+                  'created', 'last_reply', 'due_date',
                   'assigned_to', 'submitter', 'row_class', 'time_spent', 'kbitem',
                   'extra_data', 'paired_count', )
 
@@ -55,16 +54,8 @@ class DatatablesTicketSerializer(serializers.ModelSerializer):
         created = humanize.naturaltime(obj.created)
         return created.replace(u'\xa0', ' ') if created else created
 
-    def get_last_staff_reply(self, obj):
-        date = obj.get_last_followup('staff')
-        if date:
-            last_reply = humanize.naturaltime(date)
-            return last_reply.replace(u'\xa0', ' ')
-        else:
-            return ''
-
-    def get_last_member_reply(self, obj):
-        date = obj.get_last_followup('public')
+    def get_last_reply(self, obj):
+        date = obj.get_last_followup('')
         if date:
             last_reply = humanize.naturaltime(date)
             return last_reply.replace(u'\xa0', ' ')

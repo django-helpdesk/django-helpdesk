@@ -697,12 +697,14 @@ class Ticket(models.Model):
 
     def get_last_followup(self, level='staff'):
         """
-        Return the datetime of the last Public or Staff level followup
+        Return the datetime of the last followup, or last staff - public followup based on level parameter
         """
         if level == 'staff':
             followups = [f for f in self.followup_set.order_by('-date') if is_helpdesk_staff(f.user)]
         elif level == 'public':
             followups = [f for f in self.followup_set.order_by('-date') if not is_helpdesk_staff(f.user)]
+        else:
+            followups = [f for f in self.followup_set.order_by('-date')]
 
         if followups:
             return followups[0].date
