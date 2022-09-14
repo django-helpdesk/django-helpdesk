@@ -35,7 +35,7 @@ from email_reply_parser import EmailReplyParser
 from helpdesk import settings
 from helpdesk.lib import safe_template_context, process_attachments
 from helpdesk.models import Ticket, TicketCC, FollowUp, IgnoreEmail, FormType, CustomField
-from seed.models import ImporterSenderMapping
+from seed.models import EmailImporter
 from helpdesk.decorators import is_helpdesk_staff
 
 
@@ -61,9 +61,8 @@ def parse_uid(data):
 
 
 def process_email(quiet=False):
-    for importer_sender in ImporterSenderMapping.objects.filter(allow_email_imports=True):
-        importer = importer_sender.importer
-        importer_queues = importer_sender.queue_set.all()
+    for importer in EmailImporter.objects.filter(allow_email_imports=True):
+        importer_queues = importer.queue_set.all()
 
         log_name = importer.username.replace('@', '_')
         log_name = log_name.replace('.', '_')
@@ -92,10 +91,10 @@ def process_email(quiet=False):
             log_file_handler = None
 
         try:
-            if not importer_sender.default_queue:
+            if not importer.default_queue:
                 logger.info("Import canceled: no default queue set")
             else:
-                default_queue = importer_sender.default_queue
+                default_queue = importer.default_queue
 
                 matching_queues = importer_queues.exclude(match_on__exact=[])
                 address_matching_queues = importer_queues.exclude(match_on_addresses__exact=[])

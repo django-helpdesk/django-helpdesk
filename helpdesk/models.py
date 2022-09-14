@@ -171,8 +171,7 @@ class Queue(models.Model):
         help_text=_('This slug is used when building ticket ID\'s. Once set, '
                     'try not to change it or e-mailing may get messy.'),
     )
-
-    importer_sender = models.ForeignKey('seed.ImporterSenderMapping', on_delete=models.SET_NULL, null=True, blank=True)
+    importer = models.ForeignKey('seed.EmailImporter', on_delete=models.SET_NULL, null=True, blank=True)
     match_on = models.JSONField(blank=True, default=list,
                                 help_text="A list of strings. If you'd like only emails with "
                                           "certain subject lines to be imported into this queue, "
@@ -272,8 +271,8 @@ class Queue(models.Model):
 
     @property
     def email_address(self):
-        if self.importer_sender:
-            return self.importer_sender.email_address
+        if self.importer:
+            return self.importer.username
         elif self.organization.sender:
             return self.organization.sender.from_address
         else:
@@ -281,8 +280,8 @@ class Queue(models.Model):
 
     @property
     def from_address(self):
-        if self.importer_sender:
-            return self.importer_sender.sender.from_address
+        if self.importer:
+            return self.importer.sender.from_address
         elif self.organization.sender:
             return self.organization.sender.from_address
         else:
