@@ -9,6 +9,7 @@ var key = {
     acp_list: 'e_acp_type',
     property_list: 'e_property_type',
     pathway_list: 'e_pathway',
+    new_pathway_list: 'e_new_pathway',
     backup_pathway_list: 'e_backup_pathway',
     new_pathway: 'new_pathway',
     attachment: 'attachment',
@@ -104,6 +105,12 @@ var form_validator = $('#ticket_submission_form').validate({
                     path: id.backup_pathway_list,
                     prop: id.property_list
                 }
+            },
+            alert1: {
+                param: {
+                    path: id.new_pathway_list,
+                    prop: id.property_list
+                }
             }
         },
         [key.acp_list]: {
@@ -160,23 +167,26 @@ $(id.property_list).change(function(){
         $(id.affordable_list).val('');
     }
 
-   //For non-high performing categories: hide the Standard Target Pathway in the Pathway and Backup Pathway lists
-    if ($.inArray($(id.property_list).val(), high_perf) == -1) {
-        $(id.pathway_list + " option[value='Standard Target Pathway']").remove();
-        $(id.backup_pathway_list + " option[value='Standard Target Pathway']").remove();
+    form_validator.element(id.property_list);
+
+    // Used in Pathway Selection and Pathway Change Application Forms
+    //For non-high performing categories: hide the Standard Target Pathway in the Pathway, Backup Pathway, and New Pathway Lists
+    lists = [id.pathway_list, id.backup_pathway_list, id.new_pathway_list]
+    if ($.inArray($(id.property_list).val(), high_perf) === -1) {
+        lists.forEach(function (list) {
+            $(list + " option[value='Standard Target Pathway']").remove();
+        })
     } else {
-        pathway_options = []
-        var values = $(id.pathway_list + " option").map(function() {pathway_options.push(this.value);})
-        if ($.inArray('Standard Target Pathway', pathway_options) == -1){
-            $(id.pathway_list).append('<option>Standard Target Pathway</option>');
-        }
+        // Add the Standard Target pathway back in for each List
+        lists.forEach(function (list) {
+            pathway_options = []
+            var values = $(list + " option").map(function() {pathway_options.push(this.value);})
 
-        var backup_values = $(id.backup_pathway_list + " option").map(function() {pathway_options.push(this.value);})
-        if ($.inArray('Standard Target Pathway', pathway_options) == -1){
-            $(id.backup_pathway_list).append('<option>Standard Target Pathway</option>');
-        }
+            if ($.inArray('Standard Target Pathway', pathway_options) == -1){
+                $(list + ' option:eq(1)').after('<option value="Standard Target Pathway">Standard Target Pathway</option>');
+            }
+        });
     }
-
 });
 
 $(id.affordable_boolean).change(function(){
@@ -233,14 +243,13 @@ $(id.backup_pathway_list).change(function() {
 
 
 // Pathway Change Application Form Logic
-new_pathway_list = id.pathway_list.replace('e_', 'e_new_');  // Pathway field is not marked as an extra_data field
-$(new_pathway_list).change(function () {
+$(id.new_pathway_list).change(function () {
     //removes class 'error-okay' so that validator will not ignore changes
-    $(new_pathway_list).removeClass("error-okay");
-    form_validator.element(new_pathway_list);
+    $(id.new_pathway_list).removeClass("error-okay");
+    form_validator.element(id.new_pathway_list);
 
     // (Un)Mark Attachment field as required
-    if($(other_pathway_list).val() == "Alternative Compliance Pathway") {
+    if($(id.new_pathway_list).val() == "Alternative Compliance Pathway") {
         $(group.attachment + ' label').after('<span style="color:red;">*</span>');
     } else {
         // Remove mark as required
