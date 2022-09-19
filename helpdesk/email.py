@@ -502,8 +502,8 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
     attached = process_attachments(f, files)
     for att_file in attached:
         logger.info(
-            "Attachment '%s' (with size %s) successfully added to ticket from email.",
-            att_file[0], att_file[1].size
+            "Attachment '%s' successfully added to ticket from email.",
+            att_file[0]
         )
 
     context = safe_template_context(ticket)
