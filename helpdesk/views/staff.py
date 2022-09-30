@@ -73,6 +73,8 @@ from datetime import datetime, timedelta
 
 from ..templated_email import send_templated_mail
 
+from seed.models import PropertyView, Property, TaxLotView, TaxLot
+
 User = get_user_model()
 Query = get_query_class()
 
@@ -457,8 +459,10 @@ def view_ticket(request, ticket_id):
             values['has_columns'] = True if object.columns.exists() else False
             extra_data.append(values)
 
-    property_count = ticket.beam_property.all().count()  # TODO check how many queries this runs
-    taxlot_count = ticket.beam_taxlot.all().count()
+    properties = PropertyView.objects.filter(property_id__in=ticket.beam_property.all().values_list('id', flat=True))\
+        .order_by('property_id', '-cycle__end').distinct('property_id').values_list('id', 'property__id', 'state__address_line_1')
+    taxlots = TaxLotView.objects.filter(taxlot_id__in=ticket.beam_taxlot.all().values_list('id', flat=True))\
+        .order_by('taxlot_id', '-cycle__end').distinct('taxlot_id').values_list('id', 'taxlot_id', 'state__address_line_1')
 
     if hasattr(ticket, 'property_milestone'):
         property_milestone_url = ticket.property_milestone.property_view_url
@@ -476,8 +480,8 @@ def view_ticket(request, ticket_id):
         'ticketcc_string': ticketcc_string,
         'SHOW_SUBSCRIBE': show_subscribe,
         'extra_data': extra_data,
-        'properties': property_count,
-        'taxlots': taxlot_count,
+        'properties': properties,
+        'taxlots': taxlots,
         'is_staff': is_helpdesk_staff(request.user),
         'property_milestone_url': property_milestone_url,
         'debug': settings.DEBUG,
@@ -2087,6 +2091,22 @@ def attachment_del(request, ticket_id, attachment_id):
         'filename': attachment.filename,
         'debug': settings.DEBUG,
     })
+
+
+@helpdesk_staff_member_required
+def beam_unpair(request, ticket_id, inventory_type, inventory_id):
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+    perm = ticket_perm_check(request, ticket)
+    if perm is not None:
+        return perm
+    if inventory_type == 'property':
+        prop = get_object_or_404(Property, id=inventory_id)
+        ticket.beam_property.remove(prop)
+    else:
+        taxlot = get_object_or_404(TaxLot, id=inventory_id)
+        ticket.beam_taxlot.remove(taxlot)
+
+    return HttpResponseRedirect(reverse('helpdesk:view', args=[ticket_id]))
 
 
 def calc_average_nbr_days_until_ticket_resolved(Tickets):
