@@ -161,7 +161,7 @@ def generate_image_mime_part(locale: str="en_US",imagename: str = None) -> Messa
     :param locale: change this to generate locale specific file name and attachment content
     :param filename: pass a file name if you want to specify a specific name otherwise a random name will be generated
     """
-    part = MIMEImage(generate_random_image(image_format="JPEG"))
+    part = MIMEImage(generate_random_image(image_format="JPEG", array_dims=(200, 200)))
     part.set_payload(get_fake("text", locale=locale, min_length=1024))
     encoders.encode_base64(part)
     if not imagename:
@@ -206,7 +206,7 @@ def add_simple_email_headers(message: Message, locale: str="en_US",
 def generate_mime_part(locale: str="en_US",
         part_type: str="plain",
         use_short_email: bool=False
-        ) -> typing.Tuple[Message, typing.Tuple[str, str], typing.Tuple[str, str]]:
+        ) -> typing.Optional[Message]:
     """
     Generates amime part of the sepecified type
     
@@ -222,10 +222,8 @@ def generate_mime_part(locale: str="en_US",
         msg = MIMEText(body)
     elif "file" == part_type:
         msg = generate_file_mime_part(locale=locale)
-        msg = MIMEText(body)
     elif "image" == part_type:
         msg = generate_image_mime_part(locale=locale)
-        msg = MIMEText(body)
     else:
         raise Exception("Mime part not implemented: " + part_type)
     return msg
@@ -243,7 +241,7 @@ def generate_multipart_email(locale: str="en_US",
     """    
     msg = MIMEMultipart()
     for part_type in type_list:
-        msg.append(generate_mime_part(locale=locale, part_type=part_type, use_short_email=use_short_email))
+        msg.attach(generate_mime_part(locale=locale, part_type=part_type, use_short_email=use_short_email))
     from_meta, to_meta = add_simple_email_headers(msg, locale=locale, use_short_email=use_short_email)
     return msg, from_meta, to_meta
 
