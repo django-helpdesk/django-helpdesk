@@ -478,12 +478,16 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
 
     logger.info("[%s-%s] %s" % (ticket.queue.slug, ticket.id, ticket.title,))
 
-    attached = process_attachments(f, files)
-    for att_file in attached:
-        logger.info(
-            "Attachment '%s' (with size %s) successfully added to ticket from email.",
-            att_file[0], att_file[1].size
-        )
+    try:
+        attached = process_attachments(f, files)
+    except ValidationError as e:
+        logger.error(str(e))
+    else:
+        for att_file in attached:
+            logger.info(
+                "Attachment '%s' (with size %s) successfully added to ticket from email.",
+                att_file[0], att_file[1].size
+            )
 
     context = safe_template_context(ticket)
 

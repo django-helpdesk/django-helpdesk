@@ -7,6 +7,7 @@ forms.py - Definitions of newforms-based forms for creating and maintaining
            tickets.
 """
 
+
 from datetime import datetime
 from django import forms
 from django.conf import settings
@@ -33,6 +34,7 @@ from helpdesk.settings import (
     CUSTOMFIELD_TIME_FORMAT,
     CUSTOMFIELD_TO_FIELD_DICT
 )
+from helpdesk.validators import validate_file_extension
 import logging
 
 
@@ -243,6 +245,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
                     'Only file types such as plain text (.txt), '
                     'a document (.pdf, .docx, or .odt), '
                     'or screenshot (.png or .jpg) may be uploaded.'),
+        validators=[validate_file_extension]
     )
 
     class Media:

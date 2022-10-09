@@ -3,6 +3,7 @@
 
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
+from django.core import mail
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
 from django.shortcuts import get_object_or_404
@@ -36,7 +37,7 @@ unused_port = "49151"
 class GetEmailCommonTests(TestCase):
 
     def setUp(self):
-        self.queue_public = Queue.objects.create()
+        self.queue_public = Queue.objects.create(title='Test', slug='test')
         self.logger = logging.getLogger('helpdesk')
 
     # tests correct syntax for command line option
@@ -147,7 +148,7 @@ class GetEmailCommonTests(TestCase):
         ignore = IgnoreEmail(name="Test Ignore", email_address=from_meta[1], keep_in_mailbox=False)
         ignore.save()
         with self.assertRaises(DeleteIgnoredTicketException):
-            object_from_message(message.as_string(), self.queue_public, self.logger);
+            object_from_message(message.as_string(), self.queue_public, self.logger)
 
     def test_will_not_delete_ignored_email(self):
         """
@@ -158,7 +159,7 @@ class GetEmailCommonTests(TestCase):
         ignore = IgnoreEmail(name="Test Ignore", email_address=from_meta[1], keep_in_mailbox=True)
         ignore.save()
         with self.assertRaises(IgnoreTicketException):
-            object_from_message(message.as_string(), self.queue_public, self.logger);
+            object_from_message(message.as_string(), self.queue_public, self.logger)
 
     def test_utf8_filename_attachment(self):
         """
@@ -171,6 +172,26 @@ class GetEmailCommonTests(TestCase):
         sent_file: SimpleUploadedFile = files[0]
         # The extractor prepends a part identifier so compare the ending
         self.assertTrue(sent_file.name.endswith(filename), f"Filename extracted does not match: {sent_file.name}")
+
+    @override_settings(VALID_EXTENSIONS=['.png'])
+    def test_wrong_extension_attachment(self):
+        """
+        Tests if an attachment with a wrong extension doesn't stop the email process
+        """
+        message, _, _ = utils.generate_multipart_email(type_list=['plain', 'image'])
+
+        self.assertEqual(len(mail.outbox), 0)
+
+        with self.assertLogs(logger='helpdesk', level='ERROR') as cm:
+            object_from_message(message.as_string(), self.queue_public, self.logger)
+
+            self.assertIn(
+                "ERROR:helpdesk:{'file': ['Unsupported file extension: .jpg']}",
+                cm.output
+            )
+
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(f'[test-1] {message.get("subject")} (Opened)', mail.outbox[0].subject)
 
         
 class GetEmailParametricTemplate(object):
