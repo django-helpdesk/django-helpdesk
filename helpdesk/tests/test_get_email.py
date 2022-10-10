@@ -186,12 +186,50 @@ class GetEmailCommonTests(TestCase):
             object_from_message(message.as_string(), self.queue_public, self.logger)
 
             self.assertIn(
-                "ERROR:helpdesk:{'file': ['Unsupported file extension: .jpg']}",
+                "ERROR:helpdesk:['Unsupported file extension: .jpg']",
                 cm.output
             )
 
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(f'[test-1] {message.get("subject")} (Opened)', mail.outbox[0].subject)
+
+    def test_multiple_attachments(self):
+        """
+        Tests the saving of multiple attachments
+        """
+        message, _, _ = utils.generate_multipart_email(type_list=['plain', 'file', 'image'])
+
+        self.assertEqual(len(mail.outbox), 0)
+
+        object_from_message(message.as_string(), self.queue_public, self.logger)
+
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(f'[test-1] {message.get("subject")} (Opened)', mail.outbox[0].subject)
+
+        ticket = Ticket.objects.get()
+        followup = ticket.followup_set.get()
+        self.assertEqual(2, followup.followupattachment_set.count())
+
+    @override_settings(VALID_EXTENSIONS=['.txt'])
+    def test_multiple_attachments_with_wrong_extension(self):
+        """
+        Tests that a wrong extension won't stop from saving other valid attachment
+        """
+        message, _, _ = utils.generate_multipart_email(type_list=['plain', 'image', 'file', 'image'])
+
+        self.assertEqual(len(mail.outbox), 0)
+
+        with self.assertLogs(logger='helpdesk', level='ERROR') as cm:
+            object_from_message(message.as_string(), self.queue_public, self.logger)
+
+            self.assertIn(
+                "ERROR:helpdesk:['Unsupported file extension: .jpg']",
+                cm.output
+            )
+
+        ticket = Ticket.objects.get()
+        followup = ticket.followup_set.get()
+        self.assertEqual(1, followup.followupattachment_set.count())
 
         
 class GetEmailParametricTemplate(object):
