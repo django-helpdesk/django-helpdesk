@@ -19,7 +19,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.urls import reverse, reverse_lazy
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.db.models import Q, Prefetch
+from django.db.models import Q, Prefetch, F
 from django.http import HttpResponseRedirect, Http404, HttpResponse, JsonResponse, HttpRequest
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils.translation import ugettext as _
@@ -459,10 +459,17 @@ def view_ticket(request, ticket_id):
             values['has_columns'] = True if object.columns.exists() else False
             extra_data.append(values)
 
-    properties = PropertyView.objects.filter(property_id__in=ticket.beam_property.all().values_list('id', flat=True))\
-        .order_by('property_id', '-cycle__end').distinct('property_id').values_list('id', 'property__id', 'state__address_line_1')
-    taxlots = TaxLotView.objects.filter(taxlot_id__in=ticket.beam_taxlot.all().values_list('id', flat=True))\
-        .order_by('taxlot_id', '-cycle__end').distinct('taxlot_id').values_list('id', 'taxlot_id', 'state__address_line_1')
+    properties = list(PropertyView.objects.filter(property_id__in=ticket.beam_property.all().values_list('id', flat=True))\
+        .order_by('property_id', '-cycle__end').distinct('property_id').values('id', 'property_id', address=F('state__address_line_1')))
+    taxlots = list(TaxLotView.objects.filter(taxlot_id__in=ticket.beam_taxlot.all().values_list('id', flat=True))\
+        .order_by('taxlot_id', '-cycle__end').distinct('taxlot_id').values('id', 'taxlot_id', address=F('state__address_line_1')))
+
+    for p in properties:
+        if p['address'] is None or p['address'] == '':
+            p['address'] = '(No address found)'
+    for t in taxlots:
+        if t['address'] is None or t['address'] == '':
+            t['address'] = '(No address found)'
 
     if hasattr(ticket, 'property_milestone'):
         property_milestone_url = ticket.property_milestone.property_view_url
