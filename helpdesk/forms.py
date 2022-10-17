@@ -386,14 +386,15 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
                 cleaned_data[field] = value
 
         # Handle DC Pathway Selection Form
-        if cleaned_data.get('e_pathway'):
+        if form.name == 'Pathway Selection':
             self.clean_dc_ps_form()
 
         # Handle DC Pathway Change Application Form
-        if cleaned_data.get('pathway'):
+        if form.name == 'Pathway Change Application':
             self.clean_dc_pca_form()
 
-        if cleaned_data.get('e_extended_delay_for_QAH'):
+        # Handle DC Delay of Compliance Request Form
+        if form.name == 'Delay of Compliance Request':
             self.clean_dc_delay_of_compliance_form()
 
         return cleaned_data
