@@ -339,9 +339,12 @@ class FormType(models.Model):
     created = models.DateTimeField(auto_now_add=True, blank=True)
     updated = models.DateTimeField(auto_now=True, blank=True)
     public = models.BooleanField(_('Public'), blank=True, default=True,
-                                 help_text=_('Should this form be visible on the public-side list of forms?'))
+                                 help_text=_('Should this form be accessible by everyone?'))
     staff = models.BooleanField(_('Staff'), blank=True, default=True,
-                                help_text=_('Should this form be visible on the staff-side list of forms?'))
+                                help_text=_('Should this form be only accessible by staff? It will not be shown in the public form list.'))
+    unlisted = models.BooleanField(_('Unlisted'), blank=False, default=False,
+                                   help_text=_('Should this form be hidden from the public form list? '
+                                               '(It will still be accessible by everyone if the "public" option is checked.)'))
 
     # Add Preset Form Fields to the Database, avoiding having to run a PSQL command in another terminal window.
     # This will happen automatically upon FormType Creation
