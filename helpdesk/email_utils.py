@@ -23,6 +23,7 @@ import json
 from urllib.request import urlopen
 from urllib.parse import urlencode
 from django.conf import settings
+import msal
 
 # The URL root for accessing Google Accounts.
 GOOGLE_ACCOUNTS_BASE_URL = 'https://accounts.google.com'
@@ -40,7 +41,7 @@ def accounts_url(command):
     return '%s/%s' % (GOOGLE_ACCOUNTS_BASE_URL, command)
 
 
-def refresh_tokens(refresh_token):  # BEAM - removed client_id and client_secret args
+def refresh_gmail_tokens(refresh_token):  # BEAM - removed client_id and client_secret args
     # Copyright 2012 Google Inc.
     #
     # Licensed under the Apache License, Version 2.0 (the "License");
@@ -80,8 +81,35 @@ def refresh_tokens(refresh_token):  # BEAM - removed client_id and client_secret
     return json.loads(response)
 
 
+def refresh_microsoft_tokens(importer):
+    outlook_config = {
+        "scope": ["https://outlook.office365.com/.default"],
+        "authority": f"https://login.microsoftonline.com/{importer.tenant}",
+        "client_id": f"{importer.client}",
+        "secret": f"{importer.secret}",
+    }
+    app = msal.ConfidentialClientApplication(
+        outlook_config["client_id"],
+        authority=outlook_config["authority"],
+        client_credential=outlook_config["secret"],
+    )
+    access_token = app.acquire_token_silent(outlook_config["scope"], account=None)
+    if not access_token:
+        access_token = app.acquire_token_for_client(scopes=outlook_config["scope"])
+
+    if 'access_token' in access_token:
+        return access_token
+    else:
+        return None
+
+
+def generate_oauth2_string(user, token):
+    auth_string = f"user={user}\1auth=Bearer {token}\1\1"
+    return auth_string
+
+"""
 def generate_oauth2_string(username, access_token, base64_encode=True):
-    """Generates an IMAP OAuth2 authentication string.
+    Generates an IMAP OAuth2 authentication string.
 
   See https://developers.google.com/google-apps/gmail/oauth2_overview
 
@@ -92,27 +120,11 @@ def generate_oauth2_string(username, access_token, base64_encode=True):
 
   Returns:
     The SASL argument for the OAuth2 mechanism.
-  """
+  
     auth_string = 'user=%s\1auth=Bearer %s\1\1' % (username, access_token)
     auth_string = auth_string.encode('utf-8')
     if base64_encode:
         auth_string = base64.b64encode(auth_string)
     return auth_string.decode('utf-8')
+"""
 
-
-def imap_authentication(server, auth_string, box='INBOX'):   # BEAM - replaced user requirement with server, added box
-    """Authenticates to IMAP with the given auth_string.
-
-  Prints a debug trace of the attempted IMAP connection.
-
-  Args:
-    server: imaplib.IMAP4_SSL()
-    auth_string: A valid OAuth2 string, as returned by generate_oauth2_string.
-        Must not be base64-encoded, since imaplib does its own base64-encoding.
-    box: Name of the box to import emails from. Default is INBOX.
-  """
-    # BEAM - removed server creation, changed name
-    server.debug = 4
-    server.authenticate('XOAUTH2', lambda x: auth_string)
-    server.select(box)  # BEAM - replaced 'INBOX' with box var
-    return True  # BEAM - added return
