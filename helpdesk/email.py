@@ -35,7 +35,7 @@ from email_reply_parser import EmailReplyParser
 from helpdesk import settings
 from helpdesk.lib import safe_template_context, process_attachments
 from helpdesk.models import Ticket, TicketCC, FollowUp, IgnoreEmail, FormType, CustomField
-from seed.models import ImporterSenderMapping
+from seed.models import EmailImporter
 from helpdesk.decorators import is_helpdesk_staff
 from helpdesk import email_utils
 
@@ -62,9 +62,8 @@ def parse_uid(data):
 
 
 def process_email(quiet=False):
-    for importer_sender in ImporterSenderMapping.objects.filter(allow_email_imports=True):
-        importer = importer_sender.importer
-        importer_queues = importer_sender.queue_set.all()
+    for importer in EmailImporter.objects.filter(allow_email_imports=True):
+        importer_queues = importer.queue_set.all()
 
         log_name = importer.username.replace('@', '_')
         log_name = log_name.replace('.', '_')
@@ -93,10 +92,10 @@ def process_email(quiet=False):
             log_file_handler = None
 
         try:
-            if not importer_sender.default_queue:
-                logger.info("\nImport canceled: no default queue set")
+            if not importer.default_queue:
+                logger.info("Import canceled: no default queue set")
             else:
-                default_queue = importer_sender.default_queue
+                default_queue = importer.default_queue
 
                 matching_queues = importer_queues.exclude(match_on__exact=[])
                 address_matching_queues = importer_queues.exclude(match_on_addresses__exact=[])
@@ -538,8 +537,8 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
     attached = process_attachments(f, files)
     for att_file in attached:
         logger.info(
-            "Attachment '%s' (with size %s) successfully added to ticket from email.",
-            att_file[0], att_file[1].size
+            "Attachment '%s' successfully added to ticket from email.",
+            att_file[0]
         )
 
     context = safe_template_context(ticket)
@@ -569,27 +568,30 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
                      'extra': ('newticket_cc_public', context)}
             if ticket.assigned_to:
                 roles['assigned_to'] = ('assigned_owner', context)
-            ticket.send(roles, organization=org, fail_silently=True, extra_headers=extra_headers, email_logger=logger)
+            ticket.send_ticket_mail(roles, organization=org, fail_silently=True, extra_headers=extra_headers, email_logger=logger,
+                                    source="import (new ticket)")
         else:
             context.update(comment=f.comment)
-            ticket.send(
+            ticket.send_ticket_mail(
                 {'submitter': ('updated_submitter', context),
                  'assigned_to': ('updated_owner', context),
-                 'cc_users': ('updated_cc_user', context)},
+                 'cc_users': ('updated_cc_user', context),
+                 'queue_updated': ('updated_cc_user', context)},
                 organization=org,
                 fail_silently=True,
                 extra_headers=extra_headers,
                 email_logger=logger,
+                source="import (submitter, staff)"
             )
             if queue.enable_notifications_on_email_events:
-                ticket.send(
-                    {'queue_updated': ('updated_cc_user', context),
-                     'cc_public': ('updated_cc_public', context),
+                ticket.send_ticket_mail(
+                    {'cc_public': ('updated_cc_public', context),
                      'extra': ('updated_cc_public', context)},
                     organization=org,
                     fail_silently=True,
                     extra_headers=extra_headers,
                     email_logger=logger,
+                    source="import (public)"
                 )
 
     return ticket

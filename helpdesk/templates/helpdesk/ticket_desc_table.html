@@ -130,9 +130,27 @@ copy_public_link = function() {
                     {% endif %}
                     <tr>
                         <th class="table-active">{% trans "Properties Paired" %}</th>
-                        <td>{{ properties }}</td>
+                        <td>
+                            {% for property in properties %}
+                            <div style="display:flex;justify-content:space-between;">
+                                <div><a href="{% url 'seed:home' %}#/properties/{{ property.id }}" target="_blank" rel="noopener noreferrer">{{ property.address }}</a></div>
+                                <div style="flex-shrink:0;">
+                                    <a href="{% url 'helpdesk:ticket_beam_unpair' ticket.id 'property' property.property_id %}" data-toggle="tooltip" title="Unpair {{ property.address }}"><button type="button" class="btn btn-warning btn-sm"><i class="fas fa-unlink"></i></button></a>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </td>
                         <th class="table-active">{% trans "Taxlots Paired" %}</th>
-                        <td>{{ taxlots }}</td>
+                        <td>
+                            {% for taxlot in taxlots %}
+                            <div style="display:flex;justify-content:space-between;">
+                                <div><a href="{% url 'seed:home' %}#/taxlots/{{ taxlot.id }}" target="_blank" rel="noopener noreferrer">{{ taxlot.address }}</a></div>
+                                <div style="flex-shrink:0;">
+                                    <a href="{% url 'helpdesk:ticket_beam_unpair' ticket.id 'taxlot' taxlot.taxlot_id %}" data-toggle="tooltip" title="Unpair {{ taxlot.address }}"><button type="button" class="btn btn-warning btn-sm"><i class="fas fa-unlink"></i></button></a>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </td>
                     </tr>
                     <tr>
                         <th class="table-active">{% trans "Attachments" %}</th>

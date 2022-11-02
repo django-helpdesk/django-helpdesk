@@ -171,8 +171,7 @@ class Queue(models.Model):
         help_text=_('This slug is used when building ticket ID\'s. Once set, '
                     'try not to change it or e-mailing may get messy.'),
     )
-
-    importer_sender = models.ForeignKey('seed.ImporterSenderMapping', on_delete=models.SET_NULL, null=True, blank=True)
+    importer = models.ForeignKey('seed.EmailImporter', on_delete=models.SET_NULL, null=True, blank=True)
     match_on = models.JSONField(blank=True, default=list,
                                 help_text="A list of strings. If you'd like only emails with "
                                           "certain subject lines to be imported into this queue, "
@@ -272,8 +271,8 @@ class Queue(models.Model):
 
     @property
     def email_address(self):
-        if self.importer_sender:
-            return self.importer_sender.email_address
+        if self.importer:
+            return self.importer.username
         elif self.organization.sender:
             return self.organization.sender.from_address
         else:
@@ -281,8 +280,8 @@ class Queue(models.Model):
 
     @property
     def from_address(self):
-        if self.importer_sender:
-            return self.importer_sender.sender.from_address
+        if self.importer:
+            return self.importer.sender.from_address
         elif self.organization.sender:
             return self.organization.sender.from_address
         else:
@@ -340,9 +339,12 @@ class FormType(models.Model):
     created = models.DateTimeField(auto_now_add=True, blank=True)
     updated = models.DateTimeField(auto_now=True, blank=True)
     public = models.BooleanField(_('Public'), blank=True, default=True,
-                                 help_text=_('Should this form be visible on the public-side list of forms?'))
+                                 help_text=_('Should this form be accessible by everyone?'))
     staff = models.BooleanField(_('Staff'), blank=True, default=True,
-                                help_text=_('Should this form be visible on the staff-side list of forms?'))
+                                help_text=_('Should this form be only accessible by staff? It will not be shown in the public form list.'))
+    unlisted = models.BooleanField(_('Unlisted'), blank=False, default=False,
+                                   help_text=_('Should this form be hidden from the public form list? '
+                                               '(It will still be accessible by everyone if the "public" option is checked.)'))
 
     # Add Preset Form Fields to the Database, avoiding having to run a PSQL command in another terminal window.
     # This will happen automatically upon FormType Creation
@@ -486,7 +488,7 @@ class Ticket(models.Model):
     def time_spent_formatted(self):
         return format_time_spent(self.time_spent)
 
-    def send(self, roles, organization=None, dont_send_to=None,  **kwargs):
+    def send_ticket_mail(self, roles, organization=None, dont_send_to=None,  **kwargs):
         """
         Send notifications to everyone interested in this ticket.
 
@@ -534,7 +536,8 @@ class Ticket(models.Model):
         def send(role, recipient):
             if recipient and recipient not in recipients and role in roles:
                 template, context = roles[role]
-                send_templated_mail(template, context, recipient, sender=self.queue.from_address, organization=organization, **kwargs)
+                send_templated_mail(template, context, recipient, sender=self.queue.from_address,
+                                    organization=organization, ticket_id=self.pk, **kwargs)
                 recipients.add(recipient)
 
         # Attempts to send an email to every possible field.
@@ -693,6 +696,22 @@ class Ticket(models.Model):
         return TicketDependency.objects.filter(ticket=self).filter(
             depends_on__status__in=OPEN_STATUSES).count() == 0
     can_be_resolved = property(_can_be_resolved)
+
+    def get_last_followup(self, level='staff'):
+        """
+        Return the datetime of the last followup, or last staff - public followup based on level parameter
+        """
+        if level == 'staff':
+            followups = [f for f in self.followup_set.order_by('-date') if is_helpdesk_staff(f.user)]
+        elif level == 'public':
+            followups = [f for f in self.followup_set.order_by('-date') if not is_helpdesk_staff(f.user)]
+        else:
+            followups = [f for f in self.followup_set.order_by('-date')]
+
+        if followups:
+            return followups[0].date
+        else:
+            return None
 
     def get_submitter_userprofile(self):
         User = get_user_model()

@@ -19,7 +19,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.urls import reverse, reverse_lazy
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.db.models import Q, Prefetch
+from django.db.models import Q, Prefetch, F
 from django.http import HttpResponseRedirect, Http404, HttpResponse, JsonResponse, HttpRequest
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils.translation import ugettext as _
@@ -72,6 +72,8 @@ from rest_framework.decorators import api_view
 from datetime import datetime, timedelta
 
 from ..templated_email import send_templated_mail
+
+from seed.models import PropertyView, Property, TaxLotView, TaxLot
 
 User = get_user_model()
 Query = get_query_class()
@@ -457,8 +459,17 @@ def view_ticket(request, ticket_id):
             values['has_columns'] = True if object.columns.exists() else False
             extra_data.append(values)
 
-    property_count = ticket.beam_property.all().count()  # TODO check how many queries this runs
-    taxlot_count = ticket.beam_taxlot.all().count()
+    properties = list(PropertyView.objects.filter(property_id__in=ticket.beam_property.all().values_list('id', flat=True))\
+        .order_by('property_id', '-cycle__end').distinct('property_id').values('id', 'property_id', address=F('state__address_line_1')))
+    taxlots = list(TaxLotView.objects.filter(taxlot_id__in=ticket.beam_taxlot.all().values_list('id', flat=True))\
+        .order_by('taxlot_id', '-cycle__end').distinct('taxlot_id').values('id', 'taxlot_id', address=F('state__address_line_1')))
+
+    for p in properties:
+        if p['address'] is None or p['address'] == '':
+            p['address'] = '(No address found)'
+    for t in taxlots:
+        if t['address'] is None or t['address'] == '':
+            t['address'] = '(No address found)'
 
     if hasattr(ticket, 'property_milestone'):
         property_milestone_url = ticket.property_milestone.property_view_url
@@ -476,8 +487,8 @@ def view_ticket(request, ticket_id):
         'ticketcc_string': ticketcc_string,
         'SHOW_SUBSCRIBE': show_subscribe,
         'extra_data': extra_data,
-        'properties': property_count,
-        'taxlots': taxlot_count,
+        'properties': properties,
+        'taxlots': taxlots,
         'is_staff': is_helpdesk_staff(request.user),
         'property_milestone_url': property_milestone_url,
         'debug': settings.DEBUG,
@@ -808,13 +819,17 @@ def update_ticket(request, ticket_id, public=False):
         ticket.assigned_to.usersettings_helpdesk.email_on_ticket_change
         or (reassigned and ticket.assigned_to.usersettings_helpdesk.email_on_ticket_assigned)
     ):
-        messages_sent_to.update(ticket.send(    # sends the assigned/resolved/closed/updated_owner template to the owner.
-            {'assigned_to': (template_staff, context)},
-            organization=ticket.ticket_form.organization,
-            dont_send_to=messages_sent_to,
-            fail_silently=True,
-            files=files,
-        ))
+        messages_sent_to.update(
+            ticket.send_ticket_mail(    # sends the assigned/resolved/closed/updated_owner template to the owner.
+                {'assigned_to': (template_staff, context)},
+                organization=ticket.ticket_form.organization,
+                dont_send_to=messages_sent_to,
+                fail_silently=True,
+                files=files,
+                user=None if not is_helpdesk_staff(request.user, ticket.ticket_form.organization_id) else request.user,
+                source='updated (owner)'
+            )
+        )
 
     # Send an email about the reassignment to the previously assigned user
     if old_owner and reassigned and old_owner.email not in messages_sent_to:
@@ -825,6 +840,9 @@ def update_ticket(request, ticket_id, public=False):
             sender=ticket.queue.from_address,
             fail_silently=True,
             organization=ticket.ticket_form.organization,
+            user=None if not is_helpdesk_staff(request.user, ticket.ticket_form.organization_id) else request.user,
+            source='updated (reassigned owner)',
+            ticket_id=ticket.pk
         )
 
     # Emails an update to users who follow all ticket updates.
@@ -838,14 +856,17 @@ def update_ticket(request, ticket_id, public=False):
         template_cc = 'updated_cc_user'
 
     if not no_changes_excluding_time_spent:
-        messages_sent_to.update(ticket.send(
-            {'queue_updated': (template_cc, context),
-             'cc_users': (template_cc, context)},
-            organization=ticket.ticket_form.organization,
-            dont_send_to=messages_sent_to,
-            fail_silently=True,
-            files=files,
-        ))
+        messages_sent_to.update(
+            ticket.send_ticket_mail(
+                {'queue_updated': (template_cc, context),
+                 'cc_users': (template_cc, context)},
+                organization=ticket.ticket_form.organization,
+                dont_send_to=messages_sent_to,
+                fail_silently=True,
+                files=files,
+                user=None if not is_helpdesk_staff(request.user, ticket.ticket_form.organization_id) else request.user,
+                source="updated (CC'd staff)"
+            ))
 
         # Public users (submitter, public CC, and extra_field emails) are only updated if there's a new status or a comment.
         if public and (
@@ -869,7 +890,15 @@ def update_ticket(request, ticket_id, public=False):
                 roles['submitter'] = (template + 'cc_user', context)
 
             messages_sent_to.update(
-                ticket.send(roles, organization=ticket.ticket_form.organization, dont_send_to=messages_sent_to, fail_silently=True, files=files, ))
+                ticket.send_ticket_mail(
+                    roles,
+                    organization=ticket.ticket_form.organization,
+                    dont_send_to=messages_sent_to,
+                    fail_silently=True,
+                    files=files,
+                    user=None if not is_helpdesk_staff(request.user, ticket.ticket_form.organization_id) else request.user,
+                    source='updated (public)'
+                ))
 
     ticket.save()
 
@@ -1015,12 +1044,16 @@ def mass_update(request):
             if t.assigned_to and t.assigned_to.usersettings_helpdesk.email_on_ticket_change:
                 roles['assigned_to'] = ('closed_owner', context)
 
-            messages_sent_to.update(t.send(
-                roles,
-                organization=t.ticket_form.organization,
-                dont_send_to=messages_sent_to,
-                fail_silently=True,
-            ))
+            messages_sent_to.update(
+                t.send_ticket_mail(
+                    roles,
+                    organization=t.ticket_form.organization,
+                    dont_send_to=messages_sent_to,
+                    fail_silently=True,
+                    user=None if not is_helpdesk_staff(request.user, t.ticket_form.organization_id) else request.user,
+                    source='bulk (closed)'
+                )
+            )
             if t.queue.reassign_when_closed and t.queue.default_owner and old_user and old_user.email not in messages_sent_to:
                 send_templated_mail(
                     template_name='closed_owner',
@@ -1029,9 +1062,13 @@ def mass_update(request):
                     sender=t.queue.from_address,
                     fail_silently=True,
                     organization=t.ticket_form.organization,
+                    user=None if not is_helpdesk_staff(request.user, t.ticket_form.organization_id) else request.user,
+                    source='bulk (closed and auto-reassigned)',
+                    ticket_id=t.pk
                 )
 
         elif action == 'delete':
+            # todo create a note of this somewhere?
             t.delete()
 
     return HttpResponseRedirect(reverse('helpdesk:list'))
@@ -1166,6 +1203,9 @@ def merge_tickets(request):
                             sender=ticket.queue.from_address,
                             fail_silently=True,
                             organization=ticket.ticket_form.organization,
+                            user=None if not is_helpdesk_staff(request.user, ticket.ticket_form.organization_id) else request.user,
+                            source='merging',
+                            ticket_id=chosen_ticket.pk
                         )
 
                     # Move all followups and update their title to know they come from another ticket
@@ -1173,6 +1213,9 @@ def merge_tickets(request):
                         ticket=chosen_ticket,
                         title=_(('[Merged from #%(id)d] %(title)s') % {'id': ticket.id, 'title': ticket.title})[:200],
                     )
+
+                    # Move all emails to the chosen ticket
+                    ticket.emails.update(ticket_id=chosen_ticket.id)
 
                     # Add submitter_email, assigned_to email and ticketcc to chosen ticket if necessary
                     chosen_ticket.add_email_to_ticketcc_if_not_in(email=ticket.submitter_email)
@@ -1295,6 +1338,14 @@ def ticket_list(request):
         date_to = request.GET.get('date_to')
         if date_to:
             query_params['filtering']['created__lte'] = date_to
+
+        last_reply_from = request.GET.get('last_reply_from')
+        if last_reply_from:
+            query_params['filtering']['last_reply__gte'] = last_reply_from
+
+        last_reply_to = request.GET.get('last_reply_to')
+        if last_reply_to:
+            query_params['filtering']['last_reply__lte'] = last_reply_to
 
         paired_count_from = request.GET.get('paired_count_from')
         if paired_count_from:
@@ -2047,6 +2098,22 @@ def attachment_del(request, ticket_id, attachment_id):
         'filename': attachment.filename,
         'debug': settings.DEBUG,
     })
+
+
+@helpdesk_staff_member_required
+def beam_unpair(request, ticket_id, inventory_type, inventory_id):
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+    perm = ticket_perm_check(request, ticket)
+    if perm is not None:
+        return perm
+    if inventory_type == 'property':
+        prop = get_object_or_404(Property, id=inventory_id)
+        ticket.beam_property.remove(prop)
+    else:
+        taxlot = get_object_or_404(TaxLot, id=inventory_id)
+        ticket.beam_taxlot.remove(taxlot)
+
+    return HttpResponseRedirect(reverse('helpdesk:view', args=[ticket_id]))
 
 
 def calc_average_nbr_days_until_ticket_resolved(Tickets):

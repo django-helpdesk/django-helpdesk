@@ -43,6 +43,7 @@ def form_list(user, request):
                     org = helpdesk_orgs.first()
             sidebar_form_list = FormType.objects.filter(
                 public=True,
+                unlisted=False,
                 organization=org,
             ).values('name', 'id', 'organization__name')
         return sidebar_form_list

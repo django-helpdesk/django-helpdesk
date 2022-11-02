@@ -105,7 +105,7 @@ def escalate_tickets(queues, verbose):
             context = safe_template_context(t)
             context['private'] = False
 
-            t.send(
+            t.send_ticket_mail(
                 {'submitter': ('escalated_submitter', context),
                  'queue_updated': ('escalated_cc_user', context),
                  'cc_users': ('escalated_cc_user', context),
@@ -114,6 +114,7 @@ def escalate_tickets(queues, verbose):
                  'extra': ('escalated_cc_public', context)},
                 organization=q.organization,
                 fail_silently=True,
+                source='escalate tickets'
             )
 
             if verbose:

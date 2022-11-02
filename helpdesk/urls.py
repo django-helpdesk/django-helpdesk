@@ -113,6 +113,10 @@ urlpatterns = [
         staff.attachment_del,
         name='attachment_del'),
 
+    url(r'^tickets/(?P<ticket_id>[0-9]+)/beam_unpair/(?P<inventory_type>(property|taxlot))/(?P<inventory_id>[0-9]+)/$',
+        staff.beam_unpair,
+        name='ticket_beam_unpair'),
+
     url(r'^raw/(?P<type>\w+)/$',
         staff.raw_details,
         name='raw'),
@@ -148,7 +152,6 @@ urlpatterns = [
     url(r'^unshare_query/(?P<id>[0-9]+)/$',
         staff.unshare_saved_query,
         name='unshare_query'),
-
 
     url(r'^settings/$',
         staff.EditUserSettingsView.as_view(),

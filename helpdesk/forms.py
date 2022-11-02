@@ -280,9 +280,11 @@ class EditFollowUpForm(forms.ModelForm):
         exclude = ('date', 'user',)
 
     def __init__(self, *args, **kwargs):
-        """Filter not opened tickets here."""
+        """Filter for Tickets belonging to the current Org."""
         super(EditFollowUpForm, self).__init__(*args, **kwargs)
-        self.fields["ticket"].queryset = Ticket.objects.filter(status__in=(Ticket.OPEN_STATUS, Ticket.REOPENED_STATUS, Ticket.REPLIED_STATUS, Ticket.NEW_STATUS))
+
+        t = kwargs['initial']['ticket'] if kwargs else Ticket.objects.filter(id=args[0]['ticket']).first()
+        self.fields['ticket'].queryset = Ticket.objects.filter(queue__organization__id=t.queue.organization_id)
 
 
 class AbstractTicketForm(CustomFieldMixin, forms.Form):
@@ -384,24 +386,24 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
                 cleaned_data[field] = value
 
         # Handle DC Pathway Selection Form
-        if cleaned_data.get('e_pathway'):
+        if form.name == 'Pathway Selection':
             self.clean_dc_ps_form()
 
         # Handle DC Pathway Change Application Form
-        if cleaned_data.get('pathway'):
+        if form.name == 'Pathway Change Application':
             self.clean_dc_pca_form()
 
-        if cleaned_data.get('e_extended_delay_for_QAH'):
+        # Handle DC Delay of Compliance Request Form
+        if form.name == 'Delay of Compliance Request':
             self.clean_dc_delay_of_compliance_form()
 
         return cleaned_data
 
     def clean_dc_ps_form(self):
         if self.cleaned_data.get('e_pathway') == 'Alternative Compliance Pathway':
-            # Check that e_backup_pathway, e_acp_type, and attachment were provided
+            # Check that e_backup_pathway, and attachment were provided
             fields = [
                 ('e_backup_pathway', 'A Backup Pathway is required'),
-                ('e_acp_type', 'An ACP Type is required'),
                 ('attachment', 'An attachment is required')
             ]
             for field in fields:
@@ -410,7 +412,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
                     self.add_error(field[0], msg)
 
     def clean_dc_pca_form(self):
-        if self.cleaned_data.get('pathway') == 'Alternative Compliance Pathway':
+        if self.cleaned_data.get('e_new_pathway') == 'Alternative Compliance Pathway':
             # Check that an attachment was provided
             if not self.cleaned_data.get('attachment'):
                 self.add_error('attachment', forms.ValidationError('An Attachment is required if Alternative Compliance'
@@ -518,11 +520,13 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
         if ticket.assigned_to and ticket.assigned_to.usersettings_helpdesk.email_on_ticket_assign:
             roles['assigned_to'] = ('assigned_owner', context)
 
-        ticket.send(
+        ticket.send_ticket_mail(
             roles,
             organization=ticket.ticket_form.organization,
             fail_silently=True,
             files=files,
+            source="new ticket",
+            user=user
         )
 
     # TODO move this init

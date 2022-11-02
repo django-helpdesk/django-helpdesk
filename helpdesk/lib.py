@@ -51,7 +51,7 @@ def ticket_template_context(ticket):
 def queue_template_context(queue):
     context = {}
 
-    for field in ('title', 'slug', 'email_address', 'from_address', 'locale', 'organization_id', 'importer_sender_id'):
+    for field in ('title', 'slug', 'email_address', 'from_address', 'locale', 'organization_id', 'importer_id'):
         attr = getattr(queue, field, None)
         if callable(attr):
             context[field] = attr()
@@ -161,7 +161,7 @@ def process_attachments(followup, attached_files):
                 if attached.size < max_email_attachment_size:
                     # Only files smaller than 512kb (or as defined in
                     # settings.HELPDESK_MAX_EMAIL_ATTACHMENT_SIZE) are sent via email.
-                    attachments.append([filename, att.file])
+                    attachments.append((filename, att.file.path, att.mime_type))
         except Exception as e:
             logger.exception('Exception occurred while processing an attachment.')
 

@@ -2,41 +2,13 @@ import os
 import logging
 from smtplib import SMTPException
 
-from django.conf import settings
 from django.utils.safestring import mark_safe
 from seed.lib.superperms.orgs.models import Organization
-from seed.models.email_settings import ImporterSenderMapping
-from seed.utils.seed_send_email import get_email_backend
+from seed.utils.email import send_beam_mail, add_custom_header
+from seed.models.postoffice import PostOfficeEmail
 
 
 DEBUGGING = False
-
-
-def add_custom_header(recipients):
-    """
-    :return recipients: list of strings
-    :return header: a comma-separated string
-    """
-    address_list = []
-    header = ''
-
-    if isinstance(recipients, str):
-        if ',' in recipients:
-            # Lower string, split into list, strip individual strings, and then assign
-            address_list = recipients.lower().split(',')
-            address_list = list(map(str.strip, address_list))
-            header = ','.join(address_list)
-        else:
-            # Lower string, strip, assign to header, make a list again
-            recipients = recipients.lower().strip()
-            header = recipients
-            address_list = [recipients]
-    elif isinstance(recipients, list):
-        # Map strip to list, map lower to list, turn into a list again, assign
-        address_list = list(map(str.lower, map(str.strip, recipients)))
-        header = ','.join(address_list)
-
-    return address_list, header
 
 
 def send_templated_mail(template_name,
@@ -47,8 +19,11 @@ def send_templated_mail(template_name,
                         fail_silently=False,
                         files=None,
                         organization=None,
+                        ticket_id=None,
                         extra_headers=None,
-                        email_logger=None):
+                        email_logger=None,
+                        source='',
+                        user=None):
     """
     send_templated_mail() is a wrapper around Django's e-mail routines that
     allows us to easily send multipart (text/plain & text/html) e-mails using
@@ -78,7 +53,7 @@ def send_templated_mail(template_name,
         email replies and keep proper threading.
 
     """
-    from django.core.mail import EmailMultiAlternatives, BadHeaderError
+    from django.core.mail import BadHeaderError
     from django.template import engines
     from_string = engines['django'].from_string
 
@@ -99,18 +74,6 @@ def send_templated_mail(template_name,
 
     org_id = context['queue'].get('organization_id', None)
     org = Organization.objects.get(id=org_id)
-
-    importer_sender_id = context['queue'].get('importer_sender_id', None)
-    backend = None
-    if importer_sender_id:
-        importer_sender_settings = ImporterSenderMapping.objects.get(id=importer_sender_id)
-        sender_address = importer_sender_settings.sender.from_address
-        backend = get_email_backend(None, importer_sender_settings.sender)
-    elif org:
-        sender_address = org.sender.from_address
-        backend = get_email_backend(org, None)
-    else:
-        sender_address = sender
 
     try:
         t = EmailTemplate.objects.get(template_name__iexact=template_name, locale=locale, organization=organization)
@@ -147,27 +110,22 @@ def send_templated_mail(template_name,
 
     recipients, headers['X-BEAMHelpdesk-Delivered'] = add_custom_header(recipients)
 
-    msg = EmailMultiAlternatives(subject_part, text_part,
-                                 sender_address or settings.DEFAULT_FROM_EMAIL,
-                                 recipients, bcc=bcc,
-                                 headers=headers)
-    msg.attach_alternative(html_part, "text/html")
-    if backend:
-        msg.connection = backend
-
-    if files:
-        for filename, filefield in files:
-            filefield.open('rb')
-            content = filefield.read()
-            msg.attach(filename, content)
-            filefield.close()
-
-    logger.info('Sending emails.')
     try:
-        if DEBUGGING:
-            return 0
-        else:
-            msg.send()
+        # Create and send email out.
+        send_beam_mail(
+            organization=org,
+            recipient_emails=recipients,
+            bcc=bcc,
+            subject=subject_part,
+            msg_plain=text_part,
+            msg_html=html_part,
+            files=files,
+            headers=headers,
+            source_page=PostOfficeEmail.HELPDESK,
+            source_action=source,
+            user=user,
+            ticket_id=ticket_id,
+        )
     except SMTPException as e:
         logger.exception('SMTPException raised while sending email from {} to {}'.format(sender, recipients))
         if not fail_silently:
