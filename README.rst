@@ -17,9 +17,6 @@ contributors reaching far beyond Jutda.
 Complete documentation is available in the docs/ directory,
 or online at http://django-helpdesk.readthedocs.org/.
 
-You can see a demo installation at https://django-helpdesk-demo.herokuapp.com/,
-or run a demo locally in just a couple steps!
-
 Demo Quickstart
 ---------------
 
