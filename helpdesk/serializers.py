@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from seed.models.properties import PropertyView
 from helpdesk.models import FollowUp, KBItem, Ticket, Queue
 from .lib import format_time_spent
 from datetime import datetime
@@ -106,7 +107,14 @@ class DatatablesTicketSerializer(serializers.ModelSerializer):
         return data
 
 
+# Hard-code Org ID field for report since they are too variable
+ORG_TO_ID_FIELD_MAPPING = {
+    'City of Cambridge': 'Cambridge Building Energy Reporting ID',
+}
+
+
 class ReportTicketSerializer(serializers.ModelSerializer):
+    queue = serializers.CharField(source='queue.title')
     formtype = serializers.CharField(source='ticket_form.name')
     created = serializers.DateTimeField(format='%m-%d-%Y %H:%M:%S')
     first_staff_followup = serializers.SerializerMethodField()
@@ -118,8 +126,11 @@ class ReportTicketSerializer(serializers.ModelSerializer):
     number_public_followups = serializers.SerializerMethodField()
     kbitem = serializers.CharField(source='kbitem.title', allow_null=True, default='')
     merged_to = serializers.SerializerMethodField()
-    queue = serializers.CharField(source='queue.title')
     extra_data = serializers.JSONField()
+
+    building_id = serializers.SerializerMethodField()
+    pm_id = serializers.SerializerMethodField()
+    property_type = serializers.SerializerMethodField()
 
     class Meta:
         model = Ticket
@@ -137,9 +148,8 @@ class ReportTicketSerializer(serializers.ModelSerializer):
             'contact_email',
             'building_name',
             'building_address',
-            'building_id',
-            'pm_id',
             'kbitem',
+
             # Generated Fields
             'assigned_to',
             'time_spent',
@@ -149,7 +159,12 @@ class ReportTicketSerializer(serializers.ModelSerializer):
             'is_followup_required',
             'number_staff_followups',
             'number_public_followups',
-            'extra_data'
+            'extra_data',
+
+            # Property Paired Fields, or Ticket Fields if not Paired Property
+            'building_id',
+            'pm_id',
+            'property_type',
         )
 
     @staticmethod
@@ -196,3 +211,55 @@ class ReportTicketSerializer(serializers.ModelSerializer):
     def get_merged_to(obj):
         return obj.merged_to.queue.title + '-' + str(obj.merged_to.id) if obj.merged_to else ''
 
+    # BEAM Property Retrieval Fields
+    def get_building_id(self, obj):
+        # Return the paired properties building id, and if none exist, return building_id of ticket if available
+        paired_property = self.get_paired_property(obj)
+        if paired_property is None:
+            return ''
+        org = obj.ticket_form.organization
+        if org.name in ORG_TO_ID_FIELD_MAPPING:
+            field = ORG_TO_ID_FIELD_MAPPING.get(org.name)
+            return paired_property.state.extra_data.get(field)
+        else:
+            return obj.building_id
+
+    def get_pm_id(self, obj):
+        # Return the paired properties building id, and if none exist, return building_id of ticket if available
+        paired_property = self.get_paired_property(obj)
+        if paired_property is None:
+            return ''
+        return paired_property.state.pm_property_id if paired_property.state.pm_property_id else obj.pm_id
+
+    def get_property_type(self, obj):
+        paired_property = self.get_paired_property(obj)
+        if paired_property is None:
+            return ''
+        return paired_property.state.extra_data.get('Primary Property Type - Portfolio Manager-Calculated')
+
+    @staticmethod
+    def get_paired_property(obj):
+        """
+        Helper function for previous three fields, return the closest Paired Property to this Ticket
+        """
+        org = obj.ticket_form.organization
+        paired_properties = obj.beam_property.all()
+        p_ids = paired_properties.values_list('id')
+        pvs = PropertyView.objects.filter(property_id__in=p_ids).order_by('-cycle__start')
+
+        if not paired_properties:
+            return None
+        else:
+            if pvs.count() == 1:
+                return pvs.first()
+            else:
+                # Multiple paired properties, check that they all have the same id, property type fields
+                fields = ['state__pm_property_id',
+                          'state__extra_data__Primary Property Type - Portfolio Manager-Calculated']
+                if org.name in ORG_TO_ID_FIELD_MAPPING:
+                    fields.append('state__extra_data__%s' % ORG_TO_ID_FIELD_MAPPING.get(org.name))
+                for field in fields:
+                    values = pvs.values_list(field, flat=True)
+                    if len(set(values)) > 1:
+                        return None  # If values are different, prob different Properties are paired, return None
+                return pvs.first()   # Return most recent PV if all fields were identical

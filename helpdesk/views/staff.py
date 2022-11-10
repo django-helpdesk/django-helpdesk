@@ -2423,8 +2423,13 @@ def export(qs, serializer, paginate=False, do_extra_data=True, visible_cols=[]):
     :return: None, starts downloading the csv file
     """
     from collections import OrderedDict
+    from helpdesk.serializers import ORG_TO_ID_FIELD_MAPPING
 
     ticket_form_ids = list(set(qs.values_list('ticket_form', flat=True)))
+    org = qs.first().ticket_form.organization if qs else None
+    building_id_org_field = None
+    if org.name in ORG_TO_ID_FIELD_MAPPING:
+        building_id_org_field = ORG_TO_ID_FIELD_MAPPING.get(org.name)
 
     # Fields that could be omitted from Form but still required a Display Name
     just_in_case_mapping = {
@@ -2434,7 +2439,7 @@ def export(qs, serializer, paginate=False, do_extra_data=True, visible_cols=[]):
         'contact_email': 'Contact Email',
         'building_name': 'Building Name',
         'building_address': 'Building Address',
-        'building_id': 'Building ID',
+        'building_id': 'Building ID' if building_id_org_field is None else building_id_org_field,
         'pm_id': 'Portfolio Manager ID',
         'title': 'Subject',
     }
@@ -2459,6 +2464,7 @@ def export(qs, serializer, paginate=False, do_extra_data=True, visible_cols=[]):
         'is_followup_required': 'Is Followup Required?',
         'number_staff_followups': 'Number of Staff Followups',
         'number_public_followups': 'Number of Public Followups',
+        'property_type': 'Primary Property Type - Portfolio Manager-Calculated'
     }
 
     # Split tickets up into separate forms, serialize, and concatenate them
