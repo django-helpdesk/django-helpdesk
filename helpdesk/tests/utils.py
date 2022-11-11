@@ -205,16 +205,14 @@ def add_simple_email_headers(message: Message, locale: str="en_US",
 
 def generate_mime_part(locale: str="en_US",
         part_type: str="plain",
-        use_short_email: bool=False
         ) -> typing.Optional[Message]:
     """
     Generates amime part of the sepecified type
     
     :param locale: change this to generate locale specific strings
     :param text_type: options are plain, html, image (attachment), file (attachment)
-    :param use_short_email: produces a "To" or "From" that is only the email address if True
     """
-    if  "plain" == part_type:
+    if "plain" == part_type:
         body = get_fake("text", locale=locale, min_length=1024)
         msg = MIMEText(body)
     elif "html" == part_type:
@@ -241,7 +239,7 @@ def generate_multipart_email(locale: str="en_US",
     """    
     msg = MIMEMultipart()
     for part_type in type_list:
-        msg.attach(generate_mime_part(locale=locale, part_type=part_type, use_short_email=use_short_email))
+        msg.attach(generate_mime_part(locale=locale, part_type=part_type))
     from_meta, to_meta = add_simple_email_headers(msg, locale=locale, use_short_email=use_short_email)
     return msg, from_meta, to_meta
 
