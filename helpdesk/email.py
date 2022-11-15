@@ -14,7 +14,6 @@ import poplib
 import re
 import socket
 import ssl
-import sys
 from datetime import timedelta
 from email.utils import getaddresses, parseaddr
 from os.path import isfile, join
@@ -37,7 +36,6 @@ from helpdesk.lib import safe_template_context, process_attachments
 from helpdesk.models import Ticket, TicketCC, FollowUp, IgnoreEmail, FormType, CustomField
 from seed.models import EmailImporter
 from helpdesk.decorators import is_helpdesk_staff
-from helpdesk import email_utils
 
 
 # import User model, which may be a custom model
@@ -134,170 +132,6 @@ def process_email(quiet=False):
                 logging.exception(e)
 
 
-def pop3_sync(importer, queues, logger, server):
-    server.getwelcome()
-    try:
-        server.stls()
-    except Exception:
-        logger.warning("POP3 StartTLS failed or unsupported. Connection will be unencrypted.")
-    server.user(importer.username or settings.QUEUE_EMAIL_BOX_USER)
-    server.pass_(importer.password or settings.QUEUE_EMAIL_BOX_PASSWORD)
-
-    messages_info = server.list()[1]
-    logger.info("Received %s messages from POP3 server" % len(messages_info))
-
-    for msg_raw in messages_info:
-        if type(msg_raw) is bytes:
-            try:
-                msg = msg_raw.decode("utf-8")
-            except UnicodeError:
-                # if couldn't decode easily, just leave it raw
-                msg = msg_raw
-        else:
-            # already a str
-            msg = msg_raw
-        msg_num = msg.split(" ")[0]
-        logger.info("Processing message %s" % msg_num)
-
-        raw_content = server.retr(msg_num)[1]
-        if type(raw_content[0]) is bytes:
-            full_message = "\n".join([elm.decode('utf-8') for elm in raw_content])
-        else:
-            full_message = encoding.force_text("\n".join(raw_content), errors='replace')
-        ticket = object_from_message(full_message, importer, queues, logger)
-
-        if ticket:
-            if not DEBUGGING:
-                server.dele(msg_num)
-            logger.info("Successfully processed message %s, deleted from POP3 server\n" % msg_num)
-        else:
-            logger.warn("Message %s was not successfully processed, and will be left on POP3 server\n" % msg_num)
-
-    server.quit()
-
-
-def imap_sync(importer, queues, logger, server):
-    login_successful = True
-    try:
-        # Check if importer is Gmail or Microsoft. If so, we must authenticate
-        if importer.email_box_host == 'imap.gmail.com' or importer.email_box_host == 'outlook.office365.com':
-            if not (hasattr(importer, 'access_token') or hasattr(importer, 'refresh_token')):
-                logger.error("IMAP login failed. Please check that you have provided an access and refresh token.")
-                login_successful = False
-            else:
-                logger.info("* Checking for unexpired access token.")
-                if importer.token_expiration < timezone.now():
-                    logger.info("* Generating new access token.")
-                    if importer.email_box_host == 'outlook.office365.com':
-                        response = email_utils.refresh_microsoft_tokens(importer)
-                    else:
-                        response = email_utils.refresh_gmail_tokens(importer.refresh_token)
-
-                    if 'access_token' in response:
-                        importer.access_token = response['access_token']
-                        importer.token_expiration = timezone.now() + timedelta(seconds=response['expires_in'])
-                        importer.save()
-                    else:
-                        logger.error("Access token could not be generated.")
-                        login_successful = False
-
-                if login_successful:
-                    try:
-                        try:
-                            server.starttls()
-                        except Exception:
-                            logger.warning("IMAP4 StartTLS unsupported or failed. Connection will be unencrypted.")
-                        # Obtain authentication string from access token
-                        logger.info("* Authenticating and selecting box.")
-                        server.debug = 4
-                        server.authenticate('XOAUTH2', lambda x: email_utils.generate_oauth2_string(importer.username, importer.access_token))
-                        server.select(importer.email_box_imap_folder)
-                        server.debug = 3
-                        # server.select(importer.email_box_imap_folder)
-                    except:
-                        logger.error("IMAP authentication failed. Check that the server is accessible and that "
-                                     "the username and password are correct.")
-                        server.logout()
-                        login_successful = False
-
-        else:
-            # If not Gmail, continue without the rest.
-            try:
-                server.starttls()
-            except Exception:
-                logger.warning("IMAP4 StartTLS unsupported or failed. Connection will be unencrypted.")
-            else:
-                server.login(importer.username or settings.QUEUE_EMAIL_BOX_USER,
-                             importer.password or settings.QUEUE_EMAIL_BOX_PASSWORD)
-                server.select(importer.email_box_imap_folder)
-
-    except imaplib.IMAP4.abort:
-        logger.error(
-            "IMAP login failed. Check that the server is accessible and that "
-            "the username and password are correct."
-        )
-        server.logout()
-        login_successful = False
-
-    except ssl.SSLError:
-        logger.error(
-            "IMAP login failed due to SSL error. This is often due to a timeout. "
-            "Please check your connection and try again."
-        )
-        server.logout()
-        login_successful = False
-
-    if login_successful:
-        try:
-            if importer.keep_mail:
-                status, data = server.search(None, 'NOT', 'ANSWERED')
-            else:
-                status, data = server.search(None, 'NOT', 'DELETED')
-            if data:
-                msg_nums = data[0].split()
-                logger.info("Received %s messages from IMAP server" % len(msg_nums))
-
-                for num_raw in msg_nums:
-                    # Get UID and use that
-                    resp, uid = server.fetch(num_raw, "(UID)")
-                    uid = uid[0].decode('ascii')
-                    msg_uid = parse_uid(uid)
-                    logger.info("Received message UID: %s" % msg_uid)
-
-                    # Grab message first to get date to sort by
-                    status, data = server.uid('fetch', msg_uid, '(RFC822)')
-                    full_message = encoding.force_text(data[0][1], errors='replace')
-                    try:
-                        ticket = object_from_message(full_message, importer, queues, logger)
-                    except TypeError:
-                        ticket = None  # hotfix. Need to work out WHY.
-                    except BadHeaderError:
-                        # Malformed email received from the server
-                        ticket = None
-                    if ticket:
-                        if DEBUGGING:
-                            logger.info("Successfully processed message %s, left untouched on IMAP server\n" % msg_uid)
-                        elif importer.keep_mail:
-                            # server.store(num, '+FLAGS', '\\Answered')
-                            ov, data = server.uid('STORE', msg_uid, '+FLAGS', '(\\Answered)')
-                            logger.info("Successfully processed message %s, marked as Answered on IMAP server\n" % msg_uid)
-                        else:
-                            # server.store(num, '+FLAGS', '\\Deleted')
-                            ov, data = server.uid('STORE', msg_uid, '+FLAGS', '(\\Deleted)')
-                            logger.info("Successfully processed message %s, deleted from IMAP server\n" % msg_uid)
-                    else:
-                        logger.warn("Message %s was not successfully processed, and will be left on IMAP server\n" % msg_uid)
-        except imaplib.IMAP4.error:
-            logger.error(
-                "IMAP retrieve failed. Is the folder '%s' spelled correctly, and does it exist on the server?",
-                importer.email_box_imap_folder
-            )
-
-        server.expunge()
-        server.close()
-        server.logout()
-
-
 def process_importer(importer, queues, logger):
     logger.info("\n***** %s: Begin processing mail for django-helpdesk" % ctime())
 
@@ -380,6 +214,174 @@ def process_importer(importer, queues, logger):
                     logger.info("Successfully deleted message %d.", i)
             else:
                 logger.warn("Message %d was not successfully processed, and will be left in local directory", i)
+
+
+def pop3_sync(importer, queues, logger, server):
+    server.getwelcome()
+    try:
+        server.stls()
+    except Exception:
+        logger.warning("POP3 StartTLS failed or unsupported. Connection will be unencrypted.")
+    server.user(importer.username or settings.QUEUE_EMAIL_BOX_USER)
+    server.pass_(importer.password or settings.QUEUE_EMAIL_BOX_PASSWORD)
+
+    messages_info = server.list()[1]
+    logger.info("Received %s messages from POP3 server" % len(messages_info))
+
+    for msg_raw in messages_info:
+        if type(msg_raw) is bytes:
+            try:
+                msg = msg_raw.decode("utf-8")
+            except UnicodeError:
+                # if couldn't decode easily, just leave it raw
+                msg = msg_raw
+        else:
+            # already a str
+            msg = msg_raw
+        msg_num = msg.split(" ")[0]
+        logger.info("Processing message %s" % msg_num)
+
+        raw_content = server.retr(msg_num)[1]
+        if type(raw_content[0]) is bytes:
+            full_message = "\n".join([elm.decode('utf-8') for elm in raw_content])
+        else:
+            full_message = encoding.force_text("\n".join(raw_content), errors='replace')
+        ticket = object_from_message(full_message, importer, queues, logger)
+
+        if ticket:
+            if not DEBUGGING:
+                server.dele(msg_num)
+            logger.info("Successfully processed message %s, deleted from POP3 server\n" % msg_num)
+        else:
+            logger.warn("Message %s was not successfully processed, and will be left on POP3 server\n" % msg_num)
+
+    server.quit()
+
+
+def generate_oauth2_string(user, token):
+    auth_string = f"user={user}\1auth=Bearer {token}\1\1"
+    return auth_string
+
+
+def refreshed(importer, logger, token_backend=None):
+    # checks if token needs refreshing - if so, refreshes it
+    if not token_backend:
+        return False
+    try:
+        was_refreshed = token_backend.should_refresh_token(check_time=1)
+    except RuntimeError:
+        logger.error(f"* Token could not be refreshed by refreshed(). Exiting import for {importer.username}.")
+        return False
+
+    if was_refreshed is None:
+        logger.info(f"* Token was refreshed. Exiting import for {importer.username}.")
+        return True  # The token was refreshed - stop now
+    else:
+        return False  # The token is still good - keep going
+
+
+def imap_sync(importer, queues, logger, server):
+    login_successful = True
+    token_backend = None
+
+    if importer.email_box_host == 'imap.gmail.com' or importer.email_box_host == 'outlook.office365.com':
+        # Start TLS first
+        try:
+            server.starttls()
+        except Exception:
+            logger.warning("IMAP4 StartTLS unsupported or failed. Connection will be unencrypted.")
+
+        # Next, acquire the token
+        token_backend = importer.auth.get_access_token_backend()
+        try:
+            token_backend.should_refresh_token()
+        except RuntimeError:
+            logger.error(f"* Token could not be refreshed by should_refresh_token. Exiting import for {importer.username}.")
+            login_successful = False
+        else:
+            logger.info("* Authenticating and selecting box.")
+            server.debug = 4
+            server.authenticate('XOAUTH2', lambda x: generate_oauth2_string(importer.username, token_backend.token['access_token']))
+            try:
+                server.select(importer.email_box_imap_folder)
+            except:
+                logger.error(f"IMAP authentication failed. Exiting import for {importer.username}.")
+                login_successful = False
+            server.debug = 3
+    else:
+        try:
+            server.starttls()
+        except Exception:
+            logger.warning("IMAP4 StartTLS unsupported or failed. Connection will be unencrypted.")
+        try:
+            server.login(importer.username or settings.QUEUE_EMAIL_BOX_USER,
+                         importer.password or settings.QUEUE_EMAIL_BOX_PASSWORD)
+            server.select(importer.email_box_imap_folder)
+        except imaplib.IMAP4.abort:
+            logger.error("IMAP login failed. Check that the server is accessible and that "
+                         "the username and password are correct.")
+            login_successful = False
+        except ssl.SSLError:
+            logger.error("IMAP login failed due to SSL error. This is often due to a timeout. "
+                         "Please check your connection and try again.")
+            login_successful = False
+
+    if login_successful:
+        try:
+            if importer.keep_mail:
+                status, data = server.search(None, 'NOT', 'ANSWERED')
+            else:
+                status, data = server.search(None, 'NOT', 'DELETED')
+
+            if data:
+                msg_nums = data[0].split()
+                logger.info("Received %s messages from IMAP server" % len(msg_nums))
+                # check whether our token is running out of time - if so, or if we refreshed it, just stop here.
+                # we don't want to get interrupted mid-import, and accidentally import twice!
+                refreshed_flag = refreshed(importer, logger, token_backend)
+                for num_raw in msg_nums:
+                    if not refreshed_flag:
+                        # Get UID and use that
+                        resp, uid = server.fetch(num_raw, "(UID)")
+                        uid = uid[0].decode('ascii')
+                        msg_uid = parse_uid(uid)
+                        logger.info("Received message UID: %s" % msg_uid)
+
+                        # Grab message first to get date to sort by
+                        status, data = server.uid('fetch', msg_uid, '(RFC822)')
+                        full_message = encoding.force_text(data[0][1], errors='replace')
+                        try:
+                            ticket = object_from_message(full_message, importer, queues, logger)
+                        except TypeError:
+                            logger.error("Type error - ticket set to None")
+                            ticket = None  # hotfix. Need to work out WHY.
+                        except BadHeaderError:
+                            # Malformed email received from the server
+                            logger.error("BadHeaderError - ticket set to None")
+                            ticket = None
+                        if ticket:
+                            if DEBUGGING:
+                                logger.info("Successfully processed message %s, left untouched on IMAP server\n" % msg_uid)
+                            elif importer.keep_mail:
+                                # server.store(num, '+FLAGS', '\\Answered')
+                                ov, data = server.uid('STORE', msg_uid, '+FLAGS', '(\\Answered)')
+                                logger.info("Successfully processed message %s, marked as Answered on IMAP server\n" % msg_uid)
+                            else:
+                                # server.store(num, '+FLAGS', '\\Deleted')
+                                ov, data = server.uid('STORE', msg_uid, '+FLAGS', '(\\Deleted)')
+                                logger.info("Successfully processed message %s, deleted from IMAP server\n" % msg_uid)
+                        else:
+                            logger.warn("Message %s was not successfully processed, and will be left on IMAP server\n" % msg_uid)
+                        refreshed_flag = refreshed(importer, logger, token_backend)
+        except imaplib.IMAP4.error:
+            logger.error(
+                "IMAP retrieve failed. Is the folder '%s' spelled correctly, and does it exist on the server?",
+                importer.email_box_imap_folder
+            )
+        server.expunge()
+        server.close()
+
+    server.logout()
 
 
 def decode_unknown(charset, string):
