@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
-from .models import Ticket, FollowUp
+from seed.models.properties import PropertyView
+from helpdesk.models import FollowUp, KBItem, Ticket, Queue
 from .lib import format_time_spent
 from datetime import datetime
 from helpdesk.decorators import is_helpdesk_staff
@@ -14,47 +15,63 @@ datatables for ticket_list.html. Called from staff.datatables_ticket_list.
 """
 
 
+class QueueField(serializers.Field):
+    def to_representation(self, value):
+        ret = {
+            'title': value.title,
+            'id': value.id,
+        }
+        return ret
+
+
 class DatatablesTicketSerializer(serializers.ModelSerializer):
     ticket = serializers.SerializerMethodField()
     priority = serializers.SerializerMethodField()
     assigned_to = serializers.SerializerMethodField()
-    submitter = serializers.SerializerMethodField()
     created = serializers.SerializerMethodField()
     due_date = serializers.SerializerMethodField()
-    status = serializers.SerializerMethodField()
-    row_class = serializers.SerializerMethodField()
+    row_class = serializers.CharField(source='get_priority_css_class')
     time_spent = serializers.SerializerMethodField()
-    queue = serializers.SerializerMethodField()
-    kbitem = serializers.SerializerMethodField()
-    extra_data = serializers.SerializerMethodField()
+    queue = QueueField(source='*')
+    kbitem = serializers.CharField(source='kbitem.title', allow_null=True, default='')
+    extra_data = serializers.JSONField()
     paired_count = serializers.SerializerMethodField()
     last_reply = serializers.SerializerMethodField()
 
     class Meta:
         model = Ticket
-        # fields = '__all__'
-        fields = ('ticket', 'id', 'priority', 'title', 'queue', 'status',
-                  'created', 'last_reply', 'due_date',
-                  'assigned_to', 'submitter', 'row_class', 'time_spent', 'kbitem',
-                  'extra_data', 'paired_count', )
+        fields = ('ticket',
+                  'id',
+                  'title',
+                  'priority',
+                  'queue',
+                  'get_status',
+                  'created',
+                  'last_reply',
+                  'due_date',
+                  'assigned_to',
+                  'submitter_email',
+                  'row_class',
+                  'time_spent',
+                  'kbitem',
+                  'extra_data',
+                  'paired_count', )
 
-    def get_queue(self, obj):
-        return {"title": obj.queue.title, "id": obj.queue.id}
-
-    def get_ticket(self, obj):
+    @staticmethod
+    def get_ticket(obj):
         return str(obj.id) + " " + obj.ticket
 
-    def get_priority(self, obj):
+    @staticmethod
+    def get_priority(obj):
         return obj.get_priority[3:]
 
-    def get_status(self, obj):
-        return obj.get_status
-
-    def get_created(self, obj):
+    @staticmethod
+    def get_created(obj):
         created = humanize.naturaltime(obj.created)
         return created.replace(u'\xa0', ' ') if created else created
 
-    def get_last_reply(self, obj):
+    @staticmethod
+    def get_last_reply(obj):
         date = obj.get_last_followup('')
         if date:
             last_reply = humanize.naturaltime(date)
@@ -62,73 +79,101 @@ class DatatablesTicketSerializer(serializers.ModelSerializer):
         else:
             return ''
 
-    def get_due_date(self, obj):
+    @staticmethod
+    def get_due_date(obj):
         due_date = humanize.naturaltime(obj.due_date)
         return due_date.replace(u'\xa0', ' ') if due_date else due_date
 
-    def get_assigned_to(self, obj):
-        if obj.assigned_to:
-            if obj.assigned_to.get_full_name():
-                return obj.assigned_to.get_full_name()
-            elif obj.assigned_to.email:
-                return obj.assigned_to.email
-            else:
-                return obj.assigned_to.username
-        else:
-            return "None"
+    @staticmethod
+    def get_assigned_to(obj):
+        possible_vals = [*((obj.assigned_to.get_full_name(), obj.assigned_to.email, obj.assigned_to.username)
+                           if obj.assigned_to else ()),
+                         'None']
+        return next(val for val in possible_vals if val)
 
-    def get_submitter(self, obj):
-        return obj.submitter_email
-
-    def get_time_spent(self, obj):
+    @staticmethod
+    def get_time_spent(obj):
         return format_time_spent(obj.time_spent)
 
-    def get_row_class(self, obj):
-        return obj.get_priority_css_class
-
-    def get_kbitem(self, obj):
-        return obj.kbitem.title if obj.kbitem else ""
-
-    def get_extra_data(self, obj):
-        return obj.extra_data if obj.extra_data else ""
-
-    def get_paired_count(self, obj):
+    @staticmethod
+    def get_paired_count(obj):
         return obj.beam_property.count() + obj.beam_taxlot.count()
+
+    def to_representation(self, instance):
+        from collections import OrderedDict
+        data = super(DatatablesTicketSerializer, self).to_representation(instance)
+        new_names = {'get_status': 'status', 'submitter_email': 'submitter'}
+        data = OrderedDict((new_names.get(k, k), v if v else '') for k, v in data.items())
+        return data
+
+
+# Hard-code Org ID field for report since they are too variable
+ORG_TO_ID_FIELD_MAPPING = {
+    'City of Cambridge': 'Cambridge Building Energy Reporting ID',
+}
 
 
 class ReportTicketSerializer(serializers.ModelSerializer):
-    formtype = serializers.SerializerMethodField()
-    created = serializers.SerializerMethodField()
+    queue = serializers.CharField(source='queue.title')
+    formtype = serializers.CharField(source='ticket_form.name')
+    created = serializers.DateTimeField(format='%m-%d-%Y %H:%M:%S')
     first_staff_followup = serializers.SerializerMethodField()
     closed_date = serializers.SerializerMethodField()
     assigned_to = serializers.SerializerMethodField()
     time_spent = serializers.SerializerMethodField()
     is_followup_required = serializers.SerializerMethodField()
-    number_followups = serializers.SerializerMethodField()
-    status = serializers.SerializerMethodField()
-    kbitem = serializers.SerializerMethodField()
+    number_staff_followups = serializers.SerializerMethodField()
+    number_public_followups = serializers.SerializerMethodField()
+    kbitem = serializers.CharField(source='kbitem.title', allow_null=True, default='')
     merged_to = serializers.SerializerMethodField()
-    queue = serializers.SerializerMethodField()
-    extra_data = serializers.SerializerMethodField()
+    extra_data = serializers.JSONField()
+
+    building_id = serializers.SerializerMethodField()
+    pm_id = serializers.SerializerMethodField()
+    property_type = serializers.SerializerMethodField()
 
     class Meta:
         model = Ticket
-        fields = ('queue', 'formtype', 'created', 'id', 'title', 'status', 'assigned_to', 'submitter_email',
-                  'time_spent', 'description', 'contact_name', 'contact_email', 'building_name', 'building_address',
-                  'pm_id', 'kbitem', 'merged_to', 'first_staff_followup', 'closed_date', 'is_followup_required',
-                  'number_followups', 'extra_data')
+        fields = (
+            # Ticket Fields
+            'queue',
+            'formtype',
+            'created',
+            'id',
+            'title',
+            'get_status',
+            'submitter_email',
+            'description',
+            'contact_name',
+            'contact_email',
+            'building_name',
+            'building_address',
+            'kbitem',
 
-    def get_formtype(self, obj):
-        return obj.ticket_form.name
+            # Generated Fields
+            'assigned_to',
+            'time_spent',
+            'merged_to',
+            'first_staff_followup',
+            'closed_date',
+            'is_followup_required',
+            'number_staff_followups',
+            'number_public_followups',
+            'extra_data',
 
-    def get_created(self, obj):
-        return datetime.strftime(obj.created, '%m-%d-%Y %H:%M:%S')
+            # Property Paired Fields, or Ticket Fields if not Paired Property
+            'building_id',
+            'pm_id',
+            'property_type',
+        )
 
-    def get_first_staff_followup(self, obj):
+    @staticmethod
+    def get_first_staff_followup(obj):
         date = obj.get_last_followup('staff')
         return datetime.strftime(date, '%m-%d-%Y %H:%M:%S') if date else 'None'
 
-    def get_closed_date(self, obj):
+    @staticmethod
+    def get_closed_date(obj):
         terminal_statuses = [Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS, Ticket.DUPLICATE_STATUS]
         if obj.status in terminal_statuses:
             f = FollowUp.objects.filter(ticket_id=obj.id, new_status__in=terminal_statuses).order_by('date').last()
@@ -136,38 +181,85 @@ class ReportTicketSerializer(serializers.ModelSerializer):
         else:
             return 'None'
 
-    def get_assigned_to(self, obj):
-        if obj.assigned_to:
-            if obj.assigned_to.get_full_name():
-                return obj.assigned_to.get_full_name()
-            elif obj.assigned_to.email:
-                return obj.assigned_to.email
-            else:
-                return obj.assigned_to.username
-        else:
-            return 'None'
+    @staticmethod
+    def get_assigned_to(obj):
+        possible_vals = [*((obj.assigned_to.get_full_name(), obj.assigned_to.email, obj.assigned_to.username)
+                           if obj.assigned_to else ()),
+                         'None']
+        return next(val for val in possible_vals if val)
 
-    def get_time_spent(self, obj):
+    @staticmethod
+    def get_time_spent(obj):
         return format_time_spent(obj.time_spent)
 
-    def get_is_followup_required(self, obj):
+    @staticmethod
+    def get_is_followup_required(obj):
         starting_statuses = [Ticket.OPEN_STATUS, Ticket.REOPENED_STATUS, Ticket.NEW_STATUS]
         return 'Yes' if obj.status in starting_statuses else 'No'
 
-    def get_number_followups(self, obj):
-        return FollowUp.objects.filter(ticket_id=obj.id).count()
+    @staticmethod
+    def get_number_staff_followups(obj):
+        staff_followups = [f for f in obj.followup_set.all() if is_helpdesk_staff(f.user)]
+        return len(staff_followups)
 
-    def get_status(self, obj):
-        return obj.get_status
+    @staticmethod
+    def get_number_public_followups(obj):
+        public_followups = [f for f in obj.followup_set.all() if not is_helpdesk_staff(f.user)]
+        return len(public_followups)
 
-    def get_kbitem(self, obj):
-        return obj.kbitem.title if obj.kbitem else ''
-
-    def get_merged_to(self, obj):
+    @staticmethod
+    def get_merged_to(obj):
         return obj.merged_to.queue.title + '-' + str(obj.merged_to.id) if obj.merged_to else ''
 
-    def get_queue(self, obj):
-        return obj.queue.title
+    # BEAM Property Retrieval Fields
+    def get_building_id(self, obj):
+        # Return the paired properties building id, and if none exist, return building_id of ticket if available
+        paired_property = self.get_paired_property(obj)
+        if paired_property is None:
+            return ''
+        org = obj.ticket_form.organization
+        if org.name in ORG_TO_ID_FIELD_MAPPING:
+            field = ORG_TO_ID_FIELD_MAPPING.get(org.name)
+            return paired_property.state.extra_data.get(field)
+        else:
+            return obj.building_id
 
-    def get_extra_data(self, obj):
-        return obj.extra_data if obj.extra_data else ''
+    def get_pm_id(self, obj):
+        # Return the paired properties building id, and if none exist, return building_id of ticket if available
+        paired_property = self.get_paired_property(obj)
+        if paired_property is None:
+            return ''
+        return paired_property.state.pm_property_id if paired_property.state.pm_property_id else obj.pm_id
+
+    def get_property_type(self, obj):
+        paired_property = self.get_paired_property(obj)
+        if paired_property is None:
+            return ''
+        return paired_property.state.extra_data.get('Primary Property Type - Portfolio Manager-Calculated')
+
+    @staticmethod
+    def get_paired_property(obj):
+        """
+        Helper function for previous three fields, return the closest Paired Property to this Ticket
+        """
+        org = obj.ticket_form.organization
+        paired_properties = obj.beam_property.all()
+        p_ids = paired_properties.values_list('id')
+        pvs = PropertyView.objects.filter(property_id__in=p_ids).order_by('-cycle__start')
+
+        if not paired_properties:
+            return None
+        else:
+            if pvs.count() == 1:
+                return pvs.first()
+            else:
+                # Multiple paired properties, check that they all have the same id, property type fields
+                fields = ['state__pm_property_id',
+                          'state__extra_data__Primary Property Type - Portfolio Manager-Calculated']
+                if org.name in ORG_TO_ID_FIELD_MAPPING:
+                    fields.append('state__extra_data__%s' % ORG_TO_ID_FIELD_MAPPING.get(org.name))
+                for field in fields:
+                    values = pvs.values_list(field, flat=True)
+                    if len(set(values)) > 1:
+                        return None  # If values are different, prob different Properties are paired, return None
+                return pvs.first()   # Return most recent PV if all fields were identical

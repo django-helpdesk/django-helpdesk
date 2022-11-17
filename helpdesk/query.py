@@ -12,7 +12,7 @@ from functools import reduce
 import operator
 
 from helpdesk.decorators import is_helpdesk_staff
-from helpdesk.models import Ticket, CustomField
+from helpdesk.models import Ticket, CustomField, FormType
 from helpdesk.serializers import DatatablesTicketSerializer
 from seed.landing.models import SEEDUser as User
 
@@ -297,9 +297,8 @@ class __Query__:
 
         extra_data_columns = {}
         # If filter options chooses one queue, get extra_data columns to show in ticket list
-        if 'queue__id__in' in self.params['filtering']:
-            if len(self.params['filtering']['queue__id__in']) == 1:
-                extra_data_columns, data = get_extra_data_columns(data)
+        if len(self.params['filtering'].get('queue__id__in', [])) == 1:
+            extra_data_columns, data = process_extra_data_columns(data, self.params['filtering']['queue__id__in'][0])
 
         # Collect and apply column-based filters that CAN'T be done using Django because of post-processing
         data = do_custom_filtering(data, extra_data_columns, **kwargs)
@@ -314,7 +313,6 @@ class __Query__:
             'recordsFiltered': count,   # Total records, after filtering (i.e. the total number of records after filtering has been applied - not just the number of records being returned for this page of data).
             'recordsTotal': total,      # Total records, before filtering (i.e. the total number of records in the database)
             'draw': draw,
-            'extra_data_columns': extra_data_columns,
             'all_ticket_ids': all_ticket_ids,
         }
 
@@ -367,29 +365,22 @@ def do_custom_filtering(data, extra_data_columns, **kwargs):
     return data
 
 
-def get_extra_data_columns(data):
+def process_extra_data_columns(data, queue_id):
     """
     Get the list of extra_data columns in all of the Tickets. Remove it as a nested field and add it back as just
     another field
     :param data: json data from DatatablesTicketSerializer
+    :param queue_id: Queue id for tickets being serialized in data
     :return: modified json data where nested extra_data field is expanded
     """
-    extra_data_cols = {}
-    for row in data:
-        # Handle extra_data columns
-        if row['extra_data'] != '':
-            new_cols = [i for i in row['extra_data'].keys() if i not in extra_data_cols]
-            ticket_id = row.get('id') if 'id' in row else row['ticket'].split('[')[0]
-            new_cols = {i: get_viewable_name(ticket_id,  i) for i in new_cols}
-            extra_data_cols.update(new_cols)
-        else:
-            row['extra_data'] = {}
+    extra_data_cols = get_extra_data_columns(queue_id)
 
     # Replace extra_data with individual columns
     for row in data:
+        row['extra_data'] = {} if row['extra_data'] == '' else row['extra_data']
         # Add in any other col not in extra_data
-        missing_cols = {k: '' for k in extra_data_cols.keys() if k not in row['extra_data'].keys()}
-        row['extra_data'].update(missing_cols)
+        missing_data = {k: '' for k in extra_data_cols.keys() if k not in row['extra_data'].keys()}
+        row['extra_data'].update(missing_data)
 
         # Replace extra_data with the cols themselves
         extra_data = row.pop('extra_data')
@@ -398,9 +389,17 @@ def get_extra_data_columns(data):
     return extra_data_cols, data
 
 
-def get_viewable_name(ticket_id, extra_data_name):
-    # Helper function to take serialized ticket name and extra_data field and return display name
-    form_id = Ticket.objects.get(id=ticket_id).ticket_form_id
-    field = CustomField.objects.filter(ticket_form_id=form_id, field_name=extra_data_name).first()
+def get_extra_data_columns(queue_id=None):
+    """
+    Helper function to get all Form extra data fields in a Queue
+    """
+    extra_data_columns = {}
+    forms = FormType.objects.filter(queue_id=queue_id)
+    for form in forms:
+        mappings = form.get_extra_fields_mapping()
+        for field_name, label in mappings.items():
+            if field_name not in extra_data_columns:
+                extra_data_columns[field_name] = label
 
-    return field.label if field is not None else extra_data_name
+    return extra_data_columns
+

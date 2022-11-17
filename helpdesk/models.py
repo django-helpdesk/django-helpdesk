@@ -366,6 +366,13 @@ class FormType(models.Model):
         fields = CustomField.objects.filter(ticket_form=self.id).values_list('field_name', flat=True)
         return [field for field in fields if is_extra_data(field)]
 
+    def get_extra_fields_mapping(self):
+        fields = CustomField.objects.filter(ticket_form=self.id).values_list('field_name', 'label')
+        return {field_name: label for field_name, label in fields if is_extra_data(field_name)}
+
+    def get_fields_mapping(self):
+        fields = CustomField.objects.filter(ticket_form=self.id).values_list('field_name', 'label')
+        return {field_name: label for field_name, label in fields if not is_extra_data(field_name)}
 
 @receiver(post_save, sender=FormType)
 def insert_presets_to_db(instance, created, **kwargs):

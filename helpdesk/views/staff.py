@@ -33,7 +33,6 @@ from helpdesk.query import (
     query_to_base64,
     query_from_base64,
     get_extra_data_columns,
-    get_viewable_name,
 )
 
 from helpdesk.serializers import DatatablesTicketSerializer, ReportTicketSerializer
@@ -58,7 +57,8 @@ from helpdesk.lib import (
 )
 from helpdesk.models import (
     Ticket, Queue, FollowUp, TicketChange, PreSetReply, FollowUpAttachment, SavedSearch,
-    IgnoreEmail, TicketCC, TicketDependency, UserSettings, KBItem, CustomField, is_unlisted
+    IgnoreEmail, TicketCC, TicketDependency, UserSettings, KBItem, CustomField, is_unlisted,
+    FormType
 )
 
 from helpdesk import settings as helpdesk_settings
@@ -1400,9 +1400,9 @@ def ticket_list(request):
     user_choices = list_of_helpdesk_staff(org)
 
     # Get extra data columns to be displayed if only 1 queue is selected
-    # TODO Figure out a way to get extra_cols without making a full call to datatables_ticket_list?
-    data = datatables_ticket_list(request, urlsafe_query).content
-    extra_data_columns = json.loads(data)['extra_data_columns']
+    extra_data_columns = {}
+    if len(query_params['filtering'].get('queue__id__in', [])) == 1:
+        extra_data_columns = get_extra_data_columns(query_params['filtering']['queue__id__in'][0])
 
     json_queries = {i['id']: i for i in user_saved_queries.values('id', 'user_id', 'shared')}
 
@@ -2387,19 +2387,14 @@ def export_ticket_table(request, tickets):
     """
     Export Tickets as they would be visible in the Ticket List
     """
-    column_display_names = {'id': 'Ticket ID', 'title': 'Subject', 'ticket': 'Ticket', 'priority': 'Priority',
-                            'queue': 'Queue', 'status': 'Status', 'paired_count': '# of Paired Properties and Taxlots',
-                            'created': 'Created', 'due_date': 'Due Date', 'assigned_to': 'Owner',
-                            'submitter': 'Submitter', 'kbitem': 'KB Item'}
-
     visible_cols = request.POST.get('visible').split(',')
+    visible_cols.insert(2, 'title')  # Add title since it's concatenated in Front-End
     num_queues = request.POST.get('queue_length', '0')
 
     qs = Ticket.objects.filter(id__in=tickets)
     do_extra_data = int(num_queues) == 1
 
-    return export(qs, DatatablesTicketSerializer, column_display_names, do_extra_data=do_extra_data,
-                  visible_cols=visible_cols)
+    return export(qs, DatatablesTicketSerializer, do_extra_data=do_extra_data, visible_cols=visible_cols)
 
 
 @staff_member_required
@@ -2414,65 +2409,108 @@ def export_report(request):
     user_queues = HelpdeskUser(request.user).get_queues()
     qs = Ticket.objects.filter(queue__in=user_queues).order_by('created', 'ticket_form')
 
-    # Get display names for the regular columns
-    column_display_names = {'created': 'Ticket Creation Date', 'first_followup': 'Initial Staff Response Date',
-                            'closed_date': 'Closed Date', 'assigned_to': 'Assigned To',
-                            'time_spent': 'Total Time Spent (mins)', 'followup_required': 'Follow Up Required',
-                            'number_followups': 'Number of Interactions', 'status': 'Ticket Status',
-                            'kbitem': 'Knowledgebase Item', 'merged_to': 'Merged With', 'queue': 'Queue',
-                            'id': 'Ticket ID'}
-    varying_columns = ['title', 'description', 'submitter_email', 'contact_name', 'contact_email', 'building_name',
-                       'building_address', 'pm_id']
-
-    return export(qs, ReportTicketSerializer, column_display_names, paginate=paginate, varying_columns=varying_columns)
+    return export(qs, ReportTicketSerializer, paginate=paginate)
 
 
-def export(qs, serializer, column_display_names, paginate=False, do_extra_data=True, visible_cols=[],
-           varying_columns=[]):
+def export(qs, serializer, paginate=False, do_extra_data=True, visible_cols=[]):
     """
     Helper function for exporting the Ticket Table and for Reports. Lots of input variables describing which process
     :param qs: QuerySet of Tickets to Serialize and output to csv file.
-    :param serializer: Ticket Serializer
-    :param column_display_names:
-    :param paginate:
-    :param do_extra_data:
-    :param visible_cols:
-    :param varying_columns:
+    :param serializer: Ticket Serializer to use on Queryset
+    :param paginate:  TODO file into separate sheets for each year of tickets
+    :param do_extra_data: Bool, process and save extra data fields to csv file
+    :param visible_cols: List of visible cols to include in output
     :return: None, starts downloading the csv file
     """
     from collections import OrderedDict
+    from helpdesk.serializers import ORG_TO_ID_FIELD_MAPPING
 
-    data = serializer(qs, many=True).data
+    ticket_form_ids = list(set(qs.values_list('ticket_form', flat=True)))
+    org = qs.first().ticket_form.organization if qs else None
+    building_id_org_field = None
+    if org.name in ORG_TO_ID_FIELD_MAPPING:
+        building_id_org_field = ORG_TO_ID_FIELD_MAPPING.get(org.name)
 
-    extra_data_cols = {}
-    if do_extra_data:
-        extra_data_cols, data = get_extra_data_columns(data)
+    # Fields that could be omitted from Form but still required a Display Name
+    just_in_case_mapping = {
+        'submitter_email': 'Submitter Email',
+        'description': 'Description',
+        'contact_name': 'Contact Name',
+        'contact_email': 'Contact Email',
+        'building_name': 'Building Name',
+        'building_address': 'Building Address',
+        'building_id': 'Building ID' if building_id_org_field is None else building_id_org_field,
+        'pm_id': 'Portfolio Manager ID',
+        'title': 'Subject',
+    }
 
-    # Process Data
-    for i, row in enumerate(data):
-        ticket_id = row['id']
-        cf_display_names = {}
-        if varying_columns:
-            cf_display_names = {column_name: get_viewable_name(ticket_id, column_name) for column_name in
-                                varying_columns}
+    # Fields that either don't take a column or are generated by serializer
+    other_mapping = {
+        'last_reply': 'Last Reply',
+        'status': 'Status',
+        'paired_count': 'Number of Paired Tickets',
+        'submitter': 'Submitter Email',
+        'ticket': 'Ticket',
+        'get_status': 'Ticket Status',
+        'formtype': 'Ticket Form',
+        'created': 'Created',
+        'id': 'Ticket ID',
+        'kbitem': 'Knowledgebase Item',
+        'assigned_to': 'Assigned To',
+        'time_spent': 'Time Spent',
+        'merged_to': 'Merged To',
+        'first_staff_followup': 'Date of First Staff Followup',
+        'closed_date': 'Ticket Closed Date',
+        'is_followup_required': 'Is Followup Required?',
+        'number_staff_followups': 'Number of Staff Followups',
+        'number_public_followups': 'Number of Public Followups',
+        'property_type': 'Primary Property Type - Portfolio Manager-Calculated'
+    }
 
-        # Get the data that is only visible
-        if visible_cols:
-            for col in list(set(row.keys()).difference(visible_cols)):
-                row.pop(col)
+    # Split tickets up into separate forms, serialize, and concatenate them
+    report = pd.DataFrame()
+    for ticket_form_id in ticket_form_ids:
+        sub_qs = qs.filter(ticket_form_id=ticket_form_id)
 
-        # Replace Columns with their display names
-        display_names = {**column_display_names, **cf_display_names, **extra_data_cols}
-        renamed_row = OrderedDict((display_names.get(k, k), v if v else '') for k, v in row.items())
-        data[i] = renamed_row
+        form = FormType.objects.get(id=ticket_form_id)
+        data = serializer(sub_qs, many=True).data
+
+        # Get extra data columns and their display names
+        extra_data_cols = {}
+        if do_extra_data:
+            extra_data_cols = form.get_extra_fields_mapping()
+
+        # Get Standard columns and their display names
+        column_mapping = form.get_fields_mapping()
+        mappings = {**column_mapping, **extra_data_cols, **other_mapping}
+        mappings.update({k: v for k, v in just_in_case_mapping.items() if k not in mappings})
+
+        # Process Data
+        output = []
+        for row in data:
+            # Move extra data from being a nested dict to being other fields
+            extra_data = row.pop('extra_data')
+            if do_extra_data:
+                row.update(extra_data)
+
+            # Get the data that is only visible
+            if visible_cols:
+                for col in list(set(row.keys()).difference(visible_cols)):
+                    row.pop(col)
+
+            # Replace Columns with their display names
+            renamed_row = OrderedDict((mappings.get(k, k), v if v else '') for k, v in row.items())
+            output.append(renamed_row)
+
+        output = pd.json_normalize(output)
+        report = report.append(output, ignore_index=True)
 
     file_name = 'ticket_export.csv'
     file_path = '/tmp/' + file_name  # TODO Better Place to store this temp file?
 
     # Convert to pandas dataframe for csv download, after some clean up
-    df = pd.json_normalize(data)
-    df = df.set_index('Ticket ID')
-    df.to_csv(file_path)
+    report = report.set_index('Ticket ID')
+    report.to_csv(file_path)
 
     # initiate the download, user will stay on the same page
     with open(file_path, 'rb') as f:
