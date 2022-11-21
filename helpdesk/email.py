@@ -268,7 +268,7 @@ def refreshed(importer, logger, token_backend=None):
     if not token_backend:
         return False
     try:
-        was_refreshed = token_backend.should_refresh_token(check_time=1)
+        was_refreshed = token_backend.should_refresh_token(expr_minutes=1)
     except RuntimeError:
         logger.error(f"* Token could not be refreshed by refreshed(). Exiting import for {importer.username}.")
         return False
