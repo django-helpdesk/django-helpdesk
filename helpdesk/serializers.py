@@ -32,7 +32,7 @@ class DatatablesTicketSerializer(serializers.ModelSerializer):
     due_date = serializers.SerializerMethodField()
     row_class = serializers.CharField(source='get_priority_css_class')
     time_spent = serializers.SerializerMethodField()
-    queue = QueueField(source='*')
+    queue = QueueField()
     kbitem = serializers.CharField(source='kbitem.title', allow_null=True, default='')
     extra_data = serializers.JSONField()
     paired_count = serializers.SerializerMethodField()
