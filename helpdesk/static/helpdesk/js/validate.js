@@ -3,7 +3,6 @@
 var key = {
     // DC Specific
     affordable_boolean: 'e_is_affordable_housing',
-    affordable_list: 'e_type_affordable_housing',
     property_list: 'e_property_type',
     pathway_list: 'e_pathway',
     new_pathway_list: 'e_new_pathway',
@@ -106,7 +105,28 @@ var form_validator = $('#ticket_submission_form').validate({
 /* Hiding/showing elements in DC-Specific forms based on other fields */
 
 // Pathway Selection Form Logic
-$(group.affordable_boolean + ', ' + group.affordable_list).hide();
+$(group.affordable_boolean + ', ' + group.type_affordable_housing).hide();
+
+show_hide_type_affordable_housing = function () {
+    // type_affordable_housing field appears if "Primary Property Type - Portfolio Manager Calculated" = "Multifamily Housing" AND "Affordable Housing" = TRUE
+    if ($(id.property_list).val() == "Multifamily Housing" && $(id.affordable_boolean).prop('checked')) {
+        $(group.type_affordable_housing).show();
+    } else {
+        $(group.type_affordable_housing).hide();
+        $(id.type_affordable_housing).val('');
+    }
+}
+
+// Check if fields need to be shown on form reload
+if ($(id.property_list).val() == "Multifamily Housing") {
+    $(group.affordable_boolean).show();
+} else {
+    $(group.affordable_boolean).hide();
+    $(id.affordable_boolean).prop('checked', false);
+}
+show_hide_type_affordable_housing();
+
+// Check if fields need to be marked required on form reload
 groups_to_mark = [group.backup_pathway_list, group.attachment];
 if ($(id.pathway_list).val() != "Alternative Compliance Pathway") {
     // Show them on ticket reload when there are errors
@@ -114,16 +134,6 @@ if ($(id.pathway_list).val() != "Alternative Compliance Pathway") {
 } else {
     // Mark them as required too, if needed
     groups_to_mark.forEach(e => ! $(e + ' span').length ? $(e + ' label').after('<span style="color:red;">*</span>') : {})
-}
-
-show_hide_affordable_list = function () {
-    //affordable_list field appears if "Primary Property Type - Portfolio Manager Calculated" = "Multifamily Housing" AND "Affordable Housing" = TRUE
-    if ($(id.property_list).val() == "Multifamily Housing" && $(id.affordable_boolean).prop('checked')) {
-        $(group.affordable_list).show();
-    } else {
-        $(group.affordable_list).hide();
-        $(id.affordable_list).val('');
-    }
 }
 
 $(id.property_list).change(function(){
@@ -135,7 +145,7 @@ $(id.property_list).change(function(){
         $(id.affordable_boolean).prop('checked', false);
     }
 
-    show_hide_affordable_list();
+    show_hide_type_affordable_housing();
 
     form_validator.element(id.property_list);
 
@@ -160,7 +170,7 @@ $(id.property_list).change(function(){
 });
 
 $(id.affordable_boolean).change(function(){
-    show_hide_affordable_list();
+    show_hide_type_affordable_housing();
 });
 
 $(id.pathway_list).change(function(){
@@ -257,13 +267,14 @@ if (! $(id.extended_delay_for_QAH).prop('checked')) {
 }
 
 $(id.extended_delay_for_QAH).change(function() {
+  fields = QAH_fields.join(', ');
   if ($(id.extended_delay_for_QAH).prop('checked')) {
-    $(QAH_fields.join(', ')).show()
+    $(fields).show()
     QAH_fields.forEach(e => $(e + ' label').after('<span style="color:red;">*</span>'))
     $(id.delay_years).attr({"min": 0}).removeAttr('max')
   } else {
-    $(QAH_fields).hide()
-    $(QAH_fields.join(', ')).children('span').remove();
+    $(fields).hide()
+    $(fields).children('span').remove();
     $(id.delay_years).attr({"max" : 3, "min" : 1});
     if ($(id.delay_years).val() > '3') $(id.delay_years).val('3');
   }
