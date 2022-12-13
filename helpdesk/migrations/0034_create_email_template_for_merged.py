@@ -6,8 +6,10 @@ from django.db import migrations
 def forwards_func(apps, schema_editor):
     EmailTemplate = apps.get_model("helpdesk", "EmailTemplate")
     db_alias = schema_editor.connection.alias
+    latest_template = EmailTemplate.objects.order_by('-id').first()  # because PG sequences are not reset
+    new_id = latest_template.id + 1 if latest_template else 1
     EmailTemplate.objects.using(db_alias).create(
-        id=EmailTemplate.objects.order_by('-id').first().id + 1,  # because PG sequences are not reset
+        id=new_id,
         template_name='merged',
         subject='(Merged)',
         heading='Ticket merged',
@@ -24,7 +26,7 @@ From now on, please answer on this ticket, or you can include the tag {{ ticket.
         locale='en'
     )
     EmailTemplate.objects.using(db_alias).create(
-        id=EmailTemplate.objects.order_by('-id').first().id + 1,  # because PG sequences are not reset
+        id=new_id + 1,  # because PG sequences are not reset
         template_name='merged',
         subject='(Fusionné)',
         heading='Ticket Fusionné',
