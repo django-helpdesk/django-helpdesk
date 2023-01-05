@@ -42,7 +42,7 @@
                 <option value="" selected>Your {{ inventory_type }} Selection</option>
                 {% for cycle, views in property_views_per_cycle.items %}
                 {% for view in views %}
-                <option value="{{ cycle.id }}-{{ view.id }}">{{ inventory_type }} ID: {{ view.id }} - {{ view.state.address_line_1 }}</option>
+                <option value="{{ cycle.id }}-{{ view.id }}">{% if inventory_type == 'Property' %}PM Property ID: {{ view.state.pm_property_id }}{% else %}Jurisdiction TaxLot ID {{ view.state.jurisdiction_tax_lot_id }}{% endif %}</option>
                 {% endfor %}
                 {% endfor %}
             </select>

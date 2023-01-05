@@ -26,7 +26,7 @@
     <form method="post">
         {% csrf_token %}
         <div id="group_cycle_select" class="form-group">
-            <h5>{% blocktrans %}Select a Cycle to select a {{ inventory_type }}{% endblocktrans %}</h5>
+            <h5>{% blocktrans %}Select a Cycle to select a Property{% endblocktrans %}</h5>
             <!-- Dropdown List of Properties -->
             <select class="custom-select" id="cycle_select" name="cycle_id">
                 <option value="" selected>Your Cycle Selection</option>
@@ -42,7 +42,7 @@
                 <option value="" selected>Your Property Selection</option>
                 {% for cycle, views in properties_per_cycle.items %}
                 {% for view in views %}
-                <option value="{{ cycle.id }}-{{ view.id }}">Property ID: {{ view.id }} - {{ view.state.address_line_1 }}</option>
+                <option value="{{ cycle.id }}-{{ view.id }}">PM Property ID: {{ view.state.pm_property_id }}</option>
                 {% endfor %}
                 {% endfor %}
             </select>
