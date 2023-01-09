@@ -13,9 +13,9 @@ var key = {
     extended_delay_for_QAH: 'e_extended_delay_for_QAH',
     delay_years: 'e_delay_years',
     type_affordable_housing: 'e_type_affordable_housing',
-    attachment_1: 'attachment_1',
-    attachment_2: 'attachment_2',
-    attachment_3: 'attachment_3',
+    attachment_1: 'e_attachment_1',
+    attachment_2: 'e_attachment_2',
+    attachment_3: 'e_attachment_3',
 
     // Ann Arbor Specific
     ext_or_exempt: 'e_extension_or_exemption',

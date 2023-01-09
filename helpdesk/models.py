@@ -1921,6 +1921,7 @@ class CustomField(models.Model):
         ('url', _('URL')),
         ('ipaddress', _('IP Address')),
         ('slug', _('Slug')),
+        ('attachment', _('Attachment')),
     )
 
     data_type = models.CharField(

@@ -451,7 +451,7 @@ def view_ticket(request, ticket_id):
     )
     extra_data = []
     for values, object in zip(display_data.values(), display_data):  # TODO check how many queries this runs
-        if not is_unlisted(values['field_name']):
+        if not is_unlisted(values['field_name']) and not values['data_type'] == 'attachment':
             if values['field_name'] in ticket.extra_data:
                 values['value'] = ticket.extra_data[values['field_name']]
             else:

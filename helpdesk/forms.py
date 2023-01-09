@@ -43,7 +43,8 @@ CUSTOMFIELD_TO_FIELD_DICT = {
     'url': forms.URLField,
     'ipaddress': forms.GenericIPAddressField,
     'slug': forms.SlugField,
-    # TODO Add attachment type here? and foreignkey?
+    'attachment': forms.FileField,
+    # TODO Add foreignkey type here?
 }
 
 CUSTOMFIELD_DATE_FORMAT = "%Y-%m-%d"
@@ -133,6 +134,8 @@ class CustomFieldMixin(object):
                     instanceargs['widget'] = forms.TimeInput(attrs={'class': 'form-control time-field', 'autocomplete': 'off'})
                 elif fieldclass == forms.BooleanField:
                     instanceargs['widget'] = forms.CheckboxInput(attrs={'class': 'form-control'})
+                elif fieldclass == forms.FileField:
+                    instanceargs['widget'] = forms.FileInput(attrs={'class': 'form-control-file'})
 
             except KeyError:
                 # The data_type was not found anywhere
@@ -331,14 +334,6 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
         if form.queue:
             del self.fields['queue']
 
-        widget = forms.FileInput(attrs={'class': 'form-control-file'})
-        if 'extended_delay_for_QAH' in kwargs['initial']:
-            for i in range(1, 4):
-                self.fields[f'attachment_{i}'] = forms.FileField(widget=widget)
-
-        if 'eem_package_attachment' in kwargs['initial']:
-            self.fields['eem_package_attachment'] = forms.FileField(widget=widget)
-
         if kbcategory:
             self.fields['kbitem'] = forms.ChoiceField(
                 widget=forms.Select(attrs={'class': 'form-control'}),
@@ -419,16 +414,20 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
                                                                    ' Pathway is selected for New Pathway Selection'))
 
     def clean_dc_delay_of_compliance_form(self):
-        # If extended_delay_for_QAH, check that attachment_1, type_affordable_housing, attachment_3 were provided
+        # If extended_delay_for_QAH, check that type_affordable_housing was provided
         if self.cleaned_data.get('e_extended_delay_for_QAH'):
-            fields = [('attachment_1', 'Qualifying Affordable Housing Attachment is required '),
-                      ('type_affordable_housing', 'Type of Affordable Housing option is required '),
-                      ('attachment_3', 'Extended Delay Milestone Plan Attachment is required ')
-                      ]
-            for field in fields:
-                if not self.cleaned_data.get(field[0]):
-                    msg = forms.ValidationError(field[1] + 'if Extended Delay for Qualified Affordable Housing is selected.')
-                    self.add_error(field[0], msg)
+            if not self.cleaned_data.get('e_type_affordable_housing'):
+                msg = forms.ValidationError('Type of Affordable Housing option is required if Extended Delay for'
+                                            ' Qualified Affordable Housing is selected.')
+                self.add_error('e_type_affordable_housing', msg)
+
+    def _get_attachment_fields(self, with_e=False):
+        attachment_fields = []
+        for field in self.fields:
+            if isinstance(self.fields[field], forms.FileField):
+                attachment_fields.append(field.replace('e_', '', 1) if
+                                         (field.startswith('e_') and not with_e) else field)
+        return attachment_fields
 
     def _create_ticket(self):
         kbitem = None
@@ -443,6 +442,10 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
             if field.startswith('e_'):
                 field_name = field.replace('e_', '', 1)
                 extra_data[field_name] = value
+
+        # Remove any attachment fields from extra_data. They will be stored in the first attachment
+        attachment_fields = self._get_attachment_fields()
+        extra_data = {k: v for k, v in extra_data.items() if k not in attachment_fields}
 
         ticket_form = FormType.objects.get(pk=self.form_id)
         queue = Queue.objects.get(id=int(self.cleaned_data['queue']))
@@ -490,15 +493,11 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
     def _attach_files_to_follow_up(self, followup):
         files = []
 
-        file = self.cleaned_data['attachment']
-        if file:
+        attachment_fields = self._get_attachment_fields(with_e=True)
+        for field in attachment_fields:
+            file = self.cleaned_data[field]
             files.append(file)
 
-        if self.cleaned_data.get('e_extended_delay_for_QAH'):
-            for i in range(1, 4):
-                file = self.cleaned_data.get(f'attachment_{i}')
-                if file:
-                    files.append(file)
         if files:
             files = process_attachments(followup, files)
         return files
