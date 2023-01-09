@@ -311,7 +311,10 @@ class Queue(models.Model):
         super(Queue, self).save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
-        permission_name = self.permission_name
+        permission_name = None
+        if hasattr(self, 'permission_name'):
+            permission_name = self.permission_name
+
         super(Queue, self).delete(*args, **kwargs)
 
         # once the Queue is safely deleted, remove the permission (if exists)
