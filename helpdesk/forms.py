@@ -414,12 +414,17 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
                                                                    ' Pathway is selected for New Pathway Selection'))
 
     def clean_dc_delay_of_compliance_form(self):
-        # If extended_delay_for_QAH, check that type_affordable_housing was provided
+        # If extended_delay_for_QAH, check that attachment_1, type_affordable_housing, attachment_3 were provided
         if self.cleaned_data.get('e_extended_delay_for_QAH'):
-            if not self.cleaned_data.get('e_type_affordable_housing'):
-                msg = forms.ValidationError('Type of Affordable Housing option is required if Extended Delay for'
-                                            ' Qualified Affordable Housing is selected.')
-                self.add_error('e_type_affordable_housing', msg)
+            fields = [('e_attachment_1', 'Qualifying Affordable Housing Attachment is required '),
+                      ('e_type_affordable_housing', 'Type of Affordable Housing option is required '),
+                      ('e_attachment_3', 'Extended Delay Milestone Plan Attachment is required ')
+                      ]
+            for field in fields:
+                if not self.cleaned_data.get(field[0]):
+                    msg = forms.ValidationError(
+                        field[1] + 'if Extended Delay for Qualified Affordable Housing is selected.')
+                    self.add_error(field[0], msg)
 
     def _get_attachment_fields(self, with_e=False):
         attachment_fields = []
