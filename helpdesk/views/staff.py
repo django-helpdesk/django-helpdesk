@@ -459,9 +459,11 @@ def view_ticket(request, ticket_id):
             values['has_columns'] = True if object.columns.exists() else False
             extra_data.append(values)
 
-    properties = list(PropertyView.objects.filter(property_id__in=ticket.beam_property.all().values_list('id', flat=True))\
+    properties = list(
+        PropertyView.objects.filter(property_id__in=ticket.beam_property.all().values_list('id', flat=True))
         .order_by('property_id', '-cycle__end').distinct('property_id').values('id', 'property_id', address=F('state__address_line_1')))
-    taxlots = list(TaxLotView.objects.filter(taxlot_id__in=ticket.beam_taxlot.all().values_list('id', flat=True))\
+    taxlots = list(
+        TaxLotView.objects.filter(taxlot_id__in=ticket.beam_taxlot.all().values_list('id', flat=True))
         .order_by('taxlot_id', '-cycle__end').distinct('taxlot_id').values('id', 'taxlot_id', address=F('state__address_line_1')))
 
     for p in properties:
