@@ -315,7 +315,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
         required=False
     )
     attachment = forms.FileField(
-        widget=forms.FileInput(attrs={'class': 'form-control-file'}),
+        widget=forms.FileInput(attrs={'class': 'form-control-file', 'multiple': True}),
         required=False
     )
     # TODO add beam_property and beam_taxlot so they can be viewed on the staff-side ticket page
@@ -333,6 +333,8 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
         self.form_queue = form.queue
         if form.queue:
             del self.fields['queue']
+
+        self.files = kwargs.get('files')
 
         if kbcategory:
             self.fields['kbitem'] = forms.ChoiceField(
@@ -380,6 +382,12 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
                     value = str(value)
                 cleaned_data[field] = value
 
+        # Reattach files since the attachment field will only parse the first one
+        if self.files:
+            for k, files in self.files.lists():
+                cleaned_data[k] = files
+
+
         # Handle DC Pathway Selection Form
         if form.name == 'Pathway Selection':
             self.clean_dc_ps_form()
@@ -403,8 +411,17 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
             ]
             for field in fields:
                 if not self.cleaned_data.get(field[0]):
-                    msg = forms.ValidationError(field[1] + ' if Alternative Compliance Pathway is selected.')
+                    msg = forms.ValidationError(field[1] + ' if the Alternative Compliance Pathway is selected.')
                     self.add_error(field[0], msg)
+        elif self.cleaned_data.get('e_pathway') == 'Standard Target Pathway':
+            # check that there are at least two attachments
+            if not self.files.get('attachment'):
+                msg = forms.ValidationError('Attachments are required if the Standard Target Pathway is selected.')
+                self.add_error('attachment', msg)
+            elif len(self.files.getlist('attachment')) < 2:
+                msg = forms.ValidationError('There must be attached at least two attachments if the Standard Target'
+                                            ' Pathway is selected.')
+                self.add_error('attachment', msg)
 
     def clean_dc_pca_form(self):
         if self.cleaned_data.get('e_new_pathway') == 'Alternative Compliance Pathway':
@@ -500,8 +517,12 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
 
         attachment_fields = self._get_attachment_fields(with_e=True)
         for field in attachment_fields:
-            file = self.cleaned_data[field]
-            files.append(file)
+            file_or_files = self.cleaned_data[field]
+            if isinstance(file_or_files, list):
+                for file in file_or_files:
+                    files.append(file)
+            elif file_or_files:
+                files.append(file_or_files)
 
         if files:
             files = process_attachments(followup, files)
