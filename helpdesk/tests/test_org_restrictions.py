@@ -332,7 +332,7 @@ class PerOrgMembershipTestCase(TestCase):
         self.assertEqual(org_info['default_org'],
                          Organization.objects.get(name='org1'),
                          'Non-Logged in User did not get the right default_org when the Org was in the URL')
-        self.assertEqual(org_info['url'],
+        self.assertEqual(org_info['public_url'],
                          '?org=org1',
                          'Non-Logged in User did not get the right URL when the Org was in the URL')
         self.assertEqual(len(org_info['orgs']),
@@ -345,7 +345,7 @@ class PerOrgMembershipTestCase(TestCase):
         self.assertEqual(org_info['default_org'],
                          {'name': 'Select an Organization'},
                          'Non-Logged in User did not get the right default_org when the Org was NOT in the URL with mutliple Helpdesk Orgs')
-        self.assertEqual(org_info['url'],
+        self.assertEqual(org_info['public_url'],
                          '',
                          'Non-Logged in User did not get the right URL when the Org was NOT in URL with mutliple Helpdesk Orgs')
         self.assertEqual(len(org_info['orgs']),
@@ -362,7 +362,7 @@ class PerOrgMembershipTestCase(TestCase):
         self.assertEqual(org_info['default_org'],
                          Organization.objects.get(name='org1'),
                          'Non-Logged in User did not get the right default_org when the Org was NOT in the URL with a SINGLE Helpdesk Org')
-        self.assertEqual(org_info['url'],
+        self.assertEqual(org_info['public_url'],
                          '?org=org1',
                          'Non-Logged in User did not get the right URL when the Org was NOT in URL with a SIGNLE Helpdesk Org')
         self.assertEqual(len(org_info['orgs']),

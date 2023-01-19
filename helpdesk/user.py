@@ -4,7 +4,7 @@ from helpdesk.models import (
     KBCategory,
     KBItem,
 )
-from seed.lib.superperms.orgs.models import Organization, get_helpdesk_count
+from seed.lib.superperms.orgs.models import Organization, get_helpdesk_count, get_helpdesk_orgs_for_domain
 
 from helpdesk import settings as helpdesk_settings
 from helpdesk.decorators import is_helpdesk_staff
@@ -101,6 +101,11 @@ class HelpdeskUser:
             User does NOT have to be staff; if not, category must be public.
         Works independent of the user's role permissions in the category's organization.
         """
+        if self.request:
+            domain_id = getattr(self.request, 'domain_id', None)
+            helpdesk_orgs = get_helpdesk_orgs_for_domain(domain_id)
+            if len(helpdesk_orgs) == 1 and helpdesk_orgs.first() == category.organization and category.public:
+                return True
         if get_helpdesk_count() == 1 or self.check_default_org(category.organization):
             if is_helpdesk_staff(self.user) or self.has_full_access() or category.public:
                 return True
@@ -112,6 +117,11 @@ class HelpdeskUser:
             User does NOT have to be staff; if not, article must be public.
         Works independent of the user's role permissions in the article's organization.
         """
+        if self.request:
+            domain_id = getattr(self.request, 'domain_id', None)
+            helpdesk_orgs = get_helpdesk_orgs_for_domain(domain_id)
+            if len(helpdesk_orgs) == 1 and helpdesk_orgs.first() == article.category.organization and article.category.public:
+                return True
         if get_helpdesk_count() == 1 or self.check_default_org(article.category.organization):
             if (is_helpdesk_staff(self.user) or
                self.has_full_access() or
@@ -125,6 +135,11 @@ class HelpdeskUser:
             User must be staff or have staff permissions.
         Works independent of the user's role permissions in the form's organization.
         """
+        if self.request:
+            domain_id = getattr(self.request, 'domain_id', None)
+            helpdesk_orgs = get_helpdesk_orgs_for_domain(domain_id)
+            if len(helpdesk_orgs) == 1 and helpdesk_orgs.first() == form.organization and form.public:
+                return True
         if get_helpdesk_count() == 1 or self.check_default_org(form.organization):
             if is_helpdesk_staff(self.user) or self.has_full_access() or form.public:
                 return True

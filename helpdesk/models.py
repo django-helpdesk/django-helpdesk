@@ -45,7 +45,7 @@ from helpdesk.decorators import is_helpdesk_staff
 
 from .templated_email import send_templated_mail
 
-from seed.lib.superperms.orgs.models import Organization
+from seed.lib.superperms.orgs.models import Organization, get_helpdesk_count_by_domain
 from seed.models import (
     Column,
     Cycle,
@@ -648,7 +648,9 @@ class Ticket(models.Model):
         from django.contrib.sites.models import Site
         from django.core.exceptions import ImproperlyConfigured
         from django.urls import reverse
+        domain_id = None
         try:
+            domain_id = self.ticket_form.organization.domain.id
             domain_name = self.ticket_form.organization.domain.netloc
         except Exception:
             domain_name = Site.objects.get_current().domain
@@ -658,16 +660,26 @@ class Ticket(models.Model):
             protocol = 'https'
         else:
             protocol = 'http'
-        org_name = quote(self.queue.organization.name)
-        return u"%s://%s%s?org=%s&ticket=%s&email=%s&key=%s" % (
-            protocol,
-            domain_name,
-            reverse('helpdesk:public_view'),
-            org_name,
-            self.ticket_for_url,
-            self.submitter_email,
-            self.secret_key
-        )
+        if get_helpdesk_count_by_domain(domain_id) == 1:
+            return u"%s://%s%s?ticket=%s&email=%s&key=%s" % (
+                protocol,
+                domain_name,
+                reverse('helpdesk:public_view'),
+                self.ticket_for_url,
+                self.submitter_email,
+                self.secret_key
+            )
+        else:
+            org_name = quote(self.queue.organization.name)
+            return u"%s://%s%s?org=%s&ticket=%s&email=%s&key=%s" % (
+                protocol,
+                domain_name,
+                reverse('helpdesk:public_view'),
+                org_name,
+                self.ticket_for_url,
+                self.submitter_email,
+                self.secret_key
+            )
     ticket_url = property(_get_ticket_url)
 
     def _get_staff_url(self):

@@ -25,7 +25,7 @@
             {% if forms %}
             {% for f in forms %}
             {% if f.organization__name == user_info.default_org.name %}
-            <a class="dropdown-item small text-wrap" href="{% if iframe %}{% url 'helpdesk:submit_iframe' %}{% else %}{% url 'helpdesk:submit' f.id %}{%endif%}?{% if category.queue %}queue={{category.queue.pk}}&_readonly_fields_=queue&{%endif%}kbitem={{item.id}}&{{query_param_string}}">{{ f.name }}</a>
+            <a class="dropdown-item small text-wrap" href="{% if iframe %}{% url 'helpdesk:submit_iframe' %}{% else %}{% url 'helpdesk:submit' f.id %}{%endif%}?{% if category.queue %}queue={{category.queue.pk}}&_readonly_fields_=queue&{%endif%}kbitem={{item.id}}{% if query_param_string %}&{{query_param_string}}{% endif %}">{{ f.name }}</a>
             {% endif %}
             {% endfor %}
             {% else %}

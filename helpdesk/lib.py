@@ -142,7 +142,7 @@ def text_is_spam(text, request):
 def process_attachments(followup, attached_files):
     max_email_attachment_size = getattr(settings, 'HELPDESK_MAX_EMAIL_ATTACHMENT_SIZE', 512000)
     attachments = []
-
+    attached_files = [f for f in attached_files if f is not None]
     for attached in attached_files:
         try:
             if attached.size:

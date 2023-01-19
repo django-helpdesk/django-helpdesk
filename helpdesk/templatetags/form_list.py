@@ -6,7 +6,7 @@ templatetags/form_list.py - This template tag returns all forms the user can acc
 from django import template
 from helpdesk.models import FormType
 from helpdesk.decorators import is_helpdesk_staff
-from seed.lib.superperms.orgs.models import Organization, get_helpdesk_organizations
+from seed.lib.superperms.orgs.models import Organization, get_helpdesk_organizations, get_helpdesk_orgs_for_domain
 
 register = template.Library()
 
@@ -22,25 +22,29 @@ def form_list(user, request):
     A non-logged in user, with no org in url with multiple Helpdesk Orgs will return no forms
     """
     try:
-        helpdesk_orgs = get_helpdesk_organizations()
         if is_helpdesk_staff(user):
             sidebar_form_list = FormType.objects.filter(
                 staff=True,
                 organization=user.default_organization.helpdesk_organization_id,
             ).values('name', 'id', 'organization__name')
         else:
-            # Parse request for organization
-            url_org = request.GET.get('org', '')
-            org = None
-            if url_org:
-                org = Organization.objects.filter(name=url_org).first()
-                if org:
-                    org = org.helpdesk_organization
+            domain_id = getattr(request, 'domain_id', 0)
+            helpdesk_orgs = get_helpdesk_orgs_for_domain(domain_id)
+            if len(helpdesk_orgs) == 1:
+                org = helpdesk_orgs.first()
             else:
-                if not user.is_anonymous:
-                    org = user.default_organization.helpdesk_organization
-                elif user.is_anonymous and len(helpdesk_orgs) == 1:
-                    org = helpdesk_orgs.first()
+                # Parse request for organization
+                url_org = request.GET.get('org', '')
+                org = None
+                if url_org:
+                    org = Organization.objects.filter(name=url_org).first()
+                    if org:
+                        org = org.helpdesk_organization
+                else:
+                    if not user.is_anonymous:
+                        org = user.default_organization.helpdesk_organization
+                    elif user.is_anonymous and len(helpdesk_orgs) == 1:
+                        org = helpdesk_orgs.first()
             sidebar_form_list = FormType.objects.filter(
                 public=True,
                 unlisted=False,
