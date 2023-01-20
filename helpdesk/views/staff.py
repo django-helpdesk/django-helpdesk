@@ -25,6 +25,8 @@ from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.html import escape
 from django.utils.translation import gettext as _
+from django.utils.dateparse import parse_datetime
+from django.utils.timezone import make_aware
 from django.views.decorators.csrf import requires_csrf_token
 from django.views.generic.edit import FormView, UpdateView
 from helpdesk import settings as helpdesk_settings
@@ -536,12 +538,7 @@ def get_due_date_from_request_or_ticket(
     due_date = request.POST.get('due_date', None) or None
 
     if due_date is not None:
-        # based on Django code to parse dates:
-        # https://docs.djangoproject.com/en/2.0/_modules/django/utils/dateparse/
-        match = DATE_RE.match(due_date)
-        if match:
-            kw = {k: int(v) for k, v in match.groupdict().items()}
-            due_date = date(**kw)
+        due_date = make_aware(parse_datetime(due_date))
     else:
         due_date_year = int(request.POST.get('due_date_year', 0))
         due_date_month = int(request.POST.get('due_date_month', 0))
