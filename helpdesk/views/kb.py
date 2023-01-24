@@ -70,7 +70,11 @@ def article(request, slug, pk, iframe=False):
             'helpdesk_settings': helpdesk_settings,
             'debug': settings.DEBUG,
         })
-    items = item.category.kbitem_set.all()
+    staff = request.user.is_authenticated and is_helpdesk_staff(request.user)
+    if staff:
+        items = item.category.kbitem_set.all()
+    else:
+        items = item.category.kbitem_set.filter(enabled=True)
     item_index = list(items.values_list('id', flat=True)).index(item.id)
     try:
         prev_item = items[item_index - 1]
@@ -87,7 +91,6 @@ def article(request, slug, pk, iframe=False):
     except KeyError:
         pass
     template = 'helpdesk/kb_article.html'
-    staff = request.user.is_authenticated and is_helpdesk_staff(request.user)
     return render(request, template, {
         'category': item.category,
         'prev_item': prev_item,

@@ -101,14 +101,18 @@ class HelpdeskUser:
             User does NOT have to be staff; if not, category must be public.
         Works independent of the user's role permissions in the category's organization.
         """
+        if is_helpdesk_staff(self.user) or self.has_full_access():
+            return self.check_default_org(category.organization)
+
+        helpdesk_orgs = []
         if self.request:
             domain_id = getattr(self.request, 'domain_id', None)
             helpdesk_orgs = get_helpdesk_orgs_for_domain(domain_id)
-            if len(helpdesk_orgs) == 1 and helpdesk_orgs.first() == category.organization and category.public:
+
+        if category.public:
+            if len(helpdesk_orgs) == 1 and helpdesk_orgs.first() == category.organization:
                 return True
-        if get_helpdesk_count() == 1 or self.check_default_org(category.organization):
-            if is_helpdesk_staff(self.user) or self.has_full_access() or category.public:
-                return True
+            return self.check_default_org(category.organization)
         return False
 
     def can_access_kbarticle(self, article):
@@ -117,16 +121,18 @@ class HelpdeskUser:
             User does NOT have to be staff; if not, article must be public.
         Works independent of the user's role permissions in the article's organization.
         """
+        if is_helpdesk_staff(self.user) or self.has_full_access():
+            return self.check_default_org(article.category.organization)
+
+        helpdesk_orgs = []
         if self.request:
             domain_id = getattr(self.request, 'domain_id', None)
             helpdesk_orgs = get_helpdesk_orgs_for_domain(domain_id)
-            if len(helpdesk_orgs) == 1 and helpdesk_orgs.first() == article.category.organization and article.category.public:
+
+        if article.category.public and article.enabled:
+            if len(helpdesk_orgs) == 1 and helpdesk_orgs.first() == article.category.organization:
                 return True
-        if get_helpdesk_count() == 1 or self.check_default_org(article.category.organization):
-            if (is_helpdesk_staff(self.user) or
-               self.has_full_access() or
-               (article.category.public and article.enabled)):
-                    return True
+            return self.check_default_org(article.category.organization)
         return False
 
     def can_access_form(self, form):
@@ -135,14 +141,18 @@ class HelpdeskUser:
             User must be staff or have staff permissions.
         Works independent of the user's role permissions in the form's organization.
         """
+        if is_helpdesk_staff(self.user) or self.has_full_access():
+            return self.check_default_org(form.organization)
+
+        helpdesk_orgs = []
         if self.request:
             domain_id = getattr(self.request, 'domain_id', None)
             helpdesk_orgs = get_helpdesk_orgs_for_domain(domain_id)
-            if len(helpdesk_orgs) == 1 and helpdesk_orgs.first() == form.organization and form.public:
+
+        if form.public:
+            if len(helpdesk_orgs) == 1 and helpdesk_orgs.first() == form.organization:
                 return True
-        if get_helpdesk_count() == 1 or self.check_default_org(form.organization):
-            if is_helpdesk_staff(self.user) or self.has_full_access() or form.public:
-                return True
+            return self.check_default_org(form.organization)
         return False
 
     def check_default_org(self, organization):
