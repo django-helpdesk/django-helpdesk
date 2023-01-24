@@ -23,10 +23,10 @@ from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonRespons
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
-from django.utils.html import escape
-from django.utils.translation import gettext as _
 from django.utils.dateparse import parse_datetime
+from django.utils.html import escape
 from django.utils.timezone import make_aware
+from django.utils.translation import gettext as _
 from django.views.decorators.csrf import requires_csrf_token
 from django.views.generic.edit import FormView, UpdateView
 from helpdesk import settings as helpdesk_settings
