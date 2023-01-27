@@ -414,13 +414,9 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
                     msg = forms.ValidationError(field[1] + ' if the Alternative Compliance Pathway is selected.')
                     self.add_error(field[0], msg)
         elif self.cleaned_data.get('e_pathway') == 'Standard Target Pathway':
-            # check that there are at least two attachments
+            # check that there are is at least one attachment
             if not self.files.get('attachment'):
-                msg = forms.ValidationError('Attachments are required if the Standard Target Pathway is selected.')
-                self.add_error('attachment', msg)
-            elif len(self.files.getlist('attachment')) < 2:
-                msg = forms.ValidationError('There must be attached at least two attachments if the Standard Target'
-                                            ' Pathway is selected.')
+                msg = forms.ValidationError('Attachment(s) required if the Standard Target Pathway is selected.')
                 self.add_error('attachment', msg)
 
     def clean_dc_pca_form(self):

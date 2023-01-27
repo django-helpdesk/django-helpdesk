@@ -132,25 +132,22 @@ toggle_affordable_boolean = function () {
 };
 
 toggle_backup_pathway_list_when_ACP_selected = function () {
-  groups_to_mark = [group.backup_pathway_list, group.attachment];
   if ($(id.pathway_list).val() == "Alternative Compliance Pathway") {
       $(group.backup_pathway_list).show();
-      // Mark them as required too
-      groups_to_mark.forEach(e => ! $(e + ' span').length ? $(e + ' label').after('<span style="color:red;">*</span>') : {})
+      $(group.backup_pathway_list + ' label').after('<span style="color:red;">*</span>');  // Mark required
   } else {
       // Hide Groups and Reset inputs
-      $(group.backup_pathway_list).hide();
-      $(group.backup_pathway_list).val('');
-      $(groups_to_mark.join(', ')).children('span').remove();  // Remove mark as required
+      $(group.backup_pathway_list).hide().val('');
+      $(group.backup_pathway_list).children('span').remove();  // Remove mark as required
 
       // Remove error message if a different Pathway was selected before Backup Pathway could be changed
       $(id.backup_pathway_list + '-error').remove();
   }
 };
 
-toggle_require_attachment_when_selected_in_list = function (list_id, pathway_name) {
+toggle_require_attachment_when_selected_in_list = function (list_id, pathway_names) {
   // Add a star showing attachment is required
-  if ($(list_id).val() == pathway_name) {
+  if (pathway_names.indexOf($(list_id).val()) >= 0) {
       $(group.attachment + ' label').after('<span style="color:red;">*</span>');
   } else {
       // Remove mark as required
@@ -158,13 +155,20 @@ toggle_require_attachment_when_selected_in_list = function (list_id, pathway_nam
   }
 };
 
+toggle_alert_field_for_pathway_list = function () {
+  curr_val = $(id.pathway_list).val();
+  if (curr_val == "Alternative Compliance Pathway" || curr_val == 'Standard Target Pathway') {
+    form_validator.element(id.pathway_list);
+  }
+}
+
 // Initialize the Pathway Selection and Pathway Change Application Forms
 toggle_type_affordable_housing();
 toggle_affordable_boolean();
 toggle_backup_pathway_list_when_ACP_selected();
-toggle_require_attachment_when_selected_in_list(id.new_pathway_list, 'Alternative Compliance Pathway');
-toggle_require_attachment_when_selected_in_list(id.pathway_list, 'Alternative Compliance Pathway');
-toggle_require_attachment_when_selected_in_list(id.pathway_list, 'Standard Target Pathway');
+toggle_require_attachment_when_selected_in_list(id.new_pathway_list, ['Alternative Compliance Pathway']);
+toggle_require_attachment_when_selected_in_list(id.pathway_list, ['Alternative Compliance Pathway', 'Standard Target Pathway']);
+toggle_alert_field_for_pathway_list();
 
 
 $(id.property_list).change(function(){
@@ -204,8 +208,9 @@ $(id.pathway_list).change(function() {
     if ($(id.property_list).val() != '')
         form_validator.element(id.property_list);
 
-    toggle_require_attachment_when_selected_in_list(id.pathway_list, 'Alternative Compliance Pathway');
-    toggle_require_attachment_when_selected_in_list(id.pathway_list, 'Standard Target Pathway');
+    // IF ACP Selected, show backup_pathway field
+    toggle_backup_pathway_list_when_ACP_selected();
+    toggle_require_attachment_when_selected_in_list(id.pathway_list, ['Alternative Compliance Pathway', 'Standard Target Pathway']);
 });
 
 $(id.backup_pathway_list).change(function () {
@@ -226,7 +231,7 @@ $(id.new_pathway_list).change(function () {
     form_validator.element(id.new_pathway_list);
 
     // (Un)Mark Attachment field as required
-    toggle_require_attachment_when_selected_in_list(id.new_pathway_list, 'Alternative Compliance Pathway');
+    toggle_require_attachment_when_selected_in_list(id.new_pathway_list, ['Alternative Compliance Pathway']);
 })
 
 
