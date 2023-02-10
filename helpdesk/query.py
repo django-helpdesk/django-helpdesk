@@ -194,7 +194,10 @@ class __Query__:
         return str(self.huser.user.pk) + ":" + self.base64
 
     def refresh_query(self):
-        tickets = self.huser.get_tickets_in_queues().select_related('queue', 'ticket_form')
+        tickets = self.huser.get_tickets_in_queues().select_related(
+            'queue', 'ticket_form', 'assigned_to').prefetch_related(
+            'followup_set__user', 'beam_property', 'beam_taxlot'
+        )
         ticket_qs = self.__run__(tickets)
         cache.set(self.get_cache_key(), ticket_qs, timeout=3600)
         return ticket_qs

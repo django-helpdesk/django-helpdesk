@@ -167,6 +167,12 @@ class ReportTicketSerializer(serializers.ModelSerializer):
             'property_type',
         )
 
+    def __init__(self, *args, **kwargs):
+        # Get all paired properties at beginning to avoid calling multiple times
+        for q in args[0]:
+            self.get_paired_property(q)
+        super(ReportTicketSerializer, self).__init__(*args, **kwargs)
+
     @staticmethod
     def get_first_staff_followup(obj):
         date = obj.get_last_followup('staff')
@@ -214,45 +220,38 @@ class ReportTicketSerializer(serializers.ModelSerializer):
     # BEAM Property Retrieval Fields
     def get_building_id(self, obj):
         # Return the paired properties building id, and if none exist, return building_id of ticket if available
-        paired_property = self.get_paired_property(obj)
-        if paired_property is None:
-            return ''
         org = obj.ticket_form.organization
-        if org.name in ORG_TO_ID_FIELD_MAPPING:
+        if org.name in ORG_TO_ID_FIELD_MAPPING and obj.paired_property:
             field = ORG_TO_ID_FIELD_MAPPING.get(org.name)
-            return paired_property.state.extra_data.get(field)
+            return obj.paired_property.state.extra_data.get(field)
         else:
             return obj.building_id
 
     def get_pm_id(self, obj):
         # Return the paired properties building id, and if none exist, return building_id of ticket if available
-        paired_property = self.get_paired_property(obj)
-        if paired_property is None:
+        if obj.paired_property is None:
             return ''
-        return paired_property.state.pm_property_id if paired_property.state.pm_property_id else obj.pm_id
+        return obj.paired_property.state.pm_property_id if obj.paired_property.state.pm_property_id else obj.pm_id
 
     def get_property_type(self, obj):
-        paired_property = self.get_paired_property(obj)
-        if paired_property is None:
+        if obj.paired_property is None:
             return ''
-        return paired_property.state.extra_data.get('Primary Property Type - Portfolio Manager-Calculated')
+        return obj.paired_property.state.extra_data.get('Primary Property Type - Portfolio Manager-Calculated')
 
     @staticmethod
     def get_paired_property(obj):
         """
         Helper function for previous three fields, return the closest Paired Property to this Ticket
         """
+        obj.paired_property = None  # Initialize field
+
         org = obj.ticket_form.organization
         paired_properties = obj.beam_property.all()
         p_ids = paired_properties.values_list('id')
-        pvs = PropertyView.objects.filter(property_id__in=p_ids).order_by('-cycle__start')
+        pvs = PropertyView.objects.filter(property_id__in=p_ids).order_by('-cycle__start').select_related('state')
 
-        if not paired_properties:
-            return None
-        else:
-            if pvs.count() == 1:
-                return pvs.first()
-            else:
+        if paired_properties:
+            if pvs.count() >= 1:
                 # Multiple paired properties, check that they all have the same id, property type fields
                 fields = ['state__pm_property_id',
                           'state__extra_data__Primary Property Type - Portfolio Manager-Calculated']
@@ -261,5 +260,6 @@ class ReportTicketSerializer(serializers.ModelSerializer):
                 for field in fields:
                     values = pvs.values_list(field, flat=True)
                     if len(set(values)) > 1:
-                        return None  # If values are different, prob different Properties are paired, return None
-                return pvs.first()   # Return most recent PV if all fields were identical
+                        return obj  # If values are different, prob different Properties are paired, return None
+            obj.paired_property = pvs.first()
+        return obj

@@ -15,9 +15,10 @@ import pytz
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import user_passes_test
-from django.contrib.contenttypes.models import ContentType
 from django.urls import reverse, reverse_lazy
 from django.core.exceptions import ValidationError, PermissionDenied
+from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q, Prefetch, F
 from django.http import HttpResponseRedirect, Http404, HttpResponse, JsonResponse, HttpRequest
@@ -69,7 +70,7 @@ from ..lib import format_time_spent
 from rest_framework import status
 from rest_framework.decorators import api_view
 
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from ..templated_email import send_templated_mail
 
@@ -2419,16 +2420,21 @@ def export_report(request):
     action = request.POST.get('action')
     paginate = action == 'export_year'  # TODO
 
-    user_queues = HelpdeskUser(request.user).get_queues()
-    qs = Ticket.objects.filter(queue__in=user_queues).order_by('created', 'ticket_form')
+    user_queue_ids = HelpdeskUser(request.user).get_queues().values_list('id', flat=True)
+    qs = Ticket.objects.filter(queue_id__in=user_queue_ids
+                               ).order_by('created', 'ticket_form'
+                                          ).select_related('ticket_form__organization', 'assigned_to', 'queue',
+                                                           ).prefetch_related('followup_set__user', 'beam_property')
+    org = request.user.default_organization
 
-    return export(qs, ReportTicketSerializer, paginate=paginate)
+    return export(qs, org, ReportTicketSerializer, paginate=paginate)
 
 
-def export(qs, serializer, paginate=False, do_extra_data=True, visible_cols=[]):
+def export(qs, org, serializer, paginate=False, do_extra_data=True, visible_cols=[]):
     """
     Helper function for exporting the Ticket Table and for Reports. Lots of input variables describing which process
     :param qs: QuerySet of Tickets to Serialize and output to csv file.
+    :param org: Organization object associated to all of the Forms
     :param serializer: Ticket Serializer to use on Queryset
     :param paginate:  TODO file into separate sheets for each year of tickets
     :param do_extra_data: Bool, process and save extra data fields to csv file
@@ -2438,8 +2444,7 @@ def export(qs, serializer, paginate=False, do_extra_data=True, visible_cols=[]):
     from collections import OrderedDict
     from helpdesk.serializers import ORG_TO_ID_FIELD_MAPPING
 
-    ticket_form_ids = list(set(qs.values_list('ticket_form', flat=True)))
-    org = qs.first().ticket_form.organization if qs else None
+    ticket_form_ids = list(set(qs.values_list('ticket_form_id', flat=True)))
     building_id_org_field = None
     if org.name in ORG_TO_ID_FIELD_MAPPING:
         building_id_org_field = ORG_TO_ID_FIELD_MAPPING.get(org.name)
@@ -2452,7 +2457,7 @@ def export(qs, serializer, paginate=False, do_extra_data=True, visible_cols=[]):
         'contact_email': 'Contact Email',
         'building_name': 'Building Name',
         'building_address': 'Building Address',
-        'building_id': 'Building ID' if building_id_org_field is None else building_id_org_field,
+        'building_id': 'Building ID',
         'pm_id': 'Portfolio Manager ID',
         'title': 'Subject',
     }
@@ -2496,7 +2501,9 @@ def export(qs, serializer, paginate=False, do_extra_data=True, visible_cols=[]):
         # Get Standard columns and their display names
         column_mapping = form.get_fields_mapping()
         mappings = {**column_mapping, **extra_data_cols, **other_mapping}
-        mappings.update({k: v for k, v in just_in_case_mapping.items() if k not in mappings})
+        mappings.update({k: v for k, v in just_in_case_mapping.items() if k not in mappings})  # Doesn't overwrite
+        if mappings['building_id'] == 'Building ID' and building_id_org_field:
+            mappings['building_id'] = building_id_org_field
 
         # Process Data
         output = []
@@ -2514,19 +2521,21 @@ def export(qs, serializer, paginate=False, do_extra_data=True, visible_cols=[]):
             # Replace Columns with their display names
             renamed_row = OrderedDict((mappings.get(k, k), v if v else '') for k, v in row.items())
             output.append(renamed_row)
-
         output = pd.json_normalize(output)
         report = report.append(output, ignore_index=True)
-
-    file_name = 'ticket_export.csv'
-    file_path = '/tmp/' + file_name  # TODO Better Place to store this temp file?
-
-    # Convert to pandas dataframe for csv download, after some clean up
     report = report.set_index('Ticket ID')
-    report.to_csv(file_path)
+
+    time_stamp = timezone.now().strftime('%Y%m%d_%H%M%S')
+    media_dir = 'helpdesk/reports/'
+    file_name = f'ticket_export_{time_stamp}.csv'
+    media_path = media_dir + file_name
+
+    path = default_storage.save(media_path, ContentFile(b''))
+    full_path = settings.MEDIA_ROOT + '/' + path
+    report.to_csv(full_path)
 
     # initiate the download, user will stay on the same page
-    with open(file_path, 'rb') as f:
+    with open(full_path, 'rb') as f:
         response = HttpResponse(f.read(), content_type='application/vnd.ms-excel')
         response['Content-Disposition'] = 'attachment; filename=' + file_name
         response['Content-Type'] = 'application/vnd.ms-excel; charset=utf-16'
