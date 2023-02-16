@@ -1363,7 +1363,7 @@ class KBCategory(models.Model):
     )
 
     def __str__(self):
-        return '%s (%s)' % (self.name, self.pk)
+        return '%s: %s (%s)' % (self.organization.name, self.name, self.pk)
 
     class Meta:
         ordering = ('title',)

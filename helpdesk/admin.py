@@ -260,6 +260,7 @@ class IgnoreEmailAdmin(admin.ModelAdmin):
 @admin.register(KBCategory)
 class KBCategoryAdmin(admin.ModelAdmin):
     list_display = ('__str__', 'title', 'slug', 'public', 'organization', )
+    list_filter = ('organization',)
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == "organization":
