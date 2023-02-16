@@ -1357,6 +1357,12 @@ class KBCategory(models.Model):
         verbose_name=_('Default queue when creating a ticket after viewing this category.'),
     )
 
+    forms = models.ManyToManyField(
+        FormType,
+        blank=True,
+        help_text='Forms listed on the page, that the user can submit after reading any article in this category. (Only public forms will be displayed to public users, regardless of whether or not they are unlisted.)',
+    )
+
     public = models.BooleanField(
         default=True,
         verbose_name=_("Is KBCategory publicly visible?")

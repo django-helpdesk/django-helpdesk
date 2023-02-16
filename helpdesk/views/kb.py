@@ -72,9 +72,11 @@ def article(request, slug, pk, iframe=False):
         })
     staff = request.user.is_authenticated and is_helpdesk_staff(request.user)
     if staff:
-        items = item.category.kbitem_set.all()
+        items = item.category.kbitem_set.filter(staff=True)
+        kb_forms = item.category.forms.all().values('id', 'name')
     else:
         items = item.category.kbitem_set.filter(enabled=True)
+        kb_forms = item.category.forms.filter(public=True).values('id', 'name')
     item_index = list(items.values_list('id', flat=True)).index(item.id)
     try:
         prev_item = items[item_index - 1]
@@ -84,6 +86,7 @@ def article(request, slug, pk, iframe=False):
         next_item = items[item_index + 1]
     except IndexError:
         next_item = None
+
 
     qparams = request.GET.copy()
     try:
@@ -101,6 +104,7 @@ def article(request, slug, pk, iframe=False):
         'iframe': iframe,
         'staff': staff,
         'debug': settings.DEBUG,
+        'kb_forms': kb_forms
     })
 
 

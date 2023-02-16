@@ -1,6 +1,4 @@
 {% load i18n helpdesk_staff %}
-{% load form_list %}
-{% form_list user request as forms %}
 {% block header %}
 <div class="row" style="display:inline">
     <h2>{% blocktrans with item.question as itemq %}{{ itemq }}{% endblocktrans %}</h2>
@@ -17,21 +15,18 @@
     <div class="row" style="margin-top:15px;display:block;">
         {{ item.get_markdown }}
     </div>
+
     <div class="row" style="margin-top:20px">
+        {% if kb_forms %}
         <a class="dropdown-toggle btn btn-success btn-circle btn-xl" href="#" id="ticketsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <i class="fas fa-fw fa-plus-circle"></i> {% trans 'Ask for more help with ' %} "{{ item.question }}" by submitting a ticket
         </a>
         <div class="dropdown-menu" aria-labelledby="ticketsDropdown">
-            {% if forms %}
-            {% for f in forms %}
-            {% if f.organization__name == user_info.default_org.name %}
+            {% for f in kb_forms %}
             <a class="dropdown-item small text-wrap" href="{% if iframe %}{% url 'helpdesk:submit_iframe' %}{% else %}{% url 'helpdesk:submit' f.id %}{%endif%}?{% if category.queue %}queue={{category.queue.pk}}&_readonly_fields_=queue&{%endif%}kbitem={{item.id}}{% if query_param_string %}&{{query_param_string}}{% endif %}">{{ f.name }}</a>
-            {% endif %}
             {% endfor %}
-            {% else %}
-            <p class="dropdown-item small text-wrap">{% trans "No forms are available." %}</p>
-            {% endif %}
         </div>
+        {% endif %}
         {% if staff %}
         <a href="{% url 'helpdesk:list' %}?kbitem={{item.id}}" class="col-sm">
             <div class="btn btn-warning btn-circle btn-xl"><i class="fa fa-search fa-lg"></i> {{item.num_open_tickets}} {% trans 'open tickets' %}</div>
