@@ -72,7 +72,7 @@ def article(request, slug, pk, iframe=False):
         })
     staff = request.user.is_authenticated and is_helpdesk_staff(request.user)
     if staff:
-        items = item.category.kbitem_set.filter(staff=True)
+        items = item.category.kbitem_set.all()
         kb_forms = item.category.forms.all().values('id', 'name')
     else:
         items = item.category.kbitem_set.filter(enabled=True)
