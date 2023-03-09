@@ -272,7 +272,7 @@ class Queue(models.Model):
     @property
     def email_address(self):
         if self.importer:
-            return self.importer.username
+            return self.importer.email_address
         elif self.organization.sender:
             return self.organization.sender.from_address
         else:
@@ -1786,7 +1786,7 @@ class IgnoreEmail(models.Model):
         """Return a list of the importers this IgnoreEmail applies to.
         If this IgnoreEmail applies to ALL importers, return '*'.
         """
-        importers = self.importers.all().order_by('username')
+        importers = self.importers.all().order_by('email_address')
         if len(importers) == 0:
             return '*'
         else:

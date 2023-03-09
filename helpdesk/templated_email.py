@@ -112,7 +112,7 @@ def send_templated_mail(template_name,
 
     try:
         # Create and send email out.
-        send_beam_mail(
+        success = send_beam_mail(
             organization=org,
             recipient_emails=recipients,
             bcc=bcc,

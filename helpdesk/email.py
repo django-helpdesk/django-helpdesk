@@ -31,6 +31,8 @@ from django.utils import encoding, timezone
 from django.utils.translation import ugettext as _
 from email_reply_parser import EmailReplyParser
 
+from exchangelib import FileAttachment, ItemAttachment
+
 from helpdesk import settings
 from helpdesk.lib import safe_template_context, process_attachments
 from helpdesk.models import Ticket, TicketCC, FollowUp, IgnoreEmail, FormType, CustomField
@@ -63,7 +65,7 @@ def process_email(quiet=False):
     for importer in EmailImporter.objects.filter(allow_email_imports=True):
         importer_queues = importer.queue_set.all()
 
-        log_name = importer.username.replace('@', '_')
+        log_name = importer.email_address.replace('@', '_')
         log_name = log_name.replace('.', '_')
         logger = logging.getLogger('django.helpdesk.emailimporter.' + log_name)
         logging_types = {
@@ -215,6 +217,12 @@ def process_importer(importer, queues, logger):
             else:
                 logger.warn("Message %d was not successfully processed, and will be left in local directory", i)
 
+    elif importer.auth:
+        logger.info("Attempting %s server login" % email_box_type.upper())
+        server, _ = importer.auth.login(email=importer.sender, logger=logger)
+        if server:
+            ews_sync(importer, queues, logger, server)
+
 
 def pop3_sync(importer, queues, logger, server):
     server.getwelcome()
@@ -270,11 +278,11 @@ def refreshed(importer, logger, token_backend=None):
     try:
         was_refreshed = token_backend.should_refresh_token(expr_minutes=1)
     except RuntimeError:
-        logger.error(f"* Token could not be refreshed by refreshed(). Exiting import for {importer.username}.")
+        logger.error(f"* Token could not be refreshed by refreshed(). Exiting import for {importer.email_address}.")
         return False
 
     if was_refreshed is None:
-        logger.info(f"* Token was refreshed. Exiting import for {importer.username}.")
+        logger.info(f"* Token was refreshed. Exiting import for {importer.email_address}.")
         return True  # The token was refreshed - stop now
     else:
         return False  # The token is still good - keep going
@@ -296,7 +304,7 @@ def imap_sync(importer, queues, logger, server):
         try:
             token_backend.should_refresh_token()
         except RuntimeError:
-            logger.error(f"* Token could not be refreshed by should_refresh_token. Exiting import for {importer.username}.")
+            logger.error(f"* Token could not be refreshed by should_refresh_token. Exiting import for {importer.email_address}.")
             login_successful = False
         else:
             logger.info("* Authenticating and selecting box.")
@@ -305,7 +313,7 @@ def imap_sync(importer, queues, logger, server):
             try:
                 server.select(importer.email_box_imap_folder)
             except:
-                logger.error(f"IMAP authentication failed. Exiting import for {importer.username}.")
+                logger.error(f"IMAP authentication failed. Exiting import for {importer.email_address}.")
                 login_successful = False
             server.debug = 3
     else:
@@ -384,6 +392,84 @@ def imap_sync(importer, queues, logger, server):
     server.logout()
 
 
+def ews_sync(importer, queues, logger, server):
+    # first, connect
+
+    # select box from email_box_imap_folder
+    folder = None
+    if importer.email_box_imap_folder.lower() == 'inbox':
+        folder = server.inbox
+    else:
+        folders = server.root.glob(importer.email_box_imap_folder)
+        if len(folders) > 1:
+            logger.error('Error - be more specific')  # todo
+        elif len(folders) == 0:
+            logger.error('Error - folder not found')  # todo
+        else:
+            folder = folders[0]
+
+    # filter for mail
+    if folder:
+        if importer.keep_mail:
+            data = folder.filter(is_read=False)
+        else:
+            data = folder.all()
+
+        values = [
+            '_id',  # id is an ItemID and change_key. These CAN change if the item is moved or updated
+            'conversation_id',  # EWS id type referring to conversation/thread, includes change_key
+            'headers',
+            'sender',  # email address that sent the mail for the author (?)
+            'author',  # email address that created the mail
+            'to_recipients', 'cc_recipients', 'bcc_recipients',  # lists of mailbox objects
+            'subject', 'conversation_topic',  # subject and original subject ("Re: FW: Subject" vs "FW: Subject")
+            'text_body', 'body', 'unique_body',  # Body with HTML
+            'attachments', 'has_attachments',  # has_attachments does not include inline attachments
+            'size',
+            'message_id', 'in_reply_to',  # message-id of the message this is replying to, or None
+            'references',  # string of message-ids involved in the thread, or None. ('<id1> <id2> <id3>')
+            'is_from_me',
+            'is_read',
+            'importance',
+        ]
+        data = data.order_by('datetime_received').only(*values)
+
+        try:
+            # loop thru msgs
+            msg_num = data.count()
+            logger.info("Received %s messages from IMAP server" % msg_num)
+            for item in data:
+                # item = data[0]
+                msg_id = getattr(item, '_id', None)
+                logger.info("Received message UID: %s" % msg_id)  # todo
+                try:
+                    ticket = object_from_ews_message(item, importer, queues, logger)
+                except Exception as e:
+                    logger.error('Unable to process message into ticket: ', str(e))  # todo
+                    ticket = None
+                if ticket:
+                    if DEBUGGING:
+                        logger.info("Successfully processed message %s, left untouched on server\n" % msg_id.id)
+                    else:
+                        try:
+                            item_obj = folder.get(id=msg_id.id, changekey=msg_id.changekey)
+                        except Exception:
+                            logger.error("Unable to retrieve message %s for final processing, left untouched on server." % msg_id.id)
+                        else:
+                            if importer.keep_mail:
+                                item_obj.is_read = True
+                                item_obj.save(update_fields=['is_read'])
+                                logger.info("Successfully processed message %s, marked as Answered on server\n" % msg_id.id)
+                            else:
+                                item_obj = folder.get(id=msg_id.id, changekey=msg_id.changekey)
+                                item_obj.soft_delete()
+                                logger.info("Successfully processed message %s, deleted from server\n" % msg_id.id)
+                else:
+                    logger.warn("Message %s was not successfully processed, and will be left on IMAP server\n" % msg_id.id)
+        except Exception as e:
+            logger.error(e)  # todo
+
+
 def decode_unknown(charset, string):
     if type(string) is not str:
         if not charset:
@@ -404,12 +490,14 @@ def decode_mail_headers(string):
     ])
 
 
-def is_autoreply(message):
+def is_autoreply(message, headers=None):
     """
     Accepting message as something with .get(header_name) method
     Returns True if it's likely to be auto-reply or False otherwise
     So we don't start mail loops
     """
+    if headers:
+        message = headers
     any_if_this = [
         False if not message.get("Auto-Submitted") else message.get("Auto-Submitted").lower() != "no",
         True if message.get("X-Auto-Response-Suppress") in ("DR", "AutoReply", "All") else False,
@@ -458,8 +546,8 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
     sender_email = payload['sender'][1]
     org = queue.organization
 
-    message_id = parseaddr(message.get('Message-Id'))[1]
-    in_reply_to = parseaddr(message.get('In-Reply-To'))[1]
+    message_id = getattr(message, 'message_id', None) or parseaddr(message.get('Message-Id'))[1]
+    in_reply_to = getattr(message, 'in_reply_to', None) or parseaddr(message.get('In-Reply-To'))[1]
 
     if in_reply_to:
         try:
@@ -560,7 +648,8 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
 
     create_ticket_cc(ticket, payload['to_list'] + payload['cc_list'])
 
-    autoreply = is_autoreply(message)
+    headers = payload['headers'] if 'headers' in payload else None
+    autoreply = is_autoreply(message, headers)
     if autoreply:
         logger.info("Message seems to be auto-reply, not sending any emails back to the sender")
     else:
@@ -820,5 +909,181 @@ def object_from_message(message, importer, queues, logger):
         'files': files,
         'cc_list': cc_list,
         'to_list': to_list,
+    }
+    return create_object_from_email_message(message, ticket, payload, files, logger=logger)
+
+
+def object_from_ews_message(message, importer, queues, logger):
+
+    subject = message.subject
+    for affix in STRIPPED_SUBJECT_STRINGS:
+        subject = subject.replace(affix, "")
+    subject = subject.strip()
+
+    if getattr(message, 'author', None):
+        sender = (message.author.name, message.author.email_address.lower())
+    elif getattr(message, 'sender', None):
+        sender = (message.sender.name, message.sender.email_address.lower())
+    else:
+        sender = ('', '')
+
+    to_list = [(r.name, r.email_address.lower()) for r in message.to_recipients]
+    cc_list = [(r.name, r.email_address.lower()) for r in message.cc_recipients]
+
+    # Ignore List applies to sender, TO emails, and CC list
+    for ignored_address in IgnoreEmail.objects.filter(Q(importers=importer) | Q(importers__isnull=True)):
+        for name, address in [sender] + to_list + cc_list:
+            if ignored_address.test(address):
+                logger.debug("Email address matched an ignored address. Ticket will not be created")
+                if ignored_address.keep_in_mailbox:
+                    return False  # By returning 'False' the message will be kept in the mailbox,
+                return True  # and the 'True' will cause the message to be deleted.
+
+    # Sort out which queue this email should go into #
+    ticket, queue = None, None
+    for q in queues['importer_queues']:
+        matchobj = re.match(r".*\[" + q.slug + r"-(?P<id>\d+)\]", subject)
+        if matchobj and not ticket:
+            ticket = matchobj.group('id')
+            queue = q
+            logger.info("- Matched tracking ID %s-%s" % (q.slug, ticket))
+    if not ticket:
+        logger.info("- No tracking ID matched.")
+        for q in queues['matching_queues']:
+            if not queue:
+                for m in q.match_on:
+                    m_re = re.compile(r'\b%s\b' % m, re.I)
+                    if m_re.search(subject):
+                        queue = q
+                        logger.info("- Subject matched list from '%s'" % q.slug)
+    if not queue:
+        sender_lower = sender[1].lower()
+        for q in queues['address_matching_queues']:
+            if reduce(lambda prev, e: prev or (e.lower() in sender_lower), q.match_on_addresses, False):
+                queue = q
+                logger.info("- Sender address matched list from '%s'" % q.slug)
+    if not queue:
+        logger.info("- Using default queue.")
+        queue = queues['default_queue']
+
+    # Accounting for forwarding loops
+    headers = {h.name: h.value for h in getattr(message, 'headers', {})}
+    auto_forward = headers.get('X-BEAMHelpdesk-Delivered', None)
+    if not auto_forward:
+        auto_forward = message.get('x-beamhelpdesk-delivered', None)
+
+    if auto_forward is not None or sender[1] == queue.email_address.lower():
+        logger.info("Found a forwarding loop.")
+        if ticket and Ticket.objects.filter(pk=ticket).exists():
+            if sender[1] == queue.email_address.lower() and auto_forward is None:
+                auto_forward = [i[1] for i in to_list]
+            else:
+                auto_forward = auto_forward.strip().split(',')
+            for address in auto_forward:
+                cc = TicketCC.objects.filter(ticket_id=ticket, email__iexact=address)
+                if cc:
+                    cc.delete()
+                    logger.info("Deleted the CC'd address from the ticket")
+                    logger.debug("Address deleted was %s" % address)  # TODO remove later for privacy
+        return True
+
+    files = []
+    plain_body = getattr(message, 'text_body', None)
+    html_body = getattr(message, 'body', None)
+    unique_body = getattr(message, 'unique_body', None)
+    full_text_body = ''
+    latest_text_body = None
+
+    # 1. If there's a unique body, and the unique body isn't the same as the body (both are in html), use that.
+    # Need both the latest_body and full_body. latest_body will be in the ticket comment and should be in plain text.
+    # If latest_body: don't parse out the rest of it, just use all of it (for better or worse).
+    # If not latest body: try parsing out the rest
+
+    if unique_body and html_body != unique_body:
+        logger.info('Found unique body.')
+        altered_body = unique_body.replace("</p>", "</p>\n").replace("<br", "\n<br")
+        mail = BeautifulSoup(str(altered_body), "html.parser")
+        unique_body = str(mail)
+        latest_text_body = EmailReplyParser.parse_reply(mail.get_text())
+
+    if plain_body:
+        logger.info('Found plain body.')
+        body_parts = []
+        for f in EmailReplyParser.read(plain_body).fragments:
+            body_parts.append(f.content)
+        plain_body = '\n\n'.join(body_parts)
+        plain_body = re.sub('<mailto:[^>]*>', '', plain_body)
+        plain_body = re.sub(r'^\[cid:[^]]*]$', '', plain_body, flags=re.MULTILINE)
+        full_text_body = plain_body
+
+        if not latest_text_body:
+            latest_text_body = EmailReplyParser.parse_reply(full_text_body)
+
+    if html_body:
+        logger.info('Found HTML body.')
+        html_body = html_body.replace('\n', '').replace('\r', '')
+        altered_body = html_body.replace("</p>", "</p>\n").replace("<br>", "\n<br>").replace("<br/>", "\n<br/>")
+        mail = BeautifulSoup(str(altered_body), "html.parser")
+        html_body = str(mail)  # cids replaced with image tags
+        if not full_text_body:
+            full_text_body = mail.get_text()  # cids already removed
+        if not latest_text_body:
+            latest_text_body = EmailReplyParser.parse_reply(full_text_body)
+
+        email_body = html_body
+    elif plain_body:
+        email_body = plain_body.replace('\n', '<br/>')
+    else:
+        email_body = unique_body
+
+    # Next, save the entire email body
+    logger.info('Saving email body as a file.')
+    if "<body" not in email_body:
+        email_body = f"<body>{email_body}</body>"
+
+    payload = (
+        '<html>'
+        '<head>'
+        '<meta charset="utf-8" />'
+        '</head>'
+        '%s'
+        '</html>'
+    ) % email_body
+    files.append(
+        SimpleUploadedFile(_("email_html_body.html"), payload.encode("utf-8"), 'text/html')
+    )
+
+    logger.info("Found %s attachments." % len(message.attachments))
+    for attachment in message.attachments:
+        file_content = []
+        if isinstance(attachment, FileAttachment):
+            name = getattr(attachment, 'name', None)
+            file_type = getattr(attachment, 'content_type', None)
+            with attachment.fp as fp:
+                buffer = fp.read(1024)
+                while buffer:
+                    file_content.append(buffer)
+                    buffer = fp.read(1024)
+            file_content = b''.join(file_content)
+            files.append(SimpleUploadedFile(name, file_content, file_type))
+        elif isinstance(attachment, ItemAttachment):
+            logger.info('- Found ItemAttachment, not attaching')
+            # todo
+            pass
+
+    smtp_importance = getattr(message, 'importance', '')
+    high_priority_types = {'high', 'important', '1', 'urgent'}
+    priority = 2 if high_priority_types & {smtp_importance} else 3
+    payload = {
+        'body': full_text_body or latest_text_body,  # the actual entire body
+        'full_body': latest_text_body or full_text_body,  # just the latest body
+        'subject': subject,
+        'queue': queue,
+        'sender': sender,
+        'priority': priority,
+        'files': files,
+        'cc_list': cc_list,
+        'to_list': to_list,
+        'headers': headers
     }
     return create_object_from_email_message(message, ticket, payload, files, logger=logger)
