@@ -499,7 +499,7 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
         logger.info(
             "Message seems to be auto-reply, not sending any emails back to the sender")
     else:
-        send_info_email(message_id, f, context, queue, new)
+        send_info_email(message_id, f, ticket, context, queue, new)
     return ticket
 
 
