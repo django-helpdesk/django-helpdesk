@@ -27,27 +27,6 @@ def query_from_base64(b64data):
     return query
 
 
-def query_to_dict(results, descriptions):
-    """
-    Replacement method for cursor.dictfetchall() as that method no longer
-    exists in psycopg2, and I'm guessing in other backends too.
-
-    Converts the results of a raw SQL query into a list of dictionaries, suitable
-    for use in templates etc.
-    """
-
-    output = []
-    for data in results:
-        row = {}
-        i = 0
-        for column in descriptions:
-            row[column[0]] = data[i]
-            i += 1
-
-        output.append(row)
-    return output
-
-
 def get_search_filter_args(search):
     if search.startswith('queue:'):
         return Q(queue__title__icontains=search[len('queue:'):])
