@@ -9,6 +9,7 @@ lib.py - Common functions (eg multipart e-mail)
 
 from datetime import date, datetime, time
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.utils.encoding import smart_str
 from helpdesk.settings import CUSTOMFIELD_DATE_FORMAT, CUSTOMFIELD_DATETIME_FORMAT, CUSTOMFIELD_TIME_FORMAT
 import logging
@@ -80,12 +81,12 @@ def text_is_spam(text, request):
     # This will return 'True' is the given text is deemed to be spam, or
     # False if it is not spam. If it cannot be checked for some reason, we
     # assume it isn't spam.
-    from django.contrib.sites.models import Site
-    from django.core.exceptions import ImproperlyConfigured
     try:
         from akismet import Akismet
     except ImportError:
         return False
+    from django.contrib.sites.models import Site
+    from django.core.exceptions import ImproperlyConfigured
     try:
         site = Site.objects.get_current()
     except ImproperlyConfigured:
@@ -132,6 +133,7 @@ def process_attachments(followup, attached_files):
     max_email_attachment_size = getattr(
         settings, 'HELPDESK_MAX_EMAIL_ATTACHMENT_SIZE', 512000)
     attachments = []
+    errors = set()
 
     for attached in attached_files:
 
@@ -148,14 +150,21 @@ def process_attachments(followup, attached_files):
                 'application/octet-stream',
                 size=attached.size,
             )
-            att.full_clean()
-            att.save()
+            try:
+                att.full_clean()
+            except ValidationError as e:
+                errors.add(e)
+            else:
+                att.save()
 
-            if attached.size < max_email_attachment_size:
-                # Only files smaller than 512kb (or as defined in
-                # settings.HELPDESK_MAX_EMAIL_ATTACHMENT_SIZE) are sent via
-                # email.
-                attachments.append([filename, att.file])
+                if attached.size < max_email_attachment_size:
+                    # Only files smaller than 512kb (or as defined in
+                    # settings.HELPDESK_MAX_EMAIL_ATTACHMENT_SIZE) are sent via
+                    # email.
+                    attachments.append([filename, att.file])
+
+    if errors:
+        raise ValidationError(list(errors))
 
     return attachments
 

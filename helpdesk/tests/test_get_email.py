@@ -1,13 +1,19 @@
 # -*- coding: utf-8 -*-
 
+
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
+from django.core import mail
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
 from django.shortcuts import get_object_or_404
 from django.test import override_settings, TestCase
 import helpdesk.email
+from helpdesk.email import extract_part_data, object_from_message
+from helpdesk.exceptions import DeleteIgnoredTicketException, IgnoreTicketException
 from helpdesk.management.commands.get_email import Command
-from helpdesk.models import FollowUp, FollowUpAttachment, Queue, Ticket, TicketCC
+from helpdesk.models import FollowUp, FollowUpAttachment, IgnoreEmail, Queue, Ticket, TicketCC
+from helpdesk.tests import utils
 import itertools
 import logging
 import os
@@ -15,6 +21,7 @@ from shutil import rmtree
 import six
 import sys
 from tempfile import mkdtemp
+import typing
 from unittest import mock
 
 
@@ -30,7 +37,7 @@ unused_port = "49151"
 class GetEmailCommonTests(TestCase):
 
     def setUp(self):
-        self.queue_public = Queue.objects.create()
+        self.queue_public = Queue.objects.create(title='Test', slug='test')
         self.logger = logging.getLogger('helpdesk')
 
     # tests correct syntax for command line option
@@ -42,7 +49,7 @@ class GetEmailCommonTests(TestCase):
             with mock.patch.object(Command, 'handle', return_value=None) as mocked_handle:
                 call_command('get_email', quiet=quiet_test_value)
                 mocked_handle.assert_called_once()
-                for args, kwargs in mocked_handle.call_args_list:
+                for _, kwargs in mocked_handle.call_args_list:
                     self.assertEqual(quiet_test_value, (kwargs['quiet']))
 
     def test_email_with_blank_body_and_attachment(self):
@@ -132,7 +139,99 @@ class GetEmailCommonTests(TestCase):
         assert "Hello there!" in FollowUp.objects.filter(
             ticket=ticket).first().comment
 
+    def test_will_delete_ignored_email(self):
+        """
+        Tests if an email will be ignored if configured to do so and throws the correct exception
+        to ensure the email is deleted
+        """
+        message, from_meta, _ = utils.generate_text_email(locale="es_ES")
+        ignore = IgnoreEmail(name="Test Ignore", email_address=from_meta[1], keep_in_mailbox=False)
+        ignore.save()
+        with self.assertRaises(DeleteIgnoredTicketException):
+            object_from_message(message.as_string(), self.queue_public, self.logger)
 
+    def test_will_not_delete_ignored_email(self):
+        """
+        Tests if an email will be ignored if configured to do so and throws the correct exception
+        to ensure the email is NOT deleted
+        """
+        message, from_meta, _ = utils.generate_text_email(locale="es_ES")
+        ignore = IgnoreEmail(name="Test Ignore", email_address=from_meta[1], keep_in_mailbox=True)
+        ignore.save()
+        with self.assertRaises(IgnoreTicketException):
+            object_from_message(message.as_string(), self.queue_public, self.logger)
+
+    def test_utf8_filename_attachment(self):
+        """
+        Tests if an attachment correctly sent with a UTF8 filename in disposition is extracted correctly
+        """
+        filename = "TeléfonoMañana.txt"
+        part = utils.generate_file_mime_part(locale="es_ES", filename=filename)
+        files: typing.List[SimpleUploadedFile] = []
+        extract_part_data(part, counter=1, ticket_id="tst1", files=files, logger=self.logger)
+        sent_file: SimpleUploadedFile = files[0]
+        # The extractor prepends a part identifier so compare the ending
+        self.assertTrue(sent_file.name.endswith(filename), f"Filename extracted does not match: {sent_file.name}")
+
+    @override_settings(VALID_EXTENSIONS=['.png'])
+    def test_wrong_extension_attachment(self):
+        """
+        Tests if an attachment with a wrong extension doesn't stop the email process
+        """
+        message, _, _ = utils.generate_multipart_email(type_list=['plain', 'image'])
+
+        self.assertEqual(len(mail.outbox), 0)
+
+        with self.assertLogs(logger='helpdesk', level='ERROR') as cm:
+            object_from_message(message.as_string(), self.queue_public, self.logger)
+
+            self.assertIn(
+                "ERROR:helpdesk:['Unsupported file extension: .jpg']",
+                cm.output
+            )
+
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(f'[test-1] {message.get("subject")} (Opened)', mail.outbox[0].subject)
+
+    def test_multiple_attachments(self):
+        """
+        Tests the saving of multiple attachments
+        """
+        message, _, _ = utils.generate_multipart_email(type_list=['plain', 'file', 'image'])
+
+        self.assertEqual(len(mail.outbox), 0)
+
+        object_from_message(message.as_string(), self.queue_public, self.logger)
+
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(f'[test-1] {message.get("subject")} (Opened)', mail.outbox[0].subject)
+
+        ticket = Ticket.objects.get()
+        followup = ticket.followup_set.get()
+        self.assertEqual(2, followup.followupattachment_set.count())
+
+    @override_settings(VALID_EXTENSIONS=['.txt'])
+    def test_multiple_attachments_with_wrong_extension(self):
+        """
+        Tests that a wrong extension won't stop from saving other valid attachment
+        """
+        message, _, _ = utils.generate_multipart_email(type_list=['plain', 'image', 'file', 'image'])
+
+        self.assertEqual(len(mail.outbox), 0)
+
+        with self.assertLogs(logger='helpdesk', level='ERROR') as cm:
+            object_from_message(message.as_string(), self.queue_public, self.logger)
+
+            self.assertIn(
+                "ERROR:helpdesk:['Unsupported file extension: .jpg']",
+                cm.output
+            )
+
+        ticket = Ticket.objects.get()
+        followup = ticket.followup_set.get()
+        self.assertEqual(1, followup.followupattachment_set.count())
+
+        
 class GetEmailParametricTemplate(object):
     """TestCase that checks basic email functionality across methods and socks configs."""
 
@@ -258,12 +357,12 @@ class GetEmailParametricTemplate(object):
         """Tests correctly decoding mail headers when a comma is encoded into
            UTF-8. See bug report #832."""
 
-        # example email text from Django docs:
-        # https://docs.djangoproject.com/en/1.10/ref/unicode/
-        test_email_from = "Bernard-Bouissières, Benjamin <bbb@example.com>"
+        # Create the from using standard RFC required formats
+        # Override the last_name to ensure we get a non-ascii character in it
+        test_email_from_meta = utils.generate_email_address("fr_FR", last_name_override="Bouissières")
         test_email_subject = "Commas in From lines"
         test_email_body = "Testing commas in from email UTF-8."
-        test_email = "To: helpdesk@example.com\nFrom: " + test_email_from + \
+        test_email = "To: helpdesk@example.com\nFrom: " + test_email_from_meta[0] + \
             "\nSubject: " + test_email_subject + "\n\n" + test_email_body
         test_mail_len = len(test_email)
 
@@ -333,13 +432,13 @@ class GetEmailParametricTemplate(object):
 
             ticket1 = get_object_or_404(Ticket, pk=1)
             self.assertEqual(ticket1.ticket_for_url, "QQ-%s" % ticket1.id)
-            self.assertEqual(ticket1.submitter_email, 'bbb@example.com')
+            self.assertEqual(ticket1.submitter_email, test_email_from_meta[1])
             self.assertEqual(ticket1.title, test_email_subject)
             self.assertEqual(ticket1.description, test_email_body)
 
             ticket2 = get_object_or_404(Ticket, pk=2)
             self.assertEqual(ticket2.ticket_for_url, "QQ-%s" % ticket2.id)
-            self.assertEqual(ticket2.submitter_email, 'bbb@example.com')
+            self.assertEqual(ticket2.submitter_email, test_email_from_meta[1])
             self.assertEqual(ticket2.title, test_email_subject)
             self.assertEqual(ticket2.description, test_email_body)
 

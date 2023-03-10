@@ -4,6 +4,7 @@
 
 
 from django.conf import settings
+from django.utils.translation import gettext as _
 
 
 # TODO: can we use the builtin Django validator instead?
@@ -32,4 +33,5 @@ def validate_file_extension(value):
         # should always allow that?
         if not (ext.lower() == '' or ext.lower() == '.'):
             raise ValidationError(
-                'Unsupported file extension: %s.' % ext.lower())
+                _('Unsupported file extension: ') + ext.lower()
+            )
