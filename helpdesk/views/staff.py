@@ -14,6 +14,7 @@ from datetime import date, datetime, timedelta
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.views import redirect_to_login
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.handlers.wsgi import WSGIRequest
@@ -275,8 +276,7 @@ def followup_edit(request, ticket_id, followup_id):
             'time_spent': format_time_spent(followup.time_spent),
         })
 
-        ticketcc_string, __ = \
-            return_ticketccstring_and_show_subscribe(request.user, ticket)
+        ticketcc_string = return_ticketccstring_and_show_subscribe(request.user, ticket)[0]
 
         return render(request, 'helpdesk/followup_edit.html', {
             'followup': followup,
@@ -358,7 +358,7 @@ def view_ticket(request, ticket_id):
         )[1]
 
         if show_subscribe:
-            subscribe_staff_member_to_ticket(ticket, request.user)
+            subscribe_to_ticket_updates(ticket, request.user)
             return HttpResponseRedirect(reverse('helpdesk:view', args=[ticket.id]))
 
     if 'close' in request.GET and ticket.status == Ticket.RESOLVED_STATUS:
@@ -473,30 +473,19 @@ def subscribe_to_ticket_updates(ticket, user=None, email=None, can_view=True, ca
                 _('When you add somebody on Cc, you must provide either a User or a valid email. Email: %s' % email)
             )
 
-        ticketcc = TicketCC(
-            ticket=ticket,
+        return ticket.ticketcc_set.create(
             user=user,
             email=email,
             can_view=can_view,
             can_update=can_update
         )
-        ticketcc.save()
-
-        return ticketcc
-
-
-def subscribe_staff_member_to_ticket(ticket, user, email='', can_view=True, can_update=False):
-    """used in view_ticket() and update_ticket()"""
-    return subscribe_to_ticket_updates(ticket=ticket, user=user, email=email, can_view=can_view, can_update=can_update)
 
 
 def get_ticket_from_request_with_authorisation(
     request: WSGIRequest,
     ticket_id: str,
     public: bool
-) -> typing.Union[
-    Ticket, typing.NoReturn
-]:
+) -> Ticket:
     """Gets a ticket from the public status and if the user is authenticated and
     has permissions to update tickets
 
@@ -510,20 +499,14 @@ def get_ticket_from_request_with_authorisation(
                 is_helpdesk_staff(request.user) or
                 helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE))):
 
-        key = request.POST.get('key')
-        email = request.POST.get('mail')
-
-        if key and email:
-            ticket = Ticket.objects.get(
+        try:
+            return Ticket.objects.get(
                 id=ticket_id,
-                submitter_email__iexact=email,
-                secret_key__iexact=key
+                submitter_email__iexact=request.POST.get('mail'),
+                secret_key__iexact=request.POST.get('key')
             )
-
-        if not ticket:
-            return HttpResponseRedirect(
-                '%s?next=%s' % (reverse('helpdesk:login'), request.path)
-            )
+        except (Ticket.DoesNotExist, ValueError):
+            return redirect_to_login(request.path, 'helpdesk:login')
 
     return get_object_or_404(Ticket, id=ticket_id)
 
@@ -559,10 +542,10 @@ def get_due_date_from_request_or_ticket(
 
 
 def get_and_set_ticket_status(
-    new_status: str,
+    new_status: int,
     ticket: Ticket,
     follow_up: FollowUp
-) -> typing.Tuple[str, str]:
+) -> typing.Tuple[str, int]:
     """Performs comparision on previous status to new status,
     updating the title as required.
 
@@ -587,7 +570,7 @@ def get_and_set_ticket_status(
             follow_up.title = _('Updated')
 
     follow_up.save()
-    return (old_status_str, old_status)
+    return old_status_str, old_status
 
 
 def get_time_spent_from_request(request: WSGIRequest) -> typing.Optional[timedelta]:
@@ -603,7 +586,7 @@ def update_messages_sent_to_by_public_and_status(
     ticket: Ticket,
     follow_up: FollowUp,
     context: str,
-    messages_sent_to: typing.List[str],
+    messages_sent_to: typing.Set[str],
     files: typing.List[typing.Tuple[str, str]]
 ) -> Ticket:
     """Sets the status of the ticket"""
@@ -645,13 +628,10 @@ def add_staff_subscription(
 ) -> None:
     """Auto subscribe the staff member if that's what the settigs say and the
     user is authenticated and a staff member"""
-    if helpdesk_settings.HELPDESK_AUTO_SUBSCRIBE_ON_TICKET_RESPONSE and request.user.is_authenticated:
-        SHOW_SUBSCRIBE = return_ticketccstring_and_show_subscribe(
-            request.user, ticket
-        )[1]
-
-        if SHOW_SUBSCRIBE:
-            subscribe_staff_member_to_ticket(ticket, request.user)
+    if helpdesk_settings.HELPDESK_AUTO_SUBSCRIBE_ON_TICKET_RESPONSE \
+            and request.user.is_authenticated \
+            and return_ticketccstring_and_show_subscribe(request.user, ticket)[1]:
+        subscribe_to_ticket_updates(ticket, request.user)
 
 
 def get_template_staff_and_template_cc(
@@ -875,12 +855,13 @@ def mass_update(request):
     if not (tickets and action):
         return HttpResponseRedirect(reverse('helpdesk:list'))
 
+    user = kbitem = None
+
     if action.startswith('assign_'):
         parts = action.split('_')
         user = User.objects.get(id=parts[1])
         action = 'assign'
     if action == 'kbitem_none':
-        kbitem = None
         action = 'set_kbitem'
     if action.startswith('kbitem_'):
         parts = action.split('_')
@@ -905,52 +886,50 @@ def mass_update(request):
         if action == 'assign' and t.assigned_to != user:
             t.assigned_to = user
             t.save()
-            f = FollowUp(ticket=t,
-                         date=timezone.now(),
-                         title=_('Assigned to %(username)s in bulk update' % {
-                             'username': user.get_username()
-                         }),
-                         public=True,
-                         user=request.user)
-            f.save()
+            t.followup_set.create(
+                date=timezone.now(),
+                title=_('Assigned to %(username)s in bulk update' % {'username': user.get_username()}),
+                public=True,
+                user=request.user
+            )
         elif action == 'unassign' and t.assigned_to is not None:
             t.assigned_to = None
             t.save()
-            f = FollowUp(ticket=t,
-                         date=timezone.now(),
-                         title=_('Unassigned in bulk update'),
-                         public=True,
-                         user=request.user)
-            f.save()
+            t.followup_set.create(
+                date=timezone.now(),
+                title=_('Unassigned in bulk update'),
+                public=True,
+                user=request.user
+            )
         elif action == 'set_kbitem':
             t.kbitem = kbitem
             t.save()
-            f = FollowUp(ticket=t,
-                         date=timezone.now(),
-                         title=_('KBItem set in bulk update'),
-                         public=False,
-                         user=request.user)
-            f.save()
+            t.followup_set.create(
+                date=timezone.now(),
+                title=_('KBItem set in bulk update'),
+                public=False,
+                user=request.user
+            )
         elif action == 'close' and t.status != Ticket.CLOSED_STATUS:
             t.status = Ticket.CLOSED_STATUS
             t.save()
-            f = FollowUp(ticket=t,
-                         date=timezone.now(),
-                         title=_('Closed in bulk update'),
-                         public=False,
-                         user=request.user,
-                         new_status=Ticket.CLOSED_STATUS)
-            f.save()
+            t.followup_set.create(
+                date=timezone.now(),
+                title=_('Closed in bulk update'),
+                public=False,
+                user=request.user,
+                new_status=Ticket.CLOSED_STATUS
+            )
         elif action == 'close_public' and t.status != Ticket.CLOSED_STATUS:
             t.status = Ticket.CLOSED_STATUS
             t.save()
-            f = FollowUp(ticket=t,
-                         date=timezone.now(),
-                         title=_('Closed in bulk update'),
-                         public=True,
-                         user=request.user,
-                         new_status=Ticket.CLOSED_STATUS)
-            f.save()
+            t.followup_set.create(
+                date=timezone.now(),
+                title=_('Closed in bulk update'),
+                public=True,
+                user=request.user,
+                new_status=Ticket.CLOSED_STATUS
+            )
             # Send email to Submitter, Owner, Queue CC
             context = safe_template_context(t)
             context.update(resolution=t.resolution,
@@ -1180,19 +1159,17 @@ def check_redirect_on_user_query(request, huser):
         if query.find('-') > 0:
             try:
                 queue, id_ = Ticket.queue_and_id_from_query(query)
-                id_ = int(id)
+                id_ = int(id_)
             except ValueError:
-                id_ = None
-
-            if id_:
+                pass
+            else:
                 filter_ = {'queue__slug': queue, 'id': id_}
         else:
             try:
                 query = int(query)
             except ValueError:
-                query = None
-
-            if query:
+                pass
+            else:
                 filter_ = {'id': int(query)}
 
         if filter_:
@@ -1361,7 +1338,7 @@ def load_saved_query(request, query_params=None):
             query_params = query_from_base64(b64query)
         except json.JSONDecodeError:
             raise QueryLoadError()
-    return (saved_query, query_params)
+    return saved_query, query_params
 
 
 @helpdesk_staff_member_required
@@ -1374,14 +1351,14 @@ def datatables_ticket_list(request, query):
     """
     query = Query(HelpdeskUser(request.user), base64query=query)
     result = query.get_datatables_context(**request.query_params)
-    return (JsonResponse(result, status=status.HTTP_200_OK))
+    return JsonResponse(result, status=status.HTTP_200_OK)
 
 
 @helpdesk_staff_member_required
 @api_view(['GET'])
 def timeline_ticket_list(request, query):
     query = Query(HelpdeskUser(request.user), base64query=query)
-    return (JsonResponse(query.get_timeline_context(), status=status.HTTP_200_OK))
+    return JsonResponse(query.get_timeline_context(), status=status.HTTP_200_OK)
 
 
 @helpdesk_staff_member_required
@@ -1612,6 +1589,9 @@ def update_summary_tables(report_queryset, report, summarytable, summarytable2):
             metric3 = ticket.modified - ticket.created
             metric3 = metric3.days
 
+        else:
+            raise ValueError(f'report "{report}" is unrecognized.')
+
         summarytable[metric1, metric2] += 1
         if metric3:
             if report == 'daysuntilticketclosedbymonth':
@@ -1794,7 +1774,7 @@ class EditUserSettingsView(MustBeStaffMixin, UpdateView):
     model = UserSettings
     success_url = reverse_lazy('helpdesk:dashboard')
 
-    def get_object(self):
+    def get_object(self, queryset=None):
         return UserSettings.objects.get_or_create(user=self.request.user)[0]
 
 
