@@ -81,12 +81,12 @@ def text_is_spam(text, request):
     # This will return 'True' is the given text is deemed to be spam, or
     # False if it is not spam. If it cannot be checked for some reason, we
     # assume it isn't spam.
-    from django.contrib.sites.models import Site
-    from django.core.exceptions import ImproperlyConfigured
     try:
         from akismet import Akismet
     except ImportError:
         return False
+    from django.contrib.sites.models import Site
+    from django.core.exceptions import ImproperlyConfigured
     try:
         site = Site.objects.get_current()
     except ImproperlyConfigured:
