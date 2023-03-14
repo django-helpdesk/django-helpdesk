@@ -550,7 +550,7 @@ def subscribe_to_ticket_updates(ticket, user=None, email=None, can_view=True, ca
 
         # Don't create duplicate entries for subscribers
         if queryset.count() > 0:
-            return queryset.first()
+            return None
 
         if user is None and len(email) < 5:
             raise ValidationError(

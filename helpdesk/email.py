@@ -529,7 +529,8 @@ def create_ticket_cc(ticket, cc_list):
 
         try:
             ticket_cc = subscribe_to_ticket_updates(ticket=ticket, user=user, email=cced_email)
-            new_ticket_ccs.append(ticket_cc)
+            if ticket_cc is not None:
+                new_ticket_ccs.append(ticket_cc)
         except ValidationError:
             pass
 
@@ -646,7 +647,7 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
     context = safe_template_context(ticket)
     context['private'] = False
 
-    create_ticket_cc(ticket, payload['to_list'] + payload['cc_list'])
+    new_ticket_ccs = create_ticket_cc(ticket, [(sender_name, sender_email)] + payload['to_list'] + payload['cc_list'])
 
     headers = payload['headers'] if 'headers' in payload else None
     autoreply = is_autoreply(message, headers)
@@ -848,7 +849,7 @@ def object_from_message(message, importer, queues, logger):
             else:
                 name = ("part-%i_" % counter) + name
 
-            # # FIXME: this code gets the paylods, then does something with it and then completely ignores it
+            # # FIXME: this code gets the payloads, then does something with it and then completely ignores it
             # # writing the part.get_payload(decode=True) instead; and then the payload variable is
             # # replaced by some dict later.
             # # the `payloadToWrite` has been also ignored so was commented
