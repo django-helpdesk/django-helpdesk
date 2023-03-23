@@ -116,7 +116,8 @@ class BaseCreateTicketView(abstract_views.AbstractCreateTicketMixin, FormView):
                 pm = PropertyMilestone.objects.filter(id=request.GET.get('property_milestone_id', None)).first()
                 if pm:
                     pm.ticket = ticket
-                    pm.submission_date = now()
+                    # Only set submission_date if it has never been set
+                    pm.submission_date = now() if pm.submission_date is None else pm.submission_date
                     pm.implementation_status = PropertyMilestone.MILESTONE_IN_REVIEW
                     pm.save()
 

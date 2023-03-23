@@ -2291,7 +2291,8 @@ def pair_property_milestone(request, ticket_id):
 
         pm.ticket = ticket
         pm.implementation_status = PropertyMilestone.MILESTONE_IN_REVIEW
-        pm.submission_date = timezone.now()
+        # Only set submission_date if it has never been set
+        pm.submission_date = timezone.now() if pm.submission_date is None else pm.submission_date
         pm.save()
 
         return return_to_ticket(request.user, request, helpdesk_settings, ticket)
