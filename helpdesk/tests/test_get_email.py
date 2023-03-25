@@ -12,8 +12,7 @@ import helpdesk.email
 from helpdesk.email import extract_part_data, object_from_message
 from helpdesk.exceptions import DeleteIgnoredTicketException, IgnoreTicketException
 from helpdesk.management.commands.get_email import Command
-from helpdesk.models import FollowUp, FollowUpAttachment, IgnoreEmail, Queue, Ticket, TicketCC,\
-    Attachment
+from helpdesk.models import Attachment, FollowUp, FollowUpAttachment, IgnoreEmail, Queue, Ticket, TicketCC
 from helpdesk.tests import utils
 import itertools
 import logging
