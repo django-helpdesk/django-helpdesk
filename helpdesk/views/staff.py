@@ -10,7 +10,7 @@ from ..lib import format_time_spent
 from ..templated_email import send_templated_mail
 from collections import defaultdict
 from copy import deepcopy
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import user_passes_test
