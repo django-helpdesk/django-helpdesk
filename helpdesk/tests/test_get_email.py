@@ -18,7 +18,6 @@ import itertools
 import logging
 import os
 from shutil import rmtree
-import six
 import sys
 from tempfile import mkdtemp
 import typing
@@ -376,7 +375,7 @@ class GetEmailParametricTemplate(object):
             if self.method == 'local':
                 with mock.patch('os.listdir') as mocked_listdir, \
                         mock.patch('helpdesk.email.isfile') as mocked_isfile, \
-                        mock.patch('builtins.open' if six.PY3 else '__builtin__.open', mock.mock_open(read_data=test_email)), \
+                        mock.patch('builtins.open', mock.mock_open(read_data=test_email)), \
                         mock.patch('os.unlink'):
                     mocked_isfile.return_value = True
                     mocked_listdir.return_value = ['filename1', 'filename2']
