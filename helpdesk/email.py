@@ -687,8 +687,8 @@ def extract_part_data(
             name = f"part-{counter}{ext}"
         else:
             name = f"part-{counter}_{name}"
-
-        files.append(SimpleUploadedFile(name, part.get_payload(decode=True), mimetypes.guess_type(name)[0]))
+        payload = part.as_string() if part.is_multipart() else part.get_payload(decode=True)
+        files.append(SimpleUploadedFile(name, payload, mimetypes.guess_type(name)[0]))
         logger.debug("Found MIME attachment %s", name)
     return part_body, part_full_body
 
