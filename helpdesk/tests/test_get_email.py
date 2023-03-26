@@ -12,7 +12,7 @@ import helpdesk.email
 from helpdesk.email import extract_part_data, object_from_message
 from helpdesk.exceptions import DeleteIgnoredTicketException, IgnoreTicketException
 from helpdesk.management.commands.get_email import Command
-from helpdesk.models import FollowUp, FollowUpAttachment, IgnoreEmail, Queue, Ticket, TicketCC
+from helpdesk.models import Attachment, FollowUp, FollowUpAttachment, IgnoreEmail, Queue, Ticket, TicketCC
 from helpdesk.tests import utils
 import itertools
 import logging
@@ -230,6 +230,29 @@ class GetEmailCommonTests(TestCase):
         ticket = Ticket.objects.get()
         followup = ticket.followup_set.get()
         self.assertEqual(1, followup.followupattachment_set.count())
+
+    def test_email_with_multipart_as_attachment(self):
+        """
+        Is a multipart attachment to an email correctly saved as an attachment
+        """
+        att_filename = 'email_attachment.eml'
+        message, _, _ = utils.generate_multipart_email(type_list=['plain', 'html'])
+        email_attachment, _, _ = utils.generate_multipart_email(type_list=['plain', 'html'])
+        att_content = email_attachment.as_string()
+        message.attach(utils.generate_file_mime_part(filename=att_filename, content=att_content))
+
+        object_from_message(message.as_string(), self.queue_public, self.logger)
+
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(f'[test-1] {message.get("subject")} (Opened)', mail.outbox[0].subject)
+
+        ticket = Ticket.objects.get()
+        followup = ticket.followup_set.get()
+        att_retrieved: Attachment = followup.followupattachment_set.get()
+        self.assertTrue(att_retrieved.filename.endswith(att_filename), "Filename of attached multipart not detected: %s" % (att_retrieved.filename))
+        with att_retrieved.file.open('r') as f:
+            retrieved_content = f.read()
+            self.assertEquals(att_content, retrieved_content, "Retrieved attachment content different to original :\n\n%s\n\n%s" % (att_content, retrieved_content))
 
         
 class GetEmailParametricTemplate(object):

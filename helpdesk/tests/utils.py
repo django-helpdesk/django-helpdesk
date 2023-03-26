@@ -141,14 +141,15 @@ def generate_email_address(
     # format email address for RFC 2822 and return
     return email.utils.formataddr((real_name, email_address)), email_address, first_name, last_name
 
-def generate_file_mime_part(locale: str="en_US",filename: str = None) -> Message:
+def generate_file_mime_part(locale: str="en_US",filename: str = None, content: str = None) -> Message:
     """
     
     :param locale: change this to generate locale specific file name and attachment content
     :param filename: pass a file name if you want to specify a specific name otherwise a random name will be generated
+    :param content: pass a string value if you want have specific content otherwise a random string will be generated
     """
     part = MIMEBase('application', 'octet-stream')
-    part.set_payload(get_fake("text", locale=locale, min_length=1024))
+    part.set_payload(get_fake("text", locale=locale, min_length=1024) if content is None else content)
     encoders.encode_base64(part)
     if not filename:
         filename = get_fake("word", locale=locale, min_length=8) + ".txt"
@@ -227,7 +228,7 @@ def generate_mime_part(locale: str="en_US",
     return msg
 
 def generate_multipart_email(locale: str="en_US",
-        type_list: typing.List[str]=["plain", "html", "attachment"],
+        type_list: typing.List[str]=["plain", "html", "image"],
         use_short_email: bool=False
         ) -> typing.Tuple[Message, typing.Tuple[str, str], typing.Tuple[str, str]]:
     """
