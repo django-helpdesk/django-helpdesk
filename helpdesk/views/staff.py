@@ -24,7 +24,7 @@ from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonRespons
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
-from django.utils.dateparse import parse_datetime
+from django.utils.dateparse import parse_date, parse_datetime
 from django.utils.html import escape
 from django.utils.timezone import make_aware
 from django.utils.translation import gettext as _
@@ -521,7 +521,8 @@ def get_due_date_from_request_or_ticket(
     due_date = request.POST.get('due_date', None) or None
 
     if due_date is not None:
-        due_date = make_aware(parse_datetime(due_date))
+        parsed_date = parse_datetime(due_date) or datetime.combine(parse_date(due_date), time())
+        due_date = make_aware(parsed_date)
     else:
         due_date_year = int(request.POST.get('due_date_year', 0))
         due_date_month = int(request.POST.get('due_date_month', 0))
