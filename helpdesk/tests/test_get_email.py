@@ -57,7 +57,7 @@ class GetEmailCommonTests(TestCase):
         Tests that emails with blank bodies and attachments work.
         https://github.com/django-helpdesk/django-helpdesk/issues/700
         """
-        with open(os.path.join(THIS_DIR, "test_files/blank-body-with-attachment.eml")) as fd:
+        with open(os.path.join(THIS_DIR, "test_files/blank-body-with-attachment.eml"), encoding="utf-8") as fd:
             test_email = fd.read()
             ticket = helpdesk.email.object_from_message(
                 test_email, self.queue_public, self.logger)
@@ -74,7 +74,7 @@ class GetEmailCommonTests(TestCase):
         """
         Tests that emails with quoted-printable bodies work.
         """
-        with open(os.path.join(THIS_DIR, "test_files/quoted_printable.eml")) as fd:
+        with open(os.path.join(THIS_DIR, "test_files/quoted_printable.eml"), encoding="utf-8") as fd:
             test_email = fd.read()
             ticket = helpdesk.email.object_from_message(
                 test_email, self.queue_public, self.logger)
@@ -95,7 +95,7 @@ class GetEmailCommonTests(TestCase):
         Tests that emails with 8bit transfer encoding and utf-8 charset
         https://github.com/django-helpdesk/django-helpdesk/issues/732
         """
-        with open(os.path.join(THIS_DIR, "test_files/all-special-chars.eml")) as fd:
+        with open(os.path.join(THIS_DIR, "test_files/all-special-chars.eml"), encoding="utf-8") as fd:
             test_email = fd.read()
             ticket = helpdesk.email.object_from_message(
                 test_email, self.queue_public, self.logger)
@@ -108,7 +108,7 @@ class GetEmailCommonTests(TestCase):
         Tests that emails with utf-8 non-decodable sequences are parsed correctly
         The message is fowarded as well
         """
-        with open(os.path.join(THIS_DIR, "test_files/utf-nondecodable.eml")) as fd:
+        with open(os.path.join(THIS_DIR, "test_files/utf-nondecodable.eml"), encoding="utf-8") as fd:
             test_email = fd.read()
         ticket = helpdesk.email.object_from_message(
             test_email, self.queue_public, self.logger)
@@ -127,7 +127,7 @@ class GetEmailCommonTests(TestCase):
         """
         Forwarded message of that format must be still attached correctly
         """
-        with open(os.path.join(THIS_DIR, "test_files/forwarded-message.eml")) as fd:
+        with open(os.path.join(THIS_DIR, "test_files/forwarded-message.eml"), encoding="utf-8") as fd:
             test_email = fd.read()
         ticket = helpdesk.email.object_from_message(
             test_email, self.queue_public, self.logger)
@@ -709,7 +709,7 @@ class GetEmailParametricTemplate(object):
            and PGP signatures appropriately."""
 
         # example email text from #567 on GitHub
-        with open(os.path.join(THIS_DIR, "test_files/pgp.eml")) as fd:
+        with open(os.path.join(THIS_DIR, "test_files/pgp.eml"), encoding="utf-8") as fd:
             test_email = fd.read()
         test_mail_len = len(test_email)
 
