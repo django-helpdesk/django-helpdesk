@@ -524,7 +524,7 @@ def send_info_email(message_id: str, f: FollowUp, ticket: Ticket, context: dict,
     else:
         context.update(comment=f.comment)
         ticket.send(
-            {'submitter': ('newticket_submitter', context),
+            {'submitter': ('updated_submitter', context),
              'assigned_to': ('updated_owner', context)},
             fail_silently=True,
             extra_headers=extra_headers,
