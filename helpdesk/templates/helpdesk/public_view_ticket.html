@@ -28,8 +28,14 @@
                 <h3>Ticket details for <span class="byline text-info">{{ ticket.ticket }}{% if ticket.title %} {{ ticket.title }}{% endif %}</span> {% if ticket.get_status == 'Replied' %}(Open){% else %}({{ ticket.get_status }}){% endif %}</h3>
                 {% blocktrans with ticket.queue as queue and ticket.queue.organization.name as org %}
                 {{ org }}'s Queue: {{ queue }}{% endblocktrans %}
-                {% if ticket.property_milestone %}
-                <br><a href="{{ ticket.property_milestone.property_view_url }}" target="_blank" rel="noopener noreferrer"><button class="btn btn-primary btn-sm"><i class="fas fa-road"></i> {% trans "View Milestone" %}</button></a>
+                {% if ticket.property_milestones.count > 0 %}
+                <br>
+                <button type="button" id="milestoneButton" class="btn btn-primary btn-sm dropdown-toggle" data-toggle="dropdown"><i class="fas fa-road"></i> {% trans "View Milestone(s)" %}</button>
+                <div class="dropdown-menu" aria-labelledby="milestoneButton">
+                    {% for property_milestone in ticket.property_milestones.all %}
+                    <a class="dropdown-item" href="{{ property_milestone.property_view_url }}" target="_blank" rel="noopener noreferrer">{{ property_milestone.milestone.name }}</a>
+                    {% endfor %}
+                </div>
                 {% endif %}
             </th>
         </tr>

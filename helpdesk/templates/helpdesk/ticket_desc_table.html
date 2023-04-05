@@ -24,8 +24,13 @@ copy_public_link = function() {
                     <tr class=''><th colspan='4'><h3>{{ ticket.queue.slug }}-{{ ticket.id }}. {{ ticket.title }} [{{ ticket.get_status }}]</h3>
                         {% blocktrans with ticket.queue as queue %}Queue: {{ queue }}{% endblocktrans %}
                         <span class='ticket_toolbar float-right'>
-                            {% if property_milestone_url %}
-                            <a href="{{ property_milestone_url }}" target="_blank" rel="noopener noreferrer"><button class="btn btn-primary btn-sm"><i class="fas fa-road"></i> {% trans "View Milestone" %}</button></a> |
+                            {% if ticket.property_milestones.count > 0 %}
+                            <button type="button" id="milestoneButton" class="btn btn-primary btn-sm dropdown-toggle" data-toggle="dropdown"><i class="fas fa-road"></i> {% trans "View Milestone(s)" %}</button>
+                            <div class="dropdown-menu" aria-labelledby="milestoneButton">
+                                {% for property_milestone in ticket.property_milestones.all %}
+                                <a class="dropdown-item" href="{{ property_milestone.property_view_url }}" target="_blank" rel="noopener noreferrer">{{ property_milestone.milestone.name }}</a>
+                                {% endfor %}
+                            </div> |
                             {% else %}
                             {% if not ticket.beam_property.count %} <span class="tooltip-wrapper" data-toggle="tooltip" data-placement="top" title="Must be paired to a BEAM Property to Pair a Milestone"> {% else %} <span> {% endif %}
                             <a href="{% url 'helpdesk:pair_property_milestone' ticket.id %}"

@@ -485,11 +485,6 @@ def view_ticket(request, ticket_id):
         if t['address'] is None or t['address'] == '':
             t['address'] = '(No address found)'
 
-    if hasattr(ticket, 'property_milestone'):
-        property_milestone_url = ticket.property_milestone.property_view_url
-    else:
-        property_milestone_url = None
-
     return render(request, 'helpdesk/ticket.html', {
         'ticket': ticket,
         'submitter_userprofile_url': submitter_userprofile_url,
@@ -504,7 +499,6 @@ def view_ticket(request, ticket_id):
         'properties': properties,
         'taxlots': taxlots,
         'is_staff': is_helpdesk_staff(request.user),
-        'property_milestone_url': property_milestone_url,
         'debug': settings.DEBUG,
     })
 
