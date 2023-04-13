@@ -8,7 +8,6 @@ beautifulsoup4
 lxml
 simplejson
 pytz
-six
 pinax_teams
 djangorestframework
 django-model-utils
