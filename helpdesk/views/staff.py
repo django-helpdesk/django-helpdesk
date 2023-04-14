@@ -1505,6 +1505,32 @@ def edit_ticket(request, ticket_id):
 edit_ticket = staff_member_required(edit_ticket)
 
 
+def attach_ticket_to_property_milestone(request, ticket):
+    from seed.models import PropertyMilestone, Note
+    from django.utils.timezone import now
+
+    property_milestone_id = request.GET.get('property_milestone_id', None)
+    pm = PropertyMilestone.objects.filter(id=property_milestone_id).first()
+    if pm:
+        pm.ticket = ticket
+        # Only set submission_date if it has never been set
+        pm.submission_date = now() if pm.submission_date is None else pm.submission_date
+        pm.implementation_status = PropertyMilestone.MILESTONE_IN_REVIEW
+        pm.save()
+
+        note_kwargs = {'organization_id': request.GET.get('org_id'),
+                       'user': request.user if request.user.is_authenticated else None,
+                       'name': 'Automatically Created', 'property_view': pm.property_view,
+                       'note_type': Note.LOG,
+                       'log_data': [{'model': 'PropertyMilestone', 'name': pm.milestone.name,
+                                     'action': 'edited with the following:'},
+                                    {'field': 'Milestone Submitted Ticket',
+                                     'previous_value': 'None', 'new_value': f'Ticket ID {pm.ticket.id}',
+                                     'state_id': pm.property_view.state.id}]
+                       }
+        Note.objects.create(**note_kwargs)
+
+
 class CreateTicketView(MustBeStaffMixin, abstract_views.AbstractCreateTicketMixin, FormView):
     template_name = 'helpdesk/create_ticket.html'
     form_class = TicketForm
@@ -1523,6 +1549,9 @@ class CreateTicketView(MustBeStaffMixin, abstract_views.AbstractCreateTicketMixi
 
     def form_valid(self, form):
         self.ticket = form.save(form_id=self.form_id, user=self.request.user if self.request.user.is_authenticated else None)
+        if self.request.GET.get('milestone_beam_redirect', False):
+            # Pair Ticket to Milestone
+            attach_ticket_to_property_milestone(self.request, self.ticket)
         return super().form_valid(form)
 
     def get_success_url(self):
