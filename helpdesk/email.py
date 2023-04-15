@@ -21,6 +21,11 @@ import email
 from email.message import Message
 from email.utils import getaddresses
 from email_reply_parser import EmailReplyParser
+
+# Add OAUTH Libraries
+from oauthlib.oauth2 import BackendApplicationClient
+from requests_oauthlib import OAuth2Session
+
 from helpdesk import settings
 from helpdesk.exceptions import DeleteIgnoredTicketException, IgnoreTicketException
 from helpdesk.lib import process_attachments, safe_template_context
@@ -225,6 +230,101 @@ def imap_sync(q, logger, server):
     server.logout()
 
 
+def imap_oauth_sync(q, logger, server):
+    """
+    IMAP eMail server with OAUTH authentication.
+    Only tested against O365 implementation
+
+    Uses OAUTH Dict in Settings.
+
+    """
+
+    try:
+        logger.debug("Start Mailbox polling via IMAP OAUTH")
+
+        client = BackendApplicationClient(
+            client_id=django_settings.HELPDESK_OAUTH["client_id"],
+            scope=django_settings.HELPDESK_OAUTH["scope"],
+        )
+
+        oauth = OAuth2Session(client=client)
+        token = oauth.fetch_token(
+            token_url=django_settings.HELPDESK_OAUTH["token_url"],
+            client_id=django_settings.HELPDESK_OAUTH["client_id"],
+            client_secret=django_settings.HELPDESK_OAUTH["secret"],
+            include_client_id=True,
+        )
+
+        # TODO: Somehow link this to the debug level set within Django settings logging
+        server.debug = 4
+
+        # TODO: Perhaps store the authentication string template externally? Settings? Queue Table?
+        server.authenticate(
+            "XOAUTH2",
+            lambda x: f"user={q.email_box_user}\x01auth=Bearer {token['access_token']}\x01\x01".encode(),
+        )
+
+        # Select the Inbound Mailbox folder
+        server.select(q.email_box_imap_folder)
+
+    except imaplib.IMAP4.abort:
+        logger.error("IMAP authentication failed.")
+        server.logout()
+        sys.exit()
+
+    except ssl.SSLError:
+        logger.error(
+            "IMAP login failed due to SSL error. This is often due to a timeout. "
+            "Please check your connection and try again."
+        )
+        server.logout()
+        sys.exit()
+
+    try:
+        data = server.search(None, 'NOT', 'DELETED')[1]
+        if data:
+            msgnums = data[0].split()
+            logger.info(f"Found {len(msgnums)} message(s) on IMAP server" )
+            for num in msgnums:
+                logger.info(f"Processing message {num}")
+                data = server.fetch(num, '(RFC822)')[1]
+                full_message = encoding.force_str(data[0][1], errors='replace')
+
+                try:
+                    ticket = object_from_message(message=full_message, queue=q, logger=logger)
+
+                except IgnoreTicketException as itex:
+                    logger.warn(f"Message {num} was ignored. {itex}")
+
+                except DeleteIgnoredTicketException:
+                    server.store(num, '+FLAGS', '\\Deleted')
+                    logger.warn("Message %s was ignored and deleted from IMAP server" % num)
+
+                except TypeError as te:
+                    # Log the error with stacktrace to help identify what went wrong
+                    logger.error(f"Unexpected error processing message: {te}", exc_info=True)
+
+                else:
+                    if ticket:
+                        server.store(num, '+FLAGS', '\\Deleted')
+                        logger.info(
+                            "Successfully processed message %s, deleted from IMAP server" % num)
+                    else:
+                        logger.warn(
+                            "Message %s was not successfully processed, and will be left on IMAP server" % num)
+
+    except imaplib.IMAP4.error:
+        logger.error(
+            "IMAP retrieve failed. Is the folder '%s' spelled correctly, and does it exist on the server?",
+            q.email_box_imap_folder
+        )
+
+    # Purged Flagged Messages & Logout
+    server.expunge()
+    server.close()
+    server.logout()
+
+
 def process_queue(q, logger):
     logger.info("***** %s: Begin processing mail for django-helpdesk" % ctime())
 
@@ -272,7 +372,18 @@ def process_queue(q, logger):
                 'init': imaplib.IMAP4,
             },
             'sync': imap_sync
-        }
+        },
+        'oauth': {
+            'ssl': {
+                'port': 993,
+                'init': imaplib.IMAP4_SSL,
+            },
+            'insecure': {
+                'port': 143,
+                'init': imaplib.IMAP4,
+            },
+            'sync': imap_oauth_sync
+        },
     }
     if email_box_type in mail_defaults:
         encryption = 'insecure'
