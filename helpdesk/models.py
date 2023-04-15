@@ -175,9 +175,7 @@ class Queue(models.Model):
     email_box_type = models.CharField(
         _('E-Mail Box Type'),
         max_length=5,
-        choices=(('pop3', _('POP 3')),
-                 ('imap', _('IMAP')),
-                 ('oauth', _('IMAP OAUTH')),
+        choices=(('pop3', _('POP 3')), ('imap', _('IMAP')),
                  ('local', _('Local Directory'))),
         blank=True,
         null=True,

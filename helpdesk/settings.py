@@ -249,14 +249,3 @@ HELPDESK_FULL_FIRST_MESSAGE_FROM_EMAIL = getattr(
 # (which gets stripped/corrupted otherwise)
 HELPDESK_ALWAYS_SAVE_INCOMING_EMAIL_MESSAGE = getattr(
     settings, "HELPDESK_ALWAYS_SAVE_INCOMING_EMAIL_MESSAGE", False)
-
-#######################
-# email OAUTH         #
-#######################
-
-HELPDESK_OAUTH = {
-    "token_url": "",
-    "client_id": "",
-    "secret": "",
-    "scope": [""]
-}
