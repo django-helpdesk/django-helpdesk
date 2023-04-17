@@ -21,11 +21,6 @@ import email
 from email.message import Message
 from email.utils import getaddresses
 from email_reply_parser import EmailReplyParser
-
-# Add OAUTH Libraries
-from oauthlib.oauth2 import BackendApplicationClient
-from requests_oauthlib import OAuth2Session
-
 from helpdesk import settings
 from helpdesk.exceptions import DeleteIgnoredTicketException, IgnoreTicketException
 from helpdesk.lib import process_attachments, safe_template_context
@@ -33,10 +28,12 @@ from helpdesk.models import FollowUp, IgnoreEmail, Queue, Ticket
 import imaplib
 import logging
 import mimetypes
+from oauthlib.oauth2 import BackendApplicationClient
 import os
 from os.path import isfile, join
 import poplib
 import re
+from requests_oauthlib import OAuth2Session
 import socket
 import ssl
 import sys
@@ -47,7 +44,6 @@ from typing import List, Tuple
 
 # import User model, which may be a custom model
 User = get_user_model()
-
 
 STRIPPED_SUBJECT_STRINGS = [
     "Re: ",
@@ -284,7 +280,7 @@ def imap_oauth_sync(q, logger, server):
         data = server.search(None, 'NOT', 'DELETED')[1]
         if data:
             msgnums = data[0].split()
-            logger.info(f"Found {len(msgnums)} message(s) on IMAP server" )
+            logger.info(f"Found {len(msgnums)} message(s) on IMAP server")
             for num in msgnums:
                 logger.info(f"Processing message {num}")
                 data = server.fetch(num, '(RFC822)')[1]
@@ -472,7 +468,6 @@ def is_autoreply(message):
 
 
 def create_ticket_cc(ticket, cc_list):
-
     if not cc_list:
         return []
 
@@ -504,7 +499,6 @@ def create_ticket_cc(ticket, cc_list):
 
 
 def create_object_from_email_message(message, ticket_id, payload, files, logger):
-
     ticket, previous_followup, new = None, None, False
     now = timezone.now()
 
@@ -649,9 +643,9 @@ def send_info_email(message_id: str, f: FollowUp, ticket: Ticket, context: dict,
 
 
 def get_ticket_id_from_subject_slug(
-    queue_slug: str,
-    subject: str,
-    logger: logging.Logger
+        queue_slug: str,
+        subject: str,
+        logger: logging.Logger
 ) -> typing.Optional[int]:
     """Get a ticket id from the subject string
 
@@ -670,8 +664,8 @@ def get_ticket_id_from_subject_slug(
 
 
 def add_file_if_always_save_incoming_email_message(
-    files_,
-    message: str
+        files_,
+        message: str
 ) -> None:
     """When `settings.HELPDESK_ALWAYS_SAVE_INCOMING_EMAIL_MESSAGE` is `True`
     add a file to the files_ list"""
