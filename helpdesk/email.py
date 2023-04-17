@@ -239,15 +239,15 @@ def imap_oauth_sync(q, logger, server):
         logger.debug("Start Mailbox polling via IMAP OAUTH")
 
         client = BackendApplicationClient(
-            client_id=django_settings.HELPDESK_OAUTH["client_id"],
-            scope=django_settings.HELPDESK_OAUTH["scope"],
+            client_id=settings.HELPDESK_OAUTH["client_id"],
+            scope=settings.HELPDESK_OAUTH["scope"],
         )
 
         oauth = OAuth2Session(client=client)
         token = oauth.fetch_token(
-            token_url=django_settings.HELPDESK_OAUTH["token_url"],
-            client_id=django_settings.HELPDESK_OAUTH["client_id"],
-            client_secret=django_settings.HELPDESK_OAUTH["secret"],
+            token_url=settings.HELPDESK_OAUTH["token_url"],
+            client_id=settings.HELPDESK_OAUTH["client_id"],
+            client_secret=settings.HELPDESK_OAUTH["secret"],
             include_client_id=True,
         )
 
