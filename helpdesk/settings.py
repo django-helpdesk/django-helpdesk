@@ -254,9 +254,11 @@ HELPDESK_ALWAYS_SAVE_INCOMING_EMAIL_MESSAGE = getattr(
 # email OAUTH         #
 #######################
 
-HELPDESK_OAUTH = {
-    "token_url": "",
-    "client_id": "",
-    "secret": "",
-    "scope": [""]
-}
+HELPDESK_OAUTH = getattr(
+    settings, 'HELPDESK_OAUTH', {
+        "token_url": "",
+        "client_id": "",
+        "secret": "",
+        "scope": [""]
+    }
+)
