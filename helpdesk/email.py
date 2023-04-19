@@ -28,10 +28,12 @@ from helpdesk.models import FollowUp, IgnoreEmail, Queue, Ticket
 import imaplib
 import logging
 import mimetypes
+import oauthlib.oauth2 as oauth2lib
 import os
 from os.path import isfile, join
 import poplib
 import re
+import requests_oauthlib
 import socket
 import ssl
 import sys
@@ -42,7 +44,6 @@ from typing import List, Tuple
 
 # import User model, which may be a custom model
 User = get_user_model()
-
 
 STRIPPED_SUBJECT_STRINGS = [
     "Re: ",
@@ -225,6 +226,99 @@ def imap_sync(q, logger, server):
     server.logout()
 
 
+def imap_oauth_sync(q, logger, server):
+    """
+    IMAP eMail server with OAUTH authentication.
+    Only tested against O365 implementation
+
+    Uses HELPDESK OAUTH Dict in Settings.
+
+    """
+
+    try:
+        logger.debug("Start Mailbox polling via IMAP OAUTH")
+
+        client = oauth2lib.BackendApplicationClient(
+            client_id=settings.HELPDESK_OAUTH["client_id"],
+            scope=settings.HELPDESK_OAUTH["scope"],
+        )
+
+        oauth = requests_oauthlib.OAuth2Session(client=client)
+        token = oauth.fetch_token(
+            token_url=settings.HELPDESK_OAUTH["token_url"],
+            client_id=settings.HELPDESK_OAUTH["client_id"],
+            client_secret=settings.HELPDESK_OAUTH["secret"],
+            include_client_id=True,
+        )
+
+        server.debug = settings.HELPDESK_IMAP_DEBUG_LEVEL
+
+        # TODO: Perhaps store the authentication string template externally? Settings? Queue Table?
+        server.authenticate(
+            "XOAUTH2",
+            lambda x: f"user={q.email_box_user}\x01auth=Bearer {token['access_token']}\x01\x01".encode(),
+        )
+
+        # Select the Inbound Mailbox folder
+        server.select(q.email_box_imap_folder)
+
+    except imaplib.IMAP4.abort as e1:
+        logger.error(f"IMAP authentication failed in OAUTH: {e1}", exc_info=True)
+        server.logout()
+        sys.exit()
+
+    except ssl.SSLError as e2:
+        logger.error(
+            f"IMAP login failed due to SSL error. (This is often due to a timeout): {e2}", exc_info=True
+        )
+        server.logout()
+        sys.exit()
+
+    try:
+        data = server.search(None, 'NOT', 'DELETED')[1]
+        if data:
+            msgnums = data[0].split()
+            logger.info(f"Found {len(msgnums)} message(s) on IMAP server")
+            for num in msgnums:
+                logger.info(f"Processing message {num}")
+                data = server.fetch(num, '(RFC822)')[1]
+                full_message = encoding.force_str(data[0][1], errors='replace')
+
+                try:
+                    ticket = object_from_message(message=full_message, queue=q, logger=logger)
+
+                except IgnoreTicketException as itex:
+                    logger.warn(f"Message {num} was ignored. {itex}")
+
+                except DeleteIgnoredTicketException:
+                    server.store(num, '+FLAGS', '\\Deleted')
+                    logger.warn("Message %s was ignored and deleted from IMAP server" % num)
+
+                except TypeError as te:
+                    # Log the error with stacktrace to help identify what went wrong
+                    logger.error(f"Unexpected error processing message: {te}", exc_info=True)
+
+                else:
+                    if ticket:
+                        server.store(num, '+FLAGS', '\\Deleted')
+                        logger.info(
+                            "Successfully processed message %s, deleted from IMAP server" % num)
+                    else:
+                        logger.warn(
+                            "Message %s was not successfully processed, and will be left on IMAP server" % num)
+
+    except imaplib.IMAP4.error:
+        logger.error(
+            "IMAP retrieve failed. Is the folder '%s' spelled correctly, and does it exist on the server?",
+            q.email_box_imap_folder
+        )
+
+    # Purged Flagged Messages & Logout
+    server.expunge()
+    server.close()
+    server.logout()
+
+
 def process_queue(q, logger):
     logger.info("***** %s: Begin processing mail for django-helpdesk" % ctime())
 
@@ -272,7 +366,18 @@ def process_queue(q, logger):
                 'init': imaplib.IMAP4,
             },
             'sync': imap_sync
-        }
+        },
+        'oauth': {
+            'ssl': {
+                'port': 993,
+                'init': imaplib.IMAP4_SSL,
+            },
+            'insecure': {
+                'port': 143,
+                'init': imaplib.IMAP4,
+            },
+            'sync': imap_oauth_sync
+        },
     }
     if email_box_type in mail_defaults:
         encryption = 'insecure'
@@ -361,7 +466,6 @@ def is_autoreply(message):
 
 
 def create_ticket_cc(ticket, cc_list):
-
     if not cc_list:
         return []
 
@@ -393,7 +497,6 @@ def create_ticket_cc(ticket, cc_list):
 
 
 def create_object_from_email_message(message, ticket_id, payload, files, logger):
-
     ticket, previous_followup, new = None, None, False
     now = timezone.now()
 
@@ -538,9 +641,9 @@ def send_info_email(message_id: str, f: FollowUp, ticket: Ticket, context: dict,
 
 
 def get_ticket_id_from_subject_slug(
-    queue_slug: str,
-    subject: str,
-    logger: logging.Logger
+        queue_slug: str,
+        subject: str,
+        logger: logging.Logger
 ) -> typing.Optional[int]:
     """Get a ticket id from the subject string
 
@@ -559,8 +662,8 @@ def get_ticket_id_from_subject_slug(
 
 
 def add_file_if_always_save_incoming_email_message(
-    files_,
-    message: str
+        files_,
+        message: str
 ) -> None:
     """When `settings.HELPDESK_ALWAYS_SAVE_INCOMING_EMAIL_MESSAGE` is `True`
     add a file to the files_ list"""
