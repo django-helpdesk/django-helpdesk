@@ -262,3 +262,6 @@ HELPDESK_OAUTH = getattr(
         "scope": [""]
     }
 )
+
+# Set Debug Logging Level for IMAP Services. Default to '0' for No Debugging
+HELPDESK_IMAP_DEBUG_LEVEL = getattr(settings, 'HELPDESK_IMAP_DEBUG_LEVEL', 0)

@@ -251,8 +251,7 @@ def imap_oauth_sync(q, logger, server):
             include_client_id=True,
         )
 
-        # TODO: Somehow link this to the debug level set within Django settings logging
-        server.debug = 4
+        server.debug = settings.HELPDESK_IMAP_DEBUG_LEVEL
 
         # TODO: Perhaps store the authentication string template externally? Settings? Queue Table?
         server.authenticate(
@@ -263,15 +262,14 @@ def imap_oauth_sync(q, logger, server):
         # Select the Inbound Mailbox folder
         server.select(q.email_box_imap_folder)
 
-    except imaplib.IMAP4.abort:
-        logger.error("IMAP authentication failed.")
+    except imaplib.IMAP4.abort as e1:
+        logger.error(f"IMAP authentication failed in OAUTH: {e1}", exc_info=True)
         server.logout()
         sys.exit()
 
-    except ssl.SSLError:
+    except ssl.SSLError as e2:
         logger.error(
-            "IMAP login failed due to SSL error. This is often due to a timeout. "
-            "Please check your connection and try again."
+            f"IMAP login failed due to SSL error. (This is often due to a timeout): {e2}", exc_info=True
         )
         server.logout()
         sys.exit()
