@@ -29,12 +29,10 @@ import imaplib
 import logging
 import mimetypes
 import oauthlib.oauth2 as oauth2lib
-# from oauthlib.oauth2 import BackendApplicationClient
 import os
 from os.path import isfile, join
 import poplib
 import re
-# from requests_oauthlib import OAuth2Session
 import requests_oauthlib
 import socket
 import ssl

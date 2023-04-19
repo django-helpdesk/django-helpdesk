@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
 from django.core import mail
@@ -8,8 +7,6 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
 from django.shortcuts import get_object_or_404
 from django.test import override_settings, TestCase
-from oauthlib.oauth2 import BackendApplicationClient
-
 import helpdesk.email
 from helpdesk.email import extract_part_data, object_from_message
 from helpdesk.exceptions import DeleteIgnoredTicketException, IgnoreTicketException
@@ -18,6 +15,7 @@ from helpdesk.models import Attachment, FollowUp, FollowUpAttachment, IgnoreEmai
 from helpdesk.tests import utils
 import itertools
 import logging
+from oauthlib.oauth2 import BackendApplicationClient
 import os
 from shutil import rmtree
 import sys
@@ -28,7 +26,6 @@ from unittest import mock
 
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
-
 # class A addresses can't have first octet of 0
 unrouted_socks_server = "0.0.0.1"
 unrouted_email_server = "0.0.0.1"
@@ -43,7 +40,6 @@ class GetEmailCommonTests(TestCase):
     def setUp(self):
         self.queue_public = Queue.objects.create(title='Test', slug='test')
         self.logger = logging.getLogger('helpdesk')
-
     # tests correct syntax for command line option
     def test_get_email_quiet_option(self):
         """Test quiet option is properly propagated"""
@@ -65,7 +61,6 @@ class GetEmailCommonTests(TestCase):
             test_email = fd.read()
             ticket = helpdesk.email.object_from_message(
                 test_email, self.queue_public, self.logger)
-
         # title got truncated because of max_lengh of the model.title field
         assert ticket.title == (
             "Attachment without body - and a loooooooooooooooooooooooooooooooooo"
@@ -307,7 +302,6 @@ class GetEmailParametricTemplate(object):
         """Tests reading plain text emails from a queue and creating tickets.
            For each email source supported, we mock the backend to provide
            authentically formatted responses containing our test data."""
-
         # example email text from Django docs:
         # https://docs.djangoproject.com/en/1.10/ref/unicode/
         test_email_from = "Arnbjörg Ráðormsdóttir <arnbjorg@example.com>"
@@ -371,7 +365,6 @@ class GetEmailParametricTemplate(object):
                 mocked_imaplib_server = mock.Mock()
                 mocked_imaplib_server.search = mock.Mock(
                     return_value=imap_mail_list)
-
                 # we ignore the second arg as the data item/mime-part is
                 # constant (RFC822)
                 mocked_imaplib_server.fetch = mock.Mock(
@@ -385,7 +378,6 @@ class GetEmailParametricTemplate(object):
                 # mock the oauthlib session and requests oauth backendclient
                 # then mock imaplib.IMAP4's search and fetch methods with responses
                 # from RFC 3501
-
                 imap_emails = {
                     "1": ("OK", (("1", test_email),)),
                     "2": ("OK", (("2", test_email),)),
@@ -394,7 +386,6 @@ class GetEmailParametricTemplate(object):
                 mocked_imaplib_server = mock.Mock()
                 mocked_imaplib_server.search = mock.Mock(
                     return_value=imap_mail_list)
-
                 # we ignore the second arg as the data item/mime-part is
                 # constant (RFC822)
                 mocked_imaplib_server.fetch = mock.Mock(
@@ -429,7 +420,6 @@ class GetEmailParametricTemplate(object):
             self.assertEqual(ticket2.ticket_for_url, "QQ-%s" % ticket2.id)
             self.assertEqual(ticket2.title, test_email_subject)
             self.assertEqual(ticket2.description, test_email_body)
-
 #     def test_commas_in_mail_headers(self):
 #         """Tests correctly decoding mail headers when a comma is encoded into
 #            UTF-8. See bug report #832."""
@@ -860,7 +850,6 @@ class GetEmailParametricTemplate(object):
 #             # should this be 'application/pgp-signature'?
 #             # self.assertEqual(attach1.mime_type, 'text/plain')
 #
-
 class GetEmailCCHandling(TestCase):
     """TestCase that checks CC handling in email. Needs its own test harness."""
 
@@ -933,7 +922,6 @@ class GetEmailCCHandling(TestCase):
     def test_read_email_cc(self):
         """Tests reading plain text emails from a queue and adding to a ticket,
            particularly to test appropriate handling of CC'd emails."""
-
         # first, check that test ticket exists
         ticket1 = get_object_or_404(Ticket, pk=1)
         self.assertEqual(ticket1.ticket_for_url, "CC-1")
@@ -944,7 +932,6 @@ class GetEmailCCHandling(TestCase):
         self.assertEqual(ccstaff.user, User.objects.get(username='staff'))
         self.assertEqual(ticket1.assigned_to,
                          User.objects.get(username='assigned'))
-
         # example email text from Django docs:
         # https://docs.djangoproject.com/en/1.10/ref/unicode/
         test_email_from = "submitter@example.com"
@@ -975,7 +962,6 @@ class GetEmailCCHandling(TestCase):
 
             mocked_listdir.assert_called_with('/var/lib/mail/helpdesk/')
             mocked_isfile.assert_any_call('/var/lib/mail/helpdesk/filename1')
-
         # 9 unique email addresses are CC'd when all is done
         self.assertEqual(len(TicketCC.objects.filter(ticket=1)), 9)
         # next we make sure no duplicates were added, and the
@@ -999,16 +985,12 @@ class GetEmailCCHandling(TestCase):
         cc9 = get_object_or_404(TicketCC, pk=9)
         self.assertEqual(cc9.user, User.objects.get(username='observer'))
         self.assertEqual(cc9.email, "observer@example.com")
-
-
 # build matrix of test cases
 case_methods = [c[0] for c in Queue._meta.get_field('email_box_type').choices]
-
 # uncomment if you want to run tests with socks - which is much slover
 # case_socks = [False] + [c[0] for c in Queue._meta.get_field('socks_proxy_type').choices]
 case_socks = [False]
 case_matrix = list(itertools.product(case_methods, case_socks))
-
 # Populate TestCases from the matrix of parameters
 thismodule = sys.modules[__name__]
 for method, socks in case_matrix:
