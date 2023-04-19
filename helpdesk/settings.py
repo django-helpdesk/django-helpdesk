@@ -249,3 +249,19 @@ HELPDESK_FULL_FIRST_MESSAGE_FROM_EMAIL = getattr(
 # (which gets stripped/corrupted otherwise)
 HELPDESK_ALWAYS_SAVE_INCOMING_EMAIL_MESSAGE = getattr(
     settings, "HELPDESK_ALWAYS_SAVE_INCOMING_EMAIL_MESSAGE", False)
+
+#######################
+# email OAUTH         #
+#######################
+
+HELPDESK_OAUTH = getattr(
+    settings, 'HELPDESK_OAUTH', {
+        "token_url": "",
+        "client_id": "",
+        "secret": "",
+        "scope": [""]
+    }
+)
+
+# Set Debug Logging Level for IMAP Services. Default to '0' for No Debugging
+HELPDESK_IMAP_DEBUG_LEVEL = getattr(settings, 'HELPDESK_IMAP_DEBUG_LEVEL', 0)

@@ -1,6 +1,5 @@
 pysocks
 pycodestyle
-codecov
 coverage
 argparse
 pbr

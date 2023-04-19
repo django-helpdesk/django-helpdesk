@@ -12,3 +12,5 @@ pinax_teams
 djangorestframework
 django-model-utils
 django-cleanup
+oauthlib
+requests_oauthlib
