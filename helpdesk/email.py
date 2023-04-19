@@ -28,12 +28,14 @@ from helpdesk.models import FollowUp, IgnoreEmail, Queue, Ticket
 import imaplib
 import logging
 import mimetypes
-from oauthlib.oauth2 import BackendApplicationClient
+import oauthlib.oauth2 as oauth2lib
+# from oauthlib.oauth2 import BackendApplicationClient
 import os
 from os.path import isfile, join
 import poplib
 import re
-from requests_oauthlib import OAuth2Session
+# from requests_oauthlib import OAuth2Session
+import requests_oauthlib
 import socket
 import ssl
 import sys
@@ -231,19 +233,19 @@ def imap_oauth_sync(q, logger, server):
     IMAP eMail server with OAUTH authentication.
     Only tested against O365 implementation
 
-    Uses OAUTH Dict in Settings.
+    Uses HELPDESK OAUTH Dict in Settings.
 
     """
 
     try:
         logger.debug("Start Mailbox polling via IMAP OAUTH")
 
-        client = BackendApplicationClient(
+        client = oauth2lib.BackendApplicationClient(
             client_id=settings.HELPDESK_OAUTH["client_id"],
             scope=settings.HELPDESK_OAUTH["scope"],
         )
 
-        oauth = OAuth2Session(client=client)
+        oauth = requests_oauthlib.OAuth2Session(client=client)
         token = oauth.fetch_token(
             token_url=settings.HELPDESK_OAUTH["token_url"],
             client_id=settings.HELPDESK_OAUTH["client_id"],
