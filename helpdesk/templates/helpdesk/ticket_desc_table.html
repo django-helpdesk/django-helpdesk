@@ -172,6 +172,62 @@
                         </td>
                     </tr>
                     <tr>
+                        <th class="table-active">{% trans "Checklists" %}</th>
+                        <td colspan="3">
+                            <div class="container-fluid">
+                                <div class="row">
+                                    {% for checklist in ticket.checklists.all %}
+                                        <div class="col-sm-4 col-xs-12">
+                                            <div class="card">
+                                                <div class="card-header" data-toggle="collapse" data-target="#checklist{{ checklist.id }}" onclick="$(this).find('i').toggleClass('fa-caret-down fa-caret-up')">
+                                                    <h4>
+                                                        {{ checklist }}
+                                                        <button class="btn btn-link float-right">
+                                                            <i class="fas fa-caret-down"></i>
+                                                        </button>
+                                                    </h4>
+                                                </div>
+                                                <div class="card-body collapse" id="checklist{{ checklist.id }}">
+                                                    <div class="list-group">
+                                                        {% for task in checklist.tasks.all %}
+                                                            <div class="list-group-item">
+                                                                <input type="checkbox" disabled{% if task.completion_date %} checked{% endif %}>
+                                                                {{ task }}
+                                                                {% if task.completion_date %}
+                                                                    <i>
+                                                                        ({% trans "Completed on" %} {{ task.completion_date }})
+                                                                    </i>
+                                                                {% endif %}
+                                                            </div>
+                                                        {% endfor %}
+                                                    </div>
+                                                </div>
+                                                <div class="card-footer">
+                                                    <div class="progress">
+                                                        {% widthratio checklist.tasks.completed.count checklist.tasks.count 100 as width  %}
+                                                        <div class="progress-bar" role="progressbar" style="width: {{ width }}%" aria-valuenow="{{ width }}" aria-valuemin="0" aria-valuemax="100">
+                                                            {{ width }}%
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                    <div class="col-sm-4 col-xs-12">
+                                        <div class="card">
+                                            <div class="card-header">
+                                                <h4>Add a checklist</h4>
+                                            </div>
+                                            <div class="card-body">
+                                                TODO
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
                         <td id="ticket-description" colspan='4'>
                             <h4>{% trans "Description" %}</h4>
                             {{ ticket.get_markdown|urlizetrunc:50|num_to_link }}

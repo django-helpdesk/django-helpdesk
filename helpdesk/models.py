@@ -2049,6 +2049,14 @@ class Checklist(models.Model):
         return self.name
 
 
+class ChecklistTaskQuerySet(models.QuerySet):
+    def todo(self):
+        return self.filter(completion_date__isnull=True)
+
+    def completed(self):
+        return self.filter(completion_date__isnull=False)
+
+
 class ChecklistTask(models.Model):
     checklist = models.ForeignKey(
         Checklist,
@@ -2065,6 +2073,8 @@ class ChecklistTask(models.Model):
         null=True,
         blank=True
     )
+
+    objects = ChecklistTaskQuerySet.as_manager()
 
     class Meta:
         verbose_name = _('Checklist Task')
