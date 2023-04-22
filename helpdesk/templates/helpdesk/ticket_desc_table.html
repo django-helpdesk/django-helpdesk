@@ -219,7 +219,13 @@
                                                 <h4>Add a checklist</h4>
                                             </div>
                                             <div class="card-body">
-                                                TODO
+                                                <form method="post">
+                                                    {% csrf_token %}
+                                                    {{ checklist_form.as_p }}
+                                                    <button type="submit" class="btn btn-primary">
+                                                        {% trans "Add" %}
+                                                    </button>
+                                                </form>
                                             </div>
                                         </div>
                                     </div>

@@ -26,7 +26,9 @@ from helpdesk.models import (
     TicketCC,
     TicketCustomFieldValue,
     TicketDependency,
-    UserSettings
+    UserSettings,
+    Checklist,
+    ChecklistTemplate
 )
 from helpdesk.settings import (
     CUSTOMFIELD_DATE_FORMAT,
@@ -602,3 +604,26 @@ class MultipleTicketSelectForm(forms.Form):
             raise ValidationError(
                 _('All selected tickets must share the same queue in order to be merged.'))
         return tickets
+
+
+class ChecklistForm(forms.ModelForm):
+    checklist_template = forms.ModelChoiceField(
+        label=_("Template"),
+        queryset=ChecklistTemplate.objects.all(),
+        widget=forms.Select(attrs={'class': 'form-wontrol'}),
+        required=False,
+    )
+    name = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-wontrol'}),
+        required=False,
+    )
+
+    class Meta:
+        model = Checklist
+        fields = ('name',)
+
+    def clean(self):
+        if not self.cleaned_data.get('checklist_template') and not self.cleaned_data.get('name'):
+            raise ValidationError(_('Please choose at least a name or a template for the new checklist'))
+        if self.cleaned_data.get('checklist_template') and self.cleaned_data.get('name'):
+            raise ValidationError(_('Please choose either a name or a template for the new checklist'))

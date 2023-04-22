@@ -2028,6 +2028,12 @@ class ChecklistTemplate(models.Model):
     def __str__(self):
         return self.name
 
+    def create_checklist_for_ticket(self, ticket):
+        checklist = ticket.checklists.create(name=self.name)
+        for task in self.task_list:
+            checklist.tasks.create(description=task)
+        return checklist
+
 
 class Checklist(models.Model):
     ticket = models.ForeignKey(

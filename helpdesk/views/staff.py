@@ -48,7 +48,8 @@ from helpdesk.forms import (
     TicketCCUserForm,
     TicketDependencyForm,
     TicketForm,
-    UserSettingsForm
+    UserSettingsForm,
+    ChecklistForm
 )
 from helpdesk.lib import process_attachments, queue_template_context, safe_template_context
 from helpdesk.models import (
@@ -406,6 +407,17 @@ def view_ticket(request, ticket_id):
     else:
         submitter_userprofile_url = None
 
+    checklist_form = ChecklistForm(request.POST or None)
+    if checklist_form.is_valid():
+        checklist_template = checklist_form.cleaned_data.get('checklist_template')
+        if checklist_template:
+            checklist_template.create_checklist_for_ticket(ticket)
+        else:
+            checklist = checklist_form.save(commit=False)
+            checklist.ticket = ticket
+            checklist.save()
+        return redirect(ticket)
+
     return render(request, 'helpdesk/ticket.html', {
         'ticket': ticket,
         'submitter_userprofile_url': submitter_userprofile_url,
@@ -416,6 +428,7 @@ def view_ticket(request, ticket_id):
             Q(queues=ticket.queue) | Q(queues__isnull=True)),
         'ticketcc_string': ticketcc_string,
         'SHOW_SUBSCRIBE': show_subscribe,
+        'checklist_form': checklist_form,
     })
 
 
