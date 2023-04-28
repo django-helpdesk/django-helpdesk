@@ -7,6 +7,11 @@
 {% block helpdesk_title %}{{ ticket.queue.slug }}-{{ ticket.id }} : {% trans "View Ticket Details" %}{% endblock %}
 
 {% block helpdesk_head %}
+    <style>
+        .checklist {
+            margin-bottom: 15px;
+        }
+    </style>
 {% endblock %}
 
 {% block h1_title %}{{ ticket.ticket_for_url }}{% endblock %}

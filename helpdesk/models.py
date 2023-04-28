@@ -2030,8 +2030,8 @@ class ChecklistTemplate(models.Model):
 
     def create_checklist_for_ticket(self, ticket):
         checklist = ticket.checklists.create(name=self.name)
-        for task in self.task_list:
-            checklist.tasks.create(description=task)
+        for position, task in enumerate(self.task_list):
+            checklist.tasks.create(description=task, position=position)
         return checklist
 
 
@@ -2079,12 +2079,17 @@ class ChecklistTask(models.Model):
         null=True,
         blank=True
     )
+    position = models.PositiveSmallIntegerField(
+        verbose_name=_('Position'),
+        db_index=True
+    )
 
     objects = ChecklistTaskQuerySet.as_manager()
 
     class Meta:
         verbose_name = _('Checklist Task')
         verbose_name_plural = _('Checklist Tasks')
+        ordering = ('position',)
 
     def __str__(self):
         return self.description

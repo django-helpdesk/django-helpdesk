@@ -1,0 +1,106 @@
+{% extends "helpdesk/base.html" %}
+
+{% load i18n %}
+
+{% block helpdesk_title %}{% trans "Edit Checklist" %}{% endblock %}
+
+{% block helpdesk_breadcrumb %}
+    <li class="breadcrumb-item">
+        <a href="{% url 'helpdesk:list' %}">{% trans "Tickets" %}</a>
+    </li>
+    <li class="breadcrumb-item">
+        <a href="{% url 'helpdesk:list' %}{{ ticket.id }}/">{{ ticket.queue.slug }}-{{ ticket.id }}</a>
+    </li>
+    <li class="breadcrumb-item active">{{ checklist.name }}</li>
+{% endblock %}
+
+{% block helpdesk_body %}
+    <div class="card">
+        <div class="card-header">
+            <h2>
+                {% trans "Edit Checklist" %}
+                <a class="btn btn-danger float-right" href='{% url "helpdesk:delete_ticket_checklist" ticket.id checklist.id %}'>
+                    <i class="fas fa-trash"></i>
+                    {% trans "Delete checklist" %}
+                </a>
+            </h2>
+        </div>
+        <div class="card-body">
+            {% if form.non_field_errors %}
+                <p class="text-danger">
+                    {{ form.non_field_errors }}
+                </p>
+            {% endif %}
+            <form method='post'>
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-sm-6 col-xs-12 form-group">
+                        {{ form.name.label_tag }}
+                        {{ form.name }}
+                        {{ form.name.errors }}
+                    </div>
+                </div>
+                <h3>Tasks</h3>
+                {{ formset.management_form }}
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>{% trans "Description" %}</th>
+                        <th>{% trans "Position" %}</th>
+                        <th class="text-center">{% trans "Delete?" %}</th>
+                    </tr>
+                    </thead>
+                    <tbody id="tasks">
+                    {% for form in formset %}
+                        <tr>
+                        {{ form.id }}
+                        <td>
+                            {{ form.description }}
+                            {{ form.description.errors }}
+                        </td>
+                        <td>
+                            {{ form.position }}
+                            {{ form.position.errors }}
+                        </td>
+                        <td>
+                            {{ form.DELETE }}
+                            {{ form.DELETE.errors }}
+                        </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                <button type="button" class="btn btn-secondary" id="addRow">
+                    <i class="fas fa-plus"></i>
+                    {% trans "Add another task" %}
+                </button>
+                <div class='buttons form-group text-center'>
+                    <a class="btn btn-link" href='{{ ticket.get_absolute_url }}'>
+                        <i class="fas fa-times"></i>
+                        {% trans "Cancel Changes" %}
+                    </a>
+                    <button type='submit' class="btn btn-primary">
+                        <i class="fas fa-save"></i>
+                        {% trans "Save Changes" %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+
+{% block helpdesk_js %}
+    <script>
+        $(() => {
+            const idTasksTotalForms = $('#id_tasks-TOTAL_FORMS')
+            $('#addRow').on('click', function() {
+                const formCount = idTasksTotalForms.val()
+                const description = '{{ formset.empty_form.description|escapejs }}'.replace(/__prefix__/g, formCount);
+                const position = '{{ formset.empty_form.position|escapejs }}'.replace(/__prefix__/g, formCount);
+                const delete_checkbox = '{{ formset.empty_form.DELETE|escapejs }}'.replace(/__prefix__/g, formCount);
+                $('#tasks').append(`<tr><td>${description}</td><td>${position}</td><td>${delete_checkbox}</td></tr>`)
+                idTasksTotalForms.val(parseInt(formCount) + 1);
+            });
+        })
+    </script>
+{% endblock %}

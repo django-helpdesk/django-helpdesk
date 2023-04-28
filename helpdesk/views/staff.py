@@ -20,6 +20,7 @@ from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.handlers.wsgi import WSGIRequest
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db.models import Q
+from django.forms import inlineformset_factory, TextInput, NumberInput
 from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
@@ -49,7 +50,9 @@ from helpdesk.forms import (
     TicketDependencyForm,
     TicketForm,
     UserSettingsForm,
-    ChecklistForm
+    CreateChecklistForm,
+    ChecklistForm,
+    FormControlDeleteFormSet
 )
 from helpdesk.lib import process_attachments, queue_template_context, safe_template_context
 from helpdesk.models import (
@@ -65,7 +68,9 @@ from helpdesk.models import (
     TicketChange,
     TicketCustomFieldValue,
     TicketDependency,
-    UserSettings
+    UserSettings,
+    Checklist,
+    ChecklistTask
 )
 from helpdesk.query import get_query_class, query_from_base64, query_to_base64
 from helpdesk.user import HelpdeskUser
@@ -407,7 +412,7 @@ def view_ticket(request, ticket_id):
     else:
         submitter_userprofile_url = None
 
-    checklist_form = ChecklistForm(request.POST or None)
+    checklist_form = CreateChecklistForm(request.POST or None)
     if checklist_form.is_valid():
         checklist_template = checklist_form.cleaned_data.get('checklist_template')
         if checklist_template:
@@ -429,6 +434,55 @@ def view_ticket(request, ticket_id):
         'ticketcc_string': ticketcc_string,
         'SHOW_SUBSCRIBE': show_subscribe,
         'checklist_form': checklist_form,
+    })
+
+
+@helpdesk_staff_member_required
+def edit_ticket_checklist(request, ticket_id, checklist_id):
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+    ticket_perm_check(request, ticket)
+    checklist = get_object_or_404(ticket.checklists.all(), id=checklist_id)
+
+    form = ChecklistForm(request.POST or None, instance=checklist)
+    TaskFormSet = inlineformset_factory(
+        Checklist,
+        ChecklistTask,
+        formset=FormControlDeleteFormSet,
+        fields=['description', 'position'],
+        widgets={
+            'description': TextInput(attrs={'class': 'form-control'}),
+            'position': NumberInput(attrs={'class': 'form-control'}),
+        },
+        can_delete=True,
+        extra=1
+    )
+    formset = TaskFormSet(request.POST or None, instance=checklist)
+    if form.is_valid() and formset.is_valid():
+        form.save()
+        formset.save()
+        return redirect(ticket)
+
+    return render(request, 'helpdesk/checklist_form.html', {
+        'ticket': ticket,
+        'checklist': checklist,
+        'form': form,
+        'formset': formset,
+    })
+
+
+@helpdesk_staff_member_required
+def delete_ticket_checklist(request, ticket_id, checklist_id):
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+    ticket_perm_check(request, ticket)
+    checklist = get_object_or_404(ticket.checklists.all(), id=checklist_id)
+
+    if request.POST:
+        checklist.delete()
+        return redirect(ticket)
+
+    return render(request, 'helpdesk/checklist_confirm_delete.html', {
+        'ticket': ticket,
+        'checklist': checklist,
     })
 
 

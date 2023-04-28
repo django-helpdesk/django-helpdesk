@@ -607,23 +607,34 @@ class MultipleTicketSelectForm(forms.Form):
 
 
 class ChecklistForm(forms.ModelForm):
-    checklist_template = forms.ModelChoiceField(
-        label=_("Template"),
-        queryset=ChecklistTemplate.objects.all(),
-        widget=forms.Select(attrs={'class': 'form-wontrol'}),
-        required=False,
-    )
     name = forms.CharField(
-        widget=forms.TextInput(attrs={'class': 'form-wontrol'}),
-        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        required=True,
     )
 
     class Meta:
         model = Checklist
         fields = ('name',)
 
+
+class CreateChecklistForm(ChecklistForm):
+    checklist_template = forms.ModelChoiceField(
+        label=_("Template"),
+        queryset=ChecklistTemplate.objects.all(),
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        required=False,
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['name'].required = False
+
     def clean(self):
         if not self.cleaned_data.get('checklist_template') and not self.cleaned_data.get('name'):
             raise ValidationError(_('Please choose at least a name or a template for the new checklist'))
         if self.cleaned_data.get('checklist_template') and self.cleaned_data.get('name'):
             raise ValidationError(_('Please choose either a name or a template for the new checklist'))
+
+
+class FormControlDeleteFormSet(forms.BaseInlineFormSet):
+    deletion_widget = forms.CheckboxInput(attrs={'class': 'form-control'})
