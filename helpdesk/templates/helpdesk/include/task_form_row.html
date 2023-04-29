@@ -1,0 +1,13 @@
+<tr>
+    <td title="Drag & Drop" class="text-center handle">
+        <i class="fas fa-grip-vertical"></i>
+    </td>
+    <td>
+        <input class="form-control taskInput" oninput="updateTemplateTaskList()" required value="{{ value }}">
+    </td>
+    <td class="text-center">
+        <button type="button" class="btn btn-sm btn-danger" onclick="removeTask(this)">
+            <i class="fas fa-times"></i>
+        </button>
+    </td>
+</tr>

@@ -52,7 +52,8 @@ from helpdesk.forms import (
     UserSettingsForm,
     CreateChecklistForm,
     ChecklistForm,
-    FormControlDeleteFormSet
+    FormControlDeleteFormSet,
+    ChecklistTemplateForm
 )
 from helpdesk.lib import process_attachments, queue_template_context, safe_template_context
 from helpdesk.models import (
@@ -70,7 +71,8 @@ from helpdesk.models import (
     TicketDependency,
     UserSettings,
     Checklist,
-    ChecklistTask
+    ChecklistTask,
+    ChecklistTemplate
 )
 from helpdesk.query import get_query_class, query_from_base64, query_to_base64
 from helpdesk.user import HelpdeskUser
@@ -2097,3 +2099,30 @@ def date_rel_to_today(today, offset):
 def sort_string(begin, end):
     return 'sort=created&date_from=%s&date_to=%s&status=%s&status=%s&status=%s' % (
         begin, end, Ticket.OPEN_STATUS, Ticket.REOPENED_STATUS, Ticket.RESOLVED_STATUS)
+
+
+@helpdesk_staff_member_required
+def checklist_templates(request, checklist_template_id=None):
+    checklist_template = None
+    if checklist_template_id:
+        checklist_template = get_object_or_404(ChecklistTemplate, id=checklist_template_id)
+    form = ChecklistTemplateForm(request.POST or None, instance=checklist_template)
+    if form.is_valid():
+        form.save()
+        return redirect('helpdesk:checklist_templates')
+    return render(request, 'helpdesk/checklist_templates.html', {
+        'checklists': ChecklistTemplate.objects.all(),
+        'checklist_template': checklist_template,
+        'form': form
+    })
+
+
+@helpdesk_staff_member_required
+def delete_checklist_template(request, checklist_template_id):
+    checklist_template = get_object_or_404(ChecklistTemplate, id=checklist_template_id)
+    if request.POST:
+        checklist_template.delete()
+        return redirect('helpdesk:checklist_templates')
+    return render(request, 'helpdesk/checklist_template_confirm_delete.html', {
+        'checklist_template': checklist_template,
+    })

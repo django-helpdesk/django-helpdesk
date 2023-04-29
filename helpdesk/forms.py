@@ -606,6 +606,22 @@ class MultipleTicketSelectForm(forms.Form):
         return tickets
 
 
+class ChecklistTemplateForm(forms.ModelForm):
+    name = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        required=True,
+    )
+    task_list = forms.JSONField(widget=forms.HiddenInput())
+
+    class Meta:
+        model = ChecklistTemplate
+        fields = ('name', 'task_list')
+
+    def clean_task_list(self):
+        task_list = self.cleaned_data['task_list']
+        return list(map(lambda task: task.strip(), task_list))
+
+
 class ChecklistForm(forms.ModelForm):
     name = forms.CharField(
         widget=forms.TextInput(attrs={'class': 'form-control'}),

@@ -2010,7 +2010,7 @@ def is_a_list_without_empty_element(task_list):
     for task in task_list:
         if not isinstance(task, str):
             raise ValidationError(f'{task} is not a string')
-        if task == '':
+        if task.strip() == '':
             raise ValidationError('A task cannot be an empty string')
 
 

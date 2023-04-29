@@ -102,3 +102,7 @@ table .tickettitle {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+.handle {
+	cursor: grab;
+}

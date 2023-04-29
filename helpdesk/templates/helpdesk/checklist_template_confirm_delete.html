@@ -1,0 +1,47 @@
+{% extends "helpdesk/base.html" %}
+
+{% load i18n %}
+
+{% block helpdesk_title %}{% trans "Delete Checklist Template" %}{% endblock %}
+
+{% block helpdesk_breadcrumb %}
+    <li class="breadcrumb-item">
+        <a href="{% url 'helpdesk:system_settings' %}">{% trans "System Settings" %}</a>
+    </li>
+    <li class="breadcrumb-item">
+        <a href="{% url 'helpdesk:checklist_templates' %}">{% trans "Checklist Templates" %}</a>
+    </li>
+    <li class="breadcrumb-item active">
+        {{ checklist_template }}
+    </li>
+{% endblock %}
+
+{% block helpdesk_body %}
+    <div class="row">
+        <div class="col-sm-6 offset-sm-3 col-xs-12">
+            <div class="card">
+                <div class="card-header">
+                    <h2>
+                        {% trans "Delete Checklist Template" %}
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <form method='post'>
+                        {% csrf_token %}
+                        <p>{% trans "Are you sure your want to delete checklist template" %} {{ checklist_template.name }} ?</p>
+                        <div class='buttons form-group text-center'>
+                            <a class="btn btn-secondary" href='{% url 'helpdesk:checklist_templates' %}'>
+                                <i class="fas fa-times"></i>
+                                {% trans "Don't Delete" %}
+                            </a>
+                            <button type='submit' class="btn btn-danger">
+                                <i class="fas fa-trash"></i>
+                                {% trans "Yes, I Understand - Delete" %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

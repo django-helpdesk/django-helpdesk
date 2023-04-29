@@ -115,6 +115,17 @@ urlpatterns = [
     path("ignore/add/", staff.email_ignore_add, name="email_ignore_add"),
     path("ignore/delete/<int:id>/",
          staff.email_ignore_del, name="email_ignore_del"),
+    path("checklist-templates/", staff.checklist_templates, name="checklist_templates"),
+    path(
+        "checklist-templates/<int:checklist_template_id>/",
+        staff.checklist_templates,
+        name="edit_checklist_template"
+    ),
+    path(
+        "checklist-templates/<int:checklist_template_id>/delete/",
+        staff.delete_checklist_template,
+        name="delete_checklist_template"
+    ),
     re_path(
         r"^datatables_ticket_list/(?P<query>{})$".format(base64_pattern),
         staff.datatables_ticket_list,
