@@ -178,14 +178,16 @@
                                 <div class="row">
                                     {% for checklist in ticket.checklists.all %}
                                         <div class="col-sm-4 col-xs-12">
-                                            <div class="card checklist">
+                                            <div class="card mb-4">
                                                 <div class="card-header">
                                                     <h5>
-                                                        {{ checklist }}
+                                                        <span data-toggle="collapse" data-target="#checklist{{ checklist.id }}" onclick="$(this).siblings('button').children('i').toggleClass('fa-caret-down fa-caret-up')">
+                                                            {{ checklist }}
+                                                        </span>
                                                         <a class="btn btn-link btn-sm" href="{% url 'helpdesk:edit_ticket_checklist' ticket.id checklist.id %}">
                                                             <i class="fas fa-edit"></i>
                                                         </a>
-                                                        <button class="btn btn-secondary btn-sm float-right" data-toggle="collapse" data-target="#checklist{{ checklist.id }}" onclick="$(this).find('i').toggleClass('fa-caret-down fa-caret-up')">
+                                                        <button class="btn btn-secondary btn-sm float-right" data-toggle="collapse" data-target="#checklist{{ checklist.id }}" onclick="$(this).children('i').toggleClass('fa-caret-down fa-caret-up')">
                                                             <i class="fas fa-caret-down"></i>
                                                         </button>
                                                     </h5>
@@ -193,31 +195,30 @@
                                                 <div class="card-body collapse" id="checklist{{ checklist.id }}">
                                                     <div class="list-group">
                                                         {% for task in checklist.tasks.all %}
-                                                            <div class="list-group-item">
-                                                                <input type="checkbox" disabled{% if task.completion_date %} checked{% endif %}>
-                                                                {{ task }}
-                                                                {% if task.completion_date %}
-                                                                    <i>
-                                                                        ({% trans "Completed on" %} {{ task.completion_date }})
-                                                                    </i>
-                                                                {% endif %}
+                                                            <div class="list-group-item"{% if task.completion_date %} title="{% trans "Completed on" %} {{ task.completion_date }}" {% endif %}>
+                                                                <label>
+                                                                    <input type="checkbox" disabled{% if task.completion_date %} checked{% endif %}>
+                                                                    {{ task }}
+                                                                </label>
                                                             </div>
                                                         {% endfor %}
                                                     </div>
                                                 </div>
-                                                <div class="card-footer">
-                                                    <div class="progress">
-                                                        {% widthratio checklist.tasks.completed.count checklist.tasks.count 100 as width  %}
-                                                        <div class="progress-bar" role="progressbar" style="width: {{ width }}%" aria-valuenow="{{ width }}" aria-valuemin="0" aria-valuemax="100">
-                                                            {{ width }}%
+                                                {% if checklist.tasks.completed.count %}
+                                                    <div class="card-footer">
+                                                        <div class="progress">
+                                                            {% widthratio checklist.tasks.completed.count checklist.tasks.count 100 as width  %}
+                                                            <div class="progress-bar" role="progressbar" style="width: {{ width }}%" aria-valuenow="{{ width }}" aria-valuemin="0" aria-valuemax="100">
+                                                                {{ width }}%
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                </div>
+                                                {% endif %}
                                             </div>
                                         </div>
                                     {% endfor %}
                                     <div class="col-sm-4 col-xs-12">
-                                        <div class="card checklist">
+                                        <div class="card mb-4">
                                             <div class="card-header">
                                                 <h5>Add a checklist</h5>
                                             </div>

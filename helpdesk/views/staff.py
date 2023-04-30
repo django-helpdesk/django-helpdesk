@@ -738,6 +738,14 @@ def update_ticket(request, ticket_id, public=False):
     owner = int(request.POST.get('owner', -1))
     priority = int(request.POST.get('priority', ticket.priority))
 
+    # Check if a change happened on checklists
+    changes_in_checklists = False
+    for checklist in ticket.checklists.all():
+        old_completed_id = sorted(list(checklist.tasks.completed().values_list('id', flat=True)))
+        new_completed_id = sorted(list(map(int, request.POST.getlist(f'checklist-{checklist.id}', []))))
+        if old_completed_id != new_completed_id:
+            changes_in_checklists = True
+
     time_spent = get_time_spent_from_request(request)
     # NOTE: jQuery's default for dates is mm/dd/yy
     # very US-centric but for now that's the only format supported
@@ -746,6 +754,7 @@ def update_ticket(request, ticket_id, public=False):
     no_changes = all([
         not request.FILES,
         not comment,
+        not changes_in_checklists,
         new_status == ticket.status,
         title == ticket.title,
         priority == int(ticket.priority),
@@ -853,6 +862,30 @@ def update_ticket(request, ticket_id, public=False):
         )
         c.save()
         ticket.due_date = due_date
+
+    if changes_in_checklists:
+        for checklist in ticket.checklists.all():
+            new_completed_tasks = list(map(int, request.POST.getlist(f'checklist-{checklist.id}', [])))
+            for task in checklist.tasks.all():
+                changed = None
+
+                # Add completion if it was not done yet
+                if not task.completion_date and task.id in new_completed_tasks:
+                    task.completion_date = timezone.now()
+                    changed = 'completed'
+                # Remove it if it was done before
+                elif task.completion_date and task.id not in new_completed_tasks:
+                    task.completion_date = None
+                    changed = 'uncompleted'
+
+                # Save and add ticket change if task state has changed
+                if changed:
+                    task.save(update_fields=['completion_date'])
+                    f.ticketchange_set.create(
+                        field=f'[{checklist.name}] {task.description}',
+                        old_value=_('To do') if changed == 'completed' else _('Completed'),
+                        new_value=_('Completed') if changed == 'completed' else _('To do'),
+                    )
 
     if new_status in (
         Ticket.RESOLVED_STATUS, Ticket.CLOSED_STATUS

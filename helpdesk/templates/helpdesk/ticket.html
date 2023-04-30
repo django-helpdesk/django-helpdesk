@@ -6,14 +6,6 @@
 
 {% block helpdesk_title %}{{ ticket.queue.slug }}-{{ ticket.id }} : {% trans "View Ticket Details" %}{% endblock %}
 
-{% block helpdesk_head %}
-    <style>
-        .checklist {
-            margin-bottom: 15px;
-        }
-    </style>
-{% endblock %}
-
 {% block h1_title %}{{ ticket.ticket_for_url }}{% endblock %}
 
 {% block helpdesk_breadcrumb %}
@@ -171,7 +163,7 @@
                 {% endif %}
             </dl>
 
-        <p id='ShowFurtherOptPara'><button class="btn btn-warning btn-sm" id='ShowFurtherEditOptions'>{% trans "Change Further Details &raquo;" %}</button></p>
+        <p id='ShowFurtherOptPara'><button type="button" class="btn btn-warning btn-sm" id='ShowFurtherEditOptions'>{% trans "Change Further Details &raquo;" %}</button></p>
 
         <div id='FurtherEditOptions' style='display: none;'>
 
@@ -193,7 +185,41 @@
 
         </div>
 
-        <p id='ShowFileUploadPara'><button class="btn btn-warning btn-sm" id='ShowFileUpload'>{% trans "Attach File(s) &raquo;" %}</button></p>
+        {% if ticket.checklists.exists %}
+            <p>
+                <button type="button" class="btn btn-warning btn-sm" id='ShowChecklistEditOptions'>
+                    {% trans "Update checklists" %} &raquo;
+                </button>
+            </p>
+
+            <div id="checklistEdit" style="display: none">
+                <div class="row">
+                    {% for checklist in ticket.checklists.all %}
+                        <div class="col-sm-4 col-xs-12">
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h5>{{ checklist }}</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="list-group">
+                                        {% for task in checklist.tasks.all %}
+                                            <div class="list-group-item"{% if task.completion_date %} title="{% trans "Completed on" %} {{ task.completion_date }}" {% endif %}>
+                                                <label>
+                                                    <input type="checkbox" name="checklist-{{ checklist.id }}" value="{{ task.id }}" {% if task.completion_date %} checked{% endif %}>
+                                                    {{ task }}
+                                                </label>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+
+        <p id='ShowFileUploadPara'><button type="button" class="btn btn-warning btn-sm" id='ShowFileUpload'>{% trans "Attach File(s) &raquo;" %}</button></p>
 
         <div id='FileUpload' style='display: none;'>
 
@@ -234,13 +260,15 @@ $( function() {
 $(document).ready(function() {
     $("#ShowFurtherEditOptions").click(function() {
         $("#FurtherEditOptions").toggle();
-        return false;
+    });
+
+    $("#ShowChecklistEditOptions").click(function() {
+        $("#checklistEdit").toggle();
     });
 
     $("#ShowFileUpload").click(function() {
         $("#FileUpload").fadeIn();
         $("#ShowFileUploadPara").hide();
-        return false;
     });
 
     $('#id_preset').change(function() {
