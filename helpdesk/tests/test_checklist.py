@@ -1,11 +1,9 @@
 from datetime import datetime
-
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
-
-from helpdesk.models import Ticket, Queue, ChecklistTemplate
+from helpdesk.models import ChecklistTemplate, Queue, Ticket
 
 
 class TicketChecklistTestCase(TestCase):
@@ -159,4 +157,3 @@ class TicketChecklistTestCase(TestCase):
 
         task.refresh_from_db()
         self.assertIsNone(task.completion_date)
-
