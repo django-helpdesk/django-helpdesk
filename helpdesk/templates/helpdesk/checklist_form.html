@@ -45,28 +45,14 @@
                 <table class="table">
                     <thead>
                     <tr>
+                        <th class="text-right">{% trans "Position" %}</th>
                         <th>{% trans "Description" %}</th>
-                        <th>{% trans "Position" %}</th>
                         <th class="text-center">{% trans "Delete?" %}</th>
                     </tr>
                     </thead>
                     <tbody id="tasks">
                     {% for form in formset %}
-                        <tr>
-                        {{ form.id }}
-                        <td>
-                            {{ form.description }}
-                            {{ form.description.errors }}
-                        </td>
-                        <td>
-                            {{ form.position }}
-                            {{ form.position.errors }}
-                        </td>
-                        <td>
-                            {{ form.DELETE }}
-                            {{ form.DELETE.errors }}
-                        </td>
-                        </tr>
+                        {% include 'helpdesk/include/task_form_row.html' %}
                     {% endfor %}
                     </tbody>
                 </table>
@@ -90,17 +76,28 @@
 {% endblock %}
 
 {% block helpdesk_js %}
+    <script src="https://unpkg.com/sortablejs-make/Sortable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-sortablejs@latest/jquery-sortable.js"></script>
     <script>
+        const updatePosition = () => {
+            $('#tasks tr').each((index, taskRow) => {
+                $(taskRow).find('input[id$=position]').val(index + 1)
+            })
+        }
+
         $(() => {
             const idTasksTotalForms = $('#id_tasks-TOTAL_FORMS')
             $('#addRow').on('click', function() {
                 const formCount = idTasksTotalForms.val()
-                const description = '{{ formset.empty_form.description|escapejs }}'.replace(/__prefix__/g, formCount);
-                const position = '{{ formset.empty_form.position|escapejs }}'.replace(/__prefix__/g, formCount);
-                const delete_checkbox = '{{ formset.empty_form.DELETE|escapejs }}'.replace(/__prefix__/g, formCount);
-                $('#tasks').append(`<tr><td>${description}</td><td>${position}</td><td>${delete_checkbox}</td></tr>`)
+                $('#tasks').append(`{% include 'helpdesk/include/task_form_row.html' with form=formset.empty_form %}`.replace(/__prefix__/g, formCount))
                 idTasksTotalForms.val(parseInt(formCount) + 1);
+                updatePosition()
             });
+
+            $('#tasks').sortable({
+                handle: '.handle',
+                onChange: updatePosition
+            })
         })
     </script>
 {% endblock %}

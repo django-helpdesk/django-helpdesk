@@ -20,7 +20,7 @@ from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.handlers.wsgi import WSGIRequest
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db.models import Q
-from django.forms import inlineformset_factory, TextInput, NumberInput
+from django.forms import inlineformset_factory, TextInput, HiddenInput
 from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
@@ -454,11 +454,11 @@ def edit_ticket_checklist(request, ticket_id, checklist_id):
         formset=FormControlDeleteFormSet,
         fields=['description', 'position'],
         widgets={
+            'position': HiddenInput(),
             'description': TextInput(attrs={'class': 'form-control'}),
-            'position': NumberInput(attrs={'class': 'form-control'}),
         },
         can_delete=True,
-        extra=1
+        extra=0
     )
     formset = TaskFormSet(request.POST or None, instance=checklist)
     if form.is_valid() and formset.is_valid():
