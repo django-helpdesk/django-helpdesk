@@ -641,15 +641,8 @@ class CreateChecklistForm(ChecklistForm):
         required=False,
     )
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['name'].required = False
-
-    def clean(self):
-        if not self.cleaned_data.get('checklist_template') and not self.cleaned_data.get('name'):
-            raise ValidationError(_('Please choose at least a name or a template for the new checklist'))
-        if self.cleaned_data.get('checklist_template') and self.cleaned_data.get('name'):
-            raise ValidationError(_('Please choose either a name or a template for the new checklist'))
+    class Meta(ChecklistForm.Meta):
+        fields = ('checklist_template', 'name')
 
 
 class FormControlDeleteFormSet(forms.BaseInlineFormSet):

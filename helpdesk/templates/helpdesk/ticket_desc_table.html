@@ -196,7 +196,7 @@
                                                     <div class="list-group">
                                                         {% for task in checklist.tasks.all %}
                                                             <div class="list-group-item"{% if task.completion_date %} title="{% trans "Completed on" %} {{ task.completion_date }}" {% endif %}>
-                                                                <label>
+                                                                <label class="disabledTask">
                                                                     <input type="checkbox" disabled{% if task.completion_date %} checked{% endif %}>
                                                                     {{ task }}
                                                                 </label>
@@ -218,20 +218,10 @@
                                         </div>
                                     {% endfor %}
                                     <div class="col-sm-4 col-xs-12">
-                                        <div class="card mb-4">
-                                            <div class="card-header">
-                                                <h5>Add a checklist</h5>
-                                            </div>
-                                            <div class="card-body">
-                                                <form method="post">
-                                                    {% csrf_token %}
-                                                    {{ checklist_form.as_p }}
-                                                    <button type="submit" class="btn btn-primary">
-                                                        {% trans "Add" %}
-                                                    </button>
-                                                </form>
-                                            </div>
-                                        </div>
+                                        <button type="button" class="btn btn-sm btn-secondary" data-toggle="modal" data-target="#createChecklistModal">
+                                            <i class="fas fa-plus"></i>
+                                            {% trans "Create new checklist" %}
+                                        </button>
                                     </div>
                                 </div>
                             </div>

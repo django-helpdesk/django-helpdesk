@@ -2028,12 +2028,6 @@ class ChecklistTemplate(models.Model):
     def __str__(self):
         return self.name
 
-    def create_checklist_for_ticket(self, ticket):
-        checklist = ticket.checklists.create(name=self.name)
-        for position, task in enumerate(self.task_list):
-            checklist.tasks.create(description=task, position=position)
-        return checklist
-
 
 class Checklist(models.Model):
     ticket = models.ForeignKey(
@@ -2053,6 +2047,10 @@ class Checklist(models.Model):
 
     def __str__(self):
         return self.name
+
+    def create_tasks_from_template(self, template):
+        for position, task in enumerate(template.task_list):
+            self.tasks.create(description=task, position=position)
 
 
 class ChecklistTaskQuerySet(models.QuerySet):

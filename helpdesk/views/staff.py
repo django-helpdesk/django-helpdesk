@@ -416,14 +416,16 @@ def view_ticket(request, ticket_id):
 
     checklist_form = CreateChecklistForm(request.POST or None)
     if checklist_form.is_valid():
+        checklist = checklist_form.save(commit=False)
+        checklist.ticket = ticket
+        checklist.save()
+
         checklist_template = checklist_form.cleaned_data.get('checklist_template')
+        # Add predefined tasks if template has been selected
         if checklist_template:
-            checklist_template.create_checklist_for_ticket(ticket)
-        else:
-            checklist = checklist_form.save(commit=False)
-            checklist.ticket = ticket
-            checklist.save()
-        return redirect(ticket)
+            checklist.create_tasks_from_template(checklist_template)
+
+        return redirect('helpdesk:edit_ticket_checklist', ticket.id, checklist.id)
 
     return render(request, 'helpdesk/ticket.html', {
         'ticket': ticket,
