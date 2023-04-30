@@ -3,6 +3,9 @@ from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 from helpdesk import settings as helpdesk_settings
 from helpdesk.models import (
+    Checklist,
+    ChecklistTask,
+    ChecklistTemplate,
     CustomField,
     EmailTemplate,
     EscalationExclusion,
@@ -13,7 +16,7 @@ from helpdesk.models import (
     PreSetReply,
     Queue,
     Ticket,
-    TicketChange, Checklist, ChecklistTemplate, ChecklistTask
+    TicketChange
 )
 
 

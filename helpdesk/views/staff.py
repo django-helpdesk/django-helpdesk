@@ -6,6 +6,7 @@ django-helpdesk - A Django powered ticket tracker for small enterprise.
 views/staff.py - The bulk of the application - provides most business logic and
                  renders all staff-facing views.
 """
+
 from ..lib import format_time_spent
 from ..templated_email import send_templated_mail
 from collections import defaultdict
@@ -20,7 +21,7 @@ from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.handlers.wsgi import WSGIRequest
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db.models import Q
-from django.forms import inlineformset_factory, TextInput, HiddenInput
+from django.forms import HiddenInput, inlineformset_factory, TextInput
 from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
@@ -39,24 +40,27 @@ from helpdesk.decorators import (
     superuser_required
 )
 from helpdesk.forms import (
+    ChecklistForm,
+    ChecklistTemplateForm,
+    CreateChecklistForm,
     CUSTOMFIELD_DATE_FORMAT,
     EditFollowUpForm,
     EditTicketForm,
     EmailIgnoreForm,
+    FormControlDeleteFormSet,
     MultipleTicketSelectForm,
     TicketCCEmailForm,
     TicketCCForm,
     TicketCCUserForm,
     TicketDependencyForm,
     TicketForm,
-    UserSettingsForm,
-    CreateChecklistForm,
-    ChecklistForm,
-    FormControlDeleteFormSet,
-    ChecklistTemplateForm
+    UserSettingsForm
 )
 from helpdesk.lib import process_attachments, queue_template_context, safe_template_context
 from helpdesk.models import (
+    Checklist,
+    ChecklistTask,
+    ChecklistTemplate,
     CustomField,
     FollowUp,
     FollowUpAttachment,
@@ -69,10 +73,7 @@ from helpdesk.models import (
     TicketChange,
     TicketCustomFieldValue,
     TicketDependency,
-    UserSettings,
-    Checklist,
-    ChecklistTask,
-    ChecklistTemplate
+    UserSettings
 )
 from helpdesk.query import get_query_class, query_from_base64, query_to_base64
 from helpdesk.user import HelpdeskUser
