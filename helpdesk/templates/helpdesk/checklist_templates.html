@@ -38,10 +38,10 @@
                             <tbody id="tasks">
                                 {% if checklist_template %}
                                     {% for value in checklist_template.task_list %}
-                                        {% include 'helpdesk/include/task_form_row.html' %}
+                                        {% include 'helpdesk/include/template_task_form_row.html' %}
                                     {% endfor %}
                                 {% else %}
-                                    {% include 'helpdesk/include/task_form_row.html' %}
+                                    {% include 'helpdesk/include/template_task_form_row.html' %}
                                 {% endif %}
                             </tbody>
                         </table>
@@ -107,7 +107,7 @@
 
         $(() => {
             $('#addTask').on('click', () => {
-                $('#tasks').append(`{% include 'helpdesk/include/task_form_row.html' %}`)
+                $('#tasks').append(`{% include 'helpdesk/include/template_task_form_row.html' %}`)
             })
 
             $('#tasks').sortable({
