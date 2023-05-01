@@ -2,8 +2,7 @@ from datetime import datetime
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
-from django.utils.translation import gettext_lazy as _
-from helpdesk.models import ChecklistTemplate, Queue, Ticket
+from helpdesk.models import Checklist, ChecklistTask, ChecklistTemplate, Queue, Ticket
 
 
 class TicketChecklistTestCase(TestCase):
@@ -109,6 +108,26 @@ class TicketChecklistTestCase(TestCase):
         self.assertEqual(checklist.tasks.all()[0].description, 'New first task')
         self.assertEqual(checklist.tasks.all()[1].description, 'First task edited')
 
+    def test_delete_checklist(self):
+        checklist = self.ticket.checklists.create(name='Test checklist')
+        checklist.tasks.create(description='First task', position=1)
+        self.assertEqual(Checklist.objects.count(), 1)
+        self.assertEqual(ChecklistTask.objects.count(), 1)
+
+        response = self.client.post(
+            reverse(
+                'helpdesk:delete_ticket_checklist',
+                kwargs={'ticket_id': self.ticket.id, 'checklist_id': checklist.id}
+            ),
+            follow=True
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'helpdesk/ticket.html')
+
+        self.assertEqual(Checklist.objects.count(), 0)
+        self.assertEqual(ChecklistTask.objects.count(), 0)
+
     def test_mark_task_as_done(self):
         checklist = self.ticket.checklists.create(name='Test checklist')
         task = checklist.tasks.create(description='Task', position=1)
@@ -129,8 +148,8 @@ class TicketChecklistTestCase(TestCase):
         self.assertEqual(self.ticket.followup_set.count(), 1)
         followup = self.ticket.followup_set.get()
         self.assertEqual(followup.ticketchange_set.count(), 1)
-        self.assertEqual(followup.ticketchange_set.get().old_value, _('To do'))
-        self.assertEqual(followup.ticketchange_set.get().new_value, _('Completed'))
+        self.assertEqual(followup.ticketchange_set.get().old_value, 'To do')
+        self.assertEqual(followup.ticketchange_set.get().new_value, 'Completed')
 
         task.refresh_from_db()
         self.assertIsNotNone(task.completion_date)
@@ -152,8 +171,82 @@ class TicketChecklistTestCase(TestCase):
         self.assertEqual(self.ticket.followup_set.count(), 1)
         followup = self.ticket.followup_set.get()
         self.assertEqual(followup.ticketchange_set.count(), 1)
-        self.assertEqual(followup.ticketchange_set.get().old_value, _('Completed'))
-        self.assertEqual(followup.ticketchange_set.get().new_value, _('To do'))
+        self.assertEqual(followup.ticketchange_set.get().old_value, 'Completed')
+        self.assertEqual(followup.ticketchange_set.get().new_value, 'To do')
 
         task.refresh_from_db()
         self.assertIsNone(task.completion_date)
+
+    def test_display_checklist_templates(self):
+        ChecklistTemplate.objects.create(
+            name='Test checklist template',
+            task_list=['first', 'second', 'third']
+        )
+
+        response = self.client.get(reverse('helpdesk:checklist_templates'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'helpdesk/checklist_templates.html')
+        self.assertContains(response, 'Test checklist template')
+        self.assertContains(response, '3 tasks')
+
+    def test_create_checklist_template(self):
+        self.assertEqual(ChecklistTemplate.objects.count(), 0)
+
+        response = self.client.post(
+            reverse('helpdesk:checklist_templates'),
+            data={
+                'name': 'Test checklist template',
+                'task_list': '["first", "second", "third"]'
+            },
+            follow=True
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'helpdesk/checklist_templates.html')
+
+        self.assertEqual(ChecklistTemplate.objects.count(), 1)
+        checklist_template = ChecklistTemplate.objects.get()
+        self.assertEqual(checklist_template.name, 'Test checklist template')
+        self.assertEqual(checklist_template.task_list, ['first', 'second', 'third'])
+
+    def test_edit_checklist_template(self):
+        checklist_template = ChecklistTemplate.objects.create(
+            name='Test checklist template',
+            task_list=['first', 'second', 'third']
+        )
+        self.assertEqual(ChecklistTemplate.objects.count(), 1)
+
+        response = self.client.post(
+            reverse('helpdesk:edit_checklist_template', kwargs={'checklist_template_id': checklist_template.id}),
+            data={
+                'name': 'New checklist template',
+                'task_list': '["new first", "second", "third", "last"]'
+            },
+            follow=True
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'helpdesk/checklist_templates.html')
+
+        self.assertEqual(ChecklistTemplate.objects.count(), 1)
+        checklist_template.refresh_from_db()
+        self.assertEqual(checklist_template.name, 'New checklist template')
+        self.assertEqual(checklist_template.task_list, ['new first', 'second', 'third', 'last'])
+
+    def test_delete_checklist_template(self):
+        checklist_template = ChecklistTemplate.objects.create(
+            name='Test checklist template',
+            task_list=['first', 'second', 'third']
+        )
+        self.assertEqual(ChecklistTemplate.objects.count(), 1)
+
+        response = self.client.post(
+            reverse('helpdesk:delete_checklist_template', kwargs={'checklist_template_id': checklist_template.id}),
+            follow=True
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'helpdesk/checklist_templates.html')
+
+        self.assertEqual(ChecklistTemplate.objects.count(), 0)

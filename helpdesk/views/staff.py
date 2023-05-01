@@ -481,7 +481,7 @@ def delete_ticket_checklist(request, ticket_id, checklist_id):
     ticket_perm_check(request, ticket)
     checklist = get_object_or_404(ticket.checklists.all(), id=checklist_id)
 
-    if request.POST:
+    if request.method == 'POST':
         checklist.delete()
         return redirect(ticket)
 
@@ -2156,7 +2156,7 @@ def checklist_templates(request, checklist_template_id=None):
 @helpdesk_staff_member_required
 def delete_checklist_template(request, checklist_template_id):
     checklist_template = get_object_or_404(ChecklistTemplate, id=checklist_template_id)
-    if request.POST:
+    if request.method == 'POST':
         checklist_template.delete()
         return redirect('helpdesk:checklist_templates')
     return render(request, 'helpdesk/checklist_template_confirm_delete.html', {
