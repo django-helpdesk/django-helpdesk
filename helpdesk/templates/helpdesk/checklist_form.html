@@ -1,0 +1,103 @@
+{% extends "helpdesk/base.html" %}
+
+{% load i18n %}
+
+{% block helpdesk_title %}{% trans "Edit Checklist" %}{% endblock %}
+
+{% block helpdesk_breadcrumb %}
+    <li class="breadcrumb-item">
+        <a href="{% url 'helpdesk:list' %}">{% trans "Tickets" %}</a>
+    </li>
+    <li class="breadcrumb-item">
+        <a href="{% url 'helpdesk:list' %}{{ ticket.id }}/">{{ ticket.queue.slug }}-{{ ticket.id }}</a>
+    </li>
+    <li class="breadcrumb-item active">{{ checklist.name }}</li>
+{% endblock %}
+
+{% block helpdesk_body %}
+    <div class="card">
+        <div class="card-header">
+            <h2>
+                {% trans "Edit Checklist" %}
+                <a class="btn btn-danger float-right" href='{% url "helpdesk:delete_ticket_checklist" ticket.id checklist.id %}'>
+                    <i class="fas fa-trash"></i>
+                    {% trans "Delete checklist" %}
+                </a>
+            </h2>
+        </div>
+        <div class="card-body">
+            {% if form.non_field_errors %}
+                <p class="text-danger">
+                    {{ form.non_field_errors }}
+                </p>
+            {% endif %}
+            <form method='post'>
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-sm-6 col-xs-12 form-group">
+                        {{ form.name.label_tag }}
+                        {{ form.name }}
+                        {{ form.name.errors }}
+                    </div>
+                </div>
+                <h3>Tasks</h3>
+                {{ formset.management_form }}
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th class="text-right">{% trans "Position" %}</th>
+                        <th>{% trans "Description" %}</th>
+                        <th class="text-center">{% trans "Delete?" %}</th>
+                    </tr>
+                    </thead>
+                    <tbody id="tasks">
+                    {% for form in formset %}
+                        {% include 'helpdesk/include/task_form_row.html' %}
+                    {% endfor %}
+                    </tbody>
+                </table>
+                <button type="button" class="btn btn-secondary" id="addRow">
+                    <i class="fas fa-plus"></i>
+                    {% trans "Add task" %}
+                </button>
+                <div class='buttons form-group text-center'>
+                    <a class="btn btn-link" href='{{ ticket.get_absolute_url }}'>
+                        <i class="fas fa-times"></i>
+                        {% trans "Cancel Changes" %}
+                    </a>
+                    <button type='submit' class="btn btn-primary">
+                        <i class="fas fa-save"></i>
+                        {% trans "Save Changes" %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+
+{% block helpdesk_js %}
+    <script src="https://unpkg.com/sortablejs-make/Sortable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-sortablejs@latest/jquery-sortable.js"></script>
+    <script>
+        const updatePosition = () => {
+            $('#tasks tr').each((index, taskRow) => {
+                $(taskRow).find('input[id$=position]').val(index + 1)
+            })
+        }
+
+        $(() => {
+            const idTasksTotalForms = $('#id_tasks-TOTAL_FORMS')
+            $('#addRow').on('click', function() {
+                const formCount = idTasksTotalForms.val()
+                $('#tasks').append(`{% include 'helpdesk/include/task_form_row.html' with form=formset.empty_form %}`.replace(/__prefix__/g, formCount))
+                idTasksTotalForms.val(parseInt(formCount) + 1);
+                updatePosition()
+            });
+
+            $('#tasks').sortable({
+                handle: '.handle',
+                onChange: updatePosition
+            })
+        })
+    </script>
+{% endblock %}

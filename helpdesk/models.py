@@ -2002,3 +2002,92 @@ class TicketDependency(models.Model):
 
     def __str__(self):
         return '%s / %s' % (self.ticket, self.depends_on)
+
+
+def is_a_list_without_empty_element(task_list):
+    if not isinstance(task_list, list):
+        raise ValidationError(f'{task_list} is not a list')
+    for task in task_list:
+        if not isinstance(task, str):
+            raise ValidationError(f'{task} is not a string')
+        if task.strip() == '':
+            raise ValidationError('A task cannot be an empty string')
+
+
+class ChecklistTemplate(models.Model):
+    name = models.CharField(
+        verbose_name=_('Name'),
+        max_length=100
+    )
+    task_list = models.JSONField(verbose_name=_('Task List'), validators=[is_a_list_without_empty_element])
+
+    class Meta:
+        verbose_name = _('Checklist Template')
+        verbose_name_plural = _('Checklist Templates')
+
+    def __str__(self):
+        return self.name
+
+
+class Checklist(models.Model):
+    ticket = models.ForeignKey(
+        Ticket,
+        on_delete=models.CASCADE,
+        verbose_name=_('Ticket'),
+        related_name='checklists',
+    )
+    name = models.CharField(
+        verbose_name=_('Name'),
+        max_length=100
+    )
+
+    class Meta:
+        verbose_name = _('Checklist')
+        verbose_name_plural = _('Checklists')
+
+    def __str__(self):
+        return self.name
+
+    def create_tasks_from_template(self, template):
+        for position, task in enumerate(template.task_list):
+            self.tasks.create(description=task, position=position)
+
+
+class ChecklistTaskQuerySet(models.QuerySet):
+    def todo(self):
+        return self.filter(completion_date__isnull=True)
+
+    def completed(self):
+        return self.filter(completion_date__isnull=False)
+
+
+class ChecklistTask(models.Model):
+    checklist = models.ForeignKey(
+        Checklist,
+        on_delete=models.CASCADE,
+        verbose_name=_('Checklist'),
+        related_name='tasks',
+    )
+    description = models.CharField(
+        verbose_name=_('Description'),
+        max_length=250
+    )
+    completion_date = models.DateTimeField(
+        verbose_name=_('Completion Date'),
+        null=True,
+        blank=True
+    )
+    position = models.PositiveSmallIntegerField(
+        verbose_name=_('Position'),
+        db_index=True
+    )
+
+    objects = ChecklistTaskQuerySet.as_manager()
+
+    class Meta:
+        verbose_name = _('Checklist Task')
+        verbose_name_plural = _('Checklist Tasks')
+        ordering = ('position',)
+
+    def __str__(self):
+        return self.description

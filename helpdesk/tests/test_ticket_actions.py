@@ -1,6 +1,4 @@
 from django.contrib.auth import get_user_model
-from django.contrib.sites.models import Site
-from django.core import mail
 from django.test import TestCase
 from django.test.client import Client
 from django.urls import reverse
@@ -38,6 +36,7 @@ class TicketActionsTestCase(TestCase):
         )
 
         self.ticket_data = {
+            'queue': self.queue_public,
             'title': 'Test Ticket',
             'description': 'Some Test Ticket',
         }
@@ -73,8 +72,7 @@ class TicketActionsTestCase(TestCase):
         self.loginUser()
 
         """Tests whether staff can delete tickets"""
-        ticket_data = dict(queue=self.queue_public, **self.ticket_data)
-        ticket = Ticket.objects.create(**ticket_data)
+        ticket = Ticket.objects.create(**self.ticket_data)
         ticket_id = ticket.id
 
         response = self.client.get(reverse('helpdesk:delete', kwargs={

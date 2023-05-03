@@ -93,6 +93,16 @@ urlpatterns = [
         staff.attachment_del,
         name="attachment_del",
     ),
+    path(
+        "tickets/<int:ticket_id>/checklists/<int:checklist_id>/",
+        staff.edit_ticket_checklist,
+        name="edit_ticket_checklist"
+    ),
+    path(
+        "tickets/<int:ticket_id>/checklists/<int:checklist_id>/delete/",
+        staff.delete_ticket_checklist,
+        name="delete_ticket_checklist"
+    ),
     re_path(r"^raw/(?P<type>\w+)/$", staff.raw_details, name="raw"),
     path("rss/", staff.rss_list, name="rss_index"),
     path("reports/", staff.report_index, name="report_index"),
@@ -105,6 +115,17 @@ urlpatterns = [
     path("ignore/add/", staff.email_ignore_add, name="email_ignore_add"),
     path("ignore/delete/<int:id>/",
          staff.email_ignore_del, name="email_ignore_del"),
+    path("checklist-templates/", staff.checklist_templates, name="checklist_templates"),
+    path(
+        "checklist-templates/<int:checklist_template_id>/",
+        staff.checklist_templates,
+        name="edit_checklist_template"
+    ),
+    path(
+        "checklist-templates/<int:checklist_template_id>/delete/",
+        staff.delete_checklist_template,
+        name="delete_checklist_template"
+    ),
     re_path(
         r"^datatables_ticket_list/(?P<query>{})$".format(base64_pattern),
         staff.datatables_ticket_list,

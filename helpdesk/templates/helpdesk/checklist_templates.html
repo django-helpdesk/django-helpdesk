@@ -1,0 +1,119 @@
+{% extends "helpdesk/base.html" %}
+
+{% load i18n %}
+
+{% block helpdesk_title %}{% trans "Checklist Templates" %}{% endblock %}
+
+{% block helpdesk_breadcrumb %}
+    <li class="breadcrumb-item">
+        <a href="{% url 'helpdesk:system_settings' %}">{% trans "System Settings" %}</a>
+    </li>
+    <li class="breadcrumb-item active">{% trans "Checklist Templates" %}</li>
+{% endblock %}
+
+{% block helpdesk_body %}
+    <h2>{% trans "Maintain checklist templates" %}</h2>
+    <div class="row mt-4">
+        <div class="col-sm-6 col-xs-12">
+            <div class="card">
+                <div class="card-header">
+                    {% if checklist_template %}
+                        {% trans "Edit checklist template" %}
+                    {% else %}
+                        {% trans "Create new checklist template" %}
+                    {% endif %}
+                </div>
+                <form method="post">
+                    <div class="card-body">
+                        {% csrf_token %}
+                        {{ form.as_p }}
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th></th>
+                                <th>Task</th>
+                                <th class="text-center">Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody id="tasks">
+                                {% if checklist_template %}
+                                    {% for value in checklist_template.task_list %}
+                                        {% include 'helpdesk/include/template_task_form_row.html' %}
+                                    {% endfor %}
+                                {% else %}
+                                    {% include 'helpdesk/include/template_task_form_row.html' %}
+                                {% endif %}
+                            </tbody>
+                        </table>
+                         <button type="button" id="addTask" class="btn btn-sm btn-secondary">
+                            <i class="fas fa-plus"></i>
+                            {% trans "Add another task" %}
+                        </button>
+                    </div>
+                    <div class="card-footer text-center">
+                        {% if checklist_template %}
+                            <a href="{% url 'helpdesk:checklist_templates' %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i>
+                                {% trans "Cancel" %}
+                            </a>
+                        {% endif %}
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i>
+                            {% trans "Save checklist template" %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xs-12">
+            <div class="list-group">
+                {% for checklist in checklists %}
+                    <div class="list-group-item d-flex justify-content-between align-items-center{% if checklist_template.id == checklist.id %} active{% endif %}">
+                        <span>
+                            {{ checklist.name }}
+                            {% if checklist_template.id != checklist.id %}
+                                <a class="btn btn-secondary btn-sm" href="{% url 'helpdesk:edit_checklist_template' checklist.id %}">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                            {% endif %}
+                            <a class="btn btn-sm btn-danger" href="{% url 'helpdesk:delete_checklist_template' checklist.id %}">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </span>
+                        <span class="badge badge-secondary badge-pill">{{ checklist.task_list|length }} {% trans "tasks" %}</span>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block helpdesk_js %}
+    <script src="https://unpkg.com/sortablejs-make/Sortable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-sortablejs@latest/jquery-sortable.js"></script>
+    <script>
+        const updateTemplateTaskList = () => {
+            let tasks = []
+            $('#tasks .taskInput').each((index, taskInput) => {
+                tasks.push($(taskInput).val())
+            })
+            $('#id_task_list').val(JSON.stringify(tasks))
+        }
+
+        const removeTask = (btn) => {
+            $(btn).parents('tr').remove()
+            updateTemplateTaskList()
+        }
+
+        $(() => {
+            $('#addTask').on('click', () => {
+                $('#tasks').append(`{% include 'helpdesk/include/template_task_form_row.html' %}`)
+            })
+
+            $('#tasks').sortable({
+                handle: '.handle',
+                onChange: updateTemplateTaskList
+            })
+        })
+    </script>
+{% endblock %}

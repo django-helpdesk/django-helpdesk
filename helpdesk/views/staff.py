@@ -6,6 +6,7 @@ django-helpdesk - A Django powered ticket tracker for small enterprise.
 views/staff.py - The bulk of the application - provides most business logic and
                  renders all staff-facing views.
 """
+
 from ..lib import format_time_spent
 from ..templated_email import send_templated_mail
 from collections import defaultdict
@@ -20,6 +21,7 @@ from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.handlers.wsgi import WSGIRequest
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db.models import Q
+from django.forms import HiddenInput, inlineformset_factory, TextInput
 from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
@@ -38,10 +40,14 @@ from helpdesk.decorators import (
     superuser_required
 )
 from helpdesk.forms import (
+    ChecklistForm,
+    ChecklistTemplateForm,
+    CreateChecklistForm,
     CUSTOMFIELD_DATE_FORMAT,
     EditFollowUpForm,
     EditTicketForm,
     EmailIgnoreForm,
+    FormControlDeleteFormSet,
     MultipleTicketSelectForm,
     TicketCCEmailForm,
     TicketCCForm,
@@ -52,6 +58,9 @@ from helpdesk.forms import (
 )
 from helpdesk.lib import process_attachments, queue_template_context, safe_template_context
 from helpdesk.models import (
+    Checklist,
+    ChecklistTask,
+    ChecklistTemplate,
     CustomField,
     FollowUp,
     FollowUpAttachment,
@@ -406,6 +415,19 @@ def view_ticket(request, ticket_id):
     else:
         submitter_userprofile_url = None
 
+    checklist_form = CreateChecklistForm(request.POST or None)
+    if checklist_form.is_valid():
+        checklist = checklist_form.save(commit=False)
+        checklist.ticket = ticket
+        checklist.save()
+
+        checklist_template = checklist_form.cleaned_data.get('checklist_template')
+        # Add predefined tasks if template has been selected
+        if checklist_template:
+            checklist.create_tasks_from_template(checklist_template)
+
+        return redirect('helpdesk:edit_ticket_checklist', ticket.id, checklist.id)
+
     return render(request, 'helpdesk/ticket.html', {
         'ticket': ticket,
         'submitter_userprofile_url': submitter_userprofile_url,
@@ -416,6 +438,56 @@ def view_ticket(request, ticket_id):
             Q(queues=ticket.queue) | Q(queues__isnull=True)),
         'ticketcc_string': ticketcc_string,
         'SHOW_SUBSCRIBE': show_subscribe,
+        'checklist_form': checklist_form,
+    })
+
+
+@helpdesk_staff_member_required
+def edit_ticket_checklist(request, ticket_id, checklist_id):
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+    ticket_perm_check(request, ticket)
+    checklist = get_object_or_404(ticket.checklists.all(), id=checklist_id)
+
+    form = ChecklistForm(request.POST or None, instance=checklist)
+    TaskFormSet = inlineformset_factory(
+        Checklist,
+        ChecklistTask,
+        formset=FormControlDeleteFormSet,
+        fields=['description', 'position'],
+        widgets={
+            'position': HiddenInput(),
+            'description': TextInput(attrs={'class': 'form-control'}),
+        },
+        can_delete=True,
+        extra=0
+    )
+    formset = TaskFormSet(request.POST or None, instance=checklist)
+    if form.is_valid() and formset.is_valid():
+        form.save()
+        formset.save()
+        return redirect(ticket)
+
+    return render(request, 'helpdesk/checklist_form.html', {
+        'ticket': ticket,
+        'checklist': checklist,
+        'form': form,
+        'formset': formset,
+    })
+
+
+@helpdesk_staff_member_required
+def delete_ticket_checklist(request, ticket_id, checklist_id):
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+    ticket_perm_check(request, ticket)
+    checklist = get_object_or_404(ticket.checklists.all(), id=checklist_id)
+
+    if request.method == 'POST':
+        checklist.delete()
+        return redirect(ticket)
+
+    return render(request, 'helpdesk/checklist_confirm_delete.html', {
+        'ticket': ticket,
+        'checklist': checklist,
     })
 
 
@@ -669,6 +741,14 @@ def update_ticket(request, ticket_id, public=False):
     owner = int(request.POST.get('owner', -1))
     priority = int(request.POST.get('priority', ticket.priority))
 
+    # Check if a change happened on checklists
+    changes_in_checklists = False
+    for checklist in ticket.checklists.all():
+        old_completed_id = sorted(list(checklist.tasks.completed().values_list('id', flat=True)))
+        new_completed_id = sorted(list(map(int, request.POST.getlist(f'checklist-{checklist.id}', []))))
+        if old_completed_id != new_completed_id:
+            changes_in_checklists = True
+
     time_spent = get_time_spent_from_request(request)
     # NOTE: jQuery's default for dates is mm/dd/yy
     # very US-centric but for now that's the only format supported
@@ -677,6 +757,7 @@ def update_ticket(request, ticket_id, public=False):
     no_changes = all([
         not request.FILES,
         not comment,
+        not changes_in_checklists,
         new_status == ticket.status,
         title == ticket.title,
         priority == int(ticket.priority),
@@ -784,6 +865,30 @@ def update_ticket(request, ticket_id, public=False):
         )
         c.save()
         ticket.due_date = due_date
+
+    if changes_in_checklists:
+        for checklist in ticket.checklists.all():
+            new_completed_tasks = list(map(int, request.POST.getlist(f'checklist-{checklist.id}', [])))
+            for task in checklist.tasks.all():
+                changed = None
+
+                # Add completion if it was not done yet
+                if not task.completion_date and task.id in new_completed_tasks:
+                    task.completion_date = timezone.now()
+                    changed = 'completed'
+                # Remove it if it was done before
+                elif task.completion_date and task.id not in new_completed_tasks:
+                    task.completion_date = None
+                    changed = 'uncompleted'
+
+                # Save and add ticket change if task state has changed
+                if changed:
+                    task.save(update_fields=['completion_date'])
+                    f.ticketchange_set.create(
+                        field=f'[{checklist.name}] {task.description}',
+                        old_value=_('To do') if changed == 'completed' else _('Completed'),
+                        new_value=_('Completed') if changed == 'completed' else _('To do'),
+                    )
 
     if new_status in (
         Ticket.RESOLVED_STATUS, Ticket.CLOSED_STATUS
@@ -2030,3 +2135,30 @@ def date_rel_to_today(today, offset):
 def sort_string(begin, end):
     return 'sort=created&date_from=%s&date_to=%s&status=%s&status=%s&status=%s' % (
         begin, end, Ticket.OPEN_STATUS, Ticket.REOPENED_STATUS, Ticket.RESOLVED_STATUS)
+
+
+@helpdesk_staff_member_required
+def checklist_templates(request, checklist_template_id=None):
+    checklist_template = None
+    if checklist_template_id:
+        checklist_template = get_object_or_404(ChecklistTemplate, id=checklist_template_id)
+    form = ChecklistTemplateForm(request.POST or None, instance=checklist_template)
+    if form.is_valid():
+        form.save()
+        return redirect('helpdesk:checklist_templates')
+    return render(request, 'helpdesk/checklist_templates.html', {
+        'checklists': ChecklistTemplate.objects.all(),
+        'checklist_template': checklist_template,
+        'form': form
+    })
+
+
+@helpdesk_staff_member_required
+def delete_checklist_template(request, checklist_template_id):
+    checklist_template = get_object_or_404(ChecklistTemplate, id=checklist_template_id)
+    if request.method == 'POST':
+        checklist_template.delete()
+        return redirect('helpdesk:checklist_templates')
+    return render(request, 'helpdesk/checklist_template_confirm_delete.html', {
+        'checklist_template': checklist_template,
+    })

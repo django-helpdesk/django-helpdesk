@@ -6,9 +6,6 @@
 
 {% block helpdesk_title %}{{ ticket.queue.slug }}-{{ ticket.id }} : {% trans "View Ticket Details" %}{% endblock %}
 
-{% block helpdesk_head %}
-{% endblock %}
-
 {% block h1_title %}{{ ticket.ticket_for_url }}{% endblock %}
 
 {% block helpdesk_breadcrumb %}
@@ -166,7 +163,7 @@
                 {% endif %}
             </dl>
 
-        <p id='ShowFurtherOptPara'><button class="btn btn-warning btn-sm" id='ShowFurtherEditOptions'>{% trans "Change Further Details &raquo;" %}</button></p>
+        <p id='ShowFurtherOptPara'><button type="button" class="btn btn-warning btn-sm" id='ShowFurtherEditOptions'>{% trans "Change Further Details &raquo;" %}</button></p>
 
         <div id='FurtherEditOptions' style='display: none;'>
 
@@ -188,7 +185,41 @@
 
         </div>
 
-        <p id='ShowFileUploadPara'><button class="btn btn-warning btn-sm" id='ShowFileUpload'>{% trans "Attach File(s) &raquo;" %}</button></p>
+        {% if ticket.checklists.exists %}
+            <p>
+                <button type="button" class="btn btn-warning btn-sm" id='ShowChecklistEditOptions'>
+                    {% trans "Update checklists" %} &raquo;
+                </button>
+            </p>
+
+            <div id="checklistEdit" style="display: none">
+                <div class="row">
+                    {% for checklist in ticket.checklists.all %}
+                        <div class="col-sm-4 col-xs-12">
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h5>{{ checklist }}</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="list-group">
+                                        {% for task in checklist.tasks.all %}
+                                            <div class="list-group-item"{% if task.completion_date %} title="{% trans "Completed on" %} {{ task.completion_date }}" {% endif %}>
+                                                <label>
+                                                    <input type="checkbox" name="checklist-{{ checklist.id }}" value="{{ task.id }}" {% if task.completion_date %} checked{% endif %}>
+                                                    {{ task }}
+                                                </label>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+
+        <p id='ShowFileUploadPara'><button type="button" class="btn btn-warning btn-sm" id='ShowFileUpload'>{% trans "Attach File(s) &raquo;" %}</button></p>
 
         <div id='FileUpload' style='display: none;'>
 
@@ -214,6 +245,33 @@
 
             </div>
         </div>
+
+        <div class="modal fade" id="createChecklistModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="modal-header">
+                            <h5 class="modal-title">{% trans "Add a new checklist" %}</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="{% trans 'Close' %}">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <p>{% trans "You can select a template to generate a checklist with a predefined set of tasks." %}</p>
+                            <p>{% trans "Ignore it and only give a name to create an empty checklist." %}</p>
+                            {{ checklist_form.as_p }}
+                        </div>
+                        <div class="modal-footer">
+                            <a class="btn btn-secondary" href="{% url 'helpdesk:checklist_templates' %}">
+                                Manage templates
+                            </a>
+                            <button type="submit" class="btn btn-primary">{% trans "Add" %}</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     {% endif %}
 {% endblock %}
 
@@ -229,13 +287,15 @@ $( function() {
 $(document).ready(function() {
     $("#ShowFurtherEditOptions").click(function() {
         $("#FurtherEditOptions").toggle();
-        return false;
+    });
+
+    $("#ShowChecklistEditOptions").click(function() {
+        $("#checklistEdit").toggle();
     });
 
     $("#ShowFileUpload").click(function() {
         $("#FileUpload").fadeIn();
         $("#ShowFileUploadPara").hide();
-        return false;
     });
 
     $('#id_preset').change(function() {
@@ -246,6 +306,19 @@ $(document).ready(function() {
             });
         }
     });
+
+    // Preset name of checklist when a template is selected
+    $('#id_checklist_template').on('change', function() {
+        const nameField = $('#id_name')
+        const selectedTemplate = $(this).children(':selected')
+        if (nameField.val() === '' && selectedTemplate.val()) {
+            nameField.val(selectedTemplate.text())
+        }
+    })
+
+    $('.disabledTask').on('click', () => {
+        alert('{% trans 'If you want to update state of checklist tasks, please do a Follow-Up response and click on "Update checklists"' %}')
+    })
 
     $("[data-toggle=tooltip]").tooltip();
 

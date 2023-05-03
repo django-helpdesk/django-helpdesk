@@ -3,6 +3,9 @@ from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 from helpdesk import settings as helpdesk_settings
 from helpdesk.models import (
+    Checklist,
+    ChecklistTask,
+    ChecklistTemplate,
     CustomField,
     EmailTemplate,
     EscalationExclusion,
@@ -41,6 +44,7 @@ class TicketAdmin(admin.ModelAdmin):
                     'hidden_submitter_email', 'time_spent')
     date_hierarchy = 'created'
     list_filter = ('queue', 'assigned_to', 'status')
+    search_fields = ('id', 'title')
 
     def hidden_submitter_email(self, ticket):
         if ticket.submitter_email:
@@ -113,6 +117,25 @@ class EmailTemplateAdmin(admin.ModelAdmin):
 @admin.register(IgnoreEmail)
 class IgnoreEmailAdmin(admin.ModelAdmin):
     list_display = ('name', 'queue_list', 'email_address', 'keep_in_mailbox')
+
+
+@admin.register(ChecklistTemplate)
+class ChecklistTemplateAdmin(admin.ModelAdmin):
+    list_display = ('name', 'task_list')
+    search_fields = ('name', 'task_list')
+
+
+class ChecklistTaskInline(admin.TabularInline):
+    model = ChecklistTask
+
+
+@admin.register(Checklist)
+class ChecklistAdmin(admin.ModelAdmin):
+    list_display = ('name', 'ticket')
+    search_fields = ('name', 'ticket__id', 'ticket__title')
+    autocomplete_fields = ('ticket',)
+    list_select_related = ('ticket',)
+    inlines = (ChecklistTaskInline,)
 
 
 admin.site.register(PreSetReply)

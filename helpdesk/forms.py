@@ -7,7 +7,6 @@ forms.py - Definitions of newforms-based forms for creating and maintaining
            tickets.
 """
 
-
 from datetime import datetime
 from django import forms
 from django.conf import settings
@@ -18,6 +17,8 @@ from django.utils.translation import gettext_lazy as _
 from helpdesk import settings as helpdesk_settings
 from helpdesk.lib import convert_value, process_attachments, safe_template_context
 from helpdesk.models import (
+    Checklist,
+    ChecklistTemplate,
     CustomField,
     FollowUp,
     IgnoreEmail,
@@ -602,3 +603,46 @@ class MultipleTicketSelectForm(forms.Form):
             raise ValidationError(
                 _('All selected tickets must share the same queue in order to be merged.'))
         return tickets
+
+
+class ChecklistTemplateForm(forms.ModelForm):
+    name = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        required=True,
+    )
+    task_list = forms.JSONField(widget=forms.HiddenInput())
+
+    class Meta:
+        model = ChecklistTemplate
+        fields = ('name', 'task_list')
+
+    def clean_task_list(self):
+        task_list = self.cleaned_data['task_list']
+        return list(map(lambda task: task.strip(), task_list))
+
+
+class ChecklistForm(forms.ModelForm):
+    name = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        required=True,
+    )
+
+    class Meta:
+        model = Checklist
+        fields = ('name',)
+
+
+class CreateChecklistForm(ChecklistForm):
+    checklist_template = forms.ModelChoiceField(
+        label=_("Template"),
+        queryset=ChecklistTemplate.objects.all(),
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        required=False,
+    )
+
+    class Meta(ChecklistForm.Meta):
+        fields = ('checklist_template', 'name')
+
+
+class FormControlDeleteFormSet(forms.BaseInlineFormSet):
+    deletion_widget = forms.CheckboxInput(attrs={'class': 'form-control'})
