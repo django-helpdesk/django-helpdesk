@@ -70,12 +70,12 @@
                                 <th>{% trans "Priority" %}</th>
                                 <th>{% trans "Queue" %}</th>
                                 <th>{% trans "Status" %}</th>
+                                <th>{% trans "Owner" %}</th>
+                                <th>{% trans "Submitter" %}</th>
                                 <th>{% trans "Paired Count" %}</th>
                                 <th>{% trans "Created" %}</th>
                                 <th>{% trans "Last Reply" %}</th>
                                 <th>{% trans "Due Date" %}</th>
-                                <th>{% trans "Owner" %}</th>
-                                <th>{% trans "Submitter" %}</th>
                                 <th>{% trans "Time Spent" %}</th>
                                 <th>{% trans "KB item" %}</th>
                                 {% if query_params.filtering.queue__id__in|length == 1 %}
@@ -447,10 +447,6 @@
                         visible: false,
                     },
                     {name: "status", data: "status"},
-                    {name: "paired_count", data: "paired_count"},
-                    {name: "created", data: "created"},
-                    {name: "last_reply", data: "last_reply"},
-                    {name: "due_date", data: "due_date", "visible": false},
                     {
                         name: "assigned_to",
                         data: "assigned_to",
@@ -462,8 +458,12 @@
                         }
                     },
                     {name: "submitter", data: "submitter"},
-                    {name: "time_spent", data: "time_spent", "visible": false},
-                    {name: "kbitem", data: "kbitem"},
+                    {name: "paired_count", data: "paired_count", visible: false},
+                    {name: "created", data: "created"},
+                    {name: "last_reply", data: "last_reply"},
+                    {name: "due_date", data: "due_date", visible: false},
+                    {name: "time_spent", data: "time_spent", visible: false},
+                    {name: "kbitem", data: "kbitem", visible: false},
                     {% if query_params.filtering.queue__id__in|length == 1 %}
                     {% for col_name, display_name in extra_data_columns.items %}
                     {name: "{{ col_name }}", data: "{{ col_name }}"},
@@ -513,7 +513,7 @@
                     $(this).val(visible_columns.toString());
                 });
             }
-            get_visible_cols() // On initialization
+            get_visible_cols(); // On initialization
 
             {# Timeline initialization when tab is displayed #}
             // The TL.Timeline constructor takes at least two arguments:

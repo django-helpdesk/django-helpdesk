@@ -14,7 +14,7 @@
       <form class="d-none d-md-inline-block form-inline ml-auto mr-0 mr-md-3 my-2 my-md-0" id='searchform' method='get' action="{% url 'helpdesk:list' %}">
         <div class="input-group">
           <input type="text" class="form-control" name='q' size='15' placeholder='{% trans "Search..." %}' id='search_query' title='{% trans "Enter a keyword, or a ticket number to jump straight to that ticket." %}' aria-label="Search" aria-describedby="basic-addon2">
-          <input type='hidden' name='status' value='1' /><input type='hidden' name='status' value='2' /><input type='hidden' name='status' value='3' /><input type='hidden' name='search_type' value='header' />
+          <input type='hidden' name='status' value='1' /><input type='hidden' name='status' value='2' /><input type='hidden' name='status' value='3' /><input type='hidden' name='status' value='6' /><input type='hidden' name='status' value='7' /><input type='hidden' name='search_type' value='header' />
           <div class="input-group-append">
             <button class="btn btn-primary" type="submit">
               <i class="fas fa-search"></i> {% trans 'Go' %}

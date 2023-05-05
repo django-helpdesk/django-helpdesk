@@ -68,6 +68,7 @@ class DatatablesTicketSerializer(serializers.ModelSerializer):
     @staticmethod
     def get_created(obj):
         created = humanize.naturaltime(obj.created)
+        # created = datetime.strftime(obj.created, '%m-%d-%Y at %I:%M %p')
         return created.replace(u'\xa0', ' ') if created else created
 
     @staticmethod
