@@ -1514,7 +1514,8 @@ def attach_ticket_to_property_milestone(request, ticket):
     if pm:
         pm.ticket = ticket
         # Only set submission_date if it has never been set
-        pm.submission_date = now() if pm.submission_date is None else pm.submission_date
+        if not pm.submission_date:
+            pm.submission_date = timezone.now() if ticket.created is None else ticket.created
         pm.implementation_status = PropertyMilestone.MILESTONE_IN_REVIEW
         pm.save()
 
@@ -2315,7 +2316,8 @@ def pair_property_milestone(request, ticket_id):
         pm.ticket = ticket
         pm.implementation_status = PropertyMilestone.MILESTONE_IN_REVIEW
         # Only set submission_date if it has never been set
-        pm.submission_date = timezone.now() if pm.submission_date is None else pm.submission_date
+        if not pm.submission_date:
+            pm.submission_date = timezone.now() if ticket.created is None else ticket.created
         pm.save()
 
         return return_to_ticket(request.user, request, helpdesk_settings, ticket)
