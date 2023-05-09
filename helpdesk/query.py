@@ -96,12 +96,12 @@ DATATABLES_ORDER_COLUMN_CHOICES = dict([
     ('2', 'priority'),
     ('3', 'queue'),
     ('4', 'status'),
-    ('5', 'paired_count'),
-    ('6', 'created'),
-    ('7', 'last_reply'),
-    ('8', 'due_date'),
-    ('9', 'assigned_to'),
-    ('10', 'submitter_email'),
+    ('5', 'assigned_to'),
+    ('6', 'submitter_email'),
+    ('7', 'paired_count'),
+    ('8', 'created'),
+    ('9', 'last_reply'),
+    ('10', 'due_date'),
     # ('11', 'time_spent'),
     ('12', 'kbitem'),
 ])
@@ -109,15 +109,15 @@ DATATABLES_ORDER_COLUMN_CHOICES = dict([
 DATATABLES_DJANGO_FILTER_COLUMN_CHOICES = [
     ('0', 'id__icontains'),
     ('3', 'queue__title__icontains'),
-    ('10', 'submitter_email__icontains'),
+    ('6', 'submitter_email__icontains'),
     ('12', 'kbitem__title__icontains'),
 ]
 
 ASSIGNED_TO_FILTER_FORMATS = [
-    ('9', 'assigned_to__email__icontains'),
-    ('9', 'assigned_to__first_name__icontains'),
-    ('9', 'assigned_to__last_name__icontains'),
-    ('9', 'assigned_to__username__icontains'),
+    ('5', 'assigned_to__email__icontains'),
+    ('5', 'assigned_to__first_name__icontains'),
+    ('5', 'assigned_to__last_name__icontains'),
+    ('5', 'assigned_to__username__icontains'),
 ]
 
 # These fields go through some post-processing, which is why django filters won't work and why they aren't in the
@@ -126,10 +126,10 @@ DATATABLES_CUSTOM_FILTER_COLUMN_CHOICES = dict([
     ('1', 'title'),                 # [id]. [title]
     ('2', 'priority'),              # [1:5 => Critical/High/.../Low]
     ('4', 'status'),                # [1:7 => Open/Closed../New]
-    ('5', 'paired_count'),          # Sum of ticket.beam_property and ticket.beam_taxlot
-    ('6', 'created'),               # [datetime object => humanized time]
-    ('7', 'last_reply'),       # [followup datetime object => humanized time]
-    ('8', 'due_date'),              # [datetime object => humanized time]
+    ('7', 'paired_count'),          # Sum of ticket.beam_property and ticket.beam_taxlot
+    ('8', 'created'),               # [datetime object => humanized time]
+    ('9', 'last_reply'),       # [followup datetime object => humanized time]
+    ('10', 'due_date'),              # [datetime object => humanized time]
     ('11', 'time_spent'),           # "{0:02d}h:{1:02d}m"
 ])
 
