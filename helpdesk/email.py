@@ -36,7 +36,7 @@ from exchangelib import FileAttachment, ItemAttachment
 from helpdesk import settings
 from helpdesk.lib import safe_template_context, process_attachments
 from helpdesk.models import Ticket, TicketCC, FollowUp, IgnoreEmail, FormType, CustomField
-from seed.models import EmailImporter
+from seed.models import EmailImporter, GOOGLE, MICROSOFT
 from helpdesk.decorators import is_helpdesk_staff
 
 
@@ -292,7 +292,7 @@ def imap_sync(importer, queues, logger, server):
     login_successful = True
     token_backend = None
 
-    if importer.email_box_host == 'imap.gmail.com' or importer.email_box_host == 'outlook.office365.com':
+    if importer.auth and (importer.auth.host_service == GOOGLE or importer.auth.host_service == MICROSOFT):
         # Start TLS first
         try:
             server.starttls()
