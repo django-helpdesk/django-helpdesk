@@ -343,6 +343,7 @@
 
         var selected = [];
         var all_ticket_ids = [];
+        var globalTimeout = null;
 
         $(document).ready(function () {
             if ( selector ) {
@@ -487,13 +488,19 @@
             }
 
             // Filter event handler
-            $( table.table().container() ).off('keyup change').on( 'keyup', 'thead input', function () {
-                var column = table.column( $(this).data('index') )
+
+            function filterFunction(thisSearch) {
+                globalTimeout = null;
+                var column = table.column( $(thisSearch).data('index') )
                 table
-                    .column( $(this).data('index') )
-                    .search( this.value )
+                    .column( $(thisSearch).data('index') )
+                    .search( thisSearch.value )
                     .draw();
-            } );
+            }
+            $( table.table().container() ).off('keyup change').on('keyup', 'thead input', function () {
+                if (globalTimeout != null) clearTimeout(globalTimeout);
+                globalTimeout = setTimeout(filterFunction, 400, this);
+            });
 
             // Get visible columns for csv filtering and saving
             table.on( 'buttons-action', function (e) {
