@@ -351,35 +351,38 @@ def imap_sync(importer, queues, logger, server):
                     if not refreshed_flag:
                         # Get UID and use that
                         resp, uid = server.fetch(num_raw, "(UID)")
-                        uid = uid[0].decode('ascii')
-                        msg_uid = parse_uid(uid)
-                        logger.info("Received message UID: %s" % msg_uid)
-
-                        # Grab message first to get date to sort by
-                        status, data = server.uid('fetch', msg_uid, '(RFC822)')
-                        full_message = encoding.force_text(data[0][1], errors='replace')
-                        try:
-                            ticket = object_from_message(full_message, importer, queues, logger)
-                        except TypeError:
-                            logger.error("Type error - ticket set to None")
-                            ticket = None  # hotfix. Need to work out WHY.
-                        except BadHeaderError:
-                            # Malformed email received from the server
-                            logger.error("BadHeaderError - ticket set to None")
-                            ticket = None
-                        if ticket:
-                            if DEBUGGING:
-                                logger.info("Successfully processed message %s, left untouched on IMAP server\n" % msg_uid)
-                            elif importer.keep_mail:
-                                # server.store(num, '+FLAGS', '\\Answered')
-                                ov, data = server.uid('STORE', msg_uid, '+FLAGS', '(\\Answered)')
-                                logger.info("Successfully processed message %s, marked as Answered on IMAP server\n" % msg_uid)
-                            else:
-                                # server.store(num, '+FLAGS', '\\Deleted')
-                                ov, data = server.uid('STORE', msg_uid, '+FLAGS', '(\\Deleted)')
-                                logger.info("Successfully processed message %s, deleted from IMAP server\n" % msg_uid)
+                        if not uid:
+                            logger.error("Could not fetch UID. Message will not be processed; skipping to the next message. num_raw: %s, resp: %s, uid: %s" % (num_raw, resp, uid))
                         else:
-                            logger.warn("Message %s was not successfully processed, and will be left on IMAP server\n" % msg_uid)
+                            uid = uid[0].decode('ascii')
+                            msg_uid = parse_uid(uid)
+                            logger.info("Received message UID: %s" % msg_uid)
+
+                            # Grab message first to get date to sort by
+                            status, data = server.uid('fetch', msg_uid, '(RFC822)')
+                            full_message = encoding.force_text(data[0][1], errors='replace')
+                            try:
+                                ticket = object_from_message(full_message, importer, queues, logger)
+                            except TypeError:
+                                logger.error("Type error - ticket set to None")
+                                ticket = None  # hotfix. Need to work out WHY.
+                            except BadHeaderError:
+                                # Malformed email received from the server
+                                logger.error("BadHeaderError - ticket set to None")
+                                ticket = None
+                            if ticket:
+                                if DEBUGGING:
+                                    logger.info("Successfully processed message %s, left untouched on IMAP server\n" % msg_uid)
+                                elif importer.keep_mail:
+                                    # server.store(num, '+FLAGS', '\\Answered')
+                                    ov, data = server.uid('STORE', msg_uid, '+FLAGS', '(\\Answered)')
+                                    logger.info("Successfully processed message %s, marked as Answered on IMAP server\n" % msg_uid)
+                                else:
+                                    # server.store(num, '+FLAGS', '\\Deleted')
+                                    ov, data = server.uid('STORE', msg_uid, '+FLAGS', '(\\Deleted)')
+                                    logger.info("Successfully processed message %s, deleted from IMAP server\n" % msg_uid)
+                            else:
+                                logger.warn("Message %s was not successfully processed, and will be left on IMAP server\n" % msg_uid)
                         refreshed_flag = refreshed(importer, logger, token_backend)
         except imaplib.IMAP4.error:
             logger.error(
