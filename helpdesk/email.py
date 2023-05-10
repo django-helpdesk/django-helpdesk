@@ -365,7 +365,8 @@ def imap_sync(importer, queues, logger, server):
                                 ticket = object_from_message(full_message, importer, queues, logger)
                             except TypeError as e:
                                 logger.error("Type error - ticket set to None")
-                                logger.error(e)  # todo
+                                logger.error(e)
+                                logger.error('Error printed above.')
                                 ticket = None  # hotfix. Need to work out WHY.
                             except BadHeaderError:
                                 # Malformed email received from the server
