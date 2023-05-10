@@ -363,8 +363,9 @@ def imap_sync(importer, queues, logger, server):
                             full_message = encoding.force_text(data[0][1], errors='replace')
                             try:
                                 ticket = object_from_message(full_message, importer, queues, logger)
-                            except TypeError:
+                            except TypeError as e:
                                 logger.error("Type error - ticket set to None")
+                                logger.error(e)  # todo
                                 ticket = None  # hotfix. Need to work out WHY.
                             except BadHeaderError:
                                 # Malformed email received from the server
@@ -493,7 +494,7 @@ def decode_mail_headers(string):
     ])
 
 
-def is_autoreply(message, headers=None):
+def is_autoreply(message, sender='', headers=None):
     """
     Accepting message as something with .get(header_name) method
     Returns True if it's likely to be auto-reply or False otherwise
@@ -506,6 +507,8 @@ def is_autoreply(message, headers=None):
         True if message.get("X-Auto-Response-Suppress") in ("DR", "AutoReply", "All") else False,
         message.get("List-Id"),
         message.get("List-Unsubscribe"),
+        'no-reply' in sender,
+        'noreply' in sender,
     ]
     return any(any_if_this)
 
@@ -522,6 +525,10 @@ def create_ticket_cc(ticket, cc_list):
     for cced_name, cced_email in cc_list:
         cced_email = cced_email.strip()
         if cced_email == ticket.queue.email_address:
+            continue
+        if 'no-reply' in cced_email or 'noreply' in cced_email:
+            continue
+        if ticket.queue.organization.sender and cced_email == ticket.queue.organization.sender.email_address:
             continue
 
         user = None
@@ -653,7 +660,7 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
     new_ticket_ccs = create_ticket_cc(ticket, [(sender_name, sender_email)] + payload['to_list'] + payload['cc_list'])
 
     headers = payload['headers'] if 'headers' in payload else None
-    autoreply = is_autoreply(message, headers)
+    autoreply = is_autoreply(message, sender=sender_email, headers=headers)
     if autoreply:
         logger.info("Message seems to be auto-reply, not sending any emails back to the sender")
     else:
