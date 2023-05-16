@@ -510,6 +510,7 @@ def is_autoreply(message, sender='', headers=None):
         message.get("List-Unsubscribe"),
         'no-reply' in sender,
         'noreply' in sender,
+        'postmaster' in sender,
     ]
     return any(any_if_this)
 
