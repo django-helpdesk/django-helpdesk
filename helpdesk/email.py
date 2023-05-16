@@ -194,7 +194,7 @@ def process_importer(importer, queues, logger):
             importer.email_box_host or settings.QUEUE_EMAIL_BOX_HOST,
             int(importer.email_box_port)
         )
-        logger.info("Attempting %s server login" % email_box_type.upper())
+        logger.info("Attempting %s server login" % email_box_type)
         mail_defaults[email_box_type]['sync'](importer, queues, logger, server)
 
     elif email_box_type == 'local':
@@ -218,7 +218,7 @@ def process_importer(importer, queues, logger):
                 logger.warn("Message %d was not successfully processed, and will be left in local directory", i)
 
     elif importer.auth:
-        logger.info("Attempting %s server login" % email_box_type.upper())
+        logger.info("Attempting %s server login" % importer.auth.host_service)
         server, _ = importer.auth.login(email=importer.sender, logger=logger)
         if server:
             ews_sync(importer, queues, logger, server)
@@ -372,6 +372,11 @@ def imap_sync(importer, queues, logger, server):
                                 # Malformed email received from the server
                                 logger.error("BadHeaderError - ticket set to None")
                                 ticket = None
+                            except Exception as e:
+                                logger.error("Unknown exception - ticket set to None")
+                                logger.error(e)
+                                logger.error('Error printed above.')
+                                ticket = None
                             if ticket:
                                 if DEBUGGING:
                                     logger.info("Successfully processed message %s, left untouched on IMAP server\n" % msg_uid)
@@ -446,31 +451,34 @@ def ews_sync(importer, queues, logger, server):
             for item in data:
                 # item = data[0]
                 msg_id = getattr(item, '_id', None)
-                logger.info("Received message UID: %s" % msg_id)  # todo
-                try:
-                    ticket = object_from_ews_message(item, importer, queues, logger)
-                except Exception as e:
-                    logger.error('Unable to process message into ticket: ', str(e))  # todo
-                    ticket = None
-                if ticket:
-                    if DEBUGGING:
-                        logger.info("Successfully processed message %s, left untouched on server\n" % msg_id.id)
-                    else:
-                        try:
-                            item_obj = folder.get(id=msg_id.id, changekey=msg_id.changekey)
-                        except Exception:
-                            logger.error("Unable to retrieve message %s for final processing, left untouched on server." % msg_id.id)
-                        else:
-                            if importer.keep_mail:
-                                item_obj.is_read = True
-                                item_obj.save(update_fields=['is_read'])
-                                logger.info("Successfully processed message %s, marked as Answered on server\n" % msg_id.id)
-                            else:
-                                item_obj = folder.get(id=msg_id.id, changekey=msg_id.changekey)
-                                item_obj.soft_delete()
-                                logger.info("Successfully processed message %s, deleted from server\n" % msg_id.id)
+                if not msg_id:
+                    logger.error("Could not fetch UID. Message will not be processed; skipping to the next message.\nEmail info:\n%s" % item)
                 else:
-                    logger.warn("Message %s was not successfully processed, and will be left on IMAP server\n" % msg_id.id)
+                    logger.info("Received message ID: %s" % msg_id)
+                    try:
+                        ticket = object_from_ews_message(item, importer, queues, logger)
+                    except Exception as e:
+                        logger.error('Unable to process message into ticket: ', str(e))  # todo
+                        ticket = None
+                    if ticket:
+                        if DEBUGGING:
+                            logger.info("Successfully processed message %s, left untouched on server\n" % msg_id.id)
+                        else:
+                            try:
+                                item_obj = folder.get(id=msg_id.id, changekey=msg_id.changekey)
+                            except Exception:
+                                logger.error("Unable to retrieve message %s for final processing, left untouched on server." % msg_id.id)
+                            else:
+                                if importer.keep_mail:
+                                    item_obj.is_read = True
+                                    item_obj.save(update_fields=['is_read'])
+                                    logger.info("Successfully processed message %s, marked as Answered on server\n" % msg_id.id)
+                                else:
+                                    item_obj = folder.get(id=msg_id.id, changekey=msg_id.changekey)
+                                    item_obj.soft_delete()
+                                    logger.info("Successfully processed message %s, deleted from server\n" % msg_id.id)
+                    else:
+                        logger.warn("Message %s was not successfully processed, and will be left on IMAP server\n" % msg_id.id)
         except Exception as e:
             logger.error(e)  # todo
 
@@ -528,7 +536,7 @@ def create_ticket_cc(ticket, cc_list):
         cced_email = cced_email.strip()
         if cced_email == ticket.queue.email_address:
             continue
-        if 'no-reply' in cced_email or 'noreply' in cced_email:
+        if 'no-reply' in cced_email or 'noreply' in cced_email or 'postmaster' in cced_email:  # todo make a global var for this
             continue
         if ticket.queue.organization.sender and cced_email == ticket.queue.organization.sender.email_address:
             continue
@@ -559,8 +567,8 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
     sender_email = payload['sender'][1]
     org = queue.organization
 
-    message_id = getattr(message, 'message_id', None) or parseaddr(message.get('Message-Id'))[1]
-    in_reply_to = getattr(message, 'in_reply_to', None) or parseaddr(message.get('In-Reply-To'))[1]
+    message_id = getattr(message, 'message_id', None) or parseaddr(getattr(message, 'Message-Id', None))[1]
+    in_reply_to = getattr(message, 'in_reply_to', None) or parseaddr(getattr(message, 'In-Reply-To', None))[1]
 
     if in_reply_to:
         try:
@@ -940,8 +948,12 @@ def object_from_ews_message(message, importer, queues, logger):
     else:
         sender = ('', '')
 
-    to_list = [(r.name, r.email_address.lower()) for r in message.to_recipients]
-    cc_list = [(r.name, r.email_address.lower()) for r in message.cc_recipients]
+    to_list = []
+    cc_list = []
+    if getattr(message, 'to_recipients', None):
+        to_list = [(r.name, r.email_address.lower()) for r in message.to_recipients]
+    if getattr(message, 'cc_recipients', None):
+        cc_list = [(r.name, r.email_address.lower()) for r in message.cc_recipients]
 
     # Ignore List applies to sender, TO emails, and CC list
     for ignored_address in IgnoreEmail.objects.filter(Q(importers=importer) | Q(importers__isnull=True)):
@@ -980,10 +992,8 @@ def object_from_ews_message(message, importer, queues, logger):
         queue = queues['default_queue']
 
     # Accounting for forwarding loops
-    headers = {h.name: h.value for h in getattr(message, 'headers', {})}
-    auto_forward = headers.get('X-BEAMHelpdesk-Delivered', None)
-    if not auto_forward:
-        auto_forward = message.get('x-beamhelpdesk-delivered', None)
+    headers = {h.name.lower(): h.value for h in getattr(message, 'headers', {})}
+    auto_forward = headers.get('x-beamhelpdesk-delivered', None)
 
     if auto_forward is not None or sender[1] == queue.email_address.lower():
         logger.info("Found a forwarding loop.")
