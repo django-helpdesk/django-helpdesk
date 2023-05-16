@@ -36,7 +36,7 @@ from exchangelib import FileAttachment, ItemAttachment
 from helpdesk import settings
 from helpdesk.lib import safe_template_context, process_attachments
 from helpdesk.models import Ticket, TicketCC, FollowUp, IgnoreEmail, FormType, CustomField
-from seed.models import EmailImporter, GOOGLE, MICROSOFT, HOST_SERVICE_LIST
+from seed.models import EmailImporter, GOOGLE, MICROSOFT
 from helpdesk.decorators import is_helpdesk_staff
 
 
@@ -218,7 +218,7 @@ def process_importer(importer, queues, logger):
                 logger.warn("Message %d was not successfully processed, and will be left in local directory", i)
 
     elif importer.auth:
-        logger.info("Attempting %s server login" % HOST_SERVICE_LIST[importer.auth.host_service])
+        logger.info("Attempting EWS server login")
         server, _ = importer.auth.login(email=importer.sender, logger=logger)
         if server:
             ews_sync(importer, queues, logger, server)
