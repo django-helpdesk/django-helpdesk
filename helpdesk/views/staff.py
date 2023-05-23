@@ -74,7 +74,7 @@ from datetime import timedelta
 
 from ..templated_email import send_templated_mail
 
-from seed.models import PropertyView, Property, TaxLotView, TaxLot
+from seed.models import PropertyView, Property, TaxLotView, TaxLot, Column
 from urllib.parse import urlparse, urlunparse
 from django.http import QueryDict
 User = get_user_model()
@@ -429,7 +429,7 @@ def view_ticket(request, ticket_id):
 
         return update_ticket(request, ticket_id)
 
-    org = ticket.ticket_form.organization_id
+    org = ticket.ticket_form.organization
     users = list_of_helpdesk_staff(org)
     # TODO add back HELPDESK_STAFF_ONLY_TICKET_OWNERS setting
     """if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS:
@@ -471,12 +471,30 @@ def view_ticket(request, ticket_id):
             values['has_column'] = True if object.column else False
             extra_data.append(values)
 
+    prop_display_column = Column.objects.filter(organization=org, column_name=org.property_display_field, table_name='PropertyState').first()
+    if prop_display_column:
+        if prop_display_column.is_extra_data:
+            prop_display_query = f'state__extra_data__{prop_display_column.column_name}'
+        else:
+            prop_display_query = f'state__{prop_display_column.column_name}'
+    else:
+        prop_display_query = 'state__address_line_1'
+
+    taxlot_display_column = Column.objects.filter(organization=org, column_name=org.taxlot_display_field, table_name='TaxLotState').first()
+    if taxlot_display_column:
+        if taxlot_display_column.is_extra_data:
+            taxlot_display_query = f'state__extra_data__{taxlot_display_column.column_name}'
+        else:
+            taxlot_display_query = f'state__{taxlot_display_column.column_name}'
+    else:
+        taxlot_display_query = 'state__address_line_1'
+
     properties = list(
         PropertyView.objects.filter(property_id__in=ticket.beam_property.all().values_list('id', flat=True))
-        .order_by('property_id', '-cycle__end').distinct('property_id').values('id', 'property_id', address=F('state__address_line_1')))
+        .order_by('property_id', '-cycle__end').distinct('property_id').values('id', 'property_id', address=F(prop_display_query)))
     taxlots = list(
         TaxLotView.objects.filter(taxlot_id__in=ticket.beam_taxlot.all().values_list('id', flat=True))
-        .order_by('taxlot_id', '-cycle__end').distinct('taxlot_id').values('id', 'taxlot_id', address=F('state__address_line_1')))
+        .order_by('taxlot_id', '-cycle__end').distinct('taxlot_id').values('id', 'taxlot_id', address=F(taxlot_display_query)))
 
     for p in properties:
         if p['address'] is None or p['address'] == '':
@@ -2312,7 +2330,7 @@ def batch_pair_properties_tickets(request, ticket_ids):
 def _pair_properties_by_form(request, form, tickets):
     from seed.models import PropertyState, TaxLotState, TaxLotView, PropertyView, Cycle
 
-    org = form.queue.organization.id
+    org = form.organization.id
     fields = form.customfield_set.exclude(column__isnull=True).select_related("column")
 
     lookups = {}
