@@ -957,6 +957,8 @@ def mass_update(request):
         )
     elif action == 'export':
         return export_ticket_table(request, tickets)
+    elif action == 'pair':
+        return batch_pair_properties_tickets(request, tickets)
 
     huser = HelpdeskUser(request.user)
     for t in Ticket.objects.filter(id__in=tickets):
@@ -2277,6 +2279,95 @@ def date_rel_to_today(today, offset):
 def sort_string(begin, end):
     return 'sort=created&date_from=%s&date_to=%s&status=%s&status=%s&status=%s&status=%s' % (
         begin, end, Ticket.OPEN_STATUS, Ticket.REOPENED_STATUS, Ticket.REPLIED_STATUS, Ticket.NEW_STATUS)
+
+
+@staff_member_required
+def pair_property_ticket(request, ticket_id):
+    """
+    Pair BEAM properties and taxlots based on the information in the ticket.
+    TODO: Use celery to have building lookup & pairing happen in the background.
+    """
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+    _pair_properties_by_form(ticket.ticket_form, [ticket])
+    return redirect(ticket)
+
+
+@staff_member_required
+def batch_pair_properties_tickets(request, ticket_ids):
+    tickets = Ticket.objects.filter(id__in=ticket_ids).order_by('ticket_form')
+
+    forms = {}
+    for t in tickets:
+        if t.ticket_form_id not in forms:
+            forms[t.ticket_form_id] = {'form': t.ticket_form, 'tickets': []}
+        forms[t.ticket_form_id]['tickets'].append(t)
+
+    for f in forms.values():
+        _pair_properties_by_form(f['form'], f['tickets'])
+
+    return HttpResponseRedirect(reverse('helpdesk:list'))
+
+
+@staff_member_required
+def _pair_properties_by_form(form, tickets):
+    from django.db import models
+    from seed.models import PropertyState,  TaxLotState, Pathway, PropertyView, PropertyMilestone, Column, Cycle
+    org = form.queue.organization.id
+
+    fields = form.customfield_set.exclude(columns=None).prefetch_related(
+        models.Prefetch(
+            'columns',
+            queryset=Column.objects.all().only('column_name', 'is_extra_data', 'table_name'),
+            to_attr='beam')
+    )
+
+    lookups = {}
+    cycle = None
+    for ticket in tickets:
+        lookups[ticket.id] = {'PropertyState': {}, 'TaxLotState': {}}
+        for f in fields:
+            # Locates value from ticket that will be searched for in BEAM
+            if f.field_name in ticket.extra_data \
+                    and ticket.extra_data[f.field_name] is not None and ticket.extra_data[f.field_name] != '':
+                value = ticket.extra_data[f.field_name]
+            elif hasattr(ticket, f.field_name) \
+                    and getattr(ticket, f.field_name, None) is not None and getattr(ticket, f.field_name, None) != '':
+                value = getattr(ticket, f.field_name, None)
+            else:
+                continue
+            # TODO: Check for the data type and cast value as that type before putting it in lookups?
+            # Creates a query term and pairs it with the value
+            for c in f.beam:
+                if c.column_name and hasattr(c, 'is_extra_data') and c.table_name:
+                    query_term = 'extra_data__%s' % c.column_name if c.is_extra_data else c.column_name
+                    lookups[ticket.id][c.table_name][query_term] = value
+
+        if cycle is None:
+            cycles = Cycle.objects.filter(organization_id=org, end__isnull=False).order_by('end')
+            cycle = None
+            for c in cycles:
+                if (not (lookups[ticket.id]['PropertyState'] and not PropertyView.objects.filter(cycle=c).exists())) \
+                        or (not (lookups[ticket.id]['TaxLotState'] and not TaxLotView.objects.filter(cycle=c).exists())):
+                    cycle = c
+                    break  # prevents more database hits
+
+    def lookup(query, state, view, cycle_id, building):
+        """ Queries database for either properties or taxlots. """
+        if query and cycle_id:
+            possible_views = view.objects.filter(cycle=cycle_id)
+            states = state.objects.filter(propertyview__in=possible_views).filter(**query)
+            buildings = building.objects.filter(views__state__in=states).distinct('pk')
+            if buildings:
+                return buildings
+        return None
+
+    for ticket in tickets:
+        property_lookup = lookup(lookups[ticket.id]['PropertyState'], PropertyState, PropertyView, cycle, Property)
+        if property_lookup:
+            ticket.beam_property.add(*property_lookup)
+        taxlot_lookup = lookup(lookups[ticket.id]['TaxLotState'], TaxLotState, TaxLotView, cycle, TaxLot)
+        if taxlot_lookup:
+            ticket.beam_taxlot.add(*taxlot_lookup)
 
 
 @staff_member_required

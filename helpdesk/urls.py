@@ -189,6 +189,10 @@ urlpatterns = [
         staff.pair_property_milestone,
         name="pair_property_milestone"),
 
+    url(r'pair_property_ticket/(?P<ticket_id>[0-9]+)/$',
+        staff.pair_property_ticket,
+        name="pair_property_ticket"),
+
     url(r'edit_inventory_labels/(?P<inventory_type>(property|taxlot))/(?P<ticket_id>[0-9]+)/$',
         staff.edit_inventory_labels,
         name="edit_inventory_labels"),

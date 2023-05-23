@@ -157,15 +157,7 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
 
     class Media:
         js = ('helpdesk/js/init_due_date.js', 'helpdesk/js/init_datetime_classes.js', 'helpdesk/js/validate.js')
-    """
-    lookup = forms.BooleanField(
-        widget=forms.CheckboxInput(attrs={'class': 'form-control'}),
-        label=_('Use this data to match this ticket to a building?'),
-        help_text=_('This will override previous pairings with buildings.'),
-        initial=False,
-        required=False,
-    )
-    """
+
     def __init__(self, *args, **kwargs):
         """
         Add any custom fields that are defined to the form
@@ -264,16 +256,6 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
                     value = str(value)
                 cleaned_data['extra_data'][field_name] = value
         return cleaned_data
-
-    def save(self, commit=True):
-        # Overrides save() to include building lookup method.
-        instance = super(EditTicketForm, self).save(commit=False)
-        changed_fields = None
-        # if self.cleaned_data['lookup']:
-            # changed_fields = _building_lookup(instance.ticket_form.id, self.changed_data) # TODO Temp removed
-        if commit:
-            instance.save(query_fields=changed_fields)
-        return instance
 
 
 class EditFollowUpForm(forms.ModelForm):
@@ -702,9 +684,6 @@ class TicketForm(AbstractTicketForm):
         elif queue.default_owner and not ticket.assigned_to:
             ticket.assigned_to = queue.default_owner
 
-        changed_fields = None  # _building_lookup(ticket.ticket_form.id, self.changed_data) # TODO Temp removed
-        ticket.save(query_fields=changed_fields)
-
         self._add_cc_emails(ticket)
 
         if self.cleaned_data['assigned_to']:
@@ -770,9 +749,6 @@ class PublicTicketForm(AbstractTicketForm):
 
         if queue.default_owner and not ticket.assigned_to:
             ticket.assigned_to = queue.default_owner
-
-        changed_fields = None  # _building_lookup(ticket.ticket_form.id, self.changed_data) # TODO Temp removed
-        ticket.save(query_fields=changed_fields)
 
         self._add_cc_emails(ticket)
 

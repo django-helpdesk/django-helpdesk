@@ -24,6 +24,11 @@ copy_public_link = function() {
                     <tr class=''><th colspan='4'><h3>{{ ticket.queue.slug }}-{{ ticket.id }}. {{ ticket.title }} [{{ ticket.get_status }}]</h3>
                         {% blocktrans with ticket.queue as queue %}Queue: {{ queue }}{% endblocktrans %}
                         <span class='ticket_toolbar float-right'>
+
+                            <span><a href="{% url 'helpdesk:pair_property_ticket' ticket.id %}" class="btn btn-primary btn-sm">
+                                <i class="fas fa-road"></i> {% trans "Pair to BEAM inventory" %}
+                            </a></span> |
+
                             {% if ticket.property_milestones.count > 0 %}
                             <button type="button" id="milestoneButton" class="btn btn-primary btn-sm dropdown-toggle" data-toggle="dropdown"><i class="fas fa-road"></i> {% trans "View Milestone(s)" %}</button>
                             <div class="dropdown-menu" aria-labelledby="milestoneButton">
