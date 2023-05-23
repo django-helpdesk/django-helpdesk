@@ -48,12 +48,7 @@ from .templated_email import send_templated_mail
 from seed.lib.superperms.orgs.models import Organization, get_helpdesk_count_by_domain
 from seed.models import (
     Column,
-    Cycle,
-    PropertyView,
-    PropertyState,
     Property,
-    TaxLotView,
-    TaxLotState,
     TaxLot,
 )
 
@@ -1945,8 +1940,7 @@ class CustomField(models.Model):
     public = models.BooleanField(_('Show on public form?'), default=True)
 
     ticket_form = models.ForeignKey(FormType, on_delete=models.CASCADE)
-    columns = models.ManyToManyField(Column, blank=True, related_name='helpdesk_fields',
-                                     verbose_name=_('Associated BEAM columns'))
+    column = models.ForeignKey(Column, blank=True, null=True, on_delete=models.SET_NULL, related_name='helpdesk_fields', verbose_name=_('Associated BEAM column'))
 
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)

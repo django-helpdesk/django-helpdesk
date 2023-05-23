@@ -52,25 +52,6 @@ CUSTOMFIELD_TIME_FORMAT = "%H:%M:%S"
 CUSTOMFIELD_DATETIME_FORMAT = f"{CUSTOMFIELD_DATE_FORMAT} {CUSTOMFIELD_TIME_FORMAT}"
 
 
-def _building_lookup(ticket_form_id, changed_data):
-    """
-    :param ticket_form_id: int. The ID of a ticket.
-    :param changed_data: list of strings. The strings are names of all changed form fields.
-    :return: list of strings. The strings are names of all changed field forms that are associated with columns
-
-    Checks if any changed fields are associated with columns in BEAM, and returns a list of them.
-    Called by save() in EditTicketForm, TicketForm and PublicTicketForm.
-    """
-    changed_data = map(lambda f: f.replace('e_', '', 1) if f.startswith('e_') else f, changed_data)
-    custom_fields = CustomField.objects.filter(
-        ticket_form=ticket_form_id,
-        field_name__in=changed_data,
-    ).exclude(columns=None)
-    if custom_fields.exists():
-        return custom_fields.values_list('field_name', flat=True)
-    return []
-
-
 def _field_ordering(queryset):
     # ordering fields based on form_ordering
     # if form_ordering is None, field is sorted to end of list

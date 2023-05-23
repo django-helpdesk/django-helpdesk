@@ -459,7 +459,7 @@ def view_ticket(request, ticket_id):
 
     display_data = CustomField.objects.filter(ticket_form=ticket.ticket_form).only(
         'label', 'data_type',
-        'field_name', 'columns',
+        'field_name', 'column',
     )
     extra_data = []
     for values, object in zip(display_data.values(), display_data):  # TODO check how many queries this runs
@@ -468,7 +468,7 @@ def view_ticket(request, ticket_id):
                 values['value'] = ticket.extra_data[values['field_name']]
             else:
                 values['value'] = getattr(ticket, values['field_name'], None)
-            values['has_columns'] = True if object.columns.exists() else False
+            values['has_column'] = True if object.column else False
             extra_data.append(values)
 
     properties = list(
@@ -2310,16 +2310,10 @@ def batch_pair_properties_tickets(request, ticket_ids):
 
 @staff_member_required
 def _pair_properties_by_form(request, form, tickets):
-    from django.db import models
-    from seed.models import PropertyState, TaxLotState, TaxLotView, PropertyView, Column, Cycle
-    org = form.queue.organization.id
+    from seed.models import PropertyState, TaxLotState, TaxLotView, PropertyView, Cycle
 
-    fields = form.customfield_set.exclude(columns=None).prefetch_related(
-        models.Prefetch(
-            'columns',
-            queryset=Column.objects.all().only('column_name', 'is_extra_data', 'table_name'),
-            to_attr='beam')
-    )
+    org = form.queue.organization.id
+    fields = form.customfield_set.exclude(column__isnull=True).select_related("column")
 
     lookups = {}
     cycle = None
@@ -2335,21 +2329,22 @@ def _pair_properties_by_form(request, form, tickets):
                 value = getattr(ticket, f.field_name, None)
             else:
                 continue
-            # TODO: Check for the data type and cast value as that type before putting it in lookups?
+
             # Creates a query term and pairs it with the value
-            for c in f.beam:
-                if c.column_name and hasattr(c, 'is_extra_data') and c.table_name:
-                    query_term = 'extra_data__%s' % c.column_name if c.is_extra_data else c.column_name
-                    lookups[ticket.id][c.table_name][query_term] = value
+            # TODO: Check for the data type and cast value as that type before putting it in lookups?
+            if f.column.column_name and hasattr(f.column, 'is_extra_data') and f.column.table_name:
+                query_term = 'extra_data__%s' % f.column.column_name if f.column.is_extra_data else f.column.column_name
+                lookups[ticket.id][f.column.table_name][query_term] = value
 
         if cycle is None:
             cycles = Cycle.objects.filter(organization_id=org, end__isnull=False).order_by('end')
             for c in cycles:
+                # if statement checks that if there's a prop query, there should be prop views in that cycle, as well as
+                # taxlot views if there's a taxlot query. if no queries, it doesn't matter whether it has views in that cycle.
                 if (not (lookups[ticket.id]['PropertyState'] and not PropertyView.objects.filter(cycle=c).exists())) and \
                    (not (lookups[ticket.id]['TaxLotState'] and not TaxLotView.objects.filter(cycle=c).exists())):
                     cycle = c
-                    break  # prevents more database hits
-    print(cycle)
+                    break
 
     def lookup(query, state, view, cycle, building):
         """ Queries database for either properties or taxlots. """

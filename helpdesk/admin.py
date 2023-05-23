@@ -38,43 +38,6 @@ class QueueAdmin(admin.ModelAdmin):
             return "-"
 
 
-class CustomFieldInline(admin.TabularInline):
-    # Allows user to edit form fields on the same page as the Form Type model.
-    model = CustomField
-    exclude = ('empty_selection_list',)
-    raw_id_fields = ("columns",)
-    can_delete = False
-    extra = 0
-
-    class Media:
-        css = {'all': ("helpdesk/admin_inline.css",)}
-
-    def empty_selection_list_display(self, object):
-        return object.empty_selection_list
-    empty_selection_list_display.short_description = _("Add empty choice?")
-
-
-@admin.register(FormType)
-class FormTypeAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'extra_data_cleaned', 'queue', 'public', 'staff', 'organization', )
-    list_display_links = ('name',)
-    list_filter = ('organization',)
-    inlines = [CustomFieldInline]
-
-    def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        if db_field.name == "organization":
-            kwargs["queryset"] = get_helpdesk_organizations()
-        return super().formfield_for_foreignkey(db_field, request, **kwargs)
-
-    def extra_data_cleaned(self, form):
-        display = ''
-        extra_fields = form.get_extra_field_names()
-        for item in extra_fields:
-            display += ('%s,<br />' % item)
-        return format_html(display)
-    extra_data_cleaned.short_description = _('Extra Data')
-
-
 class TicketAdminForm(forms.ModelForm):
     # Allows beam_property and beam_taxlot's querysets to be filtered.
     class Meta:
@@ -138,14 +101,14 @@ class TicketAdmin(admin.ModelAdmin):
 
 
 class CustomFieldAdminForm(forms.ModelForm):
-    # Overrides admin form for CustomField to add filtering for columns' queryset.
+    # Overrides admin form for CustomField to add filtering for column's queryset.
     class Meta:
         model = CustomField
         fields = '__all__'
 
-    def update_columns_set(self, obj):
+    def update_column_set(self, obj):
         if obj and hasattr(obj, 'ticket_form'):
-            self.fields['columns'].queryset = Column.objects \
+            self.fields['column'].queryset = Column.objects \
                 .filter(organization_id=obj.ticket_form.organization_id) \
                 .exclude(table_name='') \
                 .exclude(table_name=None) \
@@ -153,7 +116,7 @@ class CustomFieldAdminForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.update_columns_set(self.instance)
+        self.update_column_set(self.instance)
 
 
 @admin.register(CustomField)
@@ -161,9 +124,8 @@ class CustomFieldAdmin(admin.ModelAdmin):
     form = CustomFieldAdminForm
     list_display = ('ticket_form_type', 'field_name', 'label', 'data_type',
                     'required', 'staff', 'public', 'is_extra_data')
-    list_filter = ('ticket_form',)
+    list_filter = ('ticket_form__organization', 'ticket_form',)
     list_display_links = ('field_name',)
-    filter_horizontal = ('columns',)
 
     def ticket_form_type(self, ticket):
         if ticket.ticket_form:
@@ -178,7 +140,7 @@ class CustomFieldAdmin(admin.ModelAdmin):
 
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
-        form.update_columns_set(obj)
+        form.update_column_set(obj)
 
     @admin.action(description="Mark field as required")
     def make_required_true(modeladmin, request, queryset):
@@ -207,6 +169,43 @@ class CustomFieldAdmin(admin.ModelAdmin):
     actions = [make_required_true, make_required_false,
                make_staff_true, make_staff_false,
                make_public_true, make_public_false]
+
+
+class CustomFieldInline(admin.TabularInline):
+    # Allows user to edit form fields on the same page as the Form Type model.
+    model = CustomField
+    exclude = ('empty_selection_list',)
+    can_delete = False
+    extra = 0
+    form = CustomFieldAdminForm
+
+    class Media:
+        css = {'all': ("helpdesk/admin_inline.css",)}
+
+    def empty_selection_list_display(self, object):
+        return object.empty_selection_list
+    empty_selection_list_display.short_description = _("Add empty choice?")
+
+
+@admin.register(FormType)
+class FormTypeAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name', 'extra_data_cleaned', 'queue', 'public', 'staff', 'organization', )
+    list_display_links = ('name',)
+    list_filter = ('organization',)
+    inlines = [CustomFieldInline]
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "organization":
+            kwargs["queryset"] = get_helpdesk_organizations()
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+    def extra_data_cleaned(self, form):
+        display = ''
+        extra_fields = form.get_extra_field_names()
+        for item in extra_fields:
+            display += ('%s,<br />' % item)
+        return format_html(display)
+    extra_data_cleaned.short_description = _('Extra Data')
 
 
 class TicketChangeInline(admin.StackedInline):
