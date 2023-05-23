@@ -2288,7 +2288,7 @@ def pair_property_ticket(request, ticket_id):
     TODO: Use celery to have building lookup & pairing happen in the background.
     """
     ticket = get_object_or_404(Ticket, id=ticket_id)
-    _pair_properties_by_form(ticket.ticket_form, [ticket])
+    _pair_properties_by_form(request, ticket.ticket_form, [ticket])
     return redirect(ticket)
 
 
@@ -2303,13 +2303,13 @@ def batch_pair_properties_tickets(request, ticket_ids):
         forms[t.ticket_form_id]['tickets'].append(t)
 
     for f in forms.values():
-        _pair_properties_by_form(f['form'], f['tickets'])
+        _pair_properties_by_form(request, f['form'], f['tickets'])
 
     return HttpResponseRedirect(reverse('helpdesk:list'))
 
 
 @staff_member_required
-def _pair_properties_by_form(form, tickets):
+def _pair_properties_by_form(request, form, tickets):
     from django.db import models
     from seed.models import PropertyState,  TaxLotState, Pathway, PropertyView, PropertyMilestone, Column, Cycle
     org = form.queue.organization.id
