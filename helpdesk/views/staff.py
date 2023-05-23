@@ -2310,12 +2310,8 @@ def batch_pair_properties_tickets(request, ticket_ids):
 
 @staff_member_required
 def _pair_properties_by_form(request, form, tickets):
-    from time import sleep
-    print('hi')
-    sleep(5)
-    print('back')
     from django.db import models
-    from seed.models import PropertyState,  TaxLotState, TaxLotView, PropertyView, Column, Cycle
+    from seed.models import PropertyState, TaxLotState, TaxLotView, PropertyView, Column, Cycle
     org = form.queue.organization.id
 
     fields = form.customfield_set.exclude(columns=None).prefetch_related(
@@ -2330,7 +2326,6 @@ def _pair_properties_by_form(request, form, tickets):
     for ticket in tickets:
         lookups[ticket.id] = {'PropertyState': {}, 'TaxLotState': {}}
         for f in fields:
-            print(f.field_name)
             # Locates value from ticket that will be searched for in BEAM
             if f.field_name in ticket.extra_data \
                     and ticket.extra_data[f.field_name] is not None and ticket.extra_data[f.field_name] != '':
@@ -2343,17 +2338,15 @@ def _pair_properties_by_form(request, form, tickets):
             # TODO: Check for the data type and cast value as that type before putting it in lookups?
             # Creates a query term and pairs it with the value
             for c in f.beam:
-                print(c.column_name)
                 if c.column_name and hasattr(c, 'is_extra_data') and c.table_name:
                     query_term = 'extra_data__%s' % c.column_name if c.is_extra_data else c.column_name
-                    print(query_term)
-                    print(value)
                     lookups[ticket.id][c.table_name][query_term] = value
 
         if cycle is None:
             cycles = Cycle.objects.filter(organization_id=org, end__isnull=False).order_by('end')
             for c in cycles:
-                if (not (lookups[ticket.id]['PropertyState'] and not PropertyView.objects.filter(cycle=c).exists())) or (not (lookups[ticket.id]['TaxLotState'] and not TaxLotView.objects.filter(cycle=c).exists())):
+                if (not (lookups[ticket.id]['PropertyState'] and not PropertyView.objects.filter(cycle=c).exists())) and \
+                   (not (lookups[ticket.id]['TaxLotState'] and not TaxLotView.objects.filter(cycle=c).exists())):
                     cycle = c
                     break  # prevents more database hits
     print(cycle)
@@ -2362,7 +2355,6 @@ def _pair_properties_by_form(request, form, tickets):
         """ Queries database for either properties or taxlots. """
         if query and cycle:
             possible_views = view.objects.filter(cycle=cycle)
-            print(possible_views)
             states = state.objects.filter(propertyview__in=possible_views).filter(**query)
             buildings = building.objects.filter(views__state__in=states).distinct('pk')
             if buildings:
