@@ -26,7 +26,7 @@ copy_public_link = function() {
                         <span class='ticket_toolbar float-right'>
 
                             <span><a href="{% url 'helpdesk:pair_property_ticket' ticket.id %}" class="btn btn-primary btn-sm">
-                                <i class="fas fa-road"></i> {% trans "Pair to BEAM inventory" %}
+                                <i class="fas fa-city"></i> {% trans "Auto-pair to BEAM inventory" %}
                             </a></span> |
 
                             {% if ticket.property_milestones.count > 0 %}
@@ -48,13 +48,13 @@ copy_public_link = function() {
                             <a href="{% url 'helpdesk:edit_inventory_labels' 'property' ticket.id %}"
                                 {% if not ticket.beam_property.count %} class="btn btn-secondary btn-sm disabled" aria-disabled="true"
                                 {% else %} class="btn btn-primary btn-sm" {% endif %}>
-                                <i class="fas fa-building"></i> {% trans "Edit Property Labels" %}
+                                <i class="fas fa-sticky-note"></i> {% trans "Edit Property Labels" %}
                             </a></span> |
                             {% if not ticket.beam_taxlot.count %} <span class="tooltip-wrapper"  data-toggle="tooltip" data-placement="top" title="Must be paired to a BEAM TaxLot to Edit Labels"> {% else %} <span> {% endif %}
                             <a href="{% url 'helpdesk:edit_inventory_labels' 'taxlot' ticket.id %}"
                                 {% if not ticket.beam_taxlot.count %} class="btn btn-secondary btn-sm disabled" aria-disabled="true"
                                 {% else %} class="btn btn-primary btn-sm" {% endif %}>
-                                <i class="fas fa-map"></i> {% trans "Edit TaxLot Labels" %}
+                                <i class="fas fa-sticky-note"></i> {% trans "Edit TaxLot Labels" %}
                             </a> |
                             <a href="{% url 'helpdesk:edit' ticket.id %}" class="ticket-edit"><button class="btn btn-warning btn-sm"><i class="fas fa-pencil-alt"></i> {% trans "Edit" %}</button></a>
                             | <a href="{% url 'helpdesk:delete' ticket.id %}" class="ticket-delete"><button class="btn btn-danger btn-sm"><i class="fas fa-trash-alt"></i> {% trans "Delete" %}</button></a>
@@ -74,7 +74,7 @@ copy_public_link = function() {
                         {% cycle 'row' '' as row silent %}
                         {% if row %}<tr>{% endif %}
                             <th class="table-secondary">
-                                {% if field.has_column %}<span title="This field is paired to a column in BEAM's inventory.">{{ field.label }}*</span>
+                                {% if field.has_column %}<span title="This field is paired to a column in BEAM's inventory.">{{ field.label }} <i class="fas fa-city"></i></span>
                                 {% else %}{{ field.label }}{% endif %}
                             </th>
                             {% if forloop.last %} <td colspan="3"> {% else %} <td> {% endif %}
