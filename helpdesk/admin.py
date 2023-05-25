@@ -38,31 +38,12 @@ class QueueAdmin(admin.ModelAdmin):
             return "-"
 
 
-class TicketAdminForm(forms.ModelForm):
-    # Allows beam_property and beam_taxlot's querysets to be filtered.
-    class Meta:
-        model = Ticket
-        fields = '__all__'
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.update_ticket_set(self.instance)
-
-    def update_ticket_set(self, obj):
-        if obj and hasattr(obj, 'ticket_form'):
-            self.fields['beam_property'].queryset = Property.objects.filter(
-                organization_id=obj.ticket_form.organization_id).order_by('id')
-            self.fields['beam_taxlot'].queryset = TaxLot.objects.filter(
-                organization_id=obj.ticket_form.organization_id).order_by('id')
-
-
 @admin.register(Ticket)
 class TicketAdmin(admin.ModelAdmin):
     list_display = ('id', 'title_view', 'status', 'assigned_to', 'queue', 'ticket_form',
                     'hidden_submitter_email')
     list_display_links = ('title_view',)
-    list_filter = ('queue', 'ticket_form', 'assigned_to', 'status')
-    date_hierarchy = 'created'
+    list_filter = ('ticket_form__organization', 'queue', 'ticket_form', 'assigned_to', 'status')
 
     # TODO set a different ordering that doesn't require them all to be written out?
     fields = ('queue', 'ticket_form', 'title', 'description', 'contact_name', 'contact_email', 'submitter_email',
@@ -71,8 +52,7 @@ class TicketAdmin(admin.ModelAdmin):
               'assigned_to', 'status', 'on_hold', 'resolution', 'secret_key', 'kbitem', 'merged_to',
               'priority', 'due_date',)
 
-    form = TicketAdminForm
-    filter_horizontal = ('beam_property', 'beam_taxlot')
+    readonly_fields = ('beam_property', 'beam_taxlot')
 
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
@@ -122,15 +102,20 @@ class CustomFieldAdminForm(forms.ModelForm):
 @admin.register(CustomField)
 class CustomFieldAdmin(admin.ModelAdmin):
     form = CustomFieldAdminForm
-    list_display = ('ticket_form_type', 'field_name', 'label', 'data_type',
-                    'required', 'staff', 'public', 'is_extra_data')
+    list_display = ('ticket_form_type', 'field_name', 'label', 'data_type', 'beam_column',
+                    'required', 'staff', 'public', 'is_extra_data',)
     list_filter = ('ticket_form__organization', 'ticket_form',)
     list_display_links = ('field_name',)
 
-    def ticket_form_type(self, ticket):
-        if ticket.ticket_form:
-            return ticket.ticket_form.name
+    def ticket_form_type(self, field):
+        if field.ticket_form:
+            return field.ticket_form.name
     ticket_form_type.short_description = _('Ticket Form')
+
+    def beam_column(self, field):
+        if field.column:
+            return field.column.column_name
+    beam_column.short_description = _('BEAM Column')
 
     @admin.display(boolean=True)
     def is_extra_data(self, field):
@@ -228,7 +213,7 @@ class FollowUpAdmin(admin.ModelAdmin):
     inlines = [TicketChangeInline, FollowUpAttachmentInline]
     list_display = ('ticket_get_ticket_for_url', 'title', 'date', 'ticket',
                     'user', 'new_status', 'time_spent')
-    list_filter = ('user', 'date', 'new_status')
+    list_filter = ('ticket__ticket_form__organization', 'ticket__ticket_form', 'user', 'date', 'new_status')
 
     def ticket_get_ticket_for_url(self, obj):
         return obj.ticket.ticket_for_url
