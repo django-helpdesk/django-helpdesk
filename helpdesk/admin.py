@@ -92,7 +92,7 @@ class CustomFieldAdminForm(forms.ModelForm):
                 .filter(organization_id=obj.ticket_form.organization_id) \
                 .exclude(table_name='') \
                 .exclude(table_name=None) \
-                .order_by('id')
+                .order_by('column_name')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
