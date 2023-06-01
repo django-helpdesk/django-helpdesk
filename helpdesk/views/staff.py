@@ -20,7 +20,7 @@ from django.core.exceptions import ValidationError, PermissionDenied
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.db.models import Q, Prefetch, F
+from django.db.models import Q, Prefetch, F, Case, When
 from django.http import HttpResponseRedirect, Http404, HttpResponse, JsonResponse, HttpRequest
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils.translation import ugettext as _
@@ -159,7 +159,7 @@ def dashboard(request):
 
     # Get only active tickets
     active_tickets = active_tickets.filter(
-        queue__in=user_queues)
+        queue__in=user_queues).exclude(status=Ticket.DUPLICATE_STATUS)
 
     # open & reopened tickets, assigned to current user
     tickets = active_tickets.filter(
@@ -169,7 +169,7 @@ def dashboard(request):
     # closed & resolved tickets, assigned to current user
     tickets_closed_resolved = Ticket.objects.select_related('queue').filter(
         assigned_to=request.user,
-        status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
+        status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS, Ticket.DUPLICATE_STATUS],
         queue__in=user_queues,
     )
 
@@ -188,7 +188,15 @@ def dashboard(request):
         all_tickets_reported_by_current_user = Ticket.objects.select_related('queue').filter(
             submitter_email=email_current_user,
             queue__in=user_queues
-        ).order_by('status', '-id')
+        ).exclude(status=Ticket.DUPLICATE_STATUS).order_by(
+            # Custom Ordering: New, Open / Reopened, Replied, Resolved, Closed
+            Case(When(status=Ticket.NEW_STATUS, then=0), default=1),
+            Case(When(status__in=[Ticket.OPEN_STATUS, Ticket.REOPENED_STATUS], then=1), default=2),
+            Case(When(status=Ticket.REPLIED_STATUS, then=2), default=3),
+            Case(When(status=Ticket.RESOLVED_STATUS, then=3), default=4),
+            Case(When(status=Ticket.CLOSED_STATUS, then=3), default=4),
+            '-id'
+        )
 
     tickets_in_queues = Ticket.objects.filter(
         queue__in=user_queues,
