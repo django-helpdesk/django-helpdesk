@@ -1,6 +1,16 @@
 {% load i18n helpdesk_staff %}
 {% block header %}
-<h2>{% blocktrans with category.title as kbcat %}{{ kbcat }}{% endblocktrans %}</h2>
+<div class="d-flex">
+    <h2>{% blocktrans with category.title as kbcat %}{{ kbcat }}{% endblocktrans %}</h2>
+    {% if user|is_helpdesk_staff %}
+    <div class="flex-fill d-flex justify-content-end">
+        <a class="btn btn-primary align-self-center" href="{% url 'helpdesk:edit_kb_category' category.slug %}{{ user_info.url }}">
+            <i class="fa fa-pen" style="margin-right:0.25rem"></i>Edit
+        </a>
+    </div>
+    {% endif %}
+</div>
+
 {% endblock %}
 
 <div class="container-fluid">

@@ -293,6 +293,10 @@ if helpdesk_settings.HELPDESK_KB_ENABLED:
             kb.category,
             name='kb_category'),
 
+        url(r'^kb/(?P<slug>[A-Za-z0-9_-]+)/edit/$',
+            kb.edit_category,
+            name="edit_kb_category"),
+
         url(r'^kb/(?P<item>[0-9]+)/vote/$',
             kb.vote,
             name='kb_vote'),

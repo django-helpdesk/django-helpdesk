@@ -23,7 +23,7 @@ from django.shortcuts import get_object_or_404
 from helpdesk.lib import safe_template_context, process_attachments
 from helpdesk.models import (Ticket, Queue, FollowUp, IgnoreEmail, TicketCC,
                              CustomField, TicketDependency, UserSettings, KBItem,
-                             FormType, is_extra_data)
+                             FormType, KBCategory, is_extra_data)
 from helpdesk import settings as helpdesk_settings
 from helpdesk.email import create_ticket_cc
 from helpdesk.decorators import list_of_helpdesk_staff
@@ -251,6 +251,27 @@ class EditFollowUpForm(forms.ModelForm):
 
         t = kwargs['initial']['ticket'] if kwargs else Ticket.objects.filter(id=args[0]['ticket']).first()
         self.fields['ticket'].queryset = Ticket.objects.filter(queue__organization__id=t.queue.organization_id)
+
+class EditKBCategoryForm(forms.ModelForm):
+
+    slug = forms.SlugField(required=False)
+
+    class Meta:
+        model = KBCategory
+        exclude = ('organization',)
+
+    def __init__(self, *args, **kwargs):
+        """
+            Set slug field to read-only. 
+            Filter queues and forms by current org.
+        """
+        super(EditKBCategoryForm, self).__init__(*args, **kwargs)
+
+        self.fields['slug'].disabled = True
+        slug = kwargs['initial']['slug'] if kwargs else args[1]
+        org = KBCategory.objects.filter(slug=slug).first().organization
+        self.fields['queue'].queryset = Queue.objects.filter(organization=org)
+        self.fields['forms'].queryset = FormType.objects.filter(organization=org) 
 
 
 class AbstractTicketForm(CustomFieldMixin, forms.Form):

@@ -17,8 +17,9 @@ from django.urls import reverse
 from helpdesk import settings as helpdesk_settings
 from helpdesk import user
 from helpdesk.models import KBCategory, KBItem
-from helpdesk.decorators import is_helpdesk_staff
-
+from helpdesk.decorators import is_helpdesk_staff, helpdesk_staff_member_required
+from helpdesk.forms import EditKBCategoryForm
+from django.utils.html import escape
 
 def index(request):
     huser = user.huser_from_request(request)
@@ -60,6 +61,56 @@ def category(request, slug, iframe=False):
         'debug': settings.DEBUG,
     })
 
+@helpdesk_staff_member_required
+def edit_category(request, slug):
+    """Edit Knowledgebase category"""
+    category = get_object_or_404(KBCategory, slug__iexact=slug)
+
+    if request.method == 'GET':
+        form = EditKBCategoryForm(initial={
+            'name': category.name,
+            'title': category.title,
+            'slug': category.slug,
+            'preview_description': escape(category.preview_description),
+            'description': escape(category.description),
+            'queue': category.queue,
+            'forms': category.forms.all(),
+            'public': category.public,
+        })
+
+        return render(request, 'helpdesk/kb_category_edit.html', {
+            'category': category,
+            'form': form,
+            'debug': settings.DEBUG,
+        })
+    elif request.method == 'POST':
+        form = EditKBCategoryForm(request.POST, slug)
+
+        if form.is_valid():
+            name = form.cleaned_data['name']
+            title = form.cleaned_data['title']
+            #slug = form.cleaned_data['slug']
+            preview_description = form.cleaned_data['preview_description']
+            description = form.cleaned_data['description']
+            queue = form.cleaned_data['queue']
+            forms = form.cleaned_data['forms']
+            public = form.cleaned_data['public']
+
+            new_category = KBCategory(
+                id = category.id,
+                organization = category.organization,
+                name = name, 
+                title = title, 
+                slug = category.slug, 
+                preview_description = preview_description,
+                description = description,
+                queue = queue,
+                public = public
+            )
+            category.delete()
+            new_category.save()
+            new_category.forms.set(forms)
+        return HttpResponseRedirect(reverse('helpdesk:kb_category', args=[category.slug]))
 
 def article(request, slug, pk, iframe=False):
     item = get_object_or_404(KBItem, pk=pk)
@@ -134,3 +185,5 @@ def vote(request, item):
             item.voted_by.remove(request.user.pk)
     item.save()
     return HttpResponseRedirect(item.get_absolute_url())
+
+
