@@ -289,6 +289,10 @@ if helpdesk_settings.HELPDESK_KB_ENABLED:
             kb.article,
             name='kb_article'),
 
+        url(r'^kb/(?P<slug>[A-Za-z0-9_-]+)/(?P<pk>[0-9]+)/edit/$',
+            kb.edit_article,
+            name="edit_kb_article"),
+
         url(r'^kb/(?P<slug>[A-Za-z0-9_-]+)/$',
             kb.category,
             name='kb_category'),

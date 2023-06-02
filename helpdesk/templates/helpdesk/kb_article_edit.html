@@ -1,0 +1,40 @@
+{% extends "helpdesk/base.html" %}
+
+{% load i18n bootstrap4form %}
+
+{% block helpdesk_title %}{% trans "Edit Category" %}{% endblock %}
+
+{% block helpdesk_breadcrumb %}
+<li class="breadcrumb-item">
+    <a href="{% url 'helpdesk:kb_index' %}{{ user_info.url }}">{% trans "Knowledgebase" %}</a>
+</li>
+<li class="breadcrumb-item active">
+    <a href="{% url 'helpdesk:kb_category' category.slug %}{{ user_info.url }}">{% blocktrans with category.title as kbcat %}{{ kbcat }}{% endblocktrans %}</a>
+</li>
+<li class="breadcrumb-item active">{% blocktrans with item.question as itemq %} Edit: {{ itemq }}{% endblocktrans %}</li>
+{% endblock %}
+
+{% block helpdesk_body %}
+    <div class="col-xs-6">
+        <div class="panel panel-default">
+            <div class="panel-body"><h2>{% trans "Edit Article" %}</h2>
+                <p>
+                    {% trans "Unless otherwise stated, all fields are required." %}
+                </p>
+                {% if errors %}<p class="text-danger">{% for error in errors %}{% trans "Error: " %}{{ error }}<br>{% endfor %}</p>{% endif %}
+                <form method='post'>
+                    {% csrf_token %}
+                    <fieldset>
+                        {{ form|bootstrap4form }}
+                        <div class='buttons form-group'>
+                            <input type='submit' class="btn btn-primary btn" value='{% trans "Save Changes" %}'/>
+                            <a href='{{ ticket.get_absolute_url }}'>
+                                <button class="btn btn-danger">{% trans "Cancel Changes" %}</button>
+                            </a>
+                        </div>
+                    </fieldset>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

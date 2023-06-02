@@ -158,6 +158,11 @@ def article(request, slug, pk, iframe=False):
         'kb_forms': kb_forms
     })
 
+@helpdesk_staff_member_required
+def edit_article(request, slug, pk, iframe=False):
+
+    # Stub return
+    return
 
 @xframe_options_exempt
 def category_iframe(request, slug):

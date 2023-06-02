@@ -1,8 +1,15 @@
 {% load i18n helpdesk_staff %}
 {% block header %}
 <div class="row" style="display:inline">
-    <h2>{% blocktrans with item.question as itemq %}{{ itemq }}{% endblocktrans %}</h2>
-    <a style="vertial-align:center" class="btn btn-secondary btn-sm{% if not prev_item %} disabled{% endif %}" href="{{ prev_item.get_absolute_url }}/{{ user_info.url }}" role="button">
+    <div class="d-flex">
+        <h2>{% blocktrans with item.question as itemq %}{{ itemq }}{% endblocktrans %}</h2>
+        <div class="flex-fill d-flex justify-content-end">
+            <a class="btn btn-primary align-self-center" href="{% url 'helpdesk:edit_kb_article' category.slug item.id %}{{ user_info.url }}">
+                <i class="fa fa-pen" style="margin-right:0.25rem"></i>Edit
+            </a>
+        </div>
+    </div>
+    <a style="vertical-align:center" class="btn btn-secondary btn-sm{% if not prev_item %} disabled{% endif %}" href="{{ prev_item.get_absolute_url }}/{{ user_info.url }}" role="button">
         <i class="fa fa-angle-double-left"></i> Previous Item
     </a>
     <a class="btn btn-secondary btn-sm{% if not next_item %} disabled{% endif %}" href="{{ next_item.get_absolute_url }}/{{ user_info.url }}">
