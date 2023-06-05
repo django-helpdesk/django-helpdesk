@@ -18,8 +18,10 @@ from helpdesk import settings as helpdesk_settings
 from helpdesk import user
 from helpdesk.models import KBCategory, KBItem
 from helpdesk.decorators import is_helpdesk_staff, helpdesk_staff_member_required
-from helpdesk.forms import EditKBCategoryForm
+from helpdesk.forms import EditKBCategoryForm, EditKBItemForm
 from django.utils.html import escape
+
+import datetime
 
 def index(request):
     huser = user.huser_from_request(request)
@@ -160,9 +162,56 @@ def article(request, slug, pk, iframe=False):
 
 @helpdesk_staff_member_required
 def edit_article(request, slug, pk, iframe=False):
+    item = get_object_or_404(KBItem, pk=pk)
 
-    # Stub return
-    return
+    if request.method == "GET":
+        form = EditKBItemForm(initial={
+            'category': item.category,
+            'title': item.title,
+            'question': item.question,
+            'answer': item.answer,
+            'order': item.order,
+            'enabled': item.enabled,
+        })
+
+        return render(request, 'helpdesk/kb_article_edit.html', {
+            'category': item.category,
+            'item': item,
+            'form': form,
+            'debug': settings.DEBUG,
+        })
+    elif request.method == "POST":
+        form = EditKBItemForm(request.POST, item.category.slug)
+
+        if form.is_valid():
+            category = form.cleaned_data['category']
+            title = form.cleaned_data['title']
+            question = form.cleaned_data['question']
+            answer = form.cleaned_data['answer']
+            order = form.cleaned_data['order']
+            enabled = form.cleaned_data['enabled']
+            voted_by = item.voted_by
+            downvoted_by = item.downvoted_by
+
+            new_item = KBItem(
+                id = item.id,
+                category = category,
+                title = title,
+                question = question,
+                answer = answer,
+                order = order,
+                enabled = enabled,
+                votes = item.votes,
+                recommendations = item.recommendations,
+                team = item.team,
+                last_updated = datetime.datetime.now()
+            )
+            item.delete()
+            new_item.save()
+            new_item.voted_by.set(voted_by.all())
+            new_item.downvoted_by.set(downvoted_by.all())
+        return HttpResponseRedirect(reverse('helpdesk:kb_article', args=[category.slug, new_item.id]))
+            
 
 @xframe_options_exempt
 def category_iframe(request, slug):

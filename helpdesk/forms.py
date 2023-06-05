@@ -273,6 +273,28 @@ class EditKBCategoryForm(forms.ModelForm):
         self.fields['queue'].queryset = Queue.objects.filter(organization=org)
         self.fields['forms'].queryset = FormType.objects.filter(organization=org) 
 
+class EditKBItemForm(forms.ModelForm):
+
+    class CategoryModelChoiceField(forms.ModelChoiceField):
+        def label_from_instance(self, category):
+            return "%s" % (category.name)
+        
+    category = CategoryModelChoiceField(queryset=KBCategory.objects)
+
+    class Meta:
+        model = KBItem
+        exclude = ('voted_by', 'downvoted_by', 'votes', 'recommendations', 'last_updated','team')
+
+    def __init__(self, *args, **kwargs):
+        """
+            Category field will only show category titles.
+            Filter categories by current org.
+        """
+        super(EditKBItemForm, self).__init__(*args, **kwargs)
+
+        slug = kwargs['initial']['category'].slug if kwargs else args[1]
+        org = KBCategory.objects.filter(slug=slug).first().organization
+        self.fields['category'].queryset = KBCategory.objects.filter(organization=org)
 
 class AbstractTicketForm(CustomFieldMixin, forms.Form):
     """
