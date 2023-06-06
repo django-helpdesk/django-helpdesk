@@ -49,7 +49,8 @@ from helpdesk.decorators import (
 )
 from helpdesk.forms import (
     TicketForm, UserSettingsForm, EmailIgnoreForm, EditTicketForm, TicketCCForm,
-    TicketCCEmailForm, TicketCCUserForm, EditFollowUpForm, TicketDependencyForm, MultipleTicketSelectForm
+    TicketCCEmailForm, TicketCCUserForm, EditFollowUpForm, TicketDependencyForm, MultipleTicketSelectForm,
+    EditQueueForm
 )
 from helpdesk.lib import (
     safe_template_context,
@@ -130,6 +131,85 @@ def _get_queue_choices(queues):
         queue_choices = [('', '--------')]
     queue_choices += [(q.id, q.title) for q in queues]
     return queue_choices
+
+
+@helpdesk_staff_member_required
+def queue_list(request):
+    huser = HelpdeskUser(request.user)
+    queue_list = huser.get_queues()                # Queues in user's default org (or all if superuser)
+    
+    return render(request, 'helpdesk/queue_list.html', {
+        'queue_list': queue_list,
+        'debug': settings.DEBUG,
+    })
+
+@helpdesk_staff_member_required
+def create_queue(request):
+    # Stub return
+    return
+
+@helpdesk_staff_member_required
+def edit_queue(request, slug):
+    """Edit Queue"""
+    queue = get_object_or_404(Queue, slug=slug)
+
+    if request.method == "GET":
+        form = EditQueueForm(initial={
+            'title': queue.title,
+            'slug': queue.slug,
+            'match_on': queue.match_on,
+            'match_on_addresses': queue.match_on_addresses,
+            'allow_public_submission': queue.allow_public_submission,
+            'escalate_days': queue.escalate_days,
+            'enable_notifications_on_email_events': queue.enable_notifications_on_email_events,
+            'default_owner': queue.default_owner,
+            'reassign_when_closed': queue.reassign_when_closed,
+            'dedicated_time': queue.dedicated_time,
+            'email_address': queue.email_address,
+        })
+
+        return render(request, 'helpdesk/edit_queue.html', {
+            'queue': queue,
+            'form': form,
+            'debug': settings.DEBUG,
+        })
+    elif request.method == "POST":
+        form = EditQueueForm(request.POST)
+
+        if form.is_valid():
+            #import pdb; pdb.set_trace()
+            title = form.cleaned_data['title']
+            # slug = form.cleaned_data['slug']
+            match_on = form.cleaned_data['match_on']
+            match_on_addresses = form.cleaned_data['match_on_addresses']
+            allow_public_submission = form.cleaned_data['allow_public_submission']
+            escalate_days = form.cleaned_data['escalate_days']
+            enable_notifications_on_email_events = form.cleaned_data['enable_notifications_on_email_events']
+            default_owner = form.cleaned_data['default_owner']
+            reassign_when_closed = form.cleaned_data['reassign_when_closed']
+            dedicated_time = form.cleaned_data['dedicated_time']
+            # email_address = form.cleaned_data['email_address']
+            #ticket_set = queue.ticket_set()
+
+            new_queue = Queue(
+                id = queue.id,
+                organization = queue.organization,
+                importer = queue.importer,
+                title = title,
+                slug = queue.slug,
+                match_on = match_on,
+                match_on_addresses = match_on_addresses,
+                allow_public_submission = allow_public_submission,
+                escalate_days = escalate_days,
+                enable_notifications_on_email_events = enable_notifications_on_email_events,
+                default_owner = default_owner,
+                reassign_when_closed = reassign_when_closed,
+                dedicated_time = dedicated_time,
+            )
+            queue.delete()
+            new_queue.save()
+            #new_queue.ticket_set.set()
+        return HttpResponseRedirect(reverse('helpdesk:maintain_queues')) 
 
 
 @helpdesk_staff_member_required

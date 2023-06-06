@@ -324,4 +324,16 @@ urlpatterns += [
     url(r'^system_settings/$',
         login_required(DirectTemplateView.as_view(template_name='helpdesk/system_settings.html')),
         name='system_settings'),
+    
+    url(r'^system_settings/maintain_queues/$',
+        staff.queue_list,
+        name='maintain_queues'),
+
+    url(r'^system_settings/maintain_queues/create/$',
+        staff.create_queue,
+        name='create_queue'),
+
+    url(r'^system_settings/maintain_queues/(?P<slug>[A-Za-z0-9_-]+)/edit/$',
+        staff.edit_queue,
+        name='edit_queue')
 ]

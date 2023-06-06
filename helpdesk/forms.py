@@ -296,6 +296,56 @@ class EditKBItemForm(forms.ModelForm):
         org = KBCategory.objects.filter(slug=slug).first().organization
         self.fields['category'].queryset = KBCategory.objects.filter(organization=org)
 
+
+class MatchOnField(forms.MultiValueField):
+        
+    def __init__(self, num_widgets, *args, **kwargs):
+        fields = []
+        widgets = []
+        for i in range(0, num_widgets):
+            fields.append(forms.CharField())
+            widgets.append(forms.TextInput())
+        self.widget = MatchOnWidget(widgets=widgets)
+        super(MatchOnField, self).__init__(fields=fields, *args, **kwargs)
+
+    def compress(self, values):
+        return values
+
+class MatchOnWidget(forms.widgets.MultiWidget):
+    #template_name = 'helpdesk/include/multi_text_input.html'
+
+    def decompress(self, value):
+        if value:
+            return value
+        return [None]
+
+
+class EditQueueForm(forms.ModelForm):
+
+    match_on = MatchOnField(num_widgets=2, required=False)
+    slug = forms.SlugField(required=False)
+    email_address = forms.EmailField(required=False)
+
+    class Meta:
+        model = Queue
+        exclude = ('organization','importer')
+
+    def __init__(self, *args, **kwargs):
+        """
+            Set slug and email address field to read-only.
+            TODO: Set email address field to "None" if it is empty.
+        """
+        super(EditQueueForm, self).__init__(*args, **kwargs)
+
+        self.fields['slug'].disabled = True
+        self.fields['email_address'].disabled = True
+
+        #self.fields['match_on'] = MatchOnField()
+
+        #import pdb; pdb.set_trace()        
+
+        
+         
 class AbstractTicketForm(CustomFieldMixin, forms.Form):
     """
     Contain all the common code and fields between "TicketForm" and
