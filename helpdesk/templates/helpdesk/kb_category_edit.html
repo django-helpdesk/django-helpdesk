@@ -25,8 +25,8 @@
                         {{ form|bootstrap4form }}
                         <div class='buttons form-group'>
                             <input type='submit' class="btn btn-primary btn" value='{% trans "Save Changes" %}'/>
-                            <a href='{{ ticket.get_absolute_url }}'>
-                                <button class="btn btn-danger">{% trans "Cancel Changes" %}</button>
+                            <a href="{% url 'helpdesk:kb_category' category.slug %}{{ user_info.url }}">
+                                <button type="button" class="btn btn-danger">{% trans "Cancel Changes" %}</button>
                             </a>
                         </div>
                     </fieldset>
