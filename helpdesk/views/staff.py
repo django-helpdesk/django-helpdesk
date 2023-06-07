@@ -145,8 +145,49 @@ def queue_list(request):
 
 @helpdesk_staff_member_required
 def create_queue(request):
-    # Stub return
-    return
+    if request.method == "GET":
+        form = EditQueueForm(
+            # initial = {
+            #     'title': "",
+            #     'slug': "",
+            #     'match_on': [""],
+            #     'count_match_on': 1,
+            #     'match_on_addresses': [""],
+            #     'count_match_on_addresses': 1,
+            #     'allow_public_submission': False,
+            #     'escalate_days': 0,
+            #     'enable_notifications_on_email_events': False,
+            #     'default_owner': "",
+            #     'reassign_when_closed': False,
+            #     'dedicated_time': 0,
+            #     'email_address': "",
+            # }
+        )
+
+        return render(request, 'helpdesk/edit_queue.html', {
+            'form': EditQueueForm(),
+            'action': "Create",
+            'debug': settings.DEBUG,
+        })
+    elif request.method == "POST":
+        form = EditQueueForm(request.POST, request.POST.get('count_match_on'), request.POST.get('count_match_on_addresses'))
+
+        if form.is_valid():
+            #import pdb; pdb.set_trace()
+            queue = Queue(
+                title = form.cleaned_data['title'],
+                slug = form.cleaned_data['slug'], # no change
+                match_on = [i for i in form.cleaned_data['match_on'] if i], # remove empty strings
+                match_on_addresses = form.cleaned_data['match_on_addresses'],
+                allow_public_submission = form.cleaned_data['allow_public_submission'],
+                escalate_days = form.cleaned_data['escalate_days'],
+                enable_notifications_on_email_events = form.cleaned_data['enable_notifications_on_email_events'],
+                default_owner = form.cleaned_data['default_owner'],
+                reassign_when_closed = form.cleaned_data['reassign_when_closed'],
+                dedicated_time = form.cleaned_data['dedicated_time'],
+            )
+            queue.save()
+        return HttpResponseRedirect(reverse('helpdesk:maintain_queues')) 
 
 @helpdesk_staff_member_required
 def edit_queue(request, slug):
@@ -154,11 +195,13 @@ def edit_queue(request, slug):
     queue = get_object_or_404(Queue, slug=slug)
 
     if request.method == "GET":
-        form = EditQueueForm(initial={
+        form = EditQueueForm(initial = {
             'title': queue.title,
             'slug': queue.slug,
             'match_on': queue.match_on,
+            'count_match_on': len(queue.match_on) + 1,
             'match_on_addresses': queue.match_on_addresses,
+            'count_match_on_addresses': len(queue.match_on_addresses) + 1,
             'allow_public_submission': queue.allow_public_submission,
             'escalate_days': queue.escalate_days,
             'enable_notifications_on_email_events': queue.enable_notifications_on_email_events,
@@ -171,44 +214,26 @@ def edit_queue(request, slug):
         return render(request, 'helpdesk/edit_queue.html', {
             'queue': queue,
             'form': form,
+            'action': "Edit",
             'debug': settings.DEBUG,
         })
     elif request.method == "POST":
-        form = EditQueueForm(request.POST)
+        form = EditQueueForm(request.POST, request.POST.get('count_match_on'), request.POST.get('count_match_on_addresses'))
 
         if form.is_valid():
-            #import pdb; pdb.set_trace()
-            title = form.cleaned_data['title']
-            # slug = form.cleaned_data['slug']
-            match_on = form.cleaned_data['match_on']
-            match_on_addresses = form.cleaned_data['match_on_addresses']
-            allow_public_submission = form.cleaned_data['allow_public_submission']
-            escalate_days = form.cleaned_data['escalate_days']
-            enable_notifications_on_email_events = form.cleaned_data['enable_notifications_on_email_events']
-            default_owner = form.cleaned_data['default_owner']
-            reassign_when_closed = form.cleaned_data['reassign_when_closed']
-            dedicated_time = form.cleaned_data['dedicated_time']
-            # email_address = form.cleaned_data['email_address']
-            #ticket_set = queue.ticket_set()
-
-            new_queue = Queue(
-                id = queue.id,
-                organization = queue.organization,
-                importer = queue.importer,
-                title = title,
-                slug = queue.slug,
-                match_on = match_on,
-                match_on_addresses = match_on_addresses,
-                allow_public_submission = allow_public_submission,
-                escalate_days = escalate_days,
-                enable_notifications_on_email_events = enable_notifications_on_email_events,
-                default_owner = default_owner,
-                reassign_when_closed = reassign_when_closed,
-                dedicated_time = dedicated_time,
-            )
-            queue.delete()
-            new_queue.save()
-            #new_queue.ticket_set.set()
+            # import pdb; pdb.set_trace()
+            queue.title = form.cleaned_data['title']
+            # queue.slug = form.cleaned_data['slug'] # no change
+            queue.match_on = [i for i in form.cleaned_data['match_on'] if i] # remove empty strings
+            queue.match_on_addresses = form.cleaned_data['match_on_addresses']
+            queue.allow_public_submission = form.cleaned_data['allow_public_submission']
+            queue.escalate_days = form.cleaned_data['escalate_days']
+            queue.enable_notifications_on_email_events = form.cleaned_data['enable_notifications_on_email_events']
+            queue.default_owner = form.cleaned_data['default_owner']
+            queue.reassign_when_closed = form.cleaned_data['reassign_when_closed']
+            queue.dedicated_time = form.cleaned_data['dedicated_time']
+            
+            queue.save()
         return HttpResponseRedirect(reverse('helpdesk:maintain_queues')) 
 
 

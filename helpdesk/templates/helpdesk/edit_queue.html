@@ -2,7 +2,7 @@
 
 {% load i18n bootstrap4form %}
 
-{% block helpdesk_title %}{% trans "Edit Queue" %}{% endblock %}
+{% block helpdesk_title %}{% blocktrans %} {{ action }} Queue {% endblocktrans %}{% endblock %}
 
 {% block helpdesk_breadcrumb %}
 <li class="breadcrumb-item">
@@ -15,14 +15,14 @@
     <a href="{% url 'helpdesk:maintain_queues' %}">{% trans "Maintain Queues" %}</a>
 </li>
 <li class="breadcrumb-item active">
-    {% blocktrans with queue.title as qt%} Edit: {{ qt }}{% endblocktrans %}
+    {% blocktrans with queue.title as qt%} {{ action }}: {{ qt }}{% endblocktrans %}
 </li>
 {% endblock %}
 
 {% block helpdesk_body %}
     <div class="col-xs-6">
         <div class="panel panel-default">
-            <div class="panel-body"><h2>{% trans "Edit Queue" %}</h2>
+            <div class="panel-body"><h2>{% blocktrans %} {{ action }} Queue {% endblocktrans %}</h2>
                 <p>
                     {% trans "Unless otherwise stated, all fields are required." %}
                 </p>
@@ -34,7 +34,7 @@
                         <div class='buttons form-group'>
                             <input type='submit' class="btn btn-primary btn" value='{% trans "Save Changes" %}'/>
                             <a href="{% url 'helpdesk:maintain_queues' %}">
-                                <button class="btn btn-danger">{% trans "Cancel Changes" %}</button>
+                                <button type="button" class="btn btn-danger">{% trans "Cancel Changes" %}</button>
                             </a>
                         </div>
                     </fieldset>
@@ -43,3 +43,4 @@
         </div>
     </div>
 {% endblock %}
+

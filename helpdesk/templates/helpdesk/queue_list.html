@@ -18,7 +18,7 @@
         <i class="fas fa-table mr-1"></i>
         {% trans "Maintain Queues" %}
         <div class="flex-fill d-flex justify-content-end">
-            <a class="btn btn-primary align-self-center" href="{% url 'helpdesk:maintain_queues' %}{{ user_info.url }}">
+            <a class="btn btn-primary align-self-center" href="{% url 'helpdesk:create_queue' %}{{ user_info.url }}">
                 <i class="fa fa-plus mr-1"></i>Create
             </a>
         </div>
