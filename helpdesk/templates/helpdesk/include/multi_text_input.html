@@ -5,21 +5,18 @@
 </div>
 {% endfor %}
 </div>
-<a href="#">
+<a>
     <button id="{{ widget.name }}_add_string" type="button" class="ml-3 btn btn-outline-secondary">Add String</button>
 </a>
 
 <script type='text/javascript' language='javascript'>
-    let count = Number($("[name=count_{{widget.name}}]").val());
-
     $("#{{ widget.name }}_add_string").on('click', function() {
         // Create new input element and append it to the input container
         new_input_num = document.getElementById("{{widget.name}}_strings").children.length
+        new_elem_type = document.getElementById("{{widget.name}}_strings").children[0].children[0].type
         new_elem = document.createElement('div')
         new_elem.setAttribute('class', 'mb-2 ml-3')
-        new_elem.innerHTML = '<input type="text" name="{{ widget.name }}_0" class=" form-control" id="id_{{ widget.name }}_0" spellcheck="false" data-ms-editor="true">'.replaceAll("{{ widget.name }}_0", "{{ widget.name }}_" + new_input_num);
+        new_elem.innerHTML = '<input type="' + new_elem_type + '" name="{{ widget.name }}_0" class=" form-control" id="id_{{ widget.name }}_0" spellcheck="false" data-ms-editor="true">'.replaceAll("{{ widget.name }}_0", "{{ widget.name }}_" + new_input_num);
         document.getElementById('{{ widget.name }}_strings').appendChild(new_elem);
-
-        $("[name=count_{{widget.name}}]").val(++count);
     });
 </script>

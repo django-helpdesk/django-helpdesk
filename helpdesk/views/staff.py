@@ -146,35 +146,19 @@ def queue_list(request):
 @helpdesk_staff_member_required
 def create_queue(request):
     if request.method == "GET":
-        form = EditQueueForm(
-            # initial = {
-            #     'title': "",
-            #     'slug': "",
-            #     'match_on': [""],
-            #     'count_match_on': 1,
-            #     'match_on_addresses': [""],
-            #     'count_match_on_addresses': 1,
-            #     'allow_public_submission': False,
-            #     'escalate_days': 0,
-            #     'enable_notifications_on_email_events': False,
-            #     'default_owner': "",
-            #     'reassign_when_closed': False,
-            #     'dedicated_time': 0,
-            #     'email_address': "",
-            # }
-        )
+        form = EditQueueForm("create")
 
         return render(request, 'helpdesk/edit_queue.html', {
-            'form': EditQueueForm(),
+            'form': form,
             'action': "Create",
             'debug': settings.DEBUG,
         })
     elif request.method == "POST":
-        form = EditQueueForm(request.POST, request.POST.get('count_match_on'), request.POST.get('count_match_on_addresses'))
+        form = EditQueueForm("create", request.POST)
 
         if form.is_valid():
-            #import pdb; pdb.set_trace()
             queue = Queue(
+                organization = request.user.default_organization,
                 title = form.cleaned_data['title'],
                 slug = form.cleaned_data['slug'], # no change
                 match_on = [i for i in form.cleaned_data['match_on'] if i], # remove empty strings
@@ -186,6 +170,7 @@ def create_queue(request):
                 reassign_when_closed = form.cleaned_data['reassign_when_closed'],
                 dedicated_time = form.cleaned_data['dedicated_time'],
             )
+            import pdb; pdb.set_trace()
             queue.save()
         return HttpResponseRedirect(reverse('helpdesk:maintain_queues')) 
 
@@ -195,21 +180,24 @@ def edit_queue(request, slug):
     queue = get_object_or_404(Queue, slug=slug)
 
     if request.method == "GET":
-        form = EditQueueForm(initial = {
-            'title': queue.title,
-            'slug': queue.slug,
-            'match_on': queue.match_on,
-            'count_match_on': len(queue.match_on) + 1,
-            'match_on_addresses': queue.match_on_addresses,
-            'count_match_on_addresses': len(queue.match_on_addresses) + 1,
-            'allow_public_submission': queue.allow_public_submission,
-            'escalate_days': queue.escalate_days,
-            'enable_notifications_on_email_events': queue.enable_notifications_on_email_events,
-            'default_owner': queue.default_owner,
-            'reassign_when_closed': queue.reassign_when_closed,
-            'dedicated_time': queue.dedicated_time,
-            'email_address': queue.email_address,
-        })
+        form = EditQueueForm(
+            "edit",
+            initial = {
+                'title': queue.title,
+                'slug': queue.slug,
+                'match_on': queue.match_on,
+                'agg_match_on': queue.match_on,
+                'match_on_addresses': queue.match_on_addresses,
+                'agg_match_on_addresses': queue.match_on_addresses,
+                'allow_public_submission': queue.allow_public_submission,
+                'escalate_days': queue.escalate_days,
+                'enable_notifications_on_email_events': queue.enable_notifications_on_email_events,
+                'default_owner': queue.default_owner,
+                'reassign_when_closed': queue.reassign_when_closed,
+                'dedicated_time': queue.dedicated_time,
+                'email_address': queue.email_address,
+            },   
+        )
 
         return render(request, 'helpdesk/edit_queue.html', {
             'queue': queue,
@@ -218,14 +206,14 @@ def edit_queue(request, slug):
             'debug': settings.DEBUG,
         })
     elif request.method == "POST":
-        form = EditQueueForm(request.POST, request.POST.get('count_match_on'), request.POST.get('count_match_on_addresses'))
-
+        form = EditQueueForm("edit", request.POST)
+        #import pdb; pdb.set_trace()
         if form.is_valid():
-            # import pdb; pdb.set_trace()
+            
             queue.title = form.cleaned_data['title']
             # queue.slug = form.cleaned_data['slug'] # no change
-            queue.match_on = [i for i in form.cleaned_data['match_on'] if i] # remove empty strings
-            queue.match_on_addresses = form.cleaned_data['match_on_addresses']
+            queue.match_on = [i for i in form.cleaned_data['agg_match_on'] if i] # remove empty strings
+            queue.match_on_addresses = [i for i in form.cleaned_data['agg_match_on_addresses'] if i]
             queue.allow_public_submission = form.cleaned_data['allow_public_submission']
             queue.escalate_days = form.cleaned_data['escalate_days']
             queue.enable_notifications_on_email_events = form.cleaned_data['enable_notifications_on_email_events']

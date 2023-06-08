@@ -32,7 +32,13 @@
                     <fieldset>
                         {{ form|bootstrap4form }}
                         <div class='buttons form-group'>
-                            <input type='submit' class="btn btn-primary btn" value='{% trans "Save Changes" %}'/>
+                            <button type='submit' id='submit' class="btn btn-primary btn" value='{% trans "Save Changes" %}'>
+                                {% if action == "Create" %}
+                                    Create Queue
+                                {% else %}
+                                    Save Changes
+                                {% endif %}
+                            </button>
                             <a href="{% url 'helpdesk:maintain_queues' %}">
                                 <button type="button" class="btn btn-danger">{% trans "Cancel Changes" %}</button>
                             </a>
@@ -42,5 +48,21 @@
             </div>
         </div>
     </div>
-{% endblock %}
 
+    <script type='text/javascript' language='javascript'>
+        $("#submit").on('click', function() {
+            // Manually aggregate inputted strings for match on fields
+            agg_match_on = [];
+            for (const string of document.getElementById('match_on_strings').children) {
+                agg_match_on.push(string.children[0].value);
+            }  
+            $("[name=agg_match_on]").val(JSON.stringify(agg_match_on));
+        
+            agg_match_on_addresses = [];
+            for (const string of document.getElementById('match_on_addresses_strings').children) {
+                agg_match_on_addresses.push(string.children[0].value);
+            }  
+            $("[name=agg_match_on_addresses]").val(JSON.stringify(agg_match_on_addresses));
+        });
+        </script>    
+{% endblock %}

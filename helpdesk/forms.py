@@ -299,27 +299,17 @@ class EditKBItemForm(forms.ModelForm):
 
 class MatchOnField(forms.MultiValueField):
 
-    def __init__(self, num_widgets, *args, **kwargs):
+    def __init__(self, num_widgets, field_type, widget_type, *args, **kwargs):
         self.fields = []
         self.widgets = []
         for i in range(num_widgets):
-            self.fields.append(forms.CharField())
-            self.widgets.append(forms.TextInput())
+            self.fields.append(field_type)
+            self.widgets.append(widget_type)
         self.widget = MatchOnWidget(widgets=self.widgets)
         super(MatchOnField, self).__init__(fields=self.fields, *args, **kwargs)
 
     def compress(self, values):
         return values
-    
-    def addStrings(self, num):
-        new_fields = []
-        new_widgets = []
-        for i in range(num):
-            new_fields.append(forms.CharField())
-            new_widgets.append(forms.TextInput())
-            
-        self.fields = tuple(new_fields)
-        self.widget = MatchOnWidget(widgets=new_widgets)
 
 class MatchOnWidget(forms.widgets.MultiWidget):
     template_name = 'helpdesk/include/multi_text_input.html'
@@ -329,13 +319,12 @@ class MatchOnWidget(forms.widgets.MultiWidget):
             return value
         return []
 
-
 class EditQueueForm(forms.ModelForm):
 
-    count_match_on = forms.IntegerField(widget=forms.HiddenInput())
-    count_match_on_addresses = forms.IntegerField(widget=forms.HiddenInput())
-    match_on = MatchOnField(num_widgets=1, required=False)
-    match_on_addresses = MatchOnField(num_widgets=1, required=False)
+    agg_match_on = forms.JSONField(widget=forms.HiddenInput(), required=False)
+    agg_match_on_addresses = forms.JSONField(widget=forms.HiddenInput(), required=False)
+    match_on = MatchOnField(num_widgets=1, field_type=forms.CharField(), widget_type=forms.TextInput(), required=False)
+    match_on_addresses = MatchOnField(num_widgets=1, field_type=forms.EmailField(), widget_type=forms.EmailInput(), required=False)
     slug = forms.SlugField(required=False)
     email_address = forms.EmailField(required=False)
 
@@ -343,23 +332,20 @@ class EditQueueForm(forms.ModelForm):
         model = Queue
         exclude = ('organization','importer')
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, action, *args, **kwargs):
         """
             Set slug and email address field to read-only.
             TODO: Set email address field to "None" if it is empty.
         """
+        #import pdb; pdb.set_trace()
         super(EditQueueForm, self).__init__(*args, **kwargs)
 
-        self.fields['slug'].disabled = True
+        self.fields['slug'].disabled = True if action == 'edit' else False
         self.fields['email_address'].disabled = True
-        # if len(args) > 1:
-        #     self.fields['match_on'].addStrings(int(args[1]))
-        #     self.fields['match_on_addresses'].addStrings(int(args[2]))
 
         if kwargs:
-            self.fields['match_on'] = MatchOnField(num_widgets=len(kwargs['initial']['match_on']) + 1, required=False, help_text = "A list of strings. If you'd like only emails with certain subject lines to be imported into this queue, list that text here. Otherwise, leave blank.")
-            self.fields['match_on_addresses'] = MatchOnField(num_widgets=len(kwargs['initial']['match_on_addresses']) + 1, required=False, help_text="A list of strings. If you'd like only emails from specific addresses to be imported into this queue, list those addresses here. Otherwise, leave blank.")
-        #import pdb; pdb.set_trace()
+            self.fields['match_on'] = MatchOnField(num_widgets=len(kwargs['initial']['match_on']) + 1, field_type=forms.CharField(), widget_type=forms.TextInput(), required=False, help_text = "A list of strings. If you'd like only emails with certain subject lines to be imported into this queue, list that text here. Otherwise, leave blank.")
+            self.fields['match_on_addresses'] = MatchOnField(num_widgets=len(kwargs['initial']['match_on_addresses']) + 1, field_type=forms.EmailField(), widget_type=forms.EmailInput(), required=False, help_text="A list of strings. If you'd like only emails from specific addresses to be imported into this queue, list those addresses here. Otherwise, leave blank.")
 
          
 class AbstractTicketForm(CustomFieldMixin, forms.Form):
