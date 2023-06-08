@@ -320,33 +320,47 @@ class MatchOnWidget(forms.widgets.MultiWidget):
         return []
 
 class EditQueueForm(forms.ModelForm):
+    error_css_class = 'text-danger'
 
     agg_match_on = forms.JSONField(widget=forms.HiddenInput(), required=False)
     agg_match_on_addresses = forms.JSONField(widget=forms.HiddenInput(), required=False)
     match_on = MatchOnField(num_widgets=1, field_type=forms.CharField(), widget_type=forms.TextInput(), required=False)
     match_on_addresses = MatchOnField(num_widgets=1, field_type=forms.EmailField(), widget_type=forms.EmailInput(), required=False)
-    slug = forms.SlugField(required=False)
-    email_address = forms.EmailField(required=False)
+    
+    slug = forms.SlugField()
+    email_address = forms.CharField(required=False, initial="None")
 
     class Meta:
         model = Queue
-        exclude = ('organization','importer')
+        exclude = ('organization','importer',)
 
     def __init__(self, action, *args, **kwargs):
         """
             Set slug and email address field to read-only.
             TODO: Set email address field to "None" if it is empty.
         """
-        #import pdb; pdb.set_trace()
+
+        self.org = kwargs.pop('organization') if kwargs and kwargs['organization'] else None
         super(EditQueueForm, self).__init__(*args, **kwargs)
 
-        self.fields['slug'].disabled = True if action == 'edit' else False
+        if action == "edit":
+            self.fields['slug'].disabled = True
+            self.fields['slug'].required = False
+
         self.fields['email_address'].disabled = True
+        self.fields['default_owner'].queryset = User.objects.filter(orgs=self.org)
 
-        if kwargs:
-            self.fields['match_on'] = MatchOnField(num_widgets=len(kwargs['initial']['match_on']) + 1, field_type=forms.CharField(), widget_type=forms.TextInput(), required=False, help_text = "A list of strings. If you'd like only emails with certain subject lines to be imported into this queue, list that text here. Otherwise, leave blank.")
-            self.fields['match_on_addresses'] = MatchOnField(num_widgets=len(kwargs['initial']['match_on_addresses']) + 1, field_type=forms.EmailField(), widget_type=forms.EmailInput(), required=False, help_text="A list of strings. If you'd like only emails from specific addresses to be imported into this queue, list those addresses here. Otherwise, leave blank.")
+        if kwargs and kwargs['initial']:
+                self.fields['match_on'] = MatchOnField(num_widgets=len(kwargs['initial']['match_on']) + 1, field_type=forms.CharField(), widget_type=forms.TextInput(), required=False, help_text = "A list of strings. If you'd like only emails with certain subject lines to be imported into this queue, list that text here. Otherwise, leave blank.")
+                self.fields['match_on_addresses'] = MatchOnField(num_widgets=len(kwargs['initial']['match_on_addresses']) + 1, field_type=forms.EmailField(), widget_type=forms.EmailInput(), required=False, help_text="A list of strings. If you'd like only emails from specific addresses to be imported into this queue, list those addresses here. Otherwise, leave blank.")
 
+    def clean(self):
+        cleaned_data = self.cleaned_data
+
+        if Queue.objects.filter(organization=self.org, slug=cleaned_data['slug']).exists():
+            raise ValidationError({'slug': ["Queue with this slug already exists in this organization"]})
+        
+        return cleaned_data
          
 class AbstractTicketForm(CustomFieldMixin, forms.Form):
     """

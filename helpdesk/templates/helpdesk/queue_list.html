@@ -1,5 +1,7 @@
 {% extends "helpdesk/base.html" %}{% load i18n humanize %}
 
+{% block helpdesk_title %}{% blocktrans %} Maintain Queues {% endblocktrans %}{% endblock %}
+
 {% block helpdesk_breadcrumb %}
 <li class="breadcrumb-item">
     <a href="{% url 'helpdesk:user_settings' %}">{% trans "Settings" %}</a>
@@ -24,21 +26,22 @@
         </div>
     </div>
     <div class="card-body">
-        {# <p> Select a queue title to edit the queue. </p> #}
+        {% comment %} <p class="my-1"> Select a queue title to edit the queue. </p> {% endcomment %}
         <div class="table-responsive">
         <table class="table table-bordered table-sm table-striped" id="dataTable" width="100%" cellspacing="0">
             <thead class="thead-light">
                 <tr>
                     {# Need to decide which columns are most relevant to the user #}
-                    <th>{% trans "Organization" %}</th>
+                    {% comment %} <th>{% trans "Organization" %}</th> {% endcomment %}
                     <th>{% trans "Title" %}</th>
                     <th>{% trans "Slug" %}</th> {# May not need to be a column #}
-                    <th>{% trans "Importer" %}</th> {# May not need to be a column #}
+                    {% comment %} <th>{% trans "Importer" %}</th> {# May not need to be a column #} {% endcomment %}
                     <th>{% trans "Public Submission" %}</th>
                     <th>{% trans "Notify on Email" %}</th>
                     <th>{% trans "Reassign on Close" %}</th>
-                    <th>{% trans "Escalation Days" %}</th> {# May not need to be a column #}
-                    <th>{% trans "Dedicated Time" %}</th> {# May not need to be a column #}
+                    <th>{% trans "Default Owner" %}</th>
+                    {% comment %} <th>{% trans "Escalation Days" %}</th> {# May not need to be a column #} {% endcomment %}
+                    {% comment %} <th>{% trans "Dedicated Time" %}</th> {# May not need to be a column #} {% endcomment %}
                     <th>{% trans "Match On" %}</th> {# May not need to be a column #}
                     <th>{% trans "Match On Addresses" %}</th> {# May not need to be a column #}
                 </tr>
@@ -46,10 +49,10 @@
             <tbody>
                 {% for queue in queue_list %}
                 <tr>
-                    <td>{{ queue.organization.name }}</td>
+                    {% comment %} <td>{{ queue.organization.name }}</td> {% endcomment %}
                     <td class="tickettitle" data-toggle="tooltip" title="Edit {{ queue.title }}"><a href="{% url 'helpdesk:edit_queue' queue.slug %}{{ user_info.url }}">{{ queue.id }}. {{ queue.title }}</a></td>
                     <td>{{ queue.slug }}</td>
-                    <td>{% if queue.importer %}{{queue.importer}}{% else%}-{% endif %}</td>
+                    {% comment %} <td>{% if queue.importer %}{{queue.importer}}{% else%}-{% endif %}</td> {% endcomment %}
                     <td>
                         {# This block could be another template, since it is reused 3 times in this code #}
                         {% if queue.allow_public_submission %}
@@ -72,51 +75,54 @@
                             <i class="fa fa-times-circle text-danger">
                         {% endif%}
                     </td>
-                    <td>{% if queue.importer %}{{queue.escalate_days}}{% else%}-{% endif %}</td>
-                    <td>{% if queue.importer %}{{queue.dedicated_time}}{% else%}-{% endif %}</td>
+                    <td>{% if queue.get_default_owner %}{{queue.get_default_owner}}{% else%}-{% endif %}</td>
+                    {% comment %} <td>{% if queue.escalate_days %}{{queue.escalate_days}}{% else%}-{% endif %}</td> {% endcomment %}
+                    {% comment %} <td>{% if queue.dedicated_time %}{{queue.dedicated_time}}{% else%}-{% endif %}</td> {% endcomment %}
                     <td>{{queue.match_on}}</td>
                     <td>{{queue.match_on_addresses}}</td>
                 </tr>
 
                 {% empty %}
-                <tr>{% if ticket_list_empty_message %}<td colspan='6'>{{ ticket_list_empty_message }}</td>{% else %}<td colspan='6'>{% trans "You do not have any queues." %}</td>{% endif %}</tr>
+                <tr><td colspan='6'>{% trans "You do not have any queues." %}</td></tr>
                 {% endfor %}
             </tbody>
         </table>
         </div>
         <!-- /.table-responsive -->
+        {% with 'q_page' as page_var %}
         {% if queue_list.has_other_pages %}
             <ul class="pagination">
             <!-- if we aren't on page one, go back to start and go back one controls -->
-            {% if ticket_list.has_previous %}
+            {% if queue_list.has_previous %}
                 <li><a href="?{{ page_var }}=1">&laquo;&laquo;</a>&nbsp;</li>
-                <li><a href="?{{ page_var }}={{ ticket_list.previous_page_number }}">&laquo;</a>&nbsp;</li>
+                <li><a href="?{{ page_var }}={{ queue_list.previous_page_number }}">&laquo;</a>&nbsp;</li>
             {% else %}
                 <li class="disabled"><span>&laquo;&laquo;&nbsp;</span></li>
                 <li class="disabled"><span>&laquo;&nbsp;</span></li>
             {% endif %}
             <!-- other pages, set thresh to the number to show before and after active -->
             {% with 5 as thresh %}
-            {% for i in ticket_list.paginator.page_range %}
-            {% if ticket_list.number == i %}
+            {% for i in queue_list.paginator.page_range %}
+            {% if queue_list.number == i %}
                 <li class="active"><span>{{ i }}&nbsp;<span class="sr-only">(current)</span></span></li>
-            {% elif i <= ticket_list.number|add:5 and i >= ticket_list.number|add:-5 %}
+            {% elif i <= queue_list.number|add:5 and i >= queue_list.number|add:-5 %}
                 <li><a href="?{{ page_var }}={{ i }}">{{ i }}</a>&nbsp;</li>
             {% endif %}
             {% endfor %}
             {% endwith %}
             <!-- if we aren't on the last page, go forward one and go to end controls -->
-            {% if ticket_list.has_next %}
-                <li><a href="?{{ page_var }}={{ ticket_list.next_page_number }}">&raquo;</a>&nbsp;</li>
-                <li><a href="?{{ page_var }}={{ ticket_list.paginator.num_pages }}">&raquo;&raquo;</a>&nbsp;</li>
+            {% if queue_list.has_next %}
+                <li><a href="?{{ page_var }}={{ queue_list.next_page_number }}">&raquo;</a>&nbsp;</li>
+                <li><a href="?{{ page_var }}={{ queue_list.paginator.num_pages }}">&raquo;&raquo;</a>&nbsp;</li>
             {% else %}
                 <li class="disabled"><span>&raquo;&nbsp;</span></li>
                 <li class="disabled"><span>&raquo;&raquo;&nbsp;</span></li>
             {% endif %}
             </ul>
         {% endif %}
+        {% endwith %}
     </div>
-    <div class="card-footer small text-muted">Listing {{ ticket_list|length }} ticket(s) out of {{ ticket_list.paginator.count }}.</div>
+    <div class="card-footer small text-muted">Listing {{ queue_list|length }} queue(s) out of {{ queue_list.paginator.count }}.</div>
 </div>
 
 {% endblock %}

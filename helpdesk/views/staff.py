@@ -138,6 +138,22 @@ def queue_list(request):
     huser = HelpdeskUser(request.user)
     queue_list = huser.get_queues()                # Queues in user's default org (or all if superuser)
     
+    # user settings num tickets per page
+    if request.user.is_authenticated and hasattr(request.user, 'usersettings_helpdesk'):
+        queues_per_page = request.user.usersettings_helpdesk.tickets_per_page
+    else:
+        queues_per_page = 25
+
+    paginator = Paginator(
+        queue_list, queues_per_page)
+    try:
+        queue_list = paginator.page(request.GET.get(_('q_page'), 1))
+    except PageNotAnInteger:
+        queue_list = paginator.page(1)
+    except EmptyPage:
+        queue_list = paginator.page(
+            paginator.num_pages)
+
     return render(request, 'helpdesk/queue_list.html', {
         'queue_list': queue_list,
         'debug': settings.DEBUG,
@@ -146,7 +162,7 @@ def queue_list(request):
 @helpdesk_staff_member_required
 def create_queue(request):
     if request.method == "GET":
-        form = EditQueueForm("create")
+        form = EditQueueForm("create", organization=request.user.default_organization.id)
 
         return render(request, 'helpdesk/edit_queue.html', {
             'form': form,
@@ -154,15 +170,15 @@ def create_queue(request):
             'debug': settings.DEBUG,
         })
     elif request.method == "POST":
-        form = EditQueueForm("create", request.POST)
+        form = EditQueueForm("create", request.POST, organization=request.user.default_organization.id)
 
         if form.is_valid():
             queue = Queue(
                 organization = request.user.default_organization,
                 title = form.cleaned_data['title'],
                 slug = form.cleaned_data['slug'], # no change
-                match_on = [i for i in form.cleaned_data['match_on'] if i], # remove empty strings
-                match_on_addresses = form.cleaned_data['match_on_addresses'],
+                match_on = [i for i in form.cleaned_data['agg_match_on'] if i], # remove empty strings
+                match_on_addresses = [i for i in form.cleaned_data['agg_match_on_addresses'] if i],
                 allow_public_submission = form.cleaned_data['allow_public_submission'],
                 escalate_days = form.cleaned_data['escalate_days'],
                 enable_notifications_on_email_events = form.cleaned_data['enable_notifications_on_email_events'],
@@ -170,9 +186,33 @@ def create_queue(request):
                 reassign_when_closed = form.cleaned_data['reassign_when_closed'],
                 dedicated_time = form.cleaned_data['dedicated_time'],
             )
-            import pdb; pdb.set_trace()
             queue.save()
-        return HttpResponseRedirect(reverse('helpdesk:maintain_queues')) 
+            return HttpResponseRedirect(reverse('helpdesk:maintain_queues'))
+        
+        redo_form = EditQueueForm(
+            "create", 
+            request.POST, 
+            organization=request.user.default_organization.id,
+            initial = {
+                'title': form.cleaned_data['title'],
+                'slug': form.data['slug'], # no change
+                'match_on': [i for i in form.cleaned_data['agg_match_on'] if i], # remove empty strings
+                'match_on_addresses': [i for i in form.cleaned_data['agg_match_on_addresses'] if i],
+                'allow_public_submission': form.cleaned_data['allow_public_submission'],
+                'escalate_days': form.cleaned_data['escalate_days'],
+                'enable_notifications_on_email_events': form.cleaned_data['enable_notifications_on_email_events'],
+                'default_owner': form.cleaned_data['default_owner'],
+                'reassign_when_closed': form.cleaned_data['reassign_when_closed'],
+                'dedicated_time': form.cleaned_data['dedicated_time'],
+            }
+        )
+
+        return render(request, 'helpdesk/edit_queue.html', {
+            'form': redo_form,
+            'errors': form.errors,
+            'action': "Create",
+            'debug': settings.DEBUG,
+        })
 
 @helpdesk_staff_member_required
 def edit_queue(request, slug):
@@ -183,6 +223,7 @@ def edit_queue(request, slug):
         form = EditQueueForm(
             "edit",
             initial = {
+                'organization': queue.organization.id,
                 'title': queue.title,
                 'slug': queue.slug,
                 'match_on': queue.match_on,
@@ -195,8 +236,9 @@ def edit_queue(request, slug):
                 'default_owner': queue.default_owner,
                 'reassign_when_closed': queue.reassign_when_closed,
                 'dedicated_time': queue.dedicated_time,
-                'email_address': queue.email_address,
-            },   
+                'email_address': queue.email_address if queue.email_address else "None",
+            },
+            organization=request.user.default_organization.id   
         )
 
         return render(request, 'helpdesk/edit_queue.html', {
@@ -206,8 +248,7 @@ def edit_queue(request, slug):
             'debug': settings.DEBUG,
         })
     elif request.method == "POST":
-        form = EditQueueForm("edit", request.POST)
-        #import pdb; pdb.set_trace()
+        form = EditQueueForm("edit", request.POST, organization=request.user.default_organization.id)
         if form.is_valid():
             
             queue.title = form.cleaned_data['title']

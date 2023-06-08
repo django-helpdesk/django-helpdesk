@@ -291,6 +291,19 @@ class Queue(models.Model):
         self.permission_name = "helpdesk.%s" % basename
         return basename
 
+    @property
+    def get_default_owner(self):
+        """ Custom property to allow us to easily print 'Unassigned' if a
+        ticket has no owner, or the users name if it's assigned. If the user
+        has a full name configured, we use that, otherwise their username. """
+        if not self.default_owner:
+            return _('-')
+        else:
+            if self.default_owner.get_full_name():
+                return self.default_owner.get_full_name()
+            else:
+                return self.default_owner.get_username()
+
     def save(self, *args, **kwargs):
         if not self.id:
             # Prepare the permission codename and the permission

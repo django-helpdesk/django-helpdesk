@@ -15,7 +15,7 @@
     <a href="{% url 'helpdesk:maintain_queues' %}">{% trans "Maintain Queues" %}</a>
 </li>
 <li class="breadcrumb-item active">
-    {% blocktrans with queue.title as qt%} {{ action }}: {{ qt }}{% endblocktrans %}
+    {% blocktrans with queue.title as qt%} {{ action }} {{ qt }}{% endblocktrans %}
 </li>
 {% endblock %}
 
