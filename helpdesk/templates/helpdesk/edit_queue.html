@@ -24,7 +24,7 @@
         <div class="panel panel-default">
             <div class="panel-body"><h2>{% blocktrans %} {{ action }} Queue {% endblocktrans %}</h2>
                 <p>
-                    {% trans "Unless otherwise stated, all fields are required." %}
+                    {% trans "Required fields are indicated by " %} <span style="color:red;">*</span>
                 </p>
                 {% if errors %}<p class="text-danger">{% for error in errors %}{% trans "Error: " %}{{ error }}<br>{% endfor %}</p>{% endif %}
                 <form method='post'>
