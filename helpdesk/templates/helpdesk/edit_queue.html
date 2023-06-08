@@ -50,6 +50,11 @@
     </div>
 
     <script type='text/javascript' language='javascript'>
+        {# Bandaid fix for adding asterisks to required fields while the rest of the form is handled by bootstrap4form #}
+        for (const required_field of document.querySelectorAll('[required]')) {
+            document.querySelector('label[for=' + required_field.id + ']').innerHTML += '<span style="color:red;">*</span>'
+        }
+
         $("#submit").on('click', function() {
             // Manually aggregate inputted strings for match on fields
             agg_match_on = [];
