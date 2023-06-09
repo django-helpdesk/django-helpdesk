@@ -2446,9 +2446,11 @@ def pair_property_milestone(request, ticket_id):
             pathways = Pathway.objects.filter(cycle_group__cyclegroupmapping__cycle_id=view.cycle.id)
             pathways_per_property[view.id] = pathways
 
+            milestones_per_pathway[view.id] = {}
             for pathway in pathways:
-                milestones_per_pathway[pathway.id] = Milestone.objects.filter(pathwaymilestone__pathway_id=pathway.id,
+                milestones_per_pathway[view.id][pathway.id] = Milestone.objects.filter(pathwaymilestone__pathway_id=pathway.id,
                                                                               propertymilestone__property_view_id=view.id)
+
     return render(request, 'helpdesk/pair_property_milestone.html', {
         'ticket': ticket,
         'properties_per_cycle': properties_per_cycle,

@@ -64,9 +64,11 @@
             <h5>{% trans "Select a Milestone attached to this Property" %}</h5>
             <select class="custom-select" id="milestone_select" name="milestone_id">
                 <option value="" selected>Your Milestone Selection</option>
-                {% for pathway_id, milestones in milestones_per_pathway.items %}
+                {% for view_id, path_milestones in milestones_per_pathway.items %}
+                {% for pathway_id, milestones in path_milestones.items %}
                 {% for milestone in milestones %}
-                <option value="{{ pathway_id }}-{{ milestone.id }}">{{ milestone.name }}</option>
+                <option value="{{ view_id }}-{{ pathway_id }}-{{ milestone.id }}">{{ milestone.name }}</option>
+                {% endfor %}
                 {% endfor %}
                 {% endfor %}
             </select>
@@ -128,14 +130,19 @@ $('#property_select').change(function () {
 });
 
 $('#pathway_select').change(function () {
-    if ($('#pathway_select').val()) {
+    if ($('#pathway_select').val() && $('#property_select').val()) {
         $('#group_milestone_select').show()
 
         pathway_id = $('#pathway_select').val().split('-')[1]
+        pv_id = $('#property_select').val().split('-')[1];
 
         //  Limit pathway options to selected propertyview id
-        $('#milestone_select').empty().append(milestone_options.filter(function () {
-            this_pathway_id = $(this).val().split('-')[0]
+        var options = milestone_options.filter(function () {
+            this_view_id = $(this).val().split('-')[0]
+            return pv_id === this_view_id || $(this).val() === '';
+        });
+        $('#milestone_select').empty().append(options.filter(function () {
+            this_pathway_id = $(this).val().split('-')[1]
             return pathway_id === this_pathway_id || $(this).val() === '';
         }));
         $('#milestone_select').val('');
