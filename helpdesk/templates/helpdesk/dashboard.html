@@ -22,11 +22,7 @@
     </div>
 </div>
 
-{% if all_tickets_reported_by_current_user %}
-{% trans "All tickets submitted by you" as ticket_list_caption %}
-{% trans "atrbcu_page" as page_var %}
-{% include 'helpdesk/include/tickets.html' with ticket_list=all_tickets_reported_by_current_user ticket_list_empty_message="" page_var=page_var %}
-{% endif %}
+
 
 {% trans "Open tickets assigned to you (you are working on this ticket)" as ticket_list_caption %}
 {% trans "You have no tickets assigned to you." as no_assigned_tickets %}
@@ -38,8 +34,14 @@
 {% trans "uat_page" as page_var %}
 {% include 'helpdesk/include/unassigned.html' with unassigned_tickets=unassigned_tickets  page_var=page_var %}
 
+{% if all_tickets_reported_by_current_user %}
+{% trans "All tickets submitted by you" as ticket_list_caption %}
+{% trans "atrbcu_page" as page_var %}
+{% include 'helpdesk/include/tickets.html' with ticket_list=all_tickets_reported_by_current_user ticket_list_empty_message="" page_var=page_var %}
+{% endif %}
+
 {% if user_tickets_closed_resolved %}
-{% trans "Closed and resolved tickets you used to work on" as ticket_list_caption %}
+{% trans "Closed, resolved, and duplicate tickets you used to work on" as ticket_list_caption %}
 {% trans "utcr_page" as page_var %}
 {% include 'helpdesk/include/tickets.html' with ticket_list=user_tickets_closed_resolved ticket_list_empty_message="" page_var=page_var %}
 {% endif %}
