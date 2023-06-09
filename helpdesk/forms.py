@@ -253,23 +253,26 @@ class EditFollowUpForm(forms.ModelForm):
         self.fields['ticket'].queryset = Ticket.objects.filter(queue__organization__id=t.queue.organization_id)
 
 class EditKBCategoryForm(forms.ModelForm):
+    error_css_class = 'text-danger'
 
-    slug = forms.SlugField(required=False)
+    slug = forms.SlugField()
 
     class Meta:
         model = KBCategory
         exclude = ('organization',)
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, action, *args, **kwargs):
         """
             Set slug field to read-only. 
             Filter queues and forms by current org.
         """
+        org = kwargs.pop('organization') if kwargs and kwargs['organization'] else None
         super(EditKBCategoryForm, self).__init__(*args, **kwargs)
 
-        self.fields['slug'].disabled = True
-        slug = kwargs['initial']['slug'] if kwargs else args[1]
-        org = KBCategory.objects.filter(slug=slug).first().organization
+        if action == "edit":
+            self.fields['slug'].disabled = True
+            self.fields['slug'].required = False
+        
         self.fields['queue'].queryset = Queue.objects.filter(organization=org)
         self.fields['forms'].queryset = FormType.objects.filter(organization=org) 
 
@@ -289,12 +292,15 @@ class EditKBItemForm(forms.ModelForm):
         """
             Category field will only show category titles.
             Filter categories by current org.
+            Prepoulate category field when creating a new article from a category's page.
         """
+        org = kwargs.pop('organization') if kwargs and kwargs['organization'] else None
+        category = kwargs.pop('category') if kwargs and kwargs['category'] else None
         super(EditKBItemForm, self).__init__(*args, **kwargs)
 
-        slug = kwargs['initial']['category'].slug if kwargs else args[1]
-        org = KBCategory.objects.filter(slug=slug).first().organization
         self.fields['category'].queryset = KBCategory.objects.filter(organization=org)
+        if category:
+            self.fields['category'].initial = category
 
 class AbstractTicketForm(CustomFieldMixin, forms.Form):
     """

@@ -64,55 +64,104 @@ def category(request, slug, iframe=False):
     })
 
 @helpdesk_staff_member_required
+def create_category(request):
+    if request.method == 'GET':
+        form = EditKBCategoryForm('create', organization = request.user.default_organization)
+
+        return render(request, 'helpdesk/kb_category_edit.html', {
+            'form': form,
+            'action': "Create",
+            'debug': settings.DEBUG,
+        })
+    elif request.method == 'POST':
+        form = EditKBCategoryForm('create', request.POST, organization = request.user.default_organization)
+
+        if form.is_valid():
+            category = KBCategory(
+                organization = request.user.default_organization,
+                name = form.cleaned_data['name'],
+                title = form.cleaned_data['title'],
+                slug = form.cleaned_data['slug'],
+                preview_description = form.cleaned_data['preview_description'],
+                description = form.cleaned_data['description'],
+                queue = form.cleaned_data['queue'],
+                public = form.cleaned_data['public'],
+            )
+            category.save() 
+            category.forms.set(form.cleaned_data['forms'])        
+            return HttpResponseRedirect(reverse('helpdesk:kb_index'))
+        
+        redo_form = EditKBCategoryForm(
+            'create', 
+            request.POST,
+            organization =  request.user.default_organization,
+            initial = {
+                'name': form.cleaned_data['name'],
+                'title': form.cleaned_data['title'],
+                'slug': form.data['slug'],
+                'preview_description': escape(form.cleaned_data['preview_description']),
+                'description': escape(form.cleaned_data['description']),
+                'queue': form.cleaned_data['queue'],
+                'forms': form.cleaned_data['forms'].all(),
+                'public': form.cleaned_data['public'],
+            }   
+        )
+
+        return render(request, 'helpdesk/kb_category_edit.html', {
+            'form': redo_form,
+            'errors': form.errors,
+            'action': "Create",
+            'debug': settings.DEBUG,
+        })
+
+@helpdesk_staff_member_required
 def edit_category(request, slug):
     """Edit Knowledgebase category"""
     category = get_object_or_404(KBCategory, slug__iexact=slug)
 
     if request.method == 'GET':
-        form = EditKBCategoryForm(initial={
-            'name': category.name,
-            'title': category.title,
-            'slug': category.slug,
-            'preview_description': escape(category.preview_description),
-            'description': escape(category.description),
-            'queue': category.queue,
-            'forms': category.forms.all(),
-            'public': category.public,
-        })
+        form = EditKBCategoryForm(
+            'edit',
+            organization = category.organization,
+            initial = {
+                'name': category.name,
+                'title': category.title,
+                'slug': category.slug,
+                'preview_description': escape(category.preview_description),
+                'description': escape(category.description),
+                'queue': category.queue,
+                'forms': category.forms.all(),
+                'public': category.public,
+            }
+        )
 
         return render(request, 'helpdesk/kb_category_edit.html', {
             'category': category,
             'form': form,
+            'action': "Edit",
             'debug': settings.DEBUG,
         })
     elif request.method == 'POST':
-        form = EditKBCategoryForm(request.POST, slug)
+        form = EditKBCategoryForm("edit", request.POST, organization = category.organization)
 
         if form.is_valid():
-            name = form.cleaned_data['name']
-            title = form.cleaned_data['title']
-            #slug = form.cleaned_data['slug']
-            preview_description = form.cleaned_data['preview_description']
-            description = form.cleaned_data['description']
-            queue = form.cleaned_data['queue']
-            forms = form.cleaned_data['forms']
-            public = form.cleaned_data['public']
+            category.name = form.cleaned_data['name']
+            category.title = form.cleaned_data['title']
+            # slug = form.cleaned_data['slug']
+            category.preview_description = form.cleaned_data['preview_description']
+            category.description = form.cleaned_data['description']
+            category.queue = form.cleaned_data['queue']
+            category.forms.set(form.cleaned_data['forms'])
+            category.public = form.cleaned_data['public']
 
-            new_category = KBCategory(
-                id = category.id,
-                organization = category.organization,
-                name = name, 
-                title = title, 
-                slug = category.slug, 
-                preview_description = preview_description,
-                description = description,
-                queue = queue,
-                public = public
-            )
-            category.delete()
-            new_category.save()
-            new_category.forms.set(forms)
+            category.save()
         return HttpResponseRedirect(reverse('helpdesk:kb_category', args=[category.slug]))
+
+@helpdesk_staff_member_required
+def delete_category(request, slug):
+    category = get_object_or_404(KBCategory, slug=slug)
+    category.delete()
+    return HttpResponseRedirect(reverse('helpdesk:kb_index'))
 
 def article(request, slug, pk, iframe=False):
     item = get_object_or_404(KBItem, pk=pk)
@@ -161,27 +210,60 @@ def article(request, slug, pk, iframe=False):
     })
 
 @helpdesk_staff_member_required
+def create_article(request, slug):
+    category = get_object_or_404(KBCategory, slug=slug)
+
+    if request.method == 'GET':
+        form = EditKBItemForm(organization=request.user.default_organization, category=category)
+
+        return render(request, 'helpdesk/kb_article_edit.html', {
+            'category': category,
+            'form': form,
+            'action': "Create",
+            'debug': settings.DEBUG,
+        })
+    elif request.method == 'POST':
+        form = EditKBItemForm(request.POST, organization = request.user.default_organization)
+
+        if form.is_valid():
+            item = KBItem(
+                category = form.cleaned_data['category'],
+                title = form.cleaned_data['title'],
+                question = form.cleaned_data['question'],
+                answer = form.cleaned_data['answer'],
+                order = form.cleaned_data['order'],
+                enabled = form.cleaned_data['enabled'],
+            )
+            item.save()     
+        return HttpResponseRedirect(reverse('helpdesk:kb_category', args=[category.slug]))
+
+@helpdesk_staff_member_required
 def edit_article(request, slug, pk, iframe=False):
+    category = get_object_or_404(KBCategory, slug=slug)
     item = get_object_or_404(KBItem, pk=pk)
 
     if request.method == "GET":
-        form = EditKBItemForm(initial={
-            'category': item.category,
-            'title': item.title,
-            'question': item.question,
-            'answer': item.answer,
-            'order': item.order,
-            'enabled': item.enabled,
-        })
+        form = EditKBItemForm(
+            organization = request.user.default_organization,
+            initial = {
+                'category': item.category,
+                'title': item.title,
+                'question': item.question,
+                'answer': item.answer,
+                'order': item.order,
+                'enabled': item.enabled,
+            }
+        )
 
         return render(request, 'helpdesk/kb_article_edit.html', {
-            'category': item.category,
+            'category': category,
             'item': item,
+            'action': "Edit",
             'form': form,
             'debug': settings.DEBUG,
         })
     elif request.method == "POST":
-        form = EditKBItemForm(request.POST, item.category.slug)
+        form = EditKBItemForm(request.POST, organization = request.user.default_organization)
 
         if form.is_valid():
             item.category = form.cleaned_data['category']
@@ -193,7 +275,12 @@ def edit_article(request, slug, pk, iframe=False):
 
             item.save()
         return HttpResponseRedirect(reverse('helpdesk:kb_article', args=[item.category.slug, item.id]))
-            
+
+@helpdesk_staff_member_required
+def delete_article(request, slug, pk):
+    item = get_object_or_404(KBItem, pk=pk)
+    item.delete()
+    return HttpResponseRedirect(reverse('helpdesk:kb_category', args=[slug]))
 
 @xframe_options_exempt
 def category_iframe(request, slug):

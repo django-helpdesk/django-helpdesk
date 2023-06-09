@@ -285,6 +285,10 @@ if helpdesk_settings.HELPDESK_KB_ENABLED:
             kb.index,
             name='kb_index'),
 
+        url(r'^kb/(?P<slug>[A-Za-z0-9_-]+)/create/$',
+            kb.create_article,
+            name='create_kb_article'),
+
         url(r'^kb/(?P<slug>[A-Za-z0-9_-]+)/(?P<pk>[0-9]+)/$',
             kb.article,
             name='kb_article'),
@@ -293,6 +297,14 @@ if helpdesk_settings.HELPDESK_KB_ENABLED:
             kb.edit_article,
             name="edit_kb_article"),
 
+        url(r'^kb/(?P<slug>[A-Za-z0-9_-]+)/(?P<pk>[0-9]+)/delete/$',
+            kb.delete_article,
+            name="delete_kb_article"),
+
+        url(r'^kb/create/$',
+            kb.create_category,
+            name='create_kb_category'),
+
         url(r'^kb/(?P<slug>[A-Za-z0-9_-]+)/$',
             kb.category,
             name='kb_category'),
@@ -300,6 +312,10 @@ if helpdesk_settings.HELPDESK_KB_ENABLED:
         url(r'^kb/(?P<slug>[A-Za-z0-9_-]+)/edit/$',
             kb.edit_category,
             name="edit_kb_category"),
+
+        url(r'^kb/(?P<slug>[A-Za-z0-9_-]+)/delete/$',
+            kb.delete_category,
+            name="delete_kb_category"),
 
         url(r'^kb/(?P<item>[0-9]+)/vote/$',
             kb.vote,

@@ -2,7 +2,7 @@
 
 {% load i18n bootstrap4form %}
 
-{% block helpdesk_title %}{% trans "Edit Category" %}{% endblock %}
+{% block helpdesk_title %}{% blocktrans %}{{ action }} Article{% endblocktrans %}{% endblock %}
 
 {% block helpdesk_breadcrumb %}
 <li class="breadcrumb-item">
@@ -11,13 +11,13 @@
 <li class="breadcrumb-item active">
     <a href="{% url 'helpdesk:kb_category' category.slug %}{{ user_info.url }}">{% blocktrans with category.title as kbcat %}{{ kbcat }}{% endblocktrans %}</a>
 </li>
-<li class="breadcrumb-item active">{% blocktrans with item.question as itemq %} Edit: {{ itemq }}{% endblocktrans %}</li>
+<li class="breadcrumb-item active">{% blocktrans with item.question as itemq %} {{ action }} {{ itemq }}{% endblocktrans %}</li>
 {% endblock %}
 
 {% block helpdesk_body %}
     <div class="col-xs-6">
         <div class="panel panel-default">
-            <div class="panel-body"><h2>{% trans "Edit Article" %}</h2>
+            <div class="panel-body"><h2>{% blocktrans %} {{ action }} Article {% endblocktrans %}</h2>
                 <p>
                     {% trans "Required fields are indicated by " %} <span style="color:red;">*</span>
                 </p>
@@ -27,9 +27,16 @@
                     <fieldset>
                         {{ form|bootstrap4form }}
                         <div class='buttons form-group'>
-                            <input type='submit' class="btn btn-primary btn" value='{% trans "Save Changes" %}'/>
-                            <a href="{% url 'helpdesk:kb_article' category.slug item.id %}{{ user_info.url }}">
-                                <button type="button" class="btn btn-danger">{% trans "Cancel Changes" %}</button>
+                            <input type='submit' class="btn btn-primary btn" 
+                                value="{% if action == "Create"%}Create Article{% else %}Save Changes{% endif %}"/>
+                            <a href="
+                            {% if action == "Create"%}
+                                {% url 'helpdesk:kb_category' category.slug %}{{ user_info.url }}
+                            {% else %}
+                                {% url 'helpdesk:kb_article' category.slug item.id %}{{ user_info.url }}
+                            {% endif %}
+                            ">
+                                <button type="button" class="btn btn-danger">{% trans "Cancel" %}</button>
                             </a>
                         </div>
                     </fieldset>

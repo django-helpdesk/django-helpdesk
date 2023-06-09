@@ -15,7 +15,15 @@
     <div class="row">
         <div class="col-sm-8">
 {% endif %}
-            <h2>{% trans "Knowledgebase" %}</h2>
+            <div class="d-flex">
+                <h2>{% trans "Knowledgebase" %}</h2>
+                <div class="flex-fill d-flex justify-content-end">
+                    <a class="btn btn-primary align-self-center" href="{% url 'helpdesk:create_kb_category' %}{{ user_info.url }}">
+                        <i class="fa fa-plus mr-1"></i>Create Category
+                    </a>
+                </div>
+            </div>
+
             <p>{% trans "We have listed a number of Knowledgebase articles for your perusal in the following categories. Please check to see if any of these articles address your problem prior to opening a support ticket." %}</p>
             {% for category in kb_categories %}
             {% cycle 'one' 'two' 'three' as catnumperrow silent %}

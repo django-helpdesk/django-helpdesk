@@ -2,31 +2,46 @@
 
 {% load i18n bootstrap4form %}
 
-{% block helpdesk_title %}{% trans "Edit Category" %}{% endblock %}
+{% block helpdesk_title %}{% blocktrans %}{{ action }} Category{% endblocktrans %} {% endblock %}
 
 {% block helpdesk_breadcrumb %}
 <li class="breadcrumb-item">
     <a href="{% url 'helpdesk:kb_index' %}{{ user_info.url }}">{% trans "Knowledgebase" %}</a>
 </li>
-<li class="breadcrumb-item active">{% blocktrans with category.title as kbcat %} Edit: {{ kbcat }}{% endblocktrans %}</li>
+<li class="breadcrumb-item active">{% blocktrans with category.title as kbcat %} {{ action }} {{ kbcat }}{% endblocktrans %}</li>
 {% endblock %}
 
 {% block helpdesk_body %}
     <div class="col-xs-6">
         <div class="panel panel-default">
-            <div class="panel-body"><h2>{% trans "Edit Category" %}</h2>
+            <div class="panel-body"><h2>{% blocktrans %} {{ action }} Category {% endblocktrans %}</h2>
                 <p>
-                    {% trans "Unless otherwise stated, all fields are required." %}
+                    {% trans "Required fields are indicated by " %} <span style="color:red;">*</span>
                 </p>
-                {% if errors %}<p class="text-danger">{% for error in errors %}{% trans "Error: " %}{{ error }}<br>{% endfor %}</p>{% endif %}
+                {% if errors %}
+                <div class="alert alert-danger" role="alert">
+                    <a class="close" data-dismiss="alert">&times;</a>
+                        {% trans "Error in the following field(s): " %}
+                        {% for error in errors %}
+                            {{ error }}{% if not forloop.last %},{% endif %}
+                        {% endfor %}
+                </div>
+                {% endif %}
                 <form method='post'>
                     {% csrf_token %}
                     <fieldset>
                         {{ form|bootstrap4form }}
                         <div class='buttons form-group'>
-                            <input type='submit' class="btn btn-primary btn" value='{% trans "Save Changes" %}'/>
-                            <a href="{% url 'helpdesk:kb_category' category.slug %}{{ user_info.url }}">
-                                <button type="button" class="btn btn-danger">{% trans "Cancel Changes" %}</button>
+                            <input type='submit' class="btn btn-primary btn" 
+                                value="{% if action == "Create"%}Create Category{% else %}Save Changes{% endif %}"/>
+                            <a href="
+                            {% if action == "Create"%}
+                                {% url 'helpdesk:kb_index'%}{{ user_info.url }}
+                            {% else %}
+                                {% url 'helpdesk:kb_category' category.slug %}{{ user_info.url }}
+                            {% endif %}
+                            ">
+                                <button type="button" class="btn btn-danger">{% trans "Cancel" %}</button>
                             </a>
                         </div>
                     </fieldset>
@@ -34,4 +49,11 @@
             </div>
         </div>
     </div>
+
+    <script type='text/javascript' language='javascript'>
+        {# Bandaid fix for adding asterisks to required fields while the rest of the form is handled by bootstrap4form #}
+        for (const required_field of document.querySelectorAll('[required]')) {
+            document.querySelector('label[for=' + required_field.id + ']').innerHTML += '<span style="color:red;">*</span>'
+        }
+    </script>
 {% endblock %}
