@@ -178,7 +178,7 @@ def create_queue(request):
                 title = form.cleaned_data['title'],
                 slug = form.cleaned_data['slug'], # no change
                 match_on = [i for i in form.cleaned_data['agg_match_on'] if i], # remove empty strings
-                match_on_addresses = [i for i in form.cleaned_data['agg_match_on_addresses'] if i],
+                match_on_addresses = [i for i in form.cleaned_data['agg_match_on_addresses'] if i], # remove empty strings
                 allow_public_submission = form.cleaned_data['allow_public_submission'],
                 escalate_days = form.cleaned_data['escalate_days'],
                 enable_notifications_on_email_events = form.cleaned_data['enable_notifications_on_email_events'],
@@ -197,7 +197,7 @@ def create_queue(request):
                 'title': form.cleaned_data['title'],
                 'slug': form.data['slug'], # no change
                 'match_on': [i for i in form.cleaned_data['agg_match_on'] if i], # remove empty strings
-                'match_on_addresses': [i for i in form.cleaned_data['agg_match_on_addresses'] if i],
+                'match_on_addresses': [i for i in form.cleaned_data['agg_match_on_addresses'] if i], # remove empty strings
                 'allow_public_submission': form.cleaned_data['allow_public_submission'],
                 'escalate_days': form.cleaned_data['escalate_days'],
                 'enable_notifications_on_email_events': form.cleaned_data['enable_notifications_on_email_events'],
@@ -222,6 +222,7 @@ def edit_queue(request, slug):
     if request.method == "GET":
         form = EditQueueForm(
             "edit",
+            organization=request.user.default_organization.id,
             initial = {
                 'organization': queue.organization.id,
                 'title': queue.title,
@@ -237,8 +238,7 @@ def edit_queue(request, slug):
                 'reassign_when_closed': queue.reassign_when_closed,
                 'dedicated_time': queue.dedicated_time,
                 'email_address': queue.email_address if queue.email_address else "None",
-            },
-            organization=request.user.default_organization.id   
+            }
         )
 
         return render(request, 'helpdesk/edit_queue.html', {
@@ -250,11 +250,10 @@ def edit_queue(request, slug):
     elif request.method == "POST":
         form = EditQueueForm("edit", request.POST, organization=request.user.default_organization.id)
         if form.is_valid():
-            
             queue.title = form.cleaned_data['title']
             # queue.slug = form.cleaned_data['slug'] # no change
             queue.match_on = [i for i in form.cleaned_data['agg_match_on'] if i] # remove empty strings
-            queue.match_on_addresses = [i for i in form.cleaned_data['agg_match_on_addresses'] if i]
+            queue.match_on_addresses = [i for i in form.cleaned_data['agg_match_on_addresses'] if i] # remove empty strings
             queue.allow_public_submission = form.cleaned_data['allow_public_submission']
             queue.escalate_days = form.cleaned_data['escalate_days']
             queue.enable_notifications_on_email_events = form.cleaned_data['enable_notifications_on_email_events']

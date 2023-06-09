@@ -298,7 +298,12 @@ class EditKBItemForm(forms.ModelForm):
 
 
 class MatchOnField(forms.MultiValueField):
-
+    """
+        Custom MultiValueField that creates num_widgets number of fields and widgets
+        of the types specified in field_type and widget_type. These fields are
+        available as a list, with a button below to add an additional field.
+    """
+    
     def __init__(self, num_widgets, field_type, widget_type, *args, **kwargs):
         self.fields = []
         self.widgets = []
@@ -322,6 +327,9 @@ class MatchOnWidget(forms.widgets.MultiWidget):
 class EditQueueForm(forms.ModelForm):
     error_css_class = 'text-danger'
 
+    # Django only recognizes the initial match_on fields at form creation.
+    # These hidden fields aggregate the values of all match_on fields at submission time using JavaSript
+    # See helpdesk/queue_list.html and helpdesk/include/multi_text_input.html
     agg_match_on = forms.JSONField(widget=forms.HiddenInput(), required=False)
     agg_match_on_addresses = forms.JSONField(widget=forms.HiddenInput(), required=False)
     match_on = MatchOnField(num_widgets=1, field_type=forms.CharField(), widget_type=forms.TextInput(), required=False)
@@ -329,6 +337,15 @@ class EditQueueForm(forms.ModelForm):
     
     slug = forms.SlugField()
     email_address = forms.CharField(required=False, initial="None")
+    
+    class OwnerModelChoiceField(forms.ModelChoiceField):
+        def label_from_instance(self, user):
+            if user.get_full_name():
+                return "%s" % user.get_full_name()
+            else:
+                return "%s" % user.get_username()
+            
+    default_owner = OwnerModelChoiceField(queryset=User.objects)
 
     class Meta:
         model = Queue
@@ -337,7 +354,7 @@ class EditQueueForm(forms.ModelForm):
     def __init__(self, action, *args, **kwargs):
         """
             Set slug and email address field to read-only.
-            TODO: Set email address field to "None" if it is empty.
+            Set email address field to "None" if it is empty.
         """
 
         self.org = kwargs.pop('organization') if kwargs and kwargs['organization'] else None
@@ -351,12 +368,22 @@ class EditQueueForm(forms.ModelForm):
         self.fields['default_owner'].queryset = User.objects.filter(orgs=self.org)
 
         if kwargs and kwargs['initial']:
-                self.fields['match_on'] = MatchOnField(num_widgets=len(kwargs['initial']['match_on']) + 1, field_type=forms.CharField(), widget_type=forms.TextInput(), required=False, help_text = "A list of strings. If you'd like only emails with certain subject lines to be imported into this queue, list that text here. Otherwise, leave blank.")
-                self.fields['match_on_addresses'] = MatchOnField(num_widgets=len(kwargs['initial']['match_on_addresses']) + 1, field_type=forms.EmailField(), widget_type=forms.EmailInput(), required=False, help_text="A list of strings. If you'd like only emails from specific addresses to be imported into this queue, list those addresses here. Otherwise, leave blank.")
+            self.fields['match_on'] = MatchOnField(
+                num_widgets=len(kwargs['initial']['match_on']) + 1,
+                field_type=forms.CharField(), widget_type=forms.TextInput(), 
+                required=False, 
+                help_text = "A list of strings. If you'd like only emails with certain subject lines to be imported into this queue, list that text here. Otherwise, leave blank.")
+            self.fields['match_on_addresses'] = MatchOnField(
+                num_widgets=len(kwargs['initial']['match_on_addresses']) + 1, 
+                field_type=forms.EmailField(), widget_type=forms.EmailInput(), 
+                required=False, 
+                help_text="A list of strings. If you'd like only emails from specific addresses to be imported into this queue, list those addresses here. Otherwise, leave blank.")
 
     def clean(self):
         cleaned_data = self.cleaned_data
 
+        # Since organization is an excluded field, validating the unique_together 
+        # constraint of slugs must be done manually
         if Queue.objects.filter(organization=self.org, slug=cleaned_data['slug']).exists():
             raise ValidationError({'slug': ["Queue with this slug already exists in this organization"]})
         
