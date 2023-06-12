@@ -276,6 +276,9 @@ class EditKBCategoryForm(forms.ModelForm):
         self.fields['queue'].queryset = Queue.objects.filter(organization=org)
         self.fields['forms'].queryset = FormType.objects.filter(organization=org) 
 
+class PreviewWidget(forms.widgets.Textarea):
+    template_name = "helpdesk/include/edit_md_preview.html"
+
 class EditKBItemForm(forms.ModelForm):
 
     class CategoryModelChoiceField(forms.ModelChoiceField):
@@ -283,6 +286,7 @@ class EditKBItemForm(forms.ModelForm):
             return "%s" % (category.name)
         
     category = CategoryModelChoiceField(queryset=KBCategory.objects)
+    answer = forms.CharField(widget=PreviewWidget, help_text=KBItem.answer.field.help_text)
 
     class Meta:
         model = KBItem
@@ -294,8 +298,8 @@ class EditKBItemForm(forms.ModelForm):
             Filter categories by current org.
             Prepoulate category field when creating a new article from a category's page.
         """
-        org = kwargs.pop('organization') if kwargs and kwargs['organization'] else None
-        category = kwargs.pop('category') if kwargs and kwargs['category'] else None
+        org = kwargs.pop('organization', None)
+        category = kwargs.pop('category', None) 
         super(EditKBItemForm, self).__init__(*args, **kwargs)
 
         self.fields['category'].queryset = KBCategory.objects.filter(organization=org)

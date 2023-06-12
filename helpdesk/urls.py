@@ -297,6 +297,10 @@ if helpdesk_settings.HELPDESK_KB_ENABLED:
             kb.edit_article,
             name="edit_kb_article"),
 
+        url(r'^kb/preview_markdown$',
+            kb.preview_markdown,
+            name="preview_markdown"),
+
         url(r'^kb/(?P<slug>[A-Za-z0-9_-]+)/(?P<pk>[0-9]+)/delete/$',
             kb.delete_article,
             name="delete_kb_article"),

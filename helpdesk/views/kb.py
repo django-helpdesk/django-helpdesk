@@ -9,14 +9,14 @@ views/kb.py - Public-facing knowledgebase views. The knowledgebase is a
 """
 
 from django.conf import settings
-from django.http import HttpResponseRedirect, Http404
+from django.http import HttpResponseRedirect, Http404, JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.clickjacking import xframe_options_exempt
 from django.urls import reverse
 
 from helpdesk import settings as helpdesk_settings
 from helpdesk import user
-from helpdesk.models import KBCategory, KBItem
+from helpdesk.models import KBCategory, KBItem, get_markdown
 from helpdesk.decorators import is_helpdesk_staff, helpdesk_staff_member_required
 from helpdesk.forms import EditKBCategoryForm, EditKBItemForm
 from django.utils.html import escape
@@ -230,7 +230,7 @@ def create_article(request, slug):
                 category = form.cleaned_data['category'],
                 title = form.cleaned_data['title'],
                 question = form.cleaned_data['question'],
-                answer = form.cleaned_data['answer'],
+                answer = escape(form.cleaned_data['answer']),
                 order = form.cleaned_data['order'],
                 enabled = form.cleaned_data['enabled'],
             )
@@ -281,6 +281,34 @@ def delete_article(request, slug, pk):
     item = get_object_or_404(KBItem, pk=pk)
     item.delete()
     return HttpResponseRedirect(reverse('helpdesk:kb_category', args=[slug]))
+
+def preview_markdown(request):
+    answer = request.GET.get('md')
+    org = request.user.default_organization
+
+    class MarkdownNumbers(object):
+        def __init__(self, start=1, pattern=''):
+            self.count = start - 1
+            self.pattern = pattern
+
+        def __call__(self, match):
+                self.count += 1
+                return self.pattern.format(self.count)
+
+    import re
+    title_pattern = r'!~!'
+    body_pattern = r'~!~'
+    title = "{{: .card .btn .btn-link style='text-align: left;' " \
+            "data-toggle='collapse' data-target='#collapse{0}' role='region' " \
+            "aria-expanded='false' aria-controls='collapse{0}' .card-header #header{0} .h5 .mb-0 }}"
+    body = "{{ #collapse{0} .collapse role='region' aria-labelledby='header{0}' data-parent='#header{0}' " \
+           "style='padding-top:0;padding-bottom:0;margin:0;' .card-body }}"
+    new_answer, title_count = re.subn(title_pattern, MarkdownNumbers(start=1, pattern=title), answer)
+    new_answer, body_count = re.subn(body_pattern, MarkdownNumbers(start=1, pattern=body), new_answer)
+    if title_count != 0 and title_count == body_count:
+        return JsonResponse({'md_html':get_markdown(new_answer, org, kb=True)})
+    return JsonResponse({'md_html':get_markdown(answer, org)})
+
 
 @xframe_options_exempt
 def category_iframe(request, slug):
