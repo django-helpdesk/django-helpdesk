@@ -19,18 +19,15 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db.utils import IntegrityError
 from django.utils.translation import gettext_lazy as _
 from helpdesk.models import Queue
-from optparse import make_option
 
 
 class Command(BaseCommand):
 
-    def __init__(self):
-        BaseCommand.__init__(self)
-
-        self.option_list += (
-            make_option(
-                '--queues', '-q',
-                help='Queues to include (default: all). Use queue slugs'),
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '--queues',
+            '-q',
+            help='Queues to include (default: all). Use queue slugs and separate them with a coma'
         )
 
     def handle(self, *args, **options):
@@ -57,7 +54,7 @@ class Command(BaseCommand):
                     "  .. already has `permission_name=%s`" % q.permission_name)
                 basename = q.permission_name[9:]
             else:
-                basename = q.generate_permission_name()
+                basename = q.prepare_permission_name()
                 self.stdout.write(
                     "  .. generated `permission_name=%s`" % q.permission_name)
                 q.save()
