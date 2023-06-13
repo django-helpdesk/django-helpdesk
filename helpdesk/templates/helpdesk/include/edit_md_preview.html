@@ -1,21 +1,25 @@
-<div class="row">
-    <div class="col-md-6">
-        {% include "django/forms/widgets/textarea.html" with widget=widget %}
+<div class="card">
+    <div class="card-header">
+        <ul class="nav nav-tabs card-header-tabs" data-bs-tabs="tabs">
+            <li class="nav-item">
+                <a class="nav-link active" data-toggle="tab" href="#edit">Edit</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-toggle="tab" href="#preview" onclick="updatePreview()">Preview</a>
+            </li>
+        </ul>
     </div>
-    <div class="col-md-6 mt-md-0 mt-2">
-        <div id="preview_card" class="card px-1 py-1 h-100" style="overflow: auto;">
+    <div class="card-body tab-content">
+        <div id="edit" class="tab-pane active">
+            {% include "django/forms/widgets/textarea.html" with widget=widget %}
+        </div>
+        <div id="preview" class="tab-pane">
             <div id="{{widget.name}}_md_preview"></div>
         </div>
     </div>
 </div>
 
 <script type='text/javascript' language='javascript'>
-    $(document).ready(function () {
-        updateMaxHeight();
-        updatePreview();
-        $('#id_{{widget.name}}').on({'keyup': updatePreview, 'mouseup mousemove': updateMaxHeight});
-    });
-
     function updatePreview() {
         $.ajax({
             data: {md: $('#id_{{widget.name}}').val()},
@@ -25,9 +29,5 @@
                 $('#{{widget.name}}_md_preview').html(response['md_html'])
             },
         });
-    }
-
-    function updateMaxHeight() {
-        $('#preview_card').css({'max-height': document.getElementById('id_{{widget.name}}').clientHeight});
     }
 </script>
