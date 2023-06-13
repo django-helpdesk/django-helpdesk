@@ -22,7 +22,6 @@
             url: "{% url 'helpdesk:preview_markdown'  %}",
 
             success: function(response) {
-                console.log(response)
                 $('#{{widget.name}}_md_preview').html(response['md_html'])
             },
         });
