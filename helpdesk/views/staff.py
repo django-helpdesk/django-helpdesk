@@ -2404,7 +2404,7 @@ def pair_property_milestone(request, ticket_id):
 
     if request.method == 'POST':
         pv_id = request.POST.get('property_id', '').split('-')[1]
-        milestone_id = request.POST.get('milestone_id').split('-')[1]
+        milestone_id = request.POST.get('milestone_id').split('-')[2]
 
         pm = PropertyMilestone.objects.get(property_view_id=pv_id, milestone_id=milestone_id)
 
