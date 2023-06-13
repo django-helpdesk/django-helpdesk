@@ -9,7 +9,7 @@
             </li>
         </ul>
     </div>
-    <div class="card-body tab-content">
+    <div class="card-body tab-content" style='max-height: 50vh; overflow-y: auto'>
         <div id="edit" class="tab-pane active">
             {% include "django/forms/widgets/textarea.html" with widget=widget %}
         </div>
