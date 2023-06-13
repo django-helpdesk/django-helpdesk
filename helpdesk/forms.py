@@ -345,7 +345,7 @@ class EditQueueForm(forms.ModelForm):
             else:
                 return "%s" % user.get_username()
             
-    default_owner = OwnerModelChoiceField(queryset=User.objects)
+    default_owner = OwnerModelChoiceField(queryset=User.objects, required=False)
 
     class Meta:
         model = Queue
@@ -379,11 +379,12 @@ class EditQueueForm(forms.ModelForm):
                 help_text="A list of strings. If you'd like only emails from specific addresses to be imported into this queue, list those addresses here. Otherwise, leave blank.")
 
     def clean(self):
-        cleaned_data = self.cleaned_data
+        cleaned_data = super().clean()
+
 
         # Since organization is an excluded field, validating the unique_together 
         # constraint of slugs must be done manually
-        if Queue.objects.filter(organization=self.org, slug=cleaned_data['slug']).exists():
+        if 'slug' in cleaned_data and Queue.objects.filter(organization=self.org, slug=cleaned_data['slug']).exists():
             raise ValidationError({'slug': ["Queue with this slug already exists in this organization"]})
         
         return cleaned_data

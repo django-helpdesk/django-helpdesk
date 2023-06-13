@@ -69,5 +69,11 @@
             }  
             $("[name=agg_match_on_addresses]").val(JSON.stringify(agg_match_on_addresses));
         });
+
+        if (document.getElementById('id_slug').disabled == false) {
+            $('#id_title').on('input', function () {
+                $('#id_slug').val($('#id_title').val().toLowerCase().replaceAll(' ', '-'))
+            })
+        }
         </script>    
 {% endblock %}
