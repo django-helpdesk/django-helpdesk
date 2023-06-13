@@ -233,6 +233,7 @@ def create_article(request, slug):
                 answer = escape(form.cleaned_data['answer']),
                 order = form.cleaned_data['order'],
                 enabled = form.cleaned_data['enabled'],
+                last_updated = datetime.datetime.now()
             )
             item.save()     
         return HttpResponseRedirect(reverse('helpdesk:kb_category', args=[category.slug]))
@@ -272,6 +273,7 @@ def edit_article(request, slug, pk, iframe=False):
             item.answer = form.cleaned_data['answer']
             item.order = form.cleaned_data['order']
             item.enabled = form.cleaned_data['enabled']
+            item.last_updated = datetime.datetime.now()
 
             item.save()
         return HttpResponseRedirect(reverse('helpdesk:kb_article', args=[item.category.slug, item.id]))
