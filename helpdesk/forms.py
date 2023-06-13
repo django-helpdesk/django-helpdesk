@@ -356,8 +356,7 @@ class EditQueueForm(forms.ModelForm):
             Set slug and email address field to read-only.
             Set email address field to "None" if it is empty.
         """
-
-        self.org = kwargs.pop('organization') if kwargs and kwargs['organization'] else None
+        self.org = kwargs.pop('organization', None)
         super(EditQueueForm, self).__init__(*args, **kwargs)
 
         if action == "edit":
