@@ -266,7 +266,7 @@ class EditKBCategoryForm(forms.ModelForm):
             Set slug field to read-only. 
             Filter queues and forms by current org.
         """
-        org = kwargs.pop('organization') if kwargs and kwargs['organization'] else None
+        org = kwargs.pop('organization', None)
         super(EditKBCategoryForm, self).__init__(*args, **kwargs)
 
         if action == "edit":
