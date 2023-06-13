@@ -128,6 +128,8 @@ class CustomFieldMixin(object):
         else:
             self.fields[field.field_name] = fieldclass(**instanceargs)
 
+class PreviewWidget(forms.widgets.Textarea):
+    template_name = "helpdesk/include/edit_md_preview.html"
 
 class EditTicketForm(CustomFieldMixin, forms.ModelForm):
 
@@ -240,6 +242,7 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
 
 
 class EditFollowUpForm(forms.ModelForm):
+    comment = forms.CharField(widget=PreviewWidget, help_text=FollowUp.comment.field.help_text)
 
     class Meta:
         model = FollowUp
@@ -256,6 +259,8 @@ class EditKBCategoryForm(forms.ModelForm):
     error_css_class = 'text-danger'
 
     slug = forms.SlugField()
+    preview_description = forms.CharField(widget=PreviewWidget, help_text=KBCategory.preview_description.field.help_text)
+    description = forms.CharField(widget=PreviewWidget, help_text=KBCategory.description.field.help_text)
 
     class Meta:
         model = KBCategory
@@ -275,9 +280,6 @@ class EditKBCategoryForm(forms.ModelForm):
         
         self.fields['queue'].queryset = Queue.objects.filter(organization=org)
         self.fields['forms'].queryset = FormType.objects.filter(organization=org) 
-
-class PreviewWidget(forms.widgets.Textarea):
-    template_name = "helpdesk/include/edit_md_preview.html"
 
 class EditKBItemForm(forms.ModelForm):
 
@@ -317,6 +319,11 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
     form_introduction = None
     form_queue = None
     hidden_fields = []
+
+    description = forms.CharField(
+        widget=PreviewWidget, 
+        help_text=Ticket.description.field.help_text
+    )
 
     queue = forms.ChoiceField(
         widget=forms.Select(attrs={'class': 'form-control'}),
