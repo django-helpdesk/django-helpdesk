@@ -349,15 +349,23 @@ urlpatterns += [
         staff.queue_list,
         name='maintain_queues'),
 
-    url(r'^system_settings/maintain_forms/$',
-        staff.form_list,
-        name='maintain_forms'),
-
     url(r'^system_settings/maintain_queues/create/$',
         staff.create_queue,
         name='create_queue'),
 
     url(r'^system_settings/maintain_queues/(?P<slug>[A-Za-z0-9_-]+)/edit/$',
         staff.edit_queue,
-        name='edit_queue')
+        name='edit_queue'),
+
+    url(r'^system_settings/maintain_forms/$',
+        staff.form_list,
+        name='maintain_forms'),
+        
+    url(r'^system_settings/maintain_forms/create/$',
+        staff.create_form,
+        name="create_form"),
+
+    url(r'^system_settings/maintain_forms/(?P<pk>[0-9]+)/edit/$',
+        staff.edit_form,
+        name="edit_form"),
 ]

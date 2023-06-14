@@ -50,7 +50,7 @@ from helpdesk.decorators import (
 from helpdesk.forms import (
     TicketForm, UserSettingsForm, EmailIgnoreForm, EditTicketForm, TicketCCForm,
     TicketCCEmailForm, TicketCCUserForm, EditFollowUpForm, TicketDependencyForm, MultipleTicketSelectForm,
-    EditQueueForm
+    EditQueueForm, EditFormTypeForm
 )
 from helpdesk.lib import (
     safe_template_context,
@@ -288,6 +288,35 @@ def form_list(request):
         'form_list': form_list,
         'debug': settings.DEBUG,
     })
+
+@helpdesk_staff_member_required
+def create_form(request):
+    
+    if request.method == "GET":
+        form = EditFormTypeForm(organization=request.user.default_organization.id)
+
+        # breakpoint()
+        return render(request, 'helpdesk/edit_form.html', {
+            'form': form,
+            'action': "Create",
+            'debug': settings.DEBUG,
+        })
+
+@helpdesk_staff_member_required
+def edit_form(request, pk):
+    formtype = get_object_or_404(FormType, pk=pk)
+
+    if request.method == "GET":
+        form = EditFormTypeForm()
+
+        return render(request, 'helpdesk/edit_form.html', {
+            'formtype': formtype,
+            'form': form,
+            'action': "Edit",
+            'debug': settings.DEBUG,
+        })
+    # Stub return
+    return
 
 @helpdesk_staff_member_required
 def dashboard(request):

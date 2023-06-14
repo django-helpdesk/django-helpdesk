@@ -20,7 +20,7 @@
         <i class="fas fa-table mr-1"></i>
         {% trans "Maintain Forms" %}
         <div class="flex-fill d-flex justify-content-end">
-            <a class="btn btn-primary align-self-center" href="{#{% url 'helpdesk:create_form' %}{{ user_info.url }}#}">
+            <a class="btn btn-primary align-self-center" href="{% url 'helpdesk:create_form' %}{{ user_info.url }}">
                 <i class="fa fa-plus mr-1"></i>Create
             </a>
         </div>
@@ -46,7 +46,7 @@
                 {% for form in form_list %}
                 <tr>
                     {% comment %} <td>{{ form.organization.name }}</td> {% endcomment %}
-                    <td class="tickettitle" data-toggle="tooltip" title="Edit {{ form.name }}"><a href="{#{% url 'helpdesk:edit_form' form.id %}{{ user_info.url }}#}">{{ form.id }}. {{ form.name }}</a></td>
+                    <td class="tickettitle" data-toggle="tooltip" title="Edit {{ form.name }}"><a href="{% url 'helpdesk:edit_form' form.id %}{{ user_info.url }}">{{ form.id }}. {{ form.name }}</a></td>
                     {% comment %} <td>{{ form.get_markdown }}</td> {% endcomment %}
                     <td>{{ form.queue }}</td>
                     <td class="text-center">

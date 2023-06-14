@@ -402,7 +402,23 @@ class EditQueueForm(forms.ModelForm):
             raise ValidationError({'slug': ["Queue with this slug already exists in this organization"]})
         
         return cleaned_data
-         
+
+class EditFormTypeForm(forms.ModelForm):
+
+    description = forms.CharField(widget=PreviewWidget, help_text=FormType.description.field.help_text, required=False)
+    
+    class Meta:
+        model = FormType
+        exclude = ('organization', 'created', 'updated',)
+
+    def __init__(self, *args, **kwargs):
+        """
+            Yeet
+        """
+        self.org = kwargs.pop('organization', None)
+        super(EditFormTypeForm, self).__init__(*args, **kwargs)
+
+
 class AbstractTicketForm(CustomFieldMixin, forms.Form):
     """
     Contain all the common code and fields between "TicketForm" and
