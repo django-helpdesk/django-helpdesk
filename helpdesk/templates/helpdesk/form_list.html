@@ -34,12 +34,12 @@
                     {# Need to decide which columns are most relevant to the user #}
                     {% comment %} <th>{% trans "Organization" %}</th> {% endcomment %}
                     <th>{% trans "Name" %}</th>
-                    <th>{% trans "Description" %}</th> {# May not need to be a column #}
+                    {% comment %} <th>{% trans "Description" %}</th> {% endcomment %}
                     <th>{% trans "Queue" %}</th>
                     <th>{% trans "Public" %}</th>
                     <th>{% trans "Staff" %}</th>
                     <th>{% trans "Unlisted" %}</th>
-                    {% comment %} <th>{% trans "Fields" %}</th> {% endcomment %}
+                    <th>{% trans "Additional Fields" %}</th>
                 </tr>
             </thead>
             <tbody>
@@ -47,9 +47,9 @@
                 <tr>
                     {% comment %} <td>{{ form.organization.name }}</td> {% endcomment %}
                     <td class="tickettitle" data-toggle="tooltip" title="Edit {{ form.name }}"><a href="{#{% url 'helpdesk:edit_form' form.id %}{{ user_info.url }}#}">{{ form.id }}. {{ form.name }}</a></td>
-                    <td>{{ form.get_markdown }}</td>
+                    {% comment %} <td>{{ form.get_markdown }}</td> {% endcomment %}
                     <td>{{ form.queue }}</td>
-                    <td>
+                    <td class="text-center">
                         {# This block could be another template, since it is reused 3 times in this code #}
                         {% if form.public %}
                             <i class="fa fa-check-circle text-success">
@@ -57,21 +57,21 @@
                             <i class="fa fa-times-circle text-danger">
                         {% endif%}
                     </td>
-                    <td>
+                    <td class="text-center">
                         {% if form.staff %}
                             <i class="fa fa-check-circle text-success">
                         {% else %}
                             <i class="fa fa-times-circle text-danger">
                         {% endif%}
                     </td>
-                    <td>
+                    <td class="text-center">
                         {% if form.unlisted %}
                             <i class="fa fa-check-circle text-success">
                         {% else %}
                             <i class="fa fa-times-circle text-danger">
                         {% endif%}
                     </td>
-                    {% comment %} <td> {# list of form fields #} </td> {% endcomment %}
+                    <td> {{ form.get_extra_field_names }} </td>
                 </tr>
 
                 {% empty %}
