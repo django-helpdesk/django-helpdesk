@@ -264,6 +264,30 @@ def edit_queue(request, slug):
             queue.save()
         return HttpResponseRedirect(reverse('helpdesk:maintain_queues')) 
 
+@helpdesk_staff_member_required
+def form_list(request):
+    form_list = FormType.objects.filter(organization=request.user.default_organization)
+    
+    # user settings num tickets per page
+    if request.user.is_authenticated and hasattr(request.user, 'usersettings_helpdesk'):
+        forms_per_page = request.user.usersettings_helpdesk.tickets_per_page
+    else:
+        forms_per_page = 25
+
+    paginator = Paginator(
+        form_list, forms_per_page)
+    try:
+        form_list = paginator.page(request.GET.get(_('q_page'), 1))
+    except PageNotAnInteger:
+        form_list = paginator.page(1)
+    except EmptyPage:
+        form_list = paginator.page(
+            paginator.num_pages)
+
+    return render(request, 'helpdesk/form_list.html', {
+        'form_list': form_list,
+        'debug': settings.DEBUG,
+    })
 
 @helpdesk_staff_member_required
 def dashboard(request):
@@ -1656,7 +1680,6 @@ def edit_ticket(request, ticket_id):
 
 
 edit_ticket = staff_member_required(edit_ticket)
-
 
 def attach_ticket_to_property_milestone(request, ticket):
     from seed.models import PropertyMilestone, Note

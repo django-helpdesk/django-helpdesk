@@ -349,6 +349,10 @@ urlpatterns += [
         staff.queue_list,
         name='maintain_queues'),
 
+    url(r'^system_settings/maintain_forms/$',
+        staff.form_list,
+        name='maintain_forms'),
+
     url(r'^system_settings/maintain_queues/create/$',
         staff.create_queue,
         name='create_queue'),
