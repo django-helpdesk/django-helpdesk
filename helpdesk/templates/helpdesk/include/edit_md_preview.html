@@ -12,8 +12,8 @@
     <div class="card-body tab-content" style='max-height: 50vh; overflow-y: auto'>
         <div id="{{widget.name}}_edit" class="tab-pane active">
             <textarea class="form-control" name="{{ widget.name }}"{% include "django/forms/widgets/attrs.html" %}>{% spaceless %}
-                {% if widget.value %}{{ widget.value }}{% endif %}{% endspaceless %}
-            </textarea>
+                {% if widget.value %}{{ widget.value }}{% endif %}
+            {% endspaceless %}</textarea>
         </div>
         <div id="{{widget.name}}_preview" class="tab-pane">
             <div id="{{widget.name}}_md_preview"></div>
