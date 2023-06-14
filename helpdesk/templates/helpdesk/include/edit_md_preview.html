@@ -22,10 +22,12 @@
 </div>
 
 <script type='text/javascript' language='javascript'>
+    console.log("{{ item }}")
+    is_kbitem = document.getElementById('id_answer') != null
     function updatePreview_{{widget.name}}() {
         $.ajax({
-            data: {md: $('#id_{{widget.name}}').val()},
-            url: "{% url 'helpdesk:preview_markdown'  %}",
+            data: {md: $('#id_{{widget.name}}').val(), is_kbitem: is_kbitem},
+            url: "{% url 'helpdesk:preview_markdown' %}",
 
             success: function(response) {
                 $('#{{widget.name}}_md_preview').html(response['md_html'])
