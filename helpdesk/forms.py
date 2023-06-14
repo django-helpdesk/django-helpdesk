@@ -133,6 +133,8 @@ class PreviewWidget(forms.widgets.Textarea):
 
 class EditTicketForm(CustomFieldMixin, forms.ModelForm):
 
+    description = forms.CharField(widget=PreviewWidget, help_text=Ticket.description.field.help_text)
+
     class Meta:
         model = Ticket
         exclude = ('assigned_to', 'created', 'modified', 'status', 'on_hold', 'resolution', 'last_escalation',
