@@ -5,7 +5,7 @@
                 <a class="nav-link active" data-toggle="tab" href="#{{widget.name}}_edit">Edit</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" data-toggle="tab" href="#{{widget.name}}_preview" onclick="updatePreview_{{widget.name}}()">Preview</a>
+                <a class="nav-link" data-toggle="tab" href="#{{widget.name}}_preview" onclick="updatePreview('{{widget.name}}')">Preview</a>
             </li>
         </ul>
     </div>
@@ -20,18 +20,3 @@
         </div>
     </div>
 </div>
-
-<script type='text/javascript' language='javascript'>
-    console.log("{{ item }}")
-    is_kbitem = document.getElementById('id_answer') != null
-    function updatePreview_{{widget.name}}() {
-        $.ajax({
-            data: {md: $('#id_{{widget.name}}').val(), is_kbitem: is_kbitem},
-            url: "{% url 'helpdesk:preview_markdown' %}",
-
-            success: function(response) {
-                $('#{{widget.name}}_md_preview').html(response['md_html'])
-            },
-        });
-    }
-</script>

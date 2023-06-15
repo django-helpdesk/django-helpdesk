@@ -1,0 +1,13 @@
+<script type='text/javascript' language='javascript'>
+    function updatePreview(widget_name) {
+        is_kbitem = document.getElementById('id_answer') != null
+        $.ajax({
+            data: {md: $('#id_' + widget_name).val(), is_kbitem: is_kbitem},
+            url: "{% url 'helpdesk:preview_markdown' %}",
+
+            success: function(response) {
+                $('#' + widget_name + '_md_preview').html(response['md_html'])
+            },
+        });
+    }
+</script>
