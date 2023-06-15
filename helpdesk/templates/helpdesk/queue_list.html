@@ -15,6 +15,14 @@
 {% endblock %}
 
 {% block helpdesk_body %}
+
+<style>
+    {# Center table elements #}
+    #dataTable td {
+        vertical-align: middle
+    };
+</style>
+
 <div class="card mb-3">
     <div class="card-header d-flex align-items-center">
         <i class="fas fa-table mr-1"></i>
@@ -53,7 +61,7 @@
                     <td class="tickettitle" data-toggle="tooltip" title="Edit {{ queue.title }}"><a href="{% url 'helpdesk:edit_queue' queue.slug %}{{ user_info.url }}">{{ queue.id }}. {{ queue.title }}</a></td>
                     <td>{{ queue.slug }}</td>
                     {% comment %} <td>{% if queue.importer %}{{queue.importer}}{% else%}-{% endif %}</td> {% endcomment %}
-                    <td>
+                    <td class="text-center">
                         {# This block could be another template, since it is reused 3 times in this code #}
                         {% if queue.allow_public_submission %}
                             <i class="fa fa-check-circle text-success">
@@ -61,14 +69,14 @@
                             <i class="fa fa-times-circle text-danger">
                         {% endif%}
                     </td>
-                    <td>
+                    <td class="text-center">
                         {% if queue.enable_notifications_on_email_events %}
                             <i class="fa fa-check-circle text-success">
                         {% else %}
                             <i class="fa fa-times-circle text-danger">
                         {% endif%}
                     </td>
-                    <td>
+                    <td class="text-center">
                         {% if queue.reassign_when_closed %}
                             <i class="fa fa-check-circle text-success">
                         {% else %}
