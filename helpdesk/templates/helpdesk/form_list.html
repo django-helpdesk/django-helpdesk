@@ -15,6 +15,14 @@
 {% endblock %}
 
 {% block helpdesk_body %}
+
+<style>
+    {# Center table elements #}
+    #dataTable td {
+        vertical-align: middle
+    };
+</style>
+
 <div class="card mb-3">
     <div class="card-header d-flex align-items-center">
         <i class="fas fa-table mr-1"></i>
@@ -39,7 +47,8 @@
                     <th>{% trans "Public" %}</th>
                     <th>{% trans "Staff" %}</th>
                     <th>{% trans "Unlisted" %}</th>
-                    <th>{% trans "Additional Fields" %}</th>
+                    {% comment %} <th>{% trans "Additional Fields" %}</th> {% endcomment %}
+                    <th>{% trans "Delete" %}</th>
                 </tr>
             </thead>
             <tbody>
@@ -71,7 +80,12 @@
                             <i class="fa fa-times-circle text-danger">
                         {% endif%}
                     </td>
-                    <td> {{ form.get_extra_field_names }} </td>
+                    {% comment %} <td> {{ form.get_extra_field_names }} </td> {% endcomment %}
+                    <td class="text-center">
+                        <a class="btn btn-danger" data-toggle="modal" data-target="#deleteModal" title="Delete {{ form.name }}" onclick="updateModal({{form.id}}, '{{form.name}}')">
+                            <i class="fa fa-trash"></i>
+                        </a>
+                    </td>
                 </tr>
 
                 {% empty %}
@@ -116,6 +130,22 @@
     </div>
     <div class="card-footer small text-muted">Listing {{ form_list|length }} form(s) out of {{ form_list.paginator.count }}.</div>
 </div>
+
+{% url 'helpdesk:delete_form' form.id as delete_url%}
+{% include 'helpdesk/include/confirm_delete.html' with type="Form" title=form.name delete_url=delete_url %}
+
+<script type='text/javascript' language='javascript'>
+    // In order to reuse the delete modal, its contents and links need to be updated to match the form being deleted.
+    function updateModal(id, name) {
+        document.getElementById('modal_delete_confirm').href = '{% url 'helpdesk:maintain_forms' %}' + id + '/delete';
+        document.getElementById('modal_delete_body').innerHTML = 
+            `
+            Please confirm that you want to delete the Form: <strong>` + name + `</strong>. 
+            </br> </br>
+            This action <strong>cannot</strong> be undone.
+            `
+    }
+</script>
 
 {% endblock %}
 

@@ -368,4 +368,8 @@ urlpatterns += [
     url(r'^system_settings/maintain_forms/(?P<pk>[0-9]+)/edit/$',
         staff.edit_form,
         name="edit_form"),
+
+    url(r'^system_settings/maintain_forms/(?P<pk>[0-9]+)/delete/$',
+        staff.delete_form,
+        name="delete_form"),
 ]

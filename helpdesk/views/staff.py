@@ -10,6 +10,7 @@ from copy import deepcopy
 import json
 import pandas as pd
 import dateutil
+import datetime
 import pytz
 
 from django.conf import settings
@@ -21,6 +22,7 @@ from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q, Prefetch, F
+from django.forms import inlineformset_factory
 from django.http import HttpResponseRedirect, Http404, HttpResponse, JsonResponse, HttpRequest
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils.translation import ugettext as _
@@ -28,7 +30,7 @@ from django.utils.html import escape
 from django.utils import timezone
 from django.views.generic.edit import FormView, UpdateView
 
-from helpdesk.forms import CUSTOMFIELD_DATE_FORMAT, CUSTOMFIELD_DATETIME_FORMAT
+from helpdesk.forms import CUSTOMFIELD_DATE_FORMAT, CUSTOMFIELD_DATETIME_FORMAT, PreviewWidget
 from helpdesk.query import (
     get_query_class,
     query_to_base64,
@@ -307,16 +309,44 @@ def edit_form(request, pk):
     formtype = get_object_or_404(FormType, pk=pk)
 
     if request.method == "GET":
-        form = EditFormTypeForm()
-
+        form = EditFormTypeForm(
+            initial = {
+                'name': formtype.name,
+                'description': formtype.description,
+                'queue': formtype.queue,
+                'public': formtype.public,
+                'staff': formtype.staff,
+                'unlisted': formtype.unlisted
+            },
+            initial_customfields = CustomField.objects.filter(ticket_form=formtype)
+        )
+        
         return render(request, 'helpdesk/edit_form.html', {
             'formtype': formtype,
             'form': form,
             'action': "Edit",
             'debug': settings.DEBUG,
         })
-    # Stub return
-    return
+    elif request.method == "POST":
+        form = EditFormTypeForm(request.POST)
+        breakpoint()
+        if form.is_valid():
+            formtype.name = form.cleaned_data['name']
+            formtype.description = form.cleaned_data['description']
+            formtype.queue = form.cleaned_data['queue']
+            formtype.updated = datetime.datetime.now()
+            formtype.public = form.cleaned_data['public']
+            formtype.staff = form.cleaned_data['staff']
+            formtype.unlisted = form.cleaned_data['unlisted']
+
+            formtype.save()
+            return HttpResponseRedirect(reverse('helpdesk:maintain_forms'))
+
+@helpdesk_staff_member_required
+def delete_form(request, pk):
+    form = get_object_or_404(FormType, pk=pk)
+    form.delete()
+    return HttpResponseRedirect(reverse('helpdesk:maintain_forms'))
 
 @helpdesk_staff_member_required
 def dashboard(request):

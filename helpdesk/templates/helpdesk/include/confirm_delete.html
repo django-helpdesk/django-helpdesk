@@ -8,7 +8,7 @@
                 </button>
             </div>
             <div class="modal-body">
-                <p>
+                <p id='modal_delete_body'>
                     Please confirm that you want to delete the {{ type }}: <strong>{{ title }}</strong>. 
                     </br> </br>
                     This action <strong>cannot</strong> be undone.
@@ -16,7 +16,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                <a href="{{ delete_url }}">
+                <a id="modal_delete_confirm" href="{{ delete_url }}">
                     <button type="button"  class="btn btn-danger">Delete {{ type }}</button>
                 </a>
             </div>

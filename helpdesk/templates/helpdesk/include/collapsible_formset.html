@@ -1,0 +1,37 @@
+{% load i18n bootstrap4form %}
+
+<div class="card">
+    <div class="card-header"><h4 class="card-title">{{formset_title}} Editor</h4></div>
+    <div class="card-body">
+        <div id="{{ formset_type }}_formset">
+            {% for form in formset %}
+            <div class="card">
+                <div class="card-header" id="heading_{{ formset_type }}_{{ forloop.counter }}">
+                    <div class="d-flex">
+                        <h5 class="mb-0">
+                            <button type="button" class="btn btn-link" data-toggle="collapse" data-target="#collapse_{{ formset_type }}_{{ forloop.counter }}">
+                                {{ formset_title }} #{{ forloop.counter }}
+                            </button>
+                        </h5>
+                        <div class="flex-fill d-flex justify-content-end">
+                            <button id="add_{{ formset_type }}" type="button" class="btn btn-danger" href="">
+                                <i class="fa fa-trash"></i> Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div id="collapse_{{ formset_type }}_{{ forloop.counter }}" class="collapse" data-parent="#{{ formset_type }}_formset">
+                    <div class="card-body">
+                        {{ form|bootstrap4form }}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="card-footer">
+        <button id="add_{{ formset_type }}" type="button" class="btn btn-primary float-right" href="">
+            <i class="fa fa-plus"></i> Add
+        </button>
+    </div>
+</div>

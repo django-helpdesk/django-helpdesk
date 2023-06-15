@@ -406,6 +406,10 @@ class EditQueueForm(forms.ModelForm):
 class EditFormTypeForm(forms.ModelForm):
 
     description = forms.CharField(widget=PreviewWidget, help_text=FormType.description.field.help_text, required=False)
+    CustomFieldFormSet = forms.inlineformset_factory(FormType, CustomField, 
+        exclude = ['choices_as_array', 'ticket_form', 'created', 'modified','objects','view_ordering'],
+        widgets = {'help_text': PreviewWidget()}
+    )
     
     class Meta:
         model = FormType
@@ -416,8 +420,10 @@ class EditFormTypeForm(forms.ModelForm):
             Yeet
         """
         self.org = kwargs.pop('organization', None)
+        initial_customfields = kwargs.pop('initial_customfields', None)
         super(EditFormTypeForm, self).__init__(*args, **kwargs)
-
+        breakpoint()
+        self.customfield_formset = self.CustomFieldFormSet(initial = initial_customfields)
 
 class AbstractTicketForm(CustomFieldMixin, forms.Form):
     """
