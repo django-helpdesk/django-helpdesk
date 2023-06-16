@@ -406,7 +406,7 @@ class EditQueueForm(forms.ModelForm):
 class EditFormTypeForm(forms.ModelForm):
 
     description = forms.CharField(widget=PreviewWidget, help_text=FormType.description.field.help_text, required=False)
-    CustomFieldFormSet = forms.inlineformset_factory(FormType, CustomField, 
+    CustomFieldFormSet = forms.inlineformset_factory(FormType, CustomField,
         exclude = ['choices_as_array', 'ticket_form', 'created', 'modified','objects','view_ordering'],
         widgets = {'help_text': PreviewWidget()}
     )
@@ -417,13 +417,42 @@ class EditFormTypeForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         """
-            Yeet
+            Set up formset for CustomField objects 
         """
         self.org = kwargs.pop('organization', None)
-        initial_customfields = kwargs.pop('initial_customfields', None)
+        initial_customfields_objs = kwargs.pop('initial_customfields', None)
         super(EditFormTypeForm, self).__init__(*args, **kwargs)
-        breakpoint()
-        self.customfield_formset = self.CustomFieldFormSet(initial = initial_customfields)
+        
+        self.customfield_formset = self.CustomFieldFormSet()
+        if initial_customfields_objs:
+            initial_customfields = []
+            for cf in initial_customfields_objs:
+                initial_customfields.append({
+                    'id': cf.id,
+                    'field_name': cf.field_name,
+                    'label': cf.label,
+                    'help_text': cf.help_text,
+                    'data_type': cf.data_type,
+                    'form_ordering': cf.form_ordering,
+                    'required': cf.required,
+                    'staff': cf.staff,
+                    'public': cf.public,
+                    'column': cf.column
+                })
+
+            self.CustomFieldFormSet.extra = len(initial_customfields) + 1
+            self.customfield_formset.initial = initial_customfields
+        
+        if args:
+            self.CustomFieldFormSet.extra = args[0]['customfield_set-TOTAL_FORMS']
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        # ticket_form is an exclude field, so must validate unique_together manually
+        
+
+        return cleaned_data
 
 class AbstractTicketForm(CustomFieldMixin, forms.Form):
     """

@@ -4,6 +4,7 @@
     <div class="card-header"><h4 class="card-title">{{formset_title}} Editor</h4></div>
     <div class="card-body">
         <div id="{{ formset_type }}_formset">
+            {{ formset.management_form }}
             {% for form in formset %}
             <div class="card">
                 <div class="card-header" id="heading_{{ formset_type }}_{{ forloop.counter }}">

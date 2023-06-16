@@ -293,9 +293,10 @@ def form_list(request):
 
 @helpdesk_staff_member_required
 def create_form(request):
-    
+    organization=request.user.default_organization
+
     if request.method == "GET":
-        form = EditFormTypeForm(organization=request.user.default_organization.id)
+        form = EditFormTypeForm()
 
         # breakpoint()
         return render(request, 'helpdesk/edit_form.html', {
@@ -303,6 +304,48 @@ def create_form(request):
             'action': "Create",
             'debug': settings.DEBUG,
         })
+    elif request.method == "POST":
+        form = EditFormTypeForm(request.POST)
+        formset = form.CustomFieldFormSet(request.POST)
+
+        if form.is_valid():
+            formtype = FormType(
+                organization = organization,
+                name = form.cleaned_data['name'],
+                description = form.cleaned_data['description'],
+                queue = form.cleaned_data['queue'],
+                public = form.cleaned_data['public'],
+                staff = form.cleaned_data['staff'],
+                unlisted = form.cleaned_data['unlisted'],
+                created = datetime.datetime.now(),
+                updated = datetime.datetime.now()
+            )
+
+            formtype.save()
+
+            if formset.is_valid():
+
+                for cf in formset.cleaned_data:
+                    if not cf: break # break if form is empty
+
+                    customfield = cf['id'] if cf['id'] else CustomField()
+
+                    customfield.field_name = cf['field_name']
+                    customfield.label = cf['label']
+                    customfield.help_text = cf['help_text']
+                    customfield.data_type = cf['data_type']
+                    customfield.form_ordering = cf['form_ordering']
+                    customfield.required = cf['required']
+                    customfield.staff = cf['staff']
+                    customfield.public = cf['public']
+                    customfield.column = cf['column']
+                    if not customfield.created: customfield.created = datetime.datetime.now()
+                    customfield.modified = datetime.datetime.now()
+                    customfield.ticket_form = formtype
+
+                    customfield.save()
+            return HttpResponseRedirect(reverse('helpdesk:maintain_forms'))
+        
 
 @helpdesk_staff_member_required
 def edit_form(request, pk):
@@ -329,7 +372,8 @@ def edit_form(request, pk):
         })
     elif request.method == "POST":
         form = EditFormTypeForm(request.POST)
-        breakpoint()
+        formset = form.CustomFieldFormSet(request.POST)
+
         if form.is_valid():
             formtype.name = form.cleaned_data['name']
             formtype.description = form.cleaned_data['description']
@@ -338,9 +382,32 @@ def edit_form(request, pk):
             formtype.public = form.cleaned_data['public']
             formtype.staff = form.cleaned_data['staff']
             formtype.unlisted = form.cleaned_data['unlisted']
+            
+            formtype.save() 
 
-            formtype.save()
+            if formset.is_valid():
+
+                for cf in formset.cleaned_data:
+                    if not cf: break # break if form is empty
+
+                    customfield = cf['id'] if cf['id'] else CustomField()
+
+                    customfield.field_name = cf['field_name']
+                    customfield.label = cf['label']
+                    customfield.help_text = cf['help_text']
+                    customfield.data_type = cf['data_type']
+                    customfield.form_ordering = cf['form_ordering']
+                    customfield.required = cf['required']
+                    customfield.staff = cf['staff']
+                    customfield.public = cf['public']
+                    customfield.column = cf['column']
+                    if not customfield.created: customfield.created = datetime.datetime.now()
+                    customfield.modified = datetime.datetime.now()
+                    customfield.ticket_form = formtype
+
+                    customfield.save()
             return HttpResponseRedirect(reverse('helpdesk:maintain_forms'))
+        
 
 @helpdesk_staff_member_required
 def delete_form(request, pk):
