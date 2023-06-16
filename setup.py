@@ -6,7 +6,7 @@ from setuptools import find_packages, setup
 import sys
 
 
-version = '0.5.0a1'
+version = '0.5.0'
 
 
 # Provided as an attribute, so you can append to these instead
