@@ -395,7 +395,6 @@ class EditQueueForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
 
-
         # Since organization is an excluded field, validating the unique_together 
         # constraint of slugs must be done manually
         if 'slug' in cleaned_data and Queue.objects.filter(organization=self.org, slug=cleaned_data['slug']).exists():
@@ -406,9 +405,26 @@ class EditQueueForm(forms.ModelForm):
 class EditFormTypeForm(forms.ModelForm):
 
     description = forms.CharField(widget=PreviewWidget, help_text=FormType.description.field.help_text, required=False)
-    CustomFieldFormSet = forms.inlineformset_factory(FormType, CustomField,
+    
+    class BaseCustomFieldFormSet(forms.BaseInlineFormSet):
+        def clean(self):
+            # ticket_form is an excluded field, so must validate unique_together manually
+            field_names = set()
+            for form in self.forms:
+                cleaned_data = form.cleaned_data
+
+                if 'field_name' in cleaned_data:
+                    # Detect duplicate field names within the form
+                    before = len(field_names)
+                    field_names.add(cleaned_data['field_name'])
+                    after = len(field_names)
+
+                    if (before == after): # or CustomField.objects.filter(field_name=cleaned_data['field_name'], ticket_form=self.ticket_form).exists():
+                        raise ValidationError(["Custom Field with name " + cleaned_data['field_name'] + " already exists for this form."])
+
+    CustomFieldFormSet = forms.inlineformset_factory(FormType, CustomField, formset=BaseCustomFieldFormSet,
         exclude = ['choices_as_array', 'ticket_form', 'created', 'modified','objects','view_ordering'],
-        widgets = {'help_text': PreviewWidget()}
+        widgets = {'help_text': PreviewWidget}
     )
     
     class Meta:
@@ -420,6 +436,7 @@ class EditFormTypeForm(forms.ModelForm):
             Set up formset for CustomField objects 
         """
         self.org = kwargs.pop('organization', None)
+        # self.ticket_form = kwargs.pop('ticket_form', None)1
         initial_customfields_objs = kwargs.pop('initial_customfields', None)
         super(EditFormTypeForm, self).__init__(*args, **kwargs)
         
@@ -446,13 +463,6 @@ class EditFormTypeForm(forms.ModelForm):
         if args:
             self.CustomFieldFormSet.extra = args[0]['customfield_set-TOTAL_FORMS']
 
-    def clean(self):
-        cleaned_data = super().clean()
-
-        # ticket_form is an exclude field, so must validate unique_together manually
-        
-
-        return cleaned_data
 
 class AbstractTicketForm(CustomFieldMixin, forms.Form):
     """
