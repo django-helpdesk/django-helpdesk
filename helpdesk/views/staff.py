@@ -2437,6 +2437,16 @@ def pair_property_milestone(request, ticket_id):
         return return_to_ticket(request.user, request, helpdesk_settings, ticket)
 
     properties = ticket.beam_property.all()
+    org = ticket.ticket_form.organization
+
+    prop_display_column = Column.objects.filter(organization=org, column_name=org.property_display_field, table_name='PropertyState').first()
+    if prop_display_column:
+        if prop_display_column.is_extra_data:
+            prop_display_query = f'state__extra_data__{prop_display_column.column_name}'
+        else:
+            prop_display_query = f'state__{prop_display_column.column_name}'
+    else:
+        prop_display_query = 'state__address_line_1'
 
     # get all pathways attached to those properties and index them by property id
     # get all milestones for each pathway and index them by pathway id
@@ -2444,7 +2454,9 @@ def pair_property_milestone(request, ticket_id):
     pathways_per_property = {}
     milestones_per_pathway = {}
     for p in properties:
-        views = PropertyView.objects.filter(property_id=p.id)
+        # if there is no address, we will try to display the PM id instead
+        views = PropertyView.objects.filter(property_id=p.id)\
+                     .annotate(address=F(prop_display_query), pm_id=F('state__pm_property_id')).only('id', 'cycle')
         for view in views:
             if view.cycle not in properties_per_cycle:
                 properties_per_cycle[view.cycle] = [view]
@@ -2456,8 +2468,10 @@ def pair_property_milestone(request, ticket_id):
 
             milestones_per_pathway[view.id] = {}
             for pathway in pathways:
-                milestones_per_pathway[view.id][pathway.id] = Milestone.objects.filter(pathwaymilestone__pathway_id=pathway.id,
-                                                                              propertymilestone__property_view_id=view.id)
+                milestones_per_pathway[view.id][pathway.id] = Milestone.objects.filter(
+                    pathwaymilestone__pathway_id=pathway.id,
+                    propertymilestone__property_view_id=view.id
+                )
 
     return render(request, 'helpdesk/pair_property_milestone.html', {
         'ticket': ticket,
