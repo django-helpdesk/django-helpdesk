@@ -294,66 +294,15 @@ def form_list(request):
 @helpdesk_staff_member_required
 def create_form(request):
     organization=request.user.default_organization
+    
 
     if request.method == "GET":
-        form = EditFormTypeForm()
-
-        # breakpoint()
-        return render(request, 'helpdesk/edit_form.html', {
-            'form': form,
-            'action': "Create",
-            'debug': settings.DEBUG,
-        })
-    elif request.method == "POST":
-        form = EditFormTypeForm(request.POST)
-        formset = form.CustomFieldFormSet(request.POST)
-
-        if form.is_valid():
-            formtype = FormType(
-                organization = organization,
-                name = form.cleaned_data['name'],
-                description = form.cleaned_data['description'],
-                queue = form.cleaned_data['queue'],
-                public = form.cleaned_data['public'],
-                staff = form.cleaned_data['staff'],
-                unlisted = form.cleaned_data['unlisted'],
-                created = datetime.datetime.now(),
-                updated = datetime.datetime.now()
-            )
-
-            formtype.save()
-
-            if formset.is_valid():
-
-                for cf in formset.cleaned_data:
-                    if not cf: break # break if form is empty
-
-                    customfield = cf['id'] if cf['id'] else CustomField()
-
-                    customfield.field_name = cf['field_name']
-                    customfield.label = cf['label']
-                    customfield.help_text = cf['help_text']
-                    customfield.data_type = cf['data_type']
-                    customfield.form_ordering = cf['form_ordering']
-                    customfield.required = cf['required']
-                    customfield.staff = cf['staff']
-                    customfield.public = cf['public']
-                    customfield.column = cf['column']
-                    if not customfield.created: customfield.created = datetime.datetime.now()
-                    customfield.modified = datetime.datetime.now()
-                    customfield.ticket_form = formtype
-
-                    customfield.save()
-            return HttpResponseRedirect(reverse('helpdesk:maintain_forms'))
-        
-
-@helpdesk_staff_member_required
-def edit_form(request, pk):
-    formtype = get_object_or_404(FormType, pk=pk)
-
-    if request.method == "GET":
+        # Create empty form and save it to the database to generate the default Custom Fields.
+        formtype = FormType(organization = organization, name="Unnamed Form")
+        formtype.save()
         form = EditFormTypeForm(
             initial = {
+                'id': formtype.id,
                 'name': formtype.name,
                 'description': formtype.description,
                 'queue': formtype.queue,
@@ -361,17 +310,21 @@ def edit_form(request, pk):
                 'staff': formtype.staff,
                 'unlisted': formtype.unlisted
             },
-            initial_customfields = CustomField.objects.filter(ticket_form=formtype)
+            initial_customfields = CustomField.objects.filter(ticket_form=formtype),
+            organization = organization
         )
-        
+
+        # breakpoint()
         return render(request, 'helpdesk/edit_form.html', {
             'formtype': formtype,
             'form': form,
-            'action': "Edit",
+            'action': "Create",
             'debug': settings.DEBUG,
         })
     elif request.method == "POST":
         form = EditFormTypeForm(request.POST)
+        # breakpoint()
+        formtype = get_object_or_404(FormType, pk=request.POST.get('id'))
         formset = form.CustomFieldFormSet(request.POST)
 
         if form.is_valid():
@@ -386,9 +339,10 @@ def edit_form(request, pk):
             formtype.save() 
 
             if formset.is_valid():
-
+                
                 for cf in formset.cleaned_data:
-                    if not cf: break # break if form is empty
+                    
+                    if not cf or cf['DELETE']: continue # continue to next item if form is empty or item is being deleted
 
                     customfield = cf['id'] if cf['id'] else CustomField()
 
@@ -406,7 +360,78 @@ def edit_form(request, pk):
                     customfield.ticket_form = formtype
 
                     customfield.save()
+                
+                for df in formset.deleted_forms:
+                    if df.cleaned_data['id']: df.cleaned_data['id'].delete()
             return HttpResponseRedirect(reverse('helpdesk:maintain_forms'))
+        
+
+@helpdesk_staff_member_required
+def edit_form(request, pk):
+    formtype = get_object_or_404(FormType, pk=pk)
+    
+    if request.method == "GET":
+        form = EditFormTypeForm(
+            initial = {
+                'id': formtype.id,
+                'name': formtype.name,
+                'description': formtype.description,
+                'queue': formtype.queue,
+                'public': formtype.public,
+                'staff': formtype.staff,
+                'unlisted': formtype.unlisted
+            },
+            initial_customfields = CustomField.objects.filter(ticket_form=formtype),
+            organization = formtype.organization
+        )
+        
+        return render(request, 'helpdesk/edit_form.html', {
+            'formtype': formtype,
+            'form': form,
+            'action': "Edit",
+            'debug': settings.DEBUG,
+        })
+    elif request.method == "POST":
+        form = EditFormTypeForm(request.POST)
+        formset = form.CustomFieldFormSet(request.POST)
+
+        # breakpoint()
+        if form.is_valid():
+            formtype.name = form.cleaned_data['name']
+            formtype.description = form.cleaned_data['description']
+            formtype.queue = form.cleaned_data['queue']
+            formtype.updated = datetime.datetime.now()
+            formtype.public = form.cleaned_data['public']
+            formtype.staff = form.cleaned_data['staff']
+            formtype.unlisted = form.cleaned_data['unlisted']
+            
+            formtype.save() 
+            
+            if formset.is_valid():
+                for cf in formset.cleaned_data:
+                    if not cf or cf['DELETE']: continue # continue to next item if form is empty or item is being deleted
+
+                    customfield = cf['id'] if cf['id'] else CustomField()
+
+                    customfield.field_name = cf['field_name']
+                    customfield.label = cf['label']
+                    customfield.help_text = cf['help_text']
+                    customfield.data_type = cf['data_type']
+                    customfield.form_ordering = cf['form_ordering']
+                    customfield.required = cf['required']
+                    customfield.staff = cf['staff']
+                    customfield.public = cf['public']
+                    customfield.column = cf['column']
+                    if not customfield.created: customfield.created = datetime.datetime.now()
+                    customfield.modified = datetime.datetime.now()
+                    customfield.ticket_form = formtype
+
+                    customfield.save()
+                
+                for df in formset.deleted_forms:
+                    if df.cleaned_data['id']: df.cleaned_data['id'].delete()
+
+        return HttpResponseRedirect(reverse('helpdesk:maintain_forms'))
         
 
 @helpdesk_staff_member_required

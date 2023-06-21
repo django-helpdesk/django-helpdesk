@@ -1,7 +1,7 @@
 {% load i18n bootstrap4form %}
 
 <div class="card">
-    <div class="card-header"><h4 class="card-title">{{formset_title}} Editor</h4></div>
+    <div class="card-header"><h4 class="card-title mb-0">{{formset_title}} Editor</h4></div>
     <div class="card-body">
         <div id="{{ formset_type }}_formset">
             {{ formset.management_form }}
@@ -11,24 +11,30 @@
                     <div class="d-flex">
                         <h5 class="mb-0">
                             <button id="button_{{ formset_type }}_{{ forloop.counter0 }}" type="button" class="btn btn-link" data-toggle="collapse" data-target="#collapse_{{ formset_type }}_{{ forloop.counter0 }}">
-                                {{ formset_title }} #{{ forloop.counter0 }}
+                                {{ formset_title }} #{{ forloop.counter }} ({{ form.field_name.value }})
                             </button>
                         </h5>
                         <div class="flex-fill d-flex justify-content-end">
+                            {% if formset.can_delete %}
                             <div class="btn-group-toggle" data-toggle="buttons">
-                                <label class="btn btn-outline-danger">
-                                  <input id="delete_{{ formset_type }}_{{ forloop.counter0 }}" type="checkbox" autocomplete="off" onchange="deleteCustomFieldForm('{{ formset_type }}_{{ forloop.counter0 }}')"> Delete
+                                <label id="delete_{{ formset_type }}_{{ forloop.counter0 }}" class="btn btn-outline-danger">
+                                  <input type="checkbox" autocomplete="off" onchange="deleteCustomFieldForm('{{ formset_type }}_{{ forloop.counter0 }}')"> Delete
                                 </label>
                               </div>
-                            {% comment %} <button id="delete_{{ formset_type }}" type="checkbox" class="btn btn-danger" onclick="deleteCustomFieldForm('{{ formset_type }}_{{ forloop.counter0}}')">
-                                <i class="fa fa-trash"></i> Delete
-                            </button> {% endcomment %}
+                            {% endif %}
                         </div>
                     </div>
                 </div>
                 <div id="collapse_{{ formset_type }}_{{ forloop.counter0 }}" class="collapse" data-parent="#{{ formset_type }}_formset">
                     <div class="card-body">
                         {{ form|bootstrap4form }}
+                        {% comment %} {% for field in form.visible_fields %}
+                            {% if field != form.DELETE %}
+                                {{ field|bootstrap4form }}
+                            {% else %}
+                                
+                            {% endif %}
+                        {% endfor %} {% endcomment %}
                     </div>
                 </div>
             </div>
@@ -50,29 +56,45 @@
 
         // Update form counters
         newForm.innerHTML = newForm.innerHTML.replaceAll(/{{ formset_type }}_\d+/g, `{{ formset_type }}_${formCount}`);
-        newForm.innerHTML = newForm.innerHTML.replaceAll(/{{ formset_title }} #\d+/g, `{{ formset_title }} #${formCount}`);
         newForm.innerHTML = newForm.innerHTML.replaceAll(/(\w+_set)-\d+/g, `$1-${formCount}`);
+        $('[name$="TOTAL_FORMS"]').val(++formCount);
+        newForm.innerHTML = newForm.innerHTML.replaceAll(/{{ formset_title }} #\d+ \(\w*\)/g, `{{ formset_title }} #${formCount}`);
         newForm.innerHTML = newForm.innerHTML.replaceAll(/value="[^"]*"/g, `value=""`);
         newForm.id = "{{ formset_type }}_" + formCount;
         
-        $('[name$="TOTAL_FORMS"]').val(++formCount);
+        
         document.getElementById("{{ formset_type }}_formset").appendChild(newForm);
     }
 
     function deleteCustomFieldForm(id) {
         formNum = id.match(/{{ formset_type }}_(\d+)/)[1]
-        // Toggle deletion of the form
-        if (document.getElementById("delete_" + id).) {
-            document.getElementById("delete_" + id).checked = false;
+        {# Toggle deletion of the form #}
+        if ($('#delete_' + id).hasClass('active')) { {# Toggle deletion #}
+            if ($('#collapse_' + id).hasClass('show')) { // Hide form if showing
+                document.getElementById("button_" + id).click()
+            }
             document.getElementById("button_" + id).disabled = true;
-            document.getElementById(id_formset + "-" +  formNum + "-DELETE").checked = false;
-        } else {
-            document.getElementById("delete_" + id).checked = true;
-            document.getElementById("button_" + id).disabled = false;
-            console.log(id_formset + "-" +  formNum + "-DELETE")
             document.getElementById(id_formset + "-" +  formNum + "-DELETE").checked = true;
-            $('#collapse_' + id).removeClass('show');
-            $('#button_' + id).addClass('collapsed');
+            document.getElementById(id_formset + "-" +  formNum + "-DELETE").value = 'on';
+            document.getElementById(id_formset + "-" + formNum + "-field_name").required = false;
+        } else { {# Untoggle deletion #} 
+            document.getElementById("button_" + id).disabled = false;
+            document.getElementById(id_formset + "-" +  formNum + "-DELETE").checked = false;
+            document.getElementById(id_formset + "-" +  formNum + "-DELETE").value = '';
+            document.getElementById(id_formset + "-" + formNum + "-field_name").required = true;
         }
     }
+
+    $(document).ready(function() {
+        {# Visually hide the default django delete checkboxes without removing their functionality  #}
+        for (const delete_checkbox of document.querySelectorAll('[id^=' + id_formset + '-][id$="-DELETE"]')) {
+            delete_checkbox.parentElement.parentElement.hidden = true;
+        }
+        
+        {# If invalid field is in a collapsed section, show the section  #}
+        document.querySelector('#{{ formset_type }}_formset').addEventListener("invalid", (e) => {
+            formNum = e.srcElement.id.match(new RegExp(`${id_formset}-(\\d+)`))[1]
+            document.getElementById('button_custom_field_' + formNum).click()
+        }, true);
+    })
 </script>

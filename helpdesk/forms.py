@@ -404,9 +404,15 @@ class EditQueueForm(forms.ModelForm):
 
 class EditFormTypeForm(forms.ModelForm):
 
+    id = forms.IntegerField(widget = forms.HiddenInput)
     description = forms.CharField(widget=PreviewWidget, help_text=FormType.description.field.help_text, required=False)
     
     class BaseCustomFieldFormSet(forms.BaseInlineFormSet):
+
+        def add_fields(self, form, index):
+            super(EditFormTypeForm.BaseCustomFieldFormSet, self).add_fields(form, index)
+            # form.fields['DELETE'].widget = forms.HiddenInput()
+            
         def clean(self):
             # ticket_form is an excluded field, so must validate unique_together manually
             field_names = set()
@@ -439,6 +445,8 @@ class EditFormTypeForm(forms.ModelForm):
         # self.ticket_form = kwargs.pop('ticket_form', None)1
         initial_customfields_objs = kwargs.pop('initial_customfields', None)
         super(EditFormTypeForm, self).__init__(*args, **kwargs)
+
+        self.fields['queue'].queryset = Queue.objects.filter(organization = self.org)
         
         self.customfield_formset = self.CustomFieldFormSet()
         if initial_customfields_objs:
@@ -457,7 +465,7 @@ class EditFormTypeForm(forms.ModelForm):
                     'column': cf.column
                 })
 
-            self.CustomFieldFormSet.extra = len(initial_customfields) + 1
+            self.CustomFieldFormSet.extra = len(initial_customfields)
             self.customfield_formset.initial = initial_customfields
         
         if args:

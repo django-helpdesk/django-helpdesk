@@ -341,7 +341,7 @@ def mk_secret():
 class FormType(models.Model):
 
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
-    name = models.CharField(max_length=255, null=True, blank=True)
+    name = models.CharField(max_length=255, null=True)
     description = models.TextField(blank=True, null=True,
                                    help_text=_('Introduction text included in the form.'))
     queue = models.ForeignKey(Queue, on_delete=models.SET_NULL, null=True, blank=True,

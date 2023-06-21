@@ -24,7 +24,7 @@
         <div class="panel panel-default">
             <div class="panel-body"><h2>{% blocktrans %} {{ action }} Form {% endblocktrans %}</h2>
                 {% if errors %}<p class="text-danger">{% for error in errors %}{% trans "Error: " %}{{ error }}<br>{% endfor %}</p>{% endif %}
-                <form method='post'>
+                <form id='edit_form' method='post'>
                     {% csrf_token %}
                     <fieldset>
                         {{ form|bootstrap4form }}
@@ -48,10 +48,16 @@
     </div>
 
     <script type='text/javascript' language='javascript'>
-        {# Bandaid fix for adding asterisks to required fields while the rest of the form is handled by bootstrap4form #}
-        for (const required_field of document.querySelectorAll('[required]')) {
-            document.querySelector('label[for=' + required_field.id + ']').innerHTML += '<span style="color:red;">*</span>'
-        }
+        $(document).ready(function () {
+            for (const field_name of document.querySelectorAll('[name$="-field_name"]')) {
+                field_name.required = true;
+            }
+    
+            {# Bandaid fix for adding asterisks to required fields while the rest of the form is handled by bootstrap4form #}
+            for (const required_field of document.querySelectorAll('[required]')) {
+                document.querySelector('label[for=' + required_field.id + ']').innerHTML += '<span style="color:red;">*</span>'
+            }
+        })
     </script>   
     {% include 'helpdesk/include/edit_md_preview_script.html' %} 
 {% endblock %}
