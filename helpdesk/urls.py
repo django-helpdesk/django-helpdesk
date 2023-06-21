@@ -193,6 +193,18 @@ urlpatterns = [
         staff.pair_property_ticket,
         name="pair_property_ticket"),
 
+    url(r'copy_to_beam/(?P<ticket_id>[0-9]+)/$',
+        staff.load_copy_to_beam,
+        name="copy_to_beam"),
+
+    url(r'get_property_data/(?P<ticket_id>[0-9]+)/$',
+        staff.get_property_data,
+        name="get_property_data"),
+
+    url(r'update_property_data/(?P<ticket_id>[0-9]+)/$',
+        staff.update_property_data,
+        name="update_property_data"),
+
     url(r'edit_inventory_labels/(?P<inventory_type>(property|taxlot))/(?P<ticket_id>[0-9]+)/$',
         staff.edit_inventory_labels,
         name="edit_inventory_labels"),

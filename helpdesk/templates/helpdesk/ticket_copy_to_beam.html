@@ -1,0 +1,211 @@
+{% extends "helpdesk/base.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block helpdesk_title %}
+{{ ticket.queue.slug }}-{{ ticket.id }}: {% trans "Copy ticket data to BEAM inventory" %}
+{% endblock %}
+
+{% block helpdesk_head %}
+{% endblock %}
+
+{% block helpdesk_breadcrumb %}
+<li class="breadcrumb-item">
+    <a href="{% url 'helpdesk:list' %}">{% trans "Tickets" %}</a>
+</li>
+<li class="breadcrumb-item">
+    <a href="{{ ticket.get_absolute_url }}">{{ ticket.queue.slug }}-{{ ticket.id }}</a>
+</li>
+<li class="breadcrumb-item active">
+    Copy ticket data to BEAM inventory
+</li>
+{% endblock %}
+
+{% block helpdesk_body %}
+<div class="card mb-3">
+    <div class="card-body">
+        <form id="update-form" method='post' enctype='multipart/form-data'>
+        {% csrf_token %}
+        <div class="row">
+            <div class="col-md-2">
+                <div id="group_cycle_select" class="form-group">
+                    <h5>{% blocktrans %}First, select a cycle to update.{% endblocktrans %}</h5>
+                    <select class="custom-select" id="cycle_select" name="cycle_id">
+                        <option value="" selected>Your Cycle Selection</option>
+                        {% for cycle in properties_per_cycle %}
+                        <option value="{{ cycle.id }}">{{ cycle.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div id="group_property_select" class="form-group">
+                    <h5>{% trans "Select a property or taxlot to edit." %}</h5>
+                    <select class="custom-select" id="property_select" name="property_id">
+                        <option value="" selected>Your Property Selection</option>
+                        {% for cycle, views in properties_per_cycle.items %}
+                        {% for view in views %}
+                        <option value="{{ cycle.id }}-{{ view.id }}">{% if view.address %}{{ view.address }}{% else %}PM Property ID: {{ view.pm_id }}{% endif %}</option>
+                        {% endfor %}
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="col-md-9">
+                <div><h5>{% trans "Choose the fields you would like to copy over into BEAM." %}</h5></div>
+                <div class="table">
+                    <table class="table table-sm table-border" id="data_table">
+                        <thead class="thead-light">
+                            <tr class=''>
+                                <th colspan='2' style="width: 40%"><h3>Ticket data</h3></th>
+                                <th colspan='2' style="width: 40%"><h3>BEAM data</h3></th>
+                                <th colspan='1' style="width: 10%"><h3>Copy over?</h3></th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+
+                <div class="form-group text-center">
+                    <input class="btn btn-primary col-sm-3" type='submit' id="submit" value='{% trans "Copy selected values to BEAM" %}' disabled>
+                </div>
+            </div>
+        </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block helpdesk_js %}
+
+<script type='text/javascript' language='javascript'>
+
+    $('#group_property_select').hide();
+
+    var property_options = $('#property_select option').detach();
+
+    $('#cycle_select').change(function () {
+        $('#group_property_select').hide()
+        if ($('#cycle_select').val()) {
+            $('#group_property_select').show();
+
+            // Filter Properties to those in selected Cycle
+            $('#property_select').empty().append(property_options.filter(function () {
+                this_cycle_id = $(this).val().split('-')[0];
+                return $('#cycle_select').val() === this_cycle_id || $(this).val() === '';
+            }));
+            $('#data_table tbody').empty();
+        } else {
+            $('#group_property_select').hide()
+            $('#property_select').empty().append(property_options);
+        }
+        $('#property_select').val('');
+    });
+
+    $("#property_select").change(function (e) {
+        e.preventDefault();
+        var ticket = {{ ticket.id }};
+        var value = $(this).val();
+        if (value) {
+            let cycle_id = value.split('-')[0];
+            let view_id = value.split('-')[1];
+
+            // GET AJAX request
+            $.ajax({
+                type: 'GET',
+                url: "{% url 'helpdesk:get_property_data' ticket.id %}",
+                data: {"cycle_id": cycle_id, "view_id": view_id},
+                success: function (response) {
+
+                    // todo: hide this table when loading info
+                    // todo: check the data first!
+
+                    $('#data_table tbody').empty();
+
+                    let ticket_data = response['ticket_data'];
+                    let beam_data = response['beam_data'];
+
+                    for (let t in ticket_data) {
+                        /*if (beam_data[t]["is_matching_criteria"]) {
+                            $("#data_table tbody").append(
+                                `<tr>
+                                <th class="table-active" style="width: 20%">${ticket_data[t]["display"]||""}</th>
+                                <td style="width: 20%">${ticket_data[t]["value"]||""}</td>
+
+                                <th class="table-secondary" style="width: 20%">${beam_data[t]["display"]||""}</th>
+                                <td style="width: 20%">${beam_data[t]["value"]||""}</td>
+
+                                <td style="width: 10%">Match criteria data cannot be changed in Helpdesk.</td>
+                                </tr>`
+                            );
+                        } else {*/
+                            $("#data_table tbody").append(
+                                `<tr>
+                                <th class="table-active" style="width: 20%">${ticket_data[t]["display"]||""}</th>
+                                <td style="width: 20%">${ticket_data[t]["value"]||""}</td>
+
+                                <th class="table-active"style="width: 20%">${beam_data[t]["display"]||""}</th>
+                                <td style="width: 20%">${beam_data[t]["value"]||""}</td>
+
+                                <td style="width: 10%"><input class="beam_data_checkbox" type="checkbox" id=${beam_data[t]["column_name"]} name="col"
+                                    value=${ticket_data[t]["field_name"]}></td>
+                                </tr>`
+                            );
+                        //}
+                    }
+                },
+                error: function (response) {
+                    console.log(response);
+                }
+            });
+        } else {
+            $('#data_table tbody').empty();
+        }
+    });
+
+    $(document).on("change", ".beam_data_checkbox", function() {
+        if ($('.beam_data_checkbox:checkbox:checked').length > 0){
+            $('#submit').prop("disabled", false);
+        } else {
+            $('#submit').prop("disabled", true);
+        }
+    });
+
+
+    $("#update-form").submit(function (e) {
+        e.preventDefault();
+        let fields = [];
+        let data = $('.beam_data_checkbox:checkbox:checked').serializeArray();
+        for (i in data) {
+            console.log(data[i]['value']);
+            fields.push(data[i]['value']);
+        };
+        var ticket = {{ ticket.id }};
+        var value = $("#property_select").val();
+        let cycle_id = value.split('-')[0];
+        let view_id = value.split('-')[1];
+
+        // make POST ajax call
+        // todo make this directly to v3/properties/update??
+        $.ajax({
+            type: 'POST',
+            url: "{% url 'helpdesk:update_property_data' ticket.id %}",
+            data: {
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+                'cycle_id': cycle_id,
+                'view_id': view_id,
+                'fields': fields
+            },
+            success: function (response) {
+                console.log('yay');
+            },
+            error: function (response) {
+                // alert the error if any error occured
+                alert(response["responseJSON"]["error"]);
+            }
+        });
+    });
+
+
+
+</script>
+{% endblock  %}

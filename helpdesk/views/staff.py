@@ -2339,7 +2339,7 @@ def _pair_properties_by_form(request, form, tickets):
     from seed.models import PropertyState, TaxLotState, TaxLotView, PropertyView, Cycle
 
     org = form.organization.id
-    fields = form.customfield_set.exclude(column__isnull=True).select_related("column")
+    fields = form.customfield_set.exclude(column__isnull=True).exclude(lookup=False).select_related("column")
 
     def lookup(query, state, view, cycle, building):
         """ Queries database for either properties or taxlots. """
@@ -2466,6 +2466,144 @@ def pair_property_milestone(request, ticket_id):
         'milestones_per_pathway': milestones_per_pathway,
         'debug': settings.DEBUG,
     })
+
+
+def load_copy_to_beam(request, ticket_id):
+    """
+    Prompt user to select one of the Ticket's paired property's milestone to pair Ticket to
+    """
+    from seed.models import PropertyView, Cycle, PropertyState
+
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+    org = ticket.ticket_form.organization
+
+    # also do taxlot
+    prop_display_column = Column.objects.filter(organization=org, column_name=org.property_display_field, table_name='PropertyState').first()
+    if prop_display_column:
+        prop_display_query = f'state__extra_data__{prop_display_column.column_name}' if prop_display_column.is_extra_data else f'state__{prop_display_column.column_name}'
+    else:
+        prop_display_query = 'state__address_line_1'
+
+    properties_per_cycle = {}
+    views = PropertyView.objects.filter(property__in=ticket.beam_property.all())\
+        .annotate(address=F(prop_display_query), pm_id=F('state__pm_property_id')).only('state_id', 'cycle')
+    for view in views:
+        if view.cycle not in properties_per_cycle:
+            properties_per_cycle[view.cycle] = [view]
+        else:
+            properties_per_cycle[view.cycle].append(view)
+
+    return render(request, 'helpdesk/ticket_copy_to_beam.html', {
+        'ticket': ticket,
+        'properties_per_cycle': properties_per_cycle,
+        'debug': settings.DEBUG,
+    })
+
+
+def get_property_data(request, ticket_id):
+    """Given a cycle ID and view ID, loads ticket data and state data for the copy_to_beam page."""
+    from seed.models import Cycle, PropertyState
+
+    # todo add taxlots too
+
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+    if request.is_ajax and request.method == "GET":
+        # get the nick name from the client side.
+
+        org = ticket.ticket_form.organization
+        cycle_id = request.GET.get('cycle_id', 0)
+        view_id = request.GET.get('view_id', 0)
+
+        cycle = Cycle.objects.filter(organization=org, id=cycle_id).first()
+        view = PropertyView.objects.filter(state__organization=org, id=view_id).first()  # todo or taxlot
+        state = view.state
+        ticket_data = []
+        beam_data = []
+        if cycle:
+            form_fields = ticket.ticket_form.customfield_set.exclude(column__isnull=True).select_related("column")
+            for f in form_fields:
+                if f.field_name in ticket.extra_data \
+                        and ticket.extra_data[f.field_name] is not None and ticket.extra_data[f.field_name] != '':
+                    value = ticket.extra_data[f.field_name]
+                elif hasattr(ticket, f.field_name) \
+                        and getattr(ticket, f.field_name, None) is not None and getattr(ticket, f.field_name, None) != '':
+                    value = getattr(ticket, f.field_name, None)
+                else:
+                    value = ''
+                ticket_data.append({
+                    'display': f.label,
+                    'field_name': f.field_name,
+                    'value': value
+                })
+
+                value = ''
+                if f.column.column_name and hasattr(f.column, 'is_extra_data') and f.column.table_name:
+                    if f.column.is_extra_data and hasattr(state.extra_data, f.column.column_name):
+                        value = getattr(state.extra_data, f.column.column_name, None)
+                    elif not f.column.is_extra_data and hasattr(state, f.column.column_name):
+                        value = getattr(state, f.column.column_name, None)
+                beam_data.append({
+                    'display': getattr(f.column, 'display_name', f.column.column_name),
+                    'value': value,
+                    'column_name': f.column.column_name,
+                    'is_matching_criteria': f.column.is_matching_criteria
+                })
+
+        return JsonResponse({
+            "ticket_data": ticket_data,
+            'beam_data': beam_data
+        }, status=200)
+
+
+def update_property_data(request, ticket_id):
+    """
+    Given a cycle ID, view ID, and list of ticket fields, copies the data from those fields to their columns in BEAM.
+    """
+
+    from seed.models import PropertyView, Cycle
+    from seed.views.v3.properties import PropertyViewSet
+
+    if request.is_ajax and request.method == "POST":
+        ticket = get_object_or_404(Ticket, id=ticket_id)
+        org = ticket.ticket_form.organization
+        # get the form data
+        cycle_id = request.POST.get('cycle_id', '')
+        view_id = request.POST.get('view_id', '')
+        fields = request.POST.getlist('fields[]', [])
+
+        cycle = get_object_or_404(Cycle, organization=org, id=cycle_id)
+        view = get_object_or_404(PropertyView, id=view_id)  # todo or taxlot
+        form_fields = ticket.ticket_form.customfield_set.filter(field_name__in=fields, column__isnull=False).select_related("column")
+        update_data, extra_data, data = {}, {}, {}
+        for f in form_fields:
+            if f.field_name in ticket.extra_data \
+                    and ticket.extra_data[f.field_name] is not None and ticket.extra_data[f.field_name] != '':
+                value = ticket.extra_data[f.field_name]
+            elif hasattr(ticket, f.field_name) \
+                    and getattr(ticket, f.field_name, None) is not None and getattr(ticket, f.field_name, None) != '':
+                value = getattr(ticket, f.field_name, None)
+            else:
+                value = ''
+            if f.column.is_extra_data:
+                extra_data[f.column.column_name] = value
+            else:
+                data[f.column.column_name] = value
+
+        # Create request to send to BEAM
+        update_data = {'state': data, 'extra_data': extra_data}
+        update_request = HttpRequest()
+        update_request.method = 'PUT'
+        update_request.query_params = QueryDict('organization_id=' + str(org.id))
+        update_request.user = request.user
+        update_request.data = update_data
+        update_request.parser_context = {}
+        viewset = PropertyViewSet()
+        viewset.request = update_request
+        response = viewset.update(update_request, pk=view_id)
+        print(response)
+
+    # todo
+    return JsonResponse({"success": ""}, status=200)
 
 
 def add_remove_label(org_id, user, payload, inventory_type):

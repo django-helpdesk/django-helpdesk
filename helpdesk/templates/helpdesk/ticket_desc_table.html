@@ -29,6 +29,10 @@ copy_public_link = function() {
                                 <i class="fas fa-city"></i> {% trans "Auto-pair to BEAM inventory" %}
                             </a></span> |
 
+                            <span><a href="{% url 'helpdesk:copy_to_beam' ticket.id %}" class="btn btn-primary btn-sm">
+                                <i class="fa fa-share-square"></i> {% trans "Copy data to BEAM" %}
+                            </a></span> |
+
                             {% if ticket.property_milestones.count > 0 %}
                             <button type="button" id="milestoneButton" class="btn btn-primary btn-sm dropdown-toggle" data-toggle="dropdown"><i class="fas fa-road"></i> {% trans "View Milestone(s)" %}</button>
                             <div class="dropdown-menu" aria-labelledby="milestoneButton">

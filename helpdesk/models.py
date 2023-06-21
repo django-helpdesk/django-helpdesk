@@ -1941,6 +1941,7 @@ class CustomField(models.Model):
 
     ticket_form = models.ForeignKey(FormType, on_delete=models.CASCADE)
     column = models.ForeignKey(Column, blank=True, null=True, on_delete=models.SET_NULL, related_name='helpdesk_fields', verbose_name=_('Associated BEAM column'))
+    lookup = models.BooleanField('Use for BEAM pairings?', help_text=_('Use the value in this field to pair tickets with BEAM properties/taxlots?'), default=False)
 
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
