@@ -32,18 +32,23 @@
                     <h5>{% blocktrans %}First, select a cycle to update.{% endblocktrans %}</h5>
                     <select class="custom-select" id="cycle_select" name="cycle_id">
                         <option value="" selected>Your Cycle Selection</option>
-                        {% for cycle in properties_per_cycle %}
+                        {% for cycle in cycles %}
                         <option value="{{ cycle.id }}">{{ cycle.name }}</option>
                         {% endfor %}
                     </select>
                 </div>
-                <div id="group_property_select" class="form-group">
+                <div id="group_building_select" class="form-group">
                     <h5>{% trans "Select a property or taxlot to edit." %}</h5>
-                    <select class="custom-select" id="property_select" name="property_id">
+                    <select class="custom-select" id="building_select" name="building_id">
                         <option value="" selected>Your Property Selection</option>
                         {% for cycle, views in properties_per_cycle.items %}
                         {% for view in views %}
-                        <option value="{{ cycle.id }}-{{ view.id }}">{% if view.address %}{{ view.address }}{% else %}PM Property ID: {{ view.pm_id }}{% endif %}</option>
+                        <option value="PropertyState-{{ cycle.id }}-{{ view.id }}">{% if view.address %}{{ view.address }}{% else %}PM Property ID: {{ view.building_id }}{% endif %}</option>
+                        {% endfor %}
+                        {% endfor %}
+                        {% for cycle, views in taxlots_per_cycle.items %}
+                        {% for view in views %}
+                        <option value="TaxLotState-{{ cycle.id }}-{{ view.id }}">{% if view.address %}{{ view.address }}{% else %}Jurisdiction Taxlot ID: {{ view.building_id }}{% endif %}</option>
                         {% endfor %}
                         {% endfor %}
                     </select>
@@ -79,41 +84,42 @@
 
 <script type='text/javascript' language='javascript'>
 
-    $('#group_property_select').hide();
+    $('#group_building_select').hide();
 
-    var property_options = $('#property_select option').detach();
+    var building_options = $('#building_select option').detach();
 
     $('#cycle_select').change(function () {
-        $('#group_property_select').hide()
+        $('#group_building_select').hide()
         if ($('#cycle_select').val()) {
-            $('#group_property_select').show();
+            $('#group_building_select').show();
 
             // Filter Properties to those in selected Cycle
-            $('#property_select').empty().append(property_options.filter(function () {
-                this_cycle_id = $(this).val().split('-')[0];
+            $('#building_select').empty().append(building_options.filter(function () {
+                this_cycle_id = $(this).val().split('-')[1];
                 return $('#cycle_select').val() === this_cycle_id || $(this).val() === '';
             }));
             $('#data_table tbody').empty();
         } else {
-            $('#group_property_select').hide()
-            $('#property_select').empty().append(property_options);
+            $('#group_building_select').hide()
+            $('#building_select').empty().append(building_options);
         }
-        $('#property_select').val('');
+        $('#building_select').val('');
     });
 
-    $("#property_select").change(function (e) {
+    $("#building_select").change(function (e) {
         e.preventDefault();
         var ticket = {{ ticket.id }};
         var value = $(this).val();
         if (value) {
-            let cycle_id = value.split('-')[0];
-            let view_id = value.split('-')[1];
+            let inventory_type = value.split('-')[0];
+            let cycle_id = value.split('-')[1];
+            let view_id = value.split('-')[2];
 
             // GET AJAX request
             $.ajax({
                 type: 'GET',
-                url: "{% url 'helpdesk:get_property_data' ticket.id %}",
-                data: {"cycle_id": cycle_id, "view_id": view_id},
+                url: "{% url 'helpdesk:get_building_data' ticket.id %}",
+                data: {"inventory_type": inventory_type, "cycle_id": cycle_id, "view_id": view_id},
                 success: function (response) {
 
                     // todo: hide this table when loading info
@@ -180,17 +186,18 @@
             fields.push(data[i]['value']);
         };
         var ticket = {{ ticket.id }};
-        var value = $("#property_select").val();
-        let cycle_id = value.split('-')[0];
-        let view_id = value.split('-')[1];
+        var value = $("#building_select").val();
+        let inventory_type = value.split('-')[0];
+        let cycle_id = value.split('-')[1];
+        let view_id = value.split('-')[2];
 
         // make POST ajax call
-        // todo make this directly to v3/properties/update??
         $.ajax({
             type: 'POST',
-            url: "{% url 'helpdesk:update_property_data' ticket.id %}",
+            url: "{% url 'helpdesk:update_building_data' ticket.id %}",
             data: {
                 csrfmiddlewaretoken: '{{ csrf_token }}',
+                'inventory_type': inventory_type,
                 'cycle_id': cycle_id,
                 'view_id': view_id,
                 'fields': fields

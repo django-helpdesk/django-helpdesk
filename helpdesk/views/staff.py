@@ -2470,84 +2470,105 @@ def pair_property_milestone(request, ticket_id):
 
 def load_copy_to_beam(request, ticket_id):
     """
-    Prompt user to select one of the Ticket's paired property's milestone to pair Ticket to
+    Loads page for copying ticket data to BEAM.
     """
-    from seed.models import PropertyView, Cycle, PropertyState
+    from seed.models import PropertyView, Cycle, PropertyState, TaxLotView
 
     ticket = get_object_or_404(Ticket, id=ticket_id)
     org = ticket.ticket_form.organization
 
-    # also do taxlot
     prop_display_column = Column.objects.filter(organization=org, column_name=org.property_display_field, table_name='PropertyState').first()
     if prop_display_column:
         prop_display_query = f'state__extra_data__{prop_display_column.column_name}' if prop_display_column.is_extra_data else f'state__{prop_display_column.column_name}'
     else:
         prop_display_query = 'state__address_line_1'
 
+    taxlot_display_column = Column.objects.filter(organization=org, column_name=org.taxlot_display_field, table_name='TaxLotState').first()
+    if taxlot_display_column:
+        taxlot_display_query = f'state__extra_data__{taxlot_display_column.column_name}' if taxlot_display_column.is_extra_data else f'state__{taxlot_display_column.column_name}'
+    else:
+        taxlot_display_query = 'state__address_line_1'
+
     properties_per_cycle = {}
-    views = PropertyView.objects.filter(property__in=ticket.beam_property.all())\
-        .annotate(address=F(prop_display_query), pm_id=F('state__pm_property_id')).only('state_id', 'cycle')
+    views = PropertyView.objects.filter(property__in=ticket.beam_property.all()) \
+        .annotate(address=F(prop_display_query), building_id=F('state__pm_property_id')).only('state_id', 'cycle')
     for view in views:
         if view.cycle not in properties_per_cycle:
             properties_per_cycle[view.cycle] = [view]
         else:
             properties_per_cycle[view.cycle].append(view)
 
+    taxlots_per_cycle = {}
+    views = TaxLotView.objects.filter(taxlot__in=ticket.beam_taxlot.all()) \
+        .annotate(address=F(taxlot_display_query), building_id=F('state__jurisdiction_tax_lot_id')).only('state_id', 'cycle')
+    for view in views:
+        if view.cycle not in taxlots_per_cycle:
+            taxlots_per_cycle[view.cycle] = [view]
+        else:
+            taxlots_per_cycle[view.cycle].append(view)
+
+    cycles = set(list(properties_per_cycle.keys()) + list(taxlots_per_cycle.keys()))
+
     return render(request, 'helpdesk/ticket_copy_to_beam.html', {
         'ticket': ticket,
+        'cycles': cycles,
         'properties_per_cycle': properties_per_cycle,
+        'taxlots_per_cycle': taxlots_per_cycle,
         'debug': settings.DEBUG,
     })
 
 
-def get_property_data(request, ticket_id):
+def get_building_data(request, ticket_id):
     """Given a cycle ID and view ID, loads ticket data and state data for the copy_to_beam page."""
-    from seed.models import Cycle, PropertyState
-
-    # todo add taxlots too
+    from seed.models import Cycle
 
     ticket = get_object_or_404(Ticket, id=ticket_id)
     if request.is_ajax and request.method == "GET":
         # get the nick name from the client side.
 
         org = ticket.ticket_form.organization
+        inventory_type = request.GET.get('inventory_type', 'PropertyState')
         cycle_id = request.GET.get('cycle_id', 0)
         view_id = request.GET.get('view_id', 0)
 
         cycle = Cycle.objects.filter(organization=org, id=cycle_id).first()
-        view = PropertyView.objects.filter(state__organization=org, id=view_id).first()  # todo or taxlot
+        if inventory_type == 'PropertyState':
+            view = PropertyView.objects.filter(state__organization=org, id=view_id).first()
+        else:
+            view = TaxLotView.objects.filter(state__organization=org, id=view_id).first()
         state = view.state
         ticket_data = []
         beam_data = []
         if cycle:
             form_fields = ticket.ticket_form.customfield_set.exclude(column__isnull=True).select_related("column")
             for f in form_fields:
-                if f.field_name in ticket.extra_data \
-                        and ticket.extra_data[f.field_name] is not None and ticket.extra_data[f.field_name] != '':
-                    value = ticket.extra_data[f.field_name]
-                elif hasattr(ticket, f.field_name) \
-                        and getattr(ticket, f.field_name, None) is not None and getattr(ticket, f.field_name, None) != '':
-                    value = getattr(ticket, f.field_name, None)
-                else:
-                    value = ''
-                ticket_data.append({
-                    'display': f.label,
-                    'field_name': f.field_name,
-                    'value': value
-                })
+                if f.column.table_name == inventory_type:
+                    if f.field_name in ticket.extra_data \
+                            and ticket.extra_data[f.field_name] is not None and ticket.extra_data[f.field_name] != '':
+                        value = ticket.extra_data[f.field_name]
+                    elif hasattr(ticket, f.field_name) \
+                            and getattr(ticket, f.field_name, None) is not None and getattr(ticket, f.field_name, None) != '':
+                        value = getattr(ticket, f.field_name, None)
+                    else:
+                        value = ''
+                    ticket_data.append({
+                        'display': f.label,
+                        'field_name': f.field_name,
+                        'value': value
+                    })
 
-                value = ''
-                if f.column.column_name and hasattr(f.column, 'is_extra_data') and f.column.table_name:
-                    if f.column.is_extra_data and hasattr(state.extra_data, f.column.column_name):
-                        value = getattr(state.extra_data, f.column.column_name, None)
-                    elif not f.column.is_extra_data and hasattr(state, f.column.column_name):
-                        value = getattr(state, f.column.column_name, None)
-                beam_data.append({
-                    'display': getattr(f.column, 'display_name', f.column.column_name),
-                    'value': value,
-                    'column_name': f.column.column_name,
-                    'is_matching_criteria': f.column.is_matching_criteria
-                })
+                    value = ''
+                    if f.column.column_name and hasattr(f.column, 'is_extra_data') and f.column.table_name:
+                        if f.column.is_extra_data and f.column.column_name in state.extra_data:
+                            value = state.extra_data[f.column.column_name]
+                        elif not f.column.is_extra_data and hasattr(state, f.column.column_name):
+                            value = getattr(state, f.column.column_name, None)
+                    beam_data.append({
+                        'display': f.column.display_name if f.column.display_name else f.column.column_name,
+                        'value': value,
+                        'column_name': f.column.column_name,
+                        'is_matching_criteria': f.column.is_matching_criteria
+                    })
 
         return JsonResponse({
             "ticket_data": ticket_data,
@@ -2555,24 +2576,29 @@ def get_property_data(request, ticket_id):
         }, status=200)
 
 
-def update_property_data(request, ticket_id):
+def update_building_data(request, ticket_id):
     """
     Given a cycle ID, view ID, and list of ticket fields, copies the data from those fields to their columns in BEAM.
     """
 
-    from seed.models import PropertyView, Cycle
+    from seed.models import PropertyView, Cycle, TaxLotView
     from seed.views.v3.properties import PropertyViewSet
+    from seed.views.v3.taxlots import TaxlotViewSet
 
     if request.is_ajax and request.method == "POST":
         ticket = get_object_or_404(Ticket, id=ticket_id)
         org = ticket.ticket_form.organization
         # get the form data
+        inventory_type = request.POST.get('inventory_type', '')
         cycle_id = request.POST.get('cycle_id', '')
         view_id = request.POST.get('view_id', '')
         fields = request.POST.getlist('fields[]', [])
 
         cycle = get_object_or_404(Cycle, organization=org, id=cycle_id)
-        view = get_object_or_404(PropertyView, id=view_id)  # todo or taxlot
+        if inventory_type == 'PropertyState':
+            view = get_object_or_404(PropertyView, id=view_id)
+        else:
+            view = get_object_or_404(TaxLotView, id=view_id)
         form_fields = ticket.ticket_form.customfield_set.filter(field_name__in=fields, column__isnull=False).select_related("column")
         update_data, extra_data, data = {}, {}, {}
         for f in form_fields:
@@ -2590,19 +2616,23 @@ def update_property_data(request, ticket_id):
                 data[f.column.column_name] = value
 
         # Create request to send to BEAM
-        update_data = {'state': data, 'extra_data': extra_data}
+        update_data = {'state': data}
+        update_data['state']['extra_data'] = extra_data
         update_request = HttpRequest()
         update_request.method = 'PUT'
         update_request.query_params = QueryDict('organization_id=' + str(org.id))
         update_request.user = request.user
         update_request.data = update_data
         update_request.parser_context = {}
-        viewset = PropertyViewSet()
+
+        if inventory_type == 'PropertyState':
+            viewset = PropertyViewSet()
+        else:
+            viewset = TaxlotViewSet()
         viewset.request = update_request
-        response = viewset.update(update_request, pk=view_id)
+        response = viewset.update(update_request, pk=view.id)
         print(response)
 
-    # todo
     return JsonResponse({"success": ""}, status=200)
 
 
