@@ -29,6 +29,7 @@ from helpdesk.email import create_ticket_cc
 from helpdesk.decorators import list_of_helpdesk_staff
 import re
 
+from seed.models import Column
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -403,16 +404,21 @@ class EditQueueForm(forms.ModelForm):
         return cleaned_data
 
 class EditFormTypeForm(forms.ModelForm):
+    # error_css_class = 'text-danger'
 
     id = forms.IntegerField(widget = forms.HiddenInput)
     description = forms.CharField(widget=PreviewWidget, help_text=FormType.description.field.help_text, required=False)
-    
-    class BaseCustomFieldFormSet(forms.BaseInlineFormSet):
 
-        def add_fields(self, form, index):
-            super(EditFormTypeForm.BaseCustomFieldFormSet, self).add_fields(form, index)
-            # form.fields['DELETE'].widget = forms.HiddenInput()
-            
+    class BaseCustomFieldFormSet(forms.BaseInlineFormSet):
+        class ColumnModelChoiceField(forms.ModelChoiceField):
+            def label_from_instance(self, column):
+                return "%s: %s" % (column.table_name, column.column_name)
+        
+        # class SearchableSelectWidget(forms.widgets.Select):
+        #     template_name = 'helpdesk/include/'
+
+        column = ColumnModelChoiceField(queryset=None)
+
         def clean(self):
             # ticket_form is an excluded field, so must validate unique_together manually
             field_names = set()
@@ -442,13 +448,20 @@ class EditFormTypeForm(forms.ModelForm):
             Set up formset for CustomField objects 
         """
         self.org = kwargs.pop('organization', None)
-        # self.ticket_form = kwargs.pop('ticket_form', None)1
+        # self.ticket_form = kwargs.pop('ticket_form', None)
         initial_customfields_objs = kwargs.pop('initial_customfields', None)
+
         super(EditFormTypeForm, self).__init__(*args, **kwargs)
 
         self.fields['queue'].queryset = Queue.objects.filter(organization = self.org)
+        column_queryset = Column.objects \
+            .filter(organization_id=self.org) \
+            .exclude(table_name='') \
+            .exclude(table_name=None) \
+            .order_by('column_name')
         
         self.customfield_formset = self.CustomFieldFormSet()
+
         if initial_customfields_objs:
             initial_customfields = []
             for cf in initial_customfields_objs:
@@ -458,6 +471,11 @@ class EditFormTypeForm(forms.ModelForm):
                     'label': cf.label,
                     'help_text': cf.help_text,
                     'data_type': cf.data_type,
+                    'max_length': cf.max_length,
+                    'decimal_places': cf.decimal_places,
+                    'empty_selection_list': cf.empty_selection_list,
+                    'list_values': cf.list_values,
+                    'notifications': cf.notifications,
                     'form_ordering': cf.form_ordering,
                     'required': cf.required,
                     'staff': cf.staff,
@@ -467,9 +485,19 @@ class EditFormTypeForm(forms.ModelForm):
 
             self.CustomFieldFormSet.extra = len(initial_customfields)
             self.customfield_formset.initial = initial_customfields
+
+            defaults = ['queue','submitter_email', 'contact_name','title','description','building_name','building_address','building_id','pm_id','attachment','due_date','priority','cc_emails']
+            for form in self.customfield_formset.forms:
+                form.fields['column'] = EditFormTypeForm.BaseCustomFieldFormSet.ColumnModelChoiceField(queryset=column_queryset)
+                if form.initial['field_name'] in defaults:
+                    form.fields['field_name'].disabled = True
+                    if form.initial['data_type'] in ['varchar', 'text']:
+                        form.fields['data_type'].choices = (('varchar', _('Character (single line)')),('text', _('Text (multi-line)')))
+                    else:
+                        form.fields['data_type'].disabled = True
         
         if args:
-            self.CustomFieldFormSet.extra = args[0]['customfield_set-TOTAL_FORMS']
+            self.CustomFieldFormSet.extra = int(args[0]['customfield_set-TOTAL_FORMS'])
 
 
 class AbstractTicketForm(CustomFieldMixin, forms.Form):

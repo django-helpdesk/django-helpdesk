@@ -1,5 +1,7 @@
 {% load i18n bootstrap4form %}
 
+{# Some things are CustomField specific, can change later to allow for complete modularity #}
+
 <div class="card">
     <div class="card-header"><h4 class="card-title mb-0">{{formset_title}} Editor</h4></div>
     <div class="card-body">
@@ -28,13 +30,6 @@
                 <div id="collapse_{{ formset_type }}_{{ forloop.counter0 }}" class="collapse" data-parent="#{{ formset_type }}_formset">
                     <div class="card-body">
                         {{ form|bootstrap4form }}
-                        {% comment %} {% for field in form.visible_fields %}
-                            {% if field != form.DELETE %}
-                                {{ field|bootstrap4form }}
-                            {% else %}
-                                
-                            {% endif %}
-                        {% endfor %} {% endcomment %}
                     </div>
                 </div>
             </div>
@@ -42,9 +37,18 @@
         </div>
     </div>
     <div class="card-footer">
-        <button id="add_{{ formset_type }}" type="button" class="btn btn-primary float-right" onclick="addCustomFieldForm()">
-            <i class="fa fa-plus"></i> Add
-        </button>
+        <div class="d-flex align-items-center">
+            <small>
+                Select delete on unused custom fields to have then removed when you save your changes.
+                </br>
+                Improperly filled-out custom fields that are not set to be deleted may prevent form submission.
+            </small>
+            <div class="flex-fill justify-content-end">
+                <button id="add_{{ formset_type }}" type="button" class="btn btn-primary float-right" onclick="addCustomFieldForm()">
+                    <i class="fa fa-plus"></i> Add
+                </button>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -85,6 +89,31 @@
         }
     }
 
+    function updateDataTypeFields(formNum) {
+        dataType = document.getElementById(id_formset + '-' + formNum + '-data_type').value
+
+        // Hide all conditionally visible fields and recheck conditions
+        document.getElementById(id_formset + '-' + formNum + '-max_length').parentElement.parentElement.hidden = true;
+        document.getElementById(id_formset + '-' + formNum + '-decimal_places').parentElement.parentElement.hidden = true;
+        document.getElementById(id_formset + '-' + formNum + '-empty_selection_list').parentElement.parentElement.hidden = true;
+        document.getElementById(id_formset + '-' + formNum + '-list_values').parentElement.parentElement.hidden = true;
+        document.getElementById(id_formset + '-' + formNum + '-notifications').parentElement.parentElement.hidden = true;
+
+        if (['varchar', 'text', 'decimal'].indexOf(dataType) >= 0) {
+            document.getElementById(id_formset + '-' + formNum + '-max_length').parentElement.parentElement.hidden = false;
+        }
+        if (dataType == 'decimal') {
+            document.getElementById(id_formset + '-' + formNum + '-decimal_places').parentElement.parentElement.hidden = false;
+        }
+        if (dataType == 'list') {
+            document.getElementById(id_formset + '-' + formNum + '-empty_selection_list').parentElement.parentElement.hidden = false;
+            document.getElementById(id_formset + '-' + formNum + '-list_values').parentElement.parentElement.hidden = false;
+        }
+        if (dataType == 'email') {
+            document.getElementById(id_formset + '-' + formNum + '-notifications').parentElement.parentElement.hidden = false;
+        }
+    }
+
     $(document).ready(function() {
         {# Visually hide the default django delete checkboxes without removing their functionality  #}
         for (const delete_checkbox of document.querySelectorAll('[id^=' + id_formset + '-][id$="-DELETE"]')) {
@@ -94,7 +123,17 @@
         {# If invalid field is in a collapsed section, show the section  #}
         document.querySelector('#{{ formset_type }}_formset').addEventListener("invalid", (e) => {
             formNum = e.srcElement.id.match(new RegExp(`${id_formset}-(\\d+)`))[1]
-            document.getElementById('button_custom_field_' + formNum).click()
+            if (!$('collapse_custom_field_' + formNum).hasClass("show")) {
+                document.getElementById('button_custom_field_' + formNum).click()
+            }
         }, true);
+
+        // Update field visibility depending on the selected data type for the field
+        for (const data_type_field of document.querySelectorAll('[id^=id_customfield_set-][id$=-data_type]')) {
+            formNum = data_type_field.id.match(new RegExp(`${id_formset}-(\\d+)`))[1];
+            updateDataTypeFields(formNum)
+            data_type_field.addEventListener('change', (e) => {updateDataTypeFields(e.srcElement.id.match(new RegExp(`${id_formset}-(\\d+)`))[1])});
+        }
+        
     })
 </script>

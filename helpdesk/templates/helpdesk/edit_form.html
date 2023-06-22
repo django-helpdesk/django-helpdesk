@@ -24,6 +24,18 @@
         <div class="panel panel-default">
             <div class="panel-body"><h2>{% blocktrans %} {{ action }} Form {% endblocktrans %}</h2>
                 {% if errors %}<p class="text-danger">{% for error in errors %}{% trans "Error: " %}{{ error }}<br>{% endfor %}</p>{% endif %}
+                {% if formset_errors %}
+                    {% for form_errors in formset_errors %}
+                        {% if form_errors %}
+                        <div class="alert alert-danger" role="alert">
+                            <a class="close" data-dismiss="alert">&times;</a>
+                                <strong>Custom Field #{{ forloop.counter}}</strong> </br>
+                                {% for key, error in form_errors.items %} {{ key }}: {{ error.as_text }} {% endfor %}
+                        </div>
+                        {% endif %}
+                    
+                    {% endfor %}
+                {% endif %}
                 <form id='edit_form' method='post'>
                     {% csrf_token %}
                     <fieldset>
@@ -37,7 +49,7 @@
                                     Save Changes
                                 {% endif %}
                             </button>
-                            <a href="{% url 'helpdesk:maintain_forms' %}">
+                            <a href="{% if action == "Create" %}{% url 'helpdesk:delete_form' formtype.id %}{% else %}{% url 'helpdesk:maintain_forms' %} {% endif %}">
                                 <button type="button" class="btn btn-danger">{% trans "Cancel" %}</button>
                             </a>
                         </div>
