@@ -410,6 +410,7 @@ class EditFormTypeForm(forms.ModelForm):
     description = forms.CharField(widget=PreviewWidget, help_text=FormType.description.field.help_text, required=False)
 
     class BaseCustomFieldFormSet(forms.BaseInlineFormSet):
+
         class ColumnModelChoiceField(forms.ModelChoiceField):
             def label_from_instance(self, column):
                 return "%s: %s" % (column.table_name, column.column_name)
@@ -424,15 +425,15 @@ class EditFormTypeForm(forms.ModelForm):
             field_names = set()
             for form in self.forms:
                 cleaned_data = form.cleaned_data
-
-                if 'field_name' in cleaned_data:
+                # breakpoint()
+                if 'field_name' in cleaned_data and not cleaned_data['DELETE']:
                     # Detect duplicate field names within the form
                     before = len(field_names)
                     field_names.add(cleaned_data['field_name'])
                     after = len(field_names)
 
                     if (before == after): # or CustomField.objects.filter(field_name=cleaned_data['field_name'], ticket_form=self.ticket_form).exists():
-                        raise ValidationError(["Custom Field with name " + cleaned_data['field_name'] + " already exists for this form."])
+                        raise ValidationError(["Custom Field with name \"" + cleaned_data['field_name'] + "\" already exists for this form."])
 
     CustomFieldFormSet = forms.inlineformset_factory(FormType, CustomField, formset=BaseCustomFieldFormSet,
         exclude = ['choices_as_array', 'ticket_form', 'created', 'modified','objects','view_ordering'],
@@ -489,12 +490,12 @@ class EditFormTypeForm(forms.ModelForm):
             defaults = ['queue','submitter_email', 'contact_name','title','description','building_name','building_address','building_id','pm_id','attachment','due_date','priority','cc_emails']
             for form in self.customfield_formset.forms:
                 form.fields['column'] = EditFormTypeForm.BaseCustomFieldFormSet.ColumnModelChoiceField(queryset=column_queryset)
-                if form.initial['field_name'] in defaults:
-                    form.fields['field_name'].disabled = True
+                if form.initial and form.initial['field_name'] in defaults:
+                    form.fields['field_name'].widget.attrs = {'readonly': True}
                     if form.initial['data_type'] in ['varchar', 'text']:
                         form.fields['data_type'].choices = (('varchar', _('Character (single line)')),('text', _('Text (multi-line)')))
                     else:
-                        form.fields['data_type'].disabled = True
+                        form.fields['data_type'].widget.attrs = {'readonly': True}
         
         if args:
             self.CustomFieldFormSet.extra = int(args[0]['customfield_set-TOTAL_FORMS'])

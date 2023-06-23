@@ -48,6 +48,7 @@
                     <th>{% trans "Staff" %}</th>
                     <th>{% trans "Unlisted" %}</th>
                     {% comment %} <th>{% trans "Additional Fields" %}</th> {% endcomment %}
+                    <th>{% trans "Duplicate" %}</th>
                     <th>{% trans "Delete" %}</th>
                 </tr>
             </thead>
@@ -81,6 +82,11 @@
                         {% endif%}
                     </td>
                     {% comment %} <td> {{ form.get_extra_field_names }} </td> {% endcomment %}
+                    <td class="text-center">
+                        <a class="btn btn-primary" href="{% url 'helpdesk:duplicate_form' form.id %}">
+                            <i class="fa fa-clone"></i>
+                        </a>
+                    </td>
                     <td class="text-center">
                         <a class="btn btn-danger" data-toggle="modal" data-target="#deleteModal" title="Delete {{ form.name }}" onclick="updateModal({{form.id}}, '{{form.name}}')">
                             <i class="fa fa-trash"></i>

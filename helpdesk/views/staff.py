@@ -335,6 +335,9 @@ def create_form(request):
             formtype.save() 
 
             if formset.is_valid():
+                for df in formset.deleted_forms:
+                    if df.cleaned_data['id']: df.cleaned_data['id'].delete()
+
                 for cf in formset.cleaned_data:
                     if not cf or cf['DELETE']: continue # continue to next item if form is empty or item is being deleted
 
@@ -359,12 +362,8 @@ def create_form(request):
                     customfield.ticket_form = formtype
                     customfield.save()
                 
-                for df in formset.deleted_forms:
-                    if df.cleaned_data['id']: df.cleaned_data['id'].delete()
-                
-                breakpoint()
                 return HttpResponseRedirect(reverse('helpdesk:maintain_forms'))
-        breakpoint()
+            
         return render(request, "helpdesk/edit_form.html", {
             'formtype': formtype,
             'form': form,
@@ -373,7 +372,6 @@ def create_form(request):
             'debug': settings.DEBUG,             
         })
     
-        
 
 @helpdesk_staff_member_required
 def edit_form(request, pk):
@@ -415,12 +413,15 @@ def edit_form(request, pk):
             formtype.save() 
             
             if formset.is_valid():
+                for df in formset.deleted_forms:
+                    if df.cleaned_data['id']: df.cleaned_data['id'].delete()
+
                 for cf in formset.cleaned_data:
                     if not cf or cf['DELETE']: continue # continue to next item if form is empty or item is being deleted
 
                     customfield = cf['id'] if cf['id'] else CustomField()
 
-                    customfield.field_name = cf['field_name']
+                    if cf['field_name']: customfield.field_name = cf['field_name']
                     customfield.label = cf['label']
                     customfield.help_text = cf['help_text']
                     customfield.data_type = cf['data_type']
@@ -438,19 +439,15 @@ def edit_form(request, pk):
                     customfield.modified = datetime.datetime.now()
                     customfield.ticket_form = formtype
                     customfield.save()
-                
-                for df in formset.deleted_forms:
-                    if df.cleaned_data['id']: df.cleaned_data['id'].delete()
 
                 return HttpResponseRedirect(reverse('helpdesk:maintain_forms'))
-        breakpoint()
+
         form.customfield_formset = formset
         return render(request, "helpdesk/edit_form.html", {
             'formtype': formtype,
             'form': form,
-            'errors': form.errors,
-            'formset_errors': formset.errors,
-            'action': "Create",
+            'formset': formset,
+            'action': "Edit",
             'debug': settings.DEBUG,             
         })
 
@@ -459,6 +456,47 @@ def delete_form(request, pk):
     form = get_object_or_404(FormType, pk=pk)
     form.delete()
     return HttpResponseRedirect(reverse('helpdesk:maintain_forms'))
+
+@helpdesk_staff_member_required
+def duplicate_form(request, pk):
+    formtype = get_object_or_404(FormType, pk=pk)
+    new_form = FormType(
+        organization = formtype.organization,
+        name = formtype.name + " - Copy",
+        description = formtype.description,
+        queue = formtype.queue,
+        public = formtype.public,
+        staff = formtype.staff,
+        unlisted = formtype.unlisted,
+        created = datetime.datetime.now(),
+        updated = datetime.datetime.now(),
+    )
+    new_form.save() # generate default custom fields
+    
+    for cf_name in formtype.get_extra_field_names():
+        cf = CustomField.objects.get(field_name=cf_name)
+        new_cf = CustomField(
+            field_name = cf.field_name,
+            label = cf.label,
+            help_text = cf.help_text,
+            data_type = cf.data_type,
+            max_length = cf.max_length,
+            decimal_places = cf.decimal_places,
+            empty_selection_list = cf.empty_selection_list,
+            list_values = cf.list_values,
+            notifications = cf.notifications,
+            form_ordering = cf.form_ordering,
+            required = cf.required,
+            staff = cf.staff,
+            public = cf.public,
+            column = cf.column,
+            created = datetime.datetime.now(),
+            modified = datetime.datetime.now(),
+            ticket_form = new_form
+        )
+        new_cf.save()
+    return HttpResponseRedirect(reverse('helpdesk:maintain_forms'))
+
 
 @helpdesk_staff_member_required
 def dashboard(request):
