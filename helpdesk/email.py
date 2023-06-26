@@ -400,7 +400,7 @@ def imap_sync(importer, queues, logger, server):
         server.expunge()
         server.close()
 
-    server.logout()
+        server.logout()
 
 
 def ews_sync(importer, queues, logger, server):
