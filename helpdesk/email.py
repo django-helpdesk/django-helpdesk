@@ -309,11 +309,12 @@ def imap_sync(importer, queues, logger, server):
         else:
             logger.info("* Authenticating and selecting box.")
             server.debug = 4
-            server.authenticate('XOAUTH2', lambda x: generate_oauth2_string(importer.username, token_backend.token['access_token']))
             try:
+                server.authenticate('XOAUTH2', lambda x: generate_oauth2_string(importer.username, token_backend.token['access_token']))
                 server.select(importer.email_box_imap_folder)
-            except:
-                logger.error(f"IMAP authentication failed. Exiting import for {importer.email_address}.")
+            except Exception as e:
+                logger.error(f"IMAP authentication failed: {e}")
+                logger.error(f"Exiting import for {importer.email_address}.")
                 login_successful = False
             server.debug = 3
     else:
