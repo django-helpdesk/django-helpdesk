@@ -189,11 +189,17 @@ def process_importer(importer, queues, logger):
             encryption = 'ssl'
         if not importer.email_box_port:
             importer.email_box_port = mail_defaults[email_box_type][encryption]['port']
-
-        server = mail_defaults[email_box_type][encryption]['init'](
-            importer.email_box_host or settings.QUEUE_EMAIL_BOX_HOST,
-            int(importer.email_box_port)
-        )
+        if email_box_type == 'imap':
+            server = mail_defaults[email_box_type][encryption]['init'](
+                importer.email_box_host or settings.QUEUE_EMAIL_BOX_HOST,
+                int(importer.email_box_port),
+                timeout=60
+            )
+        else:
+            server = mail_defaults[email_box_type][encryption]['init'](
+                importer.email_box_host or settings.QUEUE_EMAIL_BOX_HOST,
+                int(importer.email_box_port)
+            )
         logger.info("Attempting %s server login" % email_box_type)
         mail_defaults[email_box_type]['sync'](importer, queues, logger, server)
 
@@ -291,6 +297,7 @@ def refreshed(importer, logger, token_backend=None):
 def imap_sync(importer, queues, logger, server):
     login_successful = True
     token_backend = None
+    server.debug = 4
 
     if importer.auth and (importer.auth.host_service == GOOGLE or importer.auth.host_service == MICROSOFT):
         # Start TLS first
@@ -308,7 +315,6 @@ def imap_sync(importer, queues, logger, server):
             login_successful = False
         else:
             logger.info("* Authenticating and selecting box.")
-            server.debug = 4
             try:
                 server.authenticate('XOAUTH2', lambda x: generate_oauth2_string(importer.username, token_backend.token['access_token']))
                 server.select(importer.email_box_imap_folder)
@@ -316,7 +322,6 @@ def imap_sync(importer, queues, logger, server):
                 logger.error(f"IMAP authentication failed: {e}")
                 logger.error(f"Exiting import for {importer.email_address}.")
                 login_successful = False
-            server.debug = 3
     else:
         try:
             server.starttls()
@@ -334,6 +339,7 @@ def imap_sync(importer, queues, logger, server):
             logger.error("IMAP login failed due to SSL error. This is often due to a timeout. "
                          "Please check your connection and try again.")
             login_successful = False
+    server.debug = 3
 
     if login_successful:
         try:
