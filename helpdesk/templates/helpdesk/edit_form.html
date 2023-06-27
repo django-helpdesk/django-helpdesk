@@ -47,7 +47,7 @@
                     {% csrf_token %}
                     <fieldset>
                         {{ form|bootstrap4form }}
-                        {% include 'helpdesk/include/collapsible_formset.html' with formset=form.customfield_formset formset_title="Custom Field" formset_type="custom_field" %}
+                        {% include 'helpdesk/include/collapsible_formset.html' with formset=form.customfield_formset formset_title="Custom Field" formset_type="custom_field" copy_queryset=form.copy_queryset %}
                         <div class='buttons form-group mt-2'>
                             <button type='submit' id='submit' onclick="removeEmpty()" class="btn btn-primary btn" value='{% trans "Save Changes" %}'>
                                 {% if action == "Create" %}
@@ -70,24 +70,26 @@
         $(document).ready(function () {
             defaults = ['queue','submitter_email', 'contact_name','title','description','building_name','building_address','building_id','pm_id','attachment','due_date','priority','cc_emails']
             for (const field_name of document.querySelectorAll('[name$="-field_name"]')) {
-                if (defaults.indexOf(field_name.value) >= 0) {
+                idx = defaults.indexOf(field_name.value)
+                if (idx >= 0) {
                     field_name.readOnly = true;
                     field_name.required = false;
+                    defaults.splice(idx, 1)
                 } else {
                     field_name.required = true;
                 }
             }
 
+            document.querySelector('#custom_field_empty [name$="-field_name"]').required = false;
+
             {# Bandaid fix for adding asterisks to required fields while the rest of the form is handled by bootstrap4form #}
             for (const required_field of document.querySelectorAll('[required]')) {
                 document.querySelector('label[for=' + required_field.id + ']').innerHTML += '<span style="color:red;">*</span>'
             }
-
-            document.querySelector('#custom_field_empty [name$="-field_name"]').required = false;
         })
 
         function removeEmpty() {
-            if (document.querySelector('#{{ formset_type }}_formset').checkValidity()) {
+            if (document.querySelector('#edit_form').checkValidity()) {
                 document.querySelector('#custom_field_empty').remove()
             }
         }

@@ -3,7 +3,9 @@
 {# Some things are CustomField specific, can change later to allow for complete modularity #}
 
 <div class="card">
-    <div class="card-header"><h4 class="card-title mb-0">{{formset_title}} Editor</h4></div>
+    <div class="card-header">
+        <h4 class="card-title mb-0">{{formset_title}} Editor</h4>
+    </div>
     <div class="card-body">
         <div id="{{ formset_type }}_formset">
             {{ formset.management_form }}
@@ -12,14 +14,36 @@
                 <div class="card-header" id="heading_{{ formset_type }}_{{ forloop.counter0 }}">
                     <div class="d-flex">
                         <h5 class="mb-0">
-                            <button id="button_{{ formset_type }}_{{ forloop.counter0 }}" type="button" class="btn btn-link" data-toggle="collapse" data-target="#collapse_{{ formset_type }}_{{ forloop.counter0 }}">
-                                <i class="fa fa-caret-down mr-1"></i>{% if form.label.value %}{{ form.label.value}}{% elif form.field_name.value %}{{ form.field_name.value }}{% else %}{{formset_title}} #{{forloop.counter}}{% endif %}
+                            <button id="button_{{ formset_type }}_{{ forloop.counter0 }}" type="button" class="btn btn-link font-weight-bold" data-toggle="collapse" data-target="#collapse_{{ formset_type }}_{{ forloop.counter0 }}">
+                                {% spaceless %}
+                                <i class="fa fa-caret-down mr-1"></i>
+                                {% if form.label.value %}{{ form.label.value}}{% elif form.field_name.value %}{{ form.field_name.value }}{% else %}{{formset_title}} #{{forloop.counter}}{% endif %}
+                                - {{ form.data_type.value }}{% if form.required.value %}*{% endif %}
+                                {% endspaceless %}
                             </button>
                         </h5>
                         <div class="flex-fill d-flex justify-content-end">
+                            <div class="btn-group">
+                                <div class="btn-group">
+                                    <button type="button" id="formcopy_{{ formset_type }}_{{ forloop.counter0 }}" class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown" data-toggle="tooltip" title="Copy this {{ formset_title }} to another form.">
+                                        <i class="fa fa-paste"></i>
+                                        <span>Copy to</span>
+                                    </button>
+                                    <div class="dropdown-menu p-2">
+                                        {% for formtype in copy_queryset %}
+                                        <a class="dropdown-item rounded-lg" onclick="copyCustomFieldToForm('{{formset_type}}_{{ forloop.parentloop.counter0 }}', this, {{formtype.id}})">{{formtype.name}}</a>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <button type="button" id="duplicate_{{ formset_type }}_{{ forloop.counter0 }}" class="btn btn-outline-secondary" 
+                                    onclick="duplicateCustomFieldForm('{{formset_type}}_{{ forloop.counter0 }}')" data-toggle="tooltip" title="Create a copy of this {{ formset_title }} inside this form.">
+                                    <i class="fa fa-clone"></i>
+                                    <span>Duplicate</span>
+                                </button>
+                            </div>
                             {% if formset.can_delete %}
                             <div class="btn-group-toggle" data-toggle="buttons">
-                                <label id="delete_{{ formset_type }}_{{ forloop.counter0 }}" class="btn btn-outline-danger">
+                                <label id="delete_{{ formset_type }}_{{ forloop.counter0 }}" class="btn btn-outline-danger ml-2">
                                     <i class="fa fa-trash"></i>
                                     <input type="checkbox" autocomplete="off" onchange="deleteCustomFieldForm('{{ formset_type }}_{{ forloop.counter0 }}')">
                                     <span>Delete</span>
@@ -40,14 +64,32 @@
                 <div class="card-header" id="heading_{{ formset_type }}_empty">
                     <div class="d-flex">
                         <h5 class="mb-0">
-                            <button id="button_{{ formset_type }}_empty" type="button" class="btn btn-link" data-toggle="collapse" data-target="#collapse_{{ formset_type }}_empty">
-                                <i class="fa fa-caret-down mr-1"></i>{% if form.label.value %}{{ form.label.value}}{% elif form.field_name.value %}{{ form.field_name.value }}{% else %}{{formset_title}} #empty{% endif %}
+                            <button id="button_{{ formset_type }}_empty" type="button" class="btn btn-link font-weight-bold" data-toggle="collapse" data-target="#collapse_{{ formset_type }}_empty">
+                                <i class="fa fa-caret-down mr-1"></i>New {{ formset_title }}
                             </button>
                         </h5>
                         <div class="flex-fill d-flex justify-content-end">
+                            <div class="btn-group">
+                                <div class="btn-group">
+                                    <button type="button" id="formcopy_{{ formset_type }}_empty" class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown">
+                                        <i class="fa fa-paste"></i>
+                                        <span>Copy to</span>
+                                    </button>
+                                    <div class="dropdown-menu p-2">
+                                        {% for formtype in copy_queryset %}
+                                        <a class="dropdown-item rounded-lg" onclick="copyCustomFieldToForm('{{formset_type}}_empty', this, {{formtype.id}})">{{formtype.name}}</a>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <button type="button" id="duplicate_{{ formset_type }}_empty" class="btn btn-outline-secondary"
+                                    onclick="duplicateCustomFieldForm('{{formset_type}}_empty')" data-toggle="tooltip" title="Create a copy of this {{ formset_title }} inside this form.">
+                                    <i class="fa fa-clone"></i>
+                                    <span>Duplicate</span>
+                                </button>
+                            </div>
                             {% if formset.can_delete %}
                             <div class="btn-group-toggle" data-toggle="buttons">
-                                <label id="delete_{{ formset_type }}_empty" class="btn btn-outline-danger">
+                                <label id="delete_{{ formset_type }}_empty" class="btn btn-outline-danger ml-2">
                                     <i class="fa fa-trash"></i>
                                     <input type="checkbox" autocomplete="off" onchange="deleteCustomFieldForm('{{ formset_type }}_empty')">
                                     <span>Delete</span>
@@ -59,7 +101,7 @@
                 </div>
                 <div id="collapse_{{ formset_type }}_empty" class="collapse" data-parent="#{{ formset_type }}_formset">
                     <div class="card-body">
-                        {{ formset.empty_form|bootstrap4form }}
+                        {{ form.customfield_empty|bootstrap4form }}
                     </div>
                 </div>
             </div>
@@ -70,7 +112,7 @@
             <small>
                 Select delete on unused custom fields to have then removed when you save your changes.
             </br>
-            Improperly filled-out custom fields that are not set to be deleted may prevent form submission.
+            Improperly filled-out custom fields that are not set to be deleted may prevent you from saving your changes.
         </small>
         <div class="flex-fill justify-content-end">
             <button id="add_{{ formset_type }}" type="button" class="btn btn-primary float-right" onclick="addCustomFieldForm()">
@@ -86,20 +128,59 @@
     name_formset = "{{formset_type}}".replaceAll("_", "") + "_set";
     id_formset = 'id_' + name_formset;
     
-    function addCustomFieldForm() {
-        newForm = document.getElementById('{{ formset_type }}_empty').cloneNode(true);
+    $(document).ready(function() {    
+        // Visually hide the default django delete checkboxes without removing their functionality
+        for (const delete_checkbox of document.querySelectorAll('[id^=' + id_formset + '-][id$="-DELETE"]')) {
+            delete_checkbox.parentElement.parentElement.hidden = true;
+        }
+        
+        // If invalid field is in a collapsed section, show the section
+        document.querySelector('#{{ formset_type }}_formset').addEventListener("invalid", (e) => {
+            formNum = e.srcElement.id.match(new RegExp(`${id_formset}-(\\d+)`))[1]
+            if (!($('#collapse_custom_field_' + formNum).hasClass("show"))) {
+                document.getElementById('button_custom_field_' + formNum).click()
+            }
+        }, true);
+
+        for (const field_name of document.querySelectorAll('[id$=-field_name]')) {
+            
+        }
+        
+        // Update field visibility depending on the selected data type for the field
+        for (const data_type_field of document.querySelectorAll('[id^=id_customfield_set-][id$=-data_type]')) {
+            formNum = data_type_field.id.match(new RegExp(`${id_formset}-(\\w+)`))[1];
+            updateDataTypeFields(formNum)
+            data_type_field.addEventListener('change', (e) => {updateDataTypeFields(e.srcElement.id.match(new RegExp(`${id_formset}-(\\w+)`))[1])});
+        }
+    })
+
+    function addCustomFieldForm(src='{{ formset_type }}_empty') {
+        newForm = document.getElementById(src).cloneNode(true);
         formCount = $('[name$="TOTAL_FORMS"]').val();
         
         // Update form counters
-        newForm.innerHTML = newForm.innerHTML.replaceAll(/{{ formset_type }}_empty/g, `{{ formset_type }}_${formCount}`);
-        newForm.innerHTML = newForm.innerHTML.replaceAll(/(\w+_set)-__prefix__/g, `$1-${formCount}`);
+        newForm.innerHTML = newForm.innerHTML.replaceAll(/{{ formset_type }}_(?!formset)(\w+)/g, `{{ formset_type }}_${formCount}`);
+        newForm.innerHTML = newForm.innerHTML.replaceAll(/(\w+_set)-(\w+)-/g, `$1-${formCount}-`);
         newForm.id = "{{ formset_type }}_" + formCount;
         $('[name$="TOTAL_FORMS"]').val(++formCount);
-        newForm.innerHTML = newForm.innerHTML.replaceAll("{{ formset_title }} #empty", `New {{ formset_title }}`)
-            // newForm.innerHTML = newForm.innerHTML.replaceAll(/value="[^"]*"/g, `value=""`);
+
         newForm.hidden = false;
-        newForm.querySelector('[name$=-field_name]').required = true;
-        document.getElementById("{{ formset_type }}_empty").insertAdjacentElement('beforebegin', newForm)   
+        field_name = newForm.querySelector('[name$=-field_name]')
+        field_name.required = true;
+
+        label = newForm.querySelector('label[for=' + field_name.id + ']')
+        if (!label.innerHTML.endsWith('<span style="color:red;">*</span>')) {
+            label.innerHTML += '<span style="color:red;">*</span>'
+        }
+
+        newForm = document.getElementById("{{ formset_type }}_empty").insertAdjacentElement('beforebegin', newForm)
+        if (!newForm.querySelector('[id^=collapse_]').classList.contains('show')) { // Show form if hidden
+            newForm.querySelector('[id^=button_]').click()
+        } else {
+            document.querySelector('#' + src + ' [id^=button_]').click()
+        }
+
+        return newForm
     }
         
     function deleteCustomFieldForm(id) {
@@ -109,12 +190,22 @@
             if ($('#collapse_' + id).hasClass('show')) { // Hide form if showing
                 document.getElementById("button_" + id).click()
             }
-            document.getElementById("button_" + id).disabled = true;
+            button = document.getElementById("button_" + id)
+            button.disabled = true;
+            button.innerHTML = "(Deleting) " + button.innerHTML;
+
+            document.getElementById('formcopy_' + id).disabled = true;
+            $('#formcopy_' + id).popover('hide')
+            document.getElementById('duplicate_' + id).disabled = true;
             document.getElementById(id_formset + "-" +  formNum + "-DELETE").checked = true;
-            document.getElementById(id_formset + "-" +  formNum + "-DELETE").value = 'on';
+            document.getElementById(id_formset + "-" +  formNum + "-DELETE").value =  'on';
             document.getElementById(id_formset + "-" + formNum + "-field_name").required = false;
-        } else { {# Untoggle deletion #} 
-            document.getElementById("button_" + id).disabled = false;
+        } else { {# Untoggle deletion #}
+            button = document.getElementById("button_" + id) 
+            button.disabled = false;
+            button.innerHTML = button.innerHTML.replace("(Deleting)", "");
+            document.getElementById('formcopy_' + id).disabled = false;
+            document.getElementById('duplicate_' + id).disabled = false;
             document.getElementById(id_formset + "-" +  formNum + "-DELETE").checked = false;
             document.getElementById(id_formset + "-" +  formNum + "-DELETE").value = '';
             document.getElementById(id_formset + "-" + formNum + "-field_name").required = true;
@@ -146,31 +237,77 @@ function updateDataTypeFields(formNum) {
     }
 }
 
-$(document).ready(function() {
-    // Initialize empty form template
-    // emptyForm = document.querySelector('#{{formset_type}}_empty')
-    // emptyForm.innerHTML = emptyForm.innerHTML.replaceAll(RegExp(`${id_formset}-(\\d+)`, 'g'), `${id_formset}-empty`)
-    // emptyForm.innerHTML = emptyForm.innerHTML.replaceAll(RegExp(`${name_formset}-(\\d+)`, 'g'), name_formset + '-empty')
-    
-    // Visually hide the default django delete checkboxes without removing their functionality
-    for (const delete_checkbox of document.querySelectorAll('[id^=' + id_formset + '-][id$="-DELETE"]')) {
-        delete_checkbox.parentElement.parentElement.hidden = true;
+function duplicateCustomFieldForm(src) {
+    duplicate = addCustomFieldForm(src)
+    duplicate.querySelector('[id$=-id]').value = '';
+    button = duplicate.querySelector('[id^=button_]')
+    button.innerHTML += '(Copy)'
+    for (const readonly of duplicate.querySelectorAll('[readOnly]')) {
+        readonly.readOnly = false;
     }
-    
-    // If invalid field is in a collapsed section, show the section
-    document.querySelector('#{{ formset_type }}_formset').addEventListener("invalid", (e) => {
-        formNum = e.srcElement.id.match(new RegExp(`${id_formset}-(\\d+)`))[1]
-        if (!($('#collapse_custom_field_' + formNum).hasClass("show"))) {
-            document.getElementById('button_custom_field_' + formNum).click()
-        }
-    }, true);
-    
-    // Update field visibility depending on the selected data type for the field
-    for (const data_type_field of document.querySelectorAll('[id^=id_customfield_set-][id$=-data_type]')) {
-        formNum = data_type_field.id.match(new RegExp(`${id_formset}-(\\w+)`))[1];
-        updateDataTypeFields(formNum)
-        data_type_field.addEventListener('change', (e) => {updateDataTypeFields(e.srcElement.id.match(new RegExp(`${id_formset}-(\\w+)`))[1])});
+    duplicate.querySelector('[name$=-field_name]').value += '_copy';
+}
+
+function copyCustomFieldToForm(src_field, src_link, form_id) {
+    src_field = document.getElementById(src_field)
+    data = {form_id: form_id} 
+    data['csrfmiddlewaretoken'] = document.querySelector('input[name=csrfmiddlewaretoken]').value
+    for (const field of src_field.querySelectorAll('input, select, checkbox, textarea')) {
+        name = field.name.replace(/(\w+_set)-(\w+)-/, '')
+        data[name] = field.value
     }
-    
-})
+    copy_to_button = src_link.parentElement.parentElement.children[0].id
+
+    $.ajax({
+        data: data,
+        url: "{% url 'helpdesk:copy_field' %}",
+        type: 'POST',
+
+        success: function(response) {
+            $('#' + copy_to_button).popover('dispose')
+            if (response['copied']) {
+                src_link.classList.remove('text-danger');
+                src_link.classList.add('text-success');
+                src_link.innerHTML = src_link.innerHTML.replace(' (Failed)', '');
+                match = src_link.innerHTML.match(/\(Copied - (\d+)\)/)
+                console.log(match)
+                if (match) {
+                    src_link.innerHTML = src_link.innerHTML.replace(/\(Copied - (\d+)\)/, ' (Copied - ' + (Number(match[1]) + 1) + ')');
+                } else {
+                    src_link.innerHTML += ' (Copied - 1)';
+                }
+            } else {
+                src_link.classList.remove('text-success');
+                src_link.classList.add('text-danger');
+                src_link.innerHTML = src_link.innerHTML.replace(/\s\(Copied - (\d+)\)/, '');
+                if (!src_link.innerHTML.endsWith(' (Failed)')){
+                    src_link.innerHTML += ' (Failed)';
+                }
+
+                // Format errors
+                content = '<span class="mb-2">Fix the following errors in order to copy this field to another form</span><ul class="list-group">'
+                for (const [field, error] of Object.entries(response['errors'])) {
+                    content += `
+                        <li class="list-group-item">
+                            <span class="text-danger font-weight-bold">${field}</span>
+                            <br>
+                            ${error}    
+                        </li>
+                    `;
+                }
+                content += '</ul>'
+
+                // Trigger error popover
+                $('#' + copy_to_button).popover({
+                    title: 'Field Errors',
+                    content: content,
+                    html: true,
+                    placement: 'left',
+                })
+                $('#' + copy_to_button).popover('show')
+            }
+        },
+    });
+}
+
 </script>

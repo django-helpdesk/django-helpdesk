@@ -364,10 +364,11 @@ def create_form(request):
                 
                 return HttpResponseRedirect(reverse('helpdesk:maintain_forms'))
             
+        form.customfield_formset = formset
         return render(request, "helpdesk/edit_form.html", {
             'formtype': formtype,
             'form': form,
-            'errors': form.errors,
+            'formset': formset,
             'action': "Create",
             'debug': settings.DEBUG,             
         })
@@ -389,7 +390,8 @@ def edit_form(request, pk):
                 'unlisted': formtype.unlisted
             },
             initial_customfields = CustomField.objects.filter(ticket_form=formtype),
-            organization = formtype.organization
+            organization = formtype.organization,
+            pk=pk
         )
         
         return render(request, 'helpdesk/edit_form.html', {
@@ -420,8 +422,7 @@ def edit_form(request, pk):
                     if not cf or cf['DELETE']: continue # continue to next item if form is empty or item is being deleted
 
                     customfield = cf['id'] if cf['id'] else CustomField()
-
-                    if cf['field_name']: customfield.field_name = cf['field_name']
+                    customfield.field_name = cf['field_name']
                     customfield.label = cf['label']
                     customfield.help_text = cf['help_text']
                     customfield.data_type = cf['data_type']
@@ -497,6 +498,52 @@ def duplicate_form(request, pk):
         new_cf.save()
     return HttpResponseRedirect(reverse('helpdesk:maintain_forms'))
 
+def copy_field(request):
+    """
+    Asynchonously copy CustomField to another form
+    """
+
+    form = EditFormTypeForm.CustomFieldFormSet.form(request.POST)
+    form_id = request.POST.get('form_id')
+    if form.is_valid():
+        cf = form.cleaned_data
+        target_form = FormType.objects.get(id=form_id)
+        base = cf['field_name'] + '_copy'
+        
+        high = CustomField.objects.filter(ticket_form=target_form, field_name__regex=(base + r'(\d+)')).order_by('field_name').last()
+        if high != None: # if copies exist, use the index after the highest to ensure availability
+            import re
+            match = re.search(base + r'(\d+)', high.field_name)
+            copy = base + str(int(match.group(1)) + 1)
+        else: # otherwise just use 1
+            copy = base + '1'
+
+        customfield = CustomField()
+        customfield.field_name = copy
+        customfield.label = cf['label']
+        customfield.help_text = cf['help_text']
+        customfield.data_type = cf['data_type']
+        customfield.max_length = cf['max_length']
+        customfield.decimal_places = cf['decimal_places']
+        customfield.empty_selection_list = cf['empty_selection_list']
+        customfield.list_values = cf['list_values']
+        customfield.notifications = cf['notifications']
+        customfield.form_ordering = cf['form_ordering']
+        customfield.required = cf['required']
+        customfield.staff = cf['staff']
+        customfield.public = cf['public']
+        customfield.column = cf['column']
+        if not customfield.created: customfield.created = datetime.datetime.now()
+        customfield.modified = datetime.datetime.now()
+        customfield.ticket_form = target_form
+        customfield.save()
+
+        return JsonResponse({'copied': True})
+    else:
+        return JsonResponse({'copied': False, 'errors': form.errors})
+
+
+    
 
 @helpdesk_staff_member_required
 def dashboard(request):

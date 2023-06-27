@@ -425,7 +425,7 @@ class EditFormTypeForm(forms.ModelForm):
             field_names = set()
             for form in self.forms:
                 cleaned_data = form.cleaned_data
-                # breakpoint()
+
                 if 'field_name' in cleaned_data and not cleaned_data['DELETE']:
                     # Detect duplicate field names within the form
                     before = len(field_names)
@@ -434,11 +434,6 @@ class EditFormTypeForm(forms.ModelForm):
 
                     if (before == after): # or CustomField.objects.filter(field_name=cleaned_data['field_name'], ticket_form=self.ticket_form).exists():
                         raise ValidationError(["Custom Field with name \"" + cleaned_data['field_name'] + "\" already exists for this form."])
-
-    CustomFieldFormSet = forms.inlineformset_factory(FormType, CustomField, formset=BaseCustomFieldFormSet,
-        exclude = ['choices_as_array', 'ticket_form', 'created', 'modified','objects','view_ordering'],
-        widgets = {'help_text': PreviewWidget}
-    )
     
     class Meta:
         model = FormType
@@ -449,6 +444,7 @@ class EditFormTypeForm(forms.ModelForm):
             Set up formset for CustomField objects 
         """
         self.org = kwargs.pop('organization', None)
+        self.pk = kwargs.pop('pk', None)
         # self.ticket_form = kwargs.pop('ticket_form', None)
         initial_customfields_objs = kwargs.pop('initial_customfields', None)
 
@@ -460,7 +456,13 @@ class EditFormTypeForm(forms.ModelForm):
             .exclude(table_name='') \
             .exclude(table_name=None) \
             .order_by('column_name')
-        
+
+        self.copy_queryset = FormType.objects.filter(organization = self.org).exclude(pk=self.pk)
+        self.CustomFieldFormSet = forms.inlineformset_factory(FormType, CustomField, formset=EditFormTypeForm.BaseCustomFieldFormSet,
+            exclude = ['choices_as_array', 'ticket_form', 'created', 'modified','objects','view_ordering'],
+            widgets = {'help_text': PreviewWidget}
+
+        )
         self.customfield_formset = self.CustomFieldFormSet()
 
         if initial_customfields_objs:
@@ -487,7 +489,10 @@ class EditFormTypeForm(forms.ModelForm):
             self.CustomFieldFormSet.extra = len(initial_customfields)
             self.customfield_formset.initial = initial_customfields
 
-            defaults = ['queue','submitter_email', 'contact_name','title','description','building_name','building_address','building_id','pm_id','attachment','due_date','priority','cc_emails']
+            defaults = ['queue','submitter_email', 'contact_name','title','description','building_name','building_address','building_id','pm_id','attachment','due_date','priority','cc_emails', 'empty']
+            # breakpoint()
+            self.customfield_empty = self.customfield_formset.empty_form
+            self.customfield_empty.fields['column']  = EditFormTypeForm.BaseCustomFieldFormSet.ColumnModelChoiceField(queryset=column_queryset)
             for form in self.customfield_formset.forms:
                 form.fields['column'] = EditFormTypeForm.BaseCustomFieldFormSet.ColumnModelChoiceField(queryset=column_queryset)
                 if form.initial and form.initial['field_name'] in defaults:

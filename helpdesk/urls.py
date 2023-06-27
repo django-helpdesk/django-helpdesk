@@ -373,7 +373,11 @@ urlpatterns += [
         staff.delete_form,
         name="delete_form"),
 
-        url(r'^system_settings/maintain_forms/(?P<pk>[0-9]+)/duplicate/$',
+    url(r'^system_settings/maintain_forms/(?P<pk>[0-9]+)/duplicate/$',
         staff.duplicate_form,
         name="duplicate_form"),
+
+    url(r'^system_settings/maintain_forms/copy_field/',
+        staff.copy_field,
+        name="copy_field"),
 ]
