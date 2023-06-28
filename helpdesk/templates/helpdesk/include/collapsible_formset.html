@@ -1,10 +1,17 @@
 {% load i18n bootstrap4form %}
 
-{# Some things are CustomField specific, can change later to allow for complete modularity #}
+{% comment "Settings" %}
+    formset_title: (string) - title to represent the contents of the formset
+    formset_type: (string) - all lowercase, underscore instead of whitespace slug used to encode the formset 
+    can_copy: (True | False) - show the copy to dropdown
+    copy_queryset: (queryset) - items to copy to
+    can_duplicate: (True | False) - show the duplicate button
+    header_template: (string) - relative path to the template used in 
+{% endcomment %}
 
 <div class="card shadow-sm">
     <div class="card-header">
-        <h4 class="card-title mb-0">{{formset_title}} Editor</h4>
+        <h4 class="card-title mb-0">Edit {{formset_title}}s</h4>
     </div>
     <div class="card-body">
         <div id="{{ formset_type }}_formset">
@@ -17,13 +24,14 @@
                             <button id="button_{{ formset_type }}_{{ forloop.counter0 }}" type="button" class="btn btn-link font-weight-bold" data-toggle="collapse" data-target="#collapse_{{ formset_type }}_{{ forloop.counter0 }}">
                                 {% spaceless %}
                                 <i class="fa fa-caret-down mr-1"></i>
-                                {% if form.label.value %}{{ form.label.value}}{% elif form.field_name.value %}{{ form.field_name.value }}{% else %}{{formset_title}} #{{forloop.counter}}{% endif %}
-                                - {{ form.data_type.value }}{% if form.required.value %}*{% endif %}
+                                {% include header_template %}
                                 {% endspaceless %}
                             </button>
                         </h5>
                         <div class="flex-fill d-flex justify-content-end">
+                            
                             <div class="btn-group">
+                                {% if can_copy %}
                                 <div class="btn-group">
                                     <button type="button" id="formcopy_{{ formset_type }}_{{ forloop.counter0 }}" class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown" data-toggle="tooltip" title="Copy this {{ formset_title }} to another form.">
                                         <i class="fa fa-paste"></i>
@@ -35,11 +43,14 @@
                                         {% endfor %}
                                     </div>
                                 </div>
+                                {% endif %}
+                                {% if can_duplicate %}
                                 <button type="button" id="duplicate_{{ formset_type }}_{{ forloop.counter0 }}" class="btn btn-outline-secondary" 
                                     onclick="duplicateCustomFieldForm('{{formset_type}}_{{ forloop.counter0 }}')" data-toggle="tooltip" title="Create a copy of this {{ formset_title }} inside this form.">
                                     <i class="fa fa-clone"></i>
                                     <span>Duplicate</span>
                                 </button>
+                                {% endif %}
                             </div>
                             {% if formset.can_delete %}
                             <div class="btn-group-toggle" data-toggle="buttons">
@@ -70,6 +81,7 @@
                         </h5>
                         <div class="flex-fill d-flex justify-content-end">
                             <div class="btn-group">
+                                {% if can_copy %}
                                 <div class="btn-group">
                                     <button type="button" id="formcopy_{{ formset_type }}_empty" class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown">
                                         <i class="fa fa-paste"></i>
@@ -81,11 +93,14 @@
                                         {% endfor %}
                                     </div>
                                 </div>
+                                {% endif %}
+                                {% if can_duplicate %}
                                 <button type="button" id="duplicate_{{ formset_type }}_empty" class="btn btn-outline-secondary"
                                     onclick="duplicateCustomFieldForm('{{formset_type}}_empty')" data-toggle="tooltip" title="Create a copy of this {{ formset_title }} inside this form.">
                                     <i class="fa fa-clone"></i>
                                     <span>Duplicate</span>
                                 </button>
+                                {% endif %}
                             </div>
                             {% if formset.can_delete %}
                             <div class="btn-group-toggle" data-toggle="buttons">
@@ -110,9 +125,9 @@
     <div class="card-footer">
         <div class="d-flex align-items-center">
             <small>
-                Select delete on unused custom fields to have then removed when you save your changes.
+                Select delete on unused {{ formset_title }}s to have them removed when you save your changes.
             </br>
-            Improperly filled-out custom fields that are not set to be deleted may prevent you from saving your changes.
+            Improperly filled-out {{ formset_title }}s that are not set to be deleted may prevent you from saving your changes.
         </small>
         <div class="flex-fill justify-content-end">
             <button id="add_{{ formset_type }}" type="button" class="btn btn-primary float-right" onclick="addCustomFieldForm()">
@@ -303,6 +318,7 @@ function copyCustomFieldToForm(src_field, src_link, form_id) {
                     content: content,
                     html: true,
                     placement: 'left',
+                    trigger: 'focus'
                 })
                 $('#' + copy_to_button).popover('show')
             }

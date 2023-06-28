@@ -83,7 +83,7 @@
                     </td>
                     {% comment %} <td> {{ form.get_extra_field_names }} </td> {% endcomment %}
                     <td class="text-center">
-                        <a class="btn btn-primary" href="{% url 'helpdesk:duplicate_form' form.id %}">
+                        <a class="btn btn-primary" href="{% url 'helpdesk:duplicate_form' form.id %}" title="Duplicate {{ form.name }}">
                             <i class="fa fa-clone"></i>
                         </a>
                     </td>

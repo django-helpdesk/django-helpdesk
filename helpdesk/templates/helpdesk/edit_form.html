@@ -47,7 +47,7 @@
                     {% csrf_token %}
                     <fieldset>
                         {{ form|bootstrap4form }}
-                        {% include 'helpdesk/include/collapsible_formset.html' with formset=form.customfield_formset formset_title="Custom Field" formset_type="custom_field" copy_queryset=form.copy_queryset %}
+                        {% include 'helpdesk/include/collapsible_formset.html' with formset=form.customfield_formset formset_title="Custom Field" formset_type="custom_field" can_copy=True copy_queryset=form.copy_queryset can_duplicate=True header_template='helpdesk/include/header_customfields.html'%}
                         <div class='buttons form-group mt-2'>
                             <button type='submit' id='submit' onclick="removeEmpty()" class="btn btn-primary btn" value='{% trans "Save Changes" %}'>
                                 {% if action == "Create" %}
