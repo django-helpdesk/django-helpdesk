@@ -310,7 +310,8 @@ def create_form(request):
                 'unlisted': formtype.unlisted
             },
             initial_customfields = CustomField.objects.filter(ticket_form=formtype),
-            organization = organization
+            organization = organization,
+            pk = formtype.id
         )
 
         return render(request, 'helpdesk/edit_form.html', {
@@ -391,7 +392,7 @@ def edit_form(request, pk):
             },
             initial_customfields = CustomField.objects.filter(ticket_form=formtype),
             organization = formtype.organization,
-            pk=pk
+            pk = pk
         )
         
         return render(request, 'helpdesk/edit_form.html', {

@@ -402,23 +402,23 @@ class EditQueueForm(forms.ModelForm):
             raise ValidationError({'slug': ["Queue with this slug already exists in this organization"]})
         
         return cleaned_data
+    
+class SearchableSelectWidget(forms.widgets.Select):
+    template_name = 'helpdesk/include/searchable_select.html'
 
 class EditFormTypeForm(forms.ModelForm):
     # error_css_class = 'text-danger'
 
     id = forms.IntegerField(widget = forms.HiddenInput)
     description = forms.CharField(widget=PreviewWidget, help_text=FormType.description.field.help_text, required=False)
-
+    
     class BaseCustomFieldFormSet(forms.BaseInlineFormSet):
 
         class ColumnModelChoiceField(forms.ModelChoiceField):
+            widget = SearchableSelectWidget
+
             def label_from_instance(self, column):
                 return "%s: %s" % (column.table_name, column.column_name)
-        
-        # class SearchableSelectWidget(forms.widgets.Select):
-        #     template_name = 'helpdesk/include/'
-
-        column = ColumnModelChoiceField(queryset=None)
 
         def clean(self):
             # ticket_form is an excluded field, so must validate unique_together manually
@@ -435,6 +435,11 @@ class EditFormTypeForm(forms.ModelForm):
                     if (before == after): # or CustomField.objects.filter(field_name=cleaned_data['field_name'], ticket_form=self.ticket_form).exists():
                         raise ValidationError(["Custom Field with name \"" + cleaned_data['field_name'] + "\" already exists for this form."])
     
+    CustomFieldFormSet = forms.inlineformset_factory(FormType, CustomField, formset=BaseCustomFieldFormSet,
+        exclude = ['choices_as_array', 'ticket_form', 'created', 'modified','objects','view_ordering'],
+        widgets = {'help_text': PreviewWidget}
+    )
+
     class Meta:
         model = FormType
         exclude = ('organization', 'created', 'updated',)
@@ -458,11 +463,7 @@ class EditFormTypeForm(forms.ModelForm):
             .order_by('column_name')
 
         self.copy_queryset = FormType.objects.filter(organization = self.org).exclude(pk=self.pk)
-        self.CustomFieldFormSet = forms.inlineformset_factory(FormType, CustomField, formset=EditFormTypeForm.BaseCustomFieldFormSet,
-            exclude = ['choices_as_array', 'ticket_form', 'created', 'modified','objects','view_ordering'],
-            widgets = {'help_text': PreviewWidget}
 
-        )
         self.customfield_formset = self.CustomFieldFormSet()
 
         if initial_customfields_objs:
@@ -490,7 +491,7 @@ class EditFormTypeForm(forms.ModelForm):
             self.customfield_formset.initial = initial_customfields
 
             defaults = ['queue','submitter_email', 'contact_name','title','description','building_name','building_address','building_id','pm_id','attachment','due_date','priority','cc_emails', 'empty']
-            # breakpoint()
+            
             self.customfield_empty = self.customfield_formset.empty_form
             self.customfield_empty.fields['column']  = EditFormTypeForm.BaseCustomFieldFormSet.ColumnModelChoiceField(queryset=column_queryset)
             for form in self.customfield_formset.forms:

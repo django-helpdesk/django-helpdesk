@@ -242,7 +242,7 @@ function duplicateCustomFieldForm(src) {
     duplicate.querySelector('[id$=-id]').value = '';
     button = duplicate.querySelector('[id^=button_]')
     button.innerHTML += '(Copy)'
-    for (const readonly of duplicate.querySelectorAll('[readOnly]')) {
+    for (const readonly of duplicate.querySelectorAll('[readOnly]:not([id^=colselection_])')) {
         readonly.readOnly = false;
     }
     duplicate.querySelector('[name$=-field_name]').value += '_copy';
