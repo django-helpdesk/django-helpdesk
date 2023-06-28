@@ -3,9 +3,9 @@
         if (document.getElementById('colsearch_' + widgetName) == null) {
             return
         }
-        query = document.getElementById('colsearch_' + widgetName).value.replaceAll(' ', '').toLowerCase()
+        query = document.getElementById('colsearch_' + widgetName).value.trim().toLowerCase()
         for (const entry of document.getElementById('collist_' + widgetName).children) {
-            if (!entry.children[0].innerText.replaceAll(' ', '').toLowerCase().includes(query)) {
+            if (!entry.children[0].innerText.toLowerCase().includes(query)) {
                 entry.hidden = true
             } else {
                 entry.hidden = false

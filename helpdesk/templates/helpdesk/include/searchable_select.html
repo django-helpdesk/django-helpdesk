@@ -9,7 +9,7 @@
         value="{% for group_name, group_choices, group_index in widget.optgroups %}{% for option in group_choices %}{% if option.value|stringformat:'s' == widget.value.0 %}{{ option.label }}{% endif %}{% endfor %}{% endfor %}">
 </div>
 <div class="collapse" id="collapse_list_{{ widget.name }}">
-    <div class="card pt-0 mx-0 my-0 rounded-lg overflow-hidden" style="max-height: 50vh;">
+    <div class="card pt-0 mx-0 my-0 rounded-lg overflow-hidden" style="max-height: 25vh;">
         <div class="card-header">
             <input id="colsearch_{{ widget.name }}" oninput="debounced('{{ widget.name }}')" type="search" class="form-control" autocomplete="false" placeholder="Type to filter..." 
             spellcheck="false" data-ms-editor="true" {% include "django/forms/widgets/attrs.html" %}>
