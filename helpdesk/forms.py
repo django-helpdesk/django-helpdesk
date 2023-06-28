@@ -490,7 +490,7 @@ class EditFormTypeForm(forms.ModelForm):
             self.CustomFieldFormSet.extra = len(initial_customfields)
             self.customfield_formset.initial = initial_customfields
 
-            defaults = ['queue','submitter_email', 'contact_name','title','description','building_name','building_address','building_id','pm_id','attachment','due_date','priority','cc_emails', 'empty']
+            defaults = ['queue','submitter_email', 'contact_name', 'contact_email', 'title','description','building_name','building_address','building_id','pm_id','attachment','due_date','priority','cc_emails', 'empty']
             
             self.customfield_empty = self.customfield_formset.empty_form
             self.customfield_empty.fields['column']  = EditFormTypeForm.BaseCustomFieldFormSet.ColumnModelChoiceField(queryset=column_queryset)
@@ -501,7 +501,7 @@ class EditFormTypeForm(forms.ModelForm):
                     if form.initial['data_type'] in ['varchar', 'text']:
                         form.fields['data_type'].choices = (('varchar', _('Character (single line)')),('text', _('Text (multi-line)')))
                     else:
-                        form.fields['data_type'].widget.attrs = {'readonly': True}
+                        form.fields['data_type'].widget.attrs = {'readonly': True, 'style': 'pointer-events: none;'}
         
         if args:
             self.CustomFieldFormSet.extra = int(args[0]['customfield_set-TOTAL_FORMS'])
