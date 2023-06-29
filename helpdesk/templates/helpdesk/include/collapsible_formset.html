@@ -1,6 +1,7 @@
 {% load i18n bootstrap4form %}
 
 {% comment "Settings" %}
+    formset [req]: (formset) - formset object
     formset_title [req]: (string) - title to represent the contents of the formset
     formset_type [req]: (string) - all lowercase, underscore instead of whitespace slug used to encode the formset 
     required_fields [req]: (string array)
@@ -11,7 +12,7 @@
     header_template: (string) - relative path to the template used for the section headers
 {% endcomment %}
 
-<div class="card shadow-sm">
+<div class="card shadow-sm mb-2">
     <div class="card-header">
         <h4 class="card-title mb-0">Edit {{formset_title}}s</h4>
     </div>
@@ -26,7 +27,7 @@
                             <button id="button_{{ formset_type }}_{{ forloop.counter0 }}" type="button" class="btn btn-link w-100 text-left font-weight-bold" data-toggle="collapse" data-target="#collapse_{{ formset_type }}_{{ forloop.counter0 }}">
                                 {% spaceless %}
                                 <i class="fa fa-caret-down mr-1"></i>
-                                {% if header_template %}{% include header_template %}{% else %}{{ formset_title }} #{{ forloop.counter1 }}{% endif %}
+                                {% if header_template %}{% include header_template %}{% else %}{{ formset_title }} #{{ forloop.counter }}{% endif %}
                                 {% endspaceless %}
                             </button>
                         </h5>
@@ -117,7 +118,7 @@
                 </div>
                 <div id="collapse_{{ formset_type }}_empty" class="collapse" data-parent="#{{ formset_type }}_formset">
                     <div class="card-body">
-                        {{ form.customfield_empty|bootstrap4form }}
+                        {{ form.form_empty|bootstrap4form }}
                     </div>
                 </div>
             </div>
@@ -142,6 +143,7 @@
 <script type='text/javascript' language='javascript'>
     name_formset = "{{formset_type}}".replaceAll("_", "") + "_set";
     id_formset = 'id_' + name_formset;
+    requiredFields = {{ required_fields }}
     
     $(document).ready(function() {    
         // Visually hide the default django delete checkboxes without removing their functionality
@@ -169,12 +171,13 @@
         $('[name$="TOTAL_FORMS"]').val(++formCount);
 
         newForm.hidden = false;
-        field_name = newForm.querySelector('[name$=-field_name]')
-        field_name.required = true;
-
-        label = newForm.querySelector('label[for=' + field_name.id + ']')
-        if (!label.innerHTML.endsWith('<span style="color:red;">*</span>')) {
-            label.innerHTML += '<span style="color:red;">*</span>'
+        for (const required_field of requiredFields) {
+            req = newForm.querySelector('[id$=-' + required_field + ']')
+            req.required = true;
+            label = newForm.querySelector('label[for=' + req.id + ']')
+            if (!label.innerHTML.endsWith('<span style="color:red;">*</span>')) {
+                label.innerHTML += '<span style="color:red;">*</span>'
+            }
         }
 
         newForm = document.getElementById("{{ formset_type }}_empty").insertAdjacentElement('beforebegin', newForm)
@@ -190,8 +193,6 @@
     function deleteForm(id) {
         formNum = id.match(/{{ formset_type }}_(\d+)/)[1]
 
-        var requiredFields = {{ required_fields }}
-
         if ($('#delete_' + id).hasClass('active')) { {# Toggle deletion #}
             if ($('#collapse_' + id).hasClass('show')) { // Hide form if showing
                 document.getElementById("button_" + id).click()
@@ -200,21 +201,28 @@
             button.disabled = true;
             button.innerHTML = "(Deleting) " + button.innerHTML;
 
+            {% if can_copy %}
             document.getElementById('formcopy_' + id).disabled = true;
             $('#formcopy_' + id).popover('hide')
+            {% endif %}
+            {% if can_duplicate %}
             document.getElementById('duplicate_' + id).disabled = true;
+            {% endif %}
             document.getElementById(id_formset + "-" +  formNum + "-DELETE").checked = true;
             document.getElementById(id_formset + "-" +  formNum + "-DELETE").value =  'on';
             for (const required_field of requiredFields) {
                 document.getElementById(id_formset + "-" + formNum + "-" + required_field).required = false;
             }
-            document.getElementById(id_formset + "-" + formNum + "-field_name").required = false;
         } else { {# Untoggle deletion #}
             button = document.getElementById("button_" + id) 
             button.disabled = false;
             button.innerHTML = button.innerHTML.replace("(Deleting)", "");
+            {% if can_copy %}
             document.getElementById('formcopy_' + id).disabled = false;
+            {% endif %}
+            {% if can_duplicate %}
             document.getElementById('duplicate_' + id).disabled = false;
+            {% endif %}
             document.getElementById(id_formset + "-" +  formNum + "-DELETE").checked = false;
             document.getElementById(id_formset + "-" +  formNum + "-DELETE").value = '';
             for (const required_field of requiredFields) {
@@ -247,7 +255,7 @@ function copyTo(src_field, src_link, form_id) {
 
     $.ajax({
         data: data,
-        url: "{% url copy_url %}",
+        url: "{% if copy_url %}{% url copy_url %}{% endif %}",
         type: 'POST',
 
         success: function(response) {

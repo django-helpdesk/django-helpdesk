@@ -48,7 +48,7 @@
                 <fieldset>
                     {{ form|bootstrap4form }}
                     {% include 'helpdesk/include/collapsible_formset.html' with formset=form.customfield_formset formset_title="Custom Field" formset_type="custom_field" required_fields="['field_name']" can_copy=True copy_queryset=form.copy_queryset copy_url='helpdesk:copy_field' can_duplicate=True header_template='helpdesk/include/header_customfields.html'%}
-                    <div class='buttons form-group mt-2'>
+                    <div class='buttons form-group'>
                         <button type='submit' id='submit' onclick="removeEmpty()" class="btn btn-primary btn" value='{% trans "Save Changes" %}'>
                             {% if action == "Create" %}
                             Create Form
