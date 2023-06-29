@@ -224,10 +224,10 @@ def process_importer(importer, queues, logger):
                 logger.warn("Message %d was not successfully processed, and will be left in local directory", i)
 
     elif importer.auth:
-        logger.info("Attempting EWS server login")
-        server, _ = importer.auth.login(email=importer.sender, logger=logger)
+        logger.info("Attempting Exchange server login")
+        server, _ = importer.auth.login(email=importer, logger=logger)
         if server:
-            ews_sync(importer, queues, logger, server)
+            exchange_sync(importer, queues, logger, server)
 
 
 def pop3_sync(importer, queues, logger, server):
@@ -409,7 +409,7 @@ def imap_sync(importer, queues, logger, server):
         server.logout()
 
 
-def ews_sync(importer, queues, logger, server):
+def exchange_sync(importer, queues, logger, server):
     # first, connect
 
     # select box from email_box_imap_folder
@@ -434,7 +434,7 @@ def ews_sync(importer, queues, logger, server):
 
         values = [
             '_id',  # id is an ItemID and change_key. These CAN change if the item is moved or updated
-            'conversation_id',  # EWS id type referring to conversation/thread, includes change_key
+            'conversation_id',  # Exchange id type referring to conversation/thread, includes change_key
             'headers',
             'sender',  # email address that sent the mail for the author (?)
             'author',  # email address that created the mail
@@ -463,7 +463,7 @@ def ews_sync(importer, queues, logger, server):
                 else:
                     logger.info("Received message ID: %s" % msg_id)
                     try:
-                        ticket = object_from_ews_message(item, importer, queues, logger)
+                        ticket = object_from_exchange_message(item, importer, queues, logger)
                     except Exception as e:
                         logger.error('Unable to process message into ticket: ', str(e))  # todo
                         ticket = None
@@ -941,7 +941,7 @@ def object_from_message(message, importer, queues, logger):
     return create_object_from_email_message(message, ticket, payload, files, logger=logger)
 
 
-def object_from_ews_message(message, importer, queues, logger):
+def object_from_exchange_message(message, importer, queues, logger):
 
     subject = message.subject
     for affix in STRIPPED_SUBJECT_STRINGS:
@@ -1002,7 +1002,7 @@ def object_from_ews_message(message, importer, queues, logger):
     headers = {h.name.lower(): h.value for h in getattr(message, 'headers', {})}
     auto_forward = headers.get('x-beamhelpdesk-delivered', None)
 
-    if auto_forward is not None or sender[1] == queue.email_address.lower():
+    if auto_forward is not None or (queue.email_address and sender[1] == queue.email_address.lower()):
         logger.info("Found a forwarding loop.")
         if ticket and Ticket.objects.filter(pk=ticket).exists():
             if sender[1] == queue.email_address.lower() and auto_forward is None:
