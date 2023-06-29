@@ -16,7 +16,7 @@ from django.urls import reverse
 
 from helpdesk import settings as helpdesk_settings
 from helpdesk import user
-from helpdesk.models import KBCategory, KBItem, get_markdown
+from helpdesk.models import KBCategory, KBItem, KBIAttachment, get_markdown
 from helpdesk.decorators import is_helpdesk_staff, helpdesk_staff_member_required
 from helpdesk.forms import EditKBCategoryForm, EditKBItemForm
 from django.utils.html import escape
@@ -246,6 +246,7 @@ def edit_article(request, slug, pk, iframe=False):
     if request.method == "GET":
         form = EditKBItemForm(
             organization = request.user.default_organization,
+            pk = item.id,
             initial = {
                 'category': item.category,
                 'title': item.title,
@@ -265,6 +266,10 @@ def edit_article(request, slug, pk, iframe=False):
         })
     elif request.method == "POST":
         form = EditKBItemForm(request.POST, organization = request.user.default_organization)
+        formset = form.AttachmentFormSet(request.POST, request.FILES)
+
+        for f in formset.forms:
+            f.fields['file'].required = False
 
         if form.is_valid():
             item.category = form.cleaned_data['category']
@@ -276,6 +281,22 @@ def edit_article(request, slug, pk, iframe=False):
             item.last_updated = datetime.datetime.now()
 
             item.save()
+            # breakpoint()
+            if formset.is_valid():
+                for df in formset.deleted_forms:
+                    if df.cleaned_data['id']: df.cleaned_data['id'].delete()
+
+                for cf in formset.cleaned_data:
+                    if not cf or cf['DELETE']: continue # continue to next item if form is empty or item is being deleted
+                    
+                    if cf['file']:
+                        attach = cf['id'] if cf['id'] else KBIAttachment()
+                        attach.file = cf['file']
+                        attach.filename = cf['file']
+
+                        attach.save()
+
+
         return HttpResponseRedirect(reverse('helpdesk:kb_article', args=[item.category.slug, item.id]))
 
 @helpdesk_staff_member_required

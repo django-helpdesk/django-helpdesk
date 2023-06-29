@@ -22,10 +22,12 @@
                     {% trans "Required fields are indicated by " %} <span style="color:red;">*</span>
                 </p>
                 {% if errors %}<p class="text-danger">{% for error in errors %}{% trans "Error: " %}{{ error }}<br>{% endfor %}</p>{% endif %}
-                <form method='post'>
+                <form method='post' enctype='multipart/form-data'>
                     {% csrf_token %}
                     <fieldset>
                         {{ form|bootstrap4form }}
+                        {% include 'helpdesk/include/collapsible_formset.html' with formset=form.attachment_formset formset_title="Attachment" formset_type="kbi_attachment" required_fields="['file']"%}
+                        {% comment %} can_copy=True copy_queryset=form.copy_queryset copy_url='helpdesk:copy_field' can_duplicate=True header_template='helpdesk/include/header_customfields.html' {% endcomment %}
                         <div class='buttons form-group'>
                             <input type='submit' class="btn btn-primary btn" 
                                 value="{% if action == "Create"%}Create Article{% else %}Save Changes{% endif %}"/>

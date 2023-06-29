@@ -23,7 +23,7 @@ from django.shortcuts import get_object_or_404
 from helpdesk.lib import safe_template_context, process_attachments
 from helpdesk.models import (Ticket, Queue, FollowUp, IgnoreEmail, TicketCC,
                              CustomField, TicketDependency, UserSettings, KBItem,
-                             FormType, KBCategory, is_extra_data)
+                             FormType, KBCategory, KBIAttachment, is_extra_data)
 from helpdesk import settings as helpdesk_settings
 from helpdesk.email import create_ticket_cc
 from helpdesk.decorators import list_of_helpdesk_staff
@@ -284,6 +284,9 @@ class EditKBCategoryForm(forms.ModelForm):
         self.fields['queue'].queryset = Queue.objects.filter(organization=org)
         self.fields['forms'].queryset = FormType.objects.filter(organization=org) 
 
+class AttachmentFileInputWidget(forms.FileInput):
+    template_name = 'helpdesk/include/attachment_input.html'
+
 class EditKBItemForm(forms.ModelForm):
 
     class CategoryModelChoiceField(forms.ModelChoiceField):
@@ -292,6 +295,11 @@ class EditKBItemForm(forms.ModelForm):
         
     category = CategoryModelChoiceField(queryset=KBCategory.objects)
     answer = forms.CharField(widget=PreviewWidget, help_text=KBItem.answer.field.help_text)
+
+    AttachmentFormSet = forms.inlineformset_factory(KBItem, KBIAttachment,
+        fields = ('id', 'file',),
+        # widgets = {'file': AttachmentFileInputWidget}
+    )
 
     class Meta:
         model = KBItem
@@ -304,12 +312,29 @@ class EditKBItemForm(forms.ModelForm):
             Prepoulate category field when creating a new article from a category's page.
         """
         org = kwargs.pop('organization', None)
+        pk = kwargs.pop('pk', None)
         category = kwargs.pop('category', None) 
         super(EditKBItemForm, self).__init__(*args, **kwargs)
 
         self.fields['category'].queryset = KBCategory.objects.filter(organization=org)
         if category:
             self.fields['category'].initial = category
+
+        self.AttachmentFormSet
+        self.attachment_formset = self.AttachmentFormSet()
+        self.form_empty = self.attachment_formset.empty_form
+
+        initial_attach = []
+        for attach in KBIAttachment.objects.filter(kbitem=pk):
+            initial_attach.append({
+                'id': attach.id,
+                'file': attach.file,
+            })
+        self.AttachmentFormSet.extra = len(initial_attach)
+        self.attachment_formset.initial = initial_attach
+
+        for form in self.attachment_formset.forms:
+            form.fields['file'].required = False
 
 
 class MatchOnField(forms.MultiValueField):
@@ -492,8 +517,8 @@ class EditFormTypeForm(forms.ModelForm):
 
             defaults = ['queue','submitter_email', 'contact_name', 'contact_email', 'title','description','building_name','building_address','building_id','pm_id','attachment','due_date','priority','cc_emails', 'empty']
             
-            self.customfield_empty = self.customfield_formset.empty_form
-            self.customfield_empty.fields['column']  = EditFormTypeForm.BaseCustomFieldFormSet.ColumnModelChoiceField(queryset=column_queryset)
+            self.form_empty = self.customfield_formset.empty_form
+            self.form_empty.fields['column']  = EditFormTypeForm.BaseCustomFieldFormSet.ColumnModelChoiceField(queryset=column_queryset)
             for form in self.customfield_formset.forms:
                 form.fields['column'] = EditFormTypeForm.BaseCustomFieldFormSet.ColumnModelChoiceField(queryset=column_queryset)
                 if form.initial and form.initial['field_name'] in defaults:

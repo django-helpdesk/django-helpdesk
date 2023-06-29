@@ -1,0 +1,10 @@
+<div class="input-group mb-3">
+    <div class="input-group-prepend">
+        <button class="btn btn-outline-secondary" type="button">Copy Link</button>
+        <button class="btn btn-outline-secondary" type="button">Preview</button>
+    </div>
+    <div class="custom-file">
+      <input type="file" class="custom-file-input" id="{{ widget.name }}" {% include "django/forms/widgets/attrs.html" %}>
+      <label class="custom-file-label" for="{{ widget.name }}">{% if widget.value %}{{ widget.value }}{% else %}Choose File{% endif %}</label>
+    </div>
+  </div>
