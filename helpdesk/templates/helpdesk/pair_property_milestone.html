@@ -42,7 +42,7 @@
                 <option value="" selected>Your Property Selection</option>
                 {% for cycle, views in properties_per_cycle.items %}
                 {% for view in views %}
-                <option value="{{ cycle.id }}-{{ view.id }}">PM Property ID: {{ view.state.pm_property_id }}</option>
+                <option value="{{ cycle.id }}-{{ view.id }}">{% if view.address %}{{ view.address }}{% else %}PM Property ID: {{ view.pm_id }}{% endif %}</option>
                 {% endfor %}
                 {% endfor %}
             </select>
