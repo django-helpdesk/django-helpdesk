@@ -32,9 +32,19 @@ class Command(BaseCommand):
             help='Hide details about each queue/message as they are processed',
         )
 
+        parser.add_argument(
+            '--debug',
+            required=False,
+            action='store_true',
+            dest='debugging',
+            default=False,
+            help='Will create new tickets and queue emails, but not delete emails from the servers.',
+        )
+
     def handle(self, *args, **options):
         quiet = options.get('quiet', False)
-        process_email(quiet=quiet)
+        debugging = options.get('debugging', False)
+        process_email(quiet=quiet, debugging=debugging)
 
 
 if __name__ == '__main__':

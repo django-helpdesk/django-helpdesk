@@ -61,7 +61,7 @@ def parse_uid(data):
     return match.group('uid')
 
 
-def process_email(quiet=False):
+def process_email(quiet=False, debugging=False):
     for importer in EmailImporter.objects.filter(allow_email_imports=True):
         importer_queues = importer.queue_set.all()
 
@@ -110,15 +110,15 @@ def process_email(quiet=False):
                     importer.email_box_last_check = timezone.now() - timedelta(minutes=30)
 
                 queue_time_delta = timedelta(minutes=importer.email_box_interval or 0)
-                if not DEBUGGING:
-                    if (importer.email_box_last_check + queue_time_delta) < timezone.now():
-                        process_importer(importer, queues, logger=logger)
-                        importer.email_box_last_check = timezone.now()
-                        importer.save()
-                else:
-                    process_importer(importer, queues, logger=logger)
+                if debugging or DEBUGGING:
+                    process_importer(importer, queues, logger=logger, debugging=True)
                     importer.email_box_last_check = timezone.now()
                     importer.save()
+                elif (importer.email_box_last_check + queue_time_delta) < timezone.now():
+                    process_importer(importer, queues, logger=logger, debugging=False)
+                    importer.email_box_last_check = timezone.now()
+                    importer.save()
+
             logger.info('')
         finally:
             # we must close the file handler correctly if it's created
@@ -134,7 +134,7 @@ def process_email(quiet=False):
                 logging.exception(e)
 
 
-def process_importer(importer, queues, logger):
+def process_importer(importer, queues, logger, debugging):
     logger.info("\n***** %s: Begin processing mail for django-helpdesk" % ctime())
 
     if importer.socks_proxy_type and importer.socks_proxy_host and importer.socks_proxy_port:
@@ -201,7 +201,7 @@ def process_importer(importer, queues, logger):
                 int(importer.email_box_port)
             )
         logger.info("Attempting %s server login" % email_box_type)
-        mail_defaults[email_box_type]['sync'](importer, queues, logger, server)
+        mail_defaults[email_box_type]['sync'](importer, queues, logger, server, debugging=debugging)
 
     elif email_box_type == 'local':
         mail_dir = importer.email_box_local_dir or '/var/lib/mail/helpdesk/'
@@ -227,10 +227,10 @@ def process_importer(importer, queues, logger):
         logger.info("Attempting Exchange server login")
         server, _ = importer.auth.login(email=importer, logger=logger)
         if server:
-            exchange_sync(importer, queues, logger, server)
+            exchange_sync(importer, queues, logger, server, debugging=debugging)
 
 
-def pop3_sync(importer, queues, logger, server):
+def pop3_sync(importer, queues, logger, server, debugging):
     server.getwelcome()
     try:
         server.stls()
@@ -263,7 +263,7 @@ def pop3_sync(importer, queues, logger, server):
         ticket = object_from_message(full_message, importer, queues, logger)
 
         if ticket:
-            if not DEBUGGING:
+            if not debugging:
                 server.dele(msg_num)
             logger.info("Successfully processed message %s, deleted from POP3 server\n" % msg_num)
         else:
@@ -294,7 +294,7 @@ def refreshed(importer, logger, token_backend=None):
         return False  # The token is still good - keep going
 
 
-def imap_sync(importer, queues, logger, server):
+def imap_sync(importer, queues, logger, server, debugging):
     login_successful = True
     token_backend = None
     server.debug = 4
@@ -385,7 +385,7 @@ def imap_sync(importer, queues, logger, server):
                                 logger.error('Error printed above.')
                                 ticket = None
                             if ticket:
-                                if DEBUGGING:
+                                if debugging:
                                     logger.info("Successfully processed message %s, left untouched on IMAP server\n" % msg_uid)
                                 elif importer.keep_mail:
                                     # server.store(num, '+FLAGS', '\\Answered')
@@ -409,7 +409,7 @@ def imap_sync(importer, queues, logger, server):
         server.logout()
 
 
-def exchange_sync(importer, queues, logger, server):
+def exchange_sync(importer, queues, logger, server, debugging):
     # first, connect
 
     # select box from email_box_imap_folder
@@ -468,7 +468,7 @@ def exchange_sync(importer, queues, logger, server):
                         logger.error('Unable to process message into ticket: ', str(e))  # todo
                         ticket = None
                     if ticket:
-                        if DEBUGGING:
+                        if debugging:
                             logger.info("Successfully processed message %s, left untouched on server\n" % msg_id.id)
                         else:
                             try:
