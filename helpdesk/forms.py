@@ -284,7 +284,7 @@ class EditKBCategoryForm(forms.ModelForm):
         self.fields['queue'].queryset = Queue.objects.filter(organization=org)
         self.fields['forms'].queryset = FormType.objects.filter(organization=org) 
 
-class AttachmentFileInputWidget(forms.FileInput):
+class AttachmentFileInputWidget(forms.ClearableFileInput):
     template_name = 'helpdesk/include/attachment_input.html'
 
 class EditKBItemForm(forms.ModelForm):
@@ -298,7 +298,7 @@ class EditKBItemForm(forms.ModelForm):
 
     AttachmentFormSet = forms.inlineformset_factory(KBItem, KBIAttachment,
         fields = ('id', 'file',),
-        # widgets = {'file': AttachmentFileInputWidget}
+        widgets = {'file': AttachmentFileInputWidget}
     )
 
     class Meta:
@@ -325,7 +325,7 @@ class EditKBItemForm(forms.ModelForm):
         self.form_empty = self.attachment_formset.empty_form
 
         initial_attach = []
-        for attach in KBIAttachment.objects.filter(kbitem=pk):
+        for attach in KBIAttachment.objects.filter(kbitem=pk).order_by('id'):
             initial_attach.append({
                 'id': attach.id,
                 'file': attach.file,

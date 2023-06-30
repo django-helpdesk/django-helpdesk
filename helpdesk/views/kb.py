@@ -224,6 +224,7 @@ def create_article(request, slug):
         })
     elif request.method == 'POST':
         form = EditKBItemForm(request.POST, organization = request.user.default_organization)
+        formset = form.AttachmentFormSet(request.POST, request.FILES)
 
         if form.is_valid():
             item = KBItem(
@@ -235,7 +236,21 @@ def create_article(request, slug):
                 enabled = form.cleaned_data['enabled'],
                 last_updated = datetime.datetime.now()
             )
-            item.save()     
+            item.save()
+            if formset.is_valid():
+                for df in formset.deleted_forms:
+                    if df.cleaned_data['id']: df.cleaned_data['id'].delete()
+
+                for cf in formset.cleaned_data:
+                    if not cf or cf['DELETE']: continue # continue to next item if form is empty or item is being deleted
+                    
+                    if cf['file']:
+                        attach = cf['id'] if cf['id'] else KBIAttachment()
+                        attach.kbitem = item
+                        attach.file = cf['file'] #.file
+                        # attach.filename = cf['file']
+
+                        attach.save()     
         return HttpResponseRedirect(reverse('helpdesk:kb_category', args=[category.slug]))
 
 @helpdesk_staff_member_required
@@ -281,7 +296,6 @@ def edit_article(request, slug, pk, iframe=False):
             item.last_updated = datetime.datetime.now()
 
             item.save()
-            # breakpoint()
             if formset.is_valid():
                 for df in formset.deleted_forms:
                     if df.cleaned_data['id']: df.cleaned_data['id'].delete()
@@ -291,11 +305,11 @@ def edit_article(request, slug, pk, iframe=False):
                     
                     if cf['file']:
                         attach = cf['id'] if cf['id'] else KBIAttachment()
-                        attach.file = cf['file']
-                        attach.filename = cf['file']
+                        attach.kbitem = item
+                        attach.file = cf['file'] #.file
+                        # attach.filename = cf['file']
 
                         attach.save()
-
 
         return HttpResponseRedirect(reverse('helpdesk:kb_article', args=[item.category.slug, item.id]))
 
@@ -304,6 +318,24 @@ def delete_article(request, slug, pk):
     item = get_object_or_404(KBItem, pk=pk)
     item.delete()
     return HttpResponseRedirect(reverse('helpdesk:kb_category', args=[slug]))
+
+def upload_attachment(request):
+    form = EditKBItemForm.AttachmentFormSet.form(request.POST, request.FILES)
+    kbitem_id = request.POST.get('kbitem_id')
+
+    if form.is_valid():
+        cf = form.cleaned_data
+
+        if cf['file']:
+            attach = cf['id'] if 'id' in cf and cf['id'] else KBIAttachment()
+            attach.kbitem = KBItem.objects.get(id=kbitem_id)
+            attach.file = cf['file']
+
+            attach.save()
+        
+            return JsonResponse({'uploaded': True, 'id': attach.id, 'url': attach.attachment_path(attach.filename) })
+    else:
+        return JsonResponse({'uploaded': False, 'errors': form.errors})
 
 def preview_markdown(request):
     md = request.GET.get('md')

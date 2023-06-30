@@ -301,6 +301,10 @@ if helpdesk_settings.HELPDESK_KB_ENABLED:
             kb.preview_markdown,
             name="preview_markdown"),
 
+        url(r'^kb/upload_attachment',
+            kb.upload_attachment,
+            name="upload_attachment"),
+
         url(r'^kb/(?P<slug>[A-Za-z0-9_-]+)/(?P<pk>[0-9]+)/delete/$',
             kb.delete_article,
             name="delete_kb_article"),

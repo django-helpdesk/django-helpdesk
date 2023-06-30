@@ -503,7 +503,6 @@ def copy_field(request):
     """
     Asynchonously copy CustomField to another form
     """
-
     form = EditFormTypeForm.CustomFieldFormSet.form(request.POST)
     form_id = request.POST.get('form_id')
     if form.is_valid():
