@@ -1849,6 +1849,7 @@ class CustomField(models.Model):
         null=True
     )
 
+    # If these data type choices change, please update get_building_data() in staff.py as well
     DATA_TYPE_CHOICES = (
         ('varchar', _('Character (single line)')),
         ('text', _('Text (multi-line)')),

@@ -70,7 +70,7 @@ from ..lib import format_time_spent
 from rest_framework import status
 from rest_framework.decorators import api_view
 
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 from ..templated_email import send_templated_mail
 
@@ -2505,7 +2505,7 @@ def load_copy_to_beam(request, ticket_id):
 
     properties_per_cycle = {}
     views = PropertyView.objects.filter(property__in=ticket.beam_property.all()) \
-        .annotate(address=F(prop_display_query), building_id=F('state__pm_property_id')).only('state_id', 'cycle')
+        .annotate(address=F(prop_display_query), building_id=F('state__pm_property_id')).only('id', 'cycle')
     for view in views:
         if view.cycle not in properties_per_cycle:
             properties_per_cycle[view.cycle] = [view]
@@ -2535,10 +2535,11 @@ def load_copy_to_beam(request, ticket_id):
 def get_building_data(request, ticket_id):
     """Given a cycle ID and view ID, loads ticket data and state data for the copy_to_beam page."""
     from seed.models import Cycle
+    from seed.serializers.properties import PropertyStateSerializer
+    from seed.serializers.taxlots import TaxLotStateSerializer
 
     ticket = get_object_or_404(Ticket, id=ticket_id)
     if request.is_ajax and request.method == "GET":
-        # get the nick name from the client side.
 
         org = ticket.ticket_form.organization
         inventory_type = request.GET.get('inventory_type', 'PropertyState')
@@ -2548,9 +2549,10 @@ def get_building_data(request, ticket_id):
         cycle = Cycle.objects.filter(organization=org, id=cycle_id).first()
         if inventory_type == 'PropertyState':
             view = PropertyView.objects.filter(state__organization=org, id=view_id).first()
+            state = PropertyStateSerializer(view.state).data
         else:
             view = TaxLotView.objects.filter(state__organization=org, id=view_id).first()
-        state = view.state
+            state = TaxLotStateSerializer(view.state).data
         ticket_data = []
         beam_data = []
         if cycle:
@@ -2565,23 +2567,56 @@ def get_building_data(request, ticket_id):
                         value = getattr(ticket, f.field_name, None)
                     else:
                         value = ''
+
+                    # If the data types differ, we can't allow users to copy over the data.
+                    if f.data_type in ['varchar', 'text', 'email', 'url', 'ipaddress', 'slug', 'list']:
+                        data_type = 'string'
+                    elif f.data_type in ['date', 'datetime']:
+                        data_type = 'datetime'
+                    else:
+                        data_type = f.data_type
+
                     ticket_data.append({
                         'display': f.label,
                         'field_name': f.field_name,
-                        'value': value
+                        'value': value,
+                        'data_type': data_type
                     })
 
                     value = ''
                     if f.column.column_name and hasattr(f.column, 'is_extra_data') and f.column.table_name:
-                        if f.column.is_extra_data and f.column.column_name in state.extra_data:
-                            value = state.extra_data[f.column.column_name]
-                        elif not f.column.is_extra_data and hasattr(state, f.column.column_name):
-                            value = getattr(state, f.column.column_name, None)
+                        if f.column.is_extra_data and f.column.column_name in state['extra_data']:
+                            value = state['extra_data'][f.column.column_name]
+                        elif not f.column.is_extra_data and f.column.column_name in state:
+                            value = state[f.column.column_name]
+
+                    # If the data types differ, we can't allow users to copy over the data.
+                    # Uses DATA_TYPE_PARSERS to avoid needing to update this section whenever the data types change!
+                    if f.column.data_type in Column.DATA_TYPE_PARSERS.keys():
+                        try:
+                            typed_value = Column.DATA_TYPE_PARSERS[f.column.data_type]("0")
+                        except ValueError:  # Invalid isoformat string: '0'
+                            data_type = 'datetime'
+                        else:
+                            if isinstance(typed_value, bool):
+                                data_type = 'boolean'
+                            elif isinstance(typed_value, str):
+                                data_type = 'string'
+                            elif isinstance(typed_value, float):
+                                data_type = 'decimal'
+                            elif isinstance(typed_value, int):
+                                data_type = 'integer'
+                            elif isinstance(typed_value, datetime):
+                                data_type = 'datetime'
+                            else:
+                                data_type = f.column.data_type
+
                     beam_data.append({
                         'display': f.column.display_name if f.column.display_name else f.column.column_name,
                         'value': value,
                         'column_name': f.column.column_name,
-                        'is_matching_criteria': f.column.is_matching_criteria
+                        'is_matching_criteria': f.column.is_matching_criteria,
+                        'data_type': data_type
                     })
 
         return JsonResponse({
@@ -2645,9 +2680,7 @@ def update_building_data(request, ticket_id):
             viewset = TaxlotViewSet()
         viewset.request = update_request
         response = viewset.update(update_request, pk=view.id)
-        print(response)
-
-    return JsonResponse({"success": ""}, status=200)
+        return response
 
 
 def add_remove_label(org_id, user, payload, inventory_type):

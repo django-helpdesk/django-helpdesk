@@ -70,7 +70,7 @@
                     </table>
                 </div>
 
-                <div class="form-group text-center">
+                <div class="form-group text-center" id="submit-button">
                     <input class="btn btn-primary col-sm-3" type='submit' id="submit" value='{% trans "Copy selected values to BEAM" %}' disabled>
                 </div>
             </div>
@@ -89,6 +89,9 @@
     var building_options = $('#building_select option').detach();
 
     $('#cycle_select').change(function () {
+        // When a cycle is selected, updates the dropdown of buildings and cleans the page.
+
+        $("#success-msg").remove()
         $('#group_building_select').hide()
         if ($('#cycle_select').val()) {
             $('#group_building_select').show();
@@ -106,8 +109,80 @@
         $('#building_select').val('');
     });
 
+    let update_page = function(ticket, inventory_type, cycle_id, view_id) {
+        // Submits an Ajax request to retrieve ticket and building data, then creates the table to display the info.
+
+        $.ajax({
+            type: 'GET',
+            url: "{% url 'helpdesk:get_building_data' ticket.id %}",
+            data: {"inventory_type": inventory_type, "cycle_id": cycle_id, "view_id": view_id},
+            success: function (response) {
+                $('#data_table tbody').empty();
+
+                let ticket_data = response['ticket_data'];
+                let beam_data = response['beam_data'];
+
+                if (ticket_data.length === 0) {
+                    $('<div class="form-group text-center" id="success-msg">' +
+                        "<div>No ticket data can be copied into BEAM.</div>" +
+                        "<a href='{{ ticket.get_absolute_url }}'><button class='btn btn-warning'>Return to ticket</button></a>  " +
+                        '<a href="{% url 'seed:home' %}#/properties/' + view_id + '" target="_blank" rel="noopener noreferrer"><button class="btn btn-primary">View Building in BEAM</button></a>' +
+                        '</div>'
+                    ).insertBefore('#submit-button');
+                }
+
+                for (let t in ticket_data) {
+                    if (beam_data[t]["is_matching_criteria"]) {
+                        $("#data_table tbody").append(
+                            `<tr>
+                            <th class="table-active" style="width: 20%">${ticket_data[t]["display"]||""}</th>
+                            <td style="width: 20%">${ticket_data[t]["value"]||""}</td>
+
+                            <th class="table-secondary" style="width: 20%">${beam_data[t]["display"]||""}</th>
+                            <td class="table-active" style="width: 20%">${beam_data[t]["value"]||""}</td>
+
+                            <td style="width: 10%">Match criteria data cannot be changed in Helpdesk.</td>
+                            </tr>`
+                        );
+                    } else if (beam_data[t]['data_type'] !== ticket_data[t]['data_type']) {
+                        $("#data_table tbody").append(
+                            `<tr>
+                            <th class="table-active" style="width: 20%">${ticket_data[t]["display"]||""}</th>
+                            <td style="width: 20%">${ticket_data[t]["value"]||""}</td>
+
+                            <th class="table-active" style="width: 20%">${beam_data[t]["display"]||""}</th>
+                            <td style="width: 20%">${beam_data[t]["value"]||""}</td>
+
+                            <td style="width: 10%">Fields are not of the same type.</td>
+                            </tr>`
+                        );
+                    } else {
+                        $("#data_table tbody").append(
+                            `<tr>
+                            <th class="table-active" style="width: 20%">${ticket_data[t]["display"]||""}</th>
+                            <td style="width: 20%">${ticket_data[t]["value"]||""}</td>
+
+                            <th class="table-active"style="width: 20%">${beam_data[t]["display"]||""}</th>
+                            <td style="width: 20%">${beam_data[t]["value"]||""}</td>
+
+                            <td style="width: 10%"><input class="beam_data_checkbox" type="checkbox" id=${beam_data[t]["column_name"]} name="col"
+                                value=${ticket_data[t]["field_name"]}></td>
+                            </tr>`
+                        );
+                    }
+                }
+            },
+            error: function (response) {
+                console.log(response);
+            }
+        });
+    };
+
     $("#building_select").change(function (e) {
+        // When a building is selected from the dropdown, update_page() is called to create the table.
+
         e.preventDefault();
+        $("#success-msg").remove()
         var ticket = {{ ticket.id }};
         var value = $(this).val();
         if (value) {
@@ -115,74 +190,40 @@
             let cycle_id = value.split('-')[1];
             let view_id = value.split('-')[2];
 
-            // GET AJAX request
-            $.ajax({
-                type: 'GET',
-                url: "{% url 'helpdesk:get_building_data' ticket.id %}",
-                data: {"inventory_type": inventory_type, "cycle_id": cycle_id, "view_id": view_id},
-                success: function (response) {
-
-                    // todo: hide this table when loading info
-                    // todo: check the data first!
-
-                    $('#data_table tbody').empty();
-
-                    let ticket_data = response['ticket_data'];
-                    let beam_data = response['beam_data'];
-
-                    for (let t in ticket_data) {
-                        /*if (beam_data[t]["is_matching_criteria"]) {
-                            $("#data_table tbody").append(
-                                `<tr>
-                                <th class="table-active" style="width: 20%">${ticket_data[t]["display"]||""}</th>
-                                <td style="width: 20%">${ticket_data[t]["value"]||""}</td>
-
-                                <th class="table-secondary" style="width: 20%">${beam_data[t]["display"]||""}</th>
-                                <td style="width: 20%">${beam_data[t]["value"]||""}</td>
-
-                                <td style="width: 10%">Match criteria data cannot be changed in Helpdesk.</td>
-                                </tr>`
-                            );
-                        } else {*/
-                            $("#data_table tbody").append(
-                                `<tr>
-                                <th class="table-active" style="width: 20%">${ticket_data[t]["display"]||""}</th>
-                                <td style="width: 20%">${ticket_data[t]["value"]||""}</td>
-
-                                <th class="table-active"style="width: 20%">${beam_data[t]["display"]||""}</th>
-                                <td style="width: 20%">${beam_data[t]["value"]||""}</td>
-
-                                <td style="width: 10%"><input class="beam_data_checkbox" type="checkbox" id=${beam_data[t]["column_name"]} name="col"
-                                    value=${ticket_data[t]["field_name"]}></td>
-                                </tr>`
-                            );
-                        //}
-                    }
-                },
-                error: function (response) {
-                    console.log(response);
-                }
-            });
+            update_page(ticket, inventory_type, cycle_id, view_id);
         } else {
             $('#data_table tbody').empty();
         }
     });
 
     $(document).on("change", ".beam_data_checkbox", function() {
+        // Disables the submit button if no boxes have been checked.
         if ($('.beam_data_checkbox:checkbox:checked').length > 0){
             $('#submit').prop("disabled", false);
         } else {
             $('#submit').prop("disabled", true);
         }
+
+        // If two ticket boxes have been checked to update the same BEAM field, the other box is unchecked.
+        let this_display = this.id;
+        let this_value = this.value;
+        $('input:checked').each(function() {
+            if (this.id === this_display && this.value !== this_value) {
+                $(this).prop('checked', false);
+            }
+        });
     });
 
 
     $("#update-form").submit(function (e) {
+        // Submits the checked ticket fields to BEAM to update the building with the ticket's values.
+        // Upon success, calls update_page to update the table and inserts a success message;
+        // after an error, an error message is inserted instead.
+
         e.preventDefault();
         let fields = [];
         let data = $('.beam_data_checkbox:checkbox:checked').serializeArray();
         for (i in data) {
-            console.log(data[i]['value']);
             fields.push(data[i]['value']);
         };
         var ticket = {{ ticket.id }};
@@ -190,6 +231,8 @@
         let inventory_type = value.split('-')[0];
         let cycle_id = value.split('-')[1];
         let view_id = value.split('-')[2];
+
+        $("#success-msg").remove()
 
         // make POST ajax call
         $.ajax({
@@ -203,11 +246,24 @@
                 'fields': fields
             },
             success: function (response) {
-                console.log('yay');
+                update_page(ticket, inventory_type, cycle_id, view_id);
+                $('#submit').prop("disabled", true);
+                $('<div class="form-group text-center" id="success-msg">' +
+                    "<div>BEAM data has been updated successfully.</div>" +
+                    "<a href='{{ ticket.get_absolute_url }}'><button class='btn btn-warning'>Return to ticket</button></a>  " +
+                    '<a href="{% url 'seed:home' %}#/properties/' + view_id + '" target="_blank" rel="noopener noreferrer"><button class="btn btn-primary">View Building in BEAM</button></a>' +
+                    '</div>'
+                ).insertAfter('#submit-button');
             },
             error: function (response) {
-                // alert the error if any error occured
-                alert(response["responseJSON"]["error"]);
+                update_page(ticket, inventory_type, cycle_id, view_id);
+                $('#submit').prop("disabled", true);
+                $('<div class="form-group text-center" id="success-msg">' +
+                    "<div>There was an error in updating BEAM.</div>" +
+                    "<a href='{{ ticket.get_absolute_url }}'><button class='btn btn-warning'>Return to ticket</button></a>  " +
+                    '<a href="{% url 'seed:home' %}#/properties/' + view_id + '" target="_blank" rel="noopener noreferrer"><button class="btn btn-primary">View Building in BEAM</button></a>' +
+                    '</div>'
+                ).insertAfter('#submit-button');
             }
         });
     });
