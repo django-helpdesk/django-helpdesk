@@ -78,7 +78,7 @@ copy_public_link = function() {
                         {% cycle 'row' '' as row silent %}
                         {% if row %}<tr>{% endif %}
                             <th class="table-secondary">
-                                {% if field.has_column %}<span title="This field is paired to a column in BEAM's inventory.">{{ field.label }} <i class="fas fa-city"></i></span>
+                                {% if field.has_column and field.lookup %}<span title="This field is used to look up buildings in BEAM's inventory.">{{ field.label }} <i class="fas fa-search"></i></span>
                                 {% else %}{{ field.label }}{% endif %}
                             </th>
                             {% if forloop.last %} <td colspan="3"> {% else %} <td> {% endif %}

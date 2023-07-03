@@ -180,8 +180,10 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
                     # ValueError error if parsing fails, using initial_value = current_value.value
                     # TypeError if parsing None type
                     pass
+                label = '%s (Required)' % display_data.label if display_data.required else display_data.label
+                label = '%s (Paired with "%s" in BEAM)' % (label, display_data.column.display_name if display_data.column.display_name else display_data.column.column_name) if display_data.column else label
                 instanceargs = {
-                    'label': '%s (Required)' % display_data.label if display_data.required else display_data.label,
+                    'label': label,
                     'help_text': display_data.get_markdown(),
                     'required': display_data.required,
                     'initial': initial_value,
@@ -203,8 +205,10 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
                                 if display_info == 'datetime' or display_info == 'time' or display_info == 'date':
                                     self.fields[display_data.field_name].widget.attrs.update({'autocomplete': 'off'})
                             elif attr == 'label':
-                                setattr(self.fields[display_data.field_name], attr,
-                                        '%s (Required)' % display_info if display_data.required else display_info)
+                                label = '%s (Required)' % display_info if display_data.required else display_info
+                                label = '%s (Paired with "%s" in BEAM)' % (label, display_data.column.display_name if display_data.column.display_name else display_data.column.column_name) \
+                                    if display_data.column else label
+                                setattr(self.fields[display_data.field_name], attr, label)
                             else:
                                 setattr(self.fields[display_data.field_name], attr, display_info)
 
