@@ -23,6 +23,11 @@
 <div class="col-xs-6">
     <div class="panel panel-default">
         <div class="panel-body"><h2>{% blocktrans %} {{ action }} Form {% endblocktrans %}</h2>
+            <p>
+                {% if action == "Create" %}{% trans "Leaving this page without using the cancel button will create a blank unnamed form." %}</br>{% endif %}
+                
+                {% trans "Required fields are indicated by " %} <span style="color:red;">*</span>
+            </p>
             {% if form.errors %}<p class="text-danger">{% for error in form.errors %}{% trans "Error: " %}{{ error }}<br>{% endfor %}</p>{% endif %}
             {% if formset.non_form_errors %}
             <div class="alert alert-danger" role="alert">
@@ -40,7 +45,6 @@
                 {% for key, error in form_errors.items %} {{ key }}: {{ error.as_text }} {% endfor %}
             </div>
             {% endif %}
-            
             {% endfor %}
             {% endif %}
             <form id='edit_form' method='post'>

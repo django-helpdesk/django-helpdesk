@@ -285,6 +285,10 @@ if helpdesk_settings.HELPDESK_KB_ENABLED:
             kb.index,
             name='kb_index'),
 
+        url(r'^kb/create/article$', 
+            kb.create_article,
+            name='create_kb_article'),
+
         url(r'^kb/(?P<slug>[A-Za-z0-9_-]+)/create/$',
             kb.create_article,
             name='create_kb_article'),

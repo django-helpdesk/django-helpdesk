@@ -8,9 +8,11 @@
 <li class="breadcrumb-item">
     <a href="{% url 'helpdesk:kb_index' %}{{ user_info.url }}">{% trans "Knowledgebase" %}</a>
 </li>
+{% if category %}
 <li class="breadcrumb-item active">
     <a href="{% url 'helpdesk:kb_category' category.slug %}{{ user_info.url }}">{% blocktrans with category.title as kbcat %}{{ kbcat }}{% endblocktrans %}</a>
 </li>
+{% endif %}
 <li class="breadcrumb-item active">{% blocktrans with item.question as itemq %} {{ action }} {{ itemq }}{% endblocktrans %}</li>
 {% endblock %}
 
@@ -26,14 +28,21 @@
                     {% csrf_token %}
                     <fieldset>
                         {{ form|bootstrap4form }}
-                        {% include 'helpdesk/include/collapsible_formset.html' with formset=form.attachment_formset formset_title="Attachment" formset_type="kbi_attachment" required_fields="['file']"%}
-                        {% comment %} can_copy=True copy_queryset=form.copy_queryset copy_url='helpdesk:copy_field' can_duplicate=True header_template='helpdesk/include/header_customfields.html' {% endcomment %}
+                        {% if action == "Edit" %}
+                            {% include 'helpdesk/include/collapsible_formset.html' with formset=form.attachment_formset formset_title="Attachment" formset_type="kbi_attachment" required_fields="['file']"%}
+                        {% else %}
+                            <p>Attachments</br><small>{% trans "Files can only be attached to an article after it has been created. After creating this article, edit it to upload attachments." %}</small></p>
+                        {% endif %}
                         <div class='buttons form-group'>
                             <input type='submit' class="btn btn-primary btn" 
                                 value="{% if action == "Create"%}Create Article{% else %}Save Changes{% endif %}"/>
                             <a href="
                             {% if action == "Create"%}
-                                {% url 'helpdesk:kb_category' category.slug %}{{ user_info.url }}
+                                {% if category %}
+                                    {% url 'helpdesk:kb_category' category.slug %}{{ user_info.url }}
+                                {% else %}
+                                    {% url 'helpdesk:kb_index' %}{{ user_info.url }}
+                                {% endif %}
                             {% else %}
                                 {% url 'helpdesk:kb_article' category.slug item.id %}{{ user_info.url }}
                             {% endif %}

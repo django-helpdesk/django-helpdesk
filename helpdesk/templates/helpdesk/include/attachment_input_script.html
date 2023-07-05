@@ -3,8 +3,7 @@
         src_input = document.getElementById('id_' + widgetName)
         data = new FormData()
         data.append('file', src_input.files[0])
-        //data.append('kbitem_id', document.querySelector('#id_' + widgetName.replace('-file','-kbitem')).value)
-        data.append('kbitem_id', {{ item.id }})
+        {% if item.id %} data.append('kbitem_id', {{ item.id }}) {% endif %}
         data.append('id', document.querySelector('#id_' + widgetName.replace('-file','-id')).value)
         data.append('csrfmiddlewaretoken', document.querySelector('input[name=csrfmiddlewaretoken]').value)
         

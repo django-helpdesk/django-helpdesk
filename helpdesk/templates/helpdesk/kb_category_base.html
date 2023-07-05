@@ -4,6 +4,7 @@
     <h2>{% blocktrans with category.title as kbcat %}{{ kbcat }}{% endblocktrans %}</h2>
     {% if user|is_helpdesk_staff %}
     <div class="flex-fill d-flex justify-content-end">
+        {% if  user.is_authenticated and user|is_helpdesk_staff %}
         <a class="btn btn-primary align-self-center mr-2" href="{% url 'helpdesk:create_kb_article' category.slug %}{{ user_info.url }}">
             <i class="fa fa-plus mr-1"></i>Create Article
         </a>
@@ -13,6 +14,7 @@
         <a class="btn btn-danger align-self-center" data-toggle="modal" data-target="#deleteModal">
             <i class="fa fa-trash mr-1"></i>Delete Category
         </a>
+        {% endif %}
     </div>
     {% endif %}
 </div>

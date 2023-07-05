@@ -4,12 +4,14 @@
     <div class="d-flex">
         <h2>{% blocktrans with item.question as itemq %}{{ itemq }}{% endblocktrans %}</h2>
         <div class="flex-fill d-flex justify-content-end">
+            {% if  user.is_authenticated and user|is_helpdesk_staff %}
             <a class="btn btn-primary align-self-center mr-2" href="{% url 'helpdesk:edit_kb_article' category.slug item.id %}{{ user_info.url }}">
                 <i class="fa fa-pen mr-1"></i>Edit Article
             </a>
             <a class="btn btn-danger align-self-center" data-toggle="modal" data-target="#deleteModal">
                 <i class="fa fa-trash mr-1"></i>Delete Article
             </a>
+            {% endif %}
         </div>
     </div>
     <a style="vertical-align:center" class="btn btn-secondary btn-sm{% if not prev_item %} disabled{% endif %}" href="{{ prev_item.get_absolute_url }}/{{ user_info.url }}" role="button">

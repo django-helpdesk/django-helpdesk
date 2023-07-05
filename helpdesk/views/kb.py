@@ -210,11 +210,11 @@ def article(request, slug, pk, iframe=False):
     })
 
 @helpdesk_staff_member_required
-def create_article(request, slug):
-    category = get_object_or_404(KBCategory, slug=slug)
+def create_article(request, slug=None):
+    category = get_object_or_404(KBCategory, slug=slug) if slug else None
 
     if request.method == 'GET':
-        form = EditKBItemForm(organization=request.user.default_organization, category=category)
+        form = EditKBItemForm(organization=request.user.default_organization, category=category) if slug else EditKBItemForm(organization=request.user.default_organization)
 
         return render(request, 'helpdesk/kb_article_edit.html', {
             'category': category,
@@ -247,11 +247,11 @@ def create_article(request, slug):
                     if cf['file']:
                         attach = cf['id'] if cf['id'] else KBIAttachment()
                         attach.kbitem = item
-                        attach.file = cf['file'] #.file
-                        # attach.filename = cf['file']
+                        attach.file = cf['file']
 
                         attach.save()     
-        return HttpResponseRedirect(reverse('helpdesk:kb_category', args=[category.slug]))
+            return HttpResponseRedirect(reverse('helpdesk:kb_category', args=[form.cleaned_data['category'].slug]))
+        return HttpResponseRedirect(reverse('helpdesk:kb_index'))
 
 @helpdesk_staff_member_required
 def edit_article(request, slug, pk, iframe=False):
@@ -321,14 +321,14 @@ def delete_article(request, slug, pk):
 
 def upload_attachment(request):
     form = EditKBItemForm.AttachmentFormSet.form(request.POST, request.FILES)
-    kbitem_id = request.POST.get('kbitem_id')
+    kbitem_id = request.POST.get('kbitem_id') if 'kbitem_id' in request.POST else None
 
     if form.is_valid():
         cf = form.cleaned_data
 
         if cf['file']:
             attach = cf['id'] if 'id' in cf and cf['id'] else KBIAttachment()
-            attach.kbitem = KBItem.objects.get(id=kbitem_id)
+            if kbitem_id: attach.kbitem = KBItem.objects.get(id=kbitem_id)
             attach.file = cf['file']
 
             attach.save()
