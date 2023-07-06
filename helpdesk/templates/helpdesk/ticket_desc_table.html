@@ -29,7 +29,10 @@ copy_public_link = function() {
                                 <i class="fas fa-city"></i> {% trans "Auto-pair to BEAM inventory" %}
                             </a></span> |
 
-                            <span><a href="{% url 'helpdesk:copy_to_beam' ticket.id %}" class="btn btn-primary btn-sm">
+                            {% if not ticket.beam_property.count and not ticket.beam_taxlot.count %} <span class="tooltip-wrapper" data-toggle="tooltip" data-placement="top" title="Must be paired to a BEAM building to copy data over."> {% else %} <span> {% endif %}
+                            <a href="{% url 'helpdesk:copy_to_beam' ticket.id %}"
+                                {% if not ticket.beam_property.count and not ticket.beam_taxlot.count %} class="btn btn-secondary btn-sm disabled" aria-disabled="true"
+                                {% else %} class="btn btn-primary btn-sm" {% endif %}>
                                 <i class="fa fa-share-square"></i> {% trans "Copy data to BEAM" %}
                             </a></span> |
 
