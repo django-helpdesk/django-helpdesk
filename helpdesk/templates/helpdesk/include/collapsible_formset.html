@@ -243,7 +243,12 @@ function duplicateForm(src) {
     // CloneNode does not copy new user inputs
     for (const field of srcForm.querySelectorAll('input, select, checkbox, textarea')) {
         if (field.id) {
-            duplicate.querySelector('[id=' + field.id.replace(srcNum, dupNum) + ']').value = field.value
+            if (field.type == "checkbox") {
+                duplicate.querySelector('[id=' + field.id.replace(srcNum, dupNum) + ']').checked = field.checked
+            } else {
+                duplicate.querySelector('[id=' + field.id.replace(srcNum, dupNum) + ']').value = field.value
+            }
+            
         }
     } 
 
