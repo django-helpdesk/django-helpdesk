@@ -1,13 +1,17 @@
-<div id="{{widget.name}}_strings">
-{% for subwidget in widget.subwidgets %}
-<div class="mb-2 ml-3">
-    {% include "django/forms/widgets/input.html" with widget=subwidget %}
+<div id="id_{{widget.name}}" class="card">
+    {% comment %} <input type="hidden" id="id_agg_{{widget.name}}" name="agg_{{widget.name}}" value="[]"> {% endcomment %}
+    <div id="{{widget.name}}_strings" class="card-body">
+        {% for subwidget in widget.subwidgets %}
+        <div class="mb-2">
+            {% include "django/forms/widgets/input.html" with widget=subwidget %}
+        </div>
+        {% endfor %}
+    </div>
+    <div class="card-footer">
+        <a><button id="{{ widget.name }}_add_string" type="button" class="btn btn-primary float-right"><i class="fa fa-plus mr-1"></i>Add Field</button></a>
+    </div>
 </div>
-{% endfor %}
-</div>
-<a>
-    <button id="{{ widget.name }}_add_string" type="button" class="ml-3 btn btn-outline-secondary">Add Field</button>
-</a>
+
 
 <script type='text/javascript' language='javascript'>
     $("#{{ widget.name }}_add_string").on('click', function() {
@@ -15,7 +19,7 @@
         new_input_num = document.getElementById("{{widget.name}}_strings").children.length
         new_elem_type = document.getElementById("{{widget.name}}_strings").children[0].children[0].type
         new_elem = document.createElement('div')
-        new_elem.setAttribute('class', 'mb-2 ml-3')
+        new_elem.setAttribute('class', 'mb-2')
         new_elem.innerHTML = '<input type="' + new_elem_type + '" name="{{ widget.name }}_0" class=" form-control" id="id_{{ widget.name }}_0" spellcheck="false" data-ms-editor="true">'.replaceAll("{{ widget.name }}_0", "{{ widget.name }}_" + new_input_num);
         document.getElementById('{{ widget.name }}_strings').appendChild(new_elem);
     });

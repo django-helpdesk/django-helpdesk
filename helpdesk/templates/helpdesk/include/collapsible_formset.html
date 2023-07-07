@@ -187,6 +187,8 @@
             document.querySelector('#' + src + ' [id^=button_]').click()
         }
 
+        // if additional scripting for adding is specified
+        if (typeof addScript === "function") { addScript(newForm) }
         return newForm
     }
         
@@ -265,7 +267,6 @@ function copyTo(src_field, src_link, form_id) {
                 src_link.classList.add('text-success');
                 src_link.innerHTML = src_link.innerHTML.replace(' (Failed)', '');
                 match = src_link.innerHTML.match(/\(Copied - (\d+)\)/)
-                console.log(match)
                 if (match) {
                     src_link.innerHTML = src_link.innerHTML.replace(/\(Copied - (\d+)\)/, ' (Copied - ' + (Number(match[1]) + 1) + ')');
                 } else {

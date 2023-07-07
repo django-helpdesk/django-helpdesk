@@ -443,7 +443,8 @@ class EditFormTypeForm(forms.ModelForm):
             widget = SearchableSelectWidget
 
             def label_from_instance(self, column):
-                return "%s: %s" % (column.table_name, column.column_name)
+                display = column.display_name if column.display_name else column.column_name
+                return "%s (%s)" % (display, column.table_name)
 
         def clean(self):
             # ticket_form is an excluded field, so must validate unique_together manually
@@ -493,6 +494,7 @@ class EditFormTypeForm(forms.ModelForm):
 
         if initial_customfields_objs:
             initial_customfields = []
+            list_val_lens = []
             for cf in initial_customfields_objs:
                 initial_customfields.append({
                     'id': cf.id,
@@ -511,6 +513,10 @@ class EditFormTypeForm(forms.ModelForm):
                     'public': cf.public,
                     'column': cf.column
                 })
+                if cf.list_values: 
+                    list_val_lens.append(len(cf.list_values))
+                else:
+                    list_val_lens.append(0)
 
             self.CustomFieldFormSet.extra = len(initial_customfields)
             self.customfield_formset.initial = initial_customfields
@@ -519,17 +525,26 @@ class EditFormTypeForm(forms.ModelForm):
             
             self.form_empty = self.customfield_formset.empty_form
             self.form_empty.fields['column']  = EditFormTypeForm.BaseCustomFieldFormSet.ColumnModelChoiceField(queryset=column_queryset)
+            self.form_empty.fields['agg_list_values'] = forms.JSONField(widget=forms.HiddenInput(), required=False)
+            self.form_empty.fields['list_values'] = MatchOnField(num_widgets=1, field_type=forms.CharField(), widget_type=forms.TextInput(), required=False)
+            i = 0
             for form in self.customfield_formset.forms:
                 form.fields['column'] = EditFormTypeForm.BaseCustomFieldFormSet.ColumnModelChoiceField(queryset=column_queryset)
+                form.fields['agg_list_values'] = forms.JSONField(widget=forms.HiddenInput(), required=False)
+                form.fields['list_values'] = MatchOnField(num_widgets= list_val_lens[i] + 1, field_type=forms.CharField(), widget_type=forms.TextInput(), required=False)
                 if form.initial and form.initial['field_name'] in defaults:
                     form.fields['field_name'].widget.attrs = {'readonly': True}
                     if form.initial['data_type'] in ['varchar', 'text']:
                         form.fields['data_type'].choices = (('varchar', _('Character (single line)')),('text', _('Text (multi-line)')))
                     else:
                         form.fields['data_type'].widget.attrs = {'readonly': True, 'style': 'pointer-events: none;'}
+                i += 1
         
         if args:
             self.CustomFieldFormSet.extra = int(args[0]['customfield_set-TOTAL_FORMS'])
+            self.CustomFieldFormSet.form.base_fields['agg_list_values'] = forms.JSONField(widget=forms.HiddenInput(), required=False)
+            for form in self.customfield_formset.forms:
+                form.fields['agg_list_values'] = forms.JSONField(widget=forms.HiddenInput(), required=False)
 
 
 class AbstractTicketForm(CustomFieldMixin, forms.Form):

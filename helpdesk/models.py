@@ -1915,8 +1915,9 @@ class CustomField(models.Model):
                     'which enforces that the user makes an active choice.'),
     )
 
-    list_values = models.TextField(
+    list_values = models.JSONField(
         _('List Values'),
+        default=list,
         help_text=_('For list fields only. Enter one option per line.'),
         blank=True,
         null=True,
@@ -1941,9 +1942,10 @@ class CustomField(models.Model):
     )
 
     def _choices_as_array(self):
-        valuebuffer = StringIO(self.list_values)
-        choices = [[item.strip(), item.strip()] for item in valuebuffer.readlines()]
-        valuebuffer.close()
+        # valuebuffer = StringIO(self.list_values)
+        # choices = [[item.strip(), item.strip()] for item in valuebuffer.readlines()]
+        # valuebuffer.close()
+        choices = [[item, item] for item in self.list_values]
         return choices
     choices_as_array = property(_choices_as_array)
 

@@ -53,7 +53,7 @@
                     {{ form|bootstrap4form }}
                     {% include 'helpdesk/include/collapsible_formset.html' with formset=form.customfield_formset formset_title="Custom Field" formset_type="custom_field" required_fields="['field_name']" can_copy=True copy_queryset=form.copy_queryset copy_url='helpdesk:copy_field' can_duplicate=True header_template='helpdesk/include/header_customfields.html'%}
                     <div class='buttons form-group'>
-                        <button type='submit' id='submit' onclick="removeEmpty()" class="btn btn-primary btn" value='{% trans "Save Changes" %}'>
+                        <button type='submit' id='submit' onclick="removeEmpty(); aggMultiText()" class="btn btn-primary btn" value='{% trans "Save Changes" %}'>
                             {% if action == "Create" %}
                             Create Form
                             {% else %}
@@ -92,10 +92,10 @@
         }
         
         // Update field visibility depending on the selected data type for the field
-        for (const data_type_field of document.querySelectorAll('[id^=' + id_formset + '-][id$=-data_type]')) {
-            formNum = data_type_field.id.match(new RegExp(`${id_formset}-(\\w+)`))[1];
+        for (const dataTypeField of document.querySelectorAll('[id^=' + id_formset + '-][id$=-data_type]')) {
+            formNum = dataTypeField.id.match(new RegExp(`${id_formset}-(\\w+)`))[1];
             updateDataTypeFields(formNum)
-            data_type_field.addEventListener('change', (e) => {updateDataTypeFields(e.srcElement.id.match(new RegExp(`${id_formset}-(\\w+)`))[1])});
+            dataTypeField.addEventListener('change', (e) => {updateDataTypeFields(e.srcElement.id.match(new RegExp(`${id_formset}-(\\w+)`))[1])});
         }
         
         $('[id^=colsearch_]').on('input', debounced())
@@ -106,29 +106,60 @@
             document.querySelector('#custom_field_empty').remove()
         }
     }
+
+    function aggMultiText() {
+        for (const agg of document.querySelectorAll('[name$=-agg_list_values]')) {
+            widgetName = agg.name.match('(.+)-agg_list_values')[1]
+            agg_strings = []
+            for (const string of document.getElementById(widgetName + '-list_values_strings').children) {
+                agg_strings.push(string.children[0].value)
+            }
+            agg.value = JSON.stringify(agg_strings)
+        }
+    }
+    
+    function addScript(newForm) {
+        dataTypeField = newForm.querySelector('[id$=-data_type]')
+        formNum = dataTypeField.id.match(new RegExp(`${id_formset}-(\\w+)`))[1];
+        updateDataTypeFields(formNum)
+        dataTypeField.addEventListener('change', (e) => {updateDataTypeFields(e.srcElement.id.match(new RegExp(`${id_formset}-(\\w+)`))[1])});
+    
+        newForm.querySelector("[id$=_add_string]").addEventListener('click', function() {
+            widgetName = "customfield_set-" + formNum + "-list_values"
+            // Create new input element and append it to the input container
+            new_input_num = document.getElementById(widgetName + "_strings").children.length
+            new_elem_type = document.getElementById(widgetName + "_strings").children[0].children[0].type
+            new_elem = document.createElement('div')
+            new_elem.setAttribute('class', 'mb-2')
+            new_elem.innerHTML = '<input type="' + new_elem_type + '" name="' + widgetName + '_0" class=" form-control" id="id_' + widgetName + '_0" spellcheck="false" data-ms-editor="true">'.replaceAll("{{ widget.name }}_0", "{{ widget.name }}_" + new_input_num);
+            document.getElementById(widgetName + '_strings').appendChild(new_elem);
+        });
+    }
     
     function updateDataTypeFields(formNum) {
-        dataType = document.getElementById(id_formset + '-' + formNum + '-data_type').value
+        if (formNum == "__prefix__") {formNum = "empty"}
+        form = document.getElementById('custom_field_' + formNum)
+        dataType = form.querySelector('[id$=-data_type]').value
         
         // Hide all conditionally visible fields and recheck conditions
-        document.getElementById(id_formset + '-' + formNum + '-max_length').parentElement.parentElement.hidden = true;
-        document.getElementById(id_formset + '-' + formNum + '-decimal_places').parentElement.parentElement.hidden = true;
-        document.getElementById(id_formset + '-' + formNum + '-empty_selection_list').parentElement.parentElement.hidden = true;
-        document.getElementById(id_formset + '-' + formNum + '-list_values').parentElement.parentElement.hidden = true;
-        document.getElementById(id_formset + '-' + formNum + '-notifications').parentElement.parentElement.hidden = true;
+        form.querySelector('[id$=-max_length]').parentElement.parentElement.hidden = true;
+        form.querySelector('[id$=-decimal_places]').parentElement.parentElement.hidden = true;
+        form.querySelector('[id$=-empty_selection_list]').parentElement.parentElement.hidden = true;
+        form.querySelector('[id$=-list_values]').parentElement.parentElement.hidden = true;
+        form.querySelector('[id$=-notifications]').parentElement.parentElement.hidden = true;
         
         if (['varchar', 'text', 'decimal'].indexOf(dataType) >= 0) {
-            document.getElementById(id_formset + '-' + formNum + '-max_length').parentElement.parentElement.hidden = false;
+            form.querySelector('[id$=-max_length]').parentElement.parentElement.hidden = false;
         }
         if (dataType == 'decimal') {
-            document.getElementById(id_formset + '-' + formNum + '-decimal_places').parentElement.parentElement.hidden = false;
+            form.querySelector('[id$=-decimal_places]').parentElement.parentElement.hidden = false;
         }
         if (dataType == 'list') {
-            document.getElementById(id_formset + '-' + formNum + '-empty_selection_list').parentElement.parentElement.hidden = false;
-            document.getElementById(id_formset + '-' + formNum + '-list_values').parentElement.parentElement.hidden = false;
+            form.querySelector('[id$=-empty_selection_list]').parentElement.parentElement.hidden = false;
+            form.querySelector('[id$=-list_values]').parentElement.parentElement.hidden = false;
         }
         if (dataType == 'email') {
-            document.getElementById(id_formset + '-' + formNum + '-notifications').parentElement.parentElement.hidden = false;
+            form.querySelector('[id$=-notifications]').parentElement.parentElement.hidden = false;
         }
     }
 </script>   

@@ -430,7 +430,7 @@ def edit_form(request, pk):
                     customfield.max_length = cf['max_length']
                     customfield.decimal_places = cf['decimal_places']
                     customfield.empty_selection_list = cf['empty_selection_list']
-                    customfield.list_values = cf['list_values']
+                    customfield.list_values = [i for i in cf['agg_list_values'] if i] # remove empty strings
                     customfield.notifications = cf['notifications']
                     customfield.form_ordering = cf['form_ordering']
                     customfield.required = cf['required']
@@ -476,7 +476,7 @@ def duplicate_form(request, pk):
     new_form.save() # generate default custom fields
     
     for cf_name in formtype.get_extra_field_names():
-        cf = CustomField.objects.get(field_name=cf_name)
+        cf = CustomField.objects.get(ticket_form=formtype, field_name=cf_name)
         new_cf = CustomField(
             field_name = cf.field_name,
             label = cf.label,
