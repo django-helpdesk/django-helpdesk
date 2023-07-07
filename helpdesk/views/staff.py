@@ -526,7 +526,7 @@ def copy_field(request):
         customfield.max_length = cf['max_length']
         customfield.decimal_places = cf['decimal_places']
         customfield.empty_selection_list = cf['empty_selection_list']
-        customfield.list_values = cf['list_values']
+        customfield.list_values = [i for i in cf['agg_list_values'] if i] # remove empty strings
         customfield.notifications = cf['notifications']
         customfield.form_ordering = cf['form_ordering']
         customfield.required = cf['required']

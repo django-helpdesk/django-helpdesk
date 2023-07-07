@@ -135,6 +135,18 @@
             document.getElementById(widgetName + '_strings').appendChild(new_elem);
         });
     }
+
+    function copyScript(src_field) {
+        srcForm = document.getElementById(src_field)
+
+        agg = srcForm.querySelector('[name$=-agg_list_values]')
+        widgetName = agg.name.match('(.+)-agg_list_values')[1]
+        agg_strings = []
+        for (const string of document.getElementById(widgetName + '-list_values_strings').children) {
+            agg_strings.push(string.children[0].value)
+        }
+        agg.value = JSON.stringify(agg_strings)
+    }
     
     function updateDataTypeFields(formNum) {
         if (formNum == "__prefix__") {formNum = "empty"}

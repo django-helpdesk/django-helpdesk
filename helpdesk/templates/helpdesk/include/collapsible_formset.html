@@ -257,6 +257,7 @@ function duplicateForm(src) {
 }
 
 function copyTo(src_field, src_link, form_id) {
+    if (typeof copyScript === "function") { copyScript(src_field) }
     src_field = document.getElementById(src_field)
     data = {form_id: form_id} 
     data['csrfmiddlewaretoken'] = document.querySelector('input[name=csrfmiddlewaretoken]').value
