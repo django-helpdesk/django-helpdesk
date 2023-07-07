@@ -11,7 +11,7 @@
 <div class="collapse" id="collapse_list_{{ widget.name }}">
     <div class="card pt-0 mx-0 my-0 rounded-lg overflow-hidden" style="max-height: 25vh;">
         <div class="card-header">
-            <input id="colsearch_{{ widget.name }}" oninput="debounced('{{ widget.name }}')" type="search" class="form-control" autocomplete="false" placeholder="Type to filter..." 
+            <input id="colsearch_{{ widget.name }}" onkeydown="if (event.keyCode == 13) {event.preventDefault()}" oninput="debounced('{{ widget.name }}')" type="search" class="form-control" autocomplete="false" placeholder="Type to filter..." 
             spellcheck="false" data-ms-editor="true" {% include "django/forms/widgets/attrs.html" %}>
         </div>
         <div class="card-body p-2 overflow-auto">
@@ -20,7 +20,7 @@
                 <li>
                     <a class="dropdown-item rounded-lg" onclick="selectOption(this, '{{ widget.name }}')" data-value="{{ option.value|stringformat:'s' }}">
                         {{option.label}}
-                    </a>
+                    </a>                
                 </li>
                 {% endfor %}{% endfor %}
             </ul>
