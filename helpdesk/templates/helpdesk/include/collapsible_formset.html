@@ -268,7 +268,12 @@ function copyTo(src_field, src_link, form_id) {
     data['csrfmiddlewaretoken'] = document.querySelector('input[name=csrfmiddlewaretoken]').value
     for (const field of src_field.querySelectorAll('input, select, checkbox, textarea')) {
         name = field.name.replace(/(\w+_set)-(\w+)-/, '')
-        data[name] = field.value
+        if (field.type == "checkbox") {
+            data[name] = (field.checked ? 'on' : '')
+        } else {
+            data[name] = field.value
+        }
+
     }
     copy_to_button = src_link.parentElement.parentElement.children[0].id
 
