@@ -235,7 +235,18 @@
 
 
 function duplicateForm(src) {
+    srcForm = document.getElementById(src)
+    srcNum = srcForm.id.match(`{{formset_type}}_(\\d+)`)[1]
     duplicate = addForm(src)
+    dupNum = duplicate.id.match(`{{formset_type}}_(\\d+)`)[1]
+    
+    // CloneNode does not copy new user inputs
+    for (const field of srcForm.querySelectorAll('input, select, checkbox, textarea')) {
+        if (field.id) {
+            duplicate.querySelector('[id=' + field.id.replace(srcNum, dupNum) + ']').value = field.value
+        }
+    } 
+
     duplicate.querySelector('[id$=-id]').value = '';
     button = duplicate.querySelector('[id^=button_]')
     button.innerHTML += '(Copy)'
