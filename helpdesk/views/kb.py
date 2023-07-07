@@ -337,9 +337,10 @@ def upload_attachment(request):
     else:
         return JsonResponse({'uploaded': False, 'errors': form.errors})
 
+
 def preview_markdown(request):
-    md = request.GET.get('md')
-    is_kbitem = request.GET.get('is_kbitem', 'false')
+    md = request.POST.get('md')
+    is_kbitem = request.POST.get('is_kbitem', 'false')
     org = request.user.default_organization
 
     class MarkdownNumbers(object):

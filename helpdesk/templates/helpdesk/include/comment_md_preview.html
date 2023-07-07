@@ -22,9 +22,12 @@
 <script type='text/javascript' language='javascript'>
     function updatePreview_comment() {
         $.ajax({
-            data: {md: $('#commentBox').val()},
+            data: {
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+                md: $('#commentBox').val()
+            },
             url: "{% url 'helpdesk:preview_markdown'  %}",
-
+            type: 'POST',
             success: function(response) {
                 $('#comment_md_preview').html(response['md_html'])
             },
