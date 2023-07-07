@@ -3175,9 +3175,10 @@ def export_ticket_table(request, tickets):
     num_queues = request.POST.get('queue_length', '0')
 
     qs = Ticket.objects.filter(id__in=tickets)
+    org = request.user.default_organization
     do_extra_data = int(num_queues) == 1
 
-    return export(qs, DatatablesTicketSerializer, do_extra_data=do_extra_data, visible_cols=visible_cols)
+    return export(qs, org, DatatablesTicketSerializer, do_extra_data=do_extra_data, visible_cols=visible_cols)
 
 
 @staff_member_required
@@ -3255,7 +3256,7 @@ def export(qs, org, serializer, paginate=False, do_extra_data=True, visible_cols
     }
 
     # Split tickets up into separate forms, serialize, and concatenate them
-    report = pd.DataFrame()
+    report = []
     for ticket_form_id in ticket_form_ids:
         sub_qs = qs.filter(ticket_form_id=ticket_form_id)
 
@@ -3291,7 +3292,8 @@ def export(qs, org, serializer, paginate=False, do_extra_data=True, visible_cols
             renamed_row = OrderedDict((mappings.get(k, k), v if v else '') for k, v in row.items())
             output.append(renamed_row)
         output = pd.json_normalize(output)
-        report = report.append(output, ignore_index=True)
+        report.append(output)
+    report = pd.concat(report)
     report = report.set_index('Ticket ID')
 
     time_stamp = timezone.now().strftime('%Y%m%d_%H%M%S')
