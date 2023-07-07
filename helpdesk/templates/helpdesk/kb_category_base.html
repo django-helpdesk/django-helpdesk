@@ -43,4 +43,4 @@
 {% endblock %}
 
 {% url 'helpdesk:delete_kb_category' category.slug as delete_url%}
-{% include 'helpdesk/include/confirm_delete.html' with type="Category" title=category.title delete_url=delete_url %}
+{% include 'helpdesk/include/confirm_delete.html' with type="Category" title=category.title delete_url=delete_url subdelete="Article" %}

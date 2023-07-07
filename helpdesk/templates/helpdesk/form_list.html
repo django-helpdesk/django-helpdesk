@@ -138,7 +138,7 @@
 </div>
 
 {% url 'helpdesk:delete_form' form.id as delete_url%}
-{% include 'helpdesk/include/confirm_delete.html' with type="Form" title=form.name delete_url=delete_url %}
+{% include 'helpdesk/include/confirm_delete.html' with type="Form" title=form.name delete_url=delete_url subdelete="Custom Field" %}
 
 <script type='text/javascript' language='javascript'>
     // In order to reuse the delete modal, its contents and links need to be updated to match the form being deleted.
