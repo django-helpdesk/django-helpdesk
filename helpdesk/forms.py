@@ -258,11 +258,12 @@ class EditFollowUpForm(forms.ModelForm):
         t = kwargs['initial']['ticket'] if kwargs else Ticket.objects.filter(id=args[0]['ticket']).first()
         self.fields['ticket'].queryset = Ticket.objects.filter(queue__organization__id=t.queue.organization_id)
 
+
 class EditKBCategoryForm(forms.ModelForm):
     error_css_class = 'text-danger'
 
-    slug = forms.SlugField()
-    preview_description = forms.CharField(widget=PreviewWidget, help_text=KBCategory.preview_description.field.help_text)
+    slug = forms.SlugField(help_text=KBCategory.slug.field.help_text)
+    preview_description = forms.CharField(widget=PreviewWidget, label="Short description", help_text=KBCategory.preview_description.field.help_text)
     description = forms.CharField(widget=PreviewWidget, help_text=KBCategory.description.field.help_text)
 
     class Meta:
@@ -280,25 +281,27 @@ class EditKBCategoryForm(forms.ModelForm):
         if action == "edit":
             self.fields['slug'].disabled = True
             self.fields['slug'].required = False
-        
+
         self.fields['queue'].queryset = Queue.objects.filter(organization=org)
-        self.fields['forms'].queryset = FormType.objects.filter(organization=org) 
+        self.fields['forms'].queryset = FormType.objects.filter(organization=org)
+
 
 class AttachmentFileInputWidget(forms.ClearableFileInput):
     template_name = 'helpdesk/include/attachment_input.html'
+
 
 class EditKBItemForm(forms.ModelForm):
 
     class CategoryModelChoiceField(forms.ModelChoiceField):
         def label_from_instance(self, category):
             return "%s" % (category.name)
-        
+
     category = CategoryModelChoiceField(queryset=KBCategory.objects)
-    answer = forms.CharField(widget=PreviewWidget, help_text=KBItem.answer.field.help_text)
+    answer = forms.CharField(widget=PreviewWidget, label=KBItem.answer.field.verbose_name, help_text=KBItem.answer.field.help_text)
 
     AttachmentFormSet = forms.inlineformset_factory(KBItem, KBIAttachment,
-        fields = ('id', 'file',),
-        widgets = {'file': AttachmentFileInputWidget}
+        fields=('id', 'file',),
+        widgets={'file': AttachmentFileInputWidget}
     )
 
     class Meta:
@@ -313,14 +316,13 @@ class EditKBItemForm(forms.ModelForm):
         """
         org = kwargs.pop('organization', None)
         pk = kwargs.pop('pk', None)
-        category = kwargs.pop('category', None) 
+        category = kwargs.pop('category', None)
         super(EditKBItemForm, self).__init__(*args, **kwargs)
 
         self.fields['category'].queryset = KBCategory.objects.filter(organization=org)
         if category:
             self.fields['category'].initial = category
 
-        self.AttachmentFormSet
         self.attachment_formset = self.AttachmentFormSet()
         self.form_empty = self.attachment_formset.empty_form
 
@@ -343,7 +345,7 @@ class MatchOnField(forms.MultiValueField):
         of the types specified in field_type and widget_type. These fields are
         available as a list, with a button below to add an additional field.
     """
-    
+
     def __init__(self, num_widgets, field_type, widget_type, *args, **kwargs):
         self.fields = []
         self.widgets = []
@@ -356,6 +358,7 @@ class MatchOnField(forms.MultiValueField):
     def compress(self, values):
         return values
 
+
 class MatchOnWidget(forms.widgets.MultiWidget):
     template_name = 'helpdesk/include/multi_text_input.html'
 
@@ -363,6 +366,7 @@ class MatchOnWidget(forms.widgets.MultiWidget):
         if value:
             return value
         return []
+
 
 class EditQueueForm(forms.ModelForm):
     error_css_class = 'text-danger'
@@ -374,22 +378,22 @@ class EditQueueForm(forms.ModelForm):
     agg_match_on_addresses = forms.JSONField(widget=forms.HiddenInput(), required=False)
     match_on = MatchOnField(num_widgets=1, field_type=forms.CharField(), widget_type=forms.TextInput(), required=False)
     match_on_addresses = MatchOnField(num_widgets=1, field_type=forms.EmailField(), widget_type=forms.EmailInput(), required=False)
-    
+
     slug = forms.SlugField()
-    email_address = forms.CharField(required=False, initial="None")
-    
+    importer = forms.CharField(required=False, initial="None", label="Email address", help_text=Queue.importer.field.help_text)
+
     class OwnerModelChoiceField(forms.ModelChoiceField):
         def label_from_instance(self, user):
             if user.get_full_name():
                 return "%s" % user.get_full_name()
             else:
                 return "%s" % user.get_username()
-            
+
     default_owner = OwnerModelChoiceField(queryset=User.objects, required=False)
 
     class Meta:
         model = Queue
-        exclude = ('organization','importer',)
+        exclude = ('organization',)
 
     def __init__(self, action, *args, **kwargs):
         """
@@ -403,20 +407,24 @@ class EditQueueForm(forms.ModelForm):
             self.fields['slug'].disabled = True
             self.fields['slug'].required = False
 
-        self.fields['email_address'].disabled = True
+        self.fields['importer'].disabled = True
         self.fields['default_owner'].queryset = User.objects.filter(orgs=self.org)
 
         if kwargs and kwargs['initial']:
             self.fields['match_on'] = MatchOnField(
                 num_widgets=len(kwargs['initial']['match_on']) + 1,
                 field_type=forms.CharField(), widget_type=forms.TextInput(), 
-                required=False, 
-                help_text = "A list of strings. If you'd like only emails with certain subject lines to be imported into this queue, list that text here. Otherwise, leave blank.")
+                required=False,
+                label=Queue.match_on.field.verbose_name,
+                help_text=Queue.match_on.field.help_text
+            )
             self.fields['match_on_addresses'] = MatchOnField(
                 num_widgets=len(kwargs['initial']['match_on_addresses']) + 1, 
                 field_type=forms.EmailField(), widget_type=forms.EmailInput(), 
-                required=False, 
-                help_text="A list of strings. If you'd like only emails from specific addresses to be imported into this queue, list those addresses here. Otherwise, leave blank.")
+                required=False,
+                label=Queue.match_on_addresses.field.verbose_name,
+                help_text=Queue.match_on_addresses.field.help_text
+            )
 
     def clean(self):
         cleaned_data = super().clean()
@@ -425,18 +433,20 @@ class EditQueueForm(forms.ModelForm):
         # constraint of slugs must be done manually
         if 'slug' in cleaned_data and Queue.objects.filter(organization=self.org, slug=cleaned_data['slug']).exists():
             raise ValidationError({'slug': ["Queue with this slug already exists in this organization"]})
-        
+
         return cleaned_data
-    
+
+
 class SearchableSelectWidget(forms.widgets.Select):
     template_name = 'helpdesk/include/searchable_select.html'
+
 
 class EditFormTypeForm(forms.ModelForm):
     # error_css_class = 'text-danger'
 
     id = forms.IntegerField(widget = forms.HiddenInput)
     description = forms.CharField(widget=PreviewWidget, help_text=FormType.description.field.help_text, required=False)
-    
+
     class BaseCustomFieldFormSet(forms.BaseInlineFormSet):
 
         class ColumnModelChoiceField(forms.ModelChoiceField):
@@ -460,7 +470,7 @@ class EditFormTypeForm(forms.ModelForm):
 
                     if (before == after): # or CustomField.objects.filter(field_name=cleaned_data['field_name'], ticket_form=self.ticket_form).exists():
                         raise ValidationError(["Custom Field with name \"" + cleaned_data['field_name'] + "\" already exists for this form."])
-    
+
     CustomFieldFormSet = forms.inlineformset_factory(FormType, CustomField, formset=BaseCustomFieldFormSet,
         exclude = ['choices_as_array', 'ticket_form', 'created', 'modified','objects','view_ordering'],
         widgets = {'help_text': PreviewWidget}
@@ -524,7 +534,7 @@ class EditFormTypeForm(forms.ModelForm):
             defaults = ['queue','submitter_email', 'contact_name', 'contact_email', 'title','description','building_name','building_address','building_id','pm_id','attachment','due_date','priority','cc_emails', 'empty']
             
             self.form_empty = self.customfield_formset.empty_form
-            self.form_empty.fields['column']  = EditFormTypeForm.BaseCustomFieldFormSet.ColumnModelChoiceField(queryset=column_queryset)
+            self.form_empty.fields['column'] = EditFormTypeForm.BaseCustomFieldFormSet.ColumnModelChoiceField(queryset=column_queryset)
             self.form_empty.fields['agg_list_values'] = forms.JSONField(widget=forms.HiddenInput(), required=False)
             self.form_empty.fields['list_values'] = MatchOnField(num_widgets=1, field_type=forms.CharField(), widget_type=forms.TextInput(), required=False)
             i = 0
@@ -539,7 +549,7 @@ class EditFormTypeForm(forms.ModelForm):
                     else:
                         form.fields['data_type'].widget.attrs = {'readonly': True, 'style': 'pointer-events: none;'}
                 i += 1
-        
+
         if args:
             self.CustomFieldFormSet.extra = int(args[0]['customfield_set-TOTAL_FORMS'])
             self.CustomFieldFormSet.form.base_fields['agg_list_values'] = forms.JSONField(widget=forms.HiddenInput(), required=False)
@@ -560,7 +570,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
     hidden_fields = []
 
     description = forms.CharField(
-        widget=PreviewWidget, 
+        widget=PreviewWidget,
         help_text=Ticket.description.field.help_text
     )
 

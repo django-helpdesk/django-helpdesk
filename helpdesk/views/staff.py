@@ -216,6 +216,7 @@ def create_queue(request):
             'debug': settings.DEBUG,
         })
 
+
 @helpdesk_staff_member_required
 def edit_queue(request, slug):
     """Edit Queue"""
@@ -239,7 +240,7 @@ def edit_queue(request, slug):
                 'default_owner': queue.default_owner,
                 'reassign_when_closed': queue.reassign_when_closed,
                 'dedicated_time': queue.dedicated_time,
-                'email_address': queue.email_address if queue.email_address else "None",
+                'importer': queue.email_address if queue.email_address else "None",
             }
         )
 

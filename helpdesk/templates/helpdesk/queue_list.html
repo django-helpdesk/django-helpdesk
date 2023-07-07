@@ -43,15 +43,15 @@
                     {% comment %} <th>{% trans "Organization" %}</th> {% endcomment %}
                     <th>{% trans "Title" %}</th>
                     <th>{% trans "Slug" %}</th> {# May not need to be a column #}
-                    {% comment %} <th>{% trans "Importer" %}</th> {# May not need to be a column #} {% endcomment %}
-                    <th>{% trans "Public Submission" %}</th>
-                    <th>{% trans "Notify on Email" %}</th>
-                    <th>{% trans "Reassign on Close" %}</th>
                     <th>{% trans "Default Owner" %}</th>
+                    {% comment %} <th>{% trans "Importer" %}</th> {# May not need to be a column #} {% endcomment %}
+                    <th>{% trans "Allows public submission?" %}</th>
+                    <th>{% trans "Staff notified on new tickets" %}</th>
+                    <th>{% trans "Staff notified on all ticket updates" %}</th>
                     {% comment %} <th>{% trans "Escalation Days" %}</th> {# May not need to be a column #} {% endcomment %}
                     {% comment %} <th>{% trans "Dedicated Time" %}</th> {# May not need to be a column #} {% endcomment %}
-                    <th>{% trans "Match On" %}</th> {# May not need to be a column #}
-                    <th>{% trans "Match On Addresses" %}</th> {# May not need to be a column #}
+                    <th>{% trans "Matches on these subject lines" %}</th> {# May not need to be a column #}
+                    <th>{% trans "Matches on these email addresses" %}</th> {# May not need to be a column #}
                 </tr>
             </thead>
             <tbody>
@@ -60,30 +60,18 @@
                     {% comment %} <td>{{ queue.organization.name }}</td> {% endcomment %}
                     <td class="tickettitle" data-toggle="tooltip" title="Edit {{ queue.title }}"><a href="{% url 'helpdesk:edit_queue' queue.slug %}{{ user_info.url }}">{{ queue.id }}. {{ queue.title }}</a></td>
                     <td>{{ queue.slug }}</td>
+                    <td>{% if queue.get_default_owner %}{{queue.get_default_owner}}{% else%}-{% endif %}</td>
                     {% comment %} <td>{% if queue.importer %}{{queue.importer}}{% else%}-{% endif %}</td> {% endcomment %}
                     <td class="text-center">
                         {# This block could be another template, since it is reused 3 times in this code #}
                         {% if queue.allow_public_submission %}
-                            <i class="fa fa-check-circle text-success">
+                        <i class="fa fa-check-circle text-success"></i>
                         {% else %}
-                            <i class="fa fa-times-circle text-danger">
+                        <i class="fa fa-times-circle text-danger"></i>
                         {% endif%}
                     </td>
-                    <td class="text-center">
-                        {% if queue.enable_notifications_on_email_events %}
-                            <i class="fa fa-check-circle text-success">
-                        {% else %}
-                            <i class="fa fa-times-circle text-danger">
-                        {% endif%}
-                    </td>
-                    <td class="text-center">
-                        {% if queue.reassign_when_closed %}
-                            <i class="fa fa-check-circle text-success">
-                        {% else %}
-                            <i class="fa fa-times-circle text-danger">
-                        {% endif%}
-                    </td>
-                    <td>{% if queue.get_default_owner %}{{queue.get_default_owner}}{% else%}-{% endif %}</td>
+                    <td>{{queue.new_ticket_cc}}</td>
+                    <td>{{queue.updated_ticket_cc}}</td>
                     {% comment %} <td>{% if queue.escalate_days %}{{queue.escalate_days}}{% else%}-{% endif %}</td> {% endcomment %}
                     {% comment %} <td>{% if queue.dedicated_time %}{{queue.dedicated_time}}{% else%}-{% endif %}</td> {% endcomment %}
                     <td>{{queue.match_on}}</td>
