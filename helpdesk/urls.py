@@ -297,13 +297,49 @@ if helpdesk_settings.HELPDESK_KB_ENABLED:
             kb.index,
             name='kb_index'),
 
+        url(r'^kb/create/article$', 
+            kb.create_article,
+            name='create_kb_article'),
+
+        url(r'^kb/(?P<slug>[A-Za-z0-9_-]+)/create/$',
+            kb.create_article,
+            name='create_kb_article'),
+
         url(r'^kb/(?P<slug>[A-Za-z0-9_-]+)/(?P<pk>[0-9]+)/$',
             kb.article,
             name='kb_article'),
 
+        url(r'^kb/(?P<slug>[A-Za-z0-9_-]+)/(?P<pk>[0-9]+)/edit/$',
+            kb.edit_article,
+            name="edit_kb_article"),
+
+        url(r'^kb/preview_markdown$',
+            kb.preview_markdown,
+            name="preview_markdown"),
+
+        url(r'^kb/upload_attachment',
+            kb.upload_attachment,
+            name="upload_attachment"),
+
+        url(r'^kb/(?P<slug>[A-Za-z0-9_-]+)/(?P<pk>[0-9]+)/delete/$',
+            kb.delete_article,
+            name="delete_kb_article"),
+
+        url(r'^kb/create/$',
+            kb.create_category,
+            name='create_kb_category'),
+
         url(r'^kb/(?P<slug>[A-Za-z0-9_-]+)/$',
             kb.category,
             name='kb_category'),
+
+        url(r'^kb/(?P<slug>[A-Za-z0-9_-]+)/edit/$',
+            kb.edit_category,
+            name="edit_kb_category"),
+
+        url(r'^kb/(?P<slug>[A-Za-z0-9_-]+)/delete/$',
+            kb.delete_category,
+            name="delete_kb_category"),
 
         url(r'^kb/(?P<item>[0-9]+)/vote/$',
             kb.vote,
@@ -328,4 +364,40 @@ urlpatterns += [
     url(r'^system_settings/$',
         login_required(DirectTemplateView.as_view(template_name='helpdesk/system_settings.html')),
         name='system_settings'),
+    
+    url(r'^system_settings/maintain_queues/$',
+        staff.queue_list,
+        name='maintain_queues'),
+
+    url(r'^system_settings/maintain_queues/create/$',
+        staff.create_queue,
+        name='create_queue'),
+
+    url(r'^system_settings/maintain_queues/(?P<slug>[A-Za-z0-9_-]+)/edit/$',
+        staff.edit_queue,
+        name='edit_queue'),
+
+    url(r'^system_settings/maintain_forms/$',
+        staff.form_list,
+        name='maintain_forms'),
+        
+    url(r'^system_settings/maintain_forms/create/$',
+        staff.create_form,
+        name="create_form"),
+
+    url(r'^system_settings/maintain_forms/(?P<pk>[0-9]+)/edit/$',
+        staff.edit_form,
+        name="edit_form"),
+
+    url(r'^system_settings/maintain_forms/(?P<pk>[0-9]+)/delete/$',
+        staff.delete_form,
+        name="delete_form"),
+
+    url(r'^system_settings/maintain_forms/(?P<pk>[0-9]+)/duplicate/$',
+        staff.duplicate_form,
+        name="duplicate_form"),
+
+    url(r'^system_settings/maintain_forms/copy_field/',
+        staff.copy_field,
+        name="copy_field"),
 ]

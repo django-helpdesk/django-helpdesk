@@ -1,0 +1,29 @@
+<div hidden>
+    {% include 'django/forms/widgets/select.html' %}
+</div>
+<div class="input-group mb-2">
+    <div class="input-group-prepend">
+        <button type="button" id='new_{{widget.name}}' class="btn btn-outline-secondary" data-toggle="collapse" data-target="#collapse_list_{{widget.name}}">Select New</button>
+    </div>
+    <input type="text" id="colselection_{{ widget.name }}" placeholder="None" class="form-control" readOnly 
+        value="{% for group_name, group_choices, group_index in widget.optgroups %}{% for option in group_choices %}{% if option.value|stringformat:'s' == widget.value.0 %}{{ option.label }}{% endif %}{% endfor %}{% endfor %}">
+</div>
+<div class="collapse" id="collapse_list_{{ widget.name }}">
+    <div class="card pt-0 mx-0 my-0 rounded-lg overflow-hidden" style="max-height: 25vh;">
+        <div class="card-header">
+            <input id="colsearch_{{ widget.name }}" onkeydown="if (event.keyCode == 13) {event.preventDefault()}" oninput="debounced('{{ widget.name }}')" type="search" class="form-control" autocomplete="false" placeholder="Type to filter..." 
+            spellcheck="false" data-ms-editor="true" {% include "django/forms/widgets/attrs.html" %}>
+        </div>
+        <div class="card-body p-2 overflow-auto">
+            <ul id="collist_{{widget.name}}" class="list-unstyled mb-0 overflow-auto">
+                {% for group_name, group_choices, group_index in widget.optgroups %}{% for option in group_choices %}
+                <li>
+                    <a class="dropdown-item rounded-lg" onclick="selectOption(this, '{{ widget.name }}')" data-value="{{ option.value|stringformat:'s' }}">
+                        {{option.label}}
+                    </a>                
+                </li>
+                {% endfor %}{% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>

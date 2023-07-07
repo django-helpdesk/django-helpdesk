@@ -1,4 +1,4 @@
-{% extends "helpdesk/base.html" %}{% load i18n %}
+{% extends "helpdesk/base.html" %}{% load i18n bootstrap4form %}
 {% block helpdesk_title %}{% trans "Edit followup" %}{% endblock %}
 
 {% block helpdesk_head %}
@@ -33,25 +33,11 @@
         <form action="." method="POST" name="edit_followup_form">
             {{ form.non_field_errors }}
             <fieldset>
-            <dl>
-                <dt><label for='id_ticket'>{% trans "Reassign ticket:" %}</label></dt>
-                <dd>{{ form.ticket }}</dd>
-                <dt><label for="id_title">{% trans "Title:" %}</label></dt>
-                <dd>{{ form.title }}</dd>
-                <dt><label for="id_comment">{% trans "Comment:" %}</label></dt>
-                <dd>{{ form.comment }}</dd>
-                <dt><label for="id_public">Public:</label></dt>
-                <dd>{{ form.public }}</dd>
-                    <p>Public tickets are viewable by the submitter and all staff, but non-public tickets can only be seen by staff.</p>
-                <dt><label for="id_new_status">New Status:</label></dt>
-                <dd>{{ form.new_status }}</dd>
-                    <p>If the status was changed, what was it changed to?</p>
-                <dt><label for="id_time_spent">Time spent:</label></dt>
-                <dd>{{ form.time_spent }}</dd>
-            </dl>
+                {{ form|bootstrap4form}}
             </fieldset>
             <p><input class="btn btn-primary btn-sm" type="submit" value="Submit"></p>{% csrf_token %}
         </form>
     </div>
 </div>
+{% include 'helpdesk/include/edit_md_preview_script.html' %} 
 {% endblock helpdesk_body %}

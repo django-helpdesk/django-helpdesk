@@ -23,12 +23,13 @@ from django.shortcuts import get_object_or_404
 from helpdesk.lib import safe_template_context, process_attachments
 from helpdesk.models import (Ticket, Queue, FollowUp, IgnoreEmail, TicketCC,
                              CustomField, TicketDependency, UserSettings, KBItem,
-                             FormType, is_extra_data)
+                             FormType, KBCategory, KBIAttachment, is_extra_data)
 from helpdesk import settings as helpdesk_settings
 from helpdesk.email import create_ticket_cc
 from helpdesk.decorators import list_of_helpdesk_staff
 import re
 
+from seed.models import Column
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -128,8 +129,12 @@ class CustomFieldMixin(object):
         else:
             self.fields[field.field_name] = fieldclass(**instanceargs)
 
+class PreviewWidget(forms.widgets.Textarea):
+    template_name = "helpdesk/include/edit_md_preview.html"
 
 class EditTicketForm(CustomFieldMixin, forms.ModelForm):
+
+    description = forms.CharField(widget=PreviewWidget, help_text=Ticket.description.field.help_text)
 
     class Meta:
         model = Ticket
@@ -244,6 +249,7 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
 
 
 class EditFollowUpForm(forms.ModelForm):
+    comment = forms.CharField(widget=PreviewWidget, help_text=FollowUp.comment.field.help_text)
 
     class Meta:
         model = FollowUp
@@ -257,6 +263,304 @@ class EditFollowUpForm(forms.ModelForm):
         self.fields['ticket'].queryset = Ticket.objects.filter(queue__organization__id=t.queue.organization_id)
 
 
+class EditKBCategoryForm(forms.ModelForm):
+    error_css_class = 'text-danger'
+
+    slug = forms.SlugField(help_text=KBCategory.slug.field.help_text)
+    preview_description = forms.CharField(widget=PreviewWidget, label="Short description", help_text=KBCategory.preview_description.field.help_text)
+    description = forms.CharField(widget=PreviewWidget, help_text=KBCategory.description.field.help_text)
+
+    class Meta:
+        model = KBCategory
+        exclude = ('organization',)
+
+    def __init__(self, action, *args, **kwargs):
+        """
+            Set slug field to read-only. 
+            Filter queues and forms by current org.
+        """
+        org = kwargs.pop('organization', None)
+        super(EditKBCategoryForm, self).__init__(*args, **kwargs)
+
+        if action == "edit":
+            self.fields['slug'].disabled = True
+            self.fields['slug'].required = False
+
+        self.fields['queue'].queryset = Queue.objects.filter(organization=org)
+        self.fields['forms'].queryset = FormType.objects.filter(organization=org)
+
+
+class AttachmentFileInputWidget(forms.ClearableFileInput):
+    template_name = 'helpdesk/include/attachment_input.html'
+
+
+class EditKBItemForm(forms.ModelForm):
+
+    class CategoryModelChoiceField(forms.ModelChoiceField):
+        def label_from_instance(self, category):
+            return "%s" % (category.name)
+
+    category = CategoryModelChoiceField(queryset=KBCategory.objects)
+    answer = forms.CharField(widget=PreviewWidget, label=KBItem.answer.field.verbose_name, help_text=KBItem.answer.field.help_text)
+
+    AttachmentFormSet = forms.inlineformset_factory(KBItem, KBIAttachment,
+        fields=('id', 'file',),
+        widgets={'file': AttachmentFileInputWidget}
+    )
+
+    class Meta:
+        model = KBItem
+        exclude = ('voted_by', 'downvoted_by', 'votes', 'recommendations', 'last_updated','team')
+
+    def __init__(self, *args, **kwargs):
+        """
+            Category field will only show category titles.
+            Filter categories by current org.
+            Prepoulate category field when creating a new article from a category's page.
+        """
+        org = kwargs.pop('organization', None)
+        pk = kwargs.pop('pk', None)
+        category = kwargs.pop('category', None)
+        super(EditKBItemForm, self).__init__(*args, **kwargs)
+
+        self.fields['category'].queryset = KBCategory.objects.filter(organization=org)
+        if category:
+            self.fields['category'].initial = category
+
+        self.attachment_formset = self.AttachmentFormSet()
+        self.form_empty = self.attachment_formset.empty_form
+
+        initial_attach = []
+        for attach in KBIAttachment.objects.filter(kbitem=pk).order_by('id'):
+            initial_attach.append({
+                'id': attach.id,
+                'file': attach.file,
+            })
+        self.AttachmentFormSet.extra = len(initial_attach)
+        self.attachment_formset.initial = initial_attach
+
+        for form in self.attachment_formset.forms:
+            form.fields['file'].required = False
+
+
+class MatchOnField(forms.MultiValueField):
+    """
+        Custom MultiValueField that creates num_widgets number of fields and widgets
+        of the types specified in field_type and widget_type. These fields are
+        available as a list, with a button below to add an additional field.
+    """
+
+    def __init__(self, num_widgets, field_type, widget_type, *args, **kwargs):
+        self.fields = []
+        self.widgets = []
+        for i in range(num_widgets):
+            self.fields.append(field_type)
+            self.widgets.append(widget_type)
+        self.widget = MatchOnWidget(widgets=self.widgets)
+        super(MatchOnField, self).__init__(fields=self.fields, *args, **kwargs)
+
+    def compress(self, values):
+        return values
+
+
+class MatchOnWidget(forms.widgets.MultiWidget):
+    template_name = 'helpdesk/include/multi_text_input.html'
+
+    def decompress(self, value):
+        if value:
+            return value
+        return []
+
+
+class EditQueueForm(forms.ModelForm):
+    error_css_class = 'text-danger'
+
+    # Django only recognizes the initial match_on fields at form creation.
+    # These hidden fields aggregate the values of all match_on fields at submission time using JavaSript
+    # See helpdesk/queue_list.html and helpdesk/include/multi_text_input.html
+    agg_match_on = forms.JSONField(widget=forms.HiddenInput(), required=False)
+    agg_match_on_addresses = forms.JSONField(widget=forms.HiddenInput(), required=False)
+    match_on = MatchOnField(num_widgets=1, field_type=forms.CharField(), widget_type=forms.TextInput(), required=False)
+    match_on_addresses = MatchOnField(num_widgets=1, field_type=forms.EmailField(), widget_type=forms.EmailInput(), required=False)
+
+    slug = forms.SlugField()
+    importer = forms.CharField(required=False, initial="None", label="Email address", help_text=Queue.importer.field.help_text)
+
+    class OwnerModelChoiceField(forms.ModelChoiceField):
+        def label_from_instance(self, user):
+            if user.get_full_name():
+                return "%s" % user.get_full_name()
+            else:
+                return "%s" % user.get_username()
+
+    default_owner = OwnerModelChoiceField(queryset=User.objects, required=False)
+
+    class Meta:
+        model = Queue
+        exclude = ('organization',)
+
+    def __init__(self, action, *args, **kwargs):
+        """
+            Set slug and email address field to read-only.
+            Set email address field to "None" if it is empty.
+        """
+        self.org = kwargs.pop('organization', None)
+        super(EditQueueForm, self).__init__(*args, **kwargs)
+
+        if action == "edit":
+            self.fields['slug'].disabled = True
+            self.fields['slug'].required = False
+
+        self.fields['importer'].disabled = True
+        self.fields['default_owner'].queryset = User.objects.filter(orgs=self.org)
+
+        if kwargs and kwargs['initial']:
+            self.fields['match_on'] = MatchOnField(
+                num_widgets=len(kwargs['initial']['match_on']) + 1,
+                field_type=forms.CharField(), widget_type=forms.TextInput(), 
+                required=False,
+                label=Queue.match_on.field.verbose_name,
+                help_text=Queue.match_on.field.help_text
+            )
+            self.fields['match_on_addresses'] = MatchOnField(
+                num_widgets=len(kwargs['initial']['match_on_addresses']) + 1, 
+                field_type=forms.EmailField(), widget_type=forms.EmailInput(), 
+                required=False,
+                label=Queue.match_on_addresses.field.verbose_name,
+                help_text=Queue.match_on_addresses.field.help_text
+            )
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        # Since organization is an excluded field, validating the unique_together 
+        # constraint of slugs must be done manually
+        if 'slug' in cleaned_data and Queue.objects.filter(organization=self.org, slug=cleaned_data['slug']).exists():
+            raise ValidationError({'slug': ["Queue with this slug already exists in this organization"]})
+
+        return cleaned_data
+
+
+class SearchableSelectWidget(forms.widgets.Select):
+    template_name = 'helpdesk/include/searchable_select.html'
+
+
+class EditFormTypeForm(forms.ModelForm):
+    # error_css_class = 'text-danger'
+
+    id = forms.IntegerField(widget = forms.HiddenInput)
+    description = forms.CharField(widget=PreviewWidget, help_text=FormType.description.field.help_text, required=False)
+
+    class BaseCustomFieldFormSet(forms.BaseInlineFormSet):
+
+        class ColumnModelChoiceField(forms.ModelChoiceField):
+            widget = SearchableSelectWidget
+
+            def label_from_instance(self, column):
+                display = column.display_name if column.display_name else column.column_name
+                return "%s (%s)" % (display, column.table_name)
+
+        def clean(self):
+            # ticket_form is an excluded field, so must validate unique_together manually
+            field_names = set()
+            for form in self.forms:
+                cleaned_data = form.cleaned_data
+
+                if 'field_name' in cleaned_data and not cleaned_data['DELETE']:
+                    # Detect duplicate field names within the form
+                    before = len(field_names)
+                    field_names.add(cleaned_data['field_name'])
+                    after = len(field_names)
+
+                    if (before == after): # or CustomField.objects.filter(field_name=cleaned_data['field_name'], ticket_form=self.ticket_form).exists():
+                        raise ValidationError(["Custom Field with name \"" + cleaned_data['field_name'] + "\" already exists for this form."])
+
+    CustomFieldFormSet = forms.inlineformset_factory(FormType, CustomField, formset=BaseCustomFieldFormSet,
+        exclude = ['choices_as_array', 'ticket_form', 'created', 'modified','objects','view_ordering'],
+        widgets = {'help_text': PreviewWidget}
+    )
+
+    class Meta:
+        model = FormType
+        exclude = ('organization', 'created', 'updated',)
+
+    def __init__(self, *args, **kwargs):
+        """
+            Set up formset for CustomField objects 
+        """
+        self.org = kwargs.pop('organization', None)
+        self.pk = kwargs.pop('pk', None)
+        # self.ticket_form = kwargs.pop('ticket_form', None)
+        initial_customfields_objs = kwargs.pop('initial_customfields', None)
+
+        super(EditFormTypeForm, self).__init__(*args, **kwargs)
+
+        self.fields['queue'].queryset = Queue.objects.filter(organization = self.org)
+        column_queryset = Column.objects \
+            .filter(organization_id=self.org) \
+            .exclude(table_name='') \
+            .exclude(table_name=None) \
+            .order_by('column_name')
+
+        self.copy_queryset = FormType.objects.filter(organization = self.org).exclude(pk=self.pk)
+
+        self.customfield_formset = self.CustomFieldFormSet()
+
+        if initial_customfields_objs:
+            initial_customfields = []
+            list_val_lens = []
+            for cf in initial_customfields_objs:
+                initial_customfields.append({
+                    'id': cf.id,
+                    'field_name': cf.field_name,
+                    'label': cf.label,
+                    'help_text': cf.help_text,
+                    'data_type': cf.data_type,
+                    'max_length': cf.max_length,
+                    'decimal_places': cf.decimal_places,
+                    'empty_selection_list': cf.empty_selection_list,
+                    'list_values': cf.list_values,
+                    'notifications': cf.notifications,
+                    'form_ordering': cf.form_ordering,
+                    'required': cf.required,
+                    'staff': cf.staff,
+                    'public': cf.public,
+                    'column': cf.column
+                })
+                if cf.list_values: 
+                    list_val_lens.append(len(cf.list_values))
+                else:
+                    list_val_lens.append(0)
+
+            self.CustomFieldFormSet.extra = len(initial_customfields)
+            self.customfield_formset.initial = initial_customfields
+
+            defaults = ['queue','submitter_email', 'contact_name', 'contact_email', 'title','description','building_name','building_address','building_id','pm_id','attachment','due_date','priority','cc_emails', 'empty']
+            
+            self.form_empty = self.customfield_formset.empty_form
+            self.form_empty.fields['column'] = EditFormTypeForm.BaseCustomFieldFormSet.ColumnModelChoiceField(queryset=column_queryset)
+            self.form_empty.fields['agg_list_values'] = forms.JSONField(widget=forms.HiddenInput(), required=False)
+            self.form_empty.fields['list_values'] = MatchOnField(num_widgets=1, field_type=forms.CharField(), widget_type=forms.TextInput(), required=False)
+            i = 0
+            for form in self.customfield_formset.forms:
+                form.fields['column'] = EditFormTypeForm.BaseCustomFieldFormSet.ColumnModelChoiceField(queryset=column_queryset)
+                form.fields['agg_list_values'] = forms.JSONField(widget=forms.HiddenInput(), required=False)
+                form.fields['list_values'] = MatchOnField(num_widgets= list_val_lens[i] + 1, field_type=forms.CharField(), widget_type=forms.TextInput(), required=False)
+                if form.initial and form.initial['field_name'] in defaults:
+                    form.fields['field_name'].widget.attrs = {'readonly': True}
+                    if form.initial['data_type'] in ['varchar', 'text']:
+                        form.fields['data_type'].choices = (('varchar', _('Character (single line)')),('text', _('Text (multi-line)')))
+                    else:
+                        form.fields['data_type'].widget.attrs = {'readonly': True, 'style': 'pointer-events: none;'}
+                i += 1
+
+        if args:
+            self.CustomFieldFormSet.extra = int(args[0]['customfield_set-TOTAL_FORMS'])
+            self.CustomFieldFormSet.form.base_fields['agg_list_values'] = forms.JSONField(widget=forms.HiddenInput(), required=False)
+            for form in self.customfield_formset.forms:
+                form.fields['agg_list_values'] = forms.JSONField(widget=forms.HiddenInput(), required=False)
+
+
 class AbstractTicketForm(CustomFieldMixin, forms.Form):
     """
     Contain all the common code and fields between "TicketForm" and
@@ -268,6 +572,11 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
     form_introduction = None
     form_queue = None
     hidden_fields = []
+
+    description = forms.CharField(
+        widget=PreviewWidget,
+        help_text=Ticket.description.field.help_text
+    )
 
     queue = forms.ChoiceField(
         widget=forms.Select(attrs={'class': 'form-control'}),

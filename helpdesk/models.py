@@ -163,62 +163,8 @@ class Queue(models.Model):
     slug = models.SlugField(
         _('Slug'),
         max_length=50,
-        help_text=_('This slug is used when building ticket ID\'s. Once set, '
-                    'try not to change it or e-mailing may get messy.'),
-    )
-    importer = models.ForeignKey('seed.EmailImporter', on_delete=models.SET_NULL, null=True, blank=True)
-    match_on = models.JSONField(blank=True, default=list,
-                                help_text="A list of strings. If you'd like only emails with "
-                                          "certain subject lines to be imported into this queue, "
-                                          "list that text here. Otherwise, leave blank.")
-    match_on_addresses = models.JSONField(blank=True, default=list,
-                                          help_text="A list of strings. If you'd like only emails from "
-                                                    "specific addresses to be imported into this queue, "
-                                                    "list those addresses here. Otherwise, leave blank.")
-
-    allow_public_submission = models.BooleanField(
-        _('Allow Public Submission?'),
-        blank=True,
-        default=False,
-        help_text=_('Should this queue be listed on the public submission form?'),
-    )
-
-    escalate_days = models.IntegerField(
-        _('Escalation Days'),
-        blank=True,
-        null=True,
-        help_text=_('For tickets which are not held, how often do you wish to '
-                    'increase their priority? Set to 0 for no escalation.'),
-    )
-
-    new_ticket_cc = models.CharField(
-        _('New Ticket CC Address'),
-        blank=True,
-        null=True,
-        max_length=200,
-        help_text=_('If an e-mail address is entered here, then it will '
-                    'receive notification of all new tickets created for this queue. '
-                    'Enter a comma between multiple e-mail addresses.'),
-    )
-
-    updated_ticket_cc = models.CharField(
-        _('Updated Ticket CC Address'),
-        blank=True,
-        null=True,
-        max_length=200,
-        help_text=_('If an e-mail address is entered here, then it will '
-                    'receive notification of all activity (new tickets, closed '
-                    'tickets, updates, reassignments, etc) for this queue. Separate '
-                    'multiple addresses with a comma.'),
-    )
-    # TODO implement -- when off, this should turn off ALL notifications in the future
-    enable_notifications_on_email_events = models.BooleanField(
-        _('Notify contacts when email updates arrive'),
-        blank=True,
-        default=True,
-        help_text=_('When an email arrives to either create a ticket or to '
-                    'interact with an existing discussion. Should email notifications be sent ? '
-                    'Note: the new_ticket_cc and updated_ticket_cc work independently of this feature'),
+        help_text=_('This slug is used in ticket ID\'s. Only lowercase letters, numbers, and underscores'
+                    'are allowed. Shorter slugs preferred! Once set, the slug cannot be changed.'),
     )
 
     default_owner = models.ForeignKey(
@@ -228,15 +174,72 @@ class Queue(models.Model):
         blank=True,
         null=True,
         verbose_name=_('Default owner'),
+        help_text='The default assigned owner of all tickets in this queue.'
     )
 
     reassign_when_closed = models.BooleanField(
         default=False,
+        verbose_name="Reassign to default owner when closed?",
         help_text=_('When a ticket is closed, reassign the ticket to the default owner (if one is set).')
     )
 
+    new_ticket_cc = models.CharField(
+        _('Users to notify when a new ticket is created'),
+        blank=True,
+        null=True,
+        max_length=200,
+        help_text=_('If an e-mail address is entered here, then it will '
+                    'receive notification of all new tickets created for this queue. '
+                    'Enter a comma between multiple e-mail addresses.'),
+    )
+
+    updated_ticket_cc = models.CharField(
+        _('Users to notify when any update is made to a ticket'),
+        blank=True,
+        null=True,
+        max_length=200,
+        help_text=_('If an e-mail address is entered here, then it will '
+                    'receive notification of all activity (new tickets, closed '
+                    'tickets, updates, reassignments, etc) for this queue. Separate '
+                    'multiple addresses with a comma.'),
+    )
+
+    # TODO implement -- when off, this should turn off ALL notifications in the future
+    enable_notifications_on_email_events = models.BooleanField(
+        _('Notify contacts when email updates arrive?'),
+        blank=True,
+        default=True,
+        help_text=_('When an email arrives to either create a ticket or to '
+                    'interact with an existing discussion, should email notifications be sent to non-Helpdesk participants? '
+                    'Note: the two fields for updating staff users work independently of this setting.'),
+    )
+
+    allow_public_submission = models.BooleanField(
+        _('Allow visitors to select this queue?'),
+        blank=True,
+        default=False,
+        help_text=_('On forms where a default queue is not set, should this queue be listed as an option for visitors?'),
+    )
+
+    importer = models.ForeignKey('seed.EmailImporter', on_delete=models.SET_NULL, null=True, blank=True,
+                                 help_text="Emails are imported from this address into the queue.")
+    match_on = models.JSONField(blank=True, default=list, verbose_name="Subject lines to import",
+                                help_text="When importing emails, emails will typically only go into one default queue."
+                                          "Add a word or phrase here to have emails containing that subject line to be routed into this queue instead.")
+    match_on_addresses = models.JSONField(blank=True, default=list, verbose_name="Email addresses to import",
+                                          help_text="Add an email address here to have all emails from that address to be routed into this queue during importing.")
+
+    escalate_days = models.IntegerField(
+        _('Escalation days'),
+        blank=True,
+        null=True,
+        help_text=_('For tickets which are not on hold, how often do you wish to '
+                    'increase their priority? Set to 0 for no escalation.'),
+    )
+
     dedicated_time = models.DurationField(
-        help_text=_("Time to be spent on this Queue in total"),
+        verbose_name="Total dedicated time",
+        help_text=_("Time to be spent on this queue in total. Enter the time in seconds, or '0 00:00:00' format (day hour:minute:second)."),
         blank=True, null=True
     )
 
@@ -291,6 +294,19 @@ class Queue(models.Model):
         self.permission_name = "helpdesk.%s" % basename
         return basename
 
+    @property
+    def get_default_owner(self):
+        """ Custom property to allow us to easily print 'Unassigned' if a
+        ticket has no owner, or the users name if it's assigned. If the user
+        has a full name configured, we use that, otherwise their username. """
+        if not self.default_owner:
+            return _('-')
+        else:
+            if self.default_owner.get_full_name():
+                return self.default_owner.get_full_name()
+            else:
+                return self.default_owner.get_username()
+
     def save(self, *args, **kwargs):
         if not self.id:
             # Prepare the permission codename and the permission
@@ -328,21 +344,21 @@ def mk_secret():
 class FormType(models.Model):
 
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
-    name = models.CharField(max_length=255, null=True, blank=True)
+    name = models.CharField(max_length=255, null=True)
     description = models.TextField(blank=True, null=True,
                                    help_text=_('Introduction text included in the form.'))
     queue = models.ForeignKey(Queue, on_delete=models.SET_NULL, null=True, blank=True,
-                              help_text=_('Tickets should automatically be added to this queue.'
+                              help_text=_('If a queue is selected, tickets will automatically be added to this queue when submitted. '
                                           'This option will hide the Queue field on the form.'))
     created = models.DateTimeField(auto_now_add=True, blank=True)
     updated = models.DateTimeField(auto_now=True, blank=True)
-    public = models.BooleanField(_('Public'), blank=True, default=True,
+    public = models.BooleanField(_('Public?'), blank=True, default=True,
                                  help_text=_('Should this form be accessible by everyone?'))
     staff = models.BooleanField(_('Staff'), blank=True, default=True,
                                 help_text=_('Should this form be only accessible by staff? It will not be shown in the public form list.'))
     unlisted = models.BooleanField(_('Unlisted'), blank=False, default=False,
                                    help_text=_('Should this form be hidden from the public form list? '
-                                               '(It will still be accessible by everyone if the "public" option is checked.)'))
+                                               '(If the "public" option is checked, this form will still be accessible by everyone through the link.)'))
 
     # Add Preset Form Fields to the Database, avoiding having to run a PSQL command in another terminal window.
     # This will happen automatically upon FormType Creation
@@ -1249,28 +1265,38 @@ class KBCategory(models.Model):
     )
 
     name = models.CharField(
-        _('Name of the category'),
+        _('Category name'),
         max_length=100,
+        help_text="This name is only used internally, and can be a descriptive name."
     )
 
     title = models.CharField(
-        _('Title on knowledgebase page'),
+        _('Title'),
         max_length=100,
+        help_text="The title of the category that users will see."
     )
 
     slug = models.SlugField(
         _('Slug'),
         unique=True,
+        help_text="The slug is used in the URL, and cannot be changed once set. Only lowercase letters, numbers, and underscores are allowed."
     )
 
     preview_description = models.TextField(
-        _('Preview description on knowledgebase page'),
+        _('Short description'),
         blank=True,
         null=True,
+        help_text="Optional short description that will describe the category on the Knowledgebase Overview page."
     )
 
     description = models.TextField(
         _('Full description on knowledgebase category page'),
+    )
+
+    forms = models.ManyToManyField(
+        FormType,
+        blank=True,
+        help_text='The list of forms that visitors will be able to use to submit a ticket after reading an article in this category. (Only public forms will be displayed to public visitors, regardless of whether or not they are unlisted.)',
     )
 
     queue = models.ForeignKey(
@@ -1278,18 +1304,13 @@ class KBCategory(models.Model):
         blank=True,
         null=True,
         on_delete=models.SET_NULL,
-        verbose_name=_('Default queue when creating a ticket after viewing this category.'),
-    )
-
-    forms = models.ManyToManyField(
-        FormType,
-        blank=True,
-        help_text='Forms listed on the page, that the user can submit after reading any article in this category. (Only public forms will be displayed to public users, regardless of whether or not they are unlisted.)',
+        verbose_name=_('Default queue for tickets'),
+        help_text='Set a default queue for tickets submitted after reading an article in this category.',
     )
 
     public = models.BooleanField(
         default=True,
-        verbose_name=_("Is KBCategory publicly visible?")
+        verbose_name=_("Is this category publicly visible?")
     )
 
     def __str__(self):
@@ -1333,22 +1354,26 @@ class KBItem(models.Model):
     title = models.CharField(
         _('Title'),
         max_length=100,
+        help_text="The title is the title of the article's webpage (in your browser's tab or window), and also in the 'breadcrumb trail'"
+                  " viewed above the question (example: Knowledgebase / Category Name / Article Title)."
     )
 
     question = models.TextField(
         _('Question'),
+        help_text="The article's title or 'question' that will be on the category page and at the top of the article page."
     )
 
     answer = models.TextField(
-        _('Answer'),
-        help_text=_(markdown_allowed() + '<br/><br/>'
+        _('Article body'),
+        help_text=_("The body of the article, or answer to the question.<br/><br/>" +
+                    markdown_allowed() + '<br/><br/>'
                     "<b>Multple newlines:</b><br/>Markdown doesn't recognize multiple blank lines. "
                     "To display one, write &amp;nbsp; on a blank line.<br/><br/>"
                     "<b>Table formatting:</b><br/>"
                     "<pre>First Header  | Second Header</br>"
                     '------------- | -------------</br>'
                     'Content Cell  | Content Cell</br>'
-                    'Content Cell  | Content Cell</pre></br>'
+                    'Content Cell  | Content Cell</pre>'
                     '<b>Collapsing section:</b><br/> '
                     'Add !~! on a line following the section title, followed by a blank line. '
                     'Add ~!~ on a line following the section body, followed by another blank line. <br/>'
@@ -1387,13 +1412,14 @@ class KBItem(models.Model):
     )
 
     order = models.PositiveIntegerField(
-        _('Order'),
+        _('Ordering'),
         blank=True,
         null=True,
+        help_text='Smaller numbers will be ordered first.'
     )
 
     enabled = models.BooleanField(
-        _('Enabled to display to users'),
+        _('Is this article publicly visible?'),
         default=True,
     )
 
@@ -1903,8 +1929,9 @@ class CustomField(models.Model):
                     'which enforces that the user makes an active choice.'),
     )
 
-    list_values = models.TextField(
+    list_values = models.JSONField(
         _('List Values'),
+        default=list,
         help_text=_('For list fields only. Enter one option per line.'),
         blank=True,
         null=True,
@@ -1929,16 +1956,17 @@ class CustomField(models.Model):
     )
 
     def _choices_as_array(self):
-        valuebuffer = StringIO(self.list_values)
-        choices = [[item.strip(), item.strip()] for item in valuebuffer.readlines()]
-        valuebuffer.close()
+        # valuebuffer = StringIO(self.list_values)
+        # choices = [[item.strip(), item.strip()] for item in valuebuffer.readlines()]
+        # valuebuffer.close()
+        choices = [[item, item] for item in self.list_values]
         return choices
     choices_as_array = property(_choices_as_array)
 
     required = models.BooleanField(_('Required?'), help_text=_('Does the user have to enter a value for this field?'),
                                    default=False)
-    staff = models.BooleanField(_('Show on staff form?'), default=True)
     public = models.BooleanField(_('Show on public form?'), default=True)
+    staff = models.BooleanField(_('Show on staff form?'), default=True)
 
     ticket_form = models.ForeignKey(FormType, on_delete=models.CASCADE)
     column = models.ForeignKey(Column, blank=True, null=True, on_delete=models.SET_NULL, related_name='helpdesk_fields', verbose_name=_('Associated BEAM column'))

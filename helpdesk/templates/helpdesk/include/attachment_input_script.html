@@ -1,0 +1,54 @@
+<script type='text/javascript' language='javascript'>
+    function uploadFile(widgetName) {
+        src_input = document.getElementById('id_' + widgetName)
+        data = new FormData()
+        data.append('file', src_input.files[0])
+        {% if item.id %} data.append('kbitem_id', {{ item.id }}) {% endif %}
+        data.append('id', document.querySelector('#id_' + widgetName.replace('-file','-id')).value)
+        data.append('csrfmiddlewaretoken', document.querySelector('input[name=csrfmiddlewaretoken]').value)
+        
+        $.ajax({
+            data: data,
+            url: "{%url 'helpdesk:upload_attachment' %}",
+            type: 'POST',
+            processData: false,
+            contentType: false,
+    
+            success: function(response) {
+                $('#' + widgetName + '_upload').popover('dispose')
+                if (response['uploaded']) {
+                    response['url'] = '/media/' + encodeURI(response['url'])
+                    document.getElementById(widgetName + '_text').value = src_input.files[0].name
+                    document.querySelector('#id_' + widgetName.replace('-file','-id')).value = response['id']
+                    document.getElementById(widgetName + '_interact').hidden = false
+                    document.getElementById(widgetName + '_preview').href = window.location.origin + response['url'] 
+                    document.getElementById(widgetName + '_copylink').onclick = () => {navigator.clipboard.writeText(window.location.origin + response['url'])}
+                } else {
+                    console.log("failed")
+                    // Format errors
+                    content = '<span class="mb-2">Fix the following errors in order to copy this field to another form</span><ul class="list-group">'
+                    // for (const [field, error] of Object.entries(response['errors'])) {
+                    //     content += `
+                    //         <li class="list-group-item">
+                    //             <span class="text-danger font-weight-bold">${field}</span>
+                    //             <br>
+                    //             ${error}    
+                    //         </li>
+                    //     `;
+                    // }
+                    content += '</ul>'
+    
+                    // Trigger error popover
+                    $('#' + widgetName + '_upload').popover({
+                        title: 'Field Errors',
+                        content: 'Failed',
+                        html: true,
+                        placement: 'top',
+                        trigger: 'focus'
+                    })
+                    $('#' + widgetName + '_upload').popover('show')
+                }
+            },
+        });
+    }
+</script>

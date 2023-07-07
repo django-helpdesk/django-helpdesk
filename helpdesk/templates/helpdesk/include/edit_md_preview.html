@@ -1,0 +1,22 @@
+<div class="card">
+    <div class="card-header">
+        <ul class="nav nav-tabs card-header-tabs" data-bs-tabs="tabs">
+            <li class="nav-item">
+                <a class="nav-link active" data-toggle="tab" href="#{{widget.name}}_edit">Edit</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-toggle="tab" href="#{{widget.name}}_preview" onclick="updatePreview('{{widget.name}}')">Preview</a>
+            </li>
+        </ul>
+    </div>
+    <div class="card-body tab-content" style='max-height: 50vh; overflow-y: auto'>
+        <div id="{{widget.name}}_edit" class="tab-pane active">
+            <textarea class="form-control" name="{{ widget.name }}"{% include "django/forms/widgets/attrs.html" %}>{% spaceless %}
+                {% if widget.value %}{{ widget.value }}{% endif %}
+            {% endspaceless %}</textarea>
+        </div>
+        <div id="{{widget.name}}_preview" class="tab-pane">
+            <div id="{{widget.name}}_md_preview"></div>
+        </div>
+    </div>
+</div>

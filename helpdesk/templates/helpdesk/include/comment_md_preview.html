@@ -1,0 +1,33 @@
+<div class="card">
+    <div class="card-header">
+        <ul class="nav nav-tabs card-header-tabs" data-bs-tabs="tabs">
+            <li class="nav-item">
+                <a class="nav-link active" data-toggle="tab" href="#comment_edit">Edit</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-toggle="tab" href="#comment_preview" onclick="updatePreview_comment()">Preview</a>
+            </li>
+        </ul>
+    </div>
+    <div class="card-body tab-content" style='max-height: 50vh; overflow-y: auto'>
+        <div id="comment_edit" class="tab-pane active">
+            <textarea class="form-control" name="comment" id="commentBox" cols="40" rows="10" spellcheck="false" data-ms-editor="true"></textarea>
+        </div>
+        <div id="comment_preview" class="tab-pane">
+            <div id="comment_md_preview"></div>
+        </div>
+    </div>
+</div>
+
+<script type='text/javascript' language='javascript'>
+    function updatePreview_comment() {
+        $.ajax({
+            data: {md: $('#commentBox').val()},
+            url: "{% url 'helpdesk:preview_markdown'  %}",
+
+            success: function(response) {
+                $('#comment_md_preview').html(response['md_html'])
+            },
+        });
+    }
+</script>

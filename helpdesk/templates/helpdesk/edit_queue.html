@@ -1,0 +1,79 @@
+{% extends "helpdesk/base.html" %}
+
+{% load i18n bootstrap4form %}
+
+{% block helpdesk_title %}{% blocktrans %} {{ action }} Queue {% endblocktrans %}{% endblock %}
+
+{% block helpdesk_breadcrumb %}
+<li class="breadcrumb-item">
+    <a href="{% url 'helpdesk:user_settings' %}">{% trans "Settings" %}</a>
+</li>
+<li class="breadcrumb-item">
+    <a href="{% url 'helpdesk:system_settings' %}">{% trans "System Settings" %}</a>
+</li>
+<li class="breadcrumb-item">
+    <a href="{% url 'helpdesk:maintain_queues' %}">{% trans "Maintain Queues" %}</a>
+</li>
+<li class="breadcrumb-item active">
+    {% blocktrans with queue.title as qt%} {{ action }} {{ qt }}{% endblocktrans %}
+</li>
+{% endblock %}
+
+{% block helpdesk_body %}
+    <div class="col-xs-6">
+        <div class="panel panel-default">
+            <div class="panel-body"><h2>{% blocktrans %} {{ action }} Queue {% endblocktrans %}</h2>
+                <p>
+                    {% trans "Required fields are indicated by " %} <span style="color:red;">*</span>
+                </p>
+                {% if errors %}<p class="text-danger">{% for error in errors %}{% trans "Error: " %}{{ error }}<br>{% endfor %}</p>{% endif %}
+                <form method='post'>
+                    {% csrf_token %}
+                    <fieldset>
+                        {{ form|bootstrap4form }}
+                        <div class='buttons form-group'>
+                            <button type='submit' id='submit' class="btn btn-primary btn" value='{% trans "Save Changes" %}'>
+                                {% if action == "Create" %}
+                                    Create Queue
+                                {% else %}
+                                    Save Changes
+                                {% endif %}
+                            </button>
+                            <a href="{% url 'helpdesk:maintain_queues' %}">
+                                <button type="button" class="btn btn-danger">{% trans "Cancel" %}</button>
+                            </a>
+                        </div>
+                    </fieldset>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script type='text/javascript' language='javascript'>
+        {# Bandaid fix for adding asterisks to required fields while the rest of the form is handled by bootstrap4form #}
+        for (const required_field of document.querySelectorAll('[required]')) {
+            document.querySelector('label[for=' + required_field.id + ']').innerHTML += '<span style="color:red;">*</span>'
+        }
+
+        $("#submit").on('click', function() {
+            // Manually aggregate inputted strings for match on fields
+            agg_match_on = [];
+            for (const string of document.getElementById('match_on_strings').children) {
+                agg_match_on.push(string.children[0].value);
+            }  
+            $("[name=agg_match_on]").val(JSON.stringify(agg_match_on));
+        
+            agg_match_on_addresses = [];
+            for (const string of document.getElementById('match_on_addresses_strings').children) {
+                agg_match_on_addresses.push(string.children[0].value);
+            }  
+            $("[name=agg_match_on_addresses]").val(JSON.stringify(agg_match_on_addresses));
+        });
+
+        if (document.getElementById('id_slug').disabled == false) {
+            $('#id_title').on('input', function () {
+                $('#id_slug').val($('#id_title').val().toLowerCase().replaceAll(' ', '-'))
+            })
+        }
+        </script>    
+{% endblock %}

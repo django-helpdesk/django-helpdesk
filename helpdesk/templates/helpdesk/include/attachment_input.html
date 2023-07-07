@@ -1,0 +1,12 @@
+<div class="input-group mb-3">
+    <div class="input-group-prepend">
+        <button id="{{ widget.name}}_upload" type="button" class="btn btn-secondary" onclick="document.getElementById('id_{{ widget.name }}').click()">Upload</button>
+    </div>
+    <input type="file" hidden onchange="uploadFile('{{widget.name}}');" id="id_{{ widget.name}}" name="{{ widget.name }}" {% include "django/forms/widgets/attrs.html" %}>
+    <input type="text" class="form-control" disabled id="{{widget.name}}_text" value="{{widget.value}}">
+    <div class="input-group-append" id="{{ widget.name }}_interact" {% if not widget.value %}hidden{% endif %}>
+        <button class="btn btn-outline-secondary" id="{{ widget.name }}_copylink" type="button" onclick="navigator.clipboard.writeText(window.location.origin + '{{ widget.value.url }}')">Copy Link</button>
+        <a class="btn btn-outline-secondary" id="{{ widget.name }}_preview" type="button" href="{{ widget.value.url }}" rel="noopener noreferrer" target="_blank"
+            title="Preview attachment in new tab">Preview</a>
+    </div>
+</div>

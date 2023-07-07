@@ -1,8 +1,20 @@
 {% load i18n helpdesk_staff %}
 {% block header %}
 <div class="row" style="display:inline">
-    <h2>{% blocktrans with item.question as itemq %}{{ itemq }}{% endblocktrans %}</h2>
-    <a style="vertial-align:center" class="btn btn-secondary btn-sm{% if not prev_item %} disabled{% endif %}" href="{{ prev_item.get_absolute_url }}/{{ user_info.url }}" role="button">
+    <div class="d-flex">
+        <h2>{% blocktrans with item.question as itemq %}{{ itemq }}{% endblocktrans %}</h2>
+        <div class="flex-fill d-flex justify-content-end">
+            {% if  user.is_authenticated and user|is_helpdesk_staff %}
+            <a class="btn btn-primary align-self-center mr-2" href="{% url 'helpdesk:edit_kb_article' category.slug item.id %}{{ user_info.url }}">
+                <i class="fa fa-pen mr-1"></i>Edit Article
+            </a>
+            <a class="btn btn-danger align-self-center" data-toggle="modal" data-target="#deleteModal">
+                <i class="fa fa-trash mr-1"></i>Delete Article
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    <a style="vertical-align:center" class="btn btn-secondary btn-sm{% if not prev_item %} disabled{% endif %}" href="{{ prev_item.get_absolute_url }}/{{ user_info.url }}" role="button">
         <i class="fa fa-angle-double-left"></i> Previous Item
     </a>
     <a class="btn btn-secondary btn-sm{% if not next_item %} disabled{% endif %}" href="{{ next_item.get_absolute_url }}/{{ user_info.url }}">
@@ -36,3 +48,6 @@
 </div>
 {% block footer %}
 {% endblock %}
+
+{% url 'helpdesk:delete_kb_article' category.slug item.id as delete_url%}
+{% include 'helpdesk/include/confirm_delete.html' with type="Article" title=item.title delete_url=delete_url %}

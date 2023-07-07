@@ -1,0 +1,2 @@
+{% if form.label.value %}{{ form.label.value}}{% elif form.field_name.value %}{{ form.field_name.value }}{% else %}{{formset_title}} #{{forloop.counter}}{% endif %}
+- {{ form.data_type.value }}{% if form.required.value %}*{% endif %}

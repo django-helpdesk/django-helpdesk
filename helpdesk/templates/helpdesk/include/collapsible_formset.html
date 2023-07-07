@@ -1,0 +1,332 @@
+{% load i18n bootstrap4form %}
+
+{% comment "Settings" %}
+    formset [req]: (formset) - formset object
+    formset_title [req]: (string) - title to represent the contents of the formset
+    formset_type [req]: (string) - all lowercase, underscore instead of whitespace slug used to encode the formset 
+    required_fields [req]: (string array)
+    can_copy: (True | False) - show the copy to dropdown
+    copy_queryset: (queryset) - items to copy to
+    copy_url: (string) - django url name for the copy to function
+    can_duplicate: (True | False) - show the duplicate button
+    header_template: (string) - relative path to the template used for the section headers
+{% endcomment %}
+
+<div class="card shadow-sm mb-2">
+    <div class="card-header">
+        <h4 class="card-title mb-0">Edit {{formset_title}}s</h4>
+    </div>
+    <div class="card-body">
+        <div id="{{ formset_type }}_formset">
+            {{ formset.management_form }}
+            {% for form in formset %}
+            <div id="{{formset_type}}_{{ forloop.counter0 }}" class="card">
+                <div class="card-header" id="heading_{{ formset_type }}_{{ forloop.counter0 }}">
+                    <div class="d-flex">
+                        <h5 class="mb-0 flex-fill mr-2">
+                            <button id="button_{{ formset_type }}_{{ forloop.counter0 }}" type="button" class="btn btn-link w-100 text-left font-weight-bold" data-toggle="collapse" data-target="#collapse_{{ formset_type }}_{{ forloop.counter0 }}">
+                                {% spaceless %}
+                                <i class="fa fa-caret-down mr-1"></i>
+                                {% if header_template %}{% include header_template %}{% else %}{{ formset_title }} #{{ forloop.counter }}{% endif %}
+                                {% endspaceless %}
+                            </button>
+                        </h5>
+                        <div class="d-flex justify-content-end">
+                            <div class="btn-group">
+                                {% if can_copy %}
+                                <div class="btn-group">
+                                    <button type="button" id="formcopy_{{ formset_type }}_{{ forloop.counter0 }}" class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown" data-toggle="tooltip" title="Copy this {{ formset_title }} to another form.">
+                                        <i class="fa fa-paste"></i>
+                                        <span>Copy to</span>
+                                    </button>
+                                    <div class="dropdown-menu p-2">
+                                        {% for formtype in copy_queryset %}
+                                        <a class="dropdown-item rounded-lg" onclick="copyTo('{{formset_type}}_{{ forloop.parentloop.counter0 }}', this, {{formtype.id}})">{{formtype.name}}</a>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                {% endif %}
+                                {% if can_duplicate %}
+                                <button type="button" id="duplicate_{{ formset_type }}_{{ forloop.counter0 }}" class="btn btn-outline-secondary" 
+                                    onclick="duplicateForm('{{formset_type}}_{{ forloop.counter0 }}')" data-toggle="tooltip" title="Create a copy of this {{ formset_title }} inside this form.">
+                                    <i class="fa fa-clone"></i>
+                                    <span>Duplicate</span>
+                                </button>
+                                {% endif %}
+                            </div>
+                            {% if formset.can_delete %}
+                            <div class="btn-group-toggle" data-toggle="buttons">
+                                <label id="delete_{{ formset_type }}_{{ forloop.counter0 }}" class="btn btn-outline-danger ml-2">
+                                    <i class="fa fa-trash"></i>
+                                    <input type="checkbox" autocomplete="off" onchange="deleteForm('{{ formset_type }}_{{ forloop.counter0 }}')">
+                                    <span>Delete</span>
+                                </label>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div id="collapse_{{ formset_type }}_{{ forloop.counter0 }}" class="collapse" data-parent="#{{ formset_type }}_formset">
+                    <div class="card-body">
+                        {{ form|bootstrap4form }}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            <div id="{{formset_type}}_empty" hidden class="card">
+                <div class="card-header" id="heading_{{ formset_type }}_empty">
+                    <div class="d-flex">
+                        <h5 class="mb-0">
+                            <button id="button_{{ formset_type }}_empty" type="button" class="btn btn-link font-weight-bold" data-toggle="collapse" data-target="#collapse_{{ formset_type }}_empty">
+                                <i class="fa fa-caret-down mr-1"></i>New {{ formset_title }}
+                            </button>
+                        </h5>
+                        <div class="flex-fill d-flex justify-content-end">
+                            <div class="btn-group">
+                                {% if can_copy %}
+                                <div class="btn-group">
+                                    <button type="button" id="formcopy_{{ formset_type }}_empty" class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown">
+                                        <i class="fa fa-paste"></i>
+                                        <span>Copy to</span>
+                                    </button>
+                                    <div class="dropdown-menu p-2">
+                                        {% for formtype in copy_queryset %}
+                                        <a class="dropdown-item rounded-lg" onclick="copyTo('{{formset_type}}_empty', this, {{formtype.id}})">{{formtype.name}}</a>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                {% endif %}
+                                {% if can_duplicate %}
+                                <button type="button" id="duplicate_{{ formset_type }}_empty" class="btn btn-outline-secondary"
+                                    onclick="duplicateForm('{{formset_type}}_empty')" data-toggle="tooltip" title="Create a copy of this {{ formset_title }} inside this form.">
+                                    <i class="fa fa-clone"></i>
+                                    <span>Duplicate</span>
+                                </button>
+                                {% endif %}
+                            </div>
+                            {% if formset.can_delete %}
+                            <div class="btn-group-toggle" data-toggle="buttons">
+                                <label id="delete_{{ formset_type }}_empty" class="btn btn-outline-danger ml-2">
+                                    <i class="fa fa-trash"></i>
+                                    <input type="checkbox" autocomplete="off" onchange="deleteForm('{{ formset_type }}_empty')">
+                                    <span>Delete</span>
+                                </label>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div id="collapse_{{ formset_type }}_empty" class="collapse" data-parent="#{{ formset_type }}_formset">
+                    <div class="card-body">
+                        {{ form.form_empty|bootstrap4form }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-footer">
+        <div class="d-flex align-items-center">
+            <small>
+                Select delete on unused {{ formset_title }}s to have them removed when you save your changes.
+            </br>
+            Improperly filled-out {{ formset_title }}s that are not set to be deleted may prevent you from saving your changes.
+        </small>
+        <div class="flex-fill justify-content-end">
+            <button id="add_{{ formset_type }}" type="button" class="btn btn-primary float-right" onclick="addForm()">
+                <i class="fa fa-plus"></i> Add
+            </button>
+        </div>
+    </div>
+</div>
+</div>
+
+<script type='text/javascript' language='javascript'>
+    name_formset = "{{formset_type}}".replaceAll("_", "") + "_set";
+    id_formset = 'id_' + name_formset;
+    requiredFields = {{ required_fields }}
+    
+    $(document).ready(function() {    
+        // Visually hide the default django delete checkboxes without removing their functionality
+        for (const delete_checkbox of document.querySelectorAll('[id^=' + id_formset + '-][id$="-DELETE"]')) {
+            delete_checkbox.parentElement.parentElement.hidden = true;
+        }
+        
+        // If invalid field is in a collapsed section, show the section
+        document.querySelector('#{{ formset_type }}_formset').addEventListener("invalid", (e) => {
+            formNum = e.srcElement.id.match(new RegExp(`${id_formset}-(\\d+)`))[1]
+            if (!($('#collapse_{{formset_type}}_' + formNum).hasClass("show"))) {
+                document.getElementById('button_{{formset_type}}_' + formNum).click()
+            }
+        }, true);
+    })
+
+    function addForm(src='{{ formset_type }}_empty') {
+        newForm = document.getElementById(src).cloneNode(true);
+        formCount = $('[name$="TOTAL_FORMS"]').val();
+        
+        // Update form counters
+        newForm.innerHTML = newForm.innerHTML.replaceAll(/{{ formset_type }}_(?!formset)(\w+)/g, `{{ formset_type }}_${formCount}`);
+        newForm.innerHTML = newForm.innerHTML.replaceAll(/(\w+_set)-(\w+)-/g, `$1-${formCount}-`);
+        newForm.id = "{{ formset_type }}_" + formCount;
+        $('[name$="TOTAL_FORMS"]').val(++formCount);
+
+        newForm.hidden = false;
+        for (const required_field of requiredFields) {
+            req = newForm.querySelector('[id$=-' + required_field + ']')
+            req.required = true;
+            label = newForm.querySelector('label[for=' + req.id + ']')
+            if (!label.innerHTML.endsWith('<span style="color:red;">*</span>')) {
+                label.innerHTML += '<span style="color:red;">*</span>'
+            }
+        }
+
+        newForm = document.getElementById("{{ formset_type }}_empty").insertAdjacentElement('beforebegin', newForm)
+        if (!newForm.querySelector('[id^=collapse_]').classList.contains('show')) { // Show form if hidden
+            newForm.querySelector('[id^=button_]').click()
+        } else {
+            document.querySelector('#' + src + ' [id^=button_]').click()
+        }
+
+        // if additional scripting for adding is specified
+        if (typeof addScript === "function") { addScript(newForm) }
+        return newForm
+    }
+        
+    function deleteForm(id) {
+        formNum = id.match(/{{ formset_type }}_(\d+)/)[1]
+
+        if ($('#delete_' + id).hasClass('active')) { {# Toggle deletion #}
+            if ($('#collapse_' + id).hasClass('show')) { // Hide form if showing
+                document.getElementById("button_" + id).click()
+            }
+            button = document.getElementById("button_" + id)
+            button.disabled = true;
+            button.innerHTML = "(Deleting) " + button.innerHTML;
+
+            {% if can_copy %}
+            document.getElementById('formcopy_' + id).disabled = true;
+            $('#formcopy_' + id).popover('hide')
+            {% endif %}
+            {% if can_duplicate %}
+            document.getElementById('duplicate_' + id).disabled = true;
+            {% endif %}
+            document.getElementById(id_formset + "-" +  formNum + "-DELETE").checked = true;
+            document.getElementById(id_formset + "-" +  formNum + "-DELETE").value =  'on';
+            for (const required_field of requiredFields) {
+                document.getElementById(id_formset + "-" + formNum + "-" + required_field).required = false;
+            }
+        } else { {# Untoggle deletion #}
+            button = document.getElementById("button_" + id) 
+            button.disabled = false;
+            button.innerHTML = button.innerHTML.replace("(Deleting)", "");
+            {% if can_copy %}
+            document.getElementById('formcopy_' + id).disabled = false;
+            {% endif %}
+            {% if can_duplicate %}
+            document.getElementById('duplicate_' + id).disabled = false;
+            {% endif %}
+            document.getElementById(id_formset + "-" +  formNum + "-DELETE").checked = false;
+            document.getElementById(id_formset + "-" +  formNum + "-DELETE").value = '';
+            for (const required_field of requiredFields) {
+                document.getElementById(id_formset + "-" + formNum + "-" + required_field).required = true;
+            }
+        }
+    }
+
+
+function duplicateForm(src) {
+    srcForm = document.getElementById(src)
+    srcNum = srcForm.id.match(`{{formset_type}}_(\\d+)`)[1]
+    duplicate = addForm(src)
+    dupNum = duplicate.id.match(`{{formset_type}}_(\\d+)`)[1]
+    
+    // CloneNode does not copy new user inputs
+    for (const field of srcForm.querySelectorAll('input, select, checkbox, textarea')) {
+        if (field.id) {
+            if (field.type == "checkbox") {
+                duplicate.querySelector('[id=' + field.id.replace(srcNum, dupNum) + ']').checked = field.checked
+            } else {
+                duplicate.querySelector('[id=' + field.id.replace(srcNum, dupNum) + ']').value = field.value
+            }
+            
+        }
+    } 
+
+    duplicate.querySelector('[id$=-id]').value = '';
+    button = duplicate.querySelector('[id^=button_]')
+    button.innerHTML += '(Copy)'
+    for (const readonly of duplicate.querySelectorAll('[readOnly]:not([id^=colselection_])')) {
+        readonly.readOnly = false;
+    }
+    duplicate.querySelector('[name$=-field_name]').value += '_copy';
+}
+
+function copyTo(src_field, src_link, form_id) {
+    if (typeof copyScript === "function") { copyScript(src_field) }
+    src_field = document.getElementById(src_field)
+    data = {form_id: form_id} 
+    data['csrfmiddlewaretoken'] = document.querySelector('input[name=csrfmiddlewaretoken]').value
+    for (const field of src_field.querySelectorAll('input, select, checkbox, textarea')) {
+        name = field.name.replace(/(\w+_set)-(\w+)-/, '')
+        if (field.type == "checkbox") {
+            data[name] = (field.checked ? 'on' : '')
+        } else {
+            data[name] = field.value
+        }
+
+    }
+    copy_to_button = src_link.parentElement.parentElement.children[0].id
+
+    $.ajax({
+        data: data,
+        url: "{% if copy_url %}{% url copy_url %}{% endif %}",
+        type: 'POST',
+
+        success: function(response) {
+            $('#' + copy_to_button).popover('dispose')
+            if (response['copied']) {
+                src_link.classList.remove('text-danger');
+                src_link.classList.add('text-success');
+                src_link.innerHTML = src_link.innerHTML.replace(' (Failed)', '');
+                match = src_link.innerHTML.match(/\(Copied - (\d+)\)/)
+                if (match) {
+                    src_link.innerHTML = src_link.innerHTML.replace(/\(Copied - (\d+)\)/, ' (Copied - ' + (Number(match[1]) + 1) + ')');
+                } else {
+                    src_link.innerHTML += ' (Copied - 1)';
+                }
+            } else {
+                src_link.classList.remove('text-success');
+                src_link.classList.add('text-danger');
+                src_link.innerHTML = src_link.innerHTML.replace(/\s\(Copied - (\d+)\)/, '');
+                if (!src_link.innerHTML.endsWith(' (Failed)')){
+                    src_link.innerHTML += ' (Failed)';
+                }
+
+                // Format errors
+                content = '<span class="mb-2">Fix the following errors in order to copy this field to another form</span><ul class="list-group">'
+                for (const [field, error] of Object.entries(response['errors'])) {
+                    content += `
+                        <li class="list-group-item">
+                            <span class="text-danger font-weight-bold">${field}</span>
+                            <br>
+                            ${error}    
+                        </li>
+                    `;
+                }
+                content += '</ul>'
+
+                // Trigger error popover
+                $('#' + copy_to_button).popover({
+                    title: 'Field Errors',
+                    content: content,
+                    html: true,
+                    placement: 'left',
+                    trigger: 'focus'
+                })
+                $('#' + copy_to_button).popover('show')
+            }
+        },
+    });
+}
+
+</script>

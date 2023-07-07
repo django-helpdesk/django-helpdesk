@@ -10,6 +10,7 @@ from copy import deepcopy
 import json
 import pandas as pd
 import dateutil
+import datetime
 import pytz
 
 from django.conf import settings
@@ -28,7 +29,7 @@ from django.utils.html import escape
 from django.utils import timezone
 from django.views.generic.edit import FormView, UpdateView
 
-from helpdesk.forms import CUSTOMFIELD_DATE_FORMAT, CUSTOMFIELD_DATETIME_FORMAT
+from helpdesk.forms import CUSTOMFIELD_DATE_FORMAT, CUSTOMFIELD_DATETIME_FORMAT, PreviewWidget
 from helpdesk.query import (
     get_query_class,
     query_to_base64,
@@ -49,7 +50,8 @@ from helpdesk.decorators import (
 )
 from helpdesk.forms import (
     TicketForm, UserSettingsForm, EmailIgnoreForm, EditTicketForm, TicketCCForm,
-    TicketCCEmailForm, TicketCCUserForm, EditFollowUpForm, TicketDependencyForm, MultipleTicketSelectForm
+    TicketCCEmailForm, TicketCCUserForm, EditFollowUpForm, TicketDependencyForm, MultipleTicketSelectForm,
+    EditQueueForm, EditFormTypeForm
 )
 from helpdesk.lib import (
     safe_template_context,
@@ -131,6 +133,417 @@ def _get_queue_choices(queues):
     queue_choices += [(q.id, q.title) for q in queues]
     return queue_choices
 
+
+@helpdesk_staff_member_required
+def queue_list(request):
+    huser = HelpdeskUser(request.user)
+    queue_list = huser.get_queues()                # Queues in user's default org (or all if superuser)
+    
+    # user settings num tickets per page
+    if request.user.is_authenticated and hasattr(request.user, 'usersettings_helpdesk'):
+        queues_per_page = request.user.usersettings_helpdesk.tickets_per_page
+    else:
+        queues_per_page = 25
+
+    paginator = Paginator(
+        queue_list, queues_per_page)
+    try:
+        queue_list = paginator.page(request.GET.get(_('q_page'), 1))
+    except PageNotAnInteger:
+        queue_list = paginator.page(1)
+    except EmptyPage:
+        queue_list = paginator.page(
+            paginator.num_pages)
+
+    return render(request, 'helpdesk/queue_list.html', {
+        'queue_list': queue_list,
+        'debug': settings.DEBUG,
+    })
+
+@helpdesk_staff_member_required
+def create_queue(request):
+    if request.method == "GET":
+        form = EditQueueForm("create", organization=request.user.default_organization.id)
+
+        return render(request, 'helpdesk/edit_queue.html', {
+            'form': form,
+            'action': "Create",
+            'debug': settings.DEBUG,
+        })
+    elif request.method == "POST":
+        form = EditQueueForm("create", request.POST, organization=request.user.default_organization.id)
+
+        if form.is_valid():
+            queue = Queue(
+                organization = request.user.default_organization,
+                title = form.cleaned_data['title'],
+                slug = form.cleaned_data['slug'], # no change
+                match_on = [i for i in form.cleaned_data['agg_match_on'] if i], # remove empty strings
+                match_on_addresses = [i for i in form.cleaned_data['agg_match_on_addresses'] if i], # remove empty strings
+                allow_public_submission = form.cleaned_data['allow_public_submission'],
+                escalate_days = form.cleaned_data['escalate_days'],
+                enable_notifications_on_email_events = form.cleaned_data['enable_notifications_on_email_events'],
+                default_owner = form.cleaned_data['default_owner'],
+                reassign_when_closed = form.cleaned_data['reassign_when_closed'],
+                dedicated_time = form.cleaned_data['dedicated_time'],
+            )
+            queue.save()
+            return HttpResponseRedirect(reverse('helpdesk:maintain_queues'))
+        
+        redo_form = EditQueueForm(
+            "create", 
+            request.POST, 
+            organization=request.user.default_organization.id,
+            initial = {
+                'title': form.cleaned_data['title'],
+                'slug': form.data['slug'], # no change
+                'match_on': [i for i in form.cleaned_data['agg_match_on'] if i], # remove empty strings
+                'match_on_addresses': [i for i in form.cleaned_data['agg_match_on_addresses'] if i], # remove empty strings
+                'allow_public_submission': form.cleaned_data['allow_public_submission'],
+                'escalate_days': form.cleaned_data['escalate_days'],
+                'enable_notifications_on_email_events': form.cleaned_data['enable_notifications_on_email_events'],
+                'default_owner': form.cleaned_data['default_owner'],
+                'reassign_when_closed': form.cleaned_data['reassign_when_closed'],
+                'dedicated_time': form.cleaned_data['dedicated_time'],
+            }
+        )
+
+        return render(request, 'helpdesk/edit_queue.html', {
+            'form': redo_form,
+            'errors': form.errors,
+            'action': "Create",
+            'debug': settings.DEBUG,
+        })
+
+
+@helpdesk_staff_member_required
+def edit_queue(request, slug):
+    """Edit Queue"""
+    queue = get_object_or_404(Queue, slug=slug)
+
+    if request.method == "GET":
+        form = EditQueueForm(
+            "edit",
+            organization=request.user.default_organization.id,
+            initial = {
+                'organization': queue.organization.id,
+                'title': queue.title,
+                'slug': queue.slug,
+                'match_on': queue.match_on,
+                'agg_match_on': queue.match_on,
+                'match_on_addresses': queue.match_on_addresses,
+                'agg_match_on_addresses': queue.match_on_addresses,
+                'allow_public_submission': queue.allow_public_submission,
+                'escalate_days': queue.escalate_days,
+                'enable_notifications_on_email_events': queue.enable_notifications_on_email_events,
+                'default_owner': queue.default_owner,
+                'reassign_when_closed': queue.reassign_when_closed,
+                'dedicated_time': queue.dedicated_time,
+                'importer': queue.email_address if queue.email_address else "None",
+            }
+        )
+
+        return render(request, 'helpdesk/edit_queue.html', {
+            'queue': queue,
+            'form': form,
+            'action': "Edit",
+            'debug': settings.DEBUG,
+        })
+    elif request.method == "POST":
+        form = EditQueueForm("edit", request.POST, organization=request.user.default_organization.id)
+        if form.is_valid():
+            queue.title = form.cleaned_data['title']
+            # queue.slug = form.cleaned_data['slug'] # no change
+            queue.match_on = [i for i in form.cleaned_data['agg_match_on'] if i] # remove empty strings
+            queue.match_on_addresses = [i for i in form.cleaned_data['agg_match_on_addresses'] if i] # remove empty strings
+            queue.allow_public_submission = form.cleaned_data['allow_public_submission']
+            queue.escalate_days = form.cleaned_data['escalate_days']
+            queue.enable_notifications_on_email_events = form.cleaned_data['enable_notifications_on_email_events']
+            queue.default_owner = form.cleaned_data['default_owner']
+            queue.reassign_when_closed = form.cleaned_data['reassign_when_closed']
+            queue.dedicated_time = form.cleaned_data['dedicated_time']
+            
+            queue.save()
+        return HttpResponseRedirect(reverse('helpdesk:maintain_queues')) 
+
+@helpdesk_staff_member_required
+def form_list(request):
+    form_list = FormType.objects.filter(organization=request.user.default_organization)
+    
+    # user settings num tickets per page
+    if request.user.is_authenticated and hasattr(request.user, 'usersettings_helpdesk'):
+        forms_per_page = request.user.usersettings_helpdesk.tickets_per_page
+    else:
+        forms_per_page = 25
+
+    paginator = Paginator(
+        form_list, forms_per_page)
+    try:
+        form_list = paginator.page(request.GET.get(_('q_page'), 1))
+    except PageNotAnInteger:
+        form_list = paginator.page(1)
+    except EmptyPage:
+        form_list = paginator.page(
+            paginator.num_pages)
+
+    return render(request, 'helpdesk/form_list.html', {
+        'form_list': form_list,
+        'debug': settings.DEBUG,
+    })
+
+@helpdesk_staff_member_required
+def create_form(request):
+    organization = request.user.default_organization
+    
+    if request.method == "GET":
+        # Create empty form and save it to the database to generate the default Custom Fields.
+        formtype = FormType(organization = organization, name="Unnamed Form")
+        formtype.save()
+        form = EditFormTypeForm(
+            initial = {
+                'id': formtype.id,
+                'name': formtype.name,
+                'description': formtype.description,
+                'queue': formtype.queue,
+                'public': formtype.public,
+                'staff': formtype.staff,
+                'unlisted': formtype.unlisted
+            },
+            initial_customfields = CustomField.objects.filter(ticket_form=formtype),
+            organization = organization,
+            pk = formtype.id
+        )
+
+        return render(request, 'helpdesk/edit_form.html', {
+            'formtype': formtype,
+            'form': form,
+            'action': "Create",
+            'debug': settings.DEBUG,
+        })
+    elif request.method == "POST":
+        form = EditFormTypeForm(request.POST, organization = organization)
+        formtype = get_object_or_404(FormType, pk=request.POST.get('id'))
+        formset = form.CustomFieldFormSet(request.POST)
+
+        if form.is_valid():
+            formtype.name = form.cleaned_data['name']
+            formtype.description = form.cleaned_data['description']
+            formtype.queue = form.cleaned_data['queue']
+            formtype.updated = datetime.datetime.now()
+            formtype.public = form.cleaned_data['public']
+            formtype.staff = form.cleaned_data['staff']
+            formtype.unlisted = form.cleaned_data['unlisted']
+            formtype.save() 
+
+            if formset.is_valid():
+                for df in formset.deleted_forms:
+                    if df.cleaned_data['id']: df.cleaned_data['id'].delete()
+
+                for cf in formset.cleaned_data:
+                    if not cf or cf['DELETE']: continue # continue to next item if form is empty or item is being deleted
+
+                    customfield = cf['id'] if cf['id'] else CustomField()
+
+                    customfield.field_name = cf['field_name']
+                    customfield.label = cf['label']
+                    customfield.help_text = cf['help_text']
+                    customfield.data_type = cf['data_type']
+                    customfield.max_length = cf['max_length']
+                    customfield.decimal_places = cf['decimal_places']
+                    customfield.empty_selection_list = cf['empty_selection_list']
+                    customfield.list_values = cf['list_values']
+                    customfield.notifications = cf['notifications']
+                    customfield.form_ordering = cf['form_ordering']
+                    customfield.required = cf['required']
+                    customfield.staff = cf['staff']
+                    customfield.public = cf['public']
+                    customfield.column = cf['column']
+                    if not customfield.created: customfield.created = datetime.datetime.now()
+                    customfield.modified = datetime.datetime.now()
+                    customfield.ticket_form = formtype
+                    customfield.save()
+                
+                return HttpResponseRedirect(reverse('helpdesk:maintain_forms'))
+            
+        form.customfield_formset = formset
+        return render(request, "helpdesk/edit_form.html", {
+            'formtype': formtype,
+            'form': form,
+            'formset': formset,
+            'action': "Create",
+            'debug': settings.DEBUG,             
+        })
+    
+
+@helpdesk_staff_member_required
+def edit_form(request, pk):
+    formtype = get_object_or_404(FormType, pk=pk)
+    
+    if request.method == "GET":
+        form = EditFormTypeForm(
+            initial = {
+                'id': formtype.id,
+                'name': formtype.name,
+                'description': formtype.description,
+                'queue': formtype.queue,
+                'public': formtype.public,
+                'staff': formtype.staff,
+                'unlisted': formtype.unlisted
+            },
+            initial_customfields = CustomField.objects.filter(ticket_form=formtype),
+            organization = formtype.organization,
+            pk = pk
+        )
+        
+        return render(request, 'helpdesk/edit_form.html', {
+            'formtype': formtype,
+            'form': form,
+            'action': "Edit",
+            'debug': settings.DEBUG,
+        })
+    elif request.method == "POST":
+        form = EditFormTypeForm(request.POST, organization = formtype.organization)
+        formset = form.CustomFieldFormSet(request.POST)
+
+        if form.is_valid():
+            formtype.name = form.cleaned_data['name']
+            formtype.description = form.cleaned_data['description']
+            formtype.queue = form.cleaned_data['queue']
+            formtype.updated = datetime.datetime.now()
+            formtype.public = form.cleaned_data['public']
+            formtype.staff = form.cleaned_data['staff']
+            formtype.unlisted = form.cleaned_data['unlisted']
+            formtype.save() 
+            
+            if formset.is_valid():
+                for df in formset.deleted_forms:
+                    if df.cleaned_data['id']: df.cleaned_data['id'].delete()
+
+                for cf in formset.cleaned_data:
+                    if not cf or cf['DELETE']: continue # continue to next item if form is empty or item is being deleted
+
+                    customfield = cf['id'] if cf['id'] else CustomField()
+                    customfield.field_name = cf['field_name']
+                    customfield.label = cf['label']
+                    customfield.help_text = cf['help_text']
+                    customfield.data_type = cf['data_type']
+                    customfield.max_length = cf['max_length']
+                    customfield.decimal_places = cf['decimal_places']
+                    customfield.empty_selection_list = cf['empty_selection_list']
+                    customfield.list_values = [i for i in cf['agg_list_values'] if i] # remove empty strings
+                    customfield.notifications = cf['notifications']
+                    customfield.form_ordering = cf['form_ordering']
+                    customfield.required = cf['required']
+                    customfield.staff = cf['staff']
+                    customfield.public = cf['public']
+                    customfield.column = cf['column']
+                    if not customfield.created: customfield.created = datetime.datetime.now()
+                    customfield.modified = datetime.datetime.now()
+                    customfield.ticket_form = formtype
+                    customfield.save()
+
+                return HttpResponseRedirect(reverse('helpdesk:maintain_forms'))
+
+        form.customfield_formset = formset
+        return render(request, "helpdesk/edit_form.html", {
+            'formtype': formtype,
+            'form': form,
+            'formset': formset,
+            'action': "Edit",
+            'debug': settings.DEBUG,             
+        })
+
+@helpdesk_staff_member_required
+def delete_form(request, pk):
+    form = get_object_or_404(FormType, pk=pk)
+    form.delete()
+    return HttpResponseRedirect(reverse('helpdesk:maintain_forms'))
+
+@helpdesk_staff_member_required
+def duplicate_form(request, pk):
+    formtype = get_object_or_404(FormType, pk=pk)
+    new_form = FormType(
+        organization = formtype.organization,
+        name = formtype.name + " - Copy",
+        description = formtype.description,
+        queue = formtype.queue,
+        public = formtype.public,
+        staff = formtype.staff,
+        unlisted = formtype.unlisted,
+        created = datetime.datetime.now(),
+        updated = datetime.datetime.now(),
+    )
+    new_form.save() # generate default custom fields
+    
+    for cf_name in formtype.get_extra_field_names():
+        cf = CustomField.objects.get(ticket_form=formtype, field_name=cf_name)
+        new_cf = CustomField(
+            field_name = cf.field_name,
+            label = cf.label,
+            help_text = cf.help_text,
+            data_type = cf.data_type,
+            max_length = cf.max_length,
+            decimal_places = cf.decimal_places,
+            empty_selection_list = cf.empty_selection_list,
+            list_values = cf.list_values,
+            notifications = cf.notifications,
+            form_ordering = cf.form_ordering,
+            required = cf.required,
+            staff = cf.staff,
+            public = cf.public,
+            column = cf.column,
+            created = datetime.datetime.now(),
+            modified = datetime.datetime.now(),
+            ticket_form = new_form
+        )
+        new_cf.save()
+    return HttpResponseRedirect(reverse('helpdesk:maintain_forms'))
+
+def copy_field(request):
+    """
+    Asynchonously copy CustomField to another form
+    """
+    form = EditFormTypeForm.CustomFieldFormSet.form(request.POST)
+    form_id = request.POST.get('form_id')
+    if form.is_valid():
+        cf = form.cleaned_data
+        target_form = FormType.objects.get(id=form_id)
+        base = cf['field_name'] + '_copy'
+        
+        high = CustomField.objects.filter(ticket_form=target_form, field_name__regex=(base + r'(\d+)')).order_by('field_name').last()
+        if high != None: # if copies exist, use the index after the highest to ensure availability
+            import re
+            match = re.search(base + r'(\d+)', high.field_name)
+            copy = base + str(int(match.group(1)) + 1)
+        else: # otherwise just use 1
+            copy = base + '1'
+
+        customfield = CustomField()
+        customfield.field_name = copy
+        customfield.label = cf['label']
+        customfield.help_text = cf['help_text']
+        customfield.data_type = cf['data_type']
+        customfield.max_length = cf['max_length']
+        customfield.decimal_places = cf['decimal_places']
+        customfield.empty_selection_list = cf['empty_selection_list']
+        customfield.list_values = [i for i in cf['agg_list_values'] if i] # remove empty strings
+        customfield.notifications = cf['notifications']
+        customfield.form_ordering = cf['form_ordering']
+        customfield.required = cf['required']
+        customfield.staff = cf['staff']
+        customfield.public = cf['public']
+        customfield.column = cf['column']
+        if not customfield.created: customfield.created = datetime.datetime.now()
+        customfield.modified = datetime.datetime.now()
+        customfield.ticket_form = target_form
+        customfield.save()
+
+        return JsonResponse({'copied': True})
+    else:
+        return JsonResponse({'copied': False, 'errors': form.errors})
+
+
+    
 
 @helpdesk_staff_member_required
 def dashboard(request):
@@ -1531,7 +1944,6 @@ def edit_ticket(request, ticket_id):
 
 
 edit_ticket = staff_member_required(edit_ticket)
-
 
 def attach_ticket_to_property_milestone(request, ticket):
     from seed.models import PropertyMilestone, Note

@@ -1,0 +1,160 @@
+{% extends "helpdesk/base.html" %}{% load i18n humanize %}
+
+{% block helpdesk_title %}{% blocktrans %} Maintain Forms {% endblocktrans %}{% endblock %}
+
+{% block helpdesk_breadcrumb %}
+<li class="breadcrumb-item">
+    <a href="{% url 'helpdesk:user_settings' %}">{% trans "Settings" %}</a>
+</li>
+<li class="breadcrumb-item">
+    <a href="{% url 'helpdesk:system_settings' %}">{% trans "System Settings" %}</a>
+</li>
+<li class="breadcrumb-item active">
+    Maintain Forms
+</li>
+{% endblock %}
+
+{% block helpdesk_body %}
+
+<style>
+    {# Center table elements #}
+    #dataTable td {
+        vertical-align: middle
+    };
+</style>
+
+<div class="card mb-3">
+    <div class="card-header d-flex align-items-center">
+        <i class="fas fa-table mr-1"></i>
+        {% trans "Maintain Forms" %}
+        <div class="flex-fill d-flex justify-content-end">
+            <a class="btn btn-primary align-self-center" href="{% url 'helpdesk:create_form' %}{{ user_info.url }}">
+                <i class="fa fa-plus mr-1"></i>Create
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        {% comment %} <p class="my-1"> Select a form title to edit the form. </p> {% endcomment %}
+        <div class="table-responsive">
+        <table class="table table-bordered table-sm table-striped" id="dataTable" width="100%" cellspacing="0">
+            <thead class="thead-light">
+                <tr>
+                    {# Need to decide which columns are most relevant to the user #}
+                    {% comment %} <th>{% trans "Organization" %}</th> {% endcomment %}
+                    <th>{% trans "Name" %}</th>
+                    {% comment %} <th>{% trans "Description" %}</th> {% endcomment %}
+                    <th>{% trans "Queue" %}</th>
+                    <th class="text-center">{% trans "Public" %}</th>
+                    <th class="text-center">{% trans "Staff" %}</th>
+                    <th class="text-center">{% trans "Unlisted" %}</th>
+                    {% comment %} <th>{% trans "Additional Fields" %}</th> {% endcomment %}
+                    <th class="text-center">{% trans "Duplicate" %}</th>
+                    <th class="text-center">{% trans "Delete" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for form in form_list %}
+                <tr>
+                    {% comment %} <td>{{ form.organization.name }}</td> {% endcomment %}
+                    <td class="tickettitle" data-toggle="tooltip" title="Edit {{ form.name }}"><a href="{% url 'helpdesk:edit_form' form.id %}{{ user_info.url }}">{{ form.id }}. {{ form.name }}</a></td>
+                    {% comment %} <td>{{ form.get_markdown }}</td> {% endcomment %}
+                    <td>{{ form.queue }}</td>
+                    <td class="text-center">
+                        {# This block could be another template, since it is reused 3 times in this code #}
+                        {% if form.public %}
+                            <i class="fa fa-check-circle text-success">
+                        {% else %}
+                            <i class="fa fa-times-circle text-danger">
+                        {% endif%}
+                    </td>
+                    <td class="text-center">
+                        {% if form.staff %}
+                            <i class="fa fa-check-circle text-success">
+                        {% else %}
+                            <i class="fa fa-times-circle text-danger">
+                        {% endif%}
+                    </td>
+                    <td class="text-center">
+                        {% if form.unlisted %}
+                            <i class="fa fa-check-circle text-success">
+                        {% else %}
+                            <i class="fa fa-times-circle text-danger">
+                        {% endif%}
+                    </td>
+                    {% comment %} <td> {{ form.get_extra_field_names }} </td> {% endcomment %}
+                    <td class="text-center">
+                        <a class="btn btn-primary" href="{% url 'helpdesk:duplicate_form' form.id %}" title="Duplicate {{ form.name }}">
+                            <i class="fa fa-clone"></i>
+                        </a>
+                    </td>
+                    <td class="text-center">
+                        <a class="btn btn-danger" data-toggle="modal" data-target="#deleteModal" title="Delete {{ form.name }}" onclick="updateModal({{form.id}}, '{{form.name}}')">
+                            <i class="fa fa-trash"></i>
+                        </a>
+                    </td>
+                </tr>
+
+                {% empty %}
+                <tr><td colspan='6'>{% trans "You do not have any forms." %}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        </div>
+        <!-- /.table-responsive -->
+        {% with 'q_page' as page_var %}
+        {% if form_list.has_other_pages %}
+            <ul class="pagination">
+            <!-- if we aren't on page one, go back to start and go back one controls -->
+            {% if form_list.has_previous %}
+                <li><a href="?{{ page_var }}=1">&laquo;&laquo;</a>&nbsp;</li>
+                <li><a href="?{{ page_var }}={{ form_list.previous_page_number }}">&laquo;</a>&nbsp;</li>
+            {% else %}
+                <li class="disabled"><span>&laquo;&laquo;&nbsp;</span></li>
+                <li class="disabled"><span>&laquo;&nbsp;</span></li>
+            {% endif %}
+            <!-- other pages, set thresh to the number to show before and after active -->
+            {% with 5 as thresh %}
+            {% for i in form_list.paginator.page_range %}
+            {% if form_list.number == i %}
+                <li class="active"><span>{{ i }}&nbsp;<span class="sr-only">(current)</span></span></li>
+            {% elif i <= form_list.number|add:5 and i >= form_list.number|add:-5 %}
+                <li><a href="?{{ page_var }}={{ i }}">{{ i }}</a>&nbsp;</li>
+            {% endif %}
+            {% endfor %}
+            {% endwith %}
+            <!-- if we aren't on the last page, go forward one and go to end controls -->
+            {% if form_list.has_next %}
+                <li><a href="?{{ page_var }}={{ form_list.next_page_number }}">&raquo;</a>&nbsp;</li>
+                <li><a href="?{{ page_var }}={{ form_list.paginator.num_pages }}">&raquo;&raquo;</a>&nbsp;</li>
+            {% else %}
+                <li class="disabled"><span>&raquo;&nbsp;</span></li>
+                <li class="disabled"><span>&raquo;&raquo;&nbsp;</span></li>
+            {% endif %}
+            </ul>
+        {% endif %}
+        {% endwith %}
+    </div>
+    <div class="card-footer small text-muted">Listing {{ form_list|length }} form(s) out of {{ form_list.paginator.count }}.</div>
+</div>
+
+{% url 'helpdesk:delete_form' form.id as delete_url%}
+{% include 'helpdesk/include/confirm_delete.html' with type="Form" title=form.name delete_url=delete_url subdelete="Custom Field" %}
+
+<script type='text/javascript' language='javascript'>
+    // In order to reuse the delete modal, its contents and links need to be updated to match the form being deleted.
+    function updateModal(id, name) {
+        document.getElementById('modal_delete_confirm').href = '{% url 'helpdesk:maintain_forms' %}' + id + '/delete';
+        document.getElementById('modal_delete_body').innerHTML = 
+            `
+            Please confirm that you want to delete the Form: <strong>` + name + `</strong>. 
+            </br>
+            This will also delete any associated <strong>Custom Fields</strong>
+            </br></br>
+            This action <strong>cannot</strong> be undone.
+            `
+    }
+</script>
+
+{% endblock %}
+
+

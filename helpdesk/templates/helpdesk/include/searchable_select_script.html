@@ -1,0 +1,38 @@
+<script type='text/javascript' language='javascript'>
+    function filterColumns(widgetName) {
+        if (document.getElementById('colsearch_' + widgetName) == null) {
+            return
+        }
+        query = document.getElementById('colsearch_' + widgetName).value.trim().toLowerCase()
+        for (const entry of document.getElementById('collist_' + widgetName).children) {
+            if (!entry.children[0].innerText.toLowerCase().includes(query)) {
+                entry.hidden = true
+            } else {
+                entry.hidden = false
+            }
+        }
+    }
+
+    function selectOption(src, widgetName) {
+        document.getElementById('colselection_' + widgetName).value = src.innerText
+        document.getElementById('id_' + widgetName).value = src.dataset.value
+        document.getElementById('new_' + widgetName).click()
+    }
+
+    var debounced = debounce(filterColumns, 500)
+
+    function debounce(func, wait, immediate) {
+        var timeout;
+        return function() {
+            var context = this, args = arguments;
+            var later = function() {
+                timeout = null;
+                if (!immediate) func.apply(context, args);
+            };
+            var callNow = immediate && !timeout;
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+            if (callNow) func.apply(context, args);
+        };
+    };
+</script>

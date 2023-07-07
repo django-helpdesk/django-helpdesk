@@ -1,0 +1,180 @@
+{% extends "helpdesk/base.html" %}
+
+{% load i18n bootstrap4form %}
+
+{% block helpdesk_title %}{% blocktrans %} {{ action }} Form {% endblocktrans %}{% endblock %}
+
+{% block helpdesk_breadcrumb %}
+<li class="breadcrumb-item">
+    <a href="{% url 'helpdesk:user_settings' %}">{% trans "Settings" %}</a>
+</li>
+<li class="breadcrumb-item">
+    <a href="{% url 'helpdesk:system_settings' %}">{% trans "System Settings" %}</a>
+</li>
+<li class="breadcrumb-item">
+    <a href="{% url 'helpdesk:maintain_forms' %}">{% trans "Maintain Forms" %}</a>
+</li>
+<li class="breadcrumb-item active">
+    {% blocktrans with formtype.name as fn%}{{ action }} {{ fn }}{% endblocktrans %}
+</li>
+{% endblock %}
+
+{% block helpdesk_body %}
+<div class="col-xs-6">
+    <div class="panel panel-default">
+        <div class="panel-body"><h2>{% blocktrans %} {{ action }} Form {% endblocktrans %}</h2>
+            <p>
+                {% if action == "Create" %}{% trans "Leaving this page without using the cancel button will create a blank unnamed form." %}</br>{% endif %}
+                
+                {% trans "Required fields are indicated by " %} <span style="color:red;">*</span>
+            </p>
+            {% if form.errors %}<p class="text-danger">{% for error in form.errors %}{% trans "Error: " %}{{ error }}<br>{% endfor %}</p>{% endif %}
+            {% if formset.non_form_errors %}
+            <div class="alert alert-danger" role="alert">
+                <a class="close" data-dismiss="alert">&times;</a>
+                <strong>Custom Field Error</strong>: {{ formset.non_form_errors.as_text }}
+            </div>
+            {% endif %}
+            
+            {% if formset.errors %}
+            {% for form_errors in formset.errors %}
+            {% if form_errors %}
+            <div class="alert alert-danger" role="alert">
+                <a class="close" data-dismiss="alert">&times;</a>
+                <strong>Custom Field #{{ forloop.counter}}</strong> </br>
+                {% for key, error in form_errors.items %} {{ key }}: {{ error.as_text }} {% endfor %}
+            </div>
+            {% endif %}
+            {% endfor %}
+            {% endif %}
+            <form id='edit_form' method='post'>
+                {% csrf_token %}
+                <fieldset>
+                    {{ form|bootstrap4form }}
+                    {% include 'helpdesk/include/collapsible_formset.html' with formset=form.customfield_formset formset_title="Custom Field" formset_type="custom_field" required_fields="['field_name']" can_copy=True copy_queryset=form.copy_queryset copy_url='helpdesk:copy_field' can_duplicate=True header_template='helpdesk/include/header_customfields.html'%}
+                    <div class='buttons form-group'>
+                        <button type='submit' id='submit' onclick="removeEmpty(); aggMultiText()" class="btn btn-primary btn" value='{% trans "Save Changes" %}'>
+                            {% if action == "Create" %}
+                            Create Form
+                            {% else %}
+                            Save Changes
+                            {% endif %}
+                        </button>
+                        <a href="{% if action == "Create" %}{% url 'helpdesk:delete_form' formtype.id %}{% else %}{% url 'helpdesk:maintain_forms' %} {% endif %}">
+                            <button type="button" class="btn btn-danger">{% trans "Cancel" %}</button>
+                        </a>
+                    </div>
+                </fieldset>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script type='text/javascript' language='javascript'>
+    $(document).ready(function () {
+        defaults = ['queue','submitter_email', 'contact_name','title','description','building_name','building_address','building_id','pm_id','attachment','due_date','priority','cc_emails']
+        for (const field_name of document.querySelectorAll('[name$="-field_name"]')) {
+            idx = defaults.indexOf(field_name.value)
+            if (idx >= 0) {
+                field_name.readOnly = true;
+                field_name.required = false;
+                defaults.splice(idx, 1)
+            } else {
+                field_name.required = true;
+            }
+        }
+        
+        document.querySelector('#custom_field_empty [name$="-field_name"]').required = false;
+        
+        {# Bandaid fix for adding asterisks to required fields while the rest of the form is handled by bootstrap4form #}
+        for (const required_field of document.querySelectorAll('[required]')) {
+            document.querySelector('label[for=' + required_field.id + ']').innerHTML += '<span style="color:red;">*</span>'
+        }
+        
+        // Update field visibility depending on the selected data type for the field
+        for (const dataTypeField of document.querySelectorAll('[id^=' + id_formset + '-][id$=-data_type]')) {
+            formNum = dataTypeField.id.match(new RegExp(`${id_formset}-(\\w+)`))[1];
+            updateDataTypeFields(formNum)
+            dataTypeField.addEventListener('change', (e) => {updateDataTypeFields(e.srcElement.id.match(new RegExp(`${id_formset}-(\\w+)`))[1])});
+        }
+        
+        $('[id^=colsearch_]').on('input', debounced())
+    })
+    
+    function removeEmpty() {
+        if (document.querySelector('#edit_form').checkValidity()) {
+            document.querySelector('#custom_field_empty').remove()
+        }
+    }
+
+    function aggMultiText() {
+        for (const agg of document.querySelectorAll('[name$=-agg_list_values]')) {
+            widgetName = agg.name.match('(.+)-agg_list_values')[1]
+            agg_strings = []
+            for (const string of document.getElementById(widgetName + '-list_values_strings').children) {
+                agg_strings.push(string.children[0].value)
+            }
+            agg.value = JSON.stringify(agg_strings)
+        }
+    }
+    
+    function addScript(newForm) {
+        dataTypeField = newForm.querySelector('[id$=-data_type]')
+        formNum = dataTypeField.id.match(new RegExp(`${id_formset}-(\\w+)`))[1];
+        updateDataTypeFields(formNum)
+        dataTypeField.addEventListener('change', (e) => {updateDataTypeFields(e.srcElement.id.match(new RegExp(`${id_formset}-(\\w+)`))[1])});
+    
+        newForm.querySelector("[id$=_add_string]").addEventListener('click', function() {
+            widgetName = "customfield_set-" + formNum + "-list_values"
+            // Create new input element and append it to the input container
+            new_input_num = document.getElementById(widgetName + "_strings").children.length
+            new_elem_type = document.getElementById(widgetName + "_strings").children[0].children[0].type
+            new_elem = document.createElement('div')
+            new_elem.setAttribute('class', 'mb-2')
+            new_elem.innerHTML = '<input type="' + new_elem_type + '" name="' + widgetName + '_0" class=" form-control" id="id_' + widgetName + '_0" spellcheck="false" data-ms-editor="true">'.replaceAll("{{ widget.name }}_0", "{{ widget.name }}_" + new_input_num);
+            document.getElementById(widgetName + '_strings').appendChild(new_elem);
+        });
+    }
+
+    function copyScript(src_field) {
+        srcForm = document.getElementById(src_field)
+
+        agg = srcForm.querySelector('[name$=-agg_list_values]')
+        widgetName = agg.name.match('(.+)-agg_list_values')[1]
+        agg_strings = []
+        for (const string of document.getElementById(widgetName + '-list_values_strings').children) {
+            agg_strings.push(string.children[0].value)
+        }
+        agg.value = JSON.stringify(agg_strings)
+    }
+    
+    function updateDataTypeFields(formNum) {
+        if (formNum == "__prefix__") {formNum = "empty"}
+        form = document.getElementById('custom_field_' + formNum)
+        dataType = form.querySelector('[id$=-data_type]').value
+        
+        // Hide all conditionally visible fields and recheck conditions
+        form.querySelector('[id$=-max_length]').parentElement.parentElement.hidden = true;
+        form.querySelector('[id$=-decimal_places]').parentElement.parentElement.hidden = true;
+        form.querySelector('[id$=-empty_selection_list]').parentElement.parentElement.hidden = true;
+        form.querySelector('[id$=-list_values]').parentElement.parentElement.hidden = true;
+        form.querySelector('[id$=-notifications]').parentElement.parentElement.hidden = true;
+        
+        if (['varchar', 'text', 'decimal'].indexOf(dataType) >= 0) {
+            form.querySelector('[id$=-max_length]').parentElement.parentElement.hidden = false;
+        }
+        if (dataType == 'decimal') {
+            form.querySelector('[id$=-decimal_places]').parentElement.parentElement.hidden = false;
+        }
+        if (dataType == 'list') {
+            form.querySelector('[id$=-empty_selection_list]').parentElement.parentElement.hidden = false;
+            form.querySelector('[id$=-list_values]').parentElement.parentElement.hidden = false;
+        }
+        if (dataType == 'email') {
+            form.querySelector('[id$=-notifications]').parentElement.parentElement.hidden = false;
+        }
+    }
+</script>   
+{% include 'helpdesk/include/edit_md_preview_script.html' %}
+{% include 'helpdesk/include/searchable_select_script.html' %}  
+{% endblock %}
