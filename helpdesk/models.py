@@ -1371,21 +1371,29 @@ class KBItem(models.Model):
         help_text=_("The body of the article, or answer to the question.<br/><br/>" +
                     markdown_allowed() + '<br/><br/>'
                     "<b>Multple newlines:</b><br/>Markdown doesn't recognize multiple blank lines. "
-                    "To display one, write &amp;nbsp; on a blank line.<br/><br/>"
+                    "To display one, write <code>&amp;nbsp;</code> on a blank line.<br/><br/>"
                     "<b>Table formatting:</b><br/>"
                     "<pre>First Header  | Second Header</br>"
                     '------------- | -------------</br>'
                     'Content Cell  | Content Cell</br>'
                     'Content Cell  | Content Cell</pre>'
                     '<b>Collapsing section:</b><br/> '
-                    'Add !~! on a line following the section title, followed by a blank line. '
-                    'Add ~!~ on a line following the section body, followed by another blank line. <br/>'
+                    'Add <code>!~!</code> on a line following the section title, followed by a blank line. '
+                    'Add <code>~!~</code> on a line following the section body, followed by another blank line. <br/>'
                     'The body may have multiple lines of text, but no blank lines.<br/><br/>'
                     'Example:<br/><pre>This text comes before the section.<br/><br/>'
                     'Title of Subsection<br/>!~!<br/><br/>'
                     '&amp;nbsp;<br/>Body of subsection.<br/>&amp;nbsp;<br/>I can add many lines of text to this. '
                     "It will all be included in the section.<br/>~!~<br/><br/>"
-                    "&amp;nbsp;<br/>This, however, won't be included in the collapsing section.</pre>"),
+                    "&amp;nbsp;<br/>This, however, won't be included in the collapsing section.</pre>"
+                    "<b>Anchor links:</b></br>Add <code>{: #name }</code> on the same line after a header, or on the line " 
+                    "after a paragraph to create an anchor. Use <code>[Link Text](#name)</code> to create a link "
+                    "that will jump to the anchor. "
+                    "Name can have letters, numbers, and underscores - no spaces.<br/><br/>"
+                    "Example:<br/><pre># Header {: #header_1 }<br/></br/>"
+                    "multiple</br>line</br>paragraph</br>{: #paragraph_1}</br></br>"
+                    "[This link will jump to the header](#header_1)</br>"
+                    "[This link will jump to the top of the paragraph](#paragraph_1)</pre>"),
     )
 
     votes = models.IntegerField(
