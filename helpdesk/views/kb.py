@@ -99,8 +99,8 @@ def create_category(request):
                 'name': form.cleaned_data['name'],
                 'title': form.cleaned_data['title'],
                 'slug': form.data['slug'],
-                'preview_description': escape(form.cleaned_data['preview_description']),
-                'description': escape(form.cleaned_data['description']),
+                'preview_description': form.cleaned_data['preview_description'],
+                'description': form.cleaned_data['description'],
                 'queue': form.cleaned_data['queue'],
                 'forms': form.cleaned_data['forms'].all(),
                 'public': form.cleaned_data['public'],
@@ -127,8 +127,8 @@ def edit_category(request, slug):
                 'name': category.name,
                 'title': category.title,
                 'slug': category.slug,
-                'preview_description': escape(category.preview_description),
-                'description': escape(category.description),
+                'preview_description': category.preview_description,
+                'description': category.description,
                 'queue': category.queue,
                 'forms': category.forms.all(),
                 'public': category.public,
@@ -231,7 +231,7 @@ def create_article(request, slug=None):
                 category = form.cleaned_data['category'],
                 title = form.cleaned_data['title'],
                 question = form.cleaned_data['question'],
-                answer = escape(form.cleaned_data['answer']),
+                answer = form.cleaned_data['answer'],
                 order = form.cleaned_data['order'],
                 enabled = form.cleaned_data['enabled'],
                 last_updated = datetime.datetime.now()
@@ -351,8 +351,14 @@ def preview_markdown(request):
         def __call__(self, match):
                 self.count += 1
                 return self.pattern.format(self.count)
+    
     if is_kbitem == 'true':
         import re
+        anchor_target_pattern = r'{\:\s*#(\w+)\s*}'
+        anchor_link_pattern = r'\[(.+)\]\(#(\w+)\)'
+        new_md, anchor_target_count = re.subn(anchor_target_pattern, "{: #anchor-\g<1> }", md)
+        new_md, anchor_link_count = re.subn(anchor_link_pattern, "[\g<1>](#anchor-\g<2>)", new_md)
+
         title_pattern = r'!~!'
         body_pattern = r'~!~'
         title = "{{: .card .btn .btn-link style='text-align: left;' " \
@@ -360,9 +366,9 @@ def preview_markdown(request):
                 "aria-expanded='false' aria-controls='collapse{0}' .card-header #header{0} .h5 .mb-0 }}"
         body = "{{ #collapse{0} .collapse role='region' aria-labelledby='header{0}' data-parent='#header{0}' " \
                "style='padding-top:0;padding-bottom:0;margin:0;' .card-body }}"
-        new_md, title_count = re.subn(title_pattern, MarkdownNumbers(start=1, pattern=title), md)
+        new_md, title_count = re.subn(title_pattern, MarkdownNumbers(start=1, pattern=title), new_md)
         new_md, body_count = re.subn(body_pattern, MarkdownNumbers(start=1, pattern=body), new_md)
-        if title_count != 0 and title_count == body_count:
+        if (anchor_target_count != 0 and anchor_target_count == anchor_link_count) or (title_count != 0 and title_count == body_count):
             return JsonResponse({'md_html':get_markdown(new_md, org, kb=True)})
     return JsonResponse({'md_html':get_markdown(md, org)})
 

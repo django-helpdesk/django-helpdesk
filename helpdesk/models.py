@@ -128,16 +128,19 @@ def get_markdown(text, org, kb=False):
                   'markdown.extensions.fenced_code',  # required for collapsing sections
                   'markdown.extensions.tables']  # requested
     collapsible_attrs = {}
+    header_attrs = {}
     if kb:
         extensions.append('markdown.extensions.attr_list')
         collapsible_attrs = {"p": ["data-target", "data-toggle", "data-parent", "role",
                                    'aria-controls', 'aria-expanded', 'aria-labelledby', 'id']}
+        header_attrs = {"h1": ['id'],"h2": ['id'], "h3": ['id'], "h4": ['id'], "h5": ['id'], "h6": ['id'],}
     cleaner = Cleaner(
         filters=[partial(LinkifyFilter, callbacks=[partial(_cleaner_set_target, domain), _cleaner_shorten_url])],
         tags=markdown_tags + print_tags,
         attributes={**markdown_attrs,
                     **print_attrs,
-                    **collapsible_attrs},
+                    **collapsible_attrs,
+                    **header_attrs},
         styles=all_styles
     )
     cleaned = cleaner.clean(markdown(text, extensions=extensions))
@@ -1488,19 +1491,23 @@ class KBItem(models.Model):
             def __call__(self, match):
                 self.count += 1
                 return self.pattern.format(self.count)
+            
+        anchor_target_pattern = r'{\:\s*#(\w+)\s*}'
+        anchor_link_pattern = r'\[(.+)\]\(#(\w+)\)'
+        new_answer, anchor_target_count = re.subn(anchor_target_pattern, "{: #anchor-\g<1> }", self.answer)
+        new_answer, anchor_link_count = re.subn(anchor_link_pattern, "[\g<1>](#anchor-\g<2>)", new_answer)
 
         title_pattern = r'!~!'
         body_pattern = r'~!~'
-
         title = "{{: .card .btn .btn-link style='text-align: left;' " \
                 "data-toggle='collapse' data-target='#collapse{0}' role='region' " \
                 "aria-expanded='false' aria-controls='collapse{0}' .card-header #header{0} .h5 .mb-0 }}"
         body = "{{ #collapse{0} .collapse role='region' aria-labelledby='header{0}' data-parent='#header{0}' " \
                "style='padding-top:0;padding-bottom:0;margin:0;' .card-body }}"
 
-        new_answer, title_count = re.subn(title_pattern, MarkdownNumbers(start=1, pattern=title), self.answer)
+        new_answer, title_count = re.subn(title_pattern, MarkdownNumbers(start=1, pattern=title), new_answer)
         new_answer, body_count = re.subn(body_pattern, MarkdownNumbers(start=1, pattern=body), new_answer)
-        if title_count != 0 and title_count == body_count:
+        if (anchor_target_count != 0 and anchor_target_count == anchor_link_count) or (title_count != 0 and title_count == body_count):
             return get_markdown(new_answer, self.category.organization, kb=True)
         return get_markdown(self.answer, self.category.organization)
 
