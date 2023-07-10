@@ -10,7 +10,6 @@ from copy import deepcopy
 import json
 import pandas as pd
 import dateutil
-import datetime
 import pytz
 
 from django.conf import settings
@@ -329,7 +328,7 @@ def create_form(request):
             formtype.name = form.cleaned_data['name']
             formtype.description = form.cleaned_data['description']
             formtype.queue = form.cleaned_data['queue']
-            formtype.updated = datetime.datetime.now()
+            formtype.updated = datetime.now()
             formtype.public = form.cleaned_data['public']
             formtype.staff = form.cleaned_data['staff']
             formtype.unlisted = form.cleaned_data['unlisted']
@@ -358,8 +357,8 @@ def create_form(request):
                     customfield.staff = cf['staff']
                     customfield.public = cf['public']
                     customfield.column = cf['column']
-                    if not customfield.created: customfield.created = datetime.datetime.now()
-                    customfield.modified = datetime.datetime.now()
+                    if not customfield.created: customfield.created = datetime.now()
+                    customfield.modified = datetime.now()
                     customfield.ticket_form = formtype
                     customfield.save()
                 
@@ -409,7 +408,7 @@ def edit_form(request, pk):
             formtype.name = form.cleaned_data['name']
             formtype.description = form.cleaned_data['description']
             formtype.queue = form.cleaned_data['queue']
-            formtype.updated = datetime.datetime.now()
+            formtype.updated = datetime.now()
             formtype.public = form.cleaned_data['public']
             formtype.staff = form.cleaned_data['staff']
             formtype.unlisted = form.cleaned_data['unlisted']
@@ -437,8 +436,8 @@ def edit_form(request, pk):
                     customfield.staff = cf['staff']
                     customfield.public = cf['public']
                     customfield.column = cf['column']
-                    if not customfield.created: customfield.created = datetime.datetime.now()
-                    customfield.modified = datetime.datetime.now()
+                    if not customfield.created: customfield.created = datetime.now()
+                    customfield.modified = datetime.now()
                     customfield.ticket_form = formtype
                     customfield.save()
 
@@ -470,8 +469,8 @@ def duplicate_form(request, pk):
         public = formtype.public,
         staff = formtype.staff,
         unlisted = formtype.unlisted,
-        created = datetime.datetime.now(),
-        updated = datetime.datetime.now(),
+        created = datetime.now(),
+        updated = datetime.now(),
     )
     new_form.save() # generate default custom fields
     
@@ -492,8 +491,8 @@ def duplicate_form(request, pk):
             staff = cf.staff,
             public = cf.public,
             column = cf.column,
-            created = datetime.datetime.now(),
-            modified = datetime.datetime.now(),
+            created = datetime.now(),
+            modified = datetime.now(),
             ticket_form = new_form
         )
         new_cf.save()
@@ -533,8 +532,8 @@ def copy_field(request):
         customfield.staff = cf['staff']
         customfield.public = cf['public']
         customfield.column = cf['column']
-        if not customfield.created: customfield.created = datetime.datetime.now()
-        customfield.modified = datetime.datetime.now()
+        if not customfield.created: customfield.created = datetime.now()
+        customfield.modified = datetime.now()
         customfield.ticket_form = target_form
         customfield.save()
 
