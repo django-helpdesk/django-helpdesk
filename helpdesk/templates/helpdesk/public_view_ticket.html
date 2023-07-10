@@ -1,5 +1,6 @@
 {% extends "helpdesk/public_base.html" %}{% load i18n humanize helpdesk_staff %}
 {% load static %}
+{% load ticket_to_link %}
 {% block helpdesk_title %}{% trans "View a Ticket" %}{% endblock %}
 
 {% block helpdesk_breadcrumb %}
@@ -83,7 +84,7 @@
         {% endif %}
 
         <tr><th colspan='2'>{% trans "Description" %}</th></tr>
-        <tr><td colspan='2'>{% if ticket.description %}{{ ticket.description|force_escape|urlizetrunc:50|linebreaksbr }}{% else %}No description given.{% endif %}</td></tr>
+        <tr><td colspan='2'>{% if ticket.description %}{{ ticket.get_markdown|num_to_link }}{% else %}No description given.{% endif %}</td></tr>
 
         {% if ticket.resolution %}
         <tr>
