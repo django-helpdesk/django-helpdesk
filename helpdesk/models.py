@@ -1515,7 +1515,7 @@ class KBItem(models.Model):
 
         new_answer, title_count = re.subn(title_pattern, MarkdownNumbers(start=1, pattern=title), new_answer)
         new_answer, body_count = re.subn(body_pattern, MarkdownNumbers(start=1, pattern=body), new_answer)
-        if (anchor_target_count != 0 and anchor_target_count == anchor_link_count) or (title_count != 0 and title_count == body_count):
+        if (anchor_target_count != 0) or (title_count != 0 and title_count == body_count):
             return get_markdown(new_answer, self.category.organization, kb=True)
         return get_markdown(self.answer, self.category.organization)
 

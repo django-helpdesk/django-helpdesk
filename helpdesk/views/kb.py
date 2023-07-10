@@ -368,7 +368,7 @@ def preview_markdown(request):
                "style='padding-top:0;padding-bottom:0;margin:0;' .card-body }}"
         new_md, title_count = re.subn(title_pattern, MarkdownNumbers(start=1, pattern=title), new_md)
         new_md, body_count = re.subn(body_pattern, MarkdownNumbers(start=1, pattern=body), new_md)
-        if (anchor_target_count != 0 and anchor_target_count == anchor_link_count) or (title_count != 0 and title_count == body_count):
+        if (anchor_target_count != 0) or (title_count != 0 and title_count == body_count):
             return JsonResponse({'md_html':get_markdown(new_md, org, kb=True)})
     return JsonResponse({'md_html':get_markdown(md, org)})
 
