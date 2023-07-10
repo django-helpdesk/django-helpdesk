@@ -159,6 +159,7 @@ def queue_list(request):
         'debug': settings.DEBUG,
     })
 
+
 @helpdesk_staff_member_required
 def create_queue(request):
     if request.method == "GET":
@@ -238,7 +239,7 @@ def edit_queue(request, slug):
                 'default_owner': queue.default_owner,
                 'reassign_when_closed': queue.reassign_when_closed,
                 'dedicated_time': queue.dedicated_time,
-                'importer': queue.email_address if queue.email_address else "None",
+                'importer': queue.importer if queue.importer else None,
             }
         )
 
@@ -264,6 +265,7 @@ def edit_queue(request, slug):
             
             queue.save()
         return HttpResponseRedirect(reverse('helpdesk:maintain_queues')) 
+
 
 @helpdesk_staff_member_required
 def form_list(request):

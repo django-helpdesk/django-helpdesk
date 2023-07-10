@@ -384,7 +384,7 @@ class EditQueueForm(forms.ModelForm):
     match_on_addresses = MatchOnField(num_widgets=1, field_type=forms.EmailField(), widget_type=forms.EmailInput(), required=False)
 
     slug = forms.SlugField()
-    importer = forms.CharField(required=False, initial="None", label="Email address", help_text=Queue.importer.field.help_text)
+    importer = forms.CharField(required=False, initial=None, label="Email address", help_text=Queue.importer.field.help_text)
 
     class OwnerModelChoiceField(forms.ModelChoiceField):
         def label_from_instance(self, user):
@@ -433,6 +433,8 @@ class EditQueueForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
 
+        if cleaned_data['importer'] == '':
+            cleaned_data['importer'] = None
         # Since organization is an excluded field, validating the unique_together 
         # constraint of slugs must be done manually
         if 'slug' in cleaned_data and Queue.objects.filter(organization=self.org, slug=cleaned_data['slug']).exists():
