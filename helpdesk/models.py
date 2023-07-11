@@ -1511,12 +1511,12 @@ class KBItem(models.Model):
 
         title_pattern = r'^(.*)\n!~!'
         body_pattern = r'~!~'
-        title = "<div markdown='1' id=\"header{0}\" class='card btn btn-link card-header h5 mb-2' " \
+        title = "<div markdown='1' class='card'>\n<div markdown='1' id=\"header{0}\" class='btn btn-link card-header h5' " \
                 "style='text-align: left; 'data-toggle='collapse' data-target='#collapse{0}' role='region' " \
                 "aria-expanded='false' aria-controls='collapse{0}'>\1\n{{: .mb-0}}</div>\n" \
-                "<div markdown='1' id='collapse{0}' class='collapse card-body' role='region'" \
+                "<div markdown='1' id='collapse{0}' class='collapse card-body mt-1' role='region'" \
                 "aria-labelledby='header{0}' data-parent='#header{0}' style='padding-top:0;padding-bottom:0;margin:0;'>"
-        body = "</div>"
+        body = "</div>\n</div>"
 
         new_answer, title_count = re.subn(title_pattern, MarkdownNumbers(start=1, pattern=title), new_answer, flags=re.MULTILINE)
         new_answer, body_count = re.subn(body_pattern, body, new_answer)
