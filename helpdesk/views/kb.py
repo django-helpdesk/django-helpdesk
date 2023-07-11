@@ -361,7 +361,7 @@ def preview_markdown(request):
         
         title_pattern = r'^(.*)\n!~!'
         body_pattern = r'~!~'
-        title = "<div markdown='1' class='card'>\n<div markdown='1' id=\"header{0}\" class='btn btn-link card-header h5' " \
+        title = "<div markdown='1' class='card mb-2'>\n<div markdown='1' id=\"header{0}\" class='btn btn-link card-header h5' " \
                 "style='text-align: left; 'data-toggle='collapse' data-target='#collapse{0}' role='region' " \
                 "aria-expanded='false' aria-controls='collapse{0}'>\1\n{{: .mb-0}}</div>\n" \
                 "<div markdown='1' id='collapse{0}' class='collapse card-body mt-1' role='region'" \
