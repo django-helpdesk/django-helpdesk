@@ -32,11 +32,11 @@
 
 
 {% block helpdesk_body %}
-<div class="card">
-    <div class="card-header">
-        <ul class="nav nav-tabs">
-            <li class="nav-item" style="width: 200px;">
-                {% trans "Query Results" %}:
+<div class="card mb-2">
+    <div class="card-header pt-1">
+        <ul class="nav nav-tabs card-header-tabs">
+            <li class="nav-item d-flex align-self-center mr-2 font-weight-bold">
+                {% trans "Query Results" %}
             </li>
             <li class="nav-item">
                 <a class="nav-link active" href="#datatabletabcontents" id="datatabletabcontents-tab"
@@ -46,7 +46,7 @@
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="#timelinetabcontents" id="timelinetabcontents-tab" data-toggle="tab"
+            <a class="nav-link disabled" href="#timelinetabcontents" id="timelinetabcontents-tab" data-toggle="tab"
             role="tab" aria-controls="timelinetabcontents" aria-selected=false>
             <i class="fas fa-history"></i>
             {% trans "Timeline" %}
@@ -54,91 +54,124 @@
     </li>
 </ul>
 </div>
-<div class="card-body">
+
+<style>
+    #dataTable td {
+        vertical-align: middle
+    };
+</style>
+
+<div class="card-body p-0">
     {{ search_message|safe }}
     <div class="tab-content" id="myTabContent">
         <div class="tab-pane fade show active" id="datatabletabcontents" role="tabpanel"
         aria-labelledby="datatabletabcontents-tab">
         <form method='post' action="{% url 'helpdesk:mass_update' %}" id="ticket_mass_update">
             {% csrf_token %}
-            <table class="table table-bordered table-sm table-striped" id="dataTable" width="100%" cellspacing="0">
-                <thead class="thead-light">
-                    <tr>
-                        <th></th>
-                        <th>{% trans "Ticket" %}</th>
-                        <th>{% trans "Priority" %}</th>
-                        <th>{% trans "Queue" %}</th>
-                        <th>{% trans "Status" %}</th>
-                        <th>{% trans "Owner" %}</th>
-                        <th>{% trans "Submitter" %}</th>
-                        <th>{% trans "Paired Count" %}</th>
-                        <th>{% trans "Created" %}</th>
-                        <th>{% trans "Last Reply" %}</th>
-                        <th>{% trans "Due Date" %}</th>
-                        <th>{% trans "Time Spent" %}</th>
-                        <th>{% trans "KB item" %}</th>
-                        {% if query_params.filtering.queue__id__in|length == 1 %}
-                        {% for col_name, display_name in extra_data_columns.items %}
-                        <th>{{ display_name }}</th>
+            <div class="overflow-auto" style="max-height: 87vh">
+                <table class="table table-bordered table-sm table-striped" id="dataTable" width="100%" cellspacing="0">
+                    <thead class="thead-light">
+                        <tr>
+                            <th></th>
+                            <th>{% trans "Ticket" %}</th>
+                            <th>{% trans "Priority" %}</th>
+                            <th>{% trans "Queue" %}</th>
+                            <th>{% trans "Status" %}</th>
+                            <th>{% trans "Owner" %}</th>
+                            <th>{% trans "Submitter" %}</th>
+                            <th>{% trans "Paired Count" %}</th>
+                            <th>{% trans "Created" %}</th>
+                            <th>{% trans "Last Reply" %}</th>
+                            <th>{% trans "Due Date" %}</th>
+                            <th>{% trans "Time Spent" %}</th>
+                            <th>{% trans "KB item" %}</th>
+                            {% if query_params.filtering.queue__id__in|length == 1 %}
+                            {% for col_name, display_name in extra_data_columns.items %}
+                            <th>{{ display_name }}</th>
+                            {% endfor %}
+                            {% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ticket in ticket_list %}
+                        <tr>
+                            <td><input type="checkbox" name="ticket_id" value="{{ ticket.id }}" class="ticket_multi_select"></td>
+                            <td class="tickettitle" data-toggle="tooltip" title="Edit {{ ticket.title }}"><a href="{{ ticket.get_absolute_url }}">{{ ticket.id }}. {{ ticket.title }}</a></td>
+                            <td class="text-{{ ticket.get_priority_css_class }}">{{ ticket.get_priority }}</td>
+                            <td>{{ ticket.queue }}</td>
+                            <td>{{ ticket.get_status }}</td>
+                            <td>{{ ticket.get_assigned_to }}</td>
+                            <td>{{ ticket.submitter_email }}</td>
+                            <td>{# paired count #}</td>
+                            <td><span title='{{ ticket.created|naturaltime }}'>{{ ticket.created|date:"DATETIME_FORMAT" }}</span></td>
+                            <td><span title='{{ ticket.get_last_followup|naturaltime }}'>{{ ticket.get_last_followup|date:"DATETIME_FORMAT" }}</span></td>
+                            <td><span title='{{ ticket.due_date|naturaltime }}'>{{ ticket.due_date|date:"DATETIME_FORMAT" }}</span></td>
+                            <td>{{ ticket.time_spent_formatted }}</td>
+                            <td>{{ ticket.kbitem.title}}</td>
+                        </tr>
+                        
+                        {% empty %}
+                        <tr><td colspan='6'>{% trans "You do not have any tickets." %}</td></tr>
                         {% endfor %}
-                        {% endif %}
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for ticket in ticket_list %}
-                    <tr>
-                        <td>{# checkbox #}</td>
-                        <td class="tickettitle" data-toggle="tooltip" title="Edit {{ ticket.title }}"><a href="{{ ticket.get_absolute_url }}">{{ ticket.id }}. {{ ticket.title }}</a></td>
-                        <td class="text-{{ ticket.get_priority_css_class }}">{{ ticket.get_priority }}</td>
-                        <td>{{ ticket.queue }}</td>
-                        <td>{{ ticket.get_status }}</td>
-                        <td>{{ ticket.get_assigned_to }}</td>
-                        <td>{{ ticket.submitter_email }}</td>
-                        <td>{# paired count #}</td>
-                        <td><span title='{{ ticket.created|naturaltime }}'>{{ ticket.created|date:"DATETIME_FORMAT" }}</span></td>
-                        <td><span title='{{ ticket.get_last_followup|naturaltime }}'>{{ ticket.get_last_followup|date:"DATETIME_FORMAT" }}</span></td>
-                        <td><span title='{{ ticket.due_date|naturaltime }}'>{{ ticket.due_date|date:"DATETIME_FORMAT" }}</span></td>
-                        <td>{{ ticket.time_spent_formatted }}</td>
-                        <td>{{ ticket.kbitem.title}}</td>
-                    </tr>
-                    
-                    {% empty %}
-                    <tr><td colspan='6'>{% trans "You do not have any tickets." %}</td></tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            {% with 't_page' as page_var %}
-            {% if ticket_list.has_other_pages %}
-            <ul class="pagination">
-                <!-- if we aren't on page one, go back to start and go back one controls -->
-                {% if ticket_list.has_previous %}
-                <li><a href="?{{ page_var }}=1">&laquo;&laquo;</a>&nbsp;</li>
-                <li><a href="?{{ page_var }}={{ ticket_list.previous_page_number }}">&laquo;</a>&nbsp;</li>
-                {% else %}
-                <li class="disabled"><span>&laquo;&laquo;&nbsp;</span></li>
-                <li class="disabled"><span>&laquo;&nbsp;</span></li>
+                    </tbody>
+                </table>
+            </div>
+            <div class="d-flex border-top" style="background-color: #f7f7f7">
+                {% with 't_page' as page_var %}
+                {% if ticket_list.has_other_pages %}
+                <div class="d-flex align-items-center ml-2">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text font-weight-normal">Show</label>
+                        </div>
+                        <button class="btn btn-outline-secondary rounded-0 font-weight-semibold dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">{{ tickets_per_page }}</button>
+                        <div class="dropdown-menu p-1">
+                            <a class="dropdown-item rounded-lg {% if tickets_per_page == 10 %}active{% endif %}" href="?t_per_page=10">10</a>
+                            <a class="dropdown-item rounded-lg {% if tickets_per_page == 25 %}active{% endif %}" href="?t_per_page=25">25</a>
+                            <a class="dropdown-item rounded-lg {% if tickets_per_page == 50 %}active{% endif %}" href="?t_per_page=50">50</a>
+                            <a class="dropdown-item rounded-lg {% if tickets_per_page == 100 %}active{% endif %}" href="?t_per_page=100">100</a>
+                        </div>
+                        <div class="input-group-append border-left border-secondary">
+                            <label class="input-group-text font-weight-normal" for="inputGroupSelect01">Tickets</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex-fill justify-content-end">
+                    <div class="btn-toolbar float-right p-2" role="toolbar" style="bottom: 0;">
+                        <div class="btn-group mr-2" role="group">
+                            {% if ticket_list.has_previous %}
+                            <a class="btn btn-primary font-weight-bold" href="?{{ page_var }}=1">First</a>
+                            <a class="btn btn-primary font-weight-bold" href="?{{ page_var }}={{ ticket_list.previous_page_number }}">Previous</a>
+                            {% else %}
+                            <a class="btn btn-primary font-weight-bold disabled">First</a>
+                            <a class="btn btn-primary font-weight-bold disabled">Previous</a>
+                            {% endif %}
+                        </div>
+                        <div class="btn-group mr-2" role="group">
+                            {% with 3 as thresh %}
+                            {% for i in ticket_list.paginator.page_range %}
+                            {% if ticket_list.number == i %}
+                            <a class="btn btn-outline-primary active font-weight-bold">{{ i }}</a>
+                            {% elif i <= ticket_list.number|add:5 and i >= ticket_list.number|add:-5 %}
+                            <a class="btn btn-outline-primary font-weight-bold" href="?{{ page_var }}={{ i }}">{{ i }}</a>
+                            {% endif %}
+                            {% endfor %}
+                            {% endwith %}
+                        </div>
+                        <div class="btn-group" role="group">
+                            {% if ticket_list.has_next %}
+                            <a class="btn btn-primary font-weight-bold" href="?{{ page_var }}={{ ticket_list.next_page_number }}">Next</a>
+                            <a class="btn btn-primary font-weight-bold" href="?{{ page_var }}={{ ticket_list.paginator.num_pages }}">Last</a>
+                            {% else %}
+                            <a class="btn btn-primary font-weight-bold disabled">Next</a>
+                            <a class="btn btn-primary font-weight-bold disabled">Last</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
                 {% endif %}
-                <!-- other pages, set thresh to the number to show before and after active -->
-                {% with 5 as thresh %}
-                {% for i in ticket_list.paginator.page_range %}
-                {% if ticket_list.number == i %}
-                <li class="active"><span>{{ i }}&nbsp;<span class="sr-only">(current)</span></span></li>
-                {% elif i <= ticket_list.number|add:5 and i >= ticket_list.number|add:-5 %}
-                <li><a href="?{{ page_var }}={{ i }}">{{ i }}</a>&nbsp;</li>
-                {% endif %}
-                {% endfor %}
                 {% endwith %}
-                <!-- if we aren't on the last page, go forward one and go to end controls -->
-                {% if ticket_list.has_next %}
-                <li><a href="?{{ page_var }}={{ ticket_list.next_page_number }}">&raquo;</a>&nbsp;</li>
-                <li><a href="?{{ page_var }}={{ ticket_list.paginator.num_pages }}">&raquo;&raquo;</a>&nbsp;</li>
-                {% else %}
-                <li class="disabled"><span>&raquo;&nbsp;</span></li>
-                <li class="disabled"><span>&raquo;&raquo;&nbsp;</span></li>
-                {% endif %}
-            </ul>
-            {% endif %}
-            {% endwith %}
+            </div>
             <!-- Pass vars to View for exporting to work Properly -->
             <input type='hidden' name='visible' value=''/>
             <input type='hidden' name='selected_ids' value=''/>

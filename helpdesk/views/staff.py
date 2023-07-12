@@ -1855,7 +1855,9 @@ def ticket_list(request):
 
     json_queries = {i['id']: i for i in user_saved_queries.values('id', 'user_id', 'shared')}
 
-    if request.user.is_authenticated and hasattr(request.user, 'usersettings_helpdesk'):
+    if request.GET.get(_('t_per_page'), None):
+        tickets_per_page = request.GET.get(_('t_per_page'))
+    elif request.user.is_authenticated and hasattr(request.user, 'usersettings_helpdesk'):
         tickets_per_page = request.user.usersettings_helpdesk.tickets_per_page
     else:
         tickets_per_page = 25
@@ -1873,7 +1875,7 @@ def ticket_list(request):
 
     return render(request, 'helpdesk/ticket_list.html', dict(
         context,
-        default_tickets_per_page=request.user.usersettings_helpdesk.tickets_per_page,
+        tickets_per_page=tickets_per_page,
         ticket_list=ticket_list,
         user_choices=user_choices,
         kb_items=KBItem.objects.all(),
