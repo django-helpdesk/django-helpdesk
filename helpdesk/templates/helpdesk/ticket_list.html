@@ -5,422 +5,475 @@
 {% block helpdesk_title %}{% trans "Tickets" %}{% endblock %}
 
 {% block helpdesk_head %}
-    <!-- Timeline 3 CSS -->
-    {% if helpdesk_settings.HELPDESK_USE_CDN %}
-    <link title="timeline-styles" rel="stylesheet" href="https://cdn.knightlab.com/libs/timeline3/latest/css/timeline.css">
-    {% else %}
-    <link title="timeline-styles" rel="stylesheet" href="{% static 'helpdesk/vendor/timeline3/css/timeline.css' %}">
-    {% endif %}
+<!-- Timeline 3 CSS -->
+{% if helpdesk_settings.HELPDESK_USE_CDN %}
+<link title="timeline-styles" rel="stylesheet" href="https://cdn.knightlab.com/libs/timeline3/latest/css/timeline.css">
+{% else %}
+<link title="timeline-styles" rel="stylesheet" href="{% static 'helpdesk/vendor/timeline3/css/timeline.css' %}">
+{% endif %}
 {% endblock %}
 
 {% block h1_title %}Tickets
-    {% if from_saved_query %} [{{ saved_query.title }}]{% endif %}
+{% if from_saved_query %} [{{ saved_query.title }}]{% endif %}
 {% endblock %}
 
 
 {% block helpdesk_breadcrumb %}
-    <li class="breadcrumb-item">
-        <a href="{% url 'helpdesk:list' %}">{% trans "Tickets" %}</a>
-    </li>
-    {% if from_saved_query and saved_query.user == user %}
-        <li class="breadcrumb-item">{% trans "Saved Query" %}</li>
-        <li class="breadcrumb-item active">{{ saved_query.title }}</li>
-    {% else %}
-        <li class="breadcrumb-item active">{% trans "Overview" %}</li>
-    {% endif %}
+<li class="breadcrumb-item">
+    <a href="{% url 'helpdesk:list' %}">{% trans "Tickets" %}</a>
+</li>
+{% if from_saved_query and saved_query.user == user %}
+<li class="breadcrumb-item">{% trans "Saved Query" %}</li>
+<li class="breadcrumb-item active">{{ saved_query.title }}</li>
+{% else %}
+<li class="breadcrumb-item active">{% trans "Overview" %}</li>
+{% endif %}
 {% endblock %}
 
 
 {% block helpdesk_body %}
-    <div class="card">
-        <div class="card-header">
-            <ul class="nav nav-tabs">
-                <li class="nav-item" style="width: 200px;">
-                    {% trans "Query Results" %}:
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link active" href="#datatabletabcontents" id="datatabletabcontents-tab"
-                       data-toggle="tab" role="tab" aria-controls="datatabletabcontents" aria-selected=true>
-                        <i class="fas fa-th-list"></i>
-                        {% trans "Table" %}
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#timelinetabcontents" id="timelinetabcontents-tab" data-toggle="tab"
-                       role="tab" aria-controls="timelinetabcontents" aria-selected=false>
-                        <i class="fas fa-history"></i>
-                        {% trans "Timeline" %}
-                    </a>
-                </li>
-            </ul>
-        </div>
-        <div class="card-body">
-            {{ search_message|safe }}
-            <div class="tab-content" id="myTabContent">
-                <div class="tab-pane fade show active" id="datatabletabcontents" role="tabpanel"
-                     aria-labelledby="datatabletabcontents-tab">
-                    <form method='post' action="{% url 'helpdesk:mass_update' %}" id="ticket_mass_update">
-                        {% csrf_token %}
-                        <table class="table table-sm table-striped table-bordered table-hover"
-                               id="ticketTable" data-page-length='{{ default_tickets_per_page }}' style="width:100%">
-                            <thead class="thead-light">
-                            <tr>
-                                <th></th>
-                                <th>{% trans "Ticket" %}</th>
-                                <th>{% trans "Priority" %}</th>
-                                <th>{% trans "Queue" %}</th>
-                                <th>{% trans "Status" %}</th>
-                                <th>{% trans "Owner" %}</th>
-                                <th>{% trans "Submitter" %}</th>
-                                <th>{% trans "Paired Count" %}</th>
-                                <th>{% trans "Created" %}</th>
-                                <th>{% trans "Last Reply" %}</th>
-                                <th>{% trans "Due Date" %}</th>
-                                <th>{% trans "Time Spent" %}</th>
-                                <th>{% trans "KB item" %}</th>
-                                {% if query_params.filtering.queue__id__in|length == 1 %}
-                                    {% for col_name, display_name in extra_data_columns.items %}
-                                <th>{{ display_name }}</th>
-                                    {% endfor %}
-                                {% endif %}
-                            </tr>
-                            </thead>
-                        </table>
-                        <!-- Pass vars to View for exporting to work Properly -->
-                        <input type='hidden' name='visible' value=''/>
-                        <input type='hidden' name='selected_ids' value=''/>
-                        <input type="hidden" name="queue_length" value="{{ query_params.filtering.queue__id__in|length }}"/>
-                    </form>
-                </div>
-                <div class="tab-pane fade" id="timelinetabcontents" role="tabpanel" aria-labelledby="timelinetabcontents-tab">
-                    <div id='timeline-embed' style="width: 100%; height: 80vh"></div>
-                </div>
-            </div>
-        </div>
-        <!-- /.panel-body -->
-    </div>
-    <!-- /.panel -->
-
-    <div class="card mb-3">
-        <div class="card-header">
-            <i class="fas fa-hand-pointer"></i>
-            {% trans "Query Selection" %}
-        </div>
-        <div class="card-body">
-            <!-- start accordion -->
-            <div class="accordion" id="queryAccordion">
-                <div class="card">
-                    <div class="card-header" id="headingOne">
-                        <h5 class="mb-0">
-                            <button class="btn btn-link btn-sm" type="button" data-toggle="collapse"
-                                    data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                                <i class="fas fa-filter"></i>
-                                {% trans "Filters" %}
-                            </button>
-                        </h5>
-                    </div>
-
-                    <div id="collapseOne" class="collapse show" aria-labelledby="headingOne"
-                         data-parent="#queryAccordion">
-                        <div class="card-body">
-                            <form method="get">
-                                <div class="form-group float-right">
-                                    <label for="filterBuilderSelect">{% trans "Add filter" %}:</label>
-                                    <select class="custom-select custom-select-sm mb-0"
-                                            aria-describedby="select-description" name="select" id="filterBuilderSelect"
-                                            onChange="onFilterChange(this.value)">
-                                        <option value="">--</option>
-                                        <option id="filterBuilderSelect-Sort" value="Sort"{% if query_params.sorting %} disabled{% endif %}>
-                                            {% trans "Sorting" %}
-                                        </option>
-                                        <option id="filterBuilderSelect-Owner" value="Owner"{% if query_params.filtering.assigned_to__id__in %} disabled{% endif %}>
-                                            {% trans "Owner" %}
-                                        </option>
-                                        <option id="filterBuilderSelect-Queue" value="Queue"{% if query_params.filtering.queue__id__in %} disabled{% endif %}>
-                                            {% trans "Queue" %}
-                                        </option>
-                                        <option id="filterBuilderSelect-Status" value="Status"{% if query_params.filtering.status__in %} disabled{% endif %}>
-                                            {% trans "Status" %}
-                                        </option>
-                                        <option id="filterBuilderSelect-Keywords" value="Keywords"{% if query_params.search_string %} disabled{% endif %}>
-                                            {% trans "Keywords" %}
-                                        </option>
-                                        <option id="filterBuilderSelect-Dates" value="Dates"{% if query_params.filtering.created__gte or query_params.filtering.created__lte %} disabled{% endif %}>
-                                            {% trans "Date Range" %}
-                                        </option>
-                                        <option id="filterBuilderSelect-KBItems" value="KBItems"{% if query_params.filtering.kbitem__in %} disabled{% endif %}>
-                                            {% trans "Knowledge base items" %}
-                                        </option>
-                                        <option id="filterBuilderSelect-PairedCount" value="PairedCount"{% if query_params.filtering.paired_count__lte or query_params.filtering.paired_count__gte %} disabled{% endif %}>
-                                            {% trans "Paired Count Range" %}
-                                        </option>
-                                        <option id="filterBuilderSelect-LastReply" value="LastReply"{% if query_params.filtering.last_reply__lte or query_params.filtering.last_reply__gte %} disabled{% endif %}>
-                                            {% trans "Last Reply Range" %}
-                                        </option>
-                                    </select>
-                                </div>
-                            </form>
-                        </div>
-
-                        <form method="get">
-                            <ul class="list-group list-group-flush">
-                                <li id="filterBoxSort"
-                                    class="filterBox{% if query_params.sorting %} filterBoxShow{% endif %} list-group-item"
-                                    id="filterBoxSort">
-                                    {% include 'helpdesk/filters/sorting.html' %}
-                                </li>
-                                <li class="filterBox{% if query_params.filtering.assigned_to__id__in %} filterBoxShow{% endif %} list-group-item"
-                                    id=filterBoxOwner>
-                                    {% include 'helpdesk/filters/owner.html' %}
-                                </li>
-                                <li class="list-group-item filterBox{% if query_params.filtering.queue__id__in %} filterBoxShow{% endif %}"
-                                    id="filterBoxQueue">
-                                    {% include 'helpdesk/filters/queue.html' %}
-                                </li>
-                                <li class="list-group-item filterBox{% if query_params.filtering.status__in %} filterBoxShow{% endif %}"
-                                    id="filterBoxStatus">
-                                    {% include 'helpdesk/filters/status.html' %}
-                                </li>
-                                <li class="list-group-item filterBox{% if query_params.filtering.created__gte or query_params.filtering.created__lte %} filterBoxShow{% endif %}"
-                                    id='filterBoxDates'>
-                                    {% include 'helpdesk/filters/date.html' %}
-                                </li>
-                                <li class="list-group-item filterBox{% if query_params.search_string %} filterBoxShow{% endif %}"
-                                    id="filterBoxKeywords">
-                                    {% include 'helpdesk/filters/keywords.html' %}
-                                </li>
-                                <li class="list-group-item filterBox{% if query_params.filtering.kbitem__in %} filterBoxShow{% endif %}"
-                                    id="filterBoxKBItems">
-                                    {% include 'helpdesk/filters/kbitems.html' %}
-                                </li>
-                                <li class="list-group-item filterBox{% if query_params.filtering.paired_count__lte or query_params.filtering.paired_count__gte %} filterBoxShow{% endif %}"
-                                    id="filterBoxPairedCount">
-                                    {% include 'helpdesk/filters/paired_count.html' %}
-                                </li>
-                                <li class="list-group-item filterBox{% if query_params.filtering.last_reply__lte or query_params.filtering.last_reply__gte %} filterBoxShow{% endif %}"
-                                    id="filterBoxLastReply">
-                                    {% include 'helpdesk/filters/last_reply.html' %}
-                                </li>
-                                <li class="list-group-item">
-                                    <input class="btn btn-primary btn-sm" type='submit' value='{% trans "Apply Filters" %}'/>
-                                </li>
-                                {% if from_saved_query %}
-                                    <li class="list-group-item">
-                                    {% if saved_query.user == user %}
-                                        {% blocktrans with saved_query.title as query_name %}You are currently viewing saved query <strong>"{{ query_name }}"</strong>.{% endblocktrans %}
-                                        <a href="{% url 'helpdesk:delete_query' saved_query.id %}" class="btn btn-danger btn-sm">
-                                            {% trans "Delete Query" %}
-                                        </a>
-                                        {% if saved_query.shared %}
-                                            <a href="{% url 'helpdesk:unshare_query' saved_query.id %}" class="btn btn-warning btn-sm">
-                                                {% trans "Un-share Query" %}
-                                            </a>
-                                        {% else %}
-                                            <a href="{% url 'helpdesk:reshare_query' saved_query.id %}" class="btn btn-warning btn-sm">
-                                                {% trans "Re-share Query" %}
-                                            </a>
-                                        {% endif %}
-                                    {% elif saved_query.user != user %}
-                                        <a href="{% url 'helpdesk:reject_query' saved_query.id %}" class="btn btn-warning btn-sm">
-                                            {% trans "Reject Query" %}
-                                        </a>
-                                    {% endif %}
-                                    </li>
-                                {% endif %}
-                                {% if from_saved_query %}
-                                    <li class="list-group-item">
-                                        {% blocktrans with saved_query.id as query_id %}<a href='../reports/?saved_query={{ query_id }}'>Run a report</a> on this query to see stats and charts for the data listed below.{% endblocktrans %}
-                                    </li>
-                                {% endif %}
-                            </ul>
-                        </form>
-                    </div>
-                </div> <!-- end card -->
-
-                <div class="card">
-                    <div class="card-header" id="headingTwo">
-                        <h5 class="mb-0">
-                            <button class="btn btn-link collapsed btn-sm" type="button" data-toggle="collapse"
-                                    data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                                <i class="fas fa-save"></i>
-                                {% trans "Save Query" %}
-                            </button>
-                        </h5>
-                    </div>
-                    <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#queryAccordion">
-                        <div class="card-body">
-                            <form method='post' action='{% url 'helpdesk:savequery' %}'>
-                                {% csrf_token %}
-                                <input type='hidden' name='query_encoded' value='{{ urlsafe_query }}'/>
-                                <input type='hidden' name='visible' value=''/>
-                                <dl>
-                                    <dt><label for='id_title'>{% trans "Query Name" %}</label></dt>
-                                    <dd><input type='text' name='title' id='id_title'/></dd>
-                                    <dd class='form_help_text'>{% trans "This name appears in the drop-down list of saved queries. If you share your query, other users will see this name, so choose something clear and descriptive!" %}</dd>
-
-                                    <dt><label for='id_shared'>{% trans "Shared?" %}</label></dt>
-                                    <dd><input type='checkbox' name='shared'
-                                               id='id_shared'/> {% trans "Yes, share this query with other users." %}
-                                    </dd>
-                                    <dd class='form_help_text'>{% trans "If you share this query, it will be visible by <em>all</em> other logged-in users." %}</dd>
-
-                                </dl>
-                                <div class='buttons'>
-                                    <input class="btn btn-primary" type='submit' value='{% trans "Save Query" %}'>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div> <!-- end card -->
-
-                {% if user_saved_queries %}
-                    <div class="card">
-                        <div class="card-header" id="headingThree">
-                            <h5 class="mb-0">
-                                <button class="btn btn-link collapsed btn-sm" type="button" data-toggle="collapse"
-                                        data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-                                    <i class="fas fa-clipboard-check"></i>
-                                    {% trans "View Your Saved Query" %}
-                                </button>
-                            </h5>
-                        </div>
-                        <div id="collapseThree" class="collapse" aria-labelledby="headingThree"
-                             data-parent="#queryAccordion">
-                            <div class="card-body">
-                                <form action='{% url 'helpdesk:list' %}'>
-                                    <p>
-                                        <label for='id_query_selector'>{% trans "Query" %}</label>
-                                        <select name='saved_query' id='id_query_selector'>
-                                        {% for q in user_saved_queries %}
-                                            <option value='{{ q.id }}'>
-                                                {{ q.title }}{% if q.shared %}
-                                                    (Shared{% if user != q.user %} by {{ q.user.get_username }}{% endif %})
-                                                {% endif %}
-                                            </option>
-                                        {% endfor %}
-                                    </select></p>
-                                    <input class="btn btn-primary" id='run_query' type='submit' value='{% trans "Run Query" %}'>
-
-                                    <!-- Only query creater can see from here -->
-                                    <a class="btn btn-danger remove" id='delete_query'>{% trans "Delete Query" %}</a>
-                                    <!-- if shared, show this -->
-                                    <a class="btn btn-warning  share" id='unshare_query'>{% trans "Un-share Query" %}</a>
-                                    <!-- else if not shared, show this -->
-                                    <a class="btn btn-warning  share" id='reshare_query'>{% trans "Re-share Query" %}</a>
-                                    <!-- to here -->
-                                    <!-- if not query creater show this -->
-                                    <a class="btn btn-warning  remove" id='reject_query'>{% trans "Reject Query" %}</a>
-
-                                </form>
-                            </div>
-                        </div>
-                    </div> <!-- end card -->
+<div class="card">
+    <div class="card-header">
+        <ul class="nav nav-tabs">
+            <li class="nav-item" style="width: 200px;">
+                {% trans "Query Results" %}:
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="#datatabletabcontents" id="datatabletabcontents-tab"
+                data-toggle="tab" role="tab" aria-controls="datatabletabcontents" aria-selected=true>
+                <i class="fas fa-th-list"></i>
+                {% trans "Table" %}
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#timelinetabcontents" id="timelinetabcontents-tab" data-toggle="tab"
+            role="tab" aria-controls="timelinetabcontents" aria-selected=false>
+            <i class="fas fa-history"></i>
+            {% trans "Timeline" %}
+        </a>
+    </li>
+</ul>
+</div>
+<div class="card-body">
+    {{ search_message|safe }}
+    <div class="tab-content" id="myTabContent">
+        <div class="tab-pane fade show active" id="datatabletabcontents" role="tabpanel"
+        aria-labelledby="datatabletabcontents-tab">
+        <form method='post' action="{% url 'helpdesk:mass_update' %}" id="ticket_mass_update">
+            {% csrf_token %}
+            <table class="table table-bordered table-sm table-striped" id="dataTable" width="100%" cellspacing="0">
+                <thead class="thead-light">
+                    <tr>
+                        <th></th>
+                        <th>{% trans "Ticket" %}</th>
+                        <th>{% trans "Priority" %}</th>
+                        <th>{% trans "Queue" %}</th>
+                        <th>{% trans "Status" %}</th>
+                        <th>{% trans "Owner" %}</th>
+                        <th>{% trans "Submitter" %}</th>
+                        <th>{% trans "Paired Count" %}</th>
+                        <th>{% trans "Created" %}</th>
+                        <th>{% trans "Last Reply" %}</th>
+                        <th>{% trans "Due Date" %}</th>
+                        <th>{% trans "Time Spent" %}</th>
+                        <th>{% trans "KB item" %}</th>
+                        {% if query_params.filtering.queue__id__in|length == 1 %}
+                        {% for col_name, display_name in extra_data_columns.items %}
+                        <th>{{ display_name }}</th>
+                        {% endfor %}
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ticket in ticket_list %}
+                    <tr>
+                        <td>{# checkbox #}</td>
+                        <td class="tickettitle" data-toggle="tooltip" title="Edit {{ ticket.title }}"><a href="{{ ticket.get_absolute_url }}">{{ ticket.id }}. {{ ticket.title }}</a></td>
+                        <td class="text-{{ ticket.get_priority_css_class }}">{{ ticket.get_priority }}</td>
+                        <td>{{ ticket.queue }}</td>
+                        <td>{{ ticket.get_status }}</td>
+                        <td>{{ ticket.get_assigned_to }}</td>
+                        <td>{{ ticket.submitter_email }}</td>
+                        <td>{# paired count #}</td>
+                        <td><span title='{{ ticket.created|naturaltime }}'>{{ ticket.created|date:"DATETIME_FORMAT" }}</span></td>
+                        <td><span title='{{ ticket.get_last_followup|naturaltime }}'>{{ ticket.get_last_followup|date:"DATETIME_FORMAT" }}</span></td>
+                        <td><span title='{{ ticket.due_date|naturaltime }}'>{{ ticket.due_date|date:"DATETIME_FORMAT" }}</span></td>
+                        <td>{{ ticket.time_spent_formatted }}</td>
+                        <td>{{ ticket.kbitem.title}}</td>
+                    </tr>
+                    
+                    {% empty %}
+                    <tr><td colspan='6'>{% trans "You do not have any tickets." %}</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% with 't_page' as page_var %}
+            {% if ticket_list.has_other_pages %}
+            <ul class="pagination">
+                <!-- if we aren't on page one, go back to start and go back one controls -->
+                {% if ticket_list.has_previous %}
+                <li><a href="?{{ page_var }}=1">&laquo;&laquo;</a>&nbsp;</li>
+                <li><a href="?{{ page_var }}={{ ticket_list.previous_page_number }}">&laquo;</a>&nbsp;</li>
+                {% else %}
+                <li class="disabled"><span>&laquo;&laquo;&nbsp;</span></li>
+                <li class="disabled"><span>&laquo;&nbsp;</span></li>
                 {% endif %}
-            </div>
-            <!-- end accordion -->
-        </div>
-        <!-- end card-body -->
+                <!-- other pages, set thresh to the number to show before and after active -->
+                {% with 5 as thresh %}
+                {% for i in ticket_list.paginator.page_range %}
+                {% if ticket_list.number == i %}
+                <li class="active"><span>{{ i }}&nbsp;<span class="sr-only">(current)</span></span></li>
+                {% elif i <= ticket_list.number|add:5 and i >= ticket_list.number|add:-5 %}
+                <li><a href="?{{ page_var }}={{ i }}">{{ i }}</a>&nbsp;</li>
+                {% endif %}
+                {% endfor %}
+                {% endwith %}
+                <!-- if we aren't on the last page, go forward one and go to end controls -->
+                {% if ticket_list.has_next %}
+                <li><a href="?{{ page_var }}={{ ticket_list.next_page_number }}">&raquo;</a>&nbsp;</li>
+                <li><a href="?{{ page_var }}={{ ticket_list.paginator.num_pages }}">&raquo;&raquo;</a>&nbsp;</li>
+                {% else %}
+                <li class="disabled"><span>&raquo;&nbsp;</span></li>
+                <li class="disabled"><span>&raquo;&raquo;&nbsp;</span></li>
+                {% endif %}
+            </ul>
+            {% endif %}
+            {% endwith %}
+            <!-- Pass vars to View for exporting to work Properly -->
+            <input type='hidden' name='visible' value=''/>
+            <input type='hidden' name='selected_ids' value=''/>
+            <input type="hidden" name="queue_length" value="{{ query_params.filtering.queue__id__in|length }}"/>
+        </form>
     </div>
-    <!-- end top card -->
+    <div class="tab-pane fade" id="timelinetabcontents" role="tabpanel" aria-labelledby="timelinetabcontents-tab">
+        <div id='timeline-embed' style="width: 100%; height: 80vh"></div>
+    </div>
+</div>
+</div>
+<!-- /.panel-body -->
+</div>
+<!-- /.panel -->
+
+<div class="card mb-3">
+    <div class="card-header">
+        <i class="fas fa-hand-pointer"></i>
+        {% trans "Query Selection" %}
+    </div>
+    <div class="card-body">
+        <!-- start accordion -->
+        <div class="accordion" id="queryAccordion">
+            <div class="card">
+                <div class="card-header" id="headingOne">
+                    <h5 class="mb-0">
+                        <button class="btn btn-link btn-sm" type="button" data-toggle="collapse"
+                        data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                        <i class="fas fa-filter"></i>
+                        {% trans "Filters" %}
+                    </button>
+                </h5>
+            </div>
+            
+            <div id="collapseOne" class="collapse show" aria-labelledby="headingOne"
+            data-parent="#queryAccordion">
+            <div class="card-body">
+                <form method="get">
+                    <div class="form-group float-right">
+                        <label for="filterBuilderSelect">{% trans "Add filter" %}:</label>
+                        <select class="custom-select custom-select-sm mb-0"
+                        aria-describedby="select-description" name="select" id="filterBuilderSelect"
+                        onChange="onFilterChange(this.value)">
+                        <option value="">--</option>
+                        <option id="filterBuilderSelect-Sort" value="Sort"{% if query_params.sorting %} disabled{% endif %}>
+                            {% trans "Sorting" %}
+                        </option>
+                        <option id="filterBuilderSelect-Owner" value="Owner"{% if query_params.filtering.assigned_to__id__in %} disabled{% endif %}>
+                            {% trans "Owner" %}
+                        </option>
+                        <option id="filterBuilderSelect-Queue" value="Queue"{% if query_params.filtering.queue__id__in %} disabled{% endif %}>
+                            {% trans "Queue" %}
+                        </option>
+                        <option id="filterBuilderSelect-Status" value="Status"{% if query_params.filtering.status__in %} disabled{% endif %}>
+                            {% trans "Status" %}
+                        </option>
+                        <option id="filterBuilderSelect-Keywords" value="Keywords"{% if query_params.search_string %} disabled{% endif %}>
+                            {% trans "Keywords" %}
+                        </option>
+                        <option id="filterBuilderSelect-Dates" value="Dates"{% if query_params.filtering.created__gte or query_params.filtering.created__lte %} disabled{% endif %}>
+                            {% trans "Date Range" %}
+                        </option>
+                        <option id="filterBuilderSelect-KBItems" value="KBItems"{% if query_params.filtering.kbitem__in %} disabled{% endif %}>
+                            {% trans "Knowledge base items" %}
+                        </option>
+                        <option id="filterBuilderSelect-PairedCount" value="PairedCount"{% if query_params.filtering.paired_count__lte or query_params.filtering.paired_count__gte %} disabled{% endif %}>
+                            {% trans "Paired Count Range" %}
+                        </option>
+                        <option id="filterBuilderSelect-LastReply" value="LastReply"{% if query_params.filtering.last_reply__lte or query_params.filtering.last_reply__gte %} disabled{% endif %}>
+                            {% trans "Last Reply Range" %}
+                        </option>
+                    </select>
+                </div>
+            </form>
+        </div>
+        
+        <form method="get">
+            <ul class="list-group list-group-flush">
+                <li id="filterBoxSort"
+                class="filterBox{% if query_params.sorting %} filterBoxShow{% endif %} list-group-item"
+                id="filterBoxSort">
+                {% include 'helpdesk/filters/sorting.html' %}
+            </li>
+            <li class="filterBox{% if query_params.filtering.assigned_to__id__in %} filterBoxShow{% endif %} list-group-item"
+            id=filterBoxOwner>
+            {% include 'helpdesk/filters/owner.html' %}
+        </li>
+        <li class="list-group-item filterBox{% if query_params.filtering.queue__id__in %} filterBoxShow{% endif %}"
+        id="filterBoxQueue">
+        {% include 'helpdesk/filters/queue.html' %}
+    </li>
+    <li class="list-group-item filterBox{% if query_params.filtering.status__in %} filterBoxShow{% endif %}"
+    id="filterBoxStatus">
+    {% include 'helpdesk/filters/status.html' %}
+</li>
+<li class="list-group-item filterBox{% if query_params.filtering.created__gte or query_params.filtering.created__lte %} filterBoxShow{% endif %}"
+id='filterBoxDates'>
+{% include 'helpdesk/filters/date.html' %}
+</li>
+<li class="list-group-item filterBox{% if query_params.search_string %} filterBoxShow{% endif %}"
+id="filterBoxKeywords">
+{% include 'helpdesk/filters/keywords.html' %}
+</li>
+<li class="list-group-item filterBox{% if query_params.filtering.kbitem__in %} filterBoxShow{% endif %}"
+id="filterBoxKBItems">
+{% include 'helpdesk/filters/kbitems.html' %}
+</li>
+<li class="list-group-item filterBox{% if query_params.filtering.paired_count__lte or query_params.filtering.paired_count__gte %} filterBoxShow{% endif %}"
+id="filterBoxPairedCount">
+{% include 'helpdesk/filters/paired_count.html' %}
+</li>
+<li class="list-group-item filterBox{% if query_params.filtering.last_reply__lte or query_params.filtering.last_reply__gte %} filterBoxShow{% endif %}"
+id="filterBoxLastReply">
+{% include 'helpdesk/filters/last_reply.html' %}
+</li>
+<li class="list-group-item">
+    <input class="btn btn-primary btn-sm" type='submit' value='{% trans "Apply Filters" %}'/>
+</li>
+{% if from_saved_query %}
+<li class="list-group-item">
+    {% if saved_query.user == user %}
+    {% blocktrans with saved_query.title as query_name %}You are currently viewing saved query <strong>"{{ query_name }}"</strong>.{% endblocktrans %}
+    <a href="{% url 'helpdesk:delete_query' saved_query.id %}" class="btn btn-danger btn-sm">
+        {% trans "Delete Query" %}
+    </a>
+    {% if saved_query.shared %}
+    <a href="{% url 'helpdesk:unshare_query' saved_query.id %}" class="btn btn-warning btn-sm">
+        {% trans "Un-share Query" %}
+    </a>
+    {% else %}
+    <a href="{% url 'helpdesk:reshare_query' saved_query.id %}" class="btn btn-warning btn-sm">
+        {% trans "Re-share Query" %}
+    </a>
+    {% endif %}
+    {% elif saved_query.user != user %}
+    <a href="{% url 'helpdesk:reject_query' saved_query.id %}" class="btn btn-warning btn-sm">
+        {% trans "Reject Query" %}
+    </a>
+    {% endif %}
+</li>
+{% endif %}
+{% if from_saved_query %}
+<li class="list-group-item">
+    {% blocktrans with saved_query.id as query_id %}<a href='../reports/?saved_query={{ query_id }}'>Run a report</a> on this query to see stats and charts for the data listed below.{% endblocktrans %}
+</li>
+{% endif %}
+</ul>
+</form>
+</div>
+</div> <!-- end card -->
+
+<div class="card">
+    <div class="card-header" id="headingTwo">
+        <h5 class="mb-0">
+            <button class="btn btn-link collapsed btn-sm" type="button" data-toggle="collapse"
+            data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+            <i class="fas fa-save"></i>
+            {% trans "Save Query" %}
+        </button>
+    </h5>
+</div>
+<div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#queryAccordion">
+    <div class="card-body">
+        <form method='post' action='{% url 'helpdesk:savequery' %}'>
+            {% csrf_token %}
+            <input type='hidden' name='query_encoded' value='{{ urlsafe_query }}'/>
+            <input type='hidden' name='visible' value=''/>
+            <dl>
+                <dt><label for='id_title'>{% trans "Query Name" %}</label></dt>
+                <dd><input type='text' name='title' id='id_title'/></dd>
+                <dd class='form_help_text'>{% trans "This name appears in the drop-down list of saved queries. If you share your query, other users will see this name, so choose something clear and descriptive!" %}</dd>
+                
+                <dt><label for='id_shared'>{% trans "Shared?" %}</label></dt>
+                <dd><input type='checkbox' name='shared'
+                    id='id_shared'/> {% trans "Yes, share this query with other users." %}
+                </dd>
+                <dd class='form_help_text'>{% trans "If you share this query, it will be visible by <em>all</em> other logged-in users." %}</dd>
+                
+            </dl>
+            <div class='buttons'>
+                <input class="btn btn-primary" type='submit' value='{% trans "Save Query" %}'>
+            </div>
+        </form>
+    </div>
+</div>
+</div> <!-- end card -->
+
+{% if user_saved_queries %}
+<div class="card">
+    <div class="card-header" id="headingThree">
+        <h5 class="mb-0">
+            <button class="btn btn-link collapsed btn-sm" type="button" data-toggle="collapse"
+            data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+            <i class="fas fa-clipboard-check"></i>
+            {% trans "View Your Saved Query" %}
+        </button>
+    </h5>
+</div>
+<div id="collapseThree" class="collapse" aria-labelledby="headingThree"
+data-parent="#queryAccordion">
+<div class="card-body">
+    <form action='{% url 'helpdesk:list' %}'>
+        <p>
+            <label for='id_query_selector'>{% trans "Query" %}</label>
+            <select name='saved_query' id='id_query_selector'>
+                {% for q in user_saved_queries %}
+                <option value='{{ q.id }}'>
+                    {{ q.title }}{% if q.shared %}
+                    (Shared{% if user != q.user %} by {{ q.user.get_username }}{% endif %})
+                    {% endif %}
+                </option>
+                {% endfor %}
+            </select></p>
+            <input class="btn btn-primary" id='run_query' type='submit' value='{% trans "Run Query" %}'>
+            
+            <!-- Only query creater can see from here -->
+            <a class="btn btn-danger remove" id='delete_query'>{% trans "Delete Query" %}</a>
+            <!-- if shared, show this -->
+            <a class="btn btn-warning  share" id='unshare_query'>{% trans "Un-share Query" %}</a>
+            <!-- else if not shared, show this -->
+            <a class="btn btn-warning  share" id='reshare_query'>{% trans "Re-share Query" %}</a>
+            <!-- to here -->
+            <!-- if not query creater show this -->
+            <a class="btn btn-warning  remove" id='reject_query'>{% trans "Reject Query" %}</a>
+            
+        </form>
+    </div>
+</div>
+</div> <!-- end card -->
+{% endif %}
+</div>
+<!-- end accordion -->
+</div>
+<!-- end card-body -->
+</div>
+<!-- end top card -->
 
 {% endblock %}
 
 {% block helpdesk_js %}
-    <script src='{% static "helpdesk/filter.js" %}'></script>
-    <!-- Timeline 3 JavaScript -->
-    {% if helpdesk_settings.HELPDESK_USE_CDN %}
-    <script src="https://cdn.knightlab.com/libs/timeline3/latest/js/timeline.js"></script>
-    {% else %}
-    <script src="{% static 'helpdesk/vendor/timeline3/js/timeline.js' %}"></script>
-    {% endif %}
+<script src='{% static "helpdesk/filter.js" %}'></script>
+<!-- Timeline 3 JavaScript -->
+{% if helpdesk_settings.HELPDESK_USE_CDN %}
+<script src="https://cdn.knightlab.com/libs/timeline3/latest/js/timeline.js"></script>
+{% else %}
+<script src="{% static 'helpdesk/vendor/timeline3/js/timeline.js' %}"></script>
+{% endif %}
 <!--TODO Move this to a separate file, keep django specific code here or use API calls somehow-->
-    <script>
-        function get_url(row) {
-            return "{% url 'helpdesk:view' 1234 %}".replace(/1234/, row.id.toString());
+<script>
+    function get_url(row) {
+        return "{% url 'helpdesk:view' 1234 %}".replace(/1234/, row.id.toString());
+    }
+    var json_queries = {{ json_queries | safe }};
+    var from_saved_query = {% if from_saved_query %}true{% else %}false{% endif %};
+    
+    var selected = [];
+    var all_ticket_ids = [];
+    var globalTimeout = null;
+    
+    $(document).ready(function () {
+        if ( selector ) {
+            adjust_query_buttons();
         }
-        var json_queries = {{ json_queries | safe }};
-        var from_saved_query = {% if from_saved_query %}true{% else %}false{% endif %};
-
-        var selected = [];
-        var all_ticket_ids = [];
-        var globalTimeout = null;
-
-        $(document).ready(function () {
-            if ( selector ) {
-                adjust_query_buttons();
-            }
-            // Duplicate thead for column filtering
-            $('#ticketTable thead tr').clone(true).addClass('filters').appendTo('#ticketTable thead');
-            $('.filters th').slice(1,).each( function (i) {
-                i = i+1;
-                var title = $('#ticketTable thead th').eq( $(this).index() ).text();
-                $(this).html( '<input type="text" style="width:auto" placeholder="'+title+'" data-index="'+i+'" />' );
-            } );
-            // Ticket DataTable Initialization
-            var table = $('#ticketTable').DataTable({
-                language: {
-                    "emptyTable": "{% trans 'No Tickets Match Your Selection' %}"
+        // Duplicate thead for column filtering
+        $('#ticketTable thead tr').clone(true).addClass('filters').appendTo('#ticketTable thead');
+        $('.filters th').slice(1,).each( function (i) {
+            i = i+1;
+            var title = $('#ticketTable thead th').eq( $(this).index() ).text();
+            $(this).html( '<input type="text" style="width:auto" placeholder="'+title+'" data-index="'+i+'" />' );
+        } );
+        // Ticket DataTable Initialization
+        var table = $('#ticketTable').DataTable({
+            language: {
+                "emptyTable": "{% trans 'No Tickets Match Your Selection' %}"
+            },
+            processing: true,
+            serverSide: true,
+            scrollX: true, // Allows scrolling horizontally in the table
+            ajax: {
+                "url": "{% url 'helpdesk:datatables_ticket_list' urlsafe_query %}",
+                "type": "GET",
+                "data": function (d) {
+                    // Remove unnecessary data
+                    d.order[0] = Object.assign(d.order[0], {'name': d.columns[d.order[0].column].name});
+                    d.columns = _.map(d.columns, function(v) { return v.search.value === "" ? {} : v});
                 },
-                processing: true,
-                serverSide: true,
-                scrollX: true, // Allows scrolling horizontally in the table
-                ajax: {
-                    "url": "{% url 'helpdesk:datatables_ticket_list' urlsafe_query %}",
-                    "type": "GET",
-                    "data": function (d) {
-                        // Remove unnecessary data
-                        d.order[0] = Object.assign(d.order[0], {'name': d.columns[d.order[0].column].name});
-                        d.columns = _.map(d.columns, function(v) { return v.search.value === "" ? {} : v});
-                    },
-                    "dataSrc": function (json) {
-                        all_ticket_ids = json.all_ticket_ids;
-                        return json.data;
-                    },
+                "dataSrc": function (json) {
+                    all_ticket_ids = json.all_ticket_ids;
+                    return json.data;
                 },
-                createdRow: function (row, data, dataIndex) {
-                    $(row).addClass(data.row_class);
-                    if ( $.inArray(String(data.id), selected) !== -1 ) {
-                        $(row).find('input').prop('checked', true);
+            },
+            createdRow: function (row, data, dataIndex) {
+                $(row).addClass(data.row_class);
+                if ( $.inArray(String(data.id), selected) !== -1 ) {
+                    $(row).find('input').prop('checked', true);
+                }
+            },
+            dom: "<'row'" +
+            "<'col col-sm-auto'<'select_el'>>" +
+            "<'col col-lg-auto'<'mass_action_el'>>" +
+            "<'col'<'float-right'B>>" +
+            ">" +
+            "t" +
+            "<'row'" +
+            "<'col float-left'l>" +
+            "<'col float-right'p>" +
+            ">",
+            buttons: [{
+                extend: "colvis",
+                columns: ":gt(1)"
+            }],
+            columns: [
+            {
+                name: "id",
+                data: "id",
+                orderable: false,
+                render: function (data, type, row, meta) {
+                    const pk = data;
+                    if (type === 'display') {
+                        data = "<input type='checkbox' name='ticket_id' value='" + pk + "' class='ticket_multi_select' />"
                     }
-                },
-                dom: "<'row'" +
-                        "<'col col-sm-auto'<'select_el'>>" +
-                         "<'col col-lg-auto'<'mass_action_el'>>" +
-                        "<'col'<'float-right'B>>" +
-                    ">" +
-                    "t" +
-                    "<'row'" +
-                        "<'col float-left'l>" +
-                        "<'col float-right'p>" +
-                    ">",
-                buttons: [{
-                    extend: "colvis",
-                    columns: ":gt(1)"
-                }],
-                columns: [
-                    {
-                        name: "id",
-                        data: "id",
-                        orderable: false,
-                        render: function (data, type, row, meta) {
-                            const pk = data;
-                            if (type === 'display') {
-                                data = "<input type='checkbox' name='ticket_id' value='" + pk + "' class='ticket_multi_select' />"
-                            }
-                            return data
+                    return data
+                }
+            },
+            {
+                name: "ticket",
+                data: "ticket",
+                render: function (data, type, row, meta) {
+                    if (type === 'display') {
+                        data = '<div class="tickettitle" data-toggle="tooltip" title="' + row.id + '. ' + row.title + '"><a href="' + get_url(row) + '" >' +
+                            row.id + '. ' +
+                            row.title + '</a></div>';
                         }
-                    },
-                    {
-                        name: "ticket",
-                        data: "ticket",
-                        render: function (data, type, row, meta) {
-                            if (type === 'display') {
-                                data = '<div class="tickettitle" data-toggle="tooltip" title="' + row.id + '. ' + row.title + '"><a href="' + get_url(row) + '" >' +
-                                    row.id + '. ' +
-                                    row.title + '</a></div>';
-                            }
-                            else {
-                                data = '<div data-toggle="tooltip" title="' + row.id + '. ' + row.title + '">' + row.id + '. ' + row.title;
+                        else {
+                            data = '<div data-toggle="tooltip" title="' + row.id + '. ' + row.title + '">' + row.id + '. ' + row.title;
                             }
                             return data
                         }
@@ -470,244 +523,245 @@
                     {name: "{{ col_name }}", data: "{{ col_name }}"},
                     {% endfor %}
                     {% endif %}
-                ],
-                orderCellsTop: true,
-                fixedHeader: true,
-            });
-            if (from_saved_query) {
-                var all_columns = table.settings().init().columns;
-
-                // Filter visible columns
-                visible_cols = {{ saved_query.get_visible_cols | safe }}
-                table.columns().every(function (ind) {
-                    if (!visible_cols.includes(all_columns[ind].name)) {
-                        table.column(ind).visible(false, false);
-                    }
-                })
-                table.columns.adjust().draw( false );
-            }
-
-            // Filter event handler
-            function filterFunction(thisSearch) {
-                globalTimeout = null;
-                var column = table.column( $(thisSearch).data('index') )
-                table
+                    ],
+                    orderCellsTop: true,
+                    fixedHeader: true,
+                });
+                if (from_saved_query) {
+                    var all_columns = table.settings().init().columns;
+                    
+                    // Filter visible columns
+                    visible_cols = {{ saved_query.get_visible_cols | safe }}
+                    table.columns().every(function (ind) {
+                        if (!visible_cols.includes(all_columns[ind].name)) {
+                            table.column(ind).visible(false, false);
+                        }
+                    })
+                    table.columns.adjust().draw( false );
+                }
+                
+                // Filter event handler
+                function filterFunction(thisSearch) {
+                    globalTimeout = null;
+                    var column = table.column( $(thisSearch).data('index') )
+                    table
                     .column( $(thisSearch).data('index') )
                     .search( thisSearch.value )
                     .draw();
-            }
-            $( table.table().container() ).off('keyup change').on('keyup', 'thead input', function () {
-                if (globalTimeout != null) clearTimeout(globalTimeout);
-                globalTimeout = setTimeout(filterFunction, 400, this);
-            });
-
-            // Get visible columns for csv filtering and saving
-            table.on( 'buttons-action', function (e) {
-                get_visible_cols(); // For table changes
-            });
-
-            function get_visible_cols() {
-                var all_columns = table.settings().init().columns;
-                var visible_columns = [];
-                for (var i in all_columns) {
-                    if (table.column(i).visible()) {
-                        visible_columns.push(all_columns[i].data);
-                    }
                 }
-                // Add data to post field to be avaiable in mass_update function, and save_query
-                $('input[name="visible"]').each(function () {
-                    $(this).val(visible_columns.toString());
+                $( table.table().container() ).off('keyup change').on('keyup', 'thead input', function () {
+                    if (globalTimeout != null) clearTimeout(globalTimeout);
+                    globalTimeout = setTimeout(filterFunction, 400, this);
                 });
-            }
-            get_visible_cols(); // On initialization
-
-            {# Timeline initialization when tab is displayed #}
-            // The TL.Timeline constructor takes at least two arguments:
-            // the id of the Timeline container (no '#'), and
-            // the URL to your JSON data file or Google spreadsheet.
-            // the id must refer to an element "above" this code,
-            // and the element must have CSS styling to give it width and height
-            // optionally, a third argument with configuration options can be passed.
-            // See below for more about options.
-
-            let timeline_loaded = false;
-            $('#timelinetabcontents-tab').on('shown.bs.tab', function (e) {
-                if (!timeline_loaded) {
-                    new TL.Timeline(
+                
+                // Get visible columns for csv filtering and saving
+                table.on( 'buttons-action', function (e) {
+                    get_visible_cols(); // For table changes
+                });
+                
+                function get_visible_cols() {
+                    var all_columns = table.settings().init().columns;
+                    var visible_columns = [];
+                    for (var i in all_columns) {
+                        if (table.column(i).visible()) {
+                            visible_columns.push(all_columns[i].data);
+                        }
+                    }
+                    // Add data to post field to be avaiable in mass_update function, and save_query
+                    $('input[name="visible"]').each(function () {
+                        $(this).val(visible_columns.toString());
+                    });
+                }
+                get_visible_cols(); // On initialization
+                
+                {# Timeline initialization when tab is displayed #}
+                // The TL.Timeline constructor takes at least two arguments:
+                // the id of the Timeline container (no '#'), and
+                // the URL to your JSON data file or Google spreadsheet.
+                // the id must refer to an element "above" this code,
+                // and the element must have CSS styling to give it width and height
+                // optionally, a third argument with configuration options can be passed.
+                // See below for more about options.
+                
+                let timeline_loaded = false;
+                $('#timelinetabcontents-tab').on('shown.bs.tab', function (e) {
+                    if (!timeline_loaded) {
+                        new TL.Timeline(
                         'timeline-embed',
                         '{% url 'helpdesk:timeline_ticket_list' urlsafe_query %}'
-                    );
-                    timeline_loaded = true;
-                }
-            });
-
-            $("div.select_el").html(
+                        );
+                        timeline_loaded = true;
+                    }
+                });
+                
+                $("div.select_el").html(
                 "<label>{% trans 'Select:' %}</label>" +
                 "<button id='select_none_btn' type='button' class='btn btn-primary btn-sm'>" +
                     "<i class='fas fa-times-circle'></i> {% trans 'None' %}" +
-                "</button>"
-            );
-            $("div.mass_action_el").html(
-                "<label for='id_mass_action'>{% trans 'With Selected Tickets:' %} </label>" +
-                "<select name='action' id='id_mass_action' style='width: 250px;'>" +
-                    "<option value='take'>{% trans 'Take (Assign to me)' %}</option>" +
-                    "<option value='delete'>{% trans 'Delete' %}</option>" +
-                    "<option value='merge'>{% trans 'Merge' %}</option>" +
-                    "<option value='export'>{% trans 'Export' %}</option>" +
-                    "<option value='pair'>{% trans 'Pair to BEAM inventory' %}</option>" +
-                    "<optgroup label='{% trans 'Close' %}'>" +
-                        "<option value='close'>{% trans "Close (Don't Send E-Mail)" %}</option>" +
-                        "<option value='close_public'>{% trans 'Close (Send E-Mail)' %}</option>" +
-                    "</optgroup>" +
-                    "<optgroup label='{% trans 'Assign To' %}'>" +
-                        "<option value='unassign'>{% trans 'Nobody (Unassign)' %}</option>" +
-                        "{% for u in user_choices %}" +
-                        "<option value='assign_{{ u.id }}'>{{ u.get_username }}</option>" +
-                        "{% endfor %}" +
-                    "</optgroup>" +
-                    "<optgroup label='{% trans 'Set KB Item' %}'>" +
-                        "<option value='kbitem_none'>{% trans 'No KB Item' %}</option>" +
-                        "{% for kbi in kb_items %}" +
-                        "<option value='kbitem_{{ kbi.id }}'>{{ kbi.category.title }}: {{ kbi.title }}</option>" +
-                        "{% endfor %}" +
-                    "</optgroup>" +
-                "</select>" +
-                "<button type='submit' class='btn btn-primary btn-sm'>" +
-                    "<i class='fas fa-arrow-circle-right'></i> {% trans 'Go' %}" +
-                "</button>"
-            );
-
-            update_selected_ids = function () {
-                // Add data to post field to be avaiable in mass_update function, and save_query
-                $('input[name="selected_ids"]').each(function () {
-                    $(this).val(selected.toString());
-                });
-            }
-
-            {# Shortcuts to select/unselect multiple tickets #}
-            $("#select_all_btn").click(function () {
-                $(".ticket_multi_select").prop('checked', true);
-                all_ticket_ids.forEach(function(e) {
-                    if (!selected.includes(String(e))) {
-                        selected.push(String(e));
-                    }
-                })
-                update_selected_ids();
-            });
-
-            $("#select_none_btn").click(function () {
-                $(".ticket_multi_select").prop('checked', false);
-                selected = [];
-                update_selected_ids();
-            });
-
-            $("#select_inverse_btn").click(function () {
-                $(".ticket_multi_select").each(function () {
-                    $(this).prop('checked', !$(this).prop('checked'));
-                });
-                unselected = all_ticket_ids.filter(function (e) {
-                    return !selected.includes(String(e));
-                }).map(e => String(e));
-                selected = unselected;
-                update_selected_ids();
-            });
-
-            $(document).on('click', '.ticket_multi_select', function () {
-                if ($(this).prop('checked')) {
-                    if (!selected.includes($(this).val())) {
-                        selected.push($(this).val())
-                    }
-                } else {
-                    var index = selected.indexOf($(this).val());
-                    if (index !== -1) {
-                      selected.splice(index, 1);
-                    }
-                };
-                update_selected_ids();
-            });
-        })
-
-        // Handle sharing, unsharing, rejecting, deleting queries
-        var selector = $('#id_query_selector');
-        if ( selector ) {
-            // selector.onchange = adjust_query_buttons;
-            selector.change(function() {
-                adjust_query_buttons();
-            });
-
-            function adjust_query_buttons() {
-                var value = selector.val();
-                var q_data = json_queries[value];
-                var user_id = {{ user.id }};
-                if (q_data) {
-                    if (user_id == q_data['user_id']) {
-                        $('#reject_query').css('display', 'none')
-                        $('#delete_query').css('display', '')
-                        // Hide or show sharing options
-                        $('#reshare_query').css('display',  q_data['shared'] ? 'none' : '' )
-                        $('#unshare_query').css('display', q_data['shared'] ? '' : 'none');
-                    } else {
-                        $('.share').css('display', 'none');
-                        $('#delete_query').css('display', 'none')
-                        $('#reject_query').css('display', '');
-                    }
-                } else {
-                    // Remove buttons
-                    $('.remove').css('display', 'none')
-                    $('.share').css('display', 'none');
-                    $('#run_query').attr('type', 'hidden');
-                    // Add placeholder option
-                    $('#id_query_selector').append('<option>Save a new query to see it here</option>');
-                }
-            }
-
-            $('#delete_query, #unshare_query, #reshare_query, #reject_query').click(function() {
-                var value = selector.val()
-                var action = this.id;
-                var method = "GET";
-                switch (action) {
-                    case 'delete_query':
-                        var url = "{% url 'helpdesk:delete_query' 1234 %}";
-                        method = "POST";
-                        break;
-                    case 'unshare_query':
-                        var url = "{% url 'helpdesk:unshare_query' 1234 %}";
-                        break;
-                    case 'reshare_query':
-                        var url = "{% url 'helpdesk:reshare_query' 1234 %}";
-                        break;
-                    case 'reject_query':
-                        var url = "{% url 'helpdesk:reject_query' 1234 %}";
-                        break;
-                }
-                $.ajax({
-                    method: method,
-                    url: url.replace(/1234/, value),
-                    data: { csrfmiddlewaretoken: '{{ csrf_token }}'},
-                    success: function(data, textStatus) {
-                        if (action == 'delete_query' || action == 'reject_query') {
-                            // Remove option from list
-                            $("#id_query_selector option[value='" + value + "']").remove();
-                            if ( from_saved_query ) {
-                                location.reload(); // Refresh page
-                            }
-                        } else if (action == 'unshare_query') {
-                            // Remove 'Shared' from option
-                            var option = $("#id_query_selector option[value='" + value + "']")
-                            option.text(option.text().replace('(Shared)', ''));
-                            json_queries[value]['shared'] = false;
-                        } else if (action == 'reshare_query') {
-                            // Add 'Shared' to option
-                            var option = $("#id_query_selector option[value='" + value + "']")
-                            option.text(option.text() + '(Shared)');
-                            json_queries[value]['shared'] = true;
-                        }
-                        // Reset buttons
-                        adjust_query_buttons();
-                    }
-                })
-            })
-        }
-    </script>
-{% endblock %}
-
+                    "</button>"
+                    );
+                    $("div.mass_action_el").html(
+                    "<label for='id_mass_action'>{% trans 'With Selected Tickets:' %} </label>" +
+                    "<select name='action' id='id_mass_action' style='width: 250px;'>" +
+                        "<option value='take'>{% trans 'Take (Assign to me)' %}</option>" +
+                        "<option value='delete'>{% trans 'Delete' %}</option>" +
+                        "<option value='merge'>{% trans 'Merge' %}</option>" +
+                        "<option value='export'>{% trans 'Export' %}</option>" +
+                        "<option value='pair'>{% trans 'Pair to BEAM inventory' %}</option>" +
+                        "<optgroup label='{% trans 'Close' %}'>" +
+                            "<option value='close'>{% trans "Close (Don't Send E-Mail)" %}</option>" +
+                            "<option value='close_public'>{% trans 'Close (Send E-Mail)' %}</option>" +
+                            "</optgroup>" +
+                            "<optgroup label='{% trans 'Assign To' %}'>" +
+                                "<option value='unassign'>{% trans 'Nobody (Unassign)' %}</option>" +
+                                "{% for u in user_choices %}" +
+                                "<option value='assign_{{ u.id }}'>{{ u.get_username }}</option>" +
+                                "{% endfor %}" +
+                                "</optgroup>" +
+                                "<optgroup label='{% trans 'Set KB Item' %}'>" +
+                                    "<option value='kbitem_none'>{% trans 'No KB Item' %}</option>" +
+                                    "{% for kbi in kb_items %}" +
+                                    "<option value='kbitem_{{ kbi.id }}'>{{ kbi.category.title }}: {{ kbi.title }}</option>" +
+                                    "{% endfor %}" +
+                                    "</optgroup>" +
+                                    "</select>" +
+                                    "<button type='submit' class='btn btn-primary btn-sm'>" +
+                                        "<i class='fas fa-arrow-circle-right'></i> {% trans 'Go' %}" +
+                                        "</button>"
+                                        );
+                                        
+                                        update_selected_ids = function () {
+                                            // Add data to post field to be avaiable in mass_update function, and save_query
+                                            $('input[name="selected_ids"]').each(function () {
+                                                $(this).val(selected.toString());
+                                            });
+                                        }
+                                        
+                                        {# Shortcuts to select/unselect multiple tickets #}
+                                        $("#select_all_btn").click(function () {
+                                            $(".ticket_multi_select").prop('checked', true);
+                                            all_ticket_ids.forEach(function(e) {
+                                                if (!selected.includes(String(e))) {
+                                                    selected.push(String(e));
+                                                }
+                                            })
+                                            update_selected_ids();
+                                        });
+                                        
+                                        $("#select_none_btn").click(function () {
+                                            $(".ticket_multi_select").prop('checked', false);
+                                            selected = [];
+                                            update_selected_ids();
+                                        });
+                                        
+                                        $("#select_inverse_btn").click(function () {
+                                            $(".ticket_multi_select").each(function () {
+                                                $(this).prop('checked', !$(this).prop('checked'));
+                                            });
+                                            unselected = all_ticket_ids.filter(function (e) {
+                                                return !selected.includes(String(e));
+                                            }).map(e => String(e));
+                                            selected = unselected;
+                                            update_selected_ids();
+                                        });
+                                        
+                                        $(document).on('click', '.ticket_multi_select', function () {
+                                            if ($(this).prop('checked')) {
+                                                if (!selected.includes($(this).val())) {
+                                                    selected.push($(this).val())
+                                                }
+                                            } else {
+                                                var index = selected.indexOf($(this).val());
+                                                if (index !== -1) {
+                                                    selected.splice(index, 1);
+                                                }
+                                            };
+                                            update_selected_ids();
+                                        });
+                                    })
+                                    
+                                    // Handle sharing, unsharing, rejecting, deleting queries
+                                    var selector = $('#id_query_selector');
+                                    if ( selector ) {
+                                        // selector.onchange = adjust_query_buttons;
+                                        selector.change(function() {
+                                            adjust_query_buttons();
+                                        });
+                                        
+                                        function adjust_query_buttons() {
+                                            var value = selector.val();
+                                            var q_data = json_queries[value];
+                                            var user_id = {{ user.id }};
+                                            if (q_data) {
+                                                if (user_id == q_data['user_id']) {
+                                                    $('#reject_query').css('display', 'none')
+                                                    $('#delete_query').css('display', '')
+                                                    // Hide or show sharing options
+                                                    $('#reshare_query').css('display',  q_data['shared'] ? 'none' : '' )
+                                                    $('#unshare_query').css('display', q_data['shared'] ? '' : 'none');
+                                                } else {
+                                                    $('.share').css('display', 'none');
+                                                    $('#delete_query').css('display', 'none')
+                                                    $('#reject_query').css('display', '');
+                                                }
+                                            } else {
+                                                // Remove buttons
+                                                $('.remove').css('display', 'none')
+                                                $('.share').css('display', 'none');
+                                                $('#run_query').attr('type', 'hidden');
+                                                // Add placeholder option
+                                                $('#id_query_selector').append('<option>Save a new query to see it here</option>');
+                                            }
+                                        }
+                                        
+                                        $('#delete_query, #unshare_query, #reshare_query, #reject_query').click(function() {
+                                            var value = selector.val()
+                                            var action = this.id;
+                                            var method = "GET";
+                                            switch (action) {
+                                                case 'delete_query':
+                                                var url = "{% url 'helpdesk:delete_query' 1234 %}";
+                                                method = "POST";
+                                                break;
+                                                case 'unshare_query':
+                                                var url = "{% url 'helpdesk:unshare_query' 1234 %}";
+                                                break;
+                                                case 'reshare_query':
+                                                var url = "{% url 'helpdesk:reshare_query' 1234 %}";
+                                                break;
+                                                case 'reject_query':
+                                                var url = "{% url 'helpdesk:reject_query' 1234 %}";
+                                                break;
+                                            }
+                                            $.ajax({
+                                                method: method,
+                                                url: url.replace(/1234/, value),
+                                                data: { csrfmiddlewaretoken: '{{ csrf_token }}'},
+                                                success: function(data, textStatus) {
+                                                    if (action == 'delete_query' || action == 'reject_query') {
+                                                        // Remove option from list
+                                                        $("#id_query_selector option[value='" + value + "']").remove();
+                                                        if ( from_saved_query ) {
+                                                            location.reload(); // Refresh page
+                                                        }
+                                                    } else if (action == 'unshare_query') {
+                                                        // Remove 'Shared' from option
+                                                        var option = $("#id_query_selector option[value='" + value + "']")
+                                                        option.text(option.text().replace('(Shared)', ''));
+                                                        json_queries[value]['shared'] = false;
+                                                    } else if (action == 'reshare_query') {
+                                                        // Add 'Shared' to option
+                                                        var option = $("#id_query_selector option[value='" + value + "']")
+                                                        option.text(option.text() + '(Shared)');
+                                                        json_queries[value]['shared'] = true;
+                                                    }
+                                                    // Reset buttons
+                                                    adjust_query_buttons();
+                                                }
+                                            })
+                                        })
+                                    }
+                                </script>
+                                {% endblock %}
+                                
+                                

@@ -1683,9 +1683,217 @@ def merge_tickets(request):
         'debug': settings.DEBUG,
     })
 
-
 @helpdesk_staff_member_required
 def ticket_list(request):
+    context = {}
+
+    huser = HelpdeskUser(request.user)
+    org = request.user.default_organization.helpdesk_organization
+
+    # Query_params will hold a dictionary of parameters relating to
+    # a query, to be saved if needed:
+    query_params = {
+        'filtering': {},
+        'filtering_or': {},
+        'sorting': None,
+        'sortreverse': False,
+        'search_string': '',
+    }
+    default_query_params = {
+        'filtering': {
+            'status__in': [Ticket.OPEN_STATUS, Ticket.REOPENED_STATUS, Ticket.REPLIED_STATUS, Ticket.NEW_STATUS],
+        },
+        'sorting': 'created',
+        'sortreverse': False,
+        'search_string': '',
+    }
+
+    # If the user is coming from the header/navigation search box, lets' first
+    # look at their query to see if they have entered a valid ticket number. If
+    # they have, just redirect to that ticket number. Otherwise, we treat it as
+    # a keyword search.
+
+    if request.GET.get('search_type', None) == 'header':
+        query = request.GET.get('q')
+        filter = None
+        if query.find('-') > 0:
+            try:
+                queue, id = Ticket.queue_and_id_from_query(query)
+                id = int(id)
+            except ValueError:
+                id = None
+
+            if id:
+                filter = {'queue__slug': queue, 'id': id}
+        else:
+            try:
+                query = int(query)
+            except ValueError:
+                query = None
+
+            if query:
+                filter = {'id': int(query)}
+
+        if filter:
+            try:
+                ticket = huser.get_tickets_in_queues().get(**filter)
+                return HttpResponseRedirect(ticket.staff_url)
+            except Ticket.DoesNotExist:
+                # Go on to standard keyword searching
+                pass
+
+    try:
+        saved_query, query_params = load_saved_query(request, query_params)
+    except QueryLoadError:
+        return HttpResponseRedirect(reverse('helpdesk:list'))
+
+    filter_in_params = dict([
+        ('queue', 'queue__id__in'),
+        ('assigned_to', 'assigned_to__id__in'),
+        ('status', 'status__in'),
+        ('kbitem', 'kbitem__in'),
+        ('submitter', 'submitter_email__in'),
+    ])
+    filter_null_params = dict([
+        ('queue', 'queue__id__isnull'),
+        ('assigned_to', 'assigned_to__id__isnull'),
+        ('status', 'status__isnull'),
+        ('kbitem', 'kbitem__isnull'),
+        ('submitter', 'submitter_email__isnull'),
+    ])
+
+    if saved_query:
+        pass
+    elif not {'queue', 'assigned_to', 'status', 'q', 'sort', 'sortreverse', 'kbitem', 'submitter'}.intersection(request.GET):
+        # Fall-back if no querying is being done
+        query_params = deepcopy(default_query_params)
+    else:
+        for param, filter_command in filter_in_params.items():
+            if not request.GET.get(param) is None:
+                patterns = request.GET.getlist(param)
+                try:
+                    pattern_pks = [int(pattern) for pattern in patterns]
+                    if -1 in pattern_pks:
+                        query_params['filtering'][filter_null_params[param]] = True
+                    else:
+                        query_params['filtering'][filter_command] = pattern_pks
+                except ValueError:
+                    pass
+
+        date_from = request.GET.get('date_from')
+        if date_from:
+            query_params['filtering']['created__gte'] = date_from
+
+        date_to = request.GET.get('date_to')
+        if date_to:
+            query_params['filtering']['created__lte'] = date_to
+
+        last_reply_from = request.GET.get('last_reply_from')
+        if last_reply_from:
+            query_params['filtering']['last_reply__gte'] = last_reply_from
+
+        last_reply_to = request.GET.get('last_reply_to')
+        if last_reply_to:
+            query_params['filtering']['last_reply__lte'] = last_reply_to
+
+        paired_count_from = request.GET.get('paired_count_from')
+        if paired_count_from:
+            query_params['filtering']['paired_count__gte'] = paired_count_from
+
+        paired_count_to = request.GET.get('paired_count_to')
+        if paired_count_to:
+            query_params['filtering']['paired_count__lte'] = paired_count_to
+
+        # KEYWORD SEARCHING
+        q = request.GET.get('q', '')
+        context['query'] = q
+        query_params['search_string'] = q
+
+        # SORTING
+        sort = request.GET.get('sort', None)
+        if sort not in ('status', 'assigned_to', 'created', 'title', 'queue', 'priority', 'kbitem', 'submitter',
+                        'paired_count'):
+            sort = 'created'
+        query_params['sorting'] = sort
+
+        sortreverse = request.GET.get('sortreverse', None)
+        query_params['sortreverse'] = sortreverse
+
+    urlsafe_query = query_to_base64(query_params)
+    qs = Query(huser, base64query=urlsafe_query).refresh_query()
+
+    # Return queries that the user created, or that have been shared with everyone and the user hasn't rejected
+    user_saved_queries = SavedSearch.objects.filter(Q(user=request.user)
+                                                    | (Q(shared__exact=True) & ~Q(opted_out_users__in=[request.user])))
+
+    search_message = ''
+    if query_params['search_string'] and settings.DATABASES['default']['ENGINE'].endswith('sqlite'):
+        search_message = _(
+            '<p><strong>Note:</strong> Your keyword search is case sensitive '
+            'because of your database. This means the search will <strong>not</strong> '
+            'be accurate. By switching to a different database system you will gain '
+            'better searching! For more information, read the '
+            '<a href="http://docs.djangoproject.com/en/dev/ref/databases/#sqlite-string-matching">'
+            'Django Documentation on string matching in SQLite</a>.')
+
+    # Get KBItems that are part of the user's helpdesk_organization
+    kbitem_choices = [(item.pk, str(item)) for item in KBItem.objects.filter(
+        category__organization=org)]
+
+    # After query is run, replaces null-filters with in-filters=[-1], so page can properly display that filter.
+    for param, null_query in filter_null_params.items():
+        popped = query_params['filtering'].pop(null_query, None)
+        if popped is not None:
+            query_params['filtering'][filter_in_params[param]] = [-1]
+
+    user_choices = list_of_helpdesk_staff(org)
+
+    # Get extra data columns to be displayed if only 1 queue is selected
+    extra_data_columns = {}
+    if len(query_params['filtering'].get('queue__id__in', [])) == 1:
+        extra_data_columns = get_extra_data_columns(query_params['filtering']['queue__id__in'][0])
+
+    json_queries = {i['id']: i for i in user_saved_queries.values('id', 'user_id', 'shared')}
+
+    if request.user.is_authenticated and hasattr(request.user, 'usersettings_helpdesk'):
+        tickets_per_page = request.user.usersettings_helpdesk.tickets_per_page
+    else:
+        tickets_per_page = 25
+
+    ticket_list = qs
+    paginator = Paginator(
+        ticket_list, tickets_per_page)
+    try:
+        ticket_list = paginator.page(request.GET.get(_('t_page'), 1))
+    except PageNotAnInteger:
+        ticket_list = paginator.page(1)
+    except EmptyPage:
+        ticket_list = paginator.page(
+            paginator.num_pages)
+
+    return render(request, 'helpdesk/ticket_list.html', dict(
+        context,
+        default_tickets_per_page=request.user.usersettings_helpdesk.tickets_per_page,
+        ticket_list=ticket_list,
+        user_choices=user_choices,
+        kb_items=KBItem.objects.all(),
+        queue_choices=huser.get_queues(),
+        status_choices=Ticket.STATUS_CHOICES,
+        kbitem_choices=kbitem_choices,
+        urlsafe_query=urlsafe_query,
+        user_saved_queries=user_saved_queries,
+        json_queries=json.dumps(json_queries),
+        query_params=query_params,
+        from_saved_query=saved_query is not None,
+        saved_query=saved_query,
+        search_message=search_message,
+        extra_data_columns=extra_data_columns,
+        debug=settings.DEBUG,
+    ))
+
+
+@helpdesk_staff_member_required
+def ticket_list_old(request):
     context = {}
 
     huser = HelpdeskUser(request.user)
