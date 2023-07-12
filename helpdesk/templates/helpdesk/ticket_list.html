@@ -125,11 +125,11 @@
                             <label class="input-group-text font-weight-normal">Show</label>
                         </div>
                         <button class="btn btn-outline-secondary rounded-0 font-weight-semibold dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">{{ tickets_per_page }}</button>
-                        <div class="dropdown-menu p-1">
-                            <a class="dropdown-item rounded-lg {% if tickets_per_page == 10 %}active{% endif %}" href="?t_per_page=10">10</a>
-                            <a class="dropdown-item rounded-lg {% if tickets_per_page == 25 %}active{% endif %}" href="?t_per_page=25">25</a>
-                            <a class="dropdown-item rounded-lg {% if tickets_per_page == 50 %}active{% endif %}" href="?t_per_page=50">50</a>
-                            <a class="dropdown-item rounded-lg {% if tickets_per_page == 100 %}active{% endif %}" href="?t_per_page=100">100</a>
+                        <div class="dropdown-menu p-1 text-right" style="min-width: 0">
+                            <a class="dropdown-item px-3 rounded-lg {% if tickets_per_page == 10 %}active{% endif %}" href="?t_per_page=10">10</a>
+                            <a class="dropdown-item px-3 rounded-lg {% if tickets_per_page == 25 %}active{% endif %}" href="?t_per_page=25">25</a>
+                            <a class="dropdown-item px-3 rounded-lg {% if tickets_per_page == 50 %}active{% endif %}" href="?t_per_page=50">50</a>
+                            <a class="dropdown-item px-3 rounded-lg {% if tickets_per_page == 100 %}active{% endif %}" href="?t_per_page=100">100</a>
                         </div>
                         <div class="input-group-append border-left border-secondary">
                             <label class="input-group-text font-weight-normal" for="inputGroupSelect01">Tickets</label>
@@ -140,8 +140,8 @@
                     <div class="btn-toolbar float-right p-2" role="toolbar" style="bottom: 0;">
                         <div class="btn-group mr-2" role="group">
                             {% if ticket_list.has_previous %}
-                            <a class="btn btn-primary font-weight-bold" href="?{{ page_var }}=1">First</a>
-                            <a class="btn btn-primary font-weight-bold" href="?{{ page_var }}={{ ticket_list.previous_page_number }}">Previous</a>
+                            <a class="btn btn-primary font-weight-bold" href="?t_per_page={{ tickets_per_page }}&{{ page_var }}=1">First</a>
+                            <a class="btn btn-primary font-weight-bold" href="?t_per_page={{ tickets_per_page }}&{{ page_var }}={{ ticket_list.previous_page_number }}">Previous</a>
                             {% else %}
                             <a class="btn btn-primary font-weight-bold disabled">First</a>
                             <a class="btn btn-primary font-weight-bold disabled">Previous</a>
@@ -153,15 +153,15 @@
                             {% if ticket_list.number == i %}
                             <a class="btn btn-outline-primary active font-weight-bold">{{ i }}</a>
                             {% elif i <= ticket_list.number|add:5 and i >= ticket_list.number|add:-5 %}
-                            <a class="btn btn-outline-primary font-weight-bold" href="?{{ page_var }}={{ i }}">{{ i }}</a>
+                            <a class="btn btn-outline-primary font-weight-bold" href="?t_per_page={{ tickets_per_page }}&{{ page_var }}={{ i }}">{{ i }}</a>
                             {% endif %}
                             {% endfor %}
                             {% endwith %}
                         </div>
                         <div class="btn-group" role="group">
                             {% if ticket_list.has_next %}
-                            <a class="btn btn-primary font-weight-bold" href="?{{ page_var }}={{ ticket_list.next_page_number }}">Next</a>
-                            <a class="btn btn-primary font-weight-bold" href="?{{ page_var }}={{ ticket_list.paginator.num_pages }}">Last</a>
+                            <a class="btn btn-primary font-weight-bold" href="?t_per_page={{ tickets_per_page }}&{{ page_var }}={{ ticket_list.next_page_number }}">Next</a>
+                            <a class="btn btn-primary font-weight-bold" href="?t_per_page={{ tickets_per_page }}&{{ page_var }}={{ ticket_list.paginator.num_pages }}">Last</a>
                             {% else %}
                             <a class="btn btn-primary font-weight-bold disabled">Next</a>
                             <a class="btn btn-primary font-weight-bold disabled">Last</a>
