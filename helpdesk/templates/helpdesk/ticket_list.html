@@ -32,8 +32,9 @@
 
 
 {% block helpdesk_body %}
-<div class="card mb-2">
+<div id="query_card" class="card mb-2">
     <div class="card-header pt-1">
+        <!-- Tabs -->
         <ul class="nav nav-tabs card-header-tabs">
             <li class="nav-item d-flex align-self-center mr-2 font-weight-bold">
                 {% trans "Query Results" %}
@@ -46,7 +47,7 @@
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link disabled" href="#timelinetabcontents" id="timelinetabcontents-tab" data-toggle="tab"
+            <a class="nav-link" href="#timelinetabcontents" id="timelinetabcontents-tab" data-toggle="tab"
             role="tab" aria-controls="timelinetabcontents" aria-selected=false>
             <i class="fas fa-history"></i>
             {% trans "Timeline" %}
@@ -55,133 +56,221 @@
 </ul>
 </div>
 
-<style>
-    #dataTable td {
-        vertical-align: middle
-    };
-</style>
-
 <div class="card-body p-0">
     {{ search_message|safe }}
     <div class="tab-content" id="myTabContent">
-        <div class="tab-pane fade show active" id="datatabletabcontents" role="tabpanel"
+        <div class="tab-pane fade show active overflow-hidden" id="datatabletabcontents" role="tabpanel"
         aria-labelledby="datatabletabcontents-tab">
         <form method='post' action="{% url 'helpdesk:mass_update' %}" id="ticket_mass_update">
             {% csrf_token %}
-            <div class="overflow-auto" style="max-height: 87vh">
+            <!-- Action Toolbar -->
+            <div class="d-flex flex-wrap overflow-auto mx-2 mb-2 mw-100" style="max-width: 100%; //background-color: #f7f7f7">
+                <div class="d-flex align-items-center mt-2 mr-2">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text font-weight-normal">Select</label>
+                        </div>
+                        <button id="select_none_btn" class="btn btn-outline-danger rounded-0 font-weight-semibold" type="button"><i class="fa fa-times-circle mr-1"></i>None</button>
+                        <button id="select_all_btn" class="btn btn-outline-primary rounded-0 font-weight-semibold" type="button"><i class="fa fa-plus-circle mr-1"></i>All</button>
+                        <button id="select_inverse_btn" class="btn btn-outline-secondary rounded-0 font-weight-semibold" type="button"><i class="fa fa-random mr-1"></i>Invert</button>
+                        <div class="input-group-append border-left border-secondary">
+                            <label id="select_count" class="input-group-text font-weight-normal">0 Selected</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center mt-2">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text font-weight-normal">Action</label>
+                        </div>
+                        <select class="custom-select" name="action" id="id_mass_action">
+                            <option value="take">Take (Assign to me)</option>
+                            <option value="delete">Delete</option><option value="merge">Merge</option>
+                            <option value="export">Export</option><option value="pair">Pair to BEAM inventory</option>
+                            <optgroup label="Close">
+                                <option value="close">Close (Don't Send E-Mail)</option>
+                                <option value="close_public">Close (Send E-Mail)</option>
+                            </optgroup>
+                            <optgroup label="Assign To">
+                                <option value="unassign">Nobody (Unassign)</option>
+                                <option value="assign_2">iiloni@terpmail.umd.edu</option>
+                            </optgroup>
+                            <optgroup label="Set KB Item">
+                                <option value="kbitem_none">No KB Item</option>
+                                <option value="kbitem_28">Test Category: Test Article</option>
+                            </optgroup>
+                        </select>
+                        <div class="input-group-append">
+                            <button type="submit" class="btn btn-outline-primary"><i class="fa fa-arrow-circle-right mr-1"></i>Go</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex-fill mt-2">
+                    <button class="btn btn-outline-secondary float-right font-weight-semibold dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">Column Visibility</button>
+                    <div class="dropdown-menu p-1" style="min-width: 0">
+                        <div class="btn-group-vertical btn-group-toggle" data-toggle="buttons">
+                            <label class="btn btn-outline-secondary">
+                                <input type="checkbox" onchange="toggleColumn(this.checked, 3)"> Priority
+                            </label>
+                            <label class="btn btn-outline-secondary">
+                                <input type="checkbox" onchange="toggleColumn(this.checked, 4)"> Queue
+                            </label>
+                            <label class="btn btn-outline-secondary active">
+                                <input type="checkbox" onchange="toggleColumn(this.checked, 5)" checked> Status
+                            </label>
+                            <label class="btn btn-outline-secondary active">
+                                <input type="checkbox" onchange="toggleColumn(this.checked, 6)" checked> Owner
+                            </label>
+                            <label class="btn btn-outline-secondary active">
+                                <input type="checkbox" onchange="toggleColumn(this.checked, 7)" checked> Submitter
+                            </label>
+                            <label class="btn btn-outline-secondary">
+                                <input type="checkbox" onchange="toggleColumn(this.checked, 8)"> Paired Count
+                            </label>
+                            <label class="btn btn-outline-secondary active">
+                                <input type="checkbox" onchange="toggleColumn(this.checked, 9)" checked> Created
+                            </label>
+                            <label class="btn btn-outline-secondary active">
+                                <input type="checkbox" onchange="toggleColumn(this.checked, 10)" checked> Last Reply
+                            </label>
+                            <label class="btn btn-outline-secondary">
+                                <input type="checkbox" onchange="toggleColumn(this.checked, 11)"> Due Date
+                            </label>
+                            <label class="btn btn-outline-secondary">
+                                <input type="checkbox" onchange="toggleColumn(this.checked, 12)"> Time Spent
+                            </label>
+                            <label class="btn btn-outline-secondary">
+                                <input type="checkbox" onchange="toggleColumn(this.checked, 13)"> KB Item
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- / Action Toolbar -->
+            <!-- Data Table -->
+            <div class="overflow-auto" style="max-height: 82vh">
                 <table class="table table-bordered table-sm table-striped" id="dataTable" width="100%" cellspacing="0">
-                    <thead class="thead-light">
-                        <tr>
-                            <th></th>
-                            <th>{% trans "Ticket" %}</th>
-                            <th>{% trans "Priority" %}</th>
-                            <th>{% trans "Queue" %}</th>
-                            <th>{% trans "Status" %}</th>
-                            <th>{% trans "Owner" %}</th>
-                            <th>{% trans "Submitter" %}</th>
-                            <th>{% trans "Paired Count" %}</th>
-                            <th>{% trans "Created" %}</th>
-                            <th>{% trans "Last Reply" %}</th>
-                            <th>{% trans "Due Date" %}</th>
-                            <th>{% trans "Time Spent" %}</th>
-                            <th>{% trans "KB item" %}</th>
+                    <thead class="thead-light"> 
+                        <tr> <!-- Headers -->
+                            <th data-colname="id"></th>
+                            <th data-colname="ticket">{% trans "Ticket" %}</th>
+                            <th data-colname="priority" class="d-none">{% trans "Priority" %}</th>
+                            <th data-colname="queue" class="d-none">{% trans "Queue" %}</th>
+                            <th data-colname="status">{% trans "Status" %}</th>
+                            <th data-colname="assigned_to">{% trans "Owner" %}</th>
+                            <th data-colname="submitter">{% trans "Submitter" %}</th>
+                            <th data-colname="paired_count" class="d-none">{% trans "Paired Count" %}</th>
+                            <th data-colname="created">{% trans "Created" %}</th>
+                            <th data-colname="last_reply">{% trans "Last Reply" %}</th>
+                            <th data-colname="due_date" class="d-none">{% trans "Due Date" %}</th>
+                            <th data-colname="time_spent" class="d-none">{% trans "Time Spent" %}</th>
+                            <th data-colname="kbitem" class="d-none">{% trans "KB item" %}</th>
                             {% if query_params.filtering.queue__id__in|length == 1 %}
                             {% for col_name, display_name in extra_data_columns.items %}
-                            <th>{{ display_name }}</th>
+                            <th data-colname="{{ col_name }}">{{ display_name }}</th>
                             {% endfor %}
                             {% endif %}
                         </tr>
                     </thead>
                     <tbody>
-                        {% for ticket in ticket_list %}
                         <tr>
-                            <td><input type="checkbox" name="ticket_id" value="{{ ticket.id }}" class="ticket_multi_select"></td>
-                            <td class="tickettitle" data-toggle="tooltip" title="Edit {{ ticket.title }}"><a href="{{ ticket.get_absolute_url }}">{{ ticket.id }}. {{ ticket.title }}</a></td>
-                            <td class="text-{{ ticket.get_priority_css_class }}">{{ ticket.get_priority }}</td>
-                            <td>{{ ticket.queue }}</td>
-                            <td>{{ ticket.get_status }}</td>
-                            <td>{{ ticket.get_assigned_to }}</td>
-                            <td>{{ ticket.submitter_email }}</td>
-                            <td>{# paired count #}</td>
-                            <td><span title='{{ ticket.created|naturaltime }}'>{{ ticket.created|date:"DATETIME_FORMAT" }}</span></td>
-                            <td><span title='{{ ticket.get_last_followup|naturaltime }}'>{{ ticket.get_last_followup|date:"DATETIME_FORMAT" }}</span></td>
-                            <td><span title='{{ ticket.due_date|naturaltime }}'>{{ ticket.due_date|date:"DATETIME_FORMAT" }}</span></td>
-                            <td>{{ ticket.time_spent_formatted }}</td>
-                            <td>{{ ticket.kbitem.title}}</td>
-                        </tr>
-                        
-                        {% empty %}
-                        <tr><td colspan='6'>{% trans "You do not have any tickets." %}</td></tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            <div class="d-flex border-top" style="background-color: #f7f7f7">
-                {% with 't_page' as page_var %}
-                {% if ticket_list.has_other_pages %}
-                <div class="d-flex align-items-center ml-2">
-                    <div class="input-group">
-                        <div class="input-group-prepend">
-                            <label class="input-group-text font-weight-normal">Show</label>
-                        </div>
-                        <button class="btn btn-outline-secondary rounded-0 font-weight-semibold dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">{{ tickets_per_page }}</button>
-                        <div class="dropdown-menu p-1 text-right" style="min-width: 0">
-                            <a class="dropdown-item px-3 rounded-lg {% if tickets_per_page == 10 %}active{% endif %}" href="?t_per_page=10">10</a>
-                            <a class="dropdown-item px-3 rounded-lg {% if tickets_per_page == 25 %}active{% endif %}" href="?t_per_page=25">25</a>
-                            <a class="dropdown-item px-3 rounded-lg {% if tickets_per_page == 50 %}active{% endif %}" href="?t_per_page=50">50</a>
-                            <a class="dropdown-item px-3 rounded-lg {% if tickets_per_page == 100 %}active{% endif %}" href="?t_per_page=100">100</a>
-                        </div>
-                        <div class="input-group-append border-left border-secondary">
-                            <label class="input-group-text font-weight-normal" for="inputGroupSelect01">Tickets</label>
-                        </div>
-                    </div>
-                </div>
-                <div class="flex-fill justify-content-end">
-                    <div class="btn-toolbar float-right p-2" role="toolbar" style="bottom: 0;">
-                        <div class="btn-group mr-2" role="group">
-                            {% if ticket_list.has_previous %}
-                            <a class="btn btn-primary font-weight-bold" href="?t_per_page={{ tickets_per_page }}&{{ page_var }}=1">First</a>
-                            <a class="btn btn-primary font-weight-bold" href="?t_per_page={{ tickets_per_page }}&{{ page_var }}={{ ticket_list.previous_page_number }}">Previous</a>
-                            {% else %}
-                            <a class="btn btn-primary font-weight-bold disabled">First</a>
-                            <a class="btn btn-primary font-weight-bold disabled">Previous</a>
-                            {% endif %}
-                        </div>
-                        <div class="btn-group mr-2" role="group">
-                            {% with 3 as thresh %}
-                            {% for i in ticket_list.paginator.page_range %}
-                            {% if ticket_list.number == i %}
-                            <a class="btn btn-outline-primary active font-weight-bold">{{ i }}</a>
-                            {% elif i <= ticket_list.number|add:5 and i >= ticket_list.number|add:-5 %}
-                            <a class="btn btn-outline-primary font-weight-bold" href="?t_per_page={{ tickets_per_page }}&{{ page_var }}={{ i }}">{{ i }}</a>
-                            {% endif %}
+                            <td></td>
+                            <td>
+                            </tr>
+                            {% for ticket in ticket_list %}
+                            <tr> <!-- Data -->
+                                <td class="text-center"><input type="checkbox" name="ticket_id" value="{{ ticket.id }}" class="ticket_multi_select"></td>
+                                <td class="tickettitle" data-toggle="tooltip" title="Edit {{ ticket.title }}"><a href="{{ ticket.get_absolute_url }}">{{ ticket.id }}. {{ ticket.title }}</a></td>
+                                <td class="d-none text-{{ ticket.get_priority_css_class }}">{{ ticket.get_priority }}</td>
+                                <td class="d-none">{{ ticket.queue }}</td>
+                                <td>{{ ticket.get_status }}</td>
+                                <td>{% if ticket.get_assigned_to != "Unassigned" %}{{ ticket.get_assigned_to }}{% endif %}</td> {# Remove if statement for "Unassigned" instead of blank #}
+                                <td>{{ ticket.submitter_email }}</td>
+                                <td class="d-none">{# paired count #}</td>
+                                <td><span title='{{ ticket.created|naturaltime }}'>{{ ticket.created|date:"DATETIME_FORMAT" }}</span></td>
+                                <td><span title='{{ ticket.get_last_followup|naturaltime }}'>{{ ticket.get_last_followup|date:"DATETIME_FORMAT" }}</span></td>
+                                <td class="d-none"><span title='{{ ticket.due_date|naturaltime }}'>{{ ticket.due_date|date:"DATETIME_FORMAT" }}</span></td>
+                                <td class="d-none">{{ ticket.time_spent_formatted }}</td>
+                                <td class="d-none">{{ ticket.kbitem.title}}</td>
+                            </tr>
+                            
+                            {% empty %}
+                            <tr><td colspan='6'>{% trans "You do not have any tickets." %}</td></tr>
                             {% endfor %}
-                            {% endwith %}
-                        </div>
-                        <div class="btn-group" role="group">
-                            {% if ticket_list.has_next %}
-                            <a class="btn btn-primary font-weight-bold" href="?t_per_page={{ tickets_per_page }}&{{ page_var }}={{ ticket_list.next_page_number }}">Next</a>
-                            <a class="btn btn-primary font-weight-bold" href="?t_per_page={{ tickets_per_page }}&{{ page_var }}={{ ticket_list.paginator.num_pages }}">Last</a>
-                            {% else %}
-                            <a class="btn btn-primary font-weight-bold disabled">Next</a>
-                            <a class="btn btn-primary font-weight-bold disabled">Last</a>
-                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+                <!-- / Data Table -->
+                <!-- Pagination Toolbar -->
+                <div class="d-flex flex-wrap border-top mx-2 mb-2" style="//background-color: #f7f7f7">
+                    {% with 't_page' as page_var %}
+                    {% if ticket_list.has_other_pages %}
+                    <div class="d-flex align-items-center mt-2">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <label class="input-group-text font-weight-normal">Show</label>
+                            </div>
+                            <div class="btn-group dropup">
+                                <button class="btn btn-outline-secondary rounded-0 font-weight-semibold dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">{{ tickets_per_page }}</button>
+                                <div class="dropdown-menu p-1 text-right" style="min-width: 0">
+                                    <a class="dropdown-item px-3 rounded-lg {% if tickets_per_page == 10 %}active{% endif %}" href="?t_per_page=10">10</a>
+                                    <a class="dropdown-item px-3 rounded-lg {% if tickets_per_page == 25 %}active{% endif %}" href="?t_per_page=25">25</a>
+                                    <a class="dropdown-item px-3 rounded-lg {% if tickets_per_page == 50 %}active{% endif %}" href="?t_per_page=50">50</a>
+                                    <a class="dropdown-item px-3 rounded-lg {% if tickets_per_page == 100 %}active{% endif %}" href="?t_per_page=100">100</a>
+                                </div>
+                            </div>
+                            <div class="input-group-append border-left border-secondary">
+                                <label class="input-group-text font-weight-normal" for="inputGroupSelect01">Tickets</label>
+                            </div>
                         </div>
                     </div>
+                    <div class="flex-fill justify-content-end">
+                        <div class="btn-toolbar float-right mt-2" role="toolbar" style="bottom: 0;">
+                            <div class="btn-group mr-2" role="group">
+                                {% if ticket_list.has_previous %}
+                                <a class="btn btn-primary font-weight-bold" href="?t_per_page={{ tickets_per_page }}&{{ page_var }}=1">First</a>
+                                <a class="btn btn-primary font-weight-bold" href="?t_per_page={{ tickets_per_page }}&{{ page_var }}={{ ticket_list.previous_page_number }}">Previous</a>
+                                {% else %}
+                                <a class="btn btn-primary font-weight-bold disabled">First</a>
+                                <a class="btn btn-primary font-weight-bold disabled">Previous</a>
+                                {% endif %}
+                            </div>
+                            <div class="btn-group mr-2" role="group">
+                                {% with 3 as thresh %}
+                                {% for i in ticket_list.paginator.page_range %}
+                                {% if ticket_list.number == i %}
+                                <a class="btn btn-outline-primary active font-weight-bold">{{ i }}</a>
+                                {% elif i <= ticket_list.number|add:5 and i >= ticket_list.number|add:-5 %}
+                                <a class="btn btn-outline-primary font-weight-bold" href="?t_per_page={{ tickets_per_page }}&{{ page_var }}={{ i }}">{{ i }}</a>
+                                {% endif %}
+                                {% endfor %}
+                                {% endwith %}
+                            </div>
+                            <div class="btn-group" role="group">
+                                {% if ticket_list.has_next %}
+                                <a class="btn btn-primary font-weight-bold" href="?t_per_page={{ tickets_per_page }}&{{ page_var }}={{ ticket_list.next_page_number }}">Next</a>
+                                <a class="btn btn-primary font-weight-bold" href="?t_per_page={{ tickets_per_page }}&{{ page_var }}={{ ticket_list.paginator.num_pages }}">Last</a>
+                                {% else %}
+                                <a class="btn btn-primary font-weight-bold disabled">Next</a>
+                                <a class="btn btn-primary font-weight-bold disabled">Last</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% endwith %}
                 </div>
-                {% endif %}
-                {% endwith %}
-            </div>
-            <!-- Pass vars to View for exporting to work Properly -->
-            <input type='hidden' name='visible' value=''/>
-            <input type='hidden' name='selected_ids' value=''/>
-            <input type="hidden" name="queue_length" value="{{ query_params.filtering.queue__id__in|length }}"/>
-        </form>
+                <!-- / Pagination Toolbar -->
+                <!-- Pass vars to View for exporting to work Properly -->
+                <input type='hidden' name='visible' value=''/>
+                <input type='hidden' name='selected_ids' value=''/>
+                <input type="hidden" name="queue_length" value="{{ query_params.filtering.queue__id__in|length }}"/>
+            </form>
+        </div>
+        <div class="tab-pane fade" id="timelinetabcontents" role="tabpanel" aria-labelledby="timelinetabcontents-tab">
+            <div id='timeline-embed' style="width: 100%; height: 80vh"></div>
+        </div>
     </div>
-    <div class="tab-pane fade" id="timelinetabcontents" role="tabpanel" aria-labelledby="timelinetabcontents-tab">
-        <div id='timeline-embed' style="width: 100%; height: 80vh"></div>
-    </div>
-</div>
 </div>
 <!-- /.panel-body -->
 </div>
@@ -322,6 +411,7 @@ id="filterBoxLastReply">
 </form>
 </div>
 </div> <!-- end card -->
+</div>
 
 <div class="card">
     <div class="card-header" id="headingTwo">
@@ -419,6 +509,39 @@ data-parent="#queryAccordion">
 {% else %}
 <script src="{% static 'helpdesk/vendor/timeline3/js/timeline.js' %}"></script>
 {% endif %}
+
+<style>
+    #dataTable td {
+        vertical-align: middle
+    };
+</style>
+
+<script>
+    $(document).ready(function () {
+        document.getElementById('query_card').scrollIntoView({behavior: 'instant'})
+    })
+
+    function toggleColumn(show, colNum) {
+        if (show) {
+            $('#dataTable td:nth-child(' + colNum + '), #dataTable th:nth-child(' + colNum + ')').removeClass("d-none")
+        } else {
+            $('#dataTable td:nth-child(' + colNum + '), #dataTable th:nth-child(' + colNum + ')').addClass("d-none")
+        }
+    }
+    
+    function scrollQueryCard() {
+        var element = document.getElementById('query_card');
+        var headerOffset = 5;
+        var elementPosition = element.getBoundingClientRect().top;
+        var offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+        window.scrollTo({
+            top: offsetPosition,
+            behavior: "instant"
+        });
+    }
+</script>
+
 <!--TODO Move this to a separate file, keep django specific code here or use API calls somehow-->
 <script>
     function get_url(row) {
@@ -573,6 +696,11 @@ data-parent="#queryAccordion">
                     table.columns.adjust().draw( false );
                 }
                 
+                
+                for (const id of document.querySelectorAll(".ticket_multi_select")) {
+                    all_ticket_ids.push(id.value)
+                }
+                
                 // Filter event handler
                 function filterFunction(thisSearch) {
                     globalTimeout = null;
@@ -593,11 +721,10 @@ data-parent="#queryAccordion">
                 });
                 
                 function get_visible_cols() {
-                    var all_columns = table.settings().init().columns;
                     var visible_columns = [];
-                    for (var i in all_columns) {
-                        if (table.column(i).visible()) {
-                            visible_columns.push(all_columns[i].data);
+                    for (const col of document.querySelectorAll('#dataTable th')) {
+                        if (!col.classList.contains("d-none")) {
+                            visible_columns.push(col.dataset.colname);
                         }
                     }
                     // Add data to post field to be avaiable in mass_update function, and save_query
@@ -668,6 +795,7 @@ data-parent="#queryAccordion">
                                             $('input[name="selected_ids"]').each(function () {
                                                 $(this).val(selected.toString());
                                             });
+                                            $('#select_count').text(selected.length + ' Selected')
                                         }
                                         
                                         {# Shortcuts to select/unselect multiple tickets #}
