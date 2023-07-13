@@ -106,42 +106,44 @@
                     </div>
                 </div>
                 <div class="flex-fill mt-2">
-                    <button class="btn btn-outline-secondary float-right font-weight-semibold dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">Column Visibility</button>
-                    <div class="dropdown-menu p-1" style="min-width: 0">
-                        <div class="btn-group-vertical btn-group-toggle" data-toggle="buttons">
-                            <label class="btn btn-outline-secondary">
-                                <input type="checkbox" onchange="toggleColumn(this.checked, 3)"> Priority
-                            </label>
-                            <label class="btn btn-outline-secondary">
-                                <input type="checkbox" onchange="toggleColumn(this.checked, 4)"> Queue
-                            </label>
-                            <label class="btn btn-outline-secondary active">
-                                <input type="checkbox" onchange="toggleColumn(this.checked, 5)" checked> Status
-                            </label>
-                            <label class="btn btn-outline-secondary active">
-                                <input type="checkbox" onchange="toggleColumn(this.checked, 6)" checked> Owner
-                            </label>
-                            <label class="btn btn-outline-secondary active">
-                                <input type="checkbox" onchange="toggleColumn(this.checked, 7)" checked> Submitter
-                            </label>
-                            <label class="btn btn-outline-secondary">
-                                <input type="checkbox" onchange="toggleColumn(this.checked, 8)"> Paired Count
-                            </label>
-                            <label class="btn btn-outline-secondary active">
-                                <input type="checkbox" onchange="toggleColumn(this.checked, 9)" checked> Created
-                            </label>
-                            <label class="btn btn-outline-secondary active">
-                                <input type="checkbox" onchange="toggleColumn(this.checked, 10)" checked> Last Reply
-                            </label>
-                            <label class="btn btn-outline-secondary">
-                                <input type="checkbox" onchange="toggleColumn(this.checked, 11)"> Due Date
-                            </label>
-                            <label class="btn btn-outline-secondary">
-                                <input type="checkbox" onchange="toggleColumn(this.checked, 12)"> Time Spent
-                            </label>
-                            <label class="btn btn-outline-secondary">
-                                <input type="checkbox" onchange="toggleColumn(this.checked, 13)"> KB Item
-                            </label>
+                    <div class="dropdown">
+                        <button class="btn btn-outline-secondary float-right font-weight-semibold dropdown-toggle" type="button" data-toggle="dropdown" data-boundary="window" aria-expanded="false">Column Visibility</button>
+                        <div class="dropdown-menu dropdown-menu-left text-center p-2" style="min-width: 0">
+                            <div class="btn-group-vertical btn-group-toggle" data-toggle="buttons">
+                                <label class="btn btn-outline-secondary">
+                                    <input type="checkbox" onchange="toggleColumn(this.checked, 3)"> Priority
+                                </label>
+                                <label class="btn btn-outline-secondary">
+                                    <input type="checkbox" onchange="toggleColumn(this.checked, 4)"> Queue
+                                </label>
+                                <label class="btn btn-outline-secondary active">
+                                    <input type="checkbox" onchange="toggleColumn(this.checked, 5)" checked> Status
+                                </label>
+                                <label class="btn btn-outline-secondary active">
+                                    <input type="checkbox" onchange="toggleColumn(this.checked, 6)" checked> Owner
+                                </label>
+                                <label class="btn btn-outline-secondary active">
+                                    <input type="checkbox" onchange="toggleColumn(this.checked, 7)" checked> Submitter
+                                </label>
+                                <label class="btn btn-outline-secondary">
+                                    <input type="checkbox" onchange="toggleColumn(this.checked, 8)"> Paired Count
+                                </label>
+                                <label class="btn btn-outline-secondary active">
+                                    <input type="checkbox" onchange="toggleColumn(this.checked, 9)" checked> Created
+                                </label>
+                                <label class="btn btn-outline-secondary active">
+                                    <input type="checkbox" onchange="toggleColumn(this.checked, 10)" checked> Last Reply
+                                </label>
+                                <label class="btn btn-outline-secondary">
+                                    <input type="checkbox" onchange="toggleColumn(this.checked, 11)"> Due Date
+                                </label>
+                                <label class="btn btn-outline-secondary">
+                                    <input type="checkbox" onchange="toggleColumn(this.checked, 12)"> Time Spent
+                                </label>
+                                <label class="btn btn-outline-secondary">
+                                    <input type="checkbox" onchange="toggleColumn(this.checked, 13)"> KB Item
+                                </label>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -518,7 +520,7 @@ data-parent="#queryAccordion">
 
 <script>
     $(document).ready(function () {
-        document.getElementById('query_card').scrollIntoView({behavior: 'instant'})
+        scrollQueryCard()
     })
 
     function toggleColumn(show, colNum) {
