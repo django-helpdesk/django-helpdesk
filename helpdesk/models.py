@@ -6,7 +6,6 @@ django-helpdesk - A Django powered ticket tracker for small enterprise.
 models.py - Model (and hence database) definitions. This is the core of the
             helpdesk structure.
 """
-
 from django.contrib.auth.models import Permission
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
@@ -150,10 +149,8 @@ def get_markdown(text, org, kb=False):
     return mark_safe(cleaned)
 
 def markdown_allowed():
-    """
-    TODO: Replace href with proper PDF url
-    """
-    return "<a href='#cheat_sheet_PDF_url' target='_blank' rel='noopener noreferrer' \
+    url = settings.STATIC_URL
+    return "<a href='" + url + "seed/pdf/Markdown_Cheat_Sheet.pdf' target='_blank' rel='noopener noreferrer' \
             title='ClearlyEnergy Markdown Cheat Sheet'>Markdown syntax</a> allowed, but no raw HTML."
 
 class Queue(models.Model):
