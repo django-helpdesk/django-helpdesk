@@ -108,7 +108,7 @@
                 <div class="flex-fill mt-2">
                     <div id="colvis" class="dropdown">
                         <button class="btn btn-outline-secondary float-right font-weight-semibold dropdown-toggle" type="button" data-boundary="window" aria-expanded="false">Column Visibility</button>
-                        <div  class="dropdown-menu dropdown-menu-left text-center p-2" style="min-width: 0; z-index: 1021;">
+                        <div class="dropdown-menu dropdown-menu-left text-center p-2" style="min-width: 0; z-index: 1021;">
                             <div class="btn-group-vertical btn-group-toggle" data-toggle="buttons">
                                 <label class="btn btn-outline-secondary">
                                     <input type="checkbox" onchange="toggleColumn(this.checked, 2)"> Priority
@@ -153,7 +153,7 @@
             <div class="table-responsive" style="max-height: 82vh;">
                 <table class="table table-bordered table-sm table-striped" id="dataTable" width="100%" cellspacing="0">
                     <thead class="thead-light"> 
-                        <tr> <!-- Headers -->
+                        <tr id="headers"> <!-- Headers -->
                             <th class="sticky-top" data-colname="ticket" colspan="2">{% trans "Ticket" %}</th>
                             <th class="sticky-top d-none" data-colname="priority">{% trans "Priority" %}</th>
                             <th class="sticky-top d-none" data-colname="queue">{% trans "Queue" %}</th>
@@ -535,7 +535,27 @@ data-parent="#queryAccordion">
 
 <script>
     $(document).ready(function () {
-        scrollQueryCard()
+        if (sessionStorage['visible_cols']) {
+            vis = sessionStorage['visible_cols'].split(',')
+            for (const col of document.querySelectorAll('#headers th')) {
+                num = colNums[col.dataset.colname]
+                if (vis.includes(col.dataset.colname)) {
+                    toggleColumn(true, num, false)
+                    $('#colvis .btn-group-toggle label:nth-child(' + (num-1) + ')').addClass('active')
+                    $('#colvis .btn-group-toggle label:nth-child(' + (num-1) + ') input').prop('checked', true)
+                } else {
+                    toggleColumn(false, num, false)
+                    $('#colvis .btn-group-toggle :nth-child(' + (num-1) + ')').removeClass('active')
+                    $('#colvis .btn-group-toggle label:nth-child(' + (num-1) + ') input').prop('checked', false)
+                }
+            }
+        } else {
+            sessionStorage['visible_cols'] = get_visible_cols()
+        }
+
+        // Scroll the query results to fill the viewport by default
+        // Browser will take over scroll position on reload
+        scrollQueryCard() 
         
         // Column visibility dropdown will no longer close when a column is changed
         $('#colvis button').on('click', function (event) {
@@ -552,7 +572,13 @@ data-parent="#queryAccordion">
         });
     })
 
-    function toggleColumn(show, colNum) {
+    colNums = {"id": 0};
+    idx = 1;
+    for (const col of document.querySelectorAll('#headers th')) {
+        colNums[col.dataset.colname] = idx++;
+    }
+
+    function toggleColumn(show, colNum, save=true) {
         if (show) {
             $('#dataTable th:nth-child(' + colNum + ')').removeClass("d-none")
             $('#dataTable td:nth-child(' + (colNum+1) + ')').removeClass("d-none")
@@ -560,6 +586,8 @@ data-parent="#queryAccordion">
             $('#dataTable th:nth-child(' + colNum + ')').addClass("d-none")
             $('#dataTable td:nth-child(' + (colNum+1) + ')').addClass("d-none")
         }
+
+        if (save) { sessionStorage['visible_cols'] = get_visible_cols() }
     }
     
     function scrollQueryCard() {
@@ -572,6 +600,20 @@ data-parent="#queryAccordion">
             top: offsetPosition,
             behavior: "instant"
         });
+    }
+
+    function get_visible_cols() {
+        var visible_columns = [];
+        for (const col of document.querySelectorAll('#headers th')) {
+            if (!col.classList.contains("d-none")) {
+                visible_columns.push(col.dataset.colname);
+            }
+        }
+        // Add data to post field to be avaiable in mass_update function, and save_query
+        $('input[name="visible"]').each(function () {
+            $(this).val(visible_columns.toString());
+        });
+        return visible_columns
     }
 </script>
 
@@ -754,18 +796,6 @@ data-parent="#queryAccordion">
                     get_visible_cols(); // For table changes
                 });
                 
-                function get_visible_cols() {
-                    var visible_columns = [];
-                    for (const col of document.querySelectorAll('#dataTable th')) {
-                        if (!col.classList.contains("d-none")) {
-                            visible_columns.push(col.dataset.colname);
-                        }
-                    }
-                    // Add data to post field to be avaiable in mass_update function, and save_query
-                    $('input[name="visible"]').each(function () {
-                        $(this).val(visible_columns.toString());
-                    });
-                }
                 get_visible_cols(); // On initialization
                 
                 {# Timeline initialization when tab is displayed #}
