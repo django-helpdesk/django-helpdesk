@@ -525,10 +525,10 @@ data-parent="#queryAccordion">
 <style>
     #dataTable td {
         vertical-align: middle
-    };
+    }
 
     {# Prevents rows scrolling above frozen header #}
-    th.sticky-top { 
+    #dataTable th.sticky-top { 
         top: -1px; 
     }
 </style>
@@ -536,7 +536,6 @@ data-parent="#queryAccordion">
 <script>
     $(document).ready(function () {
         scrollQueryCard()
-        
         
         // Column visibility dropdown will no longer close when a column is changed
         $('#colvis button').on('click', function (event) {
