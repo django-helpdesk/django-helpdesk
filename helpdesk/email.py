@@ -734,7 +734,7 @@ def extract_part_data(
     if name:
         name = email.utils.collapse_rfc2231_value(name)
     part_body = None
-    part_full_body = None
+    formatted_body = None
     if part.get_content_maintype() == 'text' and name is None:
         if part.get_content_subtype() == 'plain':
             part_body = part.get_payload(decode=True)
@@ -747,26 +747,26 @@ def extract_part_data(
             if ticket_id is None and getattr(django_settings, 'HELPDESK_FULL_FIRST_MESSAGE_FROM_EMAIL', False):
                 # first message in thread, we save full body to avoid
                 # losing forwards and things like that
-                part_full_body = get_body_from_fragments(part_body)
+                formatted_body = get_body_from_fragments(part_body)
                 part_body = EmailReplyParser.parse_reply(part_body)
             else:
                 # second and other reply, save only first part of the
                 # message
                 part_body = EmailReplyParser.parse_reply(part_body)
-                part_full_body = part_body
+                formatted_body = part_body
             # workaround to get unicode text out rather than escaped text
             part_body = get_encoded_body(part_body)
             logger.debug("Discovered plain text MIME part")
         else:
             email_body = get_email_body_from_part_payload(part)
 
-            if not part_body and not part_full_body:
+            if not part_body and not formatted_body:
                 # no text has been parsed so far - try such deep parsing
                 # for some messages
                 altered_body = email_body.replace(
                     "</p>", "</p>\n").replace("<br", "\n<br")
                 mail = BeautifulSoup(str(altered_body), "html.parser")
-                part_full_body = mail.get_text()
+                formatted_body = mail.get_text()
 
             if "<body" not in email_body:
                 email_body = f"<body>{email_body}</body>"
@@ -793,7 +793,44 @@ def extract_part_data(
         payload = part.as_string() if part.is_multipart() else part.get_payload(decode=True)
         files.append(SimpleUploadedFile(name, payload, mimetypes.guess_type(name)[0]))
         logger.debug("Found MIME attachment %s", name)
-    return part_body, part_full_body
+    return part_body, formatted_body
+
+
+def recurse_multipart(
+        multipart: Message,
+        counter: int,
+        ticket_id: int,
+        files: List,
+        logger: logging.Logger
+) -> Tuple[str, str]:
+    '''
+    The received MIME part could be a multipart with embedded multiparts and therefore requires recursion.
+    Recurse through the multipart structures trying to find the 1st body part that
+    provides the message body. It will try to find an HTML formatted part (contentType=text/html)
+    and a TEXT formatted part (contentType=text/plain) and return both
+    :param multipart:
+    :param counter:
+    :param ticket_id:
+    :param files:
+    :param logger:
+    '''
+    plain_msg = None
+    formatted_msg = None
+
+    for part in multipart.walk():
+        if part.get_content_maintype() == 'multipart':
+            continue
+        # See email.message_obj.Message.get_filename()
+        plain_body, formatted_body = recurse_multipart(
+            part, counter, ticket_id, files, logger) if part.get_content_maintype(
+        ) == 'multipart' else extract_part_data(part, counter, ticket_id, files, logger)
+        # Only update the message variables if they are still empty to handle attached messages overriding the core message
+        if plain_msg is None and plain_body:
+            plain_msg = plain_body
+        if formatted_msg is None and formatted_body:
+            formatted_msg = formatted_body
+        counter += 1
+    return plain_msg, formatted_msg
 
 
 def object_from_message(message: str,
@@ -841,10 +878,11 @@ def object_from_message(message: str,
         if part.get_content_maintype() == 'multipart':
             continue
         # See email.message_obj.Message.get_filename()
-        part_body, part_full_body = extract_part_data(part, counter, ticket_id, files, logger)
-        if part_body:
-            body = part_body
-            full_body = part_full_body
+        plain_body, formatted_body = extract_part_data(part, counter, ticket_id, files, logger)
+        if plain_body:
+            body = plain_body
+        if formatted_body:
+            full_body = formatted_body
         counter += 1
 
     if not body:
