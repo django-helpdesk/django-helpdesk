@@ -2,15 +2,12 @@
 
 from django.contrib.auth import get_user_model
 from django.core import mail
-from django.core.exceptions import ObjectDoesNotExist
-from django.forms import ValidationError
 from django.test import TestCase
 from django.test.client import Client
 from django.urls import reverse
 import email
-from helpdesk.email import create_ticket_cc, object_from_message
+from helpdesk.email import object_from_message
 from helpdesk.models import CustomField, FollowUp, KBCategory, KBItem, Queue, Ticket, TicketCC
-from helpdesk.tests.helpers import print_response
 import logging
 from urllib.parse import urlparse
 import uuid
@@ -1102,9 +1099,23 @@ class EmailInteractionsTestCase(TestCase):
         cat_url = reverse('helpdesk:submit') + \
             "?kbitem=1&submitter_email=foo@bar.cz&title=lol"
         response = self.client.get(cat_url)
+        
+        if (
+            hasattr(response, "render")
+            and callable(response.render)
+            and not response.is_rendered
+        ):
+            response.render()
+        if response.streaming:
+            content = b"".join(response.streaming_content)
+        else:
+            content = response.content
+
+        
+        msg_prefix = content.decode(response.charset)
         self.assertContains(
-            response, '<option value="1" selected>KBItem 1</option>')
+            response, '<option value="1" selected>KBItem 1</option>', msg_prefix = msg_prefix)
         self.assertContains(
-            response, '<input type="email" name="submitter_email" value="foo@bar.cz" class="form-control form-control" required id="id_submitter_email">')
+            response, '<input type="email" name="submitter_email" value="foo@bar.cz" class="form-control form-control" required id="id_submitter_email">', msg_prefix = msg_prefix)
         self.assertContains(
-            response, '<input type="text" name="title" value="lol" class="form-control form-control" maxlength="100" required id="id_title">')
+            response, '<input type="text" name="title" value="lol" class="form-control form-control" maxlength="100" required id="id_title">', msg_prefix = msg_prefix)
