@@ -317,112 +317,102 @@
                         </div>
                         <select class="custom-select mb-0" aria-describedby="select-description" name="select" 
                         id="filterBuilderSelect"onChange="onFilterChange(this.value)">
-                            <option value="">--</option>
-                            <option id="filterBuilderSelect-Sort" value="Sort"{% if query_params.sorting %} disabled{% endif %}>
-                                {% trans "Sorting" %}
-                            </option>
-                            <option id="filterBuilderSelect-Owner" value="Owner"{% if query_params.filtering.assigned_to__id__in %} disabled{% endif %}>
-                                {% trans "Owner" %}
-                            </option>
-                            <option id="filterBuilderSelect-Queue" value="Queue"{% if query_params.filtering.queue__id__in %} disabled{% endif %}>
-                                {% trans "Queue" %}
-                            </option>
-                            <option id="filterBuilderSelect-Status" value="Status"{% if query_params.filtering.status__in %} disabled{% endif %}>
-                                {% trans "Status" %}
-                            </option>
-                            <option id="filterBuilderSelect-Keywords" value="Keywords"{% if query_params.search_string %} disabled{% endif %}>
-                                {% trans "Keywords" %}
-                            </option>
-                            <option id="filterBuilderSelect-Dates" value="Dates"{% if query_params.filtering.created__gte or query_params.filtering.created__lte %} disabled{% endif %}>
-                                {% trans "Date Range" %}
-                            </option>
-                            <option id="filterBuilderSelect-KBItems" value="KBItems"{% if query_params.filtering.kbitem__in %} disabled{% endif %}>
-                                {% trans "Knowledge base items" %}
-                            </option>
-                            <option id="filterBuilderSelect-PairedCount" value="PairedCount"{% if query_params.filtering.paired_count__lte or query_params.filtering.paired_count__gte %} disabled{% endif %}>
-                                {% trans "Paired Count Range" %}
-                            </option>
-                            <option id="filterBuilderSelect-LastReply" value="LastReply"{% if query_params.filtering.last_reply__lte or query_params.filtering.last_reply__gte %} disabled{% endif %}>
-                                {% trans "Last Reply Range" %}
-                            </option>
-                        </select>
-                    </div>
-                </form>
-            
+                        <option value="">--</option>
+                        <option id="filterBuilderSelect-Sort" value="Sort"{% if query_params.sorting %} disabled{% endif %}>
+                            {% trans "Sorting" %}
+                        </option>
+                        <option id="filterBuilderSelect-Owner" value="Owner"{% if query_params.filtering.assigned_to__id__in %} disabled{% endif %}>
+                            {% trans "Owner" %}
+                        </option>
+                        <option id="filterBuilderSelect-Queue" value="Queue"{% if query_params.filtering.queue__id__in %} disabled{% endif %}>
+                            {% trans "Queue" %}
+                        </option>
+                        <option id="filterBuilderSelect-Status" value="Status"{% if query_params.filtering.status__in %} disabled{% endif %}>
+                            {% trans "Status" %}
+                        </option>
+                        <option id="filterBuilderSelect-Keywords" value="Keywords"{% if query_params.search_string %} disabled{% endif %}>
+                            {% trans "Keywords" %}
+                        </option>
+                        <option id="filterBuilderSelect-Dates" value="Dates"{% if query_params.filtering.created__gte or query_params.filtering.created__lte %} disabled{% endif %}>
+                            {% trans "Date Range" %}
+                        </option>
+                        <option id="filterBuilderSelect-KBItems" value="KBItems"{% if query_params.filtering.kbitem__in %} disabled{% endif %}>
+                            {% trans "Knowledge base items" %}
+                        </option>
+                        <option id="filterBuilderSelect-PairedCount" value="PairedCount"{% if query_params.filtering.paired_count__lte or query_params.filtering.paired_count__gte %} disabled{% endif %}>
+                            {% trans "Paired Count Range" %}
+                        </option>
+                        <option id="filterBuilderSelect-LastReply" value="LastReply"{% if query_params.filtering.last_reply__lte or query_params.filtering.last_reply__gte %} disabled{% endif %}>
+                            {% trans "Last Reply Range" %}
+                        </option>
+                    </select>
+                </div>
+            </form>
             
             <form method="get">
-                <ul class="list-group list-group-flush">
-                    <li id="filterBoxSort"
-                    class="filterBox{% if query_params.sorting %} filterBoxShow{% endif %} list-group-item"
-                    id="filterBoxSort">
-                    {% include 'helpdesk/filters/sorting.html' %}
-                </li>
-                <li class="filterBox{% if query_params.filtering.assigned_to__id__in %} filterBoxShow{% endif %} list-group-item" id=filterBoxOwner>
-                    {% include 'helpdesk/filters/owner.html' %}
-                </li>
-                <li class="list-group-item filterBox{% if query_params.filtering.queue__id__in %} filterBoxShow{% endif %}"
-                id="filterBoxQueue">
-                {% include 'helpdesk/filters/queue.html' %}
-            </li>
-            <li class="list-group-item filterBox{% if query_params.filtering.status__in %} filterBoxShow{% endif %}"
-            id="filterBoxStatus">
-            {% include 'helpdesk/filters/status.html' %}
-        </li>
-        <li class="list-group-item filterBox{% if query_params.filtering.created__gte or query_params.filtering.created__lte %} filterBoxShow{% endif %}"
-        id='filterBoxDates'>
-        {% include 'helpdesk/filters/date.html' %}
-    </li>
-    <li class="list-group-item filterBox{% if query_params.search_string %} filterBoxShow{% endif %}"
-    id="filterBoxKeywords">
-    {% include 'helpdesk/filters/keywords.html' %}
-</li>
-<li class="list-group-item filterBox{% if query_params.filtering.kbitem__in %} filterBoxShow{% endif %}"
-id="filterBoxKBItems">
-{% include 'helpdesk/filters/kbitems.html' %}
-</li>
-<li class="list-group-item filterBox{% if query_params.filtering.paired_count__lte or query_params.filtering.paired_count__gte %} filterBoxShow{% endif %}"
-id="filterBoxPairedCount">
-{% include 'helpdesk/filters/paired_count.html' %}
-</li>
-<li class="list-group-item filterBox{% if query_params.filtering.last_reply__lte or query_params.filtering.last_reply__gte %} filterBoxShow{% endif %}"
-id="filterBoxLastReply">
-{% include 'helpdesk/filters/last_reply.html' %}
-</li>
-<li class="list-group-item">
-    <input class="btn btn-primary btn-sm" type='submit' value='{% trans "Apply Filters" %}'/>
-</li>
-{% if from_saved_query %}
-<li class="list-group-item">
-    {% if saved_query.user == user %}
-    {% blocktrans with saved_query.title as query_name %}You are currently viewing saved query <strong>"{{ query_name }}"</strong>.{% endblocktrans %}
-    <a href="{% url 'helpdesk:delete_query' saved_query.id %}" class="btn btn-danger btn-sm">
-        {% trans "Delete Query" %}
-    </a>
-    {% if saved_query.shared %}
-    <a href="{% url 'helpdesk:unshare_query' saved_query.id %}" class="btn btn-warning btn-sm">
-        {% trans "Un-share Query" %}
-    </a>
-    {% else %}
-    <a href="{% url 'helpdesk:reshare_query' saved_query.id %}" class="btn btn-warning btn-sm">
-        {% trans "Re-share Query" %}
-    </a>
-    {% endif %}
-    {% elif saved_query.user != user %}
-    <a href="{% url 'helpdesk:reject_query' saved_query.id %}" class="btn btn-warning btn-sm">
-        {% trans "Reject Query" %}
-    </a>
-    {% endif %}
-</li>
-{% endif %}
-{% if from_saved_query %}
-<li class="list-group-item">
-    {% blocktrans with saved_query.id as query_id %}<a href='../reports/?saved_query={{ query_id }}'>Run a report</a> on this query to see stats and charts for the data listed below.{% endblocktrans %}
-</li>
-{% endif %}
-</ul>
-</form>
-</div>
-</div>
+                <div class="row row-cols-3">
+                    <div id="filterBoxSort" class="filterBox{% if query_params.sorting %} filterBoxShow{% endif %} p-2" id="filterBoxSort">
+                        {% include 'helpdesk/filters/sorting.html' %}
+                    </div>
+                    <div id="filterBoxOwner" class="filterBox{% if query_params.filtering.assigned_to__id__in %} filterBoxShow{% endif %} p-2">
+                        {% include 'helpdesk/filters/owner.html' %}
+                    </div>
+                    <div class="p-2 filterBox{% if query_params.filtering.queue__id__in %} filterBoxShow{% endif %}" id="filterBoxQueue">
+                        {% include 'helpdesk/filters/queue.html' %}
+                    </div>
+                    <div class="p-2 filterBox{% if query_params.filtering.status__in %} filterBoxShow{% endif %}" id="filterBoxStatus">
+                        {% include 'helpdesk/filters/status.html' %}
+                    </div>
+                    <div class="p-2 filterBox{% if query_params.filtering.created__gte or query_params.filtering.created__lte %} filterBoxShow{% endif %}" id='filterBoxDates'>
+                        {% include 'helpdesk/filters/date.html' %}
+                    </div>
+                    <div class="p-2 filterBox{% if query_params.search_string %} filterBoxShow{% endif %}" id="filterBoxKeywords">
+                        {% include 'helpdesk/filters/keywords.html' %}
+                    </div>
+                    <div class="p-2 filterBox{% if query_params.filtering.kbitem__in %} filterBoxShow{% endif %}" id="filterBoxKBItems">
+                        {% include 'helpdesk/filters/kbitems.html' %}
+                    </div>
+                    <div class="p-2 filterBox{% if query_params.filtering.paired_count__lte or query_params.filtering.paired_count__gte %} filterBoxShow{% endif %}" id="filterBoxPairedCount">
+                        {% include 'helpdesk/filters/paired_count.html' %}
+                    </div>
+                    <div class="p-2 filterBox{% if query_params.filtering.last_reply__lte or query_params.filtering.last_reply__gte %} filterBoxShow{% endif %}" id="filterBoxLastReply">
+                        {% include 'helpdesk/filters/last_reply.html' %}
+                    </div>
+                    <div class="p-2">
+                        <input class="btn btn-primary btn-sm" type='submit' value='{% trans "Apply Filters" %}'/>
+                    </div>
+                    {% if from_saved_query %}
+                    <div class="p-2">
+                        {% if saved_query.user == user %}
+                        {% blocktrans with saved_query.title as query_name %}You are currently viewing saved query <strong>"{{ query_name }}"</strong>.{% endblocktrans %}
+                        <a href="{% url 'helpdesk:delete_query' saved_query.id %}" class="btn btn-danger btn-sm">
+                            {% trans "Delete Query" %}
+                        </a>
+                        {% if saved_query.shared %}
+                        <a href="{% url 'helpdesk:unshare_query' saved_query.id %}" class="btn btn-warning btn-sm">
+                            {% trans "Un-share Query" %}
+                        </a>
+                        {% else %}
+                        <a href="{% url 'helpdesk:reshare_query' saved_query.id %}" class="btn btn-warning btn-sm">
+                            {% trans "Re-share Query" %}
+                        </a>
+                        {% endif %}
+                        {% elif saved_query.user != user %}
+                        <a href="{% url 'helpdesk:reject_query' saved_query.id %}" class="btn btn-warning btn-sm">
+                            {% trans "Reject Query" %}
+                        </a>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                    {% if from_saved_query %}
+                    <div class="p-2">
+                        {% blocktrans with saved_query.id as query_id %}<a href='../reports/?saved_query={{ query_id }}'>Run a report</a> on this query to see stats and charts for the data listed below.{% endblocktrans %}
+                    </div>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
 </div> <!-- end card -->
 
 
