@@ -6,7 +6,6 @@ django-helpdesk - A Django powered ticket tracker for small enterprise.
 models.py - Model (and hence database) definitions. This is the core of the
             helpdesk structure.
 """
-
 from django.contrib.auth.models import Permission
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
@@ -128,24 +127,31 @@ def get_markdown(text, org, kb=False):
                   'markdown.extensions.fenced_code',  # required for collapsing sections
                   'markdown.extensions.tables']  # requested
     collapsible_attrs = {}
-    header_attrs = {}
+    anchor_attrs = {}
+
     if kb:
         extensions.append('markdown.extensions.attr_list')
-        collapsible_attrs = {"p": ["data-target", "data-toggle", "data-parent", "role",
+        extensions.append('markdown.extensions.md_in_html')
+        collapsible_attrs = {"div": ["data-target", "data-toggle", "data-parent", "role",
                                    'aria-controls', 'aria-expanded', 'aria-labelledby', 'id']}
-        header_attrs = {"h1": ['id'],"h2": ['id'], "h3": ['id'], "h4": ['id'], "h5": ['id'], "h6": ['id'],}
+        anchor_attrs = {"p":['id'], "h1": ['id'],"h2": ['id'], "h3": ['id'], "h4": ['id'], "h5": ['id'], "h6": ['id'],}
     cleaner = Cleaner(
         filters=[partial(LinkifyFilter, callbacks=[partial(_cleaner_set_target, domain), _cleaner_shorten_url])],
         tags=markdown_tags + print_tags,
         attributes={**markdown_attrs,
                     **print_attrs,
                     **collapsible_attrs,
-                    **header_attrs},
+                    **anchor_attrs},
         styles=all_styles
     )
     cleaned = cleaner.clean(markdown(text, extensions=extensions))
+    # breakpoint()
     return mark_safe(cleaned)
 
+def markdown_allowed():
+    url = settings.STATIC_URL
+    return "<a href='" + url + "seed/pdf/Markdown_Cheat_Sheet.pdf' target='_blank' rel='noopener noreferrer' \
+            title='ClearlyEnergy Markdown Cheat Sheet'>Markdown syntax</a> allowed, but no raw HTML."
 
 class Queue(models.Model):
     """
@@ -349,7 +355,8 @@ class FormType(models.Model):
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
     name = models.CharField(max_length=255, null=True)
     description = models.TextField(blank=True, null=True,
-                                   help_text=_('Introduction text included in the form.'))
+                                   help_text=_("Introduction text included in the form.<br/><br/>" + markdown_allowed()),)
+    
     queue = models.ForeignKey(Queue, on_delete=models.SET_NULL, null=True, blank=True,
                               help_text=_('If a queue is selected, tickets will automatically be added to this queue when submitted. '
                                           'This option will hide the Queue field on the form.'))
@@ -473,7 +480,7 @@ class Ticket(models.Model):
     # Labels for these fields are provided by CustomField by default.
     queue = models.ForeignKey(Queue, on_delete=models.PROTECT, verbose_name=_('Queue'))
     title = models.CharField(max_length=200, default="(no title)")
-    description = models.TextField(blank=True, null=True)
+    description = models.TextField(blank=True, null=True, help_text=_(markdown_allowed()))
     priority = models.IntegerField(choices=PRIORITY_CHOICES, default=3, blank=3)
     due_date = models.DateTimeField(blank=True, null=True)
     submitter_email = models.EmailField(blank=True, null=True)
@@ -881,6 +888,7 @@ class FollowUp(models.Model):
         _('Comment'),
         blank=True,
         null=True,
+        help_text=_(markdown_allowed()),
     )
 
     public = models.BooleanField(
@@ -1289,11 +1297,14 @@ class KBCategory(models.Model):
         _('Short description'),
         blank=True,
         null=True,
-        help_text="Optional short description that will describe the category on the Knowledgebase Overview page."
+        help_text=_("Optional short description that will describe the category on the Knowledgebase Overview page.<br/><br/>" +
+                    markdown_allowed()),
     )
 
     description = models.TextField(
         _('Full description on knowledgebase category page'),
+        help_text=_("Full description on knowledgebase category page.<br/><br/>" +
+                    markdown_allowed()),
     )
 
     forms = models.ManyToManyField(
@@ -1369,6 +1380,11 @@ class KBItem(models.Model):
     answer = models.TextField(
         _('Article body'),
         help_text=_("The body of the article, or answer to the question.<br/><br/>" +
+                    markdown_allowed()),
+    )
+
+    """ OLD
+    help_text=_("The body of the article, or answer to the question.<br/><br/>" +
                     markdown_allowed() + '<br/><br/>'
                     "<b>Multple newlines:</b><br/>Markdown doesn't recognize multiple blank lines. "
                     "To display one, write <code>&amp;nbsp;</code> on a blank line.<br/><br/>"
@@ -1389,12 +1405,13 @@ class KBItem(models.Model):
                     "<b>Anchor links:</b></br>Add <code>{: #name }</code> on the same line after a header, or on the line " 
                     "after a paragraph to create an anchor. Use <code>[Link Text](#name)</code> to create a link "
                     "that will jump to the anchor. "
-                    "Name can have letters, numbers, and underscores - no spaces.<br/><br/>"
+                    "Name can have letters, numbers, and underscores - no spaces. "
+                    "Anchors inside of collapsing sections can only be jumped to when the section is open.<br/><br/>"
                     "Example:<br/><pre># Header {: #header_1 }<br/></br/>"
                     "multiple</br>line</br>paragraph</br>{: #paragraph_1}</br></br>"
                     "[This link will jump to the header](#header_1)</br>"
                     "[This link will jump to the top of the paragraph](#paragraph_1)</pre>"),
-    )
+    """
 
     votes = models.IntegerField(
         _('Votes'),
@@ -1497,24 +1514,25 @@ class KBItem(models.Model):
                 self.pattern = pattern
 
             def __call__(self, match):
-                self.count += 1
-                return self.pattern.format(self.count)
+                    self.count += 1
+                    return self.pattern.format(self.count).replace('\x01', match[1])
             
         anchor_target_pattern = r'{\:\s*#(\w+)\s*}'
         anchor_link_pattern = r'\[(.+)\]\(#(\w+)\)'
         new_answer, anchor_target_count = re.subn(anchor_target_pattern, "{: #anchor-\g<1> }", self.answer)
         new_answer, anchor_link_count = re.subn(anchor_link_pattern, "[\g<1>](#anchor-\g<2>)", new_answer)
 
-        title_pattern = r'!~!'
+        title_pattern = r'^(.*)\n!~!'
         body_pattern = r'~!~'
-        title = "{{: .card .btn .btn-link style='text-align: left;' " \
-                "data-toggle='collapse' data-target='#collapse{0}' role='region' " \
-                "aria-expanded='false' aria-controls='collapse{0}' .card-header #header{0} .h5 .mb-0 }}"
-        body = "{{ #collapse{0} .collapse role='region' aria-labelledby='header{0}' data-parent='#header{0}' " \
-               "style='padding-top:0;padding-bottom:0;margin:0;' .card-body }}"
+        title = "<div markdown='1' class='card mb-2'>\n<div markdown='1' id=\"header{0}\" class='btn btn-link card-header h5' " \
+                "style='text-align: left; 'data-toggle='collapse' data-target='#collapse{0}' role='region' " \
+                "aria-expanded='false' aria-controls='collapse{0}'>\1\n{{: .mb-0}}</div>\n" \
+                "<div markdown='1' id='collapse{0}' class='collapse card-body mt-1' role='region'" \
+                "aria-labelledby='header{0}' data-parent='#header{0}' style='padding-top:0;padding-bottom:0;margin:0;'>"
+        body = "</div>\n</div>"
 
-        new_answer, title_count = re.subn(title_pattern, MarkdownNumbers(start=1, pattern=title), new_answer)
-        new_answer, body_count = re.subn(body_pattern, MarkdownNumbers(start=1, pattern=body), new_answer)
+        new_answer, title_count = re.subn(title_pattern, MarkdownNumbers(start=1, pattern=title), new_answer, flags=re.MULTILINE)
+        new_answer, body_count = re.subn(body_pattern, body, new_answer)
         if (anchor_target_count != 0) or (title_count != 0 and title_count == body_count):
             return get_markdown(new_answer, self.category.organization, kb=True)
         return get_markdown(self.answer, self.category.organization)
@@ -1885,7 +1903,8 @@ class CustomField(models.Model):
 
     help_text = models.TextField(
         _('Help Text'),
-        help_text=_('Shown to the user when editing the ticket'),
+        help_text=_("Shown to the user when editing the ticket.<br/><br/>" +
+                    markdown_allowed()),
         blank=True,
         null=True
     )

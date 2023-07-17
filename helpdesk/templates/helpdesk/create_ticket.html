@@ -44,9 +44,7 @@
                                 {% endif %}
                                 {% if field.help_text %}
                                     <small class='form_help_text help-block'>
-                                        {% blocktrans with help_text=field.help_text %}
-                                        {{ help_text }}
-                                        {% endblocktrans %}
+                                        {{ field.help_text|safe }}
                                     </small>
                                 {% endif %}
                             </div>
@@ -59,7 +57,7 @@
             </div>
         </div>
     </div>
-
+    {% include 'helpdesk/include/edit_md_preview_script.html' %}
 {% endblock %}
 
 {% block helpdesk_js %}
@@ -77,3 +75,4 @@
         });
     </script>
 {% endblock %}
+
