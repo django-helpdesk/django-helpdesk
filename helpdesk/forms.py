@@ -574,7 +574,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
     hidden_fields = []
 
     description = forms.CharField(
-        widget=PreviewWidget,
+        widget=forms.Textarea(attrs={'class': 'form-control'}),
         help_text=Ticket.description.field.help_text
     )
 
@@ -961,6 +961,7 @@ class TicketForm(AbstractTicketForm):
         assignable_users = assignable_users.order_by(User.USERNAME_FIELD)
         self.fields['assigned_to'].choices = [('', '--------')] + [
             (u.id, (u.get_full_name() or u.get_username())) for u in assignable_users]
+        self.fields['description'].widget = PreviewWidget()
 
     def save(self, user, form_id=None):
         """
@@ -1033,6 +1034,7 @@ class PublicTicketForm(AbstractTicketForm):
         if self.form_queue is None:
             self.fields['queue'].choices = [('', '--------')] + [
                 (q.id, q.title) for q in public_queues]
+        self.fields['description'].help_text = ""
 
     def save(self, user, form_id=None):
         """
