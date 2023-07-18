@@ -303,7 +303,9 @@ class EditKBItemForm(forms.ModelForm):
     category = CategoryModelChoiceField(queryset=KBCategory.objects)
     answer = forms.CharField(widget=PreviewWidget, label=KBItem.answer.field.verbose_name, help_text=KBItem.answer.field.help_text)
 
-    AttachmentFormSet = forms.inlineformset_factory(KBItem, KBIAttachment,
+    AttachmentFormSet = forms.inlineformset_factory(
+        KBItem,
+        KBIAttachment,
         fields=('id', 'file',),
         widgets={'file': AttachmentFileInputWidget}
     )
@@ -324,6 +326,7 @@ class EditKBItemForm(forms.ModelForm):
         super(EditKBItemForm, self).__init__(*args, **kwargs)
 
         self.fields['category'].queryset = KBCategory.objects.filter(organization=org)
+        self.fields['forms'].queryset = FormType.objects.filter(organization=org)
         if category:
             self.fields['category'].initial = category
 

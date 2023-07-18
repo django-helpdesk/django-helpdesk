@@ -1310,7 +1310,15 @@ class KBCategory(models.Model):
     forms = models.ManyToManyField(
         FormType,
         blank=True,
-        help_text='The list of forms that visitors will be able to use to submit a ticket after reading an article in this category. (Only public forms will be displayed to public visitors, regardless of whether or not they are unlisted.)',
+        help_text='The list of forms that visitors will be able to use to submit a ticket after reading an article in this category.<br/>'
+                  'To deselect a form, hold down Ctrl or Cmd and click on the form.<br/>'
+                  'Only public forms will be displayed to public visitors, regardless of whether or not they are unlisted.',
+    )
+
+    form_submission_text = models.CharField(
+        _('Form submission button text'),
+        max_length=250,
+        default='Ask a question about this article'
     )
 
     queue = models.ForeignKey(
@@ -1449,6 +1457,14 @@ class KBItem(models.Model):
     enabled = models.BooleanField(
         _('Is this article publicly visible?'),
         default=True,
+    )
+
+    forms = models.ManyToManyField(
+        FormType,
+        blank=True,
+        help_text='The list of forms that visitors will be able to use to submit a ticket after reading this article. This selection will override forms chosen for the category.<br/>'
+                  'To deselect a form, hold down Ctrl or Cmd and click on the form.<br/>'
+                  'Only public forms will be displayed to public visitors, regardless of whether or not they are unlisted.',
     )
 
     def save(self, *args, **kwargs):

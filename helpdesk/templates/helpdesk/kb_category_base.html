@@ -8,7 +8,7 @@
         <a class="btn btn-primary align-self-center mr-2" href="{% url 'helpdesk:create_kb_article' category.slug %}{{ user_info.url }}">
             <i class="fa fa-plus mr-1"></i>Create Article
         </a>
-        <a class="btn btn-primary align-self-center mr-2" href="{% url 'helpdesk:edit_kb_category' category.slug %}{{ user_info.url }}">
+        <a class="btn btn-warning align-self-center mr-2" href="{% url 'helpdesk:edit_kb_category' category.slug %}{{ user_info.url }}">
             <i class="fa fa-pen mr-1" ></i>Edit Category
         </a>
         <a class="btn btn-danger align-self-center" data-toggle="modal" data-target="#deleteModal">
