@@ -26,7 +26,6 @@ import logging
 from django.utils.safestring import mark_safe
 from markdown import markdown
 from markdown.extensions import Extension
-from markdown_deux.templatetags.markdown_deux_tags import markdown_allowed
 
 import bleach
 from bleach.linkifier import LinkifyFilter
@@ -148,10 +147,12 @@ def get_markdown(text, org, kb=False):
     # breakpoint()
     return mark_safe(cleaned)
 
+
 def markdown_allowed():
     url = settings.STATIC_URL
     return "<a href='" + url + "seed/pdf/Markdown_Cheat_Sheet.pdf' target='_blank' rel='noopener noreferrer' \
             title='ClearlyEnergy Markdown Cheat Sheet'>Markdown syntax</a> allowed, but no raw HTML."
+
 
 class Queue(models.Model):
     """

@@ -114,11 +114,10 @@
                 <small>{% trans "Selecting a preset reply will overwrite your comment below. You can then modify the preset reply to your liking before saving this update." %}</small></dd>
                 {% endif %}
 
-
                 
                 <dt><label for='commentBox'>{% trans "Comment / Resolution" %}</label></dt>
                 <dd>{% include 'helpdesk/include/comment_md_preview.html' %}</dd>
-                <dd><small><a href='#cheat_sheet_pdf_url' target='_blank' rel='noopener noreferrer' title='ClearlyEnergy Markdown Cheat Sheet'>Markdown syntax</a> allowed, but no raw HTML.</small></dd>
+                <dd><small><a href='{{ STATIC_URL }}seed/pdf/Markdown_Cheat_Sheet.pdf' target='_blank' rel='noopener noreferrer' title='ClearlyEnergy Markdown Cheat Sheet'>Markdown syntax</a> allowed, but no raw HTML.</small></dd>
                 <dd class='form_help_text'><small>{% trans "You can insert ticket and queue details in your message. For more information, see the <a href='../../help/context/'>context help page</a>." %}</small></dd>
 
                 <dt><label>{% trans "Change Ticket Status" %}</label></dt>
