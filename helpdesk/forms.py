@@ -984,6 +984,7 @@ class TicketForm(AbstractTicketForm):
         elif queue.default_owner and not ticket.assigned_to:
             ticket.assigned_to = queue.default_owner
 
+        ticket.save()  # saves so that CC'd emails can be added
         self._add_cc_emails(ticket)
 
         if self.cleaned_data['assigned_to']:
@@ -1051,6 +1052,7 @@ class PublicTicketForm(AbstractTicketForm):
         if queue.default_owner and not ticket.assigned_to:
             ticket.assigned_to = queue.default_owner
 
+        ticket.save()
         self._add_cc_emails(ticket)
 
         followup = self._create_follow_up(
