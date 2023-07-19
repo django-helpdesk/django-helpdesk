@@ -1,43 +1,43 @@
 {% load i18n humanize %}
 {% load static %}
-<div class="form-row">
-    <div class="col col-sm-3">
-        <label for='id_sort'>{% trans "Sorting" %}:</label>
-    </div>
-    <div class="col col-sm-2">
+<div class="form-row flex-fill align-self-center">
+    <div class="input-group">
+        <div class="input-group-prepend">
+            <label class="input-group-text" for='id_sort'>{% trans "Sorting" %}</label>
+        </div>
         <!-- TODO Make this a Dynamic List of All the Columns. Show extra_data columns if only 1 queue is selected -->
-        <select id='id_sort' name='sort' class="" style="max-width:100%">
+        <select id='id_sort' name='sort' class="custom-select">
             <option value='created'{% if query_params.sorting == "created" %} selected='selected'{% endif %}>
-            {% trans "Created" %}
+                {% trans "Created" %}
             </option>
             <option value='title'{% if query_params.sorting == "title" %} selected='selected'{% endif %}>
-            {% trans "Title" %}
+                {% trans "Title" %}
             </option>
             <option value='queue'{% if query_params.sorting == "queue" %} selected='selected'{% endif %}>
-            {% trans "Queue" %}
+                {% trans "Queue" %}
             </option>
             <option value='status'{% if query_params.sorting == "status" %} selected='selected'{% endif %}>
-            {% trans "Status" %}
+                {% trans "Status" %}
             </option>
             <option value='priority'{% if query_params.sorting == "priority" %} selected='selected'{% endif %}>
-            {% trans "Priority" %}
+                {% trans "Priority" %}
             </option>
             <option value='assigned_to'{% if query_params.sorting == "assigned_to" %} selected='selected'{% endif %}>
-            {% trans "Owner" %}
+                {% trans "Owner" %}
             </option>
             <option value='paired_count'{% if query_params.sorting == "paired_count" %} selected='selected'{% endif %}>
-            {% trans "Paired Count" %}
+                {% trans "Paired Count" %}
             </option>
         </select>
-    </div>
-    <div class="col col-sm-3">
-        <label for='id_sortreverse' class="float-right"  style="max-width:100%">{% trans "Reverse order?" %}</label>
-    </div>
-    <div class="col col-sm-2">
-        <input type='checkbox' name='sortreverse' id='id_sortreverse' {% if query_params.sortreverse %} checked='checked'{% endif %} />
-    </div>
-    <div class="col col-sm-2">
-        <button class="filterBuilderRemove btn btn-danger btn-sm float-right"><i class="fas fa-trash-alt"></i></button>
+        <div class="input-group-append">
+            <div class="btn-group-toggle" data-toggle="buttons">
+                <label class="btn btn-outline-secondary rounded-0">
+                    <input type='checkbox' name='sortreverse' id='id_sortreverse' {% if query_params.sortreverse %} checked='checked'{% endif %} />
+                    {% trans "Reverse" %}
+                </label>
+            </div>
+            <button class="filterBuilderRemove btn btn-danger btn-sm float-right"><i class="fas fa-trash-alt"></i></button>
+        </div>
     </div>
     <div class="form-row filterHelp">{% trans "Ordering applied to tickets" %}</div>
 </div>

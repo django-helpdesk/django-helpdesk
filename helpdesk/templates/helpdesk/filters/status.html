@@ -2,18 +2,18 @@
 {% load static %}
 {% load in_list %}
 <div class="form-row">
-    <div class="col col-sm-3">
-        <label for='id_statuses'>{% trans "Status(es)" %}:</label>
-    </div>
-    <div class="col col-sm-8">
-        <select id='id_statuses' name='status' size='{{ status_choices|length }} ' style="max-width:100%" multiple>
+    <div class="input-group">
+        <div class="input-group-prepend">
+            <label class="input-group-text d-flex" for='id_statuses'>{% trans "Status(es)" %}</label>
+        </div>
+        <select class="custom-select overflow-hidden" id='id_statuses' name='status' size='{{ status_choices|length }} ' style="max-width:100%" multiple>
             {% for s in status_choices %}
             <option value='{{ s.0 }}'{% if s.0|in_list:query_params.filtering.status__in %} selected='selected'{% endif %}>{{ s.1 }}</option>
             {% endfor %}
         </select>
-    </div>
-    <div class="col col-sm-1">
-        <button class="filterBuilderRemove btn btn-danger btn-sm float-right"><i class="fas fa-trash-alt"></i></button>
+        <div class="input-group-append">
+            <button class="filterBuilderRemove btn btn-danger btn-sm"><i class="fas fa-trash-alt"></i></button>
+        </div>
     </div>
     <div class="form-row filterHelp">{% trans "Ctrl-click to select multiple options" %}</div>
 </div>
