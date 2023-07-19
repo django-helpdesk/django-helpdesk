@@ -544,8 +544,6 @@ def copy_field(request):
         return JsonResponse({'copied': False, 'errors': form.errors})
 
 
-    
-
 @helpdesk_staff_member_required
 def dashboard(request):
     """
@@ -1946,6 +1944,7 @@ def edit_ticket(request, ticket_id):
 
 edit_ticket = staff_member_required(edit_ticket)
 
+
 def attach_ticket_to_property_milestone(request, ticket):
     from seed.models import PropertyMilestone, Note
     from django.utils.timezone import now
@@ -2403,8 +2402,10 @@ class EditUserSettingsView(MustBeStaffMixin, UpdateView):
 
 @helpdesk_superuser_required
 def email_ignore(request):
+    org = request.user.default_organization.helpdesk_organization
+
     return render(request, 'helpdesk/email_ignore_list.html', {
-        'ignore_list': IgnoreEmail.objects.all(),
+        'ignore_list': IgnoreEmail.objects.filter(organization=org),
         'debug': settings.DEBUG,
     })
 
@@ -2415,17 +2416,34 @@ email_ignore = superuser_required(email_ignore)
 @helpdesk_superuser_required
 def email_ignore_add(request):
     if request.method == 'POST':
-        form = EmailIgnoreForm(request.POST)
+        form = EmailIgnoreForm(request.POST, organization=request.user.default_organization.helpdesk_organization)
         if form.is_valid():
-            form.save()
+            saved_form = form.save(commit=False)
+            saved_form.organization = request.user.default_organization.helpdesk_organization
+            saved_form.save()
+            saved_form.queues.set(form.cleaned_data['queues'])
             return HttpResponseRedirect(reverse('helpdesk:email_ignore'))
     else:
-        form = EmailIgnoreForm(request.GET)
+        form = EmailIgnoreForm(request.GET, organization=request.user.default_organization.helpdesk_organization)
 
     return render(request, 'helpdesk/email_ignore_add.html', {'form': form, 'debug': settings.DEBUG})
 
 
 email_ignore_add = superuser_required(email_ignore_add)
+
+
+@helpdesk_staff_member_required
+def email_ignore_edit(request, id):
+    ignored_address = get_object_or_404(IgnoreEmail, id=id)
+    form = EmailIgnoreForm(request.POST or None, instance=ignored_address)
+    if form.is_valid():
+        form.save()
+        return HttpResponseRedirect(reverse('helpdesk:email_ignore'))
+
+    return render(request, 'helpdesk/email_ignore_add.html', {'form': form, 'debug': settings.DEBUG})
+
+
+email_ignore_edit = superuser_required(email_ignore_edit)
 
 
 @helpdesk_superuser_required

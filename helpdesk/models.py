@@ -563,17 +563,33 @@ class Ticket(models.Model):
         if dont_send_to is not None:
             recipients.update(dont_send_to)
 
-        recipients.add(self.queue.email_address)
+        if self.queue.email_address:
+            recipients.add(self.queue.email_address.strip('<>'))
+        recipients.add(self.queue.from_address.strip('<>'))
+        if organization and organization.sender:
+            recipients.add(organization.sender.email_address.strip('<>'))
+
+        ignored_from_queue = self.queue.ignoreemail_set.all()
+        ignored_from_org = self.queue.organization.ignoreemail_set.filter(queues__isnull=True)
 
         def send(role, recipient):
             if recipient and recipient not in recipients and role in roles:
-                template, context = roles[role]
-                send_templated_mail(template, context, recipient, sender=self.queue.from_address,
-                                    organization=organization, ticket_id=self.pk, **kwargs)
-                recipients.add(recipient)
+                ignore_flag = False
+                for i in ignored_from_queue:
+                    if i.test(recipient):
+                        ignore_flag = True
+                for i in ignored_from_org:
+                    if i.test(recipient):
+                        ignore_flag = True
+
+                if not ignore_flag:
+                    template, context = roles[role]
+                    # todo: send_templated_mail doesn't actually use the sender given to it?
+                    send_templated_mail(template, context, recipient, sender=self.queue.from_address,
+                                        organization=organization, ticket_id=self.pk, **kwargs)
+                    recipients.add(recipient)
 
         # Attempts to send an email to every possible field.
-
         if self.submitter_email:
             send('submitter', self.submitter_email)
         if self.contact_email:
@@ -1740,11 +1756,13 @@ class IgnoreEmail(models.Model):
         verbose_name = _('Ignored e-mail address')
         verbose_name_plural = _('Ignored e-mail addresses')
 
-    importers = models.ManyToManyField(
-        'seed.EmailImporter',
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
+
+    queues = models.ManyToManyField(
+        Queue,
         blank=True,
-        help_text=_('Leave blank for this e-mail to be ignored on all importer emails, '
-                    'or select those importers you wish to ignore this e-mail for.'),
+        help_text=_('Leave blank for this e-mail to be ignored on all queue emails, '
+                    'or select those queues you wish to ignore this e-mail for.'),
     )
 
     name = models.CharField(
@@ -1759,8 +1777,16 @@ class IgnoreEmail(models.Model):
         editable=False
     )
 
+    modified = models.DateField(
+        _('Last Modified'),
+        help_text=_('Date on which this e-mail address was last modified'),
+        blank=True,
+        default=None,
+        editable=False
+    )
+
     email_address = models.CharField(
-        _('E-Mail Address'),
+        _('Email Address'),
         max_length=150,
         help_text=_('Enter a full e-mail address, or portions with '
                     'wildcards, eg *@domain.com or postmaster@*.'),
@@ -1780,17 +1806,18 @@ class IgnoreEmail(models.Model):
     def save(self, *args, **kwargs):
         if not self.date:
             self.date = timezone.now()
+        self.modified = timezone.now()
         return super(IgnoreEmail, self).save(*args, **kwargs)
 
-    def importer_list(self):
+    def queue_list(self):
         """Return a list of the importers this IgnoreEmail applies to.
         If this IgnoreEmail applies to ALL importers, return '*'.
         """
-        importers = self.importers.all().order_by('email_address')
-        if len(importers) == 0:
+        queues = self.queues.all().order_by('email_address')
+        if len(queues) == 0:
             return '*'
         else:
-            return ', '.join([str(i) for i in importers])
+            return ', '.join([str(i) for i in queues])
 
     def test(self, email):
         """

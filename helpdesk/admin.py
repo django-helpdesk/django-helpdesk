@@ -238,7 +238,7 @@ class EmailTemplateAdmin(admin.ModelAdmin):
 
 @admin.register(IgnoreEmail)
 class IgnoreEmailAdmin(admin.ModelAdmin):
-    list_display = ('name', 'importer_list', 'email_address', 'keep_in_mailbox')
+    list_display = ('name', 'email_address', 'keep_in_mailbox')
 
 
 @admin.register(KBCategory)

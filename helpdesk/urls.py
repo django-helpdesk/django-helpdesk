@@ -165,6 +165,10 @@ urlpatterns = [
         staff.email_ignore_add,
         name='email_ignore_add'),
 
+    url(r'^ignore/edit/(?P<id>[0-9]+)/$',
+        staff.email_ignore_edit,
+        name='email_ignore_edit'),
+
     url(r'^ignore/delete/(?P<id>[0-9]+)/$',
         staff.email_ignore_del,
         name='email_ignore_del'),

@@ -129,8 +129,10 @@ class CustomFieldMixin(object):
         else:
             self.fields[field.field_name] = fieldclass(**instanceargs)
 
+
 class PreviewWidget(forms.widgets.Textarea):
     template_name = "helpdesk/include/edit_md_preview.html"
+
 
 class EditTicketForm(CustomFieldMixin, forms.ModelForm):
 
@@ -668,7 +670,6 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
             for k, files in self.files.lists():
                 cleaned_data[k] = files
 
-
         # Handle DC Pathway Selection Form
         if form.name == 'Pathway Selection':
             self.clean_dc_ps_form()
@@ -1078,7 +1079,23 @@ class EmailIgnoreForm(forms.ModelForm):
 
     class Meta:
         model = IgnoreEmail
-        exclude = []
+        exclude = ['organization']
+
+    def __init__(self, *args, **kwargs):
+        """
+            Set slug and email address field to read-only.
+            Set email address field to "None" if it is empty.
+        """
+        if 'instance' in kwargs:
+            instance = kwargs.get('instance', None)
+            self.organization = instance.organization
+        elif 'organization' in kwargs:
+            self.organization = kwargs.pop('organization', None)
+
+        super(EmailIgnoreForm, self).__init__(*args, **kwargs)
+
+        if self.organization:
+            self.fields['queues'].queryset = self.organization.queue_set.all()
 
 
 class TicketCCForm(forms.ModelForm):

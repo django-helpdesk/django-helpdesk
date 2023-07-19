@@ -1,17 +1,29 @@
 {% extends "helpdesk/base.html" %}{% load i18n %}
 
-{% block helpdesk_title %}{% trans "Delete Ignored E-Mail Address" %}{% endblock %}
+{% block helpdesk_title %}{% trans "Delete Ignored Email Address" %}{% endblock %}
+
+{% block helpdesk_breadcrumb %}
+<li class="breadcrumb-item">
+    <a href="{% url 'helpdesk:system_settings' %}">{% trans "System Settings" %}</a>
+</li>
+<li class="breadcrumb-item active">
+    <a href="{% url 'helpdesk:email_ignore' %}">{% trans "Ignored Email Addresses" %}</a>
+</li>
+<li class="breadcrumb-item active">{% trans "Un-Ignore Email Address" %}</li>
+{% endblock %}
 
 {% block helpdesk_body %}
-<h2>{% trans "Un-Ignore E-Mail Address" %}</h2>
+<h2>{% trans "Un-Ignore Email Address" %}</h2>
 
-<p>{% blocktrans with ignore.email_address as email_address %}Are you sure you wish to stop removing this email address (<em>{{ email_address }}</em>) and allow their e-mails to automatically create tickets in your system? You can re-add this e-mail address at any time.{% endblocktrans %}</p>
-
-<p><a href='../../'><button class="btn btn-primary btn-lg">{% trans "Keep Ignoring It" %}</button></a></p>
+<p>{% blocktrans with ignore.email_address as email_address %}Are you sure you wish to remove this email address (<em>{{ email_address }}</em>) from the ignore list?
+    This will allow their emails to automatically create tickets in your system, and they will begin to receive notifications from this point on from tickets they are copied on.
+    You can re-add this email address at any time.{% endblocktrans %}</p>
 
 <form method='post' action='./'>
-    <button class="btn btn-danger" type='submit'>{% trans "Stop Ignoring It" %}</button>
+    <button class="btn btn-danger" type='submit'>{% trans "Remove from list" %}</button>
 {% csrf_token %}</form>
+<br/>
+<p><a href='../../'><button class="btn btn-primary btn">{% trans "Cancel" %}</button></a></p>
 
 
 {% endblock %}

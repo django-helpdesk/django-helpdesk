@@ -747,15 +747,6 @@ def object_from_message(message, importer, queues, logger):
     to_list = getaddresses(message.get_all('To', []))
     cc_list = getaddresses(message.get_all('Cc', []))
 
-    # Ignore List applies to sender, TO emails, and CC list
-    for ignored_address in IgnoreEmail.objects.filter(Q(importers=importer) | Q(importers__isnull=True)):
-        for name, address in [sender] + to_list + cc_list:
-            if ignored_address.test(address):
-                logger.debug("Email address matched an ignored address. Ticket will not be created")
-                if ignored_address.keep_in_mailbox:
-                    return False  # By returning 'False' the message will be kept in the mailbox,
-                return True  # and the 'True' will cause the message to be deleted.
-
     # Sort out which queue this email should go into #
     ticket, queue = None, None
     for q in queues['importer_queues']:
@@ -782,6 +773,15 @@ def object_from_message(message, importer, queues, logger):
     if not queue:
         logger.info("- Using default queue.")
         queue = queues['default_queue']
+
+    # Ignore List applies to sender, TO emails, and CC list
+    for ignored_address in IgnoreEmail.objects.filter(Q(queues=queue) | Q(organization=queue.organization, queues__isnull=True)):
+        for name, address in [sender] + to_list + cc_list:
+            if ignored_address.test(address):
+                logger.debug("Email address matched an ignored address. Ticket will not be created")
+                if ignored_address.keep_in_mailbox:
+                    return False  # By returning 'False' the message will be kept in the mailbox,
+                return True  # and the 'True' will cause the message to be deleted.
 
     # Accounting for forwarding loops
     auto_forward = message.get('X-BEAMHelpdesk-Delivered', None)
@@ -962,15 +962,6 @@ def object_from_exchange_message(message, importer, queues, logger):
     if getattr(message, 'cc_recipients', None):
         cc_list = [(r.name, r.email_address.lower()) for r in message.cc_recipients]
 
-    # Ignore List applies to sender, TO emails, and CC list
-    for ignored_address in IgnoreEmail.objects.filter(Q(importers=importer) | Q(importers__isnull=True)):
-        for name, address in [sender] + to_list + cc_list:
-            if ignored_address.test(address):
-                logger.debug("Email address matched an ignored address. Ticket will not be created")
-                if ignored_address.keep_in_mailbox:
-                    return False  # By returning 'False' the message will be kept in the mailbox,
-                return True  # and the 'True' will cause the message to be deleted.
-
     # Sort out which queue this email should go into #
     ticket, queue = None, None
     for q in queues['importer_queues']:
@@ -997,6 +988,15 @@ def object_from_exchange_message(message, importer, queues, logger):
     if not queue:
         logger.info("- Using default queue.")
         queue = queues['default_queue']
+
+    # Ignore List applies to sender, TO emails, and CC list
+    for ignored_address in IgnoreEmail.objects.filter(Q(queues=queue) | Q(organization=queue.organization, queues__isnull=True)):
+        for name, address in [sender] + to_list + cc_list:
+            if ignored_address.test(address):
+                logger.debug("Email address matched an ignored address. Ticket will not be created")
+                if ignored_address.keep_in_mailbox:
+                    return False  # By returning 'False' the message will be kept in the mailbox,
+                return True  # and the 'True' will cause the message to be deleted.
 
     # Accounting for forwarding loops
     headers = {h.name.lower(): h.value for h in getattr(message, 'headers', {})}
