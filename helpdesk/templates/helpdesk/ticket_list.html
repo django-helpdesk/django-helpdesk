@@ -161,7 +161,7 @@
                 </div>
                 <!-- / Action Toolbar -->
                 <!-- Data Table -->
-                <div class="table-responsive" style="max-height: 82vh;">
+                <div class="table-responsive" style="max-height: 81.5vh;">
                     <table class="table table-bordered table-sm table-striped" id="dataTable" width="100%" cellspacing="0">
                         <thead class="thead-light"> 
                             <tr id="headers"> <!-- Headers -->
@@ -301,8 +301,8 @@
 </div>
 
 <div class="col-3 pr-0 collapse show" id="query_select">
-    <div class="card mb-3">
-        <div class="card-header font-weight-bold">
+    <div class="card mb-3" >
+        <div class="card-header pt-2 font-weight-bold">
             <i class="fas fa-hand-pointer"></i>
             {% trans "Query Selection" %}
         </div>
@@ -321,14 +321,14 @@
                 </div>
                 
                 <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#queryAccordion">
-                    <div class="card-body">
+                    <div class="border-bottom border-top bg-light p-2">
                         <form method="get">
                             <div class="input-group">
                                 <div class="input-group-prepend">
                                     <label class="input-group-text" for="filterBuilderSelect">{% trans "Add filter" %}</label>
                                 </div>
                                 <select class="custom-select mb-0" aria-describedby="select-description" name="select" id="filterBuilderSelect"onChange="onFilterChange(this.value)">
-                                    <option value="">--</option>
+                                    <option value="">-----</option>
                                     <option id="filterBuilderSelect-Sort" value="Sort"{% if query_params.sorting %} disabled{% endif %}>
                                         {% trans "Sorting" %}
                                     </option>
@@ -359,8 +359,10 @@
                                 </select>
                             </div>
                         </form>
-                        <hr>
-                        <form method="get">
+                    </div>
+                    <form method="get">
+                        <div class="card-body overflow-auto" style="max-height: 67.75vh;">
+                            
                             <ul class="list-group list-group-flush">
                                 <li id="filterBoxSort" class="filterBox{% if query_params.sorting %} filterBoxShow{% endif %} mb-2" id="filterBoxSort">
                                     {% include 'helpdesk/filters/sorting.html' %}
@@ -368,7 +370,7 @@
                                 <li id="filterBoxOwner" class="filterBox{% if query_params.filtering.assigned_to__id__in %} filterBoxShow{% endif %} mb-2">
                                     {% include 'helpdesk/filters/owner.html' %}
                                 </li>
-                                <li class=" filterBox{% if query_params.filtering.queue__id__in %} filterBoxShow{% endif %}" mb-2 id="filterBoxQueue">
+                                <li class=" filterBox{% if query_params.filtering.queue__id__in %} filterBoxShow{% endif %} mb-2"  id="filterBoxQueue">
                                     {% include 'helpdesk/filters/queue.html' %}
                                 </li>
                                 <li class=" filterBox{% if query_params.filtering.status__in %} filterBoxShow{% endif %} mb-2" id="filterBoxStatus">
@@ -418,9 +420,11 @@
                                 </li>
                                 {% endif %}
                             </ul>   
-                            <input class="btn btn-primary mb-2 float-right" type='submit' value='{% trans "Apply" %}'/>
-                        </form>
-                    </div>
+                        </div>
+                        <div class="border-bottom border-top bg-light p-2">
+                            <input class="btn btn-primary w-100" type='submit' value='{% trans "Apply Filters" %}'/>
+                        </div>
+                    </form>
                 </div>
             </div> <!-- end card -->
             

@@ -1,19 +1,14 @@
 {% load i18n humanize %}
 <div class="form-row">
-    <div class="col col-sm-3">
-        <label for='id_date_from'>{% trans "Date (From)" %}</label>
+    <div class="input-group">
+        <div class="input-group-prepend">
+            <label class="input-group-text d-flex" for='id_date'>{% trans "Date" %}</label>
+        </div>
+        <input class="form-control" type='date' name='date_from' value='{{ query_params.filtering.created__gte }}' placeholder="From" id='id_date_from' style="max-width:100%" />
+        <input class="form-control" type='date' name='date_to' value='{{ query_params.filtering.created__lte }}' placeholder="To" id='id_date_to' style="max-width:100%" />
+        <div class="input-group-append">
+            <button class="filterBuilderRemove btn btn-danger btn-sm"><i class="fas fa-trash-alt"></i></button>
+        </div>
     </div>
-    <div class="col col-sm-3">
-        <input type='text' name='date_from' value='{{ query_params.filtering.created__gte }}' id='id_date_from' style="max-width:100%" />
-    </div>
-    <div class="col col-sm-2">
-        <label for='id_date_to'>{% trans "Date (To)" %}</label>
-    </div>
-    <div class="col col-sm-3">
-        <input type='text' name='date_to' value='{{ query_params.filtering.created__lte }}' id='id_date_to' style="max-width:100%" />
-    </div>
-    <div class="col col-sm-1">
-        <button class='float-right filterBuilderRemove btn btn-danger btn-sm'><i class="fas fa-trash-alt"></i></button>
-    </div>
-    <p class='filterHelp'>{% trans "Use YYYY-MM-DD date format, eg 2018-01-30" %}</p>
+    <p class='filterHelp'>{% trans "Range from the 1st date to the 2nd date" %}</p>
 </div>
