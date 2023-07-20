@@ -173,6 +173,22 @@ urlpatterns = [
         staff.email_ignore_del,
         name='email_ignore_del'),
 
+    url(r'^preset_reply/$',
+        staff.preset_reply_list,
+        name='preset_reply_list'),
+
+    url(r'^preset_reply/add/$',
+        staff.preset_reply_add,
+        name='preset_reply_add'),
+
+    url(r'^preset_reply/edit/(?P<id>[0-9]+)/$',
+        staff.preset_reply_edit,
+        name='preset_reply_edit'),
+
+    url(r'^preset_reply/delete/(?P<id>[0-9]+)/$',
+        staff.preset_reply_delete,
+        name='preset_reply_delete'),
+
     url(r'^datatables_ticket_list/(?P<query>{})$'.format(base64_pattern),
         staff.datatables_ticket_list,
         name="datatables_ticket_list"),

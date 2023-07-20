@@ -1155,12 +1155,7 @@ class PreSetReply(models.Model):
         verbose_name = _('Pre-set reply')
         verbose_name_plural = _('Pre-set replies')
 
-    queues = models.ManyToManyField(
-        Queue,
-        blank=True,
-        help_text=_('Leave blank to allow this reply to be used for all '
-                    'queues, or select those queues you wish to limit this reply to.'),
-    )
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
 
     name = models.CharField(
         _('Name'),
@@ -1169,15 +1164,26 @@ class PreSetReply(models.Model):
                     'shown to the user.'),
     )
 
+    queues = models.ManyToManyField(
+        Queue,
+        blank=True,
+        help_text=_('Leave blank to allow this reply to be used for all '
+                    'queues, or select those queues you wish to limit this reply to.'),
+    )
+
     body = models.TextField(
         _('Body'),
-        help_text=_('Context available: {{ ticket }} - ticket object (eg '
-                    '{{ ticket.title }}); {{ queue }} - The queue; and {{ user }} '
-                    '- the current user.'),
+        help_text=_(markdown_allowed() + '<br/>Context available:<br/>'
+                    '{{ ticket }}: the ticket object (eg {{ ticket.title }})<br/>'
+                    '{{ queue }}: the queue<br/>'
+                    '{{ user }}: the current user.<br/>'),
     )
 
     def __str__(self):
         return '%s' % self.name
+
+    def get_markdown(self):
+        return get_markdown(self.body, self.organization)
 
 
 class EscalationExclusion(models.Model):

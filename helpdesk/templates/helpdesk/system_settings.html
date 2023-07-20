@@ -14,11 +14,10 @@
 <p>{% blocktrans %}The following items can be maintained by you or other superusers:{% endblocktrans %}</p>
 
 <ul>
-    {% comment %} <li><a href='{% url 'admin:helpdesk_queue_changelist' %}'>{% trans "Maintain Queues" %}</a></li> {% endcomment %}
     <li><a href='{% url 'helpdesk:maintain_queues' %}'>{% trans "Maintain Queues" %}</a></li>
     <li><a href='{% url 'helpdesk:maintain_forms' %}'>{% trans "Maintain Forms" %}</a></li>
     <li><a href='{% url 'helpdesk:email_ignore' %}'>{% trans "Email Ignore List" %}</a></li>
-    {% comment %} <li><a href='{% url 'admin:helpdesk_presetreply_changelist' %}'>{% trans "Maintain Pre-Set Replies" %}</a></li> {% endcomment %}
+    <li><a href='{% url 'helpdesk:preset_reply_list' %}'>{% trans "Maintain Preset Replies" %}</a></li>
     {% comment %} <li><a href='{% url 'admin:helpdesk_kbcategory_changelist' %}'>{% trans "Maintain Knowledgebase Categories" %}</a></li> {% endcomment %}
     {% comment %} <li><a href='{% url 'admin:helpdesk_kbitem_changelist' %}'>{% trans "Maintain Knowledgebase Items" %}</a></li> {% endcomment %}
     {% comment %} <li><a href='{% url 'admin:helpdesk_emailtemplate_changelist' %}'>{% trans "Maintain E-Mail Templates" %}</a></li> {% endcomment %}

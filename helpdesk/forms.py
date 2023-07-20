@@ -23,7 +23,7 @@ from django.shortcuts import get_object_or_404
 from helpdesk.lib import safe_template_context, process_attachments
 from helpdesk.models import (Ticket, Queue, FollowUp, IgnoreEmail, TicketCC,
                              CustomField, TicketDependency, UserSettings, KBItem,
-                             FormType, KBCategory, KBIAttachment, is_extra_data)
+                             FormType, KBCategory, KBIAttachment, is_extra_data, PreSetReply)
 from helpdesk import settings as helpdesk_settings
 from helpdesk.email import create_ticket_cc
 from helpdesk.decorators import list_of_helpdesk_staff
@@ -1093,6 +1093,26 @@ class EmailIgnoreForm(forms.ModelForm):
             self.organization = kwargs.pop('organization', None)
 
         super(EmailIgnoreForm, self).__init__(*args, **kwargs)
+
+        if self.organization:
+            self.fields['queues'].queryset = self.organization.queue_set.all()
+
+
+class PreSetReplyForm(forms.ModelForm):
+    body = forms.CharField(widget=PreviewWidget, help_text=PreSetReply.body.field.help_text)
+
+    class Meta:
+        model = PreSetReply
+        exclude = ['organization']
+
+    def __init__(self, *args, **kwargs):
+        if 'instance' in kwargs:
+            instance = kwargs.get('instance', None)
+            self.organization = instance.organization
+        elif 'organization' in kwargs:
+            self.organization = kwargs.pop('organization', None)
+
+        super(PreSetReplyForm, self).__init__(*args, **kwargs)
 
         if self.organization:
             self.fields['queues'].queryset = self.organization.queue_set.all()

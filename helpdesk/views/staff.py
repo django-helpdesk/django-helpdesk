@@ -50,7 +50,7 @@ from helpdesk.decorators import (
 from helpdesk.forms import (
     TicketForm, UserSettingsForm, EmailIgnoreForm, EditTicketForm, TicketCCForm,
     TicketCCEmailForm, TicketCCUserForm, EditFollowUpForm, TicketDependencyForm, MultipleTicketSelectForm,
-    EditQueueForm, EditFormTypeForm
+    EditQueueForm, EditFormTypeForm, PreSetReplyForm
 )
 from helpdesk.lib import (
     safe_template_context,
@@ -929,7 +929,7 @@ def view_ticket(request, ticket_id):
         'form': form,
         'active_users': users,
         'priorities': Ticket.PRIORITY_CHOICES,
-        'preset_replies': PreSetReply.objects.filter(
+        'preset_replies': PreSetReply.objects.filter(organization=org).filter(
             Q(queues=ticket.queue) | Q(queues__isnull=True)),
         'ticketcc_string': ticketcc_string,
         'SHOW_SUBSCRIBE': show_subscribe,
@@ -2457,6 +2457,75 @@ def email_ignore_del(request, id):
 
 
 email_ignore_del = superuser_required(email_ignore_del)
+
+
+@helpdesk_superuser_required
+def preset_reply_list(request):
+    org = request.user.default_organization.helpdesk_organization
+    replies = PreSetReply.objects.filter(organization=org)
+    reply_list = []
+    for reply in replies:
+        reply_list.append({
+            'id': reply.id,
+            'queues': reply.queues.all(),
+            'name': reply.name,
+            'body': reply.get_markdown()
+        })
+
+    return render(request, 'helpdesk/preset_reply_list.html', {
+        'reply_list': reply_list,
+        'debug': settings.DEBUG,
+    })
+
+
+preset_reply_list = superuser_required(preset_reply_list)
+
+
+@helpdesk_superuser_required
+def preset_reply_add(request):
+    org = request.user.default_organization.helpdesk_organization
+    if request.method == 'POST':
+        form = PreSetReplyForm(request.POST, organization=org)
+        if form.is_valid():
+            saved_form = form.save(commit=False)
+            saved_form.organization = org
+            saved_form.save()
+            saved_form.queues.set(form.cleaned_data['queues'])
+            return HttpResponseRedirect(reverse('helpdesk:preset_reply_list'))
+    else:
+        form = PreSetReplyForm(request.GET, organization=org)
+
+    return render(request, 'helpdesk/preset_reply_add.html', {'form': form, 'debug': settings.DEBUG})
+
+
+preset_reply_add = superuser_required(preset_reply_add)
+
+
+@helpdesk_staff_member_required
+def preset_reply_edit(request, id):
+    preset_reply = get_object_or_404(PreSetReply, id=id)
+    form = PreSetReplyForm(request.POST or None, instance=preset_reply)
+    if form.is_valid():
+        form.save()
+        return HttpResponseRedirect(reverse('helpdesk:preset_reply_list'))
+
+    return render(request, 'helpdesk/preset_reply_add.html', {'form': form, 'debug': settings.DEBUG})
+
+
+preset_reply_edit = superuser_required(preset_reply_edit)
+
+
+@helpdesk_superuser_required
+def preset_reply_delete(request, id):
+    preset_reply = get_object_or_404(PreSetReply, id=id)
+    if request.method == 'POST':
+        preset_reply.delete()
+        return HttpResponseRedirect(reverse('helpdesk:preset_reply_list'))
+    else:
+        return render(request, 'helpdesk/preset_reply_delete.html', {'reply': preset_reply, 'debug': settings.DEBUG})
+
+
+preset_reply_delete = superuser_required(preset_reply_delete)
 
 
 @helpdesk_staff_member_required
