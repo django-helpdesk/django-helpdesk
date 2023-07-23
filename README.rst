@@ -51,7 +51,7 @@ Installation
 `django-helpdesk` requires:
 
 * Python 3.8+
-* Django 3.2 LTS highly recommended (early adopters may test Django 4)
+* Django 3.2 LTS or Django 4.*
 
 You can quickly install the latest stable version of `django-helpdesk`
 app via `pip`::
@@ -72,12 +72,18 @@ Developer Environment
 ---------------------
 
 Follow these steps to set up your development environment to contribute to helpdesk:
+ - check out the helpdesk app to you local file system::
+        git clone https://github.com/django-helpdesk/django-helpdesk.git
+ 
  - install a virtual environment
      - using virtualenv from the helpdesk base folder do::
           virtualenv .venv && source .venv/bin/activate
 
  - install the requirements for development::
     pip install -r requirements.txt -r requirements-dev.txt
+
+To reactivate a VENV just run:
+   source .venv/bin/activate
 
 To see option for the Makefile run: `make`
 
