@@ -39,7 +39,8 @@ import ssl
 import sys
 from time import ctime
 import typing
-from typing import List, Tuple
+from typing import List
+from email.mime.text import MIMEText
 
 
 # import User model, which may be a custom model
@@ -52,6 +53,8 @@ STRIPPED_SUBJECT_STRINGS = [
     "FW: ",
     "Automatic reply: ",
 ]
+
+HTML_EMAIL_ATTACHMENT_FILENAME = _("email_html_body.html")
 
 
 def process_email(quiet=False):
@@ -141,7 +144,7 @@ def pop3_sync(q, logger, server):
             full_message = encoding.force_str(
                 "\n".join(raw_content), errors='replace')
         try:
-            ticket = object_from_message(message=full_message, queue=q, logger=logger)
+            ticket = extract_email_metadata(message=full_message, queue=q, logger=logger)
         except IgnoreTicketException:
             logger.warn(
                 "Message %s was ignored and will be left on POP3 server" % msgNum)
@@ -198,7 +201,7 @@ def imap_sync(q, logger, server):
                 data = server.fetch(num, '(RFC822)')[1]
                 full_message = encoding.force_str(data[0][1], errors='replace')
                 try:
-                    ticket = object_from_message(message=full_message, queue=q, logger=logger)
+                    ticket = extract_email_metadata(message=full_message, queue=q, logger=logger)
                 except IgnoreTicketException:
                     logger.warn("Message %s was ignored and will be left on IMAP server" % num)
                 except DeleteIgnoredTicketException:
@@ -285,7 +288,7 @@ def imap_oauth_sync(q, logger, server):
                 full_message = encoding.force_str(data[0][1], errors='replace')
 
                 try:
-                    ticket = object_from_message(message=full_message, queue=q, logger=logger)
+                    ticket = extract_email_metadata(message=full_message, queue=q, logger=logger)
 
                 except IgnoreTicketException as itex:
                     logger.warn(f"Message {num} was ignored. {itex}")
@@ -405,7 +408,7 @@ def process_queue(q, logger):
             with open(m, 'r') as f:
                 full_message = encoding.force_str(f.read(), errors='replace')
                 try:
-                    ticket = object_from_message(message=full_message, queue=q, logger=logger)
+                    ticket = extract_email_metadata(message=full_message, queue=q, logger=logger)
                 except IgnoreTicketException:
                     logger.warn("Message %d was ignored and will be left in local directory", i)
                 except DeleteIgnoredTicketException:
@@ -433,7 +436,7 @@ def decodeUnknown(charset, string):
         if not charset:
             try:
                 return str(string, encoding='utf-8', errors='replace')
-            except UnicodeError:
+            except UnicodeError as e:
                 return str(string, encoding='iso8859-1', errors='replace')
         return str(string, encoding=charset, errors='replace')
     return string
@@ -723,133 +726,92 @@ def attempt_body_extract_from_html(message: str) -> str:
     return body, full_body
 
 
-def extract_part_data(
+def  extract_mime_content(part: Message,) -> str:
+    '''
+    Extract the content from the MIME body part
+    :param part: the MIME part to extract the content from
+    '''
+    content_bytes = part.get_payload(decode=True)
+    charset = part.get_content_charset()
+    # The default for MIME email is 7bit which requires special decoding to utf-8 so make sure we handle the decoding correctly
+    if part['Content-Transfer-Encoding'] in [None, '8bit', '7bit'] and (charset == 'utf-8' or charset is None):
+        charset = "unicode_escape"
+    content = decodeUnknown(charset, content_bytes)
+    return content
+
+
+def extract_email_message(mime_content: str, is_plain_content_type: bool, is_extract_full_email_msg: bool) -> str:
+    email_content = None
+    if is_extract_full_email_msg:
+        # Take the full content including encapsulated "forwarded" and "reply" sections
+        email_content = get_body_from_fragments(mime_content) if is_plain_content_type else mime_content
+    else:
+        # Just get the primary part of the email and drop off any text below the actually response text
+        email_content = EmailReplyParser.parse_reply(mime_content) if is_plain_content_type else mime_content
+    return email_content
+
+
+def process_as_attachment(
         part: Message,
         counter: int,
-        ticket_id: int,
         files: List,
         logger: logging.Logger
-) -> Tuple[str, str]:
+):
     name = part.get_filename()
     if name:
-        name = email.utils.collapse_rfc2231_value(name)
-    part_body = None
-    formatted_body = None
-    if part.get_content_maintype() == 'text' and name is None:
-        if part.get_content_subtype() == 'plain':
-            part_body = part.get_payload(decode=True)
-            # https://github.com/django-helpdesk/django-helpdesk/issues/732
-            if part['Content-Transfer-Encoding'] == '8bit' and part.get_content_charset() == 'utf-8':
-                part_body = part_body.decode('unicode_escape')
-            part_body = decodeUnknown(part.get_content_charset(), part_body)
-            # have to use django_settings here so overwriting it works in tests
-            # the default value is False anyway
-            if ticket_id is None and getattr(django_settings, 'HELPDESK_FULL_FIRST_MESSAGE_FROM_EMAIL', False):
-                # first message in thread, we save full body to avoid
-                # losing forwards and things like that
-                formatted_body = get_body_from_fragments(part_body)
-                part_body = EmailReplyParser.parse_reply(part_body)
-            else:
-                # second and other reply, save only first part of the
-                # message
-                part_body = EmailReplyParser.parse_reply(part_body)
-                formatted_body = part_body
-            # workaround to get unicode text out rather than escaped text
-            part_body = get_encoded_body(part_body)
-            logger.debug("Discovered plain text MIME part")
-        else:
-            email_body = get_email_body_from_part_payload(part)
-
-            if not part_body and not formatted_body:
-                # no text has been parsed so far - try such deep parsing
-                # for some messages
-                altered_body = email_body.replace(
-                    "</p>", "</p>\n").replace("<br", "\n<br")
-                mail = BeautifulSoup(str(altered_body), "html.parser")
-                formatted_body = mail.get_text()
-
-            if "<body" not in email_body:
-                email_body = f"<body>{email_body}</body>"
-
-            payload = (
-                '<html>'
-                '<head>'
-                '<meta charset="utf-8" />'
-                '</head>'
-                '%s'
-                '</html>'
-            ) % email_body
-            files.append(
-                SimpleUploadedFile(
-                    _("email_html_body.html"), payload.encode("utf-8"), 'text/html')
-            )
-            logger.debug("Discovered HTML MIME part")
+        name = f"part-{counter}_{email.utils.collapse_rfc2231_value(name)}"
     else:
-        if not name:
-            ext = mimetypes.guess_extension(part.get_content_type())
-            name = f"part-{counter}{ext}"
-        else:
-            name = f"part-{counter}_{name}"
-        payload = part.as_string() if part.is_multipart() else part.get_payload(decode=True)
-        files.append(SimpleUploadedFile(name, payload, mimetypes.guess_type(name)[0]))
-        logger.debug("Found MIME attachment %s", name)
-    return part_body, formatted_body
+        ext = mimetypes.guess_extension(part.get_content_type())
+        name = f"part-{counter}{ext}"
+    # Extract payload accounting for attached multiparts
+    payload = part.as_string() if part.is_multipart() else part.get_payload(decode=True)
+    files.append(SimpleUploadedFile(name, payload, mimetypes.guess_type(name)[0]))
+    if logger.isEnabledFor(logging.DEBUG):
+        logger.debug("Processed MIME as attachment: %s", name)
+    return
 
 
-def recurse_multipart(
-        multipart: Message,
-        counter: int,
-        ticket_id: int,
-        files: List,
-        logger: logging.Logger
-) -> Tuple[str, str]:
-    '''
-    The received MIME part could be a multipart with embedded multiparts and therefore requires recursion.
-    Recurse through the multipart structures trying to find the 1st body part that
-    provides the message body. It will try to find an HTML formatted part (contentType=text/html)
-    and a TEXT formatted part (contentType=text/plain) and return both
-    :param multipart:
-    :param counter:
-    :param ticket_id:
-    :param files:
-    :param logger:
-    '''
-    plain_msg = None
-    formatted_msg = None
-
-    for part in multipart.walk():
-        if part.get_content_maintype() == 'multipart':
-            continue
-        # See email.message_obj.Message.get_filename()
-        plain_body, formatted_body = recurse_multipart(
-            part, counter, ticket_id, files, logger) if part.get_content_maintype(
-        ) == 'multipart' else extract_part_data(part, counter, ticket_id, files, logger)
-        # Only update the message variables if they are still empty to handle attached messages overriding the core message
-        if plain_msg is None and plain_body:
-            plain_msg = plain_body
-        if formatted_msg is None and formatted_body:
-            formatted_msg = formatted_body
-        counter += 1
-    return plain_msg, formatted_msg
+def extract_email_subject(email_msg: Message,) -> str:
+    subject = email_msg.get('subject', _('Comment from e-mail'))
+    subject = decode_mail_headers(
+        decodeUnknown(email_msg.get_charset(), subject))
+    for affix in STRIPPED_SUBJECT_STRINGS:
+        subject = subject.replace(affix, "")
+    return subject.strip()
 
 
-def object_from_message(message: str,
+def extract_email_metadata(message: str,
                         queue: Queue,
                         logger: logging.Logger
                         ) -> Ticket:
+    '''
+    Extracts the text/plain  mime part if there is one as the ticket description and
+    stores the text/html part as an attachment if it is present.
+    If no text/plain  part is present then it will try to use the text/html part if
+    it is present as the ticket description by removing the HTML formatting.
+    If neither a text/plain or text/html is present then it will use the first text/*
+    MIME part that it finds as the ticket description.
+    By default it will always take only the actual message and drop any chained messages
+    from replies.
+    The HELPDESK_FULL_FIRST_MESSAGE_FROM_EMAIL settings can force the entire message to be
+    stored in the ticket if it is a new ticket by setting it to True.
+    In this scenario, if it is a reply that is a forwarded message with no actual message,
+    then the description will be sourced from the text/html part and the forwarded message
+    will be in the FollowUp record aassociated with the ticket.
+    It will iterate over every MIME part and store all MIME parts as attachments apart
+    from the text/plain part.
+    There may be a case for trying to exclude repeated signature images by checking if an
+    attachment of the same name already exists as an attachement on the ticket but that is
+    not implemented.
+    :param message: the raw email message received
+    :param queue: the queue that hte 
+    :param logger: the logger to be used
+    '''
     # 'message' must be an RFC822 formatted message to correctly parse.
-    message_obj = email.message_from_string(message)
+    message_obj: Message = email.message_from_string(message)
 
-    subject = message_obj.get('subject', _('Comment from e-mail'))
-    subject = decode_mail_headers(
-        decodeUnknown(message_obj.get_charset(), subject))
-    for affix in STRIPPED_SUBJECT_STRINGS:
-        subject = subject.replace(affix, "")
-    subject = subject.strip()
+    subject = extract_email_subject(message_obj)
 
-    # TODO: Should really be assigning a properly formatted fake email.
-    #       Check if anything relies on this being a "real name" formatted string if no sender is found on message_obj.
-    #       Also not sure it should be accepting emails from unknown senders
     sender_email = _('Unknown Sender')
     sender_hdr = message_obj.get('from')
     if sender_hdr:
@@ -868,27 +830,86 @@ def object_from_message(message: str,
         subject,
         logger
     )
-
-    body = None
-    full_body = None
+    plain_body: str = None
+    formatted_body: str = None
     counter = 0
     files = []
+    first_mime_non_multipart_content: MIMEText = None
 
+    # Cycle through all MIME parts in the email extracting the plain and formatted messages
+    # Algorithm uses the first text parts found as the actual email content and subsequent text parts
+    # are made into attachments so they do not get lost
     for part in message_obj.walk():
-        if part.get_content_maintype() == 'multipart':
+        part_main_type = part.get_content_maintype()
+        if part_main_type == 'multipart':
             continue
-        # See email.message_obj.Message.get_filename()
-        plain_body, formatted_body = extract_part_data(part, counter, ticket_id, files, logger)
-        if plain_body:
-            body = plain_body
-        if formatted_body:
-            full_body = formatted_body
+        if part.get_content_disposition() in ['inline', 'attachment']:
+            process_as_attachment(part, counter, files, logger)
+        else:
+            # Get the content then assign to plain for formatted email message otherwise store the content as an attachment
+            mime_content = extract_mime_content(part)
+            if first_mime_non_multipart_content is None:
+                first_mime_non_multipart_content = mime_content
+            if part_main_type == 'text':
+                # Could be the body of the email
+                part_sub_type = part.get_content_subtype()
+                if plain_body is None and part_sub_type == "plain":
+                    plain_body = mime_content
+                elif formatted_body is None and part_sub_type == "html":
+                    formatted_body = mime_content
+                    if "<body" not in formatted_body:
+                        email_body = f"<body>{formatted_body}</body>"
+                    else:
+                        email_body = formatted_body
+        
+                    payload = (
+                        '<html>'
+                        '<head>'
+                        '<meta charset="utf-8" />'
+                        '</head>'
+                        '%s'
+                        '</html>'
+                    ) % email_body
+                    files.append(
+                        SimpleUploadedFile(
+                            HTML_EMAIL_ATTACHMENT_FILENAME, payload.encode("utf-8"), 'text/html')
+                    )
+                else:
+                    # Theoretically should not happen to properly structured emails but process anything else as an attachment
+                    process_as_attachment(part, counter, files, logger)
+                    logger.debug(f"Text MIME part added as attachment: {part.get_content_type()}")
+            else:
+                # process anything else as an attachment
+                process_as_attachment(part, counter, files, logger)
         counter += 1
 
-    if not body:
-        body, full_body = attempt_body_extract_from_html(message_obj)
+    # Check if we have at least the plain body
+    if not plain_body:
+        if formatted_body:
+            # We have a formatted body but no plain text body
+            plain_body, _x = attempt_body_extract_from_html(formatted_body)
+        else:
+            # Something wrong with email or a processing issue so try first part or save full email message
+            if first_mime_non_multipart_content:
+                plain_body = extract_email_message(first_mime_non_multipart_content, True, True)
+            else:
+                plain_body = message
+    # first message in thread, we save full body to avoid losing forwards and things like that
+    include_chained_msgs = True if ticket_id is None and getattr(django_settings, 'HELPDESK_FULL_FIRST_MESSAGE_FROM_EMAIL', False) else False
+    message_body = extract_email_message(plain_body, True, include_chained_msgs)
 
-    add_file_if_always_save_incoming_email_message(files, message_obj)
+    # Only need the full message if the message_body excludes the chained messages
+    chained_email_message = None if include_chained_msgs else plain_body
+
+    # Not sure this is valid but a unit test uses a DIFFERENT plain text to html text body
+    # where plain text has blank message with forwarded message so.... hack away to support it
+    if message_body is not None and len(message_body) == 0 and formatted_body and len(formatted_body) > 0:
+        message_body, _x = attempt_body_extract_from_html(formatted_body)
+        # Set the chained message to the orignal plain text full message so it is stored in a FollowUp comments field
+        if len(plain_body) > 0:
+            chained_email_message = plain_body
+
+    add_file_if_always_save_incoming_email_message(files, message)
 
     smtp_priority = message_obj.get('priority', '')
     smtp_importance = message_obj.get('importance', '')
@@ -897,8 +918,8 @@ def object_from_message(message: str,
         smtp_priority, smtp_importance} else 3
 
     payload = {
-        'body': body,
-        'full_body': full_body or body,
+        'body': message_body,
+        'full_body': chained_email_message,
         'subject': subject,
         'queue': queue,
         'sender_email': sender_email,
