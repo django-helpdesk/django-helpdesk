@@ -1,26 +1,18 @@
 {% load i18n humanize %}
 {% load static %}
 {% load in_list %}
-<div class="form-row">
-    <div class="input-group">
-        <div class="input-group-prepend">
-            <label class="input-group-text d-flex" for='id_owners'>{% trans "Owner(s)" %}</label>
-        </div>
-        <select class="custom-select overflow-auto" id='id_owners' name='assigned_to' size='5' style="max-width:100%" multiple>
-            {% with magic_number=-1 %}
-            <option value='{{magic_number}}'{% if magic_number|in_list:query_params.filtering.assigned_to__id__in %} selected='selected'{% endif %}>
-                {% trans "Unassigned" %}
-            </option>
-            {% endwith %}
-            {% for u in user_choices %}
-            <option value='{{ u.id }}'{% if u.id|in_list:query_params.filtering.assigned_to__id__in %} selected='selected'{% endif %}>
-                {{ u.get_full_name|default:u.get_username }}{% ifequal u user %} {% trans "(ME)" %}{% endifequal %}
-            </option>
-            {% endfor %}
-        </select>
-        <div class="input-group-append">
-            <button class="filterBuilderRemove btn btn-danger btn-sm"><i class="fas fa-trash-alt"></i></button>
-        </div>
+<div class="">
+    <label class="font-weight-bold" for='id_owners'>{% trans "Owner(s)" %}</label>
+    {% with magic_number=-1 %}
+    <div class="form-check">
+        <input type="checkbox" class="form-check-input" name="assigned_to" value="{{ magic_number }}" {% if magic_number|in_list:query_params.filtering.assigned_to__id__in %}checked{% endif %}>
+        <label class="form-check-label">{% trans "Unassigned" %}</label>
     </div>
-    <div class="form-row filterHelp">{% trans "Ctrl-click to select multiple options" %}</div>
+    {% endwith %}
+    {% for u in user_choices %}
+    <div class="form-check">
+        <input type="checkbox" class="form-check-input" name="assigned_to" value="{{ u.id }}" {% if u.id|in_list:query_params.filtering.assigned_to__id__in %}checked{% endif %}>
+        <label class="form-check-label">{{ u.get_full_name|default:u.get_username }}{% ifequal u user %} {% trans "(ME)" %}{% endifequal %}</label>
+    </div>
+    {% endfor %}
 </div>

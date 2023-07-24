@@ -2,19 +2,12 @@
 {% load static %}
 {% load in_list %}
 <div class="form-row">
-    <div class="input-group">
-        <div class="input-group-prepend">
-            <label class="input-group-text d-flex" for='id_queues'>{% trans "Queue(s)" %}</label>
-        </div>
-        <select class="custom-select overflow-auto" id='id_queues' name='queue' size='5' style="max-width:100%" multiple>
-            {% for q in queue_choices %}
-            <option value='{{ q.id }}'{% if q.id|in_list:query_params.filtering.queue__id__in %} selected="selected"{% endif %}>{{ q.title }}</option>
-            {% endfor %}
-        </select>
-        <div class="input-group-append">
-            <button class="filterBuilderRemove btn btn-danger btn-sm"><i class="fas fa-trash-alt"></i></button>
-        </div>
-    </div>
-    <div class="form-row filterHelp">{% trans "Ctrl-click to select multiple options" %}</div>
+    <label class="font-weight-bold" for='id_queues'>{% trans "Queue(s)" %}</label>
+    <select class="custom-select overflow-auto" id='id_queues' name='queue' size='5' style="max-width:100%" multiple>
+        {% for q in queue_choices %}
+        <option value='{{ q.id }}'{% if q.id|in_list:query_params.filtering.queue__id__in %} selected="selected"{% endif %}>{{ q.title }}</option>
+        {% endfor %}
+    </select>
+    <small class="filterHelp">{% trans "Ctrl-click to select multiple options" %}</small>
 </div>
 

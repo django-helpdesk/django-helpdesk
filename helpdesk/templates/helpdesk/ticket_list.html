@@ -321,74 +321,38 @@
                 </div>
                 
                 <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#queryAccordion">
-                    <div class="border-bottom border-top bg-light p-2">
+                    <div class="border-bottom border-top bg-light p-3">
                         <form method="get">
                             <div class="input-group">
-                                <div class="input-group-prepend">
-                                    <label class="input-group-text" for="filterBuilderSelect">{% trans "Add filter" %}</label>
-                                </div>
-                                <select class="custom-select mb-0" aria-describedby="select-description" name="select" id="filterBuilderSelect"onChange="onFilterChange(this.value)">
-                                    <option value="">-----</option>
-                                    <option id="filterBuilderSelect-Sort" value="Sort"{% if query_params.sorting %} disabled{% endif %}>
-                                        {% trans "Sorting" %}
-                                    </option>
-                                    <option id="filterBuilderSelect-Owner" value="Owner"{% if query_params.filtering.assigned_to__id__in %} disabled{% endif %}>
-                                        {% trans "Owner" %}
-                                    </option>
-                                    <option id="filterBuilderSelect-Queue" value="Queue"{% if query_params.filtering.queue__id__in %} disabled{% endif %}>
-                                        {% trans "Queue" %}
-                                    </option>
-                                    <option id="filterBuilderSelect-Status" value="Status"{% if query_params.filtering.status__in %} disabled{% endif %}>
-                                        {% trans "Status" %}
-                                    </option>
-                                    <option id="filterBuilderSelect-Keywords" value="Keywords"{% if query_params.search_string %} disabled{% endif %}>
-                                        {% trans "Keywords" %}
-                                    </option>
-                                    <option id="filterBuilderSelect-Dates" value="Dates"{% if query_params.filtering.created__gte or query_params.filtering.created__lte %} disabled{% endif %}>
-                                        {% trans "Date Range" %}
-                                    </option>
-                                    <option id="filterBuilderSelect-KBItems" value="KBItems"{% if query_params.filtering.kbitem__in %} disabled{% endif %}>
-                                        {% trans "Knowledge base items" %}
-                                    </option>
-                                    <option id="filterBuilderSelect-PairedCount" value="PairedCount"{% if query_params.filtering.paired_count__lte or query_params.filtering.paired_count__gte %} disabled{% endif %}>
-                                        {% trans "Paired Count Range" %}
-                                    </option>
-                                    <option id="filterBuilderSelect-LastReply" value="LastReply"{% if query_params.filtering.last_reply__lte or query_params.filtering.last_reply__gte %} disabled{% endif %}>
-                                        {% trans "Last Reply Range" %}
-                                    </option>
-                                </select>
+                                {% include 'helpdesk/filters/sorting.html' %}
                             </div>
                         </form>
                     </div>
                     <form method="get">
-                        <div class="card-body overflow-auto" style="max-height: 67.75vh;">
-                            
+                        <div class="card-body overflow-auto p-1" style="max-height: 67.75vh;">
                             <ul class="list-group list-group-flush">
-                                <li id="filterBoxSort" class="filterBox{% if query_params.sorting %} filterBoxShow{% endif %} mb-2" id="filterBoxSort">
-                                    {% include 'helpdesk/filters/sorting.html' %}
-                                </li>
-                                <li id="filterBoxOwner" class="filterBox{% if query_params.filtering.assigned_to__id__in %} filterBoxShow{% endif %} mb-2">
+                                <li id="filterBoxOwner" class="list-group-item {% if query_params.filtering.assigned_to__id__in %} filterBoxShow{% endif %} mb-2">
                                     {% include 'helpdesk/filters/owner.html' %}
                                 </li>
-                                <li class=" filterBox{% if query_params.filtering.queue__id__in %} filterBoxShow{% endif %} mb-2"  id="filterBoxQueue">
+                                <li class=" list-group-item {% if query_params.filtering.queue__id__in %} filterBoxShow{% endif %} mb-2"  id="filterBoxQueue">
                                     {% include 'helpdesk/filters/queue.html' %}
                                 </li>
-                                <li class=" filterBox{% if query_params.filtering.status__in %} filterBoxShow{% endif %} mb-2" id="filterBoxStatus">
+                                <li class=" list-group-item {% if query_params.filtering.status__in %} filterBoxShow{% endif %} mb-2" id="filterBoxStatus">
                                     {% include 'helpdesk/filters/status.html' %}
                                 </li>
-                                <li class=" filterBox{% if query_params.filtering.created__gte or query_params.filtering.created__lte %} filterBoxShow{% endif %} mb-2" id='filterBoxDates'>
+                                <li class=" list-group-item {% if query_params.filtering.created__gte or query_params.filtering.created__lte %} filterBoxShow{% endif %} mb-2" id='filterBoxDates'>
                                     {% include 'helpdesk/filters/date.html' %}
                                 </li>
-                                <li class=" filterBox{% if query_params.search_string %} filterBoxShow{% endif %} mb-2" id="filterBoxKeywords">
+                                <li class=" list-group-item {% if query_params.search_string %} filterBoxShow{% endif %} mb-2" id="filterBoxKeywords">
                                     {% include 'helpdesk/filters/keywords.html' %}
                                 </li>
-                                <li class=" filterBox{% if query_params.filtering.kbitem__in %} filterBoxShow{% endif %} mb-2" id="filterBoxKBItems">
+                                <li class=" list-group-item {% if query_params.filtering.kbitem__in %} filterBoxShow{% endif %} mb-2" id="filterBoxKBItems">
                                     {% include 'helpdesk/filters/kbitems.html' %}
                                 </li>
-                                <li class=" filterBox{% if query_params.filtering.paired_count__lte or query_params.filtering.paired_count__gte %} filterBoxShow{% endif %} mb-2" id="filterBoxPairedCount">
+                                <li class=" list-group-item {% if query_params.filtering.paired_count__lte or query_params.filtering.paired_count__gte %} filterBoxShow{% endif %} mb-2" id="filterBoxPairedCount">
                                     {% include 'helpdesk/filters/paired_count.html' %}
                                 </li>
-                                <li class=" filterBox{% if query_params.filtering.last_reply__lte or query_params.filtering.last_reply__gte %} filterBoxShow{% endif %} mb-2" id="filterBoxLastReply">
+                                <li class=" list-group-item {% if query_params.filtering.last_reply__lte or query_params.filtering.last_reply__gte %} filterBoxShow{% endif %} mb-2" id="filterBoxLastReply">
                                     {% include 'helpdesk/filters/last_reply.html' %}
                                 </li>
                                 {% if from_saved_query %}

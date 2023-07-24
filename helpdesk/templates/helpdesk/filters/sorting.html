@@ -3,7 +3,7 @@
 <div class="form-row flex-fill align-self-center">
     <div class="input-group">
         <div class="input-group-prepend">
-            <label class="input-group-text" for='id_sort'>{% trans "Sorting" %}</label>
+            <label class="input-group-text" for='id_sort'>{% trans "Sort By" %}</label>
         </div>
         <!-- TODO Make this a Dynamic List of All the Columns. Show extra_data columns if only 1 queue is selected -->
         <select id='id_sort' name='sort' class="custom-select">
@@ -31,13 +31,11 @@
         </select>
         <div class="input-group-append">
             <div class="btn-group-toggle" data-toggle="buttons">
-                <label class="btn btn-outline-secondary rounded-0">
+                <label class="btn btn-outline-secondary" style="border-top-left-radius: 0; border-bottom-left-radius: 0;">
                     <input type='checkbox' name='sortreverse' id='id_sortreverse' {% if query_params.sortreverse %} checked='checked'{% endif %} />
                     {% trans "Reverse" %}
                 </label>
             </div>
-            <button class="filterBuilderRemove btn btn-danger btn-sm float-right"><i class="fas fa-trash-alt"></i></button>
         </div>
     </div>
-    <div class="form-row filterHelp">{% trans "Ordering applied to tickets" %}</div>
 </div>
