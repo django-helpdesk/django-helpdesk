@@ -1,8 +1,5 @@
 {% load i18n helpdesk_staff %}
 {% block header %}
-<div class="alert alert-warning" role="alert">
-  (7/28/23) Our knowledgebase is currently undergoing maintenance, and some articles will not be accessible until Monday. Thank you for your patience!
-</div>
 <div class="d-flex">
     <h2>{% blocktrans with category.title as kbcat %}{{ kbcat }}{% endblocktrans %}</h2>
     {% if user|is_helpdesk_staff %}

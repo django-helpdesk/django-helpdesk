@@ -10,9 +10,6 @@
 
 {% block helpdesk_body %}
 
-<div class="alert alert-warning" role="alert">
-  (7/28/23) Our knowledgebase is currently undergoing maintenance, and some articles will not be accessible until Monday. Thank you for your patience!
-</div>
 {% if helpdesk_settings.HELPDESK_VIEW_A_TICKET_PUBLIC and not user.is_authenticated and not user|is_helpdesk_staff %}
 <div class="container-fluid">
     <div class="row">
