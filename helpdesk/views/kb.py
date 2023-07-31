@@ -374,7 +374,7 @@ def preview_markdown(request):
 
         def __call__(self, match):
             self.count += 1
-            return self.pattern.format(self.count).replace('\x01', match[1])
+            return self.pattern.format(self.count)
 
     if is_kbitem == 'true':
         import re
@@ -383,17 +383,16 @@ def preview_markdown(request):
         new_md, anchor_target_count = re.subn(anchor_target_pattern, "{: #anchor-\g<1> }", md)
         new_md, anchor_link_count = re.subn(anchor_link_pattern, "[\g<1>](#anchor-\g<2>)", new_md)
 
-        title_pattern = r'^(.*)\n!~!'
+        title_pattern = r'!~!'
         body_pattern = r'~!~'
-        title = "<div markdown='1' class='card mb-2'>\n<div markdown='1' id=\"header{0}\" class='btn btn-link card-header h5' " \
-                "style='text-align: left; 'data-toggle='collapse' data-target='#collapse{0}' role='region' " \
-                "aria-expanded='false' aria-controls='collapse{0}'>\1\n{{: .mb-0}}</div>\n" \
-                "<div markdown='1' id='collapse{0}' class='collapse card-body mt-1' role='region'" \
-                "aria-labelledby='header{0}' data-parent='#header{0}' style='padding-top:0;padding-bottom:0;margin:0;'>"
-        body = "</div>\n</div>"
-
-        new_md, title_count = re.subn(title_pattern, MarkdownNumbers(start=1, pattern=title), new_md, flags=re.MULTILINE)
-        new_md, body_count = re.subn(body_pattern, body, new_md)
+        title = "{{: .card .btn .btn-link style='text-align: left; border-bottom-left-radius: 0; border-bottom-right-radius: 0;' " \
+                "data-toggle='collapse' data-target='#collapse{0}' role='region' " \
+                "aria-expanded='false' aria-controls='collapse{0}' .card-header #header{0} .h5 .mb-0 }}"
+        body = "{{ #collapse{0} .card .collapse role='region' aria-labelledby='header{0}' data-parent='#header{0}' " \
+               "style='padding-top:0;padding-bottom:0;margin:0;border-top-left-radius: 0; border-top-right-radius: 0;' .card-body }}"
+        
+        new_md, title_count = re.subn(title_pattern, MarkdownNumbers(start=1, pattern=title), new_md)
+        new_md, body_count = re.subn(body_pattern, MarkdownNumbers(start=1, pattern=body), new_md)
         if (anchor_target_count != 0) or (title_count != 0 and title_count == body_count):
             return JsonResponse({'md_html': get_markdown(new_md, org, kb=True)})
     return JsonResponse({'md_html': get_markdown(md, org)})
