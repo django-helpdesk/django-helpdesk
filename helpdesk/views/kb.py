@@ -385,10 +385,10 @@ def preview_markdown(request):
 
         title_pattern = r'!~!'
         body_pattern = r'~!~'
-        title = "{{: .card .btn .btn-link style='text-align: left; border-bottom-left-radius: 0; border-bottom-right-radius: 0;' " \
+        title = "{{: .card .d-block .btn .btn-link style='text-align: left; border-bottom-left-radius: 0; border-bottom-right-radius: 0;' " \
                 "data-toggle='collapse' data-target='#collapse{0}' role='region' " \
                 "aria-expanded='false' aria-controls='collapse{0}' .card-header #header{0} .h5 .mb-0 }}"
-        body = "{{ #collapse{0} .card .collapse role='region' aria-labelledby='header{0}' data-parent='#header{0}' " \
+        body = "{{ #collapse{0} .collapse .border role='region' aria-labelledby='header{0}' data-parent='#header{0}' " \
                "style='padding-top:0;padding-bottom:0;margin:0;border-top-left-radius: 0; border-top-right-radius: 0;' .card-body }}"
         
         new_md, title_count = re.subn(title_pattern, MarkdownNumbers(start=1, pattern=title), new_md)
