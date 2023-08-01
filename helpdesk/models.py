@@ -1087,7 +1087,6 @@ class FollowUpAttachment(Attachment):
     )
 
     def attachment_path(self, filename):
-
         os.umask(0)
         path = 'helpdesk/attachments/{ticket_for_url}-{secret_key}/{id_}'.format(
             ticket_for_url=self.followup.ticket.ticket_for_url,
@@ -1109,7 +1108,6 @@ class KBIAttachment(Attachment):
     )
 
     def attachment_path(self, filename):
-
         os.umask(0)
         path = 'helpdesk/attachments/kb/{category}/{kbi}'.format(
             category=self.kbitem.category,

@@ -357,7 +357,7 @@ def upload_attachment(request):
 
             attach.save()
 
-            return JsonResponse({'uploaded': True, 'id': attach.id, 'url': attach.attachment_path(attach.filename)})
+            return JsonResponse({'uploaded': True, 'id': attach.id, 'url': attach.file.url})
     else:
         return JsonResponse({'uploaded': False, 'errors': form.errors})
 
