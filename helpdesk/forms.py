@@ -23,7 +23,7 @@ from django.shortcuts import get_object_or_404
 from helpdesk.lib import safe_template_context, process_attachments
 from helpdesk.models import (Ticket, Queue, FollowUp, IgnoreEmail, TicketCC,
                              CustomField, TicketDependency, UserSettings, KBItem,
-                             FormType, KBCategory, KBIAttachment, is_extra_data, PreSetReply)
+                             FormType, KBCategory, KBIAttachment, is_extra_data, PreSetReply, EmailTemplate, clean_html)
 from helpdesk import settings as helpdesk_settings
 from helpdesk.email import create_ticket_cc
 from helpdesk.decorators import list_of_helpdesk_staff
@@ -1117,6 +1117,23 @@ class PreSetReplyForm(forms.ModelForm):
 
         if self.organization:
             self.fields['queues'].queryset = self.organization.queue_set.all()
+
+
+class EmailTemplateForm(forms.ModelForm):
+    html = forms.CharField(widget=PreviewWidget, help_text=EmailTemplate.html.field.help_text)
+
+    class Meta:
+        model = EmailTemplate
+        exclude = ['organization', 'locale']
+
+    def __init__(self, *args, **kwargs):
+        super(EmailTemplateForm, self).__init__(*args, **kwargs)
+        self.fields['template_name'].disabled = True
+
+    def clean_html(self):
+        html = self.cleaned_data['html']
+        html = clean_html(html)
+        return html
 
 
 class TicketCCForm(forms.ModelForm):

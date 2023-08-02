@@ -116,6 +116,31 @@ def _cleaner_shorten_url(attrs, new=False):
     return attrs
 
 
+def clean_html(text):
+    # bleach is deprecated, and nh3 is a better alternative, but it doesn't have a built-in CSS style sanitizer
+    # https://nh3.readthedocs.io/en/latest/
+    """
+    for k, v in markdown_attrs.items():
+        markdown_attrs[k] = set(v)
+    for k, v in print_attrs.items():
+        print_attrs[k] = set(v)
+
+    cleaned_text = nh3.clean(
+        text,
+        tags=set(markdown_tags),
+        attributes={**markdown_attrs}
+    )
+    """
+    css_sanitizer = CSSSanitizer(allowed_css_properties=['font-family', 'font-size'])
+    cleaned_text = bleach.clean(
+        text,
+        tags=markdown_tags,
+        attributes={**markdown_attrs, 'p': 'style', 'blockquote': 'style'},
+        css_sanitizer=css_sanitizer,
+    )
+    return cleaned_text
+
+
 def get_markdown(text, org, kb=False):
     if not text:
         return ""
@@ -133,7 +158,7 @@ def get_markdown(text, org, kb=False):
         extensions.append('markdown.extensions.attr_list')
         collapsible_attrs = {"p": ["data-target", "data-toggle", "data-parent", "role",
                                    'aria-controls', 'aria-expanded', 'aria-labelledby', 'id']}
-        header_attrs = {"h1": ['id'],"h2": ['id'], "h3": ['id'], "h4": ['id'], "h5": ['id'], "h6": ['id'],}
+        header_attrs = {"h1": ['id'], "h2": ['id'], "h3": ['id'], "h4": ['id'], "h5": ['id'], "h6": ['id']}
 
     css_sanitizer = CSSSanitizer(allowed_css_properties=all_styles)
     cleaner = Cleaner(
@@ -1284,6 +1309,9 @@ class EmailTemplate(models.Model):
         ordering = ('template_name', 'locale')
         verbose_name = _('e-mail template')
         verbose_name_plural = _('e-mail templates')
+
+    def clean_html(self):
+        return clean_html(self.html)
 
 
 class KBCategory(models.Model):

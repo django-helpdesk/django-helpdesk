@@ -26,6 +26,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.utils.translation import ugettext as _
 from django.utils.html import escape
 from django.utils import timezone
+from django.utils.safestring import mark_safe
 from django.views.generic.edit import FormView, UpdateView
 
 from helpdesk.forms import CUSTOMFIELD_DATE_FORMAT, CUSTOMFIELD_DATETIME_FORMAT, PreviewWidget
@@ -50,7 +51,7 @@ from helpdesk.decorators import (
 from helpdesk.forms import (
     TicketForm, UserSettingsForm, EmailIgnoreForm, EditTicketForm, TicketCCForm,
     TicketCCEmailForm, TicketCCUserForm, EditFollowUpForm, TicketDependencyForm, MultipleTicketSelectForm,
-    EditQueueForm, EditFormTypeForm, PreSetReplyForm
+    EditQueueForm, EditFormTypeForm, PreSetReplyForm, EmailTemplateForm
 )
 from helpdesk.lib import (
     safe_template_context,
@@ -60,7 +61,7 @@ from helpdesk.lib import (
 from helpdesk.models import (
     Ticket, Queue, FollowUp, TicketChange, PreSetReply, FollowUpAttachment, SavedSearch,
     IgnoreEmail, TicketCC, TicketDependency, UserSettings, KBItem, CustomField, is_unlisted,
-    FormType, get_markdown
+    FormType, EmailTemplate, get_markdown, clean_html
 )
 
 from helpdesk import settings as helpdesk_settings
@@ -120,6 +121,12 @@ def set_default_org(request, user_id, org_id):
 
 
 @helpdesk_staff_member_required
+def preview_html(request):
+    md = request.POST.get('md')
+    return JsonResponse({'md_html': clean_html(md)})
+
+
+@helpdesk_staff_member_required
 def preview_markdown(request):
     md = request.POST.get('md')
     is_kbitem = request.POST.get('is_kbitem', 'false')
@@ -175,7 +182,7 @@ def _get_queue_choices(queues):
 def queue_list(request):
     huser = HelpdeskUser(request.user)
     queue_list = huser.get_queues()                # Queues in user's default org (or all if superuser)
-    
+
     # user settings num tickets per page
     if request.user.is_authenticated and hasattr(request.user, 'usersettings_helpdesk'):
         queues_per_page = request.user.usersettings_helpdesk.tickets_per_page
@@ -228,7 +235,7 @@ def create_queue(request):
             )
             queue.save()
             return HttpResponseRedirect(reverse('helpdesk:maintain_queues'))
-        
+
         redo_form = EditQueueForm(
             "create", 
             request.POST, 
@@ -302,9 +309,9 @@ def edit_queue(request, slug):
             queue.default_owner = form.cleaned_data['default_owner']
             queue.reassign_when_closed = form.cleaned_data['reassign_when_closed']
             queue.dedicated_time = form.cleaned_data['dedicated_time']
-            
+
             queue.save()
-        return HttpResponseRedirect(reverse('helpdesk:maintain_queues')) 
+        return HttpResponseRedirect(reverse('helpdesk:maintain_queues'))
 
 
 @helpdesk_staff_member_required
@@ -2571,6 +2578,44 @@ def preset_reply_delete(request, id):
 
 
 preset_reply_delete = superuser_required(preset_reply_delete)
+
+
+@helpdesk_superuser_required
+def email_template_list(request):
+    org = request.user.default_organization.helpdesk_organization
+    templates = EmailTemplate.objects.filter(organization=org)
+    template_list = []
+    for template in templates:
+        template_list.append({
+            'id': template.id,
+            'template_name': template.template_name,
+            'subject': template.subject,
+            'heading': template.heading,
+            'plain_text': template.plain_text,
+            'html': mark_safe(template.clean_html())
+        })
+
+    return render(request, 'helpdesk/email_template_list.html', {
+        'template_list': template_list,
+        'debug': settings.DEBUG,
+    })
+
+
+email_template_list = superuser_required(email_template_list)
+
+
+@helpdesk_staff_member_required
+def email_template_edit(request, id):
+    template = get_object_or_404(EmailTemplate, id=id)
+    form = EmailTemplateForm(request.POST or None, instance=template)
+    if form.is_valid():
+        form.save()
+        return HttpResponseRedirect(reverse('helpdesk:email_template_list'))
+
+    return render(request, 'helpdesk/email_template_edit.html', {'form': form, 'debug': settings.DEBUG})
+
+
+email_template_edit = superuser_required(email_template_edit)
 
 
 @helpdesk_staff_member_required
