@@ -479,12 +479,12 @@ class EditFormTypeForm(forms.ModelForm):
                     field_names.add(cleaned_data['field_name'])
                     after = len(field_names)
 
-                    if (before == after): # or CustomField.objects.filter(field_name=cleaned_data['field_name'], ticket_form=self.ticket_form).exists():
+                    if before == after:  # or CustomField.objects.filter(field_name=cleaned_data['field_name'], ticket_form=self.ticket_form).exists():
                         raise ValidationError(["Custom Field with name \"" + cleaned_data['field_name'] + "\" already exists for this form."])
 
     CustomFieldFormSet = forms.inlineformset_factory(FormType, CustomField, formset=BaseCustomFieldFormSet,
-        exclude = ['choices_as_array', 'ticket_form', 'created', 'modified','objects','view_ordering'],
-        widgets = {'help_text': PreviewWidget}
+        exclude=['choices_as_array', 'ticket_form', 'created', 'modified', 'objects', 'view_ordering'],
+        widgets={'help_text': PreviewWidget}
     )
 
     class Meta:
@@ -532,7 +532,8 @@ class EditFormTypeForm(forms.ModelForm):
                     'required': cf.required,
                     'staff': cf.staff,
                     'public': cf.public,
-                    'column': cf.column
+                    'column': cf.column,
+                    'lookup': cf.lookup,
                 })
                 if cf.list_values: 
                     list_val_lens.append(len(cf.list_values))
@@ -552,11 +553,11 @@ class EditFormTypeForm(forms.ModelForm):
             for form in self.customfield_formset.forms:
                 form.fields['column'] = EditFormTypeForm.BaseCustomFieldFormSet.ColumnModelChoiceField(queryset=column_queryset)
                 form.fields['agg_list_values'] = forms.JSONField(widget=forms.HiddenInput(), required=False)
-                form.fields['list_values'] = MatchOnField(num_widgets= list_val_lens[i] + 1, field_type=forms.CharField(), widget_type=forms.TextInput(), required=False)
+                form.fields['list_values'] = MatchOnField(num_widgets=list_val_lens[i] + 1, field_type=forms.CharField(), widget_type=forms.TextInput(), required=False)
                 if form.initial and form.initial['field_name'] in defaults:
                     form.fields['field_name'].widget.attrs = {'readonly': True}
                     if form.initial['data_type'] in ['varchar', 'text']:
-                        form.fields['data_type'].choices = (('varchar', _('Character (single line)')),('text', _('Text (multi-line)')))
+                        form.fields['data_type'].choices = (('varchar', _('Character (single line)')), ('text', _('Text (multi-line)')))
                     else:
                         form.fields['data_type'].widget.attrs = {'readonly': True, 'style': 'pointer-events: none;'}
                 i += 1

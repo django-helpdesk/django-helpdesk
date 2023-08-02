@@ -333,8 +333,8 @@ if helpdesk_settings.HELPDESK_KB_ENABLED:
             kb.edit_article,
             name="edit_kb_article"),
 
-        url(r'^kb/preview_markdown$',
-            kb.preview_markdown,
+        url(r'^preview_markdown$',
+            staff.preview_markdown,
             name="preview_markdown"),
 
         url(r'^kb/upload_attachment',

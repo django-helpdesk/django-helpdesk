@@ -60,7 +60,7 @@ from helpdesk.lib import (
 from helpdesk.models import (
     Ticket, Queue, FollowUp, TicketChange, PreSetReply, FollowUpAttachment, SavedSearch,
     IgnoreEmail, TicketCC, TicketDependency, UserSettings, KBItem, CustomField, is_unlisted,
-    FormType
+    FormType, get_markdown
 )
 
 from helpdesk import settings as helpdesk_settings
@@ -119,6 +119,44 @@ def set_default_org(request, user_id, org_id):
     return redirect(url)
 
 
+@helpdesk_staff_member_required
+def preview_markdown(request):
+    md = request.POST.get('md')
+    is_kbitem = request.POST.get('is_kbitem', 'false')
+    org = request.user.default_organization
+
+    class MarkdownNumbers(object):
+        def __init__(self, start=1, pattern=''):
+            self.count = start - 1
+            self.pattern = pattern
+
+        def __call__(self, match):
+            self.count += 1
+            return self.pattern.format(self.count).replace('\x01', match[1])
+
+    if is_kbitem == 'true':
+        import re
+        anchor_target_pattern = r'{\:\s*#(\w+)\s*}'
+        anchor_link_pattern = r'\[(.+)\]\(#(\w+)\)'
+        new_md, anchor_target_count = re.subn(anchor_target_pattern, "{: #anchor-\g<1> }", md)
+        new_md, anchor_link_count = re.subn(anchor_link_pattern, "[\g<1>](#anchor-\g<2>)", new_md)
+
+        title_pattern = r'^(.*)\n!~!'
+        body_pattern = r'~!~'
+        title = "<div markdown='1' class='card mb-2'>\n<div markdown='1' id=\"header{0}\" class='btn btn-link card-header h5' " \
+                "style='text-align: left; 'data-toggle='collapse' data-target='#collapse{0}' role='region' " \
+                "aria-expanded='false' aria-controls='collapse{0}'>\1\n{{: .mb-0}}</div>\n" \
+                "<div markdown='1' id='collapse{0}' class='collapse card-body mt-1' role='region'" \
+                "aria-labelledby='header{0}' data-parent='#header{0}' style='padding-top:0;padding-bottom:0;margin:0;'>"
+        body = "</div>\n</div>"
+
+        new_md, title_count = re.subn(title_pattern, MarkdownNumbers(start=1, pattern=title), new_md, flags=re.MULTILINE)
+        new_md, body_count = re.subn(body_pattern, body, new_md)
+        if (anchor_target_count != 0) or (title_count != 0 and title_count == body_count):
+            return JsonResponse({'md_html': get_markdown(new_md, org, kb=True)})
+    return JsonResponse({'md_html': get_markdown(md, org)})
+
+
 def _get_queue_choices(queues):
     """Return list of `choices` array for html form for given queues
 
@@ -162,8 +200,9 @@ def queue_list(request):
 
 @helpdesk_staff_member_required
 def create_queue(request):
+    org = request.user.default_organization.helpdesk_organization
     if request.method == "GET":
-        form = EditQueueForm("create", organization=request.user.default_organization.id)
+        form = EditQueueForm("create", organization=org.id)
 
         return render(request, 'helpdesk/edit_queue.html', {
             'form': form,
@@ -171,11 +210,11 @@ def create_queue(request):
             'debug': settings.DEBUG,
         })
     elif request.method == "POST":
-        form = EditQueueForm("create", request.POST, organization=request.user.default_organization.id)
+        form = EditQueueForm("create", request.POST, organization=org.id)
 
         if form.is_valid():
             queue = Queue(
-                organization = request.user.default_organization,
+                organization = org,
                 title = form.cleaned_data['title'],
                 slug = form.cleaned_data['slug'], # no change
                 match_on = [i for i in form.cleaned_data['agg_match_on'] if i], # remove empty strings
@@ -193,7 +232,7 @@ def create_queue(request):
         redo_form = EditQueueForm(
             "create", 
             request.POST, 
-            organization=request.user.default_organization.id,
+            organization=org.id,
             initial = {
                 'title': form.cleaned_data['title'],
                 'slug': form.data['slug'], # no change
@@ -220,11 +259,12 @@ def create_queue(request):
 def edit_queue(request, slug):
     """Edit Queue"""
     queue = get_object_or_404(Queue, slug=slug)
+    org = request.user.default_organization.helpdesk_organization
 
     if request.method == "GET":
         form = EditQueueForm(
             "edit",
-            organization=request.user.default_organization.id,
+            organization=org.id,
             initial = {
                 'organization': queue.organization.id,
                 'title': queue.title,
@@ -250,7 +290,7 @@ def edit_queue(request, slug):
             'debug': settings.DEBUG,
         })
     elif request.method == "POST":
-        form = EditQueueForm("edit", request.POST, organization=request.user.default_organization.id)
+        form = EditQueueForm("edit", request.POST, organization=org.id)
         if form.is_valid():
             queue.title = form.cleaned_data['title']
             # queue.slug = form.cleaned_data['slug'] # no change
@@ -269,7 +309,8 @@ def edit_queue(request, slug):
 
 @helpdesk_staff_member_required
 def form_list(request):
-    form_list = FormType.objects.filter(organization=request.user.default_organization)
+    org = request.user.default_organization.helpdesk_organization
+    form_list = FormType.objects.filter(organization=org)
     
     # user settings num tickets per page
     if request.user.is_authenticated and hasattr(request.user, 'usersettings_helpdesk'):
@@ -292,13 +333,14 @@ def form_list(request):
         'debug': settings.DEBUG,
     })
 
+
 @helpdesk_staff_member_required
 def create_form(request):
-    organization = request.user.default_organization
+    org = request.user.default_organization.helpdesk_organization
     
     if request.method == "GET":
         # Create empty form and save it to the database to generate the default Custom Fields.
-        formtype = FormType(organization = organization, name="Unnamed Form")
+        formtype = FormType(organization = org, name="Unnamed Form")
         formtype.save()
         form = EditFormTypeForm(
             initial = {
@@ -311,7 +353,7 @@ def create_form(request):
                 'unlisted': formtype.unlisted
             },
             initial_customfields = CustomField.objects.filter(ticket_form=formtype),
-            organization = organization,
+            organization = org,
             pk = formtype.id
         )
 
@@ -322,7 +364,7 @@ def create_form(request):
             'debug': settings.DEBUG,
         })
     elif request.method == "POST":
-        form = EditFormTypeForm(request.POST, organization = organization)
+        form = EditFormTypeForm(request.POST, organization = org)
         formtype = get_object_or_404(FormType, pk=request.POST.get('id'))
         formset = form.CustomFieldFormSet(request.POST)
 
@@ -454,11 +496,13 @@ def edit_form(request, pk):
             'debug': settings.DEBUG,             
         })
 
+
 @helpdesk_staff_member_required
 def delete_form(request, pk):
     form = get_object_or_404(FormType, pk=pk)
     form.delete()
     return HttpResponseRedirect(reverse('helpdesk:maintain_forms'))
+
 
 @helpdesk_staff_member_required
 def duplicate_form(request, pk):
@@ -499,6 +543,7 @@ def duplicate_form(request, pk):
         )
         new_cf.save()
     return HttpResponseRedirect(reverse('helpdesk:maintain_forms'))
+
 
 def copy_field(request):
     """
@@ -3263,7 +3308,7 @@ def export_ticket_table(request, tickets):
     num_queues = request.POST.get('queue_length', '0')
 
     qs = Ticket.objects.filter(id__in=tickets)
-    org = request.user.default_organization
+    org = request.user.default_organization.helpdesk_organization
     do_extra_data = int(num_queues) == 1
 
     return export(qs, org, DatatablesTicketSerializer, do_extra_data=do_extra_data, visible_cols=visible_cols)
@@ -3283,7 +3328,7 @@ def export_report(request):
                                ).order_by('created', 'ticket_form'
                                           ).select_related('ticket_form__organization', 'assigned_to', 'queue',
                                                            ).prefetch_related('followup_set__user', 'beam_property')
-    org = request.user.default_organization
+    org = request.user.default_organization.helpdesk_organization
 
     return export(qs, org, ReportTicketSerializer, paginate=paginate)
 
