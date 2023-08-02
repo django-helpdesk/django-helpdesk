@@ -31,6 +31,7 @@ import bleach
 from bleach.linkifier import LinkifyFilter
 from bleach.sanitizer import Cleaner
 from bleach_allowlist import markdown_tags, markdown_attrs, print_tags, print_attrs, all_styles
+from bleach.css_sanitizer import CSSSanitizer
 from urllib.parse import urlparse, quote
 from functools import partial
 
@@ -133,6 +134,8 @@ def get_markdown(text, org, kb=False):
         collapsible_attrs = {"p": ["data-target", "data-toggle", "data-parent", "role",
                                    'aria-controls', 'aria-expanded', 'aria-labelledby', 'id']}
         header_attrs = {"h1": ['id'],"h2": ['id'], "h3": ['id'], "h4": ['id'], "h5": ['id'], "h6": ['id'],}
+
+    css_sanitizer = CSSSanitizer(allowed_css_properties=all_styles)
     cleaner = Cleaner(
         filters=[partial(LinkifyFilter, callbacks=[partial(_cleaner_set_target, domain), _cleaner_shorten_url])],
         tags=markdown_tags + print_tags,
@@ -140,7 +143,7 @@ def get_markdown(text, org, kb=False):
                     **print_attrs,
                     **collapsible_attrs,
                     **header_attrs},
-        styles=all_styles
+        css_sanitizer=css_sanitizer
     )
     cleaned = cleaner.clean(markdown(text, extensions=extensions))
     return mark_safe(cleaned)

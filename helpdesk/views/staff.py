@@ -60,7 +60,7 @@ from helpdesk.lib import (
 from helpdesk.models import (
     Ticket, Queue, FollowUp, TicketChange, PreSetReply, FollowUpAttachment, SavedSearch,
     IgnoreEmail, TicketCC, TicketDependency, UserSettings, KBItem, CustomField, is_unlisted,
-    FormType
+    FormType, get_markdown
 )
 
 from helpdesk import settings as helpdesk_settings
@@ -117,6 +117,44 @@ def set_default_org(request, user_id, org_id):
     query = query_dict.urlencode()
     url = urlunparse((scheme, netloc, path, params, query, fragment))
     return redirect(url)
+
+
+@helpdesk_staff_member_required
+def preview_markdown(request):
+    md = request.POST.get('md')
+    is_kbitem = request.POST.get('is_kbitem', 'false')
+    org = request.user.default_organization
+
+    class MarkdownNumbers(object):
+        def __init__(self, start=1, pattern=''):
+            self.count = start - 1
+            self.pattern = pattern
+
+        def __call__(self, match):
+            self.count += 1
+            return self.pattern.format(self.count).replace('\x01', match[1])
+
+    if is_kbitem == 'true':
+        import re
+        anchor_target_pattern = r'{\:\s*#(\w+)\s*}'
+        anchor_link_pattern = r'\[(.+)\]\(#(\w+)\)'
+        new_md, anchor_target_count = re.subn(anchor_target_pattern, "{: #anchor-\g<1> }", md)
+        new_md, anchor_link_count = re.subn(anchor_link_pattern, "[\g<1>](#anchor-\g<2>)", new_md)
+
+        title_pattern = r'^(.*)\n!~!'
+        body_pattern = r'~!~'
+        title = "<div markdown='1' class='card mb-2'>\n<div markdown='1' id=\"header{0}\" class='btn btn-link card-header h5' " \
+                "style='text-align: left; 'data-toggle='collapse' data-target='#collapse{0}' role='region' " \
+                "aria-expanded='false' aria-controls='collapse{0}'>\1\n{{: .mb-0}}</div>\n" \
+                "<div markdown='1' id='collapse{0}' class='collapse card-body mt-1' role='region'" \
+                "aria-labelledby='header{0}' data-parent='#header{0}' style='padding-top:0;padding-bottom:0;margin:0;'>"
+        body = "</div>\n</div>"
+
+        new_md, title_count = re.subn(title_pattern, MarkdownNumbers(start=1, pattern=title), new_md, flags=re.MULTILINE)
+        new_md, body_count = re.subn(body_pattern, body, new_md)
+        if (anchor_target_count != 0) or (title_count != 0 and title_count == body_count):
+            return JsonResponse({'md_html': get_markdown(new_md, org, kb=True)})
+    return JsonResponse({'md_html': get_markdown(md, org)})
 
 
 def _get_queue_choices(queues):
