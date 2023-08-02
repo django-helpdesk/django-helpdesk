@@ -19,4 +19,9 @@ class Migration(migrations.Migration):
             name='organization',
             field=models.ForeignKey(on_delete=models.deletion.CASCADE, to='orgs.organization'),
         ),
+        migrations.AlterField(
+            model_name='ignoreemail',
+            name='modified',
+            field=models.DateField(blank=True, default=None, editable=False, help_text='Date on which this e-mail address was last modified', verbose_name='Last Modified'),
+        ),
     ]

@@ -18,7 +18,7 @@ def add_orgs_to_replies(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('helpdesk', '0091_auto_20230719_1508'),
+        ('helpdesk', '0091_add_presetreply_organization'),
     ]
 
     operations = [

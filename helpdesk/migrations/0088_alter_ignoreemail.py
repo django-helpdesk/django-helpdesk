@@ -25,4 +25,9 @@ class Migration(migrations.Migration):
             name='modified',
             field=models.DateField(blank=True, null=True, default=None, editable=False, help_text='Date on which this e-mail address was last modified', verbose_name='Last Modified'),
         ),
+        migrations.AlterField(
+            model_name='ignoreemail',
+            name='email_address',
+            field=models.CharField(help_text='Enter a full e-mail address, or portions with wildcards, eg *@domain.com or postmaster@*.', max_length=150, verbose_name='Email Address'),
+        ),
     ]

@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('orgs', '0045_merge_beam03'),
-        ('helpdesk', '0092_auto_20230720_1156'),
+        ('helpdesk', '0092_move_presetreply_organization'),
     ]
 
     operations = [
