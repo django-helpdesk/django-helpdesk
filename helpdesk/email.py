@@ -944,9 +944,12 @@ def object_from_message(message, importer, queues, logger):
 def object_from_exchange_message(message, importer, queues, logger):
 
     subject = message.subject
-    for affix in STRIPPED_SUBJECT_STRINGS:
-        subject = subject.replace(affix, "")
-    subject = subject.strip()
+    if subject:
+        for affix in STRIPPED_SUBJECT_STRINGS:
+            subject = subject.replace(affix, "")
+        subject = subject.strip()
+    else:
+        subject = ''
 
     if getattr(message, 'author', None):
         sender = (message.author.name, message.author.email_address.lower())
