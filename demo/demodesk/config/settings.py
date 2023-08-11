@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'pinax.teams',  # team support
     'helpdesk',  # This is us!
     'reversion',  # required by pinax-teams
+    'storages'
 ]
 
 MIDDLEWARE = [

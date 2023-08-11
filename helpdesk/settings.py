@@ -3,9 +3,13 @@ Default settings for django-helpdesk.
 
 """
 import warnings
+import os
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
+from dotenv import load_dotenv
 from seed.lib.superperms.orgs.decorators import has_perm
+
+load_dotenv()
 
 DEFAULT_USER_SETTINGS = {
     'login_view_ticketlist': True,
@@ -14,6 +18,7 @@ DEFAULT_USER_SETTINGS = {
     'tickets_per_page': 25,
     'use_email_as_submitter': True,
 }
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 try:
     DEFAULT_USER_SETTINGS.update(settings.HELPDESK_DEFAULT_SETTINGS)
@@ -171,3 +176,21 @@ HELPDESK_ALWAYS_SAVE_INCOMING_EMAIL_MESSAGE = getattr(settings, "HELPDESK_ALWAYS
 
 # TODO should be based on organization
 HELPDESK_EMAIL_FORM_NAME = getattr(settings, "HELPDESK_EMAIL_TICKET_FORM", "Email Form")
+
+
+USE_S3 = os.getenv('USE_S3') == 'TRUE'
+if USE_S3:
+    # aws settings
+    AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
+    AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
+    AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
+    AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com"
+    AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
+    AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME')
+    # s3 media settings
+    MEDIA_ROOT = "media"
+    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{MEDIA_ROOT}/'
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+else:
+    MEDIA_URL = '/media/'
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

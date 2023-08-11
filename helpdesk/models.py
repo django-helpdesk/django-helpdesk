@@ -43,6 +43,7 @@ from helpdesk import settings as helpdesk_settings
 from helpdesk.decorators import is_helpdesk_staff
 
 from .templated_email import send_templated_mail
+from django.core.files.storage import default_storage
 
 from seed.lib.superperms.orgs.models import Organization, get_helpdesk_count_by_domain
 from seed.models import (
@@ -1088,6 +1089,16 @@ class FollowUpAttachment(Attachment):
         on_delete=models.CASCADE,
         verbose_name=_('Follow-up'),
     )
+    def get_upload_path(self, filename):
+        path = os.path.join(settings.MEDIA_ROOT, 'helpdesk/attachments/{ticket_for_url}-{secret_key}/{id_}'.format(
+               ticket_for_url=self.followup.ticket.ticket_for_url,
+               secret_key=self.followup.ticket.secret_key,
+               id_=self.followup.id), filename)
+
+        # Get a unique filename using the get_available_name method in default_storage
+        s = default_storage
+        return s.get_available_name(path)
+
 
     def attachment_path(self, filename):
         os.umask(0)
@@ -1099,6 +1110,8 @@ class FollowUpAttachment(Attachment):
         if settings.DEFAULT_FILE_STORAGE == "django.core.files.storage.FileSystemStorage":
             if not os.path.exists(att_path):
                 os.makedirs(att_path, 0o777)
+        if settings.USE_S3 is True:
+            self.get_upload_path(filename)
         return os.path.join(path, filename)
 
 
@@ -1109,6 +1122,13 @@ class KBIAttachment(Attachment):
         on_delete=models.CASCADE,
         verbose_name=_('Knowledgebase Article'),
     )
+    def get_upload_path(self, filename):
+        path = os.path.join(settings.MEDIA_ROOT, 'helpdesk/attachments/kb/{category}/{kbi}'.format(
+            category=self.kbitem.category,
+            kbi=self.kbitem.id), filename)
+        # Get a unique filename using the get_available_name method in default_storage
+        s = default_storage
+        return s.get_available_name(path)
 
     def attachment_path(self, filename):
         os.umask(0)
@@ -1119,6 +1139,8 @@ class KBIAttachment(Attachment):
         if settings.DEFAULT_FILE_STORAGE == "django.core.files.storage.FileSystemStorage":
             if not os.path.exists(att_path):
                 os.makedirs(att_path, 0o777)
+        if settings.USE_S3 is True:
+            self.get_upload_path(filename)
         return os.path.join(path, filename)
 
 
