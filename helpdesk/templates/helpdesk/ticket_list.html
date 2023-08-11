@@ -227,7 +227,6 @@
                 <!-- Pagination Toolbar -->
                 <div class="d-flex flex-wrap border-top px-2 mb-2" style="//background-color: #f7f7f7">
                     {% with 't_page' as page_var %}
-                    {% if ticket_list.has_other_pages %}
                     <div class="d-flex align-items-center mt-2">
                         <div class="input-group">
                             <div class="input-group-prepend">
@@ -280,7 +279,6 @@
                             </div>
                         </div>
                     </div>
-                    {% endif %}
                     {% endwith %}
                 </div>
                 <!-- / Pagination Toolbar -->
