@@ -319,14 +319,13 @@
                 </div>
                 
                 <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#queryAccordion">
-                    <div class="border-bottom border-top bg-light p-3">
-                        <form method="get">
+                    <form method="get">
+                        <div class="border-bottom border-top bg-light p-3">
                             <div class="input-group">
                                 {% include 'helpdesk/filters/sorting.html' %}
                             </div>
-                        </form>
-                    </div>
-                    <form method="get">
+                        </div>
+                        
                         <div class="card-body overflow-auto p-1" style="max-height: 67.75vh;">
                             <ul class="list-group list-group-flush">
                                 <li id="filterBoxOwner" class="list-group-item {% if query_params.filtering.assigned_to__id__in %} filterBoxShow{% endif %} mb-2">
