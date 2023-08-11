@@ -1,14 +1,9 @@
 {% load i18n %}
-<div class="form-row">
+<div class="">
+    <label class="font-weight-bold" for='id_last_reply'>{% trans "Last Reply Date Range" %}</label>
     <div class="input-group">
-        <div class="input-group-prepend">
-            <label class="input-group-text d-flex" for='id_last_reply'>{% trans "Last Reply" %}</label>
-        </div>
         <input class="form-control" type='date' name='last_reply_from' value='{{ query_params.filtering.last_reply__gte }}' placeholder="From" id='id_last_reply_from' style="max-width:100%" />
         <input class="form-control" type='date' name='last_reply_to' value='{{ query_params.filtering.last_reply__lte }}' placeholder="To" id='id_last_reply_to' style="max-width:100%" />
-        <div class="input-group-append">
-            <button class="filterBuilderRemove btn btn-danger btn-sm"><i class="fas fa-trash-alt"></i></button>
-        </div>
     </div>
-    <p class='filterHelp'>{% trans "Range from the 1st date to the 2nd date" %}</p>
+    <small class='filterHelp'>{% trans "Range from the 1st date to the 2nd date" %}</small>
 </div>

@@ -1,13 +1,6 @@
 {% load i18n humanize %}
-<div class="form-row">
-    <div class="input-group">
-        <div class="input-group-prepend">
-            <label class="input-group-text d-flex" for='id_keywords'>{% trans "Keywords" %}</label>
-        </div>
-        <input class="form-control" type='text' name='q' value='{{ query_params.search_string }}' id='id_keywords' style="max-width:100%;"/>
-        <div class="input-group-append">
-            <button class="filterBuilderRemove btn btn-danger btn-sm"><i class="fas fa-trash-alt"></i></button>
-        </div>
-    </div>
-    <p class='filterHelp'>{% trans "Keywords are case-insensitive, and will be looked for pretty much everywhere possible. Prepend with 'queue:' or 'priority:' to search by queue or priority. You can also use the keyword OR to combine multiple searches." %}</p>
+<div class="">
+    <label class="font-weight-bold" for='id_keywords'>{% trans "Keywords" %}</label>
+    <input class="form-control" type='text' name='q' value='{{ query_params.search_string }}' id='id_keywords' style="max-width:100%;"/>
+    <small class='filterHelp'>{% trans "Keywords are case-insensitive, and will be looked for pretty much everywhere possible. Prepend with 'queue:' or 'priority:' to search by queue or priority. You can also use the keyword OR to combine multiple searches." %}</small>
 </div>

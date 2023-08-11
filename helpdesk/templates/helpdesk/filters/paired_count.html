@@ -1,14 +1,9 @@
 {% load i18n %}
-<div class="form-row">
+<div class="">
+    <label class="font-weight-bold" for='id_paired_count'>{% trans "Paired Count" %}</label>
     <div class="input-group">
-        <div class="input-group-prepend">
-            <label class="input-group-text d-flex" for='id_paired_count'>{% trans "Paired Count" %}</label>
-        </div>
         <input class="form-control" type='text' name='paired_count_from' value='{{ query_params.filtering.paired_count__gte }}' id='id_paired_count_from' placeholder="From" style="max-width:100%" />
         <input class="form-control" type='text' name='paired_count_to' value='{{ query_params.filtering.paired_count__lte }}' id='id_paired_count_to' placeholder="To" style="max-width:100%" />
-        <div class="input-group-append">
-            <button class="filterBuilderRemove btn btn-danger btn-sm"><i class="fas fa-trash-alt"></i></button>
-        </div>
     </div>
-    <p class='filterHelp'></p>
+    <small class='filterHelp'></small>
 </div>

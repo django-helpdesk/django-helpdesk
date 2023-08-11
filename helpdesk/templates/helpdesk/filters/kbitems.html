@@ -1,24 +1,17 @@
 {% load i18n humanize %}
 {% load static %}
 {% load in_list %}
-<div class="form-row">
-    <div class="input-group">
-        <div class="input-group-prepend flex-shrink-1">
-            <label class="input-group-text text-wrap d-flex" for='id_kbitems'>{% trans "Knowledge </br> base </br> item(s)" %}</label>
-        </div>
-        <select class="custom-select overflow-auto" id='id_kbitems' name='kbitem' size='5' style="max-width:100%" multiple>
-            {% with magic_number=-1 %}
-            <option value='{{magic_number}}'{% if magic_number|in_list:query_params.filtering.kbitem__in %} selected='selected'{% endif %}>
-                {% trans "Uncategorized" %}
-            </option>
-            {% endwith %}
-            {% for s in kbitem_choices %}
-            <option value='{{ s.0 }}'{% if s.0|in_list:query_params.filtering.kbitem__in %} selected='selected'{% endif %}>{{ s.1 }}</option>
-            {% endfor %}
-        </select>
-        <div class="input-group-append">
-            <button class="filterBuilderRemove btn btn-danger btn-sm"><i class="fas fa-trash-alt"></i></button>
-        </div>
-    </div>
-    <div class="form-row filterHelp">{% trans "Ctrl-click to select multiple options" %}</div>
+<div class="">
+    <label class="font-weight-bold" for='id_kbitems'>{% trans "Knowledge Base Item(s)" %}</label>
+    <select class="custom-select overflow-auto" id='id_kbitems' name='kbitem' size='5' style="max-width:100%" multiple>
+        {% with magic_number=-1 %}
+        <option value='{{magic_number}}'{% if magic_number|in_list:query_params.filtering.kbitem__in %} selected='selected'{% endif %}>
+            {% trans "Uncategorized" %}
+        </option>
+        {% endwith %}
+        {% for s in kbitem_choices %}
+        <option value='{{ s.0 }}'{% if s.0|in_list:query_params.filtering.kbitem__in %} selected='selected'{% endif %}>{{ s.1 }}</option>
+        {% endfor %}
+    </select>
+    <small class="filterHelp">{% trans "Ctrl-click to select multiple options" %}</small>
 </div>
