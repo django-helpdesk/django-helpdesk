@@ -188,7 +188,7 @@ if USE_S3:
     AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
     AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME')
     # s3 media settings
-    MEDIA_ROOT = "media"
+    MEDIA_ROOT = "media/"
     MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{MEDIA_ROOT}/'
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 else:
