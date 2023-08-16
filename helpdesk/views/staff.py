@@ -844,7 +844,7 @@ def followup_delete(request, ticket_id, followup_id):
     """followup delete for superuser"""
 
     ticket = get_object_or_404(Ticket, id=ticket_id)
-    if not request.user.is_superuser:
+    if not request.user.is_superuser:  # todo
         return HttpResponseRedirect(reverse('helpdesk:view', args=[ticket.id]))
 
     followup = get_object_or_404(FollowUp, id=followup_id)
@@ -2452,7 +2452,7 @@ class EditUserSettingsView(MustBeStaffMixin, UpdateView):
         return UserSettings.objects.get_or_create(user=self.request.user)[0]
 
 
-@helpdesk_superuser_required
+@helpdesk_staff_member_required
 def email_ignore(request):
     org = request.user.default_organization.helpdesk_organization
 
@@ -2462,10 +2462,10 @@ def email_ignore(request):
     })
 
 
-email_ignore = superuser_required(email_ignore)
+email_ignore = staff_member_required(email_ignore)
 
 
-@helpdesk_superuser_required
+@helpdesk_staff_member_required
 def email_ignore_add(request):
     if request.method == 'POST':
         form = EmailIgnoreForm(request.POST, organization=request.user.default_organization.helpdesk_organization)
@@ -2481,7 +2481,7 @@ def email_ignore_add(request):
     return render(request, 'helpdesk/email_ignore_add.html', {'form': form, 'debug': settings.DEBUG})
 
 
-email_ignore_add = superuser_required(email_ignore_add)
+email_ignore_add = staff_member_required(email_ignore_add)
 
 
 @helpdesk_staff_member_required
@@ -2498,7 +2498,7 @@ def email_ignore_edit(request, id):
 email_ignore_edit = superuser_required(email_ignore_edit)
 
 
-@helpdesk_superuser_required
+@helpdesk_staff_member_required
 def email_ignore_del(request, id):
     ignore = get_object_or_404(IgnoreEmail, id=id)
     if request.method == 'POST':
@@ -2508,7 +2508,7 @@ def email_ignore_del(request, id):
         return render(request, 'helpdesk/email_ignore_del.html', {'ignore': ignore, 'debug': settings.DEBUG})
 
 
-email_ignore_del = superuser_required(email_ignore_del)
+email_ignore_del = helpdesk_staff_member_required(email_ignore_del)
 
 
 @helpdesk_superuser_required
