@@ -2612,10 +2612,32 @@ def email_template_edit(request, id):
         form.save()
         return HttpResponseRedirect(reverse('helpdesk:email_template_list'))
 
-    return render(request, 'helpdesk/email_template_edit.html', {'form': form, 'debug': settings.DEBUG})
+    return render(request, 'helpdesk/email_template_edit.html', {'template_id': template.id, 'form': form, 'debug': settings.DEBUG})
 
 
 email_template_edit = superuser_required(email_template_edit)
+
+
+@helpdesk_staff_member_required
+def email_template_default(request, id):
+    template = get_object_or_404(EmailTemplate, id=id)
+    if request.method == 'GET':
+        with open("./seed/utils/data/emailtemplates_en.json", "r") as read_file:
+            raw_templates = json.load(read_file)
+
+        for rm in raw_templates:
+            if rm['template_name'] == template.template_name:
+                template.heading = rm.get('heading')
+                template.subject = rm.get('subject')
+                template.plain_text = rm.get('plain_text')
+                template.html = rm.get('html')
+                template.save()
+                break
+
+    return HttpResponseRedirect(reverse('helpdesk:email_template_edit', kwargs={'id': template.id}))
+
+
+email_template_default = helpdesk_staff_member_required(email_template_default)
 
 
 @helpdesk_staff_member_required

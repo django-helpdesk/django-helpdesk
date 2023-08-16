@@ -22,7 +22,10 @@
     <fieldset>
         {{ form|bootstrap4form}}
     </fieldset>
-    <p><input class="btn btn-primary btn-sm" type="submit" value="Submit"></p>{% csrf_token %}
+    <p style="display:flex;justify-content:space-between;">
+        <input class="btn btn-primary" type="submit" value="Submit">
+        <a href="{% url 'helpdesk:email_template_default' template_id %}" class="btn btn-danger" role="button">{% trans "Revert changes to default" %}</a>
+    </p>{% csrf_token %}
 </form>
 
 

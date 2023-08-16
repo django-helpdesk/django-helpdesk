@@ -157,21 +157,10 @@ urlpatterns = [
         staff.EditUserSettingsView.as_view(),
         name='user_settings'),
 
-    url(r'^ignore/$',
-        staff.email_ignore,
-        name='email_ignore'),
-
-    url(r'^ignore/add/$',
-        staff.email_ignore_add,
-        name='email_ignore_add'),
-
-    url(r'^ignore/edit/(?P<id>[0-9]+)/$',
-        staff.email_ignore_edit,
-        name='email_ignore_edit'),
-
-    url(r'^ignore/delete/(?P<id>[0-9]+)/$',
-        staff.email_ignore_del,
-        name='email_ignore_del'),
+    url(r'^ignore/$', staff.email_ignore, name='email_ignore'),
+    url(r'^ignore/add/$', staff.email_ignore_add, name='email_ignore_add'),
+    url(r'^ignore/edit/(?P<id>[0-9]+)/$', staff.email_ignore_edit, name='email_ignore_edit'),
+    url(r'^ignore/delete/(?P<id>[0-9]+)/$', staff.email_ignore_del, name='email_ignore_del'),
 
     url(r'^preset_reply/$', staff.preset_reply_list, name='preset_reply_list'),
     url(r'^preset_reply/add/$', staff.preset_reply_add, name='preset_reply_add'),
@@ -180,6 +169,7 @@ urlpatterns = [
 
     url(r'^email_template/$', staff.email_template_list, name='email_template_list'),
     url(r'^email_template/edit/(?P<id>[0-9]+)/$', staff.email_template_edit, name='email_template_edit'),
+    url(r'^email_template/default/(?P<id>[0-9]+)/$', staff.email_template_default, name='email_template_default'),
 
     url(r'^preview_html$', staff.preview_html, name="preview_html"),
 
