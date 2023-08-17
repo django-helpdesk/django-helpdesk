@@ -43,10 +43,8 @@ from helpdesk.user import HelpdeskUser
 
 from helpdesk.decorators import (
     helpdesk_staff_member_required,
-    helpdesk_superuser_required,
     is_helpdesk_staff,
     list_of_helpdesk_staff,
-    superuser_required,
 )
 from helpdesk.forms import (
     TicketForm, UserSettingsForm, EmailIgnoreForm, EditTicketForm, TicketCCForm,
@@ -2495,7 +2493,7 @@ def email_ignore_edit(request, id):
     return render(request, 'helpdesk/email_ignore_add.html', {'form': form, 'debug': settings.DEBUG})
 
 
-email_ignore_edit = superuser_required(email_ignore_edit)
+email_ignore_edit = helpdesk_staff_member_required(email_ignore_edit)
 
 
 @helpdesk_staff_member_required
@@ -2511,7 +2509,7 @@ def email_ignore_del(request, id):
 email_ignore_del = helpdesk_staff_member_required(email_ignore_del)
 
 
-@helpdesk_superuser_required
+@helpdesk_staff_member_required
 def preset_reply_list(request):
     org = request.user.default_organization.helpdesk_organization
     replies = PreSetReply.objects.filter(organization=org)
@@ -2530,10 +2528,10 @@ def preset_reply_list(request):
     })
 
 
-preset_reply_list = superuser_required(preset_reply_list)
+preset_reply_list = helpdesk_staff_member_required(preset_reply_list)
 
 
-@helpdesk_superuser_required
+@helpdesk_staff_member_required
 def preset_reply_add(request):
     org = request.user.default_organization.helpdesk_organization
     if request.method == 'POST':
@@ -2550,7 +2548,7 @@ def preset_reply_add(request):
     return render(request, 'helpdesk/preset_reply_add.html', {'form': form, 'debug': settings.DEBUG})
 
 
-preset_reply_add = superuser_required(preset_reply_add)
+preset_reply_add = helpdesk_staff_member_required(preset_reply_add)
 
 
 @helpdesk_staff_member_required
@@ -2564,10 +2562,10 @@ def preset_reply_edit(request, id):
     return render(request, 'helpdesk/preset_reply_add.html', {'form': form, 'debug': settings.DEBUG})
 
 
-preset_reply_edit = superuser_required(preset_reply_edit)
+preset_reply_edit = helpdesk_staff_member_required(preset_reply_edit)
 
 
-@helpdesk_superuser_required
+@helpdesk_staff_member_required
 def preset_reply_delete(request, id):
     preset_reply = get_object_or_404(PreSetReply, id=id)
     if request.method == 'POST':
@@ -2577,10 +2575,10 @@ def preset_reply_delete(request, id):
         return render(request, 'helpdesk/preset_reply_delete.html', {'reply': preset_reply, 'debug': settings.DEBUG})
 
 
-preset_reply_delete = superuser_required(preset_reply_delete)
+preset_reply_delete = helpdesk_staff_member_required(preset_reply_delete)
 
 
-@helpdesk_superuser_required
+@helpdesk_staff_member_required
 def email_template_list(request):
     org = request.user.default_organization.helpdesk_organization
     templates = EmailTemplate.objects.filter(organization=org)
@@ -2601,7 +2599,7 @@ def email_template_list(request):
     })
 
 
-email_template_list = superuser_required(email_template_list)
+email_template_list = helpdesk_staff_member_required(email_template_list)
 
 
 @helpdesk_staff_member_required
@@ -2615,7 +2613,7 @@ def email_template_edit(request, id):
     return render(request, 'helpdesk/email_template_edit.html', {'template_id': template.id, 'form': form, 'debug': settings.DEBUG})
 
 
-email_template_edit = superuser_required(email_template_edit)
+email_template_edit = helpdesk_staff_member_required(email_template_edit)
 
 
 @helpdesk_staff_member_required
