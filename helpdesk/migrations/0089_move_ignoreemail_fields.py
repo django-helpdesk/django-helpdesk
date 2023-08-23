@@ -56,14 +56,18 @@ def add_org(apps, schema_editor):
         organization = None
         queue = ignored.queues.first()
         if queue:
+            print('queue')
             organization = queue.organization.helpdesk_organization
         else:
             importer = ignored.importers.first()
             if importer and importer.default_queue:
+                print('default queue')
                 organization = importer.default_queue.organization.helpdesk_organization
             elif importer and importer.sender:
-                organization = importer.sender.organization__set.first().helpdesk_organization
+                print('sender')
+                organization = importer.sender.organization_set.first().helpdesk_organization
             else:
+                print('helpdesk orgs')
                 orgs = get_helpdesk_organizations()
                 if orgs.count() == 1:
                     organization = orgs.first()
