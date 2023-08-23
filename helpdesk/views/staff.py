@@ -2581,7 +2581,7 @@ preset_reply_delete = helpdesk_staff_member_required(preset_reply_delete)
 @helpdesk_staff_member_required
 def email_template_list(request):
     org = request.user.default_organization.helpdesk_organization
-    templates = EmailTemplate.objects.filter(organization=org)
+    templates = EmailTemplate.objects.filter(organization=org, locale='en')  # hiding the large amount of currently-unused templates
     template_list = []
     for template in templates:
         template_list.append({
