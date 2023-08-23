@@ -15,9 +15,9 @@
 <h2>Ignored Email Addresses</h2>
 
 <p>The following email addresses are currently being ignored.
-    Emails received from these addresses will not create new tickets or followups on existing tickets when imported.
-    If these addresses are copied on Helpdesk tickets, no emails will be sent to them either.
-    This does not affect whether they will receive mail from BEAM.
+    If "ignore imports" is checked, emails received from these addresses will not create new tickets or followups on existing tickets when imported.
+    If "prevent sending" is checked, when these addresses are copied on Helpdesk tickets, no emails will be sent to them.
+    This only affects mail sent from Helpdesk, not from BEAM.
     You can add a new item or delete any of the items below as needed.</p>{% endblocktrans %}
 
 
@@ -37,6 +37,8 @@
                                 <th>{% trans "Date Modified" %}</th>
                                 <th>{% trans "Queues" %}</th>
                                 <th>{% trans "Keep in mailbox?" %}</th>
+                                <th>{% trans "Ignore Imports?" %}</th>
+                                <th>{% trans "Prevent Sending?" %}</th>
                                 <th>{% trans "Edit" %}</th>
                                 <th>{% trans "Remove" %}</th>
                             </tr>
@@ -49,7 +51,9 @@
                                 <td>{{ ignore.date }}</td>
                                 <td>{{ ignore.modified }}</td>
                                 <td>{% for queue in ignore.queues.all %}{{ queue.slug }}{% if not forloop.last %}, {% endif %}{% empty %}{% trans "All" %}{% endfor %}</td>
-                                <td>{% if ignore.keep_in_mailbox %}{% trans "Keep" %}{% endif %}</td>
+                                <td>{% if ignore.keep_in_mailbox %}{% trans "Yes" %}{% else %}{% trans "No" %}{% endif %}</td>
+                                <td>{% if ignore.ignore_import %}{% trans "Yes" %}{% else %}{% trans "No" %}{% endif %}</td>
+                                <td>{% if ignore.prevent_send %}{% trans "Yes" %}{% else %}{% trans "No" %}{% endif %}</td>
                                 <td><a href='{% url 'helpdesk:email_ignore_edit' ignore.id %}'><button class="btn btn-warning btn-xs">{% trans "Edit" %}</button></a></td>
                                 <td><a href='{% url 'helpdesk:email_ignore_del' ignore.id %}'><button class="btn btn-danger btn-xs">{% trans "Remove" %}</button></a></td>
                             </tr>

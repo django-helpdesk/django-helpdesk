@@ -519,12 +519,17 @@ def is_autoreply(message, sender='', headers=None):
     if headers:
         message = headers
     any_if_this = [
-        False if not message.get("Auto-Submitted") else message.get("Auto-Submitted").lower() != "no",
-        True if message.get("X-Auto-Response-Suppress") in ("DR", "AutoReply", "All") else False,
+        False if not message.get("Auto-Submitted") else message.get("Auto-Submitted", '').lower() != "no",
+        False if not message.get("auto-submitted") else message.get("auto-submitted", '').lower() != "no",
+        True if message.get("x-auto-response-suppress", '').lower() in ("dr", "autoreply", "all") else False,
+        True if message.get("X-Auto-Response-Suppress", '').lower() in ("dr", "autoreply", "all") else False,
         message.get("List-Id"),
+        message.get("list-id"),
         message.get("List-Unsubscribe"),
+        message.get("list-unsubscribe"),
         'no-reply' in sender,
         'noreply' in sender,
+        'donotreply' in sender,
         'postmaster' in sender,
     ]
     return any(any_if_this)
@@ -775,13 +780,12 @@ def object_from_message(message, importer, queues, logger):
         queue = queues['default_queue']
 
     # Ignore List applies to sender, TO emails, and CC list
-    for ignored_address in IgnoreEmail.objects.filter(Q(queues=queue) | Q(organization=queue.organization, queues__isnull=True)):
-        for name, address in [sender] + to_list + cc_list:
-            if ignored_address.test(address):
-                logger.debug("Email address matched an ignored address. Ticket will not be created")
-                if ignored_address.keep_in_mailbox:
-                    return False  # By returning 'False' the message will be kept in the mailbox,
-                return True  # and the 'True' will cause the message to be deleted.
+    for ignored_address in IgnoreEmail.objects.filter(Q(queues=queue) | Q(organization=queue.organization, queues__isnull=True), ignore_import=True):
+        if ignored_address.test(sender[1]):
+            logger.debug("Email address matched an ignored address. Ticket will not be created")
+            if ignored_address.keep_in_mailbox:
+                return False  # By returning 'False' the message will be kept in the mailbox,
+            return True  # and the 'True' will cause the message to be deleted.
 
     # Accounting for forwarding loops
     auto_forward = message.get('X-BEAMHelpdesk-Delivered', None)
@@ -993,13 +997,12 @@ def object_from_exchange_message(message, importer, queues, logger):
         queue = queues['default_queue']
 
     # Ignore List applies to sender, TO emails, and CC list
-    for ignored_address in IgnoreEmail.objects.filter(Q(queues=queue) | Q(organization=queue.organization, queues__isnull=True)):
-        for name, address in [sender] + to_list + cc_list:
-            if ignored_address.test(address):
-                logger.debug("Email address matched an ignored address. Ticket will not be created")
-                if ignored_address.keep_in_mailbox:
-                    return False  # By returning 'False' the message will be kept in the mailbox,
-                return True  # and the 'True' will cause the message to be deleted.
+    for ignored_address in IgnoreEmail.objects.filter(Q(queues=queue) | Q(organization=queue.organization, queues__isnull=True), ignore_import=True):
+        if ignored_address.test(sender[1]):
+            logger.debug("Email address matched an ignored address. Ticket will not be created")
+            if ignored_address.keep_in_mailbox:
+                return False  # By returning 'False' the message will be kept in the mailbox,
+            return True  # and the 'True' will cause the message to be deleted.
 
     # Accounting for forwarding loops
     headers = {h.name.lower(): h.value for h in getattr(message, 'headers', {})}

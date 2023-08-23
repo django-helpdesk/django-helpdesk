@@ -595,25 +595,29 @@ class Ticket(models.Model):
         if organization and organization.sender:
             recipients.add(organization.sender.email_address.strip('<>'))
 
-        ignored_from_queue = self.queue.ignoreemail_set.all()
-        ignored_from_org = self.queue.organization.ignoreemail_set.filter(queues__isnull=True)
+        ignored_from_queue = self.queue.ignoreemail_set.filter(prevent_send=True)
+        ignored_from_org = self.queue.organization.ignoreemail_set.filter(prevent_send=True, queues__isnull=True)
+
+        recipients = set([s.lower().strip() for s in recipients if s])
 
         def send(role, recipient):
-            if recipient and recipient not in recipients and role in roles:
-                ignore_flag = False
-                for i in ignored_from_queue:
-                    if i.test(recipient):
-                        ignore_flag = True
-                for i in ignored_from_org:
-                    if i.test(recipient):
-                        ignore_flag = True
+            if recipient:
+                recipient = recipient.lower().strip()
+                if recipient not in recipients and role in roles:
+                    ignore_flag = False
+                    for i in ignored_from_queue:
+                        if i.test(recipient):
+                            ignore_flag = True
+                    for i in ignored_from_org:
+                        if i.test(recipient):
+                            ignore_flag = True
 
-                if not ignore_flag:
-                    template, context = roles[role]
-                    # todo: send_templated_mail doesn't actually use the sender given to it?
-                    send_templated_mail(template, context, recipient, sender=self.queue.from_address,
-                                        organization=organization, ticket_id=self.pk, **kwargs)
-                    recipients.add(recipient)
+                    if not ignore_flag:
+                        template, context = roles[role]
+                        # todo: send_templated_mail doesn't actually use the sender given to it?
+                        send_templated_mail(template, context, recipient, sender=self.queue.from_address,
+                                            organization=organization, ticket_id=self.pk, **kwargs)
+                        recipients.add(recipient)
 
         # Attempts to send an email to every possible field.
         if self.submitter_email:
@@ -1831,6 +1835,9 @@ class IgnoreEmail(models.Model):
         help_text=_('Do you want to save emails from this address in the mailbox? '
                     'If this is unticked, emails from this address will be deleted.'),
     )
+
+    ignore_import = models.BooleanField("Ignore imports from this?", default=False, help_text="If checked, emails sent from this address will not be created as tickets.")
+    prevent_send = models.BooleanField("Prevent sending to this?", default=True, help_text="If checked, emails from Helpdesk will not be sent to this address.")
 
     def __str__(self):
         return '%s <%s>' % (self.name, self.email_address)
