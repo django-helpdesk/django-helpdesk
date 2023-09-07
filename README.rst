@@ -27,11 +27,17 @@ get started with testing or developing `django-helpdesk`. The demo project
 resides in the `demo/` top-level folder.
 
 It's likely that you can start up a demo project server by running
-only the command::
+only the command:
 
     make rundemo
 
-then pointing your web browser at `localhost:8080`.
+or with docker:
+
+    docker build . -t demodesk
+    docker run --rm -v "$PWD:/app" -p 8080:8080 demodesk
+
+then pointing your web browser at http://localhost:8080 (log in as user
+`admin`` with password `Test1234`).
 
 For more information and options, please read the `demo/README.rst` file.
 
