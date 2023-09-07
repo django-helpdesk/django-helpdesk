@@ -219,7 +219,7 @@ def create_queue(request):
 
         if form.is_valid():
             queue = Queue(
-                organization = org,
+                organization = org,  # todo remove hard coding
                 title = form.cleaned_data['title'],
                 slug = form.cleaned_data['slug'], # no change
                 match_on = [i for i in form.cleaned_data['agg_match_on'] if i], # remove empty strings
@@ -238,7 +238,7 @@ def create_queue(request):
             "create", 
             request.POST, 
             organization=org.id,
-            initial = {
+            initial = {  # todo remove hard coding
                 'title': form.cleaned_data['title'],
                 'slug': form.data['slug'], # no change
                 'match_on': [i for i in form.cleaned_data['agg_match_on'] if i], # remove empty strings
@@ -270,7 +270,7 @@ def edit_queue(request, slug):
         form = EditQueueForm(
             "edit",
             organization=org.id,
-            initial = {
+            initial = {  # todo remove hard coding
                 'organization': queue.organization.id,
                 'title': queue.title,
                 'slug': queue.slug,
@@ -297,7 +297,7 @@ def edit_queue(request, slug):
     elif request.method == "POST":
         form = EditQueueForm("edit", request.POST, organization=org.id)
         if form.is_valid():
-            queue.title = form.cleaned_data['title']
+            queue.title = form.cleaned_data['title']  # todo remove hard coding
             # queue.slug = form.cleaned_data['slug'] # no change
             queue.match_on = [i for i in form.cleaned_data['agg_match_on'] if i] # remove empty strings
             queue.match_on_addresses = [i for i in form.cleaned_data['agg_match_on_addresses'] if i] # remove empty strings
@@ -349,7 +349,7 @@ def create_form(request):
         formtype.save()
         form = EditFormTypeForm(
             initial = {
-                'id': formtype.id,
+                'id': formtype.id,  # todo remove hard coding
                 'name': formtype.name,
                 'description': formtype.description,
                 'queue': formtype.queue,
@@ -374,7 +374,7 @@ def create_form(request):
         formset = form.CustomFieldFormSet(request.POST)
 
         if form.is_valid():
-            formtype.name = form.cleaned_data['name']
+            formtype.name = form.cleaned_data['name']  # todo remove hard coding
             formtype.description = form.cleaned_data['description']
             formtype.queue = form.cleaned_data['queue']
             formtype.updated = datetime.now()
@@ -392,7 +392,7 @@ def create_form(request):
 
                     customfield = cf['id'] if cf['id'] else CustomField()
 
-                    customfield.field_name = cf['field_name']
+                    customfield.field_name = cf['field_name']  # todo remove hard coding
                     customfield.label = cf['label']
                     customfield.help_text = cf['help_text']
                     customfield.data_type = cf['data_type']
@@ -430,7 +430,7 @@ def edit_form(request, pk):
     if request.method == "GET":
         form = EditFormTypeForm(
             initial = {
-                'id': formtype.id,
+                'id': formtype.id,  # todo remove hard coding
                 'name': formtype.name,
                 'description': formtype.description,
                 'queue': formtype.queue,
@@ -454,7 +454,7 @@ def edit_form(request, pk):
         formset = form.CustomFieldFormSet(request.POST)
 
         if form.is_valid():
-            formtype.name = form.cleaned_data['name']
+            formtype.name = form.cleaned_data['name']  # todo remove hard coding
             formtype.description = form.cleaned_data['description']
             formtype.queue = form.cleaned_data['queue']
             formtype.updated = datetime.now()
@@ -470,7 +470,7 @@ def edit_form(request, pk):
                 for cf in formset.cleaned_data:
                     if not cf or cf['DELETE']: continue # continue to next item if form is empty or item is being deleted
 
-                    customfield = cf['id'] if cf['id'] else CustomField()
+                    customfield = cf['id'] if cf['id'] else CustomField()  # todo remove hard coding
                     customfield.field_name = cf['field_name']
                     customfield.label = cf['label']
                     customfield.help_text = cf['help_text']
@@ -512,7 +512,7 @@ def delete_form(request, pk):
 @helpdesk_staff_member_required
 def duplicate_form(request, pk):
     formtype = get_object_or_404(FormType, pk=pk)
-    new_form = FormType(
+    new_form = FormType(  # todo remove hard coding
         organization = formtype.organization,
         name = formtype.name + " - Copy",
         description = formtype.description,
@@ -527,7 +527,7 @@ def duplicate_form(request, pk):
     
     for cf_name in formtype.get_extra_field_names():
         cf = CustomField.objects.get(ticket_form=formtype, field_name=cf_name)
-        new_cf = CustomField(
+        new_cf = CustomField(  # todo remove hard coding
             field_name = cf.field_name,
             label = cf.label,
             help_text = cf.help_text,
@@ -569,7 +569,7 @@ def copy_field(request):
         else: # otherwise just use 1
             copy = base + '1'
 
-        customfield = CustomField()
+        customfield = CustomField()  # todo remove hard coding
         customfield.field_name = copy
         customfield.label = cf['label']
         customfield.help_text = cf['help_text']
