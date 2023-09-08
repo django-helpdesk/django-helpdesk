@@ -516,6 +516,7 @@ def is_autoreply(message, sender='', headers=None):
     Returns True if it's likely to be auto-reply or False otherwise
     So we don't start mail loops
     """
+    sender = sender.lower()
     if headers:
         message = headers
     any_if_this = [
@@ -546,11 +547,14 @@ def create_ticket_cc(ticket, cc_list):
     new_ticket_ccs = []
     for cced_name, cced_email in cc_list:
         cced_email = cced_email.strip()
-        if cced_email == ticket.queue.email_address:
+        cced_email_lower = cced_email.lower()
+        if cced_email_lower == ticket.queue.email_address.lower():
             continue
-        if 'no-reply' in cced_email or 'noreply' in cced_email or 'postmaster' in cced_email:  # todo make a global var for this
+        if 'donotreply' in cced_email_lower or 'no-reply' in cced_email_lower or 'noreply' in cced_email_lower or 'postmaster' in cced_email_lower:  # todo make a global var for this
             continue
-        if ticket.queue.organization.sender and cced_email == ticket.queue.organization.sender.email_address:
+        if ticket.queue.organization.sender and cced_email_lower == ticket.queue.organization.sender.email_address.lower():  # todo also check importer?
+            continue
+        if cced_email == (ticket.submitter_email or '') or cced_email == (ticket.contact_email or ''):
             continue
 
         user = None
@@ -679,8 +683,6 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
     context = safe_template_context(ticket)
     context['private'] = False
 
-    new_ticket_ccs = create_ticket_cc(ticket, [(sender_name, sender_email)] + payload['to_list'] + payload['cc_list'])
-
     headers = payload['headers'] if 'headers' in payload else None
     autoreply = is_autoreply(message, sender=sender_email, headers=headers)
     if autoreply:
@@ -696,6 +698,7 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
             "Precedence": "auto_reply",
         }
         if new:
+            new_ticket_ccs = create_ticket_cc(ticket, payload['to_list'] + payload['cc_list'])
             roles = {'submitter': ('newticket_submitter', context),
                      'queue_new': ('newticket_cc_user', context),
                      'queue_updated': ('newticket_cc_user', context),
@@ -707,6 +710,7 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
             ticket.send_ticket_mail(roles, organization=org, fail_silently=True, extra_headers=extra_headers, email_logger=logger,
                                     source="import (new ticket)")
         else:
+            new_ticket_ccs = create_ticket_cc(ticket, [(sender_name, sender_email)] + payload['to_list'] + payload['cc_list'])
             context.update(comment=f.comment)
 
             roles = {'submitter': ('updated_submitter', context),
@@ -748,6 +752,7 @@ def object_from_message(message, importer, queues, logger):
         # Delete emails if the sender email cannot be parsed correctly. This ensures that
         # mailing list emails do not become tickets as well as malformatted emails
         return True
+    sender_lower = sender[1].lower()
 
     to_list = getaddresses(message.get_all('To', []))
     cc_list = getaddresses(message.get_all('Cc', []))
@@ -770,7 +775,6 @@ def object_from_message(message, importer, queues, logger):
                         queue = q
                         logger.info("- Subject matched list from '%s'" % q.slug)
     if not queue:
-        sender_lower = sender[1].lower()
         for q in queues['address_matching_queues']:
             if reduce(lambda prev, e: prev or (e.lower() in sender_lower), q.match_on_addresses, False):
                 queue = q
@@ -789,11 +793,10 @@ def object_from_message(message, importer, queues, logger):
 
     # Accounting for forwarding loops
     auto_forward = message.get('X-BEAMHelpdesk-Delivered', None)
-
-    if auto_forward is not None or sender[1].lower() == queue.email_address.lower():
+    if auto_forward is not None or (queue.email_address and sender_lower == queue.email_address.lower()):
         logger.info("Found a forwarding loop.")
         if ticket and Ticket.objects.filter(pk=ticket).exists():
-            if sender[1].lower() == queue.email_address.lower() and auto_forward is None:
+            if sender_lower == queue.email_address.lower() and auto_forward is None:
                 auto_forward = [i[1] for i in to_list]
             else:
                 auto_forward = auto_forward.strip().split(',')
@@ -956,18 +959,19 @@ def object_from_exchange_message(message, importer, queues, logger):
         subject = ''
 
     if getattr(message, 'author', None):
-        sender = (message.author.name, message.author.email_address.lower())
+        sender = (message.author.name, message.author.email_address)
     elif getattr(message, 'sender', None):
-        sender = (message.sender.name, message.sender.email_address.lower())
+        sender = (message.sender.name, message.sender.email_address)
     else:
         sender = ('', '')
+    sender_lower = sender[1].lower()
 
     to_list = []
     cc_list = []
     if getattr(message, 'to_recipients', None):
-        to_list = [(r.name, r.email_address.lower()) for r in message.to_recipients]
+        to_list = [(r.name, r.email_address) for r in message.to_recipients]
     if getattr(message, 'cc_recipients', None):
-        cc_list = [(r.name, r.email_address.lower()) for r in message.cc_recipients]
+        cc_list = [(r.name, r.email_address) for r in message.cc_recipients]
 
     # Sort out which queue this email should go into #
     ticket, queue = None, None
@@ -987,7 +991,6 @@ def object_from_exchange_message(message, importer, queues, logger):
                         queue = q
                         logger.info("- Subject matched list from '%s'" % q.slug)
     if not queue:
-        sender_lower = sender[1].lower()
         for q in queues['address_matching_queues']:
             if reduce(lambda prev, e: prev or (e.lower() in sender_lower), q.match_on_addresses, False):
                 queue = q
@@ -1008,10 +1011,10 @@ def object_from_exchange_message(message, importer, queues, logger):
     headers = {h.name.lower(): h.value for h in getattr(message, 'headers', {})}
     auto_forward = headers.get('x-beamhelpdesk-delivered', None)
 
-    if auto_forward is not None or (queue.email_address and sender[1] == queue.email_address.lower()):
+    if auto_forward is not None or (queue.email_address and sender_lower == queue.email_address.lower()):
         logger.info("Found a forwarding loop.")
         if ticket and Ticket.objects.filter(pk=ticket).exists():
-            if sender[1] == queue.email_address.lower() and auto_forward is None:
+            if sender_lower == queue.email_address.lower() and auto_forward is None:
                 auto_forward = [i[1] for i in to_list]
             else:
                 auto_forward = auto_forward.strip().split(',')
