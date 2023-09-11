@@ -1769,8 +1769,8 @@ def ticket_list(request):
         query_params = deepcopy(default_query_params)
     else:
         for param, filter_command in filter_in_params.items():
-            if not request.GET.get(param) is None:
-                patterns = request.GET.getlist(param)
+            if not request.POST.get(param) is None:
+                patterns = request.POST.getlist(param)
                 try:
                     pattern_pks = [int(pattern) for pattern in patterns]
                     if -1 in pattern_pks:
@@ -1780,43 +1780,43 @@ def ticket_list(request):
                 except ValueError:
                     pass
 
-        date_from = request.GET.get('date_from')
+        date_from = request.POST.get('date_from')
         if date_from:
             query_params['filtering']['created__gte'] = date_from
 
-        date_to = request.GET.get('date_to')
+        date_to = request.POST.get('date_to')
         if date_to:
             query_params['filtering']['created__lte'] = date_to
 
-        last_reply_from = request.GET.get('last_reply_from')
+        last_reply_from = request.POST.get('last_reply_from')
         if last_reply_from:
             query_params['filtering']['last_reply__gte'] = last_reply_from
 
-        last_reply_to = request.GET.get('last_reply_to')
+        last_reply_to = request.POST.get('last_reply_to')
         if last_reply_to:
             query_params['filtering']['last_reply__lte'] = last_reply_to
 
-        paired_count_from = request.GET.get('paired_count_from')
+        paired_count_from = request.POST.get('paired_count_from')
         if paired_count_from:
             query_params['filtering']['paired_count__gte'] = paired_count_from
 
-        paired_count_to = request.GET.get('paired_count_to')
+        paired_count_to = request.POST.get('paired_count_to')
         if paired_count_to:
             query_params['filtering']['paired_count__lte'] = paired_count_to
 
         # KEYWORD SEARCHING
-        q = request.GET.get('q', '')
+        q = request.POST.get('q', '')
         context['query'] = q
         query_params['search_string'] = q
 
         # SORTING
-        sort = request.GET.get('sort', None)
+        sort = request.POST.get('sort', None)
         if sort not in ('status', 'assigned_to', 'created', 'title', 'queue', 'priority', 'kbitem', 'submitter',
                         'paired_count'):
             sort = 'created'
         query_params['sorting'] = sort
 
-        sortreverse = request.GET.get('sortreverse', None)
+        sortreverse = request.POST.get('sortreverse', None)
         query_params['sortreverse'] = sortreverse
 
     urlsafe_query = query_to_base64(query_params)
@@ -1855,8 +1855,8 @@ def ticket_list(request):
 
     json_queries = {i['id']: i for i in user_saved_queries.values('id', 'user_id', 'shared')}
 
-    if request.GET.get(_('t_per_page'), None):
-        tickets_per_page = request.GET.get(_('t_per_page'))
+    if request.POST.get(_('t_per_page'), None):
+        tickets_per_page = request.POST.get(_('t_per_page'))
     elif request.user.is_authenticated and hasattr(request.user, 'usersettings_helpdesk'):
         tickets_per_page = request.user.usersettings_helpdesk.tickets_per_page
     else:
@@ -1866,7 +1866,7 @@ def ticket_list(request):
     paginator = Paginator(
         ticket_list, tickets_per_page)
     try:
-        ticket_list = paginator.page(request.GET.get(_('t_page'), 1))
+        ticket_list = paginator.page(request.POST.get(_('t_page'), 1))
     except PageNotAnInteger:
         ticket_list = paginator.page(1)
     except EmptyPage:
@@ -3505,7 +3505,7 @@ def export(qs, org, serializer, paginate=False, do_extra_data=True, visible_cols
         output = pd.json_normalize(output)
         report.append(output)
     report = pd.concat(report)
-    report = report.set_index('Ticket ID')
+    report = report.set_index('Ticket')
 
     time_stamp = timezone.now().strftime('%Y%m%d_%H%M%S')
     media_dir = 'helpdesk/reports/'

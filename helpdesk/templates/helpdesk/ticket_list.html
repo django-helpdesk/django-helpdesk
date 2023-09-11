@@ -159,6 +159,11 @@
                         </div>
                     </div>
                 </div>
+                <!-- Pass vars to View for exporting to work Properly -->
+                <input type='hidden' name='visible' value=''/>
+                <input type='hidden' name='selected_ids' value=''/>
+                <input type="hidden" name="queue_length" value="{{ query_params.filtering.queue__id__in|length }}"/>
+            </form>
                 <!-- / Action Toolbar -->
                 <!-- Data Table -->
                 <div class="table-responsive" style="max-height: 81.5vh;">
@@ -225,68 +230,65 @@
                 </div>
                 <!-- / Data Table -->
                 <!-- Pagination Toolbar -->
-                <div class="d-flex flex-wrap border-top px-2 mb-2" style="//background-color: #f7f7f7">
-                    {% with 't_page' as page_var %}
-                    <div class="d-flex align-items-center mt-2">
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <label class="input-group-text font-weight-normal">Show</label>
-                            </div>
-                            <div class="btn-group dropup">
-                                <button class="btn btn-outline-secondary rounded-0 font-weight-semibold dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">{{ tickets_per_page }}</button>
-                                <div class="dropdown-menu p-1 text-right" style="min-width: 0">
-                                    <a class="dropdown-item px-3 rounded-lg {% if tickets_per_page == 10 %}active{% endif %}" href="?t_per_page=10">10</a>
-                                    <a class="dropdown-item px-3 rounded-lg {% if tickets_per_page == 25 %}active{% endif %}" href="?t_per_page=25">25</a>
-                                    <a class="dropdown-item px-3 rounded-lg {% if tickets_per_page == 50 %}active{% endif %}" href="?t_per_page=50">50</a>
-                                    <a class="dropdown-item px-3 rounded-lg {% if tickets_per_page == 100 %}active{% endif %}" href="?t_per_page=100">100</a>
+                <form method="post" id="pagination_form">
+                    <div class="d-flex flex-wrap border-top px-2 mb-2" style="//background-color: #f7f7f7">
+                        {% with 't_page' as page_var %}
+                        <div class="d-flex align-items-center mt-2">
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <label class="input-group-text font-weight-normal">Show</label>
+                                </div>
+                                <div class="btn-group dropup">
+                                    <button class="btn btn-outline-secondary rounded-0 font-weight-semibold dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">{{ tickets_per_page }}</button>
+                                    <div class="dropdown-menu p-1 text-right" style="min-width: 0">
+                                        <a class="dropdown-item px-3 rounded-lg {% if tickets_per_page == 10 %}active{% endif %}" href="?t_per_page=10">10</a>
+                                        <a class="dropdown-item px-3 rounded-lg {% if tickets_per_page == 25 %}active{% endif %}" href="?t_per_page=25">25</a>
+                                        <a class="dropdown-item px-3 rounded-lg {% if tickets_per_page == 50 %}active{% endif %}" href="?t_per_page=50">50</a>
+                                        <a class="dropdown-item px-3 rounded-lg {% if tickets_per_page == 100 %}active{% endif %}" href="?t_per_page=100">100</a>
+                                    </div>
+                                </div>
+                                <div class="input-group-append border-left border-secondary">
+                                    <label class="input-group-text font-weight-normal" for="inputGroupSelect01">Tickets</label>
                                 </div>
                             </div>
-                            <div class="input-group-append border-left border-secondary">
-                                <label class="input-group-text font-weight-normal" for="inputGroupSelect01">Tickets</label>
+                        </div>
+                        <div class="flex-fill justify-content-end">
+                            <div class="btn-toolbar float-right mt-2" role="toolbar" style="bottom: 0;">
+                                <div class="btn-group mr-2" role="group">
+                                    {% if ticket_list.has_previous %}
+                                    <a class="btn btn-primary font-weight-bold" href="?t_per_page={{ tickets_per_page }}&{{ page_var }}=1">First</a>
+                                    <a class="btn btn-primary font-weight-bold" href="?t_per_page={{ tickets_per_page }}&{{ page_var }}={{ ticket_list.previous_page_number }}">Previous</a>
+                                    {% else %}
+                                    <a class="btn btn-primary font-weight-bold disabled">First</a>
+                                    <a class="btn btn-primary font-weight-bold disabled">Previous</a>
+                                    {% endif %}
+                                </div>
+                                <div class="btn-group mr-2" role="group">
+                                    {% with 3 as thresh %}
+                                    {% for i in ticket_list.paginator.page_range %}
+                                    {% if ticket_list.number == i %}
+                                    <a class="btn btn-outline-primary active font-weight-bold">{{ i }}</a>
+                                    {% elif i <= ticket_list.number|add:5 and i >= ticket_list.number|add:-5 %}
+                                    <a class="btn btn-outline-primary font-weight-bold" href="?t_per_page={{ tickets_per_page }}&{{ page_var }}={{ i }}">{{ i }}</a>
+                                    {% endif %}
+                                    {% endfor %}
+                                    {% endwith %}
+                                </div>
+                                <div class="btn-group" role="group">
+                                    {% if ticket_list.has_next %}
+                                    <a class="btn btn-primary font-weight-bold" href="?t_per_page={{ tickets_per_page }}&{{ page_var }}={{ ticket_list.next_page_number }}">Next</a>
+                                    <a class="btn btn-primary font-weight-bold" href="?t_per_page={{ tickets_per_page }}&{{ page_var }}={{ ticket_list.paginator.num_pages }}">Last</a>
+                                    {% else %}
+                                    <a class="btn btn-primary font-weight-bold disabled">Next</a>
+                                    <a class="btn btn-primary font-weight-bold disabled">Last</a>
+                                    {% endif %}
+                                </div>
                             </div>
                         </div>
+                        {% endwith %}
                     </div>
-                    <div class="flex-fill justify-content-end">
-                        <div class="btn-toolbar float-right mt-2" role="toolbar" style="bottom: 0;">
-                            <div class="btn-group mr-2" role="group">
-                                {% if ticket_list.has_previous %}
-                                <a class="btn btn-primary font-weight-bold" href="?t_per_page={{ tickets_per_page }}&{{ page_var }}=1">First</a>
-                                <a class="btn btn-primary font-weight-bold" href="?t_per_page={{ tickets_per_page }}&{{ page_var }}={{ ticket_list.previous_page_number }}">Previous</a>
-                                {% else %}
-                                <a class="btn btn-primary font-weight-bold disabled">First</a>
-                                <a class="btn btn-primary font-weight-bold disabled">Previous</a>
-                                {% endif %}
-                            </div>
-                            <div class="btn-group mr-2" role="group">
-                                {% with 3 as thresh %}
-                                {% for i in ticket_list.paginator.page_range %}
-                                {% if ticket_list.number == i %}
-                                <a class="btn btn-outline-primary active font-weight-bold">{{ i }}</a>
-                                {% elif i <= ticket_list.number|add:5 and i >= ticket_list.number|add:-5 %}
-                                <a class="btn btn-outline-primary font-weight-bold" href="?t_per_page={{ tickets_per_page }}&{{ page_var }}={{ i }}">{{ i }}</a>
-                                {% endif %}
-                                {% endfor %}
-                                {% endwith %}
-                            </div>
-                            <div class="btn-group" role="group">
-                                {% if ticket_list.has_next %}
-                                <a class="btn btn-primary font-weight-bold" href="?t_per_page={{ tickets_per_page }}&{{ page_var }}={{ ticket_list.next_page_number }}">Next</a>
-                                <a class="btn btn-primary font-weight-bold" href="?t_per_page={{ tickets_per_page }}&{{ page_var }}={{ ticket_list.paginator.num_pages }}">Last</a>
-                                {% else %}
-                                <a class="btn btn-primary font-weight-bold disabled">Next</a>
-                                <a class="btn btn-primary font-weight-bold disabled">Last</a>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-                    {% endwith %}
-                </div>
+                </form>
                 <!-- / Pagination Toolbar -->
-                <!-- Pass vars to View for exporting to work Properly -->
-                <input type='hidden' name='visible' value=''/>
-                <input type='hidden' name='selected_ids' value=''/>
-                <input type="hidden" name="queue_length" value="{{ query_params.filtering.queue__id__in|length }}"/>
-            </form>
         </div>
         <div class="tab-pane fade" id="timelinetabcontents" role="tabpanel" aria-labelledby="timelinetabcontents-tab">
             <div id='timeline-embed' style="width: 100%; height: 80vh"></div>
@@ -319,7 +321,8 @@
                 </div>
                 
                 <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#queryAccordion">
-                    <form method="get">
+                    <form method="post" id="query_form">
+                        {% csrf_token %}
                         <div class="border-bottom border-top bg-light p-3">
                             <div class="input-group">
                                 {% include 'helpdesk/filters/sorting.html' %}
@@ -521,13 +524,9 @@
             sessionStorage['visible_cols'] = get_visible_cols()
         }
         
-        if (sessionStorage['tickets_per_page']) {
-            
-        }
-        
         // Scroll the query results to fill the viewport by default
         // Browser will take over scroll position on reload
-        scrollQueryCard() 
+        // scrollQueryCard() 
         
         // Column visibility dropdown will no longer close when a column is changed
         $('#colvis button').on('click', function (event) {
