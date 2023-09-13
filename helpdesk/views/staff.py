@@ -1764,7 +1764,7 @@ def ticket_list(request):
 
     if saved_query:
         pass
-    elif not {'queue', 'assigned_to', 'status', 'q', 'sort', 'sortreverse', 'kbitem', 'submitter'}.intersection(request.GET):
+    elif not {'queue', 'assigned_to', 'status', 'q', 'sort', 'sortreverse', 'kbitem', 'submitter'}.intersection(request.POST):
         # Fall-back if no querying is being done
         query_params = deepcopy(default_query_params)
     else:
