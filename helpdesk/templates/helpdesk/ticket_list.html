@@ -611,6 +611,17 @@
         });
         return visible_columns
     }
+
+    /*
+    Upon changes to the query, switching pages, or changing tickets per page
+    Both the query and pagination forms need to be combined and submitted together
+
+    Changes to the query or tickets per page will reset to the first page
+    */
+    function combineQueryPagination() {
+        var queryForm = document.forms['query_form']
+        var paginationForm = document.forms['pagination_form']
+    }
 </script>
 
 <!--TODO Move this to a separate file, keep django specific code here or use API calls somehow-->
