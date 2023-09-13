@@ -122,37 +122,40 @@
                             <div class="dropdown-menu dropdown-menu-left text-center p-2" style="min-width: 0; z-index: 1021;">
                                 <div class="btn-group-vertical btn-group-toggle" data-toggle="buttons">
                                     <label class="btn btn-outline-secondary">
-                                        <input type="checkbox" onchange="toggleColumn(this.checked, 2)"> Priority
+                                        <input type="checkbox" onchange="toggleColumn(this.checked, 'priority')"> Priority
                                     </label>
                                     <label class="btn btn-outline-secondary">
-                                        <input type="checkbox" onchange="toggleColumn(this.checked, 3)"> Queue
-                                    </label>
-                                    <label class="btn btn-outline-secondary active">
-                                        <input type="checkbox" onchange="toggleColumn(this.checked, 4)" checked> Status
-                                    </label>
-                                    <label class="btn btn-outline-secondary active">
-                                        <input type="checkbox" onchange="toggleColumn(this.checked, 5)" checked> Owner
-                                    </label>
-                                    <label class="btn btn-outline-secondary active">
-                                        <input type="checkbox" onchange="toggleColumn(this.checked, 6)" checked> Submitter
+                                        <input type="checkbox" onchange="toggleColumn(this.checked, 'queue')"> Queue
                                     </label>
                                     <label class="btn btn-outline-secondary">
-                                        <input type="checkbox" onchange="toggleColumn(this.checked, 7)"> Paired Count
+                                        <input type="checkbox" onchange="toggleColumn(this.checked, 'form')"> Form
                                     </label>
                                     <label class="btn btn-outline-secondary active">
-                                        <input type="checkbox" onchange="toggleColumn(this.checked, 8)" checked> Created
+                                        <input type="checkbox" onchange="toggleColumn(this.checked, 'status')" checked> Status
                                     </label>
                                     <label class="btn btn-outline-secondary active">
-                                        <input type="checkbox" onchange="toggleColumn(this.checked, 9)" checked> Last Reply
+                                        <input type="checkbox" onchange="toggleColumn(this.checked, 'assigned_to')" checked> Owner
+                                    </label>
+                                    <label class="btn btn-outline-secondary active">
+                                        <input type="checkbox" onchange="toggleColumn(this.checked, 'submitter')" checked> Submitter
                                     </label>
                                     <label class="btn btn-outline-secondary">
-                                        <input type="checkbox" onchange="toggleColumn(this.checked, 10)"> Due Date
+                                        <input type="checkbox" onchange="toggleColumn(this.checked, 'paired_count')"> Paired Count
+                                    </label>
+                                    <label class="btn btn-outline-secondary active">
+                                        <input type="checkbox" onchange="toggleColumn(this.checked, 'created')" checked> Created
+                                    </label>
+                                    <label class="btn btn-outline-secondary active">
+                                        <input type="checkbox" onchange="toggleColumn(this.checked, 'last_reply')" checked> Last Reply
                                     </label>
                                     <label class="btn btn-outline-secondary">
-                                        <input type="checkbox" onchange="toggleColumn(this.checked, 11)"> Time Spent
+                                        <input type="checkbox" onchange="toggleColumn(this.checked, 'due_date')"> Due Date
                                     </label>
                                     <label class="btn btn-outline-secondary">
-                                        <input type="checkbox" onchange="toggleColumn(this.checked, 12)"> KB Item
+                                        <input type="checkbox" onchange="toggleColumn(this.checked, 'time_spent')"> Time Spent
+                                    </label>
+                                    <label class="btn btn-outline-secondary">
+                                        <input type="checkbox" onchange="toggleColumn(this.checked, 'kbitem')"> KB Item
                                     </label>
                                 </div>
                             </div>
@@ -173,6 +176,7 @@
                                 <th class="sticky-top" data-colname="ticket" colspan="2">{% trans "Ticket" %}</th>
                                 <th class="sticky-top d-none" data-colname="priority">{% trans "Priority" %}</th>
                                 <th class="sticky-top d-none" data-colname="queue">{% trans "Queue" %}</th>
+                                <th class="sticky-top d-none" data-colname="form">{% trans "Form" %}</th>
                                 <th class="sticky-top" data-colname="status">{% trans "Status" %}</th>
                                 <th class="sticky-top" data-colname="assigned_to">{% trans "Owner" %}</th>
                                 <th class="sticky-top" data-colname="submitter">{% trans "Submitter" %}</th>
@@ -211,6 +215,7 @@
                                 <td class="tickettitle" data-toggle="tooltip" title="Edit {{ ticket.title }}"><a href="{{ ticket.get_absolute_url }}">{{ ticket.id }}. {{ ticket.title }}</a></td>
                                 <td class="d-none text-{{ ticket.get_priority_css_class }}">{{ ticket.get_priority }}</td>
                                 <td class="d-none">{{ ticket.queue }}</td>
+                                <td class="d-none">{{ ticket.ticket_form.name }}</td>
                                 <td>{{ ticket.get_status }}</td>
                                 <td>{% if ticket.get_assigned_to != "Unassigned" %}{{ ticket.get_assigned_to }}{% endif %}</td> {# Remove if statement for "Unassigned" instead of blank #}
                                 <td>{{ ticket.submitter_email }}</td>
@@ -519,11 +524,11 @@
             for (const col of document.querySelectorAll('#headers th')) {
                 num = colNums[col.dataset.colname]
                 if (vis.includes(col.dataset.colname)) {
-                    toggleColumn(true, num, false)
+                    toggleColumn(true, col.dataset.colname, false)
                     $('#colvis .btn-group-toggle label:nth-child(' + (num-1) + ')').addClass('active')
                     $('#colvis .btn-group-toggle label:nth-child(' + (num-1) + ') input').prop('checked', true)
                 } else {
-                    toggleColumn(false, num, false)
+                    toggleColumn(false, col.dataset.colname, false)
                     $('#colvis .btn-group-toggle :nth-child(' + (num-1) + ')').removeClass('active')
                     $('#colvis .btn-group-toggle label:nth-child(' + (num-1) + ') input').prop('checked', false)
                 }
@@ -560,7 +565,9 @@
     }
     
     // Toggle visibility for given column
-    function toggleColumn(show, colNum, save=true) {
+    function toggleColumn(show, col, save=true) {
+        colNum = colNums[col]
+
         if (show) {
             $('#dataTable th:nth-child(' + colNum + ')').removeClass("d-none")
             $('#dataTable td:nth-child(' + (colNum+1) + ')').removeClass("d-none")
