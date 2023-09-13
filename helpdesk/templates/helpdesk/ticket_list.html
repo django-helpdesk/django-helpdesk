@@ -444,29 +444,33 @@
     <div id="collapseThree" class="collapse" aria-labelledby="headingThree"
     data-parent="#queryAccordion">
     <div class="card-body">
-        <form action='{% url 'helpdesk:list' %}'>
+        <form id="saved_query" action='{% url 'helpdesk:list' %}'>
             <p>
-                <label for='id_query_selector'>{% trans "Query" %}</label>
-                <select name='saved_query' id='id_query_selector'>
-                    {% for q in user_saved_queries %}
-                    <option value='{{ q.id }}'>
-                        {{ q.title }}{% if q.shared %}
-                        (Shared{% if user != q.user %} by {{ q.user.get_username }}{% endif %})
-                        {% endif %}
-                    </option>
-                    {% endfor %}
-                </select></p>
-                <input class="btn btn-primary" id='run_query' type='submit' value='{% trans "Run Query" %}'>
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <label class="input-group-text" for='id_query_selector'>{% trans "Query" %}</label>
+                    </div>
+                    <select class="custom-select" name='saved_query' id='id_query_selector'>
+                        {% for q in user_saved_queries %}
+                        <option value='{{ q.id }}'>
+                            {{ q.title }}{% if q.shared %}
+                            (Shared{% if user != q.user %} by {{ q.user.get_username }}{% endif %})
+                            {% endif %}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div></p>
+                <input class="btn btn-primary mb-2" id='run_query' type='submit' value='{% trans "Run Query" %}'>
                 
                 <!-- Only query creater can see from here -->
-                <a class="btn btn-danger remove" id='delete_query'>{% trans "Delete Query" %}</a>
+                <a class="btn btn-danger remove mb-2" id='delete_query'>{% trans "Delete Query" %}</a>
                 <!-- if shared, show this -->
-                <a class="btn btn-warning  share" id='unshare_query'>{% trans "Un-share Query" %}</a>
+                <a class="btn btn-warning share mb-2" id='unshare_query'>{% trans "Un-share Query" %}</a>
                 <!-- else if not shared, show this -->
-                <a class="btn btn-warning  share" id='reshare_query'>{% trans "Re-share Query" %}</a>
+                <a class="btn btn-warning share mb-2" id='reshare_query'>{% trans "Re-share Query" %}</a>
                 <!-- to here -->
                 <!-- if not query creater show this -->
-                <a class="btn btn-warning  remove" id='reject_query'>{% trans "Reject Query" %}</a>
+                <a class="btn btn-warning remove mb-2" id='reject_query'>{% trans "Reject Query" %}</a>
                 
             </form>
         </div>
