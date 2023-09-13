@@ -214,7 +214,7 @@
                                 <td>{{ ticket.get_status }}</td>
                                 <td>{% if ticket.get_assigned_to != "Unassigned" %}{{ ticket.get_assigned_to }}{% endif %}</td> {# Remove if statement for "Unassigned" instead of blank #}
                                 <td>{{ ticket.submitter_email }}</td>
-                                <td class="d-none">{# paired count #}</td>
+                                <td class="d-none">{{ ticket.beam_property.count|add:ticket.beam_taxlot.count }}</td>
                                 <td><span title='{{ ticket.created|naturaltime }}'>{{ ticket.created|date:"DATETIME_FORMAT" }}</span></td>
                                 <td><span title='{{ ticket.get_last_followup|naturaltime }}'>{{ ticket.get_last_followup|date:"DATETIME_FORMAT" }}</span></td>
                                 <td class="d-none"><span title='{{ ticket.due_date|naturaltime }}'>{{ ticket.due_date|date:"DATETIME_FORMAT" }}</span></td>
