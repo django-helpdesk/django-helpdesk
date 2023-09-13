@@ -213,7 +213,9 @@
                             <tr> <!-- Data -->
                                 <td class="text-center"><input type="checkbox" name="ticket_id" value="{{ ticket.id }}" class="ticket_multi_select"></td>
                                 <td class="tickettitle" data-toggle="tooltip" title="Edit {{ ticket.title }}"><a href="{{ ticket.get_absolute_url }}">{{ ticket.id }}. {{ ticket.title }}</a></td>
-                                <td class="d-none text-{{ ticket.get_priority_css_class }}">{{ ticket.get_priority }}</td>
+                                <td class="d-none text-center">
+                                    <span class="badge badge-{{ ticket.get_priority_css_class }}">{{ ticket.get_priority }}</span>
+                                </td>
                                 <td class="d-none">{{ ticket.queue }}</td>
                                 <td class="d-none">{{ ticket.ticket_form.name }}</td>
                                 <td>{{ ticket.get_status }}</td>
