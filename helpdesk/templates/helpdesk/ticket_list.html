@@ -312,11 +312,11 @@
                         <h5 class="mb-0">
                             <button class="btn btn-link" type="button" data-toggle="collapse"
                             data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                            <i class="fas fa-filter"></i>
-                            {% trans "Filters" %}
-                        </button>
-                    </h5>
-                </div>
+                                <i class="fas fa-filter"></i>
+                                {% trans "Filters" %}
+                            </button>
+                        </h5>
+                    </div>
                 
                 <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#queryAccordion">
                     <form method="post" id="query_form">
@@ -354,9 +354,9 @@
                                     {% include 'helpdesk/filters/last_reply.html' %}
                                 </li>
                                 {% if from_saved_query %}
-                                <li class="">
+                                <li class="list-group-item">
                                     {% if saved_query.user == user %}
-                                    {% blocktrans with saved_query.title as query_name %}You are currently viewing saved query <strong>"{{ query_name }}"</strong>.{% endblocktrans %}
+                                    <p>{% blocktrans with saved_query.title as query_name %}You are currently viewing saved query <strong>"{{ query_name }}"</strong>.{% endblocktrans %}</p>
                                     <a href="{% url 'helpdesk:delete_query' saved_query.id %}" class="btn btn-danger btn-sm">
                                         {% trans "Delete Query" %}
                                     </a>
@@ -377,7 +377,7 @@
                                 </li>
                                 {% endif %}
                                 {% if from_saved_query %}
-                                <li class="">
+                                <li class="list-group-item">
                                     {% blocktrans with saved_query.id as query_id %}<a href='../reports/?saved_query={{ query_id }}'>Run a report</a> on this query to see stats and charts for the data listed below.{% endblocktrans %}
                                 </li>
                                 {% endif %}
@@ -390,7 +390,7 @@
                         <input type='hidden' id='ticket_page' name='ticket_page' value="1"/>
                     </form>
                 </div>
-            </div> <!-- end card -->
+                </div> <!-- end card -->
             
             
             <div class="card">
@@ -398,83 +398,83 @@
                     <h5 class="mb-0">
                         <button class="btn btn-link collapsed" type="button" data-toggle="collapse"
                         data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                        <i class="fas fa-save"></i>
-                        {% trans "Save Query" %}
-                    </button>
-                </h5>
-            </div>
-            <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#queryAccordion">
-                <div class="card-body">
-                    <form method='post' action='{% url 'helpdesk:savequery' %}'>
-                        {% csrf_token %}
-                        <input type='hidden' name='query_encoded' value='{{ urlsafe_query }}'/>
-                        <input type='hidden' name='visible' value=''/>
-                        <dl>
-                            <dt><label for='id_title'>{% trans "Query Name" %}</label></dt>
-                            <dd><input type='text' class='form-control' name='title' id='id_title'/></dd>
-                            <dd class='form_help_text'>{% trans "This name appears in the drop-down list of saved queries. If you share your query, other users will see this name, so choose something clear and descriptive!" %}</dd>
-                            
-                            <dt><label for='id_shared'>{% trans "Shared?" %}</label></dt>
-                            <dd><input type='checkbox' name='shared'
-                                id='id_shared'/> {% trans "Yes, share this query with other users." %}
-                            </dd>
-                            <dd class='form_help_text'>{% trans "If you share this query, it will be visible by <em>all</em> other logged-in users." %}</dd>
-                            
-                        </dl>
-                        <div class='buttons'>
-                            <input class="btn btn-primary" type='submit' value='{% trans "Save Query" %}'>
-                        </div>
-                    </form>
+                            <i class="fas fa-save"></i>
+                            {% trans "Save Query" %}
+                        </button>
+                    </h5>
                 </div>
-            </div>
-        </div> <!-- end card -->
-    </div>
+                <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#queryAccordion">
+                    <div class="card-body">
+                        <form method='post' action='{% url 'helpdesk:savequery' %}'>
+                            {% csrf_token %}
+                            <input type='hidden' name='query_encoded' value='{{ urlsafe_query }}'/>
+                            <input type='hidden' name='visible' value=''/>
+                            <dl>
+                                <dt><label for='id_title'>{% trans "Query Name" %}</label></dt>
+                                <dd><input type='text' class='form-control' name='title' id='id_title'/></dd>
+                                <dd class='form_help_text'>{% trans "This name appears in the drop-down list of saved queries. If you share your query, other users will see this name, so choose something clear and descriptive!" %}</dd>
+
+                                <dt><label for='id_shared'>{% trans "Shared?" %}</label></dt>
+                                <dd><input type='checkbox' name='shared'
+                                    id='id_shared'/> {% trans "Yes, share this query with other users." %}
+                                </dd>
+                                <dd class='form_help_text'>{% trans "If you share this query, it will be visible by <em>all</em> other logged-in users." %}</dd>
+
+                            </dl>
+                            <div class='buttons'>
+                                <input class="btn btn-primary" type='submit' value='{% trans "Save Query" %}'>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div> <!-- end card -->
+        
     
     {% if user_saved_queries %}
     <div class="card">
         <div class="card-header" id="headingThree">
             <h5 class="mb-0">
-                <button class="btn btn-link collapsed btn-sm" type="button" data-toggle="collapse"
+                <button class="btn btn-link collapsed" type="button" data-toggle="collapse"
                 data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
                 <i class="fas fa-clipboard-check"></i>
-                {% trans "View Your Saved Query" %}
+                {% trans "Your Saved Queries" %}
             </button>
-        </h5>
-    </div>
+            </h5>
+        </div>
     <div id="collapseThree" class="collapse" aria-labelledby="headingThree"
     data-parent="#queryAccordion">
-    <div class="card-body">
-        <form id="saved_query" action='{% url 'helpdesk:list' %}'>
-            <p>
-                <div class="input-group">
-                    <div class="input-group-prepend">
-                        <label class="input-group-text" for='id_query_selector'>{% trans "Query" %}</label>
-                    </div>
-                    <select class="custom-select" name='saved_query' id='id_query_selector'>
-                        {% for q in user_saved_queries %}
-                        <option value='{{ q.id }}'>
-                            {{ q.title }}{% if q.shared %}
-                            (Shared{% if user != q.user %} by {{ q.user.get_username }}{% endif %})
-                            {% endif %}
-                        </option>
-                        {% endfor %}
-                    </select>
-                </div></p>
-                <input class="btn btn-primary mb-2" id='run_query' type='submit' value='{% trans "Run Query" %}'>
-                
-                <!-- Only query creater can see from here -->
-                <a class="btn btn-danger remove mb-2" id='delete_query'>{% trans "Delete Query" %}</a>
-                <!-- if shared, show this -->
-                <a class="btn btn-warning share mb-2" id='unshare_query'>{% trans "Un-share Query" %}</a>
-                <!-- else if not shared, show this -->
-                <a class="btn btn-warning share mb-2" id='reshare_query'>{% trans "Re-share Query" %}</a>
-                <!-- to here -->
-                <!-- if not query creater show this -->
-                <a class="btn btn-warning remove mb-2" id='reject_query'>{% trans "Reject Query" %}</a>
-                
+        <div class="card-body">
+            <form id="saved_query" action='{% url 'helpdesk:list' %}'>
+                <p>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" for='id_query_selector'>{% trans "Query" %}</label>
+                        </div>
+                        <select class="custom-select" name='saved_query' id='id_query_selector'>
+                            {% for q in user_saved_queries %}
+                            <option value='{{ q.id }}'>
+                                {{ q.title }}{% if q.shared %}
+                                (Shared{% if user != q.user %} by {{ q.user.get_username }}{% endif %})
+                                {% endif %}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div></p>
+                    <input class="btn btn-primary mb-2" id='run_query' type='submit' value='{% trans "Run Query" %}'>
+
+                    <!-- Only query creater can see from here -->
+                    <a class="btn btn-danger remove mb-2" id='delete_query'>{% trans "Delete Query" %}</a>
+                    <!-- if shared, show this -->
+                    <a class="btn btn-warning share mb-2" id='unshare_query'>{% trans "Un-share Query" %}</a>
+                    <!-- else if not shared, show this -->
+                    <a class="btn btn-warning share mb-2" id='reshare_query'>{% trans "Re-share Query" %}</a>
+                    <!-- to here -->
+                    <!-- if not query creater show this -->
+                    <a class="btn btn-warning remove mb-2" id='reject_query'>{% trans "Reject Query" %}</a>
             </form>
         </div>
     </div>
+</div>
 </div>
 </div> <!-- end card -->
 {% endif %}
