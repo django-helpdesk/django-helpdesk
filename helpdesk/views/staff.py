@@ -1373,7 +1373,7 @@ def mass_update(request):
     tickets = request.POST.get('selected_ids')
     action = request.POST.get('action', None)
     if not (tickets and action):
-        return HttpResponseRedirect(reverse('helpdesk:list'))
+        return JsonResponse({'update_status': "Ticket Update Failed: No tickets or action"})
     tickets = tickets.split(',')
 
     if action.startswith('assign_'):
@@ -1521,7 +1521,7 @@ def mass_update(request):
             # todo create a note of this somewhere?
             t.delete()
 
-    return HttpResponseRedirect(reverse('helpdesk:list'))
+    return JsonResponse({'update_status': "Ticket Update Complete"})
 
 
 mass_update = staff_member_required(mass_update)

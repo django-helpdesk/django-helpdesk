@@ -112,7 +112,7 @@
                                 </optgroup>
                             </select>
                             <div class="input-group-append">
-                                <button type="submit" class="btn btn-outline-primary"><i class="fa fa-arrow-circle-right mr-1"></i>Go</button>
+                                <button type="button" onclick="massUpdate()" class="btn btn-outline-primary"><i class="fa fa-arrow-circle-right mr-1"></i>Go</button>
                             </div>
                         </div>
                     </div>
@@ -626,6 +626,22 @@
     function paginatedQuery(page=1) {
         document.getElementById('ticket_page').value = page
         document.forms['query_form'].submit()        
+    }
+
+    // Perform ticket mass update asynchronously, then 
+    // reload page with current query and ticket view preferences
+    function massUpdate() {
+        data = 
+        $.ajax({
+            url: "{% url 'helpdesk:mass_update' %}",
+            type: 'POST',
+            data: new FormData(document.forms['ticket_mass_update']),
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                document.forms['query_form'].submit()
+            }
+        })
     }
 </script>
 
