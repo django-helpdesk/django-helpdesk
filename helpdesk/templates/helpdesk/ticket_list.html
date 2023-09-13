@@ -506,6 +506,8 @@
 
 <script>
     $(document).ready(function () {
+        // Restore column visibility based on user's session preferences
+        // Note: can use localStorage instead to persist between sessions
         if (sessionStorage['visible_cols']) {
             vis = sessionStorage['visible_cols'].split(',')
             for (const col of document.querySelectorAll('#headers th')) {
@@ -521,9 +523,11 @@
                 }
             }
         } else {
+            // No preference found for session, use defaults
             sessionStorage['visible_cols'] = get_visible_cols()
         }
         
+        // DISABLED
         // Scroll the query results to fill the viewport by default
         // Browser will take over scroll position on reload
         // scrollQueryCard() 
@@ -549,6 +553,7 @@
         colNums[col.dataset.colname] = idx++;
     }
     
+    // Toggle visibility for given column
     function toggleColumn(show, colNum, save=true) {
         if (show) {
             $('#dataTable th:nth-child(' + colNum + ')').removeClass("d-none")
@@ -561,6 +566,7 @@
         if (save) { sessionStorage['visible_cols'] = get_visible_cols() }
     }
     
+    // Toggle visibility for query selection card
     function toggleQuerySelector() {
         checkbox = document.getElementById("show_query")
         resultsCol = document.getElementById("query_card").parentElement
@@ -576,6 +582,8 @@
         }
     }
     
+    // CURRENTLY UNUSED
+    // Scroll to place query card centered in view.
     function scrollQueryCard() {
         var element = document.getElementById('query_card');
         var headerOffset = 5;
@@ -588,6 +596,8 @@
         });
     }
     
+    // Detect which columns are currently visible
+    // Column visibility determines what data is exported
     function get_visible_cols() {
         var visible_columns = [];
         for (const col of document.querySelectorAll('#headers th')) {
