@@ -230,7 +230,6 @@
                 </div>
                 <!-- / Data Table -->
                 <!-- Pagination Toolbar -->
-                <form method="post" id="pagination_form">
                     <div class="d-flex flex-wrap border-top px-2 mb-2" style="//background-color: #f7f7f7">
                         {% with 't_page' as page_var %}
                         <div class="d-flex align-items-center mt-2">
@@ -241,10 +240,10 @@
                                 <div class="btn-group dropup">
                                     <button class="btn btn-outline-secondary rounded-0 font-weight-semibold dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">{{ tickets_per_page }}</button>
                                     <div class="dropdown-menu p-1 text-right" style="min-width: 0">
-                                        <a class="dropdown-item px-3 rounded-lg {% if tickets_per_page == 10 %}active{% endif %}" href="?t_per_page=10">10</a>
-                                        <a class="dropdown-item px-3 rounded-lg {% if tickets_per_page == 25 %}active{% endif %}" href="?t_per_page=25">25</a>
-                                        <a class="dropdown-item px-3 rounded-lg {% if tickets_per_page == 50 %}active{% endif %}" href="?t_per_page=50">50</a>
-                                        <a class="dropdown-item px-3 rounded-lg {% if tickets_per_page == 100 %}active{% endif %}" href="?t_per_page=100">100</a>
+                                        <button class="dropdown-item px-3 rounded-lg {% if tickets_per_page == 10 %}active{% endif %}" onclick="updateTicketsPerPage(10)">10</a>
+                                        <button class="dropdown-item px-3 rounded-lg {% if tickets_per_page == 25 %}active{% endif %}" onclick="updateTicketsPerPage(25)">25</a>
+                                        <button class="dropdown-item px-3 rounded-lg {% if tickets_per_page == 50 %}active{% endif %}" onclick="updateTicketsPerPage(50)">50</a>
+                                        <button class="dropdown-item px-3 rounded-lg {% if tickets_per_page == 100 %}active{% endif %}" onclick="updateTicketsPerPage(100)">100</a>
                                     </div>
                                 </div>
                                 <div class="input-group-append border-left border-secondary">
@@ -256,38 +255,37 @@
                             <div class="btn-toolbar float-right mt-2" role="toolbar" style="bottom: 0;">
                                 <div class="btn-group mr-2" role="group">
                                     {% if ticket_list.has_previous %}
-                                    <a class="btn btn-primary font-weight-bold" href="?t_per_page={{ tickets_per_page }}&{{ page_var }}=1">First</a>
-                                    <a class="btn btn-primary font-weight-bold" href="?t_per_page={{ tickets_per_page }}&{{ page_var }}={{ ticket_list.previous_page_number }}">Previous</a>
+                                    <button class="btn btn-primary font-weight-bold" onclick="paginatedQuery()">First</a>
+                                    <button class="btn btn-primary font-weight-bold" onclick="paginatedQuery({{ ticket_list.previous_page_number }})">Previous</a>
                                     {% else %}
-                                    <a class="btn btn-primary font-weight-bold disabled">First</a>
-                                    <a class="btn btn-primary font-weight-bold disabled">Previous</a>
+                                    <button class="btn btn-primary font-weight-bold disabled">First</a>
+                                    <button class="btn btn-primary font-weight-bold disabled">Previous</a>
                                     {% endif %}
                                 </div>
                                 <div class="btn-group mr-2" role="group">
                                     {% with 3 as thresh %}
                                     {% for i in ticket_list.paginator.page_range %}
                                     {% if ticket_list.number == i %}
-                                    <a class="btn btn-outline-primary active font-weight-bold">{{ i }}</a>
+                                    <button class="btn btn-outline-primary active font-weight-bold">{{ i }}</a>
                                     {% elif i <= ticket_list.number|add:5 and i >= ticket_list.number|add:-5 %}
-                                    <a class="btn btn-outline-primary font-weight-bold" href="?t_per_page={{ tickets_per_page }}&{{ page_var }}={{ i }}">{{ i }}</a>
+                                    <button class="btn btn-outline-primary font-weight-bold" onclick="paginatedQuery({{ i }})">{{ i }}</a>
                                     {% endif %}
                                     {% endfor %}
                                     {% endwith %}
                                 </div>
                                 <div class="btn-group" role="group">
                                     {% if ticket_list.has_next %}
-                                    <a class="btn btn-primary font-weight-bold" href="?t_per_page={{ tickets_per_page }}&{{ page_var }}={{ ticket_list.next_page_number }}">Next</a>
-                                    <a class="btn btn-primary font-weight-bold" href="?t_per_page={{ tickets_per_page }}&{{ page_var }}={{ ticket_list.paginator.num_pages }}">Last</a>
+                                    <button class="btn btn-primary font-weight-bold" onclick="paginatedQuery({{ ticket_list.next_page_number }})">Next</a>
+                                    <button class="btn btn-primary font-weight-bold" onclick="paginatedQuery({{ ticket_list.paginator.num_pages }})">Last</a>
                                     {% else %}
-                                    <a class="btn btn-primary font-weight-bold disabled">Next</a>
-                                    <a class="btn btn-primary font-weight-bold disabled">Last</a>
+                                    <button class="btn btn-primary font-weight-bold disabled">Next</a>
+                                    <button class="btn btn-primary font-weight-bold disabled">Last</a>
                                     {% endif %}
                                 </div>
                             </div>
                         </div>
                         {% endwith %}
                     </div>
-                </form>
                 <!-- / Pagination Toolbar -->
         </div>
         <div class="tab-pane fade" id="timelinetabcontents" role="tabpanel" aria-labelledby="timelinetabcontents-tab">
@@ -386,8 +384,10 @@
                             </ul>   
                         </div>
                         <div class="border-bottom border-top bg-light p-2">
-                            <input class="btn btn-primary w-100" type='submit' value='{% trans "Apply Filters" %}'/>
+                            <button class="btn btn-primary w-100" type='submit'>{% trans "Apply Filters" %}</input>
                         </div>
+                        <input type='hidden' id='tickets_per_page' name='tickets_per_page' value="{{ tickets_per_page }}"/>
+                        <input type='hidden' id='ticket_page' name='ticket_page' value="1"/>
                     </form>
                 </div>
             </div> <!-- end card -->
@@ -612,15 +612,14 @@
         return visible_columns
     }
 
-    /*
-    Upon changes to the query, switching pages, or changing tickets per page
-    Both the query and pagination forms need to be combined and submitted together
+    function updateTicketsPerPage(tickets_per_page) {
+        document.getElementById('tickets_per_page').value = tickets_per_page
+        paginatedQuery()
+    }
 
-    Changes to the query or tickets per page will reset to the first page
-    */
-    function combineQueryPagination() {
-        var queryForm = document.forms['query_form']
-        var paginationForm = document.forms['pagination_form']
+    function paginatedQuery(page=1) {
+        document.getElementById('ticket_page').value = page
+        document.forms['query_form'].submit()        
     }
 </script>
 

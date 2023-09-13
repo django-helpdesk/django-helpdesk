@@ -1855,8 +1855,8 @@ def ticket_list(request):
 
     json_queries = {i['id']: i for i in user_saved_queries.values('id', 'user_id', 'shared')}
 
-    if request.POST.get(_('t_per_page'), None):
-        tickets_per_page = request.POST.get(_('t_per_page'))
+    if request.POST.get(_('tickets_per_page'), None):
+        tickets_per_page = request.POST.get(_('tickets_per_page'))
     elif request.user.is_authenticated and hasattr(request.user, 'usersettings_helpdesk'):
         tickets_per_page = request.user.usersettings_helpdesk.tickets_per_page
     else:
@@ -1866,7 +1866,7 @@ def ticket_list(request):
     paginator = Paginator(
         ticket_list, tickets_per_page)
     try:
-        ticket_list = paginator.page(request.POST.get(_('t_page'), 1))
+        ticket_list = paginator.page(request.POST.get(_('ticket_page'), 1))
     except PageNotAnInteger:
         ticket_list = paginator.page(1)
     except EmptyPage:
