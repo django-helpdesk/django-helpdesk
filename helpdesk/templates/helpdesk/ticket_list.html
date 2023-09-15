@@ -369,20 +369,20 @@
                                 <li class="list-group-item">
                                     {% if saved_query.user == user %}
                                     <p>{% blocktrans with saved_query.title as query_name %}You are currently viewing saved query <strong>"{{ query_name }}"</strong>.{% endblocktrans %}</p>
-                                    <a href="{% url 'helpdesk:delete_query' saved_query.id %}" class="btn btn-danger btn-sm">
+                                    <a href="{% url 'helpdesk:delete_query' saved_query.id %}" class="btn btn-danger btn-sm mb-2">
                                         {% trans "Delete Query" %}
                                     </a>
                                     {% if saved_query.shared %}
-                                    <a href="{% url 'helpdesk:unshare_query' saved_query.id %}" class="btn btn-warning btn-sm">
+                                    <a href="{% url 'helpdesk:unshare_query' saved_query.id %}" class="btn btn-warning btn-sm mb-2">
                                         {% trans "Un-share Query" %}
                                     </a>
                                     {% else %}
-                                    <a href="{% url 'helpdesk:reshare_query' saved_query.id %}" class="btn btn-warning btn-sm">
+                                    <a href="{% url 'helpdesk:reshare_query' saved_query.id %}" class="btn btn-warning btn-sm mb-2">
                                         {% trans "Re-share Query" %}
                                     </a>
                                     {% endif %}
                                     {% elif saved_query.user != user %}
-                                    <a href="{% url 'helpdesk:reject_query' saved_query.id %}" class="btn btn-warning btn-sm">
+                                    <a href="{% url 'helpdesk:reject_query' saved_query.id %}" class="btn btn-warning btn-sm mb-2">
                                         {% trans "Reject Query" %}
                                     </a>
                                     {% endif %}
