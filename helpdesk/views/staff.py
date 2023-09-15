@@ -1702,6 +1702,7 @@ def ticket_list(request):
     default_query_params = {
         'filtering': {
             'status__in': [Ticket.OPEN_STATUS, Ticket.REOPENED_STATUS, Ticket.REPLIED_STATUS, Ticket.NEW_STATUS],
+            'priority__in': [1, 2, 3, 4, 5] # TODO: Create constants for these priority values
         },
         'sorting': 'created',
         'sortreverse': False,
@@ -1751,6 +1752,7 @@ def ticket_list(request):
         ('queue', 'queue__id__in'),
         ('assigned_to', 'assigned_to__id__in'),
         ('status', 'status__in'),
+        ('priority', 'priority__in'),
         ('kbitem', 'kbitem__in'),
         ('submitter', 'submitter_email__in'),
     ])
@@ -1764,7 +1766,7 @@ def ticket_list(request):
 
     if saved_query:
         pass
-    elif not {'queue', 'assigned_to', 'status', 'q', 'sort', 'sortreverse', 'kbitem', 'submitter'}.intersection(request.POST):
+    elif not {'queue', 'assigned_to', 'status', 'priority', 'q', 'sort', 'sortreverse', 'kbitem', 'submitter'}.intersection(request.POST):
         # Fall-back if no querying is being done
         query_params = deepcopy(default_query_params)
     else:
@@ -1880,6 +1882,7 @@ def ticket_list(request):
         user_choices=user_choices,
         kb_items=KBItem.objects.all(),
         queue_choices=huser.get_queues(),
+        priority_choices=Ticket.PRIORITY_CHOICES,
         status_choices=Ticket.STATUS_CHOICES,
         kbitem_choices=kbitem_choices,
         urlsafe_query=urlsafe_query,
