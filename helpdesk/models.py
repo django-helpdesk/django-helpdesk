@@ -634,6 +634,15 @@ class Ticket(models.Model):
             return "success"
     get_priority_css_class = property(_get_priority_css_class)
 
+    def _get_status_css_class(self):
+        if self.status in [1, 2, 6, 7]:
+            return "primary"
+        elif self.status == 5:
+            return "info"
+        else:
+            return "secondary"
+    get_status_css_class = property(_get_status_css_class)
+
     def _get_priority(self):
         """
         Displays the priority of the ticket

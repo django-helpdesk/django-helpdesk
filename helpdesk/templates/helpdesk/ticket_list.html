@@ -218,7 +218,9 @@
                                 </td>
                                 <td class="d-none">{{ ticket.queue }}</td>
                                 <td class="d-none">{{ ticket.ticket_form.name }}</td>
-                                <td>{{ ticket.get_status }}</td>
+                                <td class="text-center">
+                                    <span class="badge badge-{{ ticket.get_status_css_class }}">{{ ticket.get_status }}</span>
+                                </td>
                                 <td>{% if ticket.get_assigned_to != "Unassigned" %}{{ ticket.get_assigned_to }}{% endif %}</td> {# Remove if statement for "Unassigned" instead of blank #}
                                 <td>{{ ticket.submitter_email }}</td>
                                 <td class="d-none">{{ ticket.beam_property.count|add:ticket.beam_taxlot.count }}</td>
