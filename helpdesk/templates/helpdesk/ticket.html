@@ -177,7 +177,8 @@
                 </div></dd>
                 {% endifequal %}
 
-                <dd><label for='id_public'><input type='checkbox' id='id_public' name='public' value='1' />&nbsp; {% trans 'Make this update public.' %}</label></dd>
+                <dd><label for='id_public'><input type='checkbox' id='id_public' name='public' value='1' />&nbsp; <b>{% trans 'Make this update public?' %}</b></label></dd>
+                <dd class='form_help_text'>{% trans "If public, an email will be sent to the submitter, primary contact, copied nonusers, and any other email addresses listed on the form.<br>If private, an email will only be sent to the assigned staff owner and internal users. Use this to leave internal comments, questions, and flags. Responses will <i>not</i> be sent to the original sender. " %}</dd>
             </dl>
             {% endwith %}
 
@@ -191,7 +192,7 @@
                 <dd>- Adding a comment or attachment, or changing the due date, spent time, or priority will all send an update notification.
                     <br>- Changing the status to Reopened, Replied, or Duplicate without changing anything else does not send any notifications.
                     <br>- Changing the status to Resolved and commenting will add a resolution. To change the resolution, Reopen the ticket and then set it to Resolved with a new comment. </dd>
-                <dd class='form_help_text'>{% trans "If private, an email will be sent to the ticket owner and any copied <i>users</i>.<br>If public, an email will also be sent to the submitter, primary contact, copied nonusers, and any other email fields on the form. " %}</dd>
+
 
                 <dt><label for='id_title'>{% trans "Title" %}</label></dt>
                 <dd><input type='text' name='title' value='{{ ticket.title|escape }}' /></dd>
