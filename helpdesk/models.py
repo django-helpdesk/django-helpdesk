@@ -598,11 +598,10 @@ class Ticket(models.Model):
         ignored_from_queue = self.queue.ignoreemail_set.filter(prevent_send=True)
         ignored_from_org = self.queue.organization.ignoreemail_set.filter(prevent_send=True, queues__isnull=True)
 
-        recipients = set([s.lower().strip() for s in recipients if s])
-
+        recipients = set([s.strip() for s in recipients if s])
         def send(role, recipient):
             if recipient:
-                recipient = recipient.lower().strip()
+                recipient = recipient.strip()
                 if recipient not in recipients and role in roles:
                     ignore_flag = False
                     for i in ignored_from_queue:
