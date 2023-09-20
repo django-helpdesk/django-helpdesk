@@ -33,7 +33,7 @@
 
 {% block helpdesk_body %}
 <div class="row">
-    <div class="col-9 order-1 pl-3">
+    <div class="col-12 order-1 pl-3">
         <div id="query_card" class="card mb-2">
             <div class="card-header pt-1">
                 <!-- Tabs -->
@@ -68,8 +68,8 @@
                 <!-- Action Toolbar -->
                 <div class="d-flex flex-wrap overflow-auto px-2 pb-2 border-bottom mw-100" style="max-width: 100%; //background-color: #f7f7f7">
                     <div class="btn-group-toggle" data-toggle="buttons">
-                        <a class="btn btn-outline-secondary active mt-2 mr-2" onclick="toggleQuerySelector(this)">
-                            <input id="show_query" type="checkbox" checked> Query
+                        <a class="btn btn-outline-secondary mt-2 mr-2" onclick="toggleQuerySelector()">
+                            <input id="show_query" type="checkbox"> Query
                         </a>
                     </div>
                     <div class="d-flex align-items-center mt-2 mr-2">
@@ -307,7 +307,7 @@
 <!-- /.panel -->
 </div>
 
-<div class="col-3 pr-0 collapse show" id="query_select">
+<div class="col-3 pr-0 collapse" id="query_select">
     <div class="card mb-3" >
         <div class="card-header pt-2 font-weight-bold">
             <i class="fas fa-hand-pointer"></i>
@@ -544,6 +544,15 @@
             // No preference found for session, use defaults
             sessionStorage['visible_cols'] = get_visible_cols()
         }
+
+        // Restore query panel visibility based on user's session preferences
+        // If preference not set, default to show query
+        if (!('show_query' in sessionStorage) || sessionStorage['show_query'] == 'true') {
+            toggleQuerySelector()
+            $('#show_query').prop('checked', true)
+            $('#show_query').parent().addClass('active')
+            sessionStorage['show_query'] = true
+        }
         
         // DISABLED
         // Scroll the query results to fill the viewport by default
@@ -593,12 +602,16 @@
         queryCol = document.getElementById("query_select")
         if (!checkbox.checked) {
             queryCol.hidden = false
+            queryCol.classList.add('show')
             resultsCol.classList.remove('col-12')
             resultsCol.classList.add('col-9')
+            sessionStorage['show_query'] = true
         } else {
             queryCol.hidden = true
+            queryCol.classList.remove('show')
             resultsCol.classList.remove('col-9')
             resultsCol.classList.add('col-12')
+            sessionStorage['show_query'] = false
         }
     }
     
