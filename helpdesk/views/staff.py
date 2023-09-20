@@ -1811,6 +1811,31 @@ def ticket_list(request):
         context['query'] = q
         query_params['search_string'] = q
 
+        filter_contains_params = dict([
+            ('ticket', 'title__icontains'),
+            ('priority', 'priority__icontains'), # need to search words not numbers
+            ('queue', 'queue__title__icontains'),
+            ('form', 'ticket_form__name__icontains'),
+            ('status', 'status__icontains'), # need to search words not numbers
+            ('assigned_to', 'assigned_to__email__icontains'), # currently only checks this one
+            ('assigned_to', 'assigned_to__first_name__icontains'),
+            ('assigned_to', 'assigned_to__last_name__icontains'),
+            ('assigned_to', 'assigned_to__username__icontains'),
+            ('submitter', 'submitter_email__icontains'),
+            ('paired_count', 'status__icontains'), # this needs to be updated once I figure out how to filter on paired_count
+            ('created', 'created__icontains'),
+            ('last_reply', 'last_escalation__icontains'),
+            ('due_date', 'due_date__icontains'),
+            ('time_spent', 'status__icontains'), # this needs to be updated once I figure out how to filter on paired_count
+            ('kbitem', 'kbitem__title__icontains'),
+        ])
+        
+        # breakpoint()
+        for item in request.POST.items():
+            if item[0].endswith('_filter') and item[1] != '':
+                col = item[0].replace('_filter', '')
+                query_params['filtering'][filter_contains_params[col]] = item[1]
+
         # SORTING
         sort = request.POST.get('sort', None)
         if sort not in ('status', 'assigned_to', 'created', 'title', 'queue', 'priority', 'kbitem', 'submitter',
