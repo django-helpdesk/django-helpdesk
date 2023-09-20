@@ -192,20 +192,22 @@
                                 {% endfor %}
                                 {% endif %}
                             </tr>
-                            <tr hidden> <!-- Filters -->
+                            <tr> <!-- Filters -->
                                 {# <th></th> #}
-                                <th colspan="2"><input type="text" class="form-control text-body" placeholder="Filter" data-index="1" spellcheck="false" data-ms-editor="true"></th>
-                                <th class="d-none"><input type="text" class="form-control" placeholder="Filter" data-index="1" spellcheck="false" data-ms-editor="true"></th>
-                                <th class="d-none"><input type="text" class="form-control" placeholder="Filter" data-index="1" spellcheck="false" data-ms-editor="true"></th>
-                                <th><input type="text" class="form-control" placeholder="Filter" data-index="1" spellcheck="false" data-ms-editor="true"></th>
-                                <th><input type="text" class="form-control" placeholder="Filter" data-index="1" spellcheck="false" data-ms-editor="true"></th>
-                                <th><input type="text" class="form-control" placeholder="Filter" data-index="1" spellcheck="false" data-ms-editor="true"></th>
-                                <th class="d-none"><input type="text" class="form-control" placeholder="Filter" data-index="1" spellcheck="false" data-ms-editor="true"></th>
-                                <th><input type="text" class="form-control" placeholder="Filter" data-index="1" spellcheck="false" data-ms-editor="true"></th>
-                                <th><input type="text" class="form-control" placeholder="Filter" data-index="1" spellcheck="false" data-ms-editor="true"></th>
-                                <th class="d-none"><input type="text" class="form-control" placeholder="Filter" data-index="1" spellcheck="false" data-ms-editor="true"></th>
-                                <th class="d-none"><input type="text" class="form-control" placeholder="Filter" data-index="1" spellcheck="false" data-ms-editor="true"></th>
-                                <th class="d-none"><input type="text" class="form-control" placeholder="Filter" data-index="1" spellcheck="false" data-ms-editor="true"></th>
+                                <th colspan="2"><input type="text" class="form-control text-body" placeholder="Filter" data-colfilter="ticket" spellcheck="false" data-ms-editor="true"></th>
+                                <th class="d-none"><input type="text" class="form-control" placeholder="Filter" data-colfilter="priority" spellcheck="false" data-ms-editor="true"></th>
+                                <th class="d-none"><input type="text" class="form-control" placeholder="Filter" data-colfilter="queue" spellcheck="false" data-ms-editor="true"></th>
+                                <th class="d-none"><input type="text" class="form-control" placeholder="Filter" data-colfilter="form" spellcheck="false" data-ms-editor="true"></th>
+                                <th><input type="text" class="form-control" placeholder="Filter" data-colfilter="status" spellcheck="false" data-ms-editor="true"></th>
+                                <th><input type="text" class="form-control" placeholder="Filter" data-colfilter="assigned_to" spellcheck="false" data-ms-editor="true"></th>
+                                <th><input type="text" class="form-control" placeholder="Filter" data-colfilter="submitter" spellcheck="false" data-ms-editor="true"></th>
+                                <th class="d-none"><input type="text" class="form-control" placeholder="Filter" data-colfilter="paired_count" spellcheck="false" data-ms-editor="true"></th>
+                                <th><input type="text" class="form-control" placeholder="Filter" data-colfilter="created" spellcheck="false" data-ms-editor="true"></th>
+                                <th><input type="text" class="form-control" placeholder="Filter" data-colfilter="last_reply" spellcheck="false" data-ms-editor="true"></th>
+                                <th class="d-none"><input type="text" class="form-control" placeholder="Filter" data-colfilter="due_date" spellcheck="false" data-ms-editor="true"></th>
+                                <th class="d-none"><input type="text" class="form-control" placeholder="Filter" data-colfilter="time_spent" spellcheck="false" data-ms-editor="true"></th>
+                                <th class="d-none"><input type="text" class="form-control" placeholder="Filter" data-colfilter="kbitem" spellcheck="false" data-ms-editor="true"></th>
+                                {% comment %} TODO: add support for extra data columns {% endcomment %}
                             </tr>
                         </thead>
                         <tbody>
@@ -229,6 +231,7 @@
                                 <td class="d-none"><span title='{{ ticket.due_date|naturaltime }}'>{{ ticket.due_date|date:"DATETIME_FORMAT" }}</span></td>
                                 <td class="d-none">{{ ticket.time_spent_formatted }}</td>
                                 <td class="d-none">{{ ticket.kbitem.title}}</td>
+                                {% comment %} TODO: add support for extra data columns {% endcomment %}
                             </tr>
                             
                             {% empty %}
@@ -398,8 +401,23 @@
                         <div class="border-bottom border-top bg-light p-2">
                             <button class="btn btn-primary w-100" type='submit'>{% trans "Apply Filters" %}</input>
                         </div>
+                        <!-- Hidden Fields -->
                         <input type='hidden' id='tickets_per_page' name='tickets_per_page' value="{{ tickets_per_page }}"/>
                         <input type='hidden' id='ticket_page' name='ticket_page' value="1"/>
+                        {% comment %} TODO: Make column filter hidden fields dynamically generate from columns {% endcomment %}
+                        <input type='hidden' id='ticket_filter' name='ticket_filter'>
+                        <input type='hidden' id='priority_filter' name='priority_filter'>
+                        <input type='hidden' id='queue_filter' name='queue_filter'>
+                        <input type='hidden' id='form_filter' name='form_filter'>
+                        <input type='hidden' id='status_filter' name='status_filter'>
+                        <input type='hidden' id='assigned_to_filter' name='assigned_to_filter'>
+                        <input type='hidden' id='submitter_filter' name='submitter_filter'>
+                        <input type='hidden' id='paired_count_filter' name='paired_count_filter'>
+                        <input type='hidden' id='created_filter' name='created_filter'>
+                        <input type='hidden' id='last_reply_filter' name='last_reply_filter'>
+                        <input type='hidden' id='due_date_filter' name='due_date_filter'>
+                        <input type='hidden' id='time_spent_filter' name='time_spent_filter'>
+                        <input type='hidden' id='kbitem_filter' name='kbitem_filter'>
                     </form>
                 </div>
                 </div> <!-- end card -->
@@ -652,6 +670,9 @@
 
     function paginatedQuery(page=1) {
         document.getElementById('ticket_page').value = page
+        for (const colfilter of document.querySelectorAll('[data-colfilter]')) {
+            document.getElementById(colfilter.dataset['colfilter'] + '_filter').value = colfilter.value
+        }
         document.forms['query_form'].submit()        
     }
 
