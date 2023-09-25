@@ -15,7 +15,7 @@ In the container cd to `/opt/django-helpdesk/standalone` and run
 
     python3 manage.py createsuperuser
 
-You should now be able to log in to the server by visiting `localhost:80`. You will also need to access the `/admin` url to set up new users.
+You should now be able to log in to the server by visiting `localhost:80`. You will also need to access the `/admin` url to set up new users. You also need to set the Site in the admin so that URLs in ticket emails will work.
 
 Configuration for production use
 --------------------------------------
