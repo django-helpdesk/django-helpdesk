@@ -1,4 +1,9 @@
 #!/bin/bash
+# Install extra deps from /opt/extra-deps.txt if it exists
+if [ -f /opt/extra-dependencies.txt ]; then
+    pip install -r /opt/extra-dependencies.txt
+fi
+
 cd /opt/django-helpdesk/standalone/
 if python manage.py showmigrations | grep '\[ \]\|^[a-z]' | grep '[  ]' -B 1; then
     python manage.py migrate --noinput                # Apply database migrations
