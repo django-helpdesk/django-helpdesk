@@ -1822,11 +1822,11 @@ def ticket_list(request):
             ('assigned_to', 'assigned_to__last_name__icontains'),
             ('assigned_to', 'assigned_to__username__icontains'),
             ('submitter', 'submitter_email__icontains'),
-            ('paired_count', 'status__icontains'), # this needs to be updated once I figure out how to filter on paired_count
+            ('paired_count', 'paired_count__icontains'), # this needs to be updated once I figure out how to filter on paired_count
             ('created', 'created__icontains'),
-            ('last_reply', 'last_escalation__icontains'),
+            ('last_reply', 'last_reply__icontains'),
             ('due_date', 'due_date__icontains'),
-            ('time_spent', 'status__icontains'), # this needs to be updated once I figure out how to filter on paired_count
+            # ('time_spent', 'status__icontains'), # this needs to be updated once I figure out how to filter on time_spent
             ('kbitem', 'kbitem__title__icontains'),
         ])
         
