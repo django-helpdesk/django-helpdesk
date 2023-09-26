@@ -291,6 +291,7 @@ def imap_oauth_sync(q, logger, server):
 
                 except DeleteIgnoredTicketException:
                     server.store(num, '+FLAGS', '\\Deleted')
+                    server.expunge()
                     logger.warn("Message %s was ignored and deleted from IMAP server" % num)
 
                 except TypeError as te:
@@ -300,6 +301,7 @@ def imap_oauth_sync(q, logger, server):
                 else:
                     if ticket:
                         server.store(num, '+FLAGS', '\\Deleted')
+                        server.expunge()
                         logger.info(
                             "Successfully processed message %s, deleted from IMAP server" % num)
                     else:
