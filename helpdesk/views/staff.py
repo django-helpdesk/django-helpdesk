@@ -2424,7 +2424,7 @@ def reshare_saved_query(request, id):
     return HttpResponseRedirect(reverse('helpdesk:list') + '?saved_query=%s' % query.id)
 
 
-reject_saved_query = staff_member_required(reject_saved_query)
+reshare_saved_query = staff_member_required(reshare_saved_query)
 
 
 @helpdesk_staff_member_required
@@ -2437,7 +2437,7 @@ def unshare_saved_query(request, id):
     return HttpResponseRedirect(reverse('helpdesk:list') + '?saved_query=%s' % query.id)
 
 
-reject_saved_query = staff_member_required(reject_saved_query)
+unshare_saved_query = staff_member_required(unshare_saved_query)
 
 
 class EditUserSettingsView(MustBeStaffMixin, UpdateView):
