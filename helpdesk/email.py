@@ -20,6 +20,7 @@ from email.utils import getaddresses, parseaddr
 from os.path import isfile, join
 from time import ctime
 from functools import reduce
+from buildingid.code import RE_PATTERN_
 
 from bs4 import BeautifulSoup
 from django.conf import settings as django_settings
@@ -36,7 +37,7 @@ from exchangelib import FileAttachment, ItemAttachment
 
 from helpdesk import settings
 from helpdesk.lib import safe_template_context, process_attachments
-from helpdesk.models import Ticket, TicketCC, FollowUp, IgnoreEmail, FormType, CustomField
+from helpdesk.models import Ticket, TicketCC, FollowUp, IgnoreEmail, FormType, CustomField, is_extra_data
 from seed.models import EmailImporter, GOOGLE, MICROSOFT
 from helpdesk.decorators import is_helpdesk_staff
 
@@ -56,6 +57,7 @@ STRIPPED_SUBJECT_STRINGS = [
 
 PATTERN_UID = re.compile(r'\d+ \(UID (?P<uid>\d+)\)')
 DEBUGGING = False
+UBID_PATTERN = RE_PATTERN_.pattern[1:len(RE_PATTERN_.pattern) - 1]  # removes ^ and $
 
 
 def parse_uid(data):
@@ -585,6 +587,9 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
     sender_email = payload['sender'][1]
     org = queue.organization
     date = payload.get('date', now)
+    ubids = re.findall(UBID_PATTERN, payload['body'])
+    if ubids:
+        ubids = ', '.join(['-'.join(s) for s in ubids])
 
     message_id = getattr(message, 'message_id', None) or parseaddr(getattr(message, 'Message-Id', None))[1]
     in_reply_to = getattr(message, 'in_reply_to', None) or parseaddr(getattr(message, 'In-Reply-To', None))[1]
@@ -634,6 +639,18 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
                 assigned_to=queue.default_owner if queue.default_owner else None,
             )
             ticket.created = date
+
+            if ubids:
+                # if ubids were found in the body, look for a field with UBID in the title
+                ubid_field = ticket_form.customfield_set.filter(label__icontains='UBID', data_type='varchar')
+                if ubid_field.count() == 1:
+                    logger.debug("Found UBIDs, adding them to the ticket.")
+                    ubid_field = ubid_field.first()
+                    if is_extra_data(ubid_field.field_name):
+                        ticket.extra_data[ubid_field.field_name] = ubids
+                    else:
+                        setattr(ticket, ubid_field.field_name, ubids)
+
             ticket.save()
             logger.debug("Created new ticket %s-%s" % (ticket.queue.slug, ticket.id))
             new = True
