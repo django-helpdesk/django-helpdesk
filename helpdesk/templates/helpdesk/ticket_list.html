@@ -195,17 +195,17 @@
                             <tr> <!-- Filters -->
                                 {# <th></th> #}
                                 <th colspan="2"><input type="text" class="form-control text-body" placeholder="Filter" data-colfilter="ticket" value="{{query_params.filtering.title__icontains}}" spellcheck="false" data-ms-editor="true"></th>
-                                <th class="d-none"><input type="text" class="form-control" placeholder="Filter" data-colfilter="priority" disabled value="" spellcheck="false" data-ms-editor="true" ></th>
+                                <th class="d-none"></th>
                                 <th class="d-none"><input type="text" class="form-control" placeholder="Filter" data-colfilter="queue" value="{{query_params.filtering.queue__title__icontains}}" spellcheck="false" data-ms-editor="true"></th>
                                 <th class="d-none"><input type="text" class="form-control" placeholder="Filter" data-colfilter="form" value="{{query_params.filtering.ticket_form__name__icontains}}" spellcheck="false" data-ms-editor="true"></th>
-                                <th><input type="text" class="form-control" placeholder="Filter" data-colfilter="status" disabled value="" spellcheck="false" data-ms-editor="true"></th>
+                                <th></th>
                                 <th><input type="text" class="form-control" placeholder="Filter" data-colfilter="assigned_to" value="{{query_params.filtering.assigned_to__email__icontains}}" spellcheck="false" data-ms-editor="true"></th>
                                 <th><input type="text" class="form-control" placeholder="Filter" data-colfilter="submitter" value="{{query_params.filtering.submitter_email__icontains}}" spellcheck="false" data-ms-editor="true"></th>
                                 <th class="d-none"><input type="text" class="form-control" placeholder="Filter" data-colfilter="paired_count" value="{{query_params.filtering.paired_count__icontains}}" spellcheck="false" data-ms-editor="true"></th>
-                                <th><input type="text" class="form-control" placeholder="Filter" data-colfilter="created" value="{{query_params.filtering.created__icontains}}" spellcheck="false" data-ms-editor="true"></th>
-                                <th><input type="text" class="form-control" placeholder="Filter" data-colfilter="last_reply" value="{{query_params.filtering.last_escalation__icontains}}" spellcheck="false" data-ms-editor="true"></th>
-                                <th class="d-none"><input type="text" class="form-control" placeholder="Filter" data-colfilter="due_date" value="{{query_params.filtering.due_date__icontains}}" spellcheck="false" data-ms-editor="true"></th>
-                                <th class="d-none"><input type="text" class="form-control" placeholder="Filter" data-colfilter="time_spent" disabled value="" spellcheck="false" data-ms-editor="true"></th>
+                                <th></th>
+                                <th></th>
+                                <th class="d-none"></th>
+                                <th class="d-none"></th>
                                 <th class="d-none"><input type="text" class="form-control" placeholder="Filter" data-colfilter="kbitem" value="{{query_params.filtering.kbitem__title__icontains}}" spellcheck="false" data-ms-editor="true"></th>
                                 {% comment %} TODO: add support for extra data columns {% endcomment %}
                             </tr>
@@ -590,6 +590,12 @@
                 $('#colvis button').dropdown('hide')
             }
         });
+
+        $('[data-colfilter]').on('keyup', function(e) {
+            if (e.keyCode == 13) {
+                paginatedQuery()
+            }
+        })
     })
     
     colNums = {"id": 0};
@@ -855,7 +861,6 @@
                 // Filter event handler
                 function filterFunction(thisSearch) {
                     globalTimeout = null;
-                    console.log(thisSearch)
                     var column = table.column( $(thisSearch).data('index') )
                     table
                     .column( $(thisSearch).data('index') )
