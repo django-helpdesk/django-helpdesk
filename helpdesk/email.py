@@ -587,9 +587,10 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
     sender_email = payload['sender'][1]
     org = queue.organization
     date = payload.get('date', now)
-    ubids = re.findall(UBID_PATTERN, payload['body'])
+    ubids = re.findall(UBID_PATTERN, payload['subject'] + ' ' + payload['body'])
     if ubids:
-        ubids = ', '.join(['-'.join(s) for s in ubids])
+        ubids = set(['-'.join(s) for s in ubids])
+        ubids = ', '.join(ubids)
 
     message_id = getattr(message, 'message_id', None) or parseaddr(getattr(message, 'Message-Id', None))[1]
     in_reply_to = getattr(message, 'in_reply_to', None) or parseaddr(getattr(message, 'In-Reply-To', None))[1]
