@@ -52,7 +52,7 @@ STRIPPED_SUBJECT_STRINGS = [
     "RE: ",
     "FW: ",
     "Automatic reply: ",
-    "[EXTERNAL] "
+    "[EXTERNAL] "  # NJ
 ]
 
 PATTERN_UID = re.compile(r'\d+ \(UID (?P<uid>\d+)\)')
@@ -65,7 +65,7 @@ def parse_uid(data):
     return match.group('uid')
 
 
-def process_email(quiet=False, debugging=False):
+def process_email(quiet=False, debugging=False, nj=None):
     for importer in EmailImporter.objects.filter(allow_email_imports=True):
         importer_queues = importer.queue_set.all()
 
@@ -115,11 +115,11 @@ def process_email(quiet=False, debugging=False):
 
                 queue_time_delta = timedelta(minutes=importer.email_box_interval or 0)
                 if debugging or DEBUGGING:
-                    process_importer(importer, queues, logger=logger, debugging=True)
+                    process_importer(importer, queues, logger=logger, debugging=True, nj=nj)
                     importer.email_box_last_check = timezone.now()
                     importer.save()
                 elif (importer.email_box_last_check + queue_time_delta) < timezone.now():
-                    process_importer(importer, queues, logger=logger, debugging=False)
+                    process_importer(importer, queues, logger=logger, debugging=False, nj=nj)
                     importer.email_box_last_check = timezone.now()
                     importer.save()
 
@@ -138,7 +138,7 @@ def process_email(quiet=False, debugging=False):
                 logging.exception(e)
 
 
-def process_importer(importer, queues, logger, debugging):
+def process_importer(importer, queues, logger, debugging, nj=None):
     logger.info("\n***** %s: Begin processing mail for django-helpdesk" % ctime())
 
     if importer.socks_proxy_type and importer.socks_proxy_host and importer.socks_proxy_port:
@@ -205,7 +205,7 @@ def process_importer(importer, queues, logger, debugging):
                 int(importer.email_box_port)
             )
         logger.info("Attempting %s server login" % email_box_type)
-        mail_defaults[email_box_type]['sync'](importer, queues, logger, server, debugging=debugging)
+        mail_defaults[email_box_type]['sync'](importer, queues, logger, server, debugging=debugging, nj=nj)
 
     elif email_box_type == 'local':
         mail_dir = importer.email_box_local_dir or '/var/lib/mail/helpdesk/'
@@ -298,7 +298,7 @@ def refreshed(importer, logger, token_backend=None):
         return False  # The token is still good - keep going
 
 
-def imap_sync(importer, queues, logger, server, debugging):
+def imap_sync(importer, queues, logger, server, debugging, nj=None):
     login_successful = True
     token_backend = None
     server.debug = 4
@@ -373,7 +373,7 @@ def imap_sync(importer, queues, logger, server, debugging):
                             status, data = server.uid('fetch', msg_uid, '(RFC822)')
                             full_message = encoding.force_text(data[0][1], errors='replace')
                             try:
-                                ticket = object_from_message(full_message, importer, queues, logger)
+                                ticket = object_from_message(full_message, importer, queues, logger, nj=nj)
                             except TypeError as e:
                                 logger.error("Type error - ticket set to None")
                                 logger.error(e)
@@ -560,6 +560,8 @@ def create_ticket_cc(ticket, cc_list):
             continue
         if cced_email == (ticket.submitter_email or '') or cced_email == (ticket.contact_email or ''):
             continue
+        if cced_email == 'benchmarking@bpu.nj.gov':  # NJ
+            continue
 
         user = None
         try:
@@ -577,7 +579,7 @@ def create_ticket_cc(ticket, cc_list):
     return new_ticket_ccs
 
 
-def create_object_from_email_message(message, ticket_id, payload, files, logger):
+def create_object_from_email_message(message, ticket_id, payload, files, logger, nj=None):
 
     ticket, previous_followup, new = None, None, False
     now = timezone.now()
@@ -640,6 +642,14 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
                 assigned_to=queue.default_owner if queue.default_owner else None,
             )
             ticket.created = date
+
+            if nj:
+                # hard-coded for initial NJ imports
+                if nj in ['Demolished', 'Exemption Evidence', 'Financial Distress', 'Size Error', 'Sold', 'Unoccupied', 'Other']:
+                    ticket.extra_data['inquiry_type'] = 'Exemption In Progress'
+                    ticket.extra_data['exemption_type'] = nj
+                else:
+                    ticket.extra_data['inquiry_type'] = nj
 
             if ubids:
                 # if ubids were found in the body, look for a field with UBID in the title
@@ -754,10 +764,10 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
     return ticket
 
 
-def object_from_message(message, importer, queues, logger):
+def object_from_message(message, importer, queues, logger, nj=None):
     # 'message' must be an RFC822 formatted message.
     message = email.message_from_string(message)
-    sender, to_list, cc_list, date, subject = None, [], [], None, None
+    sender, to_list, cc_list, date, subject, category = None, [], [], None, None, None
 
     if importer.extract_eml_attachments:  # todo make a migration to check this off
         # for processing forwarded mail
@@ -995,7 +1005,7 @@ def object_from_message(message, importer, queues, logger):
     }
     if date:
         payload['date'] = date
-    return create_object_from_email_message(message, ticket, payload, files, logger=logger)
+    return create_object_from_email_message(message, ticket, payload, files, logger=logger, nj=nj)
 
 
 def object_from_exchange_message(message, importer, queues, logger):
