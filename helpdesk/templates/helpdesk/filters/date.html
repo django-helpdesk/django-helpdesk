@@ -1,9 +1,14 @@
 {% load i18n humanize %}
 <div class="">
-    <label class="font-weight-bold" for='id_date'>{% trans "Date Range" %}</label>
+    <label class="font-weight-bold" for='id_date'>{% trans "Submission Date" %}</label>
     <div class="input-group">
-        <input class="form-control" type='date' name='date_from' value='{{ query_params.filtering.created__gte }}' placeholder="From" id='id_date_from' style="max-width:100%" />
-        <input class="form-control" type='date' name='date_to' value='{{ query_params.filtering.created__lte }}' placeholder="To" id='id_date_to' style="max-width:100%" />
+        <div style="float:left;">
+            <label for="date-start" style="margin-bottom:0px;"><small>Start</small></label>
+            <input id="date-start" class="form-control" type='date' name='date_from' value='{{ query_params.filtering.created__gte }}' placeholder="From" id='id_date_from' style="max-width:100%" />
+        </div>
+        <div style="float:left;">
+            <label for="date-end" style="margin-bottom:0px;"><small>End</small></label>
+            <input  id="date-end" class="form-control" type='date' name='date_to' value='{{ query_params.filtering.created__lte }}' placeholder="To" id='id_date_to' style="max-width:100%" />
+        </div>
     </div>
-    <small class='filterHelp'>{% trans "Range from the 1st date to the 2nd date" %}</small>
 </div>

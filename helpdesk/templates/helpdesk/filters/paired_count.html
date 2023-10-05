@@ -2,8 +2,8 @@
 <div class="">
     <label class="font-weight-bold" for='id_paired_count'>{% trans "Paired Count" %}</label>
     <div class="input-group">
-        <input class="form-control" type='text' name='paired_count_from' value='{{ query_params.filtering.paired_count__gte }}' id='id_paired_count_from' placeholder="From" style="max-width:100%" />
-        <input class="form-control" type='text' name='paired_count_to' value='{{ query_params.filtering.paired_count__lte }}' id='id_paired_count_to' placeholder="To" style="max-width:100%" />
+        <input class="form-control" type='text' name='paired_count_from' value='{{ query_params.filtering.paired_count__gte }}' id='id_paired_count_from' placeholder="Minimum" style="max-width:100%" />
+        <input class="form-control" type='text' name='paired_count_to' value='{{ query_params.filtering.paired_count__lte }}' id='id_paired_count_to' placeholder="Maximum" style="max-width:100%" />
     </div>
     <small class='filterHelp'></small>
 </div>

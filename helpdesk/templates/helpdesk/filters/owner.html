@@ -2,7 +2,7 @@
 {% load static %}
 {% load in_list %}
 <div class="">
-    <label class="font-weight-bold" for='id_owners'>{% trans "Owner(s)" %}</label>
+    <label class="font-weight-bold" for='id_owners'>{% trans "Owner" %}</label>
     {% with magic_number=-1 %}
     <div class="form-check">
         <input type="checkbox" class="form-check-input" name="assigned_to" value="{{ magic_number }}" {% if magic_number|in_list:query_params.filtering.assigned_to__id__in %}checked{% endif %}>

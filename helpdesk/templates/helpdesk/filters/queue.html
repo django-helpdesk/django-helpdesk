@@ -1,13 +1,13 @@
 {% load i18n humanize %}
 {% load static %}
 {% load in_list %}
-<div class="form-row">
-    <label class="font-weight-bold" for='id_queues'>{% trans "Queue(s)" %}</label>
-    <select class="custom-select overflow-auto" id='id_queues' name='queue' size='5' style="max-width:100%" multiple>
-        {% for q in queue_choices %}
-        <option value='{{ q.id }}'{% if q.id|in_list:query_params.filtering.queue__id__in %} selected="selected"{% endif %}>{{ q.title }}</option>
-        {% endfor %}
-    </select>
-    <small class="filterHelp">{% trans "Ctrl-click to select multiple options" %}</small>
+<div class="">
+    <label class="font-weight-bold" for='id_queues'>{% trans "Queue" %}</label>
+    {% for q in queue_choices %}
+    <div class="form-check">
+        <input type="checkbox" class="form-check-input" name="queue" value="{{ q.id }}" {% if q.id|in_list:query_params.filtering.queue__id__in %}checked{% endif %}>
+        <label class="form-check-label">{{ q.title }}</label>
+    </div>
+    {% endfor %}
 </div>
 
