@@ -1,11 +1,18 @@
 (function($) {
   "use strict"; // Start of use strict
 
+   let toggled = localStorage.getItem("helpdesk.sidebar-toggled") === 'true';
+   localStorage.setItem("helpdesk.sidebar-toggled", toggled);
+   $("body").toggleClass("sidebar-toggled", toggled);
+   $(".sidebar").toggleClass("toggled", toggled);
+
   // Toggle the side navigation
   $("#sidebarToggle").click(function(e) {
+    toggled = !toggled;
     e.preventDefault();
-    $("body").toggleClass("sidebar-toggled");
-    $(".sidebar").toggleClass("toggled");
+    $("body").toggleClass("sidebar-toggled", toggled);
+    $(".sidebar").toggleClass("toggled", toggled);
+    localStorage.setItem("helpdesk.sidebar-toggled", toggled);
   });
 
   // Prevent the content wrapper from scrolling when the fixed side navigation hovered over
