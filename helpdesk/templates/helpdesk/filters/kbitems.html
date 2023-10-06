@@ -1,10 +1,11 @@
 {% load i18n humanize %}
 {% load static %}
 {% load in_list %}
-<div class="">
+<div class="query-filter-group">
     <a class="dropdown-title" data-toggle="collapse" href="#kbitem-collapse" aria-expanded="false" aria-controls="kbitem-collapse">
         <span>{% trans "Knowledgebase Item" %}</span>
-        <i class="fas fa-chevron-down"></i>
+        <span class="query-counter badge badge-pill badge-primary"></span>
+        <i class="fas fa-chevron-down" style="float:right;"></i>
     </a>
     <div class="collapse" id="kbitem-collapse">
         <div class="form-check">

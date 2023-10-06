@@ -1,10 +1,11 @@
 {% load i18n humanize %}
 {% load static %}
 {% load in_list %}
-<div class="">
+<div class="query-filter-group">
     <a class="dropdown-title" data-toggle="collapse" href="#priority-collapse" aria-expanded="false" aria-controls="priority-collapse">
         <span>{% trans "Priority" %}</span>
-        <i class="fas fa-chevron-down"></i>
+        <span class="query-counter badge badge-pill badge-primary"></span>
+        <i class="fas fa-chevron-down" style="float:right;"></i>
     </a>
     <div class="collapse" id="priority-collapse">
         {% for p in priority_choices %}

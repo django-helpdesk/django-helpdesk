@@ -1,8 +1,9 @@
 {% load i18n %}
-<div class="">
+<div class="query-filter-group">
     <a class="dropdown-title" data-toggle="collapse" href="#last-reply-collapse" aria-expanded="false" aria-controls="last-reply-collapse">
         <span>{% trans "Latest Reply Date" %}</span>
-        <i class="fas fa-chevron-down"></i>
+        <span class="query-on"><i class="fas fa-toggle-on"></i></span>
+        <i class="fas fa-chevron-down" style="float:right;"></i>
     </a>
     <div class="collapse" id="last-reply-collapse">
         <div class="input-group">
