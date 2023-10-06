@@ -57,7 +57,7 @@
             </li>
         </ul>
     </div>
-    
+
     <div class="card-body p-0">
         {{ search_message|safe }}
         <div class="tab-content" id="myTabContent">
@@ -66,31 +66,30 @@
             <form method='post' action="{% url 'helpdesk:mass_update' %}" id="ticket_mass_update">
                 {% csrf_token %}
                 <!-- Action Toolbar -->
-                <div class="d-flex flex-wrap overflow-auto px-2 pb-2 border-bottom mw-100" style="max-width: 100%; //background-color: #f7f7f7">
+                <div class="d-flex flex-wrap justify-content-between overflow-auto px-2 pb-2 border-bottom mw-100" style="max-width: 100%; //background-color: #f7f7f7">
                     <div class="btn-group-toggle" data-toggle="buttons">
                         <a class="btn btn-outline-secondary mt-2 mr-2" onclick="toggleQuerySelector()">
-                            <input id="show_query" type="checkbox"> Query
+                            <input id="show_query" type="checkbox"><i class="fas fa-chevron-left"></i> Filter
                         </a>
+                    </div>
+                    <div class="mr-auto d-flex align-items-center mt-2">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <label class="input-group-text bg-white border-0">Select:</label>
+                            </div>
+                            <div class="input-group-append">
+                                <button id="select_all_btn" class="btn btn-outline-primary rounded-left font-weight-semibold" type="button">All <i class="fa fa-plus-circle mr-1"></i></button>
+                                <button id="select_none_btn" class="btn btn-outline-danger font-weight-semibold" type="button">None <i class="fa fa-times-circle mr-1"></i></button>
+                            </div>
+                        </div>
                     </div>
                     <div class="d-flex align-items-center mt-2 mr-2">
                         <div class="input-group">
                             <div class="input-group-prepend">
-                                <label class="input-group-text font-weight-normal">Select</label>
+                                <label class="input-group-text bg-white border-0">Action:</label>
                             </div>
-                            <button id="select_none_btn" class="btn btn-outline-danger rounded-0 font-weight-semibold" type="button"><i class="fa fa-times-circle mr-1"></i>None</button>
-                            <button id="select_all_btn" class="btn btn-outline-primary rounded-0 font-weight-semibold" type="button"><i class="fa fa-plus-circle mr-1"></i>All</button>
-                            <button id="select_inverse_btn" class="btn btn-outline-secondary rounded-0 font-weight-semibold" type="button"><i class="fa fa-random mr-1"></i>Invert</button>
-                            <div class="input-group-append border-left border-secondary">
-                                <label id="select_count" class="input-group-text font-weight-normal">0 Selected</label>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="d-flex align-items-center mt-2">
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <label class="input-group-text font-weight-normal">Action</label>
-                            </div>
-                            <select class="custom-select" name="action" id="id_mass_action">
+                            <select class="custom-select rounded-left" name="action" id="id_mass_action">
+                                <option selected>Choose...</option>
                                 <option value="take">Take (Assign to me)</option>
                                 <option value="delete">Delete</option><option value="merge">Merge</option>
                                 <option value="export">Export</option><option value="pair">Pair to BEAM inventory</option>
@@ -112,11 +111,11 @@
                                 </optgroup>
                             </select>
                             <div class="input-group-append">
-                                <button type="button" onclick="massUpdate()" class="btn btn-outline-primary"><i class="fa fa-arrow-circle-right mr-1"></i>Go</button>
+                                <button type="button" onclick="massUpdate()" class="btn btn-outline-secondary">Run Action <i class="fa fa-arrow-circle-right mr-1"></i></button>
                             </div>
                         </div>
                     </div>
-                    <div class="flex-fill mt-2">
+                    <div class="mt-2">
                         <div id="colvis" class="dropdown">
                             <button class="btn btn-outline-secondary float-right font-weight-semibold dropdown-toggle" type="button" data-boundary="window" aria-expanded="false">Column Visibility</button>
                             <div class="dropdown-menu dropdown-menu-left text-center p-2" style="min-width: 0; z-index: 1021;">
@@ -169,7 +168,7 @@
             </form>
                 <!-- / Action Toolbar -->
                 <!-- Data Table -->
-                <div class="table-responsive" style="max-height: 81.5vh;">
+                <div class="table-responsive"> <!-- style="max-height: 81.5vh;">-->
                     <table class="table table-bordered table-sm table-striped" id="dataTable" width="100%" cellspacing="0">
                         <thead class="thead-light"> 
                             <tr id="headers"> <!-- Headers -->
@@ -310,10 +309,9 @@
 <!-- /.panel -->
 </div>
 
-<div class="col-3 pr-0 collapse" id="query_select">
+<div class="col-sm-4 col-md-3 col-lg-2 pr-0 collapse" id="query_select">
     <div class="card mb-3" >
         <div class="card-header pt-2 font-weight-bold">
-            <i class="fas fa-hand-pointer"></i>
             {% trans "Query Selection" %}
         </div>
         <div class="card-body p-0">
@@ -566,7 +564,7 @@
         // Restore query panel visibility based on user's session preferences
         // If preference not set, default to show query
         if (!('show_query' in sessionStorage) || sessionStorage['show_query'] == 'true') {
-            toggleQuerySelector()
+            toggleQuerySelector();
             $('#show_query').prop('checked', true)
             $('#show_query').parent().addClass('active')
             sessionStorage['show_query'] = true
@@ -621,21 +619,25 @@
     
     // Toggle visibility for query selection card
     function toggleQuerySelector() {
-        checkbox = document.getElementById("show_query")
-        resultsCol = document.getElementById("query_card").parentElement
-        queryCol = document.getElementById("query_select")
+        checkbox = document.getElementById("show_query");
+        resultsCol = document.getElementById("query_card").parentElement;
+        queryCol = document.getElementById("query_select");
         if (!checkbox.checked) {
-            queryCol.hidden = false
-            queryCol.classList.add('show')
-            resultsCol.classList.remove('col-12')
-            resultsCol.classList.add('col-9')
-            sessionStorage['show_query'] = true
+            queryCol.hidden = false;
+            queryCol.classList.add('show');
+            resultsCol.classList.remove('col-12');
+            resultsCol.classList.add('col-sm-8');
+            resultsCol.classList.add('col-md-9')
+            resultsCol.classList.add('col-lg-10');
+            sessionStorage['show_query'] = true;
         } else {
-            queryCol.hidden = true
-            queryCol.classList.remove('show')
-            resultsCol.classList.remove('col-9')
-            resultsCol.classList.add('col-12')
-            sessionStorage['show_query'] = false
+            queryCol.hidden = true;
+            queryCol.classList.remove('show');
+            resultsCol.classList.remove('col-sm-8');
+            resultsCol.classList.remove('col-md-9')
+            resultsCol.classList.remove('col-lg-10');
+            resultsCol.classList.add('col-12');
+            sessionStorage['show_query'] = false;
         }
     }
     
