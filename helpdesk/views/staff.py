@@ -1701,8 +1701,8 @@ def ticket_list(request):
     }
     default_query_params = {
         'filtering': {
-            'status__in': [Ticket.OPEN_STATUS, Ticket.REOPENED_STATUS, Ticket.REPLIED_STATUS, Ticket.NEW_STATUS],
-            'priority__in': [1, 2, 3, 4, 5] # TODO: Create constants for these priority values
+            # 'status__in': [Ticket.OPEN_STATUS, Ticket.REOPENED_STATUS, Ticket.REPLIED_STATUS, Ticket.NEW_STATUS],
+            # 'priority__in': [1, 2, 3, 4, 5] # TODO: Create constants for these priority values
         },
         'sorting': 'created',
         'sortreverse': False,

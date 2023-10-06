@@ -1,10 +1,14 @@
 {% load i18n humanize %}
 {% load static %}
+
+<div class="query-sort-group">
+    <a class="dropdown-title">
+        <span>{% trans "Sort by" %}</span>
+    </a>
+</div>
+
 <div class="form-row flex-fill align-self-center">
     <div class="input-group">
-        <div class="input-group-prepend">
-            <label class="input-group-text" for='id_sort'>{% trans "Sort By" %}</label>
-        </div>
         <!-- TODO Make this a Dynamic List of All the Columns. Show extra_data columns if only 1 queue is selected -->
         <select id='id_sort' name='sort' class="custom-select">
             <option value='created'{% if query_params.sorting == "created" %} selected='selected'{% endif %}>

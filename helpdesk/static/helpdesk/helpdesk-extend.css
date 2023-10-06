@@ -124,3 +124,17 @@ td, th {
 .beam-navbar-header-shadow {
   text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8)
 }
+
+.query-filter-group > .dropdown-title, .query-sort-group > .dropdown-title {
+    font-weight: bold;
+    padding-bottom: 5px;
+    display: block;
+    height: 100%;
+    width: 100%;
+    text-decoration: none;
+    color:gray;
+}
+
+.form-check > .form-check-label {
+    padding-left: 5px;
+}

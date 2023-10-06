@@ -327,7 +327,7 @@
                             </button>
                         </h5>
                     </div>
-                
+
                 <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#queryAccordion">
                     <form method="post" id="query_form">
                         {% csrf_token %}
@@ -396,8 +396,9 @@
                                 {% endif %}
                             </ul>   
                         </div>
-                        <div class="border-bottom border-top bg-light p-2">
-                            <button class="btn btn-primary w-100" type='button' onclick='paginatedQuery()'>{% trans "Apply Filters" %}</input>
+                        <div class="d-flex justify-content-between border-bottom border-top bg-light p-2">
+                            <button class="btn btn-danger w-40 m-1" type='button' onclick='clearForm()'>{% trans "Clear Filters" %}</button>
+                            <button class="btn btn-primary w-40 m-1" type='button' onclick='paginatedQuery()'>{% trans "Apply Filters" %}</button>
                         </div>
                         <!-- Hidden Fields -->
                         <input type='hidden' id='tickets_per_page' name='tickets_per_page' value="{{ tickets_per_page }}"/>
@@ -700,31 +701,8 @@
         })
     }
 
-    // upon loading the page, checks the query params and visually updates filters with counter badges and on icons
-    $(".query-filter-group").each(function (i) {
-        let counters = ".collapse > .form-check > .form-check-input:checkbox:checked";
-        let on = ".collapse > .input-group > div > .form-control";
-        let flag = false;
-        if ($(this).find(counters).length > 0) {
-            $(this).find(".query-counter").text($(this).find(counters).length);
-        } else {
-            flag = false;
-            $(this).find(on).each(function () {
-                // loops through fields in each filter group to find any with a value
-                if ($(this).val()) {
-                    flag = true;
-                }
-            });
-            if (flag) {
-                $(this).find(".query-on").show()
-            } else {
-                $(this).find(".query-on").hide();
-            }
-        }
-    });
-
-    // visual filter updates when checkboxes are toggled on or off
-    $(document).on("change", ".form-check-input", function() {
+    function checkCheckboxes () {
+        // visual filter updates when checkboxes are toggled on or off
         $(".query-filter-group").each(function (i) {
             let chain = ".collapse > .form-check > .form-check-input:checkbox:checked";
             if ($(this).find(chain).length > 0) {
@@ -733,10 +711,9 @@
                 $(this).find(".query-counter").text("");
             }
         });
-    });
-
-    // visual filter updates when query form fields are changed
-    $(document).on("change", ".form-control", function() {
+    }
+    function checkInputs () {
+        // visual filter updates when query form fields are changed
         let flag;
         $(".query-filter-group").each(function (i) {
             flag = false;
@@ -753,7 +730,27 @@
                 $(this).find(".query-on").hide();
             }
         });
+    }
+    checkInputs();
+    checkCheckboxes();
+
+    $(document).on("change", ".form-control", function() {
+        checkInputs();
     });
+    $(document).on("change", ".form-check-input", function() {
+        checkCheckboxes();
+    });
+
+    function clearForm() {
+        $("#query_form :input:checkbox").each(function () {
+            $(this).prop('checked', false);
+        });
+        $("#query_form input[type!=checkbox][type!=hidden]").each(function () {
+            $(this).val('');
+        });
+        checkCheckboxes();
+        checkInputs();
+    }
 
 </script>
 
