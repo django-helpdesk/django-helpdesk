@@ -1,14 +1,19 @@
 {% load i18n humanize %}
 <div class="">
-    <label class="font-weight-bold" for='id_date'>{% trans "Submission Date" %}</label>
-    <div class="input-group">
-        <div style="float:left;">
-            <label for="date-start" style="margin-bottom:0px;"><small>Start</small></label>
-            <input id="date-start" class="form-control" type='date' name='date_from' value='{{ query_params.filtering.created__gte }}' placeholder="From" id='id_date_from' style="max-width:100%" />
-        </div>
-        <div style="float:left;">
-            <label for="date-end" style="margin-bottom:0px;"><small>End</small></label>
-            <input  id="date-end" class="form-control" type='date' name='date_to' value='{{ query_params.filtering.created__lte }}' placeholder="To" id='id_date_to' style="max-width:100%" />
+    <a class="dropdown-title" data-toggle="collapse" href="#date-collapse" aria-expanded="false" aria-controls="date-collapse">
+        <span>{% trans "Submission Date" %}</span>
+        <i class="fas fa-chevron-down"></i>
+    </a>
+    <div class="collapse" id="date-collapse">
+        <div class="input-group">
+            <div style="float:left;">
+                <label for="date-start" style="margin-bottom:0px;"><small>Start</small></label>
+                <input id="date-start" class="form-control" type='date' name='date_from' value='{{ query_params.filtering.created__gte }}' placeholder="From" id='id_date_from' style="max-width:100%" />
+            </div>
+            <div style="float:left;">
+                <label for="date-end" style="margin-bottom:0px;"><small>End</small></label>
+                <input  id="date-end" class="form-control" type='date' name='date_to' value='{{ query_params.filtering.created__lte }}' placeholder="To" id='id_date_to' style="max-width:100%" />
+            </div>
         </div>
     </div>
 </div>
