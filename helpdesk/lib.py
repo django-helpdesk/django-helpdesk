@@ -186,11 +186,11 @@ def format_time_spent(time_spent):
 
 def convert_value(value):
     """ Convert date/time data type to known fixed format string """
-    if type(value) == datetime:
+    if type(value) is datetime:
         return value.strftime(CUSTOMFIELD_DATETIME_FORMAT)
-    elif type(value) == date:
+    elif type(value) is date:
         return value.strftime(CUSTOMFIELD_DATE_FORMAT)
-    elif type(value) == time:
+    elif type(value) is time:
         return value.strftime(CUSTOMFIELD_TIME_FORMAT)
     else:
         return value

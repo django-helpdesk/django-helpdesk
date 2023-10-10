@@ -97,7 +97,7 @@ def send_templated_mail(template_name,
     if isinstance(recipients, str):
         if recipients.find(','):
             recipients = recipients.split(',')
-    elif type(recipients) != list:
+    elif type(recipients) is not list:
         recipients = [recipients]
 
     msg = EmailMultiAlternatives(subject_part, text_part,
