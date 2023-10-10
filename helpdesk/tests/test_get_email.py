@@ -7,6 +7,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
 from django.shortcuts import get_object_or_404
 from django.test import override_settings, TestCase
+from email.mime.message import MIMEMessage
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import helpdesk.email
@@ -69,7 +70,7 @@ class GetEmailCommonTests(TestCase):
             "ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
             "ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo..."
         )
-        self.assertEqual(ticket.description, "", msg=ticket.description)
+        self.assertEqual(ticket.description.strip(), "", msg=ticket.description)
 
     def test_email_with_quoted_printable_body(self):
         """
@@ -294,22 +295,27 @@ class GetEmailCommonTests(TestCase):
         inline_attachment.add_header('X-Attachment-Id', inline_image_id)
         inline_attachment.add_header('Content-ID', '<' + inline_image_id + '>')
         # Create the actual email with its plain and HTML parts
-        email_message = MIMEMultipart(_subtype="alternative")
+        alt_email_message = MIMEMultipart("alternative")
         # Create the plain and HTML that will reference the inline attachment
         plain_body = "Test with inline image: \n[image: " + inline_att_filename + "]\n\n"
         plain_msg = MIMEText(plain_body)
-        email_message.attach(plain_msg)
+        alt_email_message.attach(plain_msg)
         html_body = '<div><div>Test with inline image: <img src=3D"cid:' + inline_image_id + '" alt=3D="' + inline_att_filename + '"><br></div>'
         html_msg = MIMEText(html_body, "html")
-        email_message.attach(html_msg)
-        # Create the email attachment and attach that as well
-        email_attachment, _, _ = utils.generate_multipart_email(type_list=['plain', 'html'])
-        email_att_content = email_attachment.as_string()
-        email_message.attach(utils.generate_file_mime_part(filename=email_att_filename, content=email_att_content))
+        alt_email_message.attach(html_msg)
+        # Create the email to be attached and attach that as well
+        email_to_be_attached, _, _ = utils.generate_multipart_email(type_list=['plain', 'html'])
+        email_as_attachment = MIMEMessage(email_to_be_attached)
+        email_as_attachment.add_header('Content-Disposition', 'attachment', filename=email_att_filename)
         # Now create the base multipart and attach all the other parts to it
-        base_message,_ ,_ = utils.generate_multipart_email(type_list=[], sub_type="related")
-        base_message.attach(email_message)
-        base_message.attach(inline_attachment)
+        related_message = MIMEMultipart("related")
+        related_message.attach(alt_email_message)
+        related_message.attach(inline_attachment)
+        base_message = MIMEMultipart("mixed")
+        base_message.attach(related_message)
+        base_message.attach(email_as_attachment)
+        utils.add_simple_email_headers(base_message, locale="en_US", use_short_email=True)
+        # Now send the part to the email workflow
         extract_email_metadata(base_message.as_string(), self.queue_public, self.logger)
 
         self.assertEqual(len(mail.outbox), 1)  # @UndefinedVariable
@@ -322,14 +328,15 @@ class GetEmailCommonTests(TestCase):
         email_attachment_found = False
         for att_retrieved in followup.followupattachment_set.all():
             if (helpdesk.email.HTML_EMAIL_ATTACHMENT_FILENAME == att_retrieved.filename):
-                # Ignore the HTML formatted conntent of the email that is attached 
+                # Ignore the HTML formatted content of the email that is attached 
                 continue
             if att_retrieved.filename.endswith(inline_att_filename):
                 inline_found = True
             elif  att_retrieved.filename.endswith(email_att_filename):
                 email_attachment_found = True
             else:
-                self.assertTrue(False, "Unexpected file in ticket attachments: " % att_retrieved.filename)
+                print(f"\n\n%%%%%%   {att_retrieved}")
+                self.assertTrue(False, "Unexpected file in ticket attachments: %s" % att_retrieved.filename)
         self.assertTrue(email_attachment_found, "Email attachment file not found ticket attachments: %s" % (email_att_filename))
         self.assertTrue(inline_found, "Inline file not found in email: %s" % (inline_att_filename))
 
