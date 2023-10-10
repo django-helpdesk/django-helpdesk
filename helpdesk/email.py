@@ -18,7 +18,6 @@ from django.utils.translation import gettext as _
 import email
 from email import policy
 from email.message import EmailMessage, MIMEPart
-from email.mime.text import MIMEText
 from email.utils import getaddresses
 from email_reply_parser import EmailReplyParser
 from helpdesk import settings
@@ -757,10 +756,11 @@ def extract_email_message_content(
     there are multiple attachments to the email.
     :param part: the base email MIME part to be searched
     :param files: any MIME parts to be attached are added to this list
-    :param include_chained_msgs: flag to indicate if the entire email message content including past replies must be extracted
+    :param include_chained_msgs: flag to indicate if the entire email message content including past
+           replies must be extracted
     '''
-    message_part:MIMEPart = part.get_body()
-    parent_part:MIMEPart = part
+    message_part: MIMEPart = part.get_body()
+    parent_part: MIMEPart = part
     content_type = message_part.get_content_type()
     # Handle the possibility of a related part formatted email
     if "multipart/related" == content_type:
@@ -769,17 +769,20 @@ def extract_email_message_content(
         message_part = message_part.get_body(preferencelist=["html", "plain",])
         content_type = message_part.get_content_type()
     mime_content = None
-    formatted_body = None # Retain the original content by using a secondary variable if the HTML needs wrapping
+    formatted_body = None  # Retain the original content by using a secondary variable if the HTML needs wrapping
     if "text/html" == content_type:
         # add the HTML message as an attachment wrapping if necessary
         mime_content = mime_content_to_string(message_part)
         if "<body" not in mime_content:
             formatted_body = f"<body>{mime_content}</body>"
         if "<html" not in mime_content:
-            formatted_body = f"<html><head><meta charset=\"utf-8\" /></head>{mime_content if formatted_body is None else formatted_body}</html>"
+            formatted_body = f"<html><head><meta charset=\"utf-8\" /></head>\
+                               {mime_content if formatted_body is None else formatted_body}</html>"
         files.append(
             SimpleUploadedFile(
-                 HTML_EMAIL_ATTACHMENT_FILENAME, (mime_content if formatted_body is None else formatted_body).encode("utf-8"), 'text/html')
+                HTML_EMAIL_ATTACHMENT_FILENAME,
+                (mime_content if formatted_body is None else formatted_body).encode("utf-8"), 'text/html',
+            )
         )
         # Try to get a plain part message
         plain_message_part = parent_part.get_body(preferencelist=["plain",])
@@ -790,7 +793,8 @@ def extract_email_message_content(
             content_type = "text/plain"
         else:
             # Try to constitute the HTML response as plain text
-            mime_content, _x = attempt_body_extract_from_html(mime_content if formatted_body is None else formatted_body)
+            mime_content, _x = attempt_body_extract_from_html(
+                mime_content if formatted_body is None else formatted_body)
     else:
         # Is either text/plain or some random content-type so just decode the part content and store as is
         mime_content = mime_content_to_string(message_part)
@@ -845,12 +849,12 @@ def extract_attachments(
         content_parts_excluded: bool = False,
 ) -> (int, bool):
     '''
-    if the MIME part is a multipart and not identified as inline or attachment then
+    If the MIME part is a multipart and not identified as "inline" or "attachment" then
     iterate over the sub parts recursively.
-    Otherwise extract \MIME part content and add as an attachment.
+    Otherwise extract MIME part content and add as an attachment.
     It will recursively descend as appropriate ensuring that all parts not part of the message content
     are added to the list of files to be attached. To cater for the possibility of text/plain and text/html parts
-    that are further down in the multipart heirarchy than the ones that ones meant to provide that content,
+    that are further down in the multipart hierarchy than the ones that ones meant to provide that content,
     iterators are selectively used.
     :param part: the email MIME part to be processed
     :param files: any MIME part content or MIME parts to be attached are added to this list
@@ -867,12 +871,15 @@ def extract_attachments(
         if "multipart/related" == content_type:
             if content_parts_excluded:
                 # This should really never happen in a properly constructed email message but...
-                logger.warn("WARNING! Content type MIME parts have been excluded but a multipart/related has been encountered. there may be missing information in attachments.")
+                logger.warn(
+                    "WARNING! Content type MIME parts have been excluded but a multipart/related has been encountered.\
+                     There may be missing information in attachments.")
             else:
                 content_parts_excluded = True
             # Use the iterator that automatically excludes message content parts
             for part in target_part.iter_attachments():
-                counter, content_parts_excluded = extract_attachments(part, files, logger, counter, content_parts_excluded)
+                counter, content_parts_excluded = extract_attachments(
+                    part, files, logger, counter, content_parts_excluded)
         # The iterator must be different depending on whether we have already excluded message content parts
         else:
             # Content part might be 1 or 2 parts but will be at same level so track finding at least 1
@@ -882,7 +889,8 @@ def extract_attachments(
                     content_part_detected = True
                     continue
                 # Recurse into the part to process embedded parts
-                counter, content_parts_excluded = extract_attachments(part, files, logger, counter, content_parts_excluded)
+                counter, content_parts_excluded = extract_attachments(
+                    part, files, logger, counter, content_parts_excluded)
             # If we have found 1 or more content parts then flag that the content parts have been ommitted
             # to ensure that other text/* parts are attached
             if content_part_detected:
@@ -891,7 +899,7 @@ def extract_attachments(
         process_as_attachment(target_part, counter, files, logger)
         counter = counter + 1
     return (counter, content_parts_excluded)
-    
+
 
 def extract_email_metadata(message: str,
                            queue: Queue,
@@ -956,7 +964,9 @@ def extract_email_metadata(message: str,
         counter, content_parts_excluded = extract_attachments(message_obj, files, logger)
         if not content_parts_excluded:
             # Unexpected situation and may mean there is a hole in the email processing logic
-            logger.warning("Failed to exclude email content when parsing all MIME parts in the multipart. Verify that there were no text/* parts containing message content.")
+            logger.warning(
+                "Failed to exclude email content when parsing all MIME parts in the multipart.\
+                 Verify that there were no text/* parts containing message content.")
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("Email parsed and %s attachments were found and attached.", counter)
     add_file_if_always_save_incoming_email_message(files, message)
