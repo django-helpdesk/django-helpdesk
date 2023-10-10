@@ -240,7 +240,7 @@ def generate_multipart_email(locale: str="en_US",
     :param sub_type: multipart sub type that defaults to "mixed" if not specified
     :param use_short_email: produces a "To" or "From" that is only the email address if True
     """    
-    msg = MIMEMultipart(_subtype=sub_type) if sub_type else MIMEMultipart()
+    msg = MIMEMultipart(sub_type) if sub_type else MIMEMultipart()
     for part_type in type_list:
         msg.attach(generate_mime_part(locale=locale, part_type=part_type))
     from_meta, to_meta = add_simple_email_headers(msg, locale=locale, use_short_email=use_short_email)
