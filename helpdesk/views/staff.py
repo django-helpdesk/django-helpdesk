@@ -2364,6 +2364,8 @@ def save_query(request):
 
     if shared == 'on':  # django only translates '1', 'true', 't' into True
         shared = True
+    else:
+        shared = False
     query_encoded = request.POST.get('query_encoded', None)
 
     if not title or not query_encoded:

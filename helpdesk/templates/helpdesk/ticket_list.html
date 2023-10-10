@@ -39,481 +39,382 @@
                 <!-- Tabs -->
                 <ul class="nav nav-tabs card-header-tabs">
                     <li class="nav-item d-flex align-self-center mr-2 font-weight-bold">
-                        {% trans "Query Results" %}
+                        {% trans "Search Results" %}
                     </li>
                     <li class="nav-item">
                         <a class="nav-link active" href="#datatabletabcontents" id="datatabletabcontents-tab"
                         data-toggle="tab" role="tab" aria-controls="datatabletabcontents" aria-selected=true>
-                        <i class="fas fa-th-list"></i>
-                        {% trans "Table" %}
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#timelinetabcontents" id="timelinetabcontents-tab" data-toggle="tab"
-                    role="tab" aria-controls="timelinetabcontents" aria-selected=false>
-                    <i class="fas fa-history"></i>
-                    {% trans "Timeline" %}
-                </a>
-            </li>
-        </ul>
-    </div>
-
-    <div class="card-body p-0">
-        {{ search_message|safe }}
-        <div class="tab-content" id="myTabContent">
-            <div class="tab-pane fade show active overflow-hidden" id="datatabletabcontents" role="tabpanel"
-            aria-labelledby="datatabletabcontents-tab">
-            <form method='post' action="{% url 'helpdesk:mass_update' %}" id="ticket_mass_update">
-                {% csrf_token %}
-                <!-- Action Toolbar -->
-                <div class="d-flex flex-wrap justify-content-between overflow-auto px-2 pb-2 border-bottom mw-100" style="max-width: 100%; //background-color: #f7f7f7">
-                    <div class="btn-group-toggle" data-toggle="buttons">
-                        <a class="btn btn-outline-secondary mt-2 mr-2" onclick="toggleQuerySelector()">
-                            <input id="show_query" type="checkbox"><i class="fas fa-chevron-left"></i> Filter
+                            <i class="fas fa-th-list"></i>
+                            {% trans "Table" %}
                         </a>
-                    </div>
-                    <div class="mr-auto d-flex align-items-center mt-2">
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <label class="input-group-text bg-white border-0">Select:</label>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#timelinetabcontents" id="timelinetabcontents-tab" data-toggle="tab"
+                        role="tab" aria-controls="timelinetabcontents" aria-selected=false>
+                            <i class="fas fa-history"></i>
+                            {% trans "Timeline" %}
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <div class="card-body p-0">
+                {{ search_message|safe }}
+                <div class="tab-content" id="myTabContent">
+                    <div class="tab-pane fade show active overflow-hidden" id="datatabletabcontents" role="tabpanel"
+                    aria-labelledby="datatabletabcontents-tab">
+                    <form method='post' action="{% url 'helpdesk:mass_update' %}" id="ticket_mass_update">
+                        {% csrf_token %}
+                        <!-- Action Toolbar -->
+                        <div class="d-flex flex-wrap justify-content-between overflow-auto px-2 pb-2 border-bottom mw-100" style="max-width: 100%; //background-color: #f7f7f7">
+                            <div class="btn-group-toggle" data-toggle="buttons">
+                                <a class="btn btn-outline-secondary mt-2 mr-2" onclick="toggleQuerySelector()">
+                                    <input id="show_query" type="checkbox"><i class="fas fa-chevron-left"></i> Filter
+                                </a>
                             </div>
-                            <div class="input-group-append">
-                                <button id="select_all_btn" class="btn btn-outline-primary rounded-left font-weight-semibold" type="button">All <i class="fa fa-plus-circle mr-1"></i></button>
-                                <button id="select_none_btn" class="btn btn-outline-danger font-weight-semibold" type="button">None <i class="fa fa-times-circle mr-1"></i></button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="d-flex align-items-center mt-2 mr-2">
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <label class="input-group-text bg-white border-0">Action:</label>
-                            </div>
-                            <select class="custom-select rounded-left" name="action" id="id_mass_action">
-                                <option selected>Choose...</option>
-                                <option value="take">Take (Assign to me)</option>
-                                <option value="delete">Delete</option><option value="merge">Merge</option>
-                                <option value="export">Export</option><option value="pair">Pair to BEAM inventory</option>
-                                <optgroup label="Close">
-                                    <option value="close">Close (Don't Send E-Mail)</option>
-                                    <option value="close_public">Close (Send E-Mail)</option>
-                                </optgroup>
-                                <optgroup label="Assign To">
-                                    <option value="unassign">Nobody (Unassign)</option>
-                                    {% for user in user_choices %}
-                                    <option value="assign_{{ user.id }}">{{ user.get_username }}</option>
-                                    {% endfor %}
-                                </optgroup>
-                                <optgroup label="Set KB Item">
-                                    <option value="kbitem_none">No KB Item</option>
-                                    {% for kbi in kb_items %}
-                                    <option value='kbitem_{{ kbi.id }}'>{{ kbi.category.title }}: {{ kbi.title }}</option>
-                                    {% endfor %}
-                                </optgroup>
-                            </select>
-                            <div class="input-group-append">
-                                <button type="button" onclick="massUpdate()" class="btn btn-outline-secondary">Run Action <i class="fa fa-arrow-circle-right mr-1"></i></button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mt-2">
-                        <div id="colvis" class="dropdown">
-                            <button class="btn btn-outline-secondary float-right font-weight-semibold dropdown-toggle" type="button" data-boundary="window" aria-expanded="false">Column Visibility</button>
-                            <div class="dropdown-menu dropdown-menu-left text-center p-2" style="min-width: 0; z-index: 1021;">
-                                <div class="btn-group-vertical btn-group-toggle" data-toggle="buttons">
-                                    <label class="btn btn-outline-secondary">
-                                        <input type="checkbox" onchange="toggleColumn(this.checked, 'priority')"> Priority
-                                    </label>
-                                    <label class="btn btn-outline-secondary">
-                                        <input type="checkbox" onchange="toggleColumn(this.checked, 'queue')"> Queue
-                                    </label>
-                                    <label class="btn btn-outline-secondary">
-                                        <input type="checkbox" onchange="toggleColumn(this.checked, 'form')"> Form
-                                    </label>
-                                    <label class="btn btn-outline-secondary active">
-                                        <input type="checkbox" onchange="toggleColumn(this.checked, 'status')" checked> Status
-                                    </label>
-                                    <label class="btn btn-outline-secondary active">
-                                        <input type="checkbox" onchange="toggleColumn(this.checked, 'assigned_to')" checked> Owner
-                                    </label>
-                                    <label class="btn btn-outline-secondary active">
-                                        <input type="checkbox" onchange="toggleColumn(this.checked, 'submitter')" checked> Submitter
-                                    </label>
-                                    <label class="btn btn-outline-secondary">
-                                        <input type="checkbox" onchange="toggleColumn(this.checked, 'paired_count')"> Paired Count
-                                    </label>
-                                    <label class="btn btn-outline-secondary active">
-                                        <input type="checkbox" onchange="toggleColumn(this.checked, 'created')" checked> Created
-                                    </label>
-                                    <label class="btn btn-outline-secondary active">
-                                        <input type="checkbox" onchange="toggleColumn(this.checked, 'last_reply')" checked> Last Reply
-                                    </label>
-                                    <label class="btn btn-outline-secondary">
-                                        <input type="checkbox" onchange="toggleColumn(this.checked, 'due_date')"> Due Date
-                                    </label>
-                                    <label class="btn btn-outline-secondary">
-                                        <input type="checkbox" onchange="toggleColumn(this.checked, 'time_spent')"> Time Spent
-                                    </label>
-                                    <label class="btn btn-outline-secondary">
-                                        <input type="checkbox" onchange="toggleColumn(this.checked, 'kbitem')"> KB Item
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- Pass vars to View for exporting to work Properly -->
-                <input type='hidden' name='visible' value=''/>
-                <input type='hidden' name='selected_ids' value=''/>
-                <input type="hidden" name="queue_length" value="{{ query_params.filtering.queue__id__in|length }}"/>
-            </form>
-                <!-- / Action Toolbar -->
-                <!-- Data Table -->
-                <div class="table-responsive"> <!-- style="max-height: 81.5vh;">-->
-                    <table class="table table-bordered table-sm table-striped" id="dataTable" width="100%" cellspacing="0">
-                        <thead class="thead-light"> 
-                            <tr id="headers"> <!-- Headers -->
-                                <th class="sticky-top" data-colname="ticket" colspan="2">{% trans "Ticket" %}</th>
-                                <th class="sticky-top d-none" data-colname="priority">{% trans "Priority" %}</th>
-                                <th class="sticky-top d-none" data-colname="queue">{% trans "Queue" %}</th>
-                                <th class="sticky-top d-none" data-colname="form">{% trans "Form" %}</th>
-                                <th class="sticky-top" data-colname="status">{% trans "Status" %}</th>
-                                <th class="sticky-top" data-colname="assigned_to">{% trans "Owner" %}</th>
-                                <th class="sticky-top" data-colname="submitter">{% trans "Submitter" %}</th>
-                                <th class="sticky-top d-none" data-colname="paired_count">{% trans "Paired Count" %}</th>
-                                <th class="sticky-top" data-colname="created">{% trans "Created" %}</th>
-                                <th class="sticky-top" data-colname="last_reply">{% trans "Last Reply" %}</th>
-                                <th class="sticky-top d-none" data-colname="due_date">{% trans "Due Date" %}</th>
-                                <th class="sticky-top d-none" data-colname="time_spent">{% trans "Time Spent" %}</th>
-                                <th class="sticky-top d-none" data-colname="kbitem">{% trans "KB item" %}</th>
-                                {% if query_params.filtering.queue__id__in|length == 1 %}
-                                {% for col_name, display_name in extra_data_columns.items %}
-                                <th class="sticky-top" data-colname="{{ col_name }}">{{ display_name }}</th>
-                                {% endfor %}
-                                {% endif %}
-                            </tr>
-                            <tr> <!-- Filters -->
-                                {# <th></th> #}
-                                <th colspan="2"><input type="text" class="form-control text-body" placeholder="Filter" data-colfilter="ticket" value="{{query_params.filtering.title__icontains}}" spellcheck="false" data-ms-editor="true"></th>
-                                <th class="d-none"></th>
-                                <th class="d-none"><input type="text" class="form-control" placeholder="Filter" data-colfilter="queue" value="{{query_params.filtering.queue__title__icontains}}" spellcheck="false" data-ms-editor="true"></th>
-                                <th class="d-none"><input type="text" class="form-control" placeholder="Filter" data-colfilter="form" value="{{query_params.filtering.ticket_form__name__icontains}}" spellcheck="false" data-ms-editor="true"></th>
-                                <th></th>
-                                <th><input type="text" class="form-control" placeholder="Filter" data-colfilter="assigned_to" value="{{query_params.filtering.assigned_to__email__icontains}}" spellcheck="false" data-ms-editor="true"></th>
-                                <th><input type="text" class="form-control" placeholder="Filter" data-colfilter="submitter" value="{{query_params.filtering.submitter_email__icontains}}" spellcheck="false" data-ms-editor="true"></th>
-                                <th class="d-none"><input type="text" class="form-control" placeholder="Filter" data-colfilter="paired_count" value="{{query_params.filtering.paired_count__icontains}}" spellcheck="false" data-ms-editor="true"></th>
-                                <th></th>
-                                <th></th>
-                                <th class="d-none"></th>
-                                <th class="d-none"></th>
-                                <th class="d-none"><input type="text" class="form-control" placeholder="Filter" data-colfilter="kbitem" value="{{query_params.filtering.kbitem__title__icontains}}" spellcheck="false" data-ms-editor="true"></th>
-                                {% comment %} TODO: add support for extra data columns {% endcomment %}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for ticket in ticket_list %}
-                            <tr> <!-- Data -->
-                                <td class="text-center"><input type="checkbox" name="ticket_id" value="{{ ticket.id }}" class="ticket_multi_select"></td>
-                                <td class="tickettitle" data-toggle="tooltip" title="Edit {{ ticket.title }}"><a href="{{ ticket.get_absolute_url }}">{{ ticket.id }}. {{ ticket.title }}</a></td>
-                                <td class="d-none text-center">
-                                    <span class="badge badge-{{ ticket.get_priority_css_class }}">{{ ticket.get_priority }}</span>
-                                </td>
-                                <td class="d-none">{{ ticket.queue }}</td>
-                                <td class="d-none">{{ ticket.ticket_form.name }}</td>
-                                <td class="text-center">
-                                    <span class="badge badge-{{ ticket.get_status_css_class }}">{{ ticket.get_status }}</span>
-                                </td>
-                                <td>{% if ticket.get_assigned_to != "Unassigned" %}{{ ticket.get_assigned_to }}{% endif %}</td> {# Remove if statement for "Unassigned" instead of blank #}
-                                <td>{{ ticket.submitter_email }}</td>
-                                <td class="d-none">{{ ticket.beam_property.count|add:ticket.beam_taxlot.count }}</td>
-                                <td><span title='{{ ticket.created|naturaltime }}'>{{ ticket.created|date:"DATETIME_FORMAT" }}</span></td>
-                                <td><span title='{{ ticket.get_last_followup|naturaltime }}'>{{ ticket.get_last_followup|date:"DATETIME_FORMAT" }}</span></td>
-                                <td class="d-none"><span title='{{ ticket.due_date|naturaltime }}'>{{ ticket.due_date|date:"DATETIME_FORMAT" }}</span></td>
-                                <td class="d-none">{{ ticket.time_spent_formatted }}</td>
-                                <td class="d-none">{{ ticket.kbitem.title}}</td>
-                                {% comment %} TODO: add support for extra data columns {% endcomment %}
-                            </tr>
-                            
-                            {% empty %}
-                            <tr><td colspan='100'>{% trans "No tickets found." %}</td></tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                <!-- / Data Table -->
-                <!-- Pagination Toolbar -->
-                    <div class="d-flex flex-wrap border-top px-2 mb-2" style="//background-color: #f7f7f7">
-                        {% with 't_page' as page_var %}
-                        <div class="d-flex align-items-center mt-2">
-                            <div class="input-group">
-                                <div class="input-group-prepend">
-                                    <label class="input-group-text font-weight-normal">Show</label>
-                                </div>
-                                <div class="btn-group dropup">
-                                    <button class="btn btn-outline-secondary rounded-0 font-weight-semibold dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">{{ tickets_per_page }}</button>
-                                    <div class="dropdown-menu p-1 text-right" style="min-width: 0">
-                                        <button class="dropdown-item px-3 rounded-lg {% if tickets_per_page == 10 %}active{% endif %}" onclick="updateTicketsPerPage(10)">10</a>
-                                        <button class="dropdown-item px-3 rounded-lg {% if tickets_per_page == 25 %}active{% endif %}" onclick="updateTicketsPerPage(25)">25</a>
-                                        <button class="dropdown-item px-3 rounded-lg {% if tickets_per_page == 50 %}active{% endif %}" onclick="updateTicketsPerPage(50)">50</a>
-                                        <button class="dropdown-item px-3 rounded-lg {% if tickets_per_page == 100 %}active{% endif %}" onclick="updateTicketsPerPage(100)">100</a>
+                            <div class="mr-auto d-flex align-items-center mt-2">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <label class="input-group-text bg-white border-0">Select:</label>
+                                    </div>
+                                    <div class="input-group-append">
+                                        <button id="select_all_btn" class="btn btn-outline-primary rounded-left font-weight-semibold" type="button">All <i class="fa fa-plus-circle mr-1"></i></button>
+                                        <button id="select_none_btn" class="btn btn-outline-danger font-weight-semibold" type="button">None <i class="fa fa-times-circle mr-1"></i></button>
                                     </div>
                                 </div>
-                                <div class="input-group-append border-left border-secondary">
-                                    <label class="input-group-text font-weight-normal" for="inputGroupSelect01">Tickets</label>
+                            </div>
+                            <div class="d-flex align-items-center mt-2 mr-2">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <label class="input-group-text bg-white border-0">Action:</label>
+                                    </div>
+                                    <select class="custom-select rounded-left" name="action" id="id_mass_action">
+                                        <option selected>Choose...</option>
+                                        <option value="take">Take (Assign to me)</option>
+                                        <option value="delete">Delete</option><option value="merge">Merge</option>
+                                        <option value="export">Export</option><option value="pair">Pair to BEAM inventory</option>
+                                        <optgroup label="Close">
+                                            <option value="close">Close (Don't Send E-Mail)</option>
+                                            <option value="close_public">Close (Send E-Mail)</option>
+                                        </optgroup>
+                                        <optgroup label="Assign To">
+                                            <option value="unassign">Nobody (Unassign)</option>
+                                            {% for user in user_choices %}
+                                            <option value="assign_{{ user.id }}">{{ user.get_username }}</option>
+                                            {% endfor %}
+                                        </optgroup>
+                                        <optgroup label="Set KB Item">
+                                            <option value="kbitem_none">No KB Item</option>
+                                            {% for kbi in kb_items %}
+                                            <option value='kbitem_{{ kbi.id }}'>{{ kbi.category.title }}: {{ kbi.title }}</option>
+                                            {% endfor %}
+                                        </optgroup>
+                                    </select>
+                                    <div class="input-group-append">
+                                        <button type="button" onclick="massUpdate()" class="btn btn-outline-secondary">Run Action <i class="fa fa-arrow-circle-right mr-1"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-2">
+                                <div id="colvis" class="dropdown">
+                                    <button class="btn btn-outline-secondary float-right font-weight-semibold dropdown-toggle" type="button" data-boundary="window" aria-expanded="false">Column Visibility</button>
+                                    <div class="dropdown-menu dropdown-menu-left text-center p-2" style="min-width: 0; z-index: 1021;">
+                                        <div class="btn-group-vertical btn-group-toggle" data-toggle="buttons">
+                                            <label class="btn btn-outline-secondary">
+                                                <input type="checkbox" onchange="toggleColumn(this.checked, 'priority')"> Priority
+                                            </label>
+                                            <label class="btn btn-outline-secondary">
+                                                <input type="checkbox" onchange="toggleColumn(this.checked, 'queue')"> Queue
+                                            </label>
+                                            <label class="btn btn-outline-secondary">
+                                                <input type="checkbox" onchange="toggleColumn(this.checked, 'form')"> Form
+                                            </label>
+                                            <label class="btn btn-outline-secondary active">
+                                                <input type="checkbox" onchange="toggleColumn(this.checked, 'status')" checked> Status
+                                            </label>
+                                            <label class="btn btn-outline-secondary active">
+                                                <input type="checkbox" onchange="toggleColumn(this.checked, 'assigned_to')" checked> Owner
+                                            </label>
+                                            <label class="btn btn-outline-secondary active">
+                                                <input type="checkbox" onchange="toggleColumn(this.checked, 'submitter')" checked> Submitter
+                                            </label>
+                                            <label class="btn btn-outline-secondary">
+                                                <input type="checkbox" onchange="toggleColumn(this.checked, 'paired_count')"> Paired Count
+                                            </label>
+                                            <label class="btn btn-outline-secondary active">
+                                                <input type="checkbox" onchange="toggleColumn(this.checked, 'created')" checked> Created
+                                            </label>
+                                            <label class="btn btn-outline-secondary active">
+                                                <input type="checkbox" onchange="toggleColumn(this.checked, 'last_reply')" checked> Last Reply
+                                            </label>
+                                            <label class="btn btn-outline-secondary">
+                                                <input type="checkbox" onchange="toggleColumn(this.checked, 'due_date')"> Due Date
+                                            </label>
+                                            <label class="btn btn-outline-secondary">
+                                                <input type="checkbox" onchange="toggleColumn(this.checked, 'time_spent')"> Time Spent
+                                            </label>
+                                            <label class="btn btn-outline-secondary">
+                                                <input type="checkbox" onchange="toggleColumn(this.checked, 'kbitem')"> KB Item
+                                            </label>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="flex-fill justify-content-end">
-                            <div class="btn-toolbar float-right mt-2" role="toolbar" style="bottom: 0;">
-                                <div class="btn-group mr-2" role="group">
-                                    {% if ticket_list.has_previous %}
-                                    <button class="btn btn-primary font-weight-bold" onclick="paginatedQuery()">First</a>
-                                    <button class="btn btn-primary font-weight-bold" onclick="paginatedQuery({{ ticket_list.previous_page_number }})">Previous</a>
-                                    {% else %}
-                                    <button class="btn btn-primary font-weight-bold disabled">First</a>
-                                    <button class="btn btn-primary font-weight-bold disabled">Previous</a>
-                                    {% endif %}
-                                </div>
-                                <div class="btn-group mr-2" role="group">
-                                    {% with 3 as thresh %}
-                                    {% for i in ticket_list.paginator.page_range %}
-                                    {% if ticket_list.number == i %}
-                                    <button class="btn btn-outline-primary active font-weight-bold">{{ i }}</a>
-                                    {% elif i <= ticket_list.number|add:5 and i >= ticket_list.number|add:-5 %}
-                                    <button class="btn btn-outline-primary font-weight-bold" onclick="paginatedQuery({{ i }})">{{ i }}</a>
-                                    {% endif %}
+                        <!-- Pass vars to View for exporting to work Properly -->
+                        <input type='hidden' name='visible' value=''/>
+                        <input type='hidden' name='selected_ids' value=''/>
+                        <input type="hidden" name="queue_length" value="{{ query_params.filtering.queue__id__in|length }}"/>
+                    </form>
+                        <!-- / Action Toolbar -->
+                        <!-- Data Table -->
+                        <div class="table-responsive"> <!-- style="max-height: 81.5vh;">-->
+                            <table class="table table-bordered table-sm table-striped" id="dataTable" width="100%" cellspacing="0">
+                                <thead class="thead-light">
+                                    <tr id="headers"> <!-- Headers -->
+                                        <th class="sticky-top" data-colname="ticket" colspan="2">{% trans "Ticket" %}</th>
+                                        <th class="sticky-top d-none" data-colname="priority">{% trans "Priority" %}</th>
+                                        <th class="sticky-top d-none" data-colname="queue">{% trans "Queue" %}</th>
+                                        <th class="sticky-top d-none" data-colname="form">{% trans "Form" %}</th>
+                                        <th class="sticky-top" data-colname="status">{% trans "Status" %}</th>
+                                        <th class="sticky-top" data-colname="assigned_to">{% trans "Owner" %}</th>
+                                        <th class="sticky-top" data-colname="submitter">{% trans "Submitter" %}</th>
+                                        <th class="sticky-top d-none" data-colname="paired_count">{% trans "Paired Count" %}</th>
+                                        <th class="sticky-top" data-colname="created">{% trans "Created" %}</th>
+                                        <th class="sticky-top" data-colname="last_reply">{% trans "Last Reply" %}</th>
+                                        <th class="sticky-top d-none" data-colname="due_date">{% trans "Due Date" %}</th>
+                                        <th class="sticky-top d-none" data-colname="time_spent">{% trans "Time Spent" %}</th>
+                                        <th class="sticky-top d-none" data-colname="kbitem">{% trans "KB item" %}</th>
+                                        {% if query_params.filtering.queue__id__in|length == 1 %}
+                                        {% for col_name, display_name in extra_data_columns.items %}
+                                        <th class="sticky-top" data-colname="{{ col_name }}">{{ display_name }}</th>
+                                        {% endfor %}
+                                        {% endif %}
+                                    </tr>
+                                    <tr> <!-- Filters -->
+                                        {# <th></th> #}
+                                        <th colspan="2"><input type="text" class="form-control text-body" placeholder="Filter" data-colfilter="ticket" value="{{query_params.filtering.title__icontains}}" spellcheck="false" data-ms-editor="true"></th>
+                                        <th class="d-none"></th>
+                                        <th class="d-none"><input type="text" class="form-control" placeholder="Filter" data-colfilter="queue" value="{{query_params.filtering.queue__title__icontains}}" spellcheck="false" data-ms-editor="true"></th>
+                                        <th class="d-none"><input type="text" class="form-control" placeholder="Filter" data-colfilter="form" value="{{query_params.filtering.ticket_form__name__icontains}}" spellcheck="false" data-ms-editor="true"></th>
+                                        <th></th>
+                                        <th><input type="text" class="form-control" placeholder="Filter" data-colfilter="assigned_to" value="{{query_params.filtering.assigned_to__email__icontains}}" spellcheck="false" data-ms-editor="true"></th>
+                                        <th><input type="text" class="form-control" placeholder="Filter" data-colfilter="submitter" value="{{query_params.filtering.submitter_email__icontains}}" spellcheck="false" data-ms-editor="true"></th>
+                                        <th class="d-none"><input type="text" class="form-control" placeholder="Filter" data-colfilter="paired_count" value="{{query_params.filtering.paired_count__icontains}}" spellcheck="false" data-ms-editor="true"></th>
+                                        <th></th>
+                                        <th></th>
+                                        <th class="d-none"></th>
+                                        <th class="d-none"></th>
+                                        <th class="d-none"><input type="text" class="form-control" placeholder="Filter" data-colfilter="kbitem" value="{{query_params.filtering.kbitem__title__icontains}}" spellcheck="false" data-ms-editor="true"></th>
+                                        {% comment %} TODO: add support for extra data columns {% endcomment %}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for ticket in ticket_list %}
+                                    <tr> <!-- Data -->
+                                        <td class="text-center"><input type="checkbox" name="ticket_id" value="{{ ticket.id }}" class="ticket_multi_select"></td>
+                                        <td class="tickettitle" data-toggle="tooltip" title="Edit {{ ticket.title }}"><a href="{{ ticket.get_absolute_url }}">{{ ticket.id }}. {{ ticket.title }}</a></td>
+                                        <td class="d-none text-center">
+                                            <span class="badge badge-{{ ticket.get_priority_css_class }}">{{ ticket.get_priority }}</span>
+                                        </td>
+                                        <td class="d-none">{{ ticket.queue }}</td>
+                                        <td class="d-none">{{ ticket.ticket_form.name }}</td>
+                                        <td class="text-center">
+                                            <span class="badge badge-{{ ticket.get_status_css_class }}">{{ ticket.get_status }}</span>
+                                        </td>
+                                        <td>{% if ticket.get_assigned_to != "Unassigned" %}{{ ticket.get_assigned_to }}{% endif %}</td> {# Remove if statement for "Unassigned" instead of blank #}
+                                        <td>{{ ticket.submitter_email }}</td>
+                                        <td class="d-none">{{ ticket.beam_property.count|add:ticket.beam_taxlot.count }}</td>
+                                        <td><span title='{{ ticket.created|naturaltime }}'>{{ ticket.created|date:"DATETIME_FORMAT" }}</span></td>
+                                        <td><span title='{{ ticket.get_last_followup|naturaltime }}'>{{ ticket.get_last_followup|date:"DATETIME_FORMAT" }}</span></td>
+                                        <td class="d-none"><span title='{{ ticket.due_date|naturaltime }}'>{{ ticket.due_date|date:"DATETIME_FORMAT" }}</span></td>
+                                        <td class="d-none">{{ ticket.time_spent_formatted }}</td>
+                                        <td class="d-none">{{ ticket.kbitem.title}}</td>
+                                        {% comment %} TODO: add support for extra data columns {% endcomment %}
+                                    </tr>
+
+                                    {% empty %}
+                                    <tr><td colspan='100'>{% trans "No tickets found." %}</td></tr>
                                     {% endfor %}
-                                    {% endwith %}
-                                </div>
-                                <div class="btn-group" role="group">
-                                    {% if ticket_list.has_next %}
-                                    <button class="btn btn-primary font-weight-bold" onclick="paginatedQuery({{ ticket_list.next_page_number }})">Next</a>
-                                    <button class="btn btn-primary font-weight-bold" onclick="paginatedQuery({{ ticket_list.paginator.num_pages }})">Last</a>
-                                    {% else %}
-                                    <button class="btn btn-primary font-weight-bold disabled">Next</a>
-                                    <button class="btn btn-primary font-weight-bold disabled">Last</a>
-                                    {% endif %}
-                                </div>
-                            </div>
+                                </tbody>
+                            </table>
                         </div>
-                        {% endwith %}
-                    </div>
-                <!-- / Pagination Toolbar -->
+                        <!-- / Data Table -->
+                        <!-- Pagination Toolbar -->
+                            <div class="d-flex flex-wrap border-top px-2 mb-2" style="//background-color: #f7f7f7">
+                                {% with 't_page' as page_var %}
+                                <div class="d-flex align-items-center mt-2">
+                                    <div class="input-group">
+                                        <div class="input-group-prepend">
+                                            <label class="input-group-text font-weight-normal">Show</label>
+                                        </div>
+                                        <div class="btn-group dropup">
+                                            <button class="btn btn-outline-secondary rounded-0 font-weight-semibold dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">{{ tickets_per_page }}</button>
+                                            <div class="dropdown-menu p-1 text-right" style="min-width: 0">
+                                                <button class="dropdown-item px-3 rounded-lg {% if tickets_per_page == 10 %}active{% endif %}" onclick="updateTicketsPerPage(10)">10</a>
+                                                <button class="dropdown-item px-3 rounded-lg {% if tickets_per_page == 25 %}active{% endif %}" onclick="updateTicketsPerPage(25)">25</a>
+                                                <button class="dropdown-item px-3 rounded-lg {% if tickets_per_page == 50 %}active{% endif %}" onclick="updateTicketsPerPage(50)">50</a>
+                                                <button class="dropdown-item px-3 rounded-lg {% if tickets_per_page == 100 %}active{% endif %}" onclick="updateTicketsPerPage(100)">100</a>
+                                            </div>
+                                        </div>
+                                        <div class="input-group-append border-left border-secondary">
+                                            <label class="input-group-text font-weight-normal" for="inputGroupSelect01">Tickets</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex-fill justify-content-end">
+                                    <div class="btn-toolbar float-right mt-2" role="toolbar" style="bottom: 0;">
+                                        <div class="btn-group mr-2" role="group">
+                                            {% if ticket_list.has_previous %}
+                                            <button class="btn btn-primary font-weight-bold" onclick="paginatedQuery()">First</a>
+                                            <button class="btn btn-primary font-weight-bold" onclick="paginatedQuery({{ ticket_list.previous_page_number }})">Previous</a>
+                                            {% else %}
+                                            <button class="btn btn-primary font-weight-bold disabled">First</a>
+                                            <button class="btn btn-primary font-weight-bold disabled">Previous</a>
+                                            {% endif %}
+                                        </div>
+                                        <div class="btn-group mr-2" role="group">
+                                            {% with 3 as thresh %}
+                                            {% for i in ticket_list.paginator.page_range %}
+                                            {% if ticket_list.number == i %}
+                                            <button class="btn btn-outline-primary active font-weight-bold">{{ i }}</a>
+                                            {% elif i <= ticket_list.number|add:5 and i >= ticket_list.number|add:-5 %}
+                                            <button class="btn btn-outline-primary font-weight-bold" onclick="paginatedQuery({{ i }})">{{ i }}</a>
+                                            {% endif %}
+                                            {% endfor %}
+                                            {% endwith %}
+                                        </div>
+                                        <div class="btn-group" role="group">
+                                            {% if ticket_list.has_next %}
+                                            <button class="btn btn-primary font-weight-bold" onclick="paginatedQuery({{ ticket_list.next_page_number }})">Next</a>
+                                            <button class="btn btn-primary font-weight-bold" onclick="paginatedQuery({{ ticket_list.paginator.num_pages }})">Last</a>
+                                            {% else %}
+                                            <button class="btn btn-primary font-weight-bold disabled">Next</a>
+                                            <button class="btn btn-primary font-weight-bold disabled">Last</a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endwith %}
+                            </div>
+                        <!-- / Pagination Toolbar -->
+                </div>
+                <div class="tab-pane fade" id="timelinetabcontents" role="tabpanel" aria-labelledby="timelinetabcontents-tab">
+                    <div id='timeline-embed' style="width: 100%; height: 80vh"></div>
+                </div>
+            </div>
         </div>
-        <div class="tab-pane fade" id="timelinetabcontents" role="tabpanel" aria-labelledby="timelinetabcontents-tab">
-            <div id='timeline-embed' style="width: 100%; height: 80vh"></div>
         </div>
     </div>
-</div>
-<!-- /.panel-body -->
-</div>
-<!-- /.panel -->
-</div>
 
-<div class="col-sm-4 col-md-3 col-lg-2 pr-0 collapse" id="query_select">
-    <div class="card mb-3" >
-        <div class="card-header pt-2 font-weight-bold">
-            {% trans "Query Selection" %}
-        </div>
-        <div class="card-body p-0">
-            <!-- start accordion -->
-            <div class="accordion" id="queryAccordion">
-                <div class="card rounded-0">
-                    <div class="card-header" id="headingOne">
-                        <h5 class="mb-0">
-                            <button class="btn btn-link" type="button" data-toggle="collapse"
-                            data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                                <i class="fas fa-filter"></i>
-                                {% trans "Filters" %}
-                            </button>
-                        </h5>
-                    </div>
+    <div class="col-sm-4 col-md-3 col-lg-2 pr-0" id="query_select">
+        <div class="card mb-3">
+            <div class="card-header font-weight-bold">
+                Your Saved Searches
+            </div>
+            <div class="card-body p-0">
 
-                <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#queryAccordion">
-                    <form method="post" id="query_form">
+                {% for q in user_saved_queries %}
+                {% if not q.shared %}
+                <div class="list-group list-group-horizontal">
+                    {% if saved_query.id != q.id %}
+                    <a class="list-group-item flex-fill list-group-item-light list-group-item-action text-primary p-2 pl-3 pr-3 border-bottom border-left-0 border-right-0 border-top-0 rounded-0" href="{% url 'helpdesk:list' %}?saved_query={{ q.id }}">{{ q.title }}</a>
+                    {% else %}
+                    <a class="list-group-item flex-fill list-group-item-secondary list-group-item-action p-2 pl-3 pr-3 border-bottom border-left-0 border-right-0 border-top-0 rounded-0" href="{% url 'helpdesk:list' %}">{{ q.title }}<span style="float:right;"><i class="fas fa-times"></i></span></a>
+                    {% endif %}
+                </div>
+                {% endif %}
+                {% endfor %}
+
+                <div class="border-bottom bg-light p-3">
+                    <form method='post' action='{% url 'helpdesk:savequery' %}'>
                         {% csrf_token %}
-                        <div class="border-bottom border-top bg-light p-3">
-                            <div class="input-group">
-                                {% include 'helpdesk/filters/sorting.html' %}
-                            </div>
+                        <input type='hidden' name='query_encoded' value='{{ urlsafe_query }}'/>
+                        <input type='hidden' name='visible' value=''/>
+                        <input type='hidden' name='shared' value='0'/>
+                        Save the current search filters?
+                        <div class="input-group pt-1">
+                          <input type="text" class="form-control" name='title' id='id_title' placeholder="Name" aria-label="Save query name" aria-describedby="basic-addon2">
+                          <div class="input-group-append">
+                            <button class="btn btn-outline-secondary" type="submit">Save</button>
+                          </div>
                         </div>
-                        
-                        <div class="card-body overflow-auto p-1" style="max-height: 67.75vh;">
-                            <ul class="list-group list-group-flush">
-                                <li id="filterBoxOwner" class="list-group-item {% if query_params.filtering.assigned_to__id__in %} filterBoxShow{% endif %} mb-2">
-                                    {% include 'helpdesk/filters/owner.html' %}
-                                </li>
-                                <li class=" list-group-item {% if query_params.filtering.queue__id__in %} filterBoxShow{% endif %} mb-2"  id="filterBoxQueue">
-                                    {% include 'helpdesk/filters/queue.html' %}
-                                </li>
-                                <li class=" list-group-item {% if query_params.filtering.status__in %} filterBoxShow{% endif %} mb-2" id="filterBoxStatus">
-                                    {% include 'helpdesk/filters/status.html' %}
-                                </li>
-                                <li class=" list-group-item {% if query_params.filtering.priority__in %} filterBoxShow{% endif %} mb-2" id="filterBoxPriority">
-                                    {% include 'helpdesk/filters/priority.html' %}
-                                </li>
-                                <li class=" list-group-item {% if query_params.filtering.created__gte or query_params.filtering.created__lte %} filterBoxShow{% endif %} mb-2" id='filterBoxDates'>
-                                    {% include 'helpdesk/filters/date.html' %}
-                                </li>
-                                <li class=" list-group-item {% if query_params.search_string %} filterBoxShow{% endif %} mb-2" id="filterBoxKeywords">
-                                    {% include 'helpdesk/filters/keywords.html' %}
-                                </li>
-                                <li class=" list-group-item {% if query_params.filtering.kbitem__in %} filterBoxShow{% endif %} mb-2" id="filterBoxKBItems">
-                                    {% include 'helpdesk/filters/kbitems.html' %}
-                                </li>
-                                <li class=" list-group-item {% if query_params.filtering.paired_count__lte or query_params.filtering.paired_count__gte %} filterBoxShow{% endif %} mb-2" id="filterBoxPairedCount">
-                                    {% include 'helpdesk/filters/paired_count.html' %}
-                                </li>
-                                <li class=" list-group-item {% if query_params.filtering.last_reply__lte or query_params.filtering.last_reply__gte %} filterBoxShow{% endif %} mb-2" id="filterBoxLastReply">
-                                    {% include 'helpdesk/filters/last_reply.html' %}
-                                </li>
-                                {% if from_saved_query %}
-                                <li class="list-group-item">
-                                    {% if saved_query.user == user %}
-                                    <p>{% blocktrans with saved_query.title as query_name %}You are currently viewing saved query <strong>"{{ query_name }}"</strong>.{% endblocktrans %}</p>
-                                    <a href="{% url 'helpdesk:delete_query' saved_query.id %}" class="btn btn-danger btn-sm mb-2">
-                                        {% trans "Delete Query" %}
-                                    </a>
-                                    {% if saved_query.shared %}
-                                    <a href="{% url 'helpdesk:unshare_query' saved_query.id %}" class="btn btn-warning btn-sm mb-2">
-                                        {% trans "Un-share Query" %}
-                                    </a>
-                                    {% else %}
-                                    <a href="{% url 'helpdesk:reshare_query' saved_query.id %}" class="btn btn-warning btn-sm mb-2">
-                                        {% trans "Re-share Query" %}
-                                    </a>
-                                    {% endif %}
-                                    {% elif saved_query.user != user %}
-                                    <a href="{% url 'helpdesk:reject_query' saved_query.id %}" class="btn btn-warning btn-sm mb-2">
-                                        {% trans "Reject Query" %}
-                                    </a>
-                                    {% endif %}
-                                </li>
-                                {% endif %}
-                                {% if from_saved_query %}
-                                <li class="list-group-item">
-                                    {% blocktrans with saved_query.id as query_id %}<a href='../reports/?saved_query={{ query_id }}'>Run a report</a> on this query to see stats and charts for the data listed below.{% endblocktrans %}
-                                </li>
-                                {% endif %}
-                            </ul>   
-                        </div>
-                        <div class="d-flex justify-content-between border-bottom border-top bg-light p-2">
-                            <button class="btn btn-danger w-40 m-1" type='button' onclick='clearForm()'>{% trans "Clear Filters" %}</button>
-                            <button class="btn btn-primary w-40 m-1" type='button' onclick='paginatedQuery()'>{% trans "Apply Filters" %}</button>
-                        </div>
-                        <!-- Hidden Fields -->
-                        <input type='hidden' id='tickets_per_page' name='tickets_per_page' value="{{ tickets_per_page }}"/>
-                        <input type='hidden' id='ticket_page' name='ticket_page' value="1"/>
-                        {% comment %} TODO: Make column filter hidden fields dynamically generate from columns {% endcomment %}
-                        <input type='hidden' id='ticket_filter' name='ticket_filter'>
-                        <input type='hidden' id='priority_filter' name='priority_filter'>
-                        <input type='hidden' id='queue_filter' name='queue_filter'>
-                        <input type='hidden' id='form_filter' name='form_filter'>
-                        <input type='hidden' id='status_filter' name='status_filter'>
-                        <input type='hidden' id='assigned_to_filter' name='assigned_to_filter'>
-                        <input type='hidden' id='submitter_filter' name='submitter_filter'>
-                        <input type='hidden' id='paired_count_filter' name='paired_count_filter'>
-                        <input type='hidden' id='created_filter' name='created_filter'>
-                        <input type='hidden' id='last_reply_filter' name='last_reply_filter'>
-                        <input type='hidden' id='due_date_filter' name='due_date_filter'>
-                        <input type='hidden' id='time_spent_filter' name='time_spent_filter'>
-                        <input type='hidden' id='kbitem_filter' name='kbitem_filter'>
                     </form>
                 </div>
-                </div> <!-- end card -->
-            
-            
-            <div class="card">
-                <div class="card-header" id="headingTwo">
-                    <h5 class="mb-0">
-                        <button class="btn btn-link collapsed" type="button" data-toggle="collapse"
-                        data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                            <i class="fas fa-save"></i>
-                            {% trans "Save Query" %}
-                        </button>
-                    </h5>
-                </div>
-                <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#queryAccordion">
-                    <div class="card-body">
-                        <form method='post' action='{% url 'helpdesk:savequery' %}'>
-                            {% csrf_token %}
-                            <input type='hidden' name='query_encoded' value='{{ urlsafe_query }}'/>
-                            <input type='hidden' name='visible' value=''/>
-                            <dl>
-                                <dt><label for='id_title'>{% trans "Query Name" %}</label></dt>
-                                <dd><input type='text' class='form-control' name='title' id='id_title'/></dd>
-                                <dd class='form_help_text'>{% trans "This name appears in the drop-down list of saved queries. If you share your query, other users will see this name, so choose something clear and descriptive!" %}</dd>
+            </div>
+        </div>
+        <div class="card mb-3" >
+            <div class="card-header font-weight-bold">
+                {% trans "Search Filters" %}
+            </div>
+            <div class="card-body p-0">
+                <form method="post" id="query_form">
+                    {% csrf_token %}
+                    <div class="border-bottom p-3">
+                        <div class="input-group">
+                            {% include 'helpdesk/filters/sorting.html' %}
+                        </div>
+                    </div>
 
-                                <dt><label for='id_shared'>{% trans "Shared?" %}</label></dt>
-                                <dd><input type='checkbox' name='shared'
-                                    id='id_shared'/> {% trans "Yes, share this query with other users." %}
-                                </dd>
-                                <dd class='form_help_text'>{% trans "If you share this query, it will be visible by <em>all</em> other logged-in users." %}</dd>
+                    <div class="card-body overflow-auto p-1"> <!-- style="max-height: 67.75vh;">-->
+                        <ul class="list-group list-group-flush">
+                            <li id="filterBoxOwner" class="list-group-item {% if query_params.filtering.assigned_to__id__in %} filterBoxShow{% endif %} mb-2">
+                                {% include 'helpdesk/filters/owner.html' %}
+                            </li>
+                            <li class=" list-group-item {% if query_params.filtering.queue__id__in %} filterBoxShow{% endif %} mb-2"  id="filterBoxQueue">
+                                {% include 'helpdesk/filters/queue.html' %}
+                            </li>
+                            <li class=" list-group-item {% if query_params.filtering.status__in %} filterBoxShow{% endif %} mb-2" id="filterBoxStatus">
+                                {% include 'helpdesk/filters/status.html' %}
+                            </li>
+                            <li class=" list-group-item {% if query_params.filtering.priority__in %} filterBoxShow{% endif %} mb-2" id="filterBoxPriority">
+                                {% include 'helpdesk/filters/priority.html' %}
+                            </li>
+                            <li class=" list-group-item {% if query_params.filtering.created__gte or query_params.filtering.created__lte %} filterBoxShow{% endif %} mb-2" id='filterBoxDates'>
+                                {% include 'helpdesk/filters/date.html' %}
+                            </li>
+                            <li class=" list-group-item {% if query_params.search_string %} filterBoxShow{% endif %} mb-2" id="filterBoxKeywords">
+                                {% include 'helpdesk/filters/keywords.html' %}
+                            </li>
+                            <li class=" list-group-item {% if query_params.filtering.kbitem__in %} filterBoxShow{% endif %} mb-2" id="filterBoxKBItems">
+                                {% include 'helpdesk/filters/kbitems.html' %}
+                            </li>
+                            <li class=" list-group-item {% if query_params.filtering.paired_count__lte or query_params.filtering.paired_count__gte %} filterBoxShow{% endif %} mb-2" id="filterBoxPairedCount">
+                                {% include 'helpdesk/filters/paired_count.html' %}
+                            </li>
+                            <li class=" list-group-item {% if query_params.filtering.last_reply__lte or query_params.filtering.last_reply__gte %} filterBoxShow{% endif %}" id="filterBoxLastReply">
+                                {% include 'helpdesk/filters/last_reply.html' %}
+                            </li>
+                        </ul>
+                    </div>
 
-                            </dl>
-                            <div class='buttons'>
-                                <input class="btn btn-primary" type='submit' value='{% trans "Save Query" %}'>
-                            </div>
-                        </form>
+                    <!-- Hidden Fields -->
+                    <input type='hidden' id='tickets_per_page' name='tickets_per_page' value="{{ tickets_per_page }}"/>
+                    <input type='hidden' id='ticket_page' name='ticket_page' value="1"/>
+                    {% comment %} TODO: Make column filter hidden fields dynamically generate from columns {% endcomment %}
+                    <input type='hidden' id='ticket_filter' name='ticket_filter'>
+                    <input type='hidden' id='priority_filter' name='priority_filter'>
+                    <input type='hidden' id='queue_filter' name='queue_filter'>
+                    <input type='hidden' id='form_filter' name='form_filter'>
+                    <input type='hidden' id='status_filter' name='status_filter'>
+                    <input type='hidden' id='assigned_to_filter' name='assigned_to_filter'>
+                    <input type='hidden' id='submitter_filter' name='submitter_filter'>
+                    <input type='hidden' id='paired_count_filter' name='paired_count_filter'>
+                    <input type='hidden' id='created_filter' name='created_filter'>
+                    <input type='hidden' id='last_reply_filter' name='last_reply_filter'>
+                    <input type='hidden' id='due_date_filter' name='due_date_filter'>
+                    <input type='hidden' id='time_spent_filter' name='time_spent_filter'>
+                    <input type='hidden' id='kbitem_filter' name='kbitem_filter'>
+                </form>
+
+                <div class="border-bottom border-top bg-light p-2">
+                    <div class="d-flex justify-content-between">
+                        <button class="btn btn-primary w-40 m-1" type='button' onclick='paginatedQuery()'>{% trans "Apply Filters" %}</button>
+                        <button class="btn btn-danger w-40 m-1" type='button' onclick='clearForm()'>{% trans "Clear Filters" %}</button>
                     </div>
                 </div>
-            </div> <!-- end card -->
-        
-    
-    {% if user_saved_queries %}
-    <div class="card">
-        <div class="card-header" id="headingThree">
-            <h5 class="mb-0">
-                <button class="btn btn-link collapsed" type="button" data-toggle="collapse"
-                data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-                <i class="fas fa-clipboard-check"></i>
-                {% trans "Your Saved Queries" %}
-            </button>
-            </h5>
-        </div>
-    <div id="collapseThree" class="collapse" aria-labelledby="headingThree"
-    data-parent="#queryAccordion">
-        <div class="card-body">
-            <form id="saved_query" action='{% url 'helpdesk:list' %}'>
-                <p>
-                    <div class="input-group">
-                        <div class="input-group-prepend">
-                            <label class="input-group-text" for='id_query_selector'>{% trans "Query" %}</label>
-                        </div>
-                        <select class="custom-select" name='saved_query' id='id_query_selector'>
-                            {% for q in user_saved_queries %}
-                            <option value='{{ q.id }}'>
-                                {{ q.title }}{% if q.shared %}
-                                (Shared{% if user != q.user %} by {{ q.user.get_username }}{% endif %})
-                                {% endif %}
-                            </option>
-                            {% endfor %}
-                        </select>
-                    </div></p>
-                    <input class="btn btn-primary mb-2" id='run_query' type='submit' value='{% trans "Run Query" %}'>
-
-                    <!-- Only query creater can see from here -->
-                    <a class="btn btn-danger remove mb-2" id='delete_query'>{% trans "Delete Query" %}</a>
-                    <!-- if shared, show this -->
-                    <a class="btn btn-warning share mb-2" id='unshare_query'>{% trans "Un-share Query" %}</a>
-                    <!-- else if not shared, show this -->
-                    <a class="btn btn-warning share mb-2" id='reshare_query'>{% trans "Re-share Query" %}</a>
-                    <!-- to here -->
-                    <!-- if not query creater show this -->
-                    <a class="btn btn-warning remove mb-2" id='reject_query'>{% trans "Reject Query" %}</a>
-            </form>
+            </div>
         </div>
     </div>
-</div>
-</div>
-</div>
-</div> <!-- end card -->
-{% endif %}
-</div>
-<!-- end accordion -->
-</div>
-<!-- end card-body -->
-</div>
-<!-- end top card -->
 </div>
 
 
