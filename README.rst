@@ -72,7 +72,7 @@ Developer Environment
 ---------------------
 
 Follow these steps to set up your development environment to contribute to helpdesk:
- - check out the helpdesk app to you local file system::
+ - check out the helpdesk app to your local file system::
         git clone https://github.com/django-helpdesk/django-helpdesk.git
  
  - install a virtual environment
@@ -81,6 +81,9 @@ Follow these steps to set up your development environment to contribute to helpd
 
  - install the requirements for development::
     pip install -r requirements.txt -r requirements-dev.txt
+
+ - install the requirements for testing as well::
+    pip install -r requirements.txt -r requirements-dev.txt -r requirements-testing.txt
 
 To reactivate a VENV just run:
    source .venv/bin/activate
