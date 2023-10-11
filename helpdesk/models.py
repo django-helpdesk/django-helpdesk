@@ -1144,7 +1144,7 @@ class FollowUpAttachment(Attachment):
         att_path = os.path.join(settings.MEDIA_ROOT, path)
         if settings.DEFAULT_FILE_STORAGE == "django.core.files.storage.FileSystemStorage":
             if not os.path.exists(att_path):
-                os.makedirs(att_path, 0o755)
+                os.makedirs(att_path, helpdesk_settings.HELPDESK_ATTACHMENT_DIR_PERMS)
         return os.path.join(path, filename)
 
 
@@ -1164,7 +1164,7 @@ class KBIAttachment(Attachment):
         att_path = os.path.join(settings.MEDIA_ROOT, path)
         if settings.DEFAULT_FILE_STORAGE == "django.core.files.storage.FileSystemStorage":
             if not os.path.exists(att_path):
-                os.makedirs(att_path, 0o755)
+                os.makedirs(att_path, helpdesk_settings.HELPDESK_ATTACHMENT_DIR_PERMS)
         return os.path.join(path, filename)
 
 
