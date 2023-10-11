@@ -1,9 +1,3 @@
-/*!
- * Start Bootstrap - SB Admin v5.0.2 (https://startbootstrap.com/template-overviews/sb-admin)
- * Copyright 2013-2018 Start Bootstrap
- * Licensed under MIT (https://github.com/BlackrockDigital/startbootstrap-sb-admin/blob/master/LICENSE)
- */
-
 html {
   position: relative;
   min-height: 100%;
@@ -67,6 +61,18 @@ body.fixed-nav.sidebar-toggled #content-wrapper {
 
 .scroll-to-top i {
   font-weight: 800;
+}
+
+.sticky-top {
+  font-weight: bold;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  vertical-align: center;
+}
+
+#dataTable > thead > tbody > tr > td {
+  padding: 10px;
+  border: 0px;
 }
 
 .smaller {
@@ -147,7 +153,7 @@ body.fixed-nav.sidebar-toggled #content-wrapper {
 }
 
 .sidebar .nav-item .nav-link span {
-  font-size: 0.65rem;
+  font-size: 0.8rem;
   display: block;
 }
 
@@ -217,7 +223,7 @@ body.fixed-nav.sidebar-toggled #content-wrapper {
     width: 90px;
   }
   .sidebar.toggled .nav-item .nav-link span {
-    font-size: 0.65rem;
+    font-size: 0.8rem;
     display: block;
   }
   .sidebar.toggled .nav-item .dropdown-menu {
@@ -240,10 +246,6 @@ body.fixed-nav.sidebar-toggled #content-wrapper {
   top: 86px;
   height: calc(100vh - 86px);
   overflow-y: auto;
-}
-
-.card-text {
-   font-weight: bold;
 }
 
 .card-body-icon {
@@ -278,7 +280,20 @@ body.fixed-nav.sidebar-toggled #content-wrapper {
   }
 }
 
+.bg-gray {
+  background-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+.bg-gold {
+  background-color: #d4af36 !important;
+}
+
+.bg-teal {
+  background-color: #00a0af !important;
+}
+
 :root {
+  font-size: 13px;
   --input-padding-x: 0.75rem;
   --input-padding-y: 0.75rem;
 }
@@ -326,6 +341,10 @@ body.fixed-nav.sidebar-toggled #content-wrapper {
 }
 
 .form-label-group input::-ms-input-placeholder {
+  color: transparent;
+}
+
+.form-label-group input::-moz-placeholder {
   color: transparent;
 }
 
@@ -377,3 +396,5 @@ body.sidebar-toggled footer.sticky-footer {
     width: calc(100% - 90px);
   }
 }
+
+/*# sourceMappingURL=sb-admin.css.map */

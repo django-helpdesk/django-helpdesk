@@ -23,3 +23,15 @@
     column-count: 2;
   }
 }
+
+.bg-gray {
+    background-color: rgba(0,0,0,.08) !important;
+}
+
+.bg-gold {
+    background-color: $gold !important;
+}
+
+.bg-teal {
+    background-color: $teal !important;
+}
