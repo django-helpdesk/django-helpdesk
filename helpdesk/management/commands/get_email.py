@@ -41,10 +41,17 @@ class Command(BaseCommand):
             help='Will create new tickets and queue emails, but not delete emails from the servers.',
         )
 
+        parser.add_argument(
+            '--nj',
+            required=False,
+            action='store'
+        )
+
     def handle(self, *args, **options):
         quiet = options.get('quiet', False)
         debugging = options.get('debugging', False)
-        process_email(quiet=quiet, debugging=debugging)
+        nj = options.get('nj', None)
+        process_email(quiet=quiet, debugging=debugging, nj=nj)
 
 
 if __name__ == '__main__':

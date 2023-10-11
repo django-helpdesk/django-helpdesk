@@ -23,7 +23,7 @@ from django.shortcuts import get_object_or_404
 from helpdesk.lib import safe_template_context, process_attachments
 from helpdesk.models import (Ticket, Queue, FollowUp, IgnoreEmail, TicketCC,
                              CustomField, TicketDependency, UserSettings, KBItem,
-                             FormType, KBCategory, KBIAttachment, is_extra_data)
+                             FormType, KBCategory, KBIAttachment, is_extra_data, PreSetReply, EmailTemplate, clean_html)
 from helpdesk import settings as helpdesk_settings
 from helpdesk.email import create_ticket_cc
 from helpdesk.decorators import list_of_helpdesk_staff
@@ -129,8 +129,10 @@ class CustomFieldMixin(object):
         else:
             self.fields[field.field_name] = fieldclass(**instanceargs)
 
+
 class PreviewWidget(forms.widgets.Textarea):
     template_name = "helpdesk/include/edit_md_preview.html"
+
 
 class EditTicketForm(CustomFieldMixin, forms.ModelForm):
 
@@ -303,7 +305,9 @@ class EditKBItemForm(forms.ModelForm):
     category = CategoryModelChoiceField(queryset=KBCategory.objects)
     answer = forms.CharField(widget=PreviewWidget, label=KBItem.answer.field.verbose_name, help_text=KBItem.answer.field.help_text)
 
-    AttachmentFormSet = forms.inlineformset_factory(KBItem, KBIAttachment,
+    AttachmentFormSet = forms.inlineformset_factory(
+        KBItem,
+        KBIAttachment,
         fields=('id', 'file',),
         widgets={'file': AttachmentFileInputWidget}
     )
@@ -324,6 +328,7 @@ class EditKBItemForm(forms.ModelForm):
         super(EditKBItemForm, self).__init__(*args, **kwargs)
 
         self.fields['category'].queryset = KBCategory.objects.filter(organization=org)
+        self.fields['forms'].queryset = FormType.objects.filter(organization=org)
         if category:
             self.fields['category'].initial = category
 
@@ -474,12 +479,12 @@ class EditFormTypeForm(forms.ModelForm):
                     field_names.add(cleaned_data['field_name'])
                     after = len(field_names)
 
-                    if (before == after): # or CustomField.objects.filter(field_name=cleaned_data['field_name'], ticket_form=self.ticket_form).exists():
+                    if before == after:  # or CustomField.objects.filter(field_name=cleaned_data['field_name'], ticket_form=self.ticket_form).exists():
                         raise ValidationError(["Custom Field with name \"" + cleaned_data['field_name'] + "\" already exists for this form."])
 
     CustomFieldFormSet = forms.inlineformset_factory(FormType, CustomField, formset=BaseCustomFieldFormSet,
-        exclude = ['choices_as_array', 'ticket_form', 'created', 'modified','objects','view_ordering'],
-        widgets = {'help_text': PreviewWidget}
+        exclude=['choices_as_array', 'ticket_form', 'created', 'modified', 'objects', 'view_ordering'],
+        widgets={'help_text': PreviewWidget}
     )
 
     class Meta:
@@ -527,7 +532,8 @@ class EditFormTypeForm(forms.ModelForm):
                     'required': cf.required,
                     'staff': cf.staff,
                     'public': cf.public,
-                    'column': cf.column
+                    'column': cf.column,
+                    'lookup': cf.lookup,
                 })
                 if cf.list_values: 
                     list_val_lens.append(len(cf.list_values))
@@ -547,11 +553,11 @@ class EditFormTypeForm(forms.ModelForm):
             for form in self.customfield_formset.forms:
                 form.fields['column'] = EditFormTypeForm.BaseCustomFieldFormSet.ColumnModelChoiceField(queryset=column_queryset)
                 form.fields['agg_list_values'] = forms.JSONField(widget=forms.HiddenInput(), required=False)
-                form.fields['list_values'] = MatchOnField(num_widgets= list_val_lens[i] + 1, field_type=forms.CharField(), widget_type=forms.TextInput(), required=False)
+                form.fields['list_values'] = MatchOnField(num_widgets=list_val_lens[i] + 1, field_type=forms.CharField(), widget_type=forms.TextInput(), required=False)
                 if form.initial and form.initial['field_name'] in defaults:
                     form.fields['field_name'].widget.attrs = {'readonly': True}
                     if form.initial['data_type'] in ['varchar', 'text']:
-                        form.fields['data_type'].choices = (('varchar', _('Character (single line)')),('text', _('Text (multi-line)')))
+                        form.fields['data_type'].choices = (('varchar', _('Character (single line)')), ('text', _('Text (multi-line)')))
                     else:
                         form.fields['data_type'].widget.attrs = {'readonly': True, 'style': 'pointer-events: none;'}
                 i += 1
@@ -576,7 +582,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
     hidden_fields = []
 
     description = forms.CharField(
-        widget=PreviewWidget,
+        widget=forms.Textarea(attrs={'class': 'form-control'}),
         help_text=Ticket.description.field.help_text
     )
 
@@ -664,7 +670,6 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
         if self.files:
             for k, files in self.files.lists():
                 cleaned_data[k] = files
-
 
         # Handle DC Pathway Selection Form
         if form.name == 'Pathway Selection':
@@ -963,6 +968,7 @@ class TicketForm(AbstractTicketForm):
         assignable_users = assignable_users.order_by(User.USERNAME_FIELD)
         self.fields['assigned_to'].choices = [('', '--------')] + [
             (u.id, (u.get_full_name() or u.get_username())) for u in assignable_users]
+        self.fields['description'].widget = PreviewWidget()
 
     def save(self, user, form_id=None):
         """
@@ -980,6 +986,7 @@ class TicketForm(AbstractTicketForm):
         elif queue.default_owner and not ticket.assigned_to:
             ticket.assigned_to = queue.default_owner
 
+        ticket.save()  # saves so that CC'd emails can be added
         self._add_cc_emails(ticket)
 
         if self.cleaned_data['assigned_to']:
@@ -1035,6 +1042,7 @@ class PublicTicketForm(AbstractTicketForm):
         if self.form_queue is None:
             self.fields['queue'].choices = [('', '--------')] + [
                 (q.id, q.title) for q in public_queues]
+        self.fields['description'].help_text = ""
 
     def save(self, user, form_id=None):
         """
@@ -1046,6 +1054,7 @@ class PublicTicketForm(AbstractTicketForm):
         if queue.default_owner and not ticket.assigned_to:
             ticket.assigned_to = queue.default_owner
 
+        ticket.save()
         self._add_cc_emails(ticket)
 
         followup = self._create_follow_up(
@@ -1071,7 +1080,60 @@ class EmailIgnoreForm(forms.ModelForm):
 
     class Meta:
         model = IgnoreEmail
-        exclude = []
+        exclude = ['organization']
+
+    def __init__(self, *args, **kwargs):
+        """
+            Set slug and email address field to read-only.
+            Set email address field to "None" if it is empty.
+        """
+        if 'instance' in kwargs:
+            instance = kwargs.get('instance', None)
+            self.organization = instance.organization
+        elif 'organization' in kwargs:
+            self.organization = kwargs.pop('organization', None)
+
+        super(EmailIgnoreForm, self).__init__(*args, **kwargs)
+
+        if self.organization:
+            self.fields['queues'].queryset = self.organization.queue_set.all()
+
+
+class PreSetReplyForm(forms.ModelForm):
+    body = forms.CharField(widget=PreviewWidget, help_text=PreSetReply.body.field.help_text)
+
+    class Meta:
+        model = PreSetReply
+        exclude = ['organization']
+
+    def __init__(self, *args, **kwargs):
+        if 'instance' in kwargs:
+            instance = kwargs.get('instance', None)
+            self.organization = instance.organization
+        elif 'organization' in kwargs:
+            self.organization = kwargs.pop('organization', None)
+
+        super(PreSetReplyForm, self).__init__(*args, **kwargs)
+
+        if self.organization:
+            self.fields['queues'].queryset = self.organization.queue_set.all()
+
+
+class EmailTemplateForm(forms.ModelForm):
+    html = forms.CharField(widget=PreviewWidget, help_text=EmailTemplate.html.field.help_text)
+
+    class Meta:
+        model = EmailTemplate
+        exclude = ['organization', 'locale']
+
+    def __init__(self, *args, **kwargs):
+        super(EmailTemplateForm, self).__init__(*args, **kwargs)
+        self.fields['template_name'].disabled = True
+
+    def clean_html(self):
+        html = self.cleaned_data['html']
+        html = clean_html(html)
+        return html
 
 
 class TicketCCForm(forms.ModelForm):

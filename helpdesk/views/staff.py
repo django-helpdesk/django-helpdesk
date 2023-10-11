@@ -26,6 +26,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.utils.translation import ugettext as _
 from django.utils.html import escape
 from django.utils import timezone
+from django.utils.safestring import mark_safe
 from django.views.generic.edit import FormView, UpdateView
 
 from helpdesk.forms import CUSTOMFIELD_DATE_FORMAT, CUSTOMFIELD_DATETIME_FORMAT, PreviewWidget
@@ -42,15 +43,13 @@ from helpdesk.user import HelpdeskUser
 
 from helpdesk.decorators import (
     helpdesk_staff_member_required,
-    helpdesk_superuser_required,
     is_helpdesk_staff,
     list_of_helpdesk_staff,
-    superuser_required,
 )
 from helpdesk.forms import (
     TicketForm, UserSettingsForm, EmailIgnoreForm, EditTicketForm, TicketCCForm,
     TicketCCEmailForm, TicketCCUserForm, EditFollowUpForm, TicketDependencyForm, MultipleTicketSelectForm,
-    EditQueueForm, EditFormTypeForm
+    EditQueueForm, EditFormTypeForm, PreSetReplyForm, EmailTemplateForm
 )
 from helpdesk.lib import (
     safe_template_context,
@@ -60,7 +59,7 @@ from helpdesk.lib import (
 from helpdesk.models import (
     Ticket, Queue, FollowUp, TicketChange, PreSetReply, FollowUpAttachment, SavedSearch,
     IgnoreEmail, TicketCC, TicketDependency, UserSettings, KBItem, CustomField, is_unlisted,
-    FormType
+    FormType, EmailTemplate, get_markdown, clean_html
 )
 
 from helpdesk import settings as helpdesk_settings
@@ -119,6 +118,50 @@ def set_default_org(request, user_id, org_id):
     return redirect(url)
 
 
+@helpdesk_staff_member_required
+def preview_html(request):
+    md = request.POST.get('md')
+    return JsonResponse({'md_html': clean_html(md)})
+
+
+@helpdesk_staff_member_required
+def preview_markdown(request):
+    md = request.POST.get('md')
+    is_kbitem = request.POST.get('is_kbitem', 'false')
+    org = request.user.default_organization
+
+    class MarkdownNumbers(object):
+        def __init__(self, start=1, pattern=''):
+            self.count = start - 1
+            self.pattern = pattern
+
+        def __call__(self, match):
+            self.count += 1
+            return self.pattern.format(self.count).replace('\x01', match[1])
+
+    if is_kbitem == 'true':
+        import re
+        anchor_target_pattern = r'{\:\s*#(\w+)\s*}'
+        anchor_link_pattern = r'\[(.+)\]\(#(\w+)\)'
+        new_md, anchor_target_count = re.subn(anchor_target_pattern, "{: #anchor-\g<1> }", md)
+        new_md, anchor_link_count = re.subn(anchor_link_pattern, "[\g<1>](#anchor-\g<2>)", new_md)
+
+        title_pattern = r'^(.*)\n!~!'
+        body_pattern = r'~!~'
+        title = "<div markdown='1' class='card mb-2'>\n<div markdown='1' id=\"header{0}\" class='btn btn-link card-header h5' " \
+                "style='text-align: left; 'data-toggle='collapse' data-target='#collapse{0}' role='region' " \
+                "aria-expanded='false' aria-controls='collapse{0}'>\1\n{{: .mb-0}}</div>\n" \
+                "<div markdown='1' id='collapse{0}' class='collapse card-body mt-1' role='region'" \
+                "aria-labelledby='header{0}' data-parent='#header{0}' style='padding-top:0;padding-bottom:0;margin:0;'>"
+        body = "</div>\n</div>"
+
+        new_md, title_count = re.subn(title_pattern, MarkdownNumbers(start=1, pattern=title), new_md, flags=re.MULTILINE)
+        new_md, body_count = re.subn(body_pattern, body, new_md)
+        if (anchor_target_count != 0) or (title_count != 0 and title_count == body_count):
+            return JsonResponse({'md_html': get_markdown(new_md, org, kb=True)})
+    return JsonResponse({'md_html': get_markdown(md, org)})
+
+
 def _get_queue_choices(queues):
     """Return list of `choices` array for html form for given queues
 
@@ -137,7 +180,7 @@ def _get_queue_choices(queues):
 def queue_list(request):
     huser = HelpdeskUser(request.user)
     queue_list = huser.get_queues()                # Queues in user's default org (or all if superuser)
-    
+
     # user settings num tickets per page
     if request.user.is_authenticated and hasattr(request.user, 'usersettings_helpdesk'):
         queues_per_page = request.user.usersettings_helpdesk.tickets_per_page
@@ -162,8 +205,9 @@ def queue_list(request):
 
 @helpdesk_staff_member_required
 def create_queue(request):
+    org = request.user.default_organization.helpdesk_organization
     if request.method == "GET":
-        form = EditQueueForm("create", organization=request.user.default_organization.id)
+        form = EditQueueForm("create", organization=org.id)
 
         return render(request, 'helpdesk/edit_queue.html', {
             'form': form,
@@ -171,11 +215,11 @@ def create_queue(request):
             'debug': settings.DEBUG,
         })
     elif request.method == "POST":
-        form = EditQueueForm("create", request.POST, organization=request.user.default_organization.id)
+        form = EditQueueForm("create", request.POST, organization=org.id)
 
         if form.is_valid():
             queue = Queue(
-                organization = request.user.default_organization,
+                organization = org,  # todo remove hard coding
                 title = form.cleaned_data['title'],
                 slug = form.cleaned_data['slug'], # no change
                 match_on = [i for i in form.cleaned_data['agg_match_on'] if i], # remove empty strings
@@ -189,12 +233,12 @@ def create_queue(request):
             )
             queue.save()
             return HttpResponseRedirect(reverse('helpdesk:maintain_queues'))
-        
+
         redo_form = EditQueueForm(
             "create", 
             request.POST, 
-            organization=request.user.default_organization.id,
-            initial = {
+            organization=org.id,
+            initial = {  # todo remove hard coding
                 'title': form.cleaned_data['title'],
                 'slug': form.data['slug'], # no change
                 'match_on': [i for i in form.cleaned_data['agg_match_on'] if i], # remove empty strings
@@ -220,12 +264,13 @@ def create_queue(request):
 def edit_queue(request, slug):
     """Edit Queue"""
     queue = get_object_or_404(Queue, slug=slug)
+    org = request.user.default_organization.helpdesk_organization
 
     if request.method == "GET":
         form = EditQueueForm(
             "edit",
-            organization=request.user.default_organization.id,
-            initial = {
+            organization=org.id,
+            initial = {  # todo remove hard coding
                 'organization': queue.organization.id,
                 'title': queue.title,
                 'slug': queue.slug,
@@ -250,9 +295,9 @@ def edit_queue(request, slug):
             'debug': settings.DEBUG,
         })
     elif request.method == "POST":
-        form = EditQueueForm("edit", request.POST, organization=request.user.default_organization.id)
+        form = EditQueueForm("edit", request.POST, organization=org.id)
         if form.is_valid():
-            queue.title = form.cleaned_data['title']
+            queue.title = form.cleaned_data['title']  # todo remove hard coding
             # queue.slug = form.cleaned_data['slug'] # no change
             queue.match_on = [i for i in form.cleaned_data['agg_match_on'] if i] # remove empty strings
             queue.match_on_addresses = [i for i in form.cleaned_data['agg_match_on_addresses'] if i] # remove empty strings
@@ -262,14 +307,15 @@ def edit_queue(request, slug):
             queue.default_owner = form.cleaned_data['default_owner']
             queue.reassign_when_closed = form.cleaned_data['reassign_when_closed']
             queue.dedicated_time = form.cleaned_data['dedicated_time']
-            
+
             queue.save()
-        return HttpResponseRedirect(reverse('helpdesk:maintain_queues')) 
+        return HttpResponseRedirect(reverse('helpdesk:maintain_queues'))
 
 
 @helpdesk_staff_member_required
 def form_list(request):
-    form_list = FormType.objects.filter(organization=request.user.default_organization)
+    org = request.user.default_organization.helpdesk_organization
+    form_list = FormType.objects.filter(organization=org)
     
     # user settings num tickets per page
     if request.user.is_authenticated and hasattr(request.user, 'usersettings_helpdesk'):
@@ -292,17 +338,18 @@ def form_list(request):
         'debug': settings.DEBUG,
     })
 
+
 @helpdesk_staff_member_required
 def create_form(request):
-    organization = request.user.default_organization
+    org = request.user.default_organization.helpdesk_organization
     
     if request.method == "GET":
         # Create empty form and save it to the database to generate the default Custom Fields.
-        formtype = FormType(organization = organization, name="Unnamed Form")
+        formtype = FormType(organization = org, name="Unnamed Form")
         formtype.save()
         form = EditFormTypeForm(
             initial = {
-                'id': formtype.id,
+                'id': formtype.id,  # todo remove hard coding
                 'name': formtype.name,
                 'description': formtype.description,
                 'queue': formtype.queue,
@@ -311,7 +358,7 @@ def create_form(request):
                 'unlisted': formtype.unlisted
             },
             initial_customfields = CustomField.objects.filter(ticket_form=formtype),
-            organization = organization,
+            organization = org,
             pk = formtype.id
         )
 
@@ -322,12 +369,12 @@ def create_form(request):
             'debug': settings.DEBUG,
         })
     elif request.method == "POST":
-        form = EditFormTypeForm(request.POST, organization = organization)
+        form = EditFormTypeForm(request.POST, organization = org)
         formtype = get_object_or_404(FormType, pk=request.POST.get('id'))
         formset = form.CustomFieldFormSet(request.POST)
 
         if form.is_valid():
-            formtype.name = form.cleaned_data['name']
+            formtype.name = form.cleaned_data['name']  # todo remove hard coding
             formtype.description = form.cleaned_data['description']
             formtype.queue = form.cleaned_data['queue']
             formtype.updated = datetime.now()
@@ -345,7 +392,7 @@ def create_form(request):
 
                     customfield = cf['id'] if cf['id'] else CustomField()
 
-                    customfield.field_name = cf['field_name']
+                    customfield.field_name = cf['field_name']  # todo remove hard coding
                     customfield.label = cf['label']
                     customfield.help_text = cf['help_text']
                     customfield.data_type = cf['data_type']
@@ -383,7 +430,7 @@ def edit_form(request, pk):
     if request.method == "GET":
         form = EditFormTypeForm(
             initial = {
-                'id': formtype.id,
+                'id': formtype.id,  # todo remove hard coding
                 'name': formtype.name,
                 'description': formtype.description,
                 'queue': formtype.queue,
@@ -407,7 +454,7 @@ def edit_form(request, pk):
         formset = form.CustomFieldFormSet(request.POST)
 
         if form.is_valid():
-            formtype.name = form.cleaned_data['name']
+            formtype.name = form.cleaned_data['name']  # todo remove hard coding
             formtype.description = form.cleaned_data['description']
             formtype.queue = form.cleaned_data['queue']
             formtype.updated = datetime.now()
@@ -423,7 +470,7 @@ def edit_form(request, pk):
                 for cf in formset.cleaned_data:
                     if not cf or cf['DELETE']: continue # continue to next item if form is empty or item is being deleted
 
-                    customfield = cf['id'] if cf['id'] else CustomField()
+                    customfield = cf['id'] if cf['id'] else CustomField()  # todo remove hard coding
                     customfield.field_name = cf['field_name']
                     customfield.label = cf['label']
                     customfield.help_text = cf['help_text']
@@ -454,16 +501,18 @@ def edit_form(request, pk):
             'debug': settings.DEBUG,             
         })
 
+
 @helpdesk_staff_member_required
 def delete_form(request, pk):
     form = get_object_or_404(FormType, pk=pk)
     form.delete()
     return HttpResponseRedirect(reverse('helpdesk:maintain_forms'))
 
+
 @helpdesk_staff_member_required
 def duplicate_form(request, pk):
     formtype = get_object_or_404(FormType, pk=pk)
-    new_form = FormType(
+    new_form = FormType(  # todo remove hard coding
         organization = formtype.organization,
         name = formtype.name + " - Copy",
         description = formtype.description,
@@ -478,7 +527,7 @@ def duplicate_form(request, pk):
     
     for cf_name in formtype.get_extra_field_names():
         cf = CustomField.objects.get(ticket_form=formtype, field_name=cf_name)
-        new_cf = CustomField(
+        new_cf = CustomField(  # todo remove hard coding
             field_name = cf.field_name,
             label = cf.label,
             help_text = cf.help_text,
@@ -500,6 +549,7 @@ def duplicate_form(request, pk):
         new_cf.save()
     return HttpResponseRedirect(reverse('helpdesk:maintain_forms'))
 
+
 def copy_field(request):
     """
     Asynchonously copy CustomField to another form
@@ -519,7 +569,7 @@ def copy_field(request):
         else: # otherwise just use 1
             copy = base + '1'
 
-        customfield = CustomField()
+        customfield = CustomField()  # todo remove hard coding
         customfield.field_name = copy
         customfield.label = cf['label']
         customfield.help_text = cf['help_text']
@@ -543,8 +593,6 @@ def copy_field(request):
     else:
         return JsonResponse({'copied': False, 'errors': form.errors})
 
-
-    
 
 @helpdesk_staff_member_required
 def dashboard(request):
@@ -794,7 +842,7 @@ def followup_delete(request, ticket_id, followup_id):
     """followup delete for superuser"""
 
     ticket = get_object_or_404(Ticket, id=ticket_id)
-    if not request.user.is_superuser:
+    if not request.user.is_superuser:  # todo
         return HttpResponseRedirect(reverse('helpdesk:view', args=[ticket.id]))
 
     followup = get_object_or_404(FollowUp, id=followup_id)
@@ -931,7 +979,7 @@ def view_ticket(request, ticket_id):
         'form': form,
         'active_users': users,
         'priorities': Ticket.PRIORITY_CHOICES,
-        'preset_replies': PreSetReply.objects.filter(
+        'preset_replies': PreSetReply.objects.filter(organization=org).filter(
             Q(queues=ticket.queue) | Q(queues__isnull=True)),
         'ticketcc_string': ticketcc_string,
         'SHOW_SUBSCRIBE': show_subscribe,
@@ -1990,6 +2038,7 @@ def edit_ticket(request, ticket_id):
 
 edit_ticket = staff_member_required(edit_ticket)
 
+
 def attach_ticket_to_property_milestone(request, ticket):
     from seed.models import PropertyMilestone, Note
     from django.utils.timezone import now
@@ -2421,7 +2470,7 @@ def reshare_saved_query(request, id):
     return HttpResponseRedirect(reverse('helpdesk:list') + '?saved_query=%s' % query.id)
 
 
-reject_saved_query = staff_member_required(reject_saved_query)
+reshare_saved_query = staff_member_required(reshare_saved_query)
 
 
 @helpdesk_staff_member_required
@@ -2434,7 +2483,7 @@ def unshare_saved_query(request, id):
     return HttpResponseRedirect(reverse('helpdesk:list') + '?saved_query=%s' % query.id)
 
 
-reject_saved_query = staff_member_required(reject_saved_query)
+unshare_saved_query = staff_member_required(unshare_saved_query)
 
 
 class EditUserSettingsView(MustBeStaffMixin, UpdateView):
@@ -2447,34 +2496,53 @@ class EditUserSettingsView(MustBeStaffMixin, UpdateView):
         return UserSettings.objects.get_or_create(user=self.request.user)[0]
 
 
-@helpdesk_superuser_required
+@helpdesk_staff_member_required
 def email_ignore(request):
+    org = request.user.default_organization.helpdesk_organization
+
     return render(request, 'helpdesk/email_ignore_list.html', {
-        'ignore_list': IgnoreEmail.objects.all(),
+        'ignore_list': IgnoreEmail.objects.filter(organization=org),
         'debug': settings.DEBUG,
     })
 
 
-email_ignore = superuser_required(email_ignore)
+email_ignore = staff_member_required(email_ignore)
 
 
-@helpdesk_superuser_required
+@helpdesk_staff_member_required
 def email_ignore_add(request):
     if request.method == 'POST':
-        form = EmailIgnoreForm(request.POST)
+        form = EmailIgnoreForm(request.POST, organization=request.user.default_organization.helpdesk_organization)
         if form.is_valid():
-            form.save()
+            saved_form = form.save(commit=False)
+            saved_form.organization = request.user.default_organization.helpdesk_organization
+            saved_form.save()
+            saved_form.queues.set(form.cleaned_data['queues'])
             return HttpResponseRedirect(reverse('helpdesk:email_ignore'))
     else:
-        form = EmailIgnoreForm(request.GET)
+        form = EmailIgnoreForm(request.GET, organization=request.user.default_organization.helpdesk_organization)
 
     return render(request, 'helpdesk/email_ignore_add.html', {'form': form, 'debug': settings.DEBUG})
 
 
-email_ignore_add = superuser_required(email_ignore_add)
+email_ignore_add = staff_member_required(email_ignore_add)
 
 
-@helpdesk_superuser_required
+@helpdesk_staff_member_required
+def email_ignore_edit(request, id):
+    ignored_address = get_object_or_404(IgnoreEmail, id=id)
+    form = EmailIgnoreForm(request.POST or None, instance=ignored_address)
+    if form.is_valid():
+        form.save()
+        return HttpResponseRedirect(reverse('helpdesk:email_ignore'))
+
+    return render(request, 'helpdesk/email_ignore_add.html', {'form': form, 'debug': settings.DEBUG})
+
+
+email_ignore_edit = helpdesk_staff_member_required(email_ignore_edit)
+
+
+@helpdesk_staff_member_required
 def email_ignore_del(request, id):
     ignore = get_object_or_404(IgnoreEmail, id=id)
     if request.method == 'POST':
@@ -2484,7 +2552,136 @@ def email_ignore_del(request, id):
         return render(request, 'helpdesk/email_ignore_del.html', {'ignore': ignore, 'debug': settings.DEBUG})
 
 
-email_ignore_del = superuser_required(email_ignore_del)
+email_ignore_del = helpdesk_staff_member_required(email_ignore_del)
+
+
+@helpdesk_staff_member_required
+def preset_reply_list(request):
+    org = request.user.default_organization.helpdesk_organization
+    replies = PreSetReply.objects.filter(organization=org)
+    reply_list = []
+    for reply in replies:
+        reply_list.append({
+            'id': reply.id,
+            'queues': reply.queues.all(),
+            'name': reply.name,
+            'body': reply.get_markdown()
+        })
+
+    return render(request, 'helpdesk/preset_reply_list.html', {
+        'reply_list': reply_list,
+        'debug': settings.DEBUG,
+    })
+
+
+preset_reply_list = helpdesk_staff_member_required(preset_reply_list)
+
+
+@helpdesk_staff_member_required
+def preset_reply_add(request):
+    org = request.user.default_organization.helpdesk_organization
+    if request.method == 'POST':
+        form = PreSetReplyForm(request.POST, organization=org)
+        if form.is_valid():
+            saved_form = form.save(commit=False)
+            saved_form.organization = org
+            saved_form.save()
+            saved_form.queues.set(form.cleaned_data['queues'])
+            return HttpResponseRedirect(reverse('helpdesk:preset_reply_list'))
+    else:
+        form = PreSetReplyForm(request.GET, organization=org)
+
+    return render(request, 'helpdesk/preset_reply_add.html', {'form': form, 'debug': settings.DEBUG})
+
+
+preset_reply_add = helpdesk_staff_member_required(preset_reply_add)
+
+
+@helpdesk_staff_member_required
+def preset_reply_edit(request, id):
+    preset_reply = get_object_or_404(PreSetReply, id=id)
+    form = PreSetReplyForm(request.POST or None, instance=preset_reply)
+    if form.is_valid():
+        form.save()
+        return HttpResponseRedirect(reverse('helpdesk:preset_reply_list'))
+
+    return render(request, 'helpdesk/preset_reply_add.html', {'form': form, 'debug': settings.DEBUG})
+
+
+preset_reply_edit = helpdesk_staff_member_required(preset_reply_edit)
+
+
+@helpdesk_staff_member_required
+def preset_reply_delete(request, id):
+    preset_reply = get_object_or_404(PreSetReply, id=id)
+    if request.method == 'POST':
+        preset_reply.delete()
+        return HttpResponseRedirect(reverse('helpdesk:preset_reply_list'))
+    else:
+        return render(request, 'helpdesk/preset_reply_delete.html', {'reply': preset_reply, 'debug': settings.DEBUG})
+
+
+preset_reply_delete = helpdesk_staff_member_required(preset_reply_delete)
+
+
+@helpdesk_staff_member_required
+def email_template_list(request):
+    org = request.user.default_organization.helpdesk_organization
+    templates = EmailTemplate.objects.filter(organization=org, locale='en')  # hiding the large amount of currently-unused templates
+    template_list = []
+    for template in templates:
+        template_list.append({
+            'id': template.id,
+            'template_name': template.template_name,
+            'subject': template.subject,
+            'heading': template.heading,
+            'plain_text': template.plain_text,
+            'html': mark_safe(template.clean_html())
+        })
+
+    return render(request, 'helpdesk/email_template_list.html', {
+        'template_list': template_list,
+        'debug': settings.DEBUG,
+    })
+
+
+email_template_list = helpdesk_staff_member_required(email_template_list)
+
+
+@helpdesk_staff_member_required
+def email_template_edit(request, id):
+    template = get_object_or_404(EmailTemplate, id=id)
+    form = EmailTemplateForm(request.POST or None, instance=template)
+    if form.is_valid():
+        form.save()
+        return HttpResponseRedirect(reverse('helpdesk:email_template_list'))
+
+    return render(request, 'helpdesk/email_template_edit.html', {'template_id': template.id, 'form': form, 'debug': settings.DEBUG})
+
+
+email_template_edit = helpdesk_staff_member_required(email_template_edit)
+
+
+@helpdesk_staff_member_required
+def email_template_default(request, id):
+    template = get_object_or_404(EmailTemplate, id=id)
+    if request.method == 'GET':
+        with open("./seed/utils/data/emailtemplates_en.json", "r") as read_file:
+            raw_templates = json.load(read_file)
+
+        for rm in raw_templates:
+            if rm['template_name'] == template.template_name:
+                template.heading = rm.get('heading')
+                template.subject = rm.get('subject')
+                template.plain_text = rm.get('plain_text')
+                template.html = rm.get('html')
+                template.save()
+                break
+
+    return HttpResponseRedirect(reverse('helpdesk:email_template_edit', kwargs={'id': template.id}))
+
+
+email_template_default = helpdesk_staff_member_required(email_template_default)
 
 
 @helpdesk_staff_member_required
@@ -3222,7 +3419,7 @@ def export_ticket_table(request, tickets):
     num_queues = request.POST.get('queue_length', '0')
 
     qs = Ticket.objects.filter(id__in=tickets)
-    org = request.user.default_organization
+    org = request.user.default_organization.helpdesk_organization
     do_extra_data = int(num_queues) == 1
 
     return export(qs, org, DatatablesTicketSerializer, do_extra_data=do_extra_data, visible_cols=visible_cols)
@@ -3242,7 +3439,7 @@ def export_report(request):
                                ).order_by('created', 'ticket_form'
                                           ).select_related('ticket_form__organization', 'assigned_to', 'queue',
                                                            ).prefetch_related('followup_set__user', 'beam_property')
-    org = request.user.default_organization
+    org = request.user.default_organization.helpdesk_organization
 
     return export(qs, org, ReportTicketSerializer, paginate=paginate)
 

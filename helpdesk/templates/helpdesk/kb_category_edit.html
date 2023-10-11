@@ -8,7 +8,9 @@
 <li class="breadcrumb-item">
     <a href="{% url 'helpdesk:kb_index' %}{{ user_info.url }}">{% trans "Knowledgebase" %}</a>
 </li>
-<li class="breadcrumb-item active">{% blocktrans with category.title as kbcat %} {{ action }} {{ kbcat }}{% endblocktrans %}</li>
+<li class="breadcrumb-item active">
+    {% blocktrans with category.title as kbcat %} {{ action }} {{ kbcat }}{% endblocktrans %}
+</li>
 {% endblock %}
 
 {% block helpdesk_body %}

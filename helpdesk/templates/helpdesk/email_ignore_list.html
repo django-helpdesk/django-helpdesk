@@ -1,59 +1,75 @@
 {% extends "helpdesk/base.html" %}{% load i18n %}
 
-{% block helpdesk_title %}{% trans "Ignored E-Mail Addresses" %}{% endblock %}
+{% block helpdesk_title %}{% trans "Ignored Email Addresses" %}{% endblock %}
+
+{% block helpdesk_breadcrumb %}
+<li class="breadcrumb-item">
+    <a href="{% url 'helpdesk:system_settings' %}">{% trans "System Settings" %}</a>
+</li>
+<li class="breadcrumb-item active">
+    Ignored Email Addresses
+</li>
+{% endblock %}
 
 {% block helpdesk_body %}{% blocktrans %}
-<h2>Ignored E-Mail Addresses</h2>
+<h2>Ignored Email Addresses</h2>
 
-<p>The following e-mail addresses are currently being ignored by the incoming e-mail processor. You can add a new item or delete any of the items below as required.</p>{% endblocktrans %}
+<p>The following email addresses are currently being ignored.
+    If "ignore imports" is checked, emails received from these addresses will not create new tickets or followups on existing tickets when imported.
+    If "prevent sending" is checked, when these addresses are copied on Helpdesk tickets, no emails will be sent to them.
+    This only affects mail sent from Helpdesk, not from BEAM.
+    You can add a new item or delete any of the items below as needed.</p>{% endblocktrans %}
 
 
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="panel panel-primary">
-                        <div class="panel-heading">
-                            {% trans "Ignored E-Mail Addresses" %}
-                        </div>
-                        <!-- /.panel-heading -->
-                        <div class="panel-body">
-                            <!--
-                            <div><a href='add/'><button class="btn btn-success btn-sm"><i class="fa fa-plus-circle"></i>{% trans "Add an Email" %}</button></a></div>
-                            <div class="table-responsive">
-                                <table class="table table-striped table-bordered table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>{% trans "Name" %}</th>
-                                            <th>{% trans "E-Mail Address" %}</th>
-                                            <th>{% trans "Date Added" %}</th>
-                                            <th>{% trans "Queues" %}</th>
-                                            <th>{% trans "Keep in mailbox?" %}</th>
-                                            <th>{% trans "Delete" %}</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for ignore in ignore_list %}
-                                        <tr class='row_{% cycle 'odd' 'even' %}'>
-                                            <td>{{ ignore.name }}</td>
-                                            <td>{{ ignore.email_address }}</td>
-                                            <td>{{ ignore.date }}</td>
-                                            <td>{% for queue in ignore.importers.all %}{{ queue.slug }}{% if not forloop.last %}, {% endif %}{% empty %}{% trans "All" %}{% endfor %}</td>
-                                            <td>{% if ignore.keep_in_mailbox %}{% trans "Keep" %}{% endif %}</td>
-                                            <td><a href='{% url 'helpdesk:email_ignore_del' ignore.id %}'><button class="btn btn-danger btn-xs">{% trans "Delete" %}</button></a></td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                            -->
-                            <!-- /.table-responsive -->
-                        </div>
-                        <!-- /.panel-body -->
-                    </div>
-                    <!-- /.panel -->
+<div class="row">
+    <div class="col-lg-12">
+        <div class="panel panel-primary">
+            <!-- /.panel-heading -->
+            <div class="panel-body">
+                <p><a href='add/'><button class="btn btn-success btn"><i class="fa fa-plus-circle"></i> {% trans "Add an Email" %}</button></a></p>
+                <div class="table-responsive">
+                    <table class="table table-striped table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>{% trans "Name" %}</th>
+                                <th>{% trans "Email Address" %}</th>
+                                <th>{% trans "Date Added" %}</th>
+                                <th>{% trans "Date Modified" %}</th>
+                                <th>{% trans "Queues" %}</th>
+                                <th>{% trans "Keep in mailbox?" %}</th>
+                                <th>{% trans "Ignore Imports?" %}</th>
+                                <th>{% trans "Prevent Sending?" %}</th>
+                                <th>{% trans "Edit" %}</th>
+                                <th>{% trans "Remove" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ignore in ignore_list %}
+                            <tr class='row_{% cycle 'odd' 'even' %}'>
+                                <td>{{ ignore.name }}</td>
+                                <td>{{ ignore.email_address }}</td>
+                                <td>{{ ignore.date }}</td>
+                                <td>{{ ignore.modified }}</td>
+                                <td>{% for queue in ignore.queues.all %}{{ queue.slug }}{% if not forloop.last %}, {% endif %}{% empty %}{% trans "All" %}{% endfor %}</td>
+                                <td>{% if ignore.keep_in_mailbox %}{% trans "Yes" %}{% else %}{% trans "No" %}{% endif %}</td>
+                                <td>{% if ignore.ignore_import %}{% trans "Yes" %}{% else %}{% trans "No" %}{% endif %}</td>
+                                <td>{% if ignore.prevent_send %}{% trans "Yes" %}{% else %}{% trans "No" %}{% endif %}</td>
+                                <td><a href='{% url 'helpdesk:email_ignore_edit' ignore.id %}'><button class="btn btn-warning btn-xs">{% trans "Edit" %}</button></a></td>
+                                <td><a href='{% url 'helpdesk:email_ignore_del' ignore.id %}'><button class="btn btn-danger btn-xs">{% trans "Remove" %}</button></a></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
-                <!-- /.col-lg-12 -->
+                <!-- /.table-responsive -->
             </div>
-            <!-- /.row -->
+            <!-- /.panel-body -->
+        </div>
+        <!-- /.panel -->
+    </div>
+    <!-- /.col-lg-12 -->
+</div>
+<!-- /.row -->
 
 <p>{% trans "<strong>Note:</strong> If the 'Keep' option is not selected, emails sent from that address will be deleted permanently." %}</p>
 

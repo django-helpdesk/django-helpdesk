@@ -1,34 +1,30 @@
-{% extends "helpdesk/base.html" %}{% load i18n %}
+{% extends "helpdesk/base.html" %}{% load i18n bootstrap4form %}
 
-{% block helpdesk_title %}{% trans "Ignore E-Mail Address" %}{% endblock %}
+{% block helpdesk_title %}{% trans "Ignore Email Address" %}{% endblock %}
 
 {% block helpdesk_breadcrumb %}
 <li class="breadcrumb-item">
-    <a href="{% url 'helpdesk:list' %}">{% trans "Tickets" %}</a>
+    <a href="{% url 'helpdesk:system_settings' %}">{% trans "System Settings" %}</a>
 </li>
-<li class="breadcrumb-item active">{% trans "Ignore E-Mail Address" %}</li>
+<li class="breadcrumb-item active">
+    <a href="{% url 'helpdesk:email_ignore' %}">{% trans "Ignored Email Addresses" %}</a>
+</li>
+<li class="breadcrumb-item active">{% trans "Ignore Email Address" %}</li>
 {% endblock %}
 
 {% block helpdesk_body %}
-<h2>{% trans "Ignore E-Mail Address" %}</h2>
+<h2>{% trans "Ignore Email Address" %}</h2>
 
-<p>{% blocktrans %}To ignore an e-mail address and prevent any emails from that address creating tickets automatically, enter the e-mail address below.{% endblocktrans %}</p>
+<p>{% blocktrans %}To ignore an email address and prevent any emails from that address creating tickets automatically, enter the e-mail address below.{% endblocktrans %}</p>
 
-<p>{% blocktrans %}You can either enter a whole e-mail address such as <em>email@domain.com</em> or a portion of an e-mail address with a wildcard, such as <em>*@domain.com</em> or <em>user@*</em>.{% endblocktrans %}</p>
+<p>{% blocktrans %}You can either enter a whole email address such as <em>email@domain.com</em> or a portion of an email address with a wildcard, such as <em>*@domain.com</em> or <em>user@*</em>.{% endblocktrans %}</p>
 
-<form method='post' action='./'>
-
-<fieldset>
-    <dl>{% for field in form %}
-        <dt><label for='id_{{ field.name }}'>{{ field.label }}</label></dt>
-        <dd>{{ field }}</dd>
-        {% if field.errors %}<dd class='error'>{{ field.errors }}</dd>{% endif %}
-        {% if field.help_text %}<dd class='form_help_text'>{{ field.help_text }}</dd>{% endif %}
-    {% endfor %}</dl>
-</fieldset>
-
-<input class="btn btn-primary" type='submit' value='{% trans "Ignore E-Mail Address" %}' />
-
-{% csrf_token %}</form>
+<form method='post' action='.' name="email_ignore_form">
+    {{ form.non_field_errors }}
+    <fieldset>
+        {{ form|bootstrap4form}}
+    </fieldset>
+    <p><input class="btn btn-primary" type="submit" value="Submit"></p>{% csrf_token %}
+</form>
 
 {% endblock %}

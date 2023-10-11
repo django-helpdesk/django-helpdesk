@@ -1,0 +1,47 @@
+{% extends "helpdesk/base.html" %}{% load i18n bootstrap4form %}
+
+{% block helpdesk_title %}{% trans "Email Template" %}{% endblock %}
+
+{% block helpdesk_breadcrumb %}
+<li class="breadcrumb-item">
+    <a href="{% url 'helpdesk:system_settings' %}">{% trans "System Settings" %}</a>
+</li>
+<li class="breadcrumb-item active">
+    <a href="{% url 'helpdesk:email_template_list' %}">{% trans "Email Templates" %}</a>
+</li>
+<li class="breadcrumb-item active">{% trans "Email Template" %}</li>
+{% endblock %}
+
+{% block helpdesk_body %}
+<h2>{% trans "Email Template" %}</h2>
+
+<p>{% blocktrans %}Edit the email template below.{% endblocktrans %}</p>
+
+<form method='post' action='.' name="email-template-form">
+    {{ form.non_field_errors }}
+    <fieldset>
+        {{ form|bootstrap4form}}
+    </fieldset>
+    <p style="display:flex;justify-content:space-between;">
+        <input class="btn btn-primary" type="submit" value="Submit">
+        <a href="{% url 'helpdesk:email_template_default' template_id %}" class="btn btn-danger" role="button">{% trans "Revert changes to default" %}</a>
+    </p>{% csrf_token %}
+</form>
+
+
+<script type='text/javascript' language='javascript'>
+    function updatePreview(widget_name) {
+        $.ajax({
+            data: {
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+                md: $('#id_' + widget_name).val(),
+            },
+            url: "{% url 'helpdesk:preview_html' %}",
+            type: 'POST',
+            success: function(response) {
+                $('#' + widget_name + '_md_preview').html(response['md_html'])
+            },
+        });
+    }
+</script>
+{% endblock %}

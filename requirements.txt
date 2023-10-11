@@ -13,5 +13,6 @@ six
 djangorestframework
 django-model-utils
 pinax-teams>=2.0
-bleach==4.1.0
+bleach==6.0.0
+bleach[css]
 bleach-allowlist

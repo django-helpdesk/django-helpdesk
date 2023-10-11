@@ -1,0 +1,27 @@
+{% extends "helpdesk/base.html" %}{% load i18n %}
+
+{% block helpdesk_title %}{% trans "Delete Preset Reply" %}{% endblock %}
+
+{% block helpdesk_breadcrumb %}
+<li class="breadcrumb-item">
+    <a href="{% url 'helpdesk:system_settings' %}">{% trans "System Settings" %}</a>
+</li>
+<li class="breadcrumb-item active">
+    <a href="{% url 'helpdesk:preset_reply_list' %}">{% trans "Preset Replies" %}</a>
+</li>
+<li class="breadcrumb-item active">{% trans "Delete Preset Reply" %}</li>
+{% endblock %}
+
+{% block helpdesk_body %}
+<h2>{% trans "Delete Preset Reply" %}</h2>
+
+<p>{% blocktrans %}Are you sure you wish to delete this preset reply?{% endblocktrans %}</p>
+
+<form method='post' action='./'>
+    <button class="btn btn-danger" type='submit'>{% trans "Delete" %}</button>
+{% csrf_token %}</form>
+<br/>
+<p><a href='../../'><button class="btn btn-primary btn">{% trans "Cancel" %}</button></a></p>
+
+
+{% endblock %}

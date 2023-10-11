@@ -181,7 +181,7 @@ def send_templated_mail(template_name,
     try:
         # Create and send email out.
         success = send_beam_mail(
-            organization=org,
+            organization=org,  # todo this should use the sender given to it
             recipient_emails=recipients,
             bcc=bcc,
             subject=subject_part,

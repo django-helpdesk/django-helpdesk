@@ -15,10 +15,12 @@ import re
 import socket
 import ssl
 from datetime import timedelta
+import dateutil
 from email.utils import getaddresses, parseaddr
 from os.path import isfile, join
 from time import ctime
 from functools import reduce
+from buildingid.code import RE_PATTERN_
 
 from bs4 import BeautifulSoup
 from django.conf import settings as django_settings
@@ -35,7 +37,7 @@ from exchangelib import FileAttachment, ItemAttachment
 
 from helpdesk import settings
 from helpdesk.lib import safe_template_context, process_attachments
-from helpdesk.models import Ticket, TicketCC, FollowUp, IgnoreEmail, FormType, CustomField
+from helpdesk.models import Ticket, TicketCC, FollowUp, IgnoreEmail, FormType, CustomField, is_extra_data
 from seed.models import EmailImporter, GOOGLE, MICROSOFT
 from helpdesk.decorators import is_helpdesk_staff
 
@@ -50,10 +52,12 @@ STRIPPED_SUBJECT_STRINGS = [
     "RE: ",
     "FW: ",
     "Automatic reply: ",
+    "[EXTERNAL] "  # NJ
 ]
 
 PATTERN_UID = re.compile(r'\d+ \(UID (?P<uid>\d+)\)')
 DEBUGGING = False
+UBID_PATTERN = RE_PATTERN_.pattern[1:len(RE_PATTERN_.pattern) - 1]  # removes ^ and $
 
 
 def parse_uid(data):
@@ -61,7 +65,7 @@ def parse_uid(data):
     return match.group('uid')
 
 
-def process_email(quiet=False, debugging=False):
+def process_email(quiet=False, debugging=False, nj=None):
     for importer in EmailImporter.objects.filter(allow_email_imports=True):
         importer_queues = importer.queue_set.all()
 
@@ -111,11 +115,11 @@ def process_email(quiet=False, debugging=False):
 
                 queue_time_delta = timedelta(minutes=importer.email_box_interval or 0)
                 if debugging or DEBUGGING:
-                    process_importer(importer, queues, logger=logger, debugging=True)
+                    process_importer(importer, queues, logger=logger, debugging=True, nj=nj)
                     importer.email_box_last_check = timezone.now()
                     importer.save()
                 elif (importer.email_box_last_check + queue_time_delta) < timezone.now():
-                    process_importer(importer, queues, logger=logger, debugging=False)
+                    process_importer(importer, queues, logger=logger, debugging=False, nj=nj)
                     importer.email_box_last_check = timezone.now()
                     importer.save()
 
@@ -134,7 +138,7 @@ def process_email(quiet=False, debugging=False):
                 logging.exception(e)
 
 
-def process_importer(importer, queues, logger, debugging):
+def process_importer(importer, queues, logger, debugging, nj=None):
     logger.info("\n***** %s: Begin processing mail for django-helpdesk" % ctime())
 
     if importer.socks_proxy_type and importer.socks_proxy_host and importer.socks_proxy_port:
@@ -201,7 +205,7 @@ def process_importer(importer, queues, logger, debugging):
                 int(importer.email_box_port)
             )
         logger.info("Attempting %s server login" % email_box_type)
-        mail_defaults[email_box_type]['sync'](importer, queues, logger, server, debugging=debugging)
+        mail_defaults[email_box_type]['sync'](importer, queues, logger, server, debugging=debugging, nj=nj)
 
     elif email_box_type == 'local':
         mail_dir = importer.email_box_local_dir or '/var/lib/mail/helpdesk/'
@@ -294,7 +298,7 @@ def refreshed(importer, logger, token_backend=None):
         return False  # The token is still good - keep going
 
 
-def imap_sync(importer, queues, logger, server, debugging):
+def imap_sync(importer, queues, logger, server, debugging, nj=None):
     login_successful = True
     token_backend = None
     server.debug = 4
@@ -369,7 +373,7 @@ def imap_sync(importer, queues, logger, server, debugging):
                             status, data = server.uid('fetch', msg_uid, '(RFC822)')
                             full_message = encoding.force_text(data[0][1], errors='replace')
                             try:
-                                ticket = object_from_message(full_message, importer, queues, logger)
+                                ticket = object_from_message(full_message, importer, queues, logger, nj=nj)
                             except TypeError as e:
                                 logger.error("Type error - ticket set to None")
                                 logger.error(e)
@@ -516,15 +520,21 @@ def is_autoreply(message, sender='', headers=None):
     Returns True if it's likely to be auto-reply or False otherwise
     So we don't start mail loops
     """
+    sender = sender.lower()
     if headers:
         message = headers
     any_if_this = [
-        False if not message.get("Auto-Submitted") else message.get("Auto-Submitted").lower() != "no",
-        True if message.get("X-Auto-Response-Suppress") in ("DR", "AutoReply", "All") else False,
+        False if not message.get("Auto-Submitted") else message.get("Auto-Submitted", '').lower() != "no",
+        False if not message.get("auto-submitted") else message.get("auto-submitted", '').lower() != "no",
+        True if message.get("x-auto-response-suppress", '').lower() in ("dr", "autoreply", "all") else False,
+        True if message.get("X-Auto-Response-Suppress", '').lower() in ("dr", "autoreply", "all") else False,
         message.get("List-Id"),
+        message.get("list-id"),
         message.get("List-Unsubscribe"),
+        message.get("list-unsubscribe"),
         'no-reply' in sender,
         'noreply' in sender,
+        'donotreply' in sender,
         'postmaster' in sender,
     ]
     return any(any_if_this)
@@ -541,11 +551,16 @@ def create_ticket_cc(ticket, cc_list):
     new_ticket_ccs = []
     for cced_name, cced_email in cc_list:
         cced_email = cced_email.strip()
-        if cced_email == ticket.queue.email_address:
+        cced_email_lower = cced_email.lower()
+        if cced_email_lower == ticket.queue.email_address.lower():
             continue
-        if 'no-reply' in cced_email or 'noreply' in cced_email or 'postmaster' in cced_email:  # todo make a global var for this
+        if 'donotreply' in cced_email_lower or 'no-reply' in cced_email_lower or 'noreply' in cced_email_lower or 'postmaster' in cced_email_lower:  # todo make a global var for this
             continue
-        if ticket.queue.organization.sender and cced_email == ticket.queue.organization.sender.email_address:
+        if ticket.queue.organization.sender and cced_email_lower == ticket.queue.organization.sender.email_address.lower():  # todo also check importer?
+            continue
+        if cced_email == (ticket.submitter_email or '') or cced_email == (ticket.contact_email or ''):
+            continue
+        if cced_email == 'benchmarking@bpu.nj.gov':  # NJ
             continue
 
         user = None
@@ -564,7 +579,7 @@ def create_ticket_cc(ticket, cc_list):
     return new_ticket_ccs
 
 
-def create_object_from_email_message(message, ticket_id, payload, files, logger):
+def create_object_from_email_message(message, ticket_id, payload, files, logger, nj=None):
 
     ticket, previous_followup, new = None, None, False
     now = timezone.now()
@@ -573,6 +588,11 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
     sender_name = payload['sender'][0]
     sender_email = payload['sender'][1]
     org = queue.organization
+    date = payload.get('date', now)
+    ubids = re.findall(UBID_PATTERN, payload['subject'] + ' ' + payload['body'])
+    if ubids:
+        ubids = set(['-'.join(s) for s in ubids])
+        ubids = ', '.join(ubids)
 
     message_id = getattr(message, 'message_id', None) or parseaddr(getattr(message, 'Message-Id', None))[1]
     in_reply_to = getattr(message, 'in_reply_to', None) or parseaddr(getattr(message, 'In-Reply-To', None))[1]
@@ -621,6 +641,27 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
                 ticket_form=ticket_form,
                 assigned_to=queue.default_owner if queue.default_owner else None,
             )
+            ticket.created = date
+
+            if nj:
+                # hard-coded for initial NJ imports
+                if nj in ['Demolished', 'Exemption Evidence', 'Financial Distress', 'Size Error', 'Sold', 'Unoccupied', 'Other']:
+                    ticket.extra_data['inquiry_type'] = 'Exemption In Progress'
+                    ticket.extra_data['exemption_type'] = nj
+                else:
+                    ticket.extra_data['inquiry_type'] = nj
+
+            if ubids:
+                # if ubids were found in the body, look for a field with UBID in the title
+                ubid_field = ticket_form.customfield_set.filter(label__icontains='UBID', data_type='varchar')
+                if ubid_field.count() == 1:
+                    logger.debug("Found UBIDs, adding them to the ticket.")
+                    ubid_field = ubid_field.first()
+                    if is_extra_data(ubid_field.field_name):
+                        ticket.extra_data[ubid_field.field_name] = ubids
+                    else:
+                        setattr(ticket, ubid_field.field_name, ubids)
+
             ticket.save()
             logger.debug("Created new ticket %s-%s" % (ticket.queue.slug, ticket.id))
             new = True
@@ -628,7 +669,7 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
     f = FollowUp.objects.create(
         ticket=ticket,
         title=_('E-Mail Received from %(sender_email)s' % {'sender_email': sender_email})[0:200],
-        date=now,
+        date=date,
         public=True,
         comment=payload.get('full_body', payload['body']) or "",
         message_id=message_id
@@ -674,8 +715,6 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
     context = safe_template_context(ticket)
     context['private'] = False
 
-    new_ticket_ccs = create_ticket_cc(ticket, [(sender_name, sender_email)] + payload['to_list'] + payload['cc_list'])
-
     headers = payload['headers'] if 'headers' in payload else None
     autoreply = is_autoreply(message, sender=sender_email, headers=headers)
     if autoreply:
@@ -691,6 +730,7 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
             "Precedence": "auto_reply",
         }
         if new:
+            new_ticket_ccs = create_ticket_cc(ticket, payload['to_list'] + payload['cc_list'])
             roles = {'submitter': ('newticket_submitter', context),
                      'queue_new': ('newticket_cc_user', context),
                      'queue_updated': ('newticket_cc_user', context),
@@ -702,6 +742,7 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
             ticket.send_ticket_mail(roles, organization=org, fail_silently=True, extra_headers=extra_headers, email_logger=logger,
                                     source="import (new ticket)")
         else:
+            new_ticket_ccs = create_ticket_cc(ticket, [(sender_name, sender_email)] + payload['to_list'] + payload['cc_list'])
             context.update(comment=f.comment)
 
             roles = {'submitter': ('updated_submitter', context),
@@ -723,38 +764,56 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
     return ticket
 
 
-def object_from_message(message, importer, queues, logger):
+def object_from_message(message, importer, queues, logger, nj=None):
     # 'message' must be an RFC822 formatted message.
     message = email.message_from_string(message)
+    sender, to_list, cc_list, date, subject, category = None, [], [], None, None, None
+
+    if importer.extract_eml_attachments:  # todo make a migration to check this off
+        # for processing forwarded mail
+        for part in message.walk():
+            if part.get_content_maintype() == 'message':
+                logger.info('Found .eml part. Extracting information now.')
+                for eml_part in part.walk():
+                    keys = eml_part.keys()
+                    if 'from' in keys or 'To' in keys or 'Cc' in keys:
+                        try:
+                            if not parseaddr(eml_part.get('from', None)) == ('', ''):
+                                sender = sender or parseaddr(eml_part.get('from', None))
+                            to_list = to_list or getaddresses(eml_part.get_all('To', []))
+                            cc_list = cc_list or getaddresses(eml_part.get_all('Cc', []))
+                            if eml_part.get('date', None):
+                                date = date or dateutil.parser.parse(eml_part.get('date'))
+                            if eml_part.get('subject', None):
+                                subject = subject or eml_part.get('subject')
+                        except Exception:
+                            pass
+                break
 
     # Replaces original helpdesk code "get_charset()", which wasn't an actual method ?
     charset = list(filter(lambda s: s is not None, message.get_charsets()))
     if charset:
         charset = charset[0]
 
-    subject = message.get('subject', _('Comment from e-mail'))
+    if not subject:
+        subject = message.get('subject', _('Comment from e-mail'))
     subject = decode_mail_headers(decode_unknown(charset, subject))
     for affix in STRIPPED_SUBJECT_STRINGS:
         subject = subject.replace(affix, "")
     subject = subject.strip()
 
-    sender = parseaddr(message.get('from', _('Unknown Sender')))
+    if not sender:
+        sender = parseaddr(message.get('from', None))
     if sender[1] == '':
         # Delete emails if the sender email cannot be parsed correctly. This ensures that
         # mailing list emails do not become tickets as well as malformatted emails
         return True
+    sender_lower = sender[1].lower()
 
-    to_list = getaddresses(message.get_all('To', []))
-    cc_list = getaddresses(message.get_all('Cc', []))
-
-    # Ignore List applies to sender, TO emails, and CC list
-    for ignored_address in IgnoreEmail.objects.filter(Q(importers=importer) | Q(importers__isnull=True)):
-        for name, address in [sender] + to_list + cc_list:
-            if ignored_address.test(address):
-                logger.debug("Email address matched an ignored address. Ticket will not be created")
-                if ignored_address.keep_in_mailbox:
-                    return False  # By returning 'False' the message will be kept in the mailbox,
-                return True  # and the 'True' will cause the message to be deleted.
+    if not to_list:
+        to_list = getaddresses(message.get_all('To', []))
+    if not cc_list:
+        cc_list = getaddresses(message.get_all('Cc', []))
 
     # Sort out which queue this email should go into #
     ticket, queue = None, None
@@ -774,7 +833,6 @@ def object_from_message(message, importer, queues, logger):
                         queue = q
                         logger.info("- Subject matched list from '%s'" % q.slug)
     if not queue:
-        sender_lower = sender[1].lower()
         for q in queues['address_matching_queues']:
             if reduce(lambda prev, e: prev or (e.lower() in sender_lower), q.match_on_addresses, False):
                 queue = q
@@ -783,13 +841,20 @@ def object_from_message(message, importer, queues, logger):
         logger.info("- Using default queue.")
         queue = queues['default_queue']
 
+    # Ignore List applies to sender, TO emails, and CC list
+    for ignored_address in IgnoreEmail.objects.filter(Q(queues=queue) | Q(organization=queue.organization, queues__isnull=True), ignore_import=True):
+        if ignored_address.test(sender[1]):
+            logger.debug("Email address matched an ignored address. Ticket will not be created")
+            if ignored_address.keep_in_mailbox:
+                return False  # By returning 'False' the message will be kept in the mailbox,
+            return True  # and the 'True' will cause the message to be deleted.
+
     # Accounting for forwarding loops
     auto_forward = message.get('X-BEAMHelpdesk-Delivered', None)
-
-    if auto_forward is not None or sender[1].lower() == queue.email_address.lower():
+    if auto_forward is not None or (queue.email_address and sender_lower == queue.email_address.lower()):
         logger.info("Found a forwarding loop.")
         if ticket and Ticket.objects.filter(pk=ticket).exists():
-            if sender[1].lower() == queue.email_address.lower() and auto_forward is None:
+            if sender_lower == queue.email_address.lower() and auto_forward is None:
                 auto_forward = [i[1] for i in to_list]
             else:
                 auto_forward = auto_forward.strip().split(',')
@@ -938,38 +1003,35 @@ def object_from_message(message, importer, queues, logger):
         'cc_list': cc_list,
         'to_list': to_list,
     }
-    return create_object_from_email_message(message, ticket, payload, files, logger=logger)
+    if date:
+        payload['date'] = date
+    return create_object_from_email_message(message, ticket, payload, files, logger=logger, nj=nj)
 
 
 def object_from_exchange_message(message, importer, queues, logger):
 
     subject = message.subject
-    for affix in STRIPPED_SUBJECT_STRINGS:
-        subject = subject.replace(affix, "")
-    subject = subject.strip()
+    if subject:
+        for affix in STRIPPED_SUBJECT_STRINGS:
+            subject = subject.replace(affix, "")
+        subject = subject.strip()
+    else:
+        subject = ''
 
     if getattr(message, 'author', None):
-        sender = (message.author.name, message.author.email_address.lower())
+        sender = (message.author.name, message.author.email_address)
     elif getattr(message, 'sender', None):
-        sender = (message.sender.name, message.sender.email_address.lower())
+        sender = (message.sender.name, message.sender.email_address)
     else:
         sender = ('', '')
+    sender_lower = sender[1].lower()
 
     to_list = []
     cc_list = []
     if getattr(message, 'to_recipients', None):
-        to_list = [(r.name, r.email_address.lower()) for r in message.to_recipients]
+        to_list = [(r.name, r.email_address) for r in message.to_recipients]
     if getattr(message, 'cc_recipients', None):
-        cc_list = [(r.name, r.email_address.lower()) for r in message.cc_recipients]
-
-    # Ignore List applies to sender, TO emails, and CC list
-    for ignored_address in IgnoreEmail.objects.filter(Q(importers=importer) | Q(importers__isnull=True)):
-        for name, address in [sender] + to_list + cc_list:
-            if ignored_address.test(address):
-                logger.debug("Email address matched an ignored address. Ticket will not be created")
-                if ignored_address.keep_in_mailbox:
-                    return False  # By returning 'False' the message will be kept in the mailbox,
-                return True  # and the 'True' will cause the message to be deleted.
+        cc_list = [(r.name, r.email_address) for r in message.cc_recipients]
 
     # Sort out which queue this email should go into #
     ticket, queue = None, None
@@ -989,7 +1051,6 @@ def object_from_exchange_message(message, importer, queues, logger):
                         queue = q
                         logger.info("- Subject matched list from '%s'" % q.slug)
     if not queue:
-        sender_lower = sender[1].lower()
         for q in queues['address_matching_queues']:
             if reduce(lambda prev, e: prev or (e.lower() in sender_lower), q.match_on_addresses, False):
                 queue = q
@@ -998,14 +1059,22 @@ def object_from_exchange_message(message, importer, queues, logger):
         logger.info("- Using default queue.")
         queue = queues['default_queue']
 
+    # Ignore List applies to sender, TO emails, and CC list
+    for ignored_address in IgnoreEmail.objects.filter(Q(queues=queue) | Q(organization=queue.organization, queues__isnull=True), ignore_import=True):
+        if ignored_address.test(sender[1]):
+            logger.debug("Email address matched an ignored address. Ticket will not be created")
+            if ignored_address.keep_in_mailbox:
+                return False  # By returning 'False' the message will be kept in the mailbox,
+            return True  # and the 'True' will cause the message to be deleted.
+
     # Accounting for forwarding loops
     headers = {h.name.lower(): h.value for h in getattr(message, 'headers', {})}
     auto_forward = headers.get('x-beamhelpdesk-delivered', None)
 
-    if auto_forward is not None or (queue.email_address and sender[1] == queue.email_address.lower()):
+    if auto_forward is not None or (queue.email_address and sender_lower == queue.email_address.lower()):
         logger.info("Found a forwarding loop.")
         if ticket and Ticket.objects.filter(pk=ticket).exists():
-            if sender[1] == queue.email_address.lower() and auto_forward is None:
+            if sender_lower == queue.email_address.lower() and auto_forward is None:
                 auto_forward = [i[1] for i in to_list]
             else:
                 auto_forward = auto_forward.strip().split(',')

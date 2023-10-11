@@ -1,11 +1,12 @@
 {% load i18n helpdesk_staff %}
 {% block header %}
+
 <div class="row" style="display:inline">
     <div class="d-flex">
         <h2>{% blocktrans with item.question as itemq %}{{ itemq }}{% endblocktrans %}</h2>
         <div class="flex-fill d-flex justify-content-end">
             {% if  user.is_authenticated and user|is_helpdesk_staff %}
-            <a class="btn btn-primary align-self-center mr-2" href="{% url 'helpdesk:edit_kb_article' category.slug item.id %}{{ user_info.url }}">
+            <a class="btn btn-warning align-self-center mr-2" href="{% url 'helpdesk:edit_kb_article' category.slug item.id %}{{ user_info.url }}">
                 <i class="fa fa-pen mr-1"></i>Edit Article
             </a>
             <a class="btn btn-danger align-self-center" data-toggle="modal" data-target="#deleteModal">
@@ -31,7 +32,7 @@
     <div class="row" style="margin-top:20px">
         {% if kb_forms %}
         <a class="dropdown-toggle btn btn-success btn-circle btn-xl" href="#" id="ticketsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <i class="fas fa-fw fa-plus-circle"></i> {% trans 'Ask for more help with ' %} "{{ item.question }}" by submitting a ticket
+            <i class="fas fa-fw fa-plus-circle"></i> {% trans category.form_submission_text %}
         </a>
         <div class="dropdown-menu" aria-labelledby="ticketsDropdown">
             {% for f in kb_forms %}

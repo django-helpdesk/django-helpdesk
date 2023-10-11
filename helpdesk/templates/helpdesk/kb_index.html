@@ -19,11 +19,11 @@
                 <h2>{% trans "Knowledgebase" %}</h2>
                 <div class="flex-fill d-flex justify-content-end">
                     {% if  user.is_authenticated and user|is_helpdesk_staff %}
-                    <a class="btn btn-primary align-self-center mr-2" href="{% url 'helpdesk:create_kb_article' %}{{ user_info.url }}">
-                        <i class="fa fa-plus mr-1"></i>Create Article
-                    </a>
-                    <a class="btn btn-primary align-self-center" href="{% url 'helpdesk:create_kb_category' %}{{ user_info.url }}">
+                    <a class="btn btn-success align-self-center mr-2" href="{% url 'helpdesk:create_kb_category' %}{{ user_info.url }}">
                         <i class="fa fa-plus mr-1"></i>Create Category
+                    </a>
+                    <a class="btn btn-primary align-self-center" href="{% url 'helpdesk:create_kb_article' %}{{ user_info.url }}">
+                        <i class="fa fa-plus mr-1"></i>Create Article
                     </a>
                     {% endif %}
                 </div>
