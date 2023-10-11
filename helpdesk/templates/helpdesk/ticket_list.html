@@ -167,7 +167,7 @@
                         <!-- / Action Toolbar -->
                         <!-- Data Table -->
                         <div class="table-responsive"> <!-- style="max-height: 81.5vh;">-->
-                            <table class="table table-bordered table-sm table-striped" id="dataTable" width="100%" cellspacing="0">
+                            <table class="table table-bordered table-sm table-striped m-0" id="dataTable" width="100%" cellspacing="0">
                                 <thead class="thead-light">
                                     <tr id="headers"> <!-- Headers -->
                                         <th class="sticky-top" data-colname="ticket" colspan="2">{% trans "Ticket" %}</th>
@@ -249,10 +249,10 @@
                                         <div class="btn-group dropup">
                                             <button class="btn btn-outline-secondary rounded-0 font-weight-semibold dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">{{ tickets_per_page }}</button>
                                             <div class="dropdown-menu p-1 text-right" style="min-width: 0">
-                                                <button class="dropdown-item px-3 rounded-lg {% if tickets_per_page == 10 %}active{% endif %}" onclick="updateTicketsPerPage(10)">10</a>
-                                                <button class="dropdown-item px-3 rounded-lg {% if tickets_per_page == 25 %}active{% endif %}" onclick="updateTicketsPerPage(25)">25</a>
-                                                <button class="dropdown-item px-3 rounded-lg {% if tickets_per_page == 50 %}active{% endif %}" onclick="updateTicketsPerPage(50)">50</a>
-                                                <button class="dropdown-item px-3 rounded-lg {% if tickets_per_page == 100 %}active{% endif %}" onclick="updateTicketsPerPage(100)">100</a>
+                                                <button class="dropdown-item px-3 rounded-lg {% if tickets_per_page == 10 %}active{% endif %}" onclick="updateTicketsPerPage(10)">10</button>
+                                                <button class="dropdown-item px-3 rounded-lg {% if tickets_per_page == 25 %}active{% endif %}" onclick="updateTicketsPerPage(25)">25</button>
+                                                <button class="dropdown-item px-3 rounded-lg {% if tickets_per_page == 50 %}active{% endif %}" onclick="updateTicketsPerPage(50)">50</button>
+                                                <button class="dropdown-item px-3 rounded-lg {% if tickets_per_page == 100 %}active{% endif %}" onclick="updateTicketsPerPage(100)">100</button>
                                             </div>
                                         </div>
                                         <div class="input-group-append border-left border-secondary">
@@ -264,31 +264,31 @@
                                     <div class="btn-toolbar float-right mt-2" role="toolbar" style="bottom: 0;">
                                         <div class="btn-group mr-2" role="group">
                                             {% if ticket_list.has_previous %}
-                                            <button class="btn btn-primary font-weight-bold" onclick="paginatedQuery()">First</a>
-                                            <button class="btn btn-primary font-weight-bold" onclick="paginatedQuery({{ ticket_list.previous_page_number }})">Previous</a>
+                                            <button class="btn btn-primary font-weight-bold" onclick="paginatedQuery()">First</button>
+                                            <button class="btn btn-primary font-weight-bold" onclick="paginatedQuery({{ ticket_list.previous_page_number }})">Previous</button>
                                             {% else %}
-                                            <button class="btn btn-primary font-weight-bold disabled">First</a>
-                                            <button class="btn btn-primary font-weight-bold disabled">Previous</a>
+                                            <button class="btn btn-primary font-weight-bold disabled">First</button>
+                                            <button class="btn btn-primary font-weight-bold disabled">Previous</button>
                                             {% endif %}
                                         </div>
                                         <div class="btn-group mr-2" role="group">
                                             {% with 3 as thresh %}
                                             {% for i in ticket_list.paginator.page_range %}
                                             {% if ticket_list.number == i %}
-                                            <button class="btn btn-outline-primary active font-weight-bold">{{ i }}</a>
+                                            <button class="btn btn-outline-primary active font-weight-bold">{{ i }}</button>
                                             {% elif i <= ticket_list.number|add:5 and i >= ticket_list.number|add:-5 %}
-                                            <button class="btn btn-outline-primary font-weight-bold" onclick="paginatedQuery({{ i }})">{{ i }}</a>
+                                            <button class="btn btn-outline-primary font-weight-bold" onclick="paginatedQuery({{ i }})">{{ i }}</button>
                                             {% endif %}
                                             {% endfor %}
                                             {% endwith %}
                                         </div>
                                         <div class="btn-group" role="group">
                                             {% if ticket_list.has_next %}
-                                            <button class="btn btn-primary font-weight-bold" onclick="paginatedQuery({{ ticket_list.next_page_number }})">Next</a>
-                                            <button class="btn btn-primary font-weight-bold" onclick="paginatedQuery({{ ticket_list.paginator.num_pages }})">Last</a>
+                                            <button class="btn btn-primary font-weight-bold" onclick="paginatedQuery({{ ticket_list.next_page_number }})">Next</button>
+                                            <button class="btn btn-primary font-weight-bold" onclick="paginatedQuery({{ ticket_list.paginator.num_pages }})">Last</button>
                                             {% else %}
-                                            <button class="btn btn-primary font-weight-bold disabled">Next</a>
-                                            <button class="btn btn-primary font-weight-bold disabled">Last</a>
+                                            <button class="btn btn-primary font-weight-bold disabled">Next</button>
+                                            <button class="btn btn-primary font-weight-bold disabled">Last</button>
                                             {% endif %}
                                         </div>
                                     </div>
