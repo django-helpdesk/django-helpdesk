@@ -248,6 +248,10 @@ body.fixed-nav.sidebar-toggled #content-wrapper {
   overflow-y: auto;
 }
 
+.dropdown-toggle {
+    white-space: normal;
+}
+
 .card-body-icon {
   position: absolute;
   z-index: 0;
