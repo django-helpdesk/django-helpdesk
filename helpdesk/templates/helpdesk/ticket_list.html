@@ -349,9 +349,7 @@
                 <form method="post" id="query_form">
                     {% csrf_token %}
                     <div class="border-bottom p-3">
-                        <div class="input-group">
-                            {% include 'helpdesk/filters/sorting.html' %}
-                        </div>
+                        {% include 'helpdesk/filters/sorting.html' %}
                     </div>
 
                     <div class="card-body overflow-auto p-1"> <!-- style="max-height: 67.75vh;">-->
@@ -632,6 +630,15 @@
         checkCheckboxes();
     });
 
+    // changes icon of sorting button
+    $("#id_sortreverse").click(function(e) {
+        let desc = false;
+        if ($(this).prop('checked')) {
+            desc = true;
+        }
+        $("#sort_asc").toggle(!desc);
+        $("#sort_desc").toggle(desc);
+    });
 </script>
 
 <!--TODO Move this to a separate file, keep django specific code here or use API calls somehow-->
