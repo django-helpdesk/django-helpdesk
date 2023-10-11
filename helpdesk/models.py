@@ -791,11 +791,10 @@ class Ticket(models.Model):
         False = There are non-resolved dependencies
         """
         OPEN_STATUSES = (Ticket.OPEN_STATUS, Ticket.REOPENED_STATUS, Ticket.REPLIED_STATUS, Ticket.NEW_STATUS)
-        return TicketDependency.objects.filter(ticket=self).filter(
-            depends_on__status__in=OPEN_STATUSES).count() == 0
+        return TicketDependency.objects.filter(ticket=self).filter(depends_on__status__in=OPEN_STATUSES).exists()
     can_be_resolved = property(_can_be_resolved)
 
-    def get_last_followup(self, level='staff'):
+    def get_last_followup(self, level=None):
         """
         Return the datetime of the last followup, or last staff - public followup based on level parameter
         """
@@ -804,7 +803,7 @@ class Ticket(models.Model):
         elif level == 'public':
             followups = [f for f in self.followup_set.order_by('-date') if not is_helpdesk_staff(f.user)]
         else:
-            followups = [f for f in self.followup_set.order_by('-date')]
+            return self.followup_set.last()
 
         if followups:
             return followups[0].date

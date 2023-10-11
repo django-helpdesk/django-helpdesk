@@ -73,7 +73,7 @@ class DatatablesTicketSerializer(serializers.ModelSerializer):
 
     @staticmethod
     def get_last_reply(obj):
-        date = obj.get_last_followup('')
+        date = obj.get_last_followup()
         if date:
             last_reply = humanize.naturaltime(date)
             return last_reply.replace(u'\xa0', ' ')

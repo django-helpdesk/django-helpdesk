@@ -218,13 +218,13 @@
                                         <td class="d-none">{{ ticket.queue }}</td>
                                         <td class="d-none">{{ ticket.ticket_form.name }}</td>
                                         <td class="text-center">
-                                            <span class="badge badge-{{ ticket.get_status_css_class }}">{{ ticket.get_status }}</span>
+                                            <span class="badge badge-{{ ticket.get_status_css_class }}">{{ ticket.get_status_display }}</span>
                                         </td>
                                         <td>{% if ticket.get_assigned_to != "Unassigned" %}{{ ticket.get_assigned_to }}{% endif %}</td> {# Remove if statement for "Unassigned" instead of blank #}
                                         <td>{{ ticket.submitter_email }}</td>
                                         <td class="d-none">{{ ticket.beam_property.count|add:ticket.beam_taxlot.count }}</td>
                                         <td><span title='{{ ticket.created|naturaltime }}'>{{ ticket.created|date:"DATETIME_FORMAT" }}</span></td>
-                                        <td><span title='{{ ticket.get_last_followup|naturaltime }}'>{{ ticket.get_last_followup|date:"DATETIME_FORMAT" }}</span></td>
+                                        <td><span title='{{ ticket.latest_followup|naturaltime }}'>{{ ticket.latest_followup|date:"DATETIME_FORMAT" }}</span></td>
                                         <td class="d-none"><span title='{{ ticket.due_date|naturaltime }}'>{{ ticket.due_date|date:"DATETIME_FORMAT" }}</span></td>
                                         <td class="d-none">{{ ticket.time_spent_formatted }}</td>
                                         <td class="d-none">{{ ticket.kbitem.title}}</td>
