@@ -27,14 +27,14 @@
           <div class="dropdown-menu" aria-labelledby="queriesDropdown">
             {% if user_saved_queries_ %}
             {% for q in user_saved_queries_ %}
-            <a class="dropdown-item small text-wrap" href="{% url 'helpdesk:list' %}?saved_query={{ q.id }}">{{ q.title }}
+            <a class="dropdown-item text-wrap" href="{% url 'helpdesk:list' %}?saved_query={{ q.id }}">{{ q.title }}
                 {% if q.shared %}
                 (Shared{% ifnotequal user q.user %} by {{ q.user.get_username }}{% endifnotequal %})
                 {% endif %}
             </a>
             {% endfor %}
             {% else %}
-            <p class="dropdown-item small text-wrap">{% trans "No saved queries currently available. You can create one in the All Tickets page." %}</p>
+            <p class="dropdown-item text-wrap">{% trans "No saved queries currently available. You can create one in the All Tickets page." %}</p>
             {% endif %}
           </div>
         </li>
@@ -46,10 +46,10 @@
           <div class="dropdown-menu" aria-labelledby="ticketsDropdown">
             {% if forms %}
             {% for f in forms %}
-            <a class="dropdown-item small text-wrap" href="{% url 'helpdesk:submit' f.id %}{{ user_info.url }}">{{ f.name }}</a>
+            <a class="dropdown-item text-wrap" href="{% url 'helpdesk:submit' f.id %}{{ user_info.url }}">{{ f.name }}</a>
             {% endfor %}
             {% else %}
-            <p class="dropdown-item small text-wrap">{% trans "No forms are available." %}</p>
+            <p class="dropdown-item text-wrap">{% trans "No forms are available." %}</p>
             {% endif %}
           </div>
         </li>
@@ -74,17 +74,17 @@
               <span>{{ user.get_full_name|default:user.get_username }}</span>
           </a>
           <div class="dropdown-menu" aria-labelledby="userDropdown">
-            <a class="dropdown-item small text-wrap" href="{% url 'helpdesk:user_settings' %}"><i class="fas fa-fw fa-user-cog"></i> {% trans "User Settings" %}</a>
-            <a class="dropdown-item small text-wrap" href="{% url 'helpdesk:rss_index' %}"><i class="fas fa-fw fa-rss-square"></i> {% trans "RSS Feeds" %}</a>
+            <a class="dropdown-item text-wrap" href="{% url 'helpdesk:user_settings' %}"><i class="fas fa-fw fa-user-cog"></i> {% trans "User Settings" %}</a>
+            <a class="dropdown-item text-wrap" href="{% url 'helpdesk:rss_index' %}"><i class="fas fa-fw fa-rss-square"></i> {% trans "RSS Feeds" %}</a>
             {% if helpdesk_settings.HELPDESK_SHOW_CHANGE_PASSWORD and user.has_usable_password %}
-            <a class="dropdown-item small text-wrap" href="{% url 'helpdesk:password_change' %}"><i class="fas fa-fw fa-user-secret"></i> {% trans "Change password" %}</a>
+            <a class="dropdown-item text-wrap" href="{% url 'helpdesk:password_change' %}"><i class="fas fa-fw fa-user-secret"></i> {% trans "Change password" %}</a>
             {% endif %}
             <div class="dropdown-divider"></div>
             {% if user|is_helpdesk_staff %}
-            <a class="dropdown-item small text-wrap" href="{% url 'helpdesk:system_settings' %}"><i class="fas fa-fw fa-cogs"></i> {% trans "System Settings" %}</a>
+            <a class="dropdown-item text-wrap" href="{% url 'helpdesk:system_settings' %}"><i class="fas fa-fw fa-cogs"></i> {% trans "System Settings" %}</a>
             <div class="dropdown-divider"></div>
             {% endif %}
-            <a class="dropdown-item small text-wrap" href="{% url 'helpdesk:logout' %}?next=/helpdesk/{{ user_info.url }}"><i class="fas fa-fw fa-sign-out-alt"></i> {% trans "Logout" %}</a>
+            <a class="dropdown-item text-wrap" href="{% url 'helpdesk:logout' %}?next=/helpdesk/{{ user_info.url }}"><i class="fas fa-fw fa-sign-out-alt"></i> {% trans "Logout" %}</a>
           </div>
         </li>
         <li class="nav-item">
@@ -110,11 +110,11 @@
             {% if forms %}
             {% for f in forms %}
             {% if f.organization__name == user_info.default_org.name %}
-            <a class="dropdown-item small text-wrap" href="{% url 'helpdesk:submit' f.id %}{{ user_info.url }}">{{ f.name }}</a>
+            <a class="dropdown-item text-wrap" href="{% url 'helpdesk:submit' f.id %}{{ user_info.url }}">{{ f.name }}</a>
             {% endif %}
             {% endfor %}
             {% else %}
-            <p class="dropdown-item small text-wrap">{% trans "No forms are available." %}</p>
+            <p class="dropdown-item text-wrap">{% trans "No forms are available." %}</p>
             {% endif %}
           </div>
         </li>

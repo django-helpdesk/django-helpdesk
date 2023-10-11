@@ -170,22 +170,22 @@
                             <table class="table table-bordered table-sm table-striped m-0" id="dataTable" width="100%" cellspacing="0">
                                 <thead class="thead-light">
                                     <tr id="headers"> <!-- Headers -->
-                                        <th class="sticky-top" data-colname="ticket" colspan="2">{% trans "Ticket" %}</th>
-                                        <th class="sticky-top d-none" data-colname="priority">{% trans "Priority" %}</th>
-                                        <th class="sticky-top d-none" data-colname="queue">{% trans "Queue" %}</th>
-                                        <th class="sticky-top d-none" data-colname="form">{% trans "Form" %}</th>
-                                        <th class="sticky-top" data-colname="status">{% trans "Status" %}</th>
-                                        <th class="sticky-top" data-colname="assigned_to">{% trans "Owner" %}</th>
-                                        <th class="sticky-top" data-colname="submitter">{% trans "Submitter" %}</th>
-                                        <th class="sticky-top d-none" data-colname="paired_count">{% trans "Paired Count" %}</th>
-                                        <th class="sticky-top" data-colname="created">{% trans "Created" %}</th>
-                                        <th class="sticky-top" data-colname="last_reply">{% trans "Last Reply" %}</th>
-                                        <th class="sticky-top d-none" data-colname="due_date">{% trans "Due Date" %}</th>
-                                        <th class="sticky-top d-none" data-colname="time_spent">{% trans "Time Spent" %}</th>
-                                        <th class="sticky-top d-none" data-colname="kbitem">{% trans "KB item" %}</th>
+                                        <th class="filter-top" data-colname="ticket" colspan="2">{% trans "Ticket" %}</th>
+                                        <th class="filter-top d-none" data-colname="priority">{% trans "Priority" %}</th>
+                                        <th class="filter-top d-none" data-colname="queue">{% trans "Queue" %}</th>
+                                        <th class="filter-top d-none" data-colname="form">{% trans "Form" %}</th>
+                                        <th class="filter-top" data-colname="status">{% trans "Status" %}</th>
+                                        <th class="filter-top" data-colname="assigned_to">{% trans "Owner" %}</th>
+                                        <th class="filter-top" data-colname="submitter">{% trans "Submitter" %}</th>
+                                        <th class="filter-top d-none" data-colname="paired_count">{% trans "Paired Count" %}</th>
+                                        <th class="filter-top" data-colname="created">{% trans "Created" %}</th>
+                                        <th class="filter-top" data-colname="last_reply">{% trans "Last Reply" %}</th>
+                                        <th class="filter-top d-none" data-colname="due_date">{% trans "Due Date" %}</th>
+                                        <th class="filter-top d-none" data-colname="time_spent">{% trans "Time Spent" %}</th>
+                                        <th class="filter-top d-none" data-colname="kbitem">{% trans "KB item" %}</th>
                                         {% if query_params.filtering.queue__id__in|length == 1 %}
                                         {% for col_name, display_name in extra_data_columns.items %}
-                                        <th class="sticky-top" data-colname="{{ col_name }}">{{ display_name }}</th>
+                                        <th class="filter-top" data-colname="{{ col_name }}">{{ display_name }}</th>
                                         {% endfor %}
                                         {% endif %}
                                     </tr>
@@ -432,7 +432,7 @@
     }
     
     {# Prevents rows scrolling above frozen header #}
-    #dataTable th.sticky-top { 
+    #dataTable th.filter-top {
         top: -1px; 
     }
 </style>
