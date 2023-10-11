@@ -33,7 +33,7 @@
 
 {% block helpdesk_body %}
 <div class="row">
-    <div class="col-12 order-1 pl-3">
+    <div class="col-sm-8 col-md-9 col-lg-10 order-1 pl-3">
         <div id="query_card" class="card mb-2">
             <div class="card-header pt-1">
                 <!-- Tabs -->
@@ -66,11 +66,10 @@
                         {% csrf_token %}
                         <!-- Action Toolbar -->
                         <div class="d-flex flex-wrap justify-content-between overflow-auto px-2 pb-2 border-bottom mw-100" style="max-width: 100%; //background-color: #f7f7f7">
-                            <div class="btn-group-toggle" data-toggle="buttons">
-                                <a class="btn btn-outline-secondary mt-2 mr-2" onclick="toggleQuerySelector()">
-                                    <input id="show_query" type="checkbox"><i class="fas fa-chevron-left"></i> Filter
-                                </a>
-                            </div>
+                            <a id="show_query" class="btn btn-outline-primary mt-2 mr-2" onclick="toggleQuerySelector()">
+                                <span id="show_query_text"><i class="fas fa-eye"></i> Show Filter Menu</span>
+                                <span id="hide_query_text"><i class="fas fa-eye-slash"></i> Hide Filter Menu</span>
+                            </a>
                             <div class="mr-auto d-flex align-items-center mt-2">
                                 <div class="input-group">
                                     <div class="input-group-prepend">
@@ -408,8 +407,8 @@
 
                 <div class="border-bottom border-top bg-light p-2">
                     <div class="d-flex justify-content-between">
-                        <button class="btn btn-primary w-40 m-1" type='button' onclick='paginatedQuery()'>{% trans "Apply Filters" %}</button>
-                        <button class="btn btn-danger w-40 m-1" type='button' onclick='clearForm()'>{% trans "Clear Filters" %}</button>
+                        <button class="btn btn-primary w-40 m-1" type='button' onclick='paginatedQuery(1, true)'>{% trans "Apply Filters" %}</button>
+                        <a class="btn btn-danger w-40 m-1" type='button' href="{% url 'helpdesk:list' %}">{% trans "Clear Filters" %}</a>
                     </div>
                 </div>
             </div>
@@ -463,15 +462,6 @@
             sessionStorage['visible_cols'] = get_visible_cols()
         }
 
-        // Restore query panel visibility based on user's session preferences
-        // If preference not set, default to show query
-        if (!('show_query' in sessionStorage) || sessionStorage['show_query'] == 'true') {
-            toggleQuerySelector();
-            $('#show_query').prop('checked', true)
-            $('#show_query').parent().addClass('active')
-            sessionStorage['show_query'] = true
-        }
-        
         // DISABLED
         // Scroll the query results to fill the viewport by default
         // Browser will take over scroll position on reload
@@ -518,29 +508,25 @@
         
         if (save) { sessionStorage['visible_cols'] = get_visible_cols() }
     }
-    
+
+    // if true, the query sidebar should be visible
+    let queryToggle = !(localStorage.getItem("helpdesk.show_query") === 'true');
+    toggleQuerySelector();
+
     // Toggle visibility for query selection card
     function toggleQuerySelector() {
-        checkbox = document.getElementById("show_query");
-        resultsCol = document.getElementById("query_card").parentElement;
-        queryCol = document.getElementById("query_select");
-        if (!checkbox.checked) {
-            queryCol.hidden = false;
-            queryCol.classList.add('show');
-            resultsCol.classList.remove('col-12');
-            resultsCol.classList.add('col-sm-8');
-            resultsCol.classList.add('col-md-9')
-            resultsCol.classList.add('col-lg-10');
-            sessionStorage['show_query'] = true;
-        } else {
-            queryCol.hidden = true;
-            queryCol.classList.remove('show');
-            resultsCol.classList.remove('col-sm-8');
-            resultsCol.classList.remove('col-md-9')
-            resultsCol.classList.remove('col-lg-10');
-            resultsCol.classList.add('col-12');
-            sessionStorage['show_query'] = false;
-        }
+        queryToggle = !queryToggle;
+
+        $('#show_query_text').toggle(!queryToggle);
+        $('#hide_query_text').toggle(queryToggle);
+        $("#query_select").toggle(queryToggle);
+        let resultsCol = $("#query_card").parent();
+        resultsCol.toggleClass('col-12', !queryToggle);
+        resultsCol.toggleClass('col-sm-8', queryToggle);
+        resultsCol.toggleClass('col-md-9', queryToggle);
+        resultsCol.toggleClass('col-lg-10', queryToggle);
+
+        localStorage.setItem("helpdesk.show_query", queryToggle);
     }
     
     // CURRENTLY UNUSED
@@ -578,12 +564,16 @@
         paginatedQuery()
     }
 
-    function paginatedQuery(page=1) {
+    function paginatedQuery(page=1, clearSavedQuery=false) {
         document.getElementById('ticket_page').value = page
         for (const colfilter of document.querySelectorAll('[data-colfilter]')) {
             document.getElementById(colfilter.dataset['colfilter'] + '_filter').value = colfilter.value
         }
-        document.forms['query_form'].submit()        
+        // submits the form without the parameter for the saved query, if there is one
+        if (clearSavedQuery) {
+            document.forms['query_form'].action = "{% url 'helpdesk:list' %}";
+        }
+        document.forms['query_form'].submit()
     }
 
     // Perform ticket mass update asynchronously, then 
@@ -641,17 +631,6 @@
     $(document).on("change", ".form-check-input", function() {
         checkCheckboxes();
     });
-
-    function clearForm() {
-        $("#query_form :input:checkbox").each(function () {
-            $(this).prop('checked', false);
-        });
-        $("#query_form input[type!=checkbox][type!=hidden]").each(function () {
-            $(this).val('');
-        });
-        checkCheckboxes();
-        checkInputs();
-    }
 
 </script>
 
