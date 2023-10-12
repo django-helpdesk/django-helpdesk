@@ -406,6 +406,7 @@ def create_form(request):
                     customfield.staff = cf['staff']
                     customfield.public = cf['public']
                     customfield.column = cf['column']
+                    customfield.lookup = cf['lookup']
                     if not customfield.created: customfield.created = datetime.now()
                     customfield.modified = datetime.now()
                     customfield.ticket_form = formtype
@@ -485,6 +486,7 @@ def edit_form(request, pk):
                     customfield.staff = cf['staff']
                     customfield.public = cf['public']
                     customfield.column = cf['column']
+                    customfield.lookup = cf['lookup']
                     if not customfield.created: customfield.created = datetime.now()
                     customfield.modified = datetime.now()
                     customfield.ticket_form = formtype
@@ -542,6 +544,7 @@ def duplicate_form(request, pk):
             staff = cf.staff,
             public = cf.public,
             column = cf.column,
+            lookup = cf.lookup,
             created = datetime.now(),
             modified = datetime.now(),
             ticket_form = new_form
@@ -584,6 +587,7 @@ def copy_field(request):
         customfield.staff = cf['staff']
         customfield.public = cf['public']
         customfield.column = cf['column']
+        customfield.lookup = cf['lookup']
         if not customfield.created: customfield.created = datetime.now()
         customfield.modified = datetime.now()
         customfield.ticket_form = target_form
