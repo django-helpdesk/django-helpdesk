@@ -1,5 +1,5 @@
 from django.core.cache import cache
-from django.db.models import Q, Count, Max, F, Value, CharField
+from django.db.models import Q, Count, Max, F, Value, CharField, Subquery, OuterRef
 from django.db.models.functions import Concat
 from django.urls import reverse
 from django.utils.html import escape
@@ -12,7 +12,7 @@ from functools import reduce
 import operator
 
 from helpdesk.decorators import is_helpdesk_staff
-from helpdesk.models import Ticket, CustomField, FormType
+from helpdesk.models import Ticket, CustomField, FormType, FollowUp
 from helpdesk.serializers import DatatablesTicketSerializer
 from seed.landing.models import SEEDUser as User
 
@@ -183,11 +183,15 @@ class __Query__:
             if sortreverse:
                 sorting = "-%s" % sorting
             if 'paired_count' in sorting:
-                queryset = queryset.annotate(paired_count=Count('beam_property') + Count('beam_taxlot')).order_by(
-                    sorting)
+                queryset = queryset.annotate(paired_count=Count('beam_property') + Count('beam_taxlot')).order_by(sorting)
             else:
                 queryset = queryset.order_by(sorting)
         # https://stackoverflow.com/questions/30487056/django-queryset-contains-duplicate-entries
+
+        # avoids running ticket.get_last_followup for each ticket by fetching them all at once
+        followup_subquery = FollowUp.objects.filter(ticket_id=OuterRef("id")).reverse().values('date')
+        queryset = queryset.annotate(latest_followup=Subquery(followup_subquery[:1]))
+
         return queryset.distinct()
 
     def get_cache_key(self):
