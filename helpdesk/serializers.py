@@ -45,7 +45,7 @@ class DatatablesTicketSerializer(serializers.ModelSerializer):
                   'title',
                   'priority',
                   'queue',
-                  'status',
+                  'get_status_display',
                   'created',
                   'last_reply',
                   'due_date',
@@ -106,7 +106,7 @@ class DatatablesTicketSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         from collections import OrderedDict
         data = super(DatatablesTicketSerializer, self).to_representation(instance)
-        new_names = {'get_status': 'status', 'submitter_email': 'submitter'}
+        new_names = {'get_status_display': 'status', 'submitter_email': 'submitter'}
         data = OrderedDict((new_names.get(k, k), v if v else '') for k, v in data.items())
         return data
 
