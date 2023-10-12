@@ -791,7 +791,7 @@ class Ticket(models.Model):
         False = There are non-resolved dependencies
         """
         OPEN_STATUSES = (Ticket.OPEN_STATUS, Ticket.REOPENED_STATUS, Ticket.REPLIED_STATUS, Ticket.NEW_STATUS)
-        return TicketDependency.objects.filter(ticket=self).filter(depends_on__status__in=OPEN_STATUSES).exists()
+        return not TicketDependency.objects.filter(ticket=self).filter(depends_on__status__in=OPEN_STATUSES).exists()
     can_be_resolved = property(_can_be_resolved)
 
     def get_last_followup(self, level=None):
