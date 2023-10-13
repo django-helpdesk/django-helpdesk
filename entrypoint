@@ -1,0 +1,14 @@
+#!/bin/bash
+
+set -o errexit
+set -o pipefail
+set -o nounset
+
+pip3 install -e . --user || pip3 install -e .
+pip3 install -e demo --user || pip3 install -e demo
+python3 demo/manage.py migrate --noinput
+DJANGO_SUPERUSER_PASSWORD=Test1234 python3 demo/manage.py createsuperuser --username admin --email helpdesk@example.com --noinput
+# Install fixtures
+python3 demo/manage.py loaddata emailtemplate.json
+python3 demo/manage.py loaddata demo.json
+python3 demo/manage.py runserver 0:8080
