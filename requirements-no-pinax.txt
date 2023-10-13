@@ -7,7 +7,6 @@ akismet
 markdown
 beautifulsoup4
 lxml
-simplejson
 pytz
 six
 djangorestframework
