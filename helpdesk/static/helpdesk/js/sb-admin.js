@@ -1,14 +1,9 @@
 (function($) {
   "use strict"; // Start of use strict
 
-   let toggled = localStorage.getItem("helpdesk.sidebar-toggled") === 'true';
-   localStorage.setItem("helpdesk.sidebar-toggled", toggled);
-   $("body").toggleClass("sidebar-toggled", toggled);
-   $(".sidebar").toggleClass("toggled", toggled);
-
   // Toggle the side navigation
   $("#sidebarToggle").click(function(e) {
-    toggled = !toggled;
+    let toggled = !(localStorage.getItem("helpdesk.sidebar-toggled") === 'true');
     e.preventDefault();
     $("body").toggleClass("sidebar-toggled", toggled);
     $(".sidebar").toggleClass("toggled", toggled);
