@@ -360,6 +360,9 @@
                             <li class=" list-group-item {% if query_params.filtering.queue__id__in %} filterBoxShow{% endif %} mb-2"  id="filterBoxQueue">
                                 {% include 'helpdesk/filters/queue.html' %}
                             </li>
+                            <li class=" list-group-item {% if query_params.filtering.ticket_form__id__in %} filterBoxShow{% endif %} mb-2"  id="filterBoxTicketForm">
+                                {% include 'helpdesk/filters/ticket_form.html' %}
+                            </li>
                             <li class=" list-group-item {% if query_params.filtering.status__in %} filterBoxShow{% endif %} mb-2" id="filterBoxStatus">
                                 {% include 'helpdesk/filters/status.html' %}
                             </li>

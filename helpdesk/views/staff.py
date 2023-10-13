@@ -1798,6 +1798,7 @@ def ticket_list(request):
 
     filter_in_params = dict([
         ('queue', 'queue__id__in'),
+        ('ticket_form', 'ticket_form__id__in'),
         ('assigned_to', 'assigned_to__id__in'),
         ('status', 'status__in'),
         ('priority', 'priority__in'),
@@ -1806,6 +1807,7 @@ def ticket_list(request):
     ])
     filter_null_params = dict([
         ('queue', 'queue__id__isnull'),
+        ('ticket_form', 'ticket_form__id__isnull'),
         ('assigned_to', 'assigned_to__id__isnull'),
         ('status', 'status__isnull'),
         ('kbitem', 'kbitem__isnull'),
@@ -1814,7 +1816,7 @@ def ticket_list(request):
 
     if saved_query:
         pass
-    elif not {'queue', 'assigned_to', 'status', 'priority', 'q', 'sort', 'sortreverse', 'kbitem', 'submitter'}.intersection(request.POST):
+    elif not {'queue', 'ticket_form', 'assigned_to', 'status', 'priority', 'q', 'sort', 'sortreverse', 'kbitem', 'submitter'}.intersection(request.POST):
         # Fall-back if no querying is being done
         query_params = deepcopy(default_query_params)
     else:
@@ -1884,7 +1886,7 @@ def ticket_list(request):
                 query_params['filtering'][filter_contains_params[col]] = item[1]
 
         # SORTING
-        sort = request.POST.get('sort', None)
+        sort = request.POST.get('sort', None)  # todo: add form here
         if sort not in ('status', 'assigned_to', 'created', 'title', 'queue', 'priority', 'kbitem', 'submitter',
                         'paired_count'):
             sort = 'created'
@@ -1911,8 +1913,8 @@ def ticket_list(request):
             'Django Documentation on string matching in SQLite</a>.')
 
     # Get KBItems that are part of the user's helpdesk_organization
-    kbitem_choices = [(item.pk, str(item)) for item in KBItem.objects.filter(
-        category__organization=org)]
+    kbitem_choices = [(item.pk, str(item)) for item in KBItem.objects.filter(category__organization=org)]
+    form_choices = FormType.objects.filter(organization=org)
 
     # After query is run, replaces null-filters with in-filters=[-1], so page can properly display that filter.
     for param, null_query in filter_null_params.items():
@@ -1937,8 +1939,7 @@ def ticket_list(request):
         tickets_per_page = 25
 
     ticket_list = qs
-    paginator = Paginator(
-        ticket_list, tickets_per_page)
+    paginator = Paginator(ticket_list, tickets_per_page)
     try:
         ticket_list = paginator.page(request.POST.get(_('ticket_page'), 1))
     except PageNotAnInteger:
@@ -1954,6 +1955,7 @@ def ticket_list(request):
         user_choices=user_choices,
         kb_items=KBItem.objects.all(),
         queue_choices=huser.get_queues(),
+        form_choices=form_choices,
         priority_choices=Ticket.PRIORITY_CHOICES,
         status_choices=Ticket.STATUS_CHOICES,
         kbitem_choices=kbitem_choices,
