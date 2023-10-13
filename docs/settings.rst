@@ -37,7 +37,6 @@ If you want to override the default settings for your users, create ``HELPDESK_D
             'tickets_per_page': 25
             }
 
-
 Generic Options
 ---------------
 These changes are visible throughout django-helpdesk
@@ -85,6 +84,10 @@ These changes are visible throughout django-helpdesk
 - **HELPDESK_MAX_EMAIL_ATTACHMENT_SIZE** Maximum size, in bytes, of file attachments that will be sent via email
 
   **Default:** ``HELPDESK_MAX_EMAIL_ATTACHMENT_SIZE = 512000``
+
+- **VALID_EXTENSIONS** Valid extensions for file types that can be attached to tickets
+
+  **Default:** ``VALID_EXTENSIONS = ['.txt', '.asc', '.htm', '.html', '.pdf', '.doc', '.docx', '.odt', '.jpg', '.png', '.eml']
 
 - **QUEUE_EMAIL_BOX_UPDATE_ONLY** Only process mail with a valid tracking ID; all other mail will be ignored instead of creating a new ticket.
 
