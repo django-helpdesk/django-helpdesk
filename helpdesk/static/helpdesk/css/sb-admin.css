@@ -252,6 +252,10 @@ body.fixed-nav.sidebar-toggled #content-wrapper {
     white-space: normal;
 }
 
+.navbar {
+  height: 86px;
+}
+
 .card-body-icon {
   position: absolute;
   z-index: 0;

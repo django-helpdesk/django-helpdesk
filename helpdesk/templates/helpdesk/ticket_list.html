@@ -507,13 +507,9 @@
         if (save) { sessionStorage['visible_cols'] = get_visible_cols() }
     }
 
-    // if true, the query sidebar should be visible
-    let queryToggle = !(localStorage.getItem("helpdesk.show_query") === 'true');
-    toggleQuerySelector();
-
     // Toggle visibility for query selection card
     function toggleQuerySelector() {
-        queryToggle = !queryToggle;
+        let queryToggle = !(localStorage.getItem("helpdesk.show_query") === 'true');
 
         $('#show_query_text').toggle(!queryToggle);
         $('#hide_query_text').toggle(queryToggle);
