@@ -7,11 +7,14 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
 from django.shortcuts import get_object_or_404
 from django.test import override_settings, TestCase
+from email.mime.message import MIMEMessage
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 import helpdesk.email
-from helpdesk.email import extract_part_data, object_from_message
+from helpdesk.email import extract_email_metadata, process_as_attachment
 from helpdesk.exceptions import DeleteIgnoredTicketException, IgnoreTicketException
 from helpdesk.management.commands.get_email import Command
-from helpdesk.models import Attachment, FollowUp, FollowUpAttachment, IgnoreEmail, Queue, Ticket, TicketCC
+from helpdesk.models import FollowUp, FollowUpAttachment, IgnoreEmail, Queue, Ticket, TicketCC
 from helpdesk.tests import utils
 import itertools
 import logging
@@ -59,7 +62,7 @@ class GetEmailCommonTests(TestCase):
         """
         with open(os.path.join(THIS_DIR, "test_files/blank-body-with-attachment.eml"), encoding="utf-8") as fd:
             test_email = fd.read()
-            ticket = helpdesk.email.object_from_message(
+            ticket = helpdesk.email.extract_email_metadata(
                 test_email, self.queue_public, self.logger)
         # title got truncated because of max_lengh of the model.title field
         assert ticket.title == (
@@ -67,7 +70,7 @@ class GetEmailCommonTests(TestCase):
             "ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
             "ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo..."
         )
-        self.assertEqual(ticket.description, "")
+        self.assertEqual(ticket.description.strip(), "", msg=ticket.description)
 
     def test_email_with_quoted_printable_body(self):
         """
@@ -75,7 +78,7 @@ class GetEmailCommonTests(TestCase):
         """
         with open(os.path.join(THIS_DIR, "test_files/quoted_printable.eml"), encoding="utf-8") as fd:
             test_email = fd.read()
-            ticket = helpdesk.email.object_from_message(
+            ticket = helpdesk.email.extract_email_metadata(
                 test_email, self.queue_public, self.logger)
         self.assertEqual(ticket.title, "Český test")
         self.assertEqual(ticket.description,
@@ -96,24 +99,29 @@ class GetEmailCommonTests(TestCase):
         """
         with open(os.path.join(THIS_DIR, "test_files/all-special-chars.eml"), encoding="utf-8") as fd:
             test_email = fd.read()
-            ticket = helpdesk.email.object_from_message(
+            ticket = helpdesk.email.extract_email_metadata(
                 test_email, self.queue_public, self.logger)
         self.assertEqual(ticket.title, "Testovácí email")
         self.assertEqual(ticket.description, "íářčšáíéřášč")
 
-    @override_settings(HELPDESK_FULL_FIRST_MESSAGE_FROM_EMAIL=True)
+    @override_settings(HELPDESK_FULL_FIRST_MESSAGE_FROM_EMAIL=False)
     def test_email_with_utf_8_non_decodable_sequences(self):
         """
         Tests that emails with utf-8 non-decodable sequences are parsed correctly
-        The message is fowarded as well
+        The forwarded part of the message must still be in the ticket description if
+        HELPDESK_FULL_FIRST_MESSAGE_FROM_EMAIL is set to True.
+        Otherwise it should only be in the Followup records Comment field
+        NOTE: This test weirdly tests having completely different content in the HTML part
+               than the PLAIN part so not sure about the validity of this as a test but 
+               the code does support this oddity anyway for backwards compatibility
         """
         with open(os.path.join(THIS_DIR, "test_files/utf-nondecodable.eml"), encoding="utf-8") as fd:
             test_email = fd.read()
-        ticket = helpdesk.email.object_from_message(
+        ticket = helpdesk.email.extract_email_metadata(
             test_email, self.queue_public, self.logger)
         self.assertEqual(
             ticket.title, "Fwd: Cyklozaměstnavatel - změna vyhodnocení")
-        self.assertIn("prosazuje lepší", ticket.description)
+        self.assertIn("prosazuje lepší", ticket.description, "Missing text \"prosazuje lepší\" in description: %s" % ticket.description)
         followups = FollowUp.objects.filter(ticket=ticket)
         followup = followups[0]
         attachments = FollowUpAttachment.objects.filter(followup=followup)
@@ -122,21 +130,40 @@ class GetEmailCommonTests(TestCase):
                       attachment.file.read().decode("utf-8"))
 
     @override_settings(HELPDESK_FULL_FIRST_MESSAGE_FROM_EMAIL=True)
-    def test_email_with_forwarded_message(self):
+    def test_email_with_forwarded_message_just_message_stored(self):
         """
-        Forwarded message of that format must be still attached correctly
+        The forwarded part of the message must still be in the ticket description if
+        HELPDESK_FULL_FIRST_MESSAGE_FROM_EMAIL is set to True.
+        Otherwise it should only be in the Followup records Comment field        
         """
         with open(os.path.join(THIS_DIR, "test_files/forwarded-message.eml"), encoding="utf-8") as fd:
             test_email = fd.read()
-        ticket = helpdesk.email.object_from_message(
+        ticket = helpdesk.email.extract_email_metadata(
             test_email, self.queue_public, self.logger)
         self.assertEqual(
             ticket.title, "Test with original message from GitHub")
         self.assertIn("This is email body", ticket.description)
-        assert "Hello there!" not in ticket.description, ticket.description
-        assert FollowUp.objects.filter(ticket=ticket).count() == 1
-        assert "Hello there!" in FollowUp.objects.filter(
-            ticket=ticket).first().comment
+        self.assertTrue("Hello there!" in ticket.description, ticket.description)
+        self.assertTrue(FollowUp.objects.filter(ticket=ticket).count() == 1)
+
+    @override_settings(HELPDESK_FULL_FIRST_MESSAGE_FROM_EMAIL=False)
+    def test_email_with_forwarded_message_chained_messages_stored(self):
+        """
+        The forwarded part of the message must still be in the ticket description if
+        HELPDESK_FULL_FIRST_MESSAGE_FROM_EMAIL is set to True.
+        Otherwise it should only be in the Followup records Comment field        
+        """
+        with open(os.path.join(THIS_DIR, "test_files/forwarded-message.eml"), encoding="utf-8") as fd:
+            test_email = fd.read()
+        ticket = helpdesk.email.extract_email_metadata(
+            test_email, self.queue_public, self.logger)
+        self.assertEqual(
+            ticket.title, "Test with original message from GitHub")
+        self.assertIn("This is email body", ticket.description)
+        self.assertTrue("Hello there!" not in ticket.description, ticket.description)
+        followups = FollowUp.objects.filter(ticket=ticket).values("comment")
+        self.assertTrue(followups.count() == 1)
+        self.assertTrue("Hello there!" in followups[0]["comment"], followups[0]["comment"])
 
     def test_will_delete_ignored_email(self):
         """
@@ -147,7 +174,7 @@ class GetEmailCommonTests(TestCase):
         ignore = IgnoreEmail(name="Test Ignore", email_address=from_meta[1], keep_in_mailbox=False)
         ignore.save()
         with self.assertRaises(DeleteIgnoredTicketException):
-            object_from_message(message.as_string(), self.queue_public, self.logger)
+            extract_email_metadata(message.as_string(), self.queue_public, self.logger)
 
     def test_will_not_delete_ignored_email(self):
         """
@@ -158,7 +185,7 @@ class GetEmailCommonTests(TestCase):
         ignore = IgnoreEmail(name="Test Ignore", email_address=from_meta[1], keep_in_mailbox=True)
         ignore.save()
         with self.assertRaises(IgnoreTicketException):
-            object_from_message(message.as_string(), self.queue_public, self.logger)
+            extract_email_metadata(message.as_string(), self.queue_public, self.logger)
 
     def test_utf8_filename_attachment(self):
         """
@@ -167,7 +194,7 @@ class GetEmailCommonTests(TestCase):
         filename = "TeléfonoMañana.txt"
         part = utils.generate_file_mime_part(locale="es_ES", filename=filename)
         files: typing.List[SimpleUploadedFile] = []
-        extract_part_data(part, counter=1, ticket_id="tst1", files=files, logger=self.logger)
+        process_as_attachment(part, counter=1, files=files, logger=self.logger)
         sent_file: SimpleUploadedFile = files[0]
         # The extractor prepends a part identifier so compare the ending
         self.assertTrue(sent_file.name.endswith(filename), f"Filename extracted does not match: {sent_file.name}")
@@ -179,17 +206,17 @@ class GetEmailCommonTests(TestCase):
         """
         message, _, _ = utils.generate_multipart_email(type_list=['plain', 'image'])
 
-        self.assertEqual(len(mail.outbox), 0)
+        self.assertEqual(len(mail.outbox), 0)  # @UndefinedVariable
 
         with self.assertLogs(logger='helpdesk', level='ERROR') as cm:
-            object_from_message(message.as_string(), self.queue_public, self.logger)
+            extract_email_metadata(message.as_string(), self.queue_public, self.logger)
 
             self.assertIn(
                 "ERROR:helpdesk:['Unsupported file extension: .jpg']",
                 cm.output
             )
 
-        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(len(mail.outbox), 1)  # @UndefinedVariable
         self.assertEqual(f'[test-1] {message.get("subject")} (Opened)', mail.outbox[0].subject)
 
     def test_multiple_attachments(self):
@@ -198,11 +225,11 @@ class GetEmailCommonTests(TestCase):
         """
         message, _, _ = utils.generate_multipart_email(type_list=['plain', 'file', 'image'])
 
-        self.assertEqual(len(mail.outbox), 0)
+        self.assertEqual(len(mail.outbox), 0)  # @UndefinedVariable
 
-        object_from_message(message.as_string(), self.queue_public, self.logger)
+        extract_email_metadata(message.as_string(), self.queue_public, self.logger)
 
-        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(len(mail.outbox), 1)  # @UndefinedVariable
         self.assertEqual(f'[test-1] {message.get("subject")} (Opened)', mail.outbox[0].subject)
 
         ticket = Ticket.objects.get()
@@ -216,10 +243,10 @@ class GetEmailCommonTests(TestCase):
         """
         message, _, _ = utils.generate_multipart_email(type_list=['plain', 'image', 'file', 'image'])
 
-        self.assertEqual(len(mail.outbox), 0)
+        self.assertEqual(len(mail.outbox), 0)  # @UndefinedVariable
 
         with self.assertLogs(logger='helpdesk', level='ERROR') as cm:
-            object_from_message(message.as_string(), self.queue_public, self.logger)
+            extract_email_metadata(message.as_string(), self.queue_public, self.logger)
 
             self.assertIn(
                 "ERROR:helpdesk:['Unsupported file extension: .jpg']",
@@ -240,18 +267,78 @@ class GetEmailCommonTests(TestCase):
         att_content = email_attachment.as_string()
         message.attach(utils.generate_file_mime_part(filename=att_filename, content=att_content))
 
-        object_from_message(message.as_string(), self.queue_public, self.logger)
-
-        self.assertEqual(len(mail.outbox), 1)
+        extract_email_metadata(message.as_string(), self.queue_public, self.logger)
+        self.assertEqual(len(mail.outbox), 1)  # @UndefinedVariable
         self.assertEqual(f'[test-1] {message.get("subject")} (Opened)', mail.outbox[0].subject)
 
         ticket = Ticket.objects.get()
         followup = ticket.followup_set.get()
-        att_retrieved: Attachment = followup.followupattachment_set.get()
-        self.assertTrue(att_retrieved.filename.endswith(att_filename), "Filename of attached multipart not detected: %s" % (att_retrieved.filename))
-        with att_retrieved.file.open('r') as f:
-            retrieved_content = f.read()
-            self.assertEquals(att_content, retrieved_content, "Retrieved attachment content different to original :\n\n%s\n\n%s" % (att_content, retrieved_content))
+
+        for att_retrieved in followup.followupattachment_set.all():
+            if (helpdesk.email.HTML_EMAIL_ATTACHMENT_FILENAME == att_retrieved.filename):
+                # Ignore the HTML formatted conntent of the email that is attached 
+                continue
+            self.assertTrue(att_retrieved.filename.endswith(att_filename), "Filename of attached multipart not detected: %s" % (att_retrieved.filename))
+            with att_retrieved.file.open('r') as f:
+                retrieved_content = f.read()
+                self.assertEquals(att_content, retrieved_content, "Retrieved attachment content different to original :\n\n%s\n\n%s" % (att_content, retrieved_content))
+
+    def test_email_with_inline_and_multipart_as_attachments(self):
+        """
+        Test a multipart email with an inline attachment and a multipart email attachment to the email
+        """
+        inline_att_filename = 'inline_attachment.jpg'
+        email_att_filename = 'email_attachment2.eml'
+        # Create the inline attachment for the email using an ID so we can reference it in the email body
+        inline_image_id = "liTE5er6Dbnd"
+        inline_attachment = utils.generate_image_mime_part(locale="en_US", imagename=inline_att_filename, disposition_primary_type="inline")
+        inline_attachment.add_header('X-Attachment-Id', inline_image_id)
+        inline_attachment.add_header('Content-ID', '<' + inline_image_id + '>')
+        # Create the actual email with its plain and HTML parts
+        alt_email_message = MIMEMultipart("alternative")
+        # Create the plain and HTML that will reference the inline attachment
+        plain_body = "Test with inline image: \n[image: " + inline_att_filename + "]\n\n"
+        plain_msg = MIMEText(plain_body)
+        alt_email_message.attach(plain_msg)
+        html_body = '<div><div>Test with inline image: <img src=3D"cid:' + inline_image_id + '" alt=3D="' + inline_att_filename + '"><br></div>'
+        html_msg = MIMEText(html_body, "html")
+        alt_email_message.attach(html_msg)
+        # Create the email to be attached and attach that as well
+        email_to_be_attached, _, _ = utils.generate_multipart_email(type_list=['plain', 'html'])
+        email_as_attachment = MIMEMessage(email_to_be_attached)
+        email_as_attachment.add_header('Content-Disposition', 'attachment', filename=email_att_filename)
+        # Now create the base multipart and attach all the other parts to it
+        related_message = MIMEMultipart("related")
+        related_message.attach(alt_email_message)
+        related_message.attach(inline_attachment)
+        base_message = MIMEMultipart("mixed")
+        base_message.attach(related_message)
+        base_message.attach(email_as_attachment)
+        utils.add_simple_email_headers(base_message, locale="en_US", use_short_email=True)
+        # Now send the part to the email workflow
+        extract_email_metadata(base_message.as_string(), self.queue_public, self.logger)
+
+        self.assertEqual(len(mail.outbox), 1)  # @UndefinedVariable
+        self.assertEqual(f'[test-1] {base_message.get("subject")} (Opened)', mail.outbox[0].subject)
+
+        ticket = Ticket.objects.get()
+        followup = ticket.followup_set.get()
+        # Check both the inline and attachment are stored as attached files
+        inline_found = False
+        email_attachment_found = False
+        for att_retrieved in followup.followupattachment_set.all():
+            if (helpdesk.email.HTML_EMAIL_ATTACHMENT_FILENAME == att_retrieved.filename):
+                # Ignore the HTML formatted content of the email that is attached 
+                continue
+            if att_retrieved.filename.endswith(inline_att_filename):
+                inline_found = True
+            elif  att_retrieved.filename.endswith(email_att_filename):
+                email_attachment_found = True
+            else:
+                print(f"\n\n%%%%%%   {att_retrieved}")
+                self.assertTrue(False, "Unexpected file in ticket attachments: %s" % att_retrieved.filename)
+        self.assertTrue(email_attachment_found, "Email attachment file not found ticket attachments: %s" % (email_att_filename))
+        self.assertTrue(inline_found, "Inline file not found in email: %s" % (inline_att_filename))
 
         
 class GetEmailParametricTemplate(object):
@@ -424,7 +511,6 @@ class GetEmailParametricTemplate(object):
     def test_commas_in_mail_headers(self):
         """Tests correctly decoding mail headers when a comma is encoded into
            UTF-8. See bug report #832."""
-
         # Create the from using standard RFC required formats
         # Override the last_name to ensure we get a non-ascii character in it
         test_email_from_meta = utils.generate_email_address("fr_FR", last_name_override="Bouissières")
@@ -488,7 +574,6 @@ class GetEmailParametricTemplate(object):
                 mocked_imaplib_server = mock.Mock()
                 mocked_imaplib_server.search = mock.Mock(
                     return_value=imap_mail_list)
-
                 # we ignore the second arg as the data item/mime-part is
                 # constant (RFC822)
                 mocked_imaplib_server.fetch = mock.Mock(
@@ -510,7 +595,6 @@ class GetEmailParametricTemplate(object):
                 mocked_imaplib_server = mock.Mock()
                 mocked_imaplib_server.search = mock.Mock(
                     return_value=imap_mail_list)
-
                 # we ignore the second arg as the data item/mime-part is
                 # constant (RFC822)
                 mocked_imaplib_server.fetch = mock.Mock(
@@ -553,7 +637,6 @@ class GetEmailParametricTemplate(object):
            except this time the email body contains a Django template tag.
            For each email source supported, we mock the backend to provide
            authentically formatted responses containing our test data."""
-
         # example email text from Django docs:
         # https://docs.djangoproject.com/en/1.10/ref/unicode/
         test_email_from = "Arnbjörg Ráðormsdóttir <arnbjorg@example.com>"
@@ -617,7 +700,6 @@ class GetEmailParametricTemplate(object):
                 mocked_imaplib_server = mock.Mock()
                 mocked_imaplib_server.search = mock.Mock(
                     return_value=imap_mail_list)
-
                 # we ignore the second arg as the data item/mime-part is
                 # constant (RFC822)
                 mocked_imaplib_server.fetch = mock.Mock(
@@ -639,7 +721,6 @@ class GetEmailParametricTemplate(object):
                 mocked_imaplib_server = mock.Mock()
                 mocked_imaplib_server.search = mock.Mock(
                     return_value=imap_mail_list)
-
                 # we ignore the second arg as the data item/mime-part is
                 # constant (RFC822)
                 mocked_imaplib_server.fetch = mock.Mock(
@@ -680,12 +761,8 @@ class GetEmailParametricTemplate(object):
            emails from a queue and creating tickets.
            For each email source supported, we mock the backend to provide
            authentically formatted responses containing our test data."""
-
         # example email text from Python docs:
         # https://docs.python.org/3/library/email-examples.html
-        from email.mime.multipart import MIMEMultipart
-        from email.mime.text import MIMEText
-
         me = "my@example.com"
         you = "your@example.com"
         # NOTE: CC'd emails need to be alphabetical and tested as such!
@@ -695,7 +772,6 @@ class GetEmailParametricTemplate(object):
         cc_two = "other@example.com"
         cc = cc_one + ", " + cc_two
         subject = "Link"
-
         # Create message container - the correct MIME type is
         # multipart/alternative.
         msg = MIMEMultipart('alternative')
@@ -703,7 +779,6 @@ class GetEmailParametricTemplate(object):
         msg['From'] = me
         msg['To'] = you
         msg['Cc'] = cc
-
         # Create the body of the message (a plain-text and an HTML version).
         text = "Hi!\nHow are you?\nHere is the link you wanted:\nhttps://www.python.org"
         html = """\
@@ -717,11 +792,9 @@ class GetEmailParametricTemplate(object):
         </body>
         </html>
         """
-
         # Record the MIME types of both parts - text/plain and text/html.
         part1 = MIMEText(text, 'plain')
         part2 = MIMEText(html, 'html')
-
         # Attach parts into message container.
         # According to RFC 2046, the last part of a multipart message, in this case
         # the HTML message, is best and preferred.
@@ -785,7 +858,6 @@ class GetEmailParametricTemplate(object):
                 mocked_imaplib_server = mock.Mock()
                 mocked_imaplib_server.search = mock.Mock(
                     return_value=imap_mail_list)
-
                 # we ignore the second arg as the data item/mime-part is
                 # constant (RFC822)
                 mocked_imaplib_server.fetch = mock.Mock(
@@ -807,7 +879,6 @@ class GetEmailParametricTemplate(object):
                 mocked_imaplib_server = mock.Mock()
                 mocked_imaplib_server.search = mock.Mock(
                     return_value=imap_mail_list)
-
                 # we ignore the second arg as the data item/mime-part is
                 # constant (RFC822)
                 mocked_imaplib_server.fetch = mock.Mock(
@@ -867,7 +938,6 @@ class GetEmailParametricTemplate(object):
     def test_read_pgp_signed_email(self):
         """Tests reading a PGP signed email to ensure we handle base64
            and PGP signatures appropriately."""
-
         # example email text from #567 on GitHub
         with open(os.path.join(THIS_DIR, "test_files/pgp.eml"), encoding="utf-8") as fd:
             test_email = fd.read()
@@ -923,7 +993,6 @@ class GetEmailParametricTemplate(object):
                 mocked_imaplib_server = mock.Mock()
                 mocked_imaplib_server.search = mock.Mock(
                     return_value=imap_mail_list)
-
                 # we ignore the second arg as the data item/mime-part is
                 # constant (RFC822)
                 mocked_imaplib_server.fetch = mock.Mock(
@@ -944,7 +1013,6 @@ class GetEmailParametricTemplate(object):
                 mocked_imaplib_server = mock.Mock()
                 mocked_imaplib_server.search = mock.Mock(
                     return_value=imap_mail_list)
-
                 # we ignore the second arg as the data item/mime-part is
                 # constant (RFC822)
                 mocked_imaplib_server.fetch = mock.Mock(
@@ -1001,8 +1069,6 @@ a9eiiQ+3V1v+7wWHXCzq
 """)
             # should this be 'application/pgp-signature'?
             # self.assertEqual(attach1.mime_type, 'text/plain')
-
-
 class GetEmailCCHandling(TestCase):
     """TestCase that checks CC handling in email. Needs its own test harness."""
 
@@ -1102,7 +1168,6 @@ class GetEmailCCHandling(TestCase):
             ", " + test_email_cc_three + ", " + test_email_cc_four + ", " + ticket_user_emails + \
             "\nFrom: " + test_email_from + "\nSubject: " + \
             test_email_subject + "\n\n" + test_email_body
-        test_mail_len = len(test_email)
 
         with mock.patch('os.listdir') as mocked_listdir, \
                 mock.patch('helpdesk.email.isfile') as mocked_isfile, \

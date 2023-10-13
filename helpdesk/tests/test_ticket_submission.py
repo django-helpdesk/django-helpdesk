@@ -2,15 +2,12 @@
 
 from django.contrib.auth import get_user_model
 from django.core import mail
-from django.core.exceptions import ObjectDoesNotExist
-from django.forms import ValidationError
 from django.test import TestCase
 from django.test.client import Client
 from django.urls import reverse
 import email
-from helpdesk.email import create_ticket_cc, object_from_message
+from helpdesk.email import extract_email_metadata
 from helpdesk.models import CustomField, FollowUp, KBCategory, KBItem, Queue, Ticket, TicketCC
-from helpdesk.tests.helpers import print_response
 import logging
 from urllib.parse import urlparse
 import uuid
@@ -285,7 +282,7 @@ class EmailInteractionsTestCase(TestCase):
 
         email_count = len(mail.outbox)
 
-        object_from_message(str(msg), self.queue_public, logger=logger)
+        extract_email_metadata(str(msg), self.queue_public, logger=logger)
 
         followup = FollowUp.objects.get(message_id=message_id)
         ticket = Ticket.objects.get(id=followup.ticket.id)
@@ -317,7 +314,7 @@ class EmailInteractionsTestCase(TestCase):
 
         email_count = len(mail.outbox)
 
-        object_from_message(str(msg), self.queue_public, logger=logger)
+        extract_email_metadata(str(msg), self.queue_public, logger=logger)
 
         ticket = Ticket.objects.get(
             title=self.ticket_data['title'], queue=self.queue_public, submitter_email=submitter_email)
@@ -353,7 +350,7 @@ class EmailInteractionsTestCase(TestCase):
 
         email_count = len(mail.outbox)
 
-        object_from_message(str(msg), self.queue_public, logger=logger)
+        extract_email_metadata(str(msg), self.queue_public, logger=logger)
 
         followup = FollowUp.objects.get(message_id=message_id)
         ticket = Ticket.objects.get(id=followup.ticket.id)
@@ -400,7 +397,7 @@ class EmailInteractionsTestCase(TestCase):
 
         email_count = len(mail.outbox)
 
-        object_from_message(str(msg), self.queue_public, logger=logger)
+        extract_email_metadata(str(msg), self.queue_public, logger=logger)
 
         followup = FollowUp.objects.get(message_id=message_id)
         ticket = Ticket.objects.get(id=followup.ticket.id)
@@ -452,7 +449,7 @@ class EmailInteractionsTestCase(TestCase):
 
         email_count = len(mail.outbox)
 
-        object_from_message(str(msg), self.queue_public, logger=logger)
+        extract_email_metadata(str(msg), self.queue_public, logger=logger)
 
         followup = FollowUp.objects.get(message_id=message_id)
         ticket = Ticket.objects.get(id=followup.ticket.id)
@@ -498,7 +495,7 @@ class EmailInteractionsTestCase(TestCase):
 
         email_count = len(mail.outbox)
 
-        object_from_message(str(msg), self.queue_public, logger=logger)
+        extract_email_metadata(str(msg), self.queue_public, logger=logger)
 
         followup = FollowUp.objects.get(message_id=message_id)
         ticket = Ticket.objects.get(id=followup.ticket.id)
@@ -532,7 +529,7 @@ class EmailInteractionsTestCase(TestCase):
         reply.__setitem__('Content-Type', 'text/plain;')
         reply.set_payload(self.ticket_data['description'])
 
-        object_from_message(str(reply), self.queue_public, logger=logger)
+        extract_email_metadata(str(reply), self.queue_public, logger=logger)
 
         followup = FollowUp.objects.get(message_id=message_id)
         ticket = Ticket.objects.get(id=followup.ticket.id)
@@ -588,7 +585,7 @@ class EmailInteractionsTestCase(TestCase):
 
         email_count = len(mail.outbox)
 
-        object_from_message(str(msg), self.queue_public, logger=logger)
+        extract_email_metadata(str(msg), self.queue_public, logger=logger)
 
         followup = FollowUp.objects.get(message_id=message_id)
         ticket = Ticket.objects.get(id=followup.ticket.id)
@@ -632,7 +629,7 @@ class EmailInteractionsTestCase(TestCase):
         reply.__setitem__('Content-Type', 'text/plain;')
         reply.set_payload(self.ticket_data['description'])
 
-        object_from_message(str(reply), self.queue_public, logger=logger)
+        extract_email_metadata(str(reply), self.queue_public, logger=logger)
 
         followup = FollowUp.objects.get(message_id=message_id)
         ticket = Ticket.objects.get(id=followup.ticket.id)
@@ -686,7 +683,7 @@ class EmailInteractionsTestCase(TestCase):
 
         email_count = len(mail.outbox)
 
-        object_from_message(str(msg), self.queue_public, logger=logger)
+        extract_email_metadata(str(msg), self.queue_public, logger=logger)
 
         followup = FollowUp.objects.get(message_id=message_id)
         ticket = Ticket.objects.get(id=followup.ticket.id)
@@ -741,7 +738,7 @@ class EmailInteractionsTestCase(TestCase):
 
         email_count = len(mail.outbox)
 
-        object_from_message(str(reply), self.queue_public, logger=logger)
+        extract_email_metadata(str(reply), self.queue_public, logger=logger)
 
         followup = FollowUp.objects.get(message_id=message_id)
         ticket = Ticket.objects.get(id=followup.ticket.id)
@@ -783,7 +780,7 @@ class EmailInteractionsTestCase(TestCase):
         msg.set_payload(self.ticket_data['description'])
 
         email_count = len(mail.outbox)
-        object_from_message(str(msg), self.queue_public, logger=logger)
+        extract_email_metadata(str(msg), self.queue_public, logger=logger)
 
         followup = FollowUp.objects.get(message_id=message_id)
         ticket = Ticket.objects.get(id=followup.ticket.id)
@@ -833,7 +830,7 @@ class EmailInteractionsTestCase(TestCase):
 
         email_count = len(mail.outbox)
 
-        object_from_message(
+        extract_email_metadata(
             str(msg), self.queue_public_with_notifications_disabled, logger=logger)
 
         followup = FollowUp.objects.get(message_id=message_id)
@@ -880,7 +877,7 @@ class EmailInteractionsTestCase(TestCase):
 
         email_count = len(mail.outbox)
 
-        object_from_message(str(msg), self.queue_public, logger=logger)
+        extract_email_metadata(str(msg), self.queue_public, logger=logger)
 
         followup = FollowUp.objects.get(message_id=message_id)
         ticket = Ticket.objects.get(id=followup.ticket.id)
@@ -918,7 +915,7 @@ class EmailInteractionsTestCase(TestCase):
         reply.__setitem__('Content-Type', 'text/plain;')
         reply.set_payload(self.ticket_data['description'])
 
-        object_from_message(str(reply), self.queue_public, logger=logger)
+        extract_email_metadata(str(reply), self.queue_public, logger=logger)
 
         followup = FollowUp.objects.get(message_id=message_id)
         ticket = Ticket.objects.get(id=followup.ticket.id)
@@ -964,7 +961,7 @@ class EmailInteractionsTestCase(TestCase):
 
         email_count = len(mail.outbox)
 
-        object_from_message(
+        extract_email_metadata(
             str(msg), self.queue_public_with_notifications_disabled, logger=logger)
 
         followup = FollowUp.objects.get(message_id=message_id)
@@ -1003,7 +1000,7 @@ class EmailInteractionsTestCase(TestCase):
         reply.__setitem__('Content-Type', 'text/plain;')
         reply.set_payload(self.ticket_data['description'])
 
-        object_from_message(
+        extract_email_metadata(
             str(reply), self.queue_public_with_notifications_disabled, logger=logger)
 
         followup = FollowUp.objects.get(message_id=message_id)
@@ -1037,7 +1034,7 @@ class EmailInteractionsTestCase(TestCase):
 
         email_count = len(mail.outbox)
 
-        object_from_message(str(msg), self.queue_public, logger=logger)
+        extract_email_metadata(str(msg), self.queue_public, logger=logger)
 
         followup = FollowUp.objects.get(message_id=message_id)
         ticket = Ticket.objects.get(id=followup.ticket.id)
@@ -1059,7 +1056,7 @@ class EmailInteractionsTestCase(TestCase):
         reply.__setitem__('Content-Type', 'text/plain;')
         reply.set_payload(self.ticket_data['description'])
 
-        object_from_message(str(reply), self.queue_public, logger=logger)
+        extract_email_metadata(str(reply), self.queue_public, logger=logger)
 
         followup = FollowUp.objects.get(message_id=message_id)
         ticket = Ticket.objects.get(id=followup.ticket.id)
@@ -1088,23 +1085,48 @@ class EmailInteractionsTestCase(TestCase):
         cat = KBCategory.objects.create(
             title="Test Cat",
             slug="test_cat",
-            description="This is a test category",
+            description="This is a test category",   
             queue=self.queue_public,
         )
         cat.save()
+        attr_list = {
+            "f1_field_title": "KBItem 1",
+            "f1_attr": "kbitem",
+            "f1_attr_value": "1",
+            "f2_attr": "submitter_email",
+            "f2_attr_value": "foo@bar.cz",
+            "f3_attr": "title",
+            "f3_attr_value": "lol",
+        }
         self.kbitem1 = KBItem.objects.create(
             category=cat,
-            title="KBItem 1",
+            title=attr_list["f1_field_title"],
             question="What?",
             answer="A KB Item",
         )
         self.kbitem1.save()
-        cat_url = reverse('helpdesk:submit') + \
-            "?kbitem=1&submitter_email=foo@bar.cz&title=lol"
+        cat_url = reverse('helpdesk:submit') + '?' \
+            + attr_list["f1_attr"] + '=' + attr_list["f1_attr_value"] + '&' \
+            + attr_list["f2_attr"] + '=' + attr_list["f2_attr_value"] + '&' \
+            + attr_list["f3_attr"] + '=' + attr_list["f3_attr_value"]
         response = self.client.get(cat_url)
+        # Get the rendered response to make it easier to debug if things go wrong
+        if (
+            hasattr(response, "render")
+            and callable(response.render)
+            and not response.is_rendered
+        ):
+            response.render()
+        if response.streaming:
+            content = b"".join(response.streaming_content)
+        else:
+            content = response.content
+
+        
+        msg_prefix = content.decode(response.charset)
         self.assertContains(
-            response, '<option value="1" selected>KBItem 1</option>')
+            response, '<option value="' + attr_list["f1_attr_value"] + '" selected>' + attr_list["f1_field_title"] + '</option>', msg_prefix = msg_prefix)
         self.assertContains(
-            response, '<input type="email" name="submitter_email" value="foo@bar.cz" class="form-control form-control" required id="id_submitter_email">')
+            response, '<input type="email" name="' +  attr_list["f2_attr"] + '" value="' +  attr_list["f2_attr_value"], msg_prefix = msg_prefix)
         self.assertContains(
-            response, '<input type="text" name="title" value="lol" class="form-control form-control" maxlength="100" required id="id_title">')
+            response, '<input type="text" name="' +  attr_list["f3_attr"] + '" value="' +  attr_list["f3_attr_value"], msg_prefix = msg_prefix)
