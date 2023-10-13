@@ -229,7 +229,7 @@ HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION = getattr(
 
 # use https in the email links
 HELPDESK_USE_HTTPS_IN_EMAIL_LINK = getattr(
-    settings, 'HELPDESK_USE_HTTPS_IN_EMAIL_LINK', False)
+    settings, 'HELPDESK_USE_HTTPS_IN_EMAIL_LINK', settings.SECURE_SSL_REDIRECT)
 
 HELPDESK_TEAMS_MODEL = getattr(
     settings, 'HELPDESK_TEAMS_MODEL', 'pinax_teams.Team')

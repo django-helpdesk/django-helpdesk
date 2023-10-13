@@ -6,8 +6,6 @@ See LICENSE for details.
 """
 
 # import base64
-
-
 from bs4 import BeautifulSoup
 from datetime import timedelta
 from django.conf import settings as django_settings
@@ -18,7 +16,8 @@ from django.db.models import Q
 from django.utils import encoding, timezone
 from django.utils.translation import gettext as _
 import email
-from email.message import Message
+from email import policy
+from email.message import EmailMessage, MIMEPart
 from email.utils import getaddresses
 from email_reply_parser import EmailReplyParser
 from helpdesk import settings
@@ -39,7 +38,7 @@ import ssl
 import sys
 from time import ctime
 import typing
-from typing import List, Tuple
+from typing import List
 
 
 # import User model, which may be a custom model
@@ -52,6 +51,9 @@ STRIPPED_SUBJECT_STRINGS = [
     "FW: ",
     "Automatic reply: ",
 ]
+
+# Allow a custom default attached email name for the HTML formatted email if one is found
+HTML_EMAIL_ATTACHMENT_FILENAME = _("email_html_body.html")
 
 
 def process_email(quiet=False):
@@ -75,7 +77,6 @@ def process_email(quiet=False):
             logger.propagate = False
         if quiet:
             logger.propagate = False  # do not propagate to root logger that would log to console
-
         # Log messages to specific file only if the queue has it configured
         if (q.logging_type in logging_types) and q.logging_dir:  # if it's enabled and the dir is set
             log_file_handler = logging.FileHandler(
@@ -141,7 +142,7 @@ def pop3_sync(q, logger, server):
             full_message = encoding.force_str(
                 "\n".join(raw_content), errors='replace')
         try:
-            ticket = object_from_message(message=full_message, queue=q, logger=logger)
+            ticket = extract_email_metadata(message=full_message, queue=q, logger=logger)
         except IgnoreTicketException:
             logger.warn(
                 "Message %s was ignored and will be left on POP3 server" % msgNum)
@@ -198,7 +199,7 @@ def imap_sync(q, logger, server):
                 data = server.fetch(num, '(RFC822)')[1]
                 full_message = encoding.force_str(data[0][1], errors='replace')
                 try:
-                    ticket = object_from_message(message=full_message, queue=q, logger=logger)
+                    ticket = extract_email_metadata(message=full_message, queue=q, logger=logger)
                 except IgnoreTicketException:
                     logger.warn("Message %s was ignored and will be left on IMAP server" % num)
                 except DeleteIgnoredTicketException:
@@ -252,13 +253,11 @@ def imap_oauth_sync(q, logger, server):
         )
 
         server.debug = settings.HELPDESK_IMAP_DEBUG_LEVEL
-
         # TODO: Perhaps store the authentication string template externally? Settings? Queue Table?
         server.authenticate(
             "XOAUTH2",
             lambda x: f"user={q.email_box_user}\x01auth=Bearer {token['access_token']}\x01\x01".encode(),
         )
-
         # Select the Inbound Mailbox folder
         server.select(q.email_box_imap_folder)
 
@@ -285,7 +284,7 @@ def imap_oauth_sync(q, logger, server):
                 full_message = encoding.force_str(data[0][1], errors='replace')
 
                 try:
-                    ticket = object_from_message(message=full_message, queue=q, logger=logger)
+                    ticket = extract_email_metadata(message=full_message, queue=q, logger=logger)
 
                 except IgnoreTicketException as itex:
                     logger.warn(f"Message {num} was ignored. {itex}")
@@ -312,7 +311,6 @@ def imap_oauth_sync(q, logger, server):
             "IMAP retrieve failed. Is the folder '%s' spelled correctly, and does it exist on the server?",
             q.email_box_imap_folder
         )
-
     # Purged Flagged Messages & Logout
     server.expunge()
     server.close()
@@ -405,7 +403,7 @@ def process_queue(q, logger):
             with open(m, 'r') as f:
                 full_message = encoding.force_str(f.read(), errors='replace')
                 try:
-                    ticket = object_from_message(message=full_message, queue=q, logger=logger)
+                    ticket = extract_email_metadata(message=full_message, queue=q, logger=logger)
                 except IgnoreTicketException:
                     logger.warn("Message %d was ignored and will be left in local directory", i)
                 except DeleteIgnoredTicketException:
@@ -429,7 +427,7 @@ def process_queue(q, logger):
 
 
 def decodeUnknown(charset, string):
-    if type(string) is not str:
+    if string and not isinstance(string, str):
         if not charset:
             try:
                 return str(string, encoding='utf-8', errors='replace')
@@ -468,11 +466,10 @@ def is_autoreply(message):
 def create_ticket_cc(ticket, cc_list):
     if not cc_list:
         return []
-
     # Local import to deal with non-defined / circular reference problem
-    from helpdesk.views.staff import subscribe_to_ticket_updates, User
 
     new_ticket_ccs = []
+    from helpdesk.views.staff import subscribe_to_ticket_updates, User
     for __, cced_email in cc_list:
 
         cced_email = cced_email.strip()
@@ -538,7 +535,6 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
                             ticket.merged_to.ticket)
                 # Use the ticket in which it was merged to for next operations
                 ticket = ticket.merged_to
-
     # New issue, create a new <Ticket> instance
     if ticket is None:
         if not settings.QUEUE_EMAIL_BOX_UPDATE_ONLY:
@@ -555,7 +551,6 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
                          (ticket.queue.slug, ticket.id))
 
             new = True
-
     # Old issue being re-opened
     elif ticket.status == Ticket.CLOSED_STATUS:
         ticket.status = Ticket.REOPENED_STATUS
@@ -723,96 +718,222 @@ def attempt_body_extract_from_html(message: str) -> str:
     return body, full_body
 
 
-def extract_part_data(
-        part: Message,
+def mime_content_to_string(part: EmailMessage,) -> str:
+    '''
+    Extract the content from the MIME body part
+    :param part: the MIME part to extract the content from
+    '''
+    content_bytes = part.get_payload(decode=True)
+    charset = part.get_content_charset()
+    # The default for MIME email is 7bit which requires special decoding to utf-8 so make sure
+    # we handle the decoding correctly
+    if part['Content-Transfer-Encoding'] in [None, '8bit', '7bit'] and (charset == 'utf-8' or charset is None):
+        charset = "unicode_escape"
+    content = decodeUnknown(charset, content_bytes)
+    return content
+
+
+def parse_email_content(mime_content: str, is_extract_full_email_msg: bool) -> str:
+    if is_extract_full_email_msg:
+        # Take the full content including encapsulated "forwarded" and "reply" sections
+        return mime_content
+    else:
+        # Just get the primary part of the email and drop off any text below the actual response text
+        return EmailReplyParser.parse_reply(mime_content)
+
+
+def extract_email_message_content(
+        part: MIMEPart,
+        files: List,
+        include_chained_msgs: bool,
+) -> (str, str):
+    '''
+    Uses the get_body() method of the email package to extract the email message content.
+    If there is an HTML version of the email message content then it is stored as an attachment.
+    If there is a plain text part then that is used for storing the email content aginst the ticket.
+    Otherwise if there is just an HTML part then the HTML is parsed to extract a simple text message.
+    There is special handling for the case when a multipart/related part holds the message content when
+    there are multiple attachments to the email.
+    :param part: the base email MIME part to be searched
+    :param files: any MIME parts to be attached are added to this list
+    :param include_chained_msgs: flag to indicate if the entire email message content including past
+           replies must be extracted
+    '''
+    message_part: MIMEPart = part.get_body()
+    parent_part: MIMEPart = part
+    content_type = message_part.get_content_type()
+    # Handle the possibility of a related part formatted email
+    if "multipart/related" == content_type:
+        # We want the actual message text so try again on the related MIME part
+        parent_part = message_part
+        message_part = message_part.get_body(preferencelist=["html", "plain",])
+        content_type = message_part.get_content_type()
+    mime_content = None
+    formatted_body = None  # Retain the original content by using a secondary variable if the HTML needs wrapping
+    if "text/html" == content_type:
+        # add the HTML message as an attachment wrapping if necessary
+        mime_content = mime_content_to_string(message_part)
+        if "<body" not in mime_content:
+            formatted_body = f"<body>{mime_content}</body>"
+        if "<html" not in mime_content:
+            formatted_body = f"<html><head><meta charset=\"utf-8\" /></head>\
+                               {mime_content if formatted_body is None else formatted_body}</html>"
+        files.append(
+            SimpleUploadedFile(
+                HTML_EMAIL_ATTACHMENT_FILENAME,
+                (mime_content if formatted_body is None else formatted_body).encode("utf-8"), 'text/html',
+            )
+        )
+        # Try to get a plain part message
+        plain_message_part = parent_part.get_body(preferencelist=["plain",])
+        if plain_message_part:
+            # Replace mime_content with the plain text part content
+            mime_content = mime_content_to_string(plain_message_part)
+            message_part = plain_message_part
+            content_type = "text/plain"
+        else:
+            # Try to constitute the HTML response as plain text
+            mime_content, _x = attempt_body_extract_from_html(
+                mime_content if formatted_body is None else formatted_body)
+    else:
+        # Is either text/plain or some random content-type so just decode the part content and store as is
+        mime_content = mime_content_to_string(message_part)
+    # We should now have the mime content
+    filtered_body = parse_email_content(mime_content, include_chained_msgs)
+    if not filtered_body or "" == filtered_body.strip():
+        # A unit test that has a different HTML content to plain text which seems an invalid case as email
+        # tools should retain the HTML to be consistent with the plain text but manage this as a special case
+        # Try to constitute the HTML response as plain text
+        if formatted_body:
+            filtered_body, _x = attempt_body_extract_from_html(formatted_body)
+        else:
+            filtered_body = mime_content
+    # Only need the full message if the message_body excludes the chained messages
+    return filtered_body, mime_content
+
+
+def process_as_attachment(
+        part: MIMEPart,
         counter: int,
-        ticket_id: int,
         files: List,
         logger: logging.Logger
-) -> Tuple[str, str]:
+):
     name = part.get_filename()
     if name:
-        name = email.utils.collapse_rfc2231_value(name)
-    part_body = None
-    part_full_body = None
-    if part.get_content_maintype() == 'text' and name is None:
-        if part.get_content_subtype() == 'plain':
-            part_body = part.get_payload(decode=True)
-            # https://github.com/django-helpdesk/django-helpdesk/issues/732
-            if part['Content-Transfer-Encoding'] == '8bit' and part.get_content_charset() == 'utf-8':
-                part_body = part_body.decode('unicode_escape')
-            part_body = decodeUnknown(part.get_content_charset(), part_body)
-            # have to use django_settings here so overwriting it works in tests
-            # the default value is False anyway
-            if ticket_id is None and getattr(django_settings, 'HELPDESK_FULL_FIRST_MESSAGE_FROM_EMAIL', False):
-                # first message in thread, we save full body to avoid
-                # losing forwards and things like that
-                part_full_body = get_body_from_fragments(part_body)
-                part_body = EmailReplyParser.parse_reply(part_body)
-            else:
-                # second and other reply, save only first part of the
-                # message
-                part_body = EmailReplyParser.parse_reply(part_body)
-                part_full_body = part_body
-            # workaround to get unicode text out rather than escaped text
-            part_body = get_encoded_body(part_body)
-            logger.debug("Discovered plain text MIME part")
-        else:
-            email_body = get_email_body_from_part_payload(part)
-
-            if not part_body and not part_full_body:
-                # no text has been parsed so far - try such deep parsing
-                # for some messages
-                altered_body = email_body.replace(
-                    "</p>", "</p>\n").replace("<br", "\n<br")
-                mail = BeautifulSoup(str(altered_body), "html.parser")
-                part_full_body = mail.get_text()
-
-            if "<body" not in email_body:
-                email_body = f"<body>{email_body}</body>"
-
-            payload = (
-                '<html>'
-                '<head>'
-                '<meta charset="utf-8" />'
-                '</head>'
-                '%s'
-                '</html>'
-            ) % email_body
-            files.append(
-                SimpleUploadedFile(
-                    _("email_html_body.html"), payload.encode("utf-8"), 'text/html')
-            )
-            logger.debug("Discovered HTML MIME part")
+        name = f"part-{counter}_{email.utils.collapse_rfc2231_value(name)}"
     else:
-        if not name:
-            ext = mimetypes.guess_extension(part.get_content_type())
-            name = f"part-{counter}{ext}"
-        else:
-            name = f"part-{counter}_{name}"
-        payload = part.as_string() if part.is_multipart() else part.get_payload(decode=True)
-        files.append(SimpleUploadedFile(name, payload, mimetypes.guess_type(name)[0]))
-        logger.debug("Found MIME attachment %s", name)
-    return part_body, part_full_body
+        ext = mimetypes.guess_extension(part.get_content_type())
+        name = f"part-{counter}{ext}"
+    # Extract payload accounting for attached multiparts
+    payload_bytes = part.as_bytes() if part.is_multipart() else part.get_payload(decode=True)
+    files.append(SimpleUploadedFile(name, payload_bytes, mimetypes.guess_type(name)[0]))
+    if logger.isEnabledFor(logging.DEBUG):
+        logger.debug("Processed MIME as attachment: %s", name)
+    return
 
 
-def object_from_message(message: str,
-                        queue: Queue,
-                        logger: logging.Logger
-                        ) -> Ticket:
-    # 'message' must be an RFC822 formatted message to correctly parse.
-    message_obj = email.message_from_string(message)
-
-    subject = message_obj.get('subject', _('Comment from e-mail'))
+def extract_email_subject(email_msg: EmailMessage,) -> str:
+    subject = email_msg.get('subject', _('Comment from e-mail'))
     subject = decode_mail_headers(
-        decodeUnknown(message_obj.get_charset(), subject))
+        decodeUnknown(email_msg.get_charset(), subject))
     for affix in STRIPPED_SUBJECT_STRINGS:
         subject = subject.replace(affix, "")
-    subject = subject.strip()
+    return subject.strip()
 
-    # TODO: Should really be assigning a properly formatted fake email.
-    #       Check if anything relies on this being a "real name" formatted string if no sender is found on message_obj.
-    #       Also not sure it should be accepting emails from unknown senders
+
+def extract_attachments(
+        target_part: MIMEPart,
+        files: List,
+        logger: logging.Logger,
+        counter: int = 1,
+        content_parts_excluded: bool = False,
+) -> (int, bool):
+    '''
+    If the MIME part is a multipart and not identified as "inline" or "attachment" then
+    iterate over the sub parts recursively.
+    Otherwise extract MIME part content and add as an attachment.
+    It will recursively descend as appropriate ensuring that all parts not part of the message content
+    are added to the list of files to be attached. To cater for the possibility of text/plain and text/html parts
+    that are further down in the multipart hierarchy than the ones that ones meant to provide that content,
+    iterators are selectively used.
+    :param part: the email MIME part to be processed
+    :param files: any MIME part content or MIME parts to be attached are added to this list
+    :param logger: the logger to use for this MIME part processing
+    :param counter: the count of MIME parts added as attachment
+    :param content_parts_excluded: the MIME part(s) that provided the message content have been excluded
+    :returns the count of mime parts added as attachments and a boolean if the content parts have been excluded
+    '''
+    content_type = target_part.get_content_type()
+    content_maintype = target_part.get_content_maintype()
+    if "multipart" == content_maintype and target_part.get_content_disposition() not in ['inline', 'attachment']:
+        # Cycle through all MIME parts in the email extracting the attachments that were not part of the message body
+        # If this is a "related" multipart then we can use the message part excluder iterator directly
+        if "multipart/related" == content_type:
+            if content_parts_excluded:
+                # This should really never happen in a properly constructed email message but...
+                logger.warn(
+                    "WARNING! Content type MIME parts have been excluded but a multipart/related has been encountered.\
+                     There may be missing information in attachments.")
+            else:
+                content_parts_excluded = True
+            # Use the iterator that automatically excludes message content parts
+            for part in target_part.iter_attachments():
+                counter, content_parts_excluded = extract_attachments(
+                    part, files, logger, counter, content_parts_excluded)
+        # The iterator must be different depending on whether we have already excluded message content parts
+        else:
+            # Content part might be 1 or 2 parts but will be at same level so track finding at least 1
+            content_part_detected = False
+            for part in target_part.iter_parts():
+                if not content_parts_excluded and part.get_content_type() in ["text/plain", "text/html"]:
+                    content_part_detected = True
+                    continue
+                # Recurse into the part to process embedded parts
+                counter, content_parts_excluded = extract_attachments(
+                    part, files, logger, counter, content_parts_excluded)
+            # If we have found 1 or more content parts then flag that the content parts have been ommitted
+            # to ensure that other text/* parts are attached
+            if content_part_detected:
+                content_parts_excluded = True
+    else:
+        process_as_attachment(target_part, counter, files, logger)
+        counter = counter + 1
+    return (counter, content_parts_excluded)
+
+
+def extract_email_metadata(message: str,
+                           queue: Queue,
+                           logger: logging.Logger
+                           ) -> Ticket:
+    '''
+    Extracts the text/plain  mime part if there is one as the ticket description and
+    stores the text/html part as an attachment if it is present.
+    If no text/plain  part is present then it will try to use the text/html part if
+    it is present as the ticket description by removing the HTML formatting.
+    If neither a text/plain or text/html is present then it will use the first text/*
+    MIME part that it finds as the ticket description.
+    By default it will always take only the actual message and drop any chained messages
+    from replies.
+    The HELPDESK_FULL_FIRST_MESSAGE_FROM_EMAIL settings can force the entire message to be
+    stored in the ticket if it is a new ticket by setting it to True.
+    In this scenario, if it is a reply that is a forwarded message with no actual message,
+    then the description will be sourced from the text/html part and the forwarded message
+    will be in the FollowUp record associated with the ticket.
+    It will iterate over every MIME part and store all MIME parts as attachments apart
+    from the text/plain part.
+    There may be a case for trying to exclude repeated signature images by checking if an
+    attachment of the same name already exists as an attachment on the ticket but that is
+    not implemented.
+    :param message: the raw email message received
+    :param queue: the queue that the message is assigned to
+    :param logger: the logger to be used
+    '''
+    # 'message' must be an RFC822 formatted message to correctly parse.
+    # NBot sure why but policy explicitly set to default is required for any messages with attachments in them
+    message_obj: EmailMessage = email.message_from_string(message, EmailMessage, policy=policy.default)
+
+    subject = extract_email_subject(message_obj)
+
     sender_email = _('Unknown Sender')
     sender_hdr = message_obj.get('from')
     if sender_hdr:
@@ -831,26 +952,24 @@ def object_from_message(message: str,
         subject,
         logger
     )
-
-    body = None
-    full_body = None
-    counter = 0
     files = []
-
-    for part in message_obj.walk():
-        if part.get_content_maintype() == 'multipart':
-            continue
-        # See email.message_obj.Message.get_filename()
-        part_body, part_full_body = extract_part_data(part, counter, ticket_id, files, logger)
-        if part_body:
-            body = part_body
-            full_body = part_full_body
-        counter += 1
-
-    if not body:
-        body, full_body = attempt_body_extract_from_html(message_obj)
-
-    add_file_if_always_save_incoming_email_message(files, message_obj)
+    # first message in thread, we save full body to avoid losing forwards and things like that
+    include_chained_msgs = True if ticket_id is None and getattr(
+        django_settings, 'HELPDESK_FULL_FIRST_MESSAGE_FROM_EMAIL', False) else False
+    filtered_body, full_body = extract_email_message_content(message_obj, files, include_chained_msgs)
+    # If the base part is not a multipart then it will have already been processed as the vbody content so
+    # no need to process attachments
+    if "multipart" == message_obj.get_content_maintype():
+        # Find and attach all other parts or part contents as attachments
+        counter, content_parts_excluded = extract_attachments(message_obj, files, logger)
+        if not content_parts_excluded:
+            # Unexpected situation and may mean there is a hole in the email processing logic
+            logger.warning(
+                "Failed to exclude email content when parsing all MIME parts in the multipart.\
+                 Verify that there were no text/* parts containing message content.")
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug("Email parsed and %s attachments were found and attached.", counter)
+    add_file_if_always_save_incoming_email_message(files, message)
 
     smtp_priority = message_obj.get('priority', '')
     smtp_importance = message_obj.get('importance', '')
@@ -859,8 +978,8 @@ def object_from_message(message: str,
         smtp_priority, smtp_importance} else 3
 
     payload = {
-        'body': body,
-        'full_body': full_body or body,
+        'body': filtered_body,
+        'full_body': full_body,
         'subject': subject,
         'queue': queue,
         'sender_email': sender_email,
