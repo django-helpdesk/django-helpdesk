@@ -1137,7 +1137,6 @@ class FollowUpAttachment(Attachment):
 
     def attachment_path(self, filename):
 
-        os.umask(0)
         path = 'helpdesk/attachments/{ticket_for_url}-{secret_key}/{id_}'.format(
             ticket_for_url=self.followup.ticket.ticket_for_url,
             secret_key=self.followup.ticket.secret_key,
@@ -1145,7 +1144,7 @@ class FollowUpAttachment(Attachment):
         att_path = os.path.join(settings.MEDIA_ROOT, path)
         if settings.DEFAULT_FILE_STORAGE == "django.core.files.storage.FileSystemStorage":
             if not os.path.exists(att_path):
-                os.makedirs(att_path, 0o777)
+                os.makedirs(att_path, helpdesk_settings.HELPDESK_ATTACHMENT_DIR_PERMS)
         return os.path.join(path, filename)
 
 
@@ -1159,14 +1158,13 @@ class KBIAttachment(Attachment):
 
     def attachment_path(self, filename):
 
-        os.umask(0)
         path = 'helpdesk/attachments/kb/{category}/{kbi}'.format(
             category=self.kbitem.category,
             kbi=self.kbitem.id)
         att_path = os.path.join(settings.MEDIA_ROOT, path)
         if settings.DEFAULT_FILE_STORAGE == "django.core.files.storage.FileSystemStorage":
             if not os.path.exists(att_path):
-                os.makedirs(att_path, 0o777)
+                os.makedirs(att_path, helpdesk_settings.HELPDESK_ATTACHMENT_DIR_PERMS)
         return os.path.join(path, filename)
 
 

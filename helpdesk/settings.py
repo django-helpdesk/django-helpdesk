@@ -265,3 +265,11 @@ HELPDESK_OAUTH = getattr(
 
 # Set Debug Logging Level for IMAP Services. Default to '0' for No Debugging
 HELPDESK_IMAP_DEBUG_LEVEL = getattr(settings, 'HELPDESK_IMAP_DEBUG_LEVEL', 0)
+
+#############################################
+# file permissions - Attachment directories #
+#############################################
+
+# Attachment directories should be created with permission 755 (rwxr-xr-x)
+# Override it in your own Django settings.py
+HELPDESK_ATTACHMENT_DIR_PERMS = int(getattr(settings, 'HELPDESK_ATTACHMENT_DIR_PERMS', "755"), 8)
