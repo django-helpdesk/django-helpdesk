@@ -20,6 +20,8 @@ services:
     - /tmp/django-helpdesk-data:/data/
     - ./custom_navigation_header.html:/opt/django-helpdesk/helpdesk/templates/helpdesk/custom_navigation_header.html:r
    env_file: docker.env
+   depends_on:
+     - postgres
 
  postgres:
    image: postgres:12-bullseye
