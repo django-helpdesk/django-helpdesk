@@ -19,6 +19,7 @@ contributors reaching far beyond Jutda.
 Complete documentation is available in the docs/ directory,
 or online at http://django-helpdesk.readthedocs.org/.
 
+
 Demo Quickstart
 ---------------
 
@@ -54,25 +55,19 @@ to alert you to this shortcoming. There is no way around it, sorry.
 Installation
 ------------
 
-`django-helpdesk` requires:
+* |standalone_icon| For **standalone** installation, refer to `standalone documentation <./docs/standalone.rst>`_.
 
-* Python 3.8+
-* Django 3.2 LTS or Django 4.*
+* |django_icon| To **integrate** with an existing Django application, follow the guidelines in `installation documentation <./docs/install.rst>`_ and `configuration documentation <./docs/configuration.rst>`_.
 
-You can quickly install the latest stable version of `django-helpdesk`
-app via `pip`::
+.. |standalone_icon| image:: helpdesk/static/helpdesk/img/icon512.png
+   :height: 24px
+   :width: 24px
+   :align: middle
 
-    pip install django-helpdesk
-
-You may also check out the `master` branch on GitHub, and install manually::
-
-    python setup.py install
-
-Either way, you will need to add `django-helpdesk` to an existing
-Django project.
-
-For further installation information see `docs/install.html`
-and `docs/configuration.html`
+.. |django_icon| image:: helpdesk/static/helpdesk/img/django-logo-positive.png
+   :height: 24px
+   :width: 60px
+   :align: middle
 
 Developer Environment
 ---------------------

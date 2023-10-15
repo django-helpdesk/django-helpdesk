@@ -1,0 +1,30 @@
+version: '2'
+services:
+ caddy:
+   image: caddy:2
+   restart: unless-stopped
+   volumes:
+     - /tmp/data/caddy/data:/data
+     - /tmp/data/caddy/config:/config
+     - ./Caddyfile:/etc/caddy/Caddyfile:r
+   ports:
+     - "80:80"
+     - "443:443"
+
+ django-helpdesk:
+   build:
+    context: ..
+    dockerfile: standalone/Dockerfile
+   user: root
+   volumes:
+    - /tmp/django-helpdesk-data:/data/
+    - ./custom_navigation_header.html:/opt/django-helpdesk/helpdesk/templates/helpdesk/custom_navigation_header.html:r
+   env_file: docker.env
+   depends_on:
+     - postgres
+
+ postgres:
+   image: postgres:12-bullseye
+   volumes:
+    - ./db:/var/lib/postgresql/data
+   env_file: docker.env
