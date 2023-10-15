@@ -25,7 +25,7 @@ Implementing Custom Teams Functionality
 If youwant to use a different team app or implement your own team based app, you can hook it into Helpdesk using the following 3 settings:
 ``HELPDESK_TEAMS_MODEL``: point this to the model that defines a team in your custom implementation
 ``HELPDESK_TEAMS_MIGRATION_DEPENDENCIES``: set this to an array of migration(s) that are required to have run that will ensure the link that will be added as defined in the HELPDESK_TEAMS_MODEL will be available as a model to Helpdesk
-``HELPDESK_KBITEM_TEAM_GETTER``: the method that will be called to  to return a list of users who belong to a given team
+``HELPDESK_KBITEM_TEAM_GETTER``: the method that will be called that must return a list of users who belong to a given team
 
 Disabling Teams Functionality
 -----------------------------
