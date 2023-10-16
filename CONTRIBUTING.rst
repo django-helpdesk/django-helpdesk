@@ -18,10 +18,9 @@ https://github.com/django-helpdesk/django-helpdesk
 Testing
 -------
 
-If you don't mind testing pre-releases (don't use in production!), we appreciate
-continuous feedback on the `unstable` branch, which is our work toward the next
-major release. Please file bug reports, and tag the report with the "pre-release"
-tag.
+If you are interested in specific features that are in the development stage and are willing to test the feature prior to release, please register your willingness against he issue and you will be notified when it reaches testing phase.
+You can see a list of possible enhancements here:
+https://github.com/django-helpdesk/django-helpdesk/labels/enhancement
 
 This is an easy way to get involved that doesn't require programming.
 
@@ -30,8 +29,7 @@ Pull Requests
 -------------
 
 Please fork the project on GitHub, make your changes, and submit a
-pull request back into the appropriate branch of the
-`django-helpdesk` repository.
+pull request against the `main` branch of the `django-helpdesk` repository.
 
 Short story:
 
@@ -104,15 +102,16 @@ git with your other code changes.
 Tests
 -----
 
-Currently, test coverage is very low. We're working on increasing this, and to
-make life easier we are using Travis CI (http://travis-ci.org/) for continuous
-integration. This means that the test suite is run every time a code change is
-made, so we can try and make sure we avoid basic bugs and other regressions.
+There is a CI/CD pipeline implemented using Github actions that covers code formatting, code security and unit tests.
+All PR's are required to pass the full test coverage suite before it can be merged to the main branch.
+Currently, test coverage is very low but all new pull requests are required to have appropriate unit tests
+ to cover the any new or changed functionality which will increase the coverage over time.
+
 
 As a general policy, we will only accept new feature commits if they are
 accompanied by appropriate unit/functional tests (that is, tests for the
 functionality you just added). Bugfixes should also include new unit tests to
-ensure the bug has been fixed.
+ensure the bug has been fixed and there is no later regression due to other changes.
 
 More significant code refactoring must also include proper integration or
 validation tests, to be committed *BEFORE* the refactoring patches. This is to
