@@ -31,7 +31,8 @@ If you want to use a different team app or implement your own team based app, yo
 
 Disabling Teams Functionality
 -----------------------------
-If you do not wish to use team functionality, you can disable teams by setting the following settings: 
+If you do not wish to use team functionality, you can disable teams by setting the following settings:
+
             HELPDESK_TEAMS_MODEL='auth.User',
             HELPDESK_TEAMS_MIGRATION_DEPENDENCIES=[],
             HELPDESK_KBITEM_TEAM_GETTER=lambda _: None,
