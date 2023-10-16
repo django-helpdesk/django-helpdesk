@@ -7,6 +7,7 @@ If you only have one or two people working on tickets, basic Queue setup is enou
 
 If you are embedding the helpdesk app into your own apps, it is possible that the pinax-teams  app used to support the default team based functionality will interfere with other packages that you already use in your project and you will need to disable it.
 
+
 How It Works
 ------------
 Rather than assigning tickets to teams directly, django-helpdesk allows you assign tickets to knowledge-base items and then assign knowledge base items to teams.
@@ -22,10 +23,11 @@ Once you have set up teams. Unassigned tickets which are associated with a knowl
 
 Implementing Custom Teams Functionality
 --------------------------------
-If youwant to use a different team app or implement your own team based app, you can hook it into Helpdesk using the following 3 settings:
+If you want to use a different team app or implement your own team based app, you can hook it into Helpdesk using the following 3 settings:
 ``HELPDESK_TEAMS_MODEL``: point this to the model that defines a team in your custom implementation
 ``HELPDESK_TEAMS_MIGRATION_DEPENDENCIES``: set this to an array of migration(s) that are required to have run that will ensure the link that will be added as defined in the HELPDESK_TEAMS_MODEL will be available as a model to Helpdesk
 ``HELPDESK_KBITEM_TEAM_GETTER``: the method that will be called that must return a list of users who belong to a given team
+
 
 Disabling Teams Functionality
 -----------------------------
