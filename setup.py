@@ -6,7 +6,7 @@ from setuptools import find_packages, setup
 import sys
 
 
-version = '0.5.0'
+version = '1.0.0'
 
 
 # Provided as an attribute, so you can append to these instead
@@ -133,6 +133,7 @@ setup(
     name="django-helpdesk",
     version=version,
     description="Django-powered ticket tracker for your helpdesk",
+    long_description_content_type="text/x-rst",
     long_description=get_long_description(),
     classifiers=[
         "Development Status :: 4 - Beta",
