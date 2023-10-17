@@ -31,39 +31,25 @@ Pull Requests
 Please fork the project on GitHub, make your changes, and submit a
 pull request against the `main` branch of the `django-helpdesk` repository.
 
-Short story:
+The `main` branch always contains the bleeding edge code that has been reviewed and tested.
+all features are developed entirely in a separate branch and are only merged to `main` once all tests and maintainer reviews
+have been passed.
 
-* pull requests for `unstable` are for the next major release
-* pull requests for `stable` are for the current release
+If for some reason you are forced to stay on an older version and need a patch that may apply to others with the same road
+block preventing upgrading to the latest release,
+then you can check out that versions code using the version tag and push your patch to a branch that we can then tag with a
+patch release - it will not be merged to the `main` branch. 
 
-Longer story:
+We reserve the right to decline a pull request raised against the `main` branch if it does not contain adequate unit tests.
 
-In general, our git branching scheme looks like the following.
+Ideally a PR should be as small as possible to avoid complex and time consuming code reviews.
+Break up complex new features or code refactoring into manageable chunks and raise sequential PR's.
+If there are small bugs encountered whilst developing a new feature and they do not have a significant code impact then
+they can be included in the feature PR.
+Otherwise each bugfix, feature, code refactoring or functionality change should be in its own PR.
 
-* `unstable` always points to development for the next major release,
-  major new features should go here
-* `stable` always points to the latest stable release,
-  bugfixes and security patches should go here
-* current and past major releases can also be found in their own branches:
-
-  * `0.3` is the branch for the 0.3 release and any bugfix releases
-  * `0.2.x` is the branch for the 0.2 release and any bugfix releases
-  * `0.1` is the branch for the legacy code; it is no longer supported
-  
-If you want to submit a specific patch for an older release,
-you can put your pull request against that branch specifically.
-However, we don't currently support any older release beyond
-the latest release (currently 0.3).
-
-We reserve the right to decline a pull request if it is not for
-the appropriate branch.
-
-Wherever possible please break git commits up into small chunks that are
-specific to a single bit of functionality. For example, a commit should *not*
-contain both new functionality *and* a bugfix; the new function and the bugfix
-should be separate commits wherever possible.
-
-Commit messages should also explain *what*, precisely, has been changed.
+Please provide clear commit messages per file explaining *what*, precisely, has been changed in that file - it aids in
+researching behaviour issues down the line.
 
 All commits should include appropriate new or updated tests; see the Tests
 section below for more details.
@@ -103,9 +89,10 @@ Tests
 -----
 
 There is a CI/CD pipeline implemented using Github actions that covers code formatting, code security and unit tests.
-All PR's are required to pass the full test coverage suite before it can be merged to the main branch.
+All PR's are required to pass the full test coverage suite and a code review by one or more of the maintainers before
+it can be merged to the main branch.
 Currently, test coverage is very low but all new pull requests are required to have appropriate unit tests
- to cover the any new or changed functionality which will increase the coverage over time.
+to cover any new or changed functionality which will increase the coverage over time.
 
 
 As a general policy, we will only accept new feature commits if they are
