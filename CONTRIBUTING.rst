@@ -18,7 +18,7 @@ https://github.com/django-helpdesk/django-helpdesk
 Testing
 -------
 
-If you are interested in specific features that are in the development stage and are willing to test the feature prior to release, please register your willingness against he issue and you will be notified when it reaches testing phase.
+If you are interested in specific features that are in the development stage and are willing to test the feature prior to release, please register your willingness against the issue and you will be notified when it reaches testing phase.
 You can see a list of possible enhancements here:
 https://github.com/django-helpdesk/django-helpdesk/labels/enhancement
 
