@@ -18,10 +18,9 @@ https://github.com/django-helpdesk/django-helpdesk
 Testing
 -------
 
-If you don't mind testing pre-releases (don't use in production!), we appreciate
-continuous feedback on the `unstable` branch, which is our work toward the next
-major release. Please file bug reports, and tag the report with the "pre-release"
-tag.
+If you are interested in specific features that are in the development stage and are willing to test the feature prior to release, please register your willingness against the issue and you will be notified when it reaches testing phase.
+You can see a list of possible enhancements here:
+https://github.com/django-helpdesk/django-helpdesk/labels/enhancement
 
 This is an easy way to get involved that doesn't require programming.
 
@@ -30,42 +29,27 @@ Pull Requests
 -------------
 
 Please fork the project on GitHub, make your changes, and submit a
-pull request back into the appropriate branch of the
-`django-helpdesk` repository.
+pull request against the `main` branch of the `django-helpdesk` repository.
 
-Short story:
+The `main` branch always contains the bleeding edge code that has been reviewed and tested.
+all features are developed entirely in a separate branch and are only merged to `main` once all tests and maintainer reviews
+have been passed.
 
-* pull requests for `unstable` are for the next major release
-* pull requests for `stable` are for the current release
+If for some reason you are forced to stay on an older version and need a patch that may apply to others with the same road
+block preventing upgrading to the latest release,
+then you can check out that versions code using the version tag and push your patch to a branch that we can then tag with a
+patch release - it will not be merged to the `main` branch. 
 
-Longer story:
+We reserve the right to decline a pull request raised against the `main` branch if it does not contain adequate unit tests.
 
-In general, our git branching scheme looks like the following.
+Ideally a PR should be as small as possible to avoid complex and time consuming code reviews.
+Break up complex new features or code refactoring into manageable chunks and raise sequential PR's.
+If there are small bugs encountered whilst developing a new feature and they do not have a significant code impact then
+they can be included in the feature PR.
+Otherwise each bugfix, feature, code refactoring or functionality change should be in its own PR.
 
-* `unstable` always points to development for the next major release,
-  major new features should go here
-* `stable` always points to the latest stable release,
-  bugfixes and security patches should go here
-* current and past major releases can also be found in their own branches:
-
-  * `0.3` is the branch for the 0.3 release and any bugfix releases
-  * `0.2.x` is the branch for the 0.2 release and any bugfix releases
-  * `0.1` is the branch for the legacy code; it is no longer supported
-  
-If you want to submit a specific patch for an older release,
-you can put your pull request against that branch specifically.
-However, we don't currently support any older release beyond
-the latest release (currently 0.3).
-
-We reserve the right to decline a pull request if it is not for
-the appropriate branch.
-
-Wherever possible please break git commits up into small chunks that are
-specific to a single bit of functionality. For example, a commit should *not*
-contain both new functionality *and* a bugfix; the new function and the bugfix
-should be separate commits wherever possible.
-
-Commit messages should also explain *what*, precisely, has been changed.
+Please provide clear commit messages per file explaining *what*, precisely, has been changed in that file - it aids in
+researching behaviour issues down the line.
 
 All commits should include appropriate new or updated tests; see the Tests
 section below for more details.
@@ -104,15 +88,17 @@ git with your other code changes.
 Tests
 -----
 
-Currently, test coverage is very low. We're working on increasing this, and to
-make life easier we are using Travis CI (http://travis-ci.org/) for continuous
-integration. This means that the test suite is run every time a code change is
-made, so we can try and make sure we avoid basic bugs and other regressions.
+There is a CI/CD pipeline implemented using Github actions that covers code formatting, code security and unit tests.
+All PR's are required to pass the full test coverage suite and a code review by one or more of the maintainers before
+it can be merged to the main branch.
+Currently, test coverage is very low but all new pull requests are required to have appropriate unit tests
+to cover any new or changed functionality which will increase the coverage over time.
+
 
 As a general policy, we will only accept new feature commits if they are
 accompanied by appropriate unit/functional tests (that is, tests for the
 functionality you just added). Bugfixes should also include new unit tests to
-ensure the bug has been fixed.
+ensure the bug has been fixed and there is no later regression due to other changes.
 
 More significant code refactoring must also include proper integration or
 validation tests, to be committed *BEFORE* the refactoring patches. This is to
