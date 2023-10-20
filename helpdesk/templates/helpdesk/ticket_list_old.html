@@ -229,7 +229,7 @@
                                 {% endif %}
                                 {% if from_saved_query %}
                                     <li class="list-group-item">
-                                        {% blocktrans with saved_query.id as query_id %}<a href='../reports/?saved_query={{ query_id }}'>Run a report</a> on this query to see stats and charts for the data listed below.{% endblocktrans %}
+                                        {% blocktrans with saved_query.id as query_id %}<a href='../reports/?saved-query={{ query_id }}'>Run a report</a> on this query to see stats and charts for the data listed below.{% endblocktrans %}
                                     </li>
                                 {% endif %}
                             </ul>

@@ -36,7 +36,7 @@ class TestQueryActions(TestCase):
             })
         self.assertTrue(is_helpdesk_staff(self.user1))
         self.assertEqual(response.status_code, 302)
-        self.assertTrue('tickets/?saved_query=1' in response.url)
+        self.assertTrue('tickets/?saved-query=1' in response.url)
 
     def test_delete_query(self):
         """Can a query be deleted"""

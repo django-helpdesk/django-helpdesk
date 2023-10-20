@@ -10,7 +10,7 @@
     <div class="collapse" id="ticketform-collapse">
         {% for f in form_choices %}
         <div class="form-check">
-            <input type="checkbox" class="form-check-input" name="ticket_form" value="{{ f.id }}" {% if f.id|in_list:query_params.filtering.ticket_form__id__in %}checked{% endif %}>
+            <input type="checkbox" class="form-check-input" name="form" value="{{ f.id }}" {% if f.id|in_list:query_params.filtering.ticket_form__id__in %}checked{% endif %}>
             <label class="form-check-label">{{ f.name }}</label>
         </div>
         {% endfor %}

@@ -41,7 +41,7 @@
         </div>
         {% endif %}
         {% if staff %}
-        <a href="{% url 'helpdesk:list' %}?kbitem={{item.id}}" class="col-sm">
+        <a href="{% url 'helpdesk:list' %}?kb={{item.id}}" class="col-sm">
             <div class="btn btn-warning btn-circle btn-xl"><i class="fa fa-search fa-lg"></i> {{item.num_open_tickets}} {% trans 'open tickets' %}</div>
         </a>
         {% endif %}

@@ -35,8 +35,7 @@
 <div class="row">
     <div class="col-sm-8 col-md-9 col-lg-10 order-1 pl-3">
         <div id="query_card" class="card mb-2">
-            <div class="card-header pt-1">
-                <!-- Tabs -->
+            <!--<div class="card-header pt-1">
                 <ul class="nav nav-tabs card-header-tabs">
                     <li class="nav-item d-flex align-self-center mr-2 font-weight-bold">
                         {% trans "Search Results" %}
@@ -56,9 +55,8 @@
                         </a>
                     </li>
                 </ul>
-            </div>
+            </div>-->
             <div class="card-body p-0">
-                {{ search_message|safe }}
                 <div class="tab-content" id="myTabContent">
                     <div class="tab-pane fade show active overflow-hidden" id="datatabletabcontents" role="tabpanel"
                     aria-labelledby="datatabletabcontents-tab">
@@ -98,13 +96,13 @@
                                         <optgroup label="Assign To">
                                             <option value="unassign">Nobody (Unassign)</option>
                                             {% for user in user_choices %}
-                                            <option value="assign_{{ user.id }}">{{ user.get_username }}</option>
+                                            <option value="assign_{{ user.id }}">{{ user.username }}</option>
                                             {% endfor %}
                                         </optgroup>
                                         <optgroup label="Set KB Item">
                                             <option value="kbitem_none">No KB Item</option>
-                                            {% for kbi in kb_items %}
-                                            <option value='kbitem_{{ kbi.id }}'>{{ kbi.category.title }}: {{ kbi.title }}</option>
+                                            {% for kbi in kb_item_choices %}
+                                            <option value='kbitem_{{ kbi.id }}'>{{ kbi.category__title }}: {{ kbi.title }}</option>
                                             {% endfor %}
                                         </optgroup>
                                     </select>
@@ -189,7 +187,8 @@
                                         {% endfor %}
                                         {% endif %}
                                     </tr>
-                                    <tr> <!-- Filters -->
+                                    <!--
+                                    <tr>  Filters
                                         {# <th></th> #}
                                         <th colspan="2"><input type="text" class="form-control text-body" placeholder="Filter" data-colfilter="ticket" value="{{query_params.filtering.title__icontains}}" spellcheck="false" data-ms-editor="true"></th>
                                         <th class="d-none"></th>
@@ -206,6 +205,7 @@
                                         <th class="d-none"><input type="text" class="form-control" placeholder="Filter" data-colfilter="kbitem" value="{{query_params.filtering.kbitem__title__icontains}}" spellcheck="false" data-ms-editor="true"></th>
                                         {% comment %} TODO: add support for extra data columns {% endcomment %}
                                     </tr>
+                                    -->
                                 </thead>
                                 <tbody>
                                     {% for ticket in ticket_list %}
@@ -222,9 +222,9 @@
                                         </td>
                                         <td>{% if ticket.get_assigned_to != "Unassigned" %}{{ ticket.get_assigned_to }}{% endif %}</td> {# Remove if statement for "Unassigned" instead of blank #}
                                         <td>{{ ticket.submitter_email }}</td>
-                                        <td class="d-none">{{ ticket.beam_property.count|add:ticket.beam_taxlot.count }}</td>
+                                        <td class="d-none">{{ ticket.paired_count }}</td>
                                         <td><span title='{{ ticket.created|naturaltime }}'>{{ ticket.created|date:"DATETIME_FORMAT" }}</span></td>
-                                        <td><span title='{{ ticket.latest_followup|naturaltime }}'>{{ ticket.latest_followup|date:"DATETIME_FORMAT" }}</span></td>
+                                        <td><span title='{{ ticket.last_reply|naturaltime }}'>{{ ticket.last_reply|date:"DATETIME_FORMAT" }}</span></td>
                                         <td class="d-none"><span title='{{ ticket.due_date|naturaltime }}'>{{ ticket.due_date|date:"DATETIME_FORMAT" }}</span></td>
                                         <td class="d-none">{{ ticket.time_spent_formatted }}</td>
                                         <td class="d-none">{{ ticket.kbitem.title}}</td>
@@ -312,17 +312,21 @@
             </div>
             <div class="card-body p-0">
 
-                {% for q in user_saved_queries %}
-                {% if not q.shared %}
-                <div class="list-group list-group-horizontal">
+                <ul id="saved_list" class="list-group">
+                    {% for q in user_saved_queries %}
+                    {% if not q.shared %}
                     {% if saved_query.id != q.id %}
-                    <a class="list-group-item flex-fill list-group-item-light list-group-item-action text-primary p-2 pl-3 pr-3 border-bottom border-left-0 border-right-0 border-top-0 rounded-0" href="{% url 'helpdesk:list' %}?saved_query={{ q.id }}">{{ q.title }}</a>
+                    <li class="saved_query_selector list-group-item list-group-item-light list-group-item-action text-primary p-2 pl-3 pr-3 border-bottom border-left-0 border-right-0 border-top-0 rounded-0" type="button" value="{{ q.id }}">
+                        {{ q.title }}<button class="delete_query btn btn-danger" style="float:right; z-index=50;padding:0 .4rem;" value="{{ q.id }}" title="Delete Saved Search"><i class="fas fa-times"></i></button>
+                    </li>
                     {% else %}
-                    <a class="list-group-item flex-fill list-group-item-secondary list-group-item-action p-2 pl-3 pr-3 border-bottom border-left-0 border-right-0 border-top-0 rounded-0" href="{% url 'helpdesk:list' %}">{{ q.title }}<span style="float:right;"><i class="fas fa-times"></i></span></a>
+                    <li class="saved_query_selector saved_query_active list-group-item list-group-item-secondary list-group-item-action p-2 pl-3 pr-3 border-bottom border-left-0 border-right-0 border-top-0 rounded-0" type="button" value="{{ q.id }}">
+                        {{ q.title }}<button class="delete_query btn btn-danger" style="float:right; z-index=50;padding:0 .4rem;" value="{{ q.id }}" title="Delete Saved Search"><i class="fas fa-times"></i></button>
+                    </li>
                     {% endif %}
-                </div>
-                {% endif %}
-                {% endfor %}
+                    {% endif %}
+                    {% endfor %}
+                </ul>
 
                 <div class="border-bottom bg-light p-3">
                     <form method='post' action='{% url 'helpdesk:savequery' %}'>
@@ -346,8 +350,7 @@
                 {% trans "Search Filters" %}
             </div>
             <div class="card-body p-0">
-                <form method="post" id="query_form">
-                    {% csrf_token %}
+                <form method="get" id="query_form" action="{% url 'helpdesk:list' %}">
                     <div class="border-bottom p-3">
                         {% include 'helpdesk/filters/sorting.html' %}
                     </div>
@@ -369,7 +372,7 @@
                             <li class=" list-group-item {% if query_params.filtering.priority__in %} filterBoxShow{% endif %} mb-2" id="filterBoxPriority">
                                 {% include 'helpdesk/filters/priority.html' %}
                             </li>
-                            <li class=" list-group-item {% if query_params.filtering.created__gte or query_params.filtering.created__lte %} filterBoxShow{% endif %} mb-2" id='filterBoxDates'>
+                            <li class=" list-group-item {% if query_params.filtering.created__date__gte or query_params.filtering.created__date__lte %} filterBoxShow{% endif %} mb-2" id='filterBoxDates'>
                                 {% include 'helpdesk/filters/date.html' %}
                             </li>
                             <li class=" list-group-item {% if query_params.search_string %} filterBoxShow{% endif %} mb-2" id="filterBoxKeywords">
@@ -381,16 +384,18 @@
                             <li class=" list-group-item {% if query_params.filtering.paired_count__lte or query_params.filtering.paired_count__gte %} filterBoxShow{% endif %} mb-2" id="filterBoxPairedCount">
                                 {% include 'helpdesk/filters/paired_count.html' %}
                             </li>
-                            <li class=" list-group-item {% if query_params.filtering.last_reply__lte or query_params.filtering.last_reply__gte %} filterBoxShow{% endif %}" id="filterBoxLastReply">
+                            <li class=" list-group-item {% if query_params.filtering.last_reply__date__lte or query_params.filtering.last_reply__date__gte %} filterBoxShow{% endif %}" id="filterBoxLastReply">
                                 {% include 'helpdesk/filters/last_reply.html' %}
                             </li>
                         </ul>
                     </div>
 
                     <!-- Hidden Fields -->
-                    <input type='hidden' id='tickets_per_page' name='tickets_per_page' value="{{ tickets_per_page }}"/>
-                    <input type='hidden' id='ticket_page' name='ticket_page' value="1"/>
+                    <input type='hidden' id='n' name='n' value="{{ tickets_per_page }}"/>
+                    <input type='hidden' id='p' name='p' value="1"/>
+                    <input type='hidden' id='saved-query' name='saved-query' value="{{ saved_query.id }}"/>
                     {% comment %} TODO: Make column filter hidden fields dynamically generate from columns {% endcomment %}
+                    <!--
                     <input type='hidden' id='ticket_filter' name='ticket_filter'>
                     <input type='hidden' id='priority_filter' name='priority_filter'>
                     <input type='hidden' id='queue_filter' name='queue_filter'>
@@ -404,6 +409,7 @@
                     <input type='hidden' id='due_date_filter' name='due_date_filter'>
                     <input type='hidden' id='time_spent_filter' name='time_spent_filter'>
                     <input type='hidden' id='kbitem_filter' name='kbitem_filter'>
+                    -->
                 </form>
 
                 <div class="border-bottom border-top bg-light p-2">
@@ -525,21 +531,7 @@
 
         localStorage.setItem("helpdesk.show_query", queryToggle);
     }
-    
-    // CURRENTLY UNUSED
-    // Scroll to place query card centered in view.
-    function scrollQueryCard() {
-        var element = document.getElementById('query_card');
-        var headerOffset = 5;
-        var elementPosition = element.getBoundingClientRect().top;
-        var offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-        
-        window.scrollTo({
-            top: offsetPosition,
-            behavior: "instant"
-        });
-    }
-    
+
     // Detect which columns are currently visible
     // Column visibility determines what data is exported
     function get_visible_cols() {
@@ -557,20 +549,39 @@
     }
 
     function updateTicketsPerPage(tickets_per_page) {
-        document.getElementById('tickets_per_page').value = tickets_per_page
+        document.getElementById('n').value = tickets_per_page
         paginatedQuery()
     }
 
+    var from_saved_query = {% if from_saved_query %}true{% else %}false{% endif %};
     function paginatedQuery(page=1, clearSavedQuery=false) {
-        document.getElementById('ticket_page').value = page
+        document.getElementById('p').value = page
+        /*
         for (const colfilter of document.querySelectorAll('[data-colfilter]')) {
             document.getElementById(colfilter.dataset['colfilter'] + '_filter').value = colfilter.value
         }
-        // submits the form without the parameter for the saved query, if there is one
-        if (clearSavedQuery) {
-            document.forms['query_form'].action = "{% url 'helpdesk:list' %}";
+        */
+
+        if (!clearSavedQuery && $("#saved-query").val() !== '') {
+            // keep the saved query input and erase everything else
+            $("#query_form").find(':input:not(#saved-query)').not(":input[type=hidden]").filter(function() {
+                return true;
+            }).attr('disabled', 'disabled');
+            document.forms['query_form'].submit();
+        } else {
+            if (clearSavedQuery) {
+                // remove the saved query before submitting the form
+                $("#query_form").find("#saved-query").attr('disabled', 'disabled');
+            } else if ($("#saved-query").val() === 'None') {
+                $("#saved-query").val('');
+            }
+            // removes empty inputs from form
+            $("#query_form").find(':input').filter(function() {
+                return !($(this).is('input:checkbox:checked') || !$(this).is('input:checkbox') && $(this).val() !== '');
+            }).attr('disabled', 'disabled');
+
+            document.forms['query_form'].submit();
         }
-        document.forms['query_form'].submit()
     }
 
     // Perform ticket mass update asynchronously, then 
@@ -645,7 +656,6 @@
     function get_url(row) {
         return "{% url 'helpdesk:view' 1234 %}".replace(/1234/, row.id.toString());
     }
-    var json_queries = {{ json_queries | safe }};
     var from_saved_query = {% if from_saved_query %}true{% else %}false{% endif %};
     
     var selected = [];
@@ -653,9 +663,6 @@
     var globalTimeout = null;
     
     $(document).ready(function () {
-        if ( selector ) {
-            adjust_query_buttons();
-        }
         // Duplicate thead for column filtering
         $('#ticketTable thead tr').clone(true).addClass('filters').appendTo('#ticketTable thead');
         $('.filters th').slice(1,).each( function (i) {
@@ -663,161 +670,16 @@
             var title = $('#ticketTable thead th').eq( $(this).index() ).text();
             $(this).html( '<input type="text" style="width:auto" placeholder="'+title+'" data-index="'+i+'" />' );
         } );
-        // Ticket DataTable Initialization
-        var table = $('#ticketTable').DataTable({
-            language: {
-                "emptyTable": "{% trans 'No Tickets Match Your Selection' %}"
-            },
-            processing: true,
-            serverSide: true,
-            scrollX: true, // Allows scrolling horizontally in the table
-            ajax: {
-                "url": "{% url 'helpdesk:datatables_ticket_list' urlsafe_query %}",
-                "type": "GET",
-                "data": function (d) {
-                    // Remove unnecessary data
-                    d.order[0] = Object.assign(d.order[0], {'name': d.columns[d.order[0].column].name});
-                    d.columns = _.map(d.columns, function(v) { return v.search.value === "" ? {} : v});
-                },
-                "dataSrc": function (json) {
-                    all_ticket_ids = json.all_ticket_ids;
-                    return json.data;
-                },
-            },
-            createdRow: function (row, data, dataIndex) {
-                $(row).addClass(data.row_class);
-                if ( $.inArray(String(data.id), selected) !== -1 ) {
-                    $(row).find('input').prop('checked', true);
-                }
-            },
-            dom: "<'row'" +
-            "<'col col-sm-auto'<'select_el'>>" +
-            "<'col col-lg-auto'<'mass_action_el'>>" +
-            "<'col'<'float-right'B>>" +
-            ">" +
-            "t" +
-            "<'row'" +
-            "<'col float-left'l>" +
-            "<'col float-right'p>" +
-            ">",
-            buttons: [{
-                extend: "colvis",
-                columns: ":gt(1)"
-            }],
-            columns: [
-            {
-                name: "id",
-                data: "id",
-                orderable: false,
-                render: function (data, type, row, meta) {
-                    const pk = data;
-                    if (type === 'display') {
-                        data = "<input type='checkbox' name='ticket_id' value='" + pk + "' class='ticket_multi_select' />"
-                    }
-                    return data
-                }
-            },
-            {
-                name: "ticket",
-                data: "ticket",
-                render: function (data, type, row, meta) {
-                    if (type === 'display') {
-                        data = '<div class="tickettitle" data-toggle="tooltip" title="' + row.id + '. ' + row.title + '"><a href="' + get_url(row) + '" >' +
-                            row.id + '. ' +
-                            row.title + '</a></div>';
-                        }
-                        else {
-                            data = '<div data-toggle="tooltip" title="' + row.id + '. ' + row.title + '">' + row.id + '. ' + row.title;
-                            }
-                            return data
-                        }
-                    },
-                    {
-                        name: "priority",
-                        data: "priority",
-                        render: function (data, type, row, meta) {
-                            let priority = "success";
-                            if (data === 'High') {
-                                priority = "warning";
-                            } else if (data === 'Critical') {
-                                priority = "danger";
-                            }
-                            return '<p class="text-' + priority + '">' + data + '</p>';
-                        },
-                        visible: false,
-                    },
-                    {
-                        name: "queue",
-                        data: "queue",
-                        render: function (data, type, row, meta) {
-                            return data.title;
-                        },
-                        visible: false,
-                    },
-                    {name: "status", data: "status"},
-                    {
-                        name: "assigned_to",
-                        data: "assigned_to",
-                        render: function (data, type, row, meta) {
-                            if (data !== "None") {
-                                return data;
-                            }
-                            return "";
-                        }
-                    },
-                    {name: "submitter", data: "submitter"},
-                    {name: "paired_count", data: "paired_count", visible: false},
-                    {name: "created", data: "created"},
-                    {name: "last_reply", data: "last_reply"},
-                    {name: "due_date", data: "due_date", visible: false},
-                    {name: "time_spent", data: "time_spent", visible: false},
-                    {name: "kbitem", data: "kbitem", visible: false},
-                    {% if query_params.filtering.queue__id__in|length == 1 %}
-                    {% for col_name, display_name in extra_data_columns.items %}
-                    {name: "{{ col_name }}", data: "{{ col_name }}"},
-                    {% endfor %}
-                    {% endif %}
-                    ],
-                    orderCellsTop: true,
-                    fixedHeader: true,
-                });
-                if (from_saved_query) {
-                    var all_columns = table.settings().init().columns;
-                    
-                    // Filter visible columns
-                    visible_cols = {{ saved_query.get_visible_cols | safe }}
-                    table.columns().every(function (ind) {
-                        if (!visible_cols.includes(all_columns[ind].name)) {
-                            table.column(ind).visible(false, false);
-                        }
-                    })
-                    table.columns.adjust().draw( false );
-                }
-                
-                
+
                 for (const id of document.querySelectorAll(".ticket_multi_select")) {
                     all_ticket_ids.push(id.value)
                 }
-                
-                // Filter event handler
-                function filterFunction(thisSearch) {
-                    globalTimeout = null;
-                    var column = table.column( $(thisSearch).data('index') )
-                    table
-                    .column( $(thisSearch).data('index') )
-                    .search( thisSearch.value )
-                    .draw();
-                }
+
                 $('#dataTable').off('keyup change').on('keyup', 'thead input', function () {
                     if (globalTimeout != null) clearTimeout(globalTimeout);
                     globalTimeout = setTimeout(filterFunction, 400, this);
                 });
-                
-                // Get visible columns for csv filtering and saving
-                table.on( 'buttons-action', function (e) {
-                    get_visible_cols(); // For table changes
-                });
-                
+
                 get_visible_cols(); // On initialization
                 
                 {# Timeline initialization when tab is displayed #}
@@ -833,48 +695,13 @@
                 $('#timelinetabcontents-tab').on('shown.bs.tab', function (e) {
                     if (!timeline_loaded) {
                         new TL.Timeline(
-                        'timeline-embed',
-                        '{% url 'helpdesk:timeline_ticket_list' urlsafe_query %}'
-                        );
+                            'timeline-embed',
+                            '{% url 'helpdesk:timeline_ticket_list' urlsafe_query %}'
+                            );
                         timeline_loaded = true;
                     }
                 });
-                
-                $("div.select_el").html(
-                "<label>{% trans 'Select:' %}</label>" +
-                "<button id='select_none_btn' type='button' class='btn btn-primary btn-sm'>" +
-                    "<i class='fas fa-times-circle'></i> {% trans 'None' %}" +
-                    "</button>"
-                    );
-                    $("div.mass_action_el").html(
-                    "<label for='id_mass_action'>{% trans 'With Selected Tickets:' %} </label>" +
-                    "<select name='action' id='id_mass_action' style='width: 250px;'>" +
-                        "<option value='take'>{% trans 'Take (Assign to me)' %}</option>" +
-                        "<option value='delete'>{% trans 'Delete' %}</option>" +
-                        "<option value='merge'>{% trans 'Merge' %}</option>" +
-                        "<option value='export'>{% trans 'Export' %}</option>" +
-                        "<option value='pair'>{% trans 'Pair to BEAM inventory' %}</option>" +
-                        "<optgroup label='{% trans 'Close' %}'>" +
-                            "<option value='close'>{% trans "Close (Don't Send E-Mail)" %}</option>" +
-                            "<option value='close_public'>{% trans 'Close (Send E-Mail)' %}</option>" +
-                            "</optgroup>" +
-                            "<optgroup label='{% trans 'Assign To' %}'>" +
-                                "<option value='unassign'>{% trans 'Nobody (Unassign)' %}</option>" +
-                                "{% for u in user_choices %}" +
-                                "<option value='assign_{{ u.id }}'>{{ u.get_username }}</option>" +
-                                "{% endfor %}" +
-                                "</optgroup>" +
-                                "<optgroup label='{% trans 'Set KB Item' %}'>" +
-                                    "<option value='kbitem_none'>{% trans 'No KB Item' %}</option>" +
-                                    "{% for kbi in kb_items %}" +
-                                    "<option value='kbitem_{{ kbi.id }}'>{{ kbi.category.title }}: {{ kbi.title }}</option>" +
-                                    "{% endfor %}" +
-                                    "</optgroup>" +
-                                    "</select>" +
-                                    "<button type='submit' class='btn btn-primary btn-sm'>" +
-                                        "<i class='fas fa-arrow-circle-right'></i> {% trans 'Go' %}" +
-                                        "</button>"
-                                        );
+
                                         
                                         update_selected_ids = function () {
                                             // Add data to post field to be avaiable in mass_update function, and save_query
@@ -926,88 +753,33 @@
                                             update_selected_ids();
                                         });
                                     })
-                                    
-                                    // Handle sharing, unsharing, rejecting, deleting queries
-                                    var selector = $('#id_query_selector');
-                                    if ( selector ) {
-                                        // selector.onchange = adjust_query_buttons;
-                                        selector.change(function() {
-                                            adjust_query_buttons();
-                                        });
-                                        
-                                        function adjust_query_buttons() {
-                                            var value = selector.val();
-                                            var q_data = json_queries[value];
-                                            var user_id = {{ user.id }};
-                                            if (q_data) {
-                                                if (user_id == q_data['user_id']) {
-                                                    $('#reject_query').css('display', 'none')
-                                                    $('#delete_query').css('display', '')
-                                                    // Hide or show sharing options
-                                                    $('#reshare_query').css('display',  q_data['shared'] ? 'none' : '' )
-                                                    $('#unshare_query').css('display', q_data['shared'] ? '' : 'none');
-                                                } else {
-                                                    $('.share').css('display', 'none');
-                                                    $('#delete_query').css('display', 'none')
-                                                    $('#reject_query').css('display', '');
+
+                                    $('.delete_query').click(function() {
+                                        var value = $(this).val();
+                                        var method = "POST";
+                                        var url = "{% url 'helpdesk:delete_query' 1234 %}";
+                                        $.ajax({
+                                            method: method,
+                                            url: url.replace(/1234/, value),
+                                            data: { csrfmiddlewaretoken: '{{ csrf_token }}'},
+                                            success: function(data, textStatus) {
+                                                // Remove option from list
+                                                $(".saved_query_selector[value='" + value + "']").remove();
+                                                if ( from_saved_query && "{{ saved_query.id }}" === value) {
+                                                    window.location.href = "{% url 'helpdesk:list' %}";
                                                 }
-                                            } else {
-                                                // Remove buttons
-                                                $('.remove').css('display', 'none')
-                                                $('.share').css('display', 'none');
-                                                $('#run_query').attr('type', 'hidden');
-                                                // Add placeholder option
-                                                $('#id_query_selector').append('<option>Save a new query to see it here</option>');
                                             }
-                                        }
-                                        
-                                        $('#delete_query, #unshare_query, #reshare_query, #reject_query').click(function() {
-                                            var value = selector.val()
-                                            var action = this.id;
-                                            var method = "GET";
-                                            switch (action) {
-                                                case 'delete_query':
-                                                var url = "{% url 'helpdesk:delete_query' 1234 %}";
-                                                method = "POST";
-                                                break;
-                                                case 'unshare_query':
-                                                var url = "{% url 'helpdesk:unshare_query' 1234 %}";
-                                                break;
-                                                case 'reshare_query':
-                                                var url = "{% url 'helpdesk:reshare_query' 1234 %}";
-                                                break;
-                                                case 'reject_query':
-                                                var url = "{% url 'helpdesk:reject_query' 1234 %}";
-                                                break;
-                                            }
-                                            $.ajax({
-                                                method: method,
-                                                url: url.replace(/1234/, value),
-                                                data: { csrfmiddlewaretoken: '{{ csrf_token }}'},
-                                                success: function(data, textStatus) {
-                                                    if (action == 'delete_query' || action == 'reject_query') {
-                                                        // Remove option from list
-                                                        $("#id_query_selector option[value='" + value + "']").remove();
-                                                        if ( from_saved_query ) {
-                                                            location.reload(); // Refresh page
-                                                        }
-                                                    } else if (action == 'unshare_query') {
-                                                        // Remove 'Shared' from option
-                                                        var option = $("#id_query_selector option[value='" + value + "']")
-                                                        option.text(option.text().replace('(Shared)', ''));
-                                                        json_queries[value]['shared'] = false;
-                                                    } else if (action == 'reshare_query') {
-                                                        // Add 'Shared' to option
-                                                        var option = $("#id_query_selector option[value='" + value + "']")
-                                                        option.text(option.text() + '(Shared)');
-                                                        json_queries[value]['shared'] = true;
-                                                    }
-                                                    // Reset buttons
-                                                    adjust_query_buttons();
-                                                }
-                                            })
                                         })
-                                    }
+                                    });
+
+                                    $(".saved_query_selector").on('click', function (e) {
+                                        if (e.target.classList.contains('saved_query_active')) {
+                                            window.location.href = "{% url 'helpdesk:list' %}";
+                                        } else if (e.target.classList.contains('saved_query_selector')) {
+                                            window.location.href = "{% url 'helpdesk:list' %}?saved-query=" + $(e.target).val();
+                                        }
+                                    });
+
                                 </script>
                                 {% endblock %}
                                 

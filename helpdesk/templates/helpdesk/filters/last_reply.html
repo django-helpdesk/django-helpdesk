@@ -9,11 +9,11 @@
         <div class="input-group">
             <div style="float:left;">
                 <label for="reply-date-start" style="margin-bottom:0px;"><small>Start</small></label>
-                <input id="reply-date-start"  class="form-control" type='date' name='last_reply_from' value='{{ query_params.filtering.last_reply__gte }}' placeholder="From" id='id_last_reply_from' style="max-width:100%" />
+                <input id="reply-date-start"  class="form-control" type='date' name='re-from' value='{{ query_params.filtering.last_reply__date__gte }}' placeholder="From" style="max-width:100%" />
             </div>
             <div style="float:left;">
                 <label for="reply-date-end" style="margin-bottom:0px;"><small>End</small></label>
-                <input id="reply-date-end"  class="form-control" type='date' name='last_reply_to' value='{{ query_params.filtering.last_reply__lte }}' placeholder="To" id='id_last_reply_to' style="max-width:100%" />
+                <input id="reply-date-end"  class="form-control" type='date' name='re-to' value='{{ query_params.filtering.last_reply__date__lte }}' placeholder="To" style="max-width:100%" />
             </div>
         </div>
     </div>

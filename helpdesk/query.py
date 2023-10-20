@@ -4,12 +4,15 @@ from django.db.models.functions import Concat
 from django.urls import reverse
 from django.utils.html import escape
 from django.utils.translation import ugettext as _
+from django.utils import timezone
 
 from base64 import b64encode
 from base64 import b64decode
 import json
 from functools import reduce
 import operator
+from datetime import datetime
+import copy
 
 from helpdesk.decorators import is_helpdesk_staff
 from helpdesk.models import Ticket, CustomField, FormType, FollowUp
@@ -139,10 +142,7 @@ def get_query_class():
 
     def _get_query_class():
         return __Query__
-    return getattr(settings,
-                   'HELPDESK_QUERY_CLASS',
-                   _get_query_class)()
-
+    return getattr(settings, 'HELPDESK_QUERY_CLASS', _get_query_class)()
 
 class __Query__:
     def __init__(self, huser, base64query=None, query_params=None):
@@ -170,29 +170,29 @@ class __Query__:
 
         sorting: The name of the column to sort by
         """
-        filter = self.params.get('filtering', {})
+        filter = copy.copy(self.params.get('filtering', {}))
         filter_or = self.params.get('filtering_or', {})
-        if 'paired_count__lte' in filter or 'paired_count__gte' in filter or 'paired_count__icontains' in filter:
-            queryset = queryset.annotate(paired_count=Count('beam_property') + Count('beam_taxlot'))
-        if 'last_reply__lte' in filter or 'last_reply__gte' in filter or 'last_reply__icontains' in filter:
-            queryset = queryset.annotate(last_reply=Max('followup__date'))
-        queryset = queryset.filter((Q(**filter) | Q(**filter_or)) & self.get_search_filter_args())
         sorting = self.params.get('sorting', None)
+
+        for key, value in filter.items():
+            if '__date__' in key:
+                filter[key] = datetime.strptime(value, '%Y-%m-%d').replace(
+                        tzinfo=timezone.get_current_timezone()).astimezone(timezone.get_current_timezone()).date()
+
+        queryset = queryset.annotate(paired_count=Count('beam_property__id', distinct=True) + Count('beam_taxlot__id', distinct=True))
+        followup_subquery = FollowUp.objects.filter(ticket_id=OuterRef("id")).reverse().values('date')
+        queryset = queryset.annotate(last_reply=Subquery(followup_subquery[:1]))
+
         if sorting:
-            sortreverse = self.params.get('sortreverse', None)
+            sortreverse = self.params.get('desc', None)
             if sortreverse:
                 sorting = "-%s" % sorting
-            if 'paired_count' in sorting:
-                queryset = queryset.annotate(paired_count=Count('beam_property') + Count('beam_taxlot')).order_by(sorting)
-            else:
-                queryset = queryset.order_by(sorting)
+            queryset = queryset.order_by(sorting)
+
+        queryset = queryset.filter((Q(**filter) | Q(**filter_or)) & self.get_search_filter_args())
+
         # https://stackoverflow.com/questions/30487056/django-queryset-contains-duplicate-entries
-
-        # avoids running ticket.get_last_followup for each ticket by fetching them all at once
-        followup_subquery = FollowUp.objects.filter(ticket_id=OuterRef("id")).reverse().values('date')
-        queryset = queryset.annotate(latest_followup=Subquery(followup_subquery[:1]))
-
-        return queryset.distinct()
+        return queryset
 
     def get_cache_key(self):
         return str(self.huser.user.pk) + ":" + self.base64
@@ -200,7 +200,7 @@ class __Query__:
     def refresh_query(self):
         tickets = self.huser.get_tickets_in_queues().select_related(
             'queue', 'ticket_form', 'assigned_to').prefetch_related(
-            'followup_set__user', 'beam_property', 'beam_taxlot'
+            'followup_set__user',  # followup_set__user helps with ticket.time_spent_formatted
         )
         ticket_qs = self.__run__(tickets)
         # cache runs the entire query before the pagination can divvy it up

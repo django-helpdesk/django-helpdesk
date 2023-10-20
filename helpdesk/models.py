@@ -1555,7 +1555,7 @@ class KBItem(models.Model):
 
     def query_url(self):
         from django.urls import reverse
-        return str(reverse('helpdesk:list')) + "?kbitem=" + str(self.pk)
+        return str(reverse('helpdesk:list')) + "?kb=" + str(self.pk)
 
     def num_open_tickets(self):
         return Ticket.objects.filter(kbitem=self, status__in=(1, 2, 6)).count()

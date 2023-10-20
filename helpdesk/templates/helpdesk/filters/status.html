@@ -10,7 +10,7 @@
     <div class="collapse" id="status-collapse">
         {% for s in status_choices %}
         <div class="form-check">
-            <input type="checkbox" class="form-check-input" name="status" value="{{ s.0 }}" {% if s.0|in_list:query_params.filtering.status__in %}checked{% endif %}>
+            <input type="checkbox" class="form-check-input" name="s" value="{{ s.0 }}" {% if s.0|in_list:query_params.filtering.status__in %}checked{% endif %}>
             <label class="form-check-label">{{ s.1 }}</label>
         </div>
         {% endfor %}

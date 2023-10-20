@@ -10,14 +10,14 @@
     <div class="collapse" id="owner-collapse">
         {% with magic_number=-1 %}
         <div class="form-check">
-            <input type="checkbox" class="form-check-input" name="assigned_to" value="{{ magic_number }}" {% if magic_number|in_list:query_params.filtering.assigned_to__id__in %}checked{% endif %}>
+            <input type="checkbox" class="form-check-input" name="u" value="{{ magic_number }}" {% if magic_number|in_list:query_params.filtering.assigned_to__id__in %}checked{% endif %}>
             <label class="form-check-label">{% trans "Unassigned" %}</label>
         </div>
         {% endwith %}
         {% for u in user_choices %}
         <div class="form-check">
-            <input type="checkbox" class="form-check-input" name="assigned_to" value="{{ u.id }}" {% if u.id|in_list:query_params.filtering.assigned_to__id__in %}checked{% endif %}>
-            <label class="form-check-label">{{ u.get_full_name|default:u.get_username }}{% ifequal u user %} {% trans "(ME)" %}{% endifequal %}</label>
+            <input type="checkbox" class="form-check-input" name="u" value="{{ u.id }}" {% if u.id|in_list:query_params.filtering.assigned_to__id__in %}checked{% endif %}>
+            <label class="form-check-label">{% if u.first_name and u.last_name %}{{ u.first_name}} {{ u.last_name }}{% else %}{{ u.username }}{% endif %}{% ifequal u user %} {% trans "(ME)" %}{% endifequal %}</label>
         </div>
         {% endfor %}
     </div>

@@ -36,9 +36,9 @@
         <div class="input-group-append">
             <div class="btn-group-toggle" data-toggle="buttons">
                 <label class="btn btn-outline-secondary" style="border-top-left-radius: 0; border-bottom-left-radius: 0;">
-                    <input type='checkbox' name='sortreverse' id='id_sortreverse' {% if query_params.sortreverse %} checked='checked'{% endif %} />
-                    <i id="sort_asc" class="fas fa-sort-amount-down-alt" {% if query_params.sortreverse %}style="display:none;"{% endif %}></i>
-                    <i id="sort_desc" class="fas fa-sort-amount-up-alt" {% if not query_params.sortreverse %}style="display:none;"{% endif %}></i>
+                    <input type='checkbox' name='desc' id='id_sortreverse' {% if query_params.desc %} checked='checked'{% endif %} />
+                    <i id="sort_asc" class="fas fa-sort-amount-down-alt" {% if query_params.desc %}style="display:none;"{% endif %}></i>
+                    <i id="sort_desc" class="fas fa-sort-amount-up-alt" {% if not query_params.desc %}style="display:none;"{% endif %}></i>
                 </label>
             </div>
         </div>
