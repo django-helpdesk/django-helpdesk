@@ -107,4 +107,30 @@ To integrate `django-ses`, bindmount a file to `/opt/extra-dependencies.txt` con
 
    django-ses
 
-Ensure to update the `docker.env` file with your necessary secrets.
+Make sure you update the `docker.env` file with the necessary secrets.
+
+
+S3 base attachment support
+---------------------------
+
+Working from the previous SES example we add the following to `local_settings`:
+
+.. code-block:: python
+
+    AWS_S3_REGION_NAME = os.environ.get("AWS_S3_REGION_NAME", "eu-central-1")
+    AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_STORAGE_BUCKET_NAME", "bitswan-helpdesk-attachments")
+    AWS_QUERYSTRING_AUTH = os.environ.get("AWS_QUERYSTRING_AUTH", True)
+    AWS_QUERYSTRING_EXPIRE = os.environ.get(
+        "AWS_QUERYSTRING_EXPIRE", 60 * 60
+    )
+    AWS_DEFAULT_ACL = "private"
+
+    DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+
+
+To integrate `django-ses`, bindmount a file to `/opt/extra-dependencies.txt` containing:
+
+.. code-block:: text
+
+   django-storages
+   boto3
