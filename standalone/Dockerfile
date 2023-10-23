@@ -4,7 +4,8 @@ RUN apt-get update
 RUN apt-get install -yqq \
    postgresql-common \
    postgresql-client \
-   cron
+   cron \
+   git
 COPY requirements.txt /opt/django-helpdesk/requirements.txt
 COPY standalone/extra-requirements.txt /opt/django-helpdesk/standalone/extra-requirements.txt
 RUN pip3 install -r /opt/django-helpdesk/requirements.txt
