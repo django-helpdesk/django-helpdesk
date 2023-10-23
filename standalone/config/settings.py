@@ -65,7 +65,7 @@ MIDDLEWARE = [
     "whitenoise.middleware.WhiteNoiseMiddleware",
 ]
 
-ROOT_URLCONF = 'demo.demodesk.config.urls'
+ROOT_URLCONF = 'standalone.config.urls'
 
 TEMPLATES = [
     {
