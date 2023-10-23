@@ -89,6 +89,8 @@ An example `local_settings` configuration for utilizing AWS SES for email:
 
 .. code-block:: python
 
+
+   from .settings import *
    import os
 
    DEFAULT_FROM_EMAIL = "support@bitswan.space"
