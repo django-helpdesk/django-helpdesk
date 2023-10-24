@@ -57,17 +57,16 @@ STRIPPED_SUBJECT_STRINGS = [
 HTML_EMAIL_ATTACHMENT_FILENAME = _("email_html_body.html")
 
 
-def process_email(quiet: bool =False, debug_to_stdout=False):
+def process_email(quiet: bool = False, debug_to_stdout: bool = False):
     if debug_to_stdout:
         print("Extracting email into queues...")
-    q: Queue() # Typing ahead of time for loop to make it more useful in an IDE
+    q: Queue()  # Typing ahead of time for loop to make it more useful in an IDE
     for q in Queue.objects.filter(
             email_box_type__isnull=False,
             allow_email_submission=True):
         log_msg = f"Processing queue: {q.slug} Email address: {q.email_address}..."
         if debug_to_stdout:
-            print(log_msg )
-            
+            print(log_msg)
         logger = logging.getLogger('django.helpdesk.queue.' + q.slug)
         logging_types = {
             'info': logging.INFO,
@@ -103,11 +102,11 @@ def process_email(quiet: bool =False, debug_to_stdout=False):
                 if logger.isEnabledFor(logger.INFO):
                     logger.info(log_msg)
                 if debug_to_stdout:
-                    print(log_msg )
-        except Exception as e:
-            logger.error("Queue processing failed: {q.slug}", exc_info=True)
+                    print(log_msg)
+        except Exception:
+            logger.error("Queue processing failed: {q.slug} -- {e}", exc_info=True)
             if debug_to_stdout:
-                print(f"Queue processing failed: {q.slug}" )
+                print(f"Queue processing failed: {q.slug}")
                 print("-"*60)
                 traceback.print_exc(file=sys.stdout)
         finally:
