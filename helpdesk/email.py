@@ -37,9 +37,9 @@ import socket
 import ssl
 import sys
 from time import ctime
+import traceback
 import typing
 from typing import List
-import traceback
 
 
 # import User model, which may be a custom model
