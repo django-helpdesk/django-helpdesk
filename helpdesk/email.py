@@ -99,8 +99,7 @@ def process_email(quiet: bool = False, debug_to_stdout: bool = False):
                 q.email_box_last_check = timezone.now()
                 q.save()
                 log_msg: str = f"Queue successfully processed: {q.slug}"
-                if logger.isEnabledFor(logger.INFO):
-                    logger.info(log_msg)
+                logger.info(log_msg)
                 if debug_to_stdout:
                     print(log_msg)
         except Exception:
