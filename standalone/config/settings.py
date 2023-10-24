@@ -65,7 +65,7 @@ MIDDLEWARE = [
     "whitenoise.middleware.WhiteNoiseMiddleware",
 ]
 
-ROOT_URLCONF = 'demo.demodesk.config.urls'
+ROOT_URLCONF = 'standalone.config.urls'
 
 TEMPLATES = [
     {
@@ -229,8 +229,3 @@ MEDIA_ROOT = '/data/media'
 
 # for Django 3.2+, set default for autofields:
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
-
-try:
-    from .local_settings import *
-except ImportError:
-    pass
