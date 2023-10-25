@@ -22,24 +22,24 @@
             <div class="panel-body">
                 <p><a href='add/'><button class="btn btn-success btn"><i class="fa fa-plus-circle"></i> {% trans "Add a reply" %}</button></a></p>
                 <div class="table-responsive">
-                    <table class="table table-striped table-bordered table-hover">
-                        <thead>
+                    <table class="table">
+                        <thead class="thead-light">
                             <tr>
-                                <th>{% trans "Name" %}</th>
-                                <th>{% trans "Queues" %}</th>
+                                <th style="width:1%;">{% trans "Name" %}</th>
+                                <th style="width:1%;">{% trans "Queues" %}</th>
                                 <th>{% trans "Body" %}</th>
-                                <th>{% trans "Edit" %}</th>
-                                <th>{% trans "Remove" %}</th>
+                                <th style="width:1%;">{% trans "Edit" %}</th>
+                                <th style="width:1%;">{% trans "Remove" %}</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for reply in reply_list %}
-                            <tr class='row_{% cycle 'odd' 'even' %}'>
+                            <tr>
                                 <td>{{ reply.name }}</td>
                                 <td>{% for queue in reply.queues.all %}{{ queue.slug }}{% if not forloop.last %}, {% endif %}{% empty %}{% trans "All" %}{% endfor %}</td>
                                 <td>{{ reply.body }}</td>
-                                <td><a href='{% url 'helpdesk:preset_reply_edit' reply.id %}'><button class="btn btn-warning btn-xs">{% trans "Edit" %}</button></a></td>
-                                <td><a href='{% url 'helpdesk:preset_reply_delete' reply.id %}'><button class="btn btn-danger btn-xs">{% trans "Remove" %}</button></a></td>
+                                <td><a href='{% url 'helpdesk:preset_reply_edit' reply.id %}'><button class="btn btn-warning btn-sm">{% trans "Edit" %}</button></a></td>
+                                <td><a href='{% url 'helpdesk:preset_reply_delete' reply.id %}'><button class="btn btn-danger btn-sm">{% trans "Remove" %}</button></a></td>
                             </tr>
                             {% endfor %}
                         </tbody>
