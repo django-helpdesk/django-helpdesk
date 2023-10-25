@@ -425,6 +425,29 @@ class FormType(models.Model):
         fields = CustomField.objects.filter(ticket_form=self.id).values_list('field_name', 'label')
         return {field_name: label for field_name, label in fields if not is_extra_data(field_name)}
 
+
+class Tag(models.Model):
+    RED_CHOICE = 'danger'
+    ORANGE_CHOICE = 'warning'
+    GREEN_CHOICE = 'success'
+    LIGHT_BLUE_CHOICE = 'info'
+    BLUE_CHOICE = 'primary'
+    GRAY_CHOICE = 'secondary'
+
+    COLOR_CHOICES = (
+        (RED_CHOICE, _('red')),
+        (ORANGE_CHOICE, _('orange')),
+        (GREEN_CHOICE, _('green')),
+        (LIGHT_BLUE_CHOICE, _('light blue')),
+        (BLUE_CHOICE, _('blue')),
+        (GRAY_CHOICE, _('gray')),
+    )
+
+    name = models.CharField(max_length=200)
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
+    color = models.CharField(max_length=30, choices=COLOR_CHOICES, default=GREEN_CHOICE)
+
+
 @receiver(post_save, sender=FormType)
 def insert_presets_to_db(instance, created, **kwargs):
     from helpdesk.preset_form_fields import get_preset_fields
@@ -518,6 +541,7 @@ class Ticket(models.Model):
                                            verbose_name='BEAM Property')
     beam_taxlot = models.ManyToManyField(TaxLot, blank=True, related_name='helpdesk_ticket',  # TODO make plural
                                          verbose_name='BEAM Taxlot')  # TODO hide prop/taxlot from form fields
+    tags = models.ManyToManyField(Tag, blank=True, related_name="tickets")
 
     # Contains extra fields, determined by items in CustomField
     extra_data = models.JSONField(default=dict, blank=True)

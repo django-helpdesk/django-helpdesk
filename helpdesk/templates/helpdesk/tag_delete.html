@@ -1,0 +1,28 @@
+{% extends "helpdesk/base.html" %}{% load i18n %}
+
+{% block helpdesk_title %}{% trans "Delete Tag" %}{% endblock %}
+
+{% block helpdesk_breadcrumb %}
+<li class="breadcrumb-item">
+    <a href="{% url 'helpdesk:system_settings' %}">{% trans "System Settings" %}</a>
+</li>
+<li class="breadcrumb-item active">
+    <a href="{% url 'helpdesk:tag_list' %}">{% trans "Tags" %}</a>
+</li>
+<li class="breadcrumb-item active">{% trans "Delete Tag" %}</li>
+{% endblock %}
+
+{% block helpdesk_body %}
+<h2>{% trans "Delete Tag" %}</h2>
+
+<p>Are you sure you wish to delete this tag (<em>{{ tag.name }}</em>)?
+    Deleting will remove it from all tickets.</p>
+
+<form method='post' action='./'>
+    <button class="btn btn-danger" type='submit'>{% trans "Delete" %}</button>
+{% csrf_token %}</form>
+<br/>
+<p><a href='../../'><button class="btn btn-primary btn">{% trans "Cancel" %}</button></a></p>
+
+
+{% endblock %}

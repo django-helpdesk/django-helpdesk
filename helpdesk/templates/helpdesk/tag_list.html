@@ -1,0 +1,57 @@
+{% extends "helpdesk/base.html" %}{% load i18n %}
+
+{% block helpdesk_title %}{% trans "Tags" %}{% endblock %}
+
+{% block helpdesk_breadcrumb %}
+<li class="breadcrumb-item">
+    <a href="{% url 'helpdesk:system_settings' %}">{% trans "System Settings" %}</a>
+</li>
+<li class="breadcrumb-item active">
+    Tags
+</li>
+{% endblock %}
+
+{% block helpdesk_body %}{% blocktrans %}
+<h2>Tags</h2>
+
+<p>Here you can create, edit, and delete Helpdesk tags. They can be used to sort and categorize tickets. Helpdesk will not automatically apply or remove tags from tickets.</p>{% endblocktrans %}
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="panel panel-primary">
+            <!-- /.panel-heading -->
+            <div class="panel-body">
+                <p><a href='add/'><button class="btn btn-success btn"><i class="fa fa-plus-circle"></i> {% trans "Create a Tag" %}</button></a></p>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>{% trans "Tag" %}</th>
+                                <th style="width:10%;">{% trans "View Tagged Tickets" %}</th>
+                                <th style="width:1%;">{% trans "Edit" %}</th>
+                                <th style="width:1%;">{% trans "Delete" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for tag in tag_list %}
+                            <tr>
+                                <td style="vertical-align:middle;"><span style="font-size:95%;" class="badge badge-{{tag.color}}">{{ tag.name }}</span></td>
+                                <td style="vertical-align:middle;text-align:center;"><a href="{% url 'helpdesk:list' %}?t={{ tag.id }}">View tickets</a></td>
+                                <td style="vertical-align:middle;"><a href='{% url 'helpdesk:tag_edit' tag.id %}'><button class="btn btn-warning btn-xs">{% trans "Edit" %}</button></a></td>
+                                <td style="vertical-align:middle;"><a href='{% url 'helpdesk:tag_delete' tag.id %}'><button class="btn btn-danger btn-xs">{% trans "Delete" %}</button></a></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <!-- /.table-responsive -->
+            </div>
+            <!-- /.panel-body -->
+        </div>
+        <!-- /.panel -->
+    </div>
+    <!-- /.col-lg-12 -->
+</div>
+<!-- /.row -->
+
+{% endblock %}

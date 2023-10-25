@@ -49,9 +49,17 @@ urlpatterns = [
         staff.ticket_list,
         name='list'),
 
+    url(r'^tickets/tags/$',
+        staff.get_tags,
+        name='get_tags'),
+
     url(r'^tickets/update/$',
         staff.mass_update,
         name='mass_update'),
+
+    url(r'^tickets/update_tags/$',
+        staff.mass_update_tags,
+        name='mass_update_tags'),
 
     url(r'^tickets/merge$',
         staff.merge_tickets,
@@ -117,6 +125,8 @@ urlpatterns = [
         staff.beam_unpair,
         name='ticket_beam_unpair'),
 
+    url(r'^tickets/(?P<ticket_id>[0-9]+)/edit_tags/$', staff.edit_ticket_tags, name='edit_ticket_tags'),
+
     url(r'^raw/(?P<type>\w+)/$',
         staff.raw_details,
         name='raw'),
@@ -161,6 +171,11 @@ urlpatterns = [
     url(r'^ignore/add/$', staff.email_ignore_add, name='email_ignore_add'),
     url(r'^ignore/edit/(?P<id>[0-9]+)/$', staff.email_ignore_edit, name='email_ignore_edit'),
     url(r'^ignore/delete/(?P<id>[0-9]+)/$', staff.email_ignore_del, name='email_ignore_del'),
+
+    url(r'^tag/$', staff.tag_list, name='tag_list'),
+    url(r'^tag/add/$', staff.tag_add, name='tag_add'),
+    url(r'^tag/edit/(?P<id>[0-9]+)/$', staff.tag_edit, name='tag_edit'),
+    url(r'^tag/delete/(?P<id>[0-9]+)/$', staff.tag_delete, name='tag_delete'),
 
     url(r'^preset_reply/$', staff.preset_reply_list, name='preset_reply_list'),
     url(r'^preset_reply/add/$', staff.preset_reply_add, name='preset_reply_add'),

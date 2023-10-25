@@ -22,7 +22,7 @@ from django.shortcuts import get_object_or_404
 
 from helpdesk.lib import safe_template_context, process_attachments
 from helpdesk.models import (Ticket, Queue, FollowUp, IgnoreEmail, TicketCC,
-                             CustomField, TicketDependency, UserSettings, KBItem,
+                             CustomField, TicketDependency, UserSettings, KBItem, Tag,
                              FormType, KBCategory, KBIAttachment, is_extra_data, PreSetReply, EmailTemplate, clean_html)
 from helpdesk import settings as helpdesk_settings
 from helpdesk.email import create_ticket_cc
@@ -141,7 +141,7 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
     class Meta:
         model = Ticket
         exclude = ('assigned_to', 'created', 'modified', 'status', 'on_hold', 'resolution', 'last_escalation',
-                   'organization', 'ticket_form', 'beam_property', 'beam_taxlot')
+                   'organization', 'ticket_form', 'beam_property', 'beam_taxlot', 'tags')
 
     class Media:
         js = ('helpdesk/js/init_due_date.js', 'helpdesk/js/init_datetime_classes.js', 'helpdesk/js/validate.js')
@@ -1097,6 +1097,22 @@ class EmailIgnoreForm(forms.ModelForm):
 
         if self.organization:
             self.fields['queues'].queryset = self.organization.queue_set.all()
+
+
+class TagForm(forms.ModelForm):
+
+    class Meta:
+        model = Tag
+        exclude = ['organization']
+
+    def __init__(self, *args, **kwargs):
+        if 'instance' in kwargs:
+            instance = kwargs.get('instance', None)
+            self.organization = instance.organization
+        elif 'organization' in kwargs:
+            self.organization = kwargs.pop('organization', None)
+
+        super(TagForm, self).__init__(*args, **kwargs)
 
 
 class PreSetReplyForm(forms.ModelForm):

@@ -50,7 +50,7 @@ from helpdesk.decorators import (
 from helpdesk.forms import (
     TicketForm, UserSettingsForm, EmailIgnoreForm, EditTicketForm, TicketCCForm,
     TicketCCEmailForm, TicketCCUserForm, EditFollowUpForm, TicketDependencyForm, MultipleTicketSelectForm,
-    EditQueueForm, EditFormTypeForm, PreSetReplyForm, EmailTemplateForm
+    EditQueueForm, EditFormTypeForm, PreSetReplyForm, EmailTemplateForm, TagForm
 )
 from helpdesk.lib import (
     safe_template_context,
@@ -60,7 +60,7 @@ from helpdesk.lib import (
 from helpdesk.models import (
     Ticket, Queue, FollowUp, TicketChange, PreSetReply, FollowUpAttachment, SavedSearch,
     IgnoreEmail, TicketCC, TicketDependency, UserSettings, KBItem, CustomField, is_unlisted,
-    FormType, EmailTemplate, get_markdown, clean_html
+    FormType, EmailTemplate, get_markdown, clean_html, Tag
 )
 
 from helpdesk import settings as helpdesk_settings
@@ -982,6 +982,7 @@ def view_ticket(request, ticket_id):
         'priorities': Ticket.PRIORITY_CHOICES,
         'preset_replies': PreSetReply.objects.filter(organization=org).filter(
             Q(queues=ticket.queue) | Q(queues__isnull=True)),
+        'tag_choices': Tag.objects.filter(organization=org).only('id', 'name', 'color'),
         'ticketcc_string': ticketcc_string,
         'SHOW_SUBSCRIBE': show_subscribe,
         'extra_data': extra_data,
@@ -1758,18 +1759,19 @@ def ticket_list(request):
         'queue': 'queue__id__in',
         'form': 'ticket_form__id__in',
         'priority': 'priority__in',
-        'query': '',
+        't': 'tags__in',
     }
+    int_list_filter_null_params = dict([
+        ('u', 'assigned_to__id__isnull'),
+        ('kb', 'kbitem__isnull'),
+        ('t', 'tags__isnull'),
+    ])
 
     int_filter_params = {
         'inv-min': 'paired_count__gte',
         'inv-max': 'paired_count__lte',
     }
 
-    int_list_filter_null_params = dict([
-        ('u', 'assigned_to__id__isnull'),
-        ('kb', 'kbitem__isnull'),
-    ])
     DATE_REGEX = r"(?:[0-9]{2})?[0-9]{2}-(?:1[0-2]|0?[1-9])-(?:3[01]|[12][0-9]|0?[1-9])"
     DATE_PARAM_KEY = {
         'from': 'created__date__gte',
@@ -1915,6 +1917,7 @@ def ticket_list(request):
     kbitem_choices = KBItem.objects.filter(category__organization=org).values('id', 'title', 'category__title')
     form_choices = FormType.objects.filter(organization=org)
     user_choices = list_of_helpdesk_staff(org).values('id', 'username', 'first_name', 'last_name')
+    tag_choices = Tag.objects.filter(organization=org).values('id', 'name', 'color')
 
     """
     # Get extra data columns to be displayed if only 1 queue is selected
@@ -1961,6 +1964,7 @@ def ticket_list(request):
         priority_choices=Ticket.PRIORITY_CHOICES,
         status_choices=Ticket.STATUS_CHOICES,
         kb_item_choices=kbitem_choices,
+        tag_choices=tag_choices,
         urlsafe_query=urlsafe_query,
         user_saved_queries=user_saved_queries,
         query_params=query_params,
@@ -2667,6 +2671,127 @@ def email_template_default(request, id):
 
 
 email_template_default = helpdesk_staff_member_required(email_template_default)
+
+
+@helpdesk_staff_member_required
+def edit_ticket_tags(request, ticket_id):
+    """
+    Given a ticket_id and list of tag ids, assigns those tags to the ticket.
+    """
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+    tag_ids = request.POST.getlist('tag', [])
+    tags = Tag.objects.filter(id__in=tag_ids)
+    ticket.tags.set(tags)
+    return HttpResponseRedirect(reverse('helpdesk:view', args=[ticket_id]))
+
+
+@helpdesk_staff_member_required
+def tag_list(request):
+    """
+    Returns a list of tags for the settings page.
+    """
+    org = request.user.default_organization.helpdesk_organization
+
+    return render(request, 'helpdesk/tag_list.html', {
+        'tag_list': Tag.objects.filter(organization=org),
+        'debug': settings.DEBUG,
+    })
+
+
+@helpdesk_staff_member_required
+def tag_add(request):
+    """
+    Creates a new Tag.
+    """
+    if request.method == 'POST':
+        form = TagForm(request.POST, organization=request.user.default_organization.helpdesk_organization)
+        if form.is_valid():
+            saved_form = form.save(commit=False)
+            saved_form.organization = request.user.default_organization.helpdesk_organization
+            saved_form.save()
+            return HttpResponseRedirect(reverse('helpdesk:tag_list'))
+    else:
+        form = TagForm(request.GET, organization=request.user.default_organization.helpdesk_organization)
+
+    return render(request, 'helpdesk/tag_add.html', {'form': form, 'debug': settings.DEBUG})
+
+
+@helpdesk_staff_member_required
+def tag_edit(request, id):
+    """
+    Edits a Tag's data.
+    """
+    tag = get_object_or_404(Tag, id=id)
+    form = TagForm(request.POST or None, instance=tag)
+    if form.is_valid():
+        form.save()
+        return HttpResponseRedirect(reverse('helpdesk:tag_list'))
+
+    return render(request, 'helpdesk/tag_add.html', {'form': form, 'debug': settings.DEBUG})
+
+
+@helpdesk_staff_member_required
+def tag_delete(request, id):
+    """
+    Deletes a tag, removing it from all tickets.
+    """
+    tag = get_object_or_404(Tag, id=id)
+    if request.method == 'POST':
+        tag.delete()
+        return HttpResponseRedirect(reverse('helpdesk:tag_list'))
+    else:
+        return render(request, 'helpdesk/tag_delete.html', {'tag': tag, 'debug': settings.DEBUG})
+
+
+@helpdesk_staff_member_required
+def get_tags(request):
+    """
+    Returns a dictionary with tag ids as keys and on, indeterminate, or off as values, to style the checkboxes for editing ticket tags en-masse.
+    """
+    ticket_ids = request.GET.getlist('selected[]')
+    if not ticket_ids:
+        return JsonResponse({
+            'success': False,
+            'message': 'Must pass a ticket ID'
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    tag_checkboxes = {}
+    for tag in Tag.objects.filter(organization=request.user.default_organization.helpdesk_organization):
+        count = tag.tickets.filter(id__in=ticket_ids).count()
+        if count == 0:
+            tag_checkboxes[tag.id] = 'off'
+        elif count != len(ticket_ids):
+            tag_checkboxes[tag.id] = 'indeterminate'
+        elif count == len(ticket_ids):
+            tag_checkboxes[tag.id] = 'on'
+
+    return JsonResponse({
+        "tags": tag_checkboxes,
+    }, status=200)
+
+
+@helpdesk_staff_member_required
+def mass_update_tags(request):
+    """
+    Takes a list of ticket ids, tag ids to add, and tag ids to remove, and adds and/or removes tags from those tickets.
+    """
+    ticket_ids = request.POST.getlist('selected[]')
+    if not ticket_ids:
+        return JsonResponse({
+            'success': False,
+            'message': 'Must pass a ticket ID'
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    add_tag_ids = request.POST.getlist('add_tags[]')
+    remove_tag_ids = request.POST.getlist('remove_tags[]')
+
+    add_tags = Tag.objects.filter(id__in=add_tag_ids, organization=request.user.default_organization.helpdesk_organization)
+    remove_tags = Tag.objects.filter(id__in=remove_tag_ids, organization=request.user.default_organization.helpdesk_organization)
+
+    for ticket in Ticket.objects.filter(id__in=ticket_ids, ticket_form__organization=request.user.default_organization.helpdesk_organization):
+        ticket.tags.add(*add_tags)
+        ticket.tags.remove(*remove_tags)
+    return JsonResponse({'update_status': "Ticket Update Complete"})
 
 
 @helpdesk_staff_member_required

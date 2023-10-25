@@ -60,8 +60,6 @@
                 <div class="tab-content" id="myTabContent">
                     <div class="tab-pane fade show active overflow-hidden" id="datatabletabcontents" role="tabpanel"
                     aria-labelledby="datatabletabcontents-tab">
-                    <form method='post' action="{% url 'helpdesk:mass_update' %}" id="ticket_mass_update">
-                        {% csrf_token %}
                         <!-- Action Toolbar -->
                         <div class="d-flex flex-wrap justify-content-between overflow-auto px-2 pb-2 border-bottom mw-100" style="max-width: 100%; //background-color: #f7f7f7">
                             <a id="show_query" class="btn btn-outline-primary mt-2 mr-2" onclick="toggleQuerySelector()">
@@ -79,37 +77,65 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="d-flex align-items-center mt-2 mr-2">
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <label class="input-group-text bg-white border-0">Action:</label>
-                                    </div>
-                                    <select class="custom-select rounded-left" name="action" id="id_mass_action">
-                                        <option selected>Choose...</option>
-                                        <option value="take">Take (Assign to me)</option>
-                                        <option value="delete">Delete</option><option value="merge">Merge</option>
-                                        <option value="export">Export</option><option value="pair">Pair to BEAM inventory</option>
-                                        <optgroup label="Close">
-                                            <option value="close">Close (Don't Send E-Mail)</option>
-                                            <option value="close_public">Close (Send E-Mail)</option>
-                                        </optgroup>
-                                        <optgroup label="Assign To">
-                                            <option value="unassign">Nobody (Unassign)</option>
-                                            {% for user in user_choices %}
-                                            <option value="assign_{{ user.id }}">{{ user.username }}</option>
+
+                            <div class="mt-2">
+                                <div class="dropdown">
+                                    <a id="editTagsDropdown" class="btn btn-outline-secondary dropdown-toggle disabled" href="#" role="button" data-toggle="dropdown" data-boundary="window" aria-expanded="false" onclick="getTags()">Add/Remove Tags</a>
+                                    <div class="dropdown-menu dropdown-menu-left"  onclick="event.stopPropagation()" style="z-index: 1021;">
+                                        <form id="tagForm" class="pr-3 pt-1">
+                                            {% csrf_token %}
+                                            {% for tag in tag_choices %}
+                                            <div class="form-check">
+                                                 <div class="custom-control custom-checkbox">
+                                                     <input type="checkbox" class="custom-control-input" id="tagCheck{{ tag.id }}" value="{{ tag.id }}" name="tagCheck">
+                                                     <label class="custom-control-label" for="tagCheck{{ tag.id }}"><span class="badge badge-{{tag.color}}">{{ tag.name }}</span></label>
+                                                </div>
+                                            </div>
                                             {% endfor %}
-                                        </optgroup>
-                                        <optgroup label="Set KB Item">
-                                            <option value="kbitem_none">No KB Item</option>
-                                            {% for kbi in kb_item_choices %}
-                                            <option value='kbitem_{{ kbi.id }}'>{{ kbi.category__title }}: {{ kbi.title }}</option>
-                                            {% endfor %}
-                                        </optgroup>
-                                    </select>
-                                    <div class="input-group-append">
-                                        <button type="button" onclick="massUpdate()" class="btn btn-outline-secondary">Run Action <i class="fa fa-arrow-circle-right mr-1"></i></button>
+                                        </form>
+                                        <button onclick="massUpdateTags()" class="btn btn-primary m-2 float-right">Save</button>
                                     </div>
                                 </div>
+                            </div>
+
+                            <div class="d-flex align-items-center mt-2 mr-2">
+                                <form method='post' action="{% url 'helpdesk:mass_update' %}" id="ticket_mass_update">
+                                    {% csrf_token %}
+                                    <div class="input-group">
+                                        <div class="input-group-prepend">
+                                            <label class="input-group-text bg-white border-0">Action:</label>
+                                        </div>
+                                        <select class="custom-select rounded-left" name="action" id="id_mass_action" disabled>
+                                            <option selected>Choose...</option>
+                                            <option value="take">Take (Assign to me)</option>
+                                            <option value="delete">Delete</option><option value="merge">Merge</option>
+                                            <option value="export">Export</option><option value="pair">Pair to BEAM inventory</option>
+                                            <optgroup label="Close">
+                                                <option value="close">Close (Don't Send E-Mail)</option>
+                                                <option value="close_public">Close (Send E-Mail)</option>
+                                            </optgroup>
+                                            <optgroup label="Assign To">
+                                                <option value="unassign">Nobody (Unassign)</option>
+                                                {% for user in user_choices %}
+                                                <option value="assign_{{ user.id }}">{{ user.username }}</option>
+                                                {% endfor %}
+                                            </optgroup>
+                                            <optgroup label="Set KB Item">
+                                                <option value="kbitem_none">No KB Item</option>
+                                                {% for kbi in kb_item_choices %}
+                                                <option value='kbitem_{{ kbi.id }}'>{{ kbi.category__title }}: {{ kbi.title }}</option>
+                                                {% endfor %}
+                                            </optgroup>
+                                        </select>
+                                        <div class="input-group-append">
+                                            <button id="massActionButton" type="button" onclick="massUpdate()" class="btn btn-outline-secondary" disabled>Run Action <i class="fa fa-arrow-circle-right mr-1"></i></button>
+                                        </div>
+                                    </div>
+                                    <!-- Pass vars to View for exporting to work Properly -->
+                                    <input type='hidden' name='visible' value=''/>
+                                    <input type='hidden' name='selected_ids' value=''/>
+                                    <input type="hidden" name="queue_length" value="{{ query_params.filtering.queue__id__in|length }}"/>
+                                </form>
                             </div>
                             <div class="mt-2">
                                 <div id="colvis" class="dropdown">
@@ -152,16 +178,14 @@
                                             <label class="btn btn-outline-secondary">
                                                 <input type="checkbox" onchange="toggleColumn(this.checked, 'kbitem')"> KB Item
                                             </label>
+                                            <label class="btn btn-outline-secondary">
+                                                <input type="checkbox" onchange="toggleColumn(this.checked, 'tags')"> Tags
+                                            </label>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <!-- Pass vars to View for exporting to work Properly -->
-                        <input type='hidden' name='visible' value=''/>
-                        <input type='hidden' name='selected_ids' value=''/>
-                        <input type="hidden" name="queue_length" value="{{ query_params.filtering.queue__id__in|length }}"/>
-                    </form>
                         <!-- / Action Toolbar -->
                         <!-- Data Table -->
                         <div class="table-responsive"> <!-- style="max-height: 81.5vh;">-->
@@ -181,6 +205,7 @@
                                         <th class="filter-top d-none" data-colname="due_date">{% trans "Due Date" %}</th>
                                         <th class="filter-top d-none" data-colname="time_spent">{% trans "Time Spent" %}</th>
                                         <th class="filter-top d-none" data-colname="kbitem">{% trans "KB item" %}</th>
+                                        <th class="filter-top d-none" data-colname="tags">{% trans "Tags" %}</th>
                                         {% if query_params.filtering.queue__id__in|length == 1 %}
                                         {% for col_name, display_name in extra_data_columns.items %}
                                         <th class="filter-top" data-colname="{{ col_name }}">{{ display_name }}</th>
@@ -228,6 +253,11 @@
                                         <td class="d-none"><span title='{{ ticket.due_date|naturaltime }}'>{{ ticket.due_date|date:"DATETIME_FORMAT" }}</span></td>
                                         <td class="d-none">{{ ticket.time_spent_formatted }}</td>
                                         <td class="d-none">{{ ticket.kbitem.title}}</td>
+                                        <td class="d-none">
+                                            {% for tag in ticket.tags.all %}
+                                            <span class="badge badge-{{ tag.color }}">{{ tag.name }}</span>
+                                            {% endfor %}
+                                        </td>
                                         {% comment %} TODO: add support for extra data columns {% endcomment %}
                                     </tr>
 
@@ -386,6 +416,9 @@
                             </li>
                             <li class=" list-group-item {% if query_params.filtering.last_reply__date__lte or query_params.filtering.last_reply__date__gte %} filterBoxShow{% endif %}" id="filterBoxLastReply">
                                 {% include 'helpdesk/filters/last_reply.html' %}
+                            </li>
+                            <li class=" list-group-item {% if query_params.filtering.tags__in %} filterBoxShow{% endif %}" id="filterBoxTags">
+                                {% include 'helpdesk/filters/tags.html' %}
                             </li>
                         </ul>
                     </div>
@@ -595,7 +628,7 @@
             processData: false,
             contentType: false,
             success: function(response) {
-                document.forms['query_form'].submit()
+                location.reload();
             }
         })
     }
@@ -703,13 +736,24 @@
                 });
 
                                         
-                                        update_selected_ids = function () {
-                                            // Add data to post field to be avaiable in mass_update function, and save_query
-                                            $('input[name="selected_ids"]').each(function () {
-                                                $(this).val(selected.toString());
-                                            });
-                                            $('#select_count').text(selected.length + ' Selected')
-                                        }
+                update_selected_ids = function () {
+                    // Add data to post field to be available in mass_update function, and save_query
+                    $('input[name="selected_ids"]').each(function () {
+                        $(this).val(selected.toString());
+                    });
+                    $('#select_count').text(selected.length + ' Selected')
+
+                    // Disables or enables buttons/dropdowns based on tickets selected
+                    if ($('input[name="selected_ids"]').val() === '') {
+                        $('#id_mass_action').attr('disabled', true);
+                        $('#massActionButton').attr('disabled', true);
+                        $('#editTagsDropdown').addClass('disabled');
+                    } else {
+                        $('#id_mass_action').attr('disabled', false);
+                        $('#massActionButton').attr('disabled', false);
+                        $('#editTagsDropdown').removeClass('disabled');
+                    }
+                }
                                         
                                         {# Shortcuts to select/unselect multiple tickets #}
                                         $("#select_all_btn").click(function () {
@@ -753,6 +797,75 @@
                                             update_selected_ids();
                                         });
                                     })
+
+    function getTags() {
+        // updates the Add/Remove Tags checkboxes
+        update_selected_ids();
+        var selected = $('input[name="selected_ids"]').val();
+        selected = JSON.parse("[" + selected + "]");
+
+        $('.custom-control-input').removeClass('indeterminate');
+        $('.custom-control-input').prop('checked', false);
+        $('.custom-control-input').prop('indeterminate', false);
+        $('.custom-control-input').prop('readOnly', false);
+        $.ajax({
+            url: "{% url 'helpdesk:get_tags' %}",
+            type: 'GET',
+            data: {'selected': selected},
+            success: function(response) {
+                // update checkboxes
+                for (var key in response['tags']) {
+                    if (response['tags'][key] === 'indeterminate') {
+                        $('.custom-control-input#tagCheck' + key).prop('indeterminate', true);
+                        $('.custom-control-input#tagCheck' + key).prop('readOnly', true);
+                        $('.custom-control-input#tagCheck' + key).addClass('indeterminate');
+                    } else if (response['tags'][key] === 'on') {
+                        $('.custom-control-input#tagCheck' + key).prop('checked', true);
+                    }
+                }
+            }
+        });
+    }
+
+    $('.custom-checkbox').on('click', '.indeterminate', function() {
+        /* When a checkbox in the Add/Remove Tags dropdown is clicked, this controls whether it's marked on, off, or indeterminate (meaning, don't change)
+            readOnly == true: indeterminate
+            checked == true: on
+            checked == false: off */
+        if (this.readOnly) this.checked=this.readOnly=false;
+        else if (!this.checked) this.readOnly=this.indeterminate=true;
+    });
+
+    function massUpdateTags() {
+        // Updates ticket tags based on Add/Remove Tags dropdown
+
+        let selected = $('input[name="selected_ids"]').val();
+        selected = JSON.parse("[" + selected + "]");
+        let add_tags = [];
+        let remove_tags = [];
+        $('.custom-control-input').each(function () {
+            if (!this.readOnly) {
+                if (this.checked) {
+                    add_tags.push($(this).val());
+                } else {
+                    remove_tags.push($(this).val());
+                }
+            }
+        });
+        $.ajax({
+            url: "{% url 'helpdesk:mass_update_tags' %}",
+            method: 'POST',
+            data: {
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+                'selected': selected,
+                'add_tags': add_tags,
+                'remove_tags': remove_tags
+            },
+            success: function(response) {
+                location.reload();
+            }
+        });
+    }
 
                                     $('.delete_query').click(function() {
                                         var value = $(this).val();
