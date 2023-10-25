@@ -102,7 +102,7 @@ def process_email(quiet: bool = False, debug_to_stdout: bool = False):
                 logger.info(log_msg)
                 if debug_to_stdout:
                     print(log_msg)
-        except Exception:
+        except Exception as e:
             logger.error("Queue processing failed: {q.slug} -- {e}", exc_info=True)
             if debug_to_stdout:
                 print(f"Queue processing failed: {q.slug}")
