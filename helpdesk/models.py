@@ -712,10 +712,12 @@ class Ticket(models.Model):
     get_priority_css_class = property(_get_priority_css_class)
 
     def _get_status_css_class(self):
-        if self.status in [1, 2, 6, 7]:
+        if self.status == self.NEW_STATUS:
             return "primary"
-        elif self.status == 5:
-            return "info"
+        elif self.status in [self.REOPENED_STATUS, self.OPEN_STATUS]:
+            return "warning"
+        elif self.status in [self.REPLIED_STATUS, self.RESOLVED_STATUS]:
+            return "success"
         else:
             return "secondary"
     get_status_css_class = property(_get_status_css_class)
