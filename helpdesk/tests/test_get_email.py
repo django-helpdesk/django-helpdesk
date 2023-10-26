@@ -18,6 +18,7 @@ from helpdesk.models import FollowUp, FollowUpAttachment, IgnoreEmail, Queue, Ti
 from helpdesk.tests import utils
 import itertools
 import logging
+from mock.mock import patch
 from oauthlib.oauth2 import BackendApplicationClient
 import os
 from shutil import rmtree
@@ -26,7 +27,6 @@ from tempfile import mkdtemp
 import time
 import typing
 from unittest import mock
-from mock.mock import patch
 
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
