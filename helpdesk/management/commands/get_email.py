@@ -30,10 +30,18 @@ class Command(BaseCommand):
             default=False,
             help='Hide details about each queue/message as they are processed',
         )
+        parser.add_argument(
+            '--debug_to_stdout',
+            action='store_true',
+            dest='debug_to_stdout',
+            default=False,
+            help='Log additional messaging to stdout.',
+        )
 
     def handle(self, *args, **options):
         quiet = options.get('quiet', False)
-        process_email(quiet=quiet)
+        debug_to_stdout = options.get('debug_to_stdout', False)
+        process_email(quiet=quiet, debug_to_stdout=debug_to_stdout)
 
 
 if __name__ == '__main__':

@@ -18,6 +18,7 @@ from helpdesk.models import FollowUp, FollowUpAttachment, IgnoreEmail, Queue, Ti
 from helpdesk.tests import utils
 import itertools
 import logging
+from mock.mock import patch
 from oauthlib.oauth2 import BackendApplicationClient
 import os
 from shutil import rmtree
@@ -335,12 +336,82 @@ class GetEmailCommonTests(TestCase):
             elif  att_retrieved.filename.endswith(email_att_filename):
                 email_attachment_found = True
             else:
-                print(f"\n\n%%%%%%   {att_retrieved}")
                 self.assertTrue(False, "Unexpected file in ticket attachments: %s" % att_retrieved.filename)
         self.assertTrue(email_attachment_found, "Email attachment file not found ticket attachments: %s" % (email_att_filename))
         self.assertTrue(inline_found, "Inline file not found in email: %s" % (inline_att_filename))
 
         
+    def test_email_with_txt_as_attachment(self):
+        """
+        Test an email with an txt extension email attachment to the email
+        """
+        email_message, _, _ = utils.generate_multipart_email(type_list=['plain'])
+        email_att_filename = 'test.txt'
+        file_part = utils.generate_file_mime_part("en_US", email_att_filename, "Testing a simple txt attachment.")
+        email_message.attach(file_part)
+        # Now send the part to the email workflow
+        extract_email_metadata(email_message.as_string(), self.queue_public, self.logger)
+
+        self.assertEqual(len(mail.outbox), 1)  # @UndefinedVariable
+
+        ticket = Ticket.objects.get()
+        followup = ticket.followup_set.get()
+        attachments = FollowUpAttachment.objects.filter(followup=followup)
+        self.assertEqual(len(attachments), 1)
+        attachment = attachments[0]
+        self.assertTrue(attachment.filename.endswith(email_att_filename), "The txt file not found in email: %s" % (email_att_filename))
+
+        
+class EmailTaskTests(TestCase):
+
+    def setUp(self):
+        self.num_queues = 5
+        self.exception_queues = [2, 4]
+        self.q_ids = []
+        for i in range(self.num_queues):
+            q = Queue.objects.create(
+                    title=f'Test{i+1}',
+                    slug=f'test{i+1}',
+                    email_box_type='local',
+                    allow_email_submission=True
+                )
+            self.q_ids.append(q.id)
+        self.logger = logging.getLogger('helpdesk')
+
+    def test_get_email_with_debug_to_stdout_option(self):
+        """Test debug_to_stdout option """
+        # Test get_email with debug_to_stdout set to True and also False, and verify
+        # handle receives debug_to_stdout option set properly
+        for debug_to_stdout in [True, False]:
+            with mock.patch.object(Command, 'handle', return_value=None) as mocked_handle:
+                call_command('get_email', "--debug_to_stdout") if debug_to_stdout else call_command('get_email')
+                mocked_handle.assert_called_once()
+                for _, kwargs in mocked_handle.call_args_list:
+                    self.assertEqual(debug_to_stdout, (kwargs['debug_to_stdout']))
+
+    @patch('helpdesk.email.process_queue')
+    def test_get_email_with_queue_failure(self, mocked_process_queue):
+        """Test all queues are processed if specified queues have exceptions"""
+        ret_values = [
+                Exception(f"Error Q{i};") if (i in self.exception_queues) else None for i in range(1, self.num_queues+1)
+            ]
+        mocked_process_queue.side_effect = ret_values
+        call_command(
+                'get_email',
+                '--debug_to_stdout',
+            )
+        self.assertEqual(mocked_process_queue.call_count, self.num_queues)
+        not_processed_count = Queue.objects.filter(
+            email_box_type__isnull=False,
+            allow_email_submission=True,
+            email_box_last_check__isnull=True).count()
+        self.assertEqual(
+            not_processed_count,
+            len(self.exception_queues),
+            "Incorrect number of queues that did not get processed due to a forced exception."
+            )
+
+
 class GetEmailParametricTemplate(object):
     """TestCase that checks basic email functionality across methods and socks configs."""
 

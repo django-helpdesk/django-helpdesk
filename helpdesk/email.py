@@ -37,6 +37,7 @@ import socket
 import ssl
 import sys
 from time import ctime
+import traceback
 import typing
 from typing import List
 
@@ -56,11 +57,16 @@ STRIPPED_SUBJECT_STRINGS = [
 HTML_EMAIL_ATTACHMENT_FILENAME = _("email_html_body.html")
 
 
-def process_email(quiet=False):
+def process_email(quiet: bool = False, debug_to_stdout: bool = False):
+    if debug_to_stdout:
+        print("Extracting email into queues...")
+    q: Queue()  # Typing ahead of time for loop to make it more useful in an IDE
     for q in Queue.objects.filter(
             email_box_type__isnull=False,
             allow_email_submission=True):
-
+        log_msg = f"Processing queue: {q.slug} Email address: {q.email_address}..."
+        if debug_to_stdout:
+            print(log_msg)
         logger = logging.getLogger('django.helpdesk.queue.' + q.slug)
         logging_types = {
             'info': logging.INFO,
@@ -84,16 +90,24 @@ def process_email(quiet=False):
             logger.addHandler(log_file_handler)
         else:
             log_file_handler = None
-
-        try:
             if not q.email_box_last_check:
                 q.email_box_last_check = timezone.now() - timedelta(minutes=30)
-
+        try:
             queue_time_delta = timedelta(minutes=q.email_box_interval or 0)
             if (q.email_box_last_check + queue_time_delta) < timezone.now():
                 process_queue(q, logger=logger)
                 q.email_box_last_check = timezone.now()
                 q.save()
+                log_msg: str = f"Queue successfully processed: {q.slug}"
+                logger.info(log_msg)
+                if debug_to_stdout:
+                    print(log_msg)
+        except Exception as e:
+            logger.error(f"Queue processing failed: {q.slug} -- {e}", exc_info=True)
+            if debug_to_stdout:
+                print(f"Queue processing failed: {q.slug}")
+                print("-"*60)
+                traceback.print_exc(file=sys.stdout)
         finally:
             # we must close the file handler correctly if it's created
             try:
@@ -106,6 +120,8 @@ def process_email(quiet=False):
                     logger.removeHandler(log_file_handler)
             except Exception as e:
                 logging.exception(e)
+    if debug_to_stdout:
+        print("Email extraction into queues completed.")
 
 
 def pop3_sync(q, logger, server):
@@ -320,7 +336,7 @@ def imap_oauth_sync(q, logger, server):
 
 
 def process_queue(q, logger):
-    logger.info("***** %s: Begin processing mail for django-helpdesk" % ctime())
+    logger.info(f"***** {ctime()}: Begin processing mail for django-helpdesk queue: {q.title}")
 
     if q.socks_proxy_type and q.socks_proxy_host and q.socks_proxy_port:
         try:
