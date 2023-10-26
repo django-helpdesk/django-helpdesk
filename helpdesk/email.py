@@ -103,7 +103,7 @@ def process_email(quiet: bool = False, debug_to_stdout: bool = False):
                 if debug_to_stdout:
                     print(log_msg)
         except Exception as e:
-            logger.error("Queue processing failed: {q.slug} -- {e}", exc_info=True)
+            logger.error(f"Queue processing failed: {q.slug} -- {e}", exc_info=True)
             if debug_to_stdout:
                 print(f"Queue processing failed: {q.slug}")
                 print("-"*60)
@@ -336,7 +336,7 @@ def imap_oauth_sync(q, logger, server):
 
 
 def process_queue(q, logger):
-    logger.info("***** %s: Begin processing mail for django-helpdesk" % ctime())
+    logger.info(f"***** {ctime()}: Begin processing mail for django-helpdesk queue: {q.title}")
 
     if q.socks_proxy_type and q.socks_proxy_host and q.socks_proxy_port:
         try:
