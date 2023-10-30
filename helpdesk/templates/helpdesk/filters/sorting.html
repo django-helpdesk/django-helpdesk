@@ -14,6 +14,9 @@
             <option value='created'{% if query_params.sorting == "created" %} selected='selected'{% endif %}>
                 {% trans "Created" %}
             </option>
+            <option value='last_reply'{% if query_params.sorting == "last_reply" %} selected='selected'{% endif %}>
+                {% trans "Last Reply" %}
+            </option>
             <option value='title'{% if query_params.sorting == "title" %} selected='selected'{% endif %}>
                 {% trans "Title" %}
             </option>

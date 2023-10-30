@@ -1781,6 +1781,7 @@ def ticket_list(request):
     }
     SORT_CHOICES = [
         'created',
+        'last_reply',
         'title',
         'queue',
         'status',
