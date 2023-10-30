@@ -906,7 +906,7 @@ def view_ticket(request, ticket_id):
     """if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS:
         staff_ids = [u.id for u in users if is_helpdesk_staff(u, org=org)]  # todo
         users = users.filter(id__in=staff_ids)"""
-    users = users.order_by(User.USERNAME_FIELD)
+    users = users.order_by('last_name', 'first_name', 'email')
 
     queues = Queue.objects.filter(organization=org)
     queue_choices = _get_queue_choices(queues)
@@ -1915,10 +1915,10 @@ def ticket_list(request):
 
     # Choices/data for the rest of the page
     user_saved_queries = SavedSearch.objects.filter(user=request.user)  # todo: + org
-    kbitem_choices = KBItem.objects.filter(category__organization=org).values('id', 'title', 'category__title')
-    form_choices = FormType.objects.filter(organization=org)
-    user_choices = list_of_helpdesk_staff(org).values('id', 'username', 'first_name', 'last_name')
-    tag_choices = Tag.objects.filter(organization=org).values('id', 'name', 'color')
+    kbitem_choices = KBItem.objects.filter(category__organization=org).order_by('category__title', 'title').values('id', 'title', 'category__title')
+    form_choices = FormType.objects.filter(organization=org).order_by('name')
+    user_choices = list_of_helpdesk_staff(org).order_by('last_name', 'first_name', 'email').values('id', 'username', 'first_name', 'last_name')
+    tag_choices = Tag.objects.filter(organization=org).order_by('name').values('id', 'name', 'color')
 
     """
     # Get extra data columns to be displayed if only 1 queue is selected
@@ -2842,7 +2842,7 @@ def ticket_cc_add(request, ticket_id):
 
     # Add list of users to the TicketCCUserForm
     users = list_of_helpdesk_staff(ticket.ticket_form.organization)
-    users = users.order_by(User.USERNAME_FIELD)
+    users = users.order_by('last_name', 'first_name', 'email')
 
     form_user = TicketCCUserForm()
     form_user.fields['user'].choices = [('', '--------')] + [

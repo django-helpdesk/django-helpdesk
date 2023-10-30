@@ -1976,7 +1976,7 @@ class TicketCC(models.Model):
 
     def _display(self):
         if self.user:
-            return self.user
+            return self.user.get_full_name() or self.user.get_username()
         else:
             return self.email
     display = property(_display)

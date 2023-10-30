@@ -184,10 +184,22 @@ class __Query__:
         queryset = queryset.annotate(last_reply=Subquery(followup_subquery[:1]))
 
         if sorting:
-            sortreverse = self.params.get('desc', None)
-            if sortreverse:
-                sorting = "-%s" % sorting
-            queryset = queryset.order_by(sorting)
+            if sorting == 'assigned_to':
+                rev = ''
+                sortreverse = self.params.get('desc', None)
+                if sortreverse:
+                    rev = '-'
+                sort_by = [
+                    f'{rev}assigned_to__last_name',
+                    f'{rev}assigned_to__first_name',
+                    f'{rev}assigned_to__email',
+                ]
+                queryset = queryset.order_by(*sort_by)
+            else:
+                sortreverse = self.params.get('desc', None)
+                if sortreverse:
+                    sorting = "-%s" % sorting
+                queryset = queryset.order_by(sorting)
 
         queryset = queryset.filter((Q(**filter) | Q(**filter_or)) & self.get_search_filter_args())
 
