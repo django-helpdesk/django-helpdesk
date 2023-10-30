@@ -1740,15 +1740,15 @@ def ticket_list(request):
     org = request.user.default_organization.helpdesk_organization
 
     default_query_params = {
-        'filtering': {},
+        'filtering': {'status__in': [1, 2, 6, 7]},
         'sorting': 'created',
-        'sortreverse': False,
+        'desc': True,
         'search_string': '',
     }
     query_params = {
         'filtering': {},
         'sorting': None,
-        'sortreverse': False,
+        'desc': False,
         'search_string': '',
     }
 

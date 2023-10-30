@@ -448,7 +448,7 @@
                 <div class="border-bottom border-top bg-light p-2">
                     <div class="d-flex justify-content-between">
                         <button class="btn btn-primary w-40 m-1" type='button' onclick='paginatedQuery(1, true)'>{% trans "Apply Filters" %}</button>
-                        <a class="btn btn-danger w-40 m-1" type='button' href="{% url 'helpdesk:list' %}">{% trans "Clear Filters" %}</a>
+                        <a class="btn btn-danger w-40 m-1" type='button' href="{% url 'helpdesk:list' %}?sort=created">{% trans "Clear Filters" %}</a>
                     </div>
                 </div>
             </div>
