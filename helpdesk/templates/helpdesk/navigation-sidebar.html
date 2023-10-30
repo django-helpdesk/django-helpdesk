@@ -68,8 +68,8 @@
         <li class="dropdown-divider"></li>
         <li class="nav-item dropdown {% if url_name == 'user_settings' or url_name == 'system_settings' or 'rss_' in url_name %}active{% endif %}">
           <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <i class="fas fa-user-circle fa-fw"></i>
-              <span>{{ user.get_full_name|default:user.get_username }}</span>
+            <i class="fas fa-cog"></i>
+              <span>Settings</span>
           </a>
           <div class="dropdown-menu" aria-labelledby="userDropdown">
             <a class="dropdown-item text-wrap" href="{% url 'helpdesk:user_settings' %}"><i class="fas fa-fw fa-user-cog"></i> {% trans "User Settings" %}</a>
