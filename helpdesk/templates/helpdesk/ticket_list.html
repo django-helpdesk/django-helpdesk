@@ -251,9 +251,9 @@
                                         <td>{% if ticket.get_assigned_to != "Unassigned" %}{{ ticket.get_assigned_to }}{% endif %}</td> {# Remove if statement for "Unassigned" instead of blank #}
                                         <td>{{ ticket.submitter_email }}</td>
                                         <td class="d-none">{{ ticket.paired_count }}</td>
-                                        <td><span title='{{ ticket.created|naturaltime }}'>{{ ticket.created|date:"DATETIME_FORMAT" }}</span></td>
-                                        <td><span title='{{ ticket.last_reply|naturaltime }}'>{{ ticket.last_reply|date:"DATETIME_FORMAT" }}</span></td>
-                                        <td class="d-none"><span title='{{ ticket.due_date|naturaltime }}'>{{ ticket.due_date|date:"DATETIME_FORMAT" }}</span></td>
+                                        <td>{{ ticket.created|naturalday|default_if_none:'' }}</td>
+                                        <td>{{ ticket.last_reply|naturalday|default_if_none:'' }}</td>
+                                        <td class="d-none">{{ ticket.due_date|naturalday|default_if_none:'' }}</td>
                                         <td class="d-none">{{ ticket.time_spent_formatted }}</td>
                                         <td class="d-none">{{ ticket.kbitem.title}}</td>
                                         <td class="d-none">
