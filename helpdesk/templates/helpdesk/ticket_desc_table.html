@@ -76,6 +76,7 @@ copy_public_link = function() {
                             </div>
                         </div>
                     </th></tr>
+                    {% if tag_choices|length %}
                     <tr class=''><th colspan='4'>
                         <div class="float-left">
                             Tags: {% for tag in ticket.tags.all %}<span class="badge badge-{{ tag.color }}">{{ tag.name }}</span> {% endfor %}
@@ -100,6 +101,7 @@ copy_public_link = function() {
                             </div>
                         </div>
 					</th></tr>
+                    {% endif %}
 					<tr class=''><th colspan='4'>
                         <a href="#" onclick="copy_public_link()">Click to copy Public Link to your Clipboard</a>
 					</th></tr>

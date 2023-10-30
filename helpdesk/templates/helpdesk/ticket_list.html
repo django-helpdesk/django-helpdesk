@@ -78,6 +78,7 @@
                                 </div>
                             </div>
 
+                            {% if tag_choices|length %}
                             <div class="mt-2">
                                 <div class="dropdown">
                                     <a id="editTagsDropdown" class="btn btn-outline-secondary dropdown-toggle disabled" href="#" role="button" data-toggle="dropdown" data-boundary="window" aria-expanded="false" onclick="getTags()">Add/Remove Tags</a>
@@ -97,6 +98,7 @@
                                     </div>
                                 </div>
                             </div>
+                            {% endif %}
 
                             <div class="d-flex align-items-center mt-2 mr-2">
                                 <form method='post' action="{% url 'helpdesk:mass_update' %}" id="ticket_mass_update">
@@ -814,6 +816,7 @@
             data: {'selected': selected},
             success: function(response) {
                 // update checkboxes
+                console.log(response['tags']);
                 for (var key in response['tags']) {
                     if (response['tags'][key] === 'indeterminate') {
                         $('.custom-control-input#tagCheck' + key).prop('indeterminate', true);
