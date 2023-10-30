@@ -32,6 +32,7 @@
 
 
 {% block helpdesk_body %}
+<div class="ticket_list_page">
 <div class="row">
     <div class="col-sm-8 col-md-9 col-lg-10 order-1 pl-3">
         <div id="query_card" class="card mb-2">
@@ -457,7 +458,7 @@
         </div>
     </div>
 </div>
-
+</div>
 
 {% endblock %}
 
@@ -474,10 +475,10 @@
     #dataTable td {
         vertical-align: middle
     }
-    
+
     {# Prevents rows scrolling above frozen header #}
     #dataTable th.filter-top {
-        top: -1px; 
+        top: -1px;
     }
 </style>
 
@@ -507,16 +508,16 @@
         // DISABLED
         // Scroll the query results to fill the viewport by default
         // Browser will take over scroll position on reload
-        // scrollQueryCard() 
-        
+        // scrollQueryCard()
+
         // Column visibility dropdown will no longer close when a column is changed
         $('#colvis button').on('click', function (event) {
             $('#colvis button').dropdown('toggle')
         });
-        
+
         $('body').on('click', function (e) {
-            if (!$('#colvis').is(e.target) 
-            && $('#colvis').has(e.target).length === 0 
+            if (!$('#colvis').is(e.target)
+            && $('#colvis').has(e.target).length === 0
             && $('.open').has(e.target).length === 0
             ) {
                 $('#colvis button').dropdown('hide')
@@ -529,13 +530,13 @@
             }
         })
     })
-    
+
     colNums = {"id": 0};
     idx = 1;
     for (const col of document.querySelectorAll('#headers th')) {
         colNums[col.dataset.colname] = idx++;
     }
-    
+
     // Toggle visibility for given column
     function toggleColumn(show, col, save=true) {
         colNum = colNums[col]
@@ -547,7 +548,7 @@
             $('#dataTable th:nth-child(' + colNum + ')').addClass("d-none")
             $('#dataTable td:nth-child(' + (colNum+1) + ')').addClass("d-none")
         }
-        
+
         if (save) { sessionStorage['visible_cols'] = get_visible_cols() }
     }
 
@@ -619,10 +620,10 @@
         }
     }
 
-    // Perform ticket mass update asynchronously, then 
+    // Perform ticket mass update asynchronously, then
     // reload page with current query and ticket view preferences
     function massUpdate() {
-        data = 
+        data =
         $.ajax({
             url: "{% url 'helpdesk:mass_update' %}",
             type: 'POST',
@@ -692,11 +693,11 @@
         return "{% url 'helpdesk:view' 1234 %}".replace(/1234/, row.id.toString());
     }
     var from_saved_query = {% if from_saved_query %}true{% else %}false{% endif %};
-    
+
     var selected = [];
     var all_ticket_ids = [];
     var globalTimeout = null;
-    
+
     $(document).ready(function () {
         // Duplicate thead for column filtering
         $('#ticketTable thead tr').clone(true).addClass('filters').appendTo('#ticketTable thead');
@@ -716,7 +717,7 @@
                 });
 
                 get_visible_cols(); // On initialization
-                
+
                 {# Timeline initialization when tab is displayed #}
                 // The TL.Timeline constructor takes at least two arguments:
                 // the id of the Timeline container (no '#'), and
@@ -725,7 +726,7 @@
                 // and the element must have CSS styling to give it width and height
                 // optionally, a third argument with configuration options can be passed.
                 // See below for more about options.
-                
+
                 let timeline_loaded = false;
                 $('#timelinetabcontents-tab').on('shown.bs.tab', function (e) {
                     if (!timeline_loaded) {
@@ -737,7 +738,7 @@
                     }
                 });
 
-                                        
+
                 update_selected_ids = function () {
                     // Add data to post field to be available in mass_update function, and save_query
                     $('input[name="selected_ids"]').each(function () {
@@ -756,7 +757,7 @@
                         $('#editTagsDropdown').removeClass('disabled');
                     }
                 }
-                                        
+
                                         {# Shortcuts to select/unselect multiple tickets #}
                                         $("#select_all_btn").click(function () {
                                             $(".ticket_multi_select").prop('checked', true);
@@ -767,13 +768,13 @@
                                             })
                                             update_selected_ids();
                                         });
-                                        
+
                                         $("#select_none_btn").click(function () {
                                             $(".ticket_multi_select").prop('checked', false);
                                             selected = [];
                                             update_selected_ids();
                                         });
-                                        
+
                                         $("#select_inverse_btn").click(function () {
                                             $(".ticket_multi_select").each(function () {
                                                 $(this).prop('checked', !$(this).prop('checked'));
@@ -784,7 +785,7 @@
                                             selected = unselected;
                                             update_selected_ids();
                                         });
-                                        
+
                                         $(document).on('click', '.ticket_multi_select', function () {
                                             if ($(this).prop('checked')) {
                                                 if (!selected.includes($(this).val())) {
@@ -816,7 +817,6 @@
             data: {'selected': selected},
             success: function(response) {
                 // update checkboxes
-                console.log(response['tags']);
                 for (var key in response['tags']) {
                     if (response['tags'][key] === 'indeterminate') {
                         $('.custom-control-input#tagCheck' + key).prop('indeterminate', true);
