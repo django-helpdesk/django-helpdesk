@@ -33,163 +33,134 @@
 
 {% block helpdesk_body %}
 <div class="ticket_list_page">
-<div class="row">
+    <!-- Action Toolbar -->
+    <div class="d-flex flex-wrap justify-content-between overflow-auto pb-2 mw-100" style="max-width: 100%;">
+        <a id="show_query" class="btn btn-outline-primary mr-2" onclick="toggleQuerySelector()">
+            <span id="show_query_text"><i class="fas fa-eye"></i> Show Filter Menu</span>
+            <span id="hide_query_text"><i class="fas fa-eye-slash"></i> Hide Filter Menu</span>
+        </a>
+        <div class="mr-auto d-flex align-items-center">
+            <div class="input-group">
+                <div class="input-group-prepend">
+                    <label class="input-group-text bg-white border-0">Select:</label>
+                </div>
+                <div class="input-group-append">
+                    <button id="select_all_btn" class="btn btn-outline-primary rounded-left font-weight-semibold" type="button">All <i class="fa fa-plus-circle mr-1"></i></button>
+                    <button id="select_none_btn" class="btn btn-outline-danger font-weight-semibold" type="button">None <i class="fa fa-times-circle mr-1"></i></button>
+                </div>
+            </div>
+        </div>
+        {% if tag_choices|length %}
+        <div>
+            <div class="dropdown">
+                <a id="editTagsDropdown" class="btn btn-outline-secondary dropdown-toggle disabled" href="#" role="button" data-toggle="dropdown" data-boundary="window" aria-expanded="false" onclick="getTags()">Add/Remove Tags</a>
+                <div class="dropdown-menu dropdown-menu-left"  onclick="event.stopPropagation()" style="z-index: 1021;">
+                    <form id="tagForm" class="pr-3 pt-1">
+                        {% csrf_token %}
+                        {% for tag in tag_choices %}
+                        <div class="form-check">
+                             <div class="custom-control custom-checkbox">
+                                 <input type="checkbox" class="custom-control-input" id="tagCheck{{ tag.id }}" value="{{ tag.id }}" name="tagCheck">
+                                 <label class="custom-control-label" for="tagCheck{{ tag.id }}"><span class="badge badge-{{tag.color}}">{{ tag.name }}</span></label>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </form>
+                    <button onclick="massUpdateTags()" class="btn btn-primary m-2 float-right">Save</button>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        <div class="d-flex align-items-center mr-2">
+            <form method='post' action="{% url 'helpdesk:mass_update' %}" id="ticket_mass_update">
+                {% csrf_token %}
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <label class="input-group-text bg-white border-0">Action:</label>
+                    </div>
+                    <select class="custom-select rounded-left" name="action" id="id_mass_action" disabled>
+                        <option selected>Choose...</option>
+                        <option value="take">Take (Assign to me)</option>
+                        <option value="delete">Delete</option><option value="merge">Merge</option>
+                        <option value="export">Export</option><option value="pair">Pair to BEAM inventory</option>
+                        <optgroup label="Close">
+                            <option value="close">Close (Don't Send E-Mail)</option>
+                            <option value="close_public">Close (Send E-Mail)</option>
+                        </optgroup>
+                        <optgroup label="Set Owner">
+                            <option value="unassign">Nobody (Unassign)</option>
+                            {% for u in user_choices %}
+                            <option value="assign_{{ u.id }}">{% if u.first_name and u.last_name %}{{ u.first_name}} {{ u.last_name }}{% else %}{{ u.username }}{% endif %}</option>
+                            {% endfor %}
+                        </optgroup>
+                    </select>
+                    <div class="input-group-append">
+                        <button id="massActionButton" type="button" onclick="massUpdate()" class="btn btn-outline-secondary" disabled>Run Action <i class="fa fa-arrow-circle-right mr-1"></i></button>
+                    </div>
+                </div>
+                <!-- Pass vars to View for exporting to work Properly -->
+                <input type='hidden' name='visible' value=''/>
+                <input type='hidden' name='selected_ids' value=''/>
+                <input type="hidden" name="queue_length" value="{{ query_params.filtering.queue__id__in|length }}"/>
+            </form>
+        </div>
+        <div>
+            <div id="colvis" class="dropdown">
+                <button class="btn btn-outline-secondary float-right font-weight-semibold dropdown-toggle" type="button" data-boundary="window" aria-expanded="false">Column Visibility</button>
+                <div class="dropdown-menu dropdown-menu-left text-center p-2" style="min-width: 0; z-index: 1021;">
+                    <div class="btn-group-vertical btn-group-toggle" data-toggle="buttons">
+                        <label class="btn btn-outline-secondary">
+                            <input type="checkbox" onchange="toggleColumn(this.checked, 'priority')"> Priority
+                        </label>
+                        <label class="btn btn-outline-secondary">
+                            <input type="checkbox" onchange="toggleColumn(this.checked, 'queue')"> Queue
+                        </label>
+                        <label class="btn btn-outline-secondary">
+                            <input type="checkbox" onchange="toggleColumn(this.checked, 'form')"> Form
+                        </label>
+                        <label class="btn btn-outline-secondary active">
+                            <input type="checkbox" onchange="toggleColumn(this.checked, 'status')" checked> Status
+                        </label>
+                        <label class="btn btn-outline-secondary active">
+                            <input type="checkbox" onchange="toggleColumn(this.checked, 'assigned_to')" checked> Owner
+                        </label>
+                        <label class="btn btn-outline-secondary active">
+                            <input type="checkbox" onchange="toggleColumn(this.checked, 'submitter')" checked> Submitter
+                        </label>
+                        <label class="btn btn-outline-secondary">
+                            <input type="checkbox" onchange="toggleColumn(this.checked, 'paired_count')"> Paired Count
+                        </label>
+                        <label class="btn btn-outline-secondary active">
+                            <input type="checkbox" onchange="toggleColumn(this.checked, 'created')" checked> Created
+                        </label>
+                        <label class="btn btn-outline-secondary active">
+                            <input type="checkbox" onchange="toggleColumn(this.checked, 'last_reply')" checked> Last Reply
+                        </label>
+                        <label class="btn btn-outline-secondary">
+                            <input type="checkbox" onchange="toggleColumn(this.checked, 'due_date')"> Due Date
+                        </label>
+                        <label class="btn btn-outline-secondary">
+                            <input type="checkbox" onchange="toggleColumn(this.checked, 'time_spent')"> Time Spent
+                        </label>
+                        <label class="btn btn-outline-secondary">
+                            <input type="checkbox" onchange="toggleColumn(this.checked, 'kbitem')"> KB Item
+                        </label>
+                        <label class="btn btn-outline-secondary">
+                            <input type="checkbox" onchange="toggleColumn(this.checked, 'tags')"> Tags
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- / Action Toolbar -->
+    <div class="row">
     <div class="col-sm-8 col-md-9 col-lg-10 order-1 pl-3">
         <div id="query_card" class="card mb-2">
-            <!--<div class="card-header pt-1">
-                <ul class="nav nav-tabs card-header-tabs">
-                    <li class="nav-item d-flex align-self-center mr-2 font-weight-bold">
-                        {% trans "Search Results" %}
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="#datatabletabcontents" id="datatabletabcontents-tab"
-                        data-toggle="tab" role="tab" aria-controls="datatabletabcontents" aria-selected=true>
-                            <i class="fas fa-th-list"></i>
-                            {% trans "Table" %}
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#timelinetabcontents" id="timelinetabcontents-tab" data-toggle="tab"
-                        role="tab" aria-controls="timelinetabcontents" aria-selected=false>
-                            <i class="fas fa-history"></i>
-                            {% trans "Timeline" %}
-                        </a>
-                    </li>
-                </ul>
-            </div>-->
             <div class="card-body p-0">
                 <div class="tab-content" id="myTabContent">
                     <div class="tab-pane fade show active overflow-hidden" id="datatabletabcontents" role="tabpanel"
                     aria-labelledby="datatabletabcontents-tab">
-                        <!-- Action Toolbar -->
-                        <div class="d-flex flex-wrap justify-content-between overflow-auto px-2 pb-2 border-bottom mw-100" style="max-width: 100%; //background-color: #f7f7f7">
-                            <a id="show_query" class="btn btn-outline-primary mt-2 mr-2" onclick="toggleQuerySelector()">
-                                <span id="show_query_text"><i class="fas fa-eye"></i> Show Filter Menu</span>
-                                <span id="hide_query_text"><i class="fas fa-eye-slash"></i> Hide Filter Menu</span>
-                            </a>
-                            <div class="mr-auto d-flex align-items-center mt-2">
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <label class="input-group-text bg-white border-0">Select:</label>
-                                    </div>
-                                    <div class="input-group-append">
-                                        <button id="select_all_btn" class="btn btn-outline-primary rounded-left font-weight-semibold" type="button">All <i class="fa fa-plus-circle mr-1"></i></button>
-                                        <button id="select_none_btn" class="btn btn-outline-danger font-weight-semibold" type="button">None <i class="fa fa-times-circle mr-1"></i></button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {% if tag_choices|length %}
-                            <div class="mt-2">
-                                <div class="dropdown">
-                                    <a id="editTagsDropdown" class="btn btn-outline-secondary dropdown-toggle disabled" href="#" role="button" data-toggle="dropdown" data-boundary="window" aria-expanded="false" onclick="getTags()">Add/Remove Tags</a>
-                                    <div class="dropdown-menu dropdown-menu-left"  onclick="event.stopPropagation()" style="z-index: 1021;">
-                                        <form id="tagForm" class="pr-3 pt-1">
-                                            {% csrf_token %}
-                                            {% for tag in tag_choices %}
-                                            <div class="form-check">
-                                                 <div class="custom-control custom-checkbox">
-                                                     <input type="checkbox" class="custom-control-input" id="tagCheck{{ tag.id }}" value="{{ tag.id }}" name="tagCheck">
-                                                     <label class="custom-control-label" for="tagCheck{{ tag.id }}"><span class="badge badge-{{tag.color}}">{{ tag.name }}</span></label>
-                                                </div>
-                                            </div>
-                                            {% endfor %}
-                                        </form>
-                                        <button onclick="massUpdateTags()" class="btn btn-primary m-2 float-right">Save</button>
-                                    </div>
-                                </div>
-                            </div>
-                            {% endif %}
-
-                            <div class="d-flex align-items-center mt-2 mr-2">
-                                <form method='post' action="{% url 'helpdesk:mass_update' %}" id="ticket_mass_update">
-                                    {% csrf_token %}
-                                    <div class="input-group">
-                                        <div class="input-group-prepend">
-                                            <label class="input-group-text bg-white border-0">Action:</label>
-                                        </div>
-                                        <select class="custom-select rounded-left" name="action" id="id_mass_action" disabled>
-                                            <option selected>Choose...</option>
-                                            <option value="take">Take (Assign to me)</option>
-                                            <option value="delete">Delete</option><option value="merge">Merge</option>
-                                            <option value="export">Export</option><option value="pair">Pair to BEAM inventory</option>
-                                            <optgroup label="Close">
-                                                <option value="close">Close (Don't Send E-Mail)</option>
-                                                <option value="close_public">Close (Send E-Mail)</option>
-                                            </optgroup>
-                                            <optgroup label="Set Owner">
-                                                <option value="unassign">Nobody (Unassign)</option>
-                                                {% for u in user_choices %}
-                                                <option value="assign_{{ u.id }}">{% if u.first_name and u.last_name %}{{ u.first_name}} {{ u.last_name }}{% else %}{{ u.username }}{% endif %}</option>
-                                                {% endfor %}
-                                            </optgroup>
-                                            <optgroup label="Set KB Item">
-                                                <option value="kbitem_none">No KB Item</option>
-                                                {% for kbi in kb_item_choices %}
-                                                <option value='kbitem_{{ kbi.id }}'>{{ kbi.category__title }}: {{ kbi.title }}</option>
-                                                {% endfor %}
-                                            </optgroup>
-                                        </select>
-                                        <div class="input-group-append">
-                                            <button id="massActionButton" type="button" onclick="massUpdate()" class="btn btn-outline-secondary" disabled>Run Action <i class="fa fa-arrow-circle-right mr-1"></i></button>
-                                        </div>
-                                    </div>
-                                    <!-- Pass vars to View for exporting to work Properly -->
-                                    <input type='hidden' name='visible' value=''/>
-                                    <input type='hidden' name='selected_ids' value=''/>
-                                    <input type="hidden" name="queue_length" value="{{ query_params.filtering.queue__id__in|length }}"/>
-                                </form>
-                            </div>
-                            <div class="mt-2">
-                                <div id="colvis" class="dropdown">
-                                    <button class="btn btn-outline-secondary float-right font-weight-semibold dropdown-toggle" type="button" data-boundary="window" aria-expanded="false">Column Visibility</button>
-                                    <div class="dropdown-menu dropdown-menu-left text-center p-2" style="min-width: 0; z-index: 1021;">
-                                        <div class="btn-group-vertical btn-group-toggle" data-toggle="buttons">
-                                            <label class="btn btn-outline-secondary">
-                                                <input type="checkbox" onchange="toggleColumn(this.checked, 'priority')"> Priority
-                                            </label>
-                                            <label class="btn btn-outline-secondary">
-                                                <input type="checkbox" onchange="toggleColumn(this.checked, 'queue')"> Queue
-                                            </label>
-                                            <label class="btn btn-outline-secondary">
-                                                <input type="checkbox" onchange="toggleColumn(this.checked, 'form')"> Form
-                                            </label>
-                                            <label class="btn btn-outline-secondary active">
-                                                <input type="checkbox" onchange="toggleColumn(this.checked, 'status')" checked> Status
-                                            </label>
-                                            <label class="btn btn-outline-secondary active">
-                                                <input type="checkbox" onchange="toggleColumn(this.checked, 'assigned_to')" checked> Owner
-                                            </label>
-                                            <label class="btn btn-outline-secondary active">
-                                                <input type="checkbox" onchange="toggleColumn(this.checked, 'submitter')" checked> Submitter
-                                            </label>
-                                            <label class="btn btn-outline-secondary">
-                                                <input type="checkbox" onchange="toggleColumn(this.checked, 'paired_count')"> Paired Count
-                                            </label>
-                                            <label class="btn btn-outline-secondary active">
-                                                <input type="checkbox" onchange="toggleColumn(this.checked, 'created')" checked> Created
-                                            </label>
-                                            <label class="btn btn-outline-secondary active">
-                                                <input type="checkbox" onchange="toggleColumn(this.checked, 'last_reply')" checked> Last Reply
-                                            </label>
-                                            <label class="btn btn-outline-secondary">
-                                                <input type="checkbox" onchange="toggleColumn(this.checked, 'due_date')"> Due Date
-                                            </label>
-                                            <label class="btn btn-outline-secondary">
-                                                <input type="checkbox" onchange="toggleColumn(this.checked, 'time_spent')"> Time Spent
-                                            </label>
-                                            <label class="btn btn-outline-secondary">
-                                                <input type="checkbox" onchange="toggleColumn(this.checked, 'kbitem')"> KB Item
-                                            </label>
-                                            <label class="btn btn-outline-secondary">
-                                                <input type="checkbox" onchange="toggleColumn(this.checked, 'tags')"> Tags
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- / Action Toolbar -->
                         <!-- Data Table -->
                         <div class="table-responsive"> <!-- style="max-height: 81.5vh;">-->
                             <table class="table table-bordered table-sm table-striped m-0" id="dataTable" width="100%" cellspacing="0">

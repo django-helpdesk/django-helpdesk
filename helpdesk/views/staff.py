@@ -1915,7 +1915,6 @@ def ticket_list(request):
 
     # Choices/data for the rest of the page
     user_saved_queries = SavedSearch.objects.filter(user=request.user)  # todo: + org
-    kbitem_choices = KBItem.objects.filter(category__organization=org).order_by('category__title', 'title').values('id', 'title', 'category__title')
     form_choices = FormType.objects.filter(organization=org).order_by('name')
     user_choices = list_of_helpdesk_staff(org).order_by('last_name', 'first_name', 'email').values('id', 'username', 'first_name', 'last_name')
     tag_choices = Tag.objects.filter(organization=org).order_by('name').values('id', 'name', 'color')
@@ -1964,7 +1963,6 @@ def ticket_list(request):
         form_choices=form_choices,
         priority_choices=Ticket.PRIORITY_CHOICES,
         status_choices=Ticket.STATUS_CHOICES,
-        kb_item_choices=kbitem_choices,
         tag_choices=tag_choices,
         urlsafe_query=urlsafe_query,
         user_saved_queries=user_saved_queries,
