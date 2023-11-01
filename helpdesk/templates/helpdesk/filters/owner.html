@@ -1,26 +1,24 @@
 {% load i18n humanize %}
 {% load static %}
 {% load in_list %}
-<div class="form-row">
-    <div class="col col-sm-3">
-        <label for='id_owners' class="col-form-label">{% trans "Owner(s)" %}:</label>
+<div class="query-filter-group">
+    <a class="dropdown-title" data-toggle="collapse" href="#owner-collapse" aria-expanded="false" aria-controls="owner-collapse">
+        <span>{% trans "Owner" %}</span>
+        <span class="query-counter badge badge-pill badge-secondary"></span>
+        <i class="fas fa-chevron-down" style="float:right;"></i>
+    </a>
+    <div class="collapse" id="owner-collapse">
+        {% with magic_number=-1 %}
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" name="u" value="{{ magic_number }}" {% if magic_number|in_list:query_params.filtering.assigned_to__id__in %}checked{% endif %}>
+            <label class="form-check-label">{% trans "Unassigned" %}</label>
+        </div>
+        {% endwith %}
+        {% for u in user_choices %}
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" name="u" value="{{ u.id }}" {% if u.id|in_list:query_params.filtering.assigned_to__id__in %}checked{% endif %}>
+            <label class="form-check-label">{% if u.first_name and u.last_name %}{{ u.first_name}} {{ u.last_name }}{% else %}{{ u.username }}{% endif %}{% ifequal u user %} {% trans "(ME)" %}{% endifequal %}</label>
+        </div>
+        {% endfor %}
     </div>
-    <div class="col col-sm-8">
-        <select id='id_owners' name='assigned_to' multiple='selected' size='5' style="max-width:100%">
-            {% with magic_number=-1 %}
-            <option value='{{magic_number}}'{% if magic_number|in_list:query_params.filtering.assigned_to__id__in %} selected='selected'{% endif %}>
-                {% trans "Unassigned" %}
-            </option>
-            {% endwith %}
-            {% for u in user_choices %}
-            <option value='{{ u.id }}'{% if u.id|in_list:query_params.filtering.assigned_to__id__in %} selected='selected'{% endif %}>
-                {{ u.get_full_name|default:u.get_username }}{% ifequal u user %} {% trans "(ME)" %}{% endifequal %}
-            </option>
-            {% endfor %}
-        </select>
-    </div>
-    <div class="col col-sm-1">
-        <button class="filterBuilderRemove btn btn-danger btn-sm float-right"><i class="fas fa-trash-alt"></i></button>
-    </div>
-    <div class='form-row filterHelp'>{% trans "Ctrl-Click to select multiple options" %}</div>
 </div>

@@ -22,56 +22,86 @@ copy_public_link = function() {
             <table class="table table-sm table-border">
                 <thead class="thead-light">
                     <tr class=''><th colspan='4'><h3>{{ ticket.queue.slug }}-{{ ticket.id }}. {{ ticket.title }} [{{ ticket.get_status }}]</h3>
-                        {% blocktrans with ticket.queue as queue %}Queue: {{ queue }}{% endblocktrans %}
-                        <span class='ticket_toolbar float-right'>
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                Queue: {{ ticket.queue.title }}<br/>
+                                Form: {{ ticket.ticket_form.name }}
+                            </div>
+                            <div>
+                                <span><a href="{% url 'helpdesk:pair_property_ticket' ticket.id %}" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-city"></i> {% trans "Auto-pair to BEAM inventory" %}
+                                </a></span>
 
-                            <span><a href="{% url 'helpdesk:pair_property_ticket' ticket.id %}" class="btn btn-primary btn-sm">
-                                <i class="fas fa-city"></i> {% trans "Auto-pair to BEAM inventory" %}
-                            </a></span> |
+                                {% if not ticket.beam_property.count and not ticket.beam_taxlot.count %} <span class="tooltip-wrapper" data-toggle="tooltip" data-placement="top" title="Must be paired to a BEAM building to copy data over."> {% else %} <span> {% endif %}
+                                <a href="{% url 'helpdesk:copy_to_beam' ticket.id %}"
+                                    {% if not ticket.beam_property.count and not ticket.beam_taxlot.count %} class="btn btn-secondary btn-sm disabled" aria-disabled="true"
+                                    {% else %} class="btn btn-primary btn-sm" {% endif %}>
+                                    <i class="fa fa-share-square"></i> {% trans "Copy data to BEAM" %}
+                                </a></span>
 
-                            {% if not ticket.beam_property.count and not ticket.beam_taxlot.count %} <span class="tooltip-wrapper" data-toggle="tooltip" data-placement="top" title="Must be paired to a BEAM building to copy data over."> {% else %} <span> {% endif %}
-                            <a href="{% url 'helpdesk:copy_to_beam' ticket.id %}"
-                                {% if not ticket.beam_property.count and not ticket.beam_taxlot.count %} class="btn btn-secondary btn-sm disabled" aria-disabled="true"
-                                {% else %} class="btn btn-primary btn-sm" {% endif %}>
-                                <i class="fa fa-share-square"></i> {% trans "Copy data to BEAM" %}
-                            </a></span> |
-
-                            {% if ticket.property_milestones.count > 0 %}
-                            <button type="button" id="milestoneButton" class="btn btn-primary btn-sm dropdown-toggle" data-toggle="dropdown"><i class="fas fa-road"></i> {% trans "View Milestone(s)" %}</button>
-                            <div class="dropdown-menu" aria-labelledby="milestoneButton">
-                                {% for property_milestone in ticket.property_milestones.all %}
-                                <a class="dropdown-item" href="{{ property_milestone.property_view_url }}" target="_blank" rel="noopener noreferrer">{{ property_milestone.milestone.name }}</a>
-                                {% endfor %}
-                            </div> |
-                            {% else %}
-                            {% if not ticket.beam_property.count %} <span class="tooltip-wrapper" data-toggle="tooltip" data-placement="top" title="Must be paired to a BEAM Property to Pair a Milestone"> {% else %} <span> {% endif %}
-                            <a href="{% url 'helpdesk:pair_property_milestone' ticket.id %}"
-                                {% if not ticket.beam_property.count %} class="btn btn-secondary btn-sm disabled" aria-disabled="true"
-                                {% else %} class="btn btn-primary btn-sm" {% endif %}>
-                                <i class="fas fa-road"></i> {% trans "Pair to Milestone" %}
-                            </a></span> |
-                            {% endif %}
-                            {% if not ticket.beam_property.count %} <span class="tooltip-wrapper" data-toggle="tooltip" data-placement="top" title="Must be paired to a BEAM Property to Edit Labels"> {% else %} <span> {% endif %}
-                            <a href="{% url 'helpdesk:edit_inventory_labels' 'property' ticket.id %}"
-                                {% if not ticket.beam_property.count %} class="btn btn-secondary btn-sm disabled" aria-disabled="true"
-                                {% else %} class="btn btn-primary btn-sm" {% endif %}>
-                                <i class="fas fa-sticky-note"></i> {% trans "Edit Property Labels" %}
-                            </a></span> |
-                            {% if not ticket.beam_taxlot.count %} <span class="tooltip-wrapper"  data-toggle="tooltip" data-placement="top" title="Must be paired to a BEAM TaxLot to Edit Labels"> {% else %} <span> {% endif %}
-                            <a href="{% url 'helpdesk:edit_inventory_labels' 'taxlot' ticket.id %}"
-                                {% if not ticket.beam_taxlot.count %} class="btn btn-secondary btn-sm disabled" aria-disabled="true"
-                                {% else %} class="btn btn-primary btn-sm" {% endif %}>
-                                <i class="fas fa-sticky-note"></i> {% trans "Edit TaxLot Labels" %}
-                            </a> |
-                            <a href="{% url 'helpdesk:edit' ticket.id %}" class="ticket-edit"><button class="btn btn-warning btn-sm"><i class="fas fa-pencil-alt"></i> {% trans "Edit" %}</button></a>
-                            | <a href="{% url 'helpdesk:delete' ticket.id %}" class="ticket-delete"><button class="btn btn-danger btn-sm"><i class="fas fa-trash-alt"></i> {% trans "Delete" %}</button></a>
-                            {% if ticket.on_hold %}
-                            | <a href="{% url 'helpdesk:unhold' ticket.id %}" class="ticket-hold"><button class="btn btn-warning btn-sm"><i class="fas fa-play"></i> {% trans "Unhold" %}</button></a>
-                            {% else %}
-                            | <a href="{% url 'helpdesk:hold' ticket.id %}" class="ticket-hold"><button class="btn btn-warning btn-sm"><i class="fas fa-pause"></i> {% trans "Hold" %}</button></a>
-                            {% endif %}
-                        </span>
+                                {% if ticket.property_milestones.count > 0 %}
+                                <button type="button" id="milestoneButton" class="btn btn-primary btn-sm dropdown-toggle" data-toggle="dropdown"><i class="fas fa-road"></i> {% trans "View Milestone(s)" %}</button>
+                                <div class="dropdown-menu" aria-labelledby="milestoneButton">
+                                    {% for property_milestone in ticket.property_milestones.all %}
+                                    <a class="dropdown-item" href="{{ property_milestone.property_view_url }}" target="_blank" rel="noopener noreferrer">{{ property_milestone.milestone.name }}</a>
+                                    {% endfor %}
+                                </div>
+                                {% else %}
+                                {% if not ticket.beam_property.count %} <span class="tooltip-wrapper" data-toggle="tooltip" data-placement="top" title="Must be paired to a BEAM Property to Pair a Milestone"> {% else %} <span> {% endif %}
+                                <a href="{% url 'helpdesk:pair_property_milestone' ticket.id %}"
+                                    {% if not ticket.beam_property.count %} class="btn btn-secondary btn-sm disabled" aria-disabled="true"
+                                    {% else %} class="btn btn-primary btn-sm" {% endif %}>
+                                    <i class="fas fa-road"></i> {% trans "Pair to Milestone" %}
+                                </a></span>
+                                {% endif %}
+                                {% if not ticket.beam_property.count %} <span class="tooltip-wrapper" data-toggle="tooltip" data-placement="top" title="Must be paired to a BEAM Property to Edit Labels"> {% else %} <span> {% endif %}
+                                <a href="{% url 'helpdesk:edit_inventory_labels' 'property' ticket.id %}"
+                                    {% if not ticket.beam_property.count %} class="btn btn-secondary btn-sm disabled" aria-disabled="true"
+                                    {% else %} class="btn btn-primary btn-sm" {% endif %}>
+                                    <i class="fas fa-sticky-note"></i> {% trans "Edit Property Labels" %}
+                                </a></span>
+                                {% if not ticket.beam_taxlot.count %} <span class="tooltip-wrapper"  data-toggle="tooltip" data-placement="top" title="Must be paired to a BEAM TaxLot to Edit Labels"> {% else %} <span> {% endif %}
+                                <a href="{% url 'helpdesk:edit_inventory_labels' 'taxlot' ticket.id %}"
+                                    {% if not ticket.beam_taxlot.count %} class="btn btn-secondary btn-sm disabled" aria-disabled="true"
+                                    {% else %} class="btn btn-primary btn-sm" {% endif %}>
+                                    <i class="fas fa-sticky-note"></i> {% trans "Edit TaxLot Labels" %}
+                                </a></span>
+                                <a href="{% url 'helpdesk:edit' ticket.id %}" class="ticket-edit"><button class="btn btn-warning btn-sm"><i class="fas fa-pencil-alt"></i> {% trans "Edit" %}</button></a>
+                                <a href="{% url 'helpdesk:delete' ticket.id %}" class="ticket-delete"><button class="btn btn-danger btn-sm"><i class="fas fa-trash-alt"></i> {% trans "Delete" %}</button></a>
+                                {% if ticket.on_hold %}
+                                <a href="{% url 'helpdesk:unhold' ticket.id %}" class="ticket-hold"><button class="btn btn-warning btn-sm"><i class="fas fa-play"></i> {% trans "Unhold" %}</button></a>
+                                {% else %}
+                                <a href="{% url 'helpdesk:hold' ticket.id %}" class="ticket-hold"><button class="btn btn-warning btn-sm"><i class="fas fa-pause"></i> {% trans "Hold" %}</button></a>
+                                {% endif %}
+                            </div>
+                        </div>
                     </th></tr>
+                    {% if tag_choices|length %}
+                    <tr class=''><th colspan='4'>
+                        <div class="float-left">
+                            Tags: {% for tag in ticket.tags.all %}<span class="badge badge-{{ tag.color }}">{{ tag.name }}</span> {% endfor %}
+                        </div>
+                        <div class="float-right">
+                            <div class="dropdown" style="display:inline-block;">
+                                <a class="btn btn-sm btn-warning dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-expanded="false">Add/Remove Tags</a>
+                                <div class="dropdown-menu" >
+                                    <form action="{% url 'helpdesk:edit_ticket_tags' ticket.id %}" method="POST" class="px-3 pt-1">
+                                        {% csrf_token %}
+                                        {% for tag in tag_choices %}
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" id="tagCheck{{ tag.id }}" name="tag" value="{{ tag.id }}" {% if tag in ticket.tags.all %}checked{% endif %}>
+                                            <label class="form-check-label" for="tagCheck{{ tag.id }}">
+                                                <span class="badge badge-{{tag.color}}">{{ tag.name }}</span>
+                                            </label>
+                                        </div>
+                                        {% endfor %}
+                                        <button type="submit" class="btn btn-primary m-2 float-right">Save</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+					</th></tr>
+                    {% endif %}
 					<tr class=''><th colspan='4'>
                         <a href="#" onclick="copy_public_link()">Click to copy Public Link to your Clipboard</a>
 					</th></tr>

@@ -1,0 +1,23 @@
+{% load i18n humanize %}
+{% load static %}
+{% load in_list %}
+<div class="query-filter-group">
+    <a class="dropdown-title" data-toggle="collapse" href="#tag-collapse" aria-expanded="false" aria-controls="tag-collapse">
+        <span>{% trans "Tag" %}</span>
+        <span class="query-counter badge badge-pill badge-secondary"></span>
+        <i class="fas fa-chevron-down" style="float:right;"></i>
+    </a>
+    <div class="collapse" id="tag-collapse">
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" name="t" value="-1" {% if -1|in_list:query_params.filtering.tags__in %}checked{% endif %}>
+            <label class="form-check-label">{% trans "Untagged" %}</label>
+        </div>
+        {% for t in tag_choices %}
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" name="t" value="{{ t.id }}" {% if t.id|in_list:query_params.filtering.tags__in %}checked{% endif %}>
+            <label class="form-check-label"><span class="badge badge-{{ t.color }}">{{ t.name }}</span></label>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+

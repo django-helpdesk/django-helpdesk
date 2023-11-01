@@ -33,20 +33,20 @@
     <div class="card-body">
         {% comment %} <p class="my-1"> Select a form title to edit the form. </p> {% endcomment %}
         <div class="table-responsive">
-        <table class="table table-bordered table-sm table-striped" id="dataTable" width="100%" cellspacing="0">
+        <table class="table table-sm" id="dataTable" width="100%" cellspacing="0">
             <thead class="thead-light">
                 <tr>
                     {# Need to decide which columns are most relevant to the user #}
                     {% comment %} <th>{% trans "Organization" %}</th> {% endcomment %}
                     <th>{% trans "Name" %}</th>
                     {% comment %} <th>{% trans "Description" %}</th> {% endcomment %}
-                    <th>{% trans "Queue" %}</th>
-                    <th class="text-center">{% trans "Public" %}</th>
-                    <th class="text-center">{% trans "Staff" %}</th>
-                    <th class="text-center">{% trans "Unlisted" %}</th>
+                    <th style="width:10%">{% trans "Queue" %}</th>
+                    <th class="text-center" style="width:1%">{% trans "Public" %}</th>
+                    <th class="text-center" style="width:1%">{% trans "Staff" %}</th>
+                    <th class="text-center" style="width:1%">{% trans "Unlisted" %}</th>
                     {% comment %} <th>{% trans "Additional Fields" %}</th> {% endcomment %}
-                    <th class="text-center">{% trans "Duplicate" %}</th>
-                    <th class="text-center">{% trans "Delete" %}</th>
+                    <th class="text-center" style="width:1%">{% trans "Duplicate" %}</th>
+                    <th class="text-center" style="width:1%">{% trans "Delete" %}</th>
                 </tr>
             </thead>
             <tbody>
@@ -59,33 +59,33 @@
                     <td class="text-center">
                         {# This block could be another template, since it is reused 3 times in this code #}
                         {% if form.public %}
-                            <i class="fa fa-check-circle text-success">
+                        <i class="fa fa-check-circle text-success"></i>
                         {% else %}
-                            <i class="fa fa-times-circle text-danger">
+                        <i class="fa fa-times-circle text-danger"></i>
                         {% endif%}
                     </td>
                     <td class="text-center">
                         {% if form.staff %}
-                            <i class="fa fa-check-circle text-success">
+                        <i class="fa fa-check-circle text-success"></i>
                         {% else %}
-                            <i class="fa fa-times-circle text-danger">
+                        <i class="fa fa-times-circle text-danger"></i>
                         {% endif%}
                     </td>
                     <td class="text-center">
                         {% if form.unlisted %}
-                            <i class="fa fa-check-circle text-success">
+                        <i class="fa fa-check-circle text-success"></i>
                         {% else %}
-                            <i class="fa fa-times-circle text-danger">
+                        <i class="fa fa-times-circle text-danger"></i>
                         {% endif%}
                     </td>
                     {% comment %} <td> {{ form.get_extra_field_names }} </td> {% endcomment %}
                     <td class="text-center">
-                        <a class="btn btn-primary" href="{% url 'helpdesk:duplicate_form' form.id %}" title="Duplicate {{ form.name }}">
+                        <a class="btn btn-primary btn-sm" href="{% url 'helpdesk:duplicate_form' form.id %}" title="Duplicate {{ form.name }}">
                             <i class="fa fa-clone"></i>
                         </a>
                     </td>
                     <td class="text-center">
-                        <a class="btn btn-danger" data-toggle="modal" data-target="#deleteModal" title="Delete {{ form.name }}" onclick="updateModal({{form.id}}, '{{form.name}}')">
+                        <a class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteModal" title="Delete {{ form.name }}" onclick="updateModal({{form.id}}, '{{form.name}}')">
                             <i class="fa fa-trash"></i>
                         </a>
                     </td>

@@ -1,13 +1,16 @@
 {% load i18n humanize %}
-<div class="form-row">
-    <div class="col col-sm-3">
-        <label for='id_keywords'>{% trans "Keywords" %}</label>
+<div class="query-filter-group">
+    <a class="dropdown-title" data-toggle="collapse" href="#keyword-collapse" aria-expanded="false" aria-controls="keyword-collapse">
+        <span>{% trans "Keywords" %}</span>
+        <span class="query-on"><i class="fas fa-toggle-on"></i></span>
+        <i class="fas fa-chevron-down" style="float:right;"></i>
+    </a>
+    <div class="collapse" id="keyword-collapse">
+        <div class="input-group">
+            <div>
+                <input class="form-control" type='text' name='q' value='{{ query_params.search_string }}' id='id_keywords' style="max-width:100%;"/>
+                <small class='filterHelp'>{% trans "Keywords are case-insensitive, and will be looked for pretty much everywhere possible. Prepend with 'queue:' or 'priority:' to search by queue or priority. You can also use the keyword OR to combine multiple searches." %}</small>
+            </div>
+        </div>
     </div>
-    <div class="col col-sm-8">
-        <input type='text' name='q' value='{{ query_params.search_string }}' id='id_keywords' style="width:100%; max-width:100%;"/>
-    </div>
-    <div class="col col-sm-1">
-        <button class='filterBuilderRemove btn btn-danger btn-sm float-right'><i class="fas fa-trash-alt"></i></button>
-    </div>
-    <p class='filterHelp'>{% trans "Keywords are case-insensitive, and will be looked for pretty much everywhere possible. Prepend with 'queue:' or 'priority:' to search by queue or priority. You can also use the keyword OR to combine multiple searches." %}</p>
 </div>

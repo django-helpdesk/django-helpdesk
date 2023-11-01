@@ -6,6 +6,7 @@ django-helpdesk - A Django powered ticket tracker for small enterprise.
 views/staff.py - The bulk of the application - provides most business logic and
                  renders all staff-facing views.
 """
+import re
 from copy import deepcopy
 import json
 import pandas as pd
@@ -49,7 +50,7 @@ from helpdesk.decorators import (
 from helpdesk.forms import (
     TicketForm, UserSettingsForm, EmailIgnoreForm, EditTicketForm, TicketCCForm,
     TicketCCEmailForm, TicketCCUserForm, EditFollowUpForm, TicketDependencyForm, MultipleTicketSelectForm,
-    EditQueueForm, EditFormTypeForm, PreSetReplyForm, EmailTemplateForm
+    EditQueueForm, EditFormTypeForm, PreSetReplyForm, EmailTemplateForm, TagForm
 )
 from helpdesk.lib import (
     safe_template_context,
@@ -59,7 +60,7 @@ from helpdesk.lib import (
 from helpdesk.models import (
     Ticket, Queue, FollowUp, TicketChange, PreSetReply, FollowUpAttachment, SavedSearch,
     IgnoreEmail, TicketCC, TicketDependency, UserSettings, KBItem, CustomField, is_unlisted,
-    FormType, EmailTemplate, get_markdown, clean_html
+    FormType, EmailTemplate, get_markdown, clean_html, Tag
 )
 
 from helpdesk import settings as helpdesk_settings
@@ -909,7 +910,7 @@ def view_ticket(request, ticket_id):
     """if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS:
         staff_ids = [u.id for u in users if is_helpdesk_staff(u, org=org)]  # todo
         users = users.filter(id__in=staff_ids)"""
-    users = users.order_by(User.USERNAME_FIELD)
+    users = users.order_by('last_name', 'first_name', 'email')
 
     queues = Queue.objects.filter(organization=org)
     queue_choices = _get_queue_choices(queues)
@@ -985,6 +986,7 @@ def view_ticket(request, ticket_id):
         'priorities': Ticket.PRIORITY_CHOICES,
         'preset_replies': PreSetReply.objects.filter(organization=org).filter(
             Q(queues=ticket.queue) | Q(queues__isnull=True)),
+        'tag_choices': Tag.objects.filter(organization=org).only('id', 'name', 'color'),
         'ticketcc_string': ticketcc_string,
         'SHOW_SUBSCRIBE': show_subscribe,
         'extra_data': extra_data,
@@ -1425,7 +1427,7 @@ def mass_update(request):
     tickets = request.POST.get('selected_ids')
     action = request.POST.get('action', None)
     if not (tickets and action):
-        return HttpResponseRedirect(reverse('helpdesk:list'))
+        return JsonResponse({'update_status': "Ticket Update Failed: No tickets or action"})
     tickets = tickets.split(',')
 
     if action.startswith('assign_'):
@@ -1573,7 +1575,7 @@ def mass_update(request):
             # todo create a note of this somewhere?
             t.delete()
 
-    return HttpResponseRedirect(reverse('helpdesk:list'))
+    return JsonResponse({'update_status': "Ticket Update Complete"})
 
 
 mass_update = staff_member_required(mass_update)
@@ -1735,36 +1737,68 @@ def merge_tickets(request):
         'debug': settings.DEBUG,
     })
 
-
 @helpdesk_staff_member_required
 def ticket_list(request):
     context = {}
-
     huser = HelpdeskUser(request.user)
     org = request.user.default_organization.helpdesk_organization
 
-    # Query_params will hold a dictionary of parameters relating to
-    # a query, to be saved if needed:
-    query_params = {
-        'filtering': {},
-        'filtering_or': {},
-        'sorting': None,
-        'sortreverse': False,
+    default_query_params = {
+        'filtering': {'status__in': [1, 2, 6, 7]},
+        'sorting': 'created',
+        'desc': True,
         'search_string': '',
     }
-    default_query_params = {
-        'filtering': {
-            'status__in': [Ticket.OPEN_STATUS, Ticket.REOPENED_STATUS, Ticket.REPLIED_STATUS, Ticket.NEW_STATUS],
-        },
-        'sorting': 'created',
-        'sortreverse': False,
+    query_params = {
+        'filtering': {},
+        'sorting': None,
+        'desc': False,
         'search_string': '',
     }
 
-    # If the user is coming from the header/navigation search box, lets' first
-    # look at their query to see if they have entered a valid ticket number. If
-    # they have, just redirect to that ticket number. Otherwise, we treat it as
-    # a keyword search.
+    int_list_filter_in_params = {
+        'u': 'assigned_to__id__in',
+        's': 'status__in',
+        'kb': 'kbitem__in',
+        'queue': 'queue__id__in',
+        'form': 'ticket_form__id__in',
+        'priority': 'priority__in',
+        't': 'tags__in',
+    }
+    int_list_filter_null_params = dict([
+        ('u', 'assigned_to__id__isnull'),
+        ('kb', 'kbitem__isnull'),
+        ('t', 'tags__isnull'),
+    ])
+
+    int_filter_params = {
+        'inv-min': 'paired_count__gte',
+        'inv-max': 'paired_count__lte',
+    }
+
+    DATE_REGEX = r"(?:[0-9]{2})?[0-9]{2}-(?:1[0-2]|0?[1-9])-(?:3[01]|[12][0-9]|0?[1-9])"
+    DATE_PARAM_KEY = {
+        'from': 'created__date__gte',
+        'to': 'created__date__lte',
+        're-from': 'last_reply__date__gte',
+        're-to': 'last_reply__date__lte',
+    }
+    SORT_CHOICES = [
+        'created',
+        'last_reply',
+        'title',
+        'queue',
+        'status',
+        'priority',
+        'assigned_to',
+        'paired_count',
+    ]
+    TICKETS_PER_PAGE = [
+        10,
+        25,
+        50,
+        100
+    ]
 
     if request.GET.get('search_type', None) == 'header':
         query = request.GET.get('q')
@@ -1800,133 +1834,148 @@ def ticket_list(request):
     except QueryLoadError:
         return HttpResponseRedirect(reverse('helpdesk:list'))
 
-    filter_in_params = dict([
-        ('queue', 'queue__id__in'),
-        ('assigned_to', 'assigned_to__id__in'),
-        ('status', 'status__in'),
-        ('kbitem', 'kbitem__in'),
-        ('submitter', 'submitter_email__in'),
-    ])
-    filter_null_params = dict([
-        ('queue', 'queue__id__isnull'),
-        ('assigned_to', 'assigned_to__id__isnull'),
-        ('status', 'status__isnull'),
-        ('kbitem', 'kbitem__isnull'),
-        ('submitter', 'submitter_email__isnull'),
-    ])
-
     if saved_query:
         pass
-    elif not {'queue', 'assigned_to', 'status', 'q', 'sort', 'sortreverse', 'kbitem', 'submitter'}.intersection(request.GET):
+    elif not {'q', 'sort', 'desc', *int_list_filter_in_params.keys(), *DATE_PARAM_KEY.keys()}.intersection(request.GET):
         # Fall-back if no querying is being done
         query_params = deepcopy(default_query_params)
     else:
-        for param, filter_command in filter_in_params.items():
+        for param, filter_command in int_list_filter_in_params.items():
             if not request.GET.get(param) is None:
                 patterns = request.GET.getlist(param)
                 try:
                     pattern_pks = [int(pattern) for pattern in patterns]
                     if -1 in pattern_pks:
-                        query_params['filtering'][filter_null_params[param]] = True
+                        if param in int_list_filter_null_params:
+                            query_params['filtering'][int_list_filter_null_params[param]] = True
                     else:
                         query_params['filtering'][filter_command] = pattern_pks
                 except ValueError:
                     pass
 
-        date_from = request.GET.get('date_from')
-        if date_from:
-            query_params['filtering']['created__gte'] = date_from
+        for param, filter_command in int_filter_params.items():
+            if not request.GET.get(param) is None:
+                pattern = request.GET.get(param)
+                try:
+                    pattern_pk = int(pattern)
+                    if pattern_pk >= 0:
+                        query_params['filtering'][filter_command] = pattern_pk
+                except ValueError:
+                    pass
 
-        date_to = request.GET.get('date_to')
-        if date_to:
-            query_params['filtering']['created__lte'] = date_to
-
-        last_reply_from = request.GET.get('last_reply_from')
-        if last_reply_from:
-            query_params['filtering']['last_reply__gte'] = last_reply_from
-
-        last_reply_to = request.GET.get('last_reply_to')
-        if last_reply_to:
-            query_params['filtering']['last_reply__lte'] = last_reply_to
-
-        paired_count_from = request.GET.get('paired_count_from')
-        if paired_count_from:
-            query_params['filtering']['paired_count__gte'] = paired_count_from
-
-        paired_count_to = request.GET.get('paired_count_to')
-        if paired_count_to:
-            query_params['filtering']['paired_count__lte'] = paired_count_to
+        for param, filter_command in DATE_PARAM_KEY.items():
+            if not request.GET.get(param, '') == '':
+                patterns = request.GET.get(param)
+                match = re.match(DATE_REGEX, patterns)
+                if match:
+                    query_params['filtering'][filter_command] = match.group(0)
 
         # KEYWORD SEARCHING
         q = request.GET.get('q', '')
         context['query'] = q
         query_params['search_string'] = q
 
-        # SORTING
         sort = request.GET.get('sort', None)
-        if sort not in ('status', 'assigned_to', 'created', 'title', 'queue', 'priority', 'kbitem', 'submitter',
-                        'paired_count'):
+        if sort not in SORT_CHOICES:
             sort = 'created'
         query_params['sorting'] = sort
 
-        sortreverse = request.GET.get('sortreverse', None)
-        query_params['sortreverse'] = sortreverse
+        sortreverse = request.GET.get('desc', None)
+        if sortreverse == 'on':
+            query_params['desc'] = True
 
-    urlsafe_query = query_to_base64(query_params)
-    Query(huser, base64query=urlsafe_query).refresh_query()
-
-    # Return queries that the user created, or that have been shared with everyone and the user hasn't rejected
-    user_saved_queries = SavedSearch.objects.filter(Q(user=request.user)
-                                                    | (Q(shared__exact=True) & ~Q(opted_out_users__in=[request.user])))
-
-    search_message = ''
-    if query_params['search_string'] and settings.DATABASES['default']['ENGINE'].endswith('sqlite'):
-        search_message = _(
-            '<p><strong>Note:</strong> Your keyword search is case sensitive '
-            'because of your database. This means the search will <strong>not</strong> '
-            'be accurate. By switching to a different database system you will gain '
-            'better searching! For more information, read the '
-            '<a href="http://docs.djangoproject.com/en/dev/ref/databases/#sqlite-string-matching">'
-            'Django Documentation on string matching in SQLite</a>.')
-
-    # Get KBItems that are part of the user's helpdesk_organization
-    kbitem_choices = [(item.pk, str(item)) for item in KBItem.objects.filter(
-        category__organization=org)]
+        """
+        filter_contains_params = dict([
+            ('ticket', 'title__icontains'),
+            ('priority', 'priority__icontains'), # need to search words not numbers
+            ('queue', 'queue__title__icontains'),
+            ('form', 'ticket_form__name__icontains'),
+            ('status', 'status__icontains'), # need to search words not numbers
+            ('assigned_to', 'assigned_to__username__icontains'), # currently only checks this one
+            ('assigned_to', 'assigned_to__email__icontains'), 
+            ('submitter', 'submitter_email__icontains'),
+            ('paired_count', 'paired_count__icontains'), # this needs to be updated once I figure out how to filter on paired_count
+            ('created', 'created__icontains'),
+            ('last_reply', 'last_reply__icontains'),
+            ('due_date', 'due_date__icontains'),
+            # ('time_spent', 'status__icontains'), # this needs to be updated once I figure out how to filter on time_spent
+            ('kbitem', 'kbitem__title__icontains'),
+        ])
+        
+        # breakpoint()
+        for item in request.POST.items():
+            if item[0].endswith('_filter') and item[1] != '':
+                col = item[0].replace('_filter', '')
+                query_params['filtering'][filter_contains_params[col]] = item[1]
+        """
+    urlsafe_query = query_to_base64(query_params)  # urlsafe_query is only used to save saved queries
+    qs = Query(huser, query_params=query_params).refresh_query()
 
     # After query is run, replaces null-filters with in-filters=[-1], so page can properly display that filter.
-    for param, null_query in filter_null_params.items():
+    for param, null_query in int_list_filter_null_params.items():
         popped = query_params['filtering'].pop(null_query, None)
         if popped is not None:
-            query_params['filtering'][filter_in_params[param]] = [-1]
+            query_params['filtering'][int_list_filter_in_params[param]] = [-1]
 
-    user_choices = list_of_helpdesk_staff(org)
+    # Choices/data for the rest of the page
+    user_saved_queries = SavedSearch.objects.filter(user=request.user)  # todo: + org
+    form_choices = FormType.objects.filter(organization=org).order_by('name')
+    user_choices = list_of_helpdesk_staff(org).order_by('last_name', 'first_name', 'email').values('id', 'username', 'first_name', 'last_name')
+    tag_choices = Tag.objects.filter(organization=org).order_by('name').values('id', 'name', 'color')
 
+    """
     # Get extra data columns to be displayed if only 1 queue is selected
     extra_data_columns = {}
     if len(query_params['filtering'].get('queue__id__in', [])) == 1:
         extra_data_columns = get_extra_data_columns(query_params['filtering']['queue__id__in'][0])
+    """
 
-    json_queries = {i['id']: i for i in user_saved_queries.values('id', 'user_id', 'shared')}
+    page = request.GET.get('p', '1')
+    try:
+        page = int(page)
+    except ValueError:
+        page = 1
+
+    if request.GET.get('n', None):
+        tickets_per_page = request.GET.get('n')
+        try:
+            tickets_per_page = int(tickets_per_page)
+            if tickets_per_page not in TICKETS_PER_PAGE:
+                tickets_per_page = TICKETS_PER_PAGE[1]
+        except ValueError:
+            tickets_per_page = TICKETS_PER_PAGE[1]
+    elif request.user.is_authenticated and hasattr(request.user, 'usersettings_helpdesk'):
+        tickets_per_page = request.user.usersettings_helpdesk.tickets_per_page
+    else:
+        tickets_per_page = 25
+
+    tickets = qs
+    paginator = Paginator(tickets, tickets_per_page)
+    try:
+        tickets = paginator.page(page)
+    except PageNotAnInteger:
+        tickets = paginator.page(1)
+    except EmptyPage:
+        tickets = paginator.page(paginator.num_pages)
 
     return render(request, 'helpdesk/ticket_list.html', dict(
         context,
-        default_tickets_per_page=request.user.usersettings_helpdesk.tickets_per_page,
+        tickets_per_page=tickets_per_page,
+        ticket_list=tickets,
         user_choices=user_choices,
-        kb_items=KBItem.objects.all(),
         queue_choices=huser.get_queues(),
+        form_choices=form_choices,
+        priority_choices=Ticket.PRIORITY_CHOICES,
         status_choices=Ticket.STATUS_CHOICES,
-        kbitem_choices=kbitem_choices,
+        tag_choices=tag_choices,
         urlsafe_query=urlsafe_query,
         user_saved_queries=user_saved_queries,
-        json_queries=json.dumps(json_queries),
         query_params=query_params,
         from_saved_query=saved_query is not None,
         saved_query=saved_query,
-        search_message=search_message,
-        extra_data_columns=extra_data_columns,
+        # extra_data_columns=extra_data_columns,
         debug=settings.DEBUG,
     ))
-
 
 ticket_list = staff_member_required(ticket_list)
 
@@ -1938,10 +1987,10 @@ class QueryLoadError(Exception):
 def load_saved_query(request, query_params=None):
     saved_query = None
 
-    if request.GET.get('saved_query', None):
+    if request.GET.get('saved-query', None):
         try:
             saved_query = SavedSearch.objects.get(
-                Q(pk=request.GET.get('saved_query')) &
+                Q(pk=request.GET.get('saved-query')) &
                 ((Q(shared=True) & ~Q(opted_out_users__in=[request.user])) | Q(user=request.user))
             )
         except (SavedSearch.DoesNotExist, ValueError):
@@ -1958,21 +2007,6 @@ def load_saved_query(request, query_params=None):
         except json.JSONDecodeError:
             raise QueryLoadError()
     return (saved_query, query_params)
-
-
-@helpdesk_staff_member_required
-@api_view(['GET'])
-def datatables_ticket_list(request, query):
-    """
-    Datatable on ticket_list.html uses this view from to get objects to display
-    on the table. query_tickets_by_args is at lib.py, DatatablesTicketSerializer is in
-    serializers.py. The serializers and this view use django-rest_framework methods
-    """
-    query = Query(HelpdeskUser(request.user), base64query=query)
-    result = query.get_datatables_context(**request.query_params)
-
-    return JsonResponse(result, status=status.HTTP_200_OK)
-
 
 @helpdesk_staff_member_required
 @api_view(['GET'])
@@ -2132,7 +2166,7 @@ def report_index(request):
     user_queues = huser.get_queues()
     Tickets = Ticket.objects.filter(queue__in=user_queues)
     number_tickets = Tickets.count()
-    saved_query = request.GET.get('saved_query', None)
+    saved_query = request.GET.get('saved-query', None)
 
     basic_ticket_stats = calc_basic_ticket_stats(Tickets)
 
@@ -2184,7 +2218,7 @@ def run_report(request, report):
     except QueryLoadError:
         return HttpResponseRedirect(reverse('helpdesk:report_index'))
 
-    if request.GET.get('saved_query', None):
+    if request.GET.get('saved-query', None):
         Query(report_queryset, query_to_base64(query_params))
 
     from collections import defaultdict
@@ -2373,6 +2407,8 @@ def save_query(request):
 
     if shared == 'on':  # django only translates '1', 'true', 't' into True
         shared = True
+    else:
+        shared = False
     query_encoded = request.POST.get('query_encoded', None)
 
     if not title or not query_encoded:
@@ -2385,7 +2421,7 @@ def save_query(request):
     query = SavedSearch(title=title, shared=shared, query=query_encoded, user=request.user)
     query.save()
 
-    return HttpResponseRedirect('%s?saved_query=%s' % (reverse('helpdesk:list'), query.id))
+    return HttpResponseRedirect('%s?saved-query=%s' % (reverse('helpdesk:list'), query.id))
 
 
 save_query = staff_member_required(save_query)
@@ -2398,8 +2434,6 @@ def delete_saved_query(request, id):
     if request.method == 'POST':
         query.delete()
         return HttpResponseRedirect(reverse('helpdesk:list'))
-    else:
-        return render(request, 'helpdesk/confirm_delete_saved_query.html', {'query': query, 'debug': settings.DEBUG})
 
 
 delete_saved_query = staff_member_required(delete_saved_query)
@@ -2425,7 +2459,7 @@ def reshare_saved_query(request, id):
     query.opted_out_users.clear()
     query.shared = True
     query.save()
-    return HttpResponseRedirect(reverse('helpdesk:list') + '?saved_query=%s' % query.id)
+    return HttpResponseRedirect(reverse('helpdesk:list') + '?saved-query=%s' % query.id)
 
 
 reshare_saved_query = staff_member_required(reshare_saved_query)
@@ -2438,7 +2472,7 @@ def unshare_saved_query(request, id):
 
     query.shared = False
     query.save()
-    return HttpResponseRedirect(reverse('helpdesk:list') + '?saved_query=%s' % query.id)
+    return HttpResponseRedirect(reverse('helpdesk:list') + '?saved-query=%s' % query.id)
 
 
 unshare_saved_query = staff_member_required(unshare_saved_query)
@@ -2643,6 +2677,127 @@ email_template_default = helpdesk_staff_member_required(email_template_default)
 
 
 @helpdesk_staff_member_required
+def edit_ticket_tags(request, ticket_id):
+    """
+    Given a ticket_id and list of tag ids, assigns those tags to the ticket.
+    """
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+    tag_ids = request.POST.getlist('tag', [])
+    tags = Tag.objects.filter(id__in=tag_ids)
+    ticket.tags.set(tags)
+    return HttpResponseRedirect(reverse('helpdesk:view', args=[ticket_id]))
+
+
+@helpdesk_staff_member_required
+def tag_list(request):
+    """
+    Returns a list of tags for the settings page.
+    """
+    org = request.user.default_organization.helpdesk_organization
+
+    return render(request, 'helpdesk/tag_list.html', {
+        'tag_list': Tag.objects.filter(organization=org),
+        'debug': settings.DEBUG,
+    })
+
+
+@helpdesk_staff_member_required
+def tag_add(request):
+    """
+    Creates a new Tag.
+    """
+    if request.method == 'POST':
+        form = TagForm(request.POST, organization=request.user.default_organization.helpdesk_organization)
+        if form.is_valid():
+            saved_form = form.save(commit=False)
+            saved_form.organization = request.user.default_organization.helpdesk_organization
+            saved_form.save()
+            return HttpResponseRedirect(reverse('helpdesk:tag_list'))
+    else:
+        form = TagForm(request.GET, organization=request.user.default_organization.helpdesk_organization)
+
+    return render(request, 'helpdesk/tag_add.html', {'form': form, 'debug': settings.DEBUG})
+
+
+@helpdesk_staff_member_required
+def tag_edit(request, id):
+    """
+    Edits a Tag's data.
+    """
+    tag = get_object_or_404(Tag, id=id)
+    form = TagForm(request.POST or None, instance=tag)
+    if form.is_valid():
+        form.save()
+        return HttpResponseRedirect(reverse('helpdesk:tag_list'))
+
+    return render(request, 'helpdesk/tag_add.html', {'form': form, 'debug': settings.DEBUG})
+
+
+@helpdesk_staff_member_required
+def tag_delete(request, id):
+    """
+    Deletes a tag, removing it from all tickets.
+    """
+    tag = get_object_or_404(Tag, id=id)
+    if request.method == 'POST':
+        tag.delete()
+        return HttpResponseRedirect(reverse('helpdesk:tag_list'))
+    else:
+        return render(request, 'helpdesk/tag_delete.html', {'tag': tag, 'debug': settings.DEBUG})
+
+
+@helpdesk_staff_member_required
+def get_tags(request):
+    """
+    Returns a dictionary with tag ids as keys and on, indeterminate, or off as values, to style the checkboxes for editing ticket tags en-masse.
+    """
+    ticket_ids = request.GET.getlist('selected[]')
+    if not ticket_ids:
+        return JsonResponse({
+            'success': False,
+            'message': 'Must pass a ticket ID'
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    tag_checkboxes = {}
+    for tag in Tag.objects.filter(organization=request.user.default_organization.helpdesk_organization):
+        count = tag.tickets.filter(id__in=ticket_ids).count()
+        if count == 0:
+            tag_checkboxes[tag.id] = 'off'
+        elif count != len(ticket_ids):
+            tag_checkboxes[tag.id] = 'indeterminate'
+        elif count == len(ticket_ids):
+            tag_checkboxes[tag.id] = 'on'
+
+    return JsonResponse({
+        "tags": tag_checkboxes,
+    }, status=200)
+
+
+@helpdesk_staff_member_required
+def mass_update_tags(request):
+    """
+    Takes a list of ticket ids, tag ids to add, and tag ids to remove, and adds and/or removes tags from those tickets.
+    """
+    ticket_ids = request.POST.getlist('selected[]')
+    if not ticket_ids:
+        return JsonResponse({
+            'success': False,
+            'message': 'Must pass a ticket ID'
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    add_tag_ids = request.POST.getlist('add_tags[]')
+    remove_tag_ids = request.POST.getlist('remove_tags[]')
+
+    add_tags = Tag.objects.filter(id__in=add_tag_ids, organization=request.user.default_organization.helpdesk_organization)
+    remove_tags = Tag.objects.filter(id__in=remove_tag_ids, organization=request.user.default_organization.helpdesk_organization)
+
+    for ticket in Ticket.objects.filter(id__in=ticket_ids, ticket_form__organization=request.user.default_organization.helpdesk_organization):
+        ticket.tags.add(*add_tags)
+        ticket.tags.remove(*remove_tags)
+    return JsonResponse({'update_status': "Ticket Update Complete"})
+
+
+@helpdesk_staff_member_required
 def ticket_cc(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
     perm = ticket_perm_check(request, ticket)
@@ -2689,7 +2844,7 @@ def ticket_cc_add(request, ticket_id):
 
     # Add list of users to the TicketCCUserForm
     users = list_of_helpdesk_staff(ticket.ticket_form.organization)
-    users = users.order_by(User.USERNAME_FIELD)
+    users = users.order_by('last_name', 'first_name', 'email')
 
     form_user = TicketCCUserForm()
     form_user.fields['user'].choices = [('', '--------')] + [
@@ -3496,7 +3651,7 @@ def export(qs, org, serializer, paginate=False, do_extra_data=True, visible_cols
         output = pd.json_normalize(output)
         report.append(output)
     report = pd.concat(report)
-    report = report.set_index('Ticket ID')
+    report = report.set_index('Ticket')
 
     time_stamp = timezone.now().strftime('%Y%m%d_%H%M%S')
     media_dir = 'helpdesk/reports/'

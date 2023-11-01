@@ -64,3 +64,18 @@ body.fixed-nav {
     font-weight: 800;
   }
 }
+
+.filter-top {
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    vertical-align: center;
+}
+#dataTable > thead > tbody > tr > td {
+    padding:10px;
+    border: 0px;
+}
+
+.ticket_list_page  * {
+    font-size: 13px;
+}

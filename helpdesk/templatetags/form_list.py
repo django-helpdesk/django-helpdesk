@@ -26,7 +26,7 @@ def form_list(user, request):
             sidebar_form_list = FormType.objects.filter(
                 staff=True,
                 organization=user.default_organization.helpdesk_organization_id,
-            ).values('name', 'id', 'organization__name')
+            ).order_by('name').values('name', 'id', 'organization__name')
         else:
             domain_id = getattr(request, 'domain_id', 0)
             helpdesk_orgs = get_helpdesk_orgs_for_domain(domain_id)
@@ -49,7 +49,7 @@ def form_list(user, request):
                 public=True,
                 unlisted=False,
                 organization=org,
-            ).values('name', 'id', 'organization__name')
+            ).order_by('name').values('name', 'id', 'organization__name')
         return sidebar_form_list
     except Exception as e:
         import sys

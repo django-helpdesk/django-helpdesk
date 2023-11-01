@@ -1,24 +1,22 @@
 {% load i18n humanize %}
 {% load static %}
 {% load in_list %}
-<div class="form-row">
-    <div class="col col-sm-3">
-        <label for='id_kbitems'>{% trans "Knowledge base item(s)" %}:</label>
+<div class="query-filter-group">
+    <a class="dropdown-title" data-toggle="collapse" href="#kbitem-collapse" aria-expanded="false" aria-controls="kbitem-collapse">
+        <span>{% trans "Knowledgebase Item" %}</span>
+        <span class="query-counter badge badge-pill badge-secondary"></span>
+        <i class="fas fa-chevron-down" style="float:right;"></i>
+    </a>
+    <div class="collapse" id="kbitem-collapse">
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" name="kb" value="-1" {% if -1|in_list:query_params.filtering.kbitem__in %}checked{% endif %}>
+            <label class="form-check-label">Uncategorized</label>
+        </div>
+        {% for s in kb_item_choices %}
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" name="kb" value="{{ s.id }}" {% if s.id|in_list:query_params.filtering.kbitem__in %}checked{% endif %}>
+            <label class="form-check-label">{{ s.category__title }}: {{ s.title }}</label>
+        </div>
+        {% endfor %}
     </div>
-    <div class="col col-sm-8" >
-        <select id='id_kbitems' name='kbitem' size='5' style="max-width:100%" multiple>
-            {% with magic_number=-1 %}
-            <option value='{{magic_number}}'{% if magic_number|in_list:query_params.filtering.kbitem__in %} selected='selected'{% endif %}>
-                {% trans "Uncategorized" %}
-            </option>
-            {% endwith %}
-            {% for s in kbitem_choices %}
-            <option value='{{ s.0 }}'{% if s.0|in_list:query_params.filtering.kbitem__in %} selected='selected'{% endif %}>{{ s.1 }}</option>
-            {% endfor %}
-        </select>
-    </div>
-    <div class="col col-sm-1">
-        <button class="filterBuilderRemove btn btn-danger btn-sm float-right"><i class="fas fa-trash-alt"></i></button>
-    </div>
-    <div class='form-row filterHelp'>{% trans "Ctrl-click to select multiple options" %}</div>
 </div>

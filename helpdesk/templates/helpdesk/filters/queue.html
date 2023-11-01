@@ -1,20 +1,19 @@
 {% load i18n humanize %}
 {% load static %}
 {% load in_list %}
-<div class="form-row">
-    <div class="col col-sm-3">
-        <label for='id_queues'>{% trans "Queue(s)" %}:</label>
+<div class="query-filter-group">
+    <a class="dropdown-title" data-toggle="collapse" href="#queue-collapse" aria-expanded="false" aria-controls="queue-collapse">
+        <span>{% trans "Queue" %}</span>
+        <span class="query-counter badge badge-pill badge-secondary"></span>
+        <i class="fas fa-chevron-down" style="float:right;"></i>
+    </a>
+    <div class="collapse" id="queue-collapse">
+        {% for q in queue_choices %}
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" name="queue" value="{{ q.id }}" {% if q.id|in_list:query_params.filtering.queue__id__in %}checked{% endif %}>
+            <label class="form-check-label">{{ q.title }}</label>
+        </div>
+        {% endfor %}
     </div>
-    <div class="col col-sm-8">
-        <select id='id_queues' name='queue' size='5' style="max-width:100%" multiple>
-            {% for q in queue_choices %}
-            <option value='{{ q.id }}'{% if q.id|in_list:query_params.filtering.queue__id__in %} selected="selected"{% endif %}>{{ q.title }}</option>
-            {% endfor %}
-        </select>
-    </div>
-    <div class="col col-sm-1">
-        <button class="filterBuilderRemove btn btn-danger btn-sm float-right"><i class="fas fa-trash-alt"></i></button>
-    </div>
-    <div class="form-row filterHelp">{% trans "Ctrl-click to select multiple options" %}</div>
 </div>
 

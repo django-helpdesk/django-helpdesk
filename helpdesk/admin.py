@@ -50,13 +50,9 @@ class TicketAdmin(admin.ModelAdmin):
               'building_name', 'building_address', 'pm_id', 'building_id', 'extra_data',
               'beam_property', 'beam_taxlot',
               'assigned_to', 'status', 'on_hold', 'resolution', 'secret_key', 'kbitem', 'merged_to',
-              'priority', 'due_date',)
+              'priority', 'due_date', 'tags')
 
     readonly_fields = ('beam_property', 'beam_taxlot')
-
-    def save_model(self, request, obj, form, change):
-        super().save_model(request, obj, form, change)
-        form.update_ticket_set(obj)
 
     def title_view(self, obj):
         return '(no title)' if not obj.title else obj.title
