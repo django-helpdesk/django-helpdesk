@@ -536,6 +536,8 @@ def is_autoreply(message, sender='', headers=None):
         'noreply' in sender,
         'donotreply' in sender,
         'postmaster' in sender,
+        False if not message.get("Return-Path") else message.get("Return-Path", '').lower() == 'mailer-daemon',
+        False if not message.get("return-path") else message.get("return-path", '').lower() == 'mailer-daemon',
     ]
     return any(any_if_this)
 
@@ -660,7 +662,7 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger,
                     if is_extra_data(ubid_field.field_name):
                         ticket.extra_data[ubid_field.field_name] = ubids
                     else:
-                        setattr(ticket, ubid_field.field_name, ubids)
+                        setattr(ticket, ubid_field.field_name, ubids[0:200])  # the building_id field tends to be capped at 200 characters
 
             ticket.save()
             logger.debug("Created new ticket %s-%s" % (ticket.queue.slug, ticket.id))
@@ -814,6 +816,14 @@ def object_from_message(message, importer, queues, logger, nj=None):
         to_list = getaddresses(message.get_all('To', []))
     if not cc_list:
         cc_list = getaddresses(message.get_all('Cc', []))
+
+    # Debugging issues with address resolution
+    for (name, address) in to_list:
+        if '@' not in address:
+            logger.error(f'ERROR: Bad to list.\nmessage.get_all: {message.get_all("To", [])}\nto_list: {to_list}')
+    for (name, address) in cc_list:
+        if '@' not in address:
+            logger.error(f'ERROR: Bad CC list.\nmessage.get_all: {message.get_all("Cc", [])}\ncc_list: {cc_list}')
 
     # Sort out which queue this email should go into #
     ticket, queue = None, None
@@ -1032,6 +1042,14 @@ def object_from_exchange_message(message, importer, queues, logger):
         to_list = [(r.name, r.email_address) for r in message.to_recipients]
     if getattr(message, 'cc_recipients', None):
         cc_list = [(r.name, r.email_address) for r in message.cc_recipients]
+
+    # Debugging issues with address resolution
+    for (name, address) in to_list:
+        if '@' not in address:
+            logger.error(f'Bad to list.\nto_recipients: {message.to_recipients}\nto_list: {to_list}')
+    for (name, address) in cc_list:
+        if '@' not in address:
+            logger.error(f'Bad CC list.\ncc_recipients: {message.cc_recipients}\ncc_list: {cc_list}')
 
     # Sort out which queue this email should go into #
     ticket, queue = None, None
