@@ -2,7 +2,7 @@ from .forms import TicketForm
 from .lib import format_time_spent, process_attachments
 from .models import CustomField, FollowUp, FollowUpAttachment, Ticket
 from .user import HelpdeskUser
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.contrib.humanize.templatetags import humanize
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
@@ -152,7 +152,7 @@ class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
 
     class Meta:
-        model = User
+        model = get_user_model()
         fields = ('first_name', 'last_name', 'username', 'email', 'password')
 
     def create(self, validated_data):
