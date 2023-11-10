@@ -7,7 +7,7 @@ def forwards_func(apps, schema_editor):
     EmailTemplate = apps.get_model("helpdesk", "EmailTemplate")
     db_alias = schema_editor.connection.alias
     EmailTemplate.objects.using(db_alias).create(
-        id=EmailTemplate.objects.order_by('-id').first().id + 1,  # because PG sequences are not reset
+        id=EmailTemplate.objects.using(db_alias).order_by('-id').first().id + 1 if EmailTemplate.objects.using(db_alias).first() else 1,  # because PG sequences are not reset
         template_name='merged',
         subject='(Merged)',
         heading='Ticket merged',
@@ -24,7 +24,7 @@ From now on, please answer on this ticket, or you can include the tag {{ ticket.
         locale='en'
     )
     EmailTemplate.objects.using(db_alias).create(
-        id=EmailTemplate.objects.order_by('-id').first().id + 1,  # because PG sequences are not reset
+        id=EmailTemplate.objects.using(db_alias).order_by('-id').first().id + 1,  # because PG sequences are not reset
         template_name='merged',
         subject='(Fusionné)',
         heading='Ticket Fusionné',
