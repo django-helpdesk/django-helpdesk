@@ -578,7 +578,7 @@ def get_ticket_from_request_with_authorisation(
                 secret_key__iexact=request.POST.get('key')
             )
         except (Ticket.DoesNotExist, ValueError):
-            return redirect_to_login(request.path, 'helpdesk:login')
+            raise PermissionDenied()
 
     return get_object_or_404(Ticket, id=ticket_id)
 
@@ -732,7 +732,10 @@ def get_template_staff_and_template_cc(
 
 def update_ticket(request, ticket_id, public=False):
 
-    ticket = get_ticket_from_request_with_authorisation(request, ticket_id, public)
+    try:
+        ticket = get_ticket_from_request_with_authorisation(request, ticket_id, public)
+    except PermissionDenied:
+        return redirect_to_login(request.path, 'helpdesk:login')
 
     comment = request.POST.get('comment', '')
     new_status = int(request.POST.get('new_status', ticket.status))
