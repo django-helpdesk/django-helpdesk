@@ -347,17 +347,12 @@ def view_ticket(request, ticket_id):
     ticket_perm_check(request, ticket)
 
     if 'take' in request.GET:
-        # Allow the user to assign the ticket to themselves whilst viewing it.
-
-        # Trick the update_ticket() view into thinking it's being called with
-        # a valid POST.
-        request.POST = {
-            'owner': request.user.id,
-            'public': 1,
-            'title': ticket.title,
-            'comment': ''
-        }
-        return update_ticket_view(request, ticket_id)
+        update_ticket(
+            request.user,
+            ticket,
+            owner=request.user.id
+        )
+        return return_to_ticket(request.user, helpdesk_settings, ticket)
 
     if 'subscribe' in request.GET:
         # Allow the user to subscribe him/herself to the ticket whilst viewing
@@ -376,17 +371,13 @@ def view_ticket(request, ticket_id):
         else:
             owner = ticket.assigned_to.id
 
-        # Trick the update_ticket() view into thinking it's being called with
-        # a valid POST.
-        request.POST = {
-            'new_status': Ticket.CLOSED_STATUS,
-            'public': 1,
-            'owner': owner,
-            'title': ticket.title,
-            'comment': _('Accepted resolution and closed ticket'),
-        }
-
-        return update_ticket_view(request, ticket_id)
+        update_ticket(
+            request.user,
+            ticket,
+            owner=owner,
+            comment= _('Accepted resolution and closed ticket'),
+        )
+        return return_to_ticket(request.user, helpdesk_settings, ticket)
 
     if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS:
         users = User.objects.filter(

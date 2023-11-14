@@ -194,7 +194,7 @@ def update_ticket(
         user,
         ticket,
         title=None,
-        comment=None,
+        comment="",
         files=None,
         public=False,
         owner=-1,
@@ -207,6 +207,8 @@ def update_ticket(
     # We need to allow the 'ticket' and 'queue' contexts to be applied to the
     # comment.
     context = safe_template_context(ticket)
+    if title is None:
+        title = ticket.title
     if priority == -1:
         priority = ticket.priority
     if new_status is None:
@@ -309,6 +311,8 @@ def update_ticket(
         ticket.due_date = due_date
 
     for checklist in ticket.checklists.all():
+        if checklist.id not in new_checklists:
+            continue
         new_completed_tasks = new_checklists[checklist.id]
         for task in checklist.tasks.all():
             changed = None
