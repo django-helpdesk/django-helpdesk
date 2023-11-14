@@ -64,7 +64,7 @@ urlpatterns = [
     ),
     path("tickets/<int:ticket_id>/edit/", staff.edit_ticket, name="edit"),
     path("tickets/<int:ticket_id>/update/",
-         staff.update_ticket, name="update"),
+         staff.update_ticket_view, name="update"),
     path("tickets/<int:ticket_id>/delete/",
          staff.delete_ticket, name="delete"),
     path("tickets/<int:ticket_id>/hold/", staff.hold_ticket, name="hold"),

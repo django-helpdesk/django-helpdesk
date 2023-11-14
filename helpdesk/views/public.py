@@ -210,7 +210,7 @@ def view_ticket(request):
         return HttpResponseRedirect(redirect_url)
 
     if 'close' in request.GET and ticket.status == Ticket.RESOLVED_STATUS:
-        from helpdesk.views.staff import update_ticket
+        from helpdesk.views.staff import update_ticket_view
 
         # Trick the update_ticket() view into thinking it's being called with
         # a valid POST.
@@ -224,7 +224,7 @@ def view_ticket(request):
             request.POST['owner'] = ticket.assigned_to.id
         request.GET = {}
 
-        return update_ticket(request, ticket_id, public=True)
+        return update_ticket_view(request, ticket_id, public=True)
 
     # redirect user back to this ticket if possible.
     redirect_url = ''
