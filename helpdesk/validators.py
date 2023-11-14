@@ -28,7 +28,7 @@ def validate_file_extension(value):
         valid_extensions = ['.txt', '.asc', '.htm', '.html',
                             '.pdf', '.doc', '.docx', '.odt', '.jpg', '.png', '.eml']
 
-    if not ext.lower() in valid_extensions:
+    if ext.lower() not in valid_extensions:
         # TODO: one more check in case it is a file with no extension; we
         # should always allow that?
         if not (ext.lower() == '' or ext.lower() == '.'):

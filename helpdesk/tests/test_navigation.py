@@ -6,7 +6,7 @@ from django.test.utils import override_settings
 from django.urls import reverse
 from helpdesk import settings as helpdesk_settings
 from helpdesk.models import Queue
-from helpdesk.tests.helpers import create_ticket, get_staff_user, print_response, reload_urlconf, User
+from helpdesk.tests.helpers import create_ticket, get_staff_user, reload_urlconf, User
 from importlib import reload
 import sys
 
@@ -109,7 +109,6 @@ class StaffUsersOnlyTestCase(StaffUserTestCaseMixin, TestCase):
         """When HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE is False,
         staff users should be able to access the dashboard.
         """
-        from helpdesk.decorators import is_helpdesk_staff
 
         user = get_staff_user()
         self.client.login(username=user.username, password='password')
@@ -120,8 +119,6 @@ class StaffUsersOnlyTestCase(StaffUserTestCaseMixin, TestCase):
         """When HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE is False,
         non-staff users should not be able to access the dashboard.
         """
-        from helpdesk.decorators import is_helpdesk_staff
-
         user = self.non_staff_user
         self.client.login(username=user.username,
                           password=self.non_staff_user_password)

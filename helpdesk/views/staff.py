@@ -1340,7 +1340,7 @@ def ticket_list(request):
             ('kbitem', 'kbitem__isnull'),
         ])
         for param, filter_command in filter_in_params:
-            if not request.GET.get(param) is None:
+            if request.GET.get(param) is not None:
                 patterns = request.GET.getlist(param)
                 try:
                     pattern_pks = [int(pattern) for pattern in patterns]
