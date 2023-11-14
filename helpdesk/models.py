@@ -555,6 +555,8 @@ class Ticket(models.Model):
     pm_id = models.CharField(_("Portfolio Manager ID"), max_length=200, blank=True, null=True)
     building_id = models.CharField(_("Building ID"), max_length=200, blank=True, null=True)
 
+    allow_sending = models.BooleanField(default=True)
+
     @property
     def time_spent(self):
         """Return back total time spent on the ticket. This is calculated value
@@ -610,67 +612,68 @@ class Ticket(models.Model):
         logger.info('Sending emails from ticket model.')
         recipients = set()  # list of people already set to receive an email
 
-        if dont_send_to is not None:
-            recipients.update(dont_send_to)
+        if self.allow_sending:
+            if dont_send_to is not None:
+                recipients.update(dont_send_to)
 
-        if self.queue.email_address:
-            recipients.add(self.queue.email_address.strip('<>'))
-        recipients.add(self.queue.from_address.strip('<>'))
-        if organization and organization.sender:
-            recipients.add(organization.sender.email_address.strip('<>'))
+            if self.queue.email_address:
+                recipients.add(self.queue.email_address.strip('<>'))
+            recipients.add(self.queue.from_address.strip('<>'))
+            if organization and organization.sender:
+                recipients.add(organization.sender.email_address.strip('<>'))
 
-        ignored_from_queue = self.queue.ignoreemail_set.filter(prevent_send=True)
-        ignored_from_org = self.queue.organization.ignoreemail_set.filter(prevent_send=True, queues__isnull=True)
+            ignored_from_queue = self.queue.ignoreemail_set.filter(prevent_send=True)
+            ignored_from_org = self.queue.organization.ignoreemail_set.filter(prevent_send=True, queues__isnull=True)
 
-        recipients = set([s.strip() for s in recipients if s])
-        def send(role, recipient):
-            if recipient:
-                recipient = recipient.strip()
-                if recipient not in recipients and role in roles:
-                    ignore_flag = False
-                    for i in ignored_from_queue:
-                        if i.test(recipient):
-                            ignore_flag = True
-                    for i in ignored_from_org:
-                        if i.test(recipient):
-                            ignore_flag = True
+            recipients = set([s.strip() for s in recipients if s])
+            def send(role, recipient):
+                if recipient:
+                    recipient = recipient.strip()
+                    if recipient not in recipients and role in roles:
+                        ignore_flag = False
+                        for i in ignored_from_queue:
+                            if i.test(recipient):
+                                ignore_flag = True
+                        for i in ignored_from_org:
+                            if i.test(recipient):
+                                ignore_flag = True
 
-                    if not ignore_flag:
-                        template, context = roles[role]
-                        # todo: send_templated_mail doesn't actually use the sender given to it?
-                        send_templated_mail(template, context, recipient, sender=self.queue.from_address,
-                                            organization=organization, ticket_id=self.pk, **kwargs)
-                        recipients.add(recipient)
+                        if not ignore_flag:
+                            template, context = roles[role]
+                            # todo: send_templated_mail doesn't actually use the sender given to it?
+                            send_templated_mail(template, context, recipient, sender=self.queue.from_address,
+                                                organization=organization, ticket=self, **kwargs)
+                            recipients.add(recipient)
 
-        # Attempts to send an email to every possible field.
-        if self.submitter_email:
-            send('submitter', self.submitter_email)
-        if self.contact_email:
-            send('submitter', self.contact_email)  # TODO add a new role/template for contact_email field?
-        send('queue_updated', self.queue.updated_ticket_cc)
-        send('queue_new', self.queue.new_ticket_cc)
-        if self.assigned_to:
-            send('assigned_to', self.assigned_to.email)
+            # Attempts to send an email to every possible field.
+            if self.submitter_email:
+                send('submitter', self.submitter_email)
+            if self.contact_email:
+                send('submitter', self.contact_email)  # TODO add a new role/template for contact_email field?
+            send('queue_updated', self.queue.updated_ticket_cc)
+            send('queue_new', self.queue.new_ticket_cc)
+            if self.assigned_to:
+                send('assigned_to', self.assigned_to.email)
 
-        # If queue allows CC'd users to be notified, send them email updates
-        for cc in self.ticketcc_set.all():
-            if cc.user and organization and is_helpdesk_staff(cc.user, organization.id):
-                send('cc_users', cc.email_address)
-            elif self.queue.enable_notifications_on_email_events:
-                send('cc_public', cc.email_address)
+            # If queue allows CC'd users to be notified, send them email updates
+            for cc in self.ticketcc_set.all():
+                if cc.user and organization and is_helpdesk_staff(cc.user, organization.id):
+                    send('cc_users', cc.email_address)
+                elif self.queue.enable_notifications_on_email_events:
+                    send('cc_public', cc.email_address)
 
-        if self.queue.enable_notifications_on_email_events:
-            # 'extra' fields are treated as cc_public.
-            #  todo Add a method to pair specific extra fields with specific templates?
-            email_fields = CustomField.objects.filter(
-                ticket_form=self.ticket_form_id,
-                data_type='email',
-                notifications=True,
-            ).values_list('field_name', flat=True)
+            if self.queue.enable_notifications_on_email_events:
+                # 'extra' fields are treated as cc_public.
+                #  todo Add a method to pair specific extra fields with specific templates?
+                email_fields = CustomField.objects.filter(
+                    ticket_form=self.ticket_form_id,
+                    data_type='email',
+                    notifications=True,
+                ).values_list('field_name', flat=True)
 
-            for field in email_fields:
-                if field in self.extra_data and self.extra_data[field] is not None and self.extra_data[field] != '' and is_extra_data(field):
-                    send('extra', self.extra_data[field])
+                for field in email_fields:
+                    if field in self.extra_data and self.extra_data[field] is not None and self.extra_data[field] != '' and is_extra_data(field):
+                        send('extra', self.extra_data[field])
 
         return recipients
 

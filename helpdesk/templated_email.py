@@ -61,7 +61,7 @@ def send_templated_mail(template_name,
                         fail_silently=False,
                         files=None,
                         organization=None,
-                        ticket_id=None,
+                        ticket=None,
                         extra_headers=None,
                         email_logger=None,
                         source='',
@@ -108,104 +108,105 @@ def send_templated_mail(template_name,
     else:
         logger = logging.getLogger(__name__)
 
-    headers = extra_headers or {}
-    for key, value in headers.items():
-        headers[key] = value.strip()
+    if (ticket and ticket.allow_sending) or not ticket:
+        headers = extra_headers or {}
+        for key, value in headers.items():
+            headers[key] = value.strip()
 
-    locale = context['queue'].get('locale') or HELPDESK_EMAIL_FALLBACK_LOCALE
+        locale = context['queue'].get('locale') or HELPDESK_EMAIL_FALLBACK_LOCALE
 
-    org_id = context['queue'].get('organization_id', None)
-    org = Organization.objects.get(id=org_id)
+        org_id = context['queue'].get('organization_id', None)
+        org = Organization.objects.get(id=org_id)
 
-    try:
-        t = EmailTemplate.objects.get(template_name__iexact=template_name, locale=locale, organization=organization)
-    except EmailTemplate.DoesNotExist:
         try:
-            t = EmailTemplate.objects.get(template_name__iexact=template_name, locale__isnull=True, organization=organization)
+            t = EmailTemplate.objects.get(template_name__iexact=template_name, locale=locale, organization=organization)
         except EmailTemplate.DoesNotExist:
-            logger.warning('template "%s" does not exist, no mail sent', template_name)
-            return  # just ignore if template doesn't exist
+            try:
+                t = EmailTemplate.objects.get(template_name__iexact=template_name, locale__isnull=True, organization=organization)
+            except EmailTemplate.DoesNotExist:
+                logger.warning('template "%s" does not exist, no mail sent', template_name)
+                return  # just ignore if template doesn't exist
 
-    subject_part = from_string(
-        HELPDESK_EMAIL_SUBJECT_TEMPLATE % {
-            "subject": t.subject
-        }).render(context).replace('\n', '').replace('\r', '')
+        subject_part = from_string(
+            HELPDESK_EMAIL_SUBJECT_TEMPLATE % {
+                "subject": t.subject
+            }).render(context).replace('\n', '').replace('\r', '')
 
-    footer_file = os.path.join('helpdesk', locale, 'email_text_footer.txt')
+        footer_file = os.path.join('helpdesk', locale, 'email_text_footer.txt')
 
-    # Marking urls and email addresses safe, so that their & and <> symbols aren't escaped
-    if 'ticket_url' in context['ticket']:
-        context['ticket']['ticket_url'] = mark_safe(context['ticket']['ticket_url'])
-    if 'staff_url' in context['ticket']:
-        context['ticket']['staff_url'] = mark_safe(context['ticket']['staff_url'])
-    if 'email_address' in context['queue']:
-        context['queue']['email_address'] = mark_safe(context['queue']['email_address'])
+        # Marking urls and email addresses safe, so that their & and <> symbols aren't escaped
+        if 'ticket_url' in context['ticket']:
+            context['ticket']['ticket_url'] = mark_safe(context['ticket']['ticket_url'])
+        if 'staff_url' in context['ticket']:
+            context['ticket']['staff_url'] = mark_safe(context['ticket']['staff_url'])
+        if 'email_address' in context['queue']:
+            context['queue']['email_address'] = mark_safe(context['queue']['email_address'])
 
-    # Turn Markdown formatting into html
-    if 'comment' in context:
-        context['comment'], html_comment = _process_text(context['comment'], org)
-    if 'description' in context['ticket']:
-        context['ticket']['description'], html_description = _process_text(context['ticket']['description'], org)
-    # for some reason the resolution can be in either...
-    if 'resolution' in context:
-        context['resolution'], html_resolution = _process_text(context['resolution'], org)
-    if 'resolution' in context['ticket']:
-        context['ticket']['resolution'], html_resolution = _process_text(context['ticket']['resolution'], org)
+        # Turn Markdown formatting into html
+        if 'comment' in context:
+            context['comment'], html_comment = _process_text(context['comment'], org)
+        if 'description' in context['ticket']:
+            context['ticket']['description'], html_description = _process_text(context['ticket']['description'], org)
+        # for some reason the resolution can be in either...
+        if 'resolution' in context:
+            context['resolution'], html_resolution = _process_text(context['resolution'], org)
+        if 'resolution' in context['ticket']:
+            context['ticket']['resolution'], html_resolution = _process_text(context['ticket']['resolution'], org)
 
-    # Create plain text from context
-    text_part = from_string(
-        "%s\n\n{%% include '%s' %%}" % (t.plain_text, footer_file)
-    ).render(context)
+        # Create plain text from context
+        text_part = from_string(
+            "%s\n\n{%% include '%s' %%}" % (t.plain_text, footer_file)
+        ).render(context)
 
-    # file found in helpdesk/templates/helpdesk/[locale]/
-    email_html_base_file = os.path.join('helpdesk', locale, 'email_html_base.html')
+        # file found in helpdesk/templates/helpdesk/[locale]/
+        email_html_base_file = os.path.join('helpdesk', locale, 'email_html_base.html')
 
-    if 'comment' in context:
-        context['comment'] = html_comment
-    if 'description' in context['ticket']:
-        context['ticket']['description'] = html_description
-    if 'resolution' in context:
-        context['resolution'] = html_resolution
-    if 'resolution' in context['ticket']:
-        context['ticket']['resolution'] = html_resolution
+        if 'comment' in context:
+            context['comment'] = html_comment
+        if 'description' in context['ticket']:
+            context['ticket']['description'] = html_description
+        if 'resolution' in context:
+            context['resolution'] = html_resolution
+        if 'resolution' in context['ticket']:
+            context['ticket']['resolution'] = html_resolution
 
-    html_part = from_string(
-        "{%% extends '%s' %%}"
-        "{%% block title %%}%s{%% endblock %%}"
-        "{%% block content %%}%s{%% endblock %%}" %
-        (email_html_base_file, t.heading, t.html)
-    ).render(context)
+        html_part = from_string(
+            "{%% extends '%s' %%}"
+            "{%% block title %%}%s{%% endblock %%}"
+            "{%% block content %%}%s{%% endblock %%}" %
+            (email_html_base_file, t.heading, t.html)
+        ).render(context)
 
-    recipients, headers['X-BEAMHelpdesk-Delivered'] = add_custom_header(recipients)
+        recipients, headers['X-BEAMHelpdesk-Delivered'] = add_custom_header(recipients)
 
-    try:
-        # Create and send email out.
-        success = send_beam_mail(
-            organization=org,  # todo this should use the sender given to it
-            recipient_emails=recipients,
-            bcc=bcc,
-            subject=subject_part,
-            msg_plain=text_part,
-            msg_html=html_part,
-            files=files,
-            headers=headers,
-            source_page=Email.HELPDESK,
-            source_action=source,
-            user=user,
-            ticket_id=ticket_id,
-        )
-    except SMTPException as e:
-        logger.exception('SMTPException raised while sending email from {} to {}'.format(sender, recipients))
-        if not fail_silently:
-            raise e
-        return 0
-    except BadHeaderError as e1:
-        logger.exception('BadHeaderError raised while sending email from {} to {}.'.format(sender, recipients))
-        if not fail_silently:
-            raise e1
-        return 0
-    except Exception as e2:
-        logger.exception('Raised failure while sending email from {} to {}'.format(sender, recipients))
-        if not fail_silently:
-            raise e2
-        return 0
+        try:
+            # Create and send email out.
+            success = send_beam_mail(
+                organization=org,  # todo this should use the sender given to it
+                recipient_emails=recipients,
+                bcc=bcc,
+                subject=subject_part,
+                msg_plain=text_part,
+                msg_html=html_part,
+                files=files,
+                headers=headers,
+                source_page=Email.HELPDESK,
+                source_action=source,
+                user=user,
+                ticket_id=ticket.id if ticket else None,
+            )
+        except SMTPException as e:
+            logger.exception('SMTPException raised while sending email from {} to {}'.format(sender, recipients))
+            if not fail_silently:
+                raise e
+            return 0
+        except BadHeaderError as e1:
+            logger.exception('BadHeaderError raised while sending email from {} to {}.'.format(sender, recipients))
+            if not fail_silently:
+                raise e1
+            return 0
+        except Exception as e2:
+            logger.exception('Raised failure while sending email from {} to {}'.format(sender, recipients))
+            if not fail_silently:
+                raise e2
+            return 0

@@ -200,6 +200,10 @@ urlpatterns = [
         staff.set_user_timezone,
         name="set_user_timezone"),
 
+    url(r'emails/(?P<ticket_id>[0-9]+)/$',
+        staff.enable_disable_emails,
+        name="enable_disable_emails"),
+
     url(r'pair_property_milestone/(?P<ticket_id>[0-9]+)/$',
         staff.pair_property_milestone,
         name="pair_property_milestone"),

@@ -177,7 +177,7 @@
                 </div></dd>
                 {% endifequal %}
 
-                <dd><label for='id_public'><input type='checkbox' id='id_public' name='public' value='1' />&nbsp; <b>{% trans 'Make this update public?' %}</b></label></dd>
+                <dd><label for='id_public'><input type='checkbox' id='id_public' name='public' value='1' />&nbsp; <b>{% trans 'Make this update public?' %}</b>{% if not ticket.allow_sending %} (Note: Email notifications are currently turned off for this ticket, and no emails will go out for this public update.){% endif %}</label></dd>
                 <dd class='form_help_text'>{% trans "If public, an email will be sent to the submitter, primary contact, copied nonusers, and any other email addresses listed on the form.<br>If private, an email will only be sent to the assigned staff owner and internal users. Use this to leave internal comments, questions, and flags. Responses will <i>not</i> be sent to the original sender. " %}</dd>
             </dl>
             {% endwith %}

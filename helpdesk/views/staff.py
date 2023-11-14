@@ -21,7 +21,7 @@ from django.core.exceptions import ValidationError, PermissionDenied
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.db.models import Q, Prefetch, F, Case, When
+from django.db.models import Q, F, Case, When, ProtectedError
 from django.http import HttpResponseRedirect, Http404, HttpResponse, JsonResponse, HttpRequest
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils.translation import ugettext as _
@@ -76,6 +76,7 @@ from datetime import timedelta, datetime
 from ..templated_email import send_templated_mail
 
 from seed.models import PropertyView, Property, TaxLotView, TaxLot, Column
+from post_office.models import STATUS, Email
 from urllib.parse import urlparse, urlunparse
 from django.http import QueryDict
 User = get_user_model()
@@ -1344,7 +1345,7 @@ def update_ticket(request, ticket_id, public=False):
             organization=ticket.ticket_form.organization,
             user=None if not is_helpdesk_staff(request.user, ticket.ticket_form.organization_id) else request.user,
             source='updated (reassigned owner)',
-            ticket_id=ticket.pk
+            ticket=ticket
         )
 
     # Emails an update to users who follow all ticket updates.
@@ -1568,7 +1569,7 @@ def mass_update(request):
                     organization=t.ticket_form.organization,
                     user=None if not is_helpdesk_staff(request.user, t.ticket_form.organization_id) else request.user,
                     source='bulk (closed and auto-reassigned)',
-                    ticket_id=t.pk
+                    ticket=t
                 )
 
         elif action == 'delete':
@@ -1709,7 +1710,7 @@ def merge_tickets(request):
                             organization=ticket.ticket_form.organization,
                             user=None if not is_helpdesk_staff(request.user, ticket.ticket_form.organization_id) else request.user,
                             source='merging',
-                            ticket_id=chosen_ticket.pk
+                            ticket=chosen_ticket
                         )
 
                     # Move all followups and update their title to know they come from another ticket
@@ -3075,6 +3076,20 @@ def sort_string(begin, end):
     return 'sort=created&from=%s&to=%s&s=%s&s=%s&s=%s&s=%s' % (
         begin, end, Ticket.OPEN_STATUS, Ticket.REOPENED_STATUS, Ticket.REPLIED_STATUS, Ticket.NEW_STATUS)
 
+@staff_member_required
+def enable_disable_emails(request, ticket_id):
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+
+    ticket.allow_sending = not ticket.allow_sending
+    ticket.save()
+    if not ticket.allow_sending:
+        emails = Email.objects.filter(ticket=ticket, status=STATUS.queued)
+        try:
+            emails.delete()
+        except ProtectedError:
+            pass
+
+    return redirect(ticket)
 
 @staff_member_required
 def pair_property_ticket(request, ticket_id):

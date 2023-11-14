@@ -28,6 +28,10 @@ copy_public_link = function() {
                                 Form: {{ ticket.ticket_form.name }}
                             </div>
                             <div>
+                                <span><a href="{% url 'helpdesk:enable_disable_emails' ticket.id %}" class="btn btn-{% if not ticket.allow_sending %}outline-{% endif %}danger btn-sm">
+                                    <i class="fas fa-envelope"></i> {% if ticket.allow_sending %}{% trans "Disable Email Notifications" %}{% else %}{% trans "Enable Email Notifications" %}{% endif %}
+                                </a></span>
+
                                 <span><a href="{% url 'helpdesk:pair_property_ticket' ticket.id %}" class="btn btn-primary btn-sm">
                                     <i class="fas fa-city"></i> {% trans "Auto-pair to BEAM inventory" %}
                                 </a></span>
