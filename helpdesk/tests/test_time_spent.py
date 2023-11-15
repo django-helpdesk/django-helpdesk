@@ -1,24 +1,11 @@
 
 import datetime
-from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
-from django.contrib.sites.models import Site
-from django.core import mail
 from django.test import TestCase
 from django.test.client import Client
-from django.urls import reverse
-from helpdesk import settings as helpdesk_settings
 from helpdesk.models import FollowUp, Queue, Ticket
-from helpdesk.templatetags.ticket_to_link import num_to_link
 import uuid
-
-
-try:  # python 3
-    from urllib.parse import urlparse
-except ImportError:  # python 2
-    from urlparse import urlparse
-
 
 class TimeSpentTestCase(TestCase):
 

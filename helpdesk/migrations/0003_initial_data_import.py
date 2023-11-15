@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
-from sys import path
 
-from django.db import models, migrations
+from django.db import migrations
 from django.core import serializers
 
 fixture_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../fixtures'))
