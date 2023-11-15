@@ -34,7 +34,7 @@ ALLOWED_HOSTS = []
 # remember when setting up your own development / production server!
 
 # Default teams mode to enabled unless overridden by an environment variable set to "false"
-HELPDESK_TEAMS_MODE_ENABLED=False if "false" == os.getenv("HELPDESK_TEAMS_MODE_ENABLED", "true").lower() else True
+HELPDESK_TEAMS_MODE_ENABLED=False if os.getenv("HELPDESK_TEAMS_MODE_ENABLED", "true").lower() == "false" else True
 
 # Application definition
 INSTALLED_APPS = [
