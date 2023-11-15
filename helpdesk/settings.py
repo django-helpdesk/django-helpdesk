@@ -229,8 +229,7 @@ HELPDESK_USE_HTTPS_IN_EMAIL_LINK = getattr(
     settings, 'HELPDESK_USE_HTTPS_IN_EMAIL_LINK', settings.SECURE_SSL_REDIRECT)
 
 # Default to True for backwards compatibility
-HELPDESK_TEAMS_MODE_ENABLED = False if hasattr(settings, 'HELPDESK_TEAMS_MODE_ENABLED') and getattr(
-    settings, 'HELPDESK_TEAMS_MODE_ENABLED', True) is False else True
+HELPDESK_TEAMS_MODE_ENABLED = getattr(settings, 'HELPDESK_TEAMS_MODE_ENABLED', True)
 if HELPDESK_TEAMS_MODE_ENABLED:
     HELPDESK_TEAMS_MODEL = getattr(
         settings, 'HELPDESK_TEAMS_MODEL', 'pinax_teams.Team')
