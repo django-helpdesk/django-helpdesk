@@ -341,27 +341,48 @@ class GetEmailCommonTests(TestCase):
         self.assertTrue(inline_found, "Inline file not found in email: %s" % (inline_att_filename))
 
         
-    def test_email_with_txt_as_attachment(self):
+    def test_email_with_txt_as_attachment_with_simple_alternative_message(self):
         """
-        Test an email with an txt extension email attachment to the email
+        Test an email with a txt extension email attachment to the email where the message part of the
+        email is in a multipart/alternative directly off the main multipart/mixed (no multipart/related)
         """
-        email_message, _, _ = utils.generate_multipart_email(type_list=['plain'])
-        email_att_filename = 'test.txt'
-        file_part = utils.generate_file_mime_part("en_US", email_att_filename, "Testing a simple txt attachment.")
-        email_message.attach(file_part)
+        email_att_filename = 'the_quick_brown_fox.txt'
+        # Create the actual email with its plain and HTML parts
+        alt_email_message = MIMEMultipart("alternative")
+        # Create the plain and HTML that will reference the inline attachment
+        plain_body = "Is wet birds attached?\n\n"
+        plain_msg = MIMEText(plain_body)
+        alt_email_message.attach(plain_msg)
+        html_body = '<div><div>Is wet birds attached?</div><br></div>'
+        html_msg = MIMEText(html_body, "html")
+        alt_email_message.attach(html_msg)
+        # Now create the base multipart and attach all the other parts to it
+        base_message = MIMEMultipart("mixed")
+        base_message.attach(alt_email_message)
+        email_attachment = MIMEText("Wet birds don't fly at night.")
+        email_attachment.add_header('Content-Disposition', 'attachment', filename=email_att_filename)
+        base_message.attach(email_attachment)
+        utils.add_simple_email_headers(base_message, locale="en_US", use_short_email=True)
         # Now send the part to the email workflow
-        extract_email_metadata(email_message.as_string(), self.queue_public, self.logger)
-
+        extract_email_metadata(base_message.as_string(), self.queue_public, self.logger)
         self.assertEqual(len(mail.outbox), 1)  # @UndefinedVariable
+        #self.assertEqual(f'[test-1] {base_message.get("subject")} (Opened)', mail.outbox[0].subject)
 
         ticket = Ticket.objects.get()
         followup = ticket.followup_set.get()
-        attachments = FollowUpAttachment.objects.filter(followup=followup)
-        self.assertEqual(len(attachments), 1)
-        attachment = attachments[0]
-        self.assertTrue(attachment.filename.endswith(email_att_filename), "The txt file not found in email: %s" % (email_att_filename))
+        # Check  attachment is stored as attached file
+        email_attachment_found = False
+        for att_retrieved in followup.followupattachment_set.all():
+            if (helpdesk.email.HTML_EMAIL_ATTACHMENT_FILENAME == att_retrieved.filename):
+                # Ignore the HTML formatted content of the email that is attached 
+                continue
+            if  att_retrieved.filename.endswith(email_att_filename):
+                email_attachment_found = True
+            else:
+                self.assertTrue(False, "Unexpected file in ticket attachments: %s" % att_retrieved.filename)
+        self.assertTrue(email_attachment_found, "Email attachment file not found ticket attachments: %s" % (email_att_filename))
 
-        
+
 class EmailTaskTests(TestCase):
 
     def setUp(self):
