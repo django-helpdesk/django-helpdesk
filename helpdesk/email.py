@@ -813,17 +813,25 @@ def object_from_message(message, importer, queues, logger, nj=None):
     sender_lower = sender[1].lower()
 
     if not to_list:
-        to_list = getaddresses(message.get_all('To', []))
+        to_list = [x.replace('\r', '').replace('\n', '') for x in message.get_all('To', []) if x]
+        to_list = getaddresses(to_list)
     if not cc_list:
-        cc_list = getaddresses(message.get_all('Cc', []))
+        cc_list = [x.replace('\r', '').replace('\n', '') for x in message.get_all('Cc', []) if x]
+        cc_list = getaddresses(cc_list)
 
     # Debugging issues with address resolution
     for (name, address) in to_list:
         if '@' not in address:
             logger.error(f'ERROR: Bad to list.\nmessage.get_all: {message.get_all("To", [])}\nto_list: {to_list}')
+            continue
     for (name, address) in cc_list:
         if '@' not in address:
             logger.error(f'ERROR: Bad CC list.\nmessage.get_all: {message.get_all("Cc", [])}\ncc_list: {cc_list}')
+            continue
+
+    # preventing errors
+    to_list = [(name, address) for name, address in to_list if '@' in address]
+    cc_list = [(name, address) for name, address in cc_list if '@' in address]
 
     # Sort out which queue this email should go into #
     ticket, queue = None, None
