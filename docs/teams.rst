@@ -1,3 +1,4 @@
+.. _teams:
 Working with teams and larger organizations
 ===========================================
 
@@ -20,7 +21,6 @@ You can assign a knowledge-base item to a team on the Helpdesk admin page.
 
 Once you have set up teams. Unassigned tickets which are associated with a knowledge-base item will only be shown on the dashboard to those users who are members of the team which is associated with that knowledge-base item.
 
-
 Implementing Custom Teams Functionality
 --------------------------------
 If you want to use a different team app or implement your own team based app, you can hook it into Helpdesk using the following 3 settings:
@@ -29,10 +29,23 @@ If you want to use a different team app or implement your own team based app, yo
 ``HELPDESK_KBITEM_TEAM_GETTER``: the method that will be called that must return a list of users who belong to a given team
 
 
+Configuring Teams Functionality
+-----------------------------
+Teams functionality is enabled by default but can be disabled using this entry in your ``settings.py``::
+      HELPDESK_TEAMS_MODE_ENABLED=False 
+
+If you do not disable teams functionality then you must add additional apps into the ``INSTALLED_APPS`` tuple in your ``settings.py``use team functionality, you can disable teams by setting the following settings:
+The following can be pasted into your settings.py BELOW the INSTALLED_APPS tuple definition::
+INSTALLED_APPS.extend([
+        'account',  # Required by pinax-teams
+        'pinax.invitations',  # required by pinax-teams
+        'pinax.teams',  # team support
+        'reversion',  # required by pinax-teams
+    ])
+
+Alternatively just add the 4 apps listed above into the INSTALLED_APPS tuple.
+
 Disabling Teams Functionality
 -----------------------------
-If you do not wish to use team functionality, you can disable teams by setting the following settings:
-
-            HELPDESK_TEAMS_MODEL='auth.User',
-            HELPDESK_TEAMS_MIGRATION_DEPENDENCIES=[],
-            HELPDESK_KBITEM_TEAM_GETTER=lambda _: None,
+Teams functionality is enabled by default but can be disabled using this entry in your ``settings.py``::
+      HELPDESK_TEAMS_MODE_ENABLED=False 
