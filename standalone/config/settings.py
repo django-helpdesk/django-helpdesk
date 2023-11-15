@@ -229,3 +229,20 @@ MEDIA_ROOT = '/data/media'
 
 # for Django 3.2+, set default for autofields:
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'ERROR',  # Change to 'DEBUG' if you want to print all debug messages as well
+            'propagate': True,
+        },
+    },
+}

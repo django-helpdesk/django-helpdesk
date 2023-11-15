@@ -1,15 +1,6 @@
 from django.contrib.auth import get_user_model
-from django.core import mail
 from django.test import TestCase
-from django.test.client import Client
 from django.urls import reverse
-from helpdesk.models import CustomField, Queue, Ticket
-
-
-try:  # python 3
-    from urllib.parse import urlparse
-except ImportError:  # python 2
-    from urlparse import urlparse
 
 
 class TicketActionsTestCase(TestCase):

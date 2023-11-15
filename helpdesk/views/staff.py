@@ -17,7 +17,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.views import redirect_to_login
 from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import PermissionDenied, ValidationError
+from django.core.exceptions import PermissionDenied
 from django.core.handlers.wsgi import WSGIRequest
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db.models import Q
@@ -56,7 +56,7 @@ from helpdesk.forms import (
     TicketForm,
     UserSettingsForm
 )
-from helpdesk.lib import process_attachments, queue_template_context, safe_template_context
+from helpdesk.lib import queue_template_context, safe_template_context
 from helpdesk.models import (
     Checklist,
     ChecklistTask,
@@ -70,13 +70,13 @@ from helpdesk.models import (
     SavedSearch,
     Ticket,
     TicketCC,
-    TicketChange,
     TicketCustomFieldValue,
     TicketDependency,
     UserSettings
 )
 from helpdesk.query import get_query_class, query_from_base64, query_to_base64
 from helpdesk.user import HelpdeskUser
+from helpdesk.update_ticket import update_ticket, subscribe_to_ticket_updates, return_ticketccstring_and_show_subscribe
 import helpdesk.views.abstract_views as abstract_views
 from helpdesk.views.permissions import MustBeStaffMixin
 import json
@@ -350,17 +350,12 @@ def view_ticket(request, ticket_id):
     ticket_perm_check(request, ticket)
 
     if 'take' in request.GET:
-        # Allow the user to assign the ticket to themselves whilst viewing it.
-
-        # Trick the update_ticket() view into thinking it's being called with
-        # a valid POST.
-        request.POST = {
-            'owner': request.user.id,
-            'public': 1,
-            'title': ticket.title,
-            'comment': ''
-        }
-        return update_ticket(request, ticket_id)
+        update_ticket(
+            request.user,
+            ticket,
+            owner=request.user.id
+        )
+        return return_to_ticket(request.user, helpdesk_settings, ticket)
 
     if 'subscribe' in request.GET:
         # Allow the user to subscribe him/herself to the ticket whilst viewing
@@ -379,17 +374,13 @@ def view_ticket(request, ticket_id):
         else:
             owner = ticket.assigned_to.id
 
-        # Trick the update_ticket() view into thinking it's being called with
-        # a valid POST.
-        request.POST = {
-            'new_status': Ticket.CLOSED_STATUS,
-            'public': 1,
-            'owner': owner,
-            'title': ticket.title,
-            'comment': _('Accepted resolution and closed ticket'),
-        }
-
-        return update_ticket(request, ticket_id)
+        update_ticket(
+            request.user,
+            ticket,
+            owner=owner,
+            comment= _('Accepted resolution and closed ticket'),
+        )
+        return return_to_ticket(request.user, helpdesk_settings, ticket)
 
     if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS:
         users = User.objects.filter(
@@ -494,68 +485,6 @@ def delete_ticket_checklist(request, ticket_id, checklist_id):
     })
 
 
-def return_ticketccstring_and_show_subscribe(user, ticket):
-    """used in view_ticket() and followup_edit()"""
-    # create the ticketcc_string and check whether current user is already
-    # subscribed
-    username = user.get_username().upper()
-    try:
-        useremail = user.email.upper()
-    except AttributeError:
-        useremail = ""
-    strings_to_check = list()
-    strings_to_check.append(username)
-    strings_to_check.append(useremail)
-
-    ticketcc_string = ''
-    all_ticketcc = ticket.ticketcc_set.all()
-    counter_all_ticketcc = len(all_ticketcc) - 1
-    show_subscribe = True
-    for i, ticketcc in enumerate(all_ticketcc):
-        ticketcc_this_entry = str(ticketcc.display)
-        ticketcc_string += ticketcc_this_entry
-        if i < counter_all_ticketcc:
-            ticketcc_string += ', '
-        if strings_to_check.__contains__(ticketcc_this_entry.upper()):
-            show_subscribe = False
-
-    # check whether current user is a submitter or assigned to ticket
-    assignedto_username = str(ticket.assigned_to).upper()
-    strings_to_check = list()
-    if ticket.submitter_email is not None:
-        submitter_email = ticket.submitter_email.upper()
-        strings_to_check.append(submitter_email)
-    strings_to_check.append(assignedto_username)
-    if strings_to_check.__contains__(username) or strings_to_check.__contains__(useremail):
-        show_subscribe = False
-
-    return ticketcc_string, show_subscribe
-
-
-def subscribe_to_ticket_updates(ticket, user=None, email=None, can_view=True, can_update=False):
-
-    if ticket is not None:
-
-        queryset = TicketCC.objects.filter(
-            ticket=ticket, user=user, email=email)
-
-        # Don't create duplicate entries for subscribers
-        if queryset.count() > 0:
-            return queryset.first()
-
-        if user is None and len(email) < 5:
-            raise ValidationError(
-                _('When you add somebody on Cc, you must provide either a User or a valid email. Email: %s' % email)
-            )
-
-        return ticket.ticketcc_set.create(
-            user=user,
-            email=email,
-            can_view=can_view,
-            can_update=can_update
-        )
-
-
 def get_ticket_from_request_with_authorisation(
     request: WSGIRequest,
     ticket_id: str,
@@ -617,38 +546,6 @@ def get_due_date_from_request_or_ticket(
     return due_date
 
 
-def get_and_set_ticket_status(
-    new_status: int,
-    ticket: Ticket,
-    follow_up: FollowUp
-) -> typing.Tuple[str, int]:
-    """Performs comparision on previous status to new status,
-    updating the title as required.
-
-    Returns:
-        The old status as a display string, old status code string
-    """
-    old_status_str = ticket.get_status_display()
-    old_status = ticket.status
-    if new_status != ticket.status:
-        ticket.status = new_status
-        ticket.save()
-        follow_up.new_status = new_status
-        if follow_up.title:
-            follow_up.title += ' and %s' % ticket.get_status_display()
-        else:
-            follow_up.title = '%s' % ticket.get_status_display()
-
-    if not follow_up.title:
-        if follow_up.comment:
-            follow_up.title = _('Comment')
-        else:
-            follow_up.title = _('Updated')
-
-    follow_up.save()
-    return old_status_str, old_status
-
-
 def get_time_spent_from_request(request: WSGIRequest) -> typing.Optional[timedelta]:
     if request.POST.get("time_spent"):
         (hours, minutes) = [int(f)
@@ -657,83 +554,7 @@ def get_time_spent_from_request(request: WSGIRequest) -> typing.Optional[timedel
     return None
 
 
-def update_messages_sent_to_by_public_and_status(
-    public: bool,
-    ticket: Ticket,
-    follow_up: FollowUp,
-    context: str,
-    messages_sent_to: typing.Set[str],
-    files: typing.List[typing.Tuple[str, str]]
-) -> Ticket:
-    """Sets the status of the ticket"""
-    if public and (
-        follow_up.comment or (
-            follow_up.new_status in (
-                Ticket.RESOLVED_STATUS,
-                Ticket.CLOSED_STATUS
-            )
-        )
-    ):
-        if follow_up.new_status == Ticket.RESOLVED_STATUS:
-            template = 'resolved_'
-        elif follow_up.new_status == Ticket.CLOSED_STATUS:
-            template = 'closed_'
-        else:
-            template = 'updated_'
-
-        roles = {
-            'submitter': (template + 'submitter', context),
-            'ticket_cc': (template + 'cc', context),
-        }
-        if ticket.assigned_to and ticket.assigned_to.usersettings_helpdesk.email_on_ticket_change:
-            roles['assigned_to'] = (template + 'cc', context)
-        messages_sent_to.update(
-            ticket.send(
-                roles,
-                dont_send_to=messages_sent_to,
-                fail_silently=True,
-                files=files
-            )
-        )
-    return ticket
-
-
-def add_staff_subscription(
-    request: WSGIRequest,
-    ticket: Ticket
-) -> None:
-    """Auto subscribe the staff member if that's what the settigs say and the
-    user is authenticated and a staff member"""
-    if helpdesk_settings.HELPDESK_AUTO_SUBSCRIBE_ON_TICKET_RESPONSE \
-            and request.user.is_authenticated \
-            and return_ticketccstring_and_show_subscribe(request.user, ticket)[1]:
-        subscribe_to_ticket_updates(ticket, request.user)
-
-
-def get_template_staff_and_template_cc(
-    reassigned, follow_up:  FollowUp
-) -> typing.Tuple[str, str]:
-    if reassigned:
-        template_staff = 'assigned_owner'
-    elif follow_up.new_status == Ticket.RESOLVED_STATUS:
-        template_staff = 'resolved_owner'
-    elif follow_up.new_status == Ticket.CLOSED_STATUS:
-        template_staff = 'closed_owner'
-    else:
-        template_staff = 'updated_owner'
-    if reassigned:
-        template_cc = 'assigned_cc'
-    elif follow_up.new_status == Ticket.RESOLVED_STATUS:
-        template_cc = 'resolved_cc'
-    elif follow_up.new_status == Ticket.CLOSED_STATUS:
-        template_cc = 'closed_cc'
-    else:
-        template_cc = 'updated_cc'
-
-    return template_staff, template_cc
-
-
-def update_ticket(request, ticket_id, public=False):
+def update_ticket_view(request, ticket_id, public=False):
 
     try:
         ticket = get_ticket_from_request_with_authorisation(request, ticket_id, public)
@@ -743,16 +564,17 @@ def update_ticket(request, ticket_id, public=False):
     comment = request.POST.get('comment', '')
     new_status = int(request.POST.get('new_status', ticket.status))
     title = request.POST.get('title', '')
-    public = request.POST.get('public', False)
     owner = int(request.POST.get('owner', -1))
     priority = int(request.POST.get('priority', ticket.priority))
 
     # Check if a change happened on checklists
+    new_checklists = {}
     changes_in_checklists = False
     for checklist in ticket.checklists.all():
-        old_completed_id = sorted(list(checklist.tasks.completed().values_list('id', flat=True)))
-        new_completed_id = sorted(list(map(int, request.POST.getlist(f'checklist-{checklist.id}', []))))
-        if old_completed_id != new_completed_id:
+        old_completed = set(checklist.tasks.completed().values_list('id', flat=True))
+        new_checklist = set(map(int, request.POST.getlist(f'checklist-{checklist.id}', [])))
+        new_checklists[checklist.id] = new_checklist
+        if new_checklist != old_completed:
             changes_in_checklists = True
 
     time_spent = get_time_spent_from_request(request)
@@ -774,179 +596,20 @@ def update_ticket(request, ticket_id, public=False):
     if no_changes:
         return return_to_ticket(request.user, helpdesk_settings, ticket)
 
-    # We need to allow the 'ticket' and 'queue' contexts to be applied to the
-    # comment.
-    context = safe_template_context(ticket)
-
-    from django.template import engines
-    template_func = engines['django'].from_string
-    # this prevents system from trying to render any template tags
-    # broken into two stages to prevent changes from first replace being themselves
-    # changed by the second replace due to conflicting syntax
-    comment = comment.replace(
-        '{%', 'X-HELPDESK-COMMENT-VERBATIM').replace('%}', 'X-HELPDESK-COMMENT-ENDVERBATIM')
-    comment = comment.replace(
-        'X-HELPDESK-COMMENT-VERBATIM', '{% verbatim %}{%'
-    ).replace(
-        'X-HELPDESK-COMMENT-ENDVERBATIM', '%}{% endverbatim %}'
-    )
-    # render the neutralized template
-    comment = template_func(comment).render(context)
-
-    if owner == -1 and ticket.assigned_to:
-        owner = ticket.assigned_to.id
-
-    f = FollowUp(ticket=ticket, date=timezone.now(), comment=comment,
-                 time_spent=time_spent)
-
-    if is_helpdesk_staff(request.user):
-        f.user = request.user
-
-    f.public = public
-
-    reassigned = False
-
-    old_owner = ticket.assigned_to
-    if owner != -1:
-        if owner != 0 and ((ticket.assigned_to and owner != ticket.assigned_to.id) or not ticket.assigned_to):
-            new_user = User.objects.get(id=owner)
-            f.title = _('Assigned to %(username)s') % {
-                'username': new_user.get_username(),
-            }
-            ticket.assigned_to = new_user
-            reassigned = True
-        # user changed owner to 'unassign'
-        elif owner == 0 and ticket.assigned_to is not None:
-            f.title = _('Unassigned')
-            ticket.assigned_to = None
-
-    old_status_str, old_status = get_and_set_ticket_status(new_status, ticket, f)
-
-    files = process_attachments(f, request.FILES.getlist('attachment')) if request.FILES else []
-
-    if title and title != ticket.title:
-        c = TicketChange(
-            followup=f,
-            field=_('Title'),
-            old_value=ticket.title,
-            new_value=title,
-        )
-        c.save()
-        ticket.title = title
-
-    if new_status != old_status:
-        c = TicketChange(
-            followup=f,
-            field=_('Status'),
-            old_value=old_status_str,
-            new_value=ticket.get_status_display(),
-        )
-        c.save()
-
-    if ticket.assigned_to != old_owner:
-        c = TicketChange(
-            followup=f,
-            field=_('Owner'),
-            old_value=old_owner,
-            new_value=ticket.assigned_to,
-        )
-        c.save()
-
-    if priority != ticket.priority:
-        c = TicketChange(
-            followup=f,
-            field=_('Priority'),
-            old_value=ticket.priority,
-            new_value=priority,
-        )
-        c.save()
-        ticket.priority = priority
-
-    if due_date != ticket.due_date:
-        c = TicketChange(
-            followup=f,
-            field=_('Due on'),
-            old_value=ticket.due_date,
-            new_value=due_date,
-        )
-        c.save()
-        ticket.due_date = due_date
-
-    if changes_in_checklists:
-        for checklist in ticket.checklists.all():
-            new_completed_tasks = list(map(int, request.POST.getlist(f'checklist-{checklist.id}', [])))
-            for task in checklist.tasks.all():
-                changed = None
-
-                # Add completion if it was not done yet
-                if not task.completion_date and task.id in new_completed_tasks:
-                    task.completion_date = timezone.now()
-                    changed = 'completed'
-                # Remove it if it was done before
-                elif task.completion_date and task.id not in new_completed_tasks:
-                    task.completion_date = None
-                    changed = 'uncompleted'
-
-                # Save and add ticket change if task state has changed
-                if changed:
-                    task.save(update_fields=['completion_date'])
-                    f.ticketchange_set.create(
-                        field=f'[{checklist.name}] {task.description}',
-                        old_value=_('To do') if changed == 'completed' else _('Completed'),
-                        new_value=_('Completed') if changed == 'completed' else _('To do'),
-                    )
-
-    if new_status in (
-        Ticket.RESOLVED_STATUS, Ticket.CLOSED_STATUS
-    ) and (
-        new_status == Ticket.RESOLVED_STATUS or ticket.resolution is None
-    ):
-        ticket.resolution = comment
-
-    # ticket might have changed above, so we re-instantiate context with the
-    # (possibly) updated ticket.
-    context = safe_template_context(ticket)
-    context.update(
-        resolution=ticket.resolution,
-        comment=f.comment,
-    )
-
-    messages_sent_to = set()
-    try:
-        messages_sent_to.add(request.user.email)
-    except AttributeError:
-        pass
-    ticket = update_messages_sent_to_by_public_and_status(
-        public,
+    update_ticket(
+        request.user,
         ticket,
-        f,
-        context,
-        messages_sent_to,
-        files
+        title = title,
+        comment = comment,
+        files = request.FILES.getlist('attachment'),
+        public = request.POST.get('public', False),
+        owner = int(request.POST.get('owner', -1)),
+        priority = int(request.POST.get('priority', -1)),
+        new_status = new_status,
+        time_spent = get_time_spent_from_request(request),
+        due_date = get_due_date_from_request_or_ticket(request, ticket),
+        new_checklists = new_checklists,
     )
-
-    template_staff, template_cc = get_template_staff_and_template_cc(reassigned, f)
-    if ticket.assigned_to and (
-        ticket.assigned_to.usersettings_helpdesk.email_on_ticket_change
-        or (reassigned and ticket.assigned_to.usersettings_helpdesk.email_on_ticket_assign)
-    ):
-        messages_sent_to.update(ticket.send(
-            {'assigned_to': (template_staff, context)},
-            dont_send_to=messages_sent_to,
-            fail_silently=True,
-            files=files,
-        ))
-
-    messages_sent_to.update(ticket.send(
-        {'ticket_cc': (template_cc, context)},
-        dont_send_to=messages_sent_to,
-        fail_silently=True,
-        files=files,
-    ))
-    ticket.save()
-
-    # auto subscribe user if enabled
-    add_staff_subscription(request, ticket)
 
     return return_to_ticket(request.user, helpdesk_settings, ticket)
 
@@ -1346,7 +1009,7 @@ def ticket_list(request):
             ('kbitem', 'kbitem__isnull'),
         ])
         for param, filter_command in filter_in_params:
-            if not request.GET.get(param) is None:
+            if request.GET.get(param) is not None:
                 patterns = request.GET.getlist(param)
                 try:
                     pattern_pks = [int(pattern) for pattern in patterns]

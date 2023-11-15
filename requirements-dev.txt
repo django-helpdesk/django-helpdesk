@@ -1,6 +1,5 @@
 tox
-autopep8
-flake8
+ruff
 pycodestyle
 isort
 freezegun

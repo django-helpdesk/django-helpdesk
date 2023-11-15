@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.contrib.auth import get_user_model
-from django.db import models, migrations
+from django.db import migrations
 
 from helpdesk.settings import DEFAULT_USER_SETTINGS
 
