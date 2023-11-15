@@ -60,9 +60,6 @@ HELPDESK_ANON_ACCESS_RAISES_404 = getattr(settings,
                                           'HELPDESK_ANON_ACCESS_RAISES_404',
                                           False)
 
-# show knowledgebase links?
-HELPDESK_KB_ENABLED = getattr(settings, 'HELPDESK_KB_ENABLED', True)
-
 # Disable Timeline on ticket list
 HELPDESK_TICKETS_TIMELINE_ENABLED = getattr(
     settings, 'HELPDESK_TICKETS_TIMELINE_ENABLED', True)
@@ -231,12 +228,24 @@ HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION = getattr(
 HELPDESK_USE_HTTPS_IN_EMAIL_LINK = getattr(
     settings, 'HELPDESK_USE_HTTPS_IN_EMAIL_LINK', settings.SECURE_SSL_REDIRECT)
 
-HELPDESK_TEAMS_MODEL = getattr(
-    settings, 'HELPDESK_TEAMS_MODEL', 'pinax_teams.Team')
-HELPDESK_TEAMS_MIGRATION_DEPENDENCIES = getattr(settings, 'HELPDESK_TEAMS_MIGRATION_DEPENDENCIES', [
+# Default to True for backwards compatibility
+HELPDESK_TEAMS_MODE_ENABLED = False if hasattr(settings, 'HELPDESK_TEAMS_MODE_ENABLED') and getattr(
+    settings, 'HELPDESK_TEAMS_MODE_ENABLED', True) is False else True
+if HELPDESK_TEAMS_MODE_ENABLED:
+    HELPDESK_TEAMS_MODEL = getattr(
+        settings, 'HELPDESK_TEAMS_MODEL', 'pinax_teams.Team')
+    HELPDESK_TEAMS_MIGRATION_DEPENDENCIES = getattr(settings, 'HELPDESK_TEAMS_MIGRATION_DEPENDENCIES', [
                                                 ('pinax_teams', '0004_auto_20170511_0856')])
-HELPDESK_KBITEM_TEAM_GETTER = getattr(
-    settings, 'HELPDESK_KBITEM_TEAM_GETTER', lambda kbitem: kbitem.team)
+    HELPDESK_KBITEM_TEAM_GETTER = getattr(
+        settings, 'HELPDESK_KBITEM_TEAM_GETTER', lambda kbitem: kbitem.team)
+else:
+    HELPDESK_TEAMS_MODEL = settings.AUTH_USER_MODEL
+    HELPDESK_TEAMS_MIGRATION_DEPENDENCIES = []
+    HELPDESK_KBITEM_TEAM_GETTER = lambda _: None
+
+# show knowledgebase links?
+# If Teams mode is enabled then it has to be on
+HELPDESK_KB_ENABLED = True if HELPDESK_TEAMS_MODE_ENABLED else getattr(settings, 'HELPDESK_KB_ENABLED', True)
 
 # Include all signatures and forwards in the first ticket message if set
 # Useful if you get forwards dropped from them while they are useful part
