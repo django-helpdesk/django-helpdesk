@@ -921,9 +921,9 @@ def object_from_message(message, importer, queues, logger, nj=None):
                 try:
                     body = body.encode('ascii').decode('unicode_escape')
                 except UnicodeEncodeError:
-                    body.encode('utf-8')
+                    body = body.encode('utf-8').decode('unicode_escape')
                 except UnicodeDecodeError:
-                    body = body.encode('utf-8')  # todo
+                    pass
                 logger.debug("Discovered plain text MIME part")
             else:
                 try:
