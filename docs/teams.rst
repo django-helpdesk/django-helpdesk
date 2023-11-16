@@ -34,7 +34,7 @@ Configuring Teams Functionality
 Teams functionality is enabled by default but can be disabled using this entry in your ``settings.py``::
       HELPDESK_TEAMS_MODE_ENABLED=False 
 
-If you do not disable teams functionality then you must add additional apps into the ``INSTALLED_APPS`` tuple in your ``settings.py``.
+If you do not disable teams functionality then you must add additional apps into the ``INSTALLED_APPS`` in your ``settings.py``.
 The following can be pasted into your settings.py BELOW the INSTALLED_APPS tuple definition::
 INSTALLED_APPS.extend([
         'account',  # Required by pinax-teams
