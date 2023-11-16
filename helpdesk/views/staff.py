@@ -151,17 +151,20 @@ def dashboard(request):
     # closed & resolved tickets, assigned to current user
     tickets_closed_resolved = Ticket.objects.select_related('queue').filter(
         assigned_to=request.user,
-        status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS])
+        status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS]
+    )
 
     user_queues = huser.get_queues()
 
     unassigned_tickets = active_tickets.filter(
         assigned_to__isnull=True,
-        kbitem__isnull=True,
         queue__in=user_queues
     )
-
-    kbitems = huser.get_assigned_kb_items()
+    kbitems = None
+    # Teams mode uses assignment via knowledge base items so exclude tickets assigned to KB items
+    if helpdesk_settings.HELPDESK_TEAMS_MODE_ENABLED:
+        unassigned_tickets = unassigned_tickets.filter(kbitem__isnull=True)
+        kbitems = huser.get_assigned_kb_items()
 
     # all tickets, reported by current user
     all_tickets_reported_by_current_user = ''

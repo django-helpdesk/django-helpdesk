@@ -1,3 +1,4 @@
+.. _installation:
 Installation
 ============
 
@@ -18,7 +19,7 @@ Before getting started, ensure your system meets the following recommended depen
   
 Ensure any extra Django modules you wish to use are compatible before continuing.
 
-**NOTE**: Python 2.7 support was deprecated in ``django-helpdesk`` as of version 0.2.x
+**NOTE**: Python 2 support was deprecated in ``django-helpdesk`` as of version 0.2.x
 and completely removed in version 0.3.0. Users that still need Python 2 support should
 remain on version 0.2.x.
 
@@ -31,12 +32,12 @@ Installing using PIP
 
 Try using ``pip install django-helpdesk``. Go and have a beer to celebrate Python packaging.
 
-Checkout ``stable`` from git (Cutting Edge)
+Checkout ``main`` branch from git (Cutting Edge)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If you're planning on editing the code or just want to get whatever is the latest and greatest, you can clone the official Git repository with ``git clone git://github.com/django-helpdesk/django-helpdesk.git``. We use the ``stable`` branch as our development branch for the next major release of ``django-helpdesk``.
+If you're planning on editing the code or just want to get whatever is the latest and greatest, you can clone the official Git repository with ``git clone git://github.com/django-helpdesk/django-helpdesk.git``. Each official release of ``django-helpdesk`` is tagged.
 
-Copy the ``helpdesk`` folder into your ``PYTHONPATH``.
+Copy the ``helpdesk`` folder into your ``PYTHONPATH`` or add it to your ``PYTHONPATH``.
 
 I just want a .tar.gz!
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -52,30 +53,36 @@ If you're on a brand new Django installation, make sure you do a ``migrate``
 **before** adding ``helpdesk`` to your ``INSTALLED_APPS``. This will avoid
 errors with trying to create User settings.
 
-1. Edit your ``settings.py`` file and add ``helpdesk`` to the ``INSTALLED_APPS`` setting. You also need ``django.contrib.admin`` in ``INSTALLED_APPS`` if you haven't already added it. eg::
+1. Edit your ``settings.py`` file add the following entries:
+   - add ``helpdesk`` to the ``INSTALLED_APPS`` along with some other required entries in the ``django.contrib`` package.
 
-    INSTALLED_APPS = (
-        'django.contrib.auth',
-        'django.contrib.contenttypes',
-        'django.contrib.sessions',
-        'django.contrib.sites',  # Required for determining domain url for use in emails
-        'django.contrib.admin',  # Required for helpdesk admin/maintenance
-        'django.contrib.humanize',  # Required for elapsed time formatting
-        'bootstrap4form', # Required for nicer formatting of forms with the default templates
-        'account',  # Required by pinax-teams
-        'pinax.invitations',  # Required by pinax-teams
-        'pinax.teams',  # Team support
-        'reversion',  # Required by pinax-teams
-        'rest_framework',  # required for the API
-        'django_cleanup.apps.CleanupConfig',  # Remove this if you do NOT want to delete files on the file system when the associated record is deleted in the database
-        'helpdesk',  # This is us!
-    )
+     An example of the core  ``INSTALLED_APPS`` requirements for this app are shown below::
 
-   Note: you do not need to use pinax-teams. To disable teams see the :doc:`teams` section.
+     INSTALLED_APPS = (
+         'django.contrib.auth',
+         'django.contrib.contenttypes',
+         'django.contrib.sessions',
+         'django.contrib.sites',  # Required for determining domain url for use in emails
+         'django.contrib.admin',  # Required for helpdesk admin/maintenance
+         'django.contrib.humanize',  # Required for elapsed time formatting
+         'bootstrap4form', # Required for nicer formatting of forms with the default templates
+         'rest_framework',  # required for the API
+         'django_cleanup.apps.CleanupConfig',  # Remove this if you do NOT want to delete files on the file system when the associated record is deleted in the database
+         'helpdesk',  # This is us!
+     )
 
-   Your ``settings.py`` file should also define a ``SITE_ID`` that allows multiple projects to share
-   a single database, and is required by ``django.contrib.sites`` in Django 1.9+.
-   If you aren't running multiple sites, you can simply add a default ``SITE_ID`` to ``settings.py``::
+   - Enable or disable Teams based ticket assignment by setting the boolean flag named ``HELPDESK_TEAMS_MODE_ENABLED`` to True or False.
+   
+     IMPORTANT NOTE: It is ENABLED by default if you do not set this flag to False
+     See the :doc::ref:`teams`. section for a detailed explanation of how to use teams mode.
+     Below is an example for disabling teams::
+       HELPDESK_TEAMS_MODE_ENABLED=False 
+
+   - Your ``settings.py`` file should also define a ``SITE_ID``
+   
+     This will allow multiple projects to share a single database, and is required by ``django.contrib.sites`` in Django 1.9+.
+     If you aren't running multiple sites, you can simply add a default ``SITE_ID`` to ``settings.py``
+     Below is an example for setting a default::
 
      SITE_ID = 1
 

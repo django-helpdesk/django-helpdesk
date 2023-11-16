@@ -1,13 +1,7 @@
 """
 Django settings for django-helpdesk demodesk project.
 
-For more information on this file, see
-https://docs.djangoproject.com/en/1.11/topics/settings/
-
-For the full list of settings and their values, see
-https://docs.djangoproject.com/en/1.11/ref/settings/
 """
-
 
 import os
 
@@ -39,9 +33,10 @@ ALLOWED_HOSTS = []
 # an internal demo you don't need such security, but please
 # remember when setting up your own development / production server!
 
+# Default teams mode to enabled unless overridden by an environment variable set to "false"
+HELPDESK_TEAMS_MODE_ENABLED=os.getenv("HELPDESK_TEAMS_MODE_ENABLED", "true").lower() == "true"
 
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -52,13 +47,16 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'django.contrib.humanize',
     'bootstrap4form',
-    'account',  # Required by pinax-teams
-    'pinax.invitations',  # required by pinax-teams
-    'pinax.teams',  # team support
-    'reversion',  # required by pinax-teams
     'helpdesk',  # This is us!
     'rest_framework',  # required for the API
 ]
+if HELPDESK_TEAMS_MODE_ENABLED:
+    INSTALLED_APPS.extend([
+        'account',  # Required by pinax-teams
+        'pinax.invitations',  # required by pinax-teams
+        'pinax.teams',  # team support
+        'reversion',  # required by pinax-teams
+    ])
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
