@@ -43,7 +43,7 @@ INSTALLED_APPS.extend([
         'reversion',  # required by pinax-teams
     ])
 
-Alternatively just add the 4 apps listed above into the INSTALLED_APPS tuple.
+Alternatively just add the 4 apps listed above into the ``INSTALLED_APPS``.
 
 Disabling Teams Functionality
 -----------------------------
