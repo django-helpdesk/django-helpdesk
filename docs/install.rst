@@ -54,9 +54,9 @@ If you're on a brand new Django installation, make sure you do a ``migrate``
 errors with trying to create User settings.
 
 1. Edit your ``settings.py`` file add the following entries:
-   - add ``helpdesk`` to the ``INSTALLED_APPS`` tuple along with some other required entries in the ``django.contrib`` package.
+   - add ``helpdesk`` to the ``INSTALLED_APPS`` along with some other required entries in the ``django.contrib`` package.
 
-     An example of the core  INSTALLED_APPS requirements for this app are shown below::
+     An example of the core  ``INSTALLED_APPS`` requirements for this app are shown below::
 
      INSTALLED_APPS = (
          'django.contrib.auth',
