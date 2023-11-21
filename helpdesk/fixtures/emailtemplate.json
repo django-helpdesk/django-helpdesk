@@ -252,7 +252,18 @@
     "pk" : 21,
     "model" : "helpdesk.emailtemplate"
   },
-
+  {
+    "model": "helpdesk.emailtemplate",
+    "fields": {
+      "plain_text": "Hello,\n\nThis is a courtesy e-mail to let you know that the following tickets have been assigned to you in bulk by {{ user }}:\n\n{% for t in tickets %}\n- {{ t.ticket }} {{ t.title }} ({{ t.staff_url }})\n{% endfor %}\n",
+      "template_name": "bulk_assigned_owner",
+      "heading": "Tickets Assigned To You",
+      "subject": "You have been assigned tickets",
+      "locale": "en",
+      "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Hello,</p>\n<p style=\"font-family: sans-serif; font-size: 1em;\">This is a courtesy e-mail to let you know that the following tickets have been assigned to you in bulk by {{ user }}:</p>\n<ul style=\"font-family: sans-serif; font-size: 1em;\">\n{% for t in tickets %}\n<li>{{ t.ticket }} <a href=\"{{ t.staff_url }}\">{{ t.title }}</a>\n{% endfor %}\n</ul>\n"
+    },
+    "pk": 166
+  },
    {
       "pk" : 161,
       "fields" : {

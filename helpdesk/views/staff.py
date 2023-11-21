@@ -1456,125 +1456,164 @@ def mass_update(request):
         return batch_pair_properties_tickets(request, tickets)
 
     huser = HelpdeskUser(request.user)
-    for t in Ticket.objects.filter(id__in=tickets):
-        if not huser.can_access_queue(t.queue):
-            continue
-
-        if action == 'assign' and t.assigned_to != user:
-            t.assigned_to = user
-            t.save()
-            f = FollowUp(ticket=t,
-                         date=timezone.now(),
-                         title=_('Assigned to %(username)s in bulk update' % {
-                             'username': user.get_full_name() or user.get_username()
-                         }),
-                         public=False,  # DC
-                         user=request.user)
-            f.save()
-        elif action == 'unassign' and t.assigned_to is not None:
-            t.assigned_to = None
-            t.save()
-            f = FollowUp(ticket=t,
-                         date=timezone.now(),
-                         title=_('Unassigned in bulk update'),
-                         public=False,  # DC
-                         user=request.user)
-            f.save()
-        elif action == 'set_kbitem':
-            t.kbitem = kbitem
-            t.save()
-            f = FollowUp(ticket=t,
-                         date=timezone.now(),
-                         title=_('KBItem set in bulk update'),
-                         public=False,
-                         user=request.user)
-            f.save()
-        elif action == 'close' and t.status != Ticket.CLOSED_STATUS:
-            t.status = Ticket.CLOSED_STATUS
-            t.save()
-            f = FollowUp(ticket=t,
-                         date=timezone.now(),
-                         title=_('Closed in bulk update'),
-                         public=False,
-                         user=request.user,
-                         new_status=Ticket.CLOSED_STATUS)
-            f.save()
-            if t.queue.reassign_when_closed and t.queue.default_owner:
-                new_user = t.queue.default_owner
-                f.title += ' and Assigned to %(name)s' % {
-                    'name': new_user.get_full_name() or new_user.get_username(),
-                }
-                t.assigned_to = new_user
-                f.save()
+    if action == 'assign':
+        ticket_context = Ticket.objects.filter(id__in=tickets).exclude(assigned_to=user)  # exclude any already assigned to the assignee
+        if ticket_context:
+            org = ticket_context.first().ticket_form.organization
+            # update the tickets first
+            for t in ticket_context:
+                t.assigned_to = user
                 t.save()
-        elif action == 'close_public' and t.status != Ticket.CLOSED_STATUS:
-            t.status = Ticket.CLOSED_STATUS
-            t.save()
-            f = FollowUp(ticket=t,
-                         date=timezone.now(),
-                         title=_('Closed in bulk update'),
-                         public=True,
-                         user=request.user,
-                         new_status=Ticket.CLOSED_STATUS)
-            f.save()
-            if t.queue.reassign_when_closed and t.queue.default_owner:
-                new_user = t.queue.default_owner
-                old_user = t.assigned_to
-                f.title += ' and Assigned to %(name)s' % {
-                    'name': new_user.get_full_name() or new_user.get_username(),
-                }
-                t.assigned_to = new_user
+                f = FollowUp(ticket=t,
+                             date=timezone.now(),
+                             title=_('Assigned to %(username)s in bulk update' % {
+                                 'username': user.get_full_name() or user.get_username()
+                             }),
+                             public=False,  # DC
+                             user=request.user)
                 f.save()
+            if user.usersettings_helpdesk.email_on_ticket_assign and user != request.user:
+                # customized context in order for the bulk template to work properly
+                # yes, queues can have different sender addresses, but it seems unnecessary to rewrite everything just for that edge case
+                context = {
+                    'private': False,
+                    'tickets': [{
+                        'ticket': mark_safe(t.ticket),
+                        'staff_url': mark_safe(t.staff_url),
+                        'title': t.title
+                    } for t in ticket_context],
+                    'queue': {'organization_id': org.id},
+                    'ticket': {},
+                    'user': request.user.get_full_name() or request.user.get_username()
+                }
+                ticket_context.first().send_ticket_mail(
+                    roles={'assigned_to': ('bulk_assigned_owner', context)},
+                    organization=org,
+                    dont_send_to=set(),
+                    fail_silently=True,
+                    user=None if not is_helpdesk_staff(request.user, org.id) else request.user,
+                    source='bulk (reassigned owner)'
+                )
+    else:
+        for t in Ticket.objects.filter(id__in=tickets):
+            if not huser.can_access_queue(t.queue):
+                continue
+
+            if action == 'assign' and t.assigned_to != user:
+                t.assigned_to = user
                 t.save()
+                f = FollowUp(ticket=t,
+                             date=timezone.now(),
+                             title=_('Assigned to %(username)s in bulk update' % {
+                                 'username': user.get_full_name() or user.get_username()
+                             }),
+                             public=False,  # DC
+                             user=request.user)
+                f.save()
+            elif action == 'unassign' and t.assigned_to is not None:
+                t.assigned_to = None
+                t.save()
+                f = FollowUp(ticket=t,
+                             date=timezone.now(),
+                             title=_('Unassigned in bulk update'),
+                             public=False,  # DC
+                             user=request.user)
+                f.save()
+            elif action == 'set_kbitem':
+                t.kbitem = kbitem
+                t.save()
+                f = FollowUp(ticket=t,
+                             date=timezone.now(),
+                             title=_('KBItem set in bulk update'),
+                             public=False,
+                             user=request.user)
+                f.save()
+            elif action == 'close' and t.status != Ticket.CLOSED_STATUS:
+                t.status = Ticket.CLOSED_STATUS
+                t.save()
+                f = FollowUp(ticket=t,
+                             date=timezone.now(),
+                             title=_('Closed in bulk update'),
+                             public=False,
+                             user=request.user,
+                             new_status=Ticket.CLOSED_STATUS)
+                f.save()
+                if t.queue.reassign_when_closed and t.queue.default_owner:
+                    new_user = t.queue.default_owner
+                    f.title += ' and Assigned to %(name)s' % {
+                        'name': new_user.get_full_name() or new_user.get_username(),
+                    }
+                    t.assigned_to = new_user
+                    f.save()
+                    t.save()
+            elif action == 'close_public' and t.status != Ticket.CLOSED_STATUS:
+                t.status = Ticket.CLOSED_STATUS
+                t.save()
+                f = FollowUp(ticket=t,
+                             date=timezone.now(),
+                             title=_('Closed in bulk update'),
+                             public=True,
+                             user=request.user,
+                             new_status=Ticket.CLOSED_STATUS)
+                f.save()
+                if t.queue.reassign_when_closed and t.queue.default_owner:
+                    new_user = t.queue.default_owner
+                    old_user = t.assigned_to
+                    f.title += ' and Assigned to %(name)s' % {
+                        'name': new_user.get_full_name() or new_user.get_username(),
+                    }
+                    t.assigned_to = new_user
+                    f.save()
+                    t.save()
 
-            # Send email to Submitter, Queue CC, CC'd Users, CC'd Public, Extra Fields, and Owner
-            context = safe_template_context(t)
-            context.update(resolution=t.resolution,
-                           queue=queue_template_context(t.queue),
-                           private=False)
+                # Send email to Submitter, Queue CC, CC'd Users, CC'd Public, Extra Fields, and Owner
+                context = safe_template_context(t)
+                context.update(resolution=t.resolution,
+                               queue=queue_template_context(t.queue),
+                               private=False)
 
-            messages_sent_to = set()
-            try:
-                messages_sent_to.add(request.user.email)
-            except AttributeError:
-                pass
+                messages_sent_to = set()
+                try:
+                    messages_sent_to.add(request.user.email)
+                except AttributeError:
+                    pass
 
-            roles = {
-                'submitter': ('closed_submitter', context),
-                'queue_updated': ('closed_cc_user', context),
-                'cc_users': ('closed_cc_user', context),
-                'cc_public': ('closed_cc_public', context),
-                'extra': ('closed_cc_public', context),
-            }
-            if t.assigned_to and t.assigned_to.usersettings_helpdesk.email_on_ticket_change:
-                roles['assigned_to'] = ('closed_owner', context)
+                roles = {
+                    'submitter': ('closed_submitter', context),
+                    'queue_updated': ('closed_cc_user', context),
+                    'cc_users': ('closed_cc_user', context),
+                    'cc_public': ('closed_cc_public', context),
+                    'extra': ('closed_cc_public', context),
+                }
+                if t.assigned_to and t.assigned_to.usersettings_helpdesk.email_on_ticket_change:
+                    roles['assigned_to'] = ('closed_owner', context)
 
-            messages_sent_to.update(
-                t.send_ticket_mail(
-                    roles,
-                    organization=t.ticket_form.organization,
-                    dont_send_to=messages_sent_to,
-                    fail_silently=True,
-                    user=None if not is_helpdesk_staff(request.user, t.ticket_form.organization_id) else request.user,
-                    source='bulk (closed)'
+                messages_sent_to.update(
+                    t.send_ticket_mail(
+                        roles,
+                        organization=t.ticket_form.organization,
+                        dont_send_to=messages_sent_to,
+                        fail_silently=True,
+                        user=None if not is_helpdesk_staff(request.user, t.ticket_form.organization_id) else request.user,
+                        source='bulk (closed)'
+                    )
                 )
-            )
-            if t.queue.reassign_when_closed and t.queue.default_owner and old_user and old_user.email not in messages_sent_to:
-                send_templated_mail(
-                    template_name='closed_owner',
-                    context=context,
-                    recipients=[old_user.email],
-                    sender=t.queue.from_address,
-                    fail_silently=True,
-                    organization=t.ticket_form.organization,
-                    user=None if not is_helpdesk_staff(request.user, t.ticket_form.organization_id) else request.user,
-                    source='bulk (closed and auto-reassigned)',
-                    ticket=t
-                )
+                if t.queue.reassign_when_closed and t.queue.default_owner and old_user and old_user.email not in messages_sent_to:
+                    send_templated_mail(
+                        template_name='closed_owner',
+                        context=context,
+                        recipients=[old_user.email],
+                        sender=t.queue.from_address,
+                        fail_silently=True,
+                        organization=t.ticket_form.organization,
+                        user=None if not is_helpdesk_staff(request.user, t.ticket_form.organization_id) else request.user,
+                        source='bulk (closed and auto-reassigned)',
+                        ticket=t
+                    )
 
-        elif action == 'delete':
-            # todo create a note of this somewhere?
-            t.delete()
+            elif action == 'delete':
+                # todo create a note of this somewhere?
+                t.delete()
 
     return JsonResponse({'update_status': "Ticket Update Complete"})
 
