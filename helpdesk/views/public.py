@@ -208,12 +208,14 @@ class ViewTicket(TemplateView):
 
         try:
             queue, ticket_id = Ticket.queue_and_id_from_query(ticket_req)
+            if request.user.is_authenticated and request.user.email == email:
+                ticket = Ticket.objects.get(id=ticket_id, submitter_email__iexact=email)
             if hasattr(settings, 'HELPDESK_VIEW_A_TICKET_PUBLIC') and settings.HELPDESK_VIEW_A_TICKET_PUBLIC:
                 ticket = Ticket.objects.get(id=ticket_id, submitter_email__iexact=email)
             else:
                 ticket = Ticket.objects.get(id=ticket_id, submitter_email__iexact=email, secret_key__iexact=key)
         except (ObjectDoesNotExist, ValueError):
-            return search_for_ticket(request, _('Invalid ticket ID or e-mail address. Please try again.'))
+            return SearchForTicketView.as_view()(request, _('Invalid ticket ID or e-mail address. Please try again.'))
 
         if 'close' in request.GET and ticket.status == Ticket.RESOLVED_STATUS:
             from helpdesk.update_ticket import update_ticket
@@ -245,6 +247,17 @@ class ViewTicket(TemplateView):
         elif helpdesk_settings.HELPDESK_NAVIGATION_ENABLED:
             redirect_url = reverse('helpdesk:view', args=[ticket_id])
         return redirect_url
+
+
+class MyTickets(TemplateView):
+    template_name = 'helpdesk/my_tickets.html'
+
+    def get(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(reverse('helpdesk:login'))
+
+        context = self.get_context_data(**kwargs)
+        return self.render_to_response(context)
 
 
 def change_language(request):

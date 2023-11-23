@@ -14,7 +14,7 @@ from django.views.generic import TemplateView
 from helpdesk import settings as helpdesk_settings
 from helpdesk.decorators import helpdesk_staff_member_required, protect_view
 from helpdesk.views import feeds, login, public, staff
-from helpdesk.views.api import CreateUserView, FollowUpAttachmentViewSet, FollowUpViewSet, TicketViewSet
+from helpdesk.views.api import CreateUserView, FollowUpAttachmentViewSet, FollowUpViewSet, TicketViewSet, UserTicketViewSet
 from rest_framework.routers import DefaultRouter
 
 
@@ -154,6 +154,7 @@ if helpdesk_settings.HELPDESK_ENABLE_DEPENDENCIES_ON_TICKET:
 
 urlpatterns += [
     path("", protect_view(public.Homepage.as_view()), name="home"),
+    path("tickets/my-tickets/", public.MyTickets.as_view(), name="my-tickets"),
     path("tickets/submit/", public.create_ticket, name="submit"),
     path(
         "tickets/submit_iframe/",
@@ -199,15 +200,14 @@ urlpatterns += [
 ]
 
 
-# API is added to url conf based on the setting (False by default)
-if helpdesk_settings.HELPDESK_ACTIVATE_API_ENDPOINT:
-    router = DefaultRouter()
-    router.register(r"tickets", TicketViewSet, basename="ticket")
-    router.register(r"followups", FollowUpViewSet, basename="followups")
-    router.register(r"followups-attachments",
-                    FollowUpAttachmentViewSet, basename="followupattachments")
-    router.register(r"users", CreateUserView, basename="user")
-    urlpatterns += [re_path(r"^api/", include(router.urls))]
+router = DefaultRouter()
+router.register(r"tickets", TicketViewSet, basename="ticket")
+router.register(r"user_tickets", UserTicketViewSet, basename="user_tickets")
+router.register(r"followups", FollowUpViewSet, basename="followups")
+router.register(r"followups-attachments",
+                FollowUpAttachmentViewSet, basename="followupattachments")
+router.register(r"users", CreateUserView, basename="user")
+urlpatterns += [re_path(r"^api/", include(router.urls))]
 
 
 urlpatterns += [
