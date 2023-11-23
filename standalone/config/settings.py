@@ -116,9 +116,6 @@ HELPDESK_TICKETS_TIMELINE_ENABLED = os.environ.get('HELPDESK_TICKETS_TIMELINE_EN
 # Allow users to change their passwords
 HELPDESK_SHOW_CHANGE_PASSWORD = os.environ.get('HELPDESK_SHOW_CHANGE_PASSWORD', 'True') == 'True'
 
-# Activate the API
-HELPDESK_ACTIVATE_API_ENDPOINT = os.environ.get('HELPDESK_ACTIVATE_API_ENDPOINT', 'True') == 'True'
-
 # Instead of showing the public web portal first,
 # we can instead redirect users straight to the login page.
 HELPDESK_REDIRECT_TO_LOGIN_BY_DEFAULT = os.environ.get('HELPDESK_REDIRECT_TO_LOGIN_BY_DEFAULT', 'False') == 'True'

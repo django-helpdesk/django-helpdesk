@@ -108,8 +108,6 @@ class QuickDjangoTest:
             HELPDESK_TEAMS_MODEL='auth.User',
             HELPDESK_TEAMS_MIGRATION_DEPENDENCIES=[],
             HELPDESK_KBITEM_TEAM_GETTER=lambda _: None,
-            # test the API
-            HELPDESK_ACTIVATE_API_ENDPOINT=True,
             # Set IMAP Server Debug Verbosity
             HELPDESK_IMAP_DEBUG_LEVEL=int(os.environ.get("HELPDESK_IMAP_DEBUG_LEVEL", "0")),
         )
