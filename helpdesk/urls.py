@@ -165,7 +165,7 @@ urlpatterns += [
         public.SuccessIframeView.as_view(),
         name="success_iframe",
     ),
-    path("view/", public.view_ticket, name="public_view"),
+    path("view/", public.ViewTicket.as_view(), name="public_view"),
     path("change_language/", public.change_language,
          name="public_change_language"),
 ]
