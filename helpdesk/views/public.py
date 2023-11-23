@@ -37,7 +37,7 @@ def create_ticket(request, *args, **kwargs):
     if is_helpdesk_staff(request.user):
         return staff.CreateTicketView.as_view()(request, *args, **kwargs)
     else:
-        return CreateTicketView.as_view()(request, *args, **kwargs)
+        return protect_view(CreateTicketView.as_view())(request, *args, **kwargs)
 
 
 class BaseCreateTicketView(abstract_views.AbstractCreateTicketMixin, FormView):

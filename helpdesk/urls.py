@@ -154,19 +154,19 @@ if helpdesk_settings.HELPDESK_ENABLE_DEPENDENCIES_ON_TICKET:
 
 urlpatterns += [
     path("", protect_view(public.Homepage.as_view()), name="home"),
-    path("tickets/my-tickets/", public.MyTickets.as_view(), name="my-tickets"),
+    path("tickets/my-tickets/", protect_view(public.MyTickets.as_view()), name="my-tickets"),
     path("tickets/submit/", public.create_ticket, name="submit"),
     path(
         "tickets/submit_iframe/",
-        public.CreateTicketIframeView.as_view(),
+        protect_view(public.CreateTicketIframeView.as_view()),
         name="submit_iframe",
     ),
     path(
         "tickets/success_iframe/",  # Ticket was submitted successfully
-        public.SuccessIframeView.as_view(),
+        protect_view(public.SuccessIframeView.as_view()),
         name="success_iframe",
     ),
-    path("view/", public.ViewTicket.as_view(), name="public_view"),
+    path("view/", protect_view(public.ViewTicket.as_view()), name="public_view"),
     path("change_language/", public.change_language,
          name="public_change_language"),
 ]
