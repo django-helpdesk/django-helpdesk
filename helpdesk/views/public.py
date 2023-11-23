@@ -166,18 +166,29 @@ class Homepage(CreateTicketView):
         return context
 
 
-def search_for_ticket(request, error_message=None):
-    if hasattr(settings, 'HELPDESK_VIEW_A_TICKET_PUBLIC') and settings.HELPDESK_VIEW_A_TICKET_PUBLIC:
+class SearchForTicketView(TemplateView):
+    template_name = 'helpdesk/public_view_form.html'
+
+    def get(self, request, *args, **kwargs):
+        if hasattr(settings, 'HELPDESK_VIEW_A_TICKET_PUBLIC') and settings.HELPDESK_VIEW_A_TICKET_PUBLIC:
+            context = self.get_context_data(**kwargs)
+            return self.render_to_response(context)
+        else:
+            raise PermissionDenied("Public viewing of tickets without a secret key is forbidden.")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        request = self.request
         email = request.GET.get('email', None)
-        return render(request, 'helpdesk/public_view_form.html', {
+        error_message = kwargs.get('error_message', None)
+
+        context.update({
             'ticket': False,
             'email': email,
             'error_message': error_message,
             'helpdesk_settings': helpdesk_settings,
         })
-    else:
-        raise PermissionDenied(
-            "Public viewing of tickets without a secret key is forbidden.")
+        return context
 
 
 class ViewTicket(TemplateView):
@@ -191,9 +202,9 @@ class ViewTicket(TemplateView):
 
         if not (ticket_req and email):
             if ticket_req is None and email is None:
-                return search_for_ticket(request)
+                return SearchForTicketView.as_view()(request)
             else:
-                return search_for_ticket(request, _('Missing ticket ID or e-mail address. Please try again.'))
+                return SearchForTicketView.as_view()(request, _('Missing ticket ID or e-mail address. Please try again.'))
 
         try:
             queue, ticket_id = Ticket.queue_and_id_from_query(ticket_req)
