@@ -3,7 +3,7 @@ from helpdesk.models import FollowUp, FollowUpAttachment, Ticket
 from helpdesk.serializers import FollowUpAttachmentSerializer, FollowUpSerializer, TicketSerializer, UserSerializer, PublicTicketListingSerializer
 from rest_framework import viewsets
 from rest_framework.mixins import CreateModelMixin
-from rest_framework.permissions import IsAdminUser
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.pagination import PageNumberPagination
 
@@ -21,6 +21,7 @@ class UserTicketViewSet(viewsets.ReadOnlyModelViewSet):
     """
     serializer_class = PublicTicketListingSerializer
     pagination_class = ConservativePagination
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         return Ticket.objects.filter(submitter_email=self.request.user.email).order_by('-created')

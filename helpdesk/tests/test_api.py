@@ -359,3 +359,51 @@ class TicketTest(APITestCase):
             created_followup.followupattachment_set.last().filename, 'file.jpg')
         self.assertEqual(
             created_followup.followupattachment_set.last().mime_type, 'image/jpg')
+
+
+class UserTicketTest(APITestCase):
+    def setUp(self):
+        self.queue = Queue.objects.create(title='Test queue')
+        self.user = User.objects.create_user(username='test')
+        self.client.force_authenticate(self.user)
+
+    def test_get_user_tickets(self):
+        user = User.objects.create_user(username='test2', email="foo@example.com")
+        ticket_1 = Ticket.objects.create(
+            queue=self.queue, title='Test 1',
+            submitter_email="foo@example.com")
+        ticket_2 = Ticket.objects.create(
+            queue=self.queue, title='Test 2',
+            submitter_email="bar@example.com")
+        ticket_3 = Ticket.objects.create(
+            queue=self.queue, title='Test 3',
+            submitter_email="foo@example.com")
+        self.client.force_authenticate(user)
+        response = self.client.get('/api/user_tickets/')
+        self.assertEqual(response.status_code, HTTP_200_OK)
+        self.assertEqual(len(response.data["results"]), 2)
+        self.assertEqual(response.data["results"][0]['id'], ticket_3.id)
+        self.assertEqual(response.data["results"][1]['id'], ticket_1.id)
+
+    def test_staff_user(self):
+        staff_user = User.objects.create_user(username='test2', is_staff=True, email="staff@example.com")
+        ticket_1 = Ticket.objects.create(
+            queue=self.queue, title='Test 1',
+            submitter_email="staff@example.com")
+        ticket_2 = Ticket.objects.create(
+            queue=self.queue, title='Test 2',
+            submitter_email="foo@example.com")
+        self.client.force_authenticate(staff_user)
+        response = self.client.get('/api/user_tickets/')
+        self.assertEqual(response.status_code, HTTP_200_OK)
+        self.assertEqual(len(response.data["results"]), 1)
+
+    def test_not_logged_in_user(self):
+        ticket_1 = Ticket.objects.create(
+            queue=self.queue, title='Test 1',
+            submitter_email="ex@example.com")
+        self.client.logout()
+        response = self.client.get('/api/user_tickets/')
+        self.assertEqual(response.status_code, HTTP_403_FORBIDDEN)
+
+
