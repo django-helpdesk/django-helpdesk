@@ -11,8 +11,6 @@
                 <th>Queue</th>
                 <th>Status</th>
                 <th>Created</th>
-                <th>Due Date</th>
-                <th>Submitter</th>
             </tr>
         </thead>
         <tbody>
@@ -43,8 +41,6 @@ window.addEventListener('load', function()
                         <td>${ticket.queue.title}</td>
                         <td>${ticket.status}</td>
                         <td>${ticket.created}</td>
-                        <td>${ticket.due_date ? ticket.due_date : 'N/A'}</td>
-                        <td>${ticket.submitter}</td>
                     </tr>
                 `);
             });
