@@ -119,9 +119,6 @@ HELPDESK_TICKETS_TIMELINE_ENABLED = True
 # Allow users to change their passwords
 HELPDESK_SHOW_CHANGE_PASSWORD = True
 
-# Activate the API
-HELPDESK_ACTIVATE_API_ENDPOINT = True
-
 # Instead of showing the public web portal first,
 # we can instead redirect users straight to the login page.
 HELPDESK_REDIRECT_TO_LOGIN_BY_DEFAULT = False

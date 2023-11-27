@@ -75,6 +75,11 @@
             </li>
         {% endif %}
         {% if not request.path == '/helpdesk/login/' or user.is_authenticated %}
+            <div class="nav-item">
+                 <div class="nav-link">
+                     {{user.username}}
+                 </div>
+            </div>
             <li class="nav-item dropdown no-arrow">
               {% if user.is_authenticated %}
                 <a class="nav-link dropdown-toggle" href="{% url 'helpdesk:logout' %}" id="userDropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fas fa-fw fa-sign-out-alt"></i> {% trans "Logout" %}</a>

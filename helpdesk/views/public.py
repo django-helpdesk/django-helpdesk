@@ -37,7 +37,7 @@ def create_ticket(request, *args, **kwargs):
     if is_helpdesk_staff(request.user):
         return staff.CreateTicketView.as_view()(request, *args, **kwargs)
     else:
-        return CreateTicketView.as_view()(request, *args, **kwargs)
+        return protect_view(CreateTicketView.as_view())(request, *args, **kwargs)
 
 
 class BaseCreateTicketView(abstract_views.AbstractCreateTicketMixin, FormView):
@@ -166,73 +166,98 @@ class Homepage(CreateTicketView):
         return context
 
 
-def search_for_ticket(request, error_message=None):
-    if hasattr(settings, 'HELPDESK_VIEW_A_TICKET_PUBLIC') and settings.HELPDESK_VIEW_A_TICKET_PUBLIC:
+class SearchForTicketView(TemplateView):
+    template_name = 'helpdesk/public_view_form.html'
+
+    def get(self, request, *args, **kwargs):
+        if hasattr(settings, 'HELPDESK_VIEW_A_TICKET_PUBLIC') and settings.HELPDESK_VIEW_A_TICKET_PUBLIC:
+            context = self.get_context_data(**kwargs)
+            return self.render_to_response(context)
+        else:
+            raise PermissionDenied("Public viewing of tickets without a secret key is forbidden.")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        request = self.request
         email = request.GET.get('email', None)
-        return render(request, 'helpdesk/public_view_form.html', {
+        error_message = kwargs.get('error_message', None)
+
+        context.update({
             'ticket': False,
             'email': email,
             'error_message': error_message,
             'helpdesk_settings': helpdesk_settings,
         })
-    else:
-        raise PermissionDenied(
-            "Public viewing of tickets without a secret key is forbidden.")
+        return context
 
 
-@protect_view
-def view_ticket(request):
-    ticket_req = request.GET.get('ticket', None)
-    email = request.GET.get('email', None)
-    key = request.GET.get('key', '')
-
-    if not (ticket_req and email):
-        if ticket_req is None and email is None:
-            return search_for_ticket(request)
-        else:
-            return search_for_ticket(request, _('Missing ticket ID or e-mail address. Please try again.'))
-
-    queue, ticket_id = Ticket.queue_and_id_from_query(ticket_req)
-    try:
-        if hasattr(settings, 'HELPDESK_VIEW_A_TICKET_PUBLIC') and settings.HELPDESK_VIEW_A_TICKET_PUBLIC:
-            ticket = Ticket.objects.get(
-                id=ticket_id, submitter_email__iexact=email)
-        else:
-            ticket = Ticket.objects.get(
-                id=ticket_id, submitter_email__iexact=email, secret_key__iexact=key)
-    except (ObjectDoesNotExist, ValueError):
-        return search_for_ticket(request, _('Invalid ticket ID or e-mail address. Please try again.'))
-
-    if is_helpdesk_staff(request.user):
-        redirect_url = reverse('helpdesk:view', args=[ticket_id])
-        if 'close' in request.GET:
-            redirect_url += '?close'
-        return HttpResponseRedirect(redirect_url)
-
-    if 'close' in request.GET and ticket.status == Ticket.RESOLVED_STATUS:
-        from helpdesk.update_ticket import update_ticket
-        update_ticket(
-            request.user,
-            ticket,
-            public = True,
-            comment = _('Submitter accepted resolution and closed ticket'),
-            new_status = Ticket.CLOSED_STATUS,
-        )
-        return HttpResponseRedirect(ticket.ticket_url)
+class ViewTicket(TemplateView):
+    template_name = 'helpdesk/public_view_ticket.html'
 
 
-    # redirect user back to this ticket if possible.
-    redirect_url = ''
-    if helpdesk_settings.HELPDESK_NAVIGATION_ENABLED:
-        redirect_url = reverse('helpdesk:view', args=[ticket_id])
+    def get(self, request, *args, **kwargs):
+        ticket_req = request.GET.get('ticket', None)
+        email = request.GET.get('email', None)
+        key = request.GET.get('key', '')
 
-    return render(request, 'helpdesk/public_view_ticket.html', {
-        'key': key,
-        'mail': email,
-        'ticket': ticket,
-        'helpdesk_settings': helpdesk_settings,
-        'next': redirect_url,
-    })
+        if not (ticket_req and email):
+            if ticket_req is None and email is None:
+                return SearchForTicketView.as_view()(request)
+            else:
+                return SearchForTicketView.as_view()(request, _('Missing ticket ID or e-mail address. Please try again.'))
+
+        try:
+            queue, ticket_id = Ticket.queue_and_id_from_query(ticket_req)
+            if request.user.is_authenticated and request.user.email == email:
+                ticket = Ticket.objects.get(id=ticket_id, submitter_email__iexact=email)
+            if hasattr(settings, 'HELPDESK_VIEW_A_TICKET_PUBLIC') and settings.HELPDESK_VIEW_A_TICKET_PUBLIC:
+                ticket = Ticket.objects.get(id=ticket_id, submitter_email__iexact=email)
+            else:
+                ticket = Ticket.objects.get(id=ticket_id, submitter_email__iexact=email, secret_key__iexact=key)
+        except (ObjectDoesNotExist, ValueError):
+            return SearchForTicketView.as_view()(request, _('Invalid ticket ID or e-mail address. Please try again.'))
+
+        if 'close' in request.GET and ticket.status == Ticket.RESOLVED_STATUS:
+            from helpdesk.update_ticket import update_ticket
+            update_ticket(
+                request.user,
+                ticket,
+                public=True,
+                comment=_('Submitter accepted resolution and closed ticket'),
+                new_status=Ticket.CLOSED_STATUS,
+            )
+            return HttpResponseRedirect(ticket.ticket_url)
+
+        # Prepare context for rendering
+        context = {
+            'key': key,
+            'mail': email,
+            'ticket': ticket,
+            'helpdesk_settings': helpdesk_settings,
+            'next': self.get_next_url(ticket_id)
+        }
+        return self.render_to_response(context)
+
+    def get_next_url(self, ticket_id):
+        redirect_url = ''
+        if is_helpdesk_staff(self.request.user):
+            redirect_url = reverse('helpdesk:view', args=[ticket_id])
+            if 'close' in self.request.GET:
+                redirect_url += '?close'
+        elif helpdesk_settings.HELPDESK_NAVIGATION_ENABLED:
+            redirect_url = reverse('helpdesk:view', args=[ticket_id])
+        return redirect_url
+
+
+class MyTickets(TemplateView):
+    template_name = 'helpdesk/my_tickets.html'
+
+    def get(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(reverse('helpdesk:login'))
+
+        context = self.get_context_data(**kwargs)
+        return self.render_to_response(context)
 
 
 def change_language(request):

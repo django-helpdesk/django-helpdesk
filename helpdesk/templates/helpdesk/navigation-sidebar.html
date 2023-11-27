@@ -40,6 +40,12 @@
             <span>{% trans "New Ticket" %}</span>
           </a>
         </li>
+        <li class="nav-item{% if 'my-tickets' in request.path %} active{% endif %}">
+            <a class="nav-link" href="{% url 'helpdesk:my-tickets' %}">
+                <i class="fas fa-fw fa-tasks"></i>
+                <span>{% trans "My Tickets" %}</span>
+            </a>
+        </li>
         <li class="nav-item{% if 'reports' in request.path %} active{% endif %}">
           <a class="nav-link" href="{% url 'helpdesk:report_index' %}">
             <i class="fas fa-fw fa-chart-area"></i>
@@ -68,6 +74,15 @@
             <span>{% trans "New Ticket" %}</span>
           </a>
         </li>
+        {% if user.is_authenticated %}
+        <li class="nav-item{% if 'my-tickets' in request.path %} active{% endif %}">
+            <a class="nav-link" href="{% url 'helpdesk:my-tickets' %}">
+                <i class="fas fa-fw fa-tasks"></i>
+                <span>{% trans "My Tickets" %}</span>
+            </a>
+        </li>
+
+        {% endif %}
         {% if helpdesk_settings.HELPDESK_KB_ENABLED %}
         <li class="nav-item{% if 'kb' in request.path %} active{% endif %}">
           <a class="nav-link" href="{% url 'helpdesk:kb_index' %}">

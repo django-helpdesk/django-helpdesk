@@ -1,0 +1,65 @@
+{% extends "helpdesk/public_base.html" %}{% load i18n %}
+
+{% block helpdesk_body %}
+<h2>{% trans "My Tickets" %}</h2>
+
+<div class="container mt-4">
+    <table class="table table-striped" id="ticketsTable">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Queue</th>
+                <th>Status</th>
+                <th>Created</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Rows will be added here dynamically using jQuery -->
+        </tbody>
+    </table>
+    <nav aria-label="Page navigation">
+        <ul class="pagination" id="pagination">
+            <!-- Pagination buttons will be added here dynamically -->
+        </ul>
+    </nav>
+</div>
+
+<script>
+// don't use jquery's document ready but rather the more basic window load
+// because we need to wait for the page to load before we can fetch the tickets
+window.addEventListener('load', function()
+ {
+    function fetchTickets(page = 1) {
+        const endpoint = '{% url "helpdesk:user_tickets-list" %}?page=' + page;
+
+        $.get(endpoint, function(data) {
+            $('#ticketsTable tbody').empty();
+            data.results.forEach(function(ticket) {
+                $('#ticketsTable tbody').append(`
+                    <tr>
+                        <td><a href="/view/?ticket=${ticket.id}&email=${ticket.submitter}">${ticket.title}</a></td>
+                        <td>${ticket.queue.title}</td>
+                        <td>${ticket.status}</td>
+                        <td>${ticket.created}</td>
+                    </tr>
+                `);
+            });
+
+            $('#pagination').empty();
+            for (let i = 1; i <= data.total_pages; i++) {
+                $('#pagination').append(`
+                    <li class="page-item ${i === data.page ? 'active' : ''}">
+                        <a class="page-link" href="#" data-page="${i}">${i}</a>
+                    </li>
+                `);
+            }
+
+        });
+    }
+
+    fetchTickets();
+});
+
+</script>
+
+{% endblock %}

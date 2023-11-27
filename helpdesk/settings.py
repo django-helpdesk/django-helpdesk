@@ -200,10 +200,6 @@ HELPDESK_MAX_EMAIL_ATTACHMENT_SIZE = getattr(
 HELPDESK_CREATE_TICKET_HIDE_ASSIGNED_TO = getattr(
     settings, 'HELPDESK_CREATE_TICKET_HIDE_ASSIGNED_TO', False)
 
-# Activate the API endpoint to manage tickets thanks to Django REST Framework
-HELPDESK_ACTIVATE_API_ENDPOINT = getattr(
-    settings, 'HELPDESK_ACTIVATE_API_ENDPOINT', False)
-
 
 #################
 # email options #

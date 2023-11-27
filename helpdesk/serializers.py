@@ -70,6 +70,46 @@ class DatatablesTicketSerializer(serializers.ModelSerializer):
         return obj.kbitem.title if obj.kbitem else ""
 
 
+class PublicTicketListingSerializer(serializers.ModelSerializer):
+    """
+    A serializer to be used by the public API for listing tickets. Don't expose private fields here!
+    """
+    ticket = serializers.SerializerMethodField()
+    submitter = serializers.SerializerMethodField()
+    created = serializers.SerializerMethodField()
+    due_date = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()
+    queue = serializers.SerializerMethodField()
+    kbitem = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Ticket
+        # fields = '__all__'
+        fields = ('ticket', 'id', 'title', 'queue', 'status',
+                  'created', 'due_date', 'submitter', 'kbitem')
+
+    def get_queue(self, obj):
+        return {"title": obj.queue.title, "id": obj.queue.id}
+
+    def get_ticket(self, obj):
+        return str(obj.id) + " " + obj.ticket
+
+    def get_status(self, obj):
+        return obj.get_status
+
+    def get_created(self, obj):
+        return humanize.naturaltime(obj.created)
+
+    def get_due_date(self, obj):
+        return humanize.naturaltime(obj.due_date)
+
+    def get_submitter(self, obj):
+        return obj.submitter_email
+
+    def get_kbitem(self, obj):
+        return obj.kbitem.title if obj.kbitem else ""
+
+
 class FollowUpAttachmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = FollowUpAttachment
