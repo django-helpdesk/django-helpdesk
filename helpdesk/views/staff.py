@@ -3667,7 +3667,7 @@ def export(qs, org, serializer, paginate=False, do_extra_data=True, visible_cols
     }
 
     # Split tickets up into separate forms, serialize, and concatenate them
-    report = []
+    report = pd.DataFrame()
     for ticket_form_id in ticket_form_ids:
         sub_qs = qs.filter(ticket_form_id=ticket_form_id)
 
@@ -3703,9 +3703,11 @@ def export(qs, org, serializer, paginate=False, do_extra_data=True, visible_cols
             renamed_row = OrderedDict((mappings.get(k, k), v if v else '') for k, v in row.items())
             output.append(renamed_row)
         output = pd.json_normalize(output)
-        report.append(output)
-    report = pd.concat(report)
-    report = report.set_index('Ticket')
+        report = report.append(output, ignore_index=True)
+    if 'Ticket ID' in report:
+        report = report.set_index('Ticket ID')
+    elif 'Ticket' in report:
+        report = report.set_index('Ticket')
 
     time_stamp = timezone.now().strftime('%Y%m%d_%H%M%S')
     media_dir = 'helpdesk/reports/'

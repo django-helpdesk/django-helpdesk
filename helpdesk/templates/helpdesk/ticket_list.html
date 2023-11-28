@@ -594,17 +594,61 @@
     // Perform ticket mass update asynchronously, then
     // reload page with current query and ticket view preferences
     function massUpdate() {
-        data =
+        let refreshFlag = true;
         $.ajax({
             url: "{% url 'helpdesk:mass_update' %}",
             type: 'POST',
             data: new FormData(document.forms['ticket_mass_update']),
             processData: false,
             contentType: false,
-            success: function(response) {
-                location.reload();
+            xhrFields: {
+                responseType: 'blob',
+            },
+            // https://stackoverflow.com/a/23797348/20234455
+            success: function(blob, status, xhr) {
+                if (typeof blob === 'string') {
+                    location.reload();
+                } else {
+                    refreshFlag = false;
+                    // todo: if not an export action, dont do this
+                    // check for a filename
+                    var filename = "";
+                    var disposition = xhr.getResponseHeader('Content-Disposition');
+                    if (disposition && disposition.indexOf('attachment') !== -1) {
+                        var filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+                        var matches = filenameRegex.exec(disposition);
+                        if (matches != null && matches[1]) filename = matches[1].replace(/['"]/g, '');
+                    }
+                    if (typeof window.navigator.msSaveBlob !== 'undefined') {
+                        // IE workaround for "HTML7007: One or more blob URLs were revoked by closing the blob for which they were created. These URLs will no longer resolve as the data backing the URL has been freed."
+                        window.navigator.msSaveBlob(blob, filename);
+                    } else {
+                        var URL = window.URL || window.webkitURL;
+                        var downloadUrl = URL.createObjectURL(blob);
+
+                        if (filename) {
+                            // use HTML5 a[download] attribute to specify filename
+                            var a = document.createElement("a");
+                            // safari doesn't support this yet
+                            if (typeof a.download === 'undefined') {
+                                window.location.href = downloadUrl;
+                            } else {
+                                a.href = downloadUrl;
+                                a.download = filename;
+                                document.body.appendChild(a);
+                                a.click();
+                            }
+                        } else {
+                            window.location.href = downloadUrl;
+                        }
+                        setTimeout(function () { URL.revokeObjectURL(downloadUrl); }, 100); // cleanup
+                    }
+                }
+            },
+            complete: function() {
+                if (refreshFlag) location.reload();
             }
-        })
+        });
     }
 
     function checkCheckboxes () {
