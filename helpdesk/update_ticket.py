@@ -386,6 +386,9 @@ def update_ticket(
     ))
     ticket.save()
 
+    from helpdesk.webhooks import notify_followup_webhooks
+    notify_followup_webhooks(f)
+
     # auto subscribe user if enabled
     add_staff_subscription(user, ticket)
     return f

@@ -277,3 +277,19 @@ HELPDESK_IMAP_DEBUG_LEVEL = getattr(settings, 'HELPDESK_IMAP_DEBUG_LEVEL', 0)
 # Attachment directories should be created with permission 755 (rwxr-xr-x)
 # Override it in your own Django settings.py
 HELPDESK_ATTACHMENT_DIR_PERMS = int(getattr(settings, 'HELPDESK_ATTACHMENT_DIR_PERMS', "755"), 8)
+
+def get_followup_webhook_urls():
+    urls = os.environ.get('HELPDESK_FOLLOWUP_WEBHOOK_URLS', None)
+    if urls:
+        return urls.split(',')
+
+HELPDESK_GET_FOLLOWUP_WEBHOOK_URLS = getattr(settings, 'HELPDESK_GET_FOLLOWUP_WEBHOOK_URLS', get_followup_webhook_urls)
+
+def get_new_ticket_webhook_urls():
+    urls = os.environ.get('HELPDESK_NEW_TICKET_WEBHOOK_URLS', None)
+    if urls:
+        return urls.split(',')
+
+HELPDESK_GET_NEW_TICKET_WEBHOOK_URLS = getattr(settings, 'HELPDESK_GET_NEW_TICKET_WEBHOOK_URLS', get_new_ticket_webhook_urls)
+
+HELPDESK_WEBHOOK_TIMEOUT = getattr(settings, 'HELPDESK_WEBHOOK_TIMEOUT', 3)

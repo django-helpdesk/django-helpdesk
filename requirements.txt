@@ -13,3 +13,4 @@ django-model-utils
 django-cleanup
 oauthlib
 requests_oauthlib
+requests

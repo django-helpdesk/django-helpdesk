@@ -1,9 +1,3 @@
-Integrating django-helpdesk into your application
-=================================================
-
-Ticket submission with embeded iframe
--------------------------------------
-
 Ticket submission with embeded iframe
 -------------------------------------
 
