@@ -83,12 +83,13 @@ class PublicTicketListingSerializer(serializers.ModelSerializer):
     status = serializers.SerializerMethodField()
     queue = serializers.SerializerMethodField()
     kbitem = serializers.SerializerMethodField()
+    secret_key = serializers.CharField(read_only=True)
 
     class Meta:
         model = Ticket
         # fields = '__all__'
         fields = ('ticket', 'id', 'title', 'queue', 'status',
-                  'created', 'due_date', 'submitter', 'kbitem')
+                  'created', 'due_date', 'submitter', 'kbitem', 'secret_key')
 
     def get_queue(self, obj):
         return {"title": obj.queue.title, "id": obj.queue.id}
