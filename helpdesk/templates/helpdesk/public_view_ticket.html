@@ -5,11 +5,18 @@
 {% block helpdesk_body %}
 
 <table class="table table-hover table-bordered table-striped">
-<caption>{{ ticket.ticket }} . {{ ticket.title }} [{{ ticket.get_status }}]</caption>
 <thead>
-<tr><th colspan='2'>{% blocktrans with ticket.queue as queue_name %}Queue: {{ queue_name }}{% endblocktrans %}</th></tr>
+    <tr>
+    <th colspan="2">
+        <capiton>
+            {{ ticket.ticket }} . {{ ticket.title }} [{{ ticket.get_status }}]
+        </capiton>
+    </th>
+    </tr>
 </thead>
 <tbody>
+    <tr><th>{% blocktrans with ticket.queue as queue_name %}Queue</th>
+    <td>{{ queue_name }}{% endblocktrans %}</td></tr>
 <tr>
     <th>{% trans "Submitted On" %}</th>
     <td>{{ ticket.created|date:"DATETIME_FORMAT" }} ({{ ticket.created|naturaltime }})</td>
@@ -152,7 +159,7 @@
 
 </fieldset>
 
-<button class="btn btn-primary btn-lg" type='submit'>{% trans "Update This Ticket" %}</button>
+<button class="btn btn-primary btn-lg" style="margin-bottom:10px" type='submit'>{% trans "Update This Ticket" %}</button>
 
 {% csrf_token %}</form>
 
