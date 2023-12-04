@@ -7,17 +7,17 @@
     <table class="table table-striped" id="ticketsTable">
         <thead>
             <tr>
-                <th>Title</th>
-                <th>Queue</th>
-                <th>Status</th>
-                <th>Created</th>
+                <th>{% trans "Title" %}</th>
+                <th>{% trans "Queue" %}</th>
+                <th>{% trans "Status" %}</th>
+                <th>{% trans "Created" %}</th>
             </tr>
         </thead>
         <tbody>
             <!-- Rows will be added here dynamically using jQuery -->
         </tbody>
     </table>
-    <nav aria-label="Page navigation">
+    <nav aria-label="{% trans 'Page navigation' %}">
         <ul class="pagination" id="pagination">
             <!-- Pagination buttons will be added here dynamically -->
         </ul>
