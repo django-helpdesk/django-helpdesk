@@ -7,6 +7,7 @@ from django import forms
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 import os
+import re
 import warnings
 
 
@@ -281,7 +282,7 @@ HELPDESK_ATTACHMENT_DIR_PERMS = int(getattr(settings, 'HELPDESK_ATTACHMENT_DIR_P
 def get_followup_webhook_urls():
     urls = os.environ.get('HELPDESK_FOLLOWUP_WEBHOOK_URLS', None)
     if urls:
-        return urls.split(',')
+        return re.split(r'[\s],[\s]', urls)
 
 HELPDESK_GET_FOLLOWUP_WEBHOOK_URLS = getattr(settings, 'HELPDESK_GET_FOLLOWUP_WEBHOOK_URLS', get_followup_webhook_urls)
 

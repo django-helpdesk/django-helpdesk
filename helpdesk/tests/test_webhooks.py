@@ -27,8 +27,12 @@ class WebhookRequestHandler(http.server.BaseHTTPRequestHandler):
         })
         if self.path == '/new-ticket':
             self.server.handled_new_ticket_requests.append(json.loads(body.decode('utf-8')))
+        if self.path == '/new-ticket-1':
+            self.server.handled_new_ticket_requests_1.append(json.loads(body.decode('utf-8')))
         elif self.path == '/followup':
             self.server.handled_follow_up_requests.append(json.loads(body.decode('utf-8')))
+        elif self.path == '/followup-1':
+            self.server.handled_follow_up_requests_1.append(json.loads(body.decode('utf-8')))
         self.send_response(HTTPStatus.OK)
         self.end_headers()
 
@@ -42,7 +46,9 @@ class WebhookRequestHandler(http.server.BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(json.dumps({
             'new_ticket_requests': self.server.handled_new_ticket_requests,
-            'follow_up_requests': self.server.handled_follow_up_requests
+            'new_ticket_requests_1': self.server.handled_new_ticket_requests_1,
+            'follow_up_requests': self.server.handled_follow_up_requests,
+            'follow_up_requests_1': self.server.handled_follow_up_requests_1
         }).encode('utf-8'))
 
 
@@ -51,7 +57,9 @@ class WebhookServer(http.server.HTTPServer):
         super().__init__(*args, **kwargs)
         self.requests = []
         self.handled_new_ticket_requests = []
+        self.handled_new_ticket_requests_1 = []
         self.handled_follow_up_requests = []
+        self.handled_follow_up_requests_1 = []
 
     def start(self):
         self.thread = threading.Thread(target=self.serve_forever)
@@ -78,8 +86,6 @@ class WebhookTest(APITestCase):
 
     def test_test_server(self):
         server = WebhookServer(('localhost', 8123), WebhookRequestHandler)
-        os.environ['HELPDESK_NEW_TICKET_WEBHOOK_URLS'] = 'http://localhost:8123/new-ticket'
-        os.environ["HELPDESK_FOLLOWUP_WEBHOOK_URLS"] = 'http://localhost:8123/followup'
         server.start()
 
         requests.post('http://localhost:8123/new-ticket', json={
@@ -90,8 +96,8 @@ class WebhookTest(APITestCase):
 
     def test_create_ticket_and_followup_via_api(self):
         server = WebhookServer(('localhost', 8124), WebhookRequestHandler)
-        os.environ['HELPDESK_NEW_TICKET_WEBHOOK_URLS'] = 'http://localhost:8124/new-ticket'
-        os.environ["HELPDESK_FOLLOWUP_WEBHOOK_URLS"] = 'http://localhost:8124/followup'
+        os.environ['HELPDESK_NEW_TICKET_WEBHOOK_URLS'] = 'http://localhost:8124/new-ticket, http://localhost:8124/new-ticket-1'
+        os.environ["HELPDESK_FOLLOWUP_WEBHOOK_URLS"] = 'http://localhost:8124/followup ,  http://localhost:8124/followup-1'
         server.start()
 
         response = self.client.post('/api/tickets/', {
@@ -104,9 +110,11 @@ class WebhookTest(APITestCase):
         self.assertEqual(response.status_code, HTTP_201_CREATED)
         handled_webhook_requests = requests.get('http://localhost:8124/get-past-requests')
         handled_webhook_requests = handled_webhook_requests.json()
-        self.assertTrue(len(handled_webhook_requests['new_ticket_requests']) >= 1)
+        self.assertTrue(len(handled_webhook_requests['new_ticket_requests']) == 1)
+        self.assertTrue(len(handled_webhook_requests['new_ticket_requests_1']) == 1)
         self.assertEqual(len(handled_webhook_requests['follow_up_requests']), 0)
         self.assertEqual(handled_webhook_requests['new_ticket_requests'][-1]["ticket"]["title"], "Test title")
+        self.assertEqual(handled_webhook_requests['new_ticket_requests_1'][-1]["ticket"]["title"], "Test title")
         self.assertEqual(handled_webhook_requests['new_ticket_requests'][-1]["ticket"]["description"], "Test description\nMulti lines")
         response = self.client.post('/api/followups/', {
             'ticket': handled_webhook_requests['new_ticket_requests'][-1]["ticket"]["id"],
@@ -116,7 +124,9 @@ class WebhookTest(APITestCase):
         handled_webhook_requests = requests.get('http://localhost:8124/get-past-requests')
         handled_webhook_requests = handled_webhook_requests.json()
         self.assertEqual(len(handled_webhook_requests['follow_up_requests']), 1)
+        self.assertEqual(len(handled_webhook_requests['follow_up_requests_1']), 1)
         self.assertEqual(handled_webhook_requests['follow_up_requests'][-1]["ticket"]["followup_set"][-1]["comment"], "Test comment")
+        self.assertEqual(handled_webhook_requests['follow_up_requests_1'][-1]["ticket"]["followup_set"][-1]["comment"], "Test comment")
         server.stop()
 
     def test_create_ticket_and_followup_via_email(self):
