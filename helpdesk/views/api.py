@@ -54,6 +54,9 @@ class FollowUpViewSet(viewsets.ModelViewSet):
     pagination_class = ConservativePagination
     permission_classes = [IsAdminUser]
 
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
 
 class FollowUpAttachmentViewSet(viewsets.ModelViewSet):
     queryset = FollowUpAttachment.objects.all()

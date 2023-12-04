@@ -1,11 +1,13 @@
-from .forms import TicketForm
-from .lib import format_time_spent, process_attachments
-from .models import CustomField, FollowUp, FollowUpAttachment, Ticket
-from .user import HelpdeskUser
 from django.contrib.auth import get_user_model
 from django.contrib.humanize.templatetags import humanize
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
+
+from .forms import TicketForm
+from .lib import format_time_spent
+from .models import CustomField, FollowUp, FollowUpAttachment, Ticket
+from .user import HelpdeskUser
+from .update_ticket import update_ticket
 
 
 class DatatablesTicketSerializer(serializers.ModelSerializer):
@@ -124,20 +126,30 @@ class FollowUpSerializer(serializers.ModelSerializer):
         write_only=True,
         required=False
     )
+    date = serializers.DateTimeField(read_only=True)
 
     class Meta:
         model = FollowUp
         fields = (
-            'id', 'ticket', 'date', 'title', 'comment', 'public', 'user', 'new_status', 'message_id',
-            'time_spent', 'followupattachment_set', 'attachments'
+            'id', 'ticket', 'user', 'title', 'comment', 'public', 'new_status',
+            'time_spent', 'attachments', 'followupattachment_set', 'date', 'message_id',
         )
 
     def create(self, validated_data):
-        attachments = validated_data.pop('attachments', None)
-        followup = super().create(validated_data)
-        if attachments:
-            process_attachments(followup, attachments)
-        return followup
+        if validated_data["user"]:
+            user = validated_data["user"]
+        else:
+            user = self.context['request'].user
+        return update_ticket(
+            user=user,
+            ticket=validated_data["ticket"],
+            title=validated_data.get("title", None),
+            comment=validated_data.get("comment", ""),
+            files=validated_data.get("attachments", None),
+            public=validated_data.get("public", False),
+            new_status=validated_data.get("new_status", None),
+            time_spent=validated_data.get("time_spent", None),
+        )
 
 
 class TicketSerializer(serializers.ModelSerializer):

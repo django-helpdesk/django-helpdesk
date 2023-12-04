@@ -198,11 +198,13 @@ def update_ticket(
         files=None,
         public=False,
         owner=-1,
+        ticket_title=None,
         priority=-1,
         new_status=None,
         time_spent=None,
         due_date=None,
         new_checklists=None,
+        message_id=None,
 ):
     # We need to allow the 'ticket' and 'queue' contexts to be applied to the
     # comment.
@@ -235,7 +237,7 @@ def update_ticket(
         owner = ticket.assigned_to.id
 
     f = FollowUp(ticket=ticket, date=timezone.now(), comment=comment,
-                 time_spent=time_spent)
+                 time_spent=time_spent, message_id=message_id, title=title)
 
     if is_helpdesk_staff(user):
         f.user = user
@@ -262,15 +264,15 @@ def update_ticket(
 
     files = process_attachments(f, files) if files else []
 
-    if title and title != ticket.title:
+    if ticket_title and ticket_title != ticket.title:
         c = TicketChange(
             followup=f,
             field=_('Title'),
             old_value=ticket.title,
-            new_value=title,
+            new_value=ticket_title,
         )
         c.save()
-        ticket.title = title
+        ticket.title = ticket_title
 
     if new_status != old_status:
         c = TicketChange(
@@ -386,4 +388,5 @@ def update_ticket(
 
     # auto subscribe user if enabled
     add_staff_subscription(user, ticket)
+    return f
 

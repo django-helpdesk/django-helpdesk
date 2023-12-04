@@ -1214,11 +1214,10 @@ def hold_ticket(request, ticket_id, unhold=False):
         ticket.on_hold = True
         title = _('Ticket placed on hold')
 
-    f = FollowUp(
-        ticket=ticket,
+    f = update_ticket(
         user=request.user,
+        ticket=ticket,
         title=title,
-        date=timezone.now(),
         public=True,
     )
     f.save()
