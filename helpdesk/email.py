@@ -21,6 +21,7 @@ from email.message import EmailMessage, MIMEPart
 from email.utils import getaddresses
 from email_reply_parser import EmailReplyParser
 from helpdesk import settings
+from helpdesk import webhooks
 from helpdesk.exceptions import DeleteIgnoredTicketException, IgnoreTicketException
 from helpdesk.lib import process_attachments, safe_template_context
 from helpdesk.models import FollowUp, IgnoreEmail, Queue, Ticket
@@ -616,6 +617,8 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
             "Message seems to be auto-reply, not sending any emails back to the sender")
     else:
         send_info_email(message_id, f, ticket, context, queue, new)
+    if not new:
+        webhooks.notify_followup_webhooks(f)
     return ticket
 
 

@@ -17,7 +17,8 @@ Contents
    spam
    custom_fields
    api
-   integration
+   webhooks
+   iframe_submission
    teams
    license
 
