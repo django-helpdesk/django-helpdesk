@@ -73,7 +73,13 @@ table.ticket-stats tbody th, table.ticket-stats tbody tr {padding-left: 20px}
     padding-top: 0;
 }
 #ticket-description {background-color: #FCF8E3;}
-.followup.well {background-color: #f4f5ff;}
+.followup.well {
+    background-color: #f4f5ff;
+}
+.followup {
+    padding: 20px;
+    margin: 30px;
+}
 /*
 Add your custom styles here
 */
