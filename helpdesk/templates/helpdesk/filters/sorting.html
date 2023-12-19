@@ -35,6 +35,9 @@
             <option value='paired_count'{% if query_params.sorting == "paired_count" %} selected='selected'{% endif %}>
                 {% trans "Paired Count" %}
             </option>
+            <option value='submitter_email'{% if query_params.sorting == "submitter_email" %} selected='selected'{% endif %}>
+                {% trans "Submitter Email" %}
+            </option>
         </select>
         <div class="input-group-append">
             <div class="btn-group-toggle" data-toggle="buttons">

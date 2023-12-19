@@ -1832,6 +1832,7 @@ def ticket_list(request):
         'priority',
         'assigned_to',
         'paired_count',
+        'submitter_email',
     ]
     TICKETS_PER_PAGE = [
         10,
