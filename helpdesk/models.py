@@ -266,7 +266,6 @@ class Queue(models.Model):
 
     can_assign_to = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
-        on_delete=models.SET_NULL,
         related_name='queues_to_be_assigned',
         blank=True,
         verbose_name=_('Can assign to'),
