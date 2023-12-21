@@ -500,7 +500,8 @@ class Ticket(models.Model):
     amount = models.DecimalField(
         null=True,
         blank=True,
-        decimal_places=2
+        decimal_places=2,
+        max_digits=9
     )
 
     items = models.TextField(
