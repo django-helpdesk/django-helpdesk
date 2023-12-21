@@ -316,6 +316,8 @@ class TicketForm(AbstractTicketForm):
         Add any custom fields that are defined to the form.
         """
         super(TicketForm, self).__init__(*args, **kwargs)
+        if self.instance:
+            self.fields['assigned_to'].queryset = self.instance.queue.can_assign_to.all()
         self._add_form_custom_fields()
 
     def save(self, user):

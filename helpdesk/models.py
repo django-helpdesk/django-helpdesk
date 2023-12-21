@@ -264,6 +264,14 @@ class Queue(models.Model):
         verbose_name=_('Default owner'),
     )
 
+    can_assign_to = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name='queues_to_be_assigned',
+        blank=True,
+        verbose_name=_('Can assign to'),
+    )
+
     def __str__(self):
         return "%s" % self.title
 
@@ -475,6 +483,57 @@ class Ticket(models.Model):
         editable=False,
         help_text=_('The date this ticket was last escalated - updated '
                     'automatically by management/commands/escalate_tickets.py.'),
+    )
+
+    # COMS Requisition fields
+    payee = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True
+    )
+
+    address = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True
+    )
+
+    amount = models.DecimalField(
+        null=True,
+        blank=True,
+        decimal_places=2
+    )
+
+    items = models.TextField(
+        null=True,
+        blank=True
+    )
+
+    explanation = models.TextField(
+        null=True,
+        blank=True
+    )
+
+    items_needed_date = models.DateField(
+        null=True,
+        blank=True
+    )
+
+    cil_budget_line_item = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True
+    )
+
+    cil_budget_line_item_detail = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True
+    )
+
+    backup_documentation = models.FileField(
+        null=True,
+        blank=True
     )
 
     def _get_assigned_to(self):
