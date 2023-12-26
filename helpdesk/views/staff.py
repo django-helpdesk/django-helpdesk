@@ -2016,6 +2016,9 @@ def ticket_list(request):
         saved_query=saved_query,
         # extra_data_columns=extra_data_columns,
         debug=settings.DEBUG,
+        ticket_index_start=paginator.page(page).start_index(),
+        ticket_index_end=paginator.page(page).end_index(),
+        ticket_total=paginator.count,
     ))
 
 ticket_list = staff_member_required(ticket_list)

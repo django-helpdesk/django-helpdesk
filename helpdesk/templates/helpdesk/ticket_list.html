@@ -39,7 +39,7 @@
             <span id="show_query_text"><i class="fas fa-eye"></i> Show Filter Menu</span>
             <span id="hide_query_text"><i class="fas fa-eye-slash"></i> Hide Filter Menu</span>
         </a>
-        <div class="mr-auto d-flex align-items-center">
+        <div class="d-flex align-items-center">
             <div class="input-group">
                 <div class="input-group-prepend">
                     <label class="input-group-text bg-white border-0">Select:</label>
@@ -50,6 +50,7 @@
                 </div>
             </div>
         </div>
+        <div class="mr-auto d-flex align-items-center ml-2">{{ ticket_index_start }}-{{ ticket_index_end }} of {{ ticket_total }}<em><span class="select_count"></span></em></div>
         {% if tag_choices|length %}
         <div>
             <div class="dropdown">
@@ -243,9 +244,9 @@
                         </div>
                         <!-- / Data Table -->
                         <!-- Pagination Toolbar -->
-                            <div class="d-flex flex-wrap border-top px-2 mb-2" style="//background-color: #f7f7f7">
+                            <div class="d-flex flex-wrap border-top px-2 py-2" style="//background-color: #f7f7f7">
                                 {% with 't_page' as page_var %}
-                                <div class="d-flex align-items-center mt-2">
+                                <div class="d-flex align-items-center">
                                     <div class="input-group">
                                         <div class="input-group-prepend">
                                             <label class="input-group-text font-weight-normal">Show</label>
@@ -264,8 +265,10 @@
                                         </div>
                                     </div>
                                 </div>
+
+                                <div class="mr-auto d-flex align-items-center ml-2">{{ ticket_index_start }}-{{ ticket_index_end }} of {{ ticket_total }}<em><span class="select_count"></span></em></div>
                                 <div class="flex-fill justify-content-end">
-                                    <div class="btn-toolbar float-right mt-2" role="toolbar" style="bottom: 0;">
+                                    <div class="btn-toolbar float-right" role="toolbar" style="bottom: 0;">
                                         <div class="btn-group mr-2" role="group">
                                             {% if ticket_list.has_previous %}
                                             <button class="btn btn-primary font-weight-bold" onclick="paginatedQuery()">First</button>
@@ -759,17 +762,18 @@
                     $('input[name="selected_ids"]').each(function () {
                         $(this).val(selected.toString());
                     });
-                    $('#select_count').text(selected.length + ' Selected')
 
                     // Disables or enables buttons/dropdowns based on tickets selected
                     if ($('input[name="selected_ids"]').val() === '') {
                         $('#id_mass_action').attr('disabled', true);
                         $('#massActionButton').attr('disabled', true);
                         $('#editTagsDropdown').addClass('disabled');
+                        $('.select_count').text('');
                     } else {
                         $('#id_mass_action').attr('disabled', false);
                         $('#massActionButton').attr('disabled', false);
                         $('#editTagsDropdown').removeClass('disabled');
+                        $('.select_count').text(' (' + selected.length + ' selected)');
                     }
                 }
 
