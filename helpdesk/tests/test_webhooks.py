@@ -145,13 +145,6 @@ class WebhookTest(APITestCase):
              'submitter_email',
              'title']
         )
-        with open("/tmp/request", "w") as fd:
-            import json
-            json.dump(handled_webhook_requests['new_ticket_requests_1'][-1]["ticket"], fd, indent=4, default=str)
-        with open("/tmp/serilaizer_data", "w") as fd:
-            import json
-            json.dump(serializer.data, fd, indent=4, default=str)
-
         self.assertEqual(serializer.data, handled_webhook_requests["new_ticket_requests"][-1]["ticket"])
         response = self.client.post('/api/followups/', {
             'ticket': handled_webhook_requests['new_ticket_requests'][-1]["ticket"]["id"],
