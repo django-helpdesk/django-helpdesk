@@ -319,6 +319,8 @@ class TicketForm(AbstractTicketForm):
         if self.instance:
             self.fields['assigned_to'].queryset = self.instance.queue.can_assign_to.all()
         self._add_form_custom_fields()
+        if self.fields.get('signed_by'):
+            del self.fields['signed_by']
 
     def save(self, user):
         """

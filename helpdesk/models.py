@@ -536,6 +536,13 @@ class Ticket(models.Model):
         blank=True
     )
 
+    signed_by = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        related_name='requisitions_signed',
+        blank=True,
+        verbose_name=_('Signed by'),
+    )
+
     def _get_assigned_to(self):
         """ Custom property to allow us to easily print 'Unassigned' if a
         ticket has no owner, or the users name if it's assigned. If the user
