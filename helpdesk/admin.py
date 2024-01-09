@@ -14,7 +14,7 @@ class QueueForm(forms.ModelForm):
 
     class Meta:
         fields = [
-            'title', 'slug', 'email_address', 'locale', 'new_ticket_cc', 'update_ticket_cc', 'email_box_type',
+            'title', 'slug', 'email_address', 'locale', 'new_ticket_cc', 'updated_ticket_cc', 'email_box_type',
             'email_box_host', 'email_box_port', 'can_assign_to'
         ]
 
