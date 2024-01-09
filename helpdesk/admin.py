@@ -12,11 +12,18 @@ class QueueForm(forms.ModelForm):
         super(QueueForm, self).__init__(*args, **kwargs)
         self['can_assign_to'].queryset = self['can_assign_to'].queryset.filter(is_active=True)
 
+    class Meta:
+        fields = [
+            'title', 'slug', 'email_address', 'locale', 'new_ticket_cc', 'update_ticket_cc', 'email_box_type',
+            'email_box_host', 'email_box_port', 'can_assign_to'
+        ]
+
 
 @admin.register(Queue)
 class QueueAdmin(admin.ModelAdmin):
     list_display = ('title', 'slug', 'email_address', 'locale')
     prepopulated_fields = {"slug": ("title",)}
+    form = QueueForm
 
 
 @admin.register(Ticket)
