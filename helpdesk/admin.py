@@ -10,7 +10,8 @@ from helpdesk.models import CustomField
 class QueueForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(QueueForm, self).__init__(*args, **kwargs)
-        self.fields['can_assign_to'].queryset = self.fields['can_assign_to'].queryset.filter(is_active=True)
+        self.fields['can_assign_to'].queryset = self.fields['can_assign_to'].queryset.filter(
+            is_active=True, staffprofile__isnull=False)
 
     class Meta:
         fields = [
