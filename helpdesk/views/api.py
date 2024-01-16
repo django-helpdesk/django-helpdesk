@@ -24,7 +24,11 @@ class UserTicketViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return Ticket.objects.filter(submitter_email=self.request.user.email).order_by('-created')
+        tickets = Ticket.objects.filter(submitter_email=self.request.user.email).order_by('-created')
+        for ticket in tickets:
+            ticket.set_custom_field_values()
+        return tickets
+
 
 
 class TicketViewSet(viewsets.ModelViewSet):
