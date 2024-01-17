@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
-from helpdesk.models import Queue
+from helpdesk.models import Queue, CustomField, TicketCustomFieldValue, Ticket
+from helpdesk.serializers import TicketSerializer
 from rest_framework.status import (
     HTTP_201_CREATED
 )
@@ -82,12 +83,16 @@ class WebhookTest(APITestCase):
 
     def setUp(self):
         staff_user = User.objects.create_user(username='test', is_staff=True)
+        CustomField(
+            name="my_custom_field",
+            data_type="varchar",
+            required=False,
+        ).save()
         self.client.force_authenticate(staff_user)
 
     def test_test_server(self):
         server = WebhookServer(('localhost', 8123), WebhookRequestHandler)
         server.start()
-
         requests.post('http://localhost:8123/new-ticket', json={
             "foo": "bar"})
         handled_webhook_requests = requests.get('http://localhost:8123/get-past-requests').json()
@@ -105,8 +110,11 @@ class WebhookTest(APITestCase):
             'title': 'Test title',
             'description': 'Test description\nMulti lines',
             'submitter_email': 'test@mail.com',
-            'priority': 4
+            'priority': 4,
+            'custom_my_custom_field': 'custom value',
         })
+        self.assertEqual(CustomField.objects.all().first().name, "my_custom_field")
+        self.assertEqual(TicketCustomFieldValue.objects.get(ticket=response.data['id']).value, 'custom value')
         self.assertEqual(response.status_code, HTTP_201_CREATED)
         handled_webhook_requests = requests.get('http://localhost:8124/get-past-requests')
         handled_webhook_requests = handled_webhook_requests.json()
@@ -116,6 +124,28 @@ class WebhookTest(APITestCase):
         self.assertEqual(handled_webhook_requests['new_ticket_requests'][-1]["ticket"]["title"], "Test title")
         self.assertEqual(handled_webhook_requests['new_ticket_requests_1'][-1]["ticket"]["title"], "Test title")
         self.assertEqual(handled_webhook_requests['new_ticket_requests'][-1]["ticket"]["description"], "Test description\nMulti lines")
+        ticket = Ticket.objects.get(id=handled_webhook_requests["new_ticket_requests"][-1]["ticket"]["id"])
+        ticket.set_custom_field_values()
+        serializer = TicketSerializer(ticket)
+        self.assertEqual(
+            list(sorted(serializer.fields.keys())),
+            ['assigned_to',
+             'attachment',
+             'custom_my_custom_field',
+             'description',
+             'due_date',
+             'followup_set',
+             'id',
+             'merged_to',
+             'on_hold',
+             'priority',
+             'queue',
+             'resolution',
+             'status',
+             'submitter_email',
+             'title']
+        )
+        self.assertEqual(serializer.data, handled_webhook_requests["new_ticket_requests"][-1]["ticket"])
         response = self.client.post('/api/followups/', {
             'ticket': handled_webhook_requests['new_ticket_requests'][-1]["ticket"]["id"],
             "comment": "Test comment",
@@ -127,6 +157,7 @@ class WebhookTest(APITestCase):
         self.assertEqual(len(handled_webhook_requests['follow_up_requests_1']), 1)
         self.assertEqual(handled_webhook_requests['follow_up_requests'][-1]["ticket"]["followup_set"][-1]["comment"], "Test comment")
         self.assertEqual(handled_webhook_requests['follow_up_requests_1'][-1]["ticket"]["followup_set"][-1]["comment"], "Test comment")
+        
         server.stop()
 
     def test_create_ticket_and_followup_via_email(self):
@@ -206,5 +237,3 @@ class WebhookTest(APITestCase):
         self.assertEqual(handled_webhook_requests['follow_up_requests'][-1]["ticket"]["id"], ticket_id)
 
         server.stop()
-
-

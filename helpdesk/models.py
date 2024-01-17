@@ -11,6 +11,7 @@ models.py - Model (and hence database) definitions. This is the core of the
 from .lib import convert_value
 from .templated_email import send_templated_mail
 from .validators import validate_file_extension
+from .webhooks import send_new_ticket_webhook
 import datetime
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -664,6 +665,8 @@ class Ticket(models.Model):
         if self.queue.enable_notifications_on_email_events:
             for cc in self.ticketcc_set.all():
                 send('ticket_cc', cc.email_address)
+        if "new_ticket_cc" in roles:
+            send_new_ticket_webhook(self)
         return recipients
 
     def _get_assigned_to(self):
