@@ -11,7 +11,7 @@ class QueueForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(QueueForm, self).__init__(*args, **kwargs)
         self.fields['can_assign_to'].queryset = self.fields['can_assign_to'].queryset.filter(
-            is_active=True, staffprofile__isnull=False)
+            is_active=True, staffprofile__isnull=False).order_by('last_name', 'first_name')
 
     class Meta:
         fields = [
