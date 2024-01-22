@@ -477,7 +477,7 @@ class Ticket(models.Model):
         (DUPLICATE_STATUS, _('Duplicate')),
     )
 
-    PRIORITY_CHOICES = helpdesk_settings.PRIORITY_CHOICES
+    PRIORITY_CHOICES = helpdesk_settings.TICKET_PRIORITY_CHOICES
 
     title = models.CharField(
         _('Title'),
