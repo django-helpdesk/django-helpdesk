@@ -6,6 +6,7 @@ Default settings for django-helpdesk.
 from django import forms
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
+from django.utils.translation import gettext_lazy as _
 import os
 import re
 import warnings
@@ -101,6 +102,19 @@ HELPDESK_AUTO_SUBSCRIBE_ON_TICKET_RESPONSE = getattr(settings,
 ALLOWED_URL_SCHEMES = getattr(settings, 'ALLOWED_URL_SCHEMES', (
     'file', 'ftp', 'ftps', 'http', 'https', 'irc', 'mailto', 'sftp', 'ssh', 'tel', 'telnet', 'tftp', 'vnc', 'xmpp',
 ))
+
+# Ticket priority choices
+DEFAULT_TICKET_PRIORITY_CHOICES = (
+    (1, _('1. Critical')),
+    (2, _('2. High')),
+    (3, _('3. Normal')),
+    (4, _('4. Low')),
+    (5, _('5. Very Low')),
+)
+TICKET_PRIORITY_CHOICES = getattr(settings,
+                           'HELPDESK_TICKET_PRIORITY_CHOICES',
+                           DEFAULT_TICKET_PRIORITY_CHOICES)
+
 ############################
 # options for public pages #
 ############################
