@@ -6,7 +6,7 @@ Default settings for django-helpdesk.
 from django import forms
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-from django.utils.translation import gettext, gettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 import os
 import re
 import warnings
