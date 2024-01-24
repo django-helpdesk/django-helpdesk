@@ -190,6 +190,17 @@ Options that change ticket properties
             (4, _('4. Low')),
             (5, _('5. Very Low')),
         )
+  If you have a new instance, you may override those settings but if you want to keep previous tickets priorities and add new choices, you may increment integer values like this::
+
+        HELPDESK_TICKET_PRIORITY_CHOICES = (
+            (1, _('1. Critical')),
+            (2, _('2. High')),
+            (3, _('3. Normal')),
+            (4, _('4. Low')),
+            (5, _('5. Very Low')),
+            (6, _('1. Cold')),
+            (7, _('2. Hot')),
+        )
 
 Staff Ticket Creation Settings
 ------------------------------
