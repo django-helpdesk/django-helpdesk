@@ -48,7 +48,7 @@
       </div>
 
       {% if user_info.default_org.logo %}
-      <img src="{{ user_info.org_logo }}" title="{$:: 'BEAM' | translate $}"  style="max-height:70px;">
+      <img src="{{ MEDIA_URL }}{{ user_info.default_org.logo }}" title="{$:: 'BEAM' | translate $}" style="max-height:70px;">
       {% endif %}
     </nav>
 <!-- Organization specific font and background -->

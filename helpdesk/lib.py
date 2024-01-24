@@ -161,7 +161,7 @@ def process_attachments(followup, attached_files):
                 if attached.size < max_email_attachment_size:
                     # Only files smaller than 512kb (or as defined in
                     # settings.HELPDESK_MAX_EMAIL_ATTACHMENT_SIZE) are sent via email.
-                    attachments.append((filename, att.file, att.mime_type))
+                    attachments.append((filename, att.file.path, att.mime_type))
         except Exception as e:
             logger.exception('Exception occurred while processing an attachment.')
 

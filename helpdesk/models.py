@@ -16,6 +16,7 @@ from django.db import models
 from django.conf import settings
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _, ugettext
+from io import StringIO
 import re
 import os
 import mimetypes
@@ -33,12 +34,8 @@ from bleach_allowlist import markdown_tags, markdown_attrs, print_tags, print_at
 from bleach.css_sanitizer import CSSSanitizer
 from urllib.parse import urlparse, quote
 from functools import partial
-from django.core.files.storage import default_storage
 
 import pinax.teams.models
-import boto3
-from botocore.exceptions import ClientError
-
 
 import uuid
 
@@ -46,6 +43,7 @@ from helpdesk import settings as helpdesk_settings
 from helpdesk.decorators import is_helpdesk_staff
 
 from .templated_email import send_templated_mail
+
 from seed.lib.superperms.orgs.models import Organization, get_helpdesk_count_by_domain
 from seed.models import (
     Column,
@@ -53,24 +51,8 @@ from seed.models import (
     TaxLot,
 )
 
+
 logger = logging.getLogger(__name__)
-
-
-def create_presigned_url(bucket_name, object_name, expiration=604800):
-    # Generate a presigned URL for the S3 object
-    s3_client = boto3.client('s3', region_name=settings.AWS_DEFAULT_REGION)
-    try:
-        response = s3_client.generate_presigned_url('get_object',
-                                                    Params={'Bucket': bucket_name,
-                                                            'Key': object_name,
-                                                            'ResponseContentDisposition': 'attachment'},
-                                                    ExpiresIn=expiration)
-    except ClientError as e:
-        logging.error(e)
-        return None
-
-    # The response contains the presigned URL
-    return response
 
 
 def is_extra_data(field_name):
@@ -1169,14 +1151,6 @@ class Attachment(models.Model):
     def get_size(self):
         return self.file.file.size
 
-    def download_attachment(self):
-        url = ""
-        if settings.USE_S3 is True:
-            url = create_presigned_url(settings.AWS_STORAGE_BUCKET_NAME, f"{self.file}")
-        else:
-            url = "/api/v3/media/" + str(self.file)
-        return url
-
     def attachment_path(self, filename):
         """Provide a file path that will help prevent files being overwritten, by
         putting attachments in a folder off attachments for ticket/followup_id/.
@@ -1210,8 +1184,6 @@ class FollowUpAttachment(Attachment):
         if settings.DEFAULT_FILE_STORAGE == "django.core.files.storage.FileSystemStorage":
             if not os.path.exists(att_path):
                 os.makedirs(att_path, 0o777)
-        if settings.USE_S3 is True:
-            return default_storage.get_available_name(att_path+"/"+filename)
         return os.path.join(path, filename)
 
 
@@ -1232,8 +1204,6 @@ class KBIAttachment(Attachment):
         if settings.DEFAULT_FILE_STORAGE == "django.core.files.storage.FileSystemStorage":
             if not os.path.exists(att_path):
                 os.makedirs(att_path, 0o777)
-        if settings.USE_S3 is True:
-            return default_storage.get_available_name(att_path+"/"+filename)
         return os.path.join(path, filename)
 
 
