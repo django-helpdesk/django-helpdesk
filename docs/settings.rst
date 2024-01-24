@@ -198,8 +198,8 @@ Options that change ticket properties
             (3, _('3. Normal')),
             (4, _('4. Low')),
             (5, _('5. Very Low')),
-            (6, _('1. Cold')),
-            (7, _('2. Hot')),
+            (6, _('6. Cold')),
+            (7, _('7. Hot')),
         )
 
 Staff Ticket Creation Settings
