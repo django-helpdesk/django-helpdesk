@@ -10,6 +10,8 @@ import logging
 from datetime import datetime, date, time
 from decimal import Decimal
 from operator import itemgetter
+import boto3
+from botocore.exceptions import ClientError
 
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.validators import validate_email
@@ -296,6 +298,22 @@ class AttachmentFileInputWidget(forms.ClearableFileInput):
     template_name = 'helpdesk/include/attachment_input.html'
 
 
+def create_presigned_url(bucket_name, object_name, expiration=604800):
+    # Generate a presigned URL for the S3 object
+    s3_client = boto3.client('s3', region_name=settings.AWS_DEFAULT_REGION)
+    try:
+        response = s3_client.generate_presigned_url('get_object',
+                                                    Params={'Bucket': bucket_name,
+                                                            'Key': object_name},
+                                                    ExpiresIn=expiration)
+    except ClientError as e:
+        logging.error(e)
+        return None
+
+    # The response contains the presigned URL
+    return response
+
+
 class EditKBItemForm(forms.ModelForm):
 
     class CategoryModelChoiceField(forms.ModelChoiceField):
@@ -345,6 +363,7 @@ class EditKBItemForm(forms.ModelForm):
         self.attachment_formset.initial = initial_attach
 
         for form in self.attachment_formset.forms:
+            form.fields['file'].widget.attrs.update({'url': create_presigned_url(settings.AWS_STORAGE_BUCKET_NAME, form.initial['file'].name) if settings.USE_S3 is True else "/api/v3/media/"+ form.initial['file'].name})
             form.fields['file'].required = False
 
 

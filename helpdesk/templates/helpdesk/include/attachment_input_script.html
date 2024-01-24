@@ -20,8 +20,9 @@
                     document.getElementById(widgetName + '_text').value = src_input.files[0].name;
                     document.querySelector('#id_' + widgetName.replace('-file','-id')).value = response['id'];
                     document.getElementById(widgetName + '_interact').hidden = false;
-                    document.getElementById(widgetName + '_preview').href = window.location.origin + response['url'];
-                    document.getElementById(widgetName + '_copylink').onclick = () => {navigator.clipboard.writeText(window.location.origin + response['url'])};
+                    document.getElementById(widgetName + '_preview').href = response['url'];
+                    console.log(response['url'])
+                    document.getElementById(widgetName + '_copylink').onclick = () => {navigator.clipboard.writeText(response['url'])};
                 } else {
                     console.log("failed");
                     // Format errors
