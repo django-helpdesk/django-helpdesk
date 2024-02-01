@@ -85,7 +85,7 @@ def escalate_tickets(queues, verbose):
 
         Q_OPEN_STATUSES = Q()
         for open_status in Ticket.OPEN_STATUSES:
-            q_open_statuses |= Q(status=open_status)
+            Q_OPEN_STATUSES |= Q(status=open_status)
         
         for t in q.ticket_set.filter(
             Q_OPEN_STATUSES

@@ -21,7 +21,7 @@ User = get_user_model()
 
 Q_OPEN_STATUSES = Q()
 for open_status in Ticket.OPEN_STATUSES:
-    q_open_statuses |= Q(status=open_status)
+    Q_OPEN_STATUSES |= Q(status=open_status)
 
 
 class OpenTicketsByUser(Feed):
