@@ -463,19 +463,14 @@ class Ticket(models.Model):
     the dashboard to prompt users to take ownership of them.
     """
 
-    OPEN_STATUS = 1
-    REOPENED_STATUS = 2
-    RESOLVED_STATUS = 3
-    CLOSED_STATUS = 4
-    DUPLICATE_STATUS = 5
+    OPEN_STATUS = helpdesk_settings.OPEN_STATUS
+    REOPENED_STATUS = helpdesk_settings.REOPENED_STATUS
+    RESOLVED_STATUS = helpdesk_settings.RESOLVED_STATUS
+    CLOSED_STATUS = helpdesk_settings.CLOSED_STATUS
+    DUPLICATE_STATUS = helpdesk_settings.DUPLICATE_STATUS
 
-    STATUS_CHOICES = (
-        (OPEN_STATUS, _('Open')),
-        (REOPENED_STATUS, _('Reopened')),
-        (RESOLVED_STATUS, _('Resolved')),
-        (CLOSED_STATUS, _('Closed')),
-        (DUPLICATE_STATUS, _('Duplicate')),
-    )
+    STATUS_CHOICES = helpdesk_settings.TICKET_STATUS_CHOICES
+    OPEN_STATUSES = helpdesk_settings.TICKET_OPEN_STATUSES
 
     PRIORITY_CHOICES = helpdesk_settings.TICKET_PRIORITY_CHOICES
 
@@ -771,9 +766,8 @@ class Ticket(models.Model):
         True = any dependencies are resolved
         False = There are non-resolved dependencies
         """
-        OPEN_STATUSES = (Ticket.OPEN_STATUS, Ticket.REOPENED_STATUS)
         return TicketDependency.objects.filter(ticket=self).filter(
-            depends_on__status__in=OPEN_STATUSES).count() == 0
+            depends_on__status__in=Ticket.OPEN_STATUSES).count() == 0
     can_be_resolved = property(_can_be_resolved)
 
     def get_submitter_userprofile(self):
