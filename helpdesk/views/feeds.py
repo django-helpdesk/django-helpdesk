@@ -79,7 +79,6 @@ class OpenTicketsByUser(Feed):
             ).filter(
                 queue=obj['queue']
             ).filter(Q_OPEN_STATUSES)
-            )
         else:
             return Ticket.objects.filter(
                 assigned_to=obj['user']
