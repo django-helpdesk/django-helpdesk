@@ -37,6 +37,10 @@ class QueueAdmin(admin.ModelAdmin):
         else:
             return "-"
 
+    def delete_queryset(self, request, queryset):
+        for queue in queryset:
+            queue.delete()
+
 
 @admin.register(Ticket)
 class TicketAdmin(admin.ModelAdmin):
