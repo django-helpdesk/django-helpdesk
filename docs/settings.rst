@@ -179,6 +179,57 @@ Options that change ticket updates
 Options that change ticket properties
 -------------------------------------
 
+- **HELPDESK_TICKET_OPEN_STATUS** Customize the id of OPEN_STATUS tickets status.
+
+  **Default:** ``HELPDESK_TICKET_OPEN_STATUS = 1``
+
+- **HELPDESK_TICKET_REOPENED_STATUS** Customize the id of REOPENED_STATUS tickets status.
+
+  **Default:** ``HELPDESK_TICKET_REOPENED_STATUS = 2``
+
+- **HELPDESK_TICKET_RESOLVED_STATUS** Customize the id of RESOLVED_STATUS tickets status
+
+  **Default:** ``HELPDESK_TICKET_RESOLVED_STATUS = 3``
+
+- **HELPDESK_TICKET_CLOSED_STATUS** Customize the id of CLOSED_STATUS tickets status
+
+  **Default:** ``HELPDESK_TICKET_CLOSED_STATUS = 4``
+
+- **HELPDESK_TICKET_DUPLICATE_STATUS** Customize the id of DUPLICATE_STATUS tickets status
+
+  **Default:** ``HELPDESK_TICKET_DUPLICATE_STATUS = 5``
+
+- **HELPDESK_TICKET_STATUS_CHOICES** Customize the list of status choices for all tickets.
+
+  The **default** is below::
+
+        HELPDESK_TICKET_STATUS_CHOICES = (
+            (OPEN_STATUS, _('Open')),
+            (REOPENED_STATUS, _('Reopened')),
+            (RESOLVED_STATUS, _('Resolved')),
+            (CLOSED_STATUS, _('Closed')),
+            (DUPLICATE_STATUS, _('Duplicate')),
+        )
+
+  If you wish to introduce a new status choice for all tickets, you may add them like this::
+
+        HELPDESK_TICKET_STATUS_CHOICES = (
+            (OPEN_STATUS, _('Open')),
+            (REOPENED_STATUS, _('Reopened')),
+            (RESOLVED_STATUS, _('Resolved')),
+            (CLOSED_STATUS, _('Closed')),
+            (DUPLICATE_STATUS, _('Duplicate')),
+            (6, _('Opened by bot')),
+        )
+
+- **HELPDESK_TICKET_OPEN_STATUSES** Define the list of statuses to be considered as a type of open status.
+
+  **Default:** ``HELPDESK_TICKET_OPEN_STATUSES = (OPEN_STATUS, REOPENED_STATUS)``
+
+  If you have added the ``(6, _('Opened by bot'))`` status and wish to have django-helpdesk treat it as an open status choice, add it to the list of OPEN_STATUSES like this::
+
+        HELPDESK_TICKET_OPEN_STATUSES = (OPEN_STATUS, REOPENED_STATUS, 6)
+
 - **HELPDESK_TICKET_PRIORITY_CHOICES** Customize the priority choices for all tickets.
 
   The **default** is below::
