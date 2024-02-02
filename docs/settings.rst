@@ -204,31 +204,45 @@ Options that change ticket properties
   The **default** is below::
 
         HELPDESK_TICKET_STATUS_CHOICES = (
-            (OPEN_STATUS, _('Open')),
-            (REOPENED_STATUS, _('Reopened')),
-            (RESOLVED_STATUS, _('Resolved')),
-            (CLOSED_STATUS, _('Closed')),
-            (DUPLICATE_STATUS, _('Duplicate')),
+            (HELPDESK_TICKET_OPEN_STATUS, _('Open')),
+            (HELPDESK_TICKET_REOPENED_STATUS, _('Reopened')),
+            (HELPDESK_TICKET_RESOLVED_STATUS, _('Resolved')),
+            (HELPDESK_TICKET_CLOSED_STATUS, _('Closed')),
+            (HELPDESK_TICKET_DUPLICATE_STATUS, _('Duplicate')),
         )
 
-  If you wish to introduce new status choices, you may add them like this::
+  If you wish to modify or introduce new status choices, you may add them like this::
+        
+        # don't forget to import the gettext_lazy function at the begining of your settings file
+        from django.utils.translation import gettext_lazy as _
 
+        # explicitly define status list integer values
+        HELPDESK_TICKET_OPEN_STATUS = 1
+        HELPDESK_TICKET_REOPENED_STATUS = 2
+        HELPDESK_TICKET_RESOLVED_STATUS = 3
+        HELPDESK_TICKET_CLOSED_STATUS = 4
+        HELPDESK_TICKET_DUPLICATE_STATUS = 5
+        HELPDESK_TICKET_FORKED_STATUS = 6
+
+        # create the list with associated labels
         HELPDESK_TICKET_STATUS_CHOICES = (
-            (OPEN_STATUS, _('Open')),
-            (REOPENED_STATUS, _('Reopened')),
-            (RESOLVED_STATUS, _('Resolved')),
-            (CLOSED_STATUS, _('Closed')),
-            (DUPLICATE_STATUS, _('Duplicate')),
-            (6, _('Forked')),
+            (HELPDESK_TICKET_OPEN_STATUS, _('Open')),
+            (HELPDESK_TICKET_REOPENED_STATUS, _('Reopened')),
+            (HELPDESK_TICKET_RESOLVED_STATUS, _('Resolved')),
+            (HELPDESK_TICKET_CLOSED_STATUS, _('Closed')),
+            (HELPDESK_TICKET_DUPLICATE_STATUS, _('Duplicate')),
+            (HELPDESK_TICKET_FORKED_STATUS, _('Forked')),
         )
 
 - **HELPDESK_TICKET_OPEN_STATUSES** Define the list of statuses to be considered as a type of open status.
 
-  **Default:** ``HELPDESK_TICKET_OPEN_STATUSES = (OPEN_STATUS, REOPENED_STATUS)``
+  **Default:** ``HELPDESK_TICKET_OPEN_STATUSES = (HELPDESK_TICKET_OPEN_STATUS, HELPDESK_TICKET_REOPENED_STATUS)``
 
-  If you have added the ``(6, _('Forked'))`` status and wish to have django-helpdesk treat it as an open status choice, add it to the list of OPEN_STATUSES like this::
+  If you have added the ``HELPDESK_TICKET_FORKED_STATUS`` status and wish to have django-helpdesk treat it as an open status choice, add it to the list of OPEN_STATUSES like this::
 
-        HELPDESK_TICKET_OPEN_STATUSES = (OPEN_STATUS, REOPENED_STATUS, 6)
+        HELPDESK_TICKET_OPEN_STATUSES = (HELPDESK_TICKET_OPEN_STATUS,
+                                         HELPDESK_TICKET_REOPENED_STATUS,
+                                         HELPDESK_TICKET_FORKED_STATUS)
 
 - **HELPDESK_TICKET_PRIORITY_CHOICES** Customize the priority choices for all tickets.
 
