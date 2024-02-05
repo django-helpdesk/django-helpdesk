@@ -719,14 +719,14 @@ class Ticket(models.Model):
         if status_id_list:
             # keep defined statuses in order and add labels for display
             status_dict = dict(helpdesk_settings.TICKET_STATUS_CHOICES)
-            new_statuses = [(status_id, status_dict.get(status_id, 1))
+            new_statuses = [(status_id, status_dict.get(status_id, _('No label')))
                             for status_id in status_id_list]
         else:
             # defaults to all choices if status was not mapped
             new_statuses = helpdesk_settings.TICKET_STATUS_CHOICES
         return new_statuses
     get_allowed_status_flow = property(_get_allowed_status_flow)
-    
+
     def _get_ticket_url(self):
         """
         Returns a publicly-viewable URL for this ticket, used when giving
