@@ -471,6 +471,7 @@ class Ticket(models.Model):
 
     STATUS_CHOICES = helpdesk_settings.TICKET_STATUS_CHOICES
     OPEN_STATUSES = helpdesk_settings.TICKET_OPEN_STATUSES
+    STATUS_CHOICES_FLOW = helpdesk_settings.TICKET_STATUS_CHOICES_FLOW
 
     PRIORITY_CHOICES = helpdesk_settings.TICKET_PRIORITY_CHOICES
 
@@ -710,6 +711,22 @@ class Ticket(models.Model):
         return u'%s%s%s' % (self.get_status_display(), held_msg, dep_msg)
     get_status = property(_get_status)
 
+    def _get_allowed_status_flow(self):
+        """
+        Returns the list of allowed ticket status modifications for current state.
+        """
+        status_id_list = self.STATUS_CHOICES_FLOW.get(self.status, ())
+        if status_id_list:
+            # keep defined statuses in order and add labels for display
+            status_dict = dict(helpdesk_settings.TICKET_STATUS_CHOICES)
+            new_statuses = [(status_id, status_dict.get(status_id, 1))
+                            for status_id in status_id_list]
+        else:
+            # defaults to all choices if status was not mapped
+            new_statuses = helpdesk_settings.TICKET_STATUS_CHOICES
+        return new_statuses
+    get_allowed_status_flow = property(_get_allowed_status_flow)
+    
     def _get_ticket_url(self):
         """
         Returns a publicly-viewable URL for this ticket, used when giving
