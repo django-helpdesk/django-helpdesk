@@ -32,6 +32,14 @@ def index(request):
         'debug': settings.DEBUG,
     })
 
+def manage(request):
+    huser = user.huser_from_request(request)
+
+    return render(request, 'helpdesk/kb_manage.html', {
+        'kb_categories': huser.get_allowed_kb_categories(),
+        'helpdesk_settings': helpdesk_settings,
+        'debug': settings.DEBUG
+    })
 
 def category(request, slug, iframe=False):
     category = get_object_or_404(KBCategory, slug__iexact=slug)
@@ -67,14 +75,20 @@ def category(request, slug, iframe=False):
 @helpdesk_staff_member_required
 def create_category(request):
     if request.method == 'GET':
+        manage = False
+        if 'kb/manage' in request.headers['Referer']:
+            manage = True
+
         form = EditKBCategoryForm('create', organization=request.user.default_organization)
 
         return render(request, 'helpdesk/kb_category_edit.html', {
             'form': form,
             'action': "Create",
+            'manage': manage,
             'debug': settings.DEBUG,
         })
     elif request.method == 'POST':
+        manage = request.POST['manage'] == 'True'
         form = EditKBCategoryForm('create', request.POST, organization=request.user.default_organization)
 
         if form.is_valid():
@@ -90,7 +104,10 @@ def create_category(request):
             )
             category.save()
             category.forms.set(form.cleaned_data['forms'])
-            return HttpResponseRedirect(reverse('helpdesk:kb_index'))
+            if manage:
+                return HttpResponseRedirect(reverse('helpdesk:kb_manage'))
+            else:
+                return HttpResponseRedirect(reverse('helpdesk:kb_index'))
 
         redo_form = EditKBCategoryForm(
             'create',
@@ -112,6 +129,7 @@ def create_category(request):
             'form': redo_form,
             'errors': form.errors,
             'action': "Create",
+            'manage': manage,
             'debug': settings.DEBUG,
         })
 
@@ -122,6 +140,10 @@ def edit_category(request, slug):
     category = get_object_or_404(KBCategory, slug__iexact=slug)
 
     if request.method == 'GET':
+        manage = False
+        if 'kb/manage' in request.headers['Referer']:
+            manage = True
+
         form = EditKBCategoryForm(
             'edit',
             organization=category.organization,
@@ -142,9 +164,11 @@ def edit_category(request, slug):
             'category': category,
             'form': form,
             'action': "Edit",
+            'manage': manage,
             'debug': settings.DEBUG,
         })
     elif request.method == 'POST':
+        manage = request.POST['manage'] == 'True'
         form = EditKBCategoryForm("edit", request.POST, organization=category.organization)
 
         if form.is_valid():
@@ -159,14 +183,24 @@ def edit_category(request, slug):
             category.form_submission_text = form.cleaned_data['form_submission_text']
 
             category.save()
-        return HttpResponseRedirect(reverse('helpdesk:kb_category', args=[category.slug]))
+        if manage:
+            return HttpResponseRedirect(reverse('helpdesk:kb_manage'))
+        else:
+            return HttpResponseRedirect(reverse('helpdesk:kb_category', args=[category.slug]))
 
 
 @helpdesk_staff_member_required
 def delete_category(request, slug):
+    manage = False
+    if 'kb/manage' in request.headers['Referer']:
+        manage = True
+
     category = get_object_or_404(KBCategory, slug=slug)
     category.delete()
-    return HttpResponseRedirect(reverse('helpdesk:kb_index'))
+    if manage:
+        return HttpResponseRedirect(reverse('helpdesk:kb_manage'))
+    else:
+        return HttpResponseRedirect(reverse('helpdesk:kb_index'))
 
 
 def article(request, slug, pk, iframe=False):
@@ -226,6 +260,10 @@ def create_article(request, slug=None):
     category = get_object_or_404(KBCategory, slug=slug) if slug else None
 
     if request.method == 'GET':
+        manage = False
+        if 'kb/manage' in request.headers['Referer']:
+            manage = True
+
         form = EditKBItemForm(
             organization=request.user.default_organization,
             category=category
@@ -235,9 +273,11 @@ def create_article(request, slug=None):
             'category': category,
             'form': form,
             'action': "Create",
+            'manage': manage,
             'debug': settings.DEBUG,
         })
     elif request.method == 'POST':
+        manage = request.POST['manage'] == 'True'
         form = EditKBItemForm(request.POST, organization=request.user.default_organization)
         formset = form.AttachmentFormSet(request.POST, request.FILES)
 
@@ -266,8 +306,14 @@ def create_article(request, slug=None):
                         attach.file = cf['file']
 
                         attach.save()
-            return HttpResponseRedirect(reverse('helpdesk:kb_category', args=[form.cleaned_data['category'].slug]))
-        return HttpResponseRedirect(reverse('helpdesk:kb_index'))
+            if manage:
+                return HttpResponseRedirect(reverse('helpdesk:kb_manage'))
+            else:        
+                return HttpResponseRedirect(reverse('helpdesk:kb_category', args=[form.cleaned_data['category'].slug]))
+        if manage:
+            return HttpResponseRedirect(reverse('helpdesk:kb_manage'))
+        else:
+            return HttpResponseRedirect(reverse('helpdesk:kb_index'))
 
 
 @helpdesk_staff_member_required
@@ -276,6 +322,10 @@ def edit_article(request, slug, pk, iframe=False):
     item = get_object_or_404(KBItem, pk=pk)
 
     if request.method == "GET":
+        manage = False
+        if 'kb/manage' in request.headers['Referer']:
+            manage = True
+
         form = EditKBItemForm(
             organization=request.user.default_organization,
             pk=item.id,
@@ -294,10 +344,12 @@ def edit_article(request, slug, pk, iframe=False):
             'category': category,
             'item': item,
             'action': "Edit",
+            'manage': manage,
             'form': form,
             'debug': settings.DEBUG,
         })
     elif request.method == "POST":
+        manage = request.POST['manage'] == 'True'
         form = EditKBItemForm(request.POST, organization=request.user.default_organization)
         formset = form.AttachmentFormSet(request.POST, request.FILES)
 
@@ -331,15 +383,24 @@ def edit_article(request, slug, pk, iframe=False):
                         # attach.filename = cf['file']
 
                         attach.save()
-
-        return HttpResponseRedirect(reverse('helpdesk:kb_article', args=[item.category.slug, item.id]))
+        if manage:
+            return HttpResponseRedirect(reverse('helpdesk:kb_manage'))
+        else:
+            return HttpResponseRedirect(reverse('helpdesk:kb_article', args=[item.category.slug, item.id]))
 
 
 @helpdesk_staff_member_required
 def delete_article(request, slug, pk):
+    manage = False
+    if 'kb/manage' in request.headers['Referer']:
+        manage = True
+
     item = get_object_or_404(KBItem, pk=pk)
     item.delete()
-    return HttpResponseRedirect(reverse('helpdesk:kb_category', args=[slug]))
+    if manage:
+        return HttpResponseRedirect(reverse('helpdesk:kb_manage'))
+    else:
+        return HttpResponseRedirect(reverse('helpdesk:kb_category', args=[slug]))
 
 
 def upload_attachment(request):
