@@ -463,19 +463,15 @@ class Ticket(models.Model):
     the dashboard to prompt users to take ownership of them.
     """
 
-    OPEN_STATUS = 1
-    REOPENED_STATUS = 2
-    RESOLVED_STATUS = 3
-    CLOSED_STATUS = 4
-    DUPLICATE_STATUS = 5
+    OPEN_STATUS = helpdesk_settings.OPEN_STATUS
+    REOPENED_STATUS = helpdesk_settings.REOPENED_STATUS
+    RESOLVED_STATUS = helpdesk_settings.RESOLVED_STATUS
+    CLOSED_STATUS = helpdesk_settings.CLOSED_STATUS
+    DUPLICATE_STATUS = helpdesk_settings.DUPLICATE_STATUS
 
-    STATUS_CHOICES = (
-        (OPEN_STATUS, _('Open')),
-        (REOPENED_STATUS, _('Reopened')),
-        (RESOLVED_STATUS, _('Resolved')),
-        (CLOSED_STATUS, _('Closed')),
-        (DUPLICATE_STATUS, _('Duplicate')),
-    )
+    STATUS_CHOICES = helpdesk_settings.TICKET_STATUS_CHOICES
+    OPEN_STATUSES = helpdesk_settings.TICKET_OPEN_STATUSES
+    STATUS_CHOICES_FLOW = helpdesk_settings.TICKET_STATUS_CHOICES_FLOW
 
     PRIORITY_CHOICES = helpdesk_settings.TICKET_PRIORITY_CHOICES
 
@@ -715,6 +711,22 @@ class Ticket(models.Model):
         return u'%s%s%s' % (self.get_status_display(), held_msg, dep_msg)
     get_status = property(_get_status)
 
+    def _get_allowed_status_flow(self):
+        """
+        Returns the list of allowed ticket status modifications for current state.
+        """
+        status_id_list = self.STATUS_CHOICES_FLOW.get(self.status, ())
+        if status_id_list:
+            # keep defined statuses in order and add labels for display
+            status_dict = dict(helpdesk_settings.TICKET_STATUS_CHOICES)
+            new_statuses = [(status_id, status_dict.get(status_id, _('No label')))
+                            for status_id in status_id_list]
+        else:
+            # defaults to all choices if status was not mapped
+            new_statuses = helpdesk_settings.TICKET_STATUS_CHOICES
+        return new_statuses
+    get_allowed_status_flow = property(_get_allowed_status_flow)
+
     def _get_ticket_url(self):
         """
         Returns a publicly-viewable URL for this ticket, used when giving
@@ -771,9 +783,8 @@ class Ticket(models.Model):
         True = any dependencies are resolved
         False = There are non-resolved dependencies
         """
-        OPEN_STATUSES = (Ticket.OPEN_STATUS, Ticket.REOPENED_STATUS)
         return TicketDependency.objects.filter(ticket=self).filter(
-            depends_on__status__in=OPEN_STATUSES).count() == 0
+            depends_on__status__in=Ticket.OPEN_STATUSES).count() == 0
     can_be_resolved = property(_can_be_resolved)
 
     def get_submitter_userprofile(self):

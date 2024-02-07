@@ -103,6 +103,42 @@ ALLOWED_URL_SCHEMES = getattr(settings, 'ALLOWED_URL_SCHEMES', (
     'file', 'ftp', 'ftps', 'http', 'https', 'irc', 'mailto', 'sftp', 'ssh', 'tel', 'telnet', 'tftp', 'vnc', 'xmpp',
 ))
 
+# Ticket status choices
+OPEN_STATUS = getattr(settings, 'HELPDESK_TICKET_OPEN_STATUS', 1)
+REOPENED_STATUS = getattr(settings, 'HELPDESK_TICKET_REOPENED_STATUS', 2)
+RESOLVED_STATUS = getattr(settings, 'HELPDESK_TICKET_RESOLVED_STATUS', 3)
+CLOSED_STATUS = getattr(settings, 'HELPDESK_TICKET_CLOSED_STATUS', 4)
+DUPLICATE_STATUS = getattr(settings, 'HELPDESK_TICKET_DUPLICATE_STATUS', 5)
+
+DEFAULT_TICKET_STATUS_CHOICES = (
+    (OPEN_STATUS, _('Open')),
+    (REOPENED_STATUS, _('Reopened')),
+    (RESOLVED_STATUS, _('Resolved')),
+    (CLOSED_STATUS, _('Closed')),
+    (DUPLICATE_STATUS, _('Duplicate')),
+)
+TICKET_STATUS_CHOICES = getattr(settings,
+                                'HELPDESK_TICKET_STATUS_CHOICES',
+                                DEFAULT_TICKET_STATUS_CHOICES)
+
+# List of status choices considered as "open"
+DEFAULT_TICKET_OPEN_STATUSES = (OPEN_STATUS, REOPENED_STATUS)       
+TICKET_OPEN_STATUSES = getattr(settings,
+                               'HELPDESK_TICKET_OPEN_STATUSES',
+                               DEFAULT_TICKET_OPEN_STATUSES)
+
+# New status list choices depending on current ticket status
+DEFAULT_TICKET_STATUS_CHOICES_FLOW = {
+    OPEN_STATUS: (OPEN_STATUS, RESOLVED_STATUS, CLOSED_STATUS, DUPLICATE_STATUS,),
+    REOPENED_STATUS: (REOPENED_STATUS, RESOLVED_STATUS, CLOSED_STATUS, DUPLICATE_STATUS,),
+    RESOLVED_STATUS: (REOPENED_STATUS, RESOLVED_STATUS, CLOSED_STATUS,),
+    CLOSED_STATUS: (REOPENED_STATUS, CLOSED_STATUS,),
+    DUPLICATE_STATUS: (REOPENED_STATUS, DUPLICATE_STATUS,),
+}
+TICKET_STATUS_CHOICES_FLOW = getattr(settings,
+                                     'HELPDESK_TICKET_STATUS_CHOICES_FLOW',
+                                     DEFAULT_TICKET_STATUS_CHOICES_FLOW)
+
 # Ticket priority choices
 DEFAULT_TICKET_PRIORITY_CHOICES = (
     (1, _('1. Critical')),
@@ -112,8 +148,8 @@ DEFAULT_TICKET_PRIORITY_CHOICES = (
     (5, _('5. Very Low')),
 )
 TICKET_PRIORITY_CHOICES = getattr(settings,
-                           'HELPDESK_TICKET_PRIORITY_CHOICES',
-                           DEFAULT_TICKET_PRIORITY_CHOICES)
+                                  'HELPDESK_TICKET_PRIORITY_CHOICES',
+                                  DEFAULT_TICKET_PRIORITY_CHOICES)
 
 ############################
 # options for public pages #

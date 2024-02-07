@@ -19,6 +19,11 @@ from helpdesk.models import FollowUp, Queue, Ticket
 User = get_user_model()
 
 
+Q_OPEN_STATUSES = Q()
+for open_status in Ticket.OPEN_STATUSES:
+    Q_OPEN_STATUSES |= Q(status=open_status)
+
+
 class OpenTicketsByUser(Feed):
     title_template = 'helpdesk/rss/ticket_title.html'
     description_template = 'helpdesk/rss/ticket_description.html'
@@ -73,15 +78,11 @@ class OpenTicketsByUser(Feed):
                 assigned_to=obj['user']
             ).filter(
                 queue=obj['queue']
-            ).filter(
-                Q(status=Ticket.OPEN_STATUS) | Q(status=Ticket.REOPENED_STATUS)
-            )
+            ).filter(Q_OPEN_STATUSES)
         else:
             return Ticket.objects.filter(
                 assigned_to=obj['user']
-            ).filter(
-                Q(status=Ticket.OPEN_STATUS) | Q(status=Ticket.REOPENED_STATUS)
-            )
+            ).filter(Q_OPEN_STATUSES)
 
     def item_pubdate(self, item):
         return item.created
@@ -104,9 +105,7 @@ class UnassignedTickets(Feed):
     def items(self, obj):
         return Ticket.objects.filter(
             assigned_to__isnull=True
-        ).filter(
-            Q(status=Ticket.OPEN_STATUS) | Q(status=Ticket.REOPENED_STATUS)
-        )
+        ).filter(Q_OPEN_STATUSES)
 
     def item_pubdate(self, item):
         return item.created
@@ -157,9 +156,7 @@ class OpenTicketsByQueue(Feed):
     def items(self, obj):
         return Ticket.objects.filter(
             queue=obj
-        ).filter(
-            Q(status=Ticket.OPEN_STATUS) | Q(status=Ticket.REOPENED_STATUS)
-        )
+        ).filter(Q_OPEN_STATUSES)
 
     def item_pubdate(self, item):
         return item.created

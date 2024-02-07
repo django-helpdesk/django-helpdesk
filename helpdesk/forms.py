@@ -186,10 +186,10 @@ class EditFollowUpForm(forms.ModelForm):
         exclude = ('date', 'user',)
 
     def __init__(self, *args, **kwargs):
-        """Filter not openned tickets here."""
+        """Filter not opened tickets here."""
         super(EditFollowUpForm, self).__init__(*args, **kwargs)
         self.fields["ticket"].queryset = Ticket.objects.filter(
-            status__in=(Ticket.OPEN_STATUS, Ticket.REOPENED_STATUS))
+            status__in=Ticket.OPEN_STATUSES)
 
 
 class AbstractTicketForm(CustomFieldMixin, forms.Form):

@@ -83,9 +83,12 @@ def escalate_tickets(queues, verbose):
         if verbose:
             print("Processing: %s" % q)
 
+        Q_OPEN_STATUSES = Q()
+        for open_status in Ticket.OPEN_STATUSES:
+            Q_OPEN_STATUSES |= Q(status=open_status)
+        
         for t in q.ticket_set.filter(
-            Q(status=Ticket.OPEN_STATUS) |
-                Q(status=Ticket.REOPENED_STATUS)
+            Q_OPEN_STATUSES
         ).exclude(
             priority=1
         ).filter(
