@@ -42,16 +42,19 @@ class Command(BaseCommand):
         )
 
         parser.add_argument(
-            '--nj',
+            '--date',
             required=False,
-            action='store'
+            action='store_true',
+            default=False
         )
 
     def handle(self, *args, **options):
         quiet = options.get('quiet', False)
         debugging = options.get('debugging', False)
-        nj = options.get('nj', None)
-        process_email(quiet=quiet, debugging=debugging, nj=nj)
+        options_list = []
+        if options.get('date', None):
+            options_list.append('date')
+        process_email(quiet=quiet, debugging=debugging, options=options_list)
 
 
 if __name__ == '__main__':
