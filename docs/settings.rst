@@ -291,6 +291,13 @@ Options that change ticket properties
             (7, _('7. Hot')),
         )
 
+Time Tracking Options
+---------------------
+
+- **HELPDESK_FOLLOWUP_TIME_SPENT_AUTO** If ``True``, calculate follow-up 'time_spent' with previous follow-up or ticket creation time.
+
+  **Default:** ``HELPDESK_FOLLOWUP_TIME_SPENT_AUTO = False``
+
 Staff Ticket Creation Settings
 ------------------------------
 
