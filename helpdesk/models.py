@@ -1003,7 +1003,12 @@ class FollowUp(models.Model):
         now = timezone.now()
         t = self.ticket
         if helpdesk_settings.FOLLOWUP_TIME_SPENT_AUTO and not self.time_spent:
-            self.time_spent = now - t.modified
+            try:
+                latest_fup = t.followup_set.exclude(id=self.id).latest("date")
+                latest_time = latest_fup.date
+            except ObjectDoesNotExist:
+                latest_time = t.created
+            self.time_spent = now - latest_time
         t.modified = now
         t.save()
         super(FollowUp, self).save(*args, **kwargs)
