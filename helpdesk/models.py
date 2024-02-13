@@ -1000,8 +1000,11 @@ class FollowUp(models.Model):
         return u"%s#followup%s" % (self.ticket.get_absolute_url(), self.id)
 
     def save(self, *args, **kwargs):
+        now = timezone.now()
         t = self.ticket
-        t.modified = timezone.now()
+        if helpdesk_settings.FOLLOWUP_TIME_SPENT_AUTO and not self.time_spent:
+            self.time_spent = now - t.modified
+        t.modified = now
         t.save()
         super(FollowUp, self).save(*args, **kwargs)
 
