@@ -151,6 +151,11 @@ TICKET_PRIORITY_CHOICES = getattr(settings,
                                   'HELPDESK_TICKET_PRIORITY_CHOICES',
                                   DEFAULT_TICKET_PRIORITY_CHOICES)
 
+
+#########################
+# time tracking options #
+#########################
+
 # Follow-ups automatic time_spent calculation
 FOLLOWUP_TIME_SPENT_AUTO = getattr(settings,
                                    'HELPDESK_FOLLOWUP_TIME_SPENT_AUTO',
