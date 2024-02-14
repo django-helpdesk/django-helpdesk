@@ -172,8 +172,8 @@ FOLLOWUP_TIME_SPENT_EXCLUDE_HOLIDAYS = getattr(settings,
                                    ())
 
 # Time doesn't count for listed ticket statuses
-FOLLOWUP_TIME_CALCULATION_EXCLUDE_STATUSES = getattr(settings,
-                                   'HELPDESK_FOLLOWUP_TIME_CALCULATION_EXCLUDE_STATUSES',
+FOLLOWUP_TIME_SPENT_EXCLUDE_STATUSES = getattr(settings,
+                                   'HELPDESK_FOLLOWUP_TIME_SPENT_EXCLUDE_STATUSES',
                                    ())
 
 ############################

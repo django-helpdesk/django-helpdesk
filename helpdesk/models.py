@@ -1026,7 +1026,7 @@ class FollowUp(models.Model):
         time_spent_seconds = 0
         open_hours = helpdesk_settings.FOLLOWUP_TIME_SPENT_OPENING_HOURS
         holidays = helpdesk_settings.FOLLOWUP_TIME_SPENT_EXCLUDE_HOLIDAYS
-        exclude_statuses = helpdesk_settings.FOLLOWUP_TIME_CALCULATION_EXCLUDE_STATUSES
+        exclude_statuses = helpdesk_settings.FOLLOWUP_TIME_SPENT_EXCLUDE_STATUSES
 
         # split time interval by days
         days = latest.toordinal() - earliest.toordinal()
