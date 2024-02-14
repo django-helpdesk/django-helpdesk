@@ -327,6 +327,14 @@ Time Tracking Options
                                                          "12-25",
                                                          "12-31",)
 
+- **HELPDESK_FOLLOWUP_TIME_CALCULATION_EXCLUDE_STATUSES** List of ticket statuses to exclude from automatic follow-up 'time_spent' calculation.
+
+  **Default:** ``HELPDESK_FOLLOWUP_TIME_CALCULATION_EXCLUDE_STATUSES = ()``
+  
+  This example will have follow-ups to resolved ticket status not to be counted in::
+
+        HELPDESK_FOLLOWUP_TIME_CALCULATION_EXCLUDE_STATUSES = (HELPDESK_TICKET_RESOLVED_STATUS,)
+
 Staff Ticket Creation Settings
 ------------------------------
 
