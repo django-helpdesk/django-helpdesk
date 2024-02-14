@@ -161,6 +161,11 @@ FOLLOWUP_TIME_SPENT_AUTO = getattr(settings,
                                    'HELPDESK_FOLLOWUP_TIME_SPENT_AUTO',
                                    False)
 
+# Calculate time_spent according to open hours
+FOLLOWUP_TIME_SPENT_OPENING_HOURS = getattr(settings,
+                                   'HELPDESK_FOLLOWUP_TIME_SPENT_OPENING_HOURS',
+                                   {})
+
 ############################
 # options for public pages #
 ############################

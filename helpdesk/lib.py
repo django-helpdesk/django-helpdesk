@@ -194,3 +194,40 @@ def convert_value(value):
         return value.strftime(CUSTOMFIELD_TIME_FORMAT)
     else:
         return value
+
+
+def daily_time_spent_calculation(earliest, latest, open_hours):
+    """Returns timedelta for a single day time interval according to open hours."""
+
+    # avoid rendering day in different locale
+    weekday = ('monday', 'tuesday', 'wednesday', 'thursday',
+                'friday', 'saturday', 'sunday')[earliest.weekday()]
+    
+    # enforce correct settings
+    MIDNIGHT = 23.9999
+    start, end = open_hours.get(weekday, (0, MIDNIGHT))
+    if not 0 <= start <= end <= MIDNIGHT:
+        start, end = 0, MIDNIGHT
+    
+    # transform decimals to minutes
+    start_hour, start_minute, start_second = int(start), int(start % 1 * 60), int(start * 60 % 1 * 60)
+    end_hour, end_minute, end_second = int(end), int(end % 1 * 60), int(end * 60 % 1 * 60)
+
+    # translate time for delta calculation
+    earliest_f = earliest.hour + earliest.minute / 60
+    latest_f = latest.hour + latest.minute / 60
+
+    if earliest_f < start:
+        earliest = earliest.replace(hour=start_hour, minute=start_minute, second=start_second)
+    elif earliest_f >= end:
+        earliest = earliest.replace(hour=end_hour, minute=end_minute, second=end_second)
+    
+    if latest_f < start:
+        latest = latest.replace(hour=start_hour, minute=start_minute, second=start_second)
+    elif latest_f >= end:
+        latest = latest.replace(hour=end_hour, minute=end_minute, second=end_second)
+    
+    day_delta = latest - earliest
+
+    # returns up to 86399 seconds
+    return day_delta.seconds

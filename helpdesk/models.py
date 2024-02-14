@@ -8,7 +8,7 @@ models.py - Model (and hence database) definitions. This is the core of the
 """
 
 
-from .lib import convert_value
+from .lib import convert_value, daily_time_spent_calculation
 from .templated_email import send_templated_mail
 from .validators import validate_file_extension
 from .webhooks import send_new_ticket_webhook
@@ -1008,7 +1008,7 @@ class FollowUp(models.Model):
                 latest_time = latest_fup.date
             except ObjectDoesNotExist:
                 latest_time = t.created
-            self.time_spent = now - latest_time
+            self.time_spent = self.time_spent_calculation(latest_time, now)
         t.modified = now
         t.save()
         super(FollowUp, self).save(*args, **kwargs)
@@ -1020,6 +1020,32 @@ class FollowUp(models.Model):
     def time_spent_formated(self):
         return format_time_spent(self.time_spent)
 
+    def time_spent_calculation(self, earliest, latest):
+        "Returns timedelta according to rules settings."
+
+        time_spent_seconds = 0
+        open_hours = helpdesk_settings.FOLLOWUP_TIME_SPENT_OPENING_HOURS
+
+        # split time interval by days
+        days = latest.toordinal() - earliest.toordinal()
+        if days:
+            for day in range(days + 1):
+                if day == 0:
+                    start_day_time = earliest
+                    end_day_time = earliest.replace(hour=23, minute=59, second=59)
+                elif day == days:
+                    start_day_time = latest.replace(hour=0, minute=0, second=0)
+                    end_day_time = latest
+                else:
+                    middle_day_time = earliest + timedelta(days=day)
+                    start_day_time = middle_day_time.replace(hour=0, minute=0, second=0)
+                    end_day_time = middle_day_time.replace(hour=23, minute=59, second=59)
+                time_spent_seconds += daily_time_spent_calculation(start_day_time, end_day_time, open_hours)
+        # handle same day
+        else:
+            time_spent_seconds += daily_time_spent_calculation(earliest, latest, open_hours)
+
+        return datetime.timedelta(seconds=time_spent_seconds)
 
 class TicketChange(models.Model):
     """
