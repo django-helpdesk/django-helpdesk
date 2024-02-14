@@ -1027,6 +1027,7 @@ class FollowUp(models.Model):
         open_hours = helpdesk_settings.FOLLOWUP_TIME_SPENT_OPENING_HOURS
         holidays = helpdesk_settings.FOLLOWUP_TIME_SPENT_EXCLUDE_HOLIDAYS
         exclude_statuses = helpdesk_settings.FOLLOWUP_TIME_SPENT_EXCLUDE_STATUSES
+        exclude_queues = helpdesk_settings.FOLLOWUP_TIME_SPENT_EXCLUDE_QUEUES
 
         # split time interval by days
         days = latest.toordinal() - earliest.toordinal()
@@ -1047,7 +1048,8 @@ class FollowUp(models.Model):
                 end_day_time = middle_day_time.replace(hour=23, minute=59, second=59)
             
             if start_day_time.strftime("%m-%d") not in holidays:
-                if self.ticket.status not in exclude_statuses:
+                if (self.ticket.status not in exclude_statuses and
+                    self.ticket.queue.slug not in exclude_queues):
                     time_spent_seconds += daily_time_spent_calculation(start_day_time, end_day_time, open_hours)
 
         return datetime.timedelta(seconds=time_spent_seconds)

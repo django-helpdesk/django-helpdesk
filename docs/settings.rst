@@ -335,6 +335,14 @@ Time Tracking Options
 
         HELPDESK_FOLLOWUP_TIME_SPENT_EXCLUDE_STATUSES = (HELPDESK_TICKET_RESOLVED_STATUS,)
 
+- **HELPDESK_FOLLOWUP_TIME_SPENT_EXCLUDE_QUEUES** List of ticket queues slugs to exclude from automatic follow-up 'time_spent' calculation.
+
+  **Default:** ``HELPDESK_FOLLOWUP_TIME_SPENT_EXCLUDE_QUEUES = ()``
+  
+  This example will have follow-ups to ticket queue 'time-not-counting-queue' not to be counted in::
+
+        HELPDESK_FOLLOWUP_TIME_SPENT_EXCLUDE_QUEUES = ('time-not-counting-queue',)
+
 Staff Ticket Creation Settings
 ------------------------------
 

@@ -176,6 +176,11 @@ FOLLOWUP_TIME_SPENT_EXCLUDE_STATUSES = getattr(settings,
                                    'HELPDESK_FOLLOWUP_TIME_SPENT_EXCLUDE_STATUSES',
                                    ())
 
+# Time doesn't count for listed queues slugs
+FOLLOWUP_TIME_SPENT_EXCLUDE_QUEUES = getattr(settings,
+                                   'HELPDESK_FOLLOWUP_TIME_SPENT_EXCLUDE_QUEUES',
+                                   ())
+
 ############################
 # options for public pages #
 ############################
