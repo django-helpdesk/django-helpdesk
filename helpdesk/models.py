@@ -1025,25 +1025,28 @@ class FollowUp(models.Model):
 
         time_spent_seconds = 0
         open_hours = helpdesk_settings.FOLLOWUP_TIME_SPENT_OPENING_HOURS
+        holidays = helpdesk_settings.FOLLOWUP_TIME_SPENT_EXCLUDE_HOLIDAYS
 
         # split time interval by days
         days = latest.toordinal() - earliest.toordinal()
-        if days:
-            for day in range(days + 1):
-                if day == 0:
-                    start_day_time = earliest
-                    end_day_time = earliest.replace(hour=23, minute=59, second=59)
-                elif day == days:
-                    start_day_time = latest.replace(hour=0, minute=0, second=0)
+        for day in range(days + 1):
+            if day == 0:
+                start_day_time = earliest
+                if days == 0:
+                    # close single day case
                     end_day_time = latest
                 else:
-                    middle_day_time = earliest + datetime.timedelta(days=day)
-                    start_day_time = middle_day_time.replace(hour=0, minute=0, second=0)
-                    end_day_time = middle_day_time.replace(hour=23, minute=59, second=59)
+                    end_day_time = earliest.replace(hour=23, minute=59, second=59)
+            elif day == days:
+                start_day_time = latest.replace(hour=0, minute=0, second=0)
+                end_day_time = latest
+            else:
+                middle_day_time = earliest + datetime.timedelta(days=day)
+                start_day_time = middle_day_time.replace(hour=0, minute=0, second=0)
+                end_day_time = middle_day_time.replace(hour=23, minute=59, second=59)
+            
+            if start_day_time.strftime("%m-%d") not in holidays:
                 time_spent_seconds += daily_time_spent_calculation(start_day_time, end_day_time, open_hours)
-        # handle same day
-        else:
-            time_spent_seconds += daily_time_spent_calculation(earliest, latest, open_hours)
 
         return datetime.timedelta(seconds=time_spent_seconds)
 

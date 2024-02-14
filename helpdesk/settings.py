@@ -166,6 +166,11 @@ FOLLOWUP_TIME_SPENT_OPENING_HOURS = getattr(settings,
                                    'HELPDESK_FOLLOWUP_TIME_SPENT_OPENING_HOURS',
                                    {})
 
+# Holidays don't count for time_spent calculation
+FOLLOWUP_TIME_SPENT_EXCLUDE_HOLIDAYS= getattr(settings,
+                                   'HELPDESK_FOLLOWUP_TIME_SPENT_EXCLUDE_HOLIDAYS',
+                                   ())
+
 ############################
 # options for public pages #
 ############################

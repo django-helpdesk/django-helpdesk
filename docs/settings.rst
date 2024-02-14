@@ -299,11 +299,11 @@ Time Tracking Options
   **Default:** ``HELPDESK_FOLLOWUP_TIME_SPENT_AUTO = False``
 
 - **HELPDESK_FOLLOWUP_TIME_SPENT_OPENING_HOURS** If defined, calculates follow-up 'time_spent' according to open hours.
-
+  
   **Default:** ``HELPDESK_FOLLOWUP_TIME_SPENT_OPENING_HOURS = {}``
   
   If HELPDESK_FOLLOWUP_TIME_SPENT_AUTO is ``True``, you may set open hours to remove off hours from 'time_spent'::
-
+  
         HELPDESK_FOLLOWUP_TIME_SPENT_OPENING_HOURS = {
             "monday": (8.5, 19),
             "tuesday": (8.5, 19),
@@ -316,7 +316,16 @@ Time Tracking Options
   
   Valid hour values must be set between 0 and 23.9999.
   In this example 8.5 is interpreted as 8:30AM, saturdays and sundays don't count.
+  
+- **HELPDESK_FOLLOWUP_TIME_SPENT_EXCLUDE_HOLIDAYS** List of days in format "%m-%d" to exclude from automatic follow-up 'time_spent' calculation.
 
+  **Default:** ``HELPDESK_FOLLOWUP_TIME_SPENT_EXCLUDE_HOLIDAYS = ()``
+  
+  This example removes the first and last days of the year together with Christmas::
+
+        HELPDESK_FOLLOWUP_TIME_SPENT_EXCLUDE_HOLIDAYS = ("01-01",
+                                                         "12-25",
+                                                         "12-31",)
 
 Staff Ticket Creation Settings
 ------------------------------
