@@ -197,7 +197,7 @@ def convert_value(value):
 
 
 def daily_time_spent_calculation(earliest, latest, open_hours):
-    """Returns timedelta for a single day time interval according to open hours."""
+    """Returns the number of seconds for a single day time interval according to open hours."""
 
     # avoid rendering day in different locale
     weekday = ('monday', 'tuesday', 'wednesday', 'thursday',
@@ -209,7 +209,7 @@ def daily_time_spent_calculation(earliest, latest, open_hours):
     if not 0 <= start <= end <= MIDNIGHT:
         start, end = 0, MIDNIGHT
     
-    # transform decimals to minutes
+    # transform decimals to minutes and seconds
     start_hour, start_minute, start_second = int(start), int(start % 1 * 60), int(start * 60 % 1 * 60)
     end_hour, end_minute, end_second = int(end), int(end % 1 * 60), int(end * 60 % 1 * 60)
 
