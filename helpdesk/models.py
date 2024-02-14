@@ -1047,10 +1047,10 @@ class FollowUp(models.Model):
                 start_day_time = middle_day_time.replace(hour=0, minute=0, second=0)
                 end_day_time = middle_day_time.replace(hour=23, minute=59, second=59)
             
-            if start_day_time.strftime("%m-%d") not in holidays:
-                if (self.ticket.status not in exclude_statuses and
-                    self.ticket.queue.slug not in exclude_queues):
-                    time_spent_seconds += daily_time_spent_calculation(start_day_time, end_day_time, open_hours)
+            if (start_day_time.strftime("%m-%d") not in holidays and
+                self.ticket.status not in exclude_statuses and
+                self.ticket.queue.slug not in exclude_queues):
+                time_spent_seconds += daily_time_spent_calculation(start_day_time, end_day_time, open_hours)
 
         return datetime.timedelta(seconds=time_spent_seconds)
 
