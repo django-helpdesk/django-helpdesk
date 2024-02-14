@@ -214,8 +214,8 @@ def daily_time_spent_calculation(earliest, latest, open_hours):
     end_hour, end_minute, end_second = int(end), int(end % 1 * 60), int(end * 60 % 1 * 60)
 
     # translate time for delta calculation
-    earliest_f = earliest.hour + earliest.minute / 60
-    latest_f = latest.hour + latest.minute / 60
+    earliest_f = earliest.hour + earliest.minute / 60 + earliest.second / 3600
+    latest_f = latest.hour + latest.minute / 60 + latest.second / 3600
 
     if earliest_f < start:
         earliest = earliest.replace(hour=start_hour, minute=start_minute, second=start_second)
