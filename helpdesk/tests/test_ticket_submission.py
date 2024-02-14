@@ -12,7 +12,7 @@ from seed.lib.superperms.orgs.models import Organization
 from django.test.client import Client
 from django.urls import reverse
 
-from helpdesk.email import object_from_message, create_ticket_cc
+from helpdesk.email import process_message, create_ticket_cc
 from helpdesk.tests.helpers import print_response
 
 from urllib.parse import urlparse
@@ -282,7 +282,7 @@ class EmailInteractionsTestCase(TestCase):
 
         email_count = len(mail.outbox)
 
-        object_from_message(str(msg), self.queue_public, logger=logger)
+        process_message(str(msg), self.queue_public, logger=logger)
 
         followup = FollowUp.objects.get(message_id=message_id)
         ticket = Ticket.objects.get(id=followup.ticket.id)
@@ -315,7 +315,7 @@ class EmailInteractionsTestCase(TestCase):
 
         email_count = len(mail.outbox)
 
-        object_from_message(str(msg), self.queue_public, logger=logger)
+        process_message(str(msg), self.queue_public, logger=logger)
 
         ticket = Ticket.objects.get(title=self.ticket_data['title'], queue=self.queue_public, submitter_email=submitter_email)
 
@@ -350,7 +350,7 @@ class EmailInteractionsTestCase(TestCase):
 
         email_count = len(mail.outbox)
 
-        object_from_message(str(msg), self.queue_public, logger=logger)
+        process_message(str(msg), self.queue_public, logger=logger)
 
         followup = FollowUp.objects.get(message_id=message_id)
         ticket = Ticket.objects.get(id=followup.ticket.id)
@@ -397,7 +397,7 @@ class EmailInteractionsTestCase(TestCase):
 
         email_count = len(mail.outbox)
 
-        object_from_message(str(msg), self.queue_public, logger=logger)
+        process_message(str(msg), self.queue_public, logger=logger)
 
         followup = FollowUp.objects.get(message_id=message_id)
         ticket = Ticket.objects.get(id=followup.ticket.id)
@@ -447,7 +447,7 @@ class EmailInteractionsTestCase(TestCase):
 
         email_count = len(mail.outbox)
 
-        object_from_message(str(msg), self.queue_public, logger=logger)
+        process_message(str(msg), self.queue_public, logger=logger)
 
         followup = FollowUp.objects.get(message_id=message_id)
         ticket = Ticket.objects.get(id=followup.ticket.id)
@@ -493,7 +493,7 @@ class EmailInteractionsTestCase(TestCase):
 
         email_count = len(mail.outbox)
 
-        object_from_message(str(msg), self.queue_public, logger=logger)
+        process_message(str(msg), self.queue_public, logger=logger)
 
         followup = FollowUp.objects.get(message_id=message_id)
         ticket = Ticket.objects.get(id=followup.ticket.id)
@@ -527,7 +527,7 @@ class EmailInteractionsTestCase(TestCase):
         reply.__setitem__('Content-Type', 'text/plain;')
         reply.set_payload(self.ticket_data['description'])
 
-        object_from_message(str(reply), self.queue_public, logger=logger)
+        process_message(str(reply), self.queue_public, logger=logger)
 
         followup = FollowUp.objects.get(message_id=message_id)
         ticket = Ticket.objects.get(id=followup.ticket.id)
@@ -583,7 +583,7 @@ class EmailInteractionsTestCase(TestCase):
 
         email_count = len(mail.outbox)
 
-        object_from_message(str(msg), self.queue_public, logger=logger)
+        process_message(str(msg), self.queue_public, logger=logger)
 
         followup = FollowUp.objects.get(message_id=message_id)
         ticket = Ticket.objects.get(id=followup.ticket.id)
@@ -624,7 +624,7 @@ class EmailInteractionsTestCase(TestCase):
         reply.__setitem__('Content-Type', 'text/plain;')
         reply.set_payload(self.ticket_data['description'])
 
-        object_from_message(str(reply), self.queue_public, logger=logger)
+        process_message(str(reply), self.queue_public, logger=logger)
 
         followup = FollowUp.objects.get(message_id=message_id)
         ticket = Ticket.objects.get(id=followup.ticket.id)
@@ -676,7 +676,7 @@ class EmailInteractionsTestCase(TestCase):
 
         email_count = len(mail.outbox)
 
-        object_from_message(str(msg), self.queue_public, logger=logger)
+        process_message(str(msg), self.queue_public, logger=logger)
 
         followup = FollowUp.objects.get(message_id=message_id)
         ticket = Ticket.objects.get(id=followup.ticket.id)
@@ -731,7 +731,7 @@ class EmailInteractionsTestCase(TestCase):
 
         email_count = len(mail.outbox)
 
-        object_from_message(str(reply), self.queue_public, logger=logger)
+        process_message(str(reply), self.queue_public, logger=logger)
 
         followup = FollowUp.objects.get(message_id=message_id)
         ticket = Ticket.objects.get(id=followup.ticket.id)
@@ -773,7 +773,7 @@ class EmailInteractionsTestCase(TestCase):
         msg.set_payload(self.ticket_data['description'])
 
         email_count = len(mail.outbox)
-        object_from_message(str(msg), self.queue_public, logger=logger)
+        process_message(str(msg), self.queue_public, logger=logger)
 
         followup = FollowUp.objects.get(message_id=message_id)
         ticket = Ticket.objects.get(id=followup.ticket.id)
@@ -822,7 +822,7 @@ class EmailInteractionsTestCase(TestCase):
 
         email_count = len(mail.outbox)
 
-        object_from_message(str(msg), self.queue_public_with_notifications_disabled, logger=logger)
+        process_message(str(msg), self.queue_public_with_notifications_disabled, logger=logger)
 
         followup = FollowUp.objects.get(message_id=message_id)
         ticket = Ticket.objects.get(id=followup.ticket.id)
@@ -868,7 +868,7 @@ class EmailInteractionsTestCase(TestCase):
 
         email_count = len(mail.outbox)
 
-        object_from_message(str(msg), self.queue_public, logger=logger)
+        process_message(str(msg), self.queue_public, logger=logger)
 
         followup = FollowUp.objects.get(message_id=message_id)
         ticket = Ticket.objects.get(id=followup.ticket.id)
@@ -906,7 +906,7 @@ class EmailInteractionsTestCase(TestCase):
         reply.__setitem__('Content-Type', 'text/plain;')
         reply.set_payload(self.ticket_data['description'])
 
-        object_from_message(str(reply), self.queue_public, logger=logger)
+        process_message(str(reply), self.queue_public, logger=logger)
 
         followup = FollowUp.objects.get(message_id=message_id)
         ticket = Ticket.objects.get(id=followup.ticket.id)
@@ -951,7 +951,7 @@ class EmailInteractionsTestCase(TestCase):
 
         email_count = len(mail.outbox)
 
-        object_from_message(str(msg), self.queue_public_with_notifications_disabled, logger=logger)
+        process_message(str(msg), self.queue_public_with_notifications_disabled, logger=logger)
 
         followup = FollowUp.objects.get(message_id=message_id)
         ticket = Ticket.objects.get(id=followup.ticket.id)
@@ -988,7 +988,7 @@ class EmailInteractionsTestCase(TestCase):
         reply.__setitem__('Content-Type', 'text/plain;')
         reply.set_payload(self.ticket_data['description'])
 
-        object_from_message(str(reply), self.queue_public_with_notifications_disabled, logger=logger)
+        process_message(str(reply), self.queue_public_with_notifications_disabled, logger=logger)
 
         followup = FollowUp.objects.get(message_id=message_id)
         ticket = Ticket.objects.get(id=followup.ticket.id)
@@ -1021,7 +1021,7 @@ class EmailInteractionsTestCase(TestCase):
 
         email_count = len(mail.outbox)
 
-        object_from_message(str(msg), self.queue_public, logger=logger)
+        process_message(str(msg), self.queue_public, logger=logger)
 
         followup = FollowUp.objects.get(message_id=message_id)
         ticket = Ticket.objects.get(id=followup.ticket.id)
@@ -1043,7 +1043,7 @@ class EmailInteractionsTestCase(TestCase):
         reply.__setitem__('Content-Type', 'text/plain;')
         reply.set_payload(self.ticket_data['description'])
 
-        object_from_message(str(reply), self.queue_public, logger=logger)
+        process_message(str(reply), self.queue_public, logger=logger)
 
         followup = FollowUp.objects.get(message_id=message_id)
         ticket = Ticket.objects.get(id=followup.ticket.id)

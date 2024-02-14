@@ -56,7 +56,7 @@ class GetEmailCommonTests(TestCase):
         """
         with open(os.path.join(THIS_DIR, "test_files/blank-body-with-attachment.eml")) as fd:
             test_email = fd.read()
-        ticket = helpdesk.email.object_from_message(test_email, self.queue_public, self.logger)
+        ticket = helpdesk.email.process_message(test_email, self.queue_public, self.logger)
         self.assertEqual(ticket.title, "Attachment without body")
         self.assertEqual(ticket.description, "")
 
@@ -66,7 +66,7 @@ class GetEmailCommonTests(TestCase):
         """
         with open(os.path.join(THIS_DIR, "test_files/quoted_printable.eml")) as fd:
             test_email = fd.read()
-        ticket = helpdesk.email.object_from_message(test_email, self.queue_public, self.logger)
+        ticket = helpdesk.email.process_message(test_email, self.queue_public, self.logger)
         self.assertEqual(ticket.title, "Český test")
         self.assertEqual(ticket.description, "Tohle je test českých písmen odeslaných z gmailu.")
         followups = FollowUp.objects.filter(ticket=ticket)
@@ -84,7 +84,7 @@ class GetEmailCommonTests(TestCase):
         """
         with open(os.path.join(THIS_DIR, "test_files/all-special-chars.eml")) as fd:
             test_email = fd.read()
-        ticket = helpdesk.email.object_from_message(test_email, self.queue_public, self.logger)
+        ticket = helpdesk.email.process_message(test_email, self.queue_public, self.logger)
         self.assertEqual(ticket.title, "Testovácí email")
         self.assertEqual(ticket.description, "íářčšáíéřášč")
 
@@ -96,7 +96,7 @@ class GetEmailCommonTests(TestCase):
         """
         with open(os.path.join(THIS_DIR, "test_files/utf-nondecodable.eml")) as fd:
             test_email = fd.read()
-        ticket = helpdesk.email.object_from_message(test_email, self.queue_public, self.logger)
+        ticket = helpdesk.email.process_message(test_email, self.queue_public, self.logger)
         self.assertEqual(ticket.title, "Fwd: Cyklozaměstnavatel - změna vyhodnocení")
         self.assertIn("prosazuje lepší", ticket.description)
         followups = FollowUp.objects.filter(ticket=ticket)
@@ -112,7 +112,7 @@ class GetEmailCommonTests(TestCase):
         """
         with open(os.path.join(THIS_DIR, "test_files/forwarded-message.eml")) as fd:
             test_email = fd.read()
-        ticket = helpdesk.email.object_from_message(test_email, self.queue_public, self.logger)
+        ticket = helpdesk.email.process_message(test_email, self.queue_public, self.logger)
         self.assertEqual(ticket.title, "Test with original message from GitHub")
         self.assertIn("This is email body", ticket.description)
         assert "Hello there!" not in ticket.description, ticket.description

@@ -4,7 +4,8 @@ Django Helpdesk - A Django powered ticket tracker for small enterprise.
 (c) Copyright 2008 Jutda. Copyright 2018 Timothy Hobbs. All Rights Reserved.
 See LICENSE for details.
 """
-# import base64
+from base64 import urlsafe_b64decode
+from html import unescape
 import email
 import imaplib
 import logging
@@ -38,7 +39,7 @@ from exchangelib import FileAttachment, ItemAttachment
 from helpdesk import settings
 from helpdesk.lib import safe_template_context, process_attachments
 from helpdesk.models import Ticket, TicketCC, FollowUp, IgnoreEmail, FormType, CustomField, is_extra_data
-from seed.models import EmailImporter, GOOGLE, MICROSOFT
+from seed.models import EmailImporter, GOOGLE, MICROSOFT, EXCHANGE_OAUTH, EXCHANGE_PASS
 from helpdesk.decorators import is_helpdesk_staff
 
 
@@ -58,6 +59,7 @@ STRIPPED_SUBJECT_STRINGS = [
 PATTERN_UID = re.compile(r'\d+ \(UID (?P<uid>\d+)\)')
 DEBUGGING = False
 UBID_PATTERN = RE_PATTERN_.pattern[1:len(RE_PATTERN_.pattern) - 1]  # removes ^ and $
+ADDR_PATTERN = re.compile('\s?\"(.*?)\" <([^<>,\s@]+@[^<>,\s@]+)>|\s?([^<>,]+) <([^<>,\s@]+@[^<>,\s@]+)>|([^<>,\s@]+@[^<>,\s@]+)')
 
 
 def parse_uid(data):
@@ -215,7 +217,7 @@ def process_importer(importer, queues, logger, debugging, options=None):
             logger.info("Processing message %d" % i)
             with open(m, 'r') as f:
                 full_message = encoding.force_text(f.read(), errors='replace')
-                ticket = object_from_message(full_message, importer, queues, logger)
+                ticket = process_message(full_message, importer, queues, logger)
             if ticket:
                 logger.info("Successfully processed message %d, ticket/comment created.", i)
                 try:
@@ -228,10 +230,16 @@ def process_importer(importer, queues, logger, debugging, options=None):
                 logger.warn("Message %d was not successfully processed, and will be left in local directory", i)
 
     elif importer.auth:
-        logger.info("Attempting Exchange server login")
-        server, _ = importer.auth.login(email=importer, logger=logger)
-        if server:
-            exchange_sync(importer, queues, logger, server, debugging=debugging)
+        if importer.auth.host_service == EXCHANGE_OAUTH or importer.auth.host_service == EXCHANGE_PASS:
+            logger.info("Attempting Exchange server login")
+            server, _ = importer.auth.login(email=importer, logger=logger)
+            if server:
+                exchange_sync(importer, queues, logger, server, debugging=debugging)
+        elif importer.auth.host_service == GOOGLE:
+            logger.info("Attempting Google server login")
+            server, _ = importer.auth.login(email=importer, logger=logger)
+            if server:
+                google_sync(importer, queues, logger, server, debugging=debugging)
 
 
 def pop3_sync(importer, queues, logger, server, debugging):
@@ -264,7 +272,7 @@ def pop3_sync(importer, queues, logger, server, debugging):
             full_message = "\n".join([elm.decode('utf-8') for elm in raw_content])
         else:
             full_message = encoding.force_text("\n".join(raw_content), errors='replace')
-        ticket = object_from_message(full_message, importer, queues, logger)
+        ticket = process_message(full_message, importer, queues, logger)
 
         if ticket:
             if not debugging:
@@ -373,7 +381,7 @@ def imap_sync(importer, queues, logger, server, debugging, options=None):
                             status, data = server.uid('fetch', msg_uid, '(RFC822)')
                             full_message = encoding.force_text(data[0][1], errors='replace')
                             try:
-                                ticket = object_from_message(full_message, importer, queues, logger, options=options)
+                                ticket = process_message(full_message, importer, queues, logger, options=options)
                             except TypeError as e:
                                 logger.error("Type error - ticket set to None")
                                 logger.error(e)
@@ -467,7 +475,7 @@ def exchange_sync(importer, queues, logger, server, debugging):
                 else:
                     logger.info("Received message ID: %s" % msg_id)
                     try:
-                        ticket = object_from_exchange_message(item, importer, queues, logger)
+                        ticket = process_exchange_message(item, importer, queues, logger)
                     except Exception as e:
                         logger.error('Unable to process message into ticket: ', str(e))  # todo
                         ticket = None
@@ -492,6 +500,48 @@ def exchange_sync(importer, queues, logger, server, debugging):
                         logger.warn("Message %s was not successfully processed, and will be left on IMAP server\n" % msg_id.id)
         except Exception as e:
             logger.error(e)  # todo
+
+
+def google_sync(importer, queues, logger, server, debugging):
+    # first, connect
+
+    # select box from email_box_imap_folder
+    labels = ['INBOX']
+    if importer.keep_mail:
+        labels.append('UNREAD')
+    response = server.users().messages().list(userId='me', labelIds=labels).execute()
+    msgs = response['messages']
+    logger.info("Received %s messages from server" % len(msgs))
+    ids_to_delete = []
+    # filter for mail
+    try:
+        for item in msgs:
+            # item is an id and thread id
+            msg_id = item['id']
+            msg = server.users().messages().get(userId='me', id=msg_id).execute()
+            logger.info("Received message ID: %s" % msg_id)
+            try:
+                ticket = process_google_message(msg['payload'], importer, queues, logger, msg_id, server)
+            except Exception as e:
+                logger.error('Unable to process message into ticket: ', str(e))  # todo
+                ticket = None
+            if ticket:
+                if debugging:
+                    logger.info("Successfully processed message %s, left untouched on server\n" % msg_id)
+                else:
+                    if importer.keep_mail:
+                        server.users().messages().modify(userId='me', id=msg_id, body={'removeLabelIds': ['UNREAD']}).execute()
+                        logger.info("Successfully processed message %s, marked as Read on server\n" % msg_id)
+                    else:
+                        ids_to_delete.append(msg_id)
+                        logger.info("Successfully processed message %s, will be deleted from server\n" % msg_id)
+            else:
+                logger.warn("Message %s was not successfully processed, and will be left on server\n" % msg_id)
+    except Exception as e:
+        logger.error(e)  # todo
+    if ids_to_delete:
+        server.users().messages().batch_delete(userId='me', ids=ids_to_delete)
+        logger.info('Deleted messages: %s' % ids_to_delete)
 
 
 def decode_unknown(charset, string):
@@ -581,7 +631,7 @@ def create_ticket_cc(ticket, cc_list):
     return new_ticket_ccs
 
 
-def create_object_from_email_message(message, ticket_id, payload, files, logger, options=None):
+def create_ticket_from_processed_message(message, ticket_id, payload, files, logger, options=None):
 
     ticket, previous_followup, new = None, None, False
     now = timezone.now()
@@ -598,6 +648,8 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger,
 
     message_id = getattr(message, 'message_id', None) or parseaddr(getattr(message, 'Message-Id', None))[1]
     in_reply_to = getattr(message, 'in_reply_to', None) or parseaddr(getattr(message, 'In-Reply-To', None))[1]
+    if not in_reply_to and 'in_reply_to' in payload and payload['in_reply_to']:
+        in_reply_to = _parse_addr_string(payload['in_reply_to'])[0][1]
 
     if in_reply_to:
         try:
@@ -757,8 +809,7 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger,
             )
     return ticket
 
-
-def object_from_message(message, importer, queues, logger, options=None):
+def process_message(message, importer, queues, logger, options=None):
     # 'message' must be an RFC822 formatted message.
     message = email.message_from_string(message)
     sender, to_list, cc_list, date, subject, category = None, [], [], None, None, None
@@ -1018,11 +1069,9 @@ def object_from_message(message, importer, queues, logger, options=None):
     }
     if date:
         payload['date'] = date
-    return create_object_from_email_message(message, ticket, payload, files, logger=logger, options=options)
+    return create_ticket_from_processed_message(message, ticket, payload, files, logger=logger, options=options)
 
-
-def object_from_exchange_message(message, importer, queues, logger):
-
+def process_exchange_message(message, importer, queues, logger):
     subject = message.subject
     if subject:
         for affix in STRIPPED_SUBJECT_STRINGS:
@@ -1206,4 +1255,218 @@ def object_from_exchange_message(message, importer, queues, logger):
         'to_list': to_list,
         'headers': headers
     }
-    return create_object_from_email_message(message, ticket, payload, files, logger=logger)
+    return create_ticket_from_processed_message(message, ticket, payload, files, logger=logger)
+
+def _parse_addr_string(addresses):
+    # Takes a string of one or more addresses from a message,
+    # and returns a list of tuples [(name, address)]
+    #
+    # ex: a@a.com, "Name" <a@a.com>, "Last, First" <b@a.com>, Unquoted Name <c@c.com>
+    # -> [('', 'a@a.com'), ('Name', 'a@a.com'), ('Last, First', 'b@a.com'), ('Unquoted Name', 'c@c.com')]
+    address_groups = ADDR_PATTERN.findall(addresses)
+    addr_list = []
+    for a in address_groups:
+        if a[0]:
+            addr_list.append((a[0], a[1]))
+        elif a[2]:
+            addr_list.append((a[2], a[3]))
+        elif a[4]:
+            addr_list.append(('', a[4]))
+    return addr_list
+
+def process_google_message(message, importer, queues, logger, msg_id, server):
+    headers = message['headers']
+    sender, to_list, cc_list, date, subject, category, message_id, in_reply_to = '', [], [], None, None, None, None, None
+    auto_forward = None
+
+    if importer.extract_eml_attachments:
+        pass # todo
+
+    # Get subject, sender, to_list, cc_list
+    for header in headers:
+        if header['name'] == 'Subject':
+            subject = header['value']
+            for affix in STRIPPED_SUBJECT_STRINGS:
+                subject = subject.replace(affix, "")
+            subject = subject.strip()
+        elif header['name'] == 'From':
+            sender = _parse_addr_string(header['value'])
+            sender = sender[0] if sender else ''
+        elif header['name'] == 'To':
+            to_list = _parse_addr_string(header['value'])
+        elif header['name'] == 'X-BEAMHelpdesk-Delivered':
+            auto_forward = header['value']
+        elif header['name'] == 'Cc':
+            cc_list = _parse_addr_string(header['value'])
+        elif header['name'] == 'Message-ID':
+            message_id = header['value']
+        elif header['name'] == 'In-Reply-To':
+            in_reply_to = header['value']
+    sender_lower = sender[1].lower()
+    # Use subject & to_list/cc_list to determine queue
+
+    # Sort out which queue this email should go into #
+    ticket, queue = None, None
+    for q in queues['importer_queues']:
+        matchobj = re.match(r".*\[" + q.slug + r"-(?P<id>\d+)\]", subject)
+        if matchobj and not ticket:
+            ticket = matchobj.group('id')
+            queue = q
+            logger.info("- Matched tracking ID %s-%s" % (q.slug, ticket))
+    if not ticket:
+        logger.info("- No tracking ID matched.")
+        for q in queues['matching_queues']:
+            if not queue:
+                for m in q.match_on:
+                    m_re = re.compile(r'\b%s\b' % m, re.I)
+                    if m_re.search(subject):
+                        queue = q
+                        logger.info("- Subject matched list from '%s'" % q.slug)
+    if not queue:
+        for q in queues['address_matching_queues']:
+            if reduce(lambda prev, e: prev or (e.lower() in sender_lower), q.match_on_addresses, False):
+                queue = q
+                logger.info("- Sender address matched list from '%s'" % q.slug)
+    if not queue:
+        logger.info("- Using default queue.")
+        queue = queues['default_queue']
+
+    # Ignore List applies to sender, TO emails, and CC list
+    for ignored_address in IgnoreEmail.objects.filter(Q(queues=queue) | Q(organization=queue.organization, queues__isnull=True), ignore_import=True):
+        if ignored_address.test(sender[1]):
+            logger.debug("Email address matched an ignored address. Ticket will not be created")
+            if ignored_address.keep_in_mailbox:
+                return False  # By returning 'False' the message will be kept in the mailbox,
+            return True  # and the 'True' will cause the message to be deleted.
+
+    # Accounting for forwarding loops
+    if auto_forward is not None or (queue.email_address and sender_lower == queue.email_address.lower()):
+        logger.info("Found a forwarding loop.")
+        if ticket and Ticket.objects.filter(pk=ticket).exists():
+            if sender_lower == queue.email_address.lower() and auto_forward is None:
+                auto_forward = [i[1] for i in to_list]
+            else:
+                auto_forward = auto_forward.strip().split(',')
+            for address in auto_forward:
+                cc = TicketCC.objects.filter(ticket_id=ticket, email__iexact=address)
+                if cc:
+                    cc.delete()
+                    logger.info("Deleted the CC'd address from the ticket")
+                    logger.debug("Address deleted was %s" % address)  # TODO remove later for privacy
+        return True
+
+    body = None
+    full_body = None
+    counter = 0
+    files = []
+
+    def walk(parts_list):
+        # function for recursively walking through parts of message
+        nonlocal body, full_body, counter, files
+        for part in parts_list:
+            if 'parts' in part:
+                walk(part['parts'])
+
+            filename = None
+            if 'filename' in part and part['filename']:
+                filename = part['filename']
+
+            if 'text' in part['mimeType'] and filename is None:
+                data = part['body']['data']
+                if part['mimeType'] == 'text/plain':
+                    body = urlsafe_b64decode(data).decode('utf-8')
+                    if ticket is None and getattr(django_settings, 'HELPDESK_FULL_FIRST_MESSAGE_FROM_EMAIL', False):
+                        # first message in thread, we save full body to avoid losing forwards and things like that
+                        body_parts = []
+                        for f in EmailReplyParser.read(body).fragments:
+                            body_parts.append(f.content)
+                        full_body = '\n\n'.join(body_parts)
+                        body = EmailReplyParser.parse_reply(body)
+                    else:
+                        # second and other reply, save only first part of the message
+                        body = EmailReplyParser.parse_reply(body)
+                        full_body = body
+                    logger.debug("Discovered plain text MIME part")
+
+                elif part['mimeType'] == 'text/html' and filename is None:
+                    email_body = unescape(urlsafe_b64decode(data).decode('utf-8'))
+
+                    if not body and not full_body:
+                        # no text has been parsed so far - try such deep parsing for some messages
+                        altered_body = email_body.replace("</p>", "</p>\n").replace("<br", "\n<br")
+                        mail = BeautifulSoup(str(altered_body), "html.parser")
+                        full_body = mail.get_text()
+
+                    if "<body" not in email_body:
+                        email_body = f"<body>{email_body}</body>"
+
+                    payload = (
+                        '<html>'
+                        '<head>'
+                        '<meta charset="utf-8" />'
+                        '</head>'
+                        '%s'
+                        '</html>'
+                    ) % email_body
+                    files.append(
+                        SimpleUploadedFile(_("email_html_body.html"), payload.encode("utf-8"), 'text/html')
+                    )
+                    logger.debug("Discovered HTML MIME part")
+
+            else:
+                if 'attachmentId' in part['body']:
+                    if not filename:
+                        ext = mimetypes.guess_extension(part.get_content_type())
+                        filename = "part-%i%s" % (counter, ext)
+                    else:
+                        filename = ("part-%i_" % counter) + filename
+                    # todo write error catching
+                    attachment = server.users().messages().attachments().get(userId='me', messageId=msg_id, id=part['body']['attachmentId']).execute()
+
+                    data = urlsafe_b64decode(attachment['data'])
+                    files.append(SimpleUploadedFile(filename, data, mimetypes.guess_type(filename)[0]))
+                    counter = counter + 1
+                    logger.debug("Found MIME attachment %s" % filename)
+
+    walk([message])
+
+    if not body:
+        mail = BeautifulSoup(str(message), "html.parser")
+        beautiful_body = mail.find('body')
+        if beautiful_body:
+            try:
+                body = beautiful_body.text
+                full_body = body
+            except AttributeError:
+                pass
+        if not body:
+            body = ""
+
+    if getattr(django_settings, 'HELPDESK_ALWAYS_SAVE_INCOMING_EMAIL_MESSAGE', False):
+        # save message as attachment in case of some complex markup renders wrong
+        files.append(
+            SimpleUploadedFile(
+                _("original_message.eml").replace(
+                    ".eml",
+                    timezone.localtime().strftime("_%d-%m-%Y_%H:%M") + ".eml"
+                ),
+                str(message).encode("utf-8"),
+                'text/plain'
+            )
+        )
+
+    payload = {
+        'body': body,
+        'full_body': full_body or body,
+        'subject': subject,
+        'queue': queue,
+        'sender': sender,
+        'priority': 3,  # todo
+        'files': files,
+        'cc_list': cc_list,
+        'to_list': to_list,
+        'message_id': message_id,
+        'in_reply_to': in_reply_to,
+    }
+
+    return create_ticket_from_processed_message(message, ticket, payload, files, logger=logger)#, nj=nj)
