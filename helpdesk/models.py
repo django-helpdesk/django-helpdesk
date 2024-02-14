@@ -1037,7 +1037,7 @@ class FollowUp(models.Model):
                     start_day_time = latest.replace(hour=0, minute=0, second=0)
                     end_day_time = latest
                 else:
-                    middle_day_time = earliest + timedelta(days=day)
+                    middle_day_time = earliest + datetime.timedelta(days=day)
                     start_day_time = middle_day_time.replace(hour=0, minute=0, second=0)
                     end_day_time = middle_day_time.replace(hour=23, minute=59, second=59)
                 time_spent_seconds += daily_time_spent_calculation(start_day_time, end_day_time, open_hours)
