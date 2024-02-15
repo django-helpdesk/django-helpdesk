@@ -229,5 +229,9 @@ def daily_time_spent_calculation(earliest, latest, open_hours):
     
     day_delta = latest - earliest
 
-    # returns up to 86399 seconds
-    return day_delta.seconds
+    # returns up to 86399 seconds, add one second if full day
+    time_spent_seconds = day_delta.seconds
+    if time_spent_seconds == 86399:
+        time_spent_seconds += 1
+    
+    return time_spent_seconds
