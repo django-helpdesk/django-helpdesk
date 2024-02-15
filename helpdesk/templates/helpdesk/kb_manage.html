@@ -17,9 +17,13 @@
 <div class="d-flex">
     <h2>{% trans 'Manage Knowledgebase' %}</h2>
     <div class="flex-fill d-flex justify-content-end">
-        <a class="btn btn-success align-self-center mr-1" href={% url 'helpdesk:create_kb_category' %}><i class="fa fa-plus mr-1"></i> Create Category</a>
-        <button class="btn btn-primary align-self-center mr-1" onclick="expandAll()"><i class="fa fa-plus-square mr-1"></i>Expand All</button>
-        <button class="btn btn-secondary align-self-center" onclick="collapseAll()"><i class="fa fa-minus-square mr-1"></i>Collapse All</button>
+        <a class="btn btn-success align-self-center mr-1" href="{% url 'helpdesk:create_kb_category' %}"><i class="fa fa-plus mr-1"></i> Create Category</a>
+        {% if kb_categories %}
+        <div class="btn-group">
+            <button class="btn btn-outline-primary align-self-center" onclick="expandAll()"><i class="fa fa-plus-square mr-1"></i>Expand All</button>
+            <button class="btn btn-outline-secondary align-self-center" onclick="collapseAll()"><i class="fa fa-minus-square mr-1"></i>Collapse All</button>
+        </div>
+        {% endif %}
     </div>
 </div>
 
@@ -27,55 +31,50 @@
     {% for category in kb_categories %}
     <div class="card mb-2">
         <!-- Collapse header -->
-        <div class="card-header" id="category_{{ category.slug }}">
+        <div class="card-header border-bottom-0" id="category_{{ category.id }}">
             <div class="d-flex align-items-center">
                 {% if category.public %}
                     <div class="badge badge-success font-weight-bold mr-3" style="font-size: 15px; min-width: 57px">Public</div>
                 {% else %}
                     <div class="badge badge-danger font-weight-bold mr-3" style="font-size: 15px; min-width: 57px">Private</div>
                 {% endif %}
-                <h2 class="flex-fill mb-0 mr-2">
-                    <button class="btn btn-link w-100 text-left pl-0" id="toggle_{{ category.slug }}" type="button" data-toggle="collapse" data-target="#articles_{{ category.slug }}">
-                        <i class="fas fa-caret-down mr-1"></i>{{ category.title }}
-                    </button>
-                </h2>
-                
-                <a class="btn btn-primary mr-2" href={% url 'helpdesk:create_kb_article' category.slug %}>
+                <h4 class="mb-0 flex-fill">
+                    {{ category.title }}
+                </h4>
+                <a class="btn btn-success mr-2" href="{% url 'helpdesk:create_kb_article' category.slug %}">
                     <i class="fa fa-plus mr-1"></i>Create Article
                 </a>
-                <div class="btn-group">
-                    <a class="btn btn-warning" href={% url 'helpdesk:edit_kb_category' category.slug %}>
-                        <i class="fa fa-pen mr-1"></i>Edit Category
-                    </a>
-                    <a class="btn btn-outline-danger" onclick="confirmDelete('Category', '{{ category.title }}','{% url 'helpdesk:delete_kb_category' category.slug %}')">
-                        <i class="fa fa-trash mr-1"></i>Delete Category
-                    </a>
-                </div>
+                <a class="btn btn-warning mr-1" href="{% url 'helpdesk:edit_kb_category' category.slug %}">
+                    <i class="fa fa-pen"></i>
+                </a>
+                <a class="btn btn-danger" onclick="confirmDelete('Category', '{{ category.title }}','{% url 'helpdesk:delete_kb_category' category.slug %}')">
+                    <i class="fa fa-trash"></i>
+                </a>
+                <button class="btn btn-outline-primary ml-2" id="toggle_{{ category.id }}" type="button" data-toggle="collapse" data-target="#articles_{{ category.id }}" aria-pressed="true">
+                    <i id="toggle_articles_{{ category.id }}" class="fas fa-minus"></i>
+                </button>
             </div>
         </div>
         
         <!-- Collapse body -->
-        <div class="collapse show" id="articles_{{ category.slug }}">
+        <div class="collapse show" id="articles_{{ category.id }}">
             <div class="card-body p-0">
                 {% if category.kbitem_set.values %}
                 <table class="table table-borderless mb-0">
-                    <thead class="thead-light">
+                    <thead class="thead bg-light border-bottom">
                         <tr>
-                            <th style="width: 33%">Question</th>
-                            <th class="text-center">Ordering</th>
-                            <th class="text-center">Public</th>
-                            <th class="text-center">Last Updated</th>
-                            <th class="text-center">Edit</th>
-                            <th class="text-center">Delete</th>
+                            <th class="pt-0" style="width: 33%">Question</th>
+                            <th class="text-center pt-0" style="width:10%;">Last Updated</th>
+                            <th class="text-center pt-0" style="width:1%;">Public</th>
+                            <th class="text-center pt-0" style="width:1%;">Ordering</th>
+                            <th class="text-center pt-0" style="width:1%;">Edit</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for article in category.kbitem_set.values %}
                         <tr>
-                            <td class="align-middle">
-                                {{ article.question }}
-                            </td>
-                            <td class="text-center align-middle">{{ article.order }}</td>
+                            <td class="align-middle">{{ article.question }}</td>
+                            <td class="text-center align-middle">{{ article.last_updated }}</td>
                             <td class="text-center align-middle">
                                 {% if article.enabled %}
                                 <i class="fa fa-check-circle text-success"></i>
@@ -83,23 +82,23 @@
                                 <i class="fa fa-times-circle text-danger"></i>
                                 {% endif %}
                             </td>
-                            <td class="text-center align-middle">{{ article.last_updated }}</td>
+                            <td class="text-center align-middle">{{ article.order }}</td>
                             <td class="text-center align-middle">
-                                <a class="btn btn-warning btn-sm" href={% url 'helpdesk:edit_kb_article' category.slug article.id %}>
-                                    <i class="fa fa-pen"></i>
-                                </a>
-                            </td>
-                            <td class="text-center align-middle">
-                                <button class="btn btn-outline-danger btn-sm" onclick="confirmDelete('Article', '{{ article.title }}','{% url 'helpdesk:delete_kb_article' category.slug article.id %}')">
-                                    <i class="fa fa-trash"></i>
-                                </button>
+                                <div class="btn-group">
+                                    <a class="btn btn-warning btn-sm" href="{% url 'helpdesk:edit_kb_article' category.slug article.id %}">
+                                        <i class="fa fa-pen"></i>
+                                    </a>
+                                    <button class="btn btn-danger btn-sm" onclick="confirmDelete('Article', '{{ article.title }}','{% url 'helpdesk:delete_kb_article' category.slug article.id %}')">
+                                        <i class="fa fa-trash"></i>
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
                 {% else %}
-                <p class="text-center m-2"> No articles in the category, <a href={% url 'helpdesk:create_kb_article' category.slug%}>create one</a>!</p>
+                <p class="text-center m-2"> No articles in the category, <a href="{% url 'helpdesk:create_kb_article' category.slug%}">create one</a>!</p>
                 {% endif %}
             </div>
         </div>
@@ -111,6 +110,19 @@
 </div>
 
 <script>
+
+$(document).ready(function () {
+  $('.collapse')
+    .on('hide.bs.collapse', function () {
+      // fires immediately after clicking Hide
+      $('#toggle_' + $(this).attr('id')).addClass('fa-plus').removeClass('fa-minus');
+    })
+    .on('show.bs.collapse', function () {
+      // fires immediately after clicking Show
+      $('#toggle_' + $(this).attr('id')).addClass('fa-minus').removeClass('fa-plus');
+    })
+});
+
     function expandAll() {
         for (const collapse of document.querySelectorAll('[id^=articles_]')) {
             slug = collapse.id.slice(9)
@@ -136,21 +148,21 @@
         if (type == "Category") {
             $('#modal_delete_body').html(
                 `
-                \nPlease confirm that you want to delete the Category: <strong>${title}</strong>
-                \nThis will also delete any associated <strong>Articles</strong>
+                Please confirm that you want to delete the Category: <strong>${title}</strong>.<br>
+                This will also delete any associated <strong>Articles</strong>.
                 <br><br>This action <strong>cannot</strong> be undone.
                 `)
         } else {
             $('#modal_delete_body').html(
                 `
-                \nPlease confirm that you want to delete the Article: <strong>${title}</strong>
+                Please confirm that you want to delete the Article: <strong>${title}</strong>.
                 <br><br>This action <strong>cannot</strong> be undone.
                 `
                 )
             
         }
         
-        $('#deleteModal').modal('show')
+        $('#deleteModal').modal('show');
     }
 </script>
 
