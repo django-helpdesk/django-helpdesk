@@ -1007,16 +1007,24 @@ class FollowUp(models.Model):
     def time_spent_calculation(self):
         "Returns timedelta according to rules settings."
 
-        # extract parameters from previous follow-up or ticket
+        # extract earliest from previous follow-up or ticket
         try:
             prev_fup_qs = self.ticket.followup_set.all()
             if self.id:
                 prev_fup_qs = prev_fup_qs.filter(id__lt=self.id)
             prev_fup = prev_fup_qs.latest("date")
             earliest = prev_fup.date
-            prev_status = prev_fup.new_status
         except ObjectDoesNotExist:
             earliest = self.ticket.created
+
+        # extract previous status from follow-up or ticket
+        try:
+            prev_fup_qs = self.ticket.followup_set.exclude(new_status__isnull=True)
+            if self.id:
+                prev_fup_qs = prev_fup_qs.filter(id__lt=self.id)
+            prev_fup = prev_fup_qs.latest("date")
+            prev_status = prev_fup.new_status
+        except ObjectDoesNotExist:
             prev_status = self.ticket.status
         
         # latest time is current follow-up date
