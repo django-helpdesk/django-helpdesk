@@ -1,0 +1,172 @@
+{% extends 'helpdesk/public_base.html' %}
+{% load i18n bootstrap4form helpdesk_staff %}
+{% block helpdesk_title %}
+{% trans 'Knowledgebase' %}
+{% endblock %}
+
+{% block helpdesk_breadcrumb %}
+<li class="breadcrumb-item">
+    <a href="{% url 'helpdesk:kb_index' %}{{ user_info.url }}">{% trans 'Knowledgebase' %}</a>
+</li>
+<li class="breadcrumb-item active">
+    {% trans 'Manage' %}
+</li>
+{% endblock %}
+
+{% block helpdesk_body %}
+<div class="d-flex">
+    <h2>{% trans 'Manage Knowledgebase' %}</h2>
+    <div class="flex-fill d-flex justify-content-end">
+        <a class="btn btn-success align-self-center mr-1" href="{% url 'helpdesk:create_kb_category' %}"><i class="fa fa-plus mr-1"></i> Create Category</a>
+        {% if kb_categories %}
+        <div class="btn-group">
+            <button class="btn btn-outline-primary align-self-center" onclick="expandAll()"><i class="fa fa-plus-square mr-1"></i>Expand All</button>
+            <button class="btn btn-outline-secondary align-self-center" onclick="collapseAll()"><i class="fa fa-minus-square mr-1"></i>Collapse All</button>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="mt-2" id="categories">
+    {% for category in kb_categories %}
+    <div class="card mb-2">
+        <!-- Collapse header -->
+        <div class="card-header border-bottom-0" id="category_{{ category.id }}">
+            <div class="d-flex align-items-center">
+                {% if category.public %}
+                    <div class="badge badge-success font-weight-bold mr-3" style="font-size: 15px; min-width: 57px">Public</div>
+                {% else %}
+                    <div class="badge badge-danger font-weight-bold mr-3" style="font-size: 15px; min-width: 57px">Private</div>
+                {% endif %}
+                <h4 class="mb-0 flex-fill">
+                    {{ category.title }}
+                </h4>
+                <a class="btn btn-success mr-2" href="{% url 'helpdesk:create_kb_article' category.slug %}">
+                    <i class="fa fa-plus mr-1"></i>Create Article
+                </a>
+                <a class="btn btn-warning mr-1" href="{% url 'helpdesk:edit_kb_category' category.slug %}">
+                    <i class="fa fa-pen"></i>
+                </a>
+                <a class="btn btn-danger" onclick="confirmDelete('Category', '{{ category.title }}','{% url 'helpdesk:delete_kb_category' category.slug %}')">
+                    <i class="fa fa-trash"></i>
+                </a>
+                <button class="btn btn-outline-primary ml-2" id="toggle_{{ category.id }}" type="button" data-toggle="collapse" data-target="#articles_{{ category.id }}" aria-pressed="true">
+                    <i id="toggle_articles_{{ category.id }}" class="fas fa-minus"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Collapse body -->
+        <div class="collapse show" id="articles_{{ category.id }}">
+            <div class="card-body p-0">
+                {% if category.kbitem_set.values %}
+                <table class="table table-borderless mb-0">
+                    <thead class="thead bg-light border-bottom">
+                        <tr>
+                            <th class="pt-0" style="width: 33%">Question</th>
+                            <th class="text-center pt-0" style="width:10%;">Last Updated</th>
+                            <th class="text-center pt-0" style="width:1%;">Public</th>
+                            <th class="text-center pt-0" style="width:1%;">Ordering</th>
+                            <th class="text-center pt-0" style="width:1%;">Edit</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for article in category.kbitem_set.values %}
+                        <tr>
+                            <td class="align-middle">{{ article.question }}</td>
+                            <td class="text-center align-middle">{{ article.last_updated }}</td>
+                            <td class="text-center align-middle">
+                                {% if article.enabled %}
+                                <i class="fa fa-check-circle text-success"></i>
+                                {% else %}
+                                <i class="fa fa-times-circle text-danger"></i>
+                                {% endif %}
+                            </td>
+                            <td class="text-center align-middle">{{ article.order }}</td>
+                            <td class="text-center align-middle">
+                                <div class="btn-group">
+                                    <a class="btn btn-warning btn-sm" href="{% url 'helpdesk:edit_kb_article' category.slug article.id %}">
+                                        <i class="fa fa-pen"></i>
+                                    </a>
+                                    <button class="btn btn-danger btn-sm" onclick="confirmDelete('Article', '{{ article.title }}','{% url 'helpdesk:delete_kb_article' category.slug article.id %}')">
+                                        <i class="fa fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p class="text-center m-2"> No articles in the category, <a href="{% url 'helpdesk:create_kb_article' category.slug%}">create one</a>!</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    <div class="w-100 text-center">
+        
+    </div>
+</div>
+
+<script>
+
+$(document).ready(function () {
+  $('.collapse')
+    .on('hide.bs.collapse', function () {
+      // fires immediately after clicking Hide
+      $('#toggle_' + $(this).attr('id')).addClass('fa-plus').removeClass('fa-minus');
+    })
+    .on('show.bs.collapse', function () {
+      // fires immediately after clicking Show
+      $('#toggle_' + $(this).attr('id')).addClass('fa-minus').removeClass('fa-plus');
+    })
+});
+
+    function expandAll() {
+        for (const collapse of document.querySelectorAll('[id^=articles_]')) {
+            slug = collapse.id.slice(9)
+            if (!collapse.classList.contains('show')) {
+                document.getElementById('toggle_' + slug).click()
+            }
+        }
+    }
+    
+    function collapseAll() {
+        for (const collapse of document.querySelectorAll('[id^=articles_]')) {
+            slug = collapse.id.slice(9)
+            if (collapse.classList.contains('show')) {
+                document.getElementById('toggle_' + slug).click()
+            }
+        }
+    }
+    
+    function confirmDelete(type, title, url) {
+        $('#deleteModalLabel').text(`Confirm ${type} Deletion`) 
+        $('#modal_delete_confirm')[0].href = url
+        $('#modal_delete_confirm').children()[0].innerText = `Delete ${type}`
+        if (type == "Category") {
+            $('#modal_delete_body').html(
+                `
+                Please confirm that you want to delete the Category: <strong>${title}</strong>.<br>
+                This will also delete any associated <strong>Articles</strong>.
+                <br><br>This action <strong>cannot</strong> be undone.
+                `)
+        } else {
+            $('#modal_delete_body').html(
+                `
+                Please confirm that you want to delete the Article: <strong>${title}</strong>.
+                <br><br>This action <strong>cannot</strong> be undone.
+                `
+                )
+            
+        }
+        
+        $('#deleteModal').modal('show');
+    }
+</script>
+
+{% url 'helpdesk:delete_kb_category' category.slug as delete_url%}
+{% include 'helpdesk/include/confirm_delete.html' with type="Category" title=category.title delete_url=delete_url subdelete="Article" %}
+
+{% endblock %}
