@@ -1007,16 +1007,17 @@ class FollowUp(models.Model):
     def time_spent_calculation(self):
         "Returns timedelta according to rules settings."
 
-        # extract earliest time from previous follow-up
-        # or ticket creation time
+        # extract parameters from previous follow-up or ticket
         try:
             prev_fup_qs = self.ticket.followup_set.all()
             if self.id:
                 prev_fup_qs = prev_fup_qs.filter(id__lt=self.id)
             prev_fup = prev_fup_qs.latest("date")
             earliest = prev_fup.date
+            prev_status = prev_fup.new_status
         except ObjectDoesNotExist:
             earliest = self.ticket.created
+            prev_status = self.ticket.status
         
         # latest time is current follow-up date
         latest = self.date
@@ -1046,7 +1047,7 @@ class FollowUp(models.Model):
                 end_day_time = middle_day_time.replace(hour=23, minute=59, second=59)
             
             if (start_day_time.strftime("%m-%d") not in holidays and
-                self.ticket.status not in exclude_statuses and
+                prev_status not in exclude_statuses and
                 self.ticket.queue.slug not in exclude_queues):
                 time_spent_seconds += daily_time_spent_calculation(start_day_time, end_day_time, open_hours)
 
