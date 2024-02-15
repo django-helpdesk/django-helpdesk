@@ -321,11 +321,9 @@ Time Tracking Options
 
   **Default:** ``HELPDESK_FOLLOWUP_TIME_SPENT_EXCLUDE_HOLIDAYS = ()``
   
-  This example removes the first and last days of the year together with Christmas::
+  This example removes Christmas and New Year's Eve in 2024::
 
-        HELPDESK_FOLLOWUP_TIME_SPENT_EXCLUDE_HOLIDAYS = ("01-01",
-                                                         "12-25",
-                                                         "12-31",)
+        HELPDESK_FOLLOWUP_TIME_SPENT_EXCLUDE_HOLIDAYS = ("2024-12-25", "2024-12-31",)
 
 - **HELPDESK_FOLLOWUP_TIME_SPENT_EXCLUDE_STATUSES** List of ticket statuses to exclude from automatic follow-up 'time_spent' calculation.
 
