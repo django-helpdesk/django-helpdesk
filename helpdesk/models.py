@@ -8,7 +8,7 @@ models.py - Model (and hence database) definitions. This is the core of the
 """
 
 
-from .lib import convert_value, daily_time_spent_calculation
+from .lib import format_time_spent, convert_value, daily_time_spent_calculation
 from .templated_email import send_templated_mail
 from .validators import validate_file_extension
 from .webhooks import send_new_ticket_webhook
@@ -31,17 +31,6 @@ import os
 import re
 from rest_framework import serializers
 import uuid
-
-
-def format_time_spent(time_spent):
-    if time_spent:
-        time_spent = "{0:02d}h:{1:02d}m".format(
-            int(time_spent.total_seconds()) // 3600,
-            int(time_spent.total_seconds()) % 3600 // 60
-        )
-    else:
-        time_spent = ""
-    return time_spent
 
 
 class EscapeHtml(Extension):
@@ -1017,7 +1006,7 @@ class FollowUp(models.Model):
 
     def time_spent_calculation(self):
         "Returns timedelta according to rules settings."
-        
+
         # extract earliest time from previous follow-up
         # or ticket creation time
         try:

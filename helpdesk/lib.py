@@ -173,11 +173,10 @@ def format_time_spent(time_spent):
     """Format time_spent attribute to "[H]HHh:MMm" text string to be allign in
     all graphical outputs
     """
-
     if time_spent:
         time_spent = "{0:02d}h:{1:02d}m".format(
-            time_spent.seconds // 3600,
-            time_spent.seconds // 60
+            int(time_spent.total_seconds()) // 3600,
+            int(time_spent.total_seconds()) % 3600 // 60
         )
     else:
         time_spent = ""
