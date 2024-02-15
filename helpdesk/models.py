@@ -1000,17 +1000,12 @@ class FollowUp(models.Model):
         return u"%s#followup%s" % (self.ticket.get_absolute_url(), self.id)
 
     def save(self, *args, **kwargs):
-        now = timezone.now()
-        t = self.ticket
+        self.ticket.modified = timezone.now()
+        self.ticket.save()
+
         if helpdesk_settings.FOLLOWUP_TIME_SPENT_AUTO and not self.time_spent:
-            try:
-                latest_fup = t.followup_set.exclude(id=self.id).latest("date")
-                latest_time = latest_fup.date
-            except ObjectDoesNotExist:
-                latest_time = t.created
-            self.time_spent = self.time_spent_calculation(latest_time, now)
-        t.modified = now
-        t.save()
+            self.time_spent = self.time_spent_calculation()
+
         super(FollowUp, self).save(*args, **kwargs)
 
     def get_markdown(self):
@@ -1020,9 +1015,23 @@ class FollowUp(models.Model):
     def time_spent_formated(self):
         return format_time_spent(self.time_spent)
 
-    def time_spent_calculation(self, earliest, latest):
+    def time_spent_calculation(self):
         "Returns timedelta according to rules settings."
-
+        
+        # extract earliest time from previous follow-up
+        # or ticket creation time
+        try:
+            prev_fup_qs = self.ticket.followup_set.all()
+            if self.id:
+                prev_fup_qs = prev_fup_qs.filter(id__lt=self.id)
+            prev_fup = prev_fup_qs.latest("date")
+            earliest = prev_fup.date
+        except ObjectDoesNotExist:
+            earliest = self.ticket.created
+        
+        # latest time is current follow-up date
+        latest = self.date
+        
         time_spent_seconds = 0
         open_hours = helpdesk_settings.FOLLOWUP_TIME_SPENT_OPENING_HOURS
         holidays = helpdesk_settings.FOLLOWUP_TIME_SPENT_EXCLUDE_HOLIDAYS
