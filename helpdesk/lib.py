@@ -9,7 +9,7 @@ lib.py - Common functions (eg multipart e-mail)
 
 from datetime import date, datetime, time
 from django.conf import settings
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, ImproperlyConfigured
 from django.utils.encoding import smart_str
 from helpdesk.settings import CUSTOMFIELD_DATE_FORMAT, CUSTOMFIELD_DATETIME_FORMAT, CUSTOMFIELD_TIME_FORMAT
 import logging
@@ -206,7 +206,8 @@ def daily_time_spent_calculation(earliest, latest, open_hours):
     MIDNIGHT = 23.9999
     start, end = open_hours.get(weekday, (0, MIDNIGHT))
     if not 0 <= start <= end <= MIDNIGHT:
-        start, end = 0, MIDNIGHT
+        raise ImproperlyConfigured("HELPDESK_FOLLOWUP_TIME_SPENT_OPENING_HOURS"
+                        f" setting for {weekday} out of (0, 23.9999) boundary")
     
     # transform decimals to minutes and seconds
     start_hour, start_minute, start_second = int(start), int(start % 1 * 60), int(start * 60 % 1 * 60)
