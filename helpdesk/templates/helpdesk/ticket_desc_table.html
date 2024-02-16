@@ -120,7 +120,7 @@ copy_public_link = function() {
                                 {% else %}<span title="This field is paired to a column in BEAM's inventory.">{{ field.label }} <i class="fas fa-city"></i></span>{% endif %}
                                 {% else %}{{ field.label }}{% endif %}
                             </th>
-                            {% if forloop.last %} <td colspan="3"> {% else %} <td> {% endif %}
+                            {% if forloop.last and row %} <td colspan="3"> {% else %} <td> {% endif %}
                             {% spaceless %}{% if "url" == field.data_type %}<a href='{{ field.value }}'>{{ field.value }}</a>
                                 {% elif "datetime" == field.data_type %}{{ field.value|datetime_string_format }}
                                 {% elif "date" == field.data_type %}{{ field.value|datetime_string_format }}
@@ -232,7 +232,7 @@ copy_public_link = function() {
                         </td>
                     </tr>
                     <tr>
-                        <td id="ticket-description" colspan='4'>
+                        <td id="ticket-description" colspan='4' style="max-width:1px;">
                             <h4>{% trans "Description" %}</h4>
                             {{ ticket.get_markdown|num_to_link }}</td>
                     </tr>
