@@ -47,6 +47,14 @@ HELPDESK_REDIRECT_TO_LOGIN_BY_DEFAULT = getattr(settings,
                                                 'HELPDESK_REDIRECT_TO_LOGIN_BY_DEFAULT',
                                                 False)
 
+HELPDESK_PUBLIC_VIEW_PROTECTOR = getattr(settings,
+                                         'HELPDESK_PUBLIC_VIEW_PROTECTOR',
+                                         lambda _: None)
+
+HELPDESK_STAFF_VIEW_PROTECTOR = getattr(settings,
+                                         'HELPDESK_STAFF_VIEW_PROTECTOR',
+                                         lambda _: None)
+
 # Enable the Dependencies field on ticket view
 HELPDESK_ENABLE_DEPENDENCIES_ON_TICKET = getattr(settings,
                                                  'HELPDESK_ENABLE_DEPENDENCIES_ON_TICKET',
