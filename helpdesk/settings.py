@@ -337,6 +337,10 @@ HELPDESK_IMAP_DEBUG_LEVEL = getattr(settings, 'HELPDESK_IMAP_DEBUG_LEVEL', 0)
 # Override it in your own Django settings.py
 HELPDESK_ATTACHMENT_DIR_PERMS = int(getattr(settings, 'HELPDESK_ATTACHMENT_DIR_PERMS', "755"), 8)
 
+HELPDESK_VALID_EXTENSIONS = getattr(settings, 'HELPDESK_VALID_EXTENSIONS', ['.txt', '.asc', '.htm', '.html', '.pdf', '.doc', '.docx', '.odt', '.jpg', '.png', '.eml'])
+
+HELPDESK_VALIDATE_ATTACHMENT_TYPES = getattr(settings, 'HELPDESK_VALIDATE_ATTACHMENT_TYPES', True)
+
 def get_followup_webhook_urls():
     urls = os.environ.get('HELPDESK_FOLLOWUP_WEBHOOK_URLS', None)
     if urls:

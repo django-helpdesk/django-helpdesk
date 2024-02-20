@@ -85,9 +85,11 @@ These changes are visible throughout django-helpdesk
 
   **Default:** ``HELPDESK_MAX_EMAIL_ATTACHMENT_SIZE = 512000``
 
-- **VALID_EXTENSIONS** Valid extensions for file types that can be attached to tickets
+- **HELPDESK_VALID_EXTENSIONS** Valid extensions for file types that can be attached to tickets
 
-  **Default:** ``VALID_EXTENSIONS = ['.txt', '.asc', '.htm', '.html', '.pdf', '.doc', '.docx', '.odt', '.jpg', '.png', '.eml']
+  **Default:** ``HELPDESK_VALID_EXTENSIONS = ['.txt', '.asc', '.htm', '.html', '.pdf', '.doc', '.docx', '.odt', '.jpg', '.png', '.eml']
+
+- **HELPDESK_VALIDATE_ATTACHMENT_TYPES** If you'd like to turn of filtering of helpdesk extension types you can set this to False.
 
 - **QUEUE_EMAIL_BOX_UPDATE_ONLY** Only process mail with a valid tracking ID; all other mail will be ignored instead of creating a new ticket.
 
