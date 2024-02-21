@@ -317,7 +317,7 @@ Time Tracking Options
   Valid hour values must be set between 0 and 23.9999.
   In this example 8.5 is interpreted as 8:30AM, saturdays and sundays don't count.
   
-- **HELPDESK_FOLLOWUP_TIME_SPENT_EXCLUDE_HOLIDAYS** List of days in format "%m-%d" to exclude from automatic follow-up 'time_spent' calculation.
+- **HELPDESK_FOLLOWUP_TIME_SPENT_EXCLUDE_HOLIDAYS** List of days in format "%Y-%m-%d" to exclude from automatic follow-up 'time_spent' calculation.
 
   **Default:** ``HELPDESK_FOLLOWUP_TIME_SPENT_EXCLUDE_HOLIDAYS = ()``
   
