@@ -582,8 +582,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
     hidden_fields = []
 
     description = forms.CharField(
-        widget=forms.Textarea(attrs={'class': 'form-control'}),
-        help_text=Ticket.description.field.help_text
+        widget=forms.Textarea(attrs={'class': 'form-control'})
     )
 
     queue = forms.ChoiceField(
@@ -1042,7 +1041,6 @@ class PublicTicketForm(AbstractTicketForm):
         if self.form_queue is None:
             self.fields['queue'].choices = [('', '--------')] + [
                 (q.id, q.title) for q in public_queues]
-        self.fields['description'].help_text = ""
 
     def save(self, user, form_id=None):
         """
