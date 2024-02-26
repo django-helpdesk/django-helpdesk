@@ -37,13 +37,31 @@ If you want to override the default settings for your users, create ``HELPDESK_D
             'tickets_per_page': 25
             }
 
-Generic Options
+Access controll & Security
 ---------------
-These changes are visible throughout django-helpdesk
+These settings can be used to change who can access the helpdesk.
+
+- **HELPDESK_PUBLIC_VIEW_PROTECTOR** This is a function that takes a request and can either return `None` granting access to to a public view or a redirect denying access.
+
+- **HELPDESK_STAFF_VIEW_PROTECTOR** This is a function that takes a request and can either return `None` granting access to to a staff view or a redirect denying access.
 
 - **HELPDESK_REDIRECT_TO_LOGIN_BY_DEFAULT** When a user visits "/", should we redirect to the login page instead of the default homepage?
 
   **Default:** ``HELPDESK_REDIRECT_TO_LOGIN_BY_DEFAULT = False``
+
+- **HELPDESK_VALID_EXTENSIONS** Valid extensions for file types that can be attached to tickets
+
+  **Default:** ``HELPDESK_VALID_EXTENSIONS = ['.txt', '.asc', '.htm', '.html', '.pdf', '.doc', '.docx', '.odt', '.jpg', '.png', '.eml']
+
+- **HELPDESK_VALIDATE_ATTACHMENT_TYPES** If you'd like to turn of filtering of helpdesk extension types you can set this to False.
+
+- **HELPDESK_ANON_ACCESS_RAISES_404** If True, redirects user to a 404 page when attempting to reach ticket pages while not logged in, rather than redirecting to a login screen.
+
+  **Default:** ``HELPDESK_ANON_ACCESS_RAISES_404 = False``
+
+Generic Options
+---------------
+These changes are visible throughout django-helpdesk
 
 - **HELPDESK_KB_ENABLED** show knowledgebase links?
 
@@ -85,19 +103,9 @@ These changes are visible throughout django-helpdesk
 
   **Default:** ``HELPDESK_MAX_EMAIL_ATTACHMENT_SIZE = 512000``
 
-- **HELPDESK_VALID_EXTENSIONS** Valid extensions for file types that can be attached to tickets
-
-  **Default:** ``HELPDESK_VALID_EXTENSIONS = ['.txt', '.asc', '.htm', '.html', '.pdf', '.doc', '.docx', '.odt', '.jpg', '.png', '.eml']
-
-- **HELPDESK_VALIDATE_ATTACHMENT_TYPES** If you'd like to turn of filtering of helpdesk extension types you can set this to False.
-
 - **QUEUE_EMAIL_BOX_UPDATE_ONLY** Only process mail with a valid tracking ID; all other mail will be ignored instead of creating a new ticket.
 
   **Default:** ``QUEUE_EMAIL_BOX_UPDATE_ONLY = False``
-
-- **HELPDESK_ANON_ACCESS_RAISES_404** If True, redirects user to a 404 page when attempting to reach ticket pages while not logged in, rather than redirecting to a login screen.
-
-  **Default:** ``HELPDESK_ANON_ACCESS_RAISES_404 = False``
 
 - **HELPDESK_ENABLE_DEPENDENCIES_ON_TICKET** If False, disable the dependencies fields on ticket.
 
