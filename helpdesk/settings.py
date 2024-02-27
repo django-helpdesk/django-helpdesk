@@ -151,6 +151,36 @@ TICKET_PRIORITY_CHOICES = getattr(settings,
                                   'HELPDESK_TICKET_PRIORITY_CHOICES',
                                   DEFAULT_TICKET_PRIORITY_CHOICES)
 
+
+#########################
+# time tracking options #
+#########################
+
+# Follow-ups automatic time_spent calculation
+FOLLOWUP_TIME_SPENT_AUTO = getattr(settings,
+                                   'HELPDESK_FOLLOWUP_TIME_SPENT_AUTO',
+                                   False)
+
+# Calculate time_spent according to open hours
+FOLLOWUP_TIME_SPENT_OPENING_HOURS = getattr(settings,
+                                   'HELPDESK_FOLLOWUP_TIME_SPENT_OPENING_HOURS',
+                                   {})
+
+# Holidays don't count for time_spent calculation
+FOLLOWUP_TIME_SPENT_EXCLUDE_HOLIDAYS = getattr(settings,
+                                   'HELPDESK_FOLLOWUP_TIME_SPENT_EXCLUDE_HOLIDAYS',
+                                   ())
+
+# Time doesn't count for listed ticket statuses
+FOLLOWUP_TIME_SPENT_EXCLUDE_STATUSES = getattr(settings,
+                                   'HELPDESK_FOLLOWUP_TIME_SPENT_EXCLUDE_STATUSES',
+                                   ())
+
+# Time doesn't count for listed queues slugs
+FOLLOWUP_TIME_SPENT_EXCLUDE_QUEUES = getattr(settings,
+                                   'HELPDESK_FOLLOWUP_TIME_SPENT_EXCLUDE_QUEUES',
+                                   ())
+
 ############################
 # options for public pages #
 ############################

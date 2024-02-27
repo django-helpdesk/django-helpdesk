@@ -9,7 +9,7 @@ lib.py - Common functions (eg multipart e-mail)
 
 from datetime import date, datetime, time
 from django.conf import settings
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, ImproperlyConfigured
 from django.utils.encoding import smart_str
 from helpdesk.settings import CUSTOMFIELD_DATE_FORMAT, CUSTOMFIELD_DATETIME_FORMAT, CUSTOMFIELD_TIME_FORMAT
 import logging
@@ -173,11 +173,10 @@ def format_time_spent(time_spent):
     """Format time_spent attribute to "[H]HHh:MMm" text string to be allign in
     all graphical outputs
     """
-
     if time_spent:
         time_spent = "{0:02d}h:{1:02d}m".format(
-            time_spent.seconds // 3600,
-            time_spent.seconds // 60
+            int(time_spent.total_seconds()) // 3600,
+            int(time_spent.total_seconds()) % 3600 // 60
         )
     else:
         time_spent = ""
@@ -194,3 +193,45 @@ def convert_value(value):
         return value.strftime(CUSTOMFIELD_TIME_FORMAT)
     else:
         return value
+
+
+def daily_time_spent_calculation(earliest, latest, open_hours):
+    """Returns the number of seconds for a single day time interval according to open hours."""
+
+    # avoid rendering day in different locale
+    weekday = ('monday', 'tuesday', 'wednesday', 'thursday',
+                'friday', 'saturday', 'sunday')[earliest.weekday()]
+    
+    # enforce correct settings
+    MIDNIGHT = 23.9999
+    start, end = open_hours.get(weekday, (0, MIDNIGHT))
+    if not 0 <= start <= end <= MIDNIGHT:
+        raise ImproperlyConfigured("HELPDESK_FOLLOWUP_TIME_SPENT_OPENING_HOURS"
+                        f" setting for {weekday} out of (0, 23.9999) boundary")
+    
+    # transform decimals to minutes and seconds
+    start_hour, start_minute, start_second = int(start), int(start % 1 * 60), int(start * 60 % 1 * 60)
+    end_hour, end_minute, end_second = int(end), int(end % 1 * 60), int(end * 60 % 1 * 60)
+
+    # translate time for delta calculation
+    earliest_f = earliest.hour + earliest.minute / 60 + earliest.second / 3600
+    latest_f = latest.hour + latest.minute / 60 + latest.second / 3600
+
+    if earliest_f < start:
+        earliest = earliest.replace(hour=start_hour, minute=start_minute, second=start_second)
+    elif earliest_f >= end:
+        earliest = earliest.replace(hour=end_hour, minute=end_minute, second=end_second)
+    
+    if latest_f < start:
+        latest = latest.replace(hour=start_hour, minute=start_minute, second=start_second)
+    elif latest_f >= end:
+        latest = latest.replace(hour=end_hour, minute=end_minute, second=end_second)
+    
+    day_delta = latest - earliest
+
+    # returns up to 86399 seconds, add one second if full day
+    time_spent_seconds = day_delta.seconds
+    if time_spent_seconds == 86399:
+        time_spent_seconds += 1
+    
+    return time_spent_seconds

@@ -291,6 +291,56 @@ Options that change ticket properties
             (7, _('7. Hot')),
         )
 
+Time Tracking Options
+---------------------
+
+- **HELPDESK_FOLLOWUP_TIME_SPENT_AUTO** If ``True``, calculate follow-up 'time_spent' with previous follow-up or ticket creation time.
+
+  **Default:** ``HELPDESK_FOLLOWUP_TIME_SPENT_AUTO = False``
+
+- **HELPDESK_FOLLOWUP_TIME_SPENT_OPENING_HOURS** If defined, calculates follow-up 'time_spent' according to open hours.
+  
+  **Default:** ``HELPDESK_FOLLOWUP_TIME_SPENT_OPENING_HOURS = {}``
+  
+  If HELPDESK_FOLLOWUP_TIME_SPENT_AUTO is ``True``, you may set open hours to remove off hours from 'time_spent'::
+  
+        HELPDESK_FOLLOWUP_TIME_SPENT_OPENING_HOURS = {
+            "monday": (8.5, 19),
+            "tuesday": (8.5, 19),
+            "wednesday": (8.5, 19),
+            "thursday": (8.5, 19),
+            "friday": (8.5, 19),
+            "saturday": (0, 0),
+            "sunday": (0, 0),
+        }
+  
+  Valid hour values must be set between 0 and 23.9999.
+  In this example 8.5 is interpreted as 8:30AM, saturdays and sundays don't count.
+  
+- **HELPDESK_FOLLOWUP_TIME_SPENT_EXCLUDE_HOLIDAYS** List of days in format "%Y-%m-%d" to exclude from automatic follow-up 'time_spent' calculation.
+
+  **Default:** ``HELPDESK_FOLLOWUP_TIME_SPENT_EXCLUDE_HOLIDAYS = ()``
+  
+  This example removes Christmas and New Year's Eve in 2024::
+
+        HELPDESK_FOLLOWUP_TIME_SPENT_EXCLUDE_HOLIDAYS = ("2024-12-25", "2024-12-31",)
+
+- **HELPDESK_FOLLOWUP_TIME_SPENT_EXCLUDE_STATUSES** List of ticket statuses to exclude from automatic follow-up 'time_spent' calculation.
+
+  **Default:** ``HELPDESK_FOLLOWUP_TIME_SPENT_EXCLUDE_STATUSES = ()``
+  
+  This example will have follow-ups to resolved ticket status not to be counted in::
+
+        HELPDESK_FOLLOWUP_TIME_SPENT_EXCLUDE_STATUSES = (HELPDESK_TICKET_RESOLVED_STATUS,)
+
+- **HELPDESK_FOLLOWUP_TIME_SPENT_EXCLUDE_QUEUES** List of ticket queues slugs to exclude from automatic follow-up 'time_spent' calculation.
+
+  **Default:** ``HELPDESK_FOLLOWUP_TIME_SPENT_EXCLUDE_QUEUES = ()``
+  
+  This example will have follow-ups to ticket queue 'time-not-counting-queue' not to be counted in::
+
+        HELPDESK_FOLLOWUP_TIME_SPENT_EXCLUDE_QUEUES = ('time-not-counting-queue',)
+
 Staff Ticket Creation Settings
 ------------------------------
 
