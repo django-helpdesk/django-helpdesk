@@ -14,6 +14,7 @@
 <p>{% blocktrans %}The following items can be maintained by you or other staff users:{% endblocktrans %}</p>
 
 <ul>
+    <li><a href='{% url 'helpdesk:kb_manage' %}'>{% trans "Knowledgebase" %}</a></li>
     <li><a href='{% url 'helpdesk:maintain_queues' %}'>{% trans "Queues" %}</a></li>
     <li><a href='{% url 'helpdesk:maintain_forms' %}'>{% trans "Forms" %}</a></li>
     <li><a href='{% url 'helpdesk:email_ignore' %}'>{% trans "Ignored Email Address List" %}</a></li>

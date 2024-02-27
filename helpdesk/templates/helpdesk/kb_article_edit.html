@@ -8,7 +8,11 @@
 <li class="breadcrumb-item">
     <a href="{% url 'helpdesk:kb_index' %}{{ user_info.url }}">{% trans "Knowledgebase" %}</a>
 </li>
-{% if category %}
+{% if manage %}
+<li class="breadcrumb-item">
+    <a href="{% url 'helpdesk:kb_manage' %}{{ user_info.url }}">{% trans "Manage" %}</a>
+</li>
+{% elif category %}
 <li class="breadcrumb-item active">
     <a href="{% url 'helpdesk:kb_category' category.slug %}{{ user_info.url }}">{% blocktrans with category.title as kbcat %}{{ kbcat }}{% endblocktrans %}</a>
 </li>
@@ -28,6 +32,7 @@
                     {% csrf_token %}
                     <fieldset>
                         {{ form|bootstrap4form }}
+                        <input type="hidden" name="manage" value="{{ manage }}">
                         {% if action == "Edit" %}
                             {% include 'helpdesk/include/collapsible_formset.html' with formset=form.attachment_formset formset_title="Attachment" formset_type="kbi_attachment" required_fields="['file']"%}
                         {% else %}
@@ -37,7 +42,9 @@
                             <input type='submit' class="btn btn-primary btn" 
                                 value="{% if action == "Create"%}Create Article{% else %}Save Changes{% endif %}"/>
                             <a href="
-                            {% if action == "Create"%}
+                            {% if manage %}
+                                {% url 'helpdesk:kb_manage' %}{{ user_info.url }}
+                            {% elif action == "Create"%}
                                 {% if category %}
                                     {% url 'helpdesk:kb_category' category.slug %}{{ user_info.url }}
                                 {% else %}

@@ -316,6 +316,10 @@ if helpdesk_settings.HELPDESK_KB_ENABLED:
             kb.index,
             name='kb_index'),
 
+        url(r'^kb/manage$',
+            kb.manage,
+            name='kb_manage'),
+
         url(r'^kb/create/article$', 
             kb.create_article,
             name='create_kb_article'),

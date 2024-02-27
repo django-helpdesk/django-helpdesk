@@ -351,6 +351,15 @@ def imap_sync(importer, queues, logger, server, debugging, options=None):
             logger.error("IMAP login failed due to SSL error. This is often due to a timeout. "
                          "Please check your connection and try again.")
             login_successful = False
+        except imaplib.IMAP4.error:
+            try:
+                logger.error("IMAP login failed. Trying again...")
+                server.login(importer.username or settings.QUEUE_EMAIL_BOX_USER,
+                             importer.password or settings.QUEUE_EMAIL_BOX_PASSWORD)
+                server.select(importer.email_box_imap_folder)
+            except Exception:
+                logger.error("IMAP login failed.")
+                login_successful = False
     server.debug = 3
 
     if login_successful:
