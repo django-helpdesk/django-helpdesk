@@ -519,6 +519,12 @@ def google_sync(importer, queues, logger, server, debugging):
     if importer.keep_mail:
         labels.append('UNREAD')
     response = server.users().messages().list(userId='me', labelIds=labels).execute()
+    if 'resultSizeEstimate' in response and response['resultSizeEstimate'] == 0:
+        logger.info("Received 0 messages from server")
+        return
+    elif 'messages' not in response:
+        logger.error(f'Received unexpected response: {response}')
+        return
     msgs = response['messages']
     logger.info("Received %s messages from server" % len(msgs))
     # ids_to_delete = []
