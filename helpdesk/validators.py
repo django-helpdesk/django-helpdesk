@@ -2,9 +2,8 @@
 #
 # validators for file uploads, etc.
 
-
-from django.conf import settings
 from django.utils.translation import gettext as _
+from helpdesk import settings as helpdesk_settings
 
 
 # TODO: can we use the builtin Django validator instead?
@@ -19,16 +18,10 @@ def validate_file_extension(value):
     # TODO: we might improve this with more thorough checks of file types
     # rather than just the extensions.
 
-    # check if VALID_EXTENSIONS is defined in settings.py
-    # if not use defaults
+    if not helpdesk_settings.HELPDESK_VALIDATE_ATTACHMENT_TYPES:
+        return
 
-    if hasattr(settings, 'VALID_EXTENSIONS'):
-        valid_extensions = settings.VALID_EXTENSIONS
-    else:
-        valid_extensions = ['.txt', '.asc', '.htm', '.html',
-                            '.pdf', '.doc', '.docx', '.odt', '.jpg', '.png', '.eml']
-
-    if ext.lower() not in valid_extensions:
+    if ext.lower() not in helpdesk_settings.HELPDESK_VALID_EXTENSIONS:
         # TODO: one more check in case it is a file with no extension; we
         # should always allow that?
         if not (ext.lower() == '' or ext.lower() == '.'):

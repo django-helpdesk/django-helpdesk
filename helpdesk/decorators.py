@@ -49,6 +49,8 @@ def protect_view(view_func):
             return redirect('helpdesk:login')
         elif not request.user.is_authenticated and helpdesk_settings.HELPDESK_ANON_ACCESS_RAISES_404:
             raise Http404
+        if auth_redirect := helpdesk_settings.HELPDESK_PUBLIC_VIEW_PROTECTOR(request):
+            return auth_redirect
         return view_func(request, *args, **kwargs)
 
     return _wrapped_view
@@ -65,6 +67,8 @@ def staff_member_required(view_func):
             return redirect('helpdesk:login')
         if not helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE and not request.user.is_staff:
             raise PermissionDenied()
+        if auth_redirect := helpdesk_settings.HELPDESK_STAFF_VIEW_PROTECTOR(request):
+            return auth_redirect
         return view_func(request, *args, **kwargs)
 
     return _wrapped_view
