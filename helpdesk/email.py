@@ -529,8 +529,8 @@ def google_sync(importer, queues, logger, server, debugging):
     logger.info("Received %s messages from server" % len(msgs))
     # ids_to_delete = []
     # filter for mail
-    try:
-        for item in msgs:
+    for item in msgs:
+        try:
             # item is an id and thread id
             msg_id = item['id']
             msg = server.users().messages().get(userId='me', id=msg_id).execute()
@@ -548,13 +548,18 @@ def google_sync(importer, queues, logger, server, debugging):
                         server.users().messages().modify(userId='me', id=msg_id, body={'removeLabelIds': ['UNREAD']}).execute()
                         logger.info("Successfully processed message %s, marked as Read on server\n" % msg_id)
                     else:
-                        server.users().messages().trash(userId='me', id=msg_id).execute()
+                        try:
+                            server.users().messages().trash(userId='me', id=msg_id).execute()
+                        except Exception:
+                            # try it again
+                            server.users().messages().trash(userId='me', id=msg_id).execute()
                         # ids_to_delete.append(msg_id)
                         logger.info("Successfully processed message %s, deleted from server\n" % msg_id)
             else:
                 logger.warn("Message %s was not successfully processed, and will be left on server\n" % msg_id)
-    except Exception as e:
-        logger.error(e)  # todo
+        except Exception as e:
+            logger.error(e)  # todo
+            logger.warn("Message was not successfully processed, and will be left on server\n")
     # if ids_to_delete:
     #     server.users().messages().batch_delete(userId='me', ids=ids_to_delete).execute()
     #     logger.info('Deleted messages: %s' % ids_to_delete)
