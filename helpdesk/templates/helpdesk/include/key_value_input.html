@@ -1,18 +1,23 @@
+{% load floor_divide %}
 <div id="id_{{widget.name}}" class="card">
     <div id="{{widget.name}}_pairs" class="card-body">
-        <div id="pair_0" class="row">
-            {% for subwidget in widget.subwidgets %}
+        {% for subwidget in widget.subwidgets %}
+        {% if forloop.counter0|divisibleby:2 %}
+        <div id="pair_{% widthratio forloop.counter0 2 1 %}" class="row">
+        {% endif %}
             <div class="mb-2 col-md-5">
                 {% include subwidget.template_name with widget=subwidget %}
             </div>
             {% if forloop.counter|divisibleby:2 %}
             <div class="mb-2 col-md-2">
-                <a><button id="{{ widget.name }}_0_delete" type="button" class="btn btn-danger float-right delete_pair"><i class="fa fa-times"></i></button></a>
+                <a><button id="{{ widget.name }}_{{ forloop.counter0|floor_divide:2  }}_delete" type="button" class="btn btn-danger float-right delete_pair"><i class="fa fa-times"></i></button></a>
             </div>
             {% endif %}
 
-            {% endfor %}
+        {% if not forloop.counter0|divisibleby:2 %}
         </div>
+        {% endif %}
+        {% endfor %}
     </div>
     <div class="card-footer">
         <a><button id="{{ widget.name }}_pair" type="button" class="btn btn-primary float-right"><i class="fa fa-plus mr-1"></i>Add</button></a>
@@ -21,7 +26,8 @@
 
 
 <script type='text/javascript' language='javascript'>
-    var num_pairs = 1;
+    const pairs = $('#{{ widget.name }}_pairs');
+    var num_pairs = pairs.children().length;
 
     $('#id_{{widget.name}}').on('click', '.delete_pair', function(obj) {
         var pairs = $('#{{ widget.name }}_pairs');
@@ -32,11 +38,13 @@
         var id = e.attr('id').replace('{{ widget.name }}_', '').replace('_delete', '')
         id = parseInt(id)
         e.parents('#pair_' + id).remove();
+        num_pairs--;
 
         // Rename all the inputs to be in order
         pairs = $('#{{ widget.name }}_pairs').children();
         pairs.each(function (i, child) {
             const child_index = i * 2
+            $(child).attr('id', 'pair_' + i);
             $(child).find('select').attr('id', 'id_{{ widget.name }}_' + child_index).attr('name', '{{ widget.name }}_' + child_index);
             $(child).find('input').attr('id', 'id_{{ widget.name }}_' + (child_index + 1)).attr('name', '{{ widget.name }}_' + (child_index + 1));
             $(child).find('button').attr('id', 'id_{{ widget.name }}_' + i + '_delete').attr('name', '{{ widget.name }}_' + i + '_delete');
