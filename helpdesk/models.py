@@ -2048,6 +2048,7 @@ class CustomField(models.Model):
         ('ipaddress', _('IP Address')),
         ('slug', _('Slug')),
         ('attachment', _('Attachment')),
+        ('key_value', _('Key Value')),
     )
 
     data_type = models.CharField(

@@ -73,7 +73,7 @@ class CustomFieldMixin(object):
     Mixin that provides a method to turn CustomFields into an actual field
     """
 
-    def customfield_to_field(self, field, instanceargs):
+    def customfield_to_field(self, field, instanceargs, kwargs={}):
         # Field is an object in CustomField, with attributes like field_name, label, help_text, etc
         # instanceargs dict is for the frontend display settings like max_length, the kind of form widget, etc
         # Use TextInput widget by default
@@ -103,6 +103,26 @@ class CustomFieldMixin(object):
                 choices.insert(0, ('', '---------'))
             instanceargs['choices'] = choices
             instanceargs['widget'] = forms.Select(attrs={'class': 'form-control'})
+        elif field.data_type == 'key_value':
+            keys = []
+            if kwargs and kwargs.get('data'):
+                keys = list(filter(lambda k: (field.field_name + '_') in k, kwargs['data'].keys()))
+
+            fieldclass = KeyValueField
+            choices = field.choices_as_array
+            if field.empty_selection_list:
+                choices.insert(0, ('', '---------'))
+            instanceargs['choices'] = choices
+            instanceargs['num_widgets'] = len(keys) // 2 if keys else 1
+
+            key_widget = forms.Select(attrs={'class': 'form-control'}, choices=choices)
+            value_widget = forms.TextInput(attrs={'class': 'form-control'})
+
+            instanceargs['key_widget'] = key_widget
+            instanceargs['value_widget'] = value_widget
+
+            instanceargs['key_field'] = forms.ChoiceField(choices=choices, widget=key_widget)
+            instanceargs['value_field'] = forms.CharField(widget=value_widget)
         else:
             # Try to use the immediate equivalences dictionary
             try:
@@ -195,7 +215,7 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
                     'required': display_data.required,
                     'initial': initial_value,
                 }
-                self.customfield_to_field(display_data, instanceargs)
+                self.customfield_to_field(display_data, instanceargs, kwargs=kwargs)
 
             elif display_data.field_name in self.fields:
                 # if a built-in ticket field shouldn't be editable on this page, add its field name to this list
@@ -370,6 +390,39 @@ class MatchOnField(forms.MultiValueField):
 
 class MatchOnWidget(forms.widgets.MultiWidget):
     template_name = 'helpdesk/include/multi_text_input.html'
+
+    def decompress(self, value):
+        if value:
+            return value
+        return []
+
+
+class KeyValueField(forms.MultiValueField):
+    """
+        Custom MultiValueField that creates num_widgets number of ChoiceField - TextField Pairs.
+        These fields are available as a list, with a button below to add an additional field.
+    """
+
+    def __init__(self, choices, num_widgets, key_field, value_field, key_widget, value_widget, *args, **kwargs):
+        self.fields = []
+        self.widgets = []
+
+        for i in range(num_widgets):
+            self.fields += [key_field, value_field]
+            self.widgets += [key_widget, value_widget]
+
+        self.widget = KeyValueWidget(widgets=self.widgets)
+        kwargs.pop('widget')
+        super(KeyValueField, self).__init__(fields=self.fields, *args, **kwargs)
+
+    def compress(self, values):
+        if not values:
+            return ''
+        return values
+
+
+class KeyValueWidget(forms.widgets.MultiWidget):
+    template_name = 'helpdesk/include/key_value_input.html'
 
     def decompress(self, value):
         if value:
@@ -833,7 +886,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
         )
 
     # TODO move this init
-    def _add_form_custom_fields(self, staff_filter=None, public_filter=None):
+    def _add_form_custom_fields(self, staff_filter=None, public_filter=None, kwargs={}):
         if self.form_id is not None:
             if staff_filter:
                 queryset = CustomField.objects.filter(ticket_form=self.form_id, staff=True)
@@ -877,7 +930,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
                         'help_text': field.get_markdown(),
                         'required': field.required,
                     }
-                    self.customfield_to_field(field, instanceargs)
+                    self.customfield_to_field(field, instanceargs, kwargs=kwargs)
             for field in hidden_queryset:
                 if field.field_name not in self.fields:
                     self.customfield_to_field(field, {})
@@ -951,7 +1004,7 @@ class TicketForm(AbstractTicketForm):
         queue_choices = kwargs.pop("queue_choices")
 
         super().__init__(*args, **kwargs)
-        self._add_form_custom_fields(staff_filter=True)
+        self._add_form_custom_fields(staff_filter=True, kwargs=kwargs)
 
         if self.form_queue is None:
             self.fields['queue'].choices = queue_choices
@@ -1023,7 +1076,7 @@ class PublicTicketForm(AbstractTicketForm):
         Add any (non-staff) custom fields that are defined to the form
         """
         super(PublicTicketForm, self).__init__(*args, **kwargs)
-        self._add_form_custom_fields(public_filter=True)
+        self._add_form_custom_fields(public_filter=True, kwargs=kwargs)
 
         # Hiding fields based on CustomField attributes has already been done; this is hiding based on kwargs
         for field in self.fields.keys():
