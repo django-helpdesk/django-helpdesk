@@ -19,9 +19,11 @@ var key = {
   ext_or_exempt: 'e_extension_or_exemption',
   ext_reason: 'e_extension_reason',
 
-  // Colorado Specific
+  // Colorado Exemption
   reason: 'e_reason',
-  calculator: 'e_calculator'
+  calculator: 'e_calculator',
+  // Colorado Waiver
+  financial_hardship: 'e_financial_hardship'
 };
 
 var id = {};
@@ -314,3 +316,24 @@ $(id.reason).change(function () {
   toggle_calculator();
 });
 toggle_calculator();
+
+
+const toggle_financial_hardship = function () {
+  if ($(id.reason).val() == '5) Meets a condition for financial hardship') {
+    $(group.financial_hardship).show();
+    $(group.financial_hardship + ' label').after('<span style="color:red;">*</span>'); // Mark required
+  } else {
+    $(group.financial_hardship).hide();
+    $(group.financial_hardship).children('span').remove(); // Remove mark as required
+
+    // Remove error message if a different Pathway was selected before Backup Pathway could be changed
+    $(id.financial_hardship + '-error').remove();
+
+    // Reset
+    $(id.financial_hardship).prop('selectedIndex', 0);
+  }
+};
+$(id.reason).change(function () {
+  toggle_financial_hardship();
+});
+toggle_financial_hardship();

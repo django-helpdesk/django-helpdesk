@@ -738,6 +738,9 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
         if form.name == 'Building Performance Colorado Program Exemption Request':
             self.clean_co_exemption_request_form()
 
+        if form.name == 'Benchmarking Reporting: Annual Waiver Request':
+            self.clean_co_waiver_request_form()
+
         return cleaned_data
 
     def clean_dc_ps_form(self):
@@ -831,6 +834,13 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
                                             f'"{industrial_area} SqFt" is not greater than half the '
                                             f'Covered Building Gross Square Footage "{property_gfa} SqFt"')
                 self.add_error('e_calculator', msg)
+
+    def clean_co_waiver_request_form(self):
+        if self.cleaned_data.get('e_reason') == '5) Meets a condition for financial hardship':
+            # Check that an attachment was provided
+            if not self.cleaned_data.get('e_financial_hardship'):
+                self.add_error('e_financial_hardship',
+                               forms.ValidationError('Please select a conditions for financial hardship'))
 
     def _get_attachment_fields(self, with_e=False):
         attachment_fields = []
