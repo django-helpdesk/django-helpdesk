@@ -735,6 +735,9 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
         if form.name == 'Delay of Compliance Request':
             self.clean_dc_delay_of_compliance_form()
 
+        if form.name == 'Building Performance Colorado Program Exemption Request':
+            self.clean_co_exemption_request_form()
+
         return cleaned_data
 
     def clean_dc_ps_form(self):
@@ -773,6 +776,61 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
                     msg = forms.ValidationError(
                         field[1] + 'if Extended Delay for Qualified Affordable Housing is selected.')
                     self.add_error(field[0], msg)
+
+    def clean_co_exemption_request_form(self):
+        reason = ('4. More than half of the gross floor area used for manufacturing, industrial, '
+                  + 'or agricultural purposes')
+        industrial_property_types = ['Manufacturing/Industrial Plant', 'Energy/Power Station',
+                                     'Other - Utility', 'Wastewater Treatment Plant']
+
+        def to_float(value):
+            valid_float = False
+            try:
+                value = float(value)
+                valid_float = True
+            except Exception:
+                pass
+            return value, valid_float
+
+        if self.cleaned_data.get('e_reason') == reason:
+            property_gfa = self.cleaned_data.get('e_gsf')
+            property_gfa, valid = to_float(property_gfa)
+            if not valid:
+                if property_gfa:
+                    msg = forms.ValidationError('Need a number for Square Footage')
+                else:
+                    msg = forms.ValidationError('No Square Footage Provided')
+                self.add_error('e_gsf', msg)
+
+            pairs = self.cleaned_data.get('e_calculator')
+            if not pairs:
+                self.add_error('e_calculator', forms.ValidationError('Floor Area by Property Type not provided'))
+
+            i = 0
+            industrial_area = 0
+            while i < len(pairs):
+                key, value = pairs[i], pairs[i + 1]
+                pair_index = (i // 2) + 1
+
+                if not key:
+                    self.add_error('e_calculator', forms.ValidationError(f'No Key Provided for Pair {pair_index}'))
+                if not value:
+                    self.add_error('e_calculator', forms.ValidationError(f'No Value Provided for Pair {pair_index}'))
+
+                specific_sfa, valid_sfa = to_float(value)
+                if not valid_sfa:
+                    self.add_error('e_calculator', forms.ValidationError(f'Need a number for Pair {i // 2}'))
+
+                if key in industrial_property_types and valid_sfa:
+                    industrial_area += specific_sfa
+
+                i += 2
+
+            if property_gfa and industrial_area <= (property_gfa / 2):
+                msg = forms.ValidationError(f'Manufacturing, Industrial, or Agricultural Purpose Area '
+                                            f'"{industrial_area} SqFt" is not greater than half the '
+                                            f'Covered Building Gross Square Footage "{property_gfa} SqFt"')
+                self.add_error('e_calculator', msg)
 
     def _get_attachment_fields(self, with_e=False):
         attachment_fields = []

@@ -17,7 +17,11 @@ var key = {
 
   // Ann Arbor Specific
   ext_or_exempt: 'e_extension_or_exemption',
-  ext_reason: 'e_extension_reason'
+  ext_reason: 'e_extension_reason',
+
+  // Colorado Specific
+  reason: 'e_reason',
+  calculator: 'e_calculator'
 };
 
 var id = {};
@@ -291,3 +295,22 @@ $(id.ext_or_exempt).change(function () {
   toggle_ext_exempt();
 });
 toggle_ext_exempt(); // Initialize the form
+
+const toggle_calculator = function () {
+  if ($(id.reason).val() == '4. More than half of the gross floor area used for manufacturing, industrial, or agricultural purposes') {
+    $(group.calculator).show();
+  } else {
+    $(group.calculator).hide();
+
+    // Reset
+    var pairs = $('#' + key.calculator + '_pairs').children();
+    pairs.not(':first').remove();
+    var first_pair = $('#' + key.calculator + '_pairs').children().first();
+    first_pair.find('select').prop('selectedIndex', 0);
+    first_pair.find('input').val('');
+  }
+};
+$(id.reason).change(function () {
+  toggle_calculator();
+});
+toggle_calculator();
