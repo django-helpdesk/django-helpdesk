@@ -3,7 +3,7 @@
     <div id="{{widget.name}}_pairs" class="card-body">
         {% for subwidget in widget.subwidgets %}
         {% if forloop.counter0|divisibleby:2 %}
-        <div id="pair_{% widthratio forloop.counter0 2 1 %}" class="row">
+        <div id="{{widget.name}}_pair_{% widthratio forloop.counter0 2 1 %}" class="row">
         {% endif %}
             <div class="mb-2 col-md-5">
                 {% include subwidget.template_name with widget=subwidget %}
@@ -20,62 +20,112 @@
         {% endfor %}
     </div>
     <div class="card-footer">
-        <a><button id="{{ widget.name }}_pair" type="button" class="btn btn-primary float-right"><i class="fa fa-plus mr-1"></i>Add</button></a>
+        <a><button id="{{ widget.name }}_add_pair" type="button" class="btn btn-primary float-right"><i class="fa fa-plus mr-1"></i>Add</button></a>
     </div>
 </div>
 
 
 <script type='text/javascript' language='javascript'>
-    const pairs = $('#{{ widget.name }}_pairs');
-    var num_pairs = pairs.children().length;
+    $('#{{widget.name}}_pairs').on('change', 'select', function(obj) {
+        var e = $(obj.currentTarget);
+        var before_change = e.data('pre'); // get the stored value
+        e.data('pre', e.val()); // update the stored value
 
-    $('#id_{{widget.name}}').on('click', '.delete_pair', function(obj) {
-        var pairs = $('#{{ widget.name }}_pairs');
-        if (pairs.children().length == 1) {
+        // Update every other select option
+        var container = $('#{{ widget.name }}_pairs');
+        var pairs = container.children();
+        pairs.each(function (i, child) {
+            $(child).find('option[value="' + before_change + '"]').show()
+            if (e.val()) {
+                $(child).find('option[value="' + e.val()  + '"]').hide()
+            }
+        });
+    });
+
+    $(document).ready(function () {
+        var container = $('#{{ widget.name }}_pairs');
+        // Get currently selected options
+        const current_selected = container.find('select').map((e, i) => $(i).val()).toArray();
+
+        // Go through all options and remove those that aren't currently selected
+        var pairs = container.children();
+        pairs.each(function (i, child) {
+            var my_options_to_remove = current_selected;
+            var select_e = $(child).find('select')
+            const selected = select_e.val();
+            select_e.data('pre', selected);  // Store value for later use
+            my_options_to_remove = my_options_to_remove.filter((option) => selected !== option);
+
+            // Remove the options from the current list
+            my_options_to_remove.forEach(function (option) {
+                if (option) {
+                    select_e.find('option[value="' + option + '"]').hide()
+                }
+            });
+        });
+    });
+
+    $('#{{widget.name}}_pairs').on('click', '.delete_pair', function(obj) {
+        var container = $('#{{ widget.name }}_pairs');
+        if (container.children().length == 1) {
             return;
         }
         var e = $(obj.currentTarget);
         var id = e.attr('id').replace('{{ widget.name }}_', '').replace('_delete', '')
         id = parseInt(id)
-        e.parents('#pair_' + id).remove();
-        num_pairs--;
+        var parent = e.parents('#{{widget.name}}_pair_' + id);
+        var selected = parent.find('select').val();
+        parent.remove();
 
         // Rename all the inputs to be in order
-        pairs = $('#{{ widget.name }}_pairs').children();
+        var pairs = $('#{{ widget.name }}_pairs').children();
         pairs.each(function (i, child) {
             const child_index = i * 2
-            $(child).attr('id', 'pair_' + i);
+            $(child).attr('id', '{{widget.name}}_pair_' + i);
             $(child).find('select').attr('id', 'id_{{ widget.name }}_' + child_index).attr('name', '{{ widget.name }}_' + child_index);
             $(child).find('input').attr('id', 'id_{{ widget.name }}_' + (child_index + 1)).attr('name', '{{ widget.name }}_' + (child_index + 1));
-            $(child).find('button').attr('id', 'id_{{ widget.name }}_' + i + '_delete').attr('name', '{{ widget.name }}_' + i + '_delete');
+            $(child).find('button').attr('id', '{{ widget.name }}_' + i + '_delete');
+
+            // Update options
+            $(child).find('option[value="' + selected + '"]').show()
         });
     });
 
-    $("#{{ widget.name }}_pair").on('click', function(a) {
+    $("#{{ widget.name }}_add_pair").on('click', function(a) {
         // Create new input elements and append it to the input container
 
         // Following only for CO Form
         // TODO: add ability to remove options that have already been selected
         // TODO: make Primary Property type the default first one and make it non-removable
-        const pairs = $('#{{ widget.name }}_pairs');
-        const base_pair = pairs.children().first();
-        var new_input_num = num_pairs * 2;
+        const container = $('#{{ widget.name }}_pairs');
+        const base_pair = container.children().first();
 
-        var row = $('<div>', {'class': 'row', 'id': 'pair_' + num_pairs})
+        var num_pairs = container.children().length;
+        var new_input_num = num_pairs * 2;
+        const current_selected = container.find('select').map((e, i) => $(i).val()).toArray();
+
+        var row = $('<div>', {'class': 'row', 'id': '{{widget.name}}_pair_' + num_pairs})
         var new_choice = base_pair.children().first().clone();
         new_choice.children().attr('id', 'id_{{ widget.name }}_' + new_input_num).attr('name', '{{ widget.name }}_' + new_input_num);
+        new_choice.find('select').prop('selectedIndex', 0);
+        current_selected.forEach(function (option) {
+            if (option) {
+                new_choice.find('option[value="' + option + '"]').hide()
+            }
+        });
+
         row.append(new_choice);
 
         var new_input = base_pair.children().eq(1).clone();
         new_input_num++;
         new_input.children().attr('id', 'id_{{ widget.name }}_' + new_input_num).attr('name', '{{ widget.name }}_' + new_input_num);
+        new_input.find('input').val('');
         row.append(new_input);
 
         var new_delete = base_pair.children().eq(2).clone();
         new_delete.children().first().children().attr('id', '{{ widget.name }}_' + num_pairs + '_delete');
         row.append(new_delete);
 
-        pairs.append(row);
-        num_pairs++;
+        container.append(row);
     });
 </script>

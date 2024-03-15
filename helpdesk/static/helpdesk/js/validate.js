@@ -309,6 +309,7 @@ const toggle_calculator = function () {
     pairs.not(':first').remove();
     var first_pair = $('#' + key.calculator + '_pairs').children().first();
     first_pair.find('select').prop('selectedIndex', 0);
+    first_pair.find('select').children().show();
     first_pair.find('input').val('');
   }
 };

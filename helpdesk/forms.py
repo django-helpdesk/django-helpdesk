@@ -104,16 +104,25 @@ class CustomFieldMixin(object):
             instanceargs['choices'] = choices
             instanceargs['widget'] = forms.Select(attrs={'class': 'form-control'})
         elif field.data_type == 'key_value':
-            keys = []
+            num_widgets = 1
             if kwargs and kwargs.get('data'):
-                keys = list(filter(lambda k: (field.field_name + '_') in k, kwargs['data'].keys()))
+                prefix = ''
+                if is_extra_data(field.field_name):
+                    prefix = 'e_'
+                regexp = prefix + re.escape(field.field_name) + r'_[0-9]*$'
+                keys = list(filter(lambda k: re.match(regexp, k), kwargs['data'].keys()))
+                num_widgets = len(keys) // 2 if keys else 1
+            elif instanceargs and instanceargs.get('initial'):
+                initial_value = instanceargs.get('initial')
+                if isinstance(initial_value, dict):
+                    num_widgets = len(initial_value)
 
             fieldclass = KeyValueField
             choices = field.choices_as_array
             if field.empty_selection_list:
                 choices.insert(0, ('', '---------'))
             instanceargs['choices'] = choices
-            instanceargs['num_widgets'] = len(keys) // 2 if keys else 1
+            instanceargs['num_widgets'] = num_widgets
 
             key_widget = forms.Select(attrs={'class': 'form-control'}, choices=choices)
             value_widget = forms.TextInput(attrs={'class': 'form-control'})
@@ -417,16 +426,27 @@ class KeyValueField(forms.MultiValueField):
 
     def compress(self, values):
         if not values:
-            return ''
-        return values
+            return values
+        i = 0
+        output = {}
+        while i < len(values):
+            key, value = values[i], values[i + 1]
+            output[key] = value
+            i += 2
+        return output
 
 
 class KeyValueWidget(forms.widgets.MultiWidget):
     template_name = 'helpdesk/include/key_value_input.html'
 
     def decompress(self, value):
+        # decompress expects the value for each widget to be in a list
+        formatted = []
         if value:
-            return value
+            for k, v in value.items():
+                formatted.append(k)
+                formatted.append(v)
+            return formatted
         return []
 
 
@@ -809,25 +829,20 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
             if not pairs:
                 self.add_error('e_calculator', forms.ValidationError('Floor Area by Property Type not provided'))
 
-            i = 0
             industrial_area = 0
-            while i < len(pairs):
-                key, value = pairs[i], pairs[i + 1]
-                pair_index = (i // 2) + 1
-
+            for i, (key, value) in enumerate(pairs.items()):
+                i += 1
                 if not key:
-                    self.add_error('e_calculator', forms.ValidationError(f'No Key Provided for Pair {pair_index}'))
+                    self.add_error('e_calculator', forms.ValidationError(f'No Key Provided for Pair {i}'))
                 if not value:
-                    self.add_error('e_calculator', forms.ValidationError(f'No Value Provided for Pair {pair_index}'))
+                    self.add_error('e_calculator', forms.ValidationError(f'No Value Provided for Pair {i}'))
 
                 specific_sfa, valid_sfa = to_float(value)
                 if not valid_sfa:
-                    self.add_error('e_calculator', forms.ValidationError(f'Need a number for Pair {i // 2}'))
+                    self.add_error('e_calculator', forms.ValidationError(f'Need a number for Pair {i}'))
 
                 if key in industrial_property_types and valid_sfa:
                     industrial_area += specific_sfa
-
-                i += 2
 
             if property_gfa and industrial_area <= (property_gfa / 2):
                 msg = forms.ValidationError(f'Manufacturing, Industrial, or Agricultural Purpose Area '
