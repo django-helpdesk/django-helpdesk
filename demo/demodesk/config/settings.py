@@ -68,7 +68,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'demo.demodesk.config.urls'
+ROOT_URLCONF = 'demodesk.config.urls'
 
 TEMPLATES = [
     {
@@ -87,7 +87,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'demo.demodesk.config.wsgi.application'
+WSGI_APPLICATION = 'demodesk.config.wsgi.application'
 
 
 # django-helpdesk configuration settings
