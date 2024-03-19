@@ -239,7 +239,7 @@ def process_importer(importer, queues, logger, debugging, options=None):
             logger.info("Attempting Google server login")
             server, _ = importer.auth.login(email=importer, logger=logger)
             if server:
-                google_sync(importer, queues, logger, server, debugging=debugging)
+                google_sync(importer, queues, logger, server, debugging=debugging, options=options)
 
 
 def pop3_sync(importer, queues, logger, server, debugging):
@@ -511,13 +511,16 @@ def exchange_sync(importer, queues, logger, server, debugging):
             logger.error(e)  # todo
 
 
-def google_sync(importer, queues, logger, server, debugging):
+def google_sync(importer, queues, logger, server, debugging, options=None):
     # first, connect
 
     # select box from email_box_imap_folder
     labels = ['INBOX']
     if importer.keep_mail:
         labels.append('UNREAD')
+    if options and 'labels' in options:
+        for label in options['labels']:
+            labels.append(label)
     response = server.users().messages().list(userId='me', labelIds=labels).execute()
     if 'resultSizeEstimate' in response and response['resultSizeEstimate'] == 0:
         logger.info("Received 0 messages from server")
@@ -662,6 +665,7 @@ def create_ticket_from_processed_message(message, ticket_id, payload, files, log
     sender_email = payload['sender'][1]
     org = queue.organization
     date = payload.get('date', now)
+    related_emails = payload.get('related_emails', None)
     ubids = re.findall(UBID_PATTERN, payload['subject'] + ' ' + payload['body'])
     if ubids:
         ubids = set(['-'.join(s) for s in ubids])
@@ -728,6 +732,14 @@ def create_ticket_from_processed_message(message, ticket_id, payload, files, log
                         ticket.extra_data[ubid_field.field_name] = ubids
                     else:
                         setattr(ticket, ubid_field.field_name, ubids[0:200])  # the building_id field tends to be capped at 200 characters
+
+            if related_emails:
+                related_emails_field = ticket_form.customfield_set.filter(field_name='related_email', data_type='email')
+                if related_emails_field.count() == 1:
+                    logger.debug("Found related emails, adding them to the ticket.")
+                    related_emails_field = related_emails_field.first()
+                    if is_extra_data(related_emails_field.field_name):
+                        ticket.extra_data[related_emails_field.field_name] = related_emails
 
             ticket.save()
             logger.debug("Created new ticket %s-%s" % (ticket.queue.slug, ticket.id))
@@ -1376,18 +1388,16 @@ def process_google_message(message, importer, queues, logger, msg_id, server):
                     logger.debug("Address deleted was %s" % address)  # TODO remove later for privacy
         return True
 
-    body = None
-    full_body = None
+    body = ''
+    full_body = ''
     counter = 0
     files = []
+    related_emails = set()
 
     def walk(parts_list):
         # function for recursively walking through parts of message
-        nonlocal body, full_body, counter, files
+        nonlocal body, full_body, counter, files, related_emails
         for part in parts_list:
-            if 'parts' in part:
-                walk(part['parts'])
-
             filename = None
             if 'filename' in part and part['filename']:
                 filename = part['filename']
@@ -1396,12 +1406,12 @@ def process_google_message(message, importer, queues, logger, msg_id, server):
                 data = part['body']['data']
                 if part['mimeType'] == 'text/plain':
                     body = urlsafe_b64decode(data).decode('utf-8')
-                    if ticket is None and getattr(django_settings, 'HELPDESK_FULL_FIRST_MESSAGE_FROM_EMAIL', False):
+                    if ticket is None:
                         # first message in thread, we save full body to avoid losing forwards and things like that
                         body_parts = []
                         for f in EmailReplyParser.read(body).fragments:
                             body_parts.append(f.content)
-                        full_body = '\n\n'.join(body_parts)
+                        full_body = full_body + '\n'.join(body_parts)
                         body = EmailReplyParser.parse_reply(body)
                     else:
                         # second and other reply, save only first part of the message
@@ -1449,7 +1459,19 @@ def process_google_message(message, importer, queues, logger, msg_id, server):
                     counter = counter + 1
                     logger.debug("Found MIME attachment %s" % filename)
 
+            if 'parts' in part:
+                walk(part['parts'])
+
+            if 'headers' in part:
+                for header in part['headers']:
+                    if header['name'] == 'To':
+                        related_emails.update(_parse_addr_string(header['value']))
+
     walk([message])
+    if related_emails:
+        related_emails = set(e[1] for e in related_emails)
+        related_emails.discard(queue.email_address)
+        related_emails = list(related_emails)
 
     if not body:
         mail = BeautifulSoup(str(message), "html.parser")
@@ -1488,6 +1510,7 @@ def process_google_message(message, importer, queues, logger, msg_id, server):
         'to_list': to_list,
         'message_id': message_id,
         'in_reply_to': in_reply_to,
+        'related_emails': list(set(related_emails))
     }
 
     return create_ticket_from_processed_message(message, ticket, payload, files, logger=logger)#, nj=nj)

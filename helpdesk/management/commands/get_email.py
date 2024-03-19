@@ -48,12 +48,25 @@ class Command(BaseCommand):
             default=False
         )
 
+        parser.add_argument(
+            '--labels',
+            nargs='+',
+            type=str
+        )
+
     def handle(self, *args, **options):
         quiet = options.get('quiet', False)
         debugging = options.get('debugging', False)
-        options_list = []
+
+        options_list = {}
         if options.get('date', None):
-            options_list.append('date')
+            options_list['date'] = True
+
+        # For Google emails
+        labels = options.get('labels', None)
+        if labels:
+            options_list['labels'] = labels
+
         process_email(quiet=quiet, debugging=debugging, options=options_list)
 
 
