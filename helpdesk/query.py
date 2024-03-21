@@ -193,13 +193,14 @@ class __Query__:
                     f'{rev}assigned_to__last_name',
                     f'{rev}assigned_to__first_name',
                     f'{rev}assigned_to__email',
+                    'id'
                 ]
-                queryset = queryset.order_by(*sort_by)
             else:
                 sortreverse = self.params.get('desc', None)
                 if sortreverse:
                     sorting = "-%s" % sorting
-                queryset = queryset.order_by(sorting)
+                sort_by = [sorting, 'id']
+            queryset = queryset.order_by(*sort_by)
 
         queryset = queryset.filter((Q(**filter) | Q(**filter_or)) & self.get_search_filter_args())
 
