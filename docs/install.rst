@@ -1,12 +1,12 @@
-.. _installation:
 Installation
 ============
 
 .. note:: 
 
-   For standalone installation, refer to the :doc:`standalone installation docs <standalone>`.
+    For standalone installation, refer to the :doc:`standalone installation docs <standalone>`.
 
-``django-helpdesk`` installation isn't difficult, but it requires you have a bit of existing know-how about Django.
+``django-helpdesk`` installation isn't difficult, but it requires you have a bit 
+of existing know-how about Django.
 
 
 Prerequisites
@@ -33,9 +33,12 @@ Installing using PIP
 Try using ``pip install django-helpdesk``. Go and have a beer to celebrate Python packaging.
 
 Checkout ``main`` branch from git (Cutting Edge)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If you're planning on editing the code or just want to get whatever is the latest and greatest, you can clone the official Git repository with ``git clone git://github.com/django-helpdesk/django-helpdesk.git``. Each official release of ``django-helpdesk`` is tagged.
+If you're planning on editing the code or just want to get whatever is the latest 
+and greatest, you can clone the official Git repository with 
+``git clone git://github.com/django-helpdesk/django-helpdesk.git``. Each official 
+release of ``django-helpdesk`` is tagged.
 
 Copy the ``helpdesk`` folder into your ``PYTHONPATH`` or add it to your ``PYTHONPATH``.
 
@@ -54,100 +57,134 @@ If you're on a brand new Django installation, make sure you do a ``migrate``
 errors with trying to create User settings.
 
 1. Edit your ``settings.py`` file add the following entries:
-   - add ``helpdesk`` to the ``INSTALLED_APPS`` along with some other required entries in the ``django.contrib`` package.
+   
+   - Add ``helpdesk`` to the ``INSTALLED_APPS`` along with some other required 
+     entries in the ``django.contrib`` package.
 
-     An example of the core  ``INSTALLED_APPS`` requirements for this app are shown below::
+    An example of the core  ``INSTALLED_APPS`` requirements for this app 
+    are shown below::
 
-     INSTALLED_APPS = (
-         'django.contrib.auth',
-         'django.contrib.contenttypes',
-         'django.contrib.sessions',
-         'django.contrib.sites',  # Required for determining domain url for use in emails
-         'django.contrib.admin',  # Required for helpdesk admin/maintenance
-         'django.contrib.humanize',  # Required for elapsed time formatting
-         'bootstrap4form', # Required for nicer formatting of forms with the default templates
-         'rest_framework',  # required for the API
-         'django_cleanup.apps.CleanupConfig',  # Remove this if you do NOT want to delete files on the file system when the associated record is deleted in the database
-         'helpdesk',  # This is us!
-     )
+        INSTALLED_APPS = (
+            'django.contrib.auth',
+            'django.contrib.contenttypes',
+            'django.contrib.sessions',
+            'django.contrib.sites',  # Required for determining domain url for use in emails
+            'django.contrib.admin',  # Required for helpdesk admin/maintenance
+            'django.contrib.humanize',  # Required for elapsed time formatting
+            'bootstrap4form', # Required for nicer formatting of forms with the default templates
+            'rest_framework',  # required for the API
+            'django_cleanup.apps.CleanupConfig',  # Remove this if you do NOT want to delete files on the file system when the associated record is deleted in the database
+            'helpdesk',  # This is us!
+        )
 
-   - Enable or disable Teams based ticket assignment by setting the boolean flag named ``HELPDESK_TEAMS_MODE_ENABLED`` to True or False.
+   - Enable or disable Teams based ticket assignment by setting the boolean flag named 
+     ``HELPDESK_TEAMS_MODE_ENABLED`` to ``True`` or ``False``.
    
      IMPORTANT NOTE: It is ENABLED by default if you do not set this flag to False
-     See the :doc::ref:`teams`. section for a detailed explanation of how to use teams mode.
+     See the :doc:`Working with teams<teams>` section for a detailed explanation of how to 
+     use teams mode.  
      Below is an example for disabling teams::
-       HELPDESK_TEAMS_MODE_ENABLED=False 
+
+        HELPDESK_TEAMS_MODE_ENABLED=False 
 
    - Your ``settings.py`` file should also define a ``SITE_ID``
    
-     This will allow multiple projects to share a single database, and is required by ``django.contrib.sites`` in Django 1.9+.
-     If you aren't running multiple sites, you can simply add a default ``SITE_ID`` to ``settings.py``
+     This will allow multiple projects to share a single database, and is 
+     required by ``django.contrib.sites`` in Django 1.9+.
+     If you aren't running multiple sites, you can simply add a default 
+     ``SITE_ID`` to ``settings.py``
+
      Below is an example for setting a default::
+        
+        SITE_ID = 1
 
-     SITE_ID = 1
+2. Make sure django-helpdesk is accessible via ``urls.py``. Add the 
+   following lines to ``urls.py``::
 
-2. Make sure django-helpdesk is accessible via ``urls.py``. Add the following lines to ``urls.py``::
+    from django.conf.urls import include
+    path('helpdesk/', include('helpdesk.urls')),
 
-     from django.conf.urls import include
-     path('helpdesk/', include('helpdesk.urls')),
+   Note that you can change 'helpdesk/' to anything you like, such as 
+   'support/' or 'help/'. If you want django-helpdesk to be available at 
+   the root of your site (for example at http://support.mysite.tld/) then 
+   the path line will be as follows::
 
-   Note that you can change 'helpdesk/' to anything you like, such as 'support/' or 'help/'. If you want django-helpdesk to be available at the root of your site (for example at http://support.mysite.tld/) then the path line will be as follows::
+    path('', include('helpdesk.urls', namespace='helpdesk')),
 
-     path('', include('helpdesk.urls', namespace='helpdesk')),
+   This line will have to come *after* any other lines in your urls.py such 
+   as those used by the Django admin.
 
-   This line will have to come *after* any other lines in your urls.py such as those used by the Django admin.
-
-   Note that the `helpdesk` namespace is no longer required for Django 1.9+ and you can use a different namespace.
+   Note that the `helpdesk` namespace is no longer required for Django 1.9+ 
+   and you can use a different namespace.
    However, it is recommended to use the default namespace name for clarity.
 
 3. Create the required database tables.
 
    Migrate using Django migrations::
 
-     python manage.py migrate helpdesk
+    python manage.py migrate helpdesk
 
 4. Include your static files in your public web path::
 
-      python manage.py collectstatic
+    python manage.py collectstatic
 
-5. Inside your ``MEDIA_ROOT`` folder, inside the ``helpdesk`` folder, is a folder called ``attachments``. Ensure your web server software can write to this folder - something like this should do the trick::
+5. Inside your ``MEDIA_ROOT`` folder, inside the ``helpdesk`` folder, is a 
+   folder called ``attachments``. Ensure your web server software can write 
+   to this folder - something like this should do the trick::
 
-      chown www-data:www-data attachments/
-      chmod 700 attachments
+    chown www-data:www-data attachments/
+    chmod 700 attachments
 
-   (substitute www-data for the user / group that your web server runs as, eg 'apache' or 'httpd')
+   (substitute www-data for the user / group that your web server runs as, eg 
+   'apache' or 'httpd')
 
    If all else fails, you could ensure all users can write to it::
 
-      chmod 777 attachments/
+    chmod 777 attachments/
 
    But this is NOT recommended, especially if you're on a shared server.
 
-6. Ensure that your ``attachments`` folder has directory listings turned off, to ensure users don't download files that they are not specifically linked to from their tickets.
+6. Ensure that your ``attachments`` folder has directory listings turned off, 
+   to ensure users don't download files that they are not specifically linked 
+   to from their tickets.
 
-   If you are using Apache, put a ``.htaccess`` file in the ``attachments`` folder with the following content::
+   If you are using Apache, put a ``.htaccess`` file in the ``attachments`` 
+   folder with the following content::
 
-      Options -Indexes
+    Options -Indexes
 
    You will also have to make sure that ``.htaccess`` files aren't being ignored.
 
-   Ideally, accessing http://MEDIA_URL/helpdesk/attachments/ will give you a 403 access denied error.
+   Ideally, accessing http://MEDIA_URL/helpdesk/attachments/ will give you a 403 
+   access denied error.
 
-7. If you already have a view handling your logins, then great! If not, add the following to ``settings.py`` to get your Django installation to use the login view included in ``django-helpdesk``::
+7. If you already have a view handling your logins, then great! If not, add the 
+   following to ``settings.py`` to get your Django installation to use the login 
+   view included in ``django-helpdesk``::
 
-      LOGIN_URL = '/helpdesk/login/'
+    LOGIN_URL = '/helpdesk/login/'
 
    Alter the URL to suit your installation path.
 
 8. Load initial e-mail templates, otherwise you will not be able to send e-mail::
 
-        python manage.py loaddata emailtemplate.json
+    python manage.py loaddata emailtemplate.json
 
-9. If you intend on using local mail directories for processing email into tickets, be sure to create the mail directory before adding it to the queue in the Django administrator interface. The default mail directory is ``/var/lib/mail/helpdesk/``. Ensure that the directory has appropriate permissions so that your Django/web server instance may read and write files from this directory.
+9. If you intend on using local mail directories for processing email into tickets, 
+   be sure to create the mail directory before adding it to the queue in the 
+   Django administrator interface. The default mail directory is 
+   ``/var/lib/mail/helpdesk/``. Ensure that the directory has appropriate 
+   permissions so that your Django/web server instance may read and write 
+   files from this directory.
 
-   Note that by default, any mail files placed in your local directory will be permanently deleted after being successfully processed. It is strongly recommended that you take further steps to save emails if you wish to retain backups.
+   Note that by default, any mail files placed in your local directory will be 
+   permanently deleted after being successfully processed. It is strongly recommended 
+   that you take further steps to save emails if you wish to retain backups.
 
-   Also, be aware that if a disk error occurs and the local file is not deleted, the mail may be processed multiple times and generate duplicate tickets until the file is removed. It is recommended to monitor log files for ERRORS when a file is unable to be deleted.
+   Also, be aware that if a disk error occurs and the local file is not deleted, 
+   the mail may be processed multiple times and generate duplicate tickets until 
+   the file is removed. It is recommended to monitor log files for ERRORS when a 
+   file is unable to be deleted.
 
 Upgrading from previous versions
 --------------------------------

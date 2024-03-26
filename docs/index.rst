@@ -16,17 +16,12 @@ Contents
    settings
    spam
    custom_fields
+   custom_templates
    api
    webhooks
    iframe_submission
    teams
    license
-
-
-How Does It Look?
------------------
-
-You can see a demo installation at http://django-helpdesk-demo.herokuapp.com/
 
 Quick Start
 -----------
@@ -72,5 +67,3 @@ Optionally, their access to view tickets, both on the dashboard and through sear
 Licensing
 ---------
 django-helpdesk is released under the BSD license, however it packages 3rd party applications which may be using a different license. More details can be found in the :doc:`license` documentation.
-
-
