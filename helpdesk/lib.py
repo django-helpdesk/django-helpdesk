@@ -219,8 +219,8 @@ def daily_time_spent_calculation(earliest, latest, open_hours):
     earliest_f = earliest.hour + earliest.minute / 60 + earliest.second / 3600
     latest_f = latest.hour + latest.minute / 60 + latest.second / (60 * 60) + latest.microsecond / (60 * 60 * 999999)
 
-    # if latest time is midnight, add a second to the time spent
-    if latest_f >= 24:
+    # if latest time is midnight and close hour is midnight, add a second to the time spent
+    if latest_f >= 24 and end == MIDNIGHT:
         time_spent_seconds += 1
     
     if earliest_f < start:

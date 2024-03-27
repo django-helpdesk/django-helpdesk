@@ -40,6 +40,7 @@ class TimeSpentAutoTestCase(TestCase):
         """Tests automatic time_spent calculation"""
         # activate automatic calculation
         helpdesk_settings.FOLLOWUP_TIME_SPENT_AUTO = True
+        helpdesk_settings.USE_TZ = True
 
         # ticket creation date, follow-up creation date, assertion value
         TEST_VALUES = (
@@ -98,3 +99,74 @@ class TimeSpentAutoTestCase(TestCase):
 
                 # delete second follow-up as we test it with many intervals
                 followup2.delete()
+
+
+    def test_followup_time_spent_auto_opening_hours(self):
+        """Tests automatic time_spent calculation"""
+        # activate automatic calculation
+        helpdesk_settings.FOLLOWUP_TIME_SPENT_AUTO = True
+        helpdesk_settings.FOLLOWUP_TIME_SPENT_OPENING_HOURS = {
+            "monday": (0, 23.9999),
+            "tuesday": (8, 18),
+            "wednesday": (8.5, 18.5),
+            "thursday": (0, 10),
+            "friday": (13, 23),
+            "saturday": (0, 0),
+            "sunday": (0, 0),
+        }
+
+        # ticket creation date, follow-up creation date, assertion value
+        TEST_VALUES = (
+            # monday
+            ('2024-03-04T00:00:00+00:00', '2024-03-04T09:30:10+00:00', timedelta(hours=9, minutes=30, seconds=10)),
+            # tuesday
+            ('2024-03-05T07:00:00+00:00', '2024-03-05T09:00:00+00:00', timedelta(hours=1)),
+            ('2024-03-05T17:50:00+00:00', '2024-03-05T17:51:00+00:00', timedelta(minutes=1)),
+            ('2024-03-05T17:50:00+00:00', '2024-03-05T19:51:00+00:00', timedelta(minutes=10)),
+            ('2024-03-05T18:00:00+00:00', '2024-03-05T23:59:59+00:00', timedelta(hours=0)),
+            ('2024-03-05T20:00:00+00:00', '2024-03-05T20:59:59+00:00', timedelta(hours=0)),
+            # wednesday
+            ('2024-03-06T08:00:00+00:00', '2024-03-06T09:01:00+00:00', timedelta(minutes=31)),
+            ('2024-03-06T01:00:00+00:00', '2024-03-06T19:30:10+00:00', timedelta(hours=10)),
+            ('2024-03-06T18:01:00+00:00', '2024-03-06T19:00:00+00:00', timedelta(minutes=29)),
+            # thursday
+            ('2024-03-07T00:00:00+00:00', '2024-03-07T09:30:10+00:00', timedelta(hours=9, minutes=30, seconds=10)),
+            ('2024-03-07T09:30:00+00:00', '2024-03-07T10:30:00+00:00', timedelta(minutes=30)),
+            # friday
+            ('2024-03-08T00:00:00+00:00', '2024-03-08T23:30:10+00:00', timedelta(hours=10)),
+            # saturday
+            ('2024-03-09T00:00:00+00:00', '2024-03-09T09:30:10+00:00', timedelta(hours=0)),
+            # sunday
+            ('2024-03-10T00:00:00+00:00', '2024-03-10T09:30:10+00:00', timedelta(hours=0)),
+
+            # monday to sunday
+            ('2024-03-04T04:00:00+00:00', '2024-03-10T09:00:00+00:00', timedelta(hours=60)),
+
+            # two weeks
+            ('2024-03-04T04:00:00+00:00', '2024-03-17T09:00:00+00:00', timedelta(hours=124)),
+        )
+
+        for (ticket_time, fup_time, assertion_delta) in TEST_VALUES:
+            # create and setup test ticket time
+            ticket = Ticket.objects.create(**self.ticket_data)
+            ticket_time_p = datetime.strptime(ticket_time, "%Y-%m-%dT%H:%M:%S%z")
+            ticket.created = ticket_time_p
+            ticket.modified = ticket_time_p
+            ticket.save()
+
+            fup_time_p = datetime.strptime(fup_time, "%Y-%m-%dT%H:%M:%S%z")
+            followup1 = FollowUp.objects.create(
+                ticket=ticket,
+                date=fup_time_p,
+                title="Testing followup",
+                comment="Testing followup time spent",
+                public=True,
+                user=self.user,
+                new_status=1,
+                message_id=uuid.uuid4().hex,
+                time_spent=None
+            )
+            followup1.save()
+
+            self.assertEqual(followup1.time_spent.total_seconds(), assertion_delta.total_seconds())
+            self.assertEqual(ticket.time_spent.total_seconds(), assertion_delta.total_seconds())
