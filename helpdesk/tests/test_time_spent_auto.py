@@ -115,6 +115,11 @@ class TimeSpentAutoTestCase(TestCase):
             "sunday": (0, 0),
         }
 
+        # adding holidays
+        helpdesk_settings.FOLLOWUP_TIME_SPENT_EXCLUDE_HOLIDAYS = (
+            '2024-03-18', '2024-03-19', '2024-03-20', '2024-03-21', '2024-03-22',
+        )
+
         # ticket creation date, follow-up creation date, assertion value
         TEST_VALUES = (
             # monday
@@ -144,6 +149,10 @@ class TimeSpentAutoTestCase(TestCase):
 
             # two weeks
             ('2024-03-04T04:00:00+00:00', '2024-03-17T09:00:00+00:00', timedelta(hours=124)),
+
+            # three weeks, the third one is holidays
+            ('2024-03-04T04:00:00+00:00', '2024-03-24T09:00:00+00:00', timedelta(hours=124)),
+            ('2024-03-18T04:00:00+00:00', '2024-03-24T09:00:00+00:00', timedelta(hours=0)),
         )
 
         for (ticket_time, fup_time, assertion_delta) in TEST_VALUES:
