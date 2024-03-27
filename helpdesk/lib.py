@@ -198,6 +198,8 @@ def convert_value(value):
 def daily_time_spent_calculation(earliest, latest, open_hours):
     """Returns the number of seconds for a single day time interval according to open hours."""
 
+    time_spent_seconds = 0
+
     # avoid rendering day in different locale
     weekday = ('monday', 'tuesday', 'wednesday', 'thursday',
                 'friday', 'saturday', 'sunday')[earliest.weekday()]
@@ -215,8 +217,12 @@ def daily_time_spent_calculation(earliest, latest, open_hours):
 
     # translate time for delta calculation
     earliest_f = earliest.hour + earliest.minute / 60 + earliest.second / 3600
-    latest_f = latest.hour + latest.minute / 60 + latest.second / 3600
+    latest_f = latest.hour + latest.minute / 60 + latest.second / (60 * 60) + latest.microsecond / (60 * 60 * 999999)
 
+    # if latest time is midnight, add a second to the time spent
+    if latest_f >= 24:
+        time_spent_seconds += 1
+    
     if earliest_f < start:
         earliest = earliest.replace(hour=start_hour, minute=start_minute, second=start_second)
     elif earliest_f >= end:
@@ -230,8 +236,6 @@ def daily_time_spent_calculation(earliest, latest, open_hours):
     day_delta = latest - earliest
 
     # returns up to 86399 seconds, add one second if full day
-    time_spent_seconds = day_delta.seconds
-    if time_spent_seconds == 86399:
-        time_spent_seconds += 1
+    time_spent_seconds += day_delta.seconds
     
     return time_spent_seconds
