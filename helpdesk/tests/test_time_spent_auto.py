@@ -2,13 +2,14 @@
 from datetime import datetime, timedelta
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.test.client import Client
 from helpdesk.models import FollowUp, Queue, Ticket
 from helpdesk import settings as helpdesk_settings
 import uuid
 
 
+@override_settings(USE_TZ=True)
 class TimeSpentAutoTestCase(TestCase):
 
     def setUp(self):
@@ -97,3 +98,20 @@ class TimeSpentAutoTestCase(TestCase):
 
                 # delete second follow-up as we test it with many intervals
                 followup2.delete()
+
+
+    def test_add_two_followups_time_spent_auto(self):
+        """Tests automatic time_spent calculation"""
+        # activate automatic calculation
+        helpdesk_settings.FOLLOWUP_TIME_SPENT_AUTO = True
+
+        # ticket creation date, follow-up creation date, assertion value
+        TEST_VALUES = (
+            # friday
+            ('2024-03-01T00:00:00+00:00', '2024-03-01T09:30:10+00:00', timedelta(hours=9, minutes=30, seconds=10)),
+            ('2024-03-01T00:00:00+00:00', '2024-03-01T23:59:58+00:00', timedelta(hours=23, minutes=59, seconds=58)),
+            ('2024-03-01T00:00:00+00:00', '2024-03-01T23:59:59+00:00', timedelta(hours=23, minutes=59, seconds=59)),
+            ('2024-03-01T00:00:00+00:00', '2024-03-02T00:00:00+00:00', timedelta(hours=24)),
+            ('2024-03-01T00:00:00+00:00', '2024-03-02T09:00:00+00:00', timedelta(hours=33)),
+            ('2024-03-01T00:00:00+00:00', '2024-03-03T00:00:00+00:00', timedelta(hours=48)),
+        )
