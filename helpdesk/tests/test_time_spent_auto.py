@@ -37,7 +37,7 @@ class TimeSpentAutoTestCase(TestCase):
         )
 
     def test_add_two_followups_time_spent_auto(self):
-        """Tests automatic time_spent calculation"""
+        """Tests automatic time_spent calculation."""
         # activate automatic calculation
         helpdesk_settings.FOLLOWUP_TIME_SPENT_AUTO = True
         helpdesk_settings.USE_TZ = True
@@ -102,7 +102,8 @@ class TimeSpentAutoTestCase(TestCase):
 
 
     def test_followup_time_spent_auto_opening_hours(self):
-        """Tests automatic time_spent calculation"""
+        """Tests automatic time_spent calculation with opening hours and holidays."""
+
         # activate automatic calculation
         helpdesk_settings.FOLLOWUP_TIME_SPENT_AUTO = True
         helpdesk_settings.FOLLOWUP_TIME_SPENT_OPENING_HOURS = {
@@ -179,3 +180,42 @@ class TimeSpentAutoTestCase(TestCase):
 
             self.assertEqual(followup1.time_spent.total_seconds(), assertion_delta.total_seconds())
             self.assertEqual(ticket.time_spent.total_seconds(), assertion_delta.total_seconds())
+
+
+    def test_followup_time_spent_auto_exclude_statuses(self):
+        """Tests automatic time_spent calculation OPEN_STATUS exclusion."""
+
+        # activate automatic calculation
+        helpdesk_settings.FOLLOWUP_TIME_SPENT_AUTO = True
+
+        # Follow-ups with OPEN_STATUS are excluded from time counting
+        helpdesk_settings.FOLLOWUP_TIME_SPENT_EXCLUDE_STATUSES = (Ticket.OPEN_STATUS,)
+
+
+        # create and setup test ticket time
+        ticket = Ticket.objects.create(**self.ticket_data)
+        ticket_time_p = datetime.strptime('2024-03-04T00:00:00+00:00', "%Y-%m-%dT%H:%M:%S%z")
+        ticket.created = ticket_time_p
+        ticket.modified = ticket_time_p
+        ticket.save()
+
+        fup_time_p = datetime.strptime('2024-03-10T00:00:00+00:00', "%Y-%m-%dT%H:%M:%S%z")
+        followup1 = FollowUp.objects.create(
+            ticket=ticket,
+            date=fup_time_p,
+            title="Testing followup",
+            comment="Testing followup time spent",
+            public=True,
+            user=self.user,
+            new_status=1,
+            message_id=uuid.uuid4().hex,
+            time_spent=None
+        )
+        followup1.save()
+
+        # The Follow-up time_spent should be zero as the default OPEN_STATUS was excluded from calculation
+        self.assertEqual(followup1.time_spent.total_seconds(), 0.0)
+        self.assertEqual(ticket.time_spent.total_seconds(), 0.0)
+
+        # Remove status exclusion
+        helpdesk_settings.FOLLOWUP_TIME_SPENT_EXCLUDE_STATUSES = ()
