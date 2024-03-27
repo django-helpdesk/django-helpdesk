@@ -219,3 +219,42 @@ class TimeSpentAutoTestCase(TestCase):
 
         # Remove status exclusion
         helpdesk_settings.FOLLOWUP_TIME_SPENT_EXCLUDE_STATUSES = ()
+
+
+    def test_followup_time_spent_auto_exclude_queues(self):
+        """Tests automatic time_spent calculation queues exclusion."""
+
+        # activate automatic calculation
+        helpdesk_settings.FOLLOWUP_TIME_SPENT_AUTO = True
+
+        # Follow-ups within the default queue are excluded from time counting
+        helpdesk_settings.FOLLOWUP_TIME_SPENT_EXCLUDE_QUEUES = ('q1',)
+
+
+        # create and setup test ticket time
+        ticket = Ticket.objects.create(**self.ticket_data)
+        ticket_time_p = datetime.strptime('2024-03-04T00:00:00+00:00', "%Y-%m-%dT%H:%M:%S%z")
+        ticket.created = ticket_time_p
+        ticket.modified = ticket_time_p
+        ticket.save()
+
+        fup_time_p = datetime.strptime('2024-03-10T00:00:00+00:00', "%Y-%m-%dT%H:%M:%S%z")
+        followup1 = FollowUp.objects.create(
+            ticket=ticket,
+            date=fup_time_p,
+            title="Testing followup",
+            comment="Testing followup time spent",
+            public=True,
+            user=self.user,
+            new_status=1,
+            message_id=uuid.uuid4().hex,
+            time_spent=None
+        )
+        followup1.save()
+
+        # The Follow-up time_spent should be zero as the default queue was excluded from calculation
+        self.assertEqual(followup1.time_spent.total_seconds(), 0.0)
+        self.assertEqual(ticket.time_spent.total_seconds(), 0.0)
+
+        # Remove queues exclusion
+        helpdesk_settings.FOLLOWUP_TIME_SPENT_EXCLUDE_QUEUES = ()
