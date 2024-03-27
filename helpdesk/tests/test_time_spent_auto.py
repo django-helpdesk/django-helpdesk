@@ -40,6 +40,7 @@ class TimeSpentAutoTestCase(TestCase):
         """Tests automatic time_spent calculation."""
         # activate automatic calculation
         helpdesk_settings.FOLLOWUP_TIME_SPENT_AUTO = True
+        helpdesk_settings.USE_TZ = True
 
         # ticket creation date, follow-up creation date, assertion value
         TEST_VALUES = (
@@ -180,6 +181,9 @@ class TimeSpentAutoTestCase(TestCase):
             self.assertEqual(followup1.time_spent.total_seconds(), assertion_delta.total_seconds())
             self.assertEqual(ticket.time_spent.total_seconds(), assertion_delta.total_seconds())
 
+        # removing opening hours and holidays
+        helpdesk_settings.FOLLOWUP_TIME_SPENT_OPENING_HOURS = {}
+        helpdesk_settings.FOLLOWUP_TIME_SPENT_EXCLUDE_HOLIDAYS = ()
 
     def test_followup_time_spent_auto_exclude_statuses(self):
         """Tests automatic time_spent calculation OPEN_STATUS exclusion."""
