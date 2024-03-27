@@ -40,7 +40,6 @@ class TimeSpentAutoTestCase(TestCase):
         """Tests automatic time_spent calculation."""
         # activate automatic calculation
         helpdesk_settings.FOLLOWUP_TIME_SPENT_AUTO = True
-        helpdesk_settings.USE_TZ = True
 
         # ticket creation date, follow-up creation date, assertion value
         TEST_VALUES = (
