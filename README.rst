@@ -110,6 +110,9 @@ From the command line you can run the tests using: `make test`
 
 See `quicktest.py` for usage details.
 
+If you need to create tests for new features, add your tests in a test file to the `tests` module and call them in the test VENV with::
+    python quicktest.py helpdesk.tests.test_my_new_features -v 2
+
 Upgrading from previous versions
 --------------------------------
 
