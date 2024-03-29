@@ -994,7 +994,7 @@ class FollowUp(models.Model):
 
         if helpdesk_settings.FOLLOWUP_TIME_SPENT_AUTO and not self.time_spent:
             self.time_spent = self.time_spent_calculation()
-
+        
         super(FollowUp, self).save(*args, **kwargs)
 
     def get_markdown(self):
@@ -1045,14 +1045,14 @@ class FollowUp(models.Model):
                     # close single day case
                     end_day_time = latest
                 else:
-                    end_day_time = earliest.replace(hour=23, minute=59, second=59)
+                    end_day_time = earliest.replace(hour=23, minute=59, second=59, microsecond=999999)
             elif day == days:
                 start_day_time = latest.replace(hour=0, minute=0, second=0)
                 end_day_time = latest
             else:
                 middle_day_time = earliest + datetime.timedelta(days=day)
                 start_day_time = middle_day_time.replace(hour=0, minute=0, second=0)
-                end_day_time = middle_day_time.replace(hour=23, minute=59, second=59)
+                end_day_time = middle_day_time.replace(hour=23, minute=59, second=59, microsecond=999999)
             
             if (start_day_time.strftime("%Y-%m-%d") not in holidays and
                 prev_status not in exclude_statuses and
