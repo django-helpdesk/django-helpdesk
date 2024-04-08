@@ -3,7 +3,6 @@ from datetime import datetime, timedelta
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
 from django.test import TestCase, override_settings
-from django.test.client import Client
 from helpdesk.models import FollowUp, Queue, Ticket
 from helpdesk import settings as helpdesk_settings
 import uuid
@@ -24,8 +23,6 @@ class TimeSpentAutoTestCase(TestCase):
         self.ticket_data = dict(queue=self.queue_public,
                                 title='test ticket',
                                 description='test ticket description')
-
-        self.client = Client()
 
         self.user = User.objects.create(
             username='staff',
@@ -72,7 +69,6 @@ class TimeSpentAutoTestCase(TestCase):
                 message_id=uuid.uuid4().hex,
                 time_spent=None
             )
-            followup1.save()
 
             self.assertEqual(followup1.time_spent.total_seconds(), assertion_delta.total_seconds())
             self.assertEqual(ticket.time_spent.total_seconds(), assertion_delta.total_seconds())
@@ -91,7 +87,6 @@ class TimeSpentAutoTestCase(TestCase):
                     message_id=uuid.uuid4().hex,
                     time_spent=None
                 )
-                followup2.save()
 
                 self.assertEqual(followup2.time_spent.total_seconds(), delta.total_seconds())
                 self.assertEqual(ticket.time_spent.total_seconds(), assertion_delta.total_seconds() + delta.total_seconds())
@@ -175,7 +170,6 @@ class TimeSpentAutoTestCase(TestCase):
                 message_id=uuid.uuid4().hex,
                 time_spent=None
             )
-            followup1.save()
 
             self.assertEqual(followup1.time_spent.total_seconds(), assertion_delta.total_seconds())
             self.assertEqual(ticket.time_spent.total_seconds(), assertion_delta.total_seconds())
@@ -213,7 +207,6 @@ class TimeSpentAutoTestCase(TestCase):
             message_id=uuid.uuid4().hex,
             time_spent=None
         )
-        followup1.save()
 
         # The Follow-up time_spent should be zero as the default OPEN_STATUS was excluded from calculation
         self.assertEqual(followup1.time_spent.total_seconds(), 0.0)
@@ -252,7 +245,6 @@ class TimeSpentAutoTestCase(TestCase):
             message_id=uuid.uuid4().hex,
             time_spent=None
         )
-        followup1.save()
 
         # The Follow-up time_spent should be zero as the default queue was excluded from calculation
         self.assertEqual(followup1.time_spent.total_seconds(), 0.0)
