@@ -12,7 +12,6 @@ from helpdesk.decorators import (
     is_helpdesk_staff,
 )
 from helpdesk.models import (
-    Queue,
     FollowUp,
     Ticket,
     TicketCC,
