@@ -37,6 +37,7 @@ class TimeSpentAutoTestCase(TestCase):
         """Tests automatic time_spent calculation."""
         # activate automatic calculation
         helpdesk_settings.FOLLOWUP_TIME_SPENT_AUTO = True
+        helpdesk_settings.USE_TZ = True
 
         # ticket creation date, follow-up creation date, assertion value
         TEST_VALUES = (
@@ -69,7 +70,6 @@ class TimeSpentAutoTestCase(TestCase):
                 message_id=uuid.uuid4().hex,
                 time_spent=None
             )
-            followup1.save()
 
             self.assertEqual(followup1.time_spent.total_seconds(), assertion_delta.total_seconds())
             self.assertEqual(ticket.time_spent.total_seconds(), assertion_delta.total_seconds())
@@ -88,7 +88,6 @@ class TimeSpentAutoTestCase(TestCase):
                     message_id=uuid.uuid4().hex,
                     time_spent=None
                 )
-                followup2.save()
 
                 self.assertEqual(followup2.time_spent.total_seconds(), delta.total_seconds())
                 self.assertEqual(ticket.time_spent.total_seconds(), assertion_delta.total_seconds() + delta.total_seconds())
@@ -172,7 +171,6 @@ class TimeSpentAutoTestCase(TestCase):
                 message_id=uuid.uuid4().hex,
                 time_spent=None
             )
-            followup1.save()
 
             self.assertEqual(followup1.time_spent.total_seconds(), assertion_delta.total_seconds())
             self.assertEqual(ticket.time_spent.total_seconds(), assertion_delta.total_seconds())
@@ -210,7 +208,6 @@ class TimeSpentAutoTestCase(TestCase):
             message_id=uuid.uuid4().hex,
             time_spent=None
         )
-        followup1.save()
 
         # The Follow-up time_spent should be zero as the default OPEN_STATUS was excluded from calculation
         self.assertEqual(followup1.time_spent.total_seconds(), 0.0)
@@ -249,7 +246,6 @@ class TimeSpentAutoTestCase(TestCase):
             message_id=uuid.uuid4().hex,
             time_spent=None
         )
-        followup1.save()
 
         # The Follow-up time_spent should be zero as the default queue was excluded from calculation
         self.assertEqual(followup1.time_spent.total_seconds(), 0.0)
