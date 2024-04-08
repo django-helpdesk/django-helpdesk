@@ -3,7 +3,6 @@ from datetime import datetime, timedelta
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
 from django.test import TestCase, override_settings
-from django.test.client import Client
 from helpdesk.models import FollowUp, Queue, Ticket
 from helpdesk import settings as helpdesk_settings
 import uuid
@@ -24,8 +23,6 @@ class TimeSpentAutoTestCase(TestCase):
         self.ticket_data = dict(queue=self.queue_public,
                                 title='test ticket',
                                 description='test ticket description')
-
-        self.client = Client()
 
         self.user = User.objects.create(
             username='staff',
