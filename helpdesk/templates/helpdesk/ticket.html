@@ -150,6 +150,9 @@
                 <dt><label for='id_priority'>{% trans "Priority" %}</label></dt>
                 <dd><select id='id_priority' name='priority'>{% for p in priorities %}{% if p.0 == ticket.priority %}<option value='{{ p.0 }}' selected='selected'>{{ p.1 }}</option>{% else %}<option value='{{ p.0 }}'>{{ p.1 }}</option>{% endif %}{% endfor %}</select></dd>
 
+                <dt><label for='id_queue'>{% trans "Queue" %}</label></dt>
+                <dd><select id='id_queue' name='queue'>{% for q in queues %}{% if q.0 == ticket.queue.id %}<option value='{{ q.0 }}' selected='selected'>{{ q.1 }}</option>{% else %}<option value='{{ q.0 }}'>{{ q.1 }}</option>{% endif %}{% endfor %}</select></dd>
+
                 <dt><label for='id_due_date'>{% trans "Due on" %}</label></dt>
                 <dd>{{ form.due_date }}</dd>
 

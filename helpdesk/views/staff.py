@@ -428,6 +428,7 @@ def view_ticket(request, ticket_id):
         'form': form,
         'active_users': users,
         'priorities': Ticket.PRIORITY_CHOICES,
+        'queues': queue_choices,
         'preset_replies': PreSetReply.objects.filter(
             Q(queues=ticket.queue) | Q(queues__isnull=True)),
         'ticketcc_string': ticketcc_string,
@@ -566,6 +567,7 @@ def update_ticket_view(request, ticket_id, public=False):
     title = request.POST.get('title', '')
     owner = int(request.POST.get('owner', -1))
     priority = int(request.POST.get('priority', ticket.priority))
+    queue = int(request.POST.get('queue', ticket.queue.id))
 
     # Check if a change happened on checklists
     new_checklists = {}
@@ -589,6 +591,7 @@ def update_ticket_view(request, ticket_id, public=False):
         new_status == ticket.status,
         title == ticket.title,
         priority == int(ticket.priority),
+        queue == int(ticket.queue.id),
         due_date == ticket.due_date,
         (owner == -1) or (not owner and not ticket.assigned_to) or
         (owner and User.objects.get(id=owner) == ticket.assigned_to),
@@ -605,6 +608,7 @@ def update_ticket_view(request, ticket_id, public=False):
         public = request.POST.get('public', False),
         owner = int(request.POST.get('owner', -1)),
         priority = int(request.POST.get('priority', -1)),
+        queue = int(request.POST.get('queue', -1)),
         new_status = new_status,
         time_spent = get_time_spent_from_request(request),
         due_date = get_due_date_from_request_or_ticket(request, ticket),
