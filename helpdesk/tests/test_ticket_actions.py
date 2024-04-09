@@ -7,6 +7,7 @@ from helpdesk import settings as helpdesk_settings
 from helpdesk.models import CustomField, Queue, Ticket
 from helpdesk.templatetags.ticket_to_link import num_to_link
 from helpdesk.user import HelpdeskUser
+from django.utils.translation import gettext_lazy as _
 
 
 try:  # python 3
@@ -323,3 +324,46 @@ class TicketActionsTestCase(TestCase):
                          ticket_1_follow_up, ticket_2_follow_up])
         self.assertEqual(list(ticket_1.ticketcc_set.all()),
                          [ticket_1_cc, ticket_2_cc])
+
+    def test_update_ticket_queue(self):
+        """Tests whether user can change the queue in the Respond to this ticket section."""
+
+        # log user in
+        self.loginUser()
+
+        # create ticket
+        initial_data = {
+            'title': 'Queue change ticket test',
+            'queue': self.queue_public,
+            'assigned_to': self.user,
+            'status': Ticket.OPEN_STATUS,
+        }
+        ticket = Ticket.objects.create(**initial_data)
+        ticket_id = ticket.id
+
+        # initial queue
+        self.assertEqual(ticket.queue, self.queue_public)
+
+        # POST first follow-up with new queue
+        new_queue = Queue.objects.create(
+            title='New Queue',
+            slug='newqueue',
+        )
+        post_data = {
+            'comment': 'first follow-up in new queue',
+            'queue': str(new_queue.id),
+        }
+        response = self.client.post(reverse('helpdesk:update',
+                                    kwargs={'ticket_id': ticket_id}),
+                                    post_data)
+
+        # queue was correctly modified
+        ticket.refresh_from_db()
+        self.assertEqual(ticket.queue, new_queue)
+
+        # ticket change was saved
+        latest_fup = ticket.followup_set.latest('date')
+        latest_ticketchange = latest_fup.ticketchange_set.latest('id')
+        self.assertEqual(latest_ticketchange.field, _('Queue'))
+        self.assertEqual(int(latest_ticketchange.old_value), self.queue_public.id)
+        self.assertEqual(int(latest_ticketchange.new_value), new_queue.id)
