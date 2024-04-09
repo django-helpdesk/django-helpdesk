@@ -302,7 +302,7 @@ class TimeSpentAutoTestCase(TestCase):
 
         # create a change queue follow-up every hour
         # first follow-up created at the same time of the ticket without queue change
-        # new --1h--> stop1 --0h--> resume1 --1h--> stop2 --0h-->  --1h--> end
+        # new --1h--> stop1 --0h--> resume1 --1h--> stop2 --0h--> resume2 --1h--> end
         for (i, queue) in enumerate(queues_sequence):
             # create follow-up
             post_data = {
