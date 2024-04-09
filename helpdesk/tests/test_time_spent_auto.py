@@ -320,3 +320,6 @@ class TimeSpentAutoTestCase(TestCase):
         self.assertEqual(latest_fup.date - ticket.created, timedelta(hours=5))
         # calculated time spent with 2 hours exclusion is 3 hours
         self.assertEqual(ticket.time_spent.total_seconds(), 3 * 3600.0)
+
+        # remove queues exclusion
+        helpdesk_settings.FOLLOWUP_TIME_SPENT_EXCLUDE_QUEUES = ()
