@@ -1006,36 +1006,61 @@ class FollowUp(models.Model):
 
     def time_spent_calculation(self):
         "Returns timedelta according to rules settings."
+        
+        open_hours = helpdesk_settings.FOLLOWUP_TIME_SPENT_OPENING_HOURS
+        holidays = helpdesk_settings.FOLLOWUP_TIME_SPENT_EXCLUDE_HOLIDAYS
+        exclude_statuses = helpdesk_settings.FOLLOWUP_TIME_SPENT_EXCLUDE_STATUSES
+        exclude_queues = helpdesk_settings.FOLLOWUP_TIME_SPENT_EXCLUDE_QUEUES
+        
+        # queryset for this ticket previous follow-ups
+        prev_fup_qs = self.ticket.followup_set.all()
+        if self.id:
+            # if the follow-up exist in DB, only keep previous follow-ups
+            prev_fup_qs = prev_fup_qs.filter(date__lt=self.date)
+
+        # handle exclusions
+
+        # extract previous status from follow-up or ticket for exclusion check
+        if exclude_statuses:
+            try:
+                prev_fup = prev_fup_qs.latest("date")
+                prev_status = prev_fup.new_status
+            except ObjectDoesNotExist:
+                prev_status = self.ticket.status
+            
+            # don't calculate status exclusions
+            if prev_status in exclude_statuses:
+                return datetime.timedelta(seconds=0)
+        
+        # find the previous queue for exclusion check
+        if exclude_queues:
+            try:
+                prev_fup_ids = prev_fup_qs.values_list('id', flat=True)
+                prev_queue_change = TicketChange.objects.filter(followup_id__in=prev_fup_ids,
+                                                                field=_('Queue')).latest('id')
+                prev_queue = Queue.objects.get(pk=prev_queue_change.new_value)
+                prev_queue_slug = prev_queue.slug
+            except ObjectDoesNotExist:
+                prev_queue_slug = self.ticket.queue.slug
+            
+            # don't calculate queue exclusions
+            if prev_queue_slug in exclude_queues:
+                return datetime.timedelta(seconds=0)
+
+        # no exclusion found
+
+        time_spent_seconds = 0
 
         # extract earliest from previous follow-up or ticket
         try:
-            prev_fup_qs = self.ticket.followup_set.all()
-            if self.id:
-                prev_fup_qs = prev_fup_qs.filter(id__lt=self.id)
             prev_fup = prev_fup_qs.latest("date")
             earliest = prev_fup.date
         except ObjectDoesNotExist:
             earliest = self.ticket.created
 
-        # extract previous status from follow-up or ticket
-        try:
-            prev_fup_qs = self.ticket.followup_set.exclude(new_status__isnull=True)
-            if self.id:
-                prev_fup_qs = prev_fup_qs.filter(id__lt=self.id)
-            prev_fup = prev_fup_qs.latest("date")
-            prev_status = prev_fup.new_status
-        except ObjectDoesNotExist:
-            prev_status = self.ticket.status
-        
         # latest time is current follow-up date
         latest = self.date
         
-        time_spent_seconds = 0
-        open_hours = helpdesk_settings.FOLLOWUP_TIME_SPENT_OPENING_HOURS
-        holidays = helpdesk_settings.FOLLOWUP_TIME_SPENT_EXCLUDE_HOLIDAYS
-        exclude_statuses = helpdesk_settings.FOLLOWUP_TIME_SPENT_EXCLUDE_STATUSES
-        exclude_queues = helpdesk_settings.FOLLOWUP_TIME_SPENT_EXCLUDE_QUEUES
-
         # split time interval by days
         days = latest.toordinal() - earliest.toordinal()
         for day in range(days + 1):
@@ -1054,9 +1079,7 @@ class FollowUp(models.Model):
                 start_day_time = middle_day_time.replace(hour=0, minute=0, second=0)
                 end_day_time = middle_day_time.replace(hour=23, minute=59, second=59, microsecond=999999)
             
-            if (start_day_time.strftime("%Y-%m-%d") not in holidays and
-                prev_status not in exclude_statuses and
-                self.ticket.queue.slug not in exclude_queues):
+            if start_day_time.strftime("%Y-%m-%d") not in holidays:
                 time_spent_seconds += daily_time_spent_calculation(start_day_time, end_day_time, open_hours)
 
         return datetime.timedelta(seconds=time_spent_seconds)
