@@ -313,7 +313,7 @@ def update_ticket(
             new_value=queue,
         )
         c.save()
-        ticket.queue.id = queue
+        ticket.queue_id = queue
 
     if due_date != ticket.due_date:
         c = TicketChange(
