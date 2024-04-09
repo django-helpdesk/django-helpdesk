@@ -312,14 +312,14 @@ class TimeSpentAutoTestCase(TestCase):
             response = self.client.post(reverse('helpdesk:update', kwargs={
                                         'ticket_id': ticket.id}), post_data)
             latest_fup = ticket.followup_set.latest('id')
-            latest_fup.date = ticket.created + timedelta(minutes=60 * i)
+            latest_fup.date = ticket.created + timedelta(hours=i)
             latest_fup.time_spent = None
             latest_fup.save()
         
         # total ticket time for followups is 5 hours
         self.assertEqual(latest_fup.date - ticket.created, timedelta(hours=5))
         # calculated time spent with 2 hours exclusion is 3 hours
-        self.assertEqual(ticket.time_spent.total_seconds(), 3 * 3600.0)
+        self.assertEqual(ticket.time_spent.total_seconds(), timedelta(hours=3).total_seconds())
 
         # remove queues exclusion
         helpdesk_settings.FOLLOWUP_TIME_SPENT_EXCLUDE_QUEUES = ()
