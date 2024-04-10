@@ -15,7 +15,7 @@ import poplib
 import re
 import socket
 import ssl
-from datetime import timedelta
+from datetime import timedelta, datetime
 import dateutil
 from email.utils import getaddresses, parseaddr
 from os.path import isfile, join
@@ -41,6 +41,7 @@ from helpdesk.lib import safe_template_context, process_attachments
 from helpdesk.models import Ticket, TicketCC, FollowUp, IgnoreEmail, FormType, CustomField, is_extra_data
 from seed.models import EmailImporter, GOOGLE, MICROSOFT, EXCHANGE_OAUTH, EXCHANGE_PASS
 from helpdesk.decorators import is_helpdesk_staff
+from post_office.models import Email
 
 
 # import User model, which may be a custom model
@@ -897,11 +898,11 @@ def process_message(message, importer, queues, logger, options=None):
 
     # Debugging issues with address resolution
     for (name, address) in to_list:
-        if '@' not in address:
+        if not address or '@' not in address:
             logger.error(f'ERROR: Bad to list.\nmessage.get_all: {message.get_all("To", [])}\nto_list: {to_list}')
             continue
     for (name, address) in cc_list:
-        if '@' not in address:
+        if not address or '@' not in address:
             logger.error(f'ERROR: Bad CC list.\nmessage.get_all: {message.get_all("Cc", [])}\ncc_list: {cc_list}')
             continue
 
@@ -985,12 +986,12 @@ def process_message(message, importer, queues, logger, options=None):
                 body = decode_unknown(part.get_content_charset(), body)
                 # have to use django_settings here so overwritting it works in tests
                 # the default value is False anyway
-                if ticket is None and getattr(django_settings, 'HELPDESK_FULL_FIRST_MESSAGE_FROM_EMAIL', False):
+                if ticket is None:
                     # first message in thread, we save full body to avoid losing forwards and things like that
                     body_parts = []
                     for f in EmailReplyParser.read(body).fragments:
                         body_parts.append(f.content)
-                    full_body = '\n\n'.join(body_parts)
+                    full_body = full_body + '\n'.join(body_parts)
                     body = EmailReplyParser.parse_reply(body)
                 else:
                     # second and other reply, save only first part of the message
@@ -1130,10 +1131,10 @@ def process_exchange_message(message, importer, queues, logger):
 
     # Debugging issues with address resolution
     for (name, address) in to_list:
-        if '@' not in address:
+        if not address or '@' not in address:
             logger.error(f'Bad to list.\nto_recipients: {message.to_recipients}\nto_list: {to_list}')
     for (name, address) in cc_list:
-        if '@' not in address:
+        if not address or '@' not in address:
             logger.error(f'Bad CC list.\ncc_recipients: {message.cc_recipients}\ncc_list: {cc_list}')
 
     # Sort out which queue this email should go into #
