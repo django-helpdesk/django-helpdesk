@@ -166,8 +166,8 @@
                             <th class="table-active"style="width: 20%">${beam_data[t]["display"]||""}</th>
                             <td style="width: 20%">${beam_data[t]["value"]||""}</td>
 
-                            <td style="width: 10%"><input class="beam_data_checkbox" type="checkbox" id=${beam_data[t]["column_name"]} name="col"
-                                value=${ticket_data[t]["field_name"]}></td>
+                            <td style="width: 10%"><input class="beam_data_checkbox" type="checkbox" id="${beam_data[t]["column_name"]}" name="col"
+                                value="${ticket_data[t]['field_name']}"></td>
                             </tr>`
                         );
                     }
