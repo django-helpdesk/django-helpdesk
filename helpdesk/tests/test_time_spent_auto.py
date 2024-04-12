@@ -2,7 +2,10 @@
 from datetime import datetime, timedelta
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.test import TestCase, override_settings
+from django.test.client import Client
+from django.urls import reverse
 from helpdesk.models import FollowUp, Queue, Ticket
 from helpdesk import settings as helpdesk_settings
 import uuid
@@ -32,6 +35,21 @@ class TimeSpentAutoTestCase(TestCase):
             is_superuser=False,
             is_active=True
         )
+
+        self.client = Client()
+
+
+    def loginUser(self, is_staff=True):
+        """Create a staff user and login"""
+        User = get_user_model()
+        self.user = User.objects.create(
+            username='User_1',
+            is_staff=is_staff,
+        )
+        self.user.set_password('pass')
+        self.user.save()
+        self.client.login(username='User_1', password='pass')
+    
 
     def test_add_two_followups_time_spent_auto(self):
         """Tests automatic time_spent calculation."""
@@ -251,4 +269,57 @@ class TimeSpentAutoTestCase(TestCase):
         self.assertEqual(ticket.time_spent.total_seconds(), 0.0)
 
         # Remove queues exclusion
+        helpdesk_settings.FOLLOWUP_TIME_SPENT_EXCLUDE_QUEUES = ()
+
+    def test_http_followup_time_spent_auto_exclude_queues(self):
+        """Tests automatic time_spent calculation queues exclusion with client"""
+
+        # activate automatic calculation
+        helpdesk_settings.FOLLOWUP_TIME_SPENT_AUTO = True
+        helpdesk_settings.FOLLOWUP_TIME_SPENT_EXCLUDE_QUEUES = ('stop1', 'stop2')
+
+        # make staff user
+        self.loginUser()
+
+        # create queues
+        queues_sequence = ('new', 'stop1', 'resume1', 'stop2', 'resume2', 'end')
+        queues = dict()
+        for slug in queues_sequence:
+            queues[slug] = Queue.objects.create(
+                title=slug,
+                slug=slug,
+            )
+
+        # create ticket
+        initial_data = {
+            'title': 'Queue change ticket test',
+            'queue': queues['new'],
+            'assigned_to': self.user,
+            'status': Ticket.OPEN_STATUS,
+            'created': datetime.strptime('2024-04-09T08:00:00+00:00', "%Y-%m-%dT%H:%M:%S%z")
+        }
+        ticket = Ticket.objects.create(**initial_data)
+
+        # create a change queue follow-up every hour
+        # first follow-up created at the same time of the ticket without queue change
+        # new --1h--> stop1 --0h--> resume1 --1h--> stop2 --0h--> resume2 --1h--> end
+        for (i, queue) in enumerate(queues_sequence):
+            # create follow-up
+            post_data = {
+                'comment': 'ticket in queue {}'.format(queue),
+                'queue': queues[queue].id,
+            }
+            response = self.client.post(reverse('helpdesk:update', kwargs={
+                                        'ticket_id': ticket.id}), post_data)
+            latest_fup = ticket.followup_set.latest('id')
+            latest_fup.date = ticket.created + timedelta(hours=i)
+            latest_fup.time_spent = None
+            latest_fup.save()
+        
+        # total ticket time for followups is 5 hours
+        self.assertEqual(latest_fup.date - ticket.created, timedelta(hours=5))
+        # calculated time spent with 2 hours exclusion is 3 hours
+        self.assertEqual(ticket.time_spent.total_seconds(), timedelta(hours=3).total_seconds())
+
+        # remove queues exclusion
         helpdesk_settings.FOLLOWUP_TIME_SPENT_EXCLUDE_QUEUES = ()
