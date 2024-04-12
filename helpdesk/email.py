@@ -964,8 +964,8 @@ def process_message(message, importer, queues, logger, options=None):
     if 'date' in options and message.get('date', None):
         date = dateutil.parser.parse(message.get('date'))
 
-    body = None
-    full_body = None
+    body = ''
+    full_body = ''
     counter = 0
     files = []
 
@@ -1191,11 +1191,11 @@ def process_exchange_message(message, importer, queues, logger):
         return True
 
     files = []
-    plain_body = getattr(message, 'text_body', None)
-    html_body = getattr(message, 'body', None)
-    unique_body = getattr(message, 'unique_body', None)
+    plain_body = getattr(message, 'text_body', '')
+    html_body = getattr(message, 'body', '')
+    unique_body = getattr(message, 'unique_body', '')
     full_text_body = ''
-    latest_text_body = None
+    latest_text_body = ''
 
     # 1. If there's a unique body, and the unique body isn't the same as the body (both are in html), use that.
     # Need both the latest_body and full_body. latest_body will be in the ticket comment and should be in plain text.
