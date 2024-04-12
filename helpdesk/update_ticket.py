@@ -306,13 +306,11 @@ def update_ticket(
         ticket.priority = priority
 
     if queue != ticket.queue.id:
-        c = TicketChange(
-            followup=f,
+        c = f.ticketchange_set.create(
             field=_('Queue'),
             old_value=ticket.queue.id,
             new_value=queue,
         )
-        c.save()
         ticket.queue_id = queue
 
     if due_date != ticket.due_date:
