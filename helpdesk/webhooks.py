@@ -1,6 +1,7 @@
 import requests
 import requests.exceptions
 import logging
+from django.dispatch import receiver
 
 from . import settings
 from .signals import update_ticket_done
