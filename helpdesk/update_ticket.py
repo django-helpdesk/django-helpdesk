@@ -4,6 +4,7 @@ from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from django.utils.translation import gettext as _
+import django.dispatch
 
 from helpdesk.lib import safe_template_context
 from helpdesk import settings as helpdesk_settings
@@ -19,6 +20,8 @@ from helpdesk.models import (
 )
 
 User = get_user_model()
+
+update_ticket_done = django.dispatch.Signal()
 
 def add_staff_subscription(
     user: User,
@@ -386,6 +389,9 @@ def update_ticket(
         files=files,
     ))
     ticket.save()
+
+    # emit signal with followup when the ticket update is done
+    update_ticket_done.send(sender="update_ticket", followup=f)
 
     from helpdesk.webhooks import notify_followup_webhooks
     notify_followup_webhooks(f)
