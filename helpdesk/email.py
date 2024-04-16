@@ -21,7 +21,6 @@ from email.message import EmailMessage, MIMEPart
 from email.utils import getaddresses
 from email_reply_parser import EmailReplyParser
 from helpdesk import settings
-from helpdesk import webhooks
 from helpdesk.exceptions import DeleteIgnoredTicketException, IgnoreTicketException
 from helpdesk.lib import process_attachments, safe_template_context
 from helpdesk.models import FollowUp, IgnoreEmail, Queue, Ticket
