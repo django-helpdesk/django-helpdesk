@@ -36,8 +36,7 @@ def notify_followup_webhooks(followup):
 # listener is loaded via app.py HelpdeskConfig.ready()
 @receiver(update_ticket_done)
 def notify_followup_webhooks_receiver(sender, followup, **kwargs):
-    if sender == "update_ticket":
-        notify_followup_webhooks(followup)
+    notify_followup_webhooks(followup)
 
 
 def send_new_ticket_webhook(ticket):

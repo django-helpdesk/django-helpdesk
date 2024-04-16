@@ -25,6 +25,7 @@ from helpdesk import webhooks
 from helpdesk.exceptions import DeleteIgnoredTicketException, IgnoreTicketException
 from helpdesk.lib import process_attachments, safe_template_context
 from helpdesk.models import FollowUp, IgnoreEmail, Queue, Ticket
+from helpdesk.signals import update_ticket_done
 import imaplib
 import logging
 import mimetypes
@@ -618,7 +619,8 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
     else:
         send_info_email(message_id, f, ticket, context, queue, new)
     if not new:
-        webhooks.notify_followup_webhooks(f)
+        # emit signal with followup when the ticket is updated
+        update_ticket_done.send(sender="create_object_from_email_message", followup=f)
     return ticket
 
 
