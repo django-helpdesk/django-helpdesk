@@ -15,7 +15,6 @@ from helpdesk.models import (
     FollowUp,
     Ticket,
     TicketCC,
-    TicketChange,
 )
 from helpdesk.signals import update_ticket_done
 
