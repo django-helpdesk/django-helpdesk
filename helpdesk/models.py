@@ -644,8 +644,6 @@ class Ticket(models.Model):
         if self.queue.enable_notifications_on_email_events:
             for cc in self.ticketcc_set.all():
                 send('ticket_cc', cc.email_address)
-        if "new_ticket_cc" in roles:
-            send_new_ticket_webhook(self)
         return recipients
 
     def _get_assigned_to(self):

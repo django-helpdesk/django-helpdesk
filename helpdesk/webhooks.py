@@ -4,7 +4,7 @@ import logging
 from django.dispatch import receiver
 
 from . import settings
-from .signals import update_ticket_done
+from .signals import new_ticket_done, update_ticket_done
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +32,6 @@ def notify_followup_webhooks(followup):
         except requests.exceptions.Timeout:
             logger.error('Timeout while sending followup webhook to %s', url)
 
-
 # listener is loaded via app.py HelpdeskConfig.ready()
 @receiver(update_ticket_done)
 def notify_followup_webhooks_receiver(sender, followup, **kwargs):
@@ -59,3 +58,8 @@ def send_new_ticket_webhook(ticket):
             requests.post(url, json=data, timeout=settings.HELPDESK_WEBHOOK_TIMEOUT)
         except requests.exceptions.Timeout:
             logger.error('Timeout while sending new ticket webhook to %s', url)
+
+# listener is loaded via app.py HelpdeskConfig.ready()
+@receiver(new_ticket_done)
+def send_new_ticket_webhook_receiver(sender, ticket, **kwargs):
+    send_new_ticket_webhook(ticket)
