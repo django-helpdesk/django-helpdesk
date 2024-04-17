@@ -15,7 +15,7 @@ Once these URLs are configured, a serialized copy of the ticket object will be p
 Signals
 --------------
 
-Webhooks are triggered through django signals.
+Webhooks are triggered through `Django Signals <https://docs.djangoproject.com/en/stable/topics/signals/>_`.
 
 The two available signals are:
   - new_ticket_done
