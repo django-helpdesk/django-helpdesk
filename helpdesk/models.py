@@ -11,7 +11,6 @@ models.py - Model (and hence database) definitions. This is the core of the
 from .lib import format_time_spent, convert_value, daily_time_spent_calculation
 from .templated_email import send_templated_mail
 from .validators import validate_file_extension
-from .webhooks import send_new_ticket_webhook
 import datetime
 from django.conf import settings
 from django.contrib.auth import get_user_model
