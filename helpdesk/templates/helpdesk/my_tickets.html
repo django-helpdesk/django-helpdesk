@@ -37,7 +37,9 @@ window.addEventListener('load', function()
             data.results.forEach(function(ticket) {
                 $('#ticketsTable tbody').append(`
                     <tr>
-                        <td><a href="/view/?ticket=${ticket.id}&email=${ticket.submitter}&key=${ticket.secret_key}">${ticket.title}</a></td>
+                        <td>
+                            <a href='{% url "helpdesk:public_view" %}?ticket=${ticket.id}&email=${ticket.submitter}&key=${ticket.secret_key}'>${ticket.title}</a>
+                        </td>
                         <td>${ticket.queue.title}</td>
                         <td>${ticket.status}</td>
                         <td>${ticket.created}</td>
