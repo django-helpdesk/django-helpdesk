@@ -618,7 +618,7 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
     else:
         send_info_email(message_id, f, ticket, context, queue, new)
     if new:
-        # emit signal when the PublicTicketForm.save is done
+        # emit signal when a new ticket is created
         new_ticket_done.send(sender="create_object_from_email_message", ticket=ticket)
     else:
         # emit signal with followup when the ticket is updated
