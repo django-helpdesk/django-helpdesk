@@ -17,13 +17,14 @@ Signals
 
 Webhooks are triggered through django signals.
 
-The two existing signals are:
+The two available signals are:
   - new_ticket_done
   - update_ticket_done
 
 You have the opportunity to listen to those in your project if you have post processing workflows outside of webhooks::
 
-
+  
+  from django.dispatch import receiver
   from helpdesk.signals import new_ticket_done, update_ticket_done
   
   @receiver(new_ticket_done)
