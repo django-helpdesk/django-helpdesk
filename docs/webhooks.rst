@@ -12,27 +12,26 @@ You can register webhooks to allow third party apps to be notified of helpdesk e
 Once these URLs are configured, a serialized copy of the ticket object will be posted to each of these URLs each time a ticket is created or followed up on respectively.
 
 
-Django signals
+Signals
 --------------
 
-Webhooks are triggered through signals emitted for new tickets creation and ticket follow-up updates.
+Webhooks are triggered through django signals.
 
 The two existing signals are:
   - new_ticket_done
   - update_ticket_done
 
-You have the opportunity to listen to those in your project if you have post processing workflows outside of webhooks.
+You have the opportunity to listen to those in your project if you have post processing workflows outside of webhooks::
 
-```
-from helpdesk.signals import new_ticket_done, update_ticket_done
 
-@receiver(new_ticket_done)
-def process_new_ticket(sender, ticket, **kwargs):
-    "Triggers this code when a ticket is created."
-    pass
-    
-@receiver(update_ticket_done)
-def process_followup_update(sender, followup, **kwargs):
-    "Triggers this code when a follow-up is created."
-    pass
-```
+  from helpdesk.signals import new_ticket_done, update_ticket_done
+  
+  @receiver(new_ticket_done)
+  def process_new_ticket(sender, ticket, **kwargs):
+      "Triggers this code when a ticket is created."
+      pass
+      
+  @receiver(update_ticket_done)
+  def process_followup_update(sender, followup, **kwargs):
+      "Triggers this code when a follow-up is created."
+      pass
