@@ -224,10 +224,10 @@
                 <dt><label for='id_file'>{% trans "Attach a File" %}</label></dt>
                 <dd>
                     <div class="add_file_fields_wrap">
-                        <div><label class='btn btn-primary btn-sm btn-file'>
-                                Browse... <input type="file" name='attachment' id='file0' style='display: none;'/>
-                        </label><span>&nbsp;</span><span id='selectedfilename0'>{% trans 'No files selected.' %}</span>
-                        <button type="button" title="Remove file" class='btn btn-danger btn-sm ml-2' onclick="deleteFile(0)"><i class="fa fa-trash"></i></button></div>
+                        <div>
+                            <label class='btn btn-primary btn-sm btn-file'>Browse... <input type="file" name='attachment' id='file0' style='display: none;'/>
+                            </label><span>&nbsp;</span><span id='selectedfilename0'>{% trans 'No files selected.' %}</span>
+                        </div>
                         <button class="add_file_field_button btn btn-success btn-xs">{% trans "Add Another File" %}</button>
                     </div>
                 </dd>
@@ -274,7 +274,7 @@ $(document).ready(function() {
 
     $("[data-toggle=tooltip]").tooltip();
 
-    // lists for file input change events, then updates the associated text label
+    // listens for file input change events, then updates the associated text label
     // with the file name selected
     $('.add_file_fields_wrap').on('fileselect', ':file', function(event, numFiles, label, browseButtonNum, files) {
         for (let i=files.length - 1; i >= 0; i--) {
@@ -282,6 +282,8 @@ $(document).ready(function() {
                 alert("File size exceeds " + {{ helpdesk_settings.HELPDESK_MAX_EMAIL_ATTACHMENT_SIZE }}/1000 + "kB. The file will be uploaded to the ticket, but will not be emailed out.");
             }
             $("#selectedfilename"+browseButtonNum).html(label);
+            $(`<button type="button" title="Remove file" class='btn btn-danger btn-sm ml-2' onClick="deleteFile(${browseButtonNum})"><i class="fa fa-trash"></i></button>
+                `).insertAfter("#selectedfilename"+browseButtonNum);
         };
     });
 
@@ -298,7 +300,6 @@ $(document).ready(function() {
                 <input type='file' name='attachment' id='file${x}' multiple style='display: none;'/>
             </label>
             <span>&nbsp;</span><span id='selectedfilename${x}'>{% trans 'No files selected.' %}</span>
-            <button type="button" title="Remove file" class='btn btn-danger btn-sm ml-2' onClick="deleteFile(${x})"><i class="fa fa-trash"></i></button></div>
         </div>`).insertBefore(add_button); //add input box
     });
 
@@ -317,12 +318,12 @@ $(document).on('change', ':file', function() {
 });
 
 function deleteFile(index) {
-    console.log(`delete: ${index}`)
     if (index > 0) {
-        $(`#file_group${index}`).remove()
+        $(`#file_group${index}`).remove();
     } else {
         $(`#file${index}`).val('');
-        $(`#selectedfilename${index}`).html("{% trans 'No files selected.' %}")
+        $(`#selectedfilename${index}`).html("{% trans 'No files selected.' %}");
+        $(`#selectedfilename${index}`).next('button').remove(); // removes the delete button
     }
 }
 </script>

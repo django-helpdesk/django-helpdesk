@@ -2,25 +2,26 @@
     <div class="input-group-prepend">
         <button id="{{ widget.name}}_upload" type="button" class="btn btn-secondary">Upload</button>
     </div>
-    <input type="file" hidden id="id_{{ widget.name}}" name="{{ widget.name }}" {% include "django/forms/widgets/attrs.html" %}>
     <input type="text" class="form-control" disabled id="{{widget.name}}_text" value="{{widget.value}}">
-    <div class="input-group-append" id="{{ widget.name }}_interact">
-        <button id="{{widget.name}}_delete" type="button" class="btn btn-danger">Delete</button>
+    <div class="input-group-append" id="{{ widget.name }}_interact" style="display:none;">
+        <button id="{{widget.name}}_delete" type="button" class="btn btn-danger">Remove</button>
     </div>
 </div>
+<div><input type="file" hidden id="id_{{ widget.name}}" name="{{ widget.name }}" {% include "django/forms/widgets/attrs.html" %}></div>
 <script>
     $('#{{widget.name}}_upload').on('click', function() {
         $('#id_{{ widget.name }}').click()
-    })
+    });
 
     $('#id_{{widget.name}}').on('change', function() {
         src_input = document.getElementById('id_{{widget.name}}');
-        console.log(src_input.files[0].name)
-        $('#{{widget.name}}_text').val(src_input.files[0].name)
-    })
+        $('#{{ widget.name }}_text').val(src_input.files[0].name);
+        $('#{{ widget.name }}_interact').toggle();
+    });
 
     $('#{{widget.name}}_delete').on('click', function() {
         $('#id_{{widget.name}}').val('');
         $('#{{widget.name}}_text').val('None');
-    })
+        $('#{{ widget.name }}_interact').toggle();
+    });
 </script>
