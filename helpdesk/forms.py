@@ -324,6 +324,8 @@ class EditKBCategoryForm(forms.ModelForm):
 class AttachmentFileInputWidget(forms.ClearableFileInput):
     template_name = 'helpdesk/include/attachment_input.html'
 
+class ClearableFileInput(forms.ClearableFileInput):
+    template_name = 'helpdesk/include/clearable_file_input.html'
 
 class EditKBItemForm(forms.ModelForm):
 
@@ -1104,6 +1106,7 @@ class TicketForm(AbstractTicketForm):
         self.fields['assigned_to'].choices = [('', '--------')] + [
             (u.id, (u.get_full_name() or u.get_username())) for u in assignable_users]
         self.fields['description'].widget = PreviewWidget()
+        self.fields['attachment'].widget = ClearableFileInput()
 
     def save(self, user, form_id=None):
         """

@@ -217,7 +217,7 @@
 
         </div>
 
-        <p id='ShowFileUploadPara'><button class="btn btn-warning btn-sm" id='ShowFileUpload'>{% trans "Attach File(s) &raquo;" %}</button></p>
+        <p id='ShowFileUploadPara'><button type="button" class="btn btn-warning btn-sm" id='ShowFileUpload'>{% trans "Attach File(s) &raquo;" %}</button></p>
 
         <div id='FileUpload' style='display: none;'>
             <dl>
@@ -226,7 +226,8 @@
                     <div class="add_file_fields_wrap">
                         <div><label class='btn btn-primary btn-sm btn-file'>
                                 Browse... <input type="file" name='attachment' id='file0' style='display: none;'/>
-                        </label><span>&nbsp;</span><span id='selectedfilename0'>{% trans 'No files selected.' %}</span></div>
+                        </label><span>&nbsp;</span><span id='selectedfilename0'>{% trans 'No files selected.' %}</span>
+                        <button type="button" title="Remove file" class='btn btn-danger btn-sm ml-2' onclick="deleteFile(0)"><i class="fa fa-trash"></i></button></div>
                         <button class="add_file_field_button btn btn-success btn-xs">{% trans "Add Another File" %}</button>
                     </div>
                 </dd>
@@ -291,7 +292,14 @@ $(document).ready(function() {
     $(add_button).click(function(e){ //on add input button click
         x++;
         e.preventDefault();
-        $("<div><label class='btn btn-primary btn-sm btn-file'>Browse... <input type='file' name='attachment' id='file" + x + "' multiple style='display: none;'/></label><span>&nbsp;</span><span id='selectedfilename" + x + "'>{% trans 'No files selected.' %}</span></div>").insertBefore(add_button); //add input box
+        $(`<div id="file_group${x}">
+            <label class='btn btn-primary btn-sm btn-file'>
+                Browse... 
+                <input type='file' name='attachment' id='file${x}' multiple style='display: none;'/>
+            </label>
+            <span>&nbsp;</span><span id='selectedfilename${x}'>{% trans 'No files selected.' %}</span>
+            <button type="button" title="Remove file" class='btn btn-danger btn-sm ml-2' onClick="deleteFile(${x})"><i class="fa fa-trash"></i></button></div>
+        </div>`).insertBefore(add_button); //add input box
     });
 
 });
@@ -307,5 +315,15 @@ $(document).on('change', ':file', function() {
         files = input.get(0).files ? input.get(0).files : [];
     input.trigger('fileselect', [numFiles, label, inputWidgetNum, files]);
 });
+
+function deleteFile(index) {
+    console.log(`delete: ${index}`)
+    if (index > 0) {
+        $(`#file_group${index}`).remove()
+    } else {
+        $(`#file${index}`).val('');
+        $(`#selectedfilename${index}`).html("{% trans 'No files selected.' %}")
+    }
+}
 </script>
 {% endblock %}
