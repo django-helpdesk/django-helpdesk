@@ -49,7 +49,7 @@ These settings can be used to change who can access the helpdesk.
 
   **Default:** ``HELPDESK_REDIRECT_TO_LOGIN_BY_DEFAULT = False``
 
-- **HELPDESK_VALID_EXTENSIONS** Valid extensions for file types that can be attached to tickets
+- **HELPDESK_VALID_EXTENSIONS** Valid extensions for file types that can be attached to tickets. Note: This used to be calle **VALID_EXTENSIONS** which is now deprecated.
 
   **Default:** ``HELPDESK_VALID_EXTENSIONS = ['.txt', '.asc', '.htm', '.html', '.pdf', '.doc', '.docx', '.odt', '.jpg', '.png', '.eml']
 

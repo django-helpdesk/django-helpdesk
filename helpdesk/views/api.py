@@ -51,15 +51,16 @@ class TicketViewSet(viewsets.ModelViewSet):
 
         # filter by status
         status = self.request.query_params.get('status', None)
-        statuses = status.split(',') if status else []
-        status_choices = helpdesk_settings.TICKET_STATUS_CHOICES
-        number_statuses = []
-        for status in statuses:
-            for choice in status_choices:
-                if choice[1] == status:
-                    number_statuses.append(choice[0])
-        if number_statuses:
-            tickets = tickets.filter(status__in=number_statuses)
+        if status:
+          statuses = status.split(',') if status else []
+          status_choices = helpdesk_settings.TICKET_STATUS_CHOICES
+          number_statuses = []
+          for status in statuses:
+              for choice in status_choices:
+                  if str(choice[0]) == status:
+                      number_statuses.append(choice[0])
+          if number_statuses:
+              tickets = tickets.filter(status__in=number_statuses)
 
         for ticket in tickets:
             ticket.set_custom_field_values()
