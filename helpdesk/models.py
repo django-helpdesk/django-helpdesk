@@ -8,7 +8,7 @@ models.py - Model (and hence database) definitions. This is the core of the
 """
 
 
-from .lib import convert_value
+from .lib import format_time_spent, convert_value, daily_time_spent_calculation
 from .templated_email import send_templated_mail
 from .validators import validate_file_extension
 from .webhooks import send_new_ticket_webhook
@@ -31,17 +31,6 @@ import os
 import re
 from rest_framework import serializers
 import uuid
-
-
-def format_time_spent(time_spent):
-    if time_spent:
-        time_spent = "{0:02d}h:{1:02d}m".format(
-            time_spent.seconds // 3600,
-            time_spent.seconds % 3600 // 60
-        )
-    else:
-        time_spent = ""
-    return time_spent
 
 
 class EscapeHtml(Extension):
@@ -1000,9 +989,12 @@ class FollowUp(models.Model):
         return u"%s#followup%s" % (self.ticket.get_absolute_url(), self.id)
 
     def save(self, *args, **kwargs):
-        t = self.ticket
-        t.modified = timezone.now()
-        t.save()
+        self.ticket.modified = timezone.now()
+        self.ticket.save()
+
+        if helpdesk_settings.FOLLOWUP_TIME_SPENT_AUTO and not self.time_spent:
+            self.time_spent = self.time_spent_calculation()
+        
         super(FollowUp, self).save(*args, **kwargs)
 
     def get_markdown(self):
@@ -1012,6 +1004,85 @@ class FollowUp(models.Model):
     def time_spent_formated(self):
         return format_time_spent(self.time_spent)
 
+    def time_spent_calculation(self):
+        "Returns timedelta according to rules settings."
+        
+        open_hours = helpdesk_settings.FOLLOWUP_TIME_SPENT_OPENING_HOURS
+        holidays = helpdesk_settings.FOLLOWUP_TIME_SPENT_EXCLUDE_HOLIDAYS
+        exclude_statuses = helpdesk_settings.FOLLOWUP_TIME_SPENT_EXCLUDE_STATUSES
+        exclude_queues = helpdesk_settings.FOLLOWUP_TIME_SPENT_EXCLUDE_QUEUES
+        
+        # queryset for this ticket previous follow-ups
+        prev_fup_qs = self.ticket.followup_set.all()
+        if self.id:
+            # if the follow-up exist in DB, only keep previous follow-ups
+            prev_fup_qs = prev_fup_qs.filter(date__lt=self.date)
+
+        # handle exclusions
+
+        # extract previous status from follow-up or ticket for exclusion check
+        if exclude_statuses:
+            try:
+                prev_fup = prev_fup_qs.latest("date")
+                prev_status = prev_fup.new_status
+            except ObjectDoesNotExist:
+                prev_status = self.ticket.status
+            
+            # don't calculate status exclusions
+            if prev_status in exclude_statuses:
+                return datetime.timedelta(seconds=0)
+        
+        # find the previous queue for exclusion check
+        if exclude_queues:
+            try:
+                prev_fup_ids = prev_fup_qs.values_list('id', flat=True)
+                prev_queue_change = TicketChange.objects.filter(followup_id__in=prev_fup_ids,
+                                                                field=_('Queue')).latest('id')
+                prev_queue = Queue.objects.get(pk=prev_queue_change.new_value)
+                prev_queue_slug = prev_queue.slug
+            except ObjectDoesNotExist:
+                prev_queue_slug = self.ticket.queue.slug
+            
+            # don't calculate queue exclusions
+            if prev_queue_slug in exclude_queues:
+                return datetime.timedelta(seconds=0)
+
+        # no exclusion found
+
+        time_spent_seconds = 0
+
+        # extract earliest from previous follow-up or ticket
+        try:
+            prev_fup = prev_fup_qs.latest("date")
+            earliest = prev_fup.date
+        except ObjectDoesNotExist:
+            earliest = self.ticket.created
+
+        # latest time is current follow-up date
+        latest = self.date
+        
+        # split time interval by days
+        days = latest.toordinal() - earliest.toordinal()
+        for day in range(days + 1):
+            if day == 0:
+                start_day_time = earliest
+                if days == 0:
+                    # close single day case
+                    end_day_time = latest
+                else:
+                    end_day_time = earliest.replace(hour=23, minute=59, second=59, microsecond=999999)
+            elif day == days:
+                start_day_time = latest.replace(hour=0, minute=0, second=0)
+                end_day_time = latest
+            else:
+                middle_day_time = earliest + datetime.timedelta(days=day)
+                start_day_time = middle_day_time.replace(hour=0, minute=0, second=0)
+                end_day_time = middle_day_time.replace(hour=23, minute=59, second=59, microsecond=999999)
+            
+            if start_day_time.strftime("%Y-%m-%d") not in holidays:
+                time_spent_seconds += daily_time_spent_calculation(start_day_time, end_day_time, open_hours)
+
+        return datetime.timedelta(seconds=time_spent_seconds)
 
 class TicketChange(models.Model):
     """

@@ -200,6 +200,7 @@ def update_ticket(
         owner=-1,
         ticket_title=None,
         priority=-1,
+        queue=-1,
         new_status=None,
         time_spent=None,
         due_date=None,
@@ -213,6 +214,8 @@ def update_ticket(
         title = ticket.title
     if priority == -1:
         priority = ticket.priority
+    if queue == -1:
+        queue = ticket.queue.id
     if new_status is None:
         new_status = ticket.status
     if new_checklists is None:
@@ -301,6 +304,14 @@ def update_ticket(
         )
         c.save()
         ticket.priority = priority
+
+    if queue != ticket.queue.id:
+        c = f.ticketchange_set.create(
+            field=_('Queue'),
+            old_value=ticket.queue.id,
+            new_value=queue,
+        )
+        ticket.queue_id = queue
 
     if due_date != ticket.due_date:
         c = TicketChange(

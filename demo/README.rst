@@ -24,15 +24,13 @@ Ideally, you'd use a virtualenv instead
 (see below for details).
 
 To use your system directory, from the top-level
-django-helpdesk directory, simply run:
+django-helpdesk directory, simply run::
 
     make rundemo
 
 Once the console gives a prompt that the HTTP
 server is listening, open your web browser
-and navigate to:
-
-    localhost:8080
+and navigate to http://localhost:8080
 
 You should see the django-helpdesk public web portal!
 
@@ -40,7 +38,7 @@ If you shut down the server, you can't immediately
 re-run the demo because the make commands would
 encounter problems trying to re-write the database.
 Instead, before running the demo, you will need
-to first clean the demo:
+to first clean the demo::
 
     sudo make distclean
 
@@ -53,7 +51,7 @@ want to use a virtualenv.
 
 If so, you might change the pip in the makefile
 to point to your virtualenv's pip instead
-before running:
+before running::
 
     make rundemo
 

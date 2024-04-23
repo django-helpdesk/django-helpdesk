@@ -22,11 +22,10 @@ This service is free to use, within their terms and conditions.
 
 If you have either of these settings enabled, the spam filtering will be done automatically. If you have *both* settings configured, TypePad will be used instead of Akismet.
 
-
 Example
 ~~~~~~~
 
 A sample configuration in ``settings.py`` may be::
 
-   TYPEPAD_ANTISPAM_API_KEY = 'abc123'
+    TYPEPAD_ANTISPAM_API_KEY = 'abc123'
 
