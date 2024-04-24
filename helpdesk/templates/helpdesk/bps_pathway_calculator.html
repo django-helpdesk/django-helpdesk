@@ -1,0 +1,87 @@
+{% extends "helpdesk/base.html" %}
+{% load i18n bootstrap4form %}
+
+{% block helpdesk_body %}
+<div class="section">
+    <div class="section_content_container">
+        <div class="section_content container-fluid">
+            <div class="content_block row">
+                <div id="text-block" class="col-sm-8">
+
+                    <h2>{% trans 'Pathway Selection Calculator' %}</h2>
+
+                    <label for="pathwaySelect">{% trans 'Select a Pathway:' %}</label>
+                    <select id="pathwaySelect" class="form-control input-sm" style="width: 28em;" onchange="updateCalculation()">
+                        {% for k, pathway in pathways.items %}
+                            <option value="{{ k }}">{{ pathway }}</option>
+                        {% endfor %}
+                    </select>
+                    <label for="propertyTypeSelect" style="margin-top: 1em;">{% trans 'Select Property Type:' %}</label>
+                    <select id="propertyTypeSelect" class="form-control input-sm" style="width: 28em;" onchange="updateCalculation()">
+                        {% for property_type in property_types %}
+                            <option value="{{ property_type }}">{{ property_type }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <table class="table table-striped" style="margin-top: 2em;">
+                        <thead>
+                            <th>{% trans 'Year' %}</th>
+                            <th id="reduction_check_header">{% trans '% Reduction Check' %}</th>
+                            <th id="diff_header">Difference</th>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td >{% trans '2021 Baseline' %}</td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td >{% trans '2026 Target' %}</td>
+                                <td id="reduction_check_0"></td>
+                                <td id="difference_0"></td>
+                            </tr>
+                            <tr>
+                                <td >{% trans '2030 Target' %}</td>
+                                <td id="reduction_check_1"></td>
+                                <td id="difference_1"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block helpdesk_js %}
+    {{ eui_2026|json_script:'eui_2026_json' }}
+    {{ eui_2030|json_script:'eui_2030_json' }}
+    {{ ghgi_2026|json_script:'ghgi_2026_json' }}
+    {{ ghgi_2030|json_script:'ghgi_2030_json' }}
+    {{ property_types|json_script:'property_types_json' }}
+    {{ pathways|json_script:'pathways_json' }}
+    <script type='text/javascript' language='javascript'>
+       let eui_2026 = {};
+       let eui_2030 = {};
+       let ghgi_2026 = {};
+       let ghgi_2030 = {};
+       let pathways = [];
+       let property_types = [];
+       function updateCalculation() {
+            let select = document.getElementById('propertyTypeSelect');
+            let selectedValue = select.options[select.selectedIndex].value;
+            console.log(eui_2026[selectedValue])
+        }
+       let initObjects = function () {
+         eui_2026 = JSON.parse(document.getElementById('eui_2026_json').textContent);
+         eui_2030 = JSON.parse(document.getElementById('eui_2030_json').textContent);
+         ghgi_2026 = JSON.parse(document.getElementById('ghgi_2026_json').textContent);
+         ghgi_2030 = JSON.parse(document.getElementById('ghgi_2030_json').textContent);
+         property_types = JSON.parse(document.getElementById('property_types_json').textContent);
+         pathways = JSON.parse(document.getElementById('pathways_json').textContent);
+         updateCalculation()
+       };
+        document.addEventListener('DOMContentLoaded', initObjects);
+    </script>
+{% endblock %}
