@@ -21,10 +21,10 @@ from email.message import EmailMessage, MIMEPart
 from email.utils import getaddresses
 from email_reply_parser import EmailReplyParser
 from helpdesk import settings
-from helpdesk import webhooks
 from helpdesk.exceptions import DeleteIgnoredTicketException, IgnoreTicketException
 from helpdesk.lib import process_attachments, safe_template_context
 from helpdesk.models import FollowUp, IgnoreEmail, Queue, Ticket
+from helpdesk.signals import new_ticket_done, update_ticket_done
 import imaplib
 import logging
 import mimetypes
@@ -617,8 +617,12 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
             "Message seems to be auto-reply, not sending any emails back to the sender")
     else:
         send_info_email(message_id, f, ticket, context, queue, new)
-    if not new:
-        webhooks.notify_followup_webhooks(f)
+    if new:
+        # emit signal when a new ticket is created
+        new_ticket_done.send(sender="create_object_from_email_message", ticket=ticket)
+    else:
+        # emit signal with followup when the ticket is updated
+        update_ticket_done.send(sender="create_object_from_email_message", followup=f)
     return ticket
 
 

@@ -15,8 +15,8 @@ from helpdesk.models import (
     FollowUp,
     Ticket,
     TicketCC,
-    TicketChange,
 )
+from helpdesk.signals import update_ticket_done
 
 User = get_user_model()
 
@@ -268,41 +268,33 @@ def update_ticket(
     files = process_attachments(f, files) if files else []
 
     if ticket_title and ticket_title != ticket.title:
-        c = TicketChange(
-            followup=f,
+        c = f.ticketchange_set.create(
             field=_('Title'),
             old_value=ticket.title,
             new_value=ticket_title,
         )
-        c.save()
         ticket.title = ticket_title
 
     if new_status != old_status:
-        c = TicketChange(
-            followup=f,
+        c = f.ticketchange_set.create(
             field=_('Status'),
             old_value=old_status_str,
             new_value=ticket.get_status_display(),
         )
-        c.save()
 
     if ticket.assigned_to != old_owner:
-        c = TicketChange(
-            followup=f,
+        c = f.ticketchange_set.create(
             field=_('Owner'),
             old_value=old_owner,
             new_value=ticket.assigned_to,
         )
-        c.save()
 
     if priority != ticket.priority:
-        c = TicketChange(
-            followup=f,
+        c = f.ticketchange_set.create(
             field=_('Priority'),
             old_value=ticket.priority,
             new_value=priority,
         )
-        c.save()
         ticket.priority = priority
 
     if queue != ticket.queue.id:
@@ -314,13 +306,11 @@ def update_ticket(
         ticket.queue_id = queue
 
     if due_date != ticket.due_date:
-        c = TicketChange(
-            followup=f,
+        c = f.ticketchange_set.create(
             field=_('Due on'),
             old_value=ticket.due_date,
             new_value=due_date,
         )
-        c.save()
         ticket.due_date = due_date
 
     for checklist in ticket.checklists.all():
@@ -397,8 +387,9 @@ def update_ticket(
     ))
     ticket.save()
 
-    from helpdesk.webhooks import notify_followup_webhooks
-    notify_followup_webhooks(f)
+    # emit signal with followup when the ticket update is done
+    # internally used for webhooks
+    update_ticket_done.send(sender="update_ticket", followup=f)
 
     # auto subscribe user if enabled
     add_staff_subscription(user, ticket)
