@@ -200,9 +200,11 @@ def bps_pathway_calculator(request, error_message=None, ticket=None):
             property_types.append(_(property_type))
 
     email = request.GET.get('email', None)
-    pathways = {
+    ghgi_pathways = {
         'ghg': _('Greenhouse Gas Reduction'),
         'ghg_std': _('Standard Percent Greenhouse Gas Reduction'),
+    }
+    eui_pathways = {
         'eui': _('Energy Efficiency'),
         'eui_std': _('Standard Percent Energy Efficiency'),
     }
@@ -212,7 +214,8 @@ def bps_pathway_calculator(request, error_message=None, ticket=None):
         'error_message': error_message,
         'helpdesk_settings': helpdesk_settings,
         'debug': settings.DEBUG,
-        'pathways': pathways,
+        'ghgi_pathways': ghgi_pathways,
+        'eui_pathways': eui_pathways,
         'property_types': property_types,
         'eui_2026': eui_2026,
         'eui_2030': eui_2030,
