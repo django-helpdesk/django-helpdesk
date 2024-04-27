@@ -71,6 +71,19 @@ HELPDESK_TICKETS_TIMELINE_ENABLED = getattr(
 HELPDESK_NAVIGATION_ENABLED = getattr(
     settings, 'HELPDESK_NAVIGATION_ENABLED', False)
 
+# Configure a list of Bookmarks/links shown on the bottom of the sidebar
+# menu. Disabled if no bookmark is configured.
+#
+# Set to a list of dictionary in one of the following forms:
+# - { 'URL': external_url, 'label': label } .. external link
+# - { 'name': internal_name, 'label': label } .. internal name is resolved with reverse()
+#
+# If the label is omitted, the URL or name respectively is used instead.
+
+HELPDESK_BOOKMARKS = getattr(
+    settings, 'HELPDESK_BOOKMARKS', [])
+
+
 # use public CDNs to serve jquery and other javascript by default?
 # otherwise, use built-in static copy
 HELPDESK_USE_CDN = getattr(settings, 'HELPDESK_USE_CDN', False)

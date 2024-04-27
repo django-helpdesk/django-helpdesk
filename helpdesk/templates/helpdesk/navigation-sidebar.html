@@ -91,5 +91,23 @@
           </a>
         </li>
         {% endif %}
+      {% endif %}
+      {% if helpdesk_settings.HELPDESK_BOOKMARKS and user.is_authenticated %}
+      <li><hr class="dropdown-divider"></li>
+      {% for bookmark in helpdesk_settings.HELPDESK_BOOKMARKS %}
+      <li class="nav-item">
+        {% if bookmark.URL %}
+	<a class="nav-link" href="{{bookmark.URL}}">
+	  <i class="fas fa-fw fa-external-link-alt"></i>
+	  <span>{% trans bookmark.label|default:bookmark.URL %}</span>
+	</a>
+	{% else %}
+	<a class="nav-link" href="{% url bookmark.name %}">
+	  <i class="fas fa-fw fa-arrow-right"></i>
+	  <span>{% trans bookmark.label|default:bookmark.name %}</span>
+	</a>
+	{% endif %}
+      </li>
+      {% endfor %}
     {% endif %}
     </ul>
