@@ -36,6 +36,7 @@ from helpdesk.settings import (
     CUSTOMFIELD_TO_FIELD_DICT
 )
 from helpdesk.validators import validate_file_extension
+from helpdesk.signals import new_ticket_done
 import logging
 
 
@@ -418,6 +419,10 @@ class TicketForm(AbstractTicketForm):
         followup.save()
 
         files = self._attach_files_to_follow_up(followup)
+
+        # emit signal when the TicketForm.save is done
+        new_ticket_done.send(sender="TicketForm", ticket=ticket)
+
         self._send_messages(ticket=ticket,
                             queue=queue,
                             followup=followup,
@@ -507,6 +512,10 @@ class PublicTicketForm(AbstractTicketForm):
         followup.save()
 
         files = self._attach_files_to_follow_up(followup)
+
+        # emit signal when the PublicTicketForm.save is done
+        new_ticket_done.send(sender="PublicTicketForm", ticket=ticket)
+
         self._send_messages(ticket=ticket,
                             queue=queue,
                             followup=followup,
