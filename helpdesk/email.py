@@ -34,7 +34,7 @@ from django.utils import encoding, timezone
 from django.utils.translation import ugettext as _
 from email_reply_parser import EmailReplyParser
 
-from exchangelib import FileAttachment, ItemAttachment
+from exchangelib import FileAttachment, ItemAttachment, Message as ExchangeMessage
 
 from helpdesk import settings
 from helpdesk.lib import safe_template_context, process_attachments
@@ -1257,6 +1257,7 @@ def process_exchange_message(message, importer, queues, logger):
     )
 
     logger.info("Found %s attachments." % len(message.attachments))
+    att_counter = 0
     for attachment in message.attachments:
         file_content = []
         if isinstance(attachment, FileAttachment):
@@ -1270,9 +1271,15 @@ def process_exchange_message(message, importer, queues, logger):
             file_content = b''.join(file_content)
             files.append(SimpleUploadedFile(name, file_content, file_type))
         elif isinstance(attachment, ItemAttachment):
-            logger.info('- Found ItemAttachment, not attaching')
-            # todo
-            pass
+            logger.info('- Found ItemAttachment')
+            if isinstance(attachment.item, ExchangeMessage):
+                att_html_body = attachment.item.body
+                att_html_body = att_html_body.replace('\n', '').replace('\r', '')
+                altered_att_body = att_html_body.replace("</p>", "</p>\n").replace("<br>", "\n<br>").replace("<br/>", "\n<br/>")
+                att_html_body = BeautifulSoup(str(altered_att_body), "html.parser")
+                att_html_body = str(att_html_body)
+                files.append(SimpleUploadedFile(("email_html_attachment_%s.html" % att_counter), att_html_body.encode("utf-8"), 'text/html'))
+                att_counter += 1
 
     smtp_importance = getattr(message, 'importance', '')
     high_priority_types = {'high', 'important', '1', 'urgent'}
