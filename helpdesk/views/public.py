@@ -199,7 +199,6 @@ def bps_pathway_calculator(request):
                 continue
             property_types.append(_(property_type))
 
-    email = request.GET.get('email', None)
     ghgi_pathways = {
         # NOTE: template uses "std" suffix to determine if std/non-std pathway
         'ghg': _('Greenhouse Gas Reduction'),
@@ -211,8 +210,6 @@ def bps_pathway_calculator(request):
         'eui_std': _('Standard Percent Energy Efficiency'),
     }
     return render(request, 'helpdesk/public_bps_pathway_calculator.html', {
-        'ticket': False,
-        'email': email,
         'helpdesk_settings': helpdesk_settings,
         'debug': settings.DEBUG,
         'ghgi_pathways': ghgi_pathways,
