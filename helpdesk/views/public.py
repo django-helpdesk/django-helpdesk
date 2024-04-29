@@ -176,7 +176,7 @@ def search_for_ticket(request, error_message=None, ticket=None):
             'debug': settings.DEBUG,
         })
 
-def bps_pathway_calculator(request, error_message=None, ticket=None):
+def bps_pathway_calculator(request):
     csv_path = join(settings.BASE_DIR, 'src/django-helpdesk/helpdesk/static/helpdesk/bps_property_targets.csv')
     property_types = []
     eui_2026 = {}
@@ -201,17 +201,18 @@ def bps_pathway_calculator(request, error_message=None, ticket=None):
 
     email = request.GET.get('email', None)
     ghgi_pathways = {
+        # NOTE: template uses "std" suffix to determine if std/non-std pathway
         'ghg': _('Greenhouse Gas Reduction'),
         'ghg_std': _('Standard Percent Greenhouse Gas Reduction'),
     }
     eui_pathways = {
+        # NOTE: template uses "std" suffix to determine if std/non-std pathway
         'eui': _('Energy Efficiency'),
         'eui_std': _('Standard Percent Energy Efficiency'),
     }
-    return render(request, 'helpdesk/bps_pathway_calculator.html', {
+    return render(request, 'helpdesk/public_bps_pathway_calculator.html', {
         'ticket': False,
         'email': email,
-        'error_message': error_message,
         'helpdesk_settings': helpdesk_settings,
         'debug': settings.DEBUG,
         'ghgi_pathways': ghgi_pathways,

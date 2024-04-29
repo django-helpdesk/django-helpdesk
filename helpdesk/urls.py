@@ -261,7 +261,7 @@ urlpatterns += [
     
     url(r'^bps_pathway_calculator/$',
         public.bps_pathway_calculator,
-        name='bps_pathway_calculator'),
+        name='public_bps_pathway_calculator'),
 ]
 
 urlpatterns += [

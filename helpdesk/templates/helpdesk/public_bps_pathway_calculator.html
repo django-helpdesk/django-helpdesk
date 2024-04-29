@@ -13,7 +13,7 @@
                         <strong>
                             {% trans 'Please note that this calculator can only provide an approximation of future GHGI or EUI performance.' %}
                         </strong>
-                        {% trans 'Actual Building Performance Standard Pathway calculation relies on the ratio of fuel/electricty use and (for GHGI pathways) their related emission factors.' %}
+                        {% trans 'The official Building Performance Standard Pathway calculation relies on the ratio of fuel/electricty use and (for GHGI pathways) their related emission factors.' %}
                     </p>
                     
                     <label for="pathwaySelect">{% trans 'Select a Building Performance Standard Pathway:' %}</label>
@@ -38,12 +38,12 @@
                     </div>
                 
                     <div id="euiInputGroup" style="display: none;">
-                        <label for="euiInput" style="margin-top: 1em;">{% trans 'Estimated Baseline EUI (kgCO2e/sqft)' %}</label>
+                        <label for="euiInput" style="margin-top: 1em;">{% trans 'Enter the estimated Baseline EUI (kgCO2e/sqft)' %}</label>
                         <input id='euiInput' type="number" value="0" class="form-control" size='15' style="width: 24em;">
                     </div>
 
                     <div id="ghgiInputGroup" style="display: none;">
-                        <label for="ghgiInput" style="margin-top: 1em;">{% trans 'Estimated Baseline GHGI (kbtu/sqft)' %}</label>
+                        <label for="ghgiInput" style="margin-top: 1em;">{% trans 'Enter the estimated Baseline GHGI (kbtu/sqft)' %}</label>
                         <input id='ghgiInput' type="number" value="0" class="form-control" size='15' style="width: 24em;">
                     </div>
                     <small class="form-text text-muted">{% trans 'Estimated kbtu or kgCO2e divided by gross square footage.' %}</small>
@@ -114,26 +114,13 @@
     {{ eui_pathways|json_script:'eui_pathways_json' }}
     <script type='text/javascript' language='javascript'>
 
-       function getReduction(baseline, target) {
-        if (baseline == 0) {
-            return '--';
-        }
-        let r = ((baseline -target) / baseline) * 100;
-        r = Math.round(r * 10) / 10;
-        return r;
+       function round(x) {
+        return Math.round(x * 1000) / 1000;
        }
-
-       function getDifference(baseline, target) {
-        let r = Math.round((baseline - target) * 10) / 10;
-        return r;
-       }
-
-       function getStdReduction2026(baseline) {
-        return Math.round((baseline * 0.87) * 10) / 10;
-       }
-
-       function getStdReduction2030(baseline) {
-        return Math.round((baseline * 0.71) * 10) / 10;
+        // Rounded reduction % or '--'
+       function getReductionPercent(baseline, target) {
+        if (baseline == 0) return '--';
+        return round(((baseline - target) / baseline) * 100);
        }
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -163,11 +150,11 @@
             function updateCalculation() {
                 let pathway = pathwaySelect.options[pathwaySelect.selectedIndex].value;
                 let propertyType = propertyTypeSelect.options[propertyTypeSelect.selectedIndex].value;
-                let is_ghg_pathway = Object.hasOwn(ghgi_pathways, pathway);
-                let is_std_reduction_pathway = pathway.endsWith('std');
+                let is_ghgi_pathway = Object.hasOwn(ghgi_pathways, pathway);
+                let is_std_pathway = pathway.endsWith('std');
 
                 // hide/show elements based on pathway
-                if (is_ghg_pathway) {
+                if (is_ghgi_pathway) {
                     ghgiInputGroup.style.display = 'block';
                     euiInputGroup.style.display = 'none';
                     intensityUnitElements.forEach(element => {
@@ -181,48 +168,29 @@
                     });
                 }
 
-                if (is_std_reduction_pathway) {
-                    propertyTypeSelectGroup.style.display = 'none';
-                } else {
-                    propertyTypeSelectGroup.style.display = 'block';
-                }
-
+                propertyTypeSelectGroup.style.display = is_std_pathway ? 'none' : 'block';
 
                 // get targets based on pathway
-                let targets = [];
-                let baseline = 0;
-                if (is_ghg_pathway) {
-                    baseline = ghgiInput.value
-                    if (is_std_reduction_pathway) {
-                        intensityBaseline.textContent = baseline;
-                        targets = [
-                            getStdReduction2026(baseline),
-                            getStdReduction2030(baseline)
-                        ]
-                    } else {
-                        targets = [ghgi_2026[propertyType], ghgi_2030[propertyType]];
-                    }
+                let targetIntensities = [];
+                let baseline = is_ghgi_pathway ? ghgiInput.value : euiInput.value;
+                if (is_std_pathway) {
+                    targetIntensities = [round(baseline * 0.87), round(baseline * 0.71)]
                 } else {
-                    baseline = euiInput.value
-                    if (is_std_reduction_pathway) {
-                        intensityBaseline.textContent = baseline;
-                        targets = [
-                            getStdReduction2026(baseline),
-                            getStdReduction2030(baseline)
-                        ]
+                    if (is_ghgi_pathway) {
+                        targetIntensities = [ghgi_2026[propertyType], ghgi_2030[propertyType]]; 
                     } else {
-                        targets = [eui_2026[propertyType], eui_2030[propertyType]];
+                        targetIntensities = [eui_2026[propertyType], eui_2030[propertyType]];
                     }
                 }
 
                 // safe to assume (targets.length == 2)
-                intensityBaseline.textContent = baseline;
-                intensity2026.textContent = targets[0];
-                intensity2030.textContent = targets[1];
-                reduction2026.textContent = getReduction(baseline, targets[0]);
-                reduction2030.textContent = getReduction(baseline, targets[1]);
-                difference2026.textContent = getDifference(baseline, targets[0]);
-                difference2030.textContent = getDifference(baseline, targets[1]);
+                intensityBaseline.textContent = round(baseline);
+                intensity2026.textContent = targetIntensities[0];
+                intensity2030.textContent = targetIntensities[1];
+                reduction2026.textContent = getReductionPercent(baseline, targetIntensities[0]);
+                reduction2030.textContent = getReductionPercent(baseline, targetIntensities[1]);
+                difference2026.textContent = round(baseline - targetIntensities[0]);
+                difference2030.textContent = round(baseline - targetIntensities[1]);
         }
         pathwaySelect.addEventListener('change', updateCalculation);
         propertyTypeSelect.addEventListener('change', updateCalculation);
