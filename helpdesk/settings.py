@@ -10,6 +10,7 @@ from django.utils.translation import gettext_lazy as _
 import os
 import re
 import warnings
+import sys
 
 
 DEFAULT_USER_SETTINGS = {
@@ -46,6 +47,14 @@ if os.environ.get('SECURE_PROXY_SSL_HEADER'):
 HELPDESK_REDIRECT_TO_LOGIN_BY_DEFAULT = getattr(settings,
                                                 'HELPDESK_REDIRECT_TO_LOGIN_BY_DEFAULT',
                                                 False)
+
+HELPDESK_PUBLIC_VIEW_PROTECTOR = getattr(settings,
+                                         'HELPDESK_PUBLIC_VIEW_PROTECTOR',
+                                         lambda _: None)
+
+HELPDESK_STAFF_VIEW_PROTECTOR = getattr(settings,
+                                         'HELPDESK_STAFF_VIEW_PROTECTOR',
+                                         lambda _: None)
 
 # Enable the Dependencies field on ticket view
 HELPDESK_ENABLE_DEPENDENCIES_ON_TICKET = getattr(settings,
@@ -358,6 +367,15 @@ HELPDESK_IMAP_DEBUG_LEVEL = getattr(settings, 'HELPDESK_IMAP_DEBUG_LEVEL', 0)
 # Attachment directories should be created with permission 755 (rwxr-xr-x)
 # Override it in your own Django settings.py
 HELPDESK_ATTACHMENT_DIR_PERMS = int(getattr(settings, 'HELPDESK_ATTACHMENT_DIR_PERMS', "755"), 8)
+
+HELPDESK_VALID_EXTENSIONS = getattr(settings, 'VALID_EXTENSIONS', None)
+if HELPDESK_VALID_EXTENSIONS:
+    # Print to stderr
+    print("VALID_EXTENSIONS is deprecated, use HELPDESK_VALID_EXTENSIONS instead", file=sys.stderr)
+else:
+    HELPDESK_VALID_EXTENSIONS = getattr(settings, 'HELPDESK_VALID_EXTENSIONS', ['.txt', '.asc', '.htm', '.html', '.pdf', '.doc', '.docx', '.odt', '.jpg', '.png', '.eml'])
+
+HELPDESK_VALIDATE_ATTACHMENT_TYPES = getattr(settings, 'HELPDESK_VALIDATE_ATTACHMENT_TYPES', True)
 
 def get_followup_webhook_urls():
     urls = os.environ.get('HELPDESK_FOLLOWUP_WEBHOOK_URLS', None)
