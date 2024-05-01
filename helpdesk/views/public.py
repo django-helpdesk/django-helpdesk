@@ -7,8 +7,9 @@ views/public.py - All public facing views, eg non-staff (no authentication
                   required) views.
 """
 import logging
+from csv import DictReader
+from os.path import join
 from importlib import import_module
-
 from django.core.exceptions import (
     ObjectDoesNotExist, PermissionDenied, ImproperlyConfigured,
 )
@@ -175,6 +176,50 @@ def search_for_ticket(request, error_message=None, ticket=None):
             'debug': settings.DEBUG,
         })
 
+def bps_pathway_calculator(request):
+    csv_path = './seed/utils/data/bps_property_targets.csv'
+    property_types = []
+    eui_2026 = {}
+    eui_2030 = {}
+    ghgi_2026 = {}
+    ghgi_2030 = {}
+    with open(csv_path, 'r') as f:
+        csvreader = DictReader(f)
+        for t in csvreader:
+            property_type = t.get('property_type')
+            if property_type is None:
+                continue
+            try:
+                eui_2026[property_type] = float(t.get('site_eui_kbtu_sqft_2026', None))
+                eui_2030[property_type] = float(t.get('site_eui_kbtu_sqft_2030', None))
+                ghgi_2026[property_type] = float(t.get('ghgi_kgco2e_sqft_2026', None))
+                ghgi_2030[property_type] = float(t.get('ghgi_kgco2e_sqft_2030', None))
+            except (TypeError, ValueError) as e:
+                logger.exception(e)
+                continue
+            property_types.append(_(property_type))
+
+    ghgi_pathways = {
+        # NOTE: template uses "std" suffix to determine if std/non-std pathway
+        'ghg': _('Greenhouse Gas Reduction'),
+        'ghg_std': _('Standard Percent Greenhouse Gas Reduction'),
+    }
+    eui_pathways = {
+        # NOTE: template uses "std" suffix to determine if std/non-std pathway
+        'eui': _('Energy Efficiency'),
+        'eui_std': _('Standard Percent Energy Efficiency'),
+    }
+    return render(request, 'helpdesk/public_bps_pathway_calculator.html', {
+        'helpdesk_settings': helpdesk_settings,
+        'debug': settings.DEBUG,
+        'ghgi_pathways': ghgi_pathways,
+        'eui_pathways': eui_pathways,
+        'property_types': property_types,
+        'eui_2026': eui_2026,
+        'eui_2030': eui_2030,
+        'ghgi_2026': ghgi_2026,
+        'ghgi_2030': ghgi_2030,
+    })
 
 @protect_view
 def view_ticket(request):

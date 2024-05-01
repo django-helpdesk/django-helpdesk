@@ -1,0 +1,239 @@
+{% extends "helpdesk/base.html" %}
+{% load i18n bootstrap4form %}
+
+{% block helpdesk_body %}
+<div class="section">
+    <div class="section_content_container">
+        <div class="section_content container-fluid">
+            <div class="content_block row">
+                <div id="text-block"
+                     class="col-sm-8">
+
+                    <h2>{% trans '2026 Preliminary Target Pathway Selection Calculator' %}</h2>
+                    <p>
+                        <strong>
+                            {% trans 'Please note that this calculator can only provide an approximation of future GHGI or EUI performance.' %}
+                        </strong>
+                        {% trans 'The official Building Performance Standard Pathway calculation relies on the ratio of fuel/electricty use and (for GHGI pathways) their related emission factors.' %}
+                    </p>
+
+                    <div id="propertyTypeSelectGroup">
+                        <label for="propertyTypeSelect"
+                               style="margin-top: 1em;">{% trans 'Select your property type:' %}</label>
+                        <select id="propertyTypeSelect"
+                                class="form-control input-sm"
+                                style="width: 24em;">
+                            {% for property_type in property_types %}
+                            <option value="{{ property_type }}">{{ property_type }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <small class="form-text text-muted">
+                        {% trans 'Property type is used to determine EUI and GHGI targets for non-Standard Reduction Pathways' %}
+                    </small>
+
+                    <div>
+                        <label for="euiBaselineInput"
+                               style="margin-top: 1em;">{% trans 'Enter the estimated baseline EUI (kgCO2e/sqft)' %}</label>
+                        <input id='euiBaselineInput'
+                               type="number"
+                               value="0"
+                               class="form-control"
+                               size='15'
+                               style="width: 24em;">
+                    </div>
+                    <small class="form-text text-muted">{% trans 'Estimated annual kBtu divided by gross square footage.' %}</small>
+
+                    <div>
+                        <label for="ghgiBaselineInput"
+                               style="margin-top: 1em;">{% trans 'Enter the estimated baseline GHGI (kBtu/sqft)' %}</label>
+                        <input id='ghgiBaselineInput'
+                               type="number"
+                               value="0"
+                               class="form-control"
+                               size='15'
+                               style="width: 24em;">
+                    </div>
+                    <small class="form-text text-muted">{% trans 'Estimated annual kgCO2e divided by gross square footage.' %}</small>
+
+                    <table class="table table-striped"
+                           id="tableEui"
+                           style="margin-top: 2em;">
+                        <thead>
+                            <th>{% trans 'Year' %}</th>
+                            <th>
+                                {% trans 'EUI Pathway (kBtu/sqft)' %}
+                            </th>
+                            <th>
+                                {% trans 'EUI Standard % Reduction (kBtu/sqft)' %}
+                            </th>
+                            <th>
+                                {% trans 'Reduction Check (%)' %}
+                            </th>
+                            <th>
+                                {% trans 'Difference* (kBtu/sqft)' %}
+                            </th>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <table class="table table-striped"
+                           id="tableGhgi"
+                           style="margin-top: 2em;">
+                        <thead>
+                            <th>{% trans 'Year' %}</th>
+                            <th id="intensityHeader">
+                                {% trans 'GHGI Pathway (kgCO2e/sqft)' %}
+                            </th>
+                            <th id="intensityHeaderStandard">
+                                {% trans 'GHGI Standard % Reduction (kgCO2e/sqft)' %}
+                            </th>
+                            <th id="reductionCheckHeader">
+                                {% trans 'Reduction Check (%)' %}
+                            </th>
+                            <th id="diffHeader">
+                                {% trans 'Difference* (kgCO2e/sqft)' %}
+                            </th>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <small class="form-text text-muted">
+                        {% trans '*Difference is between normal pathway and standard reduction pathway' %}
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block helpdesk_js %}
+{{ eui_2026|json_script:'eui_2026_json' }}
+{{ eui_2030|json_script:'eui_2030_json' }}
+{{ ghgi_2026|json_script:'ghgi_2026_json' }}
+{{ ghgi_2030|json_script:'ghgi_2030_json' }}
+{{ property_types|json_script:'property_types_json' }}
+{{ ghgi_pathways|json_script:'ghgi_pathways_json' }}
+{{ eui_pathways|json_script:'eui_pathways_json' }}
+<script type='text/javascript'
+        language='javascript'>
+
+            function round(x) {
+                x = Math.round(x * 10) / 10;
+                x = x.toFixed(1);
+                return x;
+            }
+
+            function getStdReduction(baseline) {
+                return [baseline * 0.87, baseline * 0.71];
+            }
+
+            function updateTable(table, data) {
+                const tbody = table.getElementsByTagName("tbody")[0];
+                for (let i = 0; i < tbody.rows.length; i++) {
+                    const row = tbody.rows[i];
+                    for (let j = 0; j < row.cells.length; j++) {
+                        row.cells[j].textContent = data[i][j];
+                    }
+                }
+            }
+
+            function getDataFromTargets(baseline, targets) {                    
+                let stdTargets = getStdReduction(baseline);
+                let diff = targets.map((t, idx) => round(t - stdTargets[idx]));
+                let reduction = stdTargets.map((t, idx) => {
+                    if (baseline != 0) {
+                        return round(((baseline - t) / baseline) * 100);
+                    } else {
+                        return '--';
+                    }
+                });
+                baseline = round(baseline);
+                stdTargets = stdTargets.map((t) => round(t));
+                return [
+                    [2021, baseline, baseline, "--", "--"],
+                    [2026, targets[0], stdTargets[0], reduction[0], diff[0]],
+                    [2030, targets[1], stdTargets[1], reduction[1], diff[1]],
+                ];
+            }
+
+            document.addEventListener('DOMContentLoaded', function () {
+                // parse JSON given to the template
+                const eui_2026 = JSON.parse(document.getElementById('eui_2026_json').textContent);
+                const eui_2030 = JSON.parse(document.getElementById('eui_2030_json').textContent);
+                const ghgi_2026 = JSON.parse(document.getElementById('ghgi_2026_json').textContent);
+                const ghgi_2030 = JSON.parse(document.getElementById('ghgi_2030_json').textContent);
+                const property_types = JSON.parse(document.getElementById('property_types_json').textContent);
+                const ghgi_pathways = JSON.parse(document.getElementById('ghgi_pathways_json').textContent);
+                const eui_pathways = JSON.parse(document.getElementById('eui_pathways_json').textContent);
+
+                const propertyTypeSelect = document.getElementById('propertyTypeSelect');
+                const tableEui = document.getElementById('tableEui');
+                const tableGhgi = document.getElementById('tableGhgi');
+                const ghgiInput = document.getElementById('ghgiBaselineInput');
+                const euiInput = document.getElementById('euiBaselineInput');
+                function updateCalculation() {
+                    let propertyType = propertyTypeSelect.options[propertyTypeSelect.selectedIndex].value;
+
+                    // GHGI calculations
+                    let ghgiTargets = [ghgi_2026[propertyType], ghgi_2030[propertyType]];
+                    let ghgiData = getDataFromTargets(ghgiInput.value, ghgiTargets);
+                    updateTable(tableGhgi, ghgiData);
+
+                    // EUI calculations
+                    let euiTargets = [eui_2026[propertyType], eui_2030[propertyType]];
+                    let euiData = getDataFromTargets(euiInput.value, euiTargets);
+                    updateTable(tableEui, euiData);
+                }
+                propertyTypeSelect.addEventListener('change', updateCalculation);
+                ghgiInput.addEventListener('change', updateCalculation);
+                euiInput.addEventListener('change', updateCalculation);
+                updateCalculation()
+            });
+        </script>
+{% endblock %}
