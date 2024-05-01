@@ -177,7 +177,7 @@ def search_for_ticket(request, error_message=None, ticket=None):
         })
 
 def bps_pathway_calculator(request):
-    csv_path = join(settings.BASE_DIR, 'src/django-helpdesk/helpdesk/static/helpdesk/bps_property_targets.csv')
+    csv_path = './seed/utils/data/bps_property_targets.csv'
     property_types = []
     eui_2026 = {}
     eui_2030 = {}
