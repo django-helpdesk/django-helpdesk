@@ -1,4 +1,4 @@
-Django==4.2.11
+Django<=4.2.11
 django-bootstrap-form>=3.3,<4
 email-reply-parser
 django-markdown-deux
