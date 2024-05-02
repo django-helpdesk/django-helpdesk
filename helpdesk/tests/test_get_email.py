@@ -200,12 +200,11 @@ class GetEmailCommonTests(TestCase):
         # The extractor prepends a part identifier so compare the ending
         self.assertTrue(sent_file.name.endswith(filename), f"Filename extracted does not match: {sent_file.name}")
 
-    @override_settings(VALID_EXTENSIONS=['.png'])
     def test_wrong_extension_attachment(self):
         """
         Tests if an attachment with a wrong extension doesn't stop the email process
         """
-        message, _, _ = utils.generate_multipart_email(type_list=['plain', 'image'])
+        message, _, _ = utils.generate_multipart_email(type_list=['plain', 'executable'])
 
         self.assertEqual(len(mail.outbox), 0)  # @UndefinedVariable
 
@@ -213,7 +212,7 @@ class GetEmailCommonTests(TestCase):
             extract_email_metadata(message.as_string(), self.queue_public, self.logger)
 
             self.assertIn(
-                "ERROR:helpdesk:['Unsupported file extension: .jpg']",
+                "ERROR:helpdesk:['Unsupported file extension: .exe']",
                 cm.output
             )
 
@@ -237,12 +236,11 @@ class GetEmailCommonTests(TestCase):
         followup = ticket.followup_set.get()
         self.assertEqual(2, followup.followupattachment_set.count())
 
-    @override_settings(VALID_EXTENSIONS=['.txt'])
     def test_multiple_attachments_with_wrong_extension(self):
         """
         Tests that a wrong extension won't stop from saving other valid attachment
         """
-        message, _, _ = utils.generate_multipart_email(type_list=['plain', 'image', 'file', 'image'])
+        message, _, _ = utils.generate_multipart_email(type_list=['plain', 'executable', 'file', 'executable'])
 
         self.assertEqual(len(mail.outbox), 0)  # @UndefinedVariable
 
@@ -250,7 +248,7 @@ class GetEmailCommonTests(TestCase):
             extract_email_metadata(message.as_string(), self.queue_public, self.logger)
 
             self.assertIn(
-                "ERROR:helpdesk:['Unsupported file extension: .jpg']",
+                "ERROR:helpdesk:['Unsupported file extension: .exe']",
                 cm.output
             )
 

@@ -156,6 +156,21 @@ def generate_file_mime_part(locale: str="en_US",filename: str = None, content: s
     part.add_header('Content-Disposition', "attachment; filename=%s" % filename)
     return part
 
+def generate_executable_mime_part(locale: str="en_US",filename: str = None, content: str = None) -> Message:
+    """
+    
+    :param locale: change this to generate locale specific file name and attachment content
+    :param filename: pass a file name if you want to specify a specific name otherwise a random name will be generated
+    :param content: pass a string value if you want have specific content otherwise a random string will be generated
+    """
+    part = MIMEBase('application', 'vnd.microsoft.portable-executable')
+    part.set_payload(get_fake("text", locale=locale, min_length=1024) if content is None else content)
+    encoders.encode_base64(part)
+    if not filename:
+        filename = get_fake("word", locale=locale, min_length=8) + ".exe"
+    part.add_header('Content-Disposition', "attachment; filename=%s" % filename)
+    return part
+
 def generate_image_mime_part(locale: str="en_US",imagename: str = None, disposition_primary_type: str = "attachment") -> Message:
     """
     
@@ -221,6 +236,8 @@ def generate_mime_part(locale: str="en_US",
         msg = MIMEText(body, part_type)
     elif "file" == part_type:
         msg = generate_file_mime_part(locale=locale)
+    elif "executable" == part_type:
+        msg = generate_executable_mime_part(locale=locale)
     elif "image" == part_type:
         msg = generate_image_mime_part(locale=locale)
     else:
@@ -236,7 +253,7 @@ def generate_multipart_email(locale: str="en_US",
     Generates an email including headers with the defined multiparts
     
     :param locale:
-    :param type_list: options are plain, html, image (attachment), file (attachment)
+    :param type_list: options are plain, html, image (attachment), file (attachment), and executable (.exe attachment)
     :param sub_type: multipart sub type that defaults to "mixed" if not specified
     :param use_short_email: produces a "To" or "From" that is only the email address if True
     """    

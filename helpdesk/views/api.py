@@ -7,6 +7,8 @@ from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.pagination import PageNumberPagination
 
+from helpdesk import settings as helpdesk_settings
+
 
 class ConservativePagination(PageNumberPagination):
     page_size = 25
@@ -34,6 +36,10 @@ class UserTicketViewSet(viewsets.ReadOnlyModelViewSet):
 class TicketViewSet(viewsets.ModelViewSet):
     """
     A viewset that provides the standard actions to handle Ticket
+
+    You can filter the tickets by status using the `status` query parameter. For example:
+
+    `/api/tickets/?status=Open,Resolved` will return all the tickets that are Open or Resolved.
     """
     queryset = Ticket.objects.all()
     serializer_class = TicketSerializer
@@ -42,6 +48,20 @@ class TicketViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         tickets = Ticket.objects.all()
+
+        # filter by status
+        status = self.request.query_params.get('status', None)
+        if status:
+          statuses = status.split(',') if status else []
+          status_choices = helpdesk_settings.TICKET_STATUS_CHOICES
+          number_statuses = []
+          for status in statuses:
+              for choice in status_choices:
+                  if str(choice[0]) == status:
+                      number_statuses.append(choice[0])
+          if number_statuses:
+              tickets = tickets.filter(status__in=number_statuses)
+
         for ticket in tickets:
             ticket.set_custom_field_values()
         return tickets
