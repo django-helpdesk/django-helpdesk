@@ -9,7 +9,7 @@ urls.py - Mapping of URL's to our various views. Note we always used NAMED
 
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.decorators import login_required
-from django.urls import include, path, re_path
+from django.urls import include, path, re_path, reverse_lazy
 from django.views.generic import TemplateView
 from helpdesk import settings as helpdesk_settings
 from helpdesk.decorators import helpdesk_staff_member_required, protect_view
@@ -215,7 +215,7 @@ urlpatterns += [
     path(
         "logout/",
         auth_views.LogoutView.as_view(
-            template_name="helpdesk/registration/login.html", next_page="../"
+            template_name="helpdesk/registration/login.html", next_page=reverse_lazy("helpdesk:home")
         ),
         name="logout",
     ),
