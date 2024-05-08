@@ -215,7 +215,7 @@ urlpatterns += [
     path(
         "logout/",
         auth_views.LogoutView.as_view(
-            template_name="helpdesk/registration/login.html", next_page=reverse_lazy("helpdesk:home")
+            template_name="helpdesk/registration/logged_out.html"
         ),
         name="logout",
     ),
