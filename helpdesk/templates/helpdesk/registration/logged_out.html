@@ -1,13 +1,25 @@
 {% extends "helpdesk/public_base.html" %}{% load i18n %}
 {% block helpdesk_title %}{% trans "Logged Out" %}{% endblock %}
 
-{% block helpdesk_body %}{% blocktrans %}
-
-    <div class="col-md-4 col-md-offset-4">
-        <div class="alert alert-success">
-            <h2>Successfully Logged Out</h2>
-            <p>Thanks for being here. Hopefully you've helped resolve a few tickets and made the world a better place.</p>
+{% block helpdesk_body %}
+    {% blocktrans %}
+        <div class="col-md-4 offset-md-4">
+            <div class="alert alert-success">
+                <h2>Successfully Logged Out</h2>
+                <p>
+                    Thanks for being here. Hopefully you've helped resolve a few tickets 
+                    and made the world a better place.
+                </p>
+            </div>
         </div>
+    {% endblocktrans %}
+    
+    <div class="clearfix"></div>
+    
+    <div class="col-md-4 offset-md-4 text-center">
+        <a class="btn btn-secondary" href="{% url 'helpdesk:login' %}">
+            <i class="fas fa-fw fa-sign-in-alt"></i>
+            {% trans "Log In again" %}
+        </a>
     </div>
-
-{% endblocktrans %}{% endblock %}
+{% endblock %}

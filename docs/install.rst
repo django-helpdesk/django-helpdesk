@@ -162,9 +162,16 @@ errors with trying to create User settings.
    following to ``settings.py`` to get your Django installation to use the login 
    view included in ``django-helpdesk``::
 
-    LOGIN_URL = '/helpdesk/login/'
+    LOGIN_URL = 'helpdesk:login'
 
-   Alter the URL to suit your installation path.
+   Alter the view name to suit your installation path.
+
+   You can also add following settings to handle redirects after logging in or out::
+
+   LOGIN_REDIRECT_URL = 'helpdesk:home'
+   LOGOUT_REDIRECT_URL = 'helpdesk:home'
+
+   If you don't set ``LOGOUT_REDIRECT_URL``, a logout confirmation page will be displayed.
 
 8. Load initial e-mail templates, otherwise you will not be able to send e-mail::
 
