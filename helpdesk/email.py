@@ -76,7 +76,7 @@ def process_email(quiet=False, debugging=False, options=None):
 
         log_name = importer.email_address.replace('@', '_')
         log_name = log_name.replace('.', '_')
-        logger = logging.getLogger('django.helpdesk.emailimporter.' + log_name)
+        logger = logging.getLogger(log_name)
         logging_types = {
             'info': logging.INFO,
             'warn': logging.WARN,
@@ -127,8 +127,9 @@ def process_email(quiet=False, debugging=False, options=None):
                     process_importer(importer, queues, logger=logger, debugging=False, options=options)
                     importer.email_box_last_check = timezone.now()
                     importer.save()
+                else:
+                    logger.info('Import canceled: Too early to check')
 
-            logger.info('')
         finally:
             # we must close the file handler correctly if it's created
             try:
@@ -144,7 +145,7 @@ def process_email(quiet=False, debugging=False, options=None):
 
 
 def process_importer(importer, queues, logger, debugging, options=None):
-    logger.info("\n***** %s: Begin processing mail for django-helpdesk" % ctime())
+    logger.info("***** %s: Begin processing mail for django-helpdesk" % ctime())
 
     if importer.socks_proxy_type and importer.socks_proxy_host and importer.socks_proxy_port:
         try:
@@ -199,11 +200,14 @@ def process_importer(importer, queues, logger, debugging, options=None):
         if not importer.email_box_port:
             importer.email_box_port = mail_defaults[email_box_type][encryption]['port']
         if email_box_type == 'imap':
-            server = mail_defaults[email_box_type][encryption]['init'](
-                importer.email_box_host or settings.QUEUE_EMAIL_BOX_HOST,
-                int(importer.email_box_port),
-                timeout=60
-            )
+            try:
+                server = mail_defaults[email_box_type][encryption]['init'](
+                    importer.email_box_host or settings.QUEUE_EMAIL_BOX_HOST,
+                    int(importer.email_box_port),
+                    timeout=60
+                )
+            except ConnectionResetError:
+                logger.warn("Connection reset, unable to import")
         else:
             server = mail_defaults[email_box_type][encryption]['init'](
                 importer.email_box_host or settings.QUEUE_EMAIL_BOX_HOST,
@@ -312,7 +316,7 @@ def refreshed(importer, logger, token_backend=None):
 def imap_sync(importer, queues, logger, server, debugging, options=None):
     login_successful = True
     token_backend = None
-    server.debug = 4
+    # server.debug = 4
 
     if importer.auth and (importer.auth.host_service == GOOGLE or importer.auth.host_service == MICROSOFT):
         # Start TLS first
@@ -363,7 +367,7 @@ def imap_sync(importer, queues, logger, server, debugging, options=None):
             except Exception:
                 logger.error("IMAP login failed.")
                 login_successful = False
-    server.debug = 3
+    # server.debug = 3
 
     if login_successful:
         try:
