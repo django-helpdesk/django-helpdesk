@@ -22,8 +22,10 @@ from os.path import isfile, join
 from time import ctime
 from functools import reduce
 from buildingid.code import RE_PATTERN_
+import quopri
 
 from bs4 import BeautifulSoup
+from bs4.builder import ParserRejectedMarkup
 from django.conf import settings as django_settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
@@ -1061,7 +1063,12 @@ def process_message(message, importer, queues, logger, options=None):
         counter += 1
 
     if not body:
-        mail = BeautifulSoup(str(message), "html.parser")
+        try:
+            mail = BeautifulSoup(str(message), "html.parser")
+        except ParserRejectedMarkup:
+            decoded_message = quopri.decodestring(str(message))
+            mail = BeautifulSoup(decoded_message, "html.parser")
+
         beautiful_body = mail.find('body')
         if beautiful_body:
             try:
