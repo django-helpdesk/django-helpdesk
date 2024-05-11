@@ -124,6 +124,8 @@ HELPDESK_SHOW_CHANGE_PASSWORD = True
 HELPDESK_REDIRECT_TO_LOGIN_BY_DEFAULT = False
 LOGIN_URL = 'helpdesk:login'
 LOGIN_REDIRECT_URL = 'helpdesk:home'
+# You can also redirect to a specific page after logging out (instead of logout page)
+# LOGOUT_REDIRECT_URL = 'helpdesk:home'
 
 # Database
 # - by default, we use SQLite3 for the demo, but you can also

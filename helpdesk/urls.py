@@ -103,7 +103,7 @@ urlpatterns = [
         staff.delete_ticket_checklist,
         name="delete_ticket_checklist"
     ),
-    re_path(r"^raw/(?P<type>\w+)/$", staff.raw_details, name="raw"),
+    re_path(r"^raw/(?P<type_>\w+)/$", staff.raw_details, name="raw"),
     path("rss/", staff.rss_list, name="rss_index"),
     path("reports/", staff.report_index, name="report_index"),
     re_path(r"^reports/(?P<report>\w+)/$",
@@ -215,7 +215,7 @@ urlpatterns += [
     path(
         "logout/",
         auth_views.LogoutView.as_view(
-            template_name="helpdesk/registration/login.html", next_page="../"
+            template_name="helpdesk/registration/logged_out.html"
         ),
         name="logout",
     ),

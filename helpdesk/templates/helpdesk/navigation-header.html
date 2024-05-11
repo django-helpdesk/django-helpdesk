@@ -58,7 +58,11 @@
             <a class="dropdown-item" href='{% url 'helpdesk:system_settings' %}'><i class="fas fa-fw fa-cogs"></i> {% trans "System Settings" %}</a>
             <div class="dropdown-divider"></div>
             {% endif %}
-            <a class="dropdown-item" href="{% url 'helpdesk:logout' %}"><i class="fas fa-fw fa-sign-out-alt"></i> {% trans "Logout" %}</a>
+            <form action="{% url 'helpdesk:logout' %}" method="post">{% csrf_token %}
+                <button type="submit" class="dropdown-item">
+                  <i class="fas fa-fw fa-sign-out-alt"></i> {% trans "Logout" %}
+                </button>
+            </form>
           </div>
         </li>
       {% else %}
@@ -80,11 +84,17 @@
                      {{user.username}}
                  </div>
             </div>
-            <li class="nav-item dropdown no-arrow">
+            <li class="nav-item">
               {% if user.is_authenticated %}
-                <a class="nav-link dropdown-toggle" href="{% url 'helpdesk:logout' %}" id="userDropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fas fa-fw fa-sign-out-alt"></i> {% trans "Logout" %}</a>
+                <form action="{% url 'helpdesk:logout' %}" method="post">{% csrf_token %}
+                    <button type="submit" class="btn btn-outline-secondary">
+                      <i class="fas fa-fw fa-sign-out-alt"></i> {% trans "Logout" %}
+                    </button>
+                </form>
               {% else %}
-                <a class="nav-link dropdown-toggle" href="{% url 'helpdesk:login' %}?next={% if next %}{{ next|escape }}{% else %}{% url 'helpdesk:home' %}{% endif %}" id="userDropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fas fa-fw fa-sign-in-alt"></i> {% trans "Log In" %}</a>
+                <a class="btn btn-outline-secondary" href="{% url 'helpdesk:login' %}?next={% if next %}{{ next|escape }}{% else %}{% url 'helpdesk:home' %}{% endif %}">
+                  <i class="fas fa-fw fa-sign-in-alt"></i> {% trans "Log In" %}
+                </a>
               {% endif %}
             </li>
         {% endif %}
