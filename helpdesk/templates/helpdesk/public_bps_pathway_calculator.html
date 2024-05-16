@@ -9,10 +9,11 @@
                 <div id="text-block"
                      class="col-sm-8">
 
-                    <h2>{% trans '2026 Preliminary Target Pathway Selection Calculator' %}</h2>
+                    <h2>{% trans 'Building Performance Colorado Pathway Selection Calculator' %}</h2>
                     <p class="lead">
-                        {% trans 'Please note that this calculator can only provide an approximation of future GHGI or EUI performance.' %}
-                        {% trans 'The official Building Performance Standard Pathway calculation relies on the ratio of fuel/electricty use and (for GHGI pathways) their related emission factors.' %}
+                        {% trans 'This tool will show you the potential BPS targets for your building based on the building\'s property type and baseline information.' %}
+                        {% trans 'Use this tool to compare the different Building Performance Colorado pathways.' %}
+                        {% trans 'The numbers in each row allow you to compare targets defined by each pathway in order to make an informed pathway selection.' %}
                     </p>
 
                     <div id="propertyTypeSelectGroup">
@@ -68,10 +69,10 @@
                             <th>
                                 {% trans 'EUI Standard % Reduction (kBtu/sqft)' %}
                             </th>
-                            <th>
+                            <th style="display: none;">
                                 {% trans 'Reduction Check (%)' %}
                             </th>
-                            <th>
+                            <th style="display: none;">
                                 {% trans 'Difference* (kBtu/sqft)' %}
                             </th>
                         </thead>
@@ -80,22 +81,22 @@
                                 <td></td>
                                 <td></td>
                                 <td></td>
-                                <td></td>
-                                <td></td>
+                                <td style="display: none;"></td>
+                                <td style="display: none;"></td>
                             </tr>
                             <tr>
                                 <td></td>
                                 <td></td>
                                 <td></td>
-                                <td></td>
-                                <td></td>
+                                <td style="display: none;"></td>
+                                <td style="display: none;"></td>
                             </tr>
                             <tr>
                                 <td></td>
                                 <td></td>
                                 <td></td>
-                                <td></td>
-                                <td></td>
+                                <td style="display: none;"></td>
+                                <td style="display: none;"></td>
                             </tr>
                         </tbody>
                     </table>
@@ -105,16 +106,16 @@
                            id="tableGhgi">
                         <thead>
                             <th>{% trans 'Year' %}</th>
-                            <th id="intensityHeader">
+                            <th>
                                 {% trans 'GHGI Pathway (kgCO2e/sqft)' %}
                             </th>
-                            <th id="intensityHeaderStandard">
+                            <th>
                                 {% trans 'GHGI Standard % Reduction (kgCO2e/sqft)' %}
                             </th>
-                            <th id="reductionCheckHeader">
+                            <th style="display: none;">
                                 {% trans 'Reduction Check (%)' %}
                             </th>
-                            <th id="diffHeader">
+                            <th style="display: none;">
                                 {% trans 'Difference* (kgCO2e/sqft)' %}
                             </th>
                         </thead>
@@ -123,22 +124,22 @@
                                 <td></td>
                                 <td></td>
                                 <td></td>
-                                <td></td>
-                                <td></td>
+                                <td style="display: none;"></td>
+                                <td style="display: none;"></td>
                             </tr>
                             <tr>
                                 <td></td>
                                 <td></td>
                                 <td></td>
-                                <td></td>
-                                <td></td>
+                                <td style="display: none;"></td>
+                                <td style="display: none;"></td>
                             </tr>
                             <tr>
                                 <td></td>
                                 <td></td>
                                 <td></td>
-                                <td></td>
-                                <td></td>
+                                <td style="display: none;"></td>
+                                <td style="display: none;"></td>
                             </tr>
                         </tbody>
                     </table>
