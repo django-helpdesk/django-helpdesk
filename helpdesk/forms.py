@@ -814,6 +814,8 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
 
         def to_float(value):
             valid_float = False
+            if type(value) == str:
+                value = value.replace(",", "")
             try:
                 value = float(value)
                 valid_float = True
@@ -829,6 +831,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
                     msg = forms.ValidationError('Need a number for Square Footage')
                 else:
                     msg = forms.ValidationError('No Square Footage Provided')
+                property_gfa = None
                 self.add_error('e_gsf', msg)
 
             pairs = self.cleaned_data.get('e_calculator')
