@@ -15,6 +15,10 @@
                         {% trans 'Use this tool to compare the different Building Performance Colorado pathways.' %}
                         {% trans 'The numbers in each row allow you to compare targets defined by each pathway in order to make an informed pathway selection.' %}
                     </p>
+                    <p class="lead">
+                        {% trans 'Please note this tool is not the official pathway selection form, only a resource to help inform building owners and the interested public. To officially select your BPS compliance pathway, please fill out ' %}
+                        <a href="https://co.beam-portal.org/helpdesk/tickets/submit/10/">{% trans 'this form' %}</a>
+                    </p>
 
                     <div id="propertyTypeSelectGroup">
                         <label for="propertyTypeSelect"
@@ -143,10 +147,6 @@
                             </tr>
                         </tbody>
                     </table>
-
-                    <small class="form-text text-muted">
-                        {% trans '*Difference is between normal pathway and standard reduction pathway' %}
-                    </small>
                 </div>
             </div>
         </div>
@@ -169,6 +169,14 @@
                 x = Math.round(x * 10) / 10;
                 x = x.toFixed(1);
                 return x;
+            }
+
+            function formatNumber(num) {
+                if (Number.isInteger(num)) {
+                    return num.toFixed(1);
+                } else {
+                    return num.toString();
+                }
             }
 
             function getStdReduction(baseline) {
@@ -195,12 +203,12 @@
                         return '--';
                     }
                 });
-                baseline = round(baseline);
-                stdTargets = stdTargets.map((t) => round(t));
+                baseline = formatNumber(round(baseline));
+                stdTargets = stdTargets.map((t) => formatNumber(round(t)));
                 return [
                     [2021, baseline, baseline, "--", "--"],
-                    [2026, targets[0], stdTargets[0], reduction[0], diff[0]],
-                    [2030, targets[1], stdTargets[1], reduction[1], diff[1]],
+                    [2026, formatNumber(targets[0]), stdTargets[0], reduction[0], diff[0]],
+                    [2030, formatNumber(targets[1]), stdTargets[1], reduction[1], diff[1]],
                 ];
             }
 
