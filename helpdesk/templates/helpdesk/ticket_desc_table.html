@@ -117,24 +117,9 @@
                         </td>
                     </tr>
 
-                    {% if helpdesk_settings.HELPDESK_ENABLE_DEPENDENCIES_ON_TICKET != False and helpdesk_settings.HELPDESK_ENABLE_TIME_SPENT_ON_TICKET != False %}
-                        <tr>
-                            {% if helpdesk_settings.HELPDESK_ENABLE_DEPENDENCIES_ON_TICKET %}
-                                <th class="table-active">{% trans "Dependencies" %}</th>
-                                <td>
-                                    <a data-toggle='tooltip' href='{% url 'helpdesk:ticket_dependency_add' ticket.id %}' title="{% trans "Click on 'Add Dependency', if you want to make this ticket dependent on another ticket. A ticket may not be closed until all tickets it depends on are closed." %}"><button type="button" class="btn btn-primary btn-sm float-right"><i class="fas fa-link"></i></button></a>
-                                    {% for dep in ticket.ticketdependency.all %}
-                                    {% if forloop.first %}<p>{% trans "This ticket cannot be resolved until the following ticket(s) are resolved" %}</p><ul>{% endif %}
-                                        <li><a href='{{ dep.depends_on.get_absolute_url }}'>{{ dep.depends_on.ticket }} {{ dep.depends_on.title }}</a> ({{ dep.depends_on.get_status_display }}) <a href='{% url 'helpdesk:ticket_dependency_del' ticket.id dep.id %}'><button type="button" class="btn btn-warning btn-sm"><i class="fas fa-trash"></i></button></a></li>
-                                        {% if forloop.last %}</ul>{% endif %}
-                                    {% empty %}
-                                    {% trans "This ticket has no dependencies." %}
-                                    {% endfor %}
-                                </td>
-                            {% else %}
-                                <th class="table-active"></th>
-                                <td></td>
-                            {% endif %}
+		    <tr>
+			<th class="table-active">{% trans "Status" %}</th>
+			<td>{{ ticket.get_status }}</td>
                             {% if helpdesk_settings.HELPDESK_ENABLE_TIME_SPENT_ON_TICKET %}
                                 <th class="table-active">{% trans "Total time spent" %}</th>
                                 <td>{{ ticket.time_spent_formated }}</td>
@@ -142,8 +127,41 @@
                                 <th class="table-active"></th>
                                 <td></td>
                             {% endif %}
-                        </tr>
-                    {% endif %}
+		    </tr>
+                    {% if helpdesk_settings.HELPDESK_ENABLE_DEPENDENCIES_ON_TICKET != False %}
+		    <tr>
+                        <th class="table-active">{% trans "Depends" %}</th>
+                        <td>
+                            <a data-toggle='tooltip' href='{% url 'helpdesk:ticket_dependency_add' ticket.id %}'
+			       title='{% trans "Make this ticket dependent on another ticket. A ticket may not be closed until all tickets it depends on are closed or removed." %}'>
+				<button type="button" class="btn btn-primary btn-sm float-right"><i class="fas fa-link"></i></button></a>
+                            {% for dep in ticket.ticketdependency.all %}
+			    {% if forloop.first %}<ul>{% endif %}
+				<li>
+				    <a href='{{ dep.depends_on.get_absolute_url }}'>{{ dep.depends_on.ticket }} {{ dep.depends_on.title }}</a>
+				    ({{ dep.depends_on.get_status_display }})
+				    <a data-toggle='tooltip' href='{% url 'helpdesk:ticket_dependency_del' ticket.id dep.id %}'
+				       title='{% trans "Drop the dependency on this ticket. A ticket may not be closed until all tickets it depends on are closed or removed." %}'>
+					<button type="button" class="btn btn-warning btn-sm"><i class="fas fa-trash"></i></button></a></li>
+                                {% if forloop.last %}</ul>{% endif %}
+                            {% empty %}
+                            {% trans "This ticket has no dependencies." %}
+                            {% endfor %}
+                        </td>
+			<th class="table-active">{% trans "Resolves" %}</th>
+			<td>
+			    {% for parent in ticket.depends_on.all %}
+			    {% if forloop.first %}<ul>{% endif %}
+				<li>
+				    <a href='{{ parent.ticket.get_absolute_url }}'>{{ parent.ticket.ticket }} {{ parent.ticket.title }}</a>
+				</li>
+				{% if forloop.last %}</ul>{% endif %}
+			    {% empty %}
+			    {% trans "This ticket does not resolve any other" %}
+			    {% endfor %}
+			</td>
+		    </tr>
+		    {% endif %}
                     {% if ticket.kbitem %}
                         <tr>
                             <th class="table-active">{% trans "Knowlegebase item" %}</th>
