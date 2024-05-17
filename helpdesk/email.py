@@ -1270,8 +1270,9 @@ def process_exchange_message(message, importer, queues, logger):
     logger.info("Found %s attachments." % len(message.attachments))
     att_counter = 0
     for attachment in message.attachments:
-        file_content = []
         if isinstance(attachment, FileAttachment):
+            file_content = []
+            logger.info('- Found FileAttachment')
             name = getattr(attachment, 'name', None)
             file_type = getattr(attachment, 'content_type', None)
             with attachment.fp as fp:
@@ -1281,16 +1282,51 @@ def process_exchange_message(message, importer, queues, logger):
                     buffer = fp.read(1024)
             file_content = b''.join(file_content)
             files.append(SimpleUploadedFile(name, file_content, file_type))
+
         elif isinstance(attachment, ItemAttachment):
             logger.info('- Found ItemAttachment')
             if isinstance(attachment.item, ExchangeMessage):
-                att_html_body = attachment.item.body
-                att_html_body = att_html_body.replace('\n', '').replace('\r', '')
-                altered_att_body = att_html_body.replace("</p>", "</p>\n").replace("<br>", "\n<br>").replace("<br/>", "\n<br/>")
-                att_html_body = BeautifulSoup(str(altered_att_body), "html.parser")
-                att_html_body = str(att_html_body)
+                att_sender, att_to_list = '', []
+                att_subject = getattr(attachment.item, 'subject', '')
+                if getattr(attachment.item, 'sender', None):
+                    att_sender = (attachment.item.sender.name, attachment.item.sender.email_address)
+                if getattr(attachment.item, 'to_recipients', None):
+                    att_to_list = [(r.name, r.email_address) for r in attachment.item.to_recipients]
+                att_html_body = attachment.item.body.replace('\n', '').replace('\r', '').replace("</p>", "</p>\n").replace("<br>", "\n<br>").replace("<br/>", "\n<br/>")
+                att_html_body = f"<p>Subject:{att_subject}<br>\nFrom: {att_sender}<br>\nTo: {att_to_list}</p>\n" + att_html_body
+                att_html_body = str(BeautifulSoup(str(att_html_body), "html.parser"))
                 files.append(SimpleUploadedFile(("email_html_attachment_%s.html" % att_counter), att_html_body.encode("utf-8"), 'text/html'))
                 att_counter += 1
+
+                # Check for more attachments
+                for sub_attachment in attachment.item.attachments:
+                    if isinstance(sub_attachment, FileAttachment):
+                        logger.info('- Found Sub FileAttachment')
+                        file_content = []
+                        name = getattr(sub_attachment, 'name', None)
+                        file_type = getattr(sub_attachment, 'content_type', None)
+                        with sub_attachment.fp as fp:
+                            buffer = fp.read(1024)
+                            while buffer:
+                                file_content.append(buffer)
+                                buffer = fp.read(1024)
+                        file_content = b''.join(file_content)
+                        files.append(SimpleUploadedFile(name, file_content, file_type))
+
+                    elif isinstance(sub_attachment, ItemAttachment):
+                        logger.info('- Found Sub ItemAttachment')
+                        if isinstance(sub_attachment.item, ExchangeMessage):
+                            att_sender, att_to_list = '', []
+                            att_subject = getattr(attachment.item, 'subject', '')
+                            if getattr(sub_attachment.item, 'sender', None):
+                                att_sender = (sub_attachment.item.sender.name, sub_attachment.item.sender.email_address)
+                            if getattr(sub_attachment.item, 'to_recipients', None):
+                                att_to_list = [(r.name, r.email_address) for r in sub_attachment.item.to_recipients]
+                            att_html_body = sub_attachment.item.body.replace('\n', '').replace('\r', '').replace("</p>", "</p>\n").replace("<br>", "\n<br>").replace("<br/>", "\n<br/>")
+                            att_html_body = f"<p>Subject:{att_subject}<br>\nFrom: {att_sender}<br>\nTo: {att_to_list}</p>\n" + att_html_body
+                            att_html_body = str(BeautifulSoup(str(att_html_body), "html.parser"))
+                            files.append(SimpleUploadedFile(("email_html_subattachment_%s.html" % att_counter), att_html_body.encode("utf-8"), 'text/html'))
+                            att_counter += 1
 
     smtp_importance = getattr(message, 'importance', '')
     high_priority_types = {'high', 'important', '1', 'urgent'}
