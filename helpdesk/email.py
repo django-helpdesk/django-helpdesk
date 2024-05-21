@@ -208,6 +208,7 @@ def process_importer(importer, queues, logger, debugging, options=None):
                 )
             except ConnectionResetError:
                 logger.warn("Connection reset, unable to import")
+                return
         else:
             server = mail_defaults[email_box_type][encryption]['init'](
                 importer.email_box_host or settings.QUEUE_EMAIL_BOX_HOST,
