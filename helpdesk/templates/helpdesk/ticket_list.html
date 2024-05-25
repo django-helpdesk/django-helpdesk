@@ -341,6 +341,9 @@
         
         $(document).ready(function () {
             // Ticket DataTable Initialization
+	    $.fn.dataTable.ext.errMode = function(settings, helpPage, message) {
+		alert("{% trans 'Error fetching tickets occured, please contact the system administrators of this server providing the message below:\n    ' %}" + message)
+	    };
             $('#ticketTable').DataTable({
                 language: {
                     "emptyTable": "{% trans 'No Tickets Match Your Selection' %}"
