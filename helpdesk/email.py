@@ -1318,7 +1318,7 @@ def process_exchange_message(message, importer, queues, logger):
                         logger.info('- Found Sub ItemAttachment')
                         if isinstance(sub_attachment.item, ExchangeMessage):
                             att_sender, att_to_list = '', []
-                            att_subject = getattr(attachment.item, 'subject', '')
+                            att_subject = getattr(sub_attachment.item, 'subject', '')
                             if getattr(sub_attachment.item, 'sender', None):
                                 att_sender = (sub_attachment.item.sender.name, sub_attachment.item.sender.email_address)
                             if getattr(sub_attachment.item, 'to_recipients', None):
