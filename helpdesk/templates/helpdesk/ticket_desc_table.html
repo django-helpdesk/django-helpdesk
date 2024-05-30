@@ -231,11 +231,14 @@ copy_public_link = function() {
                             </ul>
                         </td>
                     </tr>
+
+                    {% if ticket.get_markdown|num_to_link %}
                     <tr>
                         <td id="ticket-description" colspan='4' style="max-width:1px;">
                             <h4>{% trans "Description" %}</h4>
                             {{ ticket.get_markdown|num_to_link }}</td>
                     </tr>
+                    {% endif %}
 
                     {% if ticket.resolution %}<tr>
                         <th colspan='2'>{% trans "Resolution" %}{% if "Resolved" == ticket.get_status_display %} <a href='?close'><button type="button" class="btn btn-warning btn-sm">{% trans "Accept and Close" %}</button></a>{% endif %}</th>
