@@ -1401,6 +1401,13 @@ class KBCategory(models.Model):
                     markdown_allowed()),
     )
 
+    order = models.PositiveIntegerField(
+        _('Ordering'),
+        blank=True,
+        null=True,
+        help_text='Smaller numbers will be ordered first.'
+    )
+
     forms = models.ManyToManyField(
         FormType,
         blank=True,
@@ -1433,7 +1440,7 @@ class KBCategory(models.Model):
         return '%s: %s (%s)' % (self.organization.name, self.name, self.pk)
 
     class Meta:
-        ordering = ('title',)
+        ordering = ('order', 'title',)
         verbose_name = _('Knowledgebase category')
         verbose_name_plural = _('Knowledgebase categories')
 
