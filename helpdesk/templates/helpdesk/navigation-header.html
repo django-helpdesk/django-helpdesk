@@ -8,8 +8,8 @@
       </button>
 
       <a class="navbar-brand mr-auto beam-navbar-header-shadow" href="{% url 'helpdesk:home' %}{% if user|is_helpdesk_staff is False %}{{ user_info.url }}{% endif %}">
-        {% if user_info.default_org.name == 'Building Performance Colorado' %}
-            {% trans 'Building Performance Colorado Helpdesk' %}
+        {% if user_info.default_org.helpdesk_title %}
+            {% trans user_info.default_org.helpdesk_title %}
         {% else %}
             {% trans 'Building Performance Helpdesk' %}
         {% endif %}
