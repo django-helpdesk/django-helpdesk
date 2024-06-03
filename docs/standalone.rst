@@ -1,7 +1,9 @@
 Django-Helpdesk Standalone Installation
 =======================================
 
-Installation
+You can find standalone docker images at `djangohelpdesk/standalone:latest <https://hub.docker.com/r/djangohelpdesk/standalone/tags>`_.
+
+Installation using docker-compose
 ------------
 
 1. Clone the django-helpdesk repository:
