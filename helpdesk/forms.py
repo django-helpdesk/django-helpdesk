@@ -288,7 +288,7 @@ class EditFollowUpForm(forms.ModelForm):
 
     class Meta:
         model = FollowUp
-        exclude = ('date', 'user',)
+        exclude = ('date', 'user')
 
     def __init__(self, *args, **kwargs):
         """Filter for Tickets belonging to the current Org."""

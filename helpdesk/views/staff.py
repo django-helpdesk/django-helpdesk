@@ -58,7 +58,7 @@ from helpdesk.lib import (
     queue_template_context,
 )
 from helpdesk.models import (
-    Ticket, Queue, FollowUp, TicketChange, PreSetReply, FollowUpAttachment, SavedSearch,
+    Ticket, Queue, FollowUp, TimeSpent, TicketChange, PreSetReply, FollowUpAttachment, SavedSearch,
     IgnoreEmail, TicketCC, TicketDependency, UserSettings, KBItem, CustomField, is_unlisted,
     FormType, EmailTemplate, get_markdown, clean_html, Tag
 )
@@ -798,7 +798,6 @@ def followup_edit(request, ticket_id, followup_id):
             'comment': escape(followup.comment),
             'public': followup.public,
             'new_status': followup.new_status,
-            'time_spent': format_time_spent(followup.time_spent),
         })
 
         ticketcc_string, show_subscribe = \
@@ -819,13 +818,12 @@ def followup_edit(request, ticket_id, followup_id):
             comment = form.cleaned_data['comment']
             public = form.cleaned_data['public']
             new_status = form.cleaned_data['new_status']
-            time_spent = form.cleaned_data['time_spent']
             # will save previous date
             old_date = followup.date
             new_followup = FollowUp(title=title, date=old_date, ticket=_ticket,
                                     comment=comment, public=public,
-                                    new_status=new_status,
-                                    time_spent=time_spent)
+                                    new_status=new_status,)
+            
             # keep old user if one did exist before.
             if followup.user:
                 new_followup.user = followup.user
@@ -1413,6 +1411,47 @@ def update_ticket(request, ticket_id, public=False):
 
     return return_to_ticket(request.user, request, helpdesk_settings, ticket)
 
+@helpdesk_staff_member_required
+def start_timer(request):
+    if request.method == 'POST':
+        ticket_id = request.POST.get('ticket_id')
+        ticket = get_object_or_404(Ticket, id=ticket_id)
+
+        new_timespent = TimeSpent(
+            user=request.user,
+            ticket=ticket,
+            start_time=timezone.now(),
+        )
+
+        new_timespent.save()
+
+        return JsonResponse({'ticket_id': ticket_id})
+
+@helpdesk_staff_member_required
+def stop_timer(request):
+    if request.method == 'POST':
+        userr = request.user
+        ticket_id = request.POST.get('ticket_id')
+        ticket = get_object_or_404(Ticket, id=ticket_id)
+
+        for timespent in TimeSpent.objects.all():
+            if timespent.user == userr and timespent.ticket == ticket and not timespent.stop_time:
+                timespent.stop_time = timezone.now()
+                timespent.save()
+                return JsonResponse({'stop_time': timespent.stop_time})
+
+        return JsonResponse({'ticket_id': ticket_id})
+
+
+@helpdesk_staff_member_required
+def get_elapsed_time(request, ticket_id):
+    if request.method == 'GET':
+        userr = request.user
+        ticket = get_object_or_404(Ticket, id=ticket_id)
+        for timespent in TimeSpent.objects.all():
+            if timespent.user == userr and timespent.ticket == ticket and not timespent.stop_time:
+                return JsonResponse({'start_time': timespent.start_time})
+        return JsonResponse({'start_time': None})
 
 def return_to_ticket(user, request, helpdesk_settings, ticket):
     """Helper function for update_ticket"""

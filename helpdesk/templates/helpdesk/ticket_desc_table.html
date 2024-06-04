@@ -183,7 +183,11 @@ copy_public_link = function() {
                             {% endfor %}
                         </td>
                         <th class="table-active">{% trans "Total time spent" %}</th>
-                        <td>{{ ticket.time_spent_formatted }}</td>
+                        <form id="timer-button" method="POST">
+                            {% csrf_token %}
+                            <td>{{ ticket.time_spent_formatted }} <button id="toggle_timer_btn" class="btn btn-warning btn-sm float-right" form="timer-button" type="SUBMIT">Start Timer</button></a> <div id="timer-display" class="float-right px-2" style="display: none;">00:00:00</div> </td> 
+                        </form>
+                        
                     </tr>
                     {% if ticket.kbitem %}
                     <tr>
@@ -255,3 +259,163 @@ copy_public_link = function() {
 </div>
 <!-- /.card -->
 
+{% block helpdesk_js %}
+<script type='text/javascript' language='javascript'>
+$(document).ready(function() {
+
+    var x = 0;
+    var wrapper         = $(".add_file_fields_wrap"); //Fields wrapper
+    var add_button      = $(".add_file_field_button"); //Add button ID
+
+    $(add_button).click(function(e){ //on add input button click
+        x++;
+        e.preventDefault();
+        $(`<div id="file_group${x}">
+            <label class='btn btn-primary btn-sm btn-file'>
+                Browse... 
+                <input type='file' name='attachment' id='file${x}' multiple style='display: none;'/>
+            </label>
+            <span>&nbsp;</span><span id='selectedfilename${x}'>{% trans 'No files selected.' %}</span>
+        </div>`).insertBefore(add_button); //add input box
+    });
+
+    var timer;
+    var totalSeconds = 0;
+    var button = $("#toggle_timer_btn");
+
+    // Updating the display
+    updateDisplay = function updateDisplay() {
+        // Spliting up by hours, minutes, and seconds
+        var hours = Math.floor(totalSeconds / 3600);
+        var minutes = Math.floor((totalSeconds % 3600) / 60);
+        var seconds = totalSeconds % 60;
+
+        // Changes the timer display
+        $('#timer-display').text(
+            String(hours).padStart(2, '0') + ':' +
+            String(minutes).padStart(2, '0') + ':' +
+            String(seconds).padStart(2, '0')
+        );
+    }
+
+    // Starting and stopping the timer
+    function toggleTimer() {
+        if (!timer) {
+            startTimer();
+        } else {
+            stopTimer();
+        }
+    }
+
+    // Starts the timer
+    function startTimer() {
+        $("#timer-display").show();
+        if (!timer) {
+            timer = setInterval(function() {
+                totalSeconds++;
+                updateDisplay();
+            }, 1000);
+        }
+    }
+ 
+    // Stops the timer and sets timer object to null for a new one to be created
+    function stopTimer() {
+        clearInterval(timer);
+        timer = null;
+
+        updateDisplay()
+    }
+
+
+    // Change button text based on timer state. Returns if the timer was stopped or started
+    function timerLogic() {
+        toggleTimer();
+        if (!timer) {
+            button.text('Start Timer');
+            return false;
+        } else {
+            button.text('Stop Timer');
+            return true;
+        }
+    }
+
+    // When button is pressed, create a new TimeSpent object or add a stop time to an existing one
+    $("#timer-button").submit(function(event) {        
+        // Checks to see if a new object needs to be made
+        create_new = timerLogic();
+
+        let ticketId = "{{ticket.id}}"
+ 
+        // If the user is starting the timer, create a new TimeSpent object
+        if (create_new) {
+            event.preventDefault();
+
+            $.ajax({
+                url: "{% url 'helpdesk:start_timer' %}",
+                method: 'POST',
+                data: {
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                    'ticket_id' : ticketId
+                },
+                success: function(response) {
+                    console.log(response)
+                }
+            });
+        // If the user is stopping the timer, go to the view that stops the timer
+        } else {
+            $.ajax({
+                url: "{% url 'helpdesk:stop_timer' %}",
+                method: 'POST',
+                data: {
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                    'ticket_id' : ticketId
+                },
+                success: function(response) {
+                    console.log(response)
+                }
+            });
+        }
+    });
+ 
+    // Checks if a TimeSpent object already exists or not
+    $.ajax({
+        url: "{% url 'helpdesk:get_elapsed_time' ticket.id %}",
+        method: 'GET',
+        success: function(response) {
+            // View returns the starting time of the matching TimeSpent object if it exists. If 
+            // it doesn't, returns null
+            let startTime = response.start_time;
+
+            if (startTime != null) {
+                var startTimeDate = new Date(response.start_time);
+                var currentTime = new Date();
+                var elapsedMilliseconds = currentTime - startTimeDate;
+                // elapsedSeconds calculates the time since start_time of the matching TimeSpent object
+                var elapsedSeconds = Math.floor(elapsedMilliseconds / 1000);
+
+                // Setting total seconds to elapsed seconds so the timer displays the correct elapsed time
+                totalSeconds = elapsedSeconds
+                // Show the timer as it is hidden by default
+                $("#timer-display").show();
+                // Changes the text to stop timer
+                button.text('Stop Timer');
+                // timer var is default null, so this will start the timer
+                toggleTimer();
+ 
+                // Updates display so time starts counting up
+                updateDisplay();
+
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Error fetching elapsed time:', error);
+        }
+    });
+
+    updateDisplay();
+
+});
+
+</script>
+
+{% endblock %}

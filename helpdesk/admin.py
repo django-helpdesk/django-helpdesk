@@ -3,7 +3,7 @@ from django import forms
 from django.utils.translation import ugettext_lazy as _
 from django.utils.html import format_html
 from helpdesk.models import (
-    Queue, Ticket, FollowUp, PreSetReply, KBCategory, EscalationExclusion, EmailTemplate, KBItem, TicketChange,
+    Queue, Ticket, FollowUp, TimeSpent, PreSetReply, KBCategory, EscalationExclusion, EmailTemplate, KBItem, TicketChange,
     KBIAttachment, FollowUpAttachment, IgnoreEmail, CustomField, FormType, is_extra_data)
 from seed.models import Column, Property, TaxLot
 from seed.lib.superperms.orgs.models import get_helpdesk_organizations
@@ -208,8 +208,16 @@ class KBIAttachmentInline(admin.StackedInline):
 class FollowUpAdmin(admin.ModelAdmin):
     inlines = [TicketChangeInline, FollowUpAttachmentInline]
     list_display = ('ticket_get_ticket_for_url', 'title', 'date', 'ticket',
-                    'user', 'new_status', 'time_spent')
+                    'user', 'new_status')
     list_filter = ('ticket__ticket_form__organization', 'ticket__ticket_form', 'user', 'date', 'new_status')
+
+    def ticket_get_ticket_for_url(self, obj):
+        return obj.ticket.ticket_for_url
+    ticket_get_ticket_for_url.short_description = _('Slug')
+
+@admin.register(TimeSpent)
+class TimeSpentAdmin(admin.ModelAdmin):
+    list_display = ('ticket_get_ticket_for_url', 'user', 'start_time', 'stop_time')
 
     def ticket_get_ticket_for_url(self, obj):
         return obj.ticket.ticket_for_url

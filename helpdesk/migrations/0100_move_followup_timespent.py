@@ -24,7 +24,6 @@ def move_to_TimeSpent(apps, schema_editor):
             ticket = ticket,
             start_time = start_time,
             stop_time = stop_time,
-            followup = followup,
         )
 
 
