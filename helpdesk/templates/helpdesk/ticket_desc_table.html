@@ -185,7 +185,7 @@ copy_public_link = function() {
                         <th class="table-active">{% trans "Total time spent" %}</th>
                         <form id="timer-button" method="POST">
                             {% csrf_token %}
-                            <td>{{ ticket.time_spent_formatted }} <button id="toggle_timer_btn" class="btn btn-warning btn-sm float-right" form="timer-button" type="SUBMIT">Start Timer</button></a> <div id="timer-display" class="float-right px-2" style="display: none;">00:00:00</div> </td> 
+                            <td>{{ ticket.time_spent_formatted }} <button id="toggle_timer_btn" class="btn btn-warning btn-sm float-right toggle-start-timer" form="timer-button" type="SUBMIT">Start Timer</button></a> <div id="timer-display" class="float-right px-2" style="display: none;">00:00:00</div> </td> 
                         </form>
                         
                     </tr>
@@ -282,6 +282,7 @@ $(document).ready(function() {
     var timer;
     var totalSeconds = 0;
     var button = $("#toggle_timer_btn");
+    var ticketId = "{{ ticket.id }}"
 
     // Updating the display
     updateDisplay = function updateDisplay() {
@@ -298,18 +299,10 @@ $(document).ready(function() {
         );
     }
 
-    // Starting and stopping the timer
-    function toggleTimer() {
-        if (!timer) {
-            startTimer();
-        } else {
-            stopTimer();
-        }
-    }
-
     // Starts the timer
     function startTimer() {
         $("#timer-display").show();
+        button.text('Stop Timer')
         if (!timer) {
             timer = setInterval(function() {
                 totalSeconds++;
@@ -322,33 +315,17 @@ $(document).ready(function() {
     function stopTimer() {
         clearInterval(timer);
         timer = null;
+        button.text('Start Timer')
 
         updateDisplay()
     }
 
+    $(document).on('click', '#toggle_timer_btn', function(e) {
 
-    // Change button text based on timer state. Returns if the timer was stopped or started
-    function timerLogic() {
-        toggleTimer();
-        if (!timer) {
-            button.text('Start Timer');
-            return false;
-        } else {
-            button.text('Stop Timer');
-            return true;
-        }
-    }
-
-    // When button is pressed, create a new TimeSpent object or add a stop time to an existing one
-    $("#timer-button").submit(function(event) {        
-        // Checks to see if a new object needs to be made
-        create_new = timerLogic();
-
-        let ticketId = "{{ticket.id}}"
- 
-        // If the user is starting the timer, create a new TimeSpent object
-        if (create_new) {
-            event.preventDefault();
+        if ($(this).hasClass('toggle-start-timer')) {
+            e.preventDefault();
+            $('#toggle_timer_btn').removeClass('toggle-start-timer');
+            $('#toggle_timer_btn').addClass('toggle-stop-timer');
 
             $.ajax({
                 url: "{% url 'helpdesk:start_timer' %}",
@@ -361,8 +338,13 @@ $(document).ready(function() {
                     console.log(response)
                 }
             });
-        // If the user is stopping the timer, go to the view that stops the timer
-        } else {
+
+            startTimer();
+        } else if ($(this).hasClass('toggle-stop-timer')) {
+            $('#toggle_timer_btn').removeClass('toggle-stop-timer');
+            $('#toggle_timer_btn').addClass('toggle-start-timer');
+
+            stopTimer();
             $.ajax({
                 url: "{% url 'helpdesk:stop_timer' %}",
                 method: 'POST',
@@ -371,12 +353,12 @@ $(document).ready(function() {
                     'ticket_id' : ticketId
                 },
                 success: function(response) {
-                    console.log(response)
+                    console.log("STOP TIMER");
                 }
             });
         }
-    });
- 
+    })
+
     // Checks if a TimeSpent object already exists or not
     $.ajax({
         url: "{% url 'helpdesk:get_elapsed_time' ticket.id %}",
@@ -397,10 +379,12 @@ $(document).ready(function() {
                 totalSeconds = elapsedSeconds
                 // Show the timer as it is hidden by default
                 $("#timer-display").show();
+                $('#toggle_timer_btn').removeClass('toggle-start-timer');
+                $('#toggle_timer_btn').addClass('toggle-stop-timer');
                 // Changes the text to stop timer
-                button.text('Stop Timer');
-                // timer var is default null, so this will start the timer
-                toggleTimer();
+                startTimer();
+
+
  
                 // Updates display so time starts counting up
                 updateDisplay();
