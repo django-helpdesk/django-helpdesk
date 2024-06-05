@@ -66,6 +66,7 @@
                             <th class="pt-0" style="width: 33%">Question</th>
                             <th class="text-center pt-0" style="width:10%;">Last Updated</th>
                             <th class="text-center pt-0" style="width:1%;">Public</th>
+                            <th class="text-center pt-0" style="width:1%;">Unlisted</th>
                             <th class="text-center pt-0" style="width:1%;">Ordering</th>
                             <th class="text-center pt-0" style="width:1%;">Edit</th>
                         </tr>
@@ -77,6 +78,13 @@
                             <td class="text-center align-middle">{{ article.last_updated }}</td>
                             <td class="text-center align-middle">
                                 {% if article.enabled %}
+                                <i class="fa fa-check-circle text-success"></i>
+                                {% else %}
+                                <i class="fa fa-times-circle text-danger"></i>
+                                {% endif %}
+                            </td>
+                            <td class="text-center align-middle">
+                                {% if article.unlisted %}
                                 <i class="fa fa-check-circle text-success"></i>
                                 {% else %}
                                 <i class="fa fa-times-circle text-danger"></i>
