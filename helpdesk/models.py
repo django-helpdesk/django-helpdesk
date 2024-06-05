@@ -1052,7 +1052,7 @@ class TimeSpent(models.Model):
             blank=True,
             null=True,
             verbose_name=_('User'),
-        )
+    )
 
     ticket = models.ForeignKey(
         Ticket,

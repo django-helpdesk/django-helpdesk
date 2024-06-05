@@ -1139,8 +1139,7 @@ def update_ticket(request, ticket_id, public=False):
     if owner == -1 and ticket.assigned_to:
         owner = ticket.assigned_to.id
 
-    f = FollowUp(ticket=ticket, date=timezone.now(), comment=comment,
-                 time_spent=time_spent)
+    f = FollowUp(ticket=ticket, date=timezone.now(), comment=comment)
 
     if is_helpdesk_staff(request.user, ticket.ticket_form.organization_id):
         f.user = request.user
