@@ -591,6 +591,14 @@ class TicketDependencyForm(forms.ModelForm):
         model = TicketDependency
         exclude = ('ticket',)
 
+class TicketResolvesForm(forms.ModelForm):
+    ''' Adds this ticket as a dependency for a different ticket '''
+
+    class Meta:
+        model = TicketDependency
+        #exclude = ('depends_on',)
+        fields = ('ticket',)
+
 
 class MultipleTicketSelectForm(forms.Form):
     tickets = forms.ModelMultipleChoiceField(
