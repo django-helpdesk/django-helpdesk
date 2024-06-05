@@ -12,7 +12,7 @@
                 <thead class="thead-light">
                     <tr class=''>
                         <th colspan='4'>
-                            <h3>{{ ticket.queue.slug }}-{{ ticket.id }}. {{ ticket.title }} [{{ ticket.get_status }}]</h3>
+                            <h3>{{ ticket.queue.slug }}-{{ ticket.id }}. {{ ticket.title }}</h3>
                             {% blocktrans with ticket.queue as queue %}Queue: {{ queue }}{% endblocktrans %}
                             <span class='ticket_toolbar float-right'>
                                 <a href="{% url 'helpdesk:edit' ticket.id %}" class="btn btn-warning btn-sm ticket-edit">
