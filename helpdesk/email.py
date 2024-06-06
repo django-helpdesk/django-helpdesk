@@ -595,16 +595,17 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
 
     logger.info("[%s-%s] %s" % (ticket.queue.slug, ticket.id, ticket.title,))
 
-    try:
-        attached = process_attachments(f, files)
-    except ValidationError as e:
-        logger.error(str(e))
-    else:
-        for att_file in attached:
-            logger.info(
-                "Attachment '%s' (with size %s) successfully added to ticket from email.",
-                att_file[0], att_file[1].size
-            )
+    if helpdesk.settings.HELPDESK_ENABLE_ATTACHMENTS:
+        try:
+            attached = process_attachments(f, files)
+        except ValidationError as e:
+            logger.error(str(e))
+        else:
+            for att_file in attached:
+                logger.info(
+                    "Attachment '%s' (with size %s) successfully added to ticket from email.",
+                    att_file[0], att_file[1].size
+                )
 
     context = safe_template_context(ticket)
 
@@ -984,7 +985,7 @@ def extract_email_metadata(message: str,
     filtered_body, full_body = extract_email_message_content(message_obj, files, include_chained_msgs)
     # If the base part is not a multipart then it will have already been processed as the vbody content so
     # no need to process attachments
-    if "multipart" == message_obj.get_content_maintype():
+    if "multipart" == message_obj.get_content_maintype() and helpdesk.settings.HELPDESK_ENABLE_ATTACHMENTS:
         # Find and attach all other parts or part contents as attachments
         counter, content_parts_excluded = extract_attachments(message_obj, files, logger)
         if not content_parts_excluded:
@@ -994,7 +995,8 @@ def extract_email_metadata(message: str,
                  Verify that there were no text/* parts containing message content.")
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("Email parsed and %s attachments were found and attached.", counter)
-    add_file_if_always_save_incoming_email_message(files, message)
+    if helpdesk.settings.HELPDESK_ENABLE_ATTACHMENTS:
+        add_file_if_always_save_incoming_email_message(files, message)
 
     smtp_priority = message_obj.get('priority', '')
     smtp_importance = message_obj.get('importance', '')
