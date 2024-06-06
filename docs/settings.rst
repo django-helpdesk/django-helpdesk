@@ -39,8 +39,8 @@ If you want to override the default settings for your users, create ``HELPDESK_D
     }
 
 
-Access controll & Security
----------------
+Access control & Security
+-------------------------
 These settings can be used to change who can access the helpdesk.
 
 - **HELPDESK_PUBLIC_VIEW_PROTECTOR** This is a function that takes a request and can either return `None` granting access to to a public view or a redirect denying access.
@@ -51,16 +51,24 @@ These settings can be used to change who can access the helpdesk.
 
   **Default:** ``HELPDESK_REDIRECT_TO_LOGIN_BY_DEFAULT = False``
 
-- **HELPDESK_VALID_EXTENSIONS** Valid extensions for file types that can be attached to tickets. Note: This used to be calle **VALID_EXTENSIONS** which is now deprecated.
-
-  **Default:** ``HELPDESK_VALID_EXTENSIONS = ['.txt', '.asc', '.htm', '.html', '.pdf', '.doc', '.docx', '.odt', '.jpg', '.png', '.eml']
-
-- **HELPDESK_VALIDATE_ATTACHMENT_TYPES** If you'd like to turn of filtering of helpdesk extension types you can set this to False.
-
 - **HELPDESK_ANON_ACCESS_RAISES_404** If True, redirects user to a 404 page when attempting to reach ticket pages while not logged in, rather than redirecting to a login screen.
 
   **Default:** ``HELPDESK_ANON_ACCESS_RAISES_404 = False``
 
+Settings related to attachments:
+
+- **HELPDESK_ENABLE_ATTACHMENTS** If set to ``True``, files can be
+  attached to tickets and followups, and emails are searched for
+  attachments which are then attached to the ticket.  Also enables the
+  ``HELPDESK_ALWAYS_SAVE_INCOMING_EMAIL_MESSAGE`` setting.
+  
+- **HELPDESK_VALID_EXTENSIONS** Valid extensions for file types that can be attached to tickets. Note: This used to be called **VALID_EXTENSIONS** which is now deprecated.
+
+  **Default:** ``HELPDESK_VALID_EXTENSIONS = ['.txt', '.asc', '.htm', '.html', '.pdf', '.doc', '.docx', '.odt', '.jpg', '.png', '.eml']``
+
+- **HELPDESK_VALIDATE_ATTACHMENT_TYPES** If you'd like to turn of filtering of helpdesk extension types you can set this to False.
+
+  
 Generic Options
 ---------------
 These changes are visible throughout django-helpdesk
@@ -422,4 +430,9 @@ The following settings were defined in previous versions and are no longer suppo
 
 - **HELPDESK_FULL_FIRST_MESSAGE_FROM_EMAIL** Do not ignore fowarded and replied text from the email messages which create a new ticket; useful for cases when customer forwards some email (error from service or something) and wants support to see that
 
-- **HELPDESK_ALWAYS_SAVE_INCOMING_EMAIL_MESSAGE** Any incoming .eml message is saved and available, helps when customer spent some time doing fancy markup which has been corrupted during the email-to-ticket-comment translate process
+- **HELPDESK_ALWAYS_SAVE_INCOMING_EMAIL_MESSAGE** Any incoming .eml
+  message is saved and available, helps when customer spent some time
+  doing fancy markup which has been corrupted during the
+  email-to-ticket-comment translate process.
+
+  Requires ``HELPDESK_ENABLE_ATTACHMENTS`` to be set to `True`
