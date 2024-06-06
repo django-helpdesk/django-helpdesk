@@ -239,17 +239,18 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
         label=_('Due on'),
     )
 
-    attachment = forms.FileField(
-        widget=forms.FileInput(attrs={'class': 'form-control-file'}),
-        required=False,
-        label=_('Attach File'),
-        help_text=_('You can attach a file to this ticket. '
-                    'Only file types such as plain text (.txt), '
-                    'a document (.pdf, .docx, or .odt), '
-                    'or screenshot (.png or .jpg) may be uploaded.'),
-        validators=[validate_file_extension]
-    )
-
+    if helpdesk_settings.HELPDESK_ENABLE_ATTACHMENTS:
+        attachment = forms.FileField(
+            widget=forms.FileInput(attrs={'class': 'form-control-file'}),
+            required=False,
+            label=_('Attach File'),
+            help_text=_('You can attach a file to this ticket. '
+                        'Only file types such as plain text (.txt), '
+                        'a document (.pdf, .docx, or .odt), '
+                        'or screenshot (.png or .jpg) may be uploaded.'),
+            validators=[validate_file_extension]
+        )
+        
     class Media:
         js = ('helpdesk/js/init_due_date.js',
               'helpdesk/js/init_datetime_classes.js')

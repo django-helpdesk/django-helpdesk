@@ -122,7 +122,8 @@
         <input type='hidden' name='public' value='1'>
 
     </dl>
-
+        
+{% if helpdesk_settings.HELPDESK_ENABLE_ATTACHMENTS %}
 <p id='ShowFileUploadPara'><button class="btn btn-warning btn-sm"
     id='ShowFileUpload' onclick="$('#FileUpload')[0].style.display='block';return false;" >{% trans "Attach File(s) &raquo;" %}</button></p>
 
@@ -140,7 +141,7 @@
     </dl>
 
 </div>
-
+{% endif %}
 </fieldset>
 
 <button class="btn btn-primary btn-lg" style="margin-bottom:10px" type='submit'>{% trans "Update This Ticket" %}</button>

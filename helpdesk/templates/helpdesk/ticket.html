@@ -54,14 +54,16 @@
                                     <li>{% blocktrans with change.field as field and change.old_value as old_value and change.new_value as new_value %}Changed {{ field }} from {{ old_value }} to {{ new_value }}.{% endblocktrans %}</li>
                                     {% if forloop.last %}</ul></div>{% endif %}
                                 {% endfor %}
-                                {% for attachment in followup.followupattachment_set.all %}{% if forloop.first %}{% trans "Attachments" %}:<div class='attachments'><ul>{% endif %}
+                                {% if helpdesk_settings.HELPDESK_ENABLE_ATTACHMENTS %}
+                                    {% for attachment in followup.followupattachment_set.all %}{% if forloop.first %}{% trans "Attachments" %}:<div class='attachments'><ul>{% endif %}
                                     <li><a href='{{ attachment.file.url }}'>{{ attachment.filename }}</a> ({{ attachment.mime_type }}, {{ attachment.size|filesizeformat }})
-                                    {% if followup.user and request.user == followup.user %}
+                                        {% if followup.user and request.user == followup.user %}
                                     <a href='{% url 'helpdesk:attachment_del' ticket.id attachment.id %}'><button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button></a>
-                                    {% endif %}
+                                        {% endif %}
                                     </li>
-                                    {% if forloop.last %}</ul></div>{% endif %}
-                                {% endfor %}
+                                        {% if forloop.last %}</ul></div>{% endif %}
+                                    {% endfor %}
+                                {% endif %}
                             </p>
                             <!--- ugly long test to suppress the following if it will be empty, to save vertical space -->
                             {% with possible=helpdesk_settings.HELPDESK_SHOW_EDIT_BUTTON_FOLLOW_UP %}
@@ -105,10 +107,10 @@
 
                 <dt><label for='commentBox'>{% trans "Comment / Resolution" %}</label></dt>
                 <dd><textarea rows='8' cols='70' name='comment' id='commentBox'></textarea></dd>
-		{% url "helpdesk:help_context" as context_help_url %}
-		{% blocktrans %}
-		<dd class='form_help_text'>You can insert ticket and queue details in your message. For more information, see the <a href='{{ context_help_url }}'>context help page</a>.</dd>
-		{% endblocktrans %}
+                {% url "helpdesk:help_context" as context_help_url %}
+                {% blocktrans %}
+                <dd class='form_help_text'>You can insert ticket and queue details in your message. For more information, see the <a href='{{ context_help_url }}'>context help page</a>.</dd>
+                {% endblocktrans %}
 
                 <dt><label>{% trans "New Status" %}</label></dt>
                 {% if not ticket.can_be_resolved %}<dd>{% trans "This ticket cannot be resolved or closed until the tickets it depends on are resolved." %}</dd>{% endif %}
@@ -197,7 +199,9 @@
             </div>
         {% endif %}
 
+        {% if helpdesk_settings.HELPDESK_ENABLE_ATTACHMENTS %}
         <p id='ShowFileUploadPara'><button type="button" class="btn btn-warning btn-sm" id='ShowFileUpload'>{% trans "Attach File(s) &raquo;" %}</button></p>
+        {% endif %}
 
         <div id='FileUpload' style='display: none;'>
 
@@ -257,7 +261,7 @@
 {% block helpdesk_js %}
 <script type='text/javascript' language='javascript'>
 $( function() {
-	$( "#id_due_date" ).datepicker({dateFormat: 'yy-mm-dd'});
+        $( "#id_due_date" ).datepicker({dateFormat: 'yy-mm-dd'});
 } );
 </script>
 

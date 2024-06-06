@@ -56,6 +56,11 @@ HELPDESK_STAFF_VIEW_PROTECTOR = getattr(settings,
                                          'HELPDESK_STAFF_VIEW_PROTECTOR',
                                          lambda _: None)
 
+# Enable ticket and Email attachments
+HELPDESK_ENABLE_ATTACHMENTS = getattr(settings,
+                                      'HELPDESK_ENABLE_ATTACHMENTS',
+                                      False)
+
 # Enable the Dependencies field on ticket view
 HELPDESK_ENABLE_DEPENDENCIES_ON_TICKET = getattr(settings,
                                                  'HELPDESK_ENABLE_DEPENDENCIES_ON_TICKET',
