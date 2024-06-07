@@ -62,11 +62,11 @@ Settings related to attachments:
   attachments which are then attached to the ticket.  Also enables the
   ``HELPDESK_ALWAYS_SAVE_INCOMING_EMAIL_MESSAGE`` setting.
 
-  **Caution**: Until version 1.2.0 attachments were enabled by
-  default. Since uploaded files by default are published without access
-  control this can lead to unintended exposure of sensitive
-  data. The default is now to disable attachments by default. Only
-  enable attachments if you have secured access to them.
+  **Caution**: Set this to False, unless you have secured access to
+   the uploaded files. Otherwise anyone on the Internet will be able
+   to download your ticket attachments.
+
+   Attachments are enabled by default for backwards compatibility.
   
 - **HELPDESK_VALID_EXTENSIONS** Valid extensions for file types that can be attached to tickets. Note: This used to be called **VALID_EXTENSIONS** which is now deprecated.
 
