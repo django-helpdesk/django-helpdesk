@@ -595,7 +595,7 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
 
     logger.info("[%s-%s] %s" % (ticket.queue.slug, ticket.id, ticket.title,))
 
-    if helpdesk.settings.HELPDESK_ENABLE_ATTACHMENTS:
+    if settings.HELPDESK_ENABLE_ATTACHMENTS:
         try:
             attached = process_attachments(f, files)
         except ValidationError as e:
@@ -985,7 +985,7 @@ def extract_email_metadata(message: str,
     filtered_body, full_body = extract_email_message_content(message_obj, files, include_chained_msgs)
     # If the base part is not a multipart then it will have already been processed as the vbody content so
     # no need to process attachments
-    if "multipart" == message_obj.get_content_maintype() and helpdesk.settings.HELPDESK_ENABLE_ATTACHMENTS:
+    if "multipart" == message_obj.get_content_maintype() and settings.HELPDESK_ENABLE_ATTACHMENTS:
         # Find and attach all other parts or part contents as attachments
         counter, content_parts_excluded = extract_attachments(message_obj, files, logger)
         if not content_parts_excluded:
@@ -995,7 +995,7 @@ def extract_email_metadata(message: str,
                  Verify that there were no text/* parts containing message content.")
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("Email parsed and %s attachments were found and attached.", counter)
-    if helpdesk.settings.HELPDESK_ENABLE_ATTACHMENTS:
+    if settings.HELPDESK_ENABLE_ATTACHMENTS:
         add_file_if_always_save_incoming_email_message(files, message)
 
     smtp_priority = message_obj.get('priority', '')
