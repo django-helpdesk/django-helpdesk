@@ -424,11 +424,9 @@ def view_ticket(request, ticket_id):
 
         return redirect('helpdesk:edit_ticket_checklist', ticket.id, checklist.id)
 
-    open_dependencies = ticket.ticketdependency.filter(depends_on__status__in=Ticket.OPEN_STATUSES)
-    dependencies = [d for d in itertools.chain(
-        open_dependencies,
-        ticket.ticketdependency.all().difference(open_dependencies)
-    )]
+    # Open tickets on top
+    dependencies = list(ticket.ticketdependency.filter(depends_on__status__in=Ticket.OPEN_STATUSES)) \
+        + list(ticket.ticketdependency.filter(depends_on__status__not_in=Ticket.OPEN_STATUSES))
     
     return render(request, 'helpdesk/ticket.html', {
         'ticket': ticket,

@@ -11,3 +11,7 @@ class HelpdeskConfig(AppConfig):
 
     def ready(self):
         from . import webhooks # noqa: F401
+
+        from django.db.models.fields import Field
+        from helpdesk.orm_operators import NotIn
+        Field.register_lookup(NotIn)
