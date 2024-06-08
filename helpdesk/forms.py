@@ -594,8 +594,8 @@ class TicketDependencyForm(forms.ModelForm):
     def __init__(self, ticket, *args, **kwargs):
         super(TicketDependencyForm,self).__init__(*args, **kwargs)
 
-        # Exclude duplicate tickets, myself, existing dependencies and parents
-        self.fields['depends_on'].queryset = Ticket.objects.exclude(status=Ticket.DUPLICATE_STATUS).exclude(id=ticket.id).exclude(depends_on__ticket=ticket).exclude(ticketdependency__depends_on=ticket)
+        # Only open tickets except myself, existing dependencies and parents
+        self.fields['depends_on'].queryset = Ticket.objects.filter(status__in=Ticket.OPEN_STATUSES).exclude(id=ticket.id).exclude(depends_on__ticket=ticket).exclude(ticketdependency__depends_on=ticket)
 
 class TicketResolvesForm(forms.ModelForm):
     ''' Adds this ticket as a dependency for a different ticket '''
@@ -608,8 +608,8 @@ class TicketResolvesForm(forms.ModelForm):
     def __init__(self, ticket, *args, **kwargs):
         super(TicketResolvesForm,self).__init__(*args, **kwargs)
 
-        # Exclude duplicate tickets, myself, existing dependencies and parents
-        self.fields['ticket'].queryset = Ticket.objects.exclude(status=Ticket.DUPLICATE_STATUS).exclude(id=ticket.id).exclude(depends_on__ticket=ticket).exclude(ticketdependency__depends_on=ticket)
+        # Only open tickets except myself, existing dependencies and parents
+        self.fields['ticket'].queryset = Ticket.objects.exclude(status__in=Ticket.OPEN_STATUSES).exclude(id=ticket.id).exclude(depends_on__ticket=ticket).exclude(ticketdependency__depends_on=ticket)
 
 
 class MultipleTicketSelectForm(forms.Form):
