@@ -80,7 +80,6 @@ from helpdesk.user import HelpdeskUser
 from helpdesk.update_ticket import update_ticket, subscribe_to_ticket_updates, return_ticketccstring_and_show_subscribe
 import helpdesk.views.abstract_views as abstract_views
 from helpdesk.views.permissions import MustBeStaffMixin
-import itertools
 import json
 import re
 from rest_framework import status
