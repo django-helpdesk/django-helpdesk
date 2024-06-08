@@ -1676,7 +1676,7 @@ def ticket_dependency_add(request, ticket_id):
             ticketdependency.ticket = ticket
             if ticketdependency.ticket != ticketdependency.depends_on:
                 ticketdependency.save()
-            return HttpResponseRedirect(reverse('helpdesk:view', args=[ticket.id]))
+            return redirect(ticket.get_absolute_url())
     else:
         form = TicketDependencyForm(ticket)
     return render(request, 'helpdesk/ticket_dependency_add.html', {
@@ -1712,7 +1712,7 @@ def ticket_resolves_add(request, ticket_id):
             ticketdependency.depends_on = depends_on
             if ticketdependency.ticket != ticketdependency.depends_on:
                 ticketdependency.save()
-            return HttpResponseRedirect(reverse('helpdesk:view', args=[depends_on.id]))
+            return redirect(depends_on.get_absolute_url())
     else:
         form = TicketResolvesForm(depends_on)
     return render(request, 'helpdesk/ticket_resolves_add.html', {
