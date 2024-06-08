@@ -430,7 +430,6 @@ def view_ticket(request, ticket_id):
     return render(request, 'helpdesk/ticket.html', {
         'ticket': ticket,
         'dependencies': dependencies,
-        'open_dependencies': open_dependencies,
         'submitter_userprofile_url': submitter_userprofile_url,
         'form': form,
         'active_users': users,
