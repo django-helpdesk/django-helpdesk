@@ -589,7 +589,7 @@ class TicketDependencyForm(forms.ModelForm):
 
     class Meta:
         model = TicketDependency
-        exclude = ('ticket',)
+        fields = ('depends_on',)
 
     def __init__(self, ticket, *args, **kwargs):
         super(TicketDependencyForm,self).__init__(*args, **kwargs)
@@ -602,7 +602,6 @@ class TicketResolvesForm(forms.ModelForm):
 
     class Meta:
         model = TicketDependency
-        #exclude = ('depends_on',)
         fields = ('ticket',)
 
     def __init__(self, ticket, *args, **kwargs):
