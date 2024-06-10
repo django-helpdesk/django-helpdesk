@@ -266,71 +266,74 @@ $( function() {
 </script>
 
 <script type='text/javascript' language='javascript'>
-$(document).ready(function() {
-    $("#ShowFurtherEditOptions").click(function() {
-        $("#FurtherEditOptions").toggle();
-    });
+  $(document).ready(function() {
+      $("#ShowFurtherEditOptions").click(function() {
+          $("#FurtherEditOptions").toggle();
+      });
 
-    $("#ShowChecklistEditOptions").click(function() {
-        $("#checklistEdit").toggle();
-    });
+      $("#ShowChecklistEditOptions").click(function() {
+          $("#checklistEdit").toggle();
+      });
 
-    $("#ShowFileUpload").click(function() {
-        $("#FileUpload").fadeIn();
-        $("#ShowFileUploadPara").hide();
-    });
+      $('#id_preset').change(function() {
+          preset = $('#id_preset').val();
+          if (preset != '') {
+              $.get("{% url 'helpdesk:raw' 'preset' %}?id=" + preset, function(data) {
+                  $("#commentBox").val(data)
+              });
+          }
+      });
 
-    $('#id_preset').change(function() {
-        preset = $('#id_preset').val();
-        if (preset != '') {
-           $.get("{% url 'helpdesk:raw' 'preset' %}?id=" + preset, function(data) {
-                $("#commentBox").val(data)
-            });
-        }
-    });
+      // Preset name of checklist when a template is selected
+      $('#id_checklist_template').on('change', function() {
+          const nameField = $('#id_name')
+          const selectedTemplate = $(this).children(':selected')
+          if (nameField.val() === '' && selectedTemplate.val()) {
+              nameField.val(selectedTemplate.text())
+          }
+      })
 
-    // Preset name of checklist when a template is selected
-    $('#id_checklist_template').on('change', function() {
-        const nameField = $('#id_name')
-        const selectedTemplate = $(this).children(':selected')
-        if (nameField.val() === '' && selectedTemplate.val()) {
-            nameField.val(selectedTemplate.text())
-        }
-    })
+      $('.disabledTask').on('click', () => {
+          alert('{% trans 'If you want to update state of checklist tasks, please do a Follow-Up response and click on "Update checklists"' %}')
+      })
 
-    $('.disabledTask').on('click', () => {
-        alert('{% trans 'If you want to update state of checklist tasks, please do a Follow-Up response and click on "Update checklists"' %}')
-    })
+      $("[data-toggle=tooltip]").tooltip();
 
-    $("[data-toggle=tooltip]").tooltip();
+      {% if helpdesk_settings.HELPDESK_ENABLE_ATTACHMENTS %}
+      $("#ShowFileUpload").click(function() {
+          $("#FileUpload").fadeIn();
+          $("#ShowFileUploadPara").hide();
+      });
 
-    // lists for file input change events, then updates the associated text label
-    // with the file name selected
-    $('.add_file_fields_wrap').on('fileselect', ':file', function(event, numFiles, label, browseButtonNum) {
-        $("#selectedfilename"+browseButtonNum).html(label);
-    });
+      // lists for file input change events, then updates the associated text label
+      // with the file name selected
+      $('.add_file_fields_wrap').on('fileselect', ':file', function(event, numFiles, label, browseButtonNum) {
+          $("#selectedfilename"+browseButtonNum).html(label);
+      });
 
-    var x = 0;
-    var wrapper         = $(".add_file_fields_wrap"); //Fields wrapper
-    var add_button      = $(".add_file_field_button"); //Add button ID
+      var x = 0;
+      var wrapper         = $(".add_file_fields_wrap"); //Fields wrapper
+      var add_button      = $(".add_file_field_button"); //Add button ID
 
-    $(add_button).click(function(e){ //on add input button click
-        x++;
-        e.preventDefault();
-        $(wrapper).append("<div><label class='btn btn-primary btn-sm btn-file'>Browse... <input type='file' name='attachment' id='file" + x + "' multiple style='display: none;'/></label><span>&nbsp;</span><span id='selectedfilename" + x + "'>{% trans 'No files selected.' %}</span></div>"); //add input box
-    });
+      $(add_button).click(function(e){ //on add input button click
+          x++;
+          e.preventDefault();
+          $(wrapper).append("<div><label class='btn btn-primary btn-sm btn-file'>Browse... <input type='file' name='attachment' id='file" + x + "' multiple style='display: none;'/></label><span>&nbsp;</span><span id='selectedfilename" + x + "'>{% trans 'No files selected.' %}</span></div>"); //add input box
+      });
+      {% endif %}
+  });
 
-});
-
-// this function listens for changes on any file input, and
-// emits the appropriate event to update the input's text.
-// Needed to have properly styled file input buttons! (this really shouldn't be this hard...)
-$(document).on('change', ':file', function() {
-    var input = $(this),
-        inputWidgetNum = $(this).attr('id').split("file")[1],
-        numFiles = input.get(0).files ? input.get(0).files.length : 1,
-        label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
-    input.trigger('fileselect', [numFiles, label, inputWidgetNum]);
-});
-</script>
+  {% if helpdesk_settings.HELPDESK_ENABLE_ATTACHMENTS %}
+  // this function listens for changes on any file input, and
+  // emits the appropriate event to update the input's text.
+  // Needed to have properly styled file input buttons! (this really shouldn't be this hard...)
+  $(document).on('change', ':file', function() {
+      var input = $(this),
+          inputWidgetNum = $(this).attr('id').split("file")[1],
+          numFiles = input.get(0).files ? input.get(0).files.length : 1,
+          label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
+      input.trigger('fileselect', [numFiles, label, inputWidgetNum]);
+  });
+  {% endif %}
+  </script>
 {% endblock %}
