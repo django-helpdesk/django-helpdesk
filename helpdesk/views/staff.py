@@ -20,7 +20,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import PermissionDenied
 from django.core.handlers.wsgi import WSGIRequest
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
-from django.db.models import Q, Case, Value, When
+from django.db.models import Q, Case, When
 from django.forms import HiddenInput, inlineformset_factory, TextInput
 from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -426,8 +426,8 @@ def view_ticket(request, ticket_id):
     # List open tickets on top
     dependencies = ticket.ticketdependency.annotate(
         rank=Case(
-                When(depends_on__status__in=Ticket.OPEN_STATUSES, then=Value('1')),
-                default=Value('2')
+                When(depends_on__status__in=Ticket.OPEN_STATUSES, then=1),
+                default=2
         )).order_by('rank')
     
     return render(request, 'helpdesk/ticket.html', {
