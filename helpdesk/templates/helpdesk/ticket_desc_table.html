@@ -183,10 +183,10 @@ copy_public_link = function() {
                             {% endfor %}
                         </td>
                         <th class="table-active">{% trans "Total time spent" %}</th>
-                        <form id="timer-button" method="POST">
-                            {% csrf_token %}
-                            <td>{{ ticket.time_spent_formatted }} <button id="toggle_timer_btn" class="btn btn-warning btn-sm float-right toggle-start-timer" form="timer-button" type="SUBMIT">Start Timer</button></a> <div id="timer-display" class="float-right px-2" style="display: none;">00:00:00</div> </td> 
-                        </form>
+                        <td>
+                            <span id="ticket-time-spent">{{ ticket.time_spent_formatted }}</span> <button id="toggle_timer_btn" class="btn btn-warning btn-sm float-right toggle-start-timer">Start Timer</button>
+                            <div id="timer-display" class="float-right px-2" style="display: none;">00:00:00</div>
+                        </td>
                         
                     </tr>
                     {% if ticket.kbitem %}
@@ -263,22 +263,6 @@ copy_public_link = function() {
 <script type='text/javascript' language='javascript'>
 $(document).ready(function() {
 
-    var x = 0;
-    var wrapper         = $(".add_file_fields_wrap"); //Fields wrapper
-    var add_button      = $(".add_file_field_button"); //Add button ID
-
-    $(add_button).click(function(e){ //on add input button click
-        x++;
-        e.preventDefault();
-        $(`<div id="file_group${x}">
-            <label class='btn btn-primary btn-sm btn-file'>
-                Browse... 
-                <input type='file' name='attachment' id='file${x}' multiple style='display: none;'/>
-            </label>
-            <span>&nbsp;</span><span id='selectedfilename${x}'>{% trans 'No files selected.' %}</span>
-        </div>`).insertBefore(add_button); //add input box
-    });
-
     var timer;
     var totalSeconds = 0;
     var button = $("#toggle_timer_btn");
@@ -302,7 +286,7 @@ $(document).ready(function() {
     // Starts the timer
     function startTimer() {
         $("#timer-display").show();
-        button.text('Stop Timer')
+        button.text('Stop Timer');
         if (!timer) {
             timer = setInterval(function() {
                 totalSeconds++;
@@ -314,10 +298,11 @@ $(document).ready(function() {
     // Stops the timer and sets timer object to null for a new one to be created
     function stopTimer() {
         clearInterval(timer);
+        $("#timer-display").hide();
         timer = null;
-        button.text('Start Timer')
+        button.text('Start Timer');
 
-        updateDisplay()
+        updateDisplay();
     }
 
     $(document).on('click', '#toggle_timer_btn', function(e) {
@@ -335,16 +320,14 @@ $(document).ready(function() {
                     'ticket_id' : ticketId
                 },
                 success: function(response) {
-                    console.log(response)
+                    startTimer();
                 }
             });
 
-            startTimer();
         } else if ($(this).hasClass('toggle-stop-timer')) {
             $('#toggle_timer_btn').removeClass('toggle-stop-timer');
             $('#toggle_timer_btn').addClass('toggle-start-timer');
 
-            stopTimer();
             $.ajax({
                 url: "{% url 'helpdesk:stop_timer' %}",
                 method: 'POST',
@@ -353,7 +336,8 @@ $(document).ready(function() {
                     'ticket_id' : ticketId
                 },
                 success: function(response) {
-                    console.log("STOP TIMER");
+                    $('#ticket-time-spent').text(response.total_time_spent);
+                    stopTimer();
                 }
             });
         }
@@ -384,8 +368,6 @@ $(document).ready(function() {
                 // Changes the text to stop timer
                 startTimer();
 
-
- 
                 // Updates display so time starts counting up
                 updateDisplay();
 
@@ -395,8 +377,6 @@ $(document).ready(function() {
             console.error('Error fetching elapsed time:', error);
         }
     });
-
-    updateDisplay();
 
 });
 

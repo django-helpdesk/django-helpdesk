@@ -6,26 +6,24 @@ def move_to_TimeSpent(apps, schema_editor):
     FollowUp = apps.get_model('helpdesk', 'FollowUp')
     TimeSpent = apps.get_model('helpdesk', 'TimeSpent')
 
-    for followup in FollowUp.objects.all():
-        if followup.user:
-            user = followup.user
-        else:
-            user = None
-        
-        ticket = followup.ticket
-        start_time = followup.date
-        stop_time = start_time
-        if followup.time_spent:
-            stop_time += followup.time_spent
-        
+    for followup in FollowUp.objects.filter(time_spent__isnull=False):
+        if followup.time_spent:  # ignore when time_spent is 0
+            if followup.user:
+                user = followup.user
+            else:
+                user = None
 
-        TimeSpent.objects.create(
-            user = user,
-            ticket = ticket,
-            start_time = start_time,
-            stop_time = stop_time,
-        )
+            ticket = followup.ticket
+            stop_time = followup.date
+            start_time = stop_time
+            start_time -= followup.time_spent
 
+            TimeSpent.objects.create(
+                user = user,
+                ticket = ticket,
+                start_time = start_time,
+                stop_time = stop_time,
+            )
 
 
 class Migration(migrations.Migration):
@@ -35,5 +33,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(move_to_TimeSpent)
+        migrations.RunPython(move_to_TimeSpent, migrations.RunPython.noop)
     ]

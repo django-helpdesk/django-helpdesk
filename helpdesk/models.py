@@ -1056,7 +1056,9 @@ class TimeSpent(models.Model):
 
     ticket = models.ForeignKey(
         Ticket,
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
         verbose_name=_('Ticket'),
     )
 
@@ -1067,6 +1069,7 @@ class TimeSpent(models.Model):
     class Meta:
         verbose_name = _('Time Spent')
         verbose_name_plural = _('Time Spent Entries')
+        ordering = ('-start_time', '-stop_time')
 
     @property
     def get_time_spent(self):

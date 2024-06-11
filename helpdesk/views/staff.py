@@ -1432,14 +1432,10 @@ def stop_timer(request):
         userr = request.user
         ticket_id = request.POST.get('ticket_id')
         ticket = get_object_or_404(Ticket, id=ticket_id)
-
-        for timespent in TimeSpent.objects.all():
-            if timespent.user == userr and timespent.ticket == ticket and not timespent.stop_time:
-                timespent.stop_time = timezone.now()
-                timespent.save()
-                return JsonResponse({'stop_time': timespent.stop_time})
-
-        return JsonResponse({'ticket_id': ticket_id})
+        for timespent in TimeSpent.objects.filter(user=userr, ticket=ticket, stop_time__isnull=True):
+            timespent.stop_time = timezone.now()
+            timespent.save()
+        return JsonResponse({'total_time_spent': ticket.time_spent_formatted})
 
 
 @helpdesk_staff_member_required
@@ -1447,10 +1443,10 @@ def get_elapsed_time(request, ticket_id):
     if request.method == 'GET':
         userr = request.user
         ticket = get_object_or_404(Ticket, id=ticket_id)
-        for timespent in TimeSpent.objects.all():
-            if timespent.user == userr and timespent.ticket == ticket and not timespent.stop_time:
-                return JsonResponse({'start_time': timespent.start_time})
-        return JsonResponse({'start_time': None})
+        timespent = TimeSpent.objects.filter(user=userr, ticket=ticket, stop_time__isnull=True).first()
+        if timespent:
+            return JsonResponse({'start_time': timespent.start_time})
+    return JsonResponse({'start_time': None})
 
 def return_to_ticket(user, request, helpdesk_settings, ticket):
     """Helper function for update_ticket"""
