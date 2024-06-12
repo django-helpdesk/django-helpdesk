@@ -1503,7 +1503,7 @@ def process_google_message(message, importer, queues, logger, msg_id, server):
             else:
                 if 'attachmentId' in part['body']:
                     if not filename:
-                        ext = mimetypes.guess_extension(part.get_content_type())
+                        ext = mimetypes.guess_extension(part['mimeType'])
                         filename = "part-%i%s" % (counter, ext)
                     else:
                         filename = ("part-%i_" % counter) + filename
