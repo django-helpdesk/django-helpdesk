@@ -419,7 +419,7 @@ class TicketForm(AbstractTicketForm):
         followup = self._create_follow_up(ticket, title=title, user=user)
         followup.save()
 
-        if settings.HELPDESK_ENABLE_ATTACHMENTS:
+        if helpdesk_settings.HELPDESK_ENABLE_ATTACHMENTS:
             files = self._attach_files_to_follow_up(followup)
         else:
             files = None
