@@ -327,7 +327,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
         return followup
 
     def _attach_files_to_follow_up(self, followup):
-        files = self.cleaned_data['attachment']
+        files = self.cleaned_data.get('attachment')
         if files:
             files = process_attachments(followup, [files])
         return files
@@ -419,7 +419,10 @@ class TicketForm(AbstractTicketForm):
         followup = self._create_follow_up(ticket, title=title, user=user)
         followup.save()
 
-        files = self._attach_files_to_follow_up(followup)
+        if settings.HELPDESK_ENABLE_ATTACHMENTS:
+            files = self._attach_files_to_follow_up(followup)
+        else:
+            files = None
 
         # emit signal when the TicketForm.save is done
         new_ticket_done.send(sender="TicketForm", ticket=ticket)
