@@ -20,7 +20,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import PermissionDenied
 from django.core.handlers.wsgi import WSGIRequest
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
-from django.db.models import Q
+from django.db.models import Q, Case, When
 from django.forms import HiddenInput, inlineformset_factory, TextInput
 from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -54,6 +54,7 @@ from helpdesk.forms import (
     TicketCCUserForm,
     TicketDependencyForm,
     TicketForm,
+    TicketResolvesForm,
     UserSettingsForm
 )
 from helpdesk.lib import queue_template_context, safe_template_context
@@ -422,8 +423,16 @@ def view_ticket(request, ticket_id):
 
         return redirect('helpdesk:edit_ticket_checklist', ticket.id, checklist.id)
 
+    # List open tickets on top
+    dependencies = ticket.ticketdependency.annotate(
+        rank=Case(
+                When(depends_on__status__in=Ticket.OPEN_STATUSES, then=1),
+                default=2
+        )).order_by('rank')
+    
     return render(request, 'helpdesk/ticket.html', {
         'ticket': ticket,
+        'dependencies': dependencies,
         'submitter_userprofile_url': submitter_userprofile_url,
         'form': form,
         'active_users': users,
@@ -1664,15 +1673,15 @@ def ticket_dependency_add(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
     ticket_perm_check(request, ticket)
     if request.method == 'POST':
-        form = TicketDependencyForm(request.POST)
+        form = TicketDependencyForm(ticket, request.POST)
         if form.is_valid():
             ticketdependency = form.save(commit=False)
             ticketdependency.ticket = ticket
             if ticketdependency.ticket != ticketdependency.depends_on:
                 ticketdependency.save()
-            return HttpResponseRedirect(reverse('helpdesk:view', args=[ticket.id]))
+            return redirect(ticket.get_absolute_url())
     else:
-        form = TicketDependencyForm()
+        form = TicketDependencyForm(ticket)
     return render(request, 'helpdesk/ticket_dependency_add.html', {
         'ticket': ticket,
         'form': form,
@@ -1693,6 +1702,42 @@ def ticket_dependency_del(request, ticket_id, dependency_id):
 
 
 ticket_dependency_del = staff_member_required(ticket_dependency_del)
+
+
+@helpdesk_staff_member_required
+def ticket_resolves_add(request, ticket_id):
+    depends_on = get_object_or_404(Ticket, id=ticket_id)
+    ticket_perm_check(request, depends_on)
+    if request.method == 'POST':
+        form = TicketResolvesForm(depends_on, request.POST)
+        if form.is_valid():
+            ticketdependency = form.save(commit=False)
+            ticketdependency.depends_on = depends_on
+            if ticketdependency.ticket != ticketdependency.depends_on:
+                ticketdependency.save()
+            return redirect(depends_on.get_absolute_url())
+    else:
+        form = TicketResolvesForm(depends_on)
+    return render(request, 'helpdesk/ticket_resolves_add.html', {
+        'depends_on': depends_on,
+        'form': form,
+    })
+
+
+ticket_resolves_add = staff_member_required(ticket_resolves_add)
+
+        
+@helpdesk_staff_member_required
+def ticket_resolves_del(request, ticket_id, dependency_id):
+    dependency = get_object_or_404(
+        TicketDependency, ticket__id=ticket_id, id=dependency_id)
+    depends_on_id = dependency.depends_on.id
+    if request.method == 'POST':
+        dependency.delete()
+        return HttpResponseRedirect(reverse('helpdesk:view', args=[depends_on_id]))
+    return render(request, 'helpdesk/ticket_dependency_del.html', {'dependency': dependency})
+
+ticket_resolves_del = staff_member_required(ticket_resolves_del)
 
 
 @helpdesk_staff_member_required

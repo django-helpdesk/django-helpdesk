@@ -89,6 +89,16 @@ urlpatterns = [
         name="ticket_dependency_del",
     ),
     path(
+        "tickets/<int:ticket_id>/resolves/add/",
+        staff.ticket_resolves_add,
+        name="ticket_resolves_add",
+    ),
+    path(
+        "tickets/<int:ticket_id>/resolves/delete/<int:dependency_id>/",
+        staff.ticket_resolves_del,
+        name="ticket_resolves_del",
+    ),
+    path(
         "tickets/<int:ticket_id>/attachment_delete/<int:attachment_id>/",
         staff.attachment_del,
         name="attachment_del",
