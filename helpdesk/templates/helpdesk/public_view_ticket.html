@@ -75,16 +75,19 @@
 {% for followup in ticket.followup_set.public_followups %}
 <div class='followup well card'>
     <p><b>{{ followup.title }} <span class='byline text-info'>{% if followup.user %}by {{ followup.user }}{% endif %} <span title='{{ followup.date|date:"DATETIME_FORMAT" }}'>{{ followup.date|naturaltime }}</span></span></b></p>
-{{ followup.comment|force_escape|urlizetrunc:50|num_to_link|linebreaksbr }}
-{% if followup.ticketchange_set.all %}<div class='changes'><ul>
-{% for change in followup.ticketchange_set.all %}
-<li>{% blocktrans with change.field as field and change.old_value as old_value and change.new_value as new_value %}Changed {{ field }} from {{ old_value }} to {{ new_value }}.{% endblocktrans %}</li>
-{% endfor %}
-</ul></div>{% endif %}
-{% for attachment in followup.followupattachment_set.all %}{% if forloop.first %}<div class='attachments'><ul>{% endif %}
-<li><a href='{{ attachment.file.url }}'>{{ attachment.filename }}</a> ({{ attachment.mime_type }}, {{ attachment.size|filesizeformat }})</li>
-{% if forloop.last %}</ul></div>{% endif %}
-{% endfor %}
+    {{ followup.comment|force_escape|urlizetrunc:50|num_to_link|linebreaksbr }}
+    {% if followup.ticketchange_set.all %}<div class='changes'><ul>
+	    {% for change in followup.ticketchange_set.all %}
+	    <li>{% blocktrans with change.field as field and change.old_value as old_value and change.new_value as new_value %}Changed {{ field }} from {{ old_value }} to {{ new_value }}.{% endblocktrans %}</li>
+	    {% endfor %}
+    </ul></div>{% endif %}
+
+    {% if helpdesk_settings.HELPDESK_ENABLE_ATTACHMENTS %}
+    {% for attachment in followup.followupattachment_set.all %}{% if forloop.first %}<div class='attachments'><ul>{% endif %}
+	    <li><a href='{{ attachment.file.url }}'>{{ attachment.filename }}</a> ({{ attachment.mime_type }}, {{ attachment.size|filesizeformat }})</li>
+	    {% if forloop.last %}</ul></div>{% endif %}
+    {% endfor %}
+    {% endif %}
 </div>
 {% endfor %}
 {% endif %}
@@ -122,7 +125,8 @@
         <input type='hidden' name='public' value='1'>
 
     </dl>
-
+        
+{% if helpdesk_settings.HELPDESK_ENABLE_ATTACHMENTS %}
 <p id='ShowFileUploadPara'><button class="btn btn-warning btn-sm"
     id='ShowFileUpload' onclick="$('#FileUpload')[0].style.display='block';return false;" >{% trans "Attach File(s) &raquo;" %}</button></p>
 
@@ -132,6 +136,7 @@
         <dt><label for='id_file'>{% trans "Attach a File" %}</label></dt>
         <dd>
             <div class="add_file_fields_wrap">
+                <button class="add_file_field_button btn btn-success btn-xs">{% trans "Add Another File" %}</button>
                 <div><label class='btn btn-primary btn-sm btn-file'>
                         Browse... <input type="file" name='attachment' id='file0' style='display: none;'/>
                 </label><span>&nbsp;</span><span id='selectedfilename0'>{% trans 'No files selected.' %}</span></div>
@@ -140,12 +145,52 @@
     </dl>
 
 </div>
-
+{% endif %}
 </fieldset>
 
 <button class="btn btn-primary btn-lg" style="margin-bottom:10px" type='submit'>{% trans "Update This Ticket" %}</button>
 
-{% csrf_token %}</form>
+{% csrf_token %}
+</form>
 
+{% if helpdesk_settings.HELPDESK_ENABLE_ATTACHMENTS %}
+<script type='text/javascript' language='javascript'>
+  $(document).ready(function() {
+
+      $("#ShowFileUpload").click(function() {
+          $("#FileUpload").fadeIn();
+          $("#ShowFileUploadPara").hide();
+      });
+
+      // lists for file input change events, then updates the associated text label
+      // with the file name selected
+      $('.add_file_fields_wrap').on('fileselect', ':file', function(event, numFiles, label, browseButtonNum) {
+          $("#selectedfilename"+browseButtonNum).html(label);
+      });
+
+      var x = 0;
+      var wrapper         = $(".add_file_fields_wrap"); //Fields wrapper
+      var add_button      = $(".add_file_field_button"); //Add button ID
+
+      $(add_button).click(function(e){ //on add input button click
+          x++;
+          e.preventDefault();
+          $(wrapper).append("<div><label class='btn btn-primary btn-sm btn-file'>Browse... <input type='file' name='attachment' id='file" + x + "' multiple style='display: none;'/></label><span>&nbsp;</span><span id='selectedfilename" + x + "'>{% trans 'No files selected.' %}</span></div>"); //add input box
+      });
+  });
+
+  // this function listens for changes on any file input, and
+  // emits the appropriate event to update the input's text.
+  // Needed to have properly styled file input buttons! (this really shouldn't be this hard...)
+  $(document).on('change', ':file', function() {
+      var input = $(this),
+          inputWidgetNum = $(this).attr('id').split("file")[1],
+          numFiles = input.get(0).files ? input.get(0).files.length : 1,
+          label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
+      input.trigger('fileselect', [numFiles, label, inputWidgetNum]);
+  });
+
+</script>
+{% endif %}
 
 {% endblock %}

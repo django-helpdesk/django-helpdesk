@@ -190,7 +190,8 @@
                             <th class="table-active">{% trans "Knowlegebase item" %}</th>
                             <td> <a href ="{{ticket.kbitem.query_url}}"> {{ticket.kbitem}} </a> </td>
                         </tr>
-                    {% endif %}
+		    {% endif %}
+		    {% if helpdesk_settings.HELPDESK_ENABLE_ATTACHMENTS %}
                     <tr>
                         <th class="table-active">{% trans "Attachments" %}</th>
                         <td colspan="3">
@@ -212,6 +213,7 @@
                             </ul>
                         </td>
                     </tr>
+                    {% endif %}
                     <tr>
                         <th class="table-active">{% trans "Checklists" %}</th>
                         <td colspan="3">

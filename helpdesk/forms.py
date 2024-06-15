@@ -239,17 +239,18 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
         label=_('Due on'),
     )
 
-    attachment = forms.FileField(
-        widget=forms.FileInput(attrs={'class': 'form-control-file'}),
-        required=False,
-        label=_('Attach File'),
-        help_text=_('You can attach a file to this ticket. '
-                    'Only file types such as plain text (.txt), '
-                    'a document (.pdf, .docx, or .odt), '
-                    'or screenshot (.png or .jpg) may be uploaded.'),
-        validators=[validate_file_extension]
-    )
-
+    if helpdesk_settings.HELPDESK_ENABLE_ATTACHMENTS:
+        attachment = forms.FileField(
+            widget=forms.FileInput(attrs={'class': 'form-control-file'}),
+            required=False,
+            label=_('Attach File'),
+            help_text=_('You can attach a file to this ticket. '
+                        'Only file types such as plain text (.txt), '
+                        'a document (.pdf, .docx, or .odt), '
+                        'or screenshot (.png or .jpg) may be uploaded.'),
+            validators=[validate_file_extension]
+        )
+        
     class Media:
         js = ('helpdesk/js/init_due_date.js',
               'helpdesk/js/init_datetime_classes.js')
@@ -326,7 +327,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
         return followup
 
     def _attach_files_to_follow_up(self, followup):
-        files = self.cleaned_data['attachment']
+        files = self.cleaned_data.get('attachment')
         if files:
             files = process_attachments(followup, [files])
         return files
@@ -418,7 +419,10 @@ class TicketForm(AbstractTicketForm):
         followup = self._create_follow_up(ticket, title=title, user=user)
         followup.save()
 
-        files = self._attach_files_to_follow_up(followup)
+        if helpdesk_settings.HELPDESK_ENABLE_ATTACHMENTS:
+            files = self._attach_files_to_follow_up(followup)
+        else:
+            files = None
 
         # emit signal when the TicketForm.save is done
         new_ticket_done.send(sender="TicketForm", ticket=ticket)
