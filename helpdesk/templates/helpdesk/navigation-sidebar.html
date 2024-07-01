@@ -65,7 +65,7 @@
           </a>
         </li>
         {% endif %}
-        {% if user.default_organization.name == 'Building Performance Colorado' %}
+        {% if user_info.default_org.name == 'Building Performance Colorado' %}
         <li class="nav-item">
           <a class="nav-link" href="https://energyoffice.colorado.gov/accessibility"  target="_blank">
             <i class="fas fa-fw fa-universal-access"></i>
@@ -130,6 +130,14 @@
           <a class="nav-link" href="{% url 'helpdesk:kb_index' %}{{ user_info.url }}">
             <i class="fas fa-fw fa-database"></i>
             <span>{% trans "Knowledge<wbr>base" %}</span>
+          </a>
+        </li>
+        {% endif %}
+        {% if user_info.default_org.name == 'Building Performance Colorado' %}
+        <li class="nav-item">
+          <a class="nav-link" href="https://energyoffice.colorado.gov/accessibility"  target="_blank">
+            <i class="fas fa-fw fa-universal-access"></i>
+            <span>{% trans "Accessibility Notice" %}</span>
           </a>
         </li>
         {% endif %}
