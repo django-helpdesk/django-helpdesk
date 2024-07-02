@@ -44,8 +44,10 @@
                         <div class="list-group-item list-group-item-action">
                             <div class="d-flex w-100 justify-content-between">
                                 <h5 class="mb-1">{{ followup.title|num_to_link }}</h5>
-                                <small><i class="fas fa-clock"></i>&nbsp;<span class='byline text-info'>{% if followup.user %}by {{ followup.user.get_full_name|default:followup.user.get_username }},{% endif %} <span title='{{ followup.date|naturaltime }}'>{{ followup.date|date:"DATETIME_FORMAT" }}</span>{% if followup.time_spent %}, <span>{% trans "time spent" %}: {{ followup.time_spent_formatted }}</span>{% endif %} {% if not followup.public %} <span class='private'>({% trans "Private" %})</span>{% endif %}</span></small>
+                                <small><i class="fas fa-clock"></i>&nbsp;<span class='byline text-info'>{% if followup.user %}by {{ followup.user.get_full_name|default:followup.user.get_username }},{% endif %} <span title='{{ followup.date|naturaltime }}'>{{ followup.date|date:"DATETIME_FORMAT" }}</span>
+                                {% if not followup.public %} <span class='private'>({% trans "Private" %})</span>{% endif %}</span></small>             
                             </div>
+                            
                             <p class="mb-1">
                                 {% if followup.comment %}<p>
                                     {% if followup.user %}{{ followup.get_markdown|num_to_link }}
@@ -205,14 +207,6 @@
 
                 <dt><label for='id_due_date'>{% trans "Due on" %}</label></dt>
                 <dd><input type="datetime-local" name="due_date" value="{{ticket.due_date|date:'Y-m-d'}}T{{ticket.due_date|time:'H:i:s'}}"/></dd>
-
-                {% if is_staff %}
-                <dt>
-                    <label for='id_time_spent'>{% trans "Time spent, in minutes" %}</label>
-                </dt>
-                <dd><input style="" id='id_time_spent' name='time_spent' type="number" min="0" value="0"/></dd>
-                {% endif %}
-
             </dl>
 
         </div>

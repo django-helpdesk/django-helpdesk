@@ -97,6 +97,7 @@ def create_category(request):
                 name=form.cleaned_data['name'],
                 title=form.cleaned_data['title'],
                 slug=form.cleaned_data['slug'],
+                order=form.cleaned_data['order'],
                 preview_description=form.cleaned_data['preview_description'],
                 description=form.cleaned_data['description'],
                 queue=form.cleaned_data['queue'],
@@ -154,6 +155,7 @@ def edit_category(request, slug):
                 'preview_description': category.preview_description,
                 'description': category.description,
                 'queue': category.queue,
+                'order': category.order,
                 'forms': category.forms.all(),
                 'public': category.public,
                 'form_submission_text': category.form_submission_text,
@@ -176,6 +178,7 @@ def edit_category(request, slug):
             category.title = form.cleaned_data['title']
             # slug = form.cleaned_data['slug']
             category.preview_description = form.cleaned_data['preview_description']
+            category.order = form.cleaned_data['order']
             category.description = form.cleaned_data['description']
             category.queue = form.cleaned_data['queue']
             category.forms.set(form.cleaned_data['forms'])

@@ -60,6 +60,20 @@ urlpatterns = [
     url(r'^tickets/update_tags/$',
         staff.mass_update_tags,
         name='mass_update_tags'),
+    
+    url(r'^tickets/get_elapsed_time/(?P<ticket_id>[0-9]+)/$',
+        staff.get_elapsed_time,
+        name='get_elapsed_time'),
+
+    
+    url(r'^tickets/start_timer/$',
+        staff.start_timer,
+        name='start_timer'),
+    
+    url(r'^tickets/stop_timer/$',
+        staff.stop_timer,
+        name='stop_timer'),
+
 
     url(r'^tickets/merge$',
         staff.merge_tickets,

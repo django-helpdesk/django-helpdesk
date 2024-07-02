@@ -562,10 +562,16 @@ class Ticket(models.Model):
         """Return back total time spent on the ticket. This is calculated value
         based on total sum from all FollowUps
         """
+        # total = datetime.timedelta(0)
+        # for val in self.followup_set.all():
+        #     if val.time_spent:
+        #         total = total + val.time_spent
+        # return total
+
         total = datetime.timedelta(0)
-        for val in self.followup_set.all():
-            if val.time_spent:
-                total = total + val.time_spent
+        for val in self.timespent_set.all():
+            if val.get_time_spent:
+                total += val.get_time_spent
         return total
 
     @property
@@ -1015,11 +1021,6 @@ class FollowUp(models.Model):
 
     objects = FollowUpManager()
 
-    time_spent = models.DurationField(
-        help_text=_("Time spent on this follow up"),
-        blank=True, null=True
-    )
-
     class Meta:
         ordering = ('date',)
         verbose_name = _('Follow-up')
@@ -1044,6 +1045,42 @@ class FollowUp(models.Model):
     def time_spent_formatted(self):
         return format_time_spent(self.time_spent)
 
+class TimeSpent(models.Model):
+    user = models.ForeignKey(
+            settings.AUTH_USER_MODEL,
+            on_delete=models.SET_NULL,
+            blank=True,
+            null=True,
+            verbose_name=_('User'),
+    )
+
+    ticket = models.ForeignKey(
+        Ticket,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        verbose_name=_('Ticket'),
+    )
+
+    start_time = models.DateTimeField()
+
+    stop_time = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        verbose_name = _('Time Spent')
+        verbose_name_plural = _('Time Spent Entries')
+        ordering = ('-start_time', '-stop_time')
+
+    @property
+    def get_time_spent(self):
+        if self.start_time and self.stop_time:
+            return self.stop_time - self.start_time
+        else:
+            return None
+    
+    @property
+    def time_spent_formatted(self):
+        return format_time_spent(self.get_time_spent)
 
 class TicketChange(models.Model):
     """
@@ -1401,6 +1438,13 @@ class KBCategory(models.Model):
                     markdown_allowed()),
     )
 
+    order = models.PositiveIntegerField(
+        _('Ordering'),
+        blank=True,
+        null=True,
+        help_text='Smaller numbers will be ordered first.'
+    )
+
     forms = models.ManyToManyField(
         FormType,
         blank=True,
@@ -1433,7 +1477,7 @@ class KBCategory(models.Model):
         return '%s: %s (%s)' % (self.organization.name, self.name, self.pk)
 
     class Meta:
-        ordering = ('title',)
+        ordering = ('order', 'title',)
         verbose_name = _('Knowledgebase category')
         verbose_name_plural = _('Knowledgebase categories')
 

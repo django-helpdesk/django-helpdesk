@@ -183,7 +183,11 @@ copy_public_link = function() {
                             {% endfor %}
                         </td>
                         <th class="table-active">{% trans "Total time spent" %}</th>
-                        <td>{{ ticket.time_spent_formatted }}</td>
+                        <td>
+                            <span id="ticket-time-spent">{{ ticket.time_spent_formatted }}</span> <button id="toggle_timer_btn" class="btn btn-warning btn-sm float-right toggle-start-timer">Start Timer</button>
+                            <div id="timer-display" class="float-right px-2" style="display: none;">00:00:00</div>
+                        </td>
+                        
                     </tr>
                     {% if ticket.kbitem %}
                     <tr>
@@ -231,11 +235,14 @@ copy_public_link = function() {
                             </ul>
                         </td>
                     </tr>
+
+                    {% if ticket.get_markdown|num_to_link %}
                     <tr>
                         <td id="ticket-description" colspan='4' style="max-width:1px;">
                             <h4>{% trans "Description" %}</h4>
                             {{ ticket.get_markdown|num_to_link }}</td>
                     </tr>
+                    {% endif %}
 
                     {% if ticket.resolution %}<tr>
                         <th colspan='2'>{% trans "Resolution" %}{% if "Resolved" == ticket.get_status_display %} <a href='?close'><button type="button" class="btn btn-warning btn-sm">{% trans "Accept and Close" %}</button></a>{% endif %}</th>
@@ -252,3 +259,127 @@ copy_public_link = function() {
 </div>
 <!-- /.card -->
 
+{% block helpdesk_js %}
+<script type='text/javascript' language='javascript'>
+$(document).ready(function() {
+
+    var timer;
+    var totalSeconds = 0;
+    var button = $("#toggle_timer_btn");
+    var ticketId = "{{ ticket.id }}"
+
+    // Updating the display
+    updateDisplay = function updateDisplay() {
+        // Spliting up by hours, minutes, and seconds
+        var hours = Math.floor(totalSeconds / 3600);
+        var minutes = Math.floor((totalSeconds % 3600) / 60);
+        var seconds = totalSeconds % 60;
+
+        // Changes the timer display
+        $('#timer-display').text(
+            String(hours).padStart(2, '0') + ':' +
+            String(minutes).padStart(2, '0') + ':' +
+            String(seconds).padStart(2, '0')
+        );
+    }
+
+    // Starts the timer
+    function startTimer() {
+        $("#timer-display").show();
+        button.text('Stop Timer');
+        if (!timer) {
+            timer = setInterval(function() {
+                totalSeconds++;
+                updateDisplay();
+            }, 1000);
+        }
+    }
+ 
+    // Stops the timer and sets timer object to null for a new one to be created
+    function stopTimer() {
+        clearInterval(timer);
+        $("#timer-display").hide();
+        timer = null;
+        button.text('Start Timer');
+
+        updateDisplay();
+    }
+
+    $(document).on('click', '#toggle_timer_btn', function(e) {
+
+        if ($(this).hasClass('toggle-start-timer')) {
+            e.preventDefault();
+            $('#toggle_timer_btn').removeClass('toggle-start-timer');
+            $('#toggle_timer_btn').addClass('toggle-stop-timer');
+
+            $.ajax({
+                url: "{% url 'helpdesk:start_timer' %}",
+                method: 'POST',
+                data: {
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                    'ticket_id' : ticketId
+                },
+                success: function(response) {
+                    startTimer();
+                }
+            });
+
+        } else if ($(this).hasClass('toggle-stop-timer')) {
+            $('#toggle_timer_btn').removeClass('toggle-stop-timer');
+            $('#toggle_timer_btn').addClass('toggle-start-timer');
+
+            $.ajax({
+                url: "{% url 'helpdesk:stop_timer' %}",
+                method: 'POST',
+                data: {
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                    'ticket_id' : ticketId
+                },
+                success: function(response) {
+                    $('#ticket-time-spent').text(response.total_time_spent);
+                    stopTimer();
+                }
+            });
+        }
+    })
+
+    // Checks if a TimeSpent object already exists or not
+    $.ajax({
+        url: "{% url 'helpdesk:get_elapsed_time' ticket.id %}",
+        method: 'GET',
+        success: function(response) {
+            // View returns the starting time of the matching TimeSpent object if it exists. If 
+            // it doesn't, returns null
+            let startTime = response.start_time;
+
+            if (startTime != null) {
+                var startTimeDate = new Date(response.start_time);
+                var currentTime = new Date();
+                var elapsedMilliseconds = currentTime - startTimeDate;
+                // elapsedSeconds calculates the time since start_time of the matching TimeSpent object
+                var elapsedSeconds = Math.floor(elapsedMilliseconds / 1000);
+
+                // Setting total seconds to elapsed seconds so the timer displays the correct elapsed time
+                totalSeconds = elapsedSeconds
+                // Show the timer as it is hidden by default
+                $("#timer-display").show();
+                $('#toggle_timer_btn').removeClass('toggle-start-timer');
+                $('#toggle_timer_btn').addClass('toggle-stop-timer');
+                // Changes the text to stop timer
+                startTimer();
+
+                // Updates display so time starts counting up
+                updateDisplay();
+
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Error fetching elapsed time:', error);
+        }
+    });
+
+});
+
+</script>
+
+{% endblock %}

@@ -145,7 +145,7 @@ def process_email(quiet=False, debugging=False, options=None):
 
 
 def process_importer(importer, queues, logger, debugging, options=None):
-    logger.info("***** %s: Begin processing mail for django-helpdesk" % ctime())
+    logger.debug("***** %s: Begin processing mail for django-helpdesk" % ctime())
 
     if importer.socks_proxy_type and importer.socks_proxy_host and importer.socks_proxy_port:
         try:
@@ -379,7 +379,7 @@ def imap_sync(importer, queues, logger, server, debugging, options=None):
 
             if data:
                 msg_nums = data[0].split()
-                logger.info("Received %s messages from IMAP server" % len(msg_nums))
+                logger.debug("Received %s messages from IMAP server" % len(msg_nums))
                 # check whether our token is running out of time - if so, or if we refreshed it, just stop here.
                 # we don't want to get interrupted mid-import, and accidentally import twice!
                 refreshed_flag = refreshed(importer, logger, token_backend)
@@ -392,7 +392,7 @@ def imap_sync(importer, queues, logger, server, debugging, options=None):
                         else:
                             uid = uid[0].decode('ascii')
                             msg_uid = parse_uid(uid)
-                            logger.info("Received message UID: %s" % msg_uid)
+                            logger.debug("Received message UID: %s" % msg_uid)
 
                             # Grab message first to get date to sort by
                             status, data = server.uid('fetch', msg_uid, '(RFC822)')
@@ -483,14 +483,14 @@ def exchange_sync(importer, queues, logger, server, debugging):
         try:
             # loop thru msgs
             msg_num = data.count()
-            logger.info("Received %s messages from IMAP server" % msg_num)
+            logger.debug("Received %s messages from IMAP server" % msg_num)
             for item in data:
                 # item = data[0]
                 msg_id = getattr(item, '_id', None)
                 if not msg_id:
                     logger.error("Could not fetch UID. Message will not be processed; skipping to the next message.\nEmail info:\n%s" % item)
                 else:
-                    logger.info("Received message ID: %s" % msg_id)
+                    logger.debug("Received message ID: %s" % msg_id)
                     try:
                         ticket = process_exchange_message(item, importer, queues, logger)
                     except Exception as e:
@@ -537,7 +537,7 @@ def google_sync(importer, queues, logger, server, debugging, options=None):
         logger.error(f'Received unexpected response: {response}')
         return
     msgs = response['messages']
-    logger.info("Received %s messages from server" % len(msgs))
+    logger.debug("Received %s messages from server" % len(msgs))
     # ids_to_delete = []
     # filter for mail
     for item in msgs:
@@ -545,7 +545,7 @@ def google_sync(importer, queues, logger, server, debugging, options=None):
             # item is an id and thread id
             msg_id = item['id']
             msg = server.users().messages().get(userId='me', id=msg_id).execute()
-            logger.info("Received message ID: %s" % msg_id)
+            logger.debug("Received message ID: %s" % msg_id)
             try:
                 ticket = process_google_message(msg['payload'], importer, queues, logger, msg_id, server)
             except Exception as e:
@@ -596,13 +596,14 @@ def decode_mail_headers(string):
     ])
 
 
-def is_autoreply(message, sender='', headers=None):
+def is_autoreply(message, sender='', subject='', headers=None):
     """
     Accepting message as something with .get(header_name) method
     Returns True if it's likely to be auto-reply or False otherwise
     So we don't start mail loops
     """
     sender = sender.lower()
+    subject = subject.lower()
     if headers:
         message = headers
     any_if_this = [
@@ -618,6 +619,7 @@ def is_autoreply(message, sender='', headers=None):
         'noreply' in sender,
         'donotreply' in sender,
         'postmaster' in sender,
+        'out of office' in subject,
         False if not message.get("Return-Path") else message.get("Return-Path", '').lower() == 'mailer-daemon',
         False if not message.get("return-path") else message.get("return-path", '').lower() == 'mailer-daemon',
     ]
@@ -734,7 +736,7 @@ def create_ticket_from_processed_message(message, ticket_id, payload, files, log
                 # if ubids were found in the body, look for a field with UBID in the title
                 ubid_field = ticket_form.customfield_set.filter(label__icontains='UBID', data_type='varchar')
                 if ubid_field.count() == 1:
-                    logger.debug("Found UBIDs, adding them to the ticket.")
+                    logger.info("Found UBIDs, adding them to the ticket.")
                     ubid_field = ubid_field.first()
                     if is_extra_data(ubid_field.field_name):
                         ticket.extra_data[ubid_field.field_name] = ubids
@@ -744,13 +746,13 @@ def create_ticket_from_processed_message(message, ticket_id, payload, files, log
             if related_emails:
                 related_emails_field = ticket_form.customfield_set.filter(field_name='related_email', data_type='email')
                 if related_emails_field.count() == 1:
-                    logger.debug("Found related emails, adding them to the ticket.")
+                    logger.info("Found related emails, adding them to the ticket.")
                     related_emails_field = related_emails_field.first()
                     if is_extra_data(related_emails_field.field_name):
                         ticket.extra_data[related_emails_field.field_name] = related_emails
 
             ticket.save()
-            logger.debug("Created new ticket %s-%s" % (ticket.queue.slug, ticket.id))
+            logger.info("Created new ticket %s-%s" % (ticket.queue.slug, ticket.id))
             new = True
 
     f = FollowUp.objects.create(
@@ -789,7 +791,7 @@ def create_ticket_from_processed_message(message, ticket_id, payload, files, log
         ticket.save()
         f.save()
 
-    logger.debug("Created new FollowUp for Ticket")
+    logger.info("Created new FollowUp for Ticket")
     logger.info("[%s-%s] %s" % (ticket.queue.slug, ticket.id, ticket.title,))
 
     attached = process_attachments(f, files)
@@ -803,7 +805,7 @@ def create_ticket_from_processed_message(message, ticket_id, payload, files, log
     context['private'] = False
 
     headers = payload['headers'] if 'headers' in payload else None
-    autoreply = is_autoreply(message, sender=sender_email, headers=headers)
+    autoreply = is_autoreply(message, sender=sender_email, subject=payload['subject'], headers=headers)
     if autoreply:
         logger.info("Message seems to be auto-reply, not sending any emails back to the sender")
     else:
@@ -946,7 +948,7 @@ def process_message(message, importer, queues, logger, options=None):
     # Ignore List applies to sender, TO emails, and CC list
     for ignored_address in IgnoreEmail.objects.filter(Q(queues=queue) | Q(organization=queue.organization, queues__isnull=True), ignore_import=True):
         if ignored_address.test(sender[1]):
-            logger.debug("Email address matched an ignored address. Ticket will not be created")
+            logger.info("Email address matched an ignored address. Ticket will not be created")
             if ignored_address.keep_in_mailbox:
                 return False  # By returning 'False' the message will be kept in the mailbox,
             return True  # and the 'True' will cause the message to be deleted.
@@ -965,7 +967,7 @@ def process_message(message, importer, queues, logger, options=None):
                 if cc:
                     cc.delete()
                     logger.info("Deleted the CC'd address from the ticket")
-                    logger.debug("Address deleted was %s" % address)  # TODO remove later for privacy
+                    logger.info("Address deleted was %s" % address)  # TODO remove later for privacy
         return True
 
     if 'date' in options and message.get('date', None):
@@ -1011,7 +1013,7 @@ def process_message(message, importer, queues, logger, options=None):
                     body = body.encode('utf-8').decode('unicode_escape')
                 except UnicodeDecodeError:
                     pass
-                logger.debug("Discovered plain text MIME part")
+                logger.info("Discovered plain text MIME part")
             else:
                 try:
                     email_body = encoding.smart_text(part.get_payload(decode=True))
@@ -1038,7 +1040,7 @@ def process_message(message, importer, queues, logger, options=None):
                 files.append(
                     SimpleUploadedFile(_("email_html_body.html"), payload.encode("utf-8"), 'text/html')
                 )
-                logger.debug("Discovered HTML MIME part")
+                logger.info("Discovered HTML MIME part")
         else:
             if not name:
                 ext = mimetypes.guess_extension(part.get_content_type())
@@ -1063,7 +1065,7 @@ def process_message(message, importer, queues, logger, options=None):
             #     logger.debug("Payload was not base64 encoded, using raw bytes")
             #     # payloadToWrite = payload
             files.append(SimpleUploadedFile(name, part.get_payload(decode=True), mimetypes.guess_type(name)[0]))
-            logger.debug("Found MIME attachment %s" % name)
+            logger.info("Found MIME attachment %s" % name)
 
         counter += 1
 
@@ -1178,7 +1180,7 @@ def process_exchange_message(message, importer, queues, logger):
     # Ignore List applies to sender, TO emails, and CC list
     for ignored_address in IgnoreEmail.objects.filter(Q(queues=queue) | Q(organization=queue.organization, queues__isnull=True), ignore_import=True):
         if ignored_address.test(sender[1]):
-            logger.debug("Email address matched an ignored address. Ticket will not be created")
+            logger.info("Email address matched an ignored address. Ticket will not be created")
             if ignored_address.keep_in_mailbox:
                 return False  # By returning 'False' the message will be kept in the mailbox,
             return True  # and the 'True' will cause the message to be deleted.
@@ -1199,7 +1201,7 @@ def process_exchange_message(message, importer, queues, logger):
                 if cc:
                     cc.delete()
                     logger.info("Deleted the CC'd address from the ticket")
-                    logger.debug("Address deleted was %s" % address)  # TODO remove later for privacy
+                    logger.info("Address deleted was %s" % address)  # TODO remove later for privacy
         return True
 
     files = []
@@ -1318,7 +1320,7 @@ def process_exchange_message(message, importer, queues, logger):
                         logger.info('- Found Sub ItemAttachment')
                         if isinstance(sub_attachment.item, ExchangeMessage):
                             att_sender, att_to_list = '', []
-                            att_subject = getattr(attachment.item, 'subject', '')
+                            att_subject = getattr(sub_attachment.item, 'subject', '')
                             if getattr(sub_attachment.item, 'sender', None):
                                 att_sender = (sub_attachment.item.sender.name, sub_attachment.item.sender.email_address)
                             if getattr(sub_attachment.item, 'to_recipients', None):
@@ -1365,7 +1367,7 @@ def _parse_addr_string(addresses):
 
 def process_google_message(message, importer, queues, logger, msg_id, server):
     headers = message['headers']
-    sender, to_list, cc_list, date, subject, category, message_id, in_reply_to = '', [], [], None, None, None, None, None
+    sender, to_list, cc_list, date, subject, category, message_id, in_reply_to = '', [], [], None, '', None, None, None
     auto_forward = None
 
     if importer.extract_eml_attachments:
@@ -1373,23 +1375,24 @@ def process_google_message(message, importer, queues, logger, msg_id, server):
 
     # Get subject, sender, to_list, cc_list
     for header in headers:
-        if header['name'] == 'Subject':
+        header_name = header['name'].lowercase()
+        if header_name == 'subject':
             subject = header['value']
             for affix in STRIPPED_SUBJECT_STRINGS:
                 subject = subject.replace(affix, "")
             subject = subject.strip()
-        elif header['name'] == 'From':
+        elif header_name == 'from':
             sender = _parse_addr_string(header['value'])
             sender = sender[0] if sender else ''
-        elif header['name'] == 'To':
+        elif header_name == 'to':
             to_list = _parse_addr_string(header['value'])
-        elif header['name'] == 'X-BEAMHelpdesk-Delivered':
+        elif header_name == 'x-beamhelpdesk-delivered':
             auto_forward = header['value']
-        elif header['name'] == 'Cc':
+        elif header_name == 'cc':
             cc_list = _parse_addr_string(header['value'])
-        elif header['name'] == 'Message-ID':
+        elif header_name == 'message-id':
             message_id = header['value']
-        elif header['name'] == 'In-Reply-To':
+        elif header_name == 'in-reply-to':
             in_reply_to = header['value']
     sender_lower = sender[1].lower()
     # Use subject & to_list/cc_list to determine queue
@@ -1423,7 +1426,7 @@ def process_google_message(message, importer, queues, logger, msg_id, server):
     # Ignore List applies to sender, TO emails, and CC list
     for ignored_address in IgnoreEmail.objects.filter(Q(queues=queue) | Q(organization=queue.organization, queues__isnull=True), ignore_import=True):
         if ignored_address.test(sender[1]):
-            logger.debug("Email address matched an ignored address. Ticket will not be created")
+            logger.info("Email address matched an ignored address. Ticket will not be created")
             if ignored_address.keep_in_mailbox:
                 return False  # By returning 'False' the message will be kept in the mailbox,
             return True  # and the 'True' will cause the message to be deleted.
@@ -1441,7 +1444,7 @@ def process_google_message(message, importer, queues, logger, msg_id, server):
                 if cc:
                     cc.delete()
                     logger.info("Deleted the CC'd address from the ticket")
-                    logger.debug("Address deleted was %s" % address)  # TODO remove later for privacy
+                    logger.info("Address deleted was %s" % address)  # TODO remove later for privacy
         return True
 
     body = ''
@@ -1473,7 +1476,7 @@ def process_google_message(message, importer, queues, logger, msg_id, server):
                         # second and other reply, save only first part of the message
                         body = EmailReplyParser.parse_reply(body)
                         full_body = body
-                    logger.debug("Discovered plain text MIME part")
+                    logger.info("Discovered plain text MIME part")
 
                 elif part['mimeType'] == 'text/html' and filename is None:
                     email_body = unescape(urlsafe_b64decode(data).decode('utf-8'))
@@ -1498,12 +1501,12 @@ def process_google_message(message, importer, queues, logger, msg_id, server):
                     files.append(
                         SimpleUploadedFile(_("email_html_body.html"), payload.encode("utf-8"), 'text/html')
                     )
-                    logger.debug("Discovered HTML MIME part")
+                    logger.info("Discovered HTML MIME part")
 
             else:
                 if 'attachmentId' in part['body']:
                     if not filename:
-                        ext = mimetypes.guess_extension(part.get_content_type())
+                        ext = mimetypes.guess_extension(part['mimeType'])
                         filename = "part-%i%s" % (counter, ext)
                     else:
                         filename = ("part-%i_" % counter) + filename
@@ -1513,7 +1516,7 @@ def process_google_message(message, importer, queues, logger, msg_id, server):
                     data = urlsafe_b64decode(attachment['data'])
                     files.append(SimpleUploadedFile(filename, data, mimetypes.guess_type(filename)[0]))
                     counter = counter + 1
-                    logger.debug("Found MIME attachment %s" % filename)
+                    logger.info("Found MIME attachment %s" % filename)
 
             if 'parts' in part:
                 walk(part['parts'])
