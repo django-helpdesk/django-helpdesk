@@ -292,6 +292,7 @@ def create_article(request, slug=None):
                 answer=form.cleaned_data['answer'],
                 order=form.cleaned_data['order'],
                 enabled=form.cleaned_data['enabled'],
+                unlisted=form.cleaned_data['unlisted'],
                 last_updated=datetime.datetime.now()
             )
             item.save()
@@ -335,6 +336,7 @@ def edit_article(request, slug, pk, iframe=False):
             initial={
                 'category': item.category,
                 'title': item.title,
+                'unlisted': item.unlisted,
                 'question': item.question,
                 'answer': item.answer,
                 'order': item.order,
@@ -366,6 +368,7 @@ def edit_article(request, slug, pk, iframe=False):
             item.answer = form.cleaned_data['answer']
             item.order = form.cleaned_data['order']
             item.enabled = form.cleaned_data['enabled']
+            item.unlisted = form.cleaned_data['unlisted']
             item.last_updated = datetime.datetime.now()
             item.forms.set(form.cleaned_data['forms'])
 
