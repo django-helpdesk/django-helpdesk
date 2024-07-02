@@ -1373,23 +1373,24 @@ def process_google_message(message, importer, queues, logger, msg_id, server):
 
     # Get subject, sender, to_list, cc_list
     for header in headers:
-        if header['name'] == 'Subject':
+        header_name = header['name'].lowercase()
+        if header_name == 'subject':
             subject = header['value']
             for affix in STRIPPED_SUBJECT_STRINGS:
                 subject = subject.replace(affix, "")
             subject = subject.strip()
-        elif header['name'] == 'From':
+        elif header_name == 'from':
             sender = _parse_addr_string(header['value'])
             sender = sender[0] if sender else ''
-        elif header['name'] == 'To':
+        elif header_name == 'to':
             to_list = _parse_addr_string(header['value'])
-        elif header['name'] == 'X-BEAMHelpdesk-Delivered':
+        elif header_name == 'x-beamhelpdesk-delivered':
             auto_forward = header['value']
-        elif header['name'] == 'Cc':
+        elif header_name == 'cc':
             cc_list = _parse_addr_string(header['value'])
-        elif header['name'] == 'Message-ID':
+        elif header_name == 'message-id':
             message_id = header['value']
-        elif header['name'] == 'In-Reply-To':
+        elif header_name == 'in-reply-to':
             in_reply_to = header['value']
     sender_lower = sender[1].lower()
     # Use subject & to_list/cc_list to determine queue
