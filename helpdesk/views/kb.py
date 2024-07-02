@@ -53,7 +53,7 @@ def category(request, slug, iframe=False):
     if is_helpdesk_staff(request.user):
         items = category.kbitem_set.all()
     else:
-        items = category.kbitem_set.filter(enabled=True)
+        items = category.kbitem_set.filter(enabled=True, unlisted=False)
     qparams = request.GET.copy()
     try:
         del qparams['kbitem']

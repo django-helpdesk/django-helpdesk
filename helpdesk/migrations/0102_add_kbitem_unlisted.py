@@ -13,6 +13,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='kbitem',
             name='unlisted',
-            field=models.BooleanField(default=False, help_text='Should this form be hidden from the public article list? (If the "Is this article publicly visible?" option is checked, this form will still be accessible by everyone through the link.)', verbose_name='Unlisted'),
+            field=models.BooleanField(default=False, help_text='Should this form be hidden from the public article list? (If the "Is this article publicly accessible?" option is checked, this form will still be accessible by everyone through the link.)', verbose_name='Unlisted'),
+        ),
+        migrations.AlterField(
+            model_name='kbitem',
+            name='enabled',
+            field=models.BooleanField(default=True, verbose_name='Is this article publicly accessible?'),
         ),
     ]

@@ -1593,13 +1593,13 @@ class KBItem(models.Model):
     )
 
     enabled = models.BooleanField(
-        _('Is this article publicly visible?'),
+        _('Is this article publicly accessible?'),
         default=True,
     )
 
     unlisted = models.BooleanField(_('Unlisted'), blank=False, default=False,
                                    help_text=_('Should this form be hidden from the public article list? '
-                                               '(If the "Is this article publicly visible?" option is checked, this form will still be accessible by everyone through the link.)'))
+                                               '(If the "Is this article publicly accessible?" option is checked, this form will still be accessible by everyone through the link.)'))
 
     forms = models.ManyToManyField(
         FormType,
