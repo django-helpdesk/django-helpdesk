@@ -596,13 +596,14 @@ def decode_mail_headers(string):
     ])
 
 
-def is_autoreply(message, sender='', headers=None):
+def is_autoreply(message, sender='', subject='', headers=None):
     """
     Accepting message as something with .get(header_name) method
     Returns True if it's likely to be auto-reply or False otherwise
     So we don't start mail loops
     """
     sender = sender.lower()
+    subject = subject.lower()
     if headers:
         message = headers
     any_if_this = [
@@ -618,6 +619,7 @@ def is_autoreply(message, sender='', headers=None):
         'noreply' in sender,
         'donotreply' in sender,
         'postmaster' in sender,
+        'out of office' in subject,
         False if not message.get("Return-Path") else message.get("Return-Path", '').lower() == 'mailer-daemon',
         False if not message.get("return-path") else message.get("return-path", '').lower() == 'mailer-daemon',
     ]
@@ -803,7 +805,7 @@ def create_ticket_from_processed_message(message, ticket_id, payload, files, log
     context['private'] = False
 
     headers = payload['headers'] if 'headers' in payload else None
-    autoreply = is_autoreply(message, sender=sender_email, headers=headers)
+    autoreply = is_autoreply(message, sender=sender_email, subject=payload['subject'], headers=headers)
     if autoreply:
         logger.info("Message seems to be auto-reply, not sending any emails back to the sender")
     else:
