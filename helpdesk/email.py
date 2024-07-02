@@ -1365,7 +1365,7 @@ def _parse_addr_string(addresses):
 
 def process_google_message(message, importer, queues, logger, msg_id, server):
     headers = message['headers']
-    sender, to_list, cc_list, date, subject, category, message_id, in_reply_to = '', [], [], None, None, None, None, None
+    sender, to_list, cc_list, date, subject, category, message_id, in_reply_to = '', [], [], None, '', None, None, None
     auto_forward = None
 
     if importer.extract_eml_attachments:
