@@ -1375,7 +1375,7 @@ def process_google_message(message, importer, queues, logger, msg_id, server):
 
     # Get subject, sender, to_list, cc_list
     for header in headers:
-        header_name = header['name'].lowercase()
+        header_name = header['name'].lower()
         if header_name == 'subject':
             subject = header['value']
             for affix in STRIPPED_SUBJECT_STRINGS:
