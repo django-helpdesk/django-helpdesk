@@ -362,11 +362,8 @@ class Queue(models.Model):
         """Return back total time spent on the ticket. This is calculated value
         based on total sum from all FollowUps
         """
-        total = datetime.timedelta(0)
-        for val in self.ticket_set.all():
-            if val.time_spent:
-                total = total + val.time_spent
-        return total
+        res = FollowUp.objects.filter(ticket__queue=self).aggregate(models.Sum('time_spent'))
+        return res.get('time_spent__sum', datetime.timedelta(0))
 
     @property
     def time_spent_formated(self):
@@ -582,11 +579,8 @@ class Ticket(models.Model):
         """Return back total time spent on the ticket. This is calculated value
         based on total sum from all FollowUps
         """
-        total = datetime.timedelta(0)
-        for val in self.followup_set.all():
-            if val.time_spent:
-                total = total + val.time_spent
-        return total
+        res = FollowUp.objects.filter(ticket=self).aggregate(models.Sum('time_spent'))
+        return res.get('time_spent__sum', datetime.timedelta(0))
 
     @property
     def time_spent_formated(self):
