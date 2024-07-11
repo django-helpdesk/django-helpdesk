@@ -1186,7 +1186,10 @@ def process_exchange_message(message, importer, queues, logger):
             return True  # and the 'True' will cause the message to be deleted.
 
     # Accounting for forwarding loops
-    headers = {h.name.lower(): h.value for h in getattr(message, 'headers', {})}
+    if getattr(message, 'headers'):
+        headers = {h.name.lower(): h.value for h in getattr(message, 'headers', {})}
+    else:  # catch for when getattr returns None
+        headers = {}
     auto_forward = headers.get('x-beamhelpdesk-delivered', None)
 
     if auto_forward is not None or (queue.email_address and sender_lower == queue.email_address.lower()):
