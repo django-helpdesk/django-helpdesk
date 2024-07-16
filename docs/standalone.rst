@@ -1,4 +1,4 @@
-Django-Helpdesk Standalone Installation
+Standalone Installation
 =======================================
 
 You can find standalone docker images at `djangohelpdesk/standalone:latest <https://hub.docker.com/r/djangohelpdesk/standalone/tags>`_.
