@@ -17,7 +17,7 @@ jobs:
       run: echo '${{ secrets.DOCKER_HUB_PASS }}' | docker login -u djangohelpdesk --password-stdin
 
     - name: Build Docker image
-      run: cd standalone ; docker build -t djangohelpdesk/standalone:latest ..
+      run: docker build --file standalone/Dockerfile -t djangohelpdesk/standalone:latest ..
 
     - name: Push Docker image
       run: docker push djangohelpdesk/standalone:latest
