@@ -7,9 +7,9 @@ RUN apt-get install -yqq \
    cron \
    git
 COPY requirements.txt /opt/django-helpdesk/requirements.txt
-COPY standalone/extra-requirements.txt /opt/django-helpdesk/standalone/extra-requirements.txt
+COPY standalone/requirements.txt /opt/django-helpdesk/standalone/requirements.txt
 RUN pip3 install -r /opt/django-helpdesk/requirements.txt
-RUN pip3 install -r /opt/django-helpdesk/standalone/extra-requirements.txt
+RUN pip3 install -r /opt/django-helpdesk/standalone/requirements.txt
 COPY . /opt/django-helpdesk
 WORKDIR /opt/django-helpdesk
 RUN pip3 install -e .

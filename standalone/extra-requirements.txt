@@ -1,3 +1,0 @@
-whitenoise
-gunicorn
-psycopg2-binary
