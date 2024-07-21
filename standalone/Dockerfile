@@ -6,11 +6,9 @@ RUN apt-get install -yqq \
    postgresql-client \
    cron \
    git
-COPY requirements.txt /opt/django-helpdesk/requirements.txt
-COPY standalone/requirements.txt /opt/django-helpdesk/standalone/requirements.txt
+COPY . /opt/
 RUN pip3 install -r /opt/django-helpdesk/requirements.txt
 RUN pip3 install -r /opt/django-helpdesk/standalone/requirements.txt
-COPY . /opt/django-helpdesk
 WORKDIR /opt/django-helpdesk
 RUN pip3 install -e .
 RUN DJANGO_HELPDESK_SECRET_KEY=foo python3 standalone/manage.py collectstatic
