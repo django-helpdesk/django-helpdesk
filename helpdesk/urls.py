@@ -119,7 +119,7 @@ urlpatterns = [
     re_path(r"^reports/(?P<report>\w+)/$",
             staff.run_report, name="run_report"),
     path("save_query/", staff.save_query, name="savequery"),
-    path("delete_query/<int:id>/", staff.delete_saved_query, name="delete_query"),
+    path("delete_query/<int:pk>/", staff.delete_saved_query, name="delete_query"),
     path("settings/", staff.EditUserSettingsView.as_view(), name="user_settings"),
     path("ignore/", staff.email_ignore, name="email_ignore"),
     path("ignore/add/", staff.email_ignore_add, name="email_ignore_add"),
