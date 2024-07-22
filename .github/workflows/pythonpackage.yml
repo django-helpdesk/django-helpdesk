@@ -31,7 +31,7 @@ jobs:
     - name: Lint with ruff
       run: |
         pip install ruff
-        ruff helpdesk
+        ruff check helpdesk
 
     - name: Test with pytest
       run: |
