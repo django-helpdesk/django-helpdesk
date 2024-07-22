@@ -80,6 +80,9 @@
                                 </small>
                             {% endif %}{% endwith %}
                         </div>
+                        <div style="display:none">
+                            <pre id="followup_extra_fields_{{followup.id}}" class="followup_extra_field">{{ followup.extra_fields }}</pre>
+                        </div>
                         <!-- /.list-group-item -->
                     {% endfor %}
                     </div>
@@ -111,6 +114,12 @@
                 {% blocktrans %}
                 <dd class='form_help_text'>You can insert ticket and queue details in your message. For more information, see the <a href='{{ context_help_url }}'>context help page</a>.</dd>
                 {% endblocktrans %}
+                <div  style="display:none;">
+                <dt><label for='extra_fields'>{% trans "Extra Fields" %}</label></dt>
+                <dd>
+                    <textarea rows='8' cols='70' name='extra_fields' id='extra_fields'></textarea>
+                </dd>
+                </div>
 
                 <dt><label>{% trans "New Status" %}</label></dt>
                 {% if not ticket.can_be_resolved %}<dd>{% trans "This ticket cannot be resolved or closed until the tickets it depends on are resolved." %}</dd>{% endif %}

@@ -91,7 +91,7 @@ class FollowUpSerializer(serializers.ModelSerializer):
     class Meta:
         model = FollowUp
         fields = (
-            'id', 'ticket', 'user', 'title', 'comment', 'public', 'new_status',
+            'id', 'ticket', 'user', 'title', 'comment', 'public', 'new_status', 'extra_fields',
             'time_spent', 'attachments', 'followupattachment_set', 'date', 'message_id',
         )
 
@@ -109,6 +109,7 @@ class FollowUpSerializer(serializers.ModelSerializer):
             public=validated_data.get("public", False),
             new_status=validated_data.get("new_status", None),
             time_spent=validated_data.get("time_spent", None),
+            extra_fields=validated_data.get("extra_fields", None),
         )
 
 

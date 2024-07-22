@@ -206,6 +206,7 @@ def update_ticket(
         due_date=None,
         new_checklists=None,
         message_id=None,
+        extra_fields=None,
 ):
     # We need to allow the 'ticket' and 'queue' contexts to be applied to the
     # comment.
@@ -240,7 +241,8 @@ def update_ticket(
         owner = ticket.assigned_to.id
 
     f = FollowUp(ticket=ticket, date=timezone.now(), comment=comment,
-                 time_spent=time_spent, message_id=message_id, title=title)
+                 time_spent=time_spent, message_id=message_id, title=title,
+                 extra_fields=extra_fields)
 
     if is_helpdesk_staff(user):
         f.user = user

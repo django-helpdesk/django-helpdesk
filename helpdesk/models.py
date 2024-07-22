@@ -30,6 +30,7 @@ import os
 import re
 from rest_framework import serializers
 import uuid
+import json
 
 
 class EscapeHtml(Extension):
@@ -926,6 +927,12 @@ class FollowUp(models.Model):
         null=True,
     )
 
+    extra_fields = models.JSONField(
+        _('Extra Fields'),
+        blank=True,
+        null=True,
+    )
+
     public = models.BooleanField(
         _('Public'),
         blank=True,
@@ -967,6 +974,9 @@ class FollowUp(models.Model):
         help_text=_("Time spent on this follow up"),
         blank=True, null=True
     )
+
+    def extra_fields_json(self):
+        return json.dumps(self.extra_fields)
 
     class Meta:
         ordering = ('date',)

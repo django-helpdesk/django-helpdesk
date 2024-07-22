@@ -306,12 +306,14 @@ def followup_edit(request, ticket_id, followup_id):
             public = form.cleaned_data['public']
             new_status = form.cleaned_data['new_status']
             time_spent = form.cleaned_data['time_spent']
+            extra_fields = form.cleaned_data['extra_fields']
             # will save previous date
             old_date = followup.date
             new_followup = FollowUp(title=title, date=old_date, ticket=_ticket,
                                     comment=comment, public=public,
                                     new_status=new_status,
-                                    time_spent=time_spent)
+                                    time_spent=time_spent,
+                                    extra_fields=extra_fields)
             # keep old user if one did exist before.
             if followup.user:
                 new_followup.user = followup.user
@@ -574,6 +576,14 @@ def update_ticket_view(request, ticket_id, public=False):
     comment = request.POST.get('comment', '')
     new_status = int(request.POST.get('new_status', ticket.status))
     title = request.POST.get('title', '')
+    try:
+        efs = request.POST.get('extra_fields', '{}')
+        if efs:
+            extra_fields = json.loads(efs)
+        else:
+            extra_fields = {}
+    except ValueError:
+        extra_fields = {"error": "Invalid JSON"}
     owner = int(request.POST.get('owner', -1))
     priority = int(request.POST.get('priority', ticket.priority))
     queue = int(request.POST.get('queue', ticket.queue.id))
@@ -597,6 +607,7 @@ def update_ticket_view(request, ticket_id, public=False):
         not request.FILES,
         not comment,
         not changes_in_checklists,
+        not extra_fields,
         new_status == ticket.status,
         title == ticket.title,
         priority == int(ticket.priority),
@@ -613,6 +624,7 @@ def update_ticket_view(request, ticket_id, public=False):
         ticket,
         title = title,
         comment = comment,
+        extra_fields = extra_fields,
         files = request.FILES.getlist('attachment'),
         public = request.POST.get('public', False),
         owner = int(request.POST.get('owner', -1)),
