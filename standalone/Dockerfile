@@ -1,4 +1,4 @@
-FROM python:3.10-slim-bullseye
+FROM python:3.11-slim-bullseye
 LABEL src=https://github.com/django-helpdesk/django-helpdesk
 RUN apt-get update
 RUN apt-get install -yqq \
