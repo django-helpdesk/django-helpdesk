@@ -619,7 +619,10 @@ def is_autoreply(message, sender='', subject='', headers=None):
         'noreply' in sender,
         'donotreply' in sender,
         'postmaster' in sender,
+        'mailer-daemon' in sender,
         'out of office' in subject,
+        'undelivered' in subject,
+        'undeliverable' in subject,
         False if not message.get("Return-Path") else message.get("Return-Path", '').lower() == 'mailer-daemon',
         False if not message.get("return-path") else message.get("return-path", '').lower() == 'mailer-daemon',
     ]
