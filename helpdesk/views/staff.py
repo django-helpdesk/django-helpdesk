@@ -2065,10 +2065,10 @@ class QueryLoadError(Exception):
 def load_saved_query(request, query_params=None):
     saved_query = None
 
-    if request.GET.get('saved-query', None):
+    if request.GET.get('saved_query', None):
         try:
             saved_query = SavedSearch.objects.get(
-                Q(pk=request.GET.get('saved-query')) &
+                Q(pk=request.GET.get('saved_query')) &
                 ((Q(shared=True) & ~Q(opted_out_users__in=[request.user])) | Q(user=request.user))
             )
         except (SavedSearch.DoesNotExist, ValueError):
@@ -2296,13 +2296,13 @@ def run_report(request, report):
     except QueryLoadError:
         return HttpResponseRedirect(reverse('helpdesk:report_index'))
 
-    if request.GET.get('saved-query', None):
-        Query(report_queryset, query_to_base64(query_params))
+    if request.GET.get('saved_query', None):
+        report_queryset = Query(report_queryset, query_to_base64(query_params)).__run__(report_queryset)
 
     from collections import defaultdict
-    summarytable = defaultdict(int)
+    summarytable = defaultdict(lambda: "")
     # a second table for more complex queries
-    summarytable2 = defaultdict(int)
+    summarytable2 = defaultdict(lambda: "")
 
     first_ticket = Ticket.objects.all().order_by('created')[0]
     first_month = first_ticket.created.month
@@ -2370,7 +2370,7 @@ def run_report(request, report):
         charttype = 'date'
 
     elif report == 'daysuntilticketclosedbymonth':
-        title = _('Days until ticket closed by Month')
+        title = _('Average days until ticket was closed (by created month)')
         col1heading = _('Queue')
         possible_options = periods
         charttype = 'date'
@@ -2406,21 +2406,31 @@ def run_report(request, report):
             metric2 = u'%s-%s' % (ticket.created.year, ticket.created.month)
 
         elif report == 'daysuntilticketclosedbymonth':
+            if ticket.status not in [Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS, Ticket.DUPLICATE_STATUS]: continue
             metric1 = u'%s' % ticket.queue.title
             metric2 = u'%s-%s' % (ticket.created.year, ticket.created.month)
             metric3 = ticket.modified - ticket.created
             metric3 = metric3.days
 
-        summarytable[metric1, metric2] += 1
+        if (metric1, metric2) in summarytable: 
+            summarytable[metric1, metric2] += 1
+        else: 
+            summarytable[metric1, metric2] = 1
+
         if metric3:
             if report == 'daysuntilticketclosedbymonth':
-                summarytable2[metric1, metric2] += metric3
+                if (metric1, metric2) in summarytable2: 
+                    summarytable2[metric1, metric2] += metric3
+                else: 
+                    summarytable2[metric1, metric2] = metric3
 
     table = []
 
     if report == 'daysuntilticketclosedbymonth':
         for key in summarytable2.keys():
-            summarytable[key] = summarytable2[key] / summarytable[key]
+            summarytable[key] = round(summarytable2[key] / summarytable[key], 1)
+            if float(summarytable[key]) == int(summarytable[key]): 
+                summarytable[key] = int(summarytable[key])
 
     header1 = sorted(set(list(i for i, _ in summarytable.keys())))
 
@@ -2434,9 +2444,9 @@ def run_report(request, report):
         data = []
         for hdr in possible_options:
             if hdr not in totals.keys():
-                totals[hdr] = summarytable[item, hdr]
+                totals[hdr] = summarytable[item, hdr] or 0
             else:
-                totals[hdr] += summarytable[item, hdr]
+                totals[hdr] += summarytable[item, hdr] or 0
             data.append(summarytable[item, hdr])
         table.append([item] + data)
 
@@ -2448,7 +2458,7 @@ def run_report(request, report):
         seriesnum += 1
         datadict = {"x": label}
         for n in range(0, len(table)):
-            datadict[n] = table[n][seriesnum]
+            datadict[n] = 0 if table[n][seriesnum] == "" else table[n][seriesnum]
         morrisjs_data.append(datadict)
 
     series_names = []
