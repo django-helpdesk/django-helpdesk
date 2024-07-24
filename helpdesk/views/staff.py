@@ -2370,7 +2370,7 @@ def run_report(request, report):
         charttype = 'date'
 
     elif report == 'daysuntilticketclosedbymonth':
-        title = _('Days until ticket closed by Month')
+        title = _('Average days until ticket was closed (by created month)')
         col1heading = _('Queue')
         possible_options = periods
         charttype = 'date'
@@ -2444,9 +2444,9 @@ def run_report(request, report):
         data = []
         for hdr in possible_options:
             if hdr not in totals.keys():
-                totals[hdr] = summarytable[item, hdr]
+                totals[hdr] = summarytable[item, hdr] or 0
             else:
-                totals[hdr] += summarytable[item, hdr]
+                totals[hdr] += summarytable[item, hdr] or 0
             data.append(summarytable[item, hdr])
         table.append([item] + data)
 
