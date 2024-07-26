@@ -578,7 +578,7 @@ def update_ticket_view(request, ticket_id, public=False):
 
     comment = request.POST.get('comment', '')
     new_status = int(request.POST.get('new_status', ticket.status))
-    title = request.POST.get('title', '')
+    title = request.POST.get('title', ticket.title)
     owner = int(request.POST.get('owner', -1))
     priority = int(request.POST.get('priority', ticket.priority))
     queue = int(request.POST.get('queue', ticket.queue.id))
