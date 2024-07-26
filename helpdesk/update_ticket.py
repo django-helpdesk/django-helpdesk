@@ -315,7 +315,7 @@ def update_ticket(
         ticket.due_date = due_date
     
     # save custom fields and ticket changes
-    if customfields_form.is_valid():
+    if customfields_form and customfields_form.is_valid():
         customfields_form.save(followup=f)
     
     for checklist in ticket.checklists.all():
