@@ -202,6 +202,9 @@ Options that change ticket updates
 
   **Default:** ``HELPDESK_STAFF_ONLY_TICKET_CC = False``
 
+- **HELPDESK_SHOW_CUSTOM_FIELDS_FOLLOW_UP_LIST** Show configured custom fields in the follow-up form.
+
+  **Default:** ``HELPDESK_SHOW_CUSTOM_FIELDS_FOLLOW_UP_LIST = []``
 
 Options that change ticket properties
 -------------------------------------
