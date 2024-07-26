@@ -192,7 +192,27 @@ class EditTicketCustomFieldForm(EditTicketForm):
         super(EditTicketCustomFieldForm, self).__init__(*args, **kwargs)
 
         del self.fields['merged_to']
+    
 
+    def save(self, *args, **kwargs):
+
+        # if form is saved in a ticket update, it is passed
+        # a followup instance to trace custom fields changes
+        if "followup" in kwargs:
+            followup = kwargs.pop('followup', None)
+
+            for field, value in self.cleaned_data.items():
+                if field.startswith('custom_'):
+                    if value != self.fields[field].initial:
+                        c = followup.ticketchange_set.create(
+                            field=field.replace('custom_', '', 1),
+                            old_value=self.fields[field].initial,
+                            new_value=value,
+                        )
+
+        super(EditTicketCustomFieldForm, self).save(*args, **kwargs)
+
+    
     class Meta:
         model = Ticket
         exclude = ('title', 'queue', 'created', 'modified',

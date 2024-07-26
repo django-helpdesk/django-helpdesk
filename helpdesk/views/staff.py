@@ -583,6 +583,10 @@ def update_ticket_view(request, ticket_id, public=False):
     priority = int(request.POST.get('priority', ticket.priority))
     queue = int(request.POST.get('queue', ticket.queue.id))
 
+    # custom fields
+    customfields_form = EditTicketCustomFieldForm(request.POST or None,
+                                                  instance=ticket)
+
     # Check if a change happened on checklists
     new_checklists = {}
     changes_in_checklists = False
@@ -609,6 +613,7 @@ def update_ticket_view(request, ticket_id, public=False):
         due_date == ticket.due_date,
         (owner == -1) or (not owner and not ticket.assigned_to) or
         (owner and User.objects.get(id=owner) == ticket.assigned_to),
+        not customfields_form.has_changed(),
     ])
     if no_changes:
         return return_to_ticket(request.user, helpdesk_settings, ticket)
@@ -627,6 +632,7 @@ def update_ticket_view(request, ticket_id, public=False):
         time_spent = get_time_spent_from_request(request),
         due_date = get_due_date_from_request_or_ticket(request, ticket),
         new_checklists = new_checklists,
+        customfields_form = customfields_form,
     )
 
     return return_to_ticket(request.user, helpdesk_settings, ticket)
