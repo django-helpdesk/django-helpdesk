@@ -255,6 +255,10 @@ HELPDESK_SHOW_EDIT_BUTTON_FOLLOW_UP = getattr(settings,
                                               'HELPDESK_SHOW_EDIT_BUTTON_FOLLOW_UP',
                                               True)
 
+HELPDESK_SHOW_CUSTOM_FIELDS_FOLLOW_UP_LIST = getattr(settings,
+                                              'HELPDESK_SHOW_CUSTOM_FIELDS_FOLLOW_UP_LIST',
+                                              [])
+
 # show delete buttons in ticket follow ups if user is 'superuser'
 HELPDESK_SHOW_DELETE_BUTTON_SUPERUSER_FOLLOW_UP = getattr(
     settings, 'HELPDESK_SHOW_DELETE_BUTTON_SUPERUSER_FOLLOW_UP', False)

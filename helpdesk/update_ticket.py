@@ -206,6 +206,7 @@ def update_ticket(
         due_date=None,
         new_checklists=None,
         message_id=None,
+        customfields_form=None,
 ):
     # We need to allow the 'ticket' and 'queue' contexts to be applied to the
     # comment.
@@ -312,7 +313,11 @@ def update_ticket(
             new_value=due_date,
         )
         ticket.due_date = due_date
-
+    
+    # save custom fields and ticket changes
+    if customfields_form and customfields_form.is_valid():
+        customfields_form.save(followup=f)
+    
     for checklist in ticket.checklists.all():
         if checklist.id not in new_checklists:
             continue
