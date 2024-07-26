@@ -198,7 +198,6 @@ class EditTicketCustomFieldForm(EditTicketForm):
                 if field != 'id' and field.replace("custom_", "", 1) not in HELPDESK_SHOW_CUSTOM_FIELDS_FOLLOW_UP_LIST:
                     self.fields.pop(field, None)
     
-
     def save(self, *args, **kwargs):
 
         # if form is saved in a ticket update, it is passed
@@ -217,13 +216,9 @@ class EditTicketCustomFieldForm(EditTicketForm):
 
         super(EditTicketCustomFieldForm, self).save(*args, **kwargs)
 
-    
     class Meta:
         model = Ticket
-        exclude = ('title', 'queue', 'created', 'modified',
-                   'submitter_email', 'assigned_to', 'status',
-                   'on_hold', 'description', 'resolution', 'priority',
-                   'due_date', 'last_escalation', 'secret_key', 'kbitem')
+        fields = ('id', 'merged_to',)
 
 
 class EditFollowUpForm(forms.ModelForm):
