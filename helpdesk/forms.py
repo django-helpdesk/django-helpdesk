@@ -180,6 +180,27 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
         return super(EditTicketForm, self).save(*args, **kwargs)
 
 
+class EditTicketCustomFieldForm(EditTicketForm):
+    """
+    Uses the EditTicketForm logic to provide a form for Ticket custom fields.
+    """
+
+    def __init__(self, *args, **kwargs):
+        """
+        Add any custom fields that are defined to the form
+        """
+        super(EditTicketCustomFieldForm, self).__init__(*args, **kwargs)
+
+        del self.fields['merged_to']
+
+    class Meta:
+        model = Ticket
+        exclude = ('title', 'queue', 'created', 'modified',
+                   'submitter_email', 'assigned_to', 'status',
+                   'on_hold', 'description', 'resolution', 'priority',
+                   'due_date', 'last_escalation', 'secret_key', 'kbitem')
+
+
 class EditFollowUpForm(forms.ModelForm):
 
     class Meta:

@@ -46,6 +46,7 @@ from helpdesk.forms import (
     CUSTOMFIELD_DATE_FORMAT,
     EditFollowUpForm,
     EditTicketForm,
+    EditTicketCustomFieldForm,
     EmailIgnoreForm,
     FormControlDeleteFormSet,
     MultipleTicketSelectForm,
@@ -430,6 +431,9 @@ def view_ticket(request, ticket_id):
                 default=2
         )).order_by('rank')
     
+    # add custom fields to further details panel
+    customfields_form = EditTicketCustomFieldForm(None, instance=ticket)
+
     return render(request, 'helpdesk/ticket.html', {
         'ticket': ticket,
         'dependencies': dependencies,
@@ -443,6 +447,7 @@ def view_ticket(request, ticket_id):
         'ticketcc_string': ticketcc_string,
         'SHOW_SUBSCRIBE': show_subscribe,
         'checklist_form': checklist_form,
+        'customfields_form': customfields_form,
     })
 
 
