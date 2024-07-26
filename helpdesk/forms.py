@@ -33,7 +33,8 @@ from helpdesk.settings import (
     CUSTOMFIELD_DATE_FORMAT,
     CUSTOMFIELD_DATETIME_FORMAT,
     CUSTOMFIELD_TIME_FORMAT,
-    CUSTOMFIELD_TO_FIELD_DICT
+    CUSTOMFIELD_TO_FIELD_DICT,
+    HELPDESK_SHOW_CUSTOM_FIELDS_FOLLOW_UP_LIST,
 )
 from helpdesk.validators import validate_file_extension
 from helpdesk.signals import new_ticket_done
@@ -191,7 +192,11 @@ class EditTicketCustomFieldForm(EditTicketForm):
         """
         super(EditTicketCustomFieldForm, self).__init__(*args, **kwargs)
 
-        del self.fields['merged_to']
+        if HELPDESK_SHOW_CUSTOM_FIELDS_FOLLOW_UP_LIST:
+            fields = list(self.fields)
+            for field in fields:
+                if field != 'id' and field.replace("custom_", "", 1) not in HELPDESK_SHOW_CUSTOM_FIELDS_FOLLOW_UP_LIST:
+                    self.fields.pop(field, None)
     
 
     def save(self, *args, **kwargs):
