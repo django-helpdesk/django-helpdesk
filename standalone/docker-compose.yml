@@ -28,3 +28,5 @@ services:
    volumes:
     - ./db:/var/lib/postgresql/data
    env_file: docker.env
+   ports:
+      - "5432:5432"
