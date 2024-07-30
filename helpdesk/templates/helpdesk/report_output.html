@@ -26,8 +26,8 @@
         {% if user_saved_queries_ %}
             <p>{% trans "You can run this query on filtered data by using one of your saved queries." %}</p>
             <form method='GET' action='./'>
-                <label for='saved_query'>{% trans "Select Query:" %}</label>
-                <select name='saved_query'>
+                <label for='saved-query'>{% trans "Select Query:" %}</label>
+                <select name='saved-query'>
                     <option value="">--------</option>{% for q in user_saved_queries_ %}
                     <option value="{{ q.id }}"{% ifequal saved_query q %} selected{% endifequal %}>{{ q.title }}</option>{% endfor %}
                 </select>

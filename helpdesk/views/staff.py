@@ -2065,10 +2065,10 @@ class QueryLoadError(Exception):
 def load_saved_query(request, query_params=None):
     saved_query = None
 
-    if request.GET.get('saved_query', None):
+    if request.GET.get('saved-query', None):
         try:
             saved_query = SavedSearch.objects.get(
-                Q(pk=request.GET.get('saved_query')) &
+                Q(pk=request.GET.get('saved-query')) &
                 ((Q(shared=True) & ~Q(opted_out_users__in=[request.user])) | Q(user=request.user))
             )
         except (SavedSearch.DoesNotExist, ValueError):
@@ -2296,7 +2296,7 @@ def run_report(request, report):
     except QueryLoadError:
         return HttpResponseRedirect(reverse('helpdesk:report_index'))
 
-    if request.GET.get('saved_query', None):
+    if request.GET.get('saved-query', None):
         report_queryset = Query(report_queryset, query_to_base64(query_params)).__run__(report_queryset)
 
     from collections import defaultdict
