@@ -230,6 +230,8 @@ def create_queue(request):
                 escalate_days = form.cleaned_data['escalate_days'],
                 enable_notifications_on_email_events = form.cleaned_data['enable_notifications_on_email_events'],
                 default_owner = form.cleaned_data['default_owner'],
+                new_ticket_cc = form.cleaned_data['new_ticket_cc'],
+                updated_ticket_cc = form.cleaned_data['updated_ticket_cc'],
                 reassign_when_closed = form.cleaned_data['reassign_when_closed'],
                 dedicated_time = form.cleaned_data['dedicated_time'],
             )
@@ -249,6 +251,8 @@ def create_queue(request):
                 'escalate_days': form.cleaned_data['escalate_days'],
                 'enable_notifications_on_email_events': form.cleaned_data['enable_notifications_on_email_events'],
                 'default_owner': form.cleaned_data['default_owner'],
+                'new_ticket_cc': form.cleaned_data['new_ticket_cc'],
+                'updated_ticket_cc': form.cleaned_data['updated_ticket_cc'],
                 'reassign_when_closed': form.cleaned_data['reassign_when_closed'],
                 'dedicated_time': form.cleaned_data['dedicated_time'],
             }
@@ -285,6 +289,8 @@ def edit_queue(request, slug):
                 'enable_notifications_on_email_events': queue.enable_notifications_on_email_events,
                 'default_owner': queue.default_owner,
                 'reassign_when_closed': queue.reassign_when_closed,
+                'new_ticket_cc': queue.new_ticket_cc,
+                'updated_ticket_cc': queue.updated_ticket_cc,
                 'dedicated_time': queue.dedicated_time,
                 'importer': queue.importer if queue.importer else None,
             }
@@ -307,6 +313,8 @@ def edit_queue(request, slug):
             queue.escalate_days = form.cleaned_data['escalate_days']
             queue.enable_notifications_on_email_events = form.cleaned_data['enable_notifications_on_email_events']
             queue.default_owner = form.cleaned_data['default_owner']
+            queue.new_ticket_cc = form.cleaned_data['new_ticket_cc']
+            queue.updated_ticket_cc = form.cleaned_data['updated_ticket_cc']
             queue.reassign_when_closed = form.cleaned_data['reassign_when_closed']
             queue.dedicated_time = form.cleaned_data['dedicated_time']
 
