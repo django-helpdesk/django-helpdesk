@@ -34,7 +34,7 @@ class HelpdeskUser:
             helpdesk_settings.HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION \
             and not user.is_superuser
         if limit_queues_by_user:
-            id_list = [q.pk for q in all_queues if user.has_perm(q.permission_name)]
+            id_list = [q.pk for q in all_queues if user.has_perm_class(q.permission_name)]
             id_list += public_ids
             return all_queues.filter(pk__in=id_list)
         else:
@@ -75,7 +75,7 @@ class HelpdeskUser:
                 return (
                     helpdesk_settings.HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION
                     and
-                    self.user.has_perm(queue.permission_name)
+                    self.user.has_perm_class(queue.permission_name)
                 )
         return False
 

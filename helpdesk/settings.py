@@ -5,7 +5,7 @@ Default settings for django-helpdesk.
 import warnings
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-from seed.lib.superperms.orgs.decorators import has_perm
+from seed.lib.superperms.orgs.decorators import has_perm_class
 
 DEFAULT_USER_SETTINGS = {
     'login_view_ticketlist': True,
