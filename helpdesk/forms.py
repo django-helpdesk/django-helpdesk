@@ -329,6 +329,7 @@ class AttachmentFileInputWidget(forms.ClearableFileInput):
     template_name = 'helpdesk/include/attachment_input.html'
 
 class ClearableFileInput(forms.ClearableFileInput):
+    allow_multiple_selected = True # Must specify as of Django 3.2.19
     template_name = 'helpdesk/include/clearable_file_input.html'
 
 class EditKBItemForm(forms.ModelForm):
