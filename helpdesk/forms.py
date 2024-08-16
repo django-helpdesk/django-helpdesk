@@ -33,7 +33,8 @@ from helpdesk.settings import (
     CUSTOMFIELD_DATE_FORMAT,
     CUSTOMFIELD_DATETIME_FORMAT,
     CUSTOMFIELD_TIME_FORMAT,
-    CUSTOMFIELD_TO_FIELD_DICT
+    CUSTOMFIELD_TO_FIELD_DICT,
+    HELPDESK_SHOW_CUSTOM_FIELDS_FOLLOW_UP_LIST,
 )
 from helpdesk.validators import validate_file_extension
 from helpdesk.signals import new_ticket_done
@@ -178,6 +179,46 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
                 cfv.save()
 
         return super(EditTicketForm, self).save(*args, **kwargs)
+
+
+class EditTicketCustomFieldForm(EditTicketForm):
+    """
+    Uses the EditTicketForm logic to provide a form for Ticket custom fields.
+    """
+
+    def __init__(self, *args, **kwargs):
+        """
+        Add any custom fields that are defined to the form
+        """
+        super(EditTicketCustomFieldForm, self).__init__(*args, **kwargs)
+
+        if HELPDESK_SHOW_CUSTOM_FIELDS_FOLLOW_UP_LIST:
+            fields = list(self.fields)
+            for field in fields:
+                if field != 'id' and field.replace("custom_", "", 1) not in HELPDESK_SHOW_CUSTOM_FIELDS_FOLLOW_UP_LIST:
+                    self.fields.pop(field, None)
+    
+    def save(self, *args, **kwargs):
+
+        # if form is saved in a ticket update, it is passed
+        # a followup instance to trace custom fields changes
+        if "followup" in kwargs:
+            followup = kwargs.pop('followup', None)
+
+            for field, value in self.cleaned_data.items():
+                if field.startswith('custom_'):
+                    if value != self.fields[field].initial:
+                        c = followup.ticketchange_set.create(
+                            field=field.replace('custom_', '', 1),
+                            old_value=self.fields[field].initial,
+                            new_value=value,
+                        )
+
+        super(EditTicketCustomFieldForm, self).save(*args, **kwargs)
+
+    class Meta:
+        model = Ticket
+        fields = ('id', 'merged_to',)
 
 
 class EditFollowUpForm(forms.ModelForm):

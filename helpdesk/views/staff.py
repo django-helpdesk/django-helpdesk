@@ -46,6 +46,7 @@ from helpdesk.forms import (
     CUSTOMFIELD_DATE_FORMAT,
     EditFollowUpForm,
     EditTicketForm,
+    EditTicketCustomFieldForm,
     EmailIgnoreForm,
     FormControlDeleteFormSet,
     MultipleTicketSelectForm,
@@ -430,6 +431,9 @@ def view_ticket(request, ticket_id):
                 default=2
         )).order_by('rank')
     
+    # add custom fields to further details panel
+    customfields_form = EditTicketCustomFieldForm(None, instance=ticket)
+
     return render(request, 'helpdesk/ticket.html', {
         'ticket': ticket,
         'dependencies': dependencies,
@@ -443,6 +447,7 @@ def view_ticket(request, ticket_id):
         'ticketcc_string': ticketcc_string,
         'SHOW_SUBSCRIBE': show_subscribe,
         'checklist_form': checklist_form,
+        'customfields_form': customfields_form,
     })
 
 
@@ -573,10 +578,14 @@ def update_ticket_view(request, ticket_id, public=False):
 
     comment = request.POST.get('comment', '')
     new_status = int(request.POST.get('new_status', ticket.status))
-    title = request.POST.get('title', '')
+    title = request.POST.get('title', ticket.title)
     owner = int(request.POST.get('owner', -1))
     priority = int(request.POST.get('priority', ticket.priority))
     queue = int(request.POST.get('queue', ticket.queue.id))
+
+    # custom fields
+    customfields_form = EditTicketCustomFieldForm(request.POST or None,
+                                                  instance=ticket)
 
     # Check if a change happened on checklists
     new_checklists = {}
@@ -604,6 +613,7 @@ def update_ticket_view(request, ticket_id, public=False):
         due_date == ticket.due_date,
         (owner == -1) or (not owner and not ticket.assigned_to) or
         (owner and User.objects.get(id=owner) == ticket.assigned_to),
+        not customfields_form.has_changed(),
     ])
     if no_changes:
         return return_to_ticket(request.user, helpdesk_settings, ticket)
@@ -622,6 +632,7 @@ def update_ticket_view(request, ticket_id, public=False):
         time_spent = get_time_spent_from_request(request),
         due_date = get_due_date_from_request_or_ticket(request, ticket),
         new_checklists = new_checklists,
+        customfields_form = customfields_form,
     )
 
     return return_to_ticket(request.user, helpdesk_settings, ticket)
