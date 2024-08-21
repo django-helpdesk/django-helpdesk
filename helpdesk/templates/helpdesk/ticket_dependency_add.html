@@ -19,6 +19,7 @@
 
 <form method='post' action='./'>
 
+{% if form.non_field_errors %}<dd class='error'>{{ form.non_field_errors }}</dd>{% endif %}
 <fieldset>
     <dl>{% for field in form %}
         <dt><label for='id_{{ field.name }}'>{{ field.label }}</label></dt>

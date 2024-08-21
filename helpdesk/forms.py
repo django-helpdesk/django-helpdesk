@@ -1334,10 +1334,44 @@ class TicketCCEmailForm(forms.ModelForm):
 
 class TicketDependencyForm(forms.ModelForm):
     """ Adds a different ticket as a dependency for this Ticket """
+    dependency_id = forms.IntegerField(label="Or, enter a ticket ID:")
 
     class Meta:
         model = TicketDependency
         exclude = ('ticket',)
+
+    def __init__(self, *args, **kwargs):
+        self.org = kwargs.pop('org', None)
+
+        super(TicketDependencyForm, self).__init__(*args, **kwargs)
+
+        self.fields['depends_on'].required = False
+        self.fields['depends_on'].label = "Select a dependent ticket:"
+        self.fields['dependency_id'].required = False
+        if self.org:
+            self.fields['depends_on'].queryset = Ticket.objects.filter(queue__organization=self.org)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        dependency_id = cleaned_data.get('dependency_id')
+        depends_on = cleaned_data.get('depends_on')
+
+        if not dependency_id and not depends_on:
+            raise ValidationError(_('Please select a ticket from the dropdown or enter a ticket ID.'))
+        if dependency_id and depends_on:
+            raise ValidationError(_('Please select a ticket using only one of the options.'))
+
+        if dependency_id and not depends_on:
+            try:
+                if self.org:
+                    depends_on = Ticket.objects.get(id=dependency_id, queue__organization=self.org)
+                else:
+                    depends_on = Ticket.objects.get(id=dependency_id)
+            except Ticket.DoesNotExist:
+                raise ValidationError(_('Please enter a valid ticket ID.'))
+
+        cleaned_data['depends_on'] = depends_on
+        return cleaned_data
 
 
 class MultipleTicketSelectForm(forms.Form):
