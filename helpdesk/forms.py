@@ -11,6 +11,7 @@ from datetime import datetime, date, time
 from decimal import Decimal
 from operator import itemgetter
 
+from click.termui import hidden_prompt_func
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.validators import validate_email
 from django import forms
@@ -165,8 +166,6 @@ class PreviewWidget(forms.widgets.Textarea):
 
 class EditTicketForm(CustomFieldMixin, forms.ModelForm):
 
-    description = forms.CharField(widget=PreviewWidget, help_text=Ticket.description.field.help_text)
-
     class Meta:
         model = Ticket
         exclude = ('assigned_to', 'created', 'modified', 'status', 'on_hold', 'resolution', 'last_escalation',
@@ -231,6 +230,9 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
                     self.fields['e_%s' % display_data.field_name].required = False
 
             elif display_data.field_name in self.fields:
+                if display_data.field_name == 'description':
+                    self.fields[display_data.field_name].widget = PreviewWidget()
+
                 # if a built-in ticket field shouldn't be editable on this page, add its field name to this list
                 if display_data.field_name in ['attachment', 'cc_emails']:
                     self.fields[display_data.field_name].widget = forms.HiddenInput()
@@ -255,7 +257,7 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
         display_list = list(display_objects.values_list('field_name', flat=True))
         for field_name in self.fields.keys():
             if field_name not in ['merged_to', 'secret_key', 'submitter_email', 'extra_data', 'queue',
-                                  'kbitem', 'title', 'description'] and (
+                                  'kbitem', 'title'] and (
                     field_name not in display_list and field_name.replace('e_', '', 1) not in display_list):
                 self.fields[field_name].widget = forms.HiddenInput()
 
@@ -1004,6 +1006,9 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
 
             for field in queryset:
                 if field.field_name in self.fields:
+                    if staff_filter and field.field_name == 'description':
+                        self.fields['description'].widget = PreviewWidget()
+
                     attrs = ['label', 'help_text', 'list_values', 'required', 'data_type']
                     for attr in attrs:
                         display_info = getattr(field, attr, None)
@@ -1112,7 +1117,6 @@ class TicketForm(AbstractTicketForm):
         assignable_users = assignable_users.order_by(User.USERNAME_FIELD)
         self.fields['assigned_to'].choices = [('', '--------')] + [
             (u.id, (u.get_full_name() or u.get_username())) for u in assignable_users]
-        self.fields['description'].widget = PreviewWidget()
 
     def save(self, user, form_id=None):
         """
