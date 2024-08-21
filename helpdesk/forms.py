@@ -496,7 +496,7 @@ class EditQueueForm(forms.ModelForm):
             self.fields['slug'].required = False
 
         self.fields['importer'].disabled = True
-        self.fields['default_owner'].queryset = User.objects.filter(orgs=self.org)
+        self.fields['default_owner'].queryset = list_of_helpdesk_staff(self.org)
 
         if kwargs and kwargs['initial']:
             self.fields['match_on'] = MatchOnField(
