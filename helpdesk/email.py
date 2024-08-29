@@ -37,6 +37,7 @@ from django.utils.translation import ugettext as _
 from email_reply_parser import EmailReplyParser
 
 from exchangelib import FileAttachment, ItemAttachment, Message as ExchangeMessage
+from exchangelib.errors import ErrorInternalServerError
 
 from helpdesk import settings
 from helpdesk.lib import safe_template_context, process_attachments
@@ -1324,19 +1325,24 @@ def process_exchange_message(message, importer, queues, logger):
 
                     elif isinstance(sub_attachment, ItemAttachment):
                         logger.info('- Found Sub ItemAttachment')
-                        if isinstance(sub_attachment.item, ExchangeMessage):
-                            att_sender, att_to_list, att_html_body = '', [], ''
-                            att_subject = getattr(sub_attachment.item, 'subject', '')
-                            if getattr(sub_attachment.item, 'sender', None):
-                                att_sender = (sub_attachment.item.sender.name, sub_attachment.item.sender.email_address)
-                            if getattr(sub_attachment.item, 'to_recipients', None):
-                                att_to_list = [(r.name, r.email_address) for r in sub_attachment.item.to_recipients]
-                            if getattr(sub_attachment.item, 'body', None):
-                                att_html_body = sub_attachment.item.body.replace('\n', '').replace('\r', '').replace("</p>", "</p>\n").replace("<br>", "\n<br>").replace("<br/>", "\n<br/>")
-                                att_html_body = f"<p>Subject:{att_subject}<br>\nFrom: {att_sender}<br>\nTo: {att_to_list}</p>\n" + att_html_body
-                                att_html_body = str(BeautifulSoup(str(att_html_body), "html.parser"))
-                            files.append(SimpleUploadedFile(("email_html_subattachment_%s.html" % att_counter), att_html_body.encode("utf-8"), 'text/html'))
-                            att_counter += 1
+                        try:
+                            hasattr(sub_attachment, 'item')
+                        except ErrorInternalServerError:
+                            logger.info('- Sub ItemAttachment had no item, skipping')
+                        else:
+                            if isinstance(sub_attachment.item, ExchangeMessage):
+                                att_sender, att_to_list, att_html_body = '', [], ''
+                                att_subject = getattr(sub_attachment.item, 'subject', '')
+                                if getattr(sub_attachment.item, 'sender', None):
+                                    att_sender = (sub_attachment.item.sender.name, sub_attachment.item.sender.email_address)
+                                if getattr(sub_attachment.item, 'to_recipients', None):
+                                    att_to_list = [(r.name, r.email_address) for r in sub_attachment.item.to_recipients]
+                                if getattr(sub_attachment.item, 'body', None):
+                                    att_html_body = sub_attachment.item.body.replace('\n', '').replace('\r', '').replace("</p>", "</p>\n").replace("<br>", "\n<br>").replace("<br/>", "\n<br/>")
+                                    att_html_body = f"<p>Subject:{att_subject}<br>\nFrom: {att_sender}<br>\nTo: {att_to_list}</p>\n" + att_html_body
+                                    att_html_body = str(BeautifulSoup(str(att_html_body), "html.parser"))
+                                files.append(SimpleUploadedFile(("email_html_subattachment_%s.html" % att_counter), att_html_body.encode("utf-8"), 'text/html'))
+                                att_counter += 1
 
     smtp_importance = getattr(message, 'importance', '')
     high_priority_types = {'high', 'important', '1', 'urgent'}
