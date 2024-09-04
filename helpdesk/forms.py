@@ -11,6 +11,7 @@ from datetime import datetime, date, time
 from decimal import Decimal
 from operator import itemgetter
 
+from click.termui import hidden_prompt_func
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.validators import validate_email
 from django import forms
@@ -165,8 +166,6 @@ class PreviewWidget(forms.widgets.Textarea):
 
 class EditTicketForm(CustomFieldMixin, forms.ModelForm):
 
-    description = forms.CharField(widget=PreviewWidget, help_text=Ticket.description.field.help_text)
-
     class Meta:
         model = Ticket
         exclude = ('assigned_to', 'created', 'modified', 'status', 'on_hold', 'resolution', 'last_escalation',
@@ -231,6 +230,9 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
                     self.fields['e_%s' % display_data.field_name].required = False
 
             elif display_data.field_name in self.fields:
+                if display_data.field_name == 'description':
+                    self.fields[display_data.field_name].widget = PreviewWidget()
+
                 # if a built-in ticket field shouldn't be editable on this page, add its field name to this list
                 if display_data.field_name in ['attachment', 'cc_emails']:
                     self.fields[display_data.field_name].widget = forms.HiddenInput()
@@ -255,7 +257,7 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
         display_list = list(display_objects.values_list('field_name', flat=True))
         for field_name in self.fields.keys():
             if field_name not in ['merged_to', 'secret_key', 'submitter_email', 'extra_data', 'queue',
-                                  'kbitem', 'title', 'description'] and (
+                                  'kbitem', 'title'] and (
                     field_name not in display_list and field_name.replace('e_', '', 1) not in display_list):
                 self.fields[field_name].widget = forms.HiddenInput()
 
@@ -497,7 +499,7 @@ class EditQueueForm(forms.ModelForm):
             self.fields['slug'].required = False
 
         self.fields['importer'].disabled = True
-        self.fields['default_owner'].queryset = User.objects.filter(orgs=self.org)
+        self.fields['default_owner'].queryset = list_of_helpdesk_staff(self.org)
 
         if kwargs and kwargs['initial']:
             self.fields['match_on'] = MatchOnField(
@@ -1005,6 +1007,9 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
 
             for field in queryset:
                 if field.field_name in self.fields:
+                    if staff_filter and field.field_name == 'description':
+                        self.fields['description'].widget = PreviewWidget()
+
                     attrs = ['label', 'help_text', 'list_values', 'required', 'data_type']
                     for attr in attrs:
                         display_info = getattr(field, attr, None)
@@ -1113,7 +1118,6 @@ class TicketForm(AbstractTicketForm):
         assignable_users = assignable_users.order_by(User.USERNAME_FIELD)
         self.fields['assigned_to'].choices = [('', '--------')] + [
             (u.id, (u.get_full_name() or u.get_username())) for u in assignable_users]
-        self.fields['description'].widget = PreviewWidget()
 
     def save(self, user, form_id=None):
         """
@@ -1331,10 +1335,44 @@ class TicketCCEmailForm(forms.ModelForm):
 
 class TicketDependencyForm(forms.ModelForm):
     """ Adds a different ticket as a dependency for this Ticket """
+    dependency_id = forms.IntegerField(label="Or, enter a ticket ID:")
 
     class Meta:
         model = TicketDependency
         exclude = ('ticket',)
+
+    def __init__(self, *args, **kwargs):
+        self.org = kwargs.pop('org', None)
+
+        super(TicketDependencyForm, self).__init__(*args, **kwargs)
+
+        self.fields['depends_on'].required = False
+        self.fields['depends_on'].label = "Select a dependent ticket:"
+        self.fields['dependency_id'].required = False
+        if self.org:
+            self.fields['depends_on'].queryset = Ticket.objects.filter(queue__organization=self.org)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        dependency_id = cleaned_data.get('dependency_id')
+        depends_on = cleaned_data.get('depends_on')
+
+        if not dependency_id and not depends_on:
+            raise ValidationError(_('Please select a ticket from the dropdown or enter a ticket ID.'))
+        if dependency_id and depends_on:
+            raise ValidationError(_('Please select a ticket using only one of the options.'))
+
+        if dependency_id and not depends_on:
+            try:
+                if self.org:
+                    depends_on = Ticket.objects.get(id=dependency_id, queue__organization=self.org)
+                else:
+                    depends_on = Ticket.objects.get(id=dependency_id)
+            except Ticket.DoesNotExist:
+                raise ValidationError(_('Please enter a valid ticket ID.'))
+
+        cleaned_data['depends_on'] = depends_on
+        return cleaned_data
 
 
 class MultipleTicketSelectForm(forms.Form):

@@ -2982,15 +2982,16 @@ def ticket_dependency_add(request, ticket_id):
         return perm
 
     if request.method == 'POST':
-        form = TicketDependencyForm(request.POST)
+        form = TicketDependencyForm(request.POST, org=ticket.queue.organization)
         if form.is_valid():
             ticketdependency = form.save(commit=False)
             ticketdependency.ticket = ticket
-            if ticketdependency.ticket != ticketdependency.depends_on:
+            if not TicketDependency.objects.filter(ticket=ticket, depends_on=ticketdependency.depends_on).exists()\
+                    and ticketdependency.ticket != ticketdependency.depends_on:
                 ticketdependency.save()
             return HttpResponseRedirect(reverse('helpdesk:view', args=[ticket.id]))
     else:
-        form = TicketDependencyForm()
+        form = TicketDependencyForm(None, org=ticket.queue.organization)
     return render(request, 'helpdesk/ticket_dependency_add.html', {
         'ticket': ticket,
         'form': form,
