@@ -10,12 +10,6 @@ Please consult the Installation instructions for general instructions and tips.
 The tips below are based on modifications of the original installation instructions.
 
 
-0.3 -> 0.4
-----------
-
-- Under `INSTALLED_APPS`, `bootstrap4form` needs to be replaced with `bootstrap5form`
-
-
 0.2 -> 0.3
 ----------
 
@@ -30,5 +24,3 @@ The tips below are based on modifications of the original installation instructi
 
   
 - If using `send_templated_mail`, then it now needs to be imported from `helpdesk.templated_email`
-
-
