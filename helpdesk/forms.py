@@ -147,7 +147,7 @@ class CustomFieldMixin(object):
                 elif fieldclass == forms.BooleanField:
                     instanceargs['widget'] = forms.CheckboxInput(attrs={'class': 'form-control'})
                 elif fieldclass == forms.FileField:
-                    instanceargs['widget'] = ClearableFileInput(attrs={'class': 'form-control-file'})
+                    instanceargs['widget'] = forms.FileInput(attrs={'class': 'form-control-file'})
 
             except KeyError:
                 # The data_type was not found anywhere
@@ -224,10 +224,6 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
                     'initial': initial_value,
                 }
                 self.customfield_to_field(display_data, instanceargs, kwargs=kwargs)
-                if display_data.data_type == 'attachment':
-                    # Attachments are not editable through the EditTicket page
-                    self.fields['e_%s' % display_data.field_name].widget = forms.HiddenInput()
-                    self.fields['e_%s' % display_data.field_name].required = False
 
             elif display_data.field_name in self.fields:
                 if display_data.field_name == 'description':
@@ -680,7 +676,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
         required=False
     )
     attachment = forms.FileField(
-        widget=ClearableFileInput(attrs={'class': 'form-control-file', 'multiple': True}),
+        widget=forms.FileInput(attrs={'class': 'form-control-file'}),
         required=False
     )
     # TODO add beam_property and beam_taxlot so they can be viewed on the staff-side ticket page
