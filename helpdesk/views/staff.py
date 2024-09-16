@@ -142,7 +142,7 @@ def dashboard(request):
 
     huser = HelpdeskUser(request.user)
     active_tickets = Ticket.objects.select_related('queue').exclude(
-        status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
+        status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS, Ticket.DUPLICATE_STATUS],
     )
 
     # open & reopened tickets, assigned to current user
@@ -153,7 +153,7 @@ def dashboard(request):
     # closed & resolved tickets, assigned to current user
     tickets_closed_resolved = Ticket.objects.select_related('queue').filter(
         assigned_to=request.user,
-        status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS]
+        status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS, Ticket.DUPLICATE_STATUS]
     )
 
     user_queues = huser.get_queues()
