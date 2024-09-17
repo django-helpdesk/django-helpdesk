@@ -10,6 +10,7 @@ Contents
    :maxdepth: 2
    :glob:
 
+   standalone
    install
    upgrade
    configuration

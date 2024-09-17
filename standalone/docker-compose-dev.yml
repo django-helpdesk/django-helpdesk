@@ -12,11 +12,13 @@ services:
      - "443:443"
 
  django-helpdesk:
-   image: djangohelpdesk/standalone
+   build:
+    context: ..
+    dockerfile: standalone/Dockerfile
    user: root
    volumes:
     - /tmp/django-helpdesk-data:/data/
-    - ./custom_navigation_header.html:/opt/django-helpdesk/helpdesk/templates/helpdesk/custom_navigation_header.html:r
+    - ../:/opt/django-helpdesk
    env_file: docker.env
    depends_on:
      - postgres

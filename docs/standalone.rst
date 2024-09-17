@@ -1,7 +1,11 @@
-Django-Helpdesk Standalone Installation
+Standalone Installation
 =======================================
 
-Installation
+You can find standalone docker images at `djangohelpdesk/standalone:latest <https://hub.docker.com/r/djangohelpdesk/standalone/tags>`_.
+
+You will also find an alternative `standalone-extras <https://hub.docker.com/r/djangohelpdesk/standalone-extras>`_ image with extra libraries needed to use the standalone image on cloud platforms such as AWS. You can find a full list of extra packages included in the extra's image `here <https://github.com/django-helpdesk/django-helpdesk/blob/main/standalone/requirements-extras.txt>`_.
+
+Installation using docker-compose
 ------------
 
 1. Clone the django-helpdesk repository:
@@ -27,6 +31,7 @@ Installation
    .. code-block:: bash
    
     docker-compose up
+
 
 Creating an Admin User
 ----------------------
@@ -84,6 +89,8 @@ Configuration for Production Use
 AWS SES Email Configuration
 ---------------------------
 
+You will need to use the standalone-extras image for SES support.
+
 An example `local_settings` configuration for utilizing AWS SES for email:
 
 .. code-block:: python
@@ -99,17 +106,13 @@ An example `local_settings` configuration for utilizing AWS SES for email:
     AWS_SES_REGION_ENDPOINT = "email.eu-west-1.amazonaws.com"
     AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
 
-To integrate `django-ses`, bindmount a file to `/opt/extra-dependencies.txt` containing:
-
-.. code-block:: text
-
-    django-ses
-
 Make sure you update the `docker.env` file with the necessary secrets.
 
 
 S3 base attachment support
 ---------------------------
+
+You will need to use the standalone-extras image for S3 support.
 
 Working from the previous SES example we add the following to `local_settings`:
 
@@ -124,10 +127,3 @@ Working from the previous SES example we add the following to `local_settings`:
     AWS_DEFAULT_ACL = "private"
 
     DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
-
-To integrate `django-ses`, bindmount a file to `/opt/extra-dependencies.txt` containing:
-
-.. code-block:: text
-
-    django-storages
-    boto3

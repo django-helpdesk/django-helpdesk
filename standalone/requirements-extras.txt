@@ -1,0 +1,4 @@
+django-ses
+django-storages
+boto3
+git+https://github.com/KristobalJunta/django-keycloak.git@1c3b555335e5a95f1bf1281f19ed082d96032f80
