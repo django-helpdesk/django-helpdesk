@@ -1712,6 +1712,12 @@ class SavedSearch(models.Model):
         verbose_name=_('User'),
     )
 
+    organization = models.ForeignKey(
+        Organization,
+        on_delete=models.CASCADE,
+        verbose_name=_('Organization'),
+    )
+
     title = models.CharField(
         _('Query Name'),
         max_length=100,
