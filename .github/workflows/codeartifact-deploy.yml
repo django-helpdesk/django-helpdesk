@@ -1,0 +1,43 @@
+name: Publish Package
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-east-2
+          role-to-assume: arn:aws:iam::870817328084:role/github-oidc-provider-aws
+          role-duration-seconds: 600
+
+      - name: Set Up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.9
+
+      - name: Build Package
+        run: |
+          python setup.py sdist
+      - name: Publish Package
+        run: |
+          aws codeartifact login --domain BEAM --repository BEAM Private Packages BEAM-OPT &&
+          pip install -r requirements.txt
+      - name: Run Tests
+        run: |
+          pip install -r requirements-testing.txt
+          python3 quicktest.py
