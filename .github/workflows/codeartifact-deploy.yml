@@ -3,7 +3,7 @@ name: Publish Package
 on:
   push:
     branches:
-      - main
+      - develop
 
 jobs:
 
@@ -35,7 +35,7 @@ jobs:
           python setup.py sdist
       - name: Publish Package
         run: |
-          aws codeartifact login --domain BEAM --repository BEAM Private Packages BEAM-OPT &&
+          aws codeartifact login --domain BEAM --repository BEAM Private Packages django-helpdesk &&
           pip install -r requirements.txt
       - name: Run Tests
         run: |
