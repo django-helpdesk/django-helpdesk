@@ -1,0 +1,66 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["helpdesk"]
+
+[project]
+name = "django-helpdesk"
+dynamic = ["version"]
+description = "Helpdesk in Django"
+readme = "README.rst"
+authors = [{name = "Ross Poulton", email = "ross@rossp.org"}]
+license = {text = "BDS3"}
+requires-python = ">=3.7"
+keywords = ["markdown"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Framework :: Django",
+    'Framework :: Django :: 2.2',
+    "Framework :: Django :: 3.0",
+    "Framework :: Django :: 3.1",
+    "Environment :: Web Environment",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Customer Service",
+    "License :: OSI Approved :: BSD License",
+    "Topic :: Software Development :: Bug Tracking",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Office/Business",
+    "Natural Language :: English"
+]
+dependencies = [
+    "Django>=2.2,<4"
+    "django-bootstrap4-form"
+    "celery"
+    "django-celery-beat"
+    "email-reply-parser"
+    "akismet"
+    "markdown"
+    "beautifulsoup4"
+    "lxml"
+    "simplejson"
+    "pytz"
+    "six"
+    "djangorestframework"
+    "django-model-utils"
+    "pinax-teams>=2.0"
+    "bleach==6.0.0"
+    "bleach[css]"
+    "bleach-allowlist"
+]
+
+[project.urls]
+homepage = "https://github.com/ClearlyEnergy/django-helpdesk"
+
+[project.scripts]
+django-helpdesk = "django-helpdesk:develop"
+panfl = "django-helpdesk:panfl"
+
+[tool.setuptools.dynamic]
+version = {attr = "django-helpdesk.version.__version__"}
