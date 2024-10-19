@@ -29,7 +29,7 @@ class Command(BaseCommand):
             '--queues',
             nargs='*',
             choices=list(Queue.objects.values_list('slug', flat=True)),
-            help='Queues to include (default: all). Use queue slugs'
+            help='Queues to include (default: all). Enter the queues slug as space separated list.'
         )
         parser.add_argument(
             '-x',

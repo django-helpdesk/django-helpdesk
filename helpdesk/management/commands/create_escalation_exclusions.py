@@ -32,7 +32,7 @@ class Command(BaseCommand):
             nargs='*',
             choices=list(day_names.keys()),
             required=True,
-            help='Days of week (monday, tuesday, etc)'
+            help='Days of week (monday, tuesday, etc). Enter the days as space separated list.'
         )
         parser.add_argument(
             '-o',
@@ -46,7 +46,7 @@ class Command(BaseCommand):
             '--queues',
             nargs='*',
             choices=list(Queue.objects.values_list('slug', flat=True)),
-            help='Queues to include (default: all). Use queue slugs'
+            help='Queues to include (default: all). Enter the queues slug as space separated list.'
         )
         parser.add_argument(
             '-x',
