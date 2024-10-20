@@ -16,9 +16,6 @@ from helpdesk.email import process_email
 
 class Command(BaseCommand):
 
-    def __init__(self):
-        BaseCommand.__init__(self)
-
     help = 'Process django-helpdesk queues and process e-mails via POP3/IMAP or ' \
            'from a local mailbox directory as required, feeding them into the helpdesk.'
 
@@ -39,8 +36,8 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        quiet = options.get('quiet', False)
-        debug_to_stdout = options.get('debug_to_stdout', False)
+        quiet = options.get('quiet')
+        debug_to_stdout = options.get('debug_to_stdout')
         process_email(quiet=quiet, debug_to_stdout=debug_to_stdout)
 
 

@@ -8,168 +8,93 @@ scripts/escalate_tickets.py - Easy way to escalate tickets based on their age,
                               designed to be run from Cron or similar.
 """
 
-
 from datetime import date, timedelta
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import BaseCommand
 from django.db.models import Q
 from django.utils import timezone
 from django.utils.translation import gettext as _
-import getopt
 from helpdesk.lib import safe_template_context
-from helpdesk.models import EscalationExclusion, FollowUp, Queue, Ticket, TicketChange
-from optparse import make_option
-import sys
+from helpdesk.models import EscalationExclusion, Queue, Ticket
 
 
 class Command(BaseCommand):
-
-    def __init__(self):
-        BaseCommand.__init__(self)
-
-        self.option_list = (
-            make_option(
-                '--queues',
-                help='Queues to include (default: all). Use queue slugs'),
-            make_option(
-                '--verboseescalation',
-                action='store_true',
-                default=False,
-                help='Display a list of dates excluded'),
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '-q',
+            '--queues',
+            nargs='*',
+            choices=list(Queue.objects.values_list('slug', flat=True)),
+            help='Queues to include (default: all). Enter the queues slug as space separated list.'
+        )
+        parser.add_argument(
+            '-x',
+            '--escalate-verbosely',
+            action='store_true',
+            default=False,
+            help='Display escalated tickets'
         )
 
     def handle(self, *args, **options):
-        verbose = False
-        queue_slugs = None
-        queues = []
+        verbose = options['escalate_verbosely']
 
-        if 'verboseescalation' in options:
-            verbose = True
-        if 'queues' in options:
-            queue_slugs = options['queues']
-
+        queue_slugs = options['queues']
+        # Only include queues with escalation configured
+        queues = Queue.objects.filter(escalate_days__isnull=False).exclude(escalate_days=0)
         if queue_slugs is not None:
-            queue_set = queue_slugs.split(',')
-            for queue in queue_set:
-                try:
-                    Queue.objects.get(slug__exact=queue)
-                except Queue.DoesNotExist:
-                    raise CommandError("Queue %s does not exist." % queue)
-                queues.append(queue)
-
-        escalate_tickets(queues=queues, verbose=verbose)
-
-
-def escalate_tickets(queues, verbose):
-    """ Only include queues with escalation configured """
-    queryset = Queue.objects.filter(
-        escalate_days__isnull=False).exclude(escalate_days=0)
-    if queues:
-        queryset = queryset.filter(slug__in=queues)
-
-    for q in queryset:
-        last = date.today() - timedelta(days=q.escalate_days)
-        today = date.today()
-        workdate = last
-
-        days = 0
-
-        while workdate < today:
-            if EscalationExclusion.objects.filter(date=workdate).count() == 0:
-                days += 1
-            workdate = workdate + timedelta(days=1)
-
-        req_last_escl_date = date.today() - timedelta(days=days)
+            queues = queues.filter(slug__in=queue_slugs)
 
         if verbose:
-            print("Processing: %s" % q)
+            self.stdout.write(f"Processing: {queues}")
 
-        Q_OPEN_STATUSES = Q()
-        for open_status in Ticket.OPEN_STATUSES:
-            Q_OPEN_STATUSES |= Q(status=open_status)
-        
-        for t in q.ticket_set.filter(
-            Q_OPEN_STATUSES
-        ).exclude(
-            priority=1
-        ).filter(
-            Q(on_hold__isnull=True) |
-                Q(on_hold=False)
-        ).filter(
-            Q(last_escalation__lte=req_last_escl_date) |
+        for queue in queues:
+            last = date.today() - timedelta(days=queue.escalate_days)
+            today = date.today()
+            workdate = last
+
+            days = 0
+
+            while workdate < today:
+                if not EscalationExclusion.objects.filter(date=workdate).exists():
+                    days += 1
+                workdate = workdate + timedelta(days=1)
+
+            req_last_escl_date = timezone.now() - timedelta(days=days)
+
+            for ticket in queue.ticket_set.filter(
+                status__in=Ticket.OPEN_STATUSES
+            ).exclude(
+                priority=1
+            ).filter(
+                Q(on_hold__isnull=True) | Q(on_hold=False)
+            ).filter(
+                Q(last_escalation__lte=req_last_escl_date) |
                 Q(last_escalation__isnull=True, created__lte=req_last_escl_date)
-        ):
+            ):
 
-            t.last_escalation = timezone.now()
-            t.priority -= 1
-            t.save()
+                ticket.last_escalation = timezone.now()
+                ticket.priority -= 1
+                ticket.save()
 
-            context = safe_template_context(t)
+                context = safe_template_context(ticket)
 
-            t.send(
-                {'submitter': ('escalated_submitter', context),
-                 'ticket_cc': ('escalated_cc', context),
-                 'assigned_to': ('escalated_owner', context)},
-                fail_silently=True,
-            )
-
-            if verbose:
-                print("  - Esclating %s from %s>%s" % (
-                    t.ticket,
-                    t.priority + 1,
-                    t.priority
-                )
+                ticket.send(
+                    {'submitter': ('escalated_submitter', context),
+                     'ticket_cc': ('escalated_cc', context),
+                     'assigned_to': ('escalated_owner', context)},
+                    fail_silently=True,
                 )
 
-            f = FollowUp(
-                ticket=t,
-                title='Ticket Escalated',
-                date=timezone.now(),
-                public=True,
-                comment=_('Ticket escalated after %s days' % q.escalate_days),
-            )
-            f.save()
+                if verbose:
+                    self.stdout.write(f"  - Esclating {ticket.ticket} from {ticket.priority + 1}>{ticket.priority}")
 
-            tc = TicketChange(
-                followup=f,
-                field=_('Priority'),
-                old_value=t.priority + 1,
-                new_value=t.priority,
-            )
-            tc.save()
+                followup = ticket.followup_set.create(
+                    title=_('Ticket Escalated'),
+                    public=True,
+                    comment=_('Ticket escalated after %(nb)s days') % {'nb': queue.escalate_days},
+                )
 
-
-def usage():
-    print("Options:")
-    print(" --queues: Queues to include (default: all). Use queue slugs")
-    print(" --verboseescalation: Display a list of dates excluded")
-
-
-if __name__ == '__main__':
-    try:
-        opts, args = getopt.getopt(
-            sys.argv[1:], ['queues=', 'verboseescalation'])
-    except getopt.GetoptError:
-        usage()
-        sys.exit(2)
-
-    verbose = False
-    queue_slugs = None
-    queues = []
-
-    for o, a in opts:
-        if o == '--verboseescalation':
-            verbose = True
-        if o == '--queues':
-            queue_slugs = a
-
-    if queue_slugs is not None:
-        queue_set = queue_slugs.split(',')
-        for queue in queue_set:
-            try:
-                q = Queue.objects.get(slug__exact=queue)
-            except Queue.DoesNotExist:
-                print("Queue %s does not exist." % queue)
-                sys.exit(2)
-            queues.append(queue)
-
-    escalate_tickets(queues=queues, verbose=verbose)
+                followup.ticketchange_set.create(
+                    field=_('Priority'),
+                    old_value=ticket.priority + 1,
+                    new_value=ticket.priority,
+                )

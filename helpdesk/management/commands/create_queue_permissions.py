@@ -15,55 +15,54 @@ scripts/create_queue_permissions.py -
 
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import BaseCommand
 from django.db.utils import IntegrityError
 from django.utils.translation import gettext_lazy as _
 from helpdesk.models import Queue
-from optparse import make_option
 
 
 class Command(BaseCommand):
 
-    def __init__(self):
-        BaseCommand.__init__(self)
-
-        self.option_list += (
-            make_option(
-                '--queues', '-q',
-                help='Queues to include (default: all). Use queue slugs'),
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '-q',
+            '--queues',
+            nargs='*',
+            choices=list(Queue.objects.values_list('slug', flat=True)),
+            help='Queues to include (default: all). Enter the queues slug as space separated list.'
+        )
+        parser.add_argument(
+            '-x',
+            '--escalate-verbosely',
+            action='store_true',
+            default=False,
+            help='Display a list of dates excluded'
         )
 
     def handle(self, *args, **options):
         queue_slugs = options['queues']
-        queues = []
 
         if queue_slugs is not None:
-            queue_set = queue_slugs.split(',')
-            for queue in queue_set:
-                try:
-                    q = Queue.objects.get(slug__exact=queue)
-                except Queue.DoesNotExist:
-                    raise CommandError("Queue %s does not exist." % queue)
-                queues.append(q)
+            queues = Queue.objects.filter(slug__in=queue_slugs)
         else:
-            queues = list(Queue.objects.all())
+            queues = Queue.objects.all()
 
         # Create permissions for the queues, which may be all or not
         for q in queues:
-            self.stdout.write("Preparing Queue %s [%s]" % (q.title, q.slug))
+            self.stdout.write(f"Preparing Queue {q} [{q.slug}]")
 
             if q.permission_name:
                 self.stdout.write(
-                    "  .. already has `permission_name=%s`" % q.permission_name)
+                    f"  .. already has `permission_name={q.permission_name}`")
                 basename = q.permission_name[9:]
             else:
                 basename = q.generate_permission_name()
                 self.stdout.write(
-                    "  .. generated `permission_name=%s`" % q.permission_name)
+                    f"  .. generated `permission_name={q.permission_name}`")
                 q.save()
 
             self.stdout.write(
-                "  .. checking permission codename `%s`" % basename)
+                f"  .. checking permission codename `{basename}`")
 
             try:
                 Permission.objects.create(
