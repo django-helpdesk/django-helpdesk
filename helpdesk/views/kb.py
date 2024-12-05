@@ -59,9 +59,8 @@ def category_iframe(request, slug):
     return category(request, slug, iframe=True)
 
 
-def vote(request, item):
+def vote(request, item, vote):
     item = get_object_or_404(KBItem, pk=item)
-    vote = request.GET.get('vote', None)
     if vote == 'up':
         if not item.voted_by.filter(pk=request.user.pk):
             item.votes += 1

@@ -25,8 +25,8 @@
             <div class="row">
                 {% if request.user.pk %}
                 <div class="col-sm">
-                    <a href='{% url "helpdesk:kb_vote" item.pk %}?vote=up'><div class="btn btn-success btn-circle btn-xl"><i class="fa fa-thumbs-up fa-lg"></i></div></a>
-                    <a href='{% url "helpdesk:kb_vote" item.pk %}?vote=down'><div class="btn btn-danger btn-circle btn-xl"><i class="fa fa-thumbs-down fa-lg"></i></div></a>
+                    <a href='{% url "helpdesk:kb_vote" item.pk "up" %}'><div class="btn btn-success btn-circle btn-xl"><i class="fa fa-thumbs-up fa-lg"></i></div></a>
+                    <a href='{% url "helpdesk:kb_vote" item.pk "down" %}'><div class="btn btn-danger btn-circle btn-xl"><i class="fa fa-thumbs-down fa-lg"></i></div></a>
                 </div>
                 {% endif %}
                 {% if staff %}
