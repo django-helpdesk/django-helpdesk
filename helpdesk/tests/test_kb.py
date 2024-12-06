@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from django.test import TestCase
+from django.test import TestCase, Client
 from django.urls import reverse
 from helpdesk.models import KBCategory, KBItem, Queue, Ticket
 from helpdesk.tests.helpers import get_staff_user
@@ -64,19 +64,20 @@ class KBTests(TestCase):
         self.assertContains(response, '1 open tickets')
 
     def test_kb_vote(self):
-        self.client.login(username=self.user.get_username(),
+        client = Client(enforce_csrf_checks=True)
+        client.login(username=self.user.get_username(),
                           password='password')
-        response = self.client.get(
-            reverse('helpdesk:kb_vote', args=(self.kbitem1.pk, "up")))
+        response = client.post(
+            reverse('helpdesk:kb_vote', args=(self.kbitem1.pk, "up")), params={})
         cat_url = reverse('helpdesk:kb_category',
                           args=("test_cat",)) + "?kbitem=1"
         self.assertRedirects(response, cat_url)
-        response = self.client.get(cat_url)
+        response = client.get(cat_url)
         self.assertContains(response, '1 people found this answer useful of 1')
-        response = self.client.get(
-            reverse('helpdesk:kb_vote', args=(self.kbitem1.pk, "down")))
+        response = client.post(
+            reverse('helpdesk:kb_vote', args=(self.kbitem1.pk, "down")), params={})
         self.assertRedirects(response, cat_url)
-        response = self.client.get(cat_url)
+        response = client.get(cat_url)
         self.assertContains(response, '0 people found this answer useful of 1')
 
     def test_kb_category_iframe(self):
