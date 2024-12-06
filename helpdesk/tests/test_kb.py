@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from django.test import TestCase, Client
+from django.test import TestCase
 from django.urls import reverse
 from helpdesk.models import KBCategory, KBItem, Queue, Ticket
 from helpdesk.tests.helpers import get_staff_user
