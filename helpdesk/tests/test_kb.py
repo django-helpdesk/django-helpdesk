@@ -66,15 +66,15 @@ class KBTests(TestCase):
     def test_kb_vote(self):
         self.client.login(username=self.user.get_username(),
                           password='password')
-        response = self.client.get(
-            reverse('helpdesk:kb_vote', args=(self.kbitem1.pk,)) + "?vote=up")
+        response = self.client.post(
+            reverse('helpdesk:kb_vote', args=(self.kbitem1.pk, "up")), params={})
         cat_url = reverse('helpdesk:kb_category',
                           args=("test_cat",)) + "?kbitem=1"
         self.assertRedirects(response, cat_url)
         response = self.client.get(cat_url)
         self.assertContains(response, '1 people found this answer useful of 1')
-        response = self.client.get(
-            reverse('helpdesk:kb_vote', args=(self.kbitem1.pk,)) + "?vote=down")
+        response = self.client.post(
+            reverse('helpdesk:kb_vote', args=(self.kbitem1.pk, "down")), params={})
         self.assertRedirects(response, cat_url)
         response = self.client.get(cat_url)
         self.assertContains(response, '0 people found this answer useful of 1')

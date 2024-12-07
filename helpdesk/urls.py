@@ -251,7 +251,7 @@ if helpdesk_settings.HELPDESK_KB_ENABLED:
         path("kb/", kb.index, name="kb_index"),
         re_path(r"^kb/(?P<slug>[A-Za-z0-9_-]+)/$",
                 kb.category, name="kb_category"),
-        path("kb/<int:item>/vote/", kb.vote, name="kb_vote"),
+        re_path(r"^kb/(?P<item>\d+)/vote/(?P<vote>up|down)/$", kb.vote, name="kb_vote"),
         re_path(
             r"^kb_iframe/(?P<slug>[A-Za-z0-9_-]+)/$",
             kb.category_iframe,

@@ -59,24 +59,24 @@ def category_iframe(request, slug):
     return category(request, slug, iframe=True)
 
 
-def vote(request, item):
+def vote(request, item, vote):
     item = get_object_or_404(KBItem, pk=item)
-    vote = request.GET.get('vote', None)
-    if vote == 'up':
-        if not item.voted_by.filter(pk=request.user.pk):
-            item.votes += 1
-            item.voted_by.add(request.user.pk)
-            item.recommendations += 1
-        if item.downvoted_by.filter(pk=request.user.pk):
-            item.votes -= 1
-            item.downvoted_by.remove(request.user.pk)
-    if vote == 'down':
-        if not item.downvoted_by.filter(pk=request.user.pk):
-            item.votes += 1
-            item.downvoted_by.add(request.user.pk)
-            item.recommendations -= 1
-        if item.voted_by.filter(pk=request.user.pk):
-            item.votes -= 1
-            item.voted_by.remove(request.user.pk)
-    item.save()
+    if request.method == "POST":
+        if vote == 'up':
+            if not item.voted_by.filter(pk=request.user.pk):
+                item.votes += 1
+                item.voted_by.add(request.user.pk)
+                item.recommendations += 1
+            if item.downvoted_by.filter(pk=request.user.pk):
+                item.votes -= 1
+                item.downvoted_by.remove(request.user.pk)
+        if vote == 'down':
+            if not item.downvoted_by.filter(pk=request.user.pk):
+                item.votes += 1
+                item.downvoted_by.add(request.user.pk)
+                item.recommendations -= 1
+            if item.voted_by.filter(pk=request.user.pk):
+                item.votes -= 1
+                item.voted_by.remove(request.user.pk)
+        item.save()
     return HttpResponseRedirect(item.get_absolute_url())
