@@ -1,0 +1,2 @@
+FROM djangohelpdesk/standalone
+RUN pip3 install -r /opt/django-helpdesk/standalone/requirements-extras.txt
