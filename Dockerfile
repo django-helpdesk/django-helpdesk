@@ -14,6 +14,7 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
 COPY ./requirements.txt ./requirements-dev.txt /
 
 # Create Python Dependency and Sub-Dependency Wheels
+RUN pip install packaging
 RUN pip wheel --wheel-dir /usr/src/app/wheels  \
   -r requirements.txt \
   -r requirements-dev.txt
