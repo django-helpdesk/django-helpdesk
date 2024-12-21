@@ -15,4 +15,4 @@ if [ ! -e "/app/demo/demodesk/db.sqlite3" ]; then
     python3 demo/manage.py loaddata demo.json
 fi
 
-python3 demo/manage.py runserver 0.0.0.0:8080
+exec "$@"

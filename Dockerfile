@@ -43,3 +43,4 @@ FROM python-run-stage AS backend
 COPY . ${APP_HOME}
 
 ENTRYPOINT ["/entrypoint"]
+CMD ["python3", "demo/manage.py", "runserver", "0.0.0.0:8080"]
