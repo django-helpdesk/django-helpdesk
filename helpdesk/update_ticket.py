@@ -268,6 +268,9 @@ def update_ticket(
 
     files = process_attachments(f, files) if files else []
 
+    if not ticket_title and title:
+        ticket_title = title
+        
     if ticket_title and ticket_title != ticket.title:
         c = f.ticketchange_set.create(
             field=_('Title'),
