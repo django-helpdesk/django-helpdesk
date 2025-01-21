@@ -67,11 +67,9 @@ Configuration for Production Use
 
 1. Update the `Caddyfile` to replace the `localhost` URL with your desired production URL.
 
-2. Modify the `docker-compose` file to adjust the paths. By default, files are stored in `/tmp`.
+2. For custom configurations, bindmount a `local_settings.py` into `/opt/django-helpdesk/standalone/config/local_settings.py`.
 
-3. For custom configurations, bindmount a `local_settings.py` into `/opt/django-helpdesk/standalone/config/local_settings.py`.
-
-4. To customize the logo in the top-left corner of the helpdesk:
+3. To customize the logo in the top-left corner of the helpdesk:
 
    .. code-block:: html
    
