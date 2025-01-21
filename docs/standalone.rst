@@ -84,6 +84,64 @@ Configuration for Production Use
     }
     </style>
 
+# Environment Variables Reference
+
+## Database Configuration
+| Variable | Default | Description |
+|----------|---------|-------------|
+| ```POSTGRES_DB``` | ```postgres``` | Database name |
+| ```POSTGRES_USER``` | ```postgres``` | Database user |
+| ```POSTGRES_PASSWORD``` | ```postgres``` | Database password |
+| ```POSTGRES_HOST``` | ```postgres``` | Database host |
+| ```POSTGRES_PORT``` | ```5432``` | Database port |
+
+## Email Configuration
+| Variable | Default | Description |
+|----------|---------|-------------|
+| ```DEFAULT_FROM_EMAIL``` | ```example@example.com``` | Default sender email address |
+| ```SERVER_EMAIL``` | ```example@example.com``` | Server email address |
+| ```EMAIL_HOST``` | *Required* | SMTP server host |
+| ```EMAIL_PORT``` | *Required* | SMTP server port |
+
+## Static Files
+| Variable | Default | Description |
+|----------|---------|-------------|
+| ```DJANGO_HELPDESK_STATIC_ROOT``` | ```./static``` | Static files root directory |
+| ```DJANGO_HELPDESK_STATIC_URL``` | ```/static/``` | Static files URL prefix |
+
+## Security Settings
+| Variable | Default | Description |
+|----------|---------|-------------|
+| ```DJANGO_HELPDESK_SECRET_KEY``` | *Required* | Django secret key |
+| ```DJANGO_HELPDESK_ALLOWED_HOSTS``` | ```*, localhost, 0.0.0.0``` | Comma-separated list of allowed hosts |
+
+## Helpdesk Core Settings
+| Variable | Default | Description |
+|----------|---------|-------------|
+| ```HELPDESK_USE_EMAIL_AS_SUBMITTER``` | ```True``` | Use email as ticket submitter |
+| ```HELPDESK_EMAIL_ON_TICKET_ASSIGN``` | ```True``` | Send email on ticket assignment |
+| ```HELPDESK_EMAIL_ON_TICKET_CHANGE``` | ```True``` | Send email on ticket changes |
+| ```HELPDESK_LOGIN_VIEW_TICKETLIST``` | ```True``` | Show ticket list after login |
+| ```HELPDESK_PRESET_REPLIES``` | ```True``` | Enable preset replies |
+| ```HELPDESK_TICKETS_PER_PAGE``` | ```25``` | Number of tickets per page |
+
+## Public Portal Settings
+| Variable | Default | Description |
+|----------|---------|-------------|
+| ```HELPDESK_PUBLIC_ENABLED``` | ```True``` | Enable public web portal |
+| ```HELPDESK_VIEW_A_TICKET_PUBLIC``` | ```True``` | Allow public ticket viewing |
+| ```HELPDESK_SUBMIT_A_TICKET_PUBLIC``` | ```True``` | Allow public ticket submission |
+| ```HELPDESK_REDIRECT_TO_LOGIN_BY_DEFAULT``` | ```False``` | Redirect to login instead of public portal |
+
+## Feature Toggles
+| Variable | Default | Description |
+|----------|---------|-------------|
+| ```HELPDESK_KB_ENABLED``` | ```True``` | Enable knowledge base |
+| ```HELPDESK_TICKETS_TIMELINE_ENABLED``` | ```True``` | Enable ticket timeline |
+| ```HELPDESK_SHOW_CHANGE_PASSWORD``` | ```True``` | Allow users to change passwords |
+
+
+
 AWS SES Email Configuration
 ---------------------------
 

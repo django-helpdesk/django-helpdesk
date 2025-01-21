@@ -98,7 +98,6 @@ HELPDESK_DEFAULT_SETTINGS = {
     'email_on_ticket_assign': os.environ.get('HELPDESK_EMAIL_ON_TICKET_ASSIGN', 'True') == 'True',
     'email_on_ticket_change': os.environ.get('HELPDESK_EMAIL_ON_TICKET_CHANGE', 'True') == 'True',
     'login_view_ticketlist': os.environ.get('HELPDESK_LOGIN_VIEW_TICKETLIST', 'True') == 'True',
-    'email_on_ticket_apichange': os.environ.get('HELPDESK_EMAIL_ON_TICKET_APICHANGE', 'True') == 'True',
     'preset_replies': os.environ.get('HELPDESK_PRESET_REPLIES', 'True') == 'True',
     'tickets_per_page': os.environ.get('HELPDESK_TICKETS_PER_PAGE', '25'),
 }
