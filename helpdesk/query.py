@@ -105,9 +105,15 @@ class __Query__:
         sorting: The name of the column to sort by
         """
         filter = self.params.get('filtering', {})
-        filter_or = self.params.get('filtering_or', {})
-        queryset = queryset.filter(
-            (Q(**filter) | Q(**filter_or)) & self.get_search_filter_args())
+        filter_or = self.params.get('filtering_or')
+
+        query_filter = Q(**filter)
+
+        if 'filtering_or' in self.params:
+            print(self.params)
+            #query_filter |= Q(**filter_or)
+
+        queryset = queryset.filter(query_filter & self.get_search_filter_args())
         sorting = self.params.get('sorting', None)
         if sorting:
             sortreverse = self.params.get('sortreverse', None)
