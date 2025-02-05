@@ -647,7 +647,7 @@ def send_info_email(message_id: str, f: FollowUp, ticket: Ticket, context: dict,
         )
     else:
         context.update(comment=f.comment)
-        context.update(sender=f.user)
+        context.update(comment_user=f.user)
         ticket.send(
             {'submitter': ('updated_submitter', context),
              'assigned_to': ('updated_owner', context)},
