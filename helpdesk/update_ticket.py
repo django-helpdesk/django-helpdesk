@@ -356,6 +356,7 @@ def update_ticket(
     context.update(
         resolution=ticket.resolution,
         comment=f.comment,
+        comment_user=f.user
     )
 
     messages_sent_to = set()
