@@ -8,6 +8,7 @@ RUN apt-get install -yqq \
    git
 COPY requirements.txt /opt/django-helpdesk/requirements.txt
 COPY standalone/extra-requirements.txt /opt/django-helpdesk/standalone/extra-requirements.txt
+RUN pip3 install packaging
 RUN pip3 install -r /opt/django-helpdesk/requirements.txt
 RUN pip3 install -r /opt/django-helpdesk/standalone/extra-requirements.txt
 COPY . /opt/django-helpdesk
