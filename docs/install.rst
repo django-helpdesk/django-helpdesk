@@ -1,4 +1,4 @@
-Installation
+Installation/integration into an existing Django application
 ============
 
 .. note:: 
