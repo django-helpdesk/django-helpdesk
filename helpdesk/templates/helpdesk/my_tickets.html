@@ -35,7 +35,7 @@ window.addEventListener('load', function()
         $.get(endpoint, function(data) {
             $('#ticketsTable tbody').empty();
             data.results.forEach(function(ticket) {
-                ticket.title = $('div').text(ticket.title).html();
+                ticket.title = $('<div>').html(ticket.title).html();
                 $('#ticketsTable tbody').append(`
                     <tr>
                         <td>
