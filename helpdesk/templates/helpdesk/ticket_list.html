@@ -176,7 +176,7 @@
                                         <option id="filterBuilderSelect-Queue" value="Queue"{% if query_params.filtering.queue__id__in or query_params.filtering_null.queue__id__isnull %} disabled{% endif %}>
                                             {% trans "Queue" %}
                                         </option>
-                                        <option id="filterBuilderSelect-Status" value="Status"{% if query_params.filtering.status__in or query_params.filtering_null.status__isnull %} disabled{% endif %}>
+                                        <option id="filterBuilderSelect-Status" value="Status"{% if query_params.filtering.status__in %} disabled{% endif %}>
                                             {% trans "Status" %}
                                         </option>
                                         <option id="filterBuilderSelect-Keywords" value="Keywords"{% if query_params.search_string %} disabled{% endif %}>
@@ -208,7 +208,7 @@
                                     id="filterBoxQueue">
                                     {% include 'helpdesk/filters/queue.html' %}
                                 </li>
-                                <li class="list-group-item filterBox{% if query_params.filtering.status__in or query_params.filtering_null.status__isnull %} filterBoxShow{% endif %}"
+                                <li class="list-group-item filterBox{% if query_params.filtering.status__in %} filterBoxShow{% endif %}"
                                     id="filterBoxStatus">
                                     {% include 'helpdesk/filters/status.html' %}
                                 </li>
