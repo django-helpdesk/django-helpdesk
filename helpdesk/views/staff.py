@@ -991,7 +991,7 @@ def ticket_list(request):
     # a query, to be saved if needed:
     query_params = {
         'filtering': {},
-        'filtering_or': {},
+        'filtering_null': {},
         'sorting': None,
         'sortreverse': False,
         'search_string': '',
@@ -1035,12 +1035,20 @@ def ticket_list(request):
         for param, filter_command in filter_in_params:
             if request.GET.get(param) is not None:
                 patterns = request.GET.getlist(param)
+                if not patterns:
+                    continue
+                try:
+                    minus_1_ndx = patterns.index("-1")
+                    # Must have the value so remove it and configure to use OR filter on NULL
+                    patterns.pop(minus_1_ndx)
+                    query_params['filtering_null'][filter_null_params[param]] = True
+                except ValueError:
+                    pass
+                if not patterns:
+                    # Caters for the case where the filter is only a null filter
+                    continue
                 try:
                     pattern_pks = [int(pattern) for pattern in patterns]
-                    if -1 in pattern_pks:
-                        query_params['filtering_or'][filter_null_params[param]] = True
-                    else:
-                        query_params['filtering_or'][filter_command] = pattern_pks
                     query_params['filtering'][filter_command] = pattern_pks
                 except ValueError:
                     pass

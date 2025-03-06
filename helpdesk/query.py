@@ -28,14 +28,18 @@ def query_from_base64(b64data):
 
 
 def get_search_filter_args(search):
+    if not search:
+        return Q()
     if search.startswith('queue:'):
         return Q(queue__title__icontains=search[len('queue:'):])
     if search.startswith('priority:'):
         return Q(priority__icontains=search[len('priority:'):])
-    filter = Q()
+    my_filter = Q()
     for subsearch in search.split("OR"):
         subsearch = subsearch.strip()
-        filter = (
+        if not subsearch:
+            continue
+        my_filter = (
             filter |
             Q(id__icontains=subsearch) |
             Q(title__icontains=subsearch) |
@@ -48,7 +52,7 @@ def get_search_filter_args(search):
             Q(created__icontains=subsearch) |
             Q(due_date__icontains=subsearch)
         )
-    return filter
+    return my_filter
 
 
 DATATABLES_ORDER_COLUMN_CHOICES = Choices(
@@ -91,23 +95,49 @@ class __Query__:
 
     def __run__(self, queryset):
         """
-        Apply a dict-based set of filters & parameters to a queryset.
+        Apply a dict-based set of value_filters & parameters to a queryset.
 
         queryset is a Django queryset, eg MyModel.objects.all() or
             MyModel.objects.filter(user=request.user)
 
         params is a dictionary that contains the following:
-           filtering: A dict of Django ORM filters, eg:
+           filtering: A dict of Django ORM value_filters, eg:
             {'user__id__in': [1, 3, 103], 'title__contains': 'foo'}
 
         search_string: A freetext search string
 
         sorting: The name of the column to sort by
         """
-        filter = self.params.get('filtering', {})
-        filter_or = self.params.get('filtering_or', {})
+        q_args = []
+        value_filters = self.params.get('filtering', {})
+        null_filters = self.params.get('filtering_null', {})
+        if null_filters:
+            if value_filters:
+                # Check if any of the value value_filters are for the same field as the
+                # ISNULL filter so that an OR filter can be set up
+                matched_null_keys = []
+                for null_key in null_filters:
+                    field_path = null_key[:-8] # Chop off the "__isnull"
+                    matched_key = None
+                    for val_key in value_filters:
+                        if val_key.startswith(field_path):
+                            matched_key = val_key
+                            break
+                    if matched_key:
+                        # Remove the matching filters into a Q param
+                        matched_null_keys.append(null_key)
+                        # Create an OR query for the selected value(s) OR if the field is NULL
+                        v = {}
+                        v[val_key] = value_filters[val_key]
+                        n = {}
+                        n[null_key] = null_filters[null_key]
+                        q_args.append((Q(**v) | Q(**n)))
+                        del value_filters[matched_key]
+                # Now remove the matched mull keys
+                for null_key in matched_null_keys:
+                    del null_filters[null_key]
         queryset = queryset.filter(
-            (Q(**filter) | Q(**filter_or)) & self.get_search_filter_args())
+            *q_args, (Q(**value_filters) & Q(**null_filters)) & self.get_search_filter_args())
         sorting = self.params.get('sorting', None)
         if sorting:
             sortreverse = self.params.get('sortreverse', None)
