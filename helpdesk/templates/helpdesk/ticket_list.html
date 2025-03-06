@@ -170,13 +170,13 @@
                                         <option id="filterBuilderSelect-Sort" value="Sort"{% if query_params.sorting %} disabled{% endif %}>
                                             {% trans "Sorting" %}
                                         </option>
-                                        <option id="filterBuilderSelect-Owner" value="Owner"{% if query_params.filtering.assigned_to__id__in %} disabled{% endif %}>
+                                        <option id="filterBuilderSelect-Owner" value="Owner"{% if query_params.filtering.assigned_to__id__in or query_params.filtering_null.assigned_to__id__isnull %} disabled{% endif %}>
                                             {% trans "Owner" %}
                                         </option>
-                                        <option id="filterBuilderSelect-Queue" value="Queue"{% if query_params.filtering.queue__id__in %} disabled{% endif %}>
+                                        <option id="filterBuilderSelect-Queue" value="Queue"{% if query_params.filtering.queue__id__in or query_params.filtering_null.queue__id__isnull %} disabled{% endif %}>
                                             {% trans "Queue" %}
                                         </option>
-                                        <option id="filterBuilderSelect-Status" value="Status"{% if query_params.filtering.status__in %} disabled{% endif %}>
+                                        <option id="filterBuilderSelect-Status" value="Status"{% if query_params.filtering.status__in or query_params.filtering_null.status__isnull %} disabled{% endif %}>
                                             {% trans "Status" %}
                                         </option>
                                         <option id="filterBuilderSelect-Keywords" value="Keywords"{% if query_params.search_string %} disabled{% endif %}>
@@ -185,7 +185,7 @@
                                         <option id="filterBuilderSelect-Dates" value="Dates"{% if query_params.filtering.created__gte or query_params.filtering.created__lte %} disabled{% endif %}>
                                             {% trans "Date Range" %}
                                         </option>
-                                        <option id="filterBuilderSelect-KBItems" value="KBItems"{% if query_params.filtering.kbitem__in %} disabled{% endif %}>
+                                        <option id="filterBuilderSelect-KBItems" value="KBItems"{% if query_params.filtering.kbitem__in or query_params.filtering_null.kbitem__isnull %} disabled{% endif %}>
                                             {% trans "Knowledge base items" %}
                                         </option>
                                     </select>
@@ -200,15 +200,15 @@
                                     id="filterBoxSort">
                                     {% include 'helpdesk/filters/sorting.html' %}
                                 </li>
-                                <li class="filterBox{% if query_params.filtering.assigned_to__id__in %} filterBoxShow{% endif %} list-group-item"
+                                <li class="filterBox{% if query_params.filtering.assigned_to__id__in or query_params.filtering_null.assigned_to__id__isnull %} filterBoxShow{% endif %} list-group-item"
                                     id=filterBoxOwner>
                                     {% include 'helpdesk/filters/owner.html' %}
                                 </li>
-                                <li class="list-group-item filterBox{% if query_params.filtering.queue__id__in %} filterBoxShow{% endif %}"
+                                <li class="list-group-item filterBox{% if query_params.filtering.queue__id__in or query_params.filtering_null.queue__id__isnull %} filterBoxShow{% endif %}"
                                     id="filterBoxQueue">
                                     {% include 'helpdesk/filters/queue.html' %}
                                 </li>
-                                <li class="list-group-item filterBox{% if query_params.filtering.status__in %} filterBoxShow{% endif %}"
+                                <li class="list-group-item filterBox{% if query_params.filtering.status__in or query_params.filtering_null.status__isnull %} filterBoxShow{% endif %}"
                                     id="filterBoxStatus">
                                     {% include 'helpdesk/filters/status.html' %}
                                 </li>
@@ -220,7 +220,7 @@
                                     id="filterBoxKeywords">
                                     {% include 'helpdesk/filters/keywords.html' %}
                                 </li>
-                                <li class="list-group-item filterBox{% if query_params.filtering.kbitem__in %} filterBoxShow{% endif %}"
+                                <li class="list-group-item filterBox{% if query_params.filtering.kbitem__in or query_params.filtering_null.kbitem__isnull %} filterBoxShow{% endif %}"
                                     id="filterBoxKBItems">
                                     {% include 'helpdesk/filters/kbitems.html' %}
                                 </li>
