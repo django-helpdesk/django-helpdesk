@@ -198,7 +198,6 @@ def update_ticket(
         files=None,
         public=False,
         owner=-1,
-        ticket_title=None,
         priority=-1,
         queue=-1,
         new_status=None,
@@ -268,13 +267,13 @@ def update_ticket(
 
     files = process_attachments(f, files) if files else []
 
-    if ticket_title and ticket_title != ticket.title:
+    if title and title != ticket.title:
         c = f.ticketchange_set.create(
             field=_('Title'),
             old_value=ticket.title,
-            new_value=ticket_title,
+            new_value=title,
         )
-        ticket.title = ticket_title
+        ticket.title = title
 
     if new_status != old_status:
         c = f.ticketchange_set.create(
