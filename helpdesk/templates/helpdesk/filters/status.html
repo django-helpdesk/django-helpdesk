@@ -6,7 +6,14 @@
             <label for='id_statuses'>{% trans "Status(es)" %}:</label>
     </div>
     <div class="col col-sm-3">
-            <select id='id_statuses' name='status' multiple='selected' size='5'>{% for s in status_choices %}<option value='{{ s.0 }}'{% if s.0|in_list:query_params.filtering.status__in %} selected='selected'{% endif %}>{{ s.1 }}</option>{% endfor %}</select>
+            <select id='id_statuses' name='status' multiple='selected' size='5'>
+            {% with magic_number=-1 %}
+            <option value='{{magic_number}}'{% if query_params.filtering_null.status__isnull %} selected='selected'{% endif %}>
+                {% trans "Unassigned" %}
+            </option>
+            {% endwith %}
+
+            {% for s in status_choices %}<option value='{{ s.0 }}'{% if s.0|in_list:query_params.filtering.status__in %} selected='selected'{% endif %}>{{ s.1 }}</option>{% endfor %}</select>
     </div>
   <div class="col col-sm-6">
     <button class="filterBuilderRemove btn btn-danger btn-sm float-right"><i class="fas fa-trash-alt"></i></button>
