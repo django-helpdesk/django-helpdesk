@@ -133,7 +133,7 @@ class __Query__:
                         n[null_key] = null_filters[null_key]
                         q_args.append((Q(**v) | Q(**n)))
                         del value_filters[matched_key]
-                # Now remove the matched mull keys
+                # Now remove the matched null keys
                 for null_key in matched_null_keys:
                     del null_filters[null_key]
         queryset = queryset.filter(
