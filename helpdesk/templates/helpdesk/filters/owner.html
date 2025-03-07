@@ -8,7 +8,7 @@
     <div class="col col-sm-3">
         <select id='id_owners' name='assigned_to' multiple='selected' size='5'>
             {% with magic_number=-1 %}
-            <option value='{{magic_number}}'{% if magic_number|in_list:query_params.filtering.assigned_to__id__in %} selected='selected'{% endif %}>
+            <option value='{{magic_number}}'{% if query_params.filtering_null.assigned_to__id__isnull %} selected='selected'{% endif %}>
                 {% trans "Unassigned" %}
             </option>
             {% endwith %}
