@@ -8,6 +8,7 @@ from helpdesk.tests.helpers import get_staff_user
 
 class QueryTests(TestCase):
     def setUp(self):
+        # self.maxDiff = None
         self.queue = Queue.objects.create(
             title="Test queue",
             slug="test_queue",
@@ -94,7 +95,7 @@ class QueryTests(TestCase):
     def test_query_by_no_kbitem(self):
         self.loginUser()
         query = query_to_base64(
-            {'filtering_or': {'kbitem__in': [self.kbitem1.pk]}}
+            {'filtering_null': {'kbitem__isnull': True}}
         )
         response = self.client.get(
             reverse('helpdesk:datatables_ticket_list', args=[query]))
@@ -103,8 +104,8 @@ class QueryTests(TestCase):
             resp_json,
             {
                 "data":
-                [{"ticket": "2 [test_queue-2]", "id": 2, "priority": 3, "title": "assigned to kbitem", "queue": {"title": "Test queue", "id": 1}, "status": "Open",
-                    "created": resp_json["data"][0]["created"], "due_date": None, "assigned_to": "None", "submitter": None, "row_class": "", "time_spent": "", "kbitem": "KBItem 1"}],
+                [{"ticket": "1 [test_queue-1]", "id": 1, "priority": 3, "title": "unassigned to kbitem", "queue": {"title": "Test queue", "id": 1}, "status": "Open",
+                    "created": resp_json["data"][0]["created"], "due_date": None, "assigned_to": "None", "submitter": None, "row_class": "", "time_spent": "", "kbitem": ""}],
                 "recordsFiltered": 1,
                 "recordsTotal": 1,
                 "draw": 0,
