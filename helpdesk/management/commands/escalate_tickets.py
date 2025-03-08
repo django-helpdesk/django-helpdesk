@@ -33,9 +33,17 @@ class Command(BaseCommand):
             default=False,
             help='Display escalated tickets'
         )
+        parser.add_argument(
+            '-n',
+            '--notify-only',
+            action='store_true',
+            default=False,
+            help='Send email reminder but dont escalate tickets'
+        )
 
     def handle(self, *args, **options):
         verbose = options['escalate_verbosely']
+        notify_only = options['notify_only']
 
         queue_slugs = options['queues']
         # Only include queues with escalation configured
@@ -87,14 +95,15 @@ class Command(BaseCommand):
                 if verbose:
                     self.stdout.write(f"  - Esclating {ticket.ticket} from {ticket.priority + 1}>{ticket.priority}")
 
-                followup = ticket.followup_set.create(
-                    title=_('Ticket Escalated'),
-                    public=True,
-                    comment=_('Ticket escalated after %(nb)s days') % {'nb': queue.escalate_days},
-                )
+                if not notify_only:
+                    followup = ticket.followup_set.create(
+                        title=_('Ticket Escalated'),
+                        public=True,
+                        comment=_('Ticket escalated after %(nb)s days') % {'nb': queue.escalate_days},
+                    )
 
-                followup.ticketchange_set.create(
-                    field=_('Priority'),
-                    old_value=ticket.priority + 1,
-                    new_value=ticket.priority,
-                )
+                    followup.ticketchange_set.create(
+                        field=_('Priority'),
+                        old_value=ticket.priority + 1,
+                        new_value=ticket.priority,
+                    )
