@@ -30,7 +30,7 @@ services:
       - postgres
 
   postgres:
-    image: postgres:12-bullseye
+    image: postgres:13-bullseye
     volumes:
       - postgres_data:/var/lib/postgresql/data
     env_file: docker.env
