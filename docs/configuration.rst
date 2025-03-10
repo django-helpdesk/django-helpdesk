@@ -36,25 +36,25 @@ Before django-helpdesk will be much use, you need to do some basic configuration
 
    This will run the escalation process hourly, using the 'Escalation Days' setting for each queue to determine which tickets to escalate.
 
+   To notify users of outstanding tickets without adding an entry to the ticket, use the `notify-only` flag. This will send the emails without creating a follow-up::
+
+    0 * * * * /path/to/helpdesksite/manage.py escalate_tickets --notify-only
+
 5. If you wish to exclude some days (eg, weekends) from escalation calculations, enter the dates manually via the Admin, or setup a cronjob to run a management command on a regular basis::
 
     0 0 * * 0 /path/to/helpdesksite/manage.py create_escalation_exclusions --days saturday sunday
 
    This will, on a weekly basis, create exclusions for the coming weekend.
 
-6. To notify users of outstanding tickets without adding an entry to the ticket, use the --notify-only flag. This will send the emails without creating a follow-up::
+6. Log in to your Django admin screen, and go to the 'Sites' module. If the site ``example.com`` is listed, click it and update the details so they are relevant for your website.
 
-    0 0 * * 0 /path/to/helpdesksite/manage.py escalate_tickets --notify-only
-
-7. Log in to your Django admin screen, and go to the 'Sites' module. If the site ``example.com`` is listed, click it and update the details so they are relevant for your website.
-
-8. If you do not send mail directly from your web server (eg, you need to use an SMTP server) then edit your ``settings.py`` file so it contains your mail server details::
+7. If you do not send mail directly from your web server (eg, you need to use an SMTP server) then edit your ``settings.py`` file so it contains your mail server details::
 
     EMAIL_HOST = 'XXXXX'
     EMAIL_HOST_USER = 'YYYYYY@ZZZZ.PPP'
     EMAIL_HOST_PASSWORD = '123456'
 
-9. If you wish to use SOCKS4/5 proxy with Helpdesk Queue email operations, install PySocks manually. Please note that mixing both SOCKS and non-SOCKS email sources for different queues is only supported under Python 2; on Python 3, SOCKS proxy support is all-or-nothing: either all queue email sources must use SOCKS or none may use it. If you need this functionality on Python 3 please `let us know <https://github.com/django-helpdesk/django-helpdesk/issues/new>`_.
+8. If you wish to use SOCKS4/5 proxy with Helpdesk Queue email operations, install PySocks manually. Please note that mixing both SOCKS and non-SOCKS email sources for different queues is only supported under Python 2; on Python 3, SOCKS proxy support is all-or-nothing: either all queue email sources must use SOCKS or none may use it. If you need this functionality on Python 3 please `let us know <https://github.com/django-helpdesk/django-helpdesk/issues/new>`_.
 
 You're now up and running! Happy ticketing.
 
