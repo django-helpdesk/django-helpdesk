@@ -36,6 +36,10 @@ Before django-helpdesk will be much use, you need to do some basic configuration
 
    This will run the escalation process hourly, using the 'Escalation Days' setting for each queue to determine which tickets to escalate.
 
+   To notify users of outstanding tickets without adding an entry to the ticket, use the `notify-only` flag. This will send the emails without creating a follow-up::
+
+    0 * * * * /path/to/helpdesksite/manage.py escalate_tickets --notify-only
+
 5. If you wish to exclude some days (eg, weekends) from escalation calculations, enter the dates manually via the Admin, or setup a cronjob to run a management command on a regular basis::
 
     0 0 * * 0 /path/to/helpdesksite/manage.py create_escalation_exclusions --days saturday sunday
