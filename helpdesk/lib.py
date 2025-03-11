@@ -34,6 +34,7 @@ def ticket_template_context(ticket):
         else:
             context[field] = attr
     context['assigned_to'] = context['_get_assigned_to']
+    context['last_followup'] = ticket.followups.latest('date')
 
     return context
 

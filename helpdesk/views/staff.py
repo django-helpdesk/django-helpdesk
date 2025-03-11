@@ -1025,12 +1025,14 @@ def ticket_list(request):
             ('assigned_to', 'assigned_to__id__in'),
             ('status', 'status__in'),
             ('kbitem', 'kbitem__in'),
+            ('last_followup', 'last_followup__in'),
         ]
         filter_null_params = dict([
             ('queue', 'queue__id__isnull'),
             ('assigned_to', 'assigned_to__id__isnull'),
             ('status', 'status__isnull'),
             ('kbitem', 'kbitem__isnull'),
+            ('last_followup', 'last_followup__isnull'),
         ])
         for param, filter_command in filter_in_params:
             if request.GET.get(param) is not None:
@@ -1061,6 +1063,14 @@ def ticket_list(request):
         if date_to:
             query_params['filtering']['created__lte'] = date_to
 
+        followup_from = request.GET.get('followup_from')
+        if followup_from:
+            query_params['filtering']['followup__gte'] = followup_from
+
+        followup_to = request.GET.get('followup_to')
+        if followup_to:
+            query_params['filtering']['followup__lte'] = followup_to
+
         # KEYWORD SEARCHING
         q = request.GET.get('q', '')
         context['query'] = q
@@ -1068,7 +1078,7 @@ def ticket_list(request):
 
         # SORTING
         sort = request.GET.get('sort', None)
-        if sort not in ('status', 'assigned_to', 'created', 'title', 'queue', 'priority', 'kbitem'):
+        if sort not in ('status', 'assigned_to', 'created', 'title', 'queue', 'priority', 'last_followup', 'kbitem'):
             sort = 'created'
         query_params['sorting'] = sort
 
@@ -1158,6 +1168,7 @@ def datatables_ticket_list(request, query):
     """
     query = Query(HelpdeskUser(request.user), base64query=query)
     result = query.get_datatables_context(**request.query_params)
+    print(result)
     return JsonResponse(result, status=status.HTTP_200_OK)
 
 
