@@ -5,7 +5,7 @@ You can find standalone docker images at `djangohelpdesk/standalone:latest <http
 
 You will also find an alternative `standalone-extras <https://hub.docker.com/r/djangohelpdesk/standalone-extras>`_ image with extra libraries needed to use the standalone image on cloud platforms such as AWS. You can find a full list of extra packages included in the extra's image `here <https://github.com/django-helpdesk/django-helpdesk/blob/main/standalone/requirements-extras.txt>`_.
 
-Installation using docker-compose
+Installation using docker compose
 ------------
 
 1. Clone the django-helpdesk repository:
@@ -21,16 +21,22 @@ Installation using docker-compose
     cd django-helpdesk/standalone
 
 3. Execute the installation script:
-   
-   .. code-block:: bash
-   
-    ./setup.sh
 
+   .. code-block:: bash
+
+      ./setup.sh
+
+   Set the POSTGRES major version if you are deploying to an existing POSTGRES instance other than the default shown within the docker-compose file. For example:
+
+   .. code-block:: bash
+
+      export POSTGRES_MAJOR_VERSION=15
+   
 4. Start the services:
 
    .. code-block:: bash
    
-    docker-compose up
+    docker compose up
 
 
 Creating an Admin User
