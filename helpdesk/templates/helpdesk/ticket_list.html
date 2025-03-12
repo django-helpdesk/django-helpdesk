@@ -189,9 +189,6 @@
                                         <option id="filterBuilderSelect-KBItems" value="KBItems"{% if query_params.filtering.kbitem__in or query_params.filtering_null.kbitem__isnull %} disabled{% endif %}>
                                             {% trans "Knowledge base items" %}
                                         </option>
-                                        <option id="filterBuilderSelect-Followup" value="Followup"{% if query_params.filtering.followup__gte or query_params.filtering.followup__lte %} disabled{% endif %}>
-                                            {% trans "Last Followup" %}
-                                        </option>
                                     </select>
                                 </div>
                             </form>
@@ -227,10 +224,6 @@
                                 <li class="list-group-item filterBox{% if query_params.filtering.kbitem__in or query_params.filtering_null.kbitem__isnull %} filterBoxShow{% endif %}"
                                     id="filterBoxKBItems">
                                     {% include 'helpdesk/filters/kbitems.html' %}
-                                </li>
-                                <li class="list-group-item filterBox{% if query_params.filtering.followup__gte or query_params.filtering.followup__lte %} filterBoxShow{% endif %}"
-                                    id='filterBoxFollowupDates'>
-                                    {% include 'helpdesk/filters/followupdates.html' %}
                                 </li>
                                 <li class="list-group-item">
                                     <input class="btn btn-primary btn-sm" type='submit' value='{% trans "Apply Filters" %}'/>
