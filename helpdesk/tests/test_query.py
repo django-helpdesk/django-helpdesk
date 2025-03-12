@@ -100,12 +100,13 @@ class QueryTests(TestCase):
         response = self.client.get(
             reverse('helpdesk:datatables_ticket_list', args=[query]))
         resp_json = response.json()
+        print(resp_json)
         self.assertEqual(
             resp_json,
             {
                 "data":
                 [{"ticket": "1 [test_queue-1]", "id": 1, "priority": 3, "title": "unassigned to kbitem", "queue": {"title": "Test queue", "id": 1}, "status": "Open",
-                    "created": resp_json["data"][0]["created"], "due_date": None, "assigned_to": "None", "submitter": None, "row_class": "", "time_spent": "", "kbitem": ""}],
+                    "created": resp_json["data"][0]["created"], "due_date": None, "assigned_to": "None", "submitter": None, 'last_followup': None, "row_class": "", "time_spent": "", "kbitem": ""}],
                 "recordsFiltered": 1,
                 "recordsTotal": 1,
                 "draw": 0,
