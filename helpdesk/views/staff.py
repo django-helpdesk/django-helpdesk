@@ -1168,7 +1168,6 @@ def datatables_ticket_list(request, query):
     """
     query = Query(HelpdeskUser(request.user), base64query=query)
     result = query.get_datatables_context(**request.query_params)
-    print(result)
     return JsonResponse(result, status=status.HTTP_200_OK)
 
 

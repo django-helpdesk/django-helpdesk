@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.contrib.humanize.templatetags import humanize
 from django.utils.timezone import localtime
+from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
@@ -74,8 +75,13 @@ class DatatablesTicketSerializer(serializers.ModelSerializer):
         return obj.kbitem.title if obj.kbitem else ""
         
     def get_last_followup(self, obj):
-        followup = obj.followup_set.latest('date')        
-        return localtime(followup.date).strftime('%Y-%m-%d %H:%M:%S') if followup else ""
+        try:
+            followup = obj.followup_set.latest('date')
+            followup = obj.followup_set.latest('date')        
+            return localtime(followup.date).strftime('%Y-%m-%d %H:%M:%S') if followup else ""
+        except ObjectDoesNotExist:
+            return None  # Return None or an empty string if no follow-ups exist
+        
     
 class FollowUpAttachmentSerializer(serializers.ModelSerializer):
     class Meta:

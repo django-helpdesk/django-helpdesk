@@ -4,6 +4,7 @@ from django.db.models import Q
 from django.urls import reverse
 from django.utils.html import escape
 from django.utils.translation import gettext as _
+from django.db.models import Max
 from helpdesk.serializers import DatatablesTicketSerializer
 import json
 from model_utils import Choices
@@ -170,13 +171,14 @@ class __Query__:
         search_value = kwargs.get('search[value]', [""])[0]
         order_column = kwargs.get('order[0][column]', ['5'])[0]
         order = kwargs.get('order[0][dir]', ["asc"])[0]
-
+        
         order_column = DATATABLES_ORDER_COLUMN_CHOICES[order_column]
         # django orm '-' -> desc
         if order == 'desc':
             order_column = '-' + order_column
 
         queryset = objects.all().order_by(order_by)
+        queryset = queryset.annotate(last_followup=Max('followup__date'))
         total = queryset.count()
 
         if search_value:  # Dead code currently
