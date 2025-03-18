@@ -1025,14 +1025,12 @@ def ticket_list(request):
             ('assigned_to', 'assigned_to__id__in'),
             ('status', 'status__in'),
             ('kbitem', 'kbitem__in'),
-            ('last_followup', 'last_followup__in'),
         ]
         filter_null_params = dict([
             ('queue', 'queue__id__isnull'),
             ('assigned_to', 'assigned_to__id__isnull'),
             ('status', 'status__isnull'),
             ('kbitem', 'kbitem__isnull'),
-            ('last_followup', 'last_followup__isnull'),
         ])
         for param, filter_command in filter_in_params:
             if request.GET.get(param) is not None:

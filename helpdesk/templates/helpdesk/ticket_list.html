@@ -416,15 +416,7 @@
                         }
                     },
                     {data: "submitter"},
-                    {
-                        data: "last_followup", 
-                        render: function (data, type, row, meta) {
-                            if (data && data !== "None") {
-                                return data;
-                            }
-                            return "";
-                        }
-                    },
+                    {data: "last_followup"},
                     {% if helpdesk_settings.HELPDESK_ENABLE_TIME_SPENT_ON_TICKET %}
                     {data: "time_spent", "visible": false},
                     {% endif %}
