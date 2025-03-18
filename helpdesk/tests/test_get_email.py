@@ -280,7 +280,7 @@ class GetEmailCommonTests(TestCase):
             self.assertTrue(att_retrieved.filename.endswith(att_filename), "Filename of attached multipart not detected: %s" % (att_retrieved.filename))
             with att_retrieved.file.open('r') as f:
                 retrieved_content = f.read()
-                self.assertEquals(att_content, retrieved_content, "Retrieved attachment content different to original :\n\n%s\n\n%s" % (att_content, retrieved_content))
+                self.assertEqual(att_content, retrieved_content, "Retrieved attachment content different to original :\n\n%s\n\n%s" % (att_content, retrieved_content))
 
     def test_email_with_inline_and_multipart_as_attachments(self):
         """
