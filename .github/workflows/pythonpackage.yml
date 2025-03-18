@@ -9,7 +9,7 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.8", "3.9", "3.10", "3.11"]
-        django-version: ["32","4"]
+        django-version: ["4"]
     steps:
     - uses: actions/checkout@v4
 
@@ -21,8 +21,7 @@ jobs:
     - uses: actions/cache@v4
       with:
         path: ~/.cache/pip
-        key: no-cache-${{ github.run_id }}  
-        #key: ${{ hashFiles('requirements.txt') }}-${{ hashFiles('requirements-testing.txt')}}-${{ hashFiles('tox.ini') }}-${{ matrix.python-version }}-${{ matrix.django-version }} 
+        key: ${{ hashFiles('requirements.txt') }}-${{ hashFiles('requirements-testing.txt')}}-${{ hashFiles('tox.ini') }}-${{ matrix.python-version }}-${{ matrix.django-version }} 
 
     - name: Install dependencies
       run: |
