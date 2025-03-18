@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.contrib.humanize.templatetags import humanize
+from django.db.models import Max, F, Window
 from django.utils.timezone import localtime
-from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
@@ -75,12 +75,15 @@ class DatatablesTicketSerializer(serializers.ModelSerializer):
         return obj.kbitem.title if obj.kbitem else ""
         
     def get_last_followup(self, obj):
-        try:
-            followup = obj.followup_set.latest('date')
-            followup = obj.followup_set.latest('date')        
-            return localtime(followup.date).strftime('%Y-%m-%d %H:%M:%S') if followup else ""
-        except ObjectDoesNotExist:
-            return None  # Return None or an empty string if no follow-ups exist
+        followup = obj.followup_set.order_by().annotate(
+            last_followup=Window(
+                expression=Max("date"),
+                partition_by=[F("ticket_id"),],
+                order_by="-date"
+            )
+        ).values("last_followup").distinct().values_list("last_followup", flat=True)
+        # If there are no followups for the ticket then the result will be empty
+        return localtime(followup[0]).strftime('%Y-%m-%d %H:%M:%S') if followup else ""
         
     
 class FollowUpAttachmentSerializer(serializers.ModelSerializer):

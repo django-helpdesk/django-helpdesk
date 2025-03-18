@@ -1,10 +1,9 @@
 
 from base64 import b64decode, b64encode
-from django.db.models import Q
+from django.db.models import Q, Max
 from django.urls import reverse
 from django.utils.html import escape
 from django.utils.translation import gettext as _
-from django.db.models import Max
 from helpdesk.serializers import DatatablesTicketSerializer
 import json
 from model_utils import Choices
@@ -177,8 +176,7 @@ class __Query__:
         if order == 'desc':
             order_column = '-' + order_column
 
-        queryset = objects.all().order_by(order_by)
-        queryset = queryset.annotate(last_followup=Max('followup__date'))
+        queryset = objects.annotate(last_followup=Max('followup__date')).order_by(order_by)
         total = queryset.count()
 
         if search_value:  # Dead code currently
