@@ -416,7 +416,23 @@
                         }
                     },
                     {data: "submitter"},
-                    {data: "last_followup"},
+                    {
+                        data: "last_followup",
+                        render: function (data, type, row) {
+                            if (isNaN(Date.parse(data))) return "No followup found"; 
+
+                            let date = new Date(data);
+                            return date.toLocaleString("en-US", {
+                                weekday: "short",
+                                year: "numeric",
+                                month: "long",
+                                day: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                hour12: true
+                            });
+                        }
+                    },
                     {% if helpdesk_settings.HELPDESK_ENABLE_TIME_SPENT_ON_TICKET %}
                     {data: "time_spent", "visible": false},
                     {% endif %}
