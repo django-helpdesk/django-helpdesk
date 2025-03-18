@@ -8,14 +8,14 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-      include:
-        # Explicitly include Python 3.8 and 3.9 only with Django 4
-        - python-version: "3.8"
-          django-version: "4"
-        - python-version: "3.9"
-          django-version: "4"
-          # Define the general matrix for Python with Django 
-        python-version: ["3.10", "3.11"]
+        include:
+          # Explicitly include Python 3.8 and 3.9 only with Django 4
+          - python-version: "3.8"
+            django-version: "4"
+          - python-version: "3.9"
+            django-version: "4"
+            # Define the general matrix for Python with Django 
+        python-version: ["3.10", "3.11", "3.12"]
         django-version: ["4", "5"]
     steps:
     - uses: actions/checkout@v4
