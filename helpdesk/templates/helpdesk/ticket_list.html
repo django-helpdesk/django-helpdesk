@@ -419,10 +419,15 @@
                     {
                         data: "last_followup",
                         render: function (data, type, row) {
-                            if (isNaN(Date.parse(data))) return "No followup found"; 
+                            let locale = window.django_settings ? window.django_settings.LANGUAGE_CODE : 'en-US'; // Default to en-US if settings are not found
+
+                            if (isNaN(Date.parse(data))) {
+                                let noFollowup = window.django_settings && window.django_settings.TRANSLATIONS && window.django_settings.TRANSLATIONS['No followup found'] ? window.django_settings.TRANSLATIONS['No followup found'] : "No followup found";
+                                return noFollowup;
+                            }
 
                             let date = new Date(data);
-                            return date.toLocaleString("en-US", {
+                            return date.toLocaleString(locale, {
                                 weekday: "short",
                                 year: "numeric",
                                 month: "long",
