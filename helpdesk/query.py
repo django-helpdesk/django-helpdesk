@@ -1,6 +1,8 @@
 
 from base64 import b64decode, b64encode
 from django.db.models import Q, Max
+from django.db.models import F, Window, Subquery, OuterRef
+from .models import FollowUp
 from django.urls import reverse
 from django.utils.html import escape
 from django.utils.translation import gettext as _
@@ -175,8 +177,21 @@ class __Query__:
         # django orm '-' -> desc
         if order == 'desc':
             order_column = '-' + order_column
-
-        queryset = objects.annotate(last_followup=Max('followup__date')).order_by(order_by)
+        
+        queryset = objects.annotate(
+            last_followup=Subquery(
+                FollowUp.objects.order_by().annotate(
+                    last_followup=Window(
+                        expression=Max("date"),
+                        partition_by=[F("ticket_id"),],
+                        order_by="-date"
+                    )
+                ).filter(
+                    ticket_id=OuterRef("id")
+                ).values("last_followup").distinct()
+            )
+        ).order_by(order_by)
+        
         total = queryset.count()
 
         if search_value:  # Dead code currently
