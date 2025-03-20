@@ -331,7 +331,13 @@
     {% else %}
     <script src="{% static 'helpdesk/vendor/timeline3/js/timeline.js' %}"></script>
     {% endif %}
+
     <script>
+        window.helpdesk_settings = {
+            LANGUAGE_CODE: "{{ helpdesk_settings.LANGUAGE_CODE|default:'en-US' }}",
+            NO_FOLLOWUP_TEXT: "{{ helpdesk_settings.TRANSLATIONS.No_followup_found|default:'No followup found' }}"
+        };
+
         function get_url(row) {
             return "{% url 'helpdesk:view' 1234 %}".replace(/1234/, row.id.toString());
         }
@@ -419,11 +425,10 @@
                     {
                         data: "last_followup",
                         render: function (data, type, row) {
-                            let locale = window.django_settings ? window.django_settings.LANGUAGE_CODE : 'en-US'; // Default to en-US if settings are not found
-
+                            let locale = window.helpdesk_settings.LANGUAGE_CODE; 
+                            
                             if (isNaN(Date.parse(data))) {
-                                let noFollowup = window.django_settings && window.django_settings.TRANSLATIONS && window.django_settings.TRANSLATIONS['No followup found'] ? window.django_settings.TRANSLATIONS['No followup found'] : "No followup found";
-                                return noFollowup;
+                                return window.helpdesk_settings.NO_FOLLOWUP_TEXT;
                             }
 
                             let date = new Date(data);
