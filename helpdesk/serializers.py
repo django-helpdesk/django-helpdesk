@@ -75,15 +75,7 @@ class DatatablesTicketSerializer(serializers.ModelSerializer):
         return obj.kbitem.title if obj.kbitem else ""
         
     def get_last_followup(self, obj):
-        followup = obj.followup_set.order_by().annotate(
-            last_followup=Window(
-                expression=Max("date"),
-                partition_by=[F("ticket_id"),],
-                order_by="-date"
-            )
-        ).values("last_followup").distinct().values_list("last_followup", flat=True)
-        # If there are no followups for the ticket then the result will be empty
-        return localtime(followup[0]).strftime('%Y-%m-%d %H:%M:%S') if followup else ""
+        return obj.last_followup
         
     
 class FollowUpAttachmentSerializer(serializers.ModelSerializer):

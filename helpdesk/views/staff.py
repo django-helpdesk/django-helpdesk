@@ -1061,14 +1061,6 @@ def ticket_list(request):
         if date_to:
             query_params['filtering']['created__lte'] = date_to
 
-        followup_from = request.GET.get('followup_from')
-        if followup_from:
-            query_params['filtering']['followup__gte'] = followup_from
-
-        followup_to = request.GET.get('followup_to')
-        if followup_to:
-            query_params['filtering']['followup__lte'] = followup_to
-
         # KEYWORD SEARCHING
         q = request.GET.get('q', '')
         context['query'] = q

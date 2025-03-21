@@ -335,7 +335,7 @@
     <script>
         window.helpdesk_settings = {
             LANGUAGE_CODE: "{{ helpdesk_settings.LANGUAGE_CODE|default:'en-US' }}",
-            NO_FOLLOWUP_TEXT: "{{ helpdesk_settings.TRANSLATIONS.No_followup_found|default:'No followup found' }}"
+            NO_FOLLOWUP_TEXT: "{% trans helpdesk_settings.TRANSLATIONS.No_followup_found|default:'No followup found' %}"
         };
 
         function get_url(row) {
@@ -425,7 +425,7 @@
                     {
                         data: "last_followup",
                         render: function (data, type, row) {
-                            let locale = window.helpdesk_settings.LANGUAGE_CODE; 
+                            let locale = navigator.language || navigator.userLanguage || window.helpdesk_settings.LANGUAGE_CODE;
                             
                             if (isNaN(Date.parse(data))) {
                                 return window.helpdesk_settings.NO_FOLLOWUP_TEXT;
