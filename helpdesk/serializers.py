@@ -1,7 +1,5 @@
 from django.contrib.auth import get_user_model
 from django.contrib.humanize.templatetags import humanize
-from django.db.models import Max, F, Window
-from django.utils.timezone import localtime
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
