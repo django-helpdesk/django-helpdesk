@@ -1,6 +1,8 @@
 
 from base64 import b64decode, b64encode
-from django.db.models import Q
+from django.db.models import Q, Max
+from django.db.models import F, Window, Subquery, OuterRef
+from .models import FollowUp
 from django.urls import reverse
 from django.utils.html import escape
 from django.utils.translation import gettext as _
@@ -65,8 +67,9 @@ DATATABLES_ORDER_COLUMN_CHOICES = Choices(
     ('6', 'due_date'),
     ('7', 'assigned_to'),
     ('8', 'submitter_email'),
-    # ('9', 'time_spent'),
-    ('10', 'kbitem'),
+    ('9', 'last_followup'),
+    # ('10', 'time_spent'),
+    ('11', 'kbitem'),
 )
 
 
@@ -169,13 +172,26 @@ class __Query__:
         search_value = kwargs.get('search[value]', [""])[0]
         order_column = kwargs.get('order[0][column]', ['5'])[0]
         order = kwargs.get('order[0][dir]', ["asc"])[0]
-
+        
         order_column = DATATABLES_ORDER_COLUMN_CHOICES[order_column]
         # django orm '-' -> desc
         if order == 'desc':
             order_column = '-' + order_column
-
-        queryset = objects.all().order_by(order_by)
+        
+        queryset = objects.annotate(
+            last_followup=Subquery(
+                FollowUp.objects.order_by().annotate(
+                    last_followup=Window(
+                        expression=Max("date"),
+                        partition_by=[F("ticket_id"),],
+                        order_by="-date"
+                    )
+                ).filter(
+                    ticket_id=OuterRef("id")
+                ).values("last_followup").distinct()
+            )
+        ).order_by(order_by)
+        
         total = queryset.count()
 
         if search_value:  # Dead code currently

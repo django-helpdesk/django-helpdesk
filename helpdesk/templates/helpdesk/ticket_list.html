@@ -76,6 +76,7 @@
                                 <th>{% trans "Due Date" %}</th>
                                 <th>{% trans "Owner" %}</th>
                                 <th>{% trans "Submitter" %}</th>
+                                <th>{% trans "Last Followup" %}</th>
                                 {% if helpdesk_settings.HELPDESK_ENABLE_TIME_SPENT_ON_TICKET %}<th>{% trans "Time Spent" %}</th>{% endif %}
                                 {% if helpdesk_settings.HELPDESK_KB_ENABLED %}<th>{% trans "KB item" %}</th>{% endif %}
                             </tr>
@@ -330,7 +331,13 @@
     {% else %}
     <script src="{% static 'helpdesk/vendor/timeline3/js/timeline.js' %}"></script>
     {% endif %}
+
     <script>
+        window.helpdesk_settings = {
+            LANGUAGE_CODE: "{{ helpdesk_settings.LANGUAGE_CODE|default:'en-US' }}",
+            NO_FOLLOWUP_TEXT: "{% trans helpdesk_settings.ALTERNATIVE_UI_STRINGS.No_followup_found|default:'No followup found' %}"
+        };
+
         function get_url(row) {
             return "{% url 'helpdesk:view' 1234 %}".replace(/1234/, row.id.toString());
         }
@@ -415,6 +422,27 @@
                         }
                     },
                     {data: "submitter"},
+                    {
+                        data: "last_followup",
+                        render: function (data, type, row) {
+                            let locale = navigator.language || navigator.userLanguage || window.helpdesk_settings.LANGUAGE_CODE;
+                            
+                            if (isNaN(Date.parse(data))) {
+                                return window.helpdesk_settings.NO_FOLLOWUP_TEXT;
+                            }
+
+                            let date = new Date(data);
+                            return date.toLocaleString(locale, {
+                                weekday: "short",
+                                year: "numeric",
+                                month: "long",
+                                day: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                hour12: true
+                            });
+                        }
+                    },
                     {% if helpdesk_settings.HELPDESK_ENABLE_TIME_SPENT_ON_TICKET %}
                     {data: "time_spent", "visible": false},
                     {% endif %}

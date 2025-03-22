@@ -18,6 +18,7 @@ class DatatablesTicketSerializer(serializers.ModelSerializer):
     ticket = serializers.SerializerMethodField()
     assigned_to = serializers.SerializerMethodField()
     submitter = serializers.SerializerMethodField()
+    last_followup = serializers.SerializerMethodField()
     created = serializers.SerializerMethodField()
     due_date = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
@@ -30,8 +31,8 @@ class DatatablesTicketSerializer(serializers.ModelSerializer):
         model = Ticket
         # fields = '__all__'
         fields = ('ticket', 'id', 'priority', 'title', 'queue', 'status',
-                  'created', 'due_date', 'assigned_to', 'submitter', 'row_class',
-                  'time_spent', 'kbitem')
+                  'created', 'due_date', 'assigned_to', 'submitter', 'last_followup',
+                  'row_class', 'time_spent', 'kbitem')
 
     def get_queue(self, obj):
         return {"title": obj.queue.title, "id": obj.queue.id}
@@ -70,8 +71,11 @@ class DatatablesTicketSerializer(serializers.ModelSerializer):
 
     def get_kbitem(self, obj):
         return obj.kbitem.title if obj.kbitem else ""
-
-
+        
+    def get_last_followup(self, obj):
+        return obj.last_followup
+        
+    
 class FollowUpAttachmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = FollowUpAttachment
