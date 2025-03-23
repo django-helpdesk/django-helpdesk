@@ -1,5 +1,3 @@
-
-
 from django.contrib.auth import get_user_model
 from django.core import mail
 from django.test import TestCase
@@ -7,39 +5,49 @@ from django.test.client import Client
 from django.urls import reverse
 import email
 from helpdesk.email import extract_email_metadata
-from helpdesk.models import CustomField, FollowUp, KBCategory, KBItem, Queue, Ticket, TicketCC
+from helpdesk.models import (
+    CustomField,
+    FollowUp,
+    KBCategory,
+    KBItem,
+    Queue,
+    Ticket,
+    TicketCC,
+)
 import logging
 from urllib.parse import urlparse
 import uuid
 
 
-logger = logging.getLogger('helpdesk')
+logger = logging.getLogger("helpdesk")
 
 
 class TicketBasicsTestCase(TestCase):
-    fixtures = ['emailtemplate.json']
+    fixtures = ["emailtemplate.json"]
 
     def setUp(self):
         self.queue_public = Queue.objects.create(
-            title='Queue 1',
-            slug='q1',
+            title="Queue 1",
+            slug="q1",
             allow_public_submission=True,
-            new_ticket_cc='new.public@example.com',
-            updated_ticket_cc='update.public@example.com')
+            new_ticket_cc="new.public@example.com",
+            updated_ticket_cc="update.public@example.com",
+        )
         self.queue_private = Queue.objects.create(
-            title='Queue 2',
-            slug='q2',
+            title="Queue 2",
+            slug="q2",
             allow_public_submission=False,
-            new_ticket_cc='new.private@example.com',
-            updated_ticket_cc='update.private@example.com')
+            new_ticket_cc="new.private@example.com",
+            updated_ticket_cc="update.private@example.com",
+        )
 
         self.ticket_data = {
-            'title': 'Test Ticket',
-            'description': 'Some Test Ticket',
+            "title": "Test Ticket",
+            "description": "Some Test Ticket",
         }
 
         self.user = get_user_model().objects.create(
-            username='User_1',
+            username="User_1",
         )
 
         self.client = Client()
@@ -58,19 +66,18 @@ class TicketBasicsTestCase(TestCase):
     def test_create_ticket_public(self):
         email_count = len(mail.outbox)
 
-        response = self.client.get(reverse('helpdesk:home'))
+        response = self.client.get(reverse("helpdesk:home"))
         self.assertEqual(response.status_code, 200)
 
         post_data = {
-            'title': 'Test ticket title',
-            'queue': self.queue_public.id,
-            'submitter_email': 'ticket1.submitter@example.com',
-            'body': 'Test ticket body',
-            'priority': 3,
+            "title": "Test ticket title",
+            "queue": self.queue_public.id,
+            "submitter_email": "ticket1.submitter@example.com",
+            "body": "Test ticket body",
+            "priority": 3,
         }
 
-        response = self.client.post(
-            reverse('helpdesk:home'), post_data, follow=True)
+        response = self.client.post(reverse("helpdesk:home"), post_data, follow=True)
         last_redirect = response.redirect_chain[-1]
         last_redirect_url = last_redirect[0]
         # last_redirect_status = last_redirect[1]
@@ -79,7 +86,7 @@ class TicketBasicsTestCase(TestCase):
         # Django 1.9 compatible way of testing this
         # https://docs.djangoproject.com/en/1.9/releases/1.9/#http-redirects-no-longer-forced-to-absolute-uris
         urlparts = urlparse(last_redirect_url)
-        self.assertEqual(urlparts.path, reverse('helpdesk:public_view'))
+        self.assertEqual(urlparts.path, reverse("helpdesk:public_view"))
 
         # Ensure submitter, new-queue + update-queue were all emailed.
         self.assertEqual(email_count + 3, len(mail.outbox))
@@ -92,19 +99,20 @@ class TicketBasicsTestCase(TestCase):
     def test_create_ticket_public_with_hidden_fields(self):
         email_count = len(mail.outbox)
 
-        response = self.client.get(reverse('helpdesk:home'))
+        response = self.client.get(reverse("helpdesk:home"))
         self.assertEqual(response.status_code, 200)
 
         post_data = {
-            'title': 'Test ticket title',
-            'queue': self.queue_public.id,
-            'submitter_email': 'ticket1.submitter@example.com',
-            'body': 'Test ticket body',
-            'priority': 4,
+            "title": "Test ticket title",
+            "queue": self.queue_public.id,
+            "submitter_email": "ticket1.submitter@example.com",
+            "body": "Test ticket body",
+            "priority": 4,
         }
 
         response = self.client.post(
-            reverse('helpdesk:home') + "?_hide_fields_=priority", post_data, follow=True)
+            reverse("helpdesk:home") + "?_hide_fields_=priority", post_data, follow=True
+        )
         ticket = Ticket.objects.last()
         self.assertEqual(ticket.priority, 4)
 
@@ -112,19 +120,18 @@ class TicketBasicsTestCase(TestCase):
         email_count = len(mail.outbox)
         self.client.force_login(self.user)
 
-        response = self.client.get(reverse('helpdesk:home'))
+        response = self.client.get(reverse("helpdesk:home"))
         self.assertEqual(response.status_code, 200)
 
         post_data = {
-            'title': 'Test ticket title',
-            'queue': self.queue_public.id,
-            'submitter_email': 'ticket1.submitter@example.com',
-            'body': 'Test ticket body',
-            'priority': 3,
+            "title": "Test ticket title",
+            "queue": self.queue_public.id,
+            "submitter_email": "ticket1.submitter@example.com",
+            "body": "Test ticket body",
+            "priority": 3,
         }
 
-        response = self.client.post(
-            reverse('helpdesk:home'), post_data, follow=True)
+        response = self.client.post(reverse("helpdesk:home"), post_data, follow=True)
         last_redirect = response.redirect_chain[-1]
         last_redirect_url = last_redirect[0]
         # last_redirect_status = last_redirect[1]
@@ -133,7 +140,7 @@ class TicketBasicsTestCase(TestCase):
         # Django 1.9 compatible way of testing this
         # https://docs.djangoproject.com/en/1.9/releases/1.9/#http-redirects-no-longer-forced-to-absolute-uris
         urlparts = urlparse(last_redirect_url)
-        self.assertEqual(urlparts.path, reverse('helpdesk:public_view'))
+        self.assertEqual(urlparts.path, reverse("helpdesk:public_view"))
 
         # Ensure submitter, new-queue + update-queue were all emailed.
         self.assertEqual(email_count + 3, len(mail.outbox))
@@ -146,44 +153,45 @@ class TicketBasicsTestCase(TestCase):
     def test_create_ticket_private(self):
         email_count = len(mail.outbox)
         post_data = {
-            'title': 'Private ticket test',
-            'queue': self.queue_private.id,
-            'submitter_email': 'ticket2.submitter@example.com',
-            'body': 'Test ticket body',
-            'priority': 3,
+            "title": "Private ticket test",
+            "queue": self.queue_private.id,
+            "submitter_email": "ticket2.submitter@example.com",
+            "body": "Test ticket body",
+            "priority": 3,
         }
 
-        response = self.client.post(reverse('helpdesk:home'), post_data)
+        response = self.client.post(reverse("helpdesk:home"), post_data)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(email_count, len(mail.outbox))
-        self.assertContains(response, 'Select a valid choice.')
+        self.assertContains(response, "Select a valid choice.")
 
     def test_create_ticket_customfields(self):
         email_count = len(mail.outbox)
         queue_custom = Queue.objects.create(
-            title='Queue 3',
-            slug='q3',
+            title="Queue 3",
+            slug="q3",
             allow_public_submission=True,
-            updated_ticket_cc='update.custom@example.com')
+            updated_ticket_cc="update.custom@example.com",
+        )
         custom_field_1 = CustomField.objects.create(
-            name='textfield',
-            label='Text Field',
-            data_type='varchar',
+            name="textfield",
+            label="Text Field",
+            data_type="varchar",
             max_length=100,
             ordering=10,
             required=False,
-            staff_only=False)
+            staff_only=False,
+        )
         post_data = {
-            'queue': queue_custom.id,
-            'title': 'Ticket with custom text field',
-            'submitter_email': 'ticket3.submitter@example.com',
-            'body': 'Test ticket body',
-            'priority': 3,
-            'custom_textfield': 'This is my custom text.',
+            "queue": queue_custom.id,
+            "title": "Ticket with custom text field",
+            "submitter_email": "ticket3.submitter@example.com",
+            "body": "Test ticket body",
+            "priority": 3,
+            "custom_textfield": "This is my custom text.",
         }
 
-        response = self.client.post(
-            reverse('helpdesk:home'), post_data, follow=True)
+        response = self.client.post(reverse("helpdesk:home"), post_data, follow=True)
 
         custom_field_1.delete()
         last_redirect = response.redirect_chain[-1]
@@ -194,7 +202,7 @@ class TicketBasicsTestCase(TestCase):
         # Django 1.9 compatible way of testing this
         # https://docs.djangoproject.com/en/1.9/releases/1.9/#http-redirects-no-longer-forced-to-absolute-uris
         urlparts = urlparse(last_redirect_url)
-        self.assertEqual(urlparts.path, reverse('helpdesk:public_view'))
+        self.assertEqual(urlparts.path, reverse("helpdesk:public_view"))
 
         # Ensure only two e-mails were sent - submitter & updated.
         self.assertEqual(email_count + 2, len(mail.outbox))
@@ -209,15 +217,14 @@ class TicketBasicsTestCase(TestCase):
         self.queue_public.save()
 
         post_data = {
-            'title': 'Test ticket title',
-            'queue': self.queue_public.id,
-            'submitter_email': 'queue@example.com',
-            'body': 'Test ticket body',
-            'priority': 3,
+            "title": "Test ticket title",
+            "queue": self.queue_public.id,
+            "submitter_email": "queue@example.com",
+            "body": "Test ticket body",
+            "priority": 3,
         }
 
-        response = self.client.post(
-            reverse('helpdesk:home'), post_data, follow=True)
+        response = self.client.post(reverse("helpdesk:home"), post_data, follow=True)
         last_redirect = response.redirect_chain[-1]
         last_redirect_url = last_redirect[0]
         # last_redirect_status = last_redirect[1]
@@ -226,39 +233,39 @@ class TicketBasicsTestCase(TestCase):
         # Django 1.9 compatible way of testing this
         # https://docs.djangoproject.com/en/1.9/releases/1.9/#http-redirects-no-longer-forced-to-absolute-uris
         urlparts = urlparse(last_redirect_url)
-        self.assertEqual(urlparts.path, reverse('helpdesk:public_view'))
+        self.assertEqual(urlparts.path, reverse("helpdesk:public_view"))
 
         # Ensure submitter, new-queue + update-queue were all emailed.
         self.assertEqual(email_count + 2, len(mail.outbox))
 
 
 class EmailInteractionsTestCase(TestCase):
-    fixtures = ['emailtemplate.json']
+    fixtures = ["emailtemplate.json"]
 
     def setUp(self):
         self.queue_public = Queue.objects.create(
-            title='Mail Queue 1',
-            slug='mq1',
-            email_address='queue-1@example.com',
+            title="Mail Queue 1",
+            slug="mq1",
+            email_address="queue-1@example.com",
             allow_public_submission=True,
-            new_ticket_cc='new.public.with.notifications@example.com',
-            updated_ticket_cc='update.public.with.notifications@example.com',
+            new_ticket_cc="new.public.with.notifications@example.com",
+            updated_ticket_cc="update.public.with.notifications@example.com",
             enable_notifications_on_email_events=True,
         )
 
         self.queue_public_with_notifications_disabled = Queue.objects.create(
-            title='Mail Queue 2',
-            slug='mq2',
-            email_address='queue-2@example.com',
+            title="Mail Queue 2",
+            slug="mq2",
+            email_address="queue-2@example.com",
             allow_public_submission=True,
-            new_ticket_cc='new.public.without.notifications@example.com',
-            updated_ticket_cc='update.public.without.notifications@example.com',
+            new_ticket_cc="new.public.without.notifications@example.com",
+            updated_ticket_cc="update.public.without.notifications@example.com",
             enable_notifications_on_email_events=False,
         )
 
         self.ticket_data = {
-            'title': 'Test Ticket',
-            'description': 'Some Test Ticket',
+            "title": "Test Ticket",
+            "description": "Some Test Ticket",
         }
 
     def test_create_ticket_from_email_with_message_id(self):
@@ -271,14 +278,14 @@ class EmailInteractionsTestCase(TestCase):
         msg = email.message.Message()
 
         message_id = uuid.uuid4().hex
-        submitter_email = 'foo@bar.py'
+        submitter_email = "foo@bar.py"
 
-        msg.__setitem__('Message-ID', message_id)
-        msg.__setitem__('Subject', self.ticket_data['title'])
-        msg.__setitem__('From', submitter_email)
-        msg.__setitem__('To', self.queue_public.email_address)
-        msg.__setitem__('Content-Type', 'text/plain;')
-        msg.set_payload(self.ticket_data['description'])
+        msg.__setitem__("Message-ID", message_id)
+        msg.__setitem__("Subject", self.ticket_data["title"])
+        msg.__setitem__("From", submitter_email)
+        msg.__setitem__("To", self.queue_public.email_address)
+        msg.__setitem__("Content-Type", "text/plain;")
+        msg.set_payload(self.ticket_data["description"])
 
         email_count = len(mail.outbox)
 
@@ -304,20 +311,23 @@ class EmailInteractionsTestCase(TestCase):
         """
 
         msg = email.message.Message()
-        submitter_email = 'foo@bar.py'
+        submitter_email = "foo@bar.py"
 
-        msg.__setitem__('Subject', self.ticket_data['title'])
-        msg.__setitem__('From', submitter_email)
-        msg.__setitem__('To', self.queue_public.email_address)
-        msg.__setitem__('Content-Type', 'text/plain;')
-        msg.set_payload(self.ticket_data['description'])
+        msg.__setitem__("Subject", self.ticket_data["title"])
+        msg.__setitem__("From", submitter_email)
+        msg.__setitem__("To", self.queue_public.email_address)
+        msg.__setitem__("Content-Type", "text/plain;")
+        msg.set_payload(self.ticket_data["description"])
 
         email_count = len(mail.outbox)
 
         extract_email_metadata(str(msg), self.queue_public, logger=logger)
 
         ticket = Ticket.objects.get(
-            title=self.ticket_data['title'], queue=self.queue_public, submitter_email=submitter_email)
+            title=self.ticket_data["title"],
+            queue=self.queue_public,
+            submitter_email=submitter_email,
+        )
 
         self.assertEqual(ticket.ticket_for_url, "mq1-%s" % ticket.id)
 
@@ -337,16 +347,16 @@ class EmailInteractionsTestCase(TestCase):
         msg = email.message.Message()
 
         message_id = uuid.uuid4().hex
-        submitter_email = 'foo@bar.py'
-        cc_list = ['bravo@example.net', 'charlie@foobar.com']
+        submitter_email = "foo@bar.py"
+        cc_list = ["bravo@example.net", "charlie@foobar.com"]
 
-        msg.__setitem__('Message-ID', message_id)
-        msg.__setitem__('Subject', self.ticket_data['title'])
-        msg.__setitem__('From', submitter_email)
-        msg.__setitem__('To', self.queue_public.email_address)
-        msg.__setitem__('Cc', ','.join(cc_list))
-        msg.__setitem__('Content-Type', 'text/plain;')
-        msg.set_payload(self.ticket_data['description'])
+        msg.__setitem__("Message-ID", message_id)
+        msg.__setitem__("Subject", self.ticket_data["title"])
+        msg.__setitem__("From", submitter_email)
+        msg.__setitem__("To", self.queue_public.email_address)
+        msg.__setitem__("Cc", ",".join(cc_list))
+        msg.__setitem__("Content-Type", "text/plain;")
+        msg.set_payload(self.ticket_data["description"])
 
         email_count = len(mail.outbox)
 
@@ -366,7 +376,6 @@ class EmailInteractionsTestCase(TestCase):
         self.assertIn(submitter_email, mail.outbox[0].to)
 
         for cc_email in cc_list:
-
             # Ensure that contacts on cc_list will be notified on the same email (index 0)
             # self.assertIn(cc_email, mail.outbox[0].to)
 
@@ -384,16 +393,16 @@ class EmailInteractionsTestCase(TestCase):
         msg = email.message.Message()
 
         message_id = uuid.uuid4().hex
-        submitter_email = 'foo@bar.py'
+        submitter_email = "foo@bar.py"
         to_list = [self.queue_public.email_address]
-        cc_list = ['bravo@example.net', 'charlie@foobar.com']
+        cc_list = ["bravo@example.net", "charlie@foobar.com"]
 
-        msg.__setitem__('Message-ID', message_id)
-        msg.__setitem__('Subject', self.ticket_data['title'])
-        msg.__setitem__('From', submitter_email)
-        msg.__setitem__('To', ','.join(to_list + cc_list))
-        msg.__setitem__('Content-Type', 'text/plain;')
-        msg.set_payload(self.ticket_data['description'])
+        msg.__setitem__("Message-ID", message_id)
+        msg.__setitem__("Subject", self.ticket_data["title"])
+        msg.__setitem__("From", submitter_email)
+        msg.__setitem__("To", ",".join(to_list + cc_list))
+        msg.__setitem__("Content-Type", "text/plain;")
+        msg.set_payload(self.ticket_data["description"])
 
         email_count = len(mail.outbox)
 
@@ -414,11 +423,11 @@ class EmailInteractionsTestCase(TestCase):
 
         # Ensure that the queue's email was not subscribed to the event
         # notifications.
-        self.assertRaises(TicketCC.DoesNotExist,
-                          TicketCC.objects.get, ticket=ticket, email=to_list[0])
+        self.assertRaises(
+            TicketCC.DoesNotExist, TicketCC.objects.get, ticket=ticket, email=to_list[0]
+        )
 
         for cc_email in cc_list:
-
             # Ensure that contacts on cc_list will be notified on the same email (index 0)
             # self.assertIn(cc_email, mail.outbox[0].to)
 
@@ -436,16 +445,16 @@ class EmailInteractionsTestCase(TestCase):
         msg = email.message.Message()
 
         message_id = uuid.uuid4().hex
-        submitter_email = 'foo@bar.py'
-        cc_list = ['null@example', 'invalid@foobar']
+        submitter_email = "foo@bar.py"
+        cc_list = ["null@example", "invalid@foobar"]
 
-        msg.__setitem__('Message-ID', message_id)
-        msg.__setitem__('Subject', self.ticket_data['title'])
-        msg.__setitem__('From', submitter_email)
-        msg.__setitem__('To', self.queue_public.email_address)
-        msg.__setitem__('Cc', ','.join(cc_list))
-        msg.__setitem__('Content-Type', 'text/plain;')
-        msg.set_payload(self.ticket_data['description'])
+        msg.__setitem__("Message-ID", message_id)
+        msg.__setitem__("Subject", self.ticket_data["title"])
+        msg.__setitem__("From", submitter_email)
+        msg.__setitem__("To", self.queue_public.email_address)
+        msg.__setitem__("Cc", ",".join(cc_list))
+        msg.__setitem__("Content-Type", "text/plain;")
+        msg.set_payload(self.ticket_data["description"])
 
         email_count = len(mail.outbox)
 
@@ -465,7 +474,6 @@ class EmailInteractionsTestCase(TestCase):
         self.assertIn(submitter_email, mail.outbox[0].to)
 
         for cc_email in cc_list:
-
             # Ensure that contacts on cc_list will be notified on the same email (index 0)
             # self.assertIn(cc_email, mail.outbox[0].to)
 
@@ -474,7 +482,9 @@ class EmailInteractionsTestCase(TestCase):
             self.assertTrue(ticket_cc.ticket, ticket)
             self.assertTrue(ticket_cc.email, cc_email)
 
-    def test_create_followup_from_email_with_valid_message_id_with_no_initial_cc_list(self):
+    def test_create_followup_from_email_with_valid_message_id_with_no_initial_cc_list(
+        self,
+    ):
         """
         Ensure that if a message is received with an valid In-Reply-To ID,
         the expected <TicketCC> instances are created even if the there were
@@ -484,14 +494,14 @@ class EmailInteractionsTestCase(TestCase):
         msg = email.message.Message()
 
         message_id = uuid.uuid4().hex
-        submitter_email = 'foo@bar.py'
+        submitter_email = "foo@bar.py"
 
-        msg.__setitem__('Message-ID', message_id)
-        msg.__setitem__('Subject', self.ticket_data['title'])
-        msg.__setitem__('From', submitter_email)
-        msg.__setitem__('To', self.queue_public.email_address)
-        msg.__setitem__('Content-Type', 'text/plain;')
-        msg.set_payload(self.ticket_data['description'])
+        msg.__setitem__("Message-ID", message_id)
+        msg.__setitem__("Subject", self.ticket_data["title"])
+        msg.__setitem__("From", submitter_email)
+        msg.__setitem__("To", self.queue_public.email_address)
+        msg.__setitem__("Content-Type", "text/plain;")
+        msg.set_payload(self.ticket_data["description"])
 
         email_count = len(mail.outbox)
 
@@ -517,17 +527,17 @@ class EmailInteractionsTestCase(TestCase):
         reply = email.message.Message()
 
         reply_message_id = uuid.uuid4().hex
-        submitter_email = 'foo@bar.py'
-        cc_list = ['bravo@example.net', 'charlie@foobar.com']
+        submitter_email = "foo@bar.py"
+        cc_list = ["bravo@example.net", "charlie@foobar.com"]
 
-        reply.__setitem__('Message-ID', reply_message_id)
-        reply.__setitem__('In-Reply-To', message_id)
-        reply.__setitem__('Subject', self.ticket_data['title'])
-        reply.__setitem__('From', submitter_email)
-        reply.__setitem__('To', self.queue_public.email_address)
-        reply.__setitem__('Cc', ','.join(cc_list))
-        reply.__setitem__('Content-Type', 'text/plain;')
-        reply.set_payload(self.ticket_data['description'])
+        reply.__setitem__("Message-ID", reply_message_id)
+        reply.__setitem__("In-Reply-To", message_id)
+        reply.__setitem__("Subject", self.ticket_data["title"])
+        reply.__setitem__("From", submitter_email)
+        reply.__setitem__("To", self.queue_public.email_address)
+        reply.__setitem__("Cc", ",".join(cc_list))
+        reply.__setitem__("Content-Type", "text/plain;")
+        reply.set_payload(self.ticket_data["description"])
 
         extract_email_metadata(str(reply), self.queue_public, logger=logger)
 
@@ -562,7 +572,9 @@ class EmailInteractionsTestCase(TestCase):
         # for cc_email in cc_list:
         # self.assertIn(cc_email, mail.outbox[expected_email_count - 1].to)
 
-    def test_create_followup_from_email_with_valid_message_id_with_original_cc_list_included(self):
+    def test_create_followup_from_email_with_valid_message_id_with_original_cc_list_included(
+        self,
+    ):
         """
         Ensure that if a message is received with an valid In-Reply-To ID,
         the expected <TicketCC> instances are created but if there's any
@@ -572,16 +584,16 @@ class EmailInteractionsTestCase(TestCase):
         msg = email.message.Message()
 
         message_id = uuid.uuid4().hex
-        submitter_email = 'foo@bar.py'
-        cc_list = ['bravo@example.net', 'charlie@foobar.com']
+        submitter_email = "foo@bar.py"
+        cc_list = ["bravo@example.net", "charlie@foobar.com"]
 
-        msg.__setitem__('Message-ID', message_id)
-        msg.__setitem__('Subject', self.ticket_data['title'])
-        msg.__setitem__('From', submitter_email)
-        msg.__setitem__('To', self.queue_public.email_address)
-        msg.__setitem__('Cc', ','.join(cc_list))
-        msg.__setitem__('Content-Type', 'text/plain;')
-        msg.set_payload(self.ticket_data['description'])
+        msg.__setitem__("Message-ID", message_id)
+        msg.__setitem__("Subject", self.ticket_data["title"])
+        msg.__setitem__("From", submitter_email)
+        msg.__setitem__("To", self.queue_public.email_address)
+        msg.__setitem__("Cc", ",".join(cc_list))
+        msg.__setitem__("Content-Type", "text/plain;")
+        msg.set_payload(self.ticket_data["description"])
 
         email_count = len(mail.outbox)
 
@@ -617,17 +629,17 @@ class EmailInteractionsTestCase(TestCase):
         reply = email.message.Message()
 
         reply_message_id = uuid.uuid4().hex
-        submitter_email = 'foo@bar.py'
-        cc_list = ['bravo@example.net', 'charlie@foobar.com']
+        submitter_email = "foo@bar.py"
+        cc_list = ["bravo@example.net", "charlie@foobar.com"]
 
-        reply.__setitem__('Message-ID', reply_message_id)
-        reply.__setitem__('In-Reply-To', message_id)
-        reply.__setitem__('Subject', self.ticket_data['title'])
-        reply.__setitem__('From', submitter_email)
-        reply.__setitem__('To', self.queue_public.email_address)
-        reply.__setitem__('Cc', ','.join(cc_list))
-        reply.__setitem__('Content-Type', 'text/plain;')
-        reply.set_payload(self.ticket_data['description'])
+        reply.__setitem__("Message-ID", reply_message_id)
+        reply.__setitem__("In-Reply-To", message_id)
+        reply.__setitem__("Subject", self.ticket_data["title"])
+        reply.__setitem__("From", submitter_email)
+        reply.__setitem__("To", self.queue_public.email_address)
+        reply.__setitem__("Cc", ",".join(cc_list))
+        reply.__setitem__("Content-Type", "text/plain;")
+        reply.set_payload(self.ticket_data["description"])
 
         extract_email_metadata(str(reply), self.queue_public, logger=logger)
 
@@ -670,16 +682,16 @@ class EmailInteractionsTestCase(TestCase):
         msg = email.message.Message()
 
         message_id = uuid.uuid4().hex
-        submitter_email = 'foo@bar.py'
-        cc_list = ['bravo@example.net', 'charlie@foobar.com']
+        submitter_email = "foo@bar.py"
+        cc_list = ["bravo@example.net", "charlie@foobar.com"]
 
-        msg.__setitem__('Message-ID', message_id)
-        msg.__setitem__('Subject', self.ticket_data['title'])
-        msg.__setitem__('From', submitter_email)
-        msg.__setitem__('To', self.queue_public.email_address)
-        msg.__setitem__('Cc', ','.join(cc_list))
-        msg.__setitem__('Content-Type', 'text/plain;')
-        msg.set_payload(self.ticket_data['description'])
+        msg.__setitem__("Message-ID", message_id)
+        msg.__setitem__("Subject", self.ticket_data["title"])
+        msg.__setitem__("From", submitter_email)
+        msg.__setitem__("To", self.queue_public.email_address)
+        msg.__setitem__("Cc", ",".join(cc_list))
+        msg.__setitem__("Content-Type", "text/plain;")
+        msg.set_payload(self.ticket_data["description"])
 
         email_count = len(mail.outbox)
 
@@ -707,7 +719,6 @@ class EmailInteractionsTestCase(TestCase):
 
         # Ensure that <TicketCC> is created
         for cc_email in cc_list:
-
             # Ensure that contacts on cc_list will be notified on the same email (index 0)
             # self.assertIn(cc_email, mail.outbox[0].to)
 
@@ -721,20 +732,20 @@ class EmailInteractionsTestCase(TestCase):
         reply = email.message.Message()
 
         reply_message_id = uuid.uuid4().hex
-        submitter_email = 'foo@bar.py'
-        cc_list = ['bravo@example.net', 'charlie@foobar.com']
+        submitter_email = "foo@bar.py"
+        cc_list = ["bravo@example.net", "charlie@foobar.com"]
 
-        invalid_message_id = 'INVALID'
-        reply_subject = 'Re: ' + self.ticket_data['title']
+        invalid_message_id = "INVALID"
+        reply_subject = "Re: " + self.ticket_data["title"]
 
-        reply.__setitem__('Message-ID', reply_message_id)
-        reply.__setitem__('In-Reply-To', invalid_message_id)
-        reply.__setitem__('Subject', reply_subject)
-        reply.__setitem__('From', submitter_email)
-        reply.__setitem__('To', self.queue_public.email_address)
-        reply.__setitem__('Cc', ','.join(cc_list))
-        reply.__setitem__('Content-Type', 'text/plain;')
-        reply.set_payload(self.ticket_data['description'])
+        reply.__setitem__("Message-ID", reply_message_id)
+        reply.__setitem__("In-Reply-To", invalid_message_id)
+        reply.__setitem__("Subject", reply_subject)
+        reply.__setitem__("From", submitter_email)
+        reply.__setitem__("To", self.queue_public.email_address)
+        reply.__setitem__("Cc", ",".join(cc_list))
+        reply.__setitem__("Content-Type", "text/plain;")
+        reply.set_payload(self.ticket_data["description"])
 
         email_count = len(mail.outbox)
 
@@ -760,24 +771,24 @@ class EmailInteractionsTestCase(TestCase):
 
     def test_create_ticket_from_email_to_a_notification_enabled_queue(self):
         """
-            Ensure that when an email is sent to a Queue with
-            notifications_enabled turned ON, and a <Ticket> is created, all
-            contacts in the TicketCC list are notified.
+        Ensure that when an email is sent to a Queue with
+        notifications_enabled turned ON, and a <Ticket> is created, all
+        contacts in the TicketCC list are notified.
         """
 
         msg = email.message.Message()
 
         message_id = uuid.uuid4().hex
-        submitter_email = 'foo@bar.py'
-        cc_list = ['bravo@example.net', 'charlie@foobar.com']
+        submitter_email = "foo@bar.py"
+        cc_list = ["bravo@example.net", "charlie@foobar.com"]
 
-        msg.__setitem__('Message-ID', message_id)
-        msg.__setitem__('Subject', self.ticket_data['title'])
-        msg.__setitem__('From', submitter_email)
-        msg.__setitem__('To', self.queue_public.email_address)
-        msg.__setitem__('Cc', ','.join(cc_list))
-        msg.__setitem__('Content-Type', 'text/plain;')
-        msg.set_payload(self.ticket_data['description'])
+        msg.__setitem__("Message-ID", message_id)
+        msg.__setitem__("Subject", self.ticket_data["title"])
+        msg.__setitem__("From", submitter_email)
+        msg.__setitem__("To", self.queue_public.email_address)
+        msg.__setitem__("Cc", ",".join(cc_list))
+        msg.__setitem__("Content-Type", "text/plain;")
+        msg.set_payload(self.ticket_data["description"])
 
         email_count = len(mail.outbox)
         extract_email_metadata(str(msg), self.queue_public, logger=logger)
@@ -797,7 +808,6 @@ class EmailInteractionsTestCase(TestCase):
 
         # Ensure that <TicketCC> exist
         for cc_email in cc_list:
-
             # Ensure that contacts on cc_list will be notified on the same email (index 0)
             # self.assertIn(cc_email, mail.outbox[0].to)
 
@@ -807,31 +817,33 @@ class EmailInteractionsTestCase(TestCase):
 
     def test_create_ticket_from_email_to_a_notification_disabled_queue(self):
         """
-            Ensure that when an email is sent to a Queue with notifications_enabled
-            turned OFF, only the new_ticket_cc and updated_ticket_cc contacts (if
-            they are set) are notified. No contact from the TicketCC list should
-            be notified.
+        Ensure that when an email is sent to a Queue with notifications_enabled
+        turned OFF, only the new_ticket_cc and updated_ticket_cc contacts (if
+        they are set) are notified. No contact from the TicketCC list should
+        be notified.
         """
 
         msg = email.message.Message()
 
         message_id = uuid.uuid4().hex
-        submitter_email = 'foo@bar.py'
-        cc_list = ['bravo@example.net', 'charlie@foobar.com']
+        submitter_email = "foo@bar.py"
+        cc_list = ["bravo@example.net", "charlie@foobar.com"]
 
-        msg.__setitem__('Message-ID', message_id)
-        msg.__setitem__('Subject', self.ticket_data['title'])
-        msg.__setitem__('From', submitter_email)
+        msg.__setitem__("Message-ID", message_id)
+        msg.__setitem__("Subject", self.ticket_data["title"])
+        msg.__setitem__("From", submitter_email)
         msg.__setitem__(
-            'To', self.queue_public_with_notifications_disabled.email_address)
-        msg.__setitem__('Cc', ','.join(cc_list))
-        msg.__setitem__('Content-Type', 'text/plain;')
-        msg.set_payload(self.ticket_data['description'])
+            "To", self.queue_public_with_notifications_disabled.email_address
+        )
+        msg.__setitem__("Cc", ",".join(cc_list))
+        msg.__setitem__("Content-Type", "text/plain;")
+        msg.set_payload(self.ticket_data["description"])
 
         email_count = len(mail.outbox)
 
         extract_email_metadata(
-            str(msg), self.queue_public_with_notifications_disabled, logger=logger)
+            str(msg), self.queue_public_with_notifications_disabled, logger=logger
+        )
 
         followup = FollowUp.objects.get(message_id=message_id)
         ticket = Ticket.objects.get(id=followup.ticket.id)
@@ -846,7 +858,6 @@ class EmailInteractionsTestCase(TestCase):
         # Ensure that <TicketCC> is created even if the Queue notifications are disabled
         # so when staff members interact with the <Ticket>, they get notified
         for cc_email in cc_list:
-
             # Ensure that contacts on the cc_list are not notified
             self.assertNotIn(cc_email, mail.outbox[0].to)
 
@@ -856,24 +867,24 @@ class EmailInteractionsTestCase(TestCase):
 
     def test_create_followup_from_email_to_a_notification_enabled_queue(self):
         """
-            Ensure that when an email is sent to a Queue with notifications_enabled
-            turned ON, and a <FollowUp> is created, all contacts n the TicketCC
-            list are notified.
+        Ensure that when an email is sent to a Queue with notifications_enabled
+        turned ON, and a <FollowUp> is created, all contacts n the TicketCC
+        list are notified.
         """
         # Ticket and TicketCCs creation #
         msg = email.message.Message()
 
         message_id = uuid.uuid4().hex
-        submitter_email = 'foo@bar.py'
-        cc_list = ['bravo@example.net', 'charlie@foobar.com']
+        submitter_email = "foo@bar.py"
+        cc_list = ["bravo@example.net", "charlie@foobar.com"]
 
-        msg.__setitem__('Message-ID', message_id)
-        msg.__setitem__('Subject', self.ticket_data['title'])
-        msg.__setitem__('From', submitter_email)
-        msg.__setitem__('To', self.queue_public.email_address)
-        msg.__setitem__('Cc', ','.join(cc_list))
-        msg.__setitem__('Content-Type', 'text/plain;')
-        msg.set_payload(self.ticket_data['description'])
+        msg.__setitem__("Message-ID", message_id)
+        msg.__setitem__("Subject", self.ticket_data["title"])
+        msg.__setitem__("From", submitter_email)
+        msg.__setitem__("To", self.queue_public.email_address)
+        msg.__setitem__("Cc", ",".join(cc_list))
+        msg.__setitem__("Content-Type", "text/plain;")
+        msg.set_payload(self.ticket_data["description"])
 
         email_count = len(mail.outbox)
 
@@ -892,7 +903,6 @@ class EmailInteractionsTestCase(TestCase):
 
         # Ensure that <TicketCC> is created
         for cc_email in cc_list:
-
             # Ensure that contacts on cc_list will be notified on the same email (index 0)
             # self.assertIn(cc_email, mail.outbox[0].to)
 
@@ -905,15 +915,15 @@ class EmailInteractionsTestCase(TestCase):
         reply = email.message.Message()
 
         reply_message_id = uuid.uuid4().hex
-        submitter_email = 'bravo@example.net'
+        submitter_email = "bravo@example.net"
 
-        reply.__setitem__('Message-ID', reply_message_id)
-        reply.__setitem__('In-Reply-To', message_id)
-        reply.__setitem__('Subject', self.ticket_data['title'])
-        reply.__setitem__('From', submitter_email)
-        reply.__setitem__('To', self.queue_public.email_address)
-        reply.__setitem__('Content-Type', 'text/plain;')
-        reply.set_payload(self.ticket_data['description'])
+        reply.__setitem__("Message-ID", reply_message_id)
+        reply.__setitem__("In-Reply-To", message_id)
+        reply.__setitem__("Subject", self.ticket_data["title"])
+        reply.__setitem__("From", submitter_email)
+        reply.__setitem__("To", self.queue_public.email_address)
+        reply.__setitem__("Content-Type", "text/plain;")
+        reply.set_payload(self.ticket_data["description"])
 
         extract_email_metadata(str(reply), self.queue_public, logger=logger)
 
@@ -930,7 +940,6 @@ class EmailInteractionsTestCase(TestCase):
 
         # Ensure that <TicketCC> exist
         for cc_email in cc_list:
-
             # Ensure that contacts on cc_list will be notified on the same email (index 0)
             # self.assertIn(cc_email, mail.outbox[expected_email_count - 1].to)
 
@@ -940,29 +949,31 @@ class EmailInteractionsTestCase(TestCase):
 
     def test_create_followup_from_email_to_a_notification_disabled_queue(self):
         """
-            Ensure that when an email is sent to a Queue with notifications_enabled
-            turned OFF, and a <FollowUp> is created, TicketCC is NOT notified.
+        Ensure that when an email is sent to a Queue with notifications_enabled
+        turned OFF, and a <FollowUp> is created, TicketCC is NOT notified.
         """
         # Ticket and TicketCCs creation #
         msg = email.message.Message()
 
         message_id = uuid.uuid4().hex
-        submitter_email = 'foo@bar.py'
-        cc_list = ['bravo@example.net', 'charlie@foobar.com']
+        submitter_email = "foo@bar.py"
+        cc_list = ["bravo@example.net", "charlie@foobar.com"]
 
-        msg.__setitem__('Message-ID', message_id)
-        msg.__setitem__('Subject', self.ticket_data['title'])
-        msg.__setitem__('From', submitter_email)
+        msg.__setitem__("Message-ID", message_id)
+        msg.__setitem__("Subject", self.ticket_data["title"])
+        msg.__setitem__("From", submitter_email)
         msg.__setitem__(
-            'To', self.queue_public_with_notifications_disabled.email_address)
-        msg.__setitem__('Cc', ','.join(cc_list))
-        msg.__setitem__('Content-Type', 'text/plain;')
-        msg.set_payload(self.ticket_data['description'])
+            "To", self.queue_public_with_notifications_disabled.email_address
+        )
+        msg.__setitem__("Cc", ",".join(cc_list))
+        msg.__setitem__("Content-Type", "text/plain;")
+        msg.set_payload(self.ticket_data["description"])
 
         email_count = len(mail.outbox)
 
         extract_email_metadata(
-            str(msg), self.queue_public_with_notifications_disabled, logger=logger)
+            str(msg), self.queue_public_with_notifications_disabled, logger=logger
+        )
 
         followup = FollowUp.objects.get(message_id=message_id)
         ticket = Ticket.objects.get(id=followup.ticket.id)
@@ -976,7 +987,6 @@ class EmailInteractionsTestCase(TestCase):
 
         # Ensure that <TicketCC> is created
         for cc_email in cc_list:
-
             # Ensure that contacts on cc_list will not be notified
             self.assertNotIn(cc_email, mail.outbox[0].to)
 
@@ -989,19 +999,21 @@ class EmailInteractionsTestCase(TestCase):
         reply = email.message.Message()
 
         reply_message_id = uuid.uuid4().hex
-        submitter_email = 'bravo@example.net'
+        submitter_email = "bravo@example.net"
 
-        reply.__setitem__('Message-ID', reply_message_id)
-        reply.__setitem__('In-Reply-To', message_id)
-        reply.__setitem__('Subject', self.ticket_data['title'])
-        reply.__setitem__('From', submitter_email)
+        reply.__setitem__("Message-ID", reply_message_id)
+        reply.__setitem__("In-Reply-To", message_id)
+        reply.__setitem__("Subject", self.ticket_data["title"])
+        reply.__setitem__("From", submitter_email)
         reply.__setitem__(
-            'To', self.queue_public_with_notifications_disabled.email_address)
-        reply.__setitem__('Content-Type', 'text/plain;')
-        reply.set_payload(self.ticket_data['description'])
+            "To", self.queue_public_with_notifications_disabled.email_address
+        )
+        reply.__setitem__("Content-Type", "text/plain;")
+        reply.set_payload(self.ticket_data["description"])
 
         extract_email_metadata(
-            str(reply), self.queue_public_with_notifications_disabled, logger=logger)
+            str(reply), self.queue_public_with_notifications_disabled, logger=logger
+        )
 
         followup = FollowUp.objects.get(message_id=message_id)
         ticket = Ticket.objects.get(id=followup.ticket.id)
@@ -1023,14 +1035,14 @@ class EmailInteractionsTestCase(TestCase):
         msg = email.message.Message()
 
         message_id = uuid.uuid4().hex
-        submitter_email = 'foo@bar.py'
+        submitter_email = "foo@bar.py"
 
-        msg.__setitem__('Message-ID', message_id)
-        msg.__setitem__('Subject', self.ticket_data['title'])
-        msg.__setitem__('From', submitter_email)
-        msg.__setitem__('To', self.queue_public.email_address)
-        msg.__setitem__('Content-Type', 'text/plain;')
-        msg.set_payload(self.ticket_data['description'])
+        msg.__setitem__("Message-ID", message_id)
+        msg.__setitem__("Subject", self.ticket_data["title"])
+        msg.__setitem__("From", submitter_email)
+        msg.__setitem__("To", self.queue_public.email_address)
+        msg.__setitem__("Content-Type", "text/plain;")
+        msg.set_payload(self.ticket_data["description"])
 
         email_count = len(mail.outbox)
 
@@ -1044,17 +1056,17 @@ class EmailInteractionsTestCase(TestCase):
         reply = email.message.Message()
 
         reply_message_id = uuid.uuid4().hex
-        submitter_email = 'bravo@example.net'
-        cc_list = ['foo@bar.py', 'charlie@foobar.com']
+        submitter_email = "bravo@example.net"
+        cc_list = ["foo@bar.py", "charlie@foobar.com"]
 
-        reply.__setitem__('Message-ID', reply_message_id)
-        reply.__setitem__('In-Reply-To', message_id)
-        reply.__setitem__('Subject', self.ticket_data['title'])
-        reply.__setitem__('From', submitter_email)
-        reply.__setitem__('To', self.queue_public.email_address)
-        reply.__setitem__('Cc', ','.join(cc_list))
-        reply.__setitem__('Content-Type', 'text/plain;')
-        reply.set_payload(self.ticket_data['description'])
+        reply.__setitem__("Message-ID", reply_message_id)
+        reply.__setitem__("In-Reply-To", message_id)
+        reply.__setitem__("Subject", self.ticket_data["title"])
+        reply.__setitem__("From", submitter_email)
+        reply.__setitem__("To", self.queue_public.email_address)
+        reply.__setitem__("Cc", ",".join(cc_list))
+        reply.__setitem__("Content-Type", "text/plain;")
+        reply.set_payload(self.ticket_data["description"])
 
         extract_email_metadata(str(reply), self.queue_public, logger=logger)
 
@@ -1085,7 +1097,7 @@ class EmailInteractionsTestCase(TestCase):
         cat = KBCategory.objects.create(
             title="Test Cat",
             slug="test_cat",
-            description="This is a test category",   
+            description="This is a test category",
             queue=self.queue_public,
         )
         cat.save()
@@ -1105,10 +1117,21 @@ class EmailInteractionsTestCase(TestCase):
             answer="A KB Item",
         )
         self.kbitem1.save()
-        cat_url = reverse('helpdesk:submit') + '?' \
-            + attr_list["f1_attr"] + '=' + attr_list["f1_attr_value"] + '&' \
-            + attr_list["f2_attr"] + '=' + attr_list["f2_attr_value"] + '&' \
-            + attr_list["f3_attr"] + '=' + attr_list["f3_attr_value"]
+        cat_url = (
+            reverse("helpdesk:submit")
+            + "?"
+            + attr_list["f1_attr"]
+            + "="
+            + attr_list["f1_attr_value"]
+            + "&"
+            + attr_list["f2_attr"]
+            + "="
+            + attr_list["f2_attr_value"]
+            + "&"
+            + attr_list["f3_attr"]
+            + "="
+            + attr_list["f3_attr_value"]
+        )
         response = self.client.get(cat_url)
         # Get the rendered response to make it easier to debug if things go wrong
         if (
@@ -1122,11 +1145,29 @@ class EmailInteractionsTestCase(TestCase):
         else:
             content = response.content
 
-        
         msg_prefix = content.decode(response.charset)
         self.assertContains(
-            response, '<option value="' + attr_list["f1_attr_value"] + '" selected>' + attr_list["f1_field_title"] + '</option>', msg_prefix = msg_prefix)
+            response,
+            '<option value="'
+            + attr_list["f1_attr_value"]
+            + '" selected>'
+            + attr_list["f1_field_title"]
+            + "</option>",
+            msg_prefix=msg_prefix,
+        )
         self.assertContains(
-            response, '<input type="email" name="' +  attr_list["f2_attr"] + '" value="' +  attr_list["f2_attr_value"], msg_prefix = msg_prefix)
+            response,
+            '<input type="email" name="'
+            + attr_list["f2_attr"]
+            + '" value="'
+            + attr_list["f2_attr_value"],
+            msg_prefix=msg_prefix,
+        )
         self.assertContains(
-            response, '<input type="text" name="' +  attr_list["f3_attr"] + '" value="' +  attr_list["f3_attr_value"], msg_prefix = msg_prefix)
+            response,
+            '<input type="text" name="'
+            + attr_list["f3_attr"]
+            + '" value="'
+            + attr_list["f3_attr_value"],
+            msg_prefix=msg_prefix,
+        )

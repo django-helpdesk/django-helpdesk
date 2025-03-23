@@ -6,20 +6,29 @@ import helpdesk.validators
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('helpdesk', '0035_alter_email_on_ticket_change'),
+        ("helpdesk", "0035_alter_email_on_ticket_change"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='followupattachment',
-            name='file',
-            field=models.FileField(max_length=1000, upload_to=helpdesk.models.attachment_path, validators=[helpdesk.validators.validate_file_extension], verbose_name='File'),
+            model_name="followupattachment",
+            name="file",
+            field=models.FileField(
+                max_length=1000,
+                upload_to=helpdesk.models.attachment_path,
+                validators=[helpdesk.validators.validate_file_extension],
+                verbose_name="File",
+            ),
         ),
         migrations.AlterField(
-            model_name='kbiattachment',
-            name='file',
-            field=models.FileField(max_length=1000, upload_to=helpdesk.models.attachment_path, validators=[helpdesk.validators.validate_file_extension], verbose_name='File'),
+            model_name="kbiattachment",
+            name="file",
+            field=models.FileField(
+                max_length=1000,
+                upload_to=helpdesk.models.attachment_path,
+                validators=[helpdesk.validators.validate_file_extension],
+                verbose_name="File",
+            ),
         ),
     ]

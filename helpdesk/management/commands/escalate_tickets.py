@@ -20,34 +20,36 @@ from helpdesk.models import EscalationExclusion, Queue, Ticket
 class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument(
-            '-q',
-            '--queues',
-            nargs='*',
-            choices=list(Queue.objects.values_list('slug', flat=True)),
-            help='Queues to include (default: all). Enter the queues slug as space separated list.'
+            "-q",
+            "--queues",
+            nargs="*",
+            choices=list(Queue.objects.values_list("slug", flat=True)),
+            help="Queues to include (default: all). Enter the queues slug as space separated list.",
         )
         parser.add_argument(
-            '-x',
-            '--escalate-verbosely',
-            action='store_true',
+            "-x",
+            "--escalate-verbosely",
+            action="store_true",
             default=False,
-            help='Display escalated tickets'
+            help="Display escalated tickets",
         )
         parser.add_argument(
-            '-n',
-            '--notify-only',
-            action='store_true',
+            "-n",
+            "--notify-only",
+            action="store_true",
             default=False,
-            help='Send email reminder but dont escalate tickets'
+            help="Send email reminder but dont escalate tickets",
         )
 
     def handle(self, *args, **options):
-        verbose = options['escalate_verbosely']
-        notify_only = options['notify_only']
+        verbose = options["escalate_verbosely"]
+        notify_only = options["notify_only"]
 
-        queue_slugs = options['queues']
+        queue_slugs = options["queues"]
         # Only include queues with escalation configured
-        queues = Queue.objects.filter(escalate_days__isnull=False).exclude(escalate_days=0)
+        queues = Queue.objects.filter(escalate_days__isnull=False).exclude(
+            escalate_days=0
+        )
         if queue_slugs is not None:
             queues = queues.filter(slug__in=queue_slugs)
 
@@ -68,17 +70,15 @@ class Command(BaseCommand):
 
             req_last_escl_date = timezone.now() - timedelta(days=days)
 
-            for ticket in queue.ticket_set.filter(
-                status__in=Ticket.OPEN_STATUSES
-            ).exclude(
-                priority=1
-            ).filter(
-                Q(on_hold__isnull=True) | Q(on_hold=False)
-            ).filter(
-                Q(last_escalation__lte=req_last_escl_date) |
-                Q(last_escalation__isnull=True, created__lte=req_last_escl_date)
+            for ticket in (
+                queue.ticket_set.filter(status__in=Ticket.OPEN_STATUSES)
+                .exclude(priority=1)
+                .filter(Q(on_hold__isnull=True) | Q(on_hold=False))
+                .filter(
+                    Q(last_escalation__lte=req_last_escl_date)
+                    | Q(last_escalation__isnull=True, created__lte=req_last_escl_date)
+                )
             ):
-
                 ticket.last_escalation = timezone.now()
                 ticket.priority -= 1
                 ticket.save()
@@ -86,24 +86,29 @@ class Command(BaseCommand):
                 context = safe_template_context(ticket)
 
                 ticket.send(
-                    {'submitter': ('escalated_submitter', context),
-                     'ticket_cc': ('escalated_cc', context),
-                     'assigned_to': ('escalated_owner', context)},
+                    {
+                        "submitter": ("escalated_submitter", context),
+                        "ticket_cc": ("escalated_cc", context),
+                        "assigned_to": ("escalated_owner", context),
+                    },
                     fail_silently=True,
                 )
 
                 if verbose:
-                    self.stdout.write(f"  - Esclating {ticket.ticket} from {ticket.priority + 1}>{ticket.priority}")
+                    self.stdout.write(
+                        f"  - Esclating {ticket.ticket} from {ticket.priority + 1}>{ticket.priority}"
+                    )
 
                 if not notify_only:
                     followup = ticket.followup_set.create(
-                        title=_('Ticket Escalated'),
+                        title=_("Ticket Escalated"),
                         public=True,
-                        comment=_('Ticket escalated after %(nb)s days') % {'nb': queue.escalate_days},
+                        comment=_("Ticket escalated after %(nb)s days")
+                        % {"nb": queue.escalate_days},
                     )
 
                     followup.ticketchange_set.create(
-                        field=_('Priority'),
+                        field=_("Priority"),
                         old_value=ticket.priority + 1,
                         new_value=ticket.priority,
                     )

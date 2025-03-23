@@ -4,15 +4,21 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('helpdesk', '0014_usersettings_related_name'),
+        ("helpdesk", "0014_usersettings_related_name"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='queue',
-            name='permission_name',
-            field=models.CharField(blank=True, editable=False, help_text='Name used in the django.contrib.auth permission system', max_length=72, null=True, verbose_name='Django auth permission name'),
+            model_name="queue",
+            name="permission_name",
+            field=models.CharField(
+                blank=True,
+                editable=False,
+                help_text="Name used in the django.contrib.auth permission system",
+                max_length=72,
+                null=True,
+                verbose_name="Django auth permission name",
+            ),
         ),
     ]

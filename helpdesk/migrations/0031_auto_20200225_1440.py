@@ -4,19 +4,24 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('helpdesk', '0030_add_kbcategory_name'),
+        ("helpdesk", "0030_add_kbcategory_name"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='kbitem',
-            options={'ordering': ('order', 'title'), 'verbose_name': 'Knowledge base item', 'verbose_name_plural': 'Knowledge base items'},
+            name="kbitem",
+            options={
+                "ordering": ("order", "title"),
+                "verbose_name": "Knowledge base item",
+                "verbose_name_plural": "Knowledge base items",
+            },
         ),
         migrations.AddField(
-            model_name='kbitem',
-            name='order',
-            field=models.PositiveIntegerField(blank=True, null=True, verbose_name='Order'),
+            model_name="kbitem",
+            name="order",
+            field=models.PositiveIntegerField(
+                blank=True, null=True, verbose_name="Order"
+            ),
         ),
     ]

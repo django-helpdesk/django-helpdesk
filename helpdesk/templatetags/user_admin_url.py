@@ -20,9 +20,7 @@ def user_admin_url(action):
     except AttributeError:  # module_name alias removed in django 1.8
         model_name = user._meta.model_name.lower()
 
-    return 'admin:%s_%s_%s' % (
-        user._meta.app_label, model_name,
-        action)
+    return "admin:%s_%s_%s" % (user._meta.app_label, model_name, action)
 
 
 register = template.Library()

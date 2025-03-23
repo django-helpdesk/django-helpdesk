@@ -1,4 +1,3 @@
-
 from helpdesk import settings as helpdesk_settings
 from helpdesk.models import Queue, Ticket
 
@@ -23,14 +22,13 @@ class HelpdeskUser:
         """
         user = self.user
         all_queues = Queue.objects.all()
-        public_ids = [q.pk for q in
-                      Queue.objects.filter(allow_public_submission=True)]
-        limit_queues_by_user = \
-            helpdesk_settings.HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION \
+        public_ids = [q.pk for q in Queue.objects.filter(allow_public_submission=True)]
+        limit_queues_by_user = (
+            helpdesk_settings.HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION
             and not user.is_superuser
+        )
         if limit_queues_by_user:
-            id_list = [q.pk for q in all_queues if user.has_perm(
-                q.permission_name)]
+            id_list = [q.pk for q in all_queues if user.has_perm(q.permission_name)]
             id_list += public_ids
             return all_queues.filter(pk__in=id_list)
         else:
@@ -56,8 +54,11 @@ class HelpdeskUser:
         return Ticket.objects.filter(queue__in=self.get_queues())
 
     def has_full_access(self):
-        return self.user.is_superuser or self.user.is_staff \
+        return (
+            self.user.is_superuser
+            or self.user.is_staff
             or helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE
+        )
 
     def can_access_queue(self, queue):
         """Check if a certain user can access a certain queue.
@@ -71,18 +72,18 @@ class HelpdeskUser:
         else:
             return (
                 helpdesk_settings.HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION
-                and
-                self.user.has_perm(queue.permission_name)
+                and self.user.has_perm(queue.permission_name)
             )
 
     def can_access_ticket(self, ticket):
         """Check to see if the user has permission to access
-            a ticket. If not then deny access."""
+        a ticket. If not then deny access."""
         user = self.user
         if self.can_access_queue(ticket.queue):
             return True
-        elif self.has_full_access() or \
-                (ticket.assigned_to and user.id == ticket.assigned_to.id):
+        elif self.has_full_access() or (
+            ticket.assigned_to and user.id == ticket.assigned_to.id
+        ):
             return True
         else:
             return False
@@ -90,4 +91,6 @@ class HelpdeskUser:
     def can_access_kbcategory(self, category):
         if category.public:
             return True
-        return self.has_full_access() or (category.queue and self.can_access_queue(category.queue))
+        return self.has_full_access() or (
+            category.queue and self.can_access_queue(category.queue)
+        )

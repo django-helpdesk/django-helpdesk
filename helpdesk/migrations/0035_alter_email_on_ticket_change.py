@@ -5,15 +5,18 @@ import helpdesk.models
 
 
 class Migration(migrations.Migration):
+    dependencies = [
+        ("helpdesk", "0034_create_email_template_for_merged"),
+    ]
 
-    dependencies = [ 
-        ('helpdesk', '0034_create_email_template_for_merged'),
-    ]   
-
-    operations = [ 
+    operations = [
         migrations.AlterField(
-            model_name='usersettings',
-            name='email_on_ticket_change',
-            field=models.BooleanField(default=helpdesk.models.email_on_ticket_change_default, help_text="If you're the ticket owner and the ticket is changed via the web by somebody else,do you want to receive an e-mail?", verbose_name='E-mail me on ticket change?'),
+            model_name="usersettings",
+            name="email_on_ticket_change",
+            field=models.BooleanField(
+                default=helpdesk.models.email_on_ticket_change_default,
+                help_text="If you're the ticket owner and the ticket is changed via the web by somebody else,do you want to receive an e-mail?",
+                verbose_name="E-mail me on ticket change?",
+            ),
         ),
-    ]  
+    ]

@@ -7,14 +7,14 @@ from django.utils.translation import gettext_lazy as _
 
 def create_and_assign_permissions(apps, schema_editor):
     db_alias = schema_editor.connection.alias
-    Permission = apps.get_model('auth', 'Permission')
-    ContentType = apps.get_model('contenttypes', 'ContentType')
+    Permission = apps.get_model("auth", "Permission")
+    ContentType = apps.get_model("contenttypes", "ContentType")
     # Two steps:
     #   1. Create the permission for existing Queues
     #   2. Assign the permission to user according to QueueMembership objects
 
     # First step: prepare the permission for each queue
-    Queue = apps.get_model('helpdesk', 'Queue')
+    Queue = apps.get_model("helpdesk", "Queue")
     for q in Queue.objects.using(db_alias).all():
         if not q.permission_name:
             basename = "queue_access_%s" % q.slug
@@ -35,7 +35,7 @@ def create_and_assign_permissions(apps, schema_editor):
         q.save()
 
     # Second step: map the permissions according to QueueMembership
-    QueueMembership = apps.get_model('helpdesk', 'QueueMembership')
+    QueueMembership = apps.get_model("helpdesk", "QueueMembership")
     for qm in QueueMembership.objects.using(db_alias).all():
         user = qm.user
         for q in qm.queues.all():
@@ -47,9 +47,9 @@ def create_and_assign_permissions(apps, schema_editor):
 
 def revert_queue_membership(apps, schema_editor):
     db_alias = schema_editor.connection.alias
-    Permission = apps.get_model('auth', 'Permission')
-    Queue = apps.get_model('helpdesk', 'Queue')
-    QueueMembership = apps.get_model('helpdesk', 'QueueMembership')
+    Permission = apps.get_model("auth", "Permission")
+    Queue = apps.get_model("helpdesk", "Queue")
+    QueueMembership = apps.get_model("helpdesk", "QueueMembership")
     for p in Permission.objects.using(db_alias).all():
         if p.codename.startswith("queue_access_"):
             slug = p.codename[13:]
@@ -66,12 +66,10 @@ def revert_queue_membership(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('helpdesk', '0008_extra_for_permissions'),
+        ("helpdesk", "0008_extra_for_permissions"),
     ]
 
     operations = [
-        migrations.RunPython(create_and_assign_permissions,
-                             revert_queue_membership)
+        migrations.RunPython(create_and_assign_permissions, revert_queue_membership)
     ]

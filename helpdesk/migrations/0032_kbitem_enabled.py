@@ -4,15 +4,16 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('helpdesk', '0031_auto_20200225_1440'),
+        ("helpdesk", "0031_auto_20200225_1440"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='kbitem',
-            name='enabled',
-            field=models.BooleanField(default=True, verbose_name='Enabled to display to users'),
+            model_name="kbitem",
+            name="enabled",
+            field=models.BooleanField(
+                default=True, verbose_name="Enabled to display to users"
+            ),
         ),
     ]

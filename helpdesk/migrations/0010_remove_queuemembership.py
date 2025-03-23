@@ -3,21 +3,20 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('helpdesk', '0009_migrate_queuemembership'),
+        ("helpdesk", "0009_migrate_queuemembership"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='queuemembership',
-            name='queues',
+            model_name="queuemembership",
+            name="queues",
         ),
         migrations.RemoveField(
-            model_name='queuemembership',
-            name='user',
+            model_name="queuemembership",
+            name="user",
         ),
         migrations.DeleteModel(
-            name='QueueMembership',
+            name="QueueMembership",
         ),
     ]

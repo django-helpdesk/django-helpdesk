@@ -4,15 +4,16 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('helpdesk', '0023_add_enable_notifications_on_email_events_to_ticket'),
+        ("helpdesk", "0023_add_enable_notifications_on_email_events_to_ticket"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='followup',
-            name='time_spent',
-            field=models.DurationField(blank=True, help_text='Time spent on this follow up', null=True),
+            model_name="followup",
+            name="time_spent",
+            field=models.DurationField(
+                blank=True, help_text="Time spent on this follow up", null=True
+            ),
         ),
     ]

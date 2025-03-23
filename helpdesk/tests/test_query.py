@@ -47,25 +47,57 @@ class QueryTests(TestCase):
         """Create a staff user and login"""
         User = get_user_model()
         self.user = User.objects.create(
-            username='User_1',
+            username="User_1",
             is_staff=is_staff,
         )
-        self.user.set_password('pass')
+        self.user.set_password("pass")
         self.user.save()
-        self.client.login(username='User_1', password='pass')
+        self.client.login(username="User_1", password="pass")
 
     def test_query_basic(self):
         self.loginUser()
         query = query_to_base64({})
         response = self.client.get(
-            reverse('helpdesk:datatables_ticket_list', args=[query]))
+            reverse("helpdesk:datatables_ticket_list", args=[query])
+        )
         resp_json = response.json()
         self.assertEqual(
             resp_json,
             {
-                "data":
-                [{"ticket": "1 [test_queue-1]", "id": 1, "priority": 3, "title": "unassigned to kbitem", "queue": {"title": "Test queue", "id": 1}, "status": "Open", "created": resp_json["data"][0]["created"], "due_date": None, "assigned_to": "None", "submitter": None, "last_followup": None, "row_class": "", "time_spent": "", "kbitem": ""},
-                 {"ticket": "2 [test_queue-2]", "id": 2, "priority": 3, "title": "assigned to kbitem", "queue": {"title": "Test queue", "id": 1}, "status": "Open", "created": resp_json["data"][1]["created"], "due_date": None, "assigned_to": "None", "submitter": None, "last_followup": None, "row_class": "", "time_spent": "", "kbitem": "KBItem 1"}],
+                "data": [
+                    {
+                        "ticket": "1 [test_queue-1]",
+                        "id": 1,
+                        "priority": 3,
+                        "title": "unassigned to kbitem",
+                        "queue": {"title": "Test queue", "id": 1},
+                        "status": "Open",
+                        "created": resp_json["data"][0]["created"],
+                        "due_date": None,
+                        "assigned_to": "None",
+                        "submitter": None,
+                        "last_followup": None,
+                        "row_class": "",
+                        "time_spent": "",
+                        "kbitem": "",
+                    },
+                    {
+                        "ticket": "2 [test_queue-2]",
+                        "id": 2,
+                        "priority": 3,
+                        "title": "assigned to kbitem",
+                        "queue": {"title": "Test queue", "id": 1},
+                        "status": "Open",
+                        "created": resp_json["data"][1]["created"],
+                        "due_date": None,
+                        "assigned_to": "None",
+                        "submitter": None,
+                        "last_followup": None,
+                        "row_class": "",
+                        "time_spent": "",
+                        "kbitem": "KBItem 1",
+                    },
+                ],
                 "recordsFiltered": 2,
                 "recordsTotal": 2,
                 "draw": 0,
@@ -74,18 +106,32 @@ class QueryTests(TestCase):
 
     def test_query_by_kbitem(self):
         self.loginUser()
-        query = query_to_base64(
-            {'filtering': {'kbitem__in': [self.kbitem1.pk]}}
-        )
+        query = query_to_base64({"filtering": {"kbitem__in": [self.kbitem1.pk]}})
         response = self.client.get(
-            reverse('helpdesk:datatables_ticket_list', args=[query]))
+            reverse("helpdesk:datatables_ticket_list", args=[query])
+        )
         resp_json = response.json()
         self.assertEqual(
             resp_json,
             {
-                "data":
-                [{"ticket": "2 [test_queue-2]", "id": 2, "priority": 3, "title": "assigned to kbitem", "queue": {"title": "Test queue", "id": 1}, "status": "Open",
-                    "created": resp_json["data"][0]["created"], "due_date": None, "assigned_to": "None", "submitter": None, "last_followup": None, "row_class": "", "time_spent": "", "kbitem": "KBItem 1"}],
+                "data": [
+                    {
+                        "ticket": "2 [test_queue-2]",
+                        "id": 2,
+                        "priority": 3,
+                        "title": "assigned to kbitem",
+                        "queue": {"title": "Test queue", "id": 1},
+                        "status": "Open",
+                        "created": resp_json["data"][0]["created"],
+                        "due_date": None,
+                        "assigned_to": "None",
+                        "submitter": None,
+                        "last_followup": None,
+                        "row_class": "",
+                        "time_spent": "",
+                        "kbitem": "KBItem 1",
+                    }
+                ],
                 "recordsFiltered": 1,
                 "recordsTotal": 1,
                 "draw": 0,
@@ -94,18 +140,32 @@ class QueryTests(TestCase):
 
     def test_query_by_no_kbitem(self):
         self.loginUser()
-        query = query_to_base64(
-            {'filtering_null': {'kbitem__isnull': True}}
-        )
+        query = query_to_base64({"filtering_null": {"kbitem__isnull": True}})
         response = self.client.get(
-            reverse('helpdesk:datatables_ticket_list', args=[query]))
+            reverse("helpdesk:datatables_ticket_list", args=[query])
+        )
         resp_json = response.json()
         self.assertEqual(
             resp_json,
             {
-                "data":
-                [{"ticket": "1 [test_queue-1]", "id": 1, "priority": 3, "title": "unassigned to kbitem", "queue": {"title": "Test queue", "id": 1}, "status": "Open",
-                    "created": resp_json["data"][0]["created"], "due_date": None, "assigned_to": "None", "submitter": None, "last_followup": None, "row_class": "", "time_spent": "", "kbitem": ""}],
+                "data": [
+                    {
+                        "ticket": "1 [test_queue-1]",
+                        "id": 1,
+                        "priority": 3,
+                        "title": "unassigned to kbitem",
+                        "queue": {"title": "Test queue", "id": 1},
+                        "status": "Open",
+                        "created": resp_json["data"][0]["created"],
+                        "due_date": None,
+                        "assigned_to": "None",
+                        "submitter": None,
+                        "last_followup": None,
+                        "row_class": "",
+                        "time_spent": "",
+                        "kbitem": "",
+                    }
+                ],
                 "recordsFiltered": 1,
                 "recordsTotal": 1,
                 "draw": 0,

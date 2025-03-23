@@ -6,31 +6,63 @@ import helpdesk.models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('helpdesk', '0025_queue_dedicated_time'),
+        ("helpdesk", "0025_queue_dedicated_time"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='KBIAttachment',
+            name="KBIAttachment",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('file', models.FileField(max_length=1000, upload_to=helpdesk.models.attachment_path, verbose_name='File')),
-                ('filename', models.CharField(max_length=1000, verbose_name='Filename')),
-                ('mime_type', models.CharField(max_length=255, verbose_name='MIME Type')),
-                ('size', models.IntegerField(help_text='Size of this file in bytes', verbose_name='Size')),
-                ('kbitem', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='helpdesk.KBItem', verbose_name='Knowledge base item')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "file",
+                    models.FileField(
+                        max_length=1000,
+                        upload_to=helpdesk.models.attachment_path,
+                        verbose_name="File",
+                    ),
+                ),
+                (
+                    "filename",
+                    models.CharField(max_length=1000, verbose_name="Filename"),
+                ),
+                (
+                    "mime_type",
+                    models.CharField(max_length=255, verbose_name="MIME Type"),
+                ),
+                (
+                    "size",
+                    models.IntegerField(
+                        help_text="Size of this file in bytes", verbose_name="Size"
+                    ),
+                ),
+                (
+                    "kbitem",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="helpdesk.KBItem",
+                        verbose_name="Knowledge base item",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Attachment',
-                'verbose_name_plural': 'Attachments',
-                'ordering': ('filename',),
-                'abstract': False,
+                "verbose_name": "Attachment",
+                "verbose_name_plural": "Attachments",
+                "ordering": ("filename",),
+                "abstract": False,
             },
         ),
         migrations.RenameModel(
-            old_name='Attachment',
-            new_name='FollowUpAttachment',
+            old_name="Attachment",
+            new_name="FollowUpAttachment",
         ),
     ]

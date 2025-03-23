@@ -22,25 +22,24 @@ from helpdesk.models import Queue
 
 
 class Command(BaseCommand):
-
     def add_arguments(self, parser):
         parser.add_argument(
-            '-q',
-            '--queues',
-            nargs='*',
-            choices=list(Queue.objects.values_list('slug', flat=True)),
-            help='Queues to include (default: all). Enter the queues slug as space separated list.'
+            "-q",
+            "--queues",
+            nargs="*",
+            choices=list(Queue.objects.values_list("slug", flat=True)),
+            help="Queues to include (default: all). Enter the queues slug as space separated list.",
         )
         parser.add_argument(
-            '-x',
-            '--escalate-verbosely',
-            action='store_true',
+            "-x",
+            "--escalate-verbosely",
+            action="store_true",
             default=False,
-            help='Display a list of dates excluded'
+            help="Display a list of dates excluded",
         )
 
     def handle(self, *args, **options):
-        queue_slugs = options['queues']
+        queue_slugs = options["queues"]
 
         if queue_slugs is not None:
             queues = Queue.objects.filter(slug__in=queue_slugs)
@@ -53,16 +52,17 @@ class Command(BaseCommand):
 
             if q.permission_name:
                 self.stdout.write(
-                    f"  .. already has `permission_name={q.permission_name}`")
+                    f"  .. already has `permission_name={q.permission_name}`"
+                )
                 basename = q.permission_name[9:]
             else:
                 basename = q.generate_permission_name()
                 self.stdout.write(
-                    f"  .. generated `permission_name={q.permission_name}`")
+                    f"  .. generated `permission_name={q.permission_name}`"
+                )
                 q.save()
 
-            self.stdout.write(
-                f"  .. checking permission codename `{basename}`")
+            self.stdout.write(f"  .. checking permission codename `{basename}`")
 
             try:
                 Permission.objects.create(

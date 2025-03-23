@@ -1,6 +1,12 @@
 from django.contrib.auth import get_user_model
 from helpdesk.models import FollowUp, FollowUpAttachment, Ticket
-from helpdesk.serializers import FollowUpAttachmentSerializer, FollowUpSerializer, TicketSerializer, UserSerializer, PublicTicketListingSerializer
+from helpdesk.serializers import (
+    FollowUpAttachmentSerializer,
+    FollowUpSerializer,
+    TicketSerializer,
+    UserSerializer,
+    PublicTicketListingSerializer,
+)
 from rest_framework import viewsets
 from rest_framework.mixins import CreateModelMixin
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
@@ -12,7 +18,7 @@ from helpdesk import settings as helpdesk_settings
 
 class ConservativePagination(PageNumberPagination):
     page_size = 25
-    page_size_query_param = 'page_size'
+    page_size_query_param = "page_size"
 
 
 class UserTicketViewSet(viewsets.ReadOnlyModelViewSet):
@@ -21,16 +27,18 @@ class UserTicketViewSet(viewsets.ReadOnlyModelViewSet):
 
     The view is paginated by default
     """
+
     serializer_class = PublicTicketListingSerializer
     pagination_class = ConservativePagination
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        tickets = Ticket.objects.filter(submitter_email=self.request.user.email).order_by('-created')
+        tickets = Ticket.objects.filter(
+            submitter_email=self.request.user.email
+        ).order_by("-created")
         for ticket in tickets:
             ticket.set_custom_field_values()
         return tickets
-
 
 
 class TicketViewSet(viewsets.ModelViewSet):
@@ -41,6 +49,7 @@ class TicketViewSet(viewsets.ModelViewSet):
 
     `/api/tickets/?status=Open,Resolved` will return all the tickets that are Open or Resolved.
     """
+
     queryset = Ticket.objects.all()
     serializer_class = TicketSerializer
     pagination_class = ConservativePagination
@@ -50,17 +59,17 @@ class TicketViewSet(viewsets.ModelViewSet):
         tickets = Ticket.objects.all()
 
         # filter by status
-        status = self.request.query_params.get('status', None)
+        status = self.request.query_params.get("status", None)
         if status:
-          statuses = status.split(',') if status else []
-          status_choices = helpdesk_settings.TICKET_STATUS_CHOICES
-          number_statuses = []
-          for status in statuses:
-              for choice in status_choices:
-                  if str(choice[0]) == status:
-                      number_statuses.append(choice[0])
-          if number_statuses:
-              tickets = tickets.filter(status__in=number_statuses)
+            statuses = status.split(",") if status else []
+            status_choices = helpdesk_settings.TICKET_STATUS_CHOICES
+            number_statuses = []
+            for status in statuses:
+                for choice in status_choices:
+                    if str(choice[0]) == status:
+                        number_statuses.append(choice[0])
+            if number_statuses:
+                tickets = tickets.filter(status__in=number_statuses)
 
         for ticket in tickets:
             ticket.set_custom_field_values()
