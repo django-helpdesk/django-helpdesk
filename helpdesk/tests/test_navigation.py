@@ -148,7 +148,7 @@ class StaffUsersOnlyTestCase(StaffUserTestCaseMixin, TestCase):
         """
         user = self.non_staff_user
         self.client.login(username=user.username, password=self.non_staff_user_password)
-        queue = Queue.objects.create(
+        Queue.objects.create(
             title="Foo",
             slug="test_queue",
         )
@@ -217,7 +217,7 @@ class HomePageAnonymousUserTestCase(TestCase):
 
     def test_homepage(self):
         helpdesk_settings.HELPDESK_REDIRECT_TO_LOGIN_BY_DEFAULT = True
-        response = self.client.get(reverse("helpdesk:home"))
+        self.client.get(reverse("helpdesk:home"))
         self.assertTemplateUsed("helpdesk/public_homepage.html")
 
     def test_redirect_to_login(self):
