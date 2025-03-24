@@ -97,8 +97,6 @@ class TicketBasicsTestCase(TestCase):
         self.assertIsNone(ticket.followup_set.first().user)
 
     def test_create_ticket_public_with_hidden_fields(self):
-        email_count = len(mail.outbox)
-
         response = self.client.get(reverse("helpdesk:home"))
         self.assertEqual(response.status_code, 200)
 
@@ -503,8 +501,6 @@ class EmailInteractionsTestCase(TestCase):
         msg.__setitem__("Content-Type", "text/plain;")
         msg.set_payload(self.ticket_data["description"])
 
-        email_count = len(mail.outbox)
-
         extract_email_metadata(str(msg), self.queue_public, logger=logger)
 
         followup = FollowUp.objects.get(message_id=message_id)
@@ -594,8 +590,6 @@ class EmailInteractionsTestCase(TestCase):
         msg.__setitem__("Cc", ",".join(cc_list))
         msg.__setitem__("Content-Type", "text/plain;")
         msg.set_payload(self.ticket_data["description"])
-
-        email_count = len(mail.outbox)
 
         extract_email_metadata(str(msg), self.queue_public, logger=logger)
 
@@ -1043,8 +1037,6 @@ class EmailInteractionsTestCase(TestCase):
         msg.__setitem__("To", self.queue_public.email_address)
         msg.__setitem__("Content-Type", "text/plain;")
         msg.set_payload(self.ticket_data["description"])
-
-        email_count = len(mail.outbox)
 
         extract_email_metadata(str(msg), self.queue_public, logger=logger)
 

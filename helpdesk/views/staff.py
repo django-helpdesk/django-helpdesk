@@ -637,7 +637,6 @@ def update_ticket_view(request, ticket_id, public=False):
         if new_checklist != old_completed:
             changes_in_checklists = True
 
-    time_spent = get_time_spent_from_request(request)
     # NOTE: jQuery's default for dates is mm/dd/yy
     # very US-centric but for now that's the only format supported
     # until we clean up code to internationalize a little more

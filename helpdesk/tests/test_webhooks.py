@@ -270,9 +270,6 @@ class WebhookTest(APITestCase):
         self.assertEqual(len(handled_webhook_requests["follow_up_requests"]), 0)
 
         ticket_id = handled_webhook_requests["new_ticket_requests"][-1]["ticket"]["id"]
-        from .. import models
-
-        ticket = models.Ticket.objects.get(id=ticket_id)
 
         payload = {
             "body": "hello",

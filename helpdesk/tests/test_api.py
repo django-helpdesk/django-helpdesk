@@ -415,7 +415,7 @@ class UserTicketTest(APITestCase):
         ticket_1 = Ticket.objects.create(
             queue=self.queue, title="Test 1", submitter_email="foo@example.com"
         )
-        ticket_2 = Ticket.objects.create(
+        Ticket.objects.create(
             queue=self.queue, title="Test 2", submitter_email="bar@example.com"
         )
         ticket_3 = Ticket.objects.create(
@@ -432,10 +432,10 @@ class UserTicketTest(APITestCase):
         staff_user = User.objects.create_user(
             username="test2", is_staff=True, email="staff@example.com"
         )
-        ticket_1 = Ticket.objects.create(
+        Ticket.objects.create(
             queue=self.queue, title="Test 1", submitter_email="staff@example.com"
         )
-        ticket_2 = Ticket.objects.create(
+        Ticket.objects.create(
             queue=self.queue, title="Test 2", submitter_email="foo@example.com"
         )
         self.client.force_authenticate(staff_user)
@@ -444,7 +444,7 @@ class UserTicketTest(APITestCase):
         self.assertEqual(len(response.data["results"]), 1)
 
     def test_not_logged_in_user(self):
-        ticket_1 = Ticket.objects.create(
+        Ticket.objects.create(
             queue=self.queue, title="Test 1", submitter_email="ex@example.com"
         )
         self.client.logout()
