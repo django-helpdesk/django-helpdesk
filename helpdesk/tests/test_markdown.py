@@ -1,10 +1,10 @@
-
 from django.test import SimpleTestCase
 from helpdesk.models import get_markdown
 
 
 class MarkDown(SimpleTestCase):
     """Test work Markdown functional"""
+
     def test_markdown_html_tab(self):
         expected_value = "<p>&lt;div&gt;test&lt;div&gt;</p>"
         input_value = "<div>test<div>"
@@ -12,7 +12,7 @@ class MarkDown(SimpleTestCase):
         self.assertEqual(output_value, expected_value)
 
     def test_markdown_nl2br(self):
-        """ warning, after Line 1 - two withespace, esle did't work"""
+        """warning, after Line 1 - two withespace, esle did't work"""
         expected_value = "<p>Line 1<br />\n                    Line 2</p>"
         input_value = """Line 1  
                     Line 2"""

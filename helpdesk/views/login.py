@@ -5,24 +5,22 @@ from django.shortcuts import resolve_url
 
 
 default_login_view = auth_views.LoginView.as_view(
-    template_name='helpdesk/registration/login.html')
+    template_name="helpdesk/registration/login.html"
+)
 
 
 def login(request):
     login_url = settings.LOGIN_URL
     # Prevent redirect loop by checking that LOGIN_URL is not this view's name
-    condition = (
-        login_url
-        and (
-            login_url != resolve_url(request.resolver_match.view_name)
-            and (login_url != request.resolver_match.view_name)
-        )
+    condition = login_url and (
+        login_url != resolve_url(request.resolver_match.view_name)
+        and (login_url != request.resolver_match.view_name)
     )
     if condition:
-        if 'next' in request.GET:
-            return_to = request.GET['next']
+        if "next" in request.GET:
+            return_to = request.GET["next"]
         else:
-            return_to = resolve_url('helpdesk:home')
+            return_to = resolve_url("helpdesk:home")
         return redirect_to_login(return_to, login_url)
     else:
         return default_login_view(request)

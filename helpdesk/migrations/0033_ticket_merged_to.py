@@ -5,15 +5,21 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('helpdesk', '0032_kbitem_enabled'),
+        ("helpdesk", "0032_kbitem_enabled"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='ticket',
-            name='merged_to',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='merged_tickets', to='helpdesk.Ticket', verbose_name='merged to'),
+            model_name="ticket",
+            name="merged_to",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="merged_tickets",
+                to="helpdesk.Ticket",
+                verbose_name="merged to",
+            ),
         ),
     ]

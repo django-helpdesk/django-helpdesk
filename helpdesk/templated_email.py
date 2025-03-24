@@ -1,4 +1,3 @@
-
 from django.conf import settings
 from django.utils.safestring import mark_safe
 import logging
@@ -6,17 +5,19 @@ import os
 from smtplib import SMTPException
 
 
-logger = logging.getLogger('helpdesk')
+logger = logging.getLogger("helpdesk")
 
 
-def send_templated_mail(template_name,
-                        context,
-                        recipients,
-                        sender=None,
-                        bcc=None,
-                        fail_silently=False,
-                        files=None,
-                        extra_headers=None):
+def send_templated_mail(
+    template_name,
+    context,
+    recipients,
+    sender=None,
+    bcc=None,
+    fail_silently=False,
+    files=None,
+    extra_headers=None,
+):
     """
     send_templated_mail() is a wrapper around Django's e-mail routines that
     allows us to easily send multipart (text/plain & text/html) e-mails using
@@ -48,77 +49,87 @@ def send_templated_mail(template_name,
     """
     from django.core.mail import EmailMultiAlternatives
     from django.template import engines
-    from_string = engines['django'].from_string
+
+    from_string = engines["django"].from_string
 
     from helpdesk.models import EmailTemplate
-    from helpdesk.settings import HELPDESK_EMAIL_FALLBACK_LOCALE, HELPDESK_EMAIL_SUBJECT_TEMPLATE
+    from helpdesk.settings import (
+        HELPDESK_EMAIL_FALLBACK_LOCALE,
+        HELPDESK_EMAIL_SUBJECT_TEMPLATE,
+    )
 
     headers = extra_headers or {}
 
-    locale = context['queue'].get('locale') or HELPDESK_EMAIL_FALLBACK_LOCALE
+    locale = context["queue"].get("locale") or HELPDESK_EMAIL_FALLBACK_LOCALE
 
     try:
         t = EmailTemplate.objects.get(
-            template_name__iexact=template_name, locale=locale)
+            template_name__iexact=template_name, locale=locale
+        )
     except EmailTemplate.DoesNotExist:
         try:
             t = EmailTemplate.objects.get(
-                template_name__iexact=template_name, locale__isnull=True)
+                template_name__iexact=template_name, locale__isnull=True
+            )
         except EmailTemplate.DoesNotExist:
-            logger.warning(
-                'template "%s" does not exist, no mail sent', template_name)
+            logger.warning('template "%s" does not exist, no mail sent', template_name)
             return  # just ignore if template doesn't exist
 
-    subject_part = from_string(
-        HELPDESK_EMAIL_SUBJECT_TEMPLATE % {
-            "subject": t.subject
-        }).render(context).replace('\n', '').replace('\r', '')
+    subject_part = (
+        from_string(HELPDESK_EMAIL_SUBJECT_TEMPLATE % {"subject": t.subject})
+        .render(context)
+        .replace("\n", "")
+        .replace("\r", "")
+    )
 
-    footer_file = os.path.join('helpdesk', locale, 'email_text_footer.txt')
+    footer_file = os.path.join("helpdesk", locale, "email_text_footer.txt")
 
     text_part = from_string(
         "%s\n\n{%% include '%s' %%}" % (t.plain_text, footer_file)
     ).render(context)
 
-    email_html_base_file = os.path.join(
-        'helpdesk', locale, 'email_html_base.html')
+    email_html_base_file = os.path.join("helpdesk", locale, "email_html_base.html")
     # keep new lines in html emails
-    if 'comment' in context:
-        context['comment'] = mark_safe(
-            context['comment'].replace('\r\n', '<br>'))
+    if "comment" in context:
+        context["comment"] = mark_safe(context["comment"].replace("\r\n", "<br>"))
 
     html_part = from_string(
         "{%% extends '%s' %%}"
         "{%% block title %%}%s{%% endblock %%}"
-        "{%% block content %%}%s{%% endblock %%}" %
-        (email_html_base_file, t.heading, t.html)
+        "{%% block content %%}%s{%% endblock %%}"
+        % (email_html_base_file, t.heading, t.html)
     ).render(context)
 
     if isinstance(recipients, str):
-        if recipients.find(','):
-            recipients = recipients.split(',')
+        if recipients.find(","):
+            recipients = recipients.split(",")
     elif type(recipients) is not list:
         recipients = [recipients]
 
-    msg = EmailMultiAlternatives(subject_part, text_part,
-                                 sender or settings.DEFAULT_FROM_EMAIL,
-                                 recipients, bcc=bcc,
-                                 headers=headers)
+    msg = EmailMultiAlternatives(
+        subject_part,
+        text_part,
+        sender or settings.DEFAULT_FROM_EMAIL,
+        recipients,
+        bcc=bcc,
+        headers=headers,
+    )
     msg.attach_alternative(html_part, "text/html")
 
     if files:
         for filename, filefield in files:
-            filefield.open('rb')
+            filefield.open("rb")
             content = filefield.read()
             msg.attach(filename, content)
             filefield.close()
-    logger.debug('Sending email to: {!r}'.format(recipients))
+    logger.debug("Sending email to: {!r}".format(recipients))
 
     try:
         return msg.send()
     except SMTPException as e:
         logger.exception(
-            'SMTPException raised while sending email to {}'.format(recipients))
+            "SMTPException raised while sending email to {}".format(recipients)
+        )
         if not fail_silently:
             raise e
         return 0

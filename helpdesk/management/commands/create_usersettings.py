@@ -20,10 +20,12 @@ User = get_user_model()
 class Command(BaseCommand):
     """create_usersettings command"""
 
-    help = _('Check for user without django-helpdesk UserSettings '
-             'and create settings if required. Uses '
-             'settings.DEFAULT_USER_SETTINGS which can be overridden to '
-             'suit your situation.')
+    help = _(
+        "Check for user without django-helpdesk UserSettings "
+        "and create settings if required. Uses "
+        "settings.DEFAULT_USER_SETTINGS which can be overridden to "
+        "suit your situation."
+    )
 
     def handle(self, *args, **options):
         """handle command line"""

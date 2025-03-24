@@ -4,15 +4,18 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('helpdesk', '0024_time_spent'),
+        ("helpdesk", "0024_time_spent"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='queue',
-            name='dedicated_time',
-            field=models.DurationField(blank=True, help_text='Time to be spent on this Queue in total', null=True),
+            model_name="queue",
+            name="dedicated_time",
+            field=models.DurationField(
+                blank=True,
+                help_text="Time to be spent on this Queue in total",
+                null=True,
+            ),
         ),
     ]

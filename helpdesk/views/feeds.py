@@ -25,8 +25,8 @@ for open_status in Ticket.OPEN_STATUSES:
 
 
 class OpenTicketsByUser(Feed):
-    title_template = 'helpdesk/rss/ticket_title.html'
-    description_template = 'helpdesk/rss/ticket_description.html'
+    title_template = "helpdesk/rss/ticket_title.html"
+    description_template = "helpdesk/rss/ticket_description.html"
 
     def get_object(self, request, user_name, queue_slug=None):
         user = get_object_or_404(User, username=user_name)
@@ -35,54 +35,56 @@ class OpenTicketsByUser(Feed):
         else:
             queue = None
 
-        return {'user': user, 'queue': queue}
+        return {"user": user, "queue": queue}
 
     def title(self, obj):
-        if obj['queue']:
+        if obj["queue"]:
             return _("Helpdesk: Open Tickets in queue %(queue)s for %(username)s") % {
-                'queue': obj['queue'].title,
-                'username': obj['user'].get_username(),
+                "queue": obj["queue"].title,
+                "username": obj["user"].get_username(),
             }
         else:
             return _("Helpdesk: Open Tickets for %(username)s") % {
-                'username': obj['user'].get_username(),
+                "username": obj["user"].get_username(),
             }
 
     def description(self, obj):
-        if obj['queue']:
-            return _("Open and Reopened Tickets in queue %(queue)s for %(username)s") % {
-                'queue': obj['queue'].title,
-                'username': obj['user'].get_username(),
+        if obj["queue"]:
+            return _(
+                "Open and Reopened Tickets in queue %(queue)s for %(username)s"
+            ) % {
+                "queue": obj["queue"].title,
+                "username": obj["user"].get_username(),
             }
         else:
             return _("Open and Reopened Tickets for %(username)s") % {
-                'username': obj['user'].get_username(),
+                "username": obj["user"].get_username(),
             }
 
     def link(self, obj):
-        if obj['queue']:
-            return u'%s?assigned_to=%s&queue=%s' % (
-                reverse('helpdesk:list'),
-                obj['user'].id,
-                obj['queue'].id,
+        if obj["queue"]:
+            return "%s?assigned_to=%s&queue=%s" % (
+                reverse("helpdesk:list"),
+                obj["user"].id,
+                obj["queue"].id,
             )
         else:
-            return u'%s?assigned_to=%s' % (
-                reverse('helpdesk:list'),
-                obj['user'].id,
+            return "%s?assigned_to=%s" % (
+                reverse("helpdesk:list"),
+                obj["user"].id,
             )
 
     def items(self, obj):
-        if obj['queue']:
-            return Ticket.objects.filter(
-                assigned_to=obj['user']
-            ).filter(
-                queue=obj['queue']
-            ).filter(Q_OPEN_STATUSES)
+        if obj["queue"]:
+            return (
+                Ticket.objects.filter(assigned_to=obj["user"])
+                .filter(queue=obj["queue"])
+                .filter(Q_OPEN_STATUSES)
+            )
         else:
-            return Ticket.objects.filter(
-                assigned_to=obj['user']
-            ).filter(Q_OPEN_STATUSES)
+            return Ticket.objects.filter(assigned_to=obj["user"]).filter(
+                Q_OPEN_STATUSES
+            )
 
     def item_pubdate(self, item):
         return item.created
@@ -91,21 +93,19 @@ class OpenTicketsByUser(Feed):
         if item.assigned_to:
             return item.assigned_to.get_username()
         else:
-            return _('Unassigned')
+            return _("Unassigned")
 
 
 class UnassignedTickets(Feed):
-    title_template = 'helpdesk/rss/ticket_title.html'
-    description_template = 'helpdesk/rss/ticket_description.html'
+    title_template = "helpdesk/rss/ticket_title.html"
+    description_template = "helpdesk/rss/ticket_description.html"
 
-    title = _('Helpdesk: Unassigned Tickets')
-    description = _('Unassigned Open and Reopened tickets')
-    link = ''  # '%s?assigned_to=' % reverse('helpdesk:list')
+    title = _("Helpdesk: Unassigned Tickets")
+    description = _("Unassigned Open and Reopened tickets")
+    link = ""  # '%s?assigned_to=' % reverse('helpdesk:list')
 
     def items(self, obj):
-        return Ticket.objects.filter(
-            assigned_to__isnull=True
-        ).filter(Q_OPEN_STATUSES)
+        return Ticket.objects.filter(assigned_to__isnull=True).filter(Q_OPEN_STATUSES)
 
     def item_pubdate(self, item):
         return item.created
@@ -114,49 +114,48 @@ class UnassignedTickets(Feed):
         if item.assigned_to:
             return item.assigned_to.get_username()
         else:
-            return _('Unassigned')
+            return _("Unassigned")
 
 
 class RecentFollowUps(Feed):
-    title_template = 'helpdesk/rss/recent_activity_title.html'
-    description_template = 'helpdesk/rss/recent_activity_description.html'
+    title_template = "helpdesk/rss/recent_activity_title.html"
+    description_template = "helpdesk/rss/recent_activity_description.html"
 
-    title = _('Helpdesk: Recent Followups')
+    title = _("Helpdesk: Recent Followups")
     description = _(
-        'Recent FollowUps, such as e-mail replies, comments, attachments and resolutions')
-    link = '/tickets/'  # reverse('helpdesk:list')
+        "Recent FollowUps, such as e-mail replies, comments, attachments and resolutions"
+    )
+    link = "/tickets/"  # reverse('helpdesk:list')
 
     def items(self):
-        return FollowUp.objects.order_by('-date')[:20]
+        return FollowUp.objects.order_by("-date")[:20]
 
 
 class OpenTicketsByQueue(Feed):
-    title_template = 'helpdesk/rss/ticket_title.html'
-    description_template = 'helpdesk/rss/ticket_description.html'
+    title_template = "helpdesk/rss/ticket_title.html"
+    description_template = "helpdesk/rss/ticket_description.html"
 
     def get_object(self, request, queue_slug):
         return get_object_or_404(Queue, slug=queue_slug)
 
     def title(self, obj):
-        return _('Helpdesk: Open Tickets in queue %(queue)s') % {
-            'queue': obj.title,
+        return _("Helpdesk: Open Tickets in queue %(queue)s") % {
+            "queue": obj.title,
         }
 
     def description(self, obj):
-        return _('Open and Reopened Tickets in queue %(queue)s') % {
-            'queue': obj.title,
+        return _("Open and Reopened Tickets in queue %(queue)s") % {
+            "queue": obj.title,
         }
 
     def link(self, obj):
-        return '%s?queue=%s' % (
-            reverse('helpdesk:list'),
+        return "%s?queue=%s" % (
+            reverse("helpdesk:list"),
             obj.id,
         )
 
     def items(self, obj):
-        return Ticket.objects.filter(
-            queue=obj
-        ).filter(Q_OPEN_STATUSES)
+        return Ticket.objects.filter(queue=obj).filter(Q_OPEN_STATUSES)
 
     def item_pubdate(self, item):
         return item.created
@@ -165,4 +164,4 @@ class OpenTicketsByQueue(Feed):
         if item.assigned_to:
             return item.assigned_to.get_username()
         else:
-            return _('Unassigned')
+            return _("Unassigned")

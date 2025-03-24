@@ -14,56 +14,56 @@ from django.core.management.base import BaseCommand, CommandError
 from helpdesk.models import EscalationExclusion, Queue
 
 day_names = {
-    'monday': 0,
-    'tuesday': 1,
-    'wednesday': 2,
-    'thursday': 3,
-    'friday': 4,
-    'saturday': 5,
-    'sunday': 6,
+    "monday": 0,
+    "tuesday": 1,
+    "wednesday": 2,
+    "thursday": 3,
+    "friday": 4,
+    "saturday": 5,
+    "sunday": 6,
 }
 
 
 class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument(
-            '-d',
-            '--days',
-            nargs='*',
+            "-d",
+            "--days",
+            nargs="*",
             choices=list(day_names.keys()),
             required=True,
-            help='Days of week (monday, tuesday, etc). Enter the days as space separated list.'
+            help="Days of week (monday, tuesday, etc). Enter the days as space separated list.",
         )
         parser.add_argument(
-            '-o',
-            '--occurrences',
+            "-o",
+            "--occurrences",
             default=1,
             type=int,
-            help='Occurrences: How many weeks ahead to exclude this day'
+            help="Occurrences: How many weeks ahead to exclude this day",
         )
         parser.add_argument(
-            '-q',
-            '--queues',
-            nargs='*',
-            choices=list(Queue.objects.values_list('slug', flat=True)),
-            help='Queues to include (default: all). Enter the queues slug as space separated list.'
+            "-q",
+            "--queues",
+            nargs="*",
+            choices=list(Queue.objects.values_list("slug", flat=True)),
+            help="Queues to include (default: all). Enter the queues slug as space separated list.",
         )
         parser.add_argument(
-            '-x',
-            '--exclude-verbosely',
-            action='store_true',
+            "-x",
+            "--exclude-verbosely",
+            action="store_true",
             default=False,
-            help='Display a list of dates excluded'
+            help="Display a list of dates excluded",
         )
 
     def handle(self, *args, **options):
-        days = options['days']
-        occurrences = options['occurrences']
-        verbose = options['exclude_verbosely']
-        queue_slugs = options['queues']
+        days = options["days"]
+        occurrences = options["occurrences"]
+        verbose = options["exclude_verbosely"]
+        queue_slugs = options["queues"]
 
         if not (days and occurrences):
-            raise CommandError('One or more occurrences must be specified.')
+            raise CommandError("One or more occurrences must be specified.")
 
         queues = []
         if queue_slugs is not None:
@@ -77,12 +77,13 @@ class Command(BaseCommand):
                 if day == workdate.weekday():
                     if EscalationExclusion.objects.filter(date=workdate).count() == 0:
                         esc = EscalationExclusion.objects.create(
-                            name=f'Auto Exclusion for {day_name}',
-                            date=workdate
+                            name=f"Auto Exclusion for {day_name}", date=workdate
                         )
 
                         if verbose:
-                            self.stdout.write(f"Created exclusion for {day_name} {workdate}")
+                            self.stdout.write(
+                                f"Created exclusion for {day_name} {workdate}"
+                            )
 
                         for q in queues:
                             esc.queues.add(q)

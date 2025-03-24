@@ -12,6 +12,7 @@ def pickle_settings(data):
     except ImportError:
         import cPickle as pickle
     from helpdesk.query import b64encode
+
     return b64encode(pickle.dumps(data))
 
 
@@ -38,14 +39,12 @@ def populate_usersettings(apps, schema_editor):
 
 noop = lambda *args, **kwargs: None
 
-class Migration(migrations.Migration):
 
+class Migration(migrations.Migration):
     dependencies = [
-        ('helpdesk', '0001_initial'),
+        ("helpdesk", "0001_initial"),
     ]
 
     operations = [
         migrations.RunPython(populate_usersettings, reverse_code=noop),
     ]
-
-
