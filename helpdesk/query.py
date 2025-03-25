@@ -40,18 +40,17 @@ def get_search_filter_args(search):
         subsearch = subsearch.strip()
         if not subsearch:
             continue
-        my_filter = (
-            filter
-            | Q(id__icontains=subsearch)
-            | Q(title__icontains=subsearch)
-            | Q(description__icontains=subsearch)
-            | Q(priority__icontains=subsearch)
-            | Q(resolution__icontains=subsearch)
-            | Q(submitter_email__icontains=subsearch)
-            | Q(assigned_to__email__icontains=subsearch)
-            | Q(ticketcustomfieldvalue__value__icontains=subsearch)
-            | Q(created__icontains=subsearch)
-            | Q(due_date__icontains=subsearch)
+        my_filter |= (
+            Q(id__icontains=subsearch) |
+            Q(title__icontains=subsearch) |
+            Q(description__icontains=subsearch) |
+            Q(priority__icontains=subsearch) |
+            Q(resolution__icontains=subsearch) |
+            Q(submitter_email__icontains=subsearch) |
+            Q(assigned_to__email__icontains=subsearch) |
+            Q(ticketcustomfieldvalue__value__icontains=subsearch) |
+            Q(created__icontains=subsearch) |
+            Q(due_date__icontains=subsearch) 
         )
     return my_filter
 

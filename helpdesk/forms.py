@@ -221,7 +221,7 @@ class EditTicketCustomFieldForm(EditTicketForm):
             for field, value in self.cleaned_data.items():
                 if field.startswith("custom_"):
                     if value != self.fields[field].initial:
-                        c = followup.ticketchange_set.create(
+                        followup.ticketchange_set.create(
                             field=field.replace("custom_", "", 1),
                             old_value=self.fields[field].initial,
                             new_value=value,

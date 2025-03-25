@@ -366,7 +366,7 @@ class TicketActionsTestCase(TestCase):
             "comment": "first follow-up in new queue",
             "queue": str(new_queue.id),
         }
-        response = self.client.post(
+        self.client.post(
             reverse("helpdesk:update", kwargs={"ticket_id": ticket_id}), post_data
         )
 

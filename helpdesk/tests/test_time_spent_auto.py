@@ -428,7 +428,7 @@ class TimeSpentAutoTestCase(TestCase):
                 "comment": "ticket in queue {}".format(queue),
                 "queue": queues[queue].id,
             }
-            response = self.client.post(
+            self.client.post(
                 reverse("helpdesk:update", kwargs={"ticket_id": ticket.id}), post_data
             )
             latest_fup = ticket.followup_set.latest("id")

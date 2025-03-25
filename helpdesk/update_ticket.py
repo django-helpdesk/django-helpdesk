@@ -272,7 +272,7 @@ def update_ticket(
     files = process_attachments(f, files) if files else []
 
     if title and title != ticket.title:
-        c = f.ticketchange_set.create(
+        f.ticketchange_set.create(
             field=_("Title"),
             old_value=ticket.title,
             new_value=title,
@@ -280,21 +280,21 @@ def update_ticket(
         ticket.title = title
 
     if new_status != old_status:
-        c = f.ticketchange_set.create(
+        f.ticketchange_set.create(
             field=_("Status"),
             old_value=old_status_str,
             new_value=ticket.get_status_display(),
         )
 
     if ticket.assigned_to != old_owner:
-        c = f.ticketchange_set.create(
+        f.ticketchange_set.create(
             field=_("Owner"),
             old_value=old_owner,
             new_value=ticket.assigned_to,
         )
 
     if priority != ticket.priority:
-        c = f.ticketchange_set.create(
+        f.ticketchange_set.create(
             field=_("Priority"),
             old_value=ticket.priority,
             new_value=priority,
@@ -302,7 +302,7 @@ def update_ticket(
         ticket.priority = priority
 
     if queue != ticket.queue.id:
-        c = f.ticketchange_set.create(
+        f.ticketchange_set.create(
             field=_("Queue"),
             old_value=ticket.queue.id,
             new_value=queue,
@@ -310,7 +310,7 @@ def update_ticket(
         ticket.queue_id = queue
 
     if due_date != ticket.due_date:
-        c = f.ticketchange_set.create(
+        f.ticketchange_set.create(
             field=_("Due on"),
             old_value=ticket.due_date,
             new_value=due_date,
