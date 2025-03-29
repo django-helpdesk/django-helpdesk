@@ -400,13 +400,6 @@ HELPDESK_KB_ENABLED = (
     else getattr(settings, "HELPDESK_KB_ENABLED", True)
 )
 
-# Include all signatures and forwards in the first ticket message if set
-# Useful if you get forwards dropped from them while they are useful part
-# of request
-HELPDESK_FULL_FIRST_MESSAGE_FROM_EMAIL = getattr(
-    settings, "HELPDESK_FULL_FIRST_MESSAGE_FROM_EMAIL", False
-)
-
 # If set then we always save incoming emails as .eml attachments
 # which is quite noisy but very helpful for complicated markup, forwards and so on
 # (which gets stripped/corrupted otherwise)
