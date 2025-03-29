@@ -617,7 +617,9 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
             new = True
         else:
             # Possibly an email with no body but has an attachment
-            logger.debug("The QUEUE_EMAIL_BOX_UPDATE_ONLY setting is True so new ticket not created.")
+            logger.debug(
+                "The QUEUE_EMAIL_BOX_UPDATE_ONLY setting is True so new ticket not created."
+            )
             return None
     # Old issue being re-opened
     elif ticket.status == Ticket.CLOSED_STATUS:
