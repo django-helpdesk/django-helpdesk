@@ -47,6 +47,14 @@ fake_time = time.time()
 
 
 class GetEmailCommonTests(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+
+    @classmethod
+    def tearDownClass(cls):
+        super().tearDownClass()
+
     def setUp(self):
         self.queue_public = Queue.objects.create(title="Test", slug="test")
         self.logger = logging.getLogger("helpdesk")
@@ -482,6 +490,30 @@ class GetEmailCommonTests(TestCase):
             email_attachment_found,
             "Email attachment file not found ticket attachments: %s"
             % (email_att_filename),
+        )
+
+    @override_settings(QUEUE_EMAIL_BOX_UPDATE_ONLY=False)
+    def test_email_for_new_ticket_when_setting_allows_create(self):
+        """
+        A new ticket is created by email if the QUEUE_EMAIL_BOX_UPDATE_ONLY setting is False
+        """
+        message, _, _ = utils.generate_text_email(locale="en_GB")
+        ticket = helpdesk.email.extract_email_metadata(
+            message.as_string(), self.queue_public, self.logger
+        )
+        self.assertTrue(ticket is not None, "Ticket not created when it should be.")
+
+    @override_settings(QUEUE_EMAIL_BOX_UPDATE_ONLY=True)
+    def test_email_for_no_new_ticket_when_setting_only_allows_update(self):
+        """
+        A new ticket cannot be created by email if the QUEUE_EMAIL_BOX_UPDATE_ONLY setting is True
+        """
+        message, _, _ = utils.generate_text_email(locale="es_ES")
+        ticket = helpdesk.email.extract_email_metadata(
+            message.as_string(), self.queue_public, self.logger
+        )
+        self.assertTrue(
+            ticket is None, f"Ticket was created when it should not be: {ticket}"
         )
 
 
