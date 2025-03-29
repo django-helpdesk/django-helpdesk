@@ -8,7 +8,7 @@ See LICENSE for details.
 # import base64
 from bs4 import BeautifulSoup
 from datetime import timedelta
-from django.conf import settings as django_settings
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -20,7 +20,7 @@ from email import policy
 from email.message import EmailMessage, MIMEPart
 from email.utils import getaddresses
 from email_reply_parser import EmailReplyParser
-from helpdesk import settings
+from helpdesk import settings as helpdesk_settings
 from helpdesk.exceptions import DeleteIgnoredTicketException, IgnoreTicketException
 from helpdesk.lib import process_attachments, safe_template_context
 from helpdesk.models import FollowUp, IgnoreEmail, Queue, Ticket
@@ -138,8 +138,8 @@ def pop3_sync(q, logger, server):
         logger.warning(
             "POP3 StartTLS failed or unsupported. Connection will be unencrypted."
         )
-    server.user(q.email_box_user or settings.QUEUE_EMAIL_BOX_USER)
-    server.pass_(q.email_box_pass or settings.QUEUE_EMAIL_BOX_PASSWORD)
+    server.user(q.email_box_user or helpdesk_settings.QUEUE_EMAIL_BOX_USER)
+    server.pass_(q.email_box_pass or helpdesk_settings.QUEUE_EMAIL_BOX_PASSWORD)
 
     messagesInfo = server.list()[1]
     logger.info("Received %d messages from POP3 server" % len(messagesInfo))
@@ -198,8 +198,8 @@ def imap_sync(q, logger, server):
                 "IMAP4 StartTLS unsupported or failed. Connection will be unencrypted."
             )
         server.login(
-            q.email_box_user or settings.QUEUE_EMAIL_BOX_USER,
-            q.email_box_pass or settings.QUEUE_EMAIL_BOX_PASSWORD,
+            q.email_box_user or helpdesk_settings.QUEUE_EMAIL_BOX_USER,
+            q.email_box_pass or helpdesk_settings.QUEUE_EMAIL_BOX_PASSWORD,
         )
         server.select(q.email_box_imap_folder)
     except imaplib.IMAP4.abort:
@@ -280,19 +280,19 @@ def imap_oauth_sync(q, logger, server):
         logger.debug("Start Mailbox polling via IMAP OAUTH")
 
         client = oauth2lib.BackendApplicationClient(
-            client_id=settings.HELPDESK_OAUTH["client_id"],
-            scope=settings.HELPDESK_OAUTH["scope"],
+            client_id=helpdesk_settings.HELPDESK_OAUTH["client_id"],
+            scope=helpdesk_settings.HELPDESK_OAUTH["scope"],
         )
 
         oauth = requests_oauthlib.OAuth2Session(client=client)
         token = oauth.fetch_token(
-            token_url=settings.HELPDESK_OAUTH["token_url"],
-            client_id=settings.HELPDESK_OAUTH["client_id"],
-            client_secret=settings.HELPDESK_OAUTH["secret"],
+            token_url=helpdesk_settings.HELPDESK_OAUTH["token_url"],
+            client_id=helpdesk_settings.HELPDESK_OAUTH["client_id"],
+            client_secret=helpdesk_settings.HELPDESK_OAUTH["secret"],
             include_client_id=True,
         )
 
-        server.debug = settings.HELPDESK_IMAP_DEBUG_LEVEL
+        server.debug = helpdesk_settings.HELPDESK_IMAP_DEBUG_LEVEL
         # TODO: Perhaps store the authentication string template externally? Settings? Queue Table?
         server.authenticate(
             "XOAUTH2",
@@ -397,7 +397,7 @@ def process_queue(q, logger):
         )
         socket.socket = socks.socksocket
 
-    email_box_type = settings.QUEUE_EMAIL_BOX_TYPE or q.email_box_type
+    email_box_type = helpdesk_settings.QUEUE_EMAIL_BOX_TYPE or q.email_box_type
 
     mail_defaults = {
         "pop3": {
@@ -436,13 +436,13 @@ def process_queue(q, logger):
     }
     if email_box_type in mail_defaults:
         encryption = "insecure"
-        if q.email_box_ssl or settings.QUEUE_EMAIL_BOX_SSL:
+        if q.email_box_ssl or helpdesk_settings.QUEUE_EMAIL_BOX_SSL:
             encryption = "ssl"
         if not q.email_box_port:
             q.email_box_port = mail_defaults[email_box_type][encryption]["port"]
 
         server = mail_defaults[email_box_type][encryption]["init"](
-            q.email_box_host or settings.QUEUE_EMAIL_BOX_HOST, int(q.email_box_port)
+            q.email_box_host or helpdesk_settings.QUEUE_EMAIL_BOX_HOST, int(q.email_box_port)
         )
         logger.info("Attempting %s server login" % email_box_type.upper())
         mail_defaults[email_box_type]["sync"](q, logger, server)
@@ -603,7 +603,7 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
                 ticket = ticket.merged_to
     # New issue, create a new <Ticket> instance
     if ticket is None:
-        if not settings.QUEUE_EMAIL_BOX_UPDATE_ONLY:
+        if not getattr(settings, "QUEUE_EMAIL_BOX_UPDATE_ONLY", False):
             ticket = Ticket.objects.create(
                 title=payload["subject"],
                 queue=queue,
@@ -614,8 +614,11 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
             )
             ticket.save()
             logger.debug("Created new ticket %s-%s" % (ticket.queue.slug, ticket.id))
-
             new = True
+        else:
+            # Possibly an email with no body but has an attachment
+            logger.debug("The QUEUE_EMAIL_BOX_UPDATE_ONLY setting is True so new ticket not created.")
+            return None
     # Old issue being re-opened
     elif ticket.status == Ticket.CLOSED_STATUS:
         ticket.status = Ticket.REOPENED_STATUS
@@ -651,7 +654,7 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
         )
     )
 
-    if settings.HELPDESK_ENABLE_ATTACHMENTS:
+    if helpdesk_settings.HELPDESK_ENABLE_ATTACHMENTS:
         try:
             attached = process_attachments(f, files)
         except ValidationError as e:
@@ -747,7 +750,7 @@ def get_ticket_id_from_subject_slug(
 def add_file_if_always_save_incoming_email_message(files_, message: str) -> None:
     """When `settings.HELPDESK_ALWAYS_SAVE_INCOMING_EMAIL_MESSAGE` is `True`
     add a file to the files_ list"""
-    if getattr(django_settings, "HELPDESK_ALWAYS_SAVE_INCOMING_EMAIL_MESSAGE", False):
+    if getattr(settings, "HELPDESK_ALWAYS_SAVE_INCOMING_EMAIL_MESSAGE", False):
         # save message as attachment in case of some complex markup renders
         # wrong
         files_.append(
@@ -1066,7 +1069,7 @@ def extract_email_metadata(
     include_chained_msgs = (
         True
         if ticket_id is None
-        and getattr(django_settings, "HELPDESK_FULL_FIRST_MESSAGE_FROM_EMAIL", False)
+        and getattr(settings, "HELPDESK_FULL_FIRST_MESSAGE_FROM_EMAIL", False)
         else False
     )
     filtered_body, full_body = extract_email_message_content(
@@ -1076,7 +1079,7 @@ def extract_email_metadata(
     # no need to process attachments
     if (
         "multipart" == message_obj.get_content_maintype()
-        and settings.HELPDESK_ENABLE_ATTACHMENTS
+        and helpdesk_settings.HELPDESK_ENABLE_ATTACHMENTS
     ):
         # Find and attach all other parts or part contents as attachments
         counter, content_parts_excluded = extract_attachments(
@@ -1092,7 +1095,7 @@ def extract_email_metadata(
             logger.debug(
                 "Email parsed and %s attachments were found and attached.", counter
             )
-    if settings.HELPDESK_ENABLE_ATTACHMENTS:
+    if helpdesk_settings.HELPDESK_ENABLE_ATTACHMENTS:
         add_file_if_always_save_incoming_email_message(files, message)
 
     smtp_priority = message_obj.get("priority", "")
