@@ -501,7 +501,7 @@ class GetEmailCommonTests(TestCase):
         ticket = helpdesk.email.extract_email_metadata(
             message.as_string(), self.queue_public, self.logger
         )
-        self.assertTrue(ticket is not None, "Ticket not created when it should be.")
+        self.assertIsNotNone(ticket, "Ticket not created when it should be.")
 
     @override_settings(QUEUE_EMAIL_BOX_UPDATE_ONLY=True)
     def test_email_for_no_new_ticket_when_setting_only_allows_update(self):
@@ -512,8 +512,7 @@ class GetEmailCommonTests(TestCase):
         ticket = helpdesk.email.extract_email_metadata(
             message.as_string(), self.queue_public, self.logger
         )
-        self.assertTrue(
-            ticket is None, f"Ticket was created when it should not be: {ticket}"
+        self.assertIsNone(ticket, f"Ticket was created when it should not be: {ticket}"
         )
 
 
