@@ -37,7 +37,8 @@ def populate_usersettings(apps, schema_editor):
             UserSettings.objects.create(user=u, settings_pickled=settings_pickled)
 
 
-noop = lambda *args, **kwargs: None
+def noop(*args, **kwargs):
+    return None
 
 
 class Migration(migrations.Migration):
