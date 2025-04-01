@@ -442,7 +442,8 @@ def process_queue(q, logger):
             q.email_box_port = mail_defaults[email_box_type][encryption]["port"]
 
         server = mail_defaults[email_box_type][encryption]["init"](
-            q.email_box_host or helpdesk_settings.QUEUE_EMAIL_BOX_HOST, int(q.email_box_port)
+            q.email_box_host or helpdesk_settings.QUEUE_EMAIL_BOX_HOST,
+            int(q.email_box_port),
         )
         logger.info("Attempting %s server login" % email_box_type.upper())
         mail_defaults[email_box_type]["sync"](q, logger, server)

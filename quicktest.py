@@ -25,42 +25,43 @@ class QuickDjangoTest:
     Based on a script published by Lukasz Dziedzia at:
     http://stackoverflow.com/questions/3841725/how-to-launch-tests-for-django-reusable-app
     """
+
     DIRNAME = os.path.dirname(__file__)
     INSTALLED_APPS = (
-        'django.contrib.admin',
-        'django.contrib.auth',
-        'django.contrib.contenttypes',
-        'django.contrib.humanize',
-        'django.contrib.messages',
-        'django.contrib.sessions',
-        'django.contrib.sites',
-        'django.contrib.staticfiles',
-        'bootstrap4form',
+        "django.contrib.admin",
+        "django.contrib.auth",
+        "django.contrib.contenttypes",
+        "django.contrib.humanize",
+        "django.contrib.messages",
+        "django.contrib.sessions",
+        "django.contrib.sites",
+        "django.contrib.staticfiles",
+        "bootstrap4form",
         #  The following commented apps are optional,
         #  related to teams functionalities
         # 'account',
         # 'pinax.invitations',
         # 'pinax.teams',
-        'rest_framework',
-        'helpdesk',
+        "rest_framework",
+        "helpdesk",
         # 'reversion',
     )
     MIDDLEWARE = [
-        'django.middleware.security.SecurityMiddleware',
-        'django.contrib.sessions.middleware.SessionMiddleware',
-        'django.middleware.common.CommonMiddleware',
-        'django.middleware.csrf.CsrfViewMiddleware',
-        'django.contrib.auth.middleware.AuthenticationMiddleware',
-        'django.contrib.messages.middleware.MessageMiddleware',
-        'django.middleware.clickjacking.XFrameOptionsMiddleware',
+        "django.middleware.security.SecurityMiddleware",
+        "django.contrib.sessions.middleware.SessionMiddleware",
+        "django.middleware.common.CommonMiddleware",
+        "django.middleware.csrf.CsrfViewMiddleware",
+        "django.contrib.auth.middleware.AuthenticationMiddleware",
+        "django.contrib.messages.middleware.MessageMiddleware",
+        "django.middleware.clickjacking.XFrameOptionsMiddleware",
     ]
 
     TEMPLATES = [
         {
-            'BACKEND': 'django.template.backends.django.DjangoTemplates',
-            'APP_DIRS': True,
-            'OPTIONS': {
-                'context_processors': (
+            "BACKEND": "django.template.backends.django.DjangoTemplates",
+            "APP_DIRS": True,
+            "OPTIONS": {
+                "context_processors": (
                     # Defaults:
                     "django.contrib.auth.context_processors.auth",
                     "django.template.context_processors.debug",
@@ -82,37 +83,39 @@ class QuickDjangoTest:
         self._tests()
 
     def _tests(self):
-
         settings.configure(
             DEBUG=True,
-            TIME_ZONE='UTC',
+            TIME_ZONE="UTC",
             DATABASES={
-                'default': {
-                    'ENGINE': 'django.db.backends.sqlite3',
-                    'NAME': os.path.join(self.DIRNAME, 'database.db'),
-                    'USER': '',
-                    'PASSWORD': '',
-                    'HOST': '',
-                    'PORT': '',
+                "default": {
+                    "ENGINE": "django.db.backends.sqlite3",
+                    "NAME": os.path.join(self.DIRNAME, "database.db"),
+                    "USER": "",
+                    "PASSWORD": "",
+                    "HOST": "",
+                    "PORT": "",
                 }
             },
             INSTALLED_APPS=self.INSTALLED_APPS,
             MIDDLEWARE=self.MIDDLEWARE,
-            ROOT_URLCONF='helpdesk.tests.urls',
-            STATIC_URL='/static/',
-            LOGIN_URL='/login/',
+            ROOT_URLCONF="helpdesk.tests.urls",
+            STATIC_URL="/static/",
+            LOGIN_URL="/login/",
             TEMPLATES=self.TEMPLATES,
             SITE_ID=1,
-            SECRET_KEY='wowdonotusethisfakesecuritykeyyouneedarealsecure1',
+            SECRET_KEY="wowdonotusethisfakesecuritykeyyouneedarealsecure1",
             # The following settings disable teams
-            HELPDESK_TEAMS_MODEL='auth.User',
+            HELPDESK_TEAMS_MODEL="auth.User",
             HELPDESK_TEAMS_MIGRATION_DEPENDENCIES=[],
             HELPDESK_KBITEM_TEAM_GETTER=lambda _: None,
             # Set IMAP Server Debug Verbosity
-            HELPDESK_IMAP_DEBUG_LEVEL=int(os.environ.get("HELPDESK_IMAP_DEBUG_LEVEL", "0")),
+            HELPDESK_IMAP_DEBUG_LEVEL=int(
+                os.environ.get("HELPDESK_IMAP_DEBUG_LEVEL", "0")
+            ),
         )
 
         from django.test.runner import DiscoverRunner
+
         test_runner = DiscoverRunner(verbosity=self.kwargs["verbosity"])
         django.setup()
 
@@ -121,7 +124,7 @@ class QuickDjangoTest:
             sys.exit(failures)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     """
     What do when the user hits this file from the shell.
 
@@ -130,13 +133,10 @@ if __name__ == '__main__':
         $ python quicktest.py test1 test2
 
     """
-    parser = argparse.ArgumentParser(
-        usage="[args]",
-        description="Run Django tests."
-    )
-    parser.add_argument('tests', nargs="*", type=str)
+    parser = argparse.ArgumentParser(usage="[args]", description="Run Django tests.")
+    parser.add_argument("tests", nargs="*", type=str)
     parser.add_argument("--verbosity", "-v", nargs="?", type=int, default=1)
     args = parser.parse_args()
     if not args.tests:
-        args.tests = ['helpdesk']
+        args.tests = ["helpdesk"]
     QuickDjangoTest(*args.tests, verbosity=args.verbosity)
