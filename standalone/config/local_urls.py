@@ -1,2 +1,1 @@
-local_urlpatterns = [
-]
+local_urlpatterns = []

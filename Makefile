@@ -63,13 +63,15 @@ test:
 #: format - Run the PEP8 formatter.
 .PHONY: format
 format:
-	ruff format helpdesk 
+	ruff check --fix # Fix linting errors
+	ruff format # fix formatting errors
 
 
 #: checkformat - checks formatting against configured format specifications for the project.
 .PHONY: checkformat
 checkformat:
-	ruff check helpdesk
+	ruff check # linting check
+	ruff format --check # format check
 
 
 #: documentation - Build documentation (Sphinx, README, ...).

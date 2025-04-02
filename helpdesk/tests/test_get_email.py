@@ -512,8 +512,7 @@ class GetEmailCommonTests(TestCase):
         ticket = helpdesk.email.extract_email_metadata(
             message.as_string(), self.queue_public, self.logger
         )
-        self.assertIsNone(ticket, f"Ticket was created when it should not be: {ticket}"
-        )
+        self.assertIsNone(ticket, f"Ticket was created when it should not be: {ticket}")
 
 
 class EmailTaskTests(TestCase):

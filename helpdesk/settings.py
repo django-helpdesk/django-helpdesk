@@ -49,11 +49,15 @@ HELPDESK_REDIRECT_TO_LOGIN_BY_DEFAULT = getattr(
 )
 
 HELPDESK_PUBLIC_VIEW_PROTECTOR = getattr(
-    settings, "HELPDESK_PUBLIC_VIEW_PROTECTOR", lambda _: None
+    settings,
+    "HELPDESK_PUBLIC_VIEW_PROTECTOR",
+    lambda _: None,  # noqa
 )
 
 HELPDESK_STAFF_VIEW_PROTECTOR = getattr(
-    settings, "HELPDESK_STAFF_VIEW_PROTECTOR", lambda _: None
+    settings,
+    "HELPDESK_STAFF_VIEW_PROTECTOR",
+    lambda _: None,  # noqa
 )
 
 # Enable ticket and Email attachments
@@ -390,7 +394,7 @@ if HELPDESK_TEAMS_MODE_ENABLED:
 else:
     HELPDESK_TEAMS_MODEL = settings.AUTH_USER_MODEL
     HELPDESK_TEAMS_MIGRATION_DEPENDENCIES = []
-    HELPDESK_KBITEM_TEAM_GETTER = lambda _: None
+    HELPDESK_KBITEM_TEAM_GETTER = lambda _: None  # noqa
 
 # show knowledgebase links?
 # If Teams mode is enabled then it has to be on

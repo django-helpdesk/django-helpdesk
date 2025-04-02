@@ -13,6 +13,7 @@ Including another URLconf
     1. Import the include() function: from django.conf.urls import url, include
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
+
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
@@ -26,7 +27,7 @@ from django.urls import include, path
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', include('helpdesk.urls', namespace='helpdesk')),
-    path('api/auth/', include('rest_framework.urls', namespace='rest_framework'))
+    path("admin/", admin.site.urls),
+    path("", include("helpdesk.urls", namespace="helpdesk")),
+    path("api/auth/", include("rest_framework.urls", namespace="rest_framework")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
