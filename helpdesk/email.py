@@ -850,6 +850,9 @@ def extract_email_message_content(
            replies must be extracted
     """
     message_part: MIMEPart = part.get_body()
+    # handle the case where there is no content, just an attachment
+    if not message_part:
+        return None, None
     parent_part: MIMEPart = part
     content_type = message_part.get_content_type()
     # Handle the possibility of a related part formatted email
@@ -902,7 +905,9 @@ def extract_email_message_content(
         # Is either text/plain or some random content-type so just decode the part content and store as is
         mime_content = mime_content_to_string(message_part)
     # We should now have the mime content
-    filtered_body = parse_email_content(mime_content, include_chained_msgs)
+    filtered_body = (
+        parse_email_content(mime_content, include_chained_msgs) if mime_content else ""
+    )
     if not filtered_body or "" == filtered_body.strip():
         # A unit test that has a different HTML content to plain text which seems an invalid case as email
         # tools should retain the HTML to be consistent with the plain text but manage this as a special case
@@ -1088,7 +1093,8 @@ def extract_email_metadata(
         counter, content_parts_excluded = extract_attachments(
             message_obj, files, logger
         )
-        if not content_parts_excluded:
+        # Check if there is expected to be a content part
+        if not content_parts_excluded and (filtered_body or full_body):
             # Unexpected situation and may mean there is a hole in the email processing logic
             logger.warning(
                 "Failed to exclude email content when parsing all MIME parts in the multipart.\
