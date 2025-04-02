@@ -341,7 +341,9 @@ def generate_multipart_email(
 
 
 def generate_text_email(
-    locale: str = "en_US", use_short_email: bool = False, body: str = None,
+    locale: str = "en_US",
+    use_short_email: bool = False,
+    body: str = None,
 ) -> typing.Tuple[Message, typing.Tuple[str, str], typing.Tuple[str, str]]:
     """
     Generates an email including headers
