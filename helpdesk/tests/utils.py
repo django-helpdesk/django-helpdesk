@@ -288,15 +288,18 @@ def add_simple_email_headers(
 def generate_mime_part(
     locale: str = "en_US",
     part_type: str = "plain",
+    body: str = None,
 ) -> typing.Optional[Message]:
     """
-    Generates amime part of the sepecified type
+    Generates a mime part of the specified type
 
     :param locale: change this to generate locale specific strings
     :param text_type: options are plain, html, image (attachment), file (attachment)
+    :param body: if provided then will be added to the plain mime part only
     """
     if "plain" == part_type:
-        body = get_fake("text", locale=locale, min_length=1024)
+        if body is None:
+            body = get_fake("text", locale=locale, min_length=1024)
         msg = MIMEText(body, part_type)
     elif "html" == part_type:
         body = get_fake_html(locale=locale, wrap_in_body_tag=True)
@@ -317,6 +320,7 @@ def generate_multipart_email(
     type_list: typing.List[str] = ["plain", "html", "image"],
     sub_type: str = None,
     use_short_email: bool = False,
+    body: str = None,
 ) -> typing.Tuple[Message, typing.Tuple[str, str], typing.Tuple[str, str]]:
     """
     Generates an email including headers with the defined multiparts
@@ -325,10 +329,11 @@ def generate_multipart_email(
     :param type_list: options are plain, html, image (attachment), file (attachment), and executable (.exe attachment)
     :param sub_type: multipart sub type that defaults to "mixed" if not specified
     :param use_short_email: produces a "To" or "From" that is only the email address if True
+    :param body: if provided then will be added to the plain mime part only
     """
     msg = MIMEMultipart(sub_type) if sub_type else MIMEMultipart()
     for part_type in type_list:
-        msg.attach(generate_mime_part(locale=locale, part_type=part_type))
+        msg.attach(generate_mime_part(locale=locale, part_type=part_type, body=body))
     from_meta, to_meta = add_simple_email_headers(
         msg, locale=locale, use_short_email=use_short_email
     )
@@ -336,12 +341,13 @@ def generate_multipart_email(
 
 
 def generate_text_email(
-    locale: str = "en_US", use_short_email: bool = False
+    locale: str = "en_US", use_short_email: bool = False, body: str = None,
 ) -> typing.Tuple[Message, typing.Tuple[str, str], typing.Tuple[str, str]]:
     """
     Generates an email including headers
     """
-    body = get_fake("text", locale=locale, min_length=1024)
+    if body is None:
+        body = get_fake("text", locale=locale, min_length=1024)
     msg = MIMEText(body)
     from_meta, to_meta = add_simple_email_headers(
         msg, locale=locale, use_short_email=use_short_email
