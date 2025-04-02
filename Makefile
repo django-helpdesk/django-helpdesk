@@ -63,7 +63,7 @@ test:
 #: format - Run the PEP8 formatter.
 .PHONY: format
 format:
-	ruff check --fix # Fix linting eerrors
+	ruff check --fix # Fix linting errors
 	ruff format # fix formatting errors
 
 
