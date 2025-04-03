@@ -514,6 +514,45 @@ class GetEmailCommonTests(TestCase):
         )
         self.assertIsNone(ticket, f"Ticket was created when it should not be: {ticket}")
 
+    def test_with_attachment_but_no_body_part(self):
+        """
+        Test an email that has no body content but does have an attachment
+        """
+        message, _, _ = utils.generate_multipart_email(
+            type_list=["image"],
+        )
+        # Now send the part to the email workflow
+        extract_email_metadata(message.as_string(), self.queue_public, self.logger)
+        self.assertEqual(len(mail.outbox), 1)  # @UndefinedVariable
+        ticket = Ticket.objects.get()
+        followup = ticket.followup_set.get()
+        # Check  attachment is stored as attached file
+        email_attachment_found = followup.followupattachment_set.exists()
+        self.assertTrue(
+            email_attachment_found,
+            "Email attachment file not found in ticket attachment for empty body.",
+        )
+
+    def test_with_attachment_but_empty_body(self):
+        """
+        Test an email that has an empty body but does have an attachment
+        """
+        message, _, _ = utils.generate_multipart_email(
+            type_list=["plain", "image"],
+            body="",
+        )
+        # Now send the part to the email workflow
+        extract_email_metadata(message.as_string(), self.queue_public, self.logger)
+        self.assertEqual(len(mail.outbox), 1)  # @UndefinedVariable
+        ticket = Ticket.objects.get()
+        followup = ticket.followup_set.get()
+        # Check  attachment is stored as attached file
+        email_attachment_found = followup.followupattachment_set.exists()
+        self.assertTrue(
+            email_attachment_found,
+            "Email attachment file not found in ticket attachment for empty body.",
+        )
+
 
 class EmailTaskTests(TestCase):
     def setUp(self):
