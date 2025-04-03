@@ -535,7 +535,7 @@ class GetEmailCommonTests(TestCase):
 
     def test_with_attachment_but_empty_body(self):
         """
-        Test an email that has no body content but does have an attachment
+        Test an email that has an empty body but does have an attachment
         """
         message, _, _ = utils.generate_multipart_email(
             type_list=["plain", "image"],
