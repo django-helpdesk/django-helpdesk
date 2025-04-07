@@ -545,7 +545,10 @@ class PublicTicketForm(AbstractTicketForm):
 
         for field_name, field_setting_key in field_deletion_table.items():
             has_settings_default_value = getattr(settings, field_setting_key, None)
-            if has_settings_default_value is not None:
+            if has_settings_default_value is not None or (
+                "HELPDESK_PUBLIC_TICKET_DUE_DATE" == field_setting_key
+                and hasattr(settings, field_setting_key)
+            ):
                 del self.fields[field_name]
 
         public_queues = Queue.objects.filter(allow_public_submission=True)
