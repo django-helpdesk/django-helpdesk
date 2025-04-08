@@ -11,7 +11,7 @@ from ..lib import format_time_spent
 from ..templated_email import send_templated_mail
 from collections import defaultdict
 from copy import deepcopy
-from datetime import datetime, time, timedelta
+from datetime import datetime, timedelta
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import user_passes_test
@@ -27,9 +27,7 @@ from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonRespons
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
-from django.utils.dateparse import parse_date, parse_datetime
 from django.utils.html import escape
-from django.utils.timezone import make_aware
 from django.utils.translation import gettext as _
 from django.views.decorators.csrf import requires_csrf_token
 from django.views.generic.edit import FormView, UpdateView
@@ -126,8 +124,8 @@ def _get_queue_choices(queues):
     queue_choices += [(q.id, q.title) for q in queues]
     return queue_choices
 
-def get_active_users() -> QuerySet:
 
+def get_active_users() -> QuerySet:
     if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS:
         users = User.objects.filter(is_active=True, is_staff=True).order_by(
             User.USERNAME_FIELD
@@ -136,16 +134,18 @@ def get_active_users() -> QuerySet:
         users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
     return users
 
-def get_user_queues(user) -> dict[str,str]:
+
+def get_user_queues(user) -> dict[str, str]:
     queues = HelpdeskUser(user).get_queues()
     return _get_queue_choices(queues)
 
-def get_form_extra_kwargs(user) -> dict[str,object]:
+
+def get_form_extra_kwargs(user) -> dict[str, object]:
     return {
-            "active_users": get_active_users(),
-            "queues": get_user_queues(user),
-            "priorities": Ticket.PRIORITY_CHOICES,
-        } 
+        "active_users": get_active_users(),
+        "queues": get_user_queues(user),
+        "priorities": Ticket.PRIORITY_CHOICES,
+    }
 
 
 @helpdesk_staff_member_required
@@ -431,7 +431,8 @@ def view_ticket(request, ticket_id):
 
     extra_context_kwargs = get_form_extra_kwargs(request.user)
     form = TicketForm(
-        initial={"due_date": ticket.due_date}, queue_choices=extra_context_kwargs["queues"]
+        initial={"due_date": ticket.due_date},
+        queue_choices=extra_context_kwargs["queues"],
     )
     ticketcc_string, show_subscribe = return_ticketccstring_and_show_subscribe(
         request.user, ticket
@@ -485,7 +486,7 @@ def view_ticket(request, ticket_id):
             "SHOW_SUBSCRIBE": show_subscribe,
             "checklist_form": checklist_form,
             "customfields_form": customfields_form,
-            **extra_context_kwargs
+            **extra_context_kwargs,
         },
     )
 
@@ -615,8 +616,8 @@ def get_time_spent_from_form(form: dict) -> typing.Optional[timedelta]:
 def update_ticket_view(request, ticket_id, *args, **kwargs):
     return UpdateTicketView.as_view()(request, *args, ticket_id=ticket_id, **kwargs)
 
-def save_ticket_update(form, ticket, user):
 
+def save_ticket_update(form, ticket, user):
     comment = form.data.get("comment", "")
     new_status = int(form.data.get("new_status", ticket.status))
     title = form.cleaned_data.get("title", ticket.title)
@@ -625,7 +626,9 @@ def save_ticket_update(form, ticket, user):
     queue = int(form.cleaned_data.get("queue", ticket.queue.id))
 
     # custom fields
-    customfields_form = EditTicketCustomFieldForm(form.cleaned_data or None, instance=ticket)
+    customfields_form = EditTicketCustomFieldForm(
+        form.cleaned_data or None, instance=ticket
+    )
 
     # Check if a change happened on checklists
     new_checklists = {}
@@ -1315,7 +1318,13 @@ class UpdateTicketView(
         # Copy all data submitted that is not in the forms defined fields
         form_fields = kwargs["form"].base_fields
         all_fields = kwargs["form"].data
-        self.extra_context = {"xform": {k:v for k,v in all_fields.items() if k != "csrfmiddlewaretoken" and k not in form_fields}}
+        self.extra_context = {
+            "xform": {
+                k: v
+                for k, v in all_fields.items()
+                if k != "csrfmiddlewaretoken" and k not in form_fields
+            }
+        }
         return super().get_context_data(**kwargs)
 
     def get_form_kwargs(self):
@@ -1325,17 +1334,16 @@ class UpdateTicketView(
         kwargs["body_reqd"] = False
         return kwargs
 
-
     def get_object(self, queryset=None):
         ticket_id = self.kwargs["ticket_id"]
         return Ticket.objects.get(id=ticket_id)
 
-
-
     def form_valid(self, form):
         ticket_id = self.kwargs["ticket_id"]
         try:
-            self.ticket = get_ticket_from_request_with_authorisation(self.request, ticket_id, False)
+            self.ticket = get_ticket_from_request_with_authorisation(
+                self.request, ticket_id, False
+            )
         except PermissionDenied:
             return redirect_to_login(self.request.path, "helpdesk:login")
         # Avoid calling super as it will call the save() mwethod on the form

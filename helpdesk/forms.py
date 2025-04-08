@@ -451,7 +451,9 @@ class TicketForm(AbstractTicketForm):
         choices=(),
     )
 
-    def __init__(self, instance=None, queue_choices=None, body_reqd=True, *args, **kwargs):
+    def __init__(
+        self, instance=None, queue_choices=None, body_reqd=True, *args, **kwargs
+    ):
         """
         Add any custom fields that are defined to the form.
         The view will have injected extra kwargs into the form init
