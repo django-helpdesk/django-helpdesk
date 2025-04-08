@@ -21,6 +21,7 @@ from django.core.exceptions import PermissionDenied
 from django.core.handlers.wsgi import WSGIRequest
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db.models import Q, Case, When
+from django.db.models.query import QuerySet
 from django.forms import HiddenInput, inlineformset_factory, TextInput
 from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -119,12 +120,32 @@ def _get_queue_choices(queues):
     idea is to return only one choice if there is only one queue or add empty
     choice at the beginning of the list, if there are more queues
     """
-
     queue_choices = []
     if len(queues) > 1:
         queue_choices = [("", "--------")]
     queue_choices += [(q.id, q.title) for q in queues]
     return queue_choices
+
+def get_active_users() -> QuerySet:
+
+    if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS:
+        users = User.objects.filter(is_active=True, is_staff=True).order_by(
+            User.USERNAME_FIELD
+        )
+    else:
+        users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
+    return users
+
+def get_user_queues(user) -> dict[str,str]:
+    queues = HelpdeskUser(user).get_queues()
+    return _get_queue_choices(queues)
+
+def get_form_extra_kwargs(user) -> dict[str,object]:
+    return {
+            "active_users": get_active_users(),
+            "queues": get_user_queues(user),
+            "priorities": Ticket.PRIORITY_CHOICES,
+        } 
 
 
 @helpdesk_staff_member_required
@@ -381,7 +402,7 @@ def view_ticket(request, ticket_id):
 
     if "take" in request.GET:
         update_ticket(request.user, ticket, owner=request.user.id)
-        return return_to_ticket(request.user, helpdesk_settings, ticket)
+        return return_to_ticket(request.user, ticket)
 
     if "subscribe" in request.GET:
         # Allow the user to subscribe him/herself to the ticket whilst viewing
@@ -406,22 +427,12 @@ def view_ticket(request, ticket_id):
             owner=owner,
             comment=_("Accepted resolution and closed ticket"),
         )
-        return return_to_ticket(request.user, helpdesk_settings, ticket)
+        return return_to_ticket(request.user, ticket)
 
-    if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS:
-        users = User.objects.filter(is_active=True, is_staff=True).order_by(
-            User.USERNAME_FIELD
-        )
-    else:
-        users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
-
-    queues = HelpdeskUser(request.user).get_queues()
-    queue_choices = _get_queue_choices(queues)
-    # TODO: shouldn't this template get a form to begin with?
+    extra_context_kwargs = get_form_extra_kwargs(request.user)
     form = TicketForm(
-        initial={"due_date": ticket.due_date}, queue_choices=queue_choices
+        initial={"due_date": ticket.due_date}, queue_choices=extra_context_kwargs["queues"]
     )
-
     ticketcc_string, show_subscribe = return_ticketccstring_and_show_subscribe(
         request.user, ticket
     )
@@ -467,9 +478,6 @@ def view_ticket(request, ticket_id):
             "dependencies": dependencies,
             "submitter_userprofile_url": submitter_userprofile_url,
             "form": form,
-            "active_users": users,
-            "priorities": Ticket.PRIORITY_CHOICES,
-            "queues": queue_choices,
             "preset_replies": PreSetReply.objects.filter(
                 Q(queues=ticket.queue) | Q(queues__isnull=True)
             ),
@@ -477,6 +485,7 @@ def view_ticket(request, ticket_id):
             "SHOW_SUBSCRIBE": show_subscribe,
             "checklist_form": checklist_form,
             "customfields_form": customfields_form,
+            **extra_context_kwargs
         },
     )
 
@@ -571,23 +580,17 @@ def get_ticket_from_request_with_authorisation(
     return get_object_or_404(Ticket, id=ticket_id)
 
 
-def get_due_date_from_request_or_ticket(
-    request: WSGIRequest, ticket: Ticket
+def get_due_date_from_form_or_ticket(
+    form, ticket: Ticket
 ) -> typing.Optional[datetime.date]:
-    """Tries to locate the due date for a ticket from the `request.POST`
+    """Tries to locate the due date for a ticket from the form
     'due_date' parameter or the `due_date_*` paramaters.
     """
-    due_date = request.POST.get("due_date", None) or None
-
-    if due_date is not None:
-        parsed_date = parse_datetime(due_date) or datetime.combine(
-            parse_date(due_date), time()
-        )
-        due_date = make_aware(parsed_date)
-    else:
-        due_date_year = int(request.POST.get("due_date_year", 0))
-        due_date_month = int(request.POST.get("due_date_month", 0))
-        due_date_day = int(request.POST.get("due_date_day", 0))
+    due_date = form.cleaned_data.get("due_date", None) or None
+    if due_date is None:
+        due_date_year = int(form.cleaned_data.get("due_date_year", 0))
+        due_date_month = int(form.cleaned_data.get("due_date_month", 0))
+        due_date_day = int(form.cleaned_data.get("due_date_day", 0))
         # old way, probably deprecated?
         if not (due_date_year and due_date_month and due_date_day):
             due_date = ticket.due_date
@@ -602,36 +605,36 @@ def get_due_date_from_request_or_ticket(
     return due_date
 
 
-def get_time_spent_from_request(request: WSGIRequest) -> typing.Optional[timedelta]:
-    if request.POST.get("time_spent"):
-        (hours, minutes) = [int(f) for f in request.POST.get("time_spent").split(":")]
+def get_time_spent_from_form(form: dict) -> typing.Optional[timedelta]:
+    if form.data.get("time_spent"):
+        (hours, minutes) = [int(f) for f in form.data.get("time_spent").split(":")]
         return timedelta(hours=hours, minutes=minutes)
     return None
 
 
-def update_ticket_view(request, ticket_id, public=False):
-    try:
-        ticket = get_ticket_from_request_with_authorisation(request, ticket_id, public)
-    except PermissionDenied:
-        return redirect_to_login(request.path, "helpdesk:login")
+def update_ticket_view(request, ticket_id, *args, **kwargs):
+    return UpdateTicketView.as_view()(request, *args, ticket_id=ticket_id, **kwargs)
 
-    comment = request.POST.get("comment", "")
-    new_status = int(request.POST.get("new_status", ticket.status))
-    title = request.POST.get("title", ticket.title)
-    owner = int(request.POST.get("owner", -1))
-    priority = int(request.POST.get("priority", ticket.priority))
-    queue = int(request.POST.get("queue", ticket.queue.id))
+def save_ticket_update(form, ticket, user):
+
+    comment = form.data.get("comment", "")
+    new_status = int(form.data.get("new_status", ticket.status))
+    title = form.cleaned_data.get("title", ticket.title)
+    owner = int(form.data.get("owner", -1))
+    priority = int(form.cleaned_data.get("priority", ticket.priority))
+    queue = int(form.cleaned_data.get("queue", ticket.queue.id))
 
     # custom fields
-    customfields_form = EditTicketCustomFieldForm(request.POST or None, instance=ticket)
+    customfields_form = EditTicketCustomFieldForm(form.cleaned_data or None, instance=ticket)
 
     # Check if a change happened on checklists
     new_checklists = {}
     changes_in_checklists = False
     for checklist in ticket.checklists.all():
         old_completed = set(checklist.tasks.completed().values_list("id", flat=True))
+        # Checklists will not be in the cleaned_data so access the submitted data
         new_checklist = set(
-            map(int, request.POST.getlist(f"checklist-{checklist.id}", []))
+            map(int, form.data.getlist(f"checklist-{checklist.id}", []))
         )
         new_checklists[checklist.id] = new_checklist
         if new_checklist != old_completed:
@@ -640,10 +643,10 @@ def update_ticket_view(request, ticket_id, public=False):
     # NOTE: jQuery's default for dates is mm/dd/yy
     # very US-centric but for now that's the only format supported
     # until we clean up code to internationalize a little more
-    due_date = get_due_date_from_request_or_ticket(request, ticket)
+    due_date = get_due_date_from_form_or_ticket(form, ticket)
     no_changes = all(
         [
-            not request.FILES,
+            not form.files,
             not comment,
             not changes_in_checklists,
             new_status == ticket.status,
@@ -658,29 +661,29 @@ def update_ticket_view(request, ticket_id, public=False):
         ]
     )
     if no_changes:
-        return return_to_ticket(request.user, helpdesk_settings, ticket)
+        return ticket
 
     update_ticket(
-        request.user,
+        user,
         ticket,
         title=title,
         comment=comment,
-        files=request.FILES.getlist("attachment"),
-        public=request.POST.get("public", False),
-        owner=int(request.POST.get("owner", -1)),
-        priority=int(request.POST.get("priority", -1)),
-        queue=int(request.POST.get("queue", -1)),
+        files=form.files.getlist("attachment"),
+        public=form.data.get("public", False),
+        owner=owner or -1,
+        priority=priority or -1,
+        queue=queue or -1,
         new_status=new_status,
-        time_spent=get_time_spent_from_request(request),
-        due_date=get_due_date_from_request_or_ticket(request, ticket),
+        time_spent=get_time_spent_from_form(form),
+        due_date=due_date,
         new_checklists=new_checklists,
         customfields_form=customfields_form,
     )
 
-    return return_to_ticket(request.user, helpdesk_settings, ticket)
+    return ticket
 
 
-def return_to_ticket(user, helpdesk_settings, ticket):
+def return_to_ticket(user, ticket):
     """Helper function for update_ticket"""
 
     if is_helpdesk_staff(user):
@@ -1277,8 +1280,8 @@ class CreateTicketView(
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        queues = HelpdeskUser(self.request.user).get_queues()
-        kwargs["queue_choices"] = _get_queue_choices(queues)
+        extra = get_form_extra_kwargs(self.request.user)
+        kwargs.update(extra)
         return kwargs
 
     def form_valid(self, form):
@@ -1293,6 +1296,51 @@ class CreateTicketView(
             return self.ticket.get_absolute_url()
         else:
             return reverse("helpdesk:dashboard")
+
+
+class UpdateTicketView(
+    MustBeStaffMixin, abstract_views.AbstractCreateTicketMixin, UpdateView
+):
+    template_name = "helpdesk/ticket.html"
+    form_class = TicketForm
+
+    def get_initial(self):
+        initial_data = super().get_initial()
+        return initial_data
+
+    def get_context_data(self, **kwargs):
+        """Insert view context that would be lost after a POST."""
+        extra = get_form_extra_kwargs(self.request.user)
+        kwargs.update(extra)
+        # Copy all data submitted that is not in the forms defined fields
+        form_fields = kwargs["form"].base_fields
+        all_fields = kwargs["form"].data
+        self.extra_context = {"xform": {k:v for k,v in all_fields.items() if k != "csrfmiddlewaretoken" and k not in form_fields}}
+        return super().get_context_data(**kwargs)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        # The ModelFormMixin adds "instance" which is then a problem in the
+        kwargs["queue_choices"] = get_user_queues(self.request.user)
+        kwargs["body_reqd"] = False
+        return kwargs
+
+
+    def get_object(self, queryset=None):
+        ticket_id = self.kwargs["ticket_id"]
+        return Ticket.objects.get(id=ticket_id)
+
+
+
+    def form_valid(self, form):
+        ticket_id = self.kwargs["ticket_id"]
+        try:
+            self.ticket = get_ticket_from_request_with_authorisation(self.request, ticket_id, False)
+        except PermissionDenied:
+            return redirect_to_login(self.request.path, "helpdesk:login")
+        # Avoid calling super as it will call the save() mwethod on the form
+        save_ticket_update(form, self.ticket, self.request.user)
+        return return_to_ticket(self.request.user, self.ticket)
 
 
 @helpdesk_staff_member_required
