@@ -18,6 +18,9 @@
 {% endblock %}
 
 {% block helpdesk_body %}
+	{% if form.errors %}
+	    {% include 'helpdesk/include/alert_form_errors.html' %}
+	{% endif %}
     {% if helpdesk_settings.HELPDESK_TRANSLATE_TICKET_COMMENTS %}
         <div id="google_translate_element"></div>
         <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
@@ -95,7 +98,7 @@
             <div class="card-header">{% trans "Respond to this ticket" %}</div>
             <div class="card-body">
 
-        <form method='post' action='update/' enctype='multipart/form-data'>
+         <form method="post" action="{% url 'helpdesk:update' ticket.id %}" enctype="multipart/form-data">
 
         <fieldset>
             <dl>
@@ -105,8 +108,10 @@
                 <dd class='form_help_text'>{% trans "Selecting a pre-set reply will over-write your comment below. You can then modify the pre-set reply to your liking before saving this update." %}</dd>
                 {% endif %}
 
-                <dt><label for='commentBox'>{% trans "Comment / Resolution" %}</label></dt>
-                <dd><textarea rows='8' cols='70' name='comment' id='commentBox'></textarea></dd>
+                <dt>
+                    <label for='commentBox'>{% trans "Comment / Resolution" %}</label>
+                </dt>
+                <dd><textarea rows='8' cols='70' name='comment' id='commentBox'>{% if form.errors %}{{ xform.comment }}{% endif %}</textarea></dd>
                 {% url "helpdesk:help_context" as context_help_url %}
                 {% blocktrans %}
                 <dd class='form_help_text'>You can insert ticket and queue details in your message. For more information, see the <a href='{{ context_help_url }}'>context help page</a>.</dd>
@@ -135,7 +140,7 @@
                 <dt>
                     <label for='id_time_spent'>{% trans "Time spent" %}</label> <span class='form_optional'>{% trans "(Optional)" %}</span>
                 </dt>
-                <dd><input name='time_spent' type="time" /></dd>
+                <dd><input name='time_spent' type="time" value="{% if form.errors %}{{ xform.time_spent }}{% endif %}"/></dd>
                 {% endif %}
                 {% endif %}
             </dl>
@@ -204,6 +209,9 @@
         {% endif %}
 
         {% if helpdesk_settings.HELPDESK_ENABLE_ATTACHMENTS %}
+           	{% if form.errors.attachment %}
+                    <small class='error'>{{ form.errors.attachment }}</small>
+            {% endif %}
         <p id='ShowFileUploadPara'><button type="button" class="btn btn-warning btn-sm" id='ShowFileUpload'>{% trans "Attach File(s) &raquo;" %}</button></p>
         {% endif %}
 
@@ -211,7 +219,7 @@
 
             <dl>
                 <dt><label for='id_file'>{% trans "Attach a File" %}</label></dt>
-                <dd>
+               <dd>
                     <div class="add_file_fields_wrap">
                         <button class="add_file_field_button btn btn-success btn-xs">{% trans "Add Another File" %}</button>
                         <div><label class='btn btn-primary btn-sm btn-file'>
