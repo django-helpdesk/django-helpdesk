@@ -1283,8 +1283,7 @@ class CreateTicketView(
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        extra = get_form_extra_kwargs(self.request.user)
-        kwargs.update(extra)
+        kwargs["queue_choices"] = get_user_queues(self.request.user)
         return kwargs
 
     def form_valid(self, form):
