@@ -119,9 +119,15 @@ class TicketActionsTestCase(TestCase):
         ticket = Ticket.objects.create(**initial_data)
         ticket_id = ticket.id
 
+        default_post_data = {
+            "title": ticket.title,
+            "priority": ticket.priority,
+            "queue": ticket.queue_id,
+        }
         # assign new owner
         post_data = {
             "owner": self.user2.id,
+            **default_post_data,
         }
         response = self.client.post(
             reverse("helpdesk:update", kwargs={"ticket_id": ticket_id}),
@@ -139,7 +145,11 @@ class TicketActionsTestCase(TestCase):
         self.user2.save()
         self.user.email = "user1@test.com"
         self.user.save()
-        post_data = {"new_status": Ticket.CLOSED_STATUS, "public": True}
+        post_data = {
+            "new_status": Ticket.CLOSED_STATUS,
+            "public": True,
+            **default_post_data,
+        }
 
         # do this also to a newly assigned user (different from logged in one)
         ticket.assigned_to = self.user
@@ -153,6 +163,7 @@ class TicketActionsTestCase(TestCase):
             "new_status": Ticket.OPEN_STATUS,
             "owner": self.user2.id,
             "public": True,
+            **default_post_data,
         }
         response = self.client.post(
             reverse("helpdesk:update", kwargs={"ticket_id": ticket_id}),
@@ -363,6 +374,8 @@ class TicketActionsTestCase(TestCase):
             slug="newqueue",
         )
         post_data = {
+            "title": ticket.title,
+            "priority": ticket.priority,
             "comment": "first follow-up in new queue",
             "queue": str(new_queue.id),
         }

@@ -416,6 +416,7 @@ class TimeSpentAutoTestCase(TestCase):
             "created": datetime.strptime(
                 "2024-04-09T08:00:00+00:00", "%Y-%m-%dT%H:%M:%S%z"
             ),
+            "description": "ollowup time spent auto exclude queues"
         }
         ticket = Ticket.objects.create(**initial_data)
 
@@ -427,6 +428,8 @@ class TimeSpentAutoTestCase(TestCase):
             post_data = {
                 "comment": "ticket in queue {}".format(queue),
                 "queue": queues[queue].id,
+                "title": ticket.title,
+                "priority": ticket.priority,
             }
             self.client.post(
                 reverse("helpdesk:update", kwargs={"ticket_id": ticket.id}), post_data

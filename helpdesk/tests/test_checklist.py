@@ -17,8 +17,14 @@ class TicketChecklistTestCase(TestCase):
         self.client.login(username="User", password="pass")
 
         self.ticket = Ticket.objects.create(
-            queue=Queue.objects.create(title="Queue", slug="queue")
+            queue=Queue.objects.create(title="Queue", slug="queue"),
+            title="Test Queue"
         )
+        self.default_update_post_data = {
+            "queue": self.ticket.queue_id,
+            "title": self.ticket.title,
+            "priority": self.ticket.priority,
+        }
 
     def test_create_checklist(self):
         self.assertEqual(self.ticket.checklists.count(), 0)
@@ -141,7 +147,10 @@ class TicketChecklistTestCase(TestCase):
 
         response = self.client.post(
             reverse("helpdesk:update", kwargs={"ticket_id": self.ticket.id}),
-            data={f"checklist-{checklist.id}": task.id},
+            data={
+                f"checklist-{checklist.id}": task.id,
+                **self.default_update_post_data,
+            },
             follow=True,
         )
         self.assertEqual(response.status_code, 200)
@@ -166,7 +175,12 @@ class TicketChecklistTestCase(TestCase):
         self.assertEqual(self.ticket.followup_set.count(), 0)
 
         response = self.client.post(
-            reverse("helpdesk:update", kwargs={"ticket_id": self.ticket.id}),
+            reverse("helpdesk:update",
+            kwargs={"ticket_id": self.ticket.id}),
+            data={
+                
+                **self.default_update_post_data
+            },
             follow=True,
         )
         self.assertEqual(response.status_code, 200)
