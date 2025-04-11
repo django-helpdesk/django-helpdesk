@@ -209,7 +209,7 @@
         {% endif %}
 
         {% if helpdesk_settings.HELPDESK_ENABLE_ATTACHMENTS %}
-           	{% if form.errors.attachment %}
+            {% if form.errors.attachment %}
                     <small class='error'>{{ form.errors.attachment }}</small>
             {% endif %}
         <p id='ShowFileUploadPara'><button type="button" class="btn btn-warning btn-sm" id='ShowFileUpload'>{% trans "Attach File(s) &raquo;" %}</button></p>
