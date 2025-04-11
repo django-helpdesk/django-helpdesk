@@ -587,7 +587,7 @@ def get_due_date_from_form_or_ticket(
     """Tries to locate the due date for a ticket from the form
     'due_date' parameter or the `due_date_*` paramaters.
     """
-    due_date = form.cleaned_data.get("due_date", None) or None
+    due_date = form.cleaned_data.get("due_date") or None
     if due_date is None:
         due_date_year = int(form.cleaned_data.get("due_date_year", 0))
         due_date_month = int(form.cleaned_data.get("due_date_month", 0))
