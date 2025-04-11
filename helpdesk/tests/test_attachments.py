@@ -10,6 +10,7 @@ import shutil
 from tempfile import gettempdir
 from unittest import mock
 from unittest.case import skip
+from django.contrib.auth import get_user_model
 
 
 MEDIA_DIR = os.path.join(gettempdir(), "helpdesk_test_media")
@@ -90,6 +91,89 @@ class AttachmentIntegrationTests(TestCase):
         ) as file_on_disk:
             disk_content = smart_str(file_on_disk.read(), "utf-8")
         self.assertEqual(disk_content, "โจ")
+
+
+@override_settings(MEDIA_ROOT=MEDIA_DIR)
+class AttachmentIntegrationStaffTests(TestCase):
+    def setUp(self):
+        self.ticket = models.Ticket.objects.create(
+            queue=models.Queue.objects.create(),
+            title="Test attachments via ticket update",
+        )
+        self.default_update_post_data = {
+            "queue": self.ticket.queue_id,
+            "title": self.ticket.title,
+            "priority": self.ticket.priority,
+        }
+
+    def loginUser(self, is_staff=True):
+        """Create a staff user and login"""
+        User = get_user_model()
+        self.user = User.objects.create(
+            username="User_1",
+            is_staff=is_staff,
+        )
+        self.user.set_password("pass")
+        self.user.save()
+        self.client.login(username="User_1", password="pass")
+
+    def test_update_ticket_with_attachment_valid_extension(self):
+        self.loginUser(is_staff=True)
+        file_content = "staff attached file content"
+        test_file = SimpleUploadedFile(
+            "test_staff_att.txt", bytes(file_content, "utf-8"), "text/plain"
+        )
+        post_data = {
+            "attachment": test_file,
+            **self.default_update_post_data,
+        }
+        # Ensure ticket form submits with attachment successfully
+        self.client.post(
+            reverse(
+                "helpdesk:update",
+                kwargs={"ticket_id": self.ticket.id},
+            ),
+            post_data,
+            follow=True,
+        )
+        # Ensure attachment is available with correct content
+        att = models.FollowUpAttachment.objects.get(followup__ticket=self.ticket)
+        with open(os.path.join(MEDIA_DIR, att.file.name)) as file_on_disk:
+            disk_content = file_on_disk.read()
+        self.assertEqual(disk_content, file_content)
+
+    def test_update_ticket_with_attachment_invalid_extension(self):
+        self.loginUser(is_staff=True)
+        file_content = "staff attached file content with invalid extension"
+        file_extension = ".crash"
+        test_file = SimpleUploadedFile(
+            f"test_staff_att{file_extension}",
+            bytes(file_content, "utf-8"),
+            "text/plain",
+        )
+        post_data = {
+            "attachment": test_file,
+            **self.default_update_post_data,
+        }
+        # Ensure ticket form submits with attachment successfully
+        response = self.client.post(
+            reverse(
+                "helpdesk:update",
+                kwargs={"ticket_id": self.ticket.id},
+            ),
+            post_data,
+            follow=True,
+        )
+        error_msg = response.context_data["form"].errors["attachment"][0]
+        self.assertTrue(
+            file_extension in error_msg,
+            "Response indicates there were no errors attaching illegal file extension",
+        )
+        # Ensure attachment is not uploaded
+        has_att = models.FollowUpAttachment.objects.filter(
+            followup__ticket=self.ticket
+        ).exists()
+        self.assertFalse(has_att, "File was attached with invalid extension")
 
 
 @mock.patch.object(models.FollowUp, "save", autospec=True)

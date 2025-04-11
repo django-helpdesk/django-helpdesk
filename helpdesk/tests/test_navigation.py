@@ -279,7 +279,7 @@ class ReturnToTicketTestCase(TestCase):
 
         user = get_staff_user()
         ticket = create_ticket()
-        response = return_to_ticket(user, helpdesk_settings, ticket)
+        response = return_to_ticket(user, ticket)
         self.assertEqual(response["location"], ticket.get_absolute_url())
 
     def test_non_staff_user(self):
@@ -291,5 +291,5 @@ class ReturnToTicketTestCase(TestCase):
             email="wensleydale@example.com",
         )
         ticket = create_ticket()
-        response = return_to_ticket(user, helpdesk_settings, ticket)
+        response = return_to_ticket(user, ticket)
         self.assertEqual(response["location"], ticket.ticket_url)

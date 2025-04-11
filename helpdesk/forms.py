@@ -424,7 +424,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
 
 class TicketForm(AbstractTicketForm):
     """
-    Ticket Form creation for registered users.
+    Ticket Form for registered users.
     """
 
     submitter_email = forms.EmailField(
@@ -451,15 +451,20 @@ class TicketForm(AbstractTicketForm):
         choices=(),
     )
 
-    def __init__(self, *args, **kwargs):
+    def __init__(
+        self, instance=None, queue_choices=None, body_reqd=True, *args, **kwargs
+    ):
         """
         Add any custom fields that are defined to the form.
+        The view will have injected extra kwargs into the form init
+        by calling the views get_form_kwargs() which must be removed before
+        calling super() because the django.forms.forms.BaseForm only
+        supports specific kwargs and so will crash and burn if they are left in
         """
-        queue_choices = kwargs.pop("queue_choices")
-
         super().__init__(*args, **kwargs)
-
-        self.fields["queue"].choices = queue_choices
+        if queue_choices:
+            self.fields["queue"].choices = queue_choices
+        self.fields["body"].required = body_reqd
         if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS:
             assignable_users = User.objects.filter(
                 is_active=True, is_staff=True
