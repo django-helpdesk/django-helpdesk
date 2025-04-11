@@ -416,7 +416,7 @@ class TimeSpentAutoTestCase(TestCase):
             "created": datetime.strptime(
                 "2024-04-09T08:00:00+00:00", "%Y-%m-%dT%H:%M:%S%z"
             ),
-            "description": "ollowup time spent auto exclude queues",
+            "description": "Followup time spent auto exclude queues",
         }
         ticket = Ticket.objects.create(**initial_data)
 
