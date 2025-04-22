@@ -127,7 +127,7 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
         """
         super(EditTicketForm, self).__init__(*args, **kwargs)
 
-        # Since title is max 100 characters limit it in in editing
+        # Since title is max 100 characters limit it in editing
         if "title" in self.fields:
             self.fields["title"].max_length = 100
             self.fields["title"].widget.attrs["maxlength"] = 100
