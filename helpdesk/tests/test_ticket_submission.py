@@ -4,7 +4,7 @@ from django.test import TestCase
 from django.test.client import Client
 from django.urls import reverse
 import email
-from helpdesk.email import extract_email_metadata
+from helpdesk.email import extract_email_metadata, MULTIPLE_USERS_SAME_EMAIL_MSG
 from helpdesk.models import (
     CustomField,
     FollowUp,
@@ -14,10 +14,13 @@ from helpdesk.models import (
     Ticket,
     TicketCC,
 )
+from . import utils
 import logging
 from urllib.parse import urlparse
 import uuid
+import mock
 
+User = get_user_model()
 
 logger = logging.getLogger("helpdesk")
 
@@ -46,7 +49,7 @@ class TicketBasicsTestCase(TestCase):
             "description": "Some Test Ticket",
         }
 
-        self.user = get_user_model().objects.create(
+        self.user = User.objects.create(
             username="User_1",
         )
 
@@ -479,6 +482,39 @@ class EmailInteractionsTestCase(TestCase):
             ticket_cc = TicketCC.objects.get(ticket=ticket, email=cc_email)
             self.assertTrue(ticket_cc.ticket, ticket)
             self.assertTrue(ticket_cc.email, cc_email)
+
+    def test_create_ticket_from_email_with_cc_duplicate_users_same_email(self):
+        """
+        Verify that the duplicated email warning log is invoked
+        """
+        dup_email = "dup@helpdesk.test"
+        user_dup1 = User.objects.create(
+            username="User_dup1", email=dup_email,
+        )
+        user_dup2 = User.objects.create(
+            username="User_dup2", email=dup_email,
+        )
+        message, _, _ = utils.generate_text_email(locale="fr_FR")
+
+        submitter_email = "foo@bar.py"
+        cc_list = [dup_email, "alpha@acme.test", "beta@acme.test", "gamma@delta.test"]
+        message_id = uuid.uuid4().hex
+
+        message["Message-ID"] = message_id
+        message["Cc"] = ",".join(cc_list)
+
+        with self.assertLogs('helpdesk', level='WARNING') as dup_warn:
+            extract_email_metadata(str(message), self.queue_public, logger=logger)
+            self.assertTrue(MULTIPLE_USERS_SAME_EMAIL_MSG in dup_warn.output[0], "The duplicated email across user ID's was was not logged.")
+        # Check that the CC duplicate was still sent a notification email
+        email_count = len(mail.outbox)
+        found = False
+        for i in range(0, email_count-1):
+            if dup_email in mail.outbox[i].to:
+                found = True
+                break
+        self.assertTrue(found, "The duplicated email across user ID's was not sent a n otification.")
+
 
     def test_create_followup_from_email_with_valid_message_id_with_no_initial_cc_list(
         self,
