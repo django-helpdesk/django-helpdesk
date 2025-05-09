@@ -564,9 +564,7 @@ def create_ticket_cc(ticket, cc_list, logger):
                 "LOG_WARN_WHEN_CC_EMAIL_LINKED_TO_MORE_THAN_1_USER",
                 True,
             ):
-                logger.warning(
-                    f"{MULTIPLE_USERS_SAME_EMAIL_MSG}: {cced_email}"
-                )
+                logger.warning(f"{MULTIPLE_USERS_SAME_EMAIL_MSG}: {cced_email}")
         else:
             user_id = user_list[0]
 
