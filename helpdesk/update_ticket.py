@@ -29,7 +29,7 @@ def add_staff_subscription(user: User, ticket: Ticket) -> None:
         and user.is_authenticated
         and return_ticketccstring_and_show_subscribe(user, ticket)[1]
     ):
-        subscribe_to_ticket_updates(ticket, user)
+        subscribe_to_ticket_updates(ticket, user.id)
 
 
 def return_ticketccstring_and_show_subscribe(user, ticket):
@@ -73,16 +73,16 @@ def return_ticketccstring_and_show_subscribe(user, ticket):
 
 
 def subscribe_to_ticket_updates(
-    ticket, user=None, email=None, can_view=True, can_update=False
+    ticket, user_id=None, email=None, can_view=True, can_update=False
 ):
     if ticket is not None:
-        queryset = TicketCC.objects.filter(ticket=ticket, user=user, email=email)
+        queryset = TicketCC.objects.filter(ticket=ticket, user_id=user_id, email=email)
 
         # Don't create duplicate entries for subscribers
         if queryset.count() > 0:
             return queryset.first()
 
-        if user is None and len(email) < 5:
+        if user_id is None and len(email) < 5:
             raise ValidationError(
                 _(
                     "When you add somebody on Cc, you must provide either a User or a valid email. Email: %s"
@@ -91,7 +91,7 @@ def subscribe_to_ticket_updates(
             )
 
         return ticket.ticketcc_set.create(
-            user=user, email=email, can_view=can_view, can_update=can_update
+            user_id=user_id, email=email, can_view=can_view, can_update=can_update
         )
 
 

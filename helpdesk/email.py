@@ -46,6 +46,7 @@ from typing import List
 # import User model, which may be a custom model
 User = get_user_model()
 
+MULTIPLE_USERS_SAME_EMAIL_MSG = "CC email address is linked to more than 1 active user"
 STRIPPED_SUBJECT_STRINGS = [
     "Re: ",
     "Fw: ",
@@ -531,7 +532,7 @@ def is_autoreply(message):
     return any(any_if_this)
 
 
-def create_ticket_cc(ticket, cc_list):
+def create_ticket_cc(ticket, cc_list, logger):
     if not cc_list:
         return []
     # Local import to deal with non-defined / circular reference problem
@@ -544,16 +545,32 @@ def create_ticket_cc(ticket, cc_list):
         if cced_email == ticket.queue.email_address:
             continue
 
-        user = None
+        user_id = None
 
-        try:
-            user = User.objects.get(email=cced_email)  # @UndefinedVariable
-        except User.DoesNotExist:
-            pass
+        user_list = User.objects.filter(email=cced_email, is_active=True).values_list(
+            "id", flat=True
+        )
+        count = user_list.count()
+        if count == 0:
+            if getattr(
+                helpdesk_settings, "LOG_WARN_WHEN_CC_EMAIL_NOT_LINKED_TO_A_USER", False
+            ):
+                logger.warning(
+                    f"CC email address is not linked to an active user: {cced_email}"
+                )
+        elif count > 1:
+            if getattr(
+                helpdesk_settings,
+                "LOG_WARN_WHEN_CC_EMAIL_LINKED_TO_MORE_THAN_1_USER",
+                True,
+            ):
+                logger.warning(f"{MULTIPLE_USERS_SAME_EMAIL_MSG}: {cced_email}")
+        else:
+            user_id = user_list[0]
 
         try:
             ticket_cc = subscribe_to_ticket_updates(
-                ticket=ticket, user=user, email=cced_email
+                ticket=ticket, user_id=user_id, email=cced_email
             )
             new_ticket_ccs.append(ticket_cc)
         except ValidationError:
@@ -673,7 +690,7 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
     context = safe_template_context(ticket)
 
     new_ticket_ccs = []
-    new_ticket_ccs.append(create_ticket_cc(ticket, to_list + cc_list))
+    new_ticket_ccs.append(create_ticket_cc(ticket, to_list + cc_list, logger))
 
     autoreply = is_autoreply(message)
     if autoreply:

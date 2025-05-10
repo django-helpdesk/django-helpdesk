@@ -412,7 +412,7 @@ def view_ticket(request, ticket_id):
         ]
 
         if show_subscribe:
-            subscribe_to_ticket_updates(ticket, request.user)
+            subscribe_to_ticket_updates(ticket, request.user.id)
             return HttpResponseRedirect(reverse("helpdesk:view", args=[ticket.id]))
 
     if "close" in request.GET and ticket.status == Ticket.RESOLVED_STATUS:
