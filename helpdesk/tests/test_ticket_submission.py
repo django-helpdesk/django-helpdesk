@@ -511,13 +511,9 @@ class EmailInteractionsTestCase(TestCase):
             )
         # Check that the CC duplicate was still sent a notification email
         email_count = len(mail.outbox)
-        found = False
-        for i in range(0, email_count - 1):
-            if dup_email in mail.outbox[i].to:
-                found = True
-                break
+        found = any(dup_email in email.to for email in mail.outbox[:email_count - 1])
         self.assertTrue(
-            found, "The duplicated email across user ID's was not sent a n otification."
+            found, "The duplicated email across user ID's was not sent a notification."
         )
 
     def test_create_followup_from_email_with_valid_message_id_with_no_initial_cc_list(
