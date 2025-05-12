@@ -168,11 +168,11 @@ def pop3_sync(q, logger, server):
                 message=full_message, queue=q, logger=logger
             )
         except IgnoreTicketException:
-            logger.warn(
+            logger.warning(
                 "Message %s was ignored and will be left on POP3 server" % msgNum
             )
         except DeleteIgnoredTicketException:
-            logger.warn("Message %s was ignored and deleted from POP3 server" % msgNum)
+            logger.warning("Message %s was ignored and deleted from POP3 server" % msgNum)
             server.dele(msgNum)
         else:
             if ticket:
@@ -182,7 +182,7 @@ def pop3_sync(q, logger, server):
                     % msgNum
                 )
             else:
-                logger.warn(
+                logger.warning(
                     "Message %s was not successfully processed, and will be left on POP3 server"
                     % msgNum
                 )
@@ -232,12 +232,12 @@ def imap_sync(q, logger, server):
                         message=full_message, queue=q, logger=logger
                     )
                 except IgnoreTicketException:
-                    logger.warn(
+                    logger.warning(
                         "Message %s was ignored and will be left on IMAP server" % num
                     )
                 except DeleteIgnoredTicketException:
                     server.store(num, "+FLAGS", "\\Deleted")
-                    logger.warn(
+                    logger.warning(
                         "Message %s was ignored and deleted from IMAP server" % num
                     )
                 except TypeError as te:
@@ -253,7 +253,7 @@ def imap_sync(q, logger, server):
                             % num
                         )
                     else:
-                        logger.warn(
+                        logger.warning(
                             "Message %s was not successfully processed, and will be left on IMAP server"
                             % num
                         )
@@ -331,12 +331,12 @@ def imap_oauth_sync(q, logger, server):
                     )
 
                 except IgnoreTicketException as itex:
-                    logger.warn(f"Message {num} was ignored. {itex}")
+                    logger.warning(f"Message {num} was ignored. {itex}")
 
                 except DeleteIgnoredTicketException:
                     server.store(num, "+FLAGS", "\\Deleted")
                     server.expunge()
-                    logger.warn(
+                    logger.warning(
                         "Message %s was ignored and deleted from IMAP server" % num
                     )
 
@@ -355,7 +355,7 @@ def imap_oauth_sync(q, logger, server):
                             % num
                         )
                     else:
-                        logger.warn(
+                        logger.warning(
                             "Message %s was not successfully processed, and will be left on IMAP server"
                             % num
                         )
@@ -466,12 +466,12 @@ def process_queue(q, logger):
                         message=full_message, queue=q, logger=logger
                     )
                 except IgnoreTicketException:
-                    logger.warn(
+                    logger.warning(
                         "Message %d was ignored and will be left in local directory", i
                     )
                 except DeleteIgnoredTicketException:
                     os.unlink(m)
-                    logger.warn("Message %d was ignored and deleted local directory", i)
+                    logger.warning("Message %d was ignored and deleted local directory", i)
                 else:
                     if ticket:
                         logger.info(
@@ -486,7 +486,7 @@ def process_queue(q, logger):
                         else:
                             logger.info("Successfully deleted message %d.", i)
                     else:
-                        logger.warn(
+                        logger.warning(
                             "Message %d was not successfully processed, and will be left in local directory",
                             i,
                         )
@@ -857,7 +857,7 @@ def extract_email_message_content(
     """
     Uses the get_body() method of the email package to extract the email message content.
     If there is an HTML version of the email message content then it is stored as an attachment.
-    If there is a plain text part then that is used for storing the email content aginst the ticket.
+    If there is a plain text part then that is used for storing the email content against the ticket.
     Otherwise if there is just an HTML part then the HTML is parsed to extract a simple text message.
     There is special handling for the case when a multipart/related part holds the message content when
     there are multiple attachments to the email.
@@ -999,7 +999,7 @@ def extract_attachments(
         if "multipart/related" == content_type:
             if content_parts_excluded:
                 # This should really never happen in a properly constructed email message but...
-                logger.warn(
+                logger.warning(
                     "WARNING! Content type MIME parts have been excluded but a multipart/related has been encountered.\
                      There may be missing information in attachments."
                 )
@@ -1025,7 +1025,7 @@ def extract_attachments(
                 counter, content_parts_excluded = extract_attachments(
                     part, files, logger, counter, content_parts_excluded
                 )
-            # If we have found 1 or more content parts then flag that the content parts have been ommitted
+            # If we have found 1 or more content parts then flag that the content parts have been omitted
             # to ensure that other text/* parts are attached
             if content_part_detected:
                 content_parts_excluded = True
