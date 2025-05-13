@@ -294,7 +294,9 @@ class TicketTest(APITestCase):
         # Check all fields with data returned from the response
         self.maxDiff = None
         # The date string generated sometimes has a "Z" appended so until they why is figured out...
-        date_suffix_hack = "Z" if response.data["followup_set"][0]["date"].endswith("Z") else ""
+        date_suffix_hack = (
+            "Z" if response.data["followup_set"][0]["date"].endswith("Z") else ""
+        )
         self.assertDictEqual(
             response.data,
             {
@@ -321,7 +323,7 @@ class TicketTest(APITestCase):
                         "new_status": None,
                         "time_spent": None,
                         "followupattachment_set": [],
-                        "date": frozen_date_time_str +  date_suffix_hack,
+                        "date": frozen_date_time_str + date_suffix_hack,
                         "message_id": None,
                     }
                 ],
