@@ -1274,10 +1274,7 @@ class FollowUpAttachment(Attachment):
             id_=self.followup.id,
         )
         att_path = os.path.join(settings.MEDIA_ROOT, path)
-        if (
-            settings.DEFAULT_FILE_STORAGE
-            == "django.core.files.storage.FileSystemStorage"
-        ):
+        if settings.STORAGES == "django.core.files.storage.FileSystemStorage":
             if not os.path.exists(att_path):
                 os.makedirs(att_path, helpdesk_settings.HELPDESK_ATTACHMENT_DIR_PERMS)
         return os.path.join(path, filename)
@@ -1295,10 +1292,7 @@ class KBIAttachment(Attachment):
             category=self.kbitem.category, kbi=self.kbitem.id
         )
         att_path = os.path.join(settings.MEDIA_ROOT, path)
-        if (
-            settings.DEFAULT_FILE_STORAGE
-            == "django.core.files.storage.FileSystemStorage"
-        ):
+        if settings.STORAGES == "django.core.files.storage.FileSystemStorage":
             if not os.path.exists(att_path):
                 os.makedirs(att_path, helpdesk_settings.HELPDESK_ATTACHMENT_DIR_PERMS)
         return os.path.join(path, filename)
@@ -2128,6 +2122,8 @@ class CustomField(models.Model):
             attributes["max_digits"] = self.max_length
         elif self.data_type == "list":
             attributes["choices"] = self.get_choices()
+        # elif self.data_type == "datetime":
+        #     attributes["default_timezone"] = getattr(settings, "DEFAULT_TIMEZONE", "UTC")
 
         try:
             return customfield_to_api_field_dict[self.data_type](**attributes)
