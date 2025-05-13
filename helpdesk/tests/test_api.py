@@ -320,7 +320,7 @@ class TicketTest(APITestCase):
                         "new_status": None,
                         "time_spent": None,
                         "followupattachment_set": [],
-                        "date": frozen_date_time_str + "Z",
+                        "date": frozen_date_time_str,
                         "message_id": None,
                     }
                 ],
