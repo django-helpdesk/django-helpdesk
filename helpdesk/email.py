@@ -172,7 +172,9 @@ def pop3_sync(q, logger, server):
                 "Message %s was ignored and will be left on POP3 server" % msgNum
             )
         except DeleteIgnoredTicketException:
-            logger.warning("Message %s was ignored and deleted from POP3 server" % msgNum)
+            logger.warning(
+                "Message %s was ignored and deleted from POP3 server" % msgNum
+            )
             server.dele(msgNum)
         else:
             if ticket:
@@ -471,7 +473,9 @@ def process_queue(q, logger):
                     )
                 except DeleteIgnoredTicketException:
                     os.unlink(m)
-                    logger.warning("Message %d was ignored and deleted local directory", i)
+                    logger.warning(
+                        "Message %d was ignored and deleted local directory", i
+                    )
                 else:
                     if ticket:
                         logger.info(
