@@ -1,9 +1,12 @@
 Installation/integration into an existing Django application
-============
+============================================================
 
 .. note:: 
 
     For standalone installation, refer to the :doc:`standalone installation docs <standalone>`.
+
+.. contents:: In this document...
+   :depth: 2
 
 ``django-helpdesk`` installation isn't difficult, but it requires you have a bit 
 of existing know-how about Django.

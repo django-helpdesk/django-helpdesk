@@ -1,6 +1,9 @@
 Settings
 ========
 
+.. contents:: In this document...
+   :depth: 2
+
 First, django-helpdesk needs  ``django.core.context_processors.request`` activated, so you must add it to the ``settings.py``. Add the following::
 
     TEMPLATES = [
@@ -86,6 +89,10 @@ These changes are visible throughout django-helpdesk
 - **HELPDESK_NAVIGATION_ENABLED** Show extended navigation by default, to all users, irrespective of staff status?
 
   **Default:** ``HELPDESK_NAVIGATION_ENABLED = False``
+  
+- **HELPDESK_SHOW_MY_TICKETS_IN_NAV_FOR_STAFF** Show "My tickets" for staff. Typically used for help desk deploymnets that allow staff to create tickets to action other staff members.
+
+  **Default:** ``HELPDESK_SHOW_MY_TICKETS_IN_NAV_FOR_STAFF = True``
 
 - **HELPDESK_TRANSLATE_TICKET_COMMENTS** Show dropdown list of languages that ticket comments can be translated into via Google Translate?
 
