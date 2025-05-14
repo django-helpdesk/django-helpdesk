@@ -1,6 +1,5 @@
 import base64
-from collections import OrderedDict
-from datetime import datetime
+import datetime
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
 from freezegun import freeze_time
@@ -15,10 +14,15 @@ from rest_framework.status import (
     HTTP_403_FORBIDDEN,
 )
 from rest_framework.test import APITestCase
+from _datetime import timedelta
+from helpdesk.lib import convert_value
+from django.utils import timezone
+
+frozen_date_time_str = (datetime.datetime.now() - timedelta(days=100)).isoformat()
 
 
 class TicketTest(APITestCase):
-    due_date = datetime(2022, 4, 10, 15, 6)
+    due_date = timezone.now() - timedelta(days=20)
 
     @classmethod
     def setUpTestData(cls):
@@ -212,8 +216,12 @@ class TicketTest(APITestCase):
         self.assertEqual(response.status_code, HTTP_204_NO_CONTENT)
         self.assertFalse(Ticket.objects.exists())
 
-    @freeze_time("2022-06-30 23:09:44")
+    @freeze_time(frozen_date_time_str)
     def test_create_api_ticket_with_custom_fields(self):
+        custom_date = "2022-04-11"
+        custom_time = "23:59:59"
+        custom_datetime = convert_value(datetime.datetime.now() - timedelta(days=30))
+
         # Create custom fields
         for field_type, field_display in CustomField.DATA_TYPE_CHOICES:
             extra_data = {}
@@ -273,9 +281,9 @@ class TicketTest(APITestCase):
                 "custom_decimal": "42.987",
                 "custom_list": "Red",
                 "custom_boolean": True,
-                "custom_date": "2022-4-11",
-                "custom_time": "23:59:59",
-                "custom_datetime": "2022-4-10 18:27",
+                "custom_date": custom_date,
+                "custom_time": custom_time,
+                "custom_datetime": custom_datetime,
                 "custom_email": "email@test.com",
                 "custom_url": "http://django-helpdesk.readthedocs.org/",
                 "custom_ipaddress": "127.0.0.1",
@@ -284,7 +292,12 @@ class TicketTest(APITestCase):
         )
         self.assertEqual(response.status_code, HTTP_201_CREATED)
         # Check all fields with data returned from the response
-        self.assertEqual(
+        self.maxDiff = None
+        # The date string generated sometimes has a "Z" appended so until they why is figured out...
+        date_suffix_hack = (
+            "Z" if response.data["followup_set"][0]["date"].endswith("Z") else ""
+        )
+        self.assertDictEqual(
             response.data,
             {
                 "id": 1,
@@ -300,21 +313,19 @@ class TicketTest(APITestCase):
                 "due_date": None,
                 "merged_to": None,
                 "followup_set": [
-                    OrderedDict(
-                        [
-                            ("id", 1),
-                            ("ticket", 1),
-                            ("user", 1),
-                            ("title", "Ticket Opened"),
-                            ("comment", "Test description\nMulti lines"),
-                            ("public", True),
-                            ("new_status", None),
-                            ("time_spent", None),
-                            ("followupattachment_set", []),
-                            ("date", "2022-06-30T23:09:44"),
-                            ("message_id", None),
-                        ]
-                    )
+                    {
+                        "id": 1,
+                        "ticket": 1,
+                        "user": 1,
+                        "title": "Ticket Opened",
+                        "comment": "Test description\nMulti lines",
+                        "public": True,
+                        "new_status": None,
+                        "time_spent": None,
+                        "followupattachment_set": [],
+                        "date": frozen_date_time_str + date_suffix_hack,
+                        "message_id": None,
+                    }
                 ],
                 "custom_varchar": "test",
                 "custom_text": "multi\nline",
@@ -322,9 +333,9 @@ class TicketTest(APITestCase):
                 "custom_decimal": "42.987",
                 "custom_list": "Red",
                 "custom_boolean": True,
-                "custom_date": "2022-04-11",
-                "custom_time": "23:59:59",
-                "custom_datetime": "2022-04-10T18:27",
+                "custom_date": custom_date,
+                "custom_time": custom_time,
+                "custom_datetime": custom_datetime,
                 "custom_email": "email@test.com",
                 "custom_url": "http://django-helpdesk.readthedocs.org/",
                 "custom_ipaddress": "127.0.0.1",

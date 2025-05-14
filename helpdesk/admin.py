@@ -55,6 +55,7 @@ class TicketAdmin(admin.ModelAdmin):
     list_filter = ("queue", "assigned_to", "status")
     search_fields = ("id", "title")
 
+    @admin.display(description=_("Submitter E-Mail"))
     def hidden_submitter_email(self, ticket):
         if ticket.submitter_email:
             username, domain = ticket.submitter_email.split("@")
@@ -63,8 +64,6 @@ class TicketAdmin(admin.ModelAdmin):
             return "%s@%s" % (username, domain)
         else:
             return ticket.submitter_email
-
-    hidden_submitter_email.short_description = _("Submitter E-Mail")
 
     def time_spent(self, ticket):
         return ticket.time_spent
@@ -99,10 +98,9 @@ class FollowUpAdmin(admin.ModelAdmin):
     )
     list_filter = ("user", "date", "new_status")
 
+    @admin.display(description=_("Slug"))
     def ticket_get_ticket_for_url(self, obj):
         return obj.ticket.ticket_for_url
-
-    ticket_get_ticket_for_url.short_description = _("Slug")
 
 
 if helpdesk_settings.HELPDESK_KB_ENABLED:

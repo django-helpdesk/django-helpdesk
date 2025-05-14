@@ -1,8 +1,9 @@
-from datetime import datetime
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 from helpdesk.models import Checklist, ChecklistTask, ChecklistTemplate, Queue, Ticket
+from _datetime import timedelta
+from django.utils import timezone
 
 
 class TicketChecklistTestCase(TestCase):
@@ -167,7 +168,9 @@ class TicketChecklistTestCase(TestCase):
     def test_mark_task_as_undone(self):
         checklist = self.ticket.checklists.create(name="Test checklist")
         task = checklist.tasks.create(
-            description="Task", position=1, completion_date=datetime(2023, 5, 1)
+            description="Task",
+            position=1,
+            completion_date=timezone.now() - timedelta(days=10),
         )
         self.assertIsNotNone(task.completion_date)
 

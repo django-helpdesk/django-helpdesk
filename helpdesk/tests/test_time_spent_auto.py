@@ -8,6 +8,7 @@ from django.urls import reverse
 from helpdesk.models import FollowUp, Queue, Ticket
 from helpdesk import settings as helpdesk_settings
 import uuid
+from django.utils import timezone
 
 
 @override_settings(USE_TZ=True)
@@ -413,9 +414,7 @@ class TimeSpentAutoTestCase(TestCase):
             "queue": queues["new"],
             "assigned_to": self.user,
             "status": Ticket.OPEN_STATUS,
-            "created": datetime.strptime(
-                "2024-04-09T08:00:00+00:00", "%Y-%m-%dT%H:%M:%S%z"
-            ),
+            "created": timezone.now() - timedelta(days=10),
             "description": "Followup time spent auto exclude queues",
         }
         ticket = Ticket.objects.create(**initial_data)

@@ -150,13 +150,13 @@ urlpatterns = [
 
 if helpdesk_settings.HELPDESK_ENABLE_DEPENDENCIES_ON_TICKET:
     urlpatterns += [
-        re_path(
-            r"^tickets/(?P<ticket_id>[0-9]+)/dependency/add/$",
+        path(
+            "tickets/<int:ticket_id>/dependency/add/",
             staff.ticket_dependency_add,
             name="ticket_dependency_add",
         ),
-        re_path(
-            r"^tickets/(?P<ticket_id>[0-9]+)/dependency/delete/(?P<dependency_id>[0-9]+)/$",
+        path(
+            "tickets/<int:ticket_id>/dependency/delete/<int:dependency_id>/",
             staff.ticket_dependency_del,
             name="ticket_dependency_del",
         ),
@@ -221,7 +221,7 @@ router.register(
     r"followups-attachments", FollowUpAttachmentViewSet, basename="followupattachments"
 )
 router.register(r"users", CreateUserView, basename="user")
-urlpatterns += [re_path(r"^api/", include(router.urls))]
+urlpatterns += [path("api/", include(router.urls))]
 
 
 urlpatterns += [
