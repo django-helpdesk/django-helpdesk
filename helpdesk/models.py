@@ -2122,8 +2122,6 @@ class CustomField(models.Model):
             attributes["max_digits"] = self.max_length
         elif self.data_type == "list":
             attributes["choices"] = self.get_choices()
-        # elif self.data_type == "datetime":
-        #     attributes["default_timezone"] = getattr(settings, "DEFAULT_TIMEZONE", "UTC")
 
         try:
             return customfield_to_api_field_dict[self.data_type](**attributes)
