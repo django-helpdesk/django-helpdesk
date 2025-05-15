@@ -91,6 +91,12 @@ HELPDESK_TICKETS_TIMELINE_ENABLED = getattr(
 # status?
 HELPDESK_NAVIGATION_ENABLED = getattr(settings, "HELPDESK_NAVIGATION_ENABLED", False)
 
+# Show the "My Tickets" navigation option for staff members - typically this is for when
+# staff can create tickets to action other staff.
+HELPDESK_SHOW_MY_TICKETS_IN_NAV_FOR_STAFF = getattr(
+    settings, "HELPDESK_SHOW_MY_TICKETS_IN_NAV_FOR_STAFF", True
+)
+
 # use public CDNs to serve jquery and other javascript by default?
 # otherwise, use built-in static copy
 HELPDESK_USE_CDN = getattr(settings, "HELPDESK_USE_CDN", False)

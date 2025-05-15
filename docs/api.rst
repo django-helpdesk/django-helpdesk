@@ -1,6 +1,9 @@
 API
 ===
 
+.. contents:: In this document...
+   :depth: 2
+
 A REST API (built with ``djangorestframework``) is available in order to list, create, update and delete tickets from
 other tools thanks to HTTP requests.
 
