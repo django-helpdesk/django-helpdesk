@@ -90,7 +90,7 @@ These changes are visible throughout django-helpdesk
 
   **Default:** ``HELPDESK_NAVIGATION_ENABLED = False``
   
-- **HELPDESK_SHOW_MY_TICKETS_IN_NAV_FOR_STAFF** Show "My tickets" for staff. Typically used for help desk deploymnets that allow staff to create tickets to action other staff members.
+- **HELPDESK_SHOW_MY_TICKETS_IN_NAV_FOR_STAFF** Show "My tickets" for staff. Typically used for help desk deployments that allow staff to create tickets to action other staff members.
 
   **Default:** ``HELPDESK_SHOW_MY_TICKETS_IN_NAV_FOR_STAFF = True``
 
