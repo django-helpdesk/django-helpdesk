@@ -49,13 +49,13 @@ def get_markdown(text):
 
     # Search for markdown that creates a clickable link and remove the undesirable ones
     pattern = re.compile(r"(\[[\s\S]*?\])\(([\w]*?):([\s\S]*?)\)", flags=re.MULTILINE)
-    rerun_scheme_check = True  # Used to decided to re-check the text after each parse
+    rerun_scheme_check = True  # Used to decide if a re-check should be done after last pass
     while rerun_scheme_check:
         has_illegal_scheme = False
         for m in re.finditer(pattern, text):
             # check if scheme is allowed
             if m.group(2).lower() in helpdesk_settings.ALLOWED_URL_SCHEMES:
-                # Considered safe so dn't change it.
+                # Considered safe so don't change it.
                 continue
             # Remove the scheme and leave the rest
             text = text.replace(m.group(0), f"{m.group(1)}({m.group(3)})")
