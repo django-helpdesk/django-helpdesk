@@ -49,7 +49,9 @@ def get_markdown(text):
 
     # Search for markdown that creates a clickable link and remove the undesirable ones
     pattern = re.compile(r"(\[[\s\S]*?\])\(([\w]*?):([\s\S]*?)\)", flags=re.MULTILINE)
-    rerun_scheme_check = True  # Used to decide if a re-check should be done after last pass
+    rerun_scheme_check = (
+        True  # Used to decide if a re-check should be done after last pass
+    )
     while rerun_scheme_check:
         has_illegal_scheme = False
         for m in re.finditer(pattern, text):
