@@ -49,12 +49,14 @@ class MarkDown(SimpleTestCase):
         output_value = get_markdown(input_value)
         self.assertEqual(output_value, expected_value)
 
-    def test_multiline_markdown_link_with_correct_and_incorrect_protocol_twice_declared(self):
+    def test_multiline_markdown_link_with_correct_and_incorrect_protocol_twice_declared(
+        self,
+    ):
         expected_value = '<p>This<a href="http://alert.javascript.test">XSS</a></p>\n<p>FAKE IT TILL YOU MAKE IT: <a href="alert(document.domain);">TEST</a></p>'
         input_value = "This[XSS](http://alert.javascript.test)\n\nFAKE IT TILL YOU MAKE IT: [TEST](javascript:javascript:alert(document.domain);)"
         output_value = get_markdown(input_value)
         self.assertEqual(output_value, expected_value)
-        
+
     def test_markdown_link_with__multiple_incorrect_protocols(self):
         expected_value = '<p>First one:<a href="alert(document.domain);">XSS1</a> ...try again: <a href="alert(document.domain);">XSS2</a></p>'
         input_value = "First one:[XSS1](javascript:alert(document.domain);) ...try again: [XSS2](javascript:javascript:alert(document.domain);)"
