@@ -38,22 +38,31 @@ class EscapeHtml(Extension):
 
 
 def get_markdown(text):
+    """
+    This algorithm will check for illegal schemes used in markdown clickable links
+    and remove the scheme. It does an iterative retry until no replacements done to
+    account for embedded schemes in the replacement text.
+    It will then do markdown processing to ensure safe markdown and return the safe string.
+    """
     if not text:
         return ""
 
-    pattern = r"([\[\s\S\]]*?)\(([\s\S]*?):([\s\S]*?)\)"
-    # Regex check
-    if re.match(pattern, text):
-        # get get value of group regex
-        scheme = re.search(pattern, text, re.IGNORECASE).group(2)
-        # scheme check
-        if scheme in helpdesk_settings.ALLOWED_URL_SCHEMES:
-            replacement = "\\1(\\2:\\3)"
-        else:
-            replacement = "\\1(\\3)"
-
-        text = re.sub(pattern, replacement, text, flags=re.IGNORECASE)
-
+    # Search for markdown that creates a clickable link and remove the undesirable ones
+    pattern = re.compile(r"(\[[\s\S]*?\])\(([\w]*?):([\s\S]*?)\)", flags=re.MULTILINE)
+    rerun_scheme_check = (
+        True  # Used to decide if a re-check should be done after last pass
+    )
+    while rerun_scheme_check:
+        has_illegal_scheme = False
+        for m in re.finditer(pattern, text):
+            # check if scheme is allowed
+            if m.group(2).lower() in helpdesk_settings.ALLOWED_URL_SCHEMES:
+                # Considered safe so don't change it.
+                continue
+            # Remove the scheme and leave the rest
+            text = text.replace(m.group(0), f"{m.group(1)}({m.group(3)})")
+            has_illegal_scheme = True
+        rerun_scheme_check = has_illegal_scheme
     return mark_safe(
         markdown(
             text,
