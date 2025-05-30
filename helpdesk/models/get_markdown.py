@@ -11,7 +11,8 @@ from markdown import markdown
 from django.utils.safestring import mark_safe
 import re
 from helpdesk import settings as helpdesk_settings
-from helpdesk.models import EscapeHtml
+
+from . import EscapeHtml
 
 
 def get_markdown(text):
