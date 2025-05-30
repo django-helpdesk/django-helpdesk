@@ -10,6 +10,7 @@ models.py - Model (and hence database) definitions. This is the core of the
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+
 class EmailTemplate(models.Model):
     """
     Since these are more likely to be changed than other templates, we store

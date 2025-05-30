@@ -11,6 +11,8 @@ from django.utils.translation import gettext, gettext_lazy as _
 from django.db import models
 
 from . import FollowUp
+
+
 class TicketChange(models.Model):
     """
     For each FollowUp, any changes to the parent ticket (eg Title, Priority,

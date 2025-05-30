@@ -9,6 +9,7 @@ models.py - Model (and hence database) definitions. This is the core of the
 
 from django.db import models
 
+
 class CustomFieldManager(models.Manager):
     def get_queryset(self):
         return super(CustomFieldManager, self).get_queryset().order_by("ordering")

@@ -12,6 +12,7 @@ from django.utils.translation import gettext_lazy as _
 
 from . import Ticket
 
+
 class TicketDependency(models.Model):
     """
     The ticket identified by `ticket` cannot be resolved until the ticket in `depends_on` has been resolved.

@@ -13,6 +13,7 @@ import re
 from helpdesk import settings as helpdesk_settings
 from helpdesk.models import EscapeHtml
 
+
 def get_markdown(text):
     """
     This algorithm will check for illegal schemes used in markdown clickable links

@@ -6,7 +6,9 @@ django-helpdesk - A Django powered ticket tracker for small enterprise.
 models.py - Model (and hence database) definitions. This is the core of the
             helpdesk structure.
 """
+
 from . import get_default_setting
+
 
 def use_email_as_submitter_default():
     return get_default_setting("use_email_as_submitter")

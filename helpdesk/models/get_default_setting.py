@@ -7,6 +7,7 @@ models.py - Model (and hence database) definitions. This is the core of the
             helpdesk structure.
 """
 
+
 def get_default_setting(setting):
     from helpdesk.settings import DEFAULT_USER_SETTINGS
 

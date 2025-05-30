@@ -14,6 +14,7 @@ from rest_framework import serializers
 
 from . import CustomFieldManager
 
+
 class CustomField(models.Model):
     """
     Definitions for custom fields that are glued onto each ticket.
@@ -179,4 +180,3 @@ class CustomField(models.Model):
             return customfield_to_api_field_dict[self.data_type](**attributes)
         except KeyError:
             raise NameError("Unrecognized data_type %s" % self.data_type)
-

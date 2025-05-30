@@ -9,6 +9,7 @@ models.py - Model (and hence database) definitions. This is the core of the
 
 from markdown.extensions import Extension
 
+
 class EscapeHtml(Extension):
     def extendMarkdown(self, md):
         md.preprocessors.deregister("html_block")

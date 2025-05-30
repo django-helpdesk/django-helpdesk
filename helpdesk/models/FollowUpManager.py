@@ -6,7 +6,9 @@ django-helpdesk - A Django powered ticket tracker for small enterprise.
 models.py - Model (and hence database) definitions. This is the core of the
             helpdesk structure.
 """
+
 from django.db import models
+
 
 class FollowUpManager(models.Manager):
     def private_followups(self):

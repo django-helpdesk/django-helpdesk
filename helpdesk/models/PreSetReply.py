@@ -12,6 +12,7 @@ from django.utils.translation import gettext_lazy as _
 
 from . import Queue
 
+
 class PreSetReply(models.Model):
     """
     We can allow the admin to define a number of pre-set replies, used to

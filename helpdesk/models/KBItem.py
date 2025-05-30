@@ -15,6 +15,7 @@ from django.utils import timezone
 
 from . import get_markdown, Ticket, KBCategory
 
+
 class KBItem(models.Model):
     """
     An item within the knowledgebase. Very straightforward question/answer

@@ -12,6 +12,7 @@ from django.utils.translation import gettext_lazy as _
 
 from . import Ticket
 
+
 class Checklist(models.Model):
     ticket = models.ForeignKey(
         Ticket,

@@ -6,6 +6,8 @@ django-helpdesk - A Django powered ticket tracker for small enterprise.
 models.py - Model (and hence database) definitions. This is the core of the
             helpdesk structure.
 """
+
+
 def attachment_path(instance, filename):
     """Just bridge"""
     return instance.attachment_path(filename)

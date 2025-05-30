@@ -6,6 +6,7 @@ django-helpdesk - A Django powered ticket tracker for small enterprise.
 models.py - Model (and hence database) definitions. This is the core of the
             helpdesk structure.
 """
+
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.conf import settings
@@ -15,10 +16,17 @@ import datetime
 from helpdesk import settings as helpdesk_settings
 
 
-
 from ..templated_email import send_templated_mail
 from ..lib import format_time_spent, convert_value
-from . import Queue, mk_secret, FollowUp, TicketDependency, get_markdown, TicketCustomFieldValue, CustomField
+from . import (
+    Queue,
+    mk_secret,
+    FollowUp,
+    TicketDependency,
+    get_markdown,
+    TicketCustomFieldValue,
+    CustomField,
+)
 
 
 class Ticket(models.Model):

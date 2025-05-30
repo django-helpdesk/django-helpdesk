@@ -15,6 +15,7 @@ import os
 
 from . import Attachment
 
+
 class KBIAttachment(Attachment):
     kbitem = models.ForeignKey(
         "KBItem",

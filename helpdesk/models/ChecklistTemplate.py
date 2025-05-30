@@ -11,6 +11,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ValidationError
 
+
 def is_a_list_without_empty_element(task_list):
     if not isinstance(task_list, list):
         raise ValidationError(f"{task_list} is not a list")

@@ -1,4 +1,3 @@
-
 """
 django-helpdesk - A Django powered ticket tracker for small enterprise.
 
@@ -13,6 +12,7 @@ from django.db import models
 
 from . import UserSettings
 
+
 def create_usersettings(sender, instance, created, **kwargs):
     """
     Helper function to create UserSettings instances as
@@ -24,5 +24,6 @@ def create_usersettings(sender, instance, created, **kwargs):
     """
     if created:
         UserSettings.objects.create(user=instance)
+
 
 models.signals.post_save.connect(create_usersettings, sender=settings.AUTH_USER_MODEL)

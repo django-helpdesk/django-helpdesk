@@ -15,6 +15,7 @@ import os
 
 from . import FollowUp, Attachment
 
+
 class FollowUpAttachment(Attachment):
     followup = models.ForeignKey(
         FollowUp,

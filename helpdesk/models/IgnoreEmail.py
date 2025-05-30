@@ -13,6 +13,7 @@ from django.utils import timezone
 
 from . import Queue
 
+
 class IgnoreEmail(models.Model):
     """
     This model lets us easily ignore e-mails from certain senders when

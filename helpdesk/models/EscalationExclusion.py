@@ -12,6 +12,7 @@ from django.utils.translation import gettext_lazy as _
 
 from . import Queue
 
+
 class EscalationExclusion(models.Model):
     """
     An 'EscalationExclusion' lets us define a date on which escalation should

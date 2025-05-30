@@ -14,6 +14,7 @@ from django.core.exceptions import ValidationError
 
 from . import Ticket
 
+
 class TicketCC(models.Model):
     """
     Often, there are people who wish to follow a ticket who aren't the

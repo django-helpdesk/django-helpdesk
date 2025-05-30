@@ -6,6 +6,7 @@ django-helpdesk - A Django powered ticket tracker for small enterprise.
 models.py - Model (and hence database) definitions. This is the core of the
             helpdesk structure.
 """
+
 import datetime
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
@@ -17,6 +18,7 @@ from django.conf import settings
 
 from ..lib import format_time_spent, daily_time_spent_calculation
 from . import Ticket, FollowUpManager, Queue, get_markdown, TicketChange
+
 
 class FollowUp(models.Model):
     """
@@ -206,4 +208,3 @@ class FollowUp(models.Model):
                 )
 
         return datetime.timedelta(seconds=time_spent_seconds)
-

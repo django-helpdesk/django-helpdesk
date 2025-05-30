@@ -12,6 +12,7 @@ from django.utils.translation import gettext_lazy as _
 
 from . import Queue
 
+
 class KBCategory(models.Model):
     """
     Lets help users help themselves: the Knowledge Base is a categorised
@@ -62,4 +63,3 @@ class KBCategory(models.Model):
         from django.urls import reverse
 
         return reverse("helpdesk:kb_category", kwargs={"slug": self.slug})
-

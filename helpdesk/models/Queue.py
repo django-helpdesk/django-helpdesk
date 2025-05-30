@@ -19,6 +19,7 @@ import datetime
 from ..lib import format_time_spent
 from . import FollowUp
 
+
 class Queue(models.Model):
     """
     A queue is a collection of tickets into what would generally be business

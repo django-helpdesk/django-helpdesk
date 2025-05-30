@@ -9,6 +9,7 @@ models.py - Model (and hence database) definitions. This is the core of the
 
 from django.db import models
 
+
 class ChecklistTaskQuerySet(models.QuerySet):
     def todo(self):
         return self.filter(completion_date__isnull=True)
