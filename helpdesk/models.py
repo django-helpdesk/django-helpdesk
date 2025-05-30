@@ -1161,7 +1161,7 @@ class TicketChange(models.Model):
 
     field = models.CharField(
         _("Field"),
-        max_length=100,
+        max_length=200,
     )
 
     old_value = models.TextField(
