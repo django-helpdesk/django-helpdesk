@@ -19,7 +19,6 @@ from helpdesk import settings as helpdesk_settings
 from ..templated_email import send_templated_mail
 from ..lib import format_time_spent, convert_value
 from . import (
-    Queue,
     mk_secret,
     FollowUp,
     TicketDependency,
@@ -64,7 +63,7 @@ class Ticket(models.Model):
     )
 
     queue = models.ForeignKey(
-        Queue,
+        "helpdesk.Queue",
         on_delete=models.CASCADE,
         verbose_name=_("Queue"),
     )
