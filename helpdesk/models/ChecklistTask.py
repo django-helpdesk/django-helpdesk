@@ -10,7 +10,7 @@ models.py - Model (and hence database) definitions. This is the core of the
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from . import ChecklistTaskQuerySet
+from .ChecklistTaskQuerySet import ChecklistTaskQuerySet
 
 
 class ChecklistTask(models.Model):
