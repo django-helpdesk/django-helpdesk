@@ -11,13 +11,12 @@ from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from . import (
-    login_view_ticketlist_default,
-    email_on_ticket_assign_default,
-    email_on_ticket_change_default,
-    tickets_per_page_default,
-    use_email_as_submitter_default,
-)
+from .login_view_ticketlist_default import login_view_ticketlist_default
+from .email_on_ticket_assign_default import email_on_ticket_assign_default
+from .email_on_ticket_change_default import email_on_ticket_change_default
+from .tickets_per_page_default import tickets_per_page_default
+from .use_email_as_submitter_default import use_email_as_submitter_default
+
 
 
 class UserSettings(models.Model):

@@ -19,13 +19,12 @@ from helpdesk import settings as helpdesk_settings
 
 from ..templated_email import send_templated_mail
 from ..lib import format_time_spent, convert_value
-from . import (
-    mk_secret,
-    TicketDependency,
-    get_markdown,
-    TicketCustomFieldValue,
-    CustomField,
-)
+from .mk_secret import mk_secret
+from .TicketDependency import TicketDependency
+from .get_markdown import get_markdown
+from .TicketCustomFieldValue import TicketCustomFieldValue
+from .CustomField import CustomField
+
 
 
 class Ticket(models.Model):

@@ -12,7 +12,7 @@ from django.utils.safestring import mark_safe
 import re
 from helpdesk import settings as helpdesk_settings
 
-from . import EscapeHtml
+from .EscapeHtml import EscapeHtml
 
 
 def get_markdown(text):

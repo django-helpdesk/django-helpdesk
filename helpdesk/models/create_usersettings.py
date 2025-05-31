@@ -10,7 +10,7 @@ models.py - Model (and hence database) definitions. This is the core of the
 from django.conf import settings
 from django.db import models
 
-from . import UserSettings
+from .UserSettings import UserSettings
 
 
 def create_usersettings(sender, instance, created, **kwargs):

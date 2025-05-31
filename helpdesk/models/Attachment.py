@@ -12,7 +12,7 @@ from django.utils.translation import gettext_lazy as _
 import mimetypes
 
 from ..validators import validate_file_extension
-from . import attachment_path
+from .attachment_path import attachment_path
 
 
 class Attachment(models.Model):

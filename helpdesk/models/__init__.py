@@ -5,6 +5,7 @@ from .ChecklistTemplate import ChecklistTemplate, is_a_list_without_empty_elemen
 from .CustomField import CustomField
 from .EmailTemplate import EmailTemplate
 from .EscalationExclusion import EscalationExclusion
+from .EscapeHtml import EscapeHtml
 from .FollowUp import FollowUp
 from .IgnoreEmail import IgnoreEmail
 from .KBCategory import KBCategory
@@ -19,10 +20,11 @@ from .TicketChange import TicketChange
 from .TicketCustomFieldValue import TicketCustomFieldValue
 from .TicketDependency import TicketDependency
 from .UserSettings import UserSettings
-from .EscapeHtml import EscapeHtml
+
 from .ChecklistTaskQuerySet import ChecklistTaskQuerySet
 from .CustomFieldManager import CustomFieldManager
 from .FollowUpManager import FollowUpManager
+from .FollowUpAttachment import FollowUpAttachment
 
 # utility functions or settings if they are part of your
 from .attachment_path import attachment_path
