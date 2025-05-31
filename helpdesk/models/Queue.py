@@ -13,11 +13,11 @@ from django.conf import settings
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
+from django.apps import apps
 import re
 import datetime
 
 from ..lib import format_time_spent
-from . import FollowUp
 
 
 class Queue(models.Model):
@@ -348,6 +348,7 @@ class Queue(models.Model):
         """Return back total time spent on the ticket. This is calculated value
         based on total sum from all FollowUps
         """
+        FollowUp = apps.get_model("helpdesk", "FollowUp")
         res = FollowUp.objects.filter(ticket__queue=self).aggregate(
             models.Sum("time_spent")
         )

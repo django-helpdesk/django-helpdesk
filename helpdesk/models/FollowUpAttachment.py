@@ -13,7 +13,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 import os
 
-from . import Attachment
+from .Attachment import Attachment
 
 
 class FollowUpAttachment(Attachment):

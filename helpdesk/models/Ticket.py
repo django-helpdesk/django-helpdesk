@@ -12,6 +12,7 @@ from django.db import models
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
+from django.apps import apps
 import datetime
 from helpdesk import settings as helpdesk_settings
 
@@ -20,7 +21,6 @@ from ..templated_email import send_templated_mail
 from ..lib import format_time_spent, convert_value
 from . import (
     mk_secret,
-    FollowUp,
     TicketDependency,
     get_markdown,
     TicketCustomFieldValue,
@@ -180,6 +180,7 @@ class Ticket(models.Model):
         """Return back total time spent on the ticket. This is calculated value
         based on total sum from all FollowUps
         """
+        FollowUp = apps.get_model("helpdesk", "FollowUp")
         res = FollowUp.objects.filter(ticket=self).aggregate(models.Sum("time_spent"))
         return res.get("time_spent__sum", datetime.timedelta(0))
 

@@ -14,10 +14,12 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from helpdesk import settings as helpdesk_settings
 from django.conf import settings
-
+from django.apps import apps
 
 from ..lib import format_time_spent, daily_time_spent_calculation
-from . import Ticket, FollowUpManager, Queue, get_markdown, TicketChange
+from .FollowUpManager import FollowUpManager
+from .Ticket import Ticket
+from .get_markdown import get_markdown
 
 
 class FollowUp(models.Model):
@@ -153,6 +155,8 @@ class FollowUp(models.Model):
         # find the previous queue for exclusion check
         if exclude_queues:
             try:
+                Queue = apps.get_model("helpdesk", "Queue")
+                TicketChange = apps.get_model("helpdesk", "TicketChange")
                 prev_fup_ids = prev_fup_qs.values_list("id", flat=True)
                 prev_queue_change = TicketChange.objects.filter(
                     followup_id__in=prev_fup_ids, field=_("Queue")

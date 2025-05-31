@@ -1,29 +1,24 @@
+"""
+django-helpdesk - A Django powered ticket tracker for small enterprise.
+
+(c) Copyright 2008-2025 Jutda. All Rights Reserved. See LICENSE for details.
+
+models.py - Model (and hence database) definitions. This is the core of the
+            helpdesk structure.
+"""
+
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
+from django.apps import apps
 from helpdesk import settings as helpdesk_settings
 from helpdesk.models import (
-    Checklist,
     ChecklistTask,
-    ChecklistTemplate,
-    CustomField,
-    EmailTemplate,
-    EscalationExclusion,
-    FollowUp,
     FollowUpAttachment,
-    IgnoreEmail,
-    KBIAttachment,
-    PreSetReply,
-    Queue,
-    Ticket,
     TicketChange,
+    KBIAttachment,
 )
 
 
-if helpdesk_settings.HELPDESK_KB_ENABLED:
-    from helpdesk.models import KBCategory, KBItem
-
-
-@admin.register(Queue)
 class QueueAdmin(admin.ModelAdmin):
     list_display = ("title", "slug", "email_address", "locale", "time_spent")
     prepopulated_fields = {"slug": ("title",)}
@@ -41,7 +36,6 @@ class QueueAdmin(admin.ModelAdmin):
             queue.delete()
 
 
-@admin.register(Ticket)
 class TicketAdmin(admin.ModelAdmin):
     list_display = (
         "title",
@@ -84,7 +78,6 @@ class KBIAttachmentInline(admin.StackedInline):
     extra = 0
 
 
-@admin.register(FollowUp)
 class FollowUpAdmin(admin.ModelAdmin):
     inlines = [TicketChangeInline, FollowUpAttachmentInline]
     list_display = (
@@ -105,7 +98,6 @@ class FollowUpAdmin(admin.ModelAdmin):
 
 if helpdesk_settings.HELPDESK_KB_ENABLED:
 
-    @admin.register(KBItem)
     class KBItemAdmin(admin.ModelAdmin):
         list_display = ("category", "title", "last_updated", "team", "order", "enabled")
         inlines = [KBIAttachmentInline]
@@ -115,28 +107,23 @@ if helpdesk_settings.HELPDESK_KB_ENABLED:
 
     if helpdesk_settings.HELPDESK_KB_ENABLED:
 
-        @admin.register(KBCategory)
         class KBCategoryAdmin(admin.ModelAdmin):
             list_display = ("name", "title", "slug", "public")
 
 
-@admin.register(CustomField)
 class CustomFieldAdmin(admin.ModelAdmin):
     list_display = ("name", "label", "data_type")
 
 
-@admin.register(EmailTemplate)
 class EmailTemplateAdmin(admin.ModelAdmin):
     list_display = ("template_name", "heading", "locale")
     list_filter = ("locale",)
 
 
-@admin.register(IgnoreEmail)
 class IgnoreEmailAdmin(admin.ModelAdmin):
     list_display = ("name", "queue_list", "email_address", "keep_in_mailbox")
 
 
-@admin.register(ChecklistTemplate)
 class ChecklistTemplateAdmin(admin.ModelAdmin):
     list_display = ("name", "task_list")
     search_fields = ("name", "task_list")
@@ -146,7 +133,6 @@ class ChecklistTaskInline(admin.TabularInline):
     model = ChecklistTask
 
 
-@admin.register(Checklist)
 class ChecklistAdmin(admin.ModelAdmin):
     list_display = ("name", "ticket")
     search_fields = ("name", "ticket__id", "ticket__title")
@@ -155,5 +141,21 @@ class ChecklistAdmin(admin.ModelAdmin):
     inlines = (ChecklistTaskInline,)
 
 
-admin.site.register(PreSetReply)
-admin.site.register(EscalationExclusion)
+admin.site.register(apps.get_model("helpdesk", "PreSetReply"))
+admin.site.register(apps.get_model("helpdesk", "EscalationExclusion"))
+admin.site.register(apps.get_model("helpdesk", "Queue"), QueueAdmin)
+admin.site.register(apps.get_model("helpdesk", "Ticket"), TicketAdmin)
+admin.site.register(apps.get_model("helpdesk", "FollowUp"), FollowUpAdmin)
+admin.site.register(apps.get_model("helpdesk", "CustomField"), CustomFieldAdmin)
+admin.site.register(apps.get_model("helpdesk", "EmailTemplate"), EmailTemplateAdmin)
+
+admin.site.register(apps.get_model("helpdesk", "Checklist"), ChecklistAdmin)
+admin.site.register(
+    apps.get_model("helpdesk", "ChecklistTemplate"), ChecklistTemplateAdmin
+)
+admin.site.register(apps.get_model("helpdesk", "IgnoreEmail"), IgnoreEmailAdmin)
+
+
+if helpdesk_settings.HELPDESK_KB_ENABLED:
+    admin.site.register(apps.get_model("helpdesk", "KBItem"), KBItemAdmin)
+    admin.site.register(apps.get_model("helpdesk", "KBCategory"), KBCategoryAdmin)
