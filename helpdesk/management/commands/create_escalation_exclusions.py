@@ -2,7 +2,7 @@
 """
 Jutda Helpdesk - A Django powered ticket tracker for small enterprise.
 
-(c) Copyright 2008 Jutda. All Rights Reserved. See LICENSE for details.
+(c) Copyright 2008-2025 Jutda. All Rights Reserved. See LICENSE for details.
 
 scripts/create_escalation_exclusion.py - Easy way to routinely add particular
                                          days to the list of days on which no

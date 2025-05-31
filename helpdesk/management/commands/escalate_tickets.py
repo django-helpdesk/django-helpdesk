@@ -2,7 +2,7 @@
 """
 django-helpdesk - A Django powered ticket tracker for small enterprise.
 
-(c) Copyright 2008 Jutda. All Rights Reserved. See LICENSE for details.
+(c) Copyright 2008-2025 Jutda. All Rights Reserved. See LICENSE for details.
 
 scripts/escalate_tickets.py - Easy way to escalate tickets based on their age,
                               designed to be run from Cron or similar.

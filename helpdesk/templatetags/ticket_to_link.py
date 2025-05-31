@@ -1,7 +1,7 @@
 """
 django-helpdesk - A Django powered ticket tracker for small enterprise.
 
-(c) Copyright 2008 Jutda. All Rights Reserved. See LICENSE for details.
+(c) Copyright 2008-2025 Jutda. All Rights Reserved. See LICENSE for details.
 
 templatetags/ticket_to_link.py - Used in ticket comments to allow wiki-style
                                  linking to other tickets. Including text such

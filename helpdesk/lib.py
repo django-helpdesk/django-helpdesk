@@ -1,7 +1,7 @@
 """
 django-helpdesk - A Django powered ticket tracker for small enterprise.
 
-(c) Copyright 2008 Jutda. All Rights Reserved. See LICENSE for details.
+(c) Copyright 2008-2025 Jutda. All Rights Reserved. See LICENSE for details.
 
 lib.py - Common functions (eg multipart e-mail)
 """

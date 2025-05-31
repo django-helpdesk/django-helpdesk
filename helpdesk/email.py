@@ -1,7 +1,7 @@
 """
 Django Helpdesk - A Django powered ticket tracker for small enterprise.
 
-(c) Copyright 2008 Jutda. Copyright 2018 Timothy Hobbs. All Rights Reserved.
+(c) Copyright 2008-2025 Jutda. Copyright 2018 Timothy Hobbs. All Rights Reserved.
 See LICENSE for details.
 """
 

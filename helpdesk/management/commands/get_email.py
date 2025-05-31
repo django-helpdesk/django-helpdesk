@@ -2,7 +2,7 @@
 """
 Jutda Helpdesk - A Django powered ticket tracker for small enterprise.
 
-(c) Copyright 2008 Jutda. All Rights Reserved. See LICENSE for details.
+(c) Copyright 2008-2025 Jutda. All Rights Reserved. See LICENSE for details.
 
 scripts/get_email.py - Designed to be run from cron, this script checks the
                        POP and IMAP boxes, or a local mailbox directory,

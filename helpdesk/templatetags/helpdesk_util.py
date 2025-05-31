@@ -1,3 +1,11 @@
+"""
+django-helpdesk - A Django powered ticket tracker for small enterprise.
+
+(c) Copyright 2008-2025 Jutda. All Rights Reserved. See LICENSE for details.
+
+helpdesk_util.py
+"""
+
 from datetime import datetime
 from django.conf import settings
 from django.template import Library
