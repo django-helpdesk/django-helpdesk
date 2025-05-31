@@ -12,8 +12,6 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ValidationError
 
-from . import Ticket
-
 
 class TicketCC(models.Model):
     """
@@ -26,7 +24,7 @@ class TicketCC(models.Model):
     """
 
     ticket = models.ForeignKey(
-        Ticket,
+        "helpdesk.Ticket",
         on_delete=models.CASCADE,
         verbose_name=_("Ticket"),
     )

@@ -13,7 +13,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 
-from . import get_markdown, Ticket, KBCategory
+from . import get_markdown, Ticket
 
 
 class KBItem(models.Model):
@@ -31,7 +31,7 @@ class KBItem(models.Model):
         related_name="downvotes",
     )
     category = models.ForeignKey(
-        KBCategory,
+        "helpdesk.KBCategory",
         on_delete=models.CASCADE,
         verbose_name=_("Category"),
     )

@@ -11,8 +11,6 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 
-from . import Queue
-
 
 class IgnoreEmail(models.Model):
     """
@@ -26,7 +24,7 @@ class IgnoreEmail(models.Model):
         verbose_name_plural = _("Ignored e-mail addresses")
 
     queues = models.ManyToManyField(
-        Queue,
+        "helpdesk.Queue",
         blank=True,
         help_text=_(
             "Leave blank for this e-mail to be ignored on all queues, "

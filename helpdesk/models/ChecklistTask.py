@@ -10,12 +10,12 @@ models.py - Model (and hence database) definitions. This is the core of the
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from . import Checklist, ChecklistTaskQuerySet
+from . import ChecklistTaskQuerySet
 
 
 class ChecklistTask(models.Model):
     checklist = models.ForeignKey(
-        Checklist,
+        "helpdesk.Checklist",
         on_delete=models.CASCADE,
         verbose_name=_("Checklist"),
         related_name="tasks",

@@ -34,7 +34,7 @@ class FollowUp(models.Model):
     """
 
     ticket = models.ForeignKey(
-        Ticket,
+        "helpdesk.Ticket",
         on_delete=models.CASCADE,
         verbose_name=_("Ticket"),
     )

@@ -10,8 +10,6 @@ models.py - Model (and hence database) definitions. This is the core of the
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from . import Queue
-
 
 class KBCategory(models.Model):
     """
@@ -38,7 +36,7 @@ class KBCategory(models.Model):
     )
 
     queue = models.ForeignKey(
-        Queue,
+        "helpdesk.Queue",
         blank=True,
         null=True,
         on_delete=models.CASCADE,

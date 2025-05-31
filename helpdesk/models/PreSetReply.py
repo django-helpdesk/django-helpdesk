@@ -10,8 +10,6 @@ models.py - Model (and hence database) definitions. This is the core of the
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from . import Queue
-
 
 class PreSetReply(models.Model):
     """
@@ -31,7 +29,7 @@ class PreSetReply(models.Model):
         verbose_name_plural = _("Pre-set replies")
 
     queues = models.ManyToManyField(
-        Queue,
+        "helpdesk.Queue",
         blank=True,
         help_text=_(
             "Leave blank to allow this reply to be used for all "

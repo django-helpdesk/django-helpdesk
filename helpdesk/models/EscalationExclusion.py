@@ -10,8 +10,6 @@ models.py - Model (and hence database) definitions. This is the core of the
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from . import Queue
-
 
 class EscalationExclusion(models.Model):
     """
@@ -25,7 +23,7 @@ class EscalationExclusion(models.Model):
     """
 
     queues = models.ManyToManyField(
-        Queue,
+        "helpdesk.Queue",
         blank=True,
         help_text=_(
             "Leave blank for this exclusion to be applied to all queues, "

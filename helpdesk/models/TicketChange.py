@@ -10,8 +10,6 @@ models.py - Model (and hence database) definitions. This is the core of the
 from django.utils.translation import gettext, gettext_lazy as _
 from django.db import models
 
-from . import FollowUp
-
 
 class TicketChange(models.Model):
     """
@@ -20,7 +18,7 @@ class TicketChange(models.Model):
     """
 
     followup = models.ForeignKey(
-        FollowUp,
+        "helpdesk.FollowUp",
         on_delete=models.CASCADE,
         verbose_name=_("Follow-up"),
     )

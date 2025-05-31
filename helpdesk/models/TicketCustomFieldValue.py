@@ -10,18 +10,16 @@ models.py - Model (and hence database) definitions. This is the core of the
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from . import Ticket, CustomField
-
 
 class TicketCustomFieldValue(models.Model):
     ticket = models.ForeignKey(
-        Ticket,
+        "helpdesk.Ticket",
         on_delete=models.CASCADE,
         verbose_name=_("Ticket"),
     )
 
     field = models.ForeignKey(
-        CustomField,
+        "helpdesk.CustomField",
         on_delete=models.CASCADE,
         verbose_name=_("Field"),
     )
