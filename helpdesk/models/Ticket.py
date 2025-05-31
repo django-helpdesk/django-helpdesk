@@ -26,7 +26,6 @@ from .TicketCustomFieldValue import TicketCustomFieldValue
 from .CustomField import CustomField
 
 
-
 class Ticket(models.Model):
     """
     To allow a ticket to be entered as quickly as possible, only the

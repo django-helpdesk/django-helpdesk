@@ -18,7 +18,6 @@ from .tickets_per_page_default import tickets_per_page_default
 from .use_email_as_submitter_default import use_email_as_submitter_default
 
 
-
 class UserSettings(models.Model):
     """
     A bunch of user-specific settings that we want to be able to define, such
