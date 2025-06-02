@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('helpdesk', '0038_checklist_checklisttemplate_checklisttask'),
+        ("helpdesk", "0038_checklist_checklisttemplate_checklisttask"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='ticketchange',
-            name='field',
-            field=models.CharField(max_length=200, verbose_name='Field'),
+            model_name="ticketchange",
+            name="field",
+            field=models.CharField(max_length=200, verbose_name="Field"),
         ),
     ]

@@ -130,7 +130,9 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
         # Since title is max 100 characters limit it in editing
         if "title" in self.fields:
             self.fields["title"].max_length = Ticket._meta.get_field("title").max_length
-            self.fields["title"].widget.attrs["maxlength"] = Ticket._meta.get_field("title").max_length
+            self.fields["title"].widget.attrs["maxlength"] = Ticket._meta.get_field(
+                "title"
+            ).max_length
 
         # Disable and add help_text to the merged_to field on this form
         self.fields["merged_to"].disabled = True
