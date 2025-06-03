@@ -392,13 +392,25 @@
                     {
                         data: "priority",
                         render: function (data, type, row, meta) {
-                            let priority = "success";
-                            if (data === 4) {
-                                priority = "warning";
-                            } else if (data === 5) {
-                                priority = "danger";
+                            let priorityClass = "text-secondary";
+                            switch (data) {
+                                case 1:
+                                    priorityClass = "text-danger";
+                                    break;
+                                case 2:
+                                    priorityClass = "text-warning";
+                                    break;
+                                case 3:
+                                    priorityClass = "text-success";
+                                    break;
+                                case 4:
+                                    priorityClass = "text-info";
+                                    break;
+                                case 5:
+                                    priorityClass = "text-secondary";
+                                    break;
                             }
-                            return '<p class="text-' + priority + '">' + data + '</p>';
+                            return '<p class="' + priorityClass + '">' + data + '</p>';
                         },
                         visible: false,
                     },
