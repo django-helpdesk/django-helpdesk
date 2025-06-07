@@ -119,6 +119,7 @@ urlpatterns = [
     path("rss/", staff.rss_list, name="rss_index"),
     path("reports/", staff.report_index, name="report_index"),
     re_path(r"^reports/(?P<report>\w+)/$", staff.run_report, name="run_report"),
+    path("saved-searches/", staff.saved_searches_list, name="saved_searches_list"),
     path("save_query/", staff.save_query, name="savequery"),
     path("delete_query/<int:pk>/", staff.delete_saved_query, name="delete_query"),
     path("settings/", staff.EditUserSettingsView.as_view(), name="user_settings"),
