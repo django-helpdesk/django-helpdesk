@@ -1688,6 +1688,23 @@ run_report = staff_member_required(run_report)
 
 
 @helpdesk_staff_member_required
+def saved_searches_list(request):
+    user = request.user
+    saved_queries = SavedSearch.objects.filter(Q(user=user) | Q(shared=True)).distinct()
+
+    return render(
+        request,
+        "helpdesk/saved_searches_list.html",
+        {
+            "saved_queries": saved_queries,
+        },
+    )
+
+
+saved_searches_list = staff_member_required(saved_searches_list)
+
+
+@helpdesk_staff_member_required
 def save_query(request):
     title = request.POST.get("title", None)
     shared = request.POST.get("shared", False)

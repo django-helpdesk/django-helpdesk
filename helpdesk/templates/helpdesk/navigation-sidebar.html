@@ -34,6 +34,12 @@
             {% endif %}
           </div>
         </li>
+        <li class="nav-item{% if 'saved-searches' in request.path %} active{% endif %}">
+          <a class="nav-link" href="{% url 'helpdesk:saved_searches_list' %}">
+            <i class="fas fa-fw fa-save"></i>
+            <span>{% trans "Manage Saved Queries" %}</span>
+          </a>
+        </li>
         <li class="nav-item{% if 'submit' in request.path %} active{% endif %}">
           <a class="nav-link" href="{% url 'helpdesk:submit' %}">
             <i class="fas fa-fw fa-plus-circle"></i>
