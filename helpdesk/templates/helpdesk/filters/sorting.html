@@ -4,7 +4,7 @@
     <div class="col col-sm-3">
       <label for='id_sort' class="col-form-label">{% trans "Sorting" %}:</label>
     </div>
-    <div class="col col-sm-3">
+    <div class="col col-sm-3 pt-2">
             <select id='id_sort' name='sort' class="">
                 <option value='created'{% if query_params.sorting == "created"%} selected='selected'{% endif %}>
                     {% trans "Created" %}
@@ -29,7 +29,7 @@
   <div class="col col-sm-2">
     <label for='id_sortreverse' class="col-form-label">{% trans "Reverse" %}</label>
   </div>
-  <div class="col col-sm-3">
+  <div class="col col-sm-3 pt-2">
     <input type='checkbox' name='sortreverse' id='id_sortreverse'{% if query_params.sortreverse %} checked='checked'{% endif %} />
   </div>
   <div class="col col-sm-1">
