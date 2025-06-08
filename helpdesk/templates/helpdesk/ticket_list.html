@@ -171,6 +171,9 @@
                                         <option id="filterBuilderSelect-Sort" value="Sort"{% if query_params.sorting %} disabled{% endif %}>
                                             {% trans "Sorting" %}
                                         </option>
+                                        <option id="filterBuilderSelect-Priority" value="Priority"{% if query_params.filtering.priority__in %} disabled{% endif %}>
+                                            {% trans "Priority" %}
+                                        </option>
                                         <option id="filterBuilderSelect-Owner" value="Owner"{% if query_params.filtering.assigned_to__id__in or query_params.filtering_null.assigned_to__id__isnull %} disabled{% endif %}>
                                             {% trans "Owner" %}
                                         </option>
@@ -200,6 +203,10 @@
                                     class="filterBox{% if query_params.sorting %} filterBoxShow{% endif %} list-group-item"
                                     id="filterBoxSort">
                                     {% include 'helpdesk/filters/sorting.html' %}
+                                </li>
+                                <li class="list-group-item filterBox{% if query_params.filtering.priority__in %} filterBoxShow{% endif %}"
+                                    id="filterBoxPriority">
+                                    {% include 'helpdesk/filters/priority.html' %}
                                 </li>
                                 <li class="filterBox{% if query_params.filtering.assigned_to__id__in or query_params.filtering_null.assigned_to__id__isnull %} filterBoxShow{% endif %} list-group-item"
                                     id=filterBoxOwner>

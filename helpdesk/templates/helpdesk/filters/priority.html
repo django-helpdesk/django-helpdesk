@@ -1,0 +1,15 @@
+{% load i18n humanize %}
+{% load static %}
+{% load in_list %}
+<div class="form-row">
+  <div class="col col-sm-3">
+    <label for='id_priority'>{% trans "Priority" %}:</label>
+  </div>
+  <div class="col col-sm-3">
+    <select id='id_priority' name='priority' multiple='selected' size='5'>{% for p in priority_choices %}<option value='{{ p.0 }}'{% if p.0|in_list:query_params.filtering.priority__in %} selected='selected'{% endif %}>{{ p.1 }}</option>{% endfor %}</select>
+  </div>
+  <div class="col col-sm-6">
+    <button class="filterBuilderRemove btn btn-danger btn-sm float-right"><i class="fas fa-trash-alt"></i></button>
+  </div>
+  <div class='form-row filterHelp'>{% trans "Ctrl-click to select multiple options" %}</div>
+</div>
