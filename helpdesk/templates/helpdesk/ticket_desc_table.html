@@ -15,27 +15,29 @@
                             <h3>{{ ticket.queue.slug }}-{{ ticket.id }}. {{ ticket.title }}</h3>
                             {% blocktrans with ticket.queue as queue %}Queue: {{ queue }}{% endblocktrans %}
                             <span class='ticket_toolbar float-right'>
-                                <a href="{% url 'helpdesk:edit' ticket.id %}" class="btn btn-warning btn-sm ticket-edit">
-                                    <i class="fas fa-pencil-alt"></i> {% trans "Edit" %}
-                                </a>
-                                | <a href="{% url 'helpdesk:delete' ticket.id %}" class="btn btn-danger btn-sm ticket-delete">
-                                    <i class="fas fa-trash-alt"></i> {% trans "Delete" %}
-                                </a>
-                                | {% if ticket.on_hold %}
-                                    <form class="form-inline ticket-hold" method='post' action='unhold/'>
-                                        {% csrf_token %}
-                                        <button class="btn btn-warning btn-sm" type='submit'>
-                                            <i class="fas fa-play"></i> {% trans "Unhold" %}
-                                        </button>
-                                    </form>
-                                {% else %}
-                                    <form class="form-inline ticket-hold" method='post' action='hold/'>
-                                        {% csrf_token %}
-                                        <button class="btn btn-warning btn-sm" type='submit'>
-                                            <i class="fas fa-pause"></i> {% trans "Hold" %}
-                                        </button>
-                                    </form>
-                                {% endif %}
+                                <div class="btn-group" style="gap: 8px;">
+                                    <a href="{% url 'helpdesk:edit' ticket.id %}" class="btn btn-warning btn-sm ticket-edit">
+                                        <i class="fas fa-pencil-alt"></i> {% trans "Edit" %}
+                                    </a>
+                                    | <a href="{% url 'helpdesk:delete' ticket.id %}" class="btn btn-danger btn-sm ticket-delete">
+                                        <i class="fas fa-trash-alt"></i> {% trans "Delete" %}
+                                    </a>
+                                    | {% if ticket.on_hold %}
+                                        <form class="form-inline ticket-hold" method='post' action='unhold/'>
+                                            {% csrf_token %}
+                                            <button class="btn btn-warning btn-sm" type='submit'>
+                                                <i class="fas fa-play"></i> {% trans "Unhold" %}
+                                            </button>
+                                        </form>
+                                    {% else %}
+                                        <form class="form-inline ticket-hold" method='post' action='hold/'>
+                                            {% csrf_token %}
+                                            <button class="btn btn-warning btn-sm" type='submit'>
+                                                <i class="fas fa-pause"></i> {% trans "Hold" %}
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                </div>
                             </span>
                         </th>
                     </tr>

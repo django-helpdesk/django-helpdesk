@@ -1079,6 +1079,7 @@ def ticket_list(request):
         "queue",
         "assigned_to",
         "status",
+        "priority",
         "q",
         "sort",
         "sortreverse",
@@ -1091,6 +1092,7 @@ def ticket_list(request):
             ("queue", "queue__id__in"),
             ("assigned_to", "assigned_to__id__in"),
             ("status", "status__in"),
+            ("priority", "priority__in"),
             ("kbitem", "kbitem__in"),
         ]
         filter_null_params = dict(
@@ -1098,6 +1100,7 @@ def ticket_list(request):
                 ("queue", "queue__id__isnull"),
                 ("assigned_to", "assigned_to__id__isnull"),
                 ("status", "status__isnull"),
+                ("priority", "priority__isnull"),
                 ("kbitem", "kbitem__isnull"),
             ]
         )
@@ -1189,6 +1192,7 @@ def ticket_list(request):
             kb_items=kbitem,
             queue_choices=huser.get_queues(),
             status_choices=Ticket.STATUS_CHOICES,
+            priority_choices=Ticket.PRIORITY_CHOICES,
             kbitem_choices=kbitem_choices,
             urlsafe_query=urlsafe_query,
             user_saved_queries=user_saved_queries,
@@ -1694,6 +1698,23 @@ def run_report(request, report):
 
 
 run_report = staff_member_required(run_report)
+
+
+@helpdesk_staff_member_required
+def saved_searches_list(request):
+    user = request.user
+    saved_queries = SavedSearch.objects.filter(Q(user=user) | Q(shared=True)).distinct()
+
+    return render(
+        request,
+        "helpdesk/saved_searches_list.html",
+        {
+            "saved_queries": saved_queries,
+        },
+    )
+
+
+saved_searches_list = staff_member_required(saved_searches_list)
 
 
 @helpdesk_staff_member_required

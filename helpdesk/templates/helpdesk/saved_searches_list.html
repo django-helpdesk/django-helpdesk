@@ -1,0 +1,59 @@
+{% extends "helpdesk/base.html" %}
+{% load i18n %}
+
+{% block helpdesk_title %}
+  {% trans "Saved Queries" %}
+{% endblock %}
+
+{% block helpdesk_breadcrumb %}
+  <li class="breadcrumb-item">
+    <a href="{% url 'helpdesk:list' %}">{% trans "Tickets" %}</a>
+  </li>
+  <li class="breadcrumb-item active">{% trans "Saved Queries" %}</li>
+{% endblock %}
+
+{% block helpdesk_body %}
+  <div class="container mt-4">
+    <h3 class="mb-4">{% trans "Saved Queries" %}</h3>
+
+    {% if saved_queries %}
+      <ul class="list-group">
+        {% for q in saved_queries %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+              <a href="{% url 'helpdesk:list' %}?saved_query={{ q.id }}" class="text-decoration-none">
+                {{ q.title }}
+                {% if q.shared %}
+                  <small class="text-muted ms-2 fst-italic">
+                    {% if q.user == user %}
+                      ({% trans "Shared" %})
+                    {% else %}
+                      ({% trans "Shared by" %} {{ q.user.get_username }})
+                    {% endif %}
+                  </small>
+                {% endif %}
+              </a>
+            </div>
+            <div class="d-flex">
+              <a href="{% url 'helpdesk:list' %}?saved_query={{ q.id }}"
+                 class="btn btn-sm btn-outline-primary mr-2"
+                 title="{% trans 'Run this query' %}">
+                <i class="fas fa-play"></i> {% trans "Run" %}
+              </a>
+
+              {% if q.user == user %}
+                <a href="{% url 'helpdesk:delete_query' q.id %}"
+                   class="btn btn-sm btn-outline-danger"
+                   title="{% trans 'Delete this query' %}">
+                  <i class="fas fa-trash"></i>
+                </a>
+              {% endif %}
+            </div>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>{% trans "No saved queries found." %}</p>
+    {% endif %}
+  </div>
+{% endblock %}
