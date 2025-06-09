@@ -71,6 +71,7 @@ from helpdesk.models import (
     SavedSearch,
     Ticket,
     TicketCC,
+    TicketChange,
     TicketCustomFieldValue,
     TicketDependency,
     UserSettings,
@@ -89,6 +90,7 @@ import re
 from rest_framework import status
 from rest_framework.decorators import api_view
 import typing
+from django.utils.timezone import now
 
 
 if helpdesk_settings.HELPDESK_KB_ENABLED:
@@ -1384,20 +1386,27 @@ def hold_ticket(request, ticket_id, unhold=False):
 
     if unhold:
         ticket.on_hold = False
-        title = _("Ticket taken off hold")
+        followup_title = _("Ticket taken off hold")
     else:
         ticket.on_hold = True
-        title = _("Ticket placed on hold")
-
-    f = update_ticket(
-        user=request.user,
-        ticket=ticket,
-        title=title,
-        public=True,
-    )
-    f.save()
+        followup_title = _("Ticket placed on hold")
 
     ticket.save()
+
+    followup = FollowUp.objects.create(
+        ticket=ticket,
+        title=followup_title,
+        date=now(),
+        public=True,
+        user=request.user,
+    )
+
+    TicketChange.objects.create(
+        followup=followup,
+        field=_("On Hold"),
+        old_value=str(not ticket.on_hold),
+        new_value=str(ticket.on_hold),
+    )
 
     return HttpResponseRedirect(ticket.get_absolute_url())
 
