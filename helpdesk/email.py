@@ -1090,9 +1090,31 @@ def extract_email_metadata(
                 else DeleteIgnoredTicketException()
             )
 
+    # First try to get ticket ID from the current queue's slug
     ticket_id: typing.Optional[int] = get_ticket_id_from_subject_slug(
         queue.slug, subject, logger
     )
+
+    # If no ticket ID found in the current queue, check all other queues
+    if ticket_id is None:
+        # Get all enabled queues except the current one
+        other_queues = Queue.objects.exclude(id=queue.id).filter(
+            email_box_type__isnull=False, allow_email_submission=True
+        )
+        
+        for other_queue in other_queues:
+            ticket_id = get_ticket_id_from_subject_slug(
+                other_queue.slug, subject, logger
+            )
+            if ticket_id is not None:
+                # Found a matching ticket in another queue, use that queue instead
+                logger.info(
+                    f"Found ticket {ticket_id} matching subject in queue {other_queue.slug} "
+                    f"instead of current queue {queue.slug}"
+                )
+                queue = other_queue
+                break
+
     files = []
     # first message in thread, we save full body to avoid losing forwards and things like that
     include_chained_msgs = (
