@@ -309,7 +309,7 @@ def update_ticket(
         )
         ticket.queue_id = queue
 
-    if due_date != ticket.due_date:
+    if due_date and due_date != ticket.due_date:
         f.ticketchange_set.create(
             field=_("Due on"),
             old_value=ticket.due_date,
