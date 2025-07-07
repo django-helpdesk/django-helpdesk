@@ -369,3 +369,43 @@ def generate_html_email(
         msg, locale=locale, use_short_email=use_short_email
     )
     return msg, from_meta, to_meta
+
+
+def generate_email_with_subject(
+    subject: str,
+    locale: str = "en_US",
+    use_short_email: bool = False,
+    body: str = None,
+    html_body: str = None,
+) -> typing.Tuple[Message, typing.Tuple[str, str], typing.Tuple[str, str]]:
+    """
+    Generates an email with a specified subject, and optional plain and HTML bodies.
+
+    :param subject: The desired subject for the email.
+    :param locale: Change this to generate locale-specific "real names" and body content.
+    :param use_short_email: Produces a "To" or "From" that is only the email address if True.
+    :param body: Optional plain text body for the email. If None, a fake text body is generated.
+    :param html_body: Optional HTML body for the email. If None and a plain body is used, a fake HTML body is generated.
+    """
+    from_meta = generate_email_address(locale, use_short_email=use_short_email)
+    to_meta = generate_email_address(locale, use_short_email=use_short_email)
+
+    if body is None and html_body is None:
+        body = get_fake("text", locale=locale, min_length=1024)
+        html_body = get_fake_html(locale=locale, wrap_in_body_tag=True)
+        msg = MIMEMultipart("alternative")
+        msg.attach(MIMEText(body, "plain"))
+        msg.attach(MIMEText(html_body, "html"))
+    elif body is not None and html_body is None:
+        msg = MIMEText(body, "plain")
+    elif body is None and html_body is not None:
+        msg = MIMEText(html_body, "html")
+    else:  # Both body and html_body are provided
+        msg = MIMEMultipart("alternative")
+        msg.attach(MIMEText(body, "plain"))
+        msg.attach(MIMEText(html_body, "html"))
+
+    msg["Subject"] = subject
+    msg["From"] = from_meta[0]
+    msg["To"] = to_meta[0]
+    return msg, from_meta, to_meta

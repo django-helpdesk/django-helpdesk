@@ -1102,7 +1102,7 @@ def extract_email_metadata(
         other_queues = Queue.objects.exclude(id=queue.id).filter(
             email_box_type__isnull=False
         )
-        
+
         for other_queue in other_queues:
             ticket_id = get_ticket_id_from_subject_slug(
                 other_queue.slug, subject, logger
@@ -1115,11 +1115,13 @@ def extract_email_metadata(
                 )
                 queue = other_queue
                 break
-        
+
         # If no ticket ID was found in any queue, revert to the original queue for new ticket
         if ticket_id is None:
             queue = original_queue
-            logger.info(f"No existing ticket found, reverting to original queue {queue.slug}")
+            logger.info(
+                f"No existing ticket found, reverting to original queue {queue.slug}"
+            )
 
     files = []
     # first message in thread, we save full body to avoid losing forwards and things like that
