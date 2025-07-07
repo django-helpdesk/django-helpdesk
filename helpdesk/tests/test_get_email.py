@@ -553,6 +553,97 @@ class GetEmailCommonTests(TestCase):
             "Email attachment file not found in ticket attachment for empty body.",
         )
 
+    @patch("helpdesk.email.get_ticket_id_from_subject_slug")
+    @patch("helpdesk.email.create_object_from_email_message")
+    def test_ticket_id_lookup_across_queues(
+        self, mock_create_object, mock_get_ticket_id
+    ):
+        """
+        Tests the logic for finding a ticket ID:
+        1. Not found in the current queue.
+        2. Found in another queue, leading to ticket association with that queue.
+        3. Not found in any queue, leading to a new ticket in the original queue.
+        """
+        # Create additional queues for testing
+        queue_other1 = Queue.objects.create(
+            title="Other Queue 1", slug="other1", email_box_type="local"
+        )
+        queue_other2 = Queue.objects.create(
+            title="Other Queue 2", slug="other2", email_box_type="local"
+        )
+
+        # Scenario 1: Ticket ID not found in current queue, then found in another queue
+        mock_get_ticket_id.side_effect = [
+            None,  # Not found in self.queue_public
+            123,  # Found in queue_other1
+        ]
+
+        # We need to mock Queue.objects.exclude().filter() to return our specific other queues
+        with patch("helpdesk.models.Queue.objects") as mock_queue_objects:
+            mock_queue_objects.exclude.return_value.filter.return_value = [
+                queue_other1,
+                queue_other2,
+            ]
+
+            message, _, _ = utils.generate_email_with_subject(
+                subject="[other1-123] Test Subject"
+            )
+            ticket = extract_email_metadata(
+                message.as_string(), self.queue_public, self.logger
+            )  # noqa
+
+            # Assert get_ticket_id_from_subject_slug was called for current and then other1
+            mock_get_ticket_id.assert_has_calls(
+                [
+                    mock.call(self.queue_public.slug, mock.ANY, self.logger),
+                    mock.call(queue_other1.slug, mock.ANY, self.logger),
+                ]
+            )
+
+            # Assert that create_object_from_email_message was called with the ticket ID and the other queue
+            mock_create_object.assert_called_once()
+            args, kwargs = mock_create_object.call_args
+            self.assertEqual(args[1], 123)  # ticket_id
+            self.assertEqual(args[2]["queue"], queue_other1)  # payload
+
+        mock_get_ticket_id.reset_mock()
+        mock_create_object.reset_mock()
+
+        # Scenario 2: Ticket ID not found in any queue, leading to a new ticket in the original queue
+        mock_get_ticket_id.side_effect = [
+            None,  # Not found in self.queue_public
+            None,  # Not found in queue_other1
+            None,  # Not found in queue_other2
+        ]
+
+        with patch("helpdesk.models.Queue.objects") as mock_queue_objects:
+            mock_queue_objects.exclude.return_value.filter.return_value = [
+                queue_other1,
+                queue_other2,
+            ]
+
+            message, _, _ = utils.generate_email_with_subject(
+                subject="[nonexistent-456] New Ticket Subject"
+            )
+            ticket = extract_email_metadata(  # noqa
+                message.as_string(), self.queue_public, self.logger
+            )
+
+            # Assert get_ticket_id_from_subject_slug was called for all queues
+            mock_get_ticket_id.assert_has_calls(
+                [
+                    mock.call(self.queue_public.slug, mock.ANY, self.logger),
+                    mock.call(queue_other1.slug, mock.ANY, self.logger),
+                    mock.call(queue_other2.slug, mock.ANY, self.logger),
+                ]
+            )
+
+            # Assert that create_object_from_email_message was called with None ticket_id and the original queue
+            mock_create_object.assert_called_once()
+            args, kwargs = mock_create_object.call_args
+            self.assertIsNone(args[1])
+            self.assertEqual(args[2]["queue"], self.queue_public)
+
 
 class EmailTaskTests(TestCase):
     def setUp(self):
