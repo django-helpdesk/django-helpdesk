@@ -175,7 +175,7 @@ class __Query__:
             column_lookup = DATATABLES_ORDER_COLUMN_CHOICES
             num_lookup = DATATABLES_COLUMN_NUM_LOOKUP
         else:
-            num_lookup = {v:k for k, v in column_lookup}
+            num_lookup = {v: k for k, v in column_lookup}
 
         sorting = self.params.get("sorting", "created")
         default_order_col = num_lookup.get(sorting, "5")
