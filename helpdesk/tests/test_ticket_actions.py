@@ -373,10 +373,11 @@ class TicketActionsTestCase(TestCase):
             title="New Queue",
             slug="newqueue",
         )
+        comment_string = "first follow-up in new queue"
         post_data = {
             "title": ticket.title,
             "priority": ticket.priority,
-            "comment": "first follow-up in new queue",
+            "comment": comment_string,
             "queue": str(new_queue.id),
         }
         self.client.post(
@@ -393,3 +394,52 @@ class TicketActionsTestCase(TestCase):
         self.assertEqual(latest_ticketchange.field, _("Queue"))
         self.assertEqual(int(latest_ticketchange.old_value), self.queue_public.id)
         self.assertEqual(int(latest_ticketchange.new_value), new_queue.id)
+        self.assertEqual(latest_fup.comment, comment_string)
+
+    def test_update_ticket_with_custom_fields(self):
+        """Tests that tickets that contain custom fields will correctly update core and custom fields."""
+
+        # log user in
+        self.loginUser()
+
+        # create ticket
+        initial_data = {
+            "title": "Queue change ticket test",
+            "queue": self.queue_public,
+            "assigned_to": self.user,
+            "status": Ticket.OPEN_STATUS,
+        }
+        ticket = Ticket.objects.create(**initial_data)
+        ticket_id = ticket.id
+        # Create custom fields and set values for tickets
+        custom_field_1 = CustomField.objects.create(
+            name="my_custom_field",
+            label="My Custom Field",
+            data_type="varchar",
+            required=True,
+        )
+        custom_field_1_value = "This is my custom field value"
+
+        comment_string = "FollowUp.comment field string"
+        post_data = {
+            "title": ticket.title,
+            "priority": ticket.priority,
+            "comment": comment_string,
+            "queue": str(self.queue_public.id),
+            "custom_" + custom_field_1.name: custom_field_1_value,
+        }
+        self.client.post(
+            reverse("helpdesk:update", kwargs={"ticket_id": ticket_id}), post_data
+        )
+
+        # queue was correctly modified
+        ticket.refresh_from_db()
+        self.assertEqual(ticket.queue_id, self.queue_public.id)
+
+        # ticket change was saved
+        latest_fup = ticket.followup_set.latest("date")
+        self.assertEqual(latest_fup.comment, comment_string)
+        self.assertEqual(
+            ticket.ticketcustomfieldvalue_set.get(field=custom_field_1).value,
+            custom_field_1_value,
+        )
