@@ -155,7 +155,7 @@ class __Query__:
         tickets = self.huser.get_tickets_in_queues().select_related()
         return self.__run__(tickets)
 
-    def get_datatables_context(self, **kwargs):
+    def get_datatables_context(self, *, column_lookup=None, **kwargs):
         """
         This function takes in a list of ticket objects from the views and throws it
         to the datatables on ticket_list.html. If a search string was entered, this
@@ -163,22 +163,29 @@ class __Query__:
         filtered list. The `draw`, `length` etc parameters are for datatables to
         display meta data on the table contents. The returning queryset is passed
         to a Serializer called DatatablesTicketSerializer in serializers.py.
+        Optionally, one can pass a dictionary in to override the default column
+        mapping for sorting
         """
         objects = self.get()
         draw = int(kwargs.get("draw", [0])[0])
         length = int(kwargs.get("length", [25])[0])
         start = int(kwargs.get("start", [0])[0])
         search_value = kwargs.get("search[value]", [""])[0]
+        if column_lookup is None:
+            column_lookup = DATATABLES_ORDER_COLUMN_CHOICES
+            num_lookup = DATATABLES_COLUMN_NUM_LOOKUP
+        else:
+            num_lookup = {v: k for k, v in column_lookup}
 
         sorting = self.params.get("sorting", "created")
-        default_order_col = DATATABLES_COLUMN_NUM_LOOKUP.get(sorting, "5")
+        default_order_col = num_lookup.get(sorting, "5")
         sortreverse = self.params.get("sortreverse", None)
         default_order = "desc" if sortreverse else "asc"
 
         order_column = kwargs.get("order[0][column]", [default_order_col])[0]
         order = kwargs.get("order[0][dir]", [default_order])[0]
 
-        order_column = DATATABLES_ORDER_COLUMN_CHOICES[order_column]
+        order_column = column_lookup[order_column]
         # django orm '-' -> desc
         if order == "desc":
             order_column = "-" + order_column
