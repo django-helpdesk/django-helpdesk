@@ -91,6 +91,8 @@ readme:
 	$(TOX) -e readme
 
 
+PY ?= from django.contrib.auth import get_user_model;print(1 if get_user_model().objects.filter(username="admin").exists() else 0)
+NO_USER ?= $(shell demodesk shell -c '${PY}' --no-imports)
 #: demo - Setup demo project using Python3.
 .PHONY: demo
 demo:
@@ -98,10 +100,12 @@ demo:
 	$(PIP) install -e . --user || $(PIP) install -e .
 	$(PIP) install -e demo --user || $(PIP) install -e demo
 	demodesk migrate --noinput
-	# Create superuser; user will be prompted to manually set a password
+	# Create superuser "admin" if it is not already created.
+	# Script will prompt user to manually set a password.
 	# When you get a prompt, enter a password of your choosing.
 	# We suggest a default of 'Test1234' for the demo project.
-	demodesk createsuperuser --username admin --email helpdesk@example.com
+	
+	@if [ $(NO_USER) -eq 0 ]; then demodesk createsuperuser --username admin --email helpdesk@example.com; fi
 	# Install fixtures
 	demodesk loaddata emailtemplate.json
 	demodesk loaddata demo.json
