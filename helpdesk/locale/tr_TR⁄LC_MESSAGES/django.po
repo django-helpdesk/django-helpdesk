@@ -1,0 +1,2417 @@
+# django-helpdesk English language translation
+# Copyright (C) 2011 Ross Poulton
+# This file is distributed under the same license as the django-helpdesk package.
+#
+# Translators:
+# Translators:
+msgid ""
+msgstr ""
+"Project-Id-Version: django-helpdesk\n"
+"Report-Msgid-Bugs-To: http://github.com/RossP/django-helpdesk/issues\n"
+"POT-Creation-Date: 2014-07-26 14:14+0200\n"
+"PO-Revision-Date: 2011-02-06 23:10+0000\n"
+"Last-Translator: Ross Poulton <ross@rossp.org>\n"
+"Language-Team: Turkish (Turkey) (http://www.transifex.com/rossp/django-helpdesk/language/tr_TR/)\n"
+"Language: tr_TR\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#: forms.py:128 forms.py:328 models.py:190 models.py:267
+#: templates/helpdesk/dashboard.html:15 templates/helpdesk/dashboard.html:58
+#: templates/helpdesk/dashboard.html:78 templates/helpdesk/dashboard.html:100
+#: templates/helpdesk/dashboard.html:124 templates/helpdesk/rss_list.html:24
+#: templates/helpdesk/ticket_list.html:69
+#: templates/helpdesk/ticket_list.html:88
+#: templates/helpdesk/ticket_list.html:225 views/staff.py:1032
+#: views/staff.py:1038 views/staff.py:1044 views/staff.py:1050 models.py:308
+msgid "If a ticket is on hold, it will not automatically be escalated."
+msgstr "Bir bilet beklemede ise, otomatik olarak yükseltilmez."
+
+#: models.py:313 models.py:826 templates/helpdesk/public_view_ticket.html:41
+#: templates/helpdesk/ticket_desc_table.html:19
+msgid "Description"
+msgstr "Tanım"
+
+#: models.py:316
+msgid "The content of the customers query."
+msgstr "Müşterilerin içeriği sorgular."
+
+#: models.py:320 templates/helpdesk/public_view_ticket.html:48
+#: templates/helpdesk/ticket_desc_table.html:26
+msgid "Resolution"
+msgstr "Çözünürlük"
+
+#: models.py:323
+msgid "The resolution provided to the customer by our staff."
+msgstr "Personelimiz tarafından müşteriye sağlanan karar."
+
+#: models.py:331
+msgid "1 = Highest Priority, 5 = Low Priority"
+msgstr "1 = en yüksek öncelik, 5 = düşük öncelik"
+
+#: models.py:344
+msgid ""
+"The date this ticket was last escalated - updated automatically by "
+"management/commands/escalate_tickets.py."
+msgstr ""
+"Bu biletin en son yükseldiği tarih - "
+"yönetim/komutlar/escalate_tickets.pytarafından otomatik olarak güncellendi."
+
+#: models.py:353 templates/helpdesk/ticket_desc_table.html:38
+#: views/feeds.py:95 views/feeds.py:121 views/feeds.py:173 views/staff.py:376
+msgid "Unassigned"
+msgstr "Atanmamış"
+
+#: models.py:392
+msgid " - On Hold"
+msgstr "- beklemede"
+
+#: models.py:394
+msgid " - Open dependencies"
+msgstr "- Açık bağımlılıklar"
+
+#: models.py:448 models.py:494 models.py:1117 models.py:1280 models.py:1309
+#: templates/helpdesk/public_homepage.html:78
+#: templates/helpdesk/public_view_form.html:12
+msgid "Ticket"
+msgstr "Bilet"
+
+#: models.py:449 templates/helpdesk/navigation.html:17
+#: templates/helpdesk/ticket_list.html:2
+#: templates/helpdesk/ticket_list.html:224
+msgid "Tickets"
+msgstr "Biletler"
+
+#: models.py:498 models.py:738 models.py:1047 models.py:1200
+msgid "Date"
+msgstr "Tarih"
+
+#: models.py:510 views/staff.py:390
+msgid "Comment"
+msgstr "Yorum"
+
+#: models.py:516
+msgid "Public"
+msgstr "Halk"
+
+#: models.py:519
+msgid ""
+"Public tickets are viewable by the submitter and all staff, but non-public "
+"tickets can only be seen by staff."
+msgstr ""
+"Kamu biletleri gönderici ve tüm personel tarafından görüntülenebilir, "
+"ancakkamuya açık olmayan biletler sadece personel tarafından görülebilir."
+
+#: models.py:527 models.py:922 models.py:1125 views/staff.py:1008
+#: views/staff.py:1014 views/staff.py:1020 views/staff.py:1026
+msgid "User"
+msgstr "Kullanıcı"
+
+#: models.py:531 templates/helpdesk/ticket.html:135
+msgid "New Status"
+msgstr "Yeni Durum"
+
+#: models.py:535
+msgid "If the status was changed, what was it changed to?"
+msgstr "Durum değiştirilirse, neye değiştirildi?"
+
+#: models.py:542 models.py:566 models.py:628
+msgid "Follow-up"
+msgstr "Takip etmek"
+
+#: models.py:543
+msgid "Follow-ups"
+msgstr "Takipler"
+
+#: models.py:570 models.py:1285
+msgid "Field"
+msgstr "Alan"
+
+#: models.py:575
+msgid "Old Value"
+msgstr "Eski değer"
+
+#: models.py:581
+msgid "New Value"
+msgstr "Yeni değer"
+
+#: models.py:589
+msgid "removed"
+msgstr "kaldırıldı"
+
+#: models.py:591
+#, python-format
+msgid "set to %s"
+msgstr "%s olarak ayarlayın"
+
+#: models.py:593
+#, python-format
+msgid "changed from \"%(old_value)s\" to \"%(new_value)s\""
+msgstr ""
+
+#: models.py:600
+msgid "Ticket change"
+msgstr "Bilet değişikliği"
+
+#: models.py:601
+msgid "Ticket changes"
+msgstr "Bilet Değişiklikleri"
+
+#: models.py:632
+msgid "File"
+msgstr "Dosya"
+
+#: models.py:637
+msgid "Filename"
+msgstr "Dosya adı"
+
+#: models.py:642
+msgid "MIME Type"
+msgstr "Mime tipi"
+
+#: models.py:647
+msgid "Size"
+msgstr "Boyut"
+
+#: models.py:648
+msgid "Size of this file in bytes"
+msgstr "Bu dosyanın bayt cinsinden boyutu"
+
+#: models.py:665
+msgid "Attachment"
+msgstr "EK"
+
+#: models.py:666
+msgid "Attachments"
+msgstr "Ekler"
+
+#: models.py:685
+msgid ""
+"Leave blank to allow this reply to be used for all queues, or select those "
+"queues you wish to limit this reply to."
+msgstr ""
+"Bu cevabın tüm kuyruklar için kullanılmasına izin vermek için boş "
+"bırakınveya bu cevabı sınırlamak istediğiniz kuyrukları seçin."
+
+#: models.py:690 models.py:733 models.py:1042
+#: templates/helpdesk/email_ignore_list.html:13
+msgid "Name"
+msgstr "İsim"
+
+#: models.py:692
+msgid ""
+"Only used to assist users with selecting a reply - not shown to the user."
+msgstr ""
+"Yalnızca kullanıcıların bir yanıt seçmesinde yardımcı olmak için kullanılır-"
+" kullanıcıya gösterilmemiştir."
+
+#: models.py:697
+msgid "Body"
+msgstr "Vücut"
+
+#: models.py:698
+msgid ""
+"Context available: {{ ticket }} - ticket object (eg {{ ticket.title }}); {{ "
+"queue }} - The queue; and {{ user }} - the current user."
+msgstr ""
+"Mevcut bağlam: {{bilet}} - Bilet nesnesi (örneğin {{bilet.title}});{{Queue}}"
+" - kuyruk; ve {{user}} - Geçerli kullanıcı."
+
+#: models.py:705
+msgid "Pre-set reply"
+msgstr "Önceden ayarlanmış cevap"
+
+#: models.py:706
+msgid "Pre-set replies"
+msgstr "Önceden ayarlanmış yanıtlar"
+
+#: models.py:727
+msgid ""
+"Leave blank for this exclusion to be applied to all queues, or select those "
+"queues you wish to exclude with this entry."
+msgstr ""
+"Bu hariç tutmanın tüm kuyruklara uygulanması için boş bırakın veya bugirişle"
+" hariç tutmak istediğiniz kuyrukları seçin."
+
+#: models.py:739
+msgid "Date on which escalation should not happen"
+msgstr "Hangi tırmanışın olmaması gerektiğine tarih"
+
+#: models.py:746
+msgid "Escalation exclusion"
+msgstr "Yükseltme hariç tutma"
+
+#: models.py:747
+msgid "Escalation exclusions"
+msgstr "Yükseltme istisnaları"
+
+#: models.py:760
+msgid "Template Name"
+msgstr "Şablon adı"
+
+#: models.py:765
+msgid "Subject"
+msgstr "Ders"
+
+#: models.py:767
+msgid ""
+"This will be prefixed with \"[ticket.ticket] ticket.title\". We recommend "
+"something simple such as \"(Updated\") or \"(Closed)\" - the same context is"
+" available as in plain_text, below."
+msgstr ""
+"Bu \"[ticket.ticket] ticket.title\" ile ön eklenecektir. \"Updated\" veya "
+"\"kapalı\" gibi basit bir şey öneriyoruz - aynı bağlam aşağıdaki "
+"Plain_Text'teki olduğu gibi mevcuttur."
+
+#: models.py:773
+msgid "Heading"
+msgstr "Başlık"
+
+#: models.py:775
+msgid ""
+"In HTML e-mails, this will be the heading at the top of the email - the same"
+" context is available as in plain_text, below."
+msgstr ""
+"HTML e -postalarında, bu e -postanın üst kısmındaki başlık olacaktır - "
+"aynıbağlam aşağıdaki Plain_Text'teki ile aynıdır."
+
+#: models.py:781
+msgid "Plain Text"
+msgstr "Düz metin"
+
+#: models.py:782
+msgid ""
+"The context available to you includes {{ ticket }}, {{ queue }}, and "
+"depending on the time of the call: {{ resolution }} or {{ comment }}."
+msgstr ""
+"Kullanabileceğiniz bağlamda {{bilet}}, {{Queue}} ve çağrı zamanına "
+"bağlıolarak: {{çözünürlük}} veya {{{yorum}} bulunur."
+
+#: models.py:788
+msgid "HTML"
+msgstr "HTML"
+
+#: models.py:789
+msgid "The same context is available here as in plain_text, above."
+msgstr "Aynı bağlam burada Plain_Text, yukarıdaki gibi mevcuttur."
+
+#: models.py:798
+msgid "Locale of this template."
+msgstr "Bu şablonun yerel ayarı."
+
+#: models.py:806
+msgid "e-mail template"
+msgstr "e-posta şablonu"
+
+#: models.py:807
+msgid "e-mail templates"
+msgstr "e-posta şablonları"
+
+#: models.py:834
+msgid "Knowledge base category"
+msgstr "Bilgi tabanı kategorisi"
+
+#: models.py:136
+msgid "Use SSL for E-Mail?"
+msgstr "E-posta için SSL kullanın mı?"
+
+#: models.py:139
+msgid ""
+"Whether to use SSL for IMAP or POP3 - the default ports when using SSL are "
+"993 for IMAP and 995 for POP3."
+msgstr ""
+"SSL'nin IMAP veya POP3 için kullanılması - SSL kullanılırken "
+"varsayılanbağlantı noktaları IMAP için 993 ve POP3 için 995'tir."
+
+#: models.py:144
+msgid "E-Mail Username"
+msgstr "E-posta kullanıcı adı"
+
+#: models.py:148
+msgid "Username for accessing this mailbox."
+msgstr "Bu posta kutusuna erişmek için kullanıcı adı."
+
+#: models.py:152
+msgid "E-Mail Password"
+msgstr "E-posta şifresi"
+
+#: models.py:156
+msgid "Password for the above username"
+msgstr "Yukarıdaki kullanıcı adı için şifre"
+
+#: models.py:160
+msgid "IMAP Folder"
+msgstr "IMAP klasörü"
+
+#: models.py:164
+msgid ""
+"If using IMAP, what folder do you wish to fetch messages from? This allows "
+"you to use one IMAP account for multiple queues, by filtering messages on "
+"your IMAP server into separate folders. Default: INBOX."
+msgstr ""
+"IMAP kullanıyorsanız, mesajları hangi klasörden almak istiyorsunuz? Bu, "
+"IMAPsunucunuzdaki mesajları ayrı klasörlere filtreleyerek birden fazla "
+"kuyrukiçin bir IMAP hesabı kullanmanıza olanak tanır. Varsayılan: Gelen "
+"Kutusu."
+
+#: models.py:171
+msgid "E-Mail Check Interval"
+msgstr "E-posta Kontrol Aralığı"
+
+#: models.py:172
+msgid "How often do you wish to check this mailbox? (in Minutes)"
+msgstr ""
+"Bu posta kutusunu ne sıklıkla kontrol etmek istersiniz? (dakikalar içinde)"
+
+#: models.py:191 templates/helpdesk/email_ignore_list.html:13
+msgid "Queues"
+msgstr "Kuyruk"
+
+#: models.py:245 templates/helpdesk/dashboard.html:15
+#: templates/helpdesk/ticket.html:138
+msgid "Open"
+msgstr "Açık"
+
+#: models.py:246 templates/helpdesk/ticket.html:144
+#: templates/helpdesk/ticket.html.py:150 templates/helpdesk/ticket.html:155
+#: templates/helpdesk/ticket.html.py:159
+msgid "Reopened"
+msgstr "Yeniden açılmış"
+
+#: models.py:247 templates/helpdesk/dashboard.html:15
+#: templates/helpdesk/ticket.html:139 templates/helpdesk/ticket.html.py:145
+#: templates/helpdesk/ticket.html:151
+msgid "Resolved"
+msgstr "Çözülmüş"
+
+#: models.py:248 templates/helpdesk/dashboard.html:15
+#: templates/helpdesk/ticket.html:140 templates/helpdesk/ticket.html.py:146
+#: templates/helpdesk/ticket.html:152 templates/helpdesk/ticket.html.py:156
+msgid "Closed"
+msgstr "Kapalı"
+
+#: models.py:249 templates/helpdesk/ticket.html:141
+#: templates/helpdesk/ticket.html.py:147 templates/helpdesk/ticket.html:160
+msgid "Duplicate"
+msgstr "Kopyalamak"
+
+#: models.py:253
+msgid "1. Critical"
+msgstr "1. Kritik"
+
+#: models.py:254
+msgid "2. High"
+msgstr "2. yüksek"
+
+#: models.py:255
+msgid "3. Normal"
+msgstr "3. Normal"
+
+#: models.py:256
+msgid "4. Low"
+msgstr "4. Düşük"
+
+#: models.py:257
+msgid "5. Very Low"
+msgstr "5. çok düşük"
+
+#: models.py:271 templates/helpdesk/dashboard.html:100
+#: templates/helpdesk/ticket_list.html:82
+#: templates/helpdesk/ticket_list.html:225
+msgid "Created"
+msgstr "Yaratılmış"
+
+#: models.py:273
+msgid "Date this ticket was first created"
+msgstr "Bu biletin ilk oluşturulduğu tarih"
+
+#: models.py:277
+msgid "Modified"
+msgstr "Değiştirilmiş"
+
+#: models.py:279
+msgid "Date this ticket was most recently changed."
+msgstr "Bu bilet en son değişti."
+
+#: models.py:283 templates/helpdesk/public_view_ticket.html:18
+#: templates/helpdesk/ticket_desc_table.html:42
+msgid "Submitter E-Mail"
+msgstr "Gönderen e-posta"
+
+#: models.py:286
+msgid ""
+"The submitter will receive an email for all public follow-ups left for this "
+"task."
+msgstr ""
+"Gönderen, bu görev için kalan tüm halka açık takipler için bir "
+"e-postaalacaktır."
+
+#: models.py:295
+msgid "Assigned to"
+msgstr "Atanmış"
+
+#: models.py:299 templates/helpdesk/dashboard.html:58
+#: templates/helpdesk/dashboard.html:78 templates/helpdesk/dashboard.html:124
+#: templates/helpdesk/ticket_list.html:70
+#: templates/helpdesk/ticket_list.html:91
+#: templates/helpdesk/ticket_list.html:225
+msgid "Status"
+msgstr "Durum"
+
+#: models.py:305
+msgid "On Hold"
+msgstr "Beklemede"
+
+#: models.py:835
+msgid "Knowledge base categories"
+msgstr "Bilgi tabanı kategorileri"
+
+#: models.py:849 templates/helpdesk/kb_index.html:11
+#: templates/helpdesk/public_homepage.html:11
+msgid "Category"
+msgstr "Kategori"
+
+#: models.py:858
+msgid "Question"
+msgstr "Soru"
+
+#: models.py:862
+msgid "Answer"
+msgstr "Cevap"
+
+#: models.py:866
+msgid "Votes"
+msgstr "Oy"
+
+#: models.py:867
+msgid "Total number of votes cast for this item"
+msgstr "Bu ürün için verilen toplam oy sayısı"
+
+#: models.py:872
+msgid "Positive Votes"
+msgstr "Olumlu oylar"
+
+#: models.py:873
+msgid "Number of votes for this item which were POSITIVE."
+msgstr "Pozitif olan bu ürün için oy sayısı."
+
+#: models.py:878
+msgid "Last Updated"
+msgstr "Son güncellendi"
+
+#: models.py:879
+msgid "The date on which this question was most recently changed."
+msgstr "Bu sorunun en son değiştiği tarih."
+
+#: models.py:893
+msgid "Unrated"
+msgstr "Aşınmış"
+
+#: models.py:901
+msgid "Knowledge base item"
+msgstr "Bilgi tabanı öğesi"
+
+#: models.py:902
+msgid "Knowledge base items"
+msgstr "Bilgi tabanı öğeleri"
+
+#: models.py:926 templates/helpdesk/ticket_list.html:170
+msgid "Query Name"
+msgstr "Sorgu adı"
+
+#: models.py:928
+msgid "User-provided name for this query"
+msgstr "Bu sorgu için kullanıcı tarafından sağlanan ad"
+
+#: models.py:932
+msgid "Shared With Other Users?"
+msgstr "Diğer kullanıcılarla paylaşıldı mı?"
+
+#: models.py:935
+msgid "Should other users see this query?"
+msgstr "Diğer kullanıcılar bu sorguyu görmeli mi?"
+
+#: models.py:939
+msgid "Search Query"
+msgstr "Arama sorgusu"
+
+#: models.py:940
+msgid "Pickled query object. Be wary changing this."
+msgstr "Turşu sorgu nesnesi. Bunu değiştirerek dikkatli olun."
+
+#: models.py:950
+msgid "Saved search"
+msgstr "Kaydedilmiş arama"
+
+#: models.py:951
+msgid "Saved searches"
+msgstr "Kaydedilmiş Aramalar"
+
+#: models.py:966
+msgid "Settings Dictionary"
+msgstr "Ayarlar Sözlük"
+
+#: models.py:967
+msgid ""
+"This is a base64-encoded representation of a pickled Python dictionary. Do "
+"not change this field via the admin."
+msgstr ""
+"Bu, turşu bir Python sözlüğünün baz 64 kodlu bir temsilidir. Bu "
+"alanıyönetici aracılığıyla değiştirmeyin."
+
+#: models.py:993
+msgid "User Setting"
+msgstr "Kullanıcı ayarı"
+
+#: models.py:994 templates/helpdesk/navigation.html:37
+#: templates/helpdesk/user_settings.html:6
+msgid "User Settings"
+msgstr "Kullanıcı Ayarları"
+
+#: models.py:1036
+msgid ""
+"Leave blank for this e-mail to be ignored on all queues, or select those "
+"queues you wish to ignore this e-mail for."
+msgstr ""
+"Bu e-postanın tüm kuyruklarda yok sayılması için boş bırakın veya bue-"
+"postayı yok saymak istediğiniz kuyrukları seçin."
+
+#: models.py:1048
+msgid "Date on which this e-mail address was added"
+msgstr "Bu e-posta adresinin eklendiği tarih"
+
+#: models.py:1056
+msgid ""
+"Enter a full e-mail address, or portions with wildcards, eg *@domain.com or "
+"postmaster@*."
+msgstr ""
+"Tam bir e-posta adresi veya joker karakterli porsiyonlar, "
+"örneğin*@domain.com veya Postmaster@ *."
+
+#: models.py:1061
+msgid "Save Emails in Mailbox?"
+msgstr "Posta kutusuna e -postaları kaydedin mi?"
+
+#: models.py:1064
+msgid ""
+"Do you want to save emails from this address in the mailbox? If this is "
+"unticked, emails from this address will be deleted."
+msgstr ""
+"Posta kutusunda bu adresten e -postaları kaydetmek istiyor musunuz? "
+"Buçözülmezse, bu adresten e -postalar silinecektir."
+
+#: forms.py:505
+msgid "If a ticket is altered by the API, do you want to receive an e-mail?"
+msgstr "E-posta için SSL kullanın mı?"
+
+#: forms.py:510
+msgid "Number of tickets to show per page"
+msgstr "Sayfa başına gösterilecek bilet sayısı"
+
+#: forms.py:511
+msgid "How many tickets do you want to see on the Ticket List page?"
+msgstr "Bilet listesi sayfasında kaç bilet görmek istiyorsunuz?"
+
+#: forms.py:518
+msgid "Use my e-mail address when submitting tickets?"
+msgstr "Bilet gönderirken e-posta adresimi kullanın mı?"
+
+#: forms.py:519
+msgid ""
+"When you submit a ticket, do you want to automatically use your e-mail "
+"address as the submitter address? You can type a different e-mail address "
+"when entering the ticket if needed, this option only changes the default."
+msgstr ""
+"Bir bilet gönderdiğinizde, e-posta adresinizi gönderen adresi olarakotomatik"
+" olarak kullanmak ister misiniz? Gerekirse bilet girerken farklı bire-posta "
+"adresi yazabilirsiniz, bu seçenek yalnızca varsayılanı değiştirir."
+
+#: models.py:35 models.py:261 models.py:503 models.py:817 models.py:853
+#: templates/helpdesk/dashboard.html:58 templates/helpdesk/dashboard.html:78
+#: templates/helpdesk/dashboard.html:100 templates/helpdesk/dashboard.html:124
+#: templates/helpdesk/ticket.html:178 templates/helpdesk/ticket_list.html:85
+#: templates/helpdesk/ticket_list.html:225 views/staff.py:419
+msgid "Title"
+msgstr "Başlık"
+
+#: models.py:40 models.py:822 models.py:1206
+msgid "Slug"
+msgstr "Sülük"
+
+#: models.py:41
+msgid ""
+"This slug is used when building ticket ID's. Once set, try not to change it "
+"or e-mailing may get messy."
+msgstr ""
+"Bu sümüklü bilet kimlikleri oluştururken kullanılır. Ayarladıktan "
+"sonra,değiştirmemeye çalışın veya e-postalama dağınık olabilir."
+
+#: models.py:46 models.py:1054 models.py:1129 models.py:1203
+#: templates/helpdesk/email_ignore_list.html:13
+#: templates/helpdesk/ticket_cc_list.html:15
+msgid "E-Mail Address"
+msgstr "E-posta adresi"
+
+#: models.py:49
+msgid ""
+"All outgoing e-mails for this queue will use this e-mail address. If you use"
+" IMAP or POP3, this should be the e-mail address for that mailbox."
+msgstr ""
+"Bu kuyruk için giden tüm e-postalar bu e-posta adresini kullanacaktır. "
+"IMAPveya POP3 kullanıyorsanız, bu posta kutusu için e-posta adresi "
+"olmalıdır."
+
+#: models.py:55 models.py:794
+msgid "Locale"
+msgstr "Yer"
+
+#: models.py:59
+msgid ""
+"Locale of this queue. All correspondence in this queue will be in this "
+"language."
+msgstr ""
+"Bu kuyruğun yerel ayarı. Bu kuyruktaki tüm yazışmalar bu dilde olacaktır."
+
+#: models.py:63
+msgid "Allow Public Submission?"
+msgstr "Kamu Gönderimine İzin Verilsin mi?"
+
+#: models.py:66
+msgid "Should this queue be listed on the public submission form?"
+msgstr "Bu kuyruk kamu gönderme formunda listelenmeli mi?"
+
+#: models.py:71
+msgid "Allow E-Mail Submission?"
+msgstr "E-posta gönderilmesine izin verilsin mi?"
+
+#: models.py:74
+msgid "Do you want to poll the e-mail box below for new tickets?"
+msgstr "Yeni biletler için aşağıdaki e-posta kutusunu yoklamak ister misiniz?"
+
+#: models.py:79
+msgid "Escalation Days"
+msgstr "Tırmanma günleri"
+
+#: models.py:82
+msgid ""
+"For tickets which are not held, how often do you wish to increase their "
+"priority? Set to 0 for no escalation."
+msgstr ""
+"Tutulmayan biletler için, önceliğini ne sıklıkla artırmak istiyorsunuz?Artan"
+" bir şekilde 0 olarak ayarlayın."
+
+#: models.py:87
+msgid "New Ticket CC Address"
+msgstr "Yeni Bilet CC Adresi"
+
+#: models.py:91
+msgid ""
+"If an e-mail address is entered here, then it will receive notification of "
+"all new tickets created for this queue. Enter a comma between multiple "
+"e-mail addresses."
+msgstr ""
+"Buraya bir e-posta adresi girilirse, bu kuyruk için oluşturulan tüm "
+"yenibiletlerin bildirimini alır. Birden fazla e-posta adresi arasında bir "
+"virgülgirin."
+
+#: models.py:97
+msgid "Updated Ticket CC Address"
+msgstr "Güncellenmiş bilet cc adresi"
+
+#: models.py:101
+msgid ""
+"If an e-mail address is entered here, then it will receive notification of "
+"all activity (new tickets, closed tickets, updates, reassignments, etc) for "
+"this queue. Separate multiple addresses with a comma."
+msgstr ""
+"Buraya bir e-posta adresi girilirse, bu kuyruk için tüm etkinliklerin "
+"(yenibiletler, kapalı biletler, güncellemeler, yeniden atama, vb.) "
+"Bildirimialır. Birden çok adresi virgülle ayırın."
+
+#: models.py:108
+msgid "E-Mail Box Type"
+msgstr "E-posta kutusu türü"
+
+#: models.py:110
+msgid "POP 3"
+msgstr "Pop 3"
+
+#: models.py:110
+msgid "IMAP"
+msgstr "İmap"
+
+#: models.py:113
+msgid ""
+"E-Mail server type for creating tickets automatically from a mailbox - both "
+"POP3 and IMAP are supported."
+msgstr ""
+"Bir posta kutusundan otomatik olarak bilet oluşturmak için e -posta "
+"sunucusutürü - hem POP3 hem de IMAP desteklenir."
+
+#: models.py:118
+msgid "E-Mail Hostname"
+msgstr "E-posta ana bilgisayar adı"
+
+#: models.py:122
+msgid ""
+"Your e-mail server address - either the domain name or IP address. May be "
+"\"localhost\"."
+msgstr ""
+"E-posta sunucusu adresiniz - Etki alanı adı veya IP adresi. \"Localhost\" "
+"olabilir."
+
+#: models.py:127
+msgid "E-Mail Port"
+msgstr "E-posta bağlantı noktası"
+
+#: models.py:130
+msgid ""
+"Port number to use for accessing e-mail. Default for POP3 is \"110\", and "
+"for IMAP is \"143\". This may differ on some servers. Leave it blank to use "
+"the defaults."
+msgstr ""
+"E-postaya erişmek için kullanılacak bağlantı noktası numarası. POP3 için "
+"varsayılan \"110\", IMAP için ise \"143\". Bu bazı sunucularda farklılık "
+"gösterebilir. Varsayılanları kullanmak için boş bırakın."
+
+# django-helpdesk English language translation
+# Copyright (C) 2011 Ross Poulton
+# This file is distributed under the same license as the django-helpdesk
+# package.
+#: forms.py:128 forms.py:328 models.py:190 models.py:267
+#: templates/helpdesk/dashboard.html:15 templates/helpdesk/dashboard.html:58
+#: templates/helpdesk/dashboard.html:78 templates/helpdesk/dashboard.html:100
+#: templates/helpdesk/dashboard.html:124 templates/helpdesk/rss_list.html:24
+#: templates/helpdesk/ticket_list.html:69
+#: templates/helpdesk/ticket_list.html:88
+#: templates/helpdesk/ticket_list.html:225 views/staff.py:1032
+#: views/staff.py:1038 views/staff.py:1044 views/staff.py:1050
+msgid "Queue"
+msgstr "Kuyruk"
+
+#: forms.py:137
+msgid "Summary of the problem"
+msgstr "Sorunun özeti"
+
+#: forms.py:142
+msgid "Submitter E-Mail Address"
+msgstr "Gönderen e-posta adresi"
+
+#: forms.py:144
+msgid ""
+"This e-mail address will receive copies of all public updates to this "
+"ticket."
+msgstr ""
+"Bu e-posta adresi, bu biletle ilgili tüm genel güncellemelerin kopyalarını "
+"alacaktır."
+
+#: forms.py:150
+msgid "Description of Issue"
+msgstr "Sorunun Tanımı"
+
+#: forms.py:157
+msgid "Case owner"
+msgstr "Vaka sahibi"
+
+#: forms.py:158
+msgid ""
+"If you select an owner other than yourself, they'll be e-mailed details of "
+"this ticket immediately."
+msgstr ""
+"Kendinizden başka bir sahip seçerseniz, bu biletin ayrıntılarını derhale-"
+"postayla gönderir."
+
+#: forms.py:166 models.py:327 management/commands/escalate_tickets.py:154
+#: templates/helpdesk/public_view_ticket.html:23
+#: templates/helpdesk/ticket.html:184
+#: templates/helpdesk/ticket_desc_table.html:47
+#: templates/helpdesk/ticket_list.html:94 views/staff.py:429
+msgid "Priority"
+msgstr "Öncelik"
+
+#: forms.py:167
+msgid "Please select a priority carefully. If unsure, leave it as '3'."
+msgstr ""
+"Lütfen bir önceliği dikkatlice seçin. Emin değilseniz, '3' olarak bırakın."
+
+#: forms.py:174 forms.py:365 models.py:335 templates/helpdesk/ticket.html:186
+#: views/staff.py:439
+msgid "Due on"
+msgstr "Ödenen"
+
+#: forms.py:186 forms.py:370
+msgid "Attach File"
+msgstr "Dosya Ekle"
+
+#: forms.py:187 forms.py:371
+msgid "You can attach a file such as a document or screenshot to this ticket."
+msgstr ""
+"Bu bilete belge veya ekran görüntüsü gibi bir dosyayı ekleyebilirsiniz."
+
+#: forms.py:240
+msgid "Ticket Opened"
+msgstr "Bilet açıldı"
+
+#: forms.py:247
+#, python-format
+msgid "Ticket Opened & Assigned to %(name)s"
+msgstr ""
+
+#: forms.py:337
+msgid "Summary of your query"
+msgstr "Sorgunuzun özeti"
+
+#: forms.py:342
+msgid "Your E-Mail Address"
+msgstr "E-posta adresiniz"
+
+#: forms.py:343
+msgid "We will e-mail you when your ticket is updated."
+msgstr "Biletiniz güncellendiğinde size e-posta göndereceğiz."
+
+#: forms.py:348
+msgid "Description of your issue"
+msgstr "Sorununuzun açıklaması"
+
+#: forms.py:350
+msgid ""
+"Please be as descriptive as possible, including any details we may need to "
+"address your query."
+msgstr ""
+"Sorgunuzu ele almanız gereken ayrıntılar da dahil olmak üzere lütfen "
+"mümkünolduğunca açıklayıcı olun."
+
+#: forms.py:358
+msgid "Urgency"
+msgstr "Aciliyet"
+
+#: forms.py:359
+msgid "Please select a priority carefully."
+msgstr "Lütfen bir önceliği dikkatlice seçin."
+
+#: forms.py:419
+msgid "Ticket Opened Via Web"
+msgstr "Bilet web üzerinden açıldı"
+
+#: forms.py:486
+msgid "Show Ticket List on Login?"
+msgstr "Girişte Bilet Listesi Göster?"
+
+#: forms.py:487
+msgid "Display the ticket list upon login? Otherwise, the dashboard is shown."
+msgstr ""
+"Bilet listesini giriş üzerine görüntüleyin? Aksi takdirde, gösterge "
+"paneligösterilir."
+
+#: forms.py:492
+msgid "E-mail me on ticket change?"
+msgstr "Bana bilet değişikliğinde e-posta gönderilsin mi?"
+
+#: forms.py:493
+msgid ""
+"If you're the ticket owner and the ticket is changed via the web by somebody"
+" else, do you want to receive an e-mail?"
+msgstr ""
+"Bilet sahibiyseniz ve bilet web üzerinden başka biri "
+"tarafındandeğiştirilirse, bir e-posta almak ister misiniz?"
+
+#: forms.py:498
+msgid "E-mail me when assigned a ticket?"
+msgstr "Bilet atandığında bana e-posta gönderin?"
+
+#: forms.py:499
+msgid ""
+"If you are assigned a ticket via the web, do you want to receive an e-mail?"
+msgstr ""
+"Web aracılığıyla size bilet verilirse, bir e-posta almak ister misiniz?"
+
+#: forms.py:504
+msgid "E-mail me when a ticket is changed via the API?"
+msgstr "API üzerinden bir bilet değiştirildiğinde bana e-posta gönderin?"
+
+#: templates/helpdesk/base.html:22 templates/helpdesk/dashboard.html:99
+#: templates/helpdesk/rss_list.html:15
+msgid "Unassigned Tickets"
+msgstr "Atamasız biletler"
+
+#: templates/helpdesk/base.html:52 templates/helpdesk/public_base.html:6
+#: templates/helpdesk/public_base.html:18
+msgid "Helpdesk"
+msgstr "Yardım Masası"
+
+#: templates/helpdesk/base.html:62 templates/helpdesk/rss_list.html:9
+#: templates/helpdesk/rss_list.html:12 templates/helpdesk/rss_list.html:15
+#: templates/helpdesk/rss_list.html:30 templates/helpdesk/rss_list.html:31
+msgid "RSS Icon"
+msgstr "RSS simgesi"
+
+#: templates/helpdesk/base.html:62 templates/helpdesk/rss_list.html:2
+#: templates/helpdesk/rss_list.html.py:4
+msgid "RSS Feeds"
+msgstr "RSS Feeds"
+
+#: templates/helpdesk/base.html:63
+msgid "API"
+msgstr "API"
+
+#: templates/helpdesk/base.html:64 templates/helpdesk/system_settings.html:6
+msgid "System Settings"
+msgstr "Sistem ayarları"
+
+#: templates/helpdesk/confirm_delete_saved_query.html:3
+#: templates/helpdesk/ticket_list.html:146
+msgid "Delete Saved Query"
+msgstr "Kaydedilen sorguyu sil"
+
+#: templates/helpdesk/confirm_delete_saved_query.html:6
+msgid "Delete Query"
+msgstr "Sorguyu sil"
+
+#: templates/helpdesk/confirm_delete_saved_query.html:8
+#, python-format
+msgid ""
+"Are you sure you want to delete this saved filter "
+"(<em>%(query_title)s</em>)? To re-create it, you will need to manually re-"
+"filter your ticket listing."
+msgstr ""
+
+#: templates/helpdesk/confirm_delete_saved_query.html:11
+msgid ""
+"You have shared this query, so other users may be using it. If you delete "
+"it, they will have to manually create their own query."
+msgstr ""
+"Bu sorguyu paylaştınız, böylece diğer kullanıcılar bunu kullanıyor "
+"olabilir.Eğer silerseniz, kendi sorgularını manuel olarak oluşturmaları "
+"gerekecektir."
+
+#: templates/helpdesk/confirm_delete_saved_query.html:14
+#: templates/helpdesk/delete_ticket.html:10
+msgid "No, Don't Delete It"
+msgstr "Hayır, silme"
+
+#: templates/helpdesk/confirm_delete_saved_query.html:16
+#: templates/helpdesk/delete_ticket.html:12
+msgid "Yes - Delete It"
+msgstr "Evet - Sil"
+
+#: templates/helpdesk/create_ticket.html:3
+msgid "Create Ticket"
+msgstr "Bilet Oluştur"
+
+#: templates/helpdesk/create_ticket.html:10
+#: templates/helpdesk/navigation.html:65 templates/helpdesk/navigation.html:68
+#: templates/helpdesk/public_homepage.html:27
+msgid "Submit a Ticket"
+msgstr "Bilet Gönder"
+
+#: templates/helpdesk/create_ticket.html:11
+#: templates/helpdesk/edit_ticket.html:11
+msgid "Unless otherwise stated, all fields are required."
+msgstr "Aksi belirtilmedikçe, tüm alanlar gereklidir."
+
+#: templates/helpdesk/create_ticket.html:11
+#: templates/helpdesk/edit_ticket.html:11
+#: templates/helpdesk/public_homepage.html:28
+msgid "Please provide as descriptive a title and description as possible."
+msgstr "Lütfen mümkün olduğunca açıklayıcı bir başlık ve açıklama sağlayın."
+
+#: templates/helpdesk/create_ticket.html:30
+#: templates/helpdesk/public_homepage.html:55
+msgid "Submit Ticket"
+msgstr "Bilet gönder"
+
+#: templates/helpdesk/dashboard.html:2
+msgid "Helpdesk Dashboard"
+msgstr "Yardım Masası Gösterge Tablosu"
+
+#: templates/helpdesk/dashboard.html:9
+msgid ""
+"Welcome to your Helpdesk Dashboard! From here you can quickly see tickets "
+"submitted by you, tickets you are working on, and those tickets that have no"
+" owner."
+msgstr ""
+"Yardım masası kontrol panelinize hoş geldiniz! Buradan, sizin "
+"tarafınızdangönderilen biletleri, üzerinde çalıştığınız biletleri ve sahibi "
+"olmayanbiletleri hızlı bir şekilde görebilirsiniz."
+
+#: templates/helpdesk/dashboard.html:14
+msgid "Helpdesk Summary"
+msgstr "Yardım Masası Özeti"
+
+#: templates/helpdesk/dashboard.html:36
+msgid "Current Ticket Stats"
+msgstr "Mevcut bilet istatistikleri"
+
+#: templates/helpdesk/dashboard.html:37
+msgid "Average number of days until ticket is closed (all tickets): "
+msgstr "Bilet kapanana kadar ortalama gün sayısı (tüm biletler):"
+
+#: templates/helpdesk/dashboard.html:38
+msgid ""
+"Average number of days until ticket is closed (tickets opened in last 60 "
+"days): "
+msgstr "Bilet kapanana kadar ortalama gün sayısı (son 60 gün içinde açıldı):"
+
+#: templates/helpdesk/dashboard.html:39
+msgid "Click"
+msgstr "Tıklamak"
+
+#: templates/helpdesk/dashboard.html:39
+msgid "for detailed average by month."
+msgstr "Aylara göre ayrıntılı ortalama için."
+
+#: templates/helpdesk/dashboard.html:40
+msgid "Distribution of open tickets, grouped by time period:"
+msgstr "Açık biletlerin dağıtım, zaman dilimine göre gruplandırılmış:"
+
+#: templates/helpdesk/dashboard.html:41
+msgid "Days since opened"
+msgstr "Açıldığından beri günler"
+
+#: templates/helpdesk/dashboard.html:41
+msgid "Number of open tickets"
+msgstr "Açık bilet sayısı"
+
+#: templates/helpdesk/dashboard.html:57
+msgid "All Tickets submitted by you"
+msgstr "Sizin tarafınızdan gönderilen tüm biletler"
+
+#: templates/helpdesk/dashboard.html:58 templates/helpdesk/dashboard.html:78
+#: templates/helpdesk/dashboard.html:100 templates/helpdesk/dashboard.html:124
+#: templates/helpdesk/ticket_list.html:225
+msgid "Pr"
+msgstr "PR"
+
+#: models.py:1101
+msgid "Ignored e-mail address"
+msgstr "Göz ardı edilen e-posta adresi"
+
+#: models.py:1102
+msgid "Ignored e-mail addresses"
+msgstr "Göz ardı edilen e-posta adresleri"
+
+#: models.py:1124
+msgid "User who wishes to receive updates for this ticket."
+msgstr "Bu bilet için güncelleme almak isteyen kullanıcı."
+
+#: models.py:1132
+msgid "For non-user followers, enter their e-mail address"
+msgstr "Kullanıcı olmayan takipçiler için e-posta adreslerini girin"
+
+#: models.py:1136
+msgid "Can View Ticket?"
+msgstr "Bileti görüntüleyebilir mi?"
+
+#: models.py:1138
+msgid "Can this CC login to view the ticket details?"
+msgstr "Bu CC bilet ayrıntılarını görüntülemek için giriş yapabilir mi?"
+
+#: models.py:1142
+msgid "Can Update Ticket?"
+msgstr "Bileti güncelleyebilir mi?"
+
+#: models.py:1144
+msgid "Can this CC login and update the ticket?"
+msgstr "Bu CC bileti giriş yapabilir ve güncelleyebilir mi?"
+
+#: models.py:1175
+msgid "Field Name"
+msgstr "Saha adı"
+
+#: models.py:1176
+msgid ""
+"As used in the database and behind the scenes. Must be unique and consist of"
+" only lowercase letters with no punctuation."
+msgstr ""
+"Veritabanında ve perde arkasında kullanıldığı gibi. Benzersiz olmalı "
+"venoktalama işaretleri olmayan sadece küçük harflerden oluşmalıdır."
+
+#: models.py:1181
+msgid "Label"
+msgstr "Etiket"
+
+#: models.py:1183
+msgid "The display label for this field"
+msgstr "Bu alanın ekran etiketi"
+
+#: models.py:1187
+msgid "Help Text"
+msgstr "Metinle Yardım Edin"
+
+#: models.py:1188
+msgid "Shown to the user when editing the ticket"
+msgstr "Bileti düzenlerken kullanıcıya gösterilir"
+
+#: models.py:1194
+msgid "Character (single line)"
+msgstr "Karakter (tek satır)"
+
+#: models.py:1195
+msgid "Text (multi-line)"
+msgstr "Metin (çok satırlı)"
+
+#: models.py:1196
+msgid "Integer"
+msgstr "Tamsayı"
+
+#: models.py:1197
+msgid "Decimal"
+msgstr "Ondalık"
+
+#: models.py:1198
+msgid "List"
+msgstr "Liste"
+
+#: models.py:1199
+msgid "Boolean (checkbox yes/no)"
+msgstr "Boolean (onay kutusu evet/hayır)"
+
+#: models.py:1201
+msgid "Time"
+msgstr "Zaman"
+
+#: models.py:1202
+msgid "Date & Time"
+msgstr "Tarih ve Saat"
+
+#: models.py:1204
+msgid "URL"
+msgstr "Url"
+
+#: models.py:1205
+msgid "IP Address"
+msgstr "IP adresi"
+
+#: models.py:1210
+msgid "Data Type"
+msgstr "Veri türü"
+
+#: models.py:1212
+msgid "Allows you to restrict the data entered into this field"
+msgstr "Bu alana girilen verileri kısıtlamanızı sağlar"
+
+#: models.py:1217
+msgid "Maximum Length (characters)"
+msgstr "Maksimum uzunluk (karakterler)"
+
+#: models.py:1223
+msgid "Decimal Places"
+msgstr "Ondalık yerler"
+
+#: models.py:1224
+msgid "Only used for decimal fields"
+msgstr "Sadece ondalık alanlar için kullanılır"
+
+#: models.py:1230
+msgid "Add empty first choice to List?"
+msgstr "Listelemek için boş ilk tercihi ekleyin?"
+
+#: models.py:1232
+msgid ""
+"Only for List: adds an empty first entry to the choices list, which enforces"
+" that the user makes an active choice."
+msgstr ""
+"Yalnızca Liste için: Seçimler listesine boş bir ilk giriş ekler, bu "
+"dakullanıcının etkin bir seçim yapmasını zorunlu kılar."
+
+#: models.py:1236
+msgid "List Values"
+msgstr "Liste Değerleri"
+
+#: models.py:1237
+msgid "For list fields only. Enter one option per line."
+msgstr "Yalnızca liste alanları için. Satır başına bir seçenek girin."
+
+#: models.py:1243
+msgid "Ordering"
+msgstr "Sipariş"
+
+#: models.py:1244
+msgid "Lower numbers are displayed first; higher numbers are listed later"
+msgstr ""
+"Önce daha düşük sayılar görüntülenir; Daha yüksek sayılar daha "
+"sonralistelenir"
+
+#: models.py:1258
+msgid "Required?"
+msgstr "Gerekli?"
+
+#: models.py:1259
+msgid "Does the user have to enter a value for this field?"
+msgstr "Kullanıcı bu alan için bir değer girmek zorunda mı?"
+
+#: models.py:1263
+msgid "Staff Only?"
+msgstr "Personellere aittir?"
+
+#: models.py:1264
+msgid ""
+"If this is ticked, then the public submission form will NOT show this field"
+msgstr "Bu işaretlenmişse, kamuya açıklama formu bu alanı göstermeyecektir."
+
+#: models.py:1273
+msgid "Custom field"
+msgstr "Özel alan"
+
+#: models.py:1274
+msgid "Custom fields"
+msgstr "Özel alanlar"
+
+#: models.py:1297
+msgid "Ticket custom field value"
+msgstr "Bilet Özel Alan Değeri"
+
+#: models.py:1298
+msgid "Ticket custom field values"
+msgstr "Bilet Özel Alan Değerleri"
+
+#: models.py:1315
+msgid "Depends On Ticket"
+msgstr "Bilete bağlı"
+
+#: models.py:1324
+msgid "Ticket dependency"
+msgstr "Bilet bağımlılığı"
+
+#: models.py:1325
+msgid "Ticket dependencies"
+msgstr "Bilet bağımlılıkları"
+
+#: management/commands/create_usersettings.py:25
+msgid ""
+"Check for user without django-helpdesk UserSettings and create settings if "
+"required. Uses settings.DEFAULT_USER_SETTINGS which can be overridden to "
+"suit your situation."
+msgstr ""
+"Django-Helpdesk Userettings olmadan kullanıcı olup olmadığını kontrol edinve"
+" gerekirse ayarlar oluşturun. Durumunuza uyacak şekilde geçersizkılınabilen "
+"sears.default_user_settings kullanır."
+
+#: management/commands/escalate_tickets.py:148
+#, python-format
+msgid "Ticket escalated after %s days"
+msgstr "Bilet %s gününden sonra tırmandı"
+
+#: management/commands/get_email.py:158
+msgid "Created from e-mail"
+msgstr "E-postadan oluşturuldu"
+
+#: management/commands/get_email.py:162
+msgid "Unknown Sender"
+msgstr "Bilinmeyen Gönderen"
+
+#: management/commands/get_email.py:216
+msgid ""
+"No plain-text email body available. Please see attachment "
+"email_html_body.html."
+msgstr ""
+"Düz metin e-posta gövdesi yok. Lütfen ek e -posta_html_body.html ekine "
+"bakın."
+
+#: management/commands/get_email.py:220
+msgid "email_html_body.html"
+msgstr "e -posta_html_body.html"
+
+#: management/commands/get_email.py:263
+#, python-format
+msgid "E-Mail Received from %(sender_email)s"
+msgstr ""
+
+#: management/commands/get_email.py:271
+#, python-format
+msgid "Ticket Re-Opened by E-Mail Received from %(sender_email)s"
+msgstr ""
+
+#: management/commands/get_email.py:329
+msgid " (Reopened)"
+msgstr "(Yeniden açıldı)"
+
+#: management/commands/get_email.py:331
+msgid " (Updated)"
+msgstr "(Güncellendi)"
+
+#: templates/helpdesk/attribution.html:2
+msgid ""
+"<a href='https://github.com/rossp/django-helpdesk'>django-helpdesk</a>."
+msgstr ""
+"<a href = 'https: //github.com/rossp/django-helpdesk'> django-helpdesk </a>."
+
+#: templates/helpdesk/base.html:10
+msgid "Powered by django-helpdesk"
+msgstr "Django-Helpdesk tarafından desteklenmektedir"
+
+#: templates/helpdesk/base.html:20 templates/helpdesk/rss_list.html:9
+#: templates/helpdesk/rss_list.html:24 templates/helpdesk/rss_list.html:31
+msgid "My Open Tickets"
+msgstr "Açık biletlerim"
+
+#: templates/helpdesk/base.html:21
+msgid "All Recent Activity"
+msgstr "Tüm son etkinlikler"
+
+#: templates/helpdesk/public_change_language.html:2
+#: templates/helpdesk/public_homepage.html:73
+#: templates/helpdesk/public_view_form.html:4
+#: templates/helpdesk/public_view_ticket.html:2
+msgid "View a Ticket"
+msgstr "Bileti Görüntüle"
+
+#: templates/helpdesk/public_change_language.html:5
+msgid "Change the display language"
+msgstr "Ekran dilini değiştir"
+
+#: templates/helpdesk/public_homepage.html:6
+msgid "Knowledgebase Articles"
+msgstr "Bilgi Baskı Makaleleri"
+
+#: templates/helpdesk/public_homepage.html:28
+msgid "All fields are required."
+msgstr "Tüm alanlar gereklidir."
+
+#: templates/helpdesk/public_homepage.html:66
+msgid "Please use button at upper right to login first."
+msgstr "Önce giriş yapmak için lütfen sağ üstte düğmeyi kullanın."
+
+#: templates/helpdesk/public_homepage.html:82
+#: templates/helpdesk/public_view_form.html:15
+msgid "Your E-mail Address"
+msgstr "E-posta adresiniz"
+
+#: templates/helpdesk/public_homepage.html:86
+#: templates/helpdesk/public_view_form.html:19
+msgid "View Ticket"
+msgstr "Bileti Görüntüle"
+
+#: templates/helpdesk/public_spam.html:4
+msgid "Unable To Open Ticket"
+msgstr "Bilet açılamıyor"
+
+#: templates/helpdesk/public_spam.html:5
+msgid "Sorry, but there has been an error trying to submit your ticket."
+msgstr "Üzgünüm, ama biletinizi göndermeye çalışırken bir hata oldu."
+
+#: templates/helpdesk/public_spam.html:6
+msgid ""
+"Our system has marked your submission as <strong>spam</strong>, so we are "
+"unable to save it. If this is not spam, please press back and re-type your "
+"message. Be careful to avoid sounding 'spammy', and if you have heaps of "
+"links please try removing them if possible."
+msgstr ""
+"Sistemimiz gönderiminizi <strong> spam </strong> olarak işaretledi, buyüzden"
+" onu kaydedemiyoruz. Bu spam değilse, lütfen geri basın ve mesajınızıyeniden"
+" yazın. 'SPAMMY' gibi ses çıkarmaktan kaçınmaya dikkat edin ve "
+"yığınbağlantınız varsa lütfen mümkünse bunları kaldırmayı deneyin."
+
+#: templates/helpdesk/public_spam.html:7
+msgid ""
+"We are sorry for any inconvenience, however this check is required to avoid "
+"our helpdesk resources being overloaded by spammers."
+msgstr ""
+"Herhangi bir rahatsızlıktan dolayı üzgünüz, ancak bu çek yardım "
+"masasıkaynaklarımızın spam gönderenler tarafından aşırı yüklenmesini önlemek"
+" içingereklidir."
+
+#: templates/helpdesk/public_view_form.html:8
+msgid "Error:"
+msgstr "Hata:"
+
+#: templates/helpdesk/public_view_ticket.html:9
+#, python-format
+msgid "Queue: %(queue_name)s"
+msgstr ""
+
+#: templates/helpdesk/public_view_ticket.html:13
+#: templates/helpdesk/ticket_desc_table.html:32
+msgid "Submitted On"
+msgstr "Gönderildi"
+
+#: templates/helpdesk/public_view_ticket.html:35
+msgid "Tags"
+msgstr "Etiketler"
+
+#: templates/helpdesk/public_view_ticket.html:48
+#: templates/helpdesk/ticket_desc_table.html:26
+msgid "Accept"
+msgstr "Kabul etmek"
+
+#: templates/helpdesk/public_view_ticket.html:48
+#: templates/helpdesk/ticket_desc_table.html:26
+msgid "Accept and Close"
+msgstr "Kabul et ve kapatmak"
+
+#: templates/helpdesk/public_view_ticket.html:57
+#: templates/helpdesk/ticket.html:66
+msgid "Follow-Ups"
+msgstr "Takipler"
+
+#: templates/helpdesk/public_view_ticket.html:65
+#: templates/helpdesk/ticket.html:100
+#, python-format
+msgid "Changed %(field)s from %(old_value)s to %(new_value)s."
+msgstr ""
+
+#: templates/helpdesk/report_index.html:3
+#: templates/helpdesk/report_index.html:6
+#: templates/helpdesk/report_output.html:3
+#: templates/helpdesk/report_output.html:16
+msgid "Reports &amp; Statistics"
+msgstr "Raporlar & amp; İstatistik"
+
+#: templates/helpdesk/report_index.html:9
+msgid "You haven't created any tickets yet, so you cannot run any reports."
+msgstr ""
+"Henüz herhangi bir bilet oluşturmadınız, bu yüzden herhangi bir "
+"raporçalıştıramazsınız."
+
+#: templates/helpdesk/report_index.html:13
+msgid "Reports By User"
+msgstr "Kullanıcı tarafından raporlar"
+
+#: templates/helpdesk/report_index.html:15
+#: templates/helpdesk/report_index.html:24
+msgid "by Priority"
+msgstr "öncelik olarak"
+
+#: templates/helpdesk/report_index.html:16
+msgid "by Queue"
+msgstr "sırayla"
+
+#: templates/helpdesk/report_index.html:17
+#: templates/helpdesk/report_index.html:25
+msgid "by Status"
+msgstr "duruma göre"
+
+#: templates/helpdesk/report_index.html:18
+#: templates/helpdesk/report_index.html:26
+msgid "by Month"
+msgstr "aya kadar"
+
+#: templates/helpdesk/report_index.html:22
+msgid "Reports By Queue"
+msgstr "Sıraya Göre Raporlar"
+
+#: templates/helpdesk/report_index.html:27 views/staff.py:1049
+msgid "Days until ticket closed by Month"
+msgstr "Bilet aya kadar kapalı günler"
+
+#: templates/helpdesk/report_output.html:19
+msgid ""
+"You can run this query on filtered data by using one of your saved queries."
+msgstr ""
+"Kaydettiğiniz sorgularınızdan birini kullanarak bu sorguyu "
+"filtrelenmişverilerde çalıştırabilirsiniz."
+
+#: templates/helpdesk/report_output.html:21
+msgid "Select Query:"
+msgstr "Sorgu seçin:"
+
+#: templates/helpdesk/dashboard.html:58 templates/helpdesk/dashboard.html:78
+#: templates/helpdesk/dashboard.html:124
+msgid "Last Update"
+msgstr "Son Güncelleme"
+
+#: templates/helpdesk/dashboard.html:77
+msgid "Open Tickets assigned to you (you are working on this ticket)"
+msgstr "Size atanan biletler açın (bu bilet üzerinde çalışıyorsunuz)"
+
+#: templates/helpdesk/dashboard.html:92
+msgid "You have no tickets assigned to you."
+msgstr "Size atanan biletiniz yok."
+
+#: templates/helpdesk/dashboard.html:99
+msgid "(pick up a ticket if you start to work on it)"
+msgstr "(üzerinde çalışmaya başlarsanız bir bilet alın)"
+
+#: templates/helpdesk/dashboard.html:110
+#: templates/helpdesk/ticket_desc_table.html:38
+msgid "Take"
+msgstr "Almak"
+
+#: templates/helpdesk/dashboard.html:110
+#: templates/helpdesk/email_ignore_list.html:13
+#: templates/helpdesk/email_ignore_list.html:23
+#: templates/helpdesk/ticket_cc_list.html:15
+#: templates/helpdesk/ticket_cc_list.html:23
+#: templates/helpdesk/ticket_list.html:262
+msgid "Delete"
+msgstr "Silmek"
+
+#: templates/helpdesk/dashboard.html:114
+msgid "There are no unassigned tickets."
+msgstr "Tayin edilmemiş bilet yok."
+
+#: templates/helpdesk/dashboard.html:123
+msgid "Closed & resolved Tickets you used to work on"
+msgstr "Üzerinde çalıştığınız kapalı ve çözülmüş biletler"
+
+#: templates/helpdesk/delete_ticket.html:3
+#: templates/helpdesk/delete_ticket.html:6
+msgid "Delete Ticket"
+msgstr "Bilet Sil"
+
+#: templates/helpdesk/delete_ticket.html:8
+#, python-format
+msgid ""
+"Are you sure you want to delete this ticket (<em>%(ticket_title)s</em>)? All"
+" traces of the ticket, including followups, attachments, and updates will be"
+" irreversibly removed."
+msgstr ""
+
+#: templates/helpdesk/edit_ticket.html:3
+msgid "Edit Ticket"
+msgstr "Bilet Düzenle"
+
+#: templates/helpdesk/edit_ticket.html:9
+msgid "Edit a Ticket"
+msgstr "Bir bilet düzenleyin"
+
+#: templates/helpdesk/edit_ticket.html:13
+msgid "Note"
+msgstr "Not"
+
+#: templates/helpdesk/edit_ticket.html:13
+msgid ""
+"Editing a ticket does <em>not</em> send an e-mail to the ticket owner or "
+"submitter. No new details should be entered, this form should only be used "
+"to fix incorrect details or clean up the submission."
+msgstr ""
+"Bir bilet düzenleme <em> değil </em> Bilet sahibine veya göndericiye bire-"
+"posta gönderin. Yeni ayrıntı girilmemeli, bu form yalnızca yanlışayrıntıları"
+" düzeltmek veya gönderimi temizlemek için kullanılmalıdır."
+
+#: templates/helpdesk/edit_ticket.html:33
+msgid "Save Changes"
+msgstr "Değişiklikleri Kaydet"
+
+#: templates/helpdesk/email_ignore_add.html:3
+#: templates/helpdesk/email_ignore_add.html:6
+#: templates/helpdesk/email_ignore_add.html:23
+msgid "Ignore E-Mail Address"
+msgstr "E-posta adresini yok say"
+
+#: templates/helpdesk/email_ignore_add.html:8
+msgid ""
+"To ignore an e-mail address and prevent any emails from that address "
+"creating tickets automatically, enter the e-mail address below."
+msgstr ""
+"Bir e-posta adresini yok saymak ve bilet oluşturmayı otomatik "
+"olarakoluşturmayı önlemek için aşağıdaki e-posta adresini girin."
+
+#: templates/helpdesk/email_ignore_add.html:10
+msgid ""
+"You can either enter a whole e-mail address such as "
+"<em>email@domain.com</em> or a portion of an e-mail address with a wildcard,"
+" such as <em>*@domain.com</em> or <em>user@*</em>."
+msgstr ""
+"<em>@Domain.com </em> veya <em> kullanıcı@*</em> gibi jokerle bir "
+"e-postaadresinin <em> e-posta@domain.com </em> gibi bir e-posta "
+"adresigirebilirsiniz."
+
+#: templates/helpdesk/email_ignore_del.html:3
+msgid "Delete Ignored E-Mail Address"
+msgstr "Yoksayılan e-posta adresini sil"
+
+#: templates/helpdesk/email_ignore_del.html:6
+msgid "Un-Ignore E-Mail Address"
+msgstr "UN-IGNORE E-posta Adresi"
+
+#: templates/helpdesk/email_ignore_del.html:8
+#, python-format
+msgid ""
+"Are you sure you wish to stop removing this email address "
+"(<em>%(email_address)s</em>) and allow their e-mails to automatically create"
+" tickets in your system? You can re-add this e-mail address at any time."
+msgstr ""
+
+#: templates/helpdesk/email_ignore_del.html:10
+msgid "Keep Ignoring It"
+msgstr "Görmezden gelmeye devam et"
+
+#: templates/helpdesk/email_ignore_del.html:12
+msgid "Stop Ignoring It"
+msgstr "Görmezden gelmeyi bırak"
+
+#: templates/helpdesk/email_ignore_list.html:3
+#: templates/helpdesk/email_ignore_list.html:12
+msgid "Ignored E-Mail Addresses"
+msgstr "Göz ardı edilen e-posta adresleri"
+
+#: templates/helpdesk/email_ignore_list.html:5
+msgid ""
+"\n"
+"<h2>Ignored E-Mail Addresses</h2>\n"
+"\n"
+"<p>The following e-mail addresses are currently being ignored by the incoming e-mail processor. You can <a href='add/'>add a new e-mail address to the list</a> or delete any of the items below as required.</p>"
+msgstr ""
+"\n"
+"<h2>Göz ardı edilen e-posta adresleri</h2>\n"
+"\n"
+"<p>Aşağıdaki e-posta adresleri şu anda gelen e-posta işlemcisi tarafından göz ardı edilmektedir. Listeye yeni bir e-posta adresi ekleyebilir veya gerektiğinde aşağıdaki öğelerden herhangi birini silebilirsiniz.</p>"
+
+#: templates/helpdesk/email_ignore_list.html:13
+msgid "Date Added"
+msgstr "Tarih eklendi"
+
+#: templates/helpdesk/email_ignore_list.html:13
+msgid "Keep in mailbox?"
+msgstr "Posta kutusunda tutmak mı?"
+
+#: templates/helpdesk/email_ignore_list.html:21
+#: templates/helpdesk/ticket_list.html:260
+msgid "All"
+msgstr "Tüm"
+
+#: templates/helpdesk/email_ignore_list.html:22
+msgid "Keep"
+msgstr "Kale"
+
+#: templates/helpdesk/email_ignore_list.html:29
+msgid ""
+"<strong>Note:</strong> If the 'Keep' option is not selected, emails sent "
+"from that address will be deleted permanently."
+msgstr ""
+"<strong> Not: </strong> 'Keep' seçeneği seçilmezse, o adresten gönderilen "
+"e-postalar kalıcı olarak silinir."
+
+#: templates/helpdesk/followup_edit.html:2
+msgid "Edit followup"
+msgstr "Takip Düzenle"
+
+#: templates/helpdesk/followup_edit.html:9
+msgid "Edit FollowUp"
+msgstr "Takip Düzenle"
+
+#: templates/helpdesk/followup_edit.html:14
+msgid "Reassign ticket:"
+msgstr "Tekrar atama bileti:"
+
+#: templates/helpdesk/followup_edit.html:16
+msgid "Title:"
+msgstr "Başlık:"
+
+#: templates/helpdesk/followup_edit.html:18
+msgid "Comment:"
+msgstr "Yorum:"
+
+#: templates/helpdesk/kb_category.html:4
+#: templates/helpdesk/kb_category.html:12
+#, python-format
+msgid "Knowledgebase Category: %(kbcat)s"
+msgstr ""
+
+#: templates/helpdesk/kb_category.html:6
+#, python-format
+msgid "You are viewing all items in the %(kbcat)s category."
+msgstr ""
+
+#: templates/helpdesk/kb_category.html:13
+msgid "Article"
+msgstr "Madde"
+
+#: templates/helpdesk/kb_index.html:4 templates/helpdesk/navigation.html:21
+#: templates/helpdesk/navigation.html:71
+msgid "Knowledgebase"
+msgstr "Bilgi tabanı"
+
+#: templates/helpdesk/kb_index.html:6
+msgid ""
+"We have listed a number of knowledgebase articles for your perusal in the "
+"following categories. Please check to see if any of these articles address "
+"your problem prior to opening a support ticket."
+msgstr ""
+"Aşağıdaki kategorilerde incelemeniz için bir dizi bilgi tabanı "
+"makalesilisteledik. Bir destek bileti açmadan önce bu makalelerden herhangi "
+"birininsorununuzu ele alıp almadığını kontrol edin."
+
+#: templates/helpdesk/kb_index.html:10
+#: templates/helpdesk/public_homepage.html:10
+msgid "Knowledgebase Categories"
+msgstr "Bilgi tabanı kategorileri"
+
+#: templates/helpdesk/kb_item.html:4
+#, python-format
+msgid "Knowledgebase: %(item)s"
+msgstr ""
+
+#: templates/helpdesk/kb_item.html:16
+#, python-format
+msgid ""
+"View <a href='%(category_url)s'>other <em>%(category_title)s</em> "
+"articles</a>, or continue <a href='../'>viewing other knowledgebase "
+"articles</a>."
+msgstr ""
+
+#: templates/helpdesk/kb_item.html:18
+msgid "Feedback"
+msgstr "Geri bildirim"
+
+#: templates/helpdesk/kb_item.html:20
+msgid ""
+"We give our users an opportunity to vote for items that they believe have "
+"helped them out, in order for us to better serve future customers. We would "
+"appreciate your feedback on this article. Did you find it useful?"
+msgstr ""
+"Gelecekteki müşterilere daha iyi hizmet verebilmemiz için "
+"kullanıcılarımızayardımcı olduklarına inandıkları ürünlere oy verme fırsatı "
+"veriyoruz. Bumakale hakkındaki geri bildirimlerinizi takdir edeceğiz. "
+"Yararlı buldun mu?"
+
+#: templates/helpdesk/kb_item.html:23
+msgid "This article was useful to me"
+msgstr "Bu makale benim için yararlı oldu"
+
+#: templates/helpdesk/kb_item.html:24
+msgid "This article was <strong>not</strong> useful to me"
+msgstr "Bu makale <strong> değil </strong> benim için yararlı"
+
+#: templates/helpdesk/kb_item.html:27
+msgid "The results of voting by other readers of this article are below:"
+msgstr ""
+"Bu makalenin diğer okuyucuları tarafından oy kullanma sonuçları aşağıdadır:"
+
+#: templates/helpdesk/kb_item.html:30
+#, python-format
+msgid "Recommendations: %(recommendations)s"
+msgstr ""
+
+#: templates/helpdesk/kb_item.html:31
+#, python-format
+msgid "Votes: %(votes)s"
+msgstr ""
+
+#: templates/helpdesk/kb_item.html:32
+#, python-format
+msgid "Overall Rating: %(score)s"
+msgstr ""
+
+#: templates/helpdesk/navigation.html:16 templates/helpdesk/navigation.html:64
+msgid "Dashboard"
+msgstr "Gösterge paneli"
+
+#: templates/helpdesk/navigation.html:18
+msgid "New Ticket"
+msgstr "Yeni Bilet"
+
+#: templates/helpdesk/navigation.html:19
+msgid "Stats"
+msgstr "İstatistikler"
+
+#: templates/helpdesk/navigation.html:24
+msgid "Saved Query"
+msgstr "Kaydedilen Sorgu"
+
+#: templates/helpdesk/navigation.html:39
+msgid "Change password"
+msgstr "Şifre değiştir"
+
+#: templates/helpdesk/navigation.html:50
+msgid "Search..."
+msgstr "Aramak..."
+
+#: templates/helpdesk/navigation.html:50
+msgid "Enter a keyword, or a ticket number to jump straight to that ticket."
+msgstr ""
+"Doğrudan o bilete atlamak için bir anahtar kelime veya bir bilet "
+"numarasıgirin."
+
+#: templates/helpdesk/navigation.html:73
+msgid "Logout"
+msgstr "Oturum açma"
+
+#: templates/helpdesk/navigation.html:73
+msgid "Log In"
+msgstr "Giriş yapmak"
+
+#: views/staff.py:1043
+msgid "Queue by Month"
+msgstr "Aya göre kuyruk"
+
+#: templates/helpdesk/report_output.html:26
+msgid "Filter Report"
+msgstr "Filtre raporu"
+
+#: templates/helpdesk/report_output.html:29
+msgid ""
+"Want to filter this report to just show a subset of data? Go to the Ticket "
+"List, filter your query, and save your query."
+msgstr ""
+"Bir veri alt kümesini göstermek için bu raporu filtrelemek ister "
+"misiniz?Bilet listesine gidin, sorgunuzu süzün ve sorgunuzu kaydedin."
+
+#: templates/helpdesk/rss_list.html:6
+msgid ""
+"The following RSS feeds are available for you to monitor using your "
+"preferred RSS software. With the exception of the 'Latest Activity' feed, "
+"all feeds provide information only on Open and Reopened cases. This ensures "
+"your RSS reader isn't full of information about closed or historical tasks."
+msgstr ""
+"Tercih ettiğiniz RSS yazılımını kullanarak izlemeniz için aşağıdaki "
+"RSSyayınları mevcuttur. 'En son etkinlik' beslemesi hariç, tüm yemler "
+"yalnızcaaçık ve yeniden açılmış durumlar hakkında bilgi sağlar. Bu, RSS "
+"okuyucunuzunkapalı veya tarihsel görevler hakkında bilgi dolu olmamasını "
+"sağlar."
+
+#: templates/helpdesk/rss_list.html:10
+msgid ""
+"A summary of your open tickets - useful for getting alerted to new tickets "
+"opened for you"
+msgstr ""
+"Açık biletlerinizin bir özeti - sizin için açılan yeni biletlere "
+"uyarılmakiçin kullanışlı"
+
+#: templates/helpdesk/rss_list.html:12
+msgid "Latest Activity"
+msgstr "En son etkinlik"
+
+#: templates/helpdesk/rss_list.html:13
+msgid ""
+"A summary of all helpdesk activity - including comments, emails, "
+"attachments, and more"
+msgstr ""
+"Yorumlar, e -postalar, ekler ve daha fazlası dahil olmak üzere tüm "
+"yardımmasası etkinliklerinin bir özeti"
+
+#: templates/helpdesk/rss_list.html:16
+msgid ""
+"All unassigned tickets - useful for being alerted to new tickets opened by "
+"the public via the web or via e-mail"
+msgstr ""
+"Tüm atanmamış biletler - Web aracılığıyla veya e -posta yoluyla açılan "
+"yenibiletlerde uyarılmak için kullanışlı"
+
+#: templates/helpdesk/rss_list.html:19
+msgid ""
+"These RSS feeds allow you to view a summary of either your own tickets, or "
+"all tickets, for each of the queues in your helpdesk. For example, if you "
+"manage the staff who utilise a particular queue, this may be used to view "
+"new tickets coming into that queue."
+msgstr ""
+"Bu RSS yayınları, yardım masanızdaki her kuyruk için kendi "
+"biletlerinizinveya tüm biletlerinizin bir özetini görüntülemenizi sağlar. "
+"Örneğin, belirlibir kuyruk kullanan personeli yönetirseniz, bu sıraya giren "
+"yeni biletlerigörüntülemek için kullanılabilir."
+
+#: templates/helpdesk/rss_list.html:23
+msgid "Per-Queue Feeds"
+msgstr "Heapee Beslemeler"
+
+#: templates/helpdesk/rss_list.html:24
+msgid "All Open Tickets"
+msgstr "Tüm Açık Biletler"
+
+#: templates/helpdesk/rss_list.html:30
+msgid "Open Tickets"
+msgstr "Açık biletler"
+
+#: templates/helpdesk/system_settings.html:3
+msgid "Change System Settings"
+msgstr "Sistem ayarlarını değiştir"
+
+#: templates/helpdesk/system_settings.html:8
+msgid "The following items can be maintained by you or other superusers:"
+msgstr ""
+"Aşağıdaki öğeler sizin veya diğer süper kullanıcılar tarafından korunabilir:"
+
+#: templates/helpdesk/system_settings.html:11
+msgid "E-Mail Ignore list"
+msgstr "E-posta Göz ardı listesi listesi"
+
+#: templates/helpdesk/system_settings.html:12
+msgid "Maintain Queues"
+msgstr "Kuyrukları korumak"
+
+#: templates/helpdesk/system_settings.html:13
+msgid "Maintain Pre-Set Replies"
+msgstr "Önceden ayarlanmış yanıtları koruyun"
+
+#: templates/helpdesk/system_settings.html:14
+msgid "Maintain Knowledgebase Categories"
+msgstr "Bilgi tabanı kategorilerini koruyun"
+
+#: templates/helpdesk/system_settings.html:15
+msgid "Maintain Knowledgebase Items"
+msgstr "Bilgi tabanı öğelerini koruyun"
+
+#: templates/helpdesk/system_settings.html:16
+msgid "Maintain E-Mail Templates"
+msgstr "E-posta şablonlarını koruyun"
+
+#: templates/helpdesk/system_settings.html:17
+msgid "Maintain Users"
+msgstr "Kullanıcıları korumak"
+
+#: templates/helpdesk/ticket.html:2
+msgid "View Ticket Details"
+msgstr "Bilet Ayrıntılarını Görüntüle"
+
+#: templates/helpdesk/ticket.html:34
+msgid "Attach another File"
+msgstr "Başka bir dosya ekleyin"
+
+#: templates/helpdesk/ticket.html:34 templates/helpdesk/ticket.html.py:200
+msgid "Add Another File"
+msgstr "Başka bir dosya ekle"
+
+#: templates/helpdesk/ticket.html:73 templates/helpdesk/ticket.html.py:86
+msgid "Private"
+msgstr "Özel"
+
+#: templates/helpdesk/ticket.html:119
+msgid "Respond to this ticket"
+msgstr "Bu bilete cevap ver"
+
+#: templates/helpdesk/ticket.html:126
+msgid "Use a Pre-set Reply"
+msgstr "Önceden ayarlanmış bir cevap kullanın"
+
+#: templates/helpdesk/ticket.html:126 templates/helpdesk/ticket.html.py:166
+msgid "(Optional)"
+msgstr "(İsteğe bağlı)"
+
+#: templates/helpdesk/ticket.html:128
+msgid ""
+"Selecting a pre-set reply will over-write your comment below. You can then "
+"modify the pre-set reply to your liking before saving this update."
+msgstr ""
+"Önceden ayarlanmış bir yanıt seçmek, aşağıdaki yorumunuzu aşırı "
+"yazacaktır.Daha sonra bu güncellemeyi kaydetmeden önce önceden ayarlanmış "
+"cevabıbeğeninize göre değiştirebilirsiniz."
+
+#: templates/helpdesk/ticket.html:131
+msgid "Comment / Resolution"
+msgstr "Yorum / Çözüm"
+
+#: templates/helpdesk/ticket.html:133
+msgid ""
+"You can insert ticket and queue details in your message. For more "
+"information, see the <a href='../../help/context/'>context help page</a>."
+msgstr ""
+"Mesajınıza bilet ve kuyruk detayları ekleyebilirsiniz. Daha fazla bilgi "
+"içinbkz."
+
+#: templates/helpdesk/ticket.html:136
+msgid ""
+"This ticket cannot be resolved or closed until the tickets it depends on are"
+" resolved."
+msgstr ""
+"Bu bilet, bağlı olduğu biletler çözülene kadar çözülemez veya kapatılamaz."
+
+#: templates/helpdesk/ticket.html:166
+msgid "Is this update public?"
+msgstr "Bu güncelleme herkese açık mı?"
+
+#: templates/helpdesk/ticket.html:168
+msgid ""
+"If this is public, the submitter will be e-mailed your comment or "
+"resolution."
+msgstr ""
+"Bu güncelleme herkese açıksa, gönderene yorumunuz veya çözümünüz e-posta ile"
+" iletilecektir."
+
+#: templates/helpdesk/ticket.html:172
+msgid "Change Further Details &raquo;"
+msgstr "Daha fazla ayrıntıyı değiştir &raquo;"
+
+#: templates/helpdesk/ticket.html:181 templates/helpdesk/ticket_list.html:68
+#: templates/helpdesk/ticket_list.html:97
+#: templates/helpdesk/ticket_list.html:225
+msgid "Owner"
+msgstr "Sahibi"
+
+#: templates/helpdesk/ticket.html:182
+msgid "Unassign"
+msgstr "Atamayı kaldır"
+
+#: templates/helpdesk/ticket.html:193
+msgid "Attach File(s) &raquo;"
+msgstr "Dosya(lar) ekle &raquo;"
+
+#: templates/helpdesk/ticket.html:199
+msgid "Attach a File"
+msgstr "Bir dosya ekle"
+
+#: templates/helpdesk/ticket.html:207
+msgid "Update This Ticket"
+msgstr "Bu bileti güncelle"
+
+#: templates/helpdesk/ticket_cc_add.html:3
+msgid "Add Ticket CC"
+msgstr "Bilet CC Ekle"
+
+#: templates/helpdesk/ticket_cc_add.html:5
+msgid ""
+"\n"
+"<h2>Add Ticket CC</h2>\n"
+"\n"
+"<p>To automatically send an email to a user or e-mail address when this ticket is updated, select the user or enter an e-mail address below.</p>"
+msgstr ""
+"\n"
+"<h2>Bilet CC Ekle</h2>\n"
+"\n"
+"<p>Bu bilet güncellendiğinde, bir kullanıcıya veya e-posta adresine otomatik olarak e-posta göndermek için aşağıdan bir kullanıcı seçin veya bir e-posta adresi girin.</p>"
+
+#: templates/helpdesk/ticket_cc_add.html:21
+msgid "Save Ticket CC"
+msgstr "Bilet CC’yi Kaydet"
+
+#: templates/helpdesk/ticket_cc_del.html:3
+msgid "Delete Ticket CC"
+msgstr "Bilet CC’yi Sil"
+
+#: templates/helpdesk/ticket_cc_del.html:5
+#, python-format
+msgid ""
+"\n"
+"<h2>Delete Ticket CC</h2>\n"
+"\n"
+"<p>Are you sure you wish to delete this email address (<em>%(email_address)s</em>) from the CC list for this ticket? They will stop receiving updates.</p>\n"
+msgstr ""
+"\n"
+"<h2>Bilet CC'yi Sil</h2>\n"
+"\n"
+"<p>Bu biletin CC listesinden bu e-posta adresini (<em>%(email_address)s</em>) silmek istediğinizden emin misiniz? Artık güncellemeleri almayacaklar.</p>\n"
+
+#: templates/helpdesk/ticket_cc_del.html:11
+#: templates/helpdesk/ticket_dependency_del.html:11
+msgid "Don't Delete"
+msgstr "Silme"
+
+#: templates/helpdesk/ticket_cc_del.html:13
+#: templates/helpdesk/ticket_dependency_del.html:13
+msgid "Yes, Delete"
+msgstr "Evet, sil"
+
+#: templates/helpdesk/ticket_cc_list.html:3
+msgid "Ticket CC Settings"
+msgstr "Bilet CC Ayarları"
+
+#: templates/helpdesk/ticket_cc_list.html:5
+#, python-format
+msgid ""
+"\n"
+"<h2>Ticket CC Settings</h2>\n"
+"\n"
+"<p>The following people will receive an e-mail whenever <em><a href='../'>%(ticket_title)s</a></em> is updated. Some people can also view or edit the ticket via the public ticket views.</p>\n"
+"\n"
+"<p>You can <a href='add/'>add a new e-mail address to the list</a> or delete any of the items below as required.</p>"
+msgstr ""
+"\n"
+"<h2>Bilet CC Ayarları</h2>\n"
+"\n"
+"<p>Aşağıdaki kişiler, <em><a href='../'>%(ticket_title)s</a></em> güncellendiğinde bir e-posta alacaktır. Bazı kullanıcılar bileti herkese açık bilet görüntüleri üzerinden görebilir veya düzenleyebilir.</p>\n"
+"\n"
+"<p>Listeye <a href='add/'>yeni bir e-posta adresi ekleyebilir</a> veya aşağıdaki öğelerden herhangi birini silebilirsiniz.</p>"
+
+#: templates/helpdesk/ticket_cc_list.html:14
+msgid "Ticket CC List"
+msgstr "Bilet CC Listesi"
+
+#: templates/helpdesk/ticket_cc_list.html:15
+msgid "View?"
+msgstr "Görüntülesin mi?"
+
+#: templates/helpdesk/ticket_cc_list.html:15
+msgid "Update?"
+msgstr "Güncelleyebilsin mi?"
+
+#: templates/helpdesk/ticket_cc_list.html:29
+#, python-format
+msgid "Return to <em>%(ticket_title)s</em>"
+msgstr "<em>%(ticket_title)s</em> sayfasına geri dön"
+
+#: views/staff.py:1019
+msgid "User by Status"
+msgstr "Duruma göre kullanıcı"
+
+#: views/staff.py:1025
+msgid "User by Month"
+msgstr "Aya göre kullanıcı"
+
+#: views/staff.py:1031
+msgid "Queue by Priority"
+msgstr "Önceliğe göre kuyruk"
+
+#: views/staff.py:1037
+msgid "Queue by Status"
+msgstr "Duruma göre kuyruk"
+
+#: templates/helpdesk/ticket_desc_table.html:37
+msgid "Assigned To"
+msgstr "Atanmış"
+
+#: templates/helpdesk/ticket_desc_table.html:43
+msgid "Ignore"
+msgstr "Görmezden gelmek"
+
+#: templates/helpdesk/ticket_desc_table.html:52
+msgid "Copies To"
+msgstr "Kopyalar"
+
+#: templates/helpdesk/ticket_desc_table.html:53
+msgid "Manage"
+msgstr "Üstesinden gelmek"
+
+#: templates/helpdesk/ticket_desc_table.html:53
+msgid ""
+"Click here to add / remove people who should receive an e-mail whenever this"
+" ticket is updated."
+msgstr ""
+"Bu bilet güncellendiğinde e-posta alması gereken kişileri eklemek /kaldırmak"
+" için buraya tıklayın."
+
+#: templates/helpdesk/ticket_desc_table.html:53
+msgid "Subscribe"
+msgstr "Abone"
+
+#: templates/helpdesk/ticket_desc_table.html:53
+msgid ""
+"Click here to subscribe yourself to this ticket, if you want to receive an "
+"e-mail whenever this ticket is updated."
+msgstr ""
+"Bu bilet güncellendiğinde bir e-posta almak istiyorsanız, kendinizi bubilete"
+" abone olmak için buraya tıklayın."
+
+#: templates/helpdesk/ticket_desc_table.html:57
+msgid "Dependencies"
+msgstr "Bağımlılık"
+
+#: templates/helpdesk/ticket_desc_table.html:59
+msgid ""
+"This ticket cannot be resolved until the following ticket(s) are resolved"
+msgstr "Bu bilet, aşağıdaki bilet (ler) çözülene kadar çözülemez"
+
+#: templates/helpdesk/ticket_desc_table.html:60
+msgid "Remove Dependency"
+msgstr "Bağımlılığı kaldır"
+
+#: templates/helpdesk/ticket_desc_table.html:63
+msgid "This ticket has no dependencies."
+msgstr "Bu biletin bağımlılığı yoktur."
+
+#: templates/helpdesk/ticket_desc_table.html:65
+msgid "Add Dependency"
+msgstr "Bağımlılık ekle"
+
+#: templates/helpdesk/ticket_desc_table.html:65
+msgid ""
+"Click on 'Add Dependency', if you want to make this ticket dependent on "
+"another ticket. A ticket may not be closed until all tickets it depends on "
+"are closed."
+msgstr ""
+"Bu bileti başka bir bilete bağımlı hale getirmek istiyorsanız, "
+"'BağımlılıkEkle'ye tıklayın. Bir bilet, bağlı olduğu tüm biletler kapalı "
+"olana kadarkapatılmayabilir."
+
+#: templates/helpdesk/ticket_list.html:59
+msgid "Change Query"
+msgstr "Sorguyu Değiştir"
+
+#: templates/helpdesk/ticket_list.html:67
+#: templates/helpdesk/ticket_list.html:79
+msgid "Sorting"
+msgstr "Sıralama"
+
+#: templates/helpdesk/ticket_list.html:71
+#: templates/helpdesk/ticket_list.html:139
+msgid "Keywords"
+msgstr "Anahtar Kelimeler"
+
+#: templates/helpdesk/ticket_list.html:72
+msgid "Date Range"
+msgstr "Tarih aralığı"
+
+#: templates/helpdesk/ticket_list.html:100
+msgid "Reverse"
+msgstr "Tersi"
+
+#: templates/helpdesk/ticket_list.html:102
+msgid "Ordering applied to tickets"
+msgstr "Biletlere uygulanan sipariş"
+
+#: templates/helpdesk/ticket_list.html:107
+msgid "Owner(s)"
+msgstr "Sahip (ler)"
+
+#: templates/helpdesk/ticket_list.html:111
+msgid "(ME)"
+msgstr "(BEN)"
+
+#: templates/helpdesk/ticket_list.html:115
+msgid "Ctrl-Click to select multiple options"
+msgstr "Birden çok seçenek seçmek için Ctrl tıklayın"
+
+#: templates/helpdesk/ticket_list.html:120
+msgid "Queue(s)"
+msgstr "Kuyruk (lar)"
+
+#: templates/helpdesk/ticket_list.html:121
+#: templates/helpdesk/ticket_list.html:127
+msgid "Ctrl-click to select multiple options"
+msgstr "Birden çok seçenek seçmek için Ctrl tıklayın"
+
+#: templates/helpdesk/ticket_list.html:126
+msgid "Status(es)"
+msgstr "Durum (ES)"
+
+#: templates/helpdesk/ticket_list.html:132
+msgid "Date (From)"
+msgstr "Tarih (Kimden)"
+
+#: templates/helpdesk/ticket_list.html:133
+msgid "Date (To)"
+msgstr "Tarih (TO)"
+
+#: templates/helpdesk/ticket_list.html:134
+msgid "Use YYYY-MM-DD date format, eg 2011-05-29"
+msgstr "YYYY-MM-DD Tarih Formatını Kullan, Örn. 2011-05-29"
+
+#: templates/helpdesk/ticket_list.html:140
+msgid ""
+"Keywords are case-insensitive, and will be looked for in the title, body and"
+" submitter fields."
+msgstr ""
+"Anahtar kelimeler vaka duyarsızdır ve başlık, gövde ve gönderici "
+"alanlarındaaranacaktır."
+
+#: templates/helpdesk/ticket_list.html:144
+msgid "Apply Filter"
+msgstr "Filtre uygulayın"
+
+#: templates/helpdesk/ticket_list.html:146
+#, python-format
+msgid "You are currently viewing saved query <strong>\"%(query_name)s\"</strong>."
+msgstr ""
+
+#: templates/helpdesk/ticket_list.html:149
+#, python-format
+msgid ""
+"<a href='../reports/?saved_query=%(query_id)s'>Run a report</a> on this "
+"query to see stats and charts for the data listed below."
+msgstr ""
+
+#: templates/helpdesk/ticket_list.html:162
+#: templates/helpdesk/ticket_list.html:181
+msgid "Save Query"
+msgstr "Sorguyu Kaydet"
+
+#: templates/helpdesk/ticket_list.html:172
+msgid ""
+"This name appears in the drop-down list of saved queries. If you share your "
+"query, other users will see this name, so choose something clear and "
+"descriptive!"
+msgstr ""
+"Bu ad, kaydedilmiş sorguların açılır listesinde görünür. "
+"Sorgunuzupaylaşırsanız, diğer kullanıcılar bu adı görür, bu yüzden net ve "
+"açıklayıcıbir şey seçin!"
+
+#: templates/helpdesk/ticket_list.html:174
+msgid "Shared?"
+msgstr "Paylaşıldı mı?"
+
+#: templates/helpdesk/ticket_list.html:175
+msgid "Yes, share this query with other users."
+msgstr "Evet, bu sorguyu diğer kullanıcılarla paylaşın."
+
+#: templates/helpdesk/ticket_list.html:176
+msgid ""
+"If you share this query, it will be visible by <em>all</em> other logged-in "
+"users."
+msgstr ""
+"Bu sorguyu paylaşırsanız, diğer günlüğe kaydedilmiş kullanıcılar "
+"tarafından<em> tüm </em> tarafından görülebilir."
+
+#: templates/helpdesk/ticket_list.html:195
+msgid "Use Saved Query"
+msgstr "Kaydedilen sorguyu kullanın"
+
+#: templates/helpdesk/ticket_list.html:202
+msgid "Query"
+msgstr "Sorgu"
+
+#: templates/helpdesk/ticket_list.html:207
+msgid "Run Query"
+msgstr "Sorguyu çalıştır"
+
+#: templates/helpdesk/ticket_list.html:240
+msgid "No Tickets Match Your Selection"
+msgstr "Seçiminize uygun bilet yok"
+
+#: templates/helpdesk/ticket_list.html:247
+msgid "Previous"
+msgstr "Öncesi"
+
+#: templates/helpdesk/ticket_list.html:251
+#, python-format
+msgid "Page %(ticket_num)s of %(num_pages)s."
+msgstr ""
+
+#: templates/helpdesk/ticket_list.html:255
+msgid "Next"
+msgstr "Sonraki"
+
+#: templates/helpdesk/ticket_list.html:260
+msgid "Select:"
+msgstr "Seçme:"
+
+#: templates/helpdesk/ticket_list.html:260
+msgid "None"
+msgstr "Hiçbiri"
+
+#: templates/helpdesk/ticket_list.html:260
+msgid "Inverse"
+msgstr "Ters"
+
+#: templates/helpdesk/ticket_list.html:262
+msgid "With Selected Tickets:"
+msgstr "Seçilen biletlerle:"
+
+#: templates/helpdesk/ticket_list.html:262
+msgid "Take (Assign to me)"
+msgstr "Al (bana ata)"
+
+#: templates/helpdesk/ticket_list.html:262
+msgid "Close"
+msgstr "Kapalı"
+
+#: templates/helpdesk/ticket_list.html:262
+msgid "Close (Don't Send E-Mail)"
+msgstr "Kapat (e-posta göndermeyin)"
+
+#: templates/helpdesk/ticket_list.html:262
+msgid "Close (Send E-Mail)"
+msgstr "Kapat (e-posta gönder)"
+
+#: templates/helpdesk/ticket_list.html:262
+msgid "Assign To"
+msgstr "Atamak"
+
+#: templates/helpdesk/ticket_list.html:262
+msgid "Nobody (Unassign)"
+msgstr "Kimse (Atamasız)"
+
+#: templates/helpdesk/user_settings.html:3
+msgid "Change User Settings"
+msgstr "Kullanıcı Ayarlarını Değiştir"
+
+#: templates/helpdesk/user_settings.html:8
+msgid ""
+"Use the following options to change the way your helpdesk system works for "
+"you. These settings do not impact any other user."
+msgstr ""
+"Yardım masası sisteminizin sizin için çalışma şeklini değiştirmek "
+"içinaşağıdaki seçenekleri kullanın. Bu ayarlar başka bir kullanıcıyı "
+"etkilemez."
+
+#: templates/helpdesk/user_settings.html:14
+msgid "Save Options"
+msgstr "Seçenekleri Kaydet"
+
+#: templates/helpdesk/registration/logged_out.html:2
+msgid "Logged Out"
+msgstr "Oturum açmış"
+
+#: templates/helpdesk/registration/login.html:2
+msgid "Helpdesk Login"
+msgstr "Yardım Masası Giriş"
