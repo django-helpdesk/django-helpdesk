@@ -145,17 +145,23 @@ def process_email_notifications_for_ticket_update(
     ):
         # For public tickets we do not want to send the assigned template for backwards compatibility
         # TODO: possibly make the template prefix modification configurable
-        pub_template_prefix = "updated_" if template_prefix == "assigned_" else template_prefix
-        roles.update({
-            "submitter": (pub_template_prefix + "submitter", context),
-            "ticket_cc": (pub_template_prefix + "cc", context),
-        })
+        pub_template_prefix = (
+            "updated_" if template_prefix == "assigned_" else template_prefix
+        )
+        roles.update(
+            {
+                "submitter": (pub_template_prefix + "submitter", context),
+                "ticket_cc": (pub_template_prefix + "cc", context),
+            }
+        )
     else:
         if helpdesk_settings.HELPDESK_SEND_EMAIL_NOTIFICATION_FOR_INTERNAL_TICKET_UPDATES:
-            roles.update({
-                "submitter": (template_prefix + "submitter", context),
-            })
-            
+            roles.update(
+                {
+                    "submitter": (template_prefix + "submitter", context),
+                }
+            )
+
     if roles:
         messages_sent_to.update(
             ticket.send(
@@ -191,10 +197,7 @@ def process_email_notifications_for_ticket_update(
     )
 
 
-
-def get_email_template_prefix(
-    reassigned, follow_up: FollowUp
-) -> str:
+def get_email_template_prefix(reassigned, follow_up: FollowUp) -> str:
     if reassigned:
         return "assigned_"
     elif follow_up.new_status == Ticket.RESOLVED_STATUS:
