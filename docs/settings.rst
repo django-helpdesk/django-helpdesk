@@ -118,6 +118,10 @@ These changes are visible throughout django-helpdesk
 
   **Default:** ``HELPDESK_EMAIL_SUBJECT_TEMPLATE = "{{ ticket.ticket }} {{ ticket.title|safe }} %(subject)s"``
 
+- **HELPDESK_SEND_EMAIL_NOTIFICATION_FOR_INTERNAL_TICKET_UPDATES** Send email to submitter for internal ticket updates. System only sends to submitter for public ticket updates.
+
+  **Default:** ``HELPDESK_SEND_EMAIL_NOTIFICATION_FOR_INTERNAL_TICKET_UPDATES = False``
+
 - **HELPDESK_EMAIL_FALLBACK_LOCALE** Fallback locale for templated emails when queue locale not found
 
   **Default:** ``HELPDESK_EMAIL_FALLBACK_LOCALE = "en"``
