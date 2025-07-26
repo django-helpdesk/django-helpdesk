@@ -125,64 +125,84 @@ def get_and_set_ticket_status(
     return old_status_str, old_status
 
 
-def update_messages_sent_to_by_public_and_status(
+def process_email_notifications_for_ticket_update(
     public: bool,
     ticket: Ticket,
     follow_up: FollowUp,
-    context: str,
+    context: dict,
     messages_sent_to: typing.Set[str],
     files: typing.List[typing.Tuple[str, str]],
-) -> Ticket:
-    """Sets the status of the ticket"""
+    reassigned: bool = False,
+):
+    """
+    Sends email notifications when the ticket is updated in any way.
+    """
+    template_prefix = get_email_template_prefix(reassigned, follow_up)
+    roles = {}
     if public and (
         follow_up.comment
         or (follow_up.new_status in (Ticket.RESOLVED_STATUS, Ticket.CLOSED_STATUS))
     ):
-        if follow_up.new_status == Ticket.RESOLVED_STATUS:
-            template = "resolved_"
-        elif follow_up.new_status == Ticket.CLOSED_STATUS:
-            template = "closed_"
-        else:
-            template = "updated_"
-
-        roles = {
-            "submitter": (template + "submitter", context),
-            "ticket_cc": (template + "cc", context),
-        }
-        if (
-            ticket.assigned_to
-            and ticket.assigned_to.usersettings_helpdesk.email_on_ticket_change
-        ):
-            roles["assigned_to"] = (template + "cc", context)
+        # For public tickets we do not want to send the assigned template for backwards compatibility
+        # TODO: possibly make the template prefix modification configurable
+        pub_template_prefix = "updated_" if template_prefix == "assigned_" else template_prefix
+        roles.update({
+            "submitter": (pub_template_prefix + "submitter", context),
+            "ticket_cc": (pub_template_prefix + "cc", context),
+        })
+    else:
+        if helpdesk_settings.HELPDESK_SEND_EMAIL_NOTIFICATION_FOR_INTERNAL_TICKET_UPDATES:
+            roles.update({
+                "submitter": (template_prefix + "submitter", context),
+            })
+            
+    if roles:
         messages_sent_to.update(
             ticket.send(
-                roles, dont_send_to=messages_sent_to, fail_silently=True, files=files
+                roles,
+                dont_send_to=messages_sent_to,
+                fail_silently=True,
+                files=files,
             )
         )
-    return ticket
+    if ticket.assigned_to and (
+        ticket.assigned_to.usersettings_helpdesk.email_on_ticket_change
+        or (
+            reassigned
+            and ticket.assigned_to.usersettings_helpdesk.email_on_ticket_assign
+        )
+    ):
+        messages_sent_to.update(
+            ticket.send(
+                {"assigned_to": (template_prefix + "owner", context)},
+                dont_send_to=messages_sent_to,
+                fail_silently=True,
+                files=files,
+            )
+        )
+
+    messages_sent_to.update(
+        ticket.send(
+            {"ticket_cc": (template_prefix + "cc", context)},
+            dont_send_to=messages_sent_to,
+            fail_silently=True,
+            files=files,
+        )
+    )
 
 
-def get_template_staff_and_template_cc(
+
+def get_email_template_prefix(
     reassigned, follow_up: FollowUp
-) -> typing.Tuple[str, str]:
+) -> str:
     if reassigned:
-        template_staff = "assigned_owner"
+        return "assigned_"
     elif follow_up.new_status == Ticket.RESOLVED_STATUS:
-        template_staff = "resolved_owner"
+        return "resolved_"
     elif follow_up.new_status == Ticket.CLOSED_STATUS:
-        template_staff = "closed_owner"
+        return "closed_"
     else:
-        template_staff = "updated_owner"
-    if reassigned:
-        template_cc = "assigned_cc"
-    elif follow_up.new_status == Ticket.RESOLVED_STATUS:
-        template_cc = "resolved_cc"
-    elif follow_up.new_status == Ticket.CLOSED_STATUS:
-        template_cc = "closed_cc"
-    else:
-        template_cc = "updated_cc"
-
-    return template_staff, template_cc
+        return "updated_"
 
 
 def update_ticket(
@@ -364,34 +384,8 @@ def update_ticket(
         messages_sent_to.add(user.email)
     except AttributeError:
         pass
-    ticket = update_messages_sent_to_by_public_and_status(
-        public, ticket, f, context, messages_sent_to, files
-    )
-
-    template_staff, template_cc = get_template_staff_and_template_cc(reassigned, f)
-    if ticket.assigned_to and (
-        ticket.assigned_to.usersettings_helpdesk.email_on_ticket_change
-        or (
-            reassigned
-            and ticket.assigned_to.usersettings_helpdesk.email_on_ticket_assign
-        )
-    ):
-        messages_sent_to.update(
-            ticket.send(
-                {"assigned_to": (template_staff, context)},
-                dont_send_to=messages_sent_to,
-                fail_silently=True,
-                files=files,
-            )
-        )
-
-    messages_sent_to.update(
-        ticket.send(
-            {"ticket_cc": (template_cc, context)},
-            dont_send_to=messages_sent_to,
-            fail_silently=True,
-            files=files,
-        )
+    process_email_notifications_for_ticket_update(
+        public, ticket, f, context, messages_sent_to, files, reassigned=reassigned
     )
     ticket.save()
 
