@@ -118,9 +118,9 @@ These changes are visible throughout django-helpdesk
 
   **Default:** ``HELPDESK_EMAIL_SUBJECT_TEMPLATE = "{{ ticket.ticket }} {{ ticket.title|safe }} %(subject)s"``
 
-- **HELPDESK_SEND_EMAIL_NOTIFICATION_FOR_INTERNAL_TICKET_UPDATES** Send email to submitter for internal ticket updates. System only sends to submitter for public ticket updates.
+- **HELPDESK_NOTIFY_SUBMITTER_FOR_ALL_TICKET_CHANGES** Send email to submitter for all ticket updates. Default is to only sends to submitter for followups marked as public (defaults to True) on ticket creation, closing, status changes or followup comment.
 
-  **Default:** ``HELPDESK_SEND_EMAIL_NOTIFICATION_FOR_INTERNAL_TICKET_UPDATES = False``
+  **Default:** ``HELPDESK_NOTIFY_SUBMITTER_FOR_ALL_TICKET_CHANGES = False``
 
 - **HELPDESK_EMAIL_FALLBACK_LOCALE** Fallback locale for templated emails when queue locale not found
 
