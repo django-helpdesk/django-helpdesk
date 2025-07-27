@@ -138,15 +138,20 @@ def process_email_notifications_for_ticket_update(
     Sends email notifications when the ticket is updated in any way.
     """
     template_prefix = get_email_template_prefix(reassigned, follow_up)
-    if helpdesk_settings.HELPDESK_NOTIFY_SUBMITTER_FOR_ALL_TICKET_CHANGES or (public and (
-        follow_up.comment
-        or (follow_up.new_status in (Ticket.RESOLVED_STATUS, Ticket.CLOSED_STATUS)))
+    if helpdesk_settings.HELPDESK_NOTIFY_SUBMITTER_FOR_ALL_TICKET_CHANGES or (
+        public
+        and (
+            follow_up.comment
+            or (follow_up.new_status in (Ticket.RESOLVED_STATUS, Ticket.CLOSED_STATUS))
+        )
     ):
         # Use hard coded prefix for submitter updates on  tickets for backwards compatibility
         # TODO: possibly make the template prefix modification configurable
         messages_sent_to.update(
             ticket.send(
-                {"submitter": ("update_submitter", context),},
+                {
+                    "submitter": ("update_submitter", context),
+                },
                 dont_send_to=messages_sent_to,
                 fail_silently=True,
                 files=files,
