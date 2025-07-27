@@ -150,7 +150,7 @@ def process_email_notifications_for_ticket_update(
         messages_sent_to.update(
             ticket.send(
                 {
-                    "submitter": ("update_submitter", context),
+                    "submitter": ("updated_submitter", context),
                 },
                 dont_send_to=messages_sent_to,
                 fail_silently=True,
