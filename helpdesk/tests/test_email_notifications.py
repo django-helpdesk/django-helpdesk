@@ -150,7 +150,7 @@ class TicketEmailNotificationTests(TestCase):
         self.assertEqual(
             email_cnt,
             1,
-            f"1. Expected to send 1 email notification. {email_cnt} were sent.",
+            f"1. Expected to send 1 email notification. {email_cnt} were sent: {recipient_list}",
         )
         self.assertTrue(
             self.existing_ticket.submitter_email in recipient_list,
@@ -170,7 +170,7 @@ class TicketEmailNotificationTests(TestCase):
         self.assertEqual(
             email_cnt,
             1,
-            f"2. Expected to send 1 email notification. {email_cnt} were sent.",
+            f"2. Expected to send 1 email notification. {email_cnt} were sent: {recipient_list}",
         )
         self.assertTrue(
             self.assigned_user.email in recipient_list,
@@ -190,7 +190,7 @@ class TicketEmailNotificationTests(TestCase):
         self.assertEqual(
             email_cnt,
             1,
-            f"3. Expected to send 1 email notification. {email_cnt} were sent.",
+            f"3. Expected to send 1 email notification. {email_cnt} were sent: {recipient_list}",
         )
         self.assertTrue(
             self.assigned_user.email in recipient_list,
@@ -210,7 +210,7 @@ class TicketEmailNotificationTests(TestCase):
         self.assertEqual(
             email_cnt,
             2,
-            f"4. Expected to send 2 email notifications. {email_cnt} were sent.",
+            f"4. Expected to send 2 email notifications. {email_cnt} were sent: {recipient_list}",
         )
         self.assertTrue(
             self.existing_ticket.submitter_email in recipient_list,
@@ -240,7 +240,7 @@ class TicketEmailNotificationTests(TestCase):
         self.assertEqual(
             email_cnt,
             1,
-            f"1. Expected to send 1 email notification. {email_cnt} were sent.",
+            f"1. Expected to send 1 email notification. {email_cnt} were sent: {recipient_list}",
         )
         self.assertTrue(
             self.existing_ticket.submitter_email in recipient_list,
@@ -260,7 +260,7 @@ class TicketEmailNotificationTests(TestCase):
         self.assertEqual(
             email_cnt,
             2,
-            f"2. Expected to send 2 email notifications. {email_cnt} were sent.",
+            f"2. Expected to send 2 email notifications. {email_cnt} were sent: {recipient_list}",
         )
         self.assertTrue(
             self.existing_ticket.submitter_email in recipient_list,
@@ -284,7 +284,7 @@ class TicketEmailNotificationTests(TestCase):
         self.assertEqual(
             email_cnt,
             2,
-            f"3. Expected to send 2 email notifications. {email_cnt} were sent.",
+            f"3. Expected to send 2 email notifications. {email_cnt} were sent: {recipient_list}",
         )
         self.assertTrue(
             self.existing_ticket.submitter_email in recipient_list,
@@ -308,7 +308,7 @@ class TicketEmailNotificationTests(TestCase):
         self.assertEqual(
             email_cnt,
             2,
-            f"4. Expected to send 2 email notifications. {email_cnt} were sent.",
+            f"4. Expected to send 2 email notifications. {email_cnt} were sent: {recipient_list}",
         )
         self.assertTrue(
             self.existing_ticket.submitter_email in recipient_list,
@@ -348,7 +348,7 @@ class TicketEmailNotificationTests(TestCase):
         self.assertEqual(
             email_cnt,
             4,
-            f"New ticket CC Notifications test expected to send 4 email notifications. {email_cnt} were sent.",
+            f"New ticket CC Notifications test expected to send 4 email notifications. {email_cnt} were sent: {recipient_list}",
         )
         self.assertTrue(
             self.new_ticket_cc_user.email in recipient_list,
@@ -384,7 +384,7 @@ class TicketEmailNotificationTests(TestCase):
         self.assertEqual(
             email_cnt,
             3,
-            f"Updated CC Ticket test expected to send 3 email notifications. {email_cnt} were sent.",
+            f"Updated CC Ticket test expected to send 3 email notifications. {email_cnt} were sent: {recipient_list}",
         )
         self.assertTrue(
             self.update_ticket_cc_user.email in recipient_list,
