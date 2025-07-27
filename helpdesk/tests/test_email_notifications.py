@@ -65,7 +65,7 @@ class TicketEmailNotificationTests(TestCase):
             data={
                 "title": "Existing Test Ticket",
                 "body": "Test ticket update email notifications",
-                "queue": self.queue_choices[2][0],
+                "queue": self.queue_public_2.id,
                 "submitter_email": self.non_user_submitter_email,
             },
         )
@@ -83,7 +83,7 @@ class TicketEmailNotificationTests(TestCase):
             data={
                 "title": "Test Ticket",
                 "body": "Test email notifications",
-                "queue": self.queue_choices[1][0],
+                "queue": self.queue_public_2.id,
                 "assigned_to": self.assigned_user.id,
                 "submitter_email": self.non_user_submitter_email,
             },
@@ -116,7 +116,7 @@ class TicketEmailNotificationTests(TestCase):
             data={
                 "title": "Test Ticket",
                 "body": "Test email notifications",
-                "queue": self.queue_choices[1][0],
+                "queue": self.queue_public_2.id,
                 "submitter_email": self.creator_user.email,
             },
         )
@@ -139,6 +139,10 @@ class TicketEmailNotificationTests(TestCase):
         Ticket is initially unassigned so should not get assigned email until assigned.
         Change various data points checking where submitter should get emailed.
         """
+        # Ensure the attribute is correct since it is not reset on each test
+        setattr(
+            helpdesk_settings, "HELPDESK_NOTIFY_SUBMITTER_FOR_ALL_TICKET_CHANGES", False
+        )
         update_ticket(
             self.update_user,
             self.existing_ticket,
@@ -157,7 +161,7 @@ class TicketEmailNotificationTests(TestCase):
             "Submitter email not found in email notifications sent.",
         )
 
-        # Assign a user but no other change so submitter should not be emailed.
+        # Assign a user but no other change so submitter should be emailed.
         self.outbox.clear()  # Remove the prior emails
         update_ticket(
             self.update_user,
@@ -226,6 +230,7 @@ class TicketEmailNotificationTests(TestCase):
         Ticket is initially unassigned so should not get assigned email until assigned.
         Check submitter should always get emailed.
         """
+        # Ensure the attribute is correct since it is not reset on each test
         setattr(
             helpdesk_settings, "HELPDESK_NOTIFY_SUBMITTER_FOR_ALL_TICKET_CHANGES", True
         )
@@ -325,7 +330,11 @@ class TicketEmailNotificationTests(TestCase):
 
         NOTE: Oddly the CC user for updates is also sent an email on create
         """
-        queue_id = self.queue_choices[1][0]
+        # Ensure the attribute is correct since it is not reset on each test
+        setattr(
+            helpdesk_settings, "HELPDESK_NOTIFY_SUBMITTER_FOR_ALL_TICKET_CHANGES", False
+        )
+        queue_id = self.queue_public_2.id
         queue = Queue.objects.get(id=queue_id)
         queue.enable_notifications_on_email_events = True
         queue.new_ticket_cc = self.new_ticket_cc_user.email
@@ -336,7 +345,7 @@ class TicketEmailNotificationTests(TestCase):
             data={
                 "title": "Test Ticket",
                 "body": "Test email notifications",
-                "queue": self.queue_choices[1][0],
+                "queue": self.queue_public_2.id,
                 "assigned_to": self.assigned_user.id,
                 "submitter_email": self.non_user_submitter_email,
             },
