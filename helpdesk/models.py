@@ -30,6 +30,8 @@ import re
 from rest_framework import serializers
 import uuid
 
+User = get_user_model()
+
 
 class EscapeHtml(Extension):
     def extendMarkdown(self, md):
@@ -836,7 +838,6 @@ class Ticket(models.Model):
     can_be_resolved = property(_can_be_resolved)
 
     def get_submitter_userprofile(self):
-        User = get_user_model()
         try:
             return User.objects.get(email=self.submitter_email)
         except (User.DoesNotExist, User.MultipleObjectsReturned):
