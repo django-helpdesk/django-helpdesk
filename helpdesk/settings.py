@@ -350,6 +350,12 @@ HELPDESK_MAX_EMAIL_ATTACHMENT_SIZE = getattr(
     settings, "HELPDESK_MAX_EMAIL_ATTACHMENT_SIZE", 512000
 )
 
+# Send email notifications for internal ticket submitter.
+HELPDESK_NOTIFY_SUBMITTER_FOR_ALL_TICKET_CHANGES = getattr(
+    settings,
+    "HELPDESK_NOTIFY_SUBMITTER_FOR_ALL_TICKET_CHANGES",
+    False,
+)
 
 ########################################
 # options for staff.create_ticket view #
