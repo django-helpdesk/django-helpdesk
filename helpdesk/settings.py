@@ -366,6 +366,9 @@ HELPDESK_CREATE_TICKET_HIDE_ASSIGNED_TO = getattr(
     settings, "HELPDESK_CREATE_TICKET_HIDE_ASSIGNED_TO", False
 )
 
+# allow users to take tickets even if a ticket is already claimed.
+HELPDESK_UNLOCK_TICKET_ASSIGNMENT = False
+
 
 #################
 # email options #
