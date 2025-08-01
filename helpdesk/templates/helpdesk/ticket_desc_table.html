@@ -73,9 +73,31 @@
                         <td>{{ ticket.created|date:"DATETIME_FORMAT" }} ({{ ticket.created|naturaltime }})</td>
                     </tr>
                     <tr>
+                        <!-- show current Assignee for ticket -->
                         <th class="table-active">{% trans "Assigned To" %}</th>
                         <td>
+                            <!-- assignment drop down -->
                             {{ ticket.get_assigned_to }}
+                            <form method="post" action="{% url 'helpdesk:mass_update' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="ticket_id" value="{{ ticket.id }}">
+                                <input type="hidden" name="next" value="{% url 'helpdesk:view' ticket.id %}">
+
+                                <div class="d-flex align-items-center gap-2">
+                                    <select name="action" class="form-select form-select-sm">
+                                        <option disabled selected>Assign to...</option>
+                                        {% for user in assignable_users %}
+                                            <option value="assign_{{ user.id }}" {% if ticket.assigned_to and ticket.assigned_to.id == user.id %}selected{% endif %}>
+                                                {{ user.get_full_name|default:user.username }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                    <button type="submit" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-user-check"></i>
+                                    </button>
+                                </div>
+                            </form>
+                            <!-- self assign hand -->
                             <a class="btn btn-primary btn-sm float-right" data-toggle="tooltip" href='?take' title='{% trans "Assign this ticket to " %}{{ request.user.email }}'>
                                 <i class="fas fa-hand-paper"></i>
                             </a>

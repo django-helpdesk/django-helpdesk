@@ -1,7 +1,7 @@
 """
 django-helpdesk - A Django powered ticket tracker for small enterprise.
 
-(c) Copyright 2008 Jutda. All Rights Reserved. See LICENSE for details.
+(c) Copyright 2008-2025 Jutda. All Rights Reserved. See LICENSE for details.
 
 views/staff.py - The bulk of the application - provides most business logic and
                  renders all staff-facing views.
@@ -87,6 +87,7 @@ import helpdesk.views.abstract_views as abstract_views
 from helpdesk.views.permissions import MustBeStaffMixin
 import json
 import re
+import logging
 from rest_framework import status
 from rest_framework.decorators import api_view
 import typing
@@ -95,6 +96,9 @@ from django.utils.timezone import now
 
 if helpdesk_settings.HELPDESK_KB_ENABLED:
     from helpdesk.models import KBItem
+
+logger = logging.getLogger(__name__)
+
 
 DATE_RE: re.Pattern = re.compile(
     r"(?P<month>\d{1,2})/(?P<day>\d{1,2})/(?P<year>\d{4})$"
@@ -473,6 +477,10 @@ def view_ticket(request, ticket_id):
     # add custom fields to further details panel
     customfields_form = EditTicketCustomFieldForm(None, instance=ticket)
 
+    # Define users that the ticket can be assigned to
+    assignable_users = User.objects.filter(is_active=True).order_by('username')
+    logger.debug("Assignable users:", assignable_users)
+
     return render(
         request,
         "helpdesk/ticket.html",
@@ -488,6 +496,7 @@ def view_ticket(request, ticket_id):
             "SHOW_SUBSCRIBE": show_subscribe,
             "checklist_form": checklist_form,
             "customfields_form": customfields_form,
+            "assignable_users": assignable_users,
             **extra_context_kwargs,
         },
     )
@@ -816,7 +825,9 @@ def mass_update(request):
         elif action == "delete":
             t.delete()
 
-    return HttpResponseRedirect(reverse("helpdesk:list"))
+    # Go to ticket template if from ticket or list template otherwise
+    next_url = request.POST.get("next") or reverse("helpdesk:list")
+    return HttpResponseRedirect(next_url)
 
 
 mass_update = staff_member_required(mass_update)
