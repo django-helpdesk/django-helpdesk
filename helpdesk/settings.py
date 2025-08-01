@@ -367,7 +367,7 @@ HELPDESK_CREATE_TICKET_HIDE_ASSIGNED_TO = getattr(
 )
 
 # allow users to take tickets even if a ticket is already claimed.
-HELPDESK_UNLOCK_TICKET_ASSIGNMENT = False
+HELPDESK_UNLOCK_TICKET_REASSIGNMENT = False
 
 
 #################
