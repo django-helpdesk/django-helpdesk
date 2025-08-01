@@ -76,11 +76,9 @@
                         <th class="table-active">{% trans "Assigned To" %}</th>
                         <td>
                             {{ ticket.get_assigned_to }}
-                            {% if _('Unassigned') == ticket.get_assigned_to or helpdesk_settings.HELPDESK_UNLOCK_TICKET_REASSIGNMENT %}
-                                <a class="btn btn-primary btn-sm float-right" data-toggle="tooltip" href='?take' title='{% trans "Assign this ticket to " %}{{ request.user.email }}'>
-                                    <i class="fas fa-hand-paper"></i>
-                                </a>
-                            {% endif %}
+                            <a class="btn btn-primary btn-sm float-right" data-toggle="tooltip" href='?take' title='{% trans "Assign this ticket to " %}{{ request.user.email }}'>
+                                <i class="fas fa-hand-paper"></i>
+                            </a>
                         </td>
                         <th class="table-active">{% trans "Submitter E-Mail" %}</th>
                         <td>
