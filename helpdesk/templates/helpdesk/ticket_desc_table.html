@@ -77,7 +77,6 @@
                         <th class="table-active">{% trans "Assigned To" %}</th>
                         <td>
                             <!-- assignment drop down -->
-                            {{ ticket.get_assigned_to }}
                             <form method="post" action="{% url 'helpdesk:mass_update' %}">
                                 {% csrf_token %}
                                 <input type="hidden" name="ticket_id" value="{{ ticket.id }}">
@@ -85,7 +84,7 @@
 
                                 <div class="d-flex align-items-center gap-2">
                                     <select name="action" class="form-select form-select-sm">
-                                        <option disabled selected>Assign to...</option>
+                                        <option disabled selected>Unassigned</option>
                                         {% for user in assignable_users %}
                                             <option value="assign_{{ user.id }}" {% if ticket.assigned_to and ticket.assigned_to.id == user.id %}selected{% endif %}>
                                                 {{ user.get_full_name|default:user.username }}
