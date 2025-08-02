@@ -366,7 +366,6 @@ HELPDESK_CREATE_TICKET_HIDE_ASSIGNED_TO = getattr(
     settings, "HELPDESK_CREATE_TICKET_HIDE_ASSIGNED_TO", False
 )
 
-
 #################
 # email options #
 #################
