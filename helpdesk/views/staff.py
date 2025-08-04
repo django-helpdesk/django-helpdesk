@@ -481,7 +481,6 @@ def view_ticket(request, ticket_id):
     assignable_users = User.objects.filter(is_active=True, is_staff=True).order_by(
         "username"
     )
-    logger.debug("Assignable users: %s", assignable_users)
 
     return render(
         request,
