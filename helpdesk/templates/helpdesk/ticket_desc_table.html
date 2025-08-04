@@ -89,7 +89,7 @@
 
                                 <div class="d-flex align-items-center gap-2">
                                     <select name="owner" class="form-select form-select-sm">
-                                        <option value="0" {% if not ticket.assigned_to %}selected{% endif %}>Unassigned</option>
+                                        <option value="unassign"{% if not ticket.assigned_to %} disabled selected{% endif %}>{% trans "Unassigned" %}</option>
                                         {% for user in assignable_users %}
                                             <option value="{{ user.id }}" {% if ticket.assigned_to and ticket.assigned_to.id == user.id %}selected{% endif %}>
                                                 {{ user.get_full_name|default:user.username }}
