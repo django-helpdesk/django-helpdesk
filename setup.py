@@ -7,7 +7,7 @@ from setuptools import find_packages, setup
 import sys
 
 
-version = "1.7.0"
+version = "1.8.0"
 
 
 # Provided as an attribute, so you can append to these instead
