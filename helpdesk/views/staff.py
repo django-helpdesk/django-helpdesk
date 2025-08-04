@@ -478,7 +478,7 @@ def view_ticket(request, ticket_id):
     customfields_form = EditTicketCustomFieldForm(None, instance=ticket)
 
     # Define users that the ticket can be assigned to
-    assignable_users = User.objects.filter(is_active=True).order_by("username")
+    assignable_users = User.objects.filter(is_active=True, is_staff=True).order_by("username")
     logger.debug("Assignable users: %s", assignable_users)
 
     return render(
