@@ -77,16 +77,21 @@
                         <th class="table-active">{% trans "Assigned To" %}</th>
                         <td>
                             <!-- assignment drop down -->
-                            <form method="post" action="{% url 'helpdesk:mass_update' %}">
+                            <form method="post" action="{% url 'helpdesk:update' ticket.id %}">
                                 {% csrf_token %}
                                 <input type="hidden" name="ticket_id" value="{{ ticket.id }}">
-                                <input type="hidden" name="next" value="{% url 'helpdesk:view' ticket.id %}">
+                                <!-- Keep current queue and priority hidden so they're unchanged -->
+                                <input type="hidden" name="queue" value="{{ ticket.queue.id }}">
+                                <input type="hidden" name="priority" value="{{ ticket.priority }}">
+
+                                <!-- Summary / Title hidden to avoid validation error -->
+                                <input type="hidden" name="title" value="{{ ticket.title }}">
 
                                 <div class="d-flex align-items-center gap-2">
-                                    <select name="action" class="form-select form-select-sm">
-                                        <option disabled selected>Unassigned</option>
+                                    <select name="owner" class="form-select form-select-sm">
+                                        <option value="0" {% if not ticket.assigned_to %}selected{% endif %}>Unassigned</option>
                                         {% for user in assignable_users %}
-                                            <option value="assign_{{ user.id }}" {% if ticket.assigned_to and ticket.assigned_to.id == user.id %}selected{% endif %}>
+                                            <option value="{{ user.id }}" {% if ticket.assigned_to and ticket.assigned_to.id == user.id %}selected{% endif %}>
                                                 {{ user.get_full_name|default:user.username }}
                                             </option>
                                         {% endfor %}
@@ -104,6 +109,21 @@
                                     </a>
                                 </div>
                             </form>
+                            {% if form.errors %}
+                                <div class="alert alert-danger">
+                                    <strong>Form Errors:</strong>
+                                    <ul>
+                                    {% for field in form %}
+                                        {% for error in field.errors %}
+                                            <li>{{ field.label }}: {{ error }}</li>
+                                        {% endfor %}
+                                    {% endfor %}
+                                    {% for error in form.non_field_errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                    </ul>
+                                </div>
+                            {% endif %}
                         </td>
                         <th class="table-active">{% trans "Submitter E-Mail" %}</th>
                         <td>

@@ -479,7 +479,7 @@ def view_ticket(request, ticket_id):
 
     # Define users that the ticket can be assigned to
     assignable_users = User.objects.filter(is_active=True).order_by("username")
-    logger.debug("Assignable users:", assignable_users)
+    logger.debug("Assignable users: %s", assignable_users)
 
     return render(
         request,
