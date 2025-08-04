@@ -825,9 +825,7 @@ def mass_update(request):
         elif action == "delete":
             t.delete()
 
-    # Go to ticket template if from ticket or list template otherwise
-    next_url = request.POST.get("next") or reverse("helpdesk:list")
-    return HttpResponseRedirect(next_url)
+    return HttpResponseRedirect(reverse("helpdesk:list"))
 
 
 mass_update = staff_member_required(mass_update)
