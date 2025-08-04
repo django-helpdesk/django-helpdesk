@@ -88,18 +88,21 @@
                                 <input type="hidden" name="title" value="{{ ticket.title }}">
 
                                 <div class="d-flex align-items-center gap-2">
-                                    <select name="owner" class="form-select form-select-sm">
-                                        <option value="unassign"{% if not ticket.assigned_to %} disabled selected{% endif %}>{% trans "Unassigned" %}</option>
+                                    <div class="input-group input-group-sm" style="width: auto;">
+                                        <select name="owner" class="form-select">
+                                        <option value="unassign" {% if not ticket.assigned_to %} disabled selected{% endif %}>
+                                            {% trans "Unassigned" %}
+                                        </option>
                                         {% for user in assignable_users %}
                                             <option value="{{ user.id }}" {% if ticket.assigned_to and ticket.assigned_to.id == user.id %}selected{% endif %}>
                                                 {{ user.get_full_name|default:user.username }}
                                             </option>
                                         {% endfor %}
-                                    </select>
-
-                                    <button type="submit" class="btn btn-primary btn-sm" data-toggle="tooltip" title="{% trans "Save ticket assignment" %}">
-                                        <i class="fas fa-user-check"></i>
-                                    </button>
+                                        </select>
+                                        <button class="btn btn-primary btn-sm" type="submit" data-bs-toggle="tooltip" title="{% trans "Save ticket assignment" %}">
+                                            <i class="fas fa-user-check"></i>
+                                        </button>
+                                    </div>
 
                                     <span class="text-muted px-1">|</span>
 
