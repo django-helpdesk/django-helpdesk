@@ -111,7 +111,7 @@
                                 </optgroup>
                                 <optgroup label='{% trans "Assign To" %}'>
                                     <option value='unassign'>{% trans "Nobody (Unassign)" %}</option>
-                                    {% for u in user_choices %}
+                                    {% for u in assignable_users %}
                                         <option value='assign_{{ u.id }}'>{{ u.get_username }}</option>
                                     {% endfor %}
                                 </optgroup>

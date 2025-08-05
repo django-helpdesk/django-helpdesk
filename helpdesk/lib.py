@@ -284,10 +284,10 @@ def daily_time_spent_calculation(earliest, latest, open_hours):
     return time_spent_seconds
 
 
-def get_active_users() -> QuerySet:
-    users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
+def get_assignable_users(filter_staff: bool) -> QuerySet:
+    users = User.objects.filter(is_active=True)
 
-    if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS:
+    if filter_staff:
         users = users.filter(is_staff=True)
 
-    return users
+    return users.order_by(User.USERNAME_FIELD)

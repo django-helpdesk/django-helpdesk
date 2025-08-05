@@ -56,7 +56,11 @@ from helpdesk.forms import (
     TicketResolvesForm,
     UserSettingsForm,
 )
-from helpdesk.lib import queue_template_context, safe_template_context, get_active_users
+from helpdesk.lib import (
+    queue_template_context,
+    safe_template_context,
+    get_assignable_users,
+)
 from helpdesk.models import (
     Checklist,
     ChecklistTask,
@@ -133,7 +137,9 @@ def get_user_queues(user) -> dict[str, str]:
 
 def get_form_extra_kwargs(user) -> dict[str, object]:
     return {
-        "active_users": get_active_users(),
+        "assignable_users": get_assignable_users(
+            helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS
+        ),
         "queues": get_user_queues(user),
         "priorities": Ticket.PRIORITY_CHOICES,
     }
@@ -1177,7 +1183,9 @@ def ticket_list(request):
         dict(
             context,
             default_tickets_per_page=request.user.usersettings_helpdesk.tickets_per_page,
-            user_choices=User.objects.filter(is_active=True, is_staff=True),
+            assignable_users=get_assignable_users(
+                helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS
+            ),
             kb_items=kbitem,
             queue_choices=huser.get_queues(),
             status_choices=Ticket.STATUS_CHOICES,

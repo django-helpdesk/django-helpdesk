@@ -19,7 +19,7 @@ from helpdesk.lib import (
     convert_value,
     process_attachments,
     safe_template_context,
-    get_active_users,
+    get_assignable_users,
 )
 from helpdesk.models import (
     Checklist,
@@ -478,7 +478,10 @@ class TicketForm(AbstractTicketForm):
             self.fields["queue"].choices = queue_choices
         self.fields["body"].required = body_reqd
         self.fields["assigned_to"].choices = [("", "--------")] + [
-            (u.id, u.get_username()) for u in get_active_users()
+            (u.id, u.get_username())
+            for u in get_assignable_users(
+                helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS
+            )
         ]
         self._add_form_custom_fields()
 
@@ -635,13 +638,9 @@ class TicketCCForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(TicketCCForm, self).__init__(*args, **kwargs)
-        if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_CC:
-            users = User.objects.filter(is_active=True, is_staff=True).order_by(
-                User.USERNAME_FIELD
-            )
-        else:
-            users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
-        self.fields["user"].queryset = users
+        self.fields["user"].queryset = get_assignable_users(
+            helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_CC
+        )
 
 
 class TicketCCUserForm(forms.ModelForm):
@@ -649,13 +648,9 @@ class TicketCCUserForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(TicketCCUserForm, self).__init__(*args, **kwargs)
-        if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_CC:
-            users = User.objects.filter(is_active=True, is_staff=True).order_by(
-                User.USERNAME_FIELD
-            )
-        else:
-            users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
-        self.fields["user"].queryset = users
+        self.fields["user"].queryset = get_assignable_users(
+            helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_CC
+        )
 
     class Meta:
         model = TicketCC
