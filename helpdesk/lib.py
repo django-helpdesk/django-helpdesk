@@ -6,20 +6,20 @@ django-helpdesk - A Django powered ticket tracker for small enterprise.
 lib.py - Common functions (eg multipart e-mail)
 """
 
-from datetime import date, datetime, time
-from django.conf import settings
-from django.core.exceptions import ValidationError, ImproperlyConfigured
-from django.utils.encoding import smart_str
-from helpdesk.settings import (
-    CUSTOMFIELD_DATE_FORMAT,
-    CUSTOMFIELD_DATETIME_FORMAT,
-    CUSTOMFIELD_TIME_FORMAT,
-)
 import logging
 import mimetypes
+from datetime import date, datetime, time
+from django.conf import settings
+from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError, ImproperlyConfigured
+from django.db.models.query import QuerySet
+from django.utils.encoding import smart_str
+from helpdesk import settings as helpdesk_settings
 
 
 logger = logging.getLogger("helpdesk")
+
+User = get_user_model()
 
 
 def ticket_template_context(ticket):
@@ -205,11 +205,11 @@ def format_time_spent(time_spent):
 def convert_value(value):
     """Convert date/time data type to known fixed format string"""
     if type(value) is datetime:
-        return value.strftime(CUSTOMFIELD_DATETIME_FORMAT)
+        return value.strftime(helpdesk_settings.CUSTOMFIELD_DATETIME_FORMAT)
     elif type(value) is date:
-        return value.strftime(CUSTOMFIELD_DATE_FORMAT)
+        return value.strftime(helpdesk_settings.CUSTOMFIELD_DATE_FORMAT)
     elif type(value) is time:
-        return value.strftime(CUSTOMFIELD_TIME_FORMAT)
+        return value.strftime(helpdesk_settings.CUSTOMFIELD_TIME_FORMAT)
     else:
         return value
 
@@ -282,3 +282,12 @@ def daily_time_spent_calculation(earliest, latest, open_hours):
     time_spent_seconds += day_delta.seconds
 
     return time_spent_seconds
+
+
+def get_active_users() -> QuerySet:
+    users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
+
+    if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS:
+        users = users.filter(is_staff=True)
+
+    return users
