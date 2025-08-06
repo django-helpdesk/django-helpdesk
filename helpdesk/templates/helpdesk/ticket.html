@@ -161,7 +161,7 @@
                 <dt><label for='id_owner'>{% trans "Owner" %}</label></dt>
                 <dd>
                     <select id='id_owner' name='owner'>
-                        <option value='0'>{% trans "Unassign" %}</option>
+                        <option value='0'>{% trans "Unassigned" %}</option>
                         {% for u in assignable_users %}
                             <option value='{{ u.id }}'{% if u.id == ticket.assigned_to.id %} selected{% endif %}>{{ u }}</option>
                         {% endfor %}
