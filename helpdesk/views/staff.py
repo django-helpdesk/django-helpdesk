@@ -487,7 +487,9 @@ def view_ticket(request, ticket_id):
             "SHOW_SUBSCRIBE": show_subscribe,
             "checklist_form": checklist_form,
             "customfields_form": customfields_form,
-            "assignable_users": get_assignable_users(settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS),
+            "assignable_users": get_assignable_users(
+                settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS
+            ),
             **extra_context_kwargs,
         },
     )
