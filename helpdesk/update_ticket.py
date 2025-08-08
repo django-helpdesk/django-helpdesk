@@ -299,7 +299,7 @@ def update_ticket(
         f.ticketchange_set.create(
             field=_("Owner"),
             old_value=old_owner,
-            new_value=ticket.assigned_to,
+            new_value=ticket.assigned_to if ticket.assigned_to else _("Unassigned"),
         )
 
     if priority != ticket.priority:

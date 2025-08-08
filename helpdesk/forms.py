@@ -15,7 +15,12 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from helpdesk import settings as helpdesk_settings
-from helpdesk.lib import convert_value, process_attachments, safe_template_context
+from helpdesk.lib import (
+    convert_value,
+    process_attachments,
+    safe_template_context,
+    get_assignable_users,
+)
 from helpdesk.models import (
     Checklist,
     ChecklistTemplate,
@@ -472,16 +477,11 @@ class TicketForm(AbstractTicketForm):
         if queue_choices:
             self.fields["queue"].choices = queue_choices
         self.fields["body"].required = body_reqd
-        if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS:
-            assignable_users = User.objects.filter(
-                is_active=True, is_staff=True
-            ).order_by(User.USERNAME_FIELD)
-        else:
-            assignable_users = User.objects.filter(is_active=True).order_by(
-                User.USERNAME_FIELD
-            )
         self.fields["assigned_to"].choices = [("", "--------")] + [
-            (u.id, u.get_username()) for u in assignable_users
+            (u.id, u.get_username())
+            for u in get_assignable_users(
+                helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS
+            )
         ]
         self._add_form_custom_fields()
 
@@ -638,13 +638,9 @@ class TicketCCForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(TicketCCForm, self).__init__(*args, **kwargs)
-        if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_CC:
-            users = User.objects.filter(is_active=True, is_staff=True).order_by(
-                User.USERNAME_FIELD
-            )
-        else:
-            users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
-        self.fields["user"].queryset = users
+        self.fields["user"].queryset = get_assignable_users(
+            helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_CC
+        )
 
 
 class TicketCCUserForm(forms.ModelForm):
@@ -652,13 +648,9 @@ class TicketCCUserForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(TicketCCUserForm, self).__init__(*args, **kwargs)
-        if helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_CC:
-            users = User.objects.filter(is_active=True, is_staff=True).order_by(
-                User.USERNAME_FIELD
-            )
-        else:
-            users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
-        self.fields["user"].queryset = users
+        self.fields["user"].queryset = get_assignable_users(
+            helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_CC
+        )
 
     class Meta:
         model = TicketCC
