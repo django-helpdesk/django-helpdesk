@@ -89,25 +89,30 @@
 
                                 <div class="d-flex align-items-center gap-2">
                                     <div class="input-group input-group-sm" style="width: auto;">
-                                        <select name="owner" class="form-select">
-                                        <option value="0" {% if not ticket.assigned_to %} disabled selected{% endif %}>
-                                            {% trans "Unassigned" %}
-                                        </option>
-                                        {% for user in assignable_users %}
-                                            <option value="{{ user.id }}" {% if ticket.assigned_to and ticket.assigned_to.id == user.id %}selected{% endif %}>
-                                                {{ user.get_full_name|default:user.username }}
+                                        <select name="owner" class="form-control">
+                                            <option value="0" {% if not ticket.assigned_to %} disabled selected{% endif %}>
+                                                {% trans "Unassigned" %}
                                             </option>
-                                        {% endfor %}
+                                            {% for user in assignable_users %}
+                                                <option value="{{ user.id }}" {% if ticket.assigned_to and ticket.assigned_to.id == user.id %}selected{% endif %}>
+                                                    {{ user.get_full_name|default:user.username }}
+                                                </option>
+                                            {% endfor %}
                                         </select>
-                                        <button class="btn btn-primary btn-sm" type="submit" data-bs-toggle="tooltip" title="{% trans "Save ticket assignment" %}">
-                                            <i class="fas fa-user-check"></i>
-                                        </button>
+
+                                        <div class="input-group-append">
+                                            <button class="btn btn-primary btn-sm" type="submit" data-toggle="tooltip"
+                                                    title="{% trans 'Save ticket assignment' %}">
+                                                <i class="fas fa-user-check"></i>
+                                            </button>
+                                        </div>
                                     </div>
 
                                     <span class="text-muted px-1">|</span>
 
                                     <!-- self assign hand -->
-                                    <a class="btn btn-primary btn-sm" data-toggle="tooltip" href="?take" title="{% trans 'Assign this ticket to ' %}{{ request.user.email }}">
+                                    <a class="btn btn-primary btn-sm" data-toggle="tooltip" href="?take"
+                                    title="{% trans 'Assign this ticket to ' %}{{ request.user.email }}">
                                         <i class="fas fa-hand-paper"></i>
                                     </a>
                                 </div>
