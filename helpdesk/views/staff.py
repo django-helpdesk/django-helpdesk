@@ -472,9 +472,6 @@ def view_ticket(request, ticket_id):
     # add custom fields to further details panel
     customfields_form = EditTicketCustomFieldForm(None, instance=ticket)
 
-    # Define users that the ticket can be assigned to
-    assignable_users = get_assignable_users(settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS)
-
     return render(
         request,
         "helpdesk/ticket.html",
@@ -490,7 +487,7 @@ def view_ticket(request, ticket_id):
             "SHOW_SUBSCRIBE": show_subscribe,
             "checklist_form": checklist_form,
             "customfields_form": customfields_form,
-            "assignable_users": assignable_users,
+            "assignable_users": get_assignable_users(settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS),
             **extra_context_kwargs,
         },
     )
