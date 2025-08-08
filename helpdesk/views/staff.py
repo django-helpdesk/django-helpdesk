@@ -90,7 +90,6 @@ import helpdesk.views.abstract_views as abstract_views
 from helpdesk.views.permissions import MustBeStaffMixin
 import json
 import re
-import logging
 from rest_framework import status
 from rest_framework.decorators import api_view
 import typing
@@ -99,8 +98,6 @@ from django.utils.timezone import now
 
 if helpdesk_settings.HELPDESK_KB_ENABLED:
     from helpdesk.models import KBItem
-
-logger = logging.getLogger(__name__)
 
 
 DATE_RE: re.Pattern = re.compile(
