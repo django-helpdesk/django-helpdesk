@@ -90,7 +90,7 @@
                                 <div class="d-flex align-items-center gap-2">
                                     <div class="input-group input-group-sm" style="width: auto;">
                                         <select name="owner" class="form-select">
-                                        <option value="unassign" {% if not ticket.assigned_to %} disabled selected{% endif %}>
+                                        <option value="0" {% if not ticket.assigned_to %} disabled selected{% endif %}>
                                             {% trans "Unassigned" %}
                                         </option>
                                         {% for user in assignable_users %}
