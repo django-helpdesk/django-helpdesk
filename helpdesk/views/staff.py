@@ -473,7 +473,7 @@ def view_ticket(request, ticket_id):
     customfields_form = EditTicketCustomFieldForm(None, instance=ticket)
 
     # Define users that the ticket can be assigned to
-    assignable_users = get_assignable_users(True)
+    assignable_users = get_assignable_users(settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS)
 
     return render(
         request,
