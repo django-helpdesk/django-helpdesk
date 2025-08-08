@@ -1,7 +1,7 @@
 """
 django-helpdesk - A Django powered ticket tracker for small enterprise.
 
-(c) Copyright 2008 Jutda. All Rights Reserved. See LICENSE for details.
+(c) Copyright 2008-2025 Jutda. All Rights Reserved. See LICENSE for details.
 
 views/staff.py - The bulk of the application - provides most business logic and
                  renders all staff-facing views.
@@ -98,6 +98,7 @@ from django.utils.timezone import now
 
 if helpdesk_settings.HELPDESK_KB_ENABLED:
     from helpdesk.models import KBItem
+
 
 DATE_RE: re.Pattern = re.compile(
     r"(?P<month>\d{1,2})/(?P<day>\d{1,2})/(?P<year>\d{4})$"
@@ -483,6 +484,9 @@ def view_ticket(request, ticket_id):
             "SHOW_SUBSCRIBE": show_subscribe,
             "checklist_form": checklist_form,
             "customfields_form": customfields_form,
+            "assignable_users": get_assignable_users(
+                bool(getattr(settings, "HELPDESK_STAFF_ONLY_TICKET_OWNERS", False))
+            ),
             **extra_context_kwargs,
         },
     )

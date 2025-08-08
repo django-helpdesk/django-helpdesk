@@ -73,14 +73,50 @@
                         <td>{{ ticket.created|date:"DATETIME_FORMAT" }} ({{ ticket.created|naturaltime }})</td>
                     </tr>
                     <tr>
+                        <!-- show current Assignee for ticket -->
                         <th class="table-active">{% trans "Assigned To" %}</th>
                         <td>
-                            {{ ticket.get_assigned_to }}
-                            {% if _('Unassigned') == ticket.get_assigned_to  %}
-                                <a class="btn btn-primary btn-sm float-right" data-toggle="tooltip" href='?take' title='{% trans "Assign this ticket to " %}{{ request.user.email }}'>
-                                    <i class="fas fa-hand-paper"></i>
-                                </a>
-                            {% endif %}
+                            <!-- assignment drop down -->
+                            <form method="post" action="{% url 'helpdesk:update' ticket.id %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="ticket_id" value="{{ ticket.id }}">
+                                <!-- Keep current queue and priority hidden so they're unchanged -->
+                                <input type="hidden" name="queue" value="{{ ticket.queue.id }}">
+                                <input type="hidden" name="priority" value="{{ ticket.priority }}">
+
+                                <!-- Summary / Title hidden to avoid validation error -->
+                                <input type="hidden" name="title" value="{{ ticket.title }}">
+
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="input-group input-group-sm" style="width: auto;">
+                                        <select name="owner" class="form-control">
+                                            <option value="0" {% if not ticket.assigned_to %} disabled selected{% endif %}>
+                                                {% trans "Unassigned" %}
+                                            </option>
+                                            {% for user in assignable_users %}
+                                                <option value="{{ user.id }}" {% if ticket.assigned_to and ticket.assigned_to.id == user.id %}selected{% endif %}>
+                                                    {{ user.get_full_name|default:user.username }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+
+                                        <div class="input-group-append">
+                                            <button class="btn btn-primary btn-sm" type="submit" data-toggle="tooltip"
+                                                    title="{% trans 'Save ticket assignment' %}">
+                                                <i class="fas fa-user-check"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <span class="text-muted px-1">|</span>
+
+                                    <!-- self assign hand -->
+                                    <a class="btn btn-primary btn-sm" data-toggle="tooltip" href="?take"
+                                    title="{% trans 'Assign this ticket to ' %}{{ request.user.email }}">
+                                        <i class="fas fa-hand-paper"></i>
+                                    </a>
+                                </div>
+                            </form>
                         </td>
                         <th class="table-active">{% trans "Submitter E-Mail" %}</th>
                         <td>
@@ -164,7 +200,7 @@
 			    <a data-toggle='tooltip' href='{% url 'helpdesk:ticket_dependency_add' ticket.id %}'
 			       title='{% trans "Make this ticket dependent on another ticket. A ticket may not be closed until all tickets it depends on are closed or removed." %}'>
 				<button type="button" class="btn btn-primary btn-sm float-right"><i class="fas fa-link"></i></button></a>
-			    
+
 			</th>
                         <td colspan="3" class="p-0">
                             {% for dep in dependencies %}
@@ -174,11 +210,11 @@
 					<a data-toggle='tooltip' href='{% url 'helpdesk:ticket_dependency_del' ticket.id dep.id %}'
 					   title='{% trans "Drop the dependency on this ticket. A ticket may not be closed until all tickets it depends on are closed or removed." %}'>
 					    <button type="button" class="btn btn-warning btn-sm"><i class="fas fa-trash"></i></button></a>
-				    </td>					
+				    </td>
 				    <td>{{ dep.depends_on.get_status_display }}</td>
 				    <td>
 					<a href='{{ dep.depends_on.get_absolute_url }}'>{{ dep.depends_on.ticket }} {{ dep.depends_on.title }}</a>
-					
+
 				    </td>
                                     {% if forloop.last %}</table>{% endif %}
                             {% empty %}
