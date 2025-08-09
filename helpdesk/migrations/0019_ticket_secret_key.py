@@ -12,6 +12,13 @@ def clear_secret_keys(apps, schema_editor):
         ticket.save()
 
 
+def no_op(apps, schema_editor):
+    """
+    This is added only to make migrations reversible.
+    """
+    pass
+
+
 class Migration(migrations.Migration):
     dependencies = [
         ("helpdesk", "0018_ticket_secret_key"),
@@ -27,5 +34,5 @@ class Migration(migrations.Migration):
                 verbose_name="Secret key needed for viewing/editing ticket by non-logged in users",
             ),
         ),
-        migrations.RunPython(clear_secret_keys),
+        migrations.RunPython(clear_secret_keys, reverse_code=no_op),
     ]
