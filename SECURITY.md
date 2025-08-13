@@ -8,7 +8,7 @@ We only support the latest django-helpdesk version.
 
 If you believe you have discovered a bug impacting security in a supported version, please DO NOT file a Issue / Bug Report for it publicly.
 
-Instead, please send details to <garret@wassiverse.com>. Please be sure to include "django-helpdesk security issue" in the subject line for fastest response.
+Instead, please send details to <uhurusurfa@gmail.com>. Please be sure to include "django-helpdesk security issue" in the subject line for fastest response.
 
 Once reported, we'll be in touch to confirm the issue and work toward releasing a patch as soon as possible.
 
