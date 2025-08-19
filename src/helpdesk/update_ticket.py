@@ -137,6 +137,10 @@ def process_email_notifications_for_ticket_update(
     """
     Sends email notifications when the ticket is updated in any way.
     """
+    # If the setting is enabled and this is a private follow-up, skip all email notifications
+    if helpdesk_settings.HELPDESK_PRIVATE_FOLLOWUP_MEANS_NO_EMAILS and not public:
+        return
+
     template_prefix = get_email_template_prefix(reassigned, follow_up)
     if helpdesk_settings.HELPDESK_NOTIFY_SUBMITTER_FOR_ALL_TICKET_CHANGES or (
         public
