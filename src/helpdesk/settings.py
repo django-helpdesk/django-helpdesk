@@ -357,6 +357,11 @@ HELPDESK_NOTIFY_SUBMITTER_FOR_ALL_TICKET_CHANGES = getattr(
     False,
 )
 
+# If True, private follow-ups (public=False) will not trigger any email notifications
+HELPDESK_PRIVATE_FOLLOWUP_MEANS_NO_EMAILS = getattr(
+    settings, "HELPDESK_PRIVATE_FOLLOWUP_MEANS_NO_EMAILS", False
+)
+
 ########################################
 # options for staff.create_ticket view #
 ########################################
