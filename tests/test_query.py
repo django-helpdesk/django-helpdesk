@@ -3,7 +3,7 @@ from django.test import TestCase
 from django.urls import reverse
 from helpdesk.models import KBCategory, KBItem, Queue, Ticket
 from helpdesk.query import query_to_base64
-from helpdesk.tests.helpers import get_staff_user
+from .helpers import get_staff_user
 
 
 class QueryTests(TestCase):

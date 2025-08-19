@@ -222,7 +222,7 @@ class WebhookTest(APITestCase):
         server.stop()
 
     def test_create_ticket_and_followup_via_email(self):
-        from .. import email
+        from helpdesk import email
 
         server = WebhookServer(("localhost", 8125), WebhookRequestHandler)
         os.environ["HELPDESK_NEW_TICKET_WEBHOOK_URLS"] = (
