@@ -122,6 +122,10 @@ These changes are visible throughout django-helpdesk
 
   **Default:** ``HELPDESK_NOTIFY_SUBMITTER_FOR_ALL_TICKET_CHANGES = False``
 
+- **HELPDESK_PRIVATE_FOLLOWUP_MEANS_NO_EMAILS** If ``True``, private follow-ups (marked with ``public=False``) will not trigger any email notifications to any recipients (submitters, assigned users, CC'd users, or queue notifications). This provides complete privacy for internal staff communications. Public follow-ups (``public=True``) continue to work normally. This setting overrides other notification settings like ``HELPDESK_NOTIFY_SUBMITTER_FOR_ALL_TICKET_CHANGES`` when the follow-up is private.
+
+  **Default:** ``HELPDESK_PRIVATE_FOLLOWUP_MEANS_NO_EMAILS = False``
+
 - **HELPDESK_EMAIL_FALLBACK_LOCALE** Fallback locale for templated emails when queue locale not found
 
   **Default:** ``HELPDESK_EMAIL_FALLBACK_LOCALE = "en"``
